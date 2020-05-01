@@ -1,10 +1,10 @@
-import _got from '../../../util/got';
-import * as hostRules from '../../../util/host-rules';
-import { getChangeLogJSON, ChangeLogError } from '.';
 import { mocked, partial } from '../../../../test/util';
 import { PLATFORM_TYPE_GITHUB } from '../../../constants/platforms';
+import _got from '../../../util/got';
+import * as hostRules from '../../../util/host-rules';
 import * as semverVersioning from '../../../versioning/semver';
 import { BranchConfig } from '../../common';
+import { ChangeLogError, getChangeLogJSON } from '.';
 
 jest.mock('../../../util/got');
 jest.mock('../../../datasource/npm');

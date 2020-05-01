@@ -1,5 +1,5 @@
-import { addMetaData } from './metadata';
 import * as datasourceMaven from './maven';
+import { addMetaData } from './metadata';
 import * as datasourcePypi from './pypi';
 
 describe('datasource/metadata', () => {

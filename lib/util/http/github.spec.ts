@@ -1,5 +1,4 @@
-import _got from '../got';
-import { GithubHttp, setBaseUrl } from './github';
+import { mocked } from '../../../test/util';
 import {
   PLATFORM_BAD_CREDENTIALS,
   PLATFORM_FAILURE,
@@ -7,7 +6,8 @@ import {
   PLATFORM_RATE_LIMIT_EXCEEDED,
   REPOSITORY_CHANGED,
 } from '../../constants/error-messages';
-import { mocked } from '../../../test/util';
+import _got from '../got';
+import { GithubHttp, setBaseUrl } from './github';
 
 jest.mock('../../util/got');
 const got = mocked<any>(_got);

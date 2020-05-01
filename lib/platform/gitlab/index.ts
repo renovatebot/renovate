@@ -1,28 +1,7 @@
 import URL, { URLSearchParams } from 'url';
 import is from '@sindresorhus/is';
 
-import { api } from './gl-got-wrapper';
-import * as hostRules from '../../util/host-rules';
-import GitStorage, { StatusResult } from '../git/storage';
-import {
-  PlatformConfig,
-  RepoParams,
-  RepoConfig,
-  GotResponse,
-  Pr,
-  Issue,
-  VulnerabilityAlert,
-  CreatePRConfig,
-  EnsureIssueConfig,
-  BranchStatusConfig,
-  FindPRConfig,
-  EnsureCommentConfig,
-  CommitFilesConfig,
-} from '../common';
 import { configFileNames } from '../../config/app-strings';
-import { logger } from '../../logger';
-import { sanitize } from '../../util/sanitize';
-import { smartTruncate } from '../utils/pr-body';
 import { RenovateConfig } from '../../config/common';
 import {
   PLATFORM_AUTHENTICATION_ERROR,
@@ -34,10 +13,31 @@ import {
   REPOSITORY_MIRRORED,
   REPOSITORY_NOT_FOUND,
 } from '../../constants/error-messages';
-import { PR_STATE_ALL, PR_STATE_OPEN } from '../../constants/pull-requests';
 import { PLATFORM_TYPE_GITLAB } from '../../constants/platforms';
+import { PR_STATE_ALL, PR_STATE_OPEN } from '../../constants/pull-requests';
+import { logger } from '../../logger';
 import { BranchStatus } from '../../types';
+import * as hostRules from '../../util/host-rules';
+import { sanitize } from '../../util/sanitize';
 import { ensureTrailingSlash } from '../../util/url';
+import {
+  BranchStatusConfig,
+  CommitFilesConfig,
+  CreatePRConfig,
+  EnsureCommentConfig,
+  EnsureIssueConfig,
+  FindPRConfig,
+  GotResponse,
+  Issue,
+  PlatformConfig,
+  Pr,
+  RepoConfig,
+  RepoParams,
+  VulnerabilityAlert,
+} from '../common';
+import GitStorage, { StatusResult } from '../git/storage';
+import { smartTruncate } from '../utils/pr-body';
+import { api } from './gl-got-wrapper';
 
 type MergeMethod = 'merge' | 'rebase_merge' | 'ff';
 const defaultConfigFile = configFileNames[0];

@@ -1,9 +1,7 @@
-import { GotError } from 'got';
 import URL from 'url';
+import { GotError } from 'got';
 import pAll from 'p-all';
 import parseLinkHeader from 'parse-link-header';
-import { Http, HttpPostOptions, HttpResponse, InternalHttpOptions } from '.';
-import { PLATFORM_TYPE_GITHUB } from '../../constants/platforms';
 import {
   PLATFORM_BAD_CREDENTIALS,
   PLATFORM_FAILURE,
@@ -11,8 +9,10 @@ import {
   PLATFORM_RATE_LIMIT_EXCEEDED,
   REPOSITORY_CHANGED,
 } from '../../constants/error-messages';
-import { maskToken } from '../mask';
+import { PLATFORM_TYPE_GITHUB } from '../../constants/platforms';
 import { logger } from '../../logger';
+import { maskToken } from '../mask';
+import { Http, HttpPostOptions, HttpResponse, InternalHttpOptions } from '.';
 
 let baseUrl = 'https://api.github.com/';
 export const setBaseUrl = (url: string): void => {

@@ -1,5 +1,5 @@
-import swift from '.';
 import { RangeStrategy } from '..';
+import swift from '.';
 
 const {
   getNewValue,

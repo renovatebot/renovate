@@ -1,11 +1,11 @@
-import AWSMock from 'aws-sdk-mock';
 import AWS from 'aws-sdk';
-import _got from '../../util/got';
-import * as docker from '.';
+import AWSMock from 'aws-sdk-mock';
 import { getPkgReleases } from '..';
-import * as _hostRules from '../../util/host-rules';
 import { DATASOURCE_FAILURE } from '../../constants/error-messages';
 import { clearRepoCache } from '../../util/cache';
+import _got from '../../util/got';
+import * as _hostRules from '../../util/host-rules';
+import * as docker from '.';
 
 const got: any = _got;
 const hostRules: any = _hostRules;

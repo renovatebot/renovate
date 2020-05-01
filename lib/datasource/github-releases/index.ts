@@ -1,6 +1,6 @@
-import { GithubHttp } from '../../util/http/github';
-import { ReleaseResult, GetReleasesConfig } from '../common';
 import { logger } from '../../logger';
+import { GithubHttp } from '../../util/http/github';
+import { GetReleasesConfig, ReleaseResult } from '../common';
 
 export const id = 'github-releases';
 

@@ -1,8 +1,8 @@
-import { skip, isSpace, removeComments } from './util';
-import { logger } from '../../logger';
-import { PackageFile, PackageDependency } from '../common';
 import * as datasourceGithubTags from '../../datasource/github-tags';
+import { logger } from '../../logger';
 import { SkipReason } from '../../types';
+import { PackageDependency, PackageFile } from '../common';
+import { isSpace, removeComments, skip } from './util';
 
 function parseSha256(idx: number, content: string): string | null {
   let i = idx;

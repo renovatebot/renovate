@@ -1,13 +1,13 @@
-import tmp, { DirectoryResult } from 'tmp-promise';
-import * as fs from 'fs-extra';
 import * as path from 'path';
+import * as fs from 'fs-extra';
+import tmp, { DirectoryResult } from 'tmp-promise';
 import { exec } from '../../util/exec';
-import { GRADLE_DEPENDENCY_REPORT_OPTIONS } from './index';
-import {
-  createRenovateGradlePlugin,
-  GRADLE_DEPENDENCY_REPORT_FILENAME,
-} from './gradle-updates-report';
 import { ifSystemSupportsGradle } from './__testutil__/gradle';
+import {
+  GRADLE_DEPENDENCY_REPORT_FILENAME,
+  createRenovateGradlePlugin,
+} from './gradle-updates-report';
+import { GRADLE_DEPENDENCY_REPORT_OPTIONS } from './index';
 
 const fixtures = 'lib/manager/gradle/__fixtures__';
 

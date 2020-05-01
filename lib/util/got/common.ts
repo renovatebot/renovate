@@ -1,5 +1,5 @@
-import got from 'got';
 import { Url } from 'url';
+import got from 'got';
 
 export interface Options {
   hooks?: any;

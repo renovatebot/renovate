@@ -1,22 +1,22 @@
+import { BUNDLER_INVALID_CREDENTIALS } from '../../constants/error-messages';
+import { logger } from '../../logger';
+import { platform } from '../../platform';
+import { HostRule } from '../../types';
+import { getRepoCached, setRepoCached } from '../../util/cache';
+import { ExecOptions, exec } from '../../util/exec';
 import {
+  deleteLocalFile,
   getSiblingFileName,
   readLocalFile,
   writeLocalFile,
-  deleteLocalFile,
 } from '../../util/fs';
-import { exec, ExecOptions } from '../../util/exec';
-import { logger } from '../../logger';
 import { isValid } from '../../versioning/ruby';
 import { UpdateArtifact, UpdateArtifactsResult } from '../common';
-import { platform } from '../../platform';
-import { BUNDLER_INVALID_CREDENTIALS } from '../../constants/error-messages';
-import { HostRule } from '../../types';
 import {
-  getAuthenticationHeaderValue,
   findAllAuthenticatable,
+  getAuthenticationHeaderValue,
   getDomain,
 } from './host-rules';
-import { getRepoCached, setRepoCached } from '../../util/cache';
 
 const hostConfigVariablePrefix = 'BUNDLE_';
 

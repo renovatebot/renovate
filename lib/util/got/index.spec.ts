@@ -1,14 +1,14 @@
 import nock from 'nock';
 import { getName } from '../../../test/util';
-import { api } from '.';
-import * as hostRules from '../host-rules';
-import { GotJSONOptions } from './common';
 import {
   PLATFORM_TYPE_GITEA,
-  PLATFORM_TYPE_GITLAB,
   PLATFORM_TYPE_GITHUB,
+  PLATFORM_TYPE_GITLAB,
 } from '../../constants/platforms';
 import { clearRepoCache } from '../cache';
+import * as hostRules from '../host-rules';
+import { GotJSONOptions } from './common';
+import { api } from '.';
 
 const baseUrl = 'https://api.github.com';
 

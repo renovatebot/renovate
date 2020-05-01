@@ -1,4 +1,4 @@
-import { getConfig, RenovateConfig } from '../../../../../test/util';
+import { RenovateConfig, getConfig } from '../../../../../test/util';
 import { getPrList } from './pr-list';
 
 describe('workers/repository/onboarding/pr/pr-list', () => {

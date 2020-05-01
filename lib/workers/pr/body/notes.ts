@@ -1,7 +1,7 @@
 import is from '@sindresorhus/is';
-import * as template from '../../../util/template';
 import { logger } from '../../../logger';
 import { emojify } from '../../../util/emoji';
+import * as template from '../../../util/template';
 import { BranchConfig } from '../../common';
 
 export function getPrNotes(config: BranchConfig): string {

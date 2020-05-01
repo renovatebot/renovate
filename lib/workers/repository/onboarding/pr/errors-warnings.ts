@@ -1,7 +1,7 @@
-import { emojify } from '../../../../util/emoji';
-import { logger } from '../../../../logger';
 import { RenovateConfig } from '../../../../config';
+import { logger } from '../../../../logger';
 import { PackageFile } from '../../../../manager/common';
+import { emojify } from '../../../../util/emoji';
 
 export function getWarnings(config: RenovateConfig): string {
   if (!config.warnings.length) {

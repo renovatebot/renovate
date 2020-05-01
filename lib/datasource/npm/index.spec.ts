@@ -1,11 +1,11 @@
-import _registryAuthToken from 'registry-auth-token';
-import nock from 'nock';
 import moment from 'moment';
-import * as npm from '.';
-import * as hostRules from '../../util/host-rules';
-import { DATASOURCE_FAILURE } from '../../constants/error-messages';
+import nock from 'nock';
+import _registryAuthToken from 'registry-auth-token';
 import { getName } from '../../../test/util';
+import { DATASOURCE_FAILURE } from '../../constants/error-messages';
 import { clearRepoCache } from '../../util/cache';
+import * as hostRules from '../../util/host-rules';
+import * as npm from '.';
 
 jest.mock('registry-auth-token');
 jest.mock('delay');

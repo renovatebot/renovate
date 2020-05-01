@@ -1,12 +1,12 @@
 import is from '@sindresorhus/is';
-import { File, platform } from '../../platform';
+import { WORKER_FILE_UPDATE_FAILED } from '../../constants/error-messages';
+import * as datasourceGitSubmodules from '../../datasource/git-submodules';
 import { logger } from '../../logger';
 import { get } from '../../manager';
 import { ArtifactError } from '../../manager/common';
-import { WORKER_FILE_UPDATE_FAILED } from '../../constants/error-messages';
-import * as datasourceGitSubmodules from '../../datasource/git-submodules';
-import { doAutoReplace } from './auto-replace';
+import { File, platform } from '../../platform';
 import { BranchConfig } from '../common';
+import { doAutoReplace } from './auto-replace';
 
 export interface PackageFilesResult {
   artifactErrors: ArtifactError[];

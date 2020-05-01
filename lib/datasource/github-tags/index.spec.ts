@@ -1,8 +1,8 @@
+import { mocked } from '../../../test/util';
 import _got from '../../util/got';
 
-import * as github from '.';
 import * as _hostRules from '../../util/host-rules';
-import { mocked } from '../../../test/util';
+import * as github from '.';
 
 jest.mock('../../util/got');
 jest.mock('../../util/host-rules');

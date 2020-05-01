@@ -1,8 +1,8 @@
 import { logger } from '../../logger';
 import { Http } from '../../util/http';
-import * as github from '../github-tags';
-import { DigestConfig, GetReleasesConfig, ReleaseResult } from '../common';
 import { regEx } from '../../util/regex';
+import { DigestConfig, GetReleasesConfig, ReleaseResult } from '../common';
+import * as github from '../github-tags';
 
 export const id = 'go';
 

@@ -1,6 +1,6 @@
-import { GithubHttp } from '../../util/http/github';
-import { ReleaseResult, GetReleasesConfig, DigestConfig } from '../common';
 import { logger } from '../../logger';
+import { GithubHttp } from '../../util/http/github';
+import { DigestConfig, GetReleasesConfig, ReleaseResult } from '../common';
 
 export const id = 'github-tags';
 

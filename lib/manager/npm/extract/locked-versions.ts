@@ -1,8 +1,8 @@
 import { valid } from 'semver';
 import { logger } from '../../../logger';
+import { PackageFile } from '../../common';
 import { getNpmLock } from './npm';
 import { getYarnLock } from './yarn';
-import { PackageFile } from '../../common';
 
 export async function getLockedVersions(
   packageFiles: PackageFile[]

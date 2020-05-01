@@ -1,10 +1,10 @@
 import parseLinkHeader from 'parse-link-header';
 
-import { GotApi, GotResponse } from '../common';
-import got from '../../util/got';
-import { logger } from '../../logger';
 import { PLATFORM_FAILURE } from '../../constants/error-messages';
 import { PLATFORM_TYPE_GITLAB } from '../../constants/platforms';
+import { logger } from '../../logger';
+import got from '../../util/got';
+import { GotApi, GotResponse } from '../common';
 
 const hostType = PLATFORM_TYPE_GITLAB;
 let baseUrl = 'https://gitlab.com/api/v4/';

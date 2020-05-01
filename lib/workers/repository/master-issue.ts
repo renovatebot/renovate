@@ -1,8 +1,8 @@
-import { logger } from '../../logger';
-import { platform, Pr } from '../../platform';
-import { BranchConfig } from '../common';
 import { RenovateConfig } from '../../config';
 import { PR_STATE_NOT_OPEN } from '../../constants/pull-requests';
+import { logger } from '../../logger';
+import { Pr, platform } from '../../platform';
+import { BranchConfig } from '../common';
 
 function getListItem(branch: BranchConfig, type: string, pr?: Pr): string {
   let item = ' - [ ] ';

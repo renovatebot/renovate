@@ -1,5 +1,5 @@
-import _got from '../../util/got';
 import { mocked } from '../../../test/util';
+import _got from '../../util/got';
 
 import * as github from '.';
 

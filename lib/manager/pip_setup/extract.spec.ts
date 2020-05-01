@@ -1,14 +1,14 @@
 import { exec as _exec } from 'child_process';
 
-import {
-  resetModule,
-  parsePythonVersion,
-  getPythonAlias,
-  pythonVersions,
-} from './extract';
 import { envMock, mockExecSequence } from '../../../test/execUtil';
-import * as _env from '../../util/exec/env';
 import { mocked } from '../../../test/util';
+import * as _env from '../../util/exec/env';
+import {
+  getPythonAlias,
+  parsePythonVersion,
+  pythonVersions,
+  resetModule,
+} from './extract';
 
 const exec: jest.Mock<typeof _exec> = _exec as any;
 const env = mocked(_env);

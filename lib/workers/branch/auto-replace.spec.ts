@@ -1,9 +1,9 @@
 import { readFileSync } from 'fs';
 import { resolve } from 'path';
-import { doAutoReplace } from './auto-replace';
 import { defaultConfig } from '../../../test/util';
 import { RenovateConfig } from '../../config';
 import { extractPackageFile } from '../../manager/html';
+import { doAutoReplace } from './auto-replace';
 
 const sampleHtml = readFileSync(
   resolve(__dirname, `../../manager/html/__fixtures__/sample.html`),

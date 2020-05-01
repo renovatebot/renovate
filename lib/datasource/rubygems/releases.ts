@@ -1,6 +1,6 @@
+import { GetReleasesConfig, ReleaseResult } from '../common';
 import { getDependency } from './get';
 import { getRubygemsOrgDependency } from './get-rubygems-org';
-import { GetReleasesConfig, ReleaseResult } from '../common';
 
 export async function getReleases({
   lookupName,

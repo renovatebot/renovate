@@ -1,7 +1,7 @@
-import { logger } from '../../logger';
-import { PackageDependency, PackageFile } from '../common';
 import * as datasourceDocker from '../../datasource/docker';
+import { logger } from '../../logger';
 import { SkipReason } from '../../types';
+import { PackageDependency, PackageFile } from '../common';
 
 export function splitImageParts(currentFrom: string): PackageDependency {
   if (currentFrom.includes('$')) {

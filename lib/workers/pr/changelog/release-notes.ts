@@ -1,11 +1,11 @@
+import * as URL from 'url';
 import changelogFilenameRegex from 'changelog-filename-regex';
 import { linkify } from 'linkify-markdown';
 import MarkdownIt from 'markdown-it';
-import * as URL from 'url';
 
 import { logger } from '../../../logger';
-import { ChangeLogResult, ChangeLogNotes } from './common';
 import { GithubHttp } from '../../../util/http/github';
+import { ChangeLogNotes, ChangeLogResult } from './common';
 
 const http = new GithubHttp();
 

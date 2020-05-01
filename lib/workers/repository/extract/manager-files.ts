@@ -1,18 +1,18 @@
 import is from '@sindresorhus/is';
+import { logger } from '../../../logger';
 import {
   extractAllPackageFiles,
   extractPackageFile,
   get,
 } from '../../../manager';
+import { PackageFile } from '../../../manager/common';
 import { platform } from '../../../platform';
-import { logger } from '../../../logger';
+import { readLocalFile } from '../../../util/fs';
 import {
   filterIgnoredFiles,
   getIncludedFiles,
   getMatchingFiles,
 } from './file-match';
-import { PackageFile } from '../../../manager/common';
-import { readLocalFile } from '../../../util/fs';
 
 export async function getManagerPackageFiles(config): Promise<PackageFile[]> {
   const { manager, enabled, includePaths, ignorePaths } = config;

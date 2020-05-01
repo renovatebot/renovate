@@ -1,8 +1,8 @@
 import crypto from 'crypto';
+import { PLATFORM_FAILURE } from '../../constants/error-messages';
+import { logger } from '../../logger';
 import { GithubHttp } from '../../util/http/github';
 import { GetReleasesConfig, ReleaseResult } from '../common';
-import { logger } from '../../logger';
-import { PLATFORM_FAILURE } from '../../constants/error-messages';
 
 export const id = 'pod';
 

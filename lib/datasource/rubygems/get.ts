@@ -2,9 +2,9 @@ import { OutgoingHttpHeaders } from 'http';
 import { logger } from '../../logger';
 import { Http } from '../../util/http';
 import { maskToken } from '../../util/mask';
-import { UNAUTHORIZED, FORBIDDEN, NOT_FOUND } from './errors';
 import { ReleaseResult } from '../common';
 import { id } from './common';
+import { FORBIDDEN, NOT_FOUND, UNAUTHORIZED } from './errors';
 
 const http = new Http(id);
 

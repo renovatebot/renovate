@@ -1,10 +1,10 @@
-import _got from '../../util/got';
-import * as pod from '.';
-import * as rubyVersioning from '../../versioning/ruby';
 import { getPkgReleases } from '..';
+import { mocked } from '../../../test/util';
 import { GotResponse } from '../../platform';
 import { clearRepoCache } from '../../util/cache';
-import { mocked } from '../../../test/util';
+import _got from '../../util/got';
+import * as rubyVersioning from '../../versioning/ruby';
+import * as pod from '.';
 
 jest.mock('../../util/got');
 const got: any = mocked(_got);
