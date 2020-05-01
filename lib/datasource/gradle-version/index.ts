@@ -1,12 +1,12 @@
 import is from '@sindresorhus/is';
-import { regEx } from '../../util/regex';
 import { logger } from '../../logger';
 import { Http } from '../../util/http';
+import { regEx } from '../../util/regex';
 import {
   DatasourceError,
   GetReleasesConfig,
-  ReleaseResult,
   Release,
+  ReleaseResult,
 } from '../common';
 
 export const id = 'gradle-version';
@@ -20,8 +20,6 @@ interface GradleRelease {
   nightly?: boolean;
   rcFor?: string;
   version: string;
-  downloadUrl?: string;
-  checksumUrl?: string;
   buildTime?: string;
 }
 
@@ -59,8 +57,6 @@ export async function getReleases({
           )
           .map((release) => ({
             version: release.version,
-            downloadUrl: release.downloadUrl,
-            checksumUrl: release.checksumUrl,
             releaseTimestamp: formatBuildTime(release.buildTime),
           }));
         return releases;

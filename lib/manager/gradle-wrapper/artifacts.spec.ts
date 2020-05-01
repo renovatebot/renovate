@@ -1,11 +1,11 @@
 import { readFileSync } from 'fs';
 import { resolve } from 'path';
 import Git from 'simple-git/promise';
-import * as dcUpdate from '.';
+import { bufferSerializer, getName, mocked } from '../../../test/util';
 import { platform as _platform } from '../../platform';
-import { mocked, getName, bufferSerializer } from '../../../test/util';
-import { ifSystemSupportsGradle } from '../gradle/__testutil__/gradle';
 import { setUtilConfig } from '../../util';
+import { ifSystemSupportsGradle } from '../gradle/__testutil__/gradle';
+import * as dcUpdate from '.';
 
 const platform = mocked(_platform);
 const config = {
@@ -86,10 +86,14 @@ describe(getName(__filename), () => {
         'gradlew.bat',
       ].forEach((file) => {
         expect(
-          readFileSync(resolve(__dirname, `./__fixtures__/testFiles/${file}`))
+          readFileSync(
+            resolve(__dirname, `./__fixtures__/testFiles/${file}`),
+            'utf8'
+          )
         ).toEqual(
           readFileSync(
-            resolve(__dirname, `./__fixtures__/expectedFiles/${file}`)
+            resolve(__dirname, `./__fixtures__/expectedFiles/${file}`),
+            'utf8'
           )
         );
       });

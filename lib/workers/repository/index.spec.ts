@@ -1,9 +1,9 @@
 import { mock } from 'jest-mock-extended';
 
-import { renovateRepository } from '.';
+import { RenovateConfig, getConfig, mocked } from '../../../test/util';
 import * as _process from './process';
-import { mocked, RenovateConfig, getConfig } from '../../../test/util';
 import { ExtractResult } from './process/extract-update';
+import { renovateRepository } from '.';
 
 const process = mocked(_process);
 

@@ -1,5 +1,5 @@
-import * as template from '../../../util/template';
 import { logger } from '../../../logger';
+import * as template from '../../../util/template';
 import { BranchConfig } from '../../common';
 
 type TableDefinition = {

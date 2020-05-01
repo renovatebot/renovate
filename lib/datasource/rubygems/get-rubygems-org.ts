@@ -1,6 +1,6 @@
 import { hrtime } from 'process';
-import { Http } from '../../util/http';
 import { logger } from '../../logger';
+import { Http } from '../../util/http';
 import { DatasourceError, ReleaseResult } from '../common';
 import { id } from './common';
 

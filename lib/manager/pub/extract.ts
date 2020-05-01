@@ -1,8 +1,8 @@
 import { safeLoad } from 'js-yaml';
-import { logger } from '../../logger';
-import { PackageDependency, PackageFile } from '../common';
 import * as datasourceDart from '../../datasource/dart';
+import { logger } from '../../logger';
 import { SkipReason } from '../../types';
+import { PackageDependency, PackageFile } from '../common';
 
 function getDeps(
   depsObj: { [x: string]: any },

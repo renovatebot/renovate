@@ -1,6 +1,6 @@
+import { RenovateConfig } from '../../../config';
 import { logger } from '../../../logger';
 import { platform } from '../../../platform';
-import { RenovateConfig } from '../../../config';
 
 export async function checkBaseBranch(
   config: RenovateConfig

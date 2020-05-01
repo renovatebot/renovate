@@ -1,7 +1,5 @@
 import delay from 'delay';
 import { Response } from 'got';
-import _got from '../../util/got';
-import { api } from './gh-got-wrapper';
 import {
   PLATFORM_BAD_CREDENTIALS,
   PLATFORM_FAILURE,
@@ -9,6 +7,8 @@ import {
   PLATFORM_RATE_LIMIT_EXCEEDED,
   REPOSITORY_CHANGED,
 } from '../../constants/error-messages';
+import _got from '../../util/got';
+import { api } from './gh-got-wrapper';
 
 jest.mock('../../util/got');
 jest.mock('delay');

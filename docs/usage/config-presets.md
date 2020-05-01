@@ -44,11 +44,11 @@ In general, GitHub or GitLab-based preset hosting is easier than npm because you
 
 ## Example configs
 
-An example of a small rule is [":preserveSemverRanges"](https://github.com/renovatebot/presets/blob/dda2282e5a53982daea09489d622eedc174243e2/packages/renovate-config-default/package.json#L44-L47), which has the description "Preserve (but continue to upgrade) any existing semver ranges". It simply sets the configuration option `rangeStrategy` to `replace`.
+An example of a small rule is `:preserveSemverRanges`, which has the description "Preserve (but continue to upgrade) any existing semver ranges". It simply sets the configuration option `rangeStrategy` to `replace`.
 
-An example of a full config is ["config:base"](https://github.com/renovatebot/presets/blob/dda2282e5a53982daea09489d622eedc174243e2/packages/renovate-config-config/package.json#L16-L36), which is Renovate's default configuration. It mostly uses Renovate config defaults but adds a few smart customisations such as grouping monorepo packages together.
+An example of a full config is `config:base`, which is Renovate's default configuration. It mostly uses Renovate config defaults but adds a few smart customisations such as grouping monorepo packages together.
 
-Special note: the `:xyz` naming convention (with `:` prefix) is a special shorthand for the [default](https://github.com/renovatebot/presets/blob/master/packages/renovate-config-default/package.json) presets. i.e. `:xyz` is equivalent to `default:xyz`.
+Special note: the `:xyz` naming convention (with `:` prefix) is a special shorthand for the `default:` presets. i.e. `:xyz` is equivalent to `default:xyz`.
 
 ## How to Use Preset Configs
 
@@ -70,7 +70,7 @@ Let's say you wish to modify that default behaviour, such as to schedule Renovat
 }
 ```
 
-This makes use of the [schedules](https://github.com/renovatebot/presets/blob/master/packages/renovate-config-schedule/package.json) presets. To see all presets published by the Renovate team then browse [https://github.com/renovatebot/presets/blob/master/packages](https://github.com/renovatebot/presets/tree/master/packages)
+This makes use of the `schedules:` presets. To see all presets published by the Renovate team then browse the "Config Presets" section of [Renovate Docs](https://docs.renovatebot.com).
 
 ## Preset Parameters
 
@@ -103,7 +103,7 @@ Here is how you would use these in your Renovate config:
 
 In short, the number of `{{argx}}` params in the definition is how many parameters you need to provide. Parameters must be strings, non-quoted, and separated by commas if there are more than one.
 
-If you find that you are repeating config a lot, you might consider publishing one of these types of parameterised presets yourself, or if you think your preset would be valuable for others, please contribute a PR to the `renovatebot/presets` repository.
+If you find that you are repeating config a lot, you might consider publishing one of these types of parameterised presets yourself, or if you think your preset would be valuable for others, please contribute a PR to the Renovate repository.
 
 ## How to Publish Preset Configs
 
@@ -180,4 +180,4 @@ The answer is to host your preset using GitHub or GitLab - not npmjs - and make 
 
 ## Contributing to presets
 
-Have you configured a rule that you think others might benefit from? Please consider contributing it to the [presets](https://github.com/renovatebot/presets) repository so that it gains higher visibility and saves others from reinventing the same thing.
+Have you configured a rule that you think others might benefit from? Please consider contributing it to the [Renovate](https://github.com/renovatebot/renovate) repository so that it gains higher visibility and saves others from reinventing the same thing.

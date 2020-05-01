@@ -1,7 +1,7 @@
 import is from '@sindresorhus/is';
 import yaml from 'js-yaml';
-import { PackageFile, PackageDependency } from '../common';
 import { logger } from '../../logger';
+import { PackageDependency, PackageFile } from '../common';
 
 export function extractPackageFile(content: string): PackageFile | null {
   let doc;

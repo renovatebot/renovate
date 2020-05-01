@@ -1,12 +1,12 @@
 /* istanbul ignore file */
-import Git from 'simple-git/promise';
 import { resolve } from 'path';
 import * as fs from 'fs-extra';
+import Git from 'simple-git/promise';
 import { logger } from '../../logger';
-import { UpdateArtifact, UpdateArtifactsResult } from '../common';
-import { exec, ExecOptions } from '../../util/exec';
-import { readLocalFile } from '../../util/fs';
 import { platform } from '../../platform';
+import { ExecOptions, exec } from '../../util/exec';
+import { readLocalFile } from '../../util/fs';
+import { UpdateArtifact, UpdateArtifactsResult } from '../common';
 import { gradleWrapperFileName, prepareGradleCommand } from '../gradle/index';
 
 async function addIfUpdated(
@@ -24,8 +24,21 @@ async function addIfUpdated(
   return null;
 }
 
+function getDistributionUrl(newPackageFileContent: string): string {
+  const distributionUrlLine = newPackageFileContent
+    .split('\n')
+    .find((line) => line.startsWith('distributionUrl='));
+  if (distributionUrlLine) {
+    return distributionUrlLine
+      .replace('distributionUrl=', '')
+      .replace('https\\:', 'https:');
+  }
+  return null;
+}
+
 export async function updateArtifacts({
   packageFileName,
+  newPackageFileContent,
   updatedDeps,
   config,
 }: UpdateArtifact): Promise<UpdateArtifactsResult[] | null> {
@@ -34,12 +47,18 @@ export async function updateArtifacts({
     logger.debug({ updatedDeps }, 'gradle-wrapper.updateArtifacts()');
     const gradlew = gradleWrapperFileName(config);
     const gradlewPath = resolve(projectDir, `./${gradlew}`);
-    const cmd = await prepareGradleCommand(
+    let cmd = await prepareGradleCommand(
       gradlew,
       projectDir,
       await fs.stat(gradlewPath).catch(() => null),
-      `wrapper --gradle-version ${config.toVersion}`
+      `wrapper`
     );
+    const distributionUrl = getDistributionUrl(newPackageFileContent);
+    if (distributionUrl) {
+      cmd += ` --gradle-distribution-url ${distributionUrl}`;
+    } else {
+      cmd += ` --gradle-version ${config.toVersion}`;
+    }
     logger.debug(`Updating gradle wrapper: "${cmd}"`);
     const execOptions: ExecOptions = {
       docker: {

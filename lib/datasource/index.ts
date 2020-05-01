@@ -1,19 +1,19 @@
 import is from '@sindresorhus/is';
 import { logger } from '../logger';
-import { addMetaData } from './metadata';
+import { getRepoCached, setRepoCached } from '../util/cache';
+import { clone } from '../util/clone';
 import * as allVersioning from '../versioning';
-
+import datasources from './api.generated';
 import {
   Datasource,
   DatasourceError,
+  DigestConfig,
+  GetPkgReleasesConfig,
+  GetReleasesConfig,
   Release,
   ReleaseResult,
-  DigestConfig,
-  GetReleasesConfig,
-  GetPkgReleasesConfig,
 } from './common';
-import datasources from './api.generated';
-import { clone } from '../util/clone';
+import { addMetaData } from './metadata';
 
 export * from './common';
 
@@ -65,12 +65,11 @@ function getRawReleases(
     config.datasource +
     config.lookupName +
     config.registryUrls;
-  // The repoCache is initialized for each repo
   // By returning a Promise and reusing it, we should only fetch each package at most once
-  if (!global.repoCache[cacheKey]) {
-    global.repoCache[cacheKey] = fetchReleases(config);
+  if (!getRepoCached(cacheKey)) {
+    setRepoCached(cacheKey, fetchReleases(config));
   }
-  return global.repoCache[cacheKey];
+  return getRepoCached<Promise<ReleaseResult | null>>(cacheKey);
 }
 
 export async function getPkgReleases(

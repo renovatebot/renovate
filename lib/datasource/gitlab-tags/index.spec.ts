@@ -1,5 +1,5 @@
-import * as gitlab from '.';
 import { api } from '../../platform/gitlab/gl-got-wrapper';
+import * as gitlab from '.';
 
 jest.mock('../../platform/gitlab/gl-got-wrapper');
 jest.mock('../../util/got');
@@ -8,7 +8,6 @@ const glGot: any = api.get;
 
 describe('datasource/gitlab-tags', () => {
   beforeEach(() => {
-    global.repoCache = {};
     return global.renovateCache.rmAll();
   });
   describe('getReleases', () => {

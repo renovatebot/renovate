@@ -1,8 +1,25 @@
 import URL from 'url';
-import GitStorage, { StatusResult } from '../git/storage';
+import { configFileNames } from '../../config/app-strings';
+import { RenovateConfig } from '../../config/common';
+import {
+  REPOSITORY_ACCESS_FORBIDDEN,
+  REPOSITORY_ARCHIVED,
+  REPOSITORY_BLOCKED,
+  REPOSITORY_CHANGED,
+  REPOSITORY_DISABLED,
+  REPOSITORY_EMPTY,
+  REPOSITORY_MIRRORED,
+} from '../../constants/error-messages';
+import { PLATFORM_TYPE_GITEA } from '../../constants/platforms';
+import { PR_STATE_ALL, PR_STATE_OPEN } from '../../constants/pull-requests';
+import { logger } from '../../logger';
+import { BranchStatus } from '../../types';
 import * as hostRules from '../../util/host-rules';
+import { sanitize } from '../../util/sanitize';
+import { ensureTrailingSlash } from '../../util/url';
 import {
   BranchStatusConfig,
+  CommitFilesConfig,
   CreatePRConfig,
   EnsureCommentConfig,
   EnsureIssueConfig,
@@ -14,28 +31,11 @@ import {
   RepoConfig,
   RepoParams,
   VulnerabilityAlert,
-  CommitFilesConfig,
 } from '../common';
-import { api } from './gitea-got-wrapper';
-import { PLATFORM_TYPE_GITEA } from '../../constants/platforms';
-import { logger } from '../../logger';
-import {
-  REPOSITORY_ACCESS_FORBIDDEN,
-  REPOSITORY_ARCHIVED,
-  REPOSITORY_BLOCKED,
-  REPOSITORY_CHANGED,
-  REPOSITORY_DISABLED,
-  REPOSITORY_EMPTY,
-  REPOSITORY_MIRRORED,
-} from '../../constants/error-messages';
-import { RenovateConfig } from '../../config/common';
-import { configFileNames } from '../../config/app-strings';
+import GitStorage, { StatusResult } from '../git/storage';
 import { smartTruncate } from '../utils/pr-body';
-import { sanitize } from '../../util/sanitize';
-import { BranchStatus } from '../../types';
+import { api } from './gitea-got-wrapper';
 import * as helper from './gitea-helper';
-import { PR_STATE_ALL, PR_STATE_OPEN } from '../../constants/pull-requests';
-import { ensureTrailingSlash } from '../../util/url';
 
 type GiteaRenovateConfig = {
   endpoint: string;
@@ -44,6 +44,7 @@ type GiteaRenovateConfig = {
 
 interface GiteaRepoConfig {
   storage: GitStorage;
+  gitPrivateKey?: string;
   repository: string;
   localDir: string;
   defaultBranch: string;
@@ -80,7 +81,7 @@ function toRenovatePR(data: helper.PR): Pr | null {
 
   if (
     !data.base?.ref ||
-    !data.head?.ref ||
+    !data.head?.label ||
     !data.head?.sha ||
     !data.head?.repo?.full_name
   ) {
@@ -97,7 +98,7 @@ function toRenovatePR(data: helper.PR): Pr | null {
     title: data.title,
     body: data.body,
     sha: data.head.sha,
-    branchName: data.head.ref,
+    branchName: data.head.label,
     targetBranch: data.base.ref,
     sourceRepo: data.head.repo.full_name,
     createdAt: data.created_at,
@@ -166,14 +167,32 @@ async function retrieveDefaultConfig(
 
 function getLabelList(): Promise<helper.Label[]> {
   if (config.labelList === null) {
-    config.labelList = helper
+    const repoLabels = helper
       .getRepoLabels(config.repository, {
         useCache: false,
       })
       .then((labels) => {
-        logger.debug(`Retrieved ${labels.length} Labels`);
+        logger.debug(`Retrieved ${labels.length} repo labels`);
         return labels;
       });
+
+    const orgLabels = helper
+      .getOrgLabels(config.repository.split('/')[0], {
+        useCache: false,
+      })
+      .then((labels) => {
+        logger.debug(`Retrieved ${labels.length} org labels`);
+        return labels;
+      })
+      .catch((err) => {
+        // Will fail if owner of repo is not org or Gitea version < 1.12
+        logger.debug(`Unable to fetch organization labels`);
+        return [];
+      });
+
+    config.labelList = Promise.all([repoLabels, orgLabels]).then((labels) => {
+      return [].concat(...labels);
+    });
   }
 
   return config.labelList;
@@ -222,6 +241,7 @@ const platform: Platform = {
 
   async initRepo({
     repository,
+    gitPrivateKey,
     localDir,
     optimizeForDisabled,
   }: RepoParams): Promise<RepoConfig> {
@@ -230,6 +250,7 @@ const platform: Platform = {
 
     config = {} as any;
     config.repository = repository;
+    config.gitPrivateKey = gitPrivateKey;
     config.localDir = localDir;
 
     // Attempt to fetch information about repository
@@ -473,11 +494,13 @@ const platform: Platform = {
     }
 
     // Enrich pull request with additional information which is more expensive to fetch
-    if (pr.isStale === undefined) {
-      pr.isStale = await platform.isBranchStale(pr.branchName);
-    }
-    if (pr.isModified === undefined) {
-      pr.isModified = await isPRModified(config.repository, pr.branchName);
+    if (pr.state !== 'closed') {
+      if (pr.isStale === undefined) {
+        pr.isStale = await platform.isBranchStale(pr.branchName);
+      }
+      if (pr.isModified === undefined) {
+        pr.isModified = await isPRModified(config.repository, pr.branchName);
+      }
     }
 
     return pr;

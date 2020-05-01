@@ -1,11 +1,11 @@
 import JSON5 from 'json5';
-import { logger } from '../../../logger';
-import { migrateAndValidate } from '../../../config/migrate-validate';
-import { configFileNames } from '../../../config/app-strings';
-import { platform, Pr } from '../../../platform';
 import { RenovateConfig } from '../../../config';
-import { PR_STATE_OPEN } from '../../../constants/pull-requests';
+import { configFileNames } from '../../../config/app-strings';
+import { migrateAndValidate } from '../../../config/migrate-validate';
 import { REPOSITORY_CHANGED } from '../../../constants/error-messages';
+import { PR_STATE_OPEN } from '../../../constants/pull-requests';
+import { logger } from '../../../logger';
+import { Pr, platform } from '../../../platform';
 import { BranchStatus } from '../../../types';
 
 async function getRenovatePrs(branchPrefix: string): Promise<Pr[]> {
@@ -73,6 +73,7 @@ export async function validatePrs(config: RenovateConfig): Promise<void> {
               ? /* istanbul ignore next */ parsed.renovate ||
                 parsed['renovate-config']
               : parsed;
+          // istanbul ignore else
           if (toValidate) {
             logger.debug({ config: toValidate }, 'Validating config');
             const { errors } = await migrateAndValidate(config, toValidate);
@@ -105,18 +106,28 @@ export async function validatePrs(config: RenovateConfig): Promise<void> {
       } else {
         description = `Renovate config is valid`;
         status = BranchStatus.green;
-        await platform.ensureCommentRemoval(pr.number, topic);
+        if (config.dryRun) {
+          logger.info(
+            `DRY-RUN: Would ensure validation comment removal in PR #${pr.number}`
+          );
+        } else {
+          await platform.ensureCommentRemoval(pr.number, topic);
+        }
       }
       // istanbul ignore else
       if (pr.sourceRepo === config.repository) {
         logger.debug({ status, description }, 'Setting PR validation status');
         const context = `renovate/validate`;
-        await platform.setBranchStatus({
-          branchName: pr.branchName,
-          context,
-          description,
-          state: status,
-        });
+        if (config.dryRun) {
+          logger.info(`DRY-RUN: Would set branch status in PR #${pr.number}`);
+        } else {
+          await platform.setBranchStatus({
+            branchName: pr.branchName,
+            context,
+            description,
+            state: status,
+          });
+        }
       } else {
         logger.debug('Skipping branch status for forked PR');
       }

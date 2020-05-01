@@ -374,7 +374,47 @@ Object {
 }
 `;
 
-exports[`datasource/packagist getReleases supports providers packages 1`] = `
+exports[`datasource/packagist getReleases supports provider-includes 1`] = `
+Object {
+  "homepage": "https://wordpress.org/plugins/1beyt/",
+  "name": "wpackagist-plugin/1beyt",
+  "releases": Array [
+    Object {
+      "gitRef": "1.0",
+      "releaseTimestamp": undefined,
+      "version": "1.0",
+    },
+    Object {
+      "gitRef": "1.1",
+      "releaseTimestamp": undefined,
+      "version": "1.1",
+    },
+    Object {
+      "gitRef": "1.4",
+      "releaseTimestamp": undefined,
+      "version": "1.4",
+    },
+    Object {
+      "gitRef": "1.5",
+      "releaseTimestamp": undefined,
+      "version": "1.5",
+    },
+    Object {
+      "gitRef": "1.5.1",
+      "releaseTimestamp": undefined,
+      "version": "1.5.1",
+    },
+    Object {
+      "gitRef": "dev-trunk",
+      "releaseTimestamp": "2018-09-03 21:31:30",
+      "version": "dev-trunk",
+    },
+  ],
+  "sourceUrl": "https://plugins.svn.wordpress.org/1beyt/",
+}
+`;
+
+exports[`datasource/packagist getReleases supports providers 1`] = `
 Object {
   "homepage": "https://wordpress.org/plugins/1beyt/",
   "name": "wpackagist-plugin/1beyt",

@@ -1,6 +1,6 @@
 import is from '@sindresorhus/is';
 import { clone } from '../util/clone';
-import { RenovateConfig, UpdateType, PackageRule } from './common';
+import { PackageRule, RenovateConfig, UpdateType } from './common';
 import { getOptions } from './definitions';
 
 const options = getOptions();

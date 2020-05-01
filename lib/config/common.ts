@@ -1,5 +1,5 @@
-import { Range } from 'semver';
 import { LogLevel } from 'bunyan';
+import { Range } from 'semver';
 import { HostRule } from '../types';
 
 export type RenovateConfigStage =
@@ -122,7 +122,7 @@ export interface RenovateConfig
   baseBranches?: string[];
   baseBranch?: string;
   branchList?: string[];
-  description?: string[];
+  description?: string | string[];
 
   errors?: ValidationMessage[];
   extends?: string[];

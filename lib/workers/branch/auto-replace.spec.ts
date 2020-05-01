@@ -1,14 +1,16 @@
 import { readFileSync } from 'fs';
 import { resolve } from 'path';
-import { doAutoReplace } from './auto-replace';
 import { defaultConfig } from '../../../test/util';
 import { RenovateConfig } from '../../config';
 import { extractPackageFile } from '../../manager/html';
+import { doAutoReplace } from './auto-replace';
 
 const sampleHtml = readFileSync(
   resolve(__dirname, `../../manager/html/__fixtures__/sample.html`),
   'utf8'
 );
+
+jest.mock('../../util/fs');
 
 describe('workers/branch/auto-replace', () => {
   describe('doAutoReplace', () => {
@@ -47,7 +49,21 @@ describe('workers/branch/auto-replace', () => {
       upgrade.lookupName = 'reactstrap/7.1.0/reactstrap.min.js';
       upgrade.currentValue = '7.1.0';
       upgrade.newValue = '7.1.1';
+      upgrade.newDigest = 'some-digest';
       upgrade.depIndex = 0;
+      const res = await doAutoReplace(upgrade, src, parentBranch);
+      expect(res).toMatchSnapshot();
+    });
+    it('handles a double attempt', async () => {
+      const script =
+        '<script src="https://cdnjs.cloudflare.com/ajax/libs/reactstrap/7.1.0/reactstrap.min.js">';
+      const src = `     ${script}  ${script} `;
+      upgrade.baseDeps = extractPackageFile(src).deps;
+      upgrade.depName = 'reactstrap';
+      upgrade.lookupName = 'reactstrap/7.1.0/reactstrap.min.js';
+      upgrade.currentValue = '7.1.0';
+      upgrade.newValue = '7.1.1';
+      upgrade.depIndex = 1;
       const res = await doAutoReplace(upgrade, src, parentBranch);
       expect(res).toMatchSnapshot();
     });

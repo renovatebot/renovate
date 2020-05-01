@@ -1,8 +1,8 @@
-import { extractPackageFile } from './extract';
-import { updateArtifacts } from './artifacts';
-import { getRangeStrategy } from './range';
 import { LANGUAGE_RUBY } from '../../constants/languages';
 import * as rubyVersioning from '../../versioning/ruby';
+import { updateArtifacts } from './artifacts';
+import { extractPackageFile } from './extract';
+import { getRangeStrategy } from './range';
 
 const language = LANGUAGE_RUBY;
 export const supportsLockFileMaintenance = true;

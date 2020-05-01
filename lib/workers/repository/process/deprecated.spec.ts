@@ -1,5 +1,5 @@
-import { raiseDeprecationWarnings } from './deprecated';
 import { platform } from '../../../../test/util';
+import { raiseDeprecationWarnings } from './deprecated';
 
 describe('workers/repository/process/deprecated', () => {
   describe('raiseDeprecationWarnings()', () => {

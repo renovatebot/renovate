@@ -1,24 +1,26 @@
 import nock from 'nock';
-import * as lookup from '.';
+import { getConfig, mocked } from '../../../../../test/util';
 import qJson from '../../../../config/npm/__fixtures__/01.json';
 import helmetJson from '../../../../config/npm/__fixtures__/02.json';
 import coffeelintJson from '../../../../config/npm/__fixtures__/coffeelint.json';
-import webpackJson from '../../../../config/npm/__fixtures__/webpack.json';
 import nextJson from '../../../../config/npm/__fixtures__/next.json';
-import vueJson from '../../../../config/npm/__fixtures__/vue.json';
 import typescriptJson from '../../../../config/npm/__fixtures__/typescript.json';
-import { mocked, getConfig } from '../../../../../test/util';
+import vueJson from '../../../../config/npm/__fixtures__/vue.json';
+import webpackJson from '../../../../config/npm/__fixtures__/webpack.json';
 import { CONFIG_VALIDATION } from '../../../../constants/error-messages';
+import * as datasourceDocker from '../../../../datasource/docker';
+import * as datasourceGitSubmodules from '../../../../datasource/git-submodules';
+import * as datasourceGithubTags from '../../../../datasource/github-tags';
+import * as datasourceNpm from '../../../../datasource/npm';
+import * as datasourcePackagist from '../../../../datasource/packagist';
+import * as datasourcePypi from '../../../../datasource/pypi';
+import { clearRepoCache } from '../../../../util/cache';
 import * as dockerVersioning from '../../../../versioning/docker';
 import * as gitVersioning from '../../../../versioning/git';
 import * as npmVersioning from '../../../../versioning/npm';
 import * as pep440Versioning from '../../../../versioning/pep440';
-import * as datasourceNpm from '../../../../datasource/npm';
-import * as datasourcePypi from '../../../../datasource/pypi';
-import * as datasourcePackagist from '../../../../datasource/packagist';
-import * as datasourceDocker from '../../../../datasource/docker';
-import * as datasourceGithubTags from '../../../../datasource/github-tags';
-import * as datasourceGitSubmodules from '../../../../datasource/git-submodules';
+import * as poetryVersioning from '../../../../versioning/poetry';
+import * as lookup from '.';
 
 jest.mock('../../../../datasource/docker');
 jest.mock('../../../../datasource/git-submodules');
@@ -36,7 +38,7 @@ describe('workers/repository/process/lookup', () => {
     config.manager = 'npm';
     config.versioning = npmVersioning.id;
     config.rangeStrategy = 'replace';
-    global.repoCache = {};
+    clearRepoCache();
     jest.resetAllMocks();
   });
 
@@ -167,6 +169,15 @@ describe('workers/repository/process/lookup', () => {
       config.allowedVersions = '<1';
       config.depName = 'q';
       config.versioning = dockerVersioning.id; // this doesn't make sense but works for this test
+      config.datasource = datasourceNpm.id; // this doesn't make sense but works for this test
+      nock('https://registry.npmjs.org').get('/q').reply(200, qJson);
+      expect((await lookup.lookupUpdates(config)).updates).toHaveLength(1);
+    });
+    it('falls back to pep440 syntax allowedVersions', async () => {
+      config.currentValue = '0.4.0';
+      config.allowedVersions = '==0.9.4';
+      config.depName = 'q';
+      config.versioning = poetryVersioning.id; // this doesn't make sense but works for this test
       config.datasource = datasourceNpm.id; // this doesn't make sense but works for this test
       nock('https://registry.npmjs.org').get('/q').reply(200, qJson);
       expect((await lookup.lookupUpdates(config)).updates).toHaveLength(1);

@@ -1,21 +1,13 @@
-import nock from 'nock';
 import fs from 'fs';
 import { resolve } from 'path';
-import * as maven from '.';
-import * as mavenVersioning from '../../versioning/maven';
+import nock from 'nock';
 import { getPkgReleases } from '..';
 import { DATASOURCE_FAILURE } from '../../constants/error-messages';
 import * as hostRules from '../../util/host-rules';
+import * as mavenVersioning from '../../versioning/maven';
+import * as maven from '.';
 
-const MYSQL_VERSIONS = [
-  '6.0.5',
-  '6.0.6',
-  '8.0.7',
-  '8.0.8',
-  '8.0.9',
-  '8.0.11',
-  '8.0.12',
-];
+const MYSQL_VERSIONS = ['6.0.5', '6.0.6', '8.0.7', '8.0.8', '8.0.9'];
 
 const MYSQL_MAVEN_METADATA = fs.readFileSync(
   resolve(
@@ -46,6 +38,8 @@ describe('datasource/maven', () => {
       username: 'username',
       password: 'password',
     });
+    jest.resetAllMocks();
+    nock.cleanAll();
     nock.disableNetConnect();
     nock('https://repo.maven.apache.org')
       .get('/maven2/mysql/mysql-connector-java/maven-metadata.xml')
@@ -88,6 +82,22 @@ describe('datasource/maven', () => {
         '/maven2/mysql/mysql-connector-java/8.0.12/mysql-connector-java-8.0.12.pom?X-Amz-Algorithm=AWS4-HMAC-SHA256'
       )
       .reply(200, MYSQL_MAVEN_MYSQL_POM);
+    Object.entries({
+      '6.0.5': 200,
+      '6.0.6': 200,
+      '8.0.7': 200,
+      '8.0.8': 200,
+      '8.0.9': 200,
+      '8.0.11': 404,
+      '8.0.12': 500,
+    }).forEach(([v, status]) => {
+      const path = `/maven2/mysql/mysql-connector-java/${v}/mysql-connector-java-${v}.jar`;
+      nock('https://repo.maven.apache.org').head(path).reply(status, '', {});
+      nock('http://frontend_for_private_s3_repository')
+        .head(path)
+        .reply(status, '', {});
+    });
+    return global.renovateCache.rmAll();
   });
 
   afterEach(() => {
@@ -144,7 +154,7 @@ describe('datasource/maven', () => {
         ],
       });
       expect(releases.releases).toEqual(
-        generateReleases(['6.0.4', ...MYSQL_VERSIONS])
+        generateReleases(['6.0.4', ...MYSQL_VERSIONS, '8.0.11', '8.0.12'])
       );
     });
 

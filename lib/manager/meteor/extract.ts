@@ -1,6 +1,6 @@
-import { logger } from '../../logger';
-import { PackageFile, PackageDependency } from '../common';
 import * as datasourceNpm from '../../datasource/npm';
+import { logger } from '../../logger';
+import { PackageDependency, PackageFile } from '../common';
 
 export function extractPackageFile(content: string): PackageFile | null {
   let deps: PackageDependency[] = [];

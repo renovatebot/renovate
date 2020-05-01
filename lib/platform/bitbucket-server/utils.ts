@@ -1,12 +1,12 @@
 // SEE for the reference https://github.com/renovatebot/renovate/blob/c3e9e572b225085448d94aa121c7ec81c14d3955/lib/platform/bitbucket/utils.js
 import url from 'url';
-import { api } from './bb-got-wrapper';
-import { Pr } from '../common';
 import {
   PR_STATE_CLOSED,
   PR_STATE_MERGED,
   PR_STATE_OPEN,
 } from '../../constants/pull-requests';
+import { Pr } from '../common';
+import { api } from './bb-got-wrapper';
 
 // https://docs.atlassian.com/bitbucket-server/rest/6.0.0/bitbucket-rest.html#idp250
 const prStateMapping: any = {

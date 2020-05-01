@@ -1,12 +1,12 @@
+import { basename, dirname, join, normalize } from 'path';
 import is from '@sindresorhus/is';
-import { basename, dirname, normalize, join } from 'path';
 import { XmlDocument, XmlElement } from 'xmldoc';
-import { logger } from '../../logger';
-import { ExtractConfig, PackageFile, PackageDependency } from '../common';
-import { platform } from '../../platform';
 import * as datasourceMaven from '../../datasource/maven';
 import { MAVEN_REPO } from '../../datasource/maven/common';
+import { logger } from '../../logger';
 import { SkipReason } from '../../types';
+import { readLocalFile } from '../../util/fs';
+import { ExtractConfig, PackageDependency, PackageFile } from '../common';
 
 export function parsePom(raw: string): XmlDocument | null {
   let project: XmlDocument;
@@ -300,7 +300,7 @@ export async function extractAllPackageFiles(
 ): Promise<PackageFile[]> {
   const packages: PackageFile[] = [];
   for (const packageFile of packageFiles) {
-    const content = await platform.getFile(packageFile);
+    const content = await readLocalFile(packageFile, 'utf8');
     if (content) {
       const pkg = extractPackage(content, packageFile);
       if (pkg) {

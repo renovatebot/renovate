@@ -1,14 +1,14 @@
 import { parse } from '@yarnpkg/lockfile';
 import { logger } from '../../../logger';
+import { readLocalFile } from '../../../util/fs';
 import { LockFileEntry } from './common';
-import { platform } from '../../../platform';
 
 export type YarnLock = Record<string, string> & {
   '@renovate_yarn_integrity'?: boolean;
 };
 
 export async function getYarnLock(filePath: string): Promise<YarnLock> {
-  const yarnLockRaw = await platform.getFile(filePath);
+  const yarnLockRaw = await readLocalFile(filePath, 'utf8');
   try {
     const yarnLockParsed = parse(yarnLockRaw);
     // istanbul ignore if

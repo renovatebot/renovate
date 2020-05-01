@@ -1,14 +1,13 @@
-import { logger } from '../../logger';
-import { Preset } from './common';
-import { Http, HttpOptions } from '../../util/http';
 import { PLATFORM_FAILURE } from '../../constants/error-messages';
-import { ensureTrailingSlash } from '../../util/url';
-import { RenovateConfig } from '../common';
 import { PLATFORM_TYPE_GITHUB } from '../../constants/platforms';
+import { logger } from '../../logger';
+import { Http, HttpOptions } from '../../util/http';
+import { ensureTrailingSlash } from '../../util/url';
+import { Preset } from './common';
 
 const http = new Http(PLATFORM_TYPE_GITHUB);
 
-async function fetchJSONFile(
+export async function fetchJSONFile(
   repo: string,
   fileName: string,
   endpoint: string
@@ -43,34 +42,42 @@ async function fetchJSONFile(
   }
 }
 
-export async function getPreset(
+export async function getPresetFromEndpoint(
   pkgName: string,
-  presetName = 'default',
-  baseConfig?: RenovateConfig
+  filePreset: string,
+  endpoint = 'https://api.github.com/'
 ): Promise<Preset> {
-  const endpoint = ensureTrailingSlash(
-    (baseConfig?.platform === PLATFORM_TYPE_GITHUB
-      ? baseConfig?.endpoint
-      : null) ?? 'https://api.github.com/'
-  );
-  if (presetName === 'default') {
+  // eslint-disable-next-line no-param-reassign
+  endpoint = ensureTrailingSlash(endpoint);
+  const [fileName, presetName, subPresetName] = filePreset.split('/');
+  let jsonContent;
+  if (fileName === 'default') {
     try {
-      const defaultJson = await fetchJSONFile(
-        pkgName,
-        'default.json',
-        endpoint
-      );
-      return defaultJson;
+      jsonContent = await fetchJSONFile(pkgName, 'default.json', endpoint);
     } catch (err) {
-      if (err.message === PLATFORM_FAILURE) {
+      if (err.message !== 'dep not found') {
         throw err;
       }
-      if (err.message === 'dep not found') {
-        logger.debug('default.json preset not found - trying renovate.json');
-        return fetchJSONFile(pkgName, 'renovate.json', endpoint);
-      }
-      throw err;
+      logger.debug('default.json preset not found - trying renovate.json');
+      jsonContent = await fetchJSONFile(pkgName, 'renovate.json', endpoint);
     }
+  } else {
+    jsonContent = await fetchJSONFile(pkgName, `${fileName}.json`, endpoint);
   }
-  return fetchJSONFile(pkgName, `${presetName}.json`, endpoint);
+  if (presetName) {
+    if (subPresetName) {
+      return jsonContent[presetName]
+        ? jsonContent[presetName][subPresetName]
+        : undefined;
+    }
+    return jsonContent[presetName];
+  }
+  return jsonContent;
+}
+
+export async function getPreset(
+  pkgName: string,
+  presetName = 'default'
+): Promise<Preset> {
+  return getPresetFromEndpoint(pkgName, presetName);
 }

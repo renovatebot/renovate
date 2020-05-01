@@ -1,11 +1,11 @@
 import { logger } from '../../../logger';
+import { readLocalFile } from '../../../util/fs';
 import { LockFileEntry } from './common';
-import { platform } from '../../../platform';
 
 export async function getNpmLock(
   filePath: string
 ): Promise<Record<string, string>> {
-  const lockRaw = await platform.getFile(filePath);
+  const lockRaw = await readLocalFile(filePath, 'utf8');
   try {
     const lockParsed = JSON.parse(lockRaw);
     const lockFile: Record<string, string> = {};

@@ -1,5 +1,5 @@
-import { isVersion } from '../../versioning/ruby';
 import { logger } from '../../logger';
+import { isVersion } from '../../versioning/ruby';
 
 const DEP_REGEX = new RegExp('(?<=\\().*(?=\\))');
 export function extractLockFileEntries(

@@ -1,6 +1,6 @@
 import {
-  exec as cpExec,
   ExecOptions as ChildProcessExecOptions,
+  exec as cpExec,
 } from 'child_process';
 import { promisify } from 'util';
 

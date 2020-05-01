@@ -1,7 +1,7 @@
 import { logger } from '../../logger';
-import { Config, accumulateValues } from './utils';
-import { api } from './bb-got-wrapper';
 import { EnsureCommentConfig } from '../common';
+import { api } from './bb-got-wrapper';
+import { Config, accumulateValues } from './utils';
 
 interface Comment {
   content: { raw: string };

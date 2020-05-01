@@ -1,5 +1,5 @@
-import fs from 'fs-extra';
 import path from 'path';
+import fs from 'fs-extra';
 import { extractPackageFile } from '.';
 
 const sample = fs.readFileSync(

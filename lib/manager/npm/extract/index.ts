@@ -1,26 +1,28 @@
-import { remove } from 'fs-extra';
 import { dirname } from 'path';
-import { join } from 'upath';
-import validateNpmPackageName from 'validate-npm-package-name';
 import is from '@sindresorhus/is';
+import validateNpmPackageName from 'validate-npm-package-name';
+import { CONFIG_VALIDATION } from '../../../constants/error-messages';
+import * as datasourceGithubTags from '../../../datasource/github-tags';
+import * as datasourceNpm from '../../../datasource/npm';
 import { logger } from '../../../logger';
 import { SkipReason } from '../../../types';
-import { getLockedVersions } from './locked-versions';
-import { detectMonorepos } from './monorepo';
-import { mightBeABrowserLibrary } from './type';
+import {
+  deleteLocalFile,
+  getSiblingFileName,
+  readLocalFile,
+} from '../../../util/fs';
+import * as nodeVersioning from '../../../versioning/node';
 import { isValid, isVersion } from '../../../versioning/npm';
 import {
   ExtractConfig,
-  PackageFile,
-  PackageDependency,
   NpmLockFiles,
+  PackageDependency,
+  PackageFile,
 } from '../../common';
 import { NpmPackage, NpmPackageDependeny } from './common';
-import { platform } from '../../../platform';
-import { CONFIG_VALIDATION } from '../../../constants/error-messages';
-import * as nodeVersioning from '../../../versioning/node';
-import * as datasourceNpm from '../../../datasource/npm';
-import * as datasourceGithubTags from '../../../datasource/github-tags';
+import { getLockedVersions } from './locked-versions';
+import { detectMonorepos } from './monorepo';
+import { mightBeABrowserLibrary } from './type';
 
 function parseDepName(depType: string, key: string): string {
   if (depType !== 'resolutions') {
@@ -81,8 +83,8 @@ export async function extractPackageFile(
   };
 
   for (const [key, val] of Object.entries(lockFiles)) {
-    const filePath = join(dirname(fileName), val);
-    if (await platform.getFile(filePath)) {
+    const filePath = getSiblingFileName(fileName, val);
+    if (await readLocalFile(filePath, 'utf8')) {
       lockFiles[key] = filePath;
     } else {
       lockFiles[key] = undefined;
@@ -94,13 +96,12 @@ export async function extractPackageFile(
 
   let npmrc: string;
   let ignoreNpmrcFile: boolean;
-  const npmrcFileName = join(dirname(fileName), '.npmrc');
-  const npmrcFileNameLocal = join(config.localDir || '', npmrcFileName);
+  const npmrcFileName = getSiblingFileName(fileName, '.npmrc');
   // istanbul ignore if
   if (config.ignoreNpmrcFile) {
-    await remove(npmrcFileNameLocal);
+    await deleteLocalFile(npmrcFileName);
   } else {
-    npmrc = await platform.getFile(npmrcFileName);
+    npmrc = await readLocalFile(npmrcFileName, 'utf8');
     if (npmrc && npmrc.includes('package-lock')) {
       logger.debug('Stripping package-lock setting from npmrc');
       npmrc = npmrc.replace(/(^|\n)package-lock.*?(\n|$)/g, '\n');
@@ -110,14 +111,14 @@ export async function extractPackageFile(
         logger.debug('Discarding .npmrc file with variables');
         ignoreNpmrcFile = true;
         npmrc = undefined;
-        await remove(npmrcFileNameLocal);
+        await deleteLocalFile(npmrcFileName);
       }
     } else {
       npmrc = undefined;
     }
   }
-  const yarnrc =
-    (await platform.getFile(join(dirname(fileName), '.yarnrc'))) || undefined;
+  const yarnrcFileName = getSiblingFileName(fileName, '.yarnrc');
+  const yarnrc = (await readLocalFile(yarnrcFileName, 'utf8')) || undefined;
 
   let lernaDir: string;
   let lernaPackages: string[];
@@ -125,9 +126,8 @@ export async function extractPackageFile(
   let hasFileRefs = false;
   let lernaJson: { packages: string[]; npmClient: string };
   try {
-    lernaJson = JSON.parse(
-      await platform.getFile(join(dirname(fileName), 'lerna.json'))
-    );
+    const lernaJsonFileName = getSiblingFileName(fileName, 'lerna.json');
+    lernaJson = JSON.parse(await readLocalFile(lernaJsonFileName, 'utf8'));
   } catch (err) /* istanbul ignore next */ {
     logger.warn({ err }, 'Could not parse lerna.json');
   }
@@ -365,7 +365,7 @@ export async function extractAllPackageFiles(
 ): Promise<PackageFile[]> {
   const npmFiles: PackageFile[] = [];
   for (const packageFile of packageFiles) {
-    const content = await platform.getFile(packageFile);
+    const content = await readLocalFile(packageFile, 'utf8');
     if (content) {
       const deps = await extractPackageFile(content, packageFile, config);
       if (deps) {

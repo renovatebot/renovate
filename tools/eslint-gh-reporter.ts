@@ -1,7 +1,7 @@
-import { CLIEngine, Linter } from 'eslint';
+import { relative } from 'path';
 import { error } from '@actions/core';
 import { issueCommand } from '@actions/core/lib/command';
-import { relative } from 'path';
+import { CLIEngine, Linter } from 'eslint';
 import stripAnsi from 'strip-ansi';
 
 const ROOT = process.cwd();

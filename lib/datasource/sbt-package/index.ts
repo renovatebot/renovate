@@ -1,9 +1,9 @@
-import { compare } from '../../versioning/maven/compare';
-import { downloadHttpProtocol } from '../maven/util';
-import { parseIndexDir } from '../sbt-plugin/util';
 import { logger } from '../../logger';
+import { compare } from '../../versioning/maven/compare';
 import { GetReleasesConfig, ReleaseResult } from '../common';
 import { MAVEN_REPO } from '../maven/common';
+import { downloadHttpProtocol } from '../maven/util';
+import { parseIndexDir } from '../sbt-plugin/util';
 
 export const id = 'sbt-package';
 
