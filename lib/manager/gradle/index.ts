@@ -11,7 +11,7 @@ import {
   UpdateDependencyConfig,
   Upgrade,
 } from '../common';
-import { platform } from '../../platform';
+import { readLocalFile } from '../../util/fs';
 import { LANGUAGE_JAVA } from '../../constants/languages';
 import * as datasourceMaven from '../../datasource/maven';
 import { DatasourceError } from '../../datasource';
@@ -161,7 +161,7 @@ export async function extractAllPackageFiles(
 
   const gradleFiles: PackageFile[] = [];
   for (const packageFile of packageFiles) {
-    const content = await platform.getFile(packageFile);
+    const content = await readLocalFile(packageFile, 'utf8');
     if (content) {
       gradleFiles.push({
         packageFile,

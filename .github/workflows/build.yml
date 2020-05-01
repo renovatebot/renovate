@@ -43,7 +43,7 @@ jobs:
         os: [ubuntu-latest, macos-latest, windows-latest]
         node-version: [12, 10]
         python-version: [3.8]
-        java-version: [11]
+        java-version: [8]
         exclude:
           - os: windows-latest
             node-version: 10
@@ -223,43 +223,8 @@ jobs:
       - name: Type check
         run: yarn type-check
 
-  test-docker:
-    needs: cleanup
-    runs-on: ubuntu-latest
-
-    timeout-minutes: 15
-
-    steps:
-      - name: Set up Docker Buildx ${{ env.BUILDX_VERSION }}
-        uses: crazy-max/ghaction-docker-buildx@v1
-        with:
-          version: ${{ env.BUILDX_VERSION }}
-
-      - uses: actions/checkout@v2
-
-      - name: Build the Docker images
-        run: |
-          docker buildx bake \
-            --progress plain \
-            --file docker/bake.hcl \
-            --set settings.output=type=docker \
-            default
-
-      - name: Test the Docker images
-        run: |
-          docker run --rm -t ${DOCKER_REPO} --version
-          docker run --rm -t ${DOCKER_REPO}:slim --version
-
-      - name: Image history latest
-        run: docker history ${DOCKER_REPO}
-      - name: Image history slim
-        run: docker history ${DOCKER_REPO}:slim
-
-      - name: Images size
-        run: docker image ls | grep ${DOCKER_REPO}
-
   release:
-    needs: [lint, test, test-docker]
+    needs: [lint, test]
     runs-on: ubuntu-latest
     # release shouldn't need more than 5 min
     timeout-minutes: 15

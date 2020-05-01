@@ -5,7 +5,7 @@ import * as _hostRules from '../../util/host-rules';
 import { PLATFORM_FAILURE } from '../../constants/error-messages';
 import { mocked } from '../../../test/util';
 import { GotResponse } from '../../platform';
-import { PLATFORM_TYPE_GITHUB } from '../../constants/platforms';
+import { clearRepoCache } from '../../util/cache';
 
 jest.mock('../../platform/github/gh-got-wrapper');
 jest.mock('../../util/got');
@@ -18,6 +18,25 @@ describe('config/presets/github', () => {
   beforeEach(() => {
     got.mockReset();
     return global.renovateCache.rmAll();
+  });
+  describe('fetchJSONFile()', () => {
+    beforeEach(() => {
+      clearRepoCache();
+    });
+    it('returns JSON', async () => {
+      hostRules.find.mockReturnValueOnce({ token: 'abc' });
+      got.mockImplementationOnce(() => ({
+        body: {
+          content: Buffer.from('{"from":"api"}').toString('base64'),
+        },
+      }));
+      const res = await github.fetchJSONFile(
+        'some/repo',
+        'some-filename',
+        'https://api.github.com'
+      );
+      expect(res).toMatchSnapshot();
+    });
   });
   describe('getPreset()', () => {
     it('passes up platform-failure', async () => {
@@ -58,6 +77,36 @@ describe('config/presets/github', () => {
       const content = await github.getPreset('some/repo');
       expect(content).toEqual({ foo: 'bar' });
     });
+    it('should query preset within the file', async () => {
+      hostRules.find.mockReturnValueOnce({ token: 'abc' });
+      got.mockImplementationOnce(() => ({
+        body: {
+          content: Buffer.from('{"somename":{"foo":"bar"}}').toString('base64'),
+        },
+      }));
+      const content = await github.getPreset('some/repo', 'somefile/somename');
+      expect(content).toEqual({ foo: 'bar' });
+    });
+    it('should query subpreset', async () => {
+      hostRules.find.mockReturnValueOnce({ token: 'abc' });
+      got.mockImplementation(() => ({
+        body: {
+          content: Buffer.from(
+            '{"somename":{"somesubname":{"foo":"bar"}}}'
+          ).toString('base64'),
+        },
+      }));
+      let content = await github.getPreset(
+        'some/repo',
+        'somefile/somename/somesubname'
+      );
+      expect(content).toEqual({ foo: 'bar' });
+      content = await github.getPreset(
+        'some/repo',
+        'somefile/wrongname/somesubname'
+      );
+      expect(content).toBeUndefined();
+    });
     it('should return custom.json', async () => {
       hostRules.find.mockReturnValueOnce({ token: 'abc' });
       got.mockImplementationOnce(() => ({
@@ -73,25 +122,15 @@ describe('config/presets/github', () => {
         delete global.appMode;
       }
     });
-
-    it('uses default endpoint', async () => {
-      await github.getPreset('some/repo', 'default').catch((_) => {});
-      await github
-        .getPreset('some/repo', 'default', {
-          endpoint: 'https://api.github.example.org',
-        })
-        .catch((_) => {});
-      expect(got.mock.calls[0][0]).toEqual(
-        'https://api.github.com/repos/some/repo/contents/default.json'
-      );
-      expect(got.mock.calls).toMatchSnapshot();
-    });
+  });
+  describe('getPresetFromEndpoint()', () => {
     it('uses custom endpoint', async () => {
       await github
-        .getPreset('some/repo', 'default', {
-          platform: PLATFORM_TYPE_GITHUB,
-          endpoint: 'https://api.github.example.org',
-        })
+        .getPresetFromEndpoint(
+          'some/repo',
+          'default',
+          'https://api.github.example.org'
+        )
         .catch((_) => {});
       expect(got.mock.calls[0][0]).toEqual(
         'https://api.github.example.org/repos/some/repo/contents/default.json'

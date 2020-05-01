@@ -3,6 +3,7 @@
 exports[`lib/manager/docker-compose/extract extractPackageFile() extracts multiple image lines 1`] = `
 Array [
   Object {
+    "autoReplaceStringTemplate": "{{depName}}{{#if newValue}}:{{newValue}}{{/if}}{{#if newDigest}}@{{newDigest}}{{/if}}",
     "currentDigest": undefined,
     "currentValue": "alpine",
     "datasource": "docker",
@@ -10,6 +11,7 @@ Array [
     "replaceString": "quay.io/something/redis:alpine",
   },
   Object {
+    "autoReplaceStringTemplate": "{{depName}}{{#if newValue}}:{{newValue}}{{/if}}{{#if newDigest}}@{{newDigest}}{{/if}}",
     "commitMessageTopic": "Node.js",
     "currentDigest": undefined,
     "currentValue": "10.0.0",
@@ -18,6 +20,7 @@ Array [
     "replaceString": "node:10.0.0",
   },
   Object {
+    "autoReplaceStringTemplate": "{{depName}}{{#if newValue}}:{{newValue}}{{/if}}{{#if newDigest}}@{{newDigest}}{{/if}}",
     "currentDigest": undefined,
     "currentValue": "9.4.0",
     "datasource": "docker",
@@ -25,6 +28,7 @@ Array [
     "replaceString": "postgres:9.4.0",
   },
   Object {
+    "autoReplaceStringTemplate": "{{depName}}{{#if newValue}}:{{newValue}}{{/if}}{{#if newDigest}}@{{newDigest}}{{/if}}",
     "currentDigest": undefined,
     "currentValue": "before",
     "datasource": "docker",
@@ -32,6 +36,7 @@ Array [
     "replaceString": "dockersamples/examplevotingapp_vote:before",
   },
   Object {
+    "autoReplaceStringTemplate": "{{depName}}{{#if newValue}}:{{newValue}}{{/if}}{{#if newDigest}}@{{newDigest}}{{/if}}",
     "currentDigest": undefined,
     "currentValue": "before",
     "datasource": "docker",
@@ -39,6 +44,7 @@ Array [
     "replaceString": "dockersamples/examplevotingapp_result:before",
   },
   Object {
+    "autoReplaceStringTemplate": "{{depName}}{{#if newValue}}:{{newValue}}{{/if}}{{#if newDigest}}@{{newDigest}}{{/if}}",
     "currentDigest": undefined,
     "currentValue": undefined,
     "datasource": "docker",
@@ -46,6 +52,7 @@ Array [
     "replaceString": "dockersamples/examplevotingapp_worker",
   },
   Object {
+    "autoReplaceStringTemplate": "{{depName}}{{#if newValue}}:{{newValue}}{{/if}}{{#if newDigest}}@{{newDigest}}{{/if}}",
     "currentDigest": undefined,
     "currentValue": "stable",
     "datasource": "docker",
@@ -53,6 +60,7 @@ Array [
     "replaceString": "dockersamples/visualizer:stable",
   },
   Object {
+    "autoReplaceStringTemplate": "{{depName}}{{#if newValue}}:{{newValue}}{{/if}}{{#if newDigest}}@{{newDigest}}{{/if}}",
     "datasource": "docker",
     "replaceString": "\${IMAGE:-synkodevelopers/edplugins}:\${TAG:-latest}",
     "skipReason": "contains-variable",

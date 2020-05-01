@@ -3,6 +3,7 @@ import _got from '../../util/got';
 import * as packagist from '.';
 import * as _hostRules from '../../util/host-rules';
 import * as composerVersioning from '../../versioning/composer';
+import { clearRepoCache } from '../../util/cache';
 
 jest.mock('../../util/got');
 jest.mock('../../util/host-rules');
@@ -27,7 +28,7 @@ describe('datasource/packagist', () => {
       jest.resetAllMocks();
       hostRules.find = jest.fn((input) => input);
       hostRules.hosts = jest.fn(() => []);
-      global.repoCache = {};
+      clearRepoCache();
       config = {
         versioning: composerVersioning.id,
         registryUrls: [
@@ -130,7 +131,7 @@ describe('datasource/packagist', () => {
       expect(res).toMatchSnapshot();
       expect(res).not.toBeNull();
     });
-    it('supports providers packages', async () => {
+    it('supports provider-includes', async () => {
       const packagesJson = {
         packages: [],
         'providers-url': '/p/%package%$%hash%.json',
@@ -169,7 +170,7 @@ describe('datasource/packagist', () => {
       expect(res).toMatchSnapshot();
       expect(res).not.toBeNull();
     });
-    it('handles providers packages miss', async () => {
+    it('handles provider-includes miss', async () => {
       const packagesJson = {
         packages: [],
         'providers-url': '/p/%package%$%hash%.json',
@@ -197,6 +198,61 @@ describe('datasource/packagist', () => {
       };
       got.mockReturnValueOnce({
         body: fileJson,
+      });
+      got.mockReturnValueOnce({
+        body: JSON.parse(beytJson),
+      });
+      const res = await packagist.getReleases({
+        ...config,
+        lookupName: 'some/other',
+      });
+      expect(res).toBeNull();
+    });
+    it('supports providers', async () => {
+      const packagesJson = {
+        packages: [],
+        'providers-url': '/p/%package%$%hash%.json',
+        providers: {
+          'wpackagist-plugin/1337-rss-feed-made-for-sharing': {
+            sha256:
+              'e9b6c98c63f99e59440863a044cc80dd9cddbf5c426b05003dba98983b5757de',
+          },
+          'wpackagist-plugin/1beyt': {
+            sha256:
+              'b574a802b5bf20a58c0f027e73aea2a75d23a6f654afc298a8dc467331be316a',
+          },
+        },
+      };
+      got.mockReturnValueOnce({
+        body: packagesJson,
+      });
+      got.mockReturnValueOnce({
+        body: JSON.parse(beytJson),
+      });
+      const res = await packagist.getReleases({
+        ...config,
+        lookupName: 'wpackagist-plugin/1beyt',
+      });
+      expect(res).toMatchSnapshot();
+      expect(res).not.toBeNull();
+    });
+    it('handles providers miss', async () => {
+      const packagesJson = {
+        packages: [],
+        'providers-url': '/p/%package%$%hash%.json',
+        providers: {
+          'wpackagist-plugin/1337-rss-feed-made-for-sharing': {
+            sha256:
+              'e9b6c98c63f99e59440863a044cc80dd9cddbf5c426b05003dba98983b5757de',
+          },
+          'wpackagist-plugin/1beyt': {
+            sha256:
+              'b574a802b5bf20a58c0f027e73aea2a75d23a6f654afc298a8dc467331be316a',
+          },
+        },
+      };
+      got.mockReturnValueOnce({
+        body: packagesJson,
       });
       got.mockReturnValueOnce({
         body: JSON.parse(beytJson),

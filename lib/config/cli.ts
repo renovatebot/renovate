@@ -70,7 +70,10 @@ export function getConfig(input: string[]): RenovateCliConfig {
     integer: parseInt,
   };
 
-  let program = new Command().arguments('[repositories...]');
+  let program = new Command()
+    .storeOptionsAsProperties(false)
+    .passCommandToAction(false)
+    .arguments('[repositories...]');
 
   options.forEach((option) => {
     if (option.cli !== false) {
@@ -103,20 +106,20 @@ export function getConfig(input: string[]): RenovateCliConfig {
   program = program
     .version(version, '-v, --version')
     .on('--help', helpConsole)
-    .action((repositories) => {
+    .action((repositories: string[], opts: Record<string, unknown>) => {
       if (repositories && repositories.length) {
         config.repositories = repositories;
       }
+
+      for (const option of options) {
+        if (option.cli !== false) {
+          if (opts[option.name] !== undefined) {
+            config[option.name] = opts[option.name];
+          }
+        }
+      }
     })
     .parse(argv);
-
-  options.forEach((option) => {
-    if (option.cli !== false) {
-      if (program[option.name] !== undefined) {
-        config[option.name] = program[option.name];
-      }
-    }
-  });
 
   return config;
 }

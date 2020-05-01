@@ -169,6 +169,7 @@ export interface PackageDependency<T = Record<string, any>> extends Package<T> {
   updates?: LookupUpdate[];
   versionLine?: number;
   replaceString?: string;
+  autoReplaceStringTemplate?: string;
   depIndex?: number;
 }
 
@@ -177,11 +178,9 @@ export interface Upgrade<T = Record<string, any>>
     NpmLockFiles {
   isLockfileUpdate?: boolean;
   currentRawValue?: any;
-  checksumUrl?: string;
   currentVersion?: string;
   depGroup?: string;
   dockerRepository?: string;
-  downloadUrl?: string;
   localDir?: string;
   name?: string;
   newDigest?: string;

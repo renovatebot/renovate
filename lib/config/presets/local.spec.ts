@@ -5,8 +5,12 @@ import * as local from './local';
 jest.mock('./gitlab');
 jest.mock('./github');
 
-const gitlabGetPreset: jest.Mock<Promise<any>> = gitlab.getPreset as never;
-const githubGetPreset: jest.Mock<Promise<any>> = github.getPreset as never;
+const gitlabGetPreset: jest.Mock<Promise<
+  any
+>> = gitlab.getPresetFromEndpoint as never;
+const githubGetPreset: jest.Mock<Promise<
+  any
+>> = github.getPresetFromEndpoint as never;
 
 describe('config/presets/local', () => {
   beforeEach(() => {
@@ -14,7 +18,6 @@ describe('config/presets/local', () => {
     gitlabGetPreset.mockResolvedValueOnce({ resolved: 'preset' });
     githubGetPreset.mockReset();
     githubGetPreset.mockResolvedValueOnce({ resolved: 'preset' });
-    global.repoCache = {};
     return global.renovateCache.rmAll();
   });
   describe('getPreset()', () => {
@@ -22,6 +25,13 @@ describe('config/presets/local', () => {
       await expect(
         local.getPreset('some/repo', 'default', {
           platform: 'unsupported-platform',
+        })
+      ).rejects.toThrow();
+    });
+    it('throws for missing platform', async () => {
+      await expect(
+        local.getPreset('some/repo', 'default', {
+          platform: undefined,
         })
       ).rejects.toThrow();
     });

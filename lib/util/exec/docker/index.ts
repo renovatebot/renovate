@@ -9,6 +9,7 @@ import {
 import { logger } from '../../../logger';
 import * as versioning from '../../../versioning';
 import { getReleases } from '../../../datasource/docker';
+import { SYSTEM_INSUFFICIENT_MEMORY } from '../../../constants/error-messages';
 
 const prefetchedImages = new Set<string>();
 
@@ -158,8 +159,15 @@ export async function removeDanglingContainers(): Promise<void> {
     } else {
       logger.debug('No dangling containers to remove');
     }
-  } catch (err) {
-    logger.warn({ err }, 'Error removing dangling containers');
+  } catch (err) /* istanbul ignore next */ {
+    if (err.errno === 'ENOMEM') {
+      throw new Error(SYSTEM_INSUFFICIENT_MEMORY);
+    }
+    if (err.stderr?.includes('Cannot connect to the Docker daemon')) {
+      logger.info('No docker deamon found');
+    } else {
+      logger.warn({ err }, 'Error removing dangling containers');
+    }
   }
 }
 
@@ -200,7 +208,14 @@ export async function generateDockerCommand(
   if (options.tag) {
     tag = options.tag;
   } else if (tagConstraint) {
-    tag = await getDockerTag(image, tagConstraint, tagScheme || 'semver');
+    const tagVersioning = tagScheme || 'semver';
+    tag = await getDockerTag(image, tagConstraint, tagVersioning);
+    logger.debug(
+      { image, tagConstraint, tagVersioning, tag },
+      'Resolved tag constraint'
+    );
+  } else {
+    logger.debug({ image }, 'No tag or tagConstraint specified');
   }
 
   const taggedImage = tag ? `${image}:${tag}` : `${image}`;
