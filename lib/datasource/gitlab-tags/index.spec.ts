@@ -8,7 +8,6 @@ const glGot: any = api.get;
 
 describe('datasource/gitlab-tags', () => {
   beforeEach(() => {
-    global.repoCache = {};
     return global.renovateCache.rmAll();
   });
   describe('getReleases', () => {

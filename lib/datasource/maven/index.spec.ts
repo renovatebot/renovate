@@ -39,7 +39,6 @@ describe('datasource/maven', () => {
       password: 'password',
     });
     jest.resetAllMocks();
-    global.repoCache = {};
     nock.cleanAll();
     nock.disableNetConnect();
     nock('https://repo.maven.apache.org')
