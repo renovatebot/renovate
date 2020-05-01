@@ -1,5 +1,5 @@
-import nock from 'nock';
 import { Url } from 'url';
+import nock from 'nock';
 
 export type { Scope } from 'nock';
 
