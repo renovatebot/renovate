@@ -1,17 +1,17 @@
 import sampleSize from 'lodash/sampleSize';
 import uniq from 'lodash/uniq';
-import { logger } from '../../logger';
-import { ChangeLogError } from './changelog';
-import { getPrBody } from './body';
-import { PlatformPrOptions, Pr, platform } from '../../platform';
-import { BranchConfig, PrResult } from '../common';
 import {
   PLATFORM_FAILURE,
   PLATFORM_INTEGRATION_UNAUTHORIZED,
   PLATFORM_RATE_LIMIT_EXCEEDED,
   REPOSITORY_CHANGED,
 } from '../../constants/error-messages';
+import { logger } from '../../logger';
+import { PlatformPrOptions, Pr, platform } from '../../platform';
 import { BranchStatus } from '../../types';
+import { BranchConfig, PrResult } from '../common';
+import { getPrBody } from './body';
+import { ChangeLogError } from './changelog';
 
 function noWhitespace(input: string): string {
   return input.replace(/\r?\n|\r|\s/g, '');

@@ -1,8 +1,8 @@
+import * as datasourceGithubTags from '../../datasource/github-tags';
 import { logger } from '../../logger';
+import { SkipReason } from '../../types';
 import { isVersion } from '../../versioning/semver';
 import { PackageDependency, PackageFile } from '../common';
-import * as datasourceGithubTags from '../../datasource/github-tags';
-import { SkipReason } from '../../types';
 
 export function extractPackageFile(content: string): PackageFile | null {
   const deps: PackageDependency[] = [];

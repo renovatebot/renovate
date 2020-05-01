@@ -1,10 +1,10 @@
 import is from '@sindresorhus/is';
 
-import { RenovateOptions, getOptions } from './definitions';
-import { RenovateConfig } from './common';
-import { logger } from '../logger';
-import * as datasourceDocker from '../datasource/docker';
 import { PLATFORM_TYPE_GITHUB } from '../constants/platforms';
+import * as datasourceDocker from '../datasource/docker';
+import { logger } from '../logger';
+import { RenovateConfig } from './common';
+import { RenovateOptions, getOptions } from './definitions';
 
 export function getEnvName(option: Partial<RenovateOptions>): string {
   if (option.env === false) {

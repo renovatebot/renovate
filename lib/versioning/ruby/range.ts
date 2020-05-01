@@ -1,5 +1,5 @@
-import { create } from '@snyk/ruby-semver/lib/ruby/gem-version';
 import { parse as _parse } from '@snyk/ruby-semver/lib/ruby/gem-requirement';
+import { create } from '@snyk/ruby-semver/lib/ruby/gem-version';
 import { logger } from '../../logger';
 import { EQUAL, GT, GTE, LT, LTE, NOT_EQUAL, PGTE } from './operator';
 

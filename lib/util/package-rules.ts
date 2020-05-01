@@ -1,7 +1,7 @@
 import minimatch from 'minimatch';
+import { PackageRule, UpdateType, mergeChildConfig } from '../config';
 import { logger } from '../logger';
 import * as allVersioning from '../versioning';
-import { PackageRule, UpdateType, mergeChildConfig } from '../config';
 import { regEx } from './regex';
 
 // TODO: move to `../config`

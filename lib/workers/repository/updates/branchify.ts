@@ -1,13 +1,13 @@
-import slugify from 'slugify';
 import { clean as cleanGitRef } from 'clean-git-ref';
-import { Merge } from 'type-fest';
+import slugify from 'slugify';
+import { RenovateConfig, ValidationMessage } from '../../../config';
 import { addMeta, logger, removeMeta } from '../../../logger';
 import * as template from '../../../util/template';
-import { generateBranchConfig } from './generate';
-import { flattenUpdates } from './flatten';
-import { RenovateConfig, ValidationMessage } from '../../../config';
 import { BranchConfig, BranchUpgradeConfig } from '../../common';
 import { getChangeLogJSON } from '../../pr/changelog';
+import { flattenUpdates } from './flatten';
+import { generateBranchConfig } from './generate';
+import { Merge } from 'type-fest';
 
 /**
  * Clean git branch name

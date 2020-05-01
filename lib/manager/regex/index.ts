@@ -1,7 +1,7 @@
+import { logger } from '../../logger';
+import { regEx } from '../../util/regex';
 import * as template from '../../util/template';
 import { CustomExtractConfig, PackageFile, Result } from '../common';
-import { regEx } from '../../util/regex';
-import { logger } from '../../logger';
 
 export const defaultConfig = {
   pinDigests: false,

@@ -1,7 +1,7 @@
-import { PR_STATE_OPEN } from '../../../constants/pull-requests';
-import * as validate from './validate';
 import { platform } from '../../../../test/util';
+import { PR_STATE_OPEN } from '../../../constants/pull-requests';
 import { BranchStatus } from '../../../types';
+import * as validate from './validate';
 
 beforeEach(() => {
   jest.resetAllMocks();

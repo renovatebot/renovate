@@ -1,12 +1,12 @@
 import * as semver from 'semver';
-import { logger } from '../../../../logger';
-import * as allVersioning from '../../../../versioning';
-import { Release } from '../../../../datasource';
 import { CONFIG_VALIDATION } from '../../../../constants/error-messages';
+import { Release } from '../../../../datasource';
+import { logger } from '../../../../logger';
+import { regEx } from '../../../../util/regex';
+import * as allVersioning from '../../../../versioning';
 import * as npmVersioning from '../../../../versioning/npm';
 import * as pep440 from '../../../../versioning/pep440';
 import * as poetryVersioning from '../../../../versioning/poetry';
-import { regEx } from '../../../../util/regex';
 
 export interface FilterConfig {
   allowedVersions?: string;

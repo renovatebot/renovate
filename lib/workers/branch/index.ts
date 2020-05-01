@@ -1,25 +1,9 @@
-import { DateTime } from 'luxon';
-import is from '@sindresorhus/is';
-import minimatch from 'minimatch';
 import { join } from 'path';
+import is from '@sindresorhus/is';
 import { concat } from 'lodash';
-import { logger } from '../../logger';
-import { isScheduledNow } from './schedule';
-import { getUpdatedPackageFiles } from './get-updated';
-import {
-  AdditionalPackageFiles,
-  getAdditionalFiles,
-} from '../../manager/npm/post-update';
-import { commitFilesToBranch } from './commit';
-import { getParentBranch } from './parent';
-import { tryBranchAutomerge } from './automerge';
-import { setStability, setUnpublishable } from './status-checks';
-import { prAlreadyExisted } from './check-existing';
-import { checkAutoMerge, ensurePr } from '../pr';
+import { DateTime } from 'luxon';
+import minimatch from 'minimatch';
 import { RenovateConfig } from '../../config';
-import { platform } from '../../platform';
-import { emojify } from '../../util/emoji';
-import { BranchConfig, PrResult, ProcessBranchResult } from '../common';
 import {
   DATASOURCE_FAILURE,
   MANAGER_LOCKFILE_ERROR,
@@ -37,10 +21,26 @@ import {
   PR_STATE_MERGED,
   PR_STATE_OPEN,
 } from '../../constants/pull-requests';
+import { logger } from '../../logger';
+import {
+  AdditionalPackageFiles,
+  getAdditionalFiles,
+} from '../../manager/npm/post-update';
+import { platform } from '../../platform';
 import { BranchStatus } from '../../types';
+import { emojify } from '../../util/emoji';
 import { exec } from '../../util/exec';
-import { regEx } from '../../util/regex';
 import { readLocalFile, writeLocalFile } from '../../util/fs';
+import { regEx } from '../../util/regex';
+import { BranchConfig, PrResult, ProcessBranchResult } from '../common';
+import { checkAutoMerge, ensurePr } from '../pr';
+import { tryBranchAutomerge } from './automerge';
+import { prAlreadyExisted } from './check-existing';
+import { commitFilesToBranch } from './commit';
+import { getUpdatedPackageFiles } from './get-updated';
+import { getParentBranch } from './parent';
+import { isScheduledNow } from './schedule';
+import { setStability, setUnpublishable } from './status-checks';
 
 // TODO: proper typings
 function rebaseCheck(config: RenovateConfig, branchPr: any): boolean {

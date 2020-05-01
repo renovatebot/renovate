@@ -1,14 +1,14 @@
-import * as template from '../../../util/template';
 import { platform } from '../../../platform';
+import * as template from '../../../util/template';
 import { get } from '../../../versioning';
-import { getPrConfigDescription } from './config-description';
-import { getPrBanner } from './banner';
-import { getPrFooter } from './footer';
-import { getPrUpdatesTable } from './updates-table';
-import { getPrExtraNotes, getPrNotes } from './notes';
-import { getChangelogs } from './changelogs';
-import { getControls } from './controls';
 import { BranchConfig } from '../../common';
+import { getPrBanner } from './banner';
+import { getChangelogs } from './changelogs';
+import { getPrConfigDescription } from './config-description';
+import { getControls } from './controls';
+import { getPrFooter } from './footer';
+import { getPrExtraNotes, getPrNotes } from './notes';
+import { getPrUpdatesTable } from './updates-table';
 
 function massageUpdateMetadata(config: BranchConfig): void {
   config.upgrades.forEach((upgrade) => {

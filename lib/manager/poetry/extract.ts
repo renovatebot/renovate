@@ -1,10 +1,10 @@
 import { parse } from 'toml';
-import { isValid } from '../../versioning/poetry';
+import * as datasourcePypi from '../../datasource/pypi';
 import { logger } from '../../logger';
+import { SkipReason } from '../../types';
+import { isValid } from '../../versioning/poetry';
 import { PackageDependency, PackageFile } from '../common';
 import { PoetryFile, PoetrySection } from './types';
-import * as datasourcePypi from '../../datasource/pypi';
-import { SkipReason } from '../../types';
 
 function extractFromSection(
   parsedFile: PoetryFile,

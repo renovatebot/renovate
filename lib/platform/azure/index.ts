@@ -3,11 +3,19 @@ import {
   GitPullRequestMergeStrategy,
 } from 'azure-devops-node-api/interfaces/GitInterfaces';
 
-import * as azureHelper from './azure-helper';
-import * as azureApi from './azure-got-wrapper';
-import * as hostRules from '../../util/host-rules';
-import GitStorage, { StatusResult } from '../git/storage';
+import { RenovateConfig } from '../../config/common';
+import { REPOSITORY_DISABLED } from '../../constants/error-messages';
+import { PLATFORM_TYPE_AZURE } from '../../constants/platforms';
+import {
+  PR_STATE_ALL,
+  PR_STATE_NOT_OPEN,
+  PR_STATE_OPEN,
+} from '../../constants/pull-requests';
 import { logger } from '../../logger';
+import { BranchStatus } from '../../types';
+import * as hostRules from '../../util/host-rules';
+import { sanitize } from '../../util/sanitize';
+import { ensureTrailingSlash } from '../../util/url';
 import {
   BranchStatusConfig,
   CommitFilesConfig,
@@ -22,18 +30,10 @@ import {
   RepoParams,
   VulnerabilityAlert,
 } from '../common';
-import { sanitize } from '../../util/sanitize';
+import GitStorage, { StatusResult } from '../git/storage';
 import { smartTruncate } from '../utils/pr-body';
-import { REPOSITORY_DISABLED } from '../../constants/error-messages';
-import { PLATFORM_TYPE_AZURE } from '../../constants/platforms';
-import {
-  PR_STATE_ALL,
-  PR_STATE_NOT_OPEN,
-  PR_STATE_OPEN,
-} from '../../constants/pull-requests';
-import { BranchStatus } from '../../types';
-import { RenovateConfig } from '../../config/common';
-import { ensureTrailingSlash } from '../../util/url';
+import * as azureApi from './azure-got-wrapper';
+import * as azureHelper from './azure-helper';
 
 interface Config {
   storage: GitStorage;

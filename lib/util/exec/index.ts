@@ -1,12 +1,7 @@
+import { ExecOptions as ChildProcessExecOptions } from 'child_process';
 import { dirname, join } from 'path';
 import { hrtime } from 'process';
-import { ExecOptions as ChildProcessExecOptions } from 'child_process';
-import {
-  generateDockerCommand,
-  removeDanglingContainers,
-  removeDockerContainer,
-} from './docker';
-import { getChildProcessEnv } from './env';
+import { RenovateConfig } from '../../config/common';
 import { logger } from '../../logger';
 import {
   BinarySource,
@@ -17,7 +12,12 @@ import {
   RawExecOptions,
   rawExec,
 } from './common';
-import { RenovateConfig } from '../../config/common';
+import {
+  generateDockerCommand,
+  removeDanglingContainers,
+  removeDockerContainer,
+} from './docker';
+import { getChildProcessEnv } from './env';
 
 const execConfig: ExecConfig = {
   binarySource: null,

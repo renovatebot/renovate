@@ -1,8 +1,8 @@
-import { writeUpdates } from './write';
-import * as _branchWorker from '../../branch';
-import * as _limits from './limits';
 import { RenovateConfig, getConfig, mocked } from '../../../../test/util';
+import * as _branchWorker from '../../branch';
 import { BranchConfig } from '../../common';
+import * as _limits from './limits';
+import { writeUpdates } from './write';
 
 const branchWorker = mocked(_branchWorker);
 const limits = mocked(_limits);

@@ -1,11 +1,11 @@
-import { addMeta, logger, removeMeta } from '../../../logger';
-import { processBranch } from '../../branch';
-import { getPrsRemaining } from './limits';
-import { getLimitRemaining } from '../../global/limits';
 import { RenovateConfig } from '../../../config';
+import { addMeta, logger, removeMeta } from '../../../logger';
 import { PackageFile } from '../../../manager/common';
 import { AdditionalPackageFiles } from '../../../manager/npm/post-update';
+import { processBranch } from '../../branch';
 import { BranchConfig } from '../../common';
+import { getLimitRemaining } from '../../global/limits';
+import { getPrsRemaining } from './limits';
 
 export type WriteUpdateResult = 'done' | 'automerged';
 

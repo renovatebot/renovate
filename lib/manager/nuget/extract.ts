@@ -1,13 +1,13 @@
-import findUp from 'find-up';
 import * as path from 'path';
-import { XmlDocument } from 'xmldoc';
+import findUp from 'find-up';
 import { readFile } from 'fs-extra';
-import { logger } from '../../logger';
-import { get } from '../../versioning';
-import { ExtractConfig, PackageDependency, PackageFile } from '../common';
-import * as semverVersioning from '../../versioning/semver';
+import { XmlDocument } from 'xmldoc';
 import * as datasourceNuget from '../../datasource/nuget';
+import { logger } from '../../logger';
 import { SkipReason } from '../../types';
+import { get } from '../../versioning';
+import * as semverVersioning from '../../versioning/semver';
+import { ExtractConfig, PackageDependency, PackageFile } from '../common';
 
 async function readFileAsXmlDocument(file: string): Promise<XmlDocument> {
   try {

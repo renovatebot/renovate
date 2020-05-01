@@ -1,9 +1,3 @@
-import { Merge } from 'type-fest';
-import {
-  ArtifactError,
-  LookupUpdate,
-  PackageDependency,
-} from '../manager/common';
 import {
   GroupConfig,
   RenovateAdminConfig,
@@ -11,9 +5,15 @@ import {
   RenovateSharedConfig,
   ValidationMessage,
 } from '../config';
-import { File, PlatformPrOptions } from '../platform';
 import { Release } from '../datasource';
+import {
+  ArtifactError,
+  LookupUpdate,
+  PackageDependency,
+} from '../manager/common';
+import { File, PlatformPrOptions } from '../platform';
 import { ChangeLogResult } from './pr/changelog/common';
+import { Merge } from 'type-fest';
 
 export interface BranchUpgradeConfig
   extends Merge<RenovateConfig, PackageDependency>,

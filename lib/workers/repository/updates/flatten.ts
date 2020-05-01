@@ -6,10 +6,10 @@ import {
   getManagerConfig,
   mergeChildConfig,
 } from '../../../config';
-import { applyPackageRules } from '../../../util/package-rules';
-import { get } from '../../../manager';
 import { LANGUAGE_DOCKER } from '../../../constants/languages';
 import { getDefaultConfig } from '../../../datasource';
+import { get } from '../../../manager';
+import { applyPackageRules } from '../../../util/package-rules';
 
 // Return only rules that contain an updateType
 function getUpdateTypeRules(packageRules: PackageRule[]): PackageRule[] {

@@ -1,3 +1,7 @@
+import { SYSTEM_INSUFFICIENT_MEMORY } from '../../../constants/error-messages';
+import { getReleases } from '../../../datasource/docker';
+import { logger } from '../../../logger';
+import * as versioning from '../../../versioning';
 import {
   DockerOptions,
   ExecConfig,
@@ -6,10 +10,6 @@ import {
   VolumesPair,
   rawExec,
 } from '../common';
-import { logger } from '../../../logger';
-import * as versioning from '../../../versioning';
-import { getReleases } from '../../../datasource/docker';
-import { SYSTEM_INSUFFICIENT_MEMORY } from '../../../constants/error-messages';
 
 const prefetchedImages = new Set<string>();
 

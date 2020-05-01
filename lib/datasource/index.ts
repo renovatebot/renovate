@@ -1,8 +1,9 @@
 import is from '@sindresorhus/is';
 import { logger } from '../logger';
-import { addMetaData } from './metadata';
+import { getRepoCached, setRepoCached } from '../util/cache';
+import { clone } from '../util/clone';
 import * as allVersioning from '../versioning';
-
+import datasources from './api.generated';
 import {
   Datasource,
   DatasourceError,
@@ -12,9 +13,8 @@ import {
   Release,
   ReleaseResult,
 } from './common';
-import datasources from './api.generated';
-import { clone } from '../util/clone';
-import { getRepoCached, setRepoCached } from '../util/cache';
+import { addMetaData } from './metadata';
+
 
 export * from './common';
 

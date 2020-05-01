@@ -1,11 +1,11 @@
-import { logger } from '../../logger';
-import { isValid, isVersion } from '../../versioning/hashicorp';
-import { PackageDependency, PackageFile } from '../common';
 import * as datasourceGitTags from '../../datasource/git-tags';
 import * as datasourceGithubTags from '../../datasource/github-tags';
 import * as datasourceTerraformModule from '../../datasource/terraform-module';
 import * as datasourceTerraformProvider from '../../datasource/terraform-provider';
+import { logger } from '../../logger';
 import { SkipReason } from '../../types';
+import { isValid, isVersion } from '../../versioning/hashicorp';
+import { PackageDependency, PackageFile } from '../common';
 
 export enum TerraformDependencyTypes {
   unknown = 'unknown',

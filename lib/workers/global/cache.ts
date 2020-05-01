@@ -1,6 +1,6 @@
 import os from 'os';
-import * as cacache from 'cacache';
 import path from 'path';
+import * as cacache from 'cacache';
 import { DateTime } from 'luxon';
 import { logger } from '../../logger';
 

@@ -1,4 +1,4 @@
-import handleError from './error';
+import { RenovateConfig, getConfig } from '../../../test/util';
 import {
   CONFIG_VALIDATION,
   DATASOURCE_FAILURE,
@@ -27,8 +27,8 @@ import {
   SYSTEM_INSUFFICIENT_MEMORY,
   UNKNOWN_ERROR,
 } from '../../constants/error-messages';
-import { RenovateConfig, getConfig } from '../../../test/util';
 import { DatasourceError } from '../../datasource/common';
+import handleError from './error';
 
 jest.mock('./error-config');
 

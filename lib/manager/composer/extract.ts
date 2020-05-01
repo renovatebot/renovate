@@ -1,11 +1,11 @@
 import is from '@sindresorhus/is';
-import { logger } from '../../logger';
-import { api as semverComposer } from '../../versioning/composer';
-import { PackageDependency, PackageFile } from '../common';
-import { SkipReason } from '../../types';
 import * as datasourceGitTags from '../../datasource/git-tags';
 import * as datasourcePackagist from '../../datasource/packagist';
+import { logger } from '../../logger';
+import { SkipReason } from '../../types';
 import { readLocalFile } from '../../util/fs';
+import { api as semverComposer } from '../../versioning/composer';
+import { PackageDependency, PackageFile } from '../common';
 
 interface Repo {
   name?: string;

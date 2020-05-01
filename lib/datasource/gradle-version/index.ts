@@ -1,7 +1,7 @@
 import is from '@sindresorhus/is';
-import { regEx } from '../../util/regex';
 import { logger } from '../../logger';
 import { Http } from '../../util/http';
+import { regEx } from '../../util/regex';
 import {
   DatasourceError,
   GetReleasesConfig,

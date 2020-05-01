@@ -1,11 +1,11 @@
 import is from '@sindresorhus/is';
-import { RenovateOptions, getOptions } from './definitions';
-import { resolveConfigPresets } from './presets';
-import { hasValidSchedule, hasValidTimezone } from '../workers/branch/schedule';
-import * as managerValidator from './validation-helpers/managers';
-import { RenovateConfig, ValidationMessage } from './common';
 import { regEx } from '../util/regex';
 import * as template from '../util/template';
+import { hasValidSchedule, hasValidTimezone } from '../workers/branch/schedule';
+import { RenovateConfig, ValidationMessage } from './common';
+import { RenovateOptions, getOptions } from './definitions';
+import { resolveConfigPresets } from './presets';
+import * as managerValidator from './validation-helpers/managers';
 
 const options = getOptions();
 

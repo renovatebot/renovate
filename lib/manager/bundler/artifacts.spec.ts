@@ -1,17 +1,17 @@
-import { join } from 'upath';
-import _fs from 'fs-extra';
 import { exec as _exec } from 'child_process';
+import _fs from 'fs-extra';
 import Git from 'simple-git/promise';
-import { updateArtifacts } from '.';
-import { platform as _platform } from '../../platform';
-import * as _datasource from '../../datasource/docker';
-import { mocked } from '../../../test/util';
+import { join } from 'upath';
 import { envMock, mockExecAll } from '../../../test/execUtil';
+import { mocked } from '../../../test/util';
+import * as _datasource from '../../datasource/docker';
+import { platform as _platform } from '../../platform';
+import { setUtilConfig } from '../../util';
+import { BinarySource } from '../../util/exec/common';
+import { resetPrefetchedImages } from '../../util/exec/docker';
 import * as _env from '../../util/exec/env';
 import * as _bundlerHostRules from './host-rules';
-import { BinarySource } from '../../util/exec/common';
-import { setUtilConfig } from '../../util';
-import { resetPrefetchedImages } from '../../util/exec/docker';
+import { updateArtifacts } from '.';
 
 const fs: jest.Mocked<typeof _fs> = _fs as any;
 const exec: jest.Mock<typeof _exec> = _exec as any;

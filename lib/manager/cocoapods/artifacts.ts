@@ -1,13 +1,13 @@
 import { dirname, join } from 'upath';
+import { logger } from '../../logger';
 import { platform } from '../../platform';
 import { ExecOptions, exec } from '../../util/exec';
-import { logger } from '../../logger';
-import { UpdateArtifact, UpdateArtifactsResult } from '../common';
 import {
   getSiblingFileName,
   readLocalFile,
   writeLocalFile,
 } from '../../util/fs';
+import { UpdateArtifact, UpdateArtifactsResult } from '../common';
 
 const pluginRegex = /^\s*plugin\s*(['"])(?<plugin>[^'"]+)\1/;
 

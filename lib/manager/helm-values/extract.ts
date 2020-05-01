@@ -1,8 +1,8 @@
 import yaml from 'js-yaml';
 import { logger } from '../../logger';
+import { PackageDependency, PackageFile } from '../common';
 import { getDep } from '../dockerfile/extract';
 
-import { PackageDependency, PackageFile } from '../common';
 import {
   HelmDockerImageDependency,
   matchesHelmValuesDockerHeuristic,

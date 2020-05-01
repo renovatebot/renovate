@@ -1,5 +1,5 @@
-import * as generic from '../loose/generic';
 import { VersioningApi } from '../common';
+import * as generic from '../loose/generic';
 
 export const id = 'git';
 export const displayName = 'git';

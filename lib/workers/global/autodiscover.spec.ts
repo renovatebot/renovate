@@ -1,8 +1,8 @@
-import { autodiscoverRepositories } from './autodiscover';
-import * as platform from '../../platform';
-import * as _hostRules from '../../util/host-rules';
-import * as _ghApi from '../../platform/github';
 import { PLATFORM_TYPE_GITHUB } from '../../constants/platforms';
+import * as platform from '../../platform';
+import * as _ghApi from '../../platform/github';
+import * as _hostRules from '../../util/host-rules';
+import { autodiscoverRepositories } from './autodiscover';
 
 jest.mock('../../platform/github');
 jest.unmock('../../platform');

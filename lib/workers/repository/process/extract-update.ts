@@ -1,14 +1,14 @@
 import { hrtime } from 'process';
-import { logger } from '../../../logger';
-import { WriteUpdateResult, writeUpdates } from './write';
-import { sortBranches } from './sort';
-import { fetchUpdates } from './fetch';
-import { raiseDeprecationWarnings } from './deprecated';
-import { branchifyUpgrades } from '../updates/branchify';
-import { extractAllDependencies } from '../extract';
-import { PackageFile } from '../../../manager/common';
 import { RenovateConfig } from '../../../config';
+import { logger } from '../../../logger';
+import { PackageFile } from '../../../manager/common';
 import { BranchConfig } from '../../common';
+import { extractAllDependencies } from '../extract';
+import { branchifyUpgrades } from '../updates/branchify';
+import { raiseDeprecationWarnings } from './deprecated';
+import { fetchUpdates } from './fetch';
+import { sortBranches } from './sort';
+import { WriteUpdateResult, writeUpdates } from './write';
 
 export type ExtractResult = {
   branches: BranchConfig[];

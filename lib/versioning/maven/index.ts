@@ -1,3 +1,4 @@
+import { NewValueConfig, VersioningApi } from '../common';
 import {
   EXCLUDING_POINT,
   QualifierTypes,
@@ -12,7 +13,6 @@ import {
   qualifierType,
   tokenize,
 } from './compare';
-import { NewValueConfig, VersioningApi } from '../common';
 
 export const id = 'maven';
 export const displayName = 'Maven';

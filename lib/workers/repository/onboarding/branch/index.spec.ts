@@ -1,9 +1,9 @@
 import { mock } from 'jest-mock-extended';
-import { PR_STATE_OPEN } from '../../../../constants/pull-requests';
 import { RenovateConfig, getConfig, platform } from '../../../../../test/util';
-import { checkOnboardingBranch } from '.';
+import { PR_STATE_OPEN } from '../../../../constants/pull-requests';
 import { Pr } from '../../../../platform';
 import * as _rebase from './rebase';
+import { checkOnboardingBranch } from '.';
 
 const rebase: any = _rebase;
 

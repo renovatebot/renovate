@@ -1,6 +1,6 @@
 import { logger } from '../../logger';
-import { getDep } from '../dockerfile/extract';
 import { PackageDependency, PackageFile } from '../common';
+import { getDep } from '../dockerfile/extract';
 
 export function extractPackageFile(content: string): PackageFile | null {
   logger.trace('kubernetes.extractPackageFile()');

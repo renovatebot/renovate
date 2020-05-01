@@ -1,10 +1,10 @@
 import { logger } from '../logger';
+import versionings from './api.generated';
 import {
   VersioningApi,
   VersioningApiConstructor,
   isVersioningApiConstructor,
 } from './common';
-import versionings from './api.generated';
 
 export * from './common';
 

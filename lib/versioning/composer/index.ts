@@ -1,7 +1,7 @@
 import { coerce } from 'semver';
 import { logger } from '../../logger';
-import { api as npm } from '../npm';
 import { NewValueConfig, VersioningApi } from '../common';
+import { api as npm } from '../npm';
 
 export const id = 'composer';
 export const displayName = 'Composer';

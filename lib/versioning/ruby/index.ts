@@ -6,12 +6,12 @@ import {
   satisfies,
   valid,
 } from '@snyk/ruby-semver';
-import { NewValueConfig, VersioningApi } from '../common';
 import { logger } from '../../logger';
-import { parse as parseVersion } from './version';
-import { ltr, parse as parseRange } from './range';
+import { NewValueConfig, VersioningApi } from '../common';
 import { isSingleOperator, isValidOperator } from './operator';
+import { ltr, parse as parseRange } from './range';
 import { bump, pin, replace } from './strategies';
+import { parse as parseVersion } from './version';
 
 export const id = 'ruby';
 export const displayName = 'Ruby';

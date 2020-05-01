@@ -1,6 +1,22 @@
 import URL from 'url';
-import GitStorage, { StatusResult } from '../git/storage';
+import { configFileNames } from '../../config/app-strings';
+import { RenovateConfig } from '../../config/common';
+import {
+  REPOSITORY_ACCESS_FORBIDDEN,
+  REPOSITORY_ARCHIVED,
+  REPOSITORY_BLOCKED,
+  REPOSITORY_CHANGED,
+  REPOSITORY_DISABLED,
+  REPOSITORY_EMPTY,
+  REPOSITORY_MIRRORED,
+} from '../../constants/error-messages';
+import { PLATFORM_TYPE_GITEA } from '../../constants/platforms';
+import { PR_STATE_ALL, PR_STATE_OPEN } from '../../constants/pull-requests';
+import { logger } from '../../logger';
+import { BranchStatus } from '../../types';
 import * as hostRules from '../../util/host-rules';
+import { sanitize } from '../../util/sanitize';
+import { ensureTrailingSlash } from '../../util/url';
 import {
   BranchStatusConfig,
   CommitFilesConfig,
@@ -16,26 +32,10 @@ import {
   RepoParams,
   VulnerabilityAlert,
 } from '../common';
-import { api } from './gitea-got-wrapper';
-import { PLATFORM_TYPE_GITEA } from '../../constants/platforms';
-import { logger } from '../../logger';
-import {
-  REPOSITORY_ACCESS_FORBIDDEN,
-  REPOSITORY_ARCHIVED,
-  REPOSITORY_BLOCKED,
-  REPOSITORY_CHANGED,
-  REPOSITORY_DISABLED,
-  REPOSITORY_EMPTY,
-  REPOSITORY_MIRRORED,
-} from '../../constants/error-messages';
-import { RenovateConfig } from '../../config/common';
-import { configFileNames } from '../../config/app-strings';
+import GitStorage, { StatusResult } from '../git/storage';
 import { smartTruncate } from '../utils/pr-body';
-import { sanitize } from '../../util/sanitize';
-import { BranchStatus } from '../../types';
+import { api } from './gitea-got-wrapper';
 import * as helper from './gitea-helper';
-import { PR_STATE_ALL, PR_STATE_OPEN } from '../../constants/pull-requests';
-import { ensureTrailingSlash } from '../../util/url';
 
 type GiteaRenovateConfig = {
   endpoint: string;

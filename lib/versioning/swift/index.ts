@@ -1,7 +1,7 @@
 import semver from 'semver';
 import stable from 'semver-stable';
-import { getNewValue, toSemverRange } from './range';
 import { VersioningApi } from '../common';
+import { getNewValue, toSemverRange } from './range';
 
 export const id = 'swift';
 export const displayName = 'Swift';

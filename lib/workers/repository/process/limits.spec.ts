@@ -1,7 +1,7 @@
 import moment from 'moment';
-import * as limits from './limits';
 import { RenovateConfig, getConfig, platform } from '../../../../test/util';
 import { BranchConfig } from '../../common';
+import * as limits from './limits';
 
 let config: RenovateConfig;
 beforeEach(() => {

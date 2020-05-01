@@ -1,9 +1,9 @@
 import { MAVEN_REPO } from '../../datasource/maven/common';
-import { PackageDependency, PackageFile } from '../common';
-import { get } from '../../versioning';
-import * as mavenVersioning from '../../versioning/maven';
 import * as datasourceSbtPackage from '../../datasource/sbt-package';
 import * as datasourceSbtPlugin from '../../datasource/sbt-plugin';
+import { get } from '../../versioning';
+import * as mavenVersioning from '../../versioning/maven';
+import { PackageDependency, PackageFile } from '../common';
 
 const isComment = (str: string): boolean => /^\s*\/\//.test(str);
 

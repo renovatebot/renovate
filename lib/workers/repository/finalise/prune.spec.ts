@@ -1,6 +1,6 @@
-import * as cleanup from './prune';
 import { RenovateConfig, getConfig, platform } from '../../../../test/util';
 import { PLATFORM_TYPE_GITHUB } from '../../../constants/platforms';
+import * as cleanup from './prune';
 
 let config: RenovateConfig;
 beforeEach(() => {

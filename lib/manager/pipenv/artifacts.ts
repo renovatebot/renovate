@@ -1,13 +1,13 @@
 import { ensureDir, outputFile, readFile, remove } from 'fs-extra';
 import { join } from 'upath';
-import { ExecOptions, exec } from '../../util/exec';
 import { logger } from '../../logger';
+import { platform } from '../../platform';
+import { ExecOptions, exec } from '../../util/exec';
 import {
   UpdateArtifact,
   UpdateArtifactsConfig,
   UpdateArtifactsResult,
 } from '../common';
-import { platform } from '../../platform';
 
 function getPythonConstraint(
   existingLockFileContent: string,

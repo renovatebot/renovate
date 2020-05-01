@@ -1,5 +1,5 @@
-import { migrateAndValidate } from './migrate-validate';
 import { RenovateConfig, getConfig } from '../../test/util';
+import { migrateAndValidate } from './migrate-validate';
 
 let config: RenovateConfig;
 beforeEach(() => {

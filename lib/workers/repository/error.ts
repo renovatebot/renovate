@@ -1,5 +1,3 @@
-import { logger } from '../../logger';
-import { raiseConfigWarningIssue } from './error-config';
 import { RenovateConfig } from '../../config';
 
 import {
@@ -31,6 +29,8 @@ import {
   UNKNOWN_ERROR,
 } from '../../constants/error-messages';
 import { DatasourceError } from '../../datasource/common';
+import { logger } from '../../logger';
+import { raiseConfigWarningIssue } from './error-config';
 
 export default async function handleError(
   config: RenovateConfig,

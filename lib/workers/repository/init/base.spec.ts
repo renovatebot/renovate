@@ -1,5 +1,5 @@
-import { checkBaseBranch } from './base';
 import { RenovateConfig, getConfig, platform } from '../../../../test/util';
+import { checkBaseBranch } from './base';
 
 let config: RenovateConfig;
 beforeEach(() => {

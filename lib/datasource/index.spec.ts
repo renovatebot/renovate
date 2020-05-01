@@ -1,10 +1,10 @@
-import * as datasource from '.';
 
+import { mocked } from '../../test/util';
+import { loadModules } from '../util/modules';
 import * as datasourceDocker from './docker';
 import * as datasourceGithubTags from './github-tags';
 import * as datasourceNpm from './npm';
-import { mocked } from '../../test/util';
-import { loadModules } from '../util/modules';
+import * as datasource from '.';
 
 jest.mock('./docker');
 jest.mock('./npm');

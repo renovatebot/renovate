@@ -1,21 +1,21 @@
+import path from 'path';
 import jsonValidator from 'json-dup-key-validator';
 import JSON5 from 'json5';
-import path from 'path';
 
-import { logger } from '../../../logger';
 import { RenovateConfig, mergeChildConfig } from '../../../config';
-import { migrateAndValidate } from '../../../config/migrate-validate';
-import { decryptConfig } from '../../../config/decrypt';
-import * as presets from '../../../config/presets';
-import * as npmApi from '../../../datasource/npm';
-import { flattenPackageRules } from './flatten';
-import * as hostRules from '../../../util/host-rules';
 import { configFileNames } from '../../../config/app-strings';
-import { platform } from '../../../platform';
+import { decryptConfig } from '../../../config/decrypt';
+import { migrateAndValidate } from '../../../config/migrate-validate';
+import * as presets from '../../../config/presets';
 import {
   CONFIG_VALIDATION,
   PLATFORM_FAILURE,
 } from '../../../constants/error-messages';
+import * as npmApi from '../../../datasource/npm';
+import { logger } from '../../../logger';
+import { platform } from '../../../platform';
+import * as hostRules from '../../../util/host-rules';
+import { flattenPackageRules } from './flatten';
 
 // Check for repository config
 export async function mergeRenovateConfig(

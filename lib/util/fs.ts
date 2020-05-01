@@ -1,7 +1,7 @@
-import { join, parse } from 'upath';
 import { outputFile, readFile, remove } from 'fs-extra';
-import { logger } from '../logger';
+import { join, parse } from 'upath';
 import { RenovateConfig } from '../config/common';
+import { logger } from '../logger';
 
 let localDir = '';
 

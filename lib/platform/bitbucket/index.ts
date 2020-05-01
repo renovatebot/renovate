@@ -1,13 +1,17 @@
 import URL from 'url';
-import parseDiff from 'parse-diff';
 import addrs from 'email-addresses';
-import { api } from './bb-got-wrapper';
-import * as utils from './utils';
-import * as hostRules from '../../util/host-rules';
+import parseDiff from 'parse-diff';
+import { RenovateConfig } from '../../config/common';
+import {
+  REPOSITORY_DISABLED,
+  REPOSITORY_NOT_FOUND,
+} from '../../constants/error-messages';
+import { PLATFORM_TYPE_BITBUCKET } from '../../constants/platforms';
+import { PR_STATE_ALL, PR_STATE_OPEN } from '../../constants/pull-requests';
 import { logger } from '../../logger';
-import GitStorage, { StatusResult } from '../git/storage';
-import { readOnlyIssueBody } from '../utils/read-only-issue-body';
-import * as comments from './comments';
+import { BranchStatus } from '../../types';
+import * as hostRules from '../../util/host-rules';
+import { sanitize } from '../../util/sanitize';
 import {
   BranchStatusConfig,
   CommitFilesConfig,
@@ -23,16 +27,12 @@ import {
   RepoParams,
   VulnerabilityAlert,
 } from '../common';
-import { sanitize } from '../../util/sanitize';
+import GitStorage, { StatusResult } from '../git/storage';
 import { smartTruncate } from '../utils/pr-body';
-import {
-  REPOSITORY_DISABLED,
-  REPOSITORY_NOT_FOUND,
-} from '../../constants/error-messages';
-import { PR_STATE_ALL, PR_STATE_OPEN } from '../../constants/pull-requests';
-import { PLATFORM_TYPE_BITBUCKET } from '../../constants/platforms';
-import { BranchStatus } from '../../types';
-import { RenovateConfig } from '../../config/common';
+import { readOnlyIssueBody } from '../utils/read-only-issue-body';
+import { api } from './bb-got-wrapper';
+import * as comments from './comments';
+import * as utils from './utils';
 
 const BITBUCKET_PROD_ENDPOINT = 'https://api.bitbucket.org/';
 

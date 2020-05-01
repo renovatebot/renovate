@@ -1,8 +1,8 @@
-import Git from 'simple-git/promise';
 import { URL } from 'url';
+import Git from 'simple-git/promise';
 
-import { DigestConfig, GetReleasesConfig, ReleaseResult } from '../common';
 import { logger } from '../../logger';
+import { DigestConfig, GetReleasesConfig, ReleaseResult } from '../common';
 
 export const id = 'git-submodules';
 

@@ -1,7 +1,7 @@
-import { PR_STATE_CLOSED } from '../../constants/pull-requests';
-import { prAlreadyExisted } from './check-existing';
 import { defaultConfig, partial, platform } from '../../../test/util';
+import { PR_STATE_CLOSED } from '../../constants/pull-requests';
 import { BranchConfig } from '../common';
+import { prAlreadyExisted } from './check-existing';
 
 describe('workers/branch/check-existing', () => {
   describe('prAlreadyExisted', () => {

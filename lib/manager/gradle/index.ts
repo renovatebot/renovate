@@ -1,9 +1,14 @@
+import { Stats } from 'fs';
 import * as os from 'os';
 import * as fs from 'fs-extra';
-import { Stats } from 'fs';
 import upath from 'upath';
-import { ExecOptions, exec } from '../../util/exec';
+import { LANGUAGE_JAVA } from '../../constants/languages';
+import { DatasourceError } from '../../datasource';
+import * as datasourceMaven from '../../datasource/maven';
 import { logger } from '../../logger';
+import { ExecOptions, exec } from '../../util/exec';
+import { BinarySource } from '../../util/exec/common';
+import { readLocalFile } from '../../util/fs';
 import * as gradleVersioning from '../../versioning/gradle';
 import {
   ExtractConfig,
@@ -11,11 +16,6 @@ import {
   UpdateDependencyConfig,
   Upgrade,
 } from '../common';
-import { readLocalFile } from '../../util/fs';
-import { LANGUAGE_JAVA } from '../../constants/languages';
-import * as datasourceMaven from '../../datasource/maven';
-import { DatasourceError } from '../../datasource';
-import { BinarySource } from '../../util/exec/common';
 import {
   GradleDependency,
   collectVersionVariables,

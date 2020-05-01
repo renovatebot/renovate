@@ -1,5 +1,5 @@
-import { RenovateOptions, getOptions } from './definitions';
 import { RenovateConfig } from './common';
+import { RenovateOptions, getOptions } from './definitions';
 
 const defaultValues = {
   boolean: true,

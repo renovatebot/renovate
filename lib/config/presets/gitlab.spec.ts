@@ -1,7 +1,7 @@
-import { PartialDeep } from 'type-fest';
-import * as gitlab from './gitlab';
-import { api } from '../../platform/gitlab/gl-got-wrapper';
 import { GotResponse } from '../../platform';
+import { api } from '../../platform/gitlab/gl-got-wrapper';
+import * as gitlab from './gitlab';
+import { PartialDeep } from 'type-fest';
 
 jest.mock('../../platform/gitlab/gl-got-wrapper');
 jest.mock('../../util/got');

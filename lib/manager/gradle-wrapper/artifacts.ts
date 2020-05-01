@@ -1,12 +1,12 @@
 /* istanbul ignore file */
-import Git from 'simple-git/promise';
 import { resolve } from 'path';
 import * as fs from 'fs-extra';
+import Git from 'simple-git/promise';
 import { logger } from '../../logger';
-import { UpdateArtifact, UpdateArtifactsResult } from '../common';
+import { platform } from '../../platform';
 import { ExecOptions, exec } from '../../util/exec';
 import { readLocalFile } from '../../util/fs';
-import { platform } from '../../platform';
+import { UpdateArtifact, UpdateArtifactsResult } from '../common';
 import { gradleWrapperFileName, prepareGradleCommand } from '../gradle/index';
 
 async function addIfUpdated(

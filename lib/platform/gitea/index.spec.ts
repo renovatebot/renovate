@@ -1,14 +1,3 @@
-import { partial } from '../../../test/util';
-import * as ght from './gitea-helper';
-import {
-  REPOSITORY_ACCESS_FORBIDDEN,
-  REPOSITORY_ARCHIVED,
-  REPOSITORY_BLOCKED,
-  REPOSITORY_CHANGED,
-  REPOSITORY_DISABLED,
-  REPOSITORY_EMPTY,
-  REPOSITORY_MIRRORED,
-} from '../../constants/error-messages';
 import {
   BranchStatusConfig,
   CommitFilesConfig,
@@ -18,9 +7,20 @@ import {
   RepoConfig,
   RepoParams,
 } from '..';
+import { partial } from '../../../test/util';
+import {
+  REPOSITORY_ACCESS_FORBIDDEN,
+  REPOSITORY_ARCHIVED,
+  REPOSITORY_BLOCKED,
+  REPOSITORY_CHANGED,
+  REPOSITORY_DISABLED,
+  REPOSITORY_EMPTY,
+  REPOSITORY_MIRRORED,
+} from '../../constants/error-messages';
 import { logger as _logger } from '../../logger';
 import { BranchStatus } from '../../types';
 import { GiteaGotApi } from './gitea-got-wrapper';
+import * as ght from './gitea-helper';
 
 describe('platform/gitea', () => {
   let gitea: Platform;

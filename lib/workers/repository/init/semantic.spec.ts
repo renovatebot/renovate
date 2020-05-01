@@ -1,5 +1,5 @@
-import { detectSemanticCommits } from './semantic';
 import { RenovateConfig, getConfig, platform } from '../../../../test/util';
+import { detectSemanticCommits } from './semantic';
 
 let config: RenovateConfig;
 beforeEach(() => {

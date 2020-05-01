@@ -1,3 +1,4 @@
+import { VersioningApi } from '../common';
 import maven from '../maven';
 import { TYPE_QUALIFIER, isSubversion, tokenize } from '../maven/compare';
 import {
@@ -5,7 +6,6 @@ import {
   REV_TYPE_SUBREV,
   parseDynamicRevision,
 } from './parse';
-import { VersioningApi } from '../common';
 
 export const id = 'ivy';
 export const displayName = 'Ivy';

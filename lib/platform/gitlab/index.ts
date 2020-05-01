@@ -1,9 +1,25 @@
 import URL, { URLSearchParams } from 'url';
 import is from '@sindresorhus/is';
 
-import { api } from './gl-got-wrapper';
+import { configFileNames } from '../../config/app-strings';
+import { RenovateConfig } from '../../config/common';
+import {
+  PLATFORM_AUTHENTICATION_ERROR,
+  REPOSITORY_ACCESS_FORBIDDEN,
+  REPOSITORY_ARCHIVED,
+  REPOSITORY_CHANGED,
+  REPOSITORY_DISABLED,
+  REPOSITORY_EMPTY,
+  REPOSITORY_MIRRORED,
+  REPOSITORY_NOT_FOUND,
+} from '../../constants/error-messages';
+import { PLATFORM_TYPE_GITLAB } from '../../constants/platforms';
+import { PR_STATE_ALL, PR_STATE_OPEN } from '../../constants/pull-requests';
+import { logger } from '../../logger';
+import { BranchStatus } from '../../types';
 import * as hostRules from '../../util/host-rules';
-import GitStorage, { StatusResult } from '../git/storage';
+import { sanitize } from '../../util/sanitize';
+import { ensureTrailingSlash } from '../../util/url';
 import {
   BranchStatusConfig,
   CommitFilesConfig,
@@ -19,25 +35,9 @@ import {
   RepoParams,
   VulnerabilityAlert,
 } from '../common';
-import { configFileNames } from '../../config/app-strings';
-import { logger } from '../../logger';
-import { sanitize } from '../../util/sanitize';
+import GitStorage, { StatusResult } from '../git/storage';
 import { smartTruncate } from '../utils/pr-body';
-import { RenovateConfig } from '../../config/common';
-import {
-  PLATFORM_AUTHENTICATION_ERROR,
-  REPOSITORY_ACCESS_FORBIDDEN,
-  REPOSITORY_ARCHIVED,
-  REPOSITORY_CHANGED,
-  REPOSITORY_DISABLED,
-  REPOSITORY_EMPTY,
-  REPOSITORY_MIRRORED,
-  REPOSITORY_NOT_FOUND,
-} from '../../constants/error-messages';
-import { PR_STATE_ALL, PR_STATE_OPEN } from '../../constants/pull-requests';
-import { PLATFORM_TYPE_GITLAB } from '../../constants/platforms';
-import { BranchStatus } from '../../types';
-import { ensureTrailingSlash } from '../../util/url';
+import { api } from './gl-got-wrapper';
 
 type MergeMethod = 'merge' | 'rebase_merge' | 'ff';
 const defaultConfigFile = configFileNames[0];

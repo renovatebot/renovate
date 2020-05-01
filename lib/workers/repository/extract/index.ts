@@ -1,12 +1,12 @@
-import { logger } from '../../../logger';
-import { getManagerList } from '../../../manager';
 import {
   RenovateConfig,
   getManagerConfig,
   mergeChildConfig,
 } from '../../../config';
-import { getManagerPackageFiles } from './manager-files';
+import { logger } from '../../../logger';
+import { getManagerList } from '../../../manager';
 import { PackageFile } from '../../../manager/common';
+import { getManagerPackageFiles } from './manager-files';
 
 export async function extractAllDependencies(
   config: RenovateConfig

@@ -1,10 +1,10 @@
 import is from '@sindresorhus/is';
 import yaml from 'js-yaml';
-import { SkipReason } from '../../types';
-import { logger } from '../../logger';
-import { ExtractConfig, PackageDependency, PackageFile } from '../common';
 import * as datasourceHelm from '../../datasource/helm';
+import { logger } from '../../logger';
+import { SkipReason } from '../../types';
 import { getSiblingFileName, readLocalFile } from '../../util/fs';
+import { ExtractConfig, PackageDependency, PackageFile } from '../common';
 
 export async function extractPackageFile(
   content: string,

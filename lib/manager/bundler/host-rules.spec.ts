@@ -1,5 +1,5 @@
-import { add, clear } from '../../util/host-rules';
 import { HostRule } from '../../types';
+import { add, clear } from '../../util/host-rules';
 
 import {
   findAllAuthenticatable,

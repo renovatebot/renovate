@@ -1,8 +1,8 @@
-import { logger } from '../../logger';
-import { getDep } from '../dockerfile/extract';
-import { PackageDependency, PackageFile } from '../common';
-import * as npmVersioning from '../../versioning/npm';
 import * as datasourceOrb from '../../datasource/orb';
+import { logger } from '../../logger';
+import * as npmVersioning from '../../versioning/npm';
+import { PackageDependency, PackageFile } from '../common';
+import { getDep } from '../dockerfile/extract';
 
 export function extractPackageFile(content: string): PackageFile | null {
   const deps: PackageDependency[] = [];

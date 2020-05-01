@@ -1,5 +1,5 @@
-import { checkIfConfigured } from './configured';
 import { RenovateConfig, getConfig } from '../../../test/util';
+import { checkIfConfigured } from './configured';
 
 let config: RenovateConfig;
 beforeEach(() => {

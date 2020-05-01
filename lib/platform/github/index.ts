@@ -1,30 +1,9 @@
+import URL from 'url';
 import is from '@sindresorhus/is';
 import delay from 'delay';
-import URL from 'url';
 
-import { logger } from '../../logger';
-import { api } from './gh-got-wrapper';
-import * as hostRules from '../../util/host-rules';
-import GitStorage, { StatusResult } from '../git/storage';
-import {
-  BranchStatusConfig,
-  CommitFilesConfig,
-  CreatePRConfig,
-  EnsureCommentConfig,
-  EnsureIssueConfig,
-  EnsureIssueResult,
-  FindPRConfig,
-  Issue,
-  PlatformConfig,
-  RepoConfig,
-  RepoParams,
-  VulnerabilityAlert,
-} from '../common';
 
 import { configFileNames } from '../../config/app-strings';
-import { sanitize } from '../../util/sanitize';
-import { smartTruncate } from '../utils/pr-body';
-import { getGraphqlNodes } from './gh-graphql-wrapper';
 import {
   PLATFORM_FAILURE,
   PLATFORM_INTEGRATION_UNAUTHORIZED,
@@ -40,13 +19,34 @@ import {
   REPOSITORY_RENAMED,
 } from '../../constants/error-messages';
 import { PLATFORM_TYPE_GITHUB } from '../../constants/platforms';
-import { BranchStatus } from '../../types';
 import {
   PR_STATE_ALL,
   PR_STATE_CLOSED,
   PR_STATE_OPEN,
 } from '../../constants/pull-requests';
+import { logger } from '../../logger';
+import { BranchStatus } from '../../types';
+import * as hostRules from '../../util/host-rules';
+import { sanitize } from '../../util/sanitize';
 import { ensureTrailingSlash } from '../../util/url';
+import {
+  BranchStatusConfig,
+  CommitFilesConfig,
+  CreatePRConfig,
+  EnsureCommentConfig,
+  EnsureIssueConfig,
+  EnsureIssueResult,
+  FindPRConfig,
+  Issue,
+  PlatformConfig,
+  RepoConfig,
+  RepoParams,
+  VulnerabilityAlert,
+} from '../common';
+import GitStorage, { StatusResult } from '../git/storage';
+import { smartTruncate } from '../utils/pr-body';
+import { api } from './gh-got-wrapper';
+import { getGraphqlNodes } from './gh-graphql-wrapper';
 
 const defaultConfigFile = configFileNames[0];
 

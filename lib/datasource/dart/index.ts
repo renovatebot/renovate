@@ -1,5 +1,5 @@
-import { Http, HttpResponse } from '../../util/http';
 import { logger } from '../../logger';
+import { Http, HttpResponse } from '../../util/http';
 import { DatasourceError, GetReleasesConfig, ReleaseResult } from '../common';
 
 export const id = 'dart';

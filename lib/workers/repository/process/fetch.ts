@@ -1,19 +1,19 @@
-import pAll from 'p-all';
 import { hrtime } from 'process';
-import { logger } from '../../../logger';
-import { getPackageUpdates } from '../../../manager';
+import pAll from 'p-all';
 import {
   ManagerConfig,
   RenovateConfig,
   getManagerConfig,
   mergeChildConfig,
 } from '../../../config';
-import { applyPackageRules } from '../../../util/package-rules';
-import { LookupUpdateConfig, lookupUpdates } from './lookup';
+import { getDefaultConfig } from '../../../datasource';
+import { logger } from '../../../logger';
+import { getPackageUpdates } from '../../../manager';
 import { PackageDependency, PackageFile } from '../../../manager/common';
 import { SkipReason } from '../../../types';
-import { getDefaultConfig } from '../../../datasource';
 import { clone } from '../../../util/clone';
+import { applyPackageRules } from '../../../util/package-rules';
+import { LookupUpdateConfig, lookupUpdates } from './lookup';
 
 async function fetchDepUpdates(
   packageFileConfig: ManagerConfig & PackageFile,

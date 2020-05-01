@@ -1,13 +1,13 @@
 import is from '@sindresorhus/is';
 import fs from 'fs-extra';
-import { ExecOptions, exec } from '../../util/exec';
 import { logger } from '../../logger';
-import { UpdateArtifact, UpdateArtifactsResult } from '../common';
+import { ExecOptions, exec } from '../../util/exec';
 import {
   getSiblingFileName,
   readLocalFile,
   writeLocalFile,
 } from '../../util/fs';
+import { UpdateArtifact, UpdateArtifactsResult } from '../common';
 
 export async function updateArtifacts({
   packageFileName,

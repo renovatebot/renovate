@@ -1,13 +1,13 @@
 import { ensureDir } from 'fs-extra';
 import { dirname, join } from 'upath';
-import { ExecOptions, exec } from '../../util/exec';
-import { find } from '../../util/host-rules';
+import { PLATFORM_TYPE_GITHUB } from '../../constants/platforms';
 import { logger } from '../../logger';
-import { UpdateArtifact, UpdateArtifactsResult } from '../common';
 import { platform } from '../../platform';
+import { ExecOptions, exec } from '../../util/exec';
 import { BinarySource } from '../../util/exec/common';
 import { readLocalFile, writeLocalFile } from '../../util/fs';
-import { PLATFORM_TYPE_GITHUB } from '../../constants/platforms';
+import { find } from '../../util/host-rules';
+import { UpdateArtifact, UpdateArtifactsResult } from '../common';
 
 function getPreCommands(): string[] | null {
   const credentials = find({

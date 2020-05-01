@@ -1,8 +1,8 @@
-import { logger } from '../../../../logger';
-import * as allVersioning from '../../../../versioning';
-import { RollbackConfig, getRollbackUpdate } from './rollback';
-import { getRangeStrategy } from '../../../../manager';
-import { FilterConfig, filterVersions } from './filter';
+import {
+  RenovateConfig,
+  UpdateType,
+  ValidationMessage,
+} from '../../../../config';
 import {
   Release,
   getDigest,
@@ -10,15 +10,15 @@ import {
   isGetPkgReleasesConfig,
   supportsDigests,
 } from '../../../../datasource';
-import { LookupUpdate, RangeConfig } from '../../../../manager/common';
-import {
-  RenovateConfig,
-  UpdateType,
-  ValidationMessage,
-} from '../../../../config';
-import { clone } from '../../../../util/clone';
 import * as datasourceGitSubmodules from '../../../../datasource/git-submodules';
+import { logger } from '../../../../logger';
+import { getRangeStrategy } from '../../../../manager';
+import { LookupUpdate, RangeConfig } from '../../../../manager/common';
 import { SkipReason } from '../../../../types';
+import { clone } from '../../../../util/clone';
+import * as allVersioning from '../../../../versioning';
+import { FilterConfig, filterVersions } from './filter';
+import { RollbackConfig, getRollbackUpdate } from './rollback';
 
 export interface UpdateResult {
   sourceDirectory?: string;

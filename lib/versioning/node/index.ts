@@ -1,5 +1,5 @@
-import npm, { isValid, isVersion } from '../npm';
 import { NewValueConfig, VersioningApi } from '../common';
+import npm, { isValid, isVersion } from '../npm';
 
 export const id = 'node';
 export const displayName = 'Node.js';

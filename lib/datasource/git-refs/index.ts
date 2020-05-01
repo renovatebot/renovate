@@ -1,6 +1,6 @@
 import simpleGit from 'simple-git/promise';
-import * as semver from '../../versioning/semver';
 import { logger } from '../../logger';
+import * as semver from '../../versioning/semver';
 import { GetReleasesConfig, ReleaseResult } from '../common';
 
 export const id = 'git-refs';

@@ -1,4 +1,5 @@
 import _fs from 'fs-extra';
+import { add } from '../util/host-rules';
 import {
   addMeta,
   addStream,
@@ -10,7 +11,6 @@ import {
   setContext,
   setMeta,
 } from '.';
-import { add } from '../util/host-rules';
 
 jest.unmock('.');
 

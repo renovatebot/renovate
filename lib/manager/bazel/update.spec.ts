@@ -1,8 +1,8 @@
 import { readFileSync } from 'fs';
-import { fromStream as _fromStream } from 'hasha';
 import { resolve } from 'path';
-import { updateDependency } from './update';
+import { fromStream as _fromStream } from 'hasha';
 import { UpdateType } from '../../config';
+import { updateDependency } from './update';
 
 jest.mock('hasha');
 jest.mock('../../util/got');
