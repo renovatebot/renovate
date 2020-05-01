@@ -1,7 +1,7 @@
 import {
+  collectVersionVariables,
   init,
   updateGradleVersion,
-  collectVersionVariables,
 } from './build-gradle';
 
 describe('lib/manager/gradle/updateGradleVersion', () => {

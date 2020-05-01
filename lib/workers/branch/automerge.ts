@@ -1,5 +1,5 @@
-import { logger } from '../../logger';
 import { RenovateConfig } from '../../config';
+import { logger } from '../../logger';
 import { platform } from '../../platform';
 import { BranchStatus } from '../../types';
 

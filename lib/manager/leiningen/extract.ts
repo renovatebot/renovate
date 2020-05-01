@@ -1,5 +1,5 @@
-import { PackageDependency, PackageFile } from '../common';
 import * as datasourceClojure from '../../datasource/clojure';
+import { PackageDependency, PackageFile } from '../common';
 
 export function trimAtKey(str: string, kwName: string): string | null {
   const regex = new RegExp(`:${kwName}(?=\\s)`);

@@ -1,14 +1,14 @@
-import { logger, levels, addStream, setContext } from '../logger';
-import * as definitions from './definitions';
-import * as defaultsParser from './defaults';
-import * as fileParser from './file';
-import * as cliParser from './cli';
-import * as envParser from './env';
-import { resolveConfigPresets } from './presets';
+import { addStream, levels, logger, setContext } from '../logger';
 import { get, getLanguageList, getManagerList } from '../manager';
-import { RenovateConfig, RenovateConfigStage } from './common';
-import { mergeChildConfig } from './utils';
 import { ensureTrailingSlash } from '../util/url';
+import * as cliParser from './cli';
+import { RenovateConfig, RenovateConfigStage } from './common';
+import * as defaultsParser from './defaults';
+import * as definitions from './definitions';
+import * as envParser from './env';
+import * as fileParser from './file';
+import { resolveConfigPresets } from './presets';
+import { mergeChildConfig } from './utils';
 
 export * from './common';
 export { mergeChildConfig };

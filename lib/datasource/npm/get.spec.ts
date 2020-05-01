@@ -1,9 +1,9 @@
 import got from 'got';
 import { getName, partial } from '../../../test/util';
-import { getDependency, resetMemCache } from './get';
-import { setNpmrc } from './npmrc';
 import * as _got from '../../util/got';
 import { DatasourceError } from '../common';
+import { getDependency, resetMemCache } from './get';
+import { setNpmrc } from './npmrc';
 
 jest.mock('../../util/got');
 

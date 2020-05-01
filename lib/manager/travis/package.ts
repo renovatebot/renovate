@@ -1,11 +1,11 @@
 import is from '@sindresorhus/is';
 import { isEqual } from 'lodash';
-import { logger } from '../../logger';
 import { getPkgReleases } from '../../datasource';
-import { isVersion, maxSatisfyingVersion } from '../../versioning/semver';
-import { PackageUpdateConfig, LookupUpdate } from '../common';
 import * as datasourceGithubTags from '../../datasource/github-tags';
+import { logger } from '../../logger';
 import { resolveFile } from '../../util';
+import { isVersion, maxSatisfyingVersion } from '../../versioning/semver';
+import { LookupUpdate, PackageUpdateConfig } from '../common';
 
 interface NodeJsPolicies {
   all: number[];

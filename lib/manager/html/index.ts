@@ -1,5 +1,5 @@
-import { extractPackageFile } from './extract';
 import * as semverVersioning from '../../versioning/semver';
+import { extractPackageFile } from './extract';
 
 export { extractPackageFile };
 

@@ -1,7 +1,7 @@
-import { addMetaData } from './metadata';
 import * as datasourceMaven from './maven';
-import * as datasourcePypi from './pypi';
+import { addMetaData } from './metadata';
 import * as datasourceNpm from './npm';
+import * as datasourcePypi from './pypi';
 
 describe('datasource/metadata', () => {
   it('Should do nothing if dep is not specified', () => {

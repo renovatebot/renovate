@@ -1,7 +1,7 @@
-import path from 'path';
 import fs from 'fs';
-import * as file from './file';
+import path from 'path';
 import customConfig from './config/__fixtures__/file';
+import * as file from './file';
 
 describe('config/file', () => {
   describe('.getConfig()', () => {

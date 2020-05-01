@@ -1,9 +1,9 @@
-import is from '@sindresorhus/is';
 import url from 'url';
+import is from '@sindresorhus/is';
 import { parse } from 'node-html-parser';
 import { logger } from '../../logger';
-import { matches } from '../../versioning/pep440';
 import { Http } from '../../util/http';
+import { matches } from '../../versioning/pep440';
 import { GetReleasesConfig, ReleaseResult } from '../common';
 
 export const id = 'pypi';

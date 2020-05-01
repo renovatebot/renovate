@@ -1,7 +1,7 @@
 import path from 'path';
 import { logger } from '../logger';
-import { migrateConfig } from './migration';
 import { RenovateConfig } from './common';
+import { migrateConfig } from './migration';
 
 export function getConfig(env: NodeJS.ProcessEnv): RenovateConfig {
   let configFile = env.RENOVATE_CONFIG_FILE || 'config';

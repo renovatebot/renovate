@@ -1,5 +1,5 @@
+import { NewValueConfig, VersioningApi } from '../common';
 import { api as npm } from '../npm';
-import { VersioningApi, NewValueConfig } from '../common';
 
 export const id = 'hex';
 export const displayName = 'Hex';

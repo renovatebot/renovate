@@ -1,7 +1,7 @@
-import { logger } from '../../logger';
-import { platform } from '../../platform';
 import { RenovateConfig } from '../../config';
 import { PR_STATE_OPEN } from '../../constants/pull-requests';
+import { logger } from '../../logger';
+import { platform } from '../../platform';
 
 export async function raiseConfigWarningIssue(
   config: RenovateConfig,

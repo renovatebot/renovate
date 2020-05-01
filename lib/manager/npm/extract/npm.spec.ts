@@ -1,6 +1,6 @@
 import { readFileSync } from 'fs';
-import { getNpmLock } from './npm';
 import * as _fs from '../../../util/fs';
+import { getNpmLock } from './npm';
 
 jest.mock('../../../util/fs');
 

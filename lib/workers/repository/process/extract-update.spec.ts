@@ -1,6 +1,6 @@
-import { extract, update } from './extract-update';
-import * as _branchify from '../updates/branchify';
 import { mocked } from '../../../../test/util';
+import * as _branchify from '../updates/branchify';
+import { extract, update } from './extract-update';
 
 jest.mock('./write');
 jest.mock('./sort');

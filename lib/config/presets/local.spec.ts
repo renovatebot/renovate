@@ -1,5 +1,5 @@
-import * as gitlab from './gitlab';
 import * as github from './github';
+import * as gitlab from './gitlab';
 import * as local from './local';
 
 jest.mock('./gitlab');

@@ -1,8 +1,8 @@
 import URL from 'url';
 import merge from 'deepmerge';
 import { logger } from '../logger';
-import * as sanitize from './sanitize';
 import { HostRule } from '../types';
+import * as sanitize from './sanitize';
 
 let hostRules: HostRule[] = [];
 

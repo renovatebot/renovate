@@ -1,5 +1,3 @@
-import { logger } from '../../logger';
-import { raiseConfigWarningIssue } from './error-config';
 import { RenovateConfig } from '../../config';
 
 import {
@@ -21,8 +19,8 @@ import {
   REPOSITORY_EMPTY,
   REPOSITORY_FORKED,
   REPOSITORY_MIRRORED,
-  REPOSITORY_NO_VULNERABILITY,
   REPOSITORY_NOT_FOUND,
+  REPOSITORY_NO_VULNERABILITY,
   REPOSITORY_RENAMED,
   REPOSITORY_TEMPORARY_ERROR,
   REPOSITORY_UNINITIATED,
@@ -31,6 +29,8 @@ import {
   UNKNOWN_ERROR,
 } from '../../constants/error-messages';
 import { DatasourceError } from '../../datasource/common';
+import { logger } from '../../logger';
+import { raiseConfigWarningIssue } from './error-config';
 
 export default async function handleError(
   config: RenovateConfig,

@@ -1,11 +1,11 @@
 import URL from 'url';
-import { api } from '../../../platform/gitlab/gl-got-wrapper';
-import { logger } from '../../../logger';
-import * as allVersioning from '../../../versioning';
-import { addReleaseNotes } from './release-notes';
-import { ChangeLogRelease, ChangeLogResult } from './common';
 import { Release } from '../../../datasource';
+import { logger } from '../../../logger';
+import { api } from '../../../platform/gitlab/gl-got-wrapper';
+import * as allVersioning from '../../../versioning';
 import { BranchUpgradeConfig } from '../../common';
+import { ChangeLogRelease, ChangeLogResult } from './common';
+import { addReleaseNotes } from './release-notes';
 
 const { get: glGot } = api;
 

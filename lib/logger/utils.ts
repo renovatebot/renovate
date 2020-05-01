@@ -1,6 +1,6 @@
-import fs from 'fs-extra';
-import bunyan from 'bunyan';
 import { Stream } from 'stream';
+import bunyan from 'bunyan';
+import fs from 'fs-extra';
 import { sanitize } from '../util/sanitize';
 
 export interface BunyanRecord extends Record<string, any> {

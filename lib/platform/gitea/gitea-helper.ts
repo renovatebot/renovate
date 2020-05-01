@@ -2,7 +2,7 @@ import { URLSearchParams } from 'url';
 import { PR_STATE_CLOSED } from '../../constants/pull-requests';
 import { BranchStatus } from '../../types';
 import { GotResponse } from '../common';
-import { api, GiteaGotOptions } from './gitea-got-wrapper';
+import { GiteaGotOptions, api } from './gitea-got-wrapper';
 
 export type PRState = 'open' | 'closed' | 'all';
 export type IssueState = 'open' | 'closed' | 'all';

@@ -1,19 +1,19 @@
-import fs from 'fs-extra';
 import path from 'path';
+import fs from 'fs-extra';
 import upath from 'upath';
 // eslint-disable-next-line import/no-unresolved
-import { PackageJson } from 'type-fest';
-import { logger } from '../../../logger';
-import * as npm from './npm';
-import * as lerna from './lerna';
-import * as yarn from './yarn';
-import * as pnpm from './pnpm';
-import * as hostRules from '../../../util/host-rules';
-import { getChildProcessEnv } from '../../../util/exec/env';
-import { PostUpdateConfig, PackageFile, Upgrade } from '../../common';
-import { platform } from '../../../platform';
 import { SYSTEM_INSUFFICIENT_DISK_SPACE } from '../../../constants/error-messages';
 import { DatasourceError } from '../../../datasource/common';
+import { logger } from '../../../logger';
+import { platform } from '../../../platform';
+import { getChildProcessEnv } from '../../../util/exec/env';
+import * as hostRules from '../../../util/host-rules';
+import { PackageFile, PostUpdateConfig, Upgrade } from '../../common';
+import * as lerna from './lerna';
+import * as npm from './npm';
+import * as pnpm from './pnpm';
+import * as yarn from './yarn';
+import { PackageJson } from 'type-fest';
 
 // Strips empty values, deduplicates, and returns the directories from filenames
 // istanbul ignore next
