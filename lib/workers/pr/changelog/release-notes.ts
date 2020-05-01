@@ -119,9 +119,9 @@ export async function getReleaseNotes(
       release.tag === `${depName}-${version}`
     ) {
       releaseNotes = release;
-      releaseNotes.url = baseUrl.includes('github')
-        ? `${baseUrl}${repository}/releases/${release.tag}`
-        : `${baseUrl}${repository}/tags/${release.tag}`;
+      releaseNotes.url = baseUrl.includes('gitlab')
+        ? `${baseUrl}${repository}/tags/${release.tag}`
+        : `${baseUrl}${repository}/releases/${release.tag}`;
       releaseNotes.body = massageBody(releaseNotes.body, baseUrl);
       if (!releaseNotes.body.length) {
         releaseNotes = null;
