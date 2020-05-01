@@ -3,13 +3,14 @@ import { resolve } from 'path';
 import Git from 'simple-git/promise';
 import * as dcUpdate from '.';
 import { platform as _platform } from '../../platform';
-import { mocked, getName } from '../../../test/util';
+import { mocked, getName, bufferSerializer } from '../../../test/util';
 import { ifSystemSupportsGradle } from '../gradle/__testutil__/gradle';
 import { setUtilConfig } from '../../util';
 
 const platform = mocked(_platform);
 const config = {
   localDir: resolve(__dirname, './__fixtures__/testFiles'),
+  toVersion: '5.6.4',
 };
 
 jest.mock('../../util/got');
@@ -23,6 +24,8 @@ async function resetTestFiles() {
     config,
   });
 }
+
+expect.addSnapshotSerializer(bufferSerializer());
 
 describe(getName(__filename), () => {
   beforeEach(async () => {
@@ -52,7 +55,7 @@ describe(getName(__filename), () => {
           ),
           'utf8'
         ),
-        config,
+        config: { ...config, toVersion: '6.3' },
       });
 
       expect(res).toEqual(
@@ -61,7 +64,7 @@ describe(getName(__filename), () => {
           'gradle/wrapper/gradle-wrapper.jar',
           'gradlew',
           'gradlew.bat',
-        ].map(fileProjectPath => {
+        ].map((fileProjectPath) => {
           return {
             file: {
               name: fileProjectPath,
@@ -81,12 +84,16 @@ describe(getName(__filename), () => {
         'gradle/wrapper/gradle-wrapper.jar',
         'gradlew',
         'gradlew.bat',
-      ].forEach(file => {
+      ].forEach((file) => {
         expect(
-          readFileSync(resolve(__dirname, `./__fixtures__/testFiles/${file}`))
+          readFileSync(
+            resolve(__dirname, `./__fixtures__/testFiles/${file}`),
+            'utf8'
+          )
         ).toEqual(
           readFileSync(
-            resolve(__dirname, `./__fixtures__/expectedFiles/${file}`)
+            resolve(__dirname, `./__fixtures__/expectedFiles/${file}`),
+            'utf8'
           )
         );
       });
@@ -116,7 +123,7 @@ describe(getName(__filename), () => {
       // 5.6.4 => 5.6.4 (updates execs)
       // 6.3 => (5.6.4) (downgrades execs)
       // looks like a bug in Gradle
-      ['gradle/wrapper/gradle-wrapper.properties'].forEach(file => {
+      ['gradle/wrapper/gradle-wrapper.properties'].forEach((file) => {
         expect(
           readFileSync(
             resolve(__dirname, `./__fixtures__/testFiles/${file}`),
@@ -157,7 +164,7 @@ describe(getName(__filename), () => {
       expect(res[0].artifactError.stderr).not.toEqual('');
 
       // 5.6.4 => 5.6.4 (updates execs) - unexpected behavior (looks like a bug in Gradle)
-      ['gradle/wrapper/gradle-wrapper.properties'].forEach(file => {
+      ['gradle/wrapper/gradle-wrapper.properties'].forEach((file) => {
         expect(
           readFileSync(
             resolve(__dirname, `./__fixtures__/testFiles/${file}`),
@@ -198,7 +205,7 @@ describe(getName(__filename), () => {
         expect(res[0].artifactError.stderr).not.toEqual('');
 
         // 5.6.4 => 5.6.4 (updates execs) - unexpected behavior (looks like a bug in Gradle)
-        ['gradle/wrapper/gradle-wrapper.properties'].forEach(file => {
+        ['gradle/wrapper/gradle-wrapper.properties'].forEach((file) => {
           expect(
             readFileSync(
               resolve(__dirname, `./__fixtures__/testFiles/${file}`),

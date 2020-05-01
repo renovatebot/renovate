@@ -18,7 +18,7 @@ describe('platform/azure', () => {
     jest.mock('../git/storage');
     jest.mock('../../util/host-rules');
     hostRules = require('../../util/host-rules');
-    require('../../util/sanitize').sanitize = jest.fn(input => input);
+    require('../../util/sanitize').sanitize = jest.fn((input) => input);
     azure = await import('.');
     azureApi = require('./azure-got-wrapper');
     azureHelper = require('./azure-helper');
@@ -639,7 +639,7 @@ describe('platform/azure', () => {
             updatePullRequest: updateFn,
           } as any)
       );
-      azureHelper.getRenovatePRFormat.mockImplementation(x => x as any);
+      azureHelper.getRenovatePRFormat.mockImplementation((x) => x as any);
       const pr = await azure.createPr({
         branchName: 'some-branch',
         prTitle: 'The Title',

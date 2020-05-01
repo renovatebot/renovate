@@ -63,7 +63,7 @@ function findBalancedParenIndex(longString: string): number {
         parenNestingDepth--;
         break;
       case '"':
-        if (i > 1 && arr.slice(i - 2, i).every(prev => char === prev)) {
+        if (i > 1 && arr.slice(i - 2, i).every((prev) => char === prev)) {
           intShouldNotBeOdd++;
         }
         break;
@@ -87,7 +87,7 @@ function parseContent(content: string): string[] {
       ...content
         .split(regEx(prefix + '\\s*\\(', 'g'))
         .slice(1)
-        .map(base => {
+        .map((base) => {
           const ind = findBalancedParenIndex(base);
 
           return ind >= 0 && `${prefix}(${base.slice(0, ind)})`;
@@ -106,7 +106,7 @@ export function extractPackageFile(content: string): PackageFile | null {
   }
   logger.debug({ definitions }, `Found ${definitions.length} definitions`);
   const deps: PackageDependency[] = [];
-  definitions.forEach(def => {
+  definitions.forEach((def) => {
     logger.debug({ def }, 'Checking bazel definition');
     const [depType] = def.split('(', 1);
     const dep: PackageDependency = { depType, managerData: { def } };

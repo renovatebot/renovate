@@ -62,18 +62,17 @@ function getTableValues(
 export function generateBranchConfig(
   branchUpgrades: BranchUpgradeConfig[]
 ): BranchConfig {
-  logger.debug(`generateBranchConfig(${branchUpgrades.length})`);
-  logger.trace({ config: branchUpgrades });
+  logger.trace({ config: branchUpgrades }, 'generateBranchConfig');
   let config: BranchConfig = {
     upgrades: [],
   } as any;
   const hasGroupName = branchUpgrades[0].groupName !== null;
-  logger.debug(`hasGroupName: ${hasGroupName}`);
+  logger.trace(`hasGroupName: ${hasGroupName}`);
   // Use group settings only if multiple upgrades or lazy grouping is disabled
   const depNames = [];
   const newValue = [];
   const toVersions = [];
-  branchUpgrades.forEach(upg => {
+  branchUpgrades.forEach((upg) => {
     if (!depNames.includes(upg.depName)) {
       depNames.push(upg.depName);
     }
@@ -96,9 +95,9 @@ export function generateBranchConfig(
     // eslint-disable-next-line no-param-reassign
     branchUpgrades[0].commitMessageExtra = `to v${toVersions[0]}`;
   }
-  logger.debug(`groupEligible: ${groupEligible}`);
+  logger.trace(`groupEligible: ${groupEligible}`);
   const useGroupSettings = hasGroupName && groupEligible;
-  logger.debug(`useGroupSettings: ${useGroupSettings}`);
+  logger.trace(`useGroupSettings: ${useGroupSettings}`);
   let releaseTimestamp: string;
   for (const branchUpgrade of branchUpgrades) {
     let upgrade: BranchUpgradeConfig = { ...branchUpgrade };
@@ -168,20 +167,6 @@ export function generateBranchConfig(
       upgrade.recreateClosed = true;
     } else if (semver.valid(toVersions[0])) {
       upgrade.isRange = false;
-    }
-    // extract parentDir and baseDir from packageFile
-    if (upgrade.packageFile) {
-      const packagePath = upgrade.packageFile.split('/');
-      if (packagePath.length > 0) {
-        packagePath.splice(-1, 1);
-      }
-      if (packagePath.length > 0) {
-        upgrade.parentDir = packagePath[packagePath.length - 1];
-        upgrade.baseDir = packagePath.join('/');
-      } else {
-        upgrade.parentDir = '';
-        upgrade.baseDir = '';
-      }
     }
     // Use templates to generate strings
     logger.trace('Compiling branchName: ' + upgrade.branchName);
@@ -306,21 +291,23 @@ export function generateBranchConfig(
   // Now assign first upgrade's config as branch config
   config = { ...config, ...config.upgrades[0], releaseTimestamp }; // TODO: fixme
   config.canBeUnpublished = config.upgrades.some(
-    upgrade => upgrade.canBeUnpublished
+    (upgrade) => upgrade.canBeUnpublished
   );
   config.reuseLockFiles = config.upgrades.every(
-    upgrade => upgrade.updateType !== 'lockFileMaintenance'
+    (upgrade) => upgrade.updateType !== 'lockFileMaintenance'
   );
   config.masterIssueApproval = config.upgrades.some(
-    upgrade => upgrade.masterIssueApproval
+    (upgrade) => upgrade.masterIssueApproval
   );
   config.masterIssuePrApproval = config.upgrades.some(
-    upgrade => upgrade.prCreation === 'approval'
+    (upgrade) => upgrade.prCreation === 'approval'
   );
-  config.automerge = config.upgrades.every(upgrade => upgrade.automerge);
-  config.blockedByPin = config.upgrades.every(upgrade => upgrade.blockedByPin);
+  config.automerge = config.upgrades.every((upgrade) => upgrade.automerge);
+  config.blockedByPin = config.upgrades.every(
+    (upgrade) => upgrade.blockedByPin
+  );
   const tableRows = config.upgrades
-    .map(upgrade => getTableValues(upgrade))
+    .map((upgrade) => getTableValues(upgrade))
     .filter(Boolean);
   if (tableRows.length) {
     let table = [];

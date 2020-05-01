@@ -12,6 +12,7 @@ import {
   getMatchingFiles,
 } from './file-match';
 import { PackageFile } from '../../../manager/common';
+import { readLocalFile } from '../../../util/fs';
 
 export async function getManagerPackageFiles(config): Promise<PackageFile[]> {
   const { manager, enabled, includePaths, ignorePaths } = config;
@@ -36,11 +37,23 @@ export async function getManagerPackageFiles(config): Promise<PackageFile[]> {
   }
   // Extract package files synchronously if manager requires it
   if (get(manager, 'extractAllPackageFiles')) {
-    return extractAllPackageFiles(manager, config, matchedFiles);
+    const allPackageFiles = await extractAllPackageFiles(
+      manager,
+      config,
+      matchedFiles
+    );
+    if (allPackageFiles) {
+      for (const packageFile of allPackageFiles) {
+        for (let index = 0; index < packageFile.deps.length; index += 1) {
+          packageFile.deps[index].depIndex = index;
+        }
+      }
+    }
+    return allPackageFiles;
   }
   const packageFiles = [];
   for (const packageFile of matchedFiles) {
-    const content = await platform.getFile(packageFile);
+    const content = await readLocalFile(packageFile, 'utf8');
     if (content) {
       const res = await extractPackageFile(
         manager,
@@ -49,15 +62,8 @@ export async function getManagerPackageFiles(config): Promise<PackageFile[]> {
         config
       );
       if (res) {
-        if (get(manager, 'autoReplace')) {
-          res.autoReplace = true;
-          for (let index = 0; index < res.deps.length; index += 1) {
-            // auto-populate the depIndex value
-            res.deps[index].autoReplaceData = {
-              ...res.deps[index].autoReplaceData,
-              depIndex: index,
-            };
-          }
+        for (let index = 0; index < res.deps.length; index += 1) {
+          res.deps[index].depIndex = index;
         }
         packageFiles.push({
           packageFile,

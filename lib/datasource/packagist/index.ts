@@ -1,12 +1,12 @@
 import is from '@sindresorhus/is';
 
 import URL from 'url';
-import delay from 'delay';
 import pAll from 'p-all';
 import { logger } from '../../logger';
 import { Http, HttpOptions } from '../../util/http';
 import * as hostRules from '../../util/host-rules';
 import { DatasourceError, GetReleasesConfig, ReleaseResult } from '../common';
+import { getRepoCached, setRepoCached } from '../../util/cache';
 
 export const id = 'packagist';
 
@@ -29,6 +29,7 @@ interface PackageMeta {
   includes?: Record<string, { sha256: string }>;
   packages: Record<string, RegistryFile>;
   'provider-includes': Record<string, { sha256: string }>;
+  providers: Record<string, { sha256: string }>;
   'providers-url'?: string;
 }
 
@@ -38,6 +39,7 @@ interface RegistryFile {
 }
 interface RegistryMeta {
   files?: RegistryFile[];
+  providerPackages: Record<string, string>;
   providersUrl?: string;
   includesFiles?: RegistryFile[];
   packages?: Record<string, RegistryFile>;
@@ -48,7 +50,9 @@ async function getRegistryMeta(regUrl: string): Promise<RegistryMeta | null> {
     const url = URL.resolve(regUrl.replace(/\/?$/, '/'), 'packages.json');
     const opts = getHostOpts(url);
     const res = (await http.getJson<PackageMeta>(url, opts)).body;
-    const meta: RegistryMeta = {};
+    const meta: RegistryMeta = {
+      providerPackages: {},
+    };
     meta.packages = res.packages;
     if (res.includes) {
       meta.includesFiles = [];
@@ -60,8 +64,10 @@ async function getRegistryMeta(regUrl: string): Promise<RegistryMeta | null> {
         meta.includesFiles.push(file);
       }
     }
-    if (res['providers-url'] && res['provider-includes']) {
+    if (res['providers-url']) {
       meta.providersUrl = res['providers-url'];
+    }
+    if (res['provider-includes']) {
       meta.files = [];
       for (const [key, val] of Object.entries(res['provider-includes'])) {
         const file = {
@@ -69,6 +75,11 @@ async function getRegistryMeta(regUrl: string): Promise<RegistryMeta | null> {
           sha256: val.sha256,
         };
         meta.files.push(file);
+      }
+    }
+    if (res.providers) {
+      for (const [key, val] of Object.entries(res.providers)) {
+        meta.providerPackages[key] = val.sha256;
       }
     }
     return meta;
@@ -137,7 +148,7 @@ function extractDepReleases(versions: RegistryFile): ReleaseResult {
     dep.releases = [];
     return dep;
   }
-  dep.releases = Object.keys(versions).map(version => {
+  dep.releases = Object.keys(versions).map((version) => {
     const release = versions[version];
     dep.homepage = release.homepage || dep.homepage;
     if (release.source && release.source.url) {
@@ -161,25 +172,19 @@ interface AllPackages {
 }
 
 async function getAllPackages(regUrl: string): Promise<AllPackages | null> {
-  let repoCacheResult = global.repoCache[`packagist-${regUrl}`];
-  // istanbul ignore if
-  if (repoCacheResult) {
-    while (repoCacheResult === 'pending') {
-      await delay(200);
-      repoCacheResult = global.repoCache[`packagist-${regUrl}`];
-    }
-    return repoCacheResult;
-  }
-  global.repoCache[`packagist-${regUrl}`] = 'pending';
   const registryMeta = await getRegistryMeta(regUrl);
   if (!registryMeta) {
-    global.repoCache[`packagist-${regUrl}`] = null;
     return null;
   }
-  const { packages, providersUrl, files, includesFiles } = registryMeta;
-  const providerPackages: Record<string, string> = {};
+  const {
+    packages,
+    providersUrl,
+    files,
+    includesFiles,
+    providerPackages,
+  } = registryMeta;
   if (files) {
-    const queue = files.map(file => (): Promise<PackagistFile> =>
+    const queue = files.map((file) => (): Promise<PackagistFile> =>
       getPackagistFile(regUrl, file)
     );
     const resolvedFiles = await pAll(queue, { concurrency: 5 });
@@ -208,8 +213,15 @@ async function getAllPackages(regUrl: string): Promise<AllPackages | null> {
     providerPackages,
     includesPackages,
   };
-  global.repoCache[`packagist-${regUrl}`] = allPackages;
   return allPackages;
+}
+
+function getAllCachedPackages(regUrl: string): Promise<AllPackages | null> {
+  const cacheKey = `packagist-${regUrl}`;
+  if (getRepoCached(cacheKey) === undefined) {
+    setRepoCached(cacheKey, getAllPackages(regUrl));
+  }
+  return getRepoCached(cacheKey);
 }
 
 async function packagistOrgLookup(name: string): Promise<ReleaseResult> {
@@ -246,7 +258,7 @@ async function packageLookup(
       const packagistResult = await packagistOrgLookup(name);
       return packagistResult;
     }
-    const allPackages = await getAllPackages(regUrl);
+    const allPackages = await getAllCachedPackages(regUrl);
     if (!allPackages) {
       return null;
     }

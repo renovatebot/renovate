@@ -8,6 +8,7 @@ import {
   PLATFORM_TYPE_GITLAB,
   PLATFORM_TYPE_GITHUB,
 } from '../../constants/platforms';
+import { clearRepoCache } from '../cache';
 
 const baseUrl = 'https://api.github.com';
 
@@ -19,7 +20,7 @@ describe(getName(__filename), () => {
   afterEach(() => {
     nock.cleanAll();
     hostRules.clear();
-    global.repoCache = {};
+    clearRepoCache();
     nock.enableNetConnect();
   });
 
@@ -34,10 +35,7 @@ describe(getName(__filename), () => {
   }
 
   function mock(opts?: nock.Options, times = 1) {
-    return nock(baseUrl, opts)
-      .get('/some')
-      .times(times)
-      .reply(200, {});
+    return nock(baseUrl, opts).get('/some').times(times).reply(200, {});
   }
 
   it('uses  bearer auth', async () => {
@@ -69,7 +67,6 @@ describe(getName(__filename), () => {
   it('uses private-token auth', async () => {
     const req = mock({ reqheaders: { 'private-token': 'XXX' } });
     hostRules.add({ baseUrl, token: 'XXX' });
-    global.repoCache = null;
     expect(await got({ hostType: PLATFORM_TYPE_GITLAB })).toMatchSnapshot();
     expect(req.isDone()).toBe(true);
   });
@@ -100,14 +97,13 @@ describe(getName(__filename), () => {
       await got({ hostType: PLATFORM_TYPE_GITHUB, method: 'HEAD' })
     ).toMatchSnapshot();
 
-    global.repoCache = {};
+    clearRepoCache();
 
     await expect(got({ hostType: PLATFORM_TYPE_GITHUB })).rejects.toThrowError(
       'not-found'
     );
 
     expect(req.isDone()).toBe(true);
-    expect(global.repoCache).toEqual({});
   });
 
   it('streams no cache', async () => {
@@ -120,7 +116,7 @@ describe(getName(__filename), () => {
 
     let data = '';
 
-    stream.on('data', c => {
+    stream.on('data', (c) => {
       data += c;
     });
 
@@ -133,6 +129,5 @@ describe(getName(__filename), () => {
 
     expect(data).toBe('{}');
     expect(req.isDone()).toBe(true);
-    expect(global.repoCache).toEqual({});
   });
 });

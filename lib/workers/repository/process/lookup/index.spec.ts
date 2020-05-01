@@ -13,12 +13,14 @@ import * as dockerVersioning from '../../../../versioning/docker';
 import * as gitVersioning from '../../../../versioning/git';
 import * as npmVersioning from '../../../../versioning/npm';
 import * as pep440Versioning from '../../../../versioning/pep440';
+import * as poetryVersioning from '../../../../versioning/poetry';
 import * as datasourceNpm from '../../../../datasource/npm';
 import * as datasourcePypi from '../../../../datasource/pypi';
 import * as datasourcePackagist from '../../../../datasource/packagist';
 import * as datasourceDocker from '../../../../datasource/docker';
 import * as datasourceGithubTags from '../../../../datasource/github-tags';
 import * as datasourceGitSubmodules from '../../../../datasource/git-submodules';
+import { clearRepoCache } from '../../../../util/cache';
 
 jest.mock('../../../../datasource/docker');
 jest.mock('../../../../datasource/git-submodules');
@@ -36,7 +38,7 @@ describe('workers/repository/process/lookup', () => {
     config.manager = 'npm';
     config.versioning = npmVersioning.id;
     config.rangeStrategy = 'replace';
-    global.repoCache = {};
+    clearRepoCache();
     jest.resetAllMocks();
   });
 
@@ -46,9 +48,7 @@ describe('workers/repository/process/lookup', () => {
       config.depName = 'q';
       config.datasource = datasourceNpm.id;
       config.rollbackPrs = true;
-      nock('https://registry.npmjs.org')
-        .get('/q')
-        .reply(200, qJson);
+      nock('https://registry.npmjs.org').get('/q').reply(200, qJson);
       expect((await lookup.lookupUpdates(config)).updates).toMatchSnapshot();
     });
     it('returns rollback for ranged version', async () => {
@@ -56,9 +56,7 @@ describe('workers/repository/process/lookup', () => {
       config.depName = 'q';
       config.datasource = datasourceNpm.id;
       config.rollbackPrs = true;
-      nock('https://registry.npmjs.org')
-        .get('/q')
-        .reply(200, qJson);
+      nock('https://registry.npmjs.org').get('/q').reply(200, qJson);
       expect((await lookup.lookupUpdates(config)).updates).toMatchSnapshot();
     });
     it('supports minor and major upgrades for tilde ranges', async () => {
@@ -66,9 +64,7 @@ describe('workers/repository/process/lookup', () => {
       config.rangeStrategy = 'pin';
       config.depName = 'q';
       config.datasource = datasourceNpm.id;
-      nock('https://registry.npmjs.org')
-        .get('/q')
-        .reply(200, qJson);
+      nock('https://registry.npmjs.org').get('/q').reply(200, qJson);
       expect((await lookup.lookupUpdates(config)).updates).toMatchSnapshot();
     });
     it('supports lock file updates mixed with regular updates', async () => {
@@ -77,9 +73,7 @@ describe('workers/repository/process/lookup', () => {
       config.depName = 'q';
       config.datasource = datasourceNpm.id;
       config.lockedVersion = '0.4.0';
-      nock('https://registry.npmjs.org')
-        .get('/q')
-        .reply(200, qJson);
+      nock('https://registry.npmjs.org').get('/q').reply(200, qJson);
       expect((await lookup.lookupUpdates(config)).updates).toMatchSnapshot();
     });
     it('returns multiple updates if grouping but separateMajorMinor=true', async () => {
@@ -88,9 +82,7 @@ describe('workers/repository/process/lookup', () => {
       config.rangeStrategy = 'pin';
       config.depName = 'q';
       config.datasource = datasourceNpm.id;
-      nock('https://registry.npmjs.org')
-        .get('/q')
-        .reply(200, qJson);
+      nock('https://registry.npmjs.org').get('/q').reply(200, qJson);
       const res = await lookup.lookupUpdates(config);
       expect(res.updates).toMatchSnapshot();
       expect(res.updates).toHaveLength(2);
@@ -102,9 +94,7 @@ describe('workers/repository/process/lookup', () => {
       config.depName = 'q';
       config.separateMinorPatch = true;
       config.datasource = datasourceNpm.id;
-      nock('https://registry.npmjs.org')
-        .get('/q')
-        .reply(200, qJson);
+      nock('https://registry.npmjs.org').get('/q').reply(200, qJson);
       const res = await lookup.lookupUpdates(config);
       expect(res.updates).toMatchSnapshot();
       expect(res.updates).toHaveLength(3);
@@ -116,9 +106,7 @@ describe('workers/repository/process/lookup', () => {
       config.separateMajorMinor = false;
       config.depName = 'q';
       config.datasource = datasourceNpm.id;
-      nock('https://registry.npmjs.org')
-        .get('/q')
-        .reply(200, qJson);
+      nock('https://registry.npmjs.org').get('/q').reply(200, qJson);
       const res = await lookup.lookupUpdates(config);
       expect(res.updates).toMatchSnapshot();
       expect(res.updates).toHaveLength(1);
@@ -129,9 +117,7 @@ describe('workers/repository/process/lookup', () => {
       config.rangeStrategy = 'pin';
       config.depName = 'q';
       config.datasource = datasourceNpm.id;
-      nock('https://registry.npmjs.org')
-        .get('/q')
-        .reply(200, qJson);
+      nock('https://registry.npmjs.org').get('/q').reply(200, qJson);
       const res = await lookup.lookupUpdates(config);
       expect(res.updates).toMatchSnapshot();
       expect(res.updates).toHaveLength(1);
@@ -142,9 +128,7 @@ describe('workers/repository/process/lookup', () => {
       config.rangeStrategy = 'pin';
       config.depName = 'q';
       config.datasource = datasourceNpm.id;
-      nock('https://registry.npmjs.org')
-        .get('/q')
-        .reply(200, qJson);
+      nock('https://registry.npmjs.org').get('/q').reply(200, qJson);
       expect((await lookup.lookupUpdates(config)).updates).toMatchSnapshot();
     });
     it('returns both updates if automerging minor', async () => {
@@ -153,9 +137,7 @@ describe('workers/repository/process/lookup', () => {
       config.rangeStrategy = 'pin';
       config.depName = 'q';
       config.datasource = datasourceNpm.id;
-      nock('https://registry.npmjs.org')
-        .get('/q')
-        .reply(200, qJson);
+      nock('https://registry.npmjs.org').get('/q').reply(200, qJson);
       expect((await lookup.lookupUpdates(config)).updates).toMatchSnapshot();
     });
     it('enforces allowedVersions', async () => {
@@ -163,9 +145,23 @@ describe('workers/repository/process/lookup', () => {
       config.allowedVersions = '<1';
       config.depName = 'q';
       config.datasource = datasourceNpm.id;
-      nock('https://registry.npmjs.org')
-        .get('/q')
-        .reply(200, qJson);
+      nock('https://registry.npmjs.org').get('/q').reply(200, qJson);
+      expect((await lookup.lookupUpdates(config)).updates).toHaveLength(1);
+    });
+    it('enforces allowedVersions with regex', async () => {
+      config.currentValue = '0.4.0';
+      config.allowedVersions = '/^0/';
+      config.depName = 'q';
+      config.datasource = datasourceNpm.id;
+      nock('https://registry.npmjs.org').get('/q').reply(200, qJson);
+      expect((await lookup.lookupUpdates(config)).updates).toHaveLength(1);
+    });
+    it('enforces allowedVersions with negativee regex', async () => {
+      config.currentValue = '0.4.0';
+      config.allowedVersions = '!/^1/';
+      config.depName = 'q';
+      config.datasource = datasourceNpm.id;
+      nock('https://registry.npmjs.org').get('/q').reply(200, qJson);
       expect((await lookup.lookupUpdates(config)).updates).toHaveLength(1);
     });
     it('falls back to semver syntax allowedVersions', async () => {
@@ -174,9 +170,16 @@ describe('workers/repository/process/lookup', () => {
       config.depName = 'q';
       config.versioning = dockerVersioning.id; // this doesn't make sense but works for this test
       config.datasource = datasourceNpm.id; // this doesn't make sense but works for this test
-      nock('https://registry.npmjs.org')
-        .get('/q')
-        .reply(200, qJson);
+      nock('https://registry.npmjs.org').get('/q').reply(200, qJson);
+      expect((await lookup.lookupUpdates(config)).updates).toHaveLength(1);
+    });
+    it('falls back to pep440 syntax allowedVersions', async () => {
+      config.currentValue = '0.4.0';
+      config.allowedVersions = '==0.9.4';
+      config.depName = 'q';
+      config.versioning = poetryVersioning.id; // this doesn't make sense but works for this test
+      config.datasource = datasourceNpm.id; // this doesn't make sense but works for this test
+      nock('https://registry.npmjs.org').get('/q').reply(200, qJson);
       expect((await lookup.lookupUpdates(config)).updates).toHaveLength(1);
     });
     it('skips invalid allowedVersions', async () => {
@@ -184,9 +187,7 @@ describe('workers/repository/process/lookup', () => {
       config.allowedVersions = 'less than 1';
       config.depName = 'q';
       config.datasource = datasourceNpm.id;
-      nock('https://registry.npmjs.org')
-        .get('/q')
-        .reply(200, qJson);
+      nock('https://registry.npmjs.org').get('/q').reply(200, qJson);
       await expect(lookup.lookupUpdates(config)).rejects.toThrow(
         Error(CONFIG_VALIDATION)
       );
@@ -196,9 +197,7 @@ describe('workers/repository/process/lookup', () => {
       config.rangeStrategy = 'pin';
       config.depName = 'q';
       config.datasource = datasourceNpm.id;
-      nock('https://registry.npmjs.org')
-        .get('/q')
-        .reply(200, qJson);
+      nock('https://registry.npmjs.org').get('/q').reply(200, qJson);
       const res = await lookup.lookupUpdates(config);
       expect(res.updates).toMatchSnapshot();
       expect(res.updates).toHaveLength(2);
@@ -213,9 +212,7 @@ describe('workers/repository/process/lookup', () => {
       config.rangeStrategy = 'pin';
       config.depName = 'q';
       config.datasource = datasourceNpm.id;
-      nock('https://registry.npmjs.org')
-        .get('/q')
-        .reply(200, qJson);
+      nock('https://registry.npmjs.org').get('/q').reply(200, qJson);
       const res = await lookup.lookupUpdates(config);
       expect(res.updates).toMatchSnapshot();
       expect(res.updates[0].updateType).toEqual('patch');
@@ -231,9 +228,7 @@ describe('workers/repository/process/lookup', () => {
       config.rangeStrategy = 'pin';
       config.depName = 'q';
       config.datasource = datasourceNpm.id;
-      nock('https://registry.npmjs.org')
-        .get('/q')
-        .reply(200, qJson);
+      nock('https://registry.npmjs.org').get('/q').reply(200, qJson);
       const res = await lookup.lookupUpdates(config);
       expect(res.updates).toMatchSnapshot();
       expect(res.updates[0].updateType).toEqual('minor');
@@ -244,9 +239,7 @@ describe('workers/repository/process/lookup', () => {
       config.rangeStrategy = 'pin';
       config.depName = 'q';
       config.datasource = datasourceNpm.id;
-      nock('https://registry.npmjs.org')
-        .get('/q')
-        .reply(200, qJson);
+      nock('https://registry.npmjs.org').get('/q').reply(200, qJson);
       expect((await lookup.lookupUpdates(config)).updates).toMatchSnapshot();
     });
     it('returns patch minor and major', async () => {
@@ -255,9 +248,7 @@ describe('workers/repository/process/lookup', () => {
       config.rangeStrategy = 'pin';
       config.depName = 'q';
       config.datasource = datasourceNpm.id;
-      nock('https://registry.npmjs.org')
-        .get('/q')
-        .reply(200, qJson);
+      nock('https://registry.npmjs.org').get('/q').reply(200, qJson);
       const res = await lookup.lookupUpdates(config);
       expect(res.updates).toHaveLength(3);
       expect(res.updates).toMatchSnapshot();
@@ -268,9 +259,7 @@ describe('workers/repository/process/lookup', () => {
       config.rangeStrategy = 'pin';
       config.depName = 'q';
       config.datasource = datasourceNpm.id;
-      nock('https://registry.npmjs.org')
-        .get('/q')
-        .reply(200, qJson);
+      nock('https://registry.npmjs.org').get('/q').reply(200, qJson);
       expect((await lookup.lookupUpdates(config)).updates).toMatchSnapshot();
     });
     it('disables major release separation (minor)', async () => {
@@ -279,9 +268,7 @@ describe('workers/repository/process/lookup', () => {
       config.rangeStrategy = 'pin';
       config.depName = 'q';
       config.datasource = datasourceNpm.id;
-      nock('https://registry.npmjs.org')
-        .get('/q')
-        .reply(200, qJson);
+      nock('https://registry.npmjs.org').get('/q').reply(200, qJson);
       expect((await lookup.lookupUpdates(config)).updates).toMatchSnapshot();
     });
     it('uses minimum version for vulnerabilityAlerts', async () => {
@@ -289,9 +276,7 @@ describe('workers/repository/process/lookup', () => {
       config.vulnerabilityAlert = true;
       config.depName = 'q';
       config.datasource = datasourceNpm.id;
-      nock('https://registry.npmjs.org')
-        .get('/q')
-        .reply(200, qJson);
+      nock('https://registry.npmjs.org').get('/q').reply(200, qJson);
       const res = (await lookup.lookupUpdates(config)).updates;
       expect(res).toMatchSnapshot();
       expect(res).toHaveLength(1);
@@ -301,9 +286,7 @@ describe('workers/repository/process/lookup', () => {
       config.rangeStrategy = 'pin';
       config.depName = 'q';
       config.datasource = datasourceNpm.id;
-      nock('https://registry.npmjs.org')
-        .get('/q')
-        .reply(200, qJson);
+      nock('https://registry.npmjs.org').get('/q').reply(200, qJson);
       expect((await lookup.lookupUpdates(config)).updates).toMatchSnapshot();
     });
     it('ignores pinning for ranges when other upgrade exists', async () => {
@@ -311,9 +294,7 @@ describe('workers/repository/process/lookup', () => {
       config.rangeStrategy = 'pin';
       config.depName = 'q';
       config.datasource = datasourceNpm.id;
-      nock('https://registry.npmjs.org')
-        .get('/q')
-        .reply(200, qJson);
+      nock('https://registry.npmjs.org').get('/q').reply(200, qJson);
       expect((await lookup.lookupUpdates(config)).updates).toMatchSnapshot();
     });
     it('upgrades minor ranged versions', async () => {
@@ -321,9 +302,7 @@ describe('workers/repository/process/lookup', () => {
       config.rangeStrategy = 'pin';
       config.depName = 'q';
       config.datasource = datasourceNpm.id;
-      nock('https://registry.npmjs.org')
-        .get('/q')
-        .reply(200, qJson);
+      nock('https://registry.npmjs.org').get('/q').reply(200, qJson);
       expect((await lookup.lookupUpdates(config)).updates).toMatchSnapshot();
     });
     it('widens minor ranged versions if configured', async () => {
@@ -331,9 +310,7 @@ describe('workers/repository/process/lookup', () => {
       config.rangeStrategy = 'widen';
       config.depName = 'q';
       config.datasource = datasourceNpm.id;
-      nock('https://registry.npmjs.org')
-        .get('/q')
-        .reply(200, qJson);
+      nock('https://registry.npmjs.org').get('/q').reply(200, qJson);
       expect((await lookup.lookupUpdates(config)).updates).toMatchSnapshot();
     });
     it('replaces minor complex ranged versions if configured', async () => {
@@ -341,9 +318,7 @@ describe('workers/repository/process/lookup', () => {
       config.rangeStrategy = 'replace';
       config.depName = 'q';
       config.datasource = datasourceNpm.id;
-      nock('https://registry.npmjs.org')
-        .get('/q')
-        .reply(200, qJson);
+      nock('https://registry.npmjs.org').get('/q').reply(200, qJson);
       expect((await lookup.lookupUpdates(config)).updates).toMatchSnapshot();
     });
     it('widens major ranged versions if configured', async () => {
@@ -371,9 +346,7 @@ describe('workers/repository/process/lookup', () => {
       config.rangeStrategy = 'pin';
       config.depName = 'q';
       config.datasource = datasourceNpm.id;
-      nock('https://registry.npmjs.org')
-        .get('/q')
-        .reply(200, qJson);
+      nock('https://registry.npmjs.org').get('/q').reply(200, qJson);
       expect((await lookup.lookupUpdates(config)).updates).toMatchSnapshot();
     });
     it('uses the locked version for pinning', async () => {
@@ -382,9 +355,7 @@ describe('workers/repository/process/lookup', () => {
       config.rangeStrategy = 'pin';
       config.depName = 'q';
       config.datasource = datasourceNpm.id;
-      nock('https://registry.npmjs.org')
-        .get('/q')
-        .reply(200, qJson);
+      nock('https://registry.npmjs.org').get('/q').reply(200, qJson);
       expect((await lookup.lookupUpdates(config)).updates).toMatchSnapshot();
     });
     it('ignores minor ranged versions when not pinning', async () => {
@@ -392,9 +363,7 @@ describe('workers/repository/process/lookup', () => {
       config.currentValue = '^1.0.0';
       config.depName = 'q';
       config.datasource = datasourceNpm.id;
-      nock('https://registry.npmjs.org')
-        .get('/q')
-        .reply(200, qJson);
+      nock('https://registry.npmjs.org').get('/q').reply(200, qJson);
       expect((await lookup.lookupUpdates(config)).updates).toHaveLength(0);
     });
     it('upgrades tilde ranges', async () => {
@@ -402,9 +371,7 @@ describe('workers/repository/process/lookup', () => {
       config.currentValue = '~1.3.0';
       config.depName = 'q';
       config.datasource = datasourceNpm.id;
-      nock('https://registry.npmjs.org')
-        .get('/q')
-        .reply(200, qJson);
+      nock('https://registry.npmjs.org').get('/q').reply(200, qJson);
       expect((await lookup.lookupUpdates(config)).updates).toMatchSnapshot();
     });
     it('upgrades .x minor ranges', async () => {
@@ -412,9 +379,7 @@ describe('workers/repository/process/lookup', () => {
       config.rangeStrategy = 'pin';
       config.depName = 'q';
       config.datasource = datasourceNpm.id;
-      nock('https://registry.npmjs.org')
-        .get('/q')
-        .reply(200, qJson);
+      nock('https://registry.npmjs.org').get('/q').reply(200, qJson);
       expect((await lookup.lookupUpdates(config)).updates).toMatchSnapshot();
     });
     it('upgrades tilde ranges without pinning', async () => {
@@ -422,9 +387,7 @@ describe('workers/repository/process/lookup', () => {
       config.currentValue = '~1.3.0';
       config.depName = 'q';
       config.datasource = datasourceNpm.id;
-      nock('https://registry.npmjs.org')
-        .get('/q')
-        .reply(200, qJson);
+      nock('https://registry.npmjs.org').get('/q').reply(200, qJson);
       expect((await lookup.lookupUpdates(config)).updates).toMatchSnapshot();
     });
     it('upgrades .x major ranges without pinning', async () => {
@@ -432,9 +395,7 @@ describe('workers/repository/process/lookup', () => {
       config.currentValue = '0.x';
       config.depName = 'q';
       config.datasource = datasourceNpm.id;
-      nock('https://registry.npmjs.org')
-        .get('/q')
-        .reply(200, qJson);
+      nock('https://registry.npmjs.org').get('/q').reply(200, qJson);
       expect((await lookup.lookupUpdates(config)).updates).toMatchSnapshot();
     });
     it('upgrades .x minor ranges without pinning', async () => {
@@ -442,9 +403,7 @@ describe('workers/repository/process/lookup', () => {
       config.currentValue = '1.3.x';
       config.depName = 'q';
       config.datasource = datasourceNpm.id;
-      nock('https://registry.npmjs.org')
-        .get('/q')
-        .reply(200, qJson);
+      nock('https://registry.npmjs.org').get('/q').reply(200, qJson);
       expect((await lookup.lookupUpdates(config)).updates).toMatchSnapshot();
     });
     it('upgrades .x complex minor ranges without pinning', async () => {
@@ -452,9 +411,7 @@ describe('workers/repository/process/lookup', () => {
       config.currentValue = '1.2.x - 1.3.x';
       config.depName = 'q';
       config.datasource = datasourceNpm.id;
-      nock('https://registry.npmjs.org')
-        .get('/q')
-        .reply(200, qJson);
+      nock('https://registry.npmjs.org').get('/q').reply(200, qJson);
       expect((await lookup.lookupUpdates(config)).updates).toMatchSnapshot();
     });
     it('upgrades shorthand major ranges without pinning', async () => {
@@ -462,9 +419,7 @@ describe('workers/repository/process/lookup', () => {
       config.currentValue = '0';
       config.depName = 'q';
       config.datasource = datasourceNpm.id;
-      nock('https://registry.npmjs.org')
-        .get('/q')
-        .reply(200, qJson);
+      nock('https://registry.npmjs.org').get('/q').reply(200, qJson);
       expect((await lookup.lookupUpdates(config)).updates).toMatchSnapshot();
     });
     it('upgrades shorthand minor ranges without pinning', async () => {
@@ -472,9 +427,7 @@ describe('workers/repository/process/lookup', () => {
       config.currentValue = '1.3';
       config.depName = 'q';
       config.datasource = datasourceNpm.id;
-      nock('https://registry.npmjs.org')
-        .get('/q')
-        .reply(200, qJson);
+      nock('https://registry.npmjs.org').get('/q').reply(200, qJson);
       expect((await lookup.lookupUpdates(config)).updates).toMatchSnapshot();
     });
     it('upgrades multiple tilde ranges without pinning', async () => {
@@ -482,9 +435,7 @@ describe('workers/repository/process/lookup', () => {
       config.currentValue = '~0.7.0';
       config.depName = 'q';
       config.datasource = datasourceNpm.id;
-      nock('https://registry.npmjs.org')
-        .get('/q')
-        .reply(200, qJson);
+      nock('https://registry.npmjs.org').get('/q').reply(200, qJson);
       expect((await lookup.lookupUpdates(config)).updates).toMatchSnapshot();
     });
     it('upgrades multiple caret ranges without pinning', async () => {
@@ -492,9 +443,7 @@ describe('workers/repository/process/lookup', () => {
       config.currentValue = '^0.7.0';
       config.depName = 'q';
       config.datasource = datasourceNpm.id;
-      nock('https://registry.npmjs.org')
-        .get('/q')
-        .reply(200, qJson);
+      nock('https://registry.npmjs.org').get('/q').reply(200, qJson);
       expect((await lookup.lookupUpdates(config)).updates).toMatchSnapshot();
     });
     it('supports complex ranges', async () => {
@@ -502,9 +451,7 @@ describe('workers/repository/process/lookup', () => {
       config.currentValue = '^0.7.0 || ^0.8.0';
       config.depName = 'q';
       config.datasource = datasourceNpm.id;
-      nock('https://registry.npmjs.org')
-        .get('/q')
-        .reply(200, qJson);
+      nock('https://registry.npmjs.org').get('/q').reply(200, qJson);
       const res = await lookup.lookupUpdates(config);
       expect(res.updates).toHaveLength(2);
       expect(res.updates[0]).toMatchSnapshot();
@@ -554,9 +501,7 @@ describe('workers/repository/process/lookup', () => {
       config.currentValue = '~1.2.0 || ~1.3.0';
       config.depName = 'q';
       config.datasource = datasourceNpm.id;
-      nock('https://registry.npmjs.org')
-        .get('/q')
-        .reply(200, qJson);
+      nock('https://registry.npmjs.org').get('/q').reply(200, qJson);
       expect((await lookup.lookupUpdates(config)).updates).toMatchSnapshot();
     });
     it('returns nothing for greater than ranges', async () => {
@@ -564,9 +509,7 @@ describe('workers/repository/process/lookup', () => {
       config.currentValue = '>= 0.7.0';
       config.depName = 'q';
       config.datasource = datasourceNpm.id;
-      nock('https://registry.npmjs.org')
-        .get('/q')
-        .reply(200, qJson);
+      nock('https://registry.npmjs.org').get('/q').reply(200, qJson);
       expect((await lookup.lookupUpdates(config)).updates).toHaveLength(0);
     });
     it('upgrades less than equal ranges without pinning', async () => {
@@ -574,9 +517,7 @@ describe('workers/repository/process/lookup', () => {
       config.currentValue = '<= 0.7.2';
       config.depName = 'q';
       config.datasource = datasourceNpm.id;
-      nock('https://registry.npmjs.org')
-        .get('/q')
-        .reply(200, qJson);
+      nock('https://registry.npmjs.org').get('/q').reply(200, qJson);
       expect((await lookup.lookupUpdates(config)).updates).toMatchSnapshot();
     });
     it('upgrades less than ranges without pinning', async () => {
@@ -584,9 +525,7 @@ describe('workers/repository/process/lookup', () => {
       config.currentValue = '< 0.7.2';
       config.depName = 'q';
       config.datasource = datasourceNpm.id;
-      nock('https://registry.npmjs.org')
-        .get('/q')
-        .reply(200, qJson);
+      nock('https://registry.npmjs.org').get('/q').reply(200, qJson);
       expect((await lookup.lookupUpdates(config)).updates).toMatchSnapshot();
     });
     it('upgrades less than major ranges', async () => {
@@ -594,9 +533,7 @@ describe('workers/repository/process/lookup', () => {
       config.currentValue = '< 1';
       config.depName = 'q';
       config.datasource = datasourceNpm.id;
-      nock('https://registry.npmjs.org')
-        .get('/q')
-        .reply(200, qJson);
+      nock('https://registry.npmjs.org').get('/q').reply(200, qJson);
       expect((await lookup.lookupUpdates(config)).updates).toMatchSnapshot();
     });
     it('upgrades less than equal minor ranges', async () => {
@@ -604,9 +541,7 @@ describe('workers/repository/process/lookup', () => {
       config.currentValue = '<= 1.3';
       config.depName = 'q';
       config.datasource = datasourceNpm.id;
-      nock('https://registry.npmjs.org')
-        .get('/q')
-        .reply(200, qJson);
+      nock('https://registry.npmjs.org').get('/q').reply(200, qJson);
       expect((await lookup.lookupUpdates(config)).updates).toMatchSnapshot();
     });
     it('upgrades equal minor ranges', async () => {
@@ -614,9 +549,7 @@ describe('workers/repository/process/lookup', () => {
       config.currentValue = '=1.3.1';
       config.depName = 'q';
       config.datasource = datasourceNpm.id;
-      nock('https://registry.npmjs.org')
-        .get('/q')
-        .reply(200, qJson);
+      nock('https://registry.npmjs.org').get('/q').reply(200, qJson);
       expect((await lookup.lookupUpdates(config)).updates).toMatchSnapshot();
     });
     it('upgrades less than equal major ranges', async () => {
@@ -625,9 +558,7 @@ describe('workers/repository/process/lookup', () => {
       config.currentValue = '<= 1';
       config.depName = 'q';
       config.datasource = datasourceNpm.id;
-      nock('https://registry.npmjs.org')
-        .get('/q')
-        .reply(200, qJson);
+      nock('https://registry.npmjs.org').get('/q').reply(200, qJson);
       expect((await lookup.lookupUpdates(config)).updates).toMatchSnapshot();
     });
     it('upgrades major less than equal ranges', async () => {
@@ -635,9 +566,7 @@ describe('workers/repository/process/lookup', () => {
       config.currentValue = '<= 1.0.0';
       config.depName = 'q';
       config.datasource = datasourceNpm.id;
-      nock('https://registry.npmjs.org')
-        .get('/q')
-        .reply(200, qJson);
+      nock('https://registry.npmjs.org').get('/q').reply(200, qJson);
       const res = await lookup.lookupUpdates(config);
       expect(res.updates).toMatchSnapshot();
       expect(res.updates[0].newValue).toEqual('<= 1.4.1');
@@ -647,9 +576,7 @@ describe('workers/repository/process/lookup', () => {
       config.currentValue = '< 1.0.0';
       config.depName = 'q';
       config.datasource = datasourceNpm.id;
-      nock('https://registry.npmjs.org')
-        .get('/q')
-        .reply(200, qJson);
+      nock('https://registry.npmjs.org').get('/q').reply(200, qJson);
       const res = await lookup.lookupUpdates(config);
       expect(res.updates).toMatchSnapshot();
       expect(res.updates[0].newValue).toEqual('< 2.0.0');
@@ -659,9 +586,7 @@ describe('workers/repository/process/lookup', () => {
       config.currentValue = '>= 0.5.0 < 1.0.0';
       config.depName = 'q';
       config.datasource = datasourceNpm.id;
-      nock('https://registry.npmjs.org')
-        .get('/q')
-        .reply(200, qJson);
+      nock('https://registry.npmjs.org').get('/q').reply(200, qJson);
       const res = await lookup.lookupUpdates(config);
       expect(res.updates).toMatchSnapshot();
       expect(res.updates[0].newValue).toEqual('>= 0.5.0 < 2.0.0');
@@ -671,9 +596,7 @@ describe('workers/repository/process/lookup', () => {
       config.currentValue = '>= 0.5.0 <0.8';
       config.depName = 'q';
       config.datasource = datasourceNpm.id;
-      nock('https://registry.npmjs.org')
-        .get('/q')
-        .reply(200, qJson);
+      nock('https://registry.npmjs.org').get('/q').reply(200, qJson);
       const res = await lookup.lookupUpdates(config);
       expect(res.updates).toMatchSnapshot();
       expect(res.updates[0].newValue).toEqual('>= 0.5.0 <0.10');
@@ -684,9 +607,7 @@ describe('workers/repository/process/lookup', () => {
       config.currentValue = '>= 0.5.0 <= 0.8.0';
       config.depName = 'q';
       config.datasource = datasourceNpm.id;
-      nock('https://registry.npmjs.org')
-        .get('/q')
-        .reply(200, qJson);
+      nock('https://registry.npmjs.org').get('/q').reply(200, qJson);
       const res = await lookup.lookupUpdates(config);
       expect(res.updates).toMatchSnapshot();
       expect(res.updates[0].newValue).toEqual('>= 0.5.0 <= 0.9.7');
@@ -697,9 +618,7 @@ describe('workers/repository/process/lookup', () => {
       config.currentValue = '<= 0.8.0 >= 0.5.0';
       config.depName = 'q';
       config.datasource = datasourceNpm.id;
-      nock('https://registry.npmjs.org')
-        .get('/q')
-        .reply(200, qJson);
+      nock('https://registry.npmjs.org').get('/q').reply(200, qJson);
       const res = await lookup.lookupUpdates(config);
       expect(res.updates).toMatchSnapshot();
     });
@@ -708,18 +627,14 @@ describe('workers/repository/process/lookup', () => {
       config.currentValue = '1.4.1';
       config.depName = 'q';
       config.datasource = datasourceNpm.id;
-      nock('https://registry.npmjs.org')
-        .get('/q')
-        .reply(200, qJson);
+      nock('https://registry.npmjs.org').get('/q').reply(200, qJson);
       expect((await lookup.lookupUpdates(config)).updates).toMatchSnapshot();
     });
     it('should ignore unstable versions if the current version is stable', async () => {
       config.currentValue = '2.5.16';
       config.depName = 'vue';
       config.datasource = datasourceNpm.id;
-      nock('https://registry.npmjs.org')
-        .get('/vue')
-        .reply(200, vueJson);
+      nock('https://registry.npmjs.org').get('/vue').reply(200, vueJson);
       expect((await lookup.lookupUpdates(config)).updates).toHaveLength(0);
     });
     it('should allow unstable versions if the ignoreUnstable=false', async () => {
@@ -727,9 +642,7 @@ describe('workers/repository/process/lookup', () => {
       config.ignoreUnstable = false;
       config.depName = 'vue';
       config.datasource = datasourceNpm.id;
-      nock('https://registry.npmjs.org')
-        .get('/vue')
-        .reply(200, vueJson);
+      nock('https://registry.npmjs.org').get('/vue').reply(200, vueJson);
       const res = await lookup.lookupUpdates(config);
       expect(res.updates).toMatchSnapshot();
       expect(res.updates).toHaveLength(1);
@@ -884,9 +797,7 @@ describe('workers/repository/process/lookup', () => {
       config.rangeStrategy = 'replace';
       config.depName = 'next';
       config.datasource = datasourceNpm.id;
-      nock('https://registry.npmjs.org')
-        .get('/next')
-        .reply(200, nextJson);
+      nock('https://registry.npmjs.org').get('/next').reply(200, nextJson);
       const res = await lookup.lookupUpdates(config);
       expect(res.updates).toHaveLength(0);
     });
@@ -895,9 +806,7 @@ describe('workers/repository/process/lookup', () => {
       config.currentValue = '^1.0.0';
       config.depName = 'q';
       config.datasource = datasourceNpm.id;
-      nock('https://registry.npmjs.org')
-        .get('/q')
-        .reply(200, qJson);
+      nock('https://registry.npmjs.org').get('/q').reply(200, qJson);
       expect((await lookup.lookupUpdates(config)).updates).toMatchSnapshot();
     });
     it('supports in-range tilde updates', async () => {
@@ -905,9 +814,7 @@ describe('workers/repository/process/lookup', () => {
       config.currentValue = '~1.0.0';
       config.depName = 'q';
       config.datasource = datasourceNpm.id;
-      nock('https://registry.npmjs.org')
-        .get('/q')
-        .reply(200, qJson);
+      nock('https://registry.npmjs.org').get('/q').reply(200, qJson);
       expect((await lookup.lookupUpdates(config)).updates).toMatchSnapshot();
     });
     it('supports in-range tilde patch updates', async () => {
@@ -916,9 +823,7 @@ describe('workers/repository/process/lookup', () => {
       config.depName = 'q';
       config.separateMinorPatch = true;
       config.datasource = datasourceNpm.id;
-      nock('https://registry.npmjs.org')
-        .get('/q')
-        .reply(200, qJson);
+      nock('https://registry.npmjs.org').get('/q').reply(200, qJson);
       expect((await lookup.lookupUpdates(config)).updates).toMatchSnapshot();
     });
     it('supports in-range gte updates', async () => {
@@ -926,9 +831,7 @@ describe('workers/repository/process/lookup', () => {
       config.currentValue = '>=1.0.0';
       config.depName = 'q';
       config.datasource = datasourceNpm.id;
-      nock('https://registry.npmjs.org')
-        .get('/q')
-        .reply(200, qJson);
+      nock('https://registry.npmjs.org').get('/q').reply(200, qJson);
       expect((await lookup.lookupUpdates(config)).updates).toMatchSnapshot();
     });
     it('supports majorgte updates', async () => {
@@ -936,9 +839,7 @@ describe('workers/repository/process/lookup', () => {
       config.currentValue = '>=0.9.0';
       config.depName = 'q';
       config.datasource = datasourceNpm.id;
-      nock('https://registry.npmjs.org')
-        .get('/q')
-        .reply(200, qJson);
+      nock('https://registry.npmjs.org').get('/q').reply(200, qJson);
       expect((await lookup.lookupUpdates(config)).updates).toMatchSnapshot();
     });
     it('rejects in-range unsupported operator', async () => {
@@ -946,9 +847,7 @@ describe('workers/repository/process/lookup', () => {
       config.currentValue = '>1.0.0';
       config.depName = 'q';
       config.datasource = datasourceNpm.id;
-      nock('https://registry.npmjs.org')
-        .get('/q')
-        .reply(200, qJson);
+      nock('https://registry.npmjs.org').get('/q').reply(200, qJson);
       expect((await lookup.lookupUpdates(config)).updates).toMatchSnapshot();
     });
     it('rejects non-fully specified in-range updates', async () => {
@@ -956,9 +855,7 @@ describe('workers/repository/process/lookup', () => {
       config.currentValue = '1.x';
       config.depName = 'q';
       config.datasource = datasourceNpm.id;
-      nock('https://registry.npmjs.org')
-        .get('/q')
-        .reply(200, qJson);
+      nock('https://registry.npmjs.org').get('/q').reply(200, qJson);
       expect((await lookup.lookupUpdates(config)).updates).toMatchSnapshot();
     });
     it('rejects complex range in-range updates', async () => {
@@ -966,9 +863,7 @@ describe('workers/repository/process/lookup', () => {
       config.currentValue = '^0.9.0 || ^1.0.0';
       config.depName = 'q';
       config.datasource = datasourceNpm.id;
-      nock('https://registry.npmjs.org')
-        .get('/q')
-        .reply(200, qJson);
+      nock('https://registry.npmjs.org').get('/q').reply(200, qJson);
       expect((await lookup.lookupUpdates(config)).updates).toMatchSnapshot();
     });
     it('replaces non-range in-range updates', async () => {
@@ -977,9 +872,7 @@ describe('workers/repository/process/lookup', () => {
       config.packageFile = 'package.json';
       config.rangeStrategy = 'bump';
       config.currentValue = '1.0.0';
-      nock('https://registry.npmjs.org')
-        .get('/q')
-        .reply(200, qJson);
+      nock('https://registry.npmjs.org').get('/q').reply(200, qJson);
       expect((await lookup.lookupUpdates(config)).updates).toMatchSnapshot();
     });
     it('handles github 404', async () => {
@@ -987,9 +880,7 @@ describe('workers/repository/process/lookup', () => {
       config.datasource = datasourceGithubTags.id;
       config.packageFile = 'package.json';
       config.currentValue = '1.0.0';
-      nock('https://pypi.org')
-        .get('/pypi/foo/json')
-        .reply(404);
+      nock('https://pypi.org').get('/pypi/foo/json').reply(404);
       expect((await lookup.lookupUpdates(config)).updates).toMatchSnapshot();
     });
     it('handles pypi 404', async () => {
@@ -1008,9 +899,7 @@ describe('workers/repository/process/lookup', () => {
       config.packageFile = 'composer.json';
       config.currentValue = '1.0.0';
       config.registryUrls = ['https://packagist.org'];
-      nock('https://packagist.org')
-        .get('/packages/foo/bar.json')
-        .reply(404);
+      nock('https://packagist.org').get('/packages/foo/bar.json').reply(404);
       expect((await lookup.lookupUpdates(config)).updates).toMatchSnapshot();
     });
     it('handles unknown datasource', async () => {
@@ -1031,9 +920,7 @@ describe('workers/repository/process/lookup', () => {
       config.depName = 'q';
       // TODO: we are using npm as source to test pep440
       config.datasource = datasourceNpm.id;
-      nock('https://registry.npmjs.org')
-        .get('/q')
-        .reply(200, qJson);
+      nock('https://registry.npmjs.org').get('/q').reply(200, qJson);
       const res = await lookup.lookupUpdates(config);
       expect(res.updates).toMatchSnapshot();
     });
@@ -1041,9 +928,7 @@ describe('workers/repository/process/lookup', () => {
       config.currentValue = '1.3.0';
       config.depName = 'q';
       config.datasource = datasourceNpm.id;
-      nock('https://registry.npmjs.org')
-        .get('/q')
-        .reply(200, qJson);
+      nock('https://registry.npmjs.org').get('/q').reply(200, qJson);
       const res = await lookup.lookupUpdates(config);
       expect(res).toMatchSnapshot();
       expect(res.sourceUrl).toBeDefined();
@@ -1055,9 +940,7 @@ describe('workers/repository/process/lookup', () => {
       const returnJson = JSON.parse(JSON.stringify(qJson));
       returnJson.name = 'q2';
       returnJson.versions['1.4.1'].deprecated = 'true';
-      nock('https://registry.npmjs.org')
-        .get('/q2')
-        .reply(200, returnJson);
+      nock('https://registry.npmjs.org').get('/q2').reply(200, returnJson);
       const res = await lookup.lookupUpdates(config);
       expect(res).toMatchSnapshot();
       expect(res.updates[0].toVersion).toEqual('1.4.0');
@@ -1073,9 +956,7 @@ describe('workers/repository/process/lookup', () => {
         repository: { url: null, directory: 'test' },
       };
 
-      nock('https://registry.npmjs.org')
-        .get('/q3')
-        .reply(200, returnJson);
+      nock('https://registry.npmjs.org').get('/q3').reply(200, returnJson);
       const res = await lookup.lookupUpdates(config);
       expect(res).toMatchSnapshot();
       expect(res.updates[0].toVersion).toEqual('1.4.1');
@@ -1113,7 +994,7 @@ describe('workers/repository/process/lookup', () => {
       const res = await lookup.lookupUpdates(config);
       expect(res).toMatchSnapshot();
     });
-    ['8.1.0', '8.1', '8'].forEach(currentValue => {
+    ['8.1.0', '8.1', '8'].forEach((currentValue) => {
       it('skips uncompatible versions for ' + currentValue, async () => {
         config.currentValue = currentValue;
         config.depName = 'node';

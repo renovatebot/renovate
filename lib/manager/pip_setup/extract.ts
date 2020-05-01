@@ -44,6 +44,9 @@ interface PythonSetup {
   extras_require: string[];
   install_requires: string[];
 }
+
+let extractPy;
+
 export async function extractSetupFile(
   _content: string,
   packageFile: string,
@@ -56,6 +59,7 @@ export async function extractSetupFile(
   if (config.binarySource === BinarySource.Docker) {
     logger.debug('Running python via docker');
     await exec(`docker pull renovate/pip`);
+    extractPy = extractPy || (await resolveFile('data/extract.py'));
     cmd = 'docker';
     args.unshift(
       'run',
@@ -65,7 +69,7 @@ export async function extractSetupFile(
       '-v',
       `${cwd}:${cwd}`,
       '-v',
-      `${__dirname}:${__dirname}`,
+      `${extractPy}:${extractPy}`,
       // cwd
       '-w',
       cwd,
@@ -120,14 +124,14 @@ export async function extractPackageFile(
   const regex = new RegExp(`^${dependencyPattern}`);
   const lines = content.split('\n');
   const deps = requires
-    .map(req => {
-      const lineNumber = lines.findIndex(l => l.includes(req));
+    .map((req) => {
+      const lineNumber = lines.findIndex((l) => l.includes(req));
       if (lineNumber === -1) {
         return null;
       }
       const rawline = lines[lineNumber];
       let dep: PackageDependency = {};
-      const [, comment] = rawline.split('#').map(part => part.trim());
+      const [, comment] = rawline.split('#').map((part) => part.trim());
       if (isSkipComment(comment)) {
         dep.skipReason = SkipReason.Ignored;
       }

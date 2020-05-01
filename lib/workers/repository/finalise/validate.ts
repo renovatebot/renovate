@@ -10,13 +10,13 @@ import { BranchStatus } from '../../../types';
 
 async function getRenovatePrs(branchPrefix: string): Promise<Pr[]> {
   return (await platform.getPrList())
-    .filter(pr => pr.state === PR_STATE_OPEN)
-    .filter(pr => pr.branchName && !pr.branchName.startsWith(branchPrefix))
-    .filter(pr => new RegExp('renovate', 'i').test(pr.title));
+    .filter((pr) => pr.state === PR_STATE_OPEN)
+    .filter((pr) => pr.branchName && !pr.branchName.startsWith(branchPrefix))
+    .filter((pr) => new RegExp('renovate', 'i').test(pr.title));
 }
 
 async function getRenovateFiles(prNo: number): Promise<string[]> {
-  return (await platform.getPrFiles(prNo)).filter(file =>
+  return (await platform.getPrFiles(prNo)).filter((file) =>
     configFileNames.includes(file)
   );
 }
@@ -73,12 +73,13 @@ export async function validatePrs(config: RenovateConfig): Promise<void> {
               ? /* istanbul ignore next */ parsed.renovate ||
                 parsed['renovate-config']
               : parsed;
+          // istanbul ignore else
           if (toValidate) {
             logger.debug({ config: toValidate }, 'Validating config');
             const { errors } = await migrateAndValidate(config, toValidate);
             if (errors && errors.length) {
               validations = validations.concat(
-                errors.map(error => ({
+                errors.map((error) => ({
                   file,
                   message: error.message,
                 }))
@@ -93,7 +94,7 @@ export async function validatePrs(config: RenovateConfig): Promise<void> {
       const topic = `Renovate Configuration Errors`;
       if (validations.length) {
         const content = validations
-          .map(v => `\`${v.file}\`: ${v.message}`)
+          .map((v) => `\`${v.file}\`: ${v.message}`)
           .join('\n\n');
         await platform.ensureComment({
           number: pr.number,
@@ -105,18 +106,28 @@ export async function validatePrs(config: RenovateConfig): Promise<void> {
       } else {
         description = `Renovate config is valid`;
         status = BranchStatus.green;
-        await platform.ensureCommentRemoval(pr.number, topic);
+        if (config.dryRun) {
+          logger.info(
+            `DRY-RUN: Would ensure validation comment removal in PR #${pr.number}`
+          );
+        } else {
+          await platform.ensureCommentRemoval(pr.number, topic);
+        }
       }
       // istanbul ignore else
       if (pr.sourceRepo === config.repository) {
         logger.debug({ status, description }, 'Setting PR validation status');
         const context = `renovate/validate`;
-        await platform.setBranchStatus({
-          branchName: pr.branchName,
-          context,
-          description,
-          state: status,
-        });
+        if (config.dryRun) {
+          logger.info(`DRY-RUN: Would set branch status in PR #${pr.number}`);
+        } else {
+          await platform.setBranchStatus({
+            branchName: pr.branchName,
+            context,
+            description,
+            state: status,
+          });
+        }
       } else {
         logger.debug('Skipping branch status for forked PR');
       }

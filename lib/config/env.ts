@@ -24,13 +24,13 @@ export function getConfig(env: NodeJS.ProcessEnv): RenovateConfig {
 
   const coersions = {
     boolean: (val: string): boolean => val === 'true',
-    array: (val: string): string[] => val.split(',').map(el => el.trim()),
+    array: (val: string): string[] => val.split(',').map((el) => el.trim()),
     string: (val: string): string => val.replace(/\\n/g, '\n'),
     object: (val: string): any => JSON.parse(val),
     integer: parseInt,
   };
 
-  options.forEach(option => {
+  options.forEach((option) => {
     if (option.env !== false) {
       const envName = getEnvName(option);
       if (env[envName]) {
@@ -86,7 +86,7 @@ export function getConfig(env: NodeJS.ProcessEnv): RenovateConfig {
     'VSTS_TOKEN',
   ];
   // eslint-disable-next-line no-param-reassign
-  unsupportedEnv.forEach(val => delete env[val]);
+  unsupportedEnv.forEach((val) => delete env[val]);
 
   return config;
 }

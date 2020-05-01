@@ -5,6 +5,7 @@ import * as docker from '.';
 import { getPkgReleases } from '..';
 import * as _hostRules from '../../util/host-rules';
 import { DATASOURCE_FAILURE } from '../../constants/error-messages';
+import { clearRepoCache } from '../../util/cache';
 
 const got: any = _got;
 const hostRules: any = _hostRules;
@@ -18,11 +19,18 @@ describe('api/docker', () => {
       const res = docker.getRegistryRepository('registry:5000/org/package', []);
       expect(res).toMatchSnapshot();
     });
+    it('supports registryUrls', () => {
+      const res = docker.getRegistryRepository(
+        'my.local.registry/prefix/image',
+        ['https://my.local.registry/prefix']
+      );
+      expect(res).toMatchSnapshot();
+    });
   });
   describe('getDigest', () => {
     beforeEach(() => {
       jest.resetAllMocks();
-      global.repoCache = {};
+      clearRepoCache();
       hostRules.find.mockReturnValue({
         username: 'some-username',
         password: 'some-password',
@@ -272,7 +280,7 @@ describe('api/docker', () => {
   describe('getReleases', () => {
     beforeEach(() => {
       jest.clearAllMocks();
-      global.repoCache = {};
+      clearRepoCache();
       return global.renovateCache.rmAll();
     });
     it('returns null if no token', async () => {

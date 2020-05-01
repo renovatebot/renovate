@@ -1,15 +1,15 @@
 import { api } from '../../platform/gitlab/gl-got-wrapper';
 import { logger } from '../../logger';
 import { Preset } from './common';
+import { ensureTrailingSlash } from '../../util/url';
 
 const { get: glGot } = api;
 
-const GitLabApiUrl = 'https://gitlab.com/api/v4/projects';
-
 async function getDefaultBranchName(
-  urlEncodedPkgName: string
+  urlEncodedPkgName: string,
+  endpoint: string
 ): Promise<string> {
-  const branchesUrl = `${GitLabApiUrl}/${urlEncodedPkgName}/repository/branches`;
+  const branchesUrl = `${endpoint}projects/${urlEncodedPkgName}/repository/branches`;
   type GlBranch = {
     default: boolean;
     name: string;
@@ -28,10 +28,13 @@ async function getDefaultBranchName(
   return defautlBranchName;
 }
 
-export async function getPreset(
+export async function getPresetFromEndpoint(
   pkgName: string,
-  presetName = 'default'
+  presetName: string,
+  endpoint = 'https://gitlab.com/api/v4/'
 ): Promise<Preset> {
+  // eslint-disable-next-line no-param-reassign
+  endpoint = ensureTrailingSlash(endpoint);
   if (presetName !== 'default') {
     // TODO: proper error contructor
     throw new Error(
@@ -42,9 +45,12 @@ export async function getPreset(
   let res: string;
   try {
     const urlEncodedPkgName = encodeURIComponent(pkgName);
-    const defautlBranchName = await getDefaultBranchName(urlEncodedPkgName);
+    const defautlBranchName = await getDefaultBranchName(
+      urlEncodedPkgName,
+      endpoint
+    );
 
-    const presetUrl = `${GitLabApiUrl}/${urlEncodedPkgName}/repository/files/renovate.json?ref=${defautlBranchName}`;
+    const presetUrl = `${endpoint}projects/${urlEncodedPkgName}/repository/files/renovate.json?ref=${defautlBranchName}`;
     res = Buffer.from(
       (await glGot(presetUrl)).body.content,
       'base64'
@@ -59,4 +65,11 @@ export async function getPreset(
     logger.debug('Failed to parse renovate.json');
     throw new Error('invalid preset JSON');
   }
+}
+
+export async function getPreset(
+  pkgName: string,
+  presetName = 'default'
+): Promise<Preset> {
+  return getPresetFromEndpoint(pkgName, presetName);
 }

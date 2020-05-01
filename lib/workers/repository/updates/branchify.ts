@@ -7,6 +7,7 @@ import { generateBranchConfig } from './generate';
 import { flattenUpdates } from './flatten';
 import { RenovateConfig, ValidationMessage } from '../../../config';
 import { BranchUpgradeConfig, BranchConfig } from '../../common';
+import { getChangeLogJSON } from '../../pr/changelog';
 
 /**
  * Clean git branch name
@@ -38,7 +39,7 @@ export async function branchifyUpgrades(
   const updates = await flattenUpdates(config, packageFiles);
   logger.debug(
     `${updates.length} flattened updates found: ${updates
-      .map(u => u.depName)
+      .map((u) => u.depName)
       .join(', ')}`
   );
   const errors: ValidationMessage[] = [];
@@ -46,6 +47,20 @@ export async function branchifyUpgrades(
   const branchUpgrades: Record<string, BranchUpgradeConfig[]> = {};
   const branches: BranchConfig[] = [];
   for (const u of updates) {
+    // extract parentDir and baseDir from packageFile
+    if (u.packageFile) {
+      const packagePath = u.packageFile.split('/');
+      if (packagePath.length > 0) {
+        packagePath.splice(-1, 1);
+      }
+      if (packagePath.length > 0) {
+        u.parentDir = packagePath[packagePath.length - 1];
+        u.baseDir = packagePath.join('/');
+      } else {
+        u.parentDir = '';
+        u.baseDir = '';
+      }
+    }
     const update: BranchUpgradeConfig = { ...u } as any;
     // Massage legacy vars just in case
     update.currentVersion = update.currentValue;
@@ -99,6 +114,40 @@ export async function branchifyUpgrades(
     addMeta({
       branch: branchName,
     });
+    for (const upgrade of branchUpgrades[branchName]) {
+      upgrade.logJSON = await getChangeLogJSON(upgrade);
+    }
+    const seenUpdates = {};
+    // Filter out duplicates
+    branchUpgrades[branchName] = branchUpgrades[branchName].filter(
+      (upgrade) => {
+        const {
+          manager,
+          packageFile,
+          depName,
+          currentValue,
+          newValue,
+        } = upgrade;
+        const upgradeKey = `${packageFile}:${depName}:${currentValue}`;
+        const previousNewValue = seenUpdates[upgradeKey];
+        if (previousNewValue && previousNewValue !== newValue) {
+          logger.info(
+            {
+              manager,
+              packageFile,
+              depName,
+              currentValue,
+              previousNewValue,
+              thisNewValue: newValue,
+            },
+            'Ignoring upgrade collision'
+          );
+          return false;
+        }
+        seenUpdates[upgradeKey] = newValue;
+        return true;
+      }
+    );
     const branch = generateBranchConfig(branchUpgrades[branchName]);
     branch.branchName = branchName;
     branches.push(branch);
@@ -106,7 +155,7 @@ export async function branchifyUpgrades(
   removeMeta(['branch']);
   logger.debug(`config.repoIsOnboarded=${config.repoIsOnboarded}`);
   const branchList = config.repoIsOnboarded
-    ? branches.map(upgrade => upgrade.branchName)
+    ? branches.map((upgrade) => upgrade.branchName)
     : config.branchList;
   // istanbul ignore next
   try {

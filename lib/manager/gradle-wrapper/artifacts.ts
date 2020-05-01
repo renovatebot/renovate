@@ -7,7 +7,6 @@ import { UpdateArtifact, UpdateArtifactsResult } from '../common';
 import { exec, ExecOptions } from '../../util/exec';
 import { readLocalFile } from '../../util/fs';
 import { platform } from '../../platform';
-import { VERSION_REGEX } from './search';
 import { gradleWrapperFileName, prepareGradleCommand } from '../gradle/index';
 
 async function addIfUpdated(
@@ -25,24 +24,41 @@ async function addIfUpdated(
   return null;
 }
 
+function getDistributionUrl(newPackageFileContent: string): string {
+  const distributionUrlLine = newPackageFileContent
+    .split('\n')
+    .find((line) => line.startsWith('distributionUrl='));
+  if (distributionUrlLine) {
+    return distributionUrlLine
+      .replace('distributionUrl=', '')
+      .replace('https\\:', 'https:');
+  }
+  return null;
+}
+
 export async function updateArtifacts({
   packageFileName,
-  updatedDeps,
   newPackageFileContent,
+  updatedDeps,
   config,
 }: UpdateArtifact): Promise<UpdateArtifactsResult[] | null> {
   try {
     const projectDir = config.localDir;
     logger.debug({ updatedDeps }, 'gradle-wrapper.updateArtifacts()');
-    const version = VERSION_REGEX.exec(newPackageFileContent).groups.version;
     const gradlew = gradleWrapperFileName(config);
     const gradlewPath = resolve(projectDir, `./${gradlew}`);
-    const cmd = await prepareGradleCommand(
+    let cmd = await prepareGradleCommand(
       gradlew,
       projectDir,
       await fs.stat(gradlewPath).catch(() => null),
-      `wrapper --gradle-version ${version}`
+      `wrapper`
     );
+    const distributionUrl = getDistributionUrl(newPackageFileContent);
+    if (distributionUrl) {
+      cmd += ` --gradle-distribution-url ${distributionUrl}`;
+    } else {
+      cmd += ` --gradle-version ${config.toVersion}`;
+    }
     logger.debug(`Updating gradle wrapper: "${cmd}"`);
     const execOptions: ExecOptions = {
       docker: {
@@ -65,11 +81,11 @@ export async function updateArtifacts({
           'gradle/wrapper/gradle-wrapper.jar',
           'gradlew',
           'gradlew.bat',
-        ].map(async fileProjectPath => addIfUpdated(status, fileProjectPath))
+        ].map(async (fileProjectPath) => addIfUpdated(status, fileProjectPath))
       )
-    ).filter(e => e != null);
+    ).filter((e) => e != null);
     logger.debug(
-      { files: updateArtifactsResult.map(r => r.file.name) },
+      { files: updateArtifactsResult.map((r) => r.file.name) },
       `Returning updated gradle-wrapper files`
     );
     return updateArtifactsResult;

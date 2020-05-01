@@ -129,7 +129,7 @@ describe('versioning/maven/compare', () => {
     '[,1.0]',
   ];
   it('filters out incorrect ranges', () => {
-    invalidRanges.forEach(rangeStr => {
+    invalidRanges.forEach((rangeStr) => {
       const range = parseRange(rangeStr);
       expect(range).toBeNull();
       expect(rangeToStr(range)).toBeNull();
@@ -225,7 +225,7 @@ describe('versioning/maven/compare', () => {
         },
       ],
     };
-    Object.keys(presetRanges).forEach(rangeStr => {
+    Object.keys(presetRanges).forEach((rangeStr) => {
       const presetValue = presetRanges[rangeStr];
       const fullRange = parseRange(rangeStr);
       expect(presetValue).toEqual(fullRange);
@@ -251,6 +251,10 @@ describe('versioning/maven/compare', () => {
       ['[1.2.3,)', '1.2.4', '[1.2.4,)'],
       ['[1.2.3,[', '1.2.4', '[1.2.4,['],
       ['[1.2.3,]', '1.2.4', '[1.2.3,]'], // invalid range
+      ['[0.21,0.22)', '0.20.21', '[0.21,0.22)'],
+      ['[0.21,0.22)', '0.21.1', '[0.21,0.22)'],
+      ['[0.21,0.22)', '0.22.1', '[0.21,0.22.1)'],
+      ['[0.21,0.22)', '0.23', '[0.21,0.23)'],
     ];
     sample.forEach(([oldRepr, newValue, newRepr]) => {
       expect(autoExtendMavenRange(oldRepr, newValue)).toEqual(newRepr);

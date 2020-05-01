@@ -9,9 +9,10 @@ import { detectVulnerabilityAlerts } from './vulnerability';
 import { platform } from '../../../platform';
 import { RenovateConfig } from '../../../config';
 import { redactedFields, add } from '../../../util/sanitize';
+import { clearRepoCache } from '../../../util/cache';
 
 export async function initRepo(input: RenovateConfig): Promise<RenovateConfig> {
-  global.repoCache = {};
+  clearRepoCache();
   let config: RenovateConfig = {
     ...input,
     errors: [],

@@ -2,9 +2,11 @@ import { readFileSync } from 'fs';
 import { extractPackage, resolveParents } from './extract';
 import { extractAllPackageFiles, updateDependency } from './index';
 import { PackageDependency, PackageFile } from '../common';
-import { platform as _platform } from '../../platform';
+import * as _fs from '../../util/fs';
 
-const platform: any = _platform;
+jest.mock('../../util/fs');
+
+const fs: any = _fs;
 
 const pomContent = readFileSync(
   'lib/manager/maven/__fixtures__/simple.pom.xml',
@@ -24,25 +26,25 @@ const origContent = readFileSync(
 );
 
 function selectDep(deps: PackageDependency[], name = 'org.example:quuz') {
-  return deps.find(dep => dep.depName === name);
+  return deps.find((dep) => dep.depName === name);
 }
 
 describe('manager/maven', () => {
   describe('extractAllPackageFiles', () => {
     it('should return empty if package has no content', async () => {
-      platform.getFile.mockReturnValueOnce(null);
+      fs.readLocalFile.mockReturnValueOnce(null);
       const res = await extractAllPackageFiles({}, ['random.pom.xml']);
       expect(res).toEqual([]);
     });
 
     it('should return empty for packages with invalid content', async () => {
-      platform.getFile.mockReturnValueOnce('invalid content');
+      fs.readLocalFile.mockReturnValueOnce('invalid content');
       const res = await extractAllPackageFiles({}, ['random.pom.xml']);
       expect(res).toEqual([]);
     });
 
     it('should return package files info', async () => {
-      platform.getFile.mockReturnValueOnce(pomContent);
+      fs.readLocalFile.mockReturnValueOnce(pomContent);
       const packages = await extractAllPackageFiles({}, ['random.pom.xml']);
       // windows path fix
       for (const p of packages) {
@@ -97,7 +99,7 @@ describe('manager/maven', () => {
     });
 
     it('should include registryUrls from parent pom files', async () => {
-      platform.getFile
+      fs.readLocalFile
         .mockReturnValueOnce(pomParent)
         .mockReturnValueOnce(pomChild);
       const packages = await extractAllPackageFiles({}, [
@@ -132,7 +134,7 @@ describe('manager/maven', () => {
     });
 
     it('should update to version of the latest dep in implicit group', async () => {
-      platform.getFile.mockReturnValueOnce(origContent);
+      fs.readLocalFile.mockReturnValueOnce(origContent);
       const [{ deps }] = await extractAllPackageFiles({}, ['pom.xml']);
 
       const dep1 = selectDep(deps, 'org.example:foo-1');
@@ -177,7 +179,7 @@ describe('manager/maven', () => {
     });
 
     it('should return null for ungrouped deps if content was updated outside', async () => {
-      platform.getFile.mockReturnValueOnce(origContent);
+      fs.readLocalFile.mockReturnValueOnce(origContent);
       const [{ deps }] = await extractAllPackageFiles({}, ['pom.xml']);
       const dep = selectDep(deps, 'org.example:bar');
       const upgrade = { ...dep, newValue: '2.0.2' };

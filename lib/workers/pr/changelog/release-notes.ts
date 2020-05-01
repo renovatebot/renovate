@@ -13,16 +13,16 @@ const markdown = new MarkdownIt('zero');
 markdown.enable(['heading', 'lheading']);
 
 export async function getReleaseList(
-  githubApiBaseURL: string,
+  apiBaseUrl: string,
   repository: string
 ): Promise<ChangeLogNotes[]> {
   logger.trace('getReleaseList()');
   // istanbul ignore if
-  if (!githubApiBaseURL) {
+  if (!apiBaseUrl) {
     return [];
   }
   try {
-    let url = githubApiBaseURL.replace(/\/?$/, '/');
+    let url = apiBaseUrl.replace(/\/?$/, '/');
     url += `repos/${repository}/releases?per_page=100`;
     const res = await ghGot<
       {
@@ -33,7 +33,7 @@ export async function getReleaseList(
         body: string;
       }[]
     >(url);
-    return res.body.map(release => ({
+    return res.body.map((release) => ({
       url: release.html_url,
       id: release.id,
       tag: release.tag_name,
@@ -48,7 +48,7 @@ export async function getReleaseList(
 
 export function massageBody(
   input: string | undefined | null,
-  githubBaseURL: string
+  baseUrl: string
 ): string {
   let body = input || '';
   // Convert line returns
@@ -57,13 +57,13 @@ export function massageBody(
   body = body.replace(/^<a name="[^"]*"><\/a>\n/, '');
   body = body.replace(
     new RegExp(
-      `^##? \\[[^\\]]*\\]\\(${githubBaseURL}[^/]*\\/[^/]*\\/compare\\/.*?\\n`
+      `^##? \\[[^\\]]*\\]\\(${baseUrl}[^/]*\\/[^/]*\\/compare\\/.*?\\n`
     ),
     ''
   );
   // Clean-up unnecessary commits link
   body = `\n${body}\n`.replace(
-    new RegExp(`\\n${githubBaseURL}[^/]+\\/[^/]+\\/compare\\/[^\\n]+(\\n|$)`),
+    new RegExp(`\\n${baseUrl}[^/]+\\/[^/]+\\/compare\\/[^\\n]+(\\n|$)`),
     '\n'
   );
   // Reduce headings size
@@ -79,21 +79,21 @@ export async function getReleaseNotes(
   repository: string,
   version: string,
   depName: string,
-  githubBaseURL: string,
-  githubApiBaseURL: string
+  baseUrl: string,
+  apiBaseUrl: string
 ): Promise<ChangeLogNotes | null> {
   logger.trace(`getReleaseNotes(${repository}, ${version}, ${depName})`);
-  const releaseList = await getReleaseList(githubApiBaseURL, repository);
+  const releaseList = await getReleaseList(apiBaseUrl, repository);
   let releaseNotes: ChangeLogNotes | null = null;
-  releaseList.forEach(release => {
+  releaseList.forEach((release) => {
     if (
       release.tag === version ||
       release.tag === `v${version}` ||
       release.tag === `${depName}-${version}`
     ) {
       releaseNotes = release;
-      releaseNotes.url = `${githubBaseURL}${repository}/releases/${release.tag}`;
-      releaseNotes.body = massageBody(releaseNotes.body, githubBaseURL);
+      releaseNotes.url = `${baseUrl}${repository}/releases/${release.tag}`;
+      releaseNotes.body = massageBody(releaseNotes.body, baseUrl);
       if (!releaseNotes.body.length) {
         releaseNotes = null;
       } else {
@@ -111,7 +111,7 @@ function sectionize(text: string, level: number): string[] {
   const sections: [number, number][] = [];
   const lines = text.split('\n');
   const tokens = markdown.parse(text, undefined);
-  tokens.forEach(token => {
+  tokens.forEach((token) => {
     if (token.type === 'heading_open') {
       const lev = +token.tag.substr(1);
       if (lev <= level) {
@@ -145,8 +145,8 @@ function isUrl(url: string): boolean {
 export async function getReleaseNotesMd(
   repository: string,
   version: string,
-  githubBaseURL: string,
-  githubApiBaseUrl: string
+  baseUrl: string,
+  apiBaseUrl: string
 ): Promise<ChangeLogNotes | null> {
   logger.trace(`getReleaseNotesMd(${repository}, ${version})`);
   const skippedRepos = ['facebook/react-native'];
@@ -157,13 +157,13 @@ export async function getReleaseNotesMd(
   let changelogFile: string;
   let changelogMd = '';
   try {
-    let apiPrefix = githubApiBaseUrl.replace(/\/?$/, '/');
+    let apiPrefix = apiBaseUrl.replace(/\/?$/, '/');
 
     apiPrefix += `repos/${repository}/contents/`;
     const filesRes = await ghGot<{ name: string }[]>(apiPrefix);
     const files = filesRes.body
-      .map(f => f.name)
-      .filter(f => changelogFilenameRegex.test(f));
+      .map((f) => f.name)
+      .filter((f) => changelogFilenameRegex.test(f));
     if (!files.length) {
       logger.trace('no changelog file found');
       return null;
@@ -202,9 +202,9 @@ export async function getReleaseNotesMd(
           for (const word of title) {
             if (word.includes(version) && !isUrl(word)) {
               logger.trace({ body }, 'Found release notes for v' + version);
-              let url = `${githubBaseURL}${repository}/blob/master/${changelogFile}#`;
+              let url = `${baseUrl}${repository}/blob/master/${changelogFile}#`;
               url += title.join('-').replace(/[^A-Za-z0-9-]/g, '');
-              body = massageBody(body, githubBaseURL);
+              body = massageBody(body, baseUrl);
               if (body && body.length) {
                 try {
                   body = linkify(body, {
@@ -252,8 +252,8 @@ export async function addReleaseNotes(
       releaseNotes = await getReleaseNotesMd(
         repository,
         v.version,
-        input.project.githubBaseURL,
-        input.project.githubApiBaseURL
+        input.project.baseUrl,
+        input.project.apiBaseUrl
       );
       if (!releaseNotes) {
         logger.trace('No markdown release notes found for v' + v.version);
@@ -261,8 +261,8 @@ export async function addReleaseNotes(
           repository,
           v.version,
           input.project.depName,
-          input.project.githubBaseURL,
-          input.project.githubApiBaseURL
+          input.project.baseUrl,
+          input.project.apiBaseUrl
         );
       }
       // Small hack to force display of release notes when there is a compare url

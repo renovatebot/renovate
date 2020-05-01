@@ -1,0 +1,65 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`config/presets/local getPreset() forwards to custom github 1`] = `
+Array [
+  Array [
+    "some/repo",
+    "",
+    "https://api.github.example.com",
+  ],
+]
+`;
+
+exports[`config/presets/local getPreset() forwards to custom github 2`] = `
+Object {
+  "resolved": "preset",
+}
+`;
+
+exports[`config/presets/local getPreset() forwards to custom gitlab 1`] = `
+Array [
+  Array [
+    "some/repo",
+    "",
+    "https://gitlab.example.com/api/v4",
+  ],
+]
+`;
+
+exports[`config/presets/local getPreset() forwards to custom gitlab 2`] = `
+Object {
+  "resolved": "preset",
+}
+`;
+
+exports[`config/presets/local getPreset() forwards to github 1`] = `
+Array [
+  Array [
+    "some/repo",
+    "default",
+    undefined,
+  ],
+]
+`;
+
+exports[`config/presets/local getPreset() forwards to github 2`] = `
+Object {
+  "resolved": "preset",
+}
+`;
+
+exports[`config/presets/local getPreset() forwards to gitlab 1`] = `
+Array [
+  Array [
+    "some/repo",
+    "",
+    undefined,
+  ],
+]
+`;
+
+exports[`config/presets/local getPreset() forwards to gitlab 2`] = `
+Object {
+  "resolved": "preset",
+}
+`;

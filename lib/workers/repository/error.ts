@@ -27,6 +27,7 @@ import {
   REPOSITORY_TEMPORARY_ERROR,
   REPOSITORY_UNINITIATED,
   SYSTEM_INSUFFICIENT_DISK_SPACE,
+  SYSTEM_INSUFFICIENT_MEMORY,
   UNKNOWN_ERROR,
 } from '../../constants/error-messages';
 import { DatasourceError } from '../../datasource/common';
@@ -135,6 +136,11 @@ export default async function handleError(
   }
   if (err.message === PLATFORM_RATE_LIMIT_EXCEEDED) {
     logger.warn('Rate limit exceeded - aborting');
+    delete config.branchList; // eslint-disable-line no-param-reassign
+    return err.message;
+  }
+  if (err.message === SYSTEM_INSUFFICIENT_MEMORY) {
+    logger.warn('Insufficient memory - aborting');
     delete config.branchList; // eslint-disable-line no-param-reassign
     return err.message;
   }

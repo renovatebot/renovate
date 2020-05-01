@@ -6,7 +6,6 @@ import * as composerVersioning from '../../versioning/composer';
 
 const language = LANGUAGE_PHP;
 export const supportsLockFileMaintenance = true;
-export const autoReplace = true;
 
 export { extractPackageFile, updateArtifacts, language, getRangeStrategy };
 

@@ -30,8 +30,16 @@ export function splitImageParts(currentFrom: string): PackageDependency {
   return dep;
 }
 
-export function getDep(currentFrom: string): PackageDependency {
+export function getDep(
+  currentFrom: string,
+  specifyReplaceString = true
+): PackageDependency {
   const dep = splitImageParts(currentFrom);
+  if (specifyReplaceString) {
+    dep.replaceString = currentFrom;
+    dep.autoReplaceStringTemplate =
+      '{{depName}}{{#if newValue}}:{{newValue}}{{/if}}{{#if newDigest}}@{{newDigest}}{{/if}}';
+  }
   dep.datasource = datasourceDocker.id;
   if (
     dep.depName &&
@@ -51,12 +59,11 @@ export function extractPackageFile(content: string): PackageFile | null {
     const fromMatch = /^FROM /i.test(fromLine);
     if (fromMatch) {
       logger.trace({ lineNumber, fromLine }, 'FROM line');
-      const [fromPrefix, currentFrom, ...fromRest] = fromLine.match(/\S+/g);
+      const [, currentFrom, ...fromRest] = fromLine.match(/\S+/g);
       if (fromRest.length === 2 && fromRest[0].toLowerCase() === 'as') {
         logger.debug('Found a multistage build stage name');
         stageNames.push(fromRest[1]);
       }
-      const fromSuffix = fromRest.join(' ');
       if (currentFrom === 'scratch') {
         logger.debug('Skipping scratch');
       } else if (stageNames.includes(currentFrom)) {
@@ -71,18 +78,13 @@ export function extractPackageFile(content: string): PackageFile | null {
           },
           'Dockerfile FROM'
         );
-        dep.managerData = {
-          lineNumber,
-          fromPrefix,
-          fromSuffix,
-        };
         deps.push(dep);
       }
     }
 
     const copyFromMatch = /^(COPY --from=)([^\s]+)\s+(.*)$/i.exec(fromLine);
     if (copyFromMatch) {
-      const [, fromPrefix, currentFrom, fromSuffix] = copyFromMatch;
+      const [, , currentFrom] = copyFromMatch;
       logger.trace({ lineNumber, fromLine }, 'COPY --from line');
       if (stageNames.includes(currentFrom)) {
         logger.debug({ currentFrom }, 'Skipping alias COPY --from');
@@ -98,11 +100,6 @@ export function extractPackageFile(content: string): PackageFile | null {
           },
           'Dockerfile COPY --from'
         );
-        dep.managerData = {
-          lineNumber,
-          fromPrefix,
-          fromSuffix,
-        };
         deps.push(dep);
       }
     }

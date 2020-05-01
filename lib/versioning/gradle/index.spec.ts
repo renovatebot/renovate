@@ -81,7 +81,7 @@ describe('versioning/gradle/compare', () => {
     '1.2.++',
   ];
   it('filters out incorrect prefix ranges', () => {
-    invalidPrefixRanges.forEach(rangeStr => {
+    invalidPrefixRanges.forEach((rangeStr) => {
       const range = parsePrefixRange(rangeStr);
       expect(range).toBeNull();
     });
@@ -105,7 +105,7 @@ describe('versioning/gradle/compare', () => {
     '[1.3,1.2]',
   ];
   it('filters out incorrect maven-based ranges', () => {
-    invalidMavenBasedRanges.forEach(rangeStr => {
+    invalidMavenBasedRanges.forEach((rangeStr) => {
       const range = parseMavenBasedRange(rangeStr);
       expect(range).toBeNull();
     });

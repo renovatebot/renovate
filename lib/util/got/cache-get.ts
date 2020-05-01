@@ -1,17 +1,13 @@
 import crypto from 'crypto';
 import { create } from './util';
 import { clone } from '../clone';
+import { getRepoCached, setRepoCached } from '../cache';
 
-// global.repoCache is reset to {} every time a repository is initialized
 // With this caching, it means every GET request is cached during each repository run
 
 export default create({
   options: {},
   handler: (options, next) => {
-    if (!global.repoCache) {
-      return next(options);
-    }
-
     if (options.stream) {
       return next(options);
     }
@@ -26,13 +22,16 @@ export default create({
             JSON.stringify({ href: options.href, headers: options.headers })
         )
         .digest('hex');
-      if (!global.repoCache[cacheKey] || options.useCache === false) {
-        global.repoCache[cacheKey] = next(options).catch(err => {
-          delete global.repoCache[cacheKey];
-          throw err;
-        });
+      if (!getRepoCached(cacheKey) || options.useCache === false) {
+        setRepoCached(
+          cacheKey,
+          next(options).catch((err) => {
+            setRepoCached(cacheKey, null);
+            throw err;
+          })
+        );
       }
-      return global.repoCache[cacheKey].then(response => ({
+      return getRepoCached<Promise<any>>(cacheKey).then((response) => ({
         ...response,
         body: clone(response.body),
       }));

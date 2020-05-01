@@ -2,6 +2,8 @@ import { VersioningApi, NewValueConfig } from '../common';
 
 export interface GenericVersion {
   release: number[];
+  /** prereleases are treated in the standard semver manner, if present */
+  prerelease?: string;
   suffix?: string;
 }
 export interface VersionParser {
@@ -40,7 +42,8 @@ export const parser = (parse: VersionParser): Partial<VersioningApi> => {
   }
 
   function isStable(version: string): boolean {
-    return !!isValid(version);
+    const parsed = parse(version);
+    return parsed && !parsed.prerelease;
   }
 
   return {
@@ -75,10 +78,10 @@ export const comparer = (
 
   // we don't not have ranges, so versions has to be equal
   function maxSatisfyingVersion(versions: string[], range: string): string {
-    return versions.find(v => equals(v, range)) || null;
+    return versions.find((v) => equals(v, range)) || null;
   }
   function minSatisfyingVersion(versions: string[], range: string): string {
-    return versions.find(v => equals(v, range)) || null;
+    return versions.find((v) => equals(v, range)) || null;
   }
   function getNewValue(newValueConfig: NewValueConfig): string {
     const { toVersion } = newValueConfig || {};
@@ -142,7 +145,8 @@ export abstract class GenericVersioningApi<
   }
 
   isStable(version: string): boolean {
-    return this.isValid(version);
+    const parsed = this._parse(version);
+    return parsed && !parsed.prerelease;
   }
 
   isSingleVersion(version: string): string | boolean {
@@ -178,11 +182,11 @@ export abstract class GenericVersioningApi<
   }
 
   maxSatisfyingVersion(versions: string[], range: string): string | null {
-    return versions.find(v => this.equals(v, range)) || null;
+    return versions.find((v) => this.equals(v, range)) || null;
   }
 
   minSatisfyingVersion(versions: string[], range: string): string | null {
-    return versions.find(v => this.equals(v, range)) || null;
+    return versions.find((v) => this.equals(v, range)) || null;
   }
 
   // eslint-disable-next-line class-methods-use-this

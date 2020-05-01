@@ -31,7 +31,7 @@ async function getTags(
       logger.debug({ repository }, 'repository has no Github tags');
     }
 
-    return tags.map(tag => tag.name).filter(Boolean);
+    return tags.map((tag) => tag.name).filter(Boolean);
   } catch (err) {
     logger.debug({ sourceRepo: repository }, 'Failed to fetch Github tags');
     logger.debug({ err });
@@ -60,7 +60,7 @@ export async function getChangeLogJSON({
   }
   const version = allVersioning.get(versioning);
   const { protocol, host, pathname } = URL.parse(sourceUrl);
-  const githubBaseURL = `${protocol}//${host}/`;
+  const baseUrl = `${protocol}//${host}/`;
   const url = sourceUrl.startsWith('https://github.com/')
     ? 'https://api.github.com/'
     : sourceUrl;
@@ -84,7 +84,7 @@ export async function getChangeLogJSON({
     );
     return null;
   }
-  const githubApiBaseURL = sourceUrl.startsWith('https://github.com/')
+  const apiBaseUrl = sourceUrl.startsWith('https://github.com/')
     ? 'https://api.github.com/'
     : endpoint; // TODO FIX
   const repository = pathname.slice(1).replace(/\/$/, '');
@@ -98,7 +98,7 @@ export async function getChangeLogJSON({
   }
   // This extra filter/sort should not be necessary, but better safe than sorry
   const validReleases = [...releases]
-    .filter(release => version.isVersion(release.version))
+    .filter((release) => version.isVersion(release.version))
     .sort((a, b) => version.sortVersions(a.version, b.version));
 
   if (validReleases.length < 2) {
@@ -114,8 +114,8 @@ export async function getChangeLogJSON({
     }
     const regex = new RegExp(`${depName}[@-]`);
     const tagName = tags
-      .filter(tag => version.isVersion(tag.replace(regex, '')))
-      .find(tag => version.equals(tag.replace(regex, ''), release.version));
+      .filter((tag) => version.isVersion(tag.replace(regex, '')))
+      .find((tag) => version.equals(tag.replace(regex, ''), release.version));
     if (tagName) {
       return tagName;
     }
@@ -154,7 +154,7 @@ export async function getChangeLogJSON({
         const prevHead = await getRef(prev);
         const nextHead = await getRef(next);
         if (prevHead && nextHead) {
-          release.compare.url = `${githubBaseURL}${repository}/compare/${prevHead}...${nextHead}`;
+          release.compare.url = `${baseUrl}${repository}/compare/${prevHead}...${nextHead}`;
         }
         const cacheMinutes = 55;
         await renovateCache.set(
@@ -170,8 +170,8 @@ export async function getChangeLogJSON({
 
   let res: ChangeLogResult = {
     project: {
-      githubApiBaseURL,
-      githubBaseURL,
+      apiBaseUrl,
+      baseUrl,
       github: repository,
       repository: sourceUrl,
       depName,

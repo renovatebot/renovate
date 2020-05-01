@@ -1,39 +1,16 @@
 import * as _npm from './npm';
 import * as presets from '.';
-import presetDefaults from './__fixtures__/renovate-config-default.json';
-import presetPackages from './__fixtures__/renovate-config-packages.json';
-import presetGroup from './__fixtures__/renovate-config-group.json';
-import presetMonorepo from './__fixtures__/renovate-config-monorepo.json';
 import presetIkatyang from './__fixtures__/renovate-config-ikatyang.json';
 import { RenovateConfig } from '..';
 
 jest.mock('./npm');
+jest.mock('./github');
 
 const npm: any = _npm;
 
 npm.getPreset = jest.fn((dep, presetName) => {
-  if (dep === 'renovate-config-default') {
-    return presetDefaults.versions[presetDefaults['dist-tags'].latest][
-      'renovate-config'
-    ][presetName];
-  }
-  if (dep === 'renovate-config-packages') {
-    return presetPackages.versions[presetPackages['dist-tags'].latest][
-      'renovate-config'
-    ][presetName];
-  }
-  if (dep === 'renovate-config-group') {
-    return presetGroup.versions[presetGroup['dist-tags'].latest][
-      'renovate-config'
-    ][presetName];
-  }
   if (dep === 'renovate-config-ikatyang') {
     return presetIkatyang.versions[presetIkatyang['dist-tags'].latest][
-      'renovate-config'
-    ][presetName];
-  }
-  if (dep === 'renovate-config-monorepo') {
-    return presetMonorepo.versions[presetMonorepo['dist-tags'].latest][
       'renovate-config'
     ][presetName];
   }
@@ -146,11 +123,6 @@ describe('config/presets', () => {
       expect(e.validationError).toMatchSnapshot();
       expect(e.validationMessage).toMatchSnapshot();
     });
-    it('resolves group monorepos', async () => {
-      config.extends = ['group:monorepos'];
-      const res = await presets.resolveConfigPresets(config);
-      expect(res).toMatchSnapshot();
-    });
     it('combines two package alls', async () => {
       config.extends = ['packages:eslint', 'packages:stylelint'];
       const res = await presets.resolveConfigPresets(config);
@@ -176,8 +148,8 @@ describe('config/presets', () => {
       config.extends = ['packages:linters'];
       const res = await presets.resolveConfigPresets(config);
       expect(res).toMatchSnapshot();
-      expect(res.packageNames).toHaveLength(1);
-      expect(res.packagePatterns).toHaveLength(2);
+      expect(res.packageNames).toHaveLength(3);
+      expect(res.packagePatterns).toHaveLength(3);
     });
     it('resolves nested groups', async () => {
       config.extends = [':automergeLinters'];
@@ -185,8 +157,8 @@ describe('config/presets', () => {
       expect(res).toMatchSnapshot();
       const rule = res.packageRules[0];
       expect(rule.automerge).toBe(true);
-      expect(rule.packageNames).toHaveLength(1);
-      expect(rule.packagePatterns).toHaveLength(2);
+      expect(rule.packageNames).toHaveLength(3);
+      expect(rule.packagePatterns).toHaveLength(3);
     });
     it('migrates automerge in presets', async () => {
       config.extends = ['ikatyang:library'];
@@ -198,7 +170,9 @@ describe('config/presets', () => {
 
     it('ignores presets', async () => {
       config.extends = ['config:base'];
-      const res = await presets.resolveConfigPresets(config, ['config:base']);
+      const res = await presets.resolveConfigPresets(config, {}, [
+        'config:base',
+      ]);
       expect(config).toMatchObject(res);
       expect(res).toMatchSnapshot();
     });
@@ -254,8 +228,31 @@ describe('config/presets', () => {
     it('parses github', () => {
       expect(presets.parsePreset('github>some/repo')).toMatchSnapshot();
     });
+    it('parses github subfiles', () => {
+      expect(
+        presets.parsePreset('github>some/repo:somefile')
+      ).toMatchSnapshot();
+    });
+    it('parses github subfiles with preset name', () => {
+      expect(
+        presets.parsePreset('github>some/repo:somefile/somepreset')
+      ).toMatchSnapshot();
+    });
+    it('parses github subfiles with preset and sub-preset name', () => {
+      expect(
+        presets.parsePreset(
+          'github>some/repo:somefile/somepreset/somesubpreset'
+        )
+      ).toMatchSnapshot();
+    });
     it('parses gitlab', () => {
       expect(presets.parsePreset('gitlab>some/repo')).toMatchSnapshot();
+    });
+    it('parses local', () => {
+      expect(presets.parsePreset('local>some/repo')).toMatchSnapshot();
+    });
+    it('parses no prefix as local', () => {
+      expect(presets.parsePreset('some/repo')).toMatchSnapshot();
     });
     it('returns default package name with params', () => {
       expect(
@@ -323,27 +320,30 @@ describe('config/presets', () => {
   });
   describe('getPreset', () => {
     it('gets linters', async () => {
-      const res = await presets.getPreset('packages:linters');
+      const res = await presets.getPreset('packages:linters', {});
       expect(res).toMatchSnapshot();
       expect(res.packageNames).toHaveLength(1);
-      expect(res.extends).toHaveLength(2);
+      expect(res.extends).toHaveLength(3);
     });
     it('gets parameterised configs', async () => {
-      const res = await presets.getPreset(':group(packages:eslint, eslint)');
+      const res = await presets.getPreset(
+        ':group(packages:eslint, eslint)',
+        {}
+      );
       expect(res).toMatchSnapshot();
     });
     it('handles missing params', async () => {
-      const res = await presets.getPreset(':group()');
+      const res = await presets.getPreset(':group()', {});
       expect(res).toMatchSnapshot();
     });
     it('ignores irrelevant params', async () => {
-      const res = await presets.getPreset(':pinVersions(foo, bar)');
+      const res = await presets.getPreset(':pinVersions(foo, bar)', {});
       expect(res).toMatchSnapshot();
     });
     it('handles 404 packages', async () => {
       let e: Error;
       try {
-        await presets.getPreset('notfound:foo');
+        await presets.getPreset('notfound:foo', {});
       } catch (err) {
         e = err;
       }
@@ -355,7 +355,7 @@ describe('config/presets', () => {
     it('handles no config', async () => {
       let e: Error;
       try {
-        await presets.getPreset('noconfig:foo');
+        await presets.getPreset('noconfig:foo', {});
       } catch (err) {
         e = err;
       }
@@ -367,7 +367,7 @@ describe('config/presets', () => {
     it('handles throw errors', async () => {
       let e: Error;
       try {
-        await presets.getPreset('throw:foo');
+        await presets.getPreset('throw:foo', {});
       } catch (err) {
         e = err;
       }
@@ -379,7 +379,7 @@ describe('config/presets', () => {
     it('handles preset not found', async () => {
       let e: Error;
       try {
-        await presets.getPreset('wrongpreset:foo');
+        await presets.getPreset('wrongpreset:foo', {});
       } catch (err) {
         e = err;
       }

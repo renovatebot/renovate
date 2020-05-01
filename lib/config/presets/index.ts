@@ -5,6 +5,8 @@ import * as migration from '../migration';
 import * as github from './github';
 import * as npm from './npm';
 import * as gitlab from './gitlab';
+import * as local from './local';
+import * as internal from './internal';
 import { RenovateConfig } from '../common';
 import { mergeChildConfig } from '../utils';
 import { regEx } from '../../util/regex';
@@ -13,11 +15,14 @@ import {
   DATASOURCE_FAILURE,
   PLATFORM_FAILURE,
 } from '../../constants/error-messages';
+import { PresetApi } from './common';
 
-const presetSources = {
+const presetSources: Record<string, PresetApi> = {
   github,
   npm,
   gitlab,
+  local,
+  internal,
 };
 
 export function replaceArgs(
@@ -61,6 +66,15 @@ export function parsePreset(input: string): ParsedPreset {
   } else if (str.startsWith('gitlab>')) {
     presetSource = 'gitlab';
     str = str.substring('gitlab>'.length);
+  } else if (str.startsWith('local>')) {
+    presetSource = 'local';
+    str = str.substring('local>'.length);
+  } else if (
+    !str.startsWith('@') &&
+    !str.startsWith(':') &&
+    str.includes('/')
+  ) {
+    presetSource = 'local';
   }
   str = str.replace(/^npm>/, '');
   presetSource = presetSource || 'npm';
@@ -68,12 +82,29 @@ export function parsePreset(input: string): ParsedPreset {
     params = str
       .slice(str.indexOf('(') + 1, -1)
       .split(',')
-      .map(elem => elem.trim());
+      .map((elem) => elem.trim());
     str = str.slice(0, str.indexOf('('));
   }
-  if (str.startsWith(':')) {
+  const presetsPackages = [
+    'config',
+    'default',
+    'docker',
+    'group',
+    'helpers',
+    'monorepo',
+    'packages',
+    'preview',
+    'schedule',
+  ];
+  if (
+    presetsPackages.some((presetPackage) => str.startsWith(`${presetPackage}:`))
+  ) {
+    presetSource = 'internal';
+    [packageName, presetName] = str.split(':');
+  } else if (str.startsWith(':')) {
     // default namespace
-    packageName = 'renovate-config-default';
+    presetSource = 'internal';
+    packageName = 'default';
     presetName = str.slice(1);
   } else if (str.startsWith('@')) {
     // scoped namespace
@@ -101,12 +132,16 @@ export function parsePreset(input: string): ParsedPreset {
   return { presetSource, packageName, presetName, params };
 }
 
-export async function getPreset(preset: string): Promise<RenovateConfig> {
+export async function getPreset(
+  preset: string,
+  baseConfig?: RenovateConfig
+): Promise<RenovateConfig> {
   logger.trace(`getPreset(${preset})`);
   const { presetSource, packageName, presetName, params } = parsePreset(preset);
   let presetConfig = await presetSources[presetSource].getPreset(
     packageName,
-    presetName
+    presetName,
+    baseConfig
   );
   logger.trace({ presetConfig }, `Found preset ${preset}`);
   if (params) {
@@ -118,6 +153,7 @@ export async function getPreset(preset: string): Promise<RenovateConfig> {
   }
   logger.trace({ presetConfig }, `Applied params to preset ${preset}`);
   const presetKeys = Object.keys(presetConfig);
+  // istanbul ignore if
   if (
     presetKeys.length === 2 &&
     presetKeys.includes('description') &&
@@ -133,7 +169,7 @@ export async function getPreset(preset: string): Promise<RenovateConfig> {
     'packagePatterns',
     'excludePackagePatterns',
   ];
-  if (presetKeys.every(key => packageListKeys.includes(key))) {
+  if (presetKeys.every((key) => packageListKeys.includes(key))) {
     delete presetConfig.description;
   }
   const { migratedConfig } = migration.migrateConfig(presetConfig);
@@ -142,6 +178,7 @@ export async function getPreset(preset: string): Promise<RenovateConfig> {
 
 export async function resolveConfigPresets(
   inputConfig: RenovateConfig,
+  baseConfig?: RenovateConfig,
   ignorePresets?: string[],
   existingPresets: string[] = []
 ): Promise<RenovateConfig> {
@@ -166,9 +203,9 @@ export async function resolveConfigPresets(
         logger.trace(`Resolving preset "${preset}"`);
         let fetchedPreset: RenovateConfig;
         try {
-          fetchedPreset = await getPreset(preset);
+          fetchedPreset = await getPreset(preset, baseConfig);
         } catch (err) {
-          logger.debug({ err }, 'Preset fetch error');
+          logger.debug({ preset, err }, 'Preset fetch error');
           // istanbul ignore if
           if (
             err.message === PLATFORM_FAILURE ||
@@ -189,11 +226,15 @@ export async function resolveConfigPresets(
             error.validationError +=
               '. Note: this is a *nested* preset so please contact the preset author if you are unable to fix it yourself.';
           }
-          logger.info('Throwing preset error');
+          logger.info(
+            { validationError: error.validationError },
+            'Throwing preset error'
+          );
           throw error;
         }
         const presetConfig = await resolveConfigPresets(
           fetchedPreset,
+          baseConfig,
           ignorePresets,
           existingPresets.concat([preset])
         );
@@ -225,6 +266,7 @@ export async function resolveConfigPresets(
           (config[key] as RenovateConfig[]).push(
             await resolveConfigPresets(
               element as RenovateConfig,
+              baseConfig,
               ignorePresets,
               existingPresets
             )
@@ -238,6 +280,7 @@ export async function resolveConfigPresets(
       logger.trace(`Resolving object "${key}"`);
       config[key] = await resolveConfigPresets(
         val as RenovateConfig,
+        baseConfig,
         ignorePresets,
         existingPresets
       );

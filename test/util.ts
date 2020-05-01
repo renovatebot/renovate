@@ -1,4 +1,5 @@
 import * as upath from 'upath';
+import crypto from 'crypto';
 import { platform as _platform } from '../lib/platform';
 import { getConfig } from '../lib/config/defaults';
 import { RenovateConfig as _RenovateConfig } from '../lib/config';
@@ -65,9 +66,21 @@ export const replacingSerializer = (
   search: string,
   replacement: string
 ): jest.SnapshotSerializerPlugin => ({
-  test: value => typeof value === 'string' && value.includes(search),
+  test: (value) => typeof value === 'string' && value.includes(search),
   serialize: (val, config, indent, depth, refs, printer) => {
     const replaced = (val as string).replace(search, replacement);
+    return printer(replaced, config, indent, depth, refs);
+  },
+});
+
+function toHash(buf: Buffer): string {
+  return crypto.createHash('sha256').update(buf).digest('hex');
+}
+
+export const bufferSerializer = (): jest.SnapshotSerializerPlugin => ({
+  test: (value) => Buffer.isBuffer(value),
+  serialize: (val, config, indent, depth, refs, printer) => {
+    const replaced = toHash(val);
     return printer(replaced, config, indent, depth, refs);
   },
 });

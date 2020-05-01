@@ -3,74 +3,66 @@
 exports[`lib/manager/docker-compose/extract extractPackageFile() extracts multiple image lines 1`] = `
 Array [
   Object {
+    "autoReplaceStringTemplate": "{{depName}}{{#if newValue}}:{{newValue}}{{/if}}{{#if newDigest}}@{{newDigest}}{{/if}}",
     "currentDigest": undefined,
     "currentValue": "alpine",
     "datasource": "docker",
     "depName": "quay.io/something/redis",
-    "managerData": Object {
-      "lineNumber": 4,
-    },
+    "replaceString": "quay.io/something/redis:alpine",
   },
   Object {
+    "autoReplaceStringTemplate": "{{depName}}{{#if newValue}}:{{newValue}}{{/if}}{{#if newDigest}}@{{newDigest}}{{/if}}",
     "commitMessageTopic": "Node.js",
     "currentDigest": undefined,
     "currentValue": "10.0.0",
     "datasource": "docker",
     "depName": "node",
-    "managerData": Object {
-      "lineNumber": 18,
-    },
+    "replaceString": "node:10.0.0",
   },
   Object {
+    "autoReplaceStringTemplate": "{{depName}}{{#if newValue}}:{{newValue}}{{/if}}{{#if newDigest}}@{{newDigest}}{{/if}}",
     "currentDigest": undefined,
     "currentValue": "9.4.0",
     "datasource": "docker",
     "depName": "postgres",
-    "managerData": Object {
-      "lineNumber": 21,
-    },
+    "replaceString": "postgres:9.4.0",
   },
   Object {
+    "autoReplaceStringTemplate": "{{depName}}{{#if newValue}}:{{newValue}}{{/if}}{{#if newDigest}}@{{newDigest}}{{/if}}",
     "currentDigest": undefined,
     "currentValue": "before",
     "datasource": "docker",
     "depName": "dockersamples/examplevotingapp_vote",
-    "managerData": Object {
-      "lineNumber": 31,
-    },
+    "replaceString": "dockersamples/examplevotingapp_vote:before",
   },
   Object {
+    "autoReplaceStringTemplate": "{{depName}}{{#if newValue}}:{{newValue}}{{/if}}{{#if newDigest}}@{{newDigest}}{{/if}}",
     "currentDigest": undefined,
     "currentValue": "before",
     "datasource": "docker",
     "depName": "dockersamples/examplevotingapp_result",
-    "managerData": Object {
-      "lineNumber": 46,
-    },
+    "replaceString": "dockersamples/examplevotingapp_result:before",
   },
   Object {
+    "autoReplaceStringTemplate": "{{depName}}{{#if newValue}}:{{newValue}}{{/if}}{{#if newDigest}}@{{newDigest}}{{/if}}",
     "currentDigest": undefined,
     "currentValue": undefined,
     "datasource": "docker",
     "depName": "dockersamples/examplevotingapp_worker",
-    "managerData": Object {
-      "lineNumber": 62,
-    },
+    "replaceString": "dockersamples/examplevotingapp_worker",
   },
   Object {
+    "autoReplaceStringTemplate": "{{depName}}{{#if newValue}}:{{newValue}}{{/if}}{{#if newDigest}}@{{newDigest}}{{/if}}",
     "currentDigest": undefined,
     "currentValue": "stable",
     "datasource": "docker",
     "depName": "dockersamples/visualizer",
-    "managerData": Object {
-      "lineNumber": 79,
-    },
+    "replaceString": "dockersamples/visualizer:stable",
   },
   Object {
+    "autoReplaceStringTemplate": "{{depName}}{{#if newValue}}:{{newValue}}{{/if}}{{#if newDigest}}@{{newDigest}}{{/if}}",
     "datasource": "docker",
-    "managerData": Object {
-      "lineNumber": 90,
-    },
+    "replaceString": "\${IMAGE:-synkodevelopers/edplugins}:\${TAG:-latest}",
     "skipReason": "contains-variable",
   },
 ]

@@ -186,7 +186,7 @@ export async function getDependency(
       dep.deprecationMessage = `On registry \`${regUrl}\`, the "latest" version (v${dep.latestVersion}) of dependency \`${packageName}\` has the following deprecation notice:\n\n\`${latestVersion.deprecated}\`\n\nMarking the latest version of an npm package as deprecated results in the entire package being considered deprecated, so contact the package author you think this is a mistake.`;
       dep.deprecationSource = id;
     }
-    dep.releases = Object.keys(res.versions).map(version => {
+    dep.releases = Object.keys(res.versions).map((version) => {
       const release: NpmRelease = {
         version,
         gitRef: res.versions[version].gitHead,
@@ -207,7 +207,17 @@ export async function getDependency(
     const cacheMinutes = process.env.RENOVATE_CACHE_NPM_MINUTES
       ? parseInt(process.env.RENOVATE_CACHE_NPM_MINUTES, 10)
       : 5;
-    if (!packageName.startsWith('@')) {
+    // TODO: use dynamic detection of public repos instead of a static list
+    const whitelistedPublicScopes = [
+      '@graphql-codegen',
+      '@storybook',
+      '@types',
+      '@typescript-eslint',
+    ];
+    if (
+      whitelistedPublicScopes.includes(scope) ||
+      !packageName.startsWith('@')
+    ) {
       await renovateCache.set(cacheNamespace, pkgUrl, dep, cacheMinutes);
     }
     return dep;
@@ -256,8 +266,13 @@ export async function getDependency(
           err.code === 'ETIMEDOUT') &&
         retries > 0
       ) {
-        logger.warn({ pkgUrl, errName: err.name }, 'Retrying npm error');
-        await delay(5000);
+        // Delay a random time to avoid contention
+        const delaySeconds = 5 + Math.round(Math.random() * 25);
+        logger.warn(
+          { pkgUrl, errName: err.name, delaySeconds },
+          'Retrying npm error'
+        );
+        await delay(1000 * delaySeconds);
         return getDependency(packageName, retries - 1);
       }
       if (err.name === 'ParseError' && err.body) {

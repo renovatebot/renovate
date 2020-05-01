@@ -39,7 +39,7 @@ export async function getRepositoryData(
       return null;
     }
     if (err.statusCode === 404 || err.code === 'ENOTFOUND') {
-      logger.warn({ err }, 'index.yaml lookup error');
+      logger.debug({ err }, 'Helm Chart not found');
       return null;
     }
     if (
@@ -100,7 +100,7 @@ export async function getReleases({
     logger.debug(`Couldn't get index.yaml file from ${helmRepository}`);
     return null;
   }
-  const releases = repositoryData.find(chart => chart.name === lookupName);
+  const releases = repositoryData.find((chart) => chart.name === lookupName);
   if (!releases) {
     logger.warn(
       { dependency: lookupName },

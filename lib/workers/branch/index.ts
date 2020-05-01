@@ -1,6 +1,8 @@
 import { DateTime } from 'luxon';
 import is from '@sindresorhus/is';
 import minimatch from 'minimatch';
+import { join } from 'path';
+import { concat } from 'lodash';
 import { logger } from '../../logger';
 import { isScheduledNow } from './schedule';
 import { getUpdatedPackageFiles } from './get-updated';
@@ -38,7 +40,7 @@ import {
 import { BranchStatus } from '../../types';
 import { exec } from '../../util/exec';
 import { regEx } from '../../util/regex';
-import { readLocalFile } from '../../util/fs';
+import { readLocalFile, writeLocalFile } from '../../util/fs';
 
 // TODO: proper typings
 function rebaseCheck(config: RenovateConfig, branchPr: any): boolean {
@@ -58,8 +60,8 @@ export async function processBranch(
 ): Promise<ProcessBranchResult> {
   const config: BranchConfig = { ...branchConfig };
   const dependencies = config.upgrades
-    .map(upgrade => upgrade.depName)
-    .filter(v => v) // remove nulls (happens for lock file maintenance)
+    .map((upgrade) => upgrade.depName)
+    .filter((v) => v) // remove nulls (happens for lock file maintenance)
     .filter((value, i, list) => list.indexOf(value) === i); // remove duplicates
   logger.debug(
     { dependencies },
@@ -237,7 +239,7 @@ export async function processBranch(
 
     if (
       config.upgrades.some(
-        upgrade => upgrade.stabilityDays && upgrade.releaseTimestamp
+        (upgrade) => upgrade.stabilityDays && upgrade.releaseTimestamp
       )
     ) {
       // Only set a stability status check if one or more of the updates contain
@@ -308,7 +310,7 @@ export async function processBranch(
     if (config.updatedArtifacts && config.updatedArtifacts.length) {
       logger.debug(
         {
-          updatedArtifacts: config.updatedArtifacts.map(f =>
+          updatedArtifacts: config.updatedArtifacts.map((f) =>
             f.name === '|delete|' ? `${f.contents} (delete)` : f.name
           ),
         },
@@ -319,6 +321,10 @@ export async function processBranch(
     }
 
     if (
+      /* Only run post-upgrade tasks if there are changes to package files... */
+      (config.updatedPackageFiles?.length > 0 ||
+        /* ... or changes to artifacts */
+        config.updatedArtifacts?.length > 0) &&
       global.trustLevel === 'high' &&
       is.nonEmptyArray(config.allowedPostUpgradeCommands)
     ) {
@@ -333,9 +339,25 @@ export async function processBranch(
       const fileFilters = config.postUpgradeTasks.fileFilters || [];
 
       if (is.nonEmptyArray(commands)) {
+        // Persist updated files in file system so any executed commands can see them
+        for (const file of concat(
+          config.updatedPackageFiles,
+          config.updatedArtifacts
+        )) {
+          if (file.name !== '|delete|') {
+            let contents;
+            if (typeof file.contents === 'string') {
+              contents = Buffer.from(file.contents);
+            } else {
+              contents = file.contents;
+            }
+            await writeLocalFile(join(config.localDir, file.name), contents);
+          }
+        }
+
         for (const cmd of commands) {
           if (
-            !config.allowedPostUpgradeCommands.some(pattern =>
+            !config.allowedPostUpgradeCommands.some((pattern) =>
               regEx(pattern).test(cmd)
             )
           ) {
@@ -578,7 +600,7 @@ export async function processBranch(
         content +=
           ' - you rename this PR\'s title to start with "rebase!" to trigger it manually';
         content += '\n\nThe artifact failure details are included below:\n\n';
-        config.artifactErrors.forEach(error => {
+        config.artifactErrors.forEach((error) => {
           content += `##### File name: ${error.lockFile}\n\n`;
           content += `\`\`\`\n${error.stderr}\n\`\`\`\n\n`;
         });

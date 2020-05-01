@@ -270,6 +270,14 @@ const options: RenovateOptions[] = [
     admin: true,
     type: 'string',
   },
+  {
+    name: 'composerIgnorePlatformReqs',
+    description:
+      'Enable / disable use of --ignore-platform-reqs in the composer package manager.',
+    type: 'boolean',
+    default: true,
+    admin: true,
+  },
   // Log options
   {
     name: 'logLevel',
@@ -862,7 +870,6 @@ const options: RenovateOptions[] = [
   {
     name: 'pinDigests',
     description: 'Whether to add digests to Dockerfile source images',
-    stage: 'package',
     type: 'boolean',
     default: false,
   },

@@ -3,93 +3,84 @@
 exports[`lib/manager/ansible/extract extractPackageFile() extracts multiple image lines from docker_container 1`] = `
 Array [
   Object {
+    "autoReplaceStringTemplate": "{{depName}}{{#if newValue}}:{{newValue}}{{/if}}{{#if newDigest}}@{{newDigest}}{{/if}}",
     "currentDigest": undefined,
     "currentValue": undefined,
     "datasource": "docker",
     "depName": "busybox",
-    "managerData": Object {
-      "lineNumber": 4,
-    },
+    "replaceString": "busybox",
     "versioning": "docker",
   },
   Object {
+    "autoReplaceStringTemplate": "{{depName}}{{#if newValue}}:{{newValue}}{{/if}}{{#if newDigest}}@{{newDigest}}{{/if}}",
     "currentDigest": undefined,
     "currentValue": undefined,
     "datasource": "docker",
     "depName": "redis",
-    "managerData": Object {
-      "lineNumber": 11,
-    },
+    "replaceString": "redis",
     "versioning": "docker",
   },
   Object {
+    "autoReplaceStringTemplate": "{{depName}}{{#if newValue}}:{{newValue}}{{/if}}{{#if newDigest}}@{{newDigest}}{{/if}}",
     "currentDigest": undefined,
     "currentValue": undefined,
     "datasource": "docker",
     "depName": "someuser/appimage",
-    "managerData": Object {
-      "lineNumber": 23,
-    },
+    "replaceString": "someuser/appimage",
     "versioning": "docker",
   },
   Object {
+    "autoReplaceStringTemplate": "{{depName}}{{#if newValue}}:{{newValue}}{{/if}}{{#if newDigest}}@{{newDigest}}{{/if}}",
     "currentDigest": undefined,
     "currentValue": "14.04",
     "datasource": "docker",
     "depName": "ubuntu",
-    "managerData": Object {
-      "lineNumber": 40,
-    },
+    "replaceString": "ubuntu:14.04",
     "versioning": "docker",
   },
   Object {
+    "autoReplaceStringTemplate": "{{depName}}{{#if newValue}}:{{newValue}}{{/if}}{{#if newDigest}}@{{newDigest}}{{/if}}",
     "currentDigest": undefined,
     "currentValue": undefined,
     "datasource": "docker",
     "depName": "someuser/anotherappimage",
-    "managerData": Object {
-      "lineNumber": 52,
-    },
+    "replaceString": "someuser/anotherappimage",
     "versioning": "docker",
   },
   Object {
+    "autoReplaceStringTemplate": "{{depName}}{{#if newValue}}:{{newValue}}{{/if}}{{#if newDigest}}@{{newDigest}}{{/if}}",
     "currentDigest": undefined,
     "currentValue": undefined,
     "datasource": "docker",
     "depName": "busybox",
-    "managerData": Object {
-      "lineNumber": 64,
-    },
+    "replaceString": "busybox",
     "versioning": "docker",
   },
   Object {
+    "autoReplaceStringTemplate": "{{depName}}{{#if newValue}}:{{newValue}}{{/if}}{{#if newDigest}}@{{newDigest}}{{/if}}",
     "currentDigest": undefined,
     "currentValue": "latest",
     "datasource": "docker",
     "depName": "postgres",
-    "managerData": Object {
-      "lineNumber": 76,
-    },
+    "replaceString": "postgres:latest",
     "versioning": "docker",
   },
   Object {
+    "autoReplaceStringTemplate": "{{depName}}{{#if newValue}}:{{newValue}}{{/if}}{{#if newDigest}}@{{newDigest}}{{/if}}",
     "currentDigest": undefined,
     "currentValue": "14.04",
     "datasource": "docker",
     "depName": "ubuntu",
-    "managerData": Object {
-      "lineNumber": 83,
-    },
+    "replaceString": "ubuntu:14.04",
     "versioning": "docker",
   },
   Object {
+    "autoReplaceStringTemplate": "{{depName}}{{#if newValue}}:{{newValue}}{{/if}}{{#if newDigest}}@{{newDigest}}{{/if}}",
     "currentDigest": undefined,
     "currentValue": "14.04",
     "datasource": "docker",
     "depName": "ubuntu",
-    "managerData": Object {
-      "lineNumber": 96,
-    },
+    "replaceString": "ubuntu:14.04",
     "versioning": "docker",
   },
 ]
@@ -98,43 +89,39 @@ Array [
 exports[`lib/manager/ansible/extract extractPackageFile() extracts multiple image lines from docker_service 1`] = `
 Array [
   Object {
+    "autoReplaceStringTemplate": "{{depName}}{{#if newValue}}:{{newValue}}{{/if}}{{#if newDigest}}@{{newDigest}}{{/if}}",
     "currentDigest": undefined,
     "currentValue": "11.5.1",
     "datasource": "docker",
     "depName": "sameersbn/gitlab",
-    "managerData": Object {
-      "lineNumber": 8,
-    },
+    "replaceString": "sameersbn/gitlab:11.5.1",
     "versioning": "docker",
   },
   Object {
+    "autoReplaceStringTemplate": "{{depName}}{{#if newValue}}:{{newValue}}{{/if}}{{#if newDigest}}@{{newDigest}}{{/if}}",
     "currentDigest": undefined,
     "currentValue": "10",
     "datasource": "docker",
     "depName": "sameersbn/postgresql",
-    "managerData": Object {
-      "lineNumber": 30,
-    },
+    "replaceString": "sameersbn/postgresql:10",
     "versioning": "docker",
   },
   Object {
+    "autoReplaceStringTemplate": "{{depName}}{{#if newValue}}:{{newValue}}{{/if}}{{#if newDigest}}@{{newDigest}}{{/if}}",
     "currentDigest": undefined,
     "currentValue": "4.0.9-1",
     "datasource": "docker",
     "depName": "sameersbn/redis",
-    "managerData": Object {
-      "lineNumber": 38,
-    },
+    "replaceString": "sameersbn/redis:4.0.9-1",
     "versioning": "docker",
   },
   Object {
+    "autoReplaceStringTemplate": "{{depName}}{{#if newValue}}:{{newValue}}{{/if}}{{#if newDigest}}@{{newDigest}}{{/if}}",
     "currentDigest": undefined,
     "currentValue": "2.6.2",
     "datasource": "docker",
     "depName": "registry",
-    "managerData": Object {
-      "lineNumber": 43,
-    },
+    "replaceString": "registry:2.6.2",
     "versioning": "docker",
   },
 ]

@@ -117,7 +117,7 @@ function tokenize(versionStr: string): Token[] {
   let buf: Token[] = [];
   let result: Token[] = [];
   let leadingZero = true;
-  iterateTokens(versionStr.toLowerCase().replace(/^v/i, ''), token => {
+  iterateTokens(versionStr.toLowerCase().replace(/^v/i, ''), (token) => {
     if (token.prefix === PREFIX_HYPHEN) {
       buf = [];
     }
@@ -308,7 +308,7 @@ function parseRange(rangeStr: string): any {
   let result: Range[] = [];
   let interval = emptyInterval();
 
-  commaSplit.forEach(subStr => {
+  commaSplit.forEach((subStr) => {
     if (!result) {
       return;
     }
@@ -432,7 +432,7 @@ function rangeToStr(fullRange: Range[]): string | null {
     }
   }
 
-  const intervals = fullRange.map(val =>
+  const intervals = fullRange.map((val) =>
     [
       val.leftBracket,
       valToStr(val.leftValue),
@@ -487,6 +487,12 @@ function autoExtendMavenRange(
     interval.rightValue = newValue;
   } else {
     interval.leftValue = newValue;
+  }
+  if (interval.leftValue && interval.rightValue) {
+    if (compare(interval.leftValue, interval.rightValue) !== 1) {
+      return rangeToStr(range);
+    }
+    return currentRepresentation;
   }
   return rangeToStr(range);
 }

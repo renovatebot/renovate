@@ -1,5 +1,4 @@
 import is from '@sindresorhus/is';
-import { coerce } from 'semver';
 import { regEx } from '../../util/regex';
 import { logger } from '../../logger';
 import { Http } from '../../util/http';
@@ -21,8 +20,6 @@ interface GradleRelease {
   nightly?: boolean;
   rcFor?: string;
   version: string;
-  downloadUrl?: string;
-  checksumUrl?: string;
   buildTime?: string;
 }
 
@@ -48,20 +45,18 @@ export async function getReleases({
     : [GradleVersionsServiceUrl];
 
   const allReleases: Release[][] = await Promise.all(
-    versionsUrls.map(async url => {
+    versionsUrls.map(async (url) => {
       try {
         const response = await http.getJson<GradleRelease[]>(url);
         const releases = response.body
-          .filter(release => !release.snapshot && !release.nightly)
+          .filter((release) => !release.snapshot && !release.nightly)
           .filter(
-            release =>
+            (release) =>
               // some milestone have wrong metadata and need to be filtered by version name content
               release.rcFor === '' && !release.version.includes('milestone')
           )
-          .map(release => ({
-            version: coerce(release.version).toString(),
-            downloadUrl: release.downloadUrl,
-            checksumUrl: release.checksumUrl,
+          .map((release) => ({
+            version: release.version,
             releaseTimestamp: formatBuildTime(release.buildTime),
           }));
         return releases;

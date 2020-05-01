@@ -18,7 +18,7 @@ async function resolvePluginReleases(
 ): Promise<string[]> {
   const searchRoot = `${rootUrl}/${artifact}`;
   const parse = (content: string): string[] =>
-    parseIndexDir(content, x => !/^\.+$/.test(x));
+    parseIndexDir(content, (x) => !/^\.+$/.test(x));
   const indexContent = await downloadHttpProtocol(
     ensureTrailingSlash(searchRoot),
     'sbt'
@@ -26,7 +26,9 @@ async function resolvePluginReleases(
   if (indexContent) {
     const releases: string[] = [];
     const scalaVersionItems = parse(indexContent);
-    const scalaVersions = scalaVersionItems.map(x => x.replace(/^scala_/, ''));
+    const scalaVersions = scalaVersionItems.map((x) =>
+      x.replace(/^scala_/, '')
+    );
     const searchVersions = !scalaVersions.includes(scalaVersion)
       ? scalaVersions
       : [scalaVersion];
@@ -46,7 +48,7 @@ async function resolvePluginReleases(
           );
           if (releasesIndexContent) {
             const releasesParsed = parse(releasesIndexContent);
-            releasesParsed.forEach(x => releases.push(x));
+            releasesParsed.forEach((x) => releases.push(x));
           }
         }
       }
@@ -67,9 +69,9 @@ export async function getReleases({
   const artifactIdSplit = artifactId.split('_');
   const [artifact, scalaVersion] = artifactIdSplit;
 
-  const repoRoots = registryUrls.map(x => x.replace(/\/?$/, ''));
+  const repoRoots = registryUrls.map((x) => x.replace(/\/?$/, ''));
   const searchRoots: string[] = [];
-  repoRoots.forEach(repoRoot => {
+  repoRoots.forEach((repoRoot) => {
     // Optimize lookup order
     searchRoots.push(`${repoRoot}/${groupIdSplit.join('.')}`);
     searchRoots.push(`${repoRoot}/${groupIdSplit.join('/')}`);
@@ -91,7 +93,7 @@ export async function getReleases({
         group: groupId,
         name: artifactId,
         dependencyUrl,
-        releases: versions.map(v => ({ version: v })),
+        releases: versions.map((v) => ({ version: v })),
       };
     }
   }

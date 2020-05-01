@@ -3,7 +3,7 @@ import { basename, dirname, normalize, join } from 'path';
 import { XmlDocument, XmlElement } from 'xmldoc';
 import { logger } from '../../logger';
 import { ExtractConfig, PackageFile, PackageDependency } from '../common';
-import { platform } from '../../platform';
+import { readLocalFile } from '../../util/fs';
 import * as datasourceMaven from '../../datasource/maven';
 import { MAVEN_REPO } from '../../datasource/maven/common';
 import { SkipReason } from '../../types';
@@ -92,19 +92,19 @@ function applyProps(
   props: MavenProp
 ): PackageDependency<Record<string, any>> {
   const replaceAll = (str: string): string =>
-    str.replace(/\${.*?}/g, substr => {
+    str.replace(/\${.*?}/g, (substr) => {
       const propKey = substr.slice(2, -1).trim();
       const propValue = props[propKey];
       return propValue ? propValue.val : substr;
     });
 
   const depName = replaceAll(dep.depName);
-  const registryUrls = dep.registryUrls.map(url => replaceAll(url));
+  const registryUrls = dep.registryUrls.map((url) => replaceAll(url));
 
   let fileReplacePosition = dep.fileReplacePosition;
   let propSource = null;
   let groupName = null;
-  const currentValue = dep.currentValue.replace(/^\${.*?}$/, substr => {
+  const currentValue = dep.currentValue.replace(/^\${.*?}$/, (substr) => {
     const propKey = substr.slice(2, -1).trim();
     const propValue = props[propKey];
     if (propValue) {
@@ -196,9 +196,9 @@ export function extractPackage(
         repoUrls.push(repoUrl);
       }
     }
-    result.deps.forEach(dep => {
+    result.deps.forEach((dep) => {
       if (dep.registryUrls) {
-        repoUrls.forEach(url => dep.registryUrls.push(url));
+        repoUrls.forEach((url) => dep.registryUrls.push(url));
       }
     });
   }
@@ -218,7 +218,7 @@ export function resolveParents(packages: PackageFile[]): PackageFile[] {
   const extractedDeps: Record<string, PackageDependency[]> = {};
   const extractedProps: Record<string, MavenProp> = {};
   const registryUrls: Record<string, Set<string>> = {};
-  packages.forEach(pkg => {
+  packages.forEach((pkg) => {
     const name = pkg.packageFile;
     packageFileNames.push(name);
     extractedPackages[name] = pkg;
@@ -228,7 +228,7 @@ export function resolveParents(packages: PackageFile[]): PackageFile[] {
   // Construct package-specific prop scopes
   // and merge them in reverse order,
   // which allows inheritance/overriding.
-  packageFileNames.forEach(name => {
+  packageFileNames.forEach((name) => {
     registryUrls[name] = new Set();
     const propsHierarchy: Record<string, MavenProp>[] = [];
     const visitedPackages: Set<string> = new Set();
@@ -237,9 +237,9 @@ export function resolveParents(packages: PackageFile[]): PackageFile[] {
       propsHierarchy.unshift(pkg.mavenProps);
 
       if (pkg.deps) {
-        pkg.deps.forEach(dep => {
+        pkg.deps.forEach((dep) => {
           if (dep.registryUrls) {
-            dep.registryUrls.forEach(url => {
+            dep.registryUrls.forEach((url) => {
               registryUrls[name].add(url);
             });
           }
@@ -258,25 +258,25 @@ export function resolveParents(packages: PackageFile[]): PackageFile[] {
   });
 
   // Resolve registryUrls
-  packageFileNames.forEach(name => {
+  packageFileNames.forEach((name) => {
     const pkg = extractedPackages[name];
-    pkg.deps.forEach(rawDep => {
+    pkg.deps.forEach((rawDep) => {
       const urlsSet = new Set([...rawDep.registryUrls, ...registryUrls[name]]);
       rawDep.registryUrls = [...urlsSet]; // eslint-disable-line no-param-reassign
     });
   });
 
   // Resolve placeholders
-  packageFileNames.forEach(name => {
+  packageFileNames.forEach((name) => {
     const pkg = extractedPackages[name];
-    pkg.deps.forEach(rawDep => {
+    pkg.deps.forEach((rawDep) => {
       const dep = applyProps(rawDep, extractedProps[name]);
       const sourceName = dep.propSource || name;
       extractedDeps[sourceName].push(dep);
     });
   });
 
-  return packageFileNames.map(name => ({
+  return packageFileNames.map((name) => ({
     ...extractedPackages[name],
     deps: extractedDeps[name],
   }));
@@ -285,9 +285,9 @@ export function resolveParents(packages: PackageFile[]): PackageFile[] {
 function cleanResult(
   packageFiles: PackageFile<Record<string, any>>[]
 ): PackageFile<Record<string, any>>[] {
-  packageFiles.forEach(packageFile => {
+  packageFiles.forEach((packageFile) => {
     delete packageFile.mavenProps; // eslint-disable-line no-param-reassign
-    packageFile.deps.forEach(dep => {
+    packageFile.deps.forEach((dep) => {
       delete dep.propSource; // eslint-disable-line no-param-reassign
     });
   });
@@ -300,7 +300,7 @@ export async function extractAllPackageFiles(
 ): Promise<PackageFile[]> {
   const packages: PackageFile[] = [];
   for (const packageFile of packageFiles) {
-    const content = await platform.getFile(packageFile);
+    const content = await readLocalFile(packageFile, 'utf8');
     if (content) {
       const pkg = extractPackage(content, packageFile);
       if (pkg) {

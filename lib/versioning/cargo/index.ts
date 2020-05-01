@@ -1,5 +1,6 @@
 import { api as npm } from '../npm';
 import { VersioningApi, NewValueConfig } from '../common';
+import { logger } from '../../logger';
 
 export const id = 'cargo';
 export const displayName = 'Cargo';
@@ -33,10 +34,14 @@ function notEmpty(s: string): boolean {
 }
 
 function npm2cargo(input: string): string {
+  // istanbul ignore if
+  if (!input) {
+    return input;
+  }
   // Note: this doesn't remove the ^
   const res = input
     .split(' ')
-    .map(str => str.trim())
+    .map((str) => str.trim())
     .filter(notEmpty);
   const operators = ['^', '~', '=', '>', '<', '<=', '>='];
   for (let i = 0; i < res.length - 1; i += 1) {
@@ -65,12 +70,7 @@ const minSatisfyingVersion = (versions: string[], range: string): string =>
 
 const isSingleVersion = (constraint: string): string | boolean =>
   constraint.trim().startsWith('=') &&
-  isVersion(
-    constraint
-      .trim()
-      .substring(1)
-      .trim()
-  );
+  isVersion(constraint.trim().substring(1).trim());
 
 function getNewValue({
   currentValue,
@@ -78,6 +78,9 @@ function getNewValue({
   fromVersion,
   toVersion,
 }: NewValueConfig): string {
+  if (!currentValue || currentValue === '*') {
+    return currentValue;
+  }
   if (rangeStrategy === 'pin' || isSingleVersion(currentValue)) {
     let res = '=';
     if (currentValue.startsWith('= ')) {
@@ -93,6 +96,14 @@ function getNewValue({
     toVersion,
   });
   let newCargo = npm2cargo(newSemver);
+  // istanbul ignore if
+  if (!newCargo) {
+    logger.info(
+      { currentValue, newSemver },
+      'Could not get cargo version from semver'
+    );
+    return currentValue;
+  }
   // Try to reverse any caret we added
   if (newCargo.startsWith('^') && !currentValue.startsWith('^')) {
     newCargo = newCargo.substring(1);

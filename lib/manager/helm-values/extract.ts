@@ -21,13 +21,13 @@ function findDependencies(
     return packageDependencies;
   }
 
-  Object.keys(parsedContent).forEach(key => {
+  Object.keys(parsedContent).forEach((key) => {
     if (matchesHelmValuesDockerHeuristic(key, parsedContent[key])) {
       const currentItem = parsedContent[key];
 
       const registry = currentItem.registry ? `${currentItem.registry}/` : '';
       packageDependencies.push(
-        getDep(`${registry}${currentItem.repository}:${currentItem.tag}`)
+        getDep(`${registry}${currentItem.repository}:${currentItem.tag}`, false)
       );
     } else {
       findDependencies(parsedContent[key], packageDependencies);

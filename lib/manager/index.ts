@@ -5,7 +5,7 @@ import {
   PackageUpdateConfig,
   RangeConfig,
   Result,
-  PackageUpdateResult,
+  LookupUpdate,
 } from './common';
 import { RangeStrategy } from '../types';
 import {
@@ -49,24 +49,33 @@ export const getLanguageList = (): string[] => languageList;
 export const getManagerList = (): string[] => managerList;
 export const getManagers = (): Map<string, ManagerApi> => managers;
 
-export function extractAllPackageFiles(
+export async function extractAllPackageFiles(
   manager: string,
   config: ExtractConfig,
   files: string[]
-): Result<PackageFile[] | null> {
+): Promise<PackageFile[] | null> {
   if (!managers.has(manager)) {
     return null;
   }
   const m = managers.get(manager);
-  return m.extractAllPackageFiles
-    ? m.extractAllPackageFiles(config, files)
-    : null;
+  if (m.extractAllPackageFiles) {
+    const res = await m.extractAllPackageFiles(config, files);
+    // istanbul ignore if
+    if (!res) {
+      return null;
+    }
+    return res.map((packageFile) => ({
+      ...packageFile,
+      managerPackageFileList: files,
+    }));
+  }
+  return null;
 }
 
 export function getPackageUpdates(
   manager: string,
   config: PackageUpdateConfig
-): Result<PackageUpdateResult[]> | null {
+): Result<LookupUpdate[]> | null {
   if (!managers.has(manager)) {
     return null;
   }

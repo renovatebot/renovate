@@ -2,12 +2,17 @@ import { logger } from '../../logger';
 import { Preset } from './common';
 import { Http, HttpOptions } from '../../util/http';
 import { PLATFORM_FAILURE } from '../../constants/error-messages';
+import { ensureTrailingSlash } from '../../util/url';
+import { PLATFORM_TYPE_GITHUB } from '../../constants/platforms';
 
-const id = 'github';
-const http = new Http(id);
+const http = new Http(PLATFORM_TYPE_GITHUB);
 
-async function fetchJSONFile(repo: string, fileName: string): Promise<Preset> {
-  const url = `https://api.github.com/repos/${repo}/contents/${fileName}`;
+export async function fetchJSONFile(
+  repo: string,
+  fileName: string,
+  endpoint: string
+): Promise<Preset> {
+  const url = `${endpoint}repos/${repo}/contents/${fileName}`;
   const opts: HttpOptions = {
     headers: {
       accept: global.appMode
@@ -23,7 +28,7 @@ async function fetchJSONFile(repo: string, fileName: string): Promise<Preset> {
       throw err;
     }
     logger.debug(
-      { statusCode: err.statusCodef },
+      { statusCode: err.statusCode },
       `Failed to retrieve ${fileName} from repo`
     );
     throw new Error('dep not found');
@@ -37,24 +42,42 @@ async function fetchJSONFile(repo: string, fileName: string): Promise<Preset> {
   }
 }
 
+export async function getPresetFromEndpoint(
+  pkgName: string,
+  filePreset: string,
+  endpoint = 'https://api.github.com/'
+): Promise<Preset> {
+  // eslint-disable-next-line no-param-reassign
+  endpoint = ensureTrailingSlash(endpoint);
+  const [fileName, presetName, subPresetName] = filePreset.split('/');
+  let jsonContent;
+  if (fileName === 'default') {
+    try {
+      jsonContent = await fetchJSONFile(pkgName, 'default.json', endpoint);
+    } catch (err) {
+      if (err.message !== 'dep not found') {
+        throw err;
+      }
+      logger.debug('default.json preset not found - trying renovate.json');
+      jsonContent = await fetchJSONFile(pkgName, 'renovate.json', endpoint);
+    }
+  } else {
+    jsonContent = await fetchJSONFile(pkgName, `${fileName}.json`, endpoint);
+  }
+  if (presetName) {
+    if (subPresetName) {
+      return jsonContent[presetName]
+        ? jsonContent[presetName][subPresetName]
+        : undefined;
+    }
+    return jsonContent[presetName];
+  }
+  return jsonContent;
+}
+
 export async function getPreset(
   pkgName: string,
   presetName = 'default'
 ): Promise<Preset> {
-  if (presetName === 'default') {
-    try {
-      const defaultJson = await fetchJSONFile(pkgName, 'default.json');
-      return defaultJson;
-    } catch (err) {
-      if (err.message === PLATFORM_FAILURE) {
-        throw err;
-      }
-      if (err.message === 'dep not found') {
-        logger.debug('default.json preset not found - trying renovate.json');
-        return fetchJSONFile(pkgName, 'renovate.json');
-      }
-      throw err;
-    }
-  }
-  return fetchJSONFile(pkgName, `${presetName}.json`);
+  return getPresetFromEndpoint(pkgName, presetName);
 }

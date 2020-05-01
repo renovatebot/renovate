@@ -136,7 +136,7 @@ export async function writeExistingFiles(
   }
   const npmFiles = packageFiles.npm;
   logger.debug(
-    { packageFiles: npmFiles.map(n => n.packageFile) },
+    { packageFiles: npmFiles.map((n) => n.packageFile) },
     'Writing package.json files'
   );
   const writtenLockFiles = [];
@@ -150,15 +150,17 @@ export async function writeExistingFiles(
     const massagedFile: PackageJson = JSON.parse(
       await platform.getFile(packageFile.packageFile)
     );
-    if (massagedFile.name) {
-      massagedFile.name = massagedFile.name.replace(/[{}]/g, '');
+    if (massagedFile) {
+      if (massagedFile.name) {
+        massagedFile.name = massagedFile.name.replace(/[{}]/g, '');
+      }
+      delete massagedFile.engines;
+      delete massagedFile.scripts;
+      await fs.outputFile(
+        upath.join(basedir, 'package.json'),
+        JSON.stringify(massagedFile)
+      );
     }
-    delete massagedFile.engines;
-    delete massagedFile.scripts;
-    await fs.outputFile(
-      upath.join(basedir, 'package.json'),
-      JSON.stringify(massagedFile)
-    );
     const npmrc = packageFile.npmrc || config.npmrc;
     if (npmrc) {
       await fs.outputFile(upath.join(basedir, '.npmrc'), npmrc);
@@ -199,7 +201,7 @@ export async function writeExistingFiles(
           try {
             const npmLockParsed = JSON.parse(existingNpmLock);
             if (npmLockParsed.dependencies) {
-              widens.forEach(depName => {
+              widens.forEach((depName) => {
                 delete npmLockParsed.dependencies[depName];
               });
             }
@@ -446,7 +448,7 @@ export async function getAdditionalFiles(
     const fileName = path.basename(lockFile);
     logger.debug(`Generating ${fileName} for ${lockFileDir}`);
     const upgrades = config.upgrades.filter(
-      upgrade => upgrade.npmLock === lockFile
+      (upgrade) => upgrade.npmLock === lockFile
     );
     const res = await npm.generateLockFile(
       fullLockFileDir,
@@ -509,7 +511,7 @@ export async function getAdditionalFiles(
     logger.debug(`Generating yarn.lock for ${lockFileDir}`);
     const lockFileName = upath.join(lockFileDir, 'yarn.lock');
     const upgrades = config.upgrades.filter(
-      upgrade => upgrade.yarnLock === lockFile
+      (upgrade) => upgrade.yarnLock === lockFile
     );
     const res = await yarn.generateLockFile(
       upath.join(config.localDir, lockFileDir),
@@ -563,7 +565,7 @@ export async function getAdditionalFiles(
           if (yarnrc) {
             const mirrorLine = yarnrc
               .split('\n')
-              .find(line => line.startsWith('yarn-offline-mirror '));
+              .find((line) => line.startsWith('yarn-offline-mirror '));
             if (mirrorLine) {
               const mirrorPath = mirrorLine
                 .split(' ')[1]
@@ -663,7 +665,7 @@ export async function getAdditionalFiles(
     let lockFile: string;
     logger.debug(`Finding package.json for lerna directory "${lernaDir}"`);
     const lernaPackageFile = packageFiles.npm.find(
-      p => path.dirname(p.packageFile) === lernaDir
+      (p) => path.dirname(p.packageFile) === lernaDir
     );
     if (!lernaPackageFile) {
       logger.debug('No matching package.json found');
@@ -686,9 +688,9 @@ export async function getAdditionalFiles(
     const res = await lerna.generateLockFiles(
       lernaPackageFile.lernaClient,
       fullLearnaFileDir,
+      config,
       env,
-      skipInstalls,
-      config.binarySource
+      skipInstalls
     );
     // istanbul ignore else
     if (res.stderr) {

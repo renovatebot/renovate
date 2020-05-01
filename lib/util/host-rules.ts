@@ -18,7 +18,7 @@ export function add(params: HostRule): void {
   }
   hostRules.push(params);
   const confidentialFields = ['password', 'token'];
-  confidentialFields.forEach(field => {
+  confidentialFields.forEach((field) => {
     const secret = params[field];
     if (secret && secret.length > 3) {
       sanitize.add(secret);
@@ -95,45 +95,45 @@ export function find(search: HostRuleSearch): HostRule {
   let res = ({} as any) as HostRule;
   // First, apply empty rule matches
   hostRules
-    .filter(rule => isEmptyRule(rule))
-    .forEach(rule => {
+    .filter((rule) => isEmptyRule(rule))
+    .forEach((rule) => {
       res = merge(res, rule);
     });
   // Next, find hostType-only matches
   hostRules
-    .filter(rule => isHostTypeRule(rule) && matchesHostType(rule, search))
-    .forEach(rule => {
+    .filter((rule) => isHostTypeRule(rule) && matchesHostType(rule, search))
+    .forEach((rule) => {
       res = merge(res, rule);
     });
   // Next, find domainName-only matches
   hostRules
-    .filter(rule => isDomainNameRule(rule) && matchesDomainName(rule, search))
-    .forEach(rule => {
+    .filter((rule) => isDomainNameRule(rule) && matchesDomainName(rule, search))
+    .forEach((rule) => {
       res = merge(res, rule);
     });
   // Next, find hostName-only matches
   hostRules
-    .filter(rule => isHostNameRule(rule) && matchesHostName(rule, search))
-    .forEach(rule => {
+    .filter((rule) => isHostNameRule(rule) && matchesHostName(rule, search))
+    .forEach((rule) => {
       res = merge(res, rule);
     });
   // Next, find baseUrl-only matches
   hostRules
-    .filter(rule => isBaseUrlRule(rule) && matchesBaseUrl(rule, search))
-    .forEach(rule => {
+    .filter((rule) => isBaseUrlRule(rule) && matchesBaseUrl(rule, search))
+    .forEach((rule) => {
       res = merge(res, rule);
     });
   // Finally, find combination matches
   hostRules
     .filter(
-      rule =>
+      (rule) =>
         isMultiRule(rule) &&
         matchesHostType(rule, search) &&
         (matchesDomainName(rule, search) ||
           matchesHostName(rule, search) ||
           matchesBaseUrl(rule, search))
     )
-    .forEach(rule => {
+    .forEach((rule) => {
       res = merge(res, rule);
     });
   delete res.hostType;
@@ -145,8 +145,8 @@ export function find(search: HostRuleSearch): HostRule {
 
 export function hosts({ hostType }: { hostType: string }): string[] {
   return hostRules
-    .filter(rule => rule.hostType === hostType)
-    .map(rule => {
+    .filter((rule) => rule.hostType === hostType)
+    .map((rule) => {
       if (rule.hostName) {
         return rule.hostName;
       }
@@ -159,7 +159,7 @@ export function hosts({ hostType }: { hostType: string }): string[] {
 }
 
 export function findAll({ hostType }: { hostType: string }): HostRule[] {
-  return hostRules.filter(rule => rule.hostType === hostType);
+  return hostRules.filter((rule) => rule.hostType === hostType);
 }
 
 export function clear(): void {
