@@ -1554,7 +1554,7 @@ Array [
 ]
 `;
 
-exports[`platform/github getBranchStatus() should suceed if no status and all passed check runs 1`] = `
+exports[`platform/github getBranchStatus() should succeed if no status and all passed check runs 1`] = `
 Array [
   Object {
     "headers": Object {

@@ -619,7 +619,7 @@ describe('platform/github', () => {
       expect(res).toEqual(BranchStatus.red);
       expect(httpMock.getTrace()).toMatchSnapshot();
     });
-    it('should suceed if no status and all passed check runs', async () => {
+    it('should succeed if no status and all passed check runs', async () => {
       const scope = httpMock.scope(githubApiHost);
       initRepoMock(scope, 'some/repo');
       scope
