@@ -5,6 +5,7 @@ import { getPkgReleases } from '..';
 import { GotResponse } from '../../platform';
 import { clearRepoCache } from '../../util/cache';
 import { mocked } from '../../../test/util';
+import { clearRepoCache } from '../../util/cache';
 
 jest.mock('../../util/got');
 const got: any = mocked(_got);
