@@ -38,12 +38,12 @@ describe('platform/gh-graphql-wrapper', () => {
   it('supports app mode', async () => {
     global.appMode = true;
     await getGraphqlNodes(query, 'testItem');
-    expect(got.post.mock.calls[0][1].headers.accept).toEqual(
+    expect(got.mock.calls[0][1].headers.accept).toEqual(
       'application/vnd.github.machine-man-preview+json, application/vnd.github.merge-info-preview+json'
     );
   });
   it('returns empty array for undefined data', async () => {
-    got.post.mockReturnValue({
+    got.mockReturnValue({
       body: {
         data: {
           someprop: 'someval',
@@ -53,7 +53,7 @@ describe('platform/gh-graphql-wrapper', () => {
     expect(await getGraphqlNodes(query, 'testItem')).toEqual([]);
   });
   it('returns empty array for undefined data.', async () => {
-    got.post.mockReturnValue({
+    got.mockReturnValue({
       body: {
         data: { repository: { otherField: 'someval' } },
       },
@@ -65,12 +65,12 @@ describe('platform/gh-graphql-wrapper', () => {
       statusCode: 418,
       message: 'Sorry, this is a teapot',
     };
-    got.post.mockImplementationOnce(() => Promise.reject(gotErr));
+    got.mockImplementationOnce(() => Promise.reject(gotErr));
     const e = await getError(query, 'someItem');
     expect(e).toBe(gotErr);
   });
   it('halves node count and retries request', async () => {
-    got.post.mockReturnValue({
+    got.mockReturnValue({
       body: {
         data: {
           someprop: 'someval',
@@ -79,10 +79,10 @@ describe('platform/gh-graphql-wrapper', () => {
     });
 
     await getGraphqlNodes(query, 'testItem');
-    expect(got.post).toHaveBeenCalledTimes(7);
+    expect(got).toHaveBeenCalledTimes(7);
   });
   it('retrieves all data from all pages', async () => {
-    got.post.mockReturnValueOnce({
+    got.mockReturnValueOnce({
       body: {
         data: {
           repository: {
@@ -105,7 +105,7 @@ describe('platform/gh-graphql-wrapper', () => {
       },
     });
 
-    got.post.mockReturnValueOnce({
+    got.mockReturnValueOnce({
       body: {
         data: {
           repository: {
@@ -128,7 +128,7 @@ describe('platform/gh-graphql-wrapper', () => {
       },
     });
 
-    got.post.mockReturnValueOnce({
+    got.mockReturnValueOnce({
       body: {
         data: {
           repository: {
@@ -152,7 +152,7 @@ describe('platform/gh-graphql-wrapper', () => {
     });
 
     const items = await getGraphqlNodes(query, 'testItem');
-    expect(got.post).toHaveBeenCalledTimes(3);
+    expect(got).toHaveBeenCalledTimes(3);
     expect(items.length).toEqual(3);
   });
 });

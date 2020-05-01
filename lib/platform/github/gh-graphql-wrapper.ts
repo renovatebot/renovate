@@ -45,7 +45,7 @@ async function get<T = unknown>(
   logger.trace(`Performing Github GraphQL request`);
 
   try {
-    const res = await got.post('graphql', options);
+    const res = await got('graphql', options);
     result = res && res.body;
   } catch (gotErr) {
     dispatchError(gotErr, path, options);
