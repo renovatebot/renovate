@@ -1,4 +1,4 @@
-import { init, getLimitRemaining, incrementLimit } from './limits';
+import { getLimitRemaining, incrementLimit, init } from './limits';
 
 describe('lib/workers/global/limits', () => {
   describe('init()', () => {

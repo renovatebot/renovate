@@ -1,11 +1,11 @@
 import URL from 'url';
 import addrs from 'email-addresses';
-import * as hostRules from '../util/host-rules';
-import { logger } from '../logger';
-import { Platform } from './common';
 import { RenovateConfig } from '../config/common';
 import { PLATFORM_NOT_FOUND } from '../constants/error-messages';
+import { logger } from '../logger';
+import * as hostRules from '../util/host-rules';
 import platforms from './api.generated';
+import { Platform } from './common';
 
 export * from './common';
 

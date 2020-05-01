@@ -1,5 +1,5 @@
-import is from '@sindresorhus/is';
 import crypto from 'crypto';
+import is from '@sindresorhus/is';
 import { logger } from '../logger';
 import { maskToken } from '../util/mask';
 import { RenovateConfig } from './common';

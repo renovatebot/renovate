@@ -1,7 +1,7 @@
+import { RenovateConfig } from '..';
+import presetIkatyang from './__fixtures__/renovate-config-ikatyang.json';
 import * as _npm from './npm';
 import * as presets from '.';
-import presetIkatyang from './__fixtures__/renovate-config-ikatyang.json';
-import { RenovateConfig } from '..';
 
 jest.mock('./npm');
 jest.mock('./github');

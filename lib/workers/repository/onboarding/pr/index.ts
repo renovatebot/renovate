@@ -1,15 +1,15 @@
 import is from '@sindresorhus/is';
-import { platform } from '../../../../platform';
-import { logger } from '../../../../logger';
-import { getConfigDesc } from './config-description';
-import { getErrors, getWarnings, getDepWarnings } from './errors-warnings';
-import { getBaseBranchDesc } from './base-branch';
-import { getPrList } from './pr-list';
-import { emojify } from '../../../../util/emoji';
 import { RenovateConfig } from '../../../../config';
+import { logger } from '../../../../logger';
 import { PackageFile } from '../../../../manager/common';
-import { addAssigneesReviewers } from '../../../pr';
+import { platform } from '../../../../platform';
+import { emojify } from '../../../../util/emoji';
 import { BranchConfig } from '../../../common';
+import { addAssigneesReviewers } from '../../../pr';
+import { getBaseBranchDesc } from './base-branch';
+import { getConfigDesc } from './config-description';
+import { getDepWarnings, getErrors, getWarnings } from './errors-warnings';
+import { getPrList } from './pr-list';
 
 export async function ensureOnboardingPr(
   config: RenovateConfig,

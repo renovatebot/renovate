@@ -1,12 +1,12 @@
+import URL from 'url';
 import is from '@sindresorhus/is';
 
-import URL from 'url';
 import pAll from 'p-all';
 import { logger } from '../../logger';
-import { Http, HttpOptions } from '../../util/http';
-import * as hostRules from '../../util/host-rules';
-import { DatasourceError, GetReleasesConfig, ReleaseResult } from '../common';
 import { getRepoCached, setRepoCached } from '../../util/cache';
+import * as hostRules from '../../util/host-rules';
+import { Http, HttpOptions } from '../../util/http';
+import { DatasourceError, GetReleasesConfig, ReleaseResult } from '../common';
 
 export const id = 'packagist';
 

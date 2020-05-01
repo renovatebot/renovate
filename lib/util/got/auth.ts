@@ -1,10 +1,10 @@
-import { logger } from '../../logger';
-import { create } from './util';
 import {
   PLATFORM_TYPE_GITEA,
   PLATFORM_TYPE_GITHUB,
   PLATFORM_TYPE_GITLAB,
 } from '../../constants/platforms';
+import { logger } from '../../logger';
+import { create } from './util';
 
 export default create({
   options: {},

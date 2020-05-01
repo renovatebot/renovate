@@ -1,5 +1,5 @@
-import { extractPackageFile } from './extract';
 import * as _fs from '../../util/fs';
+import { extractPackageFile } from './extract';
 
 const fs: any = _fs;
 

@@ -1,13 +1,13 @@
 import url from 'url';
 import fs from 'fs-extra';
-import { XmlDocument } from 'xmldoc';
 import pAll from 'p-all';
+import { XmlDocument } from 'xmldoc';
 import { logger } from '../../logger';
-import { compare } from '../../versioning/maven/compare';
 import mavenVersion from '../../versioning/maven';
-import { downloadHttpProtocol, isHttpResourceExists } from './util';
+import { compare } from '../../versioning/maven/compare';
 import { GetReleasesConfig, ReleaseResult } from '../common';
 import { MAVEN_REPO } from './common';
+import { downloadHttpProtocol, isHttpResourceExists } from './util';
 
 export { id } from './common';
 

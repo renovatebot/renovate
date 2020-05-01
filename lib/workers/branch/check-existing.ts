@@ -1,11 +1,11 @@
-import { logger } from '../../logger';
-import { platform } from '../../platform';
 import { REPOSITORY_CHANGED } from '../../constants/error-messages';
-import { BranchConfig } from '../common';
 import {
   PR_STATE_NOT_OPEN,
   PR_STATE_OPEN,
 } from '../../constants/pull-requests';
+import { logger } from '../../logger';
+import { platform } from '../../platform';
+import { BranchConfig } from '../common';
 
 /** TODO: Proper return type */
 export async function prAlreadyExisted(

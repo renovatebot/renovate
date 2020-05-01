@@ -1,6 +1,6 @@
-import * as internal from '.';
-import { validateConfig } from '../../validation';
 import { massageConfig } from '../../massage';
+import { validateConfig } from '../../validation';
+import * as internal from '.';
 
 jest.mock('../../../datasource/npm');
 

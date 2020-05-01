@@ -1,10 +1,10 @@
 import { RenovateConfig, defaultConfig } from '../../../../../test/util';
 import { BranchConfig } from '../../../common';
 
+const { platform } = require('../../../../platform');
 const { ensureOnboardingPr } = require('.');
 
 /** @type any */
-const { platform } = require('../../../../platform');
 
 describe('workers/repository/onboarding/pr', () => {
   describe('ensureOnboardingPr()', () => {

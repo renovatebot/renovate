@@ -1,7 +1,7 @@
 import crypto from 'crypto';
-import { create } from './util';
-import { clone } from '../clone';
 import { getRepoCached, setRepoCached } from '../cache';
+import { clone } from '../clone';
+import { create } from './util';
 
 // With this caching, it means every GET request is cached during each repository run
 

@@ -1,11 +1,11 @@
-import { PartialDeep } from 'type-fest';
-import * as github from './github';
-import _got from '../../util/got';
-import * as _hostRules from '../../util/host-rules';
-import { PLATFORM_FAILURE } from '../../constants/error-messages';
 import { mocked } from '../../../test/util';
+import { PLATFORM_FAILURE } from '../../constants/error-messages';
 import { GotResponse } from '../../platform';
 import { clearRepoCache } from '../../util/cache';
+import _got from '../../util/got';
+import * as _hostRules from '../../util/host-rules';
+import * as github from './github';
+import { PartialDeep } from 'type-fest';
 
 jest.mock('../../platform/github/gh-got-wrapper');
 jest.mock('../../util/got');

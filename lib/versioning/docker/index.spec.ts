@@ -1,5 +1,5 @@
-import docker from '.';
 import semver from '../semver';
+import docker from '.';
 
 describe('docker.', () => {
   describe('isValid(version)', () => {

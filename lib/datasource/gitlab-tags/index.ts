@@ -1,6 +1,6 @@
 import is from '@sindresorhus/is';
-import { api } from '../../platform/gitlab/gl-got-wrapper';
 import { logger } from '../../logger';
+import { api } from '../../platform/gitlab/gl-got-wrapper';
 import { GetReleasesConfig, ReleaseResult } from '../common';
 
 const { get: glGot } = api;

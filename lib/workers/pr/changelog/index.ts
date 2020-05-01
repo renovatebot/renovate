@@ -1,9 +1,9 @@
 import { logger } from '../../../logger';
 import * as allVersioning from '../../../versioning';
-import * as sourceGithub from './source-github';
-import { getInRangeReleases } from './releases';
-import { ChangeLogResult } from './common';
 import { BranchUpgradeConfig } from '../../common';
+import { ChangeLogResult } from './common';
+import { getInRangeReleases } from './releases';
+import * as sourceGithub from './source-github';
 
 export * from './common';
 

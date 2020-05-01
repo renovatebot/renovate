@@ -1,4 +1,4 @@
-import { readdir, readFile } from 'fs-extra';
+import { readFile, readdir } from 'fs-extra';
 
 describe('versioning metadata', () => {
   it('readme no markdown headers', async () => {

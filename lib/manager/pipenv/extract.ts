@@ -1,10 +1,10 @@
+import { RANGE_PATTERN } from '@renovate/pep440/lib/specifier';
 import is from '@sindresorhus/is';
 import toml from 'toml';
-import { RANGE_PATTERN } from '@renovate/pep440/lib/specifier';
-import { logger } from '../../logger';
-import { PackageFile, PackageDependency } from '../common';
 import * as datasourcePypi from '../../datasource/pypi';
+import { logger } from '../../logger';
 import { SkipReason } from '../../types';
+import { PackageDependency, PackageFile } from '../common';
 
 // based on https://www.python.org/dev/peps/pep-0508/#names
 const packageRegex = /^([A-Z0-9]|[A-Z0-9][A-Z0-9._-]*[A-Z0-9])$/i;

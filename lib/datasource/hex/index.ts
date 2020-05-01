@@ -1,6 +1,6 @@
 import { logger } from '../../logger';
 import { Http } from '../../util/http';
-import { DatasourceError, ReleaseResult, GetReleasesConfig } from '../common';
+import { DatasourceError, GetReleasesConfig, ReleaseResult } from '../common';
 
 export const id = 'hex';
 

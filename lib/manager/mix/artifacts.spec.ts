@@ -1,11 +1,11 @@
-import _fs from 'fs-extra';
 import { exec as _exec } from 'child_process';
-import { platform as _platform } from '../../platform';
-import { updateArtifacts } from '.';
-import { mocked } from '../../../test/util';
+import _fs from 'fs-extra';
 import { envMock, mockExecAll } from '../../../test/execUtil';
-import * as _env from '../../util/exec/env';
+import { mocked } from '../../../test/util';
+import { platform as _platform } from '../../platform';
 import { BinarySource } from '../../util/exec/common';
+import * as _env from '../../util/exec/env';
+import { updateArtifacts } from '.';
 
 const fs: jest.Mocked<typeof _fs> = _fs as any;
 const exec: jest.Mock<typeof _exec> = _exec as any;

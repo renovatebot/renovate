@@ -1,12 +1,12 @@
 import fs from 'fs-extra';
 import { Platform } from '../common';
+import { mocked } from '../../../test/util';
 import {
   REPOSITORY_DISABLED,
   REPOSITORY_NOT_FOUND,
   REPOSITORY_RENAMED,
 } from '../../constants/error-messages';
 import { BranchStatus } from '../../types';
-import { mocked } from '../../../test/util';
 import * as httpMock from '../../../test/httpMock';
 import { clearRepoCache } from '../../util/cache';
 

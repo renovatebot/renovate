@@ -1,5 +1,5 @@
-import * as gitlab from '.';
 import { api } from '../../platform/gitlab/gl-got-wrapper';
+import * as gitlab from '.';
 
 jest.mock('../../platform/gitlab/gl-got-wrapper');
 jest.mock('../../util/got');

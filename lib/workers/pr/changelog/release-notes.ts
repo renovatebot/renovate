@@ -1,11 +1,11 @@
+import * as URL from 'url';
 import changelogFilenameRegex from 'changelog-filename-regex';
 import { linkify } from 'linkify-markdown';
 import MarkdownIt from 'markdown-it';
-import * as URL from 'url';
 
-import { api } from '../../../platform/github/gh-got-wrapper';
 import { logger } from '../../../logger';
-import { ChangeLogResult, ChangeLogNotes } from './common';
+import { api } from '../../../platform/github/gh-got-wrapper';
+import { ChangeLogNotes, ChangeLogResult } from './common';
 
 const { get: ghGot } = api;
 
@@ -146,7 +146,7 @@ export async function getReleaseNotesMd(
   repository: string,
   version: string,
   baseUrl: string,
-  githubApiBaseUrl: string
+  apiBaseUrl: string
 ): Promise<ChangeLogNotes | null> {
   logger.trace(`getReleaseNotesMd(${repository}, ${version})`);
   const skippedRepos = ['facebook/react-native'];
@@ -157,7 +157,7 @@ export async function getReleaseNotesMd(
   let changelogFile: string;
   let changelogMd = '';
   try {
-    let apiPrefix = githubApiBaseUrl.replace(/\/?$/, '/');
+    let apiPrefix = apiBaseUrl.replace(/\/?$/, '/');
 
     apiPrefix += `repos/${repository}/contents/`;
     const filesRes = await ghGot<{ name: string }[]>(apiPrefix);
