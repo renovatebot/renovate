@@ -1,5 +1,13 @@
+import {
+  BranchStatusConfig,
+  CommitFilesConfig,
+  File,
+  GotResponse,
+  Platform,
+  RepoConfig,
+  RepoParams,
+} from '..';
 import { partial } from '../../../test/util';
-import * as ght from './gitea-helper';
 import {
   REPOSITORY_ACCESS_FORBIDDEN,
   REPOSITORY_ARCHIVED,
@@ -9,18 +17,10 @@ import {
   REPOSITORY_EMPTY,
   REPOSITORY_MIRRORED,
 } from '../../constants/error-messages';
-import {
-  BranchStatusConfig,
-  GotResponse,
-  RepoConfig,
-  RepoParams,
-  Platform,
-  CommitFilesConfig,
-  File,
-} from '..';
 import { logger as _logger } from '../../logger';
 import { BranchStatus } from '../../types';
 import { GiteaGotApi } from './gitea-got-wrapper';
+import * as ght from './gitea-helper';
 
 describe('platform/gitea', () => {
   let gitea: Platform;

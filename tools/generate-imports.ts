@@ -1,6 +1,6 @@
-import shell from 'shelljs';
 import fs from 'fs-extra';
 import _ from 'lodash';
+import shell from 'shelljs';
 
 shell.echo('generating imports');
 const newFiles = new Set();

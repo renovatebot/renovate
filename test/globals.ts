@@ -1,6 +1,6 @@
-import { join } from 'upath';
 import { tmpdir } from 'os';
 import nock from 'nock';
+import { join } from 'upath';
 import { init } from '../lib/workers/global/cache';
 
 jest.mock('../lib/platform', () => ({

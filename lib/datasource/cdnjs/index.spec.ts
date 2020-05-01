@@ -1,7 +1,7 @@
 import fs from 'fs';
+import { DATASOURCE_FAILURE } from '../../constants/error-messages';
 import _got from '../../util/got';
 import { getReleases } from '.';
-import { DATASOURCE_FAILURE } from '../../constants/error-messages';
 
 const got: jest.Mock<any> = _got as any;
 jest.mock('../../util/got');

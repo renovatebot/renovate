@@ -1,15 +1,15 @@
-import is from '@sindresorhus/is';
-import hasha from 'hasha';
+import { OutgoingHttpHeaders } from 'http';
 import URL from 'url';
+import is from '@sindresorhus/is';
+import AWS from 'aws-sdk';
+import hasha from 'hasha';
 import parseLinkHeader from 'parse-link-header';
 import wwwAuthenticate from 'www-authenticate';
-import { OutgoingHttpHeaders } from 'http';
-import AWS from 'aws-sdk';
 import { logger } from '../../logger';
-import { Http, HttpResponse } from '../../util/http';
-import * as hostRules from '../../util/host-rules';
-import { DatasourceError, GetReleasesConfig, ReleaseResult } from '../common';
 import { HostRule } from '../../types';
+import * as hostRules from '../../util/host-rules';
+import { Http, HttpResponse } from '../../util/http';
+import { DatasourceError, GetReleasesConfig, ReleaseResult } from '../common';
 
 // TODO: add got typings when available
 // TODO: replace www-authenticate with https://www.npmjs.com/package/auth-header ?

@@ -1,8 +1,8 @@
-import { AggregatedResult, BaseReporter, Context } from '@jest/reporters';
-import { AssertionResult, TestResult } from '@jest/test-result';
+import { relative } from 'path';
 import { error } from '@actions/core';
 import { issueCommand } from '@actions/core/lib/command';
-import { relative } from 'path';
+import { AggregatedResult, BaseReporter, Context } from '@jest/reporters';
+import { AssertionResult, TestResult } from '@jest/test-result';
 import stripAnsi from 'strip-ansi';
 import { getEnv } from './utils';
 

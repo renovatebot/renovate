@@ -1,8 +1,8 @@
 import fs from 'fs';
 import path from 'path';
-import * as npmExtract from '.';
 import { getConfig } from '../../../config/defaults';
 import * as _fs from '../../../util/fs';
+import * as npmExtract from '.';
 
 const utilfs: any = _fs;
 

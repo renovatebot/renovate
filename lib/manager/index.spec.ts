@@ -1,6 +1,6 @@
-import * as manager from '.';
-import { ManagerApi } from './common';
 import { loadModules } from '../util/modules';
+import { ManagerApi } from './common';
+import * as manager from '.';
 
 describe('manager', () => {
   describe('get()', () => {

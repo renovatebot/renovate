@@ -1,8 +1,8 @@
-import * as _base from './base';
+import { mocked } from '../../../../test/util';
 import * as _apis from './apis';
+import * as _base from './base';
 import * as _config from './config';
 import { initRepo } from '.';
-import { mocked } from '../../../../test/util';
 
 jest.mock('../../../workers/repository/onboarding/branch');
 jest.mock('../../../workers/repository/configured');

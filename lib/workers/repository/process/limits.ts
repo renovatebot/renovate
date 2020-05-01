@@ -1,7 +1,7 @@
 import moment from 'moment';
+import { RenovateConfig } from '../../../config';
 import { logger } from '../../../logger';
 import { platform } from '../../../platform';
-import { RenovateConfig } from '../../../config';
 import { BranchConfig } from '../../common';
 
 export async function getPrHourlyRemaining(

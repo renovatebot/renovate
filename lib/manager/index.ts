@@ -1,14 +1,4 @@
 import {
-  ExtractConfig,
-  ManagerApi,
-  PackageFile,
-  PackageUpdateConfig,
-  RangeConfig,
-  Result,
-  LookupUpdate,
-} from './common';
-import { RangeStrategy } from '../types';
-import {
   LANGUAGE_DART,
   LANGUAGE_DOCKER,
   LANGUAGE_DOT_NET,
@@ -21,7 +11,17 @@ import {
   LANGUAGE_RUBY,
   LANGUAGE_RUST,
 } from '../constants/languages';
+import { RangeStrategy } from '../types';
 import managers from './api.generated';
+import {
+  ExtractConfig,
+  LookupUpdate,
+  ManagerApi,
+  PackageFile,
+  PackageUpdateConfig,
+  RangeConfig,
+  Result,
+} from './common';
 
 const managerList = Array.from(managers.keys());
 

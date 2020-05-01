@@ -1,5 +1,5 @@
-import { processResult } from './result';
 import { RenovateConfig, getConfig } from '../../../test/util';
+import { processResult } from './result';
 
 let config: RenovateConfig;
 beforeEach(() => {

@@ -1,12 +1,12 @@
-import * as prWorker from '.';
-import * as _changelogHelper from './changelog';
-import { getConfig } from '../../config/defaults';
-import { platform as _platform, Pr } from '../../platform';
 import { mocked } from '../../../test/util';
-import { BranchStatus } from '../../types';
+import { getConfig } from '../../config/defaults';
 import { PLATFORM_TYPE_GITLAB } from '../../constants/platforms';
+import { Pr, platform as _platform } from '../../platform';
+import { BranchStatus } from '../../types';
 import { PrResult } from '../common';
+import * as _changelogHelper from './changelog';
 import { getChangeLogJSON } from './changelog';
+import * as prWorker from '.';
 
 const changelogHelper = mocked(_changelogHelper);
 const platform = mocked(_platform);

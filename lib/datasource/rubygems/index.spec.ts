@@ -1,10 +1,10 @@
-import _got from '../../util/got';
-import railsInfo from './__fixtures__/rails/info.json';
-import railsVersions from './__fixtures__/rails/versions.json';
-import * as rubyVersioning from '../../versioning/ruby';
-import * as rubygems from '.';
 import { getPkgReleases } from '..';
 import { clearRepoCache } from '../../util/cache';
+import _got from '../../util/got';
+import * as rubyVersioning from '../../versioning/ruby';
+import railsInfo from './__fixtures__/rails/info.json';
+import railsVersions from './__fixtures__/rails/versions.json';
+import * as rubygems from '.';
 
 const got: any = _got;
 

@@ -1,9 +1,9 @@
 import is from '@sindresorhus/is/dist';
-import { emojify } from '../../../../util/emoji';
-import { logger } from '../../../../logger';
-import { configFileNames } from '../../../../config/app-strings';
 import { RenovateConfig } from '../../../../config';
+import { configFileNames } from '../../../../config/app-strings';
+import { logger } from '../../../../logger';
 import { PackageFile } from '../../../../manager/common';
+import { emojify } from '../../../../util/emoji';
 
 const defaultConfigFile = configFileNames[0];
 

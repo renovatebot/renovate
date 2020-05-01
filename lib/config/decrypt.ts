@@ -1,9 +1,9 @@
-import is from '@sindresorhus/is';
 import crypto from 'crypto';
+import is from '@sindresorhus/is';
 import { logger } from '../logger';
 import { maskToken } from '../util/mask';
-import { RenovateConfig } from './common';
 import { add } from '../util/sanitize';
+import { RenovateConfig } from './common';
 
 export function decryptConfig(
   config: RenovateConfig,

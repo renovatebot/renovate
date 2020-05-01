@@ -1,16 +1,16 @@
 import _fs from 'fs-extra';
-import {
-  logger,
-  setContext,
-  getContext,
-  setMeta,
-  addMeta,
-  removeMeta,
-  levels,
-  getErrors,
-  addStream,
-} from '.';
 import { add } from '../util/host-rules';
+import {
+  addMeta,
+  addStream,
+  getContext,
+  getErrors,
+  levels,
+  logger,
+  removeMeta,
+  setContext,
+  setMeta,
+} from '.';
 
 jest.unmock('.');
 

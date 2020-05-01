@@ -1,7 +1,7 @@
 import { parse } from '@yarnpkg/lockfile';
 import { logger } from '../../../logger';
-import { LockFileEntry } from './common';
 import { readLocalFile } from '../../../util/fs';
+import { LockFileEntry } from './common';
 
 export type YarnLock = Record<string, string> & {
   '@renovate_yarn_integrity'?: boolean;

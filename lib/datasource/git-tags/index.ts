@@ -1,5 +1,5 @@
-import { ReleaseResult, GetReleasesConfig } from '../common';
 import * as semver from '../../versioning/semver';
+import { GetReleasesConfig, ReleaseResult } from '../common';
 import * as gitRefs from '../git-refs';
 
 export const id = 'git-tags';

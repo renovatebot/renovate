@@ -1,12 +1,12 @@
 import { readFileSync } from 'fs';
+import * as datasourceDocker from '../../datasource/docker';
+import * as datasourceGitTags from '../../datasource/git-tags';
 import {
   extractBase,
   extractImage,
-  parseKustomize,
   extractPackageFile,
+  parseKustomize,
 } from './extract';
-import * as datasourceDocker from '../../datasource/docker';
-import * as datasourceGitTags from '../../datasource/git-tags';
 
 const kustomizeGitSSHBase = readFileSync(
   'lib/manager/kustomize/__fixtures__/gitSshBase.yaml',

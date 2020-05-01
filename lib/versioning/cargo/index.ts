@@ -1,6 +1,6 @@
-import { api as npm } from '../npm';
-import { VersioningApi, NewValueConfig } from '../common';
 import { logger } from '../../logger';
+import { NewValueConfig, VersioningApi } from '../common';
+import { api as npm } from '../npm';
 
 export const id = 'cargo';
 export const displayName = 'Cargo';

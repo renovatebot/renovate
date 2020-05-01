@@ -1,10 +1,10 @@
-import upath from 'upath';
 import fs from 'fs-extra';
+import upath from 'upath';
+import { logger } from '../../logger';
 import { platform } from '../../platform';
 import { exec } from '../../util/exec';
-import { logger } from '../../logger';
-import { UpdateArtifact, UpdateArtifactsResult } from '../common';
 import { BinarySource } from '../../util/exec/common';
+import { UpdateArtifact, UpdateArtifactsResult } from '../common';
 
 export async function updateArtifacts({
   packageFileName,

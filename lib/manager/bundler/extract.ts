@@ -1,10 +1,10 @@
-import { logger } from '../../logger';
-import { PackageFile, PackageDependency } from '../common';
-import { regEx } from '../../util/regex';
-import { extractLockFileEntries } from './locked-version';
 import * as datasourceRubygems from '../../datasource/rubygems';
+import { logger } from '../../logger';
 import { SkipReason } from '../../types';
 import { readLocalFile } from '../../util/fs';
+import { regEx } from '../../util/regex';
+import { PackageDependency, PackageFile } from '../common';
+import { extractLockFileEntries } from './locked-version';
 
 export async function extractPackageFile(
   content: string,

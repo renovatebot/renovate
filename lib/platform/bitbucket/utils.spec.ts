@@ -1,5 +1,5 @@
-import * as utils from './utils';
 import { GotApi } from '../common';
+import * as utils from './utils';
 
 jest.mock('./bb-got-wrapper');
 

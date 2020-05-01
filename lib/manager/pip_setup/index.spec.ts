@@ -1,16 +1,16 @@
-import { readFileSync } from 'fs';
 import { exec as _exec } from 'child_process';
-import * as extract from './extract';
-import { extractPackageFile } from '.';
+import { readFileSync } from 'fs';
 import {
   ExecSnapshots,
   envMock,
   mockExecAll,
   mockExecSequence,
 } from '../../../test/execUtil';
-import * as _env from '../../util/exec/env';
 import { mocked } from '../../../test/util';
 import { BinarySource } from '../../util/exec/common';
+import * as _env from '../../util/exec/env';
+import * as extract from './extract';
+import { extractPackageFile } from '.';
 
 const packageFile = 'lib/manager/pip_setup/__fixtures__/setup.py';
 const content = readFileSync(packageFile, 'utf8');

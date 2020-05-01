@@ -1,8 +1,8 @@
 import {
+  autoExtendMavenRange,
   compare,
   parseRange,
   rangeToStr,
-  autoExtendMavenRange,
 } from './compare';
 import maven from '.';
 

@@ -1,28 +1,28 @@
 import { dirname } from 'path';
-import validateNpmPackageName from 'validate-npm-package-name';
 import is from '@sindresorhus/is';
+import validateNpmPackageName from 'validate-npm-package-name';
+import { CONFIG_VALIDATION } from '../../../constants/error-messages';
+import * as datasourceGithubTags from '../../../datasource/github-tags';
+import * as datasourceNpm from '../../../datasource/npm';
 import { logger } from '../../../logger';
 import { SkipReason } from '../../../types';
-import { getLockedVersions } from './locked-versions';
-import { detectMonorepos } from './monorepo';
-import { mightBeABrowserLibrary } from './type';
+import {
+  deleteLocalFile,
+  getSiblingFileName,
+  readLocalFile,
+} from '../../../util/fs';
+import * as nodeVersioning from '../../../versioning/node';
 import { isValid, isVersion } from '../../../versioning/npm';
 import {
   ExtractConfig,
-  PackageFile,
-  PackageDependency,
   NpmLockFiles,
+  PackageDependency,
+  PackageFile,
 } from '../../common';
 import { NpmPackage, NpmPackageDependeny } from './common';
-import { CONFIG_VALIDATION } from '../../../constants/error-messages';
-import * as nodeVersioning from '../../../versioning/node';
-import * as datasourceNpm from '../../../datasource/npm';
-import * as datasourceGithubTags from '../../../datasource/github-tags';
-import {
-  readLocalFile,
-  getSiblingFileName,
-  deleteLocalFile,
-} from '../../../util/fs';
+import { getLockedVersions } from './locked-versions';
+import { detectMonorepos } from './monorepo';
+import { mightBeABrowserLibrary } from './type';
 
 function parseDepName(depType: string, key: string): string {
   if (depType !== 'resolutions') {

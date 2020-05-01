@@ -1,18 +1,18 @@
-import is from '@sindresorhus/is';
 import URL from 'url';
+import is from '@sindresorhus/is';
 import fs from 'fs-extra';
 import upath from 'upath';
-import { exec, ExecOptions } from '../../util/exec';
-import { UpdateArtifact, UpdateArtifactsResult } from '../common';
-import { logger } from '../../logger';
-import * as hostRules from '../../util/host-rules';
-import { platform } from '../../platform';
 import { SYSTEM_INSUFFICIENT_DISK_SPACE } from '../../constants/error-messages';
-import * as datasourcePackagist from '../../datasource/packagist';
 import {
   PLATFORM_TYPE_GITHUB,
   PLATFORM_TYPE_GITLAB,
 } from '../../constants/platforms';
+import * as datasourcePackagist from '../../datasource/packagist';
+import { logger } from '../../logger';
+import { platform } from '../../platform';
+import { ExecOptions, exec } from '../../util/exec';
+import * as hostRules from '../../util/host-rules';
+import { UpdateArtifact, UpdateArtifactsResult } from '../common';
 
 export async function updateArtifacts({
   packageFileName,

@@ -1,8 +1,8 @@
-import { logger } from '../../logger';
-import { PackageDependency, PackageFile } from '../common';
-import * as datasourcePod from '../../datasource/pod';
 import * as datasourceGithubTags from '../../datasource/github-tags';
+import * as datasourcePod from '../../datasource/pod';
+import { logger } from '../../logger';
 import { SkipReason } from '../../types';
+import { PackageDependency, PackageFile } from '../common';
 
 const regexMappings = [
   /^\s*pod\s+(['"])(?<spec>[^'"/]+)(\/(?<subspec>[^'"]+))?\1/,

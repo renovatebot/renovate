@@ -1,6 +1,6 @@
 import { getName, mocked } from '../../../test/util';
-import { setNpmrc, getNpmrc } from './npmrc';
 import * as _sanitize from '../../util/sanitize';
+import { getNpmrc, setNpmrc } from './npmrc';
 
 jest.mock('../../util/sanitize');
 

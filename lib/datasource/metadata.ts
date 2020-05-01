@@ -1,7 +1,7 @@
 import is from '@sindresorhus/is';
 import parse from 'github-url-from-git';
-import { ReleaseResult } from './common';
 import * as hostRules from '../util/host-rules';
+import { ReleaseResult } from './common';
 
 // Use this object to define changelog URLs for packages
 // Only necessary when the changelog data cannot be found in the package's source repository

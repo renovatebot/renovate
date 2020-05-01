@@ -1,17 +1,17 @@
 import {
   eq,
-  valid,
   gt,
-  satisfies,
   maxSatisfying,
   minSatisfying,
+  satisfies,
+  valid,
 } from '@snyk/ruby-semver';
-import { VersioningApi, NewValueConfig } from '../common';
 import { logger } from '../../logger';
-import { parse as parseVersion } from './version';
-import { parse as parseRange, ltr } from './range';
+import { NewValueConfig, VersioningApi } from '../common';
 import { isSingleOperator, isValidOperator } from './operator';
-import { pin, bump, replace } from './strategies';
+import { ltr, parse as parseRange } from './range';
+import { bump, pin, replace } from './strategies';
+import { parse as parseVersion } from './version';
 
 export const id = 'ruby';
 export const displayName = 'Ruby';

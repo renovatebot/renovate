@@ -1,9 +1,9 @@
+import { RenovateConfig, mergeChildConfig } from '../../../config';
 import { logger } from '../../../logger';
-import { mergeChildConfig, RenovateConfig } from '../../../config';
-import { extract, ExtractResult, update } from './extract-update';
+import { PackageFile } from '../../../manager/common';
 import { platform } from '../../../platform';
 import { BranchConfig } from '../../common';
-import { PackageFile } from '../../../manager/common';
+import { ExtractResult, extract, update } from './extract-update';
 import { WriteUpdateResult } from './write';
 
 export async function processRepo(

@@ -1,6 +1,6 @@
 import _simpleGit from 'simple-git/promise';
-import extractPackageFile from './extract';
 import { PackageFile } from '../common';
+import extractPackageFile from './extract';
 
 jest.mock('simple-git/promise');
 const simpleGit: jest.Mock<Partial<_simpleGit.SimpleGit>> = _simpleGit as never;

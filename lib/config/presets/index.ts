@@ -1,21 +1,21 @@
 import is from '@sindresorhus/is';
-import { logger } from '../../logger';
-import * as massage from '../massage';
-import * as migration from '../migration';
-import * as github from './github';
-import * as npm from './npm';
-import * as gitlab from './gitlab';
-import * as local from './local';
-import * as internal from './internal';
-import { RenovateConfig } from '../common';
-import { mergeChildConfig } from '../utils';
-import { regEx } from '../../util/regex';
 import {
   CONFIG_VALIDATION,
   DATASOURCE_FAILURE,
   PLATFORM_FAILURE,
 } from '../../constants/error-messages';
+import { logger } from '../../logger';
+import { regEx } from '../../util/regex';
+import { RenovateConfig } from '../common';
+import * as massage from '../massage';
+import * as migration from '../migration';
+import { mergeChildConfig } from '../utils';
 import { PresetApi } from './common';
+import * as github from './github';
+import * as gitlab from './gitlab';
+import * as internal from './internal';
+import * as local from './local';
+import * as npm from './npm';
 
 const presetSources: Record<string, PresetApi> = {
   github,

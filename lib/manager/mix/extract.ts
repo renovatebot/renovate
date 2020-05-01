@@ -1,7 +1,7 @@
-import { logger } from '../../logger';
-import { PackageDependency, PackageFile } from '../common';
 import * as datasourceHex from '../../datasource/hex';
+import { logger } from '../../logger';
 import { SkipReason } from '../../types';
+import { PackageDependency, PackageFile } from '../common';
 
 const depSectionRegExp = /defp\s+deps.*do/g;
 const depMatchRegExp = /{:(\w+),\s*([^:"]+)?:?\s*"([^"]+)",?\s*(organization: "(.*)")?.*}/gm;

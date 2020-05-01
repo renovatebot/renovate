@@ -1,10 +1,10 @@
 import { DateTime } from 'luxon';
-import semver from 'semver';
 import mdTable from 'markdown-table';
-import { logger } from '../../../logger';
+import semver from 'semver';
 import { mergeChildConfig } from '../../../config';
-import { BranchConfig, BranchUpgradeConfig } from '../../common';
+import { logger } from '../../../logger';
 import * as template from '../../../util/template';
+import { BranchConfig, BranchUpgradeConfig } from '../../common';
 
 function ifTypesGroup(
   depNames: string[],

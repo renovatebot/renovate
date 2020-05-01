@@ -1,7 +1,7 @@
 import conventionalCommitsDetector from 'conventional-commits-detector';
+import { RenovateConfig } from '../../../config';
 import { logger } from '../../../logger';
 import { platform } from '../../../platform';
-import { RenovateConfig } from '../../../config';
 
 export async function detectSemanticCommits(
   config: RenovateConfig

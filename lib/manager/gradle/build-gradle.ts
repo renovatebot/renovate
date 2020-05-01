@@ -1,5 +1,5 @@
-import { BuildDependency } from './gradle-updates-report';
 import { regEx } from '../../util/regex';
+import { BuildDependency } from './gradle-updates-report';
 
 /**
  * Functions adapted/ported from https://github.com/patrikerdes/gradle-use-latest-versions-plugin

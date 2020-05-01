@@ -1,5 +1,5 @@
-import * as monorepos from './monorepo';
 import { Preset } from '../common';
+import * as monorepos from './monorepo';
 
 const staticGroups = {
   all: {

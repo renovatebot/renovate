@@ -1,13 +1,13 @@
 import { NewValueConfig, VersioningApi } from '../common';
 import {
+  RangeBound,
+  TokenType,
   compare,
   isValid,
   isVersion,
   parseMavenBasedRange,
   parsePrefixRange,
-  RangeBound,
   tokenize,
-  TokenType,
 } from './compare';
 
 export const id = 'gradle';

@@ -1,7 +1,7 @@
-import cacheGet from './cache-get';
-import renovateAgent from './renovate-agent';
-import hostRules from './host-rules';
 import auth from './auth';
+import cacheGet from './cache-get';
+import hostRules from './host-rules';
+import renovateAgent from './renovate-agent';
 import { mergeInstances } from './util';
 
 export * from './common';
