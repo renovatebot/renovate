@@ -239,7 +239,7 @@ export async function getReleaseNotesMd(
               if (body && body.length) {
                 try {
                   body = linkify(body, {
-                    repository: `https://github.com/${repository}`,
+                    repository: `${baseUrl}${repository}`,
                   });
                 } catch (err) /* istanbul ignore next */ {
                   logger.warn({ body, err }, 'linkify error');
@@ -288,29 +288,29 @@ export async function addReleaseNotes(
     const cacheKey = getCacheKey(v.version);
     releaseNotes = await renovateCache.get(cacheNamespace, cacheKey);
     if (!releaseNotes) {
-      releaseNotes = await getReleaseNotes(
-        repository,
-        v.version,
-        input.project.depName,
-        input.project.baseUrl,
-        input.project.apiBaseUrl
-      );
+      if (input.project.github != null) {
+        releaseNotes = await getReleaseNotesMd(
+          repository,
+          v.version,
+          input.project.baseUrl,
+          input.project.apiBaseUrl
+        );
+      } else {
+        releaseNotes = await getReleaseNotesMd(
+          repository.replace(/\//g, '%2F'),
+          v.version,
+          input.project.baseUrl,
+          input.project.apiBaseUrl
+        );
+      }
       if (!releaseNotes) {
-        if (input.project.github != null) {
-          releaseNotes = await getReleaseNotesMd(
-            repository,
-            v.version,
-            input.project.baseUrl,
-            input.project.apiBaseUrl
-          );
-        } else {
-          releaseNotes = await getReleaseNotesMd(
-            repository.replace(/\//g, '%2F'),
-            v.version,
-            input.project.baseUrl,
-            input.project.apiBaseUrl
-          );
-        }
+        releaseNotes = await getReleaseNotes(
+          repository,
+          v.version,
+          input.project.depName,
+          input.project.baseUrl,
+          input.project.apiBaseUrl
+        );
       }
       // Small hack to force display of release notes when there is a compare url
       if (!releaseNotes && v.compare.url) {
