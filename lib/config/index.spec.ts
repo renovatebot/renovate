@@ -14,14 +14,16 @@ describe('config/index', () => {
   describe('.parseConfigs(env, defaultArgv)', () => {
     let configParser: typeof import('.');
     let defaultArgv: string[];
+    let defaultEnv: NodeJS.ProcessEnv;
     beforeEach(async () => {
       jest.resetModules();
       configParser = await import('./index');
       defaultArgv = getArgv();
+      defaultEnv = { RENOVATE_CONFIG_FILE: 'abc' };
       jest.mock('delay', () => Promise.resolve());
     });
     it('supports token in env', async () => {
-      const env: NodeJS.ProcessEnv = { RENOVATE_TOKEN: 'abc' };
+      const env: NodeJS.ProcessEnv = { ...defaultEnv, RENOVATE_TOKEN: 'abc' };
       const parsedConfig = await configParser.parseConfigs(env, defaultArgv);
       expect(parsedConfig).toMatchSnapshot();
     });
@@ -31,13 +33,18 @@ describe('config/index', () => {
         '--pr-footer=custom',
         '--log-context=abc123',
       ]);
-      const env: NodeJS.ProcessEnv = {};
-      const parsedConfig = await configParser.parseConfigs(env, defaultArgv);
+      const parsedConfig = await configParser.parseConfigs(
+        defaultEnv,
+        defaultArgv
+      );
       expect(parsedConfig).toMatchSnapshot();
     });
     it('supports forceCli', async () => {
       defaultArgv = defaultArgv.concat(['--force-cli=false']);
-      const env: NodeJS.ProcessEnv = { RENOVATE_TOKEN: 'abc' };
+      const env: NodeJS.ProcessEnv = {
+        ...defaultEnv,
+        RENOVATE_TOKEN: 'abc',
+      };
       const parsedConfig = await configParser.parseConfigs(env, defaultArgv);
       expect(parsedConfig).toMatchSnapshot();
     });
@@ -47,16 +54,17 @@ describe('config/index', () => {
         '--username=user',
         '--password=pass',
       ]);
-      const env: NodeJS.ProcessEnv = {};
-      const parsedConfig = await configParser.parseConfigs(env, defaultArgv);
+      const parsedConfig = await configParser.parseConfigs(
+        defaultEnv,
+        defaultArgv
+      );
       expect(parsedConfig).toMatchSnapshot();
     });
     it('massages trailing slash into endpoint', async () => {
       defaultArgv = defaultArgv.concat([
         '--endpoint=https://github.renovatebot.com/api/v3',
       ]);
-      const env: NodeJS.ProcessEnv = {};
-      const parsed = await configParser.parseConfigs(env, defaultArgv);
+      const parsed = await configParser.parseConfigs(defaultEnv, defaultArgv);
       expect(parsed.endpoint).toEqual('https://github.renovatebot.com/api/v3/');
     });
   });
