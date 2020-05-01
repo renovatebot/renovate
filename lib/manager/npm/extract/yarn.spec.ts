@@ -31,7 +31,7 @@ describe('manager/npm/extract/yarn', () => {
       fs.readLocalFile.mockReturnValueOnce(plocktest1Lock);
       const res = await getYarnLock('package.json');
       expect(res).toMatchSnapshot();
-      expect(Object.keys(res)).toHaveLength(8);
+      expect(Object.keys(res)).toHaveLength(9);
     });
   });
 });
