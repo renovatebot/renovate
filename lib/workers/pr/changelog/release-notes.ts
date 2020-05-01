@@ -146,7 +146,7 @@ export async function getReleaseNotesMd(
   repository: string,
   version: string,
   baseUrl: string,
-  githubApiBaseUrl: string
+  apiBaseUrl: string
 ): Promise<ChangeLogNotes | null> {
   logger.trace(`getReleaseNotesMd(${repository}, ${version})`);
   const skippedRepos = ['facebook/react-native'];
@@ -157,7 +157,7 @@ export async function getReleaseNotesMd(
   let changelogFile: string;
   let changelogMd = '';
   try {
-    let apiPrefix = githubApiBaseUrl.replace(/\/?$/, '/');
+    let apiPrefix = apiBaseUrl.replace(/\/?$/, '/');
 
     apiPrefix += `repos/${repository}/contents/`;
     const filesRes = await ghGot<{ name: string }[]>(apiPrefix);
