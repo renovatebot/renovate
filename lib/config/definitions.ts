@@ -870,7 +870,6 @@ const options: RenovateOptions[] = [
   {
     name: 'pinDigests',
     description: 'Whether to add digests to Dockerfile source images',
-    stage: 'package',
     type: 'boolean',
     default: false,
   },

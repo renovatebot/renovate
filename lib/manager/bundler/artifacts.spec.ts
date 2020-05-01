@@ -12,7 +12,6 @@ import * as _bundlerHostRules from './host-rules';
 import { BinarySource } from '../../util/exec/common';
 import { setUtilConfig } from '../../util';
 import { resetPrefetchedImages } from '../../util/exec/docker';
-import { BUNDLER_UNKNOWN_ERROR } from '../../constants/error-messages';
 
 const fs: jest.Mocked<typeof _fs> = _fs as any;
 const exec: jest.Mock<typeof _exec> = _exec as any;
@@ -50,7 +49,7 @@ describe('bundler.updateArtifacts()', () => {
     env.getChildProcessEnv.mockReturnValue(envMock.basic);
     bundlerHostRules.findAllAuthenticatable.mockReturnValue([]);
     resetPrefetchedImages();
-    global.repoCache = {};
+
     await setUtilConfig(config);
   });
   it('returns null by default', async () => {
@@ -262,7 +261,7 @@ describe('bundler.updateArtifacts()', () => {
       expect(execSnapshots).toMatchSnapshot();
     });
   });
-  it('throws BUNDLER_UNKNOWN_ERROR when failing in lockFileMaintenance true', async () => {
+  it('returns error when failing in lockFileMaintenance true', async () => {
     const execError = new Error();
     (execError as any).stdout = ' foo was resolved to';
     (execError as any).stderr = '';
@@ -272,8 +271,8 @@ describe('bundler.updateArtifacts()', () => {
     platform.getRepoStatus.mockResolvedValueOnce({
       modified: ['Gemfile.lock'],
     } as Git.StatusResult);
-    await expect(
-      updateArtifacts({
+    expect(
+      await updateArtifacts({
         packageFileName: 'Gemfile',
         updatedDeps: [],
         newPackageFileContent: '{}',
@@ -282,7 +281,7 @@ describe('bundler.updateArtifacts()', () => {
           isLockFileMaintenance: true,
         },
       })
-    ).rejects.toThrowError(BUNDLER_UNKNOWN_ERROR);
+    ).toMatchSnapshot();
     expect(execSnapshots).toMatchSnapshot();
   });
   it('performs lockFileMaintenance', async () => {

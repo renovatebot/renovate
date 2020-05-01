@@ -34,7 +34,7 @@ export function get(versioning: string): VersioningApi {
   }
   const theVersioning = versionings.get(versioningName);
   if (!theVersioning) {
-    logger.warn({ versioning }, 'Unknown versioning');
+    logger.info({ versioning }, 'Unknown versioning - defaulting to semver');
     return versionings.get('semver') as VersioningApi;
   }
   if (isVersioningApiConstructor(theVersioning)) {

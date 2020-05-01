@@ -1,12 +1,12 @@
 import is from '@sindresorhus/is';
 
 import URL from 'url';
-import delay from 'delay';
 import pAll from 'p-all';
 import { logger } from '../../logger';
 import { Http, HttpOptions } from '../../util/http';
 import * as hostRules from '../../util/host-rules';
 import { DatasourceError, GetReleasesConfig, ReleaseResult } from '../common';
+import { getRepoCached, setRepoCached } from '../../util/cache';
 
 export const id = 'packagist';
 
@@ -172,19 +172,8 @@ interface AllPackages {
 }
 
 async function getAllPackages(regUrl: string): Promise<AllPackages | null> {
-  let repoCacheResult = global.repoCache[`packagist-${regUrl}`];
-  // istanbul ignore if
-  if (repoCacheResult) {
-    while (repoCacheResult === 'pending') {
-      await delay(200);
-      repoCacheResult = global.repoCache[`packagist-${regUrl}`];
-    }
-    return repoCacheResult;
-  }
-  global.repoCache[`packagist-${regUrl}`] = 'pending';
   const registryMeta = await getRegistryMeta(regUrl);
   if (!registryMeta) {
-    global.repoCache[`packagist-${regUrl}`] = null;
     return null;
   }
   const {
@@ -224,8 +213,15 @@ async function getAllPackages(regUrl: string): Promise<AllPackages | null> {
     providerPackages,
     includesPackages,
   };
-  global.repoCache[`packagist-${regUrl}`] = allPackages;
   return allPackages;
+}
+
+function getAllCachedPackages(regUrl: string): Promise<AllPackages | null> {
+  const cacheKey = `packagist-${regUrl}`;
+  if (getRepoCached(cacheKey) === undefined) {
+    setRepoCached(cacheKey, getAllPackages(regUrl));
+  }
+  return getRepoCached(cacheKey);
 }
 
 async function packagistOrgLookup(name: string): Promise<ReleaseResult> {
@@ -262,7 +258,7 @@ async function packageLookup(
       const packagistResult = await packagistOrgLookup(name);
       return packagistResult;
     }
-    const allPackages = await getAllPackages(regUrl);
+    const allPackages = await getAllCachedPackages(regUrl);
     if (!allPackages) {
       return null;
     }

@@ -159,12 +159,15 @@ export async function removeDanglingContainers(): Promise<void> {
     } else {
       logger.debug('No dangling containers to remove');
     }
-  } catch (err) {
-    // istanbul ignore if
+  } catch (err) /* istanbul ignore next */ {
     if (err.errno === 'ENOMEM') {
       throw new Error(SYSTEM_INSUFFICIENT_MEMORY);
     }
-    logger.warn({ err }, 'Error removing dangling containers');
+    if (err.stderr?.includes('Cannot connect to the Docker daemon')) {
+      logger.info('No docker deamon found');
+    } else {
+      logger.warn({ err }, 'Error removing dangling containers');
+    }
   }
 }
 
@@ -205,7 +208,14 @@ export async function generateDockerCommand(
   if (options.tag) {
     tag = options.tag;
   } else if (tagConstraint) {
-    tag = await getDockerTag(image, tagConstraint, tagScheme || 'semver');
+    const tagVersioning = tagScheme || 'semver';
+    tag = await getDockerTag(image, tagConstraint, tagVersioning);
+    logger.debug(
+      { image, tagConstraint, tagVersioning, tag },
+      'Resolved tag constraint'
+    );
+  } else {
+    logger.debug({ image }, 'No tag or tagConstraint specified');
   }
 
   const taggedImage = tag ? `${image}:${tag}` : `${image}`;

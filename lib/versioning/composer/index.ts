@@ -95,6 +95,26 @@ function getNewValue({
   let newValue: string;
   if (isVersion(currentValue)) {
     newValue = toVersion;
+  } else if (/^[~^](0\.[1-9][0-9]*)$/.test(currentValue)) {
+    const operator = currentValue.substr(0, 1);
+    // handle ~0.4 case first
+    if (toMajor === 0) {
+      newValue = `${operator}0.${toMinor}`;
+    } else {
+      newValue = `${operator}${toMajor}.0`;
+    }
+  } else if (/^[~^]([0-9]*)$/.test(currentValue)) {
+    // handle ~4 case
+    const operator = currentValue.substr(0, 1);
+    newValue = `${operator}${toMajor}`;
+  } else if (/^[~^]([0-9]*(?:\.[0-9]*)?)$/.test(currentValue)) {
+    const operator = currentValue.substr(0, 1);
+    // handle ~4.1 case
+    if (fromVersion && toMajor > getMajor(fromVersion)) {
+      newValue = `${operator}${toMajor}.0`;
+    } else {
+      newValue = `${operator}${toMajor}.${toMinor}`;
+    }
   } else if (
     npm.isVersion(padZeroes(toVersion)) &&
     npm.isValid(currentValue) &&
@@ -106,23 +126,6 @@ function getNewValue({
       fromVersion,
       toVersion: padZeroes(toVersion),
     });
-  } else if (/^~(0\.[1-9][0-9]*)$/.test(currentValue)) {
-    // handle ~0.4 case first
-    if (toMajor === 0) {
-      newValue = `~0.${toMinor}`;
-    } else {
-      newValue = `~${toMajor}.0`;
-    }
-  } else if (/^~([0-9]*)$/.test(currentValue)) {
-    // handle ~4 case
-    newValue = `~${toMajor}`;
-  } else if (/^~([0-9]*(?:\.[0-9]*)?)$/.test(currentValue)) {
-    // handle ~4.1 case
-    if (fromVersion && toMajor > getMajor(fromVersion)) {
-      newValue = `~${toMajor}.0`;
-    } else {
-      newValue = `~${toMajor}.${toMinor}`;
-    }
   }
   if (currentValue.includes(' || ')) {
     const lastValue = currentValue.split('||').pop().trim();

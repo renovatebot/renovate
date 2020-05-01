@@ -44,6 +44,9 @@ interface PythonSetup {
   extras_require: string[];
   install_requires: string[];
 }
+
+let extractPy;
+
 export async function extractSetupFile(
   _content: string,
   packageFile: string,
@@ -56,6 +59,7 @@ export async function extractSetupFile(
   if (config.binarySource === BinarySource.Docker) {
     logger.debug('Running python via docker');
     await exec(`docker pull renovate/pip`);
+    extractPy = extractPy || (await resolveFile('data/extract.py'));
     cmd = 'docker';
     args.unshift(
       'run',
@@ -65,7 +69,7 @@ export async function extractSetupFile(
       '-v',
       `${cwd}:${cwd}`,
       '-v',
-      `${__dirname}:${__dirname}`,
+      `${extractPy}:${extractPy}`,
       // cwd
       '-w',
       cwd,

@@ -10,8 +10,6 @@ jest.mock('../lib/platform', () => ({
 }));
 jest.mock('../lib/logger');
 
-global.repoCache = {};
-
 const tmpDir = process.env.RENOVATE_TMPDIR || process.env.TMPDIR || tmpdir();
 const cacheDir = join(tmpDir, './renovate/cache/renovate');
 

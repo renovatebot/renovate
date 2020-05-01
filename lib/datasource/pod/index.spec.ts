@@ -4,6 +4,7 @@ import * as rubyVersioning from '../../versioning/ruby';
 import { getPkgReleases } from '..';
 import { mocked } from '../../../test/util';
 import { GotResponse } from '../../platform';
+import { clearRepoCache } from '../../util/cache';
 
 const api = mocked(_api);
 
@@ -20,7 +21,7 @@ describe('datasource/cocoapods', () => {
   describe('getReleases', () => {
     beforeEach(() => {
       jest.resetAllMocks();
-      global.repoCache = {};
+      clearRepoCache();
       return global.renovateCache.rmAll();
     });
 
