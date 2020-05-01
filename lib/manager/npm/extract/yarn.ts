@@ -6,13 +6,6 @@ import { LockFileEntry } from './common';
 
 export type YarnLock = Record<string, string>;
 
-interface ParseRangeReturnType {
-  protocol: string | null;
-  source: string | null;
-  selector: string | null;
-  params: string | null;
-}
-
 export async function getYarnLock(filePath: string): Promise<YarnLock> {
   const yarnLockRaw = await readLocalFile(filePath, 'utf8');
   try {
