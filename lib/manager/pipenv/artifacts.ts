@@ -1,11 +1,11 @@
 import { ensureDir, outputFile, readFile, remove } from 'fs-extra';
 import { join } from 'upath';
-import { exec, ExecOptions } from '../../util/exec';
+import { ExecOptions, exec } from '../../util/exec';
 import { logger } from '../../logger';
 import {
-  UpdateArtifactsResult,
   UpdateArtifact,
   UpdateArtifactsConfig,
+  UpdateArtifactsResult,
 } from '../common';
 import { platform } from '../../platform';
 

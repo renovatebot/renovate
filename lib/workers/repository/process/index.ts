@@ -1,6 +1,6 @@
 import { logger } from '../../../logger';
-import { mergeChildConfig, RenovateConfig } from '../../../config';
-import { extract, ExtractResult, update } from './extract-update';
+import { RenovateConfig, mergeChildConfig } from '../../../config';
+import { ExtractResult, extract, update } from './extract-update';
 import { platform } from '../../../platform';
 import { BranchConfig } from '../../common';
 import { PackageFile } from '../../../manager/common';

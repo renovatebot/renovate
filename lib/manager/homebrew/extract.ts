@@ -1,6 +1,6 @@
-import { skip, isSpace, removeComments } from './util';
+import { isSpace, removeComments, skip } from './util';
 import { logger } from '../../logger';
-import { PackageFile, PackageDependency } from '../common';
+import { PackageDependency, PackageFile } from '../common';
 import * as datasourceGithubTags from '../../datasource/github-tags';
 import { SkipReason } from '../../types';
 

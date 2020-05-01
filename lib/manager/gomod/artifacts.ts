@@ -1,6 +1,6 @@
 import { ensureDir } from 'fs-extra';
-import { join, dirname } from 'upath';
-import { exec, ExecOptions } from '../../util/exec';
+import { dirname, join } from 'upath';
+import { ExecOptions, exec } from '../../util/exec';
 import { find } from '../../util/host-rules';
 import { logger } from '../../logger';
 import { UpdateArtifact, UpdateArtifactsResult } from '../common';

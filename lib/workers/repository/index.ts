@@ -5,7 +5,7 @@ import { platform } from '../../platform';
 import { logger, setMeta } from '../../logger';
 import { initRepo } from './init';
 import { ensureOnboardingPr } from './onboarding/pr';
-import { processResult, ProcessResult } from './result';
+import { ProcessResult, processResult } from './result';
 import { processRepo, updateRepo } from './process';
 import { finaliseRepo } from './finalise';
 import { ensureMasterIssue } from './master-issue';

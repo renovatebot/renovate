@@ -1,4 +1,4 @@
-import npm, { isVersion, isValid } from '../npm';
+import npm, { isValid, isVersion } from '../npm';
 import { NewValueConfig, VersioningApi } from '../common';
 
 export const id = 'node';

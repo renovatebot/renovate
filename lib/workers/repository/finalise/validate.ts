@@ -2,7 +2,7 @@ import JSON5 from 'json5';
 import { logger } from '../../../logger';
 import { migrateAndValidate } from '../../../config/migrate-validate';
 import { configFileNames } from '../../../config/app-strings';
-import { platform, Pr } from '../../../platform';
+import { Pr, platform } from '../../../platform';
 import { RenovateConfig } from '../../../config';
 import { PR_STATE_OPEN } from '../../../constants/pull-requests';
 import { REPOSITORY_CHANGED } from '../../../constants/error-messages';

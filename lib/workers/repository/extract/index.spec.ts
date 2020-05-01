@@ -1,6 +1,6 @@
 import * as _managerFiles from './manager-files';
 import { extractAllDependencies } from '.';
-import { mocked, defaultConfig } from '../../../../test/util';
+import { defaultConfig, mocked } from '../../../../test/util';
 import { RenovateConfig } from '../../../config';
 
 jest.mock('./manager-files');

@@ -7,30 +7,30 @@ import { logger } from '../../logger';
 import { isScheduledNow } from './schedule';
 import { getUpdatedPackageFiles } from './get-updated';
 import {
-  getAdditionalFiles,
   AdditionalPackageFiles,
+  getAdditionalFiles,
 } from '../../manager/npm/post-update';
 import { commitFilesToBranch } from './commit';
 import { getParentBranch } from './parent';
 import { tryBranchAutomerge } from './automerge';
 import { setStability, setUnpublishable } from './status-checks';
 import { prAlreadyExisted } from './check-existing';
-import { ensurePr, checkAutoMerge } from '../pr';
+import { checkAutoMerge, ensurePr } from '../pr';
 import { RenovateConfig } from '../../config';
 import { platform } from '../../platform';
 import { emojify } from '../../util/emoji';
-import { BranchConfig, ProcessBranchResult, PrResult } from '../common';
+import { BranchConfig, PrResult, ProcessBranchResult } from '../common';
 import {
+  DATASOURCE_FAILURE,
+  MANAGER_LOCKFILE_ERROR,
   PLATFORM_AUTHENTICATION_ERROR,
   PLATFORM_BAD_CREDENTIALS,
-  SYSTEM_INSUFFICIENT_DISK_SPACE,
+  PLATFORM_FAILURE,
   PLATFORM_INTEGRATION_UNAUTHORIZED,
-  MANAGER_LOCKFILE_ERROR,
   PLATFORM_RATE_LIMIT_EXCEEDED,
   REPOSITORY_CHANGED,
+  SYSTEM_INSUFFICIENT_DISK_SPACE,
   WORKER_FILE_UPDATE_FAILED,
-  DATASOURCE_FAILURE,
-  PLATFORM_FAILURE,
 } from '../../constants/error-messages';
 import {
   PR_STATE_CLOSED,

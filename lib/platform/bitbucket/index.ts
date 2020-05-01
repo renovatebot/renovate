@@ -9,19 +9,19 @@ import GitStorage, { StatusResult } from '../git/storage';
 import { readOnlyIssueBody } from '../utils/read-only-issue-body';
 import * as comments from './comments';
 import {
-  PlatformConfig,
-  RepoParams,
-  RepoConfig,
-  Pr,
-  Issue,
-  VulnerabilityAlert,
-  CreatePRConfig,
-  EnsureIssueConfig,
   BranchStatusConfig,
-  FindPRConfig,
-  EnsureCommentConfig,
-  EnsureIssueResult,
   CommitFilesConfig,
+  CreatePRConfig,
+  EnsureCommentConfig,
+  EnsureIssueConfig,
+  EnsureIssueResult,
+  FindPRConfig,
+  Issue,
+  PlatformConfig,
+  Pr,
+  RepoConfig,
+  RepoParams,
+  VulnerabilityAlert,
 } from '../common';
 import { sanitize } from '../../util/sanitize';
 import { smartTruncate } from '../utils/pr-body';

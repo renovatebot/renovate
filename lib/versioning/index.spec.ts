@@ -1,6 +1,6 @@
 import * as allVersioning from '.';
 import { getOptions } from '../config/definitions';
-import { GenericVersioningApi, GenericVersion } from './loose/generic';
+import { GenericVersion, GenericVersioningApi } from './loose/generic';
 import * as semverVersioning from './semver';
 import { loadModules } from '../util/modules';
 import {

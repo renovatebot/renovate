@@ -7,20 +7,20 @@ import * as hostRules from '../../util/host-rules';
 import GitStorage, { StatusResult } from '../git/storage';
 import { logger } from '../../logger';
 import {
-  PlatformConfig,
-  RepoParams,
-  RepoConfig,
-  Pr,
-  Issue,
-  VulnerabilityAlert,
-  GotResponse,
-  CreatePRConfig,
   BranchStatusConfig,
-  FindPRConfig,
-  EnsureCommentConfig,
-  EnsureIssueResult,
-  EnsureIssueConfig,
   CommitFilesConfig,
+  CreatePRConfig,
+  EnsureCommentConfig,
+  EnsureIssueConfig,
+  EnsureIssueResult,
+  FindPRConfig,
+  GotResponse,
+  Issue,
+  PlatformConfig,
+  Pr,
+  RepoConfig,
+  RepoParams,
+  VulnerabilityAlert,
 } from '../common';
 import { sanitize } from '../../util/sanitize';
 import { smartTruncate } from '../utils/pr-body';

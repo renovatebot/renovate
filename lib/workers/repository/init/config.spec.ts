@@ -1,10 +1,10 @@
 import { mergeRenovateConfig } from './config';
 import * as _migrateAndValidate from '../../../config/migrate-validate';
 import {
-  platform,
-  mocked,
-  getConfig,
   RenovateConfig,
+  getConfig,
+  mocked,
+  platform,
 } from '../../../../test/util';
 
 const migrateAndValidate = mocked(_migrateAndValidate);

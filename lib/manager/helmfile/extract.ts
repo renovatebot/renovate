@@ -2,7 +2,7 @@ import is from '@sindresorhus/is';
 import yaml from 'js-yaml';
 import { SkipReason } from '../../types';
 import { logger } from '../../logger';
-import { PackageFile, PackageDependency, ExtractConfig } from '../common';
+import { ExtractConfig, PackageDependency, PackageFile } from '../common';
 import * as datasourceHelm from '../../datasource/helm';
 
 const isValidChartName = (name: string): boolean => {

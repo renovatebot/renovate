@@ -1,4 +1,4 @@
-import { getOptions, RenovateOptions } from './definitions';
+import { RenovateOptions, getOptions } from './definitions';
 import { RenovateConfig } from './common';
 
 const defaultValues = {

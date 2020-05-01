@@ -1,5 +1,5 @@
 import { api } from '.';
-import { compare, parsePrefixRange, parseMavenBasedRange } from './compare';
+import { compare, parseMavenBasedRange, parsePrefixRange } from './compare';
 
 describe('versioning/gradle/compare', () => {
   it('returns equality', () => {

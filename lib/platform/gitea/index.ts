@@ -3,6 +3,7 @@ import GitStorage, { StatusResult } from '../git/storage';
 import * as hostRules from '../../util/host-rules';
 import {
   BranchStatusConfig,
+  CommitFilesConfig,
   CreatePRConfig,
   EnsureCommentConfig,
   EnsureIssueConfig,
@@ -14,7 +15,6 @@ import {
   RepoConfig,
   RepoParams,
   VulnerabilityAlert,
-  CommitFilesConfig,
 } from '../common';
 import { api } from './gitea-got-wrapper';
 import { PLATFORM_TYPE_GITEA } from '../../constants/platforms';

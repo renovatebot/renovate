@@ -2,7 +2,7 @@ import * as azure from 'azure-devops-node-api';
 import { IGitApi } from 'azure-devops-node-api/GitApi';
 import { ICoreApi } from 'azure-devops-node-api/CoreApi';
 import { IPolicyApi } from 'azure-devops-node-api/PolicyApi';
-import { getHandlerFromToken, getBasicHandler } from 'azure-devops-node-api';
+import { getBasicHandler, getHandlerFromToken } from 'azure-devops-node-api';
 import { IRequestHandler } from 'azure-devops-node-api/interfaces/common/VsoBaseInterfaces';
 import * as hostRules from '../../util/host-rules';
 import { PLATFORM_TYPE_AZURE } from '../../constants/platforms';

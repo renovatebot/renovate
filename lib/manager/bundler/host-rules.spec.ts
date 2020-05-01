@@ -3,8 +3,8 @@ import { HostRule } from '../../types';
 
 import {
   findAllAuthenticatable,
-  getDomain,
   getAuthenticationHeaderValue,
+  getDomain,
 } from './host-rules';
 
 describe('lib/manager/bundler/host-rules', () => {

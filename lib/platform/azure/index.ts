@@ -1,6 +1,6 @@
 import {
-  GitPullRequestMergeStrategy,
   GitPullRequest,
+  GitPullRequestMergeStrategy,
 } from 'azure-devops-node-api/interfaces/GitInterfaces';
 
 import * as azureHelper from './azure-helper';
@@ -9,18 +9,18 @@ import * as hostRules from '../../util/host-rules';
 import GitStorage, { StatusResult } from '../git/storage';
 import { logger } from '../../logger';
 import {
-  PlatformConfig,
-  RepoParams,
-  RepoConfig,
-  Pr,
-  Issue,
-  VulnerabilityAlert,
-  CreatePRConfig,
   BranchStatusConfig,
-  FindPRConfig,
+  CommitFilesConfig,
+  CreatePRConfig,
   EnsureCommentConfig,
   EnsureIssueResult,
-  CommitFilesConfig,
+  FindPRConfig,
+  Issue,
+  PlatformConfig,
+  Pr,
+  RepoConfig,
+  RepoParams,
+  VulnerabilityAlert,
 } from '../common';
 import { sanitize } from '../../util/sanitize';
 import { smartTruncate } from '../utils/pr-body';

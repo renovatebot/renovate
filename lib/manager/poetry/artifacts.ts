@@ -1,6 +1,6 @@
 import is from '@sindresorhus/is';
 import fs from 'fs-extra';
-import { exec, ExecOptions } from '../../util/exec';
+import { ExecOptions, exec } from '../../util/exec';
 import { logger } from '../../logger';
 import { UpdateArtifact, UpdateArtifactsResult } from '../common';
 import {

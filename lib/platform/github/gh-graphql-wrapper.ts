@@ -1,6 +1,6 @@
 import { logger } from '../../logger';
 import got, { GotJSONOptions } from '../../util/got';
-import { getHostType, getBaseUrl, dispatchError } from './gh-got-wrapper';
+import { dispatchError, getBaseUrl, getHostType } from './gh-got-wrapper';
 
 const accept = 'application/vnd.github.merge-info-preview+json';
 

@@ -1,6 +1,6 @@
 import is from '@sindresorhus/is';
 
-import { getOptions, RenovateOptions } from './definitions';
+import { RenovateOptions, getOptions } from './definitions';
 import { RenovateConfig } from './common';
 import { logger } from '../logger';
 import * as datasourceDocker from '../datasource/docker';

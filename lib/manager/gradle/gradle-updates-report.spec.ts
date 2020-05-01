@@ -4,8 +4,8 @@ import * as path from 'path';
 import { exec } from '../../util/exec';
 import { GRADLE_DEPENDENCY_REPORT_OPTIONS } from './index';
 import {
-  createRenovateGradlePlugin,
   GRADLE_DEPENDENCY_REPORT_FILENAME,
+  createRenovateGradlePlugin,
 } from './gradle-updates-report';
 import { ifSystemSupportsGradle } from './__testutil__/gradle';
 

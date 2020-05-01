@@ -1,5 +1,5 @@
 import responses from './__fixtures__/responses';
-import { GotApi, RepoParams, Platform } from '../common';
+import { GotApi, Platform, RepoParams } from '../common';
 import { Storage } from '../git/storage';
 import {
   REPOSITORY_CHANGED,

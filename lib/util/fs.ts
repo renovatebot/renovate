@@ -1,4 +1,4 @@
-import { parse, join } from 'upath';
+import { join, parse } from 'upath';
 import { outputFile, readFile, remove } from 'fs-extra';
 import { logger } from '../logger';
 import { RenovateConfig } from '../config/common';

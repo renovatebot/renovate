@@ -1,8 +1,8 @@
 import is from '@sindresorhus/is';
-import { basename, dirname, normalize, join } from 'path';
+import { basename, dirname, join, normalize } from 'path';
 import { XmlDocument, XmlElement } from 'xmldoc';
 import { logger } from '../../logger';
-import { ExtractConfig, PackageFile, PackageDependency } from '../common';
+import { ExtractConfig, PackageDependency, PackageFile } from '../common';
 import { readLocalFile } from '../../util/fs';
 import * as datasourceMaven from '../../datasource/maven';
 import { MAVEN_REPO } from '../../datasource/maven/common';

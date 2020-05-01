@@ -1,7 +1,7 @@
 import { parse } from 'toml';
 import { isValid } from '../../versioning/poetry';
 import { logger } from '../../logger';
-import { PackageFile, PackageDependency } from '../common';
+import { PackageDependency, PackageFile } from '../common';
 import { PoetryFile, PoetrySection } from './types';
 import * as datasourcePypi from '../../datasource/pypi';
 import { SkipReason } from '../../types';

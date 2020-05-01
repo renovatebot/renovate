@@ -1,4 +1,4 @@
-import { add, find, findAll, clear, hosts } from './host-rules';
+import { add, clear, find, findAll, hosts } from './host-rules';
 import * as datasourceNuget from '../datasource/nuget';
 import { PLATFORM_TYPE_AZURE } from '../constants/platforms';
 

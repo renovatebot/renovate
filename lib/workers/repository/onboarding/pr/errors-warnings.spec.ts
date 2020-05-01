@@ -1,6 +1,6 @@
 import { RenovateConfig, getConfig } from '../../../../../test/util';
 
-import { getWarnings, getErrors, getDepWarnings } from './errors-warnings';
+import { getDepWarnings, getErrors, getWarnings } from './errors-warnings';
 
 describe('workers/repository/onboarding/pr/errors-warnings', () => {
   describe('getWarnings()', () => {

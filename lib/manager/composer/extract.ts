@@ -1,7 +1,7 @@
 import is from '@sindresorhus/is';
 import { logger } from '../../logger';
 import { api as semverComposer } from '../../versioning/composer';
-import { PackageFile, PackageDependency } from '../common';
+import { PackageDependency, PackageFile } from '../common';
 import { SkipReason } from '../../types';
 import * as datasourceGitTags from '../../datasource/git-tags';
 import * as datasourcePackagist from '../../datasource/packagist';

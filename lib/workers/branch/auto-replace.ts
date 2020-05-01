@@ -2,7 +2,7 @@ import { logger } from '../../logger';
 import { get } from '../../manager';
 import { WORKER_FILE_UPDATE_FAILED } from '../../constants/error-messages';
 import { matchAt, replaceAt } from '../../util/string';
-import { regEx, escapeRegExp } from '../../util/regex';
+import { escapeRegExp, regEx } from '../../util/regex';
 import { compile } from '../../util/template';
 import { writeLocalFile } from '../../util/fs';
 

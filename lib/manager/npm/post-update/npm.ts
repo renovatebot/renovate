@@ -1,4 +1,4 @@
-import { readFile, move, pathExists } from 'fs-extra';
+import { move, pathExists, readFile } from 'fs-extra';
 import { join } from 'upath';
 import { getInstalledPath } from 'get-installed-path';
 import { exec } from '../../../util/exec';

@@ -2,7 +2,7 @@ import is from '@sindresorhus/is';
 import toml from 'toml';
 import { RANGE_PATTERN } from '@renovate/pep440/lib/specifier';
 import { logger } from '../../logger';
-import { PackageFile, PackageDependency } from '../common';
+import { PackageDependency, PackageFile } from '../common';
 import * as datasourcePypi from '../../datasource/pypi';
 import { SkipReason } from '../../types';
 

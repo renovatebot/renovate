@@ -1,5 +1,5 @@
 import { MAVEN_REPO } from '../../datasource/maven/common';
-import { PackageFile, PackageDependency } from '../common';
+import { PackageDependency, PackageFile } from '../common';
 import { get } from '../../versioning';
 import * as mavenVersioning from '../../versioning/maven';
 import * as datasourceSbtPackage from '../../datasource/sbt-package';

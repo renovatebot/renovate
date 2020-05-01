@@ -1,10 +1,10 @@
 import is from '@sindresorhus/is';
 import {
+  PackageRule,
+  RenovateConfig,
+  filterConfig,
   getManagerConfig,
   mergeChildConfig,
-  filterConfig,
-  RenovateConfig,
-  PackageRule,
 } from '../../../config';
 import { applyPackageRules } from '../../../util/package-rules';
 import { get } from '../../../manager';

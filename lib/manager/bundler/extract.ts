@@ -1,5 +1,5 @@
 import { logger } from '../../logger';
-import { PackageFile, PackageDependency } from '../common';
+import { PackageDependency, PackageFile } from '../common';
 import { regEx } from '../../util/regex';
 import { extractLockFileEntries } from './locked-version';
 import * as datasourceRubygems from '../../datasource/rubygems';

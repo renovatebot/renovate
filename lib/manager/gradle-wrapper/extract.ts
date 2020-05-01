@@ -1,5 +1,5 @@
 import { logger } from '../../logger';
-import { PackageFile, PackageDependency } from '../common';
+import { PackageDependency, PackageFile } from '../common';
 import * as gradleVersioning from '../../versioning/gradle';
 import * as datasourceGradleVersion from '../../datasource/gradle-version';
 

@@ -2,7 +2,7 @@ import * as os from 'os';
 import * as fs from 'fs-extra';
 import { Stats } from 'fs';
 import upath from 'upath';
-import { exec, ExecOptions } from '../../util/exec';
+import { ExecOptions, exec } from '../../util/exec';
 import { logger } from '../../logger';
 import * as gradleVersioning from '../../versioning/gradle';
 import {
@@ -17,8 +17,8 @@ import * as datasourceMaven from '../../datasource/maven';
 import { DatasourceError } from '../../datasource';
 import { BinarySource } from '../../util/exec/common';
 import {
-  collectVersionVariables,
   GradleDependency,
+  collectVersionVariables,
   init,
   updateGradleVersion,
 } from './build-gradle';

@@ -11,12 +11,12 @@ import {
 } from '../../constants/error-messages';
 import {
   BranchStatusConfig,
-  GotResponse,
-  RepoConfig,
-  RepoParams,
-  Platform,
   CommitFilesConfig,
   File,
+  GotResponse,
+  Platform,
+  RepoConfig,
+  RepoParams,
 } from '..';
 import { logger as _logger } from '../../logger';
 import { BranchStatus } from '../../types';

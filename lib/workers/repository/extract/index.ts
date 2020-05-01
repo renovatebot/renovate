@@ -1,9 +1,9 @@
 import { logger } from '../../../logger';
 import { getManagerList } from '../../../manager';
 import {
+  RenovateConfig,
   getManagerConfig,
   mergeChildConfig,
-  RenovateConfig,
 } from '../../../config';
 import { getManagerPackageFiles } from './manager-files';
 import { PackageFile } from '../../../manager/common';

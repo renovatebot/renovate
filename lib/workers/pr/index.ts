@@ -3,7 +3,7 @@ import uniq from 'lodash/uniq';
 import { logger } from '../../logger';
 import { ChangeLogError } from './changelog';
 import { getPrBody } from './body';
-import { platform, Pr, PlatformPrOptions } from '../../platform';
+import { PlatformPrOptions, Pr, platform } from '../../platform';
 import { BranchConfig, PrResult } from '../common';
 import {
   PLATFORM_FAILURE,

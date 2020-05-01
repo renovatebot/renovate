@@ -1,7 +1,7 @@
 import { fromStream } from 'hasha';
 import { coerce } from 'semver';
 import { parseUrlPath } from './extract';
-import { skip, isSpace, removeComments } from './util';
+import { isSpace, removeComments, skip } from './util';
 import { Http } from '../../util/http';
 import { logger } from '../../logger';
 import { UpdateDependencyConfig } from '../common';

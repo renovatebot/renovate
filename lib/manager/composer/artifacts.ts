@@ -2,7 +2,7 @@ import is from '@sindresorhus/is';
 import URL from 'url';
 import fs from 'fs-extra';
 import upath from 'upath';
-import { exec, ExecOptions } from '../../util/exec';
+import { ExecOptions, exec } from '../../util/exec';
 import { UpdateArtifact, UpdateArtifactsResult } from '../common';
 import { logger } from '../../logger';
 import * as hostRules from '../../util/host-rules';

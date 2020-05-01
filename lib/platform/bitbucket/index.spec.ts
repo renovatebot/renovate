@@ -1,6 +1,6 @@
 import URL from 'url';
 import responses from './__fixtures__/responses';
-import { GotApi, RepoParams, Platform } from '../common';
+import { GotApi, Platform, RepoParams } from '../common';
 import { REPOSITORY_DISABLED } from '../../constants/error-messages';
 import { BranchStatus } from '../../types';
 import { logger as _logger } from '../../logger';

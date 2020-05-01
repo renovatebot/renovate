@@ -5,7 +5,7 @@ import { getPrConfigDescription } from './config-description';
 import { getPrBanner } from './banner';
 import { getPrFooter } from './footer';
 import { getPrUpdatesTable } from './updates-table';
-import { getPrNotes, getPrExtraNotes } from './notes';
+import { getPrExtraNotes, getPrNotes } from './notes';
 import { getChangelogs } from './changelogs';
 import { getControls } from './controls';
 import { BranchConfig } from '../../common';

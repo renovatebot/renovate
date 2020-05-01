@@ -1,6 +1,6 @@
 import { logger } from '../../logger';
 import { isVersion } from '../../versioning/semver';
-import { PackageFile, PackageDependency } from '../common';
+import { PackageDependency, PackageFile } from '../common';
 import * as datasourceGithubTags from '../../datasource/github-tags';
 import { SkipReason } from '../../types';
 

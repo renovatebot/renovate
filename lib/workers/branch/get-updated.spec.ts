@@ -3,7 +3,7 @@ import * as _npm from '../../manager/npm';
 import * as _gitSubmodules from '../../manager/git-submodules';
 import * as _autoReplace from './auto-replace';
 import { getUpdatedPackageFiles } from './get-updated';
-import { mocked, defaultConfig, platform } from '../../../test/util';
+import { defaultConfig, mocked, platform } from '../../../test/util';
 import * as datasourceGitSubmodules from '../../datasource/git-submodules';
 
 const composer = mocked(_composer);

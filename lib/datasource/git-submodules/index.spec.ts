@@ -1,5 +1,5 @@
 import _simpleGit from 'simple-git/promise';
-import { getReleases, getDigest } from '.';
+import { getDigest, getReleases } from '.';
 
 jest.mock('simple-git/promise');
 const simpleGit: any = _simpleGit;

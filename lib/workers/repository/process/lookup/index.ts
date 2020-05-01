@@ -1,16 +1,16 @@
 import { logger } from '../../../../logger';
 import * as allVersioning from '../../../../versioning';
-import { getRollbackUpdate, RollbackConfig } from './rollback';
+import { RollbackConfig, getRollbackUpdate } from './rollback';
 import { getRangeStrategy } from '../../../../manager';
-import { filterVersions, FilterConfig } from './filter';
+import { FilterConfig, filterVersions } from './filter';
 import {
-  getPkgReleases,
-  supportsDigests,
-  getDigest,
   Release,
+  getDigest,
+  getPkgReleases,
   isGetPkgReleasesConfig,
+  supportsDigests,
 } from '../../../../datasource';
-import { RangeConfig, LookupUpdate } from '../../../../manager/common';
+import { LookupUpdate, RangeConfig } from '../../../../manager/common';
 import {
   RenovateConfig,
   UpdateType,

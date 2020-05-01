@@ -10,7 +10,7 @@ import * as _automerge from './automerge';
 import * as _prWorker from '../pr';
 import * as _getUpdated from './get-updated';
 import * as _exec from '../../util/exec';
-import { defaultConfig, platform, mocked } from '../../../test/util';
+import { defaultConfig, mocked, platform } from '../../../test/util';
 import { BranchConfig, PrResult } from '../common';
 import {
   MANAGER_LOCKFILE_ERROR,

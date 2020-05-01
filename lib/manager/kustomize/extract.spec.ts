@@ -2,8 +2,8 @@ import { readFileSync } from 'fs';
 import {
   extractBase,
   extractImage,
-  parseKustomize,
   extractPackageFile,
+  parseKustomize,
 } from './extract';
 import * as datasourceDocker from '../../datasource/docker';
 import * as datasourceGitTags from '../../datasource/git-tags';

@@ -1,7 +1,7 @@
 import { create } from '@snyk/ruby-semver/lib/ruby/gem-version';
 import { parse as _parse } from '@snyk/ruby-semver/lib/ruby/gem-requirement';
 import { logger } from '../../logger';
-import { EQUAL, NOT_EQUAL, GT, LT, GTE, LTE, PGTE } from './operator';
+import { EQUAL, GT, GTE, LT, LTE, NOT_EQUAL, PGTE } from './operator';
 
 export interface Range {
   version: string;

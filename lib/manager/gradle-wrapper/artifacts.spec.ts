@@ -3,7 +3,7 @@ import { resolve } from 'path';
 import Git from 'simple-git/promise';
 import * as dcUpdate from '.';
 import { platform as _platform } from '../../platform';
-import { mocked, getName, bufferSerializer } from '../../../test/util';
+import { bufferSerializer, getName, mocked } from '../../../test/util';
 import { ifSystemSupportsGradle } from '../gradle/__testutil__/gradle';
 import { setUtilConfig } from '../../util';
 

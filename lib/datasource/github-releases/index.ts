@@ -1,5 +1,5 @@
 import { api } from '../../platform/github/gh-got-wrapper';
-import { ReleaseResult, GetReleasesConfig } from '../common';
+import { GetReleasesConfig, ReleaseResult } from '../common';
 import { logger } from '../../logger';
 
 const { get: ghGot } = api;

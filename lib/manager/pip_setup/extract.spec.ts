@@ -1,10 +1,10 @@
 import { exec as _exec } from 'child_process';
 
 import {
-  resetModule,
-  parsePythonVersion,
   getPythonAlias,
+  parsePythonVersion,
   pythonVersions,
+  resetModule,
 } from './extract';
 import { envMock, mockExecSequence } from '../../../test/execUtil';
 import * as _env from '../../util/exec/env';

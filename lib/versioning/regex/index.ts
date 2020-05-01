@@ -1,4 +1,4 @@
-import { compare, satisfies, ltr, minSatisfying, maxSatisfying } from 'semver';
+import { compare, ltr, maxSatisfying, minSatisfying, satisfies } from 'semver';
 import { VersioningApiConstructor } from '../common';
 import { GenericVersion, GenericVersioningApi } from '../loose/generic';
 import { regEx } from '../../util/regex';

@@ -1,6 +1,6 @@
 import is from '@sindresorhus/is';
 import * as _hostRules from '../../util/host-rules';
-import { RepoParams, Platform } from '../common';
+import { Platform, RepoParams } from '../common';
 import { REPOSITORY_DISABLED } from '../../constants/error-messages';
 import { BranchStatus } from '../../types';
 

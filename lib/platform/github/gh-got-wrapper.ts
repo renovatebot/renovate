@@ -9,8 +9,8 @@ import { GotApi, GotResponse } from '../common';
 import { logger } from '../../logger';
 import {
   PLATFORM_BAD_CREDENTIALS,
-  PLATFORM_INTEGRATION_UNAUTHORIZED,
   PLATFORM_FAILURE,
+  PLATFORM_INTEGRATION_UNAUTHORIZED,
   PLATFORM_RATE_LIMIT_EXCEEDED,
   REPOSITORY_CHANGED,
 } from '../../constants/error-messages';

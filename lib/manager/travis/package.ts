@@ -3,7 +3,7 @@ import { isEqual } from 'lodash';
 import { logger } from '../../logger';
 import { getPkgReleases } from '../../datasource';
 import { isVersion, maxSatisfyingVersion } from '../../versioning/semver';
-import { PackageUpdateConfig, LookupUpdate } from '../common';
+import { LookupUpdate, PackageUpdateConfig } from '../common';
 import * as datasourceGithubTags from '../../datasource/github-tags';
 import { resolveFile } from '../../util';
 

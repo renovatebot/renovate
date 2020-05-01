@@ -4,7 +4,7 @@ import { resolve } from 'path';
 import * as fs from 'fs-extra';
 import { logger } from '../../logger';
 import { UpdateArtifact, UpdateArtifactsResult } from '../common';
-import { exec, ExecOptions } from '../../util/exec';
+import { ExecOptions, exec } from '../../util/exec';
 import { readLocalFile } from '../../util/fs';
 import { platform } from '../../platform';
 import { gradleWrapperFileName, prepareGradleCommand } from '../gradle/index';

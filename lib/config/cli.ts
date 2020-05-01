@@ -1,5 +1,5 @@
 import { Command } from 'commander';
-import { getOptions, RenovateOptions } from './definitions';
+import { RenovateOptions, getOptions } from './definitions';
 import { version } from '../../package.json';
 
 export function getCliName(option: Partial<RenovateOptions>): string {

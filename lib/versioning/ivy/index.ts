@@ -1,5 +1,5 @@
 import maven from '../maven';
-import { TYPE_QUALIFIER, tokenize, isSubversion } from '../maven/compare';
+import { TYPE_QUALIFIER, isSubversion, tokenize } from '../maven/compare';
 import {
   REV_TYPE_LATEST,
   REV_TYPE_SUBREV,

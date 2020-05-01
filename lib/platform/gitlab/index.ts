@@ -5,19 +5,19 @@ import { api } from './gl-got-wrapper';
 import * as hostRules from '../../util/host-rules';
 import GitStorage, { StatusResult } from '../git/storage';
 import {
-  PlatformConfig,
-  RepoParams,
-  RepoConfig,
-  GotResponse,
-  Pr,
-  Issue,
-  VulnerabilityAlert,
-  CreatePRConfig,
-  EnsureIssueConfig,
   BranchStatusConfig,
-  FindPRConfig,
-  EnsureCommentConfig,
   CommitFilesConfig,
+  CreatePRConfig,
+  EnsureCommentConfig,
+  EnsureIssueConfig,
+  FindPRConfig,
+  GotResponse,
+  Issue,
+  PlatformConfig,
+  Pr,
+  RepoConfig,
+  RepoParams,
+  VulnerabilityAlert,
 } from '../common';
 import { configFileNames } from '../../config/app-strings';
 import { logger } from '../../logger';

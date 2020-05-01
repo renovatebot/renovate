@@ -1,5 +1,5 @@
 import is from '@sindresorhus/is';
-import { getOptions, RenovateOptions } from './definitions';
+import { RenovateOptions, getOptions } from './definitions';
 import { resolveConfigPresets } from './presets';
 import { hasValidSchedule, hasValidTimezone } from '../workers/branch/schedule';
 import * as managerValidator from './validation-helpers/managers';

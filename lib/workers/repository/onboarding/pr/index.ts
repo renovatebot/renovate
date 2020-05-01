@@ -2,7 +2,7 @@ import is from '@sindresorhus/is';
 import { platform } from '../../../../platform';
 import { logger } from '../../../../logger';
 import { getConfigDesc } from './config-description';
-import { getErrors, getWarnings, getDepWarnings } from './errors-warnings';
+import { getDepWarnings, getErrors, getWarnings } from './errors-warnings';
 import { getBaseBranchDesc } from './base-branch';
 import { getPrList } from './pr-list';
 import { emojify } from '../../../../util/emoji';

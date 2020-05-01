@@ -1,5 +1,5 @@
 import { logger } from '../../../logger';
-import { mergeChildConfig, PackageRule } from '../../../config';
+import { PackageRule, mergeChildConfig } from '../../../config';
 
 export function flattenPackageRules(
   packageRules: PackageRule[]

@@ -7,7 +7,7 @@ import webpackJson from '../../../../config/npm/__fixtures__/webpack.json';
 import nextJson from '../../../../config/npm/__fixtures__/next.json';
 import vueJson from '../../../../config/npm/__fixtures__/vue.json';
 import typescriptJson from '../../../../config/npm/__fixtures__/typescript.json';
-import { mocked, getConfig } from '../../../../../test/util';
+import { getConfig, mocked } from '../../../../../test/util';
 import { CONFIG_VALIDATION } from '../../../../constants/error-messages';
 import * as dockerVersioning from '../../../../versioning/docker';
 import * as gitVersioning from '../../../../versioning/git';

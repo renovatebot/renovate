@@ -3,14 +3,14 @@ import { hrtime } from 'process';
 import { logger } from '../../../logger';
 import { getPackageUpdates } from '../../../manager';
 import {
+  ManagerConfig,
+  RenovateConfig,
   getManagerConfig,
   mergeChildConfig,
-  RenovateConfig,
-  ManagerConfig,
 } from '../../../config';
 import { applyPackageRules } from '../../../util/package-rules';
-import { lookupUpdates, LookupUpdateConfig } from './lookup';
-import { PackageFile, PackageDependency } from '../../../manager/common';
+import { LookupUpdateConfig, lookupUpdates } from './lookup';
+import { PackageDependency, PackageFile } from '../../../manager/common';
 import { SkipReason } from '../../../types';
 import { getDefaultConfig } from '../../../datasource';
 import { clone } from '../../../util/clone';

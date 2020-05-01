@@ -3,7 +3,7 @@ import fs from 'fs-extra';
 import os from 'os';
 import path from 'path';
 import { setEmojiConfig } from '../../util/emoji';
-import { logger, setMeta, getErrors } from '../../logger';
+import { getErrors, logger, setMeta } from '../../logger';
 import * as configParser from '../../config';
 import * as repositoryWorker from '../repository';
 import * as cache from './cache';

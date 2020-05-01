@@ -1,4 +1,4 @@
-import { ReleaseResult, GetReleasesConfig } from '../common';
+import { GetReleasesConfig, ReleaseResult } from '../common';
 import * as semver from '../../versioning/semver';
 import * as gitRefs from '../git-refs';
 

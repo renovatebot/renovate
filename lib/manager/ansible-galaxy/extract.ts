@@ -1,5 +1,5 @@
 import { logger } from '../../logger';
-import { PackageFile, PackageDependency } from '../common';
+import { PackageDependency, PackageFile } from '../common';
 import * as datasourceGitTags from '../../datasource/git-tags';
 import * as datasourceGalaxy from '../../datasource/galaxy';
 import { SkipReason } from '../../types';

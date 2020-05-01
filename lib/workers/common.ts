@@ -1,14 +1,14 @@
 import { Merge } from 'type-fest';
 import {
-  PackageDependency,
   ArtifactError,
   LookupUpdate,
+  PackageDependency,
 } from '../manager/common';
 import {
-  RenovateSharedConfig,
-  RenovateConfig,
   GroupConfig,
   RenovateAdminConfig,
+  RenovateConfig,
+  RenovateSharedConfig,
   ValidationMessage,
 } from '../config';
 import { File, PlatformPrOptions } from '../platform';

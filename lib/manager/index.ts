@@ -1,11 +1,11 @@
 import {
   ExtractConfig,
+  LookupUpdate,
   ManagerApi,
   PackageFile,
   PackageUpdateConfig,
   RangeConfig,
   Result,
-  LookupUpdate,
 } from './common';
 import { RangeStrategy } from '../types';
 import {

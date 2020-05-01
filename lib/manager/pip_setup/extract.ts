@@ -2,7 +2,7 @@ import { exec } from '../../util/exec';
 import { logger } from '../../logger';
 import { isSkipComment } from '../../util/ignore';
 import { dependencyPattern } from '../pip_requirements/extract';
-import { ExtractConfig, PackageFile, PackageDependency } from '../common';
+import { ExtractConfig, PackageDependency, PackageFile } from '../common';
 import * as datasourcePypi from '../../datasource/pypi';
 import { BinarySource } from '../../util/exec/common';
 import { SkipReason } from '../../types';

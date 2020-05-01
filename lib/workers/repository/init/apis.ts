@@ -1,5 +1,5 @@
 import * as npmApi from '../../../datasource/npm';
-import { platform, RepoConfig } from '../../../platform';
+import { RepoConfig, platform } from '../../../platform';
 import { RenovateConfig } from '../../../config';
 
 // TODO: fix types

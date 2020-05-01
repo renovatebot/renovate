@@ -1,5 +1,5 @@
 import { isEqual } from 'lodash';
-import { inc, ReleaseType } from 'semver';
+import { ReleaseType, inc } from 'semver';
 import { logger } from '../../logger';
 import { UpdateDependencyConfig } from '../common';
 import { matchAt, replaceAt } from '../../util/string';

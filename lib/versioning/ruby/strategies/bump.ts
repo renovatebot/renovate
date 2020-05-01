@@ -1,7 +1,7 @@
 import { gte, lte } from '@snyk/ruby-semver';
 import { logger } from '../../../logger';
-import { EQUAL, NOT_EQUAL, GT, LT, GTE, LTE, PGTE } from '../operator';
-import { floor, increment, decrement } from '../version';
+import { EQUAL, GT, GTE, LT, LTE, NOT_EQUAL, PGTE } from '../operator';
+import { decrement, floor, increment } from '../version';
 import { parse as parseRange } from '../range';
 
 export default ({ range, to }: { range: string; to: string }): string => {

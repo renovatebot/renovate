@@ -1,5 +1,5 @@
 import { logger } from '../../logger';
-import { platform, Pr } from '../../platform';
+import { Pr, platform } from '../../platform';
 import { BranchConfig } from '../common';
 import { RenovateConfig } from '../../config';
 import { PR_STATE_NOT_OPEN } from '../../constants/pull-requests';

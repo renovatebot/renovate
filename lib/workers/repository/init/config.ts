@@ -3,7 +3,7 @@ import JSON5 from 'json5';
 import path from 'path';
 
 import { logger } from '../../../logger';
-import { mergeChildConfig, RenovateConfig } from '../../../config';
+import { RenovateConfig, mergeChildConfig } from '../../../config';
 import { migrateAndValidate } from '../../../config/migrate-validate';
 import { decryptConfig } from '../../../config/decrypt';
 import * as presets from '../../../config/presets';

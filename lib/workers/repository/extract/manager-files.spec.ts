@@ -1,7 +1,7 @@
 import { getManagerPackageFiles } from './manager-files';
 import * as _fileMatch from './file-match';
 import * as _html from '../../../manager/html';
-import { mocked, getConfig } from '../../../../test/util';
+import { getConfig, mocked } from '../../../../test/util';
 import { RenovateConfig } from '../../../config';
 import * as _fs from '../../../util/fs';
 

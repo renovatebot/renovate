@@ -1,5 +1,5 @@
 import { logger } from '../../logger';
-import { PackageFile, PackageDependency } from '../common';
+import { PackageDependency, PackageFile } from '../common';
 import * as datasourceNpm from '../../datasource/npm';
 
 export function extractPackageFile(content: string): PackageFile | null {

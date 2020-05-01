@@ -1,7 +1,7 @@
 import { fetchUpdates } from './fetch';
 import * as _npm from '../../../manager/npm';
 import * as lookup from './lookup';
-import { getConfig, mocked, RenovateConfig } from '../../../../test/util';
+import { RenovateConfig, getConfig, mocked } from '../../../../test/util';
 import { ManagerApi } from '../../../manager/common';
 import * as datasourceNpm from '../../../datasource/npm';
 import * as datasourceMaven from '../../../datasource/maven';

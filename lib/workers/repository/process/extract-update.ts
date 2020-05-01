@@ -1,6 +1,6 @@
 import { hrtime } from 'process';
 import { logger } from '../../../logger';
-import { writeUpdates, WriteUpdateResult } from './write';
+import { WriteUpdateResult, writeUpdates } from './write';
 import { sortBranches } from './sort';
 import { fetchUpdates } from './fetch';
 import { raiseDeprecationWarnings } from './deprecated';

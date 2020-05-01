@@ -1,8 +1,8 @@
 import {
-  GitPullRequestMergeStrategy,
-  GitRef,
   GitCommit,
   GitPullRequest,
+  GitPullRequestMergeStrategy,
+  GitRef,
 } from 'azure-devops-node-api/interfaces/GitInterfaces';
 
 import { Options } from 'simple-git/promise';

@@ -1,6 +1,6 @@
 import { api } from '../../../platform/github/gh-got-wrapper';
 import * as hostRules from '../../../util/host-rules';
-import { getChangeLogJSON, ChangeLogError } from '.';
+import { ChangeLogError, getChangeLogJSON } from '.';
 import { mocked, partial } from '../../../../test/util';
 import { PLATFORM_TYPE_GITHUB } from '../../../constants/platforms';
 import * as semverVersioning from '../../../versioning/semver';

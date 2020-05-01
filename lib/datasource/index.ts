@@ -6,11 +6,11 @@ import * as allVersioning from '../versioning';
 import {
   Datasource,
   DatasourceError,
+  DigestConfig,
+  GetPkgReleasesConfig,
+  GetReleasesConfig,
   Release,
   ReleaseResult,
-  DigestConfig,
-  GetReleasesConfig,
-  GetPkgReleasesConfig,
 } from './common';
 import datasources from './api.generated';
 import { clone } from '../util/clone';

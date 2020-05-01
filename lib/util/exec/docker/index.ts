@@ -1,9 +1,9 @@
 import {
-  VolumeOption,
-  VolumesPair,
   DockerOptions,
   ExecConfig,
   Opt,
+  VolumeOption,
+  VolumesPair,
   rawExec,
 } from '../common';
 import { logger } from '../../../logger';

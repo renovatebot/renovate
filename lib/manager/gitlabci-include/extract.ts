@@ -1,7 +1,7 @@
 import is from '@sindresorhus/is';
 import yaml from 'js-yaml';
 import { logger } from '../../logger';
-import { PackageDependency, ExtractConfig, PackageFile } from '../common';
+import { ExtractConfig, PackageDependency, PackageFile } from '../common';
 import * as datasourceGitlabTags from '../../datasource/gitlab-tags';
 import { SkipReason } from '../../types';
 

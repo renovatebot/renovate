@@ -1,16 +1,16 @@
 import {
-  isVersion,
-  isValid,
-  tokenize,
-  compare,
+  EXCLUDING_POINT,
+  QualifierTypes,
   TYPE_NUMBER,
   TYPE_QUALIFIER,
-  isSingleVersion,
   autoExtendMavenRange,
+  compare,
+  isSingleVersion,
+  isValid,
+  isVersion,
   parseRange,
-  EXCLUDING_POINT,
   qualifierType,
-  QualifierTypes,
+  tokenize,
 } from './compare';
 import { NewValueConfig, VersioningApi } from '../common';
 

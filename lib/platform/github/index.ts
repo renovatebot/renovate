@@ -7,18 +7,18 @@ import { api } from './gh-got-wrapper';
 import * as hostRules from '../../util/host-rules';
 import GitStorage, { StatusResult } from '../git/storage';
 import {
-  PlatformConfig,
-  RepoParams,
-  RepoConfig,
-  Issue,
-  VulnerabilityAlert,
-  CreatePRConfig,
-  EnsureIssueConfig,
   BranchStatusConfig,
-  FindPRConfig,
-  EnsureCommentConfig,
-  EnsureIssueResult,
   CommitFilesConfig,
+  CreatePRConfig,
+  EnsureCommentConfig,
+  EnsureIssueConfig,
+  EnsureIssueResult,
+  FindPRConfig,
+  Issue,
+  PlatformConfig,
+  RepoConfig,
+  RepoParams,
+  VulnerabilityAlert,
 } from '../common';
 
 import { configFileNames } from '../../config/app-strings';

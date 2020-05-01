@@ -3,7 +3,7 @@ import { Http } from '../../util/http';
 import { logger } from '../../logger';
 import { DatasourceError } from '../common';
 
-import { id, MAVEN_REPO } from './common';
+import { MAVEN_REPO, id } from './common';
 
 const http: Record<string, Http> = {};
 

@@ -4,7 +4,7 @@ import { XmlDocument } from 'xmldoc';
 import { readFile } from 'fs-extra';
 import { logger } from '../../logger';
 import { get } from '../../versioning';
-import { PackageDependency, ExtractConfig, PackageFile } from '../common';
+import { ExtractConfig, PackageDependency, PackageFile } from '../common';
 import * as semverVersioning from '../../versioning/semver';
 import * as datasourceNuget from '../../datasource/nuget';
 import { SkipReason } from '../../types';

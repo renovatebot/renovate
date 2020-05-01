@@ -1,5 +1,5 @@
 import { safeLoad } from 'js-yaml';
-import { PackageFile, PackageDependency } from '../common';
+import { PackageDependency, PackageFile } from '../common';
 import { logger } from '../../logger';
 import * as datasourceDocker from '../../datasource/docker';
 import * as datasourceGitTags from '../../datasource/git-tags';

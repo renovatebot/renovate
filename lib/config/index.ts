@@ -1,4 +1,4 @@
-import { logger, levels, addStream, setContext } from '../logger';
+import { addStream, levels, logger, setContext } from '../logger';
 import * as definitions from './definitions';
 import * as defaultsParser from './defaults';
 import * as fileParser from './file';

@@ -1,8 +1,8 @@
 import { logger } from '../logger';
 import {
   VersioningApi,
-  isVersioningApiConstructor,
   VersioningApiConstructor,
+  isVersioningApiConstructor,
 } from './common';
 import versionings from './api.generated';
 

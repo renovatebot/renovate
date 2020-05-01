@@ -1,4 +1,4 @@
-import { logger, addMeta, removeMeta } from '../../../logger';
+import { addMeta, logger, removeMeta } from '../../../logger';
 import { processBranch } from '../../branch';
 import { getPrsRemaining } from './limits';
 import { getLimitRemaining } from '../../global/limits';

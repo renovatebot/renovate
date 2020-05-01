@@ -1,7 +1,7 @@
 /* eslint-disable no-template-curly-in-string */
 import { readFileSync } from 'fs';
 import { resolve } from 'path';
-import { trimAtKey, extractFromVectors, extractPackageFile } from './extract';
+import { extractFromVectors, extractPackageFile, trimAtKey } from './extract';
 import * as datasourceClojure from '../../datasource/clojure';
 
 const leinProjectClj = readFileSync(

@@ -1,4 +1,4 @@
-import { VersioningApi, NewValueConfig } from '../common';
+import { NewValueConfig, VersioningApi } from '../common';
 
 export interface GenericVersion {
   release: number[];

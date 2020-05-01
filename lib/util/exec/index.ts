@@ -3,19 +3,19 @@ import { hrtime } from 'process';
 import { ExecOptions as ChildProcessExecOptions } from 'child_process';
 import {
   generateDockerCommand,
-  removeDockerContainer,
   removeDanglingContainers,
+  removeDockerContainer,
 } from './docker';
 import { getChildProcessEnv } from './env';
 import { logger } from '../../logger';
 import {
   BinarySource,
+  DockerOptions,
   ExecConfig,
   ExecResult,
+  Opt,
   RawExecOptions,
   rawExec,
-  Opt,
-  DockerOptions,
 } from './common';
 import { RenovateConfig } from '../../config/common';
 

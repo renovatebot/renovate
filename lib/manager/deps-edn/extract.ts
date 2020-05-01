@@ -1,5 +1,5 @@
 import { expandDepName } from '../leiningen/extract';
-import { PackageFile, PackageDependency } from '../common';
+import { PackageDependency, PackageFile } from '../common';
 import * as datasourceClojure from '../../datasource/clojure';
 
 export function extractPackageFile(content: string): PackageFile {

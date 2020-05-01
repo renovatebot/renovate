@@ -1,14 +1,14 @@
 import _fs from 'fs-extra';
 import {
-  logger,
-  setContext,
-  getContext,
-  setMeta,
   addMeta,
-  removeMeta,
-  levels,
-  getErrors,
   addStream,
+  getContext,
+  getErrors,
+  levels,
+  logger,
+  removeMeta,
+  setContext,
+  setMeta,
 } from '.';
 import { add } from '../util/host-rules';
 

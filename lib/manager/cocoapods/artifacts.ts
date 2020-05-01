@@ -1,6 +1,6 @@
-import { join, dirname } from 'upath';
+import { dirname, join } from 'upath';
 import { platform } from '../../platform';
-import { exec, ExecOptions } from '../../util/exec';
+import { ExecOptions, exec } from '../../util/exec';
 import { logger } from '../../logger';
 import { UpdateArtifact, UpdateArtifactsResult } from '../common';
 import {

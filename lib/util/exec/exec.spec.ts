@@ -1,9 +1,9 @@
 /* eslint-disable @typescript-eslint/no-floating-promises */
 import {
-  exec as _cpExec,
   ExecOptions as ChildProcessExecOptions,
+  exec as _cpExec,
 } from 'child_process';
-import { exec, ExecOptions, setExecConfig } from '.';
+import { ExecOptions, exec, setExecConfig } from '.';
 import {
   BinarySource,
   ExecConfig,

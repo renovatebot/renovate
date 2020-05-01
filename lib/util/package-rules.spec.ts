@@ -1,4 +1,4 @@
-import { applyPackageRules, Config } from './package-rules';
+import { Config, applyPackageRules } from './package-rules';
 import { UpdateType } from '../config';
 import {
   LANGUAGE_DOCKER,

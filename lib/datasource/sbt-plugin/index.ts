@@ -1,6 +1,6 @@
 import { compare } from '../../versioning/maven/compare';
 import { downloadHttpProtocol } from '../maven/util';
-import { parseIndexDir, SBT_PLUGINS_REPO } from './util';
+import { SBT_PLUGINS_REPO, parseIndexDir } from './util';
 import { logger } from '../../logger';
 import { GetReleasesConfig, ReleaseResult } from '../common';
 import { resolvePackageReleases } from '../sbt-package';

@@ -1,8 +1,8 @@
 import {
-  setStability,
-  setUnpublishable,
   StabilityConfig,
   UnpublishableConfig,
+  setStability,
+  setUnpublishable,
 } from './status-checks';
 import { defaultConfig, platform } from '../../../test/util';
 import { BranchStatus } from '../../types';

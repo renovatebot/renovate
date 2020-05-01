@@ -1,4 +1,4 @@
-import { PackageFile, PackageDependency } from '../common';
+import { PackageDependency, PackageFile } from '../common';
 import * as datasourceCdnjs from '../../datasource/cdnjs';
 import { cloudflareUrlRegex } from '../cdnurl/extract';
 

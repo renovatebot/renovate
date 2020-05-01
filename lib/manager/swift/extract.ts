@@ -1,4 +1,4 @@
-import { PackageFile, PackageDependency } from '../common';
+import { PackageDependency, PackageFile } from '../common';
 import * as datasourceGitTags from '../../datasource/git-tags';
 
 const regExps = {

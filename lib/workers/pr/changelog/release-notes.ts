@@ -5,7 +5,7 @@ import * as URL from 'url';
 
 import { api } from '../../../platform/github/gh-got-wrapper';
 import { logger } from '../../../logger';
-import { ChangeLogResult, ChangeLogNotes } from './common';
+import { ChangeLogNotes, ChangeLogResult } from './common';
 
 const { get: ghGot } = api;
 

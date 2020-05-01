@@ -9,9 +9,9 @@ import { mightBeABrowserLibrary } from './type';
 import { isValid, isVersion } from '../../../versioning/npm';
 import {
   ExtractConfig,
-  PackageFile,
-  PackageDependency,
   NpmLockFiles,
+  PackageDependency,
+  PackageFile,
 } from '../../common';
 import { NpmPackage, NpmPackageDependeny } from './common';
 import { CONFIG_VALIDATION } from '../../../constants/error-messages';
@@ -19,9 +19,9 @@ import * as nodeVersioning from '../../../versioning/node';
 import * as datasourceNpm from '../../../datasource/npm';
 import * as datasourceGithubTags from '../../../datasource/github-tags';
 import {
-  readLocalFile,
-  getSiblingFileName,
   deleteLocalFile,
+  getSiblingFileName,
+  readLocalFile,
 } from '../../../util/fs';
 
 function parseDepName(depType: string, key: string): string {

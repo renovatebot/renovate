@@ -1,7 +1,7 @@
 import * as prWorker from '.';
 import * as _changelogHelper from './changelog';
 import { getConfig } from '../../config/defaults';
-import { platform as _platform, Pr } from '../../platform';
+import { Pr, platform as _platform } from '../../platform';
 import { mocked } from '../../../test/util';
 import { BranchStatus } from '../../types';
 import { PLATFORM_TYPE_GITLAB } from '../../constants/platforms';

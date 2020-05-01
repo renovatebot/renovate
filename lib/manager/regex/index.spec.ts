@@ -1,6 +1,6 @@
 import { readFileSync } from 'fs';
 import { resolve } from 'path';
-import { extractPackageFile, defaultConfig } from '.';
+import { defaultConfig, extractPackageFile } from '.';
 import { getName } from '../../../test/util';
 
 const dockerfileContent = readFileSync(
