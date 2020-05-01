@@ -4,6 +4,7 @@ import railsVersions from './__fixtures__/rails/versions.json';
 import * as rubyVersioning from '../../versioning/ruby';
 import * as rubygems from '.';
 import { getPkgReleases } from '..';
+import { clearRepoCache } from '../../util/cache';
 
 const got: any = _got;
 
@@ -45,7 +46,7 @@ describe('datasource/rubygems', () => {
     });
 
     afterEach(() => {
-      global.repoCache = {};
+      clearRepoCache();
       process.env.RENOVATE_SKIP_CACHE = SKIP_CACHE;
     });
 

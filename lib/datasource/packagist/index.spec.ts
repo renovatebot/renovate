@@ -3,6 +3,7 @@ import _got from '../../util/got';
 import * as packagist from '.';
 import * as _hostRules from '../../util/host-rules';
 import * as composerVersioning from '../../versioning/composer';
+import { clearRepoCache } from '../../util/cache';
 
 jest.mock('../../util/got');
 jest.mock('../../util/host-rules');
@@ -27,7 +28,7 @@ describe('datasource/packagist', () => {
       jest.resetAllMocks();
       hostRules.find = jest.fn((input) => input);
       hostRules.hosts = jest.fn(() => []);
-      global.repoCache = {};
+      clearRepoCache();
       config = {
         versioning: composerVersioning.id,
         registryUrls: [

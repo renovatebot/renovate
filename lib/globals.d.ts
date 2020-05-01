@@ -33,8 +33,6 @@ declare namespace NodeJS {
 
     renovateCache: Renovate.Cache;
 
-    repoCache: Record<string, any>;
-
     trustLevel?: string;
 
     updateRubyGemsVersions?: Promise<void>;
