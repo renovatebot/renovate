@@ -111,6 +111,7 @@
     "@renovate/pep440": "0.4.1",
     "@renovatebot/ruby-semver": "0.2.1",
     "@sindresorhus/is": "3.1.0",
+    "@yarnpkg/core": "2.0.0-rc.27",
     "@yarnpkg/lockfile": "1.1.0",
     "@yarnpkg/parsers": "2.0.0-rc.11",
     "aws-sdk": "2.725.0",
