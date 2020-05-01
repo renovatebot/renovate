@@ -87,7 +87,6 @@ describe('datasource/nuget', () => {
     beforeEach(() => {
       jest.resetAllMocks();
       hostRules.hosts = jest.fn(() => []);
-      global.repoCache = {};
     });
 
     it(`can't detect nuget feed version`, async () => {

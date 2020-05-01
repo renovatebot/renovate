@@ -11,7 +11,6 @@ const glGot: jest.Mock<Promise<PartialDeep<GotResponse>>> = api.get as never;
 describe('config/presets/gitlab', () => {
   beforeEach(() => {
     glGot.mockReset();
-    global.repoCache = {};
     return global.renovateCache.rmAll();
   });
   describe('getPreset()', () => {

@@ -16,6 +16,7 @@ import {
   findAllAuthenticatable,
   getDomain,
 } from './host-rules';
+import { getRepoCached, setRepoCached } from '../../util/cache';
 
 const hostConfigVariablePrefix = 'BUNDLE_';
 
@@ -70,12 +71,12 @@ export async function updateArtifacts(
     config,
   } = updateArtifact;
   const { compatibility = {} } = config;
-
   logger.debug(`bundler.updateArtifacts(${packageFileName})`);
+  const existingError = getRepoCached<string>('bundlerArtifactsError');
   // istanbul ignore if
-  if (global.repoCache.bundlerArtifactsError) {
+  if (existingError) {
     logger.debug('Aborting Bundler artifacts due to previous failed attempt');
-    throw new Error(global.repoCache.bundlerArtifactsError);
+    throw new Error(existingError);
   }
   const lockFileName = `${packageFileName}.lock`;
   const existingLockFileContent = await platform.getFile(lockFileName);
@@ -176,7 +177,7 @@ export async function updateArtifacts(
         'Gemfile.lock update failed due to missing credentials - skipping branch'
       );
       // Do not generate these PRs because we don't yet support Bundler authentication
-      global.repoCache.bundlerArtifactsError = BUNDLER_INVALID_CREDENTIALS;
+      setRepoCached('bundlerArtifactsError', BUNDLER_INVALID_CREDENTIALS);
       throw new Error(BUNDLER_INVALID_CREDENTIALS);
     }
     const resolveMatchRe = new RegExp('\\s+(.*) was resolved to', 'g');

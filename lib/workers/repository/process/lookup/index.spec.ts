@@ -20,6 +20,7 @@ import * as datasourcePackagist from '../../../../datasource/packagist';
 import * as datasourceDocker from '../../../../datasource/docker';
 import * as datasourceGithubTags from '../../../../datasource/github-tags';
 import * as datasourceGitSubmodules from '../../../../datasource/git-submodules';
+import { clearRepoCache } from '../../../../util/cache';
 
 jest.mock('../../../../datasource/docker');
 jest.mock('../../../../datasource/git-submodules');
@@ -37,7 +38,7 @@ describe('workers/repository/process/lookup', () => {
     config.manager = 'npm';
     config.versioning = npmVersioning.id;
     config.rangeStrategy = 'replace';
-    global.repoCache = {};
+    clearRepoCache();
     jest.resetAllMocks();
   });
 

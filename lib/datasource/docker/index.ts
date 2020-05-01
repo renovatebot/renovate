@@ -548,12 +548,11 @@ async function getLabels(
     if (err instanceof DatasourceError) {
       throw err;
     }
-    if (err.statusCode === 401) {
+    if (err.statusCode === 400 || err.statusCode === 401) {
       logger.debug(
-        { registry, dockerRepository: repository },
+        { registry, dockerRepository: repository, err },
         'Unauthorized docker lookup'
       );
-      logger.debug({ err });
     } else if (err.statusCode === 404) {
       logger.warn(
         {
@@ -570,7 +569,7 @@ async function getLabels(
     ) {
       logger.warn({ err }, 'docker registry failure: too many requests');
     } else if (err.statusCode >= 500 && err.statusCode < 600) {
-      logger.warn(
+      logger.debug(
         {
           err,
           registry,
@@ -579,19 +578,18 @@ async function getLabels(
         },
         'docker registry failure: internal error'
       );
-    } else if (err.code === 'ETIMEDOUT') {
-      logger.debug(
-        { registry },
-        'Timeout when attempting to connect to docker registry'
-      );
-      logger.debug({ err });
+    } else if (
+      err.code === 'ERR_TLS_CERT_ALTNAME_INVALID' ||
+      err.code === 'ETIMEDOUT'
+    ) {
+      logger.debug({ registry, err }, 'Error connecting to docker registry');
     } else if (registry === 'https://quay.io') {
       // istanbul ignore next
       logger.debug(
         'Ignoring quay.io errors until they fully support v2 schema'
       );
     } else {
-      logger.warn(
+      logger.info(
         { registry, dockerRepository: repository, tag, err },
         'Unknown error getting Docker labels'
       );
