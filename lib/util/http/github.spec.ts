@@ -9,7 +9,7 @@ import {
 } from '../../constants/error-messages';
 
 jest.mock('../../util/got');
-const got: any = _got;
+const got = mocked(_got);
 
 describe('Github HTTP', () => {
   async function makeError(http: GithubHttp): Promise<Error> {
