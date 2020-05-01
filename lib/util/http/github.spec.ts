@@ -7,9 +7,10 @@ import {
   PLATFORM_RATE_LIMIT_EXCEEDED,
   REPOSITORY_CHANGED,
 } from '../../constants/error-messages';
+import { mocked } from '../../../test/util';
 
 jest.mock('../../util/got');
-const got = mocked(_got);
+const got = mocked<any>(_got);
 
 describe('Github HTTP', () => {
   async function makeError(http: GithubHttp): Promise<Error> {
@@ -29,7 +30,7 @@ describe('Github HTTP', () => {
   });
 
   it('supports app mode', async () => {
-    got.mockImplementationOnce(() => ({}));
+    got.mockResolvedValueOnce({ body: {} } as any);
     global.appMode = true;
     await http.getJson('some-url', {
       headers: { accept: 'some-accept' },
