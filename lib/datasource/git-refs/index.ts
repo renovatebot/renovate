@@ -1,7 +1,7 @@
 import simpleGit from 'simple-git/promise';
 import { logger } from '../../logger';
 import * as semver from '../../versioning/semver';
-import { GetReleasesConfig, ReleaseResult } from '../common';
+import { DigestConfig, GetReleasesConfig, ReleaseResult } from '../common';
 
 export const id = 'git-refs';
 
@@ -45,21 +45,31 @@ export async function getRawRefs({
     }
 
     const refMatch = /(?<hash>.*?)\s+refs\/(?<type>.*?)\/(?<value>.*)/;
+    const headMatch = /(?<hash>.*?)\s+HEAD/;
 
     const refs = lsRemote
       .trim()
       .split('\n')
       .map((line) => line.trim())
       .map((line) => {
-        const match = refMatch.exec(line);
-        if (!match) {
-          return null;
+        let match = refMatch.exec(line);
+        if (match) {
+          return {
+            type: match.groups.type,
+            value: match.groups.value,
+            hash: match.groups.hash,
+          };
         }
-        return {
-          type: match.groups.type,
-          value: match.groups.value,
-          hash: match.groups.hash,
-        };
+        match = headMatch.exec(line);
+        if (match) {
+          return {
+            type: '',
+            value: 'HEAD',
+            hash: match.groups.hash,
+          };
+        }
+        // istanbul ignore next
+        return null;
       })
       .filter(Boolean);
 
@@ -98,6 +108,19 @@ export async function getReleases({
     return result;
   } catch (err) {
     logger.error({ err }, `Git-Refs lookup error in ${lookupName}`);
+  }
+  return null;
+}
+
+export async function getDigest(
+  { lookupName }: Partial<DigestConfig>,
+  newValue?: string
+): Promise<string | null> {
+  const rawRefs: RawRefs[] = await getRawRefs({ lookupName });
+  const findValue = newValue || 'HEAD';
+  const ref = rawRefs.find((rawRef) => rawRef.value === findValue);
+  if (ref) {
+    return ref.hash;
   }
   return null;
 }

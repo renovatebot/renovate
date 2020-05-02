@@ -1,5 +1,5 @@
 import _simpleGit from 'simple-git/promise';
-import { getReleases } from '.';
+import { getDigest, getReleases } from '.';
 
 jest.mock('simple-git/promise');
 const simpleGit: any = _simpleGit;
@@ -31,7 +31,7 @@ describe('datasource/git-refs', () => {
       simpleGit.mockReturnValue({
         listRemote() {
           return Promise.resolve(
-            'commithash1\trefs/tags/0.0.1\ncommithash2\trefs/tags/v0.0.2\ncommithash3\trefs/tags/v0.0.2^{}\ncommithash4\trefs/heads/v0.0.3\ncommithash5\trefs/tags/v0.0.3\n'
+            'commithash0\tHEAD\ncommithash1\trefs/tags/0.0.1\ncommithash2\trefs/tags/v0.0.2\ncommithash3\trefs/tags/v0.0.2^{}\ncommithash4\trefs/heads/v0.0.3\ncommithash5\trefs/tags/v0.0.3\n'
           );
         },
       });
@@ -42,6 +42,50 @@ describe('datasource/git-refs', () => {
       expect(versions).toMatchSnapshot();
       const result = versions.releases.map((x) => x.version).sort();
       expect(result).toEqual(['0.0.1', 'v0.0.2', 'v0.0.3']);
+    });
+  });
+  describe('getDigest()', () => {
+    it('returns null if not found', async () => {
+      simpleGit.mockReturnValue({
+        listRemote() {
+          return Promise.resolve(
+            'commithash0\tHEAD\ncommithash1\trefs/tags/0.0.1\ncommithash2\trefs/tags/v0.0.2\ncommithash3\trefs/tags/v0.0.2^{}\ncommithash4\trefs/heads/v0.0.3\ncommithash5\trefs/tags/v0.0.3\n'
+          );
+        },
+      });
+      const digest = await getDigest(
+        { lookupName: 'a tag to look up' },
+        'v1.0.2'
+      );
+      expect(digest).toBeNull();
+    });
+    it('returns digest for tag', async () => {
+      simpleGit.mockReturnValue({
+        listRemote() {
+          return Promise.resolve(
+            'commithash0\tHEAD\ncommithash1\trefs/tags/0.0.1\ncommithash2\trefs/tags/v0.0.2\ncommithash3\trefs/tags/v0.0.2^{}\ncommithash4\trefs/heads/v0.0.3\ncommithash5\trefs/tags/v0.0.3\n'
+          );
+        },
+      });
+      const digest = await getDigest(
+        { lookupName: 'a tag to look up' },
+        'v0.0.2'
+      );
+      expect(digest).toEqual('commithash2');
+    });
+    it('returns digest for HEAD', async () => {
+      simpleGit.mockReturnValue({
+        listRemote() {
+          return Promise.resolve(
+            'commithash0\tHEAD\ncommithash1\trefs/tags/0.0.1\ncommithash2\trefs/tags/v0.0.2\ncommithash3\trefs/tags/v0.0.2^{}\ncommithash4\trefs/heads/v0.0.3\ncommithash5\trefs/tags/v0.0.3\n'
+          );
+        },
+      });
+      const digest = await getDigest(
+        { lookupName: 'another tag to look up' },
+        undefined
+      );
+      expect(digest).toEqual('commithash0');
     });
   });
 });
