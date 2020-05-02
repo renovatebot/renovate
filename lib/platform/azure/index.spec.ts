@@ -791,11 +791,11 @@ describe('platform/azure', () => {
             updateThread: jest.fn(),
           } as any)
       );
-      await azure.ensureCommentRemoval(42, 'some-subject');
+      await azure.ensureCommentRemoval({ number: 42, topic: 'some-subject' });
       expect(azureApi.gitApi).toHaveBeenCalledTimes(3);
     });
     it('nothing should happen, no number', async () => {
-      await azure.ensureCommentRemoval(0, 'test');
+      await azure.ensureCommentRemoval({ number: 0, topic: 'test' });
       expect(azureApi.gitApi).toHaveBeenCalledTimes(0);
     });
     it('comment not found', async () => {
@@ -809,7 +809,7 @@ describe('platform/azure', () => {
             updateThread: jest.fn(),
           } as any)
       );
-      await azure.ensureCommentRemoval(42, 'some-subject');
+      await azure.ensureCommentRemoval({ number: 42, topic: 'some-subject' });
       expect(azureApi.gitApi).toHaveBeenCalledTimes(3);
     });
   });

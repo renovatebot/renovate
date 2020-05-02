@@ -857,7 +857,7 @@ describe('platform/gitlab', () => {
           body: [{ id: 1234, body: '### some-subject\n\nblablabla' }],
         })
       );
-      await gitlab.ensureCommentRemoval(42, 'some-subject');
+      await gitlab.ensureCommentRemoval({ number: 42, topic: 'some-subject' });
       expect(api.delete).toHaveBeenCalledTimes(1);
     });
   });

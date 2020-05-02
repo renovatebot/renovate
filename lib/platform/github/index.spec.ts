@@ -1438,7 +1438,7 @@ describe('platform/github', () => {
         .delete('/repos/some/repo/issues/comments/1234')
         .reply(200);
       await github.initRepo({ repository: 'some/repo', token: 'token' } as any);
-      await github.ensureCommentRemoval(42, 'some-subject');
+      await github.ensureCommentRemoval({ number: 42, topic: 'some-subject' });
       expect(httpMock.getTrace()).toMatchSnapshot();
     });
   });

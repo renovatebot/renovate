@@ -21,6 +21,7 @@ import {
   CommitFilesConfig,
   CreatePRConfig,
   EnsureCommentConfig,
+  EnsureCommentRemovalConfig,
   EnsureIssueResult,
   FindPRConfig,
   Issue,
@@ -572,10 +573,10 @@ export async function ensureComment({
   return true;
 }
 
-export async function ensureCommentRemoval(
-  issueNo: number,
-  topic: string
-): Promise<void> {
+export async function ensureCommentRemoval({
+  number: issueNo,
+  topic,
+}: EnsureCommentRemovalConfig): Promise<void> {
   logger.debug(`ensureCommentRemoval(issueNo, topic)(${issueNo}, ${topic})`);
   if (issueNo) {
     const azureApiGit = await azureApi.gitApi();
