@@ -12,19 +12,20 @@ export async function getReleases({
   if (rawRefs === null) {
     return null;
   }
-  const tags = rawRefs
+  const releases = rawRefs
     .filter((ref) => ref.type === 'tags')
-    .map((ref) => ref.value)
-    .filter((tag) => semver.isVersion(tag));
+    .filter((ref) => semver.isVersion(ref.value))
+    .map((ref) => ({
+      version: ref.value,
+      gitRef: ref.value,
+      newDigest: ref.hash,
+    }));
 
   const sourceUrl = lookupName.replace(/\.git$/, '').replace(/\/$/, '');
 
   const result: ReleaseResult = {
     sourceUrl,
-    releases: tags.map((tag) => ({
-      version: tag,
-      gitRef: tag,
-    })),
+    releases,
   };
 
   return result;

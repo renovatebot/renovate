@@ -13,6 +13,7 @@ process.env.GIT_SSH_COMMAND = 'ssh -o BatchMode=yes';
 export interface RawRefs {
   type: string;
   value: string;
+  hash: string;
 }
 
 export async function getRawRefs({
@@ -43,22 +44,27 @@ export async function getRawRefs({
       return null;
     }
 
+    const refMatch = /(?<hash>.*?)\s+refs\/(?<type>.*?)\/(?<value>.*)/;
+
     const refs = lsRemote
       .trim()
-      .replace(/^.+?refs\//gm, '')
-      .split('\n');
+      .split('\n')
+      .map((line) => line.trim())
+      .map((line) => {
+        const match = refMatch.exec(line);
+        if (!match) {
+          return null;
+        }
+        return {
+          type: match.groups.type,
+          value: match.groups.value,
+          hash: match.groups.hash,
+        };
+      })
+      .filter(Boolean);
 
-    const refMatch = /(?<type>\w+)\/(?<value>.*)/;
-    const result = refs.map((ref) => {
-      const match = refMatch.exec(ref);
-      return {
-        type: match.groups.type,
-        value: match.groups.value,
-      };
-    });
-
-    await renovateCache.set(cacheNamespace, lookupName, result, cacheMinutes);
-    return result;
+    await renovateCache.set(cacheNamespace, lookupName, refs, cacheMinutes);
+    return refs;
   } catch (err) {
     logger.error({ err }, `Git-Raw-Refs lookup error in ${lookupName}`);
   }
@@ -85,6 +91,7 @@ export async function getReleases({
       releases: uniqueRefs.map((ref) => ({
         version: ref,
         gitRef: ref,
+        newDigest: rawRefs.find((rawRef) => rawRef.value === ref).hash,
       })),
     };
 

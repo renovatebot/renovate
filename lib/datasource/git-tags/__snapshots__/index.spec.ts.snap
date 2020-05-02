@@ -5,10 +5,12 @@ Object {
   "releases": Array [
     Object {
       "gitRef": "0.0.1",
+      "newDigest": "commithash1",
       "version": "0.0.1",
     },
     Object {
       "gitRef": "v0.0.2",
+      "newDigest": "commithash2",
       "version": "v0.0.2",
     },
   ],
