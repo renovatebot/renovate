@@ -33,13 +33,7 @@ export async function getRawRefs({
     }
 
     // fetch remote tags
-    const lsRemote = await git.listRemote([
-      '--tags',
-      '--heads',
-      '--refs',
-      lookupName,
-    ]);
-
+    const lsRemote = await git.listRemote([lookupName]);
     if (!lsRemote) {
       return null;
     }
@@ -71,8 +65,8 @@ export async function getRawRefs({
         // istanbul ignore next
         return null;
       })
-      .filter(Boolean);
-
+      .filter(Boolean)
+      .filter((ref) => ref.type !== 'pull' && !ref.value.endsWith('^{}'));
     await renovateCache.set(cacheNamespace, lookupName, refs, cacheMinutes);
     return refs;
   } catch (err) {
