@@ -39,7 +39,7 @@ describe('datasource/git-refs', () => {
       const versions = await getReleases({
         lookupName,
       });
-
+      expect(versions).toMatchSnapshot();
       const result = versions.releases.map((x) => x.version).sort();
       expect(result).toEqual(['0.0.1', 'v0.0.2', 'v0.0.3']);
     });

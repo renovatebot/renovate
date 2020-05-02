@@ -1,0 +1,21 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`datasource/git-refs getReleases returns versions filtered from tags 1`] = `
+Object {
+  "releases": Array [
+    Object {
+      "gitRef": "0.0.1",
+      "version": "0.0.1",
+    },
+    Object {
+      "gitRef": "v0.0.2",
+      "version": "v0.0.2",
+    },
+    Object {
+      "gitRef": "v0.0.3",
+      "version": "v0.0.3",
+    },
+  ],
+  "sourceUrl": "https://github.com/example/example",
+}
+`;
