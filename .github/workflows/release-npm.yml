@@ -5,7 +5,7 @@ on:
 
 env:
   CI: true
-  YARN_CACHE_KEY: v1
+  YARN_CACHE_KEY: v2
   BUILDX_VERSION: v0.3.1
   NODE_VERSION: 12
   # https://github.com/chalk/supports-color/issues/106
