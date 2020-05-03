@@ -29,7 +29,7 @@ describe('workers/repository/extract/index', () => {
     });
     it('checks custom managers', async () => {
       managerFiles.getManagerPackageFiles.mockResolvedValue([{} as never]);
-      config.regexManagers = [{ fileMatch: [], matchStrings: [''] }];
+      config.regexManagers = [{ fileMatch: ['README'], matchStrings: [''] }];
       const res = await extractAllDependencies(config);
       expect(Object.keys(res).includes('regex')).toBe(true);
     });

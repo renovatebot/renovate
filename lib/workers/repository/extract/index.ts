@@ -13,7 +13,6 @@ import { getManagerPackageFiles } from './manager-files';
 export async function extractAllDependencies(
   config: RenovateConfig
 ): Promise<Record<string, PackageFile[]>> {
-  const extractions: Record<string, PackageFile[]> = {};
   let managerList = getManagerList();
   if (is.nonEmptyArray(config.enabledManagers)) {
     logger.debug('Applying enabledManagers filtering');
@@ -45,10 +44,15 @@ export async function extractAllDependencies(
       }
     }
   }
-  let fileCount = 0;
+  const extractResults = [];
   for (const managerConfig of extractList) {
     const { manager } = managerConfig;
     const packageFiles = await getManagerPackageFiles(managerConfig);
+    extractResults.push({ manager, packageFiles });
+  }
+  const extractions: Record<string, PackageFile[]> = {};
+  let fileCount = 0;
+  for (const { manager, packageFiles } of extractResults) {
     if (packageFiles && packageFiles.length) {
       fileCount += packageFiles.length;
       logger.debug(`Found ${manager} package files`);
