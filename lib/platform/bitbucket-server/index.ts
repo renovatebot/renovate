@@ -257,9 +257,10 @@ export async function getRepoForceRebase(): Promise<boolean> {
 
 export async function setBaseBranch(
   branchName: string = config.defaultBranch
-): Promise<void> {
+): Promise<string> {
   config.baseBranch = branchName;
-  await config.storage.setBaseBranch(branchName);
+  const baseBranchSha = await config.storage.setBaseBranch(branchName);
+  return baseBranchSha;
 }
 
 export /* istanbul ignore next */ function setBranchPrefix(

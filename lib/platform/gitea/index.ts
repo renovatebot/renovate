@@ -452,9 +452,10 @@ const platform: Platform = {
 
   async setBaseBranch(
     baseBranch: string = config.defaultBranch
-  ): Promise<void> {
+  ): Promise<string> {
     config.baseBranch = baseBranch;
-    await config.storage.setBaseBranch(baseBranch);
+    const baseBranchSha = await config.storage.setBaseBranch(baseBranch);
+    return baseBranchSha;
   },
 
   getPrList(): Promise<Pr[]> {

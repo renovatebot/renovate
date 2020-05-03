@@ -56,7 +56,7 @@ export async function processRepo(
         baseBranchConfig.branchPrefix += `${baseBranch}-`;
         baseBranchConfig.hasBaseBranches = true;
       }
-      await platform.setBaseBranch(baseBranch);
+      baseBranchConfig.baseBranchSha = await platform.setBaseBranch(baseBranch);
       const baseBranchRes = await extract(baseBranchConfig);
       branches = branches.concat(baseBranchRes.branches);
       branchList = branchList.concat(baseBranchRes.branchList);

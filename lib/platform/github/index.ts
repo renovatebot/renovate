@@ -519,10 +519,11 @@ export async function getRepoForceRebase(): Promise<boolean> {
 // istanbul ignore next
 export async function setBaseBranch(
   branchName = config.baseBranch
-): Promise<void> {
+): Promise<string> {
   config.baseBranch = branchName;
   config.baseCommitSHA = null;
-  await config.storage.setBaseBranch(branchName);
+  const baseBranchSha = await config.storage.setBaseBranch(branchName);
+  return baseBranchSha;
 }
 
 // istanbul ignore next
