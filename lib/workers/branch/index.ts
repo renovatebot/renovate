@@ -177,7 +177,10 @@ export async function processBranch(
                   branchPr.number
               );
             } else {
-              await platform.ensureCommentRemoval(branchPr.number, topic);
+              await platform.ensureCommentRemoval({
+                number: branchPr.number,
+                topic,
+              });
             }
           } else {
             let content = emojify(
@@ -622,10 +625,10 @@ export async function processBranch(
               content,
             });
             // TODO: remoe this soon once they're all cleared out
-            await platform.ensureCommentRemoval(
-              pr.number,
-              ':warning: Lock file problem'
-            );
+            await platform.ensureCommentRemoval({
+              number: pr.number,
+              topic: ':warning: Lock file problem',
+            });
           }
         }
         const context = `renovate/artifacts`;
@@ -659,7 +662,7 @@ export async function processBranch(
               'DRY-RUN: Would ensure comment removal in PR #' + pr.number
             );
           } else {
-            await platform.ensureCommentRemoval(pr.number, topic);
+            await platform.ensureCommentRemoval({ number: pr.number, topic });
           }
         }
         const prAutomerged = await checkAutoMerge(pr, config);

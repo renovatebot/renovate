@@ -17,6 +17,7 @@ import {
   CommitFilesConfig,
   CreatePRConfig,
   EnsureCommentConfig,
+  EnsureCommentRemovalConfig,
   EnsureIssueConfig,
   EnsureIssueResult,
   FindPRConfig,
@@ -708,10 +709,10 @@ export function ensureComment({
   });
 }
 
-export function ensureCommentRemoval(
-  prNo: number,
-  topic: string
-): Promise<void> {
+export function ensureCommentRemoval({
+  number: prNo,
+  topic,
+}: EnsureCommentRemovalConfig): Promise<void> {
   return comments.ensureCommentRemoval(config, prNo, topic);
 }
 

@@ -25,6 +25,7 @@ import {
   CommitFilesConfig,
   CreatePRConfig,
   EnsureCommentConfig,
+  EnsureCommentRemovalConfig,
   EnsureIssueConfig,
   FindPRConfig,
   GotResponse,
@@ -941,10 +942,10 @@ export async function ensureComment({
   return true;
 }
 
-export async function ensureCommentRemoval(
-  issueNo: number,
-  topic: string
-): Promise<void> {
+export async function ensureCommentRemoval({
+  number: issueNo,
+  topic,
+}: EnsureCommentRemovalConfig): Promise<void> {
   logger.debug(`Ensuring comment "${topic}" in #${issueNo} is removed`);
   const comments = await getComments(issueNo);
   let commentId: number;

@@ -377,7 +377,7 @@ describe('platform/bitbucket', () => {
 
   describe('ensureCommentRemoval()', () => {
     it('does not throw', async () => {
-      await bitbucket.ensureCommentRemoval(3, 'topic');
+      await bitbucket.ensureCommentRemoval({ number: 3, topic: 'topic' });
     });
   });
 
