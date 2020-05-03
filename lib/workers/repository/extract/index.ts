@@ -44,12 +44,12 @@ export async function extractAllDependencies(
       }
     }
   }
-  const extractResults = [];
-  for (const managerConfig of extractList) {
-    const { manager } = managerConfig;
-    const packageFiles = await getManagerPackageFiles(managerConfig);
-    extractResults.push({ manager, packageFiles });
-  }
+  const extractResults = await Promise.all(
+    extractList.map(async (managerConfig) => {
+      const packageFiles = await getManagerPackageFiles(managerConfig);
+      return { manager: managerConfig.manager, packageFiles };
+    })
+  );
   const extractions: Record<string, PackageFile[]> = {};
   let fileCount = 0;
   for (const { manager, packageFiles } of extractResults) {
