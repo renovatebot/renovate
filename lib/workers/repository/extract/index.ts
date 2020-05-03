@@ -1,3 +1,4 @@
+import is from '@sindresorhus/is';
 import {
   RenovateConfig,
   getManagerConfig,
@@ -13,14 +14,14 @@ export async function extractAllDependencies(
 ): Promise<Record<string, PackageFile[]>> {
   const extractions: Record<string, PackageFile[]> = {};
   let fileCount = 0;
-  for (const manager of getManagerList()) {
-    if (
-      config.enabledManagers.length &&
-      !config.enabledManagers.includes(manager)
-    ) {
-      logger.debug(`${manager} is not in enabledManagers list - skipping`);
-      continue; // eslint-disable-line
-    }
+  let managerList = getManagerList();
+  if (is.nonEmptyArray(config.enabledManagers)) {
+    logger.debug('Applying enabledManagers filtering');
+    managerList = managerList.filter((manager) =>
+      config.enabledManagers.includes(manager)
+    );
+  }
+  for (const manager of managerList) {
     const managerConfig = getManagerConfig(config, manager);
     let packageFiles = [];
     if (manager === 'regex') {
