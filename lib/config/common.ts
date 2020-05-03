@@ -19,13 +19,15 @@ export interface RenovateSharedConfig {
   automerge?: boolean;
   branchPrefix?: string;
   branchName?: string;
-
+  manager?: string;
   commitMessage?: string;
   enabled?: boolean;
   enabledManagers?: string[];
+  fileMatch?: string[];
   group?: GroupConfig;
   groupName?: string;
   groupSlug?: string;
+  includePaths?: string[];
   ignoreDeps?: string[];
   ignorePaths?: string[];
   labels?: string[];

@@ -1,4 +1,5 @@
 import is from '@sindresorhus/is';
+import { RenovateConfig } from '../../../config/common';
 import { logger } from '../../../logger';
 import {
   extractAllPackageFiles,
@@ -14,7 +15,9 @@ import {
   getMatchingFiles,
 } from './file-match';
 
-export async function getManagerPackageFiles(config): Promise<PackageFile[]> {
+export async function getManagerPackageFiles(
+  config: RenovateConfig
+): Promise<PackageFile[]> {
   const { manager, enabled, includePaths, ignorePaths } = config;
   logger.trace(`getPackageFiles(${manager})`);
   if (!enabled) {
