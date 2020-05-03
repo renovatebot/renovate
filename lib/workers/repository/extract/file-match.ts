@@ -36,12 +36,12 @@ export function filterIgnoredFiles(
 export function getMatchingFiles(
   fileList: string[],
   manager: string,
-  fileMatchList: string[]
+  fileMatch: string[]
 ): string[] {
   let matchedFiles = [];
-  for (const fileMatch of fileMatchList) {
-    logger.debug(`Using file match: ${fileMatch} for manager ${manager}`);
-    const re = new RegExp(fileMatch);
+  for (const match of fileMatch) {
+    logger.debug(`Using file match: ${match} for manager ${manager}`);
+    const re = new RegExp(match);
     matchedFiles = matchedFiles.concat(
       fileList.filter((file) => re.test(file))
     );
