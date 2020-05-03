@@ -1,5 +1,7 @@
 import minimatch from 'minimatch';
+import { RenovateConfig } from '../../../config/common';
 import { logger } from '../../../logger';
+import { platform } from '../../../platform';
 
 export function getIncludedFiles(
   fileList: string[],
@@ -33,11 +35,26 @@ export function filterIgnoredFiles(
   );
 }
 
-export function getMatchingFiles(
-  fileList: string[],
-  manager: string,
-  fileMatch: string[]
+export function getFileList(): Promise<string[]> {
+  return platform.getFileList();
+}
+
+export function getFilteredFileList(
+  config: RenovateConfig,
+  fileList: string[]
 ): string[] {
+  const { includePaths, ignorePaths } = config;
+  let filteredList = getIncludedFiles(fileList, includePaths);
+  filteredList = filterIgnoredFiles(filteredList, ignorePaths);
+  return filteredList;
+}
+
+export async function getMatchingFiles(
+  config: RenovateConfig
+): Promise<string[]> {
+  const allFiles = await getFileList();
+  const fileList = getFilteredFileList(config, allFiles);
+  const { fileMatch, manager } = config;
   let matchedFiles = [];
   for (const match of fileMatch) {
     logger.debug(`Using file match: ${match} for manager ${manager}`);

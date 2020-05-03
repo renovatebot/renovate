@@ -7,27 +7,19 @@ import {
   get,
 } from '../../../manager';
 import { PackageFile } from '../../../manager/common';
-import { platform } from '../../../platform';
 import { readLocalFile } from '../../../util/fs';
-import {
-  filterIgnoredFiles,
-  getIncludedFiles,
-  getMatchingFiles,
-} from './file-match';
+import { getMatchingFiles } from './file-match';
 
 export async function getManagerPackageFiles(
   config: RenovateConfig
 ): Promise<PackageFile[]> {
-  const { manager, enabled, includePaths, ignorePaths } = config;
+  const { manager, enabled } = config;
   logger.trace(`getPackageFiles(${manager})`);
   if (!enabled) {
     logger.debug(`${manager} is disabled`);
     return [];
   }
-  let fileList = await platform.getFileList();
-  fileList = getIncludedFiles(fileList, includePaths);
-  fileList = filterIgnoredFiles(fileList, ignorePaths);
-  const matchedFiles = getMatchingFiles(fileList, manager, config.fileMatch);
+  const matchedFiles = await getMatchingFiles(config);
   // istanbul ignore else
   if (is.nonEmptyArray(matchedFiles)) {
     logger.debug(
