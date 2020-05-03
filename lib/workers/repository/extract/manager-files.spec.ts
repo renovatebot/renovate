@@ -38,7 +38,11 @@ describe('workers/repository/extract/manager-files', () => {
       expect(res).toHaveLength(0);
     });
     it('returns files with extractPackageFile', async () => {
-      const managerConfig = { manager: 'html', enabled: true };
+      const managerConfig = {
+        manager: 'html',
+        enabled: true,
+        fileList: ['Dockerfile'],
+      };
       fileMatch.getMatchingFiles.mockResolvedValue(['Dockerfile']);
       fs.readLocalFile.mockResolvedValueOnce('some content');
       html.extractPackageFile = jest.fn(() => ({
@@ -48,7 +52,11 @@ describe('workers/repository/extract/manager-files', () => {
       expect(res).toMatchSnapshot();
     });
     it('returns files with extractAllPackageFiles', async () => {
-      const managerConfig = { manager: 'npm', enabled: true };
+      const managerConfig = {
+        manager: 'npm',
+        enabled: true,
+        fileList: ['package.json'],
+      };
       fileMatch.getMatchingFiles.mockResolvedValue(['package.json']);
       fs.readLocalFile.mockResolvedValueOnce(
         '{"dependencies":{"chalk":"2.0.0"}}'

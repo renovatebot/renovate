@@ -138,6 +138,8 @@ export interface RenovateConfig
   includeForks?: boolean;
   isFork?: boolean;
 
+  fileList?: string[];
+
   masterIssue?: boolean;
   masterIssueAutoclose?: boolean;
   masterIssueChecks?: Record<string, string>;

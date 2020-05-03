@@ -7,13 +7,13 @@ import {
 import { logger } from '../../../logger';
 import { getManagerList } from '../../../manager';
 import { PackageFile } from '../../../manager/common';
+import { getMatchingFiles } from './file-match';
 import { getManagerPackageFiles } from './manager-files';
 
 export async function extractAllDependencies(
   config: RenovateConfig
 ): Promise<Record<string, PackageFile[]>> {
   const extractions: Record<string, PackageFile[]> = {};
-  let fileCount = 0;
   let managerList = getManagerList();
   if (is.nonEmptyArray(config.enabledManagers)) {
     logger.debug('Applying enabledManagers filtering');
@@ -21,30 +21,38 @@ export async function extractAllDependencies(
       config.enabledManagers.includes(manager)
     );
   }
+  const extractList: RenovateConfig[] = [];
   for (const manager of managerList) {
     const managerConfig = getManagerConfig(config, manager);
-    let packageFiles = [];
+    managerConfig.manager = manager;
     if (manager === 'regex') {
       for (const regexManager of config.regexManagers) {
         const regexManagerConfig = mergeChildConfig(
           managerConfig,
           regexManager
         );
-        const customPackageFiles = await getManagerPackageFiles(
+        regexManagerConfig.fileList = await getMatchingFiles(
           regexManagerConfig
         );
-        if (customPackageFiles) {
-          packageFiles = packageFiles.concat(customPackageFiles);
+        if (regexManagerConfig.fileList.length) {
+          extractList.push(regexManagerConfig);
         }
       }
     } else {
-      packageFiles = await getManagerPackageFiles(managerConfig);
+      managerConfig.fileList = await getMatchingFiles(managerConfig);
+      if (managerConfig.fileList.length) {
+        extractList.push(managerConfig);
+      }
     }
-    managerConfig.manager = manager;
+  }
+  let fileCount = 0;
+  for (const managerConfig of extractList) {
+    const { manager } = managerConfig;
+    const packageFiles = await getManagerPackageFiles(managerConfig);
     if (packageFiles && packageFiles.length) {
       fileCount += packageFiles.length;
       logger.debug(`Found ${manager} package files`);
-      extractions[manager] = packageFiles;
+      extractions[manager] = (extractions[manager] || []).concat(packageFiles);
     }
   }
   logger.debug(`Found ${fileCount} package file(s)`);

@@ -1,4 +1,4 @@
-import { defaultConfig, mocked } from '../../../../test/util';
+import { defaultConfig, mocked, platform } from '../../../../test/util';
 import { RenovateConfig } from '../../../config';
 import * as _managerFiles from './manager-files';
 import { extractAllDependencies } from '.';
@@ -10,8 +10,10 @@ const managerFiles = mocked(_managerFiles);
 describe('workers/repository/extract/index', () => {
   describe('extractAllDependencies()', () => {
     let config: RenovateConfig;
+    const fileList = ['README', 'package.json', 'tasks/ansible.yaml'];
     beforeEach(() => {
       jest.resetAllMocks();
+      platform.getFileList.mockResolvedValue(fileList);
       config = { ...defaultConfig };
     });
     it('runs', async () => {

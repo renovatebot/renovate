@@ -8,18 +8,16 @@ import {
 } from '../../../manager';
 import { PackageFile } from '../../../manager/common';
 import { readLocalFile } from '../../../util/fs';
-import { getMatchingFiles } from './file-match';
 
 export async function getManagerPackageFiles(
   config: RenovateConfig
 ): Promise<PackageFile[]> {
-  const { manager, enabled } = config;
+  const { enabled, manager, fileList } = config;
   logger.trace(`getPackageFiles(${manager})`);
   if (!enabled) {
     logger.debug(`${manager} is disabled`);
     return [];
   }
-  const fileList = await getMatchingFiles(config);
   // istanbul ignore else
   if (is.nonEmptyArray(fileList)) {
     logger.debug(
