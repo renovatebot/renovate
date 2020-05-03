@@ -6,7 +6,7 @@ export function getIncludedFiles(
   includePaths: string[]
 ): string[] {
   if (!(includePaths && includePaths.length)) {
-    return fileList;
+    return [...fileList];
   }
   return fileList.filter((file) =>
     includePaths.some(
@@ -21,7 +21,7 @@ export function filterIgnoredFiles(
   ignorePaths: string[]
 ): string[] {
   if (!(ignorePaths && ignorePaths.length)) {
-    return fileList;
+    return [...fileList];
   }
   return fileList.filter(
     (file) =>
