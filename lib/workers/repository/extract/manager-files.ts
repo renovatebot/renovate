@@ -19,13 +19,13 @@ export async function getManagerPackageFiles(
     logger.debug(`${manager} is disabled`);
     return [];
   }
-  const matchedFiles = await getMatchingFiles(config);
+  const fileList = await getMatchingFiles(config);
   // istanbul ignore else
-  if (is.nonEmptyArray(matchedFiles)) {
+  if (is.nonEmptyArray(fileList)) {
     logger.debug(
       `Matched ${
-        matchedFiles.length
-      } file(s) for manager ${manager}: ${matchedFiles.join(', ')}`
+        fileList.length
+      } file(s) for manager ${manager}: ${fileList.join(', ')}`
     );
   } else {
     return [];
@@ -35,7 +35,7 @@ export async function getManagerPackageFiles(
     const allPackageFiles = await extractAllPackageFiles(
       manager,
       config,
-      matchedFiles
+      fileList
     );
     if (allPackageFiles) {
       for (const packageFile of allPackageFiles) {
@@ -47,7 +47,7 @@ export async function getManagerPackageFiles(
     return allPackageFiles;
   }
   const packageFiles = [];
-  for (const packageFile of matchedFiles) {
+  for (const packageFile of fileList) {
     const content = await readLocalFile(packageFile, 'utf8');
     if (content) {
       const res = await extractPackageFile(
