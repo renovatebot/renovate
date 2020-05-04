@@ -5,11 +5,11 @@ describe('workers/repository/extract/cache', () => {
   const extractList = [];
   const extraction = { foo: [] };
   it('handles missing sha', () => {
-    expect(cache.getExtractHash({}, {})).toBeNull();
+    expect(cache.getExtractHash({}, [])).toBeNull();
   });
   it('returns a hash', () => {
     expect(
-      cache.getExtractHash({ baseBranchSha: 'abc123' }, {})
+      cache.getExtractHash({ baseBranchSha: 'abc123' }, [])
     ).toMatchSnapshot();
   });
   it('sets a value', async () => {

@@ -3,7 +3,9 @@ import { RenovateConfig } from '../../../config/common';
 import { logger } from '../../../logger';
 import { PackageFile } from '../../../manager/common';
 
-function getCacheNamespaceKey(config): any {
+function getCacheNamespaceKey(
+  config: RenovateConfig
+): { cacheNamespace: string; cacheKey: string } {
   // Cache extract results per-base branch
   const { platform, repository, baseBranch } = config;
   const cacheNamespace = 'repository-extract';
@@ -11,7 +13,10 @@ function getCacheNamespaceKey(config): any {
   return { cacheNamespace, cacheKey };
 }
 
-export function getExtractHash(config, extractList): string | null {
+export function getExtractHash(
+  config: RenovateConfig,
+  extractList: RenovateConfig[]
+): string | null {
   // A cache is only valid if the following are unchanged:
   //  * base branch SHA
   //  * the list of matching files for each manager
