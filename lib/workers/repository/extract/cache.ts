@@ -62,5 +62,6 @@ export async function setCachedExtract(
   const { cacheNamespace, cacheKey } = getCacheNamespaceKey(config);
   const extractHash = getExtractHash(config, extractList);
   const payload = { extractHash, extractions };
-  await renovateCache.set(cacheNamespace, cacheKey, payload, 60);
+  const cacheMinutes = 24 * 60;
+  await renovateCache.set(cacheNamespace, cacheKey, payload, cacheMinutes);
 }
