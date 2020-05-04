@@ -1,6 +1,6 @@
 import { readFileSync } from 'fs';
-import { getYarnLock } from './yarn';
 import * as _fs from '../../../util/fs';
+import { getYarnLock } from './yarn';
 
 jest.mock('../../../util/fs');
 

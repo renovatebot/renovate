@@ -1,11 +1,11 @@
-import {
-  setStability,
-  setUnpublishable,
-  StabilityConfig,
-  UnpublishableConfig,
-} from './status-checks';
 import { defaultConfig, platform } from '../../../test/util';
 import { BranchStatus } from '../../types';
+import {
+  StabilityConfig,
+  UnpublishableConfig,
+  setStability,
+  setUnpublishable,
+} from './status-checks';
 
 describe('workers/branch/status-checks', () => {
   describe('setStability', () => {

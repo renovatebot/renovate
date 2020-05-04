@@ -1,10 +1,10 @@
-import { api } from '../../../platform/gitlab/gl-got-wrapper';
-import * as hostRules from '../../../util/host-rules';
-import { getChangeLogJSON } from '.';
 import { mocked } from '../../../../test/util';
 import { PLATFORM_TYPE_GITLAB } from '../../../constants/platforms';
+import { api } from '../../../platform/gitlab/gl-got-wrapper';
+import * as hostRules from '../../../util/host-rules';
 import * as semverVersioning from '../../../versioning/semver';
 import { BranchUpgradeConfig } from '../../common';
+import { getChangeLogJSON } from '.';
 
 jest.mock('../../../../lib/platform/gitlab/gl-got-wrapper');
 jest.mock('../../../../lib/datasource/npm');

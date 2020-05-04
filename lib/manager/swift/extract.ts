@@ -1,5 +1,5 @@
-import { PackageFile, PackageDependency } from '../common';
 import * as datasourceGitTags from '../../datasource/git-tags';
+import { PackageDependency, PackageFile } from '../common';
 
 const regExps = {
   wildcard: /^.*?/,

@@ -4,8 +4,8 @@ import {
   defaultConfig,
   platform,
 } from '../../../../../test/util';
-import { rebaseOnboardingBranch } from './rebase';
 import { Pr } from '../../../../platform';
+import { rebaseOnboardingBranch } from './rebase';
 
 describe('workers/repository/onboarding/branch/rebase', () => {
   describe('rebaseOnboardingBranch()', () => {

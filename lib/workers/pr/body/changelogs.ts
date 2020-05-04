@@ -1,6 +1,6 @@
 import * as template from '../../../util/template';
-import releaseNotesHbs from '../changelog/hbs-template';
 import { BranchConfig } from '../../common';
+import releaseNotesHbs from '../changelog/hbs-template';
 
 export function getChangelogs(config: BranchConfig): string {
   let releaseNotes = '';

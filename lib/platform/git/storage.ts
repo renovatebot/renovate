@@ -1,10 +1,8 @@
+import { join } from 'path';
+import URL from 'url';
 import convertHrtime from 'convert-hrtime';
 import fs from 'fs-extra';
-import { join } from 'path';
 import Git from 'simple-git/promise';
-import URL from 'url';
-import { logger } from '../../logger';
-import * as limits from '../../workers/global/limits';
 import {
   CONFIG_VALIDATION,
   PLATFORM_FAILURE,
@@ -12,6 +10,8 @@ import {
   REPOSITORY_EMPTY,
   REPOSITORY_TEMPORARY_ERROR,
 } from '../../constants/error-messages';
+import { logger } from '../../logger';
+import * as limits from '../../workers/global/limits';
 import { CommitFilesConfig } from '../common';
 
 declare module 'fs-extra' {
@@ -255,7 +255,7 @@ export class Storage {
     return res.all.map((commit) => commit.message);
   }
 
-  async setBaseBranch(branchName: string): Promise<void> {
+  async setBaseBranch(branchName: string): Promise<string> {
     if (branchName) {
       if (!(await this.branchExists(branchName))) {
         throwBaseBranchValidationError(branchName);
@@ -285,6 +285,10 @@ export class Storage {
         throw err;
       }
     }
+    return (
+      this._config.baseBranchSha ||
+      (await this._git.raw(['rev-parse', 'origin/master'])).trim()
+    );
   }
 
   /*

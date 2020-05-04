@@ -1,5 +1,13 @@
+import {
+  BranchStatusConfig,
+  CommitFilesConfig,
+  File,
+  GotResponse,
+  Platform,
+  RepoConfig,
+  RepoParams,
+} from '..';
 import { partial } from '../../../test/util';
-import * as ght from './gitea-helper';
 import {
   REPOSITORY_ACCESS_FORBIDDEN,
   REPOSITORY_ARCHIVED,
@@ -9,18 +17,10 @@ import {
   REPOSITORY_EMPTY,
   REPOSITORY_MIRRORED,
 } from '../../constants/error-messages';
-import {
-  BranchStatusConfig,
-  GotResponse,
-  RepoConfig,
-  RepoParams,
-  Platform,
-  CommitFilesConfig,
-  File,
-} from '..';
 import { logger as _logger } from '../../logger';
 import { BranchStatus } from '../../types';
 import { GiteaGotApi } from './gitea-got-wrapper';
+import * as ght from './gitea-helper';
 
 describe('platform/gitea', () => {
   let gitea: Platform;
@@ -1325,7 +1325,7 @@ index 0000000..2173594
     it('should remove existing comment', async () => {
       helper.getComments.mockResolvedValueOnce(mockComments);
       await initFakeRepo();
-      await gitea.ensureCommentRemoval(1, 'some-topic');
+      await gitea.ensureCommentRemoval({ number: 1, topic: 'some-topic' });
 
       expect(helper.deleteComment).toHaveBeenCalledTimes(1);
       expect(helper.deleteComment).toHaveBeenCalledWith(
@@ -1338,7 +1338,7 @@ index 0000000..2173594
       helper.getComments.mockResolvedValueOnce(mockComments);
       helper.deleteComment.mockRejectedValueOnce(new Error());
       await initFakeRepo();
-      await gitea.ensureCommentRemoval(1, 'some-topic');
+      await gitea.ensureCommentRemoval({ number: 1, topic: 'some-topic' });
 
       expect(logger.warn).toHaveBeenCalledTimes(1);
     });
@@ -1346,7 +1346,7 @@ index 0000000..2173594
     it('should abort silently if comment is missing', async () => {
       helper.getComments.mockResolvedValueOnce(mockComments);
       await initFakeRepo();
-      await gitea.ensureCommentRemoval(1, 'missing');
+      await gitea.ensureCommentRemoval({ number: 1, topic: 'missing' });
 
       expect(helper.deleteComment).not.toHaveBeenCalled();
     });

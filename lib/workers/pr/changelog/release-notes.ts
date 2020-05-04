@@ -1,12 +1,12 @@
+import * as URL from 'url';
 import changelogFilenameRegex from 'changelog-filename-regex';
 import { linkify } from 'linkify-markdown';
 import MarkdownIt from 'markdown-it';
-import * as URL from 'url';
 
+import { logger } from '../../../logger';
 import { api } from '../../../platform/github/gh-got-wrapper';
 import { api as api_gitlab } from '../../../platform/gitlab/gl-got-wrapper';
-import { logger } from '../../../logger';
-import { ChangeLogResult, ChangeLogNotes } from './common';
+import { ChangeLogNotes, ChangeLogResult } from './common';
 
 const { get: ghGot } = api;
 const { get: glGot } = api_gitlab;

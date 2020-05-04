@@ -1,7 +1,7 @@
 import { readFileSync } from 'fs';
-import { extractPackageFile } from './extract';
-import { isValid } from '../../versioning/ruby';
 import * as _fs from '../../util/fs';
+import { isValid } from '../../versioning/ruby';
+import { extractPackageFile } from './extract';
 
 jest.mock('../../util/fs');
 

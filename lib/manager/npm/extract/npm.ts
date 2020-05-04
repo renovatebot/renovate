@@ -1,6 +1,6 @@
 import { logger } from '../../../logger';
-import { LockFileEntry } from './common';
 import { readLocalFile } from '../../../util/fs';
+import { LockFileEntry } from './common';
 
 export async function getNpmLock(
   filePath: string

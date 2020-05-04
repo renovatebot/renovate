@@ -110,7 +110,7 @@
   "dependencies": {
     "@renovate/pep440": "0.4.1",
     "@sindresorhus/is": "2.1.1",
-    "@snyk/ruby-semver": "2.1.2",
+    "@snyk/ruby-semver": "2.2.0",
     "@yarnpkg/lockfile": "1.1.0",
     "aws-sdk": "2.662.0",
     "azure-devops-node-api": "10.1.1",
@@ -175,14 +175,14 @@
     "re2": "1.11.0"
   },
   "devDependencies": {
-    "@actions/core": "1.2.3",
+    "@actions/core": "1.2.4",
     "@babel/cli": "7.8.4",
-    "@babel/core": "7.9.0",
+    "@babel/core": "7.9.6",
     "@babel/node": "7.8.7",
     "@babel/plugin-proposal-class-properties": "7.8.3",
-    "@babel/plugin-proposal-object-rest-spread": "7.9.5",
+    "@babel/plugin-proposal-object-rest-spread": "7.9.6",
     "@babel/plugin-syntax-dynamic-import": "7.8.3",
-    "@babel/preset-env": "7.9.5",
+    "@babel/preset-env": "7.9.6",
     "@babel/preset-typescript": "7.9.0",
     "@jest/reporters": "25.5.1",
     "@jest/test-result": "25.5.0",

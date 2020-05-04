@@ -1,11 +1,11 @@
 import {
   inc as increment,
+  valid as isVersion,
   major,
   minor,
   patch,
   prerelease,
   satisfies,
-  valid as isVersion,
 } from 'semver';
 import { parseRange } from 'semver-utils';
 import { logger } from '../../logger';

@@ -1,7 +1,7 @@
 import { RenovateConfig, mocked } from '../../../../test/util';
+import { getConfig } from '../../../config/defaults';
 import { branchifyUpgrades } from './branchify';
 import * as _flatten from './flatten';
-import { getConfig } from '../../../config/defaults';
 
 const flattenUpdates = mocked(_flatten).flattenUpdates;
 jest.mock('./flatten');

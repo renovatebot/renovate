@@ -1,39 +1,40 @@
 import url, { URLSearchParams } from 'url';
 import delay from 'delay';
 
-import { api } from './bb-got-wrapper';
-import * as utils from './utils';
-import * as hostRules from '../../util/host-rules';
-import GitStorage, { StatusResult } from '../git/storage';
-import { logger } from '../../logger';
-import {
-  PlatformConfig,
-  RepoParams,
-  RepoConfig,
-  Pr,
-  Issue,
-  VulnerabilityAlert,
-  GotResponse,
-  CreatePRConfig,
-  BranchStatusConfig,
-  FindPRConfig,
-  EnsureCommentConfig,
-  EnsureIssueResult,
-  EnsureIssueConfig,
-  CommitFilesConfig,
-} from '../common';
-import { sanitize } from '../../util/sanitize';
-import { smartTruncate } from '../utils/pr-body';
-import { PLATFORM_TYPE_BITBUCKET_SERVER } from '../../constants/platforms';
+import { RenovateConfig } from '../../config/common';
 import {
   REPOSITORY_CHANGED,
   REPOSITORY_DISABLED,
   REPOSITORY_NOT_FOUND,
 } from '../../constants/error-messages';
+import { PLATFORM_TYPE_BITBUCKET_SERVER } from '../../constants/platforms';
 import { PR_STATE_ALL, PR_STATE_OPEN } from '../../constants/pull-requests';
+import { logger } from '../../logger';
 import { BranchStatus } from '../../types';
-import { RenovateConfig } from '../../config/common';
+import * as hostRules from '../../util/host-rules';
+import { sanitize } from '../../util/sanitize';
 import { ensureTrailingSlash } from '../../util/url';
+import {
+  BranchStatusConfig,
+  CommitFilesConfig,
+  CreatePRConfig,
+  EnsureCommentConfig,
+  EnsureCommentRemovalConfig,
+  EnsureIssueConfig,
+  EnsureIssueResult,
+  FindPRConfig,
+  GotResponse,
+  Issue,
+  PlatformConfig,
+  Pr,
+  RepoConfig,
+  RepoParams,
+  VulnerabilityAlert,
+} from '../common';
+import GitStorage, { StatusResult } from '../git/storage';
+import { smartTruncate } from '../utils/pr-body';
+import { api } from './bb-got-wrapper';
+import * as utils from './utils';
 /*
  * Version: 5.3 (EOL Date: 15 Aug 2019)
  * See following docs for api information:
@@ -257,9 +258,10 @@ export async function getRepoForceRebase(): Promise<boolean> {
 
 export async function setBaseBranch(
   branchName: string = config.defaultBranch
-): Promise<void> {
+): Promise<string> {
   config.baseBranch = branchName;
-  await config.storage.setBaseBranch(branchName);
+  const baseBranchSha = await config.storage.setBaseBranch(branchName);
+  return baseBranchSha;
 }
 
 export /* istanbul ignore next */ function setBranchPrefix(
@@ -882,10 +884,10 @@ export async function ensureComment({
   }
 }
 
-export async function ensureCommentRemoval(
-  prNo: number,
-  topic: string
-): Promise<void> {
+export async function ensureCommentRemoval({
+  number: prNo,
+  topic,
+}: EnsureCommentRemovalConfig): Promise<void> {
   try {
     logger.debug(`Ensuring comment "${topic}" in #${prNo} is removed`);
     const comments = await getComments(prNo);

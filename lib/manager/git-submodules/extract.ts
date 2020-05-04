@@ -1,9 +1,9 @@
+import URL from 'url';
 import Git from 'simple-git/promise';
 import upath from 'upath';
-import URL from 'url';
 
-import { ManagerConfig, PackageFile } from '../common';
 import * as datasourceGitSubmodules from '../../datasource/git-submodules';
+import { ManagerConfig, PackageFile } from '../common';
 
 type GitModule = {
   name: string;

@@ -1,14 +1,14 @@
-import { logger } from '../../../../logger';
-import { extractAllDependencies } from '../../extract';
-import { createOnboardingBranch } from './create';
-import { rebaseOnboardingBranch } from './rebase';
-import { isOnboarded, onboardingPrExists } from './check';
 import { RenovateConfig } from '../../../../config';
-import { platform } from '../../../../platform';
 import {
   MANAGER_NO_PACKAGE_FILES,
   REPOSITORY_FORKED,
 } from '../../../../constants/error-messages';
+import { logger } from '../../../../logger';
+import { platform } from '../../../../platform';
+import { extractAllDependencies } from '../../extract';
+import { isOnboarded, onboardingPrExists } from './check';
+import { createOnboardingBranch } from './create';
+import { rebaseOnboardingBranch } from './rebase';
 
 export async function checkOnboardingBranch(
   config: RenovateConfig

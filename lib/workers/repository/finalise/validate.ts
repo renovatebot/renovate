@@ -1,11 +1,11 @@
 import JSON5 from 'json5';
-import { logger } from '../../../logger';
-import { migrateAndValidate } from '../../../config/migrate-validate';
-import { configFileNames } from '../../../config/app-strings';
-import { platform, Pr } from '../../../platform';
 import { RenovateConfig } from '../../../config';
-import { PR_STATE_OPEN } from '../../../constants/pull-requests';
+import { configFileNames } from '../../../config/app-strings';
+import { migrateAndValidate } from '../../../config/migrate-validate';
 import { REPOSITORY_CHANGED } from '../../../constants/error-messages';
+import { PR_STATE_OPEN } from '../../../constants/pull-requests';
+import { logger } from '../../../logger';
+import { Pr, platform } from '../../../platform';
 import { BranchStatus } from '../../../types';
 
 async function getRenovatePrs(branchPrefix: string): Promise<Pr[]> {
@@ -111,7 +111,7 @@ export async function validatePrs(config: RenovateConfig): Promise<void> {
             `DRY-RUN: Would ensure validation comment removal in PR #${pr.number}`
           );
         } else {
-          await platform.ensureCommentRemoval(pr.number, topic);
+          await platform.ensureCommentRemoval({ number: pr.number, topic });
         }
       }
       // istanbul ignore else

@@ -1,8 +1,8 @@
 import { fromStream } from 'hasha';
-import { Http } from '../../util/http';
 import { logger } from '../../logger';
-import { UpdateDependencyConfig } from '../common';
+import { Http } from '../../util/http';
 import { regEx } from '../../util/regex';
+import { UpdateDependencyConfig } from '../common';
 
 const http = new Http('bazel');
 

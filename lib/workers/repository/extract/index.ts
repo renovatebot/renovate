@@ -1,51 +1,70 @@
-import { logger } from '../../../logger';
-import { getManagerList } from '../../../manager';
+import is from '@sindresorhus/is';
 import {
+  RenovateConfig,
   getManagerConfig,
   mergeChildConfig,
-  RenovateConfig,
 } from '../../../config';
-import { getManagerPackageFiles } from './manager-files';
+import { logger } from '../../../logger';
+import { getManagerList } from '../../../manager';
 import { PackageFile } from '../../../manager/common';
+import { getCachedExtract, setCachedExtract } from './cache';
+import { getMatchingFiles } from './file-match';
+import { getManagerPackageFiles } from './manager-files';
 
 export async function extractAllDependencies(
   config: RenovateConfig
 ): Promise<Record<string, PackageFile[]>> {
-  const extractions: Record<string, PackageFile[]> = {};
-  let fileCount = 0;
-  for (const manager of getManagerList()) {
-    if (
-      config.enabledManagers.length &&
-      !config.enabledManagers.includes(manager)
-    ) {
-      logger.debug(`${manager} is not in enabledManagers list - skipping`);
-      continue; // eslint-disable-line
-    }
+  let managerList = getManagerList();
+  if (is.nonEmptyArray(config.enabledManagers)) {
+    logger.debug('Applying enabledManagers filtering');
+    managerList = managerList.filter((manager) =>
+      config.enabledManagers.includes(manager)
+    );
+  }
+  const extractList: RenovateConfig[] = [];
+  for (const manager of managerList) {
     const managerConfig = getManagerConfig(config, manager);
-    let packageFiles = [];
+    managerConfig.manager = manager;
     if (manager === 'regex') {
       for (const regexManager of config.regexManagers) {
         const regexManagerConfig = mergeChildConfig(
           managerConfig,
           regexManager
         );
-        const customPackageFiles = await getManagerPackageFiles(
+        regexManagerConfig.fileList = await getMatchingFiles(
           regexManagerConfig
         );
-        if (customPackageFiles) {
-          packageFiles = packageFiles.concat(customPackageFiles);
+        if (regexManagerConfig.fileList.length) {
+          extractList.push(regexManagerConfig);
         }
       }
     } else {
-      packageFiles = await getManagerPackageFiles(managerConfig);
+      managerConfig.fileList = await getMatchingFiles(managerConfig);
+      if (managerConfig.fileList.length) {
+        extractList.push(managerConfig);
+      }
     }
-    managerConfig.manager = manager;
+  }
+  const cachedExtractions = await getCachedExtract(config, extractList);
+  if (cachedExtractions) {
+    return cachedExtractions;
+  }
+  const extractResults = await Promise.all(
+    extractList.map(async (managerConfig) => {
+      const packageFiles = await getManagerPackageFiles(managerConfig);
+      return { manager: managerConfig.manager, packageFiles };
+    })
+  );
+  const extractions: Record<string, PackageFile[]> = {};
+  let fileCount = 0;
+  for (const { manager, packageFiles } of extractResults) {
     if (packageFiles && packageFiles.length) {
       fileCount += packageFiles.length;
       logger.debug(`Found ${manager} package files`);
-      extractions[manager] = packageFiles;
+      extractions[manager] = (extractions[manager] || []).concat(packageFiles);
     }
   }
   logger.debug(`Found ${fileCount} package file(s)`);
+  await setCachedExtract(config, extractList, extractions);
   return extractions;
 }

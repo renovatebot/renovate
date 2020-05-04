@@ -1,9 +1,9 @@
 import fs from 'fs';
+import { clearRepoCache } from '../../util/cache';
 import _got from '../../util/got';
-import * as packagist from '.';
 import * as _hostRules from '../../util/host-rules';
 import * as composerVersioning from '../../versioning/composer';
-import { clearRepoCache } from '../../util/cache';
+import * as packagist from '.';
 
 jest.mock('../../util/got');
 jest.mock('../../util/host-rules');

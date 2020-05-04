@@ -1,20 +1,20 @@
 import URL from 'url';
-import parseLinkHeader from 'parse-link-header';
-import pAll from 'p-all';
-
 import { GotError } from 'got';
-import got, { GotJSONOptions } from '../../util/got';
-import { maskToken } from '../../util/mask';
-import { GotApi, GotResponse } from '../common';
-import { logger } from '../../logger';
+import pAll from 'p-all';
+import parseLinkHeader from 'parse-link-header';
+
 import {
   PLATFORM_BAD_CREDENTIALS,
-  PLATFORM_INTEGRATION_UNAUTHORIZED,
   PLATFORM_FAILURE,
+  PLATFORM_INTEGRATION_UNAUTHORIZED,
   PLATFORM_RATE_LIMIT_EXCEEDED,
   REPOSITORY_CHANGED,
 } from '../../constants/error-messages';
 import { PLATFORM_TYPE_GITHUB } from '../../constants/platforms';
+import { logger } from '../../logger';
+import got, { GotJSONOptions } from '../../util/got';
+import { maskToken } from '../../util/mask';
+import { GotApi, GotResponse } from '../common';
 
 const hostType = PLATFORM_TYPE_GITHUB;
 export const getHostType = (): string => hostType;

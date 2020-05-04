@@ -1,10 +1,10 @@
 import { readFile } from 'fs-extra';
-import { join } from 'upath';
 import { getInstalledPath } from 'get-installed-path';
-import { exec } from '../../../util/exec';
+import { join } from 'upath';
 import { logger } from '../../../logger';
-import { PostUpdateConfig } from '../../common';
+import { exec } from '../../../util/exec';
 import { BinarySource } from '../../../util/exec/common';
+import { PostUpdateConfig } from '../../common';
 
 export interface GenerateLockFileResult {
   error?: boolean;

@@ -1,6 +1,6 @@
+import { GetReleasesConfig, ReleaseResult } from '../common';
 import { getDependency } from './get';
 import { setNpmrc } from './npmrc';
-import { GetReleasesConfig, ReleaseResult } from '../common';
 
 export async function getReleases({
   lookupName,

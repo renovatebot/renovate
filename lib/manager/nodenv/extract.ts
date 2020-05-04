@@ -1,5 +1,5 @@
-import { PackageFile, PackageDependency } from '../common';
 import * as datasourceGithubTags from '../../datasource/github-tags';
+import { PackageDependency, PackageFile } from '../common';
 
 export function extractPackageFile(content: string): PackageFile {
   const dep: PackageDependency = {

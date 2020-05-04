@@ -1,15 +1,15 @@
 import fs from 'fs-extra';
 
-import handleError from './error';
-import { platform } from '../../platform';
-import { logger, setMeta } from '../../logger';
-import { initRepo } from './init';
-import { ensureOnboardingPr } from './onboarding/pr';
-import { processResult, ProcessResult } from './result';
-import { processRepo, updateRepo } from './process';
-import { finaliseRepo } from './finalise';
-import { ensureMasterIssue } from './master-issue';
 import { RenovateConfig } from '../../config';
+import { logger, setMeta } from '../../logger';
+import { platform } from '../../platform';
+import handleError from './error';
+import { finaliseRepo } from './finalise';
+import { initRepo } from './init';
+import { ensureMasterIssue } from './master-issue';
+import { ensureOnboardingPr } from './onboarding/pr';
+import { processRepo, updateRepo } from './process';
+import { ProcessResult, processResult } from './result';
 
 let renovateVersion = 'unknown';
 try {

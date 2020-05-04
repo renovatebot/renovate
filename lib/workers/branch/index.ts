@@ -1,46 +1,46 @@
-import { DateTime } from 'luxon';
-import is from '@sindresorhus/is';
-import minimatch from 'minimatch';
 import { join } from 'path';
+import is from '@sindresorhus/is';
 import { concat } from 'lodash';
-import { logger } from '../../logger';
-import { isScheduledNow } from './schedule';
-import { getUpdatedPackageFiles } from './get-updated';
-import {
-  getAdditionalFiles,
-  AdditionalPackageFiles,
-} from '../../manager/npm/post-update';
-import { commitFilesToBranch } from './commit';
-import { getParentBranch } from './parent';
-import { tryBranchAutomerge } from './automerge';
-import { setStability, setUnpublishable } from './status-checks';
-import { prAlreadyExisted } from './check-existing';
-import { ensurePr, checkAutoMerge } from '../pr';
+import { DateTime } from 'luxon';
+import minimatch from 'minimatch';
 import { RenovateConfig } from '../../config';
-import { platform } from '../../platform';
-import { emojify } from '../../util/emoji';
-import { BranchConfig, ProcessBranchResult, PrResult } from '../common';
 import {
+  DATASOURCE_FAILURE,
+  MANAGER_LOCKFILE_ERROR,
   PLATFORM_AUTHENTICATION_ERROR,
   PLATFORM_BAD_CREDENTIALS,
-  SYSTEM_INSUFFICIENT_DISK_SPACE,
+  PLATFORM_FAILURE,
   PLATFORM_INTEGRATION_UNAUTHORIZED,
-  MANAGER_LOCKFILE_ERROR,
   PLATFORM_RATE_LIMIT_EXCEEDED,
   REPOSITORY_CHANGED,
+  SYSTEM_INSUFFICIENT_DISK_SPACE,
   WORKER_FILE_UPDATE_FAILED,
-  DATASOURCE_FAILURE,
-  PLATFORM_FAILURE,
 } from '../../constants/error-messages';
 import {
   PR_STATE_CLOSED,
   PR_STATE_MERGED,
   PR_STATE_OPEN,
 } from '../../constants/pull-requests';
+import { logger } from '../../logger';
+import {
+  AdditionalPackageFiles,
+  getAdditionalFiles,
+} from '../../manager/npm/post-update';
+import { platform } from '../../platform';
 import { BranchStatus } from '../../types';
+import { emojify } from '../../util/emoji';
 import { exec } from '../../util/exec';
-import { regEx } from '../../util/regex';
 import { readLocalFile, writeLocalFile } from '../../util/fs';
+import { regEx } from '../../util/regex';
+import { BranchConfig, PrResult, ProcessBranchResult } from '../common';
+import { checkAutoMerge, ensurePr } from '../pr';
+import { tryBranchAutomerge } from './automerge';
+import { prAlreadyExisted } from './check-existing';
+import { commitFilesToBranch } from './commit';
+import { getUpdatedPackageFiles } from './get-updated';
+import { getParentBranch } from './parent';
+import { isScheduledNow } from './schedule';
+import { setStability, setUnpublishable } from './status-checks';
 
 // TODO: proper typings
 function rebaseCheck(config: RenovateConfig, branchPr: any): boolean {
@@ -177,7 +177,10 @@ export async function processBranch(
                   branchPr.number
               );
             } else {
-              await platform.ensureCommentRemoval(branchPr.number, topic);
+              await platform.ensureCommentRemoval({
+                number: branchPr.number,
+                topic,
+              });
             }
           } else {
             let content = emojify(
@@ -622,10 +625,10 @@ export async function processBranch(
               content,
             });
             // TODO: remoe this soon once they're all cleared out
-            await platform.ensureCommentRemoval(
-              pr.number,
-              ':warning: Lock file problem'
-            );
+            await platform.ensureCommentRemoval({
+              number: pr.number,
+              topic: ':warning: Lock file problem',
+            });
           }
         }
         const context = `renovate/artifacts`;
@@ -659,7 +662,7 @@ export async function processBranch(
               'DRY-RUN: Would ensure comment removal in PR #' + pr.number
             );
           } else {
-            await platform.ensureCommentRemoval(pr.number, topic);
+            await platform.ensureCommentRemoval({ number: pr.number, topic });
           }
         }
         const prAutomerged = await checkAutoMerge(pr, config);

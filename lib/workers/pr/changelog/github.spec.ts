@@ -1,10 +1,10 @@
-import { api } from '../../../platform/github/gh-got-wrapper';
-import * as hostRules from '../../../util/host-rules';
-import { getChangeLogJSON, ChangeLogError } from '.';
 import { mocked } from '../../../../test/util';
 import { PLATFORM_TYPE_GITHUB } from '../../../constants/platforms';
+import { api } from '../../../platform/github/gh-got-wrapper';
+import * as hostRules from '../../../util/host-rules';
 import * as semverVersioning from '../../../versioning/semver';
 import { BranchUpgradeConfig } from '../../common';
+import { ChangeLogError, getChangeLogJSON } from '.';
 
 jest.mock('../../../../lib/platform/github/gh-got-wrapper');
 jest.mock('../../../../lib/datasource/npm');

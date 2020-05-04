@@ -1,6 +1,6 @@
 import {
-  createGlobalProxyAgent,
   ProxyAgentConfigurationType,
+  createGlobalProxyAgent,
 } from 'global-agent';
 
 const envVars = ['HTTP_PROXY', 'HTTPS_PROXY', 'NO_PROXY'];

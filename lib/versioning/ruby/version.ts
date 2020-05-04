@@ -1,6 +1,6 @@
-import last from 'lodash/last';
-import { create } from '@snyk/ruby-semver/lib/ruby/gem-version';
 import { diff, major, minor, patch, prerelease } from '@snyk/ruby-semver';
+import { create } from '@snyk/ruby-semver/lib/ruby/gem-version';
+import last from 'lodash/last';
 
 interface RubyVersion {
   major: number;
