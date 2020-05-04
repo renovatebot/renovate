@@ -41,6 +41,11 @@ const pyproject8toml = readFileSync(
   'utf8'
 );
 
+const pyproject9toml = readFileSync(
+  'lib/manager/poetry/__fixtures__/pyproject.9.toml',
+  'utf8'
+);
+
 describe('lib/manager/poetry/extract', () => {
   describe('extractPackageFile()', () => {
     let filename: string;
@@ -88,6 +93,10 @@ describe('lib/manager/poetry/extract', () => {
     it('dedupes registries', () => {
       const res = extractPackageFile(pyproject8toml, filename);
       expect(res.registryUrls).toMatchSnapshot();
+    });
+    it('extracts mixed versioning types', () => {
+      const res = extractPackageFile(pyproject9toml, filename);
+      expect(res).toMatchSnapshot();
     });
     it('skips git dependencies', () => {
       const content =

@@ -7,6 +7,344 @@ Array [
 ]
 `;
 
+exports[`lib/manager/poetry/extract extractPackageFile() extracts mixed versioning types 1`] = `
+Object {
+  "deps": Array [
+    Object {
+      "currentValue": "0.2",
+      "datasource": "pypi",
+      "depName": "dep1",
+      "depType": "dependencies",
+      "managerData": Object {
+        "nestedVersion": false,
+      },
+    },
+    Object {
+      "currentValue": "1.1.0",
+      "datasource": "pypi",
+      "depName": "dep2",
+      "depType": "dependencies",
+      "managerData": Object {
+        "nestedVersion": false,
+      },
+    },
+    Object {
+      "currentValue": "1.0a1",
+      "datasource": "pypi",
+      "depName": "dep3",
+      "depType": "dependencies",
+      "managerData": Object {
+        "nestedVersion": false,
+      },
+      "skipReason": "unknown-version",
+    },
+    Object {
+      "currentValue": "1.0b2",
+      "datasource": "pypi",
+      "depName": "dep4",
+      "depType": "dependencies",
+      "managerData": Object {
+        "nestedVersion": false,
+      },
+      "skipReason": "unknown-version",
+    },
+    Object {
+      "currentValue": "1.0rc1",
+      "datasource": "pypi",
+      "depName": "dep5",
+      "depType": "dependencies",
+      "managerData": Object {
+        "nestedVersion": false,
+      },
+      "skipReason": "unknown-version",
+    },
+    Object {
+      "currentValue": "1.0.dev4",
+      "datasource": "pypi",
+      "depName": "dep6",
+      "depType": "dependencies",
+      "managerData": Object {
+        "nestedVersion": false,
+      },
+      "skipReason": "unknown-version",
+    },
+    Object {
+      "currentValue": "1.0c1",
+      "datasource": "pypi",
+      "depName": "dep7",
+      "depType": "dependencies",
+      "managerData": Object {
+        "nestedVersion": false,
+      },
+      "skipReason": "unknown-version",
+    },
+    Object {
+      "currentValue": "2012.2",
+      "datasource": "pypi",
+      "depName": "dep8",
+      "depType": "dependencies",
+      "managerData": Object {
+        "nestedVersion": false,
+      },
+    },
+    Object {
+      "currentValue": "1.0.dev456",
+      "datasource": "pypi",
+      "depName": "dep9",
+      "depType": "dependencies",
+      "managerData": Object {
+        "nestedVersion": false,
+      },
+      "skipReason": "unknown-version",
+    },
+    Object {
+      "currentValue": "1.0a1",
+      "datasource": "pypi",
+      "depName": "dep10",
+      "depType": "dependencies",
+      "managerData": Object {
+        "nestedVersion": false,
+      },
+      "skipReason": "unknown-version",
+    },
+    Object {
+      "currentValue": "1.0a2.dev456",
+      "datasource": "pypi",
+      "depName": "dep11",
+      "depType": "dependencies",
+      "managerData": Object {
+        "nestedVersion": false,
+      },
+      "skipReason": "unknown-version",
+    },
+    Object {
+      "currentValue": "1.0a12.dev456",
+      "datasource": "pypi",
+      "depName": "dep12",
+      "depType": "dependencies",
+      "managerData": Object {
+        "nestedVersion": false,
+      },
+      "skipReason": "unknown-version",
+    },
+    Object {
+      "currentValue": "1.0a12",
+      "datasource": "pypi",
+      "depName": "dep13",
+      "depType": "dependencies",
+      "managerData": Object {
+        "nestedVersion": false,
+      },
+      "skipReason": "unknown-version",
+    },
+    Object {
+      "currentValue": "1.0b1.dev456",
+      "datasource": "pypi",
+      "depName": "dep14",
+      "depType": "dependencies",
+      "managerData": Object {
+        "nestedVersion": false,
+      },
+      "skipReason": "unknown-version",
+    },
+    Object {
+      "currentValue": "1.0b2",
+      "datasource": "pypi",
+      "depName": "dep15",
+      "depType": "dependencies",
+      "managerData": Object {
+        "nestedVersion": false,
+      },
+      "skipReason": "unknown-version",
+    },
+    Object {
+      "currentValue": "1.0b2.post345.dev456",
+      "datasource": "pypi",
+      "depName": "dep16",
+      "depType": "dependencies",
+      "managerData": Object {
+        "nestedVersion": false,
+      },
+      "skipReason": "unknown-version",
+    },
+    Object {
+      "currentValue": "1.0b2.post345",
+      "datasource": "pypi",
+      "depName": "dep17",
+      "depType": "dependencies",
+      "managerData": Object {
+        "nestedVersion": false,
+      },
+      "skipReason": "unknown-version",
+    },
+    Object {
+      "currentValue": "1.0rc1.dev456",
+      "datasource": "pypi",
+      "depName": "dep18",
+      "depType": "dependencies",
+      "managerData": Object {
+        "nestedVersion": false,
+      },
+      "skipReason": "unknown-version",
+    },
+    Object {
+      "currentValue": "1.0rc1",
+      "datasource": "pypi",
+      "depName": "dep19",
+      "depType": "dependencies",
+      "managerData": Object {
+        "nestedVersion": false,
+      },
+      "skipReason": "unknown-version",
+    },
+    Object {
+      "currentValue": "1.0",
+      "datasource": "pypi",
+      "depName": "dep20",
+      "depType": "dependencies",
+      "managerData": Object {
+        "nestedVersion": false,
+      },
+    },
+    Object {
+      "currentValue": "1.0+abc.5",
+      "datasource": "pypi",
+      "depName": "dep21",
+      "depType": "dependencies",
+      "managerData": Object {
+        "nestedVersion": false,
+      },
+      "skipReason": "unknown-version",
+    },
+    Object {
+      "currentValue": "1.0+abc.7",
+      "datasource": "pypi",
+      "depName": "dep22",
+      "depType": "dependencies",
+      "managerData": Object {
+        "nestedVersion": false,
+      },
+      "skipReason": "unknown-version",
+    },
+    Object {
+      "currentValue": "1.0+5",
+      "datasource": "pypi",
+      "depName": "dep23",
+      "depType": "dependencies",
+      "managerData": Object {
+        "nestedVersion": false,
+      },
+      "skipReason": "unknown-version",
+    },
+    Object {
+      "currentValue": "1.0.post456.dev34",
+      "datasource": "pypi",
+      "depName": "dep24",
+      "depType": "dependencies",
+      "managerData": Object {
+        "nestedVersion": false,
+      },
+      "skipReason": "unknown-version",
+    },
+    Object {
+      "currentValue": "1.0.post456",
+      "datasource": "pypi",
+      "depName": "dep25",
+      "depType": "dependencies",
+      "managerData": Object {
+        "nestedVersion": false,
+      },
+      "skipReason": "unknown-version",
+    },
+    Object {
+      "currentValue": "1.1.dev1",
+      "datasource": "pypi",
+      "depName": "dep26",
+      "depType": "dependencies",
+      "managerData": Object {
+        "nestedVersion": false,
+      },
+      "skipReason": "unknown-version",
+    },
+    Object {
+      "currentValue": "~=3.1",
+      "datasource": "pypi",
+      "depName": "dep27",
+      "depType": "dependencies",
+      "managerData": Object {
+        "nestedVersion": false,
+      },
+    },
+    Object {
+      "currentValue": "~=3.1.2",
+      "datasource": "pypi",
+      "depName": "dep28",
+      "depType": "dependencies",
+      "managerData": Object {
+        "nestedVersion": false,
+      },
+    },
+    Object {
+      "currentValue": "~=3.1a1",
+      "datasource": "pypi",
+      "depName": "dep29",
+      "depType": "dependencies",
+      "managerData": Object {
+        "nestedVersion": false,
+      },
+      "skipReason": "unknown-version",
+    },
+    Object {
+      "currentValue": "==3.1",
+      "datasource": "pypi",
+      "depName": "dep30",
+      "depType": "dependencies",
+      "managerData": Object {
+        "nestedVersion": false,
+      },
+    },
+    Object {
+      "currentValue": "==3.1.*",
+      "datasource": "pypi",
+      "depName": "dep31",
+      "depType": "dependencies",
+      "managerData": Object {
+        "nestedVersion": false,
+      },
+    },
+    Object {
+      "currentValue": "~=3.1.0, !=3.1.3",
+      "datasource": "pypi",
+      "depName": "dep32",
+      "depType": "dependencies",
+      "managerData": Object {
+        "nestedVersion": false,
+      },
+      "skipReason": "unknown-version",
+    },
+    Object {
+      "currentValue": "<=2.0",
+      "datasource": "pypi",
+      "depName": "dep33",
+      "depType": "dependencies",
+      "managerData": Object {
+        "nestedVersion": false,
+      },
+    },
+    Object {
+      "currentValue": "<2.0",
+      "datasource": "pypi",
+      "depName": "dep34",
+      "depType": "dependencies",
+      "managerData": Object {
+        "nestedVersion": false,
+      },
+    },
+  ],
+  "registryUrls": null,
+}
+`;
+
 exports[`lib/manager/poetry/extract extractPackageFile() extracts multiple dependencies (with dep = {version = "1.2.3"} case) 1`] = `
 Array [
   Object {
