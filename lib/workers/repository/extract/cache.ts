@@ -28,7 +28,7 @@ export function getExtractHash(config, extractList): string | null {
 
 export async function getCachedExtract(
   config: RenovateConfig,
-  extractList: any
+  extractList: RenovateConfig[]
 ): Promise<Record<string, PackageFile[]> | null> {
   const { baseBranch } = config;
   const { cacheNamespace, cacheKey } = getCacheNamespaceKey(config);
@@ -49,7 +49,7 @@ export async function getCachedExtract(
 
 export async function setCachedExtract(
   config: RenovateConfig,
-  extractList: any,
+  extractList: RenovateConfig[],
   extractions: Record<string, PackageFile[]>
 ): Promise<void> {
   const { baseBranch } = config;
