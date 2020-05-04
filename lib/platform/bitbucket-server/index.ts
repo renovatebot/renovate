@@ -19,6 +19,7 @@ import {
   CommitFilesConfig,
   CreatePRConfig,
   EnsureCommentConfig,
+  EnsureCommentRemovalConfig,
   EnsureIssueConfig,
   EnsureIssueResult,
   FindPRConfig,
@@ -257,9 +258,10 @@ export async function getRepoForceRebase(): Promise<boolean> {
 
 export async function setBaseBranch(
   branchName: string = config.defaultBranch
-): Promise<void> {
+): Promise<string> {
   config.baseBranch = branchName;
-  await config.storage.setBaseBranch(branchName);
+  const baseBranchSha = await config.storage.setBaseBranch(branchName);
+  return baseBranchSha;
 }
 
 export /* istanbul ignore next */ function setBranchPrefix(
@@ -882,10 +884,10 @@ export async function ensureComment({
   }
 }
 
-export async function ensureCommentRemoval(
-  prNo: number,
-  topic: string
-): Promise<void> {
+export async function ensureCommentRemoval({
+  number: prNo,
+  topic,
+}: EnsureCommentRemovalConfig): Promise<void> {
   try {
     logger.debug(`Ensuring comment "${topic}" in #${prNo} is removed`);
     const comments = await getComments(prNo);

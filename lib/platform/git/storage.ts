@@ -255,7 +255,7 @@ export class Storage {
     return res.all.map((commit) => commit.message);
   }
 
-  async setBaseBranch(branchName: string): Promise<void> {
+  async setBaseBranch(branchName: string): Promise<string> {
     if (branchName) {
       if (!(await this.branchExists(branchName))) {
         throwBaseBranchValidationError(branchName);
@@ -285,6 +285,10 @@ export class Storage {
         throw err;
       }
     }
+    return (
+      this._config.baseBranchSha ||
+      (await this._git.raw(['rev-parse', 'origin/master'])).trim()
+    );
   }
 
   /*

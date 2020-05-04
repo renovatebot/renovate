@@ -124,6 +124,7 @@ export interface RenovateConfig
     Record<string, unknown> {
   baseBranches?: string[];
   baseBranch?: string;
+  baseBranchSha?: string;
   branchList?: string[];
   description?: string | string[];
 
