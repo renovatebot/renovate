@@ -78,8 +78,10 @@ export async function updateArtifacts({
       docker: {
         image: 'renovate/python',
         tagConstraint,
-        tagScheme: 'pep440',
-        preCommands: ['pip install poetry'],
+        tagScheme: 'poetry',
+        preCommands: [
+          'pip install ' + (config.compatibility?.poetry || 'poetry'),
+        ],
       },
     };
     await exec(cmd, execOptions);

@@ -116,6 +116,15 @@ Array [
     },
   },
   Object {
+    "currentValue": "~2.7 || ^3.4",
+    "datasource": "pypi",
+    "depName": "python",
+    "depType": "dependencies",
+    "managerData": Object {
+      "nestedVersion": false,
+    },
+  },
+  Object {
     "currentValue": "^3.0",
     "datasource": "pypi",
     "depName": "dev_dep1",
