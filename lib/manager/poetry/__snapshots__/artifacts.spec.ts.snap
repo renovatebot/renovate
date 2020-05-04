@@ -59,19 +59,19 @@ Array [
 exports[`.updateArtifacts() returns updated poetry.lock using docker 1`] = `
 Array [
   Object {
-    "cmd": "docker pull renovate/poetry",
+    "cmd": "docker pull renovate/python:latest",
     "options": Object {
       "encoding": "utf-8",
     },
   },
   Object {
-    "cmd": "docker ps --filter name=renovate_poetry -aq",
+    "cmd": "docker ps --filter name=renovate_python -aq",
     "options": Object {
       "encoding": "utf-8",
     },
   },
   Object {
-    "cmd": "docker run --rm --name=renovate_poetry --label=renovate_child --user=foobar -v \\"/tmp/github/some/repo\\":\\"/tmp/github/some/repo\\" -w \\"/tmp/github/some/repo\\" renovate/poetry bash -l -c \\"poetry update --lock --no-interaction dep1\\"",
+    "cmd": "docker run --rm --name=renovate_python --label=renovate_child --user=foobar -v \\"/tmp/github/some/repo\\":\\"/tmp/github/some/repo\\" -w \\"/tmp/github/some/repo\\" renovate/python:latest bash -l -c \\"pip install poetry && poetry update --lock --no-interaction dep1\\"",
     "options": Object {
       "cwd": "/tmp/github/some/repo",
       "encoding": "utf-8",

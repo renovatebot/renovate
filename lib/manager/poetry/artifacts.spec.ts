@@ -70,7 +70,9 @@ describe('.updateArtifacts()', () => {
     expect(execSnapshots).toMatchSnapshot();
   });
   it('returns updated poetry.lock', async () => {
-    fs.readFile.mockResolvedValueOnce('Old poetry.lock' as any);
+    fs.readFile.mockResolvedValueOnce(
+      '[metadata]\npython-versions = ">3.6"' as never
+    );
     const execSnapshots = mockExecAll(exec);
     fs.readFile.mockReturnValueOnce('New poetry.lock' as any);
     const updatedDeps = ['dep1'];
@@ -101,6 +103,7 @@ describe('.updateArtifacts()', () => {
         newPackageFileContent: '{}',
         config: {
           ...config,
+          compatibility: { python: '3.7' },
         },
       })
     ).not.toBeNull();
