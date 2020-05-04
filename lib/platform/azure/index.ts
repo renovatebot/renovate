@@ -21,6 +21,7 @@ import {
   CommitFilesConfig,
   CreatePRConfig,
   EnsureCommentConfig,
+  EnsureCommentRemovalConfig,
   EnsureIssueResult,
   FindPRConfig,
   Issue,
@@ -189,13 +190,14 @@ export /* istanbul ignore next */ function getFileList(
 
 export /* istanbul ignore next */ async function setBaseBranch(
   branchName = config.baseBranch
-): Promise<void> {
+): Promise<string> {
   logger.debug(`Setting baseBranch to ${branchName}`);
   config.baseBranch = branchName;
   delete config.baseCommitSHA;
   delete config.fileList;
-  await config.storage.setBaseBranch(branchName);
+  const baseBranchSha = await config.storage.setBaseBranch(branchName);
   await getFileList(branchName);
+  return baseBranchSha;
 }
 
 export /* istanbul ignore next */ function setBranchPrefix(
@@ -571,10 +573,10 @@ export async function ensureComment({
   return true;
 }
 
-export async function ensureCommentRemoval(
-  issueNo: number,
-  topic: string
-): Promise<void> {
+export async function ensureCommentRemoval({
+  number: issueNo,
+  topic,
+}: EnsureCommentRemovalConfig): Promise<void> {
   logger.debug(`ensureCommentRemoval(issueNo, topic)(${issueNo}, ${topic})`);
   if (issueNo) {
     const azureApiGit = await azureApi.gitApi();

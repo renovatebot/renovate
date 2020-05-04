@@ -33,6 +33,7 @@ import {
   CommitFilesConfig,
   CreatePRConfig,
   EnsureCommentConfig,
+  EnsureCommentRemovalConfig,
   EnsureIssueConfig,
   EnsureIssueResult,
   FindPRConfig,
@@ -519,10 +520,11 @@ export async function getRepoForceRebase(): Promise<boolean> {
 // istanbul ignore next
 export async function setBaseBranch(
   branchName = config.baseBranch
-): Promise<void> {
+): Promise<string> {
   config.baseBranch = branchName;
   config.baseCommitSHA = null;
-  await config.storage.setBaseBranch(branchName);
+  const baseBranchSha = await config.storage.setBaseBranch(branchName);
+  return baseBranchSha;
 }
 
 // istanbul ignore next
@@ -1619,10 +1621,10 @@ export async function ensureComment({
   }
 }
 
-export async function ensureCommentRemoval(
-  issueNo: number,
-  topic: string
-): Promise<void> {
+export async function ensureCommentRemoval({
+  number: issueNo,
+  topic,
+}: EnsureCommentRemovalConfig): Promise<void> {
   logger.debug(`Ensuring comment "${topic}" in #${issueNo} is removed`);
   const comments = await getComments(issueNo);
   let commentId: number;

@@ -1,7 +1,7 @@
 import simpleGit from 'simple-git/promise';
 import { logger } from '../../logger';
 import * as semver from '../../versioning/semver';
-import { GetReleasesConfig, ReleaseResult } from '../common';
+import { DigestConfig, GetReleasesConfig, ReleaseResult } from '../common';
 
 export const id = 'git-refs';
 
@@ -13,6 +13,7 @@ process.env.GIT_SSH_COMMAND = 'ssh -o BatchMode=yes';
 export interface RawRefs {
   type: string;
   value: string;
+  hash: string;
 }
 
 export async function getRawRefs({
@@ -32,33 +33,42 @@ export async function getRawRefs({
     }
 
     // fetch remote tags
-    const lsRemote = await git.listRemote([
-      '--tags',
-      '--heads',
-      '--refs',
-      lookupName,
-    ]);
-
+    const lsRemote = await git.listRemote([lookupName]);
     if (!lsRemote) {
       return null;
     }
 
+    const refMatch = /(?<hash>.*?)\s+refs\/(?<type>.*?)\/(?<value>.*)/;
+    const headMatch = /(?<hash>.*?)\s+HEAD/;
+
     const refs = lsRemote
       .trim()
-      .replace(/^.+?refs\//gm, '')
-      .split('\n');
-
-    const refMatch = /(?<type>\w+)\/(?<value>.*)/;
-    const result = refs.map((ref) => {
-      const match = refMatch.exec(ref);
-      return {
-        type: match.groups.type,
-        value: match.groups.value,
-      };
-    });
-
-    await renovateCache.set(cacheNamespace, lookupName, result, cacheMinutes);
-    return result;
+      .split('\n')
+      .map((line) => line.trim())
+      .map((line) => {
+        let match = refMatch.exec(line);
+        if (match) {
+          return {
+            type: match.groups.type,
+            value: match.groups.value,
+            hash: match.groups.hash,
+          };
+        }
+        match = headMatch.exec(line);
+        if (match) {
+          return {
+            type: '',
+            value: 'HEAD',
+            hash: match.groups.hash,
+          };
+        }
+        // istanbul ignore next
+        return null;
+      })
+      .filter(Boolean)
+      .filter((ref) => ref.type !== 'pull' && !ref.value.endsWith('^{}'));
+    await renovateCache.set(cacheNamespace, lookupName, refs, cacheMinutes);
+    return refs;
   } catch (err) {
     logger.error({ err }, `Git-Raw-Refs lookup error in ${lookupName}`);
   }
@@ -85,12 +95,26 @@ export async function getReleases({
       releases: uniqueRefs.map((ref) => ({
         version: ref,
         gitRef: ref,
+        newDigest: rawRefs.find((rawRef) => rawRef.value === ref).hash,
       })),
     };
 
     return result;
   } catch (err) {
     logger.error({ err }, `Git-Refs lookup error in ${lookupName}`);
+  }
+  return null;
+}
+
+export async function getDigest(
+  { lookupName }: Partial<DigestConfig>,
+  newValue?: string
+): Promise<string | null> {
+  const rawRefs: RawRefs[] = await getRawRefs({ lookupName });
+  const findValue = newValue || 'HEAD';
+  const ref = rawRefs.find((rawRef) => rawRef.value === findValue);
+  if (ref) {
+    return ref.hash;
   }
   return null;
 }

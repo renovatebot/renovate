@@ -22,6 +22,7 @@ import {
   CommitFilesConfig,
   CreatePRConfig,
   EnsureCommentConfig,
+  EnsureCommentRemovalConfig,
   EnsureIssueConfig,
   FindPRConfig,
   Issue,
@@ -452,9 +453,10 @@ const platform: Platform = {
 
   async setBaseBranch(
     baseBranch: string = config.defaultBranch
-  ): Promise<void> {
+  ): Promise<string> {
     config.baseBranch = baseBranch;
-    await config.storage.setBaseBranch(baseBranch);
+    const baseBranchSha = await config.storage.setBaseBranch(baseBranch);
+    return baseBranchSha;
   },
 
   getPrList(): Promise<Pr[]> {
@@ -816,7 +818,10 @@ const platform: Platform = {
     }
   },
 
-  async ensureCommentRemoval(issue: number, topic: string): Promise<void> {
+  async ensureCommentRemoval({
+    number: issue,
+    topic,
+  }: EnsureCommentRemovalConfig): Promise<void> {
     const commentList = await helper.getComments(config.repository, issue);
     const comment = findCommentByTopic(commentList, topic);
 

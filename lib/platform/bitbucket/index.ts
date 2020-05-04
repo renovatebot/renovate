@@ -17,6 +17,7 @@ import {
   CommitFilesConfig,
   CreatePRConfig,
   EnsureCommentConfig,
+  EnsureCommentRemovalConfig,
   EnsureIssueConfig,
   EnsureIssueResult,
   FindPRConfig,
@@ -178,13 +179,14 @@ export function getFileList(branchName?: string): Promise<string[]> {
 
 export async function setBaseBranch(
   branchName = config.baseBranch
-): Promise<void> {
+): Promise<string> {
   logger.debug(`Setting baseBranch to ${branchName}`);
   config.baseBranch = branchName;
   delete config.baseCommitSHA;
   delete config.fileList;
-  await config.storage.setBaseBranch(branchName);
+  const baseBranchSha = await config.storage.setBaseBranch(branchName);
   await getFileList(branchName);
+  return baseBranchSha;
 }
 
 export /* istanbul ignore next */ function setBranchPrefix(
@@ -707,10 +709,10 @@ export function ensureComment({
   });
 }
 
-export function ensureCommentRemoval(
-  prNo: number,
-  topic: string
-): Promise<void> {
+export function ensureCommentRemoval({
+  number: prNo,
+  topic,
+}: EnsureCommentRemovalConfig): Promise<void> {
   return comments.ensureCommentRemoval(config, prNo, topic);
 }
 

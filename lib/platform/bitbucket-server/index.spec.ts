@@ -487,7 +487,7 @@ describe('platform/bitbucket-server', () => {
       describe('ensureCommentRemoval()', () => {
         it('does not throw', async () => {
           expect.assertions(1);
-          await bitbucket.ensureCommentRemoval(5, 'topic');
+          await bitbucket.ensureCommentRemoval({ number: 5, topic: 'topic' });
           expect(api.get.mock.calls).toMatchSnapshot();
         });
 
@@ -496,7 +496,10 @@ describe('platform/bitbucket-server', () => {
           await initRepo();
           api.get.mockClear();
 
-          await bitbucket.ensureCommentRemoval(5, 'some-subject');
+          await bitbucket.ensureCommentRemoval({
+            number: 5,
+            topic: 'some-subject',
+          });
           expect(api.get.mock.calls).toMatchSnapshot();
           expect(api.delete).toHaveBeenCalledTimes(1);
         });
@@ -506,7 +509,7 @@ describe('platform/bitbucket-server', () => {
           await initRepo();
           api.get.mockClear();
 
-          await bitbucket.ensureCommentRemoval(5, 'topic');
+          await bitbucket.ensureCommentRemoval({ number: 5, topic: 'topic' });
           expect(api.get.mock.calls).toMatchSnapshot();
           expect(api.delete).toHaveBeenCalledTimes(0);
         });

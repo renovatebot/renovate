@@ -149,6 +149,11 @@ export interface EnsureCommentConfig {
   topic: string;
   content: string;
 }
+export interface EnsureCommentRemovalConfig {
+  number: number;
+  topic?: string;
+  content?: string;
+}
 /**
  * TODO: Proper typing
  */
@@ -188,11 +193,13 @@ export interface Platform {
     branchName: string,
     context: string
   ): Promise<BranchStatus | null>;
-  ensureCommentRemoval(number: number, subject: string): Promise<void>;
+  ensureCommentRemoval(
+    ensureCommentRemoval: EnsureCommentRemovalConfig
+  ): Promise<void>;
   deleteBranch(branchName: string, closePr?: boolean): Promise<void>;
   ensureComment(ensureComment: EnsureCommentConfig): Promise<boolean>;
   branchExists(branchName: string): Promise<boolean>;
-  setBaseBranch(baseBranch?: string): Promise<void>;
+  setBaseBranch(baseBranch?: string): Promise<string>;
   commitFilesToBranch(commitFile: CommitFilesConfig): Promise<string | null>;
   getPr(number: number): Promise<Pr>;
   findPr(findPRConfig: FindPRConfig): Promise<Pr>;

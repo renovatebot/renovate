@@ -366,6 +366,7 @@ export async function extractAllPackageFiles(
   const npmFiles: PackageFile[] = [];
   for (const packageFile of packageFiles) {
     const content = await readLocalFile(packageFile, 'utf8');
+    // istanbul ignore else
     if (content) {
       const deps = await extractPackageFile(content, packageFile, config);
       if (deps) {

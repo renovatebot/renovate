@@ -111,7 +111,7 @@ export async function validatePrs(config: RenovateConfig): Promise<void> {
             `DRY-RUN: Would ensure validation comment removal in PR #${pr.number}`
           );
         } else {
-          await platform.ensureCommentRemoval(pr.number, topic);
+          await platform.ensureCommentRemoval({ number: pr.number, topic });
         }
       }
       // istanbul ignore else
