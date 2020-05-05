@@ -120,7 +120,7 @@ export class Storage {
     let clone = true;
 
     // TODO: move to private class scope
-    async function determineBaseBranch(git: Git.SimpleGit): Promise<void> {
+    async function setBaseBranchToDefault(git: Git.SimpleGit): Promise<void> {
       // see https://stackoverflow.com/a/44750379/1438522
       try {
         config.baseBranch =
@@ -147,7 +147,7 @@ export class Storage {
         await this._git.raw(['remote', 'set-url', 'origin', config.url]);
         const fetchStart = process.hrtime();
         await this._git.fetch(['--depth=10']);
-        await determineBaseBranch(this._git);
+        await setBaseBranchToDefault(this._git);
         await this._resetToBranch(config.baseBranch);
         await this._cleanLocalBranches();
         await this._git.raw(['remote', 'prune', 'origin']);
@@ -222,7 +222,7 @@ export class Storage {
       }
     }
 
-    await determineBaseBranch(this._git);
+    await setBaseBranchToDefault(this._git);
   }
 
   // istanbul ignore next
