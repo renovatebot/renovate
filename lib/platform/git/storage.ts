@@ -33,7 +33,7 @@ interface LocalConfig extends StorageConfig {
   baseBranchSha: string;
   branchExists: Record<string, boolean>;
   branchPrefix: string;
-  fileList: Record<string, Promise<string[]>>;
+  fileList?: string[];
 }
 
 // istanbul ignore next
@@ -110,7 +110,6 @@ export class Storage {
     // eslint-disable-next-line no-multi-assign
     const config: LocalConfig = (this._config = {
       ...args,
-      fileList: {},
     } as any);
     // eslint-disable-next-line no-multi-assign
     const cwd = (this._cwd = config.localDir);
@@ -266,6 +265,7 @@ export class Storage {
       }
       logger.debug(`Setting baseBranch to ${branchName}`);
       this._config.baseBranch = branchName;
+      delete this._config.fileList;
       try {
         if (branchName !== 'master') {
           this._config.baseBranchSha = (
@@ -311,36 +311,28 @@ export class Storage {
     }
   }
 
-  async getFileList(branchName?: string): Promise<string[]> {
-    const branch = branchName || this._config.baseBranch;
-    if (this._config.fileList[branch] === undefined) {
-      this._config.fileList[branch] = this.getFileListInner(branchName);
+  async getFileList(): Promise<string[]> {
+    if (!this._config.fileList) {
+      const submodules = await this.getSubmodules();
+      const files: string = await this._git.raw([
+        'ls-tree',
+        '-r',
+        '--name-only',
+        'HEAD',
+      ]);
+      // istanbul ignore else
+      if (files) {
+        this._config.fileList = files
+          .split('\n')
+          .filter(Boolean)
+          .filter((file: string) =>
+            submodules.every((submodule: string) => !file.startsWith(submodule))
+          );
+      } else {
+        this._config.fileList = [];
+      }
     }
-    return this._config.fileList[branch];
-  }
-
-  async getFileListInner(branch: string): Promise<string[]> {
-    const exists = await this.branchExists(branch);
-    if (!exists) {
-      return [];
-    }
-    const submodules = await this.getSubmodules();
-    const files: string = await this._git.raw([
-      'ls-tree',
-      '-r',
-      '--name-only',
-      'origin/' + branch,
-    ]);
-    // istanbul ignore if
-    if (!files) {
-      return [];
-    }
-    return files
-      .split('\n')
-      .filter(Boolean)
-      .filter((file: string) =>
-        submodules.every((submodule: string) => !file.startsWith(submodule))
-      );
+    return this._config.fileList;
   }
 
   async getSubmodules(): Promise<string[]> {
