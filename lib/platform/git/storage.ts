@@ -1,6 +1,5 @@
 import { join } from 'path';
 import URL from 'url';
-import convertHrtime from 'convert-hrtime';
 import fs from 'fs-extra';
 import Git from 'simple-git/promise';
 import {
@@ -33,6 +32,7 @@ interface LocalConfig extends StorageConfig {
   baseBranchSha: string;
   branchExists: Record<string, boolean>;
   branchPrefix: string;
+  fileList?: string[];
 }
 
 // istanbul ignore next
@@ -107,7 +107,9 @@ export class Storage {
   async initRepo(args: StorageConfig): Promise<void> {
     this.cleanRepo();
     // eslint-disable-next-line no-multi-assign
-    const config: LocalConfig = (this._config = { ...args } as any);
+    const config: LocalConfig = (this._config = {
+      ...args,
+    } as any);
     // eslint-disable-next-line no-multi-assign
     const cwd = (this._cwd = config.localDir);
     this._config.branchExists = {};
@@ -116,7 +118,7 @@ export class Storage {
     let clone = true;
 
     // TODO: move to private class scope
-    async function determineBaseBranch(git: Git.SimpleGit): Promise<void> {
+    async function setBaseBranchToDefault(git: Git.SimpleGit): Promise<void> {
       // see https://stackoverflow.com/a/44750379/1438522
       try {
         config.baseBranch =
@@ -141,17 +143,14 @@ export class Storage {
       try {
         this._git = Git(cwd).silent(true);
         await this._git.raw(['remote', 'set-url', 'origin', config.url]);
-        const fetchStart = process.hrtime();
+        const fetchStart = Date.now();
         await this._git.fetch(['--depth=10']);
-        await determineBaseBranch(this._git);
+        await setBaseBranchToDefault(this._git);
         await this._resetToBranch(config.baseBranch);
         await this._cleanLocalBranches();
         await this._git.raw(['remote', 'prune', 'origin']);
-        const fetchSeconds =
-          Math.round(
-            1 + 10 * convertHrtime(process.hrtime(fetchStart)).seconds
-          ) / 10;
-        logger.debug({ fetchSeconds }, 'git fetch completed');
+        const durationMs = Math.round(Date.now() - fetchStart);
+        logger.debug({ durationMs }, 'git fetch completed');
         clone = false;
       } catch (err) /* istanbul ignore next */ {
         logger.error({ err }, 'git fetch error');
@@ -160,7 +159,7 @@ export class Storage {
     if (clone) {
       await fs.emptyDir(cwd);
       this._git = Git(cwd).silent(true);
-      const cloneStart = process.hrtime();
+      const cloneStart = Date.now();
       try {
         // clone only the default branch
         let opts = ['--depth=2'];
@@ -174,10 +173,8 @@ export class Storage {
         logger.debug({ err }, 'git clone error');
         throw new Error(PLATFORM_FAILURE);
       }
-      const seconds =
-        Math.round(1 + 10 * convertHrtime(process.hrtime(cloneStart)).seconds) /
-        10;
-      logger.debug({ seconds }, 'git clone completed');
+      const durationMs = Math.round(Date.now() - cloneStart);
+      logger.debug({ durationMs }, 'git clone completed');
     }
     const submodules = await this.getSubmodules();
     for (const submodule of submodules) {
@@ -218,7 +215,7 @@ export class Storage {
       }
     }
 
-    await determineBaseBranch(this._git);
+    await setBaseBranchToDefault(this._git);
   }
 
   // istanbul ignore next
@@ -262,6 +259,7 @@ export class Storage {
       }
       logger.debug(`Setting baseBranch to ${branchName}`);
       this._config.baseBranch = branchName;
+      delete this._config.fileList;
       try {
         if (branchName !== 'master') {
           this._config.baseBranchSha = (
@@ -307,29 +305,28 @@ export class Storage {
     }
   }
 
-  async getFileList(branchName?: string): Promise<string[]> {
-    const branch = branchName || this._config.baseBranch;
-    const exists = await this.branchExists(branch);
-    if (!exists) {
-      return [];
+  async getFileList(): Promise<string[]> {
+    if (!this._config.fileList) {
+      const submodules = await this.getSubmodules();
+      const files: string = await this._git.raw([
+        'ls-tree',
+        '-r',
+        '--name-only',
+        'HEAD',
+      ]);
+      // istanbul ignore else
+      if (files) {
+        this._config.fileList = files
+          .split('\n')
+          .filter(Boolean)
+          .filter((file: string) =>
+            submodules.every((submodule: string) => !file.startsWith(submodule))
+          );
+      } else {
+        this._config.fileList = [];
+      }
     }
-    const submodules = await this.getSubmodules();
-    const files: string = await this._git.raw([
-      'ls-tree',
-      '-r',
-      '--name-only',
-      'origin/' + branch,
-    ]);
-    // istanbul ignore if
-    if (!files) {
-      return [];
-    }
-    return files
-      .split('\n')
-      .filter(Boolean)
-      .filter((file: string) =>
-        submodules.every((submodule: string) => !file.startsWith(submodule))
-      );
+    return this._config.fileList;
   }
 
   async getSubmodules(): Promise<string[]> {
@@ -352,7 +349,7 @@ export class Storage {
     if (this._config.branchExists[branchName] !== undefined) {
       return this._config.branchExists[branchName];
     }
-    if (!branchName.startsWith(this._config.branchPrefix)) {
+    if (!branchName?.startsWith(this._config.branchPrefix)) {
       // fetch the branch only if it's not part of the existing branchPrefix
       try {
         await this._git.raw([

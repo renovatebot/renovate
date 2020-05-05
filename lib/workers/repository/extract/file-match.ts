@@ -35,10 +35,6 @@ export function filterIgnoredFiles(
   );
 }
 
-export function getFileList(): Promise<string[]> {
-  return platform.getFileList();
-}
-
 export function getFilteredFileList(
   config: RenovateConfig,
   fileList: string[]
@@ -52,7 +48,7 @@ export function getFilteredFileList(
 export async function getMatchingFiles(
   config: RenovateConfig
 ): Promise<string[]> {
-  const allFiles = await getFileList();
+  const allFiles = await platform.getFileList();
   const fileList = getFilteredFileList(config, allFiles);
   const { fileMatch, manager } = config;
   let matchedFiles = [];
