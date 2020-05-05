@@ -232,6 +232,7 @@
     "eslint-plugin-import": "2.20.2",
     "eslint-plugin-promise": "4.2.1",
     "glob": "7.1.6",
+    "graphql": "15.0.0",
     "husky": "4.2.5",
     "jest": "25.5.1",
     "jest-junit": "10.0.0",
