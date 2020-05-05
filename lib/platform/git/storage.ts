@@ -110,7 +110,7 @@ export class Storage {
     // eslint-disable-next-line no-multi-assign
     const config: LocalConfig = (this._config = {
       ...args,
-      fileList: [],
+      fileList: {},
     } as any);
     // eslint-disable-next-line no-multi-assign
     const cwd = (this._cwd = config.localDir);
