@@ -9,6 +9,7 @@ Array [
 
 exports[`lib/manager/poetry/extract extractPackageFile() extracts mixed versioning types 1`] = `
 Object {
+  "compatibility": Object {},
   "deps": Array [
     Object {
       "currentValue": "0.2",
@@ -466,6 +467,16 @@ Array [
     "currentValue": "^0.33.6",
     "datasource": "pypi",
     "depName": "dep3",
+    "depType": "dependencies",
+    "managerData": Object {
+      "nestedVersion": false,
+    },
+    "versioning": "poetry",
+  },
+  Object {
+    "currentValue": "~2.7 || ^3.4",
+    "datasource": "pypi",
+    "depName": "python",
     "depType": "dependencies",
     "managerData": Object {
       "nestedVersion": false,

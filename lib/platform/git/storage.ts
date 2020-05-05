@@ -1,6 +1,5 @@
 import { join } from 'path';
 import URL from 'url';
-import convertHrtime from 'convert-hrtime';
 import fs from 'fs-extra';
 import Git from 'simple-git/promise';
 import {
@@ -144,17 +143,14 @@ export class Storage {
       try {
         this._git = Git(cwd).silent(true);
         await this._git.raw(['remote', 'set-url', 'origin', config.url]);
-        const fetchStart = process.hrtime();
+        const fetchStart = Date.now();
         await this._git.fetch(['--depth=10']);
         await setBaseBranchToDefault(this._git);
         await this._resetToBranch(config.baseBranch);
         await this._cleanLocalBranches();
         await this._git.raw(['remote', 'prune', 'origin']);
-        const fetchSeconds =
-          Math.round(
-            1 + 10 * convertHrtime(process.hrtime(fetchStart)).seconds
-          ) / 10;
-        logger.debug({ fetchSeconds }, 'git fetch completed');
+        const durationMs = Math.round(Date.now() - fetchStart);
+        logger.debug({ durationMs }, 'git fetch completed');
         clone = false;
       } catch (err) /* istanbul ignore next */ {
         logger.error({ err }, 'git fetch error');
@@ -163,7 +159,7 @@ export class Storage {
     if (clone) {
       await fs.emptyDir(cwd);
       this._git = Git(cwd).silent(true);
-      const cloneStart = process.hrtime();
+      const cloneStart = Date.now();
       try {
         // clone only the default branch
         let opts = ['--depth=2'];
@@ -177,10 +173,8 @@ export class Storage {
         logger.debug({ err }, 'git clone error');
         throw new Error(PLATFORM_FAILURE);
       }
-      const seconds =
-        Math.round(1 + 10 * convertHrtime(process.hrtime(cloneStart)).seconds) /
-        10;
-      logger.debug({ seconds }, 'git clone completed');
+      const durationMs = Math.round(Date.now() - cloneStart);
+      logger.debug({ durationMs }, 'git clone completed');
     }
     const submodules = await this.getSubmodules();
     for (const submodule of submodules) {
