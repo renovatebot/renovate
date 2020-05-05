@@ -22,7 +22,7 @@ describe('workers/repository/process/index', () => {
       extract.mockResolvedValue({} as never);
       config.baseBranches = ['branch1', 'branch2'];
       const res = await processRepo(config);
-      await updateRepo(config, res.branches, res.branchList, res.packageFiles);
+      await updateRepo(config, res.branches, res.branchList);
       expect(res).toMatchSnapshot();
     });
   });

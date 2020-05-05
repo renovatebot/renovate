@@ -71,10 +71,9 @@ export async function processRepo(
 export async function updateRepo(
   config: RenovateConfig,
   branches: BranchConfig[],
-  branchList: string[],
-  packageFiles?: Record<string, PackageFile[]>
+  branchList: string[]
 ): Promise<WriteUpdateResult | undefined> {
   logger.debug('processRepo()');
 
-  return update(config, branches, branchList, packageFiles);
+  return update(config, branches);
 }

@@ -150,6 +150,7 @@ export async function branchifyUpgrades(
     );
     const branch = generateBranchConfig(branchUpgrades[branchName]);
     branch.branchName = branchName;
+    branch.packageFiles = packageFiles;
     branches.push(branch);
   }
   removeMeta(['branch']);

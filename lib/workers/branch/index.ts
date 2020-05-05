@@ -22,10 +22,7 @@ import {
   PR_STATE_OPEN,
 } from '../../constants/pull-requests';
 import { logger } from '../../logger';
-import {
-  AdditionalPackageFiles,
-  getAdditionalFiles,
-} from '../../manager/npm/post-update';
+import { getAdditionalFiles } from '../../manager/npm/post-update';
 import { platform } from '../../platform';
 import { BranchStatus } from '../../types';
 import { emojify } from '../../util/emoji';
@@ -55,8 +52,7 @@ function rebaseCheck(config: RenovateConfig, branchPr: any): boolean {
 
 export async function processBranch(
   branchConfig: BranchConfig,
-  prHourlyLimitReached?: boolean,
-  packageFiles?: AdditionalPackageFiles
+  prHourlyLimitReached?: boolean
 ): Promise<ProcessBranchResult> {
   const config: BranchConfig = { ...branchConfig };
   const dependencies = config.upgrades
@@ -303,7 +299,10 @@ export async function processBranch(
     } else {
       logger.debug('No package files need updating');
     }
-    const additionalFiles = await getAdditionalFiles(config, packageFiles);
+    const additionalFiles = await getAdditionalFiles(
+      config,
+      branchConfig.packageFiles
+    );
     config.artifactErrors = (config.artifactErrors || []).concat(
       additionalFiles.artifactErrors
     );
