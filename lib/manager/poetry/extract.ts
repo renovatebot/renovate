@@ -3,7 +3,8 @@ import { parse } from 'toml';
 import * as datasourcePypi from '../../datasource/pypi';
 import { logger } from '../../logger';
 import { SkipReason } from '../../types';
-import { isValid } from '../../versioning/poetry';
+import * as pep440Versioning from '../../versioning/pep440';
+import * as poetryVersioning from '../../versioning/poetry';
 import { PackageDependency, PackageFile } from '../common';
 import { PoetryFile, PoetrySection } from './types';
 
@@ -53,7 +54,11 @@ function extractFromSection(
     };
     if (skipReason) {
       dep.skipReason = skipReason;
-    } else if (!isValid(dep.currentValue)) {
+    } else if (pep440Versioning.isValid(dep.currentValue)) {
+      dep.versioning = pep440Versioning.id;
+    } else if (poetryVersioning.isValid(dep.currentValue)) {
+      dep.versioning = poetryVersioning.id;
+    } else {
       dep.skipReason = SkipReason.UnknownVersion;
     }
     deps.push(dep);
