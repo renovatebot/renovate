@@ -1,5 +1,10 @@
 import { mock } from 'jest-mock-extended';
-import { RenovateConfig, getConfig, platform } from '../../../../../test/util';
+import {
+  RenovateConfig,
+  fs,
+  getConfig,
+  platform,
+} from '../../../../../test/util';
 import { PR_STATE_OPEN } from '../../../../constants/pull-requests';
 import { Pr } from '../../../../platform';
 import * as _rebase from './rebase';
@@ -9,6 +14,7 @@ const rebase: any = _rebase;
 
 jest.mock('../../../../workers/repository/onboarding/branch/rebase');
 jest.mock('../../extract/cache');
+jest.mock('../../../../util/fs');
 
 describe('workers/repository/onboarding/branch', () => {
   describe('checkOnboardingBranch', () => {
@@ -27,7 +33,7 @@ describe('workers/repository/onboarding/branch', () => {
     });
     it('has default onboarding config', async () => {
       platform.getFileList.mockResolvedValue(['package.json']);
-      platform.getFile.mockResolvedValue('{}');
+      fs.readLocalFile.mockResolvedValue('{}');
       await checkOnboardingBranch(config);
       expect(
         platform.commitFilesToBranch.mock.calls[0][0].files[0].contents
@@ -50,7 +56,7 @@ describe('workers/repository/onboarding/branch', () => {
       config.requireConfig = true;
       config.onboarding = false;
       platform.getFileList.mockResolvedValueOnce(['package.json']);
-      platform.getFile.mockResolvedValueOnce('{}');
+      fs.readLocalFile.mockResolvedValueOnce('{}');
       const onboardingResult = checkOnboardingBranch(config);
       await expect(onboardingResult).rejects.toThrow('disabled');
     });
@@ -61,7 +67,7 @@ describe('workers/repository/onboarding/branch', () => {
     });
     it('detects repo is onboarded via package.json config', async () => {
       platform.getFileList.mockResolvedValueOnce(['package.json']);
-      platform.getFile.mockResolvedValueOnce('{"renovate":{}}');
+      fs.readLocalFile.mockResolvedValueOnce('{"renovate":{}}');
       const res = await checkOnboardingBranch(config);
       expect(res.repoIsOnboarded).toBe(true);
     });
@@ -94,7 +100,7 @@ describe('workers/repository/onboarding/branch', () => {
           ignore: ['foo', 'bar'],
         },
       });
-      platform.getFile.mockResolvedValue(pJsonContent);
+      fs.readLocalFile.mockResolvedValue(pJsonContent);
       platform.commitFilesToBranch.mockResolvedValueOnce('abc123');
       await checkOnboardingBranch(config);
       expect(
