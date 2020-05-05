@@ -48,7 +48,6 @@ interface Config {
   project: string;
   azureWorkItemId: string;
   prList: Pr[];
-  fileList: null;
   repository: string;
 }
 
@@ -182,10 +181,8 @@ export function getRepoForceRebase(): Promise<boolean> {
 
 // Search
 
-export /* istanbul ignore next */ function getFileList(
-  branchName?: string
-): Promise<string[]> {
-  return config.storage.getFileList(branchName);
+export /* istanbul ignore next */ function getFileList(): Promise<string[]> {
+  return config.storage.getFileList();
 }
 
 export /* istanbul ignore next */ async function setBaseBranch(
@@ -194,9 +191,7 @@ export /* istanbul ignore next */ async function setBaseBranch(
   logger.debug(`Setting baseBranch to ${branchName}`);
   config.baseBranch = branchName;
   delete config.baseCommitSHA;
-  delete config.fileList;
   const baseBranchSha = await config.storage.setBaseBranch(branchName);
-  await getFileList(branchName);
   return baseBranchSha;
 }
 
