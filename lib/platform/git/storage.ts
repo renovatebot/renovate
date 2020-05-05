@@ -308,7 +308,7 @@ export class Storage {
       'ls-tree',
       '-r',
       '--name-only',
-      'origin/' + branch,
+      branch,
     ]);
     // istanbul ignore if
     if (!files) {
