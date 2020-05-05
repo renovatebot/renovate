@@ -49,7 +49,10 @@ export async function extract(config: RenovateConfig): Promise<ExtractResult> {
   const packageFiles = await extractAllDependencies(config);
   const durationMs = Math.round(Date.now() - startTime);
   const stats = extractStats(packageFiles);
-  logger.info({ stats, durationMs }, `Dependency extraction complete`);
+  logger.info(
+    { baseBranch: config.baseBranch, stats, durationMs },
+    `Dependency extraction complete`
+  );
   logger.trace({ config: packageFiles }, 'packageFiles');
   await fetchUpdates(config, packageFiles);
   logger.debug({ config: packageFiles }, 'packageFiles with updates');
