@@ -82,11 +82,7 @@ describe('platform/git/storage', () => {
     });
   });
   describe('getFileList()', () => {
-    it('returns empty array if error', async () => {
-      expect(await git.getFileList('not_found')).toEqual([]);
-    });
     it('should return the correct files', async () => {
-      expect(await git.getFileList('renovate/future_branch')).toMatchSnapshot();
       expect(await git.getFileList()).toMatchSnapshot();
     });
     it('should exclude submodules', async () => {
