@@ -353,7 +353,7 @@ Object {
   },
   "nvm": Object {
     "fileMatch": Array [
-      "^.nvmrc$",
+      "(^|/)\\\\.nvmrc$",
     ],
     "versioning": "node",
   },
@@ -402,7 +402,6 @@ Object {
     "fileMatch": Array [
       "(^|/)pyproject\\\\.toml$",
     ],
-    "versioning": "poetry",
   },
   "postUpdateOptions": Array [],
   "postUpgradeTasks": Object {
@@ -885,7 +884,7 @@ Object {
   },
   "nvm": Object {
     "fileMatch": Array [
-      "^.nvmrc$",
+      "(^|/)\\\\.nvmrc$",
     ],
     "versioning": "node",
   },
@@ -934,7 +933,6 @@ Object {
     "fileMatch": Array [
       "(^|/)pyproject\\\\.toml$",
     ],
-    "versioning": "poetry",
   },
   "postUpdateOptions": Array [],
   "postUpgradeTasks": Object {
@@ -1422,7 +1420,7 @@ Object {
   },
   "nvm": Object {
     "fileMatch": Array [
-      "^.nvmrc$",
+      "(^|/)\\\\.nvmrc$",
     ],
     "versioning": "node",
   },
@@ -1471,7 +1469,6 @@ Object {
     "fileMatch": Array [
       "(^|/)pyproject\\\\.toml$",
     ],
-    "versioning": "poetry",
   },
   "postUpdateOptions": Array [],
   "postUpgradeTasks": Object {
@@ -1954,7 +1951,7 @@ Object {
   },
   "nvm": Object {
     "fileMatch": Array [
-      "^.nvmrc$",
+      "(^|/)\\\\.nvmrc$",
     ],
     "versioning": "node",
   },
@@ -2003,7 +2000,6 @@ Object {
     "fileMatch": Array [
       "(^|/)pyproject\\\\.toml$",
     ],
-    "versioning": "poetry",
   },
   "postUpdateOptions": Array [],
   "postUpgradeTasks": Object {

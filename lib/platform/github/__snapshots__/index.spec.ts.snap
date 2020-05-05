@@ -2067,7 +2067,7 @@ Array [
 ]
 `;
 
-exports[`platform/github getBranchStatus() should fail if a check run has failed 2`] = `
+exports[`platform/github getBranchStatus() should fail if a check run is pending 1`] = `
 Array [
   Object {
     "headers": Object {
