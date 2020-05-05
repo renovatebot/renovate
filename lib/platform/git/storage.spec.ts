@@ -87,6 +87,7 @@ describe('platform/git/storage', () => {
     });
     it('should return the correct files', async () => {
       expect(await git.getFileList('renovate/future_branch')).toMatchSnapshot();
+      expect(await git.getFileList()).toMatchSnapshot();
     });
     it('should exclude submodules', async () => {
       const repo = Git(base.path).silent(true);
@@ -97,11 +98,8 @@ describe('platform/git/storage', () => {
         url: base.path,
       });
       expect(await fs.exists(tmpDir.path + '/.gitmodules')).toBeTruthy();
-      expect(await git.getFileList('master')).toMatchSnapshot();
-      await repo.reset(['--hard', 'HEAD^']);
-    });
-    it('defaults to master', async () => {
       expect(await git.getFileList()).toMatchSnapshot();
+      await repo.reset(['--hard', 'HEAD^']);
     });
   });
   describe('branchExists(branchName)', () => {
