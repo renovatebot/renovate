@@ -7,7 +7,6 @@ import {
 import { logger } from '../../../logger';
 import { getManagerList } from '../../../manager';
 import { PackageFile } from '../../../manager/common';
-import { getCachedExtract, setCachedExtract } from './cache';
 import { getMatchingFiles } from './file-match';
 import { getManagerPackageFiles } from './manager-files';
 
@@ -45,10 +44,6 @@ export async function extractAllDependencies(
       }
     }
   }
-  const cachedExtractions = await getCachedExtract(config, extractList);
-  if (cachedExtractions) {
-    return cachedExtractions;
-  }
   const extractResults = await Promise.all(
     extractList.map(async (managerConfig) => {
       const packageFiles = await getManagerPackageFiles(managerConfig);
@@ -65,6 +60,5 @@ export async function extractAllDependencies(
     }
   }
   logger.debug(`Found ${fileCount} package file(s)`);
-  await setCachedExtract(config, extractList, extractions);
   return extractions;
 }

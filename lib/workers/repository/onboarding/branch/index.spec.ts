@@ -8,7 +8,6 @@ import { checkOnboardingBranch } from '.';
 const rebase: any = _rebase;
 
 jest.mock('../../../../workers/repository/onboarding/branch/rebase');
-jest.mock('../../extract/cache');
 
 describe('workers/repository/onboarding/branch', () => {
   describe('checkOnboardingBranch', () => {
