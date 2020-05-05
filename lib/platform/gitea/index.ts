@@ -929,7 +929,7 @@ const platform: Platform = {
   },
 
   getFileList(): Promise<string[]> {
-    return config.storage.getFileList();
+    return config.storage.getFileList(config.baseBranch);
   },
 
   getAllRenovateBranches(branchPrefix: string): Promise<string[]> {

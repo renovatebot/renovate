@@ -49,6 +49,7 @@ interface BbsConfig {
   baseBranch: string;
   bbUseDefaultReviewers: boolean;
   defaultBranch: string;
+  fileList: any[];
   mergeMethod: string;
   owner: string;
   prList: Pr[];
@@ -272,8 +273,11 @@ export /* istanbul ignore next */ function setBranchPrefix(
 // Search
 
 // Get full file list
-export function getFileList(): Promise<string[]> {
-  return config.storage.getFileList();
+export function getFileList(
+  branchName: string = config.baseBranch
+): Promise<string[]> {
+  logger.debug(`getFileList(${branchName})`);
+  return config.storage.getFileList(branchName);
 }
 
 // Branch

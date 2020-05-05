@@ -535,8 +535,8 @@ export function setBranchPrefix(branchPrefix: string): Promise<void> {
 // Search
 
 // istanbul ignore next
-export function getFileList(): Promise<string[]> {
-  return config.storage.getFileList();
+export function getFileList(branchName = config.baseBranch): Promise<string[]> {
+  return config.storage.getFileList(branchName);
 }
 
 // Branch
