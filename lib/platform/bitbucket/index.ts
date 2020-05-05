@@ -173,8 +173,8 @@ export function getRepoForceRebase(): Promise<boolean> {
 // Search
 
 // Get full file list
-export function getFileList(): Promise<string[]> {
-  return config.storage.getFileList();
+export function getFileList(branchName?: string): Promise<string[]> {
+  return config.storage.getFileList(branchName);
 }
 
 export async function setBaseBranch(
@@ -182,7 +182,10 @@ export async function setBaseBranch(
 ): Promise<string> {
   logger.debug(`Setting baseBranch to ${branchName}`);
   config.baseBranch = branchName;
+  delete config.baseCommitSHA;
+  delete config.fileList;
   const baseBranchSha = await config.storage.setBaseBranch(branchName);
+  await getFileList(branchName);
   return baseBranchSha;
 }
 
@@ -830,6 +833,7 @@ export async function mergePr(
         },
       }
     );
+    delete config.baseCommitSHA;
     logger.debug('Automerging succeeded');
   } catch (err) /* istanbul ignore next */ {
     return false;

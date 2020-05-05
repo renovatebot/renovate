@@ -240,7 +240,36 @@ Array [
     "url": "https://api.github.com/repos/some/repo",
   },
   Object {
-    "body": "{\\"query\\":\\"\\\\n      query {\\\\n        repository(owner: \\\\\\"some\\\\\\", name: \\\\\\"repo\\\\\\") {\\\\n          pullRequests(states: [CLOSED, MERGED], first: 100, orderBy: {field: UPDATED_AT, direction: DESC}) {\\\\n            nodes {\\\\n              number\\\\n              state\\\\n              headRefName\\\\n              title\\\\n              comments(last: 100) {\\\\n                nodes {\\\\n                  databaseId\\\\n                  body\\\\n                }\\\\n              }\\\\n            }\\\\n          }\\\\n        }\\\\n      }\\\\n      \\"}",
+    "graphql": Object {
+      "query": Object {
+        "repository": Object {
+          "__args": Object {
+            "name": "repo",
+            "owner": "some",
+          },
+          "pullRequests": Object {
+            "__args": Object {
+              "first": "100",
+            },
+            "nodes": Object {
+              "comments": Object {
+                "__args": Object {
+                  "last": "100",
+                },
+                "nodes": Object {
+                  "body": null,
+                  "databaseId": null,
+                },
+              },
+              "headRefName": null,
+              "number": null,
+              "state": null,
+              "title": null,
+            },
+          },
+        },
+      },
+    },
     "headers": Object {
       "accept-encoding": "gzip, deflate",
       "authorization": "token abc123",
@@ -252,7 +281,36 @@ Array [
     "url": "https://api.github.com/graphql",
   },
   Object {
-    "body": "{\\"query\\":\\"\\\\n      query {\\\\n        repository(owner: \\\\\\"some\\\\\\", name: \\\\\\"repo\\\\\\") {\\\\n          pullRequests(states: [CLOSED, MERGED], first: 25, orderBy: {field: UPDATED_AT, direction: DESC}) {\\\\n            nodes {\\\\n              number\\\\n              state\\\\n              headRefName\\\\n              title\\\\n              comments(last: 100) {\\\\n                nodes {\\\\n                  databaseId\\\\n                  body\\\\n                }\\\\n              }\\\\n            }\\\\n          }\\\\n        }\\\\n      }\\\\n      \\"}",
+    "graphql": Object {
+      "query": Object {
+        "repository": Object {
+          "__args": Object {
+            "name": "repo",
+            "owner": "some",
+          },
+          "pullRequests": Object {
+            "__args": Object {
+              "first": "25",
+            },
+            "nodes": Object {
+              "comments": Object {
+                "__args": Object {
+                  "last": "100",
+                },
+                "nodes": Object {
+                  "body": null,
+                  "databaseId": null,
+                },
+              },
+              "headRefName": null,
+              "number": null,
+              "state": null,
+              "title": null,
+            },
+          },
+        },
+      },
+    },
     "headers": Object {
       "accept-encoding": "gzip, deflate",
       "authorization": "token abc123",
@@ -305,7 +363,36 @@ Array [
     "url": "https://api.github.com/repos/some/repo",
   },
   Object {
-    "body": "{\\"query\\":\\"\\\\n      query {\\\\n        repository(owner: \\\\\\"some\\\\\\", name: \\\\\\"repo\\\\\\") {\\\\n          pullRequests(states: [CLOSED, MERGED], first: 100, orderBy: {field: UPDATED_AT, direction: DESC}) {\\\\n            nodes {\\\\n              number\\\\n              state\\\\n              headRefName\\\\n              title\\\\n              comments(last: 100) {\\\\n                nodes {\\\\n                  databaseId\\\\n                  body\\\\n                }\\\\n              }\\\\n            }\\\\n          }\\\\n        }\\\\n      }\\\\n      \\"}",
+    "graphql": Object {
+      "query": Object {
+        "repository": Object {
+          "__args": Object {
+            "name": "repo",
+            "owner": "some",
+          },
+          "pullRequests": Object {
+            "__args": Object {
+              "first": "100",
+            },
+            "nodes": Object {
+              "comments": Object {
+                "__args": Object {
+                  "last": "100",
+                },
+                "nodes": Object {
+                  "body": null,
+                  "databaseId": null,
+                },
+              },
+              "headRefName": null,
+              "number": null,
+              "state": null,
+              "title": null,
+            },
+          },
+        },
+      },
+    },
     "headers": Object {
       "accept-encoding": "gzip, deflate",
       "authorization": "token abc123",
@@ -317,7 +404,36 @@ Array [
     "url": "https://api.github.com/graphql",
   },
   Object {
-    "body": "{\\"query\\":\\"\\\\n      query {\\\\n        repository(owner: \\\\\\"some\\\\\\", name: \\\\\\"repo\\\\\\") {\\\\n          pullRequests(states: [CLOSED, MERGED], first: 25, orderBy: {field: UPDATED_AT, direction: DESC}) {\\\\n            nodes {\\\\n              number\\\\n              state\\\\n              headRefName\\\\n              title\\\\n              comments(last: 100) {\\\\n                nodes {\\\\n                  databaseId\\\\n                  body\\\\n                }\\\\n              }\\\\n            }\\\\n          }\\\\n        }\\\\n      }\\\\n      \\"}",
+    "graphql": Object {
+      "query": Object {
+        "repository": Object {
+          "__args": Object {
+            "name": "repo",
+            "owner": "some",
+          },
+          "pullRequests": Object {
+            "__args": Object {
+              "first": "25",
+            },
+            "nodes": Object {
+              "comments": Object {
+                "__args": Object {
+                  "last": "100",
+                },
+                "nodes": Object {
+                  "body": null,
+                  "databaseId": null,
+                },
+              },
+              "headRefName": null,
+              "number": null,
+              "state": null,
+              "title": null,
+            },
+          },
+        },
+      },
+    },
     "headers": Object {
       "accept-encoding": "gzip, deflate",
       "authorization": "token abc123",
@@ -370,7 +486,36 @@ Array [
     "url": "https://api.github.com/repos/some/repo",
   },
   Object {
-    "body": "{\\"query\\":\\"\\\\n      query {\\\\n        repository(owner: \\\\\\"some\\\\\\", name: \\\\\\"repo\\\\\\") {\\\\n          pullRequests(states: [CLOSED, MERGED], first: 100, orderBy: {field: UPDATED_AT, direction: DESC}) {\\\\n            nodes {\\\\n              number\\\\n              state\\\\n              headRefName\\\\n              title\\\\n              comments(last: 100) {\\\\n                nodes {\\\\n                  databaseId\\\\n                  body\\\\n                }\\\\n              }\\\\n            }\\\\n          }\\\\n        }\\\\n      }\\\\n      \\"}",
+    "graphql": Object {
+      "query": Object {
+        "repository": Object {
+          "__args": Object {
+            "name": "repo",
+            "owner": "some",
+          },
+          "pullRequests": Object {
+            "__args": Object {
+              "first": "100",
+            },
+            "nodes": Object {
+              "comments": Object {
+                "__args": Object {
+                  "last": "100",
+                },
+                "nodes": Object {
+                  "body": null,
+                  "databaseId": null,
+                },
+              },
+              "headRefName": null,
+              "number": null,
+              "state": null,
+              "title": null,
+            },
+          },
+        },
+      },
+    },
     "headers": Object {
       "accept-encoding": "gzip, deflate",
       "authorization": "token abc123",
@@ -382,7 +527,36 @@ Array [
     "url": "https://api.github.com/graphql",
   },
   Object {
-    "body": "{\\"query\\":\\"\\\\n      query {\\\\n        repository(owner: \\\\\\"some\\\\\\", name: \\\\\\"repo\\\\\\") {\\\\n          pullRequests(states: [CLOSED, MERGED], first: 25, orderBy: {field: UPDATED_AT, direction: DESC}) {\\\\n            nodes {\\\\n              number\\\\n              state\\\\n              headRefName\\\\n              title\\\\n              comments(last: 100) {\\\\n                nodes {\\\\n                  databaseId\\\\n                  body\\\\n                }\\\\n              }\\\\n            }\\\\n          }\\\\n        }\\\\n      }\\\\n      \\"}",
+    "graphql": Object {
+      "query": Object {
+        "repository": Object {
+          "__args": Object {
+            "name": "repo",
+            "owner": "some",
+          },
+          "pullRequests": Object {
+            "__args": Object {
+              "first": "25",
+            },
+            "nodes": Object {
+              "comments": Object {
+                "__args": Object {
+                  "last": "100",
+                },
+                "nodes": Object {
+                  "body": null,
+                  "databaseId": null,
+                },
+              },
+              "headRefName": null,
+              "number": null,
+              "state": null,
+              "title": null,
+            },
+          },
+        },
+      },
+    },
     "headers": Object {
       "accept-encoding": "gzip, deflate",
       "authorization": "token abc123",
@@ -424,7 +598,36 @@ Array [
     "url": "https://api.github.com/repos/some/repo",
   },
   Object {
-    "body": "{\\"query\\":\\"\\\\n      query {\\\\n        repository(owner: \\\\\\"some\\\\\\", name: \\\\\\"repo\\\\\\") {\\\\n          pullRequests(states: [CLOSED, MERGED], first: 100, orderBy: {field: UPDATED_AT, direction: DESC}) {\\\\n            nodes {\\\\n              number\\\\n              state\\\\n              headRefName\\\\n              title\\\\n              comments(last: 100) {\\\\n                nodes {\\\\n                  databaseId\\\\n                  body\\\\n                }\\\\n              }\\\\n            }\\\\n          }\\\\n        }\\\\n      }\\\\n      \\"}",
+    "graphql": Object {
+      "query": Object {
+        "repository": Object {
+          "__args": Object {
+            "name": "repo",
+            "owner": "some",
+          },
+          "pullRequests": Object {
+            "__args": Object {
+              "first": "100",
+            },
+            "nodes": Object {
+              "comments": Object {
+                "__args": Object {
+                  "last": "100",
+                },
+                "nodes": Object {
+                  "body": null,
+                  "databaseId": null,
+                },
+              },
+              "headRefName": null,
+              "number": null,
+              "state": null,
+              "title": null,
+            },
+          },
+        },
+      },
+    },
     "headers": Object {
       "accept-encoding": "gzip, deflate",
       "authorization": "token abc123",
@@ -436,7 +639,36 @@ Array [
     "url": "https://api.github.com/graphql",
   },
   Object {
-    "body": "{\\"query\\":\\"\\\\n      query {\\\\n        repository(owner: \\\\\\"some\\\\\\", name: \\\\\\"repo\\\\\\") {\\\\n          pullRequests(states: [CLOSED, MERGED], first: 25, orderBy: {field: UPDATED_AT, direction: DESC}) {\\\\n            nodes {\\\\n              number\\\\n              state\\\\n              headRefName\\\\n              title\\\\n              comments(last: 100) {\\\\n                nodes {\\\\n                  databaseId\\\\n                  body\\\\n                }\\\\n              }\\\\n            }\\\\n          }\\\\n        }\\\\n      }\\\\n      \\"}",
+    "graphql": Object {
+      "query": Object {
+        "repository": Object {
+          "__args": Object {
+            "name": "repo",
+            "owner": "some",
+          },
+          "pullRequests": Object {
+            "__args": Object {
+              "first": "25",
+            },
+            "nodes": Object {
+              "comments": Object {
+                "__args": Object {
+                  "last": "100",
+                },
+                "nodes": Object {
+                  "body": null,
+                  "databaseId": null,
+                },
+              },
+              "headRefName": null,
+              "number": null,
+              "state": null,
+              "title": null,
+            },
+          },
+        },
+      },
+    },
     "headers": Object {
       "accept-encoding": "gzip, deflate",
       "authorization": "token abc123",
@@ -475,7 +707,36 @@ Array [
     "url": "https://api.github.com/repos/some/repo",
   },
   Object {
-    "body": "{\\"query\\":\\"\\\\n      query {\\\\n        repository(owner: \\\\\\"some\\\\\\", name: \\\\\\"repo\\\\\\") {\\\\n          pullRequests(states: [CLOSED, MERGED], first: 100, orderBy: {field: UPDATED_AT, direction: DESC}) {\\\\n            nodes {\\\\n              number\\\\n              state\\\\n              headRefName\\\\n              title\\\\n              comments(last: 100) {\\\\n                nodes {\\\\n                  databaseId\\\\n                  body\\\\n                }\\\\n              }\\\\n            }\\\\n          }\\\\n        }\\\\n      }\\\\n      \\"}",
+    "graphql": Object {
+      "query": Object {
+        "repository": Object {
+          "__args": Object {
+            "name": "repo",
+            "owner": "some",
+          },
+          "pullRequests": Object {
+            "__args": Object {
+              "first": "100",
+            },
+            "nodes": Object {
+              "comments": Object {
+                "__args": Object {
+                  "last": "100",
+                },
+                "nodes": Object {
+                  "body": null,
+                  "databaseId": null,
+                },
+              },
+              "headRefName": null,
+              "number": null,
+              "state": null,
+              "title": null,
+            },
+          },
+        },
+      },
+    },
     "headers": Object {
       "accept-encoding": "gzip, deflate",
       "authorization": "token abc123",
@@ -487,7 +748,36 @@ Array [
     "url": "https://api.github.com/graphql",
   },
   Object {
-    "body": "{\\"query\\":\\"\\\\n      query {\\\\n        repository(owner: \\\\\\"some\\\\\\", name: \\\\\\"repo\\\\\\") {\\\\n          pullRequests(states: [CLOSED, MERGED], first: 25, orderBy: {field: UPDATED_AT, direction: DESC}) {\\\\n            nodes {\\\\n              number\\\\n              state\\\\n              headRefName\\\\n              title\\\\n              comments(last: 100) {\\\\n                nodes {\\\\n                  databaseId\\\\n                  body\\\\n                }\\\\n              }\\\\n            }\\\\n          }\\\\n        }\\\\n      }\\\\n      \\"}",
+    "graphql": Object {
+      "query": Object {
+        "repository": Object {
+          "__args": Object {
+            "name": "repo",
+            "owner": "some",
+          },
+          "pullRequests": Object {
+            "__args": Object {
+              "first": "25",
+            },
+            "nodes": Object {
+              "comments": Object {
+                "__args": Object {
+                  "last": "100",
+                },
+                "nodes": Object {
+                  "body": null,
+                  "databaseId": null,
+                },
+              },
+              "headRefName": null,
+              "number": null,
+              "state": null,
+              "title": null,
+            },
+          },
+        },
+      },
+    },
     "headers": Object {
       "accept-encoding": "gzip, deflate",
       "authorization": "token abc123",
@@ -526,7 +816,36 @@ Array [
     "url": "https://api.github.com/repos/some/repo",
   },
   Object {
-    "body": "{\\"query\\":\\"\\\\n      query {\\\\n        repository(owner: \\\\\\"some\\\\\\", name: \\\\\\"repo\\\\\\") {\\\\n          pullRequests(states: [CLOSED, MERGED], first: 100, orderBy: {field: UPDATED_AT, direction: DESC}) {\\\\n            nodes {\\\\n              number\\\\n              state\\\\n              headRefName\\\\n              title\\\\n              comments(last: 100) {\\\\n                nodes {\\\\n                  databaseId\\\\n                  body\\\\n                }\\\\n              }\\\\n            }\\\\n          }\\\\n        }\\\\n      }\\\\n      \\"}",
+    "graphql": Object {
+      "query": Object {
+        "repository": Object {
+          "__args": Object {
+            "name": "repo",
+            "owner": "some",
+          },
+          "pullRequests": Object {
+            "__args": Object {
+              "first": "100",
+            },
+            "nodes": Object {
+              "comments": Object {
+                "__args": Object {
+                  "last": "100",
+                },
+                "nodes": Object {
+                  "body": null,
+                  "databaseId": null,
+                },
+              },
+              "headRefName": null,
+              "number": null,
+              "state": null,
+              "title": null,
+            },
+          },
+        },
+      },
+    },
     "headers": Object {
       "accept-encoding": "gzip, deflate",
       "authorization": "token abc123",
@@ -538,7 +857,36 @@ Array [
     "url": "https://api.github.com/graphql",
   },
   Object {
-    "body": "{\\"query\\":\\"\\\\n      query {\\\\n        repository(owner: \\\\\\"some\\\\\\", name: \\\\\\"repo\\\\\\") {\\\\n          pullRequests(states: [CLOSED, MERGED], first: 25, orderBy: {field: UPDATED_AT, direction: DESC}) {\\\\n            nodes {\\\\n              number\\\\n              state\\\\n              headRefName\\\\n              title\\\\n              comments(last: 100) {\\\\n                nodes {\\\\n                  databaseId\\\\n                  body\\\\n                }\\\\n              }\\\\n            }\\\\n          }\\\\n        }\\\\n      }\\\\n      \\"}",
+    "graphql": Object {
+      "query": Object {
+        "repository": Object {
+          "__args": Object {
+            "name": "repo",
+            "owner": "some",
+          },
+          "pullRequests": Object {
+            "__args": Object {
+              "first": "25",
+            },
+            "nodes": Object {
+              "comments": Object {
+                "__args": Object {
+                  "last": "100",
+                },
+                "nodes": Object {
+                  "body": null,
+                  "databaseId": null,
+                },
+              },
+              "headRefName": null,
+              "number": null,
+              "state": null,
+              "title": null,
+            },
+          },
+        },
+      },
+    },
     "headers": Object {
       "accept-encoding": "gzip, deflate",
       "authorization": "token abc123",
@@ -1086,7 +1434,72 @@ Array [
     "url": "https://api.github.com/repos/some/repo/pulls?per_page=100&state=all",
   },
   Object {
-    "body": "{\\"query\\":\\"\\\\n      query {\\\\n        repository(owner: \\\\\\"some\\\\\\", name: \\\\\\"repo\\\\\\") {\\\\n          pullRequests(states: [OPEN], first: 100, orderBy: {field: UPDATED_AT, direction: DESC}) {\\\\n            nodes {\\\\n              number\\\\n              headRefName\\\\n              baseRefName\\\\n              title\\\\n              mergeable\\\\n              mergeStateStatus\\\\n              labels(last: 100) {\\\\n                nodes {\\\\n                  name\\\\n                }\\\\n              }\\\\n              commits(first: 2) {\\\\n                nodes {\\\\n                  commit {\\\\n                    author {\\\\n                      email\\\\n                    }\\\\n                    committer {\\\\n                      email\\\\n                    }\\\\n                    parents(last: 1) {\\\\n                      edges {\\\\n                        node {\\\\n                          abbreviatedOid\\\\n                          oid\\\\n                        }\\\\n                      }\\\\n                    }\\\\n                  }\\\\n                }\\\\n              }\\\\n              body\\\\n              reviews(first: 1, states:[CHANGES_REQUESTED]){\\\\n                nodes{\\\\n                  state\\\\n                }\\\\n              }\\\\n            }\\\\n          }\\\\n        }\\\\n      }\\\\n      \\"}",
+    "graphql": Object {
+      "query": Object {
+        "repository": Object {
+          "__args": Object {
+            "name": "repo",
+            "owner": "some",
+          },
+          "pullRequests": Object {
+            "__args": Object {
+              "first": "100",
+            },
+            "nodes": Object {
+              "baseRefName": null,
+              "body": null,
+              "commits": Object {
+                "__args": Object {
+                  "first": "2",
+                },
+                "nodes": Object {
+                  "commit": Object {
+                    "author": Object {
+                      "email": null,
+                    },
+                    "committer": Object {
+                      "email": null,
+                    },
+                    "parents": Object {
+                      "__args": Object {
+                        "last": "1",
+                      },
+                      "edges": Object {
+                        "node": Object {
+                          "abbreviatedOid": null,
+                          "oid": null,
+                        },
+                      },
+                    },
+                  },
+                },
+              },
+              "headRefName": null,
+              "labels": Object {
+                "__args": Object {
+                  "last": "100",
+                },
+                "nodes": Object {
+                  "name": null,
+                },
+              },
+              "mergeStateStatus": null,
+              "mergeable": null,
+              "number": null,
+              "reviews": Object {
+                "__args": Object {
+                  "first": "1",
+                },
+                "nodes": Object {
+                  "state": null,
+                },
+              },
+              "title": null,
+            },
+          },
+        },
+      },
+    },
     "headers": Object {
       "accept": "application/vnd.github.merge-info-preview+json",
       "accept-encoding": "gzip, deflate",
@@ -1099,7 +1512,72 @@ Array [
     "url": "https://api.github.com/graphql",
   },
   Object {
-    "body": "{\\"query\\":\\"\\\\n      query {\\\\n        repository(owner: \\\\\\"some\\\\\\", name: \\\\\\"repo\\\\\\") {\\\\n          pullRequests(states: [OPEN], first: 25, orderBy: {field: UPDATED_AT, direction: DESC}) {\\\\n            nodes {\\\\n              number\\\\n              headRefName\\\\n              baseRefName\\\\n              title\\\\n              mergeable\\\\n              mergeStateStatus\\\\n              labels(last: 100) {\\\\n                nodes {\\\\n                  name\\\\n                }\\\\n              }\\\\n              commits(first: 2) {\\\\n                nodes {\\\\n                  commit {\\\\n                    author {\\\\n                      email\\\\n                    }\\\\n                    committer {\\\\n                      email\\\\n                    }\\\\n                    parents(last: 1) {\\\\n                      edges {\\\\n                        node {\\\\n                          abbreviatedOid\\\\n                          oid\\\\n                        }\\\\n                      }\\\\n                    }\\\\n                  }\\\\n                }\\\\n              }\\\\n              body\\\\n              reviews(first: 1, states:[CHANGES_REQUESTED]){\\\\n                nodes{\\\\n                  state\\\\n                }\\\\n              }\\\\n            }\\\\n          }\\\\n        }\\\\n      }\\\\n      \\"}",
+    "graphql": Object {
+      "query": Object {
+        "repository": Object {
+          "__args": Object {
+            "name": "repo",
+            "owner": "some",
+          },
+          "pullRequests": Object {
+            "__args": Object {
+              "first": "25",
+            },
+            "nodes": Object {
+              "baseRefName": null,
+              "body": null,
+              "commits": Object {
+                "__args": Object {
+                  "first": "2",
+                },
+                "nodes": Object {
+                  "commit": Object {
+                    "author": Object {
+                      "email": null,
+                    },
+                    "committer": Object {
+                      "email": null,
+                    },
+                    "parents": Object {
+                      "__args": Object {
+                        "last": "1",
+                      },
+                      "edges": Object {
+                        "node": Object {
+                          "abbreviatedOid": null,
+                          "oid": null,
+                        },
+                      },
+                    },
+                  },
+                },
+              },
+              "headRefName": null,
+              "labels": Object {
+                "__args": Object {
+                  "last": "100",
+                },
+                "nodes": Object {
+                  "name": null,
+                },
+              },
+              "mergeStateStatus": null,
+              "mergeable": null,
+              "number": null,
+              "reviews": Object {
+                "__args": Object {
+                  "first": "1",
+                },
+                "nodes": Object {
+                  "state": null,
+                },
+              },
+              "title": null,
+            },
+          },
+        },
+      },
+    },
     "headers": Object {
       "accept": "application/vnd.github.merge-info-preview+json",
       "accept-encoding": "gzip, deflate",
@@ -1112,7 +1590,36 @@ Array [
     "url": "https://api.github.com/graphql",
   },
   Object {
-    "body": "{\\"query\\":\\"\\\\n      query {\\\\n        repository(owner: \\\\\\"some\\\\\\", name: \\\\\\"repo\\\\\\") {\\\\n          pullRequests(states: [CLOSED, MERGED], first: 100, orderBy: {field: UPDATED_AT, direction: DESC}) {\\\\n            nodes {\\\\n              number\\\\n              state\\\\n              headRefName\\\\n              title\\\\n              comments(last: 100) {\\\\n                nodes {\\\\n                  databaseId\\\\n                  body\\\\n                }\\\\n              }\\\\n            }\\\\n          }\\\\n        }\\\\n      }\\\\n      \\"}",
+    "graphql": Object {
+      "query": Object {
+        "repository": Object {
+          "__args": Object {
+            "name": "repo",
+            "owner": "some",
+          },
+          "pullRequests": Object {
+            "__args": Object {
+              "first": "100",
+            },
+            "nodes": Object {
+              "comments": Object {
+                "__args": Object {
+                  "last": "100",
+                },
+                "nodes": Object {
+                  "body": null,
+                  "databaseId": null,
+                },
+              },
+              "headRefName": null,
+              "number": null,
+              "state": null,
+              "title": null,
+            },
+          },
+        },
+      },
+    },
     "headers": Object {
       "accept-encoding": "gzip, deflate",
       "authorization": "token abc123",
@@ -1124,7 +1631,36 @@ Array [
     "url": "https://api.github.com/graphql",
   },
   Object {
-    "body": "{\\"query\\":\\"\\\\n      query {\\\\n        repository(owner: \\\\\\"some\\\\\\", name: \\\\\\"repo\\\\\\") {\\\\n          pullRequests(states: [CLOSED, MERGED], first: 25, orderBy: {field: UPDATED_AT, direction: DESC}) {\\\\n            nodes {\\\\n              number\\\\n              state\\\\n              headRefName\\\\n              title\\\\n              comments(last: 100) {\\\\n                nodes {\\\\n                  databaseId\\\\n                  body\\\\n                }\\\\n              }\\\\n            }\\\\n          }\\\\n        }\\\\n      }\\\\n      \\"}",
+    "graphql": Object {
+      "query": Object {
+        "repository": Object {
+          "__args": Object {
+            "name": "repo",
+            "owner": "some",
+          },
+          "pullRequests": Object {
+            "__args": Object {
+              "first": "25",
+            },
+            "nodes": Object {
+              "comments": Object {
+                "__args": Object {
+                  "last": "100",
+                },
+                "nodes": Object {
+                  "body": null,
+                  "databaseId": null,
+                },
+              },
+              "headRefName": null,
+              "number": null,
+              "state": null,
+              "title": null,
+            },
+          },
+        },
+      },
+    },
     "headers": Object {
       "accept-encoding": "gzip, deflate",
       "authorization": "token abc123",
@@ -1258,7 +1794,72 @@ Array [
     "url": "https://api.github.com/repos/some/repo/pulls?per_page=100&state=all",
   },
   Object {
-    "body": "{\\"query\\":\\"\\\\n      query {\\\\n        repository(owner: \\\\\\"some\\\\\\", name: \\\\\\"repo\\\\\\") {\\\\n          pullRequests(states: [OPEN], first: 100, orderBy: {field: UPDATED_AT, direction: DESC}) {\\\\n            nodes {\\\\n              number\\\\n              headRefName\\\\n              baseRefName\\\\n              title\\\\n              mergeable\\\\n              mergeStateStatus\\\\n              labels(last: 100) {\\\\n                nodes {\\\\n                  name\\\\n                }\\\\n              }\\\\n              commits(first: 2) {\\\\n                nodes {\\\\n                  commit {\\\\n                    author {\\\\n                      email\\\\n                    }\\\\n                    committer {\\\\n                      email\\\\n                    }\\\\n                    parents(last: 1) {\\\\n                      edges {\\\\n                        node {\\\\n                          abbreviatedOid\\\\n                          oid\\\\n                        }\\\\n                      }\\\\n                    }\\\\n                  }\\\\n                }\\\\n              }\\\\n              body\\\\n              reviews(first: 1, states:[CHANGES_REQUESTED]){\\\\n                nodes{\\\\n                  state\\\\n                }\\\\n              }\\\\n            }\\\\n          }\\\\n        }\\\\n      }\\\\n      \\"}",
+    "graphql": Object {
+      "query": Object {
+        "repository": Object {
+          "__args": Object {
+            "name": "repo",
+            "owner": "some",
+          },
+          "pullRequests": Object {
+            "__args": Object {
+              "first": "100",
+            },
+            "nodes": Object {
+              "baseRefName": null,
+              "body": null,
+              "commits": Object {
+                "__args": Object {
+                  "first": "2",
+                },
+                "nodes": Object {
+                  "commit": Object {
+                    "author": Object {
+                      "email": null,
+                    },
+                    "committer": Object {
+                      "email": null,
+                    },
+                    "parents": Object {
+                      "__args": Object {
+                        "last": "1",
+                      },
+                      "edges": Object {
+                        "node": Object {
+                          "abbreviatedOid": null,
+                          "oid": null,
+                        },
+                      },
+                    },
+                  },
+                },
+              },
+              "headRefName": null,
+              "labels": Object {
+                "__args": Object {
+                  "last": "100",
+                },
+                "nodes": Object {
+                  "name": null,
+                },
+              },
+              "mergeStateStatus": null,
+              "mergeable": null,
+              "number": null,
+              "reviews": Object {
+                "__args": Object {
+                  "first": "1",
+                },
+                "nodes": Object {
+                  "state": null,
+                },
+              },
+              "title": null,
+            },
+          },
+        },
+      },
+    },
     "headers": Object {
       "accept": "application/vnd.github.merge-info-preview+json",
       "accept-encoding": "gzip, deflate",
@@ -1271,7 +1872,72 @@ Array [
     "url": "https://api.github.com/graphql",
   },
   Object {
-    "body": "{\\"query\\":\\"\\\\n      query {\\\\n        repository(owner: \\\\\\"some\\\\\\", name: \\\\\\"repo\\\\\\") {\\\\n          pullRequests(states: [OPEN], first: 25, orderBy: {field: UPDATED_AT, direction: DESC}) {\\\\n            nodes {\\\\n              number\\\\n              headRefName\\\\n              baseRefName\\\\n              title\\\\n              mergeable\\\\n              mergeStateStatus\\\\n              labels(last: 100) {\\\\n                nodes {\\\\n                  name\\\\n                }\\\\n              }\\\\n              commits(first: 2) {\\\\n                nodes {\\\\n                  commit {\\\\n                    author {\\\\n                      email\\\\n                    }\\\\n                    committer {\\\\n                      email\\\\n                    }\\\\n                    parents(last: 1) {\\\\n                      edges {\\\\n                        node {\\\\n                          abbreviatedOid\\\\n                          oid\\\\n                        }\\\\n                      }\\\\n                    }\\\\n                  }\\\\n                }\\\\n              }\\\\n              body\\\\n              reviews(first: 1, states:[CHANGES_REQUESTED]){\\\\n                nodes{\\\\n                  state\\\\n                }\\\\n              }\\\\n            }\\\\n          }\\\\n        }\\\\n      }\\\\n      \\"}",
+    "graphql": Object {
+      "query": Object {
+        "repository": Object {
+          "__args": Object {
+            "name": "repo",
+            "owner": "some",
+          },
+          "pullRequests": Object {
+            "__args": Object {
+              "first": "25",
+            },
+            "nodes": Object {
+              "baseRefName": null,
+              "body": null,
+              "commits": Object {
+                "__args": Object {
+                  "first": "2",
+                },
+                "nodes": Object {
+                  "commit": Object {
+                    "author": Object {
+                      "email": null,
+                    },
+                    "committer": Object {
+                      "email": null,
+                    },
+                    "parents": Object {
+                      "__args": Object {
+                        "last": "1",
+                      },
+                      "edges": Object {
+                        "node": Object {
+                          "abbreviatedOid": null,
+                          "oid": null,
+                        },
+                      },
+                    },
+                  },
+                },
+              },
+              "headRefName": null,
+              "labels": Object {
+                "__args": Object {
+                  "last": "100",
+                },
+                "nodes": Object {
+                  "name": null,
+                },
+              },
+              "mergeStateStatus": null,
+              "mergeable": null,
+              "number": null,
+              "reviews": Object {
+                "__args": Object {
+                  "first": "1",
+                },
+                "nodes": Object {
+                  "state": null,
+                },
+              },
+              "title": null,
+            },
+          },
+        },
+      },
+    },
     "headers": Object {
       "accept": "application/vnd.github.merge-info-preview+json",
       "accept-encoding": "gzip, deflate",
@@ -1284,7 +1950,36 @@ Array [
     "url": "https://api.github.com/graphql",
   },
   Object {
-    "body": "{\\"query\\":\\"\\\\n      query {\\\\n        repository(owner: \\\\\\"some\\\\\\", name: \\\\\\"repo\\\\\\") {\\\\n          pullRequests(states: [CLOSED, MERGED], first: 100, orderBy: {field: UPDATED_AT, direction: DESC}) {\\\\n            nodes {\\\\n              number\\\\n              state\\\\n              headRefName\\\\n              title\\\\n              comments(last: 100) {\\\\n                nodes {\\\\n                  databaseId\\\\n                  body\\\\n                }\\\\n              }\\\\n            }\\\\n          }\\\\n        }\\\\n      }\\\\n      \\"}",
+    "graphql": Object {
+      "query": Object {
+        "repository": Object {
+          "__args": Object {
+            "name": "repo",
+            "owner": "some",
+          },
+          "pullRequests": Object {
+            "__args": Object {
+              "first": "100",
+            },
+            "nodes": Object {
+              "comments": Object {
+                "__args": Object {
+                  "last": "100",
+                },
+                "nodes": Object {
+                  "body": null,
+                  "databaseId": null,
+                },
+              },
+              "headRefName": null,
+              "number": null,
+              "state": null,
+              "title": null,
+            },
+          },
+        },
+      },
+    },
     "headers": Object {
       "accept-encoding": "gzip, deflate",
       "authorization": "token abc123",
@@ -1296,7 +1991,36 @@ Array [
     "url": "https://api.github.com/graphql",
   },
   Object {
-    "body": "{\\"query\\":\\"\\\\n      query {\\\\n        repository(owner: \\\\\\"some\\\\\\", name: \\\\\\"repo\\\\\\") {\\\\n          pullRequests(states: [CLOSED, MERGED], first: 25, orderBy: {field: UPDATED_AT, direction: DESC}) {\\\\n            nodes {\\\\n              number\\\\n              state\\\\n              headRefName\\\\n              title\\\\n              comments(last: 100) {\\\\n                nodes {\\\\n                  databaseId\\\\n                  body\\\\n                }\\\\n              }\\\\n            }\\\\n          }\\\\n        }\\\\n      }\\\\n      \\"}",
+    "graphql": Object {
+      "query": Object {
+        "repository": Object {
+          "__args": Object {
+            "name": "repo",
+            "owner": "some",
+          },
+          "pullRequests": Object {
+            "__args": Object {
+              "first": "25",
+            },
+            "nodes": Object {
+              "comments": Object {
+                "__args": Object {
+                  "last": "100",
+                },
+                "nodes": Object {
+                  "body": null,
+                  "databaseId": null,
+                },
+              },
+              "headRefName": null,
+              "number": null,
+              "state": null,
+              "title": null,
+            },
+          },
+        },
+      },
+    },
     "headers": Object {
       "accept-encoding": "gzip, deflate",
       "authorization": "token abc123",
@@ -1683,7 +2407,72 @@ Array [
     "url": "https://api.github.com/repos/some/repo",
   },
   Object {
-    "body": "{\\"query\\":\\"\\\\n      query {\\\\n        repository(owner: \\\\\\"some\\\\\\", name: \\\\\\"repo\\\\\\") {\\\\n          pullRequests(states: [OPEN], first: 100, orderBy: {field: UPDATED_AT, direction: DESC}) {\\\\n            nodes {\\\\n              number\\\\n              headRefName\\\\n              baseRefName\\\\n              title\\\\n              mergeable\\\\n              mergeStateStatus\\\\n              labels(last: 100) {\\\\n                nodes {\\\\n                  name\\\\n                }\\\\n              }\\\\n              commits(first: 2) {\\\\n                nodes {\\\\n                  commit {\\\\n                    author {\\\\n                      email\\\\n                    }\\\\n                    committer {\\\\n                      email\\\\n                    }\\\\n                    parents(last: 1) {\\\\n                      edges {\\\\n                        node {\\\\n                          abbreviatedOid\\\\n                          oid\\\\n                        }\\\\n                      }\\\\n                    }\\\\n                  }\\\\n                }\\\\n              }\\\\n              body\\\\n              reviews(first: 1, states:[CHANGES_REQUESTED]){\\\\n                nodes{\\\\n                  state\\\\n                }\\\\n              }\\\\n            }\\\\n          }\\\\n        }\\\\n      }\\\\n      \\"}",
+    "graphql": Object {
+      "query": Object {
+        "repository": Object {
+          "__args": Object {
+            "name": "repo",
+            "owner": "some",
+          },
+          "pullRequests": Object {
+            "__args": Object {
+              "first": "100",
+            },
+            "nodes": Object {
+              "baseRefName": null,
+              "body": null,
+              "commits": Object {
+                "__args": Object {
+                  "first": "2",
+                },
+                "nodes": Object {
+                  "commit": Object {
+                    "author": Object {
+                      "email": null,
+                    },
+                    "committer": Object {
+                      "email": null,
+                    },
+                    "parents": Object {
+                      "__args": Object {
+                        "last": "1",
+                      },
+                      "edges": Object {
+                        "node": Object {
+                          "abbreviatedOid": null,
+                          "oid": null,
+                        },
+                      },
+                    },
+                  },
+                },
+              },
+              "headRefName": null,
+              "labels": Object {
+                "__args": Object {
+                  "last": "100",
+                },
+                "nodes": Object {
+                  "name": null,
+                },
+              },
+              "mergeStateStatus": null,
+              "mergeable": null,
+              "number": null,
+              "reviews": Object {
+                "__args": Object {
+                  "first": "1",
+                },
+                "nodes": Object {
+                  "state": null,
+                },
+              },
+              "title": null,
+            },
+          },
+        },
+      },
+    },
     "headers": Object {
       "accept": "application/vnd.github.merge-info-preview+json",
       "accept-encoding": "gzip, deflate",
@@ -1696,7 +2485,72 @@ Array [
     "url": "https://api.github.com/graphql",
   },
   Object {
-    "body": "{\\"query\\":\\"\\\\n      query {\\\\n        repository(owner: \\\\\\"some\\\\\\", name: \\\\\\"repo\\\\\\") {\\\\n          pullRequests(states: [OPEN], first: 25, orderBy: {field: UPDATED_AT, direction: DESC}) {\\\\n            nodes {\\\\n              number\\\\n              headRefName\\\\n              baseRefName\\\\n              title\\\\n              mergeable\\\\n              mergeStateStatus\\\\n              labels(last: 100) {\\\\n                nodes {\\\\n                  name\\\\n                }\\\\n              }\\\\n              commits(first: 2) {\\\\n                nodes {\\\\n                  commit {\\\\n                    author {\\\\n                      email\\\\n                    }\\\\n                    committer {\\\\n                      email\\\\n                    }\\\\n                    parents(last: 1) {\\\\n                      edges {\\\\n                        node {\\\\n                          abbreviatedOid\\\\n                          oid\\\\n                        }\\\\n                      }\\\\n                    }\\\\n                  }\\\\n                }\\\\n              }\\\\n              body\\\\n              reviews(first: 1, states:[CHANGES_REQUESTED]){\\\\n                nodes{\\\\n                  state\\\\n                }\\\\n              }\\\\n            }\\\\n          }\\\\n        }\\\\n      }\\\\n      \\"}",
+    "graphql": Object {
+      "query": Object {
+        "repository": Object {
+          "__args": Object {
+            "name": "repo",
+            "owner": "some",
+          },
+          "pullRequests": Object {
+            "__args": Object {
+              "first": "25",
+            },
+            "nodes": Object {
+              "baseRefName": null,
+              "body": null,
+              "commits": Object {
+                "__args": Object {
+                  "first": "2",
+                },
+                "nodes": Object {
+                  "commit": Object {
+                    "author": Object {
+                      "email": null,
+                    },
+                    "committer": Object {
+                      "email": null,
+                    },
+                    "parents": Object {
+                      "__args": Object {
+                        "last": "1",
+                      },
+                      "edges": Object {
+                        "node": Object {
+                          "abbreviatedOid": null,
+                          "oid": null,
+                        },
+                      },
+                    },
+                  },
+                },
+              },
+              "headRefName": null,
+              "labels": Object {
+                "__args": Object {
+                  "last": "100",
+                },
+                "nodes": Object {
+                  "name": null,
+                },
+              },
+              "mergeStateStatus": null,
+              "mergeable": null,
+              "number": null,
+              "reviews": Object {
+                "__args": Object {
+                  "first": "1",
+                },
+                "nodes": Object {
+                  "state": null,
+                },
+              },
+              "title": null,
+            },
+          },
+        },
+      },
+    },
     "headers": Object {
       "accept": "application/vnd.github.merge-info-preview+json",
       "accept-encoding": "gzip, deflate",
@@ -1709,7 +2563,36 @@ Array [
     "url": "https://api.github.com/graphql",
   },
   Object {
-    "body": "{\\"query\\":\\"\\\\n      query {\\\\n        repository(owner: \\\\\\"some\\\\\\", name: \\\\\\"repo\\\\\\") {\\\\n          pullRequests(states: [CLOSED, MERGED], first: 100, orderBy: {field: UPDATED_AT, direction: DESC}) {\\\\n            nodes {\\\\n              number\\\\n              state\\\\n              headRefName\\\\n              title\\\\n              comments(last: 100) {\\\\n                nodes {\\\\n                  databaseId\\\\n                  body\\\\n                }\\\\n              }\\\\n            }\\\\n          }\\\\n        }\\\\n      }\\\\n      \\"}",
+    "graphql": Object {
+      "query": Object {
+        "repository": Object {
+          "__args": Object {
+            "name": "repo",
+            "owner": "some",
+          },
+          "pullRequests": Object {
+            "__args": Object {
+              "first": "100",
+            },
+            "nodes": Object {
+              "comments": Object {
+                "__args": Object {
+                  "last": "100",
+                },
+                "nodes": Object {
+                  "body": null,
+                  "databaseId": null,
+                },
+              },
+              "headRefName": null,
+              "number": null,
+              "state": null,
+              "title": null,
+            },
+          },
+        },
+      },
+    },
     "headers": Object {
       "accept-encoding": "gzip, deflate",
       "authorization": "token abc123",
@@ -1721,7 +2604,36 @@ Array [
     "url": "https://api.github.com/graphql",
   },
   Object {
-    "body": "{\\"query\\":\\"\\\\n      query {\\\\n        repository(owner: \\\\\\"some\\\\\\", name: \\\\\\"repo\\\\\\") {\\\\n          pullRequests(states: [CLOSED, MERGED], first: 25, orderBy: {field: UPDATED_AT, direction: DESC}) {\\\\n            nodes {\\\\n              number\\\\n              state\\\\n              headRefName\\\\n              title\\\\n              comments(last: 100) {\\\\n                nodes {\\\\n                  databaseId\\\\n                  body\\\\n                }\\\\n              }\\\\n            }\\\\n          }\\\\n        }\\\\n      }\\\\n      \\"}",
+    "graphql": Object {
+      "query": Object {
+        "repository": Object {
+          "__args": Object {
+            "name": "repo",
+            "owner": "some",
+          },
+          "pullRequests": Object {
+            "__args": Object {
+              "first": "25",
+            },
+            "nodes": Object {
+              "comments": Object {
+                "__args": Object {
+                  "last": "100",
+                },
+                "nodes": Object {
+                  "body": null,
+                  "databaseId": null,
+                },
+              },
+              "headRefName": null,
+              "number": null,
+              "state": null,
+              "title": null,
+            },
+          },
+        },
+      },
+    },
     "headers": Object {
       "accept-encoding": "gzip, deflate",
       "authorization": "token abc123",
@@ -1765,7 +2677,72 @@ Array [
     "url": "https://api.github.com/repos/some/repo",
   },
   Object {
-    "body": "{\\"query\\":\\"\\\\n      query {\\\\n        repository(owner: \\\\\\"some\\\\\\", name: \\\\\\"repo\\\\\\") {\\\\n          pullRequests(states: [OPEN], first: 100, orderBy: {field: UPDATED_AT, direction: DESC}) {\\\\n            nodes {\\\\n              number\\\\n              headRefName\\\\n              baseRefName\\\\n              title\\\\n              mergeable\\\\n              mergeStateStatus\\\\n              labels(last: 100) {\\\\n                nodes {\\\\n                  name\\\\n                }\\\\n              }\\\\n              commits(first: 2) {\\\\n                nodes {\\\\n                  commit {\\\\n                    author {\\\\n                      email\\\\n                    }\\\\n                    committer {\\\\n                      email\\\\n                    }\\\\n                    parents(last: 1) {\\\\n                      edges {\\\\n                        node {\\\\n                          abbreviatedOid\\\\n                          oid\\\\n                        }\\\\n                      }\\\\n                    }\\\\n                  }\\\\n                }\\\\n              }\\\\n              body\\\\n              reviews(first: 1, states:[CHANGES_REQUESTED]){\\\\n                nodes{\\\\n                  state\\\\n                }\\\\n              }\\\\n            }\\\\n          }\\\\n        }\\\\n      }\\\\n      \\"}",
+    "graphql": Object {
+      "query": Object {
+        "repository": Object {
+          "__args": Object {
+            "name": "repo",
+            "owner": "some",
+          },
+          "pullRequests": Object {
+            "__args": Object {
+              "first": "100",
+            },
+            "nodes": Object {
+              "baseRefName": null,
+              "body": null,
+              "commits": Object {
+                "__args": Object {
+                  "first": "2",
+                },
+                "nodes": Object {
+                  "commit": Object {
+                    "author": Object {
+                      "email": null,
+                    },
+                    "committer": Object {
+                      "email": null,
+                    },
+                    "parents": Object {
+                      "__args": Object {
+                        "last": "1",
+                      },
+                      "edges": Object {
+                        "node": Object {
+                          "abbreviatedOid": null,
+                          "oid": null,
+                        },
+                      },
+                    },
+                  },
+                },
+              },
+              "headRefName": null,
+              "labels": Object {
+                "__args": Object {
+                  "last": "100",
+                },
+                "nodes": Object {
+                  "name": null,
+                },
+              },
+              "mergeStateStatus": null,
+              "mergeable": null,
+              "number": null,
+              "reviews": Object {
+                "__args": Object {
+                  "first": "1",
+                },
+                "nodes": Object {
+                  "state": null,
+                },
+              },
+              "title": null,
+            },
+          },
+        },
+      },
+    },
     "headers": Object {
       "accept": "application/vnd.github.merge-info-preview+json",
       "accept-encoding": "gzip, deflate",
@@ -1778,7 +2755,72 @@ Array [
     "url": "https://api.github.com/graphql",
   },
   Object {
-    "body": "{\\"query\\":\\"\\\\n      query {\\\\n        repository(owner: \\\\\\"some\\\\\\", name: \\\\\\"repo\\\\\\") {\\\\n          pullRequests(states: [OPEN], first: 25, orderBy: {field: UPDATED_AT, direction: DESC}) {\\\\n            nodes {\\\\n              number\\\\n              headRefName\\\\n              baseRefName\\\\n              title\\\\n              mergeable\\\\n              mergeStateStatus\\\\n              labels(last: 100) {\\\\n                nodes {\\\\n                  name\\\\n                }\\\\n              }\\\\n              commits(first: 2) {\\\\n                nodes {\\\\n                  commit {\\\\n                    author {\\\\n                      email\\\\n                    }\\\\n                    committer {\\\\n                      email\\\\n                    }\\\\n                    parents(last: 1) {\\\\n                      edges {\\\\n                        node {\\\\n                          abbreviatedOid\\\\n                          oid\\\\n                        }\\\\n                      }\\\\n                    }\\\\n                  }\\\\n                }\\\\n              }\\\\n              body\\\\n              reviews(first: 1, states:[CHANGES_REQUESTED]){\\\\n                nodes{\\\\n                  state\\\\n                }\\\\n              }\\\\n            }\\\\n          }\\\\n        }\\\\n      }\\\\n      \\"}",
+    "graphql": Object {
+      "query": Object {
+        "repository": Object {
+          "__args": Object {
+            "name": "repo",
+            "owner": "some",
+          },
+          "pullRequests": Object {
+            "__args": Object {
+              "first": "25",
+            },
+            "nodes": Object {
+              "baseRefName": null,
+              "body": null,
+              "commits": Object {
+                "__args": Object {
+                  "first": "2",
+                },
+                "nodes": Object {
+                  "commit": Object {
+                    "author": Object {
+                      "email": null,
+                    },
+                    "committer": Object {
+                      "email": null,
+                    },
+                    "parents": Object {
+                      "__args": Object {
+                        "last": "1",
+                      },
+                      "edges": Object {
+                        "node": Object {
+                          "abbreviatedOid": null,
+                          "oid": null,
+                        },
+                      },
+                    },
+                  },
+                },
+              },
+              "headRefName": null,
+              "labels": Object {
+                "__args": Object {
+                  "last": "100",
+                },
+                "nodes": Object {
+                  "name": null,
+                },
+              },
+              "mergeStateStatus": null,
+              "mergeable": null,
+              "number": null,
+              "reviews": Object {
+                "__args": Object {
+                  "first": "1",
+                },
+                "nodes": Object {
+                  "state": null,
+                },
+              },
+              "title": null,
+            },
+          },
+        },
+      },
+    },
     "headers": Object {
       "accept": "application/vnd.github.merge-info-preview+json",
       "accept-encoding": "gzip, deflate",
@@ -1831,7 +2873,72 @@ Array [
     "url": "https://api.github.com/repos/some/repo",
   },
   Object {
-    "body": "{\\"query\\":\\"\\\\n      query {\\\\n        repository(owner: \\\\\\"some\\\\\\", name: \\\\\\"repo\\\\\\") {\\\\n          pullRequests(states: [OPEN], first: 100, orderBy: {field: UPDATED_AT, direction: DESC}) {\\\\n            nodes {\\\\n              number\\\\n              headRefName\\\\n              baseRefName\\\\n              title\\\\n              mergeable\\\\n              mergeStateStatus\\\\n              labels(last: 100) {\\\\n                nodes {\\\\n                  name\\\\n                }\\\\n              }\\\\n              commits(first: 2) {\\\\n                nodes {\\\\n                  commit {\\\\n                    author {\\\\n                      email\\\\n                    }\\\\n                    committer {\\\\n                      email\\\\n                    }\\\\n                    parents(last: 1) {\\\\n                      edges {\\\\n                        node {\\\\n                          abbreviatedOid\\\\n                          oid\\\\n                        }\\\\n                      }\\\\n                    }\\\\n                  }\\\\n                }\\\\n              }\\\\n              body\\\\n              reviews(first: 1, states:[CHANGES_REQUESTED]){\\\\n                nodes{\\\\n                  state\\\\n                }\\\\n              }\\\\n            }\\\\n          }\\\\n        }\\\\n      }\\\\n      \\"}",
+    "graphql": Object {
+      "query": Object {
+        "repository": Object {
+          "__args": Object {
+            "name": "repo",
+            "owner": "some",
+          },
+          "pullRequests": Object {
+            "__args": Object {
+              "first": "100",
+            },
+            "nodes": Object {
+              "baseRefName": null,
+              "body": null,
+              "commits": Object {
+                "__args": Object {
+                  "first": "2",
+                },
+                "nodes": Object {
+                  "commit": Object {
+                    "author": Object {
+                      "email": null,
+                    },
+                    "committer": Object {
+                      "email": null,
+                    },
+                    "parents": Object {
+                      "__args": Object {
+                        "last": "1",
+                      },
+                      "edges": Object {
+                        "node": Object {
+                          "abbreviatedOid": null,
+                          "oid": null,
+                        },
+                      },
+                    },
+                  },
+                },
+              },
+              "headRefName": null,
+              "labels": Object {
+                "__args": Object {
+                  "last": "100",
+                },
+                "nodes": Object {
+                  "name": null,
+                },
+              },
+              "mergeStateStatus": null,
+              "mergeable": null,
+              "number": null,
+              "reviews": Object {
+                "__args": Object {
+                  "first": "1",
+                },
+                "nodes": Object {
+                  "state": null,
+                },
+              },
+              "title": null,
+            },
+          },
+        },
+      },
+    },
     "headers": Object {
       "accept": "application/vnd.github.merge-info-preview+json",
       "accept-encoding": "gzip, deflate",
@@ -1844,7 +2951,36 @@ Array [
     "url": "https://api.github.com/graphql",
   },
   Object {
-    "body": "{\\"query\\":\\"\\\\n      query {\\\\n        repository(owner: \\\\\\"some\\\\\\", name: \\\\\\"repo\\\\\\") {\\\\n          pullRequests(states: [CLOSED, MERGED], first: 100, orderBy: {field: UPDATED_AT, direction: DESC}) {\\\\n            nodes {\\\\n              number\\\\n              state\\\\n              headRefName\\\\n              title\\\\n              comments(last: 100) {\\\\n                nodes {\\\\n                  databaseId\\\\n                  body\\\\n                }\\\\n              }\\\\n            }\\\\n          }\\\\n        }\\\\n      }\\\\n      \\"}",
+    "graphql": Object {
+      "query": Object {
+        "repository": Object {
+          "__args": Object {
+            "name": "repo",
+            "owner": "some",
+          },
+          "pullRequests": Object {
+            "__args": Object {
+              "first": "100",
+            },
+            "nodes": Object {
+              "comments": Object {
+                "__args": Object {
+                  "last": "100",
+                },
+                "nodes": Object {
+                  "body": null,
+                  "databaseId": null,
+                },
+              },
+              "headRefName": null,
+              "number": null,
+              "state": null,
+              "title": null,
+            },
+          },
+        },
+      },
+    },
     "headers": Object {
       "accept-encoding": "gzip, deflate",
       "authorization": "token abc123",
@@ -1902,7 +3038,72 @@ Array [
     "url": "https://api.github.com/repos/some/repo",
   },
   Object {
-    "body": "{\\"query\\":\\"\\\\n      query {\\\\n        repository(owner: \\\\\\"some\\\\\\", name: \\\\\\"repo\\\\\\") {\\\\n          pullRequests(states: [OPEN], first: 100, orderBy: {field: UPDATED_AT, direction: DESC}) {\\\\n            nodes {\\\\n              number\\\\n              headRefName\\\\n              baseRefName\\\\n              title\\\\n              mergeable\\\\n              mergeStateStatus\\\\n              labels(last: 100) {\\\\n                nodes {\\\\n                  name\\\\n                }\\\\n              }\\\\n              commits(first: 2) {\\\\n                nodes {\\\\n                  commit {\\\\n                    author {\\\\n                      email\\\\n                    }\\\\n                    committer {\\\\n                      email\\\\n                    }\\\\n                    parents(last: 1) {\\\\n                      edges {\\\\n                        node {\\\\n                          abbreviatedOid\\\\n                          oid\\\\n                        }\\\\n                      }\\\\n                    }\\\\n                  }\\\\n                }\\\\n              }\\\\n              body\\\\n              reviews(first: 1, states:[CHANGES_REQUESTED]){\\\\n                nodes{\\\\n                  state\\\\n                }\\\\n              }\\\\n            }\\\\n          }\\\\n        }\\\\n      }\\\\n      \\"}",
+    "graphql": Object {
+      "query": Object {
+        "repository": Object {
+          "__args": Object {
+            "name": "repo",
+            "owner": "some",
+          },
+          "pullRequests": Object {
+            "__args": Object {
+              "first": "100",
+            },
+            "nodes": Object {
+              "baseRefName": null,
+              "body": null,
+              "commits": Object {
+                "__args": Object {
+                  "first": "2",
+                },
+                "nodes": Object {
+                  "commit": Object {
+                    "author": Object {
+                      "email": null,
+                    },
+                    "committer": Object {
+                      "email": null,
+                    },
+                    "parents": Object {
+                      "__args": Object {
+                        "last": "1",
+                      },
+                      "edges": Object {
+                        "node": Object {
+                          "abbreviatedOid": null,
+                          "oid": null,
+                        },
+                      },
+                    },
+                  },
+                },
+              },
+              "headRefName": null,
+              "labels": Object {
+                "__args": Object {
+                  "last": "100",
+                },
+                "nodes": Object {
+                  "name": null,
+                },
+              },
+              "mergeStateStatus": null,
+              "mergeable": null,
+              "number": null,
+              "reviews": Object {
+                "__args": Object {
+                  "first": "1",
+                },
+                "nodes": Object {
+                  "state": null,
+                },
+              },
+              "title": null,
+            },
+          },
+        },
+      },
+    },
     "headers": Object {
       "accept": "application/vnd.github.merge-info-preview+json",
       "accept-encoding": "gzip, deflate",
@@ -1915,7 +3116,36 @@ Array [
     "url": "https://api.github.com/graphql",
   },
   Object {
-    "body": "{\\"query\\":\\"\\\\n      query {\\\\n        repository(owner: \\\\\\"some\\\\\\", name: \\\\\\"repo\\\\\\") {\\\\n          pullRequests(states: [CLOSED, MERGED], first: 100, orderBy: {field: UPDATED_AT, direction: DESC}) {\\\\n            nodes {\\\\n              number\\\\n              state\\\\n              headRefName\\\\n              title\\\\n              comments(last: 100) {\\\\n                nodes {\\\\n                  databaseId\\\\n                  body\\\\n                }\\\\n              }\\\\n            }\\\\n          }\\\\n        }\\\\n      }\\\\n      \\"}",
+    "graphql": Object {
+      "query": Object {
+        "repository": Object {
+          "__args": Object {
+            "name": "repo",
+            "owner": "some",
+          },
+          "pullRequests": Object {
+            "__args": Object {
+              "first": "100",
+            },
+            "nodes": Object {
+              "comments": Object {
+                "__args": Object {
+                  "last": "100",
+                },
+                "nodes": Object {
+                  "body": null,
+                  "databaseId": null,
+                },
+              },
+              "headRefName": null,
+              "number": null,
+              "state": null,
+              "title": null,
+            },
+          },
+        },
+      },
+    },
     "headers": Object {
       "accept-encoding": "gzip, deflate",
       "authorization": "token abc123",
@@ -1983,7 +3213,72 @@ Array [
     "url": "https://api.github.com/repos/some/repo",
   },
   Object {
-    "body": "{\\"query\\":\\"\\\\n      query {\\\\n        repository(owner: \\\\\\"some\\\\\\", name: \\\\\\"repo\\\\\\") {\\\\n          pullRequests(states: [OPEN], first: 100, orderBy: {field: UPDATED_AT, direction: DESC}) {\\\\n            nodes {\\\\n              number\\\\n              headRefName\\\\n              baseRefName\\\\n              title\\\\n              mergeable\\\\n              mergeStateStatus\\\\n              labels(last: 100) {\\\\n                nodes {\\\\n                  name\\\\n                }\\\\n              }\\\\n              commits(first: 2) {\\\\n                nodes {\\\\n                  commit {\\\\n                    author {\\\\n                      email\\\\n                    }\\\\n                    committer {\\\\n                      email\\\\n                    }\\\\n                    parents(last: 1) {\\\\n                      edges {\\\\n                        node {\\\\n                          abbreviatedOid\\\\n                          oid\\\\n                        }\\\\n                      }\\\\n                    }\\\\n                  }\\\\n                }\\\\n              }\\\\n              body\\\\n              reviews(first: 1, states:[CHANGES_REQUESTED]){\\\\n                nodes{\\\\n                  state\\\\n                }\\\\n              }\\\\n            }\\\\n          }\\\\n        }\\\\n      }\\\\n      \\"}",
+    "graphql": Object {
+      "query": Object {
+        "repository": Object {
+          "__args": Object {
+            "name": "repo",
+            "owner": "some",
+          },
+          "pullRequests": Object {
+            "__args": Object {
+              "first": "100",
+            },
+            "nodes": Object {
+              "baseRefName": null,
+              "body": null,
+              "commits": Object {
+                "__args": Object {
+                  "first": "2",
+                },
+                "nodes": Object {
+                  "commit": Object {
+                    "author": Object {
+                      "email": null,
+                    },
+                    "committer": Object {
+                      "email": null,
+                    },
+                    "parents": Object {
+                      "__args": Object {
+                        "last": "1",
+                      },
+                      "edges": Object {
+                        "node": Object {
+                          "abbreviatedOid": null,
+                          "oid": null,
+                        },
+                      },
+                    },
+                  },
+                },
+              },
+              "headRefName": null,
+              "labels": Object {
+                "__args": Object {
+                  "last": "100",
+                },
+                "nodes": Object {
+                  "name": null,
+                },
+              },
+              "mergeStateStatus": null,
+              "mergeable": null,
+              "number": null,
+              "reviews": Object {
+                "__args": Object {
+                  "first": "1",
+                },
+                "nodes": Object {
+                  "state": null,
+                },
+              },
+              "title": null,
+            },
+          },
+        },
+      },
+    },
     "headers": Object {
       "accept": "application/vnd.github.merge-info-preview+json",
       "accept-encoding": "gzip, deflate",
@@ -1996,7 +3291,36 @@ Array [
     "url": "https://api.github.com/graphql",
   },
   Object {
-    "body": "{\\"query\\":\\"\\\\n      query {\\\\n        repository(owner: \\\\\\"some\\\\\\", name: \\\\\\"repo\\\\\\") {\\\\n          pullRequests(states: [CLOSED, MERGED], first: 100, orderBy: {field: UPDATED_AT, direction: DESC}) {\\\\n            nodes {\\\\n              number\\\\n              state\\\\n              headRefName\\\\n              title\\\\n              comments(last: 100) {\\\\n                nodes {\\\\n                  databaseId\\\\n                  body\\\\n                }\\\\n              }\\\\n            }\\\\n          }\\\\n        }\\\\n      }\\\\n      \\"}",
+    "graphql": Object {
+      "query": Object {
+        "repository": Object {
+          "__args": Object {
+            "name": "repo",
+            "owner": "some",
+          },
+          "pullRequests": Object {
+            "__args": Object {
+              "first": "100",
+            },
+            "nodes": Object {
+              "comments": Object {
+                "__args": Object {
+                  "last": "100",
+                },
+                "nodes": Object {
+                  "body": null,
+                  "databaseId": null,
+                },
+              },
+              "headRefName": null,
+              "number": null,
+              "state": null,
+              "title": null,
+            },
+          },
+        },
+      },
+    },
     "headers": Object {
       "accept-encoding": "gzip, deflate",
       "authorization": "token abc123",
@@ -2065,7 +3389,72 @@ Array [
     "url": "https://api.github.com/repos/some/repo",
   },
   Object {
-    "body": "{\\"query\\":\\"\\\\n      query {\\\\n        repository(owner: \\\\\\"some\\\\\\", name: \\\\\\"repo\\\\\\") {\\\\n          pullRequests(states: [OPEN], first: 100, orderBy: {field: UPDATED_AT, direction: DESC}) {\\\\n            nodes {\\\\n              number\\\\n              headRefName\\\\n              baseRefName\\\\n              title\\\\n              mergeable\\\\n              mergeStateStatus\\\\n              labels(last: 100) {\\\\n                nodes {\\\\n                  name\\\\n                }\\\\n              }\\\\n              commits(first: 2) {\\\\n                nodes {\\\\n                  commit {\\\\n                    author {\\\\n                      email\\\\n                    }\\\\n                    committer {\\\\n                      email\\\\n                    }\\\\n                    parents(last: 1) {\\\\n                      edges {\\\\n                        node {\\\\n                          abbreviatedOid\\\\n                          oid\\\\n                        }\\\\n                      }\\\\n                    }\\\\n                  }\\\\n                }\\\\n              }\\\\n              body\\\\n              reviews(first: 1, states:[CHANGES_REQUESTED]){\\\\n                nodes{\\\\n                  state\\\\n                }\\\\n              }\\\\n            }\\\\n          }\\\\n        }\\\\n      }\\\\n      \\"}",
+    "graphql": Object {
+      "query": Object {
+        "repository": Object {
+          "__args": Object {
+            "name": "repo",
+            "owner": "some",
+          },
+          "pullRequests": Object {
+            "__args": Object {
+              "first": "100",
+            },
+            "nodes": Object {
+              "baseRefName": null,
+              "body": null,
+              "commits": Object {
+                "__args": Object {
+                  "first": "2",
+                },
+                "nodes": Object {
+                  "commit": Object {
+                    "author": Object {
+                      "email": null,
+                    },
+                    "committer": Object {
+                      "email": null,
+                    },
+                    "parents": Object {
+                      "__args": Object {
+                        "last": "1",
+                      },
+                      "edges": Object {
+                        "node": Object {
+                          "abbreviatedOid": null,
+                          "oid": null,
+                        },
+                      },
+                    },
+                  },
+                },
+              },
+              "headRefName": null,
+              "labels": Object {
+                "__args": Object {
+                  "last": "100",
+                },
+                "nodes": Object {
+                  "name": null,
+                },
+              },
+              "mergeStateStatus": null,
+              "mergeable": null,
+              "number": null,
+              "reviews": Object {
+                "__args": Object {
+                  "first": "1",
+                },
+                "nodes": Object {
+                  "state": null,
+                },
+              },
+              "title": null,
+            },
+          },
+        },
+      },
+    },
     "headers": Object {
       "accept": "application/vnd.github.merge-info-preview+json",
       "accept-encoding": "gzip, deflate",
@@ -2078,7 +3467,36 @@ Array [
     "url": "https://api.github.com/graphql",
   },
   Object {
-    "body": "{\\"query\\":\\"\\\\n      query {\\\\n        repository(owner: \\\\\\"some\\\\\\", name: \\\\\\"repo\\\\\\") {\\\\n          pullRequests(states: [CLOSED, MERGED], first: 100, orderBy: {field: UPDATED_AT, direction: DESC}) {\\\\n            nodes {\\\\n              number\\\\n              state\\\\n              headRefName\\\\n              title\\\\n              comments(last: 100) {\\\\n                nodes {\\\\n                  databaseId\\\\n                  body\\\\n                }\\\\n              }\\\\n            }\\\\n          }\\\\n        }\\\\n      }\\\\n      \\"}",
+    "graphql": Object {
+      "query": Object {
+        "repository": Object {
+          "__args": Object {
+            "name": "repo",
+            "owner": "some",
+          },
+          "pullRequests": Object {
+            "__args": Object {
+              "first": "100",
+            },
+            "nodes": Object {
+              "comments": Object {
+                "__args": Object {
+                  "last": "100",
+                },
+                "nodes": Object {
+                  "body": null,
+                  "databaseId": null,
+                },
+              },
+              "headRefName": null,
+              "number": null,
+              "state": null,
+              "title": null,
+            },
+          },
+        },
+      },
+    },
     "headers": Object {
       "accept-encoding": "gzip, deflate",
       "authorization": "token abc123",
@@ -2158,7 +3576,72 @@ Array [
     "url": "https://api.github.com/repos/some/repo",
   },
   Object {
-    "body": "{\\"query\\":\\"\\\\n      query {\\\\n        repository(owner: \\\\\\"some\\\\\\", name: \\\\\\"repo\\\\\\") {\\\\n          pullRequests(states: [OPEN], first: 100, orderBy: {field: UPDATED_AT, direction: DESC}) {\\\\n            nodes {\\\\n              number\\\\n              headRefName\\\\n              baseRefName\\\\n              title\\\\n              mergeable\\\\n              mergeStateStatus\\\\n              labels(last: 100) {\\\\n                nodes {\\\\n                  name\\\\n                }\\\\n              }\\\\n              commits(first: 2) {\\\\n                nodes {\\\\n                  commit {\\\\n                    author {\\\\n                      email\\\\n                    }\\\\n                    committer {\\\\n                      email\\\\n                    }\\\\n                    parents(last: 1) {\\\\n                      edges {\\\\n                        node {\\\\n                          abbreviatedOid\\\\n                          oid\\\\n                        }\\\\n                      }\\\\n                    }\\\\n                  }\\\\n                }\\\\n              }\\\\n              body\\\\n              reviews(first: 1, states:[CHANGES_REQUESTED]){\\\\n                nodes{\\\\n                  state\\\\n                }\\\\n              }\\\\n            }\\\\n          }\\\\n        }\\\\n      }\\\\n      \\"}",
+    "graphql": Object {
+      "query": Object {
+        "repository": Object {
+          "__args": Object {
+            "name": "repo",
+            "owner": "some",
+          },
+          "pullRequests": Object {
+            "__args": Object {
+              "first": "100",
+            },
+            "nodes": Object {
+              "baseRefName": null,
+              "body": null,
+              "commits": Object {
+                "__args": Object {
+                  "first": "2",
+                },
+                "nodes": Object {
+                  "commit": Object {
+                    "author": Object {
+                      "email": null,
+                    },
+                    "committer": Object {
+                      "email": null,
+                    },
+                    "parents": Object {
+                      "__args": Object {
+                        "last": "1",
+                      },
+                      "edges": Object {
+                        "node": Object {
+                          "abbreviatedOid": null,
+                          "oid": null,
+                        },
+                      },
+                    },
+                  },
+                },
+              },
+              "headRefName": null,
+              "labels": Object {
+                "__args": Object {
+                  "last": "100",
+                },
+                "nodes": Object {
+                  "name": null,
+                },
+              },
+              "mergeStateStatus": null,
+              "mergeable": null,
+              "number": null,
+              "reviews": Object {
+                "__args": Object {
+                  "first": "1",
+                },
+                "nodes": Object {
+                  "state": null,
+                },
+              },
+              "title": null,
+            },
+          },
+        },
+      },
+    },
     "headers": Object {
       "accept": "application/vnd.github.merge-info-preview+json",
       "accept-encoding": "gzip, deflate",
@@ -2171,7 +3654,36 @@ Array [
     "url": "https://api.github.com/graphql",
   },
   Object {
-    "body": "{\\"query\\":\\"\\\\n      query {\\\\n        repository(owner: \\\\\\"some\\\\\\", name: \\\\\\"repo\\\\\\") {\\\\n          pullRequests(states: [CLOSED, MERGED], first: 100, orderBy: {field: UPDATED_AT, direction: DESC}) {\\\\n            nodes {\\\\n              number\\\\n              state\\\\n              headRefName\\\\n              title\\\\n              comments(last: 100) {\\\\n                nodes {\\\\n                  databaseId\\\\n                  body\\\\n                }\\\\n              }\\\\n            }\\\\n          }\\\\n        }\\\\n      }\\\\n      \\"}",
+    "graphql": Object {
+      "query": Object {
+        "repository": Object {
+          "__args": Object {
+            "name": "repo",
+            "owner": "some",
+          },
+          "pullRequests": Object {
+            "__args": Object {
+              "first": "100",
+            },
+            "nodes": Object {
+              "comments": Object {
+                "__args": Object {
+                  "last": "100",
+                },
+                "nodes": Object {
+                  "body": null,
+                  "databaseId": null,
+                },
+              },
+              "headRefName": null,
+              "number": null,
+              "state": null,
+              "title": null,
+            },
+          },
+        },
+      },
+    },
     "headers": Object {
       "accept-encoding": "gzip, deflate",
       "authorization": "token abc123",
@@ -2251,7 +3763,72 @@ Array [
     "url": "https://api.github.com/repos/some/repo",
   },
   Object {
-    "body": "{\\"query\\":\\"\\\\n      query {\\\\n        repository(owner: \\\\\\"some\\\\\\", name: \\\\\\"repo\\\\\\") {\\\\n          pullRequests(states: [OPEN], first: 100, orderBy: {field: UPDATED_AT, direction: DESC}) {\\\\n            nodes {\\\\n              number\\\\n              headRefName\\\\n              baseRefName\\\\n              title\\\\n              mergeable\\\\n              mergeStateStatus\\\\n              labels(last: 100) {\\\\n                nodes {\\\\n                  name\\\\n                }\\\\n              }\\\\n              commits(first: 2) {\\\\n                nodes {\\\\n                  commit {\\\\n                    author {\\\\n                      email\\\\n                    }\\\\n                    committer {\\\\n                      email\\\\n                    }\\\\n                    parents(last: 1) {\\\\n                      edges {\\\\n                        node {\\\\n                          abbreviatedOid\\\\n                          oid\\\\n                        }\\\\n                      }\\\\n                    }\\\\n                  }\\\\n                }\\\\n              }\\\\n              body\\\\n              reviews(first: 1, states:[CHANGES_REQUESTED]){\\\\n                nodes{\\\\n                  state\\\\n                }\\\\n              }\\\\n            }\\\\n          }\\\\n        }\\\\n      }\\\\n      \\"}",
+    "graphql": Object {
+      "query": Object {
+        "repository": Object {
+          "__args": Object {
+            "name": "repo",
+            "owner": "some",
+          },
+          "pullRequests": Object {
+            "__args": Object {
+              "first": "100",
+            },
+            "nodes": Object {
+              "baseRefName": null,
+              "body": null,
+              "commits": Object {
+                "__args": Object {
+                  "first": "2",
+                },
+                "nodes": Object {
+                  "commit": Object {
+                    "author": Object {
+                      "email": null,
+                    },
+                    "committer": Object {
+                      "email": null,
+                    },
+                    "parents": Object {
+                      "__args": Object {
+                        "last": "1",
+                      },
+                      "edges": Object {
+                        "node": Object {
+                          "abbreviatedOid": null,
+                          "oid": null,
+                        },
+                      },
+                    },
+                  },
+                },
+              },
+              "headRefName": null,
+              "labels": Object {
+                "__args": Object {
+                  "last": "100",
+                },
+                "nodes": Object {
+                  "name": null,
+                },
+              },
+              "mergeStateStatus": null,
+              "mergeable": null,
+              "number": null,
+              "reviews": Object {
+                "__args": Object {
+                  "first": "1",
+                },
+                "nodes": Object {
+                  "state": null,
+                },
+              },
+              "title": null,
+            },
+          },
+        },
+      },
+    },
     "headers": Object {
       "accept": "application/vnd.github.merge-info-preview+json",
       "accept-encoding": "gzip, deflate",
@@ -2264,7 +3841,36 @@ Array [
     "url": "https://api.github.com/graphql",
   },
   Object {
-    "body": "{\\"query\\":\\"\\\\n      query {\\\\n        repository(owner: \\\\\\"some\\\\\\", name: \\\\\\"repo\\\\\\") {\\\\n          pullRequests(states: [CLOSED, MERGED], first: 100, orderBy: {field: UPDATED_AT, direction: DESC}) {\\\\n            nodes {\\\\n              number\\\\n              state\\\\n              headRefName\\\\n              title\\\\n              comments(last: 100) {\\\\n                nodes {\\\\n                  databaseId\\\\n                  body\\\\n                }\\\\n              }\\\\n            }\\\\n          }\\\\n        }\\\\n      }\\\\n      \\"}",
+    "graphql": Object {
+      "query": Object {
+        "repository": Object {
+          "__args": Object {
+            "name": "repo",
+            "owner": "some",
+          },
+          "pullRequests": Object {
+            "__args": Object {
+              "first": "100",
+            },
+            "nodes": Object {
+              "comments": Object {
+                "__args": Object {
+                  "last": "100",
+                },
+                "nodes": Object {
+                  "body": null,
+                  "databaseId": null,
+                },
+              },
+              "headRefName": null,
+              "number": null,
+              "state": null,
+              "title": null,
+            },
+          },
+        },
+      },
+    },
     "headers": Object {
       "accept-encoding": "gzip, deflate",
       "authorization": "token abc123",
@@ -2344,7 +3950,72 @@ Array [
     "url": "https://api.github.com/repos/some/repo",
   },
   Object {
-    "body": "{\\"query\\":\\"\\\\n      query {\\\\n        repository(owner: \\\\\\"some\\\\\\", name: \\\\\\"repo\\\\\\") {\\\\n          pullRequests(states: [OPEN], first: 100, orderBy: {field: UPDATED_AT, direction: DESC}) {\\\\n            nodes {\\\\n              number\\\\n              headRefName\\\\n              baseRefName\\\\n              title\\\\n              mergeable\\\\n              mergeStateStatus\\\\n              labels(last: 100) {\\\\n                nodes {\\\\n                  name\\\\n                }\\\\n              }\\\\n              commits(first: 2) {\\\\n                nodes {\\\\n                  commit {\\\\n                    author {\\\\n                      email\\\\n                    }\\\\n                    committer {\\\\n                      email\\\\n                    }\\\\n                    parents(last: 1) {\\\\n                      edges {\\\\n                        node {\\\\n                          abbreviatedOid\\\\n                          oid\\\\n                        }\\\\n                      }\\\\n                    }\\\\n                  }\\\\n                }\\\\n              }\\\\n              body\\\\n              reviews(first: 1, states:[CHANGES_REQUESTED]){\\\\n                nodes{\\\\n                  state\\\\n                }\\\\n              }\\\\n            }\\\\n          }\\\\n        }\\\\n      }\\\\n      \\"}",
+    "graphql": Object {
+      "query": Object {
+        "repository": Object {
+          "__args": Object {
+            "name": "repo",
+            "owner": "some",
+          },
+          "pullRequests": Object {
+            "__args": Object {
+              "first": "100",
+            },
+            "nodes": Object {
+              "baseRefName": null,
+              "body": null,
+              "commits": Object {
+                "__args": Object {
+                  "first": "2",
+                },
+                "nodes": Object {
+                  "commit": Object {
+                    "author": Object {
+                      "email": null,
+                    },
+                    "committer": Object {
+                      "email": null,
+                    },
+                    "parents": Object {
+                      "__args": Object {
+                        "last": "1",
+                      },
+                      "edges": Object {
+                        "node": Object {
+                          "abbreviatedOid": null,
+                          "oid": null,
+                        },
+                      },
+                    },
+                  },
+                },
+              },
+              "headRefName": null,
+              "labels": Object {
+                "__args": Object {
+                  "last": "100",
+                },
+                "nodes": Object {
+                  "name": null,
+                },
+              },
+              "mergeStateStatus": null,
+              "mergeable": null,
+              "number": null,
+              "reviews": Object {
+                "__args": Object {
+                  "first": "1",
+                },
+                "nodes": Object {
+                  "state": null,
+                },
+              },
+              "title": null,
+            },
+          },
+        },
+      },
+    },
     "headers": Object {
       "accept": "application/vnd.github.merge-info-preview+json",
       "accept-encoding": "gzip, deflate",
@@ -2357,7 +4028,36 @@ Array [
     "url": "https://api.github.com/graphql",
   },
   Object {
-    "body": "{\\"query\\":\\"\\\\n      query {\\\\n        repository(owner: \\\\\\"some\\\\\\", name: \\\\\\"repo\\\\\\") {\\\\n          pullRequests(states: [CLOSED, MERGED], first: 100, orderBy: {field: UPDATED_AT, direction: DESC}) {\\\\n            nodes {\\\\n              number\\\\n              state\\\\n              headRefName\\\\n              title\\\\n              comments(last: 100) {\\\\n                nodes {\\\\n                  databaseId\\\\n                  body\\\\n                }\\\\n              }\\\\n            }\\\\n          }\\\\n        }\\\\n      }\\\\n      \\"}",
+    "graphql": Object {
+      "query": Object {
+        "repository": Object {
+          "__args": Object {
+            "name": "repo",
+            "owner": "some",
+          },
+          "pullRequests": Object {
+            "__args": Object {
+              "first": "100",
+            },
+            "nodes": Object {
+              "comments": Object {
+                "__args": Object {
+                  "last": "100",
+                },
+                "nodes": Object {
+                  "body": null,
+                  "databaseId": null,
+                },
+              },
+              "headRefName": null,
+              "number": null,
+              "state": null,
+              "title": null,
+            },
+          },
+        },
+      },
+    },
     "headers": Object {
       "accept-encoding": "gzip, deflate",
       "authorization": "token abc123",
@@ -2437,7 +4137,72 @@ Array [
     "url": "https://api.github.com/repos/some/repo",
   },
   Object {
-    "body": "{\\"query\\":\\"\\\\n      query {\\\\n        repository(owner: \\\\\\"some\\\\\\", name: \\\\\\"repo\\\\\\") {\\\\n          pullRequests(states: [OPEN], first: 100, orderBy: {field: UPDATED_AT, direction: DESC}) {\\\\n            nodes {\\\\n              number\\\\n              headRefName\\\\n              baseRefName\\\\n              title\\\\n              mergeable\\\\n              mergeStateStatus\\\\n              labels(last: 100) {\\\\n                nodes {\\\\n                  name\\\\n                }\\\\n              }\\\\n              commits(first: 2) {\\\\n                nodes {\\\\n                  commit {\\\\n                    author {\\\\n                      email\\\\n                    }\\\\n                    committer {\\\\n                      email\\\\n                    }\\\\n                    parents(last: 1) {\\\\n                      edges {\\\\n                        node {\\\\n                          abbreviatedOid\\\\n                          oid\\\\n                        }\\\\n                      }\\\\n                    }\\\\n                  }\\\\n                }\\\\n              }\\\\n              body\\\\n              reviews(first: 1, states:[CHANGES_REQUESTED]){\\\\n                nodes{\\\\n                  state\\\\n                }\\\\n              }\\\\n            }\\\\n          }\\\\n        }\\\\n      }\\\\n      \\"}",
+    "graphql": Object {
+      "query": Object {
+        "repository": Object {
+          "__args": Object {
+            "name": "repo",
+            "owner": "some",
+          },
+          "pullRequests": Object {
+            "__args": Object {
+              "first": "100",
+            },
+            "nodes": Object {
+              "baseRefName": null,
+              "body": null,
+              "commits": Object {
+                "__args": Object {
+                  "first": "2",
+                },
+                "nodes": Object {
+                  "commit": Object {
+                    "author": Object {
+                      "email": null,
+                    },
+                    "committer": Object {
+                      "email": null,
+                    },
+                    "parents": Object {
+                      "__args": Object {
+                        "last": "1",
+                      },
+                      "edges": Object {
+                        "node": Object {
+                          "abbreviatedOid": null,
+                          "oid": null,
+                        },
+                      },
+                    },
+                  },
+                },
+              },
+              "headRefName": null,
+              "labels": Object {
+                "__args": Object {
+                  "last": "100",
+                },
+                "nodes": Object {
+                  "name": null,
+                },
+              },
+              "mergeStateStatus": null,
+              "mergeable": null,
+              "number": null,
+              "reviews": Object {
+                "__args": Object {
+                  "first": "1",
+                },
+                "nodes": Object {
+                  "state": null,
+                },
+              },
+              "title": null,
+            },
+          },
+        },
+      },
+    },
     "headers": Object {
       "accept": "application/vnd.github.merge-info-preview+json",
       "accept-encoding": "gzip, deflate",
@@ -2450,7 +4215,36 @@ Array [
     "url": "https://api.github.com/graphql",
   },
   Object {
-    "body": "{\\"query\\":\\"\\\\n      query {\\\\n        repository(owner: \\\\\\"some\\\\\\", name: \\\\\\"repo\\\\\\") {\\\\n          pullRequests(states: [CLOSED, MERGED], first: 100, orderBy: {field: UPDATED_AT, direction: DESC}) {\\\\n            nodes {\\\\n              number\\\\n              state\\\\n              headRefName\\\\n              title\\\\n              comments(last: 100) {\\\\n                nodes {\\\\n                  databaseId\\\\n                  body\\\\n                }\\\\n              }\\\\n            }\\\\n          }\\\\n        }\\\\n      }\\\\n      \\"}",
+    "graphql": Object {
+      "query": Object {
+        "repository": Object {
+          "__args": Object {
+            "name": "repo",
+            "owner": "some",
+          },
+          "pullRequests": Object {
+            "__args": Object {
+              "first": "100",
+            },
+            "nodes": Object {
+              "comments": Object {
+                "__args": Object {
+                  "last": "100",
+                },
+                "nodes": Object {
+                  "body": null,
+                  "databaseId": null,
+                },
+              },
+              "headRefName": null,
+              "number": null,
+              "state": null,
+              "title": null,
+            },
+          },
+        },
+      },
+    },
     "headers": Object {
       "accept-encoding": "gzip, deflate",
       "authorization": "token abc123",
@@ -2511,7 +4305,72 @@ Array [
     "url": "https://api.github.com/repos/some/repo",
   },
   Object {
-    "body": "{\\"query\\":\\"\\\\n      query {\\\\n        repository(owner: \\\\\\"some\\\\\\", name: \\\\\\"repo\\\\\\") {\\\\n          pullRequests(states: [OPEN], first: 100, orderBy: {field: UPDATED_AT, direction: DESC}) {\\\\n            nodes {\\\\n              number\\\\n              headRefName\\\\n              baseRefName\\\\n              title\\\\n              mergeable\\\\n              mergeStateStatus\\\\n              labels(last: 100) {\\\\n                nodes {\\\\n                  name\\\\n                }\\\\n              }\\\\n              commits(first: 2) {\\\\n                nodes {\\\\n                  commit {\\\\n                    author {\\\\n                      email\\\\n                    }\\\\n                    committer {\\\\n                      email\\\\n                    }\\\\n                    parents(last: 1) {\\\\n                      edges {\\\\n                        node {\\\\n                          abbreviatedOid\\\\n                          oid\\\\n                        }\\\\n                      }\\\\n                    }\\\\n                  }\\\\n                }\\\\n              }\\\\n              body\\\\n              reviews(first: 1, states:[CHANGES_REQUESTED]){\\\\n                nodes{\\\\n                  state\\\\n                }\\\\n              }\\\\n            }\\\\n          }\\\\n        }\\\\n      }\\\\n      \\"}",
+    "graphql": Object {
+      "query": Object {
+        "repository": Object {
+          "__args": Object {
+            "name": "repo",
+            "owner": "some",
+          },
+          "pullRequests": Object {
+            "__args": Object {
+              "first": "100",
+            },
+            "nodes": Object {
+              "baseRefName": null,
+              "body": null,
+              "commits": Object {
+                "__args": Object {
+                  "first": "2",
+                },
+                "nodes": Object {
+                  "commit": Object {
+                    "author": Object {
+                      "email": null,
+                    },
+                    "committer": Object {
+                      "email": null,
+                    },
+                    "parents": Object {
+                      "__args": Object {
+                        "last": "1",
+                      },
+                      "edges": Object {
+                        "node": Object {
+                          "abbreviatedOid": null,
+                          "oid": null,
+                        },
+                      },
+                    },
+                  },
+                },
+              },
+              "headRefName": null,
+              "labels": Object {
+                "__args": Object {
+                  "last": "100",
+                },
+                "nodes": Object {
+                  "name": null,
+                },
+              },
+              "mergeStateStatus": null,
+              "mergeable": null,
+              "number": null,
+              "reviews": Object {
+                "__args": Object {
+                  "first": "1",
+                },
+                "nodes": Object {
+                  "state": null,
+                },
+              },
+              "title": null,
+            },
+          },
+        },
+      },
+    },
     "headers": Object {
       "accept": "application/vnd.github.merge-info-preview+json",
       "accept-encoding": "gzip, deflate",
@@ -2524,7 +4383,36 @@ Array [
     "url": "https://api.github.com/graphql",
   },
   Object {
-    "body": "{\\"query\\":\\"\\\\n      query {\\\\n        repository(owner: \\\\\\"some\\\\\\", name: \\\\\\"repo\\\\\\") {\\\\n          pullRequests(states: [CLOSED, MERGED], first: 100, orderBy: {field: UPDATED_AT, direction: DESC}) {\\\\n            nodes {\\\\n              number\\\\n              state\\\\n              headRefName\\\\n              title\\\\n              comments(last: 100) {\\\\n                nodes {\\\\n                  databaseId\\\\n                  body\\\\n                }\\\\n              }\\\\n            }\\\\n          }\\\\n        }\\\\n      }\\\\n      \\"}",
+    "graphql": Object {
+      "query": Object {
+        "repository": Object {
+          "__args": Object {
+            "name": "repo",
+            "owner": "some",
+          },
+          "pullRequests": Object {
+            "__args": Object {
+              "first": "100",
+            },
+            "nodes": Object {
+              "comments": Object {
+                "__args": Object {
+                  "last": "100",
+                },
+                "nodes": Object {
+                  "body": null,
+                  "databaseId": null,
+                },
+              },
+              "headRefName": null,
+              "number": null,
+              "state": null,
+              "title": null,
+            },
+          },
+        },
+      },
+    },
     "headers": Object {
       "accept-encoding": "gzip, deflate",
       "authorization": "token abc123",
@@ -2702,7 +4590,50 @@ Array [
 exports[`platform/github getVulnerabilityAlerts() handles network error 1`] = `
 Array [
   Object {
-    "body": "{\\"query\\":\\"\\\\n  query {\\\\n    repository(owner:\\\\\\"undefined\\\\\\", name:\\\\\\"undefined\\\\\\") {\\\\n      vulnerabilityAlerts(last: 100) {\\\\n        edges {\\\\n          node {\\\\n            dismissReason\\\\n            vulnerableManifestFilename\\\\n            vulnerableManifestPath\\\\n            vulnerableRequirements\\\\n            securityAdvisory {\\\\n              description\\\\n              identifiers { type value }\\\\n              references { url }\\\\n              severity\\\\n            }\\\\n            securityVulnerability {\\\\n              package { name ecosystem }\\\\n              firstPatchedVersion { identifier }\\\\n              vulnerableVersionRange\\\\n            }\\\\n          }\\\\n        }\\\\n      }\\\\n    }\\\\n  }\\"}",
+    "graphql": Object {
+      "query": Object {
+        "repository": Object {
+          "__args": Object {
+            "name": "undefined",
+            "owner": "undefined",
+          },
+          "vulnerabilityAlerts": Object {
+            "__args": Object {
+              "last": "100",
+            },
+            "edges": Object {
+              "node": Object {
+                "dismissReason": null,
+                "securityAdvisory": Object {
+                  "description": null,
+                  "identifiers": Object {
+                    "type": null,
+                    "value": null,
+                  },
+                  "references": Object {
+                    "url": null,
+                  },
+                  "severity": null,
+                },
+                "securityVulnerability": Object {
+                  "firstPatchedVersion": Object {
+                    "identifier": null,
+                  },
+                  "package": Object {
+                    "ecosystem": null,
+                    "name": null,
+                  },
+                  "vulnerableVersionRange": null,
+                },
+                "vulnerableManifestFilename": null,
+                "vulnerableManifestPath": null,
+                "vulnerableRequirements": null,
+              },
+            },
+          },
+        },
+      },
+    },
     "headers": Object {
       "accept": "application/vnd.github.vixen-preview+json",
       "accept-encoding": "gzip, deflate",
@@ -2720,7 +4651,50 @@ Array [
 exports[`platform/github getVulnerabilityAlerts() returns array if found 1`] = `
 Array [
   Object {
-    "body": "{\\"query\\":\\"\\\\n  query {\\\\n    repository(owner:\\\\\\"undefined\\\\\\", name:\\\\\\"undefined\\\\\\") {\\\\n      vulnerabilityAlerts(last: 100) {\\\\n        edges {\\\\n          node {\\\\n            dismissReason\\\\n            vulnerableManifestFilename\\\\n            vulnerableManifestPath\\\\n            vulnerableRequirements\\\\n            securityAdvisory {\\\\n              description\\\\n              identifiers { type value }\\\\n              references { url }\\\\n              severity\\\\n            }\\\\n            securityVulnerability {\\\\n              package { name ecosystem }\\\\n              firstPatchedVersion { identifier }\\\\n              vulnerableVersionRange\\\\n            }\\\\n          }\\\\n        }\\\\n      }\\\\n    }\\\\n  }\\"}",
+    "graphql": Object {
+      "query": Object {
+        "repository": Object {
+          "__args": Object {
+            "name": "undefined",
+            "owner": "undefined",
+          },
+          "vulnerabilityAlerts": Object {
+            "__args": Object {
+              "last": "100",
+            },
+            "edges": Object {
+              "node": Object {
+                "dismissReason": null,
+                "securityAdvisory": Object {
+                  "description": null,
+                  "identifiers": Object {
+                    "type": null,
+                    "value": null,
+                  },
+                  "references": Object {
+                    "url": null,
+                  },
+                  "severity": null,
+                },
+                "securityVulnerability": Object {
+                  "firstPatchedVersion": Object {
+                    "identifier": null,
+                  },
+                  "package": Object {
+                    "ecosystem": null,
+                    "name": null,
+                  },
+                  "vulnerableVersionRange": null,
+                },
+                "vulnerableManifestFilename": null,
+                "vulnerableManifestPath": null,
+                "vulnerableRequirements": null,
+              },
+            },
+          },
+        },
+      },
+    },
     "headers": Object {
       "accept": "application/vnd.github.vixen-preview+json",
       "accept-encoding": "gzip, deflate",
@@ -2738,7 +4712,50 @@ Array [
 exports[`platform/github getVulnerabilityAlerts() returns empty if disabled 1`] = `
 Array [
   Object {
-    "body": "{\\"query\\":\\"\\\\n  query {\\\\n    repository(owner:\\\\\\"undefined\\\\\\", name:\\\\\\"undefined\\\\\\") {\\\\n      vulnerabilityAlerts(last: 100) {\\\\n        edges {\\\\n          node {\\\\n            dismissReason\\\\n            vulnerableManifestFilename\\\\n            vulnerableManifestPath\\\\n            vulnerableRequirements\\\\n            securityAdvisory {\\\\n              description\\\\n              identifiers { type value }\\\\n              references { url }\\\\n              severity\\\\n            }\\\\n            securityVulnerability {\\\\n              package { name ecosystem }\\\\n              firstPatchedVersion { identifier }\\\\n              vulnerableVersionRange\\\\n            }\\\\n          }\\\\n        }\\\\n      }\\\\n    }\\\\n  }\\"}",
+    "graphql": Object {
+      "query": Object {
+        "repository": Object {
+          "__args": Object {
+            "name": "undefined",
+            "owner": "undefined",
+          },
+          "vulnerabilityAlerts": Object {
+            "__args": Object {
+              "last": "100",
+            },
+            "edges": Object {
+              "node": Object {
+                "dismissReason": null,
+                "securityAdvisory": Object {
+                  "description": null,
+                  "identifiers": Object {
+                    "type": null,
+                    "value": null,
+                  },
+                  "references": Object {
+                    "url": null,
+                  },
+                  "severity": null,
+                },
+                "securityVulnerability": Object {
+                  "firstPatchedVersion": Object {
+                    "identifier": null,
+                  },
+                  "package": Object {
+                    "ecosystem": null,
+                    "name": null,
+                  },
+                  "vulnerableVersionRange": null,
+                },
+                "vulnerableManifestFilename": null,
+                "vulnerableManifestPath": null,
+                "vulnerableRequirements": null,
+              },
+            },
+          },
+        },
+      },
+    },
     "headers": Object {
       "accept": "application/vnd.github.vixen-preview+json",
       "accept-encoding": "gzip, deflate",
@@ -2756,7 +4773,50 @@ Array [
 exports[`platform/github getVulnerabilityAlerts() returns empty if error 1`] = `
 Array [
   Object {
-    "body": "{\\"query\\":\\"\\\\n  query {\\\\n    repository(owner:\\\\\\"undefined\\\\\\", name:\\\\\\"undefined\\\\\\") {\\\\n      vulnerabilityAlerts(last: 100) {\\\\n        edges {\\\\n          node {\\\\n            dismissReason\\\\n            vulnerableManifestFilename\\\\n            vulnerableManifestPath\\\\n            vulnerableRequirements\\\\n            securityAdvisory {\\\\n              description\\\\n              identifiers { type value }\\\\n              references { url }\\\\n              severity\\\\n            }\\\\n            securityVulnerability {\\\\n              package { name ecosystem }\\\\n              firstPatchedVersion { identifier }\\\\n              vulnerableVersionRange\\\\n            }\\\\n          }\\\\n        }\\\\n      }\\\\n    }\\\\n  }\\"}",
+    "graphql": Object {
+      "query": Object {
+        "repository": Object {
+          "__args": Object {
+            "name": "undefined",
+            "owner": "undefined",
+          },
+          "vulnerabilityAlerts": Object {
+            "__args": Object {
+              "last": "100",
+            },
+            "edges": Object {
+              "node": Object {
+                "dismissReason": null,
+                "securityAdvisory": Object {
+                  "description": null,
+                  "identifiers": Object {
+                    "type": null,
+                    "value": null,
+                  },
+                  "references": Object {
+                    "url": null,
+                  },
+                  "severity": null,
+                },
+                "securityVulnerability": Object {
+                  "firstPatchedVersion": Object {
+                    "identifier": null,
+                  },
+                  "package": Object {
+                    "ecosystem": null,
+                    "name": null,
+                  },
+                  "vulnerableVersionRange": null,
+                },
+                "vulnerableManifestFilename": null,
+                "vulnerableManifestPath": null,
+                "vulnerableRequirements": null,
+              },
+            },
+          },
+        },
+      },
+    },
     "headers": Object {
       "accept": "application/vnd.github.vixen-preview+json",
       "accept-encoding": "gzip, deflate",
@@ -2769,7 +4829,50 @@ Array [
     "url": "https://api.github.com/graphql",
   },
   Object {
-    "body": "{\\"query\\":\\"\\\\n  query {\\\\n    repository(owner:\\\\\\"undefined\\\\\\", name:\\\\\\"undefined\\\\\\") {\\\\n      vulnerabilityAlerts(last: 100) {\\\\n        edges {\\\\n          node {\\\\n            dismissReason\\\\n            vulnerableManifestFilename\\\\n            vulnerableManifestPath\\\\n            vulnerableRequirements\\\\n            securityAdvisory {\\\\n              description\\\\n              identifiers { type value }\\\\n              references { url }\\\\n              severity\\\\n            }\\\\n            securityVulnerability {\\\\n              package { name ecosystem }\\\\n              firstPatchedVersion { identifier }\\\\n              vulnerableVersionRange\\\\n            }\\\\n          }\\\\n        }\\\\n      }\\\\n    }\\\\n  }\\"}",
+    "graphql": Object {
+      "query": Object {
+        "repository": Object {
+          "__args": Object {
+            "name": "undefined",
+            "owner": "undefined",
+          },
+          "vulnerabilityAlerts": Object {
+            "__args": Object {
+              "last": "100",
+            },
+            "edges": Object {
+              "node": Object {
+                "dismissReason": null,
+                "securityAdvisory": Object {
+                  "description": null,
+                  "identifiers": Object {
+                    "type": null,
+                    "value": null,
+                  },
+                  "references": Object {
+                    "url": null,
+                  },
+                  "severity": null,
+                },
+                "securityVulnerability": Object {
+                  "firstPatchedVersion": Object {
+                    "identifier": null,
+                  },
+                  "package": Object {
+                    "ecosystem": null,
+                    "name": null,
+                  },
+                  "vulnerableVersionRange": null,
+                },
+                "vulnerableManifestFilename": null,
+                "vulnerableManifestPath": null,
+                "vulnerableRequirements": null,
+              },
+            },
+          },
+        },
+      },
+    },
     "headers": Object {
       "accept": "application/vnd.github.vixen-preview+json",
       "accept-encoding": "gzip, deflate",
