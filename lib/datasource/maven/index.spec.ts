@@ -91,7 +91,7 @@ describe('datasource/maven', () => {
       '8.0.11': 404,
       '8.0.12': 500,
     }).forEach(([v, status]) => {
-      const path = `/maven2/mysql/mysql-connector-java/${v}/mysql-connector-java-${v}.jar`;
+      const path = `/maven2/mysql/mysql-connector-java/${v}/mysql-connector-java-${v}.pom`;
       nock('https://repo.maven.apache.org').head(path).reply(status, '', {});
       nock('http://frontend_for_private_s3_repository')
         .head(path)
