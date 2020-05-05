@@ -64,14 +64,12 @@ export async function extract(config: RenovateConfig): Promise<ExtractResult> {
 
 export async function update(
   config: RenovateConfig,
-  branches: BranchConfig[],
-  branchList: string[],
-  packageFiles: Record<string, PackageFile[]>
+  branches: BranchConfig[]
 ): Promise<WriteUpdateResult | undefined> {
   let res: WriteUpdateResult | undefined;
   // istanbul ignore else
   if (config.repoIsOnboarded) {
-    res = await writeUpdates(config, packageFiles, branches);
+    res = await writeUpdates(config, branches);
   }
 
   return res;
