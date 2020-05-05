@@ -24,8 +24,7 @@ describe('workers/repository/process/extract-update', () => {
       };
       const res = await extract(config);
       expect(res).toMatchSnapshot();
-      const writeUpdateResult = await update(config, res.branches);
-      expect(writeUpdateResult).toMatchSnapshot();
+      await expect(update(config, res.branches)).resolves.not.toThrow();
     });
   });
 });
