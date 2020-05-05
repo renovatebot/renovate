@@ -33,6 +33,7 @@ interface LocalConfig extends StorageConfig {
   baseBranchSha: string;
   branchExists: Record<string, boolean>;
   branchPrefix: string;
+  fileList: Record<string, Promise<string[]>>;
 }
 
 // istanbul ignore next
@@ -107,7 +108,10 @@ export class Storage {
   async initRepo(args: StorageConfig): Promise<void> {
     this.cleanRepo();
     // eslint-disable-next-line no-multi-assign
-    const config: LocalConfig = (this._config = { ...args } as any);
+    const config: LocalConfig = (this._config = {
+      ...args,
+      fileList: {},
+    } as any);
     // eslint-disable-next-line no-multi-assign
     const cwd = (this._cwd = config.localDir);
     this._config.branchExists = {};
@@ -309,6 +313,13 @@ export class Storage {
 
   async getFileList(branchName?: string): Promise<string[]> {
     const branch = branchName || this._config.baseBranch;
+    if (this._config.fileList[branch] === undefined) {
+      this._config.fileList[branch] = this.getFileListInner(branchName);
+    }
+    return this._config.fileList[branch];
+  }
+
+  async getFileListInner(branch: string): Promise<string[]> {
     const exists = await this.branchExists(branch);
     if (!exists) {
       return [];
@@ -352,7 +363,7 @@ export class Storage {
     if (this._config.branchExists[branchName] !== undefined) {
       return this._config.branchExists[branchName];
     }
-    if (!branchName.startsWith(this._config.branchPrefix)) {
+    if (!branchName?.startsWith(this._config.branchPrefix)) {
       // fetch the branch only if it's not part of the existing branchPrefix
       try {
         await this._git.raw([
