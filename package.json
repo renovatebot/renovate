@@ -121,7 +121,6 @@
     "clean-git-ref": "2.0.1",
     "commander": "5.1.0",
     "conventional-commits-detector": "1.0.2",
-    "convert-hrtime": "3.0.0",
     "deepmerge": "4.2.2",
     "delay": "4.3.0",
     "detect-indent": "6.0.0",

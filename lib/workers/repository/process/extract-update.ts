@@ -1,4 +1,3 @@
-import { hrtime } from 'process';
 import { RenovateConfig } from '../../../config';
 import { logger } from '../../../logger';
 import { PackageFile } from '../../../manager/common';
@@ -46,12 +45,11 @@ function extractStats(packageFiles: Record<string, PackageFile[]>): any {
 
 export async function extract(config: RenovateConfig): Promise<ExtractResult> {
   logger.debug('extractAndUpdate()');
-  const startTime = hrtime();
+  const startTime = Date.now();
   const packageFiles = await extractAllDependencies(config);
-  const duration = hrtime(startTime);
-  const seconds = Math.round(duration[0] + duration[1] / 1e9);
+  const durationMs = Math.round(Date.now() - startTime);
   const stats = extractStats(packageFiles);
-  logger.info({ stats, seconds }, `Dependency extraction complete`);
+  logger.info({ stats, durationMs }, `Dependency extraction complete`);
   logger.trace({ config: packageFiles }, 'packageFiles');
   await fetchUpdates(config, packageFiles);
   logger.debug({ config: packageFiles }, 'packageFiles with updates');
