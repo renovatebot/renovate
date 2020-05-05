@@ -234,7 +234,7 @@
     "glob": "7.1.6",
     "graphql": "15.0.0",
     "husky": "4.2.5",
-    "jest": "25.5.1",
+    "jest": "25.5.4",
     "jest-junit": "10.0.0",
     "jest-mock-extended": "1.0.8",
     "jest-silent-reporter": "0.2.1",
