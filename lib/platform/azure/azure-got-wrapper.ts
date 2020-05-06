@@ -1,12 +1,12 @@
 import * as azure from 'azure-devops-node-api';
-import { IGitApi } from 'azure-devops-node-api/GitApi';
+import { getBasicHandler, getHandlerFromToken } from 'azure-devops-node-api';
 import { ICoreApi } from 'azure-devops-node-api/CoreApi';
+import { IGitApi } from 'azure-devops-node-api/GitApi';
 import { IPolicyApi } from 'azure-devops-node-api/PolicyApi';
-import { getHandlerFromToken, getBasicHandler } from 'azure-devops-node-api';
 import { IRequestHandler } from 'azure-devops-node-api/interfaces/common/VsoBaseInterfaces';
-import * as hostRules from '../../util/host-rules';
 import { PLATFORM_TYPE_AZURE } from '../../constants/platforms';
 import { HostRule } from '../../types';
+import * as hostRules from '../../util/host-rules';
 
 const hostType = PLATFORM_TYPE_AZURE;
 let endpoint: string;

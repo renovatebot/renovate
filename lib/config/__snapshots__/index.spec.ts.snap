@@ -34,6 +34,7 @@ Object {
   "dockerMapDotfiles": false,
   "dockerUser": null,
   "dryRun": false,
+  "endpoint": null,
   "excludeCommitPaths": Array [],
   "gitAuthor": null,
   "gitLabAutomerge": false,
@@ -56,6 +57,7 @@ Object {
   "onboardingBranch": "renovate/configure",
   "onboardingPrTitle": "Configure Renovate",
   "persistRepoData": false,
+  "pinDigests": false,
   "platform": "github",
   "postUpdateOptions": Array [],
   "postUpgradeTasks": Object {

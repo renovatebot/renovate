@@ -1,17 +1,17 @@
 /* eslint-disable @typescript-eslint/no-floating-promises */
 import {
-  exec as _cpExec,
   ExecOptions as ChildProcessExecOptions,
+  exec as _cpExec,
 } from 'child_process';
-import { exec, ExecOptions, setExecConfig } from '.';
+import { envMock } from '../../../test/execUtil';
 import {
   BinarySource,
   ExecConfig,
   RawExecOptions,
   VolumeOption,
 } from './common';
-import { envMock } from '../../../test/execUtil';
 import * as dockerModule from './docker';
+import { ExecOptions, exec, setExecConfig } from '.';
 
 const cpExec: jest.Mock<typeof _cpExec> = _cpExec as any;
 

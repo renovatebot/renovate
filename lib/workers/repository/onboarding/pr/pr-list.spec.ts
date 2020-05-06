@@ -1,6 +1,6 @@
-import { getConfig, RenovateConfig } from '../../../../../test/util';
-import { getPrList } from './pr-list';
+import { RenovateConfig, getConfig } from '../../../../../test/util';
 import { BranchConfig } from '../../../common';
+import { getPrList } from './pr-list';
 
 describe('workers/repository/onboarding/pr/pr-list', () => {
   describe('getPrList()', () => {

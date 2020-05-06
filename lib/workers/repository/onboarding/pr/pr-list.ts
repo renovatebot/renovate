@@ -1,6 +1,6 @@
-import { emojify } from '../../../../util/emoji';
-import { logger } from '../../../../logger';
 import { RenovateConfig } from '../../../../config';
+import { logger } from '../../../../logger';
+import { emojify } from '../../../../util/emoji';
 import { BranchConfig } from '../../../common';
 
 export function getPrList(

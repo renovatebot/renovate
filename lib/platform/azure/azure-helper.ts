@@ -1,19 +1,19 @@
 import {
-  GitPullRequestMergeStrategy,
-  GitRef,
   GitCommit,
   GitPullRequest,
+  GitPullRequestMergeStrategy,
+  GitRef,
 } from 'azure-devops-node-api/interfaces/GitInterfaces';
-
 import { Options } from 'simple-git/promise';
-import * as azureApi from './azure-got-wrapper';
-import { logger } from '../../logger';
 import {
   PR_STATE_CLOSED,
   PR_STATE_MERGED,
   PR_STATE_OPEN,
 } from '../../constants/pull-requests';
+import { logger } from '../../logger';
+
 import { HostRule } from '../../types';
+import * as azureApi from './azure-got-wrapper';
 import { AzurePr } from './types';
 
 const mergePolicyGuid = 'fa4e907d-c16b-4a4c-9dfa-4916e5d171ab'; // Magic GUID for merge strategy policy configurations

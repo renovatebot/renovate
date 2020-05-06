@@ -17,4 +17,3 @@ url = "https://bar.baz/+simple/"
 
 [[tool.poetry.source]]
 name = "baz"
-url = "https://bar.baz/+simple/"

@@ -1,17 +1,17 @@
 import sampleSize from 'lodash/sampleSize';
 import uniq from 'lodash/uniq';
-import { logger } from '../../logger';
-import { ChangeLogError, getChangeLogJSON } from './changelog';
-import { getPrBody } from './body';
-import { platform, Pr, PlatformPrOptions } from '../../platform';
-import { BranchConfig, PrResult } from '../common';
 import {
   PLATFORM_FAILURE,
   PLATFORM_INTEGRATION_UNAUTHORIZED,
   PLATFORM_RATE_LIMIT_EXCEEDED,
   REPOSITORY_CHANGED,
 } from '../../constants/error-messages';
+import { logger } from '../../logger';
+import { PlatformPrOptions, Pr, platform } from '../../platform';
 import { BranchStatus } from '../../types';
+import { BranchConfig, PrResult } from '../common';
+import { getPrBody } from './body';
+import { ChangeLogError } from './changelog';
 
 function noWhitespace(input: string): string {
   return input.replace(/\r?\n|\r|\s/g, '');
@@ -197,21 +197,21 @@ export async function ensurePr(
     }
     processedUpgrades.push(upgradeKey);
 
-    const logJSON = await getChangeLogJSON(upgrade);
+    const logJSON = upgrade.logJSON;
 
     if (logJSON) {
       if (typeof logJSON.error === 'undefined') {
         if (logJSON.project) {
-          upgrade.githubName = logJSON.project.github;
+          upgrade.repoName = logJSON.project.github;
         }
         upgrade.hasReleaseNotes = logJSON.hasReleaseNotes;
         upgrade.releases = [];
         if (
           upgrade.hasReleaseNotes &&
-          upgrade.githubName &&
-          !commitRepos.includes(upgrade.githubName)
+          upgrade.repoName &&
+          !commitRepos.includes(upgrade.repoName)
         ) {
-          commitRepos.push(upgrade.githubName);
+          commitRepos.push(upgrade.repoName);
           if (logJSON.versions) {
             logJSON.versions.forEach((version) => {
               const release = { ...version };

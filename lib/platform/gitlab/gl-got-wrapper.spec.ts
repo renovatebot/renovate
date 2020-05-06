@@ -1,7 +1,7 @@
-import _got from '../../util/got';
-import { api } from './gl-got-wrapper';
-import * as hostRules from '../../util/host-rules';
 import { PLATFORM_TYPE_GITLAB } from '../../constants/platforms';
+import _got from '../../util/got';
+import * as hostRules from '../../util/host-rules';
+import { api } from './gl-got-wrapper';
 
 jest.mock('../../util/got');
 

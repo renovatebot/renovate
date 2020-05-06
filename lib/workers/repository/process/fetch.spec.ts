@@ -1,10 +1,10 @@
-import { fetchUpdates } from './fetch';
-import * as _npm from '../../../manager/npm';
-import * as lookup from './lookup';
-import { getConfig, mocked, RenovateConfig } from '../../../../test/util';
-import { ManagerApi, PackageFile } from '../../../manager/common';
-import * as datasourceNpm from '../../../datasource/npm';
+import { RenovateConfig, getConfig, mocked } from '../../../../test/util';
 import * as datasourceMaven from '../../../datasource/maven';
+import * as datasourceNpm from '../../../datasource/npm';
+import { ManagerApi, PackageFile } from '../../../manager/common';
+import * as _npm from '../../../manager/npm';
+import { fetchUpdates } from './fetch';
+import * as lookup from './lookup';
 
 const npm: ManagerApi = _npm;
 const lookupUpdates = mocked(lookup).lookupUpdates;

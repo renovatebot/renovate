@@ -1,8 +1,8 @@
 import is from '@sindresorhus/is';
 import later from 'later';
 import moment from 'moment-timezone';
-import { logger } from '../../logger';
 import { RenovateConfig } from '../../config';
+import { logger } from '../../logger';
 
 const scheduleMappings: Record<string, string> = {
   'every month': 'before 3am on the first day of the month',

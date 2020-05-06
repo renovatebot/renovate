@@ -1,6 +1,6 @@
 import { RenovateConfig, getConfig } from '../../../../../test/util';
-import { getConfigDesc } from './config-description';
 import { PackageFile } from '../../../../manager/common';
+import { getConfigDesc } from './config-description';
 
 describe('workers/repository/onboarding/pr/config-description', () => {
   describe('getConfigDesc()', () => {

@@ -1,7 +1,7 @@
 import { RenovateConfig, mocked } from '../../../../test/util';
+import { getConfig } from '../../../config/defaults';
 import { branchifyUpgrades } from './branchify';
 import * as _flatten from './flatten';
-import { getConfig } from '../../../config/defaults';
 
 const flattenUpdates = mocked(_flatten).flattenUpdates;
 jest.mock('./flatten');
@@ -27,6 +27,33 @@ describe('workers/repository/updates/branchify', () => {
           depName: 'foo',
           branchName: 'foo-{{version}}',
           version: '1.1.0',
+          prTitle: 'some-title',
+          updateType: 'minor',
+          packageFile: 'foo/package.json',
+        },
+      ]);
+      config.repoIsOnboarded = true;
+      const res = await branchifyUpgrades(config, {});
+      expect(Object.keys(res.branches)).toHaveLength(1);
+      expect(res.branches[0].isMinor).toBe(true);
+      expect(res.branches[0].upgrades[0].isMinor).toBe(true);
+    });
+    it('deduplicates', async () => {
+      flattenUpdates.mockResolvedValueOnce([
+        {
+          depName: 'foo',
+          branchName: 'foo-{{version}}',
+          currentValue: '1.1.0',
+          newValue: '1.3.0',
+          prTitle: 'some-title',
+          updateType: 'minor',
+          packageFile: 'foo/package.json',
+        },
+        {
+          depName: 'foo',
+          branchName: 'foo-{{version}}',
+          currentValue: '1.1.0',
+          newValue: '1.2.0',
           prTitle: 'some-title',
           updateType: 'minor',
           packageFile: 'foo/package.json',

@@ -1,5 +1,5 @@
-import { logger } from '../logger';
 import { CONFIG_VALIDATION } from '../constants/error-messages';
+import { logger } from '../logger';
 
 let RegEx: RegExpConstructor;
 

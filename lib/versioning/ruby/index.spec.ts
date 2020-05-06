@@ -1,5 +1,5 @@
-import { api as semverRuby } from '.';
 import { RangeStrategy } from '..';
+import { api as semverRuby } from '.';
 
 describe('semverRuby', () => {
   describe('.equals', () => {
@@ -366,6 +366,14 @@ describe('semverRuby', () => {
         ['1.2.3', '<= 1.0.3', 'pin', '1.0.3', '1.2.3'],
         ['1.2.3', '~> 1.0.3', 'pin', '1.0.4', '1.2.3'],
         ['4.7.8', '~> 4.7, >= 4.7.4', 'pin', '4.7.5', '4.7.8'],
+        [
+          "'>= 3.0.5', '< 3.3'",
+          "'>= 3.0.5', '< 3.2'",
+          'replace',
+          '3.1.5',
+          '3.2.1',
+        ],
+        ["'0.0.11'", "'0.0.10'", 'replace', '0.0.10', '0.0.11'],
       ].forEach(
         ([expected, currentValue, rangeStrategy, fromVersion, toVersion]) => {
           expect(

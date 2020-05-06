@@ -1,12 +1,13 @@
-import slugify from 'slugify';
 import { clean as cleanGitRef } from 'clean-git-ref';
-import { Merge } from 'type-fest';
-import { logger, addMeta, removeMeta } from '../../../logger';
-import * as template from '../../../util/template';
-import { generateBranchConfig } from './generate';
-import { flattenUpdates } from './flatten';
+import slugify from 'slugify';
 import { RenovateConfig, ValidationMessage } from '../../../config';
-import { BranchUpgradeConfig, BranchConfig } from '../../common';
+import { addMeta, logger, removeMeta } from '../../../logger';
+import * as template from '../../../util/template';
+import { BranchConfig, BranchUpgradeConfig } from '../../common';
+import { getChangeLogJSON } from '../../pr/changelog';
+import { flattenUpdates } from './flatten';
+import { generateBranchConfig } from './generate';
+import { Merge } from 'type-fest';
 
 /**
  * Clean git branch name
@@ -113,8 +114,43 @@ export async function branchifyUpgrades(
     addMeta({
       branch: branchName,
     });
+    for (const upgrade of branchUpgrades[branchName]) {
+      upgrade.logJSON = await getChangeLogJSON(upgrade);
+    }
+    const seenUpdates = {};
+    // Filter out duplicates
+    branchUpgrades[branchName] = branchUpgrades[branchName].filter(
+      (upgrade) => {
+        const {
+          manager,
+          packageFile,
+          depName,
+          currentValue,
+          newValue,
+        } = upgrade;
+        const upgradeKey = `${packageFile}:${depName}:${currentValue}`;
+        const previousNewValue = seenUpdates[upgradeKey];
+        if (previousNewValue && previousNewValue !== newValue) {
+          logger.info(
+            {
+              manager,
+              packageFile,
+              depName,
+              currentValue,
+              previousNewValue,
+              thisNewValue: newValue,
+            },
+            'Ignoring upgrade collision'
+          );
+          return false;
+        }
+        seenUpdates[upgradeKey] = newValue;
+        return true;
+      }
+    );
     const branch = generateBranchConfig(branchUpgrades[branchName]);
     branch.branchName = branchName;
+    branch.packageFiles = packageFiles;
     branches.push(branch);
   }
   removeMeta(['branch']);

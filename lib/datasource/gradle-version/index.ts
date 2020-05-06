@@ -1,13 +1,12 @@
 import is from '@sindresorhus/is';
-import { coerce } from 'semver';
-import { regEx } from '../../util/regex';
 import { logger } from '../../logger';
 import { Http } from '../../util/http';
+import { regEx } from '../../util/regex';
 import {
   DatasourceError,
   GetReleasesConfig,
-  ReleaseResult,
   Release,
+  ReleaseResult,
 } from '../common';
 
 export const id = 'gradle-version';
@@ -21,8 +20,6 @@ interface GradleRelease {
   nightly?: boolean;
   rcFor?: string;
   version: string;
-  downloadUrl?: string;
-  checksumUrl?: string;
   buildTime?: string;
 }
 
@@ -59,9 +56,7 @@ export async function getReleases({
               release.rcFor === '' && !release.version.includes('milestone')
           )
           .map((release) => ({
-            version: coerce(release.version).toString(),
-            downloadUrl: release.downloadUrl,
-            checksumUrl: release.checksumUrl,
+            version: release.version,
             releaseTimestamp: formatBuildTime(release.buildTime),
           }));
         return releases;

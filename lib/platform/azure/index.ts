@@ -1,27 +1,8 @@
 import {
-  GitPullRequestMergeStrategy,
   GitPullRequest,
+  GitPullRequestMergeStrategy,
 } from 'azure-devops-node-api/interfaces/GitInterfaces';
-import * as azureHelper from './azure-helper';
-import * as azureApi from './azure-got-wrapper';
-import * as hostRules from '../../util/host-rules';
-import GitStorage, { StatusResult } from '../git/storage';
-import { logger } from '../../logger';
-import {
-  PlatformConfig,
-  RepoParams,
-  RepoConfig,
-  Pr,
-  Issue,
-  CreatePRConfig,
-  BranchStatusConfig,
-  FindPRConfig,
-  EnsureCommentConfig,
-  EnsureIssueResult,
-  CommitFilesConfig,
-} from '../common';
-import { sanitize } from '../../util/sanitize';
-import { smartTruncate } from '../utils/pr-body';
+import { RenovateConfig } from '../../config/common';
 import { REPOSITORY_DISABLED } from '../../constants/error-messages';
 import { PLATFORM_TYPE_AZURE } from '../../constants/platforms';
 import {
@@ -29,10 +10,33 @@ import {
   PR_STATE_NOT_OPEN,
   PR_STATE_OPEN,
 } from '../../constants/pull-requests';
-import { BranchStatus, VulnerabilityAlert } from '../../types';
-import { AzurePr } from './types';
-import { RenovateConfig } from '../../config/common';
+import { logger } from '../../logger';
+import { BranchStatus } from '../../types';
+import * as hostRules from '../../util/host-rules';
+import { sanitize } from '../../util/sanitize';
 import { ensureTrailingSlash } from '../../util/url';
+import {
+  BranchStatusConfig,
+  CommitFilesConfig,
+  CreatePRConfig,
+  EnsureCommentConfig,
+  EnsureCommentRemovalConfig,
+  EnsureIssueResult,
+  FindPRConfig,
+  Issue,
+  PlatformConfig,
+  Pr,
+  RepoConfig,
+  RepoParams,
+  VulnerabilityAlert,
+} from '../common';
+
+import GitStorage, { StatusResult } from '../git/storage';
+import { smartTruncate } from '../utils/pr-body';
+
+import * as azureApi from './azure-got-wrapper';
+import * as azureHelper from './azure-helper';
+import { AzurePr } from './types';
 
 interface Config {
   storage: GitStorage;
@@ -180,21 +184,18 @@ export function getRepoForceRebase(): Promise<boolean> {
 
 // Search
 
-export /* istanbul ignore next */ function getFileList(
-  branchName?: string
-): Promise<string[]> {
-  return config.storage.getFileList(branchName);
+export /* istanbul ignore next */ function getFileList(): Promise<string[]> {
+  return config.storage.getFileList();
 }
 
 export /* istanbul ignore next */ async function setBaseBranch(
   branchName = config.baseBranch
-): Promise<void> {
+): Promise<string> {
   logger.debug(`Setting baseBranch to ${branchName}`);
   config.baseBranch = branchName;
   delete config.baseCommitSHA;
-  delete config.fileList;
-  await config.storage.setBaseBranch(branchName);
-  await getFileList(branchName);
+  const baseBranchSha = await config.storage.setBaseBranch(branchName);
+  return baseBranchSha;
 }
 
 export /* istanbul ignore next */ function setBranchPrefix(
@@ -570,10 +571,10 @@ export async function ensureComment({
   return true;
 }
 
-export async function ensureCommentRemoval(
-  issueNo: number,
-  topic: string
-): Promise<void> {
+export async function ensureCommentRemoval({
+  number: issueNo,
+  topic,
+}: EnsureCommentRemovalConfig): Promise<void> {
   logger.debug(`ensureCommentRemoval(issueNo, topic)(${issueNo}, ${topic})`);
   if (issueNo) {
     const azureApiGit = await azureApi.gitApi();

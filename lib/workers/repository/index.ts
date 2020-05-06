@@ -1,15 +1,15 @@
 import fs from 'fs-extra';
 
-import handleError from './error';
-import { platform } from '../../platform';
-import { logger, setMeta } from '../../logger';
-import { initRepo } from './init';
-import { ensureOnboardingPr } from './onboarding/pr';
-import { processResult, ProcessResult } from './result';
-import { processRepo } from './process';
-import { finaliseRepo } from './finalise';
-import { ensureMasterIssue } from './master-issue';
 import { RenovateConfig } from '../../config';
+import { logger, setMeta } from '../../logger';
+import { platform } from '../../platform';
+import handleError from './error';
+import { finaliseRepo } from './finalise';
+import { initRepo } from './init';
+import { ensureMasterIssue } from './master-issue';
+import { ensureOnboardingPr } from './onboarding/pr';
+import { processRepo, updateRepo } from './process';
+import { ProcessResult, processResult } from './result';
 
 let renovateVersion = 'unknown';
 try {
@@ -31,10 +31,9 @@ export async function renovateRepository(
     await fs.ensureDir(config.localDir);
     logger.debug('Using localDir: ' + config.localDir);
     config = await initRepo(config);
-    const { res, branches, branchList, packageFiles } = await processRepo(
-      config
-    );
+    const { branches, branchList, packageFiles } = await processRepo(config);
     await ensureOnboardingPr(config, packageFiles, branches);
+    const res = await updateRepo(config, branches, branchList);
     if (res !== 'automerged') {
       await ensureMasterIssue(config, branches);
     }

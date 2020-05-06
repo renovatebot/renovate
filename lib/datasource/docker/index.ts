@@ -1,15 +1,15 @@
-import is from '@sindresorhus/is';
-import hasha from 'hasha';
+import { OutgoingHttpHeaders } from 'http';
 import URL from 'url';
+import is from '@sindresorhus/is';
+import AWS from 'aws-sdk';
+import hasha from 'hasha';
 import parseLinkHeader from 'parse-link-header';
 import wwwAuthenticate from 'www-authenticate';
-import { OutgoingHttpHeaders } from 'http';
-import AWS from 'aws-sdk';
 import { logger } from '../../logger';
-import { Http, HttpResponse } from '../../util/http';
-import * as hostRules from '../../util/host-rules';
-import { DatasourceError, GetReleasesConfig, ReleaseResult } from '../common';
 import { HostRule } from '../../types';
+import * as hostRules from '../../util/host-rules';
+import { Http, HttpResponse } from '../../util/http';
+import { DatasourceError, GetReleasesConfig, ReleaseResult } from '../common';
 
 // TODO: add got typings when available
 // TODO: replace www-authenticate with https://www.npmjs.com/package/auth-header ?
@@ -43,8 +43,6 @@ export const defaultConfig = {
   group: {
     commitMessageTopic: '{{{groupName}}} Docker tags',
   },
-  autoReplaceStringTemplate:
-    '{{depName}}{{#if newValue}}:{{newValue}}{{/if}}{{#if newDigest}}@{{newDigest}}{{/if}}',
 };
 
 const http = new Http(id);
@@ -60,6 +58,17 @@ export function getRegistryRepository(
   lookupName: string,
   registryUrls: string[]
 ): RegistryRepository {
+  if (is.nonEmptyArray(registryUrls)) {
+    const dockerRegistry = registryUrls[0]
+      .replace('https://', '')
+      .replace(/\/?$/, '/');
+    if (lookupName.startsWith(dockerRegistry)) {
+      return {
+        registry: dockerRegistry,
+        repository: lookupName.replace(dockerRegistry, ''),
+      };
+    }
+  }
   let registry: string;
   const split = lookupName.split('/');
   if (split.length > 1 && (split[0].includes('.') || split[0].includes(':'))) {
@@ -539,12 +548,11 @@ async function getLabels(
     if (err instanceof DatasourceError) {
       throw err;
     }
-    if (err.statusCode === 401) {
+    if (err.statusCode === 400 || err.statusCode === 401) {
       logger.debug(
-        { registry, dockerRepository: repository },
+        { registry, dockerRepository: repository, err },
         'Unauthorized docker lookup'
       );
-      logger.debug({ err });
     } else if (err.statusCode === 404) {
       logger.warn(
         {
@@ -561,7 +569,7 @@ async function getLabels(
     ) {
       logger.warn({ err }, 'docker registry failure: too many requests');
     } else if (err.statusCode >= 500 && err.statusCode < 600) {
-      logger.warn(
+      logger.debug(
         {
           err,
           registry,
@@ -570,19 +578,18 @@ async function getLabels(
         },
         'docker registry failure: internal error'
       );
-    } else if (err.code === 'ETIMEDOUT') {
-      logger.debug(
-        { registry },
-        'Timeout when attempting to connect to docker registry'
-      );
-      logger.debug({ err });
+    } else if (
+      err.code === 'ERR_TLS_CERT_ALTNAME_INVALID' ||
+      err.code === 'ETIMEDOUT'
+    ) {
+      logger.debug({ registry, err }, 'Error connecting to docker registry');
     } else if (registry === 'https://quay.io') {
       // istanbul ignore next
       logger.debug(
         'Ignoring quay.io errors until they fully support v2 schema'
       );
     } else {
-      logger.warn(
+      logger.info(
         { registry, dockerRepository: repository, tag, err },
         'Unknown error getting Docker labels'
       );

@@ -1,8 +1,10 @@
 import { readFileSync } from 'fs';
+import * as _fs from '../../util/fs';
 import { extractPackageFile } from './extract';
-import { platform as _platform, Platform } from '../../platform';
 
-const platform: jest.Mocked<Platform> = _platform as any;
+jest.mock('../../util/fs');
+
+const fs: any = _fs;
 
 const requirements1 = readFileSync(
   'lib/manager/composer/__fixtures__/composer1.json',
@@ -61,13 +63,13 @@ describe('lib/manager/composer/extract', () => {
       expect(res.registryUrls).toHaveLength(2);
     });
     it('extracts object repositories and registryUrls with lock file', async () => {
-      platform.getFile.mockResolvedValue(requirements5Lock);
+      fs.readLocalFile.mockResolvedValue(requirements5Lock);
       const res = await extractPackageFile(requirements5, packageFile);
       expect(res).toMatchSnapshot();
       expect(res.registryUrls).toHaveLength(2);
     });
     it('extracts dependencies with lock file', async () => {
-      platform.getFile.mockResolvedValue('some content');
+      fs.readLocalFile.mockResolvedValue('some content');
       const res = await extractPackageFile(requirements1, packageFile);
       expect(res).toMatchSnapshot();
     });

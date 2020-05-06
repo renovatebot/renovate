@@ -1,9 +1,9 @@
 import { mock } from 'jest-mock-extended';
-import { PR_STATE_OPEN } from '../../constants/pull-requests';
-import { CONFIG_VALIDATION } from '../../constants/error-messages';
-import { raiseConfigWarningIssue } from './error-config';
 import { RenovateConfig, getConfig, platform } from '../../../test/util';
+import { CONFIG_VALIDATION } from '../../constants/error-messages';
+import { PR_STATE_OPEN } from '../../constants/pull-requests';
 import { Pr } from '../../platform';
+import { raiseConfigWarningIssue } from './error-config';
 
 jest.mock('../../platform');
 

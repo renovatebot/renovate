@@ -1,10 +1,12 @@
+import is from '@sindresorhus/is';
 import { parse } from 'toml';
-import { isValid } from '../../versioning/poetry';
-import { logger } from '../../logger';
-import { PackageFile, PackageDependency } from '../common';
-import { PoetryFile, PoetrySection } from './types';
 import * as datasourcePypi from '../../datasource/pypi';
+import { logger } from '../../logger';
 import { SkipReason } from '../../types';
+import * as pep440Versioning from '../../versioning/pep440';
+import * as poetryVersioning from '../../versioning/poetry';
+import { PackageDependency, PackageFile } from '../common';
+import { PoetryFile, PoetrySection } from './types';
 
 function extractFromSection(
   parsedFile: PoetryFile,
@@ -52,7 +54,11 @@ function extractFromSection(
     };
     if (skipReason) {
       dep.skipReason = skipReason;
-    } else if (!isValid(dep.currentValue)) {
+    } else if (pep440Versioning.isValid(dep.currentValue)) {
+      dep.versioning = pep440Versioning.id;
+    } else if (poetryVersioning.isValid(dep.currentValue)) {
+      dep.versioning = poetryVersioning.id;
+    } else {
       dep.skipReason = SkipReason.UnknownVersion;
     }
     deps.push(dep);
@@ -106,5 +112,22 @@ export function extractPackageFile(
     return null;
   }
 
-  return { deps, registryUrls: extractRegistries(pyprojectfile) };
+  const compatibility: Record<string, any> = {};
+
+  // https://python-poetry.org/docs/pyproject/#poetry-and-pep-517
+  if (
+    pyprojectfile['build-system']?.['build-backend'] === 'poetry.masonry.api'
+  ) {
+    compatibility.poetry = pyprojectfile['build-system']?.requires.join(' ');
+  }
+
+  if (is.nonEmptyString(pyprojectfile.tool?.poetry?.['dependencies']?.python)) {
+    compatibility.python = pyprojectfile.tool?.poetry?.['dependencies']?.python;
+  }
+
+  return {
+    deps,
+    registryUrls: extractRegistries(pyprojectfile),
+    compatibility,
+  };
 }

@@ -1,6 +1,6 @@
-import { exec } from '../../../util/exec';
 import { logger } from '../../../logger';
 import { platform } from '../../../platform';
+import { exec } from '../../../util/exec';
 import { PostUpdateConfig } from '../../common';
 
 export interface GenerateLockFileResult {

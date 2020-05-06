@@ -1,6 +1,6 @@
-import * as npmApi from '../../../datasource/npm';
-import { platform, RepoConfig, RepoParams } from '../../../platform';
 import { RenovateConfig } from '../../../config';
+import * as npmApi from '../../../datasource/npm';
+import { RepoConfig, RepoParams, platform } from '../../../platform';
 
 // TODO: fix types
 export type WorkerPlatformConfig = RepoConfig &

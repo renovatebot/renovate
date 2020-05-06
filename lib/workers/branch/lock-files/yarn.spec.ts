@@ -1,11 +1,11 @@
-import { getInstalledPath as _getInstalledPath } from 'get-installed-path';
-import _fs from 'fs-extra';
 import { exec as _exec } from 'child_process';
-import * as _yarnHelper from '../../../manager/npm/post-update/yarn';
-import { getName, mocked } from '../../../../test/util';
+import _fs from 'fs-extra';
+import { getInstalledPath as _getInstalledPath } from 'get-installed-path';
 import { ExecSnapshots, envMock, mockExecAll } from '../../../../test/execUtil';
-import * as _env from '../../../util/exec/env';
+import { getName, mocked } from '../../../../test/util';
+import * as _yarnHelper from '../../../manager/npm/post-update/yarn';
 import { BinarySource } from '../../../util/exec/common';
+import * as _env from '../../../util/exec/env';
 
 jest.mock('fs-extra');
 jest.mock('child_process');

@@ -14,7 +14,6 @@ const rubyReleasesHtml = fs.readFileSync(
 describe('datasource/gradle', () => {
   describe('getReleases', () => {
     beforeEach(() => {
-      global.repoCache = {};
       return global.renovateCache.rmAll();
     });
     it('parses real data', async () => {

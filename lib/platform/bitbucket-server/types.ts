@@ -1,5 +1,5 @@
-import GitStorage from '../git/storage';
 import { Pr } from '../common';
+import GitStorage from '../git/storage';
 
 export interface BbsConfig {
   baseBranch: string;

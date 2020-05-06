@@ -1,18 +1,26 @@
+import { WORKER_FILE_UPDATE_FAILED } from '../../constants/error-messages';
 import { logger } from '../../logger';
 import { get } from '../../manager';
-import { WORKER_FILE_UPDATE_FAILED } from '../../constants/error-messages';
-import { matchAt, replaceAt } from '../../util/string';
-import { regEx, escapeRegExp } from '../../util/regex';
-import { BranchUpgradeConfig } from '../common';
 import { PackageDependency } from '../../manager/common';
+import { writeLocalFile } from '../../util/fs';
+import { escapeRegExp, regEx } from '../../util/regex';
+import { matchAt, replaceAt } from '../../util/string';
 import { compile } from '../../util/template';
-
+import { BranchUpgradeConfig } from '../common';
 
 export async function confirmIfDepUpdated(
   upgrade: BranchUpgradeConfig,
   newContent: string
 ): Promise<boolean> {
-  const { manager, packageFile, newValue, newDigest, depIndex } = upgrade;
+  const {
+    manager,
+    packageFile,
+    newValue,
+    newDigest,
+    depIndex,
+    currentDigest,
+    pinDigests,
+  } = upgrade;
   const extractPackageFile = get(manager, 'extractPackageFile');
   let newUpgrade;
   try {
@@ -25,13 +33,34 @@ export async function confirmIfDepUpdated(
   } catch (err) /* istanbul ignore next */ {
     logger.debug('Failed to parse newContent');
   }
-  if (
-    newUpgrade &&
-    newUpgrade.currentValue === newValue &&
-    (!newUpgrade.currentDigest || newUpgrade.currentDigest === newDigest)
-  ) {
+  if (!newUpgrade) {
+    logger.debug('No newUpgrade');
+    return false;
+  }
+  // istanbul ignore if
+  if (upgrade.depName !== newUpgrade.depName) {
+    logger.debug(
+      { currentDepName: upgrade.depName, newDepName: newUpgrade.depName },
+      'depName mismatch'
+    );
+  }
+  if (newUpgrade.currentValue !== newValue) {
+    logger.debug(
+      { expectedValue: newValue, foundValue: newUpgrade.currentValue },
+      'Value mismatch'
+    );
+    return false;
+  }
+  if (!newDigest) {
     return true;
   }
+  if (newUpgrade.currentDigest === newDigest) {
+    return true;
+  }
+  if (!currentDigest && !pinDigests) {
+    return true;
+  }
+  // istanbul ignore next
   return false;
 }
 
@@ -53,7 +82,7 @@ export async function checkBranchDepsMatchBaseDeps(
     );
     return getDepsSignature(baseDeps) === getDepsSignature(branchDeps);
   } catch (err) /* istanbul ignore next */ {
-    logger.warn('Failed to parse branchContent');
+    logger.info('Failed to parse branchContent - rebasing');
     return false;
   }
 }
@@ -88,7 +117,7 @@ export async function doAutoReplace(
   let searchIndex = existingContent.indexOf(replaceString);
   if (searchIndex === -1) {
     logger.warn(
-      { depName },
+      { depName, existingContent, replaceString },
       'Cannot find replaceString in current file content'
     );
     return existingContent;
@@ -125,9 +154,12 @@ export async function doAutoReplace(
           replaceString,
           newString
         );
+        await writeLocalFile(upgrade.packageFile, testContent);
         if (await confirmIfDepUpdated(upgrade, testContent)) {
           return testContent;
         }
+        // istanbul ignore next
+        await writeLocalFile(upgrade.packageFile, existingContent);
       }
     }
   } catch (err) /* istanbul ignore next */ {

@@ -1,10 +1,10 @@
-import { add, clear } from '../../util/host-rules';
 import { HostRule } from '../../types';
+import { add, clear } from '../../util/host-rules';
 
 import {
   findAllAuthenticatable,
-  getDomain,
   getAuthenticationHeaderValue,
+  getDomain,
 } from './host-rules';
 
 describe('lib/manager/bundler/host-rules', () => {

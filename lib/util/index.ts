@@ -1,8 +1,8 @@
 import findUp from 'find-up';
 import { join } from 'upath';
+import { RenovateConfig } from '../config/common';
 import { setExecConfig } from './exec';
 import { setFsConfig } from './fs';
-import { RenovateConfig } from '../config/common';
 
 export async function setUtilConfig(
   config: Partial<RenovateConfig>

@@ -1,10 +1,10 @@
-import { processRepo } from './index';
+import { RenovateConfig, getConfig, mocked } from '../../../../test/util';
 import * as _extractUpdate from './extract-update';
-import { getConfig, mocked, RenovateConfig } from '../../../../test/util';
+import { processRepo, updateRepo } from './index';
 
 jest.mock('./extract-update');
 
-const extractAndUpdate = mocked(_extractUpdate).extractAndUpdate;
+const extract = mocked(_extractUpdate).extract;
 
 let config: RenovateConfig;
 beforeEach(() => {
@@ -19,9 +19,10 @@ describe('workers/repository/process/index', () => {
       expect(res).toMatchSnapshot();
     });
     it('processes baseBranches', async () => {
-      extractAndUpdate.mockResolvedValue({} as never);
+      extract.mockResolvedValue({} as never);
       config.baseBranches = ['branch1', 'branch2'];
       const res = await processRepo(config);
+      await updateRepo(config, res.branches, res.branchList);
       expect(res).toMatchSnapshot();
     });
   });

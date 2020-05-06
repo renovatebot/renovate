@@ -1,7 +1,7 @@
 import { api } from '../../platform/github/gh-got-wrapper';
 
-import * as github from '.';
 import * as _hostRules from '../../util/host-rules';
+import * as github from '.';
 
 jest.mock('../../platform/github/gh-got-wrapper');
 jest.mock('../../util/got');
@@ -16,7 +16,6 @@ describe('datasource/github-tags', () => {
     beforeEach(() => {
       jest.resetAllMocks();
       hostRules.hosts = jest.fn(() => []);
-      global.repoCache = {};
       return global.renovateCache.rmAll();
     });
     it('returns null if no token', async () => {

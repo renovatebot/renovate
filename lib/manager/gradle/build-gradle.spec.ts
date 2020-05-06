@@ -1,7 +1,7 @@
 import {
+  collectVersionVariables,
   init,
   updateGradleVersion,
-  collectVersionVariables,
 } from './build-gradle';
 
 describe('lib/manager/gradle/updateGradleVersion', () => {
@@ -494,6 +494,70 @@ describe('lib/manager/gradle/updateGradleVersion', () => {
     );
   });
 
+  it('returns an updated file if the plugin version defined in a variable is found', () => {
+    const gradleFile = `val mysqlVersion = "6.0.5"
+               id("mysql") version mysqlVersion
+               `;
+    const updatedGradleFile = updateGradleVersion(
+      gradleFile,
+      { group: 'mysql', name: 'mysql-connector-java', version: '6.0.5' },
+      '7.0.0'
+    );
+    expect(updatedGradleFile).toEqual(
+      `val mysqlVersion = "7.0.0"
+               id("mysql") version mysqlVersion
+               `
+    );
+  });
+
+  it('returns an updated file if the plugin version defined in a variable in a template string without curly braces is found', () => {
+    const gradleFile = `val mysqlVersion = "6.0.5"
+               id("mysql") version "$mysqlVersion"
+               `;
+    const updatedGradleFile = updateGradleVersion(
+      gradleFile,
+      { group: 'mysql', name: 'mysql-connector-java', version: '6.0.5' },
+      '7.0.0'
+    );
+    expect(updatedGradleFile).toEqual(
+      `val mysqlVersion = "7.0.0"
+               id("mysql") version "$mysqlVersion"
+               `
+    );
+  });
+
+  it('returns an updated file if the plugin version defined in a variable in a template string with curly braces is found', () => {
+    const gradleFile = `val mysqlVersion = "6.0.5"
+               id("mysql") version "\${mysqlVersion}"
+               `;
+    const updatedGradleFile = updateGradleVersion(
+      gradleFile,
+      { group: 'mysql', name: 'mysql-connector-java', version: '6.0.5' },
+      '7.0.0'
+    );
+    expect(updatedGradleFile).toEqual(
+      `val mysqlVersion = "7.0.0"
+               id("mysql") version "\${mysqlVersion}"
+               `
+    );
+  });
+
+  it('returns an updated file if the plugin version defined in a variable in a template string with triple double quotes is found', () => {
+    const gradleFile = `String mysqlVersion = "6.0.5"
+               id 'mysql' version """$mysqlVersion"""
+               `;
+    const updatedGradleFile = updateGradleVersion(
+      gradleFile,
+      { group: 'mysql', name: 'mysql-connector-java', version: '6.0.5' },
+      '7.0.0'
+    );
+    expect(updatedGradleFile).toEqual(
+      `String mysqlVersion = "7.0.0"
+               id 'mysql' version """$mysqlVersion"""
+               `
+    );
+  });
+
   it('should replace a external groovy variable assigned to a specific dependency', () => {
     const gradleFile =
       'runtime (  "mysql:mysql-connector-java:${mysqlVersion}"  )'; // eslint-disable-line no-template-curly-in-string
@@ -705,5 +769,24 @@ describe('lib/manager/gradle/updateGradleVersion', () => {
       '7.0.0'
     );
     expect(updatedGradleFile).toEqual('val mysqlVersion by extra { "7.0.0" }');
+  });
+
+  it('should replace a external variable assigned to a plugin dependency', () => {
+    const gradleFile = 'id("mysql") version "$mysqlVersion";';
+    const mysqlDependency = {
+      group: 'mysql',
+      depGroup: 'mysql',
+      name: 'mysql-connector-java',
+      version: '6.0.5',
+    };
+    collectVersionVariables([mysqlDependency], gradleFile);
+
+    const gradleWithVersionFile = 'String mysqlVersion = "6.0.5"';
+    const updatedGradleFile = updateGradleVersion(
+      gradleWithVersionFile,
+      mysqlDependency,
+      '7.0.0'
+    );
+    expect(updatedGradleFile).toEqual('String mysqlVersion = "7.0.0"');
   });
 });

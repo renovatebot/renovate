@@ -205,6 +205,7 @@ describe('config/validation', () => {
       const config = {
         regexManagers: [
           {
+            fileMatch: [],
             matchStrings: [],
           },
         ],
@@ -220,6 +221,7 @@ describe('config/validation', () => {
       const config = {
         regexManagers: [
           {
+            fileMatch: ['Dockerfile'],
             matchStrings: ['***$}{]]['],
           },
         ],
@@ -235,6 +237,7 @@ describe('config/validation', () => {
       const config = {
         regexManagers: [
           {
+            fileMatch: ['Dockerfile'],
             matchStrings: ['ENV (?<currentValue>.*?)\\s'],
             depNameTemplate: 'foo',
             datasourceTemplate: 'bar',
@@ -252,6 +255,7 @@ describe('config/validation', () => {
       const config = {
         regexManagers: [
           {
+            fileMatch: ['Dockerfile'],
             matchStrings: ['ENV (?<currentValue>.*?)\\s'],
             depNameTemplate: 'foo',
             datasourceTemplate: 'bar',
@@ -270,6 +274,7 @@ describe('config/validation', () => {
       const config = {
         regexManagers: [
           {
+            fileMatch: ['Dockerfile'],
             matchStrings: ['ENV (.*?)\\s'],
             depNameTemplate: 'foo',
             datasourceTemplate: 'bar',

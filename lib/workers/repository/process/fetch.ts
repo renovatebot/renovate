@@ -1,18 +1,18 @@
 import pAll from 'p-all';
-import { logger } from '../../../logger';
-import { getPackageUpdates } from '../../../manager';
 import {
+  ManagerConfig,
+  RenovateConfig,
   getManagerConfig,
   mergeChildConfig,
-  RenovateConfig,
-  ManagerConfig,
 } from '../../../config';
-import { applyPackageRules } from '../../../util/package-rules';
-import { lookupUpdates, LookupUpdateConfig } from './lookup';
-import { PackageFile, PackageDependency } from '../../../manager/common';
-import { SkipReason } from '../../../types';
 import { getDefaultConfig } from '../../../datasource';
+import { logger } from '../../../logger';
+import { getPackageUpdates } from '../../../manager';
+import { PackageDependency, PackageFile } from '../../../manager/common';
+import { SkipReason } from '../../../types';
 import { clone } from '../../../util/clone';
+import { applyPackageRules } from '../../../util/package-rules';
+import { LookupUpdateConfig, lookupUpdates } from './lookup';
 
 async function fetchDepUpdates(
   packageFileConfig: ManagerConfig & PackageFile,
@@ -114,28 +114,11 @@ export async function fetchUpdates(
   packageFiles: Record<string, PackageFile[]>
 ): Promise<void> {
   const managers = Object.keys(packageFiles);
-  const stats = {
-    managers: {} as Record<string, { fileCount: number; depCount: number }>,
-    fileCount: 0,
-    depCount: 0,
-  };
-  for (const [manager, managerPackageFiles] of Object.entries(packageFiles)) {
-    const fileCount = managerPackageFiles.length;
-    let depCount = 0;
-    for (const file of managerPackageFiles) {
-      depCount += file.deps.length;
-    }
-    stats.managers[manager] = {
-      fileCount,
-      depCount,
-    };
-    stats.fileCount += fileCount;
-    stats.depCount += depCount;
-  }
-  logger.info({ stats }, `Extraction statistics`);
+  const startTime = Date.now();
   const allManagerJobs = managers.map((manager) =>
     fetchManagerUpdates(config, packageFiles, manager)
   );
   await Promise.all(allManagerJobs);
-  logger.debug('fetchUpdates complete');
+  const durationMs = Math.round(Date.now() - startTime);
+  logger.info({ durationMs }, 'Package releases lookups complete');
 }

@@ -1,49 +1,52 @@
 import is from '@sindresorhus/is';
+import { RenovateConfig } from '../../../config/common';
+import { logger } from '../../../logger';
 import {
   extractAllPackageFiles,
   extractPackageFile,
   get,
 } from '../../../manager';
-import { platform } from '../../../platform';
-import { logger } from '../../../logger';
-import {
-  filterIgnoredFiles,
-  getIncludedFiles,
-  getMatchingFiles,
-} from './file-match';
 import { PackageFile } from '../../../manager/common';
+import { readLocalFile } from '../../../util/fs';
 
-// TODO: fix types
 export async function getManagerPackageFiles(
-  config: any
+  config: RenovateConfig
 ): Promise<PackageFile[]> {
-  const { manager, enabled, includePaths, ignorePaths } = config;
+  const { enabled, manager, fileList } = config;
   logger.trace(`getPackageFiles(${manager})`);
   if (!enabled) {
     logger.debug(`${manager} is disabled`);
     return [];
   }
-  let fileList = await platform.getFileList();
-  fileList = getIncludedFiles(fileList, includePaths);
-  fileList = filterIgnoredFiles(fileList, ignorePaths);
-  const matchedFiles = getMatchingFiles(fileList, manager, config.fileMatch);
   // istanbul ignore else
-  if (is.nonEmptyArray(matchedFiles)) {
+  if (is.nonEmptyArray(fileList)) {
     logger.debug(
       `Matched ${
-        matchedFiles.length
-      } file(s) for manager ${manager}: ${matchedFiles.join(', ')}`
+        fileList.length
+      } file(s) for manager ${manager}: ${fileList.join(', ')}`
     );
   } else {
     return [];
   }
   // Extract package files synchronously if manager requires it
   if (get(manager, 'extractAllPackageFiles')) {
-    return extractAllPackageFiles(manager, config, matchedFiles);
+    const allPackageFiles = await extractAllPackageFiles(
+      manager,
+      config,
+      fileList
+    );
+    if (allPackageFiles) {
+      for (const packageFile of allPackageFiles) {
+        for (let index = 0; index < packageFile.deps.length; index += 1) {
+          packageFile.deps[index].depIndex = index;
+        }
+      }
+    }
+    return allPackageFiles;
   }
-  const packageFiles = [];
-  for (const packageFile of matchedFiles) {
-    const content = await platform.getFile(packageFile);
+  const packageFiles: PackageFile[] = [];
+  for (const packageFile of fileList) {
+    const content = await readLocalFile(packageFile, 'utf8');
     if (content) {
       const res = await extractPackageFile(
         manager,

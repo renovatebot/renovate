@@ -1,7 +1,7 @@
+import { defaultConfig, mocked, platform } from '../../../../test/util';
+import { RenovateConfig } from '../../../config';
 import * as _managerFiles from './manager-files';
 import { extractAllDependencies } from '.';
-import { mocked, defaultConfig } from '../../../../test/util';
-import { RenovateConfig } from '../../../config';
 
 jest.mock('./manager-files');
 
@@ -10,8 +10,10 @@ const managerFiles = mocked(_managerFiles);
 describe('workers/repository/extract/index', () => {
   describe('extractAllDependencies()', () => {
     let config: RenovateConfig;
+    const fileList = ['README', 'package.json', 'tasks/ansible.yaml'];
     beforeEach(() => {
       jest.resetAllMocks();
+      platform.getFileList.mockResolvedValue(fileList);
       config = { ...defaultConfig };
     });
     it('runs', async () => {
@@ -27,7 +29,7 @@ describe('workers/repository/extract/index', () => {
     });
     it('checks custom managers', async () => {
       managerFiles.getManagerPackageFiles.mockResolvedValue([{} as never]);
-      config.regexManagers = [{ matchStrings: [''] }];
+      config.regexManagers = [{ fileMatch: ['README'], matchStrings: [''] }];
       const res = await extractAllDependencies(config);
       expect(Object.keys(res).includes('regex')).toBe(true);
     });

@@ -1,6 +1,6 @@
-import { extractAndUpdate } from './extract-update';
-import * as _branchify from '../updates/branchify';
 import { mocked } from '../../../../test/util';
+import * as _branchify from '../updates/branchify';
+import { extract, update } from './extract-update';
 
 jest.mock('./write');
 jest.mock('./sort');
@@ -11,18 +11,19 @@ jest.mock('../extract');
 const branchify = mocked(_branchify);
 
 branchify.branchifyUpgrades.mockResolvedValueOnce({
-  branches: [],
-  branchList: [],
+  branches: [{ branchName: 'some-branch', upgrades: [] }],
+  branchList: ['branchName'],
 });
 
 describe('workers/repository/process/extract-update', () => {
-  describe('extractAndUpdate()', () => {
+  describe('extract()', () => {
     it('runs', async () => {
       const config = {
         repoIsOnboarded: true,
         suppressNotifications: ['deprecationWarningIssues'],
       };
-      await extractAndUpdate(config);
+      const res = await extract(config);
+      await update(config, res.branches);
     });
   });
 });

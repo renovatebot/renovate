@@ -1,25 +1,28 @@
 import is from '@sindresorhus/is';
-import { logger } from '../../logger';
-import * as massage from '../massage';
-import * as migration from '../migration';
-import * as github from './github';
-import * as npm from './npm';
-import * as gitlab from './gitlab';
-import * as local from './local';
-import { RenovateConfig } from '../common';
-import { mergeChildConfig } from '../utils';
-import { regEx } from '../../util/regex';
 import {
   CONFIG_VALIDATION,
   DATASOURCE_FAILURE,
   PLATFORM_FAILURE,
 } from '../../constants/error-messages';
+import { logger } from '../../logger';
+import { regEx } from '../../util/regex';
+import { RenovateConfig } from '../common';
+import * as massage from '../massage';
+import * as migration from '../migration';
+import { mergeChildConfig } from '../utils';
+import { PresetApi } from './common';
+import * as github from './github';
+import * as gitlab from './gitlab';
+import * as internal from './internal';
+import * as local from './local';
+import * as npm from './npm';
 
-const presetSources = {
+const presetSources: Record<string, PresetApi> = {
   github,
   npm,
   gitlab,
   local,
+  internal,
 };
 
 export function replaceArgs(
@@ -82,9 +85,26 @@ export function parsePreset(input: string): ParsedPreset {
       .map((elem) => elem.trim());
     str = str.slice(0, str.indexOf('('));
   }
-  if (str.startsWith(':')) {
+  const presetsPackages = [
+    'config',
+    'default',
+    'docker',
+    'group',
+    'helpers',
+    'monorepo',
+    'packages',
+    'preview',
+    'schedule',
+  ];
+  if (
+    presetsPackages.some((presetPackage) => str.startsWith(`${presetPackage}:`))
+  ) {
+    presetSource = 'internal';
+    [packageName, presetName] = str.split(':');
+  } else if (str.startsWith(':')) {
     // default namespace
-    packageName = 'renovate-config-default';
+    presetSource = 'internal';
+    packageName = 'default';
     presetName = str.slice(1);
   } else if (str.startsWith('@')) {
     // scoped namespace
@@ -133,6 +153,7 @@ export async function getPreset(
   }
   logger.trace({ presetConfig }, `Applied params to preset ${preset}`);
   const presetKeys = Object.keys(presetConfig);
+  // istanbul ignore if
   if (
     presetKeys.length === 2 &&
     presetKeys.includes('description') &&
@@ -184,7 +205,7 @@ export async function resolveConfigPresets(
         try {
           fetchedPreset = await getPreset(preset, baseConfig);
         } catch (err) {
-          logger.debug({ err }, 'Preset fetch error');
+          logger.debug({ preset, err }, 'Preset fetch error');
           // istanbul ignore if
           if (
             err.message === PLATFORM_FAILURE ||
@@ -205,7 +226,10 @@ export async function resolveConfigPresets(
             error.validationError +=
               '. Note: this is a *nested* preset so please contact the preset author if you are unable to fix it yourself.';
           }
-          logger.info('Throwing preset error');
+          logger.info(
+            { validationError: error.validationError },
+            'Throwing preset error'
+          );
           throw error;
         }
         const presetConfig = await resolveConfigPresets(

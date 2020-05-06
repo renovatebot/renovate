@@ -1,5 +1,5 @@
-import { PackageFile, PackageDependency } from '../common';
 import * as datasourceCdnjs from '../../datasource/cdnjs';
+import { PackageDependency, PackageFile } from '../common';
 
 export const cloudflareUrlRegex = /\/\/cdnjs\.cloudflare\.com\/ajax\/libs\/(?<depName>[^/]+?)\/(?<currentValue>[^/]+?)\/(?<asset>[-/_.a-zA-Z0-9]+)/;
 

@@ -1,11 +1,11 @@
 import fs from 'fs-extra';
 import got from '../../../util/got';
+import { ChangeLogNotes } from './common';
 import {
   addReleaseNotes,
   getReleaseNotes,
   getReleaseNotesMd,
 } from './release-notes';
-import { ChangeLogNotes } from './common';
 
 const ghGot: jest.Mock<Promise<{ body: unknown }>> = got as never;
 

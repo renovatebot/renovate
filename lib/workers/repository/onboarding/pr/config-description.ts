@@ -1,8 +1,9 @@
-import { emojify } from '../../../../util/emoji';
-import { logger } from '../../../../logger';
-import { configFileNames } from '../../../../config/app-strings';
+import is from '@sindresorhus/is/dist';
 import { RenovateConfig } from '../../../../config';
+import { configFileNames } from '../../../../config/app-strings';
+import { logger } from '../../../../logger';
 import { PackageFile } from '../../../../manager/common';
+import { emojify } from '../../../../util/emoji';
 
 const defaultConfigFile = configFileNames[0];
 
@@ -24,7 +25,8 @@ export function getScheduleDesc(config: RenovateConfig): string[] {
 function getDescriptionArray(config: RenovateConfig): string[] {
   logger.debug('getDescriptionArray()');
   logger.trace({ config });
-  return (config.description || []).concat(getScheduleDesc(config));
+  const desc = is.nonEmptyArray(config.description) ? config.description : [];
+  return desc.concat(getScheduleDesc(config));
 }
 
 export function getConfigDesc(

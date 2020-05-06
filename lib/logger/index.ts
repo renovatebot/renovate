@@ -1,11 +1,11 @@
+import is from '@sindresorhus/is';
 import * as bunyan from 'bunyan';
 import * as shortid from 'shortid';
 
-import is from '@sindresorhus/is';
-import { RenovateStream } from './pretty-stdout';
+import cmdSerializer from './cmd-serializer';
 import configSerializer from './config-serializer';
 import errSerializer from './err-serializer';
-import cmdSerializer from './cmd-serializer';
+import { RenovateStream } from './pretty-stdout';
 import { ErrorStream, withSanitizer } from './utils';
 
 let logContext: string = process.env.LOG_CONTEXT || shortid.generate();

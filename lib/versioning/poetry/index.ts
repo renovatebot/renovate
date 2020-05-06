@@ -1,7 +1,7 @@
-import { parseRange } from 'semver-utils';
 import { major, minor } from 'semver';
-import { api as npm } from '../npm';
+import { parseRange } from 'semver-utils';
 import { NewValueConfig, VersioningApi } from '../common';
+import { api as npm } from '../npm';
 
 export const id = 'poetry';
 export const displayName = 'Poetry';

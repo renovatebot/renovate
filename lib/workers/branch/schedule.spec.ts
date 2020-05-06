@@ -1,6 +1,6 @@
 import mockDate from 'mockdate';
-import * as schedule from './schedule';
 import { RenovateConfig } from '../../config';
+import * as schedule from './schedule';
 
 describe('workers/branch/schedule', () => {
   describe('hasValidTimezone(schedule)', () => {

@@ -1,13 +1,14 @@
+import { RenovateConfig, mergeChildConfig } from '../../../config';
 import { logger } from '../../../logger';
-import { mergeChildConfig, RenovateConfig } from '../../../config';
-import { extractAndUpdate, ExtractAndUpdateResult } from './extract-update';
+import { PackageFile } from '../../../manager/common';
 import { platform } from '../../../platform';
-import { WriteUpdateResult } from './write';
 import { BranchConfig } from '../../common';
+import { ExtractResult, extract, update } from './extract-update';
+import { WriteUpdateResult } from './write';
 
 export async function processRepo(
   config: RenovateConfig
-): Promise<ExtractAndUpdateResult> {
+): Promise<ExtractResult> {
   logger.debug('processRepo()');
   /* eslint-disable no-param-reassign */
   config.masterIssueChecks = {};
@@ -45,9 +46,9 @@ export async function processRepo(
   }
   if (config.baseBranches && config.baseBranches.length) {
     logger.debug({ baseBranches: config.baseBranches }, 'baseBranches');
-    let res: WriteUpdateResult | undefined;
     let branches: BranchConfig[] = [];
     let branchList: string[] = [];
+    let packageFiles: Record<string, PackageFile[]>;
     for (const baseBranch of config.baseBranches) {
       logger.debug(`baseBranch: ${baseBranch}`);
       const baseBranchConfig = mergeChildConfig(config, { baseBranch });
@@ -55,14 +56,24 @@ export async function processRepo(
         baseBranchConfig.branchPrefix += `${baseBranch}-`;
         baseBranchConfig.hasBaseBranches = true;
       }
-      await platform.setBaseBranch(baseBranch);
-      const baseBranchRes = await extractAndUpdate(baseBranchConfig);
-      ({ res } = baseBranchRes);
+      baseBranchConfig.baseBranchSha = await platform.setBaseBranch(baseBranch);
+      const baseBranchRes = await extract(baseBranchConfig);
       branches = branches.concat(baseBranchRes.branches);
       branchList = branchList.concat(baseBranchRes.branchList);
+      packageFiles = baseBranchRes.packageFiles;
     }
-    return { res, branches, branchList };
+    return { branches, branchList, packageFiles };
   }
   logger.debug('No baseBranches');
-  return extractAndUpdate(config);
+  return extract(config);
+}
+
+export async function updateRepo(
+  config: RenovateConfig,
+  branches: BranchConfig[],
+  branchList: string[]
+): Promise<WriteUpdateResult | undefined> {
+  logger.debug('processRepo()');
+
+  return update(config, branches);
 }
