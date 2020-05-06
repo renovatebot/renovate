@@ -10,6 +10,7 @@ import { ensureMasterIssue } from './master-issue';
 import { ensureOnboardingPr } from './onboarding/pr';
 import { processRepo, updateRepo } from './process';
 import { ProcessResult, processResult } from './result';
+import { DateTime } from 'luxon';
 
 let renovateVersion = 'unknown';
 try {
@@ -22,6 +23,7 @@ try {
 export async function renovateRepository(
   repoConfig: RenovateConfig
 ): Promise<ProcessResult> {
+  const startTime = Date.now();
   let config = { ...repoConfig };
   setMeta({ repository: config.repository });
   logger.info({ renovateVersion }, 'Repository started');
@@ -48,6 +50,6 @@ export async function renovateRepository(
   if (config.localDir && !config.persistRepoData) {
     await fs.remove(config.localDir);
   }
-  logger.info('Repository finished');
+  logger.info({ durationMs: Date.now() - startTime }, 'Repository finished');
   return repoResult;
 }
