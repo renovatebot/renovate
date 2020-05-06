@@ -123,6 +123,7 @@ export interface RenovateConfig
     RenovateSharedConfig,
     UpdateConfig<PackageRule>,
     Record<string, unknown> {
+  depName?: string;
   baseBranches?: string[];
   baseBranch?: string;
   baseBranchSha?: string;
