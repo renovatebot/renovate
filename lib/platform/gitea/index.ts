@@ -103,8 +103,6 @@ function toRenovatePR(data: helper.PR): Pr | null {
     targetBranch: data.base.ref,
     sourceRepo: data.head.repo.full_name,
     createdAt: data.created_at,
-    // Currently not needed
-    // closedAt: data.closed_at,
     canMerge: data.mergeable,
     isConflicted: !data.mergeable,
     isStale: undefined,
