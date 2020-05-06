@@ -104,7 +104,7 @@ export async function getChangeLogJSON({
 
   async function getRef(release: Release): Promise<string | null> {
     if (!tags) {
-      tags = await getTags(baseUrl, repository);
+      tags = await getTags(apiBaseUrl, repository);
     }
     const regex = new RegExp(`${depName}[@-]`);
     const tagName = tags

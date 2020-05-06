@@ -177,7 +177,7 @@ describe('workers/pr/changelog', () => {
       ).toMatchSnapshot();
       expect(ghGot).toHaveBeenNthCalledWith(
         1,
-        'https://github.com/repos/chalk/chalk/tags?per_page=100',
+        'https://api.github.com/repos/chalk/chalk/tags?per_page=100',
         { paginate: true }
       );
       expect(ghGot).toHaveBeenNthCalledWith(
