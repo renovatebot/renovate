@@ -4,6 +4,7 @@ import { parse } from 'node-html-parser';
 import { logger } from '../../logger';
 import { Http } from '../../util/http';
 import { matches } from '../../versioning/pep440';
+import * as pep440 from '../../versioning/pep440';
 import { GetReleasesConfig, ReleaseResult } from '../common';
 
 export const id = 'pypi';
@@ -19,7 +20,7 @@ function compatibleVersions(
   compatibility: Record<string, string>
 ): string[] {
   const versions = Object.keys(releases);
-  if (!(compatibility && compatibility.python)) {
+  if (!(compatibility?.python && pep440.isVersion(compatibility.python))) {
     return versions;
   }
   return versions.filter((version) =>
