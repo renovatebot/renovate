@@ -102,7 +102,7 @@ export async function getReleases({
   }
   const releases = repositoryData.find((chart) => chart.name === lookupName);
   if (!releases) {
-    logger.warn(
+    logger.debug(
       { dependency: lookupName },
       `Entry ${lookupName} doesn't exist in index.yaml from ${helmRepository}`
     );
