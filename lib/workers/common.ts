@@ -49,7 +49,6 @@ export interface BranchUpgradeConfig
   prPriority?: number;
   prTitle?: string;
   releases?: Release[];
-
   releaseTimestamp?: string;
   repoName?: string;
 

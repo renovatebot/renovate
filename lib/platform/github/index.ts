@@ -1143,8 +1143,8 @@ async function getStatusCheck(
 
 const githubToRenovateStatusMapping = {
   success: BranchStatus.green,
-  failure: BranchStatus.red,
   error: BranchStatus.red,
+  failure: BranchStatus.red,
   pending: BranchStatus.yellow,
 };
 

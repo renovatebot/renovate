@@ -30,10 +30,8 @@ import {
   RepoParams,
   VulnerabilityAlert,
 } from '../common';
-
 import GitStorage, { StatusResult } from '../git/storage';
 import { smartTruncate } from '../utils/pr-body';
-
 import * as azureApi from './azure-got-wrapper';
 import * as azureHelper from './azure-helper';
 import { AzurePr } from './types';
