@@ -1,4 +1,3 @@
-import { hrtime } from 'process';
 import { RenovateConfig } from '../../../config';
 import { logger } from '../../../logger';
 import { PackageFile } from '../../../manager/common';
@@ -46,12 +45,14 @@ function extractStats(packageFiles: Record<string, PackageFile[]>): any {
 
 export async function extract(config: RenovateConfig): Promise<ExtractResult> {
   logger.debug('extractAndUpdate()');
-  const startTime = hrtime();
+  const startTime = Date.now();
   const packageFiles = await extractAllDependencies(config);
-  const duration = hrtime(startTime);
-  const seconds = Math.round(duration[0] + duration[1] / 1e9);
+  const durationMs = Math.round(Date.now() - startTime);
   const stats = extractStats(packageFiles);
-  logger.info({ stats, seconds }, `Dependency extraction complete`);
+  logger.info(
+    { baseBranch: config.baseBranch, stats, durationMs },
+    `Dependency extraction complete`
+  );
   logger.trace({ config: packageFiles }, 'packageFiles');
   await fetchUpdates(config, packageFiles);
   logger.debug({ config: packageFiles }, 'packageFiles with updates');
@@ -66,14 +67,12 @@ export async function extract(config: RenovateConfig): Promise<ExtractResult> {
 
 export async function update(
   config: RenovateConfig,
-  branches: BranchConfig[],
-  branchList: string[],
-  packageFiles: Record<string, PackageFile[]>
+  branches: BranchConfig[]
 ): Promise<WriteUpdateResult | undefined> {
   let res: WriteUpdateResult | undefined;
   // istanbul ignore else
   if (config.repoIsOnboarded) {
-    res = await writeUpdates(config, packageFiles, branches);
+    res = await writeUpdates(config, branches);
   }
 
   return res;

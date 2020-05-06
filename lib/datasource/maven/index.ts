@@ -218,7 +218,7 @@ async function filterMissingArtifacts(
         const artifactUrl = getMavenUrl(
           dependency,
           repoUrl,
-          `${version}/${dependency.name}-${version}.jar`
+          `${version}/${dependency.name}-${version}.pom`
         );
         return [version, artifactUrl];
       })
