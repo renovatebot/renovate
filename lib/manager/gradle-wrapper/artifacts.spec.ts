@@ -1,16 +1,18 @@
-import { readFileSync } from 'fs';
 import { resolve } from 'path';
+import { readFile, readFileSync } from 'fs-extra';
 import Git from 'simple-git/promise';
-import { mockExecAll } from '../../../test/execUtil';
 import * as httpMock from '../../../test/httpMock';
-import { bufferSerializer, getName, mocked, partial } from '../../../test/util';
-import { platform as _platform } from '../../platform';
+import {
+  bufferSerializer,
+  getName,
+  partial,
+  platform,
+} from '../../../test/util';
 import { setUtilConfig } from '../../util';
 import { clearRepoCache } from '../../util/cache';
 import { ifSystemSupportsGradle } from '../gradle/__testutil__/gradle';
 import * as dcUpdate from '.';
 
-const platform = mocked(_platform);
 const config = {
   localDir: resolve(__dirname, './__fixtures__/testFiles'),
   toVersion: '5.6.4',
@@ -18,24 +20,23 @@ const config = {
 
 jest.mock('../../platform');
 
-async function resetTestFiles() {
-  await dcUpdate.updateArtifacts({
-    packageFileName: 'gradle-wrapper.properties',
-    updatedDeps: [],
-    newPackageFileContent: `https://services.gradle.org/distributions/gradle-5.6.4-bin.zip`,
-    config,
-  });
-}
-
 expect.addSnapshotSerializer(bufferSerializer());
+
+function readString(...paths: string[]): Promise<string> {
+  return readFile(resolve(__dirname, ...paths), 'utf8');
+}
 
 describe(getName(__filename), () => {
   beforeEach(async () => {
     jest.setTimeout(5 * 60 * 1000);
     jest.resetAllMocks();
     await setUtilConfig(config);
-    await resetTestFiles();
   });
+
+  afterEach(async () => {
+    await Git(config.localDir)?.checkout(['--', '.']);
+  });
+
   describe('updateArtifacts - replaces existing value', () => {
     ifSystemSupportsGradle(6).it('replaces existing value', async () => {
       platform.getRepoStatus.mockResolvedValue({
@@ -50,12 +51,8 @@ describe(getName(__filename), () => {
       const res = await dcUpdate.updateArtifacts({
         packageFileName: 'gradle-wrapper.properties',
         updatedDeps: [],
-        newPackageFileContent: readFileSync(
-          resolve(
-            __dirname,
-            `./__fixtures__/expectedFiles/gradle/wrapper/gradle-wrapper.properties`
-          ),
-          'utf8'
+        newPackageFileContent: await readString(
+          `./__fixtures__/expectedFiles/gradle/wrapper/gradle-wrapper.properties`
         ),
         config: { ...config, toVersion: '6.3' },
       });
@@ -224,15 +221,6 @@ describe(getName(__filename), () => {
   });
 
   describe('updateArtifacts - distributionSha256Sum', () => {
-    let exec: jest.Mock<typeof import('child_process').exec>;
-    let api: typeof dcUpdate;
-
-    beforeAll(async () => {
-      jest.mock('child_process');
-      exec = (await import('child_process')).exec as never;
-      api = await import('.');
-    });
-
     beforeEach(() => {
       httpMock.setup();
     });
@@ -242,8 +230,7 @@ describe(getName(__filename), () => {
       clearRepoCache();
     });
 
-    it('updates', async () => {
-      const execSnapshots = mockExecAll(exec);
+    ifSystemSupportsGradle(6).it('updates', async () => {
       httpMock
         .scope('https://services.gradle.org')
         .get('/distributions/gradle-6.3-bin.zip.sha256')
@@ -254,37 +241,37 @@ describe(getName(__filename), () => {
 
       platform.getRepoStatus.mockResolvedValueOnce(
         partial<Git.StatusResult>({
-          modified: [
-            'gradle/wrapper/gradle-wrapper.properties',
-            'gradle/wrapper/gradle-wrapper.jar',
-            'gradlew',
-            'gradlew.bat',
-          ],
+          modified: ['gradle/wrapper/gradle-wrapper.properties'],
         })
       );
 
-      const result = await api.updateArtifacts({
+      const result = await dcUpdate.updateArtifacts({
         packageFileName: 'gradle-wrapper.properties',
         updatedDeps: [],
         newPackageFileContent: `distributionSha256Sum=336b6898b491f6334502d8074a6b8c2d73ed83b92123106bd4bf837f04111043\ndistributionUrl=https\\://services.gradle.org/distributions/gradle-6.3-bin.zip`,
-        config: {
-          localDir: 'some-dir',
-        },
+        config,
       });
 
       expect(result).toMatchSnapshot('result');
-      expect(execSnapshots).toMatchSnapshot('exeSnapshots');
+
+      expect(
+        await readString(
+          config.localDir,
+          `./gradle/wrapper/gradle-wrapper.properties`
+        )
+      ).toEqual(
+        await readString(`./__fixtures__/gradle-wrapper-sum.properties`)
+      );
       expect(httpMock.getTrace()).toMatchSnapshot('httpSnapshots');
     });
 
-    it('artifact error', async () => {
-      const execSnapshots = mockExecAll(exec);
+    ifSystemSupportsGradle(6).it('artifact error', async () => {
       httpMock
         .scope('https://services.gradle.org')
         .get('/distributions/gradle-6.3-bin.zip.sha256')
         .reply(404);
 
-      const result = await api.updateArtifacts({
+      const result = await dcUpdate.updateArtifacts({
         packageFileName: 'gradle-wrapper.properties',
         updatedDeps: [],
         newPackageFileContent: `distributionSha256Sum=336b6898b491f6334502d8074a6b8c2d73ed83b92123106bd4bf837f04111043\ndistributionUrl=https\\://services.gradle.org/distributions/gradle-6.3-bin.zip`,
@@ -301,7 +288,6 @@ describe(getName(__filename), () => {
           },
         },
       ]);
-      expect(execSnapshots).toEqual([]);
       expect(httpMock.getTrace()).toMatchSnapshot('httpSnapshots');
     });
   });
