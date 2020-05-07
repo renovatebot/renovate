@@ -32,7 +32,6 @@ interface LocalConfig extends StorageConfig {
   baseBranchSha: string;
   branchExists: Record<string, boolean>;
   branchPrefix: string;
-  fileList?: string[];
 }
 
 // istanbul ignore next
@@ -107,9 +106,7 @@ export class Storage {
   async initRepo(args: StorageConfig): Promise<void> {
     this.cleanRepo();
     // eslint-disable-next-line no-multi-assign
-    const config: LocalConfig = (this._config = {
-      ...args,
-    } as any);
+    const config: LocalConfig = (this._config = { ...args } as any);
     // eslint-disable-next-line no-multi-assign
     const cwd = (this._cwd = config.localDir);
     this._config.branchExists = {};
@@ -259,7 +256,6 @@ export class Storage {
       }
       logger.debug(`Setting baseBranch to ${branchName}`);
       this._config.baseBranch = branchName;
-      delete this._config.fileList;
       try {
         if (branchName !== 'master') {
           this._config.baseBranchSha = (
@@ -306,27 +302,24 @@ export class Storage {
   }
 
   async getFileList(): Promise<string[]> {
-    if (!this._config.fileList) {
-      const submodules = await this.getSubmodules();
-      const files: string = await this._git.raw([
-        'ls-tree',
-        '-r',
-        '--name-only',
-        'HEAD',
-      ]);
-      // istanbul ignore else
-      if (files) {
-        this._config.fileList = files
-          .split('\n')
-          .filter(Boolean)
-          .filter((file: string) =>
-            submodules.every((submodule: string) => !file.startsWith(submodule))
-          );
-      } else {
-        this._config.fileList = [];
-      }
+    const branch = this._config.baseBranch;
+    const submodules = await this.getSubmodules();
+    const files: string = await this._git.raw([
+      'ls-tree',
+      '-r',
+      '--name-only',
+      branch,
+    ]);
+    // istanbul ignore if
+    if (!files) {
+      return [];
     }
-    return this._config.fileList;
+    return files
+      .split('\n')
+      .filter(Boolean)
+      .filter((file: string) =>
+        submodules.every((submodule: string) => !file.startsWith(submodule))
+      );
   }
 
   async getSubmodules(): Promise<string[]> {
@@ -349,7 +342,7 @@ export class Storage {
     if (this._config.branchExists[branchName] !== undefined) {
       return this._config.branchExists[branchName];
     }
-    if (!branchName?.startsWith(this._config.branchPrefix)) {
+    if (!branchName.startsWith(this._config.branchPrefix)) {
       // fetch the branch only if it's not part of the existing branchPrefix
       try {
         await this._git.raw([

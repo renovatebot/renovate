@@ -82,6 +82,9 @@ describe('platform/git/storage', () => {
     });
   });
   describe('getFileList()', () => {
+    it('should return the correct files', async () => {
+      expect(await git.getFileList()).toMatchSnapshot();
+    });
     it('should exclude submodules', async () => {
       const repo = Git(base.path).silent(true);
       await repo.submoduleAdd(base.path, 'submodule');
@@ -93,15 +96,6 @@ describe('platform/git/storage', () => {
       expect(await fs.exists(tmpDir.path + '/.gitmodules')).toBeTruthy();
       expect(await git.getFileList()).toMatchSnapshot();
       await repo.reset(['--hard', 'HEAD^']);
-    });
-    it('returns cached version', async () => {
-      expect(await git.getFileList()).toMatchSnapshot();
-    });
-    it('returns from other branch', async () => {
-      await git.setBaseBranch('develop');
-      const res = await git.getFileList();
-      expect(res).toMatchSnapshot();
-      expect(res).toHaveLength(1);
     });
   });
   describe('branchExists(branchName)', () => {

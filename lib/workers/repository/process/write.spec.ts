@@ -19,14 +19,13 @@ beforeEach(() => {
 
 describe('workers/repository/write', () => {
   describe('writeUpdates()', () => {
-    const packageFiles = {};
     it('skips branches blocked by pin', async () => {
       const branches: BranchConfig[] = [
         { updateType: 'pin' },
         { blockedByPin: true },
         {},
       ] as never;
-      const res = await writeUpdates(config, packageFiles, branches);
+      const res = await writeUpdates(config, branches);
       expect(res).toEqual('done');
       expect(branchWorker.processBranch).toHaveBeenCalledTimes(2);
     });
@@ -35,7 +34,7 @@ describe('workers/repository/write', () => {
       branchWorker.processBranch.mockResolvedValueOnce('pr-created');
       branchWorker.processBranch.mockResolvedValueOnce('already-existed');
       branchWorker.processBranch.mockResolvedValueOnce('automerged');
-      const res = await writeUpdates(config, packageFiles, branches);
+      const res = await writeUpdates(config, branches);
       expect(res).toEqual('automerged');
       expect(branchWorker.processBranch).toHaveBeenCalledTimes(3);
     });

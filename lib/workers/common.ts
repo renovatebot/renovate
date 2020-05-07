@@ -10,6 +10,7 @@ import {
   ArtifactError,
   LookupUpdate,
   PackageDependency,
+  PackageFile,
 } from '../manager/common';
 import { File, PlatformPrOptions } from '../platform';
 import { ChangeLogResult } from './pr/changelog/common';
@@ -95,4 +96,5 @@ export interface BranchConfig
 
   res?: ProcessBranchResult;
   upgrades: BranchUpgradeConfig[];
+  packageFiles?: Record<string, PackageFile[]>;
 }

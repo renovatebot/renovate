@@ -1,3 +1,0 @@
-// Jest Snapshot v1, https://goo.gl/fbAQLP
-
-exports[`workers/repository/extract/cache returns a hash 1`] = `"3Jfx5tzsGJEm8HQCeHT/6QL5vzE="`;

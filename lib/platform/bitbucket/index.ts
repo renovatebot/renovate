@@ -182,6 +182,7 @@ export async function setBaseBranch(
 ): Promise<string> {
   logger.debug(`Setting baseBranch to ${branchName}`);
   config.baseBranch = branchName;
+  delete config.baseCommitSHA;
   const baseBranchSha = await config.storage.setBaseBranch(branchName);
   return baseBranchSha;
 }
@@ -830,6 +831,7 @@ export async function mergePr(
         },
       }
     );
+    delete config.baseCommitSHA;
     logger.debug('Automerging succeeded');
   } catch (err) /* istanbul ignore next */ {
     return false;
