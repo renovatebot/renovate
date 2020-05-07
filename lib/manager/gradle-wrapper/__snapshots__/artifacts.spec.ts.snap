@@ -1,0 +1,60 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`manager/gradle-wrapper/artifacts updateArtifacts - distributionSha256Sum artifact error: httpSnapshots 1`] = `
+Array [
+  Object {
+    "headers": Object {
+      "accept-encoding": "gzip, deflate",
+      "host": "services.gradle.org",
+      "user-agent": "https://github.com/renovatebot/renovate",
+    },
+    "method": "GET",
+    "url": "https://services.gradle.org/distributions/gradle-6.3-bin.zip.sha256",
+  },
+]
+`;
+
+exports[`manager/gradle-wrapper/artifacts updateArtifacts - distributionSha256Sum updates: exeSnapshots 1`] = `Array []`;
+
+exports[`manager/gradle-wrapper/artifacts updateArtifacts - distributionSha256Sum updates: httpSnapshots 1`] = `
+Array [
+  Object {
+    "headers": Object {
+      "accept-encoding": "gzip, deflate",
+      "host": "services.gradle.org",
+      "user-agent": "https://github.com/renovatebot/renovate",
+    },
+    "method": "GET",
+    "url": "https://services.gradle.org/distributions/gradle-6.3-bin.zip.sha256",
+  },
+]
+`;
+
+exports[`manager/gradle-wrapper/artifacts updateArtifacts - distributionSha256Sum updates: result 1`] = `
+Array [
+  Object {
+    "file": Object {
+      "contents": "e608700075ce59fc187f1080964ab09124a42a66b5bced4c117b16b30b593e59",
+      "name": "gradle/wrapper/gradle-wrapper.properties",
+    },
+  },
+  Object {
+    "file": Object {
+      "contents": "3dc39ad650d40f6c029bd8ff605c6d95865d657dbfdeacdb079db0ddfffedf9f",
+      "name": "gradle/wrapper/gradle-wrapper.jar",
+    },
+  },
+  Object {
+    "file": Object {
+      "contents": "261d896f782ec3181add62d77d5b1b9e1d0d599757ec108d857bad1eec2e7615",
+      "name": "gradlew",
+    },
+  },
+  Object {
+    "file": Object {
+      "contents": "0dc553fa66b53404638a5cc51a2fbfbc4f00b661fdc00b52da3acb5ed6868342",
+      "name": "gradlew.bat",
+    },
+  },
+]
+`;

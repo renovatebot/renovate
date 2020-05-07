@@ -1,9 +1,12 @@
 import { readFileSync } from 'fs';
 import { resolve } from 'path';
 import Git from 'simple-git/promise';
-import { bufferSerializer, getName, mocked } from '../../../test/util';
+import { mockExecAll } from '../../../test/execUtil';
+import * as httpMock from '../../../test/httpMock';
+import { bufferSerializer, getName, mocked, partial } from '../../../test/util';
 import { platform as _platform } from '../../platform';
 import { setUtilConfig } from '../../util';
+import { clearRepoCache } from '../../util/cache';
 import { ifSystemSupportsGradle } from '../gradle/__testutil__/gradle';
 import * as dcUpdate from '.';
 
@@ -13,7 +16,6 @@ const config = {
   toVersion: '5.6.4',
 };
 
-jest.mock('../../util/got');
 jest.mock('../../platform');
 
 async function resetTestFiles() {
@@ -141,7 +143,7 @@ describe(getName(__filename), () => {
   describe('updateArtifacts - error handling - getRepoStatus', () => {
     ifSystemSupportsGradle(6).it('error handling - getRepoStatus', async () => {
       platform.getRepoStatus.mockImplementation(() => {
-        throw new Error();
+        throw new Error('failed');
       });
 
       const res = await dcUpdate.updateArtifacts({
@@ -160,8 +162,7 @@ describe(getName(__filename), () => {
       expect(res[0].artifactError.lockFile).toEqual(
         'gradle-wrapper.properties'
       );
-      expect(res[0].artifactError.stderr).not.toBeNull();
-      expect(res[0].artifactError.stderr).not.toEqual('');
+      expect(res[0].artifactError.stderr).toEqual('failed');
 
       // 5.6.4 => 5.6.4 (updates execs) - unexpected behavior (looks like a bug in Gradle)
       ['gradle/wrapper/gradle-wrapper.properties'].forEach((file) => {
@@ -220,5 +221,88 @@ describe(getName(__filename), () => {
         });
       }
     );
+  });
+
+  describe('updateArtifacts - distributionSha256Sum', () => {
+    let exec: jest.Mock<typeof import('child_process').exec>;
+    let api: typeof dcUpdate;
+
+    beforeAll(async () => {
+      jest.mock('child_process');
+      exec = (await import('child_process')).exec as never;
+      api = await import('.');
+    });
+
+    beforeEach(() => {
+      httpMock.setup();
+    });
+
+    afterEach(() => {
+      httpMock.reset();
+      clearRepoCache();
+    });
+
+    it('updates', async () => {
+      const execSnapshots = mockExecAll(exec);
+      httpMock
+        .scope('https://services.gradle.org')
+        .get('/distributions/gradle-6.3-bin.zip.sha256')
+        .reply(
+          200,
+          '038794feef1f4745c6347107b6726279d1c824f3fc634b60f86ace1e9fbd1768'
+        );
+
+      platform.getRepoStatus.mockResolvedValueOnce(
+        partial<Git.StatusResult>({
+          modified: [
+            'gradle/wrapper/gradle-wrapper.properties',
+            'gradle/wrapper/gradle-wrapper.jar',
+            'gradlew',
+            'gradlew.bat',
+          ],
+        })
+      );
+
+      const result = await api.updateArtifacts({
+        packageFileName: 'gradle-wrapper.properties',
+        updatedDeps: [],
+        newPackageFileContent: `distributionSha256Sum=336b6898b491f6334502d8074a6b8c2d73ed83b92123106bd4bf837f04111043\ndistributionUrl=https\\://services.gradle.org/distributions/gradle-6.3-bin.zip`,
+        config: {
+          localDir: 'some-dir',
+        },
+      });
+
+      expect(result).toMatchSnapshot('result');
+      expect(execSnapshots).toMatchSnapshot('exeSnapshots');
+      expect(httpMock.getTrace()).toMatchSnapshot('httpSnapshots');
+    });
+
+    it('artifact error', async () => {
+      const execSnapshots = mockExecAll(exec);
+      httpMock
+        .scope('https://services.gradle.org')
+        .get('/distributions/gradle-6.3-bin.zip.sha256')
+        .reply(404);
+
+      const result = await api.updateArtifacts({
+        packageFileName: 'gradle-wrapper.properties',
+        updatedDeps: [],
+        newPackageFileContent: `distributionSha256Sum=336b6898b491f6334502d8074a6b8c2d73ed83b92123106bd4bf837f04111043\ndistributionUrl=https\\://services.gradle.org/distributions/gradle-6.3-bin.zip`,
+        config: {
+          localDir: 'some-dir',
+        },
+      });
+
+      expect(result).toEqual([
+        {
+          artifactError: {
+            lockFile: 'gradle-wrapper.properties',
+            stderr: 'Response code 404 (Not Found)',
+          },
+        },
+      ]);
+      expect(execSnapshots).toEqual([]);
+      expect(httpMock.getTrace()).toMatchSnapshot('httpSnapshots');
+    });
   });
 });
