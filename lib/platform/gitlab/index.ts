@@ -286,8 +286,8 @@ export /* istanbul ignore next */ function setBranchPrefix(
 // Search
 
 // Get full file list
-export function getFileList(branchName = config.baseBranch): Promise<string[]> {
-  return config.storage.getFileList(branchName);
+export function getFileList(): Promise<string[]> {
+  return config.storage.getFileList();
 }
 
 // Returns true if branch exists, otherwise false

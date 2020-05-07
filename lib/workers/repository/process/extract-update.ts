@@ -49,7 +49,10 @@ export async function extract(config: RenovateConfig): Promise<ExtractResult> {
   const packageFiles = await extractAllDependencies(config);
   const durationMs = Math.round(Date.now() - startTime);
   const stats = extractStats(packageFiles);
-  logger.info({ stats, durationMs }, `Dependency extraction complete`);
+  logger.info(
+    { baseBranch: config.baseBranch, stats, durationMs },
+    `Dependency extraction complete`
+  );
   logger.trace({ config: packageFiles }, 'packageFiles');
   await fetchUpdates(config, packageFiles);
   logger.debug({ config: packageFiles }, 'packageFiles with updates');
@@ -64,14 +67,12 @@ export async function extract(config: RenovateConfig): Promise<ExtractResult> {
 
 export async function update(
   config: RenovateConfig,
-  branches: BranchConfig[],
-  branchList: string[],
-  packageFiles: Record<string, PackageFile[]>
+  branches: BranchConfig[]
 ): Promise<WriteUpdateResult | undefined> {
   let res: WriteUpdateResult | undefined;
   // istanbul ignore else
   if (config.repoIsOnboarded) {
-    res = await writeUpdates(config, packageFiles, branches);
+    res = await writeUpdates(config, branches);
   }
 
   return res;

@@ -1,7 +1,5 @@
 import { RenovateConfig } from '../../../config';
 import { addMeta, logger, removeMeta } from '../../../logger';
-import { PackageFile } from '../../../manager/common';
-import { AdditionalPackageFiles } from '../../../manager/npm/post-update';
 import { processBranch } from '../../branch';
 import { BranchConfig } from '../../common';
 import { getLimitRemaining } from '../../global/limits';
@@ -11,7 +9,6 @@ export type WriteUpdateResult = 'done' | 'automerged';
 
 export async function writeUpdates(
   config: RenovateConfig,
-  packageFiles: Record<string, PackageFile[]> | AdditionalPackageFiles,
   allBranches: BranchConfig[]
 ): Promise<WriteUpdateResult> {
   let branches = allBranches;
@@ -35,8 +32,7 @@ export async function writeUpdates(
     addMeta({ branch: branch.branchName });
     const res = await processBranch(
       branch,
-      prsRemaining <= 0 || getLimitRemaining('prCommitsPerRunLimit') <= 0,
-      packageFiles
+      prsRemaining <= 0 || getLimitRemaining('prCommitsPerRunLimit') <= 0
     );
     branch.res = res;
     if (res === 'automerged' && config.automergeType !== 'pr-comment') {

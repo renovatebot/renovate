@@ -301,18 +301,14 @@ export class Storage {
     }
   }
 
-  async getFileList(branchName?: string): Promise<string[]> {
-    const branch = branchName || this._config.baseBranch;
-    const exists = await this.branchExists(branch);
-    if (!exists) {
-      return [];
-    }
+  async getFileList(): Promise<string[]> {
+    const branch = this._config.baseBranch;
     const submodules = await this.getSubmodules();
     const files: string = await this._git.raw([
       'ls-tree',
       '-r',
       '--name-only',
-      'origin/' + branch,
+      branch,
     ]);
     // istanbul ignore if
     if (!files) {

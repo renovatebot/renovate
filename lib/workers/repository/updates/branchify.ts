@@ -40,6 +40,7 @@ export async function branchifyUpgrades(
   logger.debug(
     `${updates.length} flattened updates found: ${updates
       .map((u) => u.depName)
+      .filter((txt) => txt && txt.length)
       .join(', ')}`
   );
   const errors: ValidationMessage[] = [];
@@ -150,6 +151,7 @@ export async function branchifyUpgrades(
     );
     const branch = generateBranchConfig(branchUpgrades[branchName]);
     branch.branchName = branchName;
+    branch.packageFiles = packageFiles;
     branches.push(branch);
   }
   removeMeta(['branch']);
