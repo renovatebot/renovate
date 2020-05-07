@@ -1,47 +1,12 @@
 import { PLATFORM_FAILURE } from '../../constants/error-messages';
-import { PLATFORM_TYPE_GITLAB } from '../../constants/platforms';
 import { logger } from '../../logger';
 import { api } from '../../platform/gitlab/gl-got-wrapper';
 import { ensureTrailingSlash } from '../../util/url';
 import { Preset } from './common';
-import {fetchJSONFile} from "./github";
 
 const { get: glGot } = api;
 
-export async function fetchJSONFile(
-  repo: string,
-  fileName: string,
-  endpoint: string
-): Promise<Preset> {
-  const urlEncodedPkgName = encodeURIComponent(repo);
-  const defaultBranchName = await getDefaultBranchName(
-    urlEncodedPkgName,
-    endpoint
-  );
-  const url = `${endpoint}projects/${urlEncodedPkgName}/repository/files/${fileName}?ref=${defaultBranchName}`;
-  let res: { body: { content: string } };
-  try {
-    res = await glGot(url)
-  } catch (err) {
-    if (err.message === PLATFORM_FAILURE) {
-      throw err;
-    }
-    logger.debug(
-      { statusCode: err.statusCode },
-      `Failed to retrieve ${fileName} from repo`
-    );
-    throw new Error('dep not found');
-  }
-  try {
-    const content = Buffer.from(res.body.content, 'base64').toString();
-    const parsed = JSON.parse(content);
-    return parsed;
-  } catch (err) {
-    throw new Error('invalid preset JSON');
-  }
-}
-
-async function getDefaultBranchName(
+export async function getDefaultBranchName(
   urlEncodedPkgName: string,
   endpoint: string
 ): Promise<string> {
@@ -62,6 +27,39 @@ async function getDefaultBranchName(
   }
 
   return defautlBranchName;
+}
+
+export async function fetchJSONFile(
+  repo: string,
+  fileName: string,
+  endpoint: string
+): Promise<Preset> {
+  const urlEncodedPkgName = encodeURIComponent(repo);
+  const defaultBranchName = await getDefaultBranchName(
+    urlEncodedPkgName,
+    endpoint
+  );
+  const url = `${endpoint}projects/${urlEncodedPkgName}/repository/files/${fileName}?ref=${defaultBranchName}`;
+  let res: { body: { content: string } };
+  try {
+    res = await glGot(url);
+  } catch (err) {
+    if (err.message === PLATFORM_FAILURE) {
+      throw err;
+    }
+    logger.debug(
+      { statusCode: err.statusCode },
+      `Failed to retrieve ${fileName} from repo`
+    );
+    throw new Error('dep not found');
+  }
+  try {
+    const content = Buffer.from(res.body.content, 'base64').toString();
+    const parsed = JSON.parse(content);
+    return parsed;
+  } catch (err) {
+    throw new Error('invalid preset JSON');
+  }
 }
 
 export async function getPresetFromEndpoint(
