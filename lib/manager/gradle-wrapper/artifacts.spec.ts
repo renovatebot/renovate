@@ -111,7 +111,8 @@ describe(getName(__filename), () => {
         config: { ...config, toVersion: '6.3' },
       });
 
-      expect(result).toMatchSnapshot('result');
+      expect(result).toHaveLength(1);
+      expect(result[0].artifactError).toBeUndefined();
 
       compareFile('gradle/wrapper/gradle-wrapper.properties', 'expectedFiles');
     });
@@ -220,7 +221,8 @@ describe(getName(__filename), () => {
         config,
       });
 
-      expect(result).toMatchSnapshot('result');
+      expect(result).toHaveLength(1);
+      expect(result[0].artifactError).toBeUndefined();
 
       expect(
         await readString(
@@ -228,7 +230,19 @@ describe(getName(__filename), () => {
           `./gradle/wrapper/gradle-wrapper.properties`
         )
       ).toEqual(await readString(`./gradle-wrapper-sum.properties`));
-      expect(httpMock.getTrace()).toMatchSnapshot('httpSnapshots');
+
+      expect(httpMock.getTrace()).toEqual([
+        {
+          headers: {
+            'accept-encoding': 'gzip, deflate',
+            host: 'services.gradle.org',
+            'user-agent': 'https://github.com/renovatebot/renovate',
+          },
+          method: 'GET',
+          url:
+            'https://services.gradle.org/distributions/gradle-6.3-bin.zip.sha256',
+        },
+      ]);
     });
 
     ifSystemSupportsGradle(6).it('artifact error', async () => {
@@ -254,7 +268,18 @@ describe(getName(__filename), () => {
           },
         },
       ]);
-      expect(httpMock.getTrace()).toMatchSnapshot('httpSnapshots');
+      expect(httpMock.getTrace()).toEqual([
+        {
+          headers: {
+            'accept-encoding': 'gzip, deflate',
+            host: 'services.gradle.org',
+            'user-agent': 'https://github.com/renovatebot/renovate',
+          },
+          method: 'GET',
+          url:
+            'https://services.gradle.org/distributions/gradle-6.3-bin.zip.sha256',
+        },
+      ]);
     });
   });
 });
