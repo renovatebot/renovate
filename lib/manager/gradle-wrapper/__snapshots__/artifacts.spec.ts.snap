@@ -38,3 +38,14 @@ Array [
   },
 ]
 `;
+
+exports[`manager/gradle-wrapper/artifacts updateArtifacts - replaces existing value updates from version: result 1`] = `
+Array [
+  Object {
+    "file": Object {
+      "contents": "464a521ebb1a5d5d33bb0db6ca87a7cb57ade6e2ebb7c6dc13b982ea5cdced09",
+      "name": "gradle/wrapper/gradle-wrapper.properties",
+    },
+  },
+]
+`;

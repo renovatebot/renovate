@@ -13,8 +13,9 @@ import { clearRepoCache } from '../../util/cache';
 import { ifSystemSupportsGradle } from '../gradle/__testutil__/gradle';
 import * as dcUpdate from '.';
 
+const fixtures = resolve(__dirname, './__fixtures__');
 const config = {
-  localDir: resolve(__dirname, './__fixtures__/testFiles'),
+  localDir: resolve(fixtures, './testFiles'),
   toVersion: '5.6.4',
 };
 
@@ -23,7 +24,17 @@ jest.mock('../../platform');
 expect.addSnapshotSerializer(bufferSerializer());
 
 function readString(...paths: string[]): Promise<string> {
-  return readFile(resolve(__dirname, ...paths), 'utf8');
+  return readFile(resolve(fixtures, ...paths), 'utf8');
+}
+
+function readBinSync(...paths: string[]): Buffer {
+  return readFileSync(resolve(fixtures, ...paths));
+}
+
+function compareFile(file: string, path: string) {
+  expect(readBinSync(`./testFiles/${file}`)).toEqual(
+    readBinSync(`./${path}/${file}`)
+  );
 }
 
 describe(getName(__filename), () => {
@@ -31,10 +42,13 @@ describe(getName(__filename), () => {
     jest.setTimeout(5 * 60 * 1000);
     jest.resetAllMocks();
     await setUtilConfig(config);
+    httpMock.setup();
+    clearRepoCache();
   });
 
   afterEach(async () => {
     await Git(config.localDir)?.checkout(['--', '.']);
+    httpMock.reset();
   });
 
   describe('updateArtifacts - replaces existing value', () => {
@@ -52,7 +66,7 @@ describe(getName(__filename), () => {
         packageFileName: 'gradle-wrapper.properties',
         updatedDeps: [],
         newPackageFileContent: await readString(
-          `./__fixtures__/expectedFiles/gradle/wrapper/gradle-wrapper.properties`
+          `./expectedFiles/gradle/wrapper/gradle-wrapper.properties`
         ),
         config: { ...config, toVersion: '6.3' },
       });
@@ -67,12 +81,7 @@ describe(getName(__filename), () => {
           return {
             file: {
               name: fileProjectPath,
-              contents: readFileSync(
-                resolve(
-                  __dirname,
-                  `./__fixtures__/testFiles/${fileProjectPath}`
-                )
-              ),
+              contents: readBinSync(`./testFiles/${fileProjectPath}`),
             },
           };
         })
@@ -84,20 +93,30 @@ describe(getName(__filename), () => {
         'gradlew',
         'gradlew.bat',
       ].forEach((file) => {
-        expect(
-          readFileSync(
-            resolve(__dirname, `./__fixtures__/testFiles/${file}`),
-            'utf8'
-          )
-        ).toEqual(
-          readFileSync(
-            resolve(__dirname, `./__fixtures__/expectedFiles/${file}`),
-            'utf8'
-          )
-        );
+        compareFile(file, 'expectedFiles');
       });
     });
+
+    ifSystemSupportsGradle(6).it('updates from version', async () => {
+      platform.getRepoStatus.mockResolvedValueOnce(
+        partial<Git.StatusResult>({
+          modified: ['gradle/wrapper/gradle-wrapper.properties'],
+        })
+      );
+
+      const result = await dcUpdate.updateArtifacts({
+        packageFileName: 'gradle-wrapper.properties',
+        updatedDeps: [],
+        newPackageFileContent: ``,
+        config: { ...config, toVersion: '6.3' },
+      });
+
+      expect(result).toMatchSnapshot('result');
+
+      compareFile('gradle/wrapper/gradle-wrapper.properties', 'expectedFiles');
+    });
   });
+
   describe('updateArtifacts - up to date', () => {
     ifSystemSupportsGradle(6).it('up to date', async () => {
       platform.getRepoStatus.mockResolvedValue({
@@ -107,12 +126,8 @@ describe(getName(__filename), () => {
       const res = await dcUpdate.updateArtifacts({
         packageFileName: 'gradle-wrapper.properties',
         updatedDeps: [],
-        newPackageFileContent: readFileSync(
-          resolve(
-            __dirname,
-            `./__fixtures__/testFiles/gradle/wrapper/gradle-wrapper.properties`
-          ),
-          'utf8'
+        newPackageFileContent: await readString(
+          `./testFiles/gradle/wrapper/gradle-wrapper.properties`
         ),
         config,
       });
@@ -123,17 +138,7 @@ describe(getName(__filename), () => {
       // 6.3 => (5.6.4) (downgrades execs)
       // looks like a bug in Gradle
       ['gradle/wrapper/gradle-wrapper.properties'].forEach((file) => {
-        expect(
-          readFileSync(
-            resolve(__dirname, `./__fixtures__/testFiles/${file}`),
-            'utf8'
-          )
-        ).toEqual(
-          readFileSync(
-            resolve(__dirname, `./__fixtures__/testFiles-copy/${file}`),
-            'utf8'
-          )
-        );
+        compareFile(file, 'testFiles-copy');
       });
     });
   });
@@ -146,12 +151,8 @@ describe(getName(__filename), () => {
       const res = await dcUpdate.updateArtifacts({
         packageFileName: 'gradle-wrapper.properties',
         updatedDeps: [],
-        newPackageFileContent: readFileSync(
-          resolve(
-            __dirname,
-            `./__fixtures__/testFiles/gradle/wrapper/gradle-wrapper.properties`
-          ),
-          'utf8'
+        newPackageFileContent: await readString(
+          `./testFiles/gradle/wrapper/gradle-wrapper.properties`
         ),
         config,
       });
@@ -163,17 +164,7 @@ describe(getName(__filename), () => {
 
       // 5.6.4 => 5.6.4 (updates execs) - unexpected behavior (looks like a bug in Gradle)
       ['gradle/wrapper/gradle-wrapper.properties'].forEach((file) => {
-        expect(
-          readFileSync(
-            resolve(__dirname, `./__fixtures__/testFiles/${file}`),
-            'utf8'
-          )
-        ).toEqual(
-          readFileSync(
-            resolve(__dirname, `./__fixtures__/testFiles-copy/${file}`),
-            'utf8'
-          )
-        );
+        compareFile(file, 'testFiles-copy');
       });
     });
   });
@@ -184,12 +175,8 @@ describe(getName(__filename), () => {
         const res = await dcUpdate.updateArtifacts({
           packageFileName: 'gradle-wrapper.properties',
           updatedDeps: [],
-          newPackageFileContent: readFileSync(
-            resolve(
-              __dirname,
-              `./__fixtures__/testFiles/gradle/wrapper/gradle-wrapper.properties`
-            ),
-            'utf8'
+          newPackageFileContent: await readString(
+            `./testFiles/gradle/wrapper/gradle-wrapper.properties`
           ),
           config: {
             localDir: 'some/incorrect/path',
@@ -204,32 +191,13 @@ describe(getName(__filename), () => {
 
         // 5.6.4 => 5.6.4 (updates execs) - unexpected behavior (looks like a bug in Gradle)
         ['gradle/wrapper/gradle-wrapper.properties'].forEach((file) => {
-          expect(
-            readFileSync(
-              resolve(__dirname, `./__fixtures__/testFiles/${file}`),
-              'utf8'
-            )
-          ).toEqual(
-            readFileSync(
-              resolve(__dirname, `./__fixtures__/testFiles-copy/${file}`),
-              'utf8'
-            )
-          );
+          compareFile(file, 'testFiles-copy');
         });
       }
     );
   });
 
   describe('updateArtifacts - distributionSha256Sum', () => {
-    beforeEach(() => {
-      httpMock.setup();
-    });
-
-    afterEach(() => {
-      httpMock.reset();
-      clearRepoCache();
-    });
-
     ifSystemSupportsGradle(6).it('updates', async () => {
       httpMock
         .scope('https://services.gradle.org')
@@ -259,9 +227,7 @@ describe(getName(__filename), () => {
           config.localDir,
           `./gradle/wrapper/gradle-wrapper.properties`
         )
-      ).toEqual(
-        await readString(`./__fixtures__/gradle-wrapper-sum.properties`)
-      );
+      ).toEqual(await readString(`./gradle-wrapper-sum.properties`));
       expect(httpMock.getTrace()).toMatchSnapshot('httpSnapshots');
     });
 
