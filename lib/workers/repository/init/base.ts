@@ -1,4 +1,4 @@
-import { RenovateConfig } from '../../../config';
+import { RenovateConfig, ValidationMessage } from '../../../config';
 import { logger } from '../../../logger';
 import { platform } from '../../../platform';
 
@@ -7,8 +7,9 @@ export async function checkBaseBranch(
 ): Promise<RenovateConfig> {
   logger.debug('checkBaseBranch()');
   logger.debug(`config.repoIsOnboarded=${config.repoIsOnboarded}`);
-  let error = [];
+  let error: ValidationMessage[] = [];
   let baseBranchSha: string;
+  // istanbul ignore else
   if (config.baseBranch) {
     // Read content and target PRs here
     if (await platform.branchExists(config.baseBranch)) {
@@ -24,6 +25,8 @@ export async function checkBaseBranch(
       ];
       logger.warn(message);
     }
+  } else {
+    baseBranchSha = await platform.setBaseBranch();
   }
   return { ...config, errors: config.errors.concat(error), baseBranchSha };
 }

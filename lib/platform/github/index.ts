@@ -1,7 +1,6 @@
 import URL from 'url';
 import is from '@sindresorhus/is';
 import delay from 'delay';
-
 import { configFileNames } from '../../config/app-strings';
 import {
   PLATFORM_FAILURE,
@@ -39,6 +38,7 @@ import {
   FindPRConfig,
   Issue,
   PlatformConfig,
+  Pr,
   RepoConfig,
   RepoParams,
   VulnerabilityAlert,
@@ -47,59 +47,17 @@ import GitStorage, { StatusResult } from '../git/storage';
 import { smartTruncate } from '../utils/pr-body';
 import { api } from './gh-got-wrapper';
 import { getGraphqlNodes } from './gh-graphql-wrapper';
+import {
+  BranchProtection,
+  CombinedBranchStatus,
+  Comment,
+  GhBranchStatus,
+  GhPr,
+  LocalRepoConfig,
+  PrList,
+} from './types';
 
 const defaultConfigFile = configFileNames[0];
-
-interface Comment {
-  id: number;
-  body: string;
-}
-
-interface Pr {
-  displayNumber: string;
-  state: string;
-  title: string;
-  branchName: string;
-  number: number;
-  comments: Comment[];
-
-  createdAt: string;
-
-  sha: string;
-
-  sourceRepo: string;
-  isModified: boolean;
-}
-
-interface LocalRepoConfig {
-  repositoryName: string;
-  pushProtection: boolean;
-  prReviewsRequired: boolean;
-  repoForceRebase?: boolean;
-  storage: GitStorage;
-  parentRepo: string;
-  baseCommitSHA: string | null;
-  forkMode?: boolean;
-  forkToken?: string;
-  closedPrList: PrList | null;
-  openPrList: PrList | null;
-  prList: Pr[] | null;
-  issueList: any[] | null;
-  mergeMethod: string;
-  baseBranch: string;
-  defaultBranch: string;
-  enterpriseVersion: string;
-  gitPrivateKey?: string;
-  repositoryOwner: string;
-  repository: string | null;
-  localDir: string;
-  isGhe: boolean;
-  renovateUsername: string;
-  productLinks: any;
-}
-
-type BranchProtection = any;
-type PrList = Record<number, Pr>;
 
 let config: LocalRepoConfig = {} as any;
 
@@ -1063,20 +1021,6 @@ export async function getBranchPr(branchName: string): Promise<Pr | null> {
   return existingPr ? getPr(existingPr.number) : null;
 }
 
-// https://developer.github.com/v3/repos/statuses
-// https://developer.github.com/v3/checks/runs/
-type BranchState = 'failure' | 'pending' | 'success';
-
-interface GhBranchStatus {
-  context: string;
-  state: BranchState | 'error';
-}
-
-interface CombinedBranchStatus {
-  state: BranchState;
-  statuses: GhBranchStatus[];
-}
-
 async function getStatus(
   branchName: string,
   useCache = true
@@ -1104,7 +1048,7 @@ export async function getBranchStatus(
     logger.warn({ requiredStatusChecks }, `Unsupported requiredStatusChecks`);
     return BranchStatus.red;
   }
-  let commitStatus;
+  let commitStatus: CombinedBranchStatus;
   try {
     commitStatus = await getStatus(branchName);
   } catch (err) /* istanbul ignore next */ {
@@ -1672,7 +1616,7 @@ export async function createPr({
   }
   logger.debug({ title, head, base }, 'Creating PR');
   const pr = (
-    await api.post<Pr>(
+    await api.post<GhPr>(
       `repos/${config.parentRepo || config.repository}/pulls`,
       options
     )

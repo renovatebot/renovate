@@ -5,8 +5,8 @@ import {
   PR_STATE_MERGED,
   PR_STATE_OPEN,
 } from '../../constants/pull-requests';
-import { Pr } from '../common';
 import { api } from './bb-got-wrapper';
+import { BbbsRestPr, BbsPr } from './types';
 
 // https://docs.atlassian.com/bitbucket-server/rest/6.0.0/bitbucket-rest.html#idp250
 const prStateMapping: any = {
@@ -15,7 +15,7 @@ const prStateMapping: any = {
   OPEN: PR_STATE_OPEN,
 };
 
-export function prInfo(pr: any): Pr {
+export function prInfo(pr: BbbsRestPr): BbsPr {
   return {
     version: pr.version,
     number: pr.id,

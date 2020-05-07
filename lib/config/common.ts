@@ -37,6 +37,7 @@ export interface RenovateSharedConfig {
   platform?: string;
   postUpgradeTasks?: PostUpgradeTasks;
   prBodyColumns?: string[];
+  prBodyDefinitions?: Record<string, string>;
   prCreation?: 'immediate' | 'not-pending' | 'status-success' | 'approval';
   productLinks?: Record<string, string>;
   prPriority?: number;
@@ -122,6 +123,7 @@ export interface RenovateConfig
     RenovateSharedConfig,
     UpdateConfig<PackageRule>,
     Record<string, unknown> {
+  depName?: string;
   baseBranches?: string[];
   baseBranch?: string;
   baseBranchSha?: string;

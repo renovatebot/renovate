@@ -729,7 +729,7 @@ export async function createPr({
 
   logger.debug({ repository: config.repository, title, base }, 'Creating PR');
 
-  let reviewers = [];
+  let reviewers: { uuid: { raw: string } }[] = [];
 
   if (config.bbUseDefaultReviewers) {
     const reviewersResponse = (

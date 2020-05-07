@@ -40,6 +40,7 @@ export async function branchifyUpgrades(
   logger.debug(
     `${updates.length} flattened updates found: ${updates
       .map((u) => u.depName)
+      .filter((txt) => txt && txt.length)
       .join(', ')}`
   );
   const errors: ValidationMessage[] = [];
@@ -162,7 +163,7 @@ export async function branchifyUpgrades(
   try {
     // Here we check if there are updates from the same source repo
     // that are not grouped into the same branch
-    const branchUpdates = {};
+    const branchUpdates: Record<string, Record<string, string>> = {};
     for (const branch of branches) {
       const { sourceUrl, branchName, depName, toVersion } = branch;
       if (sourceUrl && toVersion) {

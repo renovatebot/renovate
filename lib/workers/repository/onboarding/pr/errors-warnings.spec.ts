@@ -1,5 +1,5 @@
 import { RenovateConfig, getConfig } from '../../../../../test/util';
-
+import { PackageFile } from '../../../../manager/common';
 import { getDepWarnings, getErrors, getWarnings } from './errors-warnings';
 
 describe('workers/repository/onboarding/pr/errors-warnings', () => {
@@ -25,7 +25,7 @@ describe('workers/repository/onboarding/pr/errors-warnings', () => {
       jest.resetAllMocks();
     });
     it('returns warning text', () => {
-      const packageFiles = {
+      const packageFiles: Record<string, PackageFile[]> = {
         npm: [
           {
             packageFile: 'package.json',
