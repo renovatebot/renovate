@@ -10,7 +10,6 @@ import { ensureMasterIssue } from './master-issue';
 import { ensureOnboardingPr } from './onboarding/pr';
 import { processRepo, updateRepo } from './process';
 import { ProcessResult, processResult } from './result';
-import { DateTime } from 'luxon';
 
 let renovateVersion = 'unknown';
 try {

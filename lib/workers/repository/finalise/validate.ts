@@ -31,7 +31,7 @@ export async function validatePrs(config: RenovateConfig): Promise<void> {
   logger.debug('branchPrefix: ' + config.branchPrefix);
   const renovatePrs = await getRenovatePrs(config.branchPrefix);
   logger.debug({ renovatePrs }, `Found ${renovatePrs.length} Renovate PRs`);
-  let validations = [];
+  let validations: { file: string; message: string }[] = [];
   for (const pr of renovatePrs) {
     try {
       const renovateFiles = await getRenovateFiles(pr.number);

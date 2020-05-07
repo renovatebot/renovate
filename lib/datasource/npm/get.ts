@@ -15,7 +15,7 @@ import { getNpmrc } from './npmrc';
 
 const http = new Http(id);
 
-let memcache = {};
+let memcache: Record<string, string> = {};
 
 export function resetMemCache(): void {
   logger.debug('resetMemCache()');
@@ -38,7 +38,7 @@ export interface NpmDependency extends ReleaseResult {
   latestVersion: string;
   sourceUrl: string;
   versions: Record<string, any>;
-  'dist-tags': string[];
+  'dist-tags': Record<string, string>;
   'renovate-config': any;
   sourceDirectory?: string;
 }

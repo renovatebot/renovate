@@ -1,5 +1,6 @@
 import fs from 'fs-extra';
 import got from '../../../util/got';
+import { ChangeLogNotes } from './common';
 import {
   addReleaseNotes,
   getReleaseList,
@@ -263,8 +264,8 @@ describe('workers/pr/release-notes', () => {
       expect(res).toMatchSnapshot();
     });
     describe('ReleaseNotes Correctness', () => {
-      let versionOneNotes;
-      let versionTwoNotes;
+      let versionOneNotes: ChangeLogNotes;
+      let versionTwoNotes: ChangeLogNotes;
       it('parses yargs 15.3.0', async () => {
         ghGot
           .mockResolvedValueOnce({ body: contentsResponse })
