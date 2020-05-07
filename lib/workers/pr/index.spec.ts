@@ -226,7 +226,7 @@ describe('workers/pr', () => {
       platform.getBranchStatus.mockResolvedValueOnce(BranchStatus.green);
       config.prCreation = 'status-success';
       config.automerge = true;
-      config.schedule = 'before 5am';
+      config.schedule = ['before 5am'];
       const { prResult, pr } = await prWorker.ensurePr(config);
       expect(prResult).toEqual(PrResult.Created);
       expect(pr).toMatchObject({ displayNumber: 'New Pull Request' });
