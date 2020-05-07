@@ -2,7 +2,6 @@ import {
   GitPullRequest,
   GitPullRequestMergeStrategy,
 } from 'azure-devops-node-api/interfaces/GitInterfaces';
-
 import { RenovateConfig } from '../../config/common';
 import { REPOSITORY_DISABLED } from '../../constants/error-messages';
 import { PLATFORM_TYPE_AZURE } from '../../constants/platforms';
@@ -35,6 +34,7 @@ import GitStorage, { StatusResult } from '../git/storage';
 import { smartTruncate } from '../utils/pr-body';
 import * as azureApi from './azure-got-wrapper';
 import * as azureHelper from './azure-helper';
+import { AzurePr } from './types';
 
 interface Config {
   storage: GitStorage;
@@ -47,7 +47,8 @@ interface Config {
   repoId: string;
   project: string;
   azureWorkItemId: string;
-  prList: Pr[];
+  prList: AzurePr[];
+  fileList: null;
   repository: string;
 }
 
@@ -241,7 +242,7 @@ async function abandonPr(prNo: number): Promise<void> {
   );
 }
 
-export async function getPrList(): Promise<Pr[]> {
+export async function getPrList(): Promise<AzurePr[]> {
   logger.debug('getPrList()');
   if (!config.prList) {
     const azureApiGit = await azureApi.gitApi();
@@ -273,7 +274,7 @@ export async function getPr(pullRequestId: number): Promise<Pr | null> {
     return null;
   }
   const azurePr = (await getPrList()).find(
-    (item) => item.pullRequestId === pullRequestId
+    (item) => item.number === pullRequestId
   );
 
   if (!azurePr) {
@@ -345,7 +346,7 @@ export async function getBranchPr(branchName: string): Promise<Pr | null> {
     branchName,
     state: PR_STATE_OPEN,
   });
-  return existingPr ? getPr(existingPr.pullRequestId) : null;
+  return existingPr ? getPr(existingPr.number) : null;
 }
 
 export /* istanbul ignore next */ async function deleteBranch(

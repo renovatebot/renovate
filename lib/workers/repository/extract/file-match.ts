@@ -55,7 +55,7 @@ export async function getMatchingFiles(
   const allFiles = await getFileList();
   const fileList = getFilteredFileList(config, allFiles);
   const { fileMatch, manager } = config;
-  let matchedFiles = [];
+  let matchedFiles: string[] = [];
   for (const match of fileMatch) {
     logger.debug(`Using file match: ${match} for manager ${manager}`);
     const re = new RegExp(match);
