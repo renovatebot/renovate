@@ -266,6 +266,7 @@ jobs:
         run: yarn install --frozen-lockfile --link-duplicates
 
       - name: semantic-release
+        if: github.ref == 'refs/heads/master'
         run: |
           echo '//registry.npmjs.org/:_authToken=${NPM_TOKEN}' >> ~/.npmrc
           npx semantic-release --dry-run ${{github.ref != 'refs/heads/master'}} --ci ${{github.ref == 'refs/heads/master'}}
