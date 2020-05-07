@@ -34,7 +34,6 @@ export async function createRenovateGradlePlugin(
   const content = `
 import groovy.json.JsonOutput
 import org.gradle.api.internal.artifacts.dependencies.DefaultExternalModuleDependency
-import org.gradle.api.artifacts.repositories.MavenArtifactRepository
 import java.util.concurrent.ConcurrentLinkedQueue
 
 def output = new ConcurrentLinkedQueue<>();
@@ -55,12 +54,12 @@ allprojects {
         .collect { it.dependencies + it.dependencyConstraints }
         .flatten()
         .findAll { it instanceof DefaultExternalModuleDependency || it instanceof DependencyConstraint }
+        .findAll { 'Pinned to the embedded Kotlin' != it.reason } // Embedded Kotlin dependencies
         .collect { ['name':it.name, 'group':it.group, 'version':it.version] }
       project.dependencies = deps
     }
   }
 }
-
 gradle.buildFinished {
    def outputFile = new File('${GRADLE_DEPENDENCY_REPORT_FILENAME}')
    def json = JsonOutput.toJson(output)
