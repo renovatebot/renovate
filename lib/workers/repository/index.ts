@@ -1,10 +1,9 @@
 import fs from 'fs-extra';
-
 import { RenovateConfig } from '../../config';
 import { logger, setMeta } from '../../logger';
 import { platform } from '../../platform';
 import { addSplit, getSplits, splitInit } from '../../util/split';
-import { getChangeLogJSON } from '../pr/changelog';
+import { embedChangelogs } from './changelog';
 import handleError from './error';
 import { finaliseRepo } from './finalise';
 import { initRepo } from './init';
@@ -39,15 +38,7 @@ export async function renovateRepository(
       config
     );
     await ensureOnboardingPr(config, packageFiles, branches);
-    await Promise.all(
-      branches.map(async (branch) => {
-        await Promise.all(
-          branch.upgrades.map(async (upgrade) => {
-            upgrade.logJSON = await getChangeLogJSON(upgrade); // eslint-disable-line no-param-reassign
-          })
-        );
-      })
-    );
+    await embedChangelogs(branches);
     addSplit('changelogs');
     const res = await updateRepo(config, branches, branchList);
     addSplit('update');

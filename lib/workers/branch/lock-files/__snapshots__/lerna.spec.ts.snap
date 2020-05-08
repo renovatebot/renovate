@@ -81,7 +81,7 @@ Array [
 exports[`generateLockFiles() generates yarn.lock files 1`] = `
 Array [
   Object {
-    "cmd": "yarn install --ignore-scripts --ignore-engines --ignore-platform --mutex network:31879",
+    "cmd": "yarn install --ignore-scripts --ignore-engines --ignore-platform",
     "options": Object {
       "cwd": "some-dir",
       "encoding": "utf-8",
@@ -98,7 +98,7 @@ Array [
     },
   },
   Object {
-    "cmd": "npx lerna@2.0.0 bootstrap --no-ci -- --ignore-scripts --ignore-engines --ignore-platform --mutex network:31879",
+    "cmd": "npx lerna@2.0.0 bootstrap --no-ci -- --ignore-scripts --ignore-engines --ignore-platform",
     "options": Object {
       "cwd": "some-dir",
       "encoding": "utf-8",
