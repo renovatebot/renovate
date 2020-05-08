@@ -9,12 +9,10 @@ on:
   pull_request:
 
 env:
-  CI: true
   DOCKER_REPO: renovate/renovate
   YARN_MODULES_CACHE_KEY: v1
   YARN_PACKAGE_CACHE_KEY: v1
   YARN_CACHE_FOLDER: .cache/yarn
-  BUILDX_VERSION: v0.3.1
   NODE_VERSION: 12
   # https://github.com/chalk/supports-color/issues/106
   FORCE_COLOR: true
@@ -78,10 +76,8 @@ jobs:
         run: echo "::set-env name=SKIP_JAVA_TESTS::true"
 
       - name: Init platform
-        id: init
         shell: bash
         run: |
-          python -c "from pip._internal.locations import USER_CACHE_DIR; print('::set-output name=pip_cache::' + USER_CACHE_DIR)"
           git config --global core.autocrlf false
           git config --global core.symlinks true
           git config --global user.email 'bot@renovateapp.com'
@@ -90,7 +86,6 @@ jobs:
           echo "Node $(node --version)"
           python --version
           echo "Yarn $(yarn --version)"
-          pip --version
 
       - uses: actions/checkout@v2
 
@@ -111,29 +106,13 @@ jobs:
           restore-keys: |
             ${{ env.YARN_MODULES_CACHE_KEY }}-${{ runner.os }}-${{ env.NODE_VERSION }}-yarn-
 
-      - name: Cache pip packages
-        id: pip_cache_packages
-        uses: actions/cache@v1
-        with:
-          path: ${{ steps.init.outputs.pip_cache }}
-          key: ${{ runner.os }}-${{ env.PYTHON_VERSION }}-pip-${{ hashFiles('**/requirements.txt') }}
-          restore-keys: |
-            ${{ runner.os }}-${{ env.PYTHON_VERSION }}-pip-
-
       # Clear caches on cache miss, otherwise they will grow indefinitely
       - name: Clear yarn cache
         if: steps.yarn_cache_packages.outputs.cache-hit != 'true'
         run: yarn cache clean
 
-      - name: Clear pip cache
-        if: steps.pip_cache_packages.outputs.cache-hit != 'true'
-        run: python -c "from pip._internal.locations import USER_CACHE_DIR; from shutil import rmtree; rmtree(USER_CACHE_DIR, ignore_errors=True)"
-
       - name: Installing dependencies
-        run: |
-          python -m pip install --upgrade pip
-          yarn install --frozen-lockfile --link-duplicates
-          pip install --user -r requirements.txt
+        run: yarn install --frozen-lockfile --link-duplicates
 
       - name: Build
         run: yarn build
@@ -173,8 +152,6 @@ jobs:
           node-version: ${{ env.NODE_VERSION }}
 
       - name: Init platform
-        id: init
-        shell: bash
         run: |
           git config --global core.autocrlf false
           git config --global core.symlinks true
@@ -182,7 +159,6 @@ jobs:
           git config --global user.name  'Renovate Bot'
           npm config set scripts-prepend-node-path true
           echo "Node $(node --version)"
-          python --version
           echo "Yarn $(yarn --version)"
 
       - uses: actions/checkout@v2
@@ -236,7 +212,6 @@ jobs:
           node-version: ${{ env.NODE_VERSION }}
 
       - name: Init platform
-        id: init
         run: |
           git config --global core.autocrlf false
           git config --global core.symlinks true
