@@ -1,8 +1,12 @@
 import pep440 from '.';
 
 describe('pep440.isValid(input)', () => {
-  it('should return null for irregular versions', () => {
-    expect(pep440.isValid('17.04.0')).toBeFalsy();
+  it('should support a version without equals', () => {
+    expect(pep440.isValid('0.750')).toBeTruthy();
+    expect(pep440.isValid('1.2.3')).toBeTruthy();
+  });
+  it('should support irregular versions', () => {
+    expect(pep440.isValid('17.04.0')).toBeTruthy();
   });
   it('should support simple pep440', () => {
     expect(pep440.isValid('==1.2.3')).toBeTruthy();
@@ -83,6 +87,9 @@ describe('pep440.getNewValue()', () => {
 
   // cases: [currentValue, expectedBump]
   [
+    // plain version
+    ['1.0.0', '1.2.3'],
+
     // simple cases
     ['==1.0.3', '==1.2.3'],
     ['>=1.2.0', '>=1.2.3'],
