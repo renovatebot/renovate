@@ -151,6 +151,7 @@
     "node-html-parser": "1.2.16",
     "npm": "6.14.5",
     "p-all": "2.1.0",
+    "p-map": "4.0.0",
     "parse-diff": "0.7.0",
     "parse-link-header": "1.0.1",
     "pnpm": "3.8.1",
