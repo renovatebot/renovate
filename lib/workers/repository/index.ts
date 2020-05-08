@@ -39,11 +39,15 @@ export async function renovateRepository(
       config
     );
     await ensureOnboardingPr(config, packageFiles, branches);
-    for (const branch of branches) {
-      for (const upgrade of branch.upgrades) {
-        upgrade.logJSON = await getChangeLogJSON(upgrade);
-      }
-    }
+    await Promise.all(
+      branches.map(async (branch) => {
+        await Promise.all(
+          branch.upgrades.map(async (upgrade) => {
+            upgrade.logJSON = await getChangeLogJSON(upgrade); // eslint-disable-line no-param-reassign
+          })
+        );
+      })
+    );
     addSplit('changelogs');
     const res = await updateRepo(config, branches, branchList);
     addSplit('update');
