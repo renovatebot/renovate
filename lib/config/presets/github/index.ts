@@ -50,7 +50,7 @@ export async function getPresetFromEndpoint(
   // eslint-disable-next-line no-param-reassign
   endpoint = ensureTrailingSlash(endpoint);
   const [fileName, presetName, subPresetName] = filePreset.split('/');
-  let jsonContent;
+  let jsonContent: any;
   if (fileName === 'default') {
     try {
       jsonContent = await fetchJSONFile(pkgName, 'default.json', endpoint);
