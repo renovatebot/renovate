@@ -103,9 +103,6 @@ export async function generateLockFile(
     }
     cmdExtras += ' --ignore-engines';
     cmdExtras += ' --ignore-platform';
-    cmdExtras += process.env.YARN_MUTEX_FILE
-      ? ` --mutex file:${process.env.YARN_MUTEX_FILE}`
-      : ' --mutex network:31879';
     const installCmd = cmd + ' install' + cmdExtras;
     // TODO: Switch to native util.promisify once using only node 8
     await exec(installCmd, {
