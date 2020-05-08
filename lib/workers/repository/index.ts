@@ -4,6 +4,7 @@ import { RenovateConfig } from '../../config';
 import { logger, setMeta } from '../../logger';
 import { platform } from '../../platform';
 import { addSplit, getSplits, splitInit } from '../../util/split';
+import { getChangeLogJSON } from '../pr/changelog';
 import handleError from './error';
 import { finaliseRepo } from './finalise';
 import { initRepo } from './init';
@@ -11,7 +12,6 @@ import { ensureMasterIssue } from './master-issue';
 import { ensureOnboardingPr } from './onboarding/pr';
 import { extractDependencies, updateRepo } from './process';
 import { ProcessResult, processResult } from './result';
-import { getChangeLogJSON } from '../pr/changelog';
 
 let renovateVersion = 'unknown';
 try {
