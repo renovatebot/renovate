@@ -114,11 +114,12 @@ export async function fetchUpdates(
   packageFiles: Record<string, PackageFile[]>
 ): Promise<void> {
   const managers = Object.keys(packageFiles);
-  const startTime = Date.now();
   const allManagerJobs = managers.map((manager) =>
     fetchManagerUpdates(config, packageFiles, manager)
   );
   await Promise.all(allManagerJobs);
-  const durationMs = Math.round(Date.now() - startTime);
-  logger.info({ durationMs }, 'Package releases lookups complete');
+  logger.debug(
+    { baseBranch: config.baseBranch },
+    'Package releases lookups complete'
+  );
 }
