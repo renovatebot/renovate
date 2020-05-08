@@ -128,6 +128,13 @@ function findCommentByTopic(
   return comments.find((c) => c.body.startsWith(`### ${topic}\n\n`));
 }
 
+function findCommentByContent(
+  comments: helper.Comment[],
+  content: string
+): helper.Comment | null {
+  return comments.find((c) => c.body.trim() === content);
+}
+
 async function isPRModified(
   repoPath: string,
   branchName: string
@@ -820,9 +827,19 @@ const platform: Platform = {
   async ensureCommentRemoval({
     number: issue,
     topic,
+    content,
   }: EnsureCommentRemovalConfig): Promise<void> {
+    logger.debug(
+      `Ensuring comment "${topic || content}" in #${issue} is removed`
+    );
     const commentList = await helper.getComments(config.repository, issue);
-    const comment = findCommentByTopic(commentList, topic);
+    let comment;
+
+    if (topic) {
+      comment = findCommentByTopic(commentList, topic);
+    } else if (content) {
+      comment = findCommentByContent(commentList, content);
+    }
 
     // Abort and do nothing if no matching comment was found
     if (!comment) {
