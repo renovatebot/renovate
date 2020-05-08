@@ -206,9 +206,14 @@ export interface Platform {
     branchName: string,
     context: string
   ): Promise<BranchStatus | null>;
-  ensureCommentRemoval(
-    ensureCommentRemoval: EnsureCommentRemovalConfig
-  ): Promise<void>;
+  ensureCommentRemoval(ensureCommentRemoval: {
+    number: number;
+    topic: string;
+  }): Promise<void>;
+  ensureCommentRemoval(ensureCommentRemoval: {
+    number: number;
+    content: string;
+  }): Promise<void>;
   deleteBranch(branchName: string, closePr?: boolean): Promise<void>;
   ensureComment(ensureComment: EnsureCommentConfig): Promise<boolean>;
   branchExists(branchName: string): Promise<boolean>;
