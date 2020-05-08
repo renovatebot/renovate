@@ -23,21 +23,25 @@ describe('config/presets/github', () => {
       got.mockImplementationOnce(() => {
         throw new Error(PLATFORM_FAILURE);
       });
-      await expect(github.getPreset('some/repo')).rejects.toThrow(
-        PLATFORM_FAILURE
-      );
+      await expect(
+        github.getPreset({ packageName: 'some/repo' })
+      ).rejects.toThrow(PLATFORM_FAILURE);
     });
     it('tries default then renovate', async () => {
       got.mockImplementationOnce(() => {
         throw new Error();
       });
-      await expect(github.getPreset('some/repo')).rejects.toThrow();
+      await expect(
+        github.getPreset({ packageName: 'some/repo' })
+      ).rejects.toThrow();
     });
     it('throws if no content', async () => {
       got.mockImplementationOnce(() => ({
         body: {},
       }));
-      await expect(github.getPreset('some/repo')).rejects.toThrow();
+      await expect(
+        github.getPreset({ packageName: 'some/repo' })
+      ).rejects.toThrow();
     });
     it('throws if fails to parse', async () => {
       got.mockImplementationOnce(() => ({
@@ -45,7 +49,9 @@ describe('config/presets/github', () => {
           content: Buffer.from('not json').toString('base64'),
         },
       }));
-      await expect(github.getPreset('some/repo')).rejects.toThrow();
+      await expect(
+        github.getPreset({ packageName: 'some/repo' })
+      ).rejects.toThrow();
     });
     it('should return default.json', async () => {
       hostRules.find.mockReturnValueOnce({ token: 'abc' });
@@ -54,7 +60,7 @@ describe('config/presets/github', () => {
           content: Buffer.from('{"foo":"bar"}').toString('base64'),
         },
       }));
-      const content = await github.getPreset('some/repo');
+      const content = await github.getPreset({ packageName: 'some/repo' });
       expect(content).toEqual({ foo: 'bar' });
     });
     it('should query preset within the file', async () => {
@@ -64,7 +70,10 @@ describe('config/presets/github', () => {
           content: Buffer.from('{"somename":{"foo":"bar"}}').toString('base64'),
         },
       }));
-      const content = await github.getPreset('some/repo', 'somefile/somename');
+      const content = await github.getPreset({
+        packageName: 'some/repo',
+        presetName: 'somefile/somename',
+      });
       expect(content).toEqual({ foo: 'bar' });
     });
     it('should query subpreset', async () => {
@@ -76,15 +85,15 @@ describe('config/presets/github', () => {
           ).toString('base64'),
         },
       }));
-      let content = await github.getPreset(
-        'some/repo',
-        'somefile/somename/somesubname'
-      );
+      let content = await github.getPreset({
+        packageName: 'some/repo',
+        presetName: 'somefile/somename/somesubname',
+      });
       expect(content).toEqual({ foo: 'bar' });
-      content = await github.getPreset(
-        'some/repo',
-        'somefile/wrongname/somesubname'
-      );
+      content = await github.getPreset({
+        packageName: 'some/repo',
+        presetName: 'somefile/wrongname/somesubname',
+      });
       expect(content).toBeUndefined();
     });
     it('should return custom.json', async () => {
@@ -96,7 +105,10 @@ describe('config/presets/github', () => {
       }));
       try {
         global.appMode = true;
-        const content = await github.getPreset('some/repo', 'custom');
+        const content = await github.getPreset({
+          packageName: 'some/repo',
+          presetName: 'custom',
+        });
         expect(content).toEqual({ foo: 'bar' });
       } finally {
         delete global.appMode;

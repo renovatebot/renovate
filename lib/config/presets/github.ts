@@ -1,11 +1,9 @@
-import { RenovateConfig } from '../common';
-import { Preset } from './common';
+import { Preset, PresetConfig } from './common';
 import { getPresetFromEndpoint } from './local/github';
 
-export function getPreset(
-  pkgName: string,
+export function getPreset({
+  packageName: pkgName,
   presetName = 'default',
-  _baseConfig?: RenovateConfig
-): Promise<Preset> {
+}: PresetConfig): Promise<Preset> {
   return getPresetFromEndpoint(pkgName, presetName);
 }
