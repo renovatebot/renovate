@@ -1,15 +1,20 @@
 // istanbul ignore file
 import { readFileSync } from 'fs-extra';
-import { configFileNames } from '../dist/config/app-strings';
-import { getConfig } from '../dist/config/file';
-import { massageConfig } from '../dist/config/massage';
-import { validateConfig } from '../dist/config/validation';
+import { configFileNames } from './config/app-strings';
+import { RenovateConfig } from './config/common';
+import { getConfig } from './config/file';
+import { massageConfig } from './config/massage';
+import { validateConfig } from './config/validation';
 
 /* eslint-disable no-console */
 
 let returnVal = 0;
 
-async function validate(desc, config, isPreset = false): Promise<void> {
+async function validate(
+  desc: string,
+  config: RenovateConfig,
+  isPreset = false
+): Promise<void> {
   const res = await validateConfig(massageConfig(config), isPreset);
   if (res.errors.length) {
     console.log(
@@ -25,13 +30,20 @@ async function validate(desc, config, isPreset = false): Promise<void> {
   }
 }
 
+type PackageJson = {
+  renovate?: RenovateConfig;
+  'renovate-config'?: Record<string, RenovateConfig>;
+};
+
 (async () => {
-  for (const file of configFileNames.filter(name => name !== 'package.json')) {
+  for (const file of configFileNames.filter(
+    (name) => name !== 'package.json'
+  )) {
     try {
       const rawContent = readFileSync(file, 'utf8');
       console.log(`Validating ${file}`);
       try {
-        const jsonContent = JSON.parse(rawContent);
+        const jsonContent = JSON.parse(rawContent) as PackageJson;
         await validate(file, jsonContent);
       } catch (err) {
         console.log(`${file} is not valid Renovate config`);
@@ -42,7 +54,9 @@ async function validate(desc, config, isPreset = false): Promise<void> {
     }
   }
   try {
-    const pkgJson = JSON.parse(readFileSync('package.json', 'utf8'));
+    const pkgJson = JSON.parse(
+      readFileSync('package.json', 'utf8')
+    ) as PackageJson;
     if (pkgJson.renovate) {
       console.log(`Validating package.json > renovate`);
       await validate('package.json > renovate', pkgJson.renovate);
@@ -72,7 +86,7 @@ async function validate(desc, config, isPreset = false): Promise<void> {
     process.exit(returnVal);
   }
   console.log('OK');
-})().catch(e => {
+})().catch((e) => {
   console.error(e);
   process.exit(99);
 });
