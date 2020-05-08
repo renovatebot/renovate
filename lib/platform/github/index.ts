@@ -1643,20 +1643,6 @@ export async function createPr({
   return pr;
 }
 
-// Return a list of all modified files in a PR
-export async function getPrFiles(prNo: number): Promise<string[]> {
-  logger.debug({ prNo }, 'getPrFiles');
-  if (!prNo) {
-    return [];
-  }
-  const files = (
-    await api.get(
-      `repos/${config.parentRepo || config.repository}/pulls/${prNo}/files`
-    )
-  ).body;
-  return files.map((f: { filename: string }) => f.filename);
-}
-
 export async function updatePr(
   prNo: number,
   title: string,
