@@ -57,9 +57,6 @@ export async function extract(config: RenovateConfig): Promise<ExtractResult> {
   );
   logger.trace({ config: packageFiles }, 'packageFiles');
   await fetchUpdates(config, packageFiles);
-  addSplit(
-    config.baseBranches?.length ? `lookup:${config.baseBranch}` : 'lookup'
-  );
   logger.debug({ config: packageFiles }, 'packageFiles with updates');
   await raiseDeprecationWarnings(config, packageFiles);
   const { branches, branchList } = await branchifyUpgrades(
@@ -68,7 +65,7 @@ export async function extract(config: RenovateConfig): Promise<ExtractResult> {
   );
   sortBranches(branches);
   addSplit(
-    config.baseBranches?.length ? `branchify:${config.baseBranch}` : 'branchify'
+    config.baseBranches?.length ? `lookup:${config.baseBranch}` : 'lookup'
   );
   return { branches, branchList, packageFiles };
 }

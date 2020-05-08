@@ -11,6 +11,7 @@ import { ensureMasterIssue } from './master-issue';
 import { ensureOnboardingPr } from './onboarding/pr';
 import { extractDependencies, updateRepo } from './process';
 import { ProcessResult, processResult } from './result';
+import { getChangeLogJSON } from '../pr/changelog';
 
 let renovateVersion = 'unknown';
 try {
@@ -38,6 +39,12 @@ export async function renovateRepository(
       config
     );
     await ensureOnboardingPr(config, packageFiles, branches);
+    for (const branch of branches) {
+      for (const upgrade of branch.upgrades) {
+        upgrade.logJSON = await getChangeLogJSON(upgrade);
+      }
+    }
+    addSplit('changelogs');
     const res = await updateRepo(config, branches, branchList);
     addSplit('update');
     if (res !== 'automerged') {
