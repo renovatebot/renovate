@@ -1,7 +1,7 @@
 import { logger } from '../../../logger';
 import { api } from '../../../platform/gitlab/gl-got-wrapper';
 import { ensureTrailingSlash } from '../../../util/url';
-import { Preset } from '../common';
+import { Preset, PresetConfig } from '../common';
 
 const { get: glGot } = api;
 
@@ -65,4 +65,11 @@ export async function getPresetFromEndpoint(
     logger.debug('Failed to parse renovate.json');
     throw new Error('invalid preset JSON');
   }
+}
+
+export function getPreset({
+  packageName: pkgName,
+  presetName = 'default',
+}: PresetConfig): Promise<Preset> {
+  return getPresetFromEndpoint(pkgName, presetName);
 }

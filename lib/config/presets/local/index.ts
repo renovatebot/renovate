@@ -3,8 +3,8 @@ import {
   PLATFORM_TYPE_GITLAB,
 } from '../../../constants/platforms';
 import { Preset, PresetConfig } from '../common';
-import * as github from './github';
-import * as gitlab from './gitlab';
+import * as github from '../github';
+import * as gitlab from '../gitlab';
 
 export async function getPreset({
   packageName: pkgName,

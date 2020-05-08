@@ -1,23 +1,19 @@
-import * as github from './github';
-import * as gitlab from './gitlab';
+import { mocked } from '../../../../test/util';
+import * as _github from '../github';
+import * as _gitlab from '../gitlab';
 import * as local from '.';
 
-jest.mock('./gitlab');
-jest.mock('./github');
+jest.mock('../gitlab');
+jest.mock('../github');
 
-const gitlabGetPreset: jest.Mock<Promise<
-  any
->> = gitlab.getPresetFromEndpoint as never;
-const githubGetPreset: jest.Mock<Promise<
-  any
->> = github.getPresetFromEndpoint as never;
+const gitlab = mocked(_gitlab);
+const github = mocked(_github);
 
 describe('config/presets/local', () => {
   beforeEach(() => {
-    gitlabGetPreset.mockReset();
-    gitlabGetPreset.mockResolvedValueOnce({ resolved: 'preset' });
-    githubGetPreset.mockReset();
-    githubGetPreset.mockResolvedValueOnce({ resolved: 'preset' });
+    jest.resetAllMocks();
+    gitlab.getPresetFromEndpoint.mockResolvedValueOnce({ resolved: 'preset' });
+    github.getPresetFromEndpoint.mockResolvedValueOnce({ resolved: 'preset' });
     return global.renovateCache.rmAll();
   });
   describe('getPreset()', () => {
@@ -51,7 +47,7 @@ describe('config/presets/local', () => {
           platform: 'GitLab',
         },
       });
-      expect(gitlabGetPreset.mock.calls).toMatchSnapshot();
+      expect(gitlab.getPresetFromEndpoint.mock.calls).toMatchSnapshot();
       expect(content).toMatchSnapshot();
     });
     it('forwards to custom gitlab', async () => {
@@ -63,7 +59,7 @@ describe('config/presets/local', () => {
           endpoint: 'https://gitlab.example.com/api/v4',
         },
       });
-      expect(gitlabGetPreset.mock.calls).toMatchSnapshot();
+      expect(gitlab.getPresetFromEndpoint.mock.calls).toMatchSnapshot();
       expect(content).toMatchSnapshot();
     });
 
@@ -75,7 +71,7 @@ describe('config/presets/local', () => {
           platform: 'github',
         },
       });
-      expect(githubGetPreset.mock.calls).toMatchSnapshot();
+      expect(github.getPresetFromEndpoint.mock.calls).toMatchSnapshot();
       expect(content).toMatchSnapshot();
     });
     it('forwards to custom github', async () => {
@@ -87,7 +83,7 @@ describe('config/presets/local', () => {
           endpoint: 'https://api.github.example.com',
         },
       });
-      expect(githubGetPreset.mock.calls).toMatchSnapshot();
+      expect(github.getPresetFromEndpoint.mock.calls).toMatchSnapshot();
       expect(content).toMatchSnapshot();
     });
   });
