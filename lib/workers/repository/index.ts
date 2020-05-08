@@ -3,12 +3,14 @@ import fs from 'fs-extra';
 import { RenovateConfig } from '../../config';
 import { logger, setMeta } from '../../logger';
 import { platform } from '../../platform';
+import { addSplit, getSplits, splitInit } from '../../util/split';
+import { getChangeLogJSON } from '../pr/changelog';
 import handleError from './error';
 import { finaliseRepo } from './finalise';
 import { initRepo } from './init';
 import { ensureMasterIssue } from './master-issue';
 import { ensureOnboardingPr } from './onboarding/pr';
-import { processRepo, updateRepo } from './process';
+import { extractDependencies, updateRepo } from './process';
 import { ProcessResult, processResult } from './result';
 
 let renovateVersion = 'unknown';
@@ -22,7 +24,7 @@ try {
 export async function renovateRepository(
   repoConfig: RenovateConfig
 ): Promise<ProcessResult> {
-  const startTime = Date.now();
+  splitInit();
   let config = { ...repoConfig };
   setMeta({ repository: config.repository });
   logger.info({ renovateVersion }, 'Repository started');
@@ -32,9 +34,19 @@ export async function renovateRepository(
     await fs.ensureDir(config.localDir);
     logger.debug('Using localDir: ' + config.localDir);
     config = await initRepo(config);
-    const { branches, branchList, packageFiles } = await processRepo(config);
+    addSplit('init');
+    const { branches, branchList, packageFiles } = await extractDependencies(
+      config
+    );
     await ensureOnboardingPr(config, packageFiles, branches);
+    for (const branch of branches) {
+      for (const upgrade of branch.upgrades) {
+        upgrade.logJSON = await getChangeLogJSON(upgrade);
+      }
+    }
+    addSplit('changelogs');
     const res = await updateRepo(config, branches, branchList);
+    addSplit('update');
     if (res !== 'automerged') {
       await ensureMasterIssue(config, branches);
     }
@@ -49,6 +61,8 @@ export async function renovateRepository(
   if (config.localDir && !config.persistRepoData) {
     await fs.remove(config.localDir);
   }
-  logger.info({ durationMs: Date.now() - startTime }, 'Repository finished');
+  const splits = getSplits();
+  logger.debug(splits, 'Repository timing splits (milliseconds)');
+  logger.info({ durationMs: splits.total }, 'Repository finished');
   return repoResult;
 }
