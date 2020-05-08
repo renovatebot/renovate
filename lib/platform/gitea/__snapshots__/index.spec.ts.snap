@@ -5,7 +5,6 @@ Object {
   "body": "pr-body",
   "branchName": "pr-branch",
   "canMerge": true,
-  "closedAt": "2017-12-28T12:17:48Z",
   "createdAt": "2014-04-01T05:14:20Z",
   "displayNumber": "Pull Request #42",
   "isConflicted": false,
@@ -25,7 +24,6 @@ Object {
   "body": "pr-body",
   "branchName": "pr-branch",
   "canMerge": true,
-  "closedAt": "2017-12-28T12:17:48Z",
   "createdAt": "2014-04-01T05:14:20Z",
   "displayNumber": "Pull Request #42",
   "isConflicted": false,
@@ -43,9 +41,8 @@ Object {
 exports[`platform/gitea getPr should fallback to direct fetching if cache fails 1`] = `
 Object {
   "body": "some random pull request",
-  "branchName": "some-head-ref",
+  "branchName": "some-head-branch",
   "canMerge": true,
-  "closedAt": null,
   "createdAt": "2015-03-22T20:36:16Z",
   "displayNumber": "Pull Request #1",
   "isConflicted": false,
@@ -55,28 +52,27 @@ Object {
   "sha": "some-head-sha",
   "sourceRepo": "some/repo",
   "state": "open",
-  "targetBranch": "some-base-ref",
+  "targetBranch": "some-base-branch",
   "title": "Some PR",
 }
 `;
 
-exports[`platform/gitea getPr should return enriched pull request which exists 1`] = `
+exports[`platform/gitea getPr should return enriched pull request which exists if open 1`] = `
 Object {
-  "body": "other random pull request",
-  "branchName": "other-head-ref",
+  "body": "some random pull request",
+  "branchName": "some-head-branch",
   "canMerge": true,
-  "closedAt": "2016-01-09T10:03:21Z",
-  "createdAt": "2011-08-18T22:30:38Z",
-  "displayNumber": "Pull Request #2",
+  "createdAt": "2015-03-22T20:36:16Z",
+  "displayNumber": "Pull Request #1",
   "isConflicted": false,
   "isModified": false,
   "isStale": false,
-  "number": 2,
-  "sha": "other-head-sha",
+  "number": 1,
+  "sha": "some-head-sha",
   "sourceRepo": "some/repo",
-  "state": "closed",
-  "targetBranch": "other-base-ref",
-  "title": "Other PR",
+  "state": "open",
+  "targetBranch": "some-base-branch",
+  "title": "Some PR",
 }
 `;
 
@@ -84,9 +80,8 @@ exports[`platform/gitea getPrList should return list of pull requests 1`] = `
 Array [
   Object {
     "body": "some random pull request",
-    "branchName": "some-head-ref",
+    "branchName": "some-head-branch",
     "canMerge": true,
-    "closedAt": null,
     "createdAt": "2015-03-22T20:36:16Z",
     "displayNumber": "Pull Request #1",
     "isConflicted": false,
@@ -96,14 +91,13 @@ Array [
     "sha": "some-head-sha",
     "sourceRepo": "some/repo",
     "state": "open",
-    "targetBranch": "some-base-ref",
+    "targetBranch": "some-base-branch",
     "title": "Some PR",
   },
   Object {
     "body": "other random pull request",
-    "branchName": "other-head-ref",
+    "branchName": "other-head-branch",
     "canMerge": true,
-    "closedAt": "2016-01-09T10:03:21Z",
     "createdAt": "2011-08-18T22:30:38Z",
     "displayNumber": "Pull Request #2",
     "isConflicted": false,
@@ -113,7 +107,7 @@ Array [
     "sha": "other-head-sha",
     "sourceRepo": "some/repo",
     "state": "closed",
-    "targetBranch": "other-base-ref",
+    "targetBranch": "other-base-branch",
     "title": "Other PR",
   },
 ]

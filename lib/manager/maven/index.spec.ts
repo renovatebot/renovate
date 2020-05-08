@@ -1,8 +1,8 @@
 import { readFileSync } from 'fs';
+import * as _fs from '../../util/fs';
+import { PackageDependency, PackageFile } from '../common';
 import { extractPackage, resolveParents } from './extract';
 import { extractAllPackageFiles, updateDependency } from './index';
-import { PackageDependency, PackageFile } from '../common';
-import * as _fs from '../../util/fs';
 
 jest.mock('../../util/fs');
 

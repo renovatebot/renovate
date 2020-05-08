@@ -1,13 +1,14 @@
-import { join } from 'upath';
-import _fs from 'fs-extra';
 import { exec as _exec } from 'child_process';
-import { updateArtifacts } from './artifacts';
-import { mocked } from '../../../test/util';
+import _fs from 'fs-extra';
+import { join } from 'upath';
 import { envMock, mockExecAll } from '../../../test/execUtil';
-import * as _env from '../../util/exec/env';
+import { mocked } from '../../../test/util';
+import * as _docker from '../../datasource/docker';
 import { setExecConfig } from '../../util/exec';
 import { BinarySource } from '../../util/exec/common';
 import { resetPrefetchedImages } from '../../util/exec/docker';
+import * as _env from '../../util/exec/env';
+import { updateArtifacts } from './artifacts';
 
 jest.mock('fs-extra');
 jest.mock('child_process');
@@ -17,10 +18,12 @@ jest.mock('../../util/exec/docker/index', () =>
     removeDanglingContainers: jest.fn(),
   })
 );
+jest.mock('../../datasource/docker');
 
 const fs: jest.Mocked<typeof _fs> = _fs as any;
 const exec: jest.Mock<typeof _exec> = _exec as any;
 const env = mocked(_env);
+const docker = mocked(_docker);
 
 const config = {
   localDir: join('/tmp/github/some/repo'),
@@ -70,7 +73,24 @@ describe('.updateArtifacts()', () => {
     expect(execSnapshots).toMatchSnapshot();
   });
   it('returns updated poetry.lock', async () => {
-    fs.readFile.mockResolvedValueOnce('Old poetry.lock' as any);
+    fs.readFile.mockResolvedValueOnce('[metadata]\n' as never);
+    const execSnapshots = mockExecAll(exec);
+    fs.readFile.mockReturnValueOnce('New poetry.lock' as any);
+    const updatedDeps = ['dep1'];
+    expect(
+      await updateArtifacts({
+        packageFileName: 'pyproject.toml',
+        updatedDeps,
+        newPackageFileContent: '{}',
+        config,
+      })
+    ).not.toBeNull();
+    expect(execSnapshots).toMatchSnapshot();
+  });
+
+  it('returns updated pyproject.lock', async () => {
+    fs.readFile.mockResolvedValueOnce(null);
+    fs.readFile.mockResolvedValueOnce('[metadata]\n' as never);
     const execSnapshots = mockExecAll(exec);
     fs.readFile.mockReturnValueOnce('New poetry.lock' as any);
     const updatedDeps = ['dep1'];
@@ -90,9 +110,12 @@ describe('.updateArtifacts()', () => {
       binarySource: BinarySource.Docker,
       dockerUser: 'foobar',
     });
-    fs.readFile.mockResolvedValueOnce('Old poetry.lock' as any);
+    fs.readFile.mockResolvedValueOnce('[metadata]\n' as any);
     const execSnapshots = mockExecAll(exec);
     fs.readFile.mockReturnValueOnce('New poetry.lock' as any);
+    docker.getReleases.mockResolvedValueOnce({
+      releases: [{ version: '2.7.5' }, { version: '3.4.2' }],
+    });
     const updatedDeps = ['dep1'];
     expect(
       await updateArtifacts({
@@ -101,6 +124,35 @@ describe('.updateArtifacts()', () => {
         newPackageFileContent: '{}',
         config: {
           ...config,
+          compatibility: { python: '~2.7 || ^3.4' },
+        },
+      })
+    ).not.toBeNull();
+    expect(execSnapshots).toMatchSnapshot();
+  });
+  it('returns updated poetry.lock using docker (constaints)', async () => {
+    await setExecConfig({
+      ...config,
+      binarySource: BinarySource.Docker,
+      dockerUser: 'foobar',
+    });
+    fs.readFile.mockResolvedValueOnce(
+      '[metadata]\npython-versions = "~2.7 || ^3.4"' as any
+    );
+    const execSnapshots = mockExecAll(exec);
+    fs.readFile.mockReturnValueOnce('New poetry.lock' as any);
+    docker.getReleases.mockResolvedValueOnce({
+      releases: [{ version: '2.7.5' }, { version: '3.3.2' }],
+    });
+    const updatedDeps = ['dep1'];
+    expect(
+      await updateArtifacts({
+        packageFileName: 'pyproject.toml',
+        updatedDeps,
+        newPackageFileContent: '{}',
+        config: {
+          ...config,
+          compatibility: { poetry: 'poetry>=1.0' },
         },
       })
     ).not.toBeNull();

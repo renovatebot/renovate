@@ -1,10 +1,16 @@
+import fs from 'fs-extra';
 import _simpleGit from 'simple-git/promise';
-import { getReleases } from '.';
+import { getDigest, getReleases } from '.';
 
 jest.mock('simple-git/promise');
 const simpleGit: any = _simpleGit;
 
 const lookupName = 'https://github.com/example/example.git';
+
+const lsRemote1 = fs.readFileSync(
+  'lib/datasource/git-refs/__fixtures__/ls-remote-1.txt',
+  'utf8'
+);
 
 describe('datasource/git-tags', () => {
   beforeEach(() => global.renovateCache.rmAll());
@@ -30,17 +36,52 @@ describe('datasource/git-tags', () => {
     it('returns versions filtered from tags', async () => {
       simpleGit.mockReturnValue({
         listRemote() {
-          return Promise.resolve(
-            'commithash1\trefs/tags/0.0.1\ncommithash2\trefs/tags/v0.0.2\ncommithash3\trefs/tags/v0.0.2^{}\n'
-          );
+          return Promise.resolve(lsRemote1);
         },
       });
 
       const versions = await getReleases({
         lookupName,
       });
-      const result = versions.releases.map((x) => x.version).sort();
-      expect(result).toEqual(['0.0.1', 'v0.0.2']);
+      expect(versions).toMatchSnapshot();
+    });
+  });
+  describe('getDigest()', () => {
+    it('returns null if not found', async () => {
+      simpleGit.mockReturnValue({
+        listRemote() {
+          return Promise.resolve(lsRemote1);
+        },
+      });
+      const digest = await getDigest(
+        { lookupName: 'a tag to look up' },
+        'notfound'
+      );
+      expect(digest).toBeNull();
+    });
+    it('returns digest for tag', async () => {
+      simpleGit.mockReturnValue({
+        listRemote() {
+          return Promise.resolve(lsRemote1);
+        },
+      });
+      const digest = await getDigest(
+        { lookupName: 'a tag to look up' },
+        'v1.0.2'
+      );
+      expect(digest).toMatchSnapshot();
+    });
+    it('returns digest for HEAD', async () => {
+      simpleGit.mockReturnValue({
+        listRemote() {
+          return Promise.resolve(lsRemote1);
+        },
+      });
+      const digest = await getDigest(
+        { lookupName: 'another tag to look up' },
+        undefined
+      );
+      expect(digest).toMatchSnapshot();
     });
   });
 });

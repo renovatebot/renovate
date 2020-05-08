@@ -1,11 +1,11 @@
 import fs from 'fs';
 import { mock } from 'jest-mock-extended';
-import { PR_STATE_NOT_OPEN } from '../../constants/pull-requests';
-import * as masterIssue from './master-issue';
 import { RenovateConfig, getConfig, platform } from '../../../test/util';
-import { BranchConfig, BranchUpgradeConfig } from '../common';
-import { Pr } from '../../platform';
 import { PLATFORM_TYPE_GITHUB } from '../../constants/platforms';
+import { PR_STATE_NOT_OPEN } from '../../constants/pull-requests';
+import { Platform, Pr } from '../../platform';
+import { BranchConfig, BranchUpgradeConfig } from '../common';
+import * as masterIssue from './master-issue';
 
 type PrUpgrade = BranchUpgradeConfig;
 
@@ -21,7 +21,7 @@ beforeEach(() => {
 async function dryRun(
   branches: BranchConfig[],
   // eslint-disable-next-line no-shadow
-  platform,
+  platform: jest.Mocked<Platform>,
   ensureIssueClosingCalls = 0,
   ensureIssueCalls = 0,
   getBranchPrCalls = 0,

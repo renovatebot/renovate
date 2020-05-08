@@ -1,24 +1,24 @@
-import { logger } from '../../../../logger';
-import * as allVersioning from '../../../../versioning';
-import { getRollbackUpdate, RollbackConfig } from './rollback';
-import { getRangeStrategy } from '../../../../manager';
-import { filterVersions, FilterConfig } from './filter';
-import {
-  getPkgReleases,
-  supportsDigests,
-  getDigest,
-  Release,
-  isGetPkgReleasesConfig,
-} from '../../../../datasource';
-import { RangeConfig, LookupUpdate } from '../../../../manager/common';
 import {
   RenovateConfig,
   UpdateType,
   ValidationMessage,
 } from '../../../../config';
-import { clone } from '../../../../util/clone';
+import {
+  Release,
+  getDigest,
+  getPkgReleases,
+  isGetPkgReleasesConfig,
+  supportsDigests,
+} from '../../../../datasource';
 import * as datasourceGitSubmodules from '../../../../datasource/git-submodules';
+import { logger } from '../../../../logger';
+import { getRangeStrategy } from '../../../../manager';
+import { LookupUpdate, RangeConfig } from '../../../../manager/common';
 import { SkipReason } from '../../../../types';
+import { clone } from '../../../../util/clone';
+import * as allVersioning from '../../../../versioning';
+import { FilterConfig, filterVersions } from './filter';
+import { RollbackConfig, getRollbackUpdate } from './rollback';
 
 export interface UpdateResult {
   sourceDirectory?: string;
@@ -279,7 +279,7 @@ export async function lookupUpdates(
     if (vulnerabilityAlert) {
       filteredVersions = filteredVersions.slice(0, 1);
     }
-    const buckets = {};
+    const buckets: Record<string, LookupUpdate> = {};
     for (const toVersion of filteredVersions) {
       const update: LookupUpdate = { fromVersion, toVersion } as any;
       try {
@@ -327,14 +327,17 @@ export async function lookupUpdates(
         version.equals(release.version, toVersion)
       );
       // TODO: think more about whether to just Object.assign this
-      const releaseFields = [
-        'releaseTimestamp',
-        'canBeUnpublished',
-        'newDigest',
-      ];
+      const releaseFields: (keyof Pick<
+        Release,
+        | 'releaseTimestamp'
+        | 'canBeUnpublished'
+        | 'downloadUrl'
+        | 'checksumUrl'
+        | 'newDigest'
+      >)[] = ['releaseTimestamp', 'canBeUnpublished', 'newDigest'];
       releaseFields.forEach((field) => {
         if (updateRelease[field] !== undefined) {
-          update[field] = updateRelease[field];
+          update[field] = updateRelease[field] as never;
         }
       });
 

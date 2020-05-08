@@ -137,7 +137,7 @@ Object {
   "labels": Array [
     "renovate",
   ],
-  "pullRequestId": 1234,
+  "number": 1234,
 }
 `;
 
@@ -145,7 +145,7 @@ exports[`platform/azure getPr(prNo) should return a pr thats been modified 1`] =
 Object {
   "isModified": true,
   "labels": Array [],
-  "pullRequestId": 1234,
+  "number": 1234,
 }
 `;
 

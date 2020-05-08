@@ -1,8 +1,8 @@
 import is from '@sindresorhus/is';
-import { clone } from '../../../../util/clone';
-import { platform } from '../../../../platform';
-import { logger } from '../../../../logger';
 import { RenovateConfig } from '../../../../config';
+import { logger } from '../../../../logger';
+import { platform } from '../../../../platform';
+import { clone } from '../../../../util/clone';
 
 export async function getOnboardingConfig(
   config: RenovateConfig

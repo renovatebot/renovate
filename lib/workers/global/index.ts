@@ -1,17 +1,17 @@
-import is from '@sindresorhus/is';
-import fs from 'fs-extra';
 import os from 'os';
 import path from 'path';
-import { setEmojiConfig } from '../../util/emoji';
-import { logger, setMeta, getErrors } from '../../logger';
+import is from '@sindresorhus/is';
+import fs from 'fs-extra';
 import * as configParser from '../../config';
-import * as repositoryWorker from '../repository';
-import * as cache from './cache';
-import { autodiscoverRepositories } from './autodiscover';
+import { getErrors, logger, setMeta } from '../../logger';
 import { initPlatform } from '../../platform';
-import * as hostRules from '../../util/host-rules';
-import * as limits from './limits';
 import { setUtilConfig } from '../../util';
+import { setEmojiConfig } from '../../util/emoji';
+import * as hostRules from '../../util/host-rules';
+import * as repositoryWorker from '../repository';
+import { autodiscoverRepositories } from './autodiscover';
+import * as cache from './cache';
+import * as limits from './limits';
 
 type RenovateConfig = configParser.RenovateConfig;
 type RenovateRepository = configParser.RenovateRepository;

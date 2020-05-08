@@ -1,17 +1,19 @@
-import { getInstalledPath } from 'get-installed-path';
-import _fs from 'fs-extra';
 import { exec as _exec } from 'child_process';
-import { mocked } from '../../../../test/util';
-import * as _pnpmHelper from '../../../manager/npm/post-update/pnpm';
+import _fs from 'fs-extra';
+import { getInstalledPath as _getInstalledPath } from 'get-installed-path';
 import { envMock, mockExecAll } from '../../../../test/execUtil';
-import * as _env from '../../../util/exec/env';
+import { mocked } from '../../../../test/util';
+import { PostUpdateConfig } from '../../../manager/common';
+import * as _pnpmHelper from '../../../manager/npm/post-update/pnpm';
 import { BinarySource } from '../../../util/exec/common';
+import * as _env from '../../../util/exec/env';
 
 jest.mock('fs-extra');
 jest.mock('child_process');
 jest.mock('../../../util/exec/env');
 jest.mock('get-installed-path');
 
+const getInstalledPath: jest.Mock<string> = _getInstalledPath as never;
 getInstalledPath.mockImplementation(() => null);
 
 const exec: jest.Mock<typeof _exec> = _exec as any;
@@ -20,7 +22,7 @@ const fs = mocked(_fs);
 const pnpmHelper = mocked(_pnpmHelper);
 
 describe('generateLockFile', () => {
-  let config;
+  let config: PostUpdateConfig;
   beforeEach(() => {
     config = { cacheDir: 'some-cache-dir' };
     env.getChildProcessEnv.mockReturnValue(envMock.basic);

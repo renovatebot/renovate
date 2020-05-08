@@ -1,8 +1,8 @@
 import { gte, lte } from '@snyk/ruby-semver';
 import { logger } from '../../../logger';
-import { EQUAL, NOT_EQUAL, GT, LT, GTE, LTE, PGTE } from '../operator';
-import { floor, increment, decrement } from '../version';
+import { EQUAL, GT, GTE, LT, LTE, NOT_EQUAL, PGTE } from '../operator';
 import { parse as parseRange } from '../range';
+import { decrement, floor, increment } from '../version';
 
 export default ({ range, to }: { range: string; to: string }): string => {
   const ranges = range.split(',').map(parseRange);

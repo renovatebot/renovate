@@ -1,13 +1,15 @@
-/* istanbul ignore file */
-import Git from 'simple-git/promise';
 import { resolve } from 'path';
 import * as fs from 'fs-extra';
+import Git from 'simple-git/promise';
 import { logger } from '../../logger';
-import { UpdateArtifact, UpdateArtifactsResult } from '../common';
-import { exec, ExecOptions } from '../../util/exec';
-import { readLocalFile } from '../../util/fs';
 import { platform } from '../../platform';
+import { ExecOptions, exec } from '../../util/exec';
+import { readLocalFile } from '../../util/fs';
+import { Http } from '../../util/http';
+import { UpdateArtifact, UpdateArtifactsResult } from '../common';
 import { gradleWrapperFileName, prepareGradleCommand } from '../gradle/index';
+
+const http = new Http('gradle-wrapper');
 
 async function addIfUpdated(
   status: Git.StatusResult,
@@ -36,6 +38,11 @@ function getDistributionUrl(newPackageFileContent: string): string {
   return null;
 }
 
+async function getDistributionChecksum(url: string): Promise<string> {
+  const { body } = await http.get(`${url}.sha256`);
+  return body;
+}
+
 export async function updateArtifacts({
   packageFileName,
   newPackageFileContent,
@@ -56,6 +63,10 @@ export async function updateArtifacts({
     const distributionUrl = getDistributionUrl(newPackageFileContent);
     if (distributionUrl) {
       cmd += ` --gradle-distribution-url ${distributionUrl}`;
+      if (newPackageFileContent.includes('distributionSha256Sum=')) {
+        const checksum = await getDistributionChecksum(distributionUrl);
+        cmd += ` --gradle-distribution-sha256-sum ${checksum}`;
+      }
     } else {
       cmd += ` --gradle-version ${config.toVersion}`;
     }
@@ -95,7 +106,7 @@ export async function updateArtifacts({
       {
         artifactError: {
           lockFile: packageFileName,
-          stderr: err.stdout + '\n' + err.stderr,
+          stderr: err.message,
         },
       },
     ];

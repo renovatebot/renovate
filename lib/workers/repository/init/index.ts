@@ -1,16 +1,17 @@
+import { RenovateConfig } from '../../../config';
 import { logger } from '../../../logger';
-import { checkOnboardingBranch } from '../onboarding/branch';
+import { platform } from '../../../platform';
+import { clearRepoCache } from '../../../util/cache';
 import { checkIfConfigured } from '../configured';
+import { checkOnboardingBranch } from '../onboarding/branch';
 import { initApis } from './apis';
 import { checkBaseBranch } from './base';
 import { mergeRenovateConfig } from './config';
 import { detectSemanticCommits } from './semantic';
 import { detectVulnerabilityAlerts } from './vulnerability';
-import { platform } from '../../../platform';
-import { RenovateConfig } from '../../../config';
 
 export async function initRepo(input: RenovateConfig): Promise<RenovateConfig> {
-  global.repoCache = {};
+  clearRepoCache();
   let config: RenovateConfig = {
     ...input,
     errors: [],
@@ -20,6 +21,7 @@ export async function initRepo(input: RenovateConfig): Promise<RenovateConfig> {
   config.global = config.global || {};
   config = await initApis(config);
   config.semanticCommits = await detectSemanticCommits(config);
+  config.baseBranchSha = await platform.setBaseBranch(config.baseBranch);
   config = await checkOnboardingBranch(config);
   config = await mergeRenovateConfig(config);
   checkIfConfigured(config);

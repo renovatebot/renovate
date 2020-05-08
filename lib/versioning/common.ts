@@ -1,4 +1,4 @@
-import { SemVer, Range } from 'semver';
+import { Range, SemVer } from 'semver';
 import { RangeStrategy as _RangeStrategy } from '../types';
 
 /**

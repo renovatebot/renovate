@@ -1,6 +1,6 @@
-import { getPackageUpdates } from './package';
-import { getReleases as _getReleases } from '../../datasource/github-tags';
 import { getConfig } from '../../config/defaults';
+import { getReleases as _getReleases } from '../../datasource/github-tags';
+import { getPackageUpdates } from './package';
 
 const defaultConfig = getConfig();
 const getReleases: any = _getReleases;

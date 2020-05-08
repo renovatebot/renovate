@@ -1,21 +1,21 @@
+import { OutgoingHttpHeaders } from 'http';
+import url from 'url';
+import is from '@sindresorhus/is';
 import delay from 'delay';
 import moment from 'moment';
-import url from 'url';
-import getRegistryUrl from 'registry-auth-token/registry-url';
 import registryAuthToken from 'registry-auth-token';
-import { OutgoingHttpHeaders } from 'http';
-import is from '@sindresorhus/is';
+import getRegistryUrl from 'registry-auth-token/registry-url';
 import { logger } from '../../logger';
 import { find } from '../../util/host-rules';
 import { Http, HttpOptions } from '../../util/http';
 import { maskToken } from '../../util/mask';
-import { getNpmrc } from './npmrc';
 import { DatasourceError, Release, ReleaseResult } from '../common';
 import { id } from './common';
+import { getNpmrc } from './npmrc';
 
 const http = new Http(id);
 
-let memcache = {};
+let memcache: Record<string, string> = {};
 
 export function resetMemCache(): void {
   logger.debug('resetMemCache()');
@@ -38,7 +38,7 @@ export interface NpmDependency extends ReleaseResult {
   latestVersion: string;
   sourceUrl: string;
   versions: Record<string, any>;
-  'dist-tags': string[];
+  'dist-tags': Record<string, string>;
   'renovate-config': any;
   sourceDirectory?: string;
 }
@@ -207,7 +207,17 @@ export async function getDependency(
     const cacheMinutes = process.env.RENOVATE_CACHE_NPM_MINUTES
       ? parseInt(process.env.RENOVATE_CACHE_NPM_MINUTES, 10)
       : 5;
-    if (!packageName.startsWith('@')) {
+    // TODO: use dynamic detection of public repos instead of a static list
+    const whitelistedPublicScopes = [
+      '@graphql-codegen',
+      '@storybook',
+      '@types',
+      '@typescript-eslint',
+    ];
+    if (
+      whitelistedPublicScopes.includes(scope) ||
+      !packageName.startsWith('@')
+    ) {
       await renovateCache.set(cacheNamespace, pkgUrl, dep, cacheMinutes);
     }
     return dep;
@@ -256,8 +266,13 @@ export async function getDependency(
           err.code === 'ETIMEDOUT') &&
         retries > 0
       ) {
-        logger.warn({ pkgUrl, errName: err.name }, 'Retrying npm error');
-        await delay(5000);
+        // Delay a random time to avoid contention
+        const delaySeconds = 5 + Math.round(Math.random() * 25);
+        logger.warn(
+          { pkgUrl, errName: err.name, delaySeconds },
+          'Retrying npm error'
+        );
+        await delay(1000 * delaySeconds);
         return getDependency(packageName, retries - 1);
       }
       if (err.name === 'ParseError' && err.body) {

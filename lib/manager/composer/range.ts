@@ -1,6 +1,6 @@
 import { logger } from '../../logger';
-import { RangeConfig } from '../common';
 import { RangeStrategy } from '../../versioning';
+import { RangeConfig } from '../common';
 
 export function getRangeStrategy(config: RangeConfig): RangeStrategy {
   const {

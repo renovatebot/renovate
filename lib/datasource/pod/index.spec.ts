@@ -1,9 +1,10 @@
-import { api as _api } from '../../platform/github/gh-got-wrapper';
-import * as pod from '.';
-import * as rubyVersioning from '../../versioning/ruby';
 import { getPkgReleases } from '..';
 import { mocked } from '../../../test/util';
 import { GotResponse } from '../../platform';
+import { api as _api } from '../../platform/github/gh-got-wrapper';
+import { clearRepoCache } from '../../util/cache';
+import * as rubyVersioning from '../../versioning/ruby';
+import * as pod from '.';
 
 const api = mocked(_api);
 
@@ -20,7 +21,7 @@ describe('datasource/cocoapods', () => {
   describe('getReleases', () => {
     beforeEach(() => {
       jest.resetAllMocks();
-      global.repoCache = {};
+      clearRepoCache();
       return global.renovateCache.rmAll();
     });
 

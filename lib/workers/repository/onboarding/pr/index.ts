@@ -1,15 +1,15 @@
 import is from '@sindresorhus/is';
-import { platform } from '../../../../platform';
-import { logger } from '../../../../logger';
-import { getConfigDesc } from './config-description';
-import { getErrors, getWarnings, getDepWarnings } from './errors-warnings';
-import { getBaseBranchDesc } from './base-branch';
-import { getPrList } from './pr-list';
-import { emojify } from '../../../../util/emoji';
 import { RenovateConfig } from '../../../../config';
+import { logger } from '../../../../logger';
 import { PackageFile } from '../../../../manager/common';
-import { addAssigneesReviewers } from '../../../pr';
+import { platform } from '../../../../platform';
+import { emojify } from '../../../../util/emoji';
 import { BranchConfig } from '../../../common';
+import { addAssigneesReviewers } from '../../../pr';
+import { getBaseBranchDesc } from './base-branch';
+import { getConfigDesc } from './config-description';
+import { getDepWarnings, getErrors, getWarnings } from './errors-warnings';
+import { getPrList } from './pr-list';
 
 export async function ensureOnboardingPr(
   config: RenovateConfig,
@@ -50,7 +50,7 @@ If you need any further assistance then you can also [request help here](${confi
   );
   let prBody = prTemplate;
   if (packageFiles && Object.entries(packageFiles).length) {
-    let files = [];
+    let files: string[] = [];
     for (const [manager, managerFiles] of Object.entries(packageFiles)) {
       files = files.concat(
         managerFiles.map((file) => ` * \`${file.packageFile}\` (${manager})`)
@@ -115,7 +115,7 @@ If you need any further assistance then you can also [request help here](${confi
     return;
   }
   logger.debug('Creating onboarding PR');
-  const labels = [];
+  const labels: string[] = [];
   const useDefaultBranch = true;
   try {
     // istanbul ignore if

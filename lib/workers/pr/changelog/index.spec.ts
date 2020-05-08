@@ -1,10 +1,10 @@
-import { api } from '../../../platform/github/gh-got-wrapper';
-import * as hostRules from '../../../util/host-rules';
-import { getChangeLogJSON, ChangeLogError } from '.';
 import { mocked, partial } from '../../../../test/util';
 import { PLATFORM_TYPE_GITHUB } from '../../../constants/platforms';
+import { api } from '../../../platform/github/gh-got-wrapper';
+import * as hostRules from '../../../util/host-rules';
 import * as semverVersioning from '../../../versioning/semver';
 import { BranchConfig } from '../../common';
+import { ChangeLogError, getChangeLogJSON } from '.';
 
 jest.mock('../../../platform/github/gh-got-wrapper');
 jest.mock('../../../datasource/npm');
@@ -175,6 +175,19 @@ describe('workers/pr/changelog', () => {
           endpoint: 'https://github-enterprise.example.com/',
         })
       ).toMatchSnapshot();
+      expect(ghGot).toHaveBeenNthCalledWith(
+        1,
+        'https://api.github.com/repos/chalk/chalk/tags?per_page=100',
+        { paginate: true }
+      );
+      expect(ghGot).toHaveBeenNthCalledWith(
+        2,
+        'https://api.github.com/repos/chalk/chalk/contents/'
+      );
+      expect(ghGot).toHaveBeenNthCalledWith(
+        3,
+        'https://api.github.com/repos/chalk/chalk/releases?per_page=100'
+      );
     });
     it('supports github enterprise and github enterprise changelog', async () => {
       hostRules.add({
@@ -190,6 +203,46 @@ describe('workers/pr/changelog', () => {
           endpoint: 'https://github-enterprise.example.com/',
         })
       ).toMatchSnapshot();
+      expect(ghGot).toHaveBeenNthCalledWith(
+        1,
+        'https://github-enterprise.example.com/repos/chalk/chalk/tags?per_page=100',
+        { paginate: true }
+      );
+      expect(ghGot).toHaveBeenNthCalledWith(
+        2,
+        'https://github-enterprise.example.com/repos/chalk/chalk/contents/'
+      );
+      expect(ghGot).toHaveBeenNthCalledWith(
+        3,
+        'https://github-enterprise.example.com/repos/chalk/chalk/releases?per_page=100'
+      );
+    });
+
+    it('supports github.com and github enterprise changelog', async () => {
+      hostRules.add({
+        hostType: PLATFORM_TYPE_GITHUB,
+        baseUrl: 'https://github-enterprise.example.com/',
+        token: 'abc',
+      });
+      expect(
+        await getChangeLogJSON({
+          ...upgrade,
+          sourceUrl: 'https://github-enterprise.example.com/chalk/chalk',
+        })
+      ).toMatchSnapshot();
+      expect(ghGot).toHaveBeenNthCalledWith(
+        1,
+        'https://github-enterprise.example.com/repos/chalk/chalk/tags?per_page=100',
+        { paginate: true }
+      );
+      expect(ghGot).toHaveBeenNthCalledWith(
+        2,
+        'https://github-enterprise.example.com/repos/chalk/chalk/contents/'
+      );
+      expect(ghGot).toHaveBeenNthCalledWith(
+        3,
+        'https://github-enterprise.example.com/repos/chalk/chalk/releases?per_page=100'
+      );
     });
   });
 });

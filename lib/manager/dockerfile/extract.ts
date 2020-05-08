@@ -1,7 +1,7 @@
-import { logger } from '../../logger';
-import { PackageDependency, PackageFile } from '../common';
 import * as datasourceDocker from '../../datasource/docker';
+import { logger } from '../../logger';
 import { SkipReason } from '../../types';
+import { PackageDependency, PackageFile } from '../common';
 
 export function splitImageParts(currentFrom: string): PackageDependency {
   if (currentFrom.includes('$')) {
@@ -30,9 +30,16 @@ export function splitImageParts(currentFrom: string): PackageDependency {
   return dep;
 }
 
-export function getDep(currentFrom: string): PackageDependency {
+export function getDep(
+  currentFrom: string,
+  specifyReplaceString = true
+): PackageDependency {
   const dep = splitImageParts(currentFrom);
-  dep.replaceString = currentFrom;
+  if (specifyReplaceString) {
+    dep.replaceString = currentFrom;
+    dep.autoReplaceStringTemplate =
+      '{{depName}}{{#if newValue}}:{{newValue}}{{/if}}{{#if newDigest}}@{{newDigest}}{{/if}}';
+  }
   dep.datasource = datasourceDocker.id;
   if (
     dep.depName &&

@@ -1,4 +1,3 @@
-import { applyPackageRules, Config } from './package-rules';
 import { UpdateType } from '../config';
 import {
   LANGUAGE_DOCKER,
@@ -9,6 +8,7 @@ import {
 
 import * as datasourceDocker from '../datasource/docker';
 import * as datasourceOrb from '../datasource/orb';
+import { Config, applyPackageRules } from './package-rules';
 
 type TestConfig = Config & { x?: number; y?: number };
 

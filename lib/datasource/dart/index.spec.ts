@@ -15,9 +15,6 @@ jest.mock('../../util/got');
 
 describe('datasource/dart', () => {
   describe('getReleases', () => {
-    beforeEach(() => {
-      global.repoCache = {};
-    });
     it('returns null for empty result', async () => {
       got.mockReturnValueOnce(null);
       expect(await getReleases({ lookupName: 'non_sense' })).toBeNull();

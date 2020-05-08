@@ -1,17 +1,17 @@
 import sampleSize from 'lodash/sampleSize';
 import uniq from 'lodash/uniq';
-import { logger } from '../../logger';
-import { ChangeLogError } from './changelog';
-import { getPrBody } from './body';
-import { platform, Pr, PlatformPrOptions } from '../../platform';
-import { BranchConfig, PrResult } from '../common';
 import {
   PLATFORM_FAILURE,
   PLATFORM_INTEGRATION_UNAUTHORIZED,
   PLATFORM_RATE_LIMIT_EXCEEDED,
   REPOSITORY_CHANGED,
 } from '../../constants/error-messages';
+import { logger } from '../../logger';
+import { PlatformPrOptions, Pr, platform } from '../../platform';
 import { BranchStatus } from '../../types';
+import { BranchConfig, PrResult } from '../common';
+import { getPrBody } from './body';
+import { ChangeLogError } from './changelog';
 
 function noWhitespace(input: string): string {
   return input.replace(/\r?\n|\r|\s/g, '');
@@ -21,7 +21,11 @@ function noLeadingAtSymbol(input: string): string {
   return input.length && input.startsWith('@') ? input.slice(1) : input;
 }
 
-export async function addAssigneesReviewers(config, pr: Pr): Promise<void> {
+// TODO: fix types
+export async function addAssigneesReviewers(
+  config: any,
+  pr: Pr
+): Promise<void> {
   if (config.assignees.length > 0) {
     try {
       let assignees = config.assignees.map(noLeadingAtSymbol);
@@ -180,8 +184,8 @@ export async function ensurePr(
     logger.debug('Branch status success');
   }
 
-  const processedUpgrades = [];
-  const commitRepos = [];
+  const processedUpgrades: string[] = [];
+  const commitRepos: string[] = [];
 
   // Get changelog and then generate template strings
   for (const upgrade of upgrades) {
@@ -198,16 +202,16 @@ export async function ensurePr(
     if (logJSON) {
       if (typeof logJSON.error === 'undefined') {
         if (logJSON.project) {
-          upgrade.githubName = logJSON.project.github;
+          upgrade.repoName = logJSON.project.github;
         }
         upgrade.hasReleaseNotes = logJSON.hasReleaseNotes;
         upgrade.releases = [];
         if (
           upgrade.hasReleaseNotes &&
-          upgrade.githubName &&
-          !commitRepos.includes(upgrade.githubName)
+          upgrade.repoName &&
+          !commitRepos.includes(upgrade.repoName)
         ) {
-          commitRepos.push(upgrade.githubName);
+          commitRepos.push(upgrade.repoName);
           if (logJSON.versions) {
             logJSON.versions.forEach((version) => {
               const release = { ...version };
@@ -234,7 +238,7 @@ export async function ensurePr(
   Object.assign(config, upgrades[0]);
   config.hasReleaseNotes = config.upgrades.some((upg) => upg.hasReleaseNotes);
 
-  const releaseNoteRepos = [];
+  const releaseNoteRepos: string[] = [];
   for (const upgrade of config.upgrades) {
     if (upgrade.hasReleaseNotes) {
       if (releaseNoteRepos.includes(upgrade.sourceUrl)) {
@@ -347,7 +351,7 @@ export async function ensurePr(
         if (err.body.errors && err.body.errors.length) {
           if (
             err.body.errors.some(
-              (error) =>
+              (error: { message?: string }) =>
                 error.message &&
                 error.message.startsWith('A pull request already exists')
             )
@@ -422,7 +426,10 @@ export async function ensurePr(
   return { prResult: PrResult.Error };
 }
 
-export async function checkAutoMerge(pr: Pr, config): Promise<boolean> {
+export async function checkAutoMerge(
+  pr: Pr,
+  config: BranchConfig
+): Promise<boolean> {
   logger.trace({ config }, 'checkAutoMerge');
   const {
     branchName,

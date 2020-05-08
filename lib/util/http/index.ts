@@ -74,6 +74,10 @@ export class Http {
     return this.request<string>(url, options);
   }
 
+  head(url: string, options: HttpOptions = {}): Promise<HttpResponse> {
+    return this.request<string>(url, { ...options, method: 'head' });
+  }
+
   private async requestJson<T = unknown>(
     url: string,
     options: InternalHttpOptions

@@ -1,13 +1,13 @@
-import slugify from 'slugify';
 import { clean as cleanGitRef } from 'clean-git-ref';
-import { Merge } from 'type-fest';
-import { logger, addMeta, removeMeta } from '../../../logger';
-import * as template from '../../../util/template';
-import { generateBranchConfig } from './generate';
-import { flattenUpdates } from './flatten';
+import slugify from 'slugify';
 import { RenovateConfig, ValidationMessage } from '../../../config';
-import { BranchUpgradeConfig, BranchConfig } from '../../common';
+import { addMeta, logger, removeMeta } from '../../../logger';
+import * as template from '../../../util/template';
+import { BranchConfig, BranchUpgradeConfig } from '../../common';
 import { getChangeLogJSON } from '../../pr/changelog';
+import { flattenUpdates } from './flatten';
+import { generateBranchConfig } from './generate';
+import { Merge } from 'type-fest';
 
 /**
  * Clean git branch name
@@ -40,6 +40,7 @@ export async function branchifyUpgrades(
   logger.debug(
     `${updates.length} flattened updates found: ${updates
       .map((u) => u.depName)
+      .filter((txt) => txt && txt.length)
       .join(', ')}`
   );
   const errors: ValidationMessage[] = [];
@@ -130,20 +131,18 @@ export async function branchifyUpgrades(
         } = upgrade;
         const upgradeKey = `${packageFile}:${depName}:${currentValue}`;
         const previousNewValue = seenUpdates[upgradeKey];
-        if (previousNewValue) {
-          if (previousNewValue !== newValue) {
-            logger.info(
-              {
-                manager,
-                packageFile,
-                depName,
-                currentValue,
-                previousNewValue,
-                thisNewValue: newValue,
-              },
-              'Ignoring upgrade collision'
-            );
-          }
+        if (previousNewValue && previousNewValue !== newValue) {
+          logger.info(
+            {
+              manager,
+              packageFile,
+              depName,
+              currentValue,
+              previousNewValue,
+              thisNewValue: newValue,
+            },
+            'Ignoring upgrade collision'
+          );
           return false;
         }
         seenUpdates[upgradeKey] = newValue;
@@ -152,6 +151,7 @@ export async function branchifyUpgrades(
     );
     const branch = generateBranchConfig(branchUpgrades[branchName]);
     branch.branchName = branchName;
+    branch.packageFiles = packageFiles;
     branches.push(branch);
   }
   removeMeta(['branch']);
@@ -163,7 +163,7 @@ export async function branchifyUpgrades(
   try {
     // Here we check if there are updates from the same source repo
     // that are not grouped into the same branch
-    const branchUpdates = {};
+    const branchUpdates: Record<string, Record<string, string>> = {};
     for (const branch of branches) {
       const { sourceUrl, branchName, depName, toVersion } = branch;
       if (sourceUrl && toVersion) {

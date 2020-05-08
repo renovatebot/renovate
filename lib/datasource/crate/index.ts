@@ -3,8 +3,8 @@ import { Http } from '../../util/http';
 import {
   DatasourceError,
   GetReleasesConfig,
-  ReleaseResult,
   Release,
+  ReleaseResult,
 } from '../common';
 
 export const id = 'crate';

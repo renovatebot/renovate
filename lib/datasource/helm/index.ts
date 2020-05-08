@@ -1,8 +1,8 @@
 import yaml from 'js-yaml';
 
-import { DatasourceError, GetReleasesConfig, ReleaseResult } from '../common';
-import { Http } from '../../util/http';
 import { logger } from '../../logger';
+import { Http } from '../../util/http';
+import { DatasourceError, GetReleasesConfig, ReleaseResult } from '../common';
 
 export const id = 'helm';
 
@@ -39,7 +39,7 @@ export async function getRepositoryData(
       return null;
     }
     if (err.statusCode === 404 || err.code === 'ENOTFOUND') {
-      logger.warn({ err }, 'index.yaml lookup error');
+      logger.debug({ err }, 'Helm Chart not found');
       return null;
     }
     if (
@@ -102,7 +102,7 @@ export async function getReleases({
   }
   const releases = repositoryData.find((chart) => chart.name === lookupName);
   if (!releases) {
-    logger.warn(
+    logger.debug(
       { dependency: lookupName },
       `Entry ${lookupName} doesn't exist in index.yaml from ${helmRepository}`
     );

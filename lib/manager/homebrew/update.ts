@@ -1,10 +1,10 @@
 import { fromStream } from 'hasha';
 import { coerce } from 'semver';
-import { parseUrlPath } from './extract';
-import { skip, isSpace, removeComments } from './util';
-import { Http } from '../../util/http';
 import { logger } from '../../logger';
+import { Http } from '../../util/http';
 import { UpdateDependencyConfig } from '../common';
+import { parseUrlPath } from './extract';
+import { isSpace, removeComments, skip } from './util';
 
 const http = new Http('homebrew');
 

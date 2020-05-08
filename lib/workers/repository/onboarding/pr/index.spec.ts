@@ -1,15 +1,18 @@
-import { RenovateConfig, defaultConfig } from '../../../../../test/util';
+import {
+  RenovateConfig,
+  defaultConfig,
+  partial,
+  platform,
+} from '../../../../../test/util';
+import { PackageFile } from '../../../../manager/common';
+import { Pr } from '../../../../platform';
 import { BranchConfig } from '../../../common';
-
-const { ensureOnboardingPr } = require('.');
-
-/** @type any */
-const { platform } = require('../../../../platform');
+import { ensureOnboardingPr } from '.';
 
 describe('workers/repository/onboarding/pr', () => {
   describe('ensureOnboardingPr()', () => {
     let config: RenovateConfig;
-    let packageFiles;
+    let packageFiles: Record<string, PackageFile[]>;
     let branches: BranchConfig[];
     beforeEach(() => {
       jest.resetAllMocks();
@@ -19,10 +22,10 @@ describe('workers/repository/onboarding/pr', () => {
         warnings: [],
         description: [],
       };
-      packageFiles = { npm: [{ packageFile: 'package.json' }] };
+      packageFiles = { npm: [{ packageFile: 'package.json', deps: [] }] };
       branches = [];
       platform.getPrBody = jest.fn((input) => input);
-      platform.createPr.mockReturnValue({});
+      platform.createPr.mockResolvedValueOnce(partial<Pr>({}));
     });
     let createPrBody: string;
     it('returns if onboarded', async () => {
@@ -35,34 +38,40 @@ describe('workers/repository/onboarding/pr', () => {
       createPrBody = platform.createPr.mock.calls[0][0].prBody;
     });
     it('returns if PR does not need updating', async () => {
-      platform.getBranchPr.mockReturnValue({
-        title: 'Configure Renovate',
-        body: createPrBody,
-        isModified: false,
-      });
+      platform.getBranchPr.mockResolvedValue(
+        partial<Pr>({
+          title: 'Configure Renovate',
+          body: createPrBody,
+          isModified: false,
+        })
+      );
       await ensureOnboardingPr(config, packageFiles, branches);
       expect(platform.createPr).toHaveBeenCalledTimes(0);
       expect(platform.updatePr).toHaveBeenCalledTimes(0);
     });
     it('updates PR', async () => {
       config.baseBranch = 'some-branch';
-      platform.getBranchPr.mockReturnValue({
-        title: 'Configure Renovate',
-        body: createPrBody,
-        isConflicted: true,
-        isModified: true,
-      });
+      platform.getBranchPr.mockResolvedValueOnce(
+        partial<Pr>({
+          title: 'Configure Renovate',
+          body: createPrBody,
+          isConflicted: true,
+          isModified: true,
+        })
+      );
       await ensureOnboardingPr(config, {}, branches);
       expect(platform.createPr).toHaveBeenCalledTimes(0);
       expect(platform.updatePr).toHaveBeenCalledTimes(1);
     });
     it('updates PR', async () => {
       config.baseBranch = 'some-branch';
-      platform.getBranchPr.mockReturnValue({
-        title: 'Configure Renovate',
-        body: createPrBody,
-        isModified: true,
-      });
+      platform.getBranchPr.mockResolvedValueOnce(
+        partial<Pr>({
+          title: 'Configure Renovate',
+          body: createPrBody,
+          isModified: true,
+        })
+      );
       await ensureOnboardingPr(config, {}, branches);
       expect(platform.createPr).toHaveBeenCalledTimes(0);
       expect(platform.updatePr).toHaveBeenCalledTimes(1);

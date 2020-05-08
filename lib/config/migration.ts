@@ -1,10 +1,10 @@
 import is from '@sindresorhus/is';
 import later from 'later';
 import { logger } from '../logger';
-import { clone } from '../util/clone';
-import { getOptions, RenovateOptions } from './definitions';
-import { RenovateConfig, PackageRule } from './common';
 import { HostRule } from '../types';
+import { clone } from '../util/clone';
+import { PackageRule, RenovateConfig } from './common';
+import { RenovateOptions, getOptions } from './definitions';
 
 const options = getOptions();
 

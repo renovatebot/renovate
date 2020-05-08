@@ -1,7 +1,7 @@
 import fs from 'fs';
+import { DATASOURCE_FAILURE } from '../../constants/error-messages';
 import _got from '../../util/got';
 import { getReleases } from '.';
-import { DATASOURCE_FAILURE } from '../../constants/error-messages';
 
 const got: jest.Mock<any> = _got as any;
 jest.mock('../../util/got');
@@ -39,6 +39,12 @@ describe('datasource/cdnjs', () => {
     it('returns null for 404', async () => {
       got.mockRejectedValueOnce({ statusCode: 404 });
       expect(await getReleases({ lookupName: 'foo/bar' })).toBeNull();
+    });
+    it('returns null for empty 200 OK', async () => {
+      got.mockResolvedValueOnce({ body: {} });
+      expect(
+        await getReleases({ lookupName: 'doesnotexist/doesnotexist' })
+      ).toBeNull();
     });
     it('throws for 401', async () => {
       got.mockRejectedValueOnce({ statusCode: 401 });

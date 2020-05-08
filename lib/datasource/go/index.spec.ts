@@ -1,8 +1,8 @@
+import { ReleaseResult } from '..';
+import { mocked, partial } from '../../../test/util';
 import _got from '../../util/got';
 import * as _github from '../github-tags';
 import * as go from '.';
-import { mocked, partial } from '../../../test/util';
-import { ReleaseResult } from '..';
 
 jest.mock('../../util/got');
 jest.mock('../github-tags');
@@ -24,9 +24,6 @@ Nothing to see here; <a href="https://godoc.org/golang.org/x/text">move along</a
 </html>`;
 
 describe('datasource/go', () => {
-  beforeEach(() => {
-    global.repoCache = {};
-  });
   describe('getDigest', () => {
     it('returns null for wrong name', async () => {
       got.mockReturnValueOnce({

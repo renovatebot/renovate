@@ -1,7 +1,7 @@
 import * as semver from 'semver';
 import { is as isStable } from 'semver-stable';
-import { getNewValue } from './range';
 import { VersioningApi } from '../common';
+import { getNewValue } from './range';
 
 export const id = 'npm';
 export const displayName = 'npm';

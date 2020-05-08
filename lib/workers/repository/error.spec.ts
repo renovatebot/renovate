@@ -1,4 +1,4 @@
-import handleError from './error';
+import { RenovateConfig, getConfig } from '../../../test/util';
 import {
   CONFIG_VALIDATION,
   DATASOURCE_FAILURE,
@@ -18,8 +18,8 @@ import {
   REPOSITORY_EMPTY,
   REPOSITORY_FORKED,
   REPOSITORY_MIRRORED,
-  REPOSITORY_NO_VULNERABILITY,
   REPOSITORY_NOT_FOUND,
+  REPOSITORY_NO_VULNERABILITY,
   REPOSITORY_RENAMED,
   REPOSITORY_TEMPORARY_ERROR,
   REPOSITORY_UNINITIATED,
@@ -27,8 +27,8 @@ import {
   SYSTEM_INSUFFICIENT_MEMORY,
   UNKNOWN_ERROR,
 } from '../../constants/error-messages';
-import { RenovateConfig, getConfig } from '../../../test/util';
 import { DatasourceError } from '../../datasource/common';
+import handleError from './error';
 
 jest.mock('./error-config');
 

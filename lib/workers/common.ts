@@ -1,25 +1,28 @@
-import { Merge } from 'type-fest';
 import {
-  PackageDependency,
-  ArtifactError,
-  LookupUpdate,
-} from '../manager/common';
-import {
-  RenovateSharedConfig,
-  RenovateConfig,
   GroupConfig,
   RenovateAdminConfig,
+  RenovateConfig,
+  RenovateSharedConfig,
   ValidationMessage,
 } from '../config';
-import { File, PlatformPrOptions } from '../platform';
 import { Release } from '../datasource';
+import {
+  ArtifactError,
+  LookupUpdate,
+  PackageDependency,
+  PackageFile,
+} from '../manager/common';
+import { File, PlatformPrOptions } from '../platform';
 import { ChangeLogResult } from './pr/changelog/common';
+import { Merge } from 'type-fest';
 
 export interface BranchUpgradeConfig
   extends Merge<RenovateConfig, PackageDependency>,
     Partial<LookupUpdate>,
     RenovateSharedConfig {
   artifactErrors?: ArtifactError[];
+  autoReplaceStringTemplate?: string;
+  baseDeps?: PackageDependency[];
   branchName: string;
   commitBody?: string;
   commitMessage?: string;
@@ -30,6 +33,7 @@ export interface BranchUpgradeConfig
   currentVersion?: string;
   endpoint?: string;
   excludeCommitPaths?: string[];
+  githubName?: string;
   group?: GroupConfig;
 
   groupName?: string;
@@ -46,6 +50,7 @@ export interface BranchUpgradeConfig
   prTitle?: string;
   releases?: Release[];
   releaseTimestamp?: string;
+  repoName?: string;
 
   sourceDirectory?: string;
 
@@ -86,13 +91,16 @@ export interface BranchConfig
   extends BranchUpgradeConfig,
     RenovateAdminConfig,
     PlatformPrOptions {
+  automergeComment?: string;
   automergeType?: string;
   baseBranch?: string;
   canBeUnpublished?: boolean;
   errors?: ValidationMessage[];
   hasTypes?: boolean;
+  masterIssueChecks?: Record<string, string>;
   releaseTimestamp?: string;
 
   res?: ProcessBranchResult;
   upgrades: BranchUpgradeConfig[];
+  packageFiles?: Record<string, PackageFile[]>;
 }

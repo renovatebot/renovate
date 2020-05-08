@@ -1,5 +1,5 @@
-import { logger } from '../../logger';
 import { getDependency } from '../../datasource/npm/get';
+import { logger } from '../../logger';
 import { Preset } from './common';
 
 export async function getPreset(

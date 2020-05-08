@@ -1,7 +1,7 @@
 import { readFileSync } from 'fs';
 import {
-  extractPackageFile,
   TerraformDependencyTypes,
+  extractPackageFile,
   getTerraformDependencyType,
 } from './extract';
 
