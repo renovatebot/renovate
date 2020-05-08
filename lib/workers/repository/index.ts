@@ -40,9 +40,9 @@ export async function renovateRepository(
     );
     await ensureOnboardingPr(config, packageFiles, branches);
     await Promise.all(
-      branches.map(async branch => {
+      branches.map(async (branch) => {
         await Promise.all(
-          branch.upgrades.map(async upgrade => {
+          branch.upgrades.map(async (upgrade) => {
             upgrade.logJSON = await getChangeLogJSON(upgrade); // eslint-disable-line no-param-reassign
           })
         );
