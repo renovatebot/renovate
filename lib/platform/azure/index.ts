@@ -572,29 +572,40 @@ export async function ensureComment({
 export async function ensureCommentRemoval({
   number: issueNo,
   topic,
+  content,
 }: EnsureCommentRemovalConfig): Promise<void> {
-  logger.debug(`ensureCommentRemoval(issueNo, topic)(${issueNo}, ${topic})`);
-  if (issueNo) {
-    const azureApiGit = await azureApi.gitApi();
-    const threads = await azureApiGit.getThreads(config.repoId, issueNo);
-    let threadIdFound = null;
+  logger.debug(
+    `ensureCommentRemoval(issueNo, topic, content)(${issueNo}, ${topic}, ${content})`
+  );
+  if (!issueNo) {
+    return;
+  }
 
-    threads.forEach((thread) => {
-      if (thread.comments[0].content.startsWith(`### ${topic}\n\n`)) {
-        threadIdFound = thread.id;
-      }
-    });
+  const azureApiGit = await azureApi.gitApi();
+  const threads = await azureApiGit.getThreads(config.repoId, issueNo);
 
-    if (threadIdFound) {
-      await azureApiGit.updateThread(
-        {
-          status: 4, // close
-        },
-        config.repoId,
-        issueNo,
-        threadIdFound
-      );
-    }
+  const byTopic = (thread): boolean =>
+    thread.comments[0].content.startsWith(`### ${topic}\n\n`);
+  const byContent = (thread): boolean =>
+    thread.comments[0].content.trim() === content;
+
+  let threadIdFound = null;
+
+  if (topic) {
+    threadIdFound = threads.find(byTopic)?.id;
+  } else if (content) {
+    threadIdFound = threads.find(byContent)?.id;
+  }
+
+  if (threadIdFound) {
+    await azureApiGit.updateThread(
+      {
+        status: 4, // close
+      },
+      config.repoId,
+      issueNo,
+      threadIdFound
+    );
   }
 }
 
