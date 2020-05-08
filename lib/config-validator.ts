@@ -1,16 +1,15 @@
-#!/usr/bin/env node
-
-const fs = require('fs-extra');
-const { validateConfig } = require('../dist/config/validation');
-const { massageConfig } = require('../dist/config/massage');
-const { getConfig } = require('../dist/config/file');
-const { configFileNames } = require('../dist/config/app-strings');
+// istanbul ignore file
+import { readFileSync } from 'fs-extra';
+import { configFileNames } from '../dist/config/app-strings';
+import { getConfig } from '../dist/config/file';
+import { massageConfig } from '../dist/config/massage';
+import { validateConfig } from '../dist/config/validation';
 
 /* eslint-disable no-console */
 
 let returnVal = 0;
 
-async function validate(desc, config, isPreset = false) {
+async function validate(desc, config, isPreset = false): Promise<void> {
   const res = await validateConfig(massageConfig(config), isPreset);
   if (res.errors.length) {
     console.log(
@@ -27,11 +26,9 @@ async function validate(desc, config, isPreset = false) {
 }
 
 (async () => {
-  for (const file of configFileNames.filter(
-    (name) => name !== 'package.json'
-  )) {
+  for (const file of configFileNames.filter(name => name !== 'package.json')) {
     try {
-      const rawContent = fs.readFileSync(file, 'utf8');
+      const rawContent = readFileSync(file, 'utf8');
       console.log(`Validating ${file}`);
       try {
         const jsonContent = JSON.parse(rawContent);
@@ -45,7 +42,7 @@ async function validate(desc, config, isPreset = false) {
     }
   }
   try {
-    const pkgJson = JSON.parse(fs.readFileSync('package.json', 'utf8'));
+    const pkgJson = JSON.parse(readFileSync('package.json', 'utf8'));
     if (pkgJson.renovate) {
       console.log(`Validating package.json > renovate`);
       await validate('package.json > renovate', pkgJson.renovate);
@@ -75,4 +72,7 @@ async function validate(desc, config, isPreset = false) {
     process.exit(returnVal);
   }
   console.log('OK');
-})();
+})().catch(e => {
+  console.error(e);
+  process.exit(99);
+});
