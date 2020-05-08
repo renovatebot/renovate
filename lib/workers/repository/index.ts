@@ -8,7 +8,7 @@ import { finaliseRepo } from './finalise';
 import { initRepo } from './init';
 import { ensureMasterIssue } from './master-issue';
 import { ensureOnboardingPr } from './onboarding/pr';
-import { processRepo, updateRepo } from './process';
+import { extractDependencies, updateRepo } from './process';
 import { ProcessResult, processResult } from './result';
 
 let renovateVersion = 'unknown';
@@ -32,7 +32,9 @@ export async function renovateRepository(
     await fs.ensureDir(config.localDir);
     logger.debug('Using localDir: ' + config.localDir);
     config = await initRepo(config);
-    const { branches, branchList, packageFiles } = await processRepo(config);
+    const { branches, branchList, packageFiles } = await extractDependencies(
+      config
+    );
     await ensureOnboardingPr(config, packageFiles, branches);
     const res = await updateRepo(config, branches, branchList);
     if (res !== 'automerged') {
