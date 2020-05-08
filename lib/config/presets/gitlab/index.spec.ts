@@ -13,20 +13,6 @@ describe('config/presets/gitlab', () => {
     glGot.mockReset();
     return global.renovateCache.rmAll();
   });
-  describe('getPresetFromEndpoint()', () => {
-    it('uses custom endpoint', async () => {
-      await gitlab
-        .getPresetFromEndpoint(
-          'some/repo',
-          'default',
-          'https://gitlab.example.org/api/v4'
-        )
-        .catch((_) => {});
-      expect(glGot.mock.calls[0][0]).toEqual(
-        'https://gitlab.example.org/api/v4/projects/some%2Frepo/repository/branches'
-      );
-    });
-  });
   describe('getPreset()', () => {
     it('throws if non-default', async () => {
       await expect(
@@ -73,6 +59,20 @@ describe('config/presets/gitlab', () => {
       });
       const content = await gitlab.getPreset({ packageName: 'some/repo' });
       expect(content).toEqual({ foo: 'bar' });
+    });
+  });
+  describe('getPresetFromEndpoint()', () => {
+    it('uses custom endpoint', async () => {
+      await gitlab
+        .getPresetFromEndpoint(
+          'some/repo',
+          'default',
+          'https://gitlab.example.org/api/v4'
+        )
+        .catch((_) => {});
+      expect(glGot.mock.calls[0][0]).toEqual(
+        'https://gitlab.example.org/api/v4/projects/some%2Frepo/repository/branches'
+      );
     });
   });
 });
