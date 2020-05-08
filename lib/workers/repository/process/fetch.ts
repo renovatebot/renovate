@@ -57,7 +57,7 @@ async function fetchDepUpdates(
       logger.trace(
         { dependency: depName },
         `${dep.updates.length} result(s): ${dep.updates.map(
-          (upgrade) => upgrade.newValue
+          upgrade => upgrade.newValue
         )}`
       );
     }
@@ -80,7 +80,7 @@ async function fetchManagerPackagerFileUpdates(
   const { packageFile } = pFile;
   const packageFileConfig = mergeChildConfig(managerConfig, pFile);
   const { manager } = packageFileConfig;
-  const queue = pFile.deps.map((dep) => (): Promise<PackageDependency> =>
+  const queue = pFile.deps.map(dep => (): Promise<PackageDependency> =>
     fetchDepUpdates(packageFileConfig, dep)
   );
   logger.trace(
@@ -98,7 +98,7 @@ async function fetchManagerUpdates(
   manager: string
 ): Promise<void> {
   const managerConfig = getManagerConfig(config, manager);
-  const queue = packageFiles[manager].map((pFile) => (): Promise<void> =>
+  const queue = packageFiles[manager].map(pFile => (): Promise<void> =>
     fetchManagerPackagerFileUpdates(config, managerConfig, pFile)
   );
   logger.trace(
@@ -114,11 +114,12 @@ export async function fetchUpdates(
   packageFiles: Record<string, PackageFile[]>
 ): Promise<void> {
   const managers = Object.keys(packageFiles);
-  const startTime = Date.now();
-  const allManagerJobs = managers.map((manager) =>
+  const allManagerJobs = managers.map(manager =>
     fetchManagerUpdates(config, packageFiles, manager)
   );
   await Promise.all(allManagerJobs);
-  const durationMs = Math.round(Date.now() - startTime);
-  logger.info({ durationMs }, 'Package releases lookups complete');
+  logger.debug(
+    { baseBranch: config.baseBranch },
+    'Package releases lookups complete'
+  );
 }

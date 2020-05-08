@@ -3,14 +3,6 @@
 This document serves to give tips and tricks on how to run Renovate locally to add features or fix bugs.
 Please submit PRs to improve it if you think anything is unclear or you can think of something that should be added.
 
-## General notes
-
-We are currently migrating to [typescript](https://www.typescriptlang.org), so please write all new files as `ts` files
-and feel free to help us to convert existing files.
-
-If you have to modify existing `js` files, please use modern [esm](https://nodejs.org/api/esm.html) `imports`
-and `exports`. We will transpile them to `commonjs` on build.
-
 ## Install
 
 #### Prerequisites
@@ -21,7 +13,7 @@ For local development some dependencies are required:
 - nodejs `^12.0.0 || >=13.0.0`
 - yarn `^1.17.0`
 - c++ compiler
-- python `^3.6` with `mock: ^4.0.0` library
+- python `^3.7`
 - java between `8` and `12`
 
 Java is required to execute Gradle in tests.
@@ -32,7 +24,7 @@ _Linux_
 You can use the following commands for `Ubuntu`.
 
 ```sh
-curl -sL https://deb.nodesource.com/setup_10.x | sudo -E bash -
+curl -sL https://deb.nodesource.com/setup_12.x | sudo -E bash -
 curl -sS https://dl.yarnpkg.com/debian/pubkey.gpg | sudo apt-key add -
 echo "deb https://dl.yarnpkg.com/debian/ stable main" | sudo tee /etc/apt/sources.list.d/yarn.list
 sudo apt-get update
@@ -49,26 +41,21 @@ The following steps work to set up a brand new Windows 10 installation for devel
 - Install [Node.js LTS](https://nodejs.org/en/download/)
 - In an Administrator PowerShell prompt, run `npm install -global npm` and then `npm --add-python-to-path='true' --debug install --global windows-build-tools`
 - Install [Yarn](https://yarnpkg.com/lang/en/docs/install/#windows-stable)
-- Install `mock` for Python:
-  - `curl https://bootstrap.pypa.io/get-pip.py -o get-pip.py`
-  - `python get-pip.py`
-  - `rm get-pip.py`
-  - `python -m pip install mock`
 - Install Java, e.g. from [AdoptOpenJDK](https://adoptopenjdk.net/?variant=openjdk11) or any other distribution
 
   Verify you have everything installed with appropriate versions, e.g.:
 
   ```
   PS C:\Windows\system32> git --version
-  git version 2.23.0.windows.1
+  git version 2.26.2.windows.1
   PS C:\Windows\system32> node --version
-  v10.16.3
+  v12.16.3
   PS C:\Windows\system32> yarn --version
-  1.19.0
+  1.22.4
   PS C:\Windows\system32> python --version
-  Python 2.7.16
-  PS C:\Windows\system32> python -c "import mock; print(mock.__version__)"
-  3.0.5
+  Python 3.8.1
+  PS C:\Windows\system32> python -c "from unittest import mock; print(mock.__version__)"
+  1.0
   PS C:\Windows\system32> java -version
   openjdk version "11.0.6" 2020-01-14
   OpenJDK Runtime Environment 18.9 (build 11.0.6+10)

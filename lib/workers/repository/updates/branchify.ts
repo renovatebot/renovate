@@ -4,7 +4,6 @@ import { RenovateConfig, ValidationMessage } from '../../../config';
 import { addMeta, logger, removeMeta } from '../../../logger';
 import * as template from '../../../util/template';
 import { BranchConfig, BranchUpgradeConfig } from '../../common';
-import { getChangeLogJSON } from '../../pr/changelog';
 import { flattenUpdates } from './flatten';
 import { generateBranchConfig } from './generate';
 import { Merge } from 'type-fest';
@@ -39,8 +38,8 @@ export async function branchifyUpgrades(
   const updates = await flattenUpdates(config, packageFiles);
   logger.debug(
     `${updates.length} flattened updates found: ${updates
-      .map((u) => u.depName)
-      .filter((txt) => txt && txt.length)
+      .map(u => u.depName)
+      .filter(txt => txt && txt.length)
       .join(', ')}`
   );
   const errors: ValidationMessage[] = [];
@@ -115,40 +114,29 @@ export async function branchifyUpgrades(
     addMeta({
       branch: branchName,
     });
-    for (const upgrade of branchUpgrades[branchName]) {
-      upgrade.logJSON = await getChangeLogJSON(upgrade);
-    }
     const seenUpdates = {};
     // Filter out duplicates
-    branchUpgrades[branchName] = branchUpgrades[branchName].filter(
-      (upgrade) => {
-        const {
-          manager,
-          packageFile,
-          depName,
-          currentValue,
-          newValue,
-        } = upgrade;
-        const upgradeKey = `${packageFile}:${depName}:${currentValue}`;
-        const previousNewValue = seenUpdates[upgradeKey];
-        if (previousNewValue && previousNewValue !== newValue) {
-          logger.info(
-            {
-              manager,
-              packageFile,
-              depName,
-              currentValue,
-              previousNewValue,
-              thisNewValue: newValue,
-            },
-            'Ignoring upgrade collision'
-          );
-          return false;
-        }
-        seenUpdates[upgradeKey] = newValue;
-        return true;
+    branchUpgrades[branchName] = branchUpgrades[branchName].filter(upgrade => {
+      const { manager, packageFile, depName, currentValue, newValue } = upgrade;
+      const upgradeKey = `${packageFile}:${depName}:${currentValue}`;
+      const previousNewValue = seenUpdates[upgradeKey];
+      if (previousNewValue && previousNewValue !== newValue) {
+        logger.info(
+          {
+            manager,
+            packageFile,
+            depName,
+            currentValue,
+            previousNewValue,
+            thisNewValue: newValue,
+          },
+          'Ignoring upgrade collision'
+        );
+        return false;
       }
-    );
+      seenUpdates[upgradeKey] = newValue;
+      return true;
+    });
     const branch = generateBranchConfig(branchUpgrades[branchName]);
     branch.branchName = branchName;
     branch.packageFiles = packageFiles;
@@ -157,7 +145,7 @@ export async function branchifyUpgrades(
   removeMeta(['branch']);
   logger.debug(`config.repoIsOnboarded=${config.repoIsOnboarded}`);
   const branchList = config.repoIsOnboarded
-    ? branches.map((upgrade) => upgrade.branchName)
+    ? branches.map(upgrade => upgrade.branchName)
     : config.branchList;
   // istanbul ignore next
   try {

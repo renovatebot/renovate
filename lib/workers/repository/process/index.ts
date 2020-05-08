@@ -1,6 +1,5 @@
 import { RenovateConfig, mergeChildConfig } from '../../../config';
 import { logger } from '../../../logger';
-import { PackageFile } from '../../../manager/common';
 import { platform } from '../../../platform';
 import { BranchConfig } from '../../common';
 import { ExtractResult, extract, update } from './extract-update';
@@ -19,7 +18,7 @@ export async function extractDependencies(
     config.prCreation === 'approval' ||
     (config.packageRules &&
       config.packageRules.some(
-        (rule) => rule.masterIssueApproval || rule.prCreation === 'approval'
+        rule => rule.masterIssueApproval || rule.prCreation === 'approval'
       ))
   ) {
     config.masterIssueTitle =
@@ -30,7 +29,7 @@ export async function extractDependencies(
       const checked = issue.body.match(new RegExp(checkMatch, 'g'));
       if (checked && checked.length) {
         const re = new RegExp(checkMatch);
-        checked.forEach((check) => {
+        checked.forEach(check => {
           const [, type, branchName] = re.exec(check);
           config.masterIssueChecks[branchName] = type;
         });
@@ -44,11 +43,13 @@ export async function extractDependencies(
       }
     }
   }
+  let res: ExtractResult = {
+    branches: [],
+    branchList: [],
+    packageFiles: null,
+  };
   if (config.baseBranches && config.baseBranches.length) {
     logger.debug({ baseBranches: config.baseBranches }, 'baseBranches');
-    let branches: BranchConfig[] = [];
-    let branchList: string[] = [];
-    let packageFiles: Record<string, PackageFile[]>;
     for (const baseBranch of config.baseBranches) {
       logger.debug(`baseBranch: ${baseBranch}`);
       const baseBranchConfig = mergeChildConfig(config, { baseBranch });
@@ -58,14 +59,15 @@ export async function extractDependencies(
       }
       baseBranchConfig.baseBranchSha = await platform.setBaseBranch(baseBranch);
       const baseBranchRes = await extract(baseBranchConfig);
-      branches = branches.concat(baseBranchRes.branches);
-      branchList = branchList.concat(baseBranchRes.branchList);
-      packageFiles = baseBranchRes.packageFiles;
+      res.branches = res.branches.concat(baseBranchRes.branches);
+      res.branchList = res.branchList.concat(baseBranchRes.branchList);
+      res.packageFiles = res.packageFiles || baseBranchRes.packageFiles; // Use the first branch
     }
-    return { branches, branchList, packageFiles };
+  } else {
+    logger.debug('No baseBranches');
+    res = await extract(config);
   }
-  logger.debug('No baseBranches');
-  return extract(config);
+  return res;
 }
 
 export async function updateRepo(
