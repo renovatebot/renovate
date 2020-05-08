@@ -4,11 +4,9 @@ on:
     types: [renovate-release]
 
 env:
-  CI: true
   YARN_MODULES_CACHE_KEY: v1
   YARN_PACKAGE_CACHE_KEY: v1
   YARN_CACHE_FOLDER: .cache/yarn
-  BUILDX_VERSION: v0.3.1
   NODE_VERSION: 12
   # https://github.com/chalk/supports-color/issues/106
   FORCE_COLOR: true
@@ -23,7 +21,6 @@ jobs:
           node-version: ${{ env.NODE_VERSION }}
 
       - name: Init platform
-        id: init
         run: |
           git config --global core.autocrlf false
           git config --global core.symlinks true
