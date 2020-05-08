@@ -63,7 +63,16 @@ Array [
 ]
 `;
 
-exports[`platform/comments ensureCommentRemoval() deletes comment if found 1`] = `
+exports[`platform/comments ensureCommentRemoval() deletes comment by content if found 1`] = `
+Array [
+  Array [
+    "/2.0/repositories/some/repo/pullrequests/5/comments?pagelen=100",
+    undefined,
+  ],
+]
+`;
+
+exports[`platform/comments ensureCommentRemoval() deletes comment by topic if found 1`] = `
 Array [
   Array [
     "/2.0/repositories/some/repo/pullrequests/5/comments?pagelen=100",
