@@ -54,18 +54,4 @@ describe('config/presets/gitlab', () => {
       expect(content).toEqual({ foo: 'bar' });
     });
   });
-  describe('getPresetFromEndpoint()', () => {
-    it('uses custom endpoint', async () => {
-      await gitlab
-        .getPresetFromEndpoint(
-          'some/repo',
-          'default',
-          'https://gitlab.example.org/api/v4'
-        )
-        .catch((_) => {});
-      expect(glGot.mock.calls[0][0]).toEqual(
-        'https://gitlab.example.org/api/v4/projects/some%2Frepo/repository/branches'
-      );
-    });
-  });
 });

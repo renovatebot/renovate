@@ -25,5 +25,7 @@ export function getPreset(
   pkgName: string,
   presetName: string
 ): Preset | undefined {
-  return groups[pkgName] ? groups[pkgName][presetName] : undefined;
+  return groups[pkgName]
+    ? groups[pkgName][presetName]
+    : /* istanbul ignore next */ undefined;
 }

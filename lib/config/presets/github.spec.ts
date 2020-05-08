@@ -1,13 +1,11 @@
 import { mocked } from '../../../test/util';
 import { PLATFORM_FAILURE } from '../../constants/error-messages';
 import { GotResponse } from '../../platform';
-import { clearRepoCache } from '../../util/cache';
 import _got from '../../util/got';
 import * as _hostRules from '../../util/host-rules';
 import * as github from './github';
 import { PartialDeep } from 'type-fest';
 
-jest.mock('../../platform/github/gh-got-wrapper');
 jest.mock('../../util/got');
 jest.mock('../../util/host-rules');
 
@@ -19,25 +17,7 @@ describe('config/presets/github', () => {
     got.mockReset();
     return global.renovateCache.rmAll();
   });
-  describe('fetchJSONFile()', () => {
-    beforeEach(() => {
-      clearRepoCache();
-    });
-    it('returns JSON', async () => {
-      hostRules.find.mockReturnValueOnce({ token: 'abc' });
-      got.mockImplementationOnce(() => ({
-        body: {
-          content: Buffer.from('{"from":"api"}').toString('base64'),
-        },
-      }));
-      const res = await github.fetchJSONFile(
-        'some/repo',
-        'some-filename',
-        'https://api.github.com'
-      );
-      expect(res).toMatchSnapshot();
-    });
-  });
+
   describe('getPreset()', () => {
     it('passes up platform-failure', async () => {
       got.mockImplementationOnce(() => {
@@ -121,20 +101,6 @@ describe('config/presets/github', () => {
       } finally {
         delete global.appMode;
       }
-    });
-  });
-  describe('getPresetFromEndpoint()', () => {
-    it('uses custom endpoint', async () => {
-      await github
-        .getPresetFromEndpoint(
-          'some/repo',
-          'default',
-          'https://api.github.example.org'
-        )
-        .catch((_) => {});
-      expect(got.mock.calls[0][0]).toEqual(
-        'https://api.github.example.org/repos/some/repo/contents/default.json'
-      );
     });
   });
 });

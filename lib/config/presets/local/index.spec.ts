@@ -1,6 +1,6 @@
 import * as github from './github';
 import * as gitlab from './gitlab';
-import * as local from './local';
+import * as local from '.';
 
 jest.mock('./gitlab');
 jest.mock('./github');
