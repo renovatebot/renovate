@@ -1,7 +1,7 @@
-import { PR_STATE_OPEN } from '../../../constants/pull-requests';
-import * as validate from './validate';
 import { platform } from '../../../../test/util';
+import { PR_STATE_OPEN } from '../../../constants/pull-requests';
 import { BranchStatus } from '../../../types';
+import * as validate from './validate';
 
 beforeEach(() => {
   jest.resetAllMocks();
@@ -92,6 +92,22 @@ describe('workers/repository/validate', () => {
       );
       expect(platform.ensureComment).toHaveBeenCalledTimes(0);
       expect(platform.ensureCommentRemoval).toHaveBeenCalledTimes(1);
+    });
+
+    it('validates successfully (dry-run)', async () => {
+      platform.getPrList.mockResolvedValueOnce([
+        {
+          state: PR_STATE_OPEN,
+          branchName: 'some/branch',
+          title: 'Update Renovate',
+        },
+      ]);
+      platform.getPrFiles.mockResolvedValueOnce(['renovate.json']);
+      platform.getFile.mockResolvedValue('{}');
+      await validate.validatePrs({ dryRun: true });
+      expect(platform.setBranchStatus).toHaveBeenCalledTimes(0);
+      expect(platform.ensureComment).toHaveBeenCalledTimes(0);
+      expect(platform.ensureCommentRemoval).toHaveBeenCalledTimes(0);
     });
   });
 });

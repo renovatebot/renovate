@@ -1,8 +1,8 @@
 import is from '@sindresorhus/is';
 import minimatch from 'minimatch';
-import { platform } from '../../platform';
-import { logger } from '../../logger';
 import { RenovateConfig } from '../../config';
+import { logger } from '../../logger';
+import { platform } from '../../platform';
 
 // istanbul ignore next
 function repoName(value: string | { repository: string }): string {

@@ -1,30 +1,7 @@
+import URL from 'url';
 import is from '@sindresorhus/is';
 import delay from 'delay';
-import URL from 'url';
-
-import { logger } from '../../logger';
-import { api } from './gh-got-wrapper';
-import * as hostRules from '../../util/host-rules';
-import GitStorage, { StatusResult } from '../git/storage';
-import {
-  PlatformConfig,
-  RepoParams,
-  RepoConfig,
-  Issue,
-  VulnerabilityAlert,
-  CreatePRConfig,
-  EnsureIssueConfig,
-  BranchStatusConfig,
-  FindPRConfig,
-  EnsureCommentConfig,
-  EnsureIssueResult,
-  CommitFilesConfig,
-} from '../common';
-
 import { configFileNames } from '../../config/app-strings';
-import { sanitize } from '../../util/sanitize';
-import { smartTruncate } from '../utils/pr-body';
-import { getGraphqlNodes } from './gh-graphql-wrapper';
 import {
   PLATFORM_FAILURE,
   PLATFORM_INTEGRATION_UNAUTHORIZED,
@@ -40,66 +17,47 @@ import {
   REPOSITORY_RENAMED,
 } from '../../constants/error-messages';
 import { PLATFORM_TYPE_GITHUB } from '../../constants/platforms';
-import { BranchStatus } from '../../types';
 import {
   PR_STATE_ALL,
   PR_STATE_CLOSED,
   PR_STATE_OPEN,
 } from '../../constants/pull-requests';
+import { logger } from '../../logger';
+import { BranchStatus } from '../../types';
+import * as hostRules from '../../util/host-rules';
+import { sanitize } from '../../util/sanitize';
 import { ensureTrailingSlash } from '../../util/url';
+import {
+  BranchStatusConfig,
+  CommitFilesConfig,
+  CreatePRConfig,
+  EnsureCommentConfig,
+  EnsureCommentRemovalConfig,
+  EnsureIssueConfig,
+  EnsureIssueResult,
+  FindPRConfig,
+  Issue,
+  PlatformConfig,
+  Pr,
+  RepoConfig,
+  RepoParams,
+  VulnerabilityAlert,
+} from '../common';
+import GitStorage, { StatusResult } from '../git/storage';
+import { smartTruncate } from '../utils/pr-body';
+import { api } from './gh-got-wrapper';
+import { getGraphqlNodes } from './gh-graphql-wrapper';
+import {
+  BranchProtection,
+  CombinedBranchStatus,
+  Comment,
+  GhBranchStatus,
+  GhPr,
+  LocalRepoConfig,
+  PrList,
+} from './types';
 
 const defaultConfigFile = configFileNames[0];
-
-interface Comment {
-  id: number;
-  body: string;
-}
-
-interface Pr {
-  displayNumber: string;
-  state: string;
-  title: string;
-  branchName: string;
-  number: number;
-  comments: Comment[];
-
-  createdAt: string;
-
-  sha: string;
-
-  sourceRepo: string;
-  isModified: boolean;
-}
-
-interface LocalRepoConfig {
-  repositoryName: string;
-  pushProtection: boolean;
-  prReviewsRequired: boolean;
-  repoForceRebase?: boolean;
-  storage: GitStorage;
-  parentRepo: string;
-  baseCommitSHA: string | null;
-  forkMode?: boolean;
-  forkToken?: string;
-  closedPrList: PrList | null;
-  openPrList: PrList | null;
-  prList: Pr[] | null;
-  issueList: any[] | null;
-  mergeMethod: string;
-  baseBranch: string;
-  defaultBranch: string;
-  enterpriseVersion: string;
-  gitPrivateKey?: string;
-  repositoryOwner: string;
-  repository: string | null;
-  localDir: string;
-  isGhe: boolean;
-  renovateUsername: string;
-  productLinks: any;
-}
-
-type BranchProtection = any;
-type PrList = Record<number, Pr>;
 
 let config: LocalRepoConfig = {} as any;
 
@@ -520,10 +478,11 @@ export async function getRepoForceRebase(): Promise<boolean> {
 // istanbul ignore next
 export async function setBaseBranch(
   branchName = config.baseBranch
-): Promise<void> {
+): Promise<string> {
   config.baseBranch = branchName;
   config.baseCommitSHA = null;
-  await config.storage.setBaseBranch(branchName);
+  const baseBranchSha = await config.storage.setBaseBranch(branchName);
+  return baseBranchSha;
 }
 
 // istanbul ignore next
@@ -534,8 +493,8 @@ export function setBranchPrefix(branchPrefix: string): Promise<void> {
 // Search
 
 // istanbul ignore next
-export function getFileList(branchName = config.baseBranch): Promise<string[]> {
-  return config.storage.getFileList(branchName);
+export function getFileList(): Promise<string[]> {
+  return config.storage.getFileList();
 }
 
 // Branch
@@ -1062,20 +1021,6 @@ export async function getBranchPr(branchName: string): Promise<Pr | null> {
   return existingPr ? getPr(existingPr.number) : null;
 }
 
-// https://developer.github.com/v3/repos/statuses
-// https://developer.github.com/v3/checks/runs/
-type BranchState = 'failure' | 'pending' | 'success';
-
-interface GhBranchStatus {
-  context: string;
-  state: BranchState | 'error';
-}
-
-interface CombinedBranchStatus {
-  state: BranchState;
-  statuses: GhBranchStatus[];
-}
-
 async function getStatus(
   branchName: string,
   useCache = true
@@ -1103,7 +1048,7 @@ export async function getBranchStatus(
     logger.warn({ requiredStatusChecks }, `Unsupported requiredStatusChecks`);
     return BranchStatus.red;
   }
-  let commitStatus;
+  let commitStatus: CombinedBranchStatus;
   try {
     commitStatus = await getStatus(branchName);
   } catch (err) /* istanbul ignore next */ {
@@ -1620,10 +1565,10 @@ export async function ensureComment({
   }
 }
 
-export async function ensureCommentRemoval(
-  issueNo: number,
-  topic: string
-): Promise<void> {
+export async function ensureCommentRemoval({
+  number: issueNo,
+  topic,
+}: EnsureCommentRemovalConfig): Promise<void> {
   logger.debug(`Ensuring comment "${topic}" in #${issueNo} is removed`);
   const comments = await getComments(issueNo);
   let commentId: number;
@@ -1671,7 +1616,7 @@ export async function createPr({
   }
   logger.debug({ title, head, base }, 'Creating PR');
   const pr = (
-    await api.post<Pr>(
+    await api.post<GhPr>(
       `repos/${config.parentRepo || config.repository}/pulls`,
       options
     )
@@ -1899,7 +1844,7 @@ export async function getVulnerabilityAlerts(): Promise<VulnerabilityAlert[]> {
   let alerts = [];
   try {
     const res = JSON.parse((await api.post(url, options)).body);
-    if (res.data.repository.vulnerabilityAlerts) {
+    if (res?.data?.repository?.vulnerabilityAlerts) {
       alerts = res.data.repository.vulnerabilityAlerts.edges.map(
         (edge: { node: any }) => edge.node
       );

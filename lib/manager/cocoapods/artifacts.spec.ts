@@ -1,15 +1,15 @@
-import { join } from 'upath';
-import _fs from 'fs-extra';
 import { exec as _exec } from 'child_process';
+import _fs from 'fs-extra';
 import Git from 'simple-git/promise';
-import { platform as _platform } from '../../platform';
-import { updateArtifacts } from '.';
-import * as _datasource from '../../datasource/docker';
-import { mocked } from '../../../test/util';
+import { join } from 'upath';
 import { envMock, mockExecAll } from '../../../test/execUtil';
-import * as _env from '../../util/exec/env';
+import { mocked } from '../../../test/util';
+import * as _datasource from '../../datasource/docker';
+import { platform as _platform } from '../../platform';
 import { setExecConfig } from '../../util/exec';
 import { BinarySource } from '../../util/exec/common';
+import * as _env from '../../util/exec/env';
+import { updateArtifacts } from '.';
 
 jest.mock('fs-extra');
 jest.mock('child_process');
@@ -124,7 +124,7 @@ describe('.updateArtifacts()', () => {
       await updateArtifacts({
         packageFileName: 'Podfile',
         updatedDeps: ['foo'],
-        newPackageFileContent: '',
+        newPackageFileContent: 'plugin "cocoapods-acknowledgements"',
         config,
       })
     ).toMatchSnapshot();

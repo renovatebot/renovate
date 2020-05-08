@@ -34,8 +34,15 @@ function toSemverRange(range: string): string {
   return null;
 }
 
-function getNewValue({ currentValue, toVersion }: NewValueConfig): string {
+function getNewValue({
+  currentValue,
+  fromVersion,
+  toVersion,
+}: NewValueConfig): string {
   if (fromParam.test(currentValue)) {
+    if (currentValue.includes(fromVersion)) {
+      return currentValue.replace(fromVersion, toVersion.replace(/^v/, ''));
+    }
     return toVersion.replace(/^v/, '');
   }
   if (fromRange.test(currentValue)) {

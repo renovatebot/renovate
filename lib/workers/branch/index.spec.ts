@@ -1,17 +1,5 @@
 import * as _fs from 'fs-extra';
-import * as branchWorker from '.';
-import * as _schedule from './schedule';
-import * as _checkExisting from './check-existing';
-import * as _parent from './parent';
-import * as _npmPostExtract from '../../manager/npm/post-update';
-import * as _commit from './commit';
-import * as _statusChecks from './status-checks';
-import * as _automerge from './automerge';
-import * as _prWorker from '../pr';
-import * as _getUpdated from './get-updated';
-import * as _exec from '../../util/exec';
-import { defaultConfig, platform, mocked } from '../../../test/util';
-import { BranchConfig, PrResult } from '../common';
+import { defaultConfig, mocked, platform } from '../../../test/util';
 import {
   MANAGER_LOCKFILE_ERROR,
   REPOSITORY_CHANGED,
@@ -21,7 +9,20 @@ import {
   PR_STATE_MERGED,
   PR_STATE_OPEN,
 } from '../../constants/pull-requests';
+import * as _npmPostExtract from '../../manager/npm/post-update';
+import { File } from '../../platform';
 import { StatusResult } from '../../platform/git/storage';
+import * as _exec from '../../util/exec';
+import { BranchConfig, PrResult } from '../common';
+import * as _prWorker from '../pr';
+import * as _automerge from './automerge';
+import * as _checkExisting from './check-existing';
+import * as _commit from './commit';
+import * as _getUpdated from './get-updated';
+import * as _parent from './parent';
+import * as _schedule from './schedule';
+import * as _statusChecks from './status-checks';
+import * as branchWorker from '.';
 
 jest.mock('./get-updated');
 jest.mock('./schedule');
@@ -613,13 +614,22 @@ describe('workers/branch', () => {
     });
 
     it('executes post-upgrade tasks if trust is high', async () => {
+      const updatedPackageFile: File = {
+        name: 'pom.xml',
+        contents: 'pom.xml file contents',
+      };
       getUpdated.getUpdatedPackageFiles.mockResolvedValueOnce({
-        updatedPackageFiles: [{}],
+        updatedPackageFiles: [updatedPackageFile],
         artifactErrors: [],
       } as never);
       npmPostExtract.getAdditionalFiles.mockResolvedValueOnce({
         artifactErrors: [],
-        updatedArtifacts: [{}],
+        updatedArtifacts: [
+          {
+            name: 'yarn.lock',
+            contents: Buffer.from([1, 2, 3]) /* Binary content */,
+          },
+        ],
       } as never);
       platform.branchExists.mockResolvedValueOnce(true);
       platform.getBranchPr.mockResolvedValueOnce({
@@ -635,6 +645,7 @@ describe('workers/branch', () => {
       } as StatusResult);
       global.trustLevel = 'high';
 
+      fs.outputFile.mockReturnValue();
       fs.readFile.mockResolvedValueOnce(Buffer.from('modified file content'));
 
       schedule.isScheduledNow.mockReturnValueOnce(false);

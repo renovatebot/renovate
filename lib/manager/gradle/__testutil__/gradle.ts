@@ -1,4 +1,4 @@
-import { spawnSync, SpawnSyncReturns } from 'child_process';
+import { SpawnSyncReturns, spawnSync } from 'child_process';
 
 const failIfNoJavaEnv = 'CI';
 

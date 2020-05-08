@@ -1,4 +1,4 @@
-import { get, VersioningApi } from '..';
+import { VersioningApi, get } from '..';
 import { CONFIG_VALIDATION } from '../../constants/error-messages';
 
 describe('regex', () => {

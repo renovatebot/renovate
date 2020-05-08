@@ -1,7 +1,7 @@
+import path from 'path';
 import is from '@sindresorhus/is';
 
 import minimatch from 'minimatch';
-import path from 'path';
 import upath from 'upath';
 import { logger } from '../../../logger';
 import { PackageFile } from '../../common';

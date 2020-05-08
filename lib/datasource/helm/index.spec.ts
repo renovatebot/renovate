@@ -16,7 +16,6 @@ describe('datasource/helm', () => {
   describe('getReleases', () => {
     beforeEach(() => {
       jest.resetAllMocks();
-      global.repoCache = {};
       return global.renovateCache.rmAll();
     });
     it('returns null if lookupName was not provided', async () => {

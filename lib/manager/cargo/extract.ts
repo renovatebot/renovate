@@ -1,9 +1,9 @@
 import { parse } from 'toml';
+import * as datasourceCrate from '../../datasource/crate';
 import { logger } from '../../logger';
+import { SkipReason } from '../../types';
 import { PackageDependency, PackageFile } from '../common';
 import { CargoConfig, CargoSection } from './types';
-import * as datasourceCrate from '../../datasource/crate';
-import { SkipReason } from '../../types';
 
 function extractFromSection(
   parsedContent: CargoSection,

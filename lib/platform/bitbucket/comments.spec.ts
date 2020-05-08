@@ -1,7 +1,7 @@
 import URL from 'url';
+import responses from './__fixtures__/responses';
 import { api as _api } from './bb-got-wrapper';
 import * as comments from './comments';
-import responses from './__fixtures__/responses';
 
 jest.mock('./bb-got-wrapper');
 

@@ -1,13 +1,14 @@
 import _fs from 'fs-extra';
-import * as _lockFiles from '../../../manager/npm/post-update';
-import { getConfig } from '../../../config/defaults';
-import * as _npm from '../../../manager/npm/post-update/npm';
-import * as _yarn from '../../../manager/npm/post-update/yarn';
-import * as _pnpm from '../../../manager/npm/post-update/pnpm';
-import * as _lerna from '../../../manager/npm/post-update/lerna';
-import * as _hostRules from '../../../util/host-rules';
-import { platform as _platform } from '../../../platform';
 import { mocked } from '../../../../test/util';
+import { getConfig } from '../../../config/defaults';
+import { PostUpdateConfig } from '../../../manager/common';
+import * as _lockFiles from '../../../manager/npm/post-update';
+import * as _lerna from '../../../manager/npm/post-update/lerna';
+import * as _npm from '../../../manager/npm/post-update/npm';
+import * as _pnpm from '../../../manager/npm/post-update/pnpm';
+import * as _yarn from '../../../manager/npm/post-update/yarn';
+import { platform as _platform } from '../../../platform';
+import * as _hostRules from '../../../util/host-rules';
 
 const defaultConfig = getConfig();
 
@@ -256,7 +257,7 @@ describe('manager/npm/post-update', () => {
   });
   */
   describe('writeUpdatedPackageFiles', () => {
-    let config;
+    let config: PostUpdateConfig;
     beforeEach(() => {
       config = {
         ...defaultConfig,
@@ -298,7 +299,7 @@ describe('manager/npm/post-update', () => {
     });
   });
   describe('getAdditionalFiles', () => {
-    let config;
+    let config: PostUpdateConfig;
     beforeEach(() => {
       config = {
         ...defaultConfig,

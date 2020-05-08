@@ -1,7 +1,7 @@
 import fs from 'fs';
 import _got from '../../util/got';
-import * as nuget from '.';
 import * as _hostRules from '../../util/host-rules';
+import * as nuget from '.';
 
 const hostRules: any = _hostRules;
 
@@ -87,7 +87,6 @@ describe('datasource/nuget', () => {
     beforeEach(() => {
       jest.resetAllMocks();
       hostRules.hosts = jest.fn(() => []);
-      global.repoCache = {};
     });
 
     it(`can't detect nuget feed version`, async () => {

@@ -1,11 +1,11 @@
 import yaml from 'js-yaml';
 import { logger } from '../../logger';
+import { PackageDependency, PackageFile } from '../common';
 import { getDep } from '../dockerfile/extract';
 
-import { PackageFile, PackageDependency } from '../common';
 import {
-  matchesHelmValuesDockerHeuristic,
   HelmDockerImageDependency,
+  matchesHelmValuesDockerHeuristic,
 } from './util';
 
 /**
@@ -27,7 +27,7 @@ function findDependencies(
 
       const registry = currentItem.registry ? `${currentItem.registry}/` : '';
       packageDependencies.push(
-        getDep(`${registry}${currentItem.repository}:${currentItem.tag}`)
+        getDep(`${registry}${currentItem.repository}:${currentItem.tag}`, false)
       );
     } else {
       findDependencies(parsedContent[key], packageDependencies);

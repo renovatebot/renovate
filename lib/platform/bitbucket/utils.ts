@@ -1,15 +1,14 @@
 import url from 'url';
-import { api } from './bb-got-wrapper';
-import { Storage } from '../git/storage';
-import { GotResponse, Pr } from '../common';
 import { PR_STATE_CLOSED } from '../../constants/pull-requests';
 import { BranchStatus } from '../../types';
+import { GotResponse, Pr } from '../common';
+import { Storage } from '../git/storage';
+import { api } from './bb-got-wrapper';
 
 export interface Config {
   baseBranch: string;
   baseCommitSHA: string;
   defaultBranch: string;
-  fileList: any[];
   has_issues: boolean;
   mergeMethod: string;
   owner: string;

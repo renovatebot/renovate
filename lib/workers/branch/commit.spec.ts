@@ -1,6 +1,6 @@
-import { commitFilesToBranch } from './commit';
-import { defaultConfig, platform, partial } from '../../../test/util';
+import { defaultConfig, partial, platform } from '../../../test/util';
 import { BranchConfig } from '../common';
+import { commitFilesToBranch } from './commit';
 
 describe('workers/branch/automerge', () => {
   describe('commitFilesToBranch', () => {

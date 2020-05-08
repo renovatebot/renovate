@@ -1,7 +1,7 @@
 import { RenovateConfig, getConfig } from '../../../../test/util';
 
-import { flattenUpdates } from './flatten';
 import { LANGUAGE_DOCKER } from '../../../constants/languages';
+import { flattenUpdates } from './flatten';
 
 let config: RenovateConfig;
 beforeEach(() => {

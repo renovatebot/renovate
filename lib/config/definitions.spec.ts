@@ -1,5 +1,5 @@
-import { getOptions } from './definitions';
 import { getName } from '../../test/util';
+import { getOptions } from './definitions';
 
 jest.mock('../manager', () => ({
   getManagers: jest.fn(() => new Map().set('testManager', {})),

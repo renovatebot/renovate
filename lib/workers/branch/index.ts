@@ -1,44 +1,43 @@
-import { DateTime } from 'luxon';
+import { join } from 'path';
 import is from '@sindresorhus/is';
+import { concat } from 'lodash';
+import { DateTime } from 'luxon';
 import minimatch from 'minimatch';
-import { logger } from '../../logger';
-import { isScheduledNow } from './schedule';
-import { getUpdatedPackageFiles } from './get-updated';
-import {
-  getAdditionalFiles,
-  AdditionalPackageFiles,
-} from '../../manager/npm/post-update';
-import { commitFilesToBranch } from './commit';
-import { getParentBranch } from './parent';
-import { tryBranchAutomerge } from './automerge';
-import { setStability, setUnpublishable } from './status-checks';
-import { prAlreadyExisted } from './check-existing';
-import { ensurePr, checkAutoMerge } from '../pr';
 import { RenovateConfig } from '../../config';
-import { platform } from '../../platform';
-import { emojify } from '../../util/emoji';
-import { BranchConfig, ProcessBranchResult, PrResult } from '../common';
 import {
+  DATASOURCE_FAILURE,
+  MANAGER_LOCKFILE_ERROR,
   PLATFORM_AUTHENTICATION_ERROR,
   PLATFORM_BAD_CREDENTIALS,
-  SYSTEM_INSUFFICIENT_DISK_SPACE,
+  PLATFORM_FAILURE,
   PLATFORM_INTEGRATION_UNAUTHORIZED,
-  MANAGER_LOCKFILE_ERROR,
   PLATFORM_RATE_LIMIT_EXCEEDED,
   REPOSITORY_CHANGED,
+  SYSTEM_INSUFFICIENT_DISK_SPACE,
   WORKER_FILE_UPDATE_FAILED,
-  DATASOURCE_FAILURE,
-  PLATFORM_FAILURE,
 } from '../../constants/error-messages';
 import {
   PR_STATE_CLOSED,
   PR_STATE_MERGED,
   PR_STATE_OPEN,
 } from '../../constants/pull-requests';
+import { logger } from '../../logger';
+import { getAdditionalFiles } from '../../manager/npm/post-update';
+import { platform } from '../../platform';
 import { BranchStatus } from '../../types';
+import { emojify } from '../../util/emoji';
 import { exec } from '../../util/exec';
+import { readLocalFile, writeLocalFile } from '../../util/fs';
 import { regEx } from '../../util/regex';
-import { readLocalFile } from '../../util/fs';
+import { BranchConfig, PrResult, ProcessBranchResult } from '../common';
+import { checkAutoMerge, ensurePr } from '../pr';
+import { tryBranchAutomerge } from './automerge';
+import { prAlreadyExisted } from './check-existing';
+import { commitFilesToBranch } from './commit';
+import { getUpdatedPackageFiles } from './get-updated';
+import { getParentBranch } from './parent';
+import { isScheduledNow } from './schedule';
+import { setStability, setUnpublishable } from './status-checks';
 
 // TODO: proper typings
 function rebaseCheck(config: RenovateConfig, branchPr: any): boolean {
@@ -53,8 +52,7 @@ function rebaseCheck(config: RenovateConfig, branchPr: any): boolean {
 
 export async function processBranch(
   branchConfig: BranchConfig,
-  prHourlyLimitReached?: boolean,
-  packageFiles?: AdditionalPackageFiles
+  prHourlyLimitReached?: boolean
 ): Promise<ProcessBranchResult> {
   const config: BranchConfig = { ...branchConfig };
   const dependencies = config.upgrades
@@ -175,7 +173,10 @@ export async function processBranch(
                   branchPr.number
               );
             } else {
-              await platform.ensureCommentRemoval(branchPr.number, topic);
+              await platform.ensureCommentRemoval({
+                number: branchPr.number,
+                topic,
+              });
             }
           } else {
             let content = emojify(
@@ -298,7 +299,10 @@ export async function processBranch(
     } else {
       logger.debug('No package files need updating');
     }
-    const additionalFiles = await getAdditionalFiles(config, packageFiles);
+    const additionalFiles = await getAdditionalFiles(
+      config,
+      branchConfig.packageFiles
+    );
     config.artifactErrors = (config.artifactErrors || []).concat(
       additionalFiles.artifactErrors
     );
@@ -319,6 +323,10 @@ export async function processBranch(
     }
 
     if (
+      /* Only run post-upgrade tasks if there are changes to package files... */
+      (config.updatedPackageFiles?.length > 0 ||
+        /* ... or changes to artifacts */
+        config.updatedArtifacts?.length > 0) &&
       global.trustLevel === 'high' &&
       is.nonEmptyArray(config.allowedPostUpgradeCommands)
     ) {
@@ -333,6 +341,22 @@ export async function processBranch(
       const fileFilters = config.postUpgradeTasks.fileFilters || [];
 
       if (is.nonEmptyArray(commands)) {
+        // Persist updated files in file system so any executed commands can see them
+        for (const file of concat(
+          config.updatedPackageFiles,
+          config.updatedArtifacts
+        )) {
+          if (file.name !== '|delete|') {
+            let contents;
+            if (typeof file.contents === 'string') {
+              contents = Buffer.from(file.contents);
+            } else {
+              contents = file.contents;
+            }
+            await writeLocalFile(join(config.localDir, file.name), contents);
+          }
+        }
+
         for (const cmd of commands) {
           if (
             !config.allowedPostUpgradeCommands.some((pattern) =>
@@ -600,10 +624,10 @@ export async function processBranch(
               content,
             });
             // TODO: remoe this soon once they're all cleared out
-            await platform.ensureCommentRemoval(
-              pr.number,
-              ':warning: Lock file problem'
-            );
+            await platform.ensureCommentRemoval({
+              number: pr.number,
+              topic: ':warning: Lock file problem',
+            });
           }
         }
         const context = `renovate/artifacts`;
@@ -637,7 +661,7 @@ export async function processBranch(
               'DRY-RUN: Would ensure comment removal in PR #' + pr.number
             );
           } else {
-            await platform.ensureCommentRemoval(pr.number, topic);
+            await platform.ensureCommentRemoval({ number: pr.number, topic });
           }
         }
         const prAutomerged = await checkAutoMerge(pr, config);

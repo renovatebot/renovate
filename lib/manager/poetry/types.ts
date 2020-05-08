@@ -9,6 +9,11 @@ export interface PoetryFile {
   tool?: {
     poetry?: PoetrySection;
   };
+
+  'build-system'?: {
+    requires: string[];
+    'build-backend'?: string;
+  };
 }
 
 export interface PoetryDependency {

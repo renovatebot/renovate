@@ -1,5 +1,5 @@
-import { getRangeStrategy } from '.';
 import { RangeConfig } from '../common';
+import { getRangeStrategy } from '.';
 
 describe('getRangeStrategy', () => {
   it('returns same if not auto', () => {

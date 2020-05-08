@@ -1,5 +1,5 @@
-import { initApis } from './apis';
 import { RenovateConfig, getConfig } from '../../../../test/util';
+import { initApis } from './apis';
 
 jest.mock('../../../platform/github');
 

@@ -1,8 +1,8 @@
 import is from '@sindresorhus/is';
-import * as _hostRules from '../../util/host-rules';
-import { RepoParams, Platform } from '../common';
 import { REPOSITORY_DISABLED } from '../../constants/error-messages';
 import { BranchStatus } from '../../types';
+import * as _hostRules from '../../util/host-rules';
+import { Platform, RepoParams } from '../common';
 
 describe('platform/azure', () => {
   let hostRules: jest.Mocked<typeof _hostRules>;
@@ -505,7 +505,7 @@ describe('platform/azure', () => {
       azureHelper.getRenovatePRFormat.mockImplementation(
         () =>
           ({
-            pullRequestId: 1234,
+            number: 1234,
           } as any)
       );
       const pr = await azure.getPr(1234);
@@ -542,7 +542,7 @@ describe('platform/azure', () => {
       azureHelper.getRenovatePRFormat.mockImplementation(
         () =>
           ({
-            pullRequestId: 1234,
+            number: 1234,
             isModified: false,
           } as any)
       );
@@ -791,11 +791,11 @@ describe('platform/azure', () => {
             updateThread: jest.fn(),
           } as any)
       );
-      await azure.ensureCommentRemoval(42, 'some-subject');
+      await azure.ensureCommentRemoval({ number: 42, topic: 'some-subject' });
       expect(azureApi.gitApi).toHaveBeenCalledTimes(3);
     });
     it('nothing should happen, no number', async () => {
-      await azure.ensureCommentRemoval(0, 'test');
+      await azure.ensureCommentRemoval({ number: 0, topic: 'test' });
       expect(azureApi.gitApi).toHaveBeenCalledTimes(0);
     });
     it('comment not found', async () => {
@@ -809,7 +809,7 @@ describe('platform/azure', () => {
             updateThread: jest.fn(),
           } as any)
       );
-      await azure.ensureCommentRemoval(42, 'some-subject');
+      await azure.ensureCommentRemoval({ number: 42, topic: 'some-subject' });
       expect(azureApi.gitApi).toHaveBeenCalledTimes(3);
     });
   });

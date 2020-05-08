@@ -1,4 +1,5 @@
-import * as _hostRules from '../../util/host-rules';
+import { GotResponse, Platform } from '..';
+import { partial } from '../../../test/util';
 import {
   REPOSITORY_ARCHIVED,
   REPOSITORY_CHANGED,
@@ -11,8 +12,7 @@ import {
   PR_STATE_OPEN,
 } from '../../constants/pull-requests';
 import { BranchStatus } from '../../types';
-import { GotResponse, Platform } from '..';
-import { partial } from '../../../test/util';
+import * as _hostRules from '../../util/host-rules';
 
 describe('platform/gitlab', () => {
   let gitlab: Platform;
@@ -857,7 +857,7 @@ describe('platform/gitlab', () => {
           body: [{ id: 1234, body: '### some-subject\n\nblablabla' }],
         })
       );
-      await gitlab.ensureCommentRemoval(42, 'some-subject');
+      await gitlab.ensureCommentRemoval({ number: 42, topic: 'some-subject' });
       expect(api.delete).toHaveBeenCalledTimes(1);
     });
   });

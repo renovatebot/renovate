@@ -1,5 +1,5 @@
 import { RenovateConfig, getConfig } from '../../../../../test/util';
-
+import { PackageFile } from '../../../../manager/common';
 import { getConfigDesc } from './config-description';
 
 describe('workers/repository/onboarding/pr/config-description', () => {
@@ -15,7 +15,7 @@ describe('workers/repository/onboarding/pr/config-description', () => {
       expect(res).toMatchSnapshot();
     });
     it('returns a full list', () => {
-      const packageFiles = {
+      const packageFiles: Record<string, PackageFile[]> = {
         npm: [],
         dockerfile: [],
       };

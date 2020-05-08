@@ -1,10 +1,10 @@
-import { readFile, move, pathExists } from 'fs-extra';
+import { move, pathExists, readFile } from 'fs-extra';
 import { join } from 'upath';
-import { exec } from '../../../util/exec';
-import { logger } from '../../../logger';
-import { PostUpdateConfig, Upgrade } from '../../common';
 import { SYSTEM_INSUFFICIENT_DISK_SPACE } from '../../../constants/error-messages';
+import { logger } from '../../../logger';
+import { exec } from '../../../util/exec';
 import { BinarySource } from '../../../util/exec/common';
+import { PostUpdateConfig, Upgrade } from '../../common';
 
 export interface GenerateLockFileResult {
   error?: boolean;

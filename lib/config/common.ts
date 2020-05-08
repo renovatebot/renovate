@@ -1,5 +1,5 @@
-import { Range } from 'semver';
 import { LogLevel } from 'bunyan';
+import { Range } from 'semver';
 import { HostRule } from '../types';
 
 export type RenovateConfigStage =
@@ -19,13 +19,15 @@ export interface RenovateSharedConfig {
   automerge?: boolean;
   branchPrefix?: string;
   branchName?: string;
-
+  manager?: string;
   commitMessage?: string;
   enabled?: boolean;
   enabledManagers?: string[];
+  fileMatch?: string[];
   group?: GroupConfig;
   groupName?: string;
   groupSlug?: string;
+  includePaths?: string[];
   ignoreDeps?: string[];
   ignorePaths?: string[];
   labels?: string[];
@@ -35,6 +37,7 @@ export interface RenovateSharedConfig {
   platform?: string;
   postUpgradeTasks?: PostUpgradeTasks;
   prBodyColumns?: string[];
+  prBodyDefinitions?: Record<string, string>;
   prCreation?: 'immediate' | 'not-pending' | 'status-success' | 'approval';
   productLinks?: Record<string, string>;
   prPriority?: number;
@@ -106,6 +109,7 @@ export type RenovateRepository =
     };
 
 export interface CustomManager {
+  fileMatch: string[];
   matchStrings: string[];
   depNameTemplate?: string;
   datasourceTemplate?: string;
@@ -119,10 +123,12 @@ export interface RenovateConfig
     RenovateSharedConfig,
     UpdateConfig<PackageRule>,
     Record<string, unknown> {
+  depName?: string;
   baseBranches?: string[];
   baseBranch?: string;
+  baseBranchSha?: string;
   branchList?: string[];
-  description?: string[];
+  description?: string | string[];
 
   errors?: ValidationMessage[];
   extends?: string[];
@@ -134,6 +140,8 @@ export interface RenovateConfig
   ignorePresets?: string[];
   includeForks?: boolean;
   isFork?: boolean;
+
+  fileList?: string[];
 
   masterIssue?: boolean;
   masterIssueAutoclose?: boolean;

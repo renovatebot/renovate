@@ -1,9 +1,7 @@
-import { api } from '../../platform/gitlab/gl-got-wrapper';
 import { logger } from '../../logger';
-import { Preset } from './common';
+import { api } from '../../platform/gitlab/gl-got-wrapper';
 import { ensureTrailingSlash } from '../../util/url';
-import { RenovateConfig } from '../common';
-import { PLATFORM_TYPE_GITLAB } from '../../constants/platforms';
+import { Preset } from './common';
 
 const { get: glGot } = api;
 
@@ -30,16 +28,13 @@ async function getDefaultBranchName(
   return defautlBranchName;
 }
 
-export async function getPreset(
+export async function getPresetFromEndpoint(
   pkgName: string,
-  presetName = 'default',
-  baseConfig?: RenovateConfig
+  presetName: string,
+  endpoint = 'https://gitlab.com/api/v4/'
 ): Promise<Preset> {
-  const endpoint = ensureTrailingSlash(
-    (baseConfig?.platform === PLATFORM_TYPE_GITLAB
-      ? baseConfig?.endpoint
-      : null) ?? 'https://gitlab.com/api/v4/'
-  );
+  // eslint-disable-next-line no-param-reassign
+  endpoint = ensureTrailingSlash(endpoint);
   if (presetName !== 'default') {
     // TODO: proper error contructor
     throw new Error(
@@ -70,4 +65,11 @@ export async function getPreset(
     logger.debug('Failed to parse renovate.json');
     throw new Error('invalid preset JSON');
   }
+}
+
+export async function getPreset(
+  pkgName: string,
+  presetName = 'default'
+): Promise<Preset> {
+  return getPresetFromEndpoint(pkgName, presetName);
 }

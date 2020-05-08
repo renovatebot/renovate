@@ -1,7 +1,7 @@
-import { emojify } from '../../../../util/emoji';
-import { logger } from '../../../../logger';
 import { RenovateConfig } from '../../../../config';
+import { logger } from '../../../../logger';
 import { PackageFile } from '../../../../manager/common';
+import { emojify } from '../../../../util/emoji';
 
 export function getWarnings(config: RenovateConfig): string {
   if (!config.warnings.length) {
@@ -35,8 +35,8 @@ export function getDepWarnings(
 ): string {
   let warningText = '';
   try {
-    const warnings = [];
-    const warningFiles = [];
+    const warnings: string[] = [];
+    const warningFiles: string[] = [];
     for (const files of Object.values(packageFiles || {})) {
       for (const file of files || []) {
         if (file.deps) {

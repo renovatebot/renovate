@@ -1,9 +1,9 @@
 import { readFile } from 'fs-extra';
 import { join } from 'upath';
-import { exec } from '../../../util/exec';
 import { logger } from '../../../logger';
-import { PostUpdateConfig } from '../../common';
+import { exec } from '../../../util/exec';
 import { BinarySource } from '../../../util/exec/common';
+import { PostUpdateConfig } from '../../common';
 
 export interface GenerateLockFileResult {
   error?: boolean;

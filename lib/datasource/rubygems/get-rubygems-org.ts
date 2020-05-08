@@ -1,6 +1,5 @@
-import { hrtime } from 'process';
-import { Http } from '../../util/http';
 import { logger } from '../../logger';
+import { Http } from '../../util/http';
 import { DatasourceError, ReleaseResult } from '../common';
 import { id } from './common';
 
@@ -24,11 +23,10 @@ async function updateRubyGemsVersions(): Promise<void> {
   let newLines: string;
   try {
     logger.debug('Rubygems: Fetching rubygems.org versions');
-    const startTime = hrtime();
+    const startTime = Date.now();
     newLines = (await http.get(url, options)).body;
-    const duration = hrtime(startTime);
-    const seconds = Math.round(duration[0] + duration[1] / 1e9);
-    logger.debug({ seconds }, 'Rubygems: Fetched rubygems.org versions');
+    const durationMs = Math.round(Date.now() - startTime);
+    logger.debug({ durationMs }, 'Rubygems: Fetched rubygems.org versions');
   } catch (err) /* istanbul ignore next */ {
     if (err.statusCode !== 416) {
       contentLength = 0;

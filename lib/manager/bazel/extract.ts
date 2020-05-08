@@ -1,14 +1,14 @@
 /* eslint no-plusplus: 0  */
-import parse from 'github-url-from-git';
 import { parse as _parse } from 'url';
+import parse from 'github-url-from-git';
+import * as datasourceDocker from '../../datasource/docker';
+import * as datasourceGithubReleases from '../../datasource/github-releases';
+import * as datasourceGo from '../../datasource/go';
 import { logger } from '../../logger';
-import { PackageDependency, PackageFile } from '../common';
+import { SkipReason } from '../../types';
 import { regEx } from '../../util/regex';
 import * as dockerVersioning from '../../versioning/docker';
-import * as datasourceDocker from '../../datasource/docker';
-import * as datasourceGo from '../../datasource/go';
-import * as datasourceGithubReleases from '../../datasource/github-releases';
-import { SkipReason } from '../../types';
+import { PackageDependency, PackageFile } from '../common';
 
 interface UrlParsedResult {
   repo: string;

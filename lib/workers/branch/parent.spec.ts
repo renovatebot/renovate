@@ -1,8 +1,8 @@
-import { PR_STATE_OPEN } from '../../constants/pull-requests';
-import { getParentBranch } from './parent';
 import { platform } from '../../../test/util';
 import { RenovateConfig } from '../../config';
+import { PR_STATE_OPEN } from '../../constants/pull-requests';
 import { Pr } from '../../platform';
+import { getParentBranch } from './parent';
 
 describe('workers/branch/parent', () => {
   describe('getParentBranch(config)', () => {

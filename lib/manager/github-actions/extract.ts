@@ -1,7 +1,7 @@
 import { logger } from '../../logger';
-import { getDep } from '../dockerfile/extract';
-import { PackageFile, PackageDependency } from '../common';
 import * as dockerVersioning from '../../versioning/docker';
+import { PackageDependency, PackageFile } from '../common';
+import { getDep } from '../dockerfile/extract';
 
 export function extractPackageFile(content: string): PackageFile | null {
   logger.debug('github-actions.extractPackageFile()');

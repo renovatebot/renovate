@@ -1,25 +1,21 @@
 import URL from 'url';
-import { api } from '../../../platform/github/gh-got-wrapper';
+import { PLATFORM_TYPE_GITHUB } from '../../../constants/platforms';
+import { Release } from '../../../datasource';
 import { logger } from '../../../logger';
+import { api } from '../../../platform/github/gh-got-wrapper';
 import * as hostRules from '../../../util/host-rules';
 import * as allVersioning from '../../../versioning';
-import { addReleaseNotes } from './release-notes';
-import { ChangeLogError, ChangeLogRelease, ChangeLogResult } from './common';
-import { Release } from '../../../datasource';
-import { PLATFORM_TYPE_GITHUB } from '../../../constants/platforms';
 import { BranchUpgradeConfig } from '../../common';
+import { ChangeLogError, ChangeLogRelease, ChangeLogResult } from './common';
+import { addReleaseNotes } from './release-notes';
 
 const { get: ghGot } = api;
 
 async function getTags(
   endpoint: string,
-  versioning: string,
   repository: string
 ): Promise<string[]> {
-  let url = endpoint
-    ? endpoint.replace(/\/?$/, '/')
-    : /* istanbul ignore next: not possible to test, maybe never possible? */ 'https://api.github.com/';
-  url += `repos/${repository}/tags?per_page=100`;
+  const url = `${endpoint}repos/${repository}/tags?per_page=100`;
   try {
     const res = await ghGot<{ name: string }[]>(url, {
       paginate: true,
@@ -45,7 +41,6 @@ async function getTags(
 }
 
 export async function getChangeLogJSON({
-  endpoint,
   versioning,
   fromVersion,
   toVersion,
@@ -60,7 +55,7 @@ export async function getChangeLogJSON({
   }
   const version = allVersioning.get(versioning);
   const { protocol, host, pathname } = URL.parse(sourceUrl);
-  const githubBaseURL = `${protocol}//${host}/`;
+  const baseUrl = `${protocol}//${host}/`;
   const url = sourceUrl.startsWith('https://github.com/')
     ? 'https://api.github.com/'
     : sourceUrl;
@@ -70,8 +65,7 @@ export async function getChangeLogJSON({
   });
   // istanbul ignore if
   if (!config.token) {
-    // prettier-ignore
-    if (URL.parse(sourceUrl).host.endsWith('github.com')) { // lgtm [js/incomplete-url-substring-sanitization]
+    if (host.endsWith('github.com')) {
       logger.warn(
         { manager, depName, sourceUrl },
         'No github.com token has been configured. Skipping release notes retrieval'
@@ -84,9 +78,9 @@ export async function getChangeLogJSON({
     );
     return null;
   }
-  const githubApiBaseURL = sourceUrl.startsWith('https://github.com/')
+  const apiBaseUrl = sourceUrl.startsWith('https://github.com/')
     ? 'https://api.github.com/'
-    : endpoint; // TODO FIX
+    : baseUrl;
   const repository = pathname.slice(1).replace(/\/$/, '');
   if (repository.split('/').length !== 2) {
     logger.debug({ sourceUrl }, 'Invalid github URL found');
@@ -110,7 +104,7 @@ export async function getChangeLogJSON({
 
   async function getRef(release: Release): Promise<string | null> {
     if (!tags) {
-      tags = await getTags(endpoint, versioning, repository);
+      tags = await getTags(apiBaseUrl, repository);
     }
     const regex = new RegExp(`${depName}[@-]`);
     const tagName = tags
@@ -143,6 +137,7 @@ export async function getChangeLogJSON({
         cacheNamespace,
         getCacheKey(prev.version, next.version)
       );
+      // istanbul ignore else
       if (!release) {
         release = {
           version: next.version,
@@ -154,7 +149,7 @@ export async function getChangeLogJSON({
         const prevHead = await getRef(prev);
         const nextHead = await getRef(next);
         if (prevHead && nextHead) {
-          release.compare.url = `${githubBaseURL}${repository}/compare/${prevHead}...${nextHead}`;
+          release.compare.url = `${baseUrl}${repository}/compare/${prevHead}...${nextHead}`;
         }
         const cacheMinutes = 55;
         await renovateCache.set(
@@ -170,8 +165,8 @@ export async function getChangeLogJSON({
 
   let res: ChangeLogResult = {
     project: {
-      githubApiBaseURL,
-      githubBaseURL,
+      apiBaseUrl,
+      baseUrl,
       github: repository,
       repository: sourceUrl,
       depName,

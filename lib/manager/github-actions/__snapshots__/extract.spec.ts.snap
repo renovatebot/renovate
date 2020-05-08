@@ -3,6 +3,7 @@
 exports[`lib/manager/github-actions/extract extractPackageFile() extracts multiple image lines from docker_container 1`] = `
 Array [
   Object {
+    "autoReplaceStringTemplate": "{{depName}}{{#if newValue}}:{{newValue}}{{/if}}{{#if newDigest}}@{{newDigest}}{{/if}}",
     "currentDigest": undefined,
     "currentValue": undefined,
     "datasource": "docker",
@@ -11,6 +12,7 @@ Array [
     "versioning": "docker",
   },
   Object {
+    "autoReplaceStringTemplate": "{{depName}}{{#if newValue}}:{{newValue}}{{/if}}{{#if newDigest}}@{{newDigest}}{{/if}}",
     "commitMessageTopic": "Node.js",
     "currentDigest": "sha256:7b65413af120ec5328077775022c78101f103258a1876ec2f83890bce416e896",
     "currentValue": "6",
@@ -25,6 +27,7 @@ Array [
 exports[`lib/manager/github-actions/extract extractPackageFile() extracts multiple image lines from yaml configuration file 1`] = `
 Array [
   Object {
+    "autoReplaceStringTemplate": "{{depName}}{{#if newValue}}:{{newValue}}{{/if}}{{#if newDigest}}@{{newDigest}}{{/if}}",
     "currentDigest": undefined,
     "currentValue": undefined,
     "datasource": "docker",
@@ -33,6 +36,7 @@ Array [
     "versioning": "docker",
   },
   Object {
+    "autoReplaceStringTemplate": "{{depName}}{{#if newValue}}:{{newValue}}{{/if}}{{#if newDigest}}@{{newDigest}}{{/if}}",
     "commitMessageTopic": "Node.js",
     "currentDigest": "sha256:7b65413af120ec5328077775022c78101f103258a1876ec2f83890bce416e896",
     "currentValue": "6",

@@ -1,10 +1,10 @@
-import { fetchUpdates } from './fetch';
-import * as _npm from '../../../manager/npm';
-import * as lookup from './lookup';
-import { getConfig, mocked, RenovateConfig } from '../../../../test/util';
-import { ManagerApi } from '../../../manager/common';
-import * as datasourceNpm from '../../../datasource/npm';
+import { RenovateConfig, getConfig, mocked } from '../../../../test/util';
 import * as datasourceMaven from '../../../datasource/maven';
+import * as datasourceNpm from '../../../datasource/npm';
+import { ManagerApi, PackageFile } from '../../../manager/common';
+import * as _npm from '../../../manager/npm';
+import { fetchUpdates } from './fetch';
+import * as lookup from './lookup';
 
 const npm: ManagerApi = _npm;
 const lookupUpdates = mocked(lookup).lookupUpdates;
@@ -19,7 +19,7 @@ describe('workers/repository/process/fetch', () => {
       config = getConfig();
     });
     it('handles empty deps', async () => {
-      const packageFiles = {
+      const packageFiles: Record<string, PackageFile[]> = {
         npm: [{ packageFile: 'package.json', deps: [] }],
       };
       await fetchUpdates(config, packageFiles);
@@ -33,7 +33,7 @@ describe('workers/repository/process/fetch', () => {
           enabled: false,
         },
       ];
-      const packageFiles: any = {
+      const packageFiles: Record<string, PackageFile[]> = {
         npm: [
           {
             packageFile: 'package.json',
@@ -41,7 +41,7 @@ describe('workers/repository/process/fetch', () => {
               { depName: 'abcd' },
               { depName: 'zzzz' },
               { depName: 'foo' },
-              { depName: 'skipped', skipReason: 'some-reason' },
+              { depName: 'skipped', skipReason: 'some-reason' as never },
             ],
             internalPackages: ['zzzz'],
           },

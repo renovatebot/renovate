@@ -1,7 +1,7 @@
 import moment from 'moment';
-import * as limits from './limits';
-import { platform, getConfig, RenovateConfig } from '../../../../test/util';
+import { RenovateConfig, getConfig, platform } from '../../../../test/util';
 import { BranchConfig } from '../../common';
+import * as limits from './limits';
 
 let config: RenovateConfig;
 beforeEach(() => {
@@ -15,7 +15,7 @@ describe('workers/repository/process/limits', () => {
       config.prHourlyLimit = 2;
       platform.getPrList.mockResolvedValueOnce([
         {
-          created_at: moment().format(),
+          createdAt: moment().toISOString(),
           branchName: null,
           title: null,
           state: null,

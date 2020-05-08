@@ -1,7 +1,7 @@
 import { logger } from '../../logger';
 import { Http } from '../../util/http';
-import { DatasourceError, ReleaseResult, GetReleasesConfig } from '../common';
-import { cacheAble, CachePromise } from '../cache';
+import { CachePromise, cacheAble } from '../cache';
+import { DatasourceError, GetReleasesConfig, ReleaseResult } from '../common';
 
 export const id = 'cdnjs';
 
@@ -37,6 +37,9 @@ export async function getReleases({
       lookup: library,
       cb: downloadLibrary,
     });
+    if (!assets) {
+      return null;
+    }
     const assetName = lookupName.replace(`${library}/`, '');
     const releases = assets
       .filter(({ files }) => files.includes(assetName))

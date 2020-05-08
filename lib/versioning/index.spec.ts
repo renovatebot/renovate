@@ -1,13 +1,13 @@
-import * as allVersioning from '.';
 import { getOptions } from '../config/definitions';
-import { GenericVersioningApi, GenericVersion } from './loose/generic';
-import * as semverVersioning from './semver';
 import { loadModules } from '../util/modules';
 import {
   VersioningApi,
   VersioningApiConstructor,
   isVersioningApiConstructor,
 } from './common';
+import { GenericVersion, GenericVersioningApi } from './loose/generic';
+import * as semverVersioning from './semver';
+import * as allVersioning from '.';
 
 const supportedSchemes = getOptions().find(
   (option) => option.name === 'versioning'

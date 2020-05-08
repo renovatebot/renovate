@@ -1,8 +1,8 @@
 import { exec as _exec } from 'child_process';
+import { envMock, mockExecAll } from '../../../../test/execUtil';
+import { mocked } from '../../../../test/util';
 import * as _lernaHelper from '../../../manager/npm/post-update/lerna';
 import { platform as _platform } from '../../../platform';
-import { mocked } from '../../../../test/util';
-import { envMock, mockExecAll } from '../../../../test/execUtil';
 import * as _env from '../../../util/exec/env';
 
 jest.mock('child_process');

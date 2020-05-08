@@ -1,12 +1,12 @@
 import { readFile } from 'fs-extra';
 import { join } from 'upath';
-import { api as semver } from '../../../versioning/semver';
-import { exec } from '../../../util/exec';
-import { logger } from '../../../logger';
-import { PostUpdateConfig, Upgrade } from '../../common';
 import { SYSTEM_INSUFFICIENT_DISK_SPACE } from '../../../constants/error-messages';
 import { DatasourceError } from '../../../datasource';
+import { logger } from '../../../logger';
+import { exec } from '../../../util/exec';
 import { BinarySource } from '../../../util/exec/common';
+import { api as semver } from '../../../versioning/semver';
+import { PostUpdateConfig, Upgrade } from '../../common';
 
 export interface GenerateLockFileResult {
   error?: boolean;

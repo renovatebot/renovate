@@ -2,7 +2,7 @@ import { URLSearchParams } from 'url';
 import { PR_STATE_CLOSED } from '../../constants/pull-requests';
 import { BranchStatus } from '../../types';
 import { GotResponse } from '../common';
-import { api, GiteaGotOptions } from './gitea-got-wrapper';
+import { GiteaGotOptions, api } from './gitea-got-wrapper';
 
 export type PRState = 'open' | 'closed' | 'all';
 export type IssueState = 'open' | 'closed' | 'all';
@@ -28,7 +28,7 @@ export interface PR {
     ref: string;
   };
   head?: {
-    ref: string;
+    label: string;
     sha: string;
     repo?: Repo;
   };
@@ -394,6 +394,16 @@ export async function getRepoLabels(
   options?: GiteaGotOptions
 ): Promise<Label[]> {
   const url = `repos/${repoPath}/labels`;
+  const res: GotResponse<Label[]> = await api.get(url, options);
+
+  return res.body;
+}
+
+export async function getOrgLabels(
+  orgName: string,
+  options?: GiteaGotOptions
+): Promise<Label[]> {
+  const url = `orgs/${orgName}/labels`;
   const res: GotResponse<Label[]> = await api.get(url, options);
 
   return res.body;

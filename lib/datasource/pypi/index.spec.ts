@@ -26,7 +26,6 @@ describe('datasource/pypi', () => {
     beforeEach(() => {
       process.env = { ...OLD_ENV };
       delete process.env.PIP_INDEX_URL;
-      global.repoCache = {};
     });
 
     afterEach(() => {
@@ -35,7 +34,6 @@ describe('datasource/pypi', () => {
 
     beforeEach(() => {
       jest.resetAllMocks();
-      global.repoCache = {};
     });
     it('returns null for empty result', async () => {
       got.mockReturnValueOnce({});
