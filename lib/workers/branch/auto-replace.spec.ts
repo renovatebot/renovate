@@ -1,8 +1,8 @@
 import { readFileSync } from 'fs';
 import { resolve } from 'path';
 import { defaultConfig } from '../../../test/util';
-import { RenovateConfig } from '../../config';
 import { extractPackageFile } from '../../manager/html';
+import { BranchUpgradeConfig } from '../common';
 import { doAutoReplace } from './auto-replace';
 
 const sampleHtml = readFileSync(
@@ -14,8 +14,8 @@ jest.mock('../../util/fs');
 
 describe('workers/branch/auto-replace', () => {
   describe('doAutoReplace', () => {
-    let parentBranch;
-    let upgrade: RenovateConfig;
+    let parentBranch: string;
+    let upgrade: BranchUpgradeConfig;
     beforeEach(() => {
       upgrade = {
         ...JSON.parse(JSON.stringify(defaultConfig)),

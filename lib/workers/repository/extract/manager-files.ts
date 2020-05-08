@@ -44,7 +44,7 @@ export async function getManagerPackageFiles(
     }
     return allPackageFiles;
   }
-  const packageFiles = [];
+  const packageFiles: PackageFile[] = [];
   for (const packageFile of fileList) {
     const content = await readLocalFile(packageFile, 'utf8');
     if (content) {

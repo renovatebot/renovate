@@ -6,7 +6,7 @@ import { BranchConfig } from '../../common';
 import { ExtractResult, extract, update } from './extract-update';
 import { WriteUpdateResult } from './write';
 
-export async function processRepo(
+export async function extractDependencies(
   config: RenovateConfig
 ): Promise<ExtractResult> {
   logger.debug('processRepo()');
