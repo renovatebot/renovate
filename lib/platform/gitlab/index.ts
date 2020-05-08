@@ -479,20 +479,6 @@ export async function getPr(iid: number): Promise<Pr> {
   return pr;
 }
 
-// Return a list of all modified files in a PR
-export async function getPrFiles(mrNo: number): Promise<string[]> {
-  logger.debug({ mrNo }, 'getPrFiles');
-  if (!mrNo) {
-    return [];
-  }
-  const files = (
-    await api.get(
-      `projects/${config.repository}/merge_requests/${mrNo}/changes`
-    )
-  ).body.changes;
-  return files.map((f: { new_path: string }) => f.new_path);
-}
-
 // istanbul ignore next
 async function closePr(iid: number): Promise<void> {
   await api.put(`projects/${config.repository}/merge_requests/${iid}`, {

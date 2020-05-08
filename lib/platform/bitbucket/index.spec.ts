@@ -452,14 +452,6 @@ describe('platform/bitbucket', () => {
     });
   });
 
-  describe('getPrFiles()', () => {
-    const getPrFiles = wrap('getPrFiles');
-    it('returns diff files', async () => {
-      await initRepo();
-      expect(await getPrFiles(5)).toMatchSnapshot();
-    });
-  });
-
   describe('getPrBody()', () => {
     it('returns diff files', () => {
       expect(

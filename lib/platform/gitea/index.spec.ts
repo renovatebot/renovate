@@ -2,7 +2,6 @@ import {
   BranchStatusConfig,
   CommitFilesConfig,
   File,
-  GotResponse,
   Platform,
   RepoConfig,
   RepoParams,
@@ -19,13 +18,11 @@ import {
 } from '../../constants/error-messages';
 import { logger as _logger } from '../../logger';
 import { BranchStatus } from '../../types';
-import { GiteaGotApi } from './gitea-got-wrapper';
 import * as ght from './gitea-helper';
 
 describe('platform/gitea', () => {
   let gitea: Platform;
   let helper: jest.Mocked<typeof import('./gitea-helper')>;
-  let api: jest.Mocked<GiteaGotApi>;
   let logger: jest.Mocked<typeof _logger>;
   let GitStorage: jest.Mocked<typeof import('../git/storage').Storage> &
     jest.Mock;
@@ -182,7 +179,6 @@ describe('platform/gitea', () => {
 
     gitea = await import('.');
     helper = (await import('./gitea-helper')) as any;
-    api = (await import('./gitea-got-wrapper')).api as any;
     logger = (await import('../../logger')).logger as any;
     GitStorage = (await import('../git/storage')).Storage as any;
 
@@ -936,47 +932,6 @@ describe('platform/gitea', () => {
       await initFakeRepo();
 
       expect(await gitea.mergePr(1, 'some-branch')).toEqual(false);
-    });
-  });
-
-  describe('getPrFiles', () => {
-    it('should return empty list without passing a pull request', async () => {
-      await initFakeRepo();
-
-      expect(await gitea.getPrFiles(undefined)).toEqual([]);
-    });
-
-    it('should return modified files when passing a pull request', async () => {
-      const mockPR = mockPRs[0];
-      const mockDiff = `
-diff --git a/test b/test
-deleted file mode 100644
-index 60fffd1..0000000
---- a/test
-+++ /dev/null
-@@ -1 +0,0 @@
--previously
-diff --git a/this is spaces b/this is spaces
-new file mode 100644
-index 0000000..2173594
---- /dev/null
-+++ b/this is spacey
-@@ -0,0 +1 @@
-+nowadays
-`;
-
-      helper.getPR.mockResolvedValueOnce(mockPR);
-      api.get.mockResolvedValueOnce(
-        partial<GotResponse>({
-          body: mockDiff,
-        })
-      );
-      await initFakeRepo();
-
-      expect(await gitea.getPrFiles(mockPR.number)).toEqual([
-        'test',
-        'this is spaces',
-      ]);
     });
   });
 
