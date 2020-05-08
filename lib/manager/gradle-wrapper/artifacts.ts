@@ -1,3 +1,4 @@
+/* istanbul ignore file */
 import { resolve } from 'path';
 import * as fs from 'fs-extra';
 import Git from 'simple-git/promise';
