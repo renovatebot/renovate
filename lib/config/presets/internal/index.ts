@@ -1,4 +1,4 @@
-import { Preset } from '../common';
+import { Preset, PresetConfig } from '../common';
 import * as configPreset from './config';
 import * as defaultPreset from './default';
 import * as dockerPreset from './docker';
@@ -21,9 +21,11 @@ export const groups: Record<string, Record<string, Preset>> = {
   schedule: schedulePreset.presets,
 };
 
-export function getPreset(
-  pkgName: string,
-  presetName: string
-): Preset | undefined {
-  return groups[pkgName] ? groups[pkgName][presetName] : undefined;
+export function getPreset({
+  packageName: pkgName,
+  presetName,
+}: PresetConfig): Preset | undefined {
+  return groups[pkgName]
+    ? groups[pkgName][presetName]
+    : /* istanbul ignore next */ undefined;
 }
