@@ -1,10 +1,10 @@
-import { GotResponse } from '../../platform';
-import { api } from '../../platform/gitlab/gl-got-wrapper';
-import * as gitlab from './gitlab';
+import { GotResponse } from '../../../platform';
+import { api } from '../../../platform/gitlab/gl-got-wrapper';
+import * as gitlab from '.';
 import { PartialDeep } from 'type-fest';
 
-jest.mock('../../platform/gitlab/gl-got-wrapper');
-jest.mock('../../util/got');
+jest.mock('../../../platform/gitlab/gl-got-wrapper');
+jest.mock('../../../util/got');
 
 const glGot: jest.Mock<Promise<PartialDeep<GotResponse>>> = api.get as never;
 
