@@ -1,11 +1,11 @@
 import {
   PLATFORM_TYPE_GITHUB,
   PLATFORM_TYPE_GITLAB,
-} from '../../constants/platforms';
-import { RenovateConfig } from '../common';
-import { Preset } from './common';
-import * as github from './github';
-import * as gitlab from './gitlab';
+} from '../../../constants/platforms';
+import { RenovateConfig } from '../../common';
+import { Preset } from '../common';
+import * as github from '../github';
+import * as gitlab from '../gitlab';
 
 export async function getPreset(
   pkgName: string,

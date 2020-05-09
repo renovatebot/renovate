@@ -20,7 +20,7 @@ Array [
     },
   },
   Object {
-    "cmd": "<yarn> install --ignore-scripts --ignore-engines --ignore-platform --mutex network:31879",
+    "cmd": "<yarn> install --ignore-scripts --ignore-engines --ignore-platform",
     "options": Object {
       "cwd": "some-dir",
       "encoding": "utf-8",
@@ -59,7 +59,7 @@ Array [
     },
   },
   Object {
-    "cmd": "<yarn> install --ignore-scripts --ignore-engines --ignore-platform --mutex network:31879",
+    "cmd": "<yarn> install --ignore-scripts --ignore-engines --ignore-platform",
     "options": Object {
       "cwd": "some-dir",
       "encoding": "utf-8",
@@ -76,7 +76,7 @@ Array [
     },
   },
   Object {
-    "cmd": "<yarn> upgrade some-dep --ignore-scripts --ignore-engines --ignore-platform --mutex network:31879",
+    "cmd": "<yarn> upgrade some-dep --ignore-scripts --ignore-engines --ignore-platform",
     "options": Object {
       "cwd": "some-dir",
       "encoding": "utf-8",
@@ -115,7 +115,7 @@ Array [
     },
   },
   Object {
-    "cmd": "<yarn> install --ignore-engines --ignore-platform --mutex network:31879",
+    "cmd": "<yarn> install --ignore-engines --ignore-platform",
     "options": Object {
       "cwd": "some-dir",
       "encoding": "utf-8",
@@ -133,7 +133,7 @@ Array [
     },
   },
   Object {
-    "cmd": "<yarn> upgrade some-dep --ignore-engines --ignore-platform --mutex network:31879",
+    "cmd": "<yarn> upgrade some-dep --ignore-engines --ignore-platform",
     "options": Object {
       "cwd": "some-dir",
       "encoding": "utf-8",
@@ -172,7 +172,7 @@ Array [
     },
   },
   Object {
-    "cmd": "<yarn> install --ignore-scripts --ignore-engines --ignore-platform --mutex network:31879",
+    "cmd": "<yarn> install --ignore-scripts --ignore-engines --ignore-platform",
     "options": Object {
       "cwd": "some-dir",
       "encoding": "utf-8",
@@ -211,7 +211,7 @@ Array [
     },
   },
   Object {
-    "cmd": "<yarn> install --ignore-scripts --ignore-engines --ignore-platform --mutex network:31879",
+    "cmd": "<yarn> install --ignore-scripts --ignore-engines --ignore-platform",
     "options": Object {
       "cwd": "some-dir",
       "encoding": "utf-8",
@@ -250,7 +250,7 @@ Array [
     },
   },
   Object {
-    "cmd": "<yarn> install --ignore-engines --ignore-platform --mutex network:31879",
+    "cmd": "<yarn> install --ignore-engines --ignore-platform",
     "options": Object {
       "cwd": "some-dir",
       "encoding": "utf-8",
@@ -290,7 +290,7 @@ Array [
     },
   },
   Object {
-    "cmd": "<yarn> install --ignore-scripts --ignore-engines --ignore-platform --mutex network:31879",
+    "cmd": "<yarn> install --ignore-scripts --ignore-engines --ignore-platform",
     "options": Object {
       "cwd": "some-dir",
       "encoding": "utf-8",
@@ -363,7 +363,7 @@ Array [
     },
   },
   Object {
-    "cmd": "<yarn> install --ignore-engines --ignore-platform --mutex network:31879",
+    "cmd": "<yarn> install --ignore-engines --ignore-platform",
     "options": Object {
       "cwd": "some-dir",
       "encoding": "utf-8",
@@ -403,7 +403,7 @@ Array [
     },
   },
   Object {
-    "cmd": "<yarn> install --ignore-scripts --ignore-engines --ignore-platform --mutex file:/tmp/yarn.mutext",
+    "cmd": "<yarn> install --ignore-scripts --ignore-engines --ignore-platform",
     "options": Object {
       "cwd": "some-dir",
       "encoding": "utf-8",
@@ -420,7 +420,7 @@ Array [
     },
   },
   Object {
-    "cmd": "<yarn> upgrade some-dep --ignore-scripts --ignore-engines --ignore-platform --mutex file:/tmp/yarn.mutext",
+    "cmd": "<yarn> upgrade some-dep --ignore-scripts --ignore-engines --ignore-platform",
     "options": Object {
       "cwd": "some-dir",
       "encoding": "utf-8",
@@ -459,7 +459,7 @@ Array [
     },
   },
   Object {
-    "cmd": "<yarn> install --ignore-engines --ignore-platform --mutex file:/tmp/yarn.mutext",
+    "cmd": "<yarn> install --ignore-engines --ignore-platform",
     "options": Object {
       "cwd": "some-dir",
       "encoding": "utf-8",
@@ -477,7 +477,7 @@ Array [
     },
   },
   Object {
-    "cmd": "<yarn> upgrade some-dep --ignore-engines --ignore-platform --mutex file:/tmp/yarn.mutext",
+    "cmd": "<yarn> upgrade some-dep --ignore-engines --ignore-platform",
     "options": Object {
       "cwd": "some-dir",
       "encoding": "utf-8",
@@ -516,7 +516,7 @@ Array [
     },
   },
   Object {
-    "cmd": "yarn install --ignore-scripts --ignore-engines --ignore-platform --mutex network:31879",
+    "cmd": "yarn install --ignore-scripts --ignore-engines --ignore-platform",
     "options": Object {
       "cwd": "some-dir",
       "encoding": "utf-8",

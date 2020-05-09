@@ -1,5 +1,5 @@
 import nock from 'nock';
-import * as npm from './npm';
+import * as npm from '.';
 
 jest.mock('registry-auth-token');
 jest.mock('delay');
