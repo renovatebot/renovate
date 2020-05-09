@@ -70,7 +70,6 @@ describe('config/presets/local', () => {
     it('forwards to github', async () => {
       const content = await local.getPreset({
         packageName: 'some/repo',
-        presetName: '',
         baseConfig: {
           platform: 'github',
         },
