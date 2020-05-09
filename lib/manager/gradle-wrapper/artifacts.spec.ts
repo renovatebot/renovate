@@ -38,8 +38,9 @@ function compareFile(file: string, path: string) {
 }
 
 describe(getName(__filename), () => {
+  jest.setTimeout(15 * 1000);
+
   beforeEach(async () => {
-    jest.setTimeout(5 * 60 * 1000);
     jest.resetAllMocks();
     await setUtilConfig(config);
     httpMock.setup();
