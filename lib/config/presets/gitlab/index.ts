@@ -1,7 +1,7 @@
-import { logger } from '../../logger';
-import { api } from '../../platform/gitlab/gl-got-wrapper';
-import { ensureTrailingSlash } from '../../util/url';
-import { Preset } from './common';
+import { logger } from '../../../logger';
+import { api } from '../../../platform/gitlab/gl-got-wrapper';
+import { ensureTrailingSlash } from '../../../util/url';
+import { Preset } from '../common';
 
 const { get: glGot } = api;
 

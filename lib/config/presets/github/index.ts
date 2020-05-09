@@ -1,9 +1,9 @@
-import { PLATFORM_FAILURE } from '../../constants/error-messages';
-import { PLATFORM_TYPE_GITHUB } from '../../constants/platforms';
-import { logger } from '../../logger';
-import { Http, HttpOptions } from '../../util/http';
-import { ensureTrailingSlash } from '../../util/url';
-import { Preset } from './common';
+import { PLATFORM_FAILURE } from '../../../constants/error-messages';
+import { PLATFORM_TYPE_GITHUB } from '../../../constants/platforms';
+import { logger } from '../../../logger';
+import { Http, HttpOptions } from '../../../util/http';
+import { ensureTrailingSlash } from '../../../util/url';
+import { Preset } from '../common';
 
 const http = new Http(PLATFORM_TYPE_GITHUB);
 

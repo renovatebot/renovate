@@ -1,15 +1,15 @@
-import { mocked } from '../../../test/util';
-import { PLATFORM_FAILURE } from '../../constants/error-messages';
-import { GotResponse } from '../../platform';
-import { clearRepoCache } from '../../util/cache';
-import _got from '../../util/got';
-import * as _hostRules from '../../util/host-rules';
-import * as github from './github';
+import { mocked } from '../../../../test/util';
+import { PLATFORM_FAILURE } from '../../../constants/error-messages';
+import { GotResponse } from '../../../platform';
+import { clearRepoCache } from '../../../util/cache';
+import _got from '../../../util/got';
+import * as _hostRules from '../../../util/host-rules';
+import * as github from '.';
 import { PartialDeep } from 'type-fest';
 
-jest.mock('../../platform/github/gh-got-wrapper');
-jest.mock('../../util/got');
-jest.mock('../../util/host-rules');
+jest.mock('../../../platform/github/gh-got-wrapper');
+jest.mock('../../../util/got');
+jest.mock('../../../util/host-rules');
 
 const got: jest.Mock<PartialDeep<GotResponse>> = _got as never;
 const hostRules = mocked(_hostRules);
