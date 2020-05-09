@@ -833,7 +833,7 @@ const platform: Platform = {
       `Ensuring comment "${topic || content}" in #${issue} is removed`
     );
     const commentList = await helper.getComments(config.repository, issue);
-    let comment;
+    let comment: helper.Comment | null = null;
 
     if (topic) {
       comment = findCommentByTopic(commentList, topic);
@@ -843,7 +843,7 @@ const platform: Platform = {
 
     // Abort and do nothing if no matching comment was found
     if (!comment) {
-      return null;
+      return;
     }
 
     // Attempt to delete comment
@@ -852,8 +852,6 @@ const platform: Platform = {
     } catch (err) {
       logger.warn({ err, issue, subject: topic }, 'Error deleting comment');
     }
-
-    return null;
   },
 
   async getBranchPr(branchName: string): Promise<Pr | null> {

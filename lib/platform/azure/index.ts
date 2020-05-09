@@ -1,5 +1,6 @@
 import {
   GitPullRequest,
+  GitPullRequestCommentThread,
   GitPullRequestMergeStrategy,
 } from 'azure-devops-node-api/interfaces/GitInterfaces';
 import { RenovateConfig } from '../../config/common';
@@ -575,7 +576,7 @@ export async function ensureCommentRemoval({
   content,
 }: EnsureCommentRemovalConfig): Promise<void> {
   logger.debug(
-    `ensureCommentRemoval(issueNo, topic, content)(${issueNo}, ${topic}, ${content})`
+    `Ensuring comment "${topic || content}" in #${issueNo} is removed`
   );
   if (!issueNo) {
     return;
@@ -584,12 +585,12 @@ export async function ensureCommentRemoval({
   const azureApiGit = await azureApi.gitApi();
   const threads = await azureApiGit.getThreads(config.repoId, issueNo);
 
-  const byTopic = (thread): boolean =>
+  const byTopic = (thread: GitPullRequestCommentThread): boolean =>
     thread.comments[0].content.startsWith(`### ${topic}\n\n`);
-  const byContent = (thread): boolean =>
+  const byContent = (thread: GitPullRequestCommentThread): boolean =>
     thread.comments[0].content.trim() === content;
 
-  let threadIdFound = null;
+  let threadIdFound: number | null = null;
 
   if (topic) {
     threadIdFound = threads.find(byTopic)?.id;

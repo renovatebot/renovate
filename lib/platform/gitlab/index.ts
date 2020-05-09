@@ -848,7 +848,7 @@ export async function deleteLabel(
   }
 }
 
-async function getComments(issueNo: number): Promise<any[]> {
+async function getComments(issueNo: number): Promise<GitlabComment[]> {
   // GET projects/:owner/:repo/merge_requests/:number/notes
   logger.debug(`Getting comments for #${issueNo}`);
   const url = `projects/${config.repository}/merge_requests/${issueNo}/notes`;
@@ -942,6 +942,11 @@ export async function ensureComment({
   return true;
 }
 
+type GitlabComment = {
+  body: string;
+  id: number;
+};
+
 export async function ensureCommentRemoval({
   number: issueNo,
   topic,
@@ -950,12 +955,14 @@ export async function ensureCommentRemoval({
   logger.debug(
     `Ensuring comment "${topic || content}" in #${issueNo} is removed`
   );
-  const comments: { body: string; id: number }[] = await getComments(issueNo);
-  let commentId: number;
 
-  const byTopic = (comment): boolean =>
+  const comments = await getComments(issueNo);
+  let commentId: number | null = null;
+
+  const byTopic = (comment: GitlabComment): boolean =>
     comment.body.startsWith(`### ${topic}\n\n`);
-  const byContent = (comment): boolean => comment.body.trim() === content;
+  const byContent = (comment: GitlabComment): boolean =>
+    comment.body.trim() === content;
 
   if (topic) {
     commentId = comments.find(byTopic)?.id;

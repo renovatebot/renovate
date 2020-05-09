@@ -875,11 +875,12 @@ export async function ensureCommentRemoval({
     );
     const comments = await getComments(prNo);
 
-    const byTopic = (comment): boolean =>
+    const byTopic = (comment: Comment): boolean =>
       comment.text.startsWith(`### ${topic}\n\n`);
-    const byContent = (comment): boolean => comment.text.trim() === content;
+    const byContent = (comment: Comment): boolean =>
+      comment.text.trim() === content;
 
-    let commentId: number;
+    let commentId: number | null = null;
 
     if (topic) {
       commentId = comments.find(byTopic)?.id;

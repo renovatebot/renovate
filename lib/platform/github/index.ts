@@ -1574,11 +1574,12 @@ export async function ensureCommentRemoval({
     `Ensuring comment "${topic || content}" in #${issueNo} is removed`
   );
   const comments = await getComments(issueNo);
-  let commentId: number;
+  let commentId: number | null = null;
 
-  const byTopic = (comment): boolean =>
+  const byTopic = (comment: Comment): boolean =>
     comment.body.startsWith(`### ${topic}\n\n`);
-  const byContent = (comment): boolean => comment.body.trim() === content;
+  const byContent = (comment: Comment): boolean =>
+    comment.body.trim() === content;
 
   if (topic) {
     commentId = comments.find(byTopic)?.id;
