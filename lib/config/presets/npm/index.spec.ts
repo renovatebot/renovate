@@ -17,9 +17,9 @@ describe('config/presets/npm', () => {
   });
   it('should throw if no package', async () => {
     nock('https://registry.npmjs.org').get('/nopackage').reply(404);
-    await expect(npm.getPreset('nopackage', 'default')).rejects.toThrow(
-      /dep not found/
-    );
+    await expect(
+      npm.getPreset({ packageName: 'nopackage', presetName: 'default' })
+    ).rejects.toThrow(/dep not found/);
   });
   it('should throw if no renovate-config', async () => {
     const presetPackage = {
@@ -48,9 +48,9 @@ describe('config/presets/npm', () => {
     nock('https://registry.npmjs.org')
       .get('/norenovateconfig')
       .reply(200, presetPackage);
-    await expect(npm.getPreset('norenovateconfig', 'default')).rejects.toThrow(
-      /preset renovate-config not found/
-    );
+    await expect(
+      npm.getPreset({ packageName: 'norenovateconfig', presetName: 'default' })
+    ).rejects.toThrow(/preset renovate-config not found/);
   });
   it('should throw if preset name not found', async () => {
     const presetPackage = {
@@ -81,7 +81,10 @@ describe('config/presets/npm', () => {
       .get('/presetnamenotfound')
       .reply(200, presetPackage);
     await expect(
-      npm.getPreset('presetnamenotfound', 'missing')
+      npm.getPreset({
+        packageName: 'presetnamenotfound',
+        presetName: 'missing',
+      })
     ).rejects.toThrow(/preset not found/);
   });
   it('should return preset', async () => {
@@ -112,7 +115,7 @@ describe('config/presets/npm', () => {
     nock('https://registry.npmjs.org')
       .get('/workingpreset')
       .reply(200, presetPackage);
-    const res = await npm.getPreset('workingpreset');
+    const res = await npm.getPreset({ packageName: 'workingpreset' });
     expect(res).toMatchSnapshot();
   });
 });

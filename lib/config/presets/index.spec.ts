@@ -1,4 +1,5 @@
 import { RenovateConfig } from '..';
+import { mocked } from '../../../test/util';
 import presetIkatyang from './__fixtures__/renovate-config-ikatyang.json';
 import * as _npm from './npm';
 import * as presets from '.';
@@ -6,24 +7,24 @@ import * as presets from '.';
 jest.mock('./npm');
 jest.mock('./github');
 
-const npm: any = _npm;
+const npm = mocked(_npm);
 
-npm.getPreset = jest.fn((dep, presetName) => {
-  if (dep === 'renovate-config-ikatyang') {
+npm.getPreset = jest.fn(({ packageName, presetName }) => {
+  if (packageName === 'renovate-config-ikatyang') {
     return presetIkatyang.versions[presetIkatyang['dist-tags'].latest][
       'renovate-config'
     ][presetName];
   }
-  if (dep === 'renovate-config-notfound') {
+  if (packageName === 'renovate-config-notfound') {
     throw new Error('dep not found');
   }
-  if (dep === 'renovate-config-noconfig') {
+  if (packageName === 'renovate-config-noconfig') {
     throw new Error('preset renovate-config not found');
   }
-  if (dep === 'renovate-config-throw') {
+  if (packageName === 'renovate-config-throw') {
     throw new Error('whoops');
   }
-  if (dep === 'renovate-config-wrongpreset') {
+  if (packageName === 'renovate-config-wrongpreset') {
     throw new Error('preset not found');
   }
   return null;
