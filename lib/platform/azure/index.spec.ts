@@ -816,10 +816,6 @@ describe('platform/azure', () => {
         124
       );
     });
-    it('nothing should happen, no number', async () => {
-      await azure.ensureCommentRemoval({ number: 0, topic: 'test' });
-      expect(gitApiMock.getThreads).not.toHaveBeenCalled();
-    });
     it('comment not found', async () => {
       await initRepo({ repository: 'some/repo' });
       await azure.ensureCommentRemoval({ number: 42, topic: 'does-not-exist' });

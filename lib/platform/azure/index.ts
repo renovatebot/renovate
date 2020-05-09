@@ -578,9 +578,6 @@ export async function ensureCommentRemoval({
   logger.debug(
     `Ensuring comment "${topic || content}" in #${issueNo} is removed`
   );
-  if (!issueNo) {
-    return;
-  }
 
   const azureApiGit = await azureApi.gitApi();
   const threads = await azureApiGit.getThreads(config.repoId, issueNo);
