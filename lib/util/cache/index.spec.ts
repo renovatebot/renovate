@@ -1,4 +1,4 @@
-import { clearRepoCache, getRepoCached, setRepoCached } from './cache';
+import { clearRepoCache, getRepoCached, setRepoCached } from '.';
 
 describe('getRepoCache', () => {
   it('sets and gets repo cache', () => {
