@@ -1,6 +1,6 @@
 import crypto from 'crypto';
 import { logger } from '../../logger';
-import { api } from '../../platform/github/gh-got-wrapper';
+import { GithubHttp } from '../../util/http/github';
 import { GetReleasesConfig, ReleaseResult } from '../common';
 
 export const id = 'pod';
@@ -9,6 +9,9 @@ export const defaultRegistryUrls = ['https://cdn.cocoapods.org'];
 
 const cacheNamespace = `datasource-${id}`;
 const cacheMinutes = 30;
+
+const githubHttp = new GithubHttp();
+const http = new GithubHttp();
 
 function shardParts(lookupName: string): string[] {
   return crypto
@@ -33,12 +36,14 @@ function releasesGithubUrl(
 async function makeRequest<T = unknown>(
   url: string,
   lookupName: string,
-  json = true
+  fromGithub = true
 ): Promise<T | null> {
   try {
-    const resp = await api.get(url, { json });
+    const resp = fromGithub
+      ? await githubHttp.getJson<T>(url)
+      : await http.get(url);
     if (resp && resp.body) {
-      return resp.body;
+      return resp.body as T;
     }
   } catch (err) {
     const errorData = { lookupName, err };

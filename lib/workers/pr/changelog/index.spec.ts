@@ -1,15 +1,15 @@
-import { mocked, partial } from '../../../../test/util';
+import * as httpMock from '../../../../test/httpMock';
+import { partial } from '../../../../test/util';
 import { PLATFORM_TYPE_GITHUB } from '../../../constants/platforms';
-import { api } from '../../../platform/github/gh-got-wrapper';
+import { clear } from '../../../util/cache/run';
 import * as hostRules from '../../../util/host-rules';
 import * as semverVersioning from '../../../versioning/semver';
 import { BranchConfig } from '../../common';
 import { ChangeLogError, getChangeLogJSON } from '.';
 
-jest.mock('../../../platform/github/gh-got-wrapper');
 jest.mock('../../../datasource/npm');
 
-const ghGot = mocked(api).get;
+const githubApiHost = 'https://api.github.com';
 
 const upgrade: BranchConfig = partial<BranchConfig>({
   endpoint: 'https://api.github.com/',
@@ -35,7 +35,7 @@ const upgrade: BranchConfig = partial<BranchConfig>({
 describe('workers/pr/changelog', () => {
   describe('getChangeLogJSON', () => {
     beforeEach(async () => {
-      ghGot.mockClear();
+      httpMock.setup();
       hostRules.clear();
       hostRules.add({
         hostType: PLATFORM_TYPE_GITHUB,
@@ -44,25 +44,34 @@ describe('workers/pr/changelog', () => {
       });
       await global.renovateCache.rmAll();
     });
+
+    afterEach(() => {
+      clear();
+      httpMock.reset();
+    });
+
     it('returns null if @types', async () => {
+      httpMock.scope(githubApiHost);
       expect(
         await getChangeLogJSON({
           ...upgrade,
           fromVersion: null,
         })
       ).toBeNull();
-      expect(ghGot).toHaveBeenCalledTimes(0);
+      expect(httpMock.getTrace()).toHaveLength(0);
     });
     it('returns null if no fromVersion', async () => {
+      httpMock.scope(githubApiHost);
       expect(
         await getChangeLogJSON({
           ...upgrade,
           sourceUrl: 'https://github.com/DefinitelyTyped/DefinitelyTyped',
         })
       ).toBeNull();
-      expect(ghGot).toHaveBeenCalledTimes(0);
+      expect(httpMock.getTrace()).toHaveLength(0);
     });
     it('returns null if fromVersion equals toVersion', async () => {
+      httpMock.scope(githubApiHost);
       expect(
         await getChangeLogJSON({
           ...upgrade,
@@ -70,50 +79,61 @@ describe('workers/pr/changelog', () => {
           toVersion: '1.0.0',
         })
       ).toBeNull();
-      expect(ghGot).toHaveBeenCalledTimes(0);
+      expect(httpMock.getTrace()).toHaveLength(0);
     });
     it('skips invalid repos', async () => {
+      httpMock.scope(githubApiHost);
       expect(
         await getChangeLogJSON({
           ...upgrade,
           sourceUrl: 'https://github.com/about',
         })
       ).toBeNull();
+      expect(httpMock.getTrace()).toHaveLength(0);
     });
     it('works without Github', async () => {
+      httpMock.scope(githubApiHost);
       expect(
         await getChangeLogJSON({
           ...upgrade,
         })
       ).toMatchSnapshot();
+      expect(httpMock.getTrace()).toHaveLength(0);
     });
     it('uses GitHub tags', async () => {
-      ghGot.mockResolvedValueOnce({
-        body: [
+      httpMock
+        .scope(githubApiHost)
+        .get('/repos/chalk/chalk/tags?per_page=100')
+        .reply(200, [
           { name: '0.9.0' },
           { name: '1.0.0' },
           { name: '1.4.0' },
           { name: 'v2.3.0' },
           { name: '2.2.2' },
           { name: 'v2.4.2' },
-        ],
-      } as never);
+        ])
+        .persist()
+        .get(/.*/)
+        .reply(200, []);
       expect(
         await getChangeLogJSON({
           ...upgrade,
         })
       ).toMatchSnapshot();
+      expect(httpMock.getTrace()).toMatchSnapshot();
     });
     it('filters unnecessary warns', async () => {
-      ghGot.mockImplementation(() => {
-        throw new Error('Unknown Github Repo');
+      httpMock
+        .scope(githubApiHost)
+        .persist()
+        .get(/.*/)
+        .replyWithError('Unknown Github Repo');
+      const res = await getChangeLogJSON({
+        ...upgrade,
+        depName: '@renovate/no',
       });
-      expect(
-        await getChangeLogJSON({
-          ...upgrade,
-          depName: '@renovate/no',
-        })
-      ).toMatchSnapshot();
+      expect(res).toMatchSnapshot();
+      expect(httpMock.getTrace()).toMatchSnapshot();
     });
     it('supports node engines', async () => {
       expect(
@@ -164,6 +184,7 @@ describe('workers/pr/changelog', () => {
       ).toBeNull();
     });
     it('supports github enterprise and github.com changelog', async () => {
+      httpMock.scope(githubApiHost).persist().get(/.*/).reply(200, []);
       hostRules.add({
         hostType: PLATFORM_TYPE_GITHUB,
         token: 'super_secret',
@@ -175,21 +196,14 @@ describe('workers/pr/changelog', () => {
           endpoint: 'https://github-enterprise.example.com/',
         })
       ).toMatchSnapshot();
-      expect(ghGot).toHaveBeenNthCalledWith(
-        1,
-        'https://api.github.com/repos/chalk/chalk/tags?per_page=100',
-        { paginate: true }
-      );
-      expect(ghGot).toHaveBeenNthCalledWith(
-        2,
-        'https://api.github.com/repos/chalk/chalk/contents/'
-      );
-      expect(ghGot).toHaveBeenNthCalledWith(
-        3,
-        'https://api.github.com/repos/chalk/chalk/releases?per_page=100'
-      );
+      expect(httpMock.getTrace()).toMatchSnapshot();
     });
     it('supports github enterprise and github enterprise changelog', async () => {
+      httpMock
+        .scope('https://github-enterprise.example.com')
+        .persist()
+        .get(/.*/)
+        .reply(200, []);
       hostRules.add({
         hostType: PLATFORM_TYPE_GITHUB,
         baseUrl: 'https://github-enterprise.example.com/',
@@ -203,22 +217,15 @@ describe('workers/pr/changelog', () => {
           endpoint: 'https://github-enterprise.example.com/',
         })
       ).toMatchSnapshot();
-      expect(ghGot).toHaveBeenNthCalledWith(
-        1,
-        'https://github-enterprise.example.com/repos/chalk/chalk/tags?per_page=100',
-        { paginate: true }
-      );
-      expect(ghGot).toHaveBeenNthCalledWith(
-        2,
-        'https://github-enterprise.example.com/repos/chalk/chalk/contents/'
-      );
-      expect(ghGot).toHaveBeenNthCalledWith(
-        3,
-        'https://github-enterprise.example.com/repos/chalk/chalk/releases?per_page=100'
-      );
+      expect(httpMock.getTrace()).toMatchSnapshot();
     });
 
     it('supports github.com and github enterprise changelog', async () => {
+      httpMock
+        .scope('https://github-enterprise.example.com')
+        .persist()
+        .get(/.*/)
+        .reply(200, []);
       hostRules.add({
         hostType: PLATFORM_TYPE_GITHUB,
         baseUrl: 'https://github-enterprise.example.com/',
@@ -230,19 +237,7 @@ describe('workers/pr/changelog', () => {
           sourceUrl: 'https://github-enterprise.example.com/chalk/chalk',
         })
       ).toMatchSnapshot();
-      expect(ghGot).toHaveBeenNthCalledWith(
-        1,
-        'https://github-enterprise.example.com/repos/chalk/chalk/tags?per_page=100',
-        { paginate: true }
-      );
-      expect(ghGot).toHaveBeenNthCalledWith(
-        2,
-        'https://github-enterprise.example.com/repos/chalk/chalk/contents/'
-      );
-      expect(ghGot).toHaveBeenNthCalledWith(
-        3,
-        'https://github-enterprise.example.com/repos/chalk/chalk/releases?per_page=100'
-      );
+      expect(httpMock.getTrace()).toMatchSnapshot();
     });
   });
 });
