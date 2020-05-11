@@ -1,6 +1,7 @@
 import { safeLoad } from 'js-yaml';
 import * as datasourceDocker from '../../datasource/docker';
 import * as datasourceGitTags from '../../datasource/git-tags';
+import * as datasourceGitHubTags from '../../datasource/github-tags';
 import { logger } from '../../logger';
 import { PackageDependency, PackageFile } from '../common';
 
@@ -21,7 +22,22 @@ const versionMatch = /(?<basename>.*)\?ref=(?<version>.*)\s*$/;
 // extract the url from the base of a url with a subdir
 const extractUrl = /^(?<url>.*)(?:\/\/.*)$/;
 
+const githubUrl = /^github\.com\/(?<depName>(?<lookupName>.*?\/.*?)(?:\/.+?)*)\?ref=(?<currentValue>.*?)\s*$/;
+
 export function extractBase(base: string): PackageDependency | null {
+  const githubMatch = githubUrl.exec(base);
+
+  if (githubMatch?.groups) {
+    const { currentValue, depName, lookupName } = githubMatch.groups;
+
+    return {
+      datasource: datasourceGitHubTags.id,
+      depName,
+      lookupName,
+      currentValue,
+    };
+  }
+
   const basenameVersion = versionMatch.exec(base);
   if (basenameVersion) {
     const currentValue = basenameVersion.groups.version;
