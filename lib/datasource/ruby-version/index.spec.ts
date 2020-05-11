@@ -1,5 +1,6 @@
 import fs from 'fs';
 import * as globalCache from '../../util/cache/global';
+import * as runCache from '../../util/cache/run';
 import _got from '../../util/got';
 import { getReleases } from '.';
 
@@ -15,6 +16,7 @@ const rubyReleasesHtml = fs.readFileSync(
 describe('datasource/gradle', () => {
   describe('getReleases', () => {
     beforeEach(() => {
+      runCache.clear();
       return globalCache.rmAll();
     });
     it('parses real data', async () => {
