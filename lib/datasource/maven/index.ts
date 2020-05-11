@@ -3,6 +3,7 @@ import fs from 'fs-extra';
 import pAll from 'p-all';
 import { XmlDocument } from 'xmldoc';
 import { logger } from '../../logger';
+import * as globalCache from '../../util/cache/global';
 import mavenVersion from '../../versioning/maven';
 import { compare } from '../../versioning/maven/compare';
 import { GetReleasesConfig, ReleaseResult } from '../common';
@@ -156,7 +157,7 @@ async function getVersionsFromMetadata(
 
   const cacheNamespace = 'datasource-maven-metadata';
   const cacheKey = metadataUrl.toString();
-  const cachedVersions = await renovateCache.get<string[]>(
+  const cachedVersions = await globalCache.get<string[]>(
     cacheNamespace,
     cacheKey
   );
@@ -171,7 +172,7 @@ async function getVersionsFromMetadata(
   }
 
   const versions = extractVersions(mavenMetadata);
-  await renovateCache.set<string[]>(cacheNamespace, cacheKey, versions, 10);
+  await globalCache.set(cacheNamespace, cacheKey, versions, 10);
   return versions;
 }
 
@@ -208,7 +209,7 @@ async function filterMissingArtifacts(
 ): Promise<string[]> {
   const cacheNamespace = 'datasource-maven-metadata';
   const cacheKey = dependency.dependencyUrl;
-  let artifactsInfo: ArtifactsInfo | null = await renovateCache.get<
+  let artifactsInfo: ArtifactsInfo | null = await globalCache.get<
     ArtifactsInfo
   >(cacheNamespace, cacheKey);
 
@@ -240,12 +241,7 @@ async function filterMissingArtifacts(
       ? 60
       : 24 * 60;
 
-    await renovateCache.set<ArtifactsInfo>(
-      cacheNamespace,
-      cacheKey,
-      artifactsInfo,
-      cacheTTL
-    );
+    await globalCache.set(cacheNamespace, cacheKey, artifactsInfo, cacheTTL);
   }
 
   return versions.filter((v) => artifactsInfo[v]);

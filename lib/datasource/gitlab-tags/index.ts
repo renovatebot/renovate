@@ -1,6 +1,7 @@
 import is from '@sindresorhus/is';
 import { logger } from '../../logger';
 import { api } from '../../platform/gitlab/gl-got-wrapper';
+import * as globalCache from '../../util/cache/global';
 import { GetReleasesConfig, ReleaseResult } from '../common';
 
 const { get: glGot } = api;
@@ -29,7 +30,7 @@ export async function getReleases({
     ? registryUrls[0].replace(/\/$/, '')
     : 'https://gitlab.com';
   let gitlabTags: GitlabTag[];
-  const cachedResult = await renovateCache.get<ReleaseResult>(
+  const cachedResult = await globalCache.get<ReleaseResult>(
     cacheNamespace,
     getCacheKey(depHost, repo)
   );
@@ -70,7 +71,7 @@ export async function getReleases({
   }));
 
   const cacheMinutes = 10;
-  await renovateCache.set(
+  await globalCache.set(
     cacheNamespace,
     getCacheKey(depHost, repo),
     dependency,

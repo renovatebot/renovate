@@ -1,5 +1,6 @@
 import { logger } from '../../logger';
 import { api } from '../../platform/github/gh-got-wrapper';
+import * as globalCache from '../../util/cache/global';
 import { DigestConfig, GetReleasesConfig, ReleaseResult } from '../common';
 
 const { get: ghGot } = api;
@@ -15,7 +16,7 @@ async function getTagCommit(
   githubRepo: string,
   tag: string
 ): Promise<string | null> {
-  const cachedResult = await renovateCache.get<string>(
+  const cachedResult = await globalCache.get<string>(
     cacheNamespace,
     getCacheKey(githubRepo, `tag-${tag}`)
   );
@@ -44,7 +45,7 @@ async function getTagCommit(
     return null;
   }
   const cacheMinutes = 120;
-  await renovateCache.set(
+  await globalCache.set(
     cacheNamespace,
     getCacheKey(githubRepo, `tag-${tag}`),
     digest,
@@ -67,7 +68,7 @@ export async function getDigest(
   if (newValue && newValue.length) {
     return getTagCommit(githubRepo, newValue);
   }
-  const cachedResult = await renovateCache.get(
+  const cachedResult = await globalCache.get(
     cacheNamespace,
     getCacheKey(githubRepo, 'commit')
   );
@@ -89,7 +90,7 @@ export async function getDigest(
     return null;
   }
   const cacheMinutes = 10;
-  await renovateCache.set(
+  await globalCache.set(
     cacheNamespace,
     getCacheKey(githubRepo, 'commit'),
     digest,
@@ -112,7 +113,7 @@ export async function getReleases({
   lookupName: repo,
 }: GetReleasesConfig): Promise<ReleaseResult | null> {
   let versions: string[];
-  const cachedResult = await renovateCache.get<ReleaseResult>(
+  const cachedResult = await globalCache.get<ReleaseResult>(
     cacheNamespace,
     getCacheKey(repo, 'tags')
   );
@@ -147,7 +148,7 @@ export async function getReleases({
     gitRef: version,
   }));
   const cacheMinutes = 10;
-  await renovateCache.set(
+  await globalCache.set(
     cacheNamespace,
     getCacheKey(repo, 'tags'),
     dependency,

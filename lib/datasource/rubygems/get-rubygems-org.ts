@@ -86,13 +86,15 @@ function isDataStale(): boolean {
   return minutesElapsed >= 5;
 }
 
+let _updateRubyGemsVersions: Promise<void> | undefined;
+
 async function syncVersions(): Promise<void> {
   if (isDataStale()) {
-    global.updateRubyGemsVersions =
+    _updateRubyGemsVersions =
       // eslint-disable-next-line @typescript-eslint/no-misused-promises
-      global.updateRubyGemsVersions || updateRubyGemsVersions();
-    await global.updateRubyGemsVersions;
-    delete global.updateRubyGemsVersions;
+      _updateRubyGemsVersions || updateRubyGemsVersions();
+    await _updateRubyGemsVersions;
+    _updateRubyGemsVersions = null;
   }
 }
 
