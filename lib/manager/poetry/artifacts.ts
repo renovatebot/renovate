@@ -80,7 +80,7 @@ export async function updateArtifacts({
         tagConstraint,
         tagScheme: 'poetry',
         preCommands: [
-          'pip install ' + (config.compatibility?.poetry || 'poetry'),
+          'pip install "' + (config.compatibility?.poetry || 'poetry') + '"',
         ],
       },
     };
