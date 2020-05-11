@@ -4,9 +4,9 @@ exports[`manager/kustomize/extract extractPackageFile() extracts http dependency
 Array [
   Object {
     "currentValue": "v0.0.1",
-    "datasource": "github-tags",
-    "depName": "user/repo//deploy",
-    "lookupName": "user/repo",
+    "datasource": "git-tags",
+    "depName": "github.com/user/repo//deploy",
+    "lookupName": "github.com/user/repo",
   },
   Object {
     "currentValue": "1.19.0",

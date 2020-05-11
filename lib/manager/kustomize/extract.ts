@@ -22,7 +22,7 @@ const versionMatch = /(?<basename>.*)\?ref=(?<version>.*)\s*$/;
 // extract the url from the base of a url with a subdir
 const extractUrl = /^(?<url>.*)(?:\/\/.*)$/;
 
-const githubUrl = /^github\.com\/(?<depName>(?<lookupName>.*?\/.*?)(?:\/.+?)*)\?ref=(?<currentValue>.*?)\s*$/;
+const githubUrl = /^github\.com\/(?<depName>(?<lookupName>[^/]+?\/[^/]+?)(?:\/[^/]+?)*)\?ref=(?<currentValue>.+)$/;
 
 export function extractBase(base: string): PackageDependency | null {
   const githubMatch = githubUrl.exec(base);
