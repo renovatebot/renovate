@@ -34,8 +34,6 @@ declare namespace NodeJS {
     renovateCache: Renovate.Cache;
 
     trustLevel?: string;
-
-    updateRubyGemsVersions?: Promise<void>;
   }
 }
 
