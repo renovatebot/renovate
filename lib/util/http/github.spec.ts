@@ -8,7 +8,7 @@ import {
   PLATFORM_RATE_LIMIT_EXCEEDED,
   REPOSITORY_CHANGED,
 } from '../../constants/error-messages';
-import { clearRepoCache } from '../cache';
+import { clear } from '../cache/run';
 import { GithubHttp, handleGotError, setBaseUrl } from './github';
 
 const githubApiHost = 'https://api.github.com';
@@ -27,7 +27,7 @@ describe(getName(__filename), () => {
 
   afterEach(() => {
     httpMock.reset();
-    clearRepoCache();
+    clear();
   });
 
   describe('HTTP', () => {

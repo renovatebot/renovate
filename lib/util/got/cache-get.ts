@@ -1,5 +1,5 @@
 import crypto from 'crypto';
-import { getRepoCached, setRepoCached } from '../cache';
+import * as runCache from '../cache/run';
 import { clone } from '../clone';
 import { create } from './util';
 
@@ -22,16 +22,16 @@ export default create({
             JSON.stringify({ href: options.href, headers: options.headers })
         )
         .digest('hex');
-      if (!getRepoCached(cacheKey) || options.useCache === false) {
-        setRepoCached(
+      if (!runCache.get(cacheKey) || options.useCache === false) {
+        runCache.set(
           cacheKey,
           next(options).catch((err) => {
-            setRepoCached(cacheKey, null);
+            runCache.set(cacheKey, null);
             throw err;
           })
         );
       }
-      return getRepoCached<Promise<any>>(cacheKey).then((response) => ({
+      return runCache.get<Promise<any>>(cacheKey).then((response) => ({
         ...response,
         body: clone(response.body),
       }));

@@ -1,11 +1,11 @@
-import { clearRepoCache, getRepoCached, setRepoCached } from '.';
+import { clear, get, set } from './run';
 
 describe('getRepoCache', () => {
   it('sets and gets repo cache', () => {
-    setRepoCached('key', 'value');
-    expect(getRepoCached('key')).toEqual('value');
+    set('key', 'value');
+    expect(get('key')).toEqual('value');
   });
   it('clears repo cache', () => {
-    clearRepoCache();
+    clear();
   });
 });

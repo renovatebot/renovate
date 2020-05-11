@@ -1,5 +1,5 @@
 import fs from 'fs';
-import { clearRepoCache } from '../../util/cache';
+import { clear } from '../../util/cache/run';
 import _got from '../../util/got';
 import * as _hostRules from '../../util/host-rules';
 import * as composerVersioning from '../../versioning/composer';
@@ -28,7 +28,7 @@ describe('datasource/packagist', () => {
       jest.resetAllMocks();
       hostRules.find = jest.fn((input) => input);
       hostRules.hosts = jest.fn(() => []);
-      clearRepoCache();
+      clear();
       config = {
         versioning: composerVersioning.id,
         registryUrls: [
