@@ -2,7 +2,7 @@ import { getPkgReleases } from '..';
 import { mocked } from '../../../test/util';
 import { GotResponse } from '../../platform';
 import { api as _api } from '../../platform/github/gh-got-wrapper';
-import { clearRepoCache } from '../../util/cache';
+import { clear } from '../../util/cache/run';
 import * as rubyVersioning from '../../versioning/ruby';
 import * as pod from '.';
 
@@ -21,7 +21,7 @@ describe('datasource/cocoapods', () => {
   describe('getReleases', () => {
     beforeEach(() => {
       jest.resetAllMocks();
-      clearRepoCache();
+      clear();
       return global.renovateCache.rmAll();
     });
 

@@ -3,7 +3,7 @@ import is from '@sindresorhus/is';
 
 import pAll from 'p-all';
 import { logger } from '../../logger';
-import { getRepoCached, setRepoCached } from '../../util/cache';
+import { get, set } from '../../util/cache/run';
 import * as hostRules from '../../util/host-rules';
 import { Http, HttpOptions } from '../../util/http';
 import { DatasourceError, GetReleasesConfig, ReleaseResult } from '../common';
@@ -218,10 +218,10 @@ async function getAllPackages(regUrl: string): Promise<AllPackages | null> {
 
 function getAllCachedPackages(regUrl: string): Promise<AllPackages | null> {
   const cacheKey = `packagist-${regUrl}`;
-  if (getRepoCached(cacheKey) === undefined) {
-    setRepoCached(cacheKey, getAllPackages(regUrl));
+  if (get(cacheKey) === undefined) {
+    set(cacheKey, getAllPackages(regUrl));
   }
-  return getRepoCached(cacheKey);
+  return get(cacheKey);
 }
 
 async function packagistOrgLookup(name: string): Promise<ReleaseResult> {

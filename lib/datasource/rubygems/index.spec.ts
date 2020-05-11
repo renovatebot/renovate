@@ -1,5 +1,5 @@
 import { getPkgReleases } from '..';
-import { clearRepoCache } from '../../util/cache';
+import { clear } from '../../util/cache/run';
 import _got from '../../util/got';
 import * as rubyVersioning from '../../versioning/ruby';
 import railsInfo from './__fixtures__/rails/info.json';
@@ -46,7 +46,7 @@ describe('datasource/rubygems', () => {
     });
 
     afterEach(() => {
-      clearRepoCache();
+      clear();
       process.env.RENOVATE_SKIP_CACHE = SKIP_CACHE;
     });
 
