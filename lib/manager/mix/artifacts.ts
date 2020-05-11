@@ -54,7 +54,7 @@ export async function updateArtifacts({
           '--rm',
           `-v ${cwd}:${cwd}`,
           `-w ${cwd}`,
-          'renovate/mix mix',
+          'renovate/elixir mix',
         ]
       : ['mix'];
   cmdParts.push('deps.update');

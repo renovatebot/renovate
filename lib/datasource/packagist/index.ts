@@ -3,7 +3,8 @@ import is from '@sindresorhus/is';
 
 import pAll from 'p-all';
 import { logger } from '../../logger';
-import { getRepoCached, setRepoCached } from '../../util/cache';
+import * as globalCache from '../../util/cache/global';
+import { get, set } from '../../util/cache/run';
 import * as hostRules from '../../util/host-rules';
 import { Http, HttpOptions } from '../../util/http';
 import { DatasourceError, GetReleasesConfig, ReleaseResult } from '../common';
@@ -124,7 +125,7 @@ async function getPackagistFile(
   const cacheNamespace = 'datasource-packagist-files';
   const cacheKey = regUrl + key;
   // Check the persistent cache for public registries
-  const cachedResult = await renovateCache.get(cacheNamespace, cacheKey);
+  const cachedResult = await globalCache.get(cacheNamespace, cacheKey);
   // istanbul ignore if
   if (cachedResult && cachedResult.sha256 === sha256) {
     return cachedResult.res;
@@ -132,7 +133,7 @@ async function getPackagistFile(
   const res = (await http.getJson<PackagistFile>(regUrl + '/' + fileName, opts))
     .body;
   const cacheMinutes = 1440; // 1 day
-  await renovateCache.set(
+  await globalCache.set(
     cacheNamespace,
     cacheKey,
     { res, sha256 },
@@ -218,15 +219,15 @@ async function getAllPackages(regUrl: string): Promise<AllPackages | null> {
 
 function getAllCachedPackages(regUrl: string): Promise<AllPackages | null> {
   const cacheKey = `packagist-${regUrl}`;
-  if (getRepoCached(cacheKey) === undefined) {
-    setRepoCached(cacheKey, getAllPackages(regUrl));
+  if (get(cacheKey) === undefined) {
+    set(cacheKey, getAllPackages(regUrl));
   }
-  return getRepoCached(cacheKey);
+  return get(cacheKey);
 }
 
 async function packagistOrgLookup(name: string): Promise<ReleaseResult> {
   const cacheNamespace = 'datasource-packagist-org';
-  const cachedResult = await renovateCache.get<ReleaseResult>(
+  const cachedResult = await globalCache.get<ReleaseResult>(
     cacheNamespace,
     name
   );
@@ -245,7 +246,7 @@ async function packagistOrgLookup(name: string): Promise<ReleaseResult> {
     logger.trace({ dep }, 'dep');
   }
   const cacheMinutes = 10;
-  await renovateCache.set(cacheNamespace, name, dep, cacheMinutes);
+  await globalCache.set(cacheNamespace, name, dep, cacheMinutes);
   return dep;
 }
 
