@@ -75,13 +75,14 @@ export async function updateArtifacts({
     }
     const tagConstraint = getPythonConstraint(existingLockFileContent, config);
     const poetryRequirement = config.compatibility?.poetry || 'poetry';
+    const poetryInstall = 'pip install ' + quote(poetryRequirement);
     const execOptions: ExecOptions = {
       cwdFile: packageFileName,
       docker: {
         image: 'renovate/python',
         tagConstraint,
         tagScheme: 'poetry',
-        preCommands: ['pip install ' + quote(poetryRequirement)],
+        preCommands: [poetryInstall],
       },
     };
     await exec(cmd, execOptions);
