@@ -3,7 +3,8 @@ import nock from 'nock';
 import _registryAuthToken from 'registry-auth-token';
 import { getName } from '../../../test/util';
 import { DATASOURCE_FAILURE } from '../../constants/error-messages';
-import { clearRepoCache } from '../../util/cache';
+import * as globalCache from '../../util/cache/global';
+import { clear } from '../../util/cache/run';
 import * as hostRules from '../../util/host-rules';
 import * as npm from '.';
 
@@ -26,7 +27,7 @@ describe(getName(__filename), () => {
   delete process.env.NPM_TOKEN;
   beforeEach(() => {
     jest.resetAllMocks();
-    clearRepoCache();
+    clear();
     global.trustLevel = 'low';
     npm.resetCache();
     npm.setNpmrc();
@@ -55,7 +56,7 @@ describe(getName(__filename), () => {
       },
     };
     nock.cleanAll();
-    return global.renovateCache.rmAll();
+    return globalCache.rmAll();
   });
   afterEach(() => {
     delete process.env.RENOVATE_CACHE_NPM_MINUTES;
