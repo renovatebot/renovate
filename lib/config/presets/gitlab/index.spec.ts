@@ -1,5 +1,6 @@
 import { GotResponse } from '../../../platform';
 import { api } from '../../../platform/gitlab/gl-got-wrapper';
+import * as globalCache from '../../../util/cache/global';
 import * as gitlab from '.';
 import { PartialDeep } from 'type-fest';
 
@@ -11,7 +12,7 @@ const glGot: jest.Mock<Promise<PartialDeep<GotResponse>>> = api.get as never;
 describe('config/presets/gitlab', () => {
   beforeEach(() => {
     glGot.mockReset();
-    return global.renovateCache.rmAll();
+    return globalCache.rmAll();
   });
   describe('getPreset()', () => {
     it('throws if non-default', async () => {

@@ -1,6 +1,7 @@
 import { mocked } from '../../../../test/util';
 import { PLATFORM_FAILURE } from '../../../constants/error-messages';
 import { GotResponse } from '../../../platform';
+import * as globalCache from '../../../util/cache/global';
 import { clear } from '../../../util/cache/run';
 import _got from '../../../util/got';
 import * as _hostRules from '../../../util/host-rules';
@@ -16,7 +17,7 @@ const hostRules = mocked(_hostRules);
 describe('config/presets/github', () => {
   beforeEach(() => {
     got.mockReset();
-    return global.renovateCache.rmAll();
+    return globalCache.rmAll();
   });
   describe('fetchJSONFile()', () => {
     beforeEach(() => {

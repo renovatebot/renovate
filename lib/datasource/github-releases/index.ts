@@ -1,5 +1,6 @@
 import { logger } from '../../logger';
 import { api } from '../../platform/github/gh-got-wrapper';
+import * as globalCache from '../../util/cache/global';
 import { GetReleasesConfig, ReleaseResult } from '../common';
 
 const { get: ghGot } = api;
@@ -27,7 +28,7 @@ export async function getReleases({
   lookupName: repo,
 }: GetReleasesConfig): Promise<ReleaseResult | null> {
   let githubReleases: GithubRelease[];
-  const cachedResult = await renovateCache.get<ReleaseResult>(
+  const cachedResult = await globalCache.get<ReleaseResult>(
     cacheNamespace,
     repo
   );
@@ -58,6 +59,6 @@ export async function getReleases({
     releaseTimestamp: published_at,
   }));
   const cacheMinutes = 10;
-  await renovateCache.set(cacheNamespace, repo, dependency, cacheMinutes);
+  await globalCache.set(cacheNamespace, repo, dependency, cacheMinutes);
   return dependency;
 }

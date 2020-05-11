@@ -1,5 +1,6 @@
 import is from '@sindresorhus/is';
 import { logger } from '../../logger';
+import * as globalCache from '../../util/cache/global';
 import { Http } from '../../util/http';
 import { GetReleasesConfig, ReleaseResult } from '../common';
 
@@ -65,7 +66,7 @@ export async function getReleases({
   );
   const cacheNamespace = 'terraform-module';
   const pkgUrl = `${registry}/v1/modules/${repository}`;
-  const cachedResult = await renovateCache.get<ReleaseResult>(
+  const cachedResult = await globalCache.get<ReleaseResult>(
     cacheNamespace,
     pkgUrl
   );
@@ -97,7 +98,7 @@ export async function getReleases({
     }
     logger.trace({ dep }, 'dep');
     const cacheMinutes = 30;
-    await renovateCache.set(cacheNamespace, pkgUrl, dep, cacheMinutes);
+    await globalCache.set(cacheNamespace, pkgUrl, dep, cacheMinutes);
     return dep;
   } catch (err) {
     if (err.statusCode === 404 || err.code === 'ENOTFOUND') {

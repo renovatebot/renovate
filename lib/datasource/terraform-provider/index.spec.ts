@@ -1,4 +1,5 @@
 import fs from 'fs';
+import * as globalCache from '../../util/cache/global';
 import _got from '../../util/got';
 import * as terraformProvider from '.';
 
@@ -14,7 +15,7 @@ describe('datasource/terraform', () => {
   describe('getReleases', () => {
     beforeEach(() => {
       jest.clearAllMocks();
-      return global.renovateCache.rmAll();
+      return globalCache.rmAll();
     });
     it('returns null for empty result', async () => {
       got.mockReturnValueOnce({ body: {} });
