@@ -1,7 +1,12 @@
 import got from 'got';
 import Git from 'simple-git/promise';
 import { RenovateConfig } from '../config/common';
-import { BranchStatus } from '../types';
+import {
+  BranchStatus,
+  VulnerabilityAlert as _VulnerabilityAlert,
+} from '../types';
+
+export type VulnerabilityAlert = _VulnerabilityAlert;
 
 /**
  * File to commit to branch
@@ -93,15 +98,27 @@ export interface RepoParams {
 }
 
 /**
- * TODO: Proper typing
+ *
  */
-export type Pr = {
+export interface Pr {
+  body?: string;
   branchName: string;
-  title: string;
-  state: string;
+  canMerge?: boolean;
+  canMergeReason?: string;
+  createdAt?: string;
+  displayNumber?: string;
   isConflicted?: boolean;
   isModified?: boolean;
-} & Record<string, any>;
+  isStale?: boolean;
+  labels?: string[];
+  number?: number;
+  reviewers?: string[];
+  sha?: string;
+  sourceRepo?: string;
+  state: string;
+  targetBranch?: string;
+  title: string;
+}
 
 /**
  * TODO: Proper typing
@@ -154,10 +171,6 @@ export interface EnsureCommentRemovalConfig {
   topic?: string;
   content?: string;
 }
-/**
- * TODO: Proper typing
- */
-export type VulnerabilityAlert = any;
 
 export type EnsureIssueResult = 'updated' | 'created';
 

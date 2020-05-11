@@ -1,13 +1,15 @@
 import { WORKER_FILE_UPDATE_FAILED } from '../../constants/error-messages';
 import { logger } from '../../logger';
 import { get } from '../../manager';
+import { PackageDependency } from '../../manager/common';
 import { writeLocalFile } from '../../util/fs';
 import { escapeRegExp, regEx } from '../../util/regex';
 import { matchAt, replaceAt } from '../../util/string';
 import { compile } from '../../util/template';
+import { BranchUpgradeConfig } from '../common';
 
 export async function confirmIfDepUpdated(
-  upgrade,
+  upgrade: BranchUpgradeConfig,
   newContent: string
 ): Promise<boolean> {
   const {
@@ -62,13 +64,13 @@ export async function confirmIfDepUpdated(
   return false;
 }
 
-function getDepsSignature(deps): string {
+function getDepsSignature(deps: PackageDependency[]): string {
   return deps.map((dep) => `${dep.depName}${dep.lookupName}`).join(',');
 }
 
 export async function checkBranchDepsMatchBaseDeps(
-  upgrade,
-  branchContent
+  upgrade: BranchUpgradeConfig,
+  branchContent: string
 ): Promise<boolean> {
   const { baseDeps, manager, packageFile } = upgrade;
   const extractPackageFile = get(manager, 'extractPackageFile');
@@ -86,7 +88,7 @@ export async function checkBranchDepsMatchBaseDeps(
 }
 
 export async function doAutoReplace(
-  upgrade,
+  upgrade: BranchUpgradeConfig,
   existingContent: string,
   parentBranch: string | null
 ): Promise<string | null> {

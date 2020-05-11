@@ -43,8 +43,7 @@ export async function generateLockFiles(
         params = '--package-lock-only --no-audit';
       }
     } else {
-      params =
-        '--ignore-scripts --ignore-engines --ignore-platform --mutex network:31879';
+      params = '--ignore-scripts --ignore-engines --ignore-platform';
     }
 
     // // istanbul ignore if

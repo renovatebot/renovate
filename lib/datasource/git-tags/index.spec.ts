@@ -1,5 +1,6 @@
 import fs from 'fs-extra';
 import _simpleGit from 'simple-git/promise';
+import * as globalCache from '../../util/cache/global';
 import { getDigest, getReleases } from '.';
 
 jest.mock('simple-git/promise');
@@ -13,7 +14,7 @@ const lsRemote1 = fs.readFileSync(
 );
 
 describe('datasource/git-tags', () => {
-  beforeEach(() => global.renovateCache.rmAll());
+  beforeEach(() => globalCache.rmAll());
   describe('getReleases', () => {
     it('returns nil if response is wrong', async () => {
       simpleGit.mockReturnValue({

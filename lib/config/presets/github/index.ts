@@ -1,9 +1,9 @@
-import { PLATFORM_FAILURE } from '../../constants/error-messages';
-import { PLATFORM_TYPE_GITHUB } from '../../constants/platforms';
-import { logger } from '../../logger';
-import { Http, HttpOptions } from '../../util/http';
-import { ensureTrailingSlash } from '../../util/url';
-import { Preset } from './common';
+import { PLATFORM_FAILURE } from '../../../constants/error-messages';
+import { PLATFORM_TYPE_GITHUB } from '../../../constants/platforms';
+import { logger } from '../../../logger';
+import { Http, HttpOptions } from '../../../util/http';
+import { ensureTrailingSlash } from '../../../util/url';
+import { Preset, PresetConfig } from '../common';
 
 const http = new Http(PLATFORM_TYPE_GITHUB);
 
@@ -50,7 +50,7 @@ export async function getPresetFromEndpoint(
   // eslint-disable-next-line no-param-reassign
   endpoint = ensureTrailingSlash(endpoint);
   const [fileName, presetName, subPresetName] = filePreset.split('/');
-  let jsonContent;
+  let jsonContent: any;
   if (fileName === 'default') {
     try {
       jsonContent = await fetchJSONFile(pkgName, 'default.json', endpoint);
@@ -75,9 +75,9 @@ export async function getPresetFromEndpoint(
   return jsonContent;
 }
 
-export async function getPreset(
-  pkgName: string,
-  presetName = 'default'
-): Promise<Preset> {
+export function getPreset({
+  packageName: pkgName,
+  presetName = 'default',
+}: PresetConfig): Promise<Preset> {
   return getPresetFromEndpoint(pkgName, presetName);
 }

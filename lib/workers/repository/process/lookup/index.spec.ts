@@ -1,5 +1,5 @@
 import nock from 'nock';
-import { getConfig, mocked } from '../../../../../test/util';
+import { getConfig, mocked, partial } from '../../../../../test/util';
 import qJson from '../../../../config/npm/__fixtures__/01.json';
 import helmetJson from '../../../../config/npm/__fixtures__/02.json';
 import coffeelintJson from '../../../../config/npm/__fixtures__/coffeelint.json';
@@ -14,7 +14,7 @@ import * as datasourceGithubTags from '../../../../datasource/github-tags';
 import * as datasourceNpm from '../../../../datasource/npm';
 import * as datasourcePackagist from '../../../../datasource/packagist';
 import * as datasourcePypi from '../../../../datasource/pypi';
-import { clearRepoCache } from '../../../../util/cache';
+import { clear } from '../../../../util/cache/run';
 import * as dockerVersioning from '../../../../versioning/docker';
 import * as gitVersioning from '../../../../versioning/git';
 import * as npmVersioning from '../../../../versioning/npm';
@@ -30,15 +30,16 @@ qJson.latestVersion = '1.4.1';
 const docker = mocked(datasourceDocker);
 const gitSubmodules = mocked(datasourceGitSubmodules);
 
-let config;
+let config: lookup.LookupUpdateConfig;
 
 describe('workers/repository/process/lookup', () => {
   beforeEach(() => {
-    config = getConfig();
+    // TODO: fix types
+    config = partial<lookup.LookupUpdateConfig>(getConfig());
     config.manager = 'npm';
     config.versioning = npmVersioning.id;
     config.rangeStrategy = 'replace';
-    clearRepoCache();
+    clear();
     jest.resetAllMocks();
   });
 

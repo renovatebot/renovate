@@ -4,7 +4,6 @@ import {
   GitPullRequestMergeStrategy,
   GitRef,
 } from 'azure-devops-node-api/interfaces/GitInterfaces';
-
 import { Options } from 'simple-git/promise';
 import {
   PR_STATE_CLOSED,
@@ -12,9 +11,10 @@ import {
   PR_STATE_OPEN,
 } from '../../constants/pull-requests';
 import { logger } from '../../logger';
+
 import { HostRule } from '../../types';
-import { Pr } from '../common';
 import * as azureApi from './azure-got-wrapper';
+import { AzurePr } from './types';
 
 const mergePolicyGuid = 'fa4e907d-c16b-4a4c-9dfa-4916e5d171ab'; // Magic GUID for merge strategy policy configurations
 
@@ -180,15 +180,15 @@ export function max4000Chars(str: string): string {
   return str;
 }
 
-export function getRenovatePRFormat(azurePr: GitPullRequest): Pr {
-  const pr: Pr = azurePr as any;
+export function getRenovatePRFormat(azurePr: GitPullRequest): AzurePr {
+  const pr: AzurePr = azurePr as any;
 
   pr.displayNumber = `Pull Request #${azurePr.pullRequestId}`;
   pr.number = azurePr.pullRequestId;
   pr.body = azurePr.description;
   pr.targetBranch = getBranchNameWithoutRefsheadsPrefix(azurePr.targetRefName);
   pr.branchName = pr.targetBranch;
-  pr.createdAt = pr.creationDate;
+  pr.createdAt = azurePr.creationDate?.toISOString();
 
   // status
   // export declare enum PullRequestStatus {

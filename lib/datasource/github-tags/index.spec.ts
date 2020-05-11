@@ -1,5 +1,5 @@
 import { api } from '../../platform/github/gh-got-wrapper';
-
+import * as globalCache from '../../util/cache/global';
 import * as _hostRules from '../../util/host-rules';
 import * as github from '.';
 
@@ -11,12 +11,12 @@ const ghGot: any = api.get;
 const hostRules: any = _hostRules;
 
 describe('datasource/github-tags', () => {
-  beforeEach(() => global.renovateCache.rmAll());
+  beforeEach(() => globalCache.rmAll());
   describe('getDigest', () => {
     beforeEach(() => {
       jest.resetAllMocks();
       hostRules.hosts = jest.fn(() => []);
-      return global.renovateCache.rmAll();
+      return globalCache.rmAll();
     });
     it('returns null if no token', async () => {
       ghGot.mockReturnValueOnce({ body: [] });
@@ -59,7 +59,7 @@ describe('datasource/github-tags', () => {
     });
   });
   describe('getReleases', () => {
-    beforeAll(() => global.renovateCache.rmAll());
+    beforeAll(() => globalCache.rmAll());
     it('returns tags', async () => {
       const body = [{ name: 'v1.0.0' }, { name: 'v1.1.0' }];
       ghGot.mockReturnValueOnce({ headers: {}, body });
