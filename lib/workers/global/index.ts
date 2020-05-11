@@ -10,7 +10,7 @@ import { setEmojiConfig } from '../../util/emoji';
 import * as hostRules from '../../util/host-rules';
 import * as repositoryWorker from '../repository';
 import { autodiscoverRepositories } from './autodiscover';
-import * as cache from './cache';
+import * as cache from '../../util/cache/global/file';
 import * as limits from './limits';
 
 type RenovateConfig = configParser.RenovateConfig;
