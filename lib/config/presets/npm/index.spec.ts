@@ -1,5 +1,6 @@
 import nock from 'nock';
-import * as npm from './npm';
+import * as globalCache from '../../../util/cache/global';
+import * as npm from '.';
 
 jest.mock('registry-auth-token');
 jest.mock('delay');
@@ -10,16 +11,16 @@ describe('config/presets/npm', () => {
     jest.resetAllMocks();
     global.trustLevel = 'low';
     nock.cleanAll();
-    return global.renovateCache.rmAll();
+    return globalCache.rmAll();
   });
   afterEach(() => {
     delete process.env.RENOVATE_CACHE_NPM_MINUTES;
   });
   it('should throw if no package', async () => {
     nock('https://registry.npmjs.org').get('/nopackage').reply(404);
-    await expect(npm.getPreset('nopackage', 'default')).rejects.toThrow(
-      /dep not found/
-    );
+    await expect(
+      npm.getPreset({ packageName: 'nopackage', presetName: 'default' })
+    ).rejects.toThrow(/dep not found/);
   });
   it('should throw if no renovate-config', async () => {
     const presetPackage = {
@@ -48,9 +49,9 @@ describe('config/presets/npm', () => {
     nock('https://registry.npmjs.org')
       .get('/norenovateconfig')
       .reply(200, presetPackage);
-    await expect(npm.getPreset('norenovateconfig', 'default')).rejects.toThrow(
-      /preset renovate-config not found/
-    );
+    await expect(
+      npm.getPreset({ packageName: 'norenovateconfig', presetName: 'default' })
+    ).rejects.toThrow(/preset renovate-config not found/);
   });
   it('should throw if preset name not found', async () => {
     const presetPackage = {
@@ -81,7 +82,10 @@ describe('config/presets/npm', () => {
       .get('/presetnamenotfound')
       .reply(200, presetPackage);
     await expect(
-      npm.getPreset('presetnamenotfound', 'missing')
+      npm.getPreset({
+        packageName: 'presetnamenotfound',
+        presetName: 'missing',
+      })
     ).rejects.toThrow(/preset not found/);
   });
   it('should return preset', async () => {
@@ -112,7 +116,7 @@ describe('config/presets/npm', () => {
     nock('https://registry.npmjs.org')
       .get('/workingpreset')
       .reply(200, presetPackage);
-    const res = await npm.getPreset('workingpreset');
+    const res = await npm.getPreset({ packageName: 'workingpreset' });
     expect(res).toMatchSnapshot();
   });
 });

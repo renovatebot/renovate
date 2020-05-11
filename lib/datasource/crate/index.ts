@@ -1,4 +1,5 @@
 import { logger } from '../../logger';
+import * as globalCache from '../../util/cache/global';
 import { Http } from '../../util/http';
 import {
   DatasourceError,
@@ -16,7 +17,7 @@ export async function getReleases({
 }: GetReleasesConfig): Promise<ReleaseResult | null> {
   const cacheNamespace = 'datasource-crate';
   const cacheKey = lookupName;
-  const cachedResult = await renovateCache.get<ReleaseResult>(
+  const cachedResult = await globalCache.get<ReleaseResult>(
     cacheNamespace,
     cacheKey
   );
@@ -92,7 +93,7 @@ export async function getReleases({
     });
 
     const cacheMinutes = 10;
-    await renovateCache.set(cacheNamespace, cacheKey, result, cacheMinutes);
+    await globalCache.set(cacheNamespace, cacheKey, result, cacheMinutes);
     return result;
   } catch (err) {
     if (err.statusCode === 404 || err.code === 'ENOTFOUND') {

@@ -1,6 +1,7 @@
 import crypto from 'crypto';
 import { logger } from '../../logger';
 import { api } from '../../platform/github/gh-got-wrapper';
+import * as globalCache from '../../util/cache/global';
 import { GetReleasesConfig, ReleaseResult } from '../common';
 
 export const id = 'pod';
@@ -129,7 +130,7 @@ export async function getReleases({
 }: GetReleasesConfig): Promise<ReleaseResult | null> {
   const podName = lookupName.replace(/\/.*$/, '');
 
-  const cachedResult = await renovateCache.get<ReleaseResult>(
+  const cachedResult = await globalCache.get<ReleaseResult>(
     cacheNamespace,
     podName
   );
@@ -156,7 +157,7 @@ export async function getReleases({
   }
 
   if (result) {
-    await renovateCache.set(cacheNamespace, podName, result, cacheMinutes);
+    await globalCache.set(cacheNamespace, podName, result, cacheMinutes);
   }
 
   return result;

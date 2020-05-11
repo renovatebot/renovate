@@ -19,7 +19,7 @@ describe('workers/repository', () => {
       config = getConfig();
     });
     it('runs', async () => {
-      process.processRepo.mockResolvedValue(mock<ExtractResult>());
+      process.extractDependencies.mockResolvedValue(mock<ExtractResult>());
       const res = await renovateRepository(config);
       expect(res).toMatchSnapshot();
     });

@@ -3,6 +3,7 @@ import { resolve } from 'path';
 import nock from 'nock';
 import { getPkgReleases } from '..';
 import { DATASOURCE_FAILURE } from '../../constants/error-messages';
+import * as globalCache from '../../util/cache/global';
 import * as hostRules from '../../util/host-rules';
 import * as mavenVersioning from '../../versioning/maven';
 import * as maven from '.';
@@ -97,7 +98,7 @@ describe('datasource/maven', () => {
         .head(path)
         .reply(status, '', {});
     });
-    return global.renovateCache.rmAll();
+    return globalCache.rmAll();
   });
 
   afterEach(() => {

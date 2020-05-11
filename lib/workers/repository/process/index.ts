@@ -1,12 +1,11 @@
 import { RenovateConfig, mergeChildConfig } from '../../../config';
 import { logger } from '../../../logger';
-import { PackageFile } from '../../../manager/common';
 import { platform } from '../../../platform';
 import { BranchConfig } from '../../common';
 import { ExtractResult, extract, update } from './extract-update';
 import { WriteUpdateResult } from './write';
 
-export async function processRepo(
+export async function extractDependencies(
   config: RenovateConfig
 ): Promise<ExtractResult> {
   logger.debug('processRepo()');
@@ -44,11 +43,13 @@ export async function processRepo(
       }
     }
   }
+  let res: ExtractResult = {
+    branches: [],
+    branchList: [],
+    packageFiles: null,
+  };
   if (config.baseBranches && config.baseBranches.length) {
     logger.debug({ baseBranches: config.baseBranches }, 'baseBranches');
-    let branches: BranchConfig[] = [];
-    let branchList: string[] = [];
-    let packageFiles: Record<string, PackageFile[]>;
     for (const baseBranch of config.baseBranches) {
       logger.debug(`baseBranch: ${baseBranch}`);
       const baseBranchConfig = mergeChildConfig(config, { baseBranch });
@@ -58,14 +59,15 @@ export async function processRepo(
       }
       baseBranchConfig.baseBranchSha = await platform.setBaseBranch(baseBranch);
       const baseBranchRes = await extract(baseBranchConfig);
-      branches = branches.concat(baseBranchRes.branches);
-      branchList = branchList.concat(baseBranchRes.branchList);
-      packageFiles = baseBranchRes.packageFiles;
+      res.branches = res.branches.concat(baseBranchRes.branches);
+      res.branchList = res.branchList.concat(baseBranchRes.branchList);
+      res.packageFiles = res.packageFiles || baseBranchRes.packageFiles; // Use the first branch
     }
-    return { branches, branchList, packageFiles };
+  } else {
+    logger.debug('No baseBranches');
+    res = await extract(config);
   }
-  logger.debug('No baseBranches');
-  return extract(config);
+  return res;
 }
 
 export async function updateRepo(
