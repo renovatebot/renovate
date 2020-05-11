@@ -1,5 +1,15 @@
+import * as runCache from './run';
+
+function getGlobalKey(namespace: string, key: string): string {
+  return `global%%${namespace}%%${key}`;
+}
+
 export function get<T = any>(namespace: string, key: string): Promise<T> {
-  return renovateCache.get(namespace, key);
+  const globalKey = getGlobalKey(namespace, key);
+  if (!runCache.get(globalKey)) {
+    runCache.set(globalKey, renovateCache.get(namespace, key));
+  }
+  return runCache.get(globalKey);
 }
 
 export function set(
@@ -8,6 +18,8 @@ export function set(
   value: any,
   minutes: number
 ): Promise<void> {
+  const globalKey = getGlobalKey(namespace, key);
+  runCache.set(globalKey, value);
   return renovateCache.set(namespace, key, value, minutes);
 }
 

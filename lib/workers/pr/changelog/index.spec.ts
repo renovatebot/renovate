@@ -2,6 +2,7 @@ import { mocked, partial } from '../../../../test/util';
 import { PLATFORM_TYPE_GITHUB } from '../../../constants/platforms';
 import { api } from '../../../platform/github/gh-got-wrapper';
 import * as globalCache from '../../../util/cache/global';
+import * as runCache from '../../../util/cache/run';
 import * as hostRules from '../../../util/host-rules';
 import * as semverVersioning from '../../../versioning/semver';
 import { BranchConfig } from '../../common';
@@ -44,6 +45,7 @@ describe('workers/pr/changelog', () => {
         token: 'abc',
       });
       await globalCache.rmAll();
+      runCache.clear();
     });
     it('returns null if @types', async () => {
       expect(
