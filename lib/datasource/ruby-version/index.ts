@@ -1,5 +1,6 @@
 import { parse } from 'node-html-parser';
 
+import * as globalCache from '../../util/cache/global';
 import { Http } from '../../util/http';
 import { isVersion } from '../../versioning/ruby';
 import { DatasourceError, GetReleasesConfig, ReleaseResult } from '../common';
@@ -15,7 +16,7 @@ export async function getReleases(
 ): Promise<ReleaseResult> {
   // First check the persistent cache
   const cacheNamespace = 'datasource-ruby-version';
-  const cachedResult = await renovateCache.get<ReleaseResult>(
+  const cachedResult = await globalCache.get<ReleaseResult>(
     cacheNamespace,
     'all'
   );
@@ -47,7 +48,7 @@ export async function getReleases(
         }
       }
     }
-    await renovateCache.set(cacheNamespace, 'all', res, 15);
+    await globalCache.set(cacheNamespace, 'all', res, 15);
     return res;
   } catch (err) {
     throw new DatasourceError(err);

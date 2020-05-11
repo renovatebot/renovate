@@ -1,4 +1,5 @@
 import fs from 'fs';
+import * as globalCache from '../../util/cache/global';
 import _got from '../../util/got';
 import { getReleases, getRepositoryData } from '.';
 
@@ -16,7 +17,7 @@ describe('datasource/helm', () => {
   describe('getReleases', () => {
     beforeEach(() => {
       jest.resetAllMocks();
-      return global.renovateCache.rmAll();
+      return globalCache.rmAll();
     });
     it('returns null if lookupName was not provided', async () => {
       expect(
@@ -143,7 +144,7 @@ describe('datasource/helm', () => {
       const cacheMinutes = 10;
       got.mockReturnValueOnce({ body: indexYaml });
       const repositoryData = await getRepositoryData(repository);
-      await global.renovateCache.set(
+      await globalCache.set(
         cacheNamespace,
         cacheKey,
         repositoryData,

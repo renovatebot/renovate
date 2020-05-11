@@ -1,5 +1,6 @@
 import fs from 'fs';
 import { DATASOURCE_FAILURE } from '../../constants/error-messages';
+import * as globalCache from '../../util/cache/global';
 import _got from '../../util/got';
 import { getReleases } from '.';
 
@@ -22,7 +23,7 @@ describe('datasource/cdnjs', () => {
   describe('getReleases', () => {
     beforeEach(() => {
       jest.clearAllMocks();
-      return global.renovateCache.rmAll();
+      return globalCache.rmAll();
     });
     it('throws for empty result', async () => {
       got.mockResolvedValueOnce(null);

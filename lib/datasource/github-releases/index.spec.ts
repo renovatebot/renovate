@@ -1,4 +1,5 @@
 import { api } from '../../platform/github/gh-got-wrapper';
+import * as globalCache from '../../util/cache/global';
 
 import * as github from '.';
 
@@ -9,9 +10,9 @@ jest.mock('../../util/host-rules');
 const ghGot: any = api.get;
 
 describe('datasource/github-releases', () => {
-  beforeEach(() => global.renovateCache.rmAll());
+  beforeEach(() => globalCache.rmAll());
   describe('getReleases', () => {
-    beforeAll(() => global.renovateCache.rmAll());
+    beforeAll(() => globalCache.rmAll());
     it('returns releases', async () => {
       const body = [
         { tag_name: 'a', published_at: '2020-03-09T13:00:00Z' },
