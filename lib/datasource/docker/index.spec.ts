@@ -2,7 +2,7 @@ import AWS from 'aws-sdk';
 import AWSMock from 'aws-sdk-mock';
 import { getPkgReleases } from '..';
 import { DATASOURCE_FAILURE } from '../../constants/error-messages';
-import { clearRepoCache } from '../../util/cache';
+import { clear } from '../../util/cache/run';
 import _got from '../../util/got';
 import * as _hostRules from '../../util/host-rules';
 import * as docker from '.';
@@ -30,7 +30,7 @@ describe('api/docker', () => {
   describe('getDigest', () => {
     beforeEach(() => {
       jest.resetAllMocks();
-      clearRepoCache();
+      clear();
       hostRules.find.mockReturnValue({
         username: 'some-username',
         password: 'some-password',
@@ -280,7 +280,7 @@ describe('api/docker', () => {
   describe('getReleases', () => {
     beforeEach(() => {
       jest.clearAllMocks();
-      clearRepoCache();
+      clear();
       return global.renovateCache.rmAll();
     });
     it('returns null if no token', async () => {

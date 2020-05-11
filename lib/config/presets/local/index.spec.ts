@@ -1,9 +1,9 @@
-import * as github from './github';
-import * as gitlab from './gitlab';
-import * as local from './local';
+import * as github from '../github';
+import * as gitlab from '../gitlab';
+import * as local from '.';
 
-jest.mock('./gitlab');
-jest.mock('./github');
+jest.mock('../gitlab');
+jest.mock('../github');
 
 const gitlabGetPreset: jest.Mock<Promise<
   any
@@ -23,45 +23,68 @@ describe('config/presets/local', () => {
   describe('getPreset()', () => {
     it('throws for unsupported platform', async () => {
       await expect(
-        local.getPreset('some/repo', 'default', {
-          platform: 'unsupported-platform',
+        local.getPreset({
+          packageName: 'some/repo',
+          presetName: 'default',
+          baseConfig: {
+            platform: 'unsupported-platform',
+          },
         })
       ).rejects.toThrow();
     });
     it('throws for missing platform', async () => {
       await expect(
-        local.getPreset('some/repo', 'default', {
-          platform: undefined,
+        local.getPreset({
+          packageName: 'some/repo',
+          presetName: 'default',
+          baseConfig: {
+            platform: undefined,
+          },
         })
       ).rejects.toThrow();
     });
     it('forwards to gitlab', async () => {
-      const content = await local.getPreset('some/repo', '', {
-        platform: 'GitLab',
+      const content = await local.getPreset({
+        packageName: 'some/repo',
+        presetName: '',
+        baseConfig: {
+          platform: 'GitLab',
+        },
       });
       expect(gitlabGetPreset.mock.calls).toMatchSnapshot();
       expect(content).toMatchSnapshot();
     });
     it('forwards to custom gitlab', async () => {
-      const content = await local.getPreset('some/repo', '', {
-        platform: 'gitlab',
-        endpoint: 'https://gitlab.example.com/api/v4',
+      const content = await local.getPreset({
+        packageName: 'some/repo',
+        presetName: '',
+        baseConfig: {
+          platform: 'gitlab',
+          endpoint: 'https://gitlab.example.com/api/v4',
+        },
       });
       expect(gitlabGetPreset.mock.calls).toMatchSnapshot();
       expect(content).toMatchSnapshot();
     });
 
     it('forwards to github', async () => {
-      const content = await local.getPreset('some/repo', undefined, {
-        platform: 'github',
+      const content = await local.getPreset({
+        packageName: 'some/repo',
+        baseConfig: {
+          platform: 'github',
+        },
       });
       expect(githubGetPreset.mock.calls).toMatchSnapshot();
       expect(content).toMatchSnapshot();
     });
     it('forwards to custom github', async () => {
-      const content = await local.getPreset('some/repo', '', {
-        platform: 'GitHub',
-        endpoint: 'https://api.github.example.com',
+      const content = await local.getPreset({
+        packageName: 'some/repo',
+        presetName: '',
+        baseConfig: {
+          platform: 'github',
+          endpoint: 'https://api.github.example.com',
+        },
       });
       expect(githubGetPreset.mock.calls).toMatchSnapshot();
       expect(content).toMatchSnapshot();

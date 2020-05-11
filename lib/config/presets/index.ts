@@ -138,11 +138,11 @@ export async function getPreset(
 ): Promise<RenovateConfig> {
   logger.trace(`getPreset(${preset})`);
   const { presetSource, packageName, presetName, params } = parsePreset(preset);
-  let presetConfig = await presetSources[presetSource].getPreset(
+  let presetConfig = await presetSources[presetSource].getPreset({
     packageName,
     presetName,
-    baseConfig
-  );
+    baseConfig,
+  });
   logger.trace({ presetConfig }, `Found preset ${preset}`);
   if (params) {
     const argMapping = {};
