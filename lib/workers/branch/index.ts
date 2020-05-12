@@ -438,22 +438,6 @@ export async function processBranch(
     }
 
     const commitHash = await commitFilesToBranch(config);
-    // TODO: Remove lockFileMaintenance rule?
-    if (
-      config.updateType === 'lockFileMaintenance' &&
-      !config.parentBranch &&
-      branchExists
-    ) {
-      logger.info(
-        'Deleting lock file maintenance branch as master lock file no longer needs updating'
-      );
-      if (config.dryRun) {
-        logger.info('DRY-RUN: Would delete lock file maintenance branch');
-      } else {
-        await platform.deleteBranch(config.branchName);
-      }
-      return 'done';
-    }
     if (!commitHash && !branchExists) {
       return 'no-work';
     }

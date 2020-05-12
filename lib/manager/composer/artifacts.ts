@@ -1,6 +1,7 @@
 import URL from 'url';
 import is from '@sindresorhus/is';
 import fs from 'fs-extra';
+import { quote } from 'shlex';
 import upath from 'upath';
 import { SYSTEM_INSUFFICIENT_DISK_SPACE } from '../../constants/error-messages';
 import {
@@ -115,7 +116,8 @@ export async function updateArtifacts({
       args = 'install';
     } else {
       args =
-        ('update ' + updatedDeps.join(' ')).trim() + ' --with-dependencies';
+        ('update ' + updatedDeps.map(quote).join(' ')).trim() +
+        ' --with-dependencies';
     }
     if (config.composerIgnorePlatformReqs) {
       args += ' --ignore-platform-reqs';

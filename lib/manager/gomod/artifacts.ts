@@ -1,4 +1,5 @@
 import { ensureDir } from 'fs-extra';
+import { quote } from 'shlex';
 import { dirname, join } from 'upath';
 import { PLATFORM_TYPE_GITHUB } from '../../constants/platforms';
 import { logger } from '../../logger';
@@ -16,9 +17,10 @@ function getPreCommands(): string[] | null {
   });
   let preCommands = null;
   if (credentials && credentials.token) {
-    const token = global.appMode
+    let token = global.appMode
       ? `x-access-token:${credentials.token}`
       : credentials.token;
+    token = quote(token);
     preCommands = [
       `git config --global url.\"https://${token}@github.com/\".insteadOf \"https://github.com/\"`, // eslint-disable-line no-useless-escape
     ];
