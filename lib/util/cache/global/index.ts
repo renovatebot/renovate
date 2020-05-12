@@ -1,4 +1,4 @@
-import * as runCache from './run';
+import * as runCache from '../run';
 
 function getGlobalKey(namespace: string, key: string): string {
   return `global%%${namespace}%%${key}`;

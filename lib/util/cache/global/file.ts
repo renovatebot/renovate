@@ -2,7 +2,7 @@ import os from 'os';
 import path from 'path';
 import * as cacache from 'cacache';
 import { DateTime } from 'luxon';
-import { logger } from '../../logger';
+import { logger } from '../../../logger';
 
 function getKey(namespace: string, key: string): string {
   return `${namespace}-${key}`;

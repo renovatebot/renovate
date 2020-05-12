@@ -1,3 +1,4 @@
+import { quote } from 'shlex';
 import { logger } from '../../logger';
 import { ExecOptions, exec } from '../../util/exec';
 import {
@@ -31,7 +32,9 @@ export async function updateArtifacts({
       const dep = updatedDeps[i];
       // Update dependency `${dep}` in Cargo.lock file corresponding to Cargo.toml file located
       // at ${localPackageFileName} path
-      let cmd = `cargo update --manifest-path ${packageFileName} --package ${dep}`;
+      let cmd = `cargo update --manifest-path ${quote(
+        packageFileName
+      )} --package ${quote(dep)}`;
       const execOptions: ExecOptions = {
         docker: {
           image: 'renovate/rust',
