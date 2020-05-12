@@ -126,7 +126,6 @@ jobs:
         run: yarn test-e2e
 
   lint:
-    needs: [cleanup]
     runs-on: ubuntu-latest
 
     # lint shouldn't need more than 10 min
