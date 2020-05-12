@@ -1,6 +1,7 @@
 import { readFileSync } from 'fs';
 import * as datasourceDocker from '../../datasource/docker';
 import * as datasourceGitTags from '../../datasource/git-tags';
+import * as datasourceGitHubTags from '../../datasource/github-tags';
 import {
   extractBase,
   extractImage,
@@ -68,6 +69,20 @@ describe('manager/kustomize/extract', () => {
       };
 
       const pkg = extractBase(`${base}?ref=${version}`);
+      expect(pkg).toEqual(sample);
+    });
+
+    it('should extract out the version of an github base', () => {
+      const base = 'fluxcd/flux/deploy';
+      const version = 'v1.0.0';
+      const sample = {
+        currentValue: version,
+        datasource: datasourceGitHubTags.id,
+        depName: base,
+        lookupName: 'fluxcd/flux',
+      };
+
+      const pkg = extractBase(`github.com/${base}?ref=${version}`);
       expect(pkg).toEqual(sample);
     });
     it('should extract out the version of a git base', () => {
@@ -193,8 +208,11 @@ describe('manager/kustomize/extract', () => {
     it('extracts http dependency', () => {
       const res = extractPackageFile(kustomizeHTTP);
       expect(res.deps).toMatchSnapshot();
-      expect(res.deps).toHaveLength(1);
+      expect(res.deps).toHaveLength(2);
       expect(res.deps[0].currentValue).toEqual('v0.0.1');
+      expect(res.deps[1].currentValue).toEqual('1.19.0');
+      expect(res.deps[1].depName).toEqual('fluxcd/flux/deploy');
+      expect(res.deps[1].lookupName).toEqual('fluxcd/flux');
     });
     it('should extract out image versions', () => {
       const res = extractPackageFile(gitImages);
