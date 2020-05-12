@@ -9,7 +9,6 @@ on:
   pull_request:
 
 env:
-  DOCKER_REPO: renovate/renovate
   YARN_MODULES_CACHE_KEY: v1
   YARN_PACKAGE_CACHE_KEY: v1
   YARN_CACHE_FOLDER: .cache/yarn
@@ -18,21 +17,7 @@ env:
   FORCE_COLOR: true
 
 jobs:
-  cleanup:
-    runs-on: ubuntu-latest
-    timeout-minutes: 5
-
-    steps:
-      - name: github-cleanup
-        uses: renovatebot/gh-action@v0
-        continue-on-error: true
-        with:
-          command: github-cleanup
-          token: ${{ secrets.GH_TOKEN }}
-          dry-run: ${{github.ref == 'refs/heads/master'}}
-
   test:
-    needs: [cleanup]
     runs-on: ${{ matrix.os }}
 
     # tests shouldn't need more time
