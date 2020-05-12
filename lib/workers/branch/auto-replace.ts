@@ -92,18 +92,6 @@ export async function doAutoReplace(
   existingContent: string,
   parentBranch: string | null
 ): Promise<string | null> {
-  if (parentBranch) {
-    if (!(await checkBranchDepsMatchBaseDeps(upgrade, existingContent))) {
-      logger.debug('Rebasing branch after deps list has changed');
-      return null;
-    }
-    if (!(await confirmIfDepUpdated(upgrade, existingContent))) {
-      logger.debug('Rebasing after outdated branch dep found');
-      return null;
-    }
-    logger.debug('Branch dep is already updated');
-    return existingContent;
-  }
   const {
     packageFile,
     depName,
@@ -113,6 +101,24 @@ export async function doAutoReplace(
     newDigest,
     autoReplaceStringTemplate,
   } = upgrade;
+  if (parentBranch) {
+    if (!(await checkBranchDepsMatchBaseDeps(upgrade, existingContent))) {
+      logger.debug(
+        { packageFile, depName },
+        'Rebasing branch after deps list has changed'
+      );
+      return null;
+    }
+    if (!(await confirmIfDepUpdated(upgrade, existingContent))) {
+      logger.debug(
+        { packageFile, depName },
+        'Rebasing after outdated branch dep found'
+      );
+      return null;
+    }
+    logger.debug({ packageFile, depName }, 'Branch dep is already updated');
+    return existingContent;
+  }
   const replaceString = upgrade.replaceString || currentValue;
   logger.trace({ depName, replaceString }, 'autoReplace replaceString');
   let searchIndex = existingContent.indexOf(replaceString);
