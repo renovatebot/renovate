@@ -6,11 +6,11 @@ import * as configParser from '../../config';
 import { getErrors, logger, setMeta } from '../../logger';
 import { initPlatform } from '../../platform';
 import { setUtilConfig } from '../../util';
+import * as cache from '../../util/cache/global/file';
 import { setEmojiConfig } from '../../util/emoji';
 import * as hostRules from '../../util/host-rules';
 import * as repositoryWorker from '../repository';
 import { autodiscoverRepositories } from './autodiscover';
-import * as cache from '../../util/cache/global/file';
 import * as limits from './limits';
 
 type RenovateConfig = configParser.RenovateConfig;
