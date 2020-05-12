@@ -1,6 +1,7 @@
 import crypto from 'crypto';
 import { logger } from '../../logger';
 import * as globalCache from '../../util/cache/global';
+import { Http } from '../../util/http';
 import { GithubHttp } from '../../util/http/github';
 import { GetReleasesConfig, ReleaseResult } from '../common';
 
@@ -12,7 +13,7 @@ const cacheNamespace = `datasource-${id}`;
 const cacheMinutes = 30;
 
 const githubHttp = new GithubHttp();
-const http = new GithubHttp();
+const http = new Http(id);
 
 function shardParts(lookupName: string): string[] {
   return crypto
