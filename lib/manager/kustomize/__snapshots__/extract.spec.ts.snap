@@ -8,6 +8,12 @@ Array [
     "depName": "github.com/user/repo//deploy",
     "lookupName": "github.com/user/repo",
   },
+  Object {
+    "currentValue": "1.19.0",
+    "datasource": "github-tags",
+    "depName": "fluxcd/flux/deploy",
+    "lookupName": "fluxcd/flux",
+  },
 ]
 `;
 
