@@ -9,7 +9,7 @@ import {
   platform,
 } from '../../../test/util';
 import { setUtilConfig } from '../../util';
-import { clear } from '../../util/cache/run';
+import * as runCache from '../../util/cache/run';
 import { ifSystemSupportsGradle } from '../gradle/__testutil__/gradle';
 import * as dcUpdate from '.';
 
@@ -43,7 +43,7 @@ describe(getName(__filename), () => {
     jest.resetAllMocks();
     await setUtilConfig(config);
     httpMock.setup();
-    clear();
+    runCache.clear();
   });
 
   afterEach(async () => {
