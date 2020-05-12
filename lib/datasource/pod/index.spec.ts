@@ -1,7 +1,7 @@
 import { getPkgReleases } from '..';
 import * as httpMock from '../../../test/httpMock';
 import * as globalCache from '../../util/cache/global';
-import { clear } from '../../util/cache/run';
+import * as runCache from '../../util/cache/run';
 import * as rubyVersioning from '../../versioning/ruby';
 import * as pod from '.';
 
@@ -25,7 +25,7 @@ describe('datasource/cocoapods', () => {
 
     afterEach(() => {
       httpMock.reset();
-      clear();
+      runCache.clear();
     });
 
     it('returns null for invalid inputs', async () => {

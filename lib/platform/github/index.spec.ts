@@ -7,7 +7,7 @@ import {
   REPOSITORY_RENAMED,
 } from '../../constants/error-messages';
 import { BranchStatus } from '../../types';
-import { clear } from '../../util/cache/run';
+import * as runCache from '../../util/cache/run';
 import { Platform } from '../common';
 
 const githubApiHost = 'https://api.github.com';
@@ -57,7 +57,7 @@ describe('platform/github', () => {
 
   afterEach(() => {
     httpMock.reset();
-    clear();
+    runCache.clear();
   });
 
   const graphqlOpenPullRequests = fs.readFileSync(
