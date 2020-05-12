@@ -2,6 +2,7 @@ import { URL } from 'url';
 import Git from 'simple-git/promise';
 
 import { logger } from '../../logger';
+import * as globalCache from '../../util/cache/global';
 import { DigestConfig, GetReleasesConfig, ReleaseResult } from '../common';
 
 export const id = 'git-submodules';
@@ -12,7 +13,7 @@ export async function getReleases({
 }: GetReleasesConfig): Promise<ReleaseResult | null> {
   const cacheNamespace = 'datasource-git-submodules';
   const cacheKey = `${registryUrls[0]}-${registryUrls[1]}`;
-  const cachedResult = await renovateCache.get<ReleaseResult>(
+  const cachedResult = await globalCache.get<ReleaseResult>(
     cacheNamespace,
     cacheKey
   );
@@ -41,7 +42,7 @@ export async function getReleases({
       ],
     };
     const cacheMinutes = 60;
-    await renovateCache.set(cacheNamespace, cacheKey, result, cacheMinutes);
+    await globalCache.set(cacheNamespace, cacheKey, result, cacheMinutes);
     return result;
   } catch (err) {
     logger.debug({ err }, `Git-SubModules lookup error in ${lookupName}`);

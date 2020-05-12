@@ -1,7 +1,9 @@
 import * as httpMock from '../../../../test/httpMock';
 import { partial } from '../../../../test/util';
 import { PLATFORM_TYPE_GITHUB } from '../../../constants/platforms';
+import * as globalCache from '../../../util/cache/global';
 import { clear } from '../../../util/cache/run';
+import * as runCache from '../../../util/cache/run';
 import * as hostRules from '../../../util/host-rules';
 import * as semverVersioning from '../../../versioning/semver';
 import { BranchConfig } from '../../common';
@@ -42,7 +44,8 @@ describe('workers/pr/changelog', () => {
         baseUrl: 'https://api.github.com/',
         token: 'abc',
       });
-      await global.renovateCache.rmAll();
+      await globalCache.rmAll();
+      runCache.clear();
     });
 
     afterEach(() => {

@@ -144,6 +144,12 @@ Array [
     "depName": "Range3",
     "depType": "nuget",
   },
+  Object {
+    "currentValue": "1.0.0",
+    "datasource": "nuget",
+    "depName": "Microsoft.VisualStudio.Web.CodeGeneration.Tools",
+    "depType": "nuget",
+  },
 ]
 `;
 

@@ -1,3 +1,4 @@
+import { quote } from 'shlex';
 import { dirname, join } from 'upath';
 import { logger } from '../../logger';
 import { platform } from '../../platform';
@@ -18,7 +19,7 @@ function getPluginCommands(content: string): string[] {
     const match = pluginRegex.exec(line);
     if (match) {
       const { plugin } = match.groups;
-      result.add(`gem install ${plugin}`);
+      result.add(`gem install ${quote(plugin)}`);
     }
   });
   return [...result];

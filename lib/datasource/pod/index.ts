@@ -1,5 +1,6 @@
 import crypto from 'crypto';
 import { logger } from '../../logger';
+import * as globalCache from '../../util/cache/global';
 import { GithubHttp } from '../../util/http/github';
 import { GetReleasesConfig, ReleaseResult } from '../common';
 
@@ -134,7 +135,7 @@ export async function getReleases({
 }: GetReleasesConfig): Promise<ReleaseResult | null> {
   const podName = lookupName.replace(/\/.*$/, '');
 
-  const cachedResult = await renovateCache.get<ReleaseResult>(
+  const cachedResult = await globalCache.get<ReleaseResult>(
     cacheNamespace,
     podName
   );
@@ -161,7 +162,7 @@ export async function getReleases({
   }
 
   if (result) {
-    await renovateCache.set(cacheNamespace, podName, result, cacheMinutes);
+    await globalCache.set(cacheNamespace, podName, result, cacheMinutes);
   }
 
   return result;

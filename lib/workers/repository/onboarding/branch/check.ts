@@ -4,6 +4,7 @@ import { REPOSITORY_DISABLED } from '../../../../constants/error-messages';
 import { PR_STATE_NOT_OPEN } from '../../../../constants/pull-requests';
 import { logger } from '../../../../logger';
 import { platform } from '../../../../platform';
+import { readLocalFile } from '../../../../util/fs';
 
 const findFile = async (fileName: string): Promise<boolean> => {
   logger.debug(`findFile(${fileName})`);
@@ -22,7 +23,7 @@ const configFileExists = async (): Promise<boolean> => {
 
 const packageJsonConfigExists = async (): Promise<boolean> => {
   try {
-    const pJson = JSON.parse(await platform.getFile('package.json'));
+    const pJson = JSON.parse(await readLocalFile('package.json', 'utf8'));
     if (pJson.renovate) {
       return true;
     }

@@ -1,5 +1,5 @@
 import os from 'os';
-import { init } from './cache';
+import { init } from './file';
 
 describe('lib/workers/global/cache', () => {
   beforeAll(() => {

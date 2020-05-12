@@ -14,6 +14,7 @@ import {
 import * as npmApi from '../../../datasource/npm';
 import { logger } from '../../../logger';
 import { platform } from '../../../platform';
+import { readLocalFile } from '../../../util/fs';
 import * as hostRules from '../../../util/host-rules';
 import { flattenPackageRules } from './flatten';
 
@@ -27,7 +28,7 @@ export async function mergeRenovateConfig(
     for (const fileName of configFileNames) {
       if (fileName === 'package.json') {
         try {
-          const pJson = JSON.parse(await platform.getFile('package.json'));
+          const pJson = JSON.parse(await readLocalFile('package.json', 'utf8'));
           if (pJson.renovate) {
             logger.debug('Using package.json for global renovate config');
             return 'package.json';
@@ -50,10 +51,11 @@ export async function mergeRenovateConfig(
   let renovateJson;
   if (configFile === 'package.json') {
     // We already know it parses
-    renovateJson = JSON.parse(await platform.getFile('package.json')).renovate;
+    renovateJson = JSON.parse(await readLocalFile('package.json', 'utf8'))
+      .renovate;
     logger.debug({ config: renovateJson }, 'package.json>renovate config');
   } else {
-    let renovateConfig = await platform.getFile(configFile);
+    let renovateConfig = await readLocalFile(configFile, 'utf8');
     // istanbul ignore if
     if (renovateConfig === null) {
       logger.warn('Fetching renovate config returns null');

@@ -6,6 +6,7 @@ import moment from 'moment';
 import registryAuthToken from 'registry-auth-token';
 import getRegistryUrl from 'registry-auth-token/registry-url';
 import { logger } from '../../logger';
+import * as globalCache from '../../util/cache/global';
 import { find } from '../../util/host-rules';
 import { Http, HttpOptions } from '../../util/http';
 import { maskToken } from '../../util/mask';
@@ -69,7 +70,7 @@ export async function getDependency(
   );
   // Now check the persistent cache
   const cacheNamespace = 'datasource-npm';
-  const cachedResult = await renovateCache.get<NpmDependency>(
+  const cachedResult = await globalCache.get<NpmDependency>(
     cacheNamespace,
     pkgUrl
   );
@@ -218,7 +219,7 @@ export async function getDependency(
       whitelistedPublicScopes.includes(scope) ||
       !packageName.startsWith('@')
     ) {
-      await renovateCache.set(cacheNamespace, pkgUrl, dep, cacheMinutes);
+      await globalCache.set(cacheNamespace, pkgUrl, dep, cacheMinutes);
     }
     return dep;
   } catch (err) {

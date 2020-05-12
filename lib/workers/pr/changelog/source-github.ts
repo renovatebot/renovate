@@ -2,6 +2,7 @@ import URL from 'url';
 import { PLATFORM_TYPE_GITHUB } from '../../../constants/platforms';
 import { Release } from '../../../datasource';
 import { logger } from '../../../logger';
+import * as globalCache from '../../../util/cache/global';
 import * as hostRules from '../../../util/host-rules';
 import { GithubHttp } from '../../../util/http/github';
 import * as allVersioning from '../../../versioning';
@@ -133,7 +134,7 @@ export async function getChangeLogJSON({
     const prev = validReleases[i - 1];
     const next = validReleases[i];
     if (include(next.version)) {
-      let release = await renovateCache.get(
+      let release = await globalCache.get(
         cacheNamespace,
         getCacheKey(prev.version, next.version)
       );
@@ -152,7 +153,7 @@ export async function getChangeLogJSON({
           release.compare.url = `${baseUrl}${repository}/compare/${prevHead}...${nextHead}`;
         }
         const cacheMinutes = 55;
-        await renovateCache.set(
+        await globalCache.set(
           cacheNamespace,
           getCacheKey(prev.version, next.version),
           release,
