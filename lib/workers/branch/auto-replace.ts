@@ -105,6 +105,7 @@ export async function doAutoReplace(
     return existingContent;
   }
   const {
+    packageFile,
     depName,
     currentValue,
     newValue,
@@ -117,7 +118,7 @@ export async function doAutoReplace(
   let searchIndex = existingContent.indexOf(replaceString);
   if (searchIndex === -1) {
     logger.warn(
-      { depName, existingContent, replaceString },
+      { packageFile, depName, existingContent, replaceString },
       'Cannot find replaceString in current file content'
     );
     return existingContent;
@@ -141,12 +142,18 @@ export async function doAutoReplace(
         );
       }
     }
-    logger.debug(`Starting search at index ${searchIndex}`);
+    logger.debug(
+      { packageFile, depName },
+      `Starting search at index ${searchIndex}`
+    );
     // Iterate through the rest of the file
     for (; searchIndex < existingContent.length; searchIndex += 1) {
       // First check if we have a hit for the old version
       if (matchAt(existingContent, searchIndex, replaceString)) {
-        logger.debug(`Found match at index ${searchIndex}`);
+        logger.debug(
+          { packageFile, depName },
+          `Found match at index ${searchIndex}`
+        );
         // Now test if the result matches
         const testContent = replaceAt(
           existingContent,
@@ -163,7 +170,7 @@ export async function doAutoReplace(
       }
     }
   } catch (err) /* istanbul ignore next */ {
-    logger.debug({ err }, 'doAutoReplace error');
+    logger.debug({ packageFile, depName, err }, 'doAutoReplace error');
   }
   // istanbul ignore next
   throw new Error(WORKER_FILE_UPDATE_FAILED);
