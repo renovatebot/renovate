@@ -710,8 +710,9 @@ export function ensureComment({
 export function ensureCommentRemoval({
   number: prNo,
   topic,
+  content,
 }: EnsureCommentRemovalConfig): Promise<void> {
-  return comments.ensureCommentRemoval(config, prNo, topic);
+  return comments.ensureCommentRemoval(config, prNo, topic, content);
 }
 
 // Creates PR and returns PR number

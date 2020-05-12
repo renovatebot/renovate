@@ -166,10 +166,19 @@ export interface EnsureCommentConfig {
   topic: string;
   content: string;
 }
+
+export interface EnsureCommentRemovalConfigByTopic {
+  number: number;
+  topic: string;
+}
+export interface EnsureCommentRemovalConfigByContent {
+  number: number;
+  content: string;
+}
 export interface EnsureCommentRemovalConfig {
   number: number;
-  topic?: string;
   content?: string;
+  topic?: string;
 }
 
 export type EnsureIssueResult = 'updated' | 'created';
@@ -207,7 +216,9 @@ export interface Platform {
     context: string
   ): Promise<BranchStatus | null>;
   ensureCommentRemoval(
-    ensureCommentRemoval: EnsureCommentRemovalConfig
+    ensureCommentRemoval:
+      | EnsureCommentRemovalConfigByTopic
+      | EnsureCommentRemovalConfigByContent
   ): Promise<void>;
   deleteBranch(branchName: string, closePr?: boolean): Promise<void>;
   ensureComment(ensureComment: EnsureCommentConfig): Promise<boolean>;

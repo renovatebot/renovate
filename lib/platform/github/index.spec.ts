@@ -1426,7 +1426,7 @@ describe('platform/github', () => {
     });
   });
   describe('ensureCommentRemoval', () => {
-    it('deletes comment if found', async () => {
+    it('deletes comment by topic if found', async () => {
       const scope = httpMock.scope(githubApiHost);
       initRepoMock(scope, 'some/repo');
       scope
@@ -1439,6 +1439,24 @@ describe('platform/github', () => {
         .reply(200);
       await github.initRepo({ repository: 'some/repo', token: 'token' } as any);
       await github.ensureCommentRemoval({ number: 42, topic: 'some-subject' });
+      expect(httpMock.getTrace()).toMatchSnapshot();
+    });
+    it('deletes comment by content if found', async () => {
+      const scope = httpMock.scope(githubApiHost);
+      initRepoMock(scope, 'some/repo');
+      scope
+        .post('/graphql')
+        .twice()
+        .reply(200, {})
+        .get('/repos/some/repo/issues/42/comments?per_page=100')
+        .reply(200, [{ id: 1234, body: 'some-content' }])
+        .delete('/repos/some/repo/issues/comments/1234')
+        .reply(200);
+      await github.initRepo({ repository: 'some/repo', token: 'token' } as any);
+      await github.ensureCommentRemoval({
+        number: 42,
+        content: 'some-content',
+      });
       expect(httpMock.getTrace()).toMatchSnapshot();
     });
   });
