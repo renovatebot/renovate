@@ -2,9 +2,9 @@ import fs from 'fs-extra';
 import { quote } from 'shlex';
 import upath from 'upath';
 import { logger } from '../../logger';
-import { platform } from '../../platform';
 import { exec } from '../../util/exec';
 import { BinarySource } from '../../util/exec/common';
+import { readLocalFile } from '../../util/fs';
 import { UpdateArtifact, UpdateArtifactsResult } from '../common';
 
 export async function updateArtifacts({
@@ -41,7 +41,7 @@ export async function updateArtifacts({
     ];
   }
 
-  const existingLockFileContent = await platform.getFile(lockFileName);
+  const existingLockFileContent = await readLocalFile(lockFileName, 'utf8');
   if (!existingLockFileContent) {
     logger.debug('No mix.lock found');
     return null;
