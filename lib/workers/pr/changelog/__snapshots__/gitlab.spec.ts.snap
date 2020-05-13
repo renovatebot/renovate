@@ -2,7 +2,7 @@
 
 exports[`workers/pr/changelog getChangeLogJSON filters unnecessary warns 1`] = `
 Object {
-  "hasReleaseNotes": false,
+  "hasReleaseNotes": true,
   "project": Object {
     "apiBaseUrl": "https://gitlab.com/api/v4/",
     "baseUrl": "https://gitlab.com/",
@@ -15,28 +15,36 @@ Object {
       "changes": Array [],
       "compare": Object {},
       "date": undefined,
-      "releaseNotes": null,
+      "releaseNotes": Object {
+        "url": "https://gitlab.com/meno/dropzone/compare/v5.6.0...v5.6.1",
+      },
       "version": "5.6.1",
     },
     Object {
       "changes": Array [],
       "compare": Object {},
       "date": "2020-02-13T15:37:00.000Z",
-      "releaseNotes": null,
+      "releaseNotes": Object {
+        "url": "https://gitlab.com/meno/dropzone/compare/v5.5.0...v5.6.0",
+      },
       "version": "5.6.0",
     },
     Object {
       "changes": Array [],
       "compare": Object {},
       "date": undefined,
-      "releaseNotes": null,
+      "releaseNotes": Object {
+        "url": "https://gitlab.com/meno/dropzone/compare/v5.4.0...v5.5.0",
+      },
       "version": "5.5.0",
     },
     Object {
       "changes": Array [],
       "compare": Object {},
       "date": "2018-08-24T14:23:00.000Z",
-      "releaseNotes": null,
+      "releaseNotes": Object {
+        "url": "https://gitlab.com/meno/dropzone/compare/v5.2.0...v5.4.0",
+      },
       "version": "5.4.0",
     },
   ],
@@ -45,7 +53,7 @@ Object {
 
 exports[`workers/pr/changelog getChangeLogJSON supports gitlab enterprise and gitlab enterprise changelog 1`] = `
 Object {
-  "hasReleaseNotes": false,
+  "hasReleaseNotes": true,
   "project": Object {
     "apiBaseUrl": "https://gitlab.com/api/v4/",
     "baseUrl": "https://gitlab.com/",
@@ -58,28 +66,36 @@ Object {
       "changes": Array [],
       "compare": Object {},
       "date": undefined,
-      "releaseNotes": null,
+      "releaseNotes": Object {
+        "url": "https://gitlab.com/meno/dropzone/compare/v5.6.0...v5.6.1",
+      },
       "version": "5.6.1",
     },
     Object {
       "changes": Array [],
       "compare": Object {},
       "date": "2020-02-13T15:37:00.000Z",
-      "releaseNotes": null,
+      "releaseNotes": Object {
+        "url": "https://gitlab.com/meno/dropzone/compare/v5.5.0...v5.6.0",
+      },
       "version": "5.6.0",
     },
     Object {
       "changes": Array [],
       "compare": Object {},
       "date": undefined,
-      "releaseNotes": null,
+      "releaseNotes": Object {
+        "url": "https://gitlab.com/meno/dropzone/compare/v5.4.0...v5.5.0",
+      },
       "version": "5.5.0",
     },
     Object {
       "changes": Array [],
       "compare": Object {},
       "date": "2018-08-24T14:23:00.000Z",
-      "releaseNotes": null,
+      "releaseNotes": Object {
+        "url": "https://gitlab.com/meno/dropzone/compare/v5.2.0...v5.4.0",
+      },
       "version": "5.4.0",
     },
   ],
@@ -88,7 +104,7 @@ Object {
 
 exports[`workers/pr/changelog getChangeLogJSON supports gitlab enterprise and gitlab.com changelog 1`] = `
 Object {
-  "hasReleaseNotes": false,
+  "hasReleaseNotes": true,
   "project": Object {
     "apiBaseUrl": "https://gitlab.com/api/v4/",
     "baseUrl": "https://gitlab.com/",
@@ -101,28 +117,36 @@ Object {
       "changes": Array [],
       "compare": Object {},
       "date": undefined,
-      "releaseNotes": null,
+      "releaseNotes": Object {
+        "url": "https://gitlab.com/meno/dropzone/compare/v5.6.0...v5.6.1",
+      },
       "version": "5.6.1",
     },
     Object {
       "changes": Array [],
       "compare": Object {},
       "date": "2020-02-13T15:37:00.000Z",
-      "releaseNotes": null,
+      "releaseNotes": Object {
+        "url": "https://gitlab.com/meno/dropzone/compare/v5.5.0...v5.6.0",
+      },
       "version": "5.6.0",
     },
     Object {
       "changes": Array [],
       "compare": Object {},
       "date": undefined,
-      "releaseNotes": null,
+      "releaseNotes": Object {
+        "url": "https://gitlab.com/meno/dropzone/compare/v5.4.0...v5.5.0",
+      },
       "version": "5.5.0",
     },
     Object {
       "changes": Array [],
       "compare": Object {},
       "date": "2018-08-24T14:23:00.000Z",
-      "releaseNotes": null,
+      "releaseNotes": Object {
+        "url": "https://gitlab.com/meno/dropzone/compare/v5.2.0...v5.4.0",
+      },
       "version": "5.4.0",
     },
   ],
@@ -131,7 +155,7 @@ Object {
 
 exports[`workers/pr/changelog getChangeLogJSON supports node engines 1`] = `
 Object {
-  "hasReleaseNotes": false,
+  "hasReleaseNotes": true,
   "project": Object {
     "apiBaseUrl": "https://gitlab.com/api/v4/",
     "baseUrl": "https://gitlab.com/",
@@ -144,28 +168,36 @@ Object {
       "changes": Array [],
       "compare": Object {},
       "date": undefined,
-      "releaseNotes": null,
+      "releaseNotes": Object {
+        "url": "https://gitlab.com/meno/dropzone/compare/v5.6.0...v5.6.1",
+      },
       "version": "5.6.1",
     },
     Object {
       "changes": Array [],
       "compare": Object {},
       "date": "2020-02-13T15:37:00.000Z",
-      "releaseNotes": null,
+      "releaseNotes": Object {
+        "url": "https://gitlab.com/meno/dropzone/compare/v5.5.0...v5.6.0",
+      },
       "version": "5.6.0",
     },
     Object {
       "changes": Array [],
       "compare": Object {},
       "date": undefined,
-      "releaseNotes": null,
+      "releaseNotes": Object {
+        "url": "https://gitlab.com/meno/dropzone/compare/v5.4.0...v5.5.0",
+      },
       "version": "5.5.0",
     },
     Object {
       "changes": Array [],
       "compare": Object {},
       "date": "2018-08-24T14:23:00.000Z",
-      "releaseNotes": null,
+      "releaseNotes": Object {
+        "url": "https://gitlab.com/meno/dropzone/compare/v5.2.0...v5.4.0",
+      },
       "version": "5.4.0",
     },
   ],
