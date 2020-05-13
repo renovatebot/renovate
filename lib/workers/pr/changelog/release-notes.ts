@@ -186,13 +186,18 @@ export async function getReleaseNotesMd(
   }
   let changelogFile: string;
   let changelogMd = '';
+  let apiTree: string;
+  let apiFiles: string;
   try {
-    let apiPrefix = apiBaseUrl.replace(/\/?$/, '/');
-    apiPrefix += apiBaseUrl.includes('gitlab')
-      ? `projects/${repository}/repository/tree`
-      : `repos/${repository}/contents/`;
-    // in gitlab, will look something like projects/meno%2fdropzone/releases/
-    const filesRes = await ghGot<{ name: string }[]>(apiPrefix);
+    const apiPrefix = apiBaseUrl.replace(/\/?$/, '/');
+    if (apiBaseUrl.includes('gitlab')) {
+      apiTree = apiPrefix + `projects/${repository}/repository/tree/`;
+      apiFiles = apiPrefix + `projects/${repository}/repository/files/`;
+    } else {
+      apiTree = apiPrefix + `repos/${repository}/contents/`;
+      apiFiles = apiTree;
+    }
+    const filesRes = await ghGot<{ name: string }[]>(apiTree);
     const files = filesRes.body
       .map((f) => f.name)
       .filter((f) => changelogFilenameRegex.test(f));
@@ -208,7 +213,7 @@ export async function getReleaseNotesMd(
       );
     }
     const fileRes = await ghGot<{ content: string }>(
-      `${apiPrefix}/${changelogFile}`
+      `${apiFiles}/${changelogFile}`
     );
     changelogMd =
       Buffer.from(fileRes.body.content, 'base64').toString() + '\n#\n##';
