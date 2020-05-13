@@ -34,16 +34,12 @@ describe('lib/manager/gitsubmodules/extract', () => {
         await extractPackageFile('', '.gitmodules.1', { localDir })
       ).toBeNull();
       res = await extractPackageFile('', '.gitmodules.2', { localDir });
-      expect(res.deps).toMatchSnapshot();
       expect(res.deps).toHaveLength(1);
       res = await extractPackageFile('', '.gitmodules.3', { localDir });
-      expect(res.deps).toMatchSnapshot();
       expect(res.deps).toHaveLength(1);
       res = await extractPackageFile('', '.gitmodules.4', { localDir });
-      expect(res.deps).toMatchSnapshot();
       expect(res.deps).toHaveLength(1);
       res = await extractPackageFile('', '.gitmodules.5', { localDir });
-      expect(res.deps).toMatchSnapshot();
       expect(res.deps).toHaveLength(3);
     });
   });
