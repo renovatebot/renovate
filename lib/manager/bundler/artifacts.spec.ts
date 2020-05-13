@@ -64,7 +64,7 @@ describe('bundler.updateArtifacts()', () => {
     ).toBeNull();
   });
   it('returns null if Gemfile.lock was not changed', async () => {
-    platform.getFile.mockResolvedValueOnce('Current Gemfile.lock');
+    fs.readLocalFile.mockResolvedValueOnce('Current Gemfile.lock');
     fs.writeLocalFile.mockResolvedValueOnce(null as never);
     const execSnapshots = mockExecAll(exec);
     platform.getRepoStatus.mockResolvedValueOnce({
@@ -82,8 +82,9 @@ describe('bundler.updateArtifacts()', () => {
     expect(execSnapshots).toMatchSnapshot();
   });
   it('works for default binarySource', async () => {
-    platform.getFile.mockResolvedValueOnce('Current Gemfile.lock');
+    fs.readLocalFile.mockResolvedValueOnce('Current Gemfile.lock');
     fs.writeLocalFile.mockResolvedValueOnce(null as never);
+    fs.readLocalFile.mockResolvedValueOnce(null);
     const execSnapshots = mockExecAll(exec);
     platform.getRepoStatus.mockResolvedValueOnce({
       modified: ['Gemfile.lock'],
@@ -100,8 +101,9 @@ describe('bundler.updateArtifacts()', () => {
     expect(execSnapshots).toMatchSnapshot();
   });
   it('works explicit global binarySource', async () => {
-    platform.getFile.mockResolvedValueOnce('Current Gemfile.lock');
+    fs.readLocalFile.mockResolvedValueOnce('Current Gemfile.lock');
     fs.writeLocalFile.mockResolvedValueOnce(null as never);
+    fs.readLocalFile.mockResolvedValueOnce(null);
     const execSnapshots = mockExecAll(exec);
     platform.getRepoStatus.mockResolvedValueOnce({
       modified: ['Gemfile.lock'],
@@ -125,9 +127,9 @@ describe('bundler.updateArtifacts()', () => {
       await setUtilConfig({ ...config, binarySource: BinarySource.Docker });
     });
     it('.ruby-version', async () => {
-      platform.getFile.mockResolvedValueOnce('Current Gemfile.lock');
+      fs.readLocalFile.mockResolvedValueOnce('Current Gemfile.lock');
       fs.writeLocalFile.mockResolvedValueOnce(null as never);
-      platform.getFile.mockResolvedValueOnce('1.2.0');
+      fs.readLocalFile.mockResolvedValueOnce('1.2.0');
       datasource.getReleases.mockResolvedValueOnce({
         releases: [
           { version: '1.0.0' },
@@ -154,7 +156,7 @@ describe('bundler.updateArtifacts()', () => {
       expect(execSnapshots).toMatchSnapshot();
     });
     it('compatibility options', async () => {
-      platform.getFile.mockResolvedValueOnce('Current Gemfile.lock');
+      fs.readLocalFile.mockResolvedValueOnce('Current Gemfile.lock');
       fs.writeLocalFile.mockResolvedValueOnce(null as never);
       datasource.getReleases.mockResolvedValueOnce({
         releases: [
@@ -187,7 +189,7 @@ describe('bundler.updateArtifacts()', () => {
       expect(execSnapshots).toMatchSnapshot();
     });
     it('invalid compatibility options', async () => {
-      platform.getFile.mockResolvedValueOnce('Current Gemfile.lock');
+      fs.readLocalFile.mockResolvedValueOnce('Current Gemfile.lock');
       fs.writeLocalFile.mockResolvedValueOnce(null as never);
       datasource.getReleases.mockResolvedValueOnce({
         releases: [
@@ -221,9 +223,9 @@ describe('bundler.updateArtifacts()', () => {
     });
 
     it('injects bundler host configuration environment variables', async () => {
-      platform.getFile.mockResolvedValueOnce('Current Gemfile.lock');
+      fs.readLocalFile.mockResolvedValueOnce('Current Gemfile.lock');
       fs.writeLocalFile.mockResolvedValueOnce(null as never);
-      platform.getFile.mockResolvedValueOnce('1.2.0');
+      fs.readLocalFile.mockResolvedValueOnce('1.2.0');
       datasource.getReleases.mockResolvedValueOnce({
         releases: [
           { version: '1.0.0' },
@@ -266,7 +268,7 @@ describe('bundler.updateArtifacts()', () => {
     const execError = new Error();
     (execError as any).stdout = ' foo was resolved to';
     (execError as any).stderr = '';
-    platform.getFile.mockResolvedValueOnce('Current Gemfile.lock');
+    fs.readLocalFile.mockResolvedValueOnce('Current Gemfile.lock');
     fs.writeLocalFile.mockResolvedValueOnce(null as never);
     const execSnapshots = mockExecAll(exec, execError);
     platform.getRepoStatus.mockResolvedValueOnce({
@@ -286,7 +288,7 @@ describe('bundler.updateArtifacts()', () => {
     expect(execSnapshots).toMatchSnapshot();
   });
   it('performs lockFileMaintenance', async () => {
-    platform.getFile.mockResolvedValueOnce('Current Gemfile.lock');
+    fs.readLocalFile.mockResolvedValueOnce('Current Gemfile.lock');
     fs.writeLocalFile.mockResolvedValueOnce(null as never);
     const execSnapshots = mockExecAll(exec);
     platform.getRepoStatus.mockResolvedValueOnce({

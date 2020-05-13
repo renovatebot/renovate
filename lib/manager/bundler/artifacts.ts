@@ -37,7 +37,7 @@ async function getRubyConstraint(
       packageFileName,
       '.ruby-version'
     );
-    const rubyVersionFileContent = await platform.getFile(rubyVersionFile);
+    const rubyVersionFileContent = await readLocalFile(rubyVersionFile, 'utf8');
     if (rubyVersionFileContent) {
       logger.debug('Using ruby version specified in .ruby-version');
       rubyConstraint = rubyVersionFileContent
@@ -80,7 +80,7 @@ export async function updateArtifacts(
     throw new Error(existingError);
   }
   const lockFileName = `${packageFileName}.lock`;
-  const existingLockFileContent = await platform.getFile(lockFileName);
+  const existingLockFileContent = await readLocalFile(lockFileName, 'utf8');
   if (!existingLockFileContent) {
     logger.debug('No Gemfile.lock found');
     return null;
