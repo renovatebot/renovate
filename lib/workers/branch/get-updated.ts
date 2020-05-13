@@ -18,9 +18,12 @@ export interface PackageFilesResult {
 export async function getUpdatedPackageFiles(
   config: BranchConfig
 ): Promise<PackageFilesResult> {
-  logger.debug('manager.getUpdatedPackageFiles()');
   logger.trace({ config });
-  const { parentBranch } = config;
+  const { branchName, parentBranch } = config;
+  logger.debug(
+    { parentBranch, branchName },
+    'manager.getUpdatedPackageFiles()'
+  );
   const updatedFileContents: Record<string, string> = {};
   const packageFileManagers: Record<string, string> = {};
   const packageFileUpdatedDeps: Record<string, string[]> = {};
@@ -34,9 +37,14 @@ export async function getUpdatedPackageFiles(
     if (upgrade.updateType === 'lockFileMaintenance') {
       lockFileMaintenanceFiles.push(packageFile);
     } else {
-      const existingContent =
-        updatedFileContents[packageFile] ||
-        (await platform.getFile(packageFile, config.parentBranch));
+      let existingContent = updatedFileContents[packageFile];
+      // istanbul ignore if
+      if (existingContent) {
+        logger.debug({ packageFile }, 'Reusing updated contents');
+      } else {
+        logger.debug(`platform.getFile(${packageFile}, ${parentBranch})`);
+        existingContent = await platform.getFile(packageFile, parentBranch);
+      }
       // istanbul ignore if
       if (config.parentBranch && !existingContent) {
         logger.debug(
