@@ -135,7 +135,7 @@ export async function updateArtifacts({
       {
         file: {
           name: lockFileName,
-          contents: await readLocalFile(lockFileName, 'utf8'),
+          contents: await readLocalFile(lockFileName),
         },
       },
     ];
