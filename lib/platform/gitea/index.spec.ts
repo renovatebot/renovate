@@ -1307,23 +1307,29 @@ index 0000000..2173594
   });
 
   describe('ensureCommentRemoval', () => {
-    it('should remove existing comment', async () => {
+    it('should remove existing comment by topic', async () => {
       helper.getComments.mockResolvedValueOnce(mockComments);
       await initFakeRepo();
-      await gitea.ensureCommentRemoval(1, 'some-topic');
+      await gitea.ensureCommentRemoval({ number: 1, topic: 'some-topic' });
 
       expect(helper.deleteComment).toHaveBeenCalledTimes(1);
-      expect(helper.deleteComment).toHaveBeenCalledWith(
-        mockRepo.full_name,
-        expect.any(Number)
-      );
+      expect(helper.deleteComment).toHaveBeenCalledWith(mockRepo.full_name, 3);
+    });
+
+    it('should remove existing comment by content', async () => {
+      helper.getComments.mockResolvedValueOnce(mockComments);
+      await initFakeRepo();
+      await gitea.ensureCommentRemoval({ number: 1, content: 'some-body' });
+
+      expect(helper.deleteComment).toHaveBeenCalledTimes(1);
+      expect(helper.deleteComment).toHaveBeenCalledWith(mockRepo.full_name, 1);
     });
 
     it('should gracefully fail with warning', async () => {
       helper.getComments.mockResolvedValueOnce(mockComments);
       helper.deleteComment.mockRejectedValueOnce(new Error());
       await initFakeRepo();
-      await gitea.ensureCommentRemoval(1, 'some-topic');
+      await gitea.ensureCommentRemoval({ number: 1, topic: 'some-topic' });
 
       expect(logger.warn).toHaveBeenCalledTimes(1);
     });
@@ -1331,7 +1337,7 @@ index 0000000..2173594
     it('should abort silently if comment is missing', async () => {
       helper.getComments.mockResolvedValueOnce(mockComments);
       await initFakeRepo();
-      await gitea.ensureCommentRemoval(1, 'missing');
+      await gitea.ensureCommentRemoval({ number: 1, topic: 'missing' });
 
       expect(helper.deleteComment).not.toHaveBeenCalled();
     });

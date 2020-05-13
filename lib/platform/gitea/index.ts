@@ -22,6 +22,7 @@ import {
   CommitFilesConfig,
   CreatePRConfig,
   EnsureCommentConfig,
+  EnsureCommentRemovalConfig,
   EnsureIssueConfig,
   FindPRConfig,
   Issue,
@@ -102,7 +103,6 @@ function toRenovatePR(data: helper.PR): Pr | null {
     targetBranch: data.base.ref,
     sourceRepo: data.head.repo.full_name,
     createdAt: data.created_at,
-    closedAt: data.closed_at,
     canMerge: data.mergeable,
     isConflicted: !data.mergeable,
     isStale: undefined,
@@ -126,6 +126,13 @@ function findCommentByTopic(
   topic: string
 ): helper.Comment | null {
   return comments.find((c) => c.body.startsWith(`### ${topic}\n\n`));
+}
+
+function findCommentByContent(
+  comments: helper.Comment[],
+  content: string
+): helper.Comment | null {
+  return comments.find((c) => c.body.trim() === content);
 }
 
 async function isPRModified(
@@ -452,9 +459,10 @@ const platform: Platform = {
 
   async setBaseBranch(
     baseBranch: string = config.defaultBranch
-  ): Promise<void> {
+  ): Promise<string> {
     config.baseBranch = baseBranch;
-    await config.storage.setBaseBranch(baseBranch);
+    const baseBranchSha = await config.storage.setBaseBranch(baseBranch);
+    return baseBranchSha;
   },
 
   getPrList(): Promise<Pr[]> {
@@ -809,13 +817,26 @@ const platform: Platform = {
     }
   },
 
-  async ensureCommentRemoval(issue: number, topic: string): Promise<void> {
+  async ensureCommentRemoval({
+    number: issue,
+    topic,
+    content,
+  }: EnsureCommentRemovalConfig): Promise<void> {
+    logger.debug(
+      `Ensuring comment "${topic || content}" in #${issue} is removed`
+    );
     const commentList = await helper.getComments(config.repository, issue);
-    const comment = findCommentByTopic(commentList, topic);
+    let comment: helper.Comment | null = null;
+
+    if (topic) {
+      comment = findCommentByTopic(commentList, topic);
+    } else if (content) {
+      comment = findCommentByContent(commentList, content);
+    }
 
     // Abort and do nothing if no matching comment was found
     if (!comment) {
-      return null;
+      return;
     }
 
     // Attempt to delete comment
@@ -824,8 +845,6 @@ const platform: Platform = {
     } catch (err) {
       logger.warn({ err, issue, subject: topic }, 'Error deleting comment');
     }
-
-    return null;
   },
 
   async getBranchPr(branchName: string): Promise<Pr | null> {
@@ -908,7 +927,7 @@ const platform: Platform = {
   },
 
   getFileList(): Promise<string[]> {
-    return config.storage.getFileList(config.baseBranch);
+    return config.storage.getFileList();
   },
 
   getAllRenovateBranches(branchPrefix: string): Promise<string[]> {

@@ -36,7 +36,10 @@ export function isGetPkgReleasesConfig(
 }
 
 export interface Release {
+  canBeUnpublished?: boolean;
   changelogUrl?: string;
+  checksumUrl?: string;
+  downloadUrl?: string;
   gitRef?: string;
   isDeprecated?: boolean;
 
@@ -60,7 +63,7 @@ export interface ReleaseResult {
   pkgName?: string;
   releases: Release[];
   sourceUrl?: string;
-  tags?: string[];
+  tags?: Record<string, string>;
   versions?: any;
 }
 

@@ -1,9 +1,10 @@
 import is from '@sindresorhus/is';
 import later from 'later';
 import moment from 'moment-timezone';
+import { RenovateConfig } from '../../config';
 import { logger } from '../../logger';
 
-const scheduleMappings = {
+const scheduleMappings: Record<string, string> = {
   'every month': 'before 3am on the first day of the month',
   monthly: 'before 3am on the first day of the month',
 };
@@ -65,14 +66,14 @@ export function hasValidSchedule(
   return [true, ''];
 }
 
-export function isScheduledNow(config): boolean {
+export function isScheduledNow(config: RenovateConfig): boolean {
   let configSchedule = config.schedule;
   logger.debug(`Checking schedule(${configSchedule}, ${config.timezone})`);
   if (
     !configSchedule ||
     configSchedule.length === 0 ||
     configSchedule[0] === '' ||
-    configSchedule === 'at any time' ||
+    configSchedule === ('at any time' as never) ||
     configSchedule[0] === 'at any time'
   ) {
     logger.debug('No schedule defined');

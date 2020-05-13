@@ -1,6 +1,7 @@
 import _fs from 'fs-extra';
 import { mocked } from '../../../../test/util';
 import { getConfig } from '../../../config/defaults';
+import { PostUpdateConfig } from '../../../manager/common';
 import * as _lockFiles from '../../../manager/npm/post-update';
 import * as _lerna from '../../../manager/npm/post-update/lerna';
 import * as _npm from '../../../manager/npm/post-update/npm';
@@ -256,7 +257,7 @@ describe('manager/npm/post-update', () => {
   });
   */
   describe('writeUpdatedPackageFiles', () => {
-    let config;
+    let config: PostUpdateConfig;
     beforeEach(() => {
       config = {
         ...defaultConfig,
@@ -298,7 +299,7 @@ describe('manager/npm/post-update', () => {
     });
   });
   describe('getAdditionalFiles', () => {
-    let config;
+    let config: PostUpdateConfig;
     beforeEach(() => {
       config = {
         ...defaultConfig,

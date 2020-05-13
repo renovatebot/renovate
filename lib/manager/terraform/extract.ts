@@ -85,7 +85,7 @@ export function extractPackageFile(content: string): PackageFile | null {
       dep.managerData.terraformDependencyType ===
       TerraformDependencyTypes.module
     ) {
-      const githubRefMatch = /github.com(\/|:)([^/]+\/[a-z0-9-]+).*\?ref=(.*)$/.exec(
+      const githubRefMatch = /github.com(\/|:)([^/]+\/[a-z0-9-.]+).*\?ref=(.*)$/.exec(
         dep.managerData.source
       );
       // Regex would need to be updated to support ssh://
@@ -94,12 +94,13 @@ export function extractPackageFile(content: string): PackageFile | null {
       );
       /* eslint-disable no-param-reassign */
       if (githubRefMatch) {
+        const depNameShort = githubRefMatch[2].replace(/\.git$/, '');
         dep.depType = 'github';
-        dep.depName = 'github.com/' + githubRefMatch[2];
-        dep.depNameShort = githubRefMatch[2];
+        dep.depName = 'github.com/' + depNameShort;
+        dep.depNameShort = depNameShort;
         dep.currentValue = githubRefMatch[3];
         dep.datasource = datasourceGithubTags.id;
-        dep.lookupName = githubRefMatch[2];
+        dep.lookupName = depNameShort;
         dep.managerData.lineNumber = dep.managerData.sourceLine;
         if (!isVersion(dep.currentValue)) {
           dep.skipReason = SkipReason.UnsupportedVersion;

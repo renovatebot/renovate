@@ -9,30 +9,15 @@ on:
   pull_request:
 
 env:
-  CI: true
-  DOCKER_REPO: renovate/renovate
-  YARN_CACHE_KEY: v1
-  BUILDX_VERSION: v0.3.1
+  YARN_MODULES_CACHE_KEY: v1
+  YARN_PACKAGE_CACHE_KEY: v1
+  YARN_CACHE_FOLDER: .cache/yarn
   NODE_VERSION: 12
   # https://github.com/chalk/supports-color/issues/106
   FORCE_COLOR: true
 
 jobs:
-  cleanup:
-    runs-on: ubuntu-latest
-    timeout-minutes: 5
-
-    steps:
-      - name: github-cleanup
-        uses: renovatebot/gh-action@v0
-        continue-on-error: true
-        with:
-          command: github-cleanup
-          token: ${{ secrets.GH_TOKEN }}
-          dry-run: ${{github.ref == 'refs/heads/master'}}
-
   test:
-    needs: [cleanup]
     runs-on: ${{ matrix.os }}
 
     # tests shouldn't need more time
@@ -76,11 +61,8 @@ jobs:
         run: echo "::set-env name=SKIP_JAVA_TESTS::true"
 
       - name: Init platform
-        id: init
         shell: bash
         run: |
-          echo "::set-output name=yarn_cache::$(yarn cache dir)"
-          python -c "from pip._internal.locations import USER_CACHE_DIR; print('::set-output name=pip_cache::' + USER_CACHE_DIR)"
           git config --global core.autocrlf false
           git config --global core.symlinks true
           git config --global user.email 'bot@renovateapp.com'
@@ -89,7 +71,6 @@ jobs:
           echo "Node $(node --version)"
           python --version
           echo "Yarn $(yarn --version)"
-          pip --version
 
       - uses: actions/checkout@v2
 
@@ -97,42 +78,26 @@ jobs:
         id: yarn_cache_packages
         uses: actions/cache@v1
         with:
-          path: ${{ steps.init.outputs.yarn_cache }}
-          key: ${{ env.YARN_CACHE_KEY }}-${{ runner.os }}-yarn_cache-${{ hashFiles('**/yarn.lock') }}
+          path: ${{ env.YARN_CACHE_FOLDER }}
+          key: ${{ env.YARN_PACKAGE_CACHE_KEY }}-${{ runner.os }}-yarn_cache-${{ hashFiles('**/yarn.lock') }}
           restore-keys: |
-            ${{ env.YARN_CACHE_KEY }}-${{ runner.os }}-yarn_cache-
+            ${{ env.YARN_PACKAGE_CACHE_KEY }}-${{ runner.os }}-yarn_cache-
 
       - name: Cache node_modules
         uses: actions/cache@v1
         with:
           path: node_modules
-          key: ${{ runner.os }}-${{ env.NODE_VERSION }}-yarn-${{ hashFiles('**/yarn.lock') }}
+          key: ${{ env.YARN_MODULES_CACHE_KEY }}-${{ runner.os }}-${{ env.NODE_VERSION }}-yarn-${{ hashFiles('**/yarn.lock') }}
           restore-keys: |
-            ${{ runner.os }}-${{ env.NODE_VERSION }}-yarn-
-
-      - name: Cache pip packages
-        id: pip_cache_packages
-        uses: actions/cache@v1
-        with:
-          path: ${{ steps.init.outputs.pip_cache }}
-          key: ${{ runner.os }}-${{ env.PYTHON_VERSION }}-pip-${{ hashFiles('**/requirements.txt') }}
-          restore-keys: |
-            ${{ runner.os }}-${{ env.PYTHON_VERSION }}-pip-
+            ${{ env.YARN_MODULES_CACHE_KEY }}-${{ runner.os }}-${{ env.NODE_VERSION }}-yarn-
 
       # Clear caches on cache miss, otherwise they will grow indefinitely
       - name: Clear yarn cache
         if: steps.yarn_cache_packages.outputs.cache-hit != 'true'
         run: yarn cache clean
 
-      - name: Clear pip cache
-        if: steps.pip_cache_packages.outputs.cache-hit != 'true'
-        run: python -c "from pip._internal.locations import USER_CACHE_DIR; from shutil import rmtree; rmtree(USER_CACHE_DIR, ignore_errors=True)"
-
       - name: Installing dependencies
-        run: |
-          python -m pip install --upgrade pip
-          yarn install --frozen-lockfile --link-duplicates
-          pip install --user -r requirements.txt
+        run: yarn install --frozen-lockfile --link-duplicates
 
       - name: Build
         run: yarn build
@@ -159,7 +124,6 @@ jobs:
         run: yarn test-e2e
 
   lint:
-    needs: [cleanup]
     runs-on: ubuntu-latest
 
     # lint shouldn't need more than 10 min
@@ -172,17 +136,13 @@ jobs:
           node-version: ${{ env.NODE_VERSION }}
 
       - name: Init platform
-        id: init
-        shell: bash
         run: |
-          echo "::set-output name=yarn_cache::$(yarn cache dir)"
           git config --global core.autocrlf false
           git config --global core.symlinks true
           git config --global user.email 'bot@renovateapp.com'
           git config --global user.name  'Renovate Bot'
           npm config set scripts-prepend-node-path true
           echo "Node $(node --version)"
-          python --version
           echo "Yarn $(yarn --version)"
 
       - uses: actions/checkout@v2
@@ -191,18 +151,18 @@ jobs:
         id: yarn_cache_packages
         uses: actions/cache@v1
         with:
-          path: ${{ steps.init.outputs.yarn_cache }}
-          key: ${{ env.YARN_CACHE_KEY }}-${{ runner.os }}-yarn_cache-${{ hashFiles('**/yarn.lock') }}
+          path: ${{ env.YARN_CACHE_FOLDER }}
+          key: ${{ env.YARN_PACKAGE_CACHE_KEY }}-${{ runner.os }}-yarn_cache-${{ hashFiles('**/yarn.lock') }}
           restore-keys: |
-            ${{ env.YARN_CACHE_KEY }}-${{ runner.os }}-yarn_cache-
+            ${{ env.YARN_PACKAGE_CACHE_KEY }}-${{ runner.os }}-yarn_cache-
 
       - name: Cache node_modules
         uses: actions/cache@v1
         with:
           path: node_modules
-          key: ${{ runner.os }}-${{ env.NODE_VERSION }}-yarn-${{ hashFiles('**/yarn.lock') }}
+          key: ${{ env.YARN_MODULES_CACHE_KEY }}-${{ runner.os }}-${{ env.NODE_VERSION }}-yarn-${{ hashFiles('**/yarn.lock') }}
           restore-keys: |
-            ${{ runner.os }}-${{ env.NODE_VERSION }}-yarn-
+            ${{ env.YARN_MODULES_CACHE_KEY }}-${{ runner.os }}-${{ env.NODE_VERSION }}-yarn-
 
       # Clear caches on cache miss, otherwise they will grow indefinitely
       - name: Clear yarn cache
@@ -236,9 +196,7 @@ jobs:
           node-version: ${{ env.NODE_VERSION }}
 
       - name: Init platform
-        id: init
         run: |
-          echo "::set-output name=yarn_cache::$(yarn cache dir)"
           git config --global core.autocrlf false
           git config --global core.symlinks true
           git config --global user.email 'bot@renovateapp.com'
@@ -254,19 +212,20 @@ jobs:
       - name: Cache Yarn packages
         uses: actions/cache@v1
         with:
-          path: ${{ steps.init.outputs.yarn_cache }}
-          key: ${{ env.YARN_CACHE_KEY }}-${{ runner.os }}-yarn_cache-${{ hashFiles('**/yarn.lock') }}
+          path: ${{ env.YARN_CACHE_FOLDER }}
+          key: ${{ env.YARN_PACKAGE_CACHE_KEY }}-${{ runner.os }}-yarn_cache-${{ hashFiles('**/yarn.lock') }}
 
       - name: Cache node_modules
         uses: actions/cache@v1
         with:
           path: node_modules
-          key: ${{ runner.os }}-${{ env.NODE_VERSION }}-yarn-${{ hashFiles('**/yarn.lock') }}
+          key: ${{ env.YARN_MODULES_CACHE_KEY }}-${{ runner.os }}-${{ env.NODE_VERSION }}-yarn-${{ hashFiles('**/yarn.lock') }}
 
       - name: Installing dependencies
         run: yarn install --frozen-lockfile --link-duplicates
 
       - name: semantic-release
+        if: github.ref == 'refs/heads/master'
         run: |
           echo '//registry.npmjs.org/:_authToken=${NPM_TOKEN}' >> ~/.npmrc
           npx semantic-release --dry-run ${{github.ref != 'refs/heads/master'}} --ci ${{github.ref == 'refs/heads/master'}}

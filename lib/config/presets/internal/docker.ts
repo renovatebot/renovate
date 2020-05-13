@@ -2,6 +2,7 @@ import { Preset } from '../common';
 
 export const presets: Record<string, Preset> = {
   disable: {
+    description: 'Disable docker updates',
     docker: {
       enabled: false,
     },
@@ -13,18 +14,24 @@ export const presets: Record<string, Preset> = {
     },
   },
   enableMajor: {
-    docker: {
-      major: {
+    description: 'Enable docker major updates',
+    packageRules: [
+      {
+        datasources: ['docker'],
+        updateTypes: ['major'],
         enabled: true,
       },
-    },
+    ],
   },
   disableMajor: {
-    docker: {
-      major: {
+    description: 'Disable docker major updates',
+    packageRules: [
+      {
+        datasources: ['docker'],
+        updateTypes: ['major'],
         enabled: false,
       },
-    },
+    ],
   },
   pinDigests: {
     description: 'Pin Docker digests',

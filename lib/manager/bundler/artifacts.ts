@@ -1,8 +1,9 @@
+import { quote } from 'shlex';
 import { BUNDLER_INVALID_CREDENTIALS } from '../../constants/error-messages';
 import { logger } from '../../logger';
 import { platform } from '../../platform';
 import { HostRule } from '../../types';
-import { getRepoCached, setRepoCached } from '../../util/cache';
+import { get, set } from '../../util/cache/run';
 import { ExecOptions, exec } from '../../util/exec';
 import {
   deleteLocalFile,
@@ -36,7 +37,7 @@ async function getRubyConstraint(
       packageFileName,
       '.ruby-version'
     );
-    const rubyVersionFileContent = await platform.getFile(rubyVersionFile);
+    const rubyVersionFileContent = await readLocalFile(rubyVersionFile, 'utf8');
     if (rubyVersionFileContent) {
       logger.debug('Using ruby version specified in .ruby-version');
       rubyConstraint = rubyVersionFileContent
@@ -72,14 +73,14 @@ export async function updateArtifacts(
   } = updateArtifact;
   const { compatibility = {} } = config;
   logger.debug(`bundler.updateArtifacts(${packageFileName})`);
-  const existingError = getRepoCached<string>('bundlerArtifactsError');
+  const existingError = get<string>('bundlerArtifactsError');
   // istanbul ignore if
   if (existingError) {
     logger.debug('Aborting Bundler artifacts due to previous failed attempt');
     throw new Error(existingError);
   }
   const lockFileName = `${packageFileName}.lock`;
-  const existingLockFileContent = await platform.getFile(lockFileName);
+  const existingLockFileContent = await readLocalFile(lockFileName, 'utf8');
   if (!existingLockFileContent) {
     logger.debug('No Gemfile.lock found');
     return null;
@@ -97,7 +98,7 @@ export async function updateArtifacts(
     if (config.isLockFileMaintenance) {
       cmd = 'bundle lock';
     } else {
-      cmd = `bundle lock --update ${updatedDeps.join(' ')}`;
+      cmd = `bundle lock --update ${updatedDeps.map(quote).join(' ')}`;
     }
 
     let bundlerVersion = '';
@@ -105,7 +106,7 @@ export async function updateArtifacts(
     if (bundler) {
       if (isValid(bundler)) {
         logger.debug({ bundlerVersion: bundler }, 'Found bundler version');
-        bundlerVersion = ` -v ${bundler}`;
+        bundlerVersion = ` -v ${quote(bundler)}`;
       } else {
         logger.warn({ bundlerVersion: bundler }, 'Invalid bundler version');
       }
@@ -177,7 +178,7 @@ export async function updateArtifacts(
         'Gemfile.lock update failed due to missing credentials - skipping branch'
       );
       // Do not generate these PRs because we don't yet support Bundler authentication
-      setRepoCached('bundlerArtifactsError', BUNDLER_INVALID_CREDENTIALS);
+      set('bundlerArtifactsError', BUNDLER_INVALID_CREDENTIALS);
       throw new Error(BUNDLER_INVALID_CREDENTIALS);
     }
     const resolveMatchRe = new RegExp('\\s+(.*) was resolved to', 'g');

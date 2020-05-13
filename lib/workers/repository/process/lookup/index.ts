@@ -279,7 +279,7 @@ export async function lookupUpdates(
     if (vulnerabilityAlert) {
       filteredVersions = filteredVersions.slice(0, 1);
     }
-    const buckets = {};
+    const buckets: Record<string, LookupUpdate> = {};
     for (const toVersion of filteredVersions) {
       const update: LookupUpdate = { fromVersion, toVersion } as any;
       try {
@@ -327,14 +327,17 @@ export async function lookupUpdates(
         version.equals(release.version, toVersion)
       );
       // TODO: think more about whether to just Object.assign this
-      const releaseFields = [
-        'releaseTimestamp',
-        'canBeUnpublished',
-        'newDigest',
-      ];
+      const releaseFields: (keyof Pick<
+        Release,
+        | 'releaseTimestamp'
+        | 'canBeUnpublished'
+        | 'downloadUrl'
+        | 'checksumUrl'
+        | 'newDigest'
+      >)[] = ['releaseTimestamp', 'canBeUnpublished', 'newDigest'];
       releaseFields.forEach((field) => {
         if (updateRelease[field] !== undefined) {
-          update[field] = updateRelease[field];
+          update[field] = updateRelease[field] as never;
         }
       });
 

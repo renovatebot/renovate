@@ -1,5 +1,6 @@
 import fs from 'fs';
-import { clearRepoCache } from '../../util/cache';
+import * as globalCache from '../../util/cache/global';
+import * as runCache from '../../util/cache/run';
 import _got from '../../util/got';
 import * as _hostRules from '../../util/host-rules';
 import * as composerVersioning from '../../versioning/composer';
@@ -28,7 +29,7 @@ describe('datasource/packagist', () => {
       jest.resetAllMocks();
       hostRules.find = jest.fn((input) => input);
       hostRules.hosts = jest.fn(() => []);
-      clearRepoCache();
+      runCache.clear();
       config = {
         versioning: composerVersioning.id,
         registryUrls: [
@@ -36,7 +37,7 @@ describe('datasource/packagist', () => {
           'https://packagist.org',
         ],
       };
-      return global.renovateCache.rmAll();
+      return globalCache.rmAll();
     });
     it('supports custom registries', async () => {
       config = {

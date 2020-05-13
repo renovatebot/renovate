@@ -1,8 +1,8 @@
 import is from '@sindresorhus/is';
 import { RenovateConfig } from '../../../../config';
 import { logger } from '../../../../logger';
-import { platform } from '../../../../platform';
 import { clone } from '../../../../util/clone';
+import { readLocalFile } from '../../../../util/fs';
 
 export async function getOnboardingConfig(
   config: RenovateConfig
@@ -11,8 +11,9 @@ export async function getOnboardingConfig(
   try {
     logger.debug('Checking for greenkeeper config');
 
-    const greenkeeperConfig = JSON.parse(await platform.getFile('package.json'))
-      .greenkeeper;
+    const greenkeeperConfig = JSON.parse(
+      await readLocalFile('package.json', 'utf8')
+    ).greenkeeper;
     if (greenkeeperConfig) {
       onboardingConfig.statusCheckVerify = true;
     }

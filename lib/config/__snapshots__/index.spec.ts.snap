@@ -34,6 +34,7 @@ Object {
   "dockerMapDotfiles": false,
   "dockerUser": null,
   "dryRun": false,
+  "endpoint": null,
   "excludeCommitPaths": Array [],
   "gitAuthor": null,
   "gitLabAutomerge": false,

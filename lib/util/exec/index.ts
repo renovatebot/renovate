@@ -1,6 +1,5 @@
 import { ExecOptions as ChildProcessExecOptions } from 'child_process';
 import { dirname, join } from 'path';
-import { hrtime } from 'process';
 import { RenovateConfig } from '../../config/common';
 import { logger } from '../../logger';
 import {
@@ -140,7 +139,7 @@ export async function exec(
 
   let res: ExecResult | null = null;
   for (const rawExecCommand of commands) {
-    const startTime = hrtime();
+    const startTime = Date.now();
     let timer;
     const { timeout } = rawExecOptions;
     if (useDocker) {
@@ -168,13 +167,12 @@ export async function exec(
       throw err;
     }
     clearTimeout(timer);
-    const duration = hrtime(startTime);
-    const seconds = Math.round(duration[0] + duration[1] / 1e9);
+    const durationMs = Math.round(Date.now() - startTime);
     if (res) {
       logger.debug(
         {
           cmd: rawExecCommand,
-          seconds,
+          durationMs,
           stdout: res.stdout,
           stderr: res.stderr,
         },

@@ -1,7 +1,12 @@
 import got from 'got';
 import Git from 'simple-git/promise';
 import { RenovateConfig } from '../config/common';
-import { BranchStatus } from '../types';
+import {
+  BranchStatus,
+  VulnerabilityAlert as _VulnerabilityAlert,
+} from '../types';
+
+export type VulnerabilityAlert = _VulnerabilityAlert;
 
 /**
  * File to commit to branch
@@ -93,15 +98,27 @@ export interface RepoParams {
 }
 
 /**
- * TODO: Proper typing
+ *
  */
-export type Pr = {
+export interface Pr {
+  body?: string;
   branchName: string;
-  title: string;
-  state: string;
+  canMerge?: boolean;
+  canMergeReason?: string;
+  createdAt?: string;
+  displayNumber?: string;
   isConflicted?: boolean;
   isModified?: boolean;
-} & Record<string, any>;
+  isStale?: boolean;
+  labels?: string[];
+  number?: number;
+  reviewers?: string[];
+  sha?: string;
+  sourceRepo?: string;
+  state: string;
+  targetBranch?: string;
+  title: string;
+}
 
 /**
  * TODO: Proper typing
@@ -149,10 +166,20 @@ export interface EnsureCommentConfig {
   topic: string;
   content: string;
 }
-/**
- * TODO: Proper typing
- */
-export type VulnerabilityAlert = any;
+
+export interface EnsureCommentRemovalConfigByTopic {
+  number: number;
+  topic: string;
+}
+export interface EnsureCommentRemovalConfigByContent {
+  number: number;
+  content: string;
+}
+export interface EnsureCommentRemovalConfig {
+  number: number;
+  content?: string;
+  topic?: string;
+}
 
 export type EnsureIssueResult = 'updated' | 'created';
 
@@ -188,11 +215,15 @@ export interface Platform {
     branchName: string,
     context: string
   ): Promise<BranchStatus | null>;
-  ensureCommentRemoval(number: number, subject: string): Promise<void>;
+  ensureCommentRemoval(
+    ensureCommentRemoval:
+      | EnsureCommentRemovalConfigByTopic
+      | EnsureCommentRemovalConfigByContent
+  ): Promise<void>;
   deleteBranch(branchName: string, closePr?: boolean): Promise<void>;
   ensureComment(ensureComment: EnsureCommentConfig): Promise<boolean>;
   branchExists(branchName: string): Promise<boolean>;
-  setBaseBranch(baseBranch?: string): Promise<void>;
+  setBaseBranch(baseBranch?: string): Promise<string>;
   commitFilesToBranch(commitFile: CommitFilesConfig): Promise<string | null>;
   getPr(number: number): Promise<Pr>;
   findPr(findPRConfig: FindPRConfig): Promise<Pr>;

@@ -147,11 +147,20 @@ describe('platform/comments', () => {
       expect(api.get.mock.calls).toMatchSnapshot();
     });
 
-    it('deletes comment if found', async () => {
+    it('deletes comment by topic if found', async () => {
       expect.assertions(2);
       api.get.mockClear();
 
       await comments.ensureCommentRemoval(config, 5, 'some-subject');
+      expect(api.get.mock.calls).toMatchSnapshot();
+      expect(api.delete).toHaveBeenCalledTimes(1);
+    });
+
+    it('deletes comment by content if found', async () => {
+      expect.assertions(2);
+      api.get.mockClear();
+
+      await comments.ensureCommentRemoval(config, 5, undefined, '!merge');
       expect(api.get.mock.calls).toMatchSnapshot();
       expect(api.delete).toHaveBeenCalledTimes(1);
     });

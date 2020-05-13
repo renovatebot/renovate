@@ -29,7 +29,7 @@ export function getPrList(
     prDesc += branch.baseBranch
       ? `  - Merge into: \`${branch.baseBranch}\`\n`
       : '';
-    const seen = [];
+    const seen: string[] = [];
     for (const upgrade of branch.upgrades) {
       let text = '';
       if (upgrade.updateType === 'lockFileMaintenance') {

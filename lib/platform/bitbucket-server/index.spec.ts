@@ -487,16 +487,32 @@ describe('platform/bitbucket-server', () => {
       describe('ensureCommentRemoval()', () => {
         it('does not throw', async () => {
           expect.assertions(1);
-          await bitbucket.ensureCommentRemoval(5, 'topic');
+          await bitbucket.ensureCommentRemoval({ number: 5, topic: 'topic' });
           expect(api.get.mock.calls).toMatchSnapshot();
         });
 
-        it('deletes comment if found', async () => {
+        it('deletes comment by topic if found', async () => {
           expect.assertions(2);
           await initRepo();
           api.get.mockClear();
 
-          await bitbucket.ensureCommentRemoval(5, 'some-subject');
+          await bitbucket.ensureCommentRemoval({
+            number: 5,
+            topic: 'some-subject',
+          });
+          expect(api.get.mock.calls).toMatchSnapshot();
+          expect(api.delete).toHaveBeenCalledTimes(1);
+        });
+
+        it('deletes comment by content if found', async () => {
+          expect.assertions(2);
+          await initRepo();
+          api.get.mockClear();
+
+          await bitbucket.ensureCommentRemoval({
+            number: 5,
+            content: '!merge',
+          });
           expect(api.get.mock.calls).toMatchSnapshot();
           expect(api.delete).toHaveBeenCalledTimes(1);
         });
@@ -506,7 +522,7 @@ describe('platform/bitbucket-server', () => {
           await initRepo();
           api.get.mockClear();
 
-          await bitbucket.ensureCommentRemoval(5, 'topic');
+          await bitbucket.ensureCommentRemoval({ number: 5, topic: 'topic' });
           expect(api.get.mock.calls).toMatchSnapshot();
           expect(api.delete).toHaveBeenCalledTimes(0);
         });
@@ -571,7 +587,7 @@ describe('platform/bitbucket-server', () => {
         it('posts PR', async () => {
           expect.assertions(3);
           await initRepo();
-          const { id } = await bitbucket.createPr({
+          const { number: id } = await bitbucket.createPr({
             branchName: 'branch',
             prTitle: 'title',
             prBody: 'body',
@@ -584,7 +600,7 @@ describe('platform/bitbucket-server', () => {
         it('posts PR default branch', async () => {
           expect.assertions(3);
           await initRepo();
-          const { id } = await bitbucket.createPr({
+          const { number: id } = await bitbucket.createPr({
             branchName: 'branch',
             prTitle: 'title',
             prBody: 'body',

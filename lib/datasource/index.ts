@@ -1,6 +1,6 @@
 import is from '@sindresorhus/is';
 import { logger } from '../logger';
-import { getRepoCached, setRepoCached } from '../util/cache';
+import * as runCache from '../util/cache/run';
 import { clone } from '../util/clone';
 import * as allVersioning from '../versioning';
 import datasources from './api.generated';
@@ -66,10 +66,10 @@ function getRawReleases(
     config.lookupName +
     config.registryUrls;
   // By returning a Promise and reusing it, we should only fetch each package at most once
-  if (!getRepoCached(cacheKey)) {
-    setRepoCached(cacheKey, fetchReleases(config));
+  if (!runCache.get(cacheKey)) {
+    runCache.set(cacheKey, fetchReleases(config));
   }
-  return getRepoCached<Promise<ReleaseResult | null>>(cacheKey);
+  return runCache.get<Promise<ReleaseResult | null>>(cacheKey);
 }
 
 export async function getPkgReleases(

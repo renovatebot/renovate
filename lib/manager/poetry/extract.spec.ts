@@ -41,6 +41,11 @@ const pyproject8toml = readFileSync(
   'utf8'
 );
 
+const pyproject9toml = readFileSync(
+  'lib/manager/poetry/__fixtures__/pyproject.9.toml',
+  'utf8'
+);
+
 describe('lib/manager/poetry/extract', () => {
   describe('extractPackageFile()', () => {
     let filename: string;
@@ -56,7 +61,11 @@ describe('lib/manager/poetry/extract', () => {
     it('extracts multiple dependencies', () => {
       const res = extractPackageFile(pyproject1toml, filename);
       expect(res.deps).toMatchSnapshot();
-      expect(res.deps).toHaveLength(9);
+      expect(res.deps).toHaveLength(10);
+      expect(res.compatibility).toEqual({
+        poetry: 'poetry>=1.0 wheel',
+        python: '~2.7 || ^3.4',
+      });
     });
     it('extracts multiple dependencies (with dep = {version = "1.2.3"} case)', () => {
       const res = extractPackageFile(pyproject2toml, filename);
@@ -88,6 +97,10 @@ describe('lib/manager/poetry/extract', () => {
     it('dedupes registries', () => {
       const res = extractPackageFile(pyproject8toml, filename);
       expect(res.registryUrls).toMatchSnapshot();
+    });
+    it('extracts mixed versioning types', () => {
+      const res = extractPackageFile(pyproject9toml, filename);
+      expect(res).toMatchSnapshot();
     });
     it('skips git dependencies', () => {
       const content =
