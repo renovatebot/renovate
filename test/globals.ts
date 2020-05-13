@@ -1,7 +1,7 @@
 import { tmpdir } from 'os';
 import nock from 'nock';
 import { join } from 'upath';
-import { init } from '../lib/workers/global/cache';
+import { init } from '../lib/util/cache/global/file';
 
 jest.mock('../lib/platform', () => ({
   platform: jest.genMockFromModule('../lib/platform/github'),

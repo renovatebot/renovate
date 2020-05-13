@@ -1,4 +1,5 @@
 import fs from 'fs-extra';
+import { quote } from 'shlex';
 import upath from 'upath';
 import { logger } from '../../logger';
 import { platform } from '../../platform';
@@ -61,7 +62,7 @@ export async function updateArtifacts({
 
   /* istanbul ignore next */
   try {
-    const command = [...cmdParts, ...updatedDeps].join(' ');
+    const command = [...cmdParts, ...updatedDeps.map(quote)].join(' ');
     await exec(command, { cwd });
   } catch (err) {
     logger.warn(

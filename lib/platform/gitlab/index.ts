@@ -544,7 +544,7 @@ export function getPrBody(input: string): string {
       .replace(/Pull Request/g, 'Merge Request')
       .replace(/PR/g, 'MR')
       .replace(/\]\(\.\.\/pull\//g, '](../merge_requests/'),
-    1000000
+    60000
   );
 }
 
@@ -848,7 +848,7 @@ export async function deleteLabel(
   }
 }
 
-async function getComments(issueNo: number): Promise<any[]> {
+async function getComments(issueNo: number): Promise<GitlabComment[]> {
   // GET projects/:owner/:repo/merge_requests/:number/notes
   logger.debug(`Getting comments for #${issueNo}`);
   const url = `projects/${config.repository}/merge_requests/${issueNo}/notes`;
@@ -942,18 +942,34 @@ export async function ensureComment({
   return true;
 }
 
+type GitlabComment = {
+  body: string;
+  id: number;
+};
+
 export async function ensureCommentRemoval({
   number: issueNo,
   topic,
+  content,
 }: EnsureCommentRemovalConfig): Promise<void> {
-  logger.debug(`Ensuring comment "${topic}" in #${issueNo} is removed`);
+  logger.debug(
+    `Ensuring comment "${topic || content}" in #${issueNo} is removed`
+  );
+
   const comments = await getComments(issueNo);
-  let commentId: number;
-  comments.forEach((comment: { body: string; id: number }) => {
-    if (comment.body.startsWith(`### ${topic}\n\n`)) {
-      commentId = comment.id;
-    }
-  });
+  let commentId: number | null = null;
+
+  const byTopic = (comment: GitlabComment): boolean =>
+    comment.body.startsWith(`### ${topic}\n\n`);
+  const byContent = (comment: GitlabComment): boolean =>
+    comment.body.trim() === content;
+
+  if (topic) {
+    commentId = comments.find(byTopic)?.id;
+  } else if (content) {
+    commentId = comments.find(byContent)?.id;
+  }
+
   if (commentId) {
     await deleteComment(issueNo, commentId);
   }
