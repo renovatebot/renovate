@@ -55,7 +55,7 @@ describe('.updateArtifacts()', () => {
     ).toBeNull();
   });
   it('returns null if unchanged', async () => {
-    platform.getFile.mockResolvedValueOnce('Current composer.lock');
+    fs.readFile.mockResolvedValueOnce('Current composer.lock' as any);
     const execSnapshots = mockExecAll(exec);
     fs.readFile.mockReturnValueOnce('Current composer.lock' as any);
     platform.getRepoStatus.mockResolvedValue({ modified: [] } as StatusResult);
@@ -70,7 +70,7 @@ describe('.updateArtifacts()', () => {
     expect(execSnapshots).toMatchSnapshot();
   });
   it('uses hostRules to write auth.json', async () => {
-    platform.getFile.mockResolvedValueOnce('Current composer.lock');
+    fs.readFile.mockResolvedValueOnce('Current composer.lock' as any);
     const execSnapshots = mockExecAll(exec);
     fs.readFile.mockReturnValueOnce('Current composer.lock' as any);
     const authConfig = {
@@ -93,7 +93,7 @@ describe('.updateArtifacts()', () => {
     expect(execSnapshots).toMatchSnapshot();
   });
   it('returns updated composer.lock', async () => {
-    platform.getFile.mockResolvedValueOnce('Current composer.lock');
+    fs.readFile.mockResolvedValueOnce('Current composer.lock' as any);
     const execSnapshots = mockExecAll(exec);
     fs.readFile.mockReturnValueOnce('New composer.lock' as any);
     platform.getRepoStatus.mockResolvedValue({
@@ -110,7 +110,7 @@ describe('.updateArtifacts()', () => {
     expect(execSnapshots).toMatchSnapshot();
   });
   it('performs lockFileMaintenance', async () => {
-    platform.getFile.mockResolvedValueOnce('Current composer.lock');
+    fs.readFile.mockResolvedValueOnce('Current composer.lock' as any);
     const execSnapshots = mockExecAll(exec);
     fs.readFile.mockReturnValueOnce('New composer.lock' as any);
     platform.getRepoStatus.mockResolvedValue({
@@ -131,7 +131,7 @@ describe('.updateArtifacts()', () => {
   });
   it('supports docker mode', async () => {
     await setUtilConfig({ ...config, binarySource: BinarySource.Docker });
-    platform.getFile.mockResolvedValueOnce('Current composer.lock');
+    fs.readFile.mockResolvedValueOnce('Current composer.lock' as any);
 
     const execSnapshots = mockExecAll(exec);
 
@@ -147,7 +147,7 @@ describe('.updateArtifacts()', () => {
     expect(execSnapshots).toMatchSnapshot();
   });
   it('supports global mode', async () => {
-    platform.getFile.mockResolvedValueOnce('Current composer.lock');
+    fs.readFile.mockResolvedValueOnce('Current composer.lock' as any);
     const execSnapshots = mockExecAll(exec);
     fs.readFile.mockReturnValueOnce('New composer.lock' as any);
     expect(
@@ -164,7 +164,7 @@ describe('.updateArtifacts()', () => {
     expect(execSnapshots).toMatchSnapshot();
   });
   it('catches errors', async () => {
-    platform.getFile.mockResolvedValueOnce('Current composer.lock');
+    fs.readFile.mockResolvedValueOnce('Current composer.lock' as any);
     fs.outputFile.mockImplementationOnce(() => {
       throw new Error('not found');
     });
@@ -178,7 +178,7 @@ describe('.updateArtifacts()', () => {
     ).toMatchSnapshot();
   });
   it('catches unmet requirements errors', async () => {
-    platform.getFile.mockResolvedValueOnce('Current composer.lock');
+    fs.readFile.mockResolvedValueOnce('Current composer.lock' as any);
     fs.outputFile.mockImplementationOnce(() => {
       throw new Error(
         'fooYour requirements could not be resolved to an installable set of packages.bar'
@@ -194,7 +194,7 @@ describe('.updateArtifacts()', () => {
     ).toMatchSnapshot();
   });
   it('throws for disk space', async () => {
-    platform.getFile.mockResolvedValueOnce('Current composer.lock');
+    fs.readFile.mockResolvedValueOnce('Current composer.lock' as any);
     fs.outputFile.mockImplementationOnce(() => {
       throw new Error(
         'vendor/composer/07fe2366/sebastianbergmann-php-code-coverage-c896779/src/Report/Html/Renderer/Template/js/d3.min.js:  write error (disk full?).  Continue? (y/n/^C) '
@@ -210,7 +210,7 @@ describe('.updateArtifacts()', () => {
     ).rejects.toThrow();
   });
   it('disables ignorePlatformReqs', async () => {
-    platform.getFile.mockResolvedValueOnce('Current composer.lock');
+    fs.readFile.mockResolvedValueOnce('Current composer.lock' as any);
     const execSnapshots = mockExecAll(exec);
     fs.readFile.mockReturnValueOnce('New composer.lock' as any);
     platform.getRepoStatus.mockResolvedValue({

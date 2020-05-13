@@ -31,7 +31,7 @@ export async function updateArtifacts({
   logger.debug(`Using composer cache ${cacheDir}`);
 
   const lockFileName = packageFileName.replace(/\.json$/, '.lock');
-  const existingLockFileContent = await platform.getFile(lockFileName);
+  const existingLockFileContent = await readLocalFile(lockFileName);
   if (!existingLockFileContent) {
     logger.debug('No composer.lock found');
     return null;
