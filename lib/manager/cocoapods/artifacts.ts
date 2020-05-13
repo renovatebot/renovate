@@ -54,7 +54,7 @@ export async function updateArtifacts({
     ];
   }
 
-  const existingLockFileContent = await platform.getFile(lockFileName);
+  const existingLockFileContent = await readLocalFile(lockFileName, 'utf8');
   if (!existingLockFileContent) {
     logger.debug(`Lockfile not found: ${lockFileName}`);
     return null;
@@ -106,7 +106,7 @@ export async function updateArtifacts({
 
   const podsDir = join(dirname(packageFileName), 'Pods');
   const podsManifestFileName = join(podsDir, 'Manifest.lock');
-  if (await platform.getFile(podsManifestFileName)) {
+  if (await readLocalFile(podsManifestFileName, 'utf8')) {
     for (const f of status.modified.concat(status.not_added)) {
       if (f.startsWith(podsDir)) {
         res.push({
