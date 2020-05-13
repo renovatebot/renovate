@@ -514,6 +514,8 @@ describe('semverRuby', () => {
         ],
         ['~> 6.0.0', '~> 5.2.0', 'replace', '5.2.4.1', '6.0.2.1'],
         ['~> 5.0, < 6', '~> 4.0, < 5', 'replace', '4.7.5', '5.0.0'],
+        ['~> 5.0, < 6', '~> 4.0, < 5', 'replace', '4.7.5', '5.0.1'],
+        ['~> 5.1, < 6', '~> 4.0, < 5', 'replace', '4.7.5', '5.1.0'], // ideally this should be ~> 5.0
       ].forEach(
         ([expected, currentValue, rangeStrategy, fromVersion, toVersion]) => {
           expect(
