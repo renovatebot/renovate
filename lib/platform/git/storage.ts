@@ -468,13 +468,16 @@ export class Storage {
     branchName,
     files,
     message,
-    parentBranch = this._config.baseBranch,
   }: CommitFilesConfig): Promise<string | null> {
     logger.debug(`Committing files to branch ${branchName}`);
     try {
       await this._git.reset('hard');
       await this._git.raw(['clean', '-fd']);
-      await this._git.checkout(['-B', branchName, 'origin/' + parentBranch]);
+      await this._git.checkout([
+        '-B',
+        branchName,
+        'origin/' + this._config.baseBranch,
+      ]);
       const fileNames = [];
       const deleted = [];
       for (const file of files) {
