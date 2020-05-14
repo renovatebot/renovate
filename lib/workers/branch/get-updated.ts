@@ -47,7 +47,7 @@ export async function getUpdatedPackageFiles(
         );
         existingContent = await platform.getFile(
           packageFile,
-          reuseExistingBranch ? config.branchName : undefined
+          reuseExistingBranch ? config.branchName : config.baseBranch
         );
       }
       // istanbul ignore if
@@ -168,7 +168,7 @@ export async function getUpdatedPackageFiles(
           updatedFileContents[packageFile] ||
           (await platform.getFile(
             packageFile,
-            config.reuseExistingBranch ? config.branchName : undefined
+            config.reuseExistingBranch ? config.branchName : config.baseBranch
           ));
         const results = await updateArtifacts({
           packageFileName: packageFile,

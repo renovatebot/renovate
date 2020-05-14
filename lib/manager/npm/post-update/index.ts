@@ -484,7 +484,7 @@ export async function getAdditionalFiles(
     } else {
       const existingContent = await platform.getFile(
         lockFile,
-        config.reuseExistingBranch ? config.branchName : undefined
+        config.reuseExistingBranch ? config.branchName : config.baseBranch
       );
       if (res.lockFile !== existingContent) {
         logger.debug(`${lockFile} needs updating`);
@@ -549,7 +549,7 @@ export async function getAdditionalFiles(
     } else {
       const existingContent = await platform.getFile(
         lockFileName,
-        config.reuseExistingBranch ? config.branchName : undefined
+        config.reuseExistingBranch ? config.branchName : config.baseBranch
       );
       if (res.lockFile !== existingContent) {
         logger.debug('yarn.lock needs updating');
@@ -646,7 +646,7 @@ export async function getAdditionalFiles(
     } else {
       const existingContent = await platform.getFile(
         lockFile,
-        config.reuseExistingBranch ? config.branchName : undefined
+        config.reuseExistingBranch ? config.branchName : config.baseBranch
       );
       if (res.lockFile !== existingContent) {
         logger.debug('pnpm-lock.yaml needs updating');
@@ -742,7 +742,7 @@ export async function getAdditionalFiles(
         logger.trace('Checking for ' + filename);
         const existingContent = await platform.getFile(
           filename,
-          config.reuseExistingBranch ? config.branchName : undefined
+          config.reuseExistingBranch ? config.branchName : config.baseBranch
         );
         if (existingContent) {
           logger.trace('Found lock file');
