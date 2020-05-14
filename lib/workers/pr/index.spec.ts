@@ -85,6 +85,18 @@ describe('workers/pr', () => {
       pr.isModified = false;
       platform.getBranchStatus.mockResolvedValueOnce(BranchStatus.green);
       await prWorker.checkAutoMerge(pr, config);
+      expect(platform.ensureCommentRemoval).toHaveBeenCalledTimes(0);
+      expect(platform.ensureComment).toHaveBeenCalledTimes(1);
+    });
+    it('should remove previous automerge comment when rebasing', async () => {
+      config.automerge = true;
+      config.automergeType = 'pr-comment';
+      config.automergeComment = '!merge';
+      config.rebaseRequested = true;
+      pr.isModified = false;
+      platform.getBranchStatus.mockResolvedValueOnce(BranchStatus.green);
+      await prWorker.checkAutoMerge(pr, config);
+      expect(platform.ensureCommentRemoval).toHaveBeenCalledTimes(1);
       expect(platform.ensureComment).toHaveBeenCalledTimes(1);
     });
     it('should not automerge if enabled and pr is mergeable but cannot rebase', async () => {
