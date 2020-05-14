@@ -37,6 +37,5 @@ export async function commitFilesToBranch(
     branchName: config.branchName,
     files: updatedFiles,
     message: config.commitMessage,
-    parentBranch: config.baseBranch || undefined,
   });
 }

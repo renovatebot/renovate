@@ -850,7 +850,7 @@ describe('platform/gitlab', () => {
     });
   });
   describe('ensureCommentRemoval', () => {
-    it('deletes comment if found', async () => {
+    it('deletes comment by topic if found', async () => {
       await initRepo({ repository: 'some/repo', token: 'token' });
       api.get.mockResolvedValueOnce(
         partial<GotResponse>({
@@ -858,6 +858,16 @@ describe('platform/gitlab', () => {
         })
       );
       await gitlab.ensureCommentRemoval({ number: 42, topic: 'some-subject' });
+      expect(api.delete).toHaveBeenCalledTimes(1);
+    });
+    it('deletes comment by content if found', async () => {
+      await initRepo({ repository: 'some/repo', token: 'token' });
+      api.get.mockResolvedValueOnce(
+        partial<GotResponse>({
+          body: [{ id: 1234, body: 'some-body\n' }],
+        })
+      );
+      await gitlab.ensureCommentRemoval({ number: 42, content: 'some-body' });
       expect(api.delete).toHaveBeenCalledTimes(1);
     });
   });

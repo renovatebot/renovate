@@ -162,20 +162,6 @@ describe('platform/git/storage', () => {
     it('should throw if branch merge throws', async () => {
       await expect(git.mergeBranch('not_found')).rejects.toThrow();
     });
-    it('should throw if branch merge is stale', async () => {
-      expect.assertions(1);
-      await git.setBranchPrefix('renovate/');
-      await git.commitFilesToBranch({
-        branchName: 'test',
-        files: [{ name: 'some-new-file', contents: 'some new-contents' }],
-        message: 'test mesage',
-        parentBranch: 'renovate/past_branch',
-      });
-
-      await git.setBaseBranch('master');
-
-      await expect(git.mergeBranch('test')).rejects.toThrow();
-    });
   });
   describe('deleteBranch(branchName)', () => {
     it('should send delete', async () => {
@@ -209,7 +195,7 @@ describe('platform/git/storage', () => {
       ).rejects.toMatchSnapshot();
     });
   });
-  describe('commitFilesToBranch({branchName, files, message, parentBranch})', () => {
+  describe('commitFilesToBranch({branchName, files, message})', () => {
     it('creates file', async () => {
       const file = {
         name: 'some-new-file',

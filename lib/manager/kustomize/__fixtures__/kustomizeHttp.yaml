@@ -3,8 +3,12 @@ kind: Kustomization
 
 bases:
 - github.com/user/repo//deploy?ref=v0.0.1
+- github.com/fluxcd/flux/deploy?ref=1.19.0
 
 namespace: testing-namespace
 
 resources:
 - deployment.yaml
+
+images:
+- name: nginx
