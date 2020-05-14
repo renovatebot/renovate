@@ -33,7 +33,7 @@ export async function commitFilesToBranch(
     return null;
   }
   // API will know whether to create new branch or not
-  return platform.commitFilesToBranch({
+  return platform.commitFiles({
     branchName: config.branchName,
     files: updatedFiles,
     message: config.commitMessage,

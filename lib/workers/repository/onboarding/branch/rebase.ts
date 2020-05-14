@@ -49,7 +49,7 @@ export async function rebaseOnboardingBranch(
     logger.info('DRY-RUN: Would rebase files in onboarding branch');
     return null;
   }
-  return platform.commitFilesToBranch({
+  return platform.commitFiles({
     branchName: config.onboardingBranch,
     files: [
       {

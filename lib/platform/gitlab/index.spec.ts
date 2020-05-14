@@ -41,7 +41,7 @@ describe('platform/gitlab', () => {
       getAllRenovateBranches: jest.fn(),
       getCommitMessages: jest.fn(),
       getFile: jest.fn(),
-      commitFilesToBranch: jest.fn(),
+      commitFiles: jest.fn(),
       mergeBranch: jest.fn(),
       deleteBranch: jest.fn(),
       getRepoStatus: jest.fn(),
@@ -1142,11 +1142,11 @@ These updates have all been created already. Click a checkbox below to force a r
       await gitlab.getFile('');
     });
   });
-  describe('commitFilesToBranch()', () => {
+  describe('commitFiles()', () => {
     it('sends to gitFs', async () => {
       expect.assertions(1);
       await initRepo();
-      await gitlab.commitFilesToBranch({
+      await gitlab.commitFiles({
         branchName: 'some-branch',
         files: [{ name: 'SomeFile', contents: 'Some Content' }],
         message: '',
