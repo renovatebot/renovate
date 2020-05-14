@@ -316,8 +316,8 @@ export class Storage {
     return files
       .split('\n')
       .filter(Boolean)
-      .filter((line) => !line.startsWith('120000'))
-      .map((line) => line.split(/\s/).pop())
+      .filter((line) => line.startsWith('100'))
+      .map((line) => line.split(/\t/).pop())
       .filter((file: string) =>
         submodules.every((submodule: string) => !file.startsWith(submodule))
       );
