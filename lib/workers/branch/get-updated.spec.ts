@@ -46,7 +46,7 @@ describe('workers/branch/get-updated', () => {
       await expect(getUpdatedPackageFiles(config)).rejects.toThrow();
     });
     it('handles autoreplace branch needs update', async () => {
-      config.parentBranch = 'some branch';
+      config.reuseExistingBranch = true;
       config.upgrades.push({ manager: 'html', branchName: undefined });
       autoReplace.doAutoReplace.mockResolvedValueOnce(null);
       autoReplace.doAutoReplace.mockResolvedValueOnce('updated-file');
@@ -58,14 +58,14 @@ describe('workers/branch/get-updated', () => {
       expect(res).toMatchSnapshot();
     });
     it('handles null content', async () => {
-      config.parentBranch = 'some-branch';
+      config.reuseExistingBranch = true;
       config.upgrades.push({
         manager: 'npm',
       } as never);
       await expect(getUpdatedPackageFiles(config)).rejects.toThrow();
     });
     it('handles content change', async () => {
-      config.parentBranch = 'some-branch';
+      config.reuseExistingBranch = true;
       config.upgrades.push({
         manager: 'npm',
       } as never);
@@ -74,7 +74,7 @@ describe('workers/branch/get-updated', () => {
       expect(res).toMatchSnapshot();
     });
     it('handles lock files', async () => {
-      config.parentBranch = 'some-branch';
+      config.reuseExistingBranch = true;
       config.upgrades.push({
         manager: 'composer',
         branchName: undefined,
@@ -92,7 +92,7 @@ describe('workers/branch/get-updated', () => {
       expect(res).toMatchSnapshot();
     });
     it('handles lockFileMaintenance', async () => {
-      // config.parentBranch = 'some-branch';
+      // config.reuseExistingBranch = 'some-branch';
       config.upgrades.push({
         manager: 'composer',
         updateType: 'lockFileMaintenance',
@@ -109,7 +109,7 @@ describe('workers/branch/get-updated', () => {
       expect(res).toMatchSnapshot();
     });
     it('handles lockFileMaintenance error', async () => {
-      // config.parentBranch = 'some-branch';
+      // config.reuseExistingBranch = 'some-branch';
       config.upgrades.push({
         manager: 'composer',
         updateType: 'lockFileMaintenance',
@@ -126,7 +126,7 @@ describe('workers/branch/get-updated', () => {
       expect(res).toMatchSnapshot();
     });
     it('handles lock file errors', async () => {
-      config.parentBranch = 'some-branch';
+      config.reuseExistingBranch = true;
       config.upgrades.push({
         manager: 'composer',
         branchName: undefined,

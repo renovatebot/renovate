@@ -2,7 +2,7 @@ import { platform } from '../../../test/util';
 import { RenovateConfig } from '../../config';
 import { PR_STATE_OPEN } from '../../constants/pull-requests';
 import { Pr } from '../../platform';
-import { getParentBranch } from './parent';
+import { shouldReuseExistingBranch } from './reuse';
 
 describe('workers/branch/parent', () => {
   describe('getParentBranch(config)', () => {
@@ -24,14 +24,14 @@ describe('workers/branch/parent', () => {
     });
     it('returns undefined if branch does not exist', async () => {
       platform.branchExists.mockResolvedValueOnce(false);
-      const res = await getParentBranch(config);
-      expect(res.parentBranch).toBeUndefined();
+      const res = await shouldReuseExistingBranch(config);
+      expect(res.reuseExistingBranch).toBe(false);
     });
     it('returns branchName if no PR', async () => {
       platform.branchExists.mockResolvedValueOnce(true);
       platform.getBranchPr.mockReturnValue(null);
-      const res = await getParentBranch(config);
-      expect(res.parentBranch).toBe(config.branchName);
+      const res = await shouldReuseExistingBranch(config);
+      expect(res.reuseExistingBranch).toBe(true);
     });
     it('returns branchName if does not need rebaseing', async () => {
       platform.branchExists.mockResolvedValueOnce(true);
@@ -39,8 +39,8 @@ describe('workers/branch/parent', () => {
         ...pr,
         isConflicted: false,
       });
-      const res = await getParentBranch(config);
-      expect(res.parentBranch).toBe(config.branchName);
+      const res = await shouldReuseExistingBranch(config);
+      expect(res.reuseExistingBranch).toBe(true);
     });
     it('returns branchName if unmergeable and cannot rebase', async () => {
       platform.branchExists.mockResolvedValueOnce(true);
@@ -49,8 +49,8 @@ describe('workers/branch/parent', () => {
         isConflicted: true,
         isModified: true,
       });
-      const res = await getParentBranch(config);
-      expect(res.parentBranch).toBe(config.branchName);
+      const res = await shouldReuseExistingBranch(config);
+      expect(res.reuseExistingBranch).toBe(true);
     });
     it('returns branchName if unmergeable and can rebase, but rebaseWhen is never', async () => {
       config.rebaseWhen = 'never';
@@ -60,8 +60,8 @@ describe('workers/branch/parent', () => {
         isConflicted: true,
         isModified: false,
       });
-      const res = await getParentBranch(config);
-      expect(res.parentBranch).toBe(config.branchName);
+      const res = await shouldReuseExistingBranch(config);
+      expect(res.reuseExistingBranch).toBe(true);
     });
     it('returns undefined if PR title rebase!', async () => {
       platform.branchExists.mockResolvedValueOnce(true);
@@ -69,8 +69,8 @@ describe('workers/branch/parent', () => {
         ...pr,
         title: 'rebase!Update foo to v4',
       });
-      const res = await getParentBranch(config);
-      expect(res.parentBranch).toBeUndefined();
+      const res = await shouldReuseExistingBranch(config);
+      expect(res.reuseExistingBranch).toBe(false);
     });
     it('returns undefined if PR body check rebase', async () => {
       platform.branchExists.mockResolvedValueOnce(true);
@@ -79,8 +79,8 @@ describe('workers/branch/parent', () => {
         title: 'Update foo to v4',
         body: 'blah\nblah\n- [x] <!-- rebase-check -->foo\n',
       });
-      const res = await getParentBranch(config);
-      expect(res.parentBranch).toBeUndefined();
+      const res = await shouldReuseExistingBranch(config);
+      expect(res.reuseExistingBranch).toBe(false);
     });
     it('returns undefined if manual rebase by label', async () => {
       platform.branchExists.mockResolvedValueOnce(true);
@@ -89,8 +89,8 @@ describe('workers/branch/parent', () => {
         isModified: true,
         labels: ['rebase'],
       });
-      const res = await getParentBranch(config);
-      expect(res.parentBranch).toBeUndefined();
+      const res = await shouldReuseExistingBranch(config);
+      expect(res.reuseExistingBranch).toBe(false);
     });
     it('returns undefined if unmergeable and can rebase', async () => {
       platform.branchExists.mockResolvedValueOnce(true);
@@ -99,23 +99,23 @@ describe('workers/branch/parent', () => {
         isConflicted: true,
         isModified: false,
       });
-      const res = await getParentBranch(config);
-      expect(res.parentBranch).toBeUndefined();
+      const res = await shouldReuseExistingBranch(config);
+      expect(res.reuseExistingBranch).toBe(false);
     });
     it('returns branchName if automerge branch and not stale', async () => {
       config.automerge = true;
       config.automergeType = 'branch';
       platform.branchExists.mockResolvedValueOnce(true);
-      const res = await getParentBranch(config);
-      expect(res.parentBranch).toBe(config.branchName);
+      const res = await shouldReuseExistingBranch(config);
+      expect(res.reuseExistingBranch).toBe(true);
     });
     it('returns undefined if automerge branch and stale', async () => {
       config.automerge = true;
       config.automergeType = 'branch';
       platform.branchExists.mockResolvedValueOnce(true);
       platform.isBranchStale.mockResolvedValueOnce(true);
-      const res = await getParentBranch(config);
-      expect(res.parentBranch).toBeUndefined();
+      const res = await shouldReuseExistingBranch(config);
+      expect(res.reuseExistingBranch).toBe(false);
     });
     it('returns branch if rebaseWhen=behind-base-branch but cannot rebase', async () => {
       config.rebaseWhen = 'behind-base-branch';
@@ -126,8 +126,8 @@ describe('workers/branch/parent', () => {
         isConflicted: true,
         isModified: true,
       });
-      const res = await getParentBranch(config);
-      expect(res.parentBranch).not.toBeUndefined();
+      const res = await shouldReuseExistingBranch(config);
+      expect(res.reuseExistingBranch).not.toBeUndefined();
     });
   });
 });
