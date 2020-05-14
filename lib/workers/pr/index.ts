@@ -1,5 +1,7 @@
+import ignore from 'ignore';
 import sampleSize from 'lodash/sampleSize';
 import uniq from 'lodash/uniq';
+import { RenovateConfig } from '../../config/common';
 import {
   PLATFORM_FAILURE,
   PLATFORM_INTEGRATION_UNAUTHORIZED,
@@ -21,14 +23,61 @@ function noLeadingAtSymbol(input: string): string {
   return input.length && input.startsWith('@') ? input.slice(1) : input;
 }
 
-// TODO: fix types
+function assigneesFromConfig(config: RenovateConfig): Promise<string[]> {
+  return Promise.resolve(config.assignees || []);
+}
+
+async function assigneesFromCodeowners(
+  config: RenovateConfig,
+  pr: Pr
+): Promise<string[]> {
+  if (!config.assigneesFromCodeowners) {
+    return [];
+  }
+
+  const codeowners =
+    (await platform.getFile('CODEOWNERS', pr.targetBranch)) ||
+    (await platform.getFile('.github/CODEOWNERS', pr.targetBranch)) ||
+    (await platform.getFile('.gitlab/CODEOWNERS', pr.targetBranch)) ||
+    (await platform.getFile('docs/CODEOWNERS', pr.targetBranch));
+
+  if (!codeowners) {
+    return [];
+  }
+
+  const prFiles = await platform.getPrFiles(pr.number);
+  const rules = codeowners
+    .split('\n')
+    .filter((line) => line && !line.startsWith('#'))
+    .map((line) => {
+      const [pattern, ...usernames] = line.split(/\s+/);
+      return {
+        usernames,
+        match: (path: string) => {
+          const matcher = ignore().add(pattern);
+          return matcher.ignores(path);
+        },
+      };
+    })
+    .reverse();
+
+  const matchingRule = rules.find((rule) => prFiles.every(rule.match));
+  if (!matchingRule) {
+    return [];
+  }
+  return matchingRule.usernames.map(noLeadingAtSymbol);
+}
+
 export async function addAssigneesReviewers(
-  config: any,
+  config: RenovateConfig,
   pr: Pr
 ): Promise<void> {
-  if (config.assignees.length > 0) {
+  let assignees = (await assigneesFromConfig(config)).concat(
+    await assigneesFromCodeowners(config, pr)
+  );
+  if (assignees.length > 0) {
     try {
-      let assignees = config.assignees.map(noLeadingAtSymbol);
+      assignees = assignees.map(noLeadingAtSymbol);
       if (config.assigneesSampleSize !== null) {
         assignees = sampleSize(assignees, config.assigneesSampleSize);
       }

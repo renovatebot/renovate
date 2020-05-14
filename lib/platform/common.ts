@@ -233,6 +233,6 @@ export interface Platform {
   ): Promise<BranchStatus>;
   getBranchPr(branchName: string): Promise<Pr | null>;
   getRepoStatus(): Promise<Git.StatusResult>;
-  getFile(lockFileName: string, branchName?: string): Promise<string>;
+  getFile(lockFileName: string, branchName?: string): Promise<string | null>;
   initPlatform(config: RenovateConfig): Promise<PlatformConfig>;
 }

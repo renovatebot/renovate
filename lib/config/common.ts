@@ -122,6 +122,7 @@ export interface RenovateConfig
   extends RenovateAdminConfig,
     RenovateSharedConfig,
     UpdateConfig<PackageRule>,
+    AssigneesAndReviewersConfig,
     Record<string, unknown> {
   depName?: string;
   baseBranches?: string[];
@@ -159,6 +160,15 @@ export interface RenovateConfig
   warnings?: ValidationMessage[];
   vulnerabilityAlerts?: RenovateSharedConfig;
   regexManagers?: CustomManager[];
+}
+
+export interface AssigneesAndReviewersConfig {
+  assigneesFromCodeowners?: boolean;
+  assignees?: string[];
+  assigneesSampleSize?: number;
+  reviewers?: string[];
+  reviewersSampleSize?: number;
+  additionalReviewers?: string[];
 }
 
 export type UpdateType =
