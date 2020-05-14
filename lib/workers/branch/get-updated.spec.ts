@@ -92,7 +92,6 @@ describe('workers/branch/get-updated', () => {
       expect(res).toMatchSnapshot();
     });
     it('handles lockFileMaintenance', async () => {
-      // config.reuseExistingBranch = 'some-branch';
       config.upgrades.push({
         manager: 'composer',
         updateType: 'lockFileMaintenance',
@@ -109,7 +108,6 @@ describe('workers/branch/get-updated', () => {
       expect(res).toMatchSnapshot();
     });
     it('handles lockFileMaintenance error', async () => {
-      // config.reuseExistingBranch = 'some-branch';
       config.upgrades.push({
         manager: 'composer',
         updateType: 'lockFileMaintenance',

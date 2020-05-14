@@ -38,13 +38,7 @@ export async function getUpdatedPackageFiles(
       lockFileMaintenanceFiles.push(packageFile);
     } else {
       let existingContent = updatedFileContents[packageFile];
-      // istanbul ignore if
-      if (existingContent) {
-        logger.debug({ packageFile }, 'Reusing updated contents');
-      } else {
-        logger.debug(
-          `platform.getFile(${packageFile}, ${reuseExistingBranch})`
-        );
+      if (!existingContent) {
         existingContent = await platform.getFile(
           packageFile,
           reuseExistingBranch ? config.branchName : config.baseBranch

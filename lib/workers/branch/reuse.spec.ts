@@ -127,7 +127,7 @@ describe('workers/branch/parent', () => {
         isModified: true,
       });
       const res = await shouldReuseExistingBranch(config);
-      expect(res.reuseExistingBranch).not.toBeUndefined();
+      expect(res.reuseExistingBranch).toBe(true);
     });
   });
 });

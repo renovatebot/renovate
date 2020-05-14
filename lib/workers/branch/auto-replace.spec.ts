@@ -21,7 +21,7 @@ describe('workers/branch/auto-replace', () => {
         ...JSON.parse(JSON.stringify(defaultConfig)),
         manager: 'html',
       };
-      reuseExistingBranch = undefined;
+      reuseExistingBranch = false;
     });
     it('rebases if the deps list has changed', async () => {
       upgrade.baseDeps = extractPackageFile(sampleHtml).deps;
