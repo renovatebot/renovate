@@ -308,12 +308,7 @@ export class Storage {
   async getFileList(): Promise<string[]> {
     const branch = this._config.baseBranch;
     const submodules = await this.getSubmodules();
-    const files: string = await this._git.raw([
-      'ls-tree',
-      '-r',
-      '--name-only',
-      branch,
-    ]);
+    const files: string = await this._git.raw(['ls-tree', '-r', branch]);
     // istanbul ignore if
     if (!files) {
       return [];
@@ -321,6 +316,8 @@ export class Storage {
     return files
       .split('\n')
       .filter(Boolean)
+      .filter((line) => line.startsWith('100'))
+      .map((line) => line.split(/\t/).pop())
       .filter((file: string) =>
         submodules.every((submodule: string) => !file.startsWith(submodule))
       );
