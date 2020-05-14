@@ -1,5 +1,6 @@
 import simpleGit from 'simple-git/promise';
 import { logger } from '../../logger';
+import * as globalCache from '../../util/cache/global';
 import * as semver from '../../versioning/semver';
 import { DigestConfig, GetReleasesConfig, ReleaseResult } from '../common';
 
@@ -23,7 +24,7 @@ export async function getRawRefs({
   try {
     const cacheNamespace = 'git-raw-refs';
 
-    const cachedResult = await renovateCache.get<RawRefs[]>(
+    const cachedResult = await globalCache.get<RawRefs[]>(
       cacheNamespace,
       lookupName
     );
@@ -67,7 +68,7 @@ export async function getRawRefs({
       })
       .filter(Boolean)
       .filter((ref) => ref.type !== 'pull' && !ref.value.endsWith('^{}'));
-    await renovateCache.set(cacheNamespace, lookupName, refs, cacheMinutes);
+    await globalCache.set(cacheNamespace, lookupName, refs, cacheMinutes);
     return refs;
   } catch (err) {
     logger.error({ err }, `Git-Raw-Refs lookup error in ${lookupName}`);

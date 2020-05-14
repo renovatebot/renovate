@@ -1322,16 +1322,22 @@ index 0000000..2173594
   });
 
   describe('ensureCommentRemoval', () => {
-    it('should remove existing comment', async () => {
+    it('should remove existing comment by topic', async () => {
       helper.getComments.mockResolvedValueOnce(mockComments);
       await initFakeRepo();
       await gitea.ensureCommentRemoval({ number: 1, topic: 'some-topic' });
 
       expect(helper.deleteComment).toHaveBeenCalledTimes(1);
-      expect(helper.deleteComment).toHaveBeenCalledWith(
-        mockRepo.full_name,
-        expect.any(Number)
-      );
+      expect(helper.deleteComment).toHaveBeenCalledWith(mockRepo.full_name, 3);
+    });
+
+    it('should remove existing comment by content', async () => {
+      helper.getComments.mockResolvedValueOnce(mockComments);
+      await initFakeRepo();
+      await gitea.ensureCommentRemoval({ number: 1, content: 'some-body' });
+
+      expect(helper.deleteComment).toHaveBeenCalledTimes(1);
+      expect(helper.deleteComment).toHaveBeenCalledWith(mockRepo.full_name, 1);
     });
 
     it('should gracefully fail with warning', async () => {
@@ -1447,23 +1453,7 @@ index 0000000..2173594
       expect(gsmCommitFilesToBranch).toHaveBeenCalledTimes(1);
       expect(gsmCommitFilesToBranch).toHaveBeenCalledWith({
         ...commitConfig,
-        parentBranch: mockRepo.default_branch,
       });
-    });
-
-    it('should propagate call to storage class with custom parent branch', async () => {
-      const commitConfig: CommitFilesConfig = {
-        branchName: 'some-branch',
-        files: [partial<File>({})],
-        message: 'some-message',
-        parentBranch: 'some-parent-branch',
-      };
-
-      await initFakeRepo();
-      await gitea.commitFilesToBranch(commitConfig);
-
-      expect(gsmCommitFilesToBranch).toHaveBeenCalledTimes(1);
-      expect(gsmCommitFilesToBranch).toHaveBeenCalledWith(commitConfig);
     });
   });
 

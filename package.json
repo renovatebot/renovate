@@ -141,7 +141,7 @@
     "later": "1.2.0",
     "linkify-markdown": "1.0.0",
     "lodash": "4.17.15",
-    "luxon": "1.23.0",
+    "luxon": "1.24.1",
     "markdown-it": "10.0.0",
     "markdown-table": "1.1.3",
     "minimatch": "3.0.4",
@@ -159,6 +159,7 @@
     "semver": "7.3.2",
     "semver-stable": "3.0.0",
     "semver-utils": "1.1.4",
+    "shlex": "2.0.2",
     "shortid": "2.2.15",
     "simple-git": "1.132.0",
     "slugify": "1.4.0",
@@ -203,7 +204,7 @@
     "@types/json5": "0.0.30",
     "@types/later": "1.2.6",
     "@types/lodash": "4.14.150",
-    "@types/luxon": "1.22.0",
+    "@types/luxon": "1.24.0",
     "@types/markdown-it": "10.0.1",
     "@types/markdown-table": "2.0.0",
     "@types/moment-timezone": "0.5.13",
@@ -225,7 +226,7 @@
     "aws-sdk-mock": "5.1.0",
     "babel-jest": "26.0.1",
     "babel-plugin-dynamic-import-node": "2.3.3",
-    "conventional-changelog-conventionalcommits": "4.2.3",
+    "conventional-changelog-conventionalcommits": "4.3.0",
     "cross-env": "7.0.2",
     "eslint": "6.8.0",
     "eslint-config-airbnb-typescript": "6.3.2",
@@ -251,7 +252,7 @@
     "strip-ansi": "6.0.0",
     "tmp-promise": "2.1.1",
     "type-fest": "0.13.1",
-    "typescript": "3.8.3"
+    "typescript": "3.9.2"
   },
   "resolutions": {
     "jest-silent-reporter/jest-util": ">=25.1.0",

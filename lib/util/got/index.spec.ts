@@ -5,7 +5,7 @@ import {
   PLATFORM_TYPE_GITHUB,
   PLATFORM_TYPE_GITLAB,
 } from '../../constants/platforms';
-import { clearRepoCache } from '../cache';
+import * as runCache from '../cache/run';
 import * as hostRules from '../host-rules';
 import { GotJSONOptions } from './common';
 import { api } from '.';
@@ -20,7 +20,7 @@ describe(getName(__filename), () => {
   afterEach(() => {
     nock.cleanAll();
     hostRules.clear();
-    clearRepoCache();
+    runCache.clear();
     nock.enableNetConnect();
   });
 
@@ -97,7 +97,7 @@ describe(getName(__filename), () => {
       await got({ hostType: PLATFORM_TYPE_GITHUB, method: 'HEAD' })
     ).toMatchSnapshot();
 
-    clearRepoCache();
+    runCache.clear();
 
     await expect(got({ hostType: PLATFORM_TYPE_GITHUB })).rejects.toThrowError(
       'not-found'

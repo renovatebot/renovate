@@ -1,4 +1,5 @@
 import fs from 'fs';
+import * as globalCache from '../../util/cache/global';
 import _got from '../../util/got';
 import * as gradleVersion from '.';
 
@@ -19,7 +20,7 @@ describe('datasource/gradle-version', () => {
         lookupName: 'abc',
       };
       jest.clearAllMocks();
-      return global.renovateCache.rmAll();
+      return globalCache.rmAll();
     });
 
     it('processes real data', async () => {

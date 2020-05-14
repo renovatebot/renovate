@@ -3,6 +3,7 @@ import { join } from 'upath';
 import { logger } from '../../logger';
 import { platform } from '../../platform';
 import { ExecOptions, exec } from '../../util/exec';
+import { readLocalFile } from '../../util/fs';
 import {
   UpdateArtifact,
   UpdateArtifactsConfig,
@@ -47,7 +48,7 @@ export async function updateArtifacts({
   logger.debug('Using pipenv cache ' + cacheDir);
 
   const lockFileName = pipfileName + '.lock';
-  const existingLockFileContent = await platform.getFile(lockFileName);
+  const existingLockFileContent = await readLocalFile(lockFileName, 'utf8');
   if (!existingLockFileContent) {
     logger.debug('No Pipfile.lock found');
     return null;

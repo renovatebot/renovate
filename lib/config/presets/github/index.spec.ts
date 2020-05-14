@@ -1,7 +1,8 @@
 import { mocked } from '../../../../test/util';
 import { PLATFORM_FAILURE } from '../../../constants/error-messages';
 import { GotResponse } from '../../../platform';
-import { clearRepoCache } from '../../../util/cache';
+import * as globalCache from '../../../util/cache/global';
+import * as runCache from '../../../util/cache/run';
 import _got from '../../../util/got';
 import * as _hostRules from '../../../util/host-rules';
 import * as github from '.';
@@ -16,11 +17,11 @@ const hostRules = mocked(_hostRules);
 describe('config/presets/github', () => {
   beforeEach(() => {
     got.mockReset();
-    return global.renovateCache.rmAll();
+    return globalCache.rmAll();
   });
   describe('fetchJSONFile()', () => {
     beforeEach(() => {
-      clearRepoCache();
+      runCache.clear();
     });
     it('returns JSON', async () => {
       hostRules.find.mockReturnValueOnce({ token: 'abc' });

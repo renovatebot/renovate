@@ -34,7 +34,7 @@ export function extractPackageFile(
   const deps: PackageDependency[] = [];
   try {
     const doc = yaml.safeLoad(content, { json: true });
-    if (doc.include && is.array(doc.include)) {
+    if (doc?.include && is.array(doc.include)) {
       for (const includeObj of doc.include) {
         const dep = extractDepFromInclude(includeObj);
         if (dep) {
