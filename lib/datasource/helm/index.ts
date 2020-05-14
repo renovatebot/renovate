@@ -9,6 +9,10 @@ export const id = 'helm';
 
 const http = new Http(id);
 
+export const defaultRegistryUrls = [
+  'https://kubernetes-charts.storage.googleapis.com/',
+];
+
 export async function getRepositoryData(
   repository: string
 ): Promise<ReleaseResult[]> {
