@@ -652,50 +652,11 @@ Array [
       },
     },
     "headers": Object {
+      "accept": "application/vnd.github.merge-info-preview+json",
       "accept-encoding": "gzip, deflate",
       "authorization": "token abc123",
       "content-length": 513,
-      "host": "api.github.com",
-      "user-agent": "https://github.com/renovatebot/renovate",
-    },
-    "method": "POST",
-    "url": "https://api.github.com/graphql",
-  },
-  Object {
-    "graphql": Object {
-      "query": Object {
-        "repository": Object {
-          "__args": Object {
-            "name": "repo",
-            "owner": "some",
-          },
-          "pullRequests": Object {
-            "__args": Object {
-              "first": "25",
-            },
-            "nodes": Object {
-              "comments": Object {
-                "__args": Object {
-                  "last": "100",
-                },
-                "nodes": Object {
-                  "body": null,
-                  "databaseId": null,
-                },
-              },
-              "headRefName": null,
-              "number": null,
-              "state": null,
-              "title": null,
-            },
-          },
-        },
-      },
-    },
-    "headers": Object {
-      "accept-encoding": "gzip, deflate",
-      "authorization": "token abc123",
-      "content-length": 512,
+      "content-type": "application/json",
       "host": "api.github.com",
       "user-agent": "https://github.com/renovatebot/renovate",
     },

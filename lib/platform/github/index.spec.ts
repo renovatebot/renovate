@@ -1440,7 +1440,6 @@ describe('platform/github', () => {
       initRepoMock(scope, 'some/repo');
       scope
         .post('/graphql')
-        .twice()
         .reply(200, {})
         .get('/repos/some/repo/issues/42/comments?per_page=100')
         .reply(200, [{ id: 1234, body: 'some-content' }])
