@@ -3,7 +3,9 @@ import * as upath from 'upath';
 import { RenovateConfig as _RenovateConfig } from '../lib/config';
 import { getConfig } from '../lib/config/defaults';
 import { platform as _platform } from '../lib/platform';
+import * as _env from '../lib/util/exec/env';
 import * as _fs from '../lib/util/fs';
+import * as _hostRules from '../lib/util/host-rules';
 
 /**
  * Simple wrapper for getting mocked version of a module
@@ -44,6 +46,8 @@ export function partial<T>(obj: Partial<T>): T {
 
 export const fs = mocked(_fs);
 export const platform = mocked(_platform);
+export const env = mocked(_env);
+export const hostRules = mocked(_hostRules);
 
 // Required because of isolatedModules
 export type RenovateConfig = _RenovateConfig;
