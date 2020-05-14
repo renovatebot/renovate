@@ -36,7 +36,7 @@ function getNonEmptyColumns(
 
 export function getPrUpdatesTable(config: BranchConfig): string {
   const tableDefinitions = getTableDefinition(config);
-  const tableValues = config.upgrades.map((upgrade) => {
+  const tableValues = config.upgrades.map(upgrade => {
     const res: Record<string, string> = {};
     for (const column of tableDefinitions) {
       const { header, value } = column;
@@ -61,7 +61,9 @@ export function getPrUpdatesTable(config: BranchConfig): string {
   for (const row of tableValues) {
     let val = '|';
     for (const column of tableColumns) {
-      val += ` ${row[column].replace(/^@/, '@&#8203;')} |`;
+      val += ' ';
+      val += row[column].replace(/^@/, '@&#8203;').replace(/\|/g, '\\|');
+      val += ' |';
     }
     val += '\n';
     rows.push(val);
