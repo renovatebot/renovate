@@ -1453,23 +1453,7 @@ index 0000000..2173594
       expect(gsmCommitFilesToBranch).toHaveBeenCalledTimes(1);
       expect(gsmCommitFilesToBranch).toHaveBeenCalledWith({
         ...commitConfig,
-        parentBranch: mockRepo.default_branch,
       });
-    });
-
-    it('should propagate call to storage class with custom parent branch', async () => {
-      const commitConfig: CommitFilesConfig = {
-        branchName: 'some-branch',
-        files: [partial<File>({})],
-        message: 'some-message',
-        parentBranch: 'some-parent-branch',
-      };
-
-      await initFakeRepo();
-      await gitea.commitFilesToBranch(commitConfig);
-
-      expect(gsmCommitFilesToBranch).toHaveBeenCalledTimes(1);
-      expect(gsmCommitFilesToBranch).toHaveBeenCalledWith(commitConfig);
     });
   });
 

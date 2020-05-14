@@ -430,7 +430,6 @@ export async function commitFilesToBranch({
   branchName,
   files,
   message,
-  parentBranch = config.baseBranch,
 }: CommitFilesConfig): Promise<string | null> {
   logger.debug(
     `commitFilesToBranch(${JSON.stringify(
@@ -438,7 +437,6 @@ export async function commitFilesToBranch({
         branchName,
         filesLength: files.length,
         message,
-        parentBranch,
       },
       null,
       2
@@ -448,7 +446,6 @@ export async function commitFilesToBranch({
     branchName,
     files,
     message,
-    parentBranch,
   });
 
   // wait for pr change propagation
