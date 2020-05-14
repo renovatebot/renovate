@@ -1,4 +1,3 @@
-import { hrtime } from 'process';
 import pAll from 'p-all';
 import {
   ManagerConfig,
@@ -115,12 +114,12 @@ export async function fetchUpdates(
   packageFiles: Record<string, PackageFile[]>
 ): Promise<void> {
   const managers = Object.keys(packageFiles);
-  const startTime = hrtime();
   const allManagerJobs = managers.map((manager) =>
     fetchManagerUpdates(config, packageFiles, manager)
   );
   await Promise.all(allManagerJobs);
-  const duration = hrtime(startTime);
-  const seconds = Math.round(duration[0] + duration[1] / 1e9);
-  logger.info({ seconds }, 'Package releases lookups complete');
+  logger.debug(
+    { baseBranch: config.baseBranch },
+    'Package releases lookups complete'
+  );
 }

@@ -21,6 +21,22 @@ Object {
       "skipReason": "unsupported-version",
     },
     Object {
+      "currentValue": "v1.0.0",
+      "datasource": "github-tags",
+      "depName": "github.com/hashicorp/example.2.3",
+      "depNameShort": "hashicorp/example.2.3",
+      "depType": "github",
+      "lookupName": "hashicorp/example.2.3",
+    },
+    Object {
+      "currentValue": "v1.0.0",
+      "datasource": "github-tags",
+      "depName": "github.com/hashicorp/example.2.3",
+      "depNameShort": "hashicorp/example.2.3",
+      "depType": "github",
+      "lookupName": "hashicorp/example.2.3",
+    },
+    Object {
       "currentValue": "0.1.0",
       "datasource": "terraform-module",
       "depName": "hashicorp/consul/aws",

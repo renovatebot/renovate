@@ -17,6 +17,7 @@ import {
   CommitFilesConfig,
   CreatePRConfig,
   EnsureCommentConfig,
+  EnsureCommentRemovalConfig,
   EnsureIssueConfig,
   EnsureIssueResult,
   FindPRConfig,
@@ -172,19 +173,18 @@ export function getRepoForceRebase(): Promise<boolean> {
 // Search
 
 // Get full file list
-export function getFileList(branchName?: string): Promise<string[]> {
-  return config.storage.getFileList(branchName);
+export function getFileList(): Promise<string[]> {
+  return config.storage.getFileList();
 }
 
 export async function setBaseBranch(
   branchName = config.baseBranch
-): Promise<void> {
+): Promise<string> {
   logger.debug(`Setting baseBranch to ${branchName}`);
   config.baseBranch = branchName;
   delete config.baseCommitSHA;
-  delete config.fileList;
-  await config.storage.setBaseBranch(branchName);
-  await getFileList(branchName);
+  const baseBranchSha = await config.storage.setBaseBranch(branchName);
+  return baseBranchSha;
 }
 
 export /* istanbul ignore next */ function setBranchPrefix(
@@ -292,13 +292,11 @@ export function commitFilesToBranch({
   branchName,
   files,
   message,
-  parentBranch = config.baseBranch,
 }: CommitFilesConfig): Promise<string | null> {
   return config.storage.commitFilesToBranch({
     branchName,
     files,
     message,
-    parentBranch,
   });
 }
 
@@ -707,11 +705,12 @@ export function ensureComment({
   });
 }
 
-export function ensureCommentRemoval(
-  prNo: number,
-  topic: string
-): Promise<void> {
-  return comments.ensureCommentRemoval(config, prNo, topic);
+export function ensureCommentRemoval({
+  number: prNo,
+  topic,
+  content,
+}: EnsureCommentRemovalConfig): Promise<void> {
+  return comments.ensureCommentRemoval(config, prNo, topic, content);
 }
 
 // Creates PR and returns PR number
@@ -729,7 +728,7 @@ export async function createPr({
 
   logger.debug({ repository: config.repository, title, base }, 'Creating PR');
 
-  let reviewers = [];
+  let reviewers: { uuid: { raw: string } }[] = [];
 
   if (config.bbUseDefaultReviewers) {
     const reviewersResponse = (

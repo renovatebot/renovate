@@ -1,4 +1,5 @@
 import { logger } from '../logger';
+import * as globalCache from '../util/cache/global';
 
 /**
  * Cache callback result which has to be returned by the `CacheCallback` function.
@@ -57,10 +58,7 @@ export async function cacheAble<TArg, TResult = unknown>({
 }: CacheConfig<TArg, TResult>): Promise<TResult> {
   const cacheNamespace = `datasource-${id}`;
   const cacheKey = JSON.stringify(lookup);
-  const cachedResult = await renovateCache.get<TResult>(
-    cacheNamespace,
-    cacheKey
-  );
+  const cachedResult = await globalCache.get<TResult>(cacheNamespace, cacheKey);
   // istanbul ignore if
   if (cachedResult) {
     logger.trace({ id, lookup }, 'datasource cachedResult');
@@ -71,7 +69,7 @@ export async function cacheAble<TArg, TResult = unknown>({
   if (isPrivate) {
     logger.trace({ id, lookup }, 'Skipping datasource cache for private data');
   } else {
-    await renovateCache.set(cacheNamespace, cacheKey, data, minutes);
+    await globalCache.set(cacheNamespace, cacheKey, data, minutes);
   }
   return data;
 }

@@ -1,9 +1,9 @@
-import { mocked } from '../../../test/util';
+import { mocked, partial } from '../../../test/util';
 import { getConfig } from '../../config/defaults';
 import { PLATFORM_TYPE_GITLAB } from '../../constants/platforms';
 import { Pr, platform as _platform } from '../../platform';
 import { BranchStatus } from '../../types';
-import { PrResult } from '../common';
+import { BranchConfig, PrResult } from '../common';
 import * as _changelogHelper from './changelog';
 import { getChangeLogJSON } from './changelog';
 import * as prWorker from '.';
@@ -53,18 +53,15 @@ function setupChangelogMock() {
 
 describe('workers/pr', () => {
   describe('checkAutoMerge(pr, config)', () => {
-    let config;
-    let pr;
+    let config: BranchConfig;
+    let pr: Pr;
     beforeEach(() => {
-      config = {
+      config = partial<BranchConfig>({
         ...defaultConfig,
-      };
-      pr = {
-        head: {
-          ref: 'somebranch',
-        },
+      });
+      pr = partial<Pr>({
         canMerge: true,
-      };
+      });
     });
     afterEach(() => {
       jest.clearAllMocks();
@@ -88,6 +85,18 @@ describe('workers/pr', () => {
       pr.isModified = false;
       platform.getBranchStatus.mockResolvedValueOnce(BranchStatus.green);
       await prWorker.checkAutoMerge(pr, config);
+      expect(platform.ensureCommentRemoval).toHaveBeenCalledTimes(0);
+      expect(platform.ensureComment).toHaveBeenCalledTimes(1);
+    });
+    it('should remove previous automerge comment when rebasing', async () => {
+      config.automerge = true;
+      config.automergeType = 'pr-comment';
+      config.automergeComment = '!merge';
+      config.rebaseRequested = true;
+      pr.isModified = false;
+      platform.getBranchStatus.mockResolvedValueOnce(BranchStatus.green);
+      await prWorker.checkAutoMerge(pr, config);
+      expect(platform.ensureCommentRemoval).toHaveBeenCalledTimes(1);
       expect(platform.ensureComment).toHaveBeenCalledTimes(1);
     });
     it('should not automerge if enabled and pr is mergeable but cannot rebase', async () => {
@@ -117,7 +126,7 @@ describe('workers/pr', () => {
     });
   });
   describe('ensurePr', () => {
-    let config;
+    let config: BranchConfig;
     // TODO fix type
     const existingPr: Pr = {
       displayNumber: 'Existing PR',
@@ -128,9 +137,9 @@ describe('workers/pr', () => {
     } as never;
     beforeEach(() => {
       setupChangelogMock();
-      config = {
+      config = partial<BranchConfig>({
         ...defaultConfig,
-      };
+      });
       config.branchName = 'renovate/dummy-1.x';
       config.prTitle = 'Update dependency dummy to v1.1.0';
       config.depType = 'devDependencies';
@@ -184,7 +193,7 @@ describe('workers/pr', () => {
       config.logJSON = await getChangeLogJSON(config);
       config.prCreation = 'status-success';
       config.automerge = true;
-      config.schedule = 'before 5am';
+      config.schedule = ['before 5am'];
       const { prResult, pr } = await prWorker.ensurePr(config);
       expect(prResult).toEqual(PrResult.Created);
       expect(pr).toMatchObject({ displayNumber: 'New Pull Request' });
@@ -215,7 +224,7 @@ describe('workers/pr', () => {
           updateType: 'lockFileMaintenance',
           prBodyNotes: ['{{#if foo}}'],
         },
-      ]);
+      ] as never);
       config.updateType = 'lockFileMaintenance';
       config.recreateClosed = true;
       config.rebaseWhen = 'never';
@@ -232,7 +241,7 @@ describe('workers/pr', () => {
       config.prCreation = 'status-success';
       config.isPin = true;
       config.updateType = 'pin';
-      config.schedule = 'before 5am';
+      config.schedule = ['before 5am'];
       config.timezone = 'some timezone';
       config.rebaseWhen = 'behind-base-branch';
       config.logJSON = await getChangeLogJSON(config);
@@ -374,7 +383,7 @@ describe('workers/pr', () => {
       platform.getBranchPr.mockResolvedValueOnce(existingPr);
       config.semanticCommitScope = null;
       config.automerge = true;
-      config.schedule = 'before 5am';
+      config.schedule = ['before 5am'];
       config.logJSON = await getChangeLogJSON(config);
       const { prResult, pr } = await prWorker.ensurePr(config);
       expect(prResult).toEqual(PrResult.NotUpdated);
@@ -389,7 +398,7 @@ describe('workers/pr', () => {
       platform.getBranchPr.mockResolvedValueOnce(modifiedPr);
       config.semanticCommitScope = null;
       config.automerge = true;
-      config.schedule = 'before 5am';
+      config.schedule = ['before 5am'];
       config.logJSON = await getChangeLogJSON(config);
       const { prResult, pr } = await prWorker.ensurePr(config);
       expect(prResult).toEqual(PrResult.NotUpdated);
@@ -399,7 +408,7 @@ describe('workers/pr', () => {
     it('should return modified existing PR', async () => {
       config.newValue = '1.2.0';
       config.automerge = true;
-      config.schedule = 'before 5am';
+      config.schedule = ['before 5am'];
       config.logJSON = await getChangeLogJSON(config);
       platform.getBranchPr.mockResolvedValueOnce(existingPr);
       const { prResult, pr } = await prWorker.ensurePr(config);

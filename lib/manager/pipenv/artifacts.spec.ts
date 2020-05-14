@@ -63,7 +63,7 @@ describe('.updateArtifacts()', () => {
   });
   it('returns null if unchanged', async () => {
     pipFileLock._meta.requires.python_full_version = '3.7.6';
-    platform.getFile.mockResolvedValueOnce(JSON.stringify(pipFileLock));
+    fs.readFile.mockResolvedValueOnce(JSON.stringify(pipFileLock) as any);
     const execSnapshots = mockExecAll(exec);
     fs.readFile.mockReturnValueOnce(JSON.stringify(pipFileLock) as any);
     expect(
@@ -77,7 +77,7 @@ describe('.updateArtifacts()', () => {
     expect(execSnapshots).toMatchSnapshot();
   });
   it('handles no constraint', async () => {
-    platform.getFile.mockResolvedValueOnce('unparseable pipfile lock');
+    fs.readFile.mockResolvedValueOnce('unparseable pipfile lock' as any);
     const execSnapshots = mockExecAll(exec);
     fs.readFile.mockReturnValueOnce('unparseable pipfile lock' as any);
     expect(
@@ -91,7 +91,7 @@ describe('.updateArtifacts()', () => {
     expect(execSnapshots).toMatchSnapshot();
   });
   it('returns updated Pipfile.lock', async () => {
-    platform.getFile.mockResolvedValueOnce('current pipfile.lock');
+    fs.readFile.mockResolvedValueOnce('current pipfile.lock' as any);
     const execSnapshots = mockExecAll(exec);
     platform.getRepoStatus.mockResolvedValue({
       modified: ['Pipfile.lock'],
@@ -110,7 +110,7 @@ describe('.updateArtifacts()', () => {
   it('supports docker mode', async () => {
     await setUtilConfig(dockerConfig);
     pipFileLock._meta.requires.python_version = '3.7';
-    platform.getFile.mockResolvedValueOnce(JSON.stringify(pipFileLock));
+    fs.readFile.mockResolvedValueOnce(JSON.stringify(pipFileLock) as any);
     const execSnapshots = mockExecAll(exec);
     platform.getRepoStatus.mockResolvedValue({
       modified: ['Pipfile.lock'],
@@ -127,7 +127,7 @@ describe('.updateArtifacts()', () => {
     expect(execSnapshots).toMatchSnapshot();
   });
   it('catches errors', async () => {
-    platform.getFile.mockResolvedValueOnce('Current Pipfile.lock');
+    fs.readFile.mockResolvedValueOnce('Current Pipfile.lock' as any);
     fs.outputFile.mockImplementationOnce(() => {
       throw new Error('not found');
     });
@@ -141,7 +141,7 @@ describe('.updateArtifacts()', () => {
     ).toMatchSnapshot();
   });
   it('returns updated Pipenv.lock when doing lockfile maintenance', async () => {
-    platform.getFile.mockResolvedValueOnce('Current Pipfile.lock');
+    fs.readFile.mockResolvedValueOnce('Current Pipfile.lock' as any);
     const execSnapshots = mockExecAll(exec);
     platform.getRepoStatus.mockResolvedValue({
       modified: ['Pipfile.lock'],

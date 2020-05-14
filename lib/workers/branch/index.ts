@@ -22,10 +22,7 @@ import {
   PR_STATE_OPEN,
 } from '../../constants/pull-requests';
 import { logger } from '../../logger';
-import {
-  AdditionalPackageFiles,
-  getAdditionalFiles,
-} from '../../manager/npm/post-update';
+import { getAdditionalFiles } from '../../manager/npm/post-update';
 import { platform } from '../../platform';
 import { BranchStatus } from '../../types';
 import { emojify } from '../../util/emoji';
@@ -55,8 +52,7 @@ function rebaseCheck(config: RenovateConfig, branchPr: any): boolean {
 
 export async function processBranch(
   branchConfig: BranchConfig,
-  prHourlyLimitReached?: boolean,
-  packageFiles?: AdditionalPackageFiles
+  prHourlyLimitReached?: boolean
 ): Promise<ProcessBranchResult> {
   const config: BranchConfig = { ...branchConfig };
   const dependencies = config.upgrades
@@ -177,7 +173,10 @@ export async function processBranch(
                   branchPr.number
               );
             } else {
-              await platform.ensureCommentRemoval(branchPr.number, topic);
+              await platform.ensureCommentRemoval({
+                number: branchPr.number,
+                topic,
+              });
             }
           } else {
             let content = emojify(
@@ -300,7 +299,10 @@ export async function processBranch(
     } else {
       logger.debug('No package files need updating');
     }
-    const additionalFiles = await getAdditionalFiles(config, packageFiles);
+    const additionalFiles = await getAdditionalFiles(
+      config,
+      branchConfig.packageFiles
+    );
     config.artifactErrors = (config.artifactErrors || []).concat(
       additionalFiles.artifactErrors
     );
@@ -436,22 +438,6 @@ export async function processBranch(
     }
 
     const commitHash = await commitFilesToBranch(config);
-    // TODO: Remove lockFileMaintenance rule?
-    if (
-      config.updateType === 'lockFileMaintenance' &&
-      !config.parentBranch &&
-      branchExists
-    ) {
-      logger.info(
-        'Deleting lock file maintenance branch as master lock file no longer needs updating'
-      );
-      if (config.dryRun) {
-        logger.info('DRY-RUN: Would delete lock file maintenance branch');
-      } else {
-        await platform.deleteBranch(config.branchName);
-      }
-      return 'done';
-    }
     if (!commitHash && !branchExists) {
       return 'no-work';
     }
@@ -622,10 +608,10 @@ export async function processBranch(
               content,
             });
             // TODO: remoe this soon once they're all cleared out
-            await platform.ensureCommentRemoval(
-              pr.number,
-              ':warning: Lock file problem'
-            );
+            await platform.ensureCommentRemoval({
+              number: pr.number,
+              topic: ':warning: Lock file problem',
+            });
           }
         }
         const context = `renovate/artifacts`;
@@ -659,7 +645,7 @@ export async function processBranch(
               'DRY-RUN: Would ensure comment removal in PR #' + pr.number
             );
           } else {
-            await platform.ensureCommentRemoval(pr.number, topic);
+            await platform.ensureCommentRemoval({ number: pr.number, topic });
           }
         }
         const prAutomerged = await checkAutoMerge(pr, config);

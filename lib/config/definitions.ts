@@ -470,7 +470,6 @@ const options: RenovateOptions[] = [
   {
     name: 'endpoint',
     description: 'Custom endpoint to use',
-    stage: 'repository',
     type: 'string',
     admin: true,
     default: null,

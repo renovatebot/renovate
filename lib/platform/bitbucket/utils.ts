@@ -9,7 +9,6 @@ export interface Config {
   baseBranch: string;
   baseCommitSHA: string;
   defaultBranch: string;
-  fileList: any[];
   has_issues: boolean;
   mergeMethod: string;
   owner: string;

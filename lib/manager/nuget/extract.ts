@@ -63,6 +63,7 @@ async function determineRegistryUrls(
   return registryUrls;
 }
 
+const packageRe = /<(?:PackageReference|DotNetCliToolReference).*Include\s*=\s*"([^"]+)".*Version\s*=\s*"(?:[[])?(?:([^"(,[\]]+)\s*(?:,\s*[)\]]|])?)"/;
 export async function extractPackageFile(
   content: string,
   packageFile: string,
@@ -90,9 +91,7 @@ export async function extractPackageFile(
      * so we don't include it in the extracting regexp
      */
 
-    const match = /<PackageReference.*Include\s*=\s*"([^"]+)".*Version\s*=\s*"(?:[[])?(?:([^"(,[\]]+)\s*(?:,\s*[)\]]|])?)"/.exec(
-      line
-    );
+    const match = packageRe.exec(line);
     if (match) {
       const depName = match[1];
       const currentValue = match[2];

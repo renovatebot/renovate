@@ -21,7 +21,11 @@ function noLeadingAtSymbol(input: string): string {
   return input.length && input.startsWith('@') ? input.slice(1) : input;
 }
 
-export async function addAssigneesReviewers(config, pr: Pr): Promise<void> {
+// TODO: fix types
+export async function addAssigneesReviewers(
+  config: any,
+  pr: Pr
+): Promise<void> {
   if (config.assignees.length > 0) {
     try {
       let assignees = config.assignees.map(noLeadingAtSymbol);
@@ -180,8 +184,8 @@ export async function ensurePr(
     logger.debug('Branch status success');
   }
 
-  const processedUpgrades = [];
-  const commitRepos = [];
+  const processedUpgrades: string[] = [];
+  const commitRepos: string[] = [];
 
   // Get changelog and then generate template strings
   for (const upgrade of upgrades) {
@@ -234,7 +238,7 @@ export async function ensurePr(
   Object.assign(config, upgrades[0]);
   config.hasReleaseNotes = config.upgrades.some((upg) => upg.hasReleaseNotes);
 
-  const releaseNoteRepos = [];
+  const releaseNoteRepos: string[] = [];
   for (const upgrade of config.upgrades) {
     if (upgrade.hasReleaseNotes) {
       if (releaseNoteRepos.includes(upgrade.sourceUrl)) {
@@ -347,7 +351,7 @@ export async function ensurePr(
         if (err.body.errors && err.body.errors.length) {
           if (
             err.body.errors.some(
-              (error) =>
+              (error: { message?: string }) =>
                 error.message &&
                 error.message.startsWith('A pull request already exists')
             )
@@ -422,7 +426,10 @@ export async function ensurePr(
   return { prResult: PrResult.Error };
 }
 
-export async function checkAutoMerge(pr: Pr, config): Promise<boolean> {
+export async function checkAutoMerge(
+  pr: Pr,
+  config: BranchConfig
+): Promise<boolean> {
   logger.trace({ config }, 'checkAutoMerge');
   const {
     branchName,
@@ -430,6 +437,7 @@ export async function checkAutoMerge(pr: Pr, config): Promise<boolean> {
     automergeType,
     automergeComment,
     requiredStatusChecks,
+    rebaseRequested,
   } = config;
   logger.debug(
     { automerge, automergeType, automergeComment },
@@ -473,6 +481,12 @@ export async function checkAutoMerge(pr: Pr, config): Promise<boolean> {
           'DRY-RUN: Would add PR automerge comment to PR #' + pr.number
         );
         return false;
+      }
+      if (rebaseRequested) {
+        await platform.ensureCommentRemoval({
+          number: pr.number,
+          content: automergeComment,
+        });
       }
       return platform.ensureComment({
         number: pr.number,

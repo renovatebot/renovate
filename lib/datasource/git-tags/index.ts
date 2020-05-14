@@ -1,5 +1,5 @@
 import * as semver from '../../versioning/semver';
-import { GetReleasesConfig, ReleaseResult } from '../common';
+import { DigestConfig, GetReleasesConfig, ReleaseResult } from '../common';
 import * as gitRefs from '../git-refs';
 
 export const id = 'git-tags';
@@ -12,20 +12,34 @@ export async function getReleases({
   if (rawRefs === null) {
     return null;
   }
-  const tags = rawRefs
+  const releases = rawRefs
     .filter((ref) => ref.type === 'tags')
-    .map((ref) => ref.value)
-    .filter((tag) => semver.isVersion(tag));
+    .filter((ref) => semver.isVersion(ref.value))
+    .map((ref) => ({
+      version: ref.value,
+      gitRef: ref.value,
+      newDigest: ref.hash,
+    }));
 
   const sourceUrl = lookupName.replace(/\.git$/, '').replace(/\/$/, '');
 
   const result: ReleaseResult = {
     sourceUrl,
-    releases: tags.map((tag) => ({
-      version: tag,
-      gitRef: tag,
-    })),
+    releases,
   };
 
   return result;
+}
+
+export async function getDigest(
+  { lookupName }: Partial<DigestConfig>,
+  newValue?: string
+): Promise<string | null> {
+  const rawRefs: gitRefs.RawRefs[] = await gitRefs.getRawRefs({ lookupName });
+  const findValue = newValue || 'HEAD';
+  const ref = rawRefs.find((rawRef) => rawRef.value === findValue);
+  if (ref) {
+    return ref.hash;
+  }
+  return null;
 }

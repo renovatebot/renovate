@@ -1,4 +1,4 @@
-import { outputFile, readFile, remove } from 'fs-extra';
+import * as fs from 'fs-extra';
 import { join, parse } from 'upath';
 import { RenovateConfig } from '../config/common';
 import { logger } from '../logger';
@@ -32,7 +32,7 @@ export async function readLocalFile(
 ): Promise<string | Buffer> {
   const localFileName = join(localDir, fileName);
   try {
-    const fileContent = await readFile(localFileName, encoding);
+    const fileContent = await fs.readFile(localFileName, encoding);
     return fileContent;
   } catch (err) {
     logger.trace({ err }, 'Error reading local file');
@@ -45,9 +45,9 @@ export async function writeLocalFile(
   fileContent: string
 ): Promise<void> {
   const localFileName = join(localDir, fileName);
-  await outputFile(localFileName, fileContent);
+  await fs.outputFile(localFileName, fileContent);
 }
 
 export async function deleteLocalFile(fileName: string): Promise<void> {
-  await remove(fileName);
+  await fs.remove(fileName);
 }

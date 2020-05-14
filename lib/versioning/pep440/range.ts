@@ -45,6 +45,9 @@ export function getNewValue({
   if (rangeStrategy === 'pin') {
     return '==' + toVersion;
   }
+  if (currentValue === fromVersion) {
+    return toVersion;
+  }
   const ranges: Range[] = parseRange(currentValue);
   if (!ranges) {
     logger.warn('Invalid currentValue: ' + currentValue);

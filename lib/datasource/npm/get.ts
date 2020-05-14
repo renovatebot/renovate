@@ -6,6 +6,7 @@ import moment from 'moment';
 import registryAuthToken from 'registry-auth-token';
 import getRegistryUrl from 'registry-auth-token/registry-url';
 import { logger } from '../../logger';
+import * as globalCache from '../../util/cache/global';
 import { find } from '../../util/host-rules';
 import { Http, HttpOptions } from '../../util/http';
 import { maskToken } from '../../util/mask';
@@ -15,7 +16,7 @@ import { getNpmrc } from './npmrc';
 
 const http = new Http(id);
 
-let memcache = {};
+let memcache: Record<string, string> = {};
 
 export function resetMemCache(): void {
   logger.debug('resetMemCache()');
@@ -38,7 +39,7 @@ export interface NpmDependency extends ReleaseResult {
   latestVersion: string;
   sourceUrl: string;
   versions: Record<string, any>;
-  'dist-tags': string[];
+  'dist-tags': Record<string, string>;
   'renovate-config': any;
   sourceDirectory?: string;
 }
@@ -69,7 +70,7 @@ export async function getDependency(
   );
   // Now check the persistent cache
   const cacheNamespace = 'datasource-npm';
-  const cachedResult = await renovateCache.get<NpmDependency>(
+  const cachedResult = await globalCache.get<NpmDependency>(
     cacheNamespace,
     pkgUrl
   );
@@ -218,7 +219,7 @@ export async function getDependency(
       whitelistedPublicScopes.includes(scope) ||
       !packageName.startsWith('@')
     ) {
-      await renovateCache.set(cacheNamespace, pkgUrl, dep, cacheMinutes);
+      await globalCache.set(cacheNamespace, pkgUrl, dep, cacheMinutes);
     }
     return dep;
   } catch (err) {

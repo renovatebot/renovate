@@ -3,6 +3,7 @@ import { PLATFORM_TYPE_GITHUB } from '../../../constants/platforms';
 import { Release } from '../../../datasource';
 import { logger } from '../../../logger';
 import { api } from '../../../platform/github/gh-got-wrapper';
+import * as globalCache from '../../../util/cache/global';
 import * as hostRules from '../../../util/host-rules';
 import * as allVersioning from '../../../versioning';
 import { BranchUpgradeConfig } from '../../common';
@@ -13,13 +14,9 @@ const { get: ghGot } = api;
 
 async function getTags(
   endpoint: string,
-  versioning: string,
   repository: string
 ): Promise<string[]> {
-  let url = endpoint
-    ? endpoint.replace(/\/?$/, '/')
-    : /* istanbul ignore next: not possible to test, maybe never possible? */ 'https://api.github.com/';
-  url += `repos/${repository}/tags?per_page=100`;
+  const url = `${endpoint}repos/${repository}/tags?per_page=100`;
   try {
     const res = await ghGot<{ name: string }[]>(url, {
       paginate: true,
@@ -45,7 +42,6 @@ async function getTags(
 }
 
 export async function getChangeLogJSON({
-  endpoint,
   versioning,
   fromVersion,
   toVersion,
@@ -70,8 +66,7 @@ export async function getChangeLogJSON({
   });
   // istanbul ignore if
   if (!config.token) {
-    // prettier-ignore
-    if (URL.parse(sourceUrl).host.endsWith('github.com')) { // lgtm [js/incomplete-url-substring-sanitization]
+    if (host.endsWith('github.com')) {
       logger.warn(
         { manager, depName, sourceUrl },
         'No github.com token has been configured. Skipping release notes retrieval'
@@ -86,7 +81,7 @@ export async function getChangeLogJSON({
   }
   const apiBaseUrl = sourceUrl.startsWith('https://github.com/')
     ? 'https://api.github.com/'
-    : endpoint; // TODO FIX
+    : baseUrl;
   const repository = pathname.slice(1).replace(/\/$/, '');
   if (repository.split('/').length !== 2) {
     logger.debug({ sourceUrl }, 'Invalid github URL found');
@@ -110,7 +105,7 @@ export async function getChangeLogJSON({
 
   async function getRef(release: Release): Promise<string | null> {
     if (!tags) {
-      tags = await getTags(endpoint, versioning, repository);
+      tags = await getTags(apiBaseUrl, repository);
     }
     const regex = new RegExp(`${depName}[@-]`);
     const tagName = tags
@@ -139,10 +134,11 @@ export async function getChangeLogJSON({
     const prev = validReleases[i - 1];
     const next = validReleases[i];
     if (include(next.version)) {
-      let release = await renovateCache.get(
+      let release = await globalCache.get(
         cacheNamespace,
         getCacheKey(prev.version, next.version)
       );
+      // istanbul ignore else
       if (!release) {
         release = {
           version: next.version,
@@ -157,7 +153,7 @@ export async function getChangeLogJSON({
           release.compare.url = `${baseUrl}${repository}/compare/${prevHead}...${nextHead}`;
         }
         const cacheMinutes = 55;
-        await renovateCache.set(
+        await globalCache.set(
           cacheNamespace,
           getCacheKey(prev.version, next.version),
           release,

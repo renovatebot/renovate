@@ -1,3 +1,4 @@
+import { quote } from 'shlex';
 import { logger } from '../../../logger';
 import { platform } from '../../../platform';
 import { exec } from '../../../util/exec';
@@ -43,8 +44,7 @@ export async function generateLockFiles(
         params = '--package-lock-only --no-audit';
       }
     } else {
-      params =
-        '--ignore-scripts --ignore-engines --ignore-platform --mutex network:31879';
+      params = '--ignore-scripts --ignore-engines --ignore-platform';
     }
 
     // // istanbul ignore if
@@ -55,7 +55,7 @@ export async function generateLockFiles(
     //   volumes.push([homeNpmrc, `/home/ubuntu/.npmrc`]);
     // }
     cmd.push(`${lernaClient} install ${params}`);
-    cmd.push(`npx lerna@${lernaVersion} bootstrap --no-ci -- ${params}`);
+    cmd.push(`npx lerna@${quote(lernaVersion)} bootstrap --no-ci -- ${params}`);
     await exec(cmd, {
       cwd,
       env,

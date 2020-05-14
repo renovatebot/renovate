@@ -1,8 +1,8 @@
 import {
   GitPullRequest,
+  GitPullRequestCommentThread,
   GitPullRequestMergeStrategy,
 } from 'azure-devops-node-api/interfaces/GitInterfaces';
-
 import { RenovateConfig } from '../../config/common';
 import { REPOSITORY_DISABLED } from '../../constants/error-messages';
 import { PLATFORM_TYPE_AZURE } from '../../constants/platforms';
@@ -21,6 +21,7 @@ import {
   CommitFilesConfig,
   CreatePRConfig,
   EnsureCommentConfig,
+  EnsureCommentRemovalConfig,
   EnsureIssueResult,
   FindPRConfig,
   Issue,
@@ -34,6 +35,7 @@ import GitStorage, { StatusResult } from '../git/storage';
 import { smartTruncate } from '../utils/pr-body';
 import * as azureApi from './azure-got-wrapper';
 import * as azureHelper from './azure-helper';
+import { AzurePr } from './types';
 
 interface Config {
   storage: GitStorage;
@@ -46,7 +48,7 @@ interface Config {
   repoId: string;
   project: string;
   azureWorkItemId: string;
-  prList: Pr[];
+  prList: AzurePr[];
   fileList: null;
   repository: string;
 }
@@ -181,21 +183,18 @@ export function getRepoForceRebase(): Promise<boolean> {
 
 // Search
 
-export /* istanbul ignore next */ function getFileList(
-  branchName?: string
-): Promise<string[]> {
-  return config.storage.getFileList(branchName);
+export /* istanbul ignore next */ function getFileList(): Promise<string[]> {
+  return config.storage.getFileList();
 }
 
 export /* istanbul ignore next */ async function setBaseBranch(
   branchName = config.baseBranch
-): Promise<void> {
+): Promise<string> {
   logger.debug(`Setting baseBranch to ${branchName}`);
   config.baseBranch = branchName;
   delete config.baseCommitSHA;
-  delete config.fileList;
-  await config.storage.setBaseBranch(branchName);
-  await getFileList(branchName);
+  const baseBranchSha = await config.storage.setBaseBranch(branchName);
+  return baseBranchSha;
 }
 
 export /* istanbul ignore next */ function setBranchPrefix(
@@ -244,7 +243,7 @@ async function abandonPr(prNo: number): Promise<void> {
   );
 }
 
-export async function getPrList(): Promise<Pr[]> {
+export async function getPrList(): Promise<AzurePr[]> {
   logger.debug('getPrList()');
   if (!config.prList) {
     const azureApiGit = await azureApi.gitApi();
@@ -276,7 +275,7 @@ export async function getPr(pullRequestId: number): Promise<Pr | null> {
     return null;
   }
   const azurePr = (await getPrList()).find(
-    (item) => item.pullRequestId === pullRequestId
+    (item) => item.number === pullRequestId
   );
 
   if (!azurePr) {
@@ -348,7 +347,7 @@ export async function getBranchPr(branchName: string): Promise<Pr | null> {
     branchName,
     state: PR_STATE_OPEN,
   });
-  return existingPr ? getPr(existingPr.pullRequestId) : null;
+  return existingPr ? getPr(existingPr.number) : null;
 }
 
 export /* istanbul ignore next */ async function deleteBranch(
@@ -384,13 +383,11 @@ export /* istanbul ignore next */ function commitFilesToBranch({
   branchName,
   files,
   message,
-  parentBranch = config.baseBranch,
 }: CommitFilesConfig): Promise<string | null> {
   return config.storage.commitFilesToBranch({
     branchName,
     files,
     message,
-    parentBranch,
   });
 }
 
@@ -571,32 +568,40 @@ export async function ensureComment({
   return true;
 }
 
-export async function ensureCommentRemoval(
-  issueNo: number,
-  topic: string
-): Promise<void> {
-  logger.debug(`ensureCommentRemoval(issueNo, topic)(${issueNo}, ${topic})`);
-  if (issueNo) {
-    const azureApiGit = await azureApi.gitApi();
-    const threads = await azureApiGit.getThreads(config.repoId, issueNo);
-    let threadIdFound = null;
+export async function ensureCommentRemoval({
+  number: issueNo,
+  topic,
+  content,
+}: EnsureCommentRemovalConfig): Promise<void> {
+  logger.debug(
+    `Ensuring comment "${topic || content}" in #${issueNo} is removed`
+  );
 
-    threads.forEach((thread) => {
-      if (thread.comments[0].content.startsWith(`### ${topic}\n\n`)) {
-        threadIdFound = thread.id;
-      }
-    });
+  const azureApiGit = await azureApi.gitApi();
+  const threads = await azureApiGit.getThreads(config.repoId, issueNo);
 
-    if (threadIdFound) {
-      await azureApiGit.updateThread(
-        {
-          status: 4, // close
-        },
-        config.repoId,
-        issueNo,
-        threadIdFound
-      );
-    }
+  const byTopic = (thread: GitPullRequestCommentThread): boolean =>
+    thread.comments[0].content.startsWith(`### ${topic}\n\n`);
+  const byContent = (thread: GitPullRequestCommentThread): boolean =>
+    thread.comments[0].content.trim() === content;
+
+  let threadIdFound: number | null = null;
+
+  if (topic) {
+    threadIdFound = threads.find(byTopic)?.id;
+  } else if (content) {
+    threadIdFound = threads.find(byContent)?.id;
+  }
+
+  if (threadIdFound) {
+    await azureApiGit.updateThread(
+      {
+        status: 4, // close
+      },
+      config.repoId,
+      issueNo,
+      threadIdFound
+    );
   }
 }
 

@@ -1,5 +1,7 @@
 import is from '@sindresorhus/is';
 import fs from 'fs-extra';
+import { quote } from 'shlex';
+import { parse } from 'toml';
 import { logger } from '../../logger';
 import { ExecOptions, exec } from '../../util/exec';
 import {
@@ -7,7 +9,33 @@ import {
   readLocalFile,
   writeLocalFile,
 } from '../../util/fs';
-import { UpdateArtifact, UpdateArtifactsResult } from '../common';
+import {
+  UpdateArtifact,
+  UpdateArtifactsConfig,
+  UpdateArtifactsResult,
+} from '../common';
+
+function getPythonConstraint(
+  existingLockFileContent: string,
+  config: UpdateArtifactsConfig
+): string | undefined | null {
+  const { compatibility = {} } = config;
+  const { python } = compatibility;
+
+  if (python) {
+    logger.debug('Using python constraint from config');
+    return python;
+  }
+  try {
+    const data = parse(existingLockFileContent);
+    if (data?.metadata?.['python-versions']) {
+      return data?.metadata?.['python-versions'];
+    }
+  } catch (err) {
+    // Do nothing
+  }
+  return undefined;
+}
 
 export async function updateArtifacts({
   packageFileName,
@@ -22,11 +50,11 @@ export async function updateArtifacts({
   }
   // Try poetry.lock first
   let lockFileName = getSiblingFileName(packageFileName, 'poetry.lock');
-  let existingLockFileContent = await readLocalFile(lockFileName);
+  let existingLockFileContent = await readLocalFile(lockFileName, 'utf8');
   if (!existingLockFileContent) {
     // Try pyproject.lock next
     lockFileName = getSiblingFileName(packageFileName, 'pyproject.lock');
-    existingLockFileContent = await readLocalFile(lockFileName);
+    existingLockFileContent = await readLocalFile(lockFileName, 'utf8');
     if (!existingLockFileContent) {
       logger.debug(`No lock file found`);
       return null;
@@ -42,15 +70,23 @@ export async function updateArtifacts({
     } else {
       for (let i = 0; i < updatedDeps.length; i += 1) {
         const dep = updatedDeps[i];
-        cmd.push(`poetry update --lock --no-interaction ${dep}`);
+        cmd.push(`poetry update --lock --no-interaction ${quote(dep)}`);
       }
     }
+    const tagConstraint = getPythonConstraint(existingLockFileContent, config);
+    const poetryRequirement = config.compatibility?.poetry || 'poetry';
+    const poetryInstall = 'pip install ' + quote(poetryRequirement);
     const execOptions: ExecOptions = {
       cwdFile: packageFileName,
-      docker: { image: 'renovate/poetry' },
+      docker: {
+        image: 'renovate/python',
+        tagConstraint,
+        tagScheme: 'poetry',
+        preCommands: [poetryInstall],
+      },
     };
     await exec(cmd, execOptions);
-    const newPoetryLockContent = await readLocalFile(lockFileName);
+    const newPoetryLockContent = await readLocalFile(lockFileName, 'utf8');
     if (existingLockFileContent === newPoetryLockContent) {
       logger.debug(`${lockFileName} is unchanged`);
       return null;

@@ -3,6 +3,7 @@ import * as upath from 'upath';
 import { RenovateConfig as _RenovateConfig } from '../lib/config';
 import { getConfig } from '../lib/config/defaults';
 import { platform as _platform } from '../lib/platform';
+import * as _fs from '../lib/util/fs';
 
 /**
  * Simple wrapper for getting mocked version of a module
@@ -41,6 +42,7 @@ export function partial<T>(obj: Partial<T>): T {
   return obj as T;
 }
 
+export const fs = mocked(_fs);
 export const platform = mocked(_platform);
 
 // Required because of isolatedModules
