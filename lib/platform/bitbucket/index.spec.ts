@@ -1,5 +1,5 @@
 // TODO fix mocks
-/* eslint-disable jest/expect-expect */
+/* eslint jest/expect-expect: 1 */
 import URL from 'url';
 import 'jest-extended';
 import { REPOSITORY_DISABLED } from '../../constants/error-messages';
