@@ -183,7 +183,7 @@ export class Storage {
         logger.debug(`Cloning git submodule at ${submodule}`);
         await this._git.submoduleUpdate(['--init', '--', submodule]);
       } catch (err) {
-        logger.warn(`Unable to initialise git submodule at ${submodule}`);
+        logger.warn({ err }, `Unable to initialise git submodule at ${submodule}`);
       }
     }
     try {
