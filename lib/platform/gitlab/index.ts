@@ -591,13 +591,11 @@ export function commitFilesToBranch({
   branchName,
   files,
   message,
-  parentBranch = config.baseBranch,
 }: CommitFilesConfig): Promise<string | null> {
   return config.storage.commitFilesToBranch({
     branchName,
     files,
     message,
-    parentBranch,
   });
 }
 

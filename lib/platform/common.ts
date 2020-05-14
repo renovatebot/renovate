@@ -27,7 +27,6 @@ export type CommitFilesConfig = {
   branchName: string;
   files: File[];
   message: string;
-  parentBranch?: string;
 };
 
 export interface GotApiOptions {
