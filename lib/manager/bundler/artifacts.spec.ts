@@ -1,5 +1,4 @@
 import { exec as _exec } from 'child_process';
-import _fs from 'fs-extra';
 import Git from 'simple-git/promise';
 import { join } from 'upath';
 import { envMock, mockExecAll } from '../../../test/execUtil';
@@ -10,6 +9,7 @@ import { setUtilConfig } from '../../util';
 import { BinarySource } from '../../util/exec/common';
 import { resetPrefetchedImages } from '../../util/exec/docker';
 import * as _env from '../../util/exec/env';
+import * as _fs from '../../util/fs';
 import * as _bundlerHostRules from './host-rules';
 import { updateArtifacts } from '.';
 
@@ -25,6 +25,7 @@ jest.mock('child_process');
 jest.mock('../../../lib/util/exec/env');
 jest.mock('../../../lib/platform');
 jest.mock('../../../lib/datasource/docker');
+jest.mock('../../../lib/util/fs');
 jest.mock('../../../lib/util/host-rules');
 jest.mock('./host-rules');
 jest.mock('../../util/exec/docker/index', () =>
@@ -63,13 +64,13 @@ describe('bundler.updateArtifacts()', () => {
     ).toBeNull();
   });
   it('returns null if Gemfile.lock was not changed', async () => {
-    platform.getFile.mockResolvedValueOnce('Current Gemfile.lock');
-    fs.outputFile.mockResolvedValueOnce(null as never);
+    fs.readLocalFile.mockResolvedValueOnce('Current Gemfile.lock');
+    fs.writeLocalFile.mockResolvedValueOnce(null as never);
     const execSnapshots = mockExecAll(exec);
     platform.getRepoStatus.mockResolvedValueOnce({
       modified: [],
     } as Git.StatusResult);
-    fs.readFile.mockResolvedValueOnce('Updated Gemfile.lock' as any);
+    fs.readLocalFile.mockResolvedValueOnce('Updated Gemfile.lock' as any);
     expect(
       await updateArtifacts({
         packageFileName: 'Gemfile',
@@ -81,13 +82,14 @@ describe('bundler.updateArtifacts()', () => {
     expect(execSnapshots).toMatchSnapshot();
   });
   it('works for default binarySource', async () => {
-    platform.getFile.mockResolvedValueOnce('Current Gemfile.lock');
-    fs.outputFile.mockResolvedValueOnce(null as never);
+    fs.readLocalFile.mockResolvedValueOnce('Current Gemfile.lock');
+    fs.writeLocalFile.mockResolvedValueOnce(null as never);
+    fs.readLocalFile.mockResolvedValueOnce(null);
     const execSnapshots = mockExecAll(exec);
     platform.getRepoStatus.mockResolvedValueOnce({
       modified: ['Gemfile.lock'],
     } as Git.StatusResult);
-    fs.readFile.mockResolvedValueOnce('Updated Gemfile.lock' as any);
+    fs.readLocalFile.mockResolvedValueOnce('Updated Gemfile.lock' as any);
     expect(
       await updateArtifacts({
         packageFileName: 'Gemfile',
@@ -99,13 +101,14 @@ describe('bundler.updateArtifacts()', () => {
     expect(execSnapshots).toMatchSnapshot();
   });
   it('works explicit global binarySource', async () => {
-    platform.getFile.mockResolvedValueOnce('Current Gemfile.lock');
-    fs.outputFile.mockResolvedValueOnce(null as never);
+    fs.readLocalFile.mockResolvedValueOnce('Current Gemfile.lock');
+    fs.writeLocalFile.mockResolvedValueOnce(null as never);
+    fs.readLocalFile.mockResolvedValueOnce(null);
     const execSnapshots = mockExecAll(exec);
     platform.getRepoStatus.mockResolvedValueOnce({
       modified: ['Gemfile.lock'],
     } as Git.StatusResult);
-    fs.readFile.mockResolvedValueOnce('Updated Gemfile.lock' as any);
+    fs.readLocalFile.mockResolvedValueOnce('Updated Gemfile.lock' as any);
     expect(
       await updateArtifacts({
         packageFileName: 'Gemfile',
@@ -124,9 +127,9 @@ describe('bundler.updateArtifacts()', () => {
       await setUtilConfig({ ...config, binarySource: BinarySource.Docker });
     });
     it('.ruby-version', async () => {
-      platform.getFile.mockResolvedValueOnce('Current Gemfile.lock');
-      fs.outputFile.mockResolvedValueOnce(null as never);
-      platform.getFile.mockResolvedValueOnce('1.2.0');
+      fs.readLocalFile.mockResolvedValueOnce('Current Gemfile.lock');
+      fs.writeLocalFile.mockResolvedValueOnce(null as never);
+      fs.readLocalFile.mockResolvedValueOnce('1.2.0');
       datasource.getReleases.mockResolvedValueOnce({
         releases: [
           { version: '1.0.0' },
@@ -138,7 +141,7 @@ describe('bundler.updateArtifacts()', () => {
       platform.getRepoStatus.mockResolvedValueOnce({
         modified: ['Gemfile.lock'],
       } as Git.StatusResult);
-      fs.readFile.mockResolvedValueOnce('Updated Gemfile.lock' as any);
+      fs.readLocalFile.mockResolvedValueOnce('Updated Gemfile.lock' as any);
       expect(
         await updateArtifacts({
           packageFileName: 'Gemfile',
@@ -153,8 +156,8 @@ describe('bundler.updateArtifacts()', () => {
       expect(execSnapshots).toMatchSnapshot();
     });
     it('compatibility options', async () => {
-      platform.getFile.mockResolvedValueOnce('Current Gemfile.lock');
-      fs.outputFile.mockResolvedValueOnce(null as never);
+      fs.readLocalFile.mockResolvedValueOnce('Current Gemfile.lock');
+      fs.writeLocalFile.mockResolvedValueOnce(null as never);
       datasource.getReleases.mockResolvedValueOnce({
         releases: [
           { version: '1.0.0' },
@@ -166,7 +169,7 @@ describe('bundler.updateArtifacts()', () => {
       platform.getRepoStatus.mockResolvedValueOnce({
         modified: ['Gemfile.lock'],
       } as Git.StatusResult);
-      fs.readFile.mockResolvedValueOnce('Updated Gemfile.lock' as any);
+      fs.readLocalFile.mockResolvedValueOnce('Updated Gemfile.lock' as any);
       expect(
         await updateArtifacts({
           packageFileName: 'Gemfile',
@@ -186,8 +189,8 @@ describe('bundler.updateArtifacts()', () => {
       expect(execSnapshots).toMatchSnapshot();
     });
     it('invalid compatibility options', async () => {
-      platform.getFile.mockResolvedValueOnce('Current Gemfile.lock');
-      fs.outputFile.mockResolvedValueOnce(null as never);
+      fs.readLocalFile.mockResolvedValueOnce('Current Gemfile.lock');
+      fs.writeLocalFile.mockResolvedValueOnce(null as never);
       datasource.getReleases.mockResolvedValueOnce({
         releases: [
           { version: '1.0.0' },
@@ -199,7 +202,7 @@ describe('bundler.updateArtifacts()', () => {
       platform.getRepoStatus.mockResolvedValueOnce({
         modified: ['Gemfile.lock'],
       } as Git.StatusResult);
-      fs.readFile.mockResolvedValueOnce('Updated Gemfile.lock' as any);
+      fs.readLocalFile.mockResolvedValueOnce('Updated Gemfile.lock' as any);
       expect(
         await updateArtifacts({
           packageFileName: 'Gemfile',
@@ -220,9 +223,9 @@ describe('bundler.updateArtifacts()', () => {
     });
 
     it('injects bundler host configuration environment variables', async () => {
-      platform.getFile.mockResolvedValueOnce('Current Gemfile.lock');
-      fs.outputFile.mockResolvedValueOnce(null as never);
-      platform.getFile.mockResolvedValueOnce('1.2.0');
+      fs.readLocalFile.mockResolvedValueOnce('Current Gemfile.lock');
+      fs.writeLocalFile.mockResolvedValueOnce(null as never);
+      fs.readLocalFile.mockResolvedValueOnce('1.2.0');
       datasource.getReleases.mockResolvedValueOnce({
         releases: [
           { version: '1.0.0' },
@@ -246,7 +249,7 @@ describe('bundler.updateArtifacts()', () => {
       platform.getRepoStatus.mockResolvedValueOnce({
         modified: ['Gemfile.lock'],
       } as Git.StatusResult);
-      fs.readFile.mockResolvedValueOnce('Updated Gemfile.lock' as any);
+      fs.readLocalFile.mockResolvedValueOnce('Updated Gemfile.lock' as any);
       expect(
         await updateArtifacts({
           packageFileName: 'Gemfile',
@@ -265,8 +268,8 @@ describe('bundler.updateArtifacts()', () => {
     const execError = new Error();
     (execError as any).stdout = ' foo was resolved to';
     (execError as any).stderr = '';
-    platform.getFile.mockResolvedValueOnce('Current Gemfile.lock');
-    fs.outputFile.mockResolvedValueOnce(null as never);
+    fs.readLocalFile.mockResolvedValueOnce('Current Gemfile.lock');
+    fs.writeLocalFile.mockResolvedValueOnce(null as never);
     const execSnapshots = mockExecAll(exec, execError);
     platform.getRepoStatus.mockResolvedValueOnce({
       modified: ['Gemfile.lock'],
@@ -285,13 +288,13 @@ describe('bundler.updateArtifacts()', () => {
     expect(execSnapshots).toMatchSnapshot();
   });
   it('performs lockFileMaintenance', async () => {
-    platform.getFile.mockResolvedValueOnce('Current Gemfile.lock');
-    fs.outputFile.mockResolvedValueOnce(null as never);
+    fs.readLocalFile.mockResolvedValueOnce('Current Gemfile.lock');
+    fs.writeLocalFile.mockResolvedValueOnce(null as never);
     const execSnapshots = mockExecAll(exec);
     platform.getRepoStatus.mockResolvedValueOnce({
       modified: ['Gemfile.lock'],
     } as Git.StatusResult);
-    fs.readFile.mockResolvedValueOnce('Updated Gemfile.lock' as any);
+    fs.readLocalFile.mockResolvedValueOnce('Updated Gemfile.lock' as any);
     expect(
       await updateArtifacts({
         packageFileName: 'Gemfile',

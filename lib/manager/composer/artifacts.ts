@@ -12,6 +12,7 @@ import * as datasourcePackagist from '../../datasource/packagist';
 import { logger } from '../../logger';
 import { platform } from '../../platform';
 import { ExecOptions, exec } from '../../util/exec';
+import { deleteLocalFile, readLocalFile, writeLocalFile } from '../../util/fs';
 import * as hostRules from '../../util/host-rules';
 import { UpdateArtifact, UpdateArtifactsResult } from '../common';
 
@@ -30,7 +31,7 @@ export async function updateArtifacts({
   logger.debug(`Using composer cache ${cacheDir}`);
 
   const lockFileName = packageFileName.replace(/\.json$/, '.lock');
-  const existingLockFileContent = await platform.getFile(lockFileName);
+  const existingLockFileContent = await readLocalFile(lockFileName);
   if (!existingLockFileContent) {
     logger.debug('No composer.lock found');
     return null;
@@ -38,11 +39,9 @@ export async function updateArtifacts({
   const cwd = upath.join(config.localDir, upath.dirname(packageFileName));
   await fs.ensureDir(upath.join(cwd, 'vendor'));
   try {
-    const localPackageFileName = upath.join(config.localDir, packageFileName);
-    await fs.outputFile(localPackageFileName, newPackageFileContent);
-    const localLockFileName = upath.join(config.localDir, lockFileName);
+    await writeLocalFile(packageFileName, newPackageFileContent);
     if (config.isLockFileMaintenance) {
-      await fs.remove(localLockFileName);
+      await deleteLocalFile(lockFileName);
     }
     const authJson = {};
     let credentials = hostRules.find({
@@ -98,8 +97,7 @@ export async function updateArtifacts({
       logger.warn({ err }, 'Error setting registryUrls auth for composer');
     }
     if (authJson) {
-      const localAuthFileName = upath.join(cwd, 'auth.json');
-      await fs.outputFile(localAuthFileName, JSON.stringify(authJson));
+      await writeLocalFile('auth.json', JSON.stringify(authJson));
     }
     const execOptions: ExecOptions = {
       cwd,
@@ -137,7 +135,7 @@ export async function updateArtifacts({
       {
         file: {
           name: lockFileName,
-          contents: await fs.readFile(localLockFileName, 'utf8'),
+          contents: await readLocalFile(lockFileName),
         },
       },
     ];

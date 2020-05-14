@@ -19,7 +19,7 @@ const {
   major: getMajor,
   minor: getMinor,
   patch: getPatch,
-  eq: equals,
+  eq,
 } = pep440;
 
 const isStable = (input: string): boolean => {
@@ -49,6 +49,10 @@ export const isSingleVersion = (constraint: string): string =>
   (constraint.startsWith('==') && isVersion(constraint.substring(2).trim()));
 
 export { isVersion, matches };
+
+const equals = (version1: string, version2: string): boolean => {
+  return isVersion(version1) && isVersion(version2) && eq(version1, version2);
+};
 
 export const api: VersioningApi = {
   equals,

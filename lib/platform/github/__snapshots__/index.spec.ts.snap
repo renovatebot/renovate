@@ -607,7 +607,127 @@ Array [
 ]
 `;
 
-exports[`platform/github ensureCommentRemoval deletes comment if found 1`] = `
+exports[`platform/github ensureCommentRemoval deletes comment by content if found 1`] = `
+Array [
+  Object {
+    "headers": Object {
+      "accept": "application/json",
+      "accept-encoding": "gzip, deflate",
+      "authorization": "token abc123",
+      "host": "api.github.com",
+      "user-agent": "https://github.com/renovatebot/renovate",
+    },
+    "method": "GET",
+    "url": "https://api.github.com/repos/some/repo",
+  },
+  Object {
+    "graphql": Object {
+      "query": Object {
+        "repository": Object {
+          "__args": Object {
+            "name": "repo",
+            "owner": "some",
+          },
+          "pullRequests": Object {
+            "__args": Object {
+              "first": "100",
+            },
+            "nodes": Object {
+              "comments": Object {
+                "__args": Object {
+                  "last": "100",
+                },
+                "nodes": Object {
+                  "body": null,
+                  "databaseId": null,
+                },
+              },
+              "headRefName": null,
+              "number": null,
+              "state": null,
+              "title": null,
+            },
+          },
+        },
+      },
+    },
+    "headers": Object {
+      "accept-encoding": "gzip, deflate",
+      "authorization": "token abc123",
+      "content-length": 513,
+      "host": "api.github.com",
+      "user-agent": "https://github.com/renovatebot/renovate",
+    },
+    "method": "POST",
+    "url": "https://api.github.com/graphql",
+  },
+  Object {
+    "graphql": Object {
+      "query": Object {
+        "repository": Object {
+          "__args": Object {
+            "name": "repo",
+            "owner": "some",
+          },
+          "pullRequests": Object {
+            "__args": Object {
+              "first": "25",
+            },
+            "nodes": Object {
+              "comments": Object {
+                "__args": Object {
+                  "last": "100",
+                },
+                "nodes": Object {
+                  "body": null,
+                  "databaseId": null,
+                },
+              },
+              "headRefName": null,
+              "number": null,
+              "state": null,
+              "title": null,
+            },
+          },
+        },
+      },
+    },
+    "headers": Object {
+      "accept-encoding": "gzip, deflate",
+      "authorization": "token abc123",
+      "content-length": 512,
+      "host": "api.github.com",
+      "user-agent": "https://github.com/renovatebot/renovate",
+    },
+    "method": "POST",
+    "url": "https://api.github.com/graphql",
+  },
+  Object {
+    "headers": Object {
+      "accept": "application/json",
+      "accept-encoding": "gzip, deflate",
+      "authorization": "token abc123",
+      "host": "api.github.com",
+      "user-agent": "https://github.com/renovatebot/renovate",
+    },
+    "method": "GET",
+    "url": "https://api.github.com/repos/some/repo/issues/42/comments?per_page=100",
+  },
+  Object {
+    "headers": Object {
+      "accept": "application/json",
+      "accept-encoding": "gzip, deflate",
+      "authorization": "token abc123",
+      "host": "api.github.com",
+      "user-agent": "https://github.com/renovatebot/renovate",
+    },
+    "method": "DELETE",
+    "url": "https://api.github.com/repos/some/repo/issues/comments/1234",
+  },
+]
+`;
+
+exports[`platform/github ensureCommentRemoval deletes comment by topic if found 1`] = `
 Array [
   Object {
     "headers": Object {

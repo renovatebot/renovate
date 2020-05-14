@@ -2,7 +2,7 @@ import is from '@sindresorhus/is';
 import { logger } from '../../logger';
 import * as globalCache from '../../util/cache/global';
 import { Http } from '../../util/http';
-import { GetReleasesConfig, ReleaseResult } from '../common';
+import { DatasourceError, GetReleasesConfig, ReleaseResult } from '../common';
 
 export const id = 'terraform-module';
 
@@ -110,6 +110,11 @@ export async function getReleases({
         err,
       });
       return null;
+    }
+    const failureCodes = ['EAI_AGAIN'];
+    // istanbul ignore if
+    if (failureCodes.includes(err.code)) {
+      throw new DatasourceError(err);
     }
     logger.warn(
       { err, lookupName },

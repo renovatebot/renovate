@@ -18,9 +18,12 @@ export interface PackageFilesResult {
 export async function getUpdatedPackageFiles(
   config: BranchConfig
 ): Promise<PackageFilesResult> {
-  logger.debug('manager.getUpdatedPackageFiles()');
   logger.trace({ config });
-  const { parentBranch } = config;
+  const { branchName, parentBranch } = config;
+  logger.debug(
+    { parentBranch, branchName },
+    'manager.getUpdatedPackageFiles()'
+  );
   const updatedFileContents: Record<string, string> = {};
   const packageFileManagers: Record<string, string> = {};
   const packageFileUpdatedDeps: Record<string, string[]> = {};
@@ -34,12 +37,20 @@ export async function getUpdatedPackageFiles(
     if (upgrade.updateType === 'lockFileMaintenance') {
       lockFileMaintenanceFiles.push(packageFile);
     } else {
-      const existingContent =
-        updatedFileContents[packageFile] ||
-        (await platform.getFile(packageFile, config.parentBranch));
+      let existingContent = updatedFileContents[packageFile];
+      // istanbul ignore if
+      if (existingContent) {
+        logger.debug({ packageFile }, 'Reusing updated contents');
+      } else {
+        logger.debug(`platform.getFile(${packageFile}, ${parentBranch})`);
+        existingContent = await platform.getFile(packageFile, parentBranch);
+      }
       // istanbul ignore if
       if (config.parentBranch && !existingContent) {
-        logger.debug('Rebasing branch after file not found');
+        logger.debug(
+          { packageFile, depName },
+          'Rebasing branch after file not found'
+        );
         return getUpdatedPackageFiles({
           ...config,
           parentBranch: undefined,
@@ -50,9 +61,9 @@ export async function getUpdatedPackageFiles(
         const res = await doAutoReplace(upgrade, existingContent, parentBranch);
         if (res) {
           if (res === existingContent) {
-            logger.debug('No content changed');
+            logger.debug({ packageFile, depName }, 'No content changed');
           } else {
-            logger.debug('Contents updated');
+            logger.debug({ packageFile, depName }, 'Contents updated');
             updatedFileContents[packageFile] = res;
           }
           continue; // eslint-disable-line no-continue
@@ -62,7 +73,7 @@ export async function getUpdatedPackageFiles(
             parentBranch: undefined,
           });
         }
-        logger.error('Could not autoReplace');
+        logger.error({ packageFile, depName }, 'Could not autoReplace');
         throw new Error(WORKER_FILE_UPDATE_FAILED);
       }
       const newContent = await updateDependency({
@@ -71,7 +82,10 @@ export async function getUpdatedPackageFiles(
       });
       if (!newContent) {
         if (config.parentBranch) {
-          logger.debug('Rebasing branch after error updating content');
+          logger.debug(
+            { packageFile, depName },
+            'Rebasing branch after error updating content'
+          );
           return getUpdatedPackageFiles({
             ...config,
             parentBranch: undefined,
@@ -86,13 +100,16 @@ export async function getUpdatedPackageFiles(
       if (newContent !== existingContent) {
         if (config.parentBranch) {
           // This ensure it's always 1 commit from the bot
-          logger.debug('Need to update package file so will rebase first');
+          logger.debug(
+            { packageFile, depName },
+            'Need to update package file so will rebase first'
+          );
           return getUpdatedPackageFiles({
             ...config,
             parentBranch: undefined,
           });
         }
-        logger.debug('Updating packageFile content');
+        logger.debug({ packageFile, depName }, 'Updating packageFile content');
         updatedFileContents[packageFile] = newContent;
       }
       if (

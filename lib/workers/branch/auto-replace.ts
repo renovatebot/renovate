@@ -31,22 +31,32 @@ export async function confirmIfDepUpdated(
     );
     newUpgrade = newExtract.deps[depIndex];
   } catch (err) /* istanbul ignore next */ {
-    logger.debug('Failed to parse newContent');
+    logger.debug({ manager, packageFile }, 'Failed to parse newContent');
   }
   if (!newUpgrade) {
-    logger.debug('No newUpgrade');
+    logger.debug({ manager, packageFile }, 'No newUpgrade');
     return false;
   }
   // istanbul ignore if
   if (upgrade.depName !== newUpgrade.depName) {
     logger.debug(
-      { currentDepName: upgrade.depName, newDepName: newUpgrade.depName },
+      {
+        manager,
+        packageFile,
+        currentDepName: upgrade.depName,
+        newDepName: newUpgrade.depName,
+      },
       'depName mismatch'
     );
   }
   if (newUpgrade.currentValue !== newValue) {
     logger.debug(
-      { expectedValue: newValue, foundValue: newUpgrade.currentValue },
+      {
+        manager,
+        packageFile,
+        expectedValue: newValue,
+        foundValue: newUpgrade.currentValue,
+      },
       'Value mismatch'
     );
     return false;
@@ -82,7 +92,10 @@ export async function checkBranchDepsMatchBaseDeps(
     );
     return getDepsSignature(baseDeps) === getDepsSignature(branchDeps);
   } catch (err) /* istanbul ignore next */ {
-    logger.info('Failed to parse branchContent - rebasing');
+    logger.info(
+      { manager, packageFile },
+      'Failed to parse branchContent - rebasing'
+    );
     return false;
   }
 }
@@ -92,19 +105,8 @@ export async function doAutoReplace(
   existingContent: string,
   parentBranch: string | null
 ): Promise<string | null> {
-  if (parentBranch) {
-    if (!(await checkBranchDepsMatchBaseDeps(upgrade, existingContent))) {
-      logger.debug('Rebasing branch after deps list has changed');
-      return null;
-    }
-    if (!(await confirmIfDepUpdated(upgrade, existingContent))) {
-      logger.debug('Rebasing after outdated branch dep found');
-      return null;
-    }
-    logger.debug('Branch dep is already updated');
-    return existingContent;
-  }
   const {
+    packageFile,
     depName,
     currentValue,
     newValue,
@@ -112,12 +114,30 @@ export async function doAutoReplace(
     newDigest,
     autoReplaceStringTemplate,
   } = upgrade;
+  if (parentBranch) {
+    if (!(await checkBranchDepsMatchBaseDeps(upgrade, existingContent))) {
+      logger.debug(
+        { packageFile, depName },
+        'Rebasing branch after deps list has changed'
+      );
+      return null;
+    }
+    if (!(await confirmIfDepUpdated(upgrade, existingContent))) {
+      logger.debug(
+        { packageFile, depName },
+        'Rebasing after outdated branch dep found'
+      );
+      return null;
+    }
+    logger.debug({ packageFile, depName }, 'Branch dep is already updated');
+    return existingContent;
+  }
   const replaceString = upgrade.replaceString || currentValue;
   logger.trace({ depName, replaceString }, 'autoReplace replaceString');
   let searchIndex = existingContent.indexOf(replaceString);
   if (searchIndex === -1) {
     logger.warn(
-      { depName, existingContent, replaceString },
+      { packageFile, depName, existingContent, replaceString },
       'Cannot find replaceString in current file content'
     );
     return existingContent;
@@ -141,12 +161,18 @@ export async function doAutoReplace(
         );
       }
     }
-    logger.debug(`Starting search at index ${searchIndex}`);
+    logger.debug(
+      { packageFile, depName },
+      `Starting search at index ${searchIndex}`
+    );
     // Iterate through the rest of the file
     for (; searchIndex < existingContent.length; searchIndex += 1) {
       // First check if we have a hit for the old version
       if (matchAt(existingContent, searchIndex, replaceString)) {
-        logger.debug(`Found match at index ${searchIndex}`);
+        logger.debug(
+          { packageFile, depName },
+          `Found match at index ${searchIndex}`
+        );
         // Now test if the result matches
         const testContent = replaceAt(
           existingContent,
@@ -163,7 +189,7 @@ export async function doAutoReplace(
       }
     }
   } catch (err) /* istanbul ignore next */ {
-    logger.debug({ err }, 'doAutoReplace error');
+    logger.debug({ packageFile, depName, err }, 'doAutoReplace error');
   }
   // istanbul ignore next
   throw new Error(WORKER_FILE_UPDATE_FAILED);
