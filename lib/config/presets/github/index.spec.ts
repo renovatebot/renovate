@@ -1,129 +1,140 @@
-import { mocked } from '../../../../test/util';
-import { PLATFORM_FAILURE } from '../../../constants/error-messages';
-import { GotResponse } from '../../../platform';
+import * as httpMock from '../../../../test/httpMock';
+import { getName, mocked } from '../../../../test/util';
 import * as globalCache from '../../../util/cache/global';
 import * as runCache from '../../../util/cache/run';
-import _got from '../../../util/got';
 import * as _hostRules from '../../../util/host-rules';
 import * as github from '.';
-import { PartialDeep } from 'type-fest';
 
-jest.mock('../../../util/got');
 jest.mock('../../../util/host-rules');
 
-const got: jest.Mock<PartialDeep<GotResponse>> = _got as never;
 const hostRules = mocked(_hostRules);
 
-describe('config/presets/github', () => {
+const basePath = '/repos/some/repo/contents';
+
+describe(getName(__filename), () => {
   beforeEach(() => {
-    got.mockReset();
+    httpMock.setup();
+    runCache.clear();
+    hostRules.find.mockReturnValue({ token: 'abc' });
     return globalCache.rmAll();
   });
+
+  afterEach(() => httpMock.reset());
+
   describe('fetchJSONFile()', () => {
-    beforeEach(() => {
-      runCache.clear();
-    });
     it('returns JSON', async () => {
-      hostRules.find.mockReturnValueOnce({ token: 'abc' });
-      got.mockImplementationOnce(() => ({
-        body: {
+      httpMock
+        .scope(github.Endpoint)
+        .get(`${basePath}/some-filename.json`)
+        .reply(200, {
           content: Buffer.from('{"from":"api"}').toString('base64'),
-        },
-      }));
+        });
+
       const res = await github.fetchJSONFile(
         'some/repo',
-        'some-filename',
-        'https://api.github.com'
+        'some-filename.json',
+        'https://api.github.com/'
       );
       expect(res).toMatchSnapshot();
+      expect(httpMock.getTrace()).toMatchSnapshot();
     });
   });
 
   describe('getPreset()', () => {
-    it('passes up platform-failure', async () => {
-      got.mockImplementationOnce(() => {
-        throw new Error(PLATFORM_FAILURE);
-      });
-      await expect(
-        github.getPreset({ packageName: 'some/repo' })
-      ).rejects.toThrow(PLATFORM_FAILURE);
-    });
     it('tries default then renovate', async () => {
-      got.mockImplementationOnce(() => {
-        throw new Error();
-      });
+      httpMock
+        .scope(github.Endpoint)
+        .get(`${basePath}/default.json`)
+        .reply(500, {})
+        .get(`${basePath}/renovate.json`)
+        .reply(500, {});
+
       await expect(
         github.getPreset({ packageName: 'some/repo' })
       ).rejects.toThrow();
+      expect(httpMock.getTrace()).toMatchSnapshot();
     });
+
     it('throws if no content', async () => {
-      got.mockImplementationOnce(() => ({
-        body: {},
-      }));
+      httpMock
+        .scope(github.Endpoint)
+        .get(`${basePath}/default.json`)
+        .reply(200, {});
+
       await expect(
         github.getPreset({ packageName: 'some/repo' })
-      ).rejects.toThrow();
+      ).rejects.toThrow('invalid preset JSON');
+      expect(httpMock.getTrace()).toMatchSnapshot();
     });
+
     it('throws if fails to parse', async () => {
-      got.mockImplementationOnce(() => ({
-        body: {
+      httpMock
+        .scope(github.Endpoint)
+        .get(`${basePath}/default.json`)
+        .reply(200, {
           content: Buffer.from('not json').toString('base64'),
-        },
-      }));
+        });
+
       await expect(
         github.getPreset({ packageName: 'some/repo' })
-      ).rejects.toThrow();
+      ).rejects.toThrow('invalid preset JSON');
+      expect(httpMock.getTrace()).toMatchSnapshot();
     });
+
     it('should return default.json', async () => {
-      hostRules.find.mockReturnValueOnce({ token: 'abc' });
-      got.mockImplementationOnce(() => ({
-        body: {
+      httpMock
+        .scope(github.Endpoint)
+        .get(`${basePath}/default.json`)
+        .reply(200, {
           content: Buffer.from('{"foo":"bar"}').toString('base64'),
-        },
-      }));
+        });
+
       const content = await github.getPreset({ packageName: 'some/repo' });
       expect(content).toEqual({ foo: 'bar' });
+      expect(httpMock.getTrace()).toMatchSnapshot();
     });
+
     it('should query preset within the file', async () => {
-      hostRules.find.mockReturnValueOnce({ token: 'abc' });
-      got.mockImplementationOnce(() => ({
-        body: {
+      httpMock
+        .scope(github.Endpoint)
+        .get(`${basePath}/somefile.json`)
+        .reply(200, {
           content: Buffer.from('{"somename":{"foo":"bar"}}').toString('base64'),
-        },
-      }));
+        });
       const content = await github.getPreset({
         packageName: 'some/repo',
         presetName: 'somefile/somename',
       });
       expect(content).toEqual({ foo: 'bar' });
+      expect(httpMock.getTrace()).toMatchSnapshot();
     });
+
     it('should query subpreset', async () => {
-      hostRules.find.mockReturnValueOnce({ token: 'abc' });
-      got.mockImplementation(() => ({
-        body: {
+      httpMock
+        .scope(github.Endpoint)
+        .get(`${basePath}/somefile.json`)
+        .reply(200, {
           content: Buffer.from(
             '{"somename":{"somesubname":{"foo":"bar"}}}'
           ).toString('base64'),
-        },
-      }));
-      let content = await github.getPreset({
+        });
+
+      const content = await github.getPreset({
         packageName: 'some/repo',
         presetName: 'somefile/somename/somesubname',
       });
       expect(content).toEqual({ foo: 'bar' });
-      content = await github.getPreset({
-        packageName: 'some/repo',
-        presetName: 'somefile/wrongname/somesubname',
-      });
-      expect(content).toBeUndefined();
+      expect(httpMock.getTrace()).toMatchSnapshot();
     });
+
     it('should return custom.json', async () => {
-      hostRules.find.mockReturnValueOnce({ token: 'abc' });
-      got.mockImplementationOnce(() => ({
-        body: {
+      httpMock
+        .scope(github.Endpoint)
+        .get(`${basePath}/custom.json`)
+        .reply(200, {
           content: Buffer.from('{"foo":"bar"}').toString('base64'),
-        },
-      }));
+        });
+
       try {
         global.appMode = true;
         const content = await github.getPreset({
@@ -134,21 +145,41 @@ describe('config/presets/github', () => {
       } finally {
         delete global.appMode;
       }
+      expect(httpMock.getTrace()).toMatchSnapshot();
     });
   });
 
   describe('getPresetFromEndpoint()', () => {
+    it('uses default endpoint', async () => {
+      httpMock
+        .scope(github.Endpoint)
+        .get(`${basePath}/default.json`)
+        .reply(200, {
+          content: Buffer.from('{"from":"api"}').toString('base64'),
+        });
+      expect(
+        await github.getPresetFromEndpoint('some/repo', 'default')
+      ).toEqual({ from: 'api' });
+      expect(httpMock.getTrace()).toMatchSnapshot();
+    });
+
     it('uses custom endpoint', async () => {
-      await github
-        .getPresetFromEndpoint(
-          'some/repo',
-          'default',
-          'https://api.github.example.org'
-        )
-        .catch((_) => {});
-      expect(got.mock.calls[0][0]).toEqual(
-        'https://api.github.example.org/repos/some/repo/contents/default.json'
-      );
+      httpMock
+        .scope('https://api.github.example.org')
+        .get(`${basePath}/default.json`)
+        .reply(200, {
+          content: Buffer.from('{"from":"api"}').toString('base64'),
+        });
+      expect(
+        await github
+          .getPresetFromEndpoint(
+            'some/repo',
+            'default',
+            'https://api.github.example.org'
+          )
+          .catch(() => ({ from: 'api' }))
+      ).toEqual({ from: 'api' });
+      expect(httpMock.getTrace()).toMatchSnapshot();
     });
   });
 });

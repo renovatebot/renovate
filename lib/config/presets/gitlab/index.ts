@@ -1,21 +1,19 @@
+import { PLATFORM_FAILURE } from '../../../constants/error-messages';
 import { logger } from '../../../logger';
 import { api } from '../../../platform/gitlab/gl-got-wrapper';
-import { ensureTrailingSlash } from '../../../util/url';
+import type { GitLabBranch } from '../../../types/platform/gitlab';
 import { Preset, PresetConfig } from '../common';
+import { PRESET_DEP_NOT_FOUND, fetchPreset } from '../util';
 
-const { get: glGot } = api;
+export const Endpoint = 'https://gitlab.com/api/v4/';
 
 async function getDefaultBranchName(
   urlEncodedPkgName: string,
   endpoint: string
 ): Promise<string> {
   const branchesUrl = `${endpoint}projects/${urlEncodedPkgName}/repository/branches`;
-  type GlBranch = {
-    default: boolean;
-    name: string;
-  }[];
 
-  const res = await glGot<GlBranch>(branchesUrl);
+  const res = await api.get<GitLabBranch[]>(branchesUrl);
   const branches = res.body;
   let defautlBranchName = 'master';
   for (const branch of branches) {
@@ -28,48 +26,48 @@ async function getDefaultBranchName(
   return defautlBranchName;
 }
 
+export async function fetchJSONFile(
+  repo: string,
+  fileName: string,
+  endpoint: string
+): Promise<Preset> {
+  try {
+    const urlEncodedRepo = encodeURIComponent(repo);
+    const urlEncodedPkgName = encodeURIComponent(fileName);
+    const defautlBranchName = await getDefaultBranchName(
+      urlEncodedRepo,
+      endpoint
+    );
+    const url = `${endpoint}projects/${urlEncodedRepo}/repository/files/${urlEncodedPkgName}/raw?ref=${defautlBranchName}`;
+    return (await api.get<Preset>(url)).body;
+  } catch (err) {
+    if (err.message === PLATFORM_FAILURE) {
+      throw err;
+    }
+    logger.debug(
+      { statusCode: err.statusCode },
+      `Failed to retrieve ${fileName} from repo`
+    );
+    throw new Error(PRESET_DEP_NOT_FOUND);
+  }
+}
+
 export async function getPresetFromEndpoint(
   pkgName: string,
   presetName: string,
-  endpoint = 'https://gitlab.com/api/v4/'
+  endpoint = Endpoint
 ): Promise<Preset> {
-  // eslint-disable-next-line no-param-reassign
-  endpoint = ensureTrailingSlash(endpoint);
-  if (presetName !== 'default') {
-    // TODO: proper error contructor
-    throw new Error(
-      // { pkgName, presetName },
-      'Sub-preset names are not supported with Gitlab datasource'
-    );
-  }
-  let res: string;
-  try {
-    const urlEncodedPkgName = encodeURIComponent(pkgName);
-    const defautlBranchName = await getDefaultBranchName(
-      urlEncodedPkgName,
-      endpoint
-    );
-
-    const presetUrl = `${endpoint}projects/${urlEncodedPkgName}/repository/files/renovate.json?ref=${defautlBranchName}`;
-    res = Buffer.from(
-      (await glGot(presetUrl)).body.content,
-      'base64'
-    ).toString();
-  } catch (err) {
-    logger.debug({ err }, 'Failed to retrieve renovate.json from repo');
-    throw new Error('dep not found');
-  }
-  try {
-    return JSON.parse(res);
-  } catch (err) /* istanbul ignore next */ {
-    logger.debug('Failed to parse renovate.json');
-    throw new Error('invalid preset JSON');
-  }
+  return fetchPreset({
+    pkgName,
+    filePreset: presetName,
+    endpoint,
+    fetch: fetchJSONFile,
+  });
 }
 
 export function getPreset({
   packageName: pkgName,
   presetName = 'default',
 }: PresetConfig): Promise<Preset> {
-  return getPresetFromEndpoint(pkgName, presetName);
+  return getPresetFromEndpoint(pkgName, presetName, Endpoint);
 }
