@@ -1,5 +1,5 @@
 // TODO fix mocks
-/* eslint-disable jest/expect-expect */
+/* eslint jest/expect-expect: 1 */
 import {
   REPOSITORY_CHANGED,
   REPOSITORY_DISABLED,
