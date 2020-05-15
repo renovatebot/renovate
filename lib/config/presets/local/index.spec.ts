@@ -48,7 +48,7 @@ describe(getName(__filename), () => {
           platform: 'GitLab',
         },
       });
-      expect(gitlab.fetchJSONFile.mock.calls).toMatchSnapshot();
+      expect(gitlab.getPresetFromEndpoint.mock.calls).toMatchSnapshot();
       expect(content).toMatchSnapshot();
     });
     it('forwards to custom gitlab', async () => {
@@ -60,7 +60,7 @@ describe(getName(__filename), () => {
           endpoint: 'https://gitlab.example.com/api/v4',
         },
       });
-      expect(gitlab.fetchJSONFile.mock.calls).toMatchSnapshot();
+      expect(gitlab.getPresetFromEndpoint.mock.calls).toMatchSnapshot();
       expect(content).toMatchSnapshot();
     });
 
@@ -71,7 +71,7 @@ describe(getName(__filename), () => {
           platform: 'github',
         },
       });
-      expect(github.fetchJSONFile.mock.calls).toMatchSnapshot();
+      expect(github.getPresetFromEndpoint.mock.calls).toMatchSnapshot();
       expect(content).toMatchSnapshot();
     });
     it('forwards to custom github', async () => {
@@ -83,7 +83,7 @@ describe(getName(__filename), () => {
           endpoint: 'https://api.github.example.com',
         },
       });
-      expect(github.fetchJSONFile.mock.calls).toMatchSnapshot();
+      expect(github.getPresetFromEndpoint.mock.calls).toMatchSnapshot();
       expect(content).toMatchSnapshot();
     });
   });
