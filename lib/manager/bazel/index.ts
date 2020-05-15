@@ -4,5 +4,5 @@ import { updateDependency } from './update';
 export { extractPackageFile, updateDependency };
 
 export const defaultConfig = {
-  fileMatch: ['(^|/)WORKSPACE$', '\\.bzl$'],
+  fileMatch: ['(^|/)WORKSPACE(|\\.bazel)$', '\\.bzl$'],
 };

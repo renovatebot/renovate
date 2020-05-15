@@ -19,7 +19,7 @@ import * as _automerge from './automerge';
 import * as _checkExisting from './check-existing';
 import * as _commit from './commit';
 import * as _getUpdated from './get-updated';
-import * as _parent from './parent';
+import * as _reuse from './reuse';
 import * as _schedule from './schedule';
 import * as _statusChecks from './status-checks';
 import * as branchWorker from '.';
@@ -27,7 +27,7 @@ import * as branchWorker from '.';
 jest.mock('./get-updated');
 jest.mock('./schedule');
 jest.mock('./check-existing');
-jest.mock('./parent');
+jest.mock('./reuse');
 jest.mock('../../manager/npm/post-update');
 jest.mock('./status-checks');
 jest.mock('./automerge');
@@ -39,7 +39,7 @@ jest.mock('fs-extra');
 const getUpdated = mocked(_getUpdated);
 const schedule = mocked(_schedule);
 const checkExisting = mocked(_checkExisting);
-const parent = mocked(_parent);
+const reuse = mocked(_reuse);
 const npmPostExtract = mocked(_npmPostExtract);
 const statusChecks = mocked(_statusChecks);
 const automerge = mocked(_automerge);
@@ -127,7 +127,7 @@ describe('workers/branch', () => {
         state: PR_STATE_CLOSED,
       } as never);
       await branchWorker.processBranch(config);
-      expect(parent.getParentBranch).toHaveBeenCalledTimes(0);
+      expect(reuse.shouldReuseExistingBranch).toHaveBeenCalledTimes(0);
     });
     it('skips branch if closed digest PR found', async () => {
       schedule.isScheduledNow.mockReturnValueOnce(false);
@@ -138,7 +138,7 @@ describe('workers/branch', () => {
         state: PR_STATE_CLOSED,
       });
       await branchWorker.processBranch(config);
-      expect(parent.getParentBranch).toHaveBeenCalledTimes(0);
+      expect(reuse.shouldReuseExistingBranch).toHaveBeenCalledTimes(0);
     });
     it('skips branch if closed minor PR found', async () => {
       schedule.isScheduledNow.mockReturnValueOnce(false);
@@ -148,7 +148,7 @@ describe('workers/branch', () => {
         state: PR_STATE_CLOSED,
       });
       await branchWorker.processBranch(config);
-      expect(parent.getParentBranch).toHaveBeenCalledTimes(0);
+      expect(reuse.shouldReuseExistingBranch).toHaveBeenCalledTimes(0);
     });
     it('skips branch if merged PR found', async () => {
       schedule.isScheduledNow.mockReturnValueOnce(false);
@@ -158,7 +158,7 @@ describe('workers/branch', () => {
         state: PR_STATE_MERGED,
       });
       await branchWorker.processBranch(config);
-      expect(parent.getParentBranch).toHaveBeenCalledTimes(0);
+      expect(reuse.shouldReuseExistingBranch).toHaveBeenCalledTimes(0);
     });
     it('throws error if closed PR found', async () => {
       schedule.isScheduledNow.mockReturnValueOnce(false);
@@ -546,7 +546,7 @@ describe('workers/branch', () => {
           ...config,
           dryRun: true,
           updateType: 'lockFileMaintenance',
-          parentBranch: undefined,
+          reuseExistingBranch: false,
           updatedArtifacts: [{ name: '|delete|', contents: 'dummy' }],
         })
       ).toEqual('done');
@@ -607,7 +607,7 @@ describe('workers/branch', () => {
         await branchWorker.processBranch({
           ...config,
           updateType: 'lockFileMaintenance',
-          parentBranch: undefined,
+          reuseExistingBranch: false,
           updatedArtifacts: [{ name: '|delete|', contents: 'dummy' }],
         })
       ).toEqual('done');
