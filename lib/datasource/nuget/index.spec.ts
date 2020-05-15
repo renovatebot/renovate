@@ -1,5 +1,6 @@
 import fs from 'fs';
 import * as globalCache from '../../util/cache/global';
+import * as runCache from '../../util/cache/run';
 import _got from '../../util/got';
 import * as _hostRules from '../../util/host-rules';
 import * as nuget from '.';
@@ -21,6 +22,10 @@ const pkgListV3WithoutProkjectUrl = fs.readFileSync(
 );
 const pkgListV3NoGitHubProjectUrl = fs.readFileSync(
   'lib/datasource/nuget/__fixtures__/nunitV3_noGitHubProjectUrl.json',
+  'utf8'
+);
+const pkgListV3PrivateFeed = fs.readFileSync(
+  'lib/datasource/nuget/__fixtures__/nunitV3_privateFeed.json',
   'utf8'
 );
 const pkgInfoV3FromNuget = fs.readFileSync(
@@ -82,8 +87,19 @@ const configV3NotNugetOrg = {
   registryUrls: ['https://myprivatefeed/index.json'],
 };
 
+const configV3Multiple = {
+  lookupName: 'nunit',
+  registryUrls: [
+    'https://api.nuget.org/v3/index.json',
+    'https://myprivatefeed/index.json',
+  ],
+};
+
 describe('datasource/nuget', () => {
-  beforeEach(() => globalCache.rmAll());
+  beforeEach(() => {
+    runCache.clear();
+    return globalCache.rmAll();
+  });
   describe('getReleases', () => {
     beforeEach(() => {
       jest.resetAllMocks();
@@ -215,6 +231,39 @@ describe('datasource/nuget', () => {
           ...configV3V2,
         })
       ).toBeNull();
+    });
+    it('returns deduplicated results', async () => {
+      got
+        .mockReturnValueOnce({
+          body: JSON.parse(nugetIndexV3),
+          statusCode: 200,
+        })
+        .mockReturnValueOnce({
+          body: JSON.parse(pkgListV3),
+          statusCode: 200,
+        })
+        .mockReturnValueOnce({
+          body: pkgInfoV3FromNuget,
+          statusCode: 200,
+        })
+        .mockReturnValueOnce({
+          body: JSON.parse(nugetIndexV3),
+          statusCode: 200,
+        })
+        .mockReturnValueOnce({
+          body: JSON.parse(pkgListV3PrivateFeed),
+          statusCode: 200,
+        })
+        .mockReturnValueOnce({
+          body: pkgInfoV3FromNuget,
+          statusCode: 200,
+        });
+      const res = await nuget.getReleases({
+        ...configV3Multiple,
+      });
+      expect(res).not.toBeNull();
+      expect(res).toMatchSnapshot();
+      expect(res.releases).toHaveLength(30);
     });
     it('returns null for unknown error in getReleasesFromV3Feed (v3)', async () => {
       got.mockImplementationOnce(() => {

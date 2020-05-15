@@ -246,7 +246,7 @@ Array [
 ]
 `;
 
-exports[`platform/bitbucket-server endpoint with no path commitFilesToBranch() sends to gitFs 1`] = `
+exports[`platform/bitbucket-server endpoint with no path commitFiles() sends to gitFs 1`] = `
 Array [
   Array [
     "./rest/api/1.0/projects/SOME/repos/repo",
@@ -439,7 +439,23 @@ Array [
 ]
 `;
 
-exports[`platform/bitbucket-server endpoint with no path ensureCommentRemoval() deletes comment if found 1`] = `
+exports[`platform/bitbucket-server endpoint with no path ensureCommentRemoval() deletes comment by content if found 1`] = `
+Array [
+  Array [
+    "./rest/api/1.0/projects/SOME/repos/repo/pull-requests/5/activities?limit=100",
+    undefined,
+  ],
+  Array [
+    "./rest/api/1.0/projects/SOME/repos/repo/pull-requests/5/activities?limit=100&start=1",
+    undefined,
+  ],
+  Array [
+    "./rest/api/1.0/projects/SOME/repos/repo/pull-requests/5/comments/22",
+  ],
+]
+`;
+
+exports[`platform/bitbucket-server endpoint with no path ensureCommentRemoval() deletes comment by topic if found 1`] = `
 Array [
   Array [
     "./rest/api/1.0/projects/SOME/repos/repo/pull-requests/5/activities?limit=100",
@@ -1809,7 +1825,7 @@ Array [
 ]
 `;
 
-exports[`platform/bitbucket-server endpoint with path commitFilesToBranch() sends to gitFs 1`] = `
+exports[`platform/bitbucket-server endpoint with path commitFiles() sends to gitFs 1`] = `
 Array [
   Array [
     "./rest/api/1.0/projects/SOME/repos/repo",
@@ -2002,7 +2018,23 @@ Array [
 ]
 `;
 
-exports[`platform/bitbucket-server endpoint with path ensureCommentRemoval() deletes comment if found 1`] = `
+exports[`platform/bitbucket-server endpoint with path ensureCommentRemoval() deletes comment by content if found 1`] = `
+Array [
+  Array [
+    "./rest/api/1.0/projects/SOME/repos/repo/pull-requests/5/activities?limit=100",
+    undefined,
+  ],
+  Array [
+    "./rest/api/1.0/projects/SOME/repos/repo/pull-requests/5/activities?limit=100&start=1",
+    undefined,
+  ],
+  Array [
+    "./rest/api/1.0/projects/SOME/repos/repo/pull-requests/5/comments/22",
+  ],
+]
+`;
+
+exports[`platform/bitbucket-server endpoint with path ensureCommentRemoval() deletes comment by topic if found 1`] = `
 Array [
   Array [
     "./rest/api/1.0/projects/SOME/repos/repo/pull-requests/5/activities?limit=100",

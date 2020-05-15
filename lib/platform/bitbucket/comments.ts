@@ -115,17 +115,28 @@ export async function ensureComment({
 export async function ensureCommentRemoval(
   config: CommentsConfig,
   prNo: number,
-  topic: string
+  topic?: string,
+  content?: string
 ): Promise<void> {
   try {
-    logger.debug(`Ensuring comment "${topic}" in #${prNo} is removed`);
+    logger.debug(
+      `Ensuring comment "${topic || content}" in #${prNo} is removed`
+    );
     const comments = await getComments(config, prNo);
-    let commentId: number;
-    comments.forEach((comment) => {
-      if (comment.content.raw.startsWith(`### ${topic}\n\n`)) {
-        commentId = comment.id;
-      }
-    });
+
+    const byTopic = (comment: Comment): boolean =>
+      comment.content.raw.startsWith(`### ${topic}\n\n`);
+    const byContent = (comment: Comment): boolean =>
+      comment.content.raw.trim() === content;
+
+    let commentId: number | null = null;
+
+    if (topic) {
+      commentId = comments.find(byTopic)?.id;
+    } else if (content) {
+      commentId = comments.find(byContent)?.id;
+    }
+
     if (commentId) {
       await deleteComment(config, prNo, commentId);
     }

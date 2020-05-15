@@ -1,3 +1,4 @@
+import { quote } from 'shlex';
 import { BUNDLER_INVALID_CREDENTIALS } from '../../constants/error-messages';
 import { logger } from '../../logger';
 import { platform } from '../../platform';
@@ -36,7 +37,7 @@ async function getRubyConstraint(
       packageFileName,
       '.ruby-version'
     );
-    const rubyVersionFileContent = await platform.getFile(rubyVersionFile);
+    const rubyVersionFileContent = await readLocalFile(rubyVersionFile, 'utf8');
     if (rubyVersionFileContent) {
       logger.debug('Using ruby version specified in .ruby-version');
       rubyConstraint = rubyVersionFileContent
@@ -79,7 +80,7 @@ export async function updateArtifacts(
     throw new Error(existingError);
   }
   const lockFileName = `${packageFileName}.lock`;
-  const existingLockFileContent = await platform.getFile(lockFileName);
+  const existingLockFileContent = await readLocalFile(lockFileName, 'utf8');
   if (!existingLockFileContent) {
     logger.debug('No Gemfile.lock found');
     return null;
@@ -97,7 +98,7 @@ export async function updateArtifacts(
     if (config.isLockFileMaintenance) {
       cmd = 'bundle lock';
     } else {
-      cmd = `bundle lock --update ${updatedDeps.join(' ')}`;
+      cmd = `bundle lock --update ${updatedDeps.map(quote).join(' ')}`;
     }
 
     let bundlerVersion = '';
@@ -105,7 +106,7 @@ export async function updateArtifacts(
     if (bundler) {
       if (isValid(bundler)) {
         logger.debug({ bundlerVersion: bundler }, 'Found bundler version');
-        bundlerVersion = ` -v ${bundler}`;
+        bundlerVersion = ` -v ${quote(bundler)}`;
       } else {
         logger.warn({ bundlerVersion: bundler }, 'Invalid bundler version');
       }

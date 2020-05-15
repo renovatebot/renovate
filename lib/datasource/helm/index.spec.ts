@@ -1,7 +1,8 @@
 import fs from 'fs';
 import * as globalCache from '../../util/cache/global';
+import * as runCache from '../../util/cache/run';
 import _got from '../../util/got';
-import { getReleases, getRepositoryData } from '.';
+import { getReleases } from '.';
 
 const got: any = _got;
 
@@ -17,6 +18,7 @@ describe('datasource/helm', () => {
   describe('getReleases', () => {
     beforeEach(() => {
       jest.resetAllMocks();
+      runCache.clear();
       return globalCache.rmAll();
     });
     it('returns null if lookupName was not provided', async () => {
@@ -133,26 +135,6 @@ describe('datasource/helm', () => {
       const releases = await getReleases({
         lookupName: 'ambassador',
         registryUrls: ['example-repository.com'],
-      });
-      expect(releases).not.toBeNull();
-      expect(releases).toMatchSnapshot();
-    });
-    it('returns list of versions for normal response if index.yaml is cached', async () => {
-      const repository = 'example-repository.com';
-      const cacheNamespace = 'datasource-helm';
-      const cacheKey = repository;
-      const cacheMinutes = 10;
-      got.mockReturnValueOnce({ body: indexYaml });
-      const repositoryData = await getRepositoryData(repository);
-      await globalCache.set(
-        cacheNamespace,
-        cacheKey,
-        repositoryData,
-        cacheMinutes
-      );
-      const releases = await getReleases({
-        lookupName: 'ambassador',
-        registryUrls: [repository],
       });
       expect(releases).not.toBeNull();
       expect(releases).toMatchSnapshot();

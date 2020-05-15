@@ -80,6 +80,12 @@ class WithGradle {
   get it(): jest.It {
     return !this.gradleSupportsThisJavaVersion || skipJava ? it.skip : it;
   }
+
+  get describe(): jest.Describe {
+    return !this.gradleSupportsThisJavaVersion || skipJava
+      ? describe.skip
+      : describe;
+  }
 }
 
 export function ifSystemSupportsGradle(gradleVersion: number): WithGradle {

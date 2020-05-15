@@ -34,7 +34,7 @@ describe('platform/azure', () => {
       getAllRenovateBranches: jest.fn(),
       getCommitMessages: jest.fn(),
       getFile: jest.fn(),
-      commitFilesToBranch: jest.fn(),
+      commitFiles: jest.fn(),
       mergeBranch: jest.fn(),
       deleteBranch: jest.fn(),
       getRepoStatus: jest.fn(),
@@ -777,40 +777,50 @@ describe('platform/azure', () => {
   });
 
   describe('ensureCommentRemoval', () => {
-    it('deletes comment if found', async () => {
-      await initRepo({ repository: 'some/repo' });
-      azureApi.gitApi.mockImplementation(
-        () =>
-          ({
-            getThreads: jest.fn(() => [
-              {
-                comments: [{ content: '### some-subject\n\nblabla' }],
-                id: 123,
-              },
-            ]),
-            updateThread: jest.fn(),
-          } as any)
-      );
-      await azure.ensureCommentRemoval({ number: 42, topic: 'some-subject' });
-      expect(azureApi.gitApi).toHaveBeenCalledTimes(3);
+    let gitApiMock;
+    beforeEach(() => {
+      gitApiMock = {
+        getThreads: jest.fn(() => [
+          {
+            comments: [{ content: '### some-subject\n\nblabla' }],
+            id: 123,
+          },
+          {
+            comments: [{ content: 'some-content\n' }],
+            id: 124,
+          },
+        ]),
+        updateThread: jest.fn(),
+      };
+      azureApi.gitApi.mockImplementation(() => gitApiMock);
     });
-    it('nothing should happen, no number', async () => {
-      await azure.ensureCommentRemoval({ number: 0, topic: 'test' });
-      expect(azureApi.gitApi).toHaveBeenCalledTimes(0);
+    it('deletes comment by topic if found', async () => {
+      await initRepo({ repository: 'some/repo' });
+      await azure.ensureCommentRemoval({ number: 42, topic: 'some-subject' });
+      expect(gitApiMock.getThreads).toHaveBeenCalledWith('1', 42);
+      expect(gitApiMock.updateThread).toHaveBeenCalledWith(
+        { status: 4 },
+        '1',
+        42,
+        123
+      );
+    });
+    it('deletes comment by content if found', async () => {
+      await initRepo({ repository: 'some/repo' });
+      await azure.ensureCommentRemoval({ number: 42, content: 'some-content' });
+      expect(gitApiMock.getThreads).toHaveBeenCalledWith('1', 42);
+      expect(gitApiMock.updateThread).toHaveBeenCalledWith(
+        { status: 4 },
+        '1',
+        42,
+        124
+      );
     });
     it('comment not found', async () => {
       await initRepo({ repository: 'some/repo' });
-      azureApi.gitApi.mockImplementation(
-        () =>
-          ({
-            getThreads: jest.fn(() => [
-              { comments: [{ content: 'stupid comment' }], id: 123 },
-            ]),
-            updateThread: jest.fn(),
-          } as any)
-      );
-      await azure.ensureCommentRemoval({ number: 42, topic: 'some-subject' });
-      expect(azureApi.gitApi).toHaveBeenCalledTimes(3);
+      await azure.ensureCommentRemoval({ number: 42, topic: 'does-not-exist' });
+      expect(gitApiMock.getThreads).toHaveBeenCalledWith('1', 42);
+      expect(gitApiMock.updateThread).not.toHaveBeenCalled();
     });
   });
 

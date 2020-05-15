@@ -128,6 +128,13 @@ function findCommentByTopic(
   return comments.find((c) => c.body.startsWith(`### ${topic}\n\n`));
 }
 
+function findCommentByContent(
+  comments: helper.Comment[],
+  content: string
+): helper.Comment | null {
+  return comments.find((c) => c.body.trim() === content);
+}
+
 async function isPRModified(
   repoPath: string,
   branchName: string
@@ -820,13 +827,23 @@ const platform: Platform = {
   async ensureCommentRemoval({
     number: issue,
     topic,
+    content,
   }: EnsureCommentRemovalConfig): Promise<void> {
+    logger.debug(
+      `Ensuring comment "${topic || content}" in #${issue} is removed`
+    );
     const commentList = await helper.getComments(config.repository, issue);
-    const comment = findCommentByTopic(commentList, topic);
+    let comment: helper.Comment | null = null;
+
+    if (topic) {
+      comment = findCommentByTopic(commentList, topic);
+    } else if (content) {
+      comment = findCommentByContent(commentList, content);
+    }
 
     // Abort and do nothing if no matching comment was found
     if (!comment) {
-      return null;
+      return;
     }
 
     // Attempt to delete comment
@@ -835,8 +852,6 @@ const platform: Platform = {
     } catch (err) {
       logger.warn({ err, issue, subject: topic }, 'Error deleting comment');
     }
-
-    return null;
   },
 
   async getBranchPr(branchName: string): Promise<Pr | null> {
@@ -872,17 +887,15 @@ const platform: Platform = {
     return Promise.resolve();
   },
 
-  commitFilesToBranch({
+  commitFiles({
     branchName,
     files,
     message,
-    parentBranch = config.baseBranch,
   }: CommitFilesConfig): Promise<string | null> {
-    return config.storage.commitFilesToBranch({
+    return config.storage.commitFiles({
       branchName,
       files,
       message,
-      parentBranch,
     });
   },
 
@@ -949,7 +962,7 @@ export const {
   addReviewers,
   branchExists,
   cleanRepo,
-  commitFilesToBranch,
+  commitFiles,
   createPr,
   deleteBranch,
   deleteLabel,

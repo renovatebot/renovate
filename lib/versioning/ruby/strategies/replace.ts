@@ -45,6 +45,14 @@ function reduceOnePrecision(version: string): string {
   return versionParts.join('.');
 }
 
+export function matchPrecision(existing: string, next: string): string {
+  let res = next;
+  while (res.split('.').length > existing.split('.').length) {
+    res = reduceOnePrecision(res);
+  }
+  return res;
+}
+
 export default ({ to, range }: { range: string; to: string }): string => {
   if (satisfies(to, range)) {
     return range;
@@ -72,6 +80,15 @@ export default ({ to, range }: { range: string; to: string }): string => {
     }
     const newLastPart = bump({ to: massagedTo, range: lastPart });
     newRange = range.replace(lastPart, newLastPart);
+    const firstPart = range
+      .split(',')
+      .map((part) => part.trim())
+      .shift();
+    if (firstPart && !satisfies(to, firstPart)) {
+      let newFirstPart = bump({ to: massagedTo, range: firstPart });
+      newFirstPart = matchPrecision(firstPart, newFirstPart);
+      newRange = newRange.replace(firstPart, newFirstPart);
+    }
   }
   // istanbul ignore if
   if (!satisfies(to, newRange)) {

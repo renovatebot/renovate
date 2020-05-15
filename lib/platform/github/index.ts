@@ -554,17 +554,15 @@ export function mergeBranch(branchName: string): Promise<void> {
 }
 
 // istanbul ignore next
-export function commitFilesToBranch({
+export function commitFiles({
   branchName,
   files,
   message,
-  parentBranch = config.baseBranch,
 }: CommitFilesConfig): Promise<string | null> {
-  return config.storage.commitFilesToBranch({
+  return config.storage.commitFiles({
     branchName,
     files,
     message,
-    parentBranch,
   });
 }
 
@@ -1568,15 +1566,25 @@ export async function ensureComment({
 export async function ensureCommentRemoval({
   number: issueNo,
   topic,
+  content,
 }: EnsureCommentRemovalConfig): Promise<void> {
-  logger.debug(`Ensuring comment "${topic}" in #${issueNo} is removed`);
+  logger.debug(
+    `Ensuring comment "${topic || content}" in #${issueNo} is removed`
+  );
   const comments = await getComments(issueNo);
-  let commentId: number;
-  comments.forEach((comment) => {
-    if (comment.body.startsWith(`### ${topic}\n\n`)) {
-      commentId = comment.id;
-    }
-  });
+  let commentId: number | null = null;
+
+  const byTopic = (comment: Comment): boolean =>
+    comment.body.startsWith(`### ${topic}\n\n`);
+  const byContent = (comment: Comment): boolean =>
+    comment.body.trim() === content;
+
+  if (topic) {
+    commentId = comments.find(byTopic)?.id;
+  } else if (content) {
+    commentId = comments.find(byContent)?.id;
+  }
+
   try {
     if (commentId) {
       await deleteComment(commentId);
