@@ -1061,6 +1061,22 @@ describe('platform/gitlab', () => {
     });
   });
   describe('createPr(branchName, title, body)', () => {
+    beforeEach(() => {
+      api.get.mockResolvedValueOnce(
+        partial<GotResponse>({
+          body: {
+            merge_status: 'can_be_merged',
+            pipeline: {
+              id: 29626725,
+              sha: '2be7ddb704c7b6b83732fdd5b9f09d5a397b5f8f',
+              ref: 'patch-28',
+              status: 'success',
+            },
+          },
+        })
+      );
+    });
+
     it('returns the PR', async () => {
       httpMock
         .scope(gitlabApiHost)
