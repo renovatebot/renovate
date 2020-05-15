@@ -39,8 +39,9 @@ function compareFile(file: string, path: string) {
 
 describe(getName(__filename), () => {
   ifSystemSupportsGradle(6).describe('real tests', () => {
+    jest.setTimeout(60 * 1000);
+
     beforeEach(async () => {
-      jest.setTimeout(5 * 60 * 1000);
       jest.resetAllMocks();
       await setUtilConfig(config);
       httpMock.setup();
@@ -48,7 +49,7 @@ describe(getName(__filename), () => {
     });
 
     afterEach(async () => {
-      await Git(config.localDir)?.checkout(['--', '.']);
+      await Git(fixtures)?.checkout(['HEAD', '--', '.']);
       httpMock.reset();
     });
 
