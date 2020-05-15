@@ -30,8 +30,9 @@ function compareFile(file: string, path: string) {
 
 describe(getName(__filename), () => {
   ifSystemSupportsGradle(6).describe('real tests', () => {
+    jest.setTimeout(60 * 1000);
+
     beforeEach(async () => {
-      jest.setTimeout(5 * 60 * 1000);
       jest.resetAllMocks();
       await setUtilConfig(config);
       httpMock.setup();
@@ -39,7 +40,7 @@ describe(getName(__filename), () => {
     });
 
     afterEach(async () => {
-      await Git(config.localDir)?.checkout(['--', '.']);
+      await Git(fixtures).checkout(['HEAD', '--', '.']);
       httpMock.reset();
     });
 
@@ -54,7 +55,7 @@ describe(getName(__filename), () => {
       } as Git.StatusResult);
 
       const res = await dcUpdate.updateArtifacts({
-        packageFileName: 'gradle-wrapper.properties',
+        packageFileName: 'gradle/wrapper/gradle-wrapper.properties',
         updatedDeps: [],
         newPackageFileContent: await readString(
           `./expectedFiles/gradle/wrapper/gradle-wrapper.properties`
@@ -96,7 +97,7 @@ describe(getName(__filename), () => {
       );
 
       const result = await dcUpdate.updateArtifacts({
-        packageFileName: 'gradle-wrapper.properties',
+        packageFileName: 'gradle/wrapper/gradle-wrapper.properties',
         updatedDeps: [],
         newPackageFileContent: ``,
         config: { ...config, toVersion: '6.3' },
@@ -114,7 +115,7 @@ describe(getName(__filename), () => {
       } as Git.StatusResult);
 
       const res = await dcUpdate.updateArtifacts({
-        packageFileName: 'gradle-wrapper.properties',
+        packageFileName: 'gradle/wrapper/gradle-wrapper.properties',
         updatedDeps: [],
         newPackageFileContent: await readString(
           `./testFiles/gradle/wrapper/gradle-wrapper.properties`
@@ -138,7 +139,7 @@ describe(getName(__filename), () => {
       });
 
       const res = await dcUpdate.updateArtifacts({
-        packageFileName: 'gradle-wrapper.properties',
+        packageFileName: 'gradle/wrapper/gradle-wrapper.properties',
         updatedDeps: [],
         newPackageFileContent: await readString(
           `./testFiles/gradle/wrapper/gradle-wrapper.properties`
@@ -147,7 +148,7 @@ describe(getName(__filename), () => {
       });
 
       expect(res[0].artifactError.lockFile).toEqual(
-        'gradle-wrapper.properties'
+        'gradle/wrapper/gradle-wrapper.properties'
       );
       expect(res[0].artifactError.stderr).toEqual('failed');
 
@@ -162,7 +163,7 @@ describe(getName(__filename), () => {
 
       await setUtilConfig(cfg);
       const res = await dcUpdate.updateArtifacts({
-        packageFileName: 'gradle-wrapper.properties',
+        packageFileName: 'gradle/wrapper/gradle-wrapper.properties',
         updatedDeps: [],
         newPackageFileContent: await readString(
           `./testFiles/gradle/wrapper/gradle-wrapper.properties`
@@ -171,7 +172,7 @@ describe(getName(__filename), () => {
       });
 
       expect(res[0].artifactError.lockFile).toEqual(
-        'gradle-wrapper.properties'
+        'gradle/wrapper/gradle-wrapper.properties'
       );
       expect(res[0].artifactError.stderr).not.toBeNull();
       expect(res[0].artifactError.stderr).not.toEqual('');
@@ -211,7 +212,7 @@ describe(getName(__filename), () => {
       );
 
       const result = await dcUpdate.updateArtifacts({
-        packageFileName: 'gradle-wrapper.properties',
+        packageFileName: 'gradle/wrapper/gradle-wrapper.properties',
         updatedDeps: [],
         newPackageFileContent: `distributionSha256Sum=336b6898b491f6334502d8074a6b8c2d73ed83b92123106bd4bf837f04111043\ndistributionUrl=https\\://services.gradle.org/distributions/gradle-6.3-bin.zip`,
         config,
@@ -248,7 +249,7 @@ describe(getName(__filename), () => {
         .reply(404);
 
       const result = await dcUpdate.updateArtifacts({
-        packageFileName: 'gradle-wrapper.properties',
+        packageFileName: 'gradle/wrapper/gradle-wrapper.properties',
         updatedDeps: [],
         newPackageFileContent: `distributionSha256Sum=336b6898b491f6334502d8074a6b8c2d73ed83b92123106bd4bf837f04111043\ndistributionUrl=https\\://services.gradle.org/distributions/gradle-6.3-bin.zip`,
         config,
@@ -257,7 +258,7 @@ describe(getName(__filename), () => {
       expect(result).toEqual([
         {
           artifactError: {
-            lockFile: 'gradle-wrapper.properties',
+            lockFile: 'gradle/wrapper/gradle-wrapper.properties',
             stderr: 'Response code 404 (Not Found)',
           },
         },
