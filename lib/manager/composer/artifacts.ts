@@ -1,6 +1,5 @@
 import URL from 'url';
 import is from '@sindresorhus/is';
-import fs from 'fs-extra';
 import { quote } from 'shlex';
 import upath from 'upath';
 import { SYSTEM_INSUFFICIENT_DISK_SPACE } from '../../constants/error-messages';
@@ -12,7 +11,15 @@ import * as datasourcePackagist from '../../datasource/packagist';
 import { logger } from '../../logger';
 import { platform } from '../../platform';
 import { ExecOptions, exec } from '../../util/exec';
-import { deleteLocalFile, readLocalFile, writeLocalFile } from '../../util/fs';
+import {
+  deleteLocalFile,
+  ensureDir,
+  ensureLocalDir,
+  getSiblingFileName,
+  getSubDirectory,
+  readLocalFile,
+  writeLocalFile,
+} from '../../util/fs';
 import * as hostRules from '../../util/host-rules';
 import { UpdateArtifact, UpdateArtifactsResult } from '../common';
 
@@ -27,7 +34,7 @@ export async function updateArtifacts({
   const cacheDir =
     process.env.COMPOSER_CACHE_DIR ||
     upath.join(config.cacheDir, './others/composer');
-  await fs.ensureDir(cacheDir);
+  await ensureDir(cacheDir);
   logger.debug(`Using composer cache ${cacheDir}`);
 
   const lockFileName = packageFileName.replace(/\.json$/, '.lock');
@@ -36,8 +43,7 @@ export async function updateArtifacts({
     logger.debug('No composer.lock found');
     return null;
   }
-  const cwd = upath.join(config.localDir, upath.dirname(packageFileName));
-  await fs.ensureDir(upath.join(cwd, 'vendor'));
+  await ensureLocalDir(getSiblingFileName(packageFileName, 'vendor'));
   try {
     await writeLocalFile(packageFileName, newPackageFileContent);
     if (config.isLockFileMaintenance) {
@@ -99,6 +105,7 @@ export async function updateArtifacts({
     if (authJson) {
       await writeLocalFile('auth.json', JSON.stringify(authJson));
     }
+    const cwd = getSubDirectory(packageFileName);
     const execOptions: ExecOptions = {
       cwd,
       extraEnv: {
