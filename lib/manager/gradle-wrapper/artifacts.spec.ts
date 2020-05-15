@@ -125,7 +125,7 @@ describe(getName(__filename), () => {
     expect(res).toEqual([]);
   });
 
-  it.only('updates distributionSha256Sum', async () => {
+  it('updates distributionSha256Sum', async () => {
     httpMock
       .scope('https://services.gradle.org')
       .get('/distributions/gradle-6.3-bin.zip.sha256')
