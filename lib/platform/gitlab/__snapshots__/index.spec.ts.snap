@@ -27,7 +27,7 @@ Array [
 ]
 `;
 
-exports[`platform/gitlab commitFilesToBranch() sends to gitFs 1`] = `
+exports[`platform/gitlab commitFiles() sends to gitFs 1`] = `
 Array [
   Array [
     "projects/some%2Frepo",

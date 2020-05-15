@@ -464,7 +464,7 @@ export class Storage {
     }
   }
 
-  async commitFilesToBranch({
+  async commitFiles({
     branchName,
     files,
     message,

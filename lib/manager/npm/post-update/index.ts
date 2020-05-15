@@ -7,6 +7,7 @@ import { DatasourceError } from '../../../datasource/common';
 import { logger } from '../../../logger';
 import { platform } from '../../../platform';
 import { getChildProcessEnv } from '../../../util/exec/env';
+import { deleteLocalFile } from '../../../util/fs';
 import * as hostRules from '../../../util/host-rules';
 import { PackageFile, PostUpdateConfig, Upgrade } from '../../common';
 import * as lerna from './lerna';
@@ -114,11 +115,6 @@ export async function writeExistingFiles(
   config: PostUpdateConfig,
   packageFiles: AdditionalPackageFiles
 ): Promise<void> {
-  const lernaJson = await platform.getFile('lerna.json');
-  if (lernaJson) {
-    logger.debug(`Writing repo lerna.json (${config.localDir})`);
-    await fs.outputFile(upath.join(config.localDir, 'lerna.json'), lernaJson);
-  }
   const npmrcFile = upath.join(config.localDir, '.npmrc');
   if (config.npmrc) {
     logger.debug(`Writing repo .npmrc (${config.localDir})`);
@@ -139,7 +135,6 @@ export async function writeExistingFiles(
     { packageFiles: npmFiles.map((n) => n.packageFile) },
     'Writing package.json files'
   );
-  const writtenLockFiles = [];
   for (const packageFile of npmFiles) {
     const basedir = upath.join(
       config.localDir,
@@ -217,25 +212,12 @@ export async function writeExistingFiles(
       }
     }
     const { yarnLock } = packageFile;
-    if (yarnLock) {
-      const yarnLockPath = upath.join(config.localDir, yarnLock);
-      if (config.reuseLockFiles === false) {
-        logger.debug(`Ensuring ${yarnLock} is removed`);
-        await fs.remove(yarnLockPath);
-      } else if (!writtenLockFiles[yarnLock]) {
-        logger.debug(`Writing ${yarnLock}`);
-        const existingYarnLock = await platform.getFile(yarnLock);
-        await fs.outputFile(yarnLockPath, existingYarnLock);
-        writtenLockFiles[yarnLock] = true;
-      }
+    if (yarnLock && config.reuseLockFiles === false) {
+      await deleteLocalFile(yarnLock);
     }
     // istanbul ignore next
-    if (packageFile.pnpmShrinkwrap && config.reuseLockFiles) {
-      logger.debug(`Writing pnpm-lock.yaml to ${basedir}`);
-      const shrinkwrap = await platform.getFile(packageFile.pnpmShrinkwrap);
-      await fs.outputFile(upath.join(basedir, 'pnpm-lock.yaml'), shrinkwrap);
-    } else {
-      await fs.remove(upath.join(basedir, 'pnpm-lock.yaml'));
+    if (packageFile.pnpmShrinkwrap && config.reuseLockFiles === false) {
+      await deleteLocalFile(packageFile.pnpmShrinkwrap);
     }
   }
 }
