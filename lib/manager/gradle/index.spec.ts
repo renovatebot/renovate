@@ -1,12 +1,10 @@
-// Doesn't work with ifSystemSupportsGradle
-/* eslint-disable jest/no-standalone-expect */
 import { exec as _exec } from 'child_process';
 import * as _os from 'os';
 import fs from 'fs-extra';
 import tmp, { DirectoryResult } from 'tmp-promise';
 import * as upath from 'upath';
 import { envMock, mockExecAll } from '../../../test/execUtil';
-import { replacingSerializer } from '../../../test/util';
+import { getName, replacingSerializer } from '../../../test/util';
 import * as _util from '../../util';
 import { BinarySource } from '../../util/exec/common';
 import * as _docker from '../../util/exec/docker';
@@ -62,7 +60,7 @@ async function setupMocks() {
   return [require('.'), exec, util, os];
 }
 
-describe('manager/gradle', () => {
+describe(getName(__filename), () => {
   describe('extractPackageFile', () => {
     let manager: typeof _manager;
     let exec: jest.Mock<typeof _exec>;
@@ -387,7 +385,7 @@ describe('manager/gradle', () => {
     });
   });
 
-  describe('executeGradle integration', () => {
+  ifSystemSupportsGradle(6).describe('executeGradle integration', () => {
     const SUCCESS_FILE_NAME = 'success.indicator';
     let workingDir: DirectoryResult;
     let testRunConfig: ExtractConfig;
@@ -417,25 +415,17 @@ allprojects {
       successFile = `${workingDir.path}/${SUCCESS_FILE_NAME}`;
     });
 
-    ifSystemSupportsGradle(6).it(
-      'executes an executable gradle wrapper',
-      async () => {
-        const gradlew = await fs.stat(`${workingDir.path}/gradlew`);
-        await manager.executeGradle(testRunConfig, workingDir.path, gradlew);
-        await expect(fs.readFile(successFile, 'utf8')).resolves.toBe('success');
-      },
-      120000
-    );
+    it('executes an executable gradle wrapper', async () => {
+      const gradlew = await fs.stat(`${workingDir.path}/gradlew`);
+      await manager.executeGradle(testRunConfig, workingDir.path, gradlew);
+      await expect(fs.readFile(successFile, 'utf8')).resolves.toBe('success');
+    }, 120000);
 
-    ifSystemSupportsGradle(6).it(
-      'executes a not-executable gradle wrapper',
-      async () => {
-        await fs.chmod(`${workingDir.path}/gradlew`, '444');
-        const gradlew = await fs.stat(`${workingDir.path}/gradlew`);
-        await manager.executeGradle(testRunConfig, workingDir.path, gradlew);
-        await expect(fs.readFile(successFile, 'utf8')).resolves.toBe('success');
-      },
-      120000
-    );
+    it('executes a not-executable gradle wrapper', async () => {
+      await fs.chmod(`${workingDir.path}/gradlew`, '444');
+      const gradlew = await fs.stat(`${workingDir.path}/gradlew`);
+      await manager.executeGradle(testRunConfig, workingDir.path, gradlew);
+      await expect(fs.readFile(successFile, 'utf8')).resolves.toBe('success');
+    }, 120000);
   });
 });
