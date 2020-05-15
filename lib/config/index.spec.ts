@@ -25,8 +25,9 @@ describe('config/index', () => {
     it('supports token in env', async () => {
       const env: NodeJS.ProcessEnv = { ...defaultEnv, RENOVATE_TOKEN: 'abc' };
       const parsedConfig = await configParser.parseConfigs(env, defaultArgv);
-      expect(parsedConfig).toMatchSnapshot();
+      expect(parsedConfig).toContainEntries([['token', 'abc']]);
     });
+
     it('supports token in CLI options', async () => {
       defaultArgv = defaultArgv.concat([
         '--token=abc',
@@ -37,8 +38,14 @@ describe('config/index', () => {
         defaultEnv,
         defaultArgv
       );
-      expect(parsedConfig).toMatchSnapshot();
+      expect(parsedConfig).toContainEntries([
+        ['token', 'abc'],
+        ['global', { prFooter: 'custom' }],
+        ['logContext', 'abc123'],
+        ['customPrFooter', true],
+      ]);
     });
+
     it('supports forceCli', async () => {
       defaultArgv = defaultArgv.concat(['--force-cli=false']);
       const env: NodeJS.ProcessEnv = {
@@ -46,7 +53,11 @@ describe('config/index', () => {
         RENOVATE_TOKEN: 'abc',
       };
       const parsedConfig = await configParser.parseConfigs(env, defaultArgv);
-      expect(parsedConfig).toMatchSnapshot();
+      expect(parsedConfig).toContainEntries([
+        ['token', 'abc'],
+        ['force', null],
+      ]);
+      expect(parsedConfig).not.toContainKey('configFile');
     });
     it('supports Bitbucket username/passwod', async () => {
       defaultArgv = defaultArgv.concat([
@@ -136,17 +147,20 @@ describe('config/index', () => {
       const parentConfig = { ...defaultConfig };
       const configParser = await import('./index');
       const config = configParser.getManagerConfig(parentConfig, 'npm');
-      expect(config).toMatchSnapshot();
+      expect(config).toContainEntries([
+        ['fileMatch', ['(^|/)package.json$']],
+        ['rollbackPrs', true],
+      ]);
       expect(
         configParser.getManagerConfig(parentConfig, 'html')
-      ).toMatchSnapshot();
+      ).toContainEntries([['fileMatch', ['\\.html?$']]]);
     });
 
     it('filterConfig()', async () => {
       const parentConfig = { ...defaultConfig };
       const configParser = await import('./index');
       const config = configParser.filterConfig(parentConfig, 'pr');
-      expect(config).toMatchSnapshot();
+      expect(config).toBeObject();
     });
   });
 });
