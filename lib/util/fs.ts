@@ -51,3 +51,14 @@ export async function writeLocalFile(
 export async function deleteLocalFile(fileName: string): Promise<void> {
   await fs.remove(fileName);
 }
+
+// istanbul ignore next
+export async function ensureDir(dirName): Promise<void> {
+  await fs.ensureDir(dirName);
+}
+
+// istanbul ignore next
+export async function ensureLocalDir(dirName): Promise<void> {
+  const localDirName = join(localDir, dirName);
+  await fs.ensureDir(localDirName);
+}

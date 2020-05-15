@@ -35,7 +35,7 @@ import { tryBranchAutomerge } from './automerge';
 import { prAlreadyExisted } from './check-existing';
 import { commitFilesToBranch } from './commit';
 import { getUpdatedPackageFiles } from './get-updated';
-import { getParentBranch } from './parent';
+import { shouldReuseExistingBranch } from './reuse';
 import { isScheduledNow } from './schedule';
 import { setStability, setUnpublishable } from './status-checks';
 
@@ -281,11 +281,11 @@ export async function processBranch(
     // istanbul ignore if
     if (masterIssueCheck === 'rebase' || config.masterIssueRebaseAllOpen) {
       logger.debug('Manual rebase requested via master issue');
-      delete config.parentBranch;
+      config.reuseExistingBranch = false;
     } else {
-      Object.assign(config, await getParentBranch(config));
+      Object.assign(config, await shouldReuseExistingBranch(config));
     }
-    logger.debug(`Using parentBranch: ${config.parentBranch}`);
+    logger.debug(`Using reuseExistingBranch: ${config.reuseExistingBranch}`);
     const res = await getUpdatedPackageFiles(config);
     // istanbul ignore if
     if (res.artifactErrors && config.artifactErrors) {
