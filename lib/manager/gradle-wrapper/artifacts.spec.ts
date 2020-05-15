@@ -19,6 +19,8 @@ const config = {
   toVersion: '5.6.4',
 };
 
+jest.mock('../../platform');
+
 expect.addSnapshotSerializer(bufferSerializer());
 
 function readString(...paths: string[]): Promise<string> {
