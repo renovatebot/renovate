@@ -21,12 +21,6 @@ import * as dcUpdate from '.';
 jest.mock('child_process');
 jest.mock('../../util/fs');
 jest.mock('../../util/exec/env');
-// jest.mock('../../util/host-rules');
-jest.mock('../../util/exec/docker/index', () =>
-  require('../../../test/util').mockPartial('../../util/exec/docker/index', {
-    removeDanglingContainers: jest.fn(),
-  })
-);
 
 const exec: jest.Mock<typeof _exec> = _exec as any;
 const fixtures = resolve(__dirname, './__fixtures__');
