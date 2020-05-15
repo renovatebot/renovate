@@ -2,9 +2,12 @@ import { RenovateConfig } from '../../config';
 import { logger } from '../../logger';
 import { platform } from '../../platform';
 
-type ParentBranch = { parentBranch: string | undefined; isModified?: boolean };
+type ParentBranch = {
+  reuseExistingBranch: boolean;
+  isModified?: boolean;
+};
 
-export async function getParentBranch(
+export async function shouldReuseExistingBranch(
   config: RenovateConfig
 ): Promise<ParentBranch> {
   const { branchName } = config;
@@ -12,7 +15,7 @@ export async function getParentBranch(
   const branchExists = await platform.branchExists(branchName);
   if (!branchExists) {
     logger.debug(`Branch needs creating`);
-    return { parentBranch: undefined };
+    return { reuseExistingBranch: false };
   }
   logger.debug(`Branch already exists`);
 
@@ -22,11 +25,11 @@ export async function getParentBranch(
   if (pr) {
     if (pr.title && pr.title.startsWith('rebase!')) {
       logger.debug('Manual rebase requested via PR title for #' + pr.number);
-      return { parentBranch: undefined };
+      return { reuseExistingBranch: false };
     }
     if (pr.body && pr.body.includes(`- [x] <!-- rebase-check -->`)) {
       logger.debug('Manual rebase requested via PR checkbox for #' + pr.number);
-      return { parentBranch: undefined };
+      return { reuseExistingBranch: false };
     }
     if (pr.labels && pr.labels.includes(config.rebaseLabel)) {
       logger.debug('Manual rebase requested via PR labels for #' + pr.number);
@@ -38,7 +41,7 @@ export async function getParentBranch(
       } else {
         await platform.deleteLabel(pr.number, config.rebaseLabel);
       }
-      return { parentBranch: undefined };
+      return { reuseExistingBranch: false };
     }
   }
 
@@ -52,11 +55,11 @@ export async function getParentBranch(
       logger.debug(`Branch is stale and needs rebasing`);
       // We can rebase the branch only if no PR or PR can be rebased
       if (!pr || !pr.isModified) {
-        return { parentBranch: undefined };
+        return { reuseExistingBranch: false };
       }
       // TODO: Warn here so that it appears in PR body
       logger.debug('Cannot rebase branch');
-      return { parentBranch: branchName, isModified: true };
+      return { reuseExistingBranch: true, isModified: true };
     }
   }
 
@@ -68,15 +71,15 @@ export async function getParentBranch(
       logger.debug(`Branch is not mergeable and needs rebasing`);
       if (config.rebaseWhen === 'never') {
         logger.debug('Rebasing disabled by config');
-        return { parentBranch: branchName, isModified: false };
+        return { reuseExistingBranch: true, isModified: false };
       }
-      // Setting parentBranch back to undefined means that we'll use the default branch
-      return { parentBranch: undefined };
+      // Setting reuseExistingBranch back to undefined means that we'll use the default branch
+      return { reuseExistingBranch: false };
     }
     // Don't do anything different, but warn
     // TODO: Add warning to PR
     logger.debug(`Branch is not mergeable but can't be rebased`);
   }
   logger.debug(`Branch does not need rebasing`);
-  return { parentBranch: branchName, isModified: false };
+  return { reuseExistingBranch: true, isModified: false };
 }
