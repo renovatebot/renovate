@@ -252,6 +252,7 @@ describe(getName(__filename), () => {
 
     it('should use docker if required', async () => {
       const configWithDocker = { binarySource: BinarySource.Docker, ...config };
+      jest.spyOn(docker, 'removeDanglingContainers').mockResolvedValueOnce();
       await util.setUtilConfig(configWithDocker);
       await initializeWorkingDir(false, standardUpdatesReport());
       const execSnapshots = mockExecAll(exec, gradleOutput);
@@ -263,6 +264,7 @@ describe(getName(__filename), () => {
 
     it('should use docker even if gradlew is available', async () => {
       const configWithDocker = { binarySource: BinarySource.Docker, ...config };
+      jest.spyOn(docker, 'removeDanglingContainers').mockResolvedValueOnce();
       await util.setUtilConfig(configWithDocker);
       await initializeWorkingDir(true, standardUpdatesReport());
 
@@ -274,6 +276,7 @@ describe(getName(__filename), () => {
 
     it('should use docker even if gradlew.bat is available on Windows', async () => {
       const configWithDocker = { binarySource: BinarySource.Docker, ...config };
+      jest.spyOn(docker, 'removeDanglingContainers').mockResolvedValueOnce();
       await util.setUtilConfig(configWithDocker);
       os.platform.mockReturnValue('win32');
       await initializeWorkingDir(true, standardUpdatesReport());
