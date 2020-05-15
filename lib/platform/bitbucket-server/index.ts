@@ -426,13 +426,13 @@ export function getAllRenovateBranches(
   return config.storage.getAllRenovateBranches(branchPrefix);
 }
 
-export async function commitFilesToBranch({
+export async function commitFiles({
   branchName,
   files,
   message,
 }: CommitFilesConfig): Promise<string | null> {
   logger.debug(
-    `commitFilesToBranch(${JSON.stringify(
+    `commitFiles(${JSON.stringify(
       {
         branchName,
         filesLength: files.length,
@@ -442,7 +442,7 @@ export async function commitFilesToBranch({
       2
     )})`
   );
-  const commit = config.storage.commitFilesToBranch({
+  const commit = config.storage.commitFiles({
     branchName,
     files,
     message,
