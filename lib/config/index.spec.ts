@@ -58,7 +58,11 @@ describe('config/index', () => {
         defaultEnv,
         defaultArgv
       );
-      expect(parsedConfig).toMatchSnapshot();
+      expect(parsedConfig).toContainEntries([
+        ['platform', 'bitbucket'],
+        ['username', 'user'],
+        ['password', 'pass'],
+      ]);
     });
     it('massages trailing slash into endpoint', async () => {
       defaultArgv = defaultArgv.concat([
