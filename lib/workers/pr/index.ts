@@ -1,4 +1,3 @@
-import ignore from 'ignore';
 import sampleSize from 'lodash/sampleSize';
 import uniq from 'lodash/uniq';
 import { RenovateConfig } from '../../config/common';
@@ -12,6 +11,7 @@ import { logger } from '../../logger';
 import { PlatformPrOptions, Pr, platform } from '../../platform';
 import { BranchStatus } from '../../types';
 import { BranchConfig, PrResult } from '../common';
+import { assigneesFromCodeowners, assigneesFromConfig } from './assignees';
 import { getPrBody } from './body';
 import { ChangeLogError } from './changelog';
 
@@ -21,51 +21,6 @@ function noWhitespace(input: string): string {
 
 function noLeadingAtSymbol(input: string): string {
   return input.length && input.startsWith('@') ? input.slice(1) : input;
-}
-
-function assigneesFromConfig(config: RenovateConfig): Promise<string[]> {
-  return Promise.resolve(config.assignees || []);
-}
-
-async function assigneesFromCodeowners(
-  config: RenovateConfig,
-  pr: Pr
-): Promise<string[]> {
-  if (!config.assigneesFromCodeowners) {
-    return [];
-  }
-
-  const codeowners =
-    (await platform.getFile('CODEOWNERS', pr.targetBranch)) ||
-    (await platform.getFile('.github/CODEOWNERS', pr.targetBranch)) ||
-    (await platform.getFile('.gitlab/CODEOWNERS', pr.targetBranch)) ||
-    (await platform.getFile('docs/CODEOWNERS', pr.targetBranch));
-
-  if (!codeowners) {
-    return [];
-  }
-
-  const prFiles = await platform.getPrFiles(pr.number);
-  const rules = codeowners
-    .split('\n')
-    .filter((line) => line && !line.startsWith('#'))
-    .map((line) => {
-      const [pattern, ...usernames] = line.split(/\s+/);
-      return {
-        usernames,
-        match: (path: string) => {
-          const matcher = ignore().add(pattern);
-          return matcher.ignores(path);
-        },
-      };
-    })
-    .reverse();
-
-  const matchingRule = rules.find((rule) => prFiles.every(rule.match));
-  if (!matchingRule) {
-    return [];
-  }
-  return matchingRule.usernames.map(noLeadingAtSymbol);
 }
 
 export async function addAssigneesReviewers(
