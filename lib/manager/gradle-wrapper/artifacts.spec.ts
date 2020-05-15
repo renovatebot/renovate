@@ -38,7 +38,7 @@ function compareFile(file: string, path: string) {
 describe(getName(__filename), () => {
   ifSystemSupportsGradle(6).describe('real tests', () => {
     jest.setTimeout(5 * 60 * 1000);
-    
+
     beforeEach(async () => {
       jest.resetAllMocks();
       await setUtilConfig(config);
