@@ -437,6 +437,7 @@ export async function checkAutoMerge(
     automergeType,
     automergeComment,
     requiredStatusChecks,
+    rebaseRequested,
   } = config;
   logger.debug(
     { automerge, automergeType, automergeComment },
@@ -480,6 +481,12 @@ export async function checkAutoMerge(
           'DRY-RUN: Would add PR automerge comment to PR #' + pr.number
         );
         return false;
+      }
+      if (rebaseRequested) {
+        await platform.ensureCommentRemoval({
+          number: pr.number,
+          content: automergeComment,
+        });
       }
       return platform.ensureComment({
         number: pr.number,

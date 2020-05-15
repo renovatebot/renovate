@@ -288,12 +288,12 @@ export function mergeBranch(branchName: string): Promise<void> {
   return config.storage.mergeBranch(branchName);
 }
 
-export function commitFilesToBranch({
+export function commitFiles({
   branchName,
   files,
   message,
 }: CommitFilesConfig): Promise<string | null> {
-  return config.storage.commitFilesToBranch({
+  return config.storage.commitFiles({
     branchName,
     files,
     message,

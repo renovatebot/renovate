@@ -887,12 +887,12 @@ const platform: Platform = {
     return Promise.resolve();
   },
 
-  commitFilesToBranch({
+  commitFiles({
     branchName,
     files,
     message,
   }: CommitFilesConfig): Promise<string | null> {
-    return config.storage.commitFilesToBranch({
+    return config.storage.commitFiles({
       branchName,
       files,
       message,
@@ -962,7 +962,7 @@ export const {
   addReviewers,
   branchExists,
   cleanRepo,
-  commitFilesToBranch,
+  commitFiles,
   createPr,
   deleteBranch,
   deleteLabel,

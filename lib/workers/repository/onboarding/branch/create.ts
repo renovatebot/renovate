@@ -29,7 +29,7 @@ export async function createOnboardingBranch(
     logger.info('DRY-RUN: Would commit files to onboarding branch');
     return null;
   }
-  return platform.commitFilesToBranch({
+  return platform.commitFiles({
     branchName: config.onboardingBranch,
     files: [
       {

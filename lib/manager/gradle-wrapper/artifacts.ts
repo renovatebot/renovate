@@ -61,6 +61,10 @@ export async function updateArtifacts({
       await fs.stat(gradlewPath).catch(() => null),
       `wrapper`
     );
+    if (!cmd) {
+      logger.info('No gradlew found - skipping Artifacts update');
+      return null;
+    }
     const distributionUrl = getDistributionUrl(newPackageFileContent);
     if (distributionUrl) {
       cmd += ` --gradle-distribution-url ${distributionUrl}`;
