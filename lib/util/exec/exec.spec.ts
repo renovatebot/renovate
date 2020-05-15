@@ -404,7 +404,11 @@ describe(`Child process execution wrapper`, () => {
     if (trustLevel) {
       global.trustLevel = trustLevel;
     }
+
     if (config) {
+      jest
+        .spyOn(dockerModule, 'removeDanglingContainers')
+        .mockResolvedValueOnce();
       await setExecConfig(config);
     }
 
@@ -468,6 +472,9 @@ describe(`Child process execution wrapper`, () => {
   });
 
   it('wraps error if removeDockerContainer throws an error', async () => {
+    cpExec.mockImplementationOnce((_execCmd, _execOpts, callback) =>
+      callback(null, { stdout: '', stderr: '' })
+    );
     await setExecConfig({ binarySource: BinarySource.Docker });
     cpExec.mockImplementation(() => {
       throw new Error('some error occurred');
