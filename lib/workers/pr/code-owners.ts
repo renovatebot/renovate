@@ -17,6 +17,7 @@ export async function codeOwnersForPr(pr: Pr): Promise<string[]> {
     const prFiles = await platform.getPrFiles(pr.number);
     const rules = codeOwnersFile
       .split('\n')
+      .map((line) => line.trim())
       .filter((line) => line && !line.startsWith('#'))
       .map((line) => {
         const [pattern, ...usernames] = line.split(/\s+/);

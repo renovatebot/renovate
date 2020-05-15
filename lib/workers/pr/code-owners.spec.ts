@@ -26,6 +26,20 @@ describe('workers/pr/code-owners', () => {
       const codeOwners = await codeOwnersForPr(pr);
       expect(codeOwners).toEqual(['@john', '@maria']);
     });
+    it('ignores comments and leading/trailing whitespace', async () => {
+      platformMock.getFile.mockResolvedValueOnce(
+        [
+          '# comment line',
+          '    \t    ',
+          '   * @jimmy     ',
+          '        # comment line with leading whitespace',
+          ' package.json @john @maria  ',
+        ].join('\n')
+      );
+      platformMock.getPrFiles.mockResolvedValueOnce(['package.json']);
+      const codeOwners = await codeOwnersForPr(pr);
+      expect(codeOwners).toEqual(['@john', '@maria']);
+    });
     it('returns empty array when no code owners set', async () => {
       platformMock.getFile.mockResolvedValueOnce(null);
       platformMock.getPrFiles.mockResolvedValueOnce(['package.json']);
@@ -37,6 +51,13 @@ describe('workers/pr/code-owners', () => {
         ['package-lock.json @mike'].join('\n')
       );
       platformMock.getPrFiles.mockResolvedValueOnce(['yarn.lock']);
+      const codeOwners = await codeOwnersForPr(pr);
+      expect(codeOwners).toEqual([]);
+    });
+    it('returns empty array when error occurs', async () => {
+      platformMock.getFile.mockImplementationOnce((_, __) => {
+        throw new Error();
+      });
       const codeOwners = await codeOwnersForPr(pr);
       expect(codeOwners).toEqual([]);
     });
