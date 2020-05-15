@@ -1,7 +1,6 @@
 // TODO fix mocks
 /* eslint jest/expect-expect: 1 */
 import URL from 'url';
-import 'jest-extended';
 import { REPOSITORY_DISABLED } from '../../constants/error-messages';
 import { logger as _logger } from '../../logger';
 import { BranchStatus } from '../../types';
