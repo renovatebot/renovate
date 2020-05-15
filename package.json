@@ -184,6 +184,7 @@
     "@babel/plugin-syntax-dynamic-import": "7.8.3",
     "@babel/preset-env": "7.9.6",
     "@babel/preset-typescript": "7.9.0",
+    "@jest/globals": "26.0.1",
     "@jest/reporters": "26.0.1",
     "@jest/test-result": "26.0.1",
     "@semantic-release/exec": "5.0.0",
