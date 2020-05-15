@@ -259,5 +259,5 @@ export interface PostUpdateConfig extends ManagerConfig, Record<string, any> {
   npmLock?: string;
   yarnLock?: string;
   branchName?: string;
-  parentBranch?: string;
+  reuseExistingBranch?: boolean;
 }
