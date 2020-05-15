@@ -163,9 +163,10 @@ export interface RenovateConfig
 }
 
 export interface AssigneesAndReviewersConfig {
-  assigneesFromCodeowners?: boolean;
+  assigneesFromCodeOwners?: boolean;
   assignees?: string[];
   assigneesSampleSize?: number;
+  reviewersFromCodeOwners?: boolean;
   reviewers?: string[];
   reviewersSampleSize?: number;
   additionalReviewers?: string[];

@@ -1,33 +1,21 @@
 import ignore from 'ignore';
-import { RenovateConfig } from '../../config';
-import { Pr, platform } from '../../platform';
 import { logger } from '../../logger';
+import { Pr, platform } from '../../platform';
 
-export function assigneesFromConfig(config: RenovateConfig): Promise<string[]> {
-  return Promise.resolve(config.assignees || []);
-}
-
-export async function assigneesFromCodeowners(
-  config: RenovateConfig,
-  pr: Pr
-): Promise<string[]> {
-  if (!config.assigneesFromCodeowners) {
-    return [];
-  }
-
+export async function codeOwnersForPr(pr: Pr): Promise<string[]> {
   try {
-    const codeowners =
+    const codeOwnersFile =
       (await platform.getFile('CODEOWNERS', pr.targetBranch)) ||
       (await platform.getFile('.github/CODEOWNERS', pr.targetBranch)) ||
       (await platform.getFile('.gitlab/CODEOWNERS', pr.targetBranch)) ||
       (await platform.getFile('docs/CODEOWNERS', pr.targetBranch));
 
-    if (!codeowners) {
+    if (!codeOwnersFile) {
       return [];
     }
 
     const prFiles = await platform.getPrFiles(pr.number);
-    const rules = codeowners
+    const rules = codeOwnersFile
       .split('\n')
       .filter((line) => line && !line.startsWith('#'))
       .map((line) => {
@@ -48,7 +36,7 @@ export async function assigneesFromCodeowners(
     }
     return matchingRule.usernames;
   } catch (err) {
-    logger.debug({ err }, 'Failed to detrmine assignees from codeowners');
+    logger.debug({ err, pr }, 'Failed to determine code owners for PR.');
     return [];
   }
 }

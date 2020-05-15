@@ -11,9 +11,9 @@ import { logger } from '../../logger';
 import { PlatformPrOptions, Pr, platform } from '../../platform';
 import { BranchStatus } from '../../types';
 import { BranchConfig, PrResult } from '../common';
-import { assigneesFromCodeowners, assigneesFromConfig } from './assignees';
 import { getPrBody } from './body';
 import { ChangeLogError } from './changelog';
+import { codeOwnersForPr } from './code-owners';
 
 function noWhitespace(input: string): string {
   return input.replace(/\r?\n|\r|\s/g, '');
@@ -23,13 +23,21 @@ function noLeadingAtSymbol(input: string): string {
   return input.length && input.startsWith('@') ? input.slice(1) : input;
 }
 
+async function addCodeOwners(
+  assigneesOrReviewers: string[],
+  pr: Pr
+): Promise<string[]> {
+  return uniq(assigneesOrReviewers.concat(await codeOwnersForPr(pr)));
+}
+
 export async function addAssigneesReviewers(
   config: RenovateConfig,
   pr: Pr
 ): Promise<void> {
-  let assignees = (await assigneesFromConfig(config)).concat(
-    await assigneesFromCodeowners(config, pr)
-  );
+  let assignees = config.assignees;
+  if (config.assigneesFromCodeOwners) {
+    assignees = await addCodeOwners(assignees, pr);
+  }
   if (assignees.length > 0) {
     try {
       assignees = assignees.map(noLeadingAtSymbol);
@@ -50,9 +58,13 @@ export async function addAssigneesReviewers(
       );
     }
   }
-  if (config.reviewers.length > 0) {
+  let reviewers = config.reviewers;
+  if (config.reviewersFromCodeOwners) {
+    reviewers = await addCodeOwners(reviewers, pr);
+  }
+  if (reviewers.length > 0) {
     try {
-      let reviewers = config.reviewers.map(noLeadingAtSymbol);
+      reviewers = reviewers.map(noLeadingAtSymbol);
       if (config.additionalReviewers.length > 0) {
         const additionalReviewers = config.additionalReviewers.map(
           noLeadingAtSymbol

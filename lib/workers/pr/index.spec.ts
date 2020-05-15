@@ -6,13 +6,16 @@ import { BranchStatus } from '../../types';
 import { BranchConfig, PrResult } from '../common';
 import * as _changelogHelper from './changelog';
 import { getChangeLogJSON } from './changelog';
+import * as codeOwners from './code-owners';
 import * as prWorker from '.';
 
+const codeOwnersMock = mocked(codeOwners);
 const changelogHelper = mocked(_changelogHelper);
 const platform = mocked(_platform);
 const defaultConfig = getConfig();
 
 jest.mock('./changelog');
+jest.mock('./code-owners');
 
 function setupChangelogMock() {
   changelogHelper.getChangeLogJSON = jest.fn();
@@ -308,23 +311,23 @@ describe('workers/pr', () => {
       expect(platform.addReviewers.mock.calls).toMatchSnapshot();
     });
     it('should determine assignees from code owners', async () => {
-      platform.getFile.mockResolvedValueOnce(`
-* @jimmy\n
-package.json @john @maria\n
-      `);
-      platform.getPrFiles.mockResolvedValueOnce(['package.json']);
-      config.assigneesFromCodeowners = true;
+      config.assigneesFromCodeOwners = true;
+      codeOwnersMock.codeOwnersForPr.mockResolvedValueOnce(['@john', '@maria']);
       await prWorker.ensurePr(config);
       expect(platform.addAssignees).toHaveBeenCalledTimes(1);
       expect(platform.addAssignees.mock.calls).toMatchSnapshot();
     });
+    it('should determine reviewers from code owners', async () => {
+      config.reviewersFromCodeOwners = true;
+      codeOwnersMock.codeOwnersForPr.mockResolvedValueOnce(['@john', '@maria']);
+      await prWorker.ensurePr(config);
+      expect(platform.addReviewers).toHaveBeenCalledTimes(1);
+      expect(platform.addReviewers.mock.calls).toMatchSnapshot();
+    });
     it('should combine assignees from code owners and config', async () => {
-      platform.getFile.mockResolvedValueOnce(`
-* @jimmy
-      `);
-      platform.getPrFiles.mockResolvedValueOnce(['package.json']);
+      codeOwnersMock.codeOwnersForPr.mockResolvedValueOnce(['@jimmy']);
       config.assignees = ['@mike', '@julie'];
-      config.assigneesFromCodeowners = true;
+      config.assigneesFromCodeOwners = true;
       await prWorker.ensurePr(config);
       expect(platform.addAssignees).toHaveBeenCalledTimes(1);
       expect(platform.addAssignees.mock.calls).toMatchSnapshot();
