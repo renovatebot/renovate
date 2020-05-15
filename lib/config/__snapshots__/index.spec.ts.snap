@@ -7,6 +7,7 @@ Object {
   "allowedPostUpgradeCommands": Array [],
   "assignAutomerge": false,
   "assignees": Array [],
+  "assigneesFromCodeOwners": false,
   "assigneesSampleSize": null,
   "automerge": false,
   "automergeComment": "automergeComment",
@@ -100,6 +101,7 @@ Object {
   "recreateClosed": false,
   "requiredStatusChecks": Array [],
   "reviewers": Array [],
+  "reviewersFromCodeOwners": false,
   "reviewersSampleSize": null,
   "rollbackPrs": false,
   "schedule": Array [
@@ -138,6 +140,7 @@ Object {
   "allowedPostUpgradeCommands": Array [],
   "assignAutomerge": false,
   "assignees": Array [],
+  "assigneesFromCodeOwners": false,
   "assigneesSampleSize": null,
   "autodiscover": false,
   "autodiscoverFilter": null,
@@ -322,6 +325,7 @@ Object {
   "requiredStatusChecks": Array [],
   "respectLatest": true,
   "reviewers": Array [],
+  "reviewersFromCodeOwners": false,
   "reviewersSampleSize": null,
   "rollbackPrs": true,
   "schedule": Array [
@@ -367,6 +371,7 @@ Object {
   "allowedPostUpgradeCommands": Array [],
   "assignAutomerge": false,
   "assignees": Array [],
+  "assigneesFromCodeOwners": false,
   "assigneesSampleSize": null,
   "autodiscover": false,
   "autodiscoverFilter": null,
@@ -552,6 +557,7 @@ Object {
   "requiredStatusChecks": Array [],
   "respectLatest": true,
   "reviewers": Array [],
+  "reviewersFromCodeOwners": false,
   "reviewersSampleSize": null,
   "rollbackPrs": false,
   "schedule": Array [
