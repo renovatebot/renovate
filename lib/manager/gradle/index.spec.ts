@@ -1,6 +1,5 @@
 // Doesn't work with ifSystemSupportsGradle
 /* eslint-disable jest/no-standalone-expect */
-/* eslint-disable @typescript-eslint/no-floating-promises */
 import { exec as _exec } from 'child_process';
 import * as _os from 'os';
 import fs from 'fs-extra';
@@ -255,7 +254,7 @@ describe('manager/gradle', () => {
 
     it('should use docker if required', async () => {
       const configWithDocker = { binarySource: BinarySource.Docker, ...config };
-      util.setUtilConfig(configWithDocker);
+      await util.setUtilConfig(configWithDocker);
       await initializeWorkingDir(false, standardUpdatesReport());
       const execSnapshots = mockExecAll(exec, gradleOutput);
 
@@ -266,7 +265,7 @@ describe('manager/gradle', () => {
 
     it('should use docker even if gradlew is available', async () => {
       const configWithDocker = { binarySource: BinarySource.Docker, ...config };
-      util.setUtilConfig(configWithDocker);
+      await util.setUtilConfig(configWithDocker);
       await initializeWorkingDir(true, standardUpdatesReport());
 
       const execSnapshots = mockExecAll(exec, gradleOutput);
@@ -277,7 +276,7 @@ describe('manager/gradle', () => {
 
     it('should use docker even if gradlew.bat is available on Windows', async () => {
       const configWithDocker = { binarySource: BinarySource.Docker, ...config };
-      util.setUtilConfig(configWithDocker);
+      await util.setUtilConfig(configWithDocker);
       os.platform.mockReturnValue('win32');
       await initializeWorkingDir(true, standardUpdatesReport());
       const execSnapshots = mockExecAll(exec, gradleOutput);
