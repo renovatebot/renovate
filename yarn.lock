@@ -946,7 +946,7 @@
     jest-mock "^26.0.1"
     jest-util "^26.0.1"
 
-"@jest/globals@^26.0.1":
+"@jest/globals@26.0.1", "@jest/globals@^26.0.1":
   version "26.0.1"
   resolved "https://registry.yarnpkg.com/@jest/globals/-/globals-26.0.1.tgz#3f67b508a7ce62b6e6efc536f3d18ec9deb19a9c"
   integrity sha512-iuucxOYB7BRCvT+TYBzUqUNuxFX1hqaR6G6IcGgEqkJ5x4htNKo1r7jk1ji9Zj8ZMiMw0oB5NaA7k5Tx6MVssA==

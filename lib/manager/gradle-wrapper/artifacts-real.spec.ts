@@ -211,11 +211,20 @@ describe(getName(__filename), () => {
         })
       );
 
+      const newContent = await readString(`./gradle-wrapper-sum.properties`);
+
       const result = await dcUpdate.updateArtifacts({
         packageFileName: 'gradle/wrapper/gradle-wrapper.properties',
         updatedDeps: [],
-        newPackageFileContent: `distributionSha256Sum=336b6898b491f6334502d8074a6b8c2d73ed83b92123106bd4bf837f04111043\ndistributionUrl=https\\://services.gradle.org/distributions/gradle-6.3-bin.zip`,
-        config,
+        newPackageFileContent: newContent.replace(
+          '038794feef1f4745c6347107b6726279d1c824f3fc634b60f86ace1e9fbd1768',
+          '1f3067073041bc44554d0efe5d402a33bc3d3c93cc39ab684f308586d732a80d'
+        ),
+        config: {
+          ...config,
+          toVersion: '6.3',
+          currentValue: '5.6.4',
+        },
       });
 
       expect(result).toHaveLength(1);
@@ -226,7 +235,7 @@ describe(getName(__filename), () => {
           config.localDir,
           `./gradle/wrapper/gradle-wrapper.properties`
         )
-      ).toEqual(await readString(`./gradle-wrapper-sum.properties`));
+      ).toEqual(newContent);
 
       expect(httpMock.getTrace()).toEqual([
         {

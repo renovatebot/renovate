@@ -1,4 +1,5 @@
 import crypto from 'crypto';
+import { expect, jest } from '@jest/globals';
 import * as upath from 'upath';
 import { RenovateConfig as _RenovateConfig } from '../lib/config';
 import { getConfig } from '../lib/config/defaults';
@@ -28,7 +29,7 @@ export function mocked<T>(module: T): jest.Mocked<T> {
  */
 export function mockPartial(moduleName: string, overrides?: object): unknown {
   const absolutePath = upath.join(module.parent.filename, '../', moduleName);
-  const originalModule = jest.requireActual(absolutePath);
+  const originalModule = jest.requireActual(absolutePath) as any;
   return {
     __esModule: true,
     ...originalModule,
@@ -79,14 +80,22 @@ export const replacingSerializer = (
   },
 });
 
+export function addReplacingSerializer(from: string, to: string): void {
+  expect.addSnapshotSerializer(replacingSerializer(from, to));
+}
+
 function toHash(buf: Buffer): string {
   return crypto.createHash('sha256').update(buf).digest('hex');
 }
 
-export const bufferSerializer = (): jest.SnapshotSerializerPlugin => ({
+const bufferSerializer: jest.SnapshotSerializerPlugin = {
   test: (value) => Buffer.isBuffer(value),
   serialize: (val, config, indent, depth, refs, printer) => {
     const replaced = toHash(val);
     return printer(replaced, config, indent, depth, refs);
   },
-});
+};
+
+export function addBufferSerializer(): void {
+  expect.addSnapshotSerializer(bufferSerializer);
+}

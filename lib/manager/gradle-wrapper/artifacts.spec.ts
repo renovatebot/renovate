@@ -2,16 +2,15 @@ import { exec as _exec } from 'child_process';
 import { resolve } from 'path';
 import { readFile } from 'fs-extra';
 import Git from 'simple-git/promise';
-import * as upath from 'upath';
 import { envMock, mockExecAll } from '../../../test/execUtil';
 import * as httpMock from '../../../test/httpMock';
 import {
+  addReplacingSerializer,
   env,
   fs,
   getName,
   partial,
   platform,
-  replacingSerializer,
 } from '../../../test/util';
 import { setUtilConfig } from '../../util';
 import { BinarySource } from '../../util/exec/common';
@@ -30,11 +29,8 @@ const config = {
 };
 const dockerConfig = { ...config, binarySource: BinarySource.Docker };
 
-expect.addSnapshotSerializer(
-  replacingSerializer(upath.toUnix(config.localDir), '<localDir>')
-);
-
-expect.addSnapshotSerializer(replacingSerializer('gradlew.bat', 'gradlew'));
+addReplacingSerializer('gradlew.bat', '<gradlew>');
+addReplacingSerializer('./gradlew', '<gradlew>');
 
 function readString(...paths: string[]): Promise<string> {
   return readFile(resolve(fixtures, ...paths), 'utf8');
@@ -129,7 +125,7 @@ describe(getName(__filename), () => {
     expect(res).toEqual([]);
   });
 
-  it('updates distributionSha256Sum', async () => {
+  it.only('updates distributionSha256Sum', async () => {
     httpMock
       .scope('https://services.gradle.org')
       .get('/distributions/gradle-6.3-bin.zip.sha256')
