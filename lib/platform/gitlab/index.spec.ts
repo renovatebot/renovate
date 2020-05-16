@@ -1086,27 +1086,6 @@ describe('platform/gitlab', () => {
       expect(pr).toMatchSnapshot();
     });
   });
-  describe('getPrFiles()', () => {
-    it('should return empty if no mrNo is passed', async () => {
-      const prFiles = await gitlab.getPrFiles(0);
-      expect(prFiles).toEqual([]);
-    });
-    it('returns files', async () => {
-      api.get.mockResolvedValueOnce(
-        partial<GotResponse>({
-          body: {
-            changes: [
-              { new_path: 'renovate.json' },
-              { new_path: 'not renovate.json' },
-            ],
-          },
-        })
-      );
-      const prFiles = await gitlab.getPrFiles(123);
-      expect(prFiles).toMatchSnapshot();
-      expect(prFiles).toHaveLength(2);
-    });
-  });
   describe('updatePr(prNo, title, body)', () => {
     jest.resetAllMocks();
     it('updates the PR', async () => {
