@@ -887,56 +887,6 @@ describe('platform/azure', () => {
     });
   });
 
-  describe('getPrFiles', () => {
-    it('single change', async () => {
-      azureApi.gitApi.mockImplementationOnce(
-        () =>
-          ({
-            getPullRequestIterations: jest.fn(() => [{ id: 1 }]),
-            getPullRequestIterationChanges: jest.fn(() => ({
-              changeEntries: [{ item: { path: '/index.js' } }],
-            })),
-          } as any)
-      );
-      const res = await azure.getPrFiles(46);
-      expect(res).toHaveLength(1);
-      expect(res).toEqual(['index.js']);
-    });
-    it('multiple changes', async () => {
-      azureApi.gitApi.mockImplementationOnce(
-        () =>
-          ({
-            getPullRequestIterations: jest.fn(() => [{ id: 1 }, { id: 2 }]),
-            getPullRequestIterationChanges: jest
-              .fn()
-              .mockResolvedValueOnce({
-                changeEntries: [{ item: { path: '/index.js' } }],
-              })
-              .mockResolvedValueOnce({
-                changeEntries: [{ item: { path: '/package.json' } }],
-              }),
-          } as any)
-      );
-      const res = await azure.getPrFiles(46);
-      expect(res).toHaveLength(2);
-      expect(res).toEqual(['index.js', 'package.json']);
-    });
-    it('deduplicate changes', async () => {
-      azureApi.gitApi.mockImplementationOnce(
-        () =>
-          ({
-            getPullRequestIterations: jest.fn(() => [{ id: 1 }, { id: 2 }]),
-            getPullRequestIterationChanges: jest.fn().mockResolvedValue({
-              changeEntries: [{ item: { path: '/index.js' } }],
-            }),
-          } as any)
-      );
-      const res = await azure.getPrFiles(46);
-      expect(res).toHaveLength(1);
-      expect(res).toEqual(['index.js']);
-    });
-  });
-
   describe('Not supported by Azure DevOps (yet!)', () => {
     it('setBranchStatus', async () => {
       const res = await azure.setBranchStatus({
