@@ -1645,7 +1645,7 @@ const options: RenovateOptions[] = [
     name: 'unicodeEmoji',
     description: 'Enable or disable Unicode emoji',
     type: 'boolean',
-    default: false,
+    default: true,
   },
   {
     name: 'gitLabAutomerge',
