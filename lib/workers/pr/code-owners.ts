@@ -37,7 +37,7 @@ export async function codeOwnersForPr(pr: Pr): Promise<string[]> {
     }
     return matchingRule.usernames;
   } catch (err) {
-    logger.debug({ err, pr }, 'Failed to determine code owners for PR.');
+    logger.warn({ err, pr }, 'Failed to determine code owners for PR.');
     return [];
   }
 }
