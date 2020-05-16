@@ -1933,25 +1933,6 @@ describe('platform/github', () => {
       expect(httpMock.getTrace()).toMatchSnapshot();
     });
   });
-  describe('getPrFiles()', () => {
-    it('should return empty if no prNo is passed', async () => {
-      const prFiles = await github.getPrFiles(0);
-      expect(prFiles).toEqual([]);
-    });
-    it('returns files', async () => {
-      httpMock
-        .scope(githubApiHost)
-        .get('/repos/undefined/pulls/123/files')
-        .reply(200, [
-          { filename: 'renovate.json' },
-          { filename: 'not renovate.json' },
-        ]);
-      const prFiles = await github.getPrFiles(123);
-      expect(prFiles).toMatchSnapshot();
-      expect(prFiles).toHaveLength(2);
-      expect(httpMock.getTrace()).toMatchSnapshot();
-    });
-  });
   describe('updatePr(prNo, title, body)', () => {
     it('should update the PR', async () => {
       const scope = httpMock.scope(githubApiHost);

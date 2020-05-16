@@ -979,21 +979,6 @@ Followed by some information.
 "
 `;
 
-exports[`platform/bitbucket-server endpoint with no path getPrFiles() returns one file 1`] = `
-Array [
-  Array [
-    "./rest/api/1.0/projects/SOME/repos/repo",
-  ],
-  Array [
-    "./rest/api/1.0/projects/SOME/repos/repo/branches/default",
-  ],
-  Array [
-    "./rest/api/1.0/projects/SOME/repos/repo/pull-requests/5/changes?withComments=false&limit=100",
-    undefined,
-  ],
-]
-`;
-
 exports[`platform/bitbucket-server endpoint with no path getPrList() has pr 1`] = `
 Array [
   Object {
@@ -2556,21 +2541,6 @@ Empty comment.
 
 Followed by some information.
 "
-`;
-
-exports[`platform/bitbucket-server endpoint with path getPrFiles() returns one file 1`] = `
-Array [
-  Array [
-    "./rest/api/1.0/projects/SOME/repos/repo",
-  ],
-  Array [
-    "./rest/api/1.0/projects/SOME/repos/repo/branches/default",
-  ],
-  Array [
-    "./rest/api/1.0/projects/SOME/repos/repo/pull-requests/5/changes?withComments=false&limit=100",
-    undefined,
-  ],
-]
 `;
 
 exports[`platform/bitbucket-server endpoint with path getPrList() has pr 1`] = `
