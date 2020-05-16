@@ -3,7 +3,6 @@ import { mocked, platform: platformMock } from '../../../test/util';
 import { Pr, platform } from '../../platform';
 import { codeOwnersForPr } from './code-owners';
 
-const platformMock = mocked(platform);
 
 describe('workers/pr/code-owners', () => {
   describe('codeOwnersForPr', () => {
