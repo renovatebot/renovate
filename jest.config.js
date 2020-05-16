@@ -23,6 +23,8 @@ module.exports = {
   reporters: ['default', './tmp/tools/jest-gh-reporter.js'],
   setupFilesAfterEnv: ['<rootDir>/test/globals.ts'],
   snapshotSerializers: ['<rootDir>/test/newline-snapshot-serializer.ts'],
+  testEnvironment: 'node',
+  testRunner: 'jest-circus/runner',
   transform: {
     '^.+\\.(j|t)s$': 'babel-jest',
   },

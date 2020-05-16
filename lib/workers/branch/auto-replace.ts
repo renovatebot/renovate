@@ -31,22 +31,32 @@ export async function confirmIfDepUpdated(
     );
     newUpgrade = newExtract.deps[depIndex];
   } catch (err) /* istanbul ignore next */ {
-    logger.debug('Failed to parse newContent');
+    logger.debug({ manager, packageFile }, 'Failed to parse newContent');
   }
   if (!newUpgrade) {
-    logger.debug('No newUpgrade');
+    logger.debug({ manager, packageFile }, 'No newUpgrade');
     return false;
   }
   // istanbul ignore if
   if (upgrade.depName !== newUpgrade.depName) {
     logger.debug(
-      { currentDepName: upgrade.depName, newDepName: newUpgrade.depName },
+      {
+        manager,
+        packageFile,
+        currentDepName: upgrade.depName,
+        newDepName: newUpgrade.depName,
+      },
       'depName mismatch'
     );
   }
   if (newUpgrade.currentValue !== newValue) {
     logger.debug(
-      { expectedValue: newValue, foundValue: newUpgrade.currentValue },
+      {
+        manager,
+        packageFile,
+        expectedValue: newValue,
+        foundValue: newUpgrade.currentValue,
+      },
       'Value mismatch'
     );
     return false;
@@ -82,7 +92,10 @@ export async function checkBranchDepsMatchBaseDeps(
     );
     return getDepsSignature(baseDeps) === getDepsSignature(branchDeps);
   } catch (err) /* istanbul ignore next */ {
-    logger.info('Failed to parse branchContent - rebasing');
+    logger.info(
+      { manager, packageFile },
+      'Failed to parse branchContent - rebasing'
+    );
     return false;
   }
 }
@@ -90,7 +103,7 @@ export async function checkBranchDepsMatchBaseDeps(
 export async function doAutoReplace(
   upgrade: BranchUpgradeConfig,
   existingContent: string,
-  parentBranch: string | null
+  reuseExistingBranch: boolean
 ): Promise<string | null> {
   const {
     packageFile,
@@ -101,7 +114,7 @@ export async function doAutoReplace(
     newDigest,
     autoReplaceStringTemplate,
   } = upgrade;
-  if (parentBranch) {
+  if (reuseExistingBranch) {
     if (!(await checkBranchDepsMatchBaseDeps(upgrade, existingContent))) {
       logger.debug(
         { packageFile, depName },

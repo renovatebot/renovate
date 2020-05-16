@@ -97,7 +97,7 @@ describe('.updateArtifacts()', () => {
   });
   it('returns null if unchanged', async () => {
     const execSnapshots = mockExecAll(exec);
-    platform.getFile.mockResolvedValueOnce('Current Podfile');
+    fs.readFile.mockResolvedValueOnce('Current Podfile' as any);
     platform.getRepoStatus.mockResolvedValueOnce({
       modified: [],
     } as Git.StatusResult);
@@ -115,7 +115,7 @@ describe('.updateArtifacts()', () => {
   it('returns updated Podfile', async () => {
     const execSnapshots = mockExecAll(exec);
     await setExecConfig({ ...config, binarySource: BinarySource.Docker });
-    platform.getFile.mockResolvedValueOnce('Old Podfile');
+    fs.readFile.mockResolvedValueOnce('Old Podfile' as any);
     platform.getRepoStatus.mockResolvedValueOnce({
       modified: ['Podfile.lock'],
     } as Git.StatusResult);
@@ -133,14 +133,14 @@ describe('.updateArtifacts()', () => {
   it('returns updated Podfile and Pods files', async () => {
     const execSnapshots = mockExecAll(exec);
     await setExecConfig({ ...config, binarySource: BinarySource.Docker });
-    platform.getFile.mockResolvedValueOnce('Old Podfile');
-    platform.getFile.mockResolvedValueOnce('Old Manifest.lock');
+    fs.readFile.mockResolvedValueOnce('Old Manifest.lock' as any);
+    fs.readFile.mockResolvedValueOnce('New Podfile' as any);
+    fs.readFile.mockResolvedValueOnce('Pods manifest' as any);
     platform.getRepoStatus.mockResolvedValueOnce({
       not_added: ['Pods/New'],
       modified: ['Podfile.lock', 'Pods/Manifest.lock'],
       deleted: ['Pods/Deleted'],
     } as Git.StatusResult);
-    fs.readFile.mockResolvedValueOnce('New Podfile' as any);
     expect(
       await updateArtifacts({
         packageFileName: 'Podfile',
@@ -153,7 +153,7 @@ describe('.updateArtifacts()', () => {
   });
   it('catches write error', async () => {
     const execSnapshots = mockExecAll(exec);
-    platform.getFile.mockResolvedValueOnce('Current Podfile');
+    fs.readFile.mockResolvedValueOnce('Current Podfile' as any);
     fs.outputFile.mockImplementationOnce(() => {
       throw new Error('not found');
     });
@@ -169,7 +169,7 @@ describe('.updateArtifacts()', () => {
   });
   it('returns pod exec error', async () => {
     const execSnapshots = mockExecAll(exec, new Error('exec exception'));
-    platform.getFile.mockResolvedValueOnce('Old Podfile.lock');
+    fs.readFile.mockResolvedValueOnce('Old Podfile.lock' as any);
     fs.outputFile.mockResolvedValueOnce(null as never);
     fs.readFile.mockResolvedValueOnce('Old Podfile.lock' as any);
     expect(
@@ -191,7 +191,7 @@ describe('.updateArtifacts()', () => {
       dockerUser: 'ubuntu',
     });
 
-    platform.getFile.mockResolvedValueOnce('COCOAPODS: 1.2.4');
+    fs.readFile.mockResolvedValueOnce('COCOAPODS: 1.2.4' as any);
 
     fs.readFile.mockResolvedValueOnce('New Podfile' as any);
 
@@ -216,7 +216,7 @@ describe('.updateArtifacts()', () => {
       dockerUser: 'ubuntu',
     });
 
-    platform.getFile.mockResolvedValueOnce('COCOAPODS: 1.2.4');
+    fs.readFile.mockResolvedValueOnce('COCOAPODS: 1.2.4' as any);
     datasource.getReleases.mockResolvedValueOnce({
       releases: [],
     });

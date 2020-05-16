@@ -333,7 +333,7 @@ describe('manager/npm/post-update', () => {
     });
     it('returns no error and empty lockfiles if lock file maintenance exists', async () => {
       config.updateType = 'lockFileMaintenance';
-      config.parentBranch = 'renovate/lock-file-maintenance';
+      config.reuseExistingBranch = true;
       platform.branchExists.mockResolvedValueOnce(true);
       const res = await getAdditionalFiles(config, { npm: [{}] });
       expect(res).toMatchSnapshot();

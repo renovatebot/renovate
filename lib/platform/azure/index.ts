@@ -379,17 +379,15 @@ export /* istanbul ignore next */ function mergeBranch(
   return config.storage.mergeBranch(branchName);
 }
 
-export /* istanbul ignore next */ function commitFilesToBranch({
+export /* istanbul ignore next */ function commitFiles({
   branchName,
   files,
   message,
-  parentBranch = config.baseBranch,
 }: CommitFilesConfig): Promise<string | null> {
-  return config.storage.commitFilesToBranch({
+  return config.storage.commitFiles({
     branchName,
     files,
     message,
-    parentBranch,
   });
 }
 

@@ -201,7 +201,7 @@ describe('platform/gitea', () => {
       setBranchPrefix: gsmSetBranchPrefix,
       isBranchStale: gsmIsBranchStale,
       getBranchCommit: gsmGetBranchCommit,
-      commitFilesToBranch: gsmCommitFilesToBranch,
+      commitFiles: gsmCommitFilesToBranch,
       deleteBranch: gsmDeleteBranch,
     }));
 
@@ -1439,7 +1439,7 @@ index 0000000..2173594
     });
   });
 
-  describe('commitFilesToBranch', () => {
+  describe('commitFiles', () => {
     it('should propagate call to storage class with default parent branch', async () => {
       const commitConfig: CommitFilesConfig = {
         branchName: 'some-branch',
@@ -1448,28 +1448,12 @@ index 0000000..2173594
       };
 
       await initFakeRepo();
-      await gitea.commitFilesToBranch(commitConfig);
+      await gitea.commitFiles(commitConfig);
 
       expect(gsmCommitFilesToBranch).toHaveBeenCalledTimes(1);
       expect(gsmCommitFilesToBranch).toHaveBeenCalledWith({
         ...commitConfig,
-        parentBranch: mockRepo.default_branch,
       });
-    });
-
-    it('should propagate call to storage class with custom parent branch', async () => {
-      const commitConfig: CommitFilesConfig = {
-        branchName: 'some-branch',
-        files: [partial<File>({})],
-        message: 'some-message',
-        parentBranch: 'some-parent-branch',
-      };
-
-      await initFakeRepo();
-      await gitea.commitFilesToBranch(commitConfig);
-
-      expect(gsmCommitFilesToBranch).toHaveBeenCalledTimes(1);
-      expect(gsmCommitFilesToBranch).toHaveBeenCalledWith(commitConfig);
     });
   });
 

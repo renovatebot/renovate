@@ -587,17 +587,15 @@ export function isBranchStale(branchName: string): Promise<boolean> {
   return config.storage.isBranchStale(branchName);
 }
 
-export function commitFilesToBranch({
+export function commitFiles({
   branchName,
   files,
   message,
-  parentBranch = config.baseBranch,
 }: CommitFilesConfig): Promise<string | null> {
-  return config.storage.commitFilesToBranch({
+  return config.storage.commitFiles({
     branchName,
     files,
     message,
-    parentBranch,
   });
 }
 

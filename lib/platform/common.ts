@@ -27,7 +27,6 @@ export type CommitFilesConfig = {
   branchName: string;
   files: File[];
   message: string;
-  parentBranch?: string;
 };
 
 export interface GotApiOptions {
@@ -224,7 +223,7 @@ export interface Platform {
   ensureComment(ensureComment: EnsureCommentConfig): Promise<boolean>;
   branchExists(branchName: string): Promise<boolean>;
   setBaseBranch(baseBranch?: string): Promise<string>;
-  commitFilesToBranch(commitFile: CommitFilesConfig): Promise<string | null>;
+  commitFiles(commitFile: CommitFilesConfig): Promise<string | null>;
   getPr(number: number): Promise<Pr>;
   findPr(findPRConfig: FindPRConfig): Promise<Pr>;
   mergeBranch(branchName: string): Promise<void>;

@@ -41,7 +41,7 @@ export async function updateArtifacts({
   logger.debug(`Using GOPATH: ${goPath}`);
 
   const sumFileName = goModFileName.replace(/\.mod$/, '.sum');
-  const existingGoSumContent = await platform.getFile(sumFileName);
+  const existingGoSumContent = await readLocalFile(sumFileName);
   if (!existingGoSumContent) {
     logger.debug('No go.sum found');
     return null;
@@ -96,7 +96,7 @@ export async function updateArtifacts({
     const vendorDir = join(dirname(goModFileName), 'vendor/');
     const vendorModulesFileName = join(vendorDir, 'modules.txt');
     // istanbul ignore if
-    if (await platform.getFile(vendorModulesFileName)) {
+    if (await readLocalFile(vendorModulesFileName)) {
       args = 'mod vendor';
       logger.debug({ cmd, args }, 'go mod vendor command');
       await exec(`${cmd} ${args}`, execOptions);
