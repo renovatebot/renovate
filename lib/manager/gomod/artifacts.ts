@@ -1,4 +1,5 @@
 import { ensureDir } from 'fs-extra';
+import { quote } from 'shlex';
 import { dirname, join } from 'upath';
 import { PLATFORM_TYPE_GITHUB } from '../../constants/platforms';
 import { logger } from '../../logger';
@@ -16,9 +17,10 @@ function getPreCommands(): string[] | null {
   });
   let preCommands = null;
   if (credentials && credentials.token) {
-    const token = global.appMode
+    let token = global.appMode
       ? `x-access-token:${credentials.token}`
       : credentials.token;
+    token = quote(token);
     preCommands = [
       `git config --global url.\"https://${token}@github.com/\".insteadOf \"https://github.com/\"`, // eslint-disable-line no-useless-escape
     ];
@@ -39,7 +41,7 @@ export async function updateArtifacts({
   logger.debug(`Using GOPATH: ${goPath}`);
 
   const sumFileName = goModFileName.replace(/\.mod$/, '.sum');
-  const existingGoSumContent = await platform.getFile(sumFileName);
+  const existingGoSumContent = await readLocalFile(sumFileName);
   if (!existingGoSumContent) {
     logger.debug('No go.sum found');
     return null;
@@ -94,7 +96,7 @@ export async function updateArtifacts({
     const vendorDir = join(dirname(goModFileName), 'vendor/');
     const vendorModulesFileName = join(vendorDir, 'modules.txt');
     // istanbul ignore if
-    if (await platform.getFile(vendorModulesFileName)) {
+    if (await readLocalFile(vendorModulesFileName)) {
       args = 'mod vendor';
       logger.debug({ cmd, args }, 'go mod vendor command');
       await exec(`${cmd} ${args}`, execOptions);

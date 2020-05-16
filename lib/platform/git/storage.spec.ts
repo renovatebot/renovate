@@ -162,20 +162,6 @@ describe('platform/git/storage', () => {
     it('should throw if branch merge throws', async () => {
       await expect(git.mergeBranch('not_found')).rejects.toThrow();
     });
-    it('should throw if branch merge is stale', async () => {
-      expect.assertions(1);
-      await git.setBranchPrefix('renovate/');
-      await git.commitFilesToBranch({
-        branchName: 'test',
-        files: [{ name: 'some-new-file', contents: 'some new-contents' }],
-        message: 'test mesage',
-        parentBranch: 'renovate/past_branch',
-      });
-
-      await git.setBaseBranch('master');
-
-      await expect(git.mergeBranch('test')).rejects.toThrow();
-    });
   });
   describe('deleteBranch(branchName)', () => {
     it('should send delete', async () => {
@@ -209,13 +195,13 @@ describe('platform/git/storage', () => {
       ).rejects.toMatchSnapshot();
     });
   });
-  describe('commitFilesToBranch({branchName, files, message, parentBranch})', () => {
+  describe('commitFiles({branchName, files, message})', () => {
     it('creates file', async () => {
       const file = {
         name: 'some-new-file',
         contents: 'some new-contents',
       };
-      await git.commitFilesToBranch({
+      await git.commitFiles({
         branchName: 'renovate/past_branch',
         files: [file],
         message: 'Create something',
@@ -226,7 +212,7 @@ describe('platform/git/storage', () => {
         name: '|delete|',
         contents: 'file_to_delete',
       };
-      await git.commitFilesToBranch({
+      await git.commitFiles({
         branchName: 'renovate/something',
         files: [file],
         message: 'Delete something',
@@ -243,7 +229,7 @@ describe('platform/git/storage', () => {
           contents: 'other updated content',
         },
       ];
-      await git.commitFilesToBranch({
+      await git.commitFiles({
         branchName: 'renovate/something',
         files,
         message: 'Update something',
@@ -256,7 +242,7 @@ describe('platform/git/storage', () => {
           contents: 'some content',
         },
       ];
-      await git.commitFilesToBranch({
+      await git.commitFiles({
         branchName: 'renovate/something',
         files,
         message: 'Update something',
@@ -271,7 +257,7 @@ describe('platform/git/storage', () => {
         `refs/heads/${branchName}:refs/remotes/origin/${branchName}`,
       ]);
       const files = [];
-      await git.commitFilesToBranch({
+      await git.commitFiles({
         branchName,
         files,
         message: 'Update something',

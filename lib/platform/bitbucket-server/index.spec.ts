@@ -59,7 +59,7 @@ describe('platform/bitbucket-server', () => {
               getAllRenovateBranches: jest.fn(),
               getCommitMessages: jest.fn(),
               getFile: jest.fn(),
-              commitFilesToBranch: jest.fn(),
+              commitFiles: jest.fn(),
               mergeBranch: jest.fn(),
               deleteBranch: jest.fn(),
               getRepoStatus: jest.fn(),
@@ -265,11 +265,11 @@ describe('platform/bitbucket-server', () => {
         });
       });
 
-      describe('commitFilesToBranch()', () => {
+      describe('commitFiles()', () => {
         it('sends to gitFs', async () => {
           expect.assertions(1);
           await initRepo();
-          await bitbucket.commitFilesToBranch({
+          await bitbucket.commitFiles({
             branchName: 'some-branch',
             files: [{ name: 'test', contents: 'dummy' }],
             message: 'message',
@@ -491,7 +491,7 @@ describe('platform/bitbucket-server', () => {
           expect(api.get.mock.calls).toMatchSnapshot();
         });
 
-        it('deletes comment if found', async () => {
+        it('deletes comment by topic if found', async () => {
           expect.assertions(2);
           await initRepo();
           api.get.mockClear();
@@ -499,6 +499,19 @@ describe('platform/bitbucket-server', () => {
           await bitbucket.ensureCommentRemoval({
             number: 5,
             topic: 'some-subject',
+          });
+          expect(api.get.mock.calls).toMatchSnapshot();
+          expect(api.delete).toHaveBeenCalledTimes(1);
+        });
+
+        it('deletes comment by content if found', async () => {
+          expect.assertions(2);
+          await initRepo();
+          api.get.mockClear();
+
+          await bitbucket.ensureCommentRemoval({
+            number: 5,
+            content: '!merge',
           });
           expect(api.get.mock.calls).toMatchSnapshot();
           expect(api.delete).toHaveBeenCalledTimes(1);

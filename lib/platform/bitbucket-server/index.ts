@@ -426,29 +426,26 @@ export function getAllRenovateBranches(
   return config.storage.getAllRenovateBranches(branchPrefix);
 }
 
-export async function commitFilesToBranch({
+export async function commitFiles({
   branchName,
   files,
   message,
-  parentBranch = config.baseBranch,
 }: CommitFilesConfig): Promise<string | null> {
   logger.debug(
-    `commitFilesToBranch(${JSON.stringify(
+    `commitFiles(${JSON.stringify(
       {
         branchName,
         filesLength: files.length,
         message,
-        parentBranch,
       },
       null,
       2
     )})`
   );
-  const commit = config.storage.commitFilesToBranch({
+  const commit = config.storage.commitFiles({
     branchName,
     files,
     message,
-    parentBranch,
   });
 
   // wait for pr change propagation
@@ -867,16 +864,27 @@ export async function ensureComment({
 export async function ensureCommentRemoval({
   number: prNo,
   topic,
+  content,
 }: EnsureCommentRemovalConfig): Promise<void> {
   try {
-    logger.debug(`Ensuring comment "${topic}" in #${prNo} is removed`);
+    logger.debug(
+      `Ensuring comment "${topic || content}" in #${prNo} is removed`
+    );
     const comments = await getComments(prNo);
-    let commentId: number;
-    comments.forEach((comment) => {
-      if (comment.text.startsWith(`### ${topic}\n\n`)) {
-        commentId = comment.id;
-      }
-    });
+
+    const byTopic = (comment: Comment): boolean =>
+      comment.text.startsWith(`### ${topic}\n\n`);
+    const byContent = (comment: Comment): boolean =>
+      comment.text.trim() === content;
+
+    let commentId: number | null = null;
+
+    if (topic) {
+      commentId = comments.find(byTopic)?.id;
+    } else if (content) {
+      commentId = comments.find(byContent)?.id;
+    }
+
     if (commentId) {
       await deleteComment(prNo, commentId);
     }

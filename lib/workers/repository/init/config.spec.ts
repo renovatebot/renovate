@@ -1,11 +1,14 @@
 import {
   RenovateConfig,
+  fs,
   getConfig,
   mocked,
   platform,
 } from '../../../../test/util';
 import * as _migrateAndValidate from '../../../config/migrate-validate';
 import { mergeRenovateConfig } from './config';
+
+jest.mock('../../../util/fs');
 
 const migrateAndValidate = mocked(_migrateAndValidate);
 
@@ -29,7 +32,7 @@ describe('workers/repository/init/config', () => {
     });
     it('returns config if not found', async () => {
       platform.getFileList.mockResolvedValue(['package.json']);
-      platform.getFile.mockResolvedValue('{}');
+      fs.readLocalFile.mockResolvedValue('{}');
       const res = await mergeRenovateConfig(config);
       expect(res).toMatchObject(config);
     });
@@ -41,12 +44,12 @@ describe('workers/repository/init/config', () => {
           prHourlyLimit: 10,
         },
       });
-      platform.getFile.mockResolvedValue(pJson);
+      fs.readLocalFile.mockResolvedValue(pJson);
       await mergeRenovateConfig(config);
     });
     it('returns error if cannot parse', async () => {
       platform.getFileList.mockResolvedValue(['package.json', 'renovate.json']);
-      platform.getFile.mockResolvedValue('cannot parse');
+      fs.readLocalFile.mockResolvedValue('cannot parse');
       let e;
       try {
         await mergeRenovateConfig(config);
@@ -60,7 +63,7 @@ describe('workers/repository/init/config', () => {
     });
     it('throws error if duplicate keys', async () => {
       platform.getFileList.mockResolvedValue(['package.json', '.renovaterc']);
-      platform.getFile.mockResolvedValue(
+      fs.readLocalFile.mockResolvedValue(
         '{ "enabled": true, "enabled": false }'
       );
       let e;
@@ -79,7 +82,7 @@ describe('workers/repository/init/config', () => {
         'package.json',
         'renovate.json5',
       ]);
-      platform.getFile.mockResolvedValue(`{
+      fs.readLocalFile.mockResolvedValue(`{
         // this is json5 format
       }`);
       await mergeRenovateConfig(config);
@@ -89,7 +92,7 @@ describe('workers/repository/init/config', () => {
         'package.json',
         '.github/renovate.json',
       ]);
-      platform.getFile.mockResolvedValue('{}');
+      fs.readLocalFile.mockResolvedValue('{}');
       await mergeRenovateConfig(config);
     });
     it('finds .gitlab/renovate.json', async () => {
@@ -97,7 +100,7 @@ describe('workers/repository/init/config', () => {
         'package.json',
         '.gitlab/renovate.json',
       ]);
-      platform.getFile.mockResolvedValue('{}');
+      fs.readLocalFile.mockResolvedValue('{}');
       await mergeRenovateConfig(config);
     });
     it('finds .renovaterc.json', async () => {
@@ -105,7 +108,7 @@ describe('workers/repository/init/config', () => {
         'package.json',
         '.renovaterc.json',
       ]);
-      platform.getFile.mockResolvedValue('{}');
+      fs.readLocalFile.mockResolvedValue('{}');
       await mergeRenovateConfig(config);
     });
     it('throws error if misconfigured', async () => {
@@ -113,7 +116,7 @@ describe('workers/repository/init/config', () => {
         'package.json',
         '.renovaterc.json',
       ]);
-      platform.getFile.mockResolvedValue('{}');
+      fs.readLocalFile.mockResolvedValue('{}');
       migrateAndValidate.migrateAndValidate.mockResolvedValueOnce({
         errors: [{ depName: 'dep', message: 'test error' }],
       });

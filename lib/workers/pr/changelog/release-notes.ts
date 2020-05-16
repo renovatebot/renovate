@@ -4,13 +4,14 @@ import { linkify } from 'linkify-markdown';
 import MarkdownIt from 'markdown-it';
 
 import { logger } from '../../../logger';
-import { api } from '../../../platform/github/gh-got-wrapper';
+import * as globalCache from '../../../util/cache/global';
+import { GithubHttp } from '../../../util/http/github';
 import { ChangeLogNotes, ChangeLogResult } from './common';
-
-const { get: ghGot } = api;
 
 const markdown = new MarkdownIt('zero');
 markdown.enable(['heading', 'lheading']);
+
+const http = new GithubHttp();
 
 export async function getReleaseList(
   apiBaseUrl: string,
@@ -24,7 +25,7 @@ export async function getReleaseList(
   try {
     let url = apiBaseUrl.replace(/\/?$/, '/');
     url += `repos/${repository}/releases?per_page=100`;
-    const res = await ghGot<
+    const res = await http.getJson<
       {
         html_url: string;
         id: number;
@@ -160,7 +161,7 @@ export async function getReleaseNotesMd(
     let apiPrefix = apiBaseUrl.replace(/\/?$/, '/');
 
     apiPrefix += `repos/${repository}/contents/`;
-    const filesRes = await ghGot<{ name: string }[]>(apiPrefix);
+    const filesRes = await http.getJson<{ name: string }[]>(apiPrefix);
     const files = filesRes.body
       .map((f) => f.name)
       .filter((f) => changelogFilenameRegex.test(f));
@@ -175,7 +176,7 @@ export async function getReleaseNotesMd(
         `Multiple candidates for changelog file, using ${changelogFile}`
       );
     }
-    const fileRes = await ghGot<{ content: string }>(
+    const fileRes = await http.getJson<{ content: string }>(
       `${apiPrefix}/${changelogFile}`
     );
     changelogMd =
@@ -247,7 +248,7 @@ export async function addReleaseNotes(
   for (const v of input.versions) {
     let releaseNotes: ChangeLogNotes;
     const cacheKey = getCacheKey(v.version);
-    releaseNotes = await renovateCache.get(cacheNamespace, cacheKey);
+    releaseNotes = await globalCache.get(cacheNamespace, cacheKey);
     if (!releaseNotes) {
       releaseNotes = await getReleaseNotesMd(
         repository,
@@ -270,7 +271,7 @@ export async function addReleaseNotes(
         releaseNotes = { url: v.compare.url };
       }
       const cacheMinutes = 55;
-      await renovateCache.set(
+      await globalCache.set(
         cacheNamespace,
         cacheKey,
         releaseNotes,

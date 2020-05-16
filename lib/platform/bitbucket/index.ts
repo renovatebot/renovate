@@ -288,17 +288,15 @@ export function mergeBranch(branchName: string): Promise<void> {
   return config.storage.mergeBranch(branchName);
 }
 
-export function commitFilesToBranch({
+export function commitFiles({
   branchName,
   files,
   message,
-  parentBranch = config.baseBranch,
 }: CommitFilesConfig): Promise<string | null> {
-  return config.storage.commitFilesToBranch({
+  return config.storage.commitFiles({
     branchName,
     files,
     message,
-    parentBranch,
   });
 }
 
@@ -710,8 +708,9 @@ export function ensureComment({
 export function ensureCommentRemoval({
   number: prNo,
   topic,
+  content,
 }: EnsureCommentRemovalConfig): Promise<void> {
-  return comments.ensureCommentRemoval(config, prNo, topic);
+  return comments.ensureCommentRemoval(config, prNo, topic, content);
 }
 
 // Creates PR and returns PR number

@@ -42,7 +42,7 @@ export interface BranchUpgradeConfig
   manager?: string;
   packageFile?: string;
 
-  parentBranch?: string;
+  reuseExistingBranch?: boolean;
   prBanner?: string;
   prBodyNotes?: string[];
   prBodyTemplate?: string;

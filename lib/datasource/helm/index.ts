@@ -1,6 +1,7 @@
 import yaml from 'js-yaml';
 
 import { logger } from '../../logger';
+import * as globalCache from '../../util/cache/global';
 import { Http } from '../../util/http';
 import { DatasourceError, GetReleasesConfig, ReleaseResult } from '../common';
 
@@ -8,12 +9,17 @@ export const id = 'helm';
 
 const http = new Http(id);
 
+export const defaultRegistryUrls = [
+  'https://kubernetes-charts.storage.googleapis.com/',
+];
+
 export async function getRepositoryData(
   repository: string
 ): Promise<ReleaseResult[]> {
   const cacheNamespace = 'datasource-helm';
   const cacheKey = repository;
-  const cachedIndex = await renovateCache.get(cacheNamespace, cacheKey);
+  const cachedIndex = await globalCache.get(cacheNamespace, cacheKey);
+  // istanbul ignore if
   if (cachedIndex) {
     return cachedIndex;
   }
@@ -77,7 +83,7 @@ export async function getRepositoryData(
       })
     );
     const cacheMinutes = 20;
-    await renovateCache.set(cacheNamespace, cacheKey, result, cacheMinutes);
+    await globalCache.set(cacheNamespace, cacheKey, result, cacheMinutes);
     return result;
   } catch (err) {
     logger.warn(`Failed to parse index.yaml from ${repository}`);

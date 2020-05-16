@@ -1,25 +1,41 @@
-import { api } from '../../platform/github/gh-got-wrapper';
-
+import * as httpMock from '../../../test/httpMock';
+import * as globalCache from '../../util/cache/global';
+import * as runCache from '../../util/cache/run';
+import * as _hostRules from '../../util/host-rules';
 import * as github from '.';
 
-jest.mock('../../platform/github/gh-got-wrapper');
-jest.mock('../../util/got');
 jest.mock('../../util/host-rules');
+const hostRules: any = _hostRules;
 
-const ghGot: any = api.get;
+const githubApiHost = 'https://api.github.com';
 
 describe('datasource/github-releases', () => {
-  beforeEach(() => global.renovateCache.rmAll());
+  beforeEach(async () => {
+    await globalCache.rmAll();
+    hostRules.hosts = jest.fn(() => []);
+    hostRules.find.mockReturnValue({
+      token: 'some-token',
+    });
+    httpMock.setup();
+  });
+
+  afterEach(() => {
+    httpMock.reset();
+    runCache.clear();
+  });
+
   describe('getReleases', () => {
-    beforeAll(() => global.renovateCache.rmAll());
     it('returns releases', async () => {
-      const body = [
-        { tag_name: 'a', published_at: '2020-03-09T13:00:00Z' },
-        { tag_name: 'v', published_at: '2020-03-09T12:00:00Z' },
-        { tag_name: '1.0.0', published_at: '2020-03-09T11:00:00Z' },
-        { tag_name: 'v1.1.0', published_at: '2020-03-09T10:00:00Z' },
-      ];
-      ghGot.mockReturnValueOnce({ headers: {}, body });
+      httpMock
+        .scope(githubApiHost)
+        .get('/repos/some/dep/releases?per_page=100')
+        .reply(200, [
+          { tag_name: 'a', published_at: '2020-03-09T13:00:00Z' },
+          { tag_name: 'v', published_at: '2020-03-09T12:00:00Z' },
+          { tag_name: '1.0.0', published_at: '2020-03-09T11:00:00Z' },
+          { tag_name: 'v1.1.0', published_at: '2020-03-09T10:00:00Z' },
+        ]);
+
       const res = await github.getReleases({
         lookupName: 'some/dep',
       });
@@ -28,6 +44,7 @@ describe('datasource/github-releases', () => {
       expect(
         res.releases.find((release) => release.version === 'v1.1.0')
       ).toBeDefined();
+      expect(httpMock.getTrace()).toMatchSnapshot();
     });
   });
 });

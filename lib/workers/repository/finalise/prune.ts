@@ -34,11 +34,11 @@ async function cleanUpBranches(
       const closePr = true;
       logger.debug({ branch: branchName }, `Deleting orphan branch`);
       if (skipAutoclose) {
-        logger.debug(
-          { prNo: pr.number, prTitle: pr.title },
-          'Skip PR autoclosing'
-        );
         if (pr) {
+          logger.debug(
+            { prNo: pr?.number, prTitle: pr?.title },
+            'Skip PR autoclosing'
+          );
           if (dryRun) {
             logger.info(`DRY-RUN: Would add Autoclosing Skipped comment to PR`);
           } else {

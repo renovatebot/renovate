@@ -3,6 +3,7 @@ import is from '@sindresorhus/is';
 
 import pAll from 'p-all';
 import { logger } from '../../logger';
+import * as globalCache from '../../util/cache/global';
 import { get, set } from '../../util/cache/run';
 import * as hostRules from '../../util/host-rules';
 import { Http, HttpOptions } from '../../util/http';
@@ -124,7 +125,7 @@ async function getPackagistFile(
   const cacheNamespace = 'datasource-packagist-files';
   const cacheKey = regUrl + key;
   // Check the persistent cache for public registries
-  const cachedResult = await renovateCache.get(cacheNamespace, cacheKey);
+  const cachedResult = await globalCache.get(cacheNamespace, cacheKey);
   // istanbul ignore if
   if (cachedResult && cachedResult.sha256 === sha256) {
     return cachedResult.res;
@@ -132,7 +133,7 @@ async function getPackagistFile(
   const res = (await http.getJson<PackagistFile>(regUrl + '/' + fileName, opts))
     .body;
   const cacheMinutes = 1440; // 1 day
-  await renovateCache.set(
+  await globalCache.set(
     cacheNamespace,
     cacheKey,
     { res, sha256 },
@@ -226,7 +227,7 @@ function getAllCachedPackages(regUrl: string): Promise<AllPackages | null> {
 
 async function packagistOrgLookup(name: string): Promise<ReleaseResult> {
   const cacheNamespace = 'datasource-packagist-org';
-  const cachedResult = await renovateCache.get<ReleaseResult>(
+  const cachedResult = await globalCache.get<ReleaseResult>(
     cacheNamespace,
     name
   );
@@ -245,7 +246,7 @@ async function packagistOrgLookup(name: string): Promise<ReleaseResult> {
     logger.trace({ dep }, 'dep');
   }
   const cacheMinutes = 10;
-  await renovateCache.set(cacheNamespace, name, dep, cacheMinutes);
+  await globalCache.set(cacheNamespace, name, dep, cacheMinutes);
   return dep;
 }
 

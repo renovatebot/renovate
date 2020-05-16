@@ -1,21 +1,30 @@
 import { logger } from '../../logger';
-import { api } from '../../platform/github/gh-got-wrapper';
+import * as globalCache from '../../util/cache/global';
+import { GithubHttp } from '../../util/http/github';
 import { DigestConfig, GetReleasesConfig, ReleaseResult } from '../common';
 
-const { get: ghGot } = api;
-
 export const id = 'github-tags';
+
+const http = new GithubHttp();
 
 const cacheNamespace = 'datasource-github-tags';
 function getCacheKey(repo: string, type: string): string {
   return `${repo}:${type}`;
 }
 
+interface TagResponse {
+  object: {
+    type: string;
+    url: string;
+    sha: string;
+  };
+}
+
 async function getTagCommit(
   githubRepo: string,
   tag: string
 ): Promise<string | null> {
-  const cachedResult = await renovateCache.get<string>(
+  const cachedResult = await globalCache.get<string>(
     cacheNamespace,
     getCacheKey(githubRepo, `tag-${tag}`)
   );
@@ -26,11 +35,11 @@ async function getTagCommit(
   let digest: string;
   try {
     const url = `https://api.github.com/repos/${githubRepo}/git/refs/tags/${tag}`;
-    const res = (await ghGot(url)).body.object;
+    const res = (await http.getJson<TagResponse>(url)).body.object;
     if (res.type === 'commit') {
       digest = res.sha;
     } else if (res.type === 'tag') {
-      digest = (await ghGot(res.url)).body.object.sha;
+      digest = (await http.getJson<TagResponse>(res.url)).body.object.sha;
     } else {
       logger.warn({ res }, 'Unknown git tag refs type');
     }
@@ -44,7 +53,7 @@ async function getTagCommit(
     return null;
   }
   const cacheMinutes = 120;
-  await renovateCache.set(
+  await globalCache.set(
     cacheNamespace,
     getCacheKey(githubRepo, `tag-${tag}`),
     digest,
@@ -67,7 +76,7 @@ export async function getDigest(
   if (newValue && newValue.length) {
     return getTagCommit(githubRepo, newValue);
   }
-  const cachedResult = await renovateCache.get(
+  const cachedResult = await globalCache.get(
     cacheNamespace,
     getCacheKey(githubRepo, 'commit')
   );
@@ -78,7 +87,8 @@ export async function getDigest(
   let digest: string;
   try {
     const url = `https://api.github.com/repos/${githubRepo}/commits?per_page=1`;
-    digest = (await ghGot(url)).body[0].sha;
+    const res = await http.getJson<{ sha: string }[]>(url);
+    digest = res.body[0].sha;
   } catch (err) {
     logger.debug(
       { githubRepo, err },
@@ -89,7 +99,7 @@ export async function getDigest(
     return null;
   }
   const cacheMinutes = 10;
-  await renovateCache.set(
+  await globalCache.set(
     cacheNamespace,
     getCacheKey(githubRepo, 'commit'),
     digest,
@@ -112,7 +122,7 @@ export async function getReleases({
   lookupName: repo,
 }: GetReleasesConfig): Promise<ReleaseResult | null> {
   let versions: string[];
-  const cachedResult = await renovateCache.get<ReleaseResult>(
+  const cachedResult = await globalCache.get<ReleaseResult>(
     cacheNamespace,
     getCacheKey(repo, 'tags')
   );
@@ -128,7 +138,7 @@ export async function getReleases({
     }[];
 
     versions = (
-      await ghGot<GitHubTag>(url, {
+      await http.getJson<GitHubTag>(url, {
         paginate: true,
       })
     ).body.map((o) => o.name);
@@ -147,7 +157,7 @@ export async function getReleases({
     gitRef: version,
   }));
   const cacheMinutes = 10;
-  await renovateCache.set(
+  await globalCache.set(
     cacheNamespace,
     getCacheKey(repo, 'tags'),
     dependency,

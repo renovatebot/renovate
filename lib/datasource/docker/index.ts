@@ -7,6 +7,7 @@ import parseLinkHeader from 'parse-link-header';
 import wwwAuthenticate from 'www-authenticate';
 import { logger } from '../../logger';
 import { HostRule } from '../../types';
+import * as globalCache from '../../util/cache/global';
 import * as hostRules from '../../util/host-rules';
 import { Http, HttpResponse } from '../../util/http';
 import { DatasourceError, GetReleasesConfig, ReleaseResult } from '../common';
@@ -334,7 +335,7 @@ export async function getDigest(
   try {
     const cacheNamespace = 'datasource-docker-digest';
     const cacheKey = `${registry}:${repository}:${newTag}`;
-    const cachedResult = await renovateCache.get(cacheNamespace, cacheKey);
+    const cachedResult = await globalCache.get(cacheNamespace, cacheKey);
     // istanbul ignore if
     if (cachedResult) {
       return cachedResult;
@@ -350,7 +351,7 @@ export async function getDigest(
     const digest = extractDigestFromResponse(manifestResponse);
     logger.debug({ digest }, 'Got docker digest');
     const cacheMinutes = 30;
-    await renovateCache.set(cacheNamespace, cacheKey, digest, cacheMinutes);
+    await globalCache.set(cacheNamespace, cacheKey, digest, cacheMinutes);
     return digest;
   } catch (err) /* istanbul ignore next */ {
     if (err instanceof DatasourceError) {
@@ -376,7 +377,7 @@ async function getTags(
   try {
     const cacheNamespace = 'datasource-docker-tags';
     const cacheKey = `${registry}:${repository}`;
-    const cachedResult = await renovateCache.get<string[]>(
+    const cachedResult = await globalCache.get<string[]>(
       cacheNamespace,
       cacheKey
     );
@@ -405,7 +406,7 @@ async function getTags(
       page += 1;
     } while (url && page < 20);
     const cacheMinutes = 15;
-    await renovateCache.set(cacheNamespace, cacheKey, tags, cacheMinutes);
+    await globalCache.set(cacheNamespace, cacheKey, tags, cacheMinutes);
     return tags;
   } catch (err) /* istanbul ignore next */ {
     if (err instanceof DatasourceError) {
@@ -485,7 +486,7 @@ async function getLabels(
   logger.debug(`getLabels(${registry}, ${repository}, ${tag})`);
   const cacheNamespace = 'datasource-docker-labels';
   const cacheKey = `${registry}:${repository}:${tag}`;
-  const cachedResult = await renovateCache.get<Record<string, string>>(
+  const cachedResult = await globalCache.get<Record<string, string>>(
     cacheNamespace,
     cacheKey
   );
@@ -542,7 +543,7 @@ async function getLabels(
       );
     }
     const cacheMinutes = 60;
-    await renovateCache.set(cacheNamespace, cacheKey, labels, cacheMinutes);
+    await globalCache.set(cacheNamespace, cacheKey, labels, cacheMinutes);
     return labels;
   } catch (err) {
     if (err instanceof DatasourceError) {

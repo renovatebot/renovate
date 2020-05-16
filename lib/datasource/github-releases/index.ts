@@ -1,12 +1,13 @@
 import { logger } from '../../logger';
-import { api } from '../../platform/github/gh-got-wrapper';
+import * as globalCache from '../../util/cache/global';
+import { GithubHttp } from '../../util/http/github';
 import { GetReleasesConfig, ReleaseResult } from '../common';
-
-const { get: ghGot } = api;
 
 export const id = 'github-releases';
 
 const cacheNamespace = 'datasource-github-releases';
+
+const http = new GithubHttp();
 
 type GithubRelease = {
   tag_name: string;
@@ -27,7 +28,7 @@ export async function getReleases({
   lookupName: repo,
 }: GetReleasesConfig): Promise<ReleaseResult | null> {
   let githubReleases: GithubRelease[];
-  const cachedResult = await renovateCache.get<ReleaseResult>(
+  const cachedResult = await globalCache.get<ReleaseResult>(
     cacheNamespace,
     repo
   );
@@ -37,7 +38,7 @@ export async function getReleases({
   }
   try {
     const url = `https://api.github.com/repos/${repo}/releases?per_page=100`;
-    const res = await ghGot<GithubRelease[]>(url, {
+    const res = await http.getJson<GithubRelease[]>(url, {
       paginate: true,
     });
     githubReleases = res.body;
@@ -58,6 +59,6 @@ export async function getReleases({
     releaseTimestamp: published_at,
   }));
   const cacheMinutes = 10;
-  await renovateCache.set(cacheNamespace, repo, dependency, cacheMinutes);
+  await globalCache.set(cacheNamespace, repo, dependency, cacheMinutes);
   return dependency;
 }

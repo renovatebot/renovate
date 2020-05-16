@@ -1,4 +1,5 @@
 import { api } from '../../platform/gitlab/gl-got-wrapper';
+import * as globalCache from '../../util/cache/global';
 import * as gitlab from '.';
 
 jest.mock('../../platform/gitlab/gl-got-wrapper');
@@ -8,10 +9,10 @@ const glGot: any = api.get;
 
 describe('datasource/gitlab-tags', () => {
   beforeEach(() => {
-    return global.renovateCache.rmAll();
+    return globalCache.rmAll();
   });
   describe('getReleases', () => {
-    beforeAll(() => global.renovateCache.rmAll());
+    beforeAll(() => globalCache.rmAll());
     it('returns tags', async () => {
       const body = [
         {

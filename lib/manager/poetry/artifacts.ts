@@ -1,5 +1,6 @@
 import is from '@sindresorhus/is';
 import fs from 'fs-extra';
+import { quote } from 'shlex';
 import { parse } from 'toml';
 import { logger } from '../../logger';
 import { ExecOptions, exec } from '../../util/exec';
@@ -69,19 +70,19 @@ export async function updateArtifacts({
     } else {
       for (let i = 0; i < updatedDeps.length; i += 1) {
         const dep = updatedDeps[i];
-        cmd.push(`poetry update --lock --no-interaction ${dep}`);
+        cmd.push(`poetry update --lock --no-interaction ${quote(dep)}`);
       }
     }
     const tagConstraint = getPythonConstraint(existingLockFileContent, config);
+    const poetryRequirement = config.compatibility?.poetry || 'poetry';
+    const poetryInstall = 'pip install ' + quote(poetryRequirement);
     const execOptions: ExecOptions = {
       cwdFile: packageFileName,
       docker: {
         image: 'renovate/python',
         tagConstraint,
         tagScheme: 'poetry',
-        preCommands: [
-          'pip install ' + (config.compatibility?.poetry || 'poetry'),
-        ],
+        preCommands: [poetryInstall],
       },
     };
     await exec(cmd, execOptions);

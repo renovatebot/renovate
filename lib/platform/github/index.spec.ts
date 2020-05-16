@@ -7,7 +7,7 @@ import {
   REPOSITORY_RENAMED,
 } from '../../constants/error-messages';
 import { BranchStatus } from '../../types';
-import { clear } from '../../util/cache/run';
+import * as runCache from '../../util/cache/run';
 import { Platform } from '../common';
 
 const githubApiHost = 'https://api.github.com';
@@ -39,7 +39,7 @@ describe('platform/github', () => {
           getAllRenovateBranches: jest.fn(),
           getCommitMessages: jest.fn(),
           getFile: jest.fn(),
-          commitFilesToBranch: jest.fn(),
+          commitFiles: jest.fn(),
           mergeBranch: jest.fn(),
           deleteBranch: jest.fn(),
           getRepoStatus: jest.fn(),
@@ -57,14 +57,14 @@ describe('platform/github', () => {
 
   afterEach(() => {
     httpMock.reset();
-    clear();
+    runCache.clear();
   });
 
   const graphqlOpenPullRequests = fs.readFileSync(
     'lib/platform/github/__fixtures__/graphql/pullrequest-1.json',
     'utf8'
   );
-  const graphqlClosedPullrequests = fs.readFileSync(
+  const graphqlClosedPullRequests = fs.readFileSync(
     'lib/platform/github/__fixtures__/graphql/pullrequests-closed.json',
     'utf8'
   );
@@ -426,8 +426,8 @@ describe('platform/github', () => {
       const scope = httpMock.scope(githubApiHost);
       initRepoMock(scope, 'some/repo');
       scope
-        .persist()
         .post('/graphql')
+        .twice()
         .reply(200, {})
         .get('/repos/some/repo/pulls?per_page=100&state=all')
         .reply(200, [
@@ -468,8 +468,8 @@ describe('platform/github', () => {
       const scope = httpMock.scope(githubApiHost);
       forkInitRepoMock(scope, 'some/repo', 'forked/repo');
       scope
-        .persist()
         .post('/graphql')
+        .twice()
         .reply(200, {})
         .get('/repos/some/repo/pulls?per_page=100&state=all')
         .reply(200, [
@@ -1329,7 +1329,6 @@ describe('platform/github', () => {
       initRepoMock(scope, 'some/repo');
       scope
         .post('/graphql')
-        .twice()
         .reply(200, {})
         .get('/repos/some/repo/issues/42/comments?per_page=100')
         .reply(200, [])
@@ -1351,8 +1350,7 @@ describe('platform/github', () => {
       initRepoMock(scope, 'some/repo');
       scope
         .post('/graphql')
-        .twice()
-        .reply(200, graphqlClosedPullrequests)
+        .reply(200, graphqlClosedPullRequests)
         .post('/repos/some/repo/issues/2499/comments')
         .reply(200);
       await github.initRepo({
@@ -1370,7 +1368,6 @@ describe('platform/github', () => {
       initRepoMock(scope, 'some/repo');
       scope
         .post('/graphql')
-        .twice()
         .reply(200, {})
         .get('/repos/some/repo/issues/42/comments?per_page=100')
         .reply(200, [{ id: 1234, body: '### some-subject\n\nblablabla' }])
@@ -1391,7 +1388,6 @@ describe('platform/github', () => {
       initRepoMock(scope, 'some/repo');
       scope
         .post('/graphql')
-        .twice()
         .reply(200, {})
         .get('/repos/some/repo/issues/42/comments?per_page=100')
         .reply(200, [{ id: 1234, body: '### some-subject\n\nsome\ncontent' }]);
@@ -1410,7 +1406,6 @@ describe('platform/github', () => {
       initRepoMock(scope, 'some/repo');
       scope
         .post('/graphql')
-        .twice()
         .reply(200, {})
         .get('/repos/some/repo/issues/42/comments?per_page=100')
         .reply(200, [{ id: 1234, body: '!merge' }]);
@@ -1426,12 +1421,11 @@ describe('platform/github', () => {
     });
   });
   describe('ensureCommentRemoval', () => {
-    it('deletes comment if found', async () => {
+    it('deletes comment by topic if found', async () => {
       const scope = httpMock.scope(githubApiHost);
       initRepoMock(scope, 'some/repo');
       scope
         .post('/graphql')
-        .twice()
         .reply(200, {})
         .get('/repos/some/repo/issues/42/comments?per_page=100')
         .reply(200, [{ id: 1234, body: '### some-subject\n\nblablabla' }])
@@ -1439,6 +1433,23 @@ describe('platform/github', () => {
         .reply(200);
       await github.initRepo({ repository: 'some/repo', token: 'token' } as any);
       await github.ensureCommentRemoval({ number: 42, topic: 'some-subject' });
+      expect(httpMock.getTrace()).toMatchSnapshot();
+    });
+    it('deletes comment by content if found', async () => {
+      const scope = httpMock.scope(githubApiHost);
+      initRepoMock(scope, 'some/repo');
+      scope
+        .post('/graphql')
+        .reply(200, {})
+        .get('/repos/some/repo/issues/42/comments?per_page=100')
+        .reply(200, [{ id: 1234, body: 'some-content' }])
+        .delete('/repos/some/repo/issues/comments/1234')
+        .reply(200);
+      await github.initRepo({ repository: 'some/repo', token: 'token' } as any);
+      await github.ensureCommentRemoval({
+        number: 42,
+        content: 'some-content',
+      });
       expect(httpMock.getTrace()).toMatchSnapshot();
     });
   });
@@ -1578,7 +1589,6 @@ describe('platform/github', () => {
       const scope = httpMock.scope(githubApiHost);
       initRepoMock(scope, 'some/repo');
       scope
-        .persist()
         .post('/graphql')
         .reply(200, graphqlOpenPullRequests)
         .get('/repos/some/repo/git/refs/heads/master')
@@ -1606,11 +1616,13 @@ describe('platform/github', () => {
         .post('/graphql')
         .reply(200, graphqlOpenPullRequests)
         .post('/graphql')
-        .times(2)
-        .reply(200, {})
-
-        .post('/graphql')
-        .reply(200, graphqlClosedPullrequests);
+        .reply(200, graphqlClosedPullRequests)
+        .get('/repos/some/repo/git/refs/heads/master')
+        .reply(200, {
+          object: {
+            sha: '1234123412341234123412341234123412341234',
+          },
+        });
       await github.initRepo({
         repository: 'some/repo',
       } as any);
@@ -2071,28 +2083,43 @@ describe('platform/github', () => {
   });
   describe('getVulnerabilityAlerts()', () => {
     it('returns empty if error', async () => {
-      httpMock.scope(githubApiHost).post('/graphql').twice().reply(200, {});
+      httpMock.scope(githubApiHost).post('/graphql').reply(200, {});
       const res = await github.getVulnerabilityAlerts();
       expect(res).toHaveLength(0);
       expect(httpMock.getTrace()).toMatchSnapshot();
     });
     it('returns array if found', async () => {
       // prettier-ignore
-      httpMock.scope(githubApiHost).post('/graphql').reply(200, "{\"data\":{\"repository\":{\"vulnerabilityAlerts\":{\"edges\":[{\"node\":{\"externalIdentifier\":\"CVE-2018-1000136\",\"externalReference\":\"https://nvd.nist.gov/vuln/detail/CVE-2018-1000136\",\"affectedRange\":\">= 1.8, < 1.8.3\",\"fixedIn\":\"1.8.3\",\"id\":\"MDI4OlJlcG9zaXRvcnlWdWxuZXJhYmlsaXR5QWxlcnQ1MzE3NDk4MQ==\",\"packageName\":\"electron\"}}]}}}}");
+      httpMock.scope(githubApiHost).post('/graphql').reply(200, {
+        "data": {
+          "repository": {
+            "vulnerabilityAlerts": {
+              "edges": [{
+                "node": {
+                  "externalIdentifier": "CVE-2018-1000136",
+                  "externalReference": "https://nvd.nist.gov/vuln/detail/CVE-2018-1000136",
+                  "affectedRange": ">= 1.8, < 1.8.3", "fixedIn": "1.8.3",
+                  "id": "MDI4OlJlcG9zaXRvcnlWdWxuZXJhYmlsaXR5QWxlcnQ1MzE3NDk4MQ==", "packageName": "electron"
+                }
+              }]
+            }
+          }
+        }
+      });
       const res = await github.getVulnerabilityAlerts();
       expect(res).toHaveLength(1);
       expect(httpMock.getTrace()).toMatchSnapshot();
     });
     it('returns empty if disabled', async () => {
       // prettier-ignore
-      httpMock.scope(githubApiHost).post('/graphql').reply(200, "{\"data\":{\"repository\":{}}}");
+      httpMock.scope(githubApiHost).post('/graphql').reply(200, {data: { repository: {} }} );
       const res = await github.getVulnerabilityAlerts();
       expect(res).toHaveLength(0);
       expect(httpMock.getTrace()).toMatchSnapshot();
     });
     it('handles network error', async () => {
       // prettier-ignore
-      httpMock.scope(githubApiHost).persist().post('/graphql').replyWithError('unknown error');
+      httpMock.scope(githubApiHost).post('/graphql').replyWithError('unknown error');
       const res = await github.getVulnerabilityAlerts();
       expect(res).toHaveLength(0);
       expect(httpMock.getTrace()).toMatchSnapshot();
