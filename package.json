@@ -4,7 +4,7 @@
   "version": "0.0.0-semantic-release",
   "bin": {
     "renovate": "dist/renovate.js",
-    "renovate-config-validator": "bin/config-validator.js"
+    "renovate-config-validator": "dist/config-validator.js"
   },
   "scripts": {
     "build": "run-s clean generate:* compile:*",
@@ -259,7 +259,6 @@
     "**/kind-of": ">=6.0.3"
   },
   "files": [
-    "bin/config-validator.js",
     "data",
     "dist"
   ],
