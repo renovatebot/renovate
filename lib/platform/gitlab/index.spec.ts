@@ -968,7 +968,7 @@ describe('platform/gitlab', () => {
         })
       );
     });
-                       
+
     it('returns the PR', async () => {
       api.post.mockResolvedValueOnce(
         partial<GotResponse>({
