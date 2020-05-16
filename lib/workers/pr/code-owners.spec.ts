@@ -1,5 +1,5 @@
 import { mock } from 'jest-mock-extended';
-import { mocked } from '../../../test/util';
+import { mocked, platform: platformMock } from '../../../test/util';
 import { Pr, platform } from '../../platform';
 import { codeOwnersForPr } from './code-owners';
 
