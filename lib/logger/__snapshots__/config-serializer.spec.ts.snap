@@ -1,13 +1,5 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
-exports[`logger/config-serializer redacts sensitive fields 1`] = `
-Object {
-  "githubAppKey": "***********",
-  "nottoken": "b",
-  "token": "***********",
-}
-`;
-
 exports[`logger/config-serializer squashes templates 1`] = `
 Object {
   "nottoken": "b",
