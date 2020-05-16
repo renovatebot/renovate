@@ -12,6 +12,12 @@ Although Renovate is now best known as a "service" via the GitHub App, that serv
 $ npm install -g renovate
 ```
 
+Since renovate v20 `npm`, `pnpm` and `yarn` are no longer embedded, so you need to install them globally if you need to update lockfiles.
+
+```sh
+$ npm install -g yarn pnpm
+```
+
 #### Docker
 
 Renovate is available for Docker via an automated build [renovate/renovate](https://hub.docker.com/r/renovate/renovate/). It builds `latest` based on the `master` branch and all semver tags are published too. All the following are valid:
