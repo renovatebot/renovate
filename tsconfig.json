@@ -14,8 +14,7 @@
     "lib": ["es2018"],
     "types": ["node", "jest"],
     "allowJs": true,
-    "checkJs": true,
-    "skipLibCheck": true
+    "checkJs": true
   },
   "exclude": [
     "node_modules",
