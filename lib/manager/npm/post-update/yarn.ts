@@ -1,5 +1,4 @@
 import { readFile } from 'fs-extra';
-import { getInstalledPath } from 'get-installed-path';
 import { join } from 'upath';
 import { SYSTEM_INSUFFICIENT_DISK_SPACE } from '../../../constants/error-messages';
 import { DatasourceError } from '../../../datasource';
@@ -21,71 +20,35 @@ export async function generateLockFile(
   config: PostUpdateConfig = {},
   upgrades: Upgrade[] = []
 ): Promise<GenerateLockFileResult> {
-  const { binarySource } = config;
   logger.debug(`Spawning yarn install to create ${cwd}/yarn.lock`);
   let lockFile = null;
   let stdout = '';
   let stderr = '';
-  let cmd: string;
+  let cmd = 'yarn';
   try {
-    try {
-      // See if renovate is installed locally
-      const installedPath = join(
-        await getInstalledPath('yarn', {
-          local: true,
-        }),
-        'bin/yarn.js'
-      );
-      cmd = `node ${installedPath}`;
-      const yarnIntegrity =
-        config.upgrades &&
-        config.upgrades.some((upgrade) => upgrade.yarnIntegrity);
-      if (!yarnIntegrity) {
-        logger.warn('Using yarn@1.9.4 for install is deprecated');
-        try {
-          const renovatePath = await getInstalledPath('renovate', {
-            local: true,
-          });
-          logger.debug('Using nested bundled yarn@1.9.4 for install');
-          cmd = 'node ' + join(renovatePath, 'bin/yarn-1.9.4.js');
-        } catch (err) {
-          logger.debug('Using bundled yarn@1.9.4 for install');
-          cmd = cmd.replace(
-            'node_modules/yarn/bin/yarn.js',
-            'bin/yarn-1.9.4.js'
-          );
-        }
+    if (config.binarySource === BinarySource.Docker) {
+      logger.debug('Running yarn via docker');
+      cmd = `docker run --rm `;
+      // istanbul ignore if
+      if (config.dockerUser) {
+        cmd += `--user=${config.dockerUser} `;
       }
-    } catch (localerr) {
-      logger.debug('No locally installed yarn found');
-      // Look inside globally installed renovate
-      try {
-        const renovateLocation = await getInstalledPath('renovate');
-        const installedPath = join(
-          await getInstalledPath('yarn', {
-            local: true,
-            cwd: renovateLocation,
-          }),
-          'bin/yarn.js'
-        );
-        cmd = `node ${installedPath}`;
-      } catch (nestederr) {
-        logger.debug('Could not find globally nested yarn');
-        // look for global yarn
-        try {
-          const installedPath = join(
-            await getInstalledPath('yarn'),
-            'bin/yarn.js'
-          );
-          cmd = `node ${installedPath}`;
-        } catch (globalerr) {
-          logger.warn('Could not find globally installed yarn');
-          cmd = 'yarn';
-        }
+      const volumes = [cwd];
+      if (config.cacheDir) {
+        volumes.push(config.cacheDir);
       }
-    }
-    if (binarySource === BinarySource.Global) {
-      cmd = 'yarn';
+      cmd += volumes.map((v) => `-v "${v}":"${v}" `).join('');
+      // istanbul ignore if
+      if (config.dockerMapDotfiles) {
+        const homeDir =
+          process.env.HOME || process.env.HOMEPATH || process.env.USERPROFILE;
+        const homeNpmrc = join(homeDir, '.npmrc');
+        cmd += `-v ${homeNpmrc}:/home/ubuntu/.npmrc `;
+      }
+      const envVars = ['NPM_CONFIG_CACHE', 'npm_config_store'];
+      cmd += envVars.map((e) => `-e ${e} `).join('');
+      cmd += `-w "${cwd}" `;
+      cmd += `renovate/yarn yarn`;
     }
 
     const { stdout: yarnVersion } = await exec(`${cmd} --version`);

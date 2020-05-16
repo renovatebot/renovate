@@ -127,7 +127,6 @@
     "fast-safe-stringify": "2.0.7",
     "find-up": "4.1.0",
     "fs-extra": "9.0.0",
-    "get-installed-path": "4.0.8",
     "github-url-from-git": "1.5.0",
     "global-agent": "2.1.8",
     "got": "9.6.0",
@@ -149,12 +148,10 @@
     "moment-timezone": "0.5.28",
     "node-emoji": "1.10.0",
     "node-html-parser": "1.2.16",
-    "npm": "6.14.5",
     "p-all": "2.1.0",
     "p-map": "4.0.0",
     "parse-diff": "0.7.0",
     "parse-link-header": "1.0.1",
-    "pnpm": "3.8.1",
     "registry-auth-token": "4.1.1",
     "semver": "7.3.2",
     "semver-stable": "3.0.0",
@@ -169,7 +166,7 @@
     "validate-npm-package-name": "3.0.0",
     "www-authenticate": "0.6.2",
     "xmldoc": "1.1.2",
-    "yarn": "1.22.4"
+    "yawn-yaml": "1.5.0"
   },
   "optionalDependencies": {
     "re2": "1.11.0"
@@ -263,7 +260,6 @@
   },
   "files": [
     "bin/config-validator.js",
-    "bin/yarn-1.9.4.js",
     "data",
     "dist"
   ],

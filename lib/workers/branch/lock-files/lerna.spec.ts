@@ -71,6 +71,7 @@ describe('generateLockFiles()', () => {
     expect(res.error).toBe(false);
     expect(execSnapshots).toMatchSnapshot();
   });
+
   // it('uses docker', async () => {
   //   platform.getFile.mockResolvedValueOnce(
   //     JSON.stringify({ dependencies: { lerna: '2.0.0' } })
