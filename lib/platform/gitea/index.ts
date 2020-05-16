@@ -625,30 +625,6 @@ const platform: Platform = {
     }
   },
 
-  async getPrFiles(prNo: number): Promise<string[]> {
-    if (!prNo) {
-      return [];
-    }
-
-    // Retrieving a diff for a PR is not officially supported by Gitea as of today
-    // See tracking issue: https://github.com/go-gitea/gitea/issues/5561
-    // Workaround: Parse new paths in .diff file using regular expressions
-    const regex = /^diff --git a\/.+ b\/(.+)$/gm;
-    const pr = await helper.getPR(config.repository, prNo);
-    const diff = (await api.get(pr.diff_url)).body as string;
-
-    const changedFiles: string[] = [];
-    let match: string[];
-    do {
-      match = regex.exec(diff);
-      if (match) {
-        changedFiles.push(match[1]);
-      }
-    } while (match);
-
-    return changedFiles;
-  },
-
   getIssueList(): Promise<Issue[]> {
     if (config.issueList === null) {
       config.issueList = helper
@@ -983,7 +959,6 @@ export const {
   getIssueList,
   getPr,
   getPrBody,
-  getPrFiles,
   getPrList,
   getRepoForceRebase,
   getRepoStatus,
