@@ -1,6 +1,7 @@
 import URL, { URLSearchParams } from 'url';
 import is from '@sindresorhus/is';
 
+import delay from 'delay';
 import { configFileNames } from '../../config/app-strings';
 import { RenovateConfig } from '../../config/common';
 import {
@@ -410,6 +411,21 @@ export async function createPr({
   }
   if (platformOptions && platformOptions.gitLabAutomerge) {
     try {
+      const desiredStatus = 'can_be_merged';
+      const retryTimes = 5;
+
+      // Check for correct merge request status before setting `merge_when_pipeline_succeeds` to  `true`.
+      for (let attempt = 1; attempt <= retryTimes; attempt += 1) {
+        const { body } = await api.get(
+          `projects/${config.repository}/merge_requests/${pr.iid}`
+        );
+        // Only continue if the merge request can be merged and has a pipeline.
+        if (body.merge_status === desiredStatus && body.pipeline !== null) {
+          break;
+        }
+        await delay(500 * attempt);
+      }
+
       await api.put(
         `projects/${config.repository}/merge_requests/${pr.iid}/merge`,
         {
