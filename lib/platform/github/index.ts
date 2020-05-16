@@ -1552,9 +1552,7 @@ export async function ensureComment({
     if (err.message === PLATFORM_FAILURE) {
       throw err;
     }
-    if (
-      err.message === 'Unable to create comment because issue is locked. (403)'
-    ) {
+    if (err.body?.message?.includes('is locked')) {
       logger.debug('Issue is locked - cannot add comment');
     } else {
       logger.warn({ err }, 'Error ensuring comment');
