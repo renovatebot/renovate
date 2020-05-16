@@ -1,8 +1,7 @@
 import { mock } from 'jest-mock-extended';
-import { mocked, platform: platformMock } from '../../../test/util';
-import { Pr, platform } from '../../platform';
+import { platform } from '../../../test/util';
+import { Pr } from '../../platform';
 import { codeOwnersForPr } from './code-owners';
-
 
 describe('workers/pr/code-owners', () => {
   describe('codeOwnersForPr', () => {
@@ -12,21 +11,21 @@ describe('workers/pr/code-owners', () => {
       pr = mock<Pr>();
     });
     it('returns global code owner', async () => {
-      platformMock.getFile.mockResolvedValueOnce(['* @jimmy'].join('\n'));
-      platformMock.getPrFiles.mockResolvedValueOnce(['README.md']);
+      platform.getFile.mockResolvedValueOnce(['* @jimmy'].join('\n'));
+      platform.getPrFiles.mockResolvedValueOnce(['README.md']);
       const codeOwners = await codeOwnersForPr(pr);
       expect(codeOwners).toEqual(['@jimmy']);
     });
     it('returns more specific code owners', async () => {
-      platformMock.getFile.mockResolvedValueOnce(
+      platform.getFile.mockResolvedValueOnce(
         ['* @jimmy', 'package.json @john @maria'].join('\n')
       );
-      platformMock.getPrFiles.mockResolvedValueOnce(['package.json']);
+      platform.getPrFiles.mockResolvedValueOnce(['package.json']);
       const codeOwners = await codeOwnersForPr(pr);
       expect(codeOwners).toEqual(['@john', '@maria']);
     });
     it('ignores comments and leading/trailing whitespace', async () => {
-      platformMock.getFile.mockResolvedValueOnce(
+      platform.getFile.mockResolvedValueOnce(
         [
           '# comment line',
           '    \t    ',
@@ -35,26 +34,26 @@ describe('workers/pr/code-owners', () => {
           ' package.json @john @maria  ',
         ].join('\n')
       );
-      platformMock.getPrFiles.mockResolvedValueOnce(['package.json']);
+      platform.getPrFiles.mockResolvedValueOnce(['package.json']);
       const codeOwners = await codeOwnersForPr(pr);
       expect(codeOwners).toEqual(['@john', '@maria']);
     });
     it('returns empty array when no code owners set', async () => {
-      platformMock.getFile.mockResolvedValueOnce(null);
-      platformMock.getPrFiles.mockResolvedValueOnce(['package.json']);
+      platform.getFile.mockResolvedValueOnce(null);
+      platform.getPrFiles.mockResolvedValueOnce(['package.json']);
       const codeOwners = await codeOwnersForPr(pr);
       expect(codeOwners).toEqual([]);
     });
     it('returns empty array when no code owners match', async () => {
-      platformMock.getFile.mockResolvedValueOnce(
+      platform.getFile.mockResolvedValueOnce(
         ['package-lock.json @mike'].join('\n')
       );
-      platformMock.getPrFiles.mockResolvedValueOnce(['yarn.lock']);
+      platform.getPrFiles.mockResolvedValueOnce(['yarn.lock']);
       const codeOwners = await codeOwnersForPr(pr);
       expect(codeOwners).toEqual([]);
     });
     it('returns empty array when error occurs', async () => {
-      platformMock.getFile.mockImplementationOnce((_, __) => {
+      platform.getFile.mockImplementationOnce((_, __) => {
         throw new Error();
       });
       const codeOwners = await codeOwnersForPr(pr);
@@ -68,13 +67,13 @@ describe('workers/pr/code-owners', () => {
     ];
     codeOwnerFilePaths.forEach((codeOwnerFilePath) => {
       it(`detects code owner file at '${codeOwnerFilePath}'`, async () => {
-        platformMock.getFile.mockImplementation((path, _) => {
+        platform.getFile.mockImplementation((path, _) => {
           if (path === codeOwnerFilePath) {
             return Promise.resolve(['* @mike'].join('\n'));
           }
           return Promise.resolve(null);
         });
-        platformMock.getPrFiles.mockResolvedValueOnce(['README.md']);
+        platform.getPrFiles.mockResolvedValueOnce(['README.md']);
         const codeOwners = await codeOwnersForPr(pr);
         expect(codeOwners).toEqual(['@mike']);
       });
