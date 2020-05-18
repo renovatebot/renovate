@@ -354,6 +354,16 @@ describe('semver.getNewValue()', () => {
       })
     ).toEqual('^v2.0.0-beta5@beta');
   });
+  it('preserves the current min-stability modifiers', () => {
+    expect(
+      semver.getNewValue({
+        currentValue: '^4.0@alpha',
+        rangeStrategy: 'replace',
+        fromVersion: '4.0.0-alpha1',
+        toVersion: '4.0.0-beta5',
+      })
+    ).toEqual('^4.0.0-beta5@alpha');
+  });
   it('handles differing lengths', () => {
     expect(
       semver.getNewValue({
