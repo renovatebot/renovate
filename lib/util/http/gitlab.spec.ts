@@ -68,6 +68,8 @@ describe(getName(__filename), () => {
     expect(httpMock.getTrace()).toMatchSnapshot();
   });
   it('sets baseUrl', () => {
-    setBaseUrl('https://gitlab.renovatebot.com/api/v4/');
+    expect(() =>
+      setBaseUrl('https://gitlab.renovatebot.com/api/v4/')
+    ).not.toThrow();
   });
 });

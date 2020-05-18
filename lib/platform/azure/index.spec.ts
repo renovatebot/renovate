@@ -185,7 +185,7 @@ describe('platform/azure', () => {
 
   describe('cleanRepo()', () => {
     it('exists', async () => {
-      await azure.cleanRepo();
+      await expect(azure.cleanRepo()).resolves.not.toThrow();
     });
   });
 

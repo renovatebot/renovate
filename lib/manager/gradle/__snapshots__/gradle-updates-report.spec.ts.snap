@@ -1,6 +1,6 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
-exports[`lib/manager/gradle/gradle-updates-report createRenovateGradlePlugin generates a report for Gradle version 5 1`] = `
+exports[`manager/gradle/gradle-updates-report createRenovateGradlePlugin generates a report for Gradle version 5 1`] = `
 Array [
   Object {
     "dependencies": Array [
@@ -19,7 +19,7 @@ Array [
 ]
 `;
 
-exports[`lib/manager/gradle/gradle-updates-report createRenovateGradlePlugin generates a report for Gradle version 6 1`] = `
+exports[`manager/gradle/gradle-updates-report createRenovateGradlePlugin generates a report for Gradle version 6 1`] = `
 Array [
   Object {
     "dependencies": Array [

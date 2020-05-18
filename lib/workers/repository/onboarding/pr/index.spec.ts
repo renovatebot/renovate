@@ -30,7 +30,9 @@ describe('workers/repository/onboarding/pr', () => {
     let createPrBody: string;
     it('returns if onboarded', async () => {
       config.repoIsOnboarded = true;
-      await ensureOnboardingPr(config, packageFiles, branches);
+      await expect(
+        ensureOnboardingPr(config, packageFiles, branches)
+      ).resolves.not.toThrow();
     });
     it('creates PR', async () => {
       await ensureOnboardingPr(config, packageFiles, branches);
@@ -49,7 +51,7 @@ describe('workers/repository/onboarding/pr', () => {
       expect(platform.createPr).toHaveBeenCalledTimes(0);
       expect(platform.updatePr).toHaveBeenCalledTimes(0);
     });
-    it('updates PR', async () => {
+    it('updates PR when conflicted', async () => {
       config.baseBranch = 'some-branch';
       platform.getBranchPr.mockResolvedValueOnce(
         partial<Pr>({
@@ -63,7 +65,7 @@ describe('workers/repository/onboarding/pr', () => {
       expect(platform.createPr).toHaveBeenCalledTimes(0);
       expect(platform.updatePr).toHaveBeenCalledTimes(1);
     });
-    it('updates PR', async () => {
+    it('updates PR when modified', async () => {
       config.baseBranch = 'some-branch';
       platform.getBranchPr.mockResolvedValueOnce(
         partial<Pr>({

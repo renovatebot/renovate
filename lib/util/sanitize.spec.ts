@@ -6,7 +6,7 @@ describe('util/sanitize', () => {
   });
 
   it('sanitizes empty string', () => {
-    expect(sanitize(null)).toEqual(null);
+    expect(sanitize(null)).toBeNull();
   });
   it('sanitizes secrets from strings', () => {
     const token = 'abc123token';
