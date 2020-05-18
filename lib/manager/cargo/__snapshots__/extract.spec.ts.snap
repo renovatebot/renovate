@@ -1,155 +1,6 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
-exports[`lib/manager/cargo/extract extractPackageFile() extracts multiple dependencies 1`] = `
-Array [
-  Object {
-    "currentValue": "=0.2.43",
-    "datasource": "crate",
-    "depName": "libc",
-    "depType": "dependencies",
-    "managerData": Object {
-      "nestedVersion": false,
-    },
-  },
-  Object {
-    "currentValue": "1.0.4",
-    "datasource": "crate",
-    "depName": "bitflags",
-    "depType": "dependencies",
-    "managerData": Object {
-      "nestedVersion": false,
-    },
-  },
-  Object {
-    "currentValue": "=0.1",
-    "datasource": "crate",
-    "depName": "pcap-sys",
-    "depType": "dependencies",
-    "managerData": Object {
-      "nestedVersion": true,
-    },
-    "skipReason": "path-dependency",
-  },
-  Object {
-    "currentValue": "0.21.0",
-    "datasource": "crate",
-    "depName": "pnet",
-    "depType": "dependencies",
-    "managerData": Object {
-      "nestedVersion": true,
-    },
-  },
-  Object {
-    "currentValue": "0.1.0",
-    "datasource": "crate",
-    "depName": "git_dep_with_version",
-    "depType": "dependencies",
-    "managerData": Object {
-      "nestedVersion": true,
-    },
-    "skipReason": "git-dependency",
-  },
-  Object {
-    "currentValue": "",
-    "datasource": "crate",
-    "depName": "git_dep",
-    "depType": "dependencies",
-    "managerData": Object {
-      "nestedVersion": false,
-    },
-    "skipReason": "git-dependency",
-  },
-  Object {
-    "currentValue": "0.0.0",
-    "datasource": "crate",
-    "depName": "same_version_1__",
-    "depType": "dependencies",
-    "managerData": Object {
-      "nestedVersion": false,
-    },
-  },
-  Object {
-    "currentValue": "0.0.0",
-    "datasource": "crate",
-    "depName": "same_version_1_",
-    "depType": "dependencies",
-    "managerData": Object {
-      "nestedVersion": false,
-    },
-  },
-  Object {
-    "currentValue": "0.0.0",
-    "datasource": "crate",
-    "depName": "same_version_1",
-    "depType": "dependencies",
-    "managerData": Object {
-      "nestedVersion": false,
-    },
-  },
-  Object {
-    "currentValue": "0.4.2",
-    "datasource": "crate",
-    "depName": "dep1",
-    "depType": "dependencies",
-    "managerData": Object {
-      "nestedVersion": true,
-    },
-  },
-  Object {
-    "currentValue": "=0.3.6",
-    "datasource": "crate",
-    "depName": "winapi",
-    "depType": "dependencies",
-    "managerData": Object {
-      "nestedVersion": true,
-    },
-    "target": "cfg(windows)",
-  },
-  Object {
-    "currentValue": "0.2.37",
-    "datasource": "crate",
-    "depName": "wasm-bindgen",
-    "depType": "dependencies",
-    "managerData": Object {
-      "nestedVersion": false,
-    },
-    "target": "cfg(target_arch = \\"wasm32\\")",
-  },
-  Object {
-    "currentValue": "0.3.14",
-    "datasource": "crate",
-    "depName": "js-sys",
-    "depType": "dependencies",
-    "managerData": Object {
-      "nestedVersion": false,
-    },
-    "target": "cfg(target_arch = \\"wasm32\\")",
-  },
-  Object {
-    "currentValue": "",
-    "datasource": "crate",
-    "depName": "js_relative_import",
-    "depType": "dependencies",
-    "managerData": Object {
-      "nestedVersion": false,
-    },
-    "skipReason": "path-dependency",
-    "target": "cfg(target_arch = \\"wasm32\\")",
-  },
-  Object {
-    "currentValue": "0.3.14",
-    "datasource": "crate",
-    "depName": "web-sys",
-    "depType": "dependencies",
-    "managerData": Object {
-      "nestedVersion": true,
-    },
-    "target": "cfg(target_arch = \\"wasm32\\")",
-  },
-]
-`;
-
-exports[`lib/manager/cargo/extract extractPackageFile() extracts multiple dependencies 2`] = `
+exports[`lib/manager/cargo/extract extractPackageFile() extracts multiple dependencies advanced 1`] = `
 Array [
   Object {
     "currentValue": "0.2.0",
@@ -387,6 +238,155 @@ Array [
     "managerData": Object {
       "nestedVersion": false,
     },
+  },
+]
+`;
+
+exports[`lib/manager/cargo/extract extractPackageFile() extracts multiple dependencies simple 1`] = `
+Array [
+  Object {
+    "currentValue": "=0.2.43",
+    "datasource": "crate",
+    "depName": "libc",
+    "depType": "dependencies",
+    "managerData": Object {
+      "nestedVersion": false,
+    },
+  },
+  Object {
+    "currentValue": "1.0.4",
+    "datasource": "crate",
+    "depName": "bitflags",
+    "depType": "dependencies",
+    "managerData": Object {
+      "nestedVersion": false,
+    },
+  },
+  Object {
+    "currentValue": "=0.1",
+    "datasource": "crate",
+    "depName": "pcap-sys",
+    "depType": "dependencies",
+    "managerData": Object {
+      "nestedVersion": true,
+    },
+    "skipReason": "path-dependency",
+  },
+  Object {
+    "currentValue": "0.21.0",
+    "datasource": "crate",
+    "depName": "pnet",
+    "depType": "dependencies",
+    "managerData": Object {
+      "nestedVersion": true,
+    },
+  },
+  Object {
+    "currentValue": "0.1.0",
+    "datasource": "crate",
+    "depName": "git_dep_with_version",
+    "depType": "dependencies",
+    "managerData": Object {
+      "nestedVersion": true,
+    },
+    "skipReason": "git-dependency",
+  },
+  Object {
+    "currentValue": "",
+    "datasource": "crate",
+    "depName": "git_dep",
+    "depType": "dependencies",
+    "managerData": Object {
+      "nestedVersion": false,
+    },
+    "skipReason": "git-dependency",
+  },
+  Object {
+    "currentValue": "0.0.0",
+    "datasource": "crate",
+    "depName": "same_version_1__",
+    "depType": "dependencies",
+    "managerData": Object {
+      "nestedVersion": false,
+    },
+  },
+  Object {
+    "currentValue": "0.0.0",
+    "datasource": "crate",
+    "depName": "same_version_1_",
+    "depType": "dependencies",
+    "managerData": Object {
+      "nestedVersion": false,
+    },
+  },
+  Object {
+    "currentValue": "0.0.0",
+    "datasource": "crate",
+    "depName": "same_version_1",
+    "depType": "dependencies",
+    "managerData": Object {
+      "nestedVersion": false,
+    },
+  },
+  Object {
+    "currentValue": "0.4.2",
+    "datasource": "crate",
+    "depName": "dep1",
+    "depType": "dependencies",
+    "managerData": Object {
+      "nestedVersion": true,
+    },
+  },
+  Object {
+    "currentValue": "=0.3.6",
+    "datasource": "crate",
+    "depName": "winapi",
+    "depType": "dependencies",
+    "managerData": Object {
+      "nestedVersion": true,
+    },
+    "target": "cfg(windows)",
+  },
+  Object {
+    "currentValue": "0.2.37",
+    "datasource": "crate",
+    "depName": "wasm-bindgen",
+    "depType": "dependencies",
+    "managerData": Object {
+      "nestedVersion": false,
+    },
+    "target": "cfg(target_arch = \\"wasm32\\")",
+  },
+  Object {
+    "currentValue": "0.3.14",
+    "datasource": "crate",
+    "depName": "js-sys",
+    "depType": "dependencies",
+    "managerData": Object {
+      "nestedVersion": false,
+    },
+    "target": "cfg(target_arch = \\"wasm32\\")",
+  },
+  Object {
+    "currentValue": "",
+    "datasource": "crate",
+    "depName": "js_relative_import",
+    "depType": "dependencies",
+    "managerData": Object {
+      "nestedVersion": false,
+    },
+    "skipReason": "path-dependency",
+    "target": "cfg(target_arch = \\"wasm32\\")",
+  },
+  Object {
+    "currentValue": "0.3.14",
+    "datasource": "crate",
+    "depName": "web-sys",
+    "depType": "dependencies",
+    "managerData": Object {
+      "nestedVersion": true,
+    },
+    "target": "cfg(target_arch = \\"wasm32\\")",
   },
 ]
 `;

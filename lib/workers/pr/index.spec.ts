@@ -85,6 +85,18 @@ describe('workers/pr', () => {
       pr.isModified = false;
       platform.getBranchStatus.mockResolvedValueOnce(BranchStatus.green);
       await prWorker.checkAutoMerge(pr, config);
+      expect(platform.ensureCommentRemoval).toHaveBeenCalledTimes(0);
+      expect(platform.ensureComment).toHaveBeenCalledTimes(1);
+    });
+    it('should remove previous automerge comment when rebasing', async () => {
+      config.automerge = true;
+      config.automergeType = 'pr-comment';
+      config.automergeComment = '!merge';
+      config.rebaseRequested = true;
+      pr.isModified = false;
+      platform.getBranchStatus.mockResolvedValueOnce(BranchStatus.green);
+      await prWorker.checkAutoMerge(pr, config);
+      expect(platform.ensureCommentRemoval).toHaveBeenCalledTimes(1);
       expect(platform.ensureComment).toHaveBeenCalledTimes(1);
     });
     it('should not automerge if enabled and pr is mergeable but cannot rebase', async () => {
@@ -237,9 +249,9 @@ describe('workers/pr', () => {
       expect(prResult).toEqual(PrResult.Created);
       expect(pr).toMatchObject({ displayNumber: 'New Pull Request' });
       expect(platform.createPr.mock.calls[0]).toMatchSnapshot();
-      expect(
-        platform.createPr.mock.calls[0][0].prBody.includes('this Pin PR')
-      ).toBe(true);
+      expect(platform.createPr.mock.calls[0][0].prBody).toContain(
+        'this Pin PR'
+      );
     });
     it('should return null if creating PR fails', async () => {
       platform.getBranchStatus.mockResolvedValueOnce(BranchStatus.green);
@@ -350,12 +362,12 @@ describe('workers/pr', () => {
       expect(pr).toMatchObject({ displayNumber: 'New Pull Request' });
       expect(platform.addAssignees).toHaveBeenCalledTimes(1);
       const assignees = platform.addAssignees.mock.calls[0][1];
-      expect(assignees.length).toEqual(2);
+      expect(assignees).toHaveLength(2);
       expect(config.assignees).toEqual(expect.arrayContaining(assignees));
 
       expect(platform.addReviewers).toHaveBeenCalledTimes(1);
       const reviewers = platform.addReviewers.mock.calls[0][1];
-      expect(reviewers.length).toEqual(2);
+      expect(reviewers).toHaveLength(2);
       expect(config.reviewers).toEqual(expect.arrayContaining(reviewers));
     });
     it('should add and deduplicate additionalReviewers on new PR', async () => {

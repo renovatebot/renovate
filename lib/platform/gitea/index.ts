@@ -880,17 +880,15 @@ const platform: Platform = {
     return Promise.resolve();
   },
 
-  commitFilesToBranch({
+  commitFiles({
     branchName,
     files,
     message,
-    parentBranch = config.baseBranch,
   }: CommitFilesConfig): Promise<string | null> {
-    return config.storage.commitFilesToBranch({
+    return config.storage.commitFiles({
       branchName,
       files,
       message,
-      parentBranch,
     });
   },
 
@@ -948,7 +946,7 @@ export const {
   addReviewers,
   branchExists,
   cleanRepo,
-  commitFilesToBranch,
+  commitFiles,
   createPr,
   deleteBranch,
   deleteLabel,

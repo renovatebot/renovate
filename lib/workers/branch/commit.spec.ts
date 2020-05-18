@@ -17,11 +17,11 @@ describe('workers/branch/automerge', () => {
         updatedArtifacts: [],
       });
       jest.resetAllMocks();
-      platform.commitFilesToBranch.mockResolvedValueOnce('abc123');
+      platform.commitFiles.mockResolvedValueOnce('abc123');
     });
     it('handles empty files', async () => {
       await commitFilesToBranch(config);
-      expect(platform.commitFilesToBranch).toHaveBeenCalledTimes(0);
+      expect(platform.commitFiles).toHaveBeenCalledTimes(0);
     });
     it('commits files', async () => {
       config.updatedPackageFiles.push({
@@ -29,8 +29,8 @@ describe('workers/branch/automerge', () => {
         contents: 'some contents',
       });
       await commitFilesToBranch(config);
-      expect(platform.commitFilesToBranch).toHaveBeenCalledTimes(1);
-      expect(platform.commitFilesToBranch.mock.calls).toMatchSnapshot();
+      expect(platform.commitFiles).toHaveBeenCalledTimes(1);
+      expect(platform.commitFiles.mock.calls).toMatchSnapshot();
     });
     it('dry runs', async () => {
       config.dryRun = true;
@@ -39,7 +39,7 @@ describe('workers/branch/automerge', () => {
         contents: 'some contents',
       });
       await commitFilesToBranch(config);
-      expect(platform.commitFilesToBranch).toHaveBeenCalledTimes(0);
+      expect(platform.commitFiles).toHaveBeenCalledTimes(0);
     });
   });
 });

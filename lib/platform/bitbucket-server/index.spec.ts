@@ -1,3 +1,5 @@
+// TODO fix mocks
+/* eslint jest/expect-expect: 1 */
 import {
   REPOSITORY_CHANGED,
   REPOSITORY_DISABLED,
@@ -59,7 +61,7 @@ describe('platform/bitbucket-server', () => {
               getAllRenovateBranches: jest.fn(),
               getCommitMessages: jest.fn(),
               getFile: jest.fn(),
-              commitFilesToBranch: jest.fn(),
+              commitFiles: jest.fn(),
               mergeBranch: jest.fn(),
               deleteBranch: jest.fn(),
               getRepoStatus: jest.fn(),
@@ -265,11 +267,11 @@ describe('platform/bitbucket-server', () => {
         });
       });
 
-      describe('commitFilesToBranch()', () => {
+      describe('commitFiles()', () => {
         it('sends to gitFs', async () => {
           expect.assertions(1);
           await initRepo();
-          await bitbucket.commitFilesToBranch({
+          await bitbucket.commitFiles({
             branchName: 'some-branch',
             files: [{ name: 'test', contents: 'dummy' }],
             message: 'message',

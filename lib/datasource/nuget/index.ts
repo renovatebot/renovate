@@ -1,4 +1,5 @@
 import urlApi from 'url';
+import uniqBy from 'lodash/uniqBy';
 import { logger } from '../../logger';
 import { GetReleasesConfig, ReleaseResult } from '../common';
 import * as v2 from './v2';
@@ -37,16 +38,21 @@ export async function getReleases({
   let dep: ReleaseResult = null;
   for (const feed of registryUrls) {
     const { feedUrl, protocolVersion } = parseRegistryUrl(feed);
+    let res: ReleaseResult = null;
     if (protocolVersion === 2) {
-      dep = await v2.getReleases(feedUrl, lookupName);
+      res = await v2.getReleases(feedUrl, lookupName);
     } else if (protocolVersion === 3) {
       const queryUrl = await v3.getQueryUrl(feedUrl);
       if (queryUrl !== null) {
-        dep = await v3.getReleases(feedUrl, queryUrl, lookupName);
+        res = await v3.getReleases(feedUrl, queryUrl, lookupName);
       }
     }
-    if (dep != null) {
-      break;
+    if (res !== null) {
+      if (dep !== null) {
+        dep.releases = uniqBy(dep.releases.concat(res.releases), 'version');
+      } else {
+        dep = res;
+      }
     }
   }
   if (dep === null) {

@@ -40,6 +40,7 @@ export interface UpdateArtifactsConfig extends ManagerConfig {
   compatibility?: Record<string, string>;
   cacheDir?: string;
   composerIgnorePlatformReqs?: boolean;
+  currentValue?: string;
   postUpdateOptions?: string[];
   ignoreScripts?: boolean;
 
@@ -258,5 +259,5 @@ export interface PostUpdateConfig extends ManagerConfig, Record<string, any> {
   npmLock?: string;
   yarnLock?: string;
   branchName?: string;
-  parentBranch?: string;
+  reuseExistingBranch?: boolean;
 }

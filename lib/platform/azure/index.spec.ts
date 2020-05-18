@@ -34,7 +34,7 @@ describe('platform/azure', () => {
       getAllRenovateBranches: jest.fn(),
       getCommitMessages: jest.fn(),
       getFile: jest.fn(),
-      commitFilesToBranch: jest.fn(),
+      commitFiles: jest.fn(),
       mergeBranch: jest.fn(),
       deleteBranch: jest.fn(),
       getRepoStatus: jest.fn(),
@@ -185,7 +185,7 @@ describe('platform/azure', () => {
 
   describe('cleanRepo()', () => {
     it('exists', async () => {
-      await azure.cleanRepo();
+      await expect(azure.cleanRepo()).resolves.not.toThrow();
     });
   });
 

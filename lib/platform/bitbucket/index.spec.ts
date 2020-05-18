@@ -1,3 +1,5 @@
+// TODO fix mocks
+/* eslint jest/expect-expect: 1 */
 import URL from 'url';
 import { REPOSITORY_DISABLED } from '../../constants/error-messages';
 import { logger as _logger } from '../../logger';
@@ -34,7 +36,7 @@ describe('platform/bitbucket', () => {
       getAllRenovateBranches: jest.fn(),
       getCommitMessages: jest.fn(),
       getFile: jest.fn(),
-      commitFilesToBranch: jest.fn(),
+      commitFiles: jest.fn(),
       mergeBranch: jest.fn(),
       deleteBranch: jest.fn(),
       getRepoStatus: jest.fn(),
@@ -156,7 +158,8 @@ describe('platform/bitbucket', () => {
     it('sends to gitFs', async () => {
       await initRepo();
       await mocked(async () => {
-        await bitbucket.getFileList();
+        const fileList = await bitbucket.getFileList();
+        expect(fileList).not.toBeNull();
       });
     });
   });
@@ -166,7 +169,8 @@ describe('platform/bitbucket', () => {
       it('sends to gitFs', async () => {
         await initRepo();
         await mocked(async () => {
-          await bitbucket.branchExists('test');
+          const branchExists = await bitbucket.branchExists('test');
+          expect(branchExists).toEqual(true);
         });
       });
     });
@@ -486,11 +490,11 @@ describe('platform/bitbucket', () => {
     });
   });
 
-  describe('commitFilesToBranch()', () => {
+  describe('commitFiles()', () => {
     it('sends to gitFs', async () => {
       await initRepo();
       await mocked(async () => {
-        await bitbucket.commitFilesToBranch({
+        await bitbucket.commitFiles({
           branchName: 'test',
           files: [],
           message: 'message',
@@ -522,15 +526,6 @@ describe('platform/bitbucket', () => {
       await initRepo();
       await mocked(async () => {
         await bitbucket.getAllRenovateBranches('test');
-      });
-    });
-  });
-
-  describe('getBranchLastCommitTime()', () => {
-    it('sends to gitFs', async () => {
-      await initRepo();
-      await mocked(async () => {
-        await bitbucket.getBranchLastCommitTime('test');
       });
     });
   });

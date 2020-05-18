@@ -201,7 +201,7 @@ describe('platform/gitea', () => {
       setBranchPrefix: gsmSetBranchPrefix,
       isBranchStale: gsmIsBranchStale,
       getBranchCommit: gsmGetBranchCommit,
-      commitFilesToBranch: gsmCommitFilesToBranch,
+      commitFiles: gsmCommitFilesToBranch,
       deleteBranch: gsmDeleteBranch,
     }));
 
@@ -441,6 +441,22 @@ describe('platform/gitea', () => {
 
       expect(logger.warn).toHaveBeenCalledTimes(1);
     });
+
+    it('should set default base branch', async () => {
+      await initFakeRepo();
+      await gitea.setBaseBranch();
+
+      expect(gsmSetBaseBranch).toHaveBeenCalledTimes(1);
+      expect(gsmSetBaseBranch).toHaveBeenCalledWith(mockRepo.default_branch);
+    });
+
+    it('should set custom base branch', async () => {
+      await initFakeRepo();
+      await gitea.setBaseBranch('devel');
+
+      expect(gsmSetBaseBranch).toHaveBeenCalledTimes(1);
+      expect(gsmSetBaseBranch).toHaveBeenCalledWith('devel');
+    });
   });
 
   describe('getBranchStatus', () => {
@@ -557,24 +573,6 @@ describe('platform/gitea', () => {
       expect(
         await gitea.getBranchStatusCheck('some-branch', 'some-context')
       ).toEqual(BranchStatus.green);
-    });
-  });
-
-  describe('setBranchStatus', () => {
-    it('should set default base branch', async () => {
-      await initFakeRepo();
-      await gitea.setBaseBranch();
-
-      expect(gsmSetBaseBranch).toHaveBeenCalledTimes(1);
-      expect(gsmSetBaseBranch).toHaveBeenCalledWith(mockRepo.default_branch);
-    });
-
-    it('should set custom base branch', async () => {
-      await initFakeRepo();
-      await gitea.setBaseBranch('devel');
-
-      expect(gsmSetBaseBranch).toHaveBeenCalledTimes(1);
-      expect(gsmSetBaseBranch).toHaveBeenCalledWith('devel');
     });
   });
 
@@ -1420,11 +1418,13 @@ index 0000000..2173594
   describe('addReviewers', () => {
     it('should do nothing - unsupported by platform', async () => {
       const mockPR = mockPRs[0];
-      await gitea.addReviewers(mockPR.number, ['me', 'you']);
+      await expect(
+        gitea.addReviewers(mockPR.number, ['me', 'you'])
+      ).resolves.not.toThrow();
     });
   });
 
-  describe('commitFilesToBranch', () => {
+  describe('commitFiles', () => {
     it('should propagate call to storage class with default parent branch', async () => {
       const commitConfig: CommitFilesConfig = {
         branchName: 'some-branch',
@@ -1433,28 +1433,12 @@ index 0000000..2173594
       };
 
       await initFakeRepo();
-      await gitea.commitFilesToBranch(commitConfig);
+      await gitea.commitFiles(commitConfig);
 
       expect(gsmCommitFilesToBranch).toHaveBeenCalledTimes(1);
       expect(gsmCommitFilesToBranch).toHaveBeenCalledWith({
         ...commitConfig,
-        parentBranch: mockRepo.default_branch,
       });
-    });
-
-    it('should propagate call to storage class with custom parent branch', async () => {
-      const commitConfig: CommitFilesConfig = {
-        branchName: 'some-branch',
-        files: [partial<File>({})],
-        message: 'some-message',
-        parentBranch: 'some-parent-branch',
-      };
-
-      await initFakeRepo();
-      await gitea.commitFilesToBranch(commitConfig);
-
-      expect(gsmCommitFilesToBranch).toHaveBeenCalledTimes(1);
-      expect(gsmCommitFilesToBranch).toHaveBeenCalledWith(commitConfig);
     });
   });
 
