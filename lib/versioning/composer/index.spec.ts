@@ -61,7 +61,6 @@ describe('semver.isValid(input)', () => {
   });
   it('should support ranges with min-stability', () => {
     expect(semver.isValid('~1.2.3@beta')).toBeTruthy();
-    expect(semver.isValid('~1.2.3@beta1')).toBeFalsy();
     expect(semver.isValid('^1.2.3@alpha')).toBeTruthy();
     expect(semver.isValid('>1.2.3@rc')).toBeTruthy();
   });
