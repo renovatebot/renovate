@@ -18,6 +18,8 @@ import { PR_STATE_ALL, PR_STATE_OPEN } from '../../constants/pull-requests';
 import { logger } from '../../logger';
 import { BranchStatus } from '../../types';
 import * as hostRules from '../../util/host-rules';
+import { HttpResponse } from '../../util/http';
+import { GitlabHttp, setBaseUrl } from '../../util/http/gitlab';
 import { sanitize } from '../../util/sanitize';
 import { ensureTrailingSlash } from '../../util/url';
 import {
@@ -28,7 +30,6 @@ import {
   EnsureCommentRemovalConfig,
   EnsureIssueConfig,
   FindPRConfig,
-  GotResponse,
   Issue,
   PlatformConfig,
   Pr,
@@ -38,7 +39,8 @@ import {
 } from '../common';
 import GitStorage, { StatusResult } from '../git/storage';
 import { smartTruncate } from '../utils/pr-body';
-import { api } from './gl-got-wrapper';
+
+const gitlabApi = new GitlabHttp();
 
 type MergeMethod = 'merge' | 'rebase_merge' | 'ff';
 const defaultConfigFile = configFileNames[0];
@@ -75,13 +77,18 @@ export async function initPlatform({
   }
   if (endpoint) {
     defaults.endpoint = ensureTrailingSlash(endpoint);
-    api.setBaseUrl(defaults.endpoint);
+    setBaseUrl(defaults.endpoint);
   } else {
     logger.debug('Using default GitLab endpoint: ' + defaults.endpoint);
   }
   let gitAuthor: string;
   try {
-    const user = (await api.get(`user`, { token })).body;
+    const user = (
+      await gitlabApi.getJson<{ email: string; name: string; id: number }>(
+        `user`,
+        { token }
+      )
+    ).body;
     gitAuthor = `${user.name} <${user.email}>`;
     authorId = user.id;
   } catch (err) {
@@ -103,11 +110,12 @@ export async function getRepos(): Promise<string[]> {
   logger.debug('Autodiscovering GitLab repositories');
   try {
     const url = `projects?membership=true&per_page=100&with_merge_requests_enabled=true`;
-    const res = await api.get(url, { paginate: true });
-    logger.debug(`Discovered ${res.body.length} project(s)`);
-    return res.body.map(
-      (repo: { path_with_namespace: string }) => repo.path_with_namespace
+    const res = await gitlabApi.getJson<{ path_with_namespace: string }[]>(
+      url,
+      { paginate: true }
     );
+    logger.debug(`Discovered ${res.body.length} project(s)`);
+    return res.body.map((repo) => repo.path_with_namespace);
   } catch (err) {
     logger.error({ err }, `GitLab getRepos error`);
     throw err;
@@ -140,7 +148,7 @@ export async function initRepo({
   config.gitPrivateKey = gitPrivateKey;
   config.localDir = localDir;
 
-  let res: GotResponse<{
+  type RepoResponse = {
     archived: boolean;
     mirror: boolean;
     default_branch: string;
@@ -150,9 +158,12 @@ export async function initRepo({
     repository_access_level: 'disabled' | 'private' | 'enabled';
     merge_requests_access_level: 'disabled' | 'private' | 'enabled';
     merge_method: MergeMethod;
-  }>;
+  };
+  let res: HttpResponse<RepoResponse>;
   try {
-    res = await api.get(`projects/${config.repository}`);
+    res = await gitlabApi.getJson<RepoResponse>(
+      `projects/${config.repository}`
+    );
     if (res.body.archived) {
       logger.debug(
         'Repository is archived - throwing error to abort renovation'
@@ -186,7 +197,7 @@ export async function initRepo({
         renovateConfig = JSON.parse(
           Buffer.from(
             (
-              await api.get(
+              await gitlabApi.getJson<{ content: string }>(
                 `projects/${config.repository}/repository/files/${defaultConfigFile}?ref=${res.body.default_branch}`
               )
             ).body.content,
@@ -205,7 +216,9 @@ export async function initRepo({
     config.mergeMethod = res.body.merge_method || 'merge';
     logger.debug(`${repository} default branch = ${config.baseBranch}`);
     // Discover our user email
-    config.email = (await api.get(`user`)).body.email;
+    config.email = (
+      await gitlabApi.getJson<{ email: string }>(`user`)
+    ).body.email;
     logger.debug('Bot email=' + config.email);
     delete config.prList;
     logger.debug('Enabling Git FS');
@@ -310,7 +323,12 @@ async function getStatus(
   const branchSha = await config.storage.getBranchCommit(branchName);
   const url = `projects/${config.repository}/repository/commits/${branchSha}/statuses`;
 
-  return (await api.get(url, { paginate: true, useCache })).body;
+  return (
+    await gitlabApi.getJson<GitlabBranchStatus[]>(url, {
+      paginate: true,
+      useCache,
+    })
+  ).body;
 }
 
 const gitlabToRenovateStatusMapping: Record<string, BranchStatus> = {
@@ -389,16 +407,19 @@ export async function createPr({
     ? config.defaultBranch
     : config.baseBranch;
   logger.debug(`Creating Merge Request: ${title}`);
-  const res = await api.post(`projects/${config.repository}/merge_requests`, {
-    body: {
-      source_branch: branchName,
-      target_branch: targetBranch,
-      remove_source_branch: true,
-      title,
-      description,
-      labels: is.array(labels) ? labels.join(',') : null,
-    },
-  });
+  const res = await gitlabApi.postJson<Pr & { iid: number }>(
+    `projects/${config.repository}/merge_requests`,
+    {
+      body: {
+        source_branch: branchName,
+        target_branch: targetBranch,
+        remove_source_branch: true,
+        title,
+        description,
+        labels: is.array(labels) ? labels.join(',') : null,
+      },
+    }
+  );
   const pr = res.body;
   pr.number = pr.iid;
   pr.branchName = branchName;
@@ -410,7 +431,7 @@ export async function createPr({
   }
   if (platformOptions && platformOptions.gitLabAutomerge) {
     try {
-      await api.put(
+      await gitlabApi.putJson(
         `projects/${config.repository}/merge_requests/${pr.iid}/merge`,
         {
           body: {
@@ -430,7 +451,18 @@ export async function createPr({
 export async function getPr(iid: number): Promise<Pr> {
   logger.debug(`getPr(${iid})`);
   const url = `projects/${config.repository}/merge_requests/${iid}?include_diverged_commits_count=1`;
-  const pr = (await api.get(url)).body;
+  const pr = (
+    await gitlabApi.getJson<
+      Pr & {
+        iid: number;
+        source_branch: string;
+        target_branch: string;
+        description: string;
+        diverged_commits_count: number;
+        merge_status: string;
+      }
+    >(url)
+  ).body;
   // Harmonize fields with GitHub
   pr.branchName = pr.source_branch;
   pr.targetBranch = pr.target_branch;
@@ -456,7 +488,9 @@ export async function getPr(iid: number): Promise<Pr> {
     config.repository
   }/repository/branches/${urlEscape(pr.source_branch)}`;
   try {
-    const branch = (await api.get(branchUrl)).body;
+    const branch = (
+      await gitlabApi.getJson<{ commit: { author_email: string } }>(branchUrl)
+    ).body;
     const branchCommitEmail =
       branch && branch.commit ? branch.commit.author_email : null;
     // istanbul ignore if
@@ -486,20 +520,23 @@ export async function getPrFiles(mrNo: number): Promise<string[]> {
     return [];
   }
   const files = (
-    await api.get(
+    await gitlabApi.getJson<{ changes: { new_path: string }[] }>(
       `projects/${config.repository}/merge_requests/${mrNo}/changes`
     )
   ).body.changes;
-  return files.map((f: { new_path: string }) => f.new_path);
+  return files.map((f) => f.new_path);
 }
 
 // istanbul ignore next
 async function closePr(iid: number): Promise<void> {
-  await api.put(`projects/${config.repository}/merge_requests/${iid}`, {
-    body: {
-      state_event: 'close',
-    },
-  });
+  await gitlabApi.putJson(
+    `projects/${config.repository}/merge_requests/${iid}`,
+    {
+      body: {
+        state_event: 'close',
+      },
+    }
+  );
 }
 
 export async function updatePr(
@@ -507,21 +544,27 @@ export async function updatePr(
   title: string,
   description: string
 ): Promise<void> {
-  await api.put(`projects/${config.repository}/merge_requests/${iid}`, {
-    body: {
-      title,
-      description: sanitize(description),
-    },
-  });
+  await gitlabApi.putJson(
+    `projects/${config.repository}/merge_requests/${iid}`,
+    {
+      body: {
+        title,
+        description: sanitize(description),
+      },
+    }
+  );
 }
 
 export async function mergePr(iid: number): Promise<boolean> {
   try {
-    await api.put(`projects/${config.repository}/merge_requests/${iid}/merge`, {
-      body: {
-        should_remove_source_branch: true,
-      },
-    });
+    await gitlabApi.putJson(
+      `projects/${config.repository}/merge_requests/${iid}/merge`,
+      {
+        body: {
+          should_remove_source_branch: true,
+        },
+      }
+    );
     return true;
   } catch (err) /* istanbul ignore next */ {
     if (err.statusCode === 401) {
@@ -563,10 +606,12 @@ export async function getBranchPr(branchName: string): Promise<Pr> {
     source_branch: branchName,
   }).toString();
   const urlString = `projects/${config.repository}/merge_requests?${query}`;
-  const res = await api.get(urlString, { paginate: true });
+  const res = await gitlabApi.getJson<{ source_branch: string }[]>(urlString, {
+    paginate: true,
+  });
   logger.debug(`Got res with ${res.body.length} results`);
   let pr: any = null;
-  res.body.forEach((result: { source_branch: string }) => {
+  res.body.forEach((result) => {
     if (result.source_branch === branchName) {
       pr = result;
     }
@@ -675,7 +720,7 @@ export async function setBranchStatus({
     options.target_url = targetUrl;
   }
   try {
-    await api.post(url, { body: options });
+    await gitlabApi.postJson(url, { body: options });
 
     // update status cache
     await getStatus(branchName, false);
@@ -700,7 +745,7 @@ export async function setBranchStatus({
 
 export async function getIssueList(): Promise<any[]> {
   if (!config.issueList) {
-    const res = await api.get(
+    const res = await gitlabApi.getJson<{ iid: number; title: string }[]>(
       `projects/${config.repository}/issues?state=opened`,
       {
         useCache: false,
@@ -711,7 +756,7 @@ export async function getIssueList(): Promise<any[]> {
       logger.warn({ responseBody: res.body }, 'Could not retrieve issue list');
       return [];
     }
-    config.issueList = res.body.map((i: { iid: number; title: string }) => ({
+    config.issueList = res.body.map((i) => ({
       iid: i.iid,
       title: i.title,
     }));
@@ -728,7 +773,9 @@ export async function findIssue(title: string): Promise<Issue | null> {
       return null;
     }
     const issueBody = (
-      await api.get(`projects/${config.repository}/issues/${issue.iid}`)
+      await gitlabApi.getJson<{ description: string }>(
+        `projects/${config.repository}/issues/${issue.iid}`
+      )
     ).body.description;
     return {
       number: issue.iid,
@@ -751,17 +798,22 @@ export async function ensureIssue({
     const issue = issueList.find((i: { title: string }) => i.title === title);
     if (issue) {
       const existingDescription = (
-        await api.get(`projects/${config.repository}/issues/${issue.iid}`)
+        await gitlabApi.getJson<{ description: string }>(
+          `projects/${config.repository}/issues/${issue.iid}`
+        )
       ).body.description;
       if (existingDescription !== description) {
         logger.debug('Updating issue body');
-        await api.put(`projects/${config.repository}/issues/${issue.iid}`, {
-          body: { description },
-        });
+        await gitlabApi.putJson(
+          `projects/${config.repository}/issues/${issue.iid}`,
+          {
+            body: { description },
+          }
+        );
         return 'updated';
       }
     } else {
-      await api.post(`projects/${config.repository}/issues`, {
+      await gitlabApi.postJson(`projects/${config.repository}/issues`, {
         body: {
           title,
           description,
@@ -788,9 +840,12 @@ export async function ensureIssueClosing(title: string): Promise<void> {
   for (const issue of issueList) {
     if (issue.title === title) {
       logger.debug({ issue }, 'Closing issue');
-      await api.put(`projects/${config.repository}/issues/${issue.iid}`, {
-        body: { state_event: 'close' },
-      });
+      await gitlabApi.putJson(
+        `projects/${config.repository}/issues/${issue.iid}`,
+        {
+          body: { state_event: 'close' },
+        }
+      );
     }
   }
 }
@@ -801,19 +856,25 @@ export async function addAssignees(
 ): Promise<void> {
   logger.debug(`Adding assignees ${assignees} to #${iid}`);
   try {
-    let assigneeId = (await api.get(`users?username=${assignees[0]}`)).body[0]
-      .id;
+    let assigneeId = (
+      await gitlabApi.getJson<{ id: number }[]>(
+        `users?username=${assignees[0]}`
+      )
+    ).body[0].id;
     let url = `projects/${config.repository}/merge_requests/${iid}?assignee_id=${assigneeId}`;
-    await api.put(url);
+    await gitlabApi.putJson(url);
     try {
       if (assignees.length > 1) {
         url = `projects/${config.repository}/merge_requests/${iid}?assignee_ids[]=${assigneeId}`;
         for (let i = 1; i < assignees.length; i += 1) {
-          assigneeId = (await api.get(`users?username=${assignees[i]}`)).body[0]
-            .id;
+          assigneeId = (
+            await gitlabApi.getJson<{ id: number }[]>(
+              `users?username=${assignees[i]}`
+            )
+          ).body[0].id;
           url += `&assignee_ids[]=${assigneeId}`;
         }
-        await api.put(url);
+        await gitlabApi.putJson(url);
       }
     } catch (error) {
       logger.error({ iid, assignees }, 'Failed to add multiple assignees');
@@ -838,9 +899,12 @@ export async function deleteLabel(
   try {
     const pr = await getPr(issueNo);
     const labels = (pr.labels || []).filter((l: string) => l !== label).join();
-    await api.put(`projects/${config.repository}/merge_requests/${issueNo}`, {
-      body: { labels },
-    });
+    await gitlabApi.putJson(
+      `projects/${config.repository}/merge_requests/${issueNo}`,
+      {
+        body: { labels },
+      }
+    );
   } catch (err) /* istanbul ignore next */ {
     logger.warn({ err, issueNo, label }, 'Failed to delete label');
   }
@@ -850,14 +914,16 @@ async function getComments(issueNo: number): Promise<GitlabComment[]> {
   // GET projects/:owner/:repo/merge_requests/:number/notes
   logger.debug(`Getting comments for #${issueNo}`);
   const url = `projects/${config.repository}/merge_requests/${issueNo}/notes`;
-  const comments = (await api.get(url, { paginate: true })).body;
+  const comments = (
+    await gitlabApi.getJson<GitlabComment[]>(url, { paginate: true })
+  ).body;
   logger.debug(`Found ${comments.length} comments`);
   return comments;
 }
 
 async function addComment(issueNo: number, body: string): Promise<void> {
   // POST projects/:owner/:repo/merge_requests/:number/notes
-  await api.post(
+  await gitlabApi.postJson(
     `projects/${config.repository}/merge_requests/${issueNo}/notes`,
     {
       body: { body },
@@ -871,7 +937,7 @@ async function editComment(
   body: string
 ): Promise<void> {
   // PUT projects/:owner/:repo/merge_requests/:number/notes/:id
-  await api.put(
+  await gitlabApi.putJson(
     `projects/${config.repository}/merge_requests/${issueNo}/notes/${commentId}`,
     {
       body: { body },
@@ -884,7 +950,7 @@ async function deleteComment(
   commentId: number
 ): Promise<void> {
   // DELETE projects/:owner/:repo/merge_requests/:number/notes/:id
-  await api.delete(
+  await gitlabApi.deleteJson(
     `projects/${config.repository}/merge_requests/${issueNo}/notes/${commentId}`
   );
 }
@@ -973,20 +1039,6 @@ export async function ensureCommentRemoval({
   }
 }
 
-const mapPullRequests = (pr: {
-  iid: number;
-  source_branch: string;
-  title: string;
-  state: string;
-  created_at: string;
-}): Pr => ({
-  number: pr.iid,
-  branchName: pr.source_branch,
-  title: pr.title,
-  state: pr.state === 'opened' ? PR_STATE_OPEN : pr.state,
-  createdAt: pr.created_at,
-});
-
 async function fetchPrList(): Promise<Pr[]> {
   const query = new URLSearchParams({
     per_page: '100',
@@ -994,8 +1046,22 @@ async function fetchPrList(): Promise<Pr[]> {
   }).toString();
   const urlString = `projects/${config.repository}/merge_requests?${query}`;
   try {
-    const res = await api.get(urlString, { paginate: true });
-    return res.body.map(mapPullRequests);
+    const res = await gitlabApi.getJson<
+      {
+        iid: number;
+        source_branch: string;
+        title: string;
+        state: string;
+        created_at: string;
+      }[]
+    >(urlString, { paginate: true });
+    return res.body.map((pr) => ({
+      number: pr.iid,
+      branchName: pr.source_branch,
+      title: pr.title,
+      state: pr.state === 'opened' ? PR_STATE_OPEN : pr.state,
+      createdAt: pr.created_at,
+    }));
   } catch (err) /* istanbul ignore next */ {
     logger.debug({ err }, 'Error fetching PR list');
     if (err.statusCode === 403) {
