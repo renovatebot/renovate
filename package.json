@@ -204,7 +204,7 @@
     "@types/js-yaml": "3.12.3",
     "@types/json5": "0.0.30",
     "@types/later": "1.2.6",
-    "@types/lodash": "4.14.150",
+    "@types/lodash": "4.14.151",
     "@types/luxon": "1.24.0",
     "@types/markdown-it": "10.0.1",
     "@types/markdown-table": "2.0.0",
