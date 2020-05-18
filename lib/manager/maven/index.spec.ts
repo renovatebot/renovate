@@ -224,7 +224,7 @@ describe('manager/maven', () => {
           : null;
       const oldContent = extractPackage(pomContent);
       const dep = select(oldContent);
-      expect(dep).not.toEqual(null);
+      expect(dep).not.toBeNull();
       const upgrade = { ...dep, newValue };
       expect(updateDependency({ fileContent: pomContent, upgrade })).toEqual(
         pomContent

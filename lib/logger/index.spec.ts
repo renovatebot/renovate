@@ -26,29 +26,29 @@ describe('logger', () => {
     expect(getContext()).toEqual('abc123');
   });
   it('supports logging with metadata', () => {
-    logger.debug({ some: 'meta' }, 'some meta');
+    expect(() => logger.debug({ some: 'meta' }, 'some meta')).not.toThrow();
   });
   it('supports logging with only metadata', () => {
-    logger.debug({ some: 'meta' });
+    expect(() => logger.debug({ some: 'meta' })).not.toThrow();
   });
   it('supports logging without metadata', () => {
-    logger.debug('some meta');
+    expect(() => logger.debug('some meta')).not.toThrow();
   });
 
   it('sets meta', () => {
-    setMeta({ any: 'test' });
+    expect(() => setMeta({ any: 'test' })).not.toThrow();
   });
 
   it('adds meta', () => {
-    addMeta({ new: 'test' });
+    expect(() => addMeta({ new: 'test' })).not.toThrow();
   });
 
   it('removes meta', () => {
-    removeMeta(['new']);
+    expect(() => removeMeta(['new'])).not.toThrow();
   });
 
   it('sets level', () => {
-    levels('stdout', 'debug');
+    expect(() => levels('stdout', 'debug')).not.toThrow();
   });
 
   it('saves errors', () => {

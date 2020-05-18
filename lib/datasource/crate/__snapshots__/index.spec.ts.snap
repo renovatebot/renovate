@@ -1,6 +1,71 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
-exports[`datasource/crate getReleases processes real data 1`] = `
+exports[`datasource/crate getReleases processes real data: amethyst 1`] = `
+Object {
+  "releases": Array [
+    Object {
+      "version": "0.1.0",
+    },
+    Object {
+      "version": "0.1.1",
+    },
+    Object {
+      "version": "0.1.3",
+    },
+    Object {
+      "version": "0.1.4",
+    },
+    Object {
+      "version": "0.2.1",
+    },
+    Object {
+      "version": "0.3.0",
+    },
+    Object {
+      "version": "0.3.1",
+    },
+    Object {
+      "version": "0.4.0",
+    },
+    Object {
+      "version": "0.4.1",
+    },
+    Object {
+      "version": "0.4.2",
+    },
+    Object {
+      "version": "0.4.3",
+    },
+    Object {
+      "version": "0.5.0",
+    },
+    Object {
+      "version": "0.5.1",
+    },
+    Object {
+      "version": "0.6.0",
+    },
+    Object {
+      "version": "0.7.0",
+    },
+    Object {
+      "version": "0.8.0",
+    },
+    Object {
+      "version": "0.9.0",
+    },
+    Object {
+      "version": "0.10.0",
+    },
+    Object {
+      "isDeprecated": true,
+      "version": "0.10.1",
+    },
+  ],
+}
+`;
+
+exports[`datasource/crate getReleases processes real data: libc 1`] = `
 Object {
   "releases": Array [
     Object {
@@ -199,71 +264,6 @@ Object {
     },
     Object {
       "version": "0.2.51",
-    },
-  ],
-}
-`;
-
-exports[`datasource/crate getReleases processes real data 2`] = `
-Object {
-  "releases": Array [
-    Object {
-      "version": "0.1.0",
-    },
-    Object {
-      "version": "0.1.1",
-    },
-    Object {
-      "version": "0.1.3",
-    },
-    Object {
-      "version": "0.1.4",
-    },
-    Object {
-      "version": "0.2.1",
-    },
-    Object {
-      "version": "0.3.0",
-    },
-    Object {
-      "version": "0.3.1",
-    },
-    Object {
-      "version": "0.4.0",
-    },
-    Object {
-      "version": "0.4.1",
-    },
-    Object {
-      "version": "0.4.2",
-    },
-    Object {
-      "version": "0.4.3",
-    },
-    Object {
-      "version": "0.5.0",
-    },
-    Object {
-      "version": "0.5.1",
-    },
-    Object {
-      "version": "0.6.0",
-    },
-    Object {
-      "version": "0.7.0",
-    },
-    Object {
-      "version": "0.8.0",
-    },
-    Object {
-      "version": "0.9.0",
-    },
-    Object {
-      "version": "0.10.0",
-    },
-    Object {
-      "isDeprecated": true,
-      "version": "0.10.1",
     },
   ],
 }
