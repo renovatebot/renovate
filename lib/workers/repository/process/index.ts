@@ -70,7 +70,7 @@ export async function extractDependencies(
   return res;
 }
 
-export async function updateRepo(
+export function updateRepo(
   config: RenovateConfig,
   branches: BranchConfig[],
   branchList: string[]

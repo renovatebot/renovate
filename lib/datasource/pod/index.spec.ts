@@ -67,9 +67,7 @@ describe('datasource/cocoapods', () => {
         .scope(cocoapodsHost)
         .get('/all_pods_versions_a_c_b.txt')
         .reply(429);
-      await expect(getPkgReleases(config)).rejects.toThrowError(
-        'registry-failure'
-      );
+      await expect(getPkgReleases(config)).rejects.toThrow('registry-failure');
       expect(httpMock.getTrace()).toMatchSnapshot();
     });
     it('returns null for unknown error', async () => {

@@ -21,7 +21,9 @@ describe('workers/repository/finalise/prune', () => {
     it('returns if no renovate branches', async () => {
       config.branchList = [];
       platform.getAllRenovateBranches.mockResolvedValueOnce([]);
-      await cleanup.pruneStaleBranches(config, config.branchList);
+      await expect(
+        cleanup.pruneStaleBranches(config, config.branchList)
+      ).resolves.not.toThrow();
     });
     it('returns if no remaining branches', async () => {
       config.branchList = ['renovate/a', 'renovate/b'];

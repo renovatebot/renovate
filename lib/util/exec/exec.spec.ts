@@ -1,4 +1,3 @@
-/* eslint-disable @typescript-eslint/no-floating-promises */
 import {
   ExecOptions as ChildProcessExecOptions,
   exec as _cpExec,
@@ -405,8 +404,12 @@ describe(`Child process execution wrapper`, () => {
     if (trustLevel) {
       global.trustLevel = trustLevel;
     }
+
     if (config) {
-      setExecConfig(config);
+      jest
+        .spyOn(dockerModule, 'removeDanglingContainers')
+        .mockResolvedValueOnce();
+      await setExecConfig(config);
     }
 
     const actualCmd: string[] = [];
@@ -434,19 +437,19 @@ describe(`Child process execution wrapper`, () => {
       return undefined;
     });
 
-    setExecConfig({ binarySource: BinarySource.Global });
+    await setExecConfig({ binarySource: BinarySource.Global });
     await exec(inCmd, { docker });
     await exec(inCmd, { docker });
 
-    setExecConfig({ binarySource: BinarySource.Docker });
+    await setExecConfig({ binarySource: BinarySource.Docker });
     await exec(inCmd, { docker });
     await exec(inCmd, { docker });
 
-    setExecConfig({ binarySource: BinarySource.Global });
+    await setExecConfig({ binarySource: BinarySource.Global });
     await exec(inCmd, { docker });
     await exec(inCmd, { docker });
 
-    setExecConfig({ binarySource: BinarySource.Docker });
+    await setExecConfig({ binarySource: BinarySource.Docker });
     await exec(inCmd, { docker });
     await exec(inCmd, { docker });
 
@@ -469,7 +472,10 @@ describe(`Child process execution wrapper`, () => {
   });
 
   it('wraps error if removeDockerContainer throws an error', async () => {
-    setExecConfig({ binarySource: BinarySource.Docker });
+    cpExec.mockImplementationOnce((_execCmd, _execOpts, callback) =>
+      callback(null, { stdout: '', stderr: '' })
+    );
+    await setExecConfig({ binarySource: BinarySource.Docker });
     cpExec.mockImplementation(() => {
       throw new Error('some error occurred');
     });

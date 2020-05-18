@@ -37,31 +37,9 @@ describe('lib/manager/pip_setup/extract', () => {
         { stdout: 'Python 3.8.0\\n', stderr: '' },
       ]);
       const result = await getPythonAlias();
-      expect(pythonVersions.includes(result)).toBe(true);
+      expect(pythonVersions).toContain(result);
       expect(result).toMatchSnapshot();
       expect(execSnapshots).toMatchSnapshot();
     });
   });
-  // describe('Test for presence of mock lib', () => {
-  //   it('should test if python mock lib is installed', async () => {
-  //     const cp = jest.requireActual('../../util/exec');
-  //     let isMockInstalled = true;
-  //     // when binarysource === docker
-  //     try {
-  //       await cp.exec(`python -c "import mock"`);
-  //     } catch (err) {
-  //       isMockInstalled = false;
-  //     }
-  //     if (!isMockInstalled) {
-  //       try {
-  //         const pythonAlias = await getPythonAlias();
-  //         await exec(`${pythonAlias} -c "from unittest import mock"`);
-  //         isMockInstalled = true;
-  //       } catch (err) {
-  //         isMockInstalled = false;
-  //       }
-  //     }
-  //     expect(isMockInstalled).toBe(true);
-  //   });
-  // });
 });

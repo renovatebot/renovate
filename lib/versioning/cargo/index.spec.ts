@@ -111,7 +111,7 @@ describe('semver.getNewValue()', () => {
         fromVersion: '1.0.0',
         toVersion: '1.1.0',
       })
-    ).toEqual(null);
+    ).toBeNull();
     expect(
       semver.getNewValue({
         currentValue: '*',
