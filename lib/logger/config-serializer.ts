@@ -4,18 +4,6 @@ import { RenovateConfig } from '../config/common';
 export default function configSerializer(
   config: RenovateConfig
 ): RenovateConfig {
-  const redactedFields = [
-    'authorization',
-    'token',
-    'githubAppKey',
-    'npmToken',
-    'npmrc',
-    'yarnrc',
-    'privateKey',
-    'gitPrivateKey',
-    'forkToken',
-    'password',
-  ];
   const templateFields = ['prBody'];
   const contentFields = [
     'content',
@@ -28,9 +16,6 @@ export default function configSerializer(
   return traverse(config).map(
     // eslint-disable-next-line array-callback-return
     function scrub(val: string) {
-      if (val && redactedFields.includes(this.key)) {
-        this.update('***********');
-      }
       if (val && templateFields.includes(this.key)) {
         this.update('[Template]');
       }

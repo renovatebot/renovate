@@ -2,6 +2,7 @@ import crypto from 'crypto';
 import is from '@sindresorhus/is';
 import { logger } from '../logger';
 import { maskToken } from '../util/mask';
+import { add } from '../util/sanitize';
 import { RenovateConfig } from './common';
 
 export function decryptConfig(
@@ -43,6 +44,7 @@ export function decryptConfig(
             logger.debug(`Decrypted ${eKey}`);
             if (eKey === 'npmToken') {
               const token = decryptedStr.replace(/\n$/, '');
+              add(token);
               logger.debug(
                 { decryptedToken: maskToken(token) },
                 'Migrating npmToken to npmrc'
@@ -71,6 +73,7 @@ export function decryptConfig(
               }
             } else {
               decryptedConfig[eKey] = decryptedStr;
+              add(decryptedStr);
             }
           } catch (err) {
             const error = new Error('config-validation');

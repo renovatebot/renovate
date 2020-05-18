@@ -4,16 +4,17 @@ import { linkify } from 'linkify-markdown';
 import MarkdownIt from 'markdown-it';
 
 import { logger } from '../../../logger';
-import { api } from '../../../platform/github/gh-got-wrapper';
 import { api as api_gitlab } from '../../../platform/gitlab/gl-got-wrapper';
 import * as globalCache from '../../../util/cache/global';
+import { GithubHttp } from '../../../util/http/github';
 import { ChangeLogNotes, ChangeLogResult } from './common';
 
-const { get: ghGot } = api;
 const { get: glGot } = api_gitlab;
 
 const markdown = new MarkdownIt('zero');
 markdown.enable(['heading', 'lheading']);
+
+const http = new GithubHttp();
 
 export async function getReleaseList(
   apiBaseUrl: string,
@@ -51,7 +52,7 @@ export async function getReleaseList(
       }));
     }
     url += `repos/${repository}/releases?per_page=100`;
-    const res = await ghGot<
+    const res = await http.getJson<
       {
         html_url: string;
         id: number;
@@ -197,7 +198,7 @@ export async function getReleaseNotesMd(
       apiTree = apiPrefix + `repos/${repository}/contents/`;
       apiFiles = apiTree;
     }
-    const filesRes = await ghGot<{ name: string }[]>(apiTree);
+    const filesRes = await http.getJson<{ name: string }[]>(apiTree);
     const files = filesRes.body
       .map((f) => f.name)
       .filter((f) => changelogFilenameRegex.test(f));
@@ -212,7 +213,7 @@ export async function getReleaseNotesMd(
         `Multiple candidates for changelog file, using ${changelogFile}`
       );
     }
-    const fileRes = await ghGot<{ content: string }>(
+    const fileRes = await http.getJson<{ content: string }>(
       `${apiFiles}/${changelogFile}`
     );
     changelogMd =
