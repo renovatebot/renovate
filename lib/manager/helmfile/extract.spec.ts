@@ -56,7 +56,7 @@ describe('lib/manager/helmfile/extract', () => {
       });
       expect(result).not.toBeNull();
       expect(result).toMatchSnapshot();
-      expect(result.deps.every((dep) => dep.skipReason));
+      expect(result.deps.every((dep) => dep.skipReason)).toBeTruthy();
     });
 
     it('skip templetized release with invalid characters', () => {
@@ -100,7 +100,7 @@ describe('lib/manager/helmfile/extract', () => {
       });
       expect(result).not.toBeNull();
       expect(result).toMatchSnapshot();
-      expect(result.deps.every((dep) => dep.skipReason));
+      expect(result.deps.every((dep) => dep.skipReason)).toBeTruthy();
     });
 
     it('skip chart with unknown repository', () => {
@@ -121,7 +121,7 @@ describe('lib/manager/helmfile/extract', () => {
       });
       expect(result).not.toBeNull();
       expect(result).toMatchSnapshot();
-      expect(result.deps.every((dep) => dep.skipReason));
+      expect(result.deps.every((dep) => dep.skipReason)).toBeTruthy();
     });
 
     it('skip chart with special character in the name', () => {
@@ -145,7 +145,7 @@ describe('lib/manager/helmfile/extract', () => {
       });
       expect(result).not.toBeNull();
       expect(result).toMatchSnapshot();
-      expect(result.deps.every((dep) => dep.skipReason));
+      expect(result.deps.every((dep) => dep.skipReason)).toBeTruthy();
     });
 
     it('skip chart that does not have specified version', () => {
@@ -165,7 +165,7 @@ describe('lib/manager/helmfile/extract', () => {
       });
       expect(result).not.toBeNull();
       expect(result).toMatchSnapshot();
-      expect(result.deps.every((dep) => dep.skipReason));
+      expect(result.deps.every((dep) => dep.skipReason)).toBeTruthy();
     });
   });
 });

@@ -291,7 +291,7 @@ describe('workers/repository/updates/generate', () => {
         'chore(): update dependency some-dep to v1.2.0'
       );
     });
-    it('scopes monorepo commits with nested package files', () => {
+    it('scopes monorepo commits with nested package files using parent directory', () => {
       const branch = [
         partial<BranchUpgradeConfig>({
           ...defaultConfig,
@@ -317,7 +317,7 @@ describe('workers/repository/updates/generate', () => {
         'chore(bar): update dependency some-dep to v1.2.0'
       );
     });
-    it('scopes monorepo commits with nested package files', () => {
+    it('scopes monorepo commits with nested package files using base directory', () => {
       const branch = [
         partial<BranchUpgradeConfig>({
           ...defaultConfig,
@@ -355,7 +355,7 @@ describe('workers/repository/updates/generate', () => {
       ];
       const res = generateBranchConfig(branch);
       expect(res.commitMessage).toMatchSnapshot();
-      expect(res.commitMessage.includes('\n')).toBe(true);
+      expect(res.commitMessage).toContain('\n');
     });
     it('supports manual prTitle', () => {
       const branch = [

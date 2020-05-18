@@ -659,7 +659,7 @@ describe('platform/github', () => {
       expect(res).toEqual(BranchStatus.green);
       expect(httpMock.getTrace()).toMatchSnapshot();
     });
-    it('should fail if a check run has failed', async () => {
+    it('should fail if a check run is pending', async () => {
       const scope = httpMock.scope(githubApiHost);
       initRepoMock(scope, 'some/repo');
       scope
@@ -1243,7 +1243,7 @@ describe('platform/github', () => {
         once: false,
         shouldReOpen: false,
       });
-      expect(res).toEqual(null);
+      expect(res).toBeNull();
       expect(httpMock.getTrace()).toMatchSnapshot();
     });
   });

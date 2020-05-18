@@ -441,6 +441,22 @@ describe('platform/gitea', () => {
 
       expect(logger.warn).toHaveBeenCalledTimes(1);
     });
+
+    it('should set default base branch', async () => {
+      await initFakeRepo();
+      await gitea.setBaseBranch();
+
+      expect(gsmSetBaseBranch).toHaveBeenCalledTimes(1);
+      expect(gsmSetBaseBranch).toHaveBeenCalledWith(mockRepo.default_branch);
+    });
+
+    it('should set custom base branch', async () => {
+      await initFakeRepo();
+      await gitea.setBaseBranch('devel');
+
+      expect(gsmSetBaseBranch).toHaveBeenCalledTimes(1);
+      expect(gsmSetBaseBranch).toHaveBeenCalledWith('devel');
+    });
   });
 
   describe('getBranchStatus', () => {
@@ -557,24 +573,6 @@ describe('platform/gitea', () => {
       expect(
         await gitea.getBranchStatusCheck('some-branch', 'some-context')
       ).toEqual(BranchStatus.green);
-    });
-  });
-
-  describe('setBranchStatus', () => {
-    it('should set default base branch', async () => {
-      await initFakeRepo();
-      await gitea.setBaseBranch();
-
-      expect(gsmSetBaseBranch).toHaveBeenCalledTimes(1);
-      expect(gsmSetBaseBranch).toHaveBeenCalledWith(mockRepo.default_branch);
-    });
-
-    it('should set custom base branch', async () => {
-      await initFakeRepo();
-      await gitea.setBaseBranch('devel');
-
-      expect(gsmSetBaseBranch).toHaveBeenCalledTimes(1);
-      expect(gsmSetBaseBranch).toHaveBeenCalledWith('devel');
     });
   });
 
@@ -1435,7 +1433,9 @@ index 0000000..2173594
   describe('addReviewers', () => {
     it('should do nothing - unsupported by platform', async () => {
       const mockPR = mockPRs[0];
-      await gitea.addReviewers(mockPR.number, ['me', 'you']);
+      await expect(
+        gitea.addReviewers(mockPR.number, ['me', 'you'])
+      ).resolves.not.toThrow();
     });
   });
 
