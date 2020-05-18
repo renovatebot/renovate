@@ -55,9 +55,15 @@ describe('semver.isValid(input)', () => {
     expect(semver.isValid('>1.2.3')).toBeTruthy();
   });
   it('should support ranges with stability modifiers', () => {
-    expect(semver.isValid('~1.2.3@beta1')).toBeTruthy();
+    expect(semver.isValid('~1.2.3-beta1')).toBeTruthy();
+    expect(semver.isValid('^1.2.3-alpha')).toBeTruthy();
+    expect(semver.isValid('>1.2.3-rc2')).toBeTruthy();
+  });
+  it('should support ranges with min-stability', () => {
+    expect(semver.isValid('~1.2.3@beta')).toBeTruthy();
+    expect(semver.isValid('~1.2.3@beta1')).toBeFalsy();
     expect(semver.isValid('^1.2.3@alpha')).toBeTruthy();
-    expect(semver.isValid('>1.2.3@rc2')).toBeTruthy();
+    expect(semver.isValid('>1.2.3@rc')).toBeTruthy();
   });
 });
 describe('semver.isVersion(input)', () => {
@@ -336,7 +342,7 @@ describe('semver.getNewValue()', () => {
         fromVersion: '1.0.0-beta3',
         toVersion: '1.0.0-beta5',
       })
-    ).toEqual('^v1.0.0@beta5');
+    ).toEqual('^v1.0.0-beta5@beta');
   });
   it('replaces short caret with stability modifiers', () => {
     expect(
@@ -346,7 +352,7 @@ describe('semver.getNewValue()', () => {
         fromVersion: '1.0.0-beta3',
         toVersion: '2.0.0-beta5',
       })
-    ).toEqual('^v2.0.0@beta5');
+    ).toEqual('^v2.0.0-beta5@beta');
   });
   it('handles differing lengths', () => {
     expect(
