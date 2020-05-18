@@ -14,29 +14,50 @@ describe('config/index', () => {
   describe('.parseConfigs(env, defaultArgv)', () => {
     let configParser: typeof import('.');
     let defaultArgv: string[];
+    let defaultEnv: NodeJS.ProcessEnv;
     beforeEach(async () => {
       jest.resetModules();
       configParser = await import('./index');
       defaultArgv = getArgv();
+      defaultEnv = { RENOVATE_CONFIG_FILE: 'abc' };
       jest.mock('delay', () => Promise.resolve());
     });
     it('supports token in env', async () => {
-      const env: NodeJS.ProcessEnv = { RENOVATE_TOKEN: 'abc' };
-      await configParser.parseConfigs(env, defaultArgv);
+      const env: NodeJS.ProcessEnv = { ...defaultEnv, RENOVATE_TOKEN: 'abc' };
+      const parsedConfig = await configParser.parseConfigs(env, defaultArgv);
+      expect(parsedConfig).toContainEntries([['token', 'abc']]);
     });
+
     it('supports token in CLI options', async () => {
       defaultArgv = defaultArgv.concat([
         '--token=abc',
         '--pr-footer=custom',
         '--log-context=abc123',
       ]);
-      const env: NodeJS.ProcessEnv = {};
-      await configParser.parseConfigs(env, defaultArgv);
+      const parsedConfig = await configParser.parseConfigs(
+        defaultEnv,
+        defaultArgv
+      );
+      expect(parsedConfig).toContainEntries([
+        ['token', 'abc'],
+        ['global', { prFooter: 'custom' }],
+        ['logContext', 'abc123'],
+        ['customPrFooter', true],
+      ]);
     });
+
     it('supports forceCli', async () => {
       defaultArgv = defaultArgv.concat(['--force-cli=false']);
-      const env: NodeJS.ProcessEnv = { RENOVATE_TOKEN: 'abc' };
-      await configParser.parseConfigs(env, defaultArgv);
+      const env: NodeJS.ProcessEnv = {
+        ...defaultEnv,
+        RENOVATE_TOKEN: 'abc',
+      };
+      const parsedConfig = await configParser.parseConfigs(env, defaultArgv);
+      expect(parsedConfig).toContainEntries([
+        ['token', 'abc'],
+        ['force', null],
+      ]);
+      expect(parsedConfig).not.toContainKey('configFile');
     });
     it('supports Bitbucket username/passwod', async () => {
       defaultArgv = defaultArgv.concat([
@@ -44,15 +65,21 @@ describe('config/index', () => {
         '--username=user',
         '--password=pass',
       ]);
-      const env: NodeJS.ProcessEnv = {};
-      await configParser.parseConfigs(env, defaultArgv);
+      const parsedConfig = await configParser.parseConfigs(
+        defaultEnv,
+        defaultArgv
+      );
+      expect(parsedConfig).toContainEntries([
+        ['platform', 'bitbucket'],
+        ['username', 'user'],
+        ['password', 'pass'],
+      ]);
     });
     it('massages trailing slash into endpoint', async () => {
       defaultArgv = defaultArgv.concat([
         '--endpoint=https://github.renovatebot.com/api/v3',
       ]);
-      const env: NodeJS.ProcessEnv = {};
-      const parsed = await configParser.parseConfigs(env, defaultArgv);
+      const parsed = await configParser.parseConfigs(defaultEnv, defaultArgv);
       expect(parsed.endpoint).toEqual('https://github.renovatebot.com/api/v3/');
     });
   });
@@ -120,17 +147,20 @@ describe('config/index', () => {
       const parentConfig = { ...defaultConfig };
       const configParser = await import('./index');
       const config = configParser.getManagerConfig(parentConfig, 'npm');
-      expect(config).toMatchSnapshot();
+      expect(config).toContainEntries([
+        ['fileMatch', ['(^|/)package.json$']],
+        ['rollbackPrs', true],
+      ]);
       expect(
         configParser.getManagerConfig(parentConfig, 'html')
-      ).toMatchSnapshot();
+      ).toContainEntries([['fileMatch', ['\\.html?$']]]);
     });
 
     it('filterConfig()', async () => {
       const parentConfig = { ...defaultConfig };
       const configParser = await import('./index');
       const config = configParser.filterConfig(parentConfig, 'pr');
-      expect(config).toMatchSnapshot();
+      expect(config).toBeObject();
     });
   });
 });

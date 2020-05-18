@@ -10,7 +10,9 @@ beforeEach(() => {
 describe('workers/repository/validate', () => {
   describe('validatePrs()', () => {
     it('returns if disabled', async () => {
-      await validate.validatePrs({ suppressNotifications: ['prValidation'] });
+      await expect(
+        validate.validatePrs({ suppressNotifications: ['prValidation'] })
+      ).resolves.not.toThrow();
     });
     it('catches error', async () => {
       platform.getPrList.mockResolvedValueOnce([

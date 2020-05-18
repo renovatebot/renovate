@@ -67,7 +67,7 @@ describe(getName(__filename), () => {
       });
       const [req] = httpMock.getTrace();
       expect(req).toBeDefined();
-      expect(req.url.includes('/v3')).toBe(false);
+      expect(req.url).not.toContain('/v3');
     });
     it('paginates', async () => {
       const url = '/some-url';
@@ -165,7 +165,7 @@ describe(getName(__filename), () => {
       expect(e).toBeDefined();
       expect(e.message).toEqual(PLATFORM_INTEGRATION_UNAUTHORIZED);
     });
-    it('should throw for unauthorized integration', () => {
+    it('should throw for unauthorized integration2', () => {
       const gotErr = {
         statusCode: 403,
         body: { message: 'Upgrade to GitHub Pro' },
@@ -363,7 +363,7 @@ describe(getName(__filename), () => {
 
       const items = await githubApi.getGraphqlNodes(query, 'testItem');
       expect(httpMock.getTrace()).toHaveLength(3);
-      expect(items.length).toEqual(3);
+      expect(items).toHaveLength(3);
     });
   });
 });
