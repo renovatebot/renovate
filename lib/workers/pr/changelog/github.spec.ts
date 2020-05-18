@@ -1,15 +1,10 @@
-import { mocked } from '../../../../test/util';
 import { PLATFORM_TYPE_GITHUB } from '../../../constants/platforms';
-import { api } from '../../../platform/github/gh-got-wrapper';
 import * as hostRules from '../../../util/host-rules';
 import * as semverVersioning from '../../../versioning/semver';
 import { BranchUpgradeConfig } from '../../common';
 import { ChangeLogError, getChangeLogJSON } from '.';
 
-jest.mock('../../../../lib/platform/github/gh-got-wrapper');
 jest.mock('../../../../lib/datasource/npm');
-
-const ghGot = mocked(api).get;
 
 const upgrade: BranchUpgradeConfig = {
   branchName: undefined,
@@ -36,7 +31,6 @@ const upgrade: BranchUpgradeConfig = {
 describe('workers/pr/changelog', () => {
   describe('getChangeLogJSON', () => {
     beforeEach(async () => {
-      ghGot.mockClear();
       hostRules.clear();
       hostRules.add({
         hostType: PLATFORM_TYPE_GITHUB,
@@ -52,7 +46,6 @@ describe('workers/pr/changelog', () => {
           fromVersion: null,
         })
       ).toBeNull();
-      expect(ghGot).toHaveBeenCalledTimes(0);
     });
     it('returns null if no fromVersion', async () => {
       expect(
@@ -61,7 +54,6 @@ describe('workers/pr/changelog', () => {
           sourceUrl: 'https://github.com/DefinitelyTyped/DefinitelyTyped',
         })
       ).toBeNull();
-      expect(ghGot).toHaveBeenCalledTimes(0);
     });
     it('returns null if fromVersion equals toVersion', async () => {
       expect(
@@ -71,7 +63,6 @@ describe('workers/pr/changelog', () => {
           toVersion: '1.0.0',
         })
       ).toBeNull();
-      expect(ghGot).toHaveBeenCalledTimes(0);
     });
     it('skips invalid repos', async () => {
       expect(
@@ -89,16 +80,6 @@ describe('workers/pr/changelog', () => {
       ).toMatchSnapshot();
     });
     it('uses GitHub tags', async () => {
-      ghGot.mockResolvedValueOnce({
-        body: [
-          { name: '0.9.0' },
-          { name: '1.0.0' },
-          { name: '1.4.0' },
-          { name: 'v2.3.0' },
-          { name: '2.2.2' },
-          { name: 'v2.4.2' },
-        ],
-      } as never);
       expect(
         await getChangeLogJSON({
           ...upgrade,
@@ -106,9 +87,6 @@ describe('workers/pr/changelog', () => {
       ).toMatchSnapshot();
     });
     it('filters unnecessary warns', async () => {
-      ghGot.mockImplementation(() => {
-        throw new Error('Unknown Github Repo');
-      });
       expect(
         await getChangeLogJSON({
           ...upgrade,
