@@ -16,15 +16,15 @@ describe(getName(__filename), () => {
 
   it('sanitize _auth', () => {
     setNpmrc('_auth=test');
-    expect(sanitize.add).toBeCalledWith('test');
-    expect(sanitize.add).toBeCalledTimes(1);
+    expect(sanitize.add).toHaveBeenCalledWith('test');
+    expect(sanitize.add).toHaveBeenCalledTimes(1);
   });
 
   it('sanitize _authtoken', () => {
     // eslint-disable-next-line no-template-curly-in-string
     setNpmrc('//registry.test.com:_authToken=test\n_authToken=${NPM_TOKEN}');
-    expect(sanitize.add).toBeCalledWith('test');
-    expect(sanitize.add).toBeCalledTimes(1);
+    expect(sanitize.add).toHaveBeenCalledWith('test');
+    expect(sanitize.add).toHaveBeenCalledTimes(1);
   });
 
   it('sanitize _password', () => {
@@ -34,7 +34,7 @@ describe(getName(__filename), () => {
     expect(sanitize.add).toHaveBeenNthCalledWith(1, 'dGVzdA==');
     expect(sanitize.add).toHaveBeenNthCalledWith(2, 'test');
     expect(sanitize.add).toHaveBeenNthCalledWith(3, 'dGVzdDp0ZXN0');
-    expect(sanitize.add).toBeCalledTimes(3);
+    expect(sanitize.add).toHaveBeenCalledTimes(3);
   });
 
   it('sanitize _authtoken with high trust', () => {
@@ -44,8 +44,8 @@ describe(getName(__filename), () => {
       // eslint-disable-next-line no-template-curly-in-string
       '//registry.test.com:_authToken=${TEST_TOKEN}\n_authToken=\nregistry=http://localhost'
     );
-    expect(sanitize.add).toBeCalledWith('test');
-    expect(sanitize.add).toBeCalledTimes(1);
+    expect(sanitize.add).toHaveBeenCalledWith('test');
+    expect(sanitize.add).toHaveBeenCalledTimes(1);
   });
 
   it('ignores localhost', () => {

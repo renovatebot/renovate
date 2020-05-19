@@ -152,11 +152,11 @@ describe('config/migration', () => {
       );
       expect(migratedConfig).toMatchSnapshot();
       expect(isMigrated).toBe(true);
-      expect(migratedConfig.major.schedule.length).toBe(2);
+      expect(migratedConfig.major.schedule).toHaveLength(2);
       expect(migratedConfig.major.schedule[0]).toEqual('after 10pm');
       expect(migratedConfig.major.schedule[1]).toEqual('before 7am');
       expect(migratedConfig.minor.schedule).toMatchSnapshot();
-      expect(migratedConfig.minor.schedule.length).toBe(2);
+      expect(migratedConfig.minor.schedule).toHaveLength(2);
       expect(migratedConfig.minor.schedule[0]).toEqual(
         'after 10pm every weekday'
       );

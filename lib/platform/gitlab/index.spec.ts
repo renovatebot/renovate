@@ -1,3 +1,4 @@
+// TODO fix mocks
 import nock from 'nock';
 import { Platform, RepoParams } from '..';
 import * as httpMock from '../../../test/httpMock';
@@ -172,7 +173,7 @@ describe('platform/gitlab', () => {
   });
   describe('cleanRepo()', () => {
     it('exists', async () => {
-      await gitlab.cleanRepo();
+      expect(await gitlab.cleanRepo()).toMatchSnapshot();
     });
   });
 
@@ -1251,7 +1252,7 @@ These updates have all been created already. Click a checkbox below to force a r
   describe('getFile()', () => {
     it('sends to gitFs', async () => {
       await initRepo();
-      await gitlab.getFile('');
+      expect(await gitlab.getFile('')).toMatchSnapshot();
     });
   });
   describe('commitFiles()', () => {
@@ -1269,7 +1270,7 @@ These updates have all been created already. Click a checkbox below to force a r
   describe('getCommitMessages()', () => {
     it('passes to git', async () => {
       await initRepo();
-      await gitlab.getCommitMessages();
+      expect(await gitlab.getCommitMessages()).toMatchSnapshot();
     });
   });
   describe('getVulnerabilityAlerts()', () => {

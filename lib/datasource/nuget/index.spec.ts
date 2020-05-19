@@ -209,7 +209,7 @@ describe('datasource/nuget', () => {
         })
       ).toBeNull();
     });
-    it('returns null for non 200 (v3)', async () => {
+    it('returns null for non 200 (v2)', async () => {
       got.mockImplementationOnce(() =>
         Promise.reject({
           statusCode: 500,

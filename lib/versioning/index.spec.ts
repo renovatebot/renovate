@@ -27,7 +27,7 @@ describe('allVersioning.get(versioning)', () => {
 
       // TODO: test required api
       if (!mod.isValid || !mod.isVersion) {
-        fail(`Missing api on ${name}`);
+        throw Error(`Missing api on ${name}`);
       }
 
       return true;
