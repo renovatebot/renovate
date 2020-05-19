@@ -1,5 +1,4 @@
 import { move, pathExists, readFile } from 'fs-extra';
-import { getInstalledPath } from 'get-installed-path';
 import { join } from 'upath';
 import { SYSTEM_INSUFFICIENT_DISK_SPACE } from '../../../constants/error-messages';
 import { logger } from '../../../logger';
@@ -20,53 +19,13 @@ export async function generateLockFile(
   upgrades: Upgrade[] = []
 ): Promise<GenerateLockFileResult> {
   logger.debug(`Spawning npm install to create ${cwd}/${filename}`);
-  const { skipInstalls, binarySource, postUpdateOptions } = config;
+  const { skipInstalls, postUpdateOptions } = config;
   let lockFile: string = null;
   let stdout = '';
   let stderr = '';
-  let cmd: string;
+  let cmd = 'npm';
   let args = '';
   try {
-    try {
-      // See if renovate is installed locally
-      const installedPath = join(
-        await getInstalledPath('npm', {
-          local: true,
-        }),
-        'bin/npm-cli.js'
-      );
-      cmd = `node ${installedPath}`;
-    } catch (localerr) {
-      logger.debug('No locally installed npm found');
-      // Look inside globally installed renovate
-      try {
-        const renovateLocation = await getInstalledPath('renovate');
-        const installedPath = join(
-          await getInstalledPath('npm', {
-            local: true,
-            cwd: renovateLocation,
-          }),
-          'bin/npm-cli.js'
-        );
-        cmd = `node ${installedPath}`;
-      } catch (nestederr) {
-        logger.debug('Could not find globally nested npm');
-        // look for global npm
-        try {
-          const installedPath = join(
-            await getInstalledPath('npm'),
-            'bin/npm-cli.js'
-          );
-          cmd = `node ${installedPath}`;
-        } catch (globalerr) {
-          logger.warn('Could not find globally installed npm');
-          cmd = 'npm';
-        }
-      }
-    }
-    if (binarySource === BinarySource.Global) {
-      cmd = 'npm';
-    }
     // istanbul ignore if
     if (config.binarySource === BinarySource.Docker) {
       logger.debug('Running npm via docker');
@@ -91,6 +50,7 @@ export async function generateLockFile(
       cmd += `-w "${cwd}" `;
       cmd += `renovate/npm npm`;
     }
+    logger.debug(`Using npm: ${cmd}`);
     args = `install`;
     if (
       (postUpdateOptions && postUpdateOptions.includes('npmDedupe')) ||

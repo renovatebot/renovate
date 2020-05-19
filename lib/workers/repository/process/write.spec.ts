@@ -30,13 +30,20 @@ describe('workers/repository/write', () => {
       expect(branchWorker.processBranch).toHaveBeenCalledTimes(2);
     });
     it('stops after automerge', async () => {
-      const branches: BranchConfig[] = [{}, {}, {}, {}] as never;
+      const branches: BranchConfig[] = [
+        {},
+        {},
+        { automergeType: 'pr-comment', requiredStatusChecks: null },
+        {},
+        {},
+      ] as never;
       branchWorker.processBranch.mockResolvedValueOnce('pr-created');
       branchWorker.processBranch.mockResolvedValueOnce('already-existed');
       branchWorker.processBranch.mockResolvedValueOnce('automerged');
+      branchWorker.processBranch.mockResolvedValueOnce('automerged');
       const res = await writeUpdates(config, branches);
       expect(res).toEqual('automerged');
-      expect(branchWorker.processBranch).toHaveBeenCalledTimes(3);
+      expect(branchWorker.processBranch).toHaveBeenCalledTimes(4);
     });
   });
 });

@@ -3,7 +3,7 @@
 exports[`workers/branch/lock-files/yarn catches errors 1`] = `
 Array [
   Object {
-    "cmd": "<yarn> --version",
+    "cmd": "yarn --version",
     "options": Object {
       "cwd": null,
       "encoding": "utf-8",
@@ -20,7 +20,7 @@ Array [
     },
   },
   Object {
-    "cmd": "<yarn> install --ignore-scripts --ignore-engines --ignore-platform",
+    "cmd": "yarn install --ignore-scripts --ignore-engines --ignore-platform",
     "options": Object {
       "cwd": "some-dir",
       "encoding": "utf-8",
@@ -39,10 +39,10 @@ Array [
 ]
 `;
 
-exports[`workers/branch/lock-files/yarn detects yarnIntegrity using yarn v1.0.0 1`] = `
+exports[`workers/branch/lock-files/yarn docker using yarn v1.0.0 1`] = `
 Array [
   Object {
-    "cmd": "<yarn> --version",
+    "cmd": "docker run --rm -v \\"some-dir\\":\\"some-dir\\" -v \\"dummy/dir\\":\\"dummy/dir\\" -e NPM_CONFIG_CACHE -e npm_config_store -w \\"some-dir\\" renovate/yarn yarn --version",
     "options": Object {
       "cwd": null,
       "encoding": "utf-8",
@@ -59,7 +59,7 @@ Array [
     },
   },
   Object {
-    "cmd": "<yarn> install --ignore-scripts --ignore-engines --ignore-platform",
+    "cmd": "docker run --rm -v \\"some-dir\\":\\"some-dir\\" -v \\"dummy/dir\\":\\"dummy/dir\\" -e NPM_CONFIG_CACHE -e npm_config_store -w \\"some-dir\\" renovate/yarn yarn install --ignore-scripts --ignore-engines --ignore-platform",
     "options": Object {
       "cwd": "some-dir",
       "encoding": "utf-8",
@@ -76,7 +76,7 @@ Array [
     },
   },
   Object {
-    "cmd": "<yarn> upgrade some-dep --ignore-scripts --ignore-engines --ignore-platform",
+    "cmd": "docker run --rm -v \\"some-dir\\":\\"some-dir\\" -v \\"dummy/dir\\":\\"dummy/dir\\" -e NPM_CONFIG_CACHE -e npm_config_store -w \\"some-dir\\" renovate/yarn yarn upgrade some-dep --ignore-scripts --ignore-engines --ignore-platform",
     "options": Object {
       "cwd": "some-dir",
       "encoding": "utf-8",
@@ -95,10 +95,10 @@ Array [
 ]
 `;
 
-exports[`workers/branch/lock-files/yarn detects yarnIntegrity using yarn v2.0.0 1`] = `
+exports[`workers/branch/lock-files/yarn docker using yarn v2.0.0 1`] = `
 Array [
   Object {
-    "cmd": "<yarn> --version",
+    "cmd": "docker run --rm -v \\"some-dir\\":\\"some-dir\\" -v \\"dummy/dir\\":\\"dummy/dir\\" -e NPM_CONFIG_CACHE -e npm_config_store -w \\"some-dir\\" renovate/yarn yarn --version",
     "options": Object {
       "cwd": null,
       "encoding": "utf-8",
@@ -115,7 +115,7 @@ Array [
     },
   },
   Object {
-    "cmd": "<yarn> install --ignore-engines --ignore-platform",
+    "cmd": "docker run --rm -v \\"some-dir\\":\\"some-dir\\" -v \\"dummy/dir\\":\\"dummy/dir\\" -e NPM_CONFIG_CACHE -e npm_config_store -w \\"some-dir\\" renovate/yarn yarn install --ignore-engines --ignore-platform",
     "options": Object {
       "cwd": "some-dir",
       "encoding": "utf-8",
@@ -133,46 +133,7 @@ Array [
     },
   },
   Object {
-    "cmd": "<yarn> upgrade some-dep --ignore-engines --ignore-platform",
-    "options": Object {
-      "cwd": "some-dir",
-      "encoding": "utf-8",
-      "env": Object {
-        "HOME": "/home/user",
-        "HTTPS_PROXY": "https://example.com",
-        "HTTP_PROXY": "http://example.com",
-        "LANG": "en_US.UTF-8",
-        "LC_ALL": "en_US",
-        "NO_PROXY": "localhost",
-        "PATH": "/tmp/path",
-      },
-      "timeout": 900000,
-    },
-  },
-]
-`;
-
-exports[`workers/branch/lock-files/yarn finds yarn embedded in renovate 1`] = `
-Array [
-  Object {
-    "cmd": "<yarn> --version",
-    "options": Object {
-      "cwd": null,
-      "encoding": "utf-8",
-      "env": Object {
-        "HOME": "/home/user",
-        "HTTPS_PROXY": "https://example.com",
-        "HTTP_PROXY": "http://example.com",
-        "LANG": "en_US.UTF-8",
-        "LC_ALL": "en_US",
-        "NO_PROXY": "localhost",
-        "PATH": "/tmp/path",
-      },
-      "timeout": 900000,
-    },
-  },
-  Object {
-    "cmd": "<yarn> install --ignore-scripts --ignore-engines --ignore-platform",
+    "cmd": "docker run --rm -v \\"some-dir\\":\\"some-dir\\" -v \\"dummy/dir\\":\\"dummy/dir\\" -e NPM_CONFIG_CACHE -e npm_config_store -w \\"some-dir\\" renovate/yarn yarn upgrade some-dep --ignore-engines --ignore-platform",
     "options": Object {
       "cwd": "some-dir",
       "encoding": "utf-8",
@@ -194,7 +155,7 @@ Array [
 exports[`workers/branch/lock-files/yarn finds yarn v1.0.0 globally 1`] = `
 Array [
   Object {
-    "cmd": "<yarn> --version",
+    "cmd": "yarn --version",
     "options": Object {
       "cwd": null,
       "encoding": "utf-8",
@@ -211,7 +172,7 @@ Array [
     },
   },
   Object {
-    "cmd": "<yarn> install --ignore-scripts --ignore-engines --ignore-platform",
+    "cmd": "yarn install --ignore-scripts --ignore-engines --ignore-platform",
     "options": Object {
       "cwd": "some-dir",
       "encoding": "utf-8",
@@ -233,7 +194,7 @@ Array [
 exports[`workers/branch/lock-files/yarn finds yarn v2.0.0 globally 1`] = `
 Array [
   Object {
-    "cmd": "<yarn> --version",
+    "cmd": "yarn --version",
     "options": Object {
       "cwd": null,
       "encoding": "utf-8",
@@ -250,7 +211,7 @@ Array [
     },
   },
   Object {
-    "cmd": "<yarn> install --ignore-engines --ignore-platform",
+    "cmd": "yarn install --ignore-engines --ignore-platform",
     "options": Object {
       "cwd": "some-dir",
       "encoding": "utf-8",
@@ -273,7 +234,7 @@ Array [
 exports[`workers/branch/lock-files/yarn generates lock files using yarn v1.0.0 1`] = `
 Array [
   Object {
-    "cmd": "<yarn> --version",
+    "cmd": "yarn --version",
     "options": Object {
       "cwd": null,
       "encoding": "utf-8",
@@ -290,7 +251,7 @@ Array [
     },
   },
   Object {
-    "cmd": "<yarn> install --ignore-scripts --ignore-engines --ignore-platform",
+    "cmd": "yarn install --ignore-scripts --ignore-engines --ignore-platform",
     "options": Object {
       "cwd": "some-dir",
       "encoding": "utf-8",
@@ -346,7 +307,7 @@ Array [
 exports[`workers/branch/lock-files/yarn generates lock files using yarn v2.0.0 1`] = `
 Array [
   Object {
-    "cmd": "<yarn> --version",
+    "cmd": "yarn --version",
     "options": Object {
       "cwd": null,
       "encoding": "utf-8",
@@ -363,7 +324,7 @@ Array [
     },
   },
   Object {
-    "cmd": "<yarn> install --ignore-engines --ignore-platform",
+    "cmd": "yarn install --ignore-engines --ignore-platform",
     "options": Object {
       "cwd": "some-dir",
       "encoding": "utf-8",
@@ -386,7 +347,7 @@ Array [
 exports[`workers/branch/lock-files/yarn performs lock file updates using yarn v1.0.0 1`] = `
 Array [
   Object {
-    "cmd": "<yarn> --version",
+    "cmd": "yarn --version",
     "options": Object {
       "cwd": null,
       "encoding": "utf-8",
@@ -403,7 +364,7 @@ Array [
     },
   },
   Object {
-    "cmd": "<yarn> install --ignore-scripts --ignore-engines --ignore-platform",
+    "cmd": "yarn install --ignore-scripts --ignore-engines --ignore-platform",
     "options": Object {
       "cwd": "some-dir",
       "encoding": "utf-8",
@@ -420,7 +381,7 @@ Array [
     },
   },
   Object {
-    "cmd": "<yarn> upgrade some-dep --ignore-scripts --ignore-engines --ignore-platform",
+    "cmd": "yarn upgrade some-dep --ignore-scripts --ignore-engines --ignore-platform",
     "options": Object {
       "cwd": "some-dir",
       "encoding": "utf-8",
@@ -442,63 +403,6 @@ Array [
 exports[`workers/branch/lock-files/yarn performs lock file updates using yarn v2.0.0 1`] = `
 Array [
   Object {
-    "cmd": "<yarn> --version",
-    "options": Object {
-      "cwd": null,
-      "encoding": "utf-8",
-      "env": Object {
-        "HOME": "/home/user",
-        "HTTPS_PROXY": "https://example.com",
-        "HTTP_PROXY": "http://example.com",
-        "LANG": "en_US.UTF-8",
-        "LC_ALL": "en_US",
-        "NO_PROXY": "localhost",
-        "PATH": "/tmp/path",
-      },
-      "timeout": 900000,
-    },
-  },
-  Object {
-    "cmd": "<yarn> install --ignore-engines --ignore-platform",
-    "options": Object {
-      "cwd": "some-dir",
-      "encoding": "utf-8",
-      "env": Object {
-        "HOME": "/home/user",
-        "HTTPS_PROXY": "https://example.com",
-        "HTTP_PROXY": "http://example.com",
-        "LANG": "en_US.UTF-8",
-        "LC_ALL": "en_US",
-        "NO_PROXY": "localhost",
-        "PATH": "/tmp/path",
-        "YARN_ENABLE_SCRIPTS": "0",
-      },
-      "timeout": 900000,
-    },
-  },
-  Object {
-    "cmd": "<yarn> upgrade some-dep --ignore-engines --ignore-platform",
-    "options": Object {
-      "cwd": "some-dir",
-      "encoding": "utf-8",
-      "env": Object {
-        "HOME": "/home/user",
-        "HTTPS_PROXY": "https://example.com",
-        "HTTP_PROXY": "http://example.com",
-        "LANG": "en_US.UTF-8",
-        "LC_ALL": "en_US",
-        "NO_PROXY": "localhost",
-        "PATH": "/tmp/path",
-      },
-      "timeout": 900000,
-    },
-  },
-]
-`;
-
-exports[`workers/branch/lock-files/yarn uses fallback yarn 1`] = `
-Array [
-  Object {
     "cmd": "yarn --version",
     "options": Object {
       "cwd": null,
@@ -516,7 +420,25 @@ Array [
     },
   },
   Object {
-    "cmd": "yarn install --ignore-scripts --ignore-engines --ignore-platform",
+    "cmd": "yarn install --ignore-engines --ignore-platform",
+    "options": Object {
+      "cwd": "some-dir",
+      "encoding": "utf-8",
+      "env": Object {
+        "HOME": "/home/user",
+        "HTTPS_PROXY": "https://example.com",
+        "HTTP_PROXY": "http://example.com",
+        "LANG": "en_US.UTF-8",
+        "LC_ALL": "en_US",
+        "NO_PROXY": "localhost",
+        "PATH": "/tmp/path",
+        "YARN_ENABLE_SCRIPTS": "0",
+      },
+      "timeout": 900000,
+    },
+  },
+  Object {
+    "cmd": "yarn upgrade some-dep --ignore-engines --ignore-platform",
     "options": Object {
       "cwd": "some-dir",
       "encoding": "utf-8",

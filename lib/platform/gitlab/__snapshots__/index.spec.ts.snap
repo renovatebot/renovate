@@ -175,6 +175,8 @@ Array [
 ]
 `;
 
+exports[`platform/gitlab cleanRepo() exists 1`] = `undefined`;
+
 exports[`platform/gitlab commitFiles() sends to gitFs 1`] = `
 Array [
   Object {
@@ -1468,6 +1470,10 @@ Array [
 ]
 `;
 
+exports[`platform/gitlab getCommitMessages() passes to git 1`] = `undefined`;
+
+exports[`platform/gitlab getFile() sends to gitFs 1`] = `undefined`;
+
 exports[`platform/gitlab getFileList() sends to gitFs 1`] = `
 Array [
   Object {
@@ -1684,29 +1690,6 @@ These updates have all been created already. Click a checkbox below to force a r
 
  - [ ] <!-- rebase-branch=renovate/major-got-packages -->[build(deps): update got packages (major)](../merge_requests/2433) (\`gh-got\`, \`gl-got\`, \`got\`)
 "
-`;
-
-exports[`platform/gitlab getPrFiles() returns files 1`] = `
-Array [
-  "renovate.json",
-  "not renovate.json",
-]
-`;
-
-exports[`platform/gitlab getPrFiles() returns files 2`] = `
-Array [
-  Object {
-    "headers": Object {
-      "accept": "application/json",
-      "accept-encoding": "gzip, deflate",
-      "host": "gitlab.com",
-      "private-token": "abc123",
-      "user-agent": "https://github.com/renovatebot/renovate",
-    },
-    "method": "GET",
-    "url": "https://gitlab.com/api/v4/projects/undefined/merge_requests/123/changes",
-  },
-]
 `;
 
 exports[`platform/gitlab getRepoForceRebase should return false 1`] = `

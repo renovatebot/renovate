@@ -1,5 +1,7 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
+exports[`platform/bitbucket addAssignees() does not throw 1`] = `undefined`;
+
 exports[`platform/bitbucket addReviewers should add the given reviewers to the PR 1`] = `
 Array [
   Array [
@@ -20,6 +22,8 @@ Array [
   ],
 ]
 `;
+
+exports[`platform/bitbucket commitFiles() sends to gitFs 1`] = `undefined`;
 
 exports[`platform/bitbucket createPr() posts PR 1`] = `
 Array [
@@ -51,6 +55,8 @@ Array [
 ]
 `;
 
+exports[`platform/bitbucket deleteBranch() sends to gitFs 1`] = `undefined`;
+
 exports[`platform/bitbucket deleteBranch() should handle closing PRs when none exist 1`] = `Array []`;
 
 exports[`platform/bitbucket deleteBranch() should handle closing PRs when some exist 1`] = `
@@ -60,6 +66,10 @@ Array [
   ],
 ]
 `;
+
+exports[`platform/bitbucket ensureComment() does not throw 1`] = `false`;
+
+exports[`platform/bitbucket ensureCommentRemoval() does not throw 1`] = `undefined`;
 
 exports[`platform/bitbucket ensureIssue() creates new issue 1`] = `
 Array [
@@ -144,6 +154,10 @@ Object {
 }
 `;
 
+exports[`platform/bitbucket getAllRenovateBranches() sends to gitFs 1`] = `undefined`;
+
+exports[`platform/bitbucket getBranchLastCommitTime() sends to gitFs 1`] = `undefined`;
+
 exports[`platform/bitbucket getBranchPr() bitbucket finds PR for branch 1`] = `
 Object {
   "body": "summary",
@@ -160,6 +174,10 @@ Object {
   "title": "title",
 }
 `;
+
+exports[`platform/bitbucket getCommitMessages() sends to gitFs 1`] = `undefined`;
+
+exports[`platform/bitbucket getFile() sends to gitFs 1`] = `undefined`;
 
 exports[`platform/bitbucket getPr() canRebase 1`] = `
 Object {
@@ -272,11 +290,7 @@ Object {
 
 exports[`platform/bitbucket getPrBody() returns diff files 1`] = `"**foo**bartext"`;
 
-exports[`platform/bitbucket getPrFiles() returns diff files 1`] = `
-Array [
-  "requirements.txt",
-]
-`;
+exports[`platform/bitbucket getRepoStatus() sends to gitFs 1`] = `undefined`;
 
 exports[`platform/bitbucket initPlatform() should init 1`] = `
 Object {
@@ -290,6 +304,10 @@ Object {
   "isFork": false,
 }
 `;
+
+exports[`platform/bitbucket isBranchStale() sends to gitFs 1`] = `false`;
+
+exports[`platform/bitbucket mergeBranch() sends to gitFs 1`] = `undefined`;
 
 exports[`platform/bitbucket mergePr() posts Merge 1`] = `
 Array [
