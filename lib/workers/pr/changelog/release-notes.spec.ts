@@ -29,6 +29,11 @@ const yargsChangelogMd = fs.readFileSync(
   'utf8'
 );
 
+const adapterutilsChangelogMd = fs.readFileSync(
+  'lib/workers/pr/__fixtures__/adapter-utils.md',
+  'utf8'
+);
+
 const contentsResponse = [
   { name: 'lib' },
   { name: 'CHANGELOG.md' },
@@ -297,6 +302,24 @@ describe('workers/pr/release-notes', () => {
           '15.2.0',
           'https://github.com/',
           'https://api.github.com/'
+        );
+        versionTwoNotes = res;
+        expect(res).not.toBeNull();
+        expect(res).toMatchSnapshot();
+      });
+      it('parses adapter-utils 4.33.0', async () => {
+        ghGot
+          .mockResolvedValueOnce({ body: contentsResponse })
+          .mockResolvedValueOnce({
+            body: {
+              content: Buffer.from(adapterutilsChangelogMd).toString('base64'),
+            },
+          });
+        const res = await getReleaseNotesMd(
+          'itentialopensource/adapter-utils',
+          '4.33.0',
+          'https://gitlab.com/',
+          'https://gitlab.com/api/v4/'
         );
         versionTwoNotes = res;
         expect(res).not.toBeNull();

@@ -75,6 +75,20 @@ exports[`workers/pr/release-notes getReleaseNotes() gets release notes with body
 
 exports[`workers/pr/release-notes getReleaseNotes() gets release notes with body from gitlab repo 3`] = `null`;
 
+exports[`workers/pr/release-notes getReleaseNotesMd() ReleaseNotes Correctness parses adapter-utils 4.33.0 1`] = `
+Object {
+  "body": "-   add new auth, fix accept header and base path in mock
+
+Closes ADAPT-207
+
+See merge request itentialopensource/adapter-utils!177
+
+* * *
+",
+  "url": "https://gitlab.com/itentialopensource/adapter-utils/blob/master/CHANGELOG.md#4330-05-15-2020",
+}
+`;
+
 exports[`workers/pr/release-notes getReleaseNotesMd() ReleaseNotes Correctness parses yargs 15.2.0 1`] = `
 Object {
   "body": "##### ⚠ BREAKING CHANGES
