@@ -45,7 +45,7 @@ export async function generateLockFile(
       const envVars = ['NPM_CONFIG_CACHE', 'npm_config_store'];
       cmd += envVars.map((e) => `-e ${e} `).join('');
       cmd += `-w "${cwd}" `;
-      cmd += `renovate/pnpm pnpm`;
+      cmd += `renovate/node npm i -g pnpm && pnpm`;
     }
     logger.debug(`Using pnpm: ${cmd}`);
     cmd += ' install';
