@@ -5,7 +5,7 @@ import * as globalCache from '../../util/cache/global';
 import { Http } from '../../util/http';
 import { ReleaseResult } from '../common';
 
-import { id } from './common';
+import { handleError, id } from './common';
 
 const http = new Http(id);
 
@@ -126,10 +126,6 @@ export async function getReleases(
 
     return dep;
   } catch (err) {
-    logger.debug(
-      { err, pkgName, feedUrl },
-      'nuget registry failure: Unknown error'
-    );
-    return null;
+    return handleError(err, pkgName, feedUrl);
   }
 }

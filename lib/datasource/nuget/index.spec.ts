@@ -4,6 +4,7 @@ import * as runCache from '../../util/cache/run';
 import _got from '../../util/got';
 import * as _hostRules from '../../util/host-rules';
 import * as nuget from '.';
+import { DATASOURCE_FAILURE } from '../../constants/error-messages';
 
 const hostRules: any = _hostRules;
 
@@ -209,17 +210,17 @@ describe('datasource/nuget', () => {
         })
       ).toBeNull();
     });
-    it('returns null for non 200 (v2)', async () => {
+    it('throws DATASOURCE_ERROR for 500 (v2)', async () => {
       got.mockImplementationOnce(() =>
         Promise.reject({
           statusCode: 500,
         })
       );
-      expect(
-        await nuget.getReleases({
+      await expect(
+        nuget.getReleases({
           ...configV2,
         })
-      ).toBeNull();
+      ).rejects.toThrow(DATASOURCE_FAILURE);
     });
 
     it('returns null for unknown error (v3v2)', async () => {
