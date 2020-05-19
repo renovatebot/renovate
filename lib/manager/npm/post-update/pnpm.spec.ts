@@ -2,10 +2,9 @@ import { exec as _exec } from 'child_process';
 import _fs from 'fs-extra';
 import { envMock, mockExecAll } from '../../../../test/execUtil';
 import { mocked } from '../../../../test/util';
-import { PostUpdateConfig } from '../../../manager/common';
-import * as _pnpmHelper from '../../../manager/npm/post-update/pnpm';
-import { BinarySource } from '../../../util/exec/common';
 import * as _env from '../../../util/exec/env';
+import { PostUpdateConfig } from '../../common';
+import * as _pnpmHelper from './pnpm';
 
 jest.mock('fs-extra');
 jest.mock('child_process');
@@ -23,17 +22,9 @@ describe('generateLockFile', () => {
     env.getChildProcessEnv.mockReturnValue(envMock.basic);
   });
   it('generates lock files', async () => {
+    config.dockerMapDotfiles = true;
     const execSnapshots = mockExecAll(exec);
     fs.readFile = jest.fn(() => 'package-lock-contents') as never;
-    const res = await pnpmHelper.generateLockFile('some-dir', {}, config);
-    expect(fs.readFile).toHaveBeenCalledTimes(1);
-    expect(res.lockFile).toEqual('package-lock-contents');
-    expect(execSnapshots).toMatchSnapshot();
-  });
-  it('uses docker pnpm', async () => {
-    const execSnapshots = mockExecAll(exec);
-    fs.readFile = jest.fn(() => 'package-lock-contents') as never;
-    config.binarySource = BinarySource.Docker;
     const res = await pnpmHelper.generateLockFile('some-dir', {}, config);
     expect(fs.readFile).toHaveBeenCalledTimes(1);
     expect(res.lockFile).toEqual('package-lock-contents');
