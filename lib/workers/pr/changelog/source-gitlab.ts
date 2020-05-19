@@ -2,6 +2,7 @@ import URL from 'url';
 import { Release } from '../../../datasource';
 import { logger } from '../../../logger';
 import { api } from '../../../platform/gitlab/gl-got-wrapper';
+import { regEx } from '../../../util/regex';
 import * as allVersioning from '../../../versioning';
 import { BranchUpgradeConfig } from '../../common';
 import { ChangeLogRelease, ChangeLogResult } from './common';
@@ -88,7 +89,7 @@ export async function getChangeLogJSON({
     if (!tags) {
       tags = await getTags(endpoint, versioning, repository);
     }
-    const regex = new RegExp(`${depName}[@-]`);
+    const regex = regEx(`${depName}[@-]`);
     const tagName = tags
       .filter((tag) => version.isVersion(tag.replace(regex, '')))
       .find((tag) => version.equals(tag.replace(regex, ''), release.version));
