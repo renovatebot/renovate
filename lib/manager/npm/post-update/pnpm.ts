@@ -1,8 +1,7 @@
 import { readFile } from 'fs-extra';
 import { join } from 'upath';
 import { logger } from '../../../logger';
-import { exec } from '../../../util/exec';
-import { BinarySource } from '../../../util/exec/common';
+import { ExecOptions, exec } from '../../../util/exec';
 import { PostUpdateConfig } from '../../common';
 
 export interface GenerateLockFileResult {
@@ -23,42 +22,32 @@ export async function generateLockFile(
   let stderr: string;
   let cmd = 'pnpm';
   try {
-    if (config.binarySource === BinarySource.Docker) {
-      logger.debug('Running pnpm via docker');
-      cmd = `docker run --rm `;
-      // istanbul ignore if
-      if (config.dockerUser) {
-        cmd += `--user=${config.dockerUser} `;
-      }
-      const volumes = [cwd];
-      if (config.cacheDir) {
-        volumes.push(config.cacheDir);
-      }
-      cmd += volumes.map((v) => `-v "${v}":"${v}" `).join('');
-      // istanbul ignore if
-      if (config.dockerMapDotfiles) {
-        const homeDir =
-          process.env.HOME || process.env.HOMEPATH || process.env.USERPROFILE;
-        const homeNpmrc = join(homeDir, '.npmrc');
-        cmd += `-v ${homeNpmrc}:/home/ubuntu/.npmrc `;
-      }
-      const envVars = ['NPM_CONFIG_CACHE', 'npm_config_store'];
-      cmd += envVars.map((e) => `-e ${e} `).join('');
-      cmd += `-w "${cwd}" `;
-      cmd += `renovate/node npm i -g pnpm && pnpm`;
-    }
-    logger.debug(`Using pnpm: ${cmd}`);
-    cmd += ' install';
-    cmd += ' --lockfile-only';
-    if (global.trustLevel !== 'high' || config.ignoreScripts) {
-      cmd += ' --ignore-scripts';
-      cmd += ' --ignore-pnpmfile';
-    }
-    // TODO: Switch to native util.promisify once using only node 8
-    ({ stdout, stderr } = await exec(cmd, {
+    const preCommands = ['npm i -g pnpm'];
+    const execOptions: ExecOptions = {
       cwd,
-      env,
-    }));
+      extraEnv: {
+        NPM_CONFIG_CACHE: process.env.NPM_CONFIG_CACHE,
+        npm_config_store: process.env.npm_config_store,
+      },
+      docker: {
+        image: 'renovate/node',
+        preCommands,
+      },
+    };
+    if (config.dockerMapDotfiles) {
+      const homeDir =
+        process.env.HOME || process.env.HOMEPATH || process.env.USERPROFILE;
+      const homeNpmrc = join(homeDir, '.npmrc');
+      execOptions.docker.volumes = [[homeNpmrc, '/home/ubuntu/.npmrc']];
+    }
+    cmd = 'pnpm';
+    let args = 'install --lockfile-only';
+    if (global.trustLevel !== 'high' || config.ignoreScripts) {
+      args += ' --ignore-scripts';
+      args += ' --ignore-pnpmfile';
+    }
+    logger.debug({ cmd, args }, 'pnpm command');
+    await exec(`${cmd} ${args}`, execOptions);
     lockFile = await readFile(join(cwd, 'pnpm-lock.yaml'), 'utf8');
   } catch (err) /* istanbul ignore next */ {
     logger.debug(
