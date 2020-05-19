@@ -175,6 +175,8 @@ Array [
 ]
 `;
 
+exports[`platform/gitlab cleanRepo() exists 1`] = `undefined`;
+
 exports[`platform/gitlab commitFiles() sends to gitFs 1`] = `
 Array [
   Object {
@@ -1467,6 +1469,10 @@ Array [
   },
 ]
 `;
+
+exports[`platform/gitlab getCommitMessages() passes to git 1`] = `undefined`;
+
+exports[`platform/gitlab getFile() sends to gitFs 1`] = `undefined`;
 
 exports[`platform/gitlab getFileList() sends to gitFs 1`] = `
 Array [
