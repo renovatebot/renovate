@@ -14,6 +14,7 @@ const exec: jest.Mock<typeof _exec> = _exec as any;
 const env = mocked(_env);
 const fs = mocked(_fs);
 const pnpmHelper = mocked(_pnpmHelper);
+delete process.env.NPM_CONFIG_CACHE;
 
 describe('generateLockFile', () => {
   let config: PostUpdateConfig;
