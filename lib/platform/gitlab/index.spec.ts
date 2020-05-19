@@ -1191,27 +1191,6 @@ describe('platform/gitlab', () => {
       expect(httpMock.getTrace()).toMatchSnapshot();
     });
   });
-  describe('getPrFiles()', () => {
-    it('should return empty if no mrNo is passed', async () => {
-      const prFiles = await gitlab.getPrFiles(0);
-      expect(prFiles).toEqual([]);
-    });
-    it('returns files', async () => {
-      httpMock
-        .scope(gitlabApiHost)
-        .get('/api/v4/projects/undefined/merge_requests/123/changes')
-        .reply(200, {
-          changes: [
-            { new_path: 'renovate.json' },
-            { new_path: 'not renovate.json' },
-          ],
-        });
-      const prFiles = await gitlab.getPrFiles(123);
-      expect(prFiles).toMatchSnapshot();
-      expect(prFiles).toHaveLength(2);
-      expect(httpMock.getTrace()).toMatchSnapshot();
-    });
-  });
   describe('updatePr(prNo, title, body)', () => {
     jest.resetAllMocks();
     it('updates the PR', async () => {
