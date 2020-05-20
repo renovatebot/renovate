@@ -69,11 +69,11 @@ Object {
 }
 `;
 
-exports[`workers/pr/release-notes getReleaseNotes() gets release notes with body from gitlab repo 1`] = `null`;
+exports[`workers/pr/release-notes getReleaseNotes() gets release notes with body from gitlab repo  1`] = `null`;
 
-exports[`workers/pr/release-notes getReleaseNotes() gets release notes with body from gitlab repo 2`] = `null`;
+exports[`workers/pr/release-notes getReleaseNotes() gets release notes with body from gitlab repo other- 1`] = `null`;
 
-exports[`workers/pr/release-notes getReleaseNotes() gets release notes with body from gitlab repo 3`] = `null`;
+exports[`workers/pr/release-notes getReleaseNotes() gets release notes with body from gitlab repo v 1`] = `null`;
 
 exports[`workers/pr/release-notes getReleaseNotesMd() ReleaseNotes Correctness parses adapter-utils 4.33.0 1`] = `
 Object {
