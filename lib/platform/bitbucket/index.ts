@@ -789,19 +789,6 @@ interface Commit {
   author: { raw: string };
 }
 
-// Return a list of all modified files in a PR
-export async function getPrFiles(prNo: number): Promise<string[]> {
-  logger.debug({ prNo }, 'getPrFiles');
-  const diff = (
-    await api.get(
-      `/2.0/repositories/${config.repository}/pullrequests/${prNo}/diff`,
-      { json: false } as any
-    )
-  ).body;
-  const files = parseDiff(diff).map((file) => file.to);
-  return files;
-}
-
 export async function updatePr(
   prNo: number,
   title: string,

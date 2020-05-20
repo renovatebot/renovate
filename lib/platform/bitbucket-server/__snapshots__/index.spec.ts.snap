@@ -1,5 +1,9 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
+exports[`platform/bitbucket-server endpoint with no path addAssignees() does not throw 1`] = `undefined`;
+
+exports[`platform/bitbucket-server endpoint with no path addReviewers does not throw 1`] = `undefined`;
+
 exports[`platform/bitbucket-server endpoint with no path addReviewers sends the reviewer name as a reviewer 1`] = `
 Array [
   Array [
@@ -246,6 +250,8 @@ Array [
 ]
 `;
 
+exports[`platform/bitbucket-server endpoint with no path branchExists() getFileList() sends to gitFs 1`] = `true`;
+
 exports[`platform/bitbucket-server endpoint with no path commitFiles() sends to gitFs 1`] = `
 Array [
   Array [
@@ -348,6 +354,10 @@ Array [
   ],
 ]
 `;
+
+exports[`platform/bitbucket-server endpoint with no path deleteBranch() sends to gitFs 1`] = `undefined`;
+
+exports[`platform/bitbucket-server endpoint with no path deleteLAbel() does not throw 1`] = `undefined`;
 
 exports[`platform/bitbucket-server endpoint with no path ensureComment() add comment if not found 1`] = `
 Array [
@@ -537,6 +547,10 @@ Array [
   ],
 ]
 `;
+
+exports[`platform/bitbucket-server endpoint with no path getAllRenovateBranches() sends to gitFs 1`] = `undefined`;
+
+exports[`platform/bitbucket-server endpoint with no path getBranchLastCommitTime() sends to gitFs 1`] = `undefined`;
 
 exports[`platform/bitbucket-server endpoint with no path getBranchPr() has no pr 1`] = `
 Array [
@@ -744,6 +758,12 @@ Array [
   ],
 ]
 `;
+
+exports[`platform/bitbucket-server endpoint with no path getCommitMessages() sends to gitFs 1`] = `undefined`;
+
+exports[`platform/bitbucket-server endpoint with no path getFile() sends to gitFs 1`] = `undefined`;
+
+exports[`platform/bitbucket-server endpoint with no path getFileList() sends to gitFs 1`] = `undefined`;
 
 exports[`platform/bitbucket-server endpoint with no path getPr() canRebase 1`] = `
 Object {
@@ -979,21 +999,6 @@ Followed by some information.
 "
 `;
 
-exports[`platform/bitbucket-server endpoint with no path getPrFiles() returns one file 1`] = `
-Array [
-  Array [
-    "./rest/api/1.0/projects/SOME/repos/repo",
-  ],
-  Array [
-    "./rest/api/1.0/projects/SOME/repos/repo/branches/default",
-  ],
-  Array [
-    "./rest/api/1.0/projects/SOME/repos/repo/pull-requests/5/changes?withComments=false&limit=100",
-    undefined,
-  ],
-]
-`;
-
 exports[`platform/bitbucket-server endpoint with no path getPrList() has pr 1`] = `
 Array [
   Object {
@@ -1054,6 +1059,10 @@ Object {
   "isFork": false,
 }
 `;
+
+exports[`platform/bitbucket-server endpoint with no path isBranchStale() sends to gitFs 1`] = `false`;
+
+exports[`platform/bitbucket-server endpoint with no path mergeBranch() sends to gitFs 1`] = `undefined`;
 
 exports[`platform/bitbucket-server endpoint with no path mergePr() posts Merge 1`] = `
 Array [
@@ -1579,6 +1588,10 @@ Array [
 ]
 `;
 
+exports[`platform/bitbucket-server endpoint with path addAssignees() does not throw 1`] = `undefined`;
+
+exports[`platform/bitbucket-server endpoint with path addReviewers does not throw 1`] = `undefined`;
+
 exports[`platform/bitbucket-server endpoint with path addReviewers sends the reviewer name as a reviewer 1`] = `
 Array [
   Array [
@@ -1825,6 +1838,8 @@ Array [
 ]
 `;
 
+exports[`platform/bitbucket-server endpoint with path branchExists() getFileList() sends to gitFs 1`] = `true`;
+
 exports[`platform/bitbucket-server endpoint with path commitFiles() sends to gitFs 1`] = `
 Array [
   Array [
@@ -1927,6 +1942,10 @@ Array [
   ],
 ]
 `;
+
+exports[`platform/bitbucket-server endpoint with path deleteBranch() sends to gitFs 1`] = `undefined`;
+
+exports[`platform/bitbucket-server endpoint with path deleteLAbel() does not throw 1`] = `undefined`;
 
 exports[`platform/bitbucket-server endpoint with path ensureComment() add comment if not found 1`] = `
 Array [
@@ -2116,6 +2135,10 @@ Array [
   ],
 ]
 `;
+
+exports[`platform/bitbucket-server endpoint with path getAllRenovateBranches() sends to gitFs 1`] = `undefined`;
+
+exports[`platform/bitbucket-server endpoint with path getBranchLastCommitTime() sends to gitFs 1`] = `undefined`;
 
 exports[`platform/bitbucket-server endpoint with path getBranchPr() has no pr 1`] = `
 Array [
@@ -2323,6 +2346,12 @@ Array [
   ],
 ]
 `;
+
+exports[`platform/bitbucket-server endpoint with path getCommitMessages() sends to gitFs 1`] = `undefined`;
+
+exports[`platform/bitbucket-server endpoint with path getFile() sends to gitFs 1`] = `undefined`;
+
+exports[`platform/bitbucket-server endpoint with path getFileList() sends to gitFs 1`] = `undefined`;
 
 exports[`platform/bitbucket-server endpoint with path getPr() canRebase 1`] = `
 Object {
@@ -2558,21 +2587,6 @@ Followed by some information.
 "
 `;
 
-exports[`platform/bitbucket-server endpoint with path getPrFiles() returns one file 1`] = `
-Array [
-  Array [
-    "./rest/api/1.0/projects/SOME/repos/repo",
-  ],
-  Array [
-    "./rest/api/1.0/projects/SOME/repos/repo/branches/default",
-  ],
-  Array [
-    "./rest/api/1.0/projects/SOME/repos/repo/pull-requests/5/changes?withComments=false&limit=100",
-    undefined,
-  ],
-]
-`;
-
 exports[`platform/bitbucket-server endpoint with path getPrList() has pr 1`] = `
 Array [
   Object {
@@ -2633,6 +2647,10 @@ Object {
   "isFork": false,
 }
 `;
+
+exports[`platform/bitbucket-server endpoint with path isBranchStale() sends to gitFs 1`] = `false`;
+
+exports[`platform/bitbucket-server endpoint with path mergeBranch() sends to gitFs 1`] = `undefined`;
 
 exports[`platform/bitbucket-server endpoint with path mergePr() posts Merge 1`] = `
 Array [

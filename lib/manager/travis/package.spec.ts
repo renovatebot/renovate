@@ -26,7 +26,7 @@ describe('lib/manager/travis/package', () => {
       expect(await getPackageUpdates(config)).toEqual([]);
     });
     it('returns empty if matching', async () => {
-      config.currentValue = ['10', '12'];
+      config.currentValue = ['12'];
       config.supportPolicy = ['lts_active'];
       expect(await getPackageUpdates(config)).toEqual([]);
     });
