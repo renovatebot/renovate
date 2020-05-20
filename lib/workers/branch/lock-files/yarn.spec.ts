@@ -72,7 +72,7 @@ describe(getName(__filename), () => {
 
       fs.readFile = jest.fn(() => 'package-lock-contents') as never;
       const config = {
-        upgrades: [{ yarnIntegrity: true }],
+        upgrades: [{}],
         binarySource: BinarySource.Docker,
         cacheDir: 'dummy/dir',
       };
