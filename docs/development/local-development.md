@@ -10,11 +10,13 @@ Please submit PRs to improve it if you think anything is unclear or you can thin
 For local development some dependencies are required:
 
 - git
-- nodejs `^12.13.0`
+- nodejs `>=12`
 - yarn `^1.17.0`
 - c++ compiler
 - python `^3.7`
 - java between `8` and `12`
+
+We support Node.js versions according to the [Node.js release schedule](https://github.com/nodejs/Release#release-schedule)
 
 Java is required to execute Gradle in tests.
 If you don’t have Java installed, the respective tests will be skipped.
