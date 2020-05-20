@@ -1,6 +1,6 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
-exports[`workers/branch/lock-files/yarn catches errors 1`] = `
+exports[`manager/npm/post-update/yarn catches errors 1`] = `
 Array [
   Object {
     "cmd": "yarn install --ignore-scripts --ignore-engines --ignore-platform",
@@ -22,7 +22,7 @@ Array [
 ]
 `;
 
-exports[`workers/branch/lock-files/yarn generates lock files using yarn v1.22.0 1`] = `
+exports[`manager/npm/post-update/yarn generates lock files using yarn v1.22.0 1`] = `
 Array [
   Object {
     "cmd": "yarn install --ignore-scripts --ignore-engines --ignore-platform",
@@ -42,7 +42,7 @@ Array [
     },
   },
   Object {
-    "cmd": "npx yarn-deduplicate@2.0.0 --strategy fewer",
+    "cmd": "npx yarn-deduplicate --strategy fewer",
     "options": Object {
       "cwd": "some-dir",
       "encoding": "utf-8",
@@ -112,7 +112,7 @@ Array [
 ]
 `;
 
-exports[`workers/branch/lock-files/yarn performs lock file updates using yarn v1.22.0 1`] = `
+exports[`manager/npm/post-update/yarn performs lock file updates using yarn v1.22.0 1`] = `
 Array [
   Object {
     "cmd": "yarn install --ignore-scripts --ignore-engines --ignore-platform",

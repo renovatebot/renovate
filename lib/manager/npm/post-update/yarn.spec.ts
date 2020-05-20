@@ -2,8 +2,8 @@ import { exec as _exec } from 'child_process';
 import _fs from 'fs-extra';
 import { ExecSnapshots, envMock, mockExecAll } from '../../../../test/execUtil';
 import { getName, mocked } from '../../../../test/util';
-import * as _yarnHelper from '../../../manager/npm/post-update/yarn';
 import * as _env from '../../../util/exec/env';
+import * as _yarnHelper from './yarn';
 
 jest.mock('fs-extra');
 jest.mock('child_process');
