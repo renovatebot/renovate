@@ -41,9 +41,12 @@ describe('bundler.updateArtifacts()', () => {
     jest.resetAllMocks();
     jest.resetModules();
 
+    delete process.env.GEM_HOME;
+
     config = {
       // `join` fixes Windows CI
       localDir: join('/tmp/github/some/repo'),
+      cacheDir: join('/tmp/cache'),
       dockerUser: 'foobar',
     };
 
