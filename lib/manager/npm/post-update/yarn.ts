@@ -5,7 +5,6 @@ import { DatasourceError } from '../../../datasource';
 import { logger } from '../../../logger';
 import { exec } from '../../../util/exec';
 import { BinarySource } from '../../../util/exec/common';
-import { api as semver } from '../../../versioning/semver';
 import { PostUpdateConfig, Upgrade } from '../../common';
 
 export interface GenerateLockFileResult {
@@ -51,19 +50,9 @@ export async function generateLockFile(
       cmd += `renovate/yarn yarn`;
     }
 
-    const { stdout: yarnVersion } = await exec(`${cmd} --version`);
-
-    logger.debug(`Using yarn: ${cmd} ${yarnVersion}`);
-
-    const yarnMajorVersion = semver.getMajor(yarnVersion);
-
     let cmdExtras = '';
     const cmdEnv = { ...env };
-    if (yarnMajorVersion < 2) {
-      cmdExtras += ' --ignore-scripts';
-    } else {
-      cmdEnv.YARN_ENABLE_SCRIPTS = '0';
-    }
+    cmdExtras += ' --ignore-scripts';
     cmdExtras += ' --ignore-engines';
     cmdExtras += ' --ignore-platform';
     const installCmd = cmd + ' install' + cmdExtras;
@@ -91,42 +80,35 @@ export async function generateLockFile(
       stderr += updateRes.stderr || '';
     }
 
-    if (yarnMajorVersion < 2) {
-      if (
-        config.postUpdateOptions &&
-        config.postUpdateOptions.includes('yarnDedupeFewer')
-      ) {
-        logger.debug('Performing yarn dedupe fewer');
-        const dedupeCommand =
-          'npx yarn-deduplicate@1.1.1 --strategy fewer && yarn';
-        const dedupeRes = await exec(dedupeCommand, {
-          cwd,
-          env,
-        });
-        // istanbul ignore next
-        stdout += dedupeRes.stdout || '';
-        stderr += dedupeRes.stderr || '';
-      }
-      if (
-        config.postUpdateOptions &&
-        config.postUpdateOptions.includes('yarnDedupeHighest')
-      ) {
-        logger.debug('Performing yarn dedupe highest');
-        const dedupeCommand =
-          'npx yarn-deduplicate@1.1.1 --strategy highest && yarn';
-        const dedupeRes = await exec(dedupeCommand, {
-          cwd,
-          env,
-        });
-        // istanbul ignore next
-        stdout += dedupeRes.stdout || '';
-        stderr += dedupeRes.stderr || '';
-      }
-    } else if (
+    if (
       config.postUpdateOptions &&
-      config.postUpdateOptions.some((option) => option.startsWith('yarnDedupe'))
+      config.postUpdateOptions.includes('yarnDedupeFewer')
     ) {
-      logger.warn('yarn-deduplicate is not supported since yarn 2');
+      logger.debug('Performing yarn dedupe fewer');
+      const dedupeCommand =
+        'npx yarn-deduplicate@1.1.1 --strategy fewer && yarn';
+      const dedupeRes = await exec(dedupeCommand, {
+        cwd,
+        env,
+      });
+      // istanbul ignore next
+      stdout += dedupeRes.stdout || '';
+      stderr += dedupeRes.stderr || '';
+    }
+    if (
+      config.postUpdateOptions &&
+      config.postUpdateOptions.includes('yarnDedupeHighest')
+    ) {
+      logger.debug('Performing yarn dedupe highest');
+      const dedupeCommand =
+        'npx yarn-deduplicate@1.1.1 --strategy highest && yarn';
+      const dedupeRes = await exec(dedupeCommand, {
+        cwd,
+        env,
+      });
+      // istanbul ignore next
+      stdout += dedupeRes.stdout || '';
+      stderr += dedupeRes.stderr || '';
     }
     lockFile = await readFile(join(cwd, 'yarn.lock'), 'utf8');
   } catch (err) /* istanbul ignore next */ {
