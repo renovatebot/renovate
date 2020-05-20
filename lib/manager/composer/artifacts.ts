@@ -105,9 +105,8 @@ export async function updateArtifacts({
     if (authJson) {
       await writeLocalFile('auth.json', JSON.stringify(authJson));
     }
-    const cwd = getSubDirectory(packageFileName);
     const execOptions: ExecOptions = {
-      cwd,
+      cwdFile: packageFileName,
       extraEnv: {
         COMPOSER_CACHE_DIR: cacheDir,
       },
