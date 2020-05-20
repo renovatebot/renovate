@@ -62,7 +62,7 @@ export async function generateLockFile(
     // postUpdateOptions
     if (config.postUpdateOptions?.includes('yarnDedupeFewer')) {
       logger.debug('Performing yarn dedupe fewer');
-      commands.push('npx yarn-deduplicate@2.0.0 --strategy fewer');
+      commands.push('npx yarn-deduplicate --strategy fewer');
       // Run yarn again in case any changes are necessary
       commands.push(`yarn install ${cmdOptions}`.trim());
     }
