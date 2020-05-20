@@ -68,7 +68,7 @@ export async function generateLockFile(
     }
     if (config.postUpdateOptions?.includes('yarnDedupeHighest')) {
       logger.debug('Performing yarn dedupe highest');
-      commands.push('npx yarn-deduplicate@2.0.0 --strategy highest');
+      commands.push('npx yarn-deduplicate --strategy highest');
       // Run yarn again in case any changes are necessary
       commands.push(`yarn install ${cmdOptions}`.trim());
     }

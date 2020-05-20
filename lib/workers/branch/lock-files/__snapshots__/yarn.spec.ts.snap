@@ -76,7 +76,7 @@ Array [
     },
   },
   Object {
-    "cmd": "npx yarn-deduplicate@2.0.0 --strategy highest",
+    "cmd": "npx yarn-deduplicate --strategy highest",
     "options": Object {
       "cwd": "some-dir",
       "encoding": "utf-8",
