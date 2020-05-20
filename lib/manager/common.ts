@@ -64,7 +64,6 @@ export interface RangeConfig<T = Record<string, any>> extends ManagerData<T> {
 }
 
 export interface NpmLockFiles {
-  yarnIntegrity?: boolean;
   yarnLock?: string;
   packageLock?: string;
   shrinkwrapJson?: string;
