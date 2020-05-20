@@ -513,20 +513,6 @@ export async function getPr(iid: number): Promise<Pr> {
   return pr;
 }
 
-// Return a list of all modified files in a PR
-export async function getPrFiles(mrNo: number): Promise<string[]> {
-  logger.debug({ mrNo }, 'getPrFiles');
-  if (!mrNo) {
-    return [];
-  }
-  const files = (
-    await gitlabApi.getJson<{ changes: { new_path: string }[] }>(
-      `projects/${config.repository}/merge_requests/${mrNo}/changes`
-    )
-  ).body.changes;
-  return files.map((f) => f.new_path);
-}
-
 // istanbul ignore next
 async function closePr(iid: number): Promise<void> {
   await gitlabApi.putJson(
