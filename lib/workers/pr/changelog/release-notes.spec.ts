@@ -127,7 +127,7 @@ describe('workers/pr/release-notes', () => {
       }
     );
     it.each([[''], ['v'], ['other-']])(
-      'gets release notes with body from gitlab repo',
+      'gets release notes with body from gitlab repo %s',
       async (prefix) => {
         ghGot.mockResolvedValueOnce({
           body: [
