@@ -983,21 +983,6 @@ export async function createPr({
   return pr;
 }
 
-// Return a list of all modified files in a PR
-// https://docs.atlassian.com/bitbucket-server/rest/6.0.0/bitbucket-rest.html
-export async function getPrFiles(prNo: number): Promise<string[]> {
-  logger.debug(`getPrFiles(${prNo})`);
-  if (!prNo) {
-    return [];
-  }
-
-  // GET /rest/api/1.0/projects/{projectKey}/repos/{repositorySlug}/pull-requests/{pullRequestId}/changes
-  const values = await utils.accumulateValues<{ path: { toString: string } }>(
-    `./rest/api/1.0/projects/${config.projectKey}/repos/${config.repositorySlug}/pull-requests/${prNo}/changes?withComments=false`
-  );
-  return values.map((f) => f.path.toString);
-}
-
 export async function updatePr(
   prNo: number,
   title: string,

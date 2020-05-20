@@ -185,7 +185,7 @@ describe('platform/azure', () => {
 
   describe('cleanRepo()', () => {
     it('exists', async () => {
-      await azure.cleanRepo();
+      await expect(azure.cleanRepo()).resolves.not.toThrow();
     });
   });
 
@@ -884,56 +884,6 @@ describe('platform/azure', () => {
       const input =
         '<details>https://github.com/foo/bar/issues/5 plus also [a link](https://github.com/foo/bar/issues/5)';
       expect(azure.getPrBody(input)).toMatchSnapshot();
-    });
-  });
-
-  describe('getPrFiles', () => {
-    it('single change', async () => {
-      azureApi.gitApi.mockImplementationOnce(
-        () =>
-          ({
-            getPullRequestIterations: jest.fn(() => [{ id: 1 }]),
-            getPullRequestIterationChanges: jest.fn(() => ({
-              changeEntries: [{ item: { path: '/index.js' } }],
-            })),
-          } as any)
-      );
-      const res = await azure.getPrFiles(46);
-      expect(res).toHaveLength(1);
-      expect(res).toEqual(['index.js']);
-    });
-    it('multiple changes', async () => {
-      azureApi.gitApi.mockImplementationOnce(
-        () =>
-          ({
-            getPullRequestIterations: jest.fn(() => [{ id: 1 }, { id: 2 }]),
-            getPullRequestIterationChanges: jest
-              .fn()
-              .mockResolvedValueOnce({
-                changeEntries: [{ item: { path: '/index.js' } }],
-              })
-              .mockResolvedValueOnce({
-                changeEntries: [{ item: { path: '/package.json' } }],
-              }),
-          } as any)
-      );
-      const res = await azure.getPrFiles(46);
-      expect(res).toHaveLength(2);
-      expect(res).toEqual(['index.js', 'package.json']);
-    });
-    it('deduplicate changes', async () => {
-      azureApi.gitApi.mockImplementationOnce(
-        () =>
-          ({
-            getPullRequestIterations: jest.fn(() => [{ id: 1 }, { id: 2 }]),
-            getPullRequestIterationChanges: jest.fn().mockResolvedValue({
-              changeEntries: [{ item: { path: '/index.js' } }],
-            }),
-          } as any)
-      );
-      const res = await azure.getPrFiles(46);
-      expect(res).toHaveLength(1);
-      expect(res).toEqual(['index.js']);
     });
   });
 

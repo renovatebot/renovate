@@ -13,7 +13,8 @@ describe('workers/repository/init/apis', () => {
       config.token = 'some-token';
     });
     it('runs', async () => {
-      await initApis(config);
+      const workerPlatformConfig = await initApis(config);
+      expect(workerPlatformConfig).toBeTruthy();
     });
   });
 });

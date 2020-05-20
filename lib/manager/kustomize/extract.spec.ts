@@ -118,7 +118,7 @@ describe('manager/kustomize/extract', () => {
         name: null,
         newTag: null,
       });
-      expect(pkg).toEqual(null);
+      expect(pkg).toBeNull();
     });
     it('should correctly extract a default image', () => {
       const sample = {

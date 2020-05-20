@@ -1,3 +1,4 @@
+// TODO fix mocks
 import {
   REPOSITORY_CHANGED,
   REPOSITORY_DISABLED,
@@ -231,7 +232,7 @@ describe('platform/bitbucket-server', () => {
       describe('getFileList()', () => {
         it('sends to gitFs', async () => {
           await initRepo();
-          await bitbucket.getFileList();
+          expect(await bitbucket.getFileList()).toMatchSnapshot();
         });
       });
 
@@ -239,7 +240,9 @@ describe('platform/bitbucket-server', () => {
         describe('getFileList()', () => {
           it('sends to gitFs', async () => {
             await initRepo();
-            await bitbucket.branchExists(undefined as any);
+            expect(
+              await bitbucket.branchExists(undefined as any)
+            ).toMatchSnapshot();
           });
         });
       });
@@ -247,21 +250,23 @@ describe('platform/bitbucket-server', () => {
       describe('isBranchStale()', () => {
         it('sends to gitFs', async () => {
           await initRepo();
-          await bitbucket.isBranchStale(undefined as any);
+          expect(
+            await bitbucket.isBranchStale(undefined as any)
+          ).toMatchSnapshot();
         });
       });
 
       describe('deleteBranch()', () => {
         it('sends to gitFs', async () => {
           await initRepo();
-          await bitbucket.deleteBranch('branch');
+          expect(await bitbucket.deleteBranch('branch')).toMatchSnapshot();
         });
       });
 
       describe('mergeBranch()', () => {
         it('sends to gitFs', async () => {
           await initRepo();
-          await bitbucket.mergeBranch('branch');
+          expect(await bitbucket.mergeBranch('branch')).toMatchSnapshot();
         });
       });
 
@@ -281,34 +286,34 @@ describe('platform/bitbucket-server', () => {
       describe('getFile()', () => {
         it('sends to gitFs', async () => {
           await initRepo();
-          await bitbucket.getFile('', '');
+          expect(await bitbucket.getFile('', '')).toMatchSnapshot();
         });
       });
 
       describe('getAllRenovateBranches()', () => {
         it('sends to gitFs', async () => {
           await initRepo();
-          await bitbucket.getAllRenovateBranches('');
+          expect(await bitbucket.getAllRenovateBranches('')).toMatchSnapshot();
         });
       });
 
       describe('getBranchLastCommitTime()', () => {
         it('sends to gitFs', async () => {
           await initRepo();
-          await bitbucket.getBranchLastCommitTime('');
+          expect(await bitbucket.getBranchLastCommitTime('')).toMatchSnapshot();
         });
       });
 
       describe('addAssignees()', () => {
         it('does not throw', async () => {
-          await bitbucket.addAssignees(3, ['some']);
+          expect(await bitbucket.addAssignees(3, ['some'])).toMatchSnapshot();
         });
       });
 
       describe('addReviewers', () => {
         it('does not throw', async () => {
           await initRepo();
-          await bitbucket.addReviewers(5, ['name']);
+          expect(await bitbucket.addReviewers(5, ['name'])).toMatchSnapshot();
         });
 
         it('sends the reviewer name as a reviewer', async () => {
@@ -377,7 +382,7 @@ describe('platform/bitbucket-server', () => {
 
       describe('deleteLAbel()', () => {
         it('does not throw', async () => {
-          await bitbucket.deleteLabel(5, 'renovate');
+          expect(await bitbucket.deleteLabel(5, 'renovate')).toMatchSnapshot();
         });
       });
 
@@ -663,20 +668,6 @@ describe('platform/bitbucket-server', () => {
         });
       });
 
-      describe('getPrFiles()', () => {
-        it('returns empty files', async () => {
-          expect.assertions(1);
-          expect(await bitbucket.getPrFiles(null as any)).toHaveLength(0);
-        });
-
-        it('returns one file', async () => {
-          expect.assertions(2);
-          await initRepo();
-          expect(await bitbucket.getPrFiles(5)).toHaveLength(1);
-          expect(api.get.mock.calls).toMatchSnapshot();
-        });
-      });
-
       describe('updatePr()', () => {
         it('puts PR', async () => {
           expect.assertions(2);
@@ -827,7 +818,7 @@ Followed by some information.
       describe('getCommitMessages()', () => {
         it('sends to gitFs', async () => {
           await initRepo();
-          await bitbucket.getCommitMessages();
+          expect(await bitbucket.getCommitMessages()).toMatchSnapshot();
         });
       });
 

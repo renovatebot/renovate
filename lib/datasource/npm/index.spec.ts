@@ -263,9 +263,11 @@ describe(getName(__filename), () => {
     expect(res).toMatchSnapshot();
   });
   it('resets npmrc', () => {
-    npm.setNpmrc('something=something');
-    npm.setNpmrc('something=something');
+    const npmrcContent = 'something=something';
+    npm.setNpmrc(npmrcContent);
+    npm.setNpmrc(npmrcContent);
     npm.setNpmrc();
+    expect(npm.getNpmrc()).toBeNull();
   });
   it('should use default registry if missing from npmrc', async () => {
     nock('https://registry.npmjs.org').get('/foobar').reply(200, npmResponse);

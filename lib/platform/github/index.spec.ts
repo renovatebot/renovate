@@ -659,7 +659,7 @@ describe('platform/github', () => {
       expect(res).toEqual(BranchStatus.green);
       expect(httpMock.getTrace()).toMatchSnapshot();
     });
-    it('should fail if a check run has failed', async () => {
+    it('should fail if a check run is pending', async () => {
       const scope = httpMock.scope(githubApiHost);
       initRepoMock(scope, 'some/repo');
       scope
@@ -1243,7 +1243,7 @@ describe('platform/github', () => {
         once: false,
         shouldReOpen: false,
       });
-      expect(res).toEqual(null);
+      expect(res).toBeNull();
       expect(httpMock.getTrace()).toMatchSnapshot();
     });
   });
@@ -1930,25 +1930,6 @@ describe('platform/github', () => {
       const pr = await github.getPr(1234);
       expect(pr.isModified).toBe(true);
       expect(pr).toMatchSnapshot();
-      expect(httpMock.getTrace()).toMatchSnapshot();
-    });
-  });
-  describe('getPrFiles()', () => {
-    it('should return empty if no prNo is passed', async () => {
-      const prFiles = await github.getPrFiles(0);
-      expect(prFiles).toEqual([]);
-    });
-    it('returns files', async () => {
-      httpMock
-        .scope(githubApiHost)
-        .get('/repos/undefined/pulls/123/files')
-        .reply(200, [
-          { filename: 'renovate.json' },
-          { filename: 'not renovate.json' },
-        ]);
-      const prFiles = await github.getPrFiles(123);
-      expect(prFiles).toMatchSnapshot();
-      expect(prFiles).toHaveLength(2);
       expect(httpMock.getTrace()).toMatchSnapshot();
     });
   });

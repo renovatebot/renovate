@@ -21,7 +21,8 @@ describe('workers/repository/init', () => {
       base.checkBaseBranch.mockResolvedValue({});
       apis.initApis.mockResolvedValue({} as never);
       config.mergeRenovateConfig.mockResolvedValueOnce({});
-      await initRepo({});
+      const renovateConfig = await initRepo({});
+      expect(renovateConfig).toMatchSnapshot();
     });
   });
 });

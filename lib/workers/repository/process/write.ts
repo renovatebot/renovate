@@ -36,7 +36,7 @@ export async function writeUpdates(
       prsRemaining <= 0 || getLimitRemaining('prCommitsPerRunLimit') <= 0
     );
     branch.res = res;
-    if (res === 'automerged' && config.automergeType !== 'pr-comment') {
+    if (res === 'automerged' && branch.automergeType !== 'pr-comment') {
       // Stop procesing other branches because base branch has been changed
       return res;
     }
@@ -47,8 +47,8 @@ export async function writeUpdates(
     // istanbul ignore if
     if (
       res === 'automerged' &&
-      config.automergeType === 'pr-comment' &&
-      config.requiredStatusChecks === null
+      branch.automergeType === 'pr-comment' &&
+      branch.requiredStatusChecks === null
     ) {
       deductPrRemainingCount = 1;
     }
