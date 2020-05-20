@@ -757,34 +757,6 @@ export /* istanbul ignore next */ async function deleteLabel(
   await azureApiGit.deletePullRequestLabels(config.repoId, prNumber, label);
 }
 
-export async function getPrFiles(prId: number): Promise<string[]> {
-  const azureApiGit = await azureApi.gitApi();
-  const prIterations = await azureApiGit.getPullRequestIterations(
-    config.repoId,
-    prId
-  );
-  return [
-    ...new Set(
-      (
-        await Promise.all(
-          prIterations.map(
-            async (iteration) =>
-              (
-                await azureApiGit.getPullRequestIterationChanges(
-                  config.repoId,
-                  prId,
-                  iteration.id
-                )
-              ).changeEntries
-          )
-        )
-      )
-        .reduce((acc, val) => acc.concat(val), [])
-        .map((change) => change.item.path.slice(1))
-    ),
-  ];
-}
-
 export function getVulnerabilityAlerts(): Promise<VulnerabilityAlert[]> {
   return Promise.resolve([]);
 }
