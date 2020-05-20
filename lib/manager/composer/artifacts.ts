@@ -16,7 +16,6 @@ import {
   ensureDir,
   ensureLocalDir,
   getSiblingFileName,
-  getSubDirectory,
   readLocalFile,
   writeLocalFile,
 } from '../../util/fs';
