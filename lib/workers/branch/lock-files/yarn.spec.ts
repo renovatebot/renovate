@@ -24,7 +24,6 @@ const fixSnapshots = (snapshots: ExecSnapshots): ExecSnapshots =>
 
 describe(getName(__filename), () => {
   beforeEach(() => {
-    delete process.env.YARN_MUTEX_FILE;
     jest.resetAllMocks();
     env.getChildProcessEnv.mockReturnValue(envMock.basic);
   });
@@ -54,7 +53,6 @@ describe(getName(__filename), () => {
       });
 
       fs.readFile = jest.fn(() => 'package-lock-contents') as never;
-      process.env.YARN_MUTEX_FILE = '/tmp/yarn.mutext';
       const res = await yarnHelper.generateLockFile('some-dir', {}, {}, [
         { depName: 'some-dep', isLockfileUpdate: true },
       ]);
