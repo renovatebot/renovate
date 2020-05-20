@@ -150,7 +150,7 @@ describe('workers/pr/release-notes', () => {
       }
     );
     it.each([[''], ['v'], ['other-']])(
-      'gets null from repository without gitlab/github in domain',
+      'gets null from repository without gitlab/github in domain %s',
       async (prefix) => {
         const res = await getReleaseNotes(
           'some/other-repository',
