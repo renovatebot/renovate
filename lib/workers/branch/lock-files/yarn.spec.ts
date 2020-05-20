@@ -14,6 +14,8 @@ const env = mocked(_env);
 const fs = mocked(_fs);
 const yarnHelper = mocked(_yarnHelper);
 
+delete process.env.NPM_CONFIG_CACHE;
+
 // TODO: figure out snapshot similarity for each CI platform
 const fixSnapshots = (snapshots: ExecSnapshots): ExecSnapshots =>
   snapshots.map((snapshot) => ({
