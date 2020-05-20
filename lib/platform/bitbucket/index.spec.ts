@@ -1,5 +1,4 @@
 // TODO fix mocks
-/* eslint jest/expect-expect: 1 */
 import URL from 'url';
 import { REPOSITORY_DISABLED } from '../../constants/error-messages';
 import { logger as _logger } from '../../logger';
@@ -180,7 +179,7 @@ describe('platform/bitbucket', () => {
     it('sends to gitFs', async () => {
       await initRepo();
       await mocked(async () => {
-        await bitbucket.isBranchStale('test');
+        expect(await bitbucket.isBranchStale('test')).toMatchSnapshot();
       });
     });
   });
@@ -246,7 +245,7 @@ describe('platform/bitbucket', () => {
     it('sends to gitFs', async () => {
       await initRepo();
       await mocked(async () => {
-        await bitbucket.getRepoStatus();
+        expect(await bitbucket.getRepoStatus()).toMatchSnapshot();
       });
     });
   });
@@ -255,7 +254,7 @@ describe('platform/bitbucket', () => {
     it('sends to gitFs', async () => {
       await initRepo();
       await mocked(async () => {
-        await bitbucket.deleteBranch('test');
+        expect(await bitbucket.deleteBranch('test')).toMatchSnapshot();
       });
     });
     it('should handle closing PRs when none exist', async () => {
@@ -278,7 +277,7 @@ describe('platform/bitbucket', () => {
     it('sends to gitFs', async () => {
       await initRepo();
       await mocked(async () => {
-        await bitbucket.mergeBranch('test');
+        expect(await bitbucket.mergeBranch('test')).toMatchSnapshot();
       });
     });
   });
@@ -287,7 +286,9 @@ describe('platform/bitbucket', () => {
     it('sends to gitFs', async () => {
       await initRepo();
       await mocked(async () => {
-        await bitbucket.getBranchLastCommitTime('test');
+        expect(
+          await bitbucket.getBranchLastCommitTime('test')
+        ).toMatchSnapshot();
       });
     });
   });
@@ -355,7 +356,7 @@ describe('platform/bitbucket', () => {
 
   describe('addAssignees()', () => {
     it('does not throw', async () => {
-      await bitbucket.addAssignees(3, ['some']);
+      expect(await bitbucket.addAssignees(3, ['some'])).toMatchSnapshot();
     });
   });
 
@@ -371,17 +372,21 @@ describe('platform/bitbucket', () => {
 
   describe('ensureComment()', () => {
     it('does not throw', async () => {
-      await bitbucket.ensureComment({
-        number: 3,
-        topic: 'topic',
-        content: 'content',
-      });
+      expect(
+        await bitbucket.ensureComment({
+          number: 3,
+          topic: 'topic',
+          content: 'content',
+        })
+      ).toMatchSnapshot();
     });
   });
 
   describe('ensureCommentRemoval()', () => {
     it('does not throw', async () => {
-      await bitbucket.ensureCommentRemoval({ number: 3, topic: 'topic' });
+      expect(
+        await bitbucket.ensureCommentRemoval({ number: 3, topic: 'topic' })
+      ).toMatchSnapshot();
     });
   });
 
@@ -456,14 +461,6 @@ describe('platform/bitbucket', () => {
     });
   });
 
-  describe('getPrFiles()', () => {
-    const getPrFiles = wrap('getPrFiles');
-    it('returns diff files', async () => {
-      await initRepo();
-      expect(await getPrFiles(5)).toMatchSnapshot();
-    });
-  });
-
   describe('getPrBody()', () => {
     it('returns diff files', () => {
       expect(
@@ -494,11 +491,13 @@ describe('platform/bitbucket', () => {
     it('sends to gitFs', async () => {
       await initRepo();
       await mocked(async () => {
-        await bitbucket.commitFiles({
-          branchName: 'test',
-          files: [],
-          message: 'message',
-        });
+        expect(
+          await bitbucket.commitFiles({
+            branchName: 'test',
+            files: [],
+            message: 'message',
+          })
+        ).toMatchSnapshot();
       });
     });
   });
@@ -507,7 +506,7 @@ describe('platform/bitbucket', () => {
     it('sends to gitFs', async () => {
       await initRepo();
       await mocked(async () => {
-        await bitbucket.getFile('test.file');
+        expect(await bitbucket.getFile('test.file')).toMatchSnapshot();
       });
     });
   });
@@ -516,7 +515,7 @@ describe('platform/bitbucket', () => {
     it('sends to gitFs', async () => {
       await initRepo();
       await mocked(async () => {
-        await bitbucket.getCommitMessages();
+        expect(await bitbucket.getCommitMessages()).toMatchSnapshot();
       });
     });
   });
@@ -525,7 +524,9 @@ describe('platform/bitbucket', () => {
     it('sends to gitFs', async () => {
       await initRepo();
       await mocked(async () => {
-        await bitbucket.getAllRenovateBranches('test');
+        expect(
+          await bitbucket.getAllRenovateBranches('test')
+        ).toMatchSnapshot();
       });
     });
   });

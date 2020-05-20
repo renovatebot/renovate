@@ -1,5 +1,4 @@
 // TODO fix mocks
-/* eslint jest/expect-expect: 1 */
 import nock from 'nock';
 import { Platform, RepoParams } from '..';
 import * as httpMock from '../../../test/httpMock';
@@ -174,7 +173,7 @@ describe('platform/gitlab', () => {
   });
   describe('cleanRepo()', () => {
     it('exists', async () => {
-      await gitlab.cleanRepo();
+      expect(await gitlab.cleanRepo()).toMatchSnapshot();
     });
   });
 
@@ -1192,27 +1191,6 @@ describe('platform/gitlab', () => {
       expect(httpMock.getTrace()).toMatchSnapshot();
     });
   });
-  describe('getPrFiles()', () => {
-    it('should return empty if no mrNo is passed', async () => {
-      const prFiles = await gitlab.getPrFiles(0);
-      expect(prFiles).toEqual([]);
-    });
-    it('returns files', async () => {
-      httpMock
-        .scope(gitlabApiHost)
-        .get('/api/v4/projects/undefined/merge_requests/123/changes')
-        .reply(200, {
-          changes: [
-            { new_path: 'renovate.json' },
-            { new_path: 'not renovate.json' },
-          ],
-        });
-      const prFiles = await gitlab.getPrFiles(123);
-      expect(prFiles).toMatchSnapshot();
-      expect(prFiles).toHaveLength(2);
-      expect(httpMock.getTrace()).toMatchSnapshot();
-    });
-  });
   describe('updatePr(prNo, title, body)', () => {
     jest.resetAllMocks();
     it('updates the PR', async () => {
@@ -1253,7 +1231,7 @@ These updates have all been created already. Click a checkbox below to force a r
   describe('getFile()', () => {
     it('sends to gitFs', async () => {
       await initRepo();
-      await gitlab.getFile('');
+      expect(await gitlab.getFile('')).toMatchSnapshot();
     });
   });
   describe('commitFiles()', () => {
@@ -1271,7 +1249,7 @@ These updates have all been created already. Click a checkbox below to force a r
   describe('getCommitMessages()', () => {
     it('passes to git', async () => {
       await initRepo();
-      await gitlab.getCommitMessages();
+      expect(await gitlab.getCommitMessages()).toMatchSnapshot();
     });
   });
   describe('getVulnerabilityAlerts()', () => {

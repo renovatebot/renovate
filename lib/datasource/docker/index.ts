@@ -197,6 +197,10 @@ async function getAuthHeaders(
       authorization: `Bearer ${token}`,
     };
   } catch (err) /* istanbul ignore next */ {
+    if (err.host === 'quay.io') {
+      // TODO: debug why quay throws errors
+      return null;
+    }
     if (err.statusCode === 401) {
       logger.debug(
         { registry, dockerRepository: repository },
