@@ -1,4 +1,3 @@
-import { join } from 'path';
 import is from '@sindresorhus/is';
 import { concat } from 'lodash';
 import { DateTime } from 'luxon';
@@ -353,7 +352,7 @@ export async function processBranch(
             } else {
               contents = file.contents;
             }
-            await writeLocalFile(join(config.localDir, file.name), contents);
+            await writeLocalFile(file.name, contents);
           }
         }
 
