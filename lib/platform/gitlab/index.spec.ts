@@ -110,7 +110,7 @@ describe('platform/gitlab', () => {
       httpMock
         .scope(gitlabApiHost)
         .get(
-          '/api/v4/projects?membership=true&per_page=100&with_merge_requests_enabled=true'
+          '/api/v4/projects?membership=true&per_page=100&with_merge_requests_enabled=true&min_access_level=30'
         )
         .replyWithError('getRepos error');
       await expect(gitlab.getRepos()).rejects.toThrow('getRepos error');
@@ -120,7 +120,7 @@ describe('platform/gitlab', () => {
       httpMock
         .scope(gitlabApiHost)
         .get(
-          '/api/v4/projects?membership=true&per_page=100&with_merge_requests_enabled=true'
+          '/api/v4/projects?membership=true&per_page=100&with_merge_requests_enabled=true&min_access_level=30'
         )
         .reply(200, [
           {
