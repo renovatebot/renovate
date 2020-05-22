@@ -1791,7 +1791,7 @@ Array [
       "user-agent": "https://github.com/renovatebot/renovate",
     },
     "method": "GET",
-    "url": "https://gitlab.com/api/v4/projects?membership=true&per_page=100&with_merge_requests_enabled=true",
+    "url": "https://gitlab.com/api/v4/projects?membership=true&per_page=100&with_merge_requests_enabled=true&min_access_level=30",
   },
 ]
 `;
@@ -1807,7 +1807,7 @@ Array [
       "user-agent": "https://github.com/renovatebot/renovate",
     },
     "method": "GET",
-    "url": "https://gitlab.com/api/v4/projects?membership=true&per_page=100&with_merge_requests_enabled=true",
+    "url": "https://gitlab.com/api/v4/projects?membership=true&per_page=100&with_merge_requests_enabled=true&min_access_level=30",
   },
 ]
 `;

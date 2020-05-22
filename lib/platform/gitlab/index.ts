@@ -109,7 +109,7 @@ export async function initPlatform({
 export async function getRepos(): Promise<string[]> {
   logger.debug('Autodiscovering GitLab repositories');
   try {
-    const url = `projects?membership=true&per_page=100&with_merge_requests_enabled=true`;
+    const url = `projects?membership=true&per_page=100&with_merge_requests_enabled=true&min_access_level=30`;
     const res = await gitlabApi.getJson<{ path_with_namespace: string }[]>(
       url,
       { paginate: true }
