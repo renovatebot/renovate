@@ -1,6 +1,5 @@
 import * as httpMock from '../../../test/httpMock';
 import { PLATFORM_TYPE_GITLAB } from '../../constants/platforms';
-import * as runCache from '../../util/cache/run';
 import * as hostRules from '../../util/host-rules';
 import { api } from './gl-got-wrapper';
 
@@ -20,7 +19,6 @@ describe('platform/gitlab/gl-got-wrapper', () => {
   afterEach(() => {
     jest.resetAllMocks();
     httpMock.reset();
-    runCache.clear();
   });
   it('paginates', async () => {
     httpMock

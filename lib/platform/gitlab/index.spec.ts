@@ -14,7 +14,6 @@ import {
   PR_STATE_OPEN,
 } from '../../constants/pull-requests';
 import { BranchStatus } from '../../types';
-import * as runCache from '../../util/cache/run';
 import * as _hostRules from '../../util/host-rules';
 
 const gitlabApiHost = 'https://gitlab.com';
@@ -54,7 +53,6 @@ describe('platform/gitlab', () => {
     hostRules.find.mockReturnValue({
       token: 'abc123',
     });
-    runCache.clear();
     httpMock.reset();
     httpMock.setup();
   });

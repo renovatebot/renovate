@@ -1,6 +1,5 @@
 import * as httpMock from '../../../test/httpMock';
 import * as globalCache from '../../util/cache/global';
-import * as runCache from '../../util/cache/run';
 import * as _hostRules from '../../util/host-rules';
 import * as github from '.';
 
@@ -16,7 +15,6 @@ describe('datasource/github-tags', () => {
   });
 
   afterEach(() => {
-    runCache.clear();
     httpMock.reset();
   });
 
