@@ -37,7 +37,6 @@ describe('api/docker', () => {
         password: 'some-password',
       });
       hostRules.hosts = jest.fn(() => []);
-      return globalCache.rmAll();
     });
     it('returns null if no token', async () => {
       got.mockReturnValueOnce({ body: {} });
@@ -282,7 +281,6 @@ describe('api/docker', () => {
     beforeEach(() => {
       jest.clearAllMocks();
       runCache.clear();
-      return globalCache.rmAll();
     });
     it('returns null if no token', async () => {
       got.mockReturnValueOnce({ body: {} });

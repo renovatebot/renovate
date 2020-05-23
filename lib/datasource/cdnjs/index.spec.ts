@@ -23,7 +23,6 @@ describe('datasource/cdnjs', () => {
   describe('getReleases', () => {
     beforeEach(() => {
       jest.clearAllMocks();
-      return globalCache.rmAll();
     });
     it('throws for empty result', async () => {
       got.mockResolvedValueOnce(null);

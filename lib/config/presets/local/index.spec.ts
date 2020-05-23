@@ -19,7 +19,6 @@ describe('config/presets/local', () => {
     gitlabGetPreset.mockResolvedValueOnce({ resolved: 'preset' });
     githubGetPreset.mockReset();
     githubGetPreset.mockResolvedValueOnce({ resolved: 'preset' });
-    return globalCache.rmAll();
   });
   describe('getPreset()', () => {
     it('throws for unsupported platform', async () => {

@@ -15,10 +15,4 @@ describe('lib/workers/global/cache', () => {
     await global.renovateCache.set('test', 'key', 1234, -5);
     expect(await global.renovateCache.get('test', 'key')).toBeNull();
   });
-
-  it('deletes', async () => {
-    await global.renovateCache.set('test', 'key', 1234);
-    await global.renovateCache.rmAll();
-    expect(await global.renovateCache.get('test', 'key')).toBeNull();
-  });
 });

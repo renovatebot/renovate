@@ -11,7 +11,6 @@ describe('config/presets/npm', () => {
     jest.resetAllMocks();
     global.trustLevel = 'low';
     nock.cleanAll();
-    return globalCache.rmAll();
   });
   afterEach(() => {
     delete process.env.RENOVATE_CACHE_NPM_MINUTES;

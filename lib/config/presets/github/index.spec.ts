@@ -17,7 +17,6 @@ const hostRules = mocked(_hostRules);
 describe('config/presets/github', () => {
   beforeEach(() => {
     got.mockReset();
-    return globalCache.rmAll();
   });
   describe('fetchJSONFile()', () => {
     beforeEach(() => {

@@ -1,5 +1,4 @@
 import * as httpMock from '../../../test/httpMock';
-import * as globalCache from '../../util/cache/global';
 import * as runCache from '../../util/cache/run';
 import * as _hostRules from '../../util/host-rules';
 import * as github from '.';
@@ -11,7 +10,6 @@ const githubApiHost = 'https://api.github.com';
 
 describe('datasource/github-releases', () => {
   beforeEach(async () => {
-    await globalCache.rmAll();
     hostRules.hosts = jest.fn(() => []);
     hostRules.find.mockReturnValue({
       token: 'some-token',

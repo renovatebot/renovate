@@ -1,5 +1,4 @@
 import fs from 'fs';
-import * as globalCache from '../../util/cache/global';
 import * as runCache from '../../util/cache/run';
 import _got from '../../util/got';
 import * as _hostRules from '../../util/host-rules';
@@ -98,7 +97,6 @@ const configV3Multiple = {
 describe('datasource/nuget', () => {
   beforeEach(() => {
     runCache.clear();
-    return globalCache.rmAll();
   });
   describe('getReleases', () => {
     beforeEach(() => {

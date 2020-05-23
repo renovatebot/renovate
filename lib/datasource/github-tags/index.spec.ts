@@ -1,5 +1,4 @@
 import * as httpMock from '../../../test/httpMock';
-import * as globalCache from '../../util/cache/global';
 import * as runCache from '../../util/cache/run';
 import * as _hostRules from '../../util/host-rules';
 import * as github from '.';
@@ -10,9 +9,8 @@ const hostRules: any = _hostRules;
 const githubApiHost = 'https://api.github.com';
 
 describe('datasource/github-tags', () => {
-  beforeEach(async () => {
+  beforeEach(() => {
     httpMock.setup();
-    await globalCache.rmAll();
   });
 
   afterEach(() => {
@@ -30,7 +28,6 @@ describe('datasource/github-tags', () => {
       hostRules.find.mockReturnValue({
         token: 'some-token',
       });
-      return globalCache.rmAll();
     });
 
     it('returns null if no token', async () => {
@@ -95,7 +92,6 @@ describe('datasource/github-tags', () => {
   describe('getReleases', () => {
     const lookupName = 'some/dep2';
 
-    beforeAll(() => globalCache.rmAll());
     it('returns tags', async () => {
       const body = [{ name: 'v1.0.0' }, { name: 'v1.1.0' }];
       httpMock

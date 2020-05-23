@@ -10,7 +10,6 @@ describe('config/presets/gitlab', () => {
     runCache.clear();
     httpMock.reset();
     httpMock.setup();
-    return globalCache.rmAll();
   });
   describe('getPreset()', () => {
     it('throws if non-default', async () => {

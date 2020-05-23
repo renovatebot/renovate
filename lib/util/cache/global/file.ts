@@ -50,14 +50,8 @@ async function set(
   );
 }
 
-async function rmAll(): Promise<void> {
-  await cacache.rm.all(renovateCache);
-}
-
 export function init(cacheDir: string): void {
   renovateCache = path.join(cacheDir, '/renovate/renovate-cache-v1');
   logger.debug('Initializing Renovate internal cache into ' + renovateCache);
-  global.renovateCache = global.renovateCache || { get, set, rm, rmAll };
+  global.renovateCache = global.renovateCache || { get, set, rm };
 }
-
-init(os.tmpdir()); // Use default temporary dir to begin with
