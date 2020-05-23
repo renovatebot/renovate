@@ -201,13 +201,13 @@
     "@types/js-yaml": "3.12.4",
     "@types/json5": "0.0.30",
     "@types/later": "1.2.6",
-    "@types/lodash": "4.14.151",
+    "@types/lodash": "4.14.152",
     "@types/luxon": "1.24.0",
     "@types/markdown-it": "10.0.1",
     "@types/markdown-table": "2.0.0",
     "@types/moment-timezone": "0.5.13",
     "@types/nock": "10.0.3",
-    "@types/node": "11.15.12",
+    "@types/node": "11.15.14",
     "@types/node-emoji": "1.8.1",
     "@types/parse-link-header": "1.0.0",
     "@types/registry-auth-token": "3.3.0",
@@ -252,7 +252,7 @@
     "strip-ansi": "6.0.0",
     "tmp-promise": "2.1.1",
     "type-fest": "0.13.1",
-    "typescript": "3.9.2"
+    "typescript": "3.9.3"
   },
   "resolutions": {
     "jest-silent-reporter/jest-util": ">=25.1.0",
