@@ -6,6 +6,13 @@ import { create } from './util';
 
 // With this caching, it means every GET request is cached during each repository run
 
+function cloneBody(response: any): any {
+  return {
+    ...response,
+    body: clone(response.body),
+  };
+}
+
 export default create({
   options: {},
   handler: (options, next) => {
@@ -13,7 +20,7 @@ export default create({
       return next(options);
     }
     if (!['github', 'npm'].includes(options.hostType)) {
-      return next(options);
+      return next(options).then(cloneBody);
     }
     if (options.method === 'GET') {
       const cacheKey = crypto
@@ -34,17 +41,12 @@ export default create({
         }
         logger.trace('GET cache miss: ' + options.href);
       }
-      const promisedRes = next(options)
-        .then((response) => ({
-          ...response,
-          body: clone(response.body),
-        }))
-        .catch((err) => {
-          runCache.set(cacheKey, null);
-          throw err;
-        });
+      const promisedRes = next(options).catch((err) => {
+        runCache.set(cacheKey, null);
+        throw err;
+      });
       runCache.set(cacheKey, promisedRes);
-      return promisedRes;
+      return promisedRes.then(cloneBody);
     }
     return next(options);
   },
