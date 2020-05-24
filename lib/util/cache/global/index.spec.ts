@@ -1,5 +1,5 @@
 import { getName } from '../../../../test/util';
-import { end, get, init, set } from '.';
+import { cleanup, get, init, set } from '.';
 
 jest.mock('./file');
 jest.mock('./redis');
@@ -24,6 +24,6 @@ describe(getName(__filename), () => {
       await set('some-namespace', 'some-key', 'some-value', 1)
     ).toBeUndefined();
     expect(await get('some-namespace', 'unknown-key')).toBeUndefined();
-    expect(await end({ redisUrl: 'some-url' })).toBeUndefined();
+    expect(await cleanup({ redisUrl: 'some-url' })).toBeUndefined();
   });
 });
