@@ -1,41 +1,30 @@
-import URL from 'url';
-import responses from './__fixtures__/responses';
-import { api as _api } from './bb-got-wrapper';
+import * as httpMock from '../../../test/httpMock';
+import * as runCache from '../../util/cache/run';
+import { api } from './bb-got-wrapper';
 import * as comments from './comments';
 
-jest.mock('./bb-got-wrapper');
-
-const api: jest.Mocked<typeof _api> = _api as any;
+const baseUrl = 'https://api.bitbucket.org';
 
 describe('platform/comments', () => {
   const config: comments.CommentsConfig = { repository: 'some/repo' };
 
-  async function mockedGet(path: string) {
-    const uri = URL.parse(path).pathname;
-    let body = (responses as any)[uri];
-    if (!body) {
-      throw new Error('Missing request');
-    }
-    if (typeof body === 'function') {
-      body = await body();
-    }
-    return { body } as any;
-  }
-
-  beforeAll(() => {
-    api.get.mockImplementation(mockedGet);
-    api.post.mockImplementation(mockedGet);
-    api.put.mockImplementation(mockedGet);
-    api.delete.mockImplementation(mockedGet);
-  });
-
   beforeEach(() => {
     jest.clearAllMocks();
+
+    runCache.clear();
+    httpMock.reset();
+    httpMock.setup();
+
+    api.setBaseUrl(baseUrl);
   });
 
   describe('ensureComment()', () => {
     it('does not throw', async () => {
       expect.assertions(2);
+      httpMock
+        .scope(baseUrl)
+        .get('/2.0/repositories/some/repo/pullrequests/3/comments?pagelen=100')
+        .reply(200);
       expect(
         await comments.ensureComment({
           config,
@@ -44,12 +33,17 @@ describe('platform/comments', () => {
           content: 'content',
         })
       ).toBe(false);
-      expect(api.get.mock.calls).toMatchSnapshot();
+      expect(httpMock.getTrace()).toMatchSnapshot();
     });
 
     it('add comment if not found', async () => {
-      expect.assertions(6);
-      api.get.mockClear();
+      expect.assertions(2);
+      httpMock
+        .scope(baseUrl)
+        .get('/2.0/repositories/some/repo/pullrequests/5/comments?pagelen=100')
+        .reply(200, { values: [] })
+        .post('/2.0/repositories/some/repo/pullrequests/5/comments')
+        .reply(200);
 
       expect(
         await comments.ensureComment({
@@ -59,119 +53,119 @@ describe('platform/comments', () => {
           content: 'content',
         })
       ).toBe(true);
-      expect(api.get.mock.calls).toMatchSnapshot();
-      expect(api.post).toHaveBeenCalledTimes(1);
-
-      api.get.mockClear();
-      api.post.mockClear();
-
-      expect(
-        await comments.ensureComment({
-          config,
-          number: 5,
-          topic: null,
-          content: 'content',
-        })
-      ).toBe(true);
-      expect(api.get.mock.calls).toMatchSnapshot();
-      expect(api.post).toHaveBeenCalledTimes(1);
+      expect(httpMock.getTrace()).toMatchSnapshot();
     });
 
     it('add updates comment if necessary', async () => {
-      expect.assertions(8);
-      api.get.mockClear();
-
-      expect(
-        await comments.ensureComment({
-          config,
-          number: 5,
-          topic: 'some-subject',
-          content: 'some\ncontent',
+      expect.assertions(2);
+      httpMock
+        .scope(baseUrl)
+        .get('/2.0/repositories/some/repo/pullrequests/5/comments?pagelen=100')
+        .reply(200, {
+          values: [
+            {
+              id: 5,
+              content: { raw: '### some-subject\n\nsome\nobsolete\ncontent' },
+            },
+          ],
         })
-      ).toBe(true);
-      expect(api.get.mock.calls).toMatchSnapshot();
-      expect(api.post).toHaveBeenCalledTimes(0);
-      expect(api.put).toHaveBeenCalledTimes(1);
-
-      api.get.mockClear();
-      api.put.mockClear();
-
-      expect(
-        await comments.ensureComment({
-          config,
-          number: 5,
-          topic: null,
-          content: 'some\ncontent',
-        })
-      ).toBe(true);
-      expect(api.get.mock.calls).toMatchSnapshot();
-      expect(api.post).toHaveBeenCalledTimes(1);
-      expect(api.put).toHaveBeenCalledTimes(0);
+        .put('/2.0/repositories/some/repo/pullrequests/5/comments/5')
+        .reply(200);
+      const res = await comments.ensureComment({
+        config,
+        number: 5,
+        topic: 'some-subject',
+        content: 'some\ncontent',
+      });
+      httpMock.getTrace();
+      expect(res).toBe(true);
+      expect(httpMock.getTrace()).toMatchSnapshot();
     });
 
     it('skips comment', async () => {
-      expect.assertions(6);
-      api.get.mockClear();
-
-      expect(
-        await comments.ensureComment({
-          config,
-          number: 5,
-          topic: 'some-subject',
-          content: 'blablabla',
-        })
-      ).toBe(true);
-      expect(api.get.mock.calls).toMatchSnapshot();
-      expect(api.put).toHaveBeenCalledTimes(0);
-
-      api.get.mockClear();
-      api.put.mockClear();
-
+      expect.assertions(2);
+      httpMock
+        .scope(baseUrl)
+        .get('/2.0/repositories/some/repo/pullrequests/5/comments?pagelen=100')
+        .reply(200, {
+          values: [
+            {
+              id: 5,
+              content: { raw: 'blablabla' },
+            },
+          ],
+        });
       expect(
         await comments.ensureComment({
           config,
           number: 5,
           topic: null,
-          content: '!merge',
+          content: 'blablabla',
         })
       ).toBe(true);
-      expect(api.get.mock.calls).toMatchSnapshot();
-      expect(api.put).toHaveBeenCalledTimes(0);
+      expect(httpMock.getTrace()).toMatchSnapshot();
     });
   });
 
   describe('ensureCommentRemoval()', () => {
     it('does not throw', async () => {
       expect.assertions(1);
+      httpMock
+        .scope(baseUrl)
+        .get('/2.0/repositories/some/repo/pullrequests/5/comments?pagelen=100')
+        .reply(200, { values: [] });
       await comments.ensureCommentRemoval(config, 5, 'topic');
-      expect(api.get.mock.calls).toMatchSnapshot();
+      expect(httpMock.getTrace()).toMatchSnapshot();
     });
 
     it('deletes comment by topic if found', async () => {
-      expect.assertions(2);
-      api.get.mockClear();
+      expect.assertions(1);
+      httpMock
+        .scope(baseUrl)
+        .get('/2.0/repositories/some/repo/pullrequests/5/comments?pagelen=100')
+        .reply(200, {
+          values: [
+            {
+              id: 5,
+              content: { raw: '### some-subject\n\nsome-content' },
+            },
+          ],
+        })
+        .delete('/2.0/repositories/some/repo/pullrequests/5/comments/5')
+        .reply(200);
 
       await comments.ensureCommentRemoval(config, 5, 'some-subject');
-      expect(api.get.mock.calls).toMatchSnapshot();
-      expect(api.delete).toHaveBeenCalledTimes(1);
+      expect(httpMock.getTrace()).toMatchSnapshot();
     });
 
     it('deletes comment by content if found', async () => {
-      expect.assertions(2);
-      api.get.mockClear();
+      expect.assertions(1);
+      httpMock
+        .scope(baseUrl)
+        .get('/2.0/repositories/some/repo/pullrequests/5/comments?pagelen=100')
+        .reply(200, {
+          values: [
+            {
+              id: 5,
+              content: { raw: '\n\nsome-content\n\n' },
+            },
+          ],
+        })
+        .delete('/2.0/repositories/some/repo/pullrequests/5/comments/5')
+        .reply(200);
 
-      await comments.ensureCommentRemoval(config, 5, undefined, '!merge');
-      expect(api.get.mock.calls).toMatchSnapshot();
-      expect(api.delete).toHaveBeenCalledTimes(1);
+      await comments.ensureCommentRemoval(config, 5, undefined, 'some-content');
+      expect(httpMock.getTrace()).toMatchSnapshot();
     });
 
     it('deletes nothing', async () => {
-      expect.assertions(2);
-      api.get.mockClear();
-
+      expect.assertions(1);
+      httpMock
+        .scope(baseUrl)
+        .get('/2.0/repositories/some/repo/pullrequests/5/comments?pagelen=100')
+        .reply(200, { values: [] });
       await comments.ensureCommentRemoval(config, 5, 'topic');
-      expect(api.get.mock.calls).toMatchSnapshot();
-      expect(api.delete).toHaveBeenCalledTimes(0);
+      expect(httpMock.getTrace()).toMatchSnapshot();
     });
   });
 });
