@@ -1,5 +1,4 @@
 import nock from 'nock';
-import * as globalCache from '../../../util/cache/global';
 import * as npm from '.';
 
 jest.mock('registry-auth-token');

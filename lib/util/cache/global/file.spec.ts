@@ -1,12 +1,16 @@
 import os from 'os';
 import { init } from './file';
 
-describe('lib/workers/global/cache', () => {
+describe('lib/util/cache/global/file', () => {
   beforeAll(() => {
     init(os.tmpdir());
   });
 
-  it('sets', async () => {
+  it('gets null', async () => {
+    expect(await global.renovateCache.get('test', 'missing-key')).toBeNull();
+  });
+
+  it('sets and gets', async () => {
     await global.renovateCache.set('test', 'key', 1234);
     expect(await global.renovateCache.get('test', 'key')).toBe(1234);
   });

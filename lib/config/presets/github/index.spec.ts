@@ -1,7 +1,6 @@
 import { mocked } from '../../../../test/util';
 import { PLATFORM_FAILURE } from '../../../constants/error-messages';
 import { GotResponse } from '../../../platform';
-import * as globalCache from '../../../util/cache/global';
 import _got from '../../../util/got';
 import * as _hostRules from '../../../util/host-rules';
 import * as github from '.';

@@ -1,4 +1,3 @@
-import * as globalCache from '../../../util/cache/global';
 import * as github from '../github';
 import * as gitlab from '../gitlab';
 import * as local from '.';
