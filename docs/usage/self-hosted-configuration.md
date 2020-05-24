@@ -138,7 +138,7 @@ Override this object if you wish to change the URLs that Renovate links to, e.g.
 
 ## redisUrl
 
-If this value is set then Renovate will use Renovate for its global cache instead of the local file system. The global cache is used to store lookup results (e.g. dependency versions and release notes) between repositories and runs. Example url: `redis://localhost`.
+If this value is set then Renovate will use Redis for its global cache instead of the local file system. The global cache is used to store lookup results (e.g. dependency versions and release notes) between repositories and runs. Example url: `redis://localhost`.
 
 ## repositories
 
