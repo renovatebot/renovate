@@ -169,7 +169,7 @@
     "yawn-yaml": "1.5.0"
   },
   "optionalDependencies": {
-    "re2": "1.11.0"
+    "re2": "1.13.1"
   },
   "devDependencies": {
     "@actions/core": "1.2.4",
@@ -251,7 +251,7 @@
     "shelljs": "0.8.4",
     "strip-ansi": "6.0.0",
     "tmp-promise": "2.1.1",
-    "type-fest": "0.13.1",
+    "type-fest": "0.14.0",
     "typescript": "3.9.3"
   },
   "resolutions": {

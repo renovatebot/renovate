@@ -1,7 +1,4 @@
-import { tmpdir } from 'os';
 import nock from 'nock';
-import { join } from 'upath';
-import { init } from '../lib/util/cache/global/file';
 import 'jest-extended';
 
 jest.mock('../lib/platform', () => ({
@@ -10,11 +7,6 @@ jest.mock('../lib/platform', () => ({
   getPlatformList: jest.fn(),
 }));
 jest.mock('../lib/logger');
-
-const tmpDir = process.env.RENOVATE_TMPDIR || process.env.TMPDIR || tmpdir();
-const cacheDir = join(tmpDir, './renovate/cache/renovate');
-
-init(cacheDir);
 
 beforeAll(() => {
   nock.disableNetConnect();

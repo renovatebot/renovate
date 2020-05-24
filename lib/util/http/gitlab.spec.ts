@@ -1,7 +1,6 @@
 import * as httpMock from '../../../test/httpMock';
 import { getName } from '../../../test/util';
 import { PLATFORM_TYPE_GITLAB } from '../../constants/platforms';
-import * as runCache from '../cache/run';
 import * as hostRules from '../host-rules';
 import { GitlabHttp, setBaseUrl } from './gitlab';
 
@@ -24,7 +23,6 @@ describe(getName(__filename), () => {
   afterEach(() => {
     jest.resetAllMocks();
     httpMock.reset();
-    runCache.clear();
   });
 
   it('paginates', async () => {

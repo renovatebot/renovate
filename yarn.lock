@@ -8148,10 +8148,10 @@ rc@^1.0.1, rc@^1.1.6, rc@^1.2.8:
     minimist "^1.2.0"
     strip-json-comments "~2.0.1"
 
-re2@1.11.0:
-  version "1.11.0"
-  resolved "https://registry.yarnpkg.com/re2/-/re2-1.11.0.tgz#b139158a94fba05d40556b33edb0162f20743f51"
-  integrity sha512-ZsJW49YmYTKHPUuFuzhQZrX1Z8x5mdugovcvKG4WHqHPtO2EnwC99nj5IePWqD9a8/LiOg8V5xZH64Aw8a+C7A==
+re2@1.13.1:
+  version "1.13.1"
+  resolved "https://registry.yarnpkg.com/re2/-/re2-1.13.1.tgz#12ff1f9a3f930dc9ab004b975260244841fc204c"
+  integrity sha512-9OlqC9qwXD99Er2H7zMt98u9oSzD1ei/Ji3Bw9ObABHSob5gVH/aJV0dR60FNcUCQMQrnHOWCFfO+6uJsFU0dA==
   dependencies:
     nan "^2.14.1"
 
@@ -9811,10 +9811,10 @@ type-detect@4.0.8, type-detect@^4.0.8:
   resolved "https://registry.yarnpkg.com/type-detect/-/type-detect-4.0.8.tgz#7646fb5f18871cfbb7749e69bd39a6388eb7450c"
   integrity sha512-0fr/mIH1dlO+x7TlcMy+bIDqKPsw/70tVyeHW787goQjhmqaZe10uwLujubK9q9Lg6Fiho1KUKDYz0Z7k7g5/g==
 
-type-fest@0.13.1, type-fest@^0.13.1:
-  version "0.13.1"
-  resolved "https://registry.yarnpkg.com/type-fest/-/type-fest-0.13.1.tgz#0172cb5bce80b0bd542ea348db50c7e21834d934"
-  integrity sha512-34R7HTnG0XIJcBSn5XhDd7nNFPRcXYRZrBB2O2jdKqYODldSzBAqzsWoZYYvduky73toYS/ESqxPvkDf/F0XMg==
+type-fest@0.14.0:
+  version "0.14.0"
+  resolved "https://registry.yarnpkg.com/type-fest/-/type-fest-0.14.0.tgz#758d800f2dcc0de47a946a120d91ab17883523ad"
+  integrity sha512-XFdJEnQD8Y6yRc796jPOiwK7Mb8So5qaFj8WhvOAFl1qrBr/srP3E9wL/9QUf2Uc6btJ3kHhpNfoAXa3bvDGlw==
 
 type-fest@^0.11.0:
   version "0.11.0"
@@ -9825,6 +9825,11 @@ type-fest@^0.12.0:
   version "0.12.0"
   resolved "https://registry.yarnpkg.com/type-fest/-/type-fest-0.12.0.tgz#f57a27ab81c68d136a51fd71467eff94157fa1ee"
   integrity sha512-53RyidyjvkGpnWPMF9bQgFtWp+Sl8O2Rp13VavmJgfAP9WWG6q6TkrKU8iyJdnwnfgHI6k2hTlgqH4aSdjoTbg==
+
+type-fest@^0.13.1:
+  version "0.13.1"
+  resolved "https://registry.yarnpkg.com/type-fest/-/type-fest-0.13.1.tgz#0172cb5bce80b0bd542ea348db50c7e21834d934"
+  integrity sha512-34R7HTnG0XIJcBSn5XhDd7nNFPRcXYRZrBB2O2jdKqYODldSzBAqzsWoZYYvduky73toYS/ESqxPvkDf/F0XMg==
 
 type-fest@^0.6.0:
   version "0.6.0"
