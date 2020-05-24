@@ -3,7 +3,6 @@ import * as httpMock from '../../../test/httpMock';
 import { REPOSITORY_DISABLED } from '../../constants/error-messages';
 import { logger as _logger } from '../../logger';
 import { BranchStatus } from '../../types';
-import * as runCache from '../../util/cache/run';
 import { Platform, RepoParams } from '../common';
 
 const baseUrl = 'https://api.bitbucket.org';
@@ -52,7 +51,6 @@ describe('platform/bitbucket', () => {
   beforeEach(async () => {
     // reset module
     jest.resetModules();
-    runCache.clear();
     httpMock.reset();
     httpMock.setup();
     jest.mock('../git/storage');

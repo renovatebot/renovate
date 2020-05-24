@@ -1,5 +1,4 @@
 import * as httpMock from '../../../test/httpMock';
-import * as runCache from '../../util/cache/run';
 import { api } from './bb-got-wrapper';
 import * as comments from './comments';
 
@@ -11,7 +10,6 @@ describe('platform/comments', () => {
   beforeEach(() => {
     jest.clearAllMocks();
 
-    runCache.clear();
     httpMock.reset();
     httpMock.setup();
 

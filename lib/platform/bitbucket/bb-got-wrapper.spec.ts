@@ -1,6 +1,5 @@
 import * as httpMock from '../../../test/httpMock';
 import { PLATFORM_TYPE_BITBUCKET } from '../../constants/platforms';
-import * as runCache from '../../util/cache/run';
 import * as hostRules from '../../util/host-rules';
 import { api } from './bb-got-wrapper';
 
@@ -19,7 +18,6 @@ describe('platform/gl-got-wrapper', () => {
       token: 'token',
     });
 
-    runCache.clear();
     httpMock.reset();
     httpMock.setup();
 

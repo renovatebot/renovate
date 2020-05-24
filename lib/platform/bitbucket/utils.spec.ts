@@ -1,12 +1,10 @@
 import * as httpMock from '../../../test/httpMock';
-import * as runCache from '../../util/cache/run';
 import * as utils from './utils';
 
 const range = (count: number) => [...Array(count).keys()];
 
 describe('accumulateValues()', () => {
   it('paginates', async () => {
-    runCache.clear();
     httpMock.reset();
     httpMock.setup();
 
