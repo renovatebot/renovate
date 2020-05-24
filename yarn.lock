@@ -8148,10 +8148,10 @@ rc@^1.0.1, rc@^1.1.6, rc@^1.2.8:
     minimist "^1.2.0"
     strip-json-comments "~2.0.1"
 
-re2@1.11.0:
-  version "1.11.0"
-  resolved "https://registry.yarnpkg.com/re2/-/re2-1.11.0.tgz#b139158a94fba05d40556b33edb0162f20743f51"
-  integrity sha512-ZsJW49YmYTKHPUuFuzhQZrX1Z8x5mdugovcvKG4WHqHPtO2EnwC99nj5IePWqD9a8/LiOg8V5xZH64Aw8a+C7A==
+re2@1.13.1:
+  version "1.13.1"
+  resolved "https://registry.yarnpkg.com/re2/-/re2-1.13.1.tgz#12ff1f9a3f930dc9ab004b975260244841fc204c"
+  integrity sha512-9OlqC9qwXD99Er2H7zMt98u9oSzD1ei/Ji3Bw9ObABHSob5gVH/aJV0dR60FNcUCQMQrnHOWCFfO+6uJsFU0dA==
   dependencies:
     nan "^2.14.1"
 
