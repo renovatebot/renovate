@@ -1,5 +1,4 @@
 import fs from 'fs';
-import * as globalCache from '../../util/cache/global';
 import _got from '../../util/got';
 import * as _hostRules from '../../util/host-rules';
 import * as composerVersioning from '../../versioning/composer';
@@ -35,7 +34,6 @@ describe('datasource/packagist', () => {
           'https://packagist.org',
         ],
       };
-      return globalCache.rmAll();
     });
     it('supports custom registries', async () => {
       config = {

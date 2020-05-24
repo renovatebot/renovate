@@ -1,6 +1,5 @@
 import { getPkgReleases } from '..';
 import * as httpMock from '../../../test/httpMock';
-import * as globalCache from '../../util/cache/global';
 import * as rubyVersioning from '../../versioning/ruby';
 import * as pod from '.';
 
@@ -19,7 +18,6 @@ describe('datasource/cocoapods', () => {
     beforeEach(() => {
       jest.resetAllMocks();
       httpMock.setup();
-      return globalCache.rmAll();
     });
 
     afterEach(() => {

@@ -1,5 +1,4 @@
 import _simpleGit from 'simple-git/promise';
-import * as globalCache from '../../util/cache/global';
 import { getDigest, getReleases } from '.';
 
 jest.mock('simple-git/promise');
@@ -9,7 +8,6 @@ const lookupName = 'https://github.com/example/example.git';
 const registryUrls = [lookupName, 'master'];
 
 describe('datasource/git-submoduless', () => {
-  beforeEach(() => globalCache.rmAll());
   describe('getReleases', () => {
     it('returns null if response is wrong', async () => {
       simpleGit.mockReturnValue({

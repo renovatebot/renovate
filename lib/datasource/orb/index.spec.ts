@@ -1,4 +1,3 @@
-import * as globalCache from '../../util/cache/global';
 import _got from '../../util/got';
 import * as datasource from '.';
 
@@ -31,7 +30,6 @@ describe('datasource/orb', () => {
   describe('getReleases', () => {
     beforeEach(() => {
       jest.clearAllMocks();
-      return globalCache.rmAll();
     });
     it('returns null for empty result', async () => {
       got.mockReturnValueOnce({ body: {} });

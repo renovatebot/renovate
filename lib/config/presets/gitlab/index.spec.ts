@@ -1,5 +1,4 @@
 import * as httpMock from '../../../../test/httpMock';
-import * as globalCache from '../../../util/cache/global';
 import * as gitlab from '.';
 
 const gitlabApiHost = 'https://gitlab.com';
@@ -8,7 +7,6 @@ describe('config/presets/gitlab', () => {
   beforeEach(() => {
     httpMock.reset();
     httpMock.setup();
-    return globalCache.rmAll();
   });
   describe('getPreset()', () => {
     it('throws if non-default', async () => {

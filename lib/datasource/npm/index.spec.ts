@@ -3,7 +3,6 @@ import nock from 'nock';
 import _registryAuthToken from 'registry-auth-token';
 import { getName } from '../../../test/util';
 import { DATASOURCE_FAILURE } from '../../constants/error-messages';
-import * as globalCache from '../../util/cache/global';
 import * as hostRules from '../../util/host-rules';
 import * as npm from '.';
 
@@ -54,7 +53,6 @@ describe(getName(__filename), () => {
       },
     };
     nock.cleanAll();
-    return globalCache.rmAll();
   });
   afterEach(() => {
     delete process.env.RENOVATE_CACHE_NPM_MINUTES;

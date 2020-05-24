@@ -1,12 +1,10 @@
 import * as httpMock from '../../../test/httpMock';
-import * as globalCache from '../../util/cache/global';
 import * as gitlab from '.';
 
 describe('datasource/gitlab-tags', () => {
   beforeEach(() => {
     httpMock.reset();
     httpMock.setup();
-    return globalCache.rmAll();
   });
   describe('getReleases', () => {
     it('returns tags', async () => {

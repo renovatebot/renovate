@@ -1,5 +1,4 @@
 import fs from 'fs';
-import * as globalCache from '../../util/cache/global';
 import _got from '../../util/got';
 import * as _hostRules from '../../util/host-rules';
 import * as nuget from '.';
@@ -95,9 +94,6 @@ const configV3Multiple = {
 };
 
 describe('datasource/nuget', () => {
-  beforeEach(() => {
-    return globalCache.rmAll();
-  });
   describe('getReleases', () => {
     beforeEach(() => {
       jest.resetAllMocks();

@@ -2,7 +2,6 @@ import AWS from 'aws-sdk';
 import AWSMock from 'aws-sdk-mock';
 import { getPkgReleases } from '..';
 import { DATASOURCE_FAILURE } from '../../constants/error-messages';
-import * as globalCache from '../../util/cache/global';
 import _got from '../../util/got';
 import * as _hostRules from '../../util/host-rules';
 import * as docker from '.';
@@ -35,7 +34,6 @@ describe('api/docker', () => {
         password: 'some-password',
       });
       hostRules.hosts = jest.fn(() => []);
-      return globalCache.rmAll();
     });
     it('returns null if no token', async () => {
       got.mockReturnValueOnce({ body: {} });
@@ -279,7 +277,6 @@ describe('api/docker', () => {
   describe('getReleases', () => {
     beforeEach(() => {
       jest.clearAllMocks();
-      return globalCache.rmAll();
     });
     it('returns null if no token', async () => {
       got.mockReturnValueOnce({ body: {} });
