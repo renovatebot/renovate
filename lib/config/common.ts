@@ -159,6 +159,7 @@ export interface RenovateConfig
   warnings?: ValidationMessage[];
   vulnerabilityAlerts?: RenovateSharedConfig;
   regexManagers?: CustomManager[];
+  redisUrl?: string;
 }
 
 export type UpdateType =

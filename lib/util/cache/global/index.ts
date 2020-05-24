@@ -1,5 +1,7 @@
+import { RenovateConfig } from '../../../config/common';
 import * as runCache from '../run';
 import * as fileCache from './file';
+import * as redisCache from './redis';
 
 function getGlobalKey(namespace: string, key: string): string {
   return `global%%${namespace}%%${key}`;
@@ -30,6 +32,16 @@ export function set(
   return global.renovateCache.set(namespace, key, value, minutes);
 }
 
-export function init(cacheDir: string): void {
-  return fileCache.init(cacheDir);
+export function init(config: RenovateConfig): void {
+  if (config.redisUrl) {
+    redisCache.init(config.redisUrl);
+  } else {
+    fileCache.init(config.cacheDir);
+  }
+}
+
+export async function end(config: RenovateConfig): Promise<void> {
+  if (config.redisUrl) {
+    await redisCache.end();
+  }
 }
