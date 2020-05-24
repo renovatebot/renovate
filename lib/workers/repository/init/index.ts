@@ -11,7 +11,7 @@ import { detectSemanticCommits } from './semantic';
 import { detectVulnerabilityAlerts } from './vulnerability';
 
 export async function initRepo(input: RenovateConfig): Promise<RenovateConfig> {
-  runCache.clear();
+  runCache.init();
   let config: RenovateConfig = {
     ...input,
     errors: [],

@@ -1,5 +1,4 @@
 import * as httpMock from '../../../test/httpMock';
-import * as runCache from '../../util/cache/run';
 import * as _hostRules from '../../util/host-rules';
 import * as github from '.';
 
@@ -19,7 +18,6 @@ describe('datasource/github-releases', () => {
 
   afterEach(() => {
     httpMock.reset();
-    runCache.clear();
   });
 
   describe('getReleases', () => {

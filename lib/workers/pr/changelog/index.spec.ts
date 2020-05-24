@@ -1,8 +1,6 @@
 import * as httpMock from '../../../../test/httpMock';
 import { partial } from '../../../../test/util';
 import { PLATFORM_TYPE_GITHUB } from '../../../constants/platforms';
-import { clear } from '../../../util/cache/run';
-import * as runCache from '../../../util/cache/run';
 import * as hostRules from '../../../util/host-rules';
 import * as semverVersioning from '../../../versioning/semver';
 import { BranchConfig } from '../../common';
@@ -35,7 +33,7 @@ const upgrade: BranchConfig = partial<BranchConfig>({
 
 describe('workers/pr/changelog', () => {
   describe('getChangeLogJSON', () => {
-    beforeEach(async () => {
+    beforeEach(() => {
       httpMock.setup();
       hostRules.clear();
       hostRules.add({
@@ -43,11 +41,9 @@ describe('workers/pr/changelog', () => {
         baseUrl: 'https://api.github.com/',
         token: 'abc',
       });
-      runCache.clear();
     });
 
     afterEach(() => {
-      clear();
       httpMock.reset();
     });
 

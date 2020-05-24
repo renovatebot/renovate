@@ -1,10 +1,8 @@
 import * as httpMock from '../../../test/httpMock';
-import * as runCache from '../../util/cache/run';
 import * as gitlab from '.';
 
 describe('datasource/gitlab-tags', () => {
   beforeEach(() => {
-    runCache.clear();
     httpMock.reset();
     httpMock.setup();
   });
