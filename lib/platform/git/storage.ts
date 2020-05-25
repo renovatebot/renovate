@@ -85,6 +85,8 @@ export class Storage {
 
   private _cwd: string | undefined;
 
+  private _privateKeySet = false;
+
   private async _resetToBranch(branchName: string): Promise<void> {
     logger.debug(`resetToBranch(${branchName})`);
     await this._git.raw(['reset', '--hard']);
@@ -463,9 +465,9 @@ export class Storage {
     message,
   }: CommitFilesConfig): Promise<string | null> {
     logger.debug(`Committing files to branch ${branchName}`);
-    if (!this._config.privateKeySet) {
+    if (!this._privateKeySet) {
       await writePrivateKey(this._cwd);
-      this._config.privateKeySet = true;
+      this._privateKeySet = true;
     }
     try {
       await this._git.reset('hard');
