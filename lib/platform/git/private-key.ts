@@ -1,12 +1,9 @@
-import childProcess from 'child_process';
 import os from 'os';
 import path from 'path';
-import util from 'util';
 import fs from 'fs-extra';
 import { PLATFORM_GPG_FAILED } from '../../constants/error-messages';
 import { logger } from '../../logger';
-
-const exec = util.promisify(childProcess.exec);
+import { exec } from '../../util/exec';
 
 let gitPrivateKey: string;
 let keyId: string;
