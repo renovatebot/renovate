@@ -85,7 +85,7 @@ export async function start(): Promise<0 | 1> {
       await repositoryWorker.renovateRepository(repoConfig);
     }
     setMeta({});
-    await globalCache.cleanup(config);
+    globalCache.cleanup(config);
     logger.debug(`Renovate exiting successfully`);
   } catch (err) /* istanbul ignore next */ {
     if (err.message.startsWith('Init: ')) {

@@ -11,7 +11,7 @@ function getKey(namespace: string, key: string): string {
 
 export function end(): void {
   try {
-    client?.redis?.end(true);
+    client?.redis?.end(true); // TODO: Why is this not supported by client directly?
   } catch (err) {
     logger.warn({ err }, 'Redis cache end failed');
   }
@@ -54,8 +54,7 @@ async function set(
       value,
       expiry: DateTime.local().plus({ minutes: ttlMinutes }),
     }),
-    'EX',
-    ttlMinutes * 60
+    ['EX', ttlMinutes * 60]
   );
 }
 

@@ -40,8 +40,8 @@ export function init(config: RenovateConfig): void {
   }
 }
 
-export async function cleanup(config: RenovateConfig): Promise<void> {
+export function cleanup(config: RenovateConfig): void {
   if (config.redisUrl) {
-    await redisCache.end();
+    redisCache.end();
   }
 }
