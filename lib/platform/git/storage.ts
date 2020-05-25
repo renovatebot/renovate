@@ -33,7 +33,6 @@ interface LocalConfig extends StorageConfig {
   baseBranchSha: string;
   branchExists: Record<string, boolean>;
   branchPrefix: string;
-  privateKeySet: boolean;
 }
 
 // istanbul ignore next
