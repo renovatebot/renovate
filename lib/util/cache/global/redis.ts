@@ -1,5 +1,5 @@
 /* istanbul ignore file */
-import { createHandyClient, IHandyRedis } from 'handy-redis';
+import { IHandyRedis, createHandyClient } from 'handy-redis';
 import { DateTime } from 'luxon';
 import { logger } from '../../../logger';
 
