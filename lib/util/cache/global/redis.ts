@@ -1,5 +1,5 @@
 /* istanbul ignore file */
-import redis from 'async-redis';
+import { createHandyClient } from 'handy-redis';
 import { DateTime } from 'luxon';
 import { logger } from '../../../logger';
 
@@ -64,7 +64,7 @@ export function init(redisUrl: string): void {
     return;
   }
   logger.debug('Initializing Renovate Redis cache');
-  client = redis.createClient(redisUrl);
+  client = createHandyClient(redisUrl);
 
   client.on('connect', () => {
     logger.debug('Redis client connected');
