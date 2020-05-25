@@ -77,6 +77,15 @@ RFC5322-compliant string if you wish to customise the git author for commits.
 
 ## gitPrivateKey
 
+This should be an armored private key, e.g. the type you get from running `gpg --export-secret-keys --armor 92066A17F0D1707B4E96863955FEF5171C45FAE5 > private.key`. Replace the newlines with `\n` before adding the resulting single-line value to your bot's config.
+
+It will be loaded _lazily_. Before the first commit in a repository, Renovate will:
+
+- First, run `gpg import` if it hasn't been run before
+- Then, run `git config user.signingkey` and `git config commit.gpgsign true`
+
+The `git` commands are run locally in the cloned repo instead of globally to reduce the chance of causing unintended consequences with global git configs on shared systems.
+
 ## logContext
 
 `logContext` is included with each log entry only if `logFormat="json"` - it is not included in the pretty log output. If left as default (null), a random short ID will be selected.
