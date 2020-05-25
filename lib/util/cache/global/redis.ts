@@ -13,7 +13,7 @@ export async function end(): Promise<void> {
   try {
     await client.end(true);
   } catch (err) {
-    logger.warn({ err }, 'client.end failed');
+    logger.warn({ err }, 'Redis cache end failed');
   }
 }
 
@@ -59,22 +59,20 @@ async function set(
   );
 }
 
-export function init(redisUrl: string): void {
-  if (!redisUrl) {
+export function init(url: string): void {
+  if (!url) {
     return;
   }
-  logger.debug('Initializing Renovate Redis cache');
-  client = createHandyClient(redisUrl);
-
-  client.on('connect', () => {
-    logger.debug('Redis client connected');
+  logger.debug('Redis cache init');
+  client = createHandyClient({
+    url,
+    retry_strategy: (options) => {
+      if (options.error) {
+        logger.error({ err: options.error }, 'Redis cache error');
+      }
+      // Reconnect after this time
+      return Math.min(options.attempt * 100, 3000);
+    },
   });
-
-  client.on('error', async (err) => {
-    logger.fatal({ err, stack: err.stack }, 'Could not connect to Redis cache');
-    await end();
-    process.exit(-1);
-  });
-
   global.renovateCache = { get, set, rm };
 }
