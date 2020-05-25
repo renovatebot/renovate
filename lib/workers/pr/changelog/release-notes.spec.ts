@@ -34,6 +34,11 @@ const adapterutilsChangelogMd = fs.readFileSync(
   'utf8'
 );
 
+const gitterWebappChangelogMd = fs.readFileSync(
+  'lib/workers/pr/__fixtures__/gitter-webapp.md',
+  'utf8'
+);
+
 const contentsResponse = [
   { name: 'lib' },
   { name: 'CHANGELOG.md' },
@@ -230,6 +235,23 @@ describe('workers/pr/release-notes', () => {
         '1.6.9',
         'https://github.com/',
         'https://api.github.com/'
+      );
+      expect(res).not.toBeNull();
+      expect(res).toMatchSnapshot();
+    });
+    it('parses gitlab.com/gitlab-org/gitter/webapp', async () => {
+      ghGot
+        .mockResolvedValueOnce({ body: contentsResponse })
+        .mockResolvedValueOnce({
+          body: {
+            content: Buffer.from(gitterWebappChangelogMd).toString('base64'),
+          },
+        });
+      const res = await getReleaseNotesMd(
+        'gitlab-org/gitter/webapp',
+        '20.26.0',
+        'https://gitlab.com/',
+        'https://api.gitlab.com/'
       );
       expect(res).not.toBeNull();
       expect(res).toMatchSnapshot();
