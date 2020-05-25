@@ -103,6 +103,16 @@ describe('workers/pr/changelog', () => {
         })
       ).toMatchSnapshot();
     });
+    it('uses GitLab tags with error', async () => {
+      glGot.mockImplementation(() => {
+        throw new Error('Unknown GitLab Repo');
+      });
+      expect(
+        await getChangeLogJSON({
+          ...upgrade,
+        })
+      ).toMatchSnapshot();
+    });
     it('handles no sourceUrl', async () => {
       expect(
         await getChangeLogJSON({
