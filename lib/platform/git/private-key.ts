@@ -20,7 +20,7 @@ async function getKeyId(): Promise<void> {
   await fs.outputFile(keyFileName, gitPrivateKey);
   const { stdout, stderr } = await exec(`gpg --import ${keyFileName}`);
   logger.debug({ stdout, stderr }, 'Private key import result');
-  keyId = stderr
+  keyId = (stdout + stderr)
     .split('\n')
     .find((line) => line.includes('secret key imported'))
     .replace('gpg: key ', '')
