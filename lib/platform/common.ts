@@ -191,6 +191,7 @@ export interface Platform {
   initRepo(config: RepoParams): Promise<RepoConfig>;
   cleanRepo(): Promise<void>;
   getPrList(): Promise<Pr[]>;
+  getPrFiles(pr: Pr): Promise<string[]>;
   getAllRenovateBranches(branchPrefix: string): Promise<string[]>;
   ensureIssueClosing(title: string): Promise<void>;
   getFileList(): Promise<string[]>;

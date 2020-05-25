@@ -387,6 +387,11 @@ export async function getPrList(_args?: any): Promise<Pr[]> {
   return config.prList;
 }
 
+export async function getPrFiles(pr: Pr): Promise<string[]> {
+  const diff = await config.storage.getDiff(pr.branchName, pr.targetBranch);
+  return diff.files.map((x) => x.file);
+}
+
 // TODO: coverage
 // istanbul ignore next
 export async function findPr({

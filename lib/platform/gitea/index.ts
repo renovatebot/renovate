@@ -479,6 +479,11 @@ const platform: Platform = {
     return config.prList;
   },
 
+  async getPrFiles(pr: Pr): Promise<string[]> {
+    const diff = await config.storage.getDiff(pr.branchName, pr.targetBranch);
+    return diff.files.map((x) => x.file);
+  },
+
   async getPr(number: number): Promise<Pr | null> {
     // Search for pull request in cached list or attempt to query directly
     const prList = await platform.getPrList();
@@ -960,6 +965,7 @@ export const {
   getPr,
   getPrBody,
   getPrList,
+  getPrFiles,
   getRepoForceRebase,
   getRepoStatus,
   getRepos,

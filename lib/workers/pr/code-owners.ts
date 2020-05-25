@@ -14,7 +14,7 @@ export async function codeOwnersForPr(pr: Pr): Promise<string[]> {
       return [];
     }
 
-    const prFiles = await platform.getPrFiles(pr.number);
+    const prFiles = await platform.getPrFiles(pr);
     const rules = codeOwnersFile
       .split('\n')
       .map((line) => line.trim())

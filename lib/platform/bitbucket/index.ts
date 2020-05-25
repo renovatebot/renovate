@@ -241,6 +241,11 @@ export async function getPrList(): Promise<Pr[]> {
   return config.prList;
 }
 
+export async function getPrFiles(pr: Pr): Promise<string[]> {
+  const diff = await config.storage.getDiff(pr.branchName, pr.targetBranch);
+  return diff.files.map((x) => x.file);
+}
+
 export async function findPr({
   branchName,
   prTitle,
