@@ -9,9 +9,9 @@ function getKey(namespace: string, key: string): string {
   return `${namespace}-${key}`;
 }
 
-export async function end(): Promise<void> {
+export function end(): void {
   try {
-    await client?.end(true);
+    client?.redis?.end(true);
   } catch (err) {
     logger.warn({ err }, 'Redis cache end failed');
   }
