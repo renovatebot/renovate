@@ -1,9 +1,9 @@
 /* istanbul ignore file */
-import { createHandyClient } from 'handy-redis';
+import { createHandyClient, IHandyRedis } from 'handy-redis';
 import { DateTime } from 'luxon';
 import { logger } from '../../../logger';
 
-let client;
+let client: IHandyRedis | undefined;
 
 function getKey(namespace: string, key: string): string {
   return `${namespace}-${key}`;
@@ -11,7 +11,7 @@ function getKey(namespace: string, key: string): string {
 
 export async function end(): Promise<void> {
   try {
-    await client.end(true);
+    await client?.end(true);
   } catch (err) {
     logger.warn({ err }, 'Redis cache end failed');
   }
@@ -19,13 +19,13 @@ export async function end(): Promise<void> {
 
 async function rm(namespace: string, key: string): Promise<void> {
   logger.trace({ namespace, key }, 'Removing cache entry');
-  await client.del(getKey(namespace, key));
+  await client?.del(getKey(namespace, key));
 }
 
 async function get<T = never>(namespace: string, key: string): Promise<T> {
   logger.trace(`cache.get(${namespace}, ${key})`);
   try {
-    const res = await client.get(getKey(namespace, key));
+    const res = await client?.get(getKey(namespace, key));
     const cachedValue = JSON.parse(res);
     if (cachedValue) {
       if (DateTime.local() < DateTime.fromISO(cachedValue.expiry)) {
@@ -48,7 +48,7 @@ async function set(
   ttlMinutes = 5
 ): Promise<void> {
   logger.trace({ namespace, key, ttlMinutes }, 'Saving cached value');
-  await client.set(
+  await client?.set(
     getKey(namespace, key),
     JSON.stringify({
       value,
