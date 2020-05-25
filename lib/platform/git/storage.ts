@@ -13,6 +13,7 @@ import {
 import { logger } from '../../logger';
 import * as limits from '../../workers/global/limits';
 import { CommitFilesConfig } from '../common';
+import { writePrivateKey } from './private-key';
 
 declare module 'fs-extra' {
   export function exists(pathLike: string): Promise<boolean>;
@@ -32,6 +33,7 @@ interface LocalConfig extends StorageConfig {
   baseBranchSha: string;
   branchExists: Record<string, boolean>;
   branchPrefix: string;
+  privateKeySet: boolean;
 }
 
 // istanbul ignore next
@@ -461,6 +463,10 @@ export class Storage {
     message,
   }: CommitFilesConfig): Promise<string | null> {
     logger.debug(`Committing files to branch ${branchName}`);
+    if (!this._config.privateKeySet) {
+      await writePrivateKey(this._cwd);
+      this._config.privateKeySet = true;
+    }
     try {
       await this._git.reset('hard');
       await this._git.raw(['clean', '-fd']);
