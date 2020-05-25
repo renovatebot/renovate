@@ -24,7 +24,6 @@ interface StorageConfig {
   localDir: string;
   baseBranch?: string;
   url: string;
-  gitPrivateKey?: string;
   extraCloneOpts?: Git.Options;
 }
 
@@ -196,14 +195,6 @@ export class Storage {
       }
       logger.warn({ err }, 'Cannot retrieve latest commit date');
     }
-    // istanbul ignore if
-    if (config.gitPrivateKey) {
-      logger.debug('Git private key configured, but not being set');
-    } else {
-      logger.debug('No git private key present - commits will be unsigned');
-      await this._git.raw(['config', 'commit.gpgsign', 'false']);
-    }
-
     if (global.gitAuthor) {
       logger.debug({ gitAuthor: global.gitAuthor }, 'Setting git author');
       try {

@@ -44,7 +44,6 @@ type MergeMethod = 'merge' | 'rebase_merge' | 'ff';
 const defaultConfigFile = configFileNames[0];
 let config: {
   storage: GitStorage;
-  gitPrivateKey?: string;
   repository: string;
   localDir: string;
   defaultBranch: string;
@@ -131,13 +130,11 @@ export function cleanRepo(): Promise<void> {
 // Initialize GitLab by getting base branch
 export async function initRepo({
   repository,
-  gitPrivateKey,
   localDir,
   optimizeForDisabled,
 }: RepoParams): Promise<RepoConfig> {
   config = {} as any;
   config.repository = urlEscape(repository);
-  config.gitPrivateKey = gitPrivateKey;
   config.localDir = localDir;
 
   let res: GotResponse<{

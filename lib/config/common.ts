@@ -91,6 +91,7 @@ export interface RenovateAdminConfig {
   repositories?: RenovateRepository[];
   requireConfig?: boolean;
   trustLevel?: 'low' | 'high';
+  gitPrivateKey?: string;
 }
 
 export type PostUpgradeTasks = {

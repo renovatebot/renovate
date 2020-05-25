@@ -204,7 +204,6 @@ export async function initRepo({
   repository,
   forkMode,
   forkToken,
-  gitPrivateKey,
   localDir,
   includeForks,
   renovateUsername,
@@ -229,7 +228,6 @@ export async function initRepo({
   config.localDir = localDir;
   config.repository = repository;
   [config.repositoryOwner, config.repositoryName] = repository.split('/');
-  config.gitPrivateKey = gitPrivateKey;
   let res;
   try {
     res = await githubApi.getJson<{ fork: boolean }>(`repos/${repository}`);
