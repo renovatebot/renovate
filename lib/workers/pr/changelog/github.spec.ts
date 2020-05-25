@@ -30,14 +30,13 @@ const upgrade: BranchUpgradeConfig = {
 
 describe('workers/pr/changelog', () => {
   describe('getChangeLogJSON', () => {
-    beforeEach(async () => {
+    beforeEach(() => {
       hostRules.clear();
       hostRules.add({
         hostType: PLATFORM_TYPE_GITHUB,
         baseUrl: 'https://api.github.com/',
         token: 'abc',
       });
-      await global.renovateCache.rmAll();
     });
     it('returns null if @types', async () => {
       expect(

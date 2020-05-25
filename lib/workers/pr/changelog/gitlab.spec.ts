@@ -34,7 +34,7 @@ const upgrade: BranchUpgradeConfig = {
 
 describe('workers/pr/changelog', () => {
   describe('getChangeLogJSON', () => {
-    beforeEach(async () => {
+    beforeEach(() => {
       glGot.mockClear();
       hostRules.clear();
       hostRules.add({
@@ -42,7 +42,6 @@ describe('workers/pr/changelog', () => {
         baseUrl: 'https://gitlab.com/',
         token: 'abc',
       });
-      await global.renovateCache.rmAll();
     });
     it('returns null if @types', async () => {
       expect(
