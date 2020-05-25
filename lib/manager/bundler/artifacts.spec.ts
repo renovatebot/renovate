@@ -2,12 +2,11 @@ import { exec as _exec } from 'child_process';
 import Git from 'simple-git/promise';
 import { join } from 'upath';
 import { envMock, mockExecAll } from '../../../test/execUtil';
-import { mocked } from '../../../test/util';
+import { mocked, platform } from '../../../test/util';
 import * as _datasource from '../../datasource/docker';
-import { platform as _platform } from '../../platform';
 import { setUtilConfig } from '../../util';
 import { BinarySource } from '../../util/exec/common';
-import { resetPrefetchedImages } from '../../util/exec/docker';
+import * as docker from '../../util/exec/docker';
 import * as _env from '../../util/exec/env';
 import * as _fs from '../../util/fs';
 import * as _bundlerHostRules from './host-rules';
@@ -16,23 +15,16 @@ import { updateArtifacts } from '.';
 const fs: jest.Mocked<typeof _fs> = _fs as any;
 const exec: jest.Mock<typeof _exec> = _exec as any;
 const env = mocked(_env);
-const platform = mocked(_platform);
 const datasource = mocked(_datasource);
 const bundlerHostRules = mocked(_bundlerHostRules);
 
 jest.mock('fs-extra');
 jest.mock('child_process');
 jest.mock('../../../lib/util/exec/env');
-jest.mock('../../../lib/platform');
 jest.mock('../../../lib/datasource/docker');
 jest.mock('../../../lib/util/fs');
 jest.mock('../../../lib/util/host-rules');
 jest.mock('./host-rules');
-jest.mock('../../util/exec/docker/index', () =>
-  require('../../../test/util').mockPartial('../../util/exec/docker/index', {
-    removeDanglingContainers: jest.fn(),
-  })
-);
 
 let config;
 
@@ -52,7 +44,7 @@ describe('bundler.updateArtifacts()', () => {
 
     env.getChildProcessEnv.mockReturnValue(envMock.basic);
     bundlerHostRules.findAllAuthenticatable.mockReturnValue([]);
-    resetPrefetchedImages();
+    docker.resetPrefetchedImages();
 
     await setUtilConfig(config);
   });
@@ -127,6 +119,7 @@ describe('bundler.updateArtifacts()', () => {
   });
   describe('Docker', () => {
     beforeEach(async () => {
+      jest.spyOn(docker, 'removeDanglingContainers').mockResolvedValueOnce();
       await setUtilConfig({ ...config, binarySource: BinarySource.Docker });
     });
     it('.ruby-version', async () => {
