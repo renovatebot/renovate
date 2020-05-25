@@ -6,9 +6,27 @@ import { logger } from '../../logger';
 import { exec } from '../../util/exec';
 
 let gitPrivateKey: string;
+let keyId: string;
 
 export function setPrivateKey(key: string): void {
   gitPrivateKey = key;
+}
+
+async function getKeyId(): Promise<void> {
+  if (keyId) {
+    return;
+  }
+  const keyFileName = path.join(os.tmpdir() + '/git-private.key');
+  await fs.outputFile(keyFileName, gitPrivateKey);
+  const { stdout, stderr } = await exec(`gpg --import ${keyFileName}`);
+  logger.debug({ stdout, stderr }, 'Private key import result');
+  keyId = stderr
+    .split('\n')
+    .find((line) => line.includes('secret key imported'))
+    .replace('gpg: key ', '')
+    .split(':')
+    .shift();
+  await fs.remove(keyFileName);
 }
 
 export async function writePrivateKey(cwd: string): Promise<void> {
@@ -17,17 +35,7 @@ export async function writePrivateKey(cwd: string): Promise<void> {
   }
   logger.debug('Setting git private key');
   try {
-    const keyFileName = path.join(os.tmpdir() + '/git-private.key');
-    await fs.outputFile(keyFileName, gitPrivateKey);
-    const { stdout, stderr } = await exec(`gpg --import ${keyFileName}`);
-    logger.debug({ stdout, stderr }, 'Private key import result');
-    const keyId = stderr
-      .split('\n')
-      .find((line) => line.includes('secret key imported'))
-      .replace('gpg: key ', '')
-      .split(':')
-      .shift();
-    await fs.remove(keyFileName);
+    await getKeyId();
     await exec(`git config user.signingkey ${keyId}`, { cwd });
     await exec(`git config commit.gpgsign true`, { cwd });
   } catch (err) {
