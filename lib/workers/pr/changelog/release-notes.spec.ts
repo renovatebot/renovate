@@ -53,6 +53,22 @@ describe('workers/pr/release-notes', () => {
       const input = { a: 1 };
       expect(await addReleaseNotes(input as never)).toEqual(input);
     });
+    it('returns ChangeLogResult', async () => {
+      const input = {
+        a: 1,
+        project: { github: 'https://github.com/nodeca/js-yaml' },
+        versions: [{ version: '3.10.0', compare: { url: '' } }],
+      };
+      expect(await addReleaseNotes(input as never)).toMatchSnapshot();
+    });
+    it('returns ChangeLogResult without release notes', async () => {
+      const input = {
+        a: 1,
+        project: { gitlab: 'https://gitlab.com/gitlab-org/gitter/webapp/' },
+        versions: [{ version: '20.26.0', compare: { url: '' } }],
+      };
+      expect(await addReleaseNotes(input as never)).toMatchSnapshot();
+    });
   });
   describe('getReleaseList()', () => {
     it('should return empty array if no apiBaseUrl', async () => {
