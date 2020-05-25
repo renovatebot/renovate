@@ -55,7 +55,7 @@ exports[`workers/pr/changelog getChangeLogJSON supports github enterprise and gi
 Object {
   "hasReleaseNotes": true,
   "project": Object {
-    "apiBaseUrl": "https://github-enterprise.example.com/",
+    "apiBaseUrl": "https://github-enterprise.example.com/api/v3/",
     "baseUrl": "https://github-enterprise.example.com/",
     "depName": "renovate",
     "github": "chalk/chalk",
