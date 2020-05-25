@@ -103,25 +103,6 @@ describe('workers/pr/changelog', () => {
         })
       ).toMatchSnapshot();
     });
-    it('filters unnecessary warns', async () => {
-      glGot.mockImplementation(() => {
-        throw new Error('Unknown GitLab Repo');
-      });
-      expect(
-        await getChangeLogJSON({
-          ...upgrade,
-          depName: '@renovate/no',
-        })
-      ).toMatchSnapshot();
-    });
-    it('supports node engines', async () => {
-      expect(
-        await getChangeLogJSON({
-          ...upgrade,
-          depType: 'engines',
-        })
-      ).toMatchSnapshot();
-    });
     it('handles no sourceUrl', async () => {
       expect(
         await getChangeLogJSON({
@@ -153,19 +134,6 @@ describe('workers/pr/changelog', () => {
           releases: [{ version: '0.9.0' }],
         })
       ).toBeNull();
-    });
-    it('supports gitlab enterprise and gitlab.com changelog', async () => {
-      hostRules.add({
-        hostType: PLATFORM_TYPE_GITLAB,
-        token: 'super_secret',
-        baseUrl: 'https://gitlab-enterprise.example.com/',
-      });
-      expect(
-        await getChangeLogJSON({
-          ...upgrade,
-          endpoint: 'https://gitlab-enterprise.example.com/',
-        })
-      ).toMatchSnapshot();
     });
     it('supports gitlab enterprise and gitlab enterprise changelog', async () => {
       hostRules.add({
