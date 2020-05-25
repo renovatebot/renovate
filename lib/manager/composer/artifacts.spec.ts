@@ -1,12 +1,11 @@
 import { exec as _exec } from 'child_process';
 import { join } from 'upath';
 import { envMock, mockExecAll } from '../../../test/execUtil';
-import { mocked } from '../../../test/util';
-import { platform as _platform } from '../../platform';
+import { mocked, platform } from '../../../test/util';
 import { StatusResult } from '../../platform/git/storage';
 import { setUtilConfig } from '../../util';
 import { BinarySource } from '../../util/exec/common';
-import { resetPrefetchedImages } from '../../util/exec/docker';
+import * as docker from '../../util/exec/docker';
 import * as _env from '../../util/exec/env';
 import * as _fs from '../../util/fs';
 import * as composer from './artifacts';
@@ -21,12 +20,6 @@ const hostRules = require('../../util/host-rules');
 const fs: jest.Mocked<typeof _fs> = _fs as any;
 const exec: jest.Mock<typeof _exec> = _exec as any;
 const env = mocked(_env);
-const platform = mocked(_platform);
-jest.mock('../../util/exec/docker/index', () =>
-  require('../../../test/util').mockPartial('../../util/exec/docker/index', {
-    removeDanglingContainers: jest.fn(),
-  })
-);
 
 const config = {
   // `join` fixes Windows CI
@@ -42,7 +35,7 @@ describe('.updateArtifacts()', () => {
     jest.resetModules();
     env.getChildProcessEnv.mockReturnValue(envMock.basic);
     await setUtilConfig(config);
-    resetPrefetchedImages();
+    docker.resetPrefetchedImages();
   });
   it('returns if no composer.lock found', async () => {
     expect(
@@ -130,6 +123,7 @@ describe('.updateArtifacts()', () => {
     expect(execSnapshots).toMatchSnapshot();
   });
   it('supports docker mode', async () => {
+    jest.spyOn(docker, 'removeDanglingContainers').mockResolvedValueOnce();
     await setUtilConfig({ ...config, binarySource: BinarySource.Docker });
     fs.readLocalFile.mockResolvedValueOnce('Current composer.lock' as any);
 
