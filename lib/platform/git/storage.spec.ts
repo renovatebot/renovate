@@ -148,6 +148,44 @@ describe('platform/git/storage', () => {
     });
   });
 
+  describe('getBranchFiles(branchName, baseBranchName?)', () => {
+    it('detects changed files', async () => {
+      const hex = await git.getBranchCommit('master');
+      await git.createBranch('renovate/branch_with_changes', hex);
+      const file = {
+        name: 'some-new-file',
+        contents: 'some new-contents',
+      };
+      await git.commitFiles({
+        branchName: 'renovate/branch_with_changes',
+        files: [file],
+        message: 'Create something',
+      });
+      const branchFiles = await git.getBranchFiles(
+        'renovate/branch_with_changes',
+        'master'
+      );
+      expect(branchFiles).toMatchSnapshot();
+    });
+    it('detects changed files compared to current base branch', async () => {
+      const hex = await git.getBranchCommit('master');
+      await git.createBranch('renovate/branch_with_changes', hex);
+      const file = {
+        name: 'some-new-file',
+        contents: 'some new-contents',
+      };
+      await git.commitFiles({
+        branchName: 'renovate/branch_with_changes',
+        files: [file],
+        message: 'Create something',
+      });
+      const branchFiles = await git.getBranchFiles(
+        'renovate/branch_with_changes'
+      );
+      expect(branchFiles).toMatchSnapshot();
+    });
+  });
+
   describe('mergeBranch(branchName)', () => {
     it('should perform a branch merge', async () => {
       await git.setBranchPrefix('renovate/');

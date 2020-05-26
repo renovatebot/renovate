@@ -479,9 +479,9 @@ const platform: Platform = {
     return config.prList;
   },
 
+  /* istanbul ignore next */
   async getPrFiles(pr: Pr): Promise<string[]> {
-    const diff = await config.storage.getDiff(pr.branchName, pr.targetBranch);
-    return diff.files.map((x) => x.file);
+    return config.storage.getBranchFiles(pr.branchName, pr.targetBranch);
   },
 
   async getPr(number: number): Promise<Pr | null> {

@@ -439,6 +439,22 @@ export class Storage {
     }
   }
 
+  async getBranchFiles(
+    branchName: string,
+    baseBranchName?: string
+  ): Promise<string[]> {
+    try {
+      const diff = await this._git.diffSummary([
+        branchName,
+        baseBranchName || this._config.baseBranch,
+      ]);
+      return diff.files.map((file) => file.file);
+    } catch (err) {
+      checkForPlatformFailure(err);
+      return null;
+    }
+  }
+
   async getFile(filePath: string, branchName?: string): Promise<string | null> {
     if (branchName) {
       const exists = await this.branchExists(branchName);
@@ -452,19 +468,6 @@ export class Storage {
         'origin/' + (branchName || this._config.baseBranch) + ':' + filePath,
       ]);
       return content;
-    } catch (err) {
-      checkForPlatformFailure(err);
-      return null;
-    }
-  }
-
-  async getDiff(
-    branchName: string,
-    otherBranchName: string
-  ): Promise<DiffResult> {
-    try {
-      const diff = await this._git.diffSummary([branchName, otherBranchName]);
-      return diff;
     } catch (err) {
       checkForPlatformFailure(err);
       return null;
