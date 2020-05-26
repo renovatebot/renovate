@@ -159,7 +159,7 @@ exports[`workers/pr/changelog getChangeLogJSON supports github enterprise and gi
 Object {
   "hasReleaseNotes": true,
   "project": Object {
-    "apiBaseUrl": "https://github-enterprise.example.com/",
+    "apiBaseUrl": "https://github-enterprise.example.com/api/v3/",
     "baseUrl": "https://github-enterprise.example.com/",
     "depName": "renovate",
     "github": "chalk/chalk",
@@ -217,7 +217,7 @@ Array [
       "user-agent": "https://github.com/renovatebot/renovate",
     },
     "method": "GET",
-    "url": "https://github-enterprise.example.com/repos/chalk/chalk/tags?per_page=100",
+    "url": "https://github-enterprise.example.com/api/v3/repos/chalk/chalk/tags?per_page=100",
   },
   Object {
     "headers": Object {
@@ -228,7 +228,7 @@ Array [
       "user-agent": "https://github.com/renovatebot/renovate",
     },
     "method": "GET",
-    "url": "https://github-enterprise.example.com/repos/chalk/chalk/contents/",
+    "url": "https://github-enterprise.example.com/api/v3/repos/chalk/chalk/contents/",
   },
   Object {
     "headers": Object {
@@ -239,7 +239,7 @@ Array [
       "user-agent": "https://github.com/renovatebot/renovate",
     },
     "method": "GET",
-    "url": "https://github-enterprise.example.com/repos/chalk/chalk/releases?per_page=100",
+    "url": "https://github-enterprise.example.com/api/v3/repos/chalk/chalk/releases?per_page=100",
   },
   Object {
     "headers": Object {
@@ -250,7 +250,7 @@ Array [
       "user-agent": "https://github.com/renovatebot/renovate",
     },
     "method": "GET",
-    "url": "https://github-enterprise.example.com/repos/chalk/chalk/contents/",
+    "url": "https://github-enterprise.example.com/api/v3/repos/chalk/chalk/contents/",
   },
   Object {
     "headers": Object {
@@ -261,7 +261,7 @@ Array [
       "user-agent": "https://github.com/renovatebot/renovate",
     },
     "method": "GET",
-    "url": "https://github-enterprise.example.com/repos/chalk/chalk/releases?per_page=100",
+    "url": "https://github-enterprise.example.com/api/v3/repos/chalk/chalk/releases?per_page=100",
   },
   Object {
     "headers": Object {
@@ -272,7 +272,7 @@ Array [
       "user-agent": "https://github.com/renovatebot/renovate",
     },
     "method": "GET",
-    "url": "https://github-enterprise.example.com/repos/chalk/chalk/contents/",
+    "url": "https://github-enterprise.example.com/api/v3/repos/chalk/chalk/contents/",
   },
   Object {
     "headers": Object {
@@ -283,7 +283,7 @@ Array [
       "user-agent": "https://github.com/renovatebot/renovate",
     },
     "method": "GET",
-    "url": "https://github-enterprise.example.com/repos/chalk/chalk/releases?per_page=100",
+    "url": "https://github-enterprise.example.com/api/v3/repos/chalk/chalk/releases?per_page=100",
   },
   Object {
     "headers": Object {
@@ -294,7 +294,7 @@ Array [
       "user-agent": "https://github.com/renovatebot/renovate",
     },
     "method": "GET",
-    "url": "https://github-enterprise.example.com/repos/chalk/chalk/contents/",
+    "url": "https://github-enterprise.example.com/api/v3/repos/chalk/chalk/contents/",
   },
   Object {
     "headers": Object {
@@ -305,7 +305,7 @@ Array [
       "user-agent": "https://github.com/renovatebot/renovate",
     },
     "method": "GET",
-    "url": "https://github-enterprise.example.com/repos/chalk/chalk/releases?per_page=100",
+    "url": "https://github-enterprise.example.com/api/v3/repos/chalk/chalk/releases?per_page=100",
   },
 ]
 `;
@@ -469,7 +469,7 @@ exports[`workers/pr/changelog getChangeLogJSON supports github.com and github en
 Object {
   "hasReleaseNotes": true,
   "project": Object {
-    "apiBaseUrl": "https://github-enterprise.example.com/",
+    "apiBaseUrl": "https://github-enterprise.example.com/api/v3/",
     "baseUrl": "https://github-enterprise.example.com/",
     "depName": "renovate",
     "github": "chalk/chalk",
@@ -527,7 +527,7 @@ Array [
       "user-agent": "https://github.com/renovatebot/renovate",
     },
     "method": "GET",
-    "url": "https://github-enterprise.example.com/repos/chalk/chalk/tags?per_page=100",
+    "url": "https://github-enterprise.example.com/api/v3/repos/chalk/chalk/tags?per_page=100",
   },
   Object {
     "headers": Object {
@@ -538,7 +538,7 @@ Array [
       "user-agent": "https://github.com/renovatebot/renovate",
     },
     "method": "GET",
-    "url": "https://github-enterprise.example.com/repos/chalk/chalk/contents/",
+    "url": "https://github-enterprise.example.com/api/v3/repos/chalk/chalk/contents/",
   },
   Object {
     "headers": Object {
@@ -549,7 +549,7 @@ Array [
       "user-agent": "https://github.com/renovatebot/renovate",
     },
     "method": "GET",
-    "url": "https://github-enterprise.example.com/repos/chalk/chalk/releases?per_page=100",
+    "url": "https://github-enterprise.example.com/api/v3/repos/chalk/chalk/releases?per_page=100",
   },
   Object {
     "headers": Object {
@@ -560,7 +560,7 @@ Array [
       "user-agent": "https://github.com/renovatebot/renovate",
     },
     "method": "GET",
-    "url": "https://github-enterprise.example.com/repos/chalk/chalk/contents/",
+    "url": "https://github-enterprise.example.com/api/v3/repos/chalk/chalk/contents/",
   },
   Object {
     "headers": Object {
@@ -571,7 +571,7 @@ Array [
       "user-agent": "https://github.com/renovatebot/renovate",
     },
     "method": "GET",
-    "url": "https://github-enterprise.example.com/repos/chalk/chalk/releases?per_page=100",
+    "url": "https://github-enterprise.example.com/api/v3/repos/chalk/chalk/releases?per_page=100",
   },
   Object {
     "headers": Object {
@@ -582,7 +582,7 @@ Array [
       "user-agent": "https://github.com/renovatebot/renovate",
     },
     "method": "GET",
-    "url": "https://github-enterprise.example.com/repos/chalk/chalk/contents/",
+    "url": "https://github-enterprise.example.com/api/v3/repos/chalk/chalk/contents/",
   },
   Object {
     "headers": Object {
@@ -593,7 +593,7 @@ Array [
       "user-agent": "https://github.com/renovatebot/renovate",
     },
     "method": "GET",
-    "url": "https://github-enterprise.example.com/repos/chalk/chalk/releases?per_page=100",
+    "url": "https://github-enterprise.example.com/api/v3/repos/chalk/chalk/releases?per_page=100",
   },
   Object {
     "headers": Object {
@@ -604,7 +604,7 @@ Array [
       "user-agent": "https://github.com/renovatebot/renovate",
     },
     "method": "GET",
-    "url": "https://github-enterprise.example.com/repos/chalk/chalk/contents/",
+    "url": "https://github-enterprise.example.com/api/v3/repos/chalk/chalk/contents/",
   },
   Object {
     "headers": Object {
@@ -615,7 +615,7 @@ Array [
       "user-agent": "https://github.com/renovatebot/renovate",
     },
     "method": "GET",
-    "url": "https://github-enterprise.example.com/repos/chalk/chalk/releases?per_page=100",
+    "url": "https://github-enterprise.example.com/api/v3/repos/chalk/chalk/releases?per_page=100",
   },
 ]
 `;

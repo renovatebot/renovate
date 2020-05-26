@@ -81,7 +81,7 @@ export async function getChangeLogJSON({
   }
   const apiBaseUrl = sourceUrl.startsWith('https://github.com/')
     ? 'https://api.github.com/'
-    : baseUrl;
+    : baseUrl + 'api/v3/';
   const repository = pathname.slice(1).replace(/\/$/, '');
   if (repository.split('/').length !== 2) {
     logger.debug({ sourceUrl }, 'Invalid github URL found');
