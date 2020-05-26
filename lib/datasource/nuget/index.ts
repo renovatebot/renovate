@@ -1,6 +1,6 @@
 import urlApi from 'url';
-import uniqBy from 'lodash/uniqBy';
 import { logger } from '../../logger';
+import { clone } from '../../util/clone';
 import { GetReleasesConfig, ReleaseResult } from '../common';
 import * as v2 from './v2';
 import * as v3 from './v3';
@@ -49,9 +49,17 @@ export async function getReleases({
     }
     if (res !== null) {
       if (dep !== null) {
-        dep.releases = uniqBy(dep.releases.concat(res.releases), 'version');
+        for (const resRelease of res.releases) {
+          if (
+            !dep.releases.find(
+              (depRelease) => depRelease.version === resRelease.version
+            )
+          ) {
+            dep.releases.push(clone(resRelease));
+          }
+        }
       } else {
-        dep = res;
+        dep = clone(res);
       }
     }
   }
