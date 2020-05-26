@@ -12,7 +12,7 @@ export function setPrivateKey(key: string): void {
   gitPrivateKey = key;
 }
 
-async function getKeyId(): Promise<void> {
+async function importKey(): Promise<void> {
   if (keyId) {
     return;
   }
@@ -35,7 +35,7 @@ export async function writePrivateKey(cwd: string): Promise<void> {
   }
   logger.debug('Setting git private key');
   try {
-    await getKeyId();
+    await importKey();
     await exec(`git config user.signingkey ${keyId}`, { cwd });
     await exec(`git config commit.gpgsign true`, { cwd });
   } catch (err) {
