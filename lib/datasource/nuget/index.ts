@@ -48,6 +48,7 @@ export async function getReleases({
       }
     }
     if (res !== null) {
+      res = clone(res);
       if (dep !== null) {
         for (const resRelease of res.releases) {
           if (
@@ -55,11 +56,11 @@ export async function getReleases({
               (depRelease) => depRelease.version === resRelease.version
             )
           ) {
-            dep.releases.push(clone(resRelease));
+            dep.releases.push(resRelease);
           }
         }
       } else {
-        dep = clone(res);
+        dep = res;
       }
     }
   }
