@@ -52,15 +52,6 @@ describe('workers/pr/changelog', () => {
       ).toBeNull();
       expect(glGot).toHaveBeenCalledTimes(0);
     });
-    it('returns null if no fromVersion', async () => {
-      expect(
-        await getChangeLogJSON({
-          ...upgrade,
-          sourceUrl: 'https://gitlab.com/DefinitelyTyped/DefinitelyTyped',
-        })
-      ).toBeNull();
-      expect(glGot).toHaveBeenCalledTimes(0);
-    });
     it('returns null if fromVersion equals toVersion', async () => {
       expect(
         await getChangeLogJSON({

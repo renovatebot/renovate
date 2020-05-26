@@ -11,6 +11,8 @@ import { addReleaseNotes } from './release-notes';
 
 const { get: glGot } = api;
 
+const cacheNamespace = 'changelog-gitlab-release';
+
 async function getTags(
   endpoint: string,
   versionScheme: string,
@@ -55,10 +57,6 @@ export async function getChangeLogJSON({
   depName,
   manager,
 }: BranchUpgradeConfig): Promise<ChangeLogResult | null> {
-  if (sourceUrl === 'https://gitlab.com/DefinitelyTyped/DefinitelyTyped') {
-    logger.debug('No release notes for @types');
-    return null;
-  }
   logger.trace('getChangeLogJSON for gitlab');
   const version = allVersioning.get(versioning);
   const { protocol, host, pathname } = URL.parse(sourceUrl);
@@ -67,7 +65,7 @@ export async function getChangeLogJSON({
   const apiBaseUrl = 'https://gitlab.com/api/v4/';
   const repository = pathname.slice(1).replace(/\/$/, '').replace(/\.git/, '');
   if (repository.split('/').length !== 2) {
-    logger.info({ sourceUrl }, 'Invalid gitlab (github) URL found');
+    logger.info({ sourceUrl }, 'Invalid gitlab URL found');
     return null;
   }
   if (!(releases && releases.length)) {
@@ -103,7 +101,6 @@ export async function getChangeLogJSON({
     return null;
   }
 
-  const cacheNamespace = 'changelog-gitlab-release';
   function getCacheKey(prev: string, next: string): string {
     return `${manager}:${depName}:${prev}:${next}`;
   }
