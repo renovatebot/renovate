@@ -83,6 +83,22 @@ describe('lib/versioning/hex', () => {
           toVersion: '2.0.7',
         })
       ).toEqual('== 2.0.7');
+      expect(
+        hexScheme.getNewValue({
+          currentValue: '== 3.6.1',
+          rangeStrategy: 'bump',
+          fromVersion: '3.6.1',
+          toVersion: '3.6.2',
+        })
+      ).toEqual('~> 3.6.2');
+      expect(
+        hexScheme.getNewValue({
+          currentValue: '== 3.6.1',
+          rangeStrategy: 'replace',
+          fromVersion: '3.6.1',
+          toVersion: '3.6.2',
+        })
+      ).toEqual('~> 3.6');
     });
     it('handles tilde greater than', () => {
       expect(
