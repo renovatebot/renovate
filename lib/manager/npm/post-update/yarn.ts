@@ -85,8 +85,7 @@ export async function generateLockFile(
       config.postUpdateOptions.includes('yarnDedupeFewer')
     ) {
       logger.debug('Performing yarn dedupe fewer');
-      const dedupeCommand =
-        'npx yarn-deduplicate --strategy fewer && yarn';
+      const dedupeCommand = 'npx yarn-deduplicate --strategy fewer && yarn';
       const dedupeRes = await exec(dedupeCommand, {
         cwd,
         env,
@@ -100,8 +99,7 @@ export async function generateLockFile(
       config.postUpdateOptions.includes('yarnDedupeHighest')
     ) {
       logger.debug('Performing yarn dedupe highest');
-      const dedupeCommand =
-        'npx yarn-deduplicate --strategy highest && yarn';
+      const dedupeCommand = 'npx yarn-deduplicate --strategy highest && yarn';
       const dedupeRes = await exec(dedupeCommand, {
         cwd,
         env,
