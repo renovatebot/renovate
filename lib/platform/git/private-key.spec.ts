@@ -1,4 +1,4 @@
-import { mocked } from '../../../test/util';
+import { getName, mocked } from '../../../test/util';
 import * as exec_ from '../../util/exec';
 import { setPrivateKey, writePrivateKey } from './private-key';
 
@@ -7,7 +7,7 @@ jest.mock('../../util/exec');
 
 const exec = mocked(exec_);
 
-describe('platform/git/private-key', () => {
+describe(getName(__filename), () => {
   describe('writePrivateKey()', () => {
     it('returns if no private key', async () => {
       await expect(writePrivateKey('/tmp/some-repo')).resolves.not.toThrow();
