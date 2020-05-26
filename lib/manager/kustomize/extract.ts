@@ -90,7 +90,7 @@ export function parseKustomize(content: string): Kustomize | null {
     return null;
   }
 
-  pkg.bases = pkg.bases || [];
+  pkg.bases = (pkg.bases || []).concat(pkg.resources || []);
   pkg.images = pkg.images || [];
 
   return pkg;
