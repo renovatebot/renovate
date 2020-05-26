@@ -4,8 +4,8 @@ exports[`workers/pr/changelog getChangeLogJSON supports gitlab enterprise and gi
 Object {
   "hasReleaseNotes": false,
   "project": Object {
-    "apiBaseUrl": "https://gitlab.com/api/v4/",
-    "baseUrl": "https://gitlab.com/",
+    "apiBaseUrl": "https://gitlab-enterprise.example.com/api/v4/",
+    "baseUrl": "https://gitlab-enterprise.example.com/",
     "depName": "renovate",
     "gitlab": "meno/dropzone",
     "repository": "https://gitlab-enterprise.example.com/meno/dropzone/",

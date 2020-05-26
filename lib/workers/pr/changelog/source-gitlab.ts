@@ -48,7 +48,6 @@ async function getTags(
 }
 
 export async function getChangeLogJSON({
-  endpoint,
   versioning,
   fromVersion,
   toVersion,
@@ -61,8 +60,8 @@ export async function getChangeLogJSON({
   const version = allVersioning.get(versioning);
   const { protocol, host, pathname } = URL.parse(sourceUrl);
   logger.debug({ protocol, host, pathname }, 'Protocol, host, pathname');
-  const baseUrl = 'https://gitlab.com/';
-  const apiBaseUrl = 'https://gitlab.com/api/v4/';
+  const baseUrl = protocol.concat('//', host, '/');
+  const apiBaseUrl = baseUrl.concat('api/v4/');
   const repository = pathname.slice(1).replace(/\/$/, '').replace(/\.git/, '');
   if (repository.split('/').length !== 2) {
     logger.info({ sourceUrl }, 'Invalid gitlab URL found');
@@ -86,7 +85,7 @@ export async function getChangeLogJSON({
 
   async function getRef(release: Release): Promise<string | null> {
     if (!tags) {
-      tags = await getTags(endpoint, versioning, repository);
+      tags = await getTags(apiBaseUrl, versioning, repository);
     }
     const regex = regEx(`${depName}[@-]`);
     const tagName = tags
