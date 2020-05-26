@@ -449,7 +449,7 @@ export class Storage {
         baseBranchName || this._config.baseBranch,
       ]);
       return diff.files.map((file) => file.file);
-    } catch (err) {
+    } catch (err) /* istanbul ignore next */ {
       checkForPlatformFailure(err);
       return null;
     }
