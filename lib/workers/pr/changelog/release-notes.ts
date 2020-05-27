@@ -42,7 +42,11 @@ export async function getReleaseList(
       body: release.body,
     }));
   } catch (err) /* istanbul ignore next */ {
-    logger.info({ repository, err }, 'getReleaseList error');
+    if (err.statusCode === 404) {
+      logger.debug({ repository }, 'getReleaseList 404');
+    } else {
+      logger.info({ repository, err }, 'getReleaseList error');
+    }
     return [];
   }
 }
