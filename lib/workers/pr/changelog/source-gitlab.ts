@@ -20,7 +20,7 @@ async function getTags(
 ): Promise<string[]> {
   logger.trace('getTags() from gitlab');
   let url = endpoint;
-  const repoid = repository.replace(/\.git/, '').replace(/\//g, '%2F');
+  const repoid = repository.replace(/\//g, '%2F');
   url += `projects/${repoid}/repository/tags`;
   try {
     const res = await glGot<{ name: string }[]>(url, {
