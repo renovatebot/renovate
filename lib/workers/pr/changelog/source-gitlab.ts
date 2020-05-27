@@ -30,7 +30,7 @@ async function getTags(
     const tags = (res && res.body) || [];
 
     if (!tags.length) {
-      logger.debug({ repoid }, 'repository has no Gitlab tags');
+      logger.debug({ sourceRepo: repository }, 'repository has no Gitlab tags');
     }
 
     return tags.map((tag) => tag.name).filter(Boolean);
