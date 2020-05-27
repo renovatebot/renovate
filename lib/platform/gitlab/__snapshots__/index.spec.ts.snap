@@ -2219,11 +2219,11 @@ Array [
     "url": "https://gitlab.com/api/v4/user",
   },
   Object {
-    "body": "{\\"state\\":\\"success\\",\\"description\\":\\"some-description\\",\\"context\\":\\"some-context\\",\\"target_url\\":\\"some-url\\"}",
+    "body": "{\\"state\\":\\"success\\",\\"ref\\":\\"0d9c7726c3d628b7e28af234595cfd20febdbf8e\\",\\"description\\":\\"some-description\\",\\"context\\":\\"some-context\\",\\"target_url\\":\\"some-url\\"}",
     "headers": Object {
       "accept": "application/json",
       "accept-encoding": "gzip, deflate",
-      "content-length": 101,
+      "content-length": 150,
       "content-type": "application/json",
       "host": "gitlab.com",
       "private-token": "abc123",
@@ -2271,11 +2271,11 @@ Array [
     "url": "https://gitlab.com/api/v4/user",
   },
   Object {
-    "body": "{\\"state\\":\\"failed\\",\\"description\\":\\"some-description\\",\\"context\\":\\"some-context\\",\\"target_url\\":\\"some-url\\"}",
+    "body": "{\\"state\\":\\"failed\\",\\"ref\\":\\"0d9c7726c3d628b7e28af234595cfd20febdbf8e\\",\\"description\\":\\"some-description\\",\\"context\\":\\"some-context\\",\\"target_url\\":\\"some-url\\"}",
     "headers": Object {
       "accept": "application/json",
       "accept-encoding": "gzip, deflate",
-      "content-length": 100,
+      "content-length": 149,
       "content-type": "application/json",
       "host": "gitlab.com",
       "private-token": "abc123",
@@ -2323,11 +2323,11 @@ Array [
     "url": "https://gitlab.com/api/v4/user",
   },
   Object {
-    "body": "{\\"state\\":\\"pending\\",\\"description\\":\\"some-description\\",\\"context\\":\\"some-context\\",\\"target_url\\":\\"some-url\\"}",
+    "body": "{\\"state\\":\\"pending\\",\\"ref\\":\\"0d9c7726c3d628b7e28af234595cfd20febdbf8e\\",\\"description\\":\\"some-description\\",\\"context\\":\\"some-context\\",\\"target_url\\":\\"some-url\\"}",
     "headers": Object {
       "accept": "application/json",
       "accept-encoding": "gzip, deflate",
-      "content-length": 101,
+      "content-length": 150,
       "content-type": "application/json",
       "host": "gitlab.com",
       "private-token": "abc123",
