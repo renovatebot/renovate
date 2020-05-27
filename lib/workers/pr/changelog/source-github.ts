@@ -44,16 +44,15 @@ async function getTagsInner(
 
 async function getTags(
   endpoint: string,
-  versionScheme: string,
   repository: string
 ): Promise<string[]> {
-  const cacheKey = `getTags-${endpoint}-${versionScheme}-${repository}`;
+  const cacheKey = `getTags-${endpoint}-${repository}`;
   const cachedResult = runCache.get(cacheKey);
   // istanbul ignore if
   if (cachedResult !== undefined) {
     return cachedResult;
   }
-  const promisedRes = getTagsInner(endpoint, versionScheme, repository);
+  const promisedRes = getTagsInner(endpoint, repository);
   runCache.set(cacheKey, promisedRes);
   return promisedRes;
 }
