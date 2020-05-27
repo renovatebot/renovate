@@ -3,6 +3,7 @@ import { Release } from '../../../datasource';
 import { logger } from '../../../logger';
 import { api } from '../../../platform/gitlab/gl-got-wrapper';
 import * as globalCache from '../../../util/cache/global';
+import * as runCache from '../../../util/cache/run';
 import { regEx } from '../../../util/regex';
 import * as allVersioning from '../../../versioning';
 import { BranchUpgradeConfig } from '../../common';
@@ -13,7 +14,7 @@ const { get: glGot } = api;
 
 const cacheNamespace = 'changelog-gitlab-release';
 
-async function getTags(
+async function getTagsInner(
   endpoint: string,
   versionScheme: string,
   repository: string
@@ -43,6 +44,22 @@ async function getTags(
     }
     return [];
   }
+}
+
+async function getTags(
+  endpoint: string,
+  versionScheme: string,
+  repository: string
+): Promise<string[]> {
+  const cacheKey = `getTags-${endpoint}-${versionScheme}-${repository}`;
+  const cachedResult = runCache.get(cacheKey);
+  // istanbul ignore if
+  if (cachedResult !== undefined) {
+    return cachedResult;
+  }
+  const promisedRes = getTagsInner(endpoint, versionScheme, repository);
+  runCache.set(cacheKey, promisedRes);
+  return promisedRes;
 }
 
 export async function getChangeLogJSON({
