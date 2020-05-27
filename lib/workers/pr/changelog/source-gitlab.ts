@@ -19,9 +19,7 @@ async function getTags(
   repository: string
 ): Promise<string[]> {
   logger.trace('getTags() from gitlab');
-  let url = endpoint
-    ? endpoint.replace(/\/?$/, '/')
-    : /* istanbul ignore next: not possible to test, maybe never possible? */ 'https://gitlab.com/api/v4/';
+  let url = endpoint;
   const repoid = repository.replace(/\.git/, '').replace(/\//g, '%2F');
   url += `projects/${repoid}/repository/tags`;
   try {
