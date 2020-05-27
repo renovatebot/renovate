@@ -1,9 +1,17 @@
 import crypto from 'crypto';
+import { logger } from '../../logger';
 import * as runCache from '../cache/run';
 import { clone } from '../clone';
 import { create } from './util';
 
 // With this caching, it means every GET request is cached during each repository run
+
+function cloneBody(response: any): any {
+  return {
+    ...response,
+    body: clone(response.body),
+  };
+}
 
 export default create({
   options: {},
@@ -12,7 +20,7 @@ export default create({
       return next(options);
     }
     if (!['github', 'npm'].includes(options.hostType)) {
-      return next(options);
+      return next(options).then(cloneBody);
     }
     if (options.method === 'GET') {
       const cacheKey = crypto
@@ -22,19 +30,23 @@ export default create({
             JSON.stringify({ href: options.href, headers: options.headers })
         )
         .digest('hex');
-      if (!runCache.get(cacheKey) || options.useCache === false) {
-        runCache.set(
-          cacheKey,
-          next(options).catch((err) => {
-            runCache.set(cacheKey, null);
-            throw err;
-          })
-        );
+      if (options.useCache === false) {
+        logger.trace('GET cache skipped: ' + options.href);
+      } else {
+        const cachedGot = runCache.get(cacheKey);
+        // istanbul ignore if
+        if (cachedGot) {
+          logger.trace('GET cache hit:  ' + options.href);
+          return cachedGot;
+        }
+        logger.trace('GET cache miss: ' + options.href);
       }
-      return runCache.get<Promise<any>>(cacheKey).then((response) => ({
-        ...response,
-        body: clone(response.body),
-      }));
+      const promisedRes = next(options).catch((err) => {
+        runCache.set(cacheKey, null);
+        throw err;
+      });
+      runCache.set(cacheKey, promisedRes);
+      return promisedRes.then(cloneBody);
     }
     return next(options);
   },

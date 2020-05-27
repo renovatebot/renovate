@@ -91,6 +91,7 @@ export interface RenovateAdminConfig {
   repositories?: RenovateRepository[];
   requireConfig?: boolean;
   trustLevel?: 'low' | 'high';
+  redisUrl?: string;
 }
 
 export type PostUpgradeTasks = {

@@ -160,12 +160,13 @@ export async function processBranch(
           );
           throw new Error(REPOSITORY_CHANGED);
         }
+        const topic = 'PR has been edited';
         if (
           branchPr.isModified ||
           (branchPr.targetBranch &&
             branchPr.targetBranch !== branchConfig.baseBranch)
         ) {
-          const topic = 'PR has been edited';
+          logger.debug({ prNo: branchPr.number }, 'PR has been edited');
           if (masterIssueCheck || config.rebaseRequested) {
             if (config.dryRun) {
               logger.info(
@@ -198,6 +199,11 @@ export async function processBranch(
             }
             return 'pr-edited';
           }
+        } else {
+          await platform.ensureCommentRemoval({
+            number: branchPr.number,
+            topic,
+          });
         }
       }
     }

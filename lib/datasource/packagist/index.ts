@@ -4,7 +4,7 @@ import is from '@sindresorhus/is';
 import pAll from 'p-all';
 import { logger } from '../../logger';
 import * as globalCache from '../../util/cache/global';
-import { get, set } from '../../util/cache/run';
+import * as runCache from '../../util/cache/run';
 import * as hostRules from '../../util/host-rules';
 import { Http, HttpOptions } from '../../util/http';
 import { DatasourceError, GetReleasesConfig, ReleaseResult } from '../common';
@@ -219,10 +219,14 @@ async function getAllPackages(regUrl: string): Promise<AllPackages | null> {
 
 function getAllCachedPackages(regUrl: string): Promise<AllPackages | null> {
   const cacheKey = `packagist-${regUrl}`;
-  if (get(cacheKey) === undefined) {
-    set(cacheKey, getAllPackages(regUrl));
+  const cachedResult = runCache.get(cacheKey);
+  // istanbul ignore if
+  if (cachedResult) {
+    return cachedResult;
   }
-  return get(cacheKey);
+  const promisedRes = getAllPackages(regUrl);
+  runCache.set(cacheKey, promisedRes);
+  return promisedRes;
 }
 
 async function packagistOrgLookup(name: string): Promise<ReleaseResult> {
