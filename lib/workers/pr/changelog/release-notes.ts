@@ -366,7 +366,7 @@ export async function addReleaseNotes(
         );
       } else {
         releaseNotes = await getReleaseNotesMd(
-          repository.replace(/\//g, '%2F'),
+          repository,
           v.version,
           input.project.baseUrl,
           input.project.apiBaseUrl
