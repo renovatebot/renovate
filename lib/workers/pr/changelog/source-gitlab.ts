@@ -60,7 +60,10 @@ export async function getChangeLogJSON({
   logger.debug({ protocol, host, pathname }, 'Protocol, host, pathname');
   const baseUrl = protocol.concat('//', host, '/');
   const apiBaseUrl = baseUrl.concat('api/v4/');
-  const repository = pathname.slice(1).replace(/\/$/, '').replace(/\.git$/, '');
+  const repository = pathname
+    .slice(1)
+    .replace(/\/$/, '')
+    .replace(/\.git$/, '');
   if (repository.split('/').length < 2) {
     logger.info({ sourceUrl }, 'Invalid gitlab URL found');
     return null;
