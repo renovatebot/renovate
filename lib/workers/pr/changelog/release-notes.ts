@@ -215,19 +215,19 @@ export async function getReleaseNotesMd(
         `Multiple candidates for changelog file, using ${changelogFile}`
       );
     }
+    let fileRes: { body: { content: string } };
     if (apiBaseUrl.includes('gitlab')) {
-      const fileRes = await glGot<{ content: string }>(
+      fileRes = await glGot<{ content: string }>(
         `${apiFiles}${changelogFile}?ref=master`
       );
-      changelogMd =
-        Buffer.from(fileRes.body.content, 'base64').toString() + '\n#\n##';
     } else {
-      const fileRes = await http.getJson<{ content: string }>(
+      fileRes = await http.getJson<{ content: string }>(
         `${apiFiles}${changelogFile}`
       );
-      changelogMd =
-        Buffer.from(fileRes.body.content, 'base64').toString() + '\n#\n##';
     }
+
+    changelogMd =
+      Buffer.from(fileRes.body.content, 'base64').toString() + '\n#\n##';
   } catch (err) {
     logger.debug({ err }, 'Error getting changelog md');
     return null;
