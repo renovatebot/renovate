@@ -1579,7 +1579,7 @@ export async function ensureCommentRemoval({
   topic,
   content,
 }: EnsureCommentRemovalConfig): Promise<void> {
-  logger.debug(
+  logger.trace(
     `Ensuring comment "${topic || content}" in #${issueNo} is removed`
   );
   const comments = await getComments(issueNo);
@@ -1598,6 +1598,7 @@ export async function ensureCommentRemoval({
 
   try {
     if (commentId) {
+      logger.debug({ issueNo }, 'Removing comment');
       await deleteComment(commentId);
     }
   } catch (err) /* istanbul ignore next */ {
