@@ -57,7 +57,7 @@ export async function getChangeLogJSON({
   logger.trace('getChangeLogJSON for gitlab');
   const version = allVersioning.get(versioning);
   const { protocol, host, pathname } = URL.parse(sourceUrl);
-  logger.debug({ protocol, host, pathname }, 'Protocol, host, pathname');
+  logger.trace({ protocol, host, pathname }, 'Protocol, host, pathname');
   const baseUrl = protocol.concat('//', host, '/');
   const apiBaseUrl = baseUrl.concat('api/v4/');
   const repository = pathname
