@@ -134,6 +134,7 @@ export function addMetaData(
   extraBaseUrls.push('gitlab.com');
   if (dep.sourceUrl) {
     if (dep.sourceUrl.includes('github.com')) {
+      // lgtm [js/incomplete-url-substring-sanitization]
       // try massaging it
       dep.sourceUrl =
         parse(massageGithubUrl(dep.sourceUrl), {
