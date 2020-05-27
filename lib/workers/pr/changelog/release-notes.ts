@@ -189,7 +189,7 @@ export async function getReleaseNotesMd(
   let changelogMd = '';
   let apiTree: string;
   let apiFiles: string;
-  let filesRes;
+  let filesRes: { body: { name: string }[] };
   try {
     const apiPrefix = apiBaseUrl.replace(/\/?$/, '/');
     if (apiBaseUrl.includes('gitlab')) {
