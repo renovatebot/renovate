@@ -189,16 +189,18 @@ export async function getReleaseNotesMd(
   let changelogMd = '';
   let apiTree: string;
   let apiFiles: string;
+  let filesRes;
   try {
     const apiPrefix = apiBaseUrl.replace(/\/?$/, '/');
     if (apiBaseUrl.includes('gitlab')) {
       apiTree = apiPrefix + `projects/${repository}/repository/tree/`;
       apiFiles = apiPrefix + `projects/${repository}/repository/files/`;
+      filesRes = await glGot<{ name: string }[]>(apiTree);
     } else {
       apiTree = apiPrefix + `repos/${repository}/contents/`;
       apiFiles = apiTree;
+      filesRes = await http.getJson<{ name: string }[]>(apiTree);
     }
-    const filesRes = await http.getJson<{ name: string }[]>(apiTree);
     const files = filesRes.body
       .map((f) => f.name)
       .filter((f) => changelogFilenameRegex.test(f));
@@ -214,7 +216,7 @@ export async function getReleaseNotesMd(
       );
     }
     if (apiBaseUrl.includes('gitlab')) {
-      const fileRes = await http.getJson<{ content: string }>(
+      const fileRes = await glGot<{ content: string }>(
         `${apiFiles}${changelogFile}?ref=master`
       );
       changelogMd =
