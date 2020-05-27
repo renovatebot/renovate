@@ -643,9 +643,9 @@ export async function setBranchStatus({
   url: targetUrl,
 }: BranchStatusConfig): Promise<void> {
   // First, get the branch commit SHA
-  const branchSha = await config.storage.getBranchCommit(branchName);
+  const ref = await config.storage.getBranchCommit(branchName);
   // Now, check the statuses for that commit
-  const url = `projects/${config.repository}/statuses/${branchSha}`;
+  const url = `projects/${config.repository}/statuses/${ref}`;
   let state = 'success';
   if (renovateState === BranchStatus.yellow) {
     state = 'pending';
@@ -654,6 +654,7 @@ export async function setBranchStatus({
   }
   const options: any = {
     state,
+    ref,
     description,
     context,
   };
