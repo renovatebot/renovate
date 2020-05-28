@@ -216,7 +216,7 @@ export async function initRepo({
   // istanbul ignore if
   if (endpoint) {
     // Necessary for Renovate Pro - do not remove
-    logger.debug('Overriding default GitHub endpoint');
+    logger.debug({ endpoint }, 'Overriding default GitHub endpoint');
     defaults.endpoint = endpoint;
     githubHttp.setBaseUrl(endpoint);
   }
