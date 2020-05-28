@@ -133,17 +133,16 @@ export function addMetaData(
   });
   extraBaseUrls.push('gitlab.com');
   if (dep.sourceUrl) {
-    if (dep.sourceUrl.includes('github.com')) {
-      // lgtm [js/incomplete-url-substring-sanitization]
+    if (dep.sourceUrl.includes('gitlab')) {
       // try massaging it
       dep.sourceUrl =
-        parse(massageGithubUrl(dep.sourceUrl), {
+        parse(massageGitlabUrl(dep.sourceUrl), {
           extraBaseUrls,
         }) || dep.sourceUrl;
     } else {
       // try massaging it
       dep.sourceUrl =
-        parse(massageGitlabUrl(dep.sourceUrl), {
+        parse(massageGithubUrl(dep.sourceUrl), {
           extraBaseUrls,
         }) || dep.sourceUrl;
     }
