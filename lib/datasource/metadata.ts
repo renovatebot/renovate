@@ -1,3 +1,4 @@
+import URL from 'url';
 import is from '@sindresorhus/is';
 import parse from 'github-url-from-git';
 import * as hostRules from '../util/host-rules';
@@ -100,15 +101,26 @@ export function addMetaData(
       .slice(0, 5)
       .join('/');
   };
+  /**
+   * @param {string} url
+   */
+  const massageGitlabUrl = (url: string): string => {
+    return url
+      .replace('http:', 'https:')
+      .replace(/^git:\/?\/?/, 'https://')
+      .replace(/\/tree\/.*$/i, '')
+      .replace(/\/$/i, '')
+      .replace('.git', '');
+  };
+
   if (
-    dep.changelogUrl &&
-    dep.changelogUrl.includes('github.com') && // lgtm [js/incomplete-url-substring-sanitization]
+    dep.changelogUrl?.includes('github.com') && // lgtm [js/incomplete-url-substring-sanitization]
     !dep.sourceUrl
   ) {
     dep.sourceUrl = dep.changelogUrl;
   }
   // prettier-ignore
-  if (dep.homepage && dep.homepage.includes('github.com')) { // lgtm [js/incomplete-url-substring-sanitization]
+  if (dep.homepage?.includes('github.com')) { // lgtm [js/incomplete-url-substring-sanitization]
     if (!dep.sourceUrl) {
       dep.sourceUrl = dep.homepage;
     }
@@ -119,12 +131,24 @@ export function addMetaData(
   hostRules.hosts({ hostType: 'github' }).forEach((host) => {
     extraBaseUrls.push(host, `gist.${host}`);
   });
+  extraBaseUrls.push('gitlab.com');
   if (dep.sourceUrl) {
-    // try massaging it
-    dep.sourceUrl =
-      parse(massageGithubUrl(dep.sourceUrl), {
-        extraBaseUrls,
-      }) || dep.sourceUrl;
+    const parsedUrl = URL.parse(dep.sourceUrl);
+    if (parsedUrl?.hostname) {
+      let massagedUrl;
+      if (parsedUrl.hostname.includes('gitlab')) {
+        massagedUrl = massageGitlabUrl(dep.sourceUrl);
+      } else {
+        massagedUrl = massageGithubUrl(dep.sourceUrl);
+      }
+      // try massaging it
+      dep.sourceUrl =
+        parse(massagedUrl, {
+          extraBaseUrls,
+        }) || dep.sourceUrl;
+    } else {
+      delete dep.sourceUrl;
+    }
   }
 
   // Clean up any empty urls
