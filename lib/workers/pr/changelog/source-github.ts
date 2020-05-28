@@ -3,6 +3,7 @@ import { PLATFORM_TYPE_GITHUB } from '../../../constants/platforms';
 import { Release } from '../../../datasource';
 import { logger } from '../../../logger';
 import * as globalCache from '../../../util/cache/global';
+import * as runCache from '../../../util/cache/run';
 import * as hostRules from '../../../util/host-rules';
 import { GithubHttp } from '../../../util/http/github';
 import * as allVersioning from '../../../versioning';
@@ -12,7 +13,7 @@ import { addReleaseNotes } from './release-notes';
 
 const http = new GithubHttp();
 
-async function getTags(
+async function getTagsInner(
   endpoint: string,
   repository: string
 ): Promise<string[]> {
@@ -39,6 +40,21 @@ async function getTags(
     }
     return [];
   }
+}
+
+async function getTags(
+  endpoint: string,
+  repository: string
+): Promise<string[]> {
+  const cacheKey = `getTags-${endpoint}-${repository}`;
+  const cachedResult = runCache.get(cacheKey);
+  // istanbul ignore if
+  if (cachedResult !== undefined) {
+    return cachedResult;
+  }
+  const promisedRes = getTagsInner(endpoint, repository);
+  runCache.set(cacheKey, promisedRes);
+  return promisedRes;
 }
 
 export async function getChangeLogJSON({
@@ -75,13 +91,13 @@ export async function getChangeLogJSON({
     }
     logger.debug(
       { manager, depName, sourceUrl },
-      'Repository URL does not match any known hosts - skipping changelog retrieval'
+      'Repository URL does not match any known github hosts - skipping changelog retrieval'
     );
     return null;
   }
   const apiBaseUrl = sourceUrl.startsWith('https://github.com/')
     ? 'https://api.github.com/'
-    : baseUrl;
+    : baseUrl + 'api/v3/';
   const repository = pathname.slice(1).replace(/\/$/, '');
   if (repository.split('/').length !== 2) {
     logger.debug({ sourceUrl }, 'Invalid github URL found');

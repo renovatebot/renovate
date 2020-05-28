@@ -1,4 +1,3 @@
-import * as globalCache from '../../../util/cache/global';
 import * as github from '../github';
 import * as gitlab from '../gitlab';
 import * as local from '.';
@@ -19,7 +18,6 @@ describe('config/presets/local', () => {
     gitlabGetPreset.mockResolvedValueOnce({ resolved: 'preset' });
     githubGetPreset.mockReset();
     githubGetPreset.mockResolvedValueOnce({ resolved: 'preset' });
-    return globalCache.rmAll();
   });
   describe('getPreset()', () => {
     it('throws for unsupported platform', async () => {

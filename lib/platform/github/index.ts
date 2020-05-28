@@ -216,7 +216,7 @@ export async function initRepo({
   // istanbul ignore if
   if (endpoint) {
     // Necessary for Renovate Pro - do not remove
-    logger.debug('Overriding default GitHub endpoint');
+    logger.debug({ endpoint }, 'Overriding default GitHub endpoint');
     defaults.endpoint = endpoint;
     githubHttp.setBaseUrl(endpoint);
   }
@@ -1579,7 +1579,7 @@ export async function ensureCommentRemoval({
   topic,
   content,
 }: EnsureCommentRemovalConfig): Promise<void> {
-  logger.debug(
+  logger.trace(
     `Ensuring comment "${topic || content}" in #${issueNo} is removed`
   );
   const comments = await getComments(issueNo);
@@ -1598,6 +1598,7 @@ export async function ensureCommentRemoval({
 
   try {
     if (commentId) {
+      logger.debug({ issueNo }, 'Removing comment');
       await deleteComment(commentId);
     }
   } catch (err) /* istanbul ignore next */ {

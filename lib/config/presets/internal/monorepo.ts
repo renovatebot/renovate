@@ -62,7 +62,9 @@ const repoGroups = {
     'https://github.com/dotansimha/graphql-code-generator',
     'https://github.com/dotansimha/graphql-codegen',
   ],
+  'graphql-mesh': 'https://github.com/Urigo/graphql-mesh',
   'graphql-toolkit': 'https://github.com/ardatan/graphql-toolkit',
+  'graphql-tools': 'https://github.com/ardatan/graphql-tools',
   hamcrest: 'https://github.com/hamcrest/JavaHamcrest',
   hapijs: 'https://github.com/hapijs',
   infrastructure: 'https://github.com/instructure/instructure-ui',
@@ -81,7 +83,10 @@ const repoGroups = {
     'https://github.com/neutrinojs/neutrino',
     'https://github.com/mozilla-neutrino/neutrino-dev',
   ],
-  nextjs: 'https://github.com/zeit/next.js',
+  nextjs: [
+    'https://github.com/zeit/next.js', // for compatibility
+    'https://github.com/vercel/next.js',
+  ],
   ngrx: 'https://github.com/ngrx/',
   nrwl: 'https://github.com/nrwl/',
   nuxtjs: 'https://github.com/nuxt/nuxt.js',

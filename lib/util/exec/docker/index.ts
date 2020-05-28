@@ -164,7 +164,7 @@ export async function removeDanglingContainers(): Promise<void> {
       throw new Error(SYSTEM_INSUFFICIENT_MEMORY);
     }
     if (err.stderr?.includes('Cannot connect to the Docker daemon')) {
-      logger.info('No docker deamon found');
+      logger.info('No docker daemon found');
     } else {
       logger.warn({ err }, 'Error removing dangling containers');
     }

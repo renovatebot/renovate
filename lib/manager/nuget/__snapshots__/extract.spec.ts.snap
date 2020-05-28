@@ -1,5 +1,35 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
+exports[`lib/manager/nuget/extract extractPackageFile() .config/dotnet-tools.json with-config 1`] = `
+Object {
+  "deps": Array [
+    Object {
+      "currentValue": "2.0.0",
+      "datasource": "nuget",
+      "depName": "minver-cli",
+      "depType": "nuget",
+      "registryUrls": Array [
+        "https://api.nuget.org/v3/index.json#protocolVersion=3",
+        "https://contoso.com/packages/",
+      ],
+    },
+  ],
+}
+`;
+
+exports[`lib/manager/nuget/extract extractPackageFile() .config/dotnet-tools.json works 1`] = `
+Object {
+  "deps": Array [
+    Object {
+      "currentValue": "2.0.0",
+      "datasource": "nuget",
+      "depName": "minver-cli",
+      "depType": "nuget",
+    },
+  ],
+}
+`;
+
 exports[`lib/manager/nuget/extract extractPackageFile() considers NuGet.config 1`] = `
 Object {
   "deps": Array [
@@ -153,6 +183,40 @@ Array [
 ]
 `;
 
+exports[`lib/manager/nuget/extract extractPackageFile() extracts registry URLs independently 1`] = `
+Object {
+  "deps": Array [
+    Object {
+      "currentValue": "4.5.0",
+      "datasource": "nuget",
+      "depName": "Autofac",
+      "depType": "nuget",
+      "registryUrls": Array [
+        "https://api.nuget.org/v3/index.json",
+        "https://example.org/one",
+      ],
+    },
+  ],
+}
+`;
+
+exports[`lib/manager/nuget/extract extractPackageFile() extracts registry URLs independently 2`] = `
+Object {
+  "deps": Array [
+    Object {
+      "currentValue": "4.5.0",
+      "datasource": "nuget",
+      "depName": "Autofac",
+      "depType": "nuget",
+      "registryUrls": Array [
+        "https://api.nuget.org/v3/index.json",
+        "https://example.org/two",
+      ],
+    },
+  ],
+}
+`;
+
 exports[`lib/manager/nuget/extract extractPackageFile() handles NuGet.config without package sources 1`] = `
 Object {
   "deps": Array [
@@ -174,6 +238,22 @@ Object {
       "datasource": "nuget",
       "depName": "Autofac",
       "depType": "nuget",
+    },
+  ],
+}
+`;
+
+exports[`lib/manager/nuget/extract extractPackageFile() ignores local feed in NuGet.config 1`] = `
+Object {
+  "deps": Array [
+    Object {
+      "currentValue": "4.5.0",
+      "datasource": "nuget",
+      "depName": "Autofac",
+      "depType": "nuget",
+      "registryUrls": Array [
+        "https://contoso.com/packages/",
+      ],
     },
   ],
 }

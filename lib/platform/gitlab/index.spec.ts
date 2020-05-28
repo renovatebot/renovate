@@ -14,7 +14,6 @@ import {
   PR_STATE_OPEN,
 } from '../../constants/pull-requests';
 import { BranchStatus } from '../../types';
-import * as runCache from '../../util/cache/run';
 import * as _hostRules from '../../util/host-rules';
 
 const gitlabApiHost = 'https://gitlab.com';
@@ -29,6 +28,7 @@ describe('platform/gitlab', () => {
     jest.resetAllMocks();
     gitlab = await import('.');
     jest.mock('../../util/host-rules');
+    jest.mock('delay');
     hostRules = require('../../util/host-rules');
     jest.mock('../git/storage');
     GitStorage = require('../git/storage').Storage;
@@ -54,7 +54,6 @@ describe('platform/gitlab', () => {
     hostRules.find.mockReturnValue({
       token: 'abc123',
     });
-    runCache.clear();
     httpMock.reset();
     httpMock.setup();
   });
@@ -110,7 +109,7 @@ describe('platform/gitlab', () => {
       httpMock
         .scope(gitlabApiHost)
         .get(
-          '/api/v4/projects?membership=true&per_page=100&with_merge_requests_enabled=true'
+          '/api/v4/projects?membership=true&per_page=100&with_merge_requests_enabled=true&min_access_level=30'
         )
         .replyWithError('getRepos error');
       await expect(gitlab.getRepos()).rejects.toThrow('getRepos error');
@@ -120,7 +119,7 @@ describe('platform/gitlab', () => {
       httpMock
         .scope(gitlabApiHost)
         .get(
-          '/api/v4/projects?membership=true&per_page=100&with_merge_requests_enabled=true'
+          '/api/v4/projects?membership=true&per_page=100&with_merge_requests_enabled=true&min_access_level=30'
         )
         .reply(200, [
           {
@@ -1102,6 +1101,18 @@ describe('platform/gitlab', () => {
         .reply(200, {
           id: 1,
           iid: 12345,
+        })
+        .get('/api/v4/projects/undefined/merge_requests/12345')
+        .reply(200)
+        .get('/api/v4/projects/undefined/merge_requests/12345')
+        .reply(200, {
+          merge_status: 'can_be_merged',
+          pipeline: {
+            id: 29626725,
+            sha: '2be7ddb704c7b6b83732fdd5b9f09d5a397b5f8f',
+            ref: 'patch-28',
+            status: 'success',
+          },
         })
         .put('/api/v4/projects/undefined/merge_requests/12345/merge')
         .reply(200);

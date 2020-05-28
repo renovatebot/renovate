@@ -4,9 +4,13 @@ import { linkify } from 'linkify-markdown';
 import MarkdownIt from 'markdown-it';
 
 import { logger } from '../../../logger';
+import { api as api_gitlab } from '../../../platform/gitlab/gl-got-wrapper';
 import * as globalCache from '../../../util/cache/global';
+import * as runCache from '../../../util/cache/run';
 import { GithubHttp } from '../../../util/http/github';
 import { ChangeLogNotes, ChangeLogResult } from './common';
+
+const { get: glGot } = api_gitlab;
 
 const markdown = new MarkdownIt('zero');
 markdown.enable(['heading', 'lheading']);
@@ -20,10 +24,34 @@ export async function getReleaseList(
   logger.trace('getReleaseList()');
   // istanbul ignore if
   if (!apiBaseUrl) {
+    logger.debug('No apiBaseUrl');
     return [];
   }
   try {
     let url = apiBaseUrl.replace(/\/?$/, '/');
+    if (apiBaseUrl.includes('gitlab')) {
+      url += `projects/${repository.replace(
+        /\//g,
+        '%2f'
+      )}/releases?per_page=100`;
+      const res = await glGot<
+        {
+          name: string;
+          release: string;
+          description: string;
+          tag_name: string;
+        }[]
+      >(url);
+      return res.body.map((release) => ({
+        url: `${apiBaseUrl}projects/${repository.replace(
+          /\//g,
+          '%2f'
+        )}/releases/${release.tag_name}`,
+        name: release.name,
+        body: release.description,
+        tag: release.tag_name,
+      }));
+    }
     url += `repos/${repository}/releases?per_page=100`;
     const res = await http.getJson<
       {
@@ -42,9 +70,28 @@ export async function getReleaseList(
       body: release.body,
     }));
   } catch (err) /* istanbul ignore next */ {
-    logger.info({ repository, err }, 'getReleaseList error');
+    if (err.statusCode === 404) {
+      logger.debug({ repository }, 'getReleaseList 404');
+    } else {
+      logger.info({ repository, err }, 'getReleaseList error');
+    }
     return [];
   }
+}
+
+export function getCachedReleaseList(
+  apiBaseUrl: string,
+  repository: string
+): Promise<ChangeLogNotes[]> {
+  const cacheKey = `getReleaseList-${apiBaseUrl}-${repository}`;
+  const cachedResult = runCache.get(cacheKey);
+  // istanbul ignore if
+  if (cachedResult) {
+    return cachedResult;
+  }
+  const promisedRes = getReleaseList(apiBaseUrl, repository);
+  runCache.set(cacheKey, promisedRes);
+  return promisedRes;
 }
 
 export function massageBody(
@@ -84,7 +131,8 @@ export async function getReleaseNotes(
   apiBaseUrl: string
 ): Promise<ChangeLogNotes | null> {
   logger.trace(`getReleaseNotes(${repository}, ${version}, ${depName})`);
-  const releaseList = await getReleaseList(apiBaseUrl, repository);
+  const releaseList = await getCachedReleaseList(apiBaseUrl, repository);
+  logger.trace({ releaseList }, 'Release list from getReleaseList');
   let releaseNotes: ChangeLogNotes | null = null;
   releaseList.forEach((release) => {
     if (
@@ -93,13 +141,15 @@ export async function getReleaseNotes(
       release.tag === `${depName}-${version}`
     ) {
       releaseNotes = release;
-      releaseNotes.url = `${baseUrl}${repository}/releases/${release.tag}`;
+      releaseNotes.url = baseUrl.includes('gitlab')
+        ? `${baseUrl}${repository}/tags/${release.tag}`
+        : `${baseUrl}${repository}/releases/${release.tag}`;
       releaseNotes.body = massageBody(releaseNotes.body, baseUrl);
       if (!releaseNotes.body.length) {
         releaseNotes = null;
       } else {
         releaseNotes.body = linkify(releaseNotes.body, {
-          repository: `https://github.com/${repository}`,
+          repository: `${baseUrl}${repository}`,
         });
       }
     }
@@ -143,25 +193,25 @@ function isUrl(url: string): boolean {
   return false;
 }
 
-export async function getReleaseNotesMd(
+export async function getReleaseNotesMdFileInner(
   repository: string,
-  version: string,
-  baseUrl: string,
   apiBaseUrl: string
-): Promise<ChangeLogNotes | null> {
-  logger.trace(`getReleaseNotesMd(${repository}, ${version})`);
-  const skippedRepos = ['facebook/react-native'];
-  // istanbul ignore if
-  if (skippedRepos.includes(repository)) {
-    return null;
-  }
+): Promise<{ changelogFile: string; changelogMd: string }> | null {
   let changelogFile: string;
-  let changelogMd = '';
+  let apiTree: string;
+  let apiFiles: string;
+  let filesRes: { body: { name: string }[] };
   try {
-    let apiPrefix = apiBaseUrl.replace(/\/?$/, '/');
-
-    apiPrefix += `repos/${repository}/contents/`;
-    const filesRes = await http.getJson<{ name: string }[]>(apiPrefix);
+    const apiPrefix = apiBaseUrl.replace(/\/?$/, '/');
+    if (apiBaseUrl.includes('gitlab')) {
+      apiTree = apiPrefix + `projects/${repository}/repository/tree/`;
+      apiFiles = apiPrefix + `projects/${repository}/repository/files/`;
+      filesRes = await glGot<{ name: string }[]>(apiTree);
+    } else {
+      apiTree = apiPrefix + `repos/${repository}/contents/`;
+      apiFiles = apiTree;
+      filesRes = await http.getJson<{ name: string }[]>(apiTree);
+    }
     const files = filesRes.body
       .map((f) => f.name)
       .filter((f) => changelogFilenameRegex.test(f));
@@ -176,17 +226,66 @@ export async function getReleaseNotesMd(
         `Multiple candidates for changelog file, using ${changelogFile}`
       );
     }
-    const fileRes = await http.getJson<{ content: string }>(
-      `${apiPrefix}/${changelogFile}`
-    );
-    changelogMd =
+    let fileRes: { body: { content: string } };
+    if (apiBaseUrl.includes('gitlab')) {
+      fileRes = await glGot<{ content: string }>(
+        `${apiFiles}${changelogFile}?ref=master`
+      );
+    } else {
+      fileRes = await http.getJson<{ content: string }>(
+        `${apiFiles}${changelogFile}`
+      );
+    }
+
+    const changelogMd =
       Buffer.from(fileRes.body.content, 'base64').toString() + '\n#\n##';
-  } catch (err) {
-    // Probably a 404?
+    return { changelogFile, changelogMd };
+  } catch (err) /* istanbul ignore next */ {
+    if (err.statusCode === 404) {
+      logger.debug('Error 404 getting changelog md');
+    } else {
+      logger.debug({ err }, 'Error getting changelog md');
+    }
     return null;
   }
+}
 
-  changelogMd = changelogMd.replace(/\n\s*<a name="[^"]*">.*?<\/a>\n/g, '\n');
+export async function getReleaseNotesMdFile(
+  repository: string,
+  apiBaseUrl: string
+): Promise<{ changelogFile: string; changelogMd: string }> | null {
+  const cacheKey = `getReleaseNotesMdFile-${repository}-${apiBaseUrl}`;
+  const cachedResult = runCache.get(cacheKey);
+  // istanbul ignore if
+  if (cachedResult !== undefined) {
+    return cachedResult;
+  }
+  const promisedRes = getReleaseNotesMdFileInner(repository, apiBaseUrl);
+  runCache.set(cacheKey, promisedRes);
+  return promisedRes;
+}
+
+export async function getReleaseNotesMd(
+  repository: string,
+  version: string,
+  baseUrl: string,
+  apiBaseUrl: string
+): Promise<ChangeLogNotes | null> {
+  logger.trace(`getReleaseNotesMd(${repository}, ${version})`);
+  const skippedRepos = ['facebook/react-native'];
+  // istanbul ignore if
+  if (skippedRepos.includes(repository)) {
+    return null;
+  }
+  const changelog = await getReleaseNotesMdFile(repository, apiBaseUrl);
+  if (!changelog) {
+    return null;
+  }
+  const { changelogFile } = changelog;
+  const changelogMd = changelog.changelogMd.replace(
+    /\n\s*<a name="[^"]*">.*?<\/a>\n/g,
+    '\n'
+  );
   for (const level of [1, 2, 3, 4, 5, 6, 7]) {
     const changelogParsed = sectionize(changelogMd, level);
     if (changelogParsed.length >= 2) {
@@ -209,7 +308,7 @@ export async function getReleaseNotesMd(
               if (body && body.length) {
                 try {
                   body = linkify(body, {
-                    repository: `https://github.com/${repository}`,
+                    repository: `${baseUrl}${repository}`,
                   });
                 } catch (err) /* istanbul ignore next */ {
                   logger.warn({ body, err }, 'linkify error');
@@ -235,13 +334,21 @@ export async function getReleaseNotesMd(
 export async function addReleaseNotes(
   input: ChangeLogResult
 ): Promise<ChangeLogResult> {
-  if (!(input && input.project && input.project.github && input.versions)) {
+  if (
+    !input?.versions ||
+    (!input?.project?.github && !input?.project?.gitlab)
+  ) {
     logger.debug('Missing project or versions');
     return input;
   }
   const output: ChangeLogResult = { ...input, versions: [] };
-  const repository = input.project.github.replace(/\.git$/, '');
-  const cacheNamespace = 'changelog-github-notes';
+  const repository =
+    input.project.github != null
+      ? input.project.github.replace(/\.git$/, '')
+      : input.project.gitlab;
+  const cacheNamespace = input.project.github
+    ? 'changelog-github-notes'
+    : 'changelog-gitlab-notes';
   function getCacheKey(version: string): string {
     return `${repository}:${version}`;
   }
@@ -250,14 +357,22 @@ export async function addReleaseNotes(
     const cacheKey = getCacheKey(v.version);
     releaseNotes = await globalCache.get(cacheNamespace, cacheKey);
     if (!releaseNotes) {
-      releaseNotes = await getReleaseNotesMd(
-        repository,
-        v.version,
-        input.project.baseUrl,
-        input.project.apiBaseUrl
-      );
+      if (input.project.github != null) {
+        releaseNotes = await getReleaseNotesMd(
+          repository,
+          v.version,
+          input.project.baseUrl,
+          input.project.apiBaseUrl
+        );
+      } else {
+        releaseNotes = await getReleaseNotesMd(
+          repository,
+          v.version,
+          input.project.baseUrl,
+          input.project.apiBaseUrl
+        );
+      }
       if (!releaseNotes) {
-        logger.trace('No markdown release notes found for v' + v.version);
         releaseNotes = await getReleaseNotes(
           repository,
           v.version,

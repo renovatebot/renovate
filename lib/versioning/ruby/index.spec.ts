@@ -529,5 +529,22 @@ describe('semverRuby', () => {
         }
       );
     });
+    it('returns correct version for update-lockfile strategy', () => {
+      [
+        ['~> 6.0.0', '~> 6.0.0', 'update-lockfile', '6.0.2', '6.0.3'],
+        ['~> 7.0.0', '~> 6.0.0', 'update-lockfile', '6.0.2', '7.0.0'],
+      ].forEach(
+        ([expected, currentValue, rangeStrategy, fromVersion, toVersion]) => {
+          expect(
+            semverRuby.getNewValue({
+              currentValue,
+              rangeStrategy: rangeStrategy as RangeStrategy,
+              fromVersion,
+              toVersion,
+            })
+          ).toEqual(expected);
+        }
+      );
+    });
   });
 });
