@@ -1,3 +1,4 @@
+import URL from 'url';
 import is from '@sindresorhus/is';
 import parse from 'github-url-from-git';
 import * as hostRules from '../util/host-rules';
@@ -133,7 +134,7 @@ export function addMetaData(
   });
   extraBaseUrls.push('gitlab.com');
   if (dep.sourceUrl) {
-    if (dep.sourceUrl.includes('gitlab')) {
+    if (URL.parse(dep.sourceUrl).hostname.includes('gitlab')) {
       // try massaging it
       dep.sourceUrl =
         parse(massageGitlabUrl(dep.sourceUrl), {
