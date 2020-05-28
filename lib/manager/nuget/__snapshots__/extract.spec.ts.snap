@@ -153,6 +153,40 @@ Array [
 ]
 `;
 
+exports[`lib/manager/nuget/extract extractPackageFile() extracts registry URLs independently 1`] = `
+Object {
+  "deps": Array [
+    Object {
+      "currentValue": "4.5.0",
+      "datasource": "nuget",
+      "depName": "Autofac",
+      "depType": "nuget",
+      "registryUrls": Array [
+        "https://api.nuget.org/v3/index.json",
+        "https://example.org/one",
+      ],
+    },
+  ],
+}
+`;
+
+exports[`lib/manager/nuget/extract extractPackageFile() extracts registry URLs independently 2`] = `
+Object {
+  "deps": Array [
+    Object {
+      "currentValue": "4.5.0",
+      "datasource": "nuget",
+      "depName": "Autofac",
+      "depType": "nuget",
+      "registryUrls": Array [
+        "https://api.nuget.org/v3/index.json",
+        "https://example.org/two",
+      ],
+    },
+  ],
+}
+`;
+
 exports[`lib/manager/nuget/extract extractPackageFile() handles NuGet.config without package sources 1`] = `
 Object {
   "deps": Array [

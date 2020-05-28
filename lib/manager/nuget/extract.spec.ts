@@ -96,5 +96,23 @@ describe('lib/manager/nuget/extract', () => {
         await extractPackageFile(contents, packageFile, config)
       ).toMatchSnapshot();
     });
+    it('extracts registry URLs independently', async () => {
+      const packageFile = 'multiple-package-files/one/one.csproj';
+      const contents = readFileSync(
+        path.join(config.localDir, packageFile),
+        'utf8'
+      );
+      const otherPackageFile = 'multiple-package-files/two/two.csproj';
+      const otherContents = readFileSync(
+        path.join(config.localDir, packageFile),
+        'utf8'
+      );
+      expect(
+        await extractPackageFile(contents, packageFile, config)
+      ).toMatchSnapshot();
+      expect(
+        await extractPackageFile(otherContents, otherPackageFile, config)
+      ).toMatchSnapshot();
+    });
   });
 });

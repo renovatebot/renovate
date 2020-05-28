@@ -5,6 +5,7 @@ import { XmlDocument } from 'xmldoc';
 import * as datasourceNuget from '../../datasource/nuget';
 import { logger } from '../../logger';
 import { SkipReason } from '../../types';
+import { clone } from '../../util/clone';
 import { get } from '../../versioning';
 import * as semverVersioning from '../../versioning/semver';
 import { ExtractConfig, PackageDependency, PackageFile } from '../common';
@@ -44,7 +45,7 @@ async function determineRegistryUrls(
     return undefined;
   }
 
-  const registryUrls = datasourceNuget.defaultRegistryUrls;
+  const registryUrls = clone(datasourceNuget.defaultRegistryUrls);
   for (const child of packageSources.children) {
     if (child.type === 'element') {
       if (child.name === 'clear') {
