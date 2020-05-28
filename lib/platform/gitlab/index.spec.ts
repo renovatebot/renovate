@@ -954,6 +954,7 @@ describe('platform/gitlab', () => {
   });
   describe('createPr(branchName, title, body)', () => {
     beforeEach(() => {
+      api.get.mockResolvedValueOnce({ body: {} });
       api.get.mockResolvedValueOnce(
         partial<GotResponse>({
           body: {
