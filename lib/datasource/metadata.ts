@@ -133,18 +133,21 @@ export function addMetaData(
   });
   extraBaseUrls.push('gitlab.com');
   if (dep.sourceUrl) {
-    if (URL.parse(dep.sourceUrl).hostname?.includes('gitlab')) {
+    const parsedUrl = URL.parse(dep.sourceUrl);
+    if (parsedUrl?.hostname) {
+      let massagedUrl;
+      if (parsedUrl.hostname.includes('gitlab')) {
+        massagedUrl = massageGitlabUrl(dep.sourceUrl);
+      } else {
+        massagedUrl = massageGithubUrl(dep.sourceUrl);
+      }
       // try massaging it
       dep.sourceUrl =
-        parse(massageGitlabUrl(dep.sourceUrl), {
+        parse(massagedUrl, {
           extraBaseUrls,
         }) || dep.sourceUrl;
     } else {
-      // try massaging it
-      dep.sourceUrl =
-        parse(massageGithubUrl(dep.sourceUrl), {
-          extraBaseUrls,
-        }) || dep.sourceUrl;
+      delete dep.sourceUrl;
     }
   }
 

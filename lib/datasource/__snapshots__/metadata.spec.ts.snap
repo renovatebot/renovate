@@ -81,6 +81,21 @@ Object {
 }
 `;
 
+exports[`datasource/metadata Should handle non-url 1`] = `
+Object {
+  "releases": Array [
+    Object {
+      "releaseTimestamp": "2020-02-14T13:12:00",
+      "version": "5.7.0",
+    },
+    Object {
+      "releaseTimestamp": "2020-02-14T10:04:00",
+      "version": "5.6.1",
+    },
+  ],
+}
+`;
+
 exports[`datasource/metadata Should handle parsing of sourceUrls correctly 1`] = `
 Object {
   "releases": Array [
