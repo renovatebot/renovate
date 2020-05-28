@@ -51,12 +51,20 @@ async function determineRegistryUrls(
         logger.debug(`clearing registry URLs`);
         registryUrls.length = 0;
       } else if (child.name === 'add') {
-        let registryUrl = child.attr.value;
-        if (child.attr.protocolVersion) {
-          registryUrl += `#protocolVersion=${child.attr.protocolVersion}`;
+        const isHttpUrl = /^https?:\/\//i.test(child.attr.value);
+        if (isHttpUrl) {
+          let registryUrl = child.attr.value;
+          if (child.attr.protocolVersion) {
+            registryUrl += `#protocolVersion=${child.attr.protocolVersion}`;
+          }
+          logger.debug({ registryUrl }, 'adding registry URL');
+          registryUrls.push(registryUrl);
+        } else {
+          logger.debug(
+            { registryUrl: child.attr.value },
+            'ignoring local registry URL'
+          );
         }
-        logger.debug({ registryUrl }, 'adding registry URL');
-        registryUrls.push(registryUrl);
       }
     }
   }

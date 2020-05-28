@@ -179,6 +179,22 @@ Object {
 }
 `;
 
+exports[`lib/manager/nuget/extract extractPackageFile() ignores local feed in NuGet.config 1`] = `
+Object {
+  "deps": Array [
+    Object {
+      "currentValue": "4.5.0",
+      "datasource": "nuget",
+      "depName": "Autofac",
+      "depType": "nuget",
+      "registryUrls": Array [
+        "https://contoso.com/packages/",
+      ],
+    },
+  ],
+}
+`;
+
 exports[`lib/manager/nuget/extract extractPackageFile() returns empty for invalid csproj 1`] = `
 Object {
   "deps": Array [],

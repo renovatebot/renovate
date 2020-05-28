@@ -84,5 +84,17 @@ describe('lib/manager/nuget/extract', () => {
         await extractPackageFile(contents, packageFile, config)
       ).toMatchSnapshot();
     });
+    it('ignores local feed in NuGet.config', async () => {
+      const packageFile =
+        'with-local-feed-in-config-file/with-local-feed-in-config-file.csproj';
+      const contents = readFileSync(
+        path.join(config.localDir, packageFile),
+        'utf8'
+      );
+
+      expect(
+        await extractPackageFile(contents, packageFile, config)
+      ).toMatchSnapshot();
+    });
   });
 });
