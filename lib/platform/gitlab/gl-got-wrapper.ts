@@ -33,6 +33,11 @@ async function get(path: string, options: any): Promise<GotResponse> {
     }
     return res;
   } catch (err) /* istanbul ignore next */ {
+    if (err.statusCode === 404) {
+      logger.trace({ err }, 'GitLab 404');
+      logger.debug({ url: err.url }, 'GitLab API 404');
+      throw err;
+    }
     logger.debug({ err }, 'Gitlab API error');
     if (
       err.statusCode === 429 ||
