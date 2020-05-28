@@ -9,6 +9,7 @@ import { clone } from '../../util/clone';
 import { get } from '../../versioning';
 import * as semverVersioning from '../../versioning/semver';
 import { ExtractConfig, PackageDependency, PackageFile } from '../common';
+import { DotnetToolsManifest } from './types';
 
 async function readFileAsXmlDocument(file: string): Promise<XmlDocument> {
   try {
@@ -67,6 +68,7 @@ async function determineRegistryUrls(
           );
         }
       }
+      // child.name === 'remove' not supported
     }
   }
   return registryUrls;
@@ -77,7 +79,7 @@ export async function extractPackageFile(
   content: string,
   packageFile: string,
   config: ExtractConfig
-): Promise<PackageFile> {
+): Promise<PackageFile | null> {
   logger.trace({ packageFile }, 'nuget.extractPackageFile()');
   const { isVersion } = get(config.versioning || semverVersioning.id);
   const deps: PackageDependency[] = [];
@@ -86,6 +88,40 @@ export async function extractPackageFile(
     packageFile,
     config.localDir
   );
+
+  if (packageFile.endsWith('.config/dotnet-tools.json')) {
+    let manifest: DotnetToolsManifest;
+
+    try {
+      manifest = JSON.parse(content);
+    } catch (err) {
+      logger.debug({ fileName: packageFile }, 'Invalid JSON');
+      return null;
+    }
+
+    if (manifest.version !== 1) {
+      logger.debug({ contents: manifest }, 'Unsupported dotnet tools version');
+      return null;
+    }
+
+    for (const depName of Object.keys(manifest.tools)) {
+      const tool = manifest.tools[depName];
+      const currentValue = tool.version;
+      const dep: PackageDependency = {
+        depType: 'nuget',
+        depName,
+        currentValue,
+        datasource: datasourceNuget.id,
+      };
+      if (registryUrls) {
+        dep.registryUrls = registryUrls;
+      }
+
+      deps.push(dep);
+    }
+
+    return { deps };
+  }
 
   for (const line of content.split('\n')) {
     /**

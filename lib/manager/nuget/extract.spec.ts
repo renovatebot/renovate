@@ -1,10 +1,11 @@
 import { readFileSync } from 'fs';
 import * as path from 'path';
+import { ExtractConfig } from '../common';
 import { extractPackageFile } from './extract';
 
 describe('lib/manager/nuget/extract', () => {
   describe('extractPackageFile()', () => {
-    let config;
+    let config: ExtractConfig;
     beforeEach(() => {
       config = {
         localDir: path.resolve('lib/manager/nuget/__fixtures__'),
@@ -113,6 +114,49 @@ describe('lib/manager/nuget/extract', () => {
       expect(
         await extractPackageFile(otherContents, otherPackageFile, config)
       ).toMatchSnapshot();
+    });
+
+    describe('.config/dotnet-tools.json', () => {
+      const packageFile = '.config/dotnet-tools.json';
+      const contents = `{
+  "version": 1,
+  "isRoot": true,
+  "tools": {
+    "minver-cli": {
+      "version": "2.0.0",
+      "commands": ["minver"]
+    }
+  }
+}`;
+      it('works', async () => {
+        expect(
+          await extractPackageFile(contents, packageFile, config)
+        ).toMatchSnapshot();
+      });
+
+      it('with-config', async () => {
+        expect(
+          await extractPackageFile(
+            contents,
+            `with-config-file/${packageFile}`,
+            config
+          )
+        ).toMatchSnapshot();
+      });
+
+      it('wrong version', async () => {
+        expect(
+          await extractPackageFile(
+            contents.replace('"version": 1,', '"version": 2,'),
+            packageFile,
+            config
+          )
+        ).toBeNull();
+      });
+
+      it('does not throw', async () => {
+        expect(await extractPackageFile('{{', packageFile, config)).toBeNull();
+      });
     });
   });
 });
