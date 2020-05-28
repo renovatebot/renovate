@@ -186,51 +186,6 @@ Object {
 }
 `;
 
-exports[`util/got/index uses cache 1`] = `
-Object {
-  "body": Object {},
-  "options": Object {
-    "baseUrl": "https://api.github.com/",
-    "cache": false,
-    "decompress": true,
-    "followRedirect": true,
-    "form": false,
-    "hash": "",
-    "headers": Object {
-      "accept": "application/json",
-      "accept-encoding": "gzip, deflate",
-      "user-agent": "https://github.com/renovatebot/renovate",
-    },
-    "hooks": Object {
-      "afterResponse": Array [],
-      "beforeError": Array [],
-      "beforeRedirect": Array [],
-      "beforeRequest": Array [],
-      "beforeRetry": Array [],
-      "init": Array [],
-    },
-    "hostType": "github",
-    "hostname": "api.github.com",
-    "href": "https://api.github.com/some",
-    "json": true,
-    "method": "GET",
-    "path": "/some",
-    "pathname": "/some",
-    "protocol": "https:",
-    "retry": Object {
-      "errorCodes": Set {},
-      "methods": Set {},
-      "retries": [Function],
-      "statusCodes": Set {},
-    },
-    "search": "",
-    "stream": false,
-    "throwHttpErrors": true,
-    "useElectronNet": false,
-  },
-}
-`;
-
 exports[`util/got/index uses no cache 1`] = `
 Object {
   "body": Object {},

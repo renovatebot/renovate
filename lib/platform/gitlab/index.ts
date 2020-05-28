@@ -103,7 +103,7 @@ export async function initPlatform({
 export async function getRepos(): Promise<string[]> {
   logger.debug('Autodiscovering GitLab repositories');
   try {
-    const url = `projects?membership=true&per_page=100&with_merge_requests_enabled=true`;
+    const url = `projects?membership=true&per_page=100&with_merge_requests_enabled=true&min_access_level=30`;
     const res = await api.get(url, { paginate: true });
     logger.debug(`Discovered ${res.body.length} project(s)`);
     return res.body.map(
@@ -493,20 +493,6 @@ export async function getPr(iid: number): Promise<Pr> {
     }
   }
   return pr;
-}
-
-// Return a list of all modified files in a PR
-export async function getPrFiles(mrNo: number): Promise<string[]> {
-  logger.debug({ mrNo }, 'getPrFiles');
-  if (!mrNo) {
-    return [];
-  }
-  const files = (
-    await api.get(
-      `projects/${config.repository}/merge_requests/${mrNo}/changes`
-    )
-  ).body.changes;
-  return files.map((f: { new_path: string }) => f.new_path);
 }
 
 // istanbul ignore next

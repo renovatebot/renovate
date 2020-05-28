@@ -22,7 +22,7 @@ describe('platform', () => {
     function validate(module: Platform, name: string): boolean {
       // TODO: test required api
       if (!module.initPlatform) {
-        fail(`Missing api on ${name}`);
+        throw Error(`Missing api on ${name}`);
       }
       return true;
     }

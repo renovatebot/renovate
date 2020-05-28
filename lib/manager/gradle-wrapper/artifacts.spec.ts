@@ -1,3 +1,4 @@
+/* eslint jest/no-standalone-expect: 0 */
 import { exec as _exec } from 'child_process';
 import { resolve } from 'path';
 import { readFile } from 'fs-extra';
@@ -125,7 +126,7 @@ describe(getName(__filename), () => {
     expect(res).toEqual([]);
   });
 
-  it.only('updates distributionSha256Sum', async () => {
+  it('updates distributionSha256Sum', async () => {
     httpMock
       .scope('https://services.gradle.org')
       .get('/distributions/gradle-6.3-bin.zip.sha256')

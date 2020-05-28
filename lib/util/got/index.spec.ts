@@ -5,7 +5,6 @@ import {
   PLATFORM_TYPE_GITHUB,
   PLATFORM_TYPE_GITLAB,
 } from '../../constants/platforms';
-import * as runCache from '../cache/run';
 import * as hostRules from '../host-rules';
 import { GotJSONOptions } from './common';
 import { api } from '.';
@@ -20,7 +19,6 @@ describe(getName(__filename), () => {
   afterEach(() => {
     nock.cleanAll();
     hostRules.clear();
-    runCache.clear();
     nock.enableNetConnect();
   });
 
@@ -71,14 +69,6 @@ describe(getName(__filename), () => {
     expect(req.isDone()).toBe(true);
   });
 
-  it('uses cache', async () => {
-    const req = mock();
-    const res = await got({ hostType: PLATFORM_TYPE_GITHUB });
-    expect(res).toMatchSnapshot();
-    expect(await got({ hostType: PLATFORM_TYPE_GITHUB })).toMatchObject(res);
-    expect(req.isDone()).toBe(true);
-  });
-
   it('uses no cache', async () => {
     const req = mock({})
       .head('/some')
@@ -97,9 +87,7 @@ describe(getName(__filename), () => {
       await got({ hostType: PLATFORM_TYPE_GITHUB, method: 'HEAD' })
     ).toMatchSnapshot();
 
-    runCache.clear();
-
-    await expect(got({ hostType: PLATFORM_TYPE_GITHUB })).rejects.toThrowError(
+    await expect(got({ hostType: PLATFORM_TYPE_GITHUB })).rejects.toThrow(
       'not-found'
     );
 

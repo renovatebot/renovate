@@ -70,7 +70,7 @@ describe('datasource/crate', () => {
       });
       expect(await getReleases({ lookupName: 'some_crate' })).toBeNull();
     });
-    it('processes real data', async () => {
+    it('processes real data: libc', async () => {
       got.mockReturnValueOnce({
         body: res1,
       });
@@ -79,7 +79,7 @@ describe('datasource/crate', () => {
       expect(res).not.toBeNull();
       expect(res).toBeDefined();
     });
-    it('processes real data', async () => {
+    it('processes real data: amethyst', async () => {
       got.mockReturnValueOnce({
         body: res2,
       });

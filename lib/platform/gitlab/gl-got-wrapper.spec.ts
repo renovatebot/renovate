@@ -1,69 +1,67 @@
+import * as httpMock from '../../../test/httpMock';
 import { PLATFORM_TYPE_GITLAB } from '../../constants/platforms';
-import _got from '../../util/got';
 import * as hostRules from '../../util/host-rules';
 import { api } from './gl-got-wrapper';
-
-jest.mock('../../util/got');
-
-const got: any = _got;
 
 hostRules.add({
   hostType: PLATFORM_TYPE_GITLAB,
   token: 'abc123',
 });
 
+const gitlabApiHost = 'https://gitlab.com';
+
 describe('platform/gitlab/gl-got-wrapper', () => {
   const body = ['a', 'b'];
+  beforeEach(() => {
+    // (delay as any).mockImplementation(() => Promise.resolve());
+    httpMock.setup();
+  });
   afterEach(() => {
     jest.resetAllMocks();
+    httpMock.reset();
   });
   it('paginates', async () => {
-    got.mockReturnValueOnce({
-      headers: {
+    httpMock
+      .scope(gitlabApiHost)
+      .get('/api/v4/some-url')
+      .reply(200, ['a'], {
         link:
-          '<https://api.gitlab.com/search/code?q=addClass+user%3Amozilla&page=2>; rel="next", <https://api.gitlab.com/search/code?q=addClass+user%3Amozilla&page=34>; rel="last"',
-      },
-      body: ['a'],
-    });
-    got.mockReturnValueOnce({
-      headers: {
+          '<https://gitlab.com/api/v4/some-url&page=2>; rel="next", <https://gitlab.com/api/v4/some-url&page=3>; rel="last"',
+      })
+      .get('/api/v4/some-url&page=2')
+      .reply(200, ['b', 'c'], {
         link:
-          '<https://api.gitlab.com/search/code?q=addClass+user%3Amozilla&page=3>; rel="next", <https://api.gitlab.com/search/code?q=addClass+user%3Amozilla&page=34>; rel="last"',
-      },
-      body: ['b', 'c'],
-    });
-    got.mockReturnValueOnce({
-      headers: {},
-      body: ['d'],
-    });
-    const res = await api.get('some-url', { paginate: true });
+          '<https://gitlab.com/api/v4/some-url&page=3>; rel="next", <https://gitlab.com/api/v4/some-url&page=3>; rel="last"',
+      })
+      .get('/api/v4/some-url&page=3')
+      .reply(200, ['d']);
+    const res = await api.get('/some-url', { paginate: true });
     expect(res.body).toHaveLength(4);
-    expect(got).toHaveBeenCalledTimes(3);
+
+    const trace = httpMock.getTrace();
+    expect(trace).toHaveLength(3);
+    expect(trace).toMatchSnapshot();
   });
   it('attempts to paginate', async () => {
-    got.mockReturnValueOnce({
-      headers: {
-        link:
-          '<https://api.gitlab.com/search/code?q=addClass+user%3Amozilla&page=34>; rel="last"',
-      },
-      body: ['a'],
+    httpMock.scope(gitlabApiHost).get('/api/v4/some-url').reply(200, ['a'], {
+      link: '<https://gitlab.com/api/v4/some-url&page=3>; rel="last"',
     });
-    got.mockReturnValueOnce({
-      headers: {},
-      body: ['b'],
-    });
-    const res = await api.get('some-url', { paginate: true });
+    const res = await api.get('/some-url', { paginate: true });
     expect(res.body).toHaveLength(1);
-    expect(got).toHaveBeenCalledTimes(1);
+
+    const trace = httpMock.getTrace();
+    expect(trace).toHaveLength(1);
+    expect(trace).toMatchSnapshot();
   });
   it('posts', async () => {
-    got.mockImplementationOnce(() => ({
-      body,
-    }));
-    const res = await api.post('some-url');
+    httpMock.scope(gitlabApiHost).post('/api/v4/some-url').reply(200, body);
+    const res = await api.post('/some-url');
     expect(res.body).toEqual(body);
+    expect(httpMock.getTrace()).toMatchSnapshot();
   });
   it('sets baseUrl', () => {
-    api.setBaseUrl('https://gitlab.renovatebot.com/api/v4/');
+    expect(() =>
+      api.setBaseUrl('https://gitlab.renovatebot.com/api/v4/')
+    ).not.toThrow();
   });
 });

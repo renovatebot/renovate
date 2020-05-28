@@ -4,7 +4,6 @@ import Git from 'simple-git/promise';
 import * as httpMock from '../../../test/httpMock';
 import { getName, partial, platform } from '../../../test/util';
 import { setUtilConfig } from '../../util';
-import * as runCache from '../../util/cache/run';
 import { ifSystemSupportsGradle } from '../gradle/__testutil__/gradle';
 import * as dcUpdate from '.';
 
@@ -36,7 +35,6 @@ describe(getName(__filename), () => {
       jest.resetAllMocks();
       await setUtilConfig(config);
       httpMock.setup();
-      runCache.clear();
     });
 
     afterEach(async () => {

@@ -185,7 +185,13 @@ function getNewValue({
   if (currentValue.split('.')[0].includes('v')) {
     newValue = newValue.replace(/([0-9])/, 'v$1');
   }
-  return newValue.replace('-', '@');
+
+  // Preserve original min-stability specifier
+  if (currentValue.includes('@')) {
+    newValue += '@' + currentValue.split('@')[1];
+  }
+
+  return newValue;
 }
 
 function sortVersions(a: string, b: string): number {
