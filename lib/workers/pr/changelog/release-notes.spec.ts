@@ -3,6 +3,7 @@ import got from '../../../util/got';
 import { ChangeLogNotes } from './common';
 import {
   addReleaseNotes,
+  getReleaseList,
   getReleaseNotes,
   getReleaseNotesMd,
 } from './release-notes';
@@ -28,6 +29,16 @@ const yargsChangelogMd = fs.readFileSync(
   'utf8'
 );
 
+const adapterutilsChangelogMd = fs.readFileSync(
+  'lib/workers/pr/__fixtures__/adapter-utils.md',
+  'utf8'
+);
+
+const gitterWebappChangelogMd = fs.readFileSync(
+  'lib/workers/pr/__fixtures__/gitter-webapp.md',
+  'utf8'
+);
+
 const contentsResponse = [
   { name: 'lib' },
   { name: 'CHANGELOG.md' },
@@ -41,6 +52,62 @@ describe('workers/pr/release-notes', () => {
     it('returns input if invalid', async () => {
       const input = { a: 1 };
       expect(await addReleaseNotes(input as never)).toEqual(input);
+    });
+    it('returns ChangeLogResult', async () => {
+      const input = {
+        a: 1,
+        project: { github: 'https://github.com/nodeca/js-yaml' },
+        versions: [{ version: '3.10.0', compare: { url: '' } }],
+      };
+      expect(await addReleaseNotes(input as never)).toMatchSnapshot();
+    });
+    it('returns ChangeLogResult without release notes', async () => {
+      const input = {
+        a: 1,
+        project: { gitlab: 'https://gitlab.com/gitlab-org/gitter/webapp/' },
+        versions: [{ version: '20.26.0', compare: { url: '' } }],
+      };
+      expect(await addReleaseNotes(input as never)).toMatchSnapshot();
+    });
+  });
+  describe('getReleaseList()', () => {
+    it('should return empty array if no apiBaseUrl', async () => {
+      const res = await getReleaseList('', 'some/yet-other-repository');
+      expect(res).toEqual([]);
+    });
+    it('should return release list for github repo', async () => {
+      ghGot.mockResolvedValueOnce({
+        body: [
+          { tag_name: `v1.0.0` },
+          {
+            tag_name: `v1.0.1`,
+            body:
+              'some body #123, [#124](https://github.com/some/yet-other-repository/issues/124)',
+          },
+        ],
+      });
+      const res = await getReleaseList(
+        'https://api.github.com/',
+        'some/yet-other-repository'
+      );
+      expect(res).toMatchSnapshot();
+    });
+    it('should return release list for gitlab.com project', async () => {
+      ghGot.mockResolvedValueOnce({
+        body: [
+          { tag_name: `v1.0.0` },
+          {
+            tag_name: `v1.0.1`,
+            body:
+              'some body #123, [#124](https://gitlab.com/some/yet-other-repository/issues/124)',
+          },
+        ],
+      });
+      const res = await getReleaseList(
+        'https://gitlab.com/api/v4/',
+        'some/yet-other-repository'
+      );
+      expect(res).toMatchSnapshot();
     });
   });
   describe('getReleaseNotes()', () => {
@@ -78,6 +145,42 @@ describe('workers/pr/release-notes', () => {
           'https://api.github.com/'
         );
         expect(res).toMatchSnapshot();
+      }
+    );
+    it.each([[''], ['v'], ['other-']])(
+      'gets release notes with body from gitlab repo %s',
+      async (prefix) => {
+        ghGot.mockResolvedValueOnce({
+          body: [
+            { tag_name: `${prefix}1.0.0` },
+            {
+              tag_name: `${prefix}1.0.1`,
+              body:
+                'some body #123, [#124](https://gitlab.com/some/yet-other-repository/issues/124)',
+            },
+          ],
+        });
+        const res = await getReleaseNotes(
+          'some/other-repository',
+          '1.0.1',
+          'other',
+          'https://gitlab.com/',
+          'https://api.gitlab.com/'
+        );
+        expect(res).toMatchSnapshot();
+      }
+    );
+    it.each([[''], ['v'], ['other-']])(
+      'gets null from repository without gitlab/github in domain %s',
+      async (prefix) => {
+        const res = await getReleaseNotes(
+          'some/other-repository',
+          '1.0.1',
+          'other',
+          'https://lol.lol/',
+          'https://api.lol.lol/'
+        );
+        expect(res).toBeNull();
       }
     );
   });
@@ -152,6 +255,23 @@ describe('workers/pr/release-notes', () => {
       expect(res).not.toBeNull();
       expect(res).toMatchSnapshot();
     });
+    it('parses gitlab.com/gitlab-org/gitter/webapp', async () => {
+      ghGot
+        .mockResolvedValueOnce({ body: contentsResponse })
+        .mockResolvedValueOnce({
+          body: {
+            content: Buffer.from(gitterWebappChangelogMd).toString('base64'),
+          },
+        });
+      const res = await getReleaseNotesMd(
+        'gitlab-org/gitter/webapp',
+        '20.26.0',
+        'https://gitlab.com/',
+        'https://api.gitlab.com/'
+      );
+      expect(res).not.toBeNull();
+      expect(res).toMatchSnapshot();
+    });
     it('parses jest', async () => {
       ghGot
         .mockResolvedValueOnce({ body: contentsResponse })
@@ -220,6 +340,24 @@ describe('workers/pr/release-notes', () => {
           '15.2.0',
           'https://github.com/',
           'https://api.github.com/'
+        );
+        versionTwoNotes = res;
+        expect(res).not.toBeNull();
+        expect(res).toMatchSnapshot();
+      });
+      it('parses adapter-utils 4.33.0', async () => {
+        ghGot
+          .mockResolvedValueOnce({ body: contentsResponse })
+          .mockResolvedValueOnce({
+            body: {
+              content: Buffer.from(adapterutilsChangelogMd).toString('base64'),
+            },
+          });
+        const res = await getReleaseNotesMd(
+          'itentialopensource/adapter-utils',
+          '4.33.0',
+          'https://gitlab.com/',
+          'https://gitlab.com/api/v4/'
         );
         versionTwoNotes = res;
         expect(res).not.toBeNull();

@@ -9,6 +9,7 @@ import { getChangeLogJSON } from './changelog';
 import * as prWorker from '.';
 
 const changelogHelper = mocked(_changelogHelper);
+const gitlabChangelogHelper = mocked(_changelogHelper);
 const platform = mocked(_platform);
 const defaultConfig = getConfig();
 
@@ -49,6 +50,45 @@ function setupChangelogMock() {
   changelogHelper.getChangeLogJSON.mockResolvedValueOnce(resultValue);
   changelogHelper.getChangeLogJSON.mockResolvedValueOnce(errorValue);
   changelogHelper.getChangeLogJSON.mockResolvedValue(resultValue);
+}
+
+function setupGitlabChangelogMock() {
+  gitlabChangelogHelper.getChangeLogJSON = jest.fn();
+  const resultValue = {
+    project: {
+      baseUrl: 'https://gitlab.com/',
+      gitlab: 'renovateapp/gitlabdummy',
+      repository: 'https://gitlab.com/renovateapp/gitlabdummy',
+    },
+    hasReleaseNotes: true,
+    versions: [
+      {
+        date: new Date('2017-01-01'),
+        version: '1.1.0',
+        changes: [
+          {
+            date: new Date('2017-01-01'),
+            sha: 'abcdefghijklmnopqrstuvwxyz',
+            message: 'foo #3\nbar',
+          },
+        ],
+        releaseNotes: {
+          url:
+            'https://gitlab.com/renovateapp/gitlabdummy/compare/v1.0.0...v1.1.0',
+        },
+        compare: {
+          url:
+            'https://gitlab.com/renovateapp/gitlabdummy/compare/v1.0.0...v1.1.0',
+        },
+      },
+    ],
+  };
+  const errorValue = {
+    error: _changelogHelper.ChangeLogError.MissingGithubToken,
+  };
+  gitlabChangelogHelper.getChangeLogJSON.mockResolvedValueOnce(resultValue);
+  gitlabChangelogHelper.getChangeLogJSON.mockResolvedValueOnce(errorValue);
+  gitlabChangelogHelper.getChangeLogJSON.mockResolvedValue(resultValue);
 }
 
 describe('workers/pr', () => {
@@ -187,6 +227,27 @@ describe('workers/pr', () => {
       const { prResult, pr } = await prWorker.ensurePr(config);
       expect(prResult).toEqual(PrResult.AwaitingApproval);
       expect(pr).toBeUndefined();
+    });
+    it('should create PR if success for gitlab deps', async () => {
+      setupGitlabChangelogMock();
+      config.branchName = 'renovate/gitlabdummy-1.x';
+      config.depName = 'gitlabdummy';
+      config.sourceUrl = 'https://gitlab.com/renovateapp/gitlabdummy';
+      config.changelogUrl =
+        'https://gitlab.com/renovateapp/gitlabdummy/changelog.md';
+      platform.getBranchStatus.mockResolvedValueOnce(BranchStatus.green);
+      config.prCreation = 'status-success';
+      config.automerge = true;
+      config.schedule = ['before 5am'];
+      const { prResult, pr } = await prWorker.ensurePr(config);
+      expect(prResult).toEqual(PrResult.Created);
+      expect(pr).toMatchObject({ displayNumber: 'New Pull Request' });
+      expect(platform.createPr.mock.calls[0]).toMatchSnapshot();
+      existingPr.body = platform.createPr.mock.calls[0][0].prBody;
+      config.branchName = 'renovate/dummy-1.x';
+      config.depName = 'dummy';
+      config.sourceUrl = 'https://github.com/renovateapp/dummy';
+      config.changelogUrl = 'https://github.com/renovateapp/dummy/changelog.md';
     });
     it('should create PR if success', async () => {
       platform.getBranchStatus.mockResolvedValueOnce(BranchStatus.green);
