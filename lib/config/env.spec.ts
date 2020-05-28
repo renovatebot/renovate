@@ -61,6 +61,13 @@ describe('config/env', () => {
       };
       expect(env.getConfig(envParam)).toMatchSnapshot();
     });
+    it('supports GitHub custom endpoint and gitlab.com', () => {
+      const envParam: NodeJS.ProcessEnv = {
+        RENOVATE_ENDPOINT: 'a ghe endpoint',
+        RENOVATE_TOKEN: 'a ghe token',
+      };
+      expect(env.getConfig(envParam)).toMatchSnapshot();
+    });
     it('supports GitLab token', () => {
       const envParam: NodeJS.ProcessEnv = {
         RENOVATE_PLATFORM: PLATFORM_TYPE_GITLAB,

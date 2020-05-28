@@ -1,11 +1,18 @@
 import * as runCache from './run';
 
 describe('getRepoCache', () => {
-  it('sets and gets repo cache', () => {
-    runCache.set('key', 'value');
-    expect(runCache.get('key')).toEqual('value');
+  it('returns undefined if not init', () => {
+    expect(runCache.get('key1')).toBeUndefined();
   });
-  it('clears repo cache', () => {
-    expect(() => runCache.clear()).not.toThrow();
+  it('sets and gets repo cache', () => {
+    runCache.init();
+    runCache.set('key2', 'value');
+    expect(runCache.get('key2')).toEqual('value');
+  });
+  it('resets', () => {
+    runCache.init();
+    runCache.set('key3', 'value');
+    runCache.reset();
+    expect(runCache.get('key3')).toBeUndefined();
   });
 });

@@ -56,6 +56,23 @@ Array [
 ]
 `;
 
+exports[`manager/kustomize/extract extractPackageFile() should extract bases from bases block and the resources block 1`] = `
+Array [
+  Object {
+    "currentValue": "v0.0.1",
+    "datasource": "git-tags",
+    "depName": "git@github.com:moredhel/remote-kustomize.git",
+    "lookupName": "git@github.com:moredhel/remote-kustomize.git",
+  },
+  Object {
+    "currentValue": "1.19.0",
+    "datasource": "github-tags",
+    "depName": "fluxcd/flux/deploy",
+    "lookupName": "fluxcd/flux",
+  },
+]
+`;
+
 exports[`manager/kustomize/extract extractPackageFile() should extract out image versions 1`] = `
 Array [
   Object {

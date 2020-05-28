@@ -221,6 +221,28 @@ Array [
     "url": "https://gitlab.com/api/v4/projects/undefined/merge_requests",
   },
   Object {
+    "headers": Object {
+      "accept": "application/json",
+      "accept-encoding": "gzip, deflate",
+      "host": "gitlab.com",
+      "private-token": "abc123",
+      "user-agent": "https://github.com/renovatebot/renovate",
+    },
+    "method": "GET",
+    "url": "https://gitlab.com/api/v4/projects/undefined/merge_requests/12345",
+  },
+  Object {
+    "headers": Object {
+      "accept": "application/json",
+      "accept-encoding": "gzip, deflate",
+      "host": "gitlab.com",
+      "private-token": "abc123",
+      "user-agent": "https://github.com/renovatebot/renovate",
+    },
+    "method": "GET",
+    "url": "https://gitlab.com/api/v4/projects/undefined/merge_requests/12345",
+  },
+  Object {
     "body": "{\\"should_remove_source_branch\\":true,\\"merge_when_pipeline_succeeds\\":true}",
     "headers": Object {
       "accept": "application/json",
@@ -1791,7 +1813,7 @@ Array [
       "user-agent": "https://github.com/renovatebot/renovate",
     },
     "method": "GET",
-    "url": "https://gitlab.com/api/v4/projects?membership=true&per_page=100&with_merge_requests_enabled=true",
+    "url": "https://gitlab.com/api/v4/projects?membership=true&per_page=100&with_merge_requests_enabled=true&min_access_level=30",
   },
 ]
 `;
@@ -1807,7 +1829,7 @@ Array [
       "user-agent": "https://github.com/renovatebot/renovate",
     },
     "method": "GET",
-    "url": "https://gitlab.com/api/v4/projects?membership=true&per_page=100&with_merge_requests_enabled=true",
+    "url": "https://gitlab.com/api/v4/projects?membership=true&per_page=100&with_merge_requests_enabled=true&min_access_level=30",
   },
 ]
 `;

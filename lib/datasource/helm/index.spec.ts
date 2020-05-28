@@ -1,6 +1,4 @@
 import fs from 'fs';
-import * as globalCache from '../../util/cache/global';
-import * as runCache from '../../util/cache/run';
 import _got from '../../util/got';
 import { getReleases } from '.';
 
@@ -18,8 +16,6 @@ describe('datasource/helm', () => {
   describe('getReleases', () => {
     beforeEach(() => {
       jest.resetAllMocks();
-      runCache.clear();
-      return globalCache.rmAll();
     });
     it('returns null if lookupName was not provided', async () => {
       expect(
