@@ -535,6 +535,8 @@ describe('workers/pr', () => {
       config.prCreation = 'status-success';
       config.privateRepo = false;
       config.logJSON = await getChangeLogJSON(config);
+      config.logJSON.project.gitlab = 'someproject';
+      delete config.logJSON.project.github;
       const { prResult, pr } = await prWorker.ensurePr(config);
       expect(prResult).toEqual(PrResult.Created);
       expect(pr).toMatchObject({ displayNumber: 'New Pull Request' });

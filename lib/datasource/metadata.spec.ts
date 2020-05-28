@@ -85,6 +85,40 @@ describe('datasource/metadata', () => {
     addMetaData(dep, datasource, lookupName);
     expect(dep).toMatchSnapshot();
   });
+  it('Should handle failed parsing of sourceUrls for GitLab', () => {
+    const dep = {
+      sourceUrl: 'https://gitlab-nope',
+      releases: [
+        { version: '5.7.0', releaseTimestamp: '2020-02-14T13:12:00' },
+        {
+          version: '5.6.1',
+          releaseTimestamp: '2020-02-14T10:04:00',
+        },
+      ],
+    };
+    const datasource = datasourceNpm.id;
+    const lookupName = 'dropzone';
+
+    addMetaData(dep, datasource, lookupName);
+    expect(dep).toMatchSnapshot();
+  });
+  it('Should handle failed parsing of sourceUrls for other', () => {
+    const dep = {
+      sourceUrl: 'https://nope-nope-nope',
+      releases: [
+        { version: '5.7.0', releaseTimestamp: '2020-02-14T13:12:00' },
+        {
+          version: '5.6.1',
+          releaseTimestamp: '2020-02-14T10:04:00',
+        },
+      ],
+    };
+    const datasource = datasourceNpm.id;
+    const lookupName = 'dropzone';
+
+    addMetaData(dep, datasource, lookupName);
+    expect(dep).toMatchSnapshot();
+  });
 
   it('Should handle parsing/converting of GitHub sourceUrls with http and www correctly', () => {
     const dep = {
