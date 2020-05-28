@@ -81,7 +81,7 @@ const repoGroups = {
     'https://github.com/neutrinojs/neutrino',
     'https://github.com/mozilla-neutrino/neutrino-dev',
   ],
-  nextjs: 'https://github.com/zeit/next.js',
+  nextjs: 'https://github.com/vercel/next.js',
   ngrx: 'https://github.com/ngrx/',
   nrwl: 'https://github.com/nrwl/',
   nuxtjs: 'https://github.com/nuxt/nuxt.js',
