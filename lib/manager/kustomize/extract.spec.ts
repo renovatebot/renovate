@@ -44,6 +44,11 @@ const gitImages = readFileSync(
   'utf8'
 );
 
+const kustomizeDepsInResources = readFileSync(
+  'lib/manager/kustomize/__fixtures__/depsInResources.yaml',
+  'utf8'
+);
+
 describe('manager/kustomize/extract', () => {
   it('should successfully parse a valid kustomize file', () => {
     const file = parseKustomize(kustomizeGitSSHBase);
@@ -226,6 +231,16 @@ describe('manager/kustomize/extract', () => {
     });
     it('does nothing with kustomize empty kustomize files', () => {
       expect(extractPackageFile(kustomizeEmpty)).toBeNull();
+    });
+    it('should extract bases from bases block and the resources block', () => {
+      const res = extractPackageFile(kustomizeDepsInResources);
+      expect(res).not.toBeNull();
+      expect(res.deps).toMatchSnapshot();
+      expect(res.deps).toHaveLength(2);
+      expect(res.deps[0].currentValue).toEqual('v0.0.1');
+      expect(res.deps[1].currentValue).toEqual('1.19.0');
+      expect(res.deps[1].depName).toEqual('fluxcd/flux/deploy');
+      expect(res.deps[1].lookupName).toEqual('fluxcd/flux');
     });
   });
 });
