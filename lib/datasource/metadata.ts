@@ -114,14 +114,13 @@ export function addMetaData(
   };
 
   if (
-    dep.changelogUrl &&
-    dep.changelogUrl.includes('github.com') && // lgtm [js/incomplete-url-substring-sanitization]
+    dep.changelogUrl?.includes('github.com') && // lgtm [js/incomplete-url-substring-sanitization]
     !dep.sourceUrl
   ) {
     dep.sourceUrl = dep.changelogUrl;
   }
   // prettier-ignore
-  if (dep.homepage && dep.homepage.includes('github.com')) { // lgtm [js/incomplete-url-substring-sanitization]
+  if (dep.homepage?.includes('github.com')) { // lgtm [js/incomplete-url-substring-sanitization]
     if (!dep.sourceUrl) {
       dep.sourceUrl = dep.homepage;
     }
@@ -134,7 +133,7 @@ export function addMetaData(
   });
   extraBaseUrls.push('gitlab.com');
   if (dep.sourceUrl) {
-    if (URL.parse(dep.sourceUrl).hostname.includes('gitlab')) {
+    if (URL.parse(dep.sourceUrl).hostname?.includes('gitlab')) {
       // try massaging it
       dep.sourceUrl =
         parse(massageGitlabUrl(dep.sourceUrl), {
