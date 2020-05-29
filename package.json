@@ -170,7 +170,7 @@
     "yawn-yaml": "1.5.0"
   },
   "optionalDependencies": {
-    "re2": "1.13.1"
+    "re2": "1.14.0"
   },
   "devDependencies": {
     "@actions/core": "1.2.4",
