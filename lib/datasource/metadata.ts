@@ -114,14 +114,13 @@ export function addMetaData(
   };
 
   if (
-    dep.changelogUrl &&
-    dep.changelogUrl.includes('github.com') && // lgtm [js/incomplete-url-substring-sanitization]
+    dep.changelogUrl?.includes('github.com') && // lgtm [js/incomplete-url-substring-sanitization]
     !dep.sourceUrl
   ) {
     dep.sourceUrl = dep.changelogUrl;
   }
   // prettier-ignore
-  if (dep.homepage && dep.homepage.includes('github.com')) { // lgtm [js/incomplete-url-substring-sanitization]
+  if (dep.homepage?.includes('github.com')) { // lgtm [js/incomplete-url-substring-sanitization]
     if (!dep.sourceUrl) {
       dep.sourceUrl = dep.homepage;
     }
@@ -134,18 +133,21 @@ export function addMetaData(
   });
   extraBaseUrls.push('gitlab.com');
   if (dep.sourceUrl) {
-    if (URL.parse(dep.sourceUrl).hostname.includes('gitlab')) {
+    const parsedUrl = URL.parse(dep.sourceUrl);
+    if (parsedUrl?.hostname) {
+      let massagedUrl;
+      if (parsedUrl.hostname.includes('gitlab')) {
+        massagedUrl = massageGitlabUrl(dep.sourceUrl);
+      } else {
+        massagedUrl = massageGithubUrl(dep.sourceUrl);
+      }
       // try massaging it
       dep.sourceUrl =
-        parse(massageGitlabUrl(dep.sourceUrl), {
+        parse(massagedUrl, {
           extraBaseUrls,
         }) || dep.sourceUrl;
     } else {
-      // try massaging it
-      dep.sourceUrl =
-        parse(massageGithubUrl(dep.sourceUrl), {
-          extraBaseUrls,
-        }) || dep.sourceUrl;
+      delete dep.sourceUrl;
     }
   }
 

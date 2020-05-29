@@ -1,9 +1,9 @@
 import { logger } from '../../../logger';
-import { api } from '../../../platform/gitlab/gl-got-wrapper';
+import { GitlabHttp } from '../../../util/http/gitlab';
 import { ensureTrailingSlash } from '../../../util/url';
 import { Preset, PresetConfig } from '../common';
 
-const { get: glGot } = api;
+const gitlabApi = new GitlabHttp();
 
 async function getDefaultBranchName(
   urlEncodedPkgName: string,
@@ -15,7 +15,7 @@ async function getDefaultBranchName(
     name: string;
   }[];
 
-  const res = await glGot<GlBranch>(branchesUrl);
+  const res = await gitlabApi.getJson<GlBranch>(branchesUrl);
   const branches = res.body;
   let defautlBranchName = 'master';
   for (const branch of branches) {
@@ -52,7 +52,7 @@ export async function getPresetFromEndpoint(
 
     const presetUrl = `${endpoint}projects/${urlEncodedPkgName}/repository/files/renovate.json?ref=${defautlBranchName}`;
     res = Buffer.from(
-      (await glGot(presetUrl)).body.content,
+      (await gitlabApi.getJson<{ content: string }>(presetUrl)).body.content,
       'base64'
     ).toString();
   } catch (err) {

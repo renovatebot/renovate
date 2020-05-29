@@ -119,6 +119,23 @@ describe('datasource/metadata', () => {
     addMetaData(dep, datasource, lookupName);
     expect(dep).toMatchSnapshot();
   });
+  it('Should handle non-url', () => {
+    const dep = {
+      sourceUrl: 'not-a-url',
+      releases: [
+        { version: '5.7.0', releaseTimestamp: '2020-02-14T13:12:00' },
+        {
+          version: '5.6.1',
+          releaseTimestamp: '2020-02-14T10:04:00',
+        },
+      ],
+    };
+    const datasource = datasourceNpm.id;
+    const lookupName = 'dropzone';
+
+    addMetaData(dep, datasource, lookupName);
+    expect(dep).toMatchSnapshot();
+  });
 
   it('Should handle parsing/converting of GitHub sourceUrls with http and www correctly', () => {
     const dep = {

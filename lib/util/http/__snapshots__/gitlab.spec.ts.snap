@@ -1,6 +1,6 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
-exports[`platform/gitlab/gl-got-wrapper attempts to paginate 1`] = `
+exports[`util/http/gitlab attempts to paginate 1`] = `
 Array [
   Object {
     "headers": Object {
@@ -16,7 +16,7 @@ Array [
 ]
 `;
 
-exports[`platform/gitlab/gl-got-wrapper paginates 1`] = `
+exports[`util/http/gitlab paginates 1`] = `
 Array [
   Object {
     "headers": Object {
@@ -54,7 +54,7 @@ Array [
 ]
 `;
 
-exports[`platform/gitlab/gl-got-wrapper posts 1`] = `
+exports[`util/http/gitlab posts 1`] = `
 Array [
   Object {
     "headers": Object {
