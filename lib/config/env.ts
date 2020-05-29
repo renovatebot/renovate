@@ -62,6 +62,7 @@ export function getConfig(env: NodeJS.ProcessEnv): RenovateConfig {
       hostType: PLATFORM_TYPE_GITHUB,
       domainName: 'github.com',
       token: env.GITHUB_COM_TOKEN,
+      url: 'https://api.github.com/',
     });
   }
 
