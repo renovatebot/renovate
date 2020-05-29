@@ -169,7 +169,7 @@ Object {
       "skipReason": "unsupported-version",
     },
     Object {
-      "currentValue": "v1.0.0",
+      "currentValue": "v1.0.1",
       "datasource": "git-tags",
       "depName": "bitbucket.com/hashicorp/example",
       "depNameShort": "hashicorp/example",
@@ -177,7 +177,7 @@ Object {
       "lookupName": "https://bitbucket.com/hashicorp/example",
     },
     Object {
-      "currentValue": "v1.0.0",
+      "currentValue": "v1.0.2",
       "datasource": "git-tags",
       "depName": "bitbucket.com/hashicorp/example",
       "depNameShort": "hashicorp/example",
@@ -185,7 +185,7 @@ Object {
       "lookupName": "http://bitbucket.com/hashicorp/example",
     },
     Object {
-      "currentValue": "v1.0.0",
+      "currentValue": "v1.0.3",
       "datasource": "git-tags",
       "depName": "bitbucket.com/hashicorp/example",
       "depNameShort": "hashicorp/example",
