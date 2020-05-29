@@ -1,15 +1,11 @@
-import { mocked } from '../../../../test/util';
+import * as httpMock from '../../../../test/httpMock';
 import { PLATFORM_TYPE_GITLAB } from '../../../constants/platforms';
-import { api } from '../../../platform/gitlab/gl-got-wrapper';
 import * as hostRules from '../../../util/host-rules';
 import * as semverVersioning from '../../../versioning/semver';
 import { BranchUpgradeConfig } from '../../common';
 import { getChangeLogJSON } from '.';
 
-jest.mock('../../../../lib/platform/gitlab/gl-got-wrapper');
 jest.mock('../../../../lib/datasource/npm');
-
-const glGot = mocked(api).get;
 
 const upgrade: BranchUpgradeConfig = {
   branchName: undefined,
@@ -32,27 +28,34 @@ const upgrade: BranchUpgradeConfig = {
   ],
 };
 
+const baseUrl = 'https://gitlab.com/';
+
 describe('workers/pr/changelog', () => {
   describe('getChangeLogJSON', () => {
     beforeEach(() => {
-      glGot.mockClear();
+      httpMock.setup();
       hostRules.clear();
       hostRules.add({
         hostType: PLATFORM_TYPE_GITLAB,
-        baseUrl: 'https://gitlab.com/',
+        baseUrl,
         token: 'abc',
       });
     });
+    afterEach(() => {
+      httpMock.reset();
+    });
     it('returns null if @types', async () => {
+      httpMock.scope(baseUrl);
       expect(
         await getChangeLogJSON({
           ...upgrade,
           fromVersion: null,
         })
       ).toBeNull();
-      expect(glGot).toHaveBeenCalledTimes(0);
+      expect(httpMock.getTrace()).toBeEmpty();
     });
     it('returns null if fromVersion equals toVersion', async () => {
+      httpMock.scope(baseUrl);
       expect(
         await getChangeLogJSON({
           ...upgrade,
@@ -60,7 +63,7 @@ describe('workers/pr/changelog', () => {
           toVersion: '1.0.0',
         })
       ).toBeNull();
-      expect(glGot).toHaveBeenCalledTimes(0);
+      expect(httpMock.getTrace()).toBeEmpty();
     });
     it('skips invalid repos', async () => {
       expect(
@@ -78,31 +81,65 @@ describe('workers/pr/changelog', () => {
       ).toMatchSnapshot();
     });
     it('uses GitLab tags', async () => {
-      glGot.mockResolvedValueOnce({
-        body: [
+      httpMock
+        .scope(baseUrl)
+        .get('/api/v4/projects/meno%2Fdropzone/repository/tags')
+        .reply(200, [
           { name: 'v5.2.0' },
           { name: 'v5.4.0' },
           { name: 'v5.5.0' },
           { name: 'v5.6.0' },
           { name: 'v5.6.1' },
           { name: 'v5.7.0' },
-        ],
-      } as never);
+        ])
+        .persist()
+        .get('/api/v4/projects/meno/dropzone/repository/tree/')
+        .reply(200, [])
+        .persist()
+        .get('/api/v4/projects/meno%2fdropzone/releases?per_page=100')
+        .reply(200, []);
       expect(
         await getChangeLogJSON({
           ...upgrade,
         })
       ).toMatchSnapshot();
+      expect(httpMock.getTrace()).toMatchSnapshot();
+    });
+    it('handles empty GitLab tags response', async () => {
+      httpMock
+        .scope(baseUrl)
+        .get('/api/v4/projects/meno%2Fdropzone/repository/tags')
+        .reply(200, [])
+        .persist()
+        .get('/api/v4/projects/meno/dropzone/repository/tree/')
+        .reply(200, [])
+        .persist()
+        .get('/api/v4/projects/meno%2fdropzone/releases?per_page=100')
+        .reply(200, []);
+      expect(
+        await getChangeLogJSON({
+          ...upgrade,
+        })
+      ).toMatchSnapshot();
+      expect(httpMock.getTrace()).toMatchSnapshot();
     });
     it('uses GitLab tags with error', async () => {
-      glGot.mockImplementation(() => {
-        throw new Error('Unknown GitLab Repo');
-      });
+      httpMock
+        .scope(baseUrl)
+        .get('/api/v4/projects/meno%2Fdropzone/repository/tags')
+        .replyWithError('Unknown GitLab Repo')
+        .persist()
+        .get('/api/v4/projects/meno/dropzone/repository/tree/')
+        .reply(200, [])
+        .persist()
+        .get('/api/v4/projects/meno%2fdropzone/releases?per_page=100')
+        .reply(200, []);
       expect(
         await getChangeLogJSON({
           ...upgrade,
         })
       ).toMatchSnapshot();
+      expect(httpMock.getTrace()).toMatchSnapshot();
     });
     it('handles no sourceUrl', async () => {
       expect(

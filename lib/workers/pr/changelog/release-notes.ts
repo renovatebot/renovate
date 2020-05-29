@@ -4,18 +4,17 @@ import { linkify } from 'linkify-markdown';
 import MarkdownIt from 'markdown-it';
 
 import { logger } from '../../../logger';
-import { api as api_gitlab } from '../../../platform/gitlab/gl-got-wrapper';
 import * as globalCache from '../../../util/cache/global';
 import * as runCache from '../../../util/cache/run';
 import { GithubHttp } from '../../../util/http/github';
+import { GitlabHttp } from '../../../util/http/gitlab';
 import { ChangeLogNotes, ChangeLogResult } from './common';
-
-const { get: glGot } = api_gitlab;
 
 const markdown = new MarkdownIt('zero');
 markdown.enable(['heading', 'lheading']);
 
-const http = new GithubHttp();
+const githubHttp = new GithubHttp();
+const gitlabHttp = new GitlabHttp();
 
 export async function getReleaseList(
   apiBaseUrl: string,
@@ -34,7 +33,7 @@ export async function getReleaseList(
         /\//g,
         '%2f'
       )}/releases?per_page=100`;
-      const res = await glGot<
+      const res = await gitlabHttp.getJson<
         {
           name: string;
           release: string;
@@ -53,7 +52,7 @@ export async function getReleaseList(
       }));
     }
     url += `repos/${repository}/releases?per_page=100`;
-    const res = await http.getJson<
+    const res = await githubHttp.getJson<
       {
         html_url: string;
         id: number;
@@ -206,11 +205,11 @@ export async function getReleaseNotesMdFileInner(
     if (apiBaseUrl.includes('gitlab')) {
       apiTree = apiPrefix + `projects/${repository}/repository/tree/`;
       apiFiles = apiPrefix + `projects/${repository}/repository/files/`;
-      filesRes = await glGot<{ name: string }[]>(apiTree);
+      filesRes = await gitlabHttp.getJson<{ name: string }[]>(apiTree);
     } else {
       apiTree = apiPrefix + `repos/${repository}/contents/`;
       apiFiles = apiTree;
-      filesRes = await http.getJson<{ name: string }[]>(apiTree);
+      filesRes = await githubHttp.getJson<{ name: string }[]>(apiTree);
     }
     const files = filesRes.body
       .map((f) => f.name)
@@ -228,11 +227,11 @@ export async function getReleaseNotesMdFileInner(
     }
     let fileRes: { body: { content: string } };
     if (apiBaseUrl.includes('gitlab')) {
-      fileRes = await glGot<{ content: string }>(
+      fileRes = await gitlabHttp.getJson<{ content: string }>(
         `${apiFiles}${changelogFile}?ref=master`
       );
     } else {
-      fileRes = await http.getJson<{ content: string }>(
+      fileRes = await githubHttp.getJson<{ content: string }>(
         `${apiFiles}${changelogFile}`
       );
     }

@@ -1,16 +1,16 @@
 import URL from 'url';
 import { Release } from '../../../datasource';
 import { logger } from '../../../logger';
-import { api } from '../../../platform/gitlab/gl-got-wrapper';
 import * as globalCache from '../../../util/cache/global';
 import * as runCache from '../../../util/cache/run';
+import { GitlabHttp } from '../../../util/http/gitlab';
 import { regEx } from '../../../util/regex';
 import * as allVersioning from '../../../versioning';
 import { BranchUpgradeConfig } from '../../common';
 import { ChangeLogRelease, ChangeLogResult } from './common';
 import { addReleaseNotes } from './release-notes';
 
-const { get: glGot } = api;
+const gitlabHttp = new GitlabHttp();
 
 const cacheNamespace = 'changelog-gitlab-release';
 
@@ -24,7 +24,7 @@ async function getTagsInner(
   const repoid = repository.replace(/\//g, '%2F');
   url += `projects/${repoid}/repository/tags`;
   try {
-    const res = await glGot<{ name: string }[]>(url, {
+    const res = await gitlabHttp.getJson<{ name: string }[]>(url, {
       paginate: true,
     });
 
