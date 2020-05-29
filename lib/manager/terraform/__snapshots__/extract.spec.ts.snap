@@ -176,6 +176,22 @@ Object {
       "depType": "gitTags",
       "lookupName": "https://bitbucket.com/hashicorp/example",
     },
+    Object {
+      "currentValue": "v1.0.0",
+      "datasource": "git-tags",
+      "depName": "bitbucket.com/hashicorp/example",
+      "depNameShort": "hashicorp/example",
+      "depType": "gitTags",
+      "lookupName": "http://bitbucket.com/hashicorp/example",
+    },
+    Object {
+      "currentValue": "v1.0.0",
+      "datasource": "git-tags",
+      "depName": "bitbucket.com/hashicorp/example",
+      "depNameShort": "hashicorp/example",
+      "depType": "gitTags",
+      "lookupName": "ssh://git@bitbucket.com/hashicorp/example",
+    },
   ],
 }
 `;
