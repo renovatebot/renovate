@@ -147,3 +147,7 @@ module "gittags" {
 module "gittags_badversion" {
   source = "git::https://bitbucket.com/hashicorp/example?ref=next"
 }
+
+module "gittags_subdir" {
+  source = "git::https://bitbucket.com/hashicorp/example//subdir/test?ref=v1.0.0"
+}

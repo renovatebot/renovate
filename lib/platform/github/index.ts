@@ -204,7 +204,6 @@ export async function initRepo({
   repository,
   forkMode,
   forkToken,
-  gitPrivateKey,
   localDir,
   includeForks,
   renovateUsername,
@@ -216,7 +215,7 @@ export async function initRepo({
   // istanbul ignore if
   if (endpoint) {
     // Necessary for Renovate Pro - do not remove
-    logger.debug('Overriding default GitHub endpoint');
+    logger.debug({ endpoint }, 'Overriding default GitHub endpoint');
     defaults.endpoint = endpoint;
     githubHttp.setBaseUrl(endpoint);
   }
@@ -229,7 +228,6 @@ export async function initRepo({
   config.localDir = localDir;
   config.repository = repository;
   [config.repositoryOwner, config.repositoryName] = repository.split('/');
-  config.gitPrivateKey = gitPrivateKey;
   let res;
   try {
     res = await githubApi.getJson<{ fork: boolean }>(`repos/${repository}`);

@@ -218,7 +218,9 @@ export async function ensurePr(
     if (logJSON) {
       if (typeof logJSON.error === 'undefined') {
         if (logJSON.project) {
-          upgrade.repoName = logJSON.project.github;
+          upgrade.repoName = logJSON.project.github
+            ? logJSON.project.github
+            : logJSON.project.gitlab;
         }
         upgrade.hasReleaseNotes = logJSON.hasReleaseNotes;
         upgrade.releases = [];
@@ -308,12 +310,6 @@ export async function ensurePr(
         );
       } else if (!config.committedFiles) {
         logger.debug(
-          {
-            prTitle,
-          },
-          'PR body changed'
-        );
-        logger.trace(
           {
             prTitle,
             oldPrBody: existingPrBody,

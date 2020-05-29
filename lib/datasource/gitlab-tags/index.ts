@@ -1,10 +1,10 @@
 import is from '@sindresorhus/is';
 import { logger } from '../../logger';
-import { api } from '../../platform/gitlab/gl-got-wrapper';
 import * as globalCache from '../../util/cache/global';
+import { GitlabHttp } from '../../util/http/gitlab';
 import { GetReleasesConfig, ReleaseResult } from '../common';
 
-const { get: glGot } = api;
+const gitlabApi = new GitlabHttp();
 
 export const id = 'gitlab-tags';
 
@@ -46,7 +46,7 @@ export async function getReleases({
     const url = `${depHost}/api/v4/projects/${urlEncodedRepo}/repository/tags?per_page=100`;
 
     gitlabTags = (
-      await glGot<GitlabTag[]>(url, {
+      await gitlabApi.getJson<GitlabTag[]>(url, {
         paginate: true,
       })
     ).body;

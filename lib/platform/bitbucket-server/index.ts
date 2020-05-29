@@ -112,7 +112,6 @@ export function cleanRepo(): Promise<void> {
 // Initialize GitLab by getting base branch
 export async function initRepo({
   repository,
-  gitPrivateKey,
   localDir,
   optimizeForDisabled,
   bbUseDefaultReviewers,
@@ -161,7 +160,6 @@ export async function initRepo({
   config = {
     projectKey,
     repositorySlug,
-    gitPrivateKey,
     repository,
     prVersions: new Map<number, number>(),
     username: opts.username,

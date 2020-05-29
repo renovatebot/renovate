@@ -3,8 +3,7 @@ import { join } from 'upath';
 import { SYSTEM_INSUFFICIENT_DISK_SPACE } from '../../../constants/error-messages';
 import { DatasourceError } from '../../../datasource';
 import { logger } from '../../../logger';
-import { exec } from '../../../util/exec';
-import { BinarySource } from '../../../util/exec/common';
+import { ExecOptions, exec } from '../../../util/exec';
 import { PostUpdateConfig, Upgrade } from '../../common';
 
 export interface GenerateLockFileResult {
@@ -21,101 +20,68 @@ export async function generateLockFile(
 ): Promise<GenerateLockFileResult> {
   logger.debug(`Spawning yarn install to create ${cwd}/yarn.lock`);
   let lockFile = null;
-  let stdout = '';
-  let stderr = '';
-  let cmd = 'yarn';
   try {
-    if (config.binarySource === BinarySource.Docker) {
-      logger.debug('Running yarn via docker');
-      cmd = `docker run --rm `;
-      // istanbul ignore if
-      if (config.dockerUser) {
-        cmd += `--user=${config.dockerUser} `;
-      }
-      const volumes = [cwd];
-      if (config.cacheDir) {
-        volumes.push(config.cacheDir);
-      }
-      cmd += volumes.map((v) => `-v "${v}":"${v}" `).join('');
-      // istanbul ignore if
-      if (config.dockerMapDotfiles) {
-        const homeDir =
-          process.env.HOME || process.env.HOMEPATH || process.env.USERPROFILE;
-        const homeNpmrc = join(homeDir, '.npmrc');
-        cmd += `-v ${homeNpmrc}:/home/ubuntu/.npmrc `;
-      }
-      const envVars = ['NPM_CONFIG_CACHE', 'npm_config_store'];
-      cmd += envVars.map((e) => `-e ${e} `).join('');
-      cmd += `-w "${cwd}" `;
-      cmd += `renovate/yarn yarn`;
+    const preCommands = ['npm i -g yarn'];
+    const commands = [];
+    let cmdOptions = '';
+    if (global.trustLevel !== 'high' || config.ignoreScripts) {
+      cmdOptions = '--ignore-scripts --ignore-engines --ignore-platform';
+    }
+    const execOptions: ExecOptions = {
+      cwd,
+      extraEnv: {
+        NPM_CONFIG_CACHE: env?.NPM_CONFIG_CACHE,
+        npm_config_store: env?.npm_config_store,
+      },
+      docker: {
+        image: 'renovate/node',
+        preCommands,
+      },
+    };
+    if (config.dockerMapDotfiles) {
+      const homeDir =
+        process.env.HOME || process.env.HOMEPATH || process.env.USERPROFILE;
+      const homeNpmrc = join(homeDir, '.npmrc');
+      execOptions.docker.volumes = [[homeNpmrc, '/home/ubuntu/.npmrc']];
     }
 
-    let cmdExtras = '';
-    const cmdEnv = { ...env };
-    cmdExtras += ' --ignore-scripts';
-    cmdExtras += ' --ignore-engines';
-    cmdExtras += ' --ignore-platform';
-    const installCmd = cmd + ' install' + cmdExtras;
-    // TODO: Switch to native util.promisify once using only node 8
-    await exec(installCmd, {
-      cwd,
-      env: cmdEnv,
-    });
+    // This command updates the lock file based on package.json
+    commands.push(`yarn install ${cmdOptions}`.trim());
+
+    // rangeStrategy = update-lockfile
     const lockUpdates = upgrades
       .filter((upgrade) => upgrade.isLockfileUpdate)
       .map((upgrade) => upgrade.depName);
     if (lockUpdates.length) {
       logger.debug('Performing lockfileUpdate (yarn)');
-      const updateCmd =
-        cmd +
-        ' upgrade' +
-        lockUpdates.map((depName) => ` ${depName}`).join('') +
-        cmdExtras;
-      const updateRes = await exec(updateCmd, {
-        cwd,
-        env,
-      });
-      // istanbul ignore next
-      stdout += updateRes.stdout || '';
-      stderr += updateRes.stderr || '';
+      commands.push(
+        `yarn upgrade ${lockUpdates.join(' ')} ${cmdOptions}`.trim()
+      );
     }
 
-    if (
-      config.postUpdateOptions &&
-      config.postUpdateOptions.includes('yarnDedupeFewer')
-    ) {
+    // postUpdateOptions
+    if (config.postUpdateOptions?.includes('yarnDedupeFewer')) {
       logger.debug('Performing yarn dedupe fewer');
-      const dedupeCommand = 'npx yarn-deduplicate --strategy fewer && yarn';
-      const dedupeRes = await exec(dedupeCommand, {
-        cwd,
-        env,
-      });
-      // istanbul ignore next
-      stdout += dedupeRes.stdout || '';
-      stderr += dedupeRes.stderr || '';
+      commands.push('npx yarn-deduplicate --strategy fewer');
+      // Run yarn again in case any changes are necessary
+      commands.push(`yarn install ${cmdOptions}`.trim());
     }
-    if (
-      config.postUpdateOptions &&
-      config.postUpdateOptions.includes('yarnDedupeHighest')
-    ) {
+    if (config.postUpdateOptions?.includes('yarnDedupeHighest')) {
       logger.debug('Performing yarn dedupe highest');
-      const dedupeCommand = 'npx yarn-deduplicate --strategy highest && yarn';
-      const dedupeRes = await exec(dedupeCommand, {
-        cwd,
-        env,
-      });
-      // istanbul ignore next
-      stdout += dedupeRes.stdout || '';
-      stderr += dedupeRes.stderr || '';
+      commands.push('npx yarn-deduplicate --strategy highest');
+      // Run yarn again in case any changes are necessary
+      commands.push(`yarn install ${cmdOptions}`.trim());
     }
+
+    // Run the commands
+    await exec(commands, execOptions);
+
+    // Read the result
     lockFile = await readFile(join(cwd, 'yarn.lock'), 'utf8');
   } catch (err) /* istanbul ignore next */ {
     logger.debug(
       {
-        cmd,
         err,
-        stdout,
-        stderr,
         type: 'yarn',
       },
       'lock file error'
