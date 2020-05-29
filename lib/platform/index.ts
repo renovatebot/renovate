@@ -6,6 +6,7 @@ import { logger } from '../logger';
 import * as hostRules from '../util/host-rules';
 import platforms from './api.generated';
 import { Platform } from './common';
+import { setPrivateKey } from './git/private-key';
 
 export * from './common';
 
@@ -39,6 +40,7 @@ export function setPlatformApi(name: string): void {
 export async function initPlatform(
   config: RenovateConfig
 ): Promise<RenovateConfig> {
+  setPrivateKey(config.gitPrivateKey);
   setPlatformApi(config.platform);
   // TODO: types
   const platformInfo = await platform.initPlatform(config);

@@ -13,6 +13,7 @@ import {
 import { logger } from '../../logger';
 import * as limits from '../../workers/global/limits';
 import { CommitFilesConfig } from '../common';
+import { writePrivateKey } from './private-key';
 
 declare module 'fs-extra' {
   export function exists(pathLike: string): Promise<boolean>;
@@ -24,7 +25,6 @@ interface StorageConfig {
   localDir: string;
   baseBranch?: string;
   url: string;
-  gitPrivateKey?: string;
   extraCloneOpts?: Git.Options;
 }
 
@@ -83,6 +83,8 @@ export class Storage {
   private _git: Git.SimpleGit | undefined;
 
   private _cwd: string | undefined;
+
+  private _privateKeySet = false;
 
   private async _resetToBranch(branchName: string): Promise<void> {
     logger.debug(`resetToBranch(${branchName})`);
@@ -196,14 +198,6 @@ export class Storage {
       }
       logger.warn({ err }, 'Cannot retrieve latest commit date');
     }
-    // istanbul ignore if
-    if (config.gitPrivateKey) {
-      logger.debug('Git private key configured, but not being set');
-    } else {
-      logger.debug('No git private key present - commits will be unsigned');
-      await this._git.raw(['config', 'commit.gpgsign', 'false']);
-    }
-
     if (global.gitAuthor) {
       logger.debug({ gitAuthor: global.gitAuthor }, 'Setting git author');
       try {
@@ -470,6 +464,10 @@ export class Storage {
     message,
   }: CommitFilesConfig): Promise<string | null> {
     logger.debug(`Committing files to branch ${branchName}`);
+    if (!this._privateKeySet) {
+      await writePrivateKey(this._cwd);
+      this._privateKeySet = true;
+    }
     try {
       await this._git.reset('hard');
       await this._git.raw(['clean', '-fd']);
