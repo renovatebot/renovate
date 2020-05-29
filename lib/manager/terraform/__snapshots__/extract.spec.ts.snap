@@ -168,6 +168,14 @@ Object {
       "lookupName": "https://bitbucket.com/hashicorp/example",
       "skipReason": "unsupported-version",
     },
+    Object {
+      "currentValue": "v1.0.0",
+      "datasource": "git-tags",
+      "depName": "bitbucket.com/hashicorp/example",
+      "depNameShort": "hashicorp/example",
+      "depType": "gitTags",
+      "lookupName": "https://bitbucket.com/hashicorp/example",
+    },
   ],
 }
 `;
