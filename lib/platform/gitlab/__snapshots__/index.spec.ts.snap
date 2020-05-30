@@ -1041,6 +1041,7 @@ Object {
   "commits": 1,
   "deletions": 1,
   "displayNumber": "Merge Request #91",
+  "hasAssignees": false,
   "iid": 91,
   "isModified": true,
   "isStale": false,
@@ -1525,12 +1526,14 @@ Array [
 
 exports[`platform/gitlab getPr(prNo) returns the PR 1`] = `
 Object {
+  "assignees": Array [],
   "body": "a merge request",
   "branchName": "some-branch",
   "canMerge": false,
   "description": "a merge request",
   "displayNumber": "Merge Request #12345",
   "diverged_commits_count": 5,
+  "hasAssignees": false,
   "id": 1,
   "iid": 12345,
   "isConflicted": true,
@@ -1574,12 +1577,18 @@ Array [
 
 exports[`platform/gitlab getPr(prNo) returns the PR with nonexisting branch 1`] = `
 Object {
+  "assignees": Array [
+    Object {
+      "id": 1,
+    },
+  ],
   "body": "a merge request",
   "branchName": "some-branch",
   "canMerge": false,
   "description": "a merge request",
   "displayNumber": "Merge Request #12345",
   "diverged_commits_count": 2,
+  "hasAssignees": true,
   "id": 1,
   "iid": 12345,
   "isConflicted": true,
@@ -1623,12 +1632,16 @@ Array [
 
 exports[`platform/gitlab getPr(prNo) returns the mergeable PR 1`] = `
 Object {
+  "assignee": Object {
+    "id": 1,
+  },
   "body": "a merge request",
   "branchName": "some-branch",
   "canMerge": true,
   "description": "a merge request",
   "displayNumber": "Merge Request #12345",
   "diverged_commits_count": 5,
+  "hasAssignees": true,
   "id": 1,
   "iid": 12345,
   "isModified": true,
