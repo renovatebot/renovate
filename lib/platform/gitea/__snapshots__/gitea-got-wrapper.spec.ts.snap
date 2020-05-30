@@ -1,36 +1,86 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
+exports[`platform/gitea/gitea-got-wrapper supports pagination on data property 1`] = `
+Array [
+  Object {
+    "headers": Object {
+      "accept": "application/json",
+      "accept-encoding": "gzip, deflate",
+      "host": "gitea.renovatebot.com",
+      "user-agent": "https://github.com/renovatebot/renovate",
+    },
+    "method": "GET",
+    "url": "https://gitea.renovatebot.com/api/v1/pagination-example-2",
+  },
+  Object {
+    "headers": Object {
+      "accept": "application/json",
+      "accept-encoding": "gzip, deflate",
+      "host": "gitea.renovatebot.com",
+      "user-agent": "https://github.com/renovatebot/renovate",
+    },
+    "method": "GET",
+    "url": "https://gitea.renovatebot.com/api/v1/pagination-example-2?page=2",
+  },
+  Object {
+    "headers": Object {
+      "accept": "application/json",
+      "accept-encoding": "gzip, deflate",
+      "host": "gitea.renovatebot.com",
+      "user-agent": "https://github.com/renovatebot/renovate",
+    },
+    "method": "GET",
+    "url": "https://gitea.renovatebot.com/api/v1/pagination-example-2?page=3",
+  },
+]
+`;
+
+exports[`platform/gitea/gitea-got-wrapper supports responses without pagination when enabled 1`] = `
+Array [
+  Object {
+    "headers": Object {
+      "accept": "application/json",
+      "accept-encoding": "gzip, deflate",
+      "host": "gitea.renovatebot.com",
+      "user-agent": "https://github.com/renovatebot/renovate",
+    },
+    "method": "GET",
+    "url": "https://gitea.renovatebot.com/api/v1/pagination-example-1",
+  },
+]
+`;
+
 exports[`platform/gitea/gitea-got-wrapper supports root-level pagination 1`] = `
 Array [
-  Array [
-    "https://gitea.renovatebot.com/api/v1/pagination-example-1",
-    Object {
-      "baseUrl": "https://gitea.renovatebot.com/api/v1",
-      "hostType": "gitea",
-      "json": true,
-      "method": "GET",
-      "paginate": true,
+  Object {
+    "headers": Object {
+      "accept": "application/json",
+      "accept-encoding": "gzip, deflate",
+      "host": "gitea.renovatebot.com",
+      "user-agent": "https://github.com/renovatebot/renovate",
     },
-  ],
-  Array [
-    "https://gitea.renovatebot.com/api/v1/pagination-example-1?page=2",
-    Object {
-      "baseUrl": "https://gitea.renovatebot.com/api/v1",
-      "hostType": "gitea",
-      "json": true,
-      "method": "GET",
-      "paginate": true,
+    "method": "GET",
+    "url": "https://gitea.renovatebot.com/api/v1/pagination-example-1",
+  },
+  Object {
+    "headers": Object {
+      "accept": "application/json",
+      "accept-encoding": "gzip, deflate",
+      "host": "gitea.renovatebot.com",
+      "user-agent": "https://github.com/renovatebot/renovate",
     },
-  ],
-  Array [
-    "https://gitea.renovatebot.com/api/v1/pagination-example-1?page=3",
-    Object {
-      "baseUrl": "https://gitea.renovatebot.com/api/v1",
-      "hostType": "gitea",
-      "json": true,
-      "method": "GET",
-      "paginate": true,
+    "method": "GET",
+    "url": "https://gitea.renovatebot.com/api/v1/pagination-example-1?page=2",
+  },
+  Object {
+    "headers": Object {
+      "accept": "application/json",
+      "accept-encoding": "gzip, deflate",
+      "host": "gitea.renovatebot.com",
+      "user-agent": "https://github.com/renovatebot/renovate",
     },
-  ],
+    "method": "GET",
+    "url": "https://gitea.renovatebot.com/api/v1/pagination-example-1?page=3",
+  },
 ]
 `;
