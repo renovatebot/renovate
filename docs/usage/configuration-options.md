@@ -53,6 +53,12 @@ By default, Renovate will not assign reviewers and assignees to an automerge-ena
 
 Must be valid usernames on the platform in use.
 
+## assigneesFromCodeOwners
+
+If enabled Renovate will try to determine PR assignees by matching rules defined in a CODEOWNERS file against the changes in the PR.
+
+See [GitHub](https://help.github.com/en/github/creating-cloning-and-archiving-repositories/about-code-owners) or [GitLab](https://docs.gitlab.com/ee/user/project/code_owners.html) documentation for details on syntax and possible file locations.
+
 ## assigneesSampleSize
 
 If configured, Renovate will take a random sample of given size from assignees and assign them only, instead of assigning the entire list of `assignees` you have configured.
@@ -1260,6 +1266,12 @@ Similar to `ignoreUnstable`, this option controls whether to update to versions 
 ## reviewers
 
 Must be valid usernames. If on GitHub and assigning a team to review, use the prefix `team:`, e.g. provide a value like `team:someteam`.
+
+## reviewersFromCodeOwners
+
+If enabled Renovate will try to determine PR reviewers by matching rules defined in a CODEOWNERS file against the changes in the PR.
+
+See [GitHub](https://help.github.com/en/github/creating-cloning-and-archiving-repositories/about-code-owners) or [GitLab](https://docs.gitlab.com/ee/user/project/code_owners.html) documentation for details on syntax and possible file locations.
 
 ## reviewersSampleSize
 
