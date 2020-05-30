@@ -88,8 +88,7 @@ export function extractPackageFile(content: string): PackageFile | null {
       const githubRefMatch = /github.com(\/|:)([^/]+\/[a-z0-9-.]+).*\?ref=(.*)$/.exec(
         dep.managerData.source
       );
-      // Regex would need to be updated to support ssh://
-      const gitTagsRefMatch = /git::(http|https:\/\/(.*.*\/(.*\/.*)))(?:|\/\/.*)\?ref=(.*)$/.exec(
+      const gitTagsRefMatch = /git::((?:http|https|ssh):\/\/(?:.*@)?(.*.*\/(.*\/.*)))\?ref=(.*)$/.exec(
         dep.managerData.source
       );
       /* eslint-disable no-param-reassign */
