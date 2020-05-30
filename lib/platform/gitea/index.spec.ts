@@ -173,7 +173,6 @@ describe('platform/gitea', () => {
     jest.resetModules();
     jest.clearAllMocks();
     jest.mock('./gitea-helper');
-    jest.mock('./gitea-got-wrapper');
     jest.mock('../git/storage');
     jest.mock('../../logger');
 
