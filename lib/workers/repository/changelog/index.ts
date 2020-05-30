@@ -1,4 +1,5 @@
 import pMap from 'p-map';
+import { BranchUpgradeConfig } from '../../common';
 import { getChangeLogJSON } from '../../pr/changelog';
 
 // istanbul ignore next
@@ -7,10 +8,12 @@ async function embedChangelog(upgrade): Promise<void> {
 }
 
 // istanbul ignore next
-export async function embedChangelogs(branches): Promise<void> {
+export async function embedChangelogs(
+  branchUpgrades: Record<string, BranchUpgradeConfig[]>
+): Promise<void> {
   const upgrades = [];
-  for (const branch of branches) {
-    for (const upgrade of branch.upgrades) {
+  for (const branchName of Object.keys(branchUpgrades)) {
+    for (const upgrade of branchUpgrades[branchName]) {
       upgrades.push(upgrade);
     }
   }

@@ -14,14 +14,18 @@ export interface GenerateLockFileResult {
 }
 
 export async function hasYarnOfflineMirror(cwd: string): Promise<boolean> {
-  const yarnrc = await readFile(`${cwd}/.yarnrc`, 'utf8');
-  if (is.string(yarnrc)) {
-    const mirrorLine = yarnrc
-      .split('\n')
-      .find((line) => line.startsWith('yarn-offline-mirror '));
-    if (mirrorLine) {
-      return true;
+  try {
+    const yarnrc = await readFile(`${cwd}/.yarnrc`, 'utf8');
+    if (is.string(yarnrc)) {
+      const mirrorLine = yarnrc
+        .split('\n')
+        .find((line) => line.startsWith('yarn-offline-mirror '));
+      if (mirrorLine) {
+        return true;
+      }
     }
+  } catch (err) /* istanbul ignore next */ {
+    // not found
   }
   return false;
 }
