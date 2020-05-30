@@ -26,8 +26,8 @@ export async function generateLockFile(
     const execOptions: ExecOptions = {
       cwd,
       extraEnv: {
-        NPM_CONFIG_CACHE: process.env.NPM_CONFIG_CACHE,
-        npm_config_store: process.env.npm_config_store,
+        NPM_CONFIG_CACHE: env.NPM_CONFIG_CACHE,
+        npm_config_store: env.npm_config_store,
       },
       docker: {
         image: 'renovate/node',
