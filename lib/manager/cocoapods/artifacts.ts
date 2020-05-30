@@ -9,6 +9,7 @@ import {
   writeLocalFile,
 } from '../../util/fs';
 import { UpdateArtifact, UpdateArtifactsResult } from '../common';
+import { getCocoaPodsHome } from './utils';
 
 const pluginRegex = /^\s*plugin\s*(['"])(?<plugin>[^'"]+)\1/;
 
@@ -69,6 +70,9 @@ export async function updateArtifacts({
   const cmd = [...getPluginCommands(newPackageFileContent), 'pod install'];
   const execOptions: ExecOptions = {
     cwdFile: packageFileName,
+    extraEnv: {
+      CP_HOME_DIR: await getCocoaPodsHome(config),
+    },
     docker: {
       image: 'renovate/cocoapods',
       tagScheme: 'ruby',
