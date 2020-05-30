@@ -99,7 +99,7 @@ describe(getName(__filename), () => {
       throw new Error('not-found');
     });
     const res = await yarnHelper.generateLockFile('some-dir');
-    expect(fs.readFile).toHaveBeenCalledTimes(2);
+    expect(fs.readFile).toHaveBeenCalledTimes(1);
     expect(res.error).toBe(true);
     expect(res.lockFile).not.toBeDefined();
     expect(fixSnapshots(execSnapshots)).toMatchSnapshot();
