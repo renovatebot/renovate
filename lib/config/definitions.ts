@@ -1341,6 +1341,13 @@ const options: RenovateOptions[] = [
     subType: 'string',
   },
   {
+    name: 'assigneesFromCodeOwners',
+    description:
+      'Determine assignees based on configured code owners and changes in PR.',
+    type: 'boolean',
+    default: false,
+  },
+  {
     name: 'assigneesSampleSize',
     description: 'Take a random sample of given size from assignees.',
     type: 'integer',
@@ -1359,6 +1366,13 @@ const options: RenovateOptions[] = [
       'Requested reviewers for Pull Requests (either username or email address depending on the platform)',
     type: 'array',
     subType: 'string',
+  },
+  {
+    name: 'reviewersFromCodeOwners',
+    description:
+      'Determine reviewers based on configured code owners and changes in PR.',
+    type: 'boolean',
+    default: false,
   },
   {
     name: 'reviewersSampleSize',
