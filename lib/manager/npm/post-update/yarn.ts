@@ -32,7 +32,7 @@ export async function hasYarnOfflineMirror(cwd: string): Promise<boolean> {
 
 export async function generateLockFile(
   cwd: string,
-  env?: NodeJS.ProcessEnv,
+  env: NodeJS.ProcessEnv,
   config: PostUpdateConfig = {},
   upgrades: Upgrade[] = []
 ): Promise<GenerateLockFileResult> {
