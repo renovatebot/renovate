@@ -2,8 +2,7 @@ import { move, pathExists, readFile } from 'fs-extra';
 import { join } from 'upath';
 import { SYSTEM_INSUFFICIENT_DISK_SPACE } from '../../../constants/error-messages';
 import { logger } from '../../../logger';
-import { exec } from '../../../util/exec';
-import { BinarySource } from '../../../util/exec/common';
+import { ExecOptions, exec } from '../../../util/exec';
 import { PostUpdateConfig, Upgrade } from '../../common';
 
 export interface GenerateLockFileResult {
@@ -11,6 +10,7 @@ export interface GenerateLockFileResult {
   lockFile?: string;
   stderr?: string;
 }
+
 export async function generateLockFile(
   cwd: string,
   env: NodeJS.ProcessEnv,
@@ -20,84 +20,67 @@ export async function generateLockFile(
 ): Promise<GenerateLockFileResult> {
   logger.debug(`Spawning npm install to create ${cwd}/${filename}`);
   const { skipInstalls, postUpdateOptions } = config;
-  let lockFile: string = null;
-  let stdout = '';
-  let stderr = '';
-  let cmd = 'npm';
-  let args = '';
+
+  let lockFile = null;
   try {
-    // istanbul ignore if
-    if (config.binarySource === BinarySource.Docker) {
-      logger.debug('Running npm via docker');
-      cmd = `docker run --rm `;
-      // istanbul ignore if
-      if (config.dockerUser) {
-        cmd += `--user=${config.dockerUser} `;
-      }
-      const volumes = [cwd];
-      if (config.cacheDir) {
-        volumes.push(config.cacheDir);
-      }
-      cmd += volumes.map((v) => `-v "${v}":"${v}" `).join('');
-      if (config.dockerMapDotfiles) {
-        const homeDir =
-          process.env.HOME || process.env.HOMEPATH || process.env.USERPROFILE;
-        const homeNpmrc = join(homeDir, '.npmrc');
-        cmd += `-v ${homeNpmrc}:/home/ubuntu/.npmrc `;
-      }
-      const envVars = ['NPM_CONFIG_CACHE', 'npm_config_store'];
-      cmd += envVars.map((e) => `-e ${e} `).join('');
-      cmd += `-w "${cwd}" `;
-      cmd += `renovate/npm npm`;
-    }
-    logger.debug(`Using npm: ${cmd}`);
-    args = `install`;
+    const preCommands = ['npm i -g yarn'];
+    const commands = [];
+    let cmdOptions = '';
     if (
       (postUpdateOptions && postUpdateOptions.includes('npmDedupe')) ||
       skipInstalls === false
     ) {
-      logger.debug('Performing full npm install');
-      args += ' --ignore-scripts --no-audit';
+      logger.debug('Performing node_modules install');
+      cmdOptions += '--ignore-scripts --no-audit';
     } else {
-      args += ' --package-lock-only --no-audit';
+      logger.debug('Updating lock file only');
+      cmdOptions += '--package-lock-only --no-audit';
     }
-    logger.debug(`Using npm: ${cmd} ${args}`);
-    // istanbul ignore if
+    const execOptions: ExecOptions = {
+      cwd,
+      extraEnv: {
+        NPM_CONFIG_CACHE: env?.NPM_CONFIG_CACHE,
+        npm_config_store: env?.npm_config_store,
+      },
+      docker: {
+        image: 'renovate/node',
+        preCommands,
+      },
+    };
+    if (config.dockerMapDotfiles) {
+      const homeDir =
+        process.env.HOME || process.env.HOMEPATH || process.env.USERPROFILE;
+      const homeNpmrc = join(homeDir, '.npmrc');
+      execOptions.docker.volumes = [[homeNpmrc, '/home/ubuntu/.npmrc']];
+    }
+
     if (!upgrades.every((upgrade) => upgrade.isLockfileUpdate)) {
-      // TODO: Switch to native util.promisify once using only node 8
-      ({ stdout, stderr } = await exec(`${cmd} ${args}`, {
-        cwd,
-        env,
-      }));
+      // This command updates the lock file based on package.json
+      commands.push(`npm install ${cmdOptions}`.trim());
     }
+
+    // rangeStrategy = update-lockfile
     const lockUpdates = upgrades.filter((upgrade) => upgrade.isLockfileUpdate);
     if (lockUpdates.length) {
       logger.debug('Performing lockfileUpdate (npm)');
       const updateCmd =
-        `${cmd} ${args}` +
+        `npm install ${cmdOptions}` +
         lockUpdates
           .map((update) => ` ${update.depName}@${update.toVersion}`)
           .join('');
-      const updateRes = await exec(updateCmd, {
-        cwd,
-        env,
-      });
-      stdout += updateRes.stdout ? updateRes.stdout : '';
-      stderr += updateRes.stderr ? updateRes.stderr : '';
+      commands.push(updateCmd);
     }
-    if (postUpdateOptions && postUpdateOptions.includes('npmDedupe')) {
+
+    // postUpdateOptions
+    if (config.postUpdateOptions?.includes('npmDedupe')) {
       logger.debug('Performing npm dedupe');
-      const dedupeRes = await exec(`${cmd} dedupe`, {
-        cwd,
-        env,
-      });
-      stdout += dedupeRes.stdout ? dedupeRes.stdout : '';
-      stderr += dedupeRes.stderr ? dedupeRes.stderr : '';
+      commands.push('npm dedupe');
     }
-    // istanbul ignore if
-    if (stderr && stderr.includes('ENOSPC: no space left on device')) {
-      throw new Error(SYSTEM_INSUFFICIENT_DISK_SPACE);
-    }
+
+    // Run the commands
+    await exec(commands, execOptions);
+
+    // massage to shrinkwrap if necessary
     if (
       filename === 'npm-shrinkwrap.json' &&
       (await pathExists(join(cwd, 'package-lock.json')))
@@ -107,19 +90,20 @@ export async function generateLockFile(
         join(cwd, 'npm-shrinkwrap.json')
       );
     }
+
+    // Read the result
     lockFile = await readFile(join(cwd, filename), 'utf8');
   } catch (err) /* istanbul ignore next */ {
     logger.debug(
       {
-        cmd,
-        args,
         err,
-        stdout,
-        stderr,
         type: 'npm',
       },
       'lock file error'
     );
+    if (err.stderr?.includes('ENOSPC: no space left on device')) {
+      throw new Error(SYSTEM_INSUFFICIENT_DISK_SPACE);
+    }
     return { error: true, stderr: err.stderr };
   }
   return { lockFile };
