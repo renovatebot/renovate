@@ -55,6 +55,19 @@ Array [
 ]
 `;
 
+exports[`workers/pr ensurePr should combine assignees from code owners and config 1`] = `
+Array [
+  Array [
+    undefined,
+    Array [
+      "mike",
+      "julie",
+      "jimmy",
+    ],
+  ],
+]
+`;
+
 exports[`workers/pr ensurePr should create PR if success 1`] = `
 Array [
   Object {
@@ -120,6 +133,30 @@ Array [
     "prTitle": "Update dependency dummy to v1.1.0",
     "useDefaultBranch": false,
   },
+]
+`;
+
+exports[`workers/pr ensurePr should determine assignees from code owners 1`] = `
+Array [
+  Array [
+    undefined,
+    Array [
+      "john",
+      "maria",
+    ],
+  ],
+]
+`;
+
+exports[`workers/pr ensurePr should determine reviewers from code owners 1`] = `
+Array [
+  Array [
+    undefined,
+    Array [
+      "john",
+      "maria",
+    ],
+  ],
 ]
 `;
 

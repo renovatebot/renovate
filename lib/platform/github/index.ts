@@ -991,6 +991,11 @@ export async function getPrList(): Promise<Pr[]> {
   return config.prList;
 }
 
+/* istanbul ignore next */
+export async function getPrFiles(pr: Pr): Promise<string[]> {
+  return config.storage.getBranchFiles(pr.branchName, pr.targetBranch);
+}
+
 export async function findPr({
   branchName,
   prTitle,
