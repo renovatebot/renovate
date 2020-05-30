@@ -21,6 +21,8 @@ declare module 'fs-extra' {
 
 export type StatusResult = Git.StatusResult;
 
+export type DiffResult = Git.DiffResult;
+
 interface StorageConfig {
   localDir: string;
   baseBranch?: string;
@@ -428,6 +430,22 @@ export class Storage {
     } catch (err) {
       checkForPlatformFailure(err);
       return new Date();
+    }
+  }
+
+  async getBranchFiles(
+    branchName: string,
+    baseBranchName?: string
+  ): Promise<string[]> {
+    try {
+      const diff = await this._git.diffSummary([
+        branchName,
+        baseBranchName || this._config.baseBranch,
+      ]);
+      return diff.files.map((file) => file.file);
+    } catch (err) /* istanbul ignore next */ {
+      checkForPlatformFailure(err);
+      return null;
     }
   }
 

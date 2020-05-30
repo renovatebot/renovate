@@ -1,5 +1,6 @@
 import sampleSize from 'lodash/sampleSize';
 import uniq from 'lodash/uniq';
+import { RenovateConfig } from '../../config/common';
 import {
   PLATFORM_FAILURE,
   PLATFORM_INTEGRATION_UNAUTHORIZED,
@@ -12,6 +13,7 @@ import { BranchStatus } from '../../types';
 import { BranchConfig, PrResult } from '../common';
 import { getPrBody } from './body';
 import { ChangeLogError } from './changelog';
+import { codeOwnersForPr } from './code-owners';
 
 function noWhitespace(input: string): string {
   return input.replace(/\r?\n|\r|\s/g, '');
@@ -21,14 +23,24 @@ function noLeadingAtSymbol(input: string): string {
   return input.length && input.startsWith('@') ? input.slice(1) : input;
 }
 
-// TODO: fix types
+async function addCodeOwners(
+  assigneesOrReviewers: string[],
+  pr: Pr
+): Promise<string[]> {
+  return uniq(assigneesOrReviewers.concat(await codeOwnersForPr(pr)));
+}
+
 export async function addAssigneesReviewers(
-  config: any,
+  config: RenovateConfig,
   pr: Pr
 ): Promise<void> {
-  if (config.assignees.length > 0) {
+  let assignees = config.assignees;
+  if (config.assigneesFromCodeOwners) {
+    assignees = await addCodeOwners(assignees, pr);
+  }
+  if (assignees.length > 0) {
     try {
-      let assignees = config.assignees.map(noLeadingAtSymbol);
+      assignees = assignees.map(noLeadingAtSymbol);
       if (config.assigneesSampleSize !== null) {
         assignees = sampleSize(assignees, config.assigneesSampleSize);
       }
@@ -46,9 +58,13 @@ export async function addAssigneesReviewers(
       );
     }
   }
-  if (config.reviewers.length > 0) {
+  let reviewers = config.reviewers;
+  if (config.reviewersFromCodeOwners) {
+    reviewers = await addCodeOwners(reviewers, pr);
+  }
+  if (reviewers.length > 0) {
     try {
-      let reviewers = config.reviewers.map(noLeadingAtSymbol);
+      reviewers = reviewers.map(noLeadingAtSymbol);
       if (config.additionalReviewers.length > 0) {
         const additionalReviewers = config.additionalReviewers.map(
           noLeadingAtSymbol
