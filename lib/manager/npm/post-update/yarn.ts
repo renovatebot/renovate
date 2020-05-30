@@ -1,4 +1,4 @@
-import is from '@sindresorhus/is/dist';
+import is from '@sindresorhus/is';
 import { readFile } from 'fs-extra';
 import { join } from 'upath';
 import { SYSTEM_INSUFFICIENT_DISK_SPACE } from '../../../constants/error-messages';
