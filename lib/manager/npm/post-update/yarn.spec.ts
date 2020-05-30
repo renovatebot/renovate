@@ -35,13 +35,14 @@ describe(getName(__filename), () => {
         stdout: yarnVersion,
         stderr: '',
       });
-      fs.readFile = jest.fn(() => 'package-lock-contents') as never;
+      fs.readFile.mockResolvedValue(null); // .yarnrc
+      fs.readFile.mockResolvedValue('package-lock-contents' as never);
       const config = {
         dockerMapDotfiles: true,
         postUpdateOptions: ['yarnDedupeFewer', 'yarnDedupeHighest'],
       };
       const res = await yarnHelper.generateLockFile('some-dir', {}, config);
-      expect(fs.readFile).toHaveBeenCalledTimes(1);
+      expect(fs.readFile).toHaveBeenCalledTimes(2);
       expect(res.lockFile).toEqual('package-lock-contents');
       expect(fixSnapshots(execSnapshots)).toMatchSnapshot();
     }
@@ -54,7 +55,30 @@ describe(getName(__filename), () => {
         stderr: '',
       });
 
-      fs.readFile = jest.fn(() => 'package-lock-contents') as never;
+      fs.readFile.mockResolvedValue(null); // .yarnrc
+      fs.readFile.mockResolvedValue('package-lock-contents' as never);
+      const res = await yarnHelper.generateLockFile('some-dir', {}, {}, [
+        {
+          depName: 'some-dep',
+          isLockfileUpdate: true,
+        },
+      ]);
+      expect(res.lockFile).toEqual('package-lock-contents');
+      expect(fixSnapshots(execSnapshots)).toMatchSnapshot();
+    }
+  );
+  it.each([['1.22.0']])(
+    'performs lock file updates and full install using yarn v%s',
+    async (yarnVersion) => {
+      const execSnapshots = mockExecAll(exec, {
+        stdout: yarnVersion,
+        stderr: '',
+      });
+
+      fs.readFile.mockReturnValueOnce(
+        'yarn-offline-mirror ./npm-packages-offline-cache' as never
+      );
+      fs.readFile.mockReturnValueOnce('package-lock-contents' as never);
       const res = await yarnHelper.generateLockFile('some-dir', {}, {}, [
         {
           depName: 'some-dep',
@@ -70,11 +94,12 @@ describe(getName(__filename), () => {
       stdout: '1.9.4',
       stderr: 'some-error',
     });
-    fs.readFile = jest.fn(() => {
-      throw new Error('not found');
-    }) as never;
+    fs.readFile.mockImplementationOnce(() => null);
+    fs.readFile.mockImplementationOnce(() => {
+      throw new Error('not-found');
+    });
     const res = await yarnHelper.generateLockFile('some-dir');
-    expect(fs.readFile).toHaveBeenCalledTimes(1);
+    expect(fs.readFile).toHaveBeenCalledTimes(2);
     expect(res.error).toBe(true);
     expect(res.lockFile).not.toBeDefined();
     expect(fixSnapshots(execSnapshots)).toMatchSnapshot();

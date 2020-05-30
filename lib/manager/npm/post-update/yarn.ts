@@ -1,3 +1,4 @@
+import is from '@sindresorhus/is/dist';
 import { readFile } from 'fs-extra';
 import { join } from 'upath';
 import { SYSTEM_INSUFFICIENT_DISK_SPACE } from '../../../constants/error-messages';
@@ -12,6 +13,19 @@ export interface GenerateLockFileResult {
   stderr?: string;
 }
 
+export async function hasYarnOfflineMirror(cwd: string): Promise<boolean> {
+  const yarnrc = await readFile(`${cwd}/.yarnrc`, 'utf8');
+  if (is.string(yarnrc)) {
+    const mirrorLine = yarnrc
+      .split('\n')
+      .find((line) => line.startsWith('yarn-offline-mirror '));
+    if (mirrorLine) {
+      return true;
+    }
+  }
+  return false;
+}
+
 export async function generateLockFile(
   cwd: string,
   env?: NodeJS.ProcessEnv,
@@ -22,6 +36,16 @@ export async function generateLockFile(
   let lockFile = null;
   try {
     const preCommands = ['npm i -g yarn'];
+    if (
+      config.skipInstalls !== false &&
+      (await hasYarnOfflineMirror(cwd)) === false
+    ) {
+      logger.debug('Updating yarn.lock only - skipping node_modules');
+      // The following change causes Yarn 1.x to exit gracefully after updating the lock file but without installing node_modules
+      preCommands.push(
+        "sed -i 's/ steps,/ steps.slice(0,1),/' /home/ubuntu/.npm-global/lib/node_modules/yarn/lib/cli.js"
+      );
+    }
     const commands = [];
     let cmdOptions = '';
     if (global.trustLevel !== 'high' || config.ignoreScripts) {
