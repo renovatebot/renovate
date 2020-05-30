@@ -98,7 +98,7 @@ describe(getName(__filename), () => {
     fs.readFile.mockImplementationOnce(() => {
       throw new Error('not-found');
     });
-    const res = await yarnHelper.generateLockFile('some-dir');
+    const res = await yarnHelper.generateLockFile('some-dir', {});
     expect(fs.readFile).toHaveBeenCalledTimes(2);
     expect(res.error).toBe(true);
     expect(res.lockFile).not.toBeDefined();
