@@ -1575,6 +1575,26 @@ describe('platform/github', () => {
         useDefaultBranch: true,
       });
       expect(pr).toMatchSnapshot();
+      expect(pr.draft).toBe(false);
+      expect(httpMock.getTrace()).toMatchSnapshot();
+    });
+    it('should create a draftPR if set in the settings', async () => {
+      const scope = httpMock.scope(githubApiHost);
+      initRepoMock(scope, 'some/repo');
+      scope.post('/repos/some/repo/pulls').reply(200, {
+        number: 123,
+      });
+      await github.initRepo({ repository: 'some/repo', token: 'token' } as any);
+      const pr = await github.createPr({
+        branchName: 'some-branch',
+        prTitle: 'PR draft',
+        prBody: 'This is a result of a draft',
+        labels: null,
+        useDefaultBranch: true,
+        draftPR: true,
+      });
+      expect(pr).toMatchSnapshot();
+      expect(pr.draft).toBe(true);
       expect(httpMock.getTrace()).toMatchSnapshot();
     });
   });
