@@ -64,7 +64,6 @@ exports[`platform/github createPr() should create a draftPR if set in the settin
 Object {
   "branchName": "some-branch",
   "displayNumber": "Pull Request #123",
-  "draft": true,
   "isModified": false,
   "number": 123,
 }
@@ -104,7 +103,6 @@ exports[`platform/github createPr() should create and return a PR object 1`] = `
 Object {
   "branchName": "some-branch",
   "displayNumber": "Pull Request #123",
-  "draft": false,
   "isModified": false,
   "number": 123,
 }
@@ -205,7 +203,6 @@ exports[`platform/github createPr() should use defaultBranch 1`] = `
 Object {
   "branchName": "some-branch",
   "displayNumber": "Pull Request #123",
-  "draft": false,
   "isModified": false,
   "number": 123,
 }
