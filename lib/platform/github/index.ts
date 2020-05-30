@@ -1647,7 +1647,7 @@ export async function createPr({
     )
   ).body;
   logger.debug(
-    { branch: branchName, pr: pr.number, draft: pr.draft },
+    { branch: branchName, pr: pr.number, draft: draftPR },
     'PR created'
   );
   // istanbul ignore if
