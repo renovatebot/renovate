@@ -32,7 +32,7 @@ export async function hasYarnOfflineMirror(cwd: string): Promise<boolean> {
 
 export async function generateLockFile(
   cwd: string,
-  env?: NodeJS.ProcessEnv,
+  env: NodeJS.ProcessEnv,
   config: PostUpdateConfig = {},
   upgrades: Upgrade[] = []
 ): Promise<GenerateLockFileResult> {
@@ -58,8 +58,8 @@ export async function generateLockFile(
     const execOptions: ExecOptions = {
       cwd,
       extraEnv: {
-        NPM_CONFIG_CACHE: env?.NPM_CONFIG_CACHE,
-        npm_config_store: env?.npm_config_store,
+        NPM_CONFIG_CACHE: env.NPM_CONFIG_CACHE,
+        npm_config_store: env.npm_config_store,
       },
       docker: {
         image: 'renovate/node',
