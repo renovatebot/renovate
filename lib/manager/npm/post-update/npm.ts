@@ -23,7 +23,7 @@ export async function generateLockFile(
 
   let lockFile = null;
   try {
-    const preCommands = ['npm i -g yarn'];
+    const preCommands = ['npm i -g npm'];
     const commands = [];
     let cmdOptions = '';
     if (
