@@ -1619,6 +1619,7 @@ export async function createPr({
   labels,
   useDefaultBranch,
   platformOptions = {},
+  draftPR = false,
 }: CreatePRConfig): Promise<Pr> {
   const body = sanitize(rawBody);
   const base = useDefaultBranch ? config.defaultBranch : config.baseBranch;
@@ -1630,6 +1631,7 @@ export async function createPr({
       head,
       base,
       body,
+      draft: draftPR,
     },
   };
   // istanbul ignore if
@@ -1637,14 +1639,17 @@ export async function createPr({
     options.token = config.forkToken;
     options.body.maintainer_can_modify = true;
   }
-  logger.debug({ title, head, base }, 'Creating PR');
+  logger.debug({ title, head, base, draft: draftPR }, 'Creating PR');
   const pr = (
     await githubApi.postJson<GhPr>(
       `repos/${config.parentRepo || config.repository}/pulls`,
       options
     )
   ).body;
-  logger.debug({ branch: branchName, pr: pr.number }, 'PR created');
+  logger.debug(
+    { branch: branchName, pr: pr.number, draft: pr.draft },
+    'PR created'
+  );
   // istanbul ignore if
   if (config.prList) {
     config.prList.push(pr);

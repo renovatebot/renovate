@@ -255,6 +255,10 @@ Add config here if you wish it to apply to Docker package managers Dockerfile an
 
 ## dotnet
 
+## draftPR
+
+If `draftPR` is set to true, the PR created by Renovate is set to a draft. Currently only available in Github.
+
 ## enabled
 
 The most common use of `enabled` is if you want to turn Renovate's functionality off, for some reason.

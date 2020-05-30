@@ -116,6 +116,7 @@ export interface Pr {
   state: string;
   targetBranch?: string;
   title: string;
+  draft?: boolean;
 }
 
 /**
@@ -139,6 +140,7 @@ export interface CreatePRConfig {
   labels?: string[] | null;
   useDefaultBranch?: boolean;
   platformOptions?: PlatformPrOptions;
+  draftPR?: boolean;
 }
 export interface EnsureIssueConfig {
   title: string;
