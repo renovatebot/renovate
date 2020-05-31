@@ -265,7 +265,7 @@ If you want the PRs created by Renovate to be considered as drafts rather than n
 }
 ```
 
-Please see [draft pull requests on Github.](https://github.blog/2019-02-14-introducing-draft-pull-requests/) for more information about draft PRs.
+Please see [draft pull requests on Github](https://github.blog/2019-02-14-introducing-draft-pull-requests/) for more information about draft PRs.
 
 ## enabled
 
