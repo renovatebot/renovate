@@ -79,13 +79,11 @@ const addMaxLength = (inputUrl: string, pagelen = 100): string => {
 
 async function callApi<T>(
   apiUrl: string,
-  method = 'get',
+  method: string,
   options?: any
 ): Promise<HttpResponse<T>> {
   /* istanbul ignore next */
   switch (method.toLowerCase()) {
-    case 'get':
-      return bitbucketHttp.getJson<T>(apiUrl, options);
     case 'post':
       return bitbucketHttp.postJson<T>(apiUrl, options);
     case 'put':
@@ -96,8 +94,9 @@ async function callApi<T>(
       return bitbucketHttp.headJson<T>(apiUrl, options);
     case 'delete':
       return bitbucketHttp.deleteJson<T>(apiUrl, options);
+    case 'get':
     default:
-      return null;
+      return bitbucketHttp.getJson<T>(apiUrl, options);
   }
 }
 
