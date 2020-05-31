@@ -48,8 +48,6 @@ async function callApi<T>(
 ): Promise<HttpResponse<T>> {
   /* istanbul ignore next */
   switch (method.toLowerCase()) {
-    case 'get':
-      return bitbucketServerHttp.getJson<T>(apiUrl, options);
     case 'post':
       return bitbucketServerHttp.postJson<T>(apiUrl, options);
     case 'put':
@@ -60,8 +58,9 @@ async function callApi<T>(
       return bitbucketServerHttp.headJson<T>(apiUrl, options);
     case 'delete':
       return bitbucketServerHttp.deleteJson<T>(apiUrl, options);
+    case 'get':
     default:
-      return null;
+      return bitbucketServerHttp.getJson<T>(apiUrl, options);
   }
 }
 
