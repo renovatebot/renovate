@@ -81,7 +81,8 @@ async function callApi<T>(
   apiUrl: string,
   method = 'get',
   options?: any
-): Promise<HttpResponse<T>> /* istanbul ignore next */ {
+): Promise<HttpResponse<T>> {
+  /* istanbul ignore next */
   switch (method.toLowerCase()) {
     case 'get':
       return bitbucketHttp.getJson<T>(apiUrl, options);
