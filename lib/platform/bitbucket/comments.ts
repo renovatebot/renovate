@@ -1,7 +1,9 @@
 import { logger } from '../../logger';
+import { BitbucketHttp } from '../../util/http/bitbucket';
 import { EnsureCommentConfig } from '../common';
-import { api } from './bb-got-wrapper';
 import { Config, accumulateValues } from './utils';
+
+const bitbucketHttp = new BitbucketHttp();
 
 interface Comment {
   content: { raw: string };
@@ -31,7 +33,7 @@ async function addComment(
   prNo: number,
   raw: string
 ): Promise<void> {
-  await api.post(
+  await bitbucketHttp.postJson(
     `/2.0/repositories/${config.repository}/pullrequests/${prNo}/comments`,
     {
       body: { content: { raw } },
@@ -45,7 +47,7 @@ async function editComment(
   commentId: number,
   raw: string
 ): Promise<void> {
-  await api.put(
+  await bitbucketHttp.putJson(
     `/2.0/repositories/${config.repository}/pullrequests/${prNo}/comments/${commentId}`,
     {
       body: { content: { raw } },
@@ -58,7 +60,7 @@ async function deleteComment(
   prNo: number,
   commentId: number
 ): Promise<void> {
-  await api.delete(
+  await bitbucketHttp.deleteJson(
     `/2.0/repositories/${config.repository}/pullrequests/${prNo}/comments/${commentId}`
   );
 }

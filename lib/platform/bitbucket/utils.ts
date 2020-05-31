@@ -1,9 +1,12 @@
 import url from 'url';
 import { PR_STATE_CLOSED } from '../../constants/pull-requests';
 import { BranchStatus } from '../../types';
-import { GotResponse, Pr } from '../common';
+import { HttpResponse } from '../../util/http';
+import { BitbucketHttp } from '../../util/http/bitbucket';
+import { Pr } from '../common';
 import { Storage } from '../git/storage';
-import { api } from './bb-got-wrapper';
+
+const bitbucketHttp = new BitbucketHttp();
 
 export interface Config {
   baseBranch: string;
@@ -74,6 +77,29 @@ const addMaxLength = (inputUrl: string, pagelen = 100): string => {
   return maxedUrl;
 };
 
+async function callApi<T>(
+  apiUrl: string,
+  method = 'get',
+  options?: any
+): Promise<HttpResponse<T>> /* istanbul ignore next */ {
+  switch (method.toLowerCase()) {
+    case 'get':
+      return bitbucketHttp.getJson<T>(apiUrl, options);
+    case 'post':
+      return bitbucketHttp.postJson<T>(apiUrl, options);
+    case 'put':
+      return bitbucketHttp.putJson<T>(apiUrl, options);
+    case 'patch':
+      return bitbucketHttp.patchJson<T>(apiUrl, options);
+    case 'head':
+      return bitbucketHttp.headJson<T>(apiUrl, options);
+    case 'delete':
+      return bitbucketHttp.deleteJson<T>(apiUrl, options);
+    default:
+      return null;
+  }
+}
+
 export async function accumulateValues<T = any>(
   reqUrl: string,
   method = 'get',
@@ -82,13 +108,13 @@ export async function accumulateValues<T = any>(
 ): Promise<T[]> {
   let accumulator: T[] = [];
   let nextUrl = addMaxLength(reqUrl, pagelen);
-  const lowerCaseMethod = method.toLocaleLowerCase();
 
   while (typeof nextUrl !== 'undefined') {
-    const { body } = (await api[lowerCaseMethod](
+    const { body } = await callApi<{ values: T[]; next: string }>(
       nextUrl,
+      method,
       options
-    )) as GotResponse<PagedResult<T>>;
+    );
     accumulator = [...accumulator, ...body.values];
     nextUrl = body.next;
   }
