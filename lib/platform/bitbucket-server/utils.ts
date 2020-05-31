@@ -43,7 +43,7 @@ const addMaxLength = (inputUrl: string, limit = 100): string => {
 
 async function callApi<T>(
   apiUrl: string,
-  method = 'get',
+  method: string,
   options?: any
 ): Promise<HttpResponse<T>> {
   /* istanbul ignore next */
