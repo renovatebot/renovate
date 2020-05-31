@@ -1575,7 +1575,6 @@ describe('platform/github', () => {
         useDefaultBranch: true,
       });
       expect(pr).toMatchSnapshot();
-      expect(pr.draft).toBe(false);
       expect(httpMock.getTrace()).toMatchSnapshot();
     });
     it('should create a draftPR if set in the settings', async () => {
@@ -1594,7 +1593,6 @@ describe('platform/github', () => {
         draftPR: true,
       });
       expect(pr).toMatchSnapshot();
-      expect(pr.draft).toBe(true);
       expect(httpMock.getTrace()).toMatchSnapshot();
     });
   });

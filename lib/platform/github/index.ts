@@ -1667,7 +1667,6 @@ export async function createPr({
       url: 'https://github.com/renovatebot/renovate',
     });
   }
-  pr.draft = draftPR;
   pr.isModified = false;
   return pr;
 }

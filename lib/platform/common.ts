@@ -116,7 +116,6 @@ export interface Pr {
   state: string;
   targetBranch?: string;
   title: string;
-  draft?: boolean;
 }
 
 /**
