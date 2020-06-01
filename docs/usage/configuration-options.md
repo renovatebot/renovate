@@ -53,6 +53,12 @@ By default, Renovate will not assign reviewers and assignees to an automerge-ena
 
 Must be valid usernames on the platform in use.
 
+## assigneesFromCodeOwners
+
+If enabled Renovate will try to determine PR assignees by matching rules defined in a CODEOWNERS file against the changes in the PR.
+
+See [GitHub](https://help.github.com/en/github/creating-cloning-and-archiving-repositories/about-code-owners) or [GitLab](https://docs.gitlab.com/ee/user/project/code_owners.html) documentation for details on syntax and possible file locations.
+
 ## assigneesSampleSize
 
 If configured, Renovate will take a random sample of given size from assignees and assign them only, instead of assigning the entire list of `assignees` you have configured.
@@ -248,6 +254,18 @@ Add config here if you wish it to apply to Docker package managers Dockerfile an
 ```
 
 ## dotnet
+
+## draftPR
+
+If you want the PRs created by Renovate to be considered as drafts rather than normal PRs in Github you could add this property to your `renovate.json`:
+
+```json
+{
+  "draftPR": true
+}
+```
+
+Please see [draft pull requests on Github](https://github.blog/2019-02-14-introducing-draft-pull-requests/) for more information about draft PRs.
 
 ## enabled
 
@@ -1261,6 +1279,12 @@ Similar to `ignoreUnstable`, this option controls whether to update to versions 
 
 Must be valid usernames. If on GitHub and assigning a team to review, use the prefix `team:`, e.g. provide a value like `team:someteam`.
 
+## reviewersFromCodeOwners
+
+If enabled Renovate will try to determine PR reviewers by matching rules defined in a CODEOWNERS file against the changes in the PR.
+
+See [GitHub](https://help.github.com/en/github/creating-cloning-and-archiving-repositories/about-code-owners) or [GitLab](https://docs.gitlab.com/ee/user/project/code_owners.html) documentation for details on syntax and possible file locations.
+
 ## reviewersSampleSize
 
 Take a random sample of given size from reviewers.
@@ -1328,7 +1352,7 @@ By default you will see angular-style commit prefixes like `"chore(deps):"`. If 
 
 ## semanticCommits
 
-If you are using a semantic prefix for your commits, then you will want to enable this setting. Although it's configurable to a package-level, it makes most sense to configure it at a repository level. If configured to `true`, then the `semanticPrefix` field will be used for each commit message and PR title.
+If you are using a semantic prefix for your commits, then you will want to enable this setting. Although it's configurable to a package-level, it makes most sense to configure it at a repository level. If configured to `true`, then the `semanticCommitScope` and `semanticCommitType` fields will be used for each commit message and PR title.
 
 However, please note that Renovate will autodetect if your repository is already using semantic commits or not and follow suit, so you only really need to configure this if you wish to _override_ Renovate's autodetected setting.
 

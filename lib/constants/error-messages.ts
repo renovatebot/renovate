@@ -6,6 +6,7 @@ export const SYSTEM_INSUFFICIENT_MEMORY = 'out-of-memory';
 export const PLATFORM_AUTHENTICATION_ERROR = 'authentication-error';
 export const PLATFORM_BAD_CREDENTIALS = 'bad-credentials';
 export const PLATFORM_FAILURE = 'platform-failure';
+export const PLATFORM_GPG_FAILED = 'gpg-failed';
 export const PLATFORM_INTEGRATION_UNAUTHORIZED = 'integration-unauthorized';
 export const PLATFORM_NOT_FOUND = 'platform-not-found';
 export const PLATFORM_RATE_LIMIT_EXCEEDED = 'rate-limit-exceeded';

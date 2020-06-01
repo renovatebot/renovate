@@ -7,7 +7,6 @@ import {
   REPOSITORY_RENAMED,
 } from '../../constants/error-messages';
 import { BranchStatus } from '../../types';
-import * as runCache from '../../util/cache/run';
 import { Platform } from '../common';
 
 const githubApiHost = 'https://api.github.com';
@@ -57,7 +56,6 @@ describe('platform/github', () => {
 
   afterEach(() => {
     httpMock.reset();
-    runCache.clear();
   });
 
   const graphqlOpenPullRequests = fs.readFileSync(
@@ -1575,6 +1573,24 @@ describe('platform/github', () => {
         prBody: 'Hello world',
         labels: null,
         useDefaultBranch: true,
+      });
+      expect(pr).toMatchSnapshot();
+      expect(httpMock.getTrace()).toMatchSnapshot();
+    });
+    it('should create a draftPR if set in the settings', async () => {
+      const scope = httpMock.scope(githubApiHost);
+      initRepoMock(scope, 'some/repo');
+      scope.post('/repos/some/repo/pulls').reply(200, {
+        number: 123,
+      });
+      await github.initRepo({ repository: 'some/repo', token: 'token' } as any);
+      const pr = await github.createPr({
+        branchName: 'some-branch',
+        prTitle: 'PR draft',
+        prBody: 'This is a result of a draft',
+        labels: null,
+        useDefaultBranch: true,
+        draftPR: true,
       });
       expect(pr).toMatchSnapshot();
       expect(httpMock.getTrace()).toMatchSnapshot();

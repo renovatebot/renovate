@@ -1,35 +1,39 @@
-import { GotApi } from '../common';
+import * as httpMock from '../../../test/httpMock';
+import { setBaseUrl } from '../../util/http/bitbucket';
 import * as utils from './utils';
-
-jest.mock('./bb-got-wrapper');
-
-const api: jest.Mocked<GotApi> = require('./bb-got-wrapper').api;
 
 const range = (count: number) => [...Array(count).keys()];
 
+const baseUrl = 'https://api.bitbucket.org';
+
 describe('accumulateValues()', () => {
   it('paginates', async () => {
-    api.get.mockReturnValueOnce({
-      body: {
+    httpMock.reset();
+    httpMock.setup();
+    setBaseUrl(baseUrl);
+
+    httpMock
+      .scope(baseUrl)
+      .get('/some-url?pagelen=10')
+      .reply(200, {
         values: range(10),
         next:
           'https://api.bitbucket.org/2.0/repositories/?pagelen=10&after=9&role=contributor',
-      },
-    } as any);
-    api.get.mockReturnValueOnce({
-      body: {
+      })
+      .get('/2.0/repositories/?pagelen=10&after=9&role=contributor')
+      .reply(200, {
         values: range(10),
         next:
           'https://api.bitbucket.org/2.0/repositories/?pagelen=10&after=19&role=contributor',
-      },
-    } as any);
-    api.get.mockReturnValueOnce({
-      body: {
+      })
+      .get('/2.0/repositories/?pagelen=10&after=19&role=contributor')
+      .reply(200, {
         values: range(5),
-      },
-    } as any);
+      });
+
     const res = await utils.accumulateValues('some-url', 'get', null, 10);
     expect(res).toHaveLength(25);
-    expect(api.get).toHaveBeenCalledTimes(3);
+    expect(httpMock.getTrace()).toHaveLength(3);
+    expect(httpMock.getTrace()).toMatchSnapshot();
   });
 });

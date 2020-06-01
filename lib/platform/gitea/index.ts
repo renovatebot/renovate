@@ -15,6 +15,7 @@ import { PR_STATE_ALL, PR_STATE_OPEN } from '../../constants/pull-requests';
 import { logger } from '../../logger';
 import { BranchStatus } from '../../types';
 import * as hostRules from '../../util/host-rules';
+import { setBaseUrl } from '../../util/http/gitea';
 import { sanitize } from '../../util/sanitize';
 import { ensureTrailingSlash } from '../../util/url';
 import {
@@ -35,7 +36,6 @@ import {
 } from '../common';
 import GitStorage, { StatusResult } from '../git/storage';
 import { smartTruncate } from '../utils/pr-body';
-import { api } from './gitea-got-wrapper';
 import * as helper from './gitea-helper';
 
 type GiteaRenovateConfig = {
@@ -45,7 +45,6 @@ type GiteaRenovateConfig = {
 
 interface GiteaRepoConfig {
   storage: GitStorage;
-  gitPrivateKey?: string;
   repository: string;
   localDir: string;
   defaultBranch: string;
@@ -225,7 +224,7 @@ const platform: Platform = {
     } else {
       logger.debug('Using default Gitea endpoint: ' + defaults.endpoint);
     }
-    api.setBaseUrl(defaults.endpoint);
+    setBaseUrl(defaults.endpoint);
 
     let gitAuthor: string;
     try {
@@ -248,7 +247,6 @@ const platform: Platform = {
 
   async initRepo({
     repository,
-    gitPrivateKey,
     localDir,
     optimizeForDisabled,
   }: RepoParams): Promise<RepoConfig> {
@@ -257,7 +255,6 @@ const platform: Platform = {
 
     config = {} as any;
     config.repository = repository;
-    config.gitPrivateKey = gitPrivateKey;
     config.localDir = localDir;
 
     // Attempt to fetch information about repository
@@ -477,6 +474,11 @@ const platform: Platform = {
     }
 
     return config.prList;
+  },
+
+  /* istanbul ignore next */
+  async getPrFiles(pr: Pr): Promise<string[]> {
+    return config.storage.getBranchFiles(pr.branchName, pr.targetBranch);
   },
 
   async getPr(number: number): Promise<Pr | null> {
@@ -944,6 +946,7 @@ export const {
   getPr,
   getPrBody,
   getPrList,
+  getPrFiles,
   getRepoForceRebase,
   getRepoStatus,
   getRepos,

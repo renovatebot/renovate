@@ -21,13 +21,6 @@ export async function getLockedVersions(
         dep.lockedVersion =
           lockFileCache[yarnLock][`${dep.depName}@${dep.currentValue}`];
       }
-      // istanbul ignore next
-      if (lockFileCache[yarnLock]['@renovate_yarn_integrity']) {
-        logger.debug(`${yarnLock} uses integrity hashes`);
-        packageFile.yarnIntegrity = true;
-      } else {
-        logger.debug(`${yarnLock} does not use integrity hashes`);
-      }
     } else if (npmLock) {
       logger.debug('Found ' + npmLock + ' for ' + packageFile.packageFile);
       if (!lockFileCache[npmLock]) {

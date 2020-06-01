@@ -18,6 +18,7 @@ import {
 } from '../../constants/error-messages';
 import { logger as _logger } from '../../logger';
 import { BranchStatus } from '../../types';
+import { setBaseUrl } from '../../util/http/gitea';
 import * as ght from './gitea-helper';
 
 describe('platform/gitea', () => {
@@ -173,7 +174,6 @@ describe('platform/gitea', () => {
     jest.resetModules();
     jest.clearAllMocks();
     jest.mock('./gitea-helper');
-    jest.mock('./gitea-got-wrapper');
     jest.mock('../git/storage');
     jest.mock('../../logger');
 
@@ -202,6 +202,8 @@ describe('platform/gitea', () => {
     }));
 
     global.gitAuthor = { name: 'Renovate', email: 'renovate@example.com' };
+
+    setBaseUrl('https://gitea.renovatebot.com/api/v1');
   });
 
   function initFakeRepo(

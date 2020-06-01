@@ -1,11 +1,10 @@
+import is from '@sindresorhus/is';
 import { readFile } from 'fs-extra';
 import { join } from 'upath';
 import { SYSTEM_INSUFFICIENT_DISK_SPACE } from '../../../constants/error-messages';
 import { DatasourceError } from '../../../datasource';
 import { logger } from '../../../logger';
-import { exec } from '../../../util/exec';
-import { BinarySource } from '../../../util/exec/common';
-import { api as semver } from '../../../versioning/semver';
+import { ExecOptions, exec } from '../../../util/exec';
 import { PostUpdateConfig, Upgrade } from '../../common';
 
 export interface GenerateLockFileResult {
@@ -14,128 +13,103 @@ export interface GenerateLockFileResult {
   stderr?: string;
 }
 
+export async function hasYarnOfflineMirror(cwd: string): Promise<boolean> {
+  try {
+    const yarnrc = await readFile(`${cwd}/.yarnrc`, 'utf8');
+    if (is.string(yarnrc)) {
+      const mirrorLine = yarnrc
+        .split('\n')
+        .find((line) => line.startsWith('yarn-offline-mirror '));
+      if (mirrorLine) {
+        return true;
+      }
+    }
+  } catch (err) /* istanbul ignore next */ {
+    // not found
+  }
+  return false;
+}
+
 export async function generateLockFile(
   cwd: string,
-  env?: NodeJS.ProcessEnv,
+  env: NodeJS.ProcessEnv,
   config: PostUpdateConfig = {},
   upgrades: Upgrade[] = []
 ): Promise<GenerateLockFileResult> {
   logger.debug(`Spawning yarn install to create ${cwd}/yarn.lock`);
   let lockFile = null;
-  let stdout = '';
-  let stderr = '';
-  let cmd = 'yarn';
   try {
-    if (config.binarySource === BinarySource.Docker) {
-      logger.debug('Running yarn via docker');
-      cmd = `docker run --rm `;
-      // istanbul ignore if
-      if (config.dockerUser) {
-        cmd += `--user=${config.dockerUser} `;
-      }
-      const volumes = [cwd];
-      if (config.cacheDir) {
-        volumes.push(config.cacheDir);
-      }
-      cmd += volumes.map((v) => `-v "${v}":"${v}" `).join('');
-      // istanbul ignore if
-      if (config.dockerMapDotfiles) {
-        const homeDir =
-          process.env.HOME || process.env.HOMEPATH || process.env.USERPROFILE;
-        const homeNpmrc = join(homeDir, '.npmrc');
-        cmd += `-v ${homeNpmrc}:/home/ubuntu/.npmrc `;
-      }
-      const envVars = ['NPM_CONFIG_CACHE', 'npm_config_store'];
-      cmd += envVars.map((e) => `-e ${e} `).join('');
-      cmd += `-w "${cwd}" `;
-      cmd += `renovate/yarn yarn`;
+    const preCommands = ['npm i -g yarn'];
+    if (
+      config.skipInstalls !== false &&
+      (await hasYarnOfflineMirror(cwd)) === false
+    ) {
+      logger.debug('Updating yarn.lock only - skipping node_modules');
+      // The following change causes Yarn 1.x to exit gracefully after updating the lock file but without installing node_modules
+      preCommands.push(
+        "sed -i 's/ steps,/ steps.slice(0,1),/' /home/ubuntu/.npm-global/lib/node_modules/yarn/lib/cli.js"
+      );
     }
-
-    const { stdout: yarnVersion } = await exec(`${cmd} --version`);
-
-    logger.debug(`Using yarn: ${cmd} ${yarnVersion}`);
-
-    const yarnMajorVersion = semver.getMajor(yarnVersion);
-
-    let cmdExtras = '';
-    const cmdEnv = { ...env };
-    if (yarnMajorVersion < 2) {
-      cmdExtras += ' --ignore-scripts';
-    } else {
-      cmdEnv.YARN_ENABLE_SCRIPTS = '0';
+    const commands = [];
+    let cmdOptions = '--network-timeout 100000';
+    if (global.trustLevel !== 'high' || config.ignoreScripts) {
+      cmdOptions += ' --ignore-scripts --ignore-engines --ignore-platform';
     }
-    cmdExtras += ' --ignore-engines';
-    cmdExtras += ' --ignore-platform';
-    const installCmd = cmd + ' install' + cmdExtras;
-    // TODO: Switch to native util.promisify once using only node 8
-    await exec(installCmd, {
+    const execOptions: ExecOptions = {
       cwd,
-      env: cmdEnv,
-    });
+      extraEnv: {
+        NPM_CONFIG_CACHE: env.NPM_CONFIG_CACHE,
+        npm_config_store: env.npm_config_store,
+      },
+      docker: {
+        image: 'renovate/node',
+        preCommands,
+      },
+    };
+    if (config.dockerMapDotfiles) {
+      const homeDir =
+        process.env.HOME || process.env.HOMEPATH || process.env.USERPROFILE;
+      const homeNpmrc = join(homeDir, '.npmrc');
+      execOptions.docker.volumes = [[homeNpmrc, '/home/ubuntu/.npmrc']];
+    }
+
+    // This command updates the lock file based on package.json
+    commands.push(`yarn install ${cmdOptions}`.trim());
+
+    // rangeStrategy = update-lockfile
     const lockUpdates = upgrades
       .filter((upgrade) => upgrade.isLockfileUpdate)
       .map((upgrade) => upgrade.depName);
     if (lockUpdates.length) {
       logger.debug('Performing lockfileUpdate (yarn)');
-      const updateCmd =
-        cmd +
-        ' upgrade' +
-        lockUpdates.map((depName) => ` ${depName}`).join('') +
-        cmdExtras;
-      const updateRes = await exec(updateCmd, {
-        cwd,
-        env,
-      });
-      // istanbul ignore next
-      stdout += updateRes.stdout || '';
-      stderr += updateRes.stderr || '';
+      commands.push(
+        `yarn upgrade ${lockUpdates.join(' ')} ${cmdOptions}`.trim()
+      );
     }
 
-    if (yarnMajorVersion < 2) {
-      if (
-        config.postUpdateOptions &&
-        config.postUpdateOptions.includes('yarnDedupeFewer')
-      ) {
-        logger.debug('Performing yarn dedupe fewer');
-        const dedupeCommand =
-          'npx yarn-deduplicate@1.1.1 --strategy fewer && yarn';
-        const dedupeRes = await exec(dedupeCommand, {
-          cwd,
-          env,
-        });
-        // istanbul ignore next
-        stdout += dedupeRes.stdout || '';
-        stderr += dedupeRes.stderr || '';
-      }
-      if (
-        config.postUpdateOptions &&
-        config.postUpdateOptions.includes('yarnDedupeHighest')
-      ) {
-        logger.debug('Performing yarn dedupe highest');
-        const dedupeCommand =
-          'npx yarn-deduplicate@1.1.1 --strategy highest && yarn';
-        const dedupeRes = await exec(dedupeCommand, {
-          cwd,
-          env,
-        });
-        // istanbul ignore next
-        stdout += dedupeRes.stdout || '';
-        stderr += dedupeRes.stderr || '';
-      }
-    } else if (
-      config.postUpdateOptions &&
-      config.postUpdateOptions.some((option) => option.startsWith('yarnDedupe'))
-    ) {
-      logger.warn('yarn-deduplicate is not supported since yarn 2');
+    // postUpdateOptions
+    if (config.postUpdateOptions?.includes('yarnDedupeFewer')) {
+      logger.debug('Performing yarn dedupe fewer');
+      commands.push('npx yarn-deduplicate --strategy fewer');
+      // Run yarn again in case any changes are necessary
+      commands.push(`yarn install ${cmdOptions}`.trim());
     }
+    if (config.postUpdateOptions?.includes('yarnDedupeHighest')) {
+      logger.debug('Performing yarn dedupe highest');
+      commands.push('npx yarn-deduplicate --strategy highest');
+      // Run yarn again in case any changes are necessary
+      commands.push(`yarn install ${cmdOptions}`.trim());
+    }
+
+    // Run the commands
+    await exec(commands, execOptions);
+
+    // Read the result
     lockFile = await readFile(join(cwd, 'yarn.lock'), 'utf8');
   } catch (err) /* istanbul ignore next */ {
     logger.debug(
       {
-        cmd,
         err,
-        stdout,
-        stderr,
         type: 'yarn',
       },
       'lock file error'

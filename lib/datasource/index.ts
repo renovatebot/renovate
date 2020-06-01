@@ -66,10 +66,14 @@ function getRawReleases(
     config.lookupName +
     config.registryUrls;
   // By returning a Promise and reusing it, we should only fetch each package at most once
-  if (!runCache.get(cacheKey)) {
-    runCache.set(cacheKey, fetchReleases(config));
+  const cachedResult = runCache.get(cacheKey);
+  // istanbul ignore if
+  if (cachedResult) {
+    return cachedResult;
   }
-  return runCache.get<Promise<ReleaseResult | null>>(cacheKey);
+  const promisedRes = fetchReleases(config);
+  runCache.set(cacheKey, promisedRes);
+  return promisedRes;
 }
 
 export async function getPkgReleases(

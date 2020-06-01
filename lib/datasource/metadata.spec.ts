@@ -1,5 +1,6 @@
 import * as datasourceMaven from './maven';
 import { addMetaData } from './metadata';
+import * as datasourceNpm from './npm';
 import * as datasourcePypi from './pypi';
 
 describe('datasource/metadata', () => {
@@ -67,6 +68,75 @@ describe('datasource/metadata', () => {
     expect(dep).toMatchSnapshot();
   });
 
+  it('Should handle parsing of sourceUrls correctly for GitLab also', () => {
+    const dep = {
+      sourceUrl: 'https://gitlab.com/meno/dropzone/tree/master',
+      releases: [
+        { version: '5.7.0', releaseTimestamp: '2020-02-14T13:12:00' },
+        {
+          version: '5.6.1',
+          releaseTimestamp: '2020-02-14T10:04:00',
+        },
+      ],
+    };
+    const datasource = datasourceNpm.id;
+    const lookupName = 'dropzone';
+
+    addMetaData(dep, datasource, lookupName);
+    expect(dep).toMatchSnapshot();
+  });
+  it('Should handle failed parsing of sourceUrls for GitLab', () => {
+    const dep = {
+      sourceUrl: 'https://gitlab-nope',
+      releases: [
+        { version: '5.7.0', releaseTimestamp: '2020-02-14T13:12:00' },
+        {
+          version: '5.6.1',
+          releaseTimestamp: '2020-02-14T10:04:00',
+        },
+      ],
+    };
+    const datasource = datasourceNpm.id;
+    const lookupName = 'dropzone';
+
+    addMetaData(dep, datasource, lookupName);
+    expect(dep).toMatchSnapshot();
+  });
+  it('Should handle failed parsing of sourceUrls for other', () => {
+    const dep = {
+      sourceUrl: 'https://nope-nope-nope',
+      releases: [
+        { version: '5.7.0', releaseTimestamp: '2020-02-14T13:12:00' },
+        {
+          version: '5.6.1',
+          releaseTimestamp: '2020-02-14T10:04:00',
+        },
+      ],
+    };
+    const datasource = datasourceNpm.id;
+    const lookupName = 'dropzone';
+
+    addMetaData(dep, datasource, lookupName);
+    expect(dep).toMatchSnapshot();
+  });
+  it('Should handle non-url', () => {
+    const dep = {
+      sourceUrl: 'not-a-url',
+      releases: [
+        { version: '5.7.0', releaseTimestamp: '2020-02-14T13:12:00' },
+        {
+          version: '5.6.1',
+          releaseTimestamp: '2020-02-14T10:04:00',
+        },
+      ],
+    };
+    const datasource = datasourceNpm.id;
+    const lookupName = 'dropzone';
+
+    addMetaData(dep, datasource, lookupName);
+    expect(dep).toMatchSnapshot();
+  });
+
   it('Should handle parsing/converting of GitHub sourceUrls with http and www correctly', () => {
     const dep = {
       sourceUrl: 'http://www.github.com/mockk/mockk/',
@@ -77,5 +147,31 @@ describe('datasource/metadata', () => {
 
     addMetaData(dep, datasource, lookupName);
     expect(dep.sourceUrl).toEqual('https://github.com/mockk/mockk');
+  });
+
+  it('Should move github homepage to sourceUrl', () => {
+    const dep = {
+      homepage: 'http://www.github.com/mockk/mockk/',
+      releases: [{ version: '1.9.3' }],
+      sourceUrl: undefined,
+    };
+    const datasource = datasourceMaven.id;
+    const lookupName = 'io.mockk:mockk';
+
+    addMetaData(dep, datasource, lookupName);
+    expect(dep.sourceUrl).toEqual('https://github.com/mockk/mockk');
+    expect(dep.homepage).toBeUndefined();
+  });
+
+  it('Should handle parsing/converting of GitLab sourceUrls with http and www correctly', () => {
+    const dep = {
+      sourceUrl: 'http://gitlab.com/meno/dropzone/',
+      releases: [{ version: '5.7.0' }],
+    };
+    const datasource = datasourceMaven.id;
+    const lookupName = 'dropzone';
+
+    addMetaData(dep, datasource, lookupName);
+    expect(dep.sourceUrl).toEqual('https://gitlab.com/meno/dropzone');
   });
 });

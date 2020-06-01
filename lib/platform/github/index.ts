@@ -204,7 +204,6 @@ export async function initRepo({
   repository,
   forkMode,
   forkToken,
-  gitPrivateKey,
   localDir,
   includeForks,
   renovateUsername,
@@ -216,7 +215,7 @@ export async function initRepo({
   // istanbul ignore if
   if (endpoint) {
     // Necessary for Renovate Pro - do not remove
-    logger.debug('Overriding default GitHub endpoint');
+    logger.debug({ endpoint }, 'Overriding default GitHub endpoint');
     defaults.endpoint = endpoint;
     githubHttp.setBaseUrl(endpoint);
   }
@@ -229,7 +228,6 @@ export async function initRepo({
   config.localDir = localDir;
   config.repository = repository;
   [config.repositoryOwner, config.repositoryName] = repository.split('/');
-  config.gitPrivateKey = gitPrivateKey;
   let res;
   try {
     res = await githubApi.getJson<{ fork: boolean }>(`repos/${repository}`);
@@ -993,6 +991,11 @@ export async function getPrList(): Promise<Pr[]> {
   return config.prList;
 }
 
+/* istanbul ignore next */
+export async function getPrFiles(pr: Pr): Promise<string[]> {
+  return config.storage.getBranchFiles(pr.branchName, pr.targetBranch);
+}
+
 export async function findPr({
   branchName,
   prTitle,
@@ -1579,7 +1582,7 @@ export async function ensureCommentRemoval({
   topic,
   content,
 }: EnsureCommentRemovalConfig): Promise<void> {
-  logger.debug(
+  logger.trace(
     `Ensuring comment "${topic || content}" in #${issueNo} is removed`
   );
   const comments = await getComments(issueNo);
@@ -1598,6 +1601,7 @@ export async function ensureCommentRemoval({
 
   try {
     if (commentId) {
+      logger.debug({ issueNo }, 'Removing comment');
       await deleteComment(commentId);
     }
   } catch (err) /* istanbul ignore next */ {
@@ -1615,6 +1619,7 @@ export async function createPr({
   labels,
   useDefaultBranch,
   platformOptions = {},
+  draftPR = false,
 }: CreatePRConfig): Promise<Pr> {
   const body = sanitize(rawBody);
   const base = useDefaultBranch ? config.defaultBranch : config.baseBranch;
@@ -1626,6 +1631,7 @@ export async function createPr({
       head,
       base,
       body,
+      draft: draftPR,
     },
   };
   // istanbul ignore if
@@ -1633,14 +1639,17 @@ export async function createPr({
     options.token = config.forkToken;
     options.body.maintainer_can_modify = true;
   }
-  logger.debug({ title, head, base }, 'Creating PR');
+  logger.debug({ title, head, base, draft: draftPR }, 'Creating PR');
   const pr = (
     await githubApi.postJson<GhPr>(
       `repos/${config.parentRepo || config.repository}/pulls`,
       options
     )
   ).body;
-  logger.debug({ branch: branchName, pr: pr.number }, 'PR created');
+  logger.debug(
+    { branch: branchName, pr: pr.number, draft: draftPR },
+    'PR created'
+  );
   // istanbul ignore if
   if (config.prList) {
     config.prList.push(pr);

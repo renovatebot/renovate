@@ -85,7 +85,6 @@ export interface RepoConfig {
 export interface RepoParams {
   azureWorkItemId?: number; // shouldn't this be configurable within a renovate.json?
   bbUseDefaultReviewers?: boolean; // shouldn't this be configurable within a renovate.json?
-  gitPrivateKey?: string;
   localDir: string;
   optimizeForDisabled: boolean;
   repository: string;
@@ -140,6 +139,7 @@ export interface CreatePRConfig {
   labels?: string[] | null;
   useDefaultBranch?: boolean;
   platformOptions?: PlatformPrOptions;
+  draftPR?: boolean;
 }
 export interface EnsureIssueConfig {
   title: string;
@@ -191,6 +191,7 @@ export interface Platform {
   initRepo(config: RepoParams): Promise<RepoConfig>;
   cleanRepo(): Promise<void>;
   getPrList(): Promise<Pr[]>;
+  getPrFiles(pr: Pr): Promise<string[]>;
   getAllRenovateBranches(branchPrefix: string): Promise<string[]>;
   ensureIssueClosing(title: string): Promise<void>;
   getFileList(): Promise<string[]>;
@@ -232,6 +233,6 @@ export interface Platform {
   ): Promise<BranchStatus>;
   getBranchPr(branchName: string): Promise<Pr | null>;
   getRepoStatus(): Promise<Git.StatusResult>;
-  getFile(lockFileName: string, branchName?: string): Promise<string>;
+  getFile(lockFileName: string, branchName?: string): Promise<string | null>;
   initPlatform(config: RenovateConfig): Promise<PlatformConfig>;
 }

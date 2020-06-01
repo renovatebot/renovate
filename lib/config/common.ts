@@ -21,6 +21,7 @@ export interface RenovateSharedConfig {
   branchName?: string;
   manager?: string;
   commitMessage?: string;
+  draftPR?: boolean;
   enabled?: boolean;
   enabledManagers?: string[];
   fileMatch?: string[];
@@ -91,6 +92,8 @@ export interface RenovateAdminConfig {
   repositories?: RenovateRepository[];
   requireConfig?: boolean;
   trustLevel?: 'low' | 'high';
+  redisUrl?: string;
+  gitPrivateKey?: string;
 }
 
 export type PostUpgradeTasks = {
@@ -122,6 +125,7 @@ export interface RenovateConfig
   extends RenovateAdminConfig,
     RenovateSharedConfig,
     UpdateConfig<PackageRule>,
+    AssigneesAndReviewersConfig,
     Record<string, unknown> {
   depName?: string;
   baseBranches?: string[];
@@ -159,6 +163,16 @@ export interface RenovateConfig
   warnings?: ValidationMessage[];
   vulnerabilityAlerts?: RenovateSharedConfig;
   regexManagers?: CustomManager[];
+}
+
+export interface AssigneesAndReviewersConfig {
+  assigneesFromCodeOwners?: boolean;
+  assignees?: string[];
+  assigneesSampleSize?: number;
+  reviewersFromCodeOwners?: boolean;
+  reviewers?: string[];
+  reviewersSampleSize?: number;
+  additionalReviewers?: string[];
 }
 
 export type UpdateType =

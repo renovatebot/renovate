@@ -217,6 +217,12 @@ const options: RenovateOptions[] = [
     default: true,
   },
   {
+    name: 'draftPR',
+    description: 'If enabled, the PR created by Renovate is set to a draft.',
+    type: 'boolean',
+    default: false,
+  },
+  {
     name: 'dryRun',
     description:
       'If enabled, perform a dry run by logging messages instead of creating/updating/deleting branches and PRs',
@@ -240,6 +246,13 @@ const options: RenovateOptions[] = [
     type: 'string',
     allowedValues: ['auto', 'global', 'docker'],
     default: 'auto',
+  },
+  {
+    name: 'redisUrl',
+    description:
+      'If defined, this redis url will be used for caching instead of the file system',
+    admin: true,
+    type: 'string',
   },
   {
     name: 'baseDir',
@@ -1334,6 +1347,13 @@ const options: RenovateOptions[] = [
     subType: 'string',
   },
   {
+    name: 'assigneesFromCodeOwners',
+    description:
+      'Determine assignees based on configured code owners and changes in PR.',
+    type: 'boolean',
+    default: false,
+  },
+  {
     name: 'assigneesSampleSize',
     description: 'Take a random sample of given size from assignees.',
     type: 'integer',
@@ -1352,6 +1372,13 @@ const options: RenovateOptions[] = [
       'Requested reviewers for Pull Requests (either username or email address depending on the platform)',
     type: 'array',
     subType: 'string',
+  },
+  {
+    name: 'reviewersFromCodeOwners',
+    description:
+      'Determine reviewers based on configured code owners and changes in PR.',
+    type: 'boolean',
+    default: false,
   },
   {
     name: 'reviewersSampleSize',
