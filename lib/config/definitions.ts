@@ -217,6 +217,12 @@ const options: RenovateOptions[] = [
     default: true,
   },
   {
+    name: 'draftPR',
+    description: 'If enabled, the PR created by Renovate is set to a draft.',
+    type: 'boolean',
+    default: false,
+  },
+  {
     name: 'dryRun',
     description:
       'If enabled, perform a dry run by logging messages instead of creating/updating/deleting branches and PRs',

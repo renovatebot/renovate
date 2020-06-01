@@ -354,6 +354,7 @@ export async function ensurePr(
           labels: config.labels,
           useDefaultBranch: false,
           platformOptions,
+          draftPR: config.draftPR,
         });
         logger.info({ pr: pr.number, prTitle }, 'PR created');
       }
