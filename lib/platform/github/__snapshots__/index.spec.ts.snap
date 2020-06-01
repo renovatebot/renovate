@@ -60,6 +60,45 @@ Array [
 ]
 `;
 
+exports[`platform/github createPr() should create a draftPR if set in the settings 1`] = `
+Object {
+  "branchName": "some-branch",
+  "displayNumber": "Pull Request #123",
+  "isModified": false,
+  "number": 123,
+}
+`;
+
+exports[`platform/github createPr() should create a draftPR if set in the settings 2`] = `
+Array [
+  Object {
+    "headers": Object {
+      "accept": "application/json",
+      "accept-encoding": "gzip, deflate",
+      "authorization": "token abc123",
+      "host": "api.github.com",
+      "user-agent": "https://github.com/renovatebot/renovate",
+    },
+    "method": "GET",
+    "url": "https://api.github.com/repos/some/repo",
+  },
+  Object {
+    "body": "{\\"title\\":\\"PR draft\\",\\"head\\":\\"some:some-branch\\",\\"base\\":\\"master\\",\\"body\\":\\"This is a result of a draft\\",\\"draft\\":true}",
+    "headers": Object {
+      "accept": "application/json",
+      "accept-encoding": "gzip, deflate",
+      "authorization": "token abc123",
+      "content-length": 112,
+      "content-type": "application/json",
+      "host": "api.github.com",
+      "user-agent": "https://github.com/renovatebot/renovate",
+    },
+    "method": "POST",
+    "url": "https://api.github.com/repos/some/repo/pulls",
+  },
+]
+`;
+
 exports[`platform/github createPr() should create and return a PR object 1`] = `
 Object {
   "branchName": "some-branch",
@@ -83,12 +122,12 @@ Array [
     "url": "https://api.github.com/repos/some/repo",
   },
   Object {
-    "body": "{\\"title\\":\\"The Title\\",\\"head\\":\\"some:some-branch\\",\\"base\\":\\"master\\",\\"body\\":\\"Hello world\\"}",
+    "body": "{\\"title\\":\\"The Title\\",\\"head\\":\\"some:some-branch\\",\\"base\\":\\"master\\",\\"body\\":\\"Hello world\\",\\"draft\\":false}",
     "headers": Object {
       "accept": "application/json",
       "accept-encoding": "gzip, deflate",
       "authorization": "token abc123",
-      "content-length": 84,
+      "content-length": 98,
       "content-type": "application/json",
       "host": "api.github.com",
       "user-agent": "https://github.com/renovatebot/renovate",
@@ -183,12 +222,12 @@ Array [
     "url": "https://api.github.com/repos/some/repo",
   },
   Object {
-    "body": "{\\"title\\":\\"The Title\\",\\"head\\":\\"some:some-branch\\",\\"base\\":\\"master\\",\\"body\\":\\"Hello world\\"}",
+    "body": "{\\"title\\":\\"The Title\\",\\"head\\":\\"some:some-branch\\",\\"base\\":\\"master\\",\\"body\\":\\"Hello world\\",\\"draft\\":false}",
     "headers": Object {
       "accept": "application/json",
       "accept-encoding": "gzip, deflate",
       "authorization": "token abc123",
-      "content-length": 84,
+      "content-length": 98,
       "content-type": "application/json",
       "host": "api.github.com",
       "user-agent": "https://github.com/renovatebot/renovate",

@@ -21,6 +21,7 @@ export interface RenovateSharedConfig {
   branchName?: string;
   manager?: string;
   commitMessage?: string;
+  draftPR?: boolean;
   enabled?: boolean;
   enabledManagers?: string[];
   fileMatch?: string[];

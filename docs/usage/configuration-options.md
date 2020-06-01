@@ -255,6 +255,18 @@ Add config here if you wish it to apply to Docker package managers Dockerfile an
 
 ## dotnet
 
+## draftPR
+
+If you want the PRs created by Renovate to be considered as drafts rather than normal PRs in Github you could add this property to your `renovate.json`:
+
+```json
+{
+  "draftPR": true
+}
+```
+
+Please see [draft pull requests on Github](https://github.blog/2019-02-14-introducing-draft-pull-requests/) for more information about draft PRs.
+
 ## enabled
 
 The most common use of `enabled` is if you want to turn Renovate's functionality off, for some reason.
