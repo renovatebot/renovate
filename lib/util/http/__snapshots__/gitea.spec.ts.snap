@@ -1,6 +1,6 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
-exports[`platform/gitea/gitea-got-wrapper supports pagination on data property 1`] = `
+exports[`util/http/gitea supports pagination on data property 1`] = `
 Array [
   Object {
     "headers": Object {
@@ -35,7 +35,7 @@ Array [
 ]
 `;
 
-exports[`platform/gitea/gitea-got-wrapper supports responses without pagination when enabled 1`] = `
+exports[`util/http/gitea supports responses without pagination when enabled 1`] = `
 Array [
   Object {
     "headers": Object {
@@ -50,7 +50,7 @@ Array [
 ]
 `;
 
-exports[`platform/gitea/gitea-got-wrapper supports root-level pagination 1`] = `
+exports[`util/http/gitea supports root-level pagination 1`] = `
 Array [
   Object {
     "headers": Object {
