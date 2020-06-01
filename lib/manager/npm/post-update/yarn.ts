@@ -51,9 +51,9 @@ export async function generateLockFile(
       );
     }
     const commands = [];
-    let cmdOptions = '';
+    let cmdOptions = '--network-timeout 100000';
     if (global.trustLevel !== 'high' || config.ignoreScripts) {
-      cmdOptions = '--ignore-scripts --ignore-engines --ignore-platform';
+      cmdOptions += ' --ignore-scripts --ignore-engines --ignore-platform';
     }
     const execOptions: ExecOptions = {
       cwd,
