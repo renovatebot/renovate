@@ -1,6 +1,6 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
-exports[`platform/gl-got-wrapper accepts custom baseUrl 1`] = `
+exports[`util/http/bitbucket accepts custom baseUrl 1`] = `
 Array [
   Object {
     "headers": Object {
@@ -26,7 +26,7 @@ Array [
 ]
 `;
 
-exports[`platform/gl-got-wrapper posts 1`] = `
+exports[`util/http/bitbucket posts 1`] = `
 Array [
   Object {
     "headers": Object {
@@ -42,9 +42,9 @@ Array [
 ]
 `;
 
-exports[`platform/gl-got-wrapper returns cached 1`] = `Object {}`;
+exports[`util/http/bitbucket returns cached 1`] = `Object {}`;
 
-exports[`platform/gl-got-wrapper returns cached 2`] = `
+exports[`util/http/bitbucket returns cached 2`] = `
 Array [
   Object {
     "headers": Object {

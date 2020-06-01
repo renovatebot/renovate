@@ -1,5 +1,5 @@
 import * as httpMock from '../../../test/httpMock';
-import { api } from './bb-got-wrapper';
+import { setBaseUrl } from '../../util/http/bitbucket';
 import * as comments from './comments';
 
 const baseUrl = 'https://api.bitbucket.org';
@@ -13,7 +13,7 @@ describe('platform/comments', () => {
     httpMock.reset();
     httpMock.setup();
 
-    api.setBaseUrl(baseUrl);
+    setBaseUrl(baseUrl);
   });
 
   describe('ensureComment()', () => {
