@@ -255,6 +255,18 @@ Add config here if you wish it to apply to Docker package managers Dockerfile an
 
 ## dotnet
 
+## draftPR
+
+If you want the PRs created by Renovate to be considered as drafts rather than normal PRs in Github you could add this property to your `renovate.json`:
+
+```json
+{
+  "draftPR": true
+}
+```
+
+Please see [draft pull requests on Github](https://github.blog/2019-02-14-introducing-draft-pull-requests/) for more information about draft PRs.
+
 ## enabled
 
 The most common use of `enabled` is if you want to turn Renovate's functionality off, for some reason.
@@ -1340,7 +1352,7 @@ By default you will see angular-style commit prefixes like `"chore(deps):"`. If 
 
 ## semanticCommits
 
-If you are using a semantic prefix for your commits, then you will want to enable this setting. Although it's configurable to a package-level, it makes most sense to configure it at a repository level. If configured to `true`, then the `semanticPrefix` field will be used for each commit message and PR title.
+If you are using a semantic prefix for your commits, then you will want to enable this setting. Although it's configurable to a package-level, it makes most sense to configure it at a repository level. If configured to `true`, then the `semanticCommitScope` and `semanticCommitType` fields will be used for each commit message and PR title.
 
 However, please note that Renovate will autodetect if your repository is already using semantic commits or not and follow suit, so you only really need to configure this if you wish to _override_ Renovate's autodetected setting.
 

@@ -111,7 +111,7 @@
     "@sindresorhus/is": "2.1.1",
     "@snyk/ruby-semver": "2.2.0",
     "@yarnpkg/lockfile": "1.1.0",
-    "aws-sdk": "2.683.0",
+    "aws-sdk": "2.686.0",
     "azure-devops-node-api": "10.1.1",
     "bunyan": "1.8.12",
     "cacache": "15.0.3",
