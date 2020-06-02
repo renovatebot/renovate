@@ -442,7 +442,7 @@ export async function processBranch(
       }
     }
     config.forceCommit =
-      masterIssueCheck || config.rebaseRequested || branchPr.isConflicted;
+      !!masterIssueCheck || config.rebaseRequested || branchPr?.isConflicted;
     const commitHash = await commitFilesToBranch(config);
     if (!commitHash && !branchExists) {
       return 'no-work';
