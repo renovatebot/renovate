@@ -3,6 +3,7 @@ import { join } from 'upath';
 import { logger } from '../../../logger';
 import { ExecOptions, exec } from '../../../util/exec';
 import { PostUpdateConfig } from '../../common';
+import { getNodeConstraint } from './node-version';
 
 export interface GenerateLockFileResult {
   error?: boolean;
@@ -23,6 +24,7 @@ export async function generateLockFile(
   let cmd = 'pnpm';
   try {
     const preCommands = ['npm i -g pnpm'];
+    const tagConstraint = await getNodeConstraint(config.packageFile);
     const execOptions: ExecOptions = {
       cwd,
       extraEnv: {
@@ -31,6 +33,8 @@ export async function generateLockFile(
       },
       docker: {
         image: 'renovate/node',
+        tagScheme: 'npm',
+        tagConstraint,
         preCommands,
       },
     };

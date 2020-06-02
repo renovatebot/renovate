@@ -4,6 +4,7 @@ import { SYSTEM_INSUFFICIENT_DISK_SPACE } from '../../../constants/error-message
 import { logger } from '../../../logger';
 import { ExecOptions, exec } from '../../../util/exec';
 import { PostUpdateConfig, Upgrade } from '../../common';
+import { getNodeConstraint } from './node-version';
 
 export interface GenerateLockFileResult {
   error?: boolean;
@@ -36,6 +37,7 @@ export async function generateLockFile(
       logger.debug('Updating lock file only');
       cmdOptions += '--package-lock-only --no-audit';
     }
+    const tagConstraint = await getNodeConstraint(config.packageFile);
     const execOptions: ExecOptions = {
       cwd,
       extraEnv: {
@@ -44,6 +46,8 @@ export async function generateLockFile(
       },
       docker: {
         image: 'renovate/node',
+        tagScheme: 'npm',
+        tagConstraint,
         preCommands,
       },
     };
