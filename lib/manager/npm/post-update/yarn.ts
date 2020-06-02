@@ -31,6 +31,9 @@ export async function hasYarnOfflineMirror(cwd: string): Promise<boolean> {
   return false;
 }
 
+export const optimizeCommand =
+  "sed -i 's/ steps,/ steps.slice(0,1),/' /home/ubuntu/.npm-global/lib/node_modules/yarn/lib/cli.js";
+
 export async function generateLockFile(
   cwd: string,
   env: NodeJS.ProcessEnv,
@@ -47,9 +50,7 @@ export async function generateLockFile(
     ) {
       logger.debug('Updating yarn.lock only - skipping node_modules');
       // The following change causes Yarn 1.x to exit gracefully after updating the lock file but without installing node_modules
-      preCommands.push(
-        "sed -i 's/ steps,/ steps.slice(0,1),/' /home/ubuntu/.npm-global/lib/node_modules/yarn/lib/cli.js"
-      );
+      preCommands.push(optimizeCommand);
     }
     const commands = [];
     let cmdOptions = '--network-timeout 100000';
