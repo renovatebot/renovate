@@ -865,16 +865,8 @@ const platform: Platform = {
     return Promise.resolve();
   },
 
-  commitFiles({
-    branchName,
-    files,
-    message,
-  }: CommitFilesConfig): Promise<string | null> {
-    return config.storage.commitFiles({
-      branchName,
-      files,
-      message,
-    });
+  commitFiles(commitFilesConfig: CommitFilesConfig): Promise<string | null> {
+    return config.storage.commitFiles(commitFilesConfig);
   },
 
   getPrBody(prBody: string): string {

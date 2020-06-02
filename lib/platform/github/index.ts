@@ -568,16 +568,10 @@ export function mergeBranch(branchName: string): Promise<void> {
 }
 
 // istanbul ignore next
-export function commitFiles({
-  branchName,
-  files,
-  message,
-}: CommitFilesConfig): Promise<string | null> {
-  return config.storage.commitFiles({
-    branchName,
-    files,
-    message,
-  });
+export function commitFiles(
+  commitFilesConfig: CommitFilesConfig
+): Promise<string | null> {
+  return config.storage.commitFiles(commitFilesConfig);
 }
 
 // istanbul ignore next

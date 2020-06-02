@@ -632,16 +632,11 @@ export function isBranchStale(branchName: string): Promise<boolean> {
   return config.storage.isBranchStale(branchName);
 }
 
-export function commitFiles({
-  branchName,
-  files,
-  message,
-}: CommitFilesConfig): Promise<string | null> {
-  return config.storage.commitFiles({
-    branchName,
-    files,
-    message,
-  });
+// istanbul ignore next
+export function commitFiles(
+  commitFilesConfig: CommitFilesConfig
+): Promise<string | null> {
+  return config.storage.commitFiles(commitFilesConfig);
 }
 
 export function getFile(
