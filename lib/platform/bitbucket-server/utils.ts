@@ -5,8 +5,11 @@ import {
   PR_STATE_MERGED,
   PR_STATE_OPEN,
 } from '../../constants/pull-requests';
-import { api } from './bb-got-wrapper';
+import { HttpResponse } from '../../util/http';
+import { BitbucketServerHttp } from '../../util/http/bitbucket-server';
 import { BbbsRestPr, BbsPr } from './types';
+
+const bitbucketServerHttp = new BitbucketServerHttp();
 
 // https://docs.atlassian.com/bitbucket-server/rest/6.0.0/bitbucket-rest.html#idp250
 const prStateMapping: any = {
@@ -38,6 +41,29 @@ const addMaxLength = (inputUrl: string, limit = 100): string => {
   return maxedUrl;
 };
 
+async function callApi<T>(
+  apiUrl: string,
+  method: string,
+  options?: any
+): Promise<HttpResponse<T>> {
+  /* istanbul ignore next */
+  switch (method.toLowerCase()) {
+    case 'post':
+      return bitbucketServerHttp.postJson<T>(apiUrl, options);
+    case 'put':
+      return bitbucketServerHttp.putJson<T>(apiUrl, options);
+    case 'patch':
+      return bitbucketServerHttp.patchJson<T>(apiUrl, options);
+    case 'head':
+      return bitbucketServerHttp.headJson<T>(apiUrl, options);
+    case 'delete':
+      return bitbucketServerHttp.deleteJson<T>(apiUrl, options);
+    case 'get':
+    default:
+      return bitbucketServerHttp.getJson<T>(apiUrl, options);
+  }
+}
+
 export async function accumulateValues<T = any>(
   reqUrl: string,
   method = 'get',
@@ -46,11 +72,14 @@ export async function accumulateValues<T = any>(
 ): Promise<T[]> {
   let accumulator: T[] = [];
   let nextUrl = addMaxLength(reqUrl, limit);
-  const lowerCaseMethod = method.toLocaleLowerCase();
 
   while (typeof nextUrl !== 'undefined') {
     // TODO: fix typing
-    const { body } = await (api as any)[lowerCaseMethod](nextUrl, options);
+    const { body } = await callApi<{
+      values: T[];
+      isLastPage: boolean;
+      nextPageStart: string;
+    }>(nextUrl, method, options);
     accumulator = [...accumulator, ...body.values];
     if (body.isLastPage !== false) {
       break;

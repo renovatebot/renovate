@@ -1,16 +1,21 @@
 import * as httpMock from '../../../test/httpMock';
-import { api } from './gitea-got-wrapper';
+import { getName } from '../../../test/util';
+import { GiteaHttp, setBaseUrl } from './gitea';
 
-describe('platform/gitea/gitea-got-wrapper', () => {
+describe(getName(__filename), () => {
   const baseUrl = 'https://gitea.renovatebot.com/api/v1';
 
+  let giteaHttp: GiteaHttp;
+
   beforeEach(() => {
+    giteaHttp = new GiteaHttp();
+
     jest.resetAllMocks();
 
     httpMock.reset();
     httpMock.setup();
 
-    api.setBaseUrl(baseUrl);
+    setBaseUrl(baseUrl);
   });
 
   it('supports responses without pagination when enabled', async () => {
@@ -19,7 +24,9 @@ describe('platform/gitea/gitea-got-wrapper', () => {
       .get('/pagination-example-1')
       .reply(200, { hello: 'world' });
 
-    const res = await api.get('pagination-example-1', { paginate: true });
+    const res = await giteaHttp.getJson('pagination-example-1', {
+      paginate: true,
+    });
     expect(res.body).toEqual({ hello: 'world' });
     expect(httpMock.getTrace()).toMatchSnapshot();
   });
@@ -34,7 +41,7 @@ describe('platform/gitea/gitea-got-wrapper', () => {
       .get('/pagination-example-1?page=3')
       .reply(200, ['mno', 'pqr']);
 
-    const res = await api.get(`${baseUrl}/pagination-example-1`, {
+    const res = await giteaHttp.getJson(`${baseUrl}/pagination-example-1`, {
       paginate: true,
     });
     httpMock.getTrace();
@@ -54,7 +61,9 @@ describe('platform/gitea/gitea-got-wrapper', () => {
       .get('/pagination-example-2?page=3')
       .reply(200, { data: ['mno', 'pqr'] });
 
-    const res = await api.get('pagination-example-2', { paginate: true });
+    const res = await giteaHttp.getJson<{ data: any }>('pagination-example-2', {
+      paginate: true,
+    });
     expect(res.body.data).toHaveLength(6);
     expect(res.body.data).toEqual(['abc', 'def', 'ghi', 'jkl', 'mno', 'pqr']);
     expect(httpMock.getTrace()).toMatchSnapshot();

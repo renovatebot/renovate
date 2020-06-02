@@ -14,7 +14,6 @@ import * as lerna from './lerna';
 import * as npm from './npm';
 import * as pnpm from './pnpm';
 import * as yarn from './yarn';
-import { PackageJson } from 'type-fest';
 
 // Strips empty values, deduplicates, and returns the directories from filenames
 // istanbul ignore next
@@ -140,22 +139,6 @@ export async function writeExistingFiles(
       config.localDir,
       path.dirname(packageFile.packageFile)
     );
-    logger.trace(`Writing package.json to ${basedir}`);
-    // Massage the file to eliminate yarn errors
-    const massagedFile: PackageJson = JSON.parse(
-      await platform.getFile(packageFile.packageFile)
-    );
-    if (massagedFile) {
-      if (massagedFile.name) {
-        massagedFile.name = massagedFile.name.replace(/[{}]/g, '');
-      }
-      delete massagedFile.engines;
-      delete massagedFile.scripts;
-      await fs.outputFile(
-        upath.join(basedir, 'package.json'),
-        JSON.stringify(massagedFile)
-      );
-    }
     const npmrc = packageFile.npmrc || config.npmrc;
     if (npmrc) {
       await fs.outputFile(upath.join(basedir, '.npmrc'), npmrc);

@@ -1352,7 +1352,7 @@ By default you will see angular-style commit prefixes like `"chore(deps):"`. If 
 
 ## semanticCommits
 
-If you are using a semantic prefix for your commits, then you will want to enable this setting. Although it's configurable to a package-level, it makes most sense to configure it at a repository level. If configured to `true`, then the `semanticPrefix` field will be used for each commit message and PR title.
+If you are using a semantic prefix for your commits, then you will want to enable this setting. Although it's configurable to a package-level, it makes most sense to configure it at a repository level. If configured to `true`, then the `semanticCommitScope` and `semanticCommitType` fields will be used for each commit message and PR title.
 
 However, please note that Renovate will autodetect if your repository is already using semantic commits or not and follow suit, so you only really need to configure this if you wish to _override_ Renovate's autodetected setting.
 

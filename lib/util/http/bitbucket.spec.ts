@@ -1,12 +1,16 @@
 import * as httpMock from '../../../test/httpMock';
+import { getName } from '../../../test/util';
 import { PLATFORM_TYPE_BITBUCKET } from '../../constants/platforms';
-import * as hostRules from '../../util/host-rules';
-import { api } from './bb-got-wrapper';
+import * as hostRules from '../host-rules';
+import { BitbucketHttp, setBaseUrl } from './bitbucket';
 
 const baseUrl = 'https://api.bitbucket.org';
 
-describe('platform/gl-got-wrapper', () => {
+describe(getName(__filename), () => {
+  let api: BitbucketHttp;
   beforeEach(() => {
+    api = new BitbucketHttp();
+
     // reset module
     jest.resetAllMocks();
 
@@ -21,12 +25,12 @@ describe('platform/gl-got-wrapper', () => {
     httpMock.reset();
     httpMock.setup();
 
-    api.setBaseUrl(baseUrl);
+    setBaseUrl(baseUrl);
   });
   it('posts', async () => {
     const body = ['a', 'b'];
     httpMock.scope(baseUrl).post('/some-url').reply(200, body);
-    const res = await api.post('some-url');
+    const res = await api.postJson('some-url');
     expect(res.body).toEqual(body);
     expect(httpMock.getTrace()).toMatchSnapshot();
   });
@@ -35,16 +39,16 @@ describe('platform/gl-got-wrapper', () => {
     httpMock.scope(baseUrl).post('/some-url').reply(200, {});
     httpMock.scope(customBaseUrl).post('/some-url').reply(200, {});
 
-    await api.post('some-url');
+    await api.postJson('some-url');
 
-    api.setBaseUrl(customBaseUrl);
-    await api.post('some-url');
+    setBaseUrl(customBaseUrl);
+    await api.postJson('some-url');
 
     expect(httpMock.getTrace()).toMatchSnapshot();
   });
   it('returns cached', async () => {
     httpMock.scope(baseUrl).get('/projects/foo').reply(200, {});
-    const { body } = await api.get('projects/foo');
+    const { body } = await api.getJson('projects/foo');
     expect(body).toMatchSnapshot();
     expect(httpMock.getTrace()).toMatchSnapshot();
   });

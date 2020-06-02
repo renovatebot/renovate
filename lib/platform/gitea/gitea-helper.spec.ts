@@ -1,6 +1,6 @@
 import * as httpMock from '../../../test/httpMock';
 import { PR_STATE_CLOSED } from '../../constants/pull-requests';
-import { api } from './gitea-got-wrapper';
+import { setBaseUrl } from '../../util/http/gitea';
 import * as ght from './gitea-helper';
 
 describe('platform/gitea/gitea-helper', () => {
@@ -141,7 +141,7 @@ describe('platform/gitea/gitea-helper', () => {
     jest.resetAllMocks();
     httpMock.reset();
     httpMock.setup();
-    api.setBaseUrl(baseUrl);
+    setBaseUrl(baseUrl);
   });
 
   describe('getCurrentUser', () => {
