@@ -150,7 +150,6 @@ export async function writeExistingFiles(
         packageFile.yarnrc
           .replace('--install.pure-lockfile true', '')
           .replace('--install.frozen-lockfile true', '')
-          .replace(/^yarn-path.*$/m, '')
       );
     }
     const { npmLock } = packageFile;
