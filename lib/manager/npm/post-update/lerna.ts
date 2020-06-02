@@ -30,15 +30,14 @@ export async function generateLockFiles(
   try {
     if (lernaClient === 'yarn') {
       preCommands.push('npm i -g yarn');
-    }
+      cmdOptions = '--ignore-scripts --ignore-engines --ignore-platform';
+    } else
     if (lernaClient === 'npm') {
       if (skipInstalls === false) {
         cmdOptions = '--ignore-scripts  --no-audit';
       } else {
         cmdOptions = '--package-lock-only --no-audit';
       }
-    } else {
-      cmdOptions = '--ignore-scripts --ignore-engines --ignore-platform';
     }
     if (global.trustLevel === 'high' && config.ignoreScripts !== false) {
       cmdOptions = cmdOptions.replace('--ignore-scripts ', '');
