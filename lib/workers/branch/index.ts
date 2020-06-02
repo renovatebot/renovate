@@ -441,7 +441,8 @@ export async function processBranch(
         logger.debug('PR has no releaseTimestamp');
       }
     }
-
+    config.forceCommit =
+      masterIssueCheck || config.rebaseRequested || branchPr.isConflicted;
     const commitHash = await commitFilesToBranch(config);
     if (!commitHash && !branchExists) {
       return 'no-work';

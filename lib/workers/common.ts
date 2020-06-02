@@ -99,6 +99,7 @@ export interface BranchConfig
   hasTypes?: boolean;
   masterIssueChecks?: Record<string, string>;
   releaseTimestamp?: string;
+  forceCommit?: boolean;
 
   res?: ProcessBranchResult;
   upgrades: BranchUpgradeConfig[];

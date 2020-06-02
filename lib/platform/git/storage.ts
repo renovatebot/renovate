@@ -480,6 +480,7 @@ export class Storage {
     branchName,
     files,
     message,
+    force = false,
   }: CommitFilesConfig): Promise<string | null> {
     logger.debug(`Committing files to branch ${branchName}`);
     if (!this._privateKeySet) {
@@ -534,7 +535,7 @@ export class Storage {
       }
       const commitRes = await this._git.commit(message);
       const commit = commitRes?.commit || 'unknown';
-      if (!(await this.hasDiff(`origin/${branchName}`))) {
+      if (!force && !(await this.hasDiff(`origin/${branchName}`))) {
         logger.debug(
           { branchName, fileNames },
           'No file changes detected. Skipping commit'
