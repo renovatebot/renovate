@@ -2,6 +2,7 @@
 
 exports[`manager/npm/extract .extractPackageFile() catches invalid names 1`] = `
 Object {
+  "compatibility": Object {},
   "deps": Array [
     Object {
       "depName": "kgabis/parson",
@@ -29,6 +30,11 @@ Object {
 
 exports[`manager/npm/extract .extractPackageFile() extracts engines 1`] = `
 Object {
+  "compatibility": Object {
+    "node": ">= 8.9.2",
+    "npm": "^8.0.0",
+    "yarn": "disabled",
+  },
   "deps": Array [
     Object {
       "currentValue": "1.6.0",
@@ -131,6 +137,7 @@ Object {
 
 exports[`manager/npm/extract .extractPackageFile() extracts non-npmjs 1`] = `
 Object {
+  "compatibility": Object {},
   "deps": Array [
     Object {
       "currentValue": "github:owner/a",
@@ -292,6 +299,7 @@ Object {
 
 exports[`manager/npm/extract .extractPackageFile() extracts npm package alias 1`] = `
 Object {
+  "compatibility": Object {},
   "deps": Array [
     Object {
       "currentValue": "1",
@@ -339,6 +347,9 @@ Object {
 
 exports[`manager/npm/extract .extractPackageFile() extracts volta 1`] = `
 Object {
+  "compatibility": Object {
+    "node": "8.9.2",
+  },
   "deps": Array [
     Object {
       "commitMessageTopic": "Node.js",
@@ -401,6 +412,9 @@ Object {
 
 exports[`manager/npm/extract .extractPackageFile() extracts volta yarn unknown-version 1`] = `
 Object {
+  "compatibility": Object {
+    "node": "8.9.2",
+  },
   "deps": Array [
     Object {
       "commitMessageTopic": "Node.js",
@@ -457,6 +471,7 @@ Object {
 
 exports[`manager/npm/extract .extractPackageFile() finds "npmClient":"npm" in lerna.json 1`] = `
 Object {
+  "compatibility": Object {},
   "deps": Array [
     Object {
       "currentValue": "6.5.0",
@@ -591,6 +606,7 @@ Object {
 
 exports[`manager/npm/extract .extractPackageFile() finds "npmClient":"yarn" in lerna.json 1`] = `
 Object {
+  "compatibility": Object {},
   "deps": Array [
     Object {
       "currentValue": "6.5.0",
@@ -725,6 +741,7 @@ Object {
 
 exports[`manager/npm/extract .extractPackageFile() finds a lock file 1`] = `
 Object {
+  "compatibility": Object {},
   "deps": Array [
     Object {
       "currentValue": "6.5.0",
@@ -859,6 +876,7 @@ Object {
 
 exports[`manager/npm/extract .extractPackageFile() finds complex yarn workspaces 1`] = `
 Object {
+  "compatibility": Object {},
   "deps": Array [],
   "ignoreNpmrcFile": undefined,
   "lernaClient": "npm",
@@ -881,6 +899,7 @@ Object {
 
 exports[`manager/npm/extract .extractPackageFile() finds lerna 1`] = `
 Object {
+  "compatibility": Object {},
   "deps": Array [
     Object {
       "currentValue": "6.5.0",
@@ -1015,6 +1034,7 @@ Object {
 
 exports[`manager/npm/extract .extractPackageFile() finds simple yarn workspaces 1`] = `
 Object {
+  "compatibility": Object {},
   "deps": Array [],
   "ignoreNpmrcFile": undefined,
   "lernaClient": "npm",
@@ -1037,6 +1057,7 @@ Object {
 
 exports[`manager/npm/extract .extractPackageFile() returns an array of dependencies 1`] = `
 Object {
+  "compatibility": Object {},
   "deps": Array [
     Object {
       "currentValue": "6.5.0",

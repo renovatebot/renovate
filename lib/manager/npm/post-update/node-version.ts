@@ -18,18 +18,13 @@ async function getNodeFile(filename: string): Promise<string> | null {
   return null;
 }
 
-async function getPackageJsonConstraint(
-  filename: string
+function getPackageJsonConstraint(
+  config: PostUpdateConfig
 ): Promise<string> | null {
-  try {
-    const pj = JSON.parse(await readLocalFile(filename, 'utf8'));
-    const constraint = pj?.engines?.node;
-    if (constraint && validRange(constraint)) {
-      logger.debug(`Using node constraint "${constraint}" from package.json`);
-      return constraint;
-    }
-  } catch (err) {
-    // do nothing
+  const constraint = config.compatibility?.node;
+  if (constraint && validRange(constraint)) {
+    logger.debug(`Using node constraint "${constraint}" from package.json`);
+    return constraint;
   }
   return null;
 }
@@ -41,7 +36,7 @@ export async function getNodeConstraint(
   const constraint =
     (await getNodeFile(getSiblingFileName(packageFile, '.nvmrc'))) ||
     (await getNodeFile(getSiblingFileName(packageFile, '.node-version'))) ||
-    (await getPackageJsonConstraint(packageFile));
+    getPackageJsonConstraint(config);
   if (!constraint) {
     logger.debug('No node constraint found - using latest');
   }

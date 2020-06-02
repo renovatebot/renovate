@@ -148,6 +148,8 @@ export async function extractPackageFile(
     resolutions: 'resolutions',
   };
 
+  const compatibility: Record<string, any> = {};
+
   function extractDependency(
     depType: string,
     depName: string,
@@ -168,12 +170,15 @@ export async function extractPackageFile(
         dep.datasource = datasourceGithubTags.id;
         dep.lookupName = 'nodejs/node';
         dep.versioning = nodeVersioning.id;
+        compatibility.node = dep.currentValue;
       } else if (depName === 'yarn') {
         dep.datasource = datasourceNpm.id;
         dep.commitMessageTopic = 'Yarn';
+        compatibility.yarn = dep.currentValue;
       } else if (depName === 'npm') {
         dep.datasource = datasourceNpm.id;
         dep.commitMessageTopic = 'npm';
+        compatibility.npm = dep.currentValue;
       } else {
         dep.skipReason = SkipReason.UnknownEngines;
       }
@@ -351,6 +356,7 @@ export async function extractPackageFile(
     lernaPackages,
     skipInstalls,
     yarnWorkspacesPackages,
+    compatibility,
   };
 }
 
