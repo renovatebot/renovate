@@ -37,7 +37,7 @@ export async function generateLockFile(
       logger.debug('Updating lock file only');
       cmdOptions += '--package-lock-only --no-audit';
     }
-    const tagConstraint = await getNodeConstraint(config.packageFile);
+    const tagConstraint = await getNodeConstraint(config);
     const execOptions: ExecOptions = {
       cwd,
       extraEnv: {

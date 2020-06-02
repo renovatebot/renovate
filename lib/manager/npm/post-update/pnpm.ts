@@ -24,7 +24,7 @@ export async function generateLockFile(
   let cmd = 'pnpm';
   try {
     const preCommands = ['npm i -g pnpm'];
-    const tagConstraint = await getNodeConstraint(config.packageFile);
+    const tagConstraint = await getNodeConstraint(config);
     const execOptions: ExecOptions = {
       cwd,
       extraEnv: {

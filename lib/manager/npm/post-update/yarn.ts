@@ -57,7 +57,7 @@ export async function generateLockFile(
     if (global.trustLevel !== 'high' || config.ignoreScripts) {
       cmdOptions += ' --ignore-scripts --ignore-engines --ignore-platform';
     }
-    const tagConstraint = await getNodeConstraint(config.packageFile);
+    const tagConstraint = await getNodeConstraint(config);
     const execOptions: ExecOptions = {
       cwd,
       extraEnv: {

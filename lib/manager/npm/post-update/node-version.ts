@@ -1,6 +1,7 @@
 import { validRange } from 'semver';
 import { logger } from '../../../logger';
 import { getSiblingFileName, readLocalFile } from '../../../util/fs';
+import { PostUpdateConfig } from '../../common';
 
 async function getNodeFile(filename: string): Promise<string> | null {
   try {
@@ -34,12 +35,13 @@ async function getPackageJsonConstraint(
 }
 
 export async function getNodeConstraint(
-  filename: string
+  config: PostUpdateConfig
 ): Promise<string> | null {
+  const { packageFile } = config;
   const constraint =
-    (await getNodeFile(getSiblingFileName(filename, '.nvmrc'))) ||
-    (await getNodeFile(getSiblingFileName(filename, '.node-version'))) ||
-    (await getPackageJsonConstraint(filename));
+    (await getNodeFile(getSiblingFileName(packageFile, '.nvmrc'))) ||
+    (await getNodeFile(getSiblingFileName(packageFile, '.node-version'))) ||
+    (await getPackageJsonConstraint(packageFile));
   if (!constraint) {
     logger.debug('No node constraint found - using latest');
   }
