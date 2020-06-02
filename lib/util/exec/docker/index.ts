@@ -104,7 +104,7 @@ async function getDockerTag(
   }
   logger.warn(
     { constraint },
-    'Failed to find a tag satisfying ruby constraint, using latest ruby image instead'
+    'Failed to find a tag satisfying ruby constraint, using "latest" tag instead'
   );
   return 'latest';
 }
