@@ -36,10 +36,9 @@ export async function generateLockFiles(
       }
       cmdOptions = '--ignore-scripts --ignore-engines --ignore-platform';
     } else if (lernaClient === 'npm') {
-      if (skipInstalls === false) {
-        cmdOptions = '--ignore-scripts  --no-audit';
-      } else {
-        cmdOptions = '--package-lock-only --no-audit';
+      cmdOptions = '--ignore-scripts  --no-audit';
+      if (skipInstalls !== false) {
+        cmdOptions += ' --package-lock-only';
       }
     } else {
       logger.warn({ lernaClient }, 'Unknown lernaClient');

@@ -35,7 +35,7 @@ export async function generateLockFile(
       cmdOptions += '--ignore-scripts --no-audit';
     } else {
       logger.debug('Updating lock file only');
-      cmdOptions += '--package-lock-only --no-audit';
+      cmdOptions += '--package-lock-only --ignore-scripts --no-audit';
     }
     const tagConstraint = await getNodeConstraint(config);
     const execOptions: ExecOptions = {
