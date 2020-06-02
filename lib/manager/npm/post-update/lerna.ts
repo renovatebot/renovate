@@ -6,6 +6,7 @@ import { platform } from '../../../platform';
 import { ExecOptions, exec } from '../../../util/exec';
 import { PostUpdateConfig } from '../../common';
 import { getNodeConstraint } from './node-version';
+import { optimizeCommand } from './yarn';
 
 export interface GenerateLockFileResult {
   error?: boolean;
@@ -30,14 +31,19 @@ export async function generateLockFiles(
   try {
     if (lernaClient === 'yarn') {
       preCommands.push('npm i -g yarn');
+      if (skipInstalls !== false) {
+        preCommands.push(optimizeCommand);
+      }
       cmdOptions = '--ignore-scripts --ignore-engines --ignore-platform';
-    } else
-    if (lernaClient === 'npm') {
+    } else if (lernaClient === 'npm') {
       if (skipInstalls === false) {
         cmdOptions = '--ignore-scripts  --no-audit';
       } else {
         cmdOptions = '--package-lock-only --no-audit';
       }
+    } else {
+      logger.warn({ lernaClient }, 'Unknown lernaClient');
+      return { error: false };
     }
     if (global.trustLevel === 'high' && config.ignoreScripts !== false) {
       cmdOptions = cmdOptions.replace('--ignore-scripts ', '');

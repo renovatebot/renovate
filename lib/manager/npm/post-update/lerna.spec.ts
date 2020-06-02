@@ -29,6 +29,10 @@ describe('generateLockFiles()', () => {
     );
     expect(res.error).toBe(false);
   });
+  it('returns if invalid lernaClient', async () => {
+    const res = await lernaHelper.generateLockFiles('foo', 'some-dir', {}, {});
+    expect(res.error).toBe(false);
+  });
   it('generates package-lock.json files', async () => {
     platform.getFile.mockResolvedValueOnce(
       JSON.stringify({ dependencies: { lerna: '2.0.0' } })
