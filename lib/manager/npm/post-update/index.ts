@@ -221,11 +221,6 @@ export async function writeUpdatedPackageFiles(
     }
     logger.debug(`Writing ${packageFile.name}`);
     const massagedFile = JSON.parse(packageFile.contents);
-    if (massagedFile.name) {
-      massagedFile.name = massagedFile.name.replace(/[{}]/g, '');
-    }
-    delete massagedFile.engines;
-    delete massagedFile.scripts;
     try {
       const { token } = hostRules.find({
         hostType: config.platform,
