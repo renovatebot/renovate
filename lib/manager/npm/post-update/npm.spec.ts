@@ -3,9 +3,9 @@ import path from 'path';
 import _fs from 'fs-extra';
 import { envMock, mockExecAll } from '../../../../test/execUtil';
 import { mocked } from '../../../../test/util';
-import * as npmHelper from '../../../manager/npm/post-update/npm';
 import { BinarySource } from '../../../util/exec/common';
 import * as _env from '../../../util/exec/env';
+import * as npmHelper from './npm';
 
 jest.mock('fs-extra');
 jest.mock('child_process');
@@ -25,12 +25,17 @@ describe('generateLockFile', () => {
     const execSnapshots = mockExecAll(exec);
     fs.readFile = jest.fn(() => 'package-lock-contents') as never;
     const skipInstalls = true;
+    const dockerMapDotfiles = true;
     const postUpdateOptions = ['npmDedupe'];
+    const updates = [
+      { depName: 'some-dep', toVersion: '1.0.1', isLockfileUpdate: false },
+    ];
     const res = await npmHelper.generateLockFile(
       'some-dir',
       {},
       'package-lock.json',
-      { skipInstalls, postUpdateOptions }
+      { dockerMapDotfiles, skipInstalls, postUpdateOptions },
+      updates
     );
     expect(fs.readFile).toHaveBeenCalledTimes(1);
     expect(res.error).toBeUndefined();
