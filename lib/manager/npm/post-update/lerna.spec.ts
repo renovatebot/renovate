@@ -1,9 +1,9 @@
 import { exec as _exec } from 'child_process';
 import { envMock, mockExecAll } from '../../../../test/execUtil';
 import { mocked } from '../../../../test/util';
-import * as _lernaHelper from '../../../manager/npm/post-update/lerna';
 import { platform as _platform } from '../../../platform';
 import * as _env from '../../../util/exec/env';
+import * as _lernaHelper from './lerna';
 
 jest.mock('child_process');
 jest.mock('../../../util/exec/env');
@@ -21,7 +21,12 @@ describe('generateLockFiles()', () => {
     env.getChildProcessEnv.mockReturnValue(envMock.basic);
   });
   it('returns if no lernaClient', async () => {
-    const res = await lernaHelper.generateLockFiles(undefined, 'some-dir', {});
+    const res = await lernaHelper.generateLockFiles(
+      undefined,
+      'some-dir',
+      {},
+      {}
+    );
     expect(res.error).toBe(false);
   });
   it('generates package-lock.json files', async () => {
