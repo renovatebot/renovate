@@ -572,10 +572,14 @@ export async function getAdditionalFiles(
       additionalNpmrcContent
     );
     logger.debug(`Generating pnpm-lock.yaml for ${lockFileDir}`);
+    const upgrades = config.upgrades.filter(
+      (upgrade) => upgrade.pnpmShrinkwrap === lockFile
+    );
     const res = await pnpm.generateLockFile(
       upath.join(config.localDir, lockFileDir),
       env,
-      config
+      config,
+      upgrades
     );
     if (res.error) {
       // istanbul ignore if

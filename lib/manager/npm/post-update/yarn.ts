@@ -1,5 +1,5 @@
 import is from '@sindresorhus/is';
-import { readFile } from 'fs-extra';
+import { readFile, remove } from 'fs-extra';
 import { validRange } from 'semver';
 import { quote } from 'shlex';
 import { join } from 'upath';
@@ -42,7 +42,8 @@ export async function generateLockFile(
   config: PostUpdateConfig = {},
   upgrades: Upgrade[] = []
 ): Promise<GenerateLockFileResult> {
-  logger.debug(`Spawning yarn install to create ${cwd}/yarn.lock`);
+  const lockFileName = join(cwd, 'yarn.lock');
+  logger.debug(`Spawning yarn install to create ${lockFileName}`);
   let lockFile = null;
   try {
     let installYarn = 'npm i -g yarn';
@@ -114,11 +115,25 @@ export async function generateLockFile(
       commands.push(`yarn install ${cmdOptions}`.trim());
     }
 
+    if (upgrades.find((upgrade) => upgrade.isLockFileMaintenance)) {
+      logger.debug(
+        `Removing ${lockFileName} first due to lock file maintenance upgrade`
+      );
+      try {
+        await remove(lockFileName);
+      } catch (err) /* istanbul ignore next */ {
+        logger.debug(
+          { err, lockFileName },
+          'Error removing yarn.lock for lock file maintenance'
+        );
+      }
+    }
+
     // Run the commands
     await exec(commands, execOptions);
 
     // Read the result
-    lockFile = await readFile(join(cwd, 'yarn.lock'), 'utf8');
+    lockFile = await readFile(lockFileName, 'utf8');
   } catch (err) /* istanbul ignore next */ {
     logger.debug(
       {
