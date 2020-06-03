@@ -1,5 +1,7 @@
 import is from '@sindresorhus/is';
 import { readFile } from 'fs-extra';
+import { validRange } from 'semver';
+import { quote } from 'shlex';
 import { join } from 'upath';
 import { SYSTEM_INSUFFICIENT_DISK_SPACE } from '../../../constants/error-messages';
 import { DatasourceError } from '../../../datasource';
@@ -43,7 +45,12 @@ export async function generateLockFile(
   logger.debug(`Spawning yarn install to create ${cwd}/yarn.lock`);
   let lockFile = null;
   try {
-    const preCommands = ['npm i -g yarn'];
+    let installYarn = 'npm i -g npm';
+    const yarnCompatibility = config.compatibility?.yarn;
+    if (validRange(yarnCompatibility)) {
+      installYarn += `@${quote(yarnCompatibility)}`;
+    }
+    const preCommands = [installYarn];
     if (
       config.skipInstalls !== false &&
       (await hasYarnOfflineMirror(cwd)) === false
