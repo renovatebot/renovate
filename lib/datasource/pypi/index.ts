@@ -73,7 +73,7 @@ async function getDependency(
       return null;
     }
 
-    if (dep.info && dep.info.home_page) {
+    if (dep.info?.home_page) {
       dependency.homepage = dep.info.home_page;
       if (github_repo_pattern.exec(dep.info.home_page)) {
         dependency.sourceUrl = dep.info.home_page.replace(
