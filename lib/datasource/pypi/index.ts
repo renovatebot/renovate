@@ -83,17 +83,33 @@ async function getDependency(
       }
     }
 
-    if (dep.info?.project_urls && !dependency.sourceUrl) {
-      for (const [name, projectUrl] of Object.entries(dep.info.project_urls)) {
-        const lower = name.toLowerCase();
-        if (
-          lower.startsWith('repo') ||
-          lower === 'code' ||
-          lower === 'source' ||
-          github_repo_pattern.exec(projectUrl)
-        ) {
-          dependency.sourceUrl = projectUrl;
-          break;
+    if (dep.info?.project_urls) {
+      if (!dependency.sourceUrl) {
+        for (const [name, projectUrl] of Object.entries(
+          dep.info.project_urls
+        )) {
+          const lower = name.toLowerCase();
+          if (
+            lower.startsWith('repo') ||
+            lower === 'code' ||
+            lower === 'source' ||
+            github_repo_pattern.exec(projectUrl)
+          ) {
+            dependency.sourceUrl = projectUrl;
+          }
+          if (
+            // from https://github.com/pypa/warehouse/blob/418c7511dc367fb410c71be139545d0134ccb0df/warehouse/templates/packaging/detail.html#L24
+            [
+              'changelog',
+              'change log',
+              'changes',
+              'release notes',
+              'news',
+              "what's new",
+            ].includes(lower)
+          ) {
+            dependency.changelogUrl = projectUrl;
+          }
         }
       }
     }
