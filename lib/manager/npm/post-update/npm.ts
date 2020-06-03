@@ -1,4 +1,6 @@
 import { move, pathExists, readFile } from 'fs-extra';
+import { validRange } from 'semver';
+import { quote } from 'shlex';
 import { join } from 'upath';
 import { SYSTEM_INSUFFICIENT_DISK_SPACE } from '../../../constants/error-messages';
 import { logger } from '../../../logger';
@@ -24,7 +26,12 @@ export async function generateLockFile(
 
   let lockFile = null;
   try {
-    const preCommands = ['npm i -g npm'];
+    let installNpm = 'npm i -g npm';
+    const npmCompatibility = config.compatibility?.npm;
+    if (validRange(npmCompatibility)) {
+      installNpm += `@${quote(npmCompatibility)}`;
+    }
+    const preCommands = [installNpm];
     const commands = [];
     let cmdOptions = '';
     if (

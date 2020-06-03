@@ -166,7 +166,7 @@ describe('generateLockFile', () => {
       'some-dir',
       {},
       'package-lock.json',
-      { binarySource: BinarySource.Docker }
+      { binarySource: BinarySource.Docker, compatibility: { npm: '^6.0.0' } }
     );
     expect(fs.readFile).toHaveBeenCalledTimes(1);
     expect(res.lockFile).toEqual('package-lock-contents');
