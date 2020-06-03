@@ -53,9 +53,10 @@ export async function generateLockFile(
       preCommands.push(optimizeCommand);
     }
     const commands = [];
-    let cmdOptions = '--network-timeout 100000';
+    let cmdOptions =
+      '--ignore-engines --ignore-platform --network-timeout 100000';
     if (global.trustLevel !== 'high' || config.ignoreScripts) {
-      cmdOptions += ' --ignore-scripts --ignore-engines --ignore-platform';
+      cmdOptions += ' --ignore-scripts';
     }
     const tagConstraint = await getNodeConstraint(config);
     const execOptions: ExecOptions = {
