@@ -20,7 +20,7 @@ delete process.env.NPM_CONFIG_CACHE;
 describe('generateLockFile', () => {
   let config: PostUpdateConfig;
   beforeEach(() => {
-    config = { cacheDir: 'some-cache-dir' };
+    config = { cacheDir: 'some-cache-dir', compatibility: { pnpm: '^2.0.0' } };
     env.getChildProcessEnv.mockReturnValue(envMock.basic);
   });
   it('generates lock files', async () => {
