@@ -179,6 +179,10 @@ export async function extractPackageFile(
         dep.datasource = datasourceNpm.id;
         dep.commitMessageTopic = 'npm';
         compatibility.npm = dep.currentValue;
+      } else if (depName === 'pnpm') {
+        dep.datasource = datasourceNpm.id;
+        dep.commitMessageTopic = 'pnpm';
+        compatibility.pnpm = dep.currentValue;
       } else {
         dep.skipReason = SkipReason.UnknownEngines;
       }
