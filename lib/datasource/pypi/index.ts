@@ -70,7 +70,7 @@ async function getDependency(
       }
     }
 
-    if (dep.info && !dependency.sourceUrl && dep.info.project_urls) {
+    if (dep.info?.project_urls && !dependency.sourceUrl) {
       for (const [name, projectUrl] of Object.entries(
         dep.info.project_urls as Record<string, string>
       )) {
