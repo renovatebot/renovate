@@ -47,6 +47,7 @@ describe(getName(__filename), () => {
       };
       const res = await yarnHelper.generateLockFile('some-dir', {}, config);
       expect(fs.readFile).toHaveBeenCalledTimes(2);
+      expect(fs.remove).toHaveBeenCalledTimes(0);
       expect(res.lockFile).toEqual('package-lock-contents');
       expect(fixSnapshots(execSnapshots)).toMatchSnapshot();
     }
@@ -89,6 +90,31 @@ describe(getName(__filename), () => {
           isLockfileUpdate: true,
         },
       ]);
+      expect(res.lockFile).toEqual('package-lock-contents');
+      expect(fixSnapshots(execSnapshots)).toMatchSnapshot();
+    }
+  );
+  it.each([['1.22.0']])(
+    'performs lock file maintenance using yarn v%s',
+    async (yarnVersion) => {
+      const execSnapshots = mockExecAll(exec, {
+        stdout: yarnVersion,
+        stderr: '',
+      });
+      fs.readFile.mockResolvedValue(null); // .yarnrc
+      fs.readFile.mockResolvedValue('package-lock-contents' as never);
+      const config = {
+        dockerMapDotfiles: true,
+        compatibility: {
+          yarn: '^1.10.0',
+        },
+        postUpdateOptions: ['yarnDedupeFewer', 'yarnDedupeHighest'],
+      };
+      const res = await yarnHelper.generateLockFile('some-dir', {}, config, [
+        { isLockFileMaintenance: true },
+      ]);
+      expect(fs.readFile).toHaveBeenCalledTimes(2);
+      expect(fs.remove).toHaveBeenCalledTimes(1);
       expect(res.lockFile).toEqual('package-lock-contents');
       expect(fixSnapshots(execSnapshots)).toMatchSnapshot();
     }

@@ -172,4 +172,19 @@ describe('generateLockFile', () => {
     expect(res.lockFile).toEqual('package-lock-contents');
     expect(execSnapshots).toMatchSnapshot();
   });
+  it('performs lock file maintenance', async () => {
+    const execSnapshots = mockExecAll(exec);
+    fs.readFile = jest.fn(() => 'package-lock-contents') as never;
+    const res = await npmHelper.generateLockFile(
+      'some-dir',
+      {},
+      'package-lock.json',
+      {},
+      [{ isLockFileMaintenance: true }]
+    );
+    expect(fs.readFile).toHaveBeenCalledTimes(1);
+    expect(fs.remove).toHaveBeenCalledTimes(1);
+    expect(res.lockFile).toEqual('package-lock-contents');
+    expect(execSnapshots).toMatchSnapshot();
+  });
 });

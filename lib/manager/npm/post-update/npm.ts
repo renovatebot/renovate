@@ -1,4 +1,4 @@
-import { move, pathExists, readFile } from 'fs-extra';
+import { move, pathExists, readFile, remove } from 'fs-extra';
 import { validRange } from 'semver';
 import { quote } from 'shlex';
 import { join } from 'upath';
@@ -86,6 +86,21 @@ export async function generateLockFile(
     if (config.postUpdateOptions?.includes('npmDedupe')) {
       logger.debug('Performing npm dedupe');
       commands.push('npm dedupe');
+    }
+
+    if (upgrades.find((upgrade) => upgrade.isLockFileMaintenance)) {
+      const lockFileName = join(cwd, filename);
+      logger.debug(
+        `Removing ${lockFileName} first due to lock file maintenance upgrade`
+      );
+      try {
+        await remove(lockFileName);
+      } catch (err) /* istanbul ignore next */ {
+        logger.debug(
+          { err, lockFileName },
+          'Error removing yarn.lock for lock file maintenance'
+        );
+      }
     }
 
     // Run the commands
