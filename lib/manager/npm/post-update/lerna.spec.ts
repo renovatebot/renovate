@@ -70,7 +70,12 @@ describe('generateLockFiles()', () => {
       JSON.stringify({ devDependencies: { lerna: '2.0.0' } })
     );
     const execSnapshots = mockExecAll(exec);
-    const res = await lernaHelper.generateLockFiles('yarn', 'some-dir', {}, {});
+    const res = await lernaHelper.generateLockFiles(
+      'yarn',
+      'some-dir',
+      { compatibility: { yarn: '^1.10.0' } },
+      {}
+    );
     expect(execSnapshots).toMatchSnapshot();
     expect(res.error).toBe(false);
   });
@@ -87,7 +92,10 @@ describe('generateLockFiles()', () => {
     const res = await lernaHelper.generateLockFiles(
       'npm',
       'some-dir',
-      { dockerMapDotfiles: true },
+      {
+        dockerMapDotfiles: true,
+        compatibility: { npm: '^6.0.0' },
+      },
       {}
     );
     expect(res.error).toBe(false);
