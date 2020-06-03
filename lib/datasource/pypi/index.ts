@@ -59,16 +59,33 @@ async function getDependency(
       );
       return null;
     }
+
     if (dep.info && dep.info.home_page) {
+      dependency.homepage = dep.info.home_page;
       if (dep.info.home_page.match(/^https?:\/\/github.com/)) {
         dependency.sourceUrl = dep.info.home_page.replace(
           'http://',
           'https://'
         );
-      } else {
-        dependency.homepage = dep.info.home_page;
       }
     }
+
+    if (dep.info && !dependency.sourceUrl && dep.info.project_urls) {
+      for (const [name, projectUrl] of Object.entries(
+        dep.info.project_urls as { [key: string]: string }
+      )) {
+        const lower = name.toLowerCase();
+        if (
+          lower.startsWith('repo') ||
+          lower === 'code' ||
+          /^https?:\/\/github\.com\/[^\\/]+\/[^\\/]+$/.exec(projectUrl)
+        ) {
+          dependency.sourceUrl = projectUrl;
+          break;
+        }
+      }
+    }
+
     dependency.releases = [];
     if (dep.releases) {
       const versions = compatibleVersions(dep.releases, compatibility);

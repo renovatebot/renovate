@@ -92,6 +92,7 @@ Object {
 
 exports[`datasource/pypi getReleases processes real data 1`] = `
 Object {
+  "homepage": "https://github.com/Azure/azure-cli",
   "releases": Array [
     Object {
       "releaseTimestamp": "2017-04-03T16:55:14",
@@ -202,6 +203,14 @@ Object {
       "version": "0.4.0",
     },
   ],
+}
+`;
+
+exports[`datasource/pypi getReleases return sourceUrl in project_urls 1`] = `
+Object {
+  "homepage": "https://flexget.com",
+  "releases": Array [],
+  "sourceUrl": "https://github.com/Flexget/Flexget",
 }
 `;
 
