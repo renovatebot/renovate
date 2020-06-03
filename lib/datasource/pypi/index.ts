@@ -8,7 +8,7 @@ import * as pep440 from '../../versioning/pep440';
 import { GetReleasesConfig, ReleaseResult } from '../common';
 
 export const id = 'pypi';
-
+const github_repo_pattern = /^https?:\/\/github\.com\/[^\\/]+\/[^\\/]+$/;
 const http = new Http(id);
 
 function normalizeName(input: string): string {
@@ -78,7 +78,7 @@ async function getDependency(
         if (
           lower.startsWith('repo') ||
           lower === 'code' ||
-          /^https?:\/\/github\.com\/[^\\/]+\/[^\\/]+$/.exec(projectUrl)
+          github_repo_pattern.exec(projectUrl)
         ) {
           dependency.sourceUrl = projectUrl;
           break;

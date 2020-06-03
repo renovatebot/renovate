@@ -1,0 +1,12 @@
+{
+  "info": {
+    "name": "flexget",
+    "home_page": "https://flexget.com",
+    "project_urls": {
+      "Forum": "https://discuss.flexget.com",
+      "Homepage": "https://flexget.com",
+      "Issue Tracker": "https://github.com/Flexget/Flexget/issues",
+      "Repository": "https://github.com/Flexget/Flexget"
+    }
+  }
+}
