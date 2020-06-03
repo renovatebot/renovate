@@ -1,4 +1,6 @@
 import { readFile } from 'fs-extra';
+import { validRange } from 'semver';
+import { quote } from 'shlex';
 import { join } from 'upath';
 import { logger } from '../../../logger';
 import { ExecOptions, exec } from '../../../util/exec';
@@ -23,7 +25,12 @@ export async function generateLockFile(
   let stderr: string;
   let cmd = 'pnpm';
   try {
-    const preCommands = ['npm i -g pnpm'];
+    let installPnpm = 'npm i -g pnpm';
+    const pnpmCompatibility = config.compatibility?.pnpm;
+    if (validRange(pnpmCompatibility)) {
+      installPnpm += `@${quote(pnpmCompatibility)}`;
+    }
+    const preCommands = [installPnpm];
     const tagConstraint = await getNodeConstraint(config);
     const execOptions: ExecOptions = {
       cwd,
