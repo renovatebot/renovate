@@ -45,7 +45,7 @@ export async function generateLockFile(
   logger.debug(`Spawning yarn install to create ${cwd}/yarn.lock`);
   let lockFile = null;
   try {
-    let installYarn = 'npm i -g npm';
+    let installYarn = 'npm i -g yarn';
     const yarnCompatibility = config.compatibility?.yarn;
     if (validRange(yarnCompatibility)) {
       installYarn += `@${quote(yarnCompatibility)}`;
