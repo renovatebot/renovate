@@ -89,6 +89,7 @@ async function getDependency(
         if (
           lower.startsWith('repo') ||
           lower === 'code' ||
+          lower === 'source' ||
           github_repo_pattern.exec(projectUrl)
         ) {
           dependency.sourceUrl = projectUrl;
