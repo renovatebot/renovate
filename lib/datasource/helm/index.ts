@@ -40,7 +40,11 @@ export async function getRepositoryData(
       return null;
     }
     // istanbul ignore if
-    if (err.code === 'ENOTFOUND' || err.code === 'EAI_AGAIN') {
+    if (
+      err.code === 'ENOTFOUND' ||
+      err.code === 'EAI_AGAIN' ||
+      err.code === 'ETIMEDOUT'
+    ) {
       logger.debug({ err }, 'Could not connect to helm repository');
       return null;
     }
