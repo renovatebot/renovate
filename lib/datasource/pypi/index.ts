@@ -8,15 +8,29 @@ import * as pep440 from '../../versioning/pep440';
 import { GetReleasesConfig, ReleaseResult } from '../common';
 
 export const id = 'pypi';
-
+const github_repo_pattern = /^https?:\/\/github\.com\/[^\\/]+\/[^\\/]+$/;
 const http = new Http(id);
+
+type Releases = Record<
+  string,
+  { requires_python?: boolean; upload_time?: string }[]
+>;
+type PypiJSON = {
+  info: {
+    name: string;
+    home_page?: string;
+    project_urls?: Record<string, string>;
+  };
+
+  releases?: Releases;
+};
 
 function normalizeName(input: string): string {
   return input.toLowerCase().replace(/(-|\.)/g, '_');
 }
 
 function compatibleVersions(
-  releases: Record<string, { requires_python?: boolean }[]>,
+  releases: Releases,
   compatibility: Record<string, string>
 ): string[] {
   const versions = Object.keys(releases);
@@ -42,8 +56,7 @@ async function getDependency(
     const lookupUrl = url.resolve(hostUrl, `${packageName}/json`);
     const dependency: ReleaseResult = { releases: null };
     logger.trace({ lookupUrl }, 'Pypi api got lookup');
-    // TODO: fix type
-    const rep = await http.getJson<any>(lookupUrl);
+    const rep = await http.getJson<PypiJSON>(lookupUrl);
     const dep = rep && rep.body;
     if (!dep) {
       logger.trace({ dependency: packageName }, 'pip package not found');
@@ -59,16 +72,31 @@ async function getDependency(
       );
       return null;
     }
-    if (dep.info && dep.info.home_page) {
-      if (dep.info.home_page.match(/^https?:\/\/github.com/)) {
+
+    if (dep.info?.home_page) {
+      dependency.homepage = dep.info.home_page;
+      if (github_repo_pattern.exec(dep.info.home_page)) {
         dependency.sourceUrl = dep.info.home_page.replace(
           'http://',
           'https://'
         );
-      } else {
-        dependency.homepage = dep.info.home_page;
       }
     }
+
+    if (dep.info?.project_urls && !dependency.sourceUrl) {
+      for (const [name, projectUrl] of Object.entries(dep.info.project_urls)) {
+        const lower = name.toLowerCase();
+        if (
+          lower.startsWith('repo') ||
+          lower === 'code' ||
+          github_repo_pattern.exec(projectUrl)
+        ) {
+          dependency.sourceUrl = projectUrl;
+          break;
+        }
+      }
+    }
+
     dependency.releases = [];
     if (dep.releases) {
       const versions = compatibleVersions(dep.releases, compatibility);
