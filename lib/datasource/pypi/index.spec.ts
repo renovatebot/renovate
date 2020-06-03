@@ -122,6 +122,27 @@ describe('datasource/pypi', () => {
         })
       ).toMatchSnapshot();
     });
+    it('return sourceUrl in project_urls', async () => {
+      got.mockReturnValueOnce({
+        body: {
+          info: {
+            name: 'flexget',
+            home_page: 'https://flexget.com',
+            project_urls: {
+              Forum: 'https://discuss.flexget.com',
+              Homepage: 'https://flexget.com',
+              'Issue Tracker': 'https://github.com/Flexget/Flexget/issues',
+              Repository: 'https://github.com/Flexget/Flexget',
+            },
+          },
+        },
+      });
+      const result = await pypi.getReleases({
+        lookupName: 'flexget',
+      });
+      expect(result.sourceUrl).toBe('https://github.com/Flexget/Flexget');
+      expect(result).toMatchSnapshot();
+    });
     it('returns null if mismatched name', async () => {
       got.mockReturnValueOnce({
         body: {
