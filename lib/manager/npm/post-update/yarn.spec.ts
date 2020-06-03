@@ -40,6 +40,9 @@ describe(getName(__filename), () => {
       fs.readFile.mockResolvedValue('package-lock-contents' as never);
       const config = {
         dockerMapDotfiles: true,
+        compatibility: {
+          yarn: '^1.10.0',
+        },
         postUpdateOptions: ['yarnDedupeFewer', 'yarnDedupeHighest'],
       };
       const res = await yarnHelper.generateLockFile('some-dir', {}, config);

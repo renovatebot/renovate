@@ -33,6 +33,7 @@ Object {
   "compatibility": Object {
     "node": ">= 8.9.2",
     "npm": "^8.0.0",
+    "pnpm": "^1.2.0",
     "yarn": "disabled",
   },
   "deps": Array [
@@ -105,6 +106,14 @@ Object {
       "currentValue": "^8.0.0",
       "datasource": "npm",
       "depName": "npm",
+      "depType": "engines",
+      "prettyDepType": "engine",
+    },
+    Object {
+      "commitMessageTopic": "pnpm",
+      "currentValue": "^1.2.0",
+      "datasource": "npm",
+      "depName": "pnpm",
       "depType": "engines",
       "prettyDepType": "engine",
     },

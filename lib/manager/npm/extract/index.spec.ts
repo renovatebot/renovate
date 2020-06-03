@@ -213,6 +213,7 @@ describe('manager/npm/extract', () => {
           atom: '>=1.7.0 <2.0.0',
           node: '>= 8.9.2',
           npm: '^8.0.0',
+          pnpm: '^1.2.0',
           yarn: 'disabled',
         },
         main: 'index.js',

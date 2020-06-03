@@ -1,4 +1,4 @@
-import semver from 'semver';
+import semver, { validRange } from 'semver';
 import { quote } from 'shlex';
 import { join } from 'upath';
 import { logger } from '../../../logger';
@@ -30,12 +30,23 @@ export async function generateLockFiles(
   let cmdOptions = '';
   try {
     if (lernaClient === 'yarn') {
-      preCommands.push('npm i -g yarn');
+      let installYarn = 'npm i -g yarn';
+      const yarnCompatibility = config.compatibility?.yarn;
+      if (validRange(yarnCompatibility)) {
+        installYarn += `@${quote(yarnCompatibility)}`;
+      }
+      preCommands.push(installYarn);
       if (skipInstalls !== false) {
         preCommands.push(optimizeCommand);
       }
       cmdOptions = '--ignore-scripts --ignore-engines --ignore-platform';
     } else if (lernaClient === 'npm') {
+      let installNpm = 'npm i -g npm';
+      const npmCompatibility = config.compatibility?.npm;
+      if (validRange(npmCompatibility)) {
+        installNpm += `@${quote(npmCompatibility)}`;
+        preCommands.push(installNpm);
+      }
       cmdOptions = '--ignore-scripts  --no-audit';
       if (skipInstalls !== false) {
         cmdOptions += ' --package-lock-only';
