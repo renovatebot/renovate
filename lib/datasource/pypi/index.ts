@@ -72,7 +72,7 @@ async function getDependency(
 
     if (dep.info && !dependency.sourceUrl && dep.info.project_urls) {
       for (const [name, projectUrl] of Object.entries(
-        dep.info.project_urls as { [key: string]: string }
+        dep.info.project_urls as Record<string, string>
       )) {
         const lower = name.toLowerCase();
         if (
