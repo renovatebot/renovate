@@ -99,7 +99,8 @@ async function getDependency(
         }
 
         if (
-          [
+          !dependency.changelogUrl &&
+          ([
             'changelog',
             'change log',
             'changes',
@@ -107,7 +108,7 @@ async function getDependency(
             'news',
             "what's new",
           ].includes(lower) ||
-          changelogFilenameRegex.exec(lower)
+          changelogFilenameRegex.exec(lower))
         ) {
           // from https://github.com/pypa/warehouse/blob/418c7511dc367fb410c71be139545d0134ccb0df/warehouse/templates/packaging/detail.html#L24
           dependency.changelogUrl = projectUrl;
