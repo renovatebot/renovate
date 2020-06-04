@@ -54,7 +54,7 @@ export function decryptConfig(
                 if (decryptedConfig.npmrc.includes('${NPM_TOKEN}')) {
                   logger.debug('Replacing ${NPM_TOKEN} with decrypted token');
                   decryptedConfig.npmrc = decryptedConfig.npmrc.replace(
-                    '${NPM_TOKEN}',
+                    /\${NPM_TOKEN}/g,
                     token
                   );
                 } else {
