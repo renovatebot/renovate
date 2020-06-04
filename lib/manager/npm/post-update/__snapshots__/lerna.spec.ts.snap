@@ -20,7 +20,7 @@ Array [
     },
   },
   Object {
-    "cmd": "npx lerna@latest bootstrap --no-ci --  --no-audit --package-lock-only",
+    "cmd": "lerna bootstrap --no-ci --  --no-audit --package-lock-only",
     "options": Object {
       "cwd": "some-dir",
       "encoding": "utf-8",
@@ -59,7 +59,7 @@ Array [
     },
   },
   Object {
-    "cmd": "npx lerna@latest bootstrap --no-ci -- --ignore-scripts  --no-audit --package-lock-only",
+    "cmd": "lerna bootstrap --no-ci -- --ignore-scripts  --no-audit --package-lock-only",
     "options": Object {
       "cwd": "some-dir",
       "encoding": "utf-8",
@@ -98,7 +98,7 @@ Array [
     },
   },
   Object {
-    "cmd": "npx lerna@2.0.0 bootstrap --no-ci -- --ignore-scripts  --no-audit --package-lock-only",
+    "cmd": "lerna bootstrap --no-ci -- --ignore-scripts  --no-audit --package-lock-only",
     "options": Object {
       "cwd": "some-dir",
       "encoding": "utf-8",
@@ -137,7 +137,7 @@ Array [
     },
   },
   Object {
-    "cmd": "npx lerna@2.0.0 bootstrap --no-ci -- --ignore-scripts --ignore-engines --ignore-platform",
+    "cmd": "lerna bootstrap --no-ci -- --ignore-scripts --ignore-engines --ignore-platform",
     "options": Object {
       "cwd": "some-dir",
       "encoding": "utf-8",
@@ -176,7 +176,7 @@ Array [
     },
   },
   Object {
-    "cmd": "npx lerna@latest bootstrap --no-ci -- --ignore-scripts  --no-audit --package-lock-only",
+    "cmd": "lerna bootstrap --no-ci -- --ignore-scripts  --no-audit --package-lock-only",
     "options": Object {
       "cwd": "some-dir",
       "encoding": "utf-8",
@@ -215,7 +215,7 @@ Array [
     },
   },
   Object {
-    "cmd": "npx lerna@2.0.0 bootstrap --no-ci -- --ignore-scripts  --no-audit",
+    "cmd": "lerna bootstrap --no-ci -- --ignore-scripts  --no-audit",
     "options": Object {
       "cwd": "some-dir",
       "encoding": "utf-8",
