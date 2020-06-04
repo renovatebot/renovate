@@ -1,5 +1,4 @@
 import is from '@sindresorhus/is';
-import isUrl from 'is-url';
 import { regEx } from '../util/regex';
 import * as template from '../util/template';
 import { hasValidSchedule, hasValidTimezone } from '../workers/branch/schedule';
@@ -60,7 +59,7 @@ export async function validateConfig(
   function validateAliasObject(key: string, val: object): boolean {
     if (key === 'aliases') {
       for (const value of Object.values(val)) {
-        if (!isUrl(value)) {
+        if (!is.urlString(value)) {
           return false;
         }
       }
