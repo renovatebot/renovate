@@ -1,6 +1,6 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
-exports[`datasource/helm getReleases returns list of versions for normal response if index.yaml is not cached 1`] = `
+exports[`datasource/helm getReleases returns list of versions for normal response 1`] = `
 Object {
   "homepage": "https://www.getambassador.io/",
   "name": "ambassador",

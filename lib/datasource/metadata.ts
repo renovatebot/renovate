@@ -61,6 +61,7 @@ const manualSourceUrls = {
   },
   pypi: {
     mkdocs: 'https://github.com/mkdocs/mkdocs',
+    mypy: 'https://github.com/python/mypy',
   },
 };
 

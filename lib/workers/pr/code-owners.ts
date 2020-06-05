@@ -31,7 +31,7 @@ export async function codeOwnersForPr(pr: Pr): Promise<string[]> {
       })
       .reverse();
 
-    const matchingRule = rules.find((rule) => prFiles.every(rule.match));
+    const matchingRule = rules.find((rule) => prFiles?.every(rule.match));
     if (!matchingRule) {
       return [];
     }

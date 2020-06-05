@@ -586,7 +586,7 @@ export function getPrBody(input: string): string {
     input
       .replace(/Pull Request/g, 'Merge Request')
       .replace(/PR/g, 'MR')
-      .replace(/\]\(\.\.\/pull\//g, '](../merge_requests/'),
+      .replace(/\]\(\.\.\/pull\//g, '](!'),
     60000
   );
 }

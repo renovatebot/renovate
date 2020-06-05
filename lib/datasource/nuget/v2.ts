@@ -8,7 +8,7 @@ import { id } from './common';
 const http = new Http(id);
 
 function getPkgProp(pkgInfo: XmlElement, propName: string): string {
-  return pkgInfo.childNamed('m:properties').childNamed(`d:${propName}`).val;
+  return pkgInfo.childNamed('m:properties').childNamed(`d:${propName}`)?.val;
 }
 
 export async function getReleases(

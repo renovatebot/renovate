@@ -92,9 +92,8 @@ export async function generateLockFiles(
       lernaVersion = 'latest';
     }
     logger.debug('Using lerna version ' + lernaVersion);
-    cmd.push(
-      `npx lerna@${quote(lernaVersion)} bootstrap --no-ci -- ${cmdOptions}`
-    );
+    preCommands.push(`npm i -g lerna@${quote(lernaVersion)}`);
+    cmd.push(`lerna bootstrap --no-ci -- ${cmdOptions}`);
     await exec(cmd, execOptions);
   } catch (err) /* istanbul ignore next */ {
     logger.debug(
