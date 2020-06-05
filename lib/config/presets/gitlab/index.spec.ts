@@ -4,6 +4,7 @@ import { PLATFORM_FAILURE } from '../../../constants/error-messages';
 import { PRESET_DEP_NOT_FOUND } from '../util';
 import * as gitlab from '.';
 
+const gitlabApiHost = 'https://gitlab.com';
 const basePath = '/api/v4/projects/some%2Frepo/repository';
 
 describe(getName(__filename), () => {
@@ -18,10 +19,7 @@ describe(getName(__filename), () => {
 
   describe('getPreset()', () => {
     it('throws platform-failure', async () => {
-      httpMock
-        .scope('https://gitlab.com')
-        .get(`${basePath}/branches`)
-        .reply(500);
+      httpMock.scope(gitlabApiHost).get(`${basePath}/branches`).reply(500);
       await expect(
         gitlab.getPreset({
           packageName: 'some/repo',
@@ -33,7 +31,7 @@ describe(getName(__filename), () => {
 
     it('throws if missing', async () => {
       httpMock
-        .scope('https://gitlab.com')
+        .scope(gitlabApiHost)
         .get(`${basePath}/branches`)
         .twice()
         .reply(200, [])
@@ -49,7 +47,7 @@ describe(getName(__filename), () => {
 
     it('should return the preset', async () => {
       httpMock
-        .scope('https://gitlab.com')
+        .scope(gitlabApiHost)
         .get(`${basePath}/branches`)
         .reply(200, [
           {
@@ -72,7 +70,7 @@ describe(getName(__filename), () => {
   describe('getPresetFromEndpoint()', () => {
     it('uses default endpoint', async () => {
       httpMock
-        .scope('https://gitlab.com')
+        .scope(gitlabApiHost)
         .get(`${basePath}/branches`)
         .reply(200, [
           {
