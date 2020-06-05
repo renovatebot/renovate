@@ -14,7 +14,6 @@ import * as datasourceGithubTags from '../../../../datasource/github-tags';
 import * as datasourceNpm from '../../../../datasource/npm';
 import * as datasourcePackagist from '../../../../datasource/packagist';
 import * as datasourcePypi from '../../../../datasource/pypi';
-import * as runCache from '../../../../util/cache/run';
 import * as dockerVersioning from '../../../../versioning/docker';
 import * as gitVersioning from '../../../../versioning/git';
 import * as npmVersioning from '../../../../versioning/npm';
@@ -39,7 +38,6 @@ describe('workers/repository/process/lookup', () => {
     config.manager = 'npm';
     config.versioning = npmVersioning.id;
     config.rangeStrategy = 'replace';
-    runCache.clear();
     jest.resetAllMocks();
   });
 

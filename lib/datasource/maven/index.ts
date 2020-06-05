@@ -178,6 +178,7 @@ async function getVersionsFromMetadata(
 
 type ArtifactsInfo = Record<string, boolean | null>;
 
+// istanbul ignore next
 function isValidArtifactsInfo(
   info: ArtifactsInfo | null,
   versions: string[]

@@ -15,6 +15,7 @@ import { PR_STATE_ALL, PR_STATE_OPEN } from '../../constants/pull-requests';
 import { logger } from '../../logger';
 import { BranchStatus } from '../../types';
 import * as hostRules from '../../util/host-rules';
+import { setBaseUrl } from '../../util/http/gitea';
 import { sanitize } from '../../util/sanitize';
 import { ensureTrailingSlash } from '../../util/url';
 import {
@@ -35,7 +36,6 @@ import {
 } from '../common';
 import GitStorage, { StatusResult } from '../git/storage';
 import { smartTruncate } from '../utils/pr-body';
-import { api } from './gitea-got-wrapper';
 import * as helper from './gitea-helper';
 
 type GiteaRenovateConfig = {
@@ -45,7 +45,6 @@ type GiteaRenovateConfig = {
 
 interface GiteaRepoConfig {
   storage: GitStorage;
-  gitPrivateKey?: string;
   repository: string;
   localDir: string;
   defaultBranch: string;
@@ -225,7 +224,7 @@ const platform: Platform = {
     } else {
       logger.debug('Using default Gitea endpoint: ' + defaults.endpoint);
     }
-    api.setBaseUrl(defaults.endpoint);
+    setBaseUrl(defaults.endpoint);
 
     let gitAuthor: string;
     try {
@@ -248,7 +247,6 @@ const platform: Platform = {
 
   async initRepo({
     repository,
-    gitPrivateKey,
     localDir,
     optimizeForDisabled,
   }: RepoParams): Promise<RepoConfig> {
@@ -257,7 +255,6 @@ const platform: Platform = {
 
     config = {} as any;
     config.repository = repository;
-    config.gitPrivateKey = gitPrivateKey;
     config.localDir = localDir;
 
     // Attempt to fetch information about repository
@@ -479,6 +476,11 @@ const platform: Platform = {
     return config.prList;
   },
 
+  /* istanbul ignore next */
+  async getPrFiles(pr: Pr): Promise<string[]> {
+    return config.storage.getBranchFiles(pr.branchName, pr.targetBranch);
+  },
+
   async getPr(number: number): Promise<Pr | null> {
     // Search for pull request in cached list or attempt to query directly
     const prList = await platform.getPrList();
@@ -623,30 +625,6 @@ const platform: Platform = {
       logger.warn({ err, number }, 'Merging of PR failed');
       return false;
     }
-  },
-
-  async getPrFiles(prNo: number): Promise<string[]> {
-    if (!prNo) {
-      return [];
-    }
-
-    // Retrieving a diff for a PR is not officially supported by Gitea as of today
-    // See tracking issue: https://github.com/go-gitea/gitea/issues/5561
-    // Workaround: Parse new paths in .diff file using regular expressions
-    const regex = /^diff --git a\/.+ b\/(.+)$/gm;
-    const pr = await helper.getPR(config.repository, prNo);
-    const diff = (await api.get(pr.diff_url)).body as string;
-
-    const changedFiles: string[] = [];
-    let match: string[];
-    do {
-      match = regex.exec(diff);
-      if (match) {
-        changedFiles.push(match[1]);
-      }
-    } while (match);
-
-    return changedFiles;
   },
 
   getIssueList(): Promise<Issue[]> {
@@ -887,16 +865,8 @@ const platform: Platform = {
     return Promise.resolve();
   },
 
-  commitFiles({
-    branchName,
-    files,
-    message,
-  }: CommitFilesConfig): Promise<string | null> {
-    return config.storage.commitFiles({
-      branchName,
-      files,
-      message,
-    });
+  commitFiles(commitFilesConfig: CommitFilesConfig): Promise<string | null> {
+    return config.storage.commitFiles(commitFilesConfig);
   },
 
   getPrBody(prBody: string): string {
@@ -983,8 +953,8 @@ export const {
   getIssueList,
   getPr,
   getPrBody,
-  getPrFiles,
   getPrList,
+  getPrFiles,
   getRepoForceRebase,
   getRepoStatus,
   getRepos,

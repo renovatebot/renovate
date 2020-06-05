@@ -1,8 +1,6 @@
 import * as httpMock from '../../../../test/httpMock';
 import { getName } from '../../../../test/util';
 import { PLATFORM_FAILURE } from '../../../constants/error-messages';
-import * as globalCache from '../../../util/cache/global';
-import * as runCache from '../../../util/cache/run';
 import { PRESET_DEP_NOT_FOUND } from '../util';
 import * as gitlab from '.';
 
@@ -12,12 +10,10 @@ describe(getName(__filename), () => {
   beforeEach(() => {
     jest.resetAllMocks();
     httpMock.setup();
-    return globalCache.rmAll();
   });
 
   afterEach(() => {
     httpMock.reset();
-    runCache.clear();
   });
 
   describe('getPreset()', () => {

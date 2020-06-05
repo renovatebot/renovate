@@ -91,6 +91,18 @@ const getNewValue = ({
     newValue = currentValue.replace(fromVersion, toVersion);
   } else {
     switch (rangeStrategy) {
+      case 'update-lockfile':
+        if (satisfies(toVersion, currentValue)) {
+          newValue = currentValue;
+        } else {
+          newValue = getNewValue({
+            currentValue,
+            rangeStrategy: 'replace',
+            fromVersion,
+            toVersion,
+          });
+        }
+        break;
       case 'pin':
         newValue = pin({ to: vtrim(toVersion) });
         break;

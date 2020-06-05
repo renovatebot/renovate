@@ -43,7 +43,6 @@ export interface LocalRepoConfig {
   baseBranch: string;
   defaultBranch: string;
   enterpriseVersion: string;
-  gitPrivateKey?: string;
   repositoryOwner: string;
   repository: string | null;
   localDir: string;

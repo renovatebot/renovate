@@ -12,6 +12,12 @@ Although Renovate is now best known as a "service" via the GitHub App, that serv
 $ npm install -g renovate
 ```
 
+Since renovate v20 `npm`, `pnpm` and `yarn` are no longer embedded, so you need to install them globally if you need to update lockfiles.
+
+```sh
+$ npm install -g yarn pnpm
+```
+
 #### Docker
 
 Renovate is available for Docker via an automated build [renovate/renovate](https://hub.docker.com/r/renovate/renovate/). It builds `latest` based on the `master` branch and all semver tags are published too. All the following are valid:
@@ -142,6 +148,8 @@ Don't forget to configure `platform=gitea` somewhere in config.
 ## GitHub.com token for release notes
 
 If you are running on any platform except github.com, it's important to also configure `GITHUB_COM_TOKEN` containing a personal access token for github.com. This account can actually be _any_ account on GitHub, and needs only read-only access. It's used when fetching release notes for repositories in order to increase the hourly API limit.
+
+**Note:** If you're using renovate in a project where dependencies are loaded from github (such as go modules hosted on github) it is highly reccomended to add a github token as you will run in the rate limit from the github api, which will lead to renovate closing and reopening PRs because it could not get reliable info on updated dependencies.
 
 ## File/directory usage
 

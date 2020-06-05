@@ -147,7 +147,7 @@ describe('applyPackageRules()', () => {
     });
     expect(res2.x).toBeDefined();
   });
-  it('filters depType', () => {
+  it('filters requested depType', () => {
     const config: TestConfig = {
       packageRules: [
         {
@@ -164,7 +164,7 @@ describe('applyPackageRules()', () => {
     const res = applyPackageRules({ ...config, ...dep });
     expect(res.x).toBe(1);
   });
-  it('filters depTypes', () => {
+  it('filters from list of requested depTypes', () => {
     const config: TestConfig = {
       packageRules: [
         {
@@ -418,7 +418,7 @@ describe('applyPackageRules()', () => {
     const res = applyPackageRules({ ...config, ...dep });
     expect(res.x).toBe(1);
   });
-  it('filters depType', () => {
+  it('filters out unrequested depType', () => {
     const config: TestConfig = {
       packageRules: [
         {

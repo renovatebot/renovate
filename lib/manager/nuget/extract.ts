@@ -5,9 +5,11 @@ import { XmlDocument } from 'xmldoc';
 import * as datasourceNuget from '../../datasource/nuget';
 import { logger } from '../../logger';
 import { SkipReason } from '../../types';
+import { clone } from '../../util/clone';
 import { get } from '../../versioning';
 import * as semverVersioning from '../../versioning/semver';
 import { ExtractConfig, PackageDependency, PackageFile } from '../common';
+import { DotnetToolsManifest } from './types';
 
 async function readFileAsXmlDocument(file: string): Promise<XmlDocument> {
   try {
@@ -44,20 +46,29 @@ async function determineRegistryUrls(
     return undefined;
   }
 
-  const registryUrls = datasourceNuget.defaultRegistryUrls;
+  const registryUrls = clone(datasourceNuget.defaultRegistryUrls);
   for (const child of packageSources.children) {
     if (child.type === 'element') {
       if (child.name === 'clear') {
         logger.debug(`clearing registry URLs`);
         registryUrls.length = 0;
       } else if (child.name === 'add') {
-        let registryUrl = child.attr.value;
-        if (child.attr.protocolVersion) {
-          registryUrl += `#protocolVersion=${child.attr.protocolVersion}`;
+        const isHttpUrl = /^https?:\/\//i.test(child.attr.value);
+        if (isHttpUrl) {
+          let registryUrl = child.attr.value;
+          if (child.attr.protocolVersion) {
+            registryUrl += `#protocolVersion=${child.attr.protocolVersion}`;
+          }
+          logger.debug({ registryUrl }, 'adding registry URL');
+          registryUrls.push(registryUrl);
+        } else {
+          logger.debug(
+            { registryUrl: child.attr.value },
+            'ignoring local registry URL'
+          );
         }
-        logger.debug({ registryUrl }, 'adding registry URL');
-        registryUrls.push(registryUrl);
       }
+      // child.name === 'remove' not supported
     }
   }
   return registryUrls;
@@ -68,7 +79,7 @@ export async function extractPackageFile(
   content: string,
   packageFile: string,
   config: ExtractConfig
-): Promise<PackageFile> {
+): Promise<PackageFile | null> {
   logger.trace({ packageFile }, 'nuget.extractPackageFile()');
   const { isVersion } = get(config.versioning || semverVersioning.id);
   const deps: PackageDependency[] = [];
@@ -77,6 +88,40 @@ export async function extractPackageFile(
     packageFile,
     config.localDir
   );
+
+  if (packageFile.endsWith('.config/dotnet-tools.json')) {
+    let manifest: DotnetToolsManifest;
+
+    try {
+      manifest = JSON.parse(content);
+    } catch (err) {
+      logger.debug({ fileName: packageFile }, 'Invalid JSON');
+      return null;
+    }
+
+    if (manifest.version !== 1) {
+      logger.debug({ contents: manifest }, 'Unsupported dotnet tools version');
+      return null;
+    }
+
+    for (const depName of Object.keys(manifest.tools)) {
+      const tool = manifest.tools[depName];
+      const currentValue = tool.version;
+      const dep: PackageDependency = {
+        depType: 'nuget',
+        depName,
+        currentValue,
+        datasource: datasourceNuget.id,
+      };
+      if (registryUrls) {
+        dep.registryUrls = registryUrls;
+      }
+
+      deps.push(dep);
+    }
+
+    return { deps };
+  }
 
   for (const line of content.split('\n')) {
     /**

@@ -1,6 +1,4 @@
 import fs from 'fs';
-import * as globalCache from '../../util/cache/global';
-import * as runCache from '../../util/cache/run';
 import _got from '../../util/got';
 import * as _hostRules from '../../util/host-rules';
 import * as nuget from '.';
@@ -96,10 +94,6 @@ const configV3Multiple = {
 };
 
 describe('datasource/nuget', () => {
-  beforeEach(() => {
-    runCache.clear();
-    return globalCache.rmAll();
-  });
   describe('getReleases', () => {
     beforeEach(() => {
       jest.resetAllMocks();
@@ -209,7 +203,7 @@ describe('datasource/nuget', () => {
         })
       ).toBeNull();
     });
-    it('returns null for non 200 (v3)', async () => {
+    it('returns null for non 200 (v2)', async () => {
       got.mockImplementationOnce(() =>
         Promise.reject({
           statusCode: 500,

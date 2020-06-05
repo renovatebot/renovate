@@ -25,6 +25,7 @@ import {
 import { logger } from '../../logger';
 import { BranchStatus } from '../../types';
 import * as hostRules from '../../util/host-rules';
+import * as githubHttp from '../../util/http/github';
 import { sanitize } from '../../util/sanitize';
 import { ensureTrailingSlash } from '../../util/url';
 import {
@@ -45,8 +46,6 @@ import {
 } from '../common';
 import GitStorage, { StatusResult } from '../git/storage';
 import { smartTruncate } from '../utils/pr-body';
-import { api } from './gh-got-wrapper';
-import { getGraphqlNodes } from './gh-graphql-wrapper';
 import {
   BranchProtection,
   CombinedBranchStatus,
@@ -56,6 +55,8 @@ import {
   LocalRepoConfig,
   PrList,
 } from './types';
+
+const githubApi = new githubHttp.GithubHttp();
 
 const defaultConfigFile = configFileNames[0];
 
@@ -82,7 +83,7 @@ export async function initPlatform({
 
   if (endpoint) {
     defaults.endpoint = ensureTrailingSlash(endpoint);
-    api.setBaseUrl(defaults.endpoint);
+    githubHttp.setBaseUrl(defaults.endpoint);
   } else {
     logger.debug('Using default github endpoint: ' + defaults.endpoint);
   }
@@ -90,9 +91,12 @@ export async function initPlatform({
   let renovateUsername: string;
   try {
     const userData = (
-      await api.get(defaults.endpoint + 'user', {
-        token,
-      })
+      await githubApi.getJson<{ login: string; name: string }>(
+        defaults.endpoint + 'user',
+        {
+          token,
+        }
+      )
     ).body;
     renovateUsername = userData.login;
     gitAuthor = userData.name;
@@ -102,9 +106,12 @@ export async function initPlatform({
   }
   try {
     const userEmail = (
-      await api.get(defaults.endpoint + 'user/emails', {
-        token,
-      })
+      await githubApi.getJson<{ email: string }[]>(
+        defaults.endpoint + 'user/emails',
+        {
+          token,
+        }
+      )
     ).body;
     if (userEmail.length && userEmail[0].email) {
       gitAuthor += ` <${userEmail[0].email}>`;
@@ -131,8 +138,11 @@ export async function initPlatform({
 export async function getRepos(): Promise<string[]> {
   logger.debug('Autodiscovering GitHub repositories');
   try {
-    const res = await api.get('user/repos?per_page=100', { paginate: true });
-    return res.body.map((repo: { full_name: string }) => repo.full_name);
+    const res = await githubApi.getJson<{ full_name: string }[]>(
+      'user/repos?per_page=100',
+      { paginate: true }
+    );
+    return res.body.map((repo) => repo.full_name);
   } catch (err) /* istanbul ignore next */ {
     logger.error({ err }, `GitHub getRepos error`);
     throw err;
@@ -156,7 +166,7 @@ async function getBranchProtection(
   if (config.parentRepo) {
     return {};
   }
-  const res = await api.get(
+  const res = await githubApi.getJson<BranchProtection>(
     `repos/${config.repository}/branches/${escapeHash(branchName)}/protection`
   );
   return res.body;
@@ -165,7 +175,7 @@ async function getBranchProtection(
 // Return the commit SHA for a branch
 async function getBranchCommit(branchName: string): Promise<string> {
   try {
-    const res = await api.get(
+    const res = await githubApi.getJson<{ object: { sha: string } }>(
       `repos/${config.repository}/git/refs/heads/${escapeHash(branchName)}`
     );
     return res.body.object.sha;
@@ -194,7 +204,6 @@ export async function initRepo({
   repository,
   forkMode,
   forkToken,
-  gitPrivateKey,
   localDir,
   includeForks,
   renovateUsername,
@@ -206,9 +215,9 @@ export async function initRepo({
   // istanbul ignore if
   if (endpoint) {
     // Necessary for Renovate Pro - do not remove
-    logger.debug('Overriding default GitHub endpoint');
+    logger.debug({ endpoint }, 'Overriding default GitHub endpoint');
     defaults.endpoint = endpoint;
-    api.setBaseUrl(endpoint);
+    githubHttp.setBaseUrl(endpoint);
   }
   const opts = hostRules.find({
     hostType: PLATFORM_TYPE_GITHUB,
@@ -219,10 +228,9 @@ export async function initRepo({
   config.localDir = localDir;
   config.repository = repository;
   [config.repositoryOwner, config.repositoryName] = repository.split('/');
-  config.gitPrivateKey = gitPrivateKey;
   let res;
   try {
-    res = await api.get(`repos/${repository}`);
+    res = await githubApi.getJson<{ fork: boolean }>(`repos/${repository}`);
     logger.trace({ repositoryDetails: res.body }, 'Repository details');
     config.enterpriseVersion =
       res.headers && (res.headers['x-github-enterprise-version'] as string);
@@ -232,7 +240,7 @@ export async function initRepo({
         const renovateConfig = JSON.parse(
           Buffer.from(
             (
-              await api.get(
+              await githubApi.getJson<{ content: string }>(
                 `repos/${config.repository}/contents/${defaultConfigFile}`
               )
             ).body.content,
@@ -265,7 +273,7 @@ export async function initRepo({
         renovateConfig = JSON.parse(
           Buffer.from(
             (
-              await api.get(
+              await githubApi.getJson<{ content: string }>(
                 `repos/${config.repository}/contents/${defaultConfigFile}`
               )
             ).body.content,
@@ -344,16 +352,22 @@ export async function initRepo({
     config.repository = null;
     // Get list of existing repos
     const existingRepos = (
-      await api.get<{ full_name: string }[]>('user/repos?per_page=100', {
-        token: forkToken || opts.token,
-        paginate: true,
-      })
+      await githubApi.getJson<{ full_name: string }[]>(
+        'user/repos?per_page=100',
+        {
+          token: forkToken || opts.token,
+          paginate: true,
+        }
+      )
     ).body.map((r) => r.full_name);
     try {
       config.repository = (
-        await api.post(`repos/${repository}/forks`, {
-          token: forkToken || opts.token,
-        })
+        await githubApi.postJson<{ full_name: string }>(
+          `repos/${repository}/forks`,
+          {
+            token: forkToken || opts.token,
+          }
+        )
       ).body.full_name;
     } catch (err) /* istanbul ignore next */ {
       logger.debug({ err }, 'Error forking repository');
@@ -372,7 +386,7 @@ export async function initRepo({
       // This is a lovely "hack" by GitHub that lets us force update our fork's master
       // with the base commit from the parent repository
       try {
-        await api.patch(
+        await githubApi.patchJson(
           `repos/${config.repository}/git/refs/heads/${config.baseBranch}`,
           {
             body: {
@@ -554,16 +568,10 @@ export function mergeBranch(branchName: string): Promise<void> {
 }
 
 // istanbul ignore next
-export function commitFiles({
-  branchName,
-  files,
-  message,
-}: CommitFilesConfig): Promise<string | null> {
-  return config.storage.commitFiles({
-    branchName,
-    files,
-    message,
-  });
+export function commitFiles(
+  commitFilesConfig: CommitFilesConfig
+): Promise<string | null> {
+  return config.storage.commitFiles(commitFilesConfig);
 }
 
 // istanbul ignore next
@@ -576,7 +584,6 @@ async function getClosedPrs(): Promise<PrList> {
     config.closedPrList = {};
     let query;
     try {
-      const url = 'graphql';
       // prettier-ignore
       query = `
       query {
@@ -598,21 +605,18 @@ async function getClosedPrs(): Promise<PrList> {
         }
       }
       `;
-      const options = {
-        body: JSON.stringify({ query }),
-        json: false,
-      };
-      const res = JSON.parse((await api.post(url, options)).body);
+      const nodes = await githubApi.getGraphqlNodes<any>(
+        query,
+        'pullRequests',
+        { paginate: false }
+      );
       const prNumbers: number[] = [];
       // istanbul ignore if
-      if (!res.data) {
-        logger.debug(
-          { query, res },
-          'No graphql res.data, returning empty list'
-        );
+      if (!nodes?.length) {
+        logger.debug({ query }, 'No graphql data, returning empty list');
         return {};
       }
-      for (const pr of res.data.repository.pullRequests.nodes) {
+      for (const pr of nodes) {
         // https://developer.github.com/v4/object/pullrequest/
         pr.displayNumber = `Pull Request #${pr.number}`;
         pr.state = pr.state.toLowerCase();
@@ -649,11 +653,6 @@ async function getOpenPrs(): Promise<PrList> {
     config.openPrList = {};
     let query;
     try {
-      const url = 'graphql';
-      // https://developer.github.com/v4/previews/#mergeinfopreview---more-detailed-information-about-a-pull-requests-merge-state
-      const headers = {
-        accept: 'application/vnd.github.merge-info-preview+json',
-      };
       // prettier-ignore
       query = `
       query {
@@ -702,19 +701,18 @@ async function getOpenPrs(): Promise<PrList> {
         }
       }
       `;
-      const options = {
-        headers,
-        body: JSON.stringify({ query }),
-        json: false,
-      };
-      const res = JSON.parse((await api.post(url, options)).body);
+      const nodes = await githubApi.getGraphqlNodes<any>(
+        query,
+        'pullRequests',
+        { paginate: false }
+      );
       const prNumbers: number[] = [];
       // istanbul ignore if
-      if (!res.data) {
-        logger.debug({ query, res }, 'No graphql res.data');
+      if (!nodes?.length) {
+        logger.debug({ query }, 'No graphql res.data');
         return {};
       }
-      for (const pr of res.data.repository.pullRequests.nodes) {
+      for (const pr of nodes) {
         // https://developer.github.com/v4/object/pullrequest/
         pr.displayNumber = `Pull Request #${pr.number}`;
         pr.state = PR_STATE_OPEN;
@@ -816,12 +814,14 @@ export async function getPr(prNo: number): Promise<Pr | null> {
   if (!prNo) {
     return null;
   }
-  const openPr = (await getOpenPrs())[prNo];
+  const openPrs = await getOpenPrs();
+  const openPr = openPrs[prNo];
   if (openPr) {
     logger.debug('Returning from graphql open PR list');
     return openPr;
   }
-  const closedPr = (await getClosedPrs())[prNo];
+  const closedPrs = await getClosedPrs();
+  const closedPr = closedPrs[prNo];
   if (closedPr) {
     logger.debug('Returning from graphql closed PR list');
     return closedPr;
@@ -831,7 +831,7 @@ export async function getPr(prNo: number): Promise<Pr | null> {
     'PR not found in open or closed PRs list - trying to fetch it directly'
   );
   const pr = (
-    await api.get(
+    await githubApi.getJson<any>(
       `repos/${config.parentRepo || config.repository}/pulls/${prNo}`
     )
   ).body;
@@ -858,7 +858,7 @@ export async function getPr(prNo: number): Promise<Pr | null> {
       if (global.gitAuthor) {
         // Check against gitAuthor
         const commitAuthorEmail = (
-          await api.get(
+          await githubApi.getJson<{ commit: { author: { email } } }[]>(
             `repos/${
               config.parentRepo || config.repository
             }/pulls/${prNo}/commits`
@@ -892,7 +892,9 @@ export async function getPr(prNo: number): Promise<Pr | null> {
       // Check if only one author of all commits
       logger.debug({ prNo }, 'Checking all commits');
       const prCommits = (
-        await api.get(
+        await githubApi.getJson<
+          { committer: { login: string }; commit: { message: string } }[]
+        >(
           `repos/${
             config.parentRepo || config.repository
           }/pulls/${prNo}/commits`
@@ -900,10 +902,7 @@ export async function getPr(prNo: number): Promise<Pr | null> {
       ).body;
       // Filter out "Update branch" presses
       const remainingCommits = prCommits.filter(
-        (commit: {
-          committer: { login: string };
-          commit: { message: string };
-        }) => {
+        (commit: { committer; commit }) => {
           const isWebflow =
             commit.committer && commit.committer.login === 'web-flow';
           if (!isWebflow) {
@@ -950,7 +949,15 @@ export async function getPrList(): Promise<Pr[]> {
     logger.debug('Retrieving PR list');
     let res;
     try {
-      res = await api.get(
+      res = await githubApi.getJson<{
+        number: number;
+        head: { ref: string; sha: string; repo: { full_name: string } };
+        title: string;
+        state: string;
+        merged_at: string;
+        created_at: string;
+        closed_at: string;
+      }>(
         `repos/${
           config.parentRepo || config.repository
         }/pulls?per_page=100&state=all`,
@@ -960,33 +967,27 @@ export async function getPrList(): Promise<Pr[]> {
       logger.debug({ err }, 'getPrList err');
       throw new Error('platform-failure');
     }
-    config.prList = res.body.map(
-      (pr: {
-        number: number;
-        head: { ref: string; sha: string; repo: { full_name: string } };
-        title: string;
-        state: string;
-        merged_at: string;
-        created_at: string;
-        closed_at: string;
-      }) => ({
-        number: pr.number,
-        branchName: pr.head.ref,
-        sha: pr.head.sha,
-        title: pr.title,
-        state:
-          pr.state === PR_STATE_CLOSED && pr.merged_at && pr.merged_at.length
-            ? /* istanbul ignore next */ 'merged'
-            : pr.state,
-        createdAt: pr.created_at,
-        closed_at: pr.closed_at,
-        sourceRepo:
-          pr.head && pr.head.repo ? pr.head.repo.full_name : undefined,
-      })
-    );
+    config.prList = res.body.map((pr) => ({
+      number: pr.number,
+      branchName: pr.head.ref,
+      sha: pr.head.sha,
+      title: pr.title,
+      state:
+        pr.state === PR_STATE_CLOSED && pr.merged_at && pr.merged_at.length
+          ? /* istanbul ignore next */ 'merged'
+          : pr.state,
+      createdAt: pr.created_at,
+      closed_at: pr.closed_at,
+      sourceRepo: pr.head && pr.head.repo ? pr.head.repo.full_name : undefined,
+    }));
     logger.debug(`Retrieved ${config.prList.length} Pull Requests`);
   }
   return config.prList;
+}
+
+/* istanbul ignore next */
+export async function getPrFiles(pr: Pr): Promise<string[]> {
+  return config.storage.getBranchFiles(pr.branchName, pr.targetBranch);
 }
 
 export async function findPr({
@@ -1027,7 +1028,9 @@ async function getStatus(
     branchName
   )}/status`;
 
-  return (await api.get(commitStatusUrl, { useCache })).body;
+  return (
+    await githubApi.getJson<CombinedBranchStatus>(commitStatusUrl, { useCache })
+  ).body;
 }
 
 // Returns the combined status for a branch.
@@ -1074,15 +1077,17 @@ export async function getBranchStatus(
           Accept: 'application/vnd.github.antiope-preview+json',
         },
       };
-      const checkRunsRaw = (await api.get(checkRunsUrl, opts)).body;
+      const checkRunsRaw = (
+        await githubApi.getJson<{
+          check_runs: { name: string; status: string; conclusion: string }[];
+        }>(checkRunsUrl, opts)
+      ).body;
       if (checkRunsRaw.check_runs && checkRunsRaw.check_runs.length) {
-        checkRuns = checkRunsRaw.check_runs.map(
-          (run: { name: string; status: string; conclusion: string }) => ({
-            name: run.name,
-            status: run.status,
-            conclusion: run.conclusion,
-          })
-        );
+        checkRuns = checkRunsRaw.check_runs.map((run) => ({
+          name: run.name,
+          status: run.status,
+          conclusion: run.conclusion,
+        }));
         logger.debug({ checkRuns }, 'check runs result');
       } else {
         // istanbul ignore next
@@ -1136,7 +1141,7 @@ async function getStatusCheck(
 
   const url = `repos/${config.repository}/commits/${branchCommit}/statuses`;
 
-  return (await api.get(url, { useCache })).body;
+  return (await githubApi.getJson<GhBranchStatus[]>(url, { useCache })).body;
 }
 
 const githubToRenovateStatusMapping = {
@@ -1202,7 +1207,7 @@ export async function setBranchStatus({
     if (targetUrl) {
       options.target_url = targetUrl;
     }
-    await api.post(url, { body: options });
+    await githubApi.postJson(url, { body: options });
 
     // update status cache
     await getStatus(branchName, false);
@@ -1237,7 +1242,7 @@ async function getIssues(): Promise<Issue[]> {
     }
   `;
 
-  const result = await getGraphqlNodes<Issue>(query, 'issues');
+  const result = await githubApi.getGraphqlNodes<Issue>(query, 'issues');
 
   logger.debug(`Retrieved ${result.length} issues`);
   return result.map((issue) => ({
@@ -1264,7 +1269,7 @@ export async function findIssue(title: string): Promise<Issue | null> {
   }
   logger.debug('Found issue ' + issue.number);
   const issueBody = (
-    await api.get(
+    await githubApi.getJson<{ body: string }>(
       `repos/${config.parentRepo || config.repository}/issues/${issue.number}`
     )
   ).body.body;
@@ -1276,7 +1281,7 @@ export async function findIssue(title: string): Promise<Issue | null> {
 
 async function closeIssue(issueNumber: number): Promise<void> {
   logger.debug(`closeIssue(${issueNumber})`);
-  await api.patch(
+  await githubApi.patchJson(
     `repos/${config.parentRepo || config.repository}/issues/${issueNumber}`,
     {
       body: { state: 'closed' },
@@ -1314,7 +1319,7 @@ export async function ensureIssue({
         }
       }
       const issueBody = (
-        await api.get(
+        await githubApi.getJson<{ body: string }>(
           `repos/${config.parentRepo || config.repository}/issues/${
             issue.number
           }`
@@ -1326,7 +1331,7 @@ export async function ensureIssue({
       }
       if (shouldReOpen) {
         logger.debug('Patching issue');
-        await api.patch(
+        await githubApi.patchJson(
           `repos/${config.parentRepo || config.repository}/issues/${
             issue.number
           }`,
@@ -1338,12 +1343,15 @@ export async function ensureIssue({
         return 'updated';
       }
     }
-    await api.post(`repos/${config.parentRepo || config.repository}/issues`, {
-      body: {
-        title,
-        body,
-      },
-    });
+    await githubApi.postJson(
+      `repos/${config.parentRepo || config.repository}/issues`,
+      {
+        body: {
+          title,
+          body,
+        },
+      }
+    );
     logger.info('Issue created');
     // reset issueList so that it will be fetched again as-needed
     delete config.issueList;
@@ -1381,7 +1389,7 @@ export async function addAssignees(
 ): Promise<void> {
   logger.debug(`Adding assignees ${assignees} to #${issueNo}`);
   const repository = config.parentRepo || config.repository;
-  await api.post(`repos/${repository}/issues/${issueNo}/assignees`, {
+  await githubApi.postJson(`repos/${repository}/issues/${issueNo}/assignees`, {
     body: {
       assignees,
     },
@@ -1399,7 +1407,7 @@ export async function addReviewers(
     .filter((e) => e.startsWith('team:'))
     .map((e) => e.replace(/^team:/, ''));
   try {
-    await api.post(
+    await githubApi.postJson(
       `repos/${
         config.parentRepo || config.repository
       }/pulls/${prNo}/requested_reviewers`,
@@ -1422,7 +1430,7 @@ async function addLabels(
   logger.debug(`Adding labels ${labels} to #${issueNo}`);
   const repository = config.parentRepo || config.repository;
   if (is.array(labels) && labels.length) {
-    await api.post(`repos/${repository}/issues/${issueNo}/labels`, {
+    await githubApi.postJson(`repos/${repository}/issues/${issueNo}/labels`, {
       body: labels,
     });
   }
@@ -1435,7 +1443,9 @@ export async function deleteLabel(
   logger.debug(`Deleting label ${label} from #${issueNo}`);
   const repository = config.parentRepo || config.repository;
   try {
-    await api.delete(`repos/${repository}/issues/${issueNo}/labels/${label}`);
+    await githubApi.deleteJson(
+      `repos/${repository}/issues/${issueNo}/labels/${label}`
+    );
   } catch (err) /* istanbul ignore next */ {
     logger.warn({ err, issueNo, label }, 'Failed to delete label');
   }
@@ -1443,7 +1453,7 @@ export async function deleteLabel(
 
 async function addComment(issueNo: number, body: string): Promise<void> {
   // POST /repos/:owner/:repo/issues/:number/comments
-  await api.post(
+  await githubApi.postJson(
     `repos/${
       config.parentRepo || config.repository
     }/issues/${issueNo}/comments`,
@@ -1455,7 +1465,7 @@ async function addComment(issueNo: number, body: string): Promise<void> {
 
 async function editComment(commentId: number, body: string): Promise<void> {
   // PATCH /repos/:owner/:repo/issues/comments/:id
-  await api.patch(
+  await githubApi.patchJson(
     `repos/${
       config.parentRepo || config.repository
     }/issues/comments/${commentId}`,
@@ -1467,7 +1477,7 @@ async function editComment(commentId: number, body: string): Promise<void> {
 
 async function deleteComment(commentId: number): Promise<void> {
   // DELETE /repos/:owner/:repo/issues/comments/:id
-  await api.delete(
+  await githubApi.deleteJson(
     `repos/${
       config.parentRepo || config.repository
     }/issues/comments/${commentId}`
@@ -1487,7 +1497,7 @@ async function getComments(issueNo: number): Promise<Comment[]> {
   }/issues/${issueNo}/comments?per_page=100`;
   try {
     const comments = (
-      await api.get<Comment[]>(url, {
+      await githubApi.getJson<Comment[]>(url, {
         paginate: true,
       })
     ).body;
@@ -1566,7 +1576,7 @@ export async function ensureCommentRemoval({
   topic,
   content,
 }: EnsureCommentRemovalConfig): Promise<void> {
-  logger.debug(
+  logger.trace(
     `Ensuring comment "${topic || content}" in #${issueNo} is removed`
   );
   const comments = await getComments(issueNo);
@@ -1585,6 +1595,7 @@ export async function ensureCommentRemoval({
 
   try {
     if (commentId) {
+      logger.debug({ issueNo }, 'Removing comment');
       await deleteComment(commentId);
     }
   } catch (err) /* istanbul ignore next */ {
@@ -1602,6 +1613,7 @@ export async function createPr({
   labels,
   useDefaultBranch,
   platformOptions = {},
+  draftPR = false,
 }: CreatePRConfig): Promise<Pr> {
   const body = sanitize(rawBody);
   const base = useDefaultBranch ? config.defaultBranch : config.baseBranch;
@@ -1613,6 +1625,7 @@ export async function createPr({
       head,
       base,
       body,
+      draft: draftPR,
     },
   };
   // istanbul ignore if
@@ -1620,14 +1633,17 @@ export async function createPr({
     options.token = config.forkToken;
     options.body.maintainer_can_modify = true;
   }
-  logger.debug({ title, head, base }, 'Creating PR');
+  logger.debug({ title, head, base, draft: draftPR }, 'Creating PR');
   const pr = (
-    await api.post<GhPr>(
+    await githubApi.postJson<GhPr>(
       `repos/${config.parentRepo || config.repository}/pulls`,
       options
     )
   ).body;
-  logger.debug({ branch: branchName, pr: pr.number }, 'PR created');
+  logger.debug(
+    { branch: branchName, pr: pr.number, draft: draftPR },
+    'PR created'
+  );
   // istanbul ignore if
   if (config.prList) {
     config.prList.push(pr);
@@ -1649,20 +1665,6 @@ export async function createPr({
   return pr;
 }
 
-// Return a list of all modified files in a PR
-export async function getPrFiles(prNo: number): Promise<string[]> {
-  logger.debug({ prNo }, 'getPrFiles');
-  if (!prNo) {
-    return [];
-  }
-  const files = (
-    await api.get(
-      `repos/${config.parentRepo || config.repository}/pulls/${prNo}/files`
-    )
-  ).body;
-  return files.map((f: { filename: string }) => f.filename);
-}
-
 export async function updatePr(
   prNo: number,
   title: string,
@@ -1682,7 +1684,7 @@ export async function updatePr(
     options.token = config.forkToken;
   }
   try {
-    await api.patch(
+    await githubApi.patchJson(
       `repos/${config.parentRepo || config.repository}/pulls/${prNo}`,
       options
     );
@@ -1715,9 +1717,11 @@ export async function mergePr(
       'Branch protection: Attempting to merge PR when PR reviews are enabled'
     );
     const repository = config.parentRepo || config.repository;
-    const reviews = await api.get(`repos/${repository}/pulls/${prNo}/reviews`);
+    const reviews = await githubApi.getJson<{ state: string }[]>(
+      `repos/${repository}/pulls/${prNo}/reviews`
+    );
     const isApproved = reviews.body.some(
-      (review: { state: string }) => review.state === 'APPROVED'
+      (review) => review.state === 'APPROVED'
     );
     if (!isApproved) {
       logger.debug(
@@ -1740,7 +1744,7 @@ export async function mergePr(
     options.body.merge_method = config.mergeMethod;
     try {
       logger.debug({ options, url }, `mergePr`);
-      await api.put(url, options);
+      await githubApi.putJson(url, options);
       automerged = true;
     } catch (err) {
       if (err.statusCode === 404 || err.statusCode === 405) {
@@ -1760,7 +1764,7 @@ export async function mergePr(
     options.body.merge_method = 'rebase';
     try {
       logger.debug({ options, url }, `mergePr`);
-      await api.put(url, options);
+      await githubApi.putJson(url, options);
     } catch (err1) {
       logger.debug(
         { err: err1 },
@@ -1769,7 +1773,7 @@ export async function mergePr(
       try {
         options.body.merge_method = 'squash';
         logger.debug({ options, url }, `mergePr`);
-        await api.put(url, options);
+        await githubApi.putJson(url, options);
       } catch (err2) {
         logger.debug(
           { err: err2 },
@@ -1778,7 +1782,7 @@ export async function mergePr(
         try {
           options.body.merge_method = 'merge';
           logger.debug({ options, url }, `mergePr`);
-          await api.put(url, options);
+          await githubApi.putJson(url, options);
         } catch (err3) {
           logger.debug(
             { err: err3 },
@@ -1811,10 +1815,6 @@ export function getPrBody(input: string): string {
 }
 
 export async function getVulnerabilityAlerts(): Promise<VulnerabilityAlert[]> {
-  const headers = {
-    accept: 'application/vnd.github.vixen-preview+json',
-  };
-  const url = 'graphql';
   // prettier-ignore
   const query = `
   query {
@@ -1842,18 +1842,18 @@ export async function getVulnerabilityAlerts(): Promise<VulnerabilityAlert[]> {
       }
     }
   }`;
-  const options = {
-    headers,
-    body: JSON.stringify({ query }),
-    json: false,
-  };
   let alerts = [];
   try {
-    const res = JSON.parse((await api.post(url, options)).body);
-    if (res?.data?.repository?.vulnerabilityAlerts) {
-      alerts = res.data.repository.vulnerabilityAlerts.edges.map(
-        (edge: { node: any }) => edge.node
-      );
+    const vulnerabilityAlerts = await githubApi.getGraphqlNodes<{ node: any }>(
+      query,
+      'vulnerabilityAlerts',
+      {
+        paginate: false,
+        acceptHeader: 'application/vnd.github.vixen-preview+json',
+      }
+    );
+    if (vulnerabilityAlerts?.length) {
+      alerts = vulnerabilityAlerts.map((edge) => edge.node);
       if (alerts.length) {
         logger.debug({ alerts }, 'Found GitHub vulnerability alerts');
       }

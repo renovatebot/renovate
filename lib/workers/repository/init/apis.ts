@@ -26,6 +26,5 @@ export async function initApis(
   config = await getPlatformConfig(config as never);
   npmApi.resetMemCache();
   npmApi.setNpmrc(config.npmrc);
-  delete config.gitPrivateKey;
   return config;
 }

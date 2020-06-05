@@ -244,6 +244,7 @@ export function extractPackageFile(content: string): PackageFile | null {
       dep.versioning = dockerVersioning.id;
       dep.datasource = datasourceDocker.id;
       dep.lookupName = repository;
+      dep.registryUrls = [registry];
       deps.push(dep);
     } else {
       logger.debug(

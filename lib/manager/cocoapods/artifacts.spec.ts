@@ -23,8 +23,11 @@ const env = mocked(_env);
 const platform = mocked(_platform);
 const datasource = mocked(_datasource);
 
+delete process.env.CP_HOME_DIR;
+
 const config = {
   localDir: join('/tmp/github/some/repo'),
+  cacheDir: join('/tmp/cache'),
 };
 
 describe('.updateArtifacts()', () => {

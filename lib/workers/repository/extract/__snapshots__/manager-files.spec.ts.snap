@@ -3,6 +3,7 @@
 exports[`workers/repository/extract/manager-files getManagerPackageFiles() returns files with extractAllPackageFiles 1`] = `
 Array [
   Object {
+    "compatibility": Object {},
     "deps": Array [
       Object {
         "currentValue": "2.0.0",

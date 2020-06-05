@@ -10,7 +10,8 @@ beforeEach(() => {
 describe('workers/repository/result', () => {
   describe('processResult()', () => {
     it('runs', () => {
-      processResult(config, 'done');
+      const result = processResult(config, 'done');
+      expect(result).not.toBeNil();
     });
   });
 });

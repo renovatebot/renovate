@@ -57,9 +57,9 @@ describe('datasource/hex', () => {
           statusCode: 429,
         })
       );
-      await expect(
-        getReleases({ lookupName: 'some_crate' })
-      ).rejects.toThrowError(DATASOURCE_FAILURE);
+      await expect(getReleases({ lookupName: 'some_crate' })).rejects.toThrow(
+        DATASOURCE_FAILURE
+      );
     });
     it('throws for 5xx', async () => {
       got.mockImplementationOnce(() =>
@@ -67,9 +67,9 @@ describe('datasource/hex', () => {
           statusCode: 502,
         })
       );
-      await expect(
-        getReleases({ lookupName: 'some_crate' })
-      ).rejects.toThrowError(DATASOURCE_FAILURE);
+      await expect(getReleases({ lookupName: 'some_crate' })).rejects.toThrow(
+        DATASOURCE_FAILURE
+      );
     });
     it('returns null for unknown error', async () => {
       got.mockImplementationOnce(() => {

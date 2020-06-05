@@ -64,7 +64,7 @@ describe('platform/azure/helpers', () => {
   });
 
   describe('getRef', () => {
-    it('should get the ref', async () => {
+    it('should get the ref with short ref name', async () => {
       azureApi.gitApi.mockImplementationOnce(
         () =>
           ({
@@ -74,7 +74,7 @@ describe('platform/azure/helpers', () => {
       const res = await azureHelper.getRefs('123', 'branch');
       expect(res).toMatchSnapshot();
     });
-    it('should get 0 ref', async () => {
+    it('should not get ref', async () => {
       azureApi.gitApi.mockImplementationOnce(
         () =>
           ({
@@ -82,9 +82,9 @@ describe('platform/azure/helpers', () => {
           } as any)
       );
       const res = await azureHelper.getRefs('123');
-      expect(res.length).toBe(0);
+      expect(res).toHaveLength(0);
     });
-    it('should get the ref', async () => {
+    it('should get the ref with full ref name', async () => {
       azureApi.gitApi.mockImplementationOnce(
         () =>
           ({
@@ -97,7 +97,7 @@ describe('platform/azure/helpers', () => {
   });
 
   describe('getAzureBranchObj', () => {
-    it('should be the branch object formated', async () => {
+    it('should get the branch object', async () => {
       azureApi.gitApi.mockImplementationOnce(
         () =>
           ({
@@ -111,7 +111,7 @@ describe('platform/azure/helpers', () => {
       );
       expect(res).toMatchSnapshot();
     });
-    it('should be the branch object formated', async () => {
+    it('should get the branch object when ref missing', async () => {
       azureApi.gitApi.mockImplementationOnce(
         () =>
           ({
@@ -244,7 +244,7 @@ describe('platform/azure/helpers', () => {
         str += 'a';
       }
       const res = azureHelper.max4000Chars(str);
-      expect(res.length).toBe(3999);
+      expect(res).toHaveLength(3999);
     });
   });
 

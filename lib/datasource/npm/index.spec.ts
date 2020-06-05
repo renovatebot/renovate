@@ -3,8 +3,6 @@ import nock from 'nock';
 import _registryAuthToken from 'registry-auth-token';
 import { getName } from '../../../test/util';
 import { DATASOURCE_FAILURE } from '../../constants/error-messages';
-import * as globalCache from '../../util/cache/global';
-import * as runCache from '../../util/cache/run';
 import * as hostRules from '../../util/host-rules';
 import * as npm from '.';
 
@@ -27,7 +25,6 @@ describe(getName(__filename), () => {
   delete process.env.NPM_TOKEN;
   beforeEach(() => {
     jest.resetAllMocks();
-    runCache.clear();
     global.trustLevel = 'low';
     npm.resetCache();
     npm.setNpmrc();
@@ -56,7 +53,6 @@ describe(getName(__filename), () => {
       },
     };
     nock.cleanAll();
-    return globalCache.rmAll();
   });
   afterEach(() => {
     delete process.env.RENOVATE_CACHE_NPM_MINUTES;
@@ -263,9 +259,11 @@ describe(getName(__filename), () => {
     expect(res).toMatchSnapshot();
   });
   it('resets npmrc', () => {
-    npm.setNpmrc('something=something');
-    npm.setNpmrc('something=something');
+    const npmrcContent = 'something=something';
+    npm.setNpmrc(npmrcContent);
+    npm.setNpmrc(npmrcContent);
     npm.setNpmrc();
+    expect(npm.getNpmrc()).toBeNull();
   });
   it('should use default registry if missing from npmrc', async () => {
     nock('https://registry.npmjs.org').get('/foobar').reply(200, npmResponse);

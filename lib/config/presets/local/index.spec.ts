@@ -1,5 +1,4 @@
 import { getName, mocked } from '../../../../test/util';
-import * as globalCache from '../../../util/cache/global';
 import * as _github from '../github';
 import * as _gitlab from '../gitlab';
 import * as local from '.';
@@ -15,7 +14,6 @@ describe(getName(__filename), () => {
     jest.resetAllMocks();
     gitlab.getPresetFromEndpoint.mockResolvedValueOnce({ resolved: 'preset' });
     github.getPresetFromEndpoint.mockResolvedValueOnce({ resolved: 'preset' });
-    return globalCache.rmAll();
   });
   describe('getPreset()', () => {
     it('throws for unsupported platform', async () => {

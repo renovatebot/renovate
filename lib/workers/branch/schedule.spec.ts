@@ -177,12 +177,12 @@ describe('workers/branch/schedule', () => {
       const res = schedule.isScheduledNow(config);
       expect(res).toBe(true);
     });
-    it('supports every weekday', () => {
+    it('supports every weekend', () => {
       config.schedule = ['every weekend'];
       const res = schedule.isScheduledNow(config);
       expect(res).toBe(false);
     });
-    it('supports every weekday', () => {
+    it('supports every weekday with time', () => {
       config.schedule = ['before 11:00am every weekday'];
       const res = schedule.isScheduledNow(config);
       expect(res).toBe(true);

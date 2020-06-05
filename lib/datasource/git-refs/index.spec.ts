@@ -1,6 +1,5 @@
 import fs from 'fs-extra';
 import _simpleGit from 'simple-git/promise';
-import * as globalCache from '../../util/cache/global';
 import { getDigest, getReleases } from '.';
 
 jest.mock('simple-git/promise');
@@ -14,7 +13,6 @@ const lsRemote1 = fs.readFileSync(
 );
 
 describe('datasource/git-refs', () => {
-  beforeEach(() => globalCache.rmAll());
   describe('getReleases', () => {
     it('returns nil if response is wrong', async () => {
       simpleGit.mockReturnValue({
@@ -23,7 +21,7 @@ describe('datasource/git-refs', () => {
         },
       });
       const versions = await getReleases({ lookupName });
-      expect(versions).toEqual(null);
+      expect(versions).toBeNull();
     });
     it('returns nil if remote call throws exception', async () => {
       simpleGit.mockReturnValue({
@@ -32,7 +30,7 @@ describe('datasource/git-refs', () => {
         },
       });
       const versions = await getReleases({ lookupName });
-      expect(versions).toEqual(null);
+      expect(versions).toBeNull();
     });
     it('returns versions filtered from tags', async () => {
       simpleGit.mockReturnValue({

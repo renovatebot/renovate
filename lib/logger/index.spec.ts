@@ -26,29 +26,29 @@ describe('logger', () => {
     expect(getContext()).toEqual('abc123');
   });
   it('supports logging with metadata', () => {
-    logger.debug({ some: 'meta' }, 'some meta');
+    expect(() => logger.debug({ some: 'meta' }, 'some meta')).not.toThrow();
   });
   it('supports logging with only metadata', () => {
-    logger.debug({ some: 'meta' });
+    expect(() => logger.debug({ some: 'meta' })).not.toThrow();
   });
   it('supports logging without metadata', () => {
-    logger.debug('some meta');
+    expect(() => logger.debug('some meta')).not.toThrow();
   });
 
   it('sets meta', () => {
-    setMeta({ any: 'test' });
+    expect(() => setMeta({ any: 'test' })).not.toThrow();
   });
 
   it('adds meta', () => {
-    addMeta({ new: 'test' });
+    expect(() => addMeta({ new: 'test' })).not.toThrow();
   });
 
   it('removes meta', () => {
-    removeMeta(['new']);
+    expect(() => removeMeta(['new'])).not.toThrow();
   });
 
   it('sets level', () => {
-    levels('stdout', 'debug');
+    expect(() => levels('stdout', 'debug')).not.toThrow();
   });
 
   it('saves errors', () => {
@@ -143,11 +143,19 @@ describe('logger', () => {
     logger.error({
       foo: 'secret"password',
       bar: ['somethingelse', 'secret"password'],
+      npmToken: 'token',
+      buffer: Buffer.from('test'),
+      content: 'test',
+      prBody: 'test',
     });
 
     expect(logged.foo).not.toEqual('secret"password');
     expect(logged.bar[0]).toEqual('somethingelse');
     expect(logged.foo).toContain('redacted');
     expect(logged.bar[1]).toContain('redacted');
+    expect(logged.npmToken).not.toEqual('token');
+    expect(logged.buffer).toEqual('[content]');
+    expect(logged.content).toEqual('[content]');
+    expect(logged.prBody).toEqual('[Template]');
   });
 });

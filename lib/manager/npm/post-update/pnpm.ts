@@ -1,10 +1,11 @@
-import { readFile } from 'fs-extra';
-import { getInstalledPath } from 'get-installed-path';
+import { readFile, remove } from 'fs-extra';
+import { validRange } from 'semver';
+import { quote } from 'shlex';
 import { join } from 'upath';
 import { logger } from '../../../logger';
-import { exec } from '../../../util/exec';
-import { BinarySource } from '../../../util/exec/common';
-import { PostUpdateConfig } from '../../common';
+import { ExecOptions, exec } from '../../../util/exec';
+import { PostUpdateConfig, Upgrade } from '../../common';
+import { getNodeConstraint } from './node-version';
 
 export interface GenerateLockFileResult {
   error?: boolean;
@@ -16,91 +17,66 @@ export interface GenerateLockFileResult {
 export async function generateLockFile(
   cwd: string,
   env: NodeJS.ProcessEnv,
-  config: PostUpdateConfig
+  config: PostUpdateConfig,
+  upgrades: Upgrade[] = []
 ): Promise<GenerateLockFileResult> {
-  logger.debug(`Spawning pnpm install to create ${cwd}/pnpm-lock.yaml`);
+  const lockFileName = join(cwd, 'pnpm-lock.yaml');
+  logger.debug(`Spawning pnpm install to create ${lockFileName}`);
   let lockFile = null;
   let stdout: string;
   let stderr: string;
-  let cmd: string;
+  let cmd = 'pnpm';
   try {
-    try {
-      // See if renovate is installed locally
-      const installedPath = join(
-        await getInstalledPath('pnpm', {
-          local: true,
-        }),
-        'lib/bin/pnpm.js'
-      );
-      cmd = `node ${installedPath}`;
-    } catch (localerr) {
-      logger.debug('No locally installed pnpm found');
-      // Look inside globally installed renovate
-      try {
-        const renovateLocation = await getInstalledPath('renovate');
-        const installedPath = join(
-          await getInstalledPath('pnpm', {
-            local: true,
-            cwd: renovateLocation,
-          }),
-          'lib/bin/pnpm.js'
-        );
-        cmd = `node ${installedPath}`;
-      } catch (nestederr) {
-        logger.debug('Could not find globally nested pnpm');
-        // look for global pnpm
-        try {
-          const installedPath = join(
-            await getInstalledPath('pnpm'),
-            'lib/bin/pnpm.js'
-          );
-          cmd = `node ${installedPath}`;
-        } catch (globalerr) {
-          logger.warn('Could not find globally installed pnpm');
-          cmd = 'pnpm';
-        }
-      }
+    let installPnpm = 'npm i -g pnpm';
+    const pnpmCompatibility = config.compatibility?.pnpm;
+    if (validRange(pnpmCompatibility)) {
+      installPnpm += `@${quote(pnpmCompatibility)}`;
     }
-    if (config.binarySource === BinarySource.Global) {
-      cmd = 'pnpm';
-    }
-    if (config.binarySource === BinarySource.Docker) {
-      logger.debug('Running pnpm via docker');
-      cmd = `docker run --rm `;
-      // istanbul ignore if
-      if (config.dockerUser) {
-        cmd += `--user=${config.dockerUser} `;
-      }
-      const volumes = [cwd];
-      if (config.cacheDir) {
-        volumes.push(config.cacheDir);
-      }
-      cmd += volumes.map((v) => `-v "${v}":"${v}" `).join('');
-      // istanbul ignore if
-      if (config.dockerMapDotfiles) {
-        const homeDir =
-          process.env.HOME || process.env.HOMEPATH || process.env.USERPROFILE;
-        const homeNpmrc = join(homeDir, '.npmrc');
-        cmd += `-v ${homeNpmrc}:/home/ubuntu/.npmrc `;
-      }
-      const envVars = ['NPM_CONFIG_CACHE', 'npm_config_store'];
-      cmd += envVars.map((e) => `-e ${e} `).join('');
-      cmd += `-w "${cwd}" `;
-      cmd += `renovate/pnpm pnpm`;
-    }
-    logger.debug(`Using pnpm: ${cmd}`);
-    cmd += ' install';
-    cmd += ' --lockfile-only';
-    if (global.trustLevel !== 'high' || config.ignoreScripts) {
-      cmd += ' --ignore-scripts';
-      cmd += ' --ignore-pnpmfile';
-    }
-    // TODO: Switch to native util.promisify once using only node 8
-    ({ stdout, stderr } = await exec(cmd, {
+    const preCommands = [installPnpm];
+    const tagConstraint = await getNodeConstraint(config);
+    const execOptions: ExecOptions = {
       cwd,
-      env,
-    }));
-    lockFile = await readFile(join(cwd, 'pnpm-lock.yaml'), 'utf8');
+      extraEnv: {
+        NPM_CONFIG_CACHE: env.NPM_CONFIG_CACHE,
+        npm_config_store: env.npm_config_store,
+      },
+      docker: {
+        image: 'renovate/node',
+        tagScheme: 'npm',
+        tagConstraint,
+        preCommands,
+      },
+    };
+    if (config.dockerMapDotfiles) {
+      const homeDir =
+        process.env.HOME || process.env.HOMEPATH || process.env.USERPROFILE;
+      const homeNpmrc = join(homeDir, '.npmrc');
+      execOptions.docker.volumes = [[homeNpmrc, '/home/ubuntu/.npmrc']];
+    }
+    cmd = 'pnpm';
+    let args = 'install --lockfile-only';
+    if (global.trustLevel !== 'high' || config.ignoreScripts) {
+      args += ' --ignore-scripts';
+      args += ' --ignore-pnpmfile';
+    }
+    logger.debug({ cmd, args }, 'pnpm command');
+
+    if (upgrades.find((upgrade) => upgrade.isLockFileMaintenance)) {
+      logger.debug(
+        `Removing ${lockFileName} first due to lock file maintenance upgrade`
+      );
+      try {
+        await remove(lockFileName);
+      } catch (err) /* istanbul ignore next */ {
+        logger.debug(
+          { err, lockFileName },
+          'Error removing yarn.lock for lock file maintenance'
+        );
+      }
+    }
+
+    await exec(`${cmd} ${args}`, execOptions);
+    lockFile = await readFile(lockFileName, 'utf8');
   } catch (err) /* istanbul ignore next */ {
     logger.debug(
       {

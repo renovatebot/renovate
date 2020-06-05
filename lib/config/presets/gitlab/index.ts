@@ -1,10 +1,11 @@
 import { PLATFORM_FAILURE } from '../../../constants/error-messages';
 import { logger } from '../../../logger';
-import { api } from '../../../platform/gitlab/gl-got-wrapper';
 import type { GitLabBranch } from '../../../types/platform/gitlab';
+import { GitlabHttp } from '../../../util/http/gitlab';
 import { Preset, PresetConfig } from '../common';
 import { PRESET_DEP_NOT_FOUND, fetchPreset } from '../util';
 
+const gitlabApi = new GitlabHttp();
 export const Endpoint = 'https://gitlab.com/api/v4/';
 
 async function getDefaultBranchName(
@@ -13,7 +14,7 @@ async function getDefaultBranchName(
 ): Promise<string> {
   const branchesUrl = `${endpoint}projects/${urlEncodedPkgName}/repository/branches`;
 
-  const res = await api.get<GitLabBranch[]>(branchesUrl);
+  const res = await gitlabApi.getJson<GitLabBranch[]>(branchesUrl);
   const branches = res.body;
   let defautlBranchName = 'master';
   for (const branch of branches) {
@@ -39,7 +40,7 @@ export async function fetchJSONFile(
       endpoint
     );
     const url = `${endpoint}projects/${urlEncodedRepo}/repository/files/${urlEncodedPkgName}/raw?ref=${defautlBranchName}`;
-    return (await api.get<Preset>(url)).body;
+    return (await gitlabApi.getJson<Preset>(url)).body;
   } catch (err) {
     if (err.message === PLATFORM_FAILURE) {
       throw err;

@@ -23,7 +23,8 @@ describe('workers/repository/process/extract-update', () => {
         suppressNotifications: ['deprecationWarningIssues'],
       };
       const res = await extract(config);
-      await update(config, res.branches);
+      expect(res).toMatchSnapshot();
+      await expect(update(config, res.branches)).resolves.not.toThrow();
     });
   });
 });

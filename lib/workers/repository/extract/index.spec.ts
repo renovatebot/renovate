@@ -19,7 +19,7 @@ describe('workers/repository/extract/index', () => {
     it('runs', async () => {
       managerFiles.getManagerPackageFiles.mockResolvedValue([{} as never]);
       const res = await extractAllDependencies(config);
-      expect(Object.keys(res).includes('ansible')).toBe(true);
+      expect(Object.keys(res)).toContain('ansible');
     });
     it('skips non-enabled managers', async () => {
       config.enabledManagers = ['npm'];
@@ -31,7 +31,7 @@ describe('workers/repository/extract/index', () => {
       managerFiles.getManagerPackageFiles.mockResolvedValue([{} as never]);
       config.regexManagers = [{ fileMatch: ['README'], matchStrings: [''] }];
       const res = await extractAllDependencies(config);
-      expect(Object.keys(res).includes('regex')).toBe(true);
+      expect(Object.keys(res)).toContain('regex');
     });
   });
 });

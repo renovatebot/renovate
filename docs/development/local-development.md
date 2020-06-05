@@ -10,13 +10,13 @@ Please submit PRs to improve it if you think anything is unclear or you can thin
 For local development some dependencies are required:
 
 - git
-- nodejs `^10.13.0 || ^12.0.0`
+- nodejs `>=12`
 - yarn `^1.17.0`
 - c++ compiler
 - python `^3.7`
 - java between `8` and `12`
 
-Python is required in development in order to support installing with `node-gyp`. `mock` is used by Renovate in production and is part of the Python standard library, but only from 3.3 onwards.
+We support Node.js versions according to the [Node.js release schedule](https://github.com/nodejs/Release#release-schedule)
 
 Java is required to execute Gradle in tests.
 If you don’t have Java installed, the respective tests will be skipped.

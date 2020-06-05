@@ -42,6 +42,7 @@ exports[`workers/pr ensurePr should add note about Pin 1`] = `
 Array [
   Object {
     "branchName": "renovate/dummy-1.x",
+    "draftPR": false,
     "labels": Array [],
     "platformOptions": Object {
       "azureAutoComplete": false,
@@ -55,10 +56,24 @@ Array [
 ]
 `;
 
+exports[`workers/pr ensurePr should combine assignees from code owners and config 1`] = `
+Array [
+  Array [
+    undefined,
+    Array [
+      "mike",
+      "julie",
+      "jimmy",
+    ],
+  ],
+]
+`;
+
 exports[`workers/pr ensurePr should create PR if success 1`] = `
 Array [
   Object {
     "branchName": "renovate/dummy-1.x",
+    "draftPR": false,
     "labels": Array [],
     "platformOptions": Object {
       "azureAutoComplete": false,
@@ -72,17 +87,36 @@ Array [
 ]
 `;
 
-exports[`workers/pr ensurePr should create group PR 1`] = `
+exports[`workers/pr ensurePr should create PR if success for gitlab deps 1`] = `
 Array [
   Object {
-    "branchName": "renovate/dummy-1.x",
+    "branchName": "renovate/gitlabdummy-1.x",
+    "draftPR": false,
     "labels": Array [],
     "platformOptions": Object {
       "azureAutoComplete": false,
       "gitLabAutomerge": false,
       "statusCheckVerify": false,
     },
-    "prBody": "This PR contains the following updates:\\n\\n| Package | Type | Update | Change |\\n|---|---|---|---|\\n| [dummy](https://dummy.com) ([source](https://github.com/renovateapp/dummy), [changelog](https://github.com/renovateapp/dummy/changelog.md)) | devDependencies | lockFileMaintenance | \`1.0.0\` -> \`1.1.0\` |\\n| a |  |  | \`zzzzzz\` -> \`aaaaaaa\` |\\n| b |  | pin | \`some_old_value\` -> \`some_new_value\` |\\n| c |  |  | \`\` -> \`\` |\\n| d |  | lockFileMaintenance | \`\` -> \`\` |\\n\\nnote 1\\n\\nnote 2\\n\\n:warning: Release Notes retrieval for this PR were skipped because no github.com credentials were available.\\nTo add credentials for github.com to your config, please see [this guide](https://docs.renovatebot.com/install-gitlab-app/#configuring-a-token-for-githubcom-hosted-release-notes).\\n\\n:abcd: If you wish to disable git hash updates, add \`\\":disableDigestUpdates\\"\` to the extends array in your config.\\n\\n:wrench: This Pull Request updates lock files to use the latest dependency versions.\\n\\n---\\n\\n### Release Notes\\n\\n<details>\\n<summary>renovateapp/dummy</summary>\\n\\n### [\`v1.1.0\`](https://github.com/renovateapp/dummy/compare/v1.0.0...v1.1.0)\\n\\n[Compare Source](https://github.com/renovateapp/dummy/compare/v1.0.0...v1.1.0)\\n\\n</details>\\n\\n<details>\\n<summary>renovateapp/dummy</summary>\\n\\n</details>\\n\\n---\\n\\n### Renovate configuration\\n\\n:date: **Schedule**: At any time (no schedule defined).\\n\\n:vertical_traffic_light: **Automerge**: Disabled by config. Please merge this manually once you are satisfied.\\n\\n:recycle: **Rebasing**: Never, or you tick the rebase/retry checkbox.\\n\\n:ghost: **Immortal**: This PR will be recreated if closed unmerged. Get [config help](https://github.com/renovatebot/config-help/issues) if that's undesired.\\n\\n---\\n\\n - [ ] <!-- rebase-check -->If you want to rebase/retry this PR, check this box",
+    "prBody": "This PR contains the following updates:\\n\\n| Package | Type | Update | Change |\\n|---|---|---|---|\\n| [gitlabdummy](https://dummy.com) ([source](https://gitlab.com/renovateapp/gitlabdummy), [changelog](https://gitlab.com/renovateapp/gitlabdummy/changelog.md)) | devDependencies | minor | \`1.0.0\` -> \`1.1.0\` |\\n\\n---\\n\\n### Renovate configuration\\n\\n:date: **Schedule**: \\"before 5am\\" (UTC).\\n\\n:vertical_traffic_light: **Automerge**: Enabled.\\n\\n:recycle: **Rebasing**: Whenever PR becomes conflicted, or you tick the rebase/retry checkbox.\\n\\n:no_bell: **Ignore**: Close this PR and you won't be reminded about this update again.\\n\\n---\\n\\n - [ ] <!-- rebase-check -->If you want to rebase/retry this PR, check this box",
+    "prTitle": "Update dependency dummy to v1.1.0",
+    "useDefaultBranch": false,
+  },
+]
+`;
+
+exports[`workers/pr ensurePr should create group PR 1`] = `
+Array [
+  Object {
+    "branchName": "renovate/dummy-1.x",
+    "draftPR": false,
+    "labels": Array [],
+    "platformOptions": Object {
+      "azureAutoComplete": false,
+      "gitLabAutomerge": false,
+      "statusCheckVerify": false,
+    },
+    "prBody": "This PR contains the following updates:\\n\\n| Package | Type | Update | Change |\\n|---|---|---|---|\\n| [dummy](https://dummy.com) ([source](https://github.com/renovateapp/dummy), [changelog](https://github.com/renovateapp/dummy/changelog.md)) | devDependencies | lockFileMaintenance | \`1.0.0\` -> \`1.1.0\` |\\n| a |  |  | \`zzzzzz\` -> \`aaaaaaa\` |\\n| b |  | pin | \`some_old_value\` -> \`some_new_value\` |\\n| c |  |  | \`\` -> \`\` |\\n| d |  | lockFileMaintenance | \`\` -> \`\` |\\n\\nnote 1\\n\\nnote 2\\n\\n:warning: Release Notes retrieval for this PR were skipped because no github.com credentials were available.\\nIf you are using the hosted GitLab app, please follow [this guide](https://docs.renovatebot.com/install-gitlab-app/#configuring-a-token-for-githubcom-hosted-release-notes). If you are self-hosted, please see [this instruction](https://github.com/renovatebot/renovate/blob/master/docs/development/self-hosting.md#githubcom-token-for-release-notes) instead.\\n\\n:abcd: If you wish to disable git hash updates, add \`\\":disableDigestUpdates\\"\` to the extends array in your config.\\n\\n:wrench: This Pull Request updates lock files to use the latest dependency versions.\\n\\n---\\n\\n### Release Notes\\n\\n<details>\\n<summary>renovateapp/dummy</summary>\\n\\n### [\`v1.1.0\`](https://github.com/renovateapp/dummy/compare/v1.0.0...v1.1.0)\\n\\n[Compare Source](https://github.com/renovateapp/dummy/compare/v1.0.0...v1.1.0)\\n\\n</details>\\n\\n<details>\\n<summary>renovateapp/dummy</summary>\\n\\n</details>\\n\\n---\\n\\n### Renovate configuration\\n\\n:date: **Schedule**: At any time (no schedule defined).\\n\\n:vertical_traffic_light: **Automerge**: Disabled by config. Please merge this manually once you are satisfied.\\n\\n:recycle: **Rebasing**: Never, or you tick the rebase/retry checkbox.\\n\\n:ghost: **Immortal**: This PR will be recreated if closed unmerged. Get [config help](https://github.com/renovatebot/config-help/issues) if that's undesired.\\n\\n---\\n\\n - [ ] <!-- rebase-check -->If you want to rebase/retry this PR, check this box",
     "prTitle": "Update dependency dummy to v1.1.0",
     "useDefaultBranch": false,
   },
@@ -93,16 +127,41 @@ exports[`workers/pr ensurePr should create privateRepo PR if success 1`] = `
 Array [
   Object {
     "branchName": "renovate/dummy-1.x",
+    "draftPR": false,
     "labels": Array [],
     "platformOptions": Object {
       "azureAutoComplete": false,
       "gitLabAutomerge": false,
       "statusCheckVerify": false,
     },
-    "prBody": "This PR contains the following updates:\\n\\n| Package | Type | Update | Change |\\n|---|---|---|---|\\n| [dummy](https://dummy.com) ([source](https://github.com/renovateapp/dummy), [changelog](https://github.com/renovateapp/dummy/changelog.md)) | devDependencies | minor | \`1.0.0\` -> \`1.1.0\` |\\n\\n---\\n\\n### Release Notes\\n\\n<details>\\n<summary>renovateapp/dummy</summary>\\n\\n### [\`v1.1.0\`](https://github.com/renovateapp/dummy/compare/v1.0.0...v1.1.0)\\n\\n[Compare Source](https://github.com/renovateapp/dummy/compare/v1.0.0...v1.1.0)\\n\\n</details>\\n\\n---\\n\\n### Renovate configuration\\n\\n:date: **Schedule**: At any time (no schedule defined).\\n\\n:vertical_traffic_light: **Automerge**: Disabled by config. Please merge this manually once you are satisfied.\\n\\n:recycle: **Rebasing**: Whenever PR becomes conflicted, or you tick the rebase/retry checkbox.\\n\\n:no_bell: **Ignore**: Close this PR and you won't be reminded about this update again.\\n\\n---\\n\\n - [ ] <!-- rebase-check -->If you want to rebase/retry this PR, check this box",
+    "prBody": "This PR contains the following updates:\\n\\n| Package | Type | Update | Change |\\n|---|---|---|---|\\n| [dummy](https://dummy.com) ([source](https://github.com/renovateapp/dummy), [changelog](https://github.com/renovateapp/dummy/changelog.md)) | devDependencies | minor | \`1.0.0\` -> \`1.1.0\` |\\n\\n---\\n\\n### Release Notes\\n\\n<details>\\n<summary>someproject</summary>\\n\\n### [\`v1.1.0\`](https://github.com/renovateapp/dummy/compare/v1.0.0...v1.1.0)\\n\\n[Compare Source](https://github.com/renovateapp/dummy/compare/v1.0.0...v1.1.0)\\n\\n</details>\\n\\n---\\n\\n### Renovate configuration\\n\\n:date: **Schedule**: At any time (no schedule defined).\\n\\n:vertical_traffic_light: **Automerge**: Disabled by config. Please merge this manually once you are satisfied.\\n\\n:recycle: **Rebasing**: Whenever PR becomes conflicted, or you tick the rebase/retry checkbox.\\n\\n:no_bell: **Ignore**: Close this PR and you won't be reminded about this update again.\\n\\n---\\n\\n - [ ] <!-- rebase-check -->If you want to rebase/retry this PR, check this box",
     "prTitle": "Update dependency dummy to v1.1.0",
     "useDefaultBranch": false,
   },
+]
+`;
+
+exports[`workers/pr ensurePr should determine assignees from code owners 1`] = `
+Array [
+  Array [
+    undefined,
+    Array [
+      "john",
+      "maria",
+    ],
+  ],
+]
+`;
+
+exports[`workers/pr ensurePr should determine reviewers from code owners 1`] = `
+Array [
+  Array [
+    undefined,
+    Array [
+      "john",
+      "maria",
+    ],
+  ],
 ]
 `;
 

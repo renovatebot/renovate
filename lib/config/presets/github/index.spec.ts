@@ -1,7 +1,5 @@
 import * as httpMock from '../../../../test/httpMock';
 import { getName, mocked } from '../../../../test/util';
-import * as globalCache from '../../../util/cache/global';
-import * as runCache from '../../../util/cache/run';
 import * as _hostRules from '../../../util/host-rules';
 import * as github from '.';
 
@@ -14,9 +12,7 @@ const basePath = '/repos/some/repo/contents';
 describe(getName(__filename), () => {
   beforeEach(() => {
     httpMock.setup();
-    runCache.clear();
     hostRules.find.mockReturnValue({ token: 'abc' });
-    return globalCache.rmAll();
   });
 
   afterEach(() => httpMock.reset());

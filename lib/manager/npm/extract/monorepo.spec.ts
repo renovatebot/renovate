@@ -23,7 +23,7 @@ describe('manager/npm/extract', () => {
       expect(packageFiles[1].lernaDir).toEqual('.');
       expect((packageFiles[1] as any).internalPackages).toEqual(['@org/b']);
     });
-    it('uses yarn workspaces package settings', () => {
+    it('uses yarn workspaces package settings with lerna', () => {
       const packageFiles = [
         {
           packageFile: 'package.json',
@@ -46,7 +46,7 @@ describe('manager/npm/extract', () => {
       expect(packageFiles[1].lernaDir).toEqual('.');
       expect((packageFiles[1] as any).internalPackages).toEqual(['@org/b']);
     });
-    it('uses yarn workspaces package settings', () => {
+    it('uses yarn workspaces package settings without lerna', () => {
       const packageFiles = [
         {
           packageFile: 'package.json',

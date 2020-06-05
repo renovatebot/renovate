@@ -141,7 +141,7 @@ describe('datasource/go', () => {
         const prefix = pkg.lookupName.split('/')[3];
         const result = await go.getReleases(pkg);
         expect(result.releases).toHaveLength(1);
-        expect(result.releases[0].version.startsWith(prefix));
+        expect(result.releases[0].version.startsWith(prefix)).toBeFalse();
       }
       expect(got).toHaveBeenCalledTimes(0);
       expect(github.getReleases.mock.calls).toMatchSnapshot();

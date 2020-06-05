@@ -21,13 +21,13 @@ const ibazel = fs.readFileSync(
 
 describe('lib/manager/homebrew/extract', () => {
   describe('extractPackageFile()', () => {
-    it('skips sourceforge dependency', () => {
+    it('skips sourceforge dependency 1', () => {
       const res = extractPackageFile(aalib);
       expect(res).not.toBeNull();
       expect(res.deps[0].skipReason).toBe('unsupported-url');
       expect(res).toMatchSnapshot();
     });
-    it('skips sourceforge dependency', () => {
+    it('skips sourceforge dependency 2', () => {
       const res = extractPackageFile(aap);
       expect(res).not.toBeNull();
       expect(res.deps[0].skipReason).toBe('unsupported-url');
@@ -64,7 +64,7 @@ describe('lib/manager/homebrew/extract', () => {
       expect(res.deps[0].skipReason).toBeUndefined();
       expect(res).toMatchSnapshot();
     });
-    it('returns null for invalid class header', () => {
+    it('returns null for invalid class header 1', () => {
       const content = `
           class Ibazel !?# Formula
           desc 'IBazel is a tool for building Bazel targets when source files change.'
@@ -75,7 +75,7 @@ describe('lib/manager/homebrew/extract', () => {
       `;
       expect(extractPackageFile(content)).toBeNull();
     });
-    it('returns null for invalid class header', () => {
+    it('returns null for invalid class header 2', () => {
       const content = `
           class Ibazel < NotFormula
           desc 'IBazel is a tool for building Bazel targets when source files change.'
@@ -100,7 +100,7 @@ describe('lib/manager/homebrew/extract', () => {
       expect(res.deps[0].skipReason).toBe('unsupported-url');
       expect(res).toMatchSnapshot();
     });
-    it('skips if invalid url field', () => {
+    it('skips if invalid url extension', () => {
       const content = `
           class Ibazel < Formula
           desc 'IBazel is a tool for building Bazel targets when source files change.'
@@ -112,7 +112,7 @@ describe('lib/manager/homebrew/extract', () => {
       const res = extractPackageFile(content);
       expect(res).toMatchSnapshot();
     });
-    it('skips if invalid url field', () => {
+    it('skips if invalid url version', () => {
       const content = `
           class Ibazel < Formula
           desc 'IBazel is a tool for building Bazel targets when source files change.'
@@ -124,7 +124,7 @@ describe('lib/manager/homebrew/extract', () => {
       const res = extractPackageFile(content);
       expect(res).toMatchSnapshot();
     });
-    it('skips if invalid url field', () => {
+    it('skips if invalid url protocol', () => {
       const content = `
           class Ibazel < Formula
           desc 'IBazel is a tool for building Bazel targets when source files change.'
@@ -136,7 +136,7 @@ describe('lib/manager/homebrew/extract', () => {
       const res = extractPackageFile(content);
       expect(res).toMatchSnapshot();
     });
-    it('skips if invalid url field', () => {
+    it('skips if invalid url', () => {
       const content = `
           class Ibazel < Formula
           desc 'IBazel is a tool for building Bazel targets when source files change.'

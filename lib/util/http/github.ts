@@ -125,6 +125,7 @@ export function handleGotError(
     logger.debug({ err }, '422 Error thrown from GitHub');
     throw new Error(PLATFORM_FAILURE);
   }
+  logger.debug({ err }, 'Unknown error fetching GitHub GraphQL');
   throw err;
 }
 
@@ -286,7 +287,7 @@ export class GithubHttp extends Http<GithubHttpOptions, GithubHttpOptions> {
       } else {
         count = Math.floor(count / 2);
         if (count === 0) {
-          logger.error('Error fetching GraphQL nodes');
+          logger.error({ gqlRes }, 'Error fetching GraphQL nodes');
           isIterating = false;
         }
       }

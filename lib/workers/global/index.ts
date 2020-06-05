@@ -6,7 +6,7 @@ import * as configParser from '../../config';
 import { getErrors, logger, setMeta } from '../../logger';
 import { initPlatform } from '../../platform';
 import { setUtilConfig } from '../../util';
-import * as cache from '../../util/cache/global/file';
+import * as globalCache from '../../util/cache/global';
 import { setEmojiConfig } from '../../util/emoji';
 import * as hostRules from '../../util/host-rules';
 import * as repositoryWorker from '../repository';
@@ -33,7 +33,6 @@ async function setDirectories(input: RenovateConfig): Promise<RenovateConfig> {
     logger.debug('Using cacheDir: ' + config.cacheDir);
   }
   await fs.ensureDir(config.cacheDir);
-  cache.init(config.cacheDir);
   return config;
 }
 
@@ -63,6 +62,7 @@ export async function start(): Promise<0 | 1> {
     let config = await getGlobalConfig();
     config = await initPlatform(config);
     config = await setDirectories(config);
+    globalCache.init(config);
     config = await autodiscoverRepositories(config);
 
     limits.init(config);
@@ -85,6 +85,7 @@ export async function start(): Promise<0 | 1> {
       await repositoryWorker.renovateRepository(repoConfig);
     }
     setMeta({});
+    globalCache.cleanup(config);
     logger.debug(`Renovate exiting successfully`);
   } catch (err) /* istanbul ignore next */ {
     if (err.message.startsWith('Init: ')) {

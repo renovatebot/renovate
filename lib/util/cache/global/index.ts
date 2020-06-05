@@ -1,13 +1,19 @@
+import { RenovateConfig } from '../../../config/common';
 import * as runCache from '../run';
+import * as fileCache from './file';
+import * as redisCache from './redis';
 
 function getGlobalKey(namespace: string, key: string): string {
   return `global%%${namespace}%%${key}`;
 }
 
 export function get<T = any>(namespace: string, key: string): Promise<T> {
+  if (!global.renovateCache) {
+    return undefined;
+  }
   const globalKey = getGlobalKey(namespace, key);
   if (!runCache.get(globalKey)) {
-    runCache.set(globalKey, renovateCache.get(namespace, key));
+    runCache.set(globalKey, global.renovateCache.get(namespace, key));
   }
   return runCache.get(globalKey);
 }
@@ -18,11 +24,24 @@ export function set(
   value: any,
   minutes: number
 ): Promise<void> {
+  if (!global.renovateCache) {
+    return undefined;
+  }
   const globalKey = getGlobalKey(namespace, key);
   runCache.set(globalKey, value);
-  return renovateCache.set(namespace, key, value, minutes);
+  return global.renovateCache.set(namespace, key, value, minutes);
 }
 
-export function rmAll(): Promise<void> {
-  return renovateCache.rmAll();
+export function init(config: RenovateConfig): void {
+  if (config.redisUrl) {
+    redisCache.init(config.redisUrl);
+  } else {
+    fileCache.init(config.cacheDir);
+  }
+}
+
+export function cleanup(config: RenovateConfig): void {
+  if (config.redisUrl) {
+    redisCache.end();
+  }
 }

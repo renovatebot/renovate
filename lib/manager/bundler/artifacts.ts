@@ -18,6 +18,7 @@ import {
   getAuthenticationHeaderValue,
   getDomain,
 } from './host-rules';
+import { getGemHome } from './utils';
 
 const hostConfigVariablePrefix = 'BUNDLE_';
 
@@ -115,7 +116,7 @@ export async function updateArtifacts(
     }
     const preCommands = [
       'ruby --version',
-      `gem install bundler${bundlerVersion} --no-document`,
+      `gem install bundler${bundlerVersion}`,
     ];
 
     const bundlerHostRulesVariables = findAllAuthenticatable({
@@ -126,7 +127,10 @@ export async function updateArtifacts(
 
     const execOptions: ExecOptions = {
       cwdFile: packageFileName,
-      extraEnv: bundlerHostRulesVariables,
+      extraEnv: {
+        ...bundlerHostRulesVariables,
+        GEM_HOME: await getGemHome(config),
+      },
       docker: {
         image: 'renovate/ruby',
         tagScheme: 'ruby',

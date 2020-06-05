@@ -88,8 +88,7 @@ export function extractPackageFile(content: string): PackageFile | null {
       const githubRefMatch = /github.com(\/|:)([^/]+\/[a-z0-9-.]+).*\?ref=(.*)$/.exec(
         dep.managerData.source
       );
-      // Regex would need to be updated to support ssh://
-      const gitTagsRefMatch = /git::(http|https:\/\/(.*.*\/(.*\/.*)))(?:|\/\/.*)\?ref=(.*)$/.exec(
+      const gitTagsRefMatch = /git::((?:http|https|ssh):\/\/(?:.*@)?(.*.*\/(.*\/.*)))\?ref=(.*)$/.exec(
         dep.managerData.source
       );
       /* eslint-disable no-param-reassign */
@@ -107,11 +106,19 @@ export function extractPackageFile(content: string): PackageFile | null {
         }
       } else if (gitTagsRefMatch) {
         dep.depType = 'gitTags';
-        dep.depName = gitTagsRefMatch[2].replace('.git', '');
-        dep.depNameShort = gitTagsRefMatch[3].replace('.git', '');
+        if (gitTagsRefMatch[2].includes('//')) {
+          logger.debug('Terraform module contains subdirectory');
+          dep.depName = gitTagsRefMatch[2].split('//')[0];
+          dep.depNameShort = dep.depName.split(/\/(.+)/)[1];
+          const tempLookupName = gitTagsRefMatch[1].split('//');
+          dep.lookupName = tempLookupName[0] + '//' + tempLookupName[1];
+        } else {
+          dep.depName = gitTagsRefMatch[2].replace('.git', '');
+          dep.depNameShort = gitTagsRefMatch[3].replace('.git', '');
+          dep.lookupName = gitTagsRefMatch[1];
+        }
         dep.currentValue = gitTagsRefMatch[4];
         dep.datasource = datasourceGitTags.id;
-        dep.lookupName = gitTagsRefMatch[1];
         dep.managerData.lineNumber = dep.managerData.sourceLine;
         if (!isVersion(dep.currentValue)) {
           dep.skipReason = SkipReason.UnsupportedVersion;

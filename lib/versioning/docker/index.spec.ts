@@ -67,15 +67,6 @@ describe('docker.', () => {
       expect(docker.equals('1.2', '1.2.3')).toBe(false);
     });
   });
-  describe('equals(version, other)', () => {
-    it('should support all versions length', () => {
-      expect(docker.equals('1.2.3', '1.2.3')).toBe(true);
-      expect(docker.equals('18.04', '18.4')).toBe(true);
-      expect(docker.equals('10.0', '10.0.4')).toBe(false);
-      expect(docker.equals('3', '4.0')).toBe(false);
-      expect(docker.equals('1.2', '1.2.3')).toBe(false);
-    });
-  });
   describe('maxSatisfyingVersion(versions, range)', () => {
     it('should support all versions length', () => {
       [docker.minSatisfyingVersion, docker.maxSatisfyingVersion].forEach(

@@ -2,11 +2,10 @@ import { exec as _exec } from 'child_process';
 import _fs from 'fs-extra';
 import { join } from 'upath';
 import { envMock, mockExecAll } from '../../../test/execUtil';
-import { mocked } from '../../../test/util';
-import { platform as _platform } from '../../platform';
+import { mocked, platform } from '../../../test/util';
 import { setExecConfig } from '../../util/exec';
 import { BinarySource } from '../../util/exec/common';
-import { resetPrefetchedImages } from '../../util/exec/docker';
+import * as docker from '../../util/exec/docker';
 import * as _env from '../../util/exec/env';
 import * as cargo from './artifacts';
 
@@ -17,12 +16,6 @@ jest.mock('../../util/exec/env');
 const fs: jest.Mocked<typeof _fs> = _fs as any;
 const exec: jest.Mock<typeof _exec> = _exec as any;
 const env = mocked(_env);
-const platform = mocked(_platform);
-jest.mock('../../util/exec/docker/index', () =>
-  require('../../../test/util').mockPartial('../../util/exec/docker/index', {
-    removeDanglingContainers: jest.fn(),
-  })
-);
 
 const config = {
   // `join` fixes Windows CI
@@ -37,7 +30,7 @@ describe('.updateArtifacts()', () => {
 
     env.getChildProcessEnv.mockReturnValue(envMock.basic);
     await setExecConfig(config);
-    resetPrefetchedImages();
+    docker.resetPrefetchedImages();
   });
   it('returns null if no Cargo.lock found', async () => {
     const updatedDeps = ['dep1'];
@@ -91,6 +84,7 @@ describe('.updateArtifacts()', () => {
     expect(execSnapshots).toMatchSnapshot();
   });
   it('returns updated Cargo.lock with docker', async () => {
+    jest.spyOn(docker, 'removeDanglingContainers').mockResolvedValueOnce();
     await setExecConfig({ ...config, binarySource: BinarySource.Docker });
     platform.getFile.mockResolvedValueOnce('Old Cargo.lock');
     const execSnapshots = mockExecAll(exec);

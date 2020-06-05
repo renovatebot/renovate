@@ -1,6 +1,5 @@
 import crypto from 'crypto';
 import { expect, jest } from '@jest/globals';
-import * as upath from 'upath';
 import { RenovateConfig as _RenovateConfig } from '../lib/config';
 import { getConfig } from '../lib/config/defaults';
 import { platform as _platform } from '../lib/platform';
@@ -14,27 +13,6 @@ import * as _hostRules from '../lib/util/host-rules';
  */
 export function mocked<T>(module: T): jest.Mocked<T> {
   return module as never;
-}
-
-/**
- * Partially mock a module, providing an object with explicit mocks
- * @param moduleName The module to mock
- * @param overrides An object containing the mocks
- * @example
- * jest.mock('../../util/exec/docker/index', () =>
- *   require('../../../test/util').mockPartial('../../util/exec/docker/index', {
- *     removeDanglingContainers: jest.fn(),
- *   })
- * );
- */
-export function mockPartial(moduleName: string, overrides?: object): unknown {
-  const absolutePath = upath.join(module.parent.filename, '../', moduleName);
-  const originalModule = jest.requireActual(absolutePath) as any;
-  return {
-    __esModule: true,
-    ...originalModule,
-    ...overrides,
-  };
 }
 
 /**

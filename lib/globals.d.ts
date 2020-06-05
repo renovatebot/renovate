@@ -6,7 +6,6 @@ declare namespace Renovate {
   interface Cache {
     get<T = any>(namespace: string, key: string): Promise<T>;
     rm(namespace: string, key: string): Promise<void>;
-    rmAll(): Promise<void>;
 
     set<T = any>(
       namespace: string,

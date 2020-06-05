@@ -64,7 +64,6 @@ export interface RangeConfig<T = Record<string, any>> extends ManagerData<T> {
 }
 
 export interface NpmLockFiles {
-  yarnIntegrity?: boolean;
   yarnLock?: string;
   packageLock?: string;
   shrinkwrapJson?: string;
@@ -194,6 +193,7 @@ export interface Upgrade<T = Record<string, any>>
   toVersion?: string;
   updateType?: UpdateType;
   version?: string;
+  isLockFileMaintenance?: boolean;
 }
 
 export interface ArtifactError {
