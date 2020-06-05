@@ -1,6 +1,6 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
-exports[`config/presets/gitlab getPreset() should return the preset 1`] = `
+exports[`config/presets/gitlab/index getPreset() should return the preset 1`] = `
 Array [
   Object {
     "headers": Object {
@@ -25,7 +25,32 @@ Array [
 ]
 `;
 
-exports[`config/presets/gitlab getPreset() throws if fails to parse 1`] = `
+exports[`config/presets/gitlab/index getPreset() throws if fails to parse 1`] = `
+Array [
+  Object {
+    "headers": Object {
+      "accept": "application/json",
+      "accept-encoding": "gzip, deflate",
+      "host": "gitlab.com",
+      "user-agent": "https://github.com/renovatebot/renovate",
+    },
+    "method": "GET",
+    "url": "https://gitlab.com/api/v4/projects/some%2Frepo/repository/branches",
+  },
+  Object {
+    "headers": Object {
+      "accept": "application/json",
+      "accept-encoding": "gzip, deflate",
+      "host": "gitlab.com",
+      "user-agent": "https://github.com/renovatebot/renovate",
+    },
+    "method": "GET",
+    "url": "https://gitlab.com/api/v4/projects/some%2Frepo/repository/files/renovate.json?ref=master",
+  },
+]
+`;
+
+exports[`config/presets/gitlab/index getPreset() throws if no content 1`] = `
 Array [
   Object {
     "headers": Object {
@@ -40,22 +65,9 @@ Array [
 ]
 `;
 
-exports[`config/presets/gitlab getPreset() throws if no content 1`] = `
-Array [
-  Object {
-    "headers": Object {
-      "accept": "application/json",
-      "accept-encoding": "gzip, deflate",
-      "host": "gitlab.com",
-      "user-agent": "https://github.com/renovatebot/renovate",
-    },
-    "method": "GET",
-    "url": "https://gitlab.com/api/v4/projects/some%2Frepo/repository/branches",
-  },
-]
-`;
+exports[`config/presets/gitlab/index getPreset() throws if not default 1`] = `Array []`;
 
-exports[`config/presets/gitlab getPresetFromEndpoint() uses custom endpoint 1`] = `
+exports[`config/presets/gitlab/index getPresetFromEndpoint() uses custom endpoint 1`] = `
 Array [
   Object {
     "headers": Object {
@@ -75,7 +87,32 @@ Array [
       "user-agent": "https://github.com/renovatebot/renovate",
     },
     "method": "GET",
-    "url": "https://gitlab.example.org/api/v4/projects/some%2Frepo/repository/files/renovate.json?ref=master",
+    "url": "https://gitlab.example.org/api/v4/projects/some%2Frepo/repository/files/renovate.json?ref=devel",
+  },
+]
+`;
+
+exports[`config/presets/gitlab/index getPresetFromEndpoint() uses default endpoint 1`] = `
+Array [
+  Object {
+    "headers": Object {
+      "accept": "application/json",
+      "accept-encoding": "gzip, deflate",
+      "host": "gitlab.com",
+      "user-agent": "https://github.com/renovatebot/renovate",
+    },
+    "method": "GET",
+    "url": "https://gitlab.com/api/v4/projects/some%2Frepo/repository/branches",
+  },
+  Object {
+    "headers": Object {
+      "accept": "application/json",
+      "accept-encoding": "gzip, deflate",
+      "host": "gitlab.com",
+      "user-agent": "https://github.com/renovatebot/renovate",
+    },
+    "method": "GET",
+    "url": "https://gitlab.com/api/v4/projects/some%2Frepo/repository/files/renovate.json?ref=devel",
   },
 ]
 `;
