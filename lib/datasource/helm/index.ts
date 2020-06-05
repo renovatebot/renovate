@@ -3,6 +3,7 @@ import yaml from 'js-yaml';
 import { logger } from '../../logger';
 import * as globalCache from '../../util/cache/global';
 import { Http } from '../../util/http';
+import { ensureTrailingSlash } from '../../util/url';
 import { DatasourceError, GetReleasesConfig, ReleaseResult } from '../common';
 
 export const id = 'helm';
@@ -25,7 +26,9 @@ export async function getRepositoryData(
   }
   let res: any;
   try {
-    res = await http.get('index.yaml', { baseUrl: repository });
+    res = await http.get('index.yaml', {
+      baseUrl: ensureTrailingSlash(repository),
+    });
     if (!res || !res.body) {
       logger.warn(`Received invalid response from ${repository}`);
       return null;

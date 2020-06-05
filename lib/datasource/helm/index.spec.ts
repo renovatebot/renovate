@@ -21,7 +21,7 @@ describe('datasource/helm', () => {
       expect(
         await getReleases({
           lookupName: undefined,
-          registryUrls: ['example-repository.com'],
+          registryUrls: ['https://example-repository.com'],
         })
       ).toBeNull();
     });
@@ -38,7 +38,7 @@ describe('datasource/helm', () => {
       expect(
         await getReleases({
           lookupName: 'non_existent_chart',
-          registryUrls: ['example-repository.com'],
+          registryUrls: ['https://example-repository.com'],
         })
       ).toBeNull();
     });
@@ -49,7 +49,7 @@ describe('datasource/helm', () => {
       expect(
         await getReleases({
           lookupName: 'non_existent_chart',
-          registryUrls: ['example-repository.com'],
+          registryUrls: ['https://example-repository.com'],
         })
       ).toBeNull();
     });
@@ -62,7 +62,7 @@ describe('datasource/helm', () => {
       expect(
         await getReleases({
           lookupName: 'some_chart',
-          registryUrls: ['example-repository.com'],
+          registryUrls: ['https://example-repository.com'],
         })
       ).toBeNull();
     });
@@ -76,7 +76,7 @@ describe('datasource/helm', () => {
       try {
         await getReleases({
           lookupName: 'some_chart',
-          registryUrls: ['example-repository.com'],
+          registryUrls: ['https://example-repository.com'],
         });
       } catch (err) {
         e = err;
@@ -91,7 +91,7 @@ describe('datasource/helm', () => {
       expect(
         await getReleases({
           lookupName: 'some_chart',
-          registryUrls: ['example-repository.com'],
+          registryUrls: ['https://example-repository.com'],
         })
       ).toBeNull();
     });
@@ -100,7 +100,7 @@ describe('datasource/helm', () => {
       got.mockReturnValueOnce(res);
       const releases = await getReleases({
         lookupName: 'non_existent_chart',
-        registryUrls: ['example-repository.com'],
+        registryUrls: ['https://example-repository.com'],
       });
       expect(releases).toBeNull();
     });
@@ -114,7 +114,7 @@ describe('datasource/helm', () => {
       got.mockReturnValueOnce(res);
       const releases = await getReleases({
         lookupName: 'non_existent_chart',
-        registryUrls: ['example-repository.com'],
+        registryUrls: ['https://example-repository.com'],
       });
       expect(releases).toBeNull();
     });
@@ -122,18 +122,28 @@ describe('datasource/helm', () => {
       got.mockReturnValueOnce({ body: indexYaml });
       const releases = await getReleases({
         lookupName: 'non_existent_chart',
-        registryUrls: ['example-repository.com'],
+        registryUrls: ['https://example-repository.com'],
       });
       expect(releases).toBeNull();
     });
-    it('returns list of versions for normal response if index.yaml is not cached', async () => {
+    it('returns list of versions for normal response', async () => {
       got.mockReturnValueOnce({ body: indexYaml });
       const releases = await getReleases({
         lookupName: 'ambassador',
-        registryUrls: ['example-repository.com'],
+        registryUrls: ['https://example-repository.com'],
       });
       expect(releases).not.toBeNull();
       expect(releases).toMatchSnapshot();
+    });
+    it('adds trailing slash to subdirectories', async () => {
+      got.mockReturnValueOnce({ body: indexYaml });
+      await getReleases({
+        lookupName: 'ambassador',
+        registryUrls: ['https://example-repository.com/subdir'],
+      });
+      expect(got.mock.calls[0][0]).toEqual(
+        'https://example-repository.com/subdir/index.yaml'
+      );
     });
   });
 });
