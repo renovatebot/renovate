@@ -34,6 +34,14 @@ function getGlobalConfig(): Promise<RenovateConfig> {
   return configParser.parseConfigs(process.env, process.argv);
 }
 
+function haveReachedLimits(): boolean {
+  if (limits.getLimitRemaining('prCommitsPerRunLimit') <= 0) {
+    logger.info('Max commits created for this run.');
+    return true;
+  }
+  return false;
+}
+
 export async function start(): Promise<0 | 1> {
   try {
     // read global config from file, env and cli args
@@ -44,10 +52,7 @@ export async function start(): Promise<0 | 1> {
     config = await autodiscoverRepositories(config);
     // Iterate through repositories sequentially
     for (const repository of config.repositories) {
-      if (limits.getLimitRemaining('prCommitsPerRunLimit') <= 0) {
-        logger.debug(
-          'Max commits created for this run. Skipping all remaining repositories.'
-        );
+      if (haveReachedLimits()) {
         break;
       }
       const repoConfig = await getRepositoryConfig(config, repository);
