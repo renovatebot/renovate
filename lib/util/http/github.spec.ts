@@ -18,7 +18,7 @@ describe(getName(__filename), () => {
   let githubApi;
   beforeEach(() => {
     githubApi = new GithubHttp();
-    setBaseUrl(githubApiHost);
+    setBaseUrl(githubApiHost, false);
     jest.resetAllMocks();
     httpMock.setup();
   });
@@ -45,7 +45,7 @@ describe(getName(__filename), () => {
         .scope('https://ghe.mycompany.com')
         .post('/graphql')
         .reply(200, {});
-      setBaseUrl('https://ghe.mycompany.com/api/v3/');
+      setBaseUrl('https://ghe.mycompany.com/api/v3/', true);
       await githubApi.postJson('/graphql', {
         body: {},
       });

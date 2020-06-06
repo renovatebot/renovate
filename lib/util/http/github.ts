@@ -15,8 +15,10 @@ import { maskToken } from '../mask';
 import { Http, HttpPostOptions, HttpResponse, InternalHttpOptions } from '.';
 
 let baseUrl = 'https://api.github.com/';
-export const setBaseUrl = (url: string): void => {
+let appMode = false;
+export const setBaseUrl = (url: string, isAppMode: boolean): void => {
   baseUrl = url;
+  appMode = isAppMode;
 };
 
 type GotRequestError<E = unknown, T = unknown> = GotError & {
@@ -165,10 +167,13 @@ export class GithubHttp extends Http<GithubHttpOptions, GithubHttpOptions> {
       opts.baseUrl = opts.baseUrl.replace('/v3/', '/');
     }
     opts.headers = { ...opts.headers };
+    const accept = appMode // TODO: need to check it's the app host
+      ? 'application/vnd.github.machine-man-preview+json'
+      : 'application/vnd.github.v3+json';
     if (opts.headers.accept) {
-      opts.headers.accept = `application/vnd.github.v3+json, ${opts.headers.accept}`;
+      opts.headers.accept = `${accept}, ${opts.headers.accept}`;
     } else {
-      opts.headers.accept = 'application/vnd.github.v3+json';
+      opts.headers.accept = accept;
     }
 
     try {

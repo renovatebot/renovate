@@ -22,17 +22,10 @@ export default create({
         options.hostType === PLATFORM_TYPE_GITEA
       ) {
         /* eslint-disable no-param-reassign */
-        options.headers.authorization = `token ${options.token}`;
-        if (options.token.startsWith('x-access-token:')) {
-          options.headers.authorization = options.headers.authorization.replace(
-            'x-access-token:',
-            ''
-          );
-          options.headers.accept = options.headers.accept.replace(
-            'application/vnd.github.v3+json',
-            'application/vnd.github.machine-man-preview+json'
-          );
-        }
+        options.headers.authorization = `token ${options.token.replace(
+          'x-access-token:',
+          ''
+        )}`;
         /* eslint-enable no-param-reassign */
       } else if (options.hostType === PLATFORM_TYPE_GITLAB) {
         options.headers['Private-token'] = options.token; // eslint-disable-line no-param-reassign

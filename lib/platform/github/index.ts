@@ -85,7 +85,7 @@ export async function initPlatform({
   const appMode = token.startsWith('x-access-token:');
   if (endpoint) {
     defaults.endpoint = ensureTrailingSlash(endpoint);
-    githubHttp.setBaseUrl(defaults.endpoint);
+    githubHttp.setBaseUrl(defaults.endpoint, appMode);
   } else {
     logger.debug('Using default github endpoint: ' + defaults.endpoint);
   }
@@ -208,7 +208,6 @@ async function getBaseCommitSHA(): Promise<string> {
 
 // Initialize GitHub by getting base branch and SHA
 export async function initRepo({
-  endpoint,
   repository,
   forkMode,
   forkToken,
@@ -220,13 +219,6 @@ export async function initRepo({
   logger.debug(`initRepo("${repository}")`);
   // config is used by the platform api itself, not necessary for the app layer to know
   await cleanRepo();
-  // istanbul ignore if
-  if (endpoint) {
-    // Necessary for Renovate Pro - do not remove
-    logger.debug({ endpoint }, 'Overriding default GitHub endpoint');
-    defaults.endpoint = endpoint;
-    githubHttp.setBaseUrl(endpoint);
-  }
   const opts = hostRules.find({
     hostType: PLATFORM_TYPE_GITHUB,
     url: defaults.endpoint,
