@@ -19,9 +19,7 @@ function getPreCommands(): string[] | null {
   if (credentials?.token) {
     /* eslint-disable no-useless-escape */
     preCommands = [
-      `git config --global url.\"https://${quote(
-        credentials.token
-      )}@github.com/\".insteadOf \"https://github.com/\"`,
+      `git config --global url.\"https://${credentials.token}@github.com/\".insteadOf \"https://github.com/\"`,
     ];
     /* eslint-enable no-useless-escape */
   }
