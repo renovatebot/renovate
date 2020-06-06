@@ -125,7 +125,11 @@ export function handleGotError(
     logger.debug({ err }, '422 Error thrown from GitHub');
     throw new Error(PLATFORM_FAILURE);
   }
-  logger.debug({ err }, 'Unknown error fetching GitHub GraphQL');
+  if (err.statusCode === 404) {
+    logger.debug({ url: err.url }, 'GitHub 404');
+  } else {
+    logger.debug({ err }, 'Unknown GitHub error');
+  }
   throw err;
 }
 
