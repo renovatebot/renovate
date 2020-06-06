@@ -41,6 +41,8 @@ const BITBUCKET_PROD_ENDPOINT = 'https://api.bitbucket.org/';
 
 let config: utils.Config = {} as any;
 
+let endpoint_ = BITBUCKET_PROD_ENDPOINT;
+
 export function initPlatform({
   endpoint,
   username,
@@ -55,7 +57,9 @@ export function initPlatform({
     logger.warn(
       `Init: Bitbucket Cloud endpoint should generally be ${BITBUCKET_PROD_ENDPOINT} but is being configured to a different value. Did you mean to use Bitbucket Server?`
     );
+    endpoint_ = endpoint;
   }
+  setBaseUrl(endpoint_);
   // TODO: Add a connection check that endpoint/username/password combination are valid
   const platformConfig: PlatformConfig = {
     endpoint: endpoint || BITBUCKET_PROD_ENDPOINT,
@@ -83,14 +87,12 @@ export async function initRepo({
   localDir,
   optimizeForDisabled,
   bbUseDefaultReviewers,
-  endpoint = BITBUCKET_PROD_ENDPOINT,
 }: RepoParams): Promise<RepoConfig> {
   logger.debug(`initRepo("${repository}")`);
   const opts = hostRules.find({
     hostType: PLATFORM_TYPE_BITBUCKET,
-    url: endpoint,
+    url: endpoint_,
   });
-  setBaseUrl(endpoint);
   config = {
     repository,
     username: opts.username,
@@ -139,7 +141,7 @@ export async function initRepo({
     throw err;
   }
 
-  const { hostname } = URL.parse(endpoint);
+  const { hostname } = URL.parse(endpoint_);
 
   // Converts API hostnames to their respective HTTP git hosts:
   // `api.bitbucket.org`  to `bitbucket.org`
