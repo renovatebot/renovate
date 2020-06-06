@@ -11,6 +11,7 @@ import { setEmojiConfig } from '../../util/emoji';
 import * as hostRules from '../../util/host-rules';
 import * as repositoryWorker from '../repository';
 import { autodiscoverRepositories } from './autodiscover';
+import { initialize } from './initialize';
 import * as limits from './limits';
 
 type RenovateConfig = configParser.RenovateConfig;
@@ -64,9 +65,7 @@ export async function start(): Promise<0 | 1> {
     config = await setDirectories(config);
     globalCache.init(config);
     config = await autodiscoverRepositories(config);
-
-    limits.init(config);
-    setEmojiConfig(config);
+    await initialize(config);
     // Iterate through repositories sequentially
     for (const repository of config.repositories) {
       if (limits.getLimitRemaining('prCommitsPerRunLimit') <= 0) {
