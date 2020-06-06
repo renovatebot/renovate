@@ -1,40 +1,17 @@
-import os from 'os';
 import path from 'path';
 import is from '@sindresorhus/is';
 import fs from 'fs-extra';
 import * as configParser from '../../config';
 import { getErrors, logger, setMeta } from '../../logger';
-import { initPlatform } from '../../platform';
 import { setUtilConfig } from '../../util';
-import * as globalCache from '../../util/cache/global';
-import { setEmojiConfig } from '../../util/emoji';
 import * as hostRules from '../../util/host-rules';
 import * as repositoryWorker from '../repository';
 import { autodiscoverRepositories } from './autodiscover';
+import { globalFinalize, globalInitialize } from './initialize';
 import * as limits from './limits';
 
 type RenovateConfig = configParser.RenovateConfig;
 type RenovateRepository = configParser.RenovateRepository;
-
-async function setDirectories(input: RenovateConfig): Promise<RenovateConfig> {
-  const config: RenovateConfig = { ...input };
-  process.env.TMPDIR = process.env.RENOVATE_TMPDIR || os.tmpdir();
-  if (config.baseDir) {
-    logger.debug('Using configured baseDir: ' + config.baseDir);
-  } else {
-    config.baseDir = path.join(process.env.TMPDIR, 'renovate');
-    logger.debug('Using baseDir: ' + config.baseDir);
-  }
-  await fs.ensureDir(config.baseDir);
-  if (config.cacheDir) {
-    logger.debug('Using configured cacheDir: ' + config.cacheDir);
-  } else {
-    config.cacheDir = path.join(config.baseDir, 'cache');
-    logger.debug('Using cacheDir: ' + config.cacheDir);
-  }
-  await fs.ensureDir(config.cacheDir);
-  return config;
-}
 
 export async function getRepositoryConfig(
   globalConfig: RenovateConfig,
@@ -59,14 +36,12 @@ function getGlobalConfig(): Promise<RenovateConfig> {
 
 export async function start(): Promise<0 | 1> {
   try {
+    // read global config from file, env and cli args
     let config = await getGlobalConfig();
-    config = await initPlatform(config);
-    config = await setDirectories(config);
-    globalCache.init(config);
+    // initialize all submodules
+    config = await globalInitialize(config);
+    // autodiscover repositories (needs to come after platform initialization)
     config = await autodiscoverRepositories(config);
-
-    limits.init(config);
-    setEmojiConfig(config);
     // Iterate through repositories sequentially
     for (const repository of config.repositories) {
       if (limits.getLimitRemaining('prCommitsPerRunLimit') <= 0) {
@@ -83,9 +58,9 @@ export async function start(): Promise<0 | 1> {
         repoConfig.hostRules = [];
       }
       await repositoryWorker.renovateRepository(repoConfig);
+      setMeta({});
     }
-    setMeta({});
-    globalCache.cleanup(config);
+    globalFinalize(config);
     logger.debug(`Renovate exiting successfully`);
   } catch (err) /* istanbul ignore next */ {
     if (err.message.startsWith('Init: ')) {
