@@ -73,14 +73,16 @@ const escapeHash = (input: string): string =>
 export async function initPlatform({
   endpoint,
   token,
+  username,
 }: {
   endpoint: string;
   token: string;
+  username: string;
 }): Promise<PlatformConfig> {
   if (!token) {
-    throw new Error('Init: You must configure a GitHub personal access token');
+    throw new Error('Init: You must configure a GitHub token');
   }
-
+  const appMode = token.startsWith('x-access-token:');
   if (endpoint) {
     defaults.endpoint = ensureTrailingSlash(endpoint);
     githubHttp.setBaseUrl(defaults.endpoint);
@@ -89,44 +91,50 @@ export async function initPlatform({
   }
   let gitAuthor: string;
   let renovateUsername: string;
-  try {
-    const userData = (
-      await githubApi.getJson<{ login: string; name: string }>(
-        defaults.endpoint + 'user',
-        {
-          token,
-        }
-      )
-    ).body;
-    renovateUsername = userData.login;
-    gitAuthor = userData.name;
-  } catch (err) {
-    logger.debug({ err }, 'Error authenticating with GitHub');
-    throw new Error('Init: Authentication failure');
-  }
-  try {
-    const userEmail = (
-      await githubApi.getJson<{ email: string }[]>(
-        defaults.endpoint + 'user/emails',
-        {
-          token,
-        }
-      )
-    ).body;
-    if (userEmail.length && userEmail[0].email) {
-      gitAuthor += ` <${userEmail[0].email}>`;
-    } else {
-      logger.debug('Cannot find an email address for Renovate user');
+  if (appMode) {
+    renovateUsername = username;
+    gitAuthor = `${username}@noreply.users.github.com`;
+  } else {
+    try {
+      const userData = (
+        await githubApi.getJson<{ login: string; name: string }>(
+          defaults.endpoint + 'user',
+          {
+            token,
+          }
+        )
+      ).body;
+      renovateUsername = userData.login;
+      gitAuthor = userData.name;
+    } catch (err) {
+      logger.debug({ err }, 'Error authenticating with GitHub');
+      throw new Error('Init: Authentication failure');
+    }
+    try {
+      const userEmail = (
+        await githubApi.getJson<{ email: string }[]>(
+          defaults.endpoint + 'user/emails',
+          {
+            token,
+          }
+        )
+      ).body;
+      if (userEmail.length && userEmail[0].email) {
+        gitAuthor += ` <${userEmail[0].email}>`;
+      } else {
+        logger.debug('Cannot find an email address for Renovate user');
+        gitAuthor = undefined;
+      }
+    } catch (err) {
+      logger.debug(
+        'Cannot read user/emails endpoint on GitHub to retrieve gitAuthor'
+      );
       gitAuthor = undefined;
     }
-  } catch (err) {
-    logger.debug(
-      'Cannot read user/emails endpoint on GitHub to retrieve gitAuthor'
-    );
-    gitAuthor = undefined;
   }
   logger.debug('Authenticated as GitHub user: ' + renovateUsername);
   const platformConfig: PlatformConfig = {
+    appMode,
     endpoint: defaults.endpoint,
     gitAuthor,
     renovateUsername,
@@ -419,11 +427,8 @@ export async function initRepo({
   if (forkMode) {
     logger.debug('Using forkToken for git init');
     parsedEndpoint.auth = config.forkToken;
-  } else if (global.appMode) {
-    logger.debug('Using app token for git init');
-    parsedEndpoint.auth = `x-access-token:${opts.token}`;
   } else {
-    logger.debug('Using personal access token for git init');
+    logger.debug('Using github token for git init');
     parsedEndpoint.auth = opts.token;
   }
   parsedEndpoint.host = parsedEndpoint.host.replace(

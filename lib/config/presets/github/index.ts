@@ -15,9 +15,7 @@ export async function fetchJSONFile(
   const url = `${endpoint}repos/${repo}/contents/${fileName}`;
   const opts: HttpOptions = {
     headers: {
-      accept: global.appMode
-        ? 'application/vnd.github.machine-man-preview+json'
-        : 'application/vnd.github.v3+json',
+      accept: 'application/vnd.github.v3+json',
     },
   };
   let res: { body: { content: string } };

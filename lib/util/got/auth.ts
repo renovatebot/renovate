@@ -21,7 +21,19 @@ export default create({
         options.hostType === PLATFORM_TYPE_GITHUB ||
         options.hostType === PLATFORM_TYPE_GITEA
       ) {
-        options.headers.authorization = `token ${options.token}`; // eslint-disable-line no-param-reassign
+        /* eslint-disable no-param-reassign */
+        options.headers.authorization = `token ${options.token}`;
+        if (options.token.startsWith('x-access-token:')) {
+          options.headers.authorization = options.headers.authorization.replace(
+            'x-access-token:',
+            ''
+          );
+          options.headers.accept = options.headers.accept.replace(
+            'application/vnd.github.v3+json',
+            'application/vnd.github.machine-man-preview+json'
+          );
+        }
+        /* eslint-enable no-param-reassign */
       } else if (options.hostType === PLATFORM_TYPE_GITLAB) {
         options.headers['Private-token'] = options.token; // eslint-disable-line no-param-reassign
       } else {

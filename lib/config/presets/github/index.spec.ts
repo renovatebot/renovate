@@ -118,16 +118,11 @@ describe('config/presets/github', () => {
           content: Buffer.from('{"foo":"bar"}').toString('base64'),
         },
       }));
-      try {
-        global.appMode = true;
-        const content = await github.getPreset({
-          packageName: 'some/repo',
-          presetName: 'custom',
-        });
-        expect(content).toEqual({ foo: 'bar' });
-      } finally {
-        delete global.appMode;
-      }
+      const content = await github.getPreset({
+        packageName: 'some/repo',
+        presetName: 'custom',
+      });
+      expect(content).toEqual({ foo: 'bar' });
     });
   });
 

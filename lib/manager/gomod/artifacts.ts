@@ -16,14 +16,14 @@ function getPreCommands(): string[] | null {
     url: 'https://api.github.com/',
   });
   let preCommands = null;
-  if (credentials && credentials.token) {
-    let token = global.appMode
-      ? `x-access-token:${credentials.token}`
-      : credentials.token;
-    token = quote(token);
+  if (credentials?.token) {
+    /* eslint-disable no-useless-escape */
     preCommands = [
-      `git config --global url.\"https://${token}@github.com/\".insteadOf \"https://github.com/\"`, // eslint-disable-line no-useless-escape
+      `git config --global url.\"https://${quote(
+        credentials.token
+      )}@github.com/\".insteadOf \"https://github.com/\"`,
     ];
+    /* eslint-enable no-useless-escape */
   }
   return preCommands;
 }

@@ -57,19 +57,26 @@ export async function initPlatform(
     gitAuthor = platformInfo.gitAuthor;
   }
   let gitAuthorParsed: addrs.ParsedMailbox | null = null;
-  try {
-    gitAuthorParsed = addrs.parseOneAddress(gitAuthor) as addrs.ParsedMailbox;
-  } catch (err) /* istanbul ignore next */ {
-    logger.debug({ gitAuthor, err }, 'Error parsing gitAuthor');
+  if (gitAuthor.endsWith('@noreply.users.github.com')) {
+    global.gitAuthor = {
+      name: gitAuthor.split('@')[0],
+      email: gitAuthor,
+    };
+  } else {
+    try {
+      gitAuthorParsed = addrs.parseOneAddress(gitAuthor) as addrs.ParsedMailbox;
+    } catch (err) /* istanbul ignore next */ {
+      logger.debug({ gitAuthor, err }, 'Error parsing gitAuthor');
+    }
+    // istanbul ignore if
+    if (!gitAuthorParsed) {
+      throw new Error('Init: gitAuthor is not parsed as valid RFC5322 format');
+    }
+    global.gitAuthor = {
+      name: gitAuthorParsed.name,
+      email: gitAuthorParsed.address,
+    };
   }
-  // istanbul ignore if
-  if (!gitAuthorParsed) {
-    throw new Error('Init: gitAuthor is not parsed as valid RFC5322 format');
-  }
-  global.gitAuthor = {
-    name: gitAuthorParsed.name,
-    email: gitAuthorParsed.address,
-  };
   // TODO: types
   const platformRule: any = {
     hostType: returnConfig.platform,

@@ -20,7 +20,6 @@ describe(getName(__filename), () => {
     githubApi = new GithubHttp();
     setBaseUrl(githubApiHost);
     jest.resetAllMocks();
-    delete global.appMode;
     httpMock.setup();
   });
 
@@ -40,19 +39,6 @@ describe(getName(__filename), () => {
 
     beforeEach(() => {
       (delay as any).mockImplementation(() => Promise.resolve());
-    });
-
-    it('supports app mode', async () => {
-      httpMock.scope(githubApiHost).get('/some-url').reply(200);
-      global.appMode = true;
-      await githubApi.get('/some-url', {
-        headers: { accept: 'some-accept' },
-      });
-      const [req] = httpMock.getTrace();
-      expect(req).toBeDefined();
-      expect(req.headers.accept).toBe(
-        'application/vnd.github.machine-man-preview+json, some-accept'
-      );
     });
     it('strips v3 for graphql', async () => {
       httpMock
@@ -236,17 +222,6 @@ describe(getName(__filename), () => {
           }
         }
       }`;
-
-    it('supports app mode', async () => {
-      httpMock.scope(githubApiHost).post('/graphql').reply(200, {});
-      global.appMode = true;
-      await githubApi.getGraphqlNodes(query, 'testItem', { paginate: false });
-      const [req] = httpMock.getTrace();
-      expect(req).toBeDefined();
-      expect(req.headers.accept).toBe(
-        'application/vnd.github.machine-man-preview+json, application/vnd.github.merge-info-preview+json'
-      );
-    });
     it('returns empty array for undefined data', async () => {
       httpMock
         .scope(githubApiHost)

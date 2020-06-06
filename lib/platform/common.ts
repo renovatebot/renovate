@@ -3,6 +3,7 @@ import Git from 'simple-git/promise';
 import { RenovateConfig } from '../config/common';
 import {
   BranchStatus,
+  HostRule,
   VulnerabilityAlert as _VulnerabilityAlert,
 } from '../types';
 
@@ -73,6 +74,8 @@ export interface PlatformConfig {
   endpoint: string;
   renovateUsername?: any;
   gitAuthor?: any;
+  appMode?: boolean;
+  hostRules?: HostRule[];
 }
 
 export interface RepoConfig {

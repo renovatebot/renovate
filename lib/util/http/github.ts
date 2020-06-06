@@ -164,17 +164,11 @@ export class GithubHttp extends Http<GithubHttpOptions, GithubHttpOptions> {
       // GitHub Enterprise uses unversioned graphql path
       opts.baseUrl = opts.baseUrl.replace('/v3/', '/');
     }
-
-    if (global.appMode) {
-      const accept = 'application/vnd.github.machine-man-preview+json';
-      opts.headers = {
-        accept,
-        ...opts.headers,
-      };
-      const optsAccept = opts?.headers?.accept;
-      if (typeof optsAccept === 'string' && !optsAccept.includes(accept)) {
-        opts.headers.accept = `${accept}, ${opts.headers.accept}`;
-      }
+    opts.headers = { ...opts.headers };
+    if (opts.headers.accept) {
+      opts.headers.accept = `application/vnd.github.v3+json, ${opts.headers.accept}`;
+    } else {
+      opts.headers.accept = 'application/vnd.github.v3+json';
     }
 
     try {

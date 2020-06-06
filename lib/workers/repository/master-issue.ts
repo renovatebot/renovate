@@ -193,7 +193,7 @@ export async function ensureMasterIssue(
   }
 
   // istanbul ignore if
-  if (global.appMode) {
+  if (config.appMode) {
     issueBody +=
       '---\n<details><summary>Advanced</summary>\n\n- [ ] <!-- manual job -->Check this box to trigger a request for Renovate to run again on this repository\n\n</details>\n';
   }
