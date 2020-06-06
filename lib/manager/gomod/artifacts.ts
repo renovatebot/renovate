@@ -1,5 +1,4 @@
 import { ensureDir } from 'fs-extra';
-import { quote } from 'shlex';
 import { dirname, join } from 'upath';
 import { PLATFORM_TYPE_GITHUB } from '../../constants/platforms';
 import { logger } from '../../logger';
