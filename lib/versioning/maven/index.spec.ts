@@ -67,6 +67,7 @@ describe('versioning/maven/compare', () => {
     expect(compare('1', '2')).toEqual(-1);
     expect(compare('1-snapshot', '1')).toEqual(-1);
     expect(compare('1-snap', '1')).toEqual(-1);
+    expect(compare('1.2.3-snap1', '1.2.3-snap2')).toEqual(-1);
     expect(compare('1', '1-sp')).toEqual(-1);
     expect(compare('1-foo2', '1-foo10')).toEqual(-1);
     expect(compare('1-m1', '1-milestone-2')).toEqual(-1);
@@ -89,6 +90,7 @@ describe('versioning/maven/compare', () => {
     expect(compare('2', '1')).toEqual(1);
     expect(compare('1', '1-snapshot')).toEqual(1);
     expect(compare('1', '1-snap')).toEqual(1);
+    expect(compare('1.2.3-snap2', '1.2.3-snap1')).toEqual(1);
     expect(compare('1-sp', '1')).toEqual(1);
     expect(compare('1-foo10', '1-foo2')).toEqual(1);
     expect(compare('1-milestone-2', '1-m1')).toEqual(1);
