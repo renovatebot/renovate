@@ -24,6 +24,7 @@ export async function fetchJSONFile(
   try {
     res = await http.getJson(url, opts);
   } catch (err) {
+    // istanbul ignore if: not testable with nock
     if (err.message === PLATFORM_FAILURE) {
       throw err;
     }
