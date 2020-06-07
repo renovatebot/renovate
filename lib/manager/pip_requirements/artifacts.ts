@@ -1,7 +1,7 @@
 import is from '@sindresorhus/is';
 import { logger } from '../../logger';
 import { ExecOptions, exec } from '../../util/exec';
-import { readLocalFile, writeLocalFile } from '../../util/fs';
+import { readLocalFile } from '../../util/fs';
 import { UpdateArtifact, UpdateArtifactsResult } from '../common';
 
 export async function updateArtifacts({
@@ -10,7 +10,6 @@ export async function updateArtifacts({
   newPackageFileContent,
   config,
 }: UpdateArtifact): Promise<UpdateArtifactsResult[] | null> {
-  debugger;
   logger.debug(`pip_requirements.updateArtifacts(${packageFileName})`);
   if (!is.nonEmptyArray(updatedDeps)) {
     logger.debug('No updated pip_requirements deps - returning null');
