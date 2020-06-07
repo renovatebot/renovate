@@ -144,6 +144,27 @@ describe(getName(__filename), () => {
       }
       expect(httpMock.getTrace()).toMatchSnapshot();
     });
+
+    it('should return undefined', async () => {
+      httpMock
+        .scope(githubApiHost)
+        .get(`${basePath}/somefile.json`)
+        .reply(200, {
+          content: Buffer.from('{}').toString('base64'),
+        });
+
+      try {
+        global.appMode = true;
+        const content = await github.getPreset({
+          packageName: 'some/repo',
+          presetName: 'somefile/somename/somesubname',
+        });
+        expect(content).toBeUndefined();
+      } finally {
+        delete global.appMode;
+      }
+      expect(httpMock.getTrace()).toMatchSnapshot();
+    });
   });
 
   describe('getPresetFromEndpoint()', () => {
