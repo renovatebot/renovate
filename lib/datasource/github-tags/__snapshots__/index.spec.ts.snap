@@ -4,7 +4,7 @@ exports[`datasource/github-tags getDigest returns commit digest 1`] = `
 Array [
   Object {
     "headers": Object {
-      "accept": "application/json",
+      "accept": "application/vnd.github.v3+json",
       "accept-encoding": "gzip, deflate",
       "authorization": "token some-token",
       "host": "api.github.com",
@@ -20,7 +20,7 @@ exports[`datasource/github-tags getDigest returns digest 1`] = `
 Array [
   Object {
     "headers": Object {
-      "accept": "application/json",
+      "accept": "application/vnd.github.v3+json",
       "accept-encoding": "gzip, deflate",
       "authorization": "token some-token",
       "host": "api.github.com",
@@ -36,7 +36,7 @@ exports[`datasource/github-tags getDigest returns null for missed tagged digest 
 Array [
   Object {
     "headers": Object {
-      "accept": "application/json",
+      "accept": "application/vnd.github.v3+json",
       "accept-encoding": "gzip, deflate",
       "authorization": "token some-token",
       "host": "api.github.com",
@@ -52,7 +52,7 @@ exports[`datasource/github-tags getDigest returns null if no token 1`] = `
 Array [
   Object {
     "headers": Object {
-      "accept": "application/json",
+      "accept": "application/vnd.github.v3+json",
       "accept-encoding": "gzip, deflate",
       "authorization": "token some-token",
       "host": "api.github.com",
@@ -68,7 +68,7 @@ exports[`datasource/github-tags getDigest returns tagged commit digest 1`] = `
 Array [
   Object {
     "headers": Object {
-      "accept": "application/json",
+      "accept": "application/vnd.github.v3+json",
       "accept-encoding": "gzip, deflate",
       "authorization": "token some-token",
       "host": "api.github.com",
@@ -79,7 +79,7 @@ Array [
   },
   Object {
     "headers": Object {
-      "accept": "application/json",
+      "accept": "application/vnd.github.v3+json",
       "accept-encoding": "gzip, deflate",
       "authorization": "token some-token",
       "host": "api.github.com",
@@ -95,7 +95,7 @@ exports[`datasource/github-tags getDigest warns if unknown ref 1`] = `
 Array [
   Object {
     "headers": Object {
-      "accept": "application/json",
+      "accept": "application/vnd.github.v3+json",
       "accept-encoding": "gzip, deflate",
       "authorization": "token some-token",
       "host": "api.github.com",
@@ -127,7 +127,7 @@ exports[`datasource/github-tags getReleases returns tags 2`] = `
 Array [
   Object {
     "headers": Object {
-      "accept": "application/json",
+      "accept": "application/vnd.github.v3+json",
       "accept-encoding": "gzip, deflate",
       "authorization": "token some-token",
       "host": "api.github.com",

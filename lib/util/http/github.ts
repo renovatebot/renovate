@@ -165,16 +165,17 @@ export class GithubHttp extends Http<GithubHttpOptions, GithubHttpOptions> {
       opts.baseUrl = opts.baseUrl.replace('/v3/', '/');
     }
 
-    if (global.appMode) {
-      const accept = 'application/vnd.github.machine-man-preview+json';
-      opts.headers = {
-        accept,
-        ...opts.headers,
-      };
-      const optsAccept = opts?.headers?.accept;
-      if (typeof optsAccept === 'string' && !optsAccept.includes(accept)) {
-        opts.headers.accept = `${accept}, ${opts.headers.accept}`;
-      }
+    const accept = global.appMode
+      ? 'application/vnd.github.machine-man-preview+json'
+      : 'application/vnd.github.v3+json';
+
+    opts.headers = {
+      accept,
+      ...opts.headers,
+    };
+    const optsAccept = opts.headers.accept;
+    if (typeof optsAccept === 'string' && !optsAccept.includes(accept)) {
+      opts.headers.accept = `${accept}, ${optsAccept}`;
     }
 
     try {
