@@ -185,7 +185,7 @@ export function qualifierType(token: Token): number {
   if (val === 'rc' || val === 'cr') {
     return QualifierTypes.RC;
   }
-  if (val === 'snapshot') {
+  if (val === 'snapshot' || val === 'snap') {
     return QualifierTypes.Snapshot;
   }
   if (
