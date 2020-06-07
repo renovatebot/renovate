@@ -65,14 +65,15 @@ export async function start(): Promise<0 | 1> {
       await repositoryWorker.renovateRepository(repoConfig);
       setMeta({});
     }
-    globalFinalize(config);
-    logger.debug(`Renovate exiting successfully`);
   } catch (err) /* istanbul ignore next */ {
     if (err.message.startsWith('Init: ')) {
       logger.fatal(err.message.substring(6));
     } else {
       logger.fatal({ err }, `Fatal error: ${err.message}`);
     }
+  } finally {
+    globalFinalize(config);
+    logger.debug(`Renovate exiting`);
   }
   const loggerErrors = getErrors();
   /* istanbul ignore if */
