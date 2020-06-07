@@ -32,7 +32,7 @@ exports[`datasource/github-releases getReleases returns releases 2`] = `
 Array [
   Object {
     "headers": Object {
-      "accept": "application/json",
+      "accept": "application/vnd.github.v3+json",
       "accept-encoding": "gzip, deflate",
       "authorization": "token some-token",
       "host": "api.github.com",
