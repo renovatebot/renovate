@@ -26,7 +26,8 @@ export async function commitFilesToBranch(
     logger.debug(`No files to commit`);
     return null;
   }
-  logger.debug(`${updatedFiles.length} file(s) to commit`);
+  const fileLength = [...new Set(updatedFiles.map((file) => file.name))].length;
+  logger.debug(`${fileLength} file(s) to commit`);
   // istanbul ignore if
   if (config.dryRun) {
     logger.info('DRY-RUN: Would commit files to branch ' + config.branchName);

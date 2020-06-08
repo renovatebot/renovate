@@ -1,5 +1,6 @@
 import url from 'url';
 import is from '@sindresorhus/is';
+import changelogFilenameRegex from 'changelog-filename-regex';
 import { parse } from 'node-html-parser';
 import { logger } from '../../logger';
 import { Http } from '../../util/http';
@@ -83,17 +84,34 @@ async function getDependency(
       }
     }
 
-    if (dep.info?.project_urls && !dependency.sourceUrl) {
+    if (dep.info?.project_urls) {
       for (const [name, projectUrl] of Object.entries(dep.info.project_urls)) {
         const lower = name.toLowerCase();
+
         if (
-          lower.startsWith('repo') ||
-          lower === 'code' ||
-          lower === 'source' ||
-          github_repo_pattern.exec(projectUrl)
+          !dependency.sourceUrl &&
+          (lower.startsWith('repo') ||
+            lower === 'code' ||
+            lower === 'source' ||
+            github_repo_pattern.exec(projectUrl))
         ) {
           dependency.sourceUrl = projectUrl;
-          break;
+        }
+
+        if (
+          !dependency.changelogUrl &&
+          ([
+            'changelog',
+            'change log',
+            'changes',
+            'release notes',
+            'news',
+            "what's new",
+          ].includes(lower) ||
+            changelogFilenameRegex.exec(lower))
+        ) {
+          // from https://github.com/pypa/warehouse/blob/418c7511dc367fb410c71be139545d0134ccb0df/warehouse/templates/packaging/detail.html#L24
+          dependency.changelogUrl = projectUrl;
         }
       }
     }

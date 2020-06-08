@@ -125,7 +125,11 @@ export function handleGotError(
     logger.debug({ err }, '422 Error thrown from GitHub');
     throw new Error(PLATFORM_FAILURE);
   }
-  logger.debug({ err }, 'Unknown error fetching GitHub GraphQL');
+  if (err.statusCode === 404) {
+    logger.debug({ url: err.url }, 'GitHub 404');
+  } else {
+    logger.debug({ err }, 'Unknown GitHub error');
+  }
   throw err;
 }
 
@@ -161,16 +165,17 @@ export class GithubHttp extends Http<GithubHttpOptions, GithubHttpOptions> {
       opts.baseUrl = opts.baseUrl.replace('/v3/', '/');
     }
 
-    if (global.appMode) {
-      const accept = 'application/vnd.github.machine-man-preview+json';
-      opts.headers = {
-        accept,
-        ...opts.headers,
-      };
-      const optsAccept = opts?.headers?.accept;
-      if (typeof optsAccept === 'string' && !optsAccept.includes(accept)) {
-        opts.headers.accept = `${accept}, ${opts.headers.accept}`;
-      }
+    const accept = global.appMode
+      ? 'application/vnd.github.machine-man-preview+json'
+      : 'application/vnd.github.v3+json';
+
+    opts.headers = {
+      accept,
+      ...opts.headers,
+    };
+    const optsAccept = opts.headers.accept;
+    if (typeof optsAccept === 'string' && !optsAccept.includes(accept)) {
+      opts.headers.accept = `${accept}, ${optsAccept}`;
     }
 
     try {

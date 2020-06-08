@@ -1,12 +1,14 @@
 import * as httpMock from '../../../../test/httpMock';
 import { getName, mocked } from '../../../../test/util';
 import * as _hostRules from '../../../util/host-rules';
+import { PRESET_NOT_FOUND } from '../util';
 import * as github from '.';
 
 jest.mock('../../../util/host-rules');
 
 const hostRules = mocked(_hostRules);
 
+const githubApiHost = 'https://api.github.com/';
 const basePath = '/repos/some/repo/contents';
 
 describe(getName(__filename), () => {
@@ -20,7 +22,7 @@ describe(getName(__filename), () => {
   describe('fetchJSONFile()', () => {
     it('returns JSON', async () => {
       httpMock
-        .scope(github.Endpoint)
+        .scope(githubApiHost)
         .get(`${basePath}/some-filename.json`)
         .reply(200, {
           content: Buffer.from('{"from":"api"}').toString('base64'),
@@ -39,7 +41,7 @@ describe(getName(__filename), () => {
   describe('getPreset()', () => {
     it('tries default then renovate', async () => {
       httpMock
-        .scope(github.Endpoint)
+        .scope(githubApiHost)
         .get(`${basePath}/default.json`)
         .reply(500, {})
         .get(`${basePath}/renovate.json`)
@@ -53,7 +55,7 @@ describe(getName(__filename), () => {
 
     it('throws if no content', async () => {
       httpMock
-        .scope(github.Endpoint)
+        .scope(githubApiHost)
         .get(`${basePath}/default.json`)
         .reply(200, {});
 
@@ -65,7 +67,7 @@ describe(getName(__filename), () => {
 
     it('throws if fails to parse', async () => {
       httpMock
-        .scope(github.Endpoint)
+        .scope(githubApiHost)
         .get(`${basePath}/default.json`)
         .reply(200, {
           content: Buffer.from('not json').toString('base64'),
@@ -79,7 +81,7 @@ describe(getName(__filename), () => {
 
     it('should return default.json', async () => {
       httpMock
-        .scope(github.Endpoint)
+        .scope(githubApiHost)
         .get(`${basePath}/default.json`)
         .reply(200, {
           content: Buffer.from('{"foo":"bar"}').toString('base64'),
@@ -92,7 +94,7 @@ describe(getName(__filename), () => {
 
     it('should query preset within the file', async () => {
       httpMock
-        .scope(github.Endpoint)
+        .scope(githubApiHost)
         .get(`${basePath}/somefile.json`)
         .reply(200, {
           content: Buffer.from('{"somename":{"foo":"bar"}}').toString('base64'),
@@ -107,7 +109,7 @@ describe(getName(__filename), () => {
 
     it('should query subpreset', async () => {
       httpMock
-        .scope(github.Endpoint)
+        .scope(githubApiHost)
         .get(`${basePath}/somefile.json`)
         .reply(200, {
           content: Buffer.from(
@@ -125,7 +127,7 @@ describe(getName(__filename), () => {
 
     it('should return custom.json', async () => {
       httpMock
-        .scope(github.Endpoint)
+        .scope(githubApiHost)
         .get(`${basePath}/custom.json`)
         .reply(200, {
           content: Buffer.from('{"foo":"bar"}').toString('base64'),
@@ -143,12 +145,34 @@ describe(getName(__filename), () => {
       }
       expect(httpMock.getTrace()).toMatchSnapshot();
     });
+
+    it('should throws not-found', async () => {
+      httpMock
+        .scope(githubApiHost)
+        .get(`${basePath}/somefile.json`)
+        .reply(200, {
+          content: Buffer.from('{}').toString('base64'),
+        });
+
+      try {
+        global.appMode = true;
+        await expect(
+          github.getPreset({
+            packageName: 'some/repo',
+            presetName: 'somefile/somename/somesubname',
+          })
+        ).rejects.toThrow(PRESET_NOT_FOUND);
+      } finally {
+        delete global.appMode;
+      }
+      expect(httpMock.getTrace()).toMatchSnapshot();
+    });
   });
 
   describe('getPresetFromEndpoint()', () => {
     it('uses default endpoint', async () => {
       httpMock
-        .scope(github.Endpoint)
+        .scope(githubApiHost)
         .get(`${basePath}/default.json`)
         .reply(200, {
           content: Buffer.from('{"from":"api"}').toString('base64'),

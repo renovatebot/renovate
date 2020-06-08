@@ -86,6 +86,22 @@ Array [
 ]
 `;
 
+exports[`config/presets/github/index getPreset() should throws not-found 1`] = `
+Array [
+  Object {
+    "headers": Object {
+      "accept": "application/vnd.github.machine-man-preview+json",
+      "accept-encoding": "gzip, deflate",
+      "authorization": "token abc",
+      "host": "api.github.com",
+      "user-agent": "https://github.com/renovatebot/renovate",
+    },
+    "method": "GET",
+    "url": "https://api.github.com/repos/some/repo/contents/somefile.json",
+  },
+]
+`;
+
 exports[`config/presets/github/index getPreset() throws if fails to parse 1`] = `
 Array [
   Object {
