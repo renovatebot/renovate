@@ -86,7 +86,7 @@ Array [
 ]
 `;
 
-exports[`config/presets/github/index getPreset() should return undefined 1`] = `
+exports[`config/presets/github/index getPreset() should throws not-found 1`] = `
 Array [
   Object {
     "headers": Object {
