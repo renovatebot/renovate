@@ -8,7 +8,7 @@ jest.mock('../../../util/host-rules');
 
 const hostRules = mocked(_hostRules);
 
-const githubApiHost = 'https://api.github.com/';
+const githubApiHost = github.Endpoint;
 const basePath = '/repos/some/repo/contents';
 
 describe(getName(__filename), () => {
@@ -31,7 +31,7 @@ describe(getName(__filename), () => {
       const res = await github.fetchJSONFile(
         'some/repo',
         'some-filename.json',
-        'https://api.github.com/'
+        githubApiHost
       );
       expect(res).toMatchSnapshot();
       expect(httpMock.getTrace()).toMatchSnapshot();

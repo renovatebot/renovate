@@ -1,4 +1,3 @@
-/* eslint-disable @typescript-eslint/no-floating-promises */
 import { getName } from '../../../test/util';
 import { Preset } from './common';
 import {
