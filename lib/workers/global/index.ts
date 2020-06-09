@@ -43,9 +43,10 @@ function haveReachedLimits(): boolean {
 }
 
 export async function start(): Promise<0 | 1> {
+  let config: RenovateConfig;
   try {
     // read global config from file, env and cli args
-    let config = await getGlobalConfig();
+    config = await getGlobalConfig();
     // initialize all submodules
     config = await globalInitialize(config);
     // autodiscover repositories (needs to come after platform initialization)
