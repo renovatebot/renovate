@@ -137,6 +137,14 @@ function kotlinPluginVariableVersionFormatMatch(
   );
 }
 
+function dependencyStringVariableExpressionFormatMatch(
+  dependency: GradleDependency
+): RegExp {
+  return regEx(
+    `\\s*dependency\\s+['"]${dependency.group}:${dependency.name}:([^'"]+)['"](?:\\s|;|})`
+  );
+}
+
 function variableDefinitionFormatMatch(variable: string): RegExp {
   return regEx(`(${variable}\\s*=\\s*?["'])(.*)(["'])`);
 }
@@ -162,15 +170,21 @@ export function collectVersionVariables(
       moduleStringVariableInterpolationVersionFormatMatch(dependency),
       groovyPluginVariableVersionFormatMatch(dependency),
       kotlinPluginVariableVersionFormatMatch(dependency),
+      dependencyStringVariableExpressionFormatMatch(dependency),
       ...moduleMapVariableVersionFormatMatch(dependency),
       ...moduleKotlinNamedArgumentVariableVersionFormatMatch(dependency),
     ];
 
+    const depName = `${dependency.group}:${dependency.name}`;
     for (const regex of regexes) {
       const match = regex.exec(buildGradleContent);
       if (match) {
-        variables[`${dependency.group}:${dependency.name}`] = match[1];
+        variables[depName] = match[1];
       }
+    }
+
+    if (!dep.currentValue && variables[depName]) {
+      dep.currentValue = variables[depName];
     }
   }
 }
