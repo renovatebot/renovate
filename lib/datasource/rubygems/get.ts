@@ -2,6 +2,7 @@ import { OutgoingHttpHeaders } from 'http';
 import { logger } from '../../logger';
 import { Http } from '../../util/http';
 import { maskToken } from '../../util/mask';
+import { ensureTrailingSlash } from '../../util/url';
 import { ReleaseResult } from '../common';
 import { id } from './common';
 import { FORBIDDEN, NOT_FOUND, UNAUTHORIZED } from './errors';
@@ -39,7 +40,7 @@ const fetch = async ({ dependency, registry, path }): Promise<any> => {
   const headers = getHeaders();
 
   const name = `${path}/${dependency}.json`;
-  const baseUrl = registry;
+  const baseUrl = ensureTrailingSlash(registry);
 
   logger.trace({ dependency }, `RubyGems lookup request: ${baseUrl} ${name}`);
   const response = (await http.getJson(name, { baseUrl, headers })) || {

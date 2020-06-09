@@ -3,13 +3,14 @@ import path from 'path';
 import _fs from 'fs-extra';
 import { envMock, mockExecAll } from '../../../../test/execUtil';
 import { mocked } from '../../../../test/util';
-import * as npmHelper from '../../../manager/npm/post-update/npm';
 import { BinarySource } from '../../../util/exec/common';
 import * as _env from '../../../util/exec/env';
+import * as npmHelper from './npm';
 
 jest.mock('fs-extra');
 jest.mock('child_process');
 jest.mock('../../../util/exec/env');
+jest.mock('./node-version');
 
 const exec: jest.Mock<typeof _exec> = _exec as any;
 const env = mocked(_env);
@@ -25,12 +26,17 @@ describe('generateLockFile', () => {
     const execSnapshots = mockExecAll(exec);
     fs.readFile = jest.fn(() => 'package-lock-contents') as never;
     const skipInstalls = true;
+    const dockerMapDotfiles = true;
     const postUpdateOptions = ['npmDedupe'];
+    const updates = [
+      { depName: 'some-dep', toVersion: '1.0.1', isLockfileUpdate: false },
+    ];
     const res = await npmHelper.generateLockFile(
       'some-dir',
       {},
       'package-lock.json',
-      { skipInstalls, postUpdateOptions }
+      { dockerMapDotfiles, skipInstalls, postUpdateOptions },
+      updates
     );
     expect(fs.readFile).toHaveBeenCalledTimes(1);
     expect(res.error).toBeUndefined();
@@ -160,9 +166,24 @@ describe('generateLockFile', () => {
       'some-dir',
       {},
       'package-lock.json',
-      { binarySource: BinarySource.Docker }
+      { binarySource: BinarySource.Docker, compatibility: { npm: '^6.0.0' } }
     );
     expect(fs.readFile).toHaveBeenCalledTimes(1);
+    expect(res.lockFile).toEqual('package-lock-contents');
+    expect(execSnapshots).toMatchSnapshot();
+  });
+  it('performs lock file maintenance', async () => {
+    const execSnapshots = mockExecAll(exec);
+    fs.readFile = jest.fn(() => 'package-lock-contents') as never;
+    const res = await npmHelper.generateLockFile(
+      'some-dir',
+      {},
+      'package-lock.json',
+      {},
+      [{ isLockFileMaintenance: true }]
+    );
+    expect(fs.readFile).toHaveBeenCalledTimes(1);
+    expect(fs.remove).toHaveBeenCalledTimes(1);
     expect(res.lockFile).toEqual('package-lock-contents');
     expect(execSnapshots).toMatchSnapshot();
   });

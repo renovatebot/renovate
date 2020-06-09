@@ -443,32 +443,15 @@ export function getAllRenovateBranches(
   return config.storage.getAllRenovateBranches(branchPrefix);
 }
 
-export async function commitFiles({
-  branchName,
-  files,
-  message,
-}: CommitFilesConfig): Promise<string | null> {
-  logger.debug(
-    `commitFiles(${JSON.stringify(
-      {
-        branchName,
-        filesLength: files.length,
-        message,
-      },
-      null,
-      2
-    )})`
-  );
-  const commit = config.storage.commitFiles({
-    branchName,
-    files,
-    message,
-  });
+export async function commitFiles(
+  commitFilesConfig: CommitFilesConfig
+): Promise<string | null> {
+  const commit = config.storage.commitFiles(commitFilesConfig);
 
   // wait for pr change propagation
   await delay(1000);
   // refresh cache
-  await getBranchPr(branchName, true);
+  await getBranchPr(commitFilesConfig.branchName, true);
   return commit;
 }
 

@@ -44,6 +44,18 @@ import { smartTruncate } from '../utils/pr-body';
 const gitlabApi = new GitlabHttp();
 
 type MergeMethod = 'merge' | 'rebase_merge' | 'ff';
+type RepoResponse = {
+  archived: boolean;
+  mirror: boolean;
+  default_branch: string;
+  empty_repo: boolean;
+  http_url_to_repo: string;
+  forked_from_project: boolean;
+  repository_access_level: 'disabled' | 'private' | 'enabled';
+  merge_requests_access_level: 'disabled' | 'private' | 'enabled';
+  merge_method: MergeMethod;
+  path_with_namespace: string;
+};
 const defaultConfigFile = configFileNames[0];
 let config: {
   storage: GitStorage;
@@ -110,12 +122,13 @@ export async function getRepos(): Promise<string[]> {
   logger.debug('Autodiscovering GitLab repositories');
   try {
     const url = `projects?membership=true&per_page=100&with_merge_requests_enabled=true&min_access_level=30`;
-    const res = await gitlabApi.getJson<{ path_with_namespace: string }[]>(
-      url,
-      { paginate: true }
-    );
+    const res = await gitlabApi.getJson<RepoResponse[]>(url, {
+      paginate: true,
+    });
     logger.debug(`Discovered ${res.body.length} project(s)`);
-    return res.body.map((repo) => repo.path_with_namespace);
+    return res.body
+      .filter((repo) => !repo.mirror && !repo.archived)
+      .map((repo) => repo.path_with_namespace);
   } catch (err) {
     logger.error({ err }, `GitLab getRepos error`);
     throw err;
@@ -146,17 +159,6 @@ export async function initRepo({
   config.repository = urlEscape(repository);
   config.localDir = localDir;
 
-  type RepoResponse = {
-    archived: boolean;
-    mirror: boolean;
-    default_branch: string;
-    empty_repo: boolean;
-    http_url_to_repo: string;
-    forked_from_project: boolean;
-    repository_access_level: 'disabled' | 'private' | 'enabled';
-    merge_requests_access_level: 'disabled' | 'private' | 'enabled';
-    merge_method: MergeMethod;
-  };
   let res: HttpResponse<RepoResponse>;
   try {
     res = await gitlabApi.getJson<RepoResponse>(
@@ -586,7 +588,7 @@ export function getPrBody(input: string): string {
     input
       .replace(/Pull Request/g, 'Merge Request')
       .replace(/PR/g, 'MR')
-      .replace(/\]\(\.\.\/pull\//g, '](../merge_requests/'),
+      .replace(/\]\(\.\.\/pull\//g, '](!'),
     60000
   );
 }
@@ -632,16 +634,11 @@ export function isBranchStale(branchName: string): Promise<boolean> {
   return config.storage.isBranchStale(branchName);
 }
 
-export function commitFiles({
-  branchName,
-  files,
-  message,
-}: CommitFilesConfig): Promise<string | null> {
-  return config.storage.commitFiles({
-    branchName,
-    files,
-    message,
-  });
+// istanbul ignore next
+export function commitFiles(
+  commitFilesConfig: CommitFilesConfig
+): Promise<string | null> {
+  return config.storage.commitFiles(commitFilesConfig);
 }
 
 export function getFile(

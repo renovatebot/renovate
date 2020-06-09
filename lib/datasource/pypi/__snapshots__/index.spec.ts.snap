@@ -1,5 +1,14 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
+exports[`datasource/pypi getReleases find url from project_urls 1`] = `
+Object {
+  "changelogUrl": "https://github.com/Flexget/wiki/blob/master/ChangeLog.md",
+  "homepage": "https://flexget.com",
+  "releases": Array [],
+  "sourceUrl": "https://github.com/Flexget/Flexget",
+}
+`;
+
 exports[`datasource/pypi getReleases process data from +simple endpoint 1`] = `
 Object {
   "releases": Array [
@@ -92,6 +101,7 @@ Object {
 
 exports[`datasource/pypi getReleases processes real data 1`] = `
 Object {
+  "homepage": "https://github.com/Azure/azure-cli",
   "releases": Array [
     Object {
       "releaseTimestamp": "2017-04-03T16:55:14",

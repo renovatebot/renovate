@@ -77,7 +77,7 @@ Object {
       "version": "2.2.0",
     },
   ],
-  "sourceUrl": "https://github.com/nedbat/coveragepy",
+  "sourceUrl": "https://github.com/mkdocs/mkdocs",
 }
 `;
 

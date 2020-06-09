@@ -128,6 +128,14 @@ describe('platform/gitlab', () => {
           {
             path_with_namespace: 'c/d',
           },
+          {
+            path_with_namespace: 'c/e',
+            archived: true,
+          },
+          {
+            path_with_namespace: 'c/f',
+            mirror: true,
+          },
         ]);
       const repos = await gitlab.getRepos();
       expect(repos).toMatchSnapshot();

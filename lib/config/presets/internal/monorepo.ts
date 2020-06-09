@@ -49,6 +49,7 @@ const repoGroups = {
   baset: 'https://github.com/igmat/baset',
   brave: 'https://github.com/openzipkin/brave',
   capacitor: 'https://github.com/ionic-team/capacitor',
+  chromely: 'https://github.com/chromelyapps/Chromely',
   clarity: 'https://github.com/vmware/clarity',
   commitlint: 'https://github.com/conventional-changelog/commitlint',
   dropwizard: 'https://github.com/dropwizard/dropwizard',

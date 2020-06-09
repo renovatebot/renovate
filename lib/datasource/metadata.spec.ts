@@ -42,7 +42,7 @@ describe('datasource/metadata', () => {
     };
 
     const datasource = datasourcePypi.id;
-    const lookupName = 'coverage';
+    const lookupName = 'mkdocs';
 
     addMetaData(dep, datasource, lookupName);
     expect(dep).toMatchSnapshot();

@@ -1,8 +1,12 @@
+import semver, { validRange } from 'semver';
 import { quote } from 'shlex';
+import { join } from 'upath';
 import { logger } from '../../../logger';
 import { platform } from '../../../platform';
-import { exec } from '../../../util/exec';
+import { ExecOptions, exec } from '../../../util/exec';
 import { PostUpdateConfig } from '../../common';
+import { getNodeConstraint } from './node-version';
+import { optimizeCommand } from './yarn';
 
 export interface GenerateLockFileResult {
   error?: boolean;
@@ -13,7 +17,7 @@ export async function generateLockFiles(
   lernaClient: string,
   cwd: string,
   config: PostUpdateConfig,
-  env?: NodeJS.ProcessEnv,
+  env: NodeJS.ProcessEnv,
   skipInstalls?: boolean
 ): Promise<GenerateLockFileResult> {
   if (!lernaClient) {
@@ -21,11 +25,61 @@ export async function generateLockFiles(
     return { error: false };
   }
   logger.debug(`Spawning lerna with ${lernaClient} to create lock files`);
-  const cmd: string[] = [];
-  // const envVars = ['NPM_CONFIG_CACHE', 'npm_config_store'];
+  const preCommands = [];
+  const cmd = [];
+  let cmdOptions = '';
   try {
+    if (lernaClient === 'yarn') {
+      let installYarn = 'npm i -g yarn';
+      const yarnCompatibility = config.compatibility?.yarn;
+      if (validRange(yarnCompatibility)) {
+        installYarn += `@${quote(yarnCompatibility)}`;
+      }
+      preCommands.push(installYarn);
+      if (skipInstalls !== false) {
+        preCommands.push(optimizeCommand);
+      }
+      cmdOptions = '--ignore-scripts --ignore-engines --ignore-platform';
+    } else if (lernaClient === 'npm') {
+      let installNpm = 'npm i -g npm';
+      const npmCompatibility = config.compatibility?.npm;
+      if (validRange(npmCompatibility)) {
+        installNpm += `@${quote(npmCompatibility)}`;
+        preCommands.push(installNpm);
+      }
+      cmdOptions = '--ignore-scripts  --no-audit';
+      if (skipInstalls !== false) {
+        cmdOptions += ' --package-lock-only';
+      }
+    } else {
+      logger.warn({ lernaClient }, 'Unknown lernaClient');
+      return { error: false };
+    }
+    if (global.trustLevel === 'high' && config.ignoreScripts !== false) {
+      cmdOptions = cmdOptions.replace('--ignore-scripts ', '');
+    }
+    const tagConstraint = await getNodeConstraint(config);
+    const execOptions: ExecOptions = {
+      cwd,
+      extraEnv: {
+        NPM_CONFIG_CACHE: env.NPM_CONFIG_CACHE,
+        npm_config_store: env.npm_config_store,
+      },
+      docker: {
+        image: 'renovate/node',
+        tagScheme: 'npm',
+        tagConstraint,
+        preCommands,
+      },
+    };
+    if (config.dockerMapDotfiles) {
+      const homeDir =
+        process.env.HOME || process.env.HOMEPATH || process.env.USERPROFILE;
+      const homeNpmrc = join(homeDir, '.npmrc');
+      execOptions.docker.volumes = [[homeNpmrc, '/home/ubuntu/.npmrc']];
+    }
+    cmd.push(`${lernaClient} install ${cmdOptions}`);
     let lernaVersion: string;
-    // const volumes: VolumeOption[] = [];
     try {
       const pJson = JSON.parse(await platform.getFile('package.json'));
       lernaVersion =
@@ -34,37 +88,13 @@ export async function generateLockFiles(
     } catch (err) {
       logger.warn('Could not detect lerna version in package.json');
     }
-    lernaVersion = lernaVersion || 'latest';
-    logger.debug('Using lerna version ' + lernaVersion);
-    let params: string;
-    if (lernaClient === 'npm') {
-      if (skipInstalls === false) {
-        params = '--ignore-scripts  --no-audit';
-      } else {
-        params = '--package-lock-only --no-audit';
-      }
-    } else {
-      params = '--ignore-scripts --ignore-engines --ignore-platform';
+    if (!lernaVersion || !semver.validRange(lernaVersion)) {
+      lernaVersion = 'latest';
     }
-
-    // // istanbul ignore if
-    // if (config.dockerMapDotfiles) {
-    //   const homeDir =
-    //     process.env.HOME || process.env.HOMEPATH || process.env.USERPROFILE;
-    //   const homeNpmrc = join(homeDir, '.npmrc');
-    //   volumes.push([homeNpmrc, `/home/ubuntu/.npmrc`]);
-    // }
-    cmd.push(`${lernaClient} install ${params}`);
-    cmd.push(`npx lerna@${quote(lernaVersion)} bootstrap --no-ci -- ${params}`);
-    await exec(cmd, {
-      cwd,
-      env,
-      // docker: {
-      //   image: `renovate/${lernaClient}`,
-      //   volumes,
-      //   envVars,
-      // },
-    });
+    logger.debug('Using lerna version ' + lernaVersion);
+    preCommands.push(`npm i -g lerna@${quote(lernaVersion)}`);
+    cmd.push(`lerna bootstrap --no-ci -- ${cmdOptions}`);
+    await exec(cmd, execOptions);
   } catch (err) /* istanbul ignore next */ {
     logger.debug(
       {

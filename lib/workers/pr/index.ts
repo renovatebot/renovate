@@ -15,8 +15,8 @@ import { getPrBody } from './body';
 import { ChangeLogError } from './changelog';
 import { codeOwnersForPr } from './code-owners';
 
-function noWhitespace(input: string): string {
-  return input.replace(/\r?\n|\r|\s/g, '');
+function noWhitespaceOrHeadings(input: string): string {
+  return input.replace(/\r?\n|\r|\s|#/g, '');
 }
 
 function noLeadingAtSymbol(input: string): string {
@@ -293,7 +293,8 @@ export async function ensurePr(
       existingPrBody = existingPrBody.trim();
       if (
         existingPr.title === prTitle &&
-        noWhitespace(existingPrBody) === noWhitespace(prBody)
+        noWhitespaceOrHeadings(existingPrBody) ===
+          noWhitespaceOrHeadings(prBody)
       ) {
         logger.debug(`${existingPr.displayNumber} does not need updating`);
         return { prResult: PrResult.NotUpdated, pr: existingPr };
