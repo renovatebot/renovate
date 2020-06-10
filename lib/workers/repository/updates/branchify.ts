@@ -118,8 +118,9 @@ export async function branchifyUpgrades(
     });
     const seenUpdates = {};
     // Filter out duplicates
-    branchUpgrades[branchName] = branchUpgrades[branchName].filter(
-      (upgrade) => {
+    branchUpgrades[branchName] = branchUpgrades[branchName]
+      .reverse()
+      .filter((upgrade) => {
         const {
           manager,
           packageFile,
@@ -145,8 +146,8 @@ export async function branchifyUpgrades(
         }
         seenUpdates[upgradeKey] = newValue;
         return true;
-      }
-    );
+      })
+      .reverse();
     const branch = generateBranchConfig(branchUpgrades[branchName]);
     branch.branchName = branchName;
     branch.packageFiles = packageFiles;
