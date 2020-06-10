@@ -1,3 +1,5 @@
+[![Gitpod ready-to-code](https://img.shields.io/badge/Gitpod-ready--to--code-blue?logo=gitpod)](https://gitpod.io/#https://github.com/renovatebot/renovate)
+
 ![Renovate banner](https://app.renovatebot.com/images/renovate_660_220.jpg)
 
 # Renovate
