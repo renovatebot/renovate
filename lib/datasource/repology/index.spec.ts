@@ -3,6 +3,7 @@ import * as httpMock from '../../../test/httpMock';
 import { getName } from '../../../test/util';
 import { DATASOURCE_FAILURE } from '../../constants/error-messages';
 import * as ds from '.';
+import { RepologyPackage } from '.';
 
 const repologyApiHost = 'https://repology.org/';
 
@@ -43,6 +44,14 @@ const fixtureNginx = fs.readFileSync(
 );
 const fixtureGccDefaults = fs.readFileSync(
   `${__dirname}/__fixtures__/gcc-defaults.json`,
+  'utf8'
+);
+const fixtureGcc = fs.readFileSync(
+  `${__dirname}/__fixtures__/gcc.json`,
+  'utf8'
+);
+const fixturePulseaudio = fs.readFileSync(
+  `${__dirname}/__fixtures__/pulseaudio.json`,
   'utf8'
 );
 
@@ -132,7 +141,7 @@ describe(getName(__filename), () => {
       const res = await ds.getReleases({ lookupName: 'debian_stable/nginx' });
       expect(res).toMatchSnapshot();
       expect(res.releases).toHaveLength(1);
-      expect(res.releases[0].version).toBeString();
+      expect(res.releases[0].version).toEqual('1.14.2-2+deb10u1');
       expect(httpMock.getTrace()).toMatchSnapshot();
     });
 
@@ -149,8 +158,57 @@ describe(getName(__filename), () => {
       });
       expect(res).toMatchSnapshot();
       expect(res.releases).toHaveLength(1);
-      expect(res.releases[0].version).toBeString();
+      expect(res.releases[0].version).toEqual('1.181');
       expect(httpMock.getTrace()).toMatchSnapshot();
+    });
+
+    it('returns correct version for multi-package project with same name', async () => {
+      mockProjectBy(
+        'alpine_3_12',
+        'gcc',
+        { status: 200, body: fixtureGcc },
+        null
+      );
+
+      const res = await ds.getReleases({ lookupName: 'alpine_3_12/gcc' });
+      expect(res).toMatchSnapshot();
+      expect(res.releases).toHaveLength(1);
+      expect(res.releases[0].version).toEqual('9.3.0-r2');
+      expect(httpMock.getTrace()).toMatchSnapshot();
+    });
+
+    it('returns correct version for multi-package project with different name', async () => {
+      mockProjectBy(
+        'debian_stable',
+        'pulseaudio-utils',
+        { status: 200, body: fixturePulseaudio },
+        null
+      );
+
+      const res = await ds.getReleases({
+        lookupName: 'debian_stable/pulseaudio-utils',
+      });
+      expect(res).toMatchSnapshot();
+      expect(res.releases).toHaveLength(1);
+      expect(res.releases[0].version).toEqual('12.2-4+deb10u1');
+      expect(httpMock.getTrace()).toMatchSnapshot();
+    });
+
+    it('returns null for ambiguous package results', async () => {
+      const pkgs: RepologyPackage[] = [
+        { repo: 'dummy', version: '1.0.0', visiblename: 'example' },
+        { repo: 'dummy', version: '2.0.0', visiblename: 'example' },
+      ];
+      const pkgsJSON = JSON.stringify(pkgs);
+
+      mockProjectBy(
+        'dummy',
+        'example',
+        { status: 200, body: pkgsJSON },
+        { status: 200, body: pkgsJSON }
+      );
+
+      expect(await ds.getReleases({ lookupName: 'dummy/example' })).toBeNull();
     });
   });
 });

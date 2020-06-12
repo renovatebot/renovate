@@ -18,6 +18,9 @@ function extractFromSection(
     return [];
   }
   Object.keys(sectionContent).forEach((depName) => {
+    if (depName === 'python') {
+      return;
+    }
     let skipReason: SkipReason;
     let currentValue = sectionContent[depName];
     let nestedVersion = false;

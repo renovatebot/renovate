@@ -115,7 +115,7 @@
     "azure-devops-node-api": "10.1.1",
     "bunyan": "1.8.12",
     "cacache": "15.0.4",
-    "chalk": "4.0.0",
+    "chalk": "4.1.0",
     "changelog-filename-regex": "2.0.1",
     "clean-git-ref": "2.0.1",
     "commander": "5.1.0",
@@ -149,7 +149,7 @@
     "moment": "2.25.3",
     "moment-timezone": "0.5.31",
     "node-emoji": "1.10.0",
-    "node-html-parser": "1.2.18",
+    "node-html-parser": "1.2.19",
     "p-all": "2.1.0",
     "p-map": "4.0.0",
     "parse-diff": "0.7.0",
@@ -167,8 +167,7 @@
     "upath": "1.2.0",
     "validate-npm-package-name": "3.0.0",
     "www-authenticate": "0.6.2",
-    "xmldoc": "1.1.2",
-    "yawn-yaml": "1.5.0"
+    "xmldoc": "1.1.2"
   },
   "optionalDependencies": {
     "re2": "1.14.0"
@@ -235,7 +234,7 @@
     "eslint-plugin-jest": "23.13.2",
     "eslint-plugin-promise": "4.2.1",
     "glob": "7.1.6",
-    "graphql": "15.0.0",
+    "graphql": "15.1.0",
     "husky": "4.2.5",
     "jest": "26.0.1",
     "jest-circus": "26.0.1",
@@ -253,7 +252,7 @@
     "shelljs": "0.8.4",
     "strip-ansi": "6.0.0",
     "tmp-promise": "2.1.1",
-    "type-fest": "0.15.0",
+    "type-fest": "0.15.1",
     "typescript": "3.9.5"
   },
   "resolutions": {

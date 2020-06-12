@@ -16,7 +16,9 @@ export interface RepologyPackage {
   repo: string;
   visiblename: string;
   version: string;
-  origversion: string | null;
+  srcname?: string;
+  binname?: string;
+  origversion?: string;
 }
 
 async function queryPackage(
@@ -33,12 +35,30 @@ async function queryPackage(
       name: pkgName,
     }).toString();
 
+    // Retrieve list of packages by looking up Repology project
     const url = `https://repology.org/tools/project-by?${query}`;
     const res = await http.getJson<RepologyPackage[]>(url);
+    let pkgs = res.body.filter((pkg) => pkg.repo === repoName);
 
-    return res.body.find(
-      (x) => x.repo.toLowerCase() === repoName.toLowerCase()
-    );
+    // In some cases Repology bundles multiple packages into a single project,
+    // which would result in ambiguous results. If we have more than one result
+    // left, we should try to determine the correct package by comparing either
+    // binname or srcname (depending on pkgType) to the given dependency name.
+    if (pkgs.length > 1) {
+      pkgs = pkgs.filter((pkg) => !pkg[pkgType] || pkg[pkgType] === pkgName);
+    }
+
+    // Abort if there is still more than one package left, as the result would
+    // be ambiguous and unreliable. This should usually not happen...
+    if (pkgs.length > 1) {
+      logger.warn(
+        { repoName, pkgName, pkgType, pkgs },
+        'Repology lookup returned ambiguous results, ignoring...'
+      );
+      return null;
+    }
+
+    return pkgs[0];
   } catch (err) {
     if (err.statusCode === 404) {
       logger.debug(
