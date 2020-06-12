@@ -32,7 +32,9 @@ export interface HttpResponse<T = string> {
   headers: any;
 }
 
-async function cloneResponse(promisedResponse: Promise<any>): Promise<any> {
+async function cloneResponse(
+  promisedResponse: GotPromise<any>
+): Promise<HttpResponse<any>> {
   const response = await promisedResponse;
   // clone body and headers so that the cached result doesn't get accidentally mutated
   return {
