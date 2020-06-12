@@ -5,9 +5,9 @@ import { logger } from '../../logger';
 import { platform } from '../../platform';
 import { ExecOptions, exec } from '../../util/exec';
 import {
+  getSiblingFileName,
   readLocalFile,
   writeLocalFile,
-  getSiblingFileName,
 } from '../../util/fs';
 import { Http } from '../../util/http';
 import { UpdateArtifact, UpdateArtifactsResult } from '../common';
