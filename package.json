@@ -167,8 +167,7 @@
     "upath": "1.2.0",
     "validate-npm-package-name": "3.0.0",
     "www-authenticate": "0.6.2",
-    "xmldoc": "1.1.2",
-    "yawn-yaml": "1.5.0"
+    "xmldoc": "1.1.2"
   },
   "optionalDependencies": {
     "re2": "1.14.0"
