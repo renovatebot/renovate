@@ -227,6 +227,9 @@ Array [
   Array [
     "https://custom.pypi.net/foo/azure-cli-monitor/json",
     Object {
+      "headers": Object {
+        "user-agent": "https://github.com/renovatebot/renovate",
+      },
       "hooks": Object {
         "beforeRedirect": Array [
           [Function],
@@ -245,6 +248,9 @@ Array [
   Array [
     "https://my.pypi.python/pypi/azure-cli-monitor/json",
     Object {
+      "headers": Object {
+        "user-agent": "https://github.com/renovatebot/renovate",
+      },
       "hooks": Object {
         "beforeRedirect": Array [
           [Function],
@@ -263,6 +269,9 @@ Array [
   Array [
     "https://custom.pypi.net/foo/azure-cli-monitor/json",
     Object {
+      "headers": Object {
+        "user-agent": "https://github.com/renovatebot/renovate",
+      },
       "hooks": Object {
         "beforeRedirect": Array [
           [Function],
@@ -276,6 +285,9 @@ Array [
   Array [
     "https://second-index/foo/azure-cli-monitor/json",
     Object {
+      "headers": Object {
+        "user-agent": "https://github.com/renovatebot/renovate",
+      },
       "hooks": Object {
         "beforeRedirect": Array [
           [Function],
