@@ -1,4 +1,8 @@
+import crypto from 'crypto';
 import URL from 'url';
+import { GotPromise } from 'got';
+import * as runCache from '../cache/run';
+import { clone } from '../clone';
 import got from '../got';
 
 interface OutgoingHttpHeaders {
@@ -28,10 +32,21 @@ export interface HttpResponse<T = string> {
   headers: any;
 }
 
+async function cloneResponse<T>(
+  promisedResponse: GotPromise<any>
+): Promise<HttpResponse<T>> {
+  const response = await promisedResponse;
+  // clone body and headers so that the cached result doesn't get accidentally mutated
+  return {
+    body: clone<T>(response.body),
+    headers: clone(response.headers),
+  };
+}
+
 export class Http<GetOptions = HttpOptions, PostOptions = HttpPostOptions> {
   constructor(private hostType: string, private options?: HttpOptions) {}
 
-  protected async request<T>(
+  protected request<T>(
     requestUrl: string | URL,
     httpOptions?: InternalHttpOptions
   ): Promise<HttpResponse<T> | null> {
@@ -72,8 +87,26 @@ export class Http<GetOptions = HttpOptions, PostOptions = HttpPostOptions> {
         process.env.RENOVATE_USER_AGENT ||
         'https://github.com/renovatebot/renovate',
     };
-    const res = await got(url, options);
-    return { body: res.body, headers: res.headers };
+
+    // Cache GET requests unless useCache=false
+    let promisedRes: GotPromise<any>;
+    if (options.method === 'get') {
+      const cacheKey = crypto
+        .createHash('md5')
+        .update('got-' + JSON.stringify({ url, headers: options.headers }))
+        .digest('hex');
+      if (options.useCache !== false) {
+        // check cache unless bypassing it
+        promisedRes = runCache.get(cacheKey);
+      }
+      if (promisedRes === undefined) {
+        // cache miss OR cache bypass
+        promisedRes = got(url, options);
+      }
+      runCache.set(cacheKey, promisedRes); // always set
+      return cloneResponse<T>(promisedRes);
+    }
+    return cloneResponse<T>(got(url, options));
   }
 
   get(url: string, options: HttpOptions = {}): Promise<HttpResponse> {
