@@ -1,5 +1,14 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
+exports[`datasource/pypi getReleases find url from project_urls 1`] = `
+Object {
+  "changelogUrl": "https://github.com/Flexget/wiki/blob/master/ChangeLog.md",
+  "homepage": "https://flexget.com",
+  "releases": Array [],
+  "sourceUrl": "https://github.com/Flexget/Flexget",
+}
+`;
+
 exports[`datasource/pypi getReleases process data from +simple endpoint 1`] = `
 Object {
   "releases": Array [
@@ -206,14 +215,6 @@ Object {
 }
 `;
 
-exports[`datasource/pypi getReleases return sourceUrl in project_urls 1`] = `
-Object {
-  "homepage": "https://flexget.com",
-  "releases": Array [],
-  "sourceUrl": "https://github.com/Flexget/Flexget",
-}
-`;
-
 exports[`datasource/pypi getReleases returns non-github home_page 1`] = `
 Object {
   "homepage": "https://microsoft.com",
@@ -226,6 +227,9 @@ Array [
   Array [
     "https://custom.pypi.net/foo/azure-cli-monitor/json",
     Object {
+      "headers": Object {
+        "user-agent": "https://github.com/renovatebot/renovate",
+      },
       "hooks": Object {
         "beforeRedirect": Array [
           [Function],
@@ -244,6 +248,9 @@ Array [
   Array [
     "https://my.pypi.python/pypi/azure-cli-monitor/json",
     Object {
+      "headers": Object {
+        "user-agent": "https://github.com/renovatebot/renovate",
+      },
       "hooks": Object {
         "beforeRedirect": Array [
           [Function],
@@ -262,6 +269,9 @@ Array [
   Array [
     "https://custom.pypi.net/foo/azure-cli-monitor/json",
     Object {
+      "headers": Object {
+        "user-agent": "https://github.com/renovatebot/renovate",
+      },
       "hooks": Object {
         "beforeRedirect": Array [
           [Function],
@@ -275,6 +285,9 @@ Array [
   Array [
     "https://second-index/foo/azure-cli-monitor/json",
     Object {
+      "headers": Object {
+        "user-agent": "https://github.com/renovatebot/renovate",
+      },
       "hooks": Object {
         "beforeRedirect": Array [
           [Function],

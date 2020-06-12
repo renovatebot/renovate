@@ -122,25 +122,28 @@ describe('datasource/pypi', () => {
         })
       ).toMatchSnapshot();
     });
-    it('return sourceUrl in project_urls', async () => {
+    it('find url from project_urls', async () => {
+      const info = {
+        name: 'flexget',
+        home_page: 'https://flexget.com',
+        project_urls: {
+          Forum: 'https://discuss.flexget.com',
+          Homepage: 'https://flexget.com',
+          changelog: 'https://github.com/Flexget/wiki/blob/master/ChangeLog.md',
+          'Issue Tracker': 'https://github.com/Flexget/Flexget/issues',
+          Repository: 'https://github.com/Flexget/Flexget',
+        },
+      };
       got.mockReturnValueOnce({
         body: {
-          info: {
-            name: 'flexget',
-            home_page: 'https://flexget.com',
-            project_urls: {
-              Forum: 'https://discuss.flexget.com',
-              Homepage: 'https://flexget.com',
-              'Issue Tracker': 'https://github.com/Flexget/Flexget/issues',
-              Repository: 'https://github.com/Flexget/Flexget',
-            },
-          },
+          info,
         },
       });
       const result = await pypi.getReleases({
         lookupName: 'flexget',
       });
-      expect(result.sourceUrl).toBe('https://github.com/Flexget/Flexget');
+      expect(result.sourceUrl).toBe(info.project_urls.Repository);
+      expect(result.changelogUrl).toBe(info.project_urls.changelog);
       expect(result).toMatchSnapshot();
     });
     it('returns null if mismatched name', async () => {

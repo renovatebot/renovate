@@ -1,5 +1,10 @@
+import crypto from 'crypto';
 import URL from 'url';
+import { GotPromise } from 'got';
+import * as runCache from '../cache/run';
+import { clone } from '../clone';
 import got from '../got';
+import { applyHostRules } from './host-rules';
 
 interface OutgoingHttpHeaders {
   [header: string]: number | string | string[] | undefined;
@@ -28,26 +33,36 @@ export interface HttpResponse<T = string> {
   headers: any;
 }
 
+async function cloneResponse<T>(
+  promisedResponse: GotPromise<any>
+): Promise<HttpResponse<T>> {
+  const response = await promisedResponse;
+  // clone body and headers so that the cached result doesn't get accidentally mutated
+  return {
+    body: clone<T>(response.body),
+    headers: clone(response.headers),
+  };
+}
+
 export class Http<GetOptions = HttpOptions, PostOptions = HttpPostOptions> {
   constructor(private hostType: string, private options?: HttpOptions) {}
 
-  protected async request<T>(
-    url: string | URL,
-    httpOpts?: InternalHttpOptions
+  protected request<T>(
+    requestUrl: string | URL,
+    httpOptions?: InternalHttpOptions
   ): Promise<HttpResponse<T> | null> {
-    const options = { ...httpOpts };
-    let resolvedUrl = url.toString();
-    if (options?.baseUrl) {
-      resolvedUrl = URL.resolve(options.baseUrl, resolvedUrl);
+    let url = requestUrl.toString();
+    if (httpOptions?.baseUrl) {
+      url = URL.resolve(httpOptions.baseUrl, url);
     }
     // TODO: deep merge in order to merge headers
-    const combinedOptions: any = {
+    let options: any = {
       method: 'get',
       ...this.options,
       hostType: this.hostType,
-      ...options,
+      ...httpOptions,
     };
-    combinedOptions.hooks = {
+    options.hooks = {
       beforeRedirect: [
         (opts: any): void => {
           // Check if request has been redirected to Amazon
@@ -67,8 +82,34 @@ export class Http<GetOptions = HttpOptions, PostOptions = HttpPostOptions> {
         },
       ],
     };
-    const res = await got(resolvedUrl, combinedOptions);
-    return { body: res.body, headers: res.headers };
+    options.headers = {
+      ...options.headers,
+      'user-agent':
+        process.env.RENOVATE_USER_AGENT ||
+        'https://github.com/renovatebot/renovate',
+    };
+
+    options = applyHostRules(url, options);
+
+    // Cache GET requests unless useCache=false
+    let promisedRes: GotPromise<any>;
+    if (options.method === 'get') {
+      const cacheKey = crypto
+        .createHash('md5')
+        .update('got-' + JSON.stringify({ url, headers: options.headers }))
+        .digest('hex');
+      if (options.useCache !== false) {
+        // check cache unless bypassing it
+        promisedRes = runCache.get(cacheKey);
+      }
+      if (promisedRes === undefined) {
+        // cache miss OR cache bypass
+        promisedRes = got(url, options);
+      }
+      runCache.set(cacheKey, promisedRes); // always set
+      return cloneResponse<T>(promisedRes);
+    }
+    return cloneResponse<T>(got(url, options));
   }
 
   get(url: string, options: HttpOptions = {}): Promise<HttpResponse> {
