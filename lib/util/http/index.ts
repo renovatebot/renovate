@@ -4,6 +4,7 @@ import { GotPromise } from 'got';
 import * as runCache from '../cache/run';
 import { clone } from '../clone';
 import got from '../got';
+import { applyAuthorization } from './auth';
 import { applyHostRules } from './host-rules';
 
 interface OutgoingHttpHeaders {
@@ -90,6 +91,7 @@ export class Http<GetOptions = HttpOptions, PostOptions = HttpPostOptions> {
     };
 
     options = applyHostRules(url, options);
+    options = applyAuthorization(options);
 
     // Cache GET requests unless useCache=false
     let promisedRes: GotPromise<any>;
