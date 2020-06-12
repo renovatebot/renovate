@@ -38,7 +38,7 @@ async function cloneResponse<T>(
   const response = await promisedResponse;
   // clone body and headers so that the cached result doesn't get accidentally mutated
   return {
-    body: clone<T>(response.body), // TODO: is this ok if the body is *not* JSON ?
+    body: clone<T>(response.body),
     headers: clone(response.headers),
   };
 }
