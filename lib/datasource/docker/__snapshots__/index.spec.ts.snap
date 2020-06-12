@@ -20,6 +20,9 @@ exports[`api/docker getReleases adds library/ prefix for Docker Hub (explicit) 1
     Array [
       "https://index.docker.io/v2/",
       Object {
+        "headers": Object {
+          "user-agent": "https://github.com/renovatebot/renovate",
+        },
         "hooks": Object {
           "beforeRedirect": Array [
             [Function],
@@ -35,6 +38,7 @@ exports[`api/docker getReleases adds library/ prefix for Docker Hub (explicit) 1
       Object {
         "headers": Object {
           "authorization": "Basic c29tZS11c2VybmFtZTpzb21lLXBhc3N3b3Jk",
+          "user-agent": "https://github.com/renovatebot/renovate",
         },
         "hooks": Object {
           "beforeRedirect": Array [
@@ -51,6 +55,7 @@ exports[`api/docker getReleases adds library/ prefix for Docker Hub (explicit) 1
       Object {
         "headers": Object {
           "authorization": "Bearer some-token ",
+          "user-agent": "https://github.com/renovatebot/renovate",
         },
         "hooks": Object {
           "beforeRedirect": Array [
@@ -65,6 +70,9 @@ exports[`api/docker getReleases adds library/ prefix for Docker Hub (explicit) 1
     Array [
       "https://index.docker.io/v2/",
       Object {
+        "headers": Object {
+          "user-agent": "https://github.com/renovatebot/renovate",
+        },
         "hooks": Object {
           "beforeRedirect": Array [
             [Function],
@@ -80,6 +88,7 @@ exports[`api/docker getReleases adds library/ prefix for Docker Hub (explicit) 1
       Object {
         "headers": Object {
           "accept": "application/vnd.docker.distribution.manifest.v2+json",
+          "user-agent": "https://github.com/renovatebot/renovate",
         },
         "hooks": Object {
           "beforeRedirect": Array [
@@ -143,6 +152,9 @@ exports[`api/docker getReleases adds library/ prefix for Docker Hub (implicit) 1
     Array [
       "https://index.docker.io/v2/",
       Object {
+        "headers": Object {
+          "user-agent": "https://github.com/renovatebot/renovate",
+        },
         "hooks": Object {
           "beforeRedirect": Array [
             [Function],
@@ -158,6 +170,7 @@ exports[`api/docker getReleases adds library/ prefix for Docker Hub (implicit) 1
       Object {
         "headers": Object {
           "authorization": "Basic c29tZS11c2VybmFtZTpzb21lLXBhc3N3b3Jk",
+          "user-agent": "https://github.com/renovatebot/renovate",
         },
         "hooks": Object {
           "beforeRedirect": Array [
@@ -174,6 +187,7 @@ exports[`api/docker getReleases adds library/ prefix for Docker Hub (implicit) 1
       Object {
         "headers": Object {
           "authorization": "Bearer some-token ",
+          "user-agent": "https://github.com/renovatebot/renovate",
         },
         "hooks": Object {
           "beforeRedirect": Array [
@@ -188,6 +202,9 @@ exports[`api/docker getReleases adds library/ prefix for Docker Hub (implicit) 1
     Array [
       "https://index.docker.io/v2/",
       Object {
+        "headers": Object {
+          "user-agent": "https://github.com/renovatebot/renovate",
+        },
         "hooks": Object {
           "beforeRedirect": Array [
             [Function],
@@ -203,6 +220,7 @@ exports[`api/docker getReleases adds library/ prefix for Docker Hub (implicit) 1
       Object {
         "headers": Object {
           "accept": "application/vnd.docker.distribution.manifest.v2+json",
+          "user-agent": "https://github.com/renovatebot/renovate",
         },
         "hooks": Object {
           "beforeRedirect": Array [
@@ -266,6 +284,9 @@ exports[`api/docker getReleases adds no library/ prefix for other registries 1`]
     Array [
       "https://k8s.gcr.io/v2/",
       Object {
+        "headers": Object {
+          "user-agent": "https://github.com/renovatebot/renovate",
+        },
         "hooks": Object {
           "beforeRedirect": Array [
             [Function],
@@ -281,6 +302,7 @@ exports[`api/docker getReleases adds no library/ prefix for other registries 1`]
       Object {
         "headers": Object {
           "authorization": "Basic c29tZS11c2VybmFtZTpzb21lLXBhc3N3b3Jk",
+          "user-agent": "https://github.com/renovatebot/renovate",
         },
         "hooks": Object {
           "beforeRedirect": Array [
@@ -297,6 +319,7 @@ exports[`api/docker getReleases adds no library/ prefix for other registries 1`]
       Object {
         "headers": Object {
           "authorization": "Bearer some-token ",
+          "user-agent": "https://github.com/renovatebot/renovate",
         },
         "hooks": Object {
           "beforeRedirect": Array [
@@ -311,6 +334,9 @@ exports[`api/docker getReleases adds no library/ prefix for other registries 1`]
     Array [
       "https://k8s.gcr.io/v2/",
       Object {
+        "headers": Object {
+          "user-agent": "https://github.com/renovatebot/renovate",
+        },
         "hooks": Object {
           "beforeRedirect": Array [
             [Function],
@@ -326,6 +352,7 @@ exports[`api/docker getReleases adds no library/ prefix for other registries 1`]
       Object {
         "headers": Object {
           "accept": "application/vnd.docker.distribution.manifest.v2+json",
+          "user-agent": "https://github.com/renovatebot/renovate",
         },
         "hooks": Object {
           "beforeRedirect": Array [
@@ -389,6 +416,9 @@ exports[`api/docker getReleases uses custom registry in depName 1`] = `
     Array [
       "https://registry.company.com/v2/",
       Object {
+        "headers": Object {
+          "user-agent": "https://github.com/renovatebot/renovate",
+        },
         "hooks": Object {
           "beforeRedirect": Array [
             [Function],
@@ -402,7 +432,9 @@ exports[`api/docker getReleases uses custom registry in depName 1`] = `
     Array [
       "https://registry.company.com/v2/node/tags/list?n=10000",
       Object {
-        "headers": Object {},
+        "headers": Object {
+          "user-agent": "https://github.com/renovatebot/renovate",
+        },
         "hooks": Object {
           "beforeRedirect": Array [
             [Function],
@@ -416,6 +448,9 @@ exports[`api/docker getReleases uses custom registry in depName 1`] = `
     Array [
       "https://registry.company.com/v2/",
       Object {
+        "headers": Object {
+          "user-agent": "https://github.com/renovatebot/renovate",
+        },
         "hooks": Object {
           "beforeRedirect": Array [
             [Function],
@@ -458,6 +493,9 @@ Array [
   Array [
     "https://registry.company.com/v2/",
     Object {
+      "headers": Object {
+        "user-agent": "https://github.com/renovatebot/renovate",
+      },
       "hooks": Object {
         "beforeRedirect": Array [
           [Function],
@@ -471,7 +509,9 @@ Array [
   Array [
     "https://registry.company.com/v2/node/tags/list?n=10000",
     Object {
-      "headers": Object {},
+      "headers": Object {
+        "user-agent": "https://github.com/renovatebot/renovate",
+      },
       "hooks": Object {
         "beforeRedirect": Array [
           [Function],
@@ -485,7 +525,9 @@ Array [
   Array [
     "https://api.github.com/user/9287/repos?page=3&per_page=100",
     Object {
-      "headers": Object {},
+      "headers": Object {
+        "user-agent": "https://github.com/renovatebot/renovate",
+      },
       "hooks": Object {
         "beforeRedirect": Array [
           [Function],
@@ -499,6 +541,9 @@ Array [
   Array [
     "https://registry.company.com/v2/",
     Object {
+      "headers": Object {
+        "user-agent": "https://github.com/renovatebot/renovate",
+      },
       "hooks": Object {
         "beforeRedirect": Array [
           [Function],
@@ -514,6 +559,7 @@ Array [
     Object {
       "headers": Object {
         "accept": "application/vnd.docker.distribution.manifest.v2+json",
+        "user-agent": "https://github.com/renovatebot/renovate",
       },
       "hooks": Object {
         "beforeRedirect": Array [
@@ -533,6 +579,9 @@ exports[`api/docker getReleases uses lower tag limit for ECR deps 1`] = `
     Array [
       "https://123456789.dkr.ecr.us-east-1.amazonaws.com/v2/",
       Object {
+        "headers": Object {
+          "user-agent": "https://github.com/renovatebot/renovate",
+        },
         "hooks": Object {
           "beforeRedirect": Array [
             [Function],
@@ -546,7 +595,9 @@ exports[`api/docker getReleases uses lower tag limit for ECR deps 1`] = `
     Array [
       "https://123456789.dkr.ecr.us-east-1.amazonaws.com/v2/node/tags/list?n=1000",
       Object {
-        "headers": Object {},
+        "headers": Object {
+          "user-agent": "https://github.com/renovatebot/renovate",
+        },
         "hooks": Object {
           "beforeRedirect": Array [
             [Function],
@@ -560,6 +611,9 @@ exports[`api/docker getReleases uses lower tag limit for ECR deps 1`] = `
     Array [
       "https://123456789.dkr.ecr.us-east-1.amazonaws.com/v2/",
       Object {
+        "headers": Object {
+          "user-agent": "https://github.com/renovatebot/renovate",
+        },
         "hooks": Object {
           "beforeRedirect": Array [
             [Function],

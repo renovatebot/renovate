@@ -67,6 +67,12 @@ export class Http<GetOptions = HttpOptions, PostOptions = HttpPostOptions> {
         },
       ],
     };
+    combinedOptions.headers = {
+      ...combinedOptions.headers,
+      'user-agent':
+        process.env.RENOVATE_USER_AGENT ||
+        'https://github.com/renovatebot/renovate',
+    };
     const res = await got(resolvedUrl, combinedOptions);
     return { body: res.body, headers: res.headers };
   }
