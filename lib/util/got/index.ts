@@ -1,7 +1,6 @@
 import auth from './auth';
 import cacheGet from './cache-get';
 import hostRules from './host-rules';
-import renovateAgent from './renovate-agent';
 import { mergeInstances } from './util';
 
 export * from './common';
@@ -12,6 +11,6 @@ export * from './common';
  *  - Cache all GET requests for the lifetime of the repo
  *
  */
-export const api = mergeInstances(cacheGet, renovateAgent, hostRules, auth);
+export const api = mergeInstances(cacheGet, hostRules, auth);
 
 export default api;
