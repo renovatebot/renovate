@@ -32,22 +32,21 @@ export class Http<GetOptions = HttpOptions, PostOptions = HttpPostOptions> {
   constructor(private hostType: string, private options?: HttpOptions) {}
 
   protected async request<T>(
-    url: string | URL,
-    httpOpts?: InternalHttpOptions
+    requestUrl: string | URL,
+    httpOptions?: InternalHttpOptions
   ): Promise<HttpResponse<T> | null> {
-    const options = { ...httpOpts };
-    let resolvedUrl = url.toString();
-    if (options?.baseUrl) {
-      resolvedUrl = URL.resolve(options.baseUrl, resolvedUrl);
+    let url = requestUrl.toString();
+    if (httpOptions?.baseUrl) {
+      url = URL.resolve(httpOptions.baseUrl, url);
     }
     // TODO: deep merge in order to merge headers
-    const combinedOptions: any = {
+    const options: any = {
       method: 'get',
       ...this.options,
       hostType: this.hostType,
-      ...options,
+      ...httpOptions,
     };
-    combinedOptions.hooks = {
+    options.hooks = {
       beforeRedirect: [
         (opts: any): void => {
           // Check if request has been redirected to Amazon
@@ -67,13 +66,13 @@ export class Http<GetOptions = HttpOptions, PostOptions = HttpPostOptions> {
         },
       ],
     };
-    combinedOptions.headers = {
-      ...combinedOptions.headers,
+    options.headers = {
+      ...options.headers,
       'user-agent':
         process.env.RENOVATE_USER_AGENT ||
         'https://github.com/renovatebot/renovate',
     };
-    const res = await got(resolvedUrl, combinedOptions);
+    const res = await got(url, options);
     return { body: res.body, headers: res.headers };
   }
 
