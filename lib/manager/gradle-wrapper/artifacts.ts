@@ -4,11 +4,7 @@ import Git from 'simple-git/promise';
 import { logger } from '../../logger';
 import { platform } from '../../platform';
 import { ExecOptions, exec } from '../../util/exec';
-import {
-  getSiblingFileName,
-  readLocalFile,
-  writeLocalFile,
-} from '../../util/fs';
+import { readLocalFile, writeLocalFile } from '../../util/fs';
 import { Http } from '../../util/http';
 import { UpdateArtifact, UpdateArtifactsResult } from '../common';
 import { gradleWrapperFileName, prepareGradleCommand } from '../gradle/index';
@@ -104,11 +100,11 @@ export async function updateArtifacts({
       'gradle/wrapper/gradle-wrapper.jar',
       'gradlew',
       'gradlew.bat',
-    ].map((filename) =>
-      getSiblingFileName(
-        packageFileName.replace('gradle/wrapper/', ''),
-        filename
-      )
+    ].map(
+      (filename) =>
+        packageFileName
+          .replace('gradle/wrapper/', '')
+          .replace('gradle-wrapper.properties', '') + filename
     );
     const updateArtifactsResult = (
       await Promise.all(

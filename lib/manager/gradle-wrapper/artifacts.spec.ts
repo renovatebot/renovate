@@ -52,7 +52,6 @@ describe(getName(__filename), () => {
     resetPrefetchedImages();
 
     fs.readLocalFile.mockResolvedValue('test');
-    fs.getSiblingFileName.mockImplementation((a, b) => b);
   });
 
   afterEach(() => {
