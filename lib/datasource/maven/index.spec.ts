@@ -37,6 +37,7 @@ describe('datasource/maven', () => {
       hostName: 'frontend_for_private_s3_repository',
       username: 'username',
       password: 'password',
+      timeout: 20000,
     });
     jest.resetAllMocks();
     nock.cleanAll();

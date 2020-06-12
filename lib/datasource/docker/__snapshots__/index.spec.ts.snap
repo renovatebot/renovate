@@ -152,6 +152,7 @@ exports[`api/docker getReleases adds library/ prefix for Docker Hub (implicit) 1
     Array [
       "https://index.docker.io/v2/",
       Object {
+        "auth": "some-username:some-password",
         "headers": Object {
           "user-agent": "https://github.com/renovatebot/renovate",
         },
@@ -416,6 +417,7 @@ exports[`api/docker getReleases uses custom registry in depName 1`] = `
     Array [
       "https://registry.company.com/v2/",
       Object {
+        "auth": "some-username:some-password",
         "headers": Object {
           "user-agent": "https://github.com/renovatebot/renovate",
         },
@@ -432,6 +434,7 @@ exports[`api/docker getReleases uses custom registry in depName 1`] = `
     Array [
       "https://registry.company.com/v2/node/tags/list?n=10000",
       Object {
+        "auth": "some-username:some-password",
         "headers": Object {
           "user-agent": "https://github.com/renovatebot/renovate",
         },
@@ -448,6 +451,7 @@ exports[`api/docker getReleases uses custom registry in depName 1`] = `
     Array [
       "https://registry.company.com/v2/",
       Object {
+        "auth": "some-username:some-password",
         "headers": Object {
           "user-agent": "https://github.com/renovatebot/renovate",
         },
@@ -493,6 +497,7 @@ Array [
   Array [
     "https://registry.company.com/v2/",
     Object {
+      "auth": "some-username:some-password",
       "headers": Object {
         "user-agent": "https://github.com/renovatebot/renovate",
       },
@@ -509,6 +514,7 @@ Array [
   Array [
     "https://registry.company.com/v2/node/tags/list?n=10000",
     Object {
+      "auth": "some-username:some-password",
       "headers": Object {
         "user-agent": "https://github.com/renovatebot/renovate",
       },
@@ -525,6 +531,7 @@ Array [
   Array [
     "https://api.github.com/user/9287/repos?page=3&per_page=100",
     Object {
+      "auth": "some-username:some-password",
       "headers": Object {
         "user-agent": "https://github.com/renovatebot/renovate",
       },
@@ -541,6 +548,7 @@ Array [
   Array [
     "https://registry.company.com/v2/",
     Object {
+      "auth": "some-username:some-password",
       "headers": Object {
         "user-agent": "https://github.com/renovatebot/renovate",
       },
@@ -557,6 +565,7 @@ Array [
   Array [
     "https://registry.company.com/v2/node/manifests/latest",
     Object {
+      "auth": "some-username:some-password",
       "headers": Object {
         "accept": "application/vnd.docker.distribution.manifest.v2+json",
         "user-agent": "https://github.com/renovatebot/renovate",
@@ -579,6 +588,7 @@ exports[`api/docker getReleases uses lower tag limit for ECR deps 1`] = `
     Array [
       "https://123456789.dkr.ecr.us-east-1.amazonaws.com/v2/",
       Object {
+        "auth": "some-username:some-password",
         "headers": Object {
           "user-agent": "https://github.com/renovatebot/renovate",
         },
@@ -595,6 +605,7 @@ exports[`api/docker getReleases uses lower tag limit for ECR deps 1`] = `
     Array [
       "https://123456789.dkr.ecr.us-east-1.amazonaws.com/v2/node/tags/list?n=1000",
       Object {
+        "auth": "some-username:some-password",
         "headers": Object {
           "user-agent": "https://github.com/renovatebot/renovate",
         },
@@ -611,6 +622,7 @@ exports[`api/docker getReleases uses lower tag limit for ECR deps 1`] = `
     Array [
       "https://123456789.dkr.ecr.us-east-1.amazonaws.com/v2/",
       Object {
+        "auth": "some-username:some-password",
         "headers": Object {
           "user-agent": "https://github.com/renovatebot/renovate",
         },
