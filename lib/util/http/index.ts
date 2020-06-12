@@ -44,22 +44,21 @@ export class Http<GetOptions = HttpOptions, PostOptions = HttpPostOptions> {
   constructor(private hostType: string, private options?: HttpOptions) {}
 
   protected async request<T>(
-    url: string | URL,
-    httpOpts?: InternalHttpOptions
+    requestUrl: string | URL,
+    httpOptions?: InternalHttpOptions
   ): Promise<HttpResponse<T> | null> {
-    const options = { ...httpOpts };
-    let resolvedUrl = url.toString();
-    if (options?.baseUrl) {
-      resolvedUrl = URL.resolve(options.baseUrl, resolvedUrl);
+    let url = requestUrl.toString();
+    if (httpOptions?.baseUrl) {
+      url = URL.resolve(httpOptions.baseUrl, url);
     }
     // TODO: deep merge in order to merge headers
-    const combinedOptions: any = {
+    const options: any = {
       method: 'get',
       ...this.options,
       hostType: this.hostType,
-      ...options,
+      ...httpOptions,
     };
-    combinedOptions.hooks = {
+    options.hooks = {
       beforeRedirect: [
         (opts: any): void => {
           // Check if request has been redirected to Amazon
@@ -79,8 +78,8 @@ export class Http<GetOptions = HttpOptions, PostOptions = HttpPostOptions> {
         },
       ],
     };
-    combinedOptions.headers = {
-      ...combinedOptions.headers,
+    options.headers = {
+      ...options.headers,
       'user-agent':
         process.env.RENOVATE_USER_AGENT ||
         'https://github.com/renovatebot/renovate',
@@ -88,26 +87,23 @@ export class Http<GetOptions = HttpOptions, PostOptions = HttpPostOptions> {
 
     // Cache GET requests unless useCache=false
     let promisedRes: GotPromise<any>;
-    if (combinedOptions.method === 'get') {
+    if (options.method === 'get') {
       const cacheKey = crypto
         .createHash('md5')
-        .update(
-          'got-' +
-            JSON.stringify({ url: resolvedUrl, headers: options.headers })
-        )
+        .update('got-' + JSON.stringify({ url, headers: options.headers }))
         .digest('hex');
-      if (combinedOptions.useCache !== false) {
+      if (options.useCache !== false) {
         // check cache unless bypassing it
         promisedRes = runCache.get(cacheKey);
       }
       if (promisedRes === undefined) {
         // cache miss OR cache bypass
-        promisedRes = got(resolvedUrl, combinedOptions);
+        promisedRes = got(url, options);
       }
       runCache.set(cacheKey, promisedRes); // always set
       return cloneResponse(await promisedRes);
     }
-    return cloneResponse(await got(resolvedUrl, combinedOptions));
+    return cloneResponse(await got(url, options));
   }
 
   get(url: string, options: HttpOptions = {}): Promise<HttpResponse> {
