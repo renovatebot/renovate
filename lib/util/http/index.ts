@@ -1,4 +1,8 @@
+import crypto from 'crypto';
 import URL from 'url';
+import { GotPromise } from 'got';
+import * as runCache from '../cache/run';
+import { clone } from '../clone';
 import got from '../got';
 
 interface OutgoingHttpHeaders {
@@ -26,6 +30,14 @@ export interface InternalHttpOptions extends HttpOptions {
 export interface HttpResponse<T = string> {
   body: T;
   headers: any;
+}
+
+function cloneResponse(response: any): any {
+  // clone body and headers so that the cached result doesn't get accidentally mutated
+  return {
+    body: clone(response.body),
+    headers: clone(response.headers),
+  };
 }
 
 export class Http<GetOptions = HttpOptions, PostOptions = HttpPostOptions> {
@@ -73,8 +85,29 @@ export class Http<GetOptions = HttpOptions, PostOptions = HttpPostOptions> {
         process.env.RENOVATE_USER_AGENT ||
         'https://github.com/renovatebot/renovate',
     };
-    const res = await got(resolvedUrl, combinedOptions);
-    return { body: res.body, headers: res.headers };
+
+    // Cache GET requests unless useCache=false
+    let promisedRes: GotPromise<any>;
+    if (combinedOptions.method === 'get') {
+      const cacheKey = crypto
+        .createHash('md5')
+        .update(
+          'got-' +
+            JSON.stringify({ url: resolvedUrl, headers: options.headers })
+        )
+        .digest('hex');
+      if (combinedOptions.useCache !== false) {
+        // check cache unless bypassing it
+        promisedRes = runCache.get(cacheKey);
+      }
+      if (promisedRes === undefined) {
+        // cache miss OR cache bypass
+        promisedRes = got(resolvedUrl, combinedOptions);
+      }
+      runCache.set(cacheKey, promisedRes); // always set
+      return cloneResponse(await promisedRes);
+    }
+    return cloneResponse(await got(resolvedUrl, combinedOptions));
   }
 
   get(url: string, options: HttpOptions = {}): Promise<HttpResponse> {
