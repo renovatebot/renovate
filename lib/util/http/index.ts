@@ -32,13 +32,13 @@ export interface HttpResponse<T = string> {
   headers: any;
 }
 
-async function cloneResponse(
+async function cloneResponse<T>(
   promisedResponse: GotPromise<any>
-): Promise<HttpResponse<any>> {
+): Promise<HttpResponse<T>> {
   const response = await promisedResponse;
   // clone body and headers so that the cached result doesn't get accidentally mutated
   return {
-    body: clone(response.body),
+    body: clone<T>(response.body), // TODO: is this ok if the body is *not* JSON ?
     headers: clone(response.headers),
   };
 }
@@ -104,9 +104,9 @@ export class Http<GetOptions = HttpOptions, PostOptions = HttpPostOptions> {
         promisedRes = got(url, options);
       }
       runCache.set(cacheKey, promisedRes); // always set
-      return cloneResponse(promisedRes);
+      return cloneResponse<T>(promisedRes);
     }
-    return cloneResponse(got(url, options));
+    return cloneResponse<T>(got(url, options));
   }
 
   get(url: string, options: HttpOptions = {}): Promise<HttpResponse> {
