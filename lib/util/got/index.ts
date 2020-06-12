@@ -11,6 +11,6 @@ export * from './common';
  *  - Cache all GET requests for the lifetime of the repo
  *
  */
-export const api = mergeInstances(got.extend({}), cacheGet, hostRules, auth);
+export const api = mergeInstances(got, cacheGet, hostRules, auth);
 
 export default api;
