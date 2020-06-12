@@ -1,6 +1,5 @@
 import got from 'got';
 import auth from './auth';
-import hostRules from './host-rules';
 import { mergeInstances } from './util';
 
 export * from './common';
@@ -10,6 +9,6 @@ export * from './common';
  *  - Cache all GET requests for the lifetime of the repo
  *
  */
-export const api = mergeInstances(got, hostRules, auth);
+export const api = mergeInstances(got, auth);
 
 export default api;

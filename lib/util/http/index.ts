@@ -4,6 +4,7 @@ import { GotPromise } from 'got';
 import * as runCache from '../cache/run';
 import { clone } from '../clone';
 import got from '../got';
+import { applyHostRules } from './host-rules';
 
 interface OutgoingHttpHeaders {
   [header: string]: number | string | string[] | undefined;
@@ -55,7 +56,7 @@ export class Http<GetOptions = HttpOptions, PostOptions = HttpPostOptions> {
       url = URL.resolve(httpOptions.baseUrl, url);
     }
     // TODO: deep merge in order to merge headers
-    const options: any = {
+    let options: any = {
       method: 'get',
       ...this.options,
       hostType: this.hostType,
@@ -87,6 +88,8 @@ export class Http<GetOptions = HttpOptions, PostOptions = HttpPostOptions> {
         process.env.RENOVATE_USER_AGENT ||
         'https://github.com/renovatebot/renovate',
     };
+
+    options = applyHostRules(url, options);
 
     // Cache GET requests unless useCache=false
     let promisedRes: GotPromise<any>;
