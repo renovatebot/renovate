@@ -32,7 +32,8 @@ export interface HttpResponse<T = string> {
   headers: any;
 }
 
-function cloneResponse(response: any): any {
+async function cloneResponse(promisedResponse: Promise<any>): Promise<any> {
+  const response = await promisedResponse;
   // clone body and headers so that the cached result doesn't get accidentally mutated
   return {
     body: clone(response.body),
@@ -43,7 +44,7 @@ function cloneResponse(response: any): any {
 export class Http<GetOptions = HttpOptions, PostOptions = HttpPostOptions> {
   constructor(private hostType: string, private options?: HttpOptions) {}
 
-  protected async request<T>(
+  protected request<T>(
     requestUrl: string | URL,
     httpOptions?: InternalHttpOptions
   ): Promise<HttpResponse<T> | null> {
@@ -101,9 +102,9 @@ export class Http<GetOptions = HttpOptions, PostOptions = HttpPostOptions> {
         promisedRes = got(url, options);
       }
       runCache.set(cacheKey, promisedRes); // always set
-      return cloneResponse(await promisedRes);
+      return cloneResponse(promisedRes);
     }
-    return cloneResponse(await got(url, options));
+    return cloneResponse(got(url, options));
   }
 
   get(url: string, options: HttpOptions = {}): Promise<HttpResponse> {
