@@ -102,11 +102,19 @@ export class Http<GetOptions = HttpOptions, PostOptions = HttpPostOptions> {
         return cloneResponse<T>(await cachedRes);
       }
     }
+    const startTime = Date.now();
     const promisedRes = got(url, options);
     if (options.method === 'get') {
       runCache.set(cacheKey, promisedRes); // always set if it's a get
     }
     const res = await promisedRes;
+    const httpRequests = runCache.get('http-requests') || [];
+    httpRequests.push({
+      method: options.method,
+      url,
+      duration: Date.now() - startTime,
+    });
+    runCache.set('http-requests', httpRequests);
     return cloneResponse<T>(res);
   }
 
