@@ -29,7 +29,7 @@ async function get<T = never>(namespace: string, key: string): Promise<T> {
   } catch (err) {
     logger.trace({ namespace, key }, 'Cache miss');
   }
-  return null;
+  return undefined;
 }
 
 async function set(

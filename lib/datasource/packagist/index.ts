@@ -236,7 +236,7 @@ async function packagistOrgLookup(name: string): Promise<ReleaseResult> {
     name
   );
   // istanbul ignore if
-  if (cachedResult) {
+  if (cachedResult !== undefined) {
     return cachedResult;
   }
   let dep: ReleaseResult = null;

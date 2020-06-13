@@ -21,7 +21,7 @@ export async function getRepositoryData(
   const cacheKey = repository;
   const cachedIndex = await globalCache.get(cacheNamespace, cacheKey);
   // istanbul ignore if
-  if (cachedIndex) {
+  if (cachedIndex !== undefined) {
     return cachedIndex;
   }
   let res: any;

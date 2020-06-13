@@ -75,7 +75,7 @@ export async function getDependency(
     pkgUrl
   );
   // istanbul ignore if
-  if (cachedResult) {
+  if (cachedResult !== undefined) {
     return cachedResult;
   }
   const headers: OutgoingHttpHeaders = {};

@@ -29,7 +29,7 @@ async function getTagCommit(
     getCacheKey(githubRepo, `tag-${tag}`)
   );
   // istanbul ignore if
-  if (cachedResult) {
+  if (cachedResult !== undefined) {
     return cachedResult;
   }
   let digest: string;
@@ -81,7 +81,7 @@ export async function getDigest(
     getCacheKey(githubRepo, 'commit')
   );
   // istanbul ignore if
-  if (cachedResult) {
+  if (cachedResult !== undefined) {
     return cachedResult;
   }
   let digest: string;
@@ -95,9 +95,6 @@ export async function getDigest(
       'Error getting latest commit from GitHub repo'
     );
   }
-  if (!digest) {
-    return null;
-  }
   const cacheMinutes = 10;
   await globalCache.set(
     cacheNamespace,
@@ -105,7 +102,7 @@ export async function getDigest(
     digest,
     cacheMinutes
   );
-  return digest;
+  return digest || null;
 }
 
 /**
@@ -127,7 +124,7 @@ export async function getReleases({
     getCacheKey(repo, 'tags')
   );
   // istanbul ignore if
-  if (cachedResult) {
+  if (cachedResult !== undefined) {
     return cachedResult;
   }
   try {

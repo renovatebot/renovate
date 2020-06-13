@@ -31,7 +31,7 @@ export async function getReleases({
     cacheKey
   );
   // istanbul ignore if
-  if (cachedResult) {
+  if (cachedResult !== undefined) {
     return cachedResult;
   }
   const url = 'https://circleci.com/graphql-unstable';
