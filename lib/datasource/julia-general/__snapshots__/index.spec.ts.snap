@@ -1,0 +1,40 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`datasource/julia-general getReleases processes real data 1`] = `
+Object {
+  "releases": Array [
+    Object {
+      "newDigest": "7c7ff029888c9ce6a4db84cf11b11f8c4aaaa190",
+      "version": "0.8.0",
+    },
+    Object {
+      "newDigest": "d27b78ff418d683df83ea7ae74f4eb545a8504ae",
+      "version": "0.9.0",
+    },
+    Object {
+      "newDigest": "f9f6ab756930c66824e5b374186750e0fb722caf",
+      "version": "0.10.0",
+    },
+    Object {
+      "newDigest": "9d6810e16618447a4bd77687be35568ed45c95cf",
+      "version": "0.11.0",
+    },
+    Object {
+      "newDigest": "10fd495d82fb3fa0b0c1293e988e253870f2fa48",
+      "version": "0.11.1",
+    },
+    Object {
+      "newDigest": "105c668971f973b0f1b84931b0d68b94da78e692",
+      "version": "0.11.2",
+    },
+    Object {
+      "newDigest": "78a9285fecbeee4849023f1f1906db9fd765d768",
+      "version": "0.12.0",
+    },
+    Object {
+      "newDigest": "9b33cd8be0fd2bc59c46911def57331a7d5f6e84",
+      "version": "0.12.1",
+    },
+  ],
+}
+`;
