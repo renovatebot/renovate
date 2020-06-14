@@ -537,6 +537,31 @@ Object {
 }
 `;
 
+exports[`datasource/gradle-version getReleases calls configured registryUrls 2`] = `
+Array [
+  Object {
+    "headers": Object {
+      "accept": "application/json",
+      "accept-encoding": "gzip, deflate",
+      "host": "foo.bar",
+      "user-agent": "https://github.com/renovatebot/renovate",
+    },
+    "method": "GET",
+    "url": "https://foo.bar/",
+  },
+  Object {
+    "headers": Object {
+      "accept": "application/json",
+      "accept-encoding": "gzip, deflate",
+      "host": "baz.qux",
+      "user-agent": "https://github.com/renovatebot/renovate",
+    },
+    "method": "GET",
+    "url": "http://baz.qux/",
+  },
+]
+`;
+
 exports[`datasource/gradle-version getReleases processes real data 1`] = `
 Object {
   "homepage": "https://gradle.org",
@@ -808,4 +833,19 @@ Object {
   ],
   "sourceUrl": "https://github.com/gradle/gradle",
 }
+`;
+
+exports[`datasource/gradle-version getReleases processes real data 2`] = `
+Array [
+  Object {
+    "headers": Object {
+      "accept": "application/json",
+      "accept-encoding": "gzip, deflate",
+      "host": "services.gradle.org",
+      "user-agent": "https://github.com/renovatebot/renovate",
+    },
+    "method": "GET",
+    "url": "https://services.gradle.org/versions/all",
+  },
+]
 `;

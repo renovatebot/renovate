@@ -9,6 +9,21 @@ Object {
 }
 `;
 
+exports[`datasource/pypi getReleases find url from project_urls 2`] = `
+Array [
+  Object {
+    "headers": Object {
+      "accept": "application/json",
+      "accept-encoding": "gzip, deflate",
+      "host": "pypi.org",
+      "user-agent": "https://github.com/renovatebot/renovate",
+    },
+    "method": "GET",
+    "url": "https://pypi.org/pypi/flexget/json",
+  },
+]
+`;
+
 exports[`datasource/pypi getReleases process data from +simple endpoint 1`] = `
 Object {
   "releases": Array [
@@ -47,6 +62,20 @@ Object {
     },
   ],
 }
+`;
+
+exports[`datasource/pypi getReleases process data from +simple endpoint 2`] = `
+Array [
+  Object {
+    "headers": Object {
+      "accept-encoding": "gzip, deflate",
+      "host": "some.registry.org",
+      "user-agent": "https://github.com/renovatebot/renovate",
+    },
+    "method": "GET",
+    "url": "https://some.registry.org/+simple/dj-database-url",
+  },
+]
 `;
 
 exports[`datasource/pypi getReleases process data from simple endpoint 1`] = `
@@ -89,6 +118,20 @@ Object {
 }
 `;
 
+exports[`datasource/pypi getReleases process data from simple endpoint 2`] = `
+Array [
+  Object {
+    "headers": Object {
+      "accept-encoding": "gzip, deflate",
+      "host": "pypi.org",
+      "user-agent": "https://github.com/renovatebot/renovate",
+    },
+    "method": "GET",
+    "url": "https://pypi.org/simple/dj-database-url",
+  },
+]
+`;
+
 exports[`datasource/pypi getReleases process data from simple endpoint with hyphens replaced with underscores 1`] = `
 Object {
   "releases": Array [
@@ -97,6 +140,20 @@ Object {
     },
   ],
 }
+`;
+
+exports[`datasource/pypi getReleases process data from simple endpoint with hyphens replaced with underscores 2`] = `
+Array [
+  Object {
+    "headers": Object {
+      "accept-encoding": "gzip, deflate",
+      "host": "pypi.org",
+      "user-agent": "https://github.com/renovatebot/renovate",
+    },
+    "method": "GET",
+    "url": "https://pypi.org/simple/image-collector",
+  },
+]
 `;
 
 exports[`datasource/pypi getReleases processes real data 1`] = `
@@ -196,6 +253,21 @@ Object {
 }
 `;
 
+exports[`datasource/pypi getReleases processes real data 2`] = `
+Array [
+  Object {
+    "headers": Object {
+      "accept": "application/json",
+      "accept-encoding": "gzip, deflate",
+      "host": "pypi.org",
+      "user-agent": "https://github.com/renovatebot/renovate",
+    },
+    "method": "GET",
+    "url": "https://pypi.org/pypi/azure-cli-monitor/json",
+  },
+]
+`;
+
 exports[`datasource/pypi getReleases respects compatibility 1`] = `
 Object {
   "releases": Array [
@@ -215,6 +287,21 @@ Object {
 }
 `;
 
+exports[`datasource/pypi getReleases respects compatibility 2`] = `
+Array [
+  Object {
+    "headers": Object {
+      "accept": "application/json",
+      "accept-encoding": "gzip, deflate",
+      "host": "pypi.org",
+      "user-agent": "https://github.com/renovatebot/renovate",
+    },
+    "method": "GET",
+    "url": "https://pypi.org/pypi/doit/json",
+  },
+]
+`;
+
 exports[`datasource/pypi getReleases returns non-github home_page 1`] = `
 Object {
   "homepage": "https://microsoft.com",
@@ -222,81 +309,145 @@ Object {
 }
 `;
 
+exports[`datasource/pypi getReleases returns non-github home_page 2`] = `
+Array [
+  Object {
+    "headers": Object {
+      "accept": "application/json",
+      "accept-encoding": "gzip, deflate",
+      "host": "pypi.org",
+      "user-agent": "https://github.com/renovatebot/renovate",
+    },
+    "method": "GET",
+    "url": "https://pypi.org/pypi/something/json",
+  },
+]
+`;
+
+exports[`datasource/pypi getReleases returns null for 404 1`] = `
+Array [
+  Object {
+    "headers": Object {
+      "accept": "application/json",
+      "accept-encoding": "gzip, deflate",
+      "host": "pypi.org",
+      "user-agent": "https://github.com/renovatebot/renovate",
+    },
+    "method": "GET",
+    "url": "https://pypi.org/pypi/something/json",
+  },
+]
+`;
+
+exports[`datasource/pypi getReleases returns null for 404 response from simple endpoint 1`] = `
+Array [
+  Object {
+    "headers": Object {
+      "accept-encoding": "gzip, deflate",
+      "host": "pypi.org",
+      "user-agent": "https://github.com/renovatebot/renovate",
+    },
+    "method": "GET",
+    "url": "https://pypi.org/simple/dj-database-url",
+  },
+]
+`;
+
+exports[`datasource/pypi getReleases returns null for empty response 1`] = `
+Array [
+  Object {
+    "headers": Object {
+      "accept-encoding": "gzip, deflate",
+      "host": "pypi.org",
+      "user-agent": "https://github.com/renovatebot/renovate",
+    },
+    "method": "GET",
+    "url": "https://pypi.org/simple/dj-database-url",
+  },
+]
+`;
+
+exports[`datasource/pypi getReleases returns null for empty result 1`] = `
+Array [
+  Object {
+    "headers": Object {
+      "accept": "application/json",
+      "accept-encoding": "gzip, deflate",
+      "host": "pypi.org",
+      "user-agent": "https://github.com/renovatebot/renovate",
+    },
+    "method": "GET",
+    "url": "https://pypi.org/pypi/something/json",
+  },
+]
+`;
+
+exports[`datasource/pypi getReleases returns null if mismatched name 1`] = `
+Array [
+  Object {
+    "headers": Object {
+      "accept": "application/json",
+      "accept-encoding": "gzip, deflate",
+      "host": "pypi.org",
+      "user-agent": "https://github.com/renovatebot/renovate",
+    },
+    "method": "GET",
+    "url": "https://pypi.org/pypi/something/json",
+  },
+]
+`;
+
 exports[`datasource/pypi getReleases supports custom datasource url 1`] = `
 Array [
-  Array [
-    "https://custom.pypi.net/foo/azure-cli-monitor/json",
-    Object {
-      "headers": Object {
-        "user-agent": "https://github.com/renovatebot/renovate",
-      },
-      "hooks": Object {
-        "beforeRedirect": Array [
-          [Function],
-        ],
-      },
-      "hostType": "pypi",
-      "json": true,
-      "method": "get",
+  Object {
+    "headers": Object {
+      "accept": "application/json",
+      "accept-encoding": "gzip, deflate",
+      "host": "custom.pypi.net",
+      "user-agent": "https://github.com/renovatebot/renovate",
     },
-  ],
+    "method": "GET",
+    "url": "https://custom.pypi.net/foo/azure-cli-monitor/json",
+  },
 ]
 `;
 
 exports[`datasource/pypi getReleases supports custom datasource url from environmental variable 1`] = `
 Array [
-  Array [
-    "https://my.pypi.python/pypi/azure-cli-monitor/json",
-    Object {
-      "headers": Object {
-        "user-agent": "https://github.com/renovatebot/renovate",
-      },
-      "hooks": Object {
-        "beforeRedirect": Array [
-          [Function],
-        ],
-      },
-      "hostType": "pypi",
-      "json": true,
-      "method": "get",
+  Object {
+    "headers": Object {
+      "accept": "application/json",
+      "accept-encoding": "gzip, deflate",
+      "host": "my.pypi.python",
+      "user-agent": "https://github.com/renovatebot/renovate",
     },
-  ],
+    "method": "GET",
+    "url": "https://my.pypi.python/pypi/azure-cli-monitor/json",
+  },
 ]
 `;
 
 exports[`datasource/pypi getReleases supports multiple custom datasource urls 1`] = `
 Array [
-  Array [
-    "https://custom.pypi.net/foo/azure-cli-monitor/json",
-    Object {
-      "headers": Object {
-        "user-agent": "https://github.com/renovatebot/renovate",
-      },
-      "hooks": Object {
-        "beforeRedirect": Array [
-          [Function],
-        ],
-      },
-      "hostType": "pypi",
-      "json": true,
-      "method": "get",
+  Object {
+    "headers": Object {
+      "accept": "application/json",
+      "accept-encoding": "gzip, deflate",
+      "host": "custom.pypi.net",
+      "user-agent": "https://github.com/renovatebot/renovate",
     },
-  ],
-  Array [
-    "https://second-index/foo/azure-cli-monitor/json",
-    Object {
-      "headers": Object {
-        "user-agent": "https://github.com/renovatebot/renovate",
-      },
-      "hooks": Object {
-        "beforeRedirect": Array [
-          [Function],
-        ],
-      },
-      "hostType": "pypi",
-      "json": true,
-      "method": "get",
+    "method": "GET",
+    "url": "https://custom.pypi.net/foo/azure-cli-monitor/json",
+  },
+  Object {
+    "headers": Object {
+      "accept": "application/json",
+      "accept-encoding": "gzip, deflate",
+      "host": "second-index",
+      "user-agent": "https://github.com/renovatebot/renovate",
     },
-  ],
+    "method": "GET",
+    "url": "https://second-index/foo/azure-cli-monitor/json",
+  },
 ]
 `;
