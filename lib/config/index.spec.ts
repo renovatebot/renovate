@@ -40,7 +40,7 @@ describe('config/index', () => {
       );
       expect(parsedConfig).toContainEntries([
         ['token', 'abc'],
-        ['global', { prFooter: 'custom' }],
+        ['prFooter', 'custom'],
         ['logContext', 'abc123'],
         ['customPrFooter', true],
       ]);
