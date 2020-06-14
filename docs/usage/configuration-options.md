@@ -1115,6 +1115,10 @@ This setting tells Renovate when you would like it to raise PRs:
 
 Renovate defaults to `immediate` but some like to change to `not-pending`. If you configure to immediate, it means you will usually get GitHub notifications that a new PR is available but if you view it immediately then it will still have "pending" tests so you can't take any action. With `not-pending`, it means that when you receive the PR notification, you can see if it passed or failed and take action immediately. Therefore you can customise this setting if you wish to be notified a little later in order to reduce "noise".
 
+## prFooter
+
+## prHeader
+
 ## prHourlyLimit
 
 This setting - if enabled - helps slow down Renovate, particularly during the onboarding phase. What may happen without this setting is:

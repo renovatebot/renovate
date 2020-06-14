@@ -111,12 +111,6 @@ export async function parseConfigs(
   delete config.logFileLevel;
 
   // Move global variables that we need to use later
-  const importGlobals = ['prBanner', 'prFooter'];
-  config.global = {};
-  importGlobals.forEach((key) => {
-    config.global[key] = config[key];
-    delete config[key];
-  });
   global.trustLevel =
     config.trustLevel || /* istanbul ignore next: never happen? */ 'low';
   delete config.trustLevel;
