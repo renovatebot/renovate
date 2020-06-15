@@ -276,6 +276,7 @@ export async function getDependency(
         await delay(1000 * delaySeconds);
         return getDependency(packageName, retries - 1);
       }
+      // istanbul ignore if
       if (err.name === 'ParseError' && err.body) {
         err.body = 'err.body deleted by Renovate';
       }

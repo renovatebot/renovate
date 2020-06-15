@@ -298,7 +298,6 @@ describe('workers/pr/release-notes', () => {
         'https://gitlab.com/',
         'https://api.gitlab.com/'
       );
-      httpMock.getTrace();
       expect(res).not.toBeNull();
       expect(res).toMatchSnapshot();
       expect(httpMock.getTrace()).toMatchSnapshot();

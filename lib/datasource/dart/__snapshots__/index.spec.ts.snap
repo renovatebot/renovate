@@ -60,4 +60,104 @@ Object {
 }
 `;
 
+exports[`datasource/dart getReleases processes real data 2`] = `
+Array [
+  Object {
+    "headers": Object {
+      "accept": "application/json",
+      "accept-encoding": "gzip, deflate",
+      "host": "pub.dartlang.org",
+      "user-agent": "https://github.com/renovatebot/renovate",
+    },
+    "method": "GET",
+    "url": "https://pub.dartlang.org/api/packages/shared_preferences",
+  },
+]
+`;
+
+exports[`datasource/dart getReleases returns null for 404 1`] = `
+Array [
+  Object {
+    "headers": Object {
+      "accept": "application/json",
+      "accept-encoding": "gzip, deflate",
+      "host": "pub.dartlang.org",
+      "user-agent": "https://github.com/renovatebot/renovate",
+    },
+    "method": "GET",
+    "url": "https://pub.dartlang.org/api/packages/shared_preferences",
+  },
+]
+`;
+
+exports[`datasource/dart getReleases returns null for empty fields 1`] = `
+Array [
+  Object {
+    "headers": Object {
+      "accept": "application/json",
+      "accept-encoding": "gzip, deflate",
+      "host": "pub.dartlang.org",
+      "user-agent": "https://github.com/renovatebot/renovate",
+    },
+    "method": "GET",
+    "url": "https://pub.dartlang.org/api/packages/shared_preferences",
+  },
+  Object {
+    "headers": Object {
+      "accept": "application/json",
+      "accept-encoding": "gzip, deflate",
+      "host": "pub.dartlang.org",
+      "user-agent": "https://github.com/renovatebot/renovate",
+    },
+    "method": "GET",
+    "url": "https://pub.dartlang.org/api/packages/shared_preferences",
+  },
+]
+`;
+
+exports[`datasource/dart getReleases returns null for empty result 1`] = `
+Array [
+  Object {
+    "headers": Object {
+      "accept": "application/json",
+      "accept-encoding": "gzip, deflate",
+      "host": "pub.dartlang.org",
+      "user-agent": "https://github.com/renovatebot/renovate",
+    },
+    "method": "GET",
+    "url": "https://pub.dartlang.org/api/packages/non_sense",
+  },
+]
+`;
+
+exports[`datasource/dart getReleases returns null for unknown error 1`] = `
+Array [
+  Object {
+    "headers": Object {
+      "accept": "application/json",
+      "accept-encoding": "gzip, deflate",
+      "host": "pub.dartlang.org",
+      "user-agent": "https://github.com/renovatebot/renovate",
+    },
+    "method": "GET",
+    "url": "https://pub.dartlang.org/api/packages/shared_preferences",
+  },
+]
+`;
+
 exports[`datasource/dart getReleases throws for 5xx 1`] = `[Error: registry-failure]`;
+
+exports[`datasource/dart getReleases throws for 5xx 2`] = `
+Array [
+  Object {
+    "headers": Object {
+      "accept": "application/json",
+      "accept-encoding": "gzip, deflate",
+      "host": "pub.dartlang.org",
+      "user-agent": "https://github.com/renovatebot/renovate",
+    },
+    "method": "GET",
+    "url": "https://pub.dartlang.org/api/packages/shared_preferences",
+  },
+]
+`;

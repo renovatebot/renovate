@@ -1,5 +1,19 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
+exports[`datasource/helm getReleases adds trailing slash to subdirectories 1`] = `
+Array [
+  Object {
+    "headers": Object {
+      "accept-encoding": "gzip, deflate",
+      "host": "example-repository.com",
+      "user-agent": "https://github.com/renovatebot/renovate",
+    },
+    "method": "GET",
+    "url": "https://example-repository.com/subdir/index.yaml",
+  },
+]
+`;
+
 exports[`datasource/helm getReleases returns list of versions for normal response 1`] = `
 Object {
   "homepage": "https://www.getambassador.io/",
@@ -118,4 +132,130 @@ Object {
 }
 `;
 
+exports[`datasource/helm getReleases returns list of versions for normal response 2`] = `
+Array [
+  Object {
+    "headers": Object {
+      "accept-encoding": "gzip, deflate",
+      "host": "example-repository.com",
+      "user-agent": "https://github.com/renovatebot/renovate",
+    },
+    "method": "GET",
+    "url": "https://example-repository.com/index.yaml",
+  },
+]
+`;
+
+exports[`datasource/helm getReleases returns null for 404 1`] = `
+Array [
+  Object {
+    "headers": Object {
+      "accept-encoding": "gzip, deflate",
+      "host": "example-repository.com",
+      "user-agent": "https://github.com/renovatebot/renovate",
+    },
+    "method": "GET",
+    "url": "https://example-repository.com/index.yaml",
+  },
+]
+`;
+
+exports[`datasource/helm getReleases returns null for empty response 1`] = `
+Array [
+  Object {
+    "headers": Object {
+      "accept-encoding": "gzip, deflate",
+      "host": "example-repository.com",
+      "user-agent": "https://github.com/renovatebot/renovate",
+    },
+    "method": "GET",
+    "url": "https://example-repository.com/index.yaml",
+  },
+]
+`;
+
+exports[`datasource/helm getReleases returns null for missing response body 1`] = `
+Array [
+  Object {
+    "headers": Object {
+      "accept-encoding": "gzip, deflate",
+      "host": "example-repository.com",
+      "user-agent": "https://github.com/renovatebot/renovate",
+    },
+    "method": "GET",
+    "url": "https://example-repository.com/index.yaml",
+  },
+]
+`;
+
+exports[`datasource/helm getReleases returns null for unknown error 1`] = `
+Array [
+  Object {
+    "headers": Object {
+      "accept-encoding": "gzip, deflate",
+      "host": "example-repository.com",
+      "user-agent": "https://github.com/renovatebot/renovate",
+    },
+    "method": "GET",
+    "url": "https://example-repository.com/index.yaml",
+  },
+]
+`;
+
+exports[`datasource/helm getReleases returns null if index.yaml in response is empty 1`] = `
+Array [
+  Object {
+    "headers": Object {
+      "accept-encoding": "gzip, deflate",
+      "host": "example-repository.com",
+      "user-agent": "https://github.com/renovatebot/renovate",
+    },
+    "method": "GET",
+    "url": "https://example-repository.com/index.yaml",
+  },
+]
+`;
+
+exports[`datasource/helm getReleases returns null if index.yaml in response is invalid 1`] = `
+Array [
+  Object {
+    "headers": Object {
+      "accept-encoding": "gzip, deflate",
+      "host": "example-repository.com",
+      "user-agent": "https://github.com/renovatebot/renovate",
+    },
+    "method": "GET",
+    "url": "https://example-repository.com/index.yaml",
+  },
+]
+`;
+
+exports[`datasource/helm getReleases returns null if lookupName is not in index.yaml 1`] = `
+Array [
+  Object {
+    "headers": Object {
+      "accept-encoding": "gzip, deflate",
+      "host": "example-repository.com",
+      "user-agent": "https://github.com/renovatebot/renovate",
+    },
+    "method": "GET",
+    "url": "https://example-repository.com/index.yaml",
+  },
+]
+`;
+
 exports[`datasource/helm getReleases throws for 5xx 1`] = `[Error: registry-failure]`;
+
+exports[`datasource/helm getReleases throws for 5xx 2`] = `
+Array [
+  Object {
+    "headers": Object {
+      "accept-encoding": "gzip, deflate",
+      "host": "example-repository.com",
+      "user-agent": "https://github.com/renovatebot/renovate",
+    },
+    "method": "GET",
+    "url": "https://example-repository.com/index.yaml",
+  },
+]
+`;
