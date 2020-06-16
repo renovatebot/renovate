@@ -673,3 +673,45 @@ Object {
   "sourceUrl": "https://github.com/ruby/ruby",
 }
 `;
+
+exports[`datasource/gradle getReleases parses real data 2`] = `
+Array [
+  Object {
+    "headers": Object {
+      "accept-encoding": "gzip, deflate",
+      "host": "www.ruby-lang.org",
+      "user-agent": "https://github.com/renovatebot/renovate",
+    },
+    "method": "GET",
+    "url": "https://www.ruby-lang.org/en/downloads/releases/",
+  },
+]
+`;
+
+exports[`datasource/gradle getReleases throws for 404 1`] = `
+Array [
+  Object {
+    "headers": Object {
+      "accept-encoding": "gzip, deflate",
+      "host": "www.ruby-lang.org",
+      "user-agent": "https://github.com/renovatebot/renovate",
+    },
+    "method": "GET",
+    "url": "https://www.ruby-lang.org/en/downloads/releases/",
+  },
+]
+`;
+
+exports[`datasource/gradle getReleases throws for empty result 1`] = `
+Array [
+  Object {
+    "headers": Object {
+      "accept-encoding": "gzip, deflate",
+      "host": "www.ruby-lang.org",
+      "user-agent": "https://github.com/renovatebot/renovate",
+    },
+    "method": "GET",
+    "url": "https://www.ruby-lang.org/en/downloads/releases/",
+  },
+]
+`;

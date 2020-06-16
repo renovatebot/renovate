@@ -31,7 +31,6 @@ describe('datasource/gitlab-tags', () => {
         registryUrls: ['https://gitlab.company.com/api/v4/'],
         lookupName: 'some/dep2',
       });
-      httpMock.getTrace();
       expect(res).toMatchSnapshot();
       expect(res.releases).toHaveLength(3);
       expect(httpMock.getTrace()).toMatchSnapshot();

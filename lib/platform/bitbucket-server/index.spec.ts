@@ -975,7 +975,6 @@ describe('platform/bitbucket-server', () => {
             topic: null,
             content: '!merge',
           });
-          httpMock.getTrace();
           expect(res).toBe(true);
           expect(httpMock.getTrace()).toMatchSnapshot();
         });

@@ -44,7 +44,6 @@ describe(getName(__filename), () => {
     const res = await giteaHttp.getJson(`${baseUrl}/pagination-example-1`, {
       paginate: true,
     });
-    httpMock.getTrace();
 
     expect(res.body).toHaveLength(6);
     expect(res.body).toEqual(['abc', 'def', 'ghi', 'jkl', 'mno', 'pqr']);

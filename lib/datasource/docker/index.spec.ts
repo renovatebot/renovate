@@ -486,7 +486,6 @@ describe('api/docker', () => {
         datasource: docker.id,
         depName: 'k8s.gcr.io/kubernetes-dashboard-amd64',
       });
-      httpMock.getTrace();
       expect(res.releases).toHaveLength(1);
       expect(httpMock.getTrace()).toMatchSnapshot();
     });

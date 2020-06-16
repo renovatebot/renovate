@@ -87,7 +87,6 @@ describe('datasource/galaxy', () => {
         .get('/api/v1/roles/?owner__username=foo&name=bar')
         .reply(200, empty);
       const res = await getReleases({ lookupName: 'foo.bar' });
-      httpMock.getTrace();
       expect(res).toBeNull();
       expect(httpMock.getTrace()).toMatchSnapshot();
     });

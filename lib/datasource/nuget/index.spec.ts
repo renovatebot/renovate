@@ -1,14 +1,11 @@
 import fs from 'fs';
-import _got from '../../util/got';
+import * as httpMock from '../../../test/httpMock';
 import * as _hostRules from '../../util/host-rules';
 import * as nuget from '.';
 
 const hostRules: any = _hostRules;
 
-jest.mock('../../util/got');
 jest.mock('../../util/host-rules');
-
-const got: any = _got;
 
 const pkgListV3 = fs.readFileSync(
   'lib/datasource/nuget/__fixtures__/nunitV3.json',
@@ -98,6 +95,11 @@ describe('datasource/nuget', () => {
     beforeEach(() => {
       jest.resetAllMocks();
       hostRules.hosts = jest.fn(() => []);
+      httpMock.setup();
+    });
+
+    afterEach(() => {
+      httpMock.reset();
     });
 
     it(`can't detect nuget feed version`, async () => {
@@ -114,6 +116,7 @@ describe('datasource/nuget', () => {
     });
 
     it('extracts feed version from registry URL hash', async () => {
+      httpMock.scope('https://my-registry').get('/').reply(200);
       const config = {
         lookupName: 'nunit',
         registryUrls: ['https://my-registry#protocolVersion=3'],
@@ -121,319 +124,375 @@ describe('datasource/nuget', () => {
       await nuget.getReleases({
         ...config,
       });
-      expect(got.mock.calls[0][0]).toEqual('https://my-registry/');
+      const trace = httpMock.getTrace();
+      expect(trace[0].url).toEqual('https://my-registry/');
+      expect(trace).toMatchSnapshot();
     });
 
     it(`can't get packages list (v3)`, async () => {
-      got.mockReturnValueOnce({
-        body: JSON.parse(nugetIndexV3),
-        statusCode: 200,
-      });
-      got.mockReturnValueOnce({
-        statusCode: 500,
-      });
+      httpMock
+        .scope('https://api.nuget.org')
+        .get('/v3/index.json')
+        .reply(200, JSON.parse(nugetIndexV3));
+      httpMock
+        .scope('https://api-v2v3search-0.nuget.org')
+        .get('/query?q=PackageId:nunit&semVerLevel=2.0.0&prerelease=true')
+        .reply(500);
+
       const res = await nuget.getReleases({
         ...configV3,
       });
 
       expect(res).toBeNull();
+      expect(httpMock.getTrace()).toMatchSnapshot();
     });
     it(`empty packages list (v3)`, async () => {
-      got.mockReturnValueOnce({
-        body: JSON.parse(nugetIndexV3),
-        statusCode: 200,
-      });
-      got.mockReturnValueOnce({
-        body: JSON.parse('{"totalHits": 0}'),
-        statusCode: 200,
-      });
+      httpMock
+        .scope('https://api.nuget.org')
+        .get('/v3/index.json')
+        .reply(200, JSON.parse(nugetIndexV3));
+      httpMock
+        .scope('https://api-v2v3search-0.nuget.org')
+        .get('/query?q=PackageId:nunit&semVerLevel=2.0.0&prerelease=true')
+        .reply(200, JSON.parse('{"totalHits": 0}'));
+
       const res = await nuget.getReleases({
         ...configV3,
       });
 
       expect(res).toBeNull();
+      expect(httpMock.getTrace()).toMatchSnapshot();
     });
 
     it('returns null for empty result (v3v2)', async () => {
-      got.mockReturnValueOnce({});
+      httpMock
+        .scope('https://api.nuget.org')
+        .get('/v3/index.json')
+        .reply(200, {});
+      httpMock
+        .scope('https://www.nuget.org')
+        .get(
+          '/api/v2//FindPackagesById()?id=%27nunit%27&$select=Version,IsLatestVersion,ProjectUrl'
+        )
+        .reply(200, null);
       expect(
         await nuget.getReleases({
           ...configV3V2,
         })
       ).toBeNull();
+      expect(httpMock.getTrace()).toMatchSnapshot();
     });
     it('returns null for empty result (v2)', async () => {
-      got.mockReturnValueOnce({});
+      httpMock
+        .scope('https://www.nuget.org')
+        .get(
+          '/api/v2//FindPackagesById()?id=%27nunit%27&$select=Version,IsLatestVersion,ProjectUrl'
+        )
+        .reply(200, {});
       expect(
         await nuget.getReleases({
           ...configV2,
         })
       ).toBeNull();
+      expect(httpMock.getTrace()).toMatchSnapshot();
     });
     it('returns null for empty result (v3)', async () => {
-      got.mockReturnValueOnce({});
-      expect(
-        await nuget.getReleases({
-          ...configV3,
-        })
-      ).toBeNull();
+      httpMock
+        .scope('https://api.nuget.org')
+        .get('/v3/index.json')
+        .reply(200, {});
+      const res = await nuget.getReleases({
+        ...configV3,
+      });
+      expect(res).toBeNull();
+      expect(httpMock.getTrace()).toMatchSnapshot();
     });
 
     it('returns null for non 200 (v3v2)', async () => {
-      got.mockImplementationOnce(() =>
-        Promise.reject({
-          statusCode: 500,
-        })
-      );
+      httpMock.scope('https://api.nuget.org').get('/v3/index.json').reply(500);
+      httpMock
+        .scope('https://www.nuget.org')
+        .get(
+          '/api/v2//FindPackagesById()?id=%27nunit%27&$select=Version,IsLatestVersion,ProjectUrl'
+        )
+        .reply(500);
       expect(
         await nuget.getReleases({
           ...configV3V2,
         })
       ).toBeNull();
+      expect(httpMock.getTrace()).toMatchSnapshot();
     });
     it('returns null for non 200 (v3)', async () => {
-      got.mockImplementationOnce(() =>
-        Promise.reject({
-          statusCode: 500,
-        })
-      );
+      httpMock.scope('https://api.nuget.org').get('/v3/index.json').reply(500);
       expect(
         await nuget.getReleases({
           ...configV3,
         })
       ).toBeNull();
+      expect(httpMock.getTrace()).toMatchSnapshot();
     });
     it('returns null for non 200 (v2)', async () => {
-      got.mockImplementationOnce(() =>
-        Promise.reject({
-          statusCode: 500,
-        })
-      );
+      httpMock
+        .scope('https://www.nuget.org')
+        .get(
+          '/api/v2//FindPackagesById()?id=%27nunit%27&$select=Version,IsLatestVersion,ProjectUrl'
+        )
+        .reply(500);
       expect(
         await nuget.getReleases({
           ...configV2,
         })
       ).toBeNull();
+      expect(httpMock.getTrace()).toMatchSnapshot();
     });
 
     it('returns null for unknown error (v3v2)', async () => {
-      got.mockImplementationOnce(() => {
-        throw new Error();
-      });
+      httpMock
+        .scope('https://api.nuget.org')
+        .get('/v3/index.json')
+        .replyWithError('');
+      httpMock
+        .scope('https://www.nuget.org')
+        .get(
+          '/api/v2//FindPackagesById()?id=%27nunit%27&$select=Version,IsLatestVersion,ProjectUrl'
+        )
+        .replyWithError('');
       expect(
         await nuget.getReleases({
           ...configV3V2,
         })
       ).toBeNull();
+      expect(httpMock.getTrace()).toMatchSnapshot();
     });
     it('returns deduplicated results', async () => {
-      got
-        .mockReturnValueOnce({
-          body: JSON.parse(nugetIndexV3),
-          statusCode: 200,
-        })
-        .mockReturnValueOnce({
-          body: JSON.parse(pkgListV3),
-          statusCode: 200,
-        })
-        .mockReturnValueOnce({
-          body: pkgInfoV3FromNuget,
-          statusCode: 200,
-        })
-        .mockReturnValueOnce({
-          body: JSON.parse(nugetIndexV3),
-          statusCode: 200,
-        })
-        .mockReturnValueOnce({
-          body: JSON.parse(pkgListV3PrivateFeed),
-          statusCode: 200,
-        })
-        .mockReturnValueOnce({
-          body: pkgInfoV3FromNuget,
-          statusCode: 200,
-        });
+      httpMock
+        .scope('https://api.nuget.org')
+        .get('/v3/index.json')
+        .reply(200, JSON.parse(nugetIndexV3))
+        .get('/v3-flatcontainer/nunit/3.11.0/nunit.nuspec')
+        .reply(200, pkgInfoV3FromNuget);
+      httpMock
+        .scope('https://api-v2v3search-0.nuget.org')
+        .get('/query?q=PackageId:nunit&semVerLevel=2.0.0&prerelease=true')
+        .reply(200, JSON.parse(pkgListV3))
+        .get('/query?q=nunit')
+        .reply(200, JSON.parse(pkgListV3PrivateFeed));
+      httpMock
+        .scope('https://myprivatefeed')
+        .get('/index.json')
+        .reply(200, JSON.parse(nugetIndexV3));
+
       const res = await nuget.getReleases({
         ...configV3Multiple,
       });
       expect(res).not.toBeNull();
       expect(res).toMatchSnapshot();
       expect(res.releases).toHaveLength(30);
+      expect(httpMock.getTrace()).toMatchSnapshot();
     });
     it('returns null for unknown error in getReleasesFromV3Feed (v3)', async () => {
-      got.mockImplementationOnce(() => {
-        throw new Error();
-      });
+      httpMock
+        .scope('https://api.nuget.org')
+        .get('/v3/index.json')
+        .replyWithError('');
       expect(
         await nuget.getReleases({
           ...configV3,
         })
       ).toBeNull();
+      expect(httpMock.getTrace()).toMatchSnapshot();
     });
     it('returns null for unknown error in getQueryUrlForV3Feed  (v3)', async () => {
-      got.mockReturnValueOnce({
-        body: JSON.parse(nugetIndexV3),
-        statusCode: 200,
-      });
-      got.mockImplementationOnce(() => {
-        throw new Error();
-      });
+      httpMock
+        .scope('https://api.nuget.org')
+        .get('/v3/index.json')
+        .reply(200, JSON.parse(nugetIndexV3));
+      httpMock
+        .scope('https://api-v2v3search-0.nuget.org')
+        .get('/query?q=PackageId:nunit&semVerLevel=2.0.0&prerelease=true')
+        .replyWithError('');
       expect(
         await nuget.getReleases({
           ...configV3,
         })
       ).toBeNull();
+      expect(httpMock.getTrace()).toMatchSnapshot();
     });
     it('returns null for unknown error (v2)', async () => {
-      got.mockImplementationOnce(() => {
-        throw new Error();
-      });
+      httpMock
+        .scope('https://www.nuget.org')
+        .get(
+          '/api/v2//FindPackagesById()?id=%27nunit%27&$select=Version,IsLatestVersion,ProjectUrl'
+        )
+        .replyWithError('');
       expect(
         await nuget.getReleases({
           ...configV2,
         })
       ).toBeNull();
+      expect(httpMock.getTrace()).toMatchSnapshot();
     });
     it('processes real data (v3) feed is a nuget.org', async () => {
-      got.mockReturnValueOnce({
-        body: JSON.parse(nugetIndexV3),
-        statusCode: 200,
-      });
-      got.mockReturnValueOnce({
-        body: JSON.parse(pkgListV3),
-        statusCode: 200,
-      });
-      got.mockReturnValueOnce({
-        body: pkgInfoV3FromNuget,
-        statusCode: 200,
-      });
+      httpMock
+        .scope('https://api.nuget.org')
+        .get('/v3/index.json')
+        .reply(200, JSON.parse(nugetIndexV3))
+        .get('/v3-flatcontainer/nunit/3.11.0/nunit.nuspec')
+        .reply(200, pkgInfoV3FromNuget);
+      httpMock
+        .scope('https://api-v2v3search-0.nuget.org')
+        .get('/query?q=PackageId:nunit&semVerLevel=2.0.0&prerelease=true')
+        .reply(200, JSON.parse(pkgListV3));
       const res = await nuget.getReleases({
         ...configV3,
       });
       expect(res).not.toBeNull();
       expect(res).toMatchSnapshot();
       expect(res.sourceUrl).toBeDefined();
+      expect(httpMock.getTrace()).toMatchSnapshot();
     });
     it('processes real data (v3) feed is not a nuget.org', async () => {
-      got.mockReturnValueOnce({
-        body: JSON.parse(nugetIndexV3),
-        statusCode: 200,
-      });
-      got.mockReturnValueOnce({
-        body: JSON.parse(pkgListV3),
-        statusCode: 200,
-      });
+      httpMock
+        .scope('https://api-v2v3search-0.nuget.org')
+        .get('/query?q=nunit')
+        .reply(200, JSON.parse(pkgListV3));
+      httpMock
+        .scope('https://myprivatefeed')
+        .get('/index.json')
+        .reply(200, JSON.parse(nugetIndexV3));
+
       const res = await nuget.getReleases({
         ...configV3NotNugetOrg,
       });
       expect(res).not.toBeNull();
       expect(res).toMatchSnapshot();
       expect(res.sourceUrl).toBeDefined();
+      expect(httpMock.getTrace()).toMatchSnapshot();
     });
     it('processes real data (v3) feed is not a nuget.org with mismatch', async () => {
-      got.mockReturnValueOnce({
-        body: JSON.parse(nugetIndexV3),
-        statusCode: 200,
-      });
-      got.mockReturnValueOnce({
-        body: JSON.parse(pkgListV3),
-        statusCode: 200,
-      });
+      httpMock
+        .scope('https://api-v2v3search-0.nuget.org')
+        .get('/query?q=nun')
+        .reply(200, JSON.parse(pkgListV3));
+      httpMock
+        .scope('https://myprivatefeed')
+        .get('/index.json')
+        .reply(200, JSON.parse(nugetIndexV3));
       const res = await nuget.getReleases({
         ...configV3NotNugetOrg,
         lookupName: 'nun',
       });
       expect(res).toBeNull();
+      expect(httpMock.getTrace()).toMatchSnapshot();
     });
     it('processes real data without project url (v3)', async () => {
-      got.mockReturnValueOnce({
-        body: JSON.parse(nugetIndexV3),
-        statusCode: 200,
-      });
-      got.mockReturnValueOnce({
-        body: JSON.parse(pkgListV3WithoutProkjectUrl),
-        statusCode: 200,
-      });
+      httpMock
+        .scope('https://api-v2v3search-0.nuget.org')
+        .get('/query?q=nunit')
+        .reply(200, JSON.parse(pkgListV3WithoutProkjectUrl));
+      httpMock
+        .scope('https://myprivatefeed')
+        .get('/index.json')
+        .reply(200, JSON.parse(nugetIndexV3));
       const res = await nuget.getReleases({
         ...configV3NotNugetOrg,
       });
       expect(res).not.toBeNull();
       expect(res).toMatchSnapshot();
       expect(res.sourceUrl).not.toBeDefined();
+      expect(httpMock.getTrace()).toMatchSnapshot();
     });
     it('processes real data with no github project url (v3)', async () => {
-      got.mockReturnValueOnce({
-        body: JSON.parse(nugetIndexV3),
-        statusCode: 200,
-      });
-      got.mockReturnValueOnce({
-        body: JSON.parse(pkgListV3NoGitHubProjectUrl),
-        statusCode: 200,
-      });
+      httpMock
+        .scope('https://api-v2v3search-0.nuget.org')
+        .get('/query?q=nunit')
+        .reply(200, JSON.parse(pkgListV3NoGitHubProjectUrl));
+      httpMock
+        .scope('https://myprivatefeed')
+        .get('/index.json')
+        .reply(200, JSON.parse(nugetIndexV3));
       const res = await nuget.getReleases({
         ...configV3NotNugetOrg,
       });
       expect(res).not.toBeNull();
       expect(res).toMatchSnapshot();
+      expect(httpMock.getTrace()).toMatchSnapshot();
     });
     it('processes real data (v2)', async () => {
-      got.mockReturnValueOnce({
-        body: pkgListV2,
-        statusCode: 200,
-      });
+      httpMock
+        .scope('https://www.nuget.org')
+        .get(
+          '/api/v2//FindPackagesById()?id=%27nunit%27&$select=Version,IsLatestVersion,ProjectUrl'
+        )
+        .reply(200, pkgListV2);
       const res = await nuget.getReleases({
         ...configV2,
       });
       expect(res).not.toBeNull();
       expect(res).toMatchSnapshot();
       expect(res.sourceUrl).toBeDefined();
+      expect(httpMock.getTrace()).toMatchSnapshot();
     });
     it('processes real data no relase (v2)', async () => {
-      got.mockReturnValueOnce({
-        body: pkgListV2NoRelease,
-        statusCode: 200,
-      });
+      httpMock
+        .scope('https://www.nuget.org')
+        .get(
+          '/api/v2//FindPackagesById()?id=%27nunit%27&$select=Version,IsLatestVersion,ProjectUrl'
+        )
+        .reply(200, pkgListV2NoRelease);
       const res = await nuget.getReleases({
         ...configV2,
       });
       expect(res).toBeNull();
+      expect(httpMock.getTrace()).toMatchSnapshot();
     });
     it('processes real data without project url (v2)', async () => {
-      got.mockReturnValueOnce({
-        body: pkgListV2WithoutProjectUrl,
-        statusCode: 200,
-      });
+      httpMock
+        .scope('https://www.nuget.org')
+        .get(
+          '/api/v2//FindPackagesById()?id=%27nunit%27&$select=Version,IsLatestVersion,ProjectUrl'
+        )
+        .reply(200, pkgListV2WithoutProjectUrl);
       const res = await nuget.getReleases({
         ...configV2,
       });
       expect(res).not.toBeNull();
       expect(res).toMatchSnapshot();
       expect(res.sourceUrl).not.toBeDefined();
+      expect(httpMock.getTrace()).toMatchSnapshot();
     });
     it('processes real data with no github project url (v2)', async () => {
-      got.mockReturnValueOnce({
-        body: pkgListV2NoGitHubProjectUrl,
-        statusCode: 200,
-      });
+      httpMock
+        .scope('https://www.nuget.org')
+        .get(
+          '/api/v2//FindPackagesById()?id=%27nunit%27&$select=Version,IsLatestVersion,ProjectUrl'
+        )
+        .reply(200, pkgListV2NoGitHubProjectUrl);
       const res = await nuget.getReleases({
         ...configV2,
       });
       expect(res).not.toBeNull();
       expect(res).toMatchSnapshot();
+      expect(httpMock.getTrace()).toMatchSnapshot();
     });
     it('handles paginated results (v2)', async () => {
-      got.mockReturnValueOnce({
-        body: pkgListV2Page1of2,
-        statusCode: 200,
-      });
-      got.mockReturnValueOnce({
-        body: pkgListV2Page2of2,
-        statusCode: 200,
-      });
+      httpMock
+        .scope('https://www.nuget.org')
+        .get(
+          '/api/v2//FindPackagesById()?id=%27nunit%27&$select=Version,IsLatestVersion,ProjectUrl'
+        )
+        .reply(200, pkgListV2Page1of2);
+      httpMock
+        .scope('https://example.org')
+        .get('/')
+        .reply(200, pkgListV2Page2of2);
       const res = await nuget.getReleases({
         ...configV2,
       });
       expect(res).not.toBeNull();
       expect(res).toMatchSnapshot();
+      expect(httpMock.getTrace()).toMatchSnapshot();
     });
   });
 });
