@@ -465,15 +465,6 @@ async function getTags(
   }
 }
 
-export function getConfigResponse(
-  url: string,
-  headers: OutgoingHttpHeaders
-): Promise<HttpResponse> {
-  return http.get(url, {
-    headers,
-  });
-}
-
 /*
  * docker.getLabels
  *
@@ -535,7 +526,9 @@ async function getLabels(
       return {};
     }
     const url = `${registry}/v2/${repository}/blobs/${configDigest}`;
-    const configResponse = await getConfigResponse(url, headers);
+    const configResponse = await http.get(url, {
+      headers,
+    });
     labels = JSON.parse(configResponse.body).config.Labels;
 
     if (labels) {
