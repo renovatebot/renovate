@@ -241,7 +241,7 @@ class Ibazel < Formula
 
   # To generate run:
   # curl https://codeload.github.com/bazelbuild/bazel-watcher/tar.gz/v0.8.2 | sha256sum
-  sha256 'e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855'
+  sha256 '2c26b46b68ffc68ff99b453c1d30413413422d706483bfa0f98a5e886266e7ae'
 
   bottle :unneeded
 
@@ -289,7 +289,7 @@ class Aide < Formula
   desc \\"File and directory integrity checker\\"
   homepage \\"https://aide.github.io/\\"
   url \\"https://github.com/aide/aide/releases/download/v0.17.7/aide-0.17.7.tar.gz\\"
-  sha256 \\"e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855\\"
+  sha256 \\"2c26b46b68ffc68ff99b453c1d30413413422d706483bfa0f98a5e886266e7ae\\"
 
   bottle do
     cellar :any
