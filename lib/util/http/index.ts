@@ -41,6 +41,17 @@ function cloneResponse<T>(response: any): HttpResponse<T> {
   };
 }
 
+async function resolveGot(promisedRes): Promise<any> {
+  try {
+    const res = await promisedRes;
+    return res;
+  } catch (err) {
+    err.code = err.response?.code;
+    err.statusCode = err.response?.statusCode;
+    throw err;
+  }
+}
+
 export class Http<GetOptions = HttpOptions, PostOptions = HttpPostOptions> {
   constructor(private hostType: string, private options?: HttpOptions) {}
 
@@ -102,7 +113,7 @@ export class Http<GetOptions = HttpOptions, PostOptions = HttpPostOptions> {
       const cachedRes = runCache.get(cacheKey);
       // istanbul ignore if
       if (cachedRes) {
-        return cloneResponse<T>(await cachedRes);
+        return cloneResponse<T>(await resolveGot(cachedRes));
       }
     }
     const startTime = Date.now();
@@ -110,7 +121,7 @@ export class Http<GetOptions = HttpOptions, PostOptions = HttpPostOptions> {
     if (options.method === 'get') {
       runCache.set(cacheKey, promisedRes); // always set if it's a get
     }
-    const res = await promisedRes;
+    const res = await resolveGot(promisedRes);
     const httpRequests = runCache.get('http-requests') || [];
     httpRequests.push({
       method: options.method,
