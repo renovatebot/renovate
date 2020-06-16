@@ -1,8 +1,8 @@
 import crypto from 'crypto';
 import URL from 'url';
+import got from 'got';
 import * as runCache from '../cache/run';
 import { clone } from '../clone';
-import got from '../got';
 import { applyAuthorization } from './auth';
 import { applyHostRules } from './host-rules';
 
@@ -59,6 +59,9 @@ export class Http<GetOptions = HttpOptions, PostOptions = HttpPostOptions> {
       hostType: this.hostType,
       ...httpOptions,
     };
+    if (process.env.NODE_ENV === 'test') {
+      options.retry = 0;
+    }
     options.hooks = {
       beforeRedirect: [
         (opts: any): void => {
