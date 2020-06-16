@@ -129,7 +129,7 @@ describe('manager/bazel/update', () => {
         .get(
           '/GoogleContainerTools/distroless/archive/033387ac8853e6cc1cd47df6c346bc53cbc490d8.tar.gz'
         )
-        .reply(200, Readable.from.foo);
+        .reply(200, Readable.from(['foo']));
       const res = await updateDependency({
         fileContent: content,
         upgrade,
@@ -156,7 +156,7 @@ describe('manager/bazel/update', () => {
       httpMock
         .scope('https://github.com')
         .get('/bazelbuild/bazel-skylib/archive/0.8.0.tar.gz')
-        .reply(200, Readable.from.foo);
+        .reply(200, Readable.from(['foo']));
       const res = await updateDependency({
         fileContent: content,
         upgrade,
@@ -184,7 +184,7 @@ describe('manager/bazel/update', () => {
       httpMock
         .scope('https://github.com')
         .get('/bazelbuild/bazel-skylib/archive/0.8.0.tar.gz')
-        .reply(200, Readable.from.foo);
+        .reply(200, Readable.from(['foo']));
       const res = await updateDependency({
         fileContent: content,
         upgrade,
@@ -264,11 +264,11 @@ http_archive(
       httpMock
         .scope('https://github.com')
         .get('/bazelbuild/bazel-skylib/archive/0.6.2.tar.gz')
-        .reply(200, Readable.from.foo);
+        .reply(200, Readable.from(['foo']));
       httpMock
         .scope('https://mirror.bazel.build')
         .get('/github.com/bazelbuild/bazel-skylib/archive/0.6.2.tar.gz')
-        .reply(200, Readable.from.foo);
+        .reply(200, Readable.from(['foo']));
       const res = await updateDependency({
         fileContent: content,
         upgrade,
