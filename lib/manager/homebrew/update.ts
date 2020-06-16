@@ -156,7 +156,6 @@ export async function updateDependency({
     return fileContent;
   }
   let newSha256: string;
-  let errorMsg: string;
   try {
     newUrl = `https://github.com/${upgrade.managerData.ownerName}/${
       upgrade.managerData.repoName
@@ -176,13 +175,16 @@ export async function updateDependency({
         algorithm: 'sha256',
       });
     } catch (errInner) {
-      errorMsg = `Failed to download archive download for ${upgrade.depName} - update failed`;
+      logger.debug(
+        `Failed to download archive download for ${upgrade.depName} - update failed`
+      );
+      return fileContent;
     }
   }
+  // istanbul ignore next
   if (!newSha256) {
     logger.debug(
-      errorMsg ||
-        `Failed to generate new sha256 for ${upgrade.depName} - update failed`
+      `Failed to generate new sha256 for ${upgrade.depName} - update failed`
     );
     return fileContent;
   }
