@@ -1,8 +1,8 @@
 import crypto from 'crypto';
 import URL from 'url';
+import got from 'got';
 import * as runCache from '../cache/run';
 import { clone } from '../clone';
-import got from '../got';
 import { applyAuthorization } from './auth';
 import { applyHostRules } from './host-rules';
 
@@ -55,6 +55,7 @@ export class Http<GetOptions = HttpOptions, PostOptions = HttpPostOptions> {
     // TODO: deep merge in order to merge headers
     let options: any = {
       method: 'get',
+      retry: 0,
       ...this.options,
       hostType: this.hostType,
       ...httpOptions,
