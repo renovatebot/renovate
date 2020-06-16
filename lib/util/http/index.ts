@@ -133,9 +133,13 @@ export class Http<GetOptions = HttpOptions, PostOptions = HttpPostOptions> {
     url: string,
     options: InternalHttpOptions
   ): Promise<HttpResponse<T>> {
-    const res = await this.request<T>(url, { ...options, json: true });
-    const body = res.body;
-    return { ...res, body };
+    const { body, ...jsonOptions } = options;
+    jsonOptions.responseType = 'json';
+    if (body) {
+      jsonOptions.json = body;
+    }
+    const res = await this.request<T>(url, jsonOptions);
+    return { ...res, body: res.body };
   }
 
   async getJson<T = unknown>(
