@@ -3,6 +3,7 @@ import { fromStream as _fromStream } from 'hasha';
 import { updateDependency } from './update';
 
 jest.mock('hasha');
+jest.mock('../../util/got');
 
 const fromStream: jest.Mock<Promise<string>> = _fromStream as any;
 
