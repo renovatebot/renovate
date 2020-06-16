@@ -55,11 +55,13 @@ export class Http<GetOptions = HttpOptions, PostOptions = HttpPostOptions> {
     // TODO: deep merge in order to merge headers
     let options: any = {
       method: 'get',
-      retry: 0,
       ...this.options,
       hostType: this.hostType,
       ...httpOptions,
     };
+    if (process.env.NODE_ENV === 'test') {
+      options.retry = 0;
+    }
     options.hooks = {
       beforeRedirect: [
         (opts: any): void => {
