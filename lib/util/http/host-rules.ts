@@ -15,7 +15,8 @@ export function applyHostRules(url: string, inOptions: any): any {
     logger.trace('Authorization already set for host: ' + options.hostname);
   } else if (password) {
     logger.trace('Applying Basic authentication for host ' + options.hostname);
-    options.auth = `${username || ''}:${password}`;
+    options.username = username;
+    options.password = password;
   } else if (token) {
     logger.trace('Applying Bearer authentication for host ' + options.hostname);
     options.token = token;
