@@ -71,7 +71,7 @@ export async function getReleases({
     pkgUrl
   );
   // istanbul ignore if
-  if (cachedResult !== undefined) {
+  if (cachedResult) {
     return cachedResult;
   }
   try {

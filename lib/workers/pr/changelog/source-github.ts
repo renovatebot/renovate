@@ -155,7 +155,7 @@ export async function getChangeLogJSON({
         getCacheKey(prev.version, next.version)
       );
       // istanbul ignore else
-      if (release === undefined) {
+      if (!release) {
         release = {
           version: next.version,
           date: next.releaseTimestamp,

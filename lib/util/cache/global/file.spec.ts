@@ -6,10 +6,8 @@ describe('lib/util/cache/global/file', () => {
     init(os.tmpdir());
   });
 
-  it('returns undefined if no match', async () => {
-    expect(
-      await global.renovateCache.get('test', 'missing-key')
-    ).toBeUndefined();
+  it('gets null', async () => {
+    expect(await global.renovateCache.get('test', 'missing-key')).toBeNull();
   });
 
   it('sets and gets', async () => {
@@ -19,6 +17,6 @@ describe('lib/util/cache/global/file', () => {
 
   it('expires', async () => {
     await global.renovateCache.set('test', 'key', 1234, -5);
-    expect(await global.renovateCache.get('test', 'key')).toBeUndefined();
+    expect(await global.renovateCache.get('test', 'key')).toBeNull();
   });
 });

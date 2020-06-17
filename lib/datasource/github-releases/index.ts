@@ -33,7 +33,7 @@ export async function getReleases({
     repo
   );
   // istanbul ignore if
-  if (cachedResult !== undefined) {
+  if (cachedResult) {
     return cachedResult;
   }
   try {

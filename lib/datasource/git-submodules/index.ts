@@ -18,7 +18,7 @@ export async function getReleases({
     cacheKey
   );
   // istanbul ignore if
-  if (cachedResult !== undefined) {
+  if (cachedResult) {
     return cachedResult;
   }
 

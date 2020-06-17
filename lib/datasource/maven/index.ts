@@ -162,7 +162,7 @@ async function getVersionsFromMetadata(
     cacheKey
   );
   /* istanbul ignore if */
-  if (cachedVersions !== undefined) {
+  if (cachedVersions) {
     return cachedVersions;
   }
 

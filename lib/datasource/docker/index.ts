@@ -341,7 +341,7 @@ export async function getDigest(
     const cacheKey = `${registry}:${repository}:${newTag}`;
     const cachedResult = await globalCache.get(cacheNamespace, cacheKey);
     // istanbul ignore if
-    if (cachedResult !== undefined) {
+    if (cachedResult) {
       return cachedResult;
     }
     const manifestResponse = await getManifestResponse(
@@ -386,7 +386,7 @@ async function getTags(
       cacheKey
     );
     // istanbul ignore if
-    if (cachedResult !== undefined) {
+    if (cachedResult) {
       return cachedResult;
     }
     // AWS ECR limits the maximum number of results to 1000
@@ -486,7 +486,7 @@ async function getLabels(
     cacheKey
   );
   // istanbul ignore if
-  if (cachedResult !== undefined) {
+  if (cachedResult) {
     return cachedResult;
   }
   try {

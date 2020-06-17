@@ -355,7 +355,7 @@ export async function addReleaseNotes(
     let releaseNotes: ChangeLogNotes;
     const cacheKey = getCacheKey(v.version);
     releaseNotes = await globalCache.get(cacheNamespace, cacheKey);
-    if (releaseNotes === undefined) {
+    if (!releaseNotes) {
       if (input.project.github != null) {
         releaseNotes = await getReleaseNotesMd(
           repository,
@@ -388,7 +388,7 @@ export async function addReleaseNotes(
       await globalCache.set(
         cacheNamespace,
         cacheKey,
-        releaseNotes || null,
+        releaseNotes,
         cacheMinutes
       );
     }

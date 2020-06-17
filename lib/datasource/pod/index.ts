@@ -158,7 +158,7 @@ export async function getReleases({
     podName
   );
   /* istanbul ignore next line */
-  if (cachedResult !== undefined) {
+  if (cachedResult) {
     logger.debug(`CocoaPods: Return cached result for ${podName}`);
     return cachedResult;
   }

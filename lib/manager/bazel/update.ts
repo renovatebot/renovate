@@ -51,7 +51,7 @@ async function getHashFromUrl(url: string): Promise<string | null> {
     url
   );
   /* istanbul ignore next line */
-  if (cachedResult !== undefined) {
+  if (cachedResult) {
     return cachedResult;
   }
   try {

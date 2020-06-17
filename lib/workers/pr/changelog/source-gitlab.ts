@@ -135,7 +135,7 @@ export async function getChangeLogJSON({
         cacheNamespace,
         getCacheKey(prev.version, next.version)
       );
-      if (release === undefined) {
+      if (!release) {
         release = {
           version: next.version,
           date: next.releaseTimestamp,

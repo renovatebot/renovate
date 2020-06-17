@@ -60,7 +60,7 @@ export async function cacheAble<TArg, TResult = unknown>({
   const cacheKey = JSON.stringify(lookup);
   const cachedResult = await globalCache.get<TResult>(cacheNamespace, cacheKey);
   // istanbul ignore if
-  if (cachedResult !== undefined) {
+  if (cachedResult) {
     logger.trace({ id, lookup }, 'datasource cachedResult');
     return cachedResult;
   }
