@@ -336,12 +336,13 @@ export async function getDigest(
   );
   logger.debug(`getDigest(${registry}, ${repository}, ${newValue})`);
   const newTag = newValue || 'latest';
+  const cacheNamespace = 'datasource-docker-digest';
+  const cacheKey = `${registry}:${repository}:${newTag}`;
+  let digest = null;
   try {
-    const cacheNamespace = 'datasource-docker-digest';
-    const cacheKey = `${registry}:${repository}:${newTag}`;
     const cachedResult = await globalCache.get(cacheNamespace, cacheKey);
     // istanbul ignore if
-    if (cachedResult) {
+    if (cachedResult !== undefined) {
       return cachedResult;
     }
     const manifestResponse = await getManifestResponse(
@@ -349,14 +350,10 @@ export async function getDigest(
       repository,
       newTag
     );
-    if (!manifestResponse) {
-      return null;
+    if (manifestResponse) {
+      digest = extractDigestFromResponse(manifestResponse) || null;
+      logger.debug({ digest }, 'Got docker digest');
     }
-    const digest = extractDigestFromResponse(manifestResponse);
-    logger.debug({ digest }, 'Got docker digest');
-    const cacheMinutes = 30;
-    await globalCache.set(cacheNamespace, cacheKey, digest, cacheMinutes);
-    return digest;
   } catch (err) /* istanbul ignore next */ {
     if (err instanceof DatasourceError) {
       throw err;
@@ -369,8 +366,10 @@ export async function getDigest(
       },
       'Unknown Error looking up docker image digest'
     );
-    return null;
   }
+  const cacheMinutes = 30;
+  await globalCache.set(cacheNamespace, cacheKey, null, cacheMinutes);
+  return digest;
 }
 
 async function getTags(
@@ -386,7 +385,7 @@ async function getTags(
       cacheKey
     );
     // istanbul ignore if
-    if (cachedResult) {
+    if (cachedResult !== undefined) {
       return cachedResult;
     }
     // AWS ECR limits the maximum number of results to 1000
@@ -486,7 +485,7 @@ async function getLabels(
     cacheKey
   );
   // istanbul ignore if
-  if (cachedResult) {
+  if (cachedResult !== undefined) {
     return cachedResult;
   }
   try {

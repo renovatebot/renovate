@@ -147,11 +147,12 @@ function parseDepExpr(
   }
 
   const groupId = resolveToken(rawGroupId);
+  const depName = `${groupId}:${resolveToken(rawArtifactId)}`;
   const artifactId =
     groupOp === '%%' && scalaVersion
       ? `${resolveToken(rawArtifactId)}_${scalaVersion}`
       : resolveToken(rawArtifactId);
-  const depName = `${groupId}:${artifactId}`;
+  const lookupName = `${groupId}:${artifactId}`;
   const currentValue = resolveToken(rawVersion);
 
   if (!depType && rawScope) {
@@ -160,6 +161,7 @@ function parseDepExpr(
 
   const result: PackageDependency = {
     depName,
+    lookupName,
     currentValue,
   };
 
