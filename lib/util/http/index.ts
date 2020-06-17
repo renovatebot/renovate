@@ -24,7 +24,8 @@ export interface HttpPostOptions extends HttpOptions {
 }
 
 export interface InternalHttpOptions extends HttpOptions {
-  json?: boolean;
+  json?: object;
+  responseType?: 'json';
   method?: 'get' | 'post' | 'put' | 'patch' | 'delete' | 'head';
 }
 
@@ -94,6 +95,8 @@ export class Http<GetOptions = HttpOptions, PostOptions = HttpPostOptions> {
       ],
     };
     options.headers = {
+      // will be "gzip, deflate, br" by new got default
+      'accept-encoding': 'gzip, deflate',
       ...options.headers,
       'user-agent':
         process.env.RENOVATE_USER_AGENT ||
@@ -145,11 +148,13 @@ export class Http<GetOptions = HttpOptions, PostOptions = HttpPostOptions> {
     options: InternalHttpOptions
   ): Promise<HttpResponse<T>> {
     const { body, ...jsonOptions } = options;
-    jsonOptions.responseType = 'json';
     if (body) {
       jsonOptions.json = body;
     }
-    const res = await this.request<T>(url, jsonOptions);
+    const res = await this.request<T>(url, {
+      ...jsonOptions,
+      responseType: 'json',
+    });
     return { ...res, body: res.body };
   }
 
