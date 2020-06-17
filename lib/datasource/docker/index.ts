@@ -368,7 +368,7 @@ export async function getDigest(
     );
   }
   const cacheMinutes = 30;
-  await globalCache.set(cacheNamespace, cacheKey, null, cacheMinutes);
+  await globalCache.set(cacheNamespace, cacheKey, digest, cacheMinutes);
   return digest;
 }
 
