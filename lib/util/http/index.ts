@@ -207,6 +207,10 @@ export class Http<GetOptions = HttpOptions, PostOptions = HttpPostOptions> {
       hostType: this.hostType,
       ...options,
     };
+    if (options?.baseUrl) {
+      // eslint-disable-next-line no-param-reassign
+      url = URL.resolve(options.baseUrl, url);
+    }
     return got.stream(url, combinedOptions);
   }
 }
