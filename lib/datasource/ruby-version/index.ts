@@ -21,7 +21,7 @@ export async function getReleases(
     'all'
   );
   // istanbul ignore if
-  if (cachedResult) {
+  if (cachedResult !== undefined) {
     return cachedResult;
   }
   try {

@@ -24,7 +24,7 @@ export async function getQueryUrl(url: string): Promise<string | null> {
   const cachedResult = await globalCache.get<string>(cacheNamespace, cacheKey);
 
   // istanbul ignore if
-  if (cachedResult) {
+  if (cachedResult !== undefined) {
     return cachedResult;
   }
 

@@ -89,7 +89,7 @@ async function getCachedPackage(
     cacheKey
   );
   // istanbul ignore if
-  if (cachedResult) {
+  if (cachedResult !== undefined) {
     return cachedResult;
   }
 

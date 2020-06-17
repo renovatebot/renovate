@@ -29,7 +29,7 @@ export async function getRawRefs({
       lookupName
     );
     /* istanbul ignore next line */
-    if (cachedResult) {
+    if (cachedResult !== undefined) {
       return cachedResult;
     }
 

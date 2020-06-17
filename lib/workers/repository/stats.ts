@@ -26,7 +26,7 @@ export function printRequestStats(): void {
     requestHosts[hostname] = requestHosts[hostname] || [];
     requestHosts[hostname].push(request.duration);
   }
-  logger.trace({ allRequests, requestHosts }, 'full stats');
+  logger.debug({ allRequests, requestHosts }, 'full stats');
   const hostStats: string[] = [];
   let totalRequests = 0;
   for (const [hostname, requests] of Object.entries(requestHosts)) {
