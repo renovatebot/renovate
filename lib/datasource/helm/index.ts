@@ -104,11 +104,6 @@ export async function getReleases({
   registryUrls,
 }: GetReleasesConfig): Promise<ReleaseResult | null> {
   const [helmRepository] = registryUrls;
-  // istanbul ignore if
-  if (!helmRepository) {
-    logger.warn(`helmRepository was not provided to getReleases`);
-    return null;
-  }
   const repositoryData = await getRepositoryData(helmRepository);
   if (!repositoryData) {
     logger.debug(`Couldn't get index.yaml file from ${helmRepository}`);
