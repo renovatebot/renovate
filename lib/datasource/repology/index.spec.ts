@@ -1,9 +1,10 @@
 import fs from 'fs';
+import { getPkgReleases } from '..';
 import * as httpMock from '../../../test/httpMock';
 import { getName } from '../../../test/util';
 import { DATASOURCE_FAILURE } from '../../constants/error-messages';
-import * as ds from '.';
-import { RepologyPackage } from '.';
+import { id as versioning } from '../../versioning/loose';
+import { RepologyPackage, id as datasource } from '.';
 
 const repologyApiHost = 'https://repology.org/';
 
@@ -72,7 +73,11 @@ describe(getName(__filename), () => {
       );
 
       expect(
-        await ds.getReleases({ lookupName: 'debian_stable/nginx' })
+        await getPkgReleases({
+          datasource,
+          versioning,
+          depName: 'debian_stable/nginx',
+        })
       ).toBeNull();
       expect(httpMock.getTrace()).toMatchSnapshot();
     });
@@ -86,7 +91,11 @@ describe(getName(__filename), () => {
       );
 
       expect(
-        await ds.getReleases({ lookupName: 'this_should/never-exist' })
+        await getPkgReleases({
+          datasource,
+          versioning,
+          depName: 'this_should/never-exist',
+        })
       ).toBeNull();
       expect(httpMock.getTrace()).toMatchSnapshot();
     });
@@ -100,7 +109,11 @@ describe(getName(__filename), () => {
       );
 
       expect(
-        await ds.getReleases({ lookupName: 'unsupported_repo/nginx' })
+        await getPkgReleases({
+          datasource,
+          versioning,
+          depName: 'unsupported_repo/nginx',
+        })
       ).toBeNull();
       expect(httpMock.getTrace()).toMatchSnapshot();
     });
@@ -109,7 +122,11 @@ describe(getName(__filename), () => {
       mockProjectBy('debian_stable', 'nginx', { status: 500 }, null);
 
       await expect(
-        ds.getReleases({ lookupName: 'debian_stable/nginx' })
+        getPkgReleases({
+          datasource,
+          versioning,
+          depName: 'debian_stable/nginx',
+        })
       ).rejects.toThrow(DATASOURCE_FAILURE);
       expect(httpMock.getTrace()).toMatchSnapshot();
     });
@@ -118,14 +135,22 @@ describe(getName(__filename), () => {
       mockProjectBy('debian_stable', 'nginx', { status: 404 }, { status: 500 });
 
       await expect(
-        ds.getReleases({ lookupName: 'debian_stable/nginx' })
+        getPkgReleases({
+          datasource,
+          versioning,
+          depName: 'debian_stable/nginx',
+        })
       ).rejects.toThrow(DATASOURCE_FAILURE);
       expect(httpMock.getTrace()).toMatchSnapshot();
     });
 
     it('throws without repository and package name', async () => {
       await expect(
-        ds.getReleases({ lookupName: 'invalid-lookup-name' })
+        getPkgReleases({
+          datasource,
+          versioning,
+          depName: 'invalid-lookup-name',
+        })
       ).rejects.toThrow(DATASOURCE_FAILURE);
       expect(httpMock.getTrace()).toMatchSnapshot();
     });
@@ -138,7 +163,11 @@ describe(getName(__filename), () => {
         null
       );
 
-      const res = await ds.getReleases({ lookupName: 'debian_stable/nginx' });
+      const res = await getPkgReleases({
+        datasource,
+        versioning,
+        depName: 'debian_stable/nginx',
+      });
       expect(res).toMatchSnapshot();
       expect(res.releases).toHaveLength(1);
       expect(res.releases[0].version).toEqual('1.14.2-2+deb10u1');
@@ -153,8 +182,10 @@ describe(getName(__filename), () => {
         { status: 200, body: fixtureGccDefaults }
       );
 
-      const res = await ds.getReleases({
-        lookupName: 'debian_stable/gcc-defaults',
+      const res = await getPkgReleases({
+        datasource,
+        versioning,
+        depName: 'debian_stable/gcc-defaults',
       });
       expect(res).toMatchSnapshot();
       expect(res.releases).toHaveLength(1);
@@ -170,7 +201,11 @@ describe(getName(__filename), () => {
         null
       );
 
-      const res = await ds.getReleases({ lookupName: 'alpine_3_12/gcc' });
+      const res = await getPkgReleases({
+        datasource,
+        versioning,
+        depName: 'alpine_3_12/gcc',
+      });
       expect(res).toMatchSnapshot();
       expect(res.releases).toHaveLength(1);
       expect(res.releases[0].version).toEqual('9.3.0-r2');
@@ -185,8 +220,10 @@ describe(getName(__filename), () => {
         null
       );
 
-      const res = await ds.getReleases({
-        lookupName: 'debian_stable/pulseaudio-utils',
+      const res = await getPkgReleases({
+        datasource,
+        versioning,
+        depName: 'debian_stable/pulseaudio-utils',
       });
       expect(res).toMatchSnapshot();
       expect(res.releases).toHaveLength(1);
@@ -208,7 +245,13 @@ describe(getName(__filename), () => {
         { status: 200, body: pkgsJSON }
       );
 
-      expect(await ds.getReleases({ lookupName: 'dummy/example' })).toBeNull();
+      expect(
+        await getPkgReleases({
+          datasource,
+          versioning,
+          depName: 'dummy/example',
+        })
+      ).toBeNull();
     });
   });
 });

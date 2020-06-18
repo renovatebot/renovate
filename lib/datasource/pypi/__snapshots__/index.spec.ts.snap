@@ -158,31 +158,10 @@ Array [
 
 exports[`datasource/pypi getReleases processes real data 1`] = `
 Object {
-  "homepage": "https://github.com/Azure/azure-cli",
   "releases": Array [
     Object {
       "releaseTimestamp": "2017-04-03T16:55:14",
       "version": "0.0.1",
-    },
-    Object {
-      "releaseTimestamp": "2017-09-22T23:47:59",
-      "version": "0.0.10",
-    },
-    Object {
-      "releaseTimestamp": "2017-10-24T02:14:07",
-      "version": "0.0.11",
-    },
-    Object {
-      "releaseTimestamp": "2017-11-14T18:31:57",
-      "version": "0.0.12",
-    },
-    Object {
-      "releaseTimestamp": "2017-12-05T18:57:54",
-      "version": "0.0.13",
-    },
-    Object {
-      "releaseTimestamp": "2018-01-05T21:26:03",
-      "version": "0.0.14",
     },
     Object {
       "releaseTimestamp": "2017-04-17T20:32:30",
@@ -215,6 +194,26 @@ Object {
     Object {
       "releaseTimestamp": "2017-08-28T20:14:33",
       "version": "0.0.9",
+    },
+    Object {
+      "releaseTimestamp": "2017-09-22T23:47:59",
+      "version": "0.0.10",
+    },
+    Object {
+      "releaseTimestamp": "2017-10-24T02:14:07",
+      "version": "0.0.11",
+    },
+    Object {
+      "releaseTimestamp": "2017-11-14T18:31:57",
+      "version": "0.0.12",
+    },
+    Object {
+      "releaseTimestamp": "2017-12-05T18:57:54",
+      "version": "0.0.13",
+    },
+    Object {
+      "releaseTimestamp": "2018-01-05T21:26:03",
+      "version": "0.0.14",
     },
     Object {
       "releaseTimestamp": "2018-01-17T18:36:39",
@@ -272,16 +271,13 @@ exports[`datasource/pypi getReleases respects compatibility 1`] = `
 Object {
   "releases": Array [
     Object {
-      "releaseTimestamp": undefined,
+      "version": "0.4.0",
+    },
+    Object {
       "version": "0.30.3",
     },
     Object {
-      "releaseTimestamp": undefined,
       "version": "0.31.0",
-    },
-    Object {
-      "releaseTimestamp": undefined,
-      "version": "0.4.0",
     },
   ],
 }

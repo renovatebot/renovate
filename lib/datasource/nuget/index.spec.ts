@@ -1,7 +1,9 @@
 import fs from 'fs';
+import { getPkgReleases } from '..';
 import * as httpMock from '../../../test/httpMock';
 import * as _hostRules from '../../util/host-rules';
-import * as nuget from '.';
+import { id as versioning } from '../../versioning/nuget';
+import { id as datasource } from '.';
 
 const hostRules: any = _hostRules;
 
@@ -60,7 +62,9 @@ const nugetIndexV3 = fs.readFileSync(
 );
 
 const configV3V2 = {
-  lookupName: 'nunit',
+  datasource,
+  versioning,
+  depName: 'nunit',
   registryUrls: [
     'https://api.nuget.org/v3/index.json',
     'https://www.nuget.org/api/v2/',
@@ -68,22 +72,30 @@ const configV3V2 = {
 };
 
 const configV2 = {
-  lookupName: 'nunit',
+  datasource,
+  versioning,
+  depName: 'nunit',
   registryUrls: ['https://www.nuget.org/api/v2/'],
 };
 
 const configV3 = {
-  lookupName: 'nunit',
+  datasource,
+  versioning,
+  depName: 'nunit',
   registryUrls: ['https://api.nuget.org/v3/index.json'],
 };
 
 const configV3NotNugetOrg = {
-  lookupName: 'nunit',
+  datasource,
+  versioning,
+  depName: 'nunit',
   registryUrls: ['https://myprivatefeed/index.json'],
 };
 
 const configV3Multiple = {
-  lookupName: 'nunit',
+  datasource,
+  versioning,
+  depName: 'nunit',
   registryUrls: [
     'https://api.nuget.org/v3/index.json',
     'https://myprivatefeed/index.json',
@@ -104,12 +116,14 @@ describe('datasource/nuget', () => {
 
     it(`can't detect nuget feed version`, async () => {
       const config = {
-        lookupName: 'nunit',
+        datasource,
+        versioning,
+        depName: 'nunit',
         registryUrls: ['#$#api.nuget.org/v3/index.xml'],
       };
 
       expect(
-        await nuget.getReleases({
+        await getPkgReleases({
           ...config,
         })
       ).toBeNull();
@@ -118,10 +132,12 @@ describe('datasource/nuget', () => {
     it('extracts feed version from registry URL hash', async () => {
       httpMock.scope('https://my-registry').get('/').reply(200);
       const config = {
-        lookupName: 'nunit',
+        datasource,
+        versioning,
+        depName: 'nunit',
         registryUrls: ['https://my-registry#protocolVersion=3'],
       };
-      await nuget.getReleases({
+      await getPkgReleases({
         ...config,
       });
       const trace = httpMock.getTrace();
@@ -139,7 +155,7 @@ describe('datasource/nuget', () => {
         .get('/query?q=PackageId:nunit&semVerLevel=2.0.0&prerelease=true')
         .reply(500);
 
-      const res = await nuget.getReleases({
+      const res = await getPkgReleases({
         ...configV3,
       });
 
@@ -156,7 +172,7 @@ describe('datasource/nuget', () => {
         .get('/query?q=PackageId:nunit&semVerLevel=2.0.0&prerelease=true')
         .reply(200, JSON.parse('{"totalHits": 0}'));
 
-      const res = await nuget.getReleases({
+      const res = await getPkgReleases({
         ...configV3,
       });
 
@@ -176,7 +192,7 @@ describe('datasource/nuget', () => {
         )
         .reply(200, null);
       expect(
-        await nuget.getReleases({
+        await getPkgReleases({
           ...configV3V2,
         })
       ).toBeNull();
@@ -190,7 +206,7 @@ describe('datasource/nuget', () => {
         )
         .reply(200, {});
       expect(
-        await nuget.getReleases({
+        await getPkgReleases({
           ...configV2,
         })
       ).toBeNull();
@@ -201,7 +217,7 @@ describe('datasource/nuget', () => {
         .scope('https://api.nuget.org')
         .get('/v3/index.json')
         .reply(200, {});
-      const res = await nuget.getReleases({
+      const res = await getPkgReleases({
         ...configV3,
       });
       expect(res).toBeNull();
@@ -217,7 +233,7 @@ describe('datasource/nuget', () => {
         )
         .reply(500);
       expect(
-        await nuget.getReleases({
+        await getPkgReleases({
           ...configV3V2,
         })
       ).toBeNull();
@@ -226,7 +242,7 @@ describe('datasource/nuget', () => {
     it('returns null for non 200 (v3)', async () => {
       httpMock.scope('https://api.nuget.org').get('/v3/index.json').reply(500);
       expect(
-        await nuget.getReleases({
+        await getPkgReleases({
           ...configV3,
         })
       ).toBeNull();
@@ -240,7 +256,7 @@ describe('datasource/nuget', () => {
         )
         .reply(500);
       expect(
-        await nuget.getReleases({
+        await getPkgReleases({
           ...configV2,
         })
       ).toBeNull();
@@ -259,7 +275,7 @@ describe('datasource/nuget', () => {
         )
         .replyWithError('');
       expect(
-        await nuget.getReleases({
+        await getPkgReleases({
           ...configV3V2,
         })
       ).toBeNull();
@@ -283,7 +299,7 @@ describe('datasource/nuget', () => {
         .get('/index.json')
         .reply(200, JSON.parse(nugetIndexV3));
 
-      const res = await nuget.getReleases({
+      const res = await getPkgReleases({
         ...configV3Multiple,
       });
       expect(res).not.toBeNull();
@@ -297,7 +313,7 @@ describe('datasource/nuget', () => {
         .get('/v3/index.json')
         .replyWithError('');
       expect(
-        await nuget.getReleases({
+        await getPkgReleases({
           ...configV3,
         })
       ).toBeNull();
@@ -313,7 +329,7 @@ describe('datasource/nuget', () => {
         .get('/query?q=PackageId:nunit&semVerLevel=2.0.0&prerelease=true')
         .replyWithError('');
       expect(
-        await nuget.getReleases({
+        await getPkgReleases({
           ...configV3,
         })
       ).toBeNull();
@@ -327,7 +343,7 @@ describe('datasource/nuget', () => {
         )
         .replyWithError('');
       expect(
-        await nuget.getReleases({
+        await getPkgReleases({
           ...configV2,
         })
       ).toBeNull();
@@ -344,7 +360,7 @@ describe('datasource/nuget', () => {
         .scope('https://api-v2v3search-0.nuget.org')
         .get('/query?q=PackageId:nunit&semVerLevel=2.0.0&prerelease=true')
         .reply(200, JSON.parse(pkgListV3));
-      const res = await nuget.getReleases({
+      const res = await getPkgReleases({
         ...configV3,
       });
       expect(res).not.toBeNull();
@@ -362,7 +378,7 @@ describe('datasource/nuget', () => {
         .get('/index.json')
         .reply(200, JSON.parse(nugetIndexV3));
 
-      const res = await nuget.getReleases({
+      const res = await getPkgReleases({
         ...configV3NotNugetOrg,
       });
       expect(res).not.toBeNull();
@@ -379,9 +395,11 @@ describe('datasource/nuget', () => {
         .scope('https://myprivatefeed')
         .get('/index.json')
         .reply(200, JSON.parse(nugetIndexV3));
-      const res = await nuget.getReleases({
+      const res = await getPkgReleases({
         ...configV3NotNugetOrg,
-        lookupName: 'nun',
+        datasource,
+        versioning,
+        depName: 'nun',
       });
       expect(res).toBeNull();
       expect(httpMock.getTrace()).toMatchSnapshot();
@@ -395,7 +413,7 @@ describe('datasource/nuget', () => {
         .scope('https://myprivatefeed')
         .get('/index.json')
         .reply(200, JSON.parse(nugetIndexV3));
-      const res = await nuget.getReleases({
+      const res = await getPkgReleases({
         ...configV3NotNugetOrg,
       });
       expect(res).not.toBeNull();
@@ -412,7 +430,7 @@ describe('datasource/nuget', () => {
         .scope('https://myprivatefeed')
         .get('/index.json')
         .reply(200, JSON.parse(nugetIndexV3));
-      const res = await nuget.getReleases({
+      const res = await getPkgReleases({
         ...configV3NotNugetOrg,
       });
       expect(res).not.toBeNull();
@@ -426,7 +444,7 @@ describe('datasource/nuget', () => {
           '/api/v2//FindPackagesById()?id=%27nunit%27&$select=Version,IsLatestVersion,ProjectUrl'
         )
         .reply(200, pkgListV2);
-      const res = await nuget.getReleases({
+      const res = await getPkgReleases({
         ...configV2,
       });
       expect(res).not.toBeNull();
@@ -441,7 +459,7 @@ describe('datasource/nuget', () => {
           '/api/v2//FindPackagesById()?id=%27nunit%27&$select=Version,IsLatestVersion,ProjectUrl'
         )
         .reply(200, pkgListV2NoRelease);
-      const res = await nuget.getReleases({
+      const res = await getPkgReleases({
         ...configV2,
       });
       expect(res).toBeNull();
@@ -454,7 +472,7 @@ describe('datasource/nuget', () => {
           '/api/v2//FindPackagesById()?id=%27nunit%27&$select=Version,IsLatestVersion,ProjectUrl'
         )
         .reply(200, pkgListV2WithoutProjectUrl);
-      const res = await nuget.getReleases({
+      const res = await getPkgReleases({
         ...configV2,
       });
       expect(res).not.toBeNull();
@@ -469,7 +487,7 @@ describe('datasource/nuget', () => {
           '/api/v2//FindPackagesById()?id=%27nunit%27&$select=Version,IsLatestVersion,ProjectUrl'
         )
         .reply(200, pkgListV2NoGitHubProjectUrl);
-      const res = await nuget.getReleases({
+      const res = await getPkgReleases({
         ...configV2,
       });
       expect(res).not.toBeNull();
@@ -487,7 +505,7 @@ describe('datasource/nuget', () => {
         .scope('https://example.org')
         .get('/')
         .reply(200, pkgListV2Page2of2);
-      const res = await nuget.getReleases({
+      const res = await getPkgReleases({
         ...configV2,
       });
       expect(res).not.toBeNull();
