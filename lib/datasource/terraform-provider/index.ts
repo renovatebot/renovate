@@ -15,31 +15,24 @@ interface TerraformProvider {
   versions: string[];
 }
 
-/**
- * terraform-provider.getReleases
- *
- * This function will fetch a provider from the public Terraform registry and return all semver versions.
- */
-export async function getReleases({
-  lookupName,
-  registryUrls,
-}: GetReleasesConfig): Promise<ReleaseResult | null> {
-  const repository = `hashicorp/${lookupName}`;
+interface TerraformProviderReleaseBackend {
+  [key: string]: {
+    name: string;
+    versions: VersionsReleaseBackend;
+  };
+}
 
-  logger.debug({ lookupName }, 'terraform-provider.getDependencies()');
-  const cacheNamespace = 'terraform-providers';
-  const pkgUrl = `https://registry.terraform.io/v1/providers/${repository}`;
-  const cachedResult = await globalCache.get<ReleaseResult>(
-    cacheNamespace,
-    pkgUrl
-  );
-  // istanbul ignore if
-  if (cachedResult) {
-    return cachedResult;
-  }
+interface VersionsReleaseBackend {
+  [key: string]: Record<string, any>;
+}
+
+async function queryRegistry(
+  lookupName: string,
+  backendURL: string,
+  repository: string
+): Promise<ReleaseResult> {
   try {
-    const res = (await http.getJson<TerraformProvider>(pkgUrl)).body;
-    // Simplify response before caching and returning
+    const res = (await http.getJson<TerraformProvider>(backendURL)).body;
     const dep: ReleaseResult = {
       name: repository,
       versions: {},
@@ -51,24 +44,92 @@ export async function getReleases({
     dep.releases = res.versions.map((version) => ({
       version,
     }));
-    if (pkgUrl.startsWith('https://registry.terraform.io/')) {
-      dep.homepage = `https://registry.terraform.io/providers/${repository}`;
-    }
+    dep.homepage = `https://registry.terraform.io/providers/${repository}`;
     logger.trace({ dep }, 'dep');
-    const cacheMinutes = 30;
-    await globalCache.set(cacheNamespace, pkgUrl, dep, cacheMinutes);
     return dep;
   } catch (err) {
-    if (err.statusCode === 404 || err.code === 'ENOTFOUND') {
-      logger.debug(
-        { lookupName },
-        `Terraform registry lookup failure: not found`
-      );
-      logger.debug({
-        err,
-      });
-      return null;
+    logger.debug(
+      { lookupName },
+      `Terraform registry ("registry.terraform.io") lookup failure: not found`
+    );
+    logger.debug({
+      err,
+    });
+    return null;
+  }
+}
+
+async function queryReleaseBackend(
+  lookupName: string,
+  backendURL: string,
+  repository: string
+): Promise<ReleaseResult> {
+  const backendLookUpName = `terraform-provider-${lookupName}`;
+  try {
+    const res = (
+      await http.getJson<TerraformProviderReleaseBackend>(backendURL)
+    ).body;
+    const dep: ReleaseResult = {
+      name: repository,
+      versions: {},
+      releases: null,
+    };
+    dep.releases = Object.keys(res[backendLookUpName].versions).map(
+      (version) => ({
+        version,
+      })
+    );
+    logger.trace({ dep }, 'dep');
+    return dep;
+  } catch (err) {
+    logger.debug(
+      { lookupName },
+      `Terraform registry ("releases.hashicorp.com") lookup failure: not found`
+    );
+    logger.debug({
+      err,
+    });
+    return null;
+  }
+}
+
+/**
+ * terraform-provider.getReleases
+ *
+ * This function will fetch a provider from the public Terraform registry and return all semver versions.
+ */
+export async function getReleases({
+  lookupName,
+  registryUrls,
+}: GetReleasesConfig): Promise<ReleaseResult | null> {
+  const repository = `hashicorp/${lookupName}`;
+
+  const releasesBackendURL = `https://releases.hashicorp.com/index.json`;
+  const registryBackendURL = `https://registry.terraform.io/v1/providers/${repository}`;
+
+  logger.debug({ lookupName }, 'terraform-provider.getDependencies()');
+  const cacheNamespace = 'terraform-providers';
+  const cacheMinutes = 30;
+  const cachedResult = await globalCache.get<ReleaseResult>(
+    cacheNamespace,
+    lookupName
+  );
+  // istanbul ignore if
+  if (cachedResult) {
+    return cachedResult;
+  }
+  try {
+    let dep = await queryRegistry(lookupName, registryBackendURL, repository);
+    if (dep) {
+      await globalCache.set(cacheNamespace, lookupName, dep, cacheMinutes);
+      return dep;
     }
+    dep = await queryReleaseBackend(lookupName, releasesBackendURL, repository);
+    if (dep) {
+      await globalCache.set(cacheNamespace, lookupName, dep, cacheMinutes);
+    }
+    return dep;
+  } catch (err) {
     const failureCodes = ['EAI_AGAIN'];
     // istanbul ignore if
     if (failureCodes.includes(err.code)) {
