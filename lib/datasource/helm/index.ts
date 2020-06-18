@@ -104,6 +104,7 @@ export async function getReleases({
   registryUrls,
 }: GetReleasesConfig): Promise<ReleaseResult | null> {
   const [helmRepository] = registryUrls;
+  // istanbul ignore if
   if (!helmRepository) {
     logger.warn(`helmRepository was not provided to getReleases`);
     return null;

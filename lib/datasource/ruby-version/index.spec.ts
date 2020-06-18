@@ -1,6 +1,7 @@
 import fs from 'fs';
+import { getPkgReleases } from '..';
 import * as httpMock from '../../../test/httpMock';
-import { getReleases } from '.';
+import { id as datasource } from '.';
 
 const rubyReleasesHtml = fs.readFileSync(
   'lib/datasource/ruby-version/__fixtures__/releases.html',
@@ -22,7 +23,10 @@ describe('datasource/gradle', () => {
         .scope('https://www.ruby-lang.org')
         .get('/en/downloads/releases/')
         .reply(200, rubyReleasesHtml);
-      const res = await getReleases();
+      const res = await getPkgReleases({
+        datasource,
+        depName: 'ruby',
+      });
       expect(res).toMatchSnapshot();
       expect(httpMock.getTrace()).toMatchSnapshot();
     });
@@ -31,7 +35,9 @@ describe('datasource/gradle', () => {
         .scope('https://www.ruby-lang.org')
         .get('/en/downloads/releases/')
         .reply(200, {});
-      await expect(getReleases()).rejects.toThrow();
+      await expect(
+        getPkgReleases({ datasource, depName: 'ruby' })
+      ).rejects.toThrow();
       expect(httpMock.getTrace()).toMatchSnapshot();
     });
 
@@ -40,7 +46,9 @@ describe('datasource/gradle', () => {
         .scope('https://www.ruby-lang.org')
         .get('/en/downloads/releases/')
         .reply(404);
-      await expect(getReleases()).rejects.toThrow();
+      await expect(
+        getPkgReleases({ datasource, depName: 'ruby' })
+      ).rejects.toThrow();
       expect(httpMock.getTrace()).toMatchSnapshot();
     });
   });

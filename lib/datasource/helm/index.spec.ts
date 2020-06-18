@@ -1,6 +1,7 @@
 import fs from 'fs';
+import { getPkgReleases } from '..';
 import * as httpMock from '../../../test/httpMock';
-import { getReleases } from '.';
+import { id as datasource } from '.';
 
 // Truncated index.yaml file
 const indexYaml = fs.readFileSync(
@@ -21,16 +22,18 @@ describe('datasource/helm', () => {
 
     it('returns null if lookupName was not provided', async () => {
       expect(
-        await getReleases({
-          lookupName: undefined,
+        await getPkgReleases({
+          datasource,
+          depName: undefined,
           registryUrls: ['https://example-repository.com'],
         })
       ).toBeNull();
     });
     it('returns null if repository was not provided', async () => {
       expect(
-        await getReleases({
-          lookupName: 'some_chart',
+        await getPkgReleases({
+          datasource,
+          depName: 'some_chart',
           registryUrls: [],
         })
       ).toBeNull();
@@ -41,8 +44,9 @@ describe('datasource/helm', () => {
         .get('/index.yaml')
         .reply(200, null);
       expect(
-        await getReleases({
-          lookupName: 'non_existent_chart',
+        await getPkgReleases({
+          datasource,
+          depName: 'non_existent_chart',
           registryUrls: ['https://example-repository.com'],
         })
       ).toBeNull();
@@ -54,8 +58,9 @@ describe('datasource/helm', () => {
         .get('/index.yaml')
         .reply(200, undefined);
       expect(
-        await getReleases({
-          lookupName: 'non_existent_chart',
+        await getPkgReleases({
+          datasource,
+          depName: 'non_existent_chart',
           registryUrls: ['https://example-repository.com'],
         })
       ).toBeNull();
@@ -67,8 +72,9 @@ describe('datasource/helm', () => {
         .get('/index.yaml')
         .reply(404);
       expect(
-        await getReleases({
-          lookupName: 'some_chart',
+        await getPkgReleases({
+          datasource,
+          depName: 'some_chart',
           registryUrls: ['https://example-repository.com'],
         })
       ).toBeNull();
@@ -81,8 +87,9 @@ describe('datasource/helm', () => {
         .reply(502);
       let e;
       try {
-        await getReleases({
-          lookupName: 'some_chart',
+        await getPkgReleases({
+          datasource,
+          depName: 'some_chart',
           registryUrls: ['https://example-repository.com'],
         });
       } catch (err) {
@@ -98,8 +105,9 @@ describe('datasource/helm', () => {
         .get('/index.yaml')
         .replyWithError('');
       expect(
-        await getReleases({
-          lookupName: 'some_chart',
+        await getPkgReleases({
+          datasource,
+          depName: 'some_chart',
           registryUrls: ['https://example-repository.com'],
         })
       ).toBeNull();
@@ -110,8 +118,9 @@ describe('datasource/helm', () => {
         .scope('https://example-repository.com')
         .get('/index.yaml')
         .reply(200, '# A comment');
-      const releases = await getReleases({
-        lookupName: 'non_existent_chart',
+      const releases = await getPkgReleases({
+        datasource,
+        depName: 'non_existent_chart',
         registryUrls: ['https://example-repository.com'],
       });
       expect(releases).toBeNull();
@@ -128,8 +137,9 @@ describe('datasource/helm', () => {
         .scope('https://example-repository.com')
         .get('/index.yaml')
         .reply(200, res);
-      const releases = await getReleases({
-        lookupName: 'non_existent_chart',
+      const releases = await getPkgReleases({
+        datasource,
+        depName: 'non_existent_chart',
         registryUrls: ['https://example-repository.com'],
       });
       expect(releases).toBeNull();
@@ -140,8 +150,9 @@ describe('datasource/helm', () => {
         .scope('https://example-repository.com')
         .get('/index.yaml')
         .reply(200, indexYaml);
-      const releases = await getReleases({
-        lookupName: 'non_existent_chart',
+      const releases = await getPkgReleases({
+        datasource,
+        depName: 'non_existent_chart',
         registryUrls: ['https://example-repository.com'],
       });
       expect(releases).toBeNull();
@@ -152,8 +163,9 @@ describe('datasource/helm', () => {
         .scope('https://example-repository.com')
         .get('/index.yaml')
         .reply(200, indexYaml);
-      const releases = await getReleases({
-        lookupName: 'ambassador',
+      const releases = await getPkgReleases({
+        datasource,
+        depName: 'ambassador',
         registryUrls: ['https://example-repository.com'],
       });
       expect(releases).not.toBeNull();
@@ -165,8 +177,9 @@ describe('datasource/helm', () => {
         .scope('https://example-repository.com')
         .get('/subdir/index.yaml')
         .reply(200, indexYaml);
-      await getReleases({
-        lookupName: 'ambassador',
+      await getPkgReleases({
+        datasource,
+        depName: 'ambassador',
         registryUrls: ['https://example-repository.com/subdir'],
       });
       const trace = httpMock.getTrace();

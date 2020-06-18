@@ -1,8 +1,9 @@
 import fs from 'fs';
+import { getPkgReleases } from '..';
 import * as httpMock from '../../../test/httpMock';
 import { DATASOURCE_FAILURE } from '../../constants/error-messages';
 import * as _hostRules from '../../util/host-rules';
-import { getReleases } from '.';
+import { id as datasource } from '.';
 
 const hostRules: any = _hostRules;
 
@@ -18,10 +19,12 @@ const baseUrl = 'https://hex.pm/api/packages/';
 
 describe('datasource/hex', () => {
   beforeEach(() => {
+    hostRules.hosts = jest.fn(() => []);
     httpMock.setup();
   });
 
   afterEach(() => {
+    jest.resetAllMocks();
     httpMock.reset();
   });
 
@@ -29,56 +32,74 @@ describe('datasource/hex', () => {
     it('returns null for empty result', async () => {
       httpMock.scope(baseUrl).get('/non_existent_package').reply(200, null);
       expect(
-        await getReleases({ lookupName: 'non_existent_package' })
+        await getPkgReleases({
+          datasource,
+          depName: 'non_existent_package',
+        })
       ).toBeNull();
       expect(httpMock.getTrace()).toMatchSnapshot();
     });
     it('returns null for missing fields', async () => {
       httpMock.scope(baseUrl).get('/non_existent_package').reply(200, {});
       expect(
-        await getReleases({ lookupName: 'non_existent_package' })
+        await getPkgReleases({
+          datasource,
+          depName: 'non_existent_package',
+        })
       ).toBeNull();
       expect(httpMock.getTrace()).toMatchSnapshot();
     });
     it('returns null for 404', async () => {
       httpMock.scope(baseUrl).get('/some_package').reply(404);
-      expect(await getReleases({ lookupName: 'some_package' })).toBeNull();
+      expect(
+        await getPkgReleases({ datasource, depName: 'some_package' })
+      ).toBeNull();
       expect(httpMock.getTrace()).toMatchSnapshot();
     });
     it('returns null for 401', async () => {
       httpMock.scope(baseUrl).get('/some_package').reply(401);
-      expect(await getReleases({ lookupName: 'some_package' })).toBeNull();
+      expect(
+        await getPkgReleases({ datasource, depName: 'some_package' })
+      ).toBeNull();
       expect(httpMock.getTrace()).toMatchSnapshot();
     });
     it('throws for 429', async () => {
       httpMock.scope(baseUrl).get('/some_crate').reply(429);
-      await expect(getReleases({ lookupName: 'some_crate' })).rejects.toThrow(
-        DATASOURCE_FAILURE
-      );
+      await expect(
+        getPkgReleases({ datasource, depName: 'some_crate' })
+      ).rejects.toThrow(DATASOURCE_FAILURE);
       expect(httpMock.getTrace()).toMatchSnapshot();
     });
     it('throws for 5xx', async () => {
       httpMock.scope(baseUrl).get('/some_crate').reply(502);
-      await expect(getReleases({ lookupName: 'some_crate' })).rejects.toThrow(
-        DATASOURCE_FAILURE
-      );
+      await expect(
+        getPkgReleases({ datasource, depName: 'some_crate' })
+      ).rejects.toThrow(DATASOURCE_FAILURE);
       expect(httpMock.getTrace()).toMatchSnapshot();
     });
     it('returns null for unknown error', async () => {
       httpMock.scope(baseUrl).get('/some_package').replyWithError('');
-      expect(await getReleases({ lookupName: 'some_package' })).toBeNull();
+      expect(
+        await getPkgReleases({ datasource, depName: 'some_package' })
+      ).toBeNull();
       expect(httpMock.getTrace()).toMatchSnapshot();
     });
     it('returns null with wrong auth token', async () => {
       httpMock.scope(baseUrl).get('/certifi').reply(401);
       hostRules.find.mockReturnValueOnce({ token: 'this_simple_token' });
-      const res = await getReleases({ lookupName: 'certifi' });
+      const res = await getPkgReleases({
+        datasource,
+        depName: 'certifi',
+      });
       expect(res).toBeNull();
       expect(httpMock.getTrace()).toMatchSnapshot();
     });
     it('processes real data', async () => {
       httpMock.scope(baseUrl).get('/certifi').reply(200, res1);
-      const res = await getReleases({ lookupName: 'certifi' });
+      const res = await getPkgReleases({
+        datasource,
+        depName: 'certifi',
+      });
       expect(res).toMatchSnapshot();
       expect(res).not.toBeNull();
       expect(res).toBeDefined();
@@ -87,7 +108,10 @@ describe('datasource/hex', () => {
     it('process public repo without auth', async () => {
       httpMock.scope(baseUrl).get('/certifi').reply(200, res1);
       hostRules.find.mockReturnValueOnce({});
-      const res = await getReleases({ lookupName: 'certifi' });
+      const res = await getPkgReleases({
+        datasource,
+        depName: 'certifi',
+      });
       expect(res).toMatchSnapshot();
       expect(res).not.toBeNull();
       expect(res).toBeDefined();
