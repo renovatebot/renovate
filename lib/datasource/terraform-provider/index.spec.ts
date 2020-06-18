@@ -1,6 +1,7 @@
 import fs from 'fs';
+import { getPkgReleases } from '..';
 import * as httpMock from '../../../test/httpMock';
-import * as terraformProvider from '.';
+import { id as datasource } from '.';
 
 const consulData: any = fs.readFileSync(
   'lib/datasource/terraform-provider/__fixtures__/azurerm-provider.json'
@@ -25,8 +26,9 @@ describe('datasource/terraform', () => {
         .get('/v1/providers/hashicorp/azurerm')
         .reply(200, {});
       expect(
-        await terraformProvider.getReleases({
-          lookupName: 'azurerm',
+        await getPkgReleases({
+          datasource,
+          depName: 'azurerm',
         })
       ).toBeNull();
       expect(httpMock.getTrace()).toMatchSnapshot();
@@ -34,8 +36,9 @@ describe('datasource/terraform', () => {
     it('returns null for 404', async () => {
       httpMock.scope(baseUrl).get('/v1/providers/hashicorp/azurerm').reply(404);
       expect(
-        await terraformProvider.getReleases({
-          lookupName: 'azurerm',
+        await getPkgReleases({
+          datasource,
+          depName: 'azurerm',
         })
       ).toBeNull();
       expect(httpMock.getTrace()).toMatchSnapshot();
@@ -46,8 +49,9 @@ describe('datasource/terraform', () => {
         .get('/v1/providers/hashicorp/azurerm')
         .replyWithError('');
       expect(
-        await terraformProvider.getReleases({
-          lookupName: 'azurerm',
+        await getPkgReleases({
+          datasource,
+          depName: 'azurerm',
         })
       ).toBeNull();
       expect(httpMock.getTrace()).toMatchSnapshot();
@@ -57,8 +61,9 @@ describe('datasource/terraform', () => {
         .scope(baseUrl)
         .get('/v1/providers/hashicorp/azurerm')
         .reply(200, JSON.parse(consulData));
-      const res = await terraformProvider.getReleases({
-        lookupName: 'azurerm',
+      const res = await getPkgReleases({
+        datasource,
+        depName: 'azurerm',
       });
       expect(res).toMatchSnapshot();
       expect(res).not.toBeNull();

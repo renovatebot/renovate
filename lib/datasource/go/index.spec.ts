@@ -1,8 +1,8 @@
-import { ReleaseResult } from '..';
+import { ReleaseResult, getPkgReleases } from '..';
 import * as httpMock from '../../../test/httpMock';
 import { mocked, partial } from '../../../test/util';
 import * as _github from '../github-tags';
-import * as go from '.';
+import { id as datasource, getDigest } from '.';
 
 jest.mock('../github-tags');
 
@@ -37,7 +37,7 @@ describe('datasource/go', () => {
         .get('/y/text?go-get=1')
         .reply(200, res1);
       github.getDigest.mockResolvedValueOnce('abcdefabcdefabcdefabcdef');
-      const res = await go.getDigest({ lookupName: 'golang.org/y/text' }, null);
+      const res = await getDigest({ lookupName: 'golang.org/y/text' }, null);
       expect(res).toBeNull();
       expect(httpMock.getTrace()).toMatchSnapshot();
     });
@@ -47,7 +47,7 @@ describe('datasource/go', () => {
         .get('/x/text?go-get=1')
         .reply(200, res1);
       github.getDigest.mockResolvedValueOnce('abcdefabcdefabcdefabcdef');
-      const res = await go.getDigest({ lookupName: 'golang.org/x/text' }, null);
+      const res = await getDigest({ lookupName: 'golang.org/x/text' }, null);
       expect(res).toBe('abcdefabcdefabcdefabcdef');
       expect(httpMock.getTrace()).toMatchSnapshot();
     });
@@ -59,8 +59,9 @@ describe('datasource/go', () => {
         .get('/foo/something?go-get=1')
         .reply(200, res1);
       expect(
-        await go.getReleases({
-          lookupName: 'golang.org/foo/something',
+        await getPkgReleases({
+          datasource,
+          depName: 'golang.org/foo/something',
         })
       ).toBeNull();
       expect(httpMock.getTrace()).toMatchSnapshot();
@@ -71,8 +72,9 @@ describe('datasource/go', () => {
         .get('/foo/something?go-get=1')
         .reply(404);
       expect(
-        await go.getReleases({
-          lookupName: 'golang.org/foo/something',
+        await getPkgReleases({
+          datasource,
+          depName: 'golang.org/foo/something',
         })
       ).toBeNull();
       expect(httpMock.getTrace()).toMatchSnapshot();
@@ -83,8 +85,9 @@ describe('datasource/go', () => {
         .get('/foo/something?go-get=1')
         .replyWithError('error');
       expect(
-        await go.getReleases({
-          lookupName: 'golang.org/foo/something',
+        await getPkgReleases({
+          datasource,
+          depName: 'golang.org/foo/something',
         })
       ).toBeNull();
       expect(httpMock.getTrace()).toMatchSnapshot();
@@ -97,8 +100,9 @@ describe('datasource/go', () => {
       github.getReleases.mockResolvedValueOnce({
         releases: [{ version: 'v1.0.0' }, { version: 'v2.0.0' }],
       });
-      const res = await go.getReleases({
-        lookupName: 'golang.org/x/text',
+      const res = await getPkgReleases({
+        datasource,
+        depName: 'golang.org/x/text',
       });
       expect(res).toMatchSnapshot();
       expect(res).not.toBeNull();
@@ -110,8 +114,9 @@ describe('datasource/go', () => {
         .scope('https://golang.org/')
         .get('/x/sys?go-get=1')
         .reply(200, res1);
-      const res = await go.getReleases({
-        lookupName: 'golang.org/x/sys',
+      const res = await getPkgReleases({
+        datasource,
+        depName: 'golang.org/x/sys',
       });
       expect(res).toBeNull();
       expect(httpMock.getTrace()).toMatchSnapshot();
@@ -127,8 +132,9 @@ describe('datasource/go', () => {
             'https://google.com/golang/text/'
           )
         );
-      const res = await go.getReleases({
-        lookupName: 'golang.org/x/text',
+      const res = await getPkgReleases({
+        datasource,
+        depName: 'golang.org/x/text',
       });
       expect(res).toBeNull();
       expect(httpMock.getTrace()).toMatchSnapshot();
@@ -136,32 +142,32 @@ describe('datasource/go', () => {
     it('works for known servers', async () => {
       github.getReleases.mockClear();
       const packages = [
-        { lookupName: 'github.com/x/text' },
-        { lookupName: 'gopkg.in/x/text' },
-        { lookupName: 'gopkg.in/x' },
+        { datasource, depName: 'github.com/x/text' },
+        { datasource, depName: 'gopkg.in/x/text' },
+        { datasource, depName: 'gopkg.in/x' },
       ];
       const githubRes = { releases: [1, 2] } as any;
       for (const pkg of packages) {
         github.getReleases.mockResolvedValueOnce(
           partial<ReleaseResult>(githubRes)
         );
-        expect(await go.getReleases(pkg)).toEqual(githubRes);
+        expect(await getPkgReleases(pkg)).toEqual(githubRes);
       }
       expect(github.getReleases.mock.calls).toMatchSnapshot();
     });
     it('works for nested modules on github', async () => {
       github.getReleases.mockClear();
       const packages = [
-        { lookupName: 'github.com/x/text/a' },
-        { lookupName: 'github.com/x/text/b' },
+        { datasource, depName: 'github.com/x/text/a' },
+        { datasource, depName: 'github.com/x/text/b' },
       ];
 
       for (const pkg of packages) {
         github.getReleases.mockResolvedValueOnce({
           releases: [{ version: 'a/v1.0.0' }, { version: 'b/v2.0.0' }],
         });
-        const prefix = pkg.lookupName.split('/')[3];
-        const result = await go.getReleases(pkg);
+        const prefix = pkg.depName.split('/')[3];
+        const result = await getPkgReleases(pkg);
         expect(result.releases).toHaveLength(1);
         expect(result.releases[0].version.startsWith(prefix)).toBeFalse();
       }
@@ -170,8 +176,8 @@ describe('datasource/go', () => {
     it('falls back to old behaviour', async () => {
       github.getReleases.mockClear();
       const packages = [
-        { lookupName: 'github.com/x/text/a' },
-        { lookupName: 'github.com/x/text/b' },
+        { datasource, depName: 'github.com/x/text/a' },
+        { datasource, depName: 'github.com/x/text/b' },
       ];
 
       const releases = {
@@ -179,7 +185,7 @@ describe('datasource/go', () => {
       };
       for (const pkg of packages) {
         github.getReleases.mockResolvedValueOnce(releases);
-        expect(await go.getReleases(pkg)).toBe(releases);
+        expect(await getPkgReleases(pkg)).toStrictEqual(releases);
       }
     });
   });

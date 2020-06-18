@@ -496,8 +496,9 @@ describe('api/docker', () => {
         .reply(200, null)
         .get('/my/node/tags/list?n=10000')
         .replyWithError('error');
-      const res = await docker.getReleases({
-        lookupName: 'my/node',
+      const res = await getPkgReleases({
+        datasource: docker.id,
+        depName: 'my/node',
       });
       expect(res).toBeNull();
       expect(httpMock.getTrace()).toMatchSnapshot();
