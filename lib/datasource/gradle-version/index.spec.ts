@@ -1,8 +1,8 @@
 import fs from 'fs';
 import { GetPkgReleasesConfig, getPkgReleases } from '..';
 import * as httpMock from '../../../test/httpMock';
-import { id as datasource } from '.';
 import { id as versioning } from '../../versioning/gradle';
+import { id as datasource } from '.';
 
 const allResponse: any = fs.readFileSync(
   'lib/datasource/gradle-version/__fixtures__/all.json'

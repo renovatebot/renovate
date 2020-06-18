@@ -3,8 +3,8 @@ import { getPkgReleases } from '..';
 import * as httpMock from '../../../test/httpMock';
 import * as _hostRules from '../../util/host-rules';
 import * as composerVersioning from '../../versioning/composer';
-import { id as datasource } from '.';
 import { id as versioning } from '../../versioning/loose';
+import { id as datasource } from '.';
 
 jest.mock('../../util/host-rules');
 
