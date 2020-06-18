@@ -1,7 +1,8 @@
 import fs from 'fs';
+import { getPkgReleases } from '..';
 import * as httpMock from '../../../test/httpMock';
 
-import { getReleases } from './index';
+import { id as datasource } from '.';
 
 const res1 = fs.readFileSync(
   'lib/datasource/galaxy/__fixtures__/timezone',
@@ -30,7 +31,7 @@ describe('datasource/galaxy', () => {
         .get('/api/v1/roles/?owner__username=non_existent_crate&name=undefined')
         .reply(200);
       expect(
-        await getReleases({ lookupName: 'non_existent_crate' })
+        await getPkgReleases({ datasource, depName: 'non_existent_crate' })
       ).toBeNull();
       expect(httpMock.getTrace()).toMatchSnapshot();
     });
@@ -40,7 +41,7 @@ describe('datasource/galaxy', () => {
         .get('/api/v1/roles/?owner__username=non_existent_crate&name=undefined')
         .reply(200, undefined);
       expect(
-        await getReleases({ lookupName: 'non_existent_crate' })
+        await getPkgReleases({ datasource, depName: 'non_existent_crate' })
       ).toBeNull();
       expect(httpMock.getTrace()).toMatchSnapshot();
     });
@@ -50,7 +51,7 @@ describe('datasource/galaxy', () => {
         .get('/api/v1/roles/?owner__username=non_existent_crate&name=undefined')
         .reply(200, '\n');
       expect(
-        await getReleases({ lookupName: 'non_existent_crate' })
+        await getPkgReleases({ datasource, depName: 'non_existent_crate' })
       ).toBeNull();
       expect(httpMock.getTrace()).toMatchSnapshot();
     });
@@ -59,7 +60,9 @@ describe('datasource/galaxy', () => {
         .scope(baseUrl)
         .get('/api/v1/roles/?owner__username=some_crate&name=undefined')
         .reply(404);
-      expect(await getReleases({ lookupName: 'some_crate' })).toBeNull();
+      expect(
+        await getPkgReleases({ datasource, depName: 'some_crate' })
+      ).toBeNull();
       expect(httpMock.getTrace()).toMatchSnapshot();
     });
     it('returns null for unknown error', async () => {
@@ -67,7 +70,9 @@ describe('datasource/galaxy', () => {
         .scope(baseUrl)
         .get('/api/v1/roles/?owner__username=some_crate&name=undefined')
         .replyWithError('some unknown error');
-      expect(await getReleases({ lookupName: 'some_crate' })).toBeNull();
+      expect(
+        await getPkgReleases({ datasource, depName: 'some_crate' })
+      ).toBeNull();
       expect(httpMock.getTrace()).toMatchSnapshot();
     });
     it('processes real data', async () => {
@@ -75,7 +80,10 @@ describe('datasource/galaxy', () => {
         .scope(baseUrl)
         .get('/api/v1/roles/?owner__username=yatesr&name=timezone')
         .reply(200, res1);
-      const res = await getReleases({ lookupName: 'yatesr.timezone' });
+      const res = await getPkgReleases({
+        datasource,
+        depName: 'yatesr.timezone',
+      });
       expect(res).toMatchSnapshot();
       expect(res).not.toBeNull();
       expect(res).toBeDefined();
@@ -86,7 +94,7 @@ describe('datasource/galaxy', () => {
         .scope(baseUrl)
         .get('/api/v1/roles/?owner__username=foo&name=bar')
         .reply(200, empty);
-      const res = await getReleases({ lookupName: 'foo.bar' });
+      const res = await getPkgReleases({ datasource, depName: 'foo.bar' });
       expect(res).toBeNull();
       expect(httpMock.getTrace()).toMatchSnapshot();
     });
@@ -97,7 +105,7 @@ describe('datasource/galaxy', () => {
         .reply(502);
       let e;
       try {
-        await getReleases({ lookupName: 'some_crate' });
+        await getPkgReleases({ datasource, depName: 'some_crate' });
       } catch (err) {
         e = err;
       }
@@ -110,7 +118,7 @@ describe('datasource/galaxy', () => {
         .scope(baseUrl)
         .get('/api/v1/roles/?owner__username=foo&name=bar')
         .reply(404);
-      const res = await getReleases({ lookupName: 'foo.bar' });
+      const res = await getPkgReleases({ datasource, depName: 'foo.bar' });
       expect(res).toBeNull();
       expect(httpMock.getTrace()).toMatchSnapshot();
     });

@@ -2,7 +2,6 @@
 
 exports[`datasource/dart getReleases processes real data 1`] = `
 Object {
-  "homepage": "https://github.com/flutter/plugins/tree/master/packages/shared_preferences",
   "releases": Array [
     Object {
       "version": "0.1.1",

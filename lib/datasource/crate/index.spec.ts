@@ -1,7 +1,8 @@
 import fs from 'fs';
+import { getPkgReleases } from '..';
 import * as httpMock from '../../../test/httpMock';
 
-import { getReleases } from '.';
+import { id as datasource } from '.';
 
 const res1 = fs.readFileSync('lib/datasource/crate/__fixtures__/libc', 'utf8');
 const res2 = fs.readFileSync(
@@ -21,7 +22,10 @@ describe('datasource/crate', () => {
     it('returns null for empty result', async () => {
       httpMock.scope(baseUrl).get('/no/n_/non_existent_crate').reply(200, {});
       expect(
-        await getReleases({ lookupName: 'non_existent_crate' })
+        await getPkgReleases({
+          datasource,
+          depName: 'non_existent_crate',
+        })
       ).toBeNull();
       expect(httpMock.getTrace()).toMatchSnapshot();
     });
@@ -31,27 +35,35 @@ describe('datasource/crate', () => {
         .get('/no/n_/non_existent_crate')
         .reply(200, undefined);
       expect(
-        await getReleases({ lookupName: 'non_existent_crate' })
+        await getPkgReleases({
+          datasource,
+          depName: 'non_existent_crate',
+        })
       ).toBeNull();
       expect(httpMock.getTrace()).toMatchSnapshot();
     });
     it('returns null for empty list', async () => {
       httpMock.scope(baseUrl).get('/no/n_/non_existent_crate').reply(200, '\n');
       expect(
-        await getReleases({ lookupName: 'non_existent_crate' })
+        await getPkgReleases({
+          datasource,
+          depName: 'non_existent_crate',
+        })
       ).toBeNull();
       expect(httpMock.getTrace()).toMatchSnapshot();
     });
     it('returns null for 404', async () => {
       httpMock.scope(baseUrl).get('/so/me/some_crate').reply(404);
-      expect(await getReleases({ lookupName: 'some_crate' })).toBeNull();
+      expect(
+        await getPkgReleases({ datasource, depName: 'some_crate' })
+      ).toBeNull();
       expect(httpMock.getTrace()).toMatchSnapshot();
     });
     it('throws for 5xx', async () => {
       httpMock.scope(baseUrl).get('/so/me/some_crate').reply(502);
       let e;
       try {
-        await getReleases({ lookupName: 'some_crate' });
+        await getPkgReleases({ datasource, depName: 'some_crate' });
       } catch (err) {
         e = err;
       }
@@ -61,12 +73,17 @@ describe('datasource/crate', () => {
     });
     it('returns null for unknown error', async () => {
       httpMock.scope(baseUrl).get('/so/me/some_crate').replyWithError('');
-      expect(await getReleases({ lookupName: 'some_crate' })).toBeNull();
+      expect(
+        await getPkgReleases({ datasource, depName: 'some_crate' })
+      ).toBeNull();
       expect(httpMock.getTrace()).toMatchSnapshot();
     });
     it('processes real data: libc', async () => {
       httpMock.scope(baseUrl).get('/li/bc/libc').reply(200, res1);
-      const res = await getReleases({ lookupName: 'libc' });
+      const res = await getPkgReleases({
+        datasource,
+        depName: 'libc',
+      });
       expect(res).toMatchSnapshot();
       expect(res).not.toBeNull();
       expect(res).toBeDefined();
@@ -74,7 +91,10 @@ describe('datasource/crate', () => {
     });
     it('processes real data: amethyst', async () => {
       httpMock.scope(baseUrl).get('/am/et/amethyst').reply(200, res2);
-      const res = await getReleases({ lookupName: 'amethyst' });
+      const res = await getPkgReleases({
+        datasource,
+        depName: 'amethyst',
+      });
       expect(res).toMatchSnapshot();
       expect(res).not.toBeNull();
       expect(res).toBeDefined();
@@ -82,13 +102,19 @@ describe('datasource/crate', () => {
     });
     it('returns null if crate name is invalid', async () => {
       httpMock.scope(baseUrl).get('/in/va/invalid-crate-name').reply(200, res2);
-      const res = await getReleases({ lookupName: 'invalid-crate-name' });
+      const res = await getPkgReleases({
+        datasource,
+        depName: 'invalid-crate-name',
+      });
       expect(res).toBeNull();
       expect(httpMock.getTrace()).toMatchSnapshot();
     });
     it('returns null for invalid crate data', async () => {
       httpMock.scope(baseUrl).get('/so/me/some_crate').reply(200, res3);
-      const res = await getReleases({ lookupName: 'some_crate' });
+      const res = await getPkgReleases({
+        datasource,
+        depName: 'some_crate',
+      });
       expect(res).toBeNull();
       expect(httpMock.getTrace()).toMatchSnapshot();
     });
