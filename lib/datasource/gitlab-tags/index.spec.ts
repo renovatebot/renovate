@@ -1,5 +1,6 @@
+import { getPkgReleases } from '..';
 import * as httpMock from '../../../test/httpMock';
-import * as gitlab from '.';
+import { id as datasource } from '.';
 
 describe('datasource/gitlab-tags', () => {
   beforeEach(() => {
@@ -27,11 +28,11 @@ describe('datasource/gitlab-tags', () => {
         .scope('https://gitlab.company.com')
         .get('/api/v4/api/v4/projects/some%2Fdep2/repository/tags?per_page=100')
         .reply(200, body);
-      const res = await gitlab.getReleases({
+      const res = await getPkgReleases({
+        datasource,
         registryUrls: ['https://gitlab.company.com/api/v4/'],
-        lookupName: 'some/dep2',
+        depName: 'some/dep2',
       });
-      httpMock.getTrace();
       expect(res).toMatchSnapshot();
       expect(res.releases).toHaveLength(3);
       expect(httpMock.getTrace()).toMatchSnapshot();
@@ -43,8 +44,9 @@ describe('datasource/gitlab-tags', () => {
         .scope('https://gitlab.com')
         .get('/api/v4/projects/some%2Fdep2/repository/tags?per_page=100')
         .reply(200, body);
-      const res = await gitlab.getReleases({
-        lookupName: 'some/dep2',
+      const res = await getPkgReleases({
+        datasource,
+        depName: 'some/dep2',
       });
       expect(res).toMatchSnapshot();
       expect(res.releases).toHaveLength(2);

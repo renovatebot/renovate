@@ -71,7 +71,7 @@ export async function getRawRefs({
     await globalCache.set(cacheNamespace, lookupName, refs, cacheMinutes);
     return refs;
   } catch (err) {
-    logger.error({ err }, `Git-Raw-Refs lookup error in ${lookupName}`);
+    logger.info({ err }, `Git-Raw-Refs lookup error in ${lookupName}`);
   }
   return null;
 }

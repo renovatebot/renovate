@@ -1,11 +1,10 @@
 import { getPkgReleases } from '..';
-import _got from '../../util/got';
+import * as httpMock from '../../../test/httpMock';
 import * as rubyVersioning from '../../versioning/ruby';
 import railsInfo from './__fixtures__/rails/info.json';
 import railsVersions from './__fixtures__/rails/versions.json';
+import { resetCache } from './get-rubygems-org';
 import * as rubygems from '.';
-
-const got: any = _got;
 
 const rubygemsOrgVersions = `created_at: 2017-03-27T04:38:13+00:00
 ---
@@ -26,8 +25,6 @@ const rubygemsOrgVersions = `created_at: 2017-03-27T04:38:13+00:00
 1pass -0.1.2 abcdef
 21-day-challenge-countdown 0.1.0,0.1.1,0.1.2 57e8873fe713063f4e54e85bbbd709bb`;
 
-jest.mock('../../util/got');
-
 describe('datasource/rubygems', () => {
   describe('getReleases', () => {
     const SKIP_CACHE = process.env.RENOVATE_SKIP_CACHE;
@@ -40,24 +37,40 @@ describe('datasource/rubygems', () => {
     };
 
     beforeEach(() => {
+      resetCache();
+      httpMock.setup();
       process.env.RENOVATE_SKIP_CACHE = 'true';
       jest.resetAllMocks();
     });
 
     afterEach(() => {
+      httpMock.reset();
       process.env.RENOVATE_SKIP_CACHE = SKIP_CACHE;
     });
 
     it('returns null for missing pkg', async () => {
-      got.mockReturnValueOnce({});
+      httpMock
+        .scope('https://firstparty.com')
+        .get('/api/v1/gems/rails.json')
+        .reply(200, null);
+      httpMock
+        .scope('https://thirdparty.com')
+        .get('/api/v1/gems/rails.json')
+        .reply(200, null);
       expect(await getPkgReleases(params)).toBeNull();
+      expect(httpMock.getTrace()).toMatchSnapshot();
     });
 
     it('returns null for rubygems.org package miss', async () => {
       const newparams = { ...params };
       newparams.registryUrls = [];
-      got.mockReturnValueOnce({ body: rubygemsOrgVersions });
-      expect(await getPkgReleases(newparams)).toBeNull();
+      httpMock
+        .scope('https://rubygems.org')
+        .get('/versions')
+        .reply(200, rubygemsOrgVersions);
+      const res = await getPkgReleases(newparams);
+      expect(res).toBeNull();
+      expect(httpMock.getTrace()).toMatchSnapshot();
     });
 
     it('returns a dep for rubygems.org package hit', async () => {
@@ -66,7 +79,10 @@ describe('datasource/rubygems', () => {
         lookupName: '1pass',
         registryUrls: [],
       };
-      got.mockReturnValueOnce({ body: rubygemsOrgVersions });
+      httpMock
+        .scope('https://rubygems.org')
+        .get('/versions')
+        .reply(200, rubygemsOrgVersions);
       const res = await getPkgReleases(newparams);
       expect(res).not.toBeNull();
       expect(res.releases).toHaveLength(2);
@@ -77,10 +93,14 @@ describe('datasource/rubygems', () => {
       expect(
         res.releases.find((release) => release.version === '0.1.2')
       ).toBeUndefined();
+      expect(httpMock.getTrace()).toMatchSnapshot();
     });
 
     it('uses rubygems.org if no registry urls were provided', async () => {
-      got.mockReturnValue({ body: rubygemsOrgVersions });
+      httpMock
+        .scope('https://rubygems.org')
+        .get('/versions')
+        .reply(200, rubygemsOrgVersions);
 
       expect(
         await getPkgReleases({
@@ -97,36 +117,52 @@ describe('datasource/rubygems', () => {
       expect(res).not.toBeNull();
       expect(res.releases).toHaveLength(2);
       expect(res).toMatchSnapshot();
+      expect(httpMock.getTrace()).toMatchSnapshot();
     });
 
     it('works with real data', async () => {
-      got
-        .mockReturnValueOnce({ body: railsInfo })
-        .mockReturnValueOnce({ body: railsVersions });
+      httpMock
+        .scope('https://thirdparty.com/')
+        .get('/api/v1/gems/rails.json')
+        .reply(200, railsInfo)
+        .get('/api/v1/versions/rails.json')
+        .reply(200, railsVersions);
 
       const res = await getPkgReleases(params);
       expect(res.releases).toHaveLength(339);
       expect(res).toMatchSnapshot();
+      expect(httpMock.getTrace()).toMatchSnapshot();
     });
 
     it('uses multiple source urls', async () => {
-      got
-        .mockImplementationOnce(() =>
-          Promise.reject({
-            statusCode: 404,
-          })
-        )
-        .mockImplementationOnce(() => ({ body: railsInfo }))
-        .mockImplementationOnce(() => ({ body: railsVersions }));
+      httpMock
+        .scope('https://thirdparty.com/')
+        .get('/api/v1/gems/rails.json')
+        .reply(401);
+      httpMock
+        .scope('https://firstparty.com/')
+        .get('/api/v1/gems/rails.json')
+        .reply(200, railsInfo)
+        .get('/api/v1/versions/rails.json')
+        .reply(200, railsVersions);
 
       const res = await getPkgReleases(params);
       expect(res.releases).toHaveLength(339);
       expect(res).toMatchSnapshot();
+      expect(httpMock.getTrace()).toMatchSnapshot();
     });
 
     it('returns null if mismatched name', async () => {
-      got.mockReturnValueOnce({ body: { ...railsInfo, name: 'oooops' } });
+      httpMock
+        .scope('https://thirdparty.com/')
+        .get('/api/v1/gems/rails.json')
+        .reply(200, { ...railsInfo, name: 'oooops' });
+      httpMock
+        .scope('https://firstparty.com/')
+        .get('/api/v1/gems/rails.json')
+        .reply(200, null);
       expect(await getPkgReleases(params)).toBeNull();
+      expect(httpMock.getTrace()).toMatchSnapshot();
     });
   });
 });

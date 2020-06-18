@@ -43,7 +43,8 @@ export interface BranchUpgradeConfig
   packageFile?: string;
 
   reuseExistingBranch?: boolean;
-  prBanner?: string;
+  prHeader?: string;
+  prFooter?: string;
   prBodyNotes?: string[];
   prBodyTemplate?: string;
   prPriority?: number;

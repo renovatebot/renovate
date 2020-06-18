@@ -9,6 +9,13 @@ let lastSync = new Date('2000-01-01');
 let packageReleases: Record<string, string[]> = Object.create(null); // Because we might need a "constructor" key
 let contentLength = 0;
 
+// Note: use only for tests
+export function resetCache(): void {
+  lastSync = new Date('2000-01-01');
+  packageReleases = Object.create(null);
+  contentLength = 0;
+}
+
 /* https://bugs.chromium.org/p/v8/issues/detail?id=2869 */
 const copystr = (x: string): string => (' ' + x).slice(1);
 

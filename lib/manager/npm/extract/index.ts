@@ -335,7 +335,7 @@ export async function extractPackageFile(
   let skipInstalls = config.skipInstalls;
   if (skipInstalls === null) {
     if (hasFileRefs) {
-      // https://npm.community/t/npm-i-package-lock-only-changes-lock-file-incorrectly-when-file-references-used-in-dependencies/1412
+      // https://github.com/npm/cli/issues/1432
       // Explanation:
       //  - npm install --package-lock-only is buggy for transitive deps in file: references
       //  - So we set skipInstalls to false if file: refs are found *and* the user hasn't explicitly set the value already

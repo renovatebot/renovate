@@ -88,13 +88,12 @@ If you need any further assistance then you can also [request help here](${confi
   prBody = prBody.replace('{{BASEBRANCH}}\n', getBaseBranchDesc(config));
   prBody = prBody.replace('{{PRLIST}}\n', getPrList(config, branches));
   // istanbul ignore if
-  if (config.global) {
-    if (config.global.prBanner) {
-      prBody = config.global.prBanner + '\n\n' + prBody;
-    }
-    if (config.global.prFooter) {
-      prBody = prBody + '\n---\n\n' + config.global.prFooter + '\n';
-    }
+  if (config.prHeader) {
+    prBody = (config.prHeader || '') + '\n\n' + prBody;
+  }
+  // istanbul ignore if
+  if (config.prFooter) {
+    prBody = prBody + '\n---\n\n' + config.prFooter + '\n';
   }
   logger.trace('prBody:\n' + prBody);
 

@@ -533,7 +533,9 @@ export class Storage {
           }
         }
       }
-      const commitRes = await this._git.commit(message);
+      const commitRes = await this._git.commit(message, [], {
+        '--no-verify': true,
+      });
       const commit = commitRes?.commit || 'unknown';
       if (!force && !(await this.hasDiff(`origin/${branchName}`))) {
         logger.debug(
@@ -545,6 +547,7 @@ export class Storage {
       await this._git.push('origin', `${branchName}:${branchName}`, {
         '--force': true,
         '-u': true,
+        '--no-verify': true,
       });
       // Fetch it after create
       const ref = `refs/heads/${branchName}:refs/remotes/origin/${branchName}`;

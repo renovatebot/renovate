@@ -18,7 +18,6 @@ async function get<T = never>(namespace: string, key: string): Promise<T> {
   try {
     const res = await cacache.get(renovateCache, getKey(namespace, key));
     const cachedValue = JSON.parse(res.data.toString());
-    // istanbul ignore else: only happens when cache is corrupted
     if (cachedValue) {
       if (DateTime.local() < DateTime.fromISO(cachedValue.expiry)) {
         logger.trace({ namespace, key }, 'Returning cached value');
@@ -29,7 +28,7 @@ async function get<T = never>(namespace: string, key: string): Promise<T> {
   } catch (err) {
     logger.trace({ namespace, key }, 'Cache miss');
   }
-  return null;
+  return undefined;
 }
 
 async function set(

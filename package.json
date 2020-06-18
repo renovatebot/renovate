@@ -109,7 +109,7 @@
   "dependencies": {
     "@renovate/pep440": "0.4.1",
     "@sindresorhus/is": "2.1.1",
-    "@snyk/ruby-semver": "2.2.0",
+    "@snyk/ruby-semver": "2.2.2",
     "@yarnpkg/lockfile": "1.1.0",
     "aws-sdk": "2.686.0",
     "azure-devops-node-api": "10.1.1",
@@ -170,7 +170,7 @@
     "xmldoc": "1.1.2"
   },
   "optionalDependencies": {
-    "re2": "1.14.0"
+    "re2": "1.15.0"
   },
   "devDependencies": {
     "@actions/core": "1.2.4",
@@ -208,7 +208,7 @@
     "@types/markdown-table": "2.0.0",
     "@types/moment-timezone": "0.5.13",
     "@types/nock": "10.0.3",
-    "@types/node": "12.12.44",
+    "@types/node": "12.12.47",
     "@types/node-emoji": "1.8.1",
     "@types/parse-link-header": "1.0.0",
     "@types/registry-auth-token": "3.3.0",
@@ -240,7 +240,7 @@
     "jest-circus": "26.0.1",
     "jest-extended": "0.11.5",
     "jest-junit": "10.0.0",
-    "jest-mock-extended": "1.0.8",
+    "jest-mock-extended": "1.0.9",
     "jest-silent-reporter": "0.2.1",
     "mockdate": "2.0.5",
     "nock": "12.0.3",

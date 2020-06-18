@@ -42,7 +42,6 @@ export async function validateConfig(
   function isIgnored(key: string): boolean {
     const ignoredNodes = [
       '$schema',
-      'prBanner',
       'depType',
       'npmToken',
       'packageFile',
