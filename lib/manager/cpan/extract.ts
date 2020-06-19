@@ -17,8 +17,7 @@ export async function extractPackageFile(
   const delimiters = ['"', "'"];
   const commaRegex = '(?:,|=>)';
 
-  for (let lineNumber = 0; lineNumber < lines.length; lineNumber += 1) {
-    const line = lines[lineNumber];
+  lines.forEach((line, lineNumber) => {
     let requiresMatch: RegExpMatchArray;
 
     for (const delimiter of delimiters) {
@@ -50,7 +49,7 @@ export async function extractPackageFile(
 
       res.deps.push(dep);
     }
-  }
+  });
 
   if (!res.deps.length && !res.registryUrls.length) {
     return null;
