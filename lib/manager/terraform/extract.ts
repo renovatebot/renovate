@@ -33,6 +33,9 @@ export function getTerraformDependencyType(
   }
 }
 
+const dependencyBlockExtractionRegex = /^\s*(?<type>module|provider|required_providers)\s+("(?<lookupName>[^"]+)"\s+)?{\s*$/;
+const keyValueExtractionRegex = /^\s*(?<key>[^\s]+)\s+=\s+"(?<value>[^"]+)"\s*$/; // extracts `exampleKey = exampleValue`
+
 export function extractPackageFile(content: string): PackageFile | null {
   logger.trace({ content }, 'terraform.extractPackageFile()');
   if (
@@ -47,16 +50,18 @@ export function extractPackageFile(content: string): PackageFile | null {
     const lines = content.split('\n');
     for (let lineNumber = 0; lineNumber < lines.length; lineNumber += 1) {
       let line = lines[lineNumber];
-      const terraformDependency = /^\s*(module|provider|required_providers)\s+("([^"]+)"\s+)?{\s*$/.exec(
-        line
-      );
+      const terraformDependency = dependencyBlockExtractionRegex.exec(line);
       if (terraformDependency) {
-        logger.trace(`Matched ${terraformDependency[1]} on line ${lineNumber}`);
-        const tfDepType = getTerraformDependencyType(terraformDependency[1]);
+        logger.trace(
+          `Matched ${terraformDependency.groups.type} on line ${lineNumber}`
+        );
+        const tfDepType = getTerraformDependencyType(
+          terraformDependency.groups.type
+        );
 
         if (tfDepType === TerraformDependencyTypes.unknown) {
           /* istanbul ignore next */ logger.trace(
-            `Could not identify TerraformDependencyType ${terraformDependency[1]} on line ${lineNumber}.`
+            `Could not identify TerraformDependencyType ${terraformDependency.groups.type} on line ${lineNumber}.`
           );
         } else if (tfDepType === TerraformDependencyTypes.required_providers) {
           do {
@@ -68,11 +73,10 @@ export function extractPackageFile(content: string): PackageFile | null {
 
             lineNumber += 1;
             line = lines[lineNumber];
-            const kvMatch = /^\s*([^\s]+)\s+=\s+"([^"]+)"\s*$/.exec(line);
+            const kvMatch = keyValueExtractionRegex.exec(line);
             if (kvMatch) {
-              const [, key, value] = kvMatch;
-              dep.currentValue = value;
-              dep.managerData.moduleName = key;
+              dep.currentValue = kvMatch.groups.value;
+              dep.managerData.moduleName = kvMatch.groups.key;
               dep.managerData.versionLine = lineNumber;
               deps.push(dep);
             }
@@ -80,21 +84,20 @@ export function extractPackageFile(content: string): PackageFile | null {
         } else {
           const dep: PackageDependency = {
             managerData: {
-              moduleName: terraformDependency[3],
+              moduleName: terraformDependency.groups.lookupName,
               terraformDependencyType: tfDepType,
             },
           };
           do {
             lineNumber += 1;
             line = lines[lineNumber];
-            const kvMatch = /^\s*([^\s]+)\s+=\s+"([^"]+)"\s*$/.exec(line);
+            const kvMatch = keyValueExtractionRegex.exec(line);
             if (kvMatch) {
-              const [, key, value] = kvMatch;
-              if (key === 'version') {
-                dep.currentValue = value;
+              if (kvMatch.groups.key === 'version') {
+                dep.currentValue = kvMatch.groups.value;
                 dep.managerData.versionLine = lineNumber;
-              } else if (key === 'source') {
-                dep.managerData.source = value;
+              } else if (kvMatch.groups.key === 'source') {
+                dep.managerData.source = kvMatch.groups.value;
                 dep.managerData.sourceLine = lineNumber;
               }
             }
