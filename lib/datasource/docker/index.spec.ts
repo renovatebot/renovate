@@ -1,6 +1,6 @@
 import AWS from 'aws-sdk';
 import AWSMock from 'aws-sdk-mock';
-import { getPkgReleases } from '..';
+import { getDigest, getPkgReleases } from '..';
 import * as httpMock from '../../../test/httpMock';
 import { DATASOURCE_FAILURE } from '../../constants/error-messages';
 import * as _hostRules from '../../util/host-rules';
@@ -50,8 +50,8 @@ describe('api/docker', () => {
         .reply(200, '', {})
         .get('/library/some-dep/manifests/some-new-value')
         .reply(401);
-      const res = await docker.getDigest(
-        { lookupName: 'some-dep' },
+      const res = await getDigest(
+        { datasource: 'docker', depName: 'some-dep' },
         'some-new-value'
       );
       expect(res).toBeNull();
@@ -64,8 +64,8 @@ describe('api/docker', () => {
         .reply(200, { token: 'some-token' })
         .get('/library/some-dep/manifests/some-new-value')
         .replyWithError('error');
-      const res = await docker.getDigest(
-        { lookupName: 'some-dep' },
+      const res = await getDigest(
+        { datasource: 'docker', depName: 'some-dep' },
         'some-new-value'
       );
       expect(res).toBeNull();
@@ -87,7 +87,10 @@ describe('api/docker', () => {
           '/token?service=registry.docker.io&scope=repository:library/some-dep:pull'
         )
         .reply(200, { token: 'some-token' });
-      const res = await docker.getDigest({ lookupName: 'some-dep' });
+      const res = await getDigest({
+        datasource: 'docker',
+        depName: 'some-dep',
+      });
       expect(res).toBe('some-digest');
       expect(httpMock.getTrace()).toMatchSnapshot();
     });
@@ -130,8 +133,8 @@ describe('api/docker', () => {
           '/token?service=registry.docker.io&scope=repository:library/some-dep:pull'
         )
         .reply(200, { token: 'some-token' });
-      const res = await docker.getDigest(
-        { lookupName: 'some-dep' },
+      const res = await getDigest(
+        { datasource: 'docker', depName: 'some-dep' },
         'some-new-value'
       );
       expect(res).toBe(
@@ -147,7 +150,10 @@ describe('api/docker', () => {
         .get('/library/some-dep/manifests/latest')
         .reply(200, '', { 'docker-content-digest': 'some-digest' });
       hostRules.find.mockReturnValueOnce({ insecureRegistry: true });
-      const res = await docker.getDigest({ lookupName: 'some-dep' });
+      const res = await getDigest({
+        datasource: 'docker',
+        depName: 'some-dep',
+      });
       expect(res).toBe('some-digest');
       expect(httpMock.getTrace()).toMatchSnapshot();
     });
@@ -162,8 +168,8 @@ describe('api/docker', () => {
         .reply(200)
         .get('/library/some-dep/manifests/some-tag')
         .reply(200, '', { 'docker-content-digest': 'some-digest' });
-      const res = await docker.getDigest(
-        { lookupName: 'some-dep' },
+      const res = await getDigest(
+        { datasource: 'docker', depName: 'some-dep' },
         'some-tag'
       );
       const trace = httpMock.getTrace();
@@ -182,8 +188,8 @@ describe('api/docker', () => {
         })
         .get('/')
         .reply(403);
-      const res = await docker.getDigest(
-        { lookupName: 'some-dep' },
+      const res = await getDigest(
+        { datasource: 'docker', depName: 'some-dep' },
         'some-tag'
       );
       expect(res).toBeNull();
@@ -210,8 +216,11 @@ describe('api/docker', () => {
           });
         }
       );
-      const res = await docker.getDigest(
-        { lookupName: '123456789.dkr.ecr.us-east-1.amazonaws.com/node' },
+      const res = await getDigest(
+        {
+          datasource: 'docker',
+          depName: '123456789.dkr.ecr.us-east-1.amazonaws.com/node',
+        },
         'some-tag'
       );
       const trace = httpMock.getTrace();
@@ -237,8 +246,11 @@ describe('api/docker', () => {
           callback(null, {});
         }
       );
-      const res = await docker.getDigest(
-        { lookupName: '123456789.dkr.ecr.us-east-1.amazonaws.com/node' },
+      const res = await getDigest(
+        {
+          datasource: 'docker',
+          depName: '123456789.dkr.ecr.us-east-1.amazonaws.com/node',
+        },
         'some-tag'
       );
       expect(res).toBeNull();
@@ -262,8 +274,11 @@ describe('api/docker', () => {
           callback(Error('some error'), null);
         }
       );
-      const res = await docker.getDigest(
-        { lookupName: '123456789.dkr.ecr.us-east-1.amazonaws.com/node' },
+      const res = await getDigest(
+        {
+          datasource: 'docker',
+          depName: '123456789.dkr.ecr.us-east-1.amazonaws.com/node',
+        },
         'some-tag'
       );
       expect(res).toBeNull();
@@ -279,8 +294,8 @@ describe('api/docker', () => {
         })
         .get('/library/some-dep/manifests/some-new-value')
         .reply(200, {}, { 'docker-content-digest': 'some-digest' });
-      const res = await docker.getDigest(
-        { lookupName: 'some-dep' },
+      const res = await getDigest(
+        { datasource: 'docker', depName: 'some-dep' },
         'some-new-value'
       );
       expect(res).toBe('some-digest');
@@ -302,8 +317,8 @@ describe('api/docker', () => {
           '/token?service=registry.docker.io&scope=repository:library/some-other-dep:pull'
         )
         .reply(200, { token: 'some-token' });
-      const res = await docker.getDigest(
-        { lookupName: 'some-other-dep' },
+      const res = await getDigest(
+        { datasource: 'docker', depName: 'some-other-dep' },
         '8.0.0-alpine'
       );
       expect(res).toBe('some-digest');
@@ -312,13 +327,13 @@ describe('api/docker', () => {
     it('should throw error for 429', async () => {
       httpMock.scope(baseUrl).get('/').replyWithError({ statusCode: 429 });
       await expect(
-        docker.getDigest({ lookupName: 'some-dep' }, 'latest')
+        getDigest({ datasource: 'docker', depName: 'some-dep' }, 'latest')
       ).rejects.toThrow(Error(DATASOURCE_FAILURE));
     });
     it('should throw error for 5xx', async () => {
       httpMock.scope(baseUrl).get('/').replyWithError({ statusCode: 504 });
       await expect(
-        docker.getDigest({ lookupName: 'some-dep' }, 'latest')
+        getDigest({ datasource: 'docker', depName: 'some-dep' }, 'latest')
       ).rejects.toThrow(Error(DATASOURCE_FAILURE));
     });
   });
