@@ -1,7 +1,7 @@
 import { logger } from '../../logger';
 import * as globalCache from '../../util/cache/global';
 import { Http } from '../../util/http';
-import { DatasourceError, GetReleasesConfig, ReleaseResult } from '../common';
+import { GetReleasesConfig, ReleaseResult } from '../common';
 
 export const id = 'terraform-provider';
 
@@ -118,27 +118,14 @@ export async function getReleases({
   if (cachedResult) {
     return cachedResult;
   }
-  try {
-    let dep = await queryRegistry(lookupName, registryBackendURL, repository);
-    if (dep) {
-      await globalCache.set(cacheNamespace, lookupName, dep, cacheMinutes);
-      return dep;
-    }
-    dep = await queryReleaseBackend(lookupName, releasesBackendURL, repository);
-    if (dep) {
-      await globalCache.set(cacheNamespace, lookupName, dep, cacheMinutes);
-    }
+  let dep = await queryRegistry(lookupName, registryBackendURL, repository);
+  if (dep) {
+    await globalCache.set(cacheNamespace, lookupName, dep, cacheMinutes);
     return dep;
-  } catch (err) {
-    const failureCodes = ['EAI_AGAIN'];
-    // istanbul ignore if
-    if (failureCodes.includes(err.code)) {
-      throw new DatasourceError(err);
-    }
-    logger.warn(
-      { err, lookupName },
-      'Terraform registry failure: Unknown error'
-    );
-    return null;
   }
+  dep = await queryReleaseBackend(lookupName, releasesBackendURL, repository);
+  if (dep) {
+    await globalCache.set(cacheNamespace, lookupName, dep, cacheMinutes);
+  }
+  return dep;
 }

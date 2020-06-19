@@ -99,5 +99,21 @@ describe('datasource/terraform', () => {
       expect(res).not.toBeNull();
       expect(httpMock.getTrace()).toMatchSnapshot();
     });
+    it('simulate failing secondary release source', async () => {
+      httpMock
+        .scope(primaryUrl)
+        .get('/v1/providers/hashicorp/google-beta')
+        .reply(404, {
+          errors: ['Not Found'],
+        });
+      httpMock.scope(secondaryUrl).get('/index.json').reply(404);
+
+      const res = await getPkgReleases({
+        datasource,
+        depName: 'datadog',
+      });
+      expect(res).toMatchSnapshot();
+      expect(res).toBeNull();
+    });
   });
 });

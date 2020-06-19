@@ -338,3 +338,5 @@ Array [
   },
 ]
 `;
+
+exports[`datasource/terraform getReleases simulate failing secondary release source 1`] = `null`;
