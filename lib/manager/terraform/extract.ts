@@ -11,6 +11,7 @@ export enum TerraformDependencyTypes {
   unknown = 'unknown',
   module = 'module',
   provider = 'provider',
+  required_providers = 'required_providers',
 }
 
 export function getTerraformDependencyType(
@@ -23,6 +24,9 @@ export function getTerraformDependencyType(
     case 'provider': {
       return TerraformDependencyTypes.provider;
     }
+    case 'required_providers': {
+      return TerraformDependencyTypes.required_providers;
+    }
     default: {
       return TerraformDependencyTypes.unknown;
     }
@@ -31,7 +35,11 @@ export function getTerraformDependencyType(
 
 export function extractPackageFile(content: string): PackageFile | null {
   logger.trace({ content }, 'terraform.extractPackageFile()');
-  if (!content.includes('module "') && !content.includes('provider "')) {
+  if (
+    !content.includes('module "') &&
+    !content.includes('provider "') &&
+    !content.includes('required_providers ')
+  ) {
     return null;
   }
   const deps: PackageDependency[] = [];
@@ -39,25 +47,43 @@ export function extractPackageFile(content: string): PackageFile | null {
     const lines = content.split('\n');
     for (let lineNumber = 0; lineNumber < lines.length; lineNumber += 1) {
       let line = lines[lineNumber];
-      const terraformDependency = /^(module|provider)\s+"([^"]+)"\s+{\s*$/.exec(
+      const terraformDependency = /^\s*(module|provider|required_providers)\s+("([^"]+)"\s+)?{\s*$/.exec(
         line
       );
       if (terraformDependency) {
         logger.trace(`Matched ${terraformDependency[1]} on line ${lineNumber}`);
-        const tfDepType: TerraformDependencyTypes = getTerraformDependencyType(
-          terraformDependency[1]
-        );
-        const dep: PackageDependency = {
-          managerData: {
-            moduleName: terraformDependency[2],
-            terraformDependencyType: tfDepType,
-          },
-        };
+        const tfDepType = getTerraformDependencyType(terraformDependency[1]);
+
         if (tfDepType === TerraformDependencyTypes.unknown) {
           /* istanbul ignore next */ logger.trace(
             `Could not identify TerraformDependencyType ${terraformDependency[1]} on line ${lineNumber}.`
           );
+        } else if (tfDepType === TerraformDependencyTypes.required_providers) {
+          do {
+            const dep: PackageDependency = {
+              managerData: {
+                terraformDependencyType: tfDepType,
+              },
+            };
+
+            lineNumber += 1;
+            line = lines[lineNumber];
+            const kvMatch = /^\s*([^\s]+)\s+=\s+"([^"]+)"\s*$/.exec(line);
+            if (kvMatch) {
+              const [, key, value] = kvMatch;
+              dep.currentValue = value;
+              dep.managerData.moduleName = key;
+              dep.managerData.versionLine = lineNumber;
+              deps.push(dep);
+            }
+          } while (line.trim() !== '}');
         } else {
+          const dep: PackageDependency = {
+            managerData: {
+              moduleName: terraformDependency[3],
+              terraformDependencyType: tfDepType,
+            },
+          };
           do {
             lineNumber += 1;
             line = lines[lineNumber];
@@ -140,7 +166,9 @@ export function extractPackageFile(content: string): PackageFile | null {
       }
     } else if (
       dep.managerData.terraformDependencyType ===
-      TerraformDependencyTypes.provider
+        TerraformDependencyTypes.provider ||
+      dep.managerData.terraformDependencyType ===
+        TerraformDependencyTypes.required_providers
     ) {
       dep.depType = 'terraform';
       dep.depName = dep.managerData.moduleName;
