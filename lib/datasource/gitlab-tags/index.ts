@@ -1,3 +1,4 @@
+import URL from 'url';
 import is from '@sindresorhus/is';
 import { logger } from '../../logger';
 import * as globalCache from '../../util/cache/global';
@@ -43,7 +44,10 @@ export async function getReleases({
 
   try {
     // tag
-    const url = `${depHost}/api/v4/projects/${urlEncodedRepo}/repository/tags?per_page=100`;
+    const url = URL.resolve(
+      depHost,
+      `/api/v4/projects/${urlEncodedRepo}/repository/tags?per_page=100`
+    );
 
     gitlabTags = (
       await gitlabApi.getJson<GitlabTag[]>(url, {
