@@ -76,7 +76,9 @@ describe('datasource/index', () => {
     ).toBeUndefined();
   });
   it('adds changelogUrl', async () => {
-    npmDatasource.getReleases.mockResolvedValue({ releases: [] });
+    npmDatasource.getReleases.mockResolvedValue({
+      releases: [{ version: '1.0.0' }],
+    });
     const res = await datasource.getPkgReleases({
       datasource: datasourceNpm.id,
       depName: 'react-native',
@@ -86,7 +88,9 @@ describe('datasource/index', () => {
     expect(res.sourceUrl).toBeDefined();
   });
   it('adds sourceUrl', async () => {
-    npmDatasource.getReleases.mockResolvedValue({ releases: [] });
+    npmDatasource.getReleases.mockResolvedValue({
+      releases: [{ version: '1.0.0' }],
+    });
     const res = await datasource.getPkgReleases({
       datasource: datasourceNpm.id,
       depName: 'node',
@@ -97,7 +101,7 @@ describe('datasource/index', () => {
   it('trims sourceUrl', async () => {
     npmDatasource.getReleases.mockResolvedValue({
       sourceUrl: ' https://abc.com',
-      releases: [],
+      releases: [{ version: '1.0.0' }],
     });
     const res = await datasource.getPkgReleases({
       datasource: datasourceNpm.id,
@@ -108,7 +112,7 @@ describe('datasource/index', () => {
   it('massages sourceUrl', async () => {
     npmDatasource.getReleases.mockResolvedValue({
       sourceUrl: 'scm:git@github.com:Jasig/cas.git',
-      releases: [],
+      releases: [{ version: '1.0.0' }],
     });
     const res = await datasource.getPkgReleases({
       datasource: datasourceNpm.id,
