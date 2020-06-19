@@ -22,7 +22,6 @@ interface TerraformProvider {
  */
 export async function getReleases({
   lookupName,
-  registryUrls,
 }: GetReleasesConfig): Promise<ReleaseResult | null> {
   const repository = `hashicorp/${lookupName}`;
 

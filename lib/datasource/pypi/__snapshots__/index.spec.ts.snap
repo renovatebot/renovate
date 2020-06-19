@@ -394,21 +394,6 @@ Array [
 ]
 `;
 
-exports[`datasource/pypi getReleases supports custom datasource url from environmental variable 1`] = `
-Array [
-  Object {
-    "headers": Object {
-      "accept": "application/json",
-      "accept-encoding": "gzip, deflate",
-      "host": "my.pypi.python",
-      "user-agent": "https://github.com/renovatebot/renovate",
-    },
-    "method": "GET",
-    "url": "https://my.pypi.python/pypi/azure-cli-monitor/json",
-  },
-]
-`;
-
 exports[`datasource/pypi getReleases supports multiple custom datasource urls 1`] = `
 Array [
   Object {

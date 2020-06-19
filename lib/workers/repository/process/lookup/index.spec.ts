@@ -28,7 +28,8 @@ jest.mock('../../../../datasource/git-submodules');
 
 qJson.latestVersion = '1.4.1';
 
-const docker = mocked(datasourceDocker);
+const docker = mocked(datasourceDocker) as any;
+docker.defaultRegistryUrls = ['https://index.docker.io'];
 const gitSubmodules = mocked(datasourceGitSubmodules);
 
 let config: lookup.LookupUpdateConfig;
