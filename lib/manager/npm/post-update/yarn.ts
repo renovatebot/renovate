@@ -1,4 +1,7 @@
 import is from '@sindresorhus/is';
+import { Configuration } from '@yarnpkg/core';
+import { npath } from '@yarnpkg/fslib';
+import { readFile, remove } from 'fs-extra';
 import { validRange } from 'semver';
 import { quote } from 'shlex';
 import { join } from 'upath';
@@ -7,7 +10,7 @@ import { id as npmId } from '../../../datasource/npm';
 import { logger } from '../../../logger';
 import { ExternalHostError } from '../../../types/errors/external-host-error';
 import { ExecOptions, exec } from '../../../util/exec';
-import { readFile, remove } from '../../../util/fs';
+import { api as semver } from '../../../versioning/semver';
 import { PostUpdateConfig, Upgrade } from '../../common';
 import { getNodeConstraint } from './node-version';
 
@@ -47,15 +50,38 @@ export async function generateLockFile(
   logger.debug(`Spawning yarn install to create ${lockFileName}`);
   let lockFile = null;
   try {
-    let installYarn = 'npm i -g yarn';
-    const yarnCompatibility = config.compatibility?.yarn;
-    if (validRange(yarnCompatibility)) {
-      installYarn += `@${quote(yarnCompatibility)}`;
+    const configuration = await Configuration.find(
+      npath.toPortablePath(cwd),
+      null,
+      { strict: false }
+    ).catch(() => null);
+    const yarnPath = configuration && configuration.get('yarnPath');
+
+    const yarnVersion =
+      yarnPath && (await exec(`${yarnPath} --version`)).stdout;
+    const isYarn1 = !yarnVersion || semver.getMajor(yarnVersion) === 1;
+
+    const preCommands = [];
+    const extraEnv: ExecOptions['extraEnv'] = {
+      NPM_CONFIG_CACHE: env.NPM_CONFIG_CACHE,
+      npm_config_store: env.npm_config_store,
+    };
+
+    if (isYarn1) {
+      let installYarn = 'npm i -g yarn';
+      const yarnCompatibility = config.compatibility?.yarn;
+      if (validRange(yarnCompatibility)) {
+        installYarn += `@${quote(yarnCompatibility)}`;
+      }
+      preCommands.push(installYarn);
     }
-    const preCommands = [installYarn];
+
+    const yarnCmd = yarnPath || 'yarn';
+
     if (
+      isYarn1 &&
       config.skipInstalls !== false &&
-      (await hasYarnOfflineMirror(cwd)) === false
+      (yarnPath || (await hasYarnOfflineMirror(cwd))) === false
     ) {
       logger.debug('Updating yarn.lock only - skipping node_modules');
       // The following change causes Yarn 1.x to exit gracefully after updating the lock file but without installing node_modules
@@ -65,15 +91,16 @@ export async function generateLockFile(
     let cmdOptions =
       '--ignore-engines --ignore-platform --network-timeout 100000';
     if (global.trustLevel !== 'high' || config.ignoreScripts) {
-      cmdOptions += ' --ignore-scripts';
+      if (isYarn1) {
+        cmdOptions += ' --ignore-scripts';
+      } else {
+        extraEnv.YARN_ENABLE_SCRIPTS = '0';
+      }
     }
     const tagConstraint = await getNodeConstraint(config);
     const execOptions: ExecOptions = {
       cwd,
-      extraEnv: {
-        NPM_CONFIG_CACHE: env.NPM_CONFIG_CACHE,
-        npm_config_store: env.npm_config_store,
-      },
+      extraEnv,
       docker: {
         image: 'renovate/node',
         tagScheme: 'npm',
@@ -89,7 +116,7 @@ export async function generateLockFile(
     }
 
     // This command updates the lock file based on package.json
-    commands.push(`yarn install ${cmdOptions}`.trim());
+    commands.push(`${yarnCmd} install ${cmdOptions}`.trim());
 
     // rangeStrategy = update-lockfile
     const lockUpdates = upgrades
@@ -98,18 +125,18 @@ export async function generateLockFile(
     if (lockUpdates.length) {
       logger.debug('Performing lockfileUpdate (yarn)');
       commands.push(
-        `yarn upgrade ${lockUpdates.join(' ')} ${cmdOptions}`.trim()
+        `${yarnCmd} upgrade ${lockUpdates.join(' ')} ${cmdOptions}`.trim()
       );
     }
 
     // postUpdateOptions
-    if (config.postUpdateOptions?.includes('yarnDedupeFewer')) {
+    if (isYarn1 && config.postUpdateOptions?.includes('yarnDedupeFewer')) {
       logger.debug('Performing yarn dedupe fewer');
       commands.push('npx yarn-deduplicate --strategy fewer');
       // Run yarn again in case any changes are necessary
       commands.push(`yarn install ${cmdOptions}`.trim());
     }
-    if (config.postUpdateOptions?.includes('yarnDedupeHighest')) {
+    if (isYarn1 && config.postUpdateOptions?.includes('yarnDedupeHighest')) {
       logger.debug('Performing yarn dedupe highest');
       commands.push('npx yarn-deduplicate --strategy highest');
       // Run yarn again in case any changes are necessary

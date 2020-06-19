@@ -223,6 +223,7 @@
     "@types/xmldoc": "1.1.4",
     "@typescript-eslint/eslint-plugin": "3.8.0",
     "@typescript-eslint/parser": "3.8.0",
+    "@yarnpkg/fslib": "^2.0.0-rc.22",
     "aws-sdk-mock": "5.1.0",
     "babel-jest": "26.2.2",
     "babel-plugin-dynamic-import-node": "2.3.3",
