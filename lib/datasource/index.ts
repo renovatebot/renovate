@@ -147,6 +147,7 @@ async function fetchReleases(
   const registryUrls = resolveRegistryUrls(datasource, config.registryUrls);
   let dep: ReleaseResult;
   if (datasource.registryStrategy) {
+    // istanbul ignore if
     if (!registryUrls.length) {
       logger.warn(
         { datasource: datasourceName, depName: config.depName },
@@ -167,10 +168,7 @@ async function fetchReleases(
       registryUrls,
     });
   }
-  if (!dep) {
-    return null;
-  }
-  if (!dep.releases?.length) {
+  if (!dep?.releases?.length) {
     return null;
   }
   addMetaData(dep, datasourceName, config.lookupName);
