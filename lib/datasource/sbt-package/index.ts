@@ -73,11 +73,11 @@ export async function getReleases({
   const artifactIdSplit = artifactId.split('_');
   const [artifact, scalaVersion] = artifactIdSplit;
 
-  const repoRoot = registryUrl.replace(/\/?$/, '');
+  const repoRoot = ensureTrailingSlash(registryUrl);
   const searchRoots: string[] = [];
   // Optimize lookup order
-  searchRoots.push(`${repoRoot}/${groupIdSplit.join('/')}`);
-  searchRoots.push(`${repoRoot}/${groupIdSplit.join('.')}`);
+  searchRoots.push(`${repoRoot}${groupIdSplit.join('/')}`);
+  searchRoots.push(`${repoRoot}${groupIdSplit.join('.')}`);
 
   for (let idx = 0; idx < searchRoots.length; idx += 1) {
     const searchRoot = searchRoots[idx];

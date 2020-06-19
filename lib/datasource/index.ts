@@ -34,13 +34,6 @@ function firstRegistry(
   datasource: Datasource,
   registryUrls: string[]
 ): Promise<ReleaseResult> {
-  if (!registryUrls?.length) {
-    logger.warn(
-      { datasource: datasource.id, depName: config.depName },
-      'No registryUrls found for datasource lookup'
-    );
-    return null;
-  }
   if (registryUrls.length > 1) {
     logger.warn(
       { datasource: datasource.id, depName: config.depName, registryUrls },
@@ -59,23 +52,17 @@ async function huntRegistries(
   datasource: Datasource,
   registryUrls: string[]
 ): Promise<ReleaseResult> {
-  if (!registryUrls?.length) {
-    logger.warn(
-      { datasource: datasource.id, depName: config.depName },
-      'No registryUrls found for datasource lookup'
-    );
-    return null;
-  }
   let res: ReleaseResult;
   let datasourceError;
   for (const registryUrl of registryUrls) {
     try {
-      res =
-        res ||
-        (await datasource.getReleases({
-          ...config,
-          registryUrl,
-        }));
+      res = await datasource.getReleases({
+        ...config,
+        registryUrl,
+      });
+      if (res) {
+        break;
+      }
     } catch (err) {
       if (err instanceof DatasourceError) {
         throw err;
@@ -97,13 +84,6 @@ async function mergeRegistries(
   datasource: Datasource,
   registryUrls: string[]
 ): Promise<ReleaseResult> {
-  if (!registryUrls?.length) {
-    logger.warn(
-      { datasource: datasource.id, depName: config.depName },
-      'No registryUrls found for datasource lookup'
-    );
-    return null;
-  }
   let combinedRes: ReleaseResult;
   let datasourceError;
   for (const registryUrl of registryUrls) {
@@ -133,12 +113,12 @@ async function mergeRegistries(
   }
   // De-duplicate releases
   if (combinedRes?.releases?.length) {
-    const seenVersions = [];
+    const seenVersions = new Set<string>();
     combinedRes.releases = combinedRes.releases.filter((release) => {
-      if (seenVersions.includes(release.version)) {
+      if (seenVersions.has(release.version)) {
         return false;
       }
-      seenVersions.push(release.version);
+      seenVersions.add(release.version);
       return true;
     });
   }
@@ -166,20 +146,32 @@ async function fetchReleases(
   const datasource = await load(datasourceName);
   const registryUrls = resolveRegistryUrls(datasource, config.registryUrls);
   let dep: ReleaseResult;
-  if (datasource.registryStrategy === 'first') {
-    dep = await firstRegistry(config, datasource, registryUrls);
-  } else if (datasource.registryStrategy === 'hunt') {
-    dep = await huntRegistries(config, datasource, registryUrls);
-  } else if (datasource.registryStrategy === 'merge') {
-    dep = await mergeRegistries(config, datasource, registryUrls);
+  if (datasource.registryStrategy) {
+    if (!registryUrls.length) {
+      logger.warn(
+        { datasource: datasourceName, depName: config.depName },
+        'Missing registryUrls for registryStrategy'
+      );
+      return null;
+    }
+    if (datasource.registryStrategy === 'first') {
+      dep = await firstRegistry(config, datasource, registryUrls);
+    } else if (datasource.registryStrategy === 'hunt') {
+      dep = await huntRegistries(config, datasource, registryUrls);
+    } else if (datasource.registryStrategy === 'merge') {
+      dep = await mergeRegistries(config, datasource, registryUrls);
+    }
   } else {
     dep = await datasource.getReleases({
       ...config,
       registryUrls,
     });
   }
-  if (dep?.releases?.length === 0) {
-    dep = null;
+  if (!dep) {
+    return null;
+  }
+  if (!dep.releases?.length) {
+    return null;
   }
   addMetaData(dep, datasourceName, config.lookupName);
   return dep;

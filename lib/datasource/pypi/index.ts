@@ -3,6 +3,7 @@ import changelogFilenameRegex from 'changelog-filename-regex';
 import { parse } from 'node-html-parser';
 import { logger } from '../../logger';
 import { Http } from '../../util/http';
+import { ensureTrailingSlash } from '../../util/url';
 import { matches } from '../../versioning/pep440';
 import * as pep440 from '../../versioning/pep440';
 import { GetReleasesConfig, ReleaseResult } from '../common';
@@ -214,7 +215,7 @@ export async function getReleases({
   lookupName,
   registryUrl,
 }: GetReleasesConfig): Promise<ReleaseResult | null> {
-  const hostUrl = registryUrl + (registryUrl.endsWith('/') ? '' : '/');
+  const hostUrl = ensureTrailingSlash(registryUrl);
   if (hostUrl.endsWith('/simple/') || hostUrl.endsWith('/+simple/')) {
     logger.trace({ lookupName, hostUrl }, 'Looking up pypi simple dependency');
     return getSimpleDependency(lookupName, hostUrl);

@@ -49,7 +49,6 @@ export async function getReleases({
         releaseTimestamp: formatBuildTime(release.buildTime),
       }));
   } catch (err) /* istanbul ignore next */ {
-    // istanbul ignore if
     if (err.host === 'services.gradle.org') {
       throw new DatasourceError(err);
     }
