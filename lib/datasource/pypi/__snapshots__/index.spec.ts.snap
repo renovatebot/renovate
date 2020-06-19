@@ -1,15 +1,6 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
 exports[`datasource/pypi getReleases find url from project_urls 1`] = `
-Object {
-  "changelogUrl": "https://github.com/Flexget/wiki/blob/master/ChangeLog.md",
-  "homepage": "https://flexget.com",
-  "releases": Array [],
-  "sourceUrl": "https://github.com/Flexget/Flexget",
-}
-`;
-
-exports[`datasource/pypi getReleases find url from project_urls 2`] = `
 Array [
   Object {
     "headers": Object {
@@ -298,12 +289,7 @@ Array [
 ]
 `;
 
-exports[`datasource/pypi getReleases returns non-github home_page 1`] = `
-Object {
-  "homepage": "https://microsoft.com",
-  "releases": Array [],
-}
-`;
+exports[`datasource/pypi getReleases returns non-github home_page 1`] = `"https://microsoft.com"`;
 
 exports[`datasource/pypi getReleases returns non-github home_page 2`] = `
 Array [

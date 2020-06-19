@@ -49,10 +49,13 @@ async function fetchReleases(
   }
   const datasource = await load(datasourceName);
   const registryUrls = resolveRegistryUrls(datasource, config.registryUrls);
-  const dep = await datasource.getReleases({
+  let dep = await datasource.getReleases({
     ...config,
     registryUrls,
   });
+  if (!(dep && dep.releases.length)) {
+    dep = null;
+  }
   addMetaData(dep, datasourceName, config.lookupName);
   return dep;
 }

@@ -146,12 +146,14 @@ describe('datasource/go', () => {
         { datasource, depName: 'gopkg.in/x/text' },
         { datasource, depName: 'gopkg.in/x' },
       ];
-      const githubRes = { releases: [1, 2] } as any;
+      const githubRes = {
+        releases: [],
+      } as any;
       for (const pkg of packages) {
         github.getReleases.mockResolvedValueOnce(
           partial<ReleaseResult>(githubRes)
         );
-        expect(await getPkgReleases(pkg)).toEqual(githubRes);
+        expect(await getPkgReleases(pkg)).toBeNull();
       }
       expect(github.getReleases.mock.calls).toMatchSnapshot();
     });
