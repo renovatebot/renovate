@@ -10,3 +10,4 @@ export const LANGUAGE_PHP = 'php';
 export const LANGUAGE_PYTHON = 'python';
 export const LANGUAGE_RUBY = 'ruby';
 export const LANGUAGE_RUST = 'rust';
+export const LANGUAGE_PERL = 'perl';
