@@ -278,6 +278,10 @@ export async function getReleases({
     logger.debug(`Found ${availableVersions.length} new versions for ${dependency.display} in repository ${repoUrl}`); // prettier-ignore
   }
 
+  if (!versions?.length) {
+    return null;
+  }
+
   let dependencyInfo = {};
   const latestVersion = getLatestStableVersion(versions);
   if (latestVersion) {

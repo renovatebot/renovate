@@ -1,4 +1,5 @@
 import is from '@sindresorhus/is';
+import _ from 'lodash';
 import { logger } from '../logger';
 import * as runCache from '../util/cache/run';
 import { clone } from '../util/clone';
@@ -168,7 +169,7 @@ async function fetchReleases(
       registryUrls,
     });
   }
-  if (!dep?.releases?.length) {
+  if (!dep || _.isEqual(dep, { releases: [] })) {
     return null;
   }
   addMetaData(dep, datasourceName, config.lookupName);
