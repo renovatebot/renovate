@@ -13,6 +13,7 @@ import { downloadHttpProtocol, isHttpResourceExists } from './util';
 export { id } from './common';
 
 export const defaultRegistryUrls = [MAVEN_REPO];
+export const registryStrategy = 'merge';
 
 function containsPlaceholder(str: string): boolean {
   return /\${.*?}/g.test(str);
@@ -250,53 +251,39 @@ async function filterMissingArtifacts(
 
 export async function getReleases({
   lookupName,
-  registryUrls,
+  registryUrl,
 }: GetReleasesConfig): Promise<ReleaseResult | null> {
-  const repositories = registryUrls.map((repository) =>
-    repository.replace(/\/?$/, '/')
-  );
   const dependency = getDependencyParts(lookupName);
   const versions: string[] = [];
   const repoForVersions = {};
-  for (let i = 0; i < repositories.length; i += 1) {
-    const repoUrl = repositories[i];
-    logger.debug(
-      `Looking up ${dependency.display} in repository #${i} - ${repoUrl}`
+  const repoUrl = registryUrl.replace(/\/?$/, '/');
+  logger.debug(`Looking up ${dependency.display} in repository ${repoUrl}`);
+  const metadataVersions = await getVersionsFromMetadata(dependency, repoUrl);
+  if (metadataVersions) {
+    const availableVersions = await filterMissingArtifacts(
+      dependency,
+      repoUrl,
+      metadataVersions
     );
-    const metadataVersions = await getVersionsFromMetadata(dependency, repoUrl);
-    if (metadataVersions) {
-      const availableVersions = await filterMissingArtifacts(
-        dependency,
-        repoUrl,
-        metadataVersions
-      );
-      const filteredVersions = availableVersions.filter(
-        (version) => !versions.includes(version)
-      );
-      versions.push(...filteredVersions);
+    const filteredVersions = availableVersions.filter(
+      (version) => !versions.includes(version)
+    );
+    versions.push(...filteredVersions);
 
-      const latestVersion = getLatestStableVersion(filteredVersions);
-      if (latestVersion) {
-        repoForVersions[latestVersion] = repoUrl;
-      }
-
-      logger.debug(`Found ${availableVersions.length} new versions for ${dependency.display} in repository ${repoUrl}`); // prettier-ignore
+    const latestVersion = getLatestStableVersion(filteredVersions);
+    if (latestVersion) {
+      repoForVersions[latestVersion] = repoUrl;
     }
-  }
 
-  if (versions.length === 0) {
-    logger.debug(`No versions found for ${dependency.display} in ${repositories.length} repositories`); // prettier-ignore
-    return null;
+    logger.debug(`Found ${availableVersions.length} new versions for ${dependency.display} in repository ${repoUrl}`); // prettier-ignore
   }
-  logger.debug(`Found ${versions.length} versions for ${dependency.display}`);
 
   let dependencyInfo = {};
   const latestVersion = getLatestStableVersion(versions);
   if (latestVersion) {
-    const repoUrl = repoForVersions[latestVersion];
     dependencyInfo = await getDependencyInfo(
       dependency,
-      repoUrl,
+      repoForVersions[latestVersion],
       latestVersion
     );
   }

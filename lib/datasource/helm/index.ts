@@ -13,6 +13,7 @@ const http = new Http(id);
 export const defaultRegistryUrls = [
   'https://kubernetes-charts.storage.googleapis.com/',
 ];
+export const registryStrategy = 'first';
 
 export async function getRepositoryData(
   repository: string
@@ -101,9 +102,8 @@ export async function getRepositoryData(
 
 export async function getReleases({
   lookupName,
-  registryUrls,
+  registryUrl: helmRepository,
 }: GetReleasesConfig): Promise<ReleaseResult | null> {
-  const [helmRepository] = registryUrls;
   const repositoryData = await getRepositoryData(helmRepository);
   if (!repositoryData) {
     logger.debug(`Couldn't get index.yaml file from ${helmRepository}`);

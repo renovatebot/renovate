@@ -29,6 +29,102 @@ function load(datasource: string): Promise<Datasource> {
 
 type GetReleasesInternalConfig = GetReleasesConfig & GetPkgReleasesConfig;
 
+function firstRegistry(
+  config: GetReleasesInternalConfig,
+  datasource: Datasource,
+  registryUrls: string[]
+): Promise<ReleaseResult> {
+  if (registryUrls.length > 1) {
+    logger.warn(
+      { datasource: datasource.id, depName: config.depName, registryUrls },
+      'Excess registryUrls found for datasource lookup - using first configured only'
+    );
+  }
+  const registryUrl = registryUrls[0];
+  return datasource.getReleases({
+    ...config,
+    registryUrl,
+  });
+}
+
+async function huntRegistries(
+  config: GetReleasesInternalConfig,
+  datasource: Datasource,
+  registryUrls: string[]
+): Promise<ReleaseResult> {
+  let res: ReleaseResult;
+  let datasourceError;
+  for (const registryUrl of registryUrls) {
+    try {
+      res = await datasource.getReleases({
+        ...config,
+        registryUrl,
+      });
+      if (res) {
+        break;
+      }
+    } catch (err) {
+      if (err instanceof DatasourceError) {
+        throw err;
+      }
+      // We'll always save the last-thrown error
+      datasourceError = err;
+      logger.trace({ err }, 'datasource hunt failure');
+    }
+  }
+  if (res === undefined && datasourceError) {
+    // if we failed to get a result and also got an error then throw it
+    throw datasourceError;
+  }
+  return res;
+}
+
+async function mergeRegistries(
+  config: GetReleasesInternalConfig,
+  datasource: Datasource,
+  registryUrls: string[]
+): Promise<ReleaseResult> {
+  let combinedRes: ReleaseResult;
+  let datasourceError;
+  for (const registryUrl of registryUrls) {
+    try {
+      const res = await datasource.getReleases({
+        ...config,
+        registryUrl,
+      });
+      if (combinedRes) {
+        combinedRes = { ...res, ...combinedRes };
+        combinedRes.releases = [...combinedRes.releases, ...res.releases];
+      } else {
+        combinedRes = res;
+      }
+    } catch (err) {
+      if (err instanceof DatasourceError) {
+        throw err;
+      }
+      // We'll always save the last-thrown error
+      datasourceError = err;
+      logger.trace({ err }, 'datasource merge failure');
+    }
+  }
+  if (combinedRes === undefined && datasourceError) {
+    // if we failed to get a result and also got an error then throw it
+    throw datasourceError;
+  }
+  // De-duplicate releases
+  if (combinedRes?.releases?.length) {
+    const seenVersions = new Set<string>();
+    combinedRes.releases = combinedRes.releases.filter((release) => {
+      if (seenVersions.has(release.version)) {
+        return false;
+      }
+      seenVersions.add(release.version);
+      return true;
+    });
+  }
+  return combinedRes;
+}
+
 function resolveRegistryUrls(
   datasource: Datasource,
   extractedUrls: string[]
@@ -49,12 +145,31 @@ async function fetchReleases(
   }
   const datasource = await load(datasourceName);
   const registryUrls = resolveRegistryUrls(datasource, config.registryUrls);
-  let dep = await datasource.getReleases({
-    ...config,
-    registryUrls,
-  });
-  if (!(dep && dep.releases.length)) {
-    dep = null;
+  let dep: ReleaseResult;
+  if (datasource.registryStrategy) {
+    // istanbul ignore if
+    if (!registryUrls.length) {
+      logger.warn(
+        { datasource: datasourceName, depName: config.depName },
+        'Missing registryUrls for registryStrategy'
+      );
+      return null;
+    }
+    if (datasource.registryStrategy === 'first') {
+      dep = await firstRegistry(config, datasource, registryUrls);
+    } else if (datasource.registryStrategy === 'hunt') {
+      dep = await huntRegistries(config, datasource, registryUrls);
+    } else if (datasource.registryStrategy === 'merge') {
+      dep = await mergeRegistries(config, datasource, registryUrls);
+    }
+  } else {
+    dep = await datasource.getReleases({
+      ...config,
+      registryUrls,
+    });
+  }
+  if (!dep?.releases?.length) {
+    return null;
   }
   addMetaData(dep, datasourceName, config.lookupName);
   return dep;
@@ -131,10 +246,11 @@ export async function getDigest(
   config: DigestConfig,
   value?: string
 ): Promise<string | null> {
+  const datasource = await load(config.datasource);
   const lookupName = config.lookupName || config.depName;
-  const { registryUrls } = config;
-  return (await load(config.datasource)).getDigest(
-    { lookupName, registryUrls },
+  const registryUrls = resolveRegistryUrls(datasource, config.registryUrls);
+  return datasource.getDigest(
+    { lookupName, registryUrl: registryUrls[0] },
     value
   );
 }

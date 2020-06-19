@@ -1,14 +1,19 @@
 import url from 'url';
-import is from '@sindresorhus/is';
 import changelogFilenameRegex from 'changelog-filename-regex';
 import { parse } from 'node-html-parser';
 import { logger } from '../../logger';
 import { Http } from '../../util/http';
+import { ensureTrailingSlash } from '../../util/url';
 import { matches } from '../../versioning/pep440';
 import * as pep440 from '../../versioning/pep440';
 import { GetReleasesConfig, ReleaseResult } from '../common';
 
 export const id = 'pypi';
+export const defaultRegistryUrls = [
+  process.env.PIP_INDEX_URL || 'https://pypi.org/pypi/',
+];
+export const registryStrategy = 'hunt';
+
 const github_repo_pattern = /^https?:\/\/github\.com\/[^\\/]+\/[^\\/]+$/;
 const http = new Http(id);
 
@@ -208,36 +213,13 @@ async function getSimpleDependency(
 export async function getReleases({
   compatibility,
   lookupName,
-  registryUrls,
+  registryUrl,
 }: GetReleasesConfig): Promise<ReleaseResult | null> {
-  let hostUrls = ['https://pypi.org/pypi/'];
-  if (is.nonEmptyArray(registryUrls)) {
-    hostUrls = registryUrls;
+  const hostUrl = ensureTrailingSlash(registryUrl);
+  if (hostUrl.endsWith('/simple/') || hostUrl.endsWith('/+simple/')) {
+    logger.trace({ lookupName, hostUrl }, 'Looking up pypi simple dependency');
+    return getSimpleDependency(lookupName, hostUrl);
   }
-  if (process.env.PIP_INDEX_URL) {
-    hostUrls = [process.env.PIP_INDEX_URL];
-  }
-  let dep: ReleaseResult;
-  for (let index = 0; index < hostUrls.length && !dep; index += 1) {
-    let hostUrl = hostUrls[index];
-    hostUrl += hostUrl.endsWith('/') ? '' : '/';
-    if (hostUrl.endsWith('/simple/') || hostUrl.endsWith('/+simple/')) {
-      logger.trace(
-        { lookupName, hostUrl },
-        'Looking up pypi simple dependency'
-      );
-      dep = await getSimpleDependency(lookupName, hostUrl);
-    } else {
-      logger.trace({ lookupName, hostUrl }, 'Looking up pypi api dependency');
-      dep = await getDependency(lookupName, hostUrl, compatibility);
-    }
-    if (dep !== null) {
-      logger.trace({ lookupName, hostUrl }, 'Found pypi result');
-    }
-  }
-  if (dep) {
-    return dep;
-  }
-  logger.debug({ lookupName, registryUrls }, 'No pypi result - returning null');
-  return null;
+  logger.trace({ lookupName, hostUrl }, 'Looking up pypi api dependency');
+  return getDependency(lookupName, hostUrl, compatibility);
 }
