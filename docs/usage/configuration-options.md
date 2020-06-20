@@ -516,6 +516,8 @@ This field can be used to override the default status codes that Renovate decide
 }
 ```
 
+Note that this field is _not_ mergeable, so if you want to add any status codes to the defaults then you need to include the full list. However, this also means you can make the default list smaller, if needed.
+
 ### baseUrl
 
 Use this instead of `domainName` or `hostName` if you need a rule to apply to a specific path on a host. For example, `"baseUrl": "https://api.github.com"` is equivalent to `"hostName": "api.github.com"` but `"baseUrl": "https://api.github.com/google/"` is not.
