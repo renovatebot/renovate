@@ -129,7 +129,6 @@ export function extractPackageFile(content: string): PackageFile | null {
         dep.currentValue = githubRefMatch[3];
         dep.datasource = datasourceGithubTags.id;
         dep.lookupName = depNameShort;
-        dep.managerData.lineNumber = dep.managerData.sourceLine;
         if (!isVersion(dep.currentValue)) {
           dep.skipReason = SkipReason.UnsupportedVersion;
         }
@@ -148,7 +147,6 @@ export function extractPackageFile(content: string): PackageFile | null {
         }
         dep.currentValue = gitTagsRefMatch[4];
         dep.datasource = datasourceGitTags.id;
-        dep.managerData.lineNumber = dep.managerData.sourceLine;
         if (!isVersion(dep.currentValue)) {
           dep.skipReason = SkipReason.UnsupportedVersion;
         }
@@ -160,7 +158,6 @@ export function extractPackageFile(content: string): PackageFile | null {
           dep.depType = 'terraform';
           dep.depName = moduleParts.join('/');
           dep.depNameShort = dep.depName;
-          dep.managerData.lineNumber = dep.managerData.versionLine;
           dep.datasource = datasourceTerraformModule.id;
         }
       } else {
@@ -176,9 +173,8 @@ export function extractPackageFile(content: string): PackageFile | null {
       dep.depType = 'terraform';
       dep.depName = dep.managerData.moduleName;
       dep.depNameShort = dep.managerData.moduleName;
-      dep.managerData.lineNumber = dep.managerData.versionLine;
       dep.datasource = datasourceTerraformProvider.id;
-      if (dep.managerData.lineNumber) {
+      if (dep.managerData.versionLine) {
         if (!isValid(dep.currentValue)) {
           dep.skipReason = SkipReason.UnsupportedVersion;
         }
