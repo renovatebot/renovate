@@ -1,9 +1,13 @@
 import { logger } from '../../logger';
-import * as globalCache from '../../util/cache/global';
 import { Http } from '../../util/http';
 import { GetReleasesConfig, ReleaseResult } from '../common';
 
 export const id = 'terraform-provider';
+export const defaultRegistryUrls = [
+  'https://registry.terraform.io',
+  'https://releases.hashicorp.com',
+];
+export const registryStrategy = 'hunt';
 
 const http = new Http(id);
 
@@ -28,10 +32,11 @@ interface VersionsReleaseBackend {
 
 async function queryRegistry(
   lookupName: string,
-  backendURL: string,
+  registryURL: string,
   repository: string
 ): Promise<ReleaseResult> {
   try {
+    const backendURL = `${registryURL}/v1/providers/${repository}`;
     const res = (await http.getJson<TerraformProvider>(backendURL)).body;
     const dep: ReleaseResult = {
       name: repository,
@@ -44,13 +49,13 @@ async function queryRegistry(
     dep.releases = res.versions.map((version) => ({
       version,
     }));
-    dep.homepage = `https://registry.terraform.io/providers/${repository}`;
+    dep.homepage = `${registryURL}/providers/${repository}`;
     logger.trace({ dep }, 'dep');
     return dep;
   } catch (err) {
     logger.debug(
       { lookupName },
-      `Terraform registry ("registry.terraform.io") lookup failure: not found`
+      `Terraform registry ("${registryURL}") lookup failure: not found`
     );
     logger.debug({
       err,
@@ -61,10 +66,11 @@ async function queryRegistry(
 
 async function queryReleaseBackend(
   lookupName: string,
-  backendURL: string,
+  registryURL: string,
   repository: string
 ): Promise<ReleaseResult> {
   const backendLookUpName = `terraform-provider-${lookupName}`;
+  const backendURL = registryURL + `/index.json`;
   try {
     const res = (
       await http.getJson<TerraformProviderReleaseBackend>(backendURL)
@@ -84,7 +90,7 @@ async function queryReleaseBackend(
   } catch (err) {
     logger.debug(
       { lookupName },
-      `Terraform registry ("releases.hashicorp.com") lookup failure: not found`
+      `Terraform registry ("${registryURL}") lookup failure: not found`
     );
     logger.debug({
       err,
@@ -100,31 +106,16 @@ async function queryReleaseBackend(
  */
 export async function getReleases({
   lookupName,
+  registryUrl,
 }: GetReleasesConfig): Promise<ReleaseResult | null> {
   const repository = `hashicorp/${lookupName}`;
 
-  const releasesBackendURL = `https://releases.hashicorp.com/index.json`;
-  const registryBackendURL = `https://registry.terraform.io/v1/providers/${repository}`;
-
   logger.debug({ lookupName }, 'terraform-provider.getDependencies()');
-  const cacheNamespace = 'terraform-providers';
-  const cacheMinutes = 30;
-  const cachedResult = await globalCache.get<ReleaseResult>(
-    cacheNamespace,
-    lookupName
-  );
-  // istanbul ignore if
-  if (cachedResult) {
-    return cachedResult;
-  }
-  let dep = await queryRegistry(lookupName, registryBackendURL, repository);
-  if (dep) {
-    await globalCache.set(cacheNamespace, lookupName, dep, cacheMinutes);
-    return dep;
-  }
-  dep = await queryReleaseBackend(lookupName, releasesBackendURL, repository);
-  if (dep) {
-    await globalCache.set(cacheNamespace, lookupName, dep, cacheMinutes);
+  let dep: ReleaseResult = null;
+  if (registryUrl.includes('registry.terraform.io')) {
+    dep = await queryRegistry(lookupName, registryUrl, repository);
+  } else if (registryUrl.includes('releases.hashicorp.com')) {
+    dep = await queryReleaseBackend(lookupName, registryUrl, repository);
   }
   return dep;
 }

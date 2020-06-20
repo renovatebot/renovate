@@ -1,7 +1,7 @@
 import fs from 'fs';
 import { getPkgReleases } from '..';
 import * as httpMock from '../../../test/httpMock';
-import { id as datasource } from '.';
+import { id as datasource, defaultRegistryUrls } from '.';
 
 const consulData: any = fs.readFileSync(
   'lib/datasource/terraform-provider/__fixtures__/azurerm-provider.json'
@@ -10,8 +10,8 @@ const hashicorpReleases: any = fs.readFileSync(
   'lib/datasource/terraform-provider/__fixtures__/releaseBackendIndex.json'
 );
 
-const primaryUrl = 'https://registry.terraform.io/';
-const secondaryUrl = 'https://releases.hashicorp.com/';
+const primaryUrl = defaultRegistryUrls[0];
+const secondaryUrl = defaultRegistryUrls[1];
 
 describe('datasource/terraform', () => {
   describe('getReleases', () => {
