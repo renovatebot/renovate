@@ -112,9 +112,9 @@ export async function getReleases({
 
   logger.debug({ lookupName }, 'terraform-provider.getDependencies()');
   let dep: ReleaseResult = null;
-  if (registryUrl.includes('registry.terraform.io')) {
+  if (registryUrl.startsWith('https://registry.terraform.io')) {
     dep = await queryRegistry(lookupName, registryUrl, repository);
-  } else if (registryUrl.includes('releases.hashicorp.com')) {
+  } else if (registryUrl.includes('https://releases.hashicorp.com')) {
     dep = await queryReleaseBackend(lookupName, registryUrl, repository);
   }
   return dep;
