@@ -1,5 +1,7 @@
 import nock from 'nock';
 import { getName } from '../../../test/util';
+import { DATASOURCE_FAILURE } from '../../constants/error-messages';
+import * as hostRules from '../host-rules';
 import { Http } from '.';
 
 const baseUrl = 'http://renovate.com';
@@ -10,10 +12,27 @@ describe(getName(__filename), () => {
   beforeEach(() => {
     http = new Http('dummy');
     nock.cleanAll();
+    hostRules.clear();
   });
   it('get', async () => {
     nock(baseUrl).get('/test').reply(200);
     expect(await http.get('http://renovate.com/test')).toMatchSnapshot();
+    expect(nock.isDone()).toBe(true);
+  });
+  it('returns 429 error', async () => {
+    nock(baseUrl).get('/test').reply(429);
+    await expect(http.get('http://renovate.com/test')).rejects.toThrow(
+      'Response code 429 (Too Many Requests)'
+    );
+    expect(nock.isDone()).toBe(true);
+  });
+  it('converts 429 error to DatasourceError', async () => {
+    nock(baseUrl).get('/test').reply(429);
+    // TODO: set abortStatusCodes default value
+    hostRules.add({ abortOnError: true, abortStatusCodes: [429] });
+    await expect(http.get('http://renovate.com/test')).rejects.toThrow(
+      DATASOURCE_FAILURE
+    );
     expect(nock.isDone()).toBe(true);
   });
   it('getJson', async () => {

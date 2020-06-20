@@ -1,6 +1,7 @@
 import crypto from 'crypto';
 import URL from 'url';
 import got from 'got';
+import { DatasourceError } from '../../datasource';
 import * as runCache from '../cache/run';
 import { clone } from '../clone';
 import { applyAuthorization } from './auth';
@@ -110,15 +111,26 @@ export class Http<GetOptions = HttpOptions, PostOptions = HttpPostOptions> {
     if (options.method === 'get') {
       runCache.set(cacheKey, promisedRes); // always set if it's a get
     }
-    const res = await promisedRes;
-    const httpRequests = runCache.get('http-requests') || [];
-    httpRequests.push({
-      method: options.method,
-      url,
-      duration: Date.now() - startTime,
-    });
-    runCache.set('http-requests', httpRequests);
-    return cloneResponse<T>(res);
+    // TODO: make this try/catch shared with the earlier cachedRes
+    try {
+      const res = await promisedRes;
+      const httpRequests = runCache.get('http-requests') || [];
+      httpRequests.push({
+        method: options.method,
+        url,
+        duration: Date.now() - startTime,
+      });
+      runCache.set('http-requests', httpRequests);
+      return cloneResponse<T>(res);
+    } catch (err) {
+      if (
+        options.abortOnError &&
+        options.abortStatusCodes?.includes(err.statusCode)
+      ) {
+        throw new DatasourceError(err);
+      }
+      throw err;
+    }
   }
 
   get(url: string, options: HttpOptions = {}): Promise<HttpResponse> {

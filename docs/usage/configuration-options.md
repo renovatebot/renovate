@@ -445,6 +445,52 @@ Example for configuring `docker` auth:
 }
 ```
 
+### abortOnError
+
+Use this field to configure Renovate to abort runs for custom hosts. By default, Renovate will only abort for known public hosts, which has the downside that transient errors for other hosts can cause autoclosing of PRs.
+
+To abort Renovate runs for _any_
+
+```json
+{
+  "hostRules": [
+    {
+      "hostName": "docker.company.com",
+      "abortOnError": true
+    }
+  ]
+}
+```
+
+When this field is enabled, Renovate will abort its run if it encounters either (a) any low-level http error (e.g. `ETIMEDOUT`) or (b) receives a response matching any of the configured `abortStatusCodes` (e.g. `500 Internal Error`);
+
+### abortStatusCodes
+
+This field can be used to override the default status codes that Renovate decides should cause an abort. For example to also abort for 401 and 403 responses then configure the following:
+
+```json
+{
+  "hostRules": [
+    {
+      "abortStatusCodes": [
+        401,
+        403,
+        408,
+        413,
+        429,
+        500,
+        502,
+        503,
+        504,
+        521,
+        522,
+        524
+      ]
+    }
+  ]
+}
+```
+
 ### baseUrl
 
 Use this instead of `domainName` or `hostName` if you need a rule to apply to a specific path on a host. For example, `"baseUrl": "https://api.github.com"` is equivalent to `"hostName": "api.github.com"` but `"baseUrl": "https://api.github.com/google/"` is not.

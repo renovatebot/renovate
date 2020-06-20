@@ -38,17 +38,22 @@ export interface RenovateOptionBase {
   stage?: RenovateConfigStage;
 }
 
-export interface RenovateArrayOption<T extends string | object = object>
-  extends RenovateOptionBase {
+export interface RenovateArrayOption<
+  T extends string | number | object = object
+> extends RenovateOptionBase {
   default?: T[];
   mergeable?: boolean;
   type: 'array';
-  subType?: 'string' | 'object';
+  subType?: 'string' | 'object' | 'number';
 }
 
 export interface RenovateStringArrayOption extends RenovateArrayOption<string> {
   format?: 'regex';
   subType: 'string';
+}
+
+export interface RenovateNumberArrayOption extends RenovateArrayOption<number> {
+  subType: 'number';
 }
 
 export interface RenovateBooleanOption extends RenovateOptionBase {
@@ -79,6 +84,7 @@ export interface RenovateObjectOption extends RenovateOptionBase {
 
 export type RenovateOptions =
   | RenovateStringOption
+  | RenovateNumberArrayOption
   | RenovateStringArrayOption
   | RenovateIntegerOption
   | RenovateBooleanOption
@@ -1610,6 +1616,29 @@ const options: RenovateOptions[] = [
     type: 'boolean',
     stage: 'repository',
     parent: 'hostRules',
+    cli: false,
+    env: false,
+  },
+  {
+    name: 'abortOnError',
+    description:
+      'If enabled, Renovate will abort its run when http request errors occur.',
+    type: 'boolean',
+    stage: 'repository',
+    parent: 'hostRules',
+    default: false,
+    cli: false,
+    env: false,
+  },
+  {
+    name: 'abortStatusCodes',
+    description:
+      'A list of HTTP status codes to trigger a run abort if received.',
+    type: 'array',
+    subType: 'number',
+    stage: 'repository',
+    parent: 'hostRules',
+    default: [408, 413, 429, 500, 502, 503, 504, 521, 522, 524],
     cli: false,
     env: false,
   },
