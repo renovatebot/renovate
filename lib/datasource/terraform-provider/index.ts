@@ -1,3 +1,4 @@
+import URL from 'url';
 import { logger } from '../../logger';
 import { Http } from '../../util/http';
 import { GetReleasesConfig, ReleaseResult } from '../common';
@@ -112,9 +113,10 @@ export async function getReleases({
 
   logger.debug({ lookupName }, 'terraform-provider.getDependencies()');
   let dep: ReleaseResult = null;
-  if (registryUrl.startsWith('https://registry.terraform.io')) {
+  const registryHost = URL.parse(registryUrl).host;
+  if (registryHost === 'registry.terraform.io') {
     dep = await queryRegistry(lookupName, registryUrl, repository);
-  } else if (registryUrl.includes('https://releases.hashicorp.com')) {
+  } else if (registryHost === 'releases.hashicorp.com') {
     dep = await queryReleaseBackend(lookupName, registryUrl, repository);
   }
   return dep;
