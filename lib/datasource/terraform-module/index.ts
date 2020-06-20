@@ -1,10 +1,11 @@
-import is from '@sindresorhus/is';
 import { logger } from '../../logger';
 import * as globalCache from '../../util/cache/global';
 import { Http } from '../../util/http';
 import { DatasourceError, GetReleasesConfig, ReleaseResult } from '../common';
 
 export const id = 'terraform-module';
+export const defaultRegistryUrls = ['https://registry.terraform.io'];
+export const registryStrategy = 'first';
 
 const http = new Http(id);
 
@@ -15,17 +16,15 @@ interface RegistryRepository {
 
 function getRegistryRepository(
   lookupName: string,
-  registryUrls: string[]
+  registryUrl: string
 ): RegistryRepository {
   let registry: string;
   const split = lookupName.split('/');
   if (split.length > 3 && split[0].includes('.')) {
     [registry] = split;
     split.shift();
-  } else if (is.nonEmptyArray(registryUrls)) {
-    [registry] = registryUrls;
   } else {
-    registry = 'registry.terraform.io';
+    registry = registryUrl;
   }
   if (!/^https?:\/\//.test(registry)) {
     registry = `https://${registry}`;
@@ -54,11 +53,11 @@ interface TerraformRelease {
  */
 export async function getReleases({
   lookupName,
-  registryUrls,
+  registryUrl,
 }: GetReleasesConfig): Promise<ReleaseResult | null> {
   const { registry, repository } = getRegistryRepository(
     lookupName,
-    registryUrls
+    registryUrl
   );
   logger.debug(
     { registry, terraformRepository: repository },

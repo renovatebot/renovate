@@ -1,6 +1,5 @@
 import { OutgoingHttpHeaders } from 'http';
 import URL from 'url';
-import is from '@sindresorhus/is';
 import AWS from 'aws-sdk';
 import hasha from 'hasha';
 import parseLinkHeader from 'parse-link-header';
@@ -16,6 +15,8 @@ import { DatasourceError, GetReleasesConfig, ReleaseResult } from '../common';
 // TODO: replace www-authenticate with https://www.npmjs.com/package/auth-header ?
 
 export const id = 'docker';
+export const defaultRegistryUrls = ['https://index.docker.io'];
+export const registryStrategy = 'first';
 
 export const defaultConfig = {
   managerBranchPrefix: 'docker-',
@@ -57,10 +58,10 @@ export interface RegistryRepository {
 
 export function getRegistryRepository(
   lookupName: string,
-  registryUrls: string[]
+  registryUrl: string
 ): RegistryRepository {
-  if (is.nonEmptyArray(registryUrls)) {
-    const dockerRegistry = registryUrls[0]
+  if (registryUrl !== defaultRegistryUrls[0]) {
+    const dockerRegistry = registryUrl
       .replace('https://', '')
       .replace(/\/?$/, '/');
     if (lookupName.startsWith(dockerRegistry)) {
@@ -77,10 +78,10 @@ export function getRegistryRepository(
     split.shift();
   }
   let repository = split.join('/');
-  if (!registry && is.nonEmptyArray(registryUrls)) {
-    [registry] = registryUrls;
+  if (!registry) {
+    registry = registryUrl;
   }
-  if (!registry || registry === 'docker.io') {
+  if (registry === 'docker.io') {
     registry = 'index.docker.io';
   }
   if (!/^https?:\/\//.exec(registry)) {
@@ -327,12 +328,12 @@ async function getManifestResponse(
  *  - Return the digest as a string
  */
 export async function getDigest(
-  { registryUrls, lookupName }: GetReleasesConfig,
+  { registryUrl, lookupName }: GetReleasesConfig,
   newValue?: string
 ): Promise<string | null> {
   const { registry, repository } = getRegistryRepository(
     lookupName,
-    registryUrls
+    registryUrl
   );
   logger.debug(`getDigest(${registry}, ${repository}, ${newValue})`);
   const newTag = newValue || 'latest';
@@ -608,11 +609,11 @@ async function getLabels(
  */
 export async function getReleases({
   lookupName,
-  registryUrls,
+  registryUrl,
 }: GetReleasesConfig): Promise<ReleaseResult | null> {
   const { registry, repository } = getRegistryRepository(
     lookupName,
-    registryUrls
+    registryUrl
   );
   const tags = await getTags(registry, repository);
   if (!tags) {

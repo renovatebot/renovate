@@ -8,7 +8,7 @@ describe('datasource/gitlab-tags', () => {
     httpMock.setup();
   });
   describe('getReleases', () => {
-    it('returns tags', async () => {
+    it('returns tags from custom registry', async () => {
       const body = [
         {
           name: 'v1.0.0',
@@ -26,7 +26,7 @@ describe('datasource/gitlab-tags', () => {
       ];
       httpMock
         .scope('https://gitlab.company.com')
-        .get('/api/v4/api/v4/projects/some%2Fdep2/repository/tags?per_page=100')
+        .get('/api/v4/projects/some%2Fdep2/repository/tags?per_page=100')
         .reply(200, body);
       const res = await getPkgReleases({
         datasource,

@@ -4,7 +4,7 @@ import Git from 'simple-git/promise';
 import { join } from 'upath';
 import { envMock, mockExecAll } from '../../../test/execUtil';
 import { mocked } from '../../../test/util';
-import * as _datasource from '../../datasource/docker';
+import * as _datasource from '../../datasource';
 import { platform as _platform } from '../../platform';
 import { setExecConfig } from '../../util/exec';
 import { BinarySource } from '../../util/exec/common';
@@ -15,7 +15,7 @@ jest.mock('fs-extra');
 jest.mock('child_process');
 jest.mock('../../util/exec/env');
 jest.mock('../../platform');
-jest.mock('../../datasource/docker');
+jest.mock('../../datasource');
 
 const fs: jest.Mocked<typeof _fs> = _fs as any;
 const exec: jest.Mock<typeof _exec> = _exec as any;
@@ -36,7 +36,7 @@ describe('.updateArtifacts()', () => {
     env.getChildProcessEnv.mockReturnValue(envMock.basic);
     await setExecConfig(config);
 
-    datasource.getReleases.mockResolvedValue({
+    datasource.getPkgReleases.mockResolvedValue({
       releases: [
         { version: '1.2.0' },
         { version: '1.2.1' },
@@ -220,7 +220,7 @@ describe('.updateArtifacts()', () => {
     });
 
     fs.readFile.mockResolvedValueOnce('COCOAPODS: 1.2.4' as any);
-    datasource.getReleases.mockResolvedValueOnce({
+    datasource.getPkgReleases.mockResolvedValueOnce({
       releases: [],
     });
 

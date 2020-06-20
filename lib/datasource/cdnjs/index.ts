@@ -7,13 +7,13 @@ export const id = 'cdnjs';
 
 const http = new Http(id);
 
-export interface CdnjsAsset {
+interface CdnjsAsset {
   version: string;
   files: string[];
   sri?: Record<string, string>;
 }
 
-export interface CdnjsResponse {
+interface CdnjsResponse {
   homepage?: string;
   repository?: {
     type: 'git' | unknown;
@@ -30,6 +30,7 @@ async function downloadLibrary(library: string): CachePromise<CdnjsResponse> {
 export async function getReleases({
   lookupName,
 }: GetReleasesConfig): Promise<ReleaseResult | null> {
+  // Each library contains multiple assets, so we cache at the library level instead of per-asset
   const library = lookupName.split('/')[0];
   try {
     const { assets, homepage, repository } = await cacheAble({
@@ -56,7 +57,7 @@ export async function getReleases({
     return result;
   } catch (err) {
     if (err.statusCode === 404) {
-      logger.debug({ library, err }, 'Package lookup error');
+      logger.debug({ library }, 'cdnjs library not found');
       return null;
     }
     // Throw a DatasourceError for all other types of errors

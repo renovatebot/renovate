@@ -1,6 +1,6 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
-exports[`datasource/gitlab-tags getReleases returns tags 1`] = `
+exports[`datasource/gitlab-tags getReleases returns tags from custom registry 1`] = `
 Object {
   "releases": Array [
     Object {
@@ -21,7 +21,7 @@ Object {
 }
 `;
 
-exports[`datasource/gitlab-tags getReleases returns tags 2`] = `
+exports[`datasource/gitlab-tags getReleases returns tags from custom registry 2`] = `
 Array [
   Object {
     "headers": Object {
@@ -31,7 +31,7 @@ Array [
       "user-agent": "https://github.com/renovatebot/renovate",
     },
     "method": "GET",
-    "url": "https://gitlab.company.com/api/v4/api/v4/projects/some%2Fdep2/repository/tags?per_page=100",
+    "url": "https://gitlab.company.com/api/v4/projects/some%2Fdep2/repository/tags?per_page=100",
   },
 ]
 `;
