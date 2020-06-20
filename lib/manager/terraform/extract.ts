@@ -60,7 +60,7 @@ export function extractPackageFile(content: string): PackageFile | null {
         );
 
         if (tfDepType === TerraformDependencyTypes.unknown) {
-          /* istanbul ignore next */ logger.trace(
+          /* istanbul ignore next */ logger.warn(
             `Could not identify TerraformDependencyType ${terraformDependency.groups.type} on line ${lineNumber}.`
           );
         } else if (tfDepType === TerraformDependencyTypes.required_providers) {
