@@ -449,7 +449,7 @@ Example for configuring `docker` auth:
 
 Use this field to configure Renovate to abort runs for custom hosts. By default, Renovate will only abort for known public hosts, which has the downside that transient errors for other hosts can cause autoclosing of PRs.
 
-To abort Renovate runs for _any_ failure:
+To abort Renovate runs for http failures from _any_ host:
 
 ```json
 {
@@ -461,7 +461,7 @@ To abort Renovate runs for _any_ failure:
 }
 ```
 
-To abort Renovate runs for docker datasource failure:
+To abort Renovate runs for any `docker` datasource failures:
 
 ```json
 {
@@ -474,7 +474,7 @@ To abort Renovate runs for docker datasource failure:
 }
 ```
 
-To abort Renovate for errors for a specific docker host:
+To abort Renovate for errors for a specific `docker` host:
 
 ```json
 {
