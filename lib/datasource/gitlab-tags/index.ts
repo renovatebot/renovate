@@ -1,4 +1,4 @@
-import is from '@sindresorhus/is';
+import URL from 'url';
 import { logger } from '../../logger';
 import * as globalCache from '../../util/cache/global';
 import { GitlabHttp } from '../../util/http/gitlab';
@@ -7,6 +7,8 @@ import { GetReleasesConfig, ReleaseResult } from '../common';
 const gitlabApi = new GitlabHttp();
 
 export const id = 'gitlab-tags';
+export const defaultRegistryUrls = ['https://gitlab.com'];
+export const registryStrategy = 'first';
 
 const cacheNamespace = 'datasource-gitlab';
 function getCacheKey(depHost: string, repo: string): string {
@@ -22,13 +24,9 @@ type GitlabTag = {
 };
 
 export async function getReleases({
-  registryUrls,
+  registryUrl: depHost,
   lookupName: repo,
 }: GetReleasesConfig): Promise<ReleaseResult | null> {
-  // Use registryUrls if present, otherwise default to publid gitlab.com
-  const depHost = is.nonEmptyArray(registryUrls)
-    ? registryUrls[0].replace(/\/$/, '')
-    : 'https://gitlab.com';
   let gitlabTags: GitlabTag[];
   const cachedResult = await globalCache.get<ReleaseResult>(
     cacheNamespace,
@@ -43,7 +41,10 @@ export async function getReleases({
 
   try {
     // tag
-    const url = `${depHost}/api/v4/projects/${urlEncodedRepo}/repository/tags?per_page=100`;
+    const url = URL.resolve(
+      depHost,
+      `/api/v4/projects/${urlEncodedRepo}/repository/tags?per_page=100`
+    );
 
     gitlabTags = (
       await gitlabApi.getJson<GitlabTag[]>(url, {
@@ -61,7 +62,7 @@ export async function getReleases({
   }
 
   const dependency: ReleaseResult = {
-    sourceUrl: `${depHost}/${repo}`,
+    sourceUrl: URL.resolve(depHost, repo),
     releases: null,
   };
   dependency.releases = gitlabTags.map(({ name, commit }) => ({

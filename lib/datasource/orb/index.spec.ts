@@ -1,5 +1,6 @@
+import { getPkgReleases } from '..';
 import * as httpMock from '../../../test/httpMock';
-import * as datasource from '.';
+import { id as datasource } from '.';
 
 const orbData = {
   data: {
@@ -38,8 +39,9 @@ describe('datasource/orb', () => {
     it('returns null for empty result', async () => {
       httpMock.scope(baseUrl).post('/graphql-unstable').reply(200, {});
       expect(
-        await datasource.getReleases({
-          lookupName: 'hyper-expanse/library-release-workflows',
+        await getPkgReleases({
+          datasource,
+          depName: 'hyper-expanse/library-release-workflows',
         })
       ).toBeNull();
       expect(httpMock.getTrace()).toMatchSnapshot();
@@ -50,8 +52,9 @@ describe('datasource/orb', () => {
         .post('/graphql-unstable')
         .reply(200, { data: {} });
       expect(
-        await datasource.getReleases({
-          lookupName: 'hyper-expanse/library-release-wonkflows',
+        await getPkgReleases({
+          datasource,
+          depName: 'hyper-expanse/library-release-wonkflows',
         })
       ).toBeNull();
       expect(httpMock.getTrace()).toMatchSnapshot();
@@ -59,8 +62,9 @@ describe('datasource/orb', () => {
     it('returns null for 404', async () => {
       httpMock.scope(baseUrl).post('/graphql-unstable').reply(404);
       expect(
-        await datasource.getReleases({
-          lookupName: 'hyper-expanse/library-release-workflows',
+        await getPkgReleases({
+          datasource,
+          depName: 'hyper-expanse/library-release-workflows',
         })
       ).toBeNull();
       expect(httpMock.getTrace()).toMatchSnapshot();
@@ -68,16 +72,18 @@ describe('datasource/orb', () => {
     it('returns null for unknown error', async () => {
       httpMock.scope(baseUrl).post('/graphql-unstable').replyWithError('');
       expect(
-        await datasource.getReleases({
-          lookupName: 'hyper-expanse/library-release-workflows',
+        await getPkgReleases({
+          datasource,
+          depName: 'hyper-expanse/library-release-workflows',
         })
       ).toBeNull();
       expect(httpMock.getTrace()).toMatchSnapshot();
     });
     it('processes real data', async () => {
       httpMock.scope(baseUrl).post('/graphql-unstable').reply(200, orbData);
-      const res = await datasource.getReleases({
-        lookupName: 'hyper-expanse/library-release-workflows',
+      const res = await getPkgReleases({
+        datasource,
+        depName: 'hyper-expanse/library-release-workflows',
       });
       expect(res).toMatchSnapshot();
       expect(res).not.toBeNull();
@@ -86,8 +92,9 @@ describe('datasource/orb', () => {
     it('processes homeUrl', async () => {
       orbData.data.orb.homeUrl = 'https://google.com';
       httpMock.scope(baseUrl).post('/graphql-unstable').reply(200, orbData);
-      const res = await datasource.getReleases({
-        lookupName: 'hyper-expanse/library-release-workflows',
+      const res = await getPkgReleases({
+        datasource,
+        depName: 'hyper-expanse/library-release-workflows',
       });
       expect(res).toMatchSnapshot();
       expect(res.homepage).toEqual('https://google.com');

@@ -3,7 +3,7 @@ import _fs from 'fs-extra';
 import { join } from 'upath';
 import { envMock, mockExecAll } from '../../../test/execUtil';
 import { mocked } from '../../../test/util';
-import * as _datasource from '../../datasource/docker';
+import * as _datasource from '../../datasource';
 import { setExecConfig } from '../../util/exec';
 import { BinarySource } from '../../util/exec/common';
 import * as docker from '../../util/exec/docker';
@@ -13,7 +13,7 @@ import { updateArtifacts } from './artifacts';
 jest.mock('fs-extra');
 jest.mock('child_process');
 jest.mock('../../util/exec/env');
-jest.mock('../../datasource/docker');
+jest.mock('../../datasource');
 
 const fs: jest.Mocked<typeof _fs> = _fs as any;
 const exec: jest.Mock<typeof _exec> = _exec as any;
@@ -109,7 +109,7 @@ describe('.updateArtifacts()', () => {
     fs.readFile.mockResolvedValueOnce('[metadata]\n' as any);
     const execSnapshots = mockExecAll(exec);
     fs.readFile.mockReturnValueOnce('New poetry.lock' as any);
-    datasource.getReleases.mockResolvedValueOnce({
+    datasource.getPkgReleases.mockResolvedValueOnce({
       releases: [{ version: '2.7.5' }, { version: '3.4.2' }],
     });
     const updatedDeps = ['dep1'];
@@ -138,7 +138,7 @@ describe('.updateArtifacts()', () => {
     );
     const execSnapshots = mockExecAll(exec);
     fs.readFile.mockReturnValueOnce('New poetry.lock' as any);
-    datasource.getReleases.mockResolvedValueOnce({
+    datasource.getPkgReleases.mockResolvedValueOnce({
       releases: [{ version: '2.7.5' }, { version: '3.3.2' }],
     });
     const updatedDeps = ['dep1'];

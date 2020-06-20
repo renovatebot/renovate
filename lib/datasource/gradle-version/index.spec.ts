@@ -1,18 +1,22 @@
 import fs from 'fs';
+import { GetPkgReleasesConfig, getPkgReleases } from '..';
 import * as httpMock from '../../../test/httpMock';
-import * as gradleVersion from '.';
+import { id as versioning } from '../../versioning/gradle';
+import { id as datasource } from '.';
 
 const allResponse: any = fs.readFileSync(
   'lib/datasource/gradle-version/__fixtures__/all.json'
 );
 
-let config: any = {};
+let config: GetPkgReleasesConfig;
 
 describe('datasource/gradle-version', () => {
   describe('getReleases', () => {
     beforeEach(() => {
       config = {
-        lookupName: 'abc',
+        datasource,
+        versioning,
+        depName: 'abc',
       };
       jest.clearAllMocks();
       httpMock.setup();
@@ -27,7 +31,7 @@ describe('datasource/gradle-version', () => {
         .scope('https://services.gradle.org/')
         .get('/versions/all')
         .reply(200, JSON.parse(allResponse));
-      const res = await gradleVersion.getReleases(config);
+      const res = await getPkgReleases(config);
       expect(res).toMatchSnapshot();
       expect(res).not.toBeNull();
       expect(httpMock.getTrace()).toMatchSnapshot();
@@ -44,7 +48,7 @@ describe('datasource/gradle-version', () => {
         .get('/')
         .reply(200, JSON.parse(allResponse));
 
-      const res = await gradleVersion.getReleases({
+      const res = await getPkgReleases({
         ...config,
         registryUrls: ['https://foo.bar', 'http://baz.qux'],
       });

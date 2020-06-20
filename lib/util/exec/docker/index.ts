@@ -1,5 +1,5 @@
 import { SYSTEM_INSUFFICIENT_MEMORY } from '../../../constants/error-messages';
-import { getReleases } from '../../../datasource/docker';
+import { getPkgReleases } from '../../../datasource';
 import { logger } from '../../../logger';
 import * as versioning from '../../../versioning';
 import {
@@ -68,7 +68,7 @@ function prepareCommands(commands: Opt<string>[]): string[] {
 }
 
 async function getDockerTag(
-  lookupName: string,
+  depName: string,
   constraint: string,
   scheme: string
 ): Promise<string> {
@@ -81,9 +81,9 @@ async function getDockerTag(
 
   logger.debug(
     { constraint },
-    `Found ${scheme} version constraint - checking for a compatible ${lookupName} image to use`
+    `Found ${scheme} version constraint - checking for a compatible ${depName} image to use`
   );
-  const imageReleases = await getReleases({ lookupName });
+  const imageReleases = await getPkgReleases({ datasource: 'docker', depName });
   if (imageReleases && imageReleases.releases) {
     let versions = imageReleases.releases.map((release) => release.version);
     versions = versions.filter(
@@ -99,7 +99,7 @@ async function getDockerTag(
       return version;
     }
   } /* istanbul ignore next */ else {
-    logger.error(`No ${lookupName} releases found`);
+    logger.error(`No ${depName} releases found`);
     return 'latest';
   }
   logger.warn(
