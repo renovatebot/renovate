@@ -6,7 +6,6 @@ import {
   MANAGER_NO_PACKAGE_FILES,
   PLATFORM_AUTHENTICATION_ERROR,
   PLATFORM_BAD_CREDENTIALS,
-  PLATFORM_FAILURE,
   PLATFORM_INTEGRATION_UNAUTHORIZED,
   PLATFORM_RATE_LIMIT_EXCEEDED,
   REPOSITORY_ACCESS_FORBIDDEN,
@@ -59,7 +58,6 @@ describe('workers/repository/error', () => {
       MANAGER_LOCKFILE_ERROR,
       SYSTEM_INSUFFICIENT_DISK_SPACE,
       SYSTEM_INSUFFICIENT_MEMORY,
-      PLATFORM_FAILURE,
       REPOSITORY_NO_VULNERABILITY,
       REPOSITORY_CANNOT_FORK,
       PLATFORM_INTEGRATION_UNAUTHORIZED,
@@ -84,14 +82,14 @@ describe('workers/repository/error', () => {
         "fatal: unable to access 'https://**redacted**@gitlab.com/learnox/learnox.git/': The requested URL returned error: 500\n"
       );
       const res = await handleError(config, gitError);
-      expect(res).toEqual(PLATFORM_FAILURE);
+      expect(res).toEqual(EXTERNAL_HOST_ERROR);
     });
     it('rewrites git remote error', async () => {
       const gitError = new Error(
         'fatal: remote error: access denied or repository not exported: /b/nw/bd/27/47/159945428/108610112.git\n'
       );
       const res = await handleError(config, gitError);
-      expect(res).toEqual(PLATFORM_FAILURE);
+      expect(res).toEqual(EXTERNAL_HOST_ERROR);
     });
     it('handles unknown error', async () => {
       const res = await handleError(config, new Error('abcdefg'));

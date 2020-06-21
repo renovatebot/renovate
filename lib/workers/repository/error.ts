@@ -2,11 +2,11 @@ import { RenovateConfig } from '../../config';
 
 import {
   CONFIG_VALIDATION,
+  EXTERNAL_HOST_ERROR,
   MANAGER_LOCKFILE_ERROR,
   MANAGER_NO_PACKAGE_FILES,
   PLATFORM_AUTHENTICATION_ERROR,
   PLATFORM_BAD_CREDENTIALS,
-  PLATFORM_FAILURE,
   PLATFORM_INTEGRATION_UNAUTHORIZED,
   PLATFORM_RATE_LIMIT_EXCEEDED,
   REPOSITORY_ACCESS_FORBIDDEN,
@@ -115,11 +115,6 @@ export default async function handleError(
     delete config.branchList; // eslint-disable-line no-param-reassign
     return err.message;
   }
-  if (err.message === PLATFORM_FAILURE) {
-    logger.info('Platform error - skipping');
-    delete config.branchList; // eslint-disable-line no-param-reassign
-    return err.message;
-  }
   if (
     err.message.includes('No space left on device') ||
     err.message === SYSTEM_INSUFFICIENT_DISK_SPACE
@@ -168,7 +163,7 @@ export default async function handleError(
     logger.warn({ err }, 'Git error - aborting');
     delete config.branchList; // eslint-disable-line no-param-reassign
     // rewrite this error
-    return PLATFORM_FAILURE;
+    return EXTERNAL_HOST_ERROR;
   }
   if (
     err.message.includes('The remote end hung up unexpectedly') ||
@@ -177,7 +172,7 @@ export default async function handleError(
     logger.warn({ err }, 'Git error - aborting');
     delete config.branchList; // eslint-disable-line no-param-reassign
     // rewrite this error
-    return PLATFORM_FAILURE;
+    return EXTERNAL_HOST_ERROR;
   }
   // Swallow this error so that other repositories can be processed
   logger.error({ err }, `Repository has unknown error`);
