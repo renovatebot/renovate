@@ -1,7 +1,7 @@
 import fs from 'fs';
 import { getPkgReleases } from '..';
 import * as httpMock from '../../../test/httpMock';
-import { DATASOURCE_FAILURE } from '../../constants/error-messages';
+import { EXTERNAL_HOST_ERROR } from '../../constants/error-messages';
 import { id as datasource } from '.';
 
 let res1 = fs.readFileSync(
@@ -36,14 +36,14 @@ describe('datasource/cdnjs', () => {
       httpMock.scope(baseUrl).get(pathFor('foo/bar')).reply(200, null);
       await expect(
         getPkgReleases({ datasource, depName: 'foo/bar' })
-      ).rejects.toThrow(DATASOURCE_FAILURE);
+      ).rejects.toThrow(EXTERNAL_HOST_ERROR);
       expect(httpMock.getTrace()).toMatchSnapshot();
     });
     it('throws for error', async () => {
       httpMock.scope(baseUrl).get(pathFor('foo/bar')).replyWithError('error');
       await expect(
         getPkgReleases({ datasource, depName: 'foo/bar' })
-      ).rejects.toThrow(DATASOURCE_FAILURE);
+      ).rejects.toThrow(EXTERNAL_HOST_ERROR);
       expect(httpMock.getTrace()).toMatchSnapshot();
     });
     it('returns null for 404', async () => {
@@ -70,28 +70,28 @@ describe('datasource/cdnjs', () => {
       httpMock.scope(baseUrl).get(pathFor('foo/bar')).reply(401);
       await expect(
         getPkgReleases({ datasource, depName: 'foo/bar' })
-      ).rejects.toThrow(DATASOURCE_FAILURE);
+      ).rejects.toThrow(EXTERNAL_HOST_ERROR);
       expect(httpMock.getTrace()).toMatchSnapshot();
     });
     it('throws for 429', async () => {
       httpMock.scope(baseUrl).get(pathFor('foo/bar')).reply(429);
       await expect(
         getPkgReleases({ datasource, depName: 'foo/bar' })
-      ).rejects.toThrow(DATASOURCE_FAILURE);
+      ).rejects.toThrow(EXTERNAL_HOST_ERROR);
       expect(httpMock.getTrace()).toMatchSnapshot();
     });
     it('throws for 5xx', async () => {
       httpMock.scope(baseUrl).get(pathFor('foo/bar')).reply(502);
       await expect(
         getPkgReleases({ datasource, depName: 'foo/bar' })
-      ).rejects.toThrow(DATASOURCE_FAILURE);
+      ).rejects.toThrow(EXTERNAL_HOST_ERROR);
       expect(httpMock.getTrace()).toMatchSnapshot();
     });
     it('returns null for unknown error', async () => {
       httpMock.scope(baseUrl).get(pathFor('foo/bar')).replyWithError('error');
       await expect(
         getPkgReleases({ datasource, depName: 'foo/bar' })
-      ).rejects.toThrow(DATASOURCE_FAILURE);
+      ).rejects.toThrow(EXTERNAL_HOST_ERROR);
       expect(httpMock.getTrace()).toMatchSnapshot();
     });
     it('processes real data', async () => {

@@ -764,7 +764,7 @@ Array [
 ]
 `;
 
-exports[`datasource/crate getReleases throws for 5xx 1`] = `[Error: registry-failure]`;
+exports[`datasource/crate getReleases throws for 5xx 1`] = `[Error: external-host-error]`;
 
 exports[`datasource/crate getReleases throws for 5xx 2`] = `
 Array [

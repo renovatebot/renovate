@@ -1,7 +1,7 @@
 import { RenovateConfig, getConfig } from '../../../test/util';
 import {
   CONFIG_VALIDATION,
-  DATASOURCE_FAILURE,
+  EXTERNAL_HOST_ERROR,
   MANAGER_LOCKFILE_ERROR,
   MANAGER_NO_PACKAGE_FILES,
   PLATFORM_AUTHENTICATION_ERROR,
@@ -27,7 +27,7 @@ import {
   SYSTEM_INSUFFICIENT_MEMORY,
   UNKNOWN_ERROR,
 } from '../../constants/error-messages';
-import { DatasourceError } from '../../datasource/common';
+import { ExternalHostError } from '../../types/error';
 import handleError from './error';
 
 jest.mock('./error-config');
@@ -48,7 +48,6 @@ describe('workers/repository/error', () => {
       REPOSITORY_FORKED,
       MANAGER_NO_PACKAGE_FILES,
       CONFIG_VALIDATION,
-      DATASOURCE_FAILURE,
       REPOSITORY_ARCHIVED,
       REPOSITORY_MIRRORED,
       REPOSITORY_RENAMED,
@@ -73,9 +72,12 @@ describe('workers/repository/error', () => {
         expect(res).toEqual(err);
       });
     });
-    it(`handles DatasourceError`, async () => {
-      const res = await handleError(config, new DatasourceError(new Error()));
-      expect(res).toEqual(DATASOURCE_FAILURE);
+    it(`handles ExternalHostError`, async () => {
+      const res = await handleError(
+        config,
+        new ExternalHostError('some-hostType', new Error())
+      );
+      expect(res).toEqual(EXTERNAL_HOST_ERROR);
     });
     it('rewrites git 5xx error', async () => {
       const gitError = new Error(

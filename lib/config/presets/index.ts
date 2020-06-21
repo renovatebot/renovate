@@ -1,7 +1,7 @@
 import is from '@sindresorhus/is';
 import {
   CONFIG_VALIDATION,
-  DATASOURCE_FAILURE,
+  EXTERNAL_HOST_ERROR,
   PLATFORM_FAILURE,
 } from '../../constants/error-messages';
 import { logger } from '../../logger';
@@ -209,7 +209,7 @@ export async function resolveConfigPresets(
           // istanbul ignore if
           if (
             err.message === PLATFORM_FAILURE ||
-            err.message === DATASOURCE_FAILURE
+            err.message === EXTERNAL_HOST_ERROR
           ) {
             throw err;
           }

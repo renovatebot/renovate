@@ -35,7 +35,7 @@ export const MANAGER_LOCKFILE_ERROR = 'lockfile-error';
 export const MANAGER_NO_PACKAGE_FILES = 'no-package-files';
 
 // Datasource error
-export const DATASOURCE_FAILURE = 'registry-failure';
+export const EXTERNAL_HOST_ERROR = 'external-host-error';
 
 // Worker Error
 export const WORKER_FILE_UPDATE_FAILED = 'update-failure';

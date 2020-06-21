@@ -2,7 +2,6 @@ import { RenovateConfig } from '../../config';
 
 import {
   CONFIG_VALIDATION,
-  DATASOURCE_FAILURE,
   MANAGER_LOCKFILE_ERROR,
   MANAGER_NO_PACKAGE_FILES,
   PLATFORM_AUTHENTICATION_ERROR,
@@ -28,8 +27,8 @@ import {
   SYSTEM_INSUFFICIENT_MEMORY,
   UNKNOWN_ERROR,
 } from '../../constants/error-messages';
-import { DatasourceError } from '../../datasource/common';
 import { logger } from '../../logger';
+import { ExternalHostError } from '../../types/error';
 import { raiseConfigWarningIssue } from './error-config';
 
 export default async function handleError(
@@ -107,17 +106,12 @@ export default async function handleError(
     await raiseConfigWarningIssue(config, err);
     return err.message;
   }
-  if (err instanceof DatasourceError) {
+  if (err instanceof ExternalHostError) {
     logger.warn(
-      { datasource: err.datasource, lookupName: err.lookupName, err: err.err },
-      'Datasource failure'
+      { hostType: err.hostType, lookupName: err.lookupName, err: err.err },
+      'Host error'
     );
-    logger.info('Registry error - skipping');
-    delete config.branchList; // eslint-disable-line no-param-reassign
-    return err.message;
-  }
-  if (err.message === DATASOURCE_FAILURE) {
-    logger.info({ err }, 'Registry error - skipping');
+    logger.info('External host error causing abort - skipping');
     delete config.branchList; // eslint-disable-line no-param-reassign
     return err.message;
   }

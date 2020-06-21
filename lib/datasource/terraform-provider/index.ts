@@ -1,7 +1,8 @@
 import { logger } from '../../logger';
+import { ExternalHostError } from '../../types/error';
 import * as globalCache from '../../util/cache/global';
 import { Http } from '../../util/http';
-import { DatasourceError, GetReleasesConfig, ReleaseResult } from '../common';
+import { GetReleasesConfig, ReleaseResult } from '../common';
 
 export const id = 'terraform-provider';
 
@@ -71,7 +72,7 @@ export async function getReleases({
     const failureCodes = ['EAI_AGAIN'];
     // istanbul ignore if
     if (failureCodes.includes(err.code)) {
-      throw new DatasourceError(err);
+      throw new ExternalHostError(id, err);
     }
     logger.warn(
       { err, lookupName },

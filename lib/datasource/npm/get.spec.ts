@@ -1,6 +1,6 @@
 import * as httpMock from '../../../test/httpMock';
 import { getName } from '../../../test/util';
-import { DatasourceError } from '../common';
+import { ExternalHostError } from '../../types/error';
 import { getDependency, resetMemCache } from './get';
 import { setNpmrc } from './npmrc';
 
@@ -150,7 +150,7 @@ describe(getName(__filename), () => {
       .get('/npm-parse-error')
       .reply(200, 'not-a-json');
     await expect(getDependency('npm-parse-error', 0)).rejects.toThrow(
-      DatasourceError
+      ExternalHostError
     );
 
     httpMock
