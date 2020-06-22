@@ -195,7 +195,7 @@ describe('datasource/maven', () => {
           depName: 'org:artifact',
           registryUrls: ['https://repo.maven.apache.org/maven2/'],
         })
-      ).rejects.toThrow(Error(EXTERNAL_HOST_ERROR));
+      ).rejects.toThrow(EXTERNAL_HOST_ERROR);
     });
 
     it('should return all versions of a specific library if a repository fails because invalid protocol', async () => {

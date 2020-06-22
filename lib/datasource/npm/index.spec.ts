@@ -204,13 +204,13 @@ describe(getName(__filename), () => {
     nock('https://registry.npmjs.org').get('/foobar').reply(503);
     await expect(
       getPkgReleases({ datasource, depName: 'foobar' })
-    ).rejects.toThrow(Error(EXTERNAL_HOST_ERROR));
+    ).rejects.toThrow(EXTERNAL_HOST_ERROR);
   });
   it('should throw error for 408', async () => {
     nock('https://registry.npmjs.org').get('/foobar').reply(408);
     await expect(
       getPkgReleases({ datasource, depName: 'foobar' })
-    ).rejects.toThrow(Error(EXTERNAL_HOST_ERROR));
+    ).rejects.toThrow(EXTERNAL_HOST_ERROR);
   });
   it('should throw error for others', async () => {
     nock('https://registry.npmjs.org').get('/foobar').reply(451);

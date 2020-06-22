@@ -331,13 +331,13 @@ describe('api/docker', () => {
       httpMock.scope(baseUrl).get('/').replyWithError({ statusCode: 429 });
       await expect(
         getDigest({ datasource: 'docker', depName: 'some-dep' }, 'latest')
-      ).rejects.toThrow(Error(EXTERNAL_HOST_ERROR));
+      ).rejects.toThrow(EXTERNAL_HOST_ERROR);
     });
     it('should throw error for 5xx', async () => {
       httpMock.scope(baseUrl).get('/').replyWithError({ statusCode: 504 });
       await expect(
         getDigest({ datasource: 'docker', depName: 'some-dep' }, 'latest')
-      ).rejects.toThrow(Error(EXTERNAL_HOST_ERROR));
+      ).rejects.toThrow(EXTERNAL_HOST_ERROR);
     });
   });
   describe('getReleases', () => {
