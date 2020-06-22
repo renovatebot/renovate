@@ -19,10 +19,10 @@ const isPluginDep = (str: string): boolean =>
 const isStringLiteral = (str: string): boolean => /^"[^"]*"$/.test(str);
 
 const isScalaVersion = (str: string): boolean =>
-  /^\s*scalaVersion\s*:=\s*"[^"]*"\s*$/.test(str);
+  /^\s*scalaVersion\s*:=\s*"[^"]*"[\s,]*$/.test(str);
 
 const getScalaVersion = (str: string): string =>
-  str.replace(/^\s*scalaVersion\s*:=\s*"/, '').replace(/"\s*$/, '');
+  str.replace(/^\s*scalaVersion\s*:=\s*"/, '').replace(/"[\s,]*$/, '');
 
 /*
   https://www.scala-sbt.org/release/docs/Cross-Build.html#Publishing+conventions
@@ -51,10 +51,10 @@ const normalizeScalaVersion = (str: string): string => {
 };
 
 const isScalaVersionVariable = (str: string): boolean =>
-  /^\s*scalaVersion\s*:=\s*[_a-zA-Z][_a-zA-Z0-9]*\s*$/.test(str);
+  /^\s*scalaVersion\s*:=\s*[_a-zA-Z][_a-zA-Z0-9]*[\s,]*$/.test(str);
 
 const getScalaVersionVariable = (str: string): string =>
-  str.replace(/^\s*scalaVersion\s*:=\s*/, '').replace(/\s*$/, '');
+  str.replace(/^\s*scalaVersion\s*:=\s*/, '').replace(/[\s,]*$/, '');
 
 const isResolver = (str: string): boolean =>
   /^\s*(resolvers\s*\+\+?=\s*(Seq\()?)?"[^"]*"\s*at\s*"[^"]*"[\s,)]*$/.test(
@@ -147,11 +147,12 @@ function parseDepExpr(
   }
 
   const groupId = resolveToken(rawGroupId);
+  const depName = `${groupId}:${resolveToken(rawArtifactId)}`;
   const artifactId =
     groupOp === '%%' && scalaVersion
       ? `${resolveToken(rawArtifactId)}_${scalaVersion}`
       : resolveToken(rawArtifactId);
-  const depName = `${groupId}:${artifactId}`;
+  const lookupName = `${groupId}:${artifactId}`;
   const currentValue = resolveToken(rawVersion);
 
   if (!depType && rawScope) {
@@ -160,6 +161,7 @@ function parseDepExpr(
 
   const result: PackageDependency = {
     depName,
+    lookupName,
     currentValue,
   };
 

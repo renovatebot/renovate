@@ -18,7 +18,6 @@ export async function initRepo(input: RenovateConfig): Promise<RenovateConfig> {
     warnings: [],
     branchList: [],
   };
-  config.global = config.global || {};
   config = await initApis(config);
   config.semanticCommits = await detectSemanticCommits(config);
   config.baseBranchSha = await platform.setBaseBranch(config.baseBranch);

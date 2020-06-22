@@ -1,13 +1,14 @@
 import * as httpMock from '../../../../test/httpMock';
 import { getName, mocked } from '../../../../test/util';
 import * as _hostRules from '../../../util/host-rules';
+import { PRESET_NOT_FOUND } from '../util';
 import * as github from '.';
 
 jest.mock('../../../util/host-rules');
 
 const hostRules = mocked(_hostRules);
 
-const githubApiHost = 'https://api.github.com/';
+const githubApiHost = github.Endpoint;
 const basePath = '/repos/some/repo/contents';
 
 describe(getName(__filename), () => {
@@ -30,7 +31,7 @@ describe(getName(__filename), () => {
       const res = await github.fetchJSONFile(
         'some/repo',
         'some-filename.json',
-        'https://api.github.com/'
+        githubApiHost
       );
       expect(res).toMatchSnapshot();
       expect(httpMock.getTrace()).toMatchSnapshot();
@@ -145,7 +146,7 @@ describe(getName(__filename), () => {
       expect(httpMock.getTrace()).toMatchSnapshot();
     });
 
-    it('should return undefined', async () => {
+    it('should throws not-found', async () => {
       httpMock
         .scope(githubApiHost)
         .get(`${basePath}/somefile.json`)
@@ -155,11 +156,12 @@ describe(getName(__filename), () => {
 
       try {
         global.appMode = true;
-        const content = await github.getPreset({
-          packageName: 'some/repo',
-          presetName: 'somefile/somename/somesubname',
-        });
-        expect(content).toBeUndefined();
+        await expect(
+          github.getPreset({
+            packageName: 'some/repo',
+            presetName: 'somefile/somename/somesubname',
+          })
+        ).rejects.toThrow(PRESET_NOT_FOUND);
       } finally {
         delete global.appMode;
       }

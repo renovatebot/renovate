@@ -10,6 +10,7 @@ import { ensureMasterIssue } from './master-issue';
 import { ensureOnboardingPr } from './onboarding/pr';
 import { extractDependencies, updateRepo } from './process';
 import { ProcessResult, processResult } from './result';
+import { printRequestStats } from './stats';
 
 let renovateVersion = 'unknown';
 try {
@@ -55,6 +56,7 @@ export async function renovateRepository(
   }
   const splits = getSplits();
   logger.debug(splits, 'Repository timing splits (milliseconds)');
+  printRequestStats();
   logger.info({ durationMs: splits.total }, 'Repository finished');
   return repoResult;
 }

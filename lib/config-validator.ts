@@ -1,6 +1,7 @@
 #!/usr/bin/env node
 // istanbul ignore file
 import { readFileSync } from 'fs-extra';
+import JSON5 from 'json5';
 import { configFileNames } from './config/app-strings';
 import { RenovateConfig } from './config/common';
 import { getConfig } from './config/file';
@@ -19,13 +20,13 @@ async function validate(
   const res = await validateConfig(massageConfig(config), isPreset);
   if (res.errors.length) {
     console.log(
-      `${desc} contains errors:\n\n${JSON.stringify(res.errors, null, 2)}`
+      `${desc} contains errors:\n\n${JSON5.stringify(res.errors, null, 2)}`
     );
     returnVal = 1;
   }
   if (res.warnings.length) {
     console.log(
-      `${desc} contains warnings:\n\n${JSON.stringify(res.warnings, null, 2)}`
+      `${desc} contains warnings:\n\n${JSON5.stringify(res.warnings, null, 2)}`
     );
     returnVal = 1;
   }
@@ -44,10 +45,10 @@ type PackageJson = {
       const rawContent = readFileSync(file, 'utf8');
       console.log(`Validating ${file}`);
       try {
-        const jsonContent = JSON.parse(rawContent) as PackageJson;
+        const jsonContent = JSON5.parse(rawContent) as PackageJson;
         await validate(file, jsonContent);
       } catch (err) {
-        console.log(`${file} is not valid Renovate config`);
+        console.log(`${file} is not valid Renovate config`, err);
         returnVal = 1;
       }
     } catch (err) {
@@ -55,7 +56,7 @@ type PackageJson = {
     }
   }
   try {
-    const pkgJson = JSON.parse(
+    const pkgJson = JSON5.parse(
       readFileSync('package.json', 'utf8')
     ) as PackageJson;
     if (pkgJson.renovate) {

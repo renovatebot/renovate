@@ -1,6 +1,7 @@
+import { getPkgReleases } from '..';
 import * as httpMock from '../../../test/httpMock';
 import * as _hostRules from '../../util/host-rules';
-import * as github from '.';
+import { id as datasource } from '.';
 
 jest.mock('../../util/host-rules');
 const hostRules: any = _hostRules;
@@ -32,11 +33,12 @@ describe('datasource/github-releases', () => {
           { tag_name: 'v1.1.0', published_at: '2020-03-09T10:00:00Z' },
         ]);
 
-      const res = await github.getReleases({
-        lookupName: 'some/dep',
+      const res = await getPkgReleases({
+        datasource,
+        depName: 'some/dep',
       });
       expect(res).toMatchSnapshot();
-      expect(res.releases).toHaveLength(4);
+      expect(res.releases).toHaveLength(2);
       expect(
         res.releases.find((release) => release.version === 'v1.1.0')
       ).toBeDefined();

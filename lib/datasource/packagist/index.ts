@@ -1,5 +1,4 @@
 import URL from 'url';
-import is from '@sindresorhus/is';
 
 import pAll from 'p-all';
 import { logger } from '../../logger';
@@ -10,6 +9,8 @@ import { Http, HttpOptions } from '../../util/http';
 import { DatasourceError, GetReleasesConfig, ReleaseResult } from '../common';
 
 export const id = 'packagist';
+export const defaultRegistryUrls = ['https://packagist.org'];
+export const registryStrategy = 'hunt';
 
 const http = new Http(id);
 
@@ -325,19 +326,8 @@ async function packageLookup(
 
 export async function getReleases({
   lookupName,
-  registryUrls,
+  registryUrl,
 }: GetReleasesConfig): Promise<ReleaseResult> {
   logger.trace(`getReleases(${lookupName})`);
-
-  let res: ReleaseResult;
-  const registries = is.nonEmptyArray(registryUrls)
-    ? registryUrls
-    : ['https://packagist.org'];
-  for (const regUrl of registries) {
-    res = await packageLookup(regUrl, lookupName);
-    if (res) {
-      break;
-    }
-  }
-  return res;
+  return packageLookup(registryUrl, lookupName);
 }

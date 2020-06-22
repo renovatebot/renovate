@@ -173,6 +173,7 @@ export async function processBranch(
                   branchPr.number
               );
             } else {
+              // Remove any "PR has been edited" comment only when rebasing
               await platform.ensureCommentRemoval({
                 number: branchPr.number,
                 topic,
@@ -183,6 +184,7 @@ export async function processBranch(
               `:construction_worker: This PR has received other commits, so Renovate will stop updating it to avoid conflicts or other problems.`
             );
             content += ` If you wish to abandon your changes and have Renovate start over you may click the "rebase" checkbox in the PR body/description.`;
+            content += `\n\nIf you think this comment is in error and the branch is *not* modified, try deleting this comment. If it comes back again the next time Renovate runs, please submit an issue or seek config help.`;
             if (!config.suppressNotifications.includes('prEditNotification')) {
               if (config.dryRun) {
                 logger.info(
@@ -198,11 +200,6 @@ export async function processBranch(
             }
             return 'pr-edited';
           }
-        } else {
-          await platform.ensureCommentRemoval({
-            number: branchPr.number,
-            topic,
-          });
         }
       }
     }
@@ -613,11 +610,6 @@ export async function processBranch(
               topic,
               content,
             });
-            // TODO: remoe this soon once they're all cleared out
-            await platform.ensureCommentRemoval({
-              number: pr.number,
-              topic: ':warning: Lock file problem',
-            });
           }
         }
         const context = `renovate/artifacts`;
@@ -651,6 +643,7 @@ export async function processBranch(
               'DRY-RUN: Would ensure comment removal in PR #' + pr.number
             );
           } else {
+            // Remove artifacts error comment only if this run has successfully updated artifacts
             await platform.ensureCommentRemoval({ number: pr.number, topic });
           }
         }

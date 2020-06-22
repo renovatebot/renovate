@@ -1,5 +1,7 @@
 import * as httpMock from '../../../../test/httpMock';
 import { getName } from '../../../../test/util';
+import { PLATFORM_FAILURE } from '../../../constants/error-messages';
+import { PRESET_DEP_NOT_FOUND } from '../util';
 import * as gitlab from '.';
 
 const gitlabApiHost = 'https://gitlab.com';
@@ -16,38 +18,30 @@ describe(getName(__filename), () => {
   });
 
   describe('getPreset()', () => {
-    it('throws if no content', async () => {
-      httpMock.scope(gitlabApiHost).get(`${basePath}/branches`).reply(500, {});
-      await expect(
-        gitlab.getPreset({
-          packageName: 'some/repo',
-          presetName: 'default',
-        })
-      ).rejects.toThrow();
-      expect(httpMock.getTrace()).toMatchSnapshot();
-    });
-
-    it('throws if not default', async () => {
+    it('throws platform-failure', async () => {
+      httpMock.scope(gitlabApiHost).get(`${basePath}/branches`).reply(500);
       await expect(
         gitlab.getPreset({
           packageName: 'some/repo',
           presetName: 'non-default',
         })
-      ).rejects.toThrow();
+      ).rejects.toThrow(PLATFORM_FAILURE);
       expect(httpMock.getTrace()).toMatchSnapshot();
     });
 
-    it('throws if fails to parse', async () => {
+    it('throws if missing', async () => {
       httpMock
         .scope(gitlabApiHost)
         .get(`${basePath}/branches`)
+        .twice()
         .reply(200, [])
-        .get(`${basePath}/files/renovate.json?ref=master`)
-        .reply(200, { content: Buffer.from('not json').toString('base64') });
-
+        .get(`${basePath}/files/default.json/raw?ref=master`)
+        .reply(404, null)
+        .get(`${basePath}/files/renovate.json/raw?ref=master`)
+        .reply(404, null);
       await expect(
         gitlab.getPreset({ packageName: 'some/repo' })
-      ).rejects.toThrow();
+      ).rejects.toThrow(PRESET_DEP_NOT_FOUND);
       expect(httpMock.getTrace()).toMatchSnapshot();
     });
 
@@ -64,14 +58,8 @@ describe(getName(__filename), () => {
             default: true,
           },
         ])
-        .get(`${basePath}/files/renovate.json?ref=master`)
-        .reply(
-          200,
-          {
-            content: Buffer.from('{"foo":"bar"}').toString('base64'),
-          },
-          {}
-        );
+        .get(`${basePath}/files/default.json/raw?ref=master`)
+        .reply(200, { foo: 'bar' }, {});
 
       const content = await gitlab.getPreset({ packageName: 'some/repo' });
       expect(content).toEqual({ foo: 'bar' });
@@ -90,10 +78,10 @@ describe(getName(__filename), () => {
             default: true,
           },
         ])
-        .get(`${basePath}/files/renovate.json?ref=devel`)
-        .reply(200, { content: Buffer.from('{}').toString('base64') });
+        .get(`${basePath}/files/some.json/raw?ref=devel`)
+        .reply(200, { preset: { file: {} } });
       expect(
-        await gitlab.getPresetFromEndpoint('some/repo', 'default')
+        await gitlab.getPresetFromEndpoint('some/repo', 'some/preset/file')
       ).toEqual({});
       expect(httpMock.getTrace()).toMatchSnapshot();
     });
@@ -108,15 +96,15 @@ describe(getName(__filename), () => {
             default: true,
           },
         ])
-        .get(`${basePath}/files/renovate.json?ref=devel`)
+        .get(`${basePath}/files/some.json/raw?ref=devel`)
         .reply(404);
       await expect(
         gitlab.getPresetFromEndpoint(
           'some/repo',
-          'default',
+          'some/preset/file',
           'https://gitlab.example.org/api/v4'
         )
-      ).rejects.toThrow();
+      ).rejects.toThrow(PRESET_DEP_NOT_FOUND);
       expect(httpMock.getTrace()).toMatchSnapshot();
     });
   });

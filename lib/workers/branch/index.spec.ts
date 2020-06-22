@@ -376,7 +376,6 @@ describe('workers/branch', () => {
       commit.commitFilesToBranch.mockResolvedValueOnce(null);
       await branchWorker.processBranch(config);
       expect(platform.ensureComment).toHaveBeenCalledTimes(1);
-      // expect(platform.ensureCommentRemoval.mock.calls).toHaveLength(0);
       expect(prWorker.ensurePr).toHaveBeenCalledTimes(1);
       expect(prWorker.checkAutoMerge).toHaveBeenCalledTimes(0);
     });
@@ -399,7 +398,6 @@ describe('workers/branch', () => {
       commit.commitFilesToBranch.mockResolvedValueOnce(null);
       await branchWorker.processBranch(config);
       expect(platform.ensureComment).toHaveBeenCalledTimes(1);
-      // expect(platform.ensureCommentRemoval.mock.calls).toHaveLength(0);
       expect(prWorker.ensurePr).toHaveBeenCalledTimes(1);
       expect(prWorker.checkAutoMerge).toHaveBeenCalledTimes(0);
     });
@@ -422,7 +420,6 @@ describe('workers/branch', () => {
       commit.commitFilesToBranch.mockResolvedValueOnce(null);
       await branchWorker.processBranch(config);
       expect(platform.ensureComment).toHaveBeenCalledTimes(1);
-      // expect(platform.ensureCommentRemoval.mock.calls).toHaveLength(0);
       expect(prWorker.ensurePr).toHaveBeenCalledTimes(1);
       expect(prWorker.checkAutoMerge).toHaveBeenCalledTimes(0);
     });
@@ -465,7 +462,6 @@ describe('workers/branch', () => {
       commit.commitFilesToBranch.mockResolvedValueOnce(null);
       await branchWorker.processBranch(config);
       expect(platform.ensureComment).toHaveBeenCalledTimes(1);
-      // expect(platform.ensureCommentRemoval.mock.calls).toHaveLength(0);
       expect(prWorker.ensurePr).toHaveBeenCalledTimes(1);
       expect(prWorker.checkAutoMerge).toHaveBeenCalledTimes(0);
     });

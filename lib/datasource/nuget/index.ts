@@ -1,6 +1,5 @@
 import urlApi from 'url';
 import { logger } from '../../logger';
-import { clone } from '../../util/clone';
 import { GetReleasesConfig, ReleaseResult } from '../common';
 import * as v2 from './v2';
 import * as v3 from './v3';
@@ -8,6 +7,7 @@ import * as v3 from './v3';
 export { id } from './common';
 
 export const defaultRegistryUrls = [v3.getDefaultFeed()];
+export const registryStrategy = 'merge';
 
 function parseRegistryUrl(
   registryUrl: string
@@ -32,43 +32,18 @@ function parseRegistryUrl(
 
 export async function getReleases({
   lookupName,
-  registryUrls,
+  registryUrl,
 }: GetReleasesConfig): Promise<ReleaseResult> {
   logger.trace(`nuget.getReleases(${lookupName})`);
-  let dep: ReleaseResult = null;
-  for (const feed of registryUrls) {
-    const { feedUrl, protocolVersion } = parseRegistryUrl(feed);
-    let res: ReleaseResult = null;
-    if (protocolVersion === 2) {
-      res = await v2.getReleases(feedUrl, lookupName);
-    } else if (protocolVersion === 3) {
-      const queryUrl = await v3.getQueryUrl(feedUrl);
-      if (queryUrl !== null) {
-        res = await v3.getReleases(feedUrl, queryUrl, lookupName);
-      }
-    }
-    if (res !== null) {
-      res = clone(res);
-      if (dep !== null) {
-        for (const resRelease of res.releases) {
-          if (
-            !dep.releases.find(
-              (depRelease) => depRelease.version === resRelease.version
-            )
-          ) {
-            dep.releases.push(resRelease);
-          }
-        }
-      } else {
-        dep = res;
-      }
+  const { feedUrl, protocolVersion } = parseRegistryUrl(registryUrl);
+  if (protocolVersion === 2) {
+    return v2.getReleases(feedUrl, lookupName);
+  }
+  if (protocolVersion === 3) {
+    const queryUrl = await v3.getQueryUrl(feedUrl);
+    if (queryUrl !== null) {
+      return v3.getReleases(feedUrl, queryUrl, lookupName);
     }
   }
-  if (dep === null) {
-    logger.debug(
-      { lookupName },
-      `Dependency lookup failure: not found in all feeds`
-    );
-  }
-  return dep;
+  return null;
 }

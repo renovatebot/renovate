@@ -53,7 +53,10 @@ async function setupMocks() {
   const exec: jest.Mock<typeof _exec> = require('child_process').exec;
   const util: jest.Mocked<typeof _util> = require('../../util');
 
-  utilfs.readLocalFile.mockResolvedValue('some content');
+  utilfs.readLocalFile.mockResolvedValue(`
+    dependency 'foo:foo:1.2.3'
+    dependency "bar:bar:3.4.5"
+  `);
   env.getChildProcessEnv.mockReturnValue(envMock.basic);
   await util.setUtilConfig(baseConfig);
 
