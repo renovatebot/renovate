@@ -1506,7 +1506,7 @@ async function getComments(issueNo: number): Promise<Comment[]> {
   } catch (err) /* istanbul ignore next */ {
     if (err.statusCode === 404) {
       logger.debug('404 respose when retrieving comments');
-      throw new ExternalHostError(err, 'github');
+      throw new ExternalHostError(err, PLATFORM_TYPE_GITHUB);
     }
     throw err;
   }
