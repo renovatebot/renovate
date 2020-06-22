@@ -54,7 +54,7 @@ function checkForPlatformFailure(err: Error): void {
   ];
   for (const errorStr of platformFailureStrings) {
     if (err.message.includes(errorStr)) {
-      throw new ExternalHostError('git', err);
+      throw new ExternalHostError(err, 'git');
     }
   }
 }
@@ -176,7 +176,7 @@ export class Storage {
         if (err.message?.includes('write error: No space left on device')) {
           throw new Error(SYSTEM_INSUFFICIENT_DISK_SPACE);
         }
-        throw new ExternalHostError('git', err);
+        throw new ExternalHostError(err, 'git');
       }
       const durationMs = Math.round(Date.now() - cloneStart);
       logger.debug({ durationMs }, 'git clone completed');

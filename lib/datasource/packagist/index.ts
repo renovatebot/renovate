@@ -314,10 +314,10 @@ async function packageLookup(
     }
     if (err.host === 'packagist.org') {
       if (err.code === 'ECONNRESET' || err.code === 'ETIMEDOUT') {
-        throw new ExternalHostError(id, err);
+        throw new ExternalHostError(err);
       }
       if (err.statusCode && err.statusCode >= 500 && err.statusCode < 600) {
-        throw new ExternalHostError(id, err);
+        throw new ExternalHostError(err);
       }
     }
     logger.warn({ err, name }, 'packagist registry failure: Unknown error');

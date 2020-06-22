@@ -152,7 +152,7 @@ export async function generateLockFile(
         err.stderr.includes('getaddrinfo ENOTFOUND registry.yarnpkg.com') ||
         err.stderr.includes('getaddrinfo ENOTFOUND registry.npmjs.org')
       ) {
-        throw new ExternalHostError(npmId, err);
+        throw new ExternalHostError(err, npmId);
       }
     }
     return { error: true, stderr: err.stderr };

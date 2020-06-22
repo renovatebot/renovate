@@ -52,6 +52,6 @@ export async function getReleases(
     await globalCache.set(cacheNamespace, 'all', res, 15);
     return res;
   } catch (err) {
-    throw new ExternalHostError(id, err);
+    throw new ExternalHostError(err);
   }
 }

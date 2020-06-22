@@ -73,7 +73,7 @@ describe('workers/repository/error', () => {
     it(`handles ExternalHostError`, async () => {
       const res = await handleError(
         config,
-        new ExternalHostError('some-hostType', new Error())
+        new ExternalHostError(new Error(), 'some-host-type')
       );
       expect(res).toEqual(EXTERNAL_HOST_ERROR);
     });

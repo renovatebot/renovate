@@ -281,7 +281,7 @@ export async function getDependency(
       if (err.name === 'ParseError' && err.body) {
         err.body = 'err.body deleted by Renovate';
       }
-      throw new ExternalHostError(id, err);
+      throw new ExternalHostError(err);
     }
     return null;
   }

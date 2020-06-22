@@ -70,7 +70,7 @@ export async function getReleases({
       err.statusCode === 429 ||
       (err.statusCode >= 500 && err.statusCode < 600)
     ) {
-      throw new ExternalHostError(id, err);
+      throw new ExternalHostError(err);
     }
 
     if (err.statusCode === 401) {

@@ -133,7 +133,7 @@ describe('datasource/index', () => {
   });
   it('hunts registries and aborts on ExternalHostError', async () => {
     packagistDatasource.getReleases.mockImplementationOnce(() => {
-      throw new ExternalHostError('packagist', new Error());
+      throw new ExternalHostError(new Error());
     });
     await expect(
       datasource.getPkgReleases({
@@ -175,7 +175,7 @@ describe('datasource/index', () => {
   });
   it('merges registries and aborts on ExternalHostError', async () => {
     mavenDatasource.getReleases.mockImplementationOnce(() => {
-      throw new ExternalHostError('maven', new Error());
+      throw new ExternalHostError(new Error());
     });
     await expect(
       datasource.getPkgReleases({

@@ -433,7 +433,7 @@ export async function getAdditionalFiles(
             const err = new Error(
               'lock file failed for the dependency being updated - skipping branch creation'
             );
-            throw new ExternalHostError(npmId, err);
+            throw new ExternalHostError(err, npmId);
           }
         }
       }
@@ -494,10 +494,10 @@ export async function getAdditionalFiles(
               'lock file failed for the dependency being updated - skipping branch creation'
             );
             throw new ExternalHostError(
-              npmId,
               new Error(
                 'lock file failed for the dependency being updated - skipping branch creation'
-              )
+              ),
+              npmId
             );
           }
           /* eslint-enable no-useless-escape */
@@ -597,10 +597,10 @@ export async function getAdditionalFiles(
               'lock file failed for the dependency being updated - skipping branch creation'
             );
             throw new ExternalHostError(
-              npmId,
               Error(
                 'lock file failed for the dependency being updated - skipping branch creation'
-              )
+              ),
+              npmId
             );
           }
         }
@@ -676,10 +676,10 @@ export async function getAdditionalFiles(
             'lock file failed for the dependency being updated - skipping branch creation'
           );
           throw new ExternalHostError(
-            npmId,
             Error(
               'lock file failed for the dependency being updated - skipping branch creation'
-            )
+            ),
+            npmId
           );
         }
         /* eslint-enable no-useless-escape */
@@ -693,10 +693,10 @@ export async function getAdditionalFiles(
             'lock file failed for the dependency being updated - skipping branch creation'
           );
           throw new ExternalHostError(
-            npmId,
             Error(
               'lock file failed for the dependency being updated - skipping branch creation'
-            )
+            ),
+            npmId
           );
         }
       }

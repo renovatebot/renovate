@@ -45,7 +45,7 @@ function handleError(lookupName: string, err: Error): void {
     (err.statusCode >= 500 && err.statusCode < 600)
   ) {
     logger.warn({ lookupName, err }, `CocoaPods registry failure`);
-    throw new ExternalHostError(id, err);
+    throw new ExternalHostError(err);
   }
 
   if (err.statusCode === 401) {

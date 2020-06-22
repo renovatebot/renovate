@@ -1,6 +1,5 @@
 import URL from 'url';
 import { logger } from '../../logger';
-import { ExternalHostError } from '../../types/error';
 import { Http } from '../../util/http';
 import { GetReleasesConfig, ReleaseResult } from '../common';
 

@@ -63,15 +63,15 @@ export function handleGotError(
       err.code === 'EAI_AGAIN')
   ) {
     logger.debug({ err }, 'GitHub failure: RequestError');
-    throw new ExternalHostError(hostType, err);
+    throw new ExternalHostError(err, hostType);
   }
   if (err.name === 'ParseError') {
     logger.debug({ err }, '');
-    throw new ExternalHostError(hostType, err);
+    throw new ExternalHostError(err, hostType);
   }
   if (err.statusCode >= 500 && err.statusCode < 600) {
     logger.debug({ err }, 'GitHub failure: 5xx');
-    throw new ExternalHostError(hostType, err);
+    throw new ExternalHostError(err, hostType);
   }
   if (
     err.statusCode === 403 &&
@@ -108,7 +108,7 @@ export function handleGotError(
       'GitHub failure: Bad credentials'
     );
     if (rateLimit === '60') {
-      throw new ExternalHostError(hostType, err);
+      throw new ExternalHostError(err, hostType);
     }
     throw new Error(PLATFORM_BAD_CREDENTIALS);
   }
@@ -125,7 +125,7 @@ export function handleGotError(
       throw new Error(REPOSITORY_CHANGED);
     }
     logger.debug({ err }, '422 Error thrown from GitHub');
-    throw new ExternalHostError(hostType, err);
+    throw new ExternalHostError(err, hostType);
   }
   if (err.statusCode === 404) {
     logger.debug({ url: err.url }, 'GitHub 404');

@@ -221,14 +221,14 @@ async function getAuthHeaders(
     }
     // prettier-ignore
     if (err.name === 'RequestError' && registry.endsWith('docker.io')) { // lgtm [js/incomplete-url-substring-sanitization]
-      throw new ExternalHostError(id, err);
+      throw new ExternalHostError(err);
     }
     // prettier-ignore
     if (err.statusCode === 429 && registry.endsWith('docker.io')) { // lgtm [js/incomplete-url-substring-sanitization]
-      throw new ExternalHostError(id, err);
+      throw new ExternalHostError(err);
     }
     if (err.statusCode >= 500 && err.statusCode < 600) {
-      throw new ExternalHostError(id, err);
+      throw new ExternalHostError(err);
     }
     logger.warn(
       { registry, dockerRepository: repository, err },
@@ -293,10 +293,10 @@ async function getManifestResponse(
     }
     // prettier-ignore
     if (err.statusCode === 429 && registry.endsWith('docker.io')) { // lgtm [js/incomplete-url-substring-sanitization]
-      throw new ExternalHostError(id, err);
+      throw new ExternalHostError(err);
     }
     if (err.statusCode >= 500 && err.statusCode < 600) {
-      throw new ExternalHostError(id, err);
+      throw new ExternalHostError(err);
     }
     if (err.code === 'ETIMEDOUT') {
       logger.debug(
@@ -442,14 +442,14 @@ async function getTags(
         { registry, dockerRepository: repository, err },
         'docker registry failure: too many requests'
       );
-      throw new ExternalHostError(id, err);
+      throw new ExternalHostError(err);
     }
     if (err.statusCode >= 500 && err.statusCode < 600) {
       logger.warn(
         { registry, dockerRepository: repository, err },
         'docker registry failure: internal error'
       );
-      throw new ExternalHostError(id, err);
+      throw new ExternalHostError(err);
     }
     if (err.code === 'ETIMEDOUT') {
       logger.debug(

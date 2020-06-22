@@ -77,7 +77,7 @@ export async function downloadHttpProtocol(
     } else if (isTemporalError(err)) {
       logger.debug({ failedUrl, err }, 'Temporary error');
       if (isMavenCentral(pkgUrl)) {
-        throw new ExternalHostError(id, err);
+        throw new ExternalHostError(err);
       }
     } else if (isConnectionError(err)) {
       // istanbul ignore next

@@ -119,7 +119,6 @@ export async function getReleases({
   const [repoName, pkgName] = lookupName.split('/', 2);
   if (!repoName || !pkgName) {
     throw new ExternalHostError(
-      id,
       new Error(
         'Repology lookup name must contain repository and package separated by slash (<repo>/<pkg>)'
       )
@@ -144,6 +143,6 @@ export async function getReleases({
       { lookupName, err },
       'Repology lookup failed with unexpected error'
     );
-    throw new ExternalHostError(id, err);
+    throw new ExternalHostError(err);
   }
 }

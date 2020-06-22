@@ -965,7 +965,7 @@ export async function getPrList(): Promise<Pr[]> {
       );
     } catch (err) /* istanbul ignore next */ {
       logger.debug({ err }, 'getPrList err');
-      throw new ExternalHostError('gitlab', err);
+      throw new ExternalHostError(err, 'gitlab');
     }
     config.prList = res.body.map((pr) => ({
       number: pr.number,
@@ -1506,7 +1506,7 @@ async function getComments(issueNo: number): Promise<Comment[]> {
   } catch (err) /* istanbul ignore next */ {
     if (err.statusCode === 404) {
       logger.debug('404 respose when retrieving comments');
-      throw new ExternalHostError('github', err);
+      throw new ExternalHostError(err, 'github');
     }
     throw err;
   }

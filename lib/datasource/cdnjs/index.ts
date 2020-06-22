@@ -62,6 +62,6 @@ export async function getReleases({
       return null;
     }
     // Throw an ExternalHostError for all other types of errors
-    throw new ExternalHostError(id, err);
+    throw new ExternalHostError(err);
   }
 }

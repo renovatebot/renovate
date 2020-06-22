@@ -106,7 +106,7 @@ export async function executeGradle(
     ({ stdout, stderr } = await exec(cmd, execOptions));
   } catch (err) /* istanbul ignore next */ {
     if (err.code === TIMEOUT_CODE) {
-      const error = new ExternalHostError(datasourceMaven.id, err);
+      const error = new ExternalHostError(err, datasourceMaven.id);
       error.hostType = 'gradle';
       throw error;
     }

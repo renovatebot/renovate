@@ -51,7 +51,7 @@ export async function getReleases({
       }));
   } catch (err) /* istanbul ignore next */ {
     if (err.host === 'services.gradle.org') {
-      throw new ExternalHostError(id, err);
+      throw new ExternalHostError(err);
     }
     logger.debug({ err }, 'gradle-version err');
     return null;

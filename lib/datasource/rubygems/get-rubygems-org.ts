@@ -40,7 +40,6 @@ async function updateRubyGemsVersions(): Promise<void> {
       contentLength = 0;
       packageReleases = Object.create(null); // Because we might need a "constructor" key
       throw new ExternalHostError(
-        id,
         new Error('Rubygems fetch error - need to reset cache')
       );
     }

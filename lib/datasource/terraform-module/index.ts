@@ -114,7 +114,7 @@ export async function getReleases({
     const failureCodes = ['EAI_AGAIN'];
     // istanbul ignore if
     if (failureCodes.includes(err.code)) {
-      throw new ExternalHostError(id, err);
+      throw new ExternalHostError(err);
     }
     logger.warn(
       { err, lookupName },
