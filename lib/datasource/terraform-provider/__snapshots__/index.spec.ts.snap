@@ -1,5 +1,48 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
+exports[`datasource/terraform getReleases processes data with alternative backend 1`] = `
+Object {
+  "name": "hashicorp/google-beta",
+  "releases": Array [
+    Object {
+      "version": "1.19.0",
+    },
+    Object {
+      "version": "1.20.0",
+    },
+    Object {
+      "version": "2.0.0",
+    },
+  ],
+  "versions": Object {},
+}
+`;
+
+exports[`datasource/terraform getReleases processes data with alternative backend 2`] = `
+Array [
+  Object {
+    "headers": Object {
+      "accept": "application/json",
+      "accept-encoding": "gzip, deflate",
+      "host": "registry.terraform.io",
+      "user-agent": "https://github.com/renovatebot/renovate",
+    },
+    "method": "GET",
+    "url": "https://registry.terraform.io/v1/providers/hashicorp/google-beta",
+  },
+  Object {
+    "headers": Object {
+      "accept": "application/json",
+      "accept-encoding": "gzip, deflate",
+      "host": "releases.hashicorp.com",
+      "user-agent": "https://github.com/renovatebot/renovate",
+    },
+    "method": "GET",
+    "url": "https://releases.hashicorp.com/index.json",
+  },
+]
+`;
+
 exports[`datasource/terraform getReleases processes real data 1`] = `
 Object {
   "homepage": "https://registry.terraform.io/providers/hashicorp/azurerm",
@@ -233,6 +276,16 @@ Array [
     "method": "GET",
     "url": "https://registry.terraform.io/v1/providers/hashicorp/azurerm",
   },
+  Object {
+    "headers": Object {
+      "accept": "application/json",
+      "accept-encoding": "gzip, deflate",
+      "host": "releases.hashicorp.com",
+      "user-agent": "https://github.com/renovatebot/renovate",
+    },
+    "method": "GET",
+    "url": "https://releases.hashicorp.com/index.json",
+  },
 ]
 `;
 
@@ -247,6 +300,16 @@ Array [
     },
     "method": "GET",
     "url": "https://registry.terraform.io/v1/providers/hashicorp/azurerm",
+  },
+  Object {
+    "headers": Object {
+      "accept": "application/json",
+      "accept-encoding": "gzip, deflate",
+      "host": "releases.hashicorp.com",
+      "user-agent": "https://github.com/renovatebot/renovate",
+    },
+    "method": "GET",
+    "url": "https://releases.hashicorp.com/index.json",
   },
 ]
 `;
@@ -263,5 +326,17 @@ Array [
     "method": "GET",
     "url": "https://registry.terraform.io/v1/providers/hashicorp/azurerm",
   },
+  Object {
+    "headers": Object {
+      "accept": "application/json",
+      "accept-encoding": "gzip, deflate",
+      "host": "releases.hashicorp.com",
+      "user-agent": "https://github.com/renovatebot/renovate",
+    },
+    "method": "GET",
+    "url": "https://releases.hashicorp.com/index.json",
+  },
 ]
 `;
+
+exports[`datasource/terraform getReleases simulate failing secondary release source 1`] = `null`;

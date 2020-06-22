@@ -1,10 +1,15 @@
+import URL from 'url';
 import { logger } from '../../logger';
 import { ExternalHostError } from '../../types/error';
-import * as globalCache from '../../util/cache/global';
 import { Http } from '../../util/http';
 import { GetReleasesConfig, ReleaseResult } from '../common';
 
 export const id = 'terraform-provider';
+export const defaultRegistryUrls = [
+  'https://registry.terraform.io',
+  'https://releases.hashicorp.com',
+];
+export const registryStrategy = 'hunt';
 
 const http = new Http(id);
 
@@ -16,30 +21,25 @@ interface TerraformProvider {
   versions: string[];
 }
 
-/**
- * terraform-provider.getReleases
- *
- * This function will fetch a provider from the public Terraform registry and return all semver versions.
- */
-export async function getReleases({
-  lookupName,
-}: GetReleasesConfig): Promise<ReleaseResult | null> {
-  const repository = `hashicorp/${lookupName}`;
+interface TerraformProviderReleaseBackend {
+  [key: string]: {
+    name: string;
+    versions: VersionsReleaseBackend;
+  };
+}
 
-  logger.debug({ lookupName }, 'terraform-provider.getDependencies()');
-  const cacheNamespace = 'terraform-providers';
-  const pkgUrl = `https://registry.terraform.io/v1/providers/${repository}`;
-  const cachedResult = await globalCache.get<ReleaseResult>(
-    cacheNamespace,
-    pkgUrl
-  );
-  // istanbul ignore if
-  if (cachedResult) {
-    return cachedResult;
-  }
+interface VersionsReleaseBackend {
+  [key: string]: Record<string, any>;
+}
+
+async function queryRegistry(
+  lookupName: string,
+  registryURL: string,
+  repository: string
+): Promise<ReleaseResult> {
   try {
-    const res = (await http.getJson<TerraformProvider>(pkgUrl)).body;
-    // Simplify response before caching and returning
+    const backendURL = `${registryURL}/v1/providers/${repository}`;
+    const res = (await http.getJson<TerraformProvider>(backendURL)).body;
     const dep: ReleaseResult = {
       name: repository,
       versions: {},
@@ -51,33 +51,74 @@ export async function getReleases({
     dep.releases = res.versions.map((version) => ({
       version,
     }));
-    if (pkgUrl.startsWith('https://registry.terraform.io/')) {
-      dep.homepage = `https://registry.terraform.io/providers/${repository}`;
-    }
+    dep.homepage = `${registryURL}/providers/${repository}`;
     logger.trace({ dep }, 'dep');
-    const cacheMinutes = 30;
-    await globalCache.set(cacheNamespace, pkgUrl, dep, cacheMinutes);
     return dep;
   } catch (err) {
-    if (err.statusCode === 404 || err.code === 'ENOTFOUND') {
-      logger.debug(
-        { lookupName },
-        `Terraform registry lookup failure: not found`
-      );
-      logger.debug({
-        err,
-      });
-      return null;
-    }
-    const failureCodes = ['EAI_AGAIN'];
-    // istanbul ignore if
-    if (failureCodes.includes(err.code)) {
-      throw new ExternalHostError(id, err);
-    }
-    logger.warn(
-      { err, lookupName },
-      'Terraform registry failure: Unknown error'
+    logger.debug(
+      { lookupName },
+      `Terraform registry ("${registryURL}") lookup failure: not found`
     );
+    logger.debug({
+      err,
+    });
     return null;
   }
+}
+
+async function queryReleaseBackend(
+  lookupName: string,
+  registryURL: string,
+  repository: string
+): Promise<ReleaseResult> {
+  const backendLookUpName = `terraform-provider-${lookupName}`;
+  const backendURL = registryURL + `/index.json`;
+  try {
+    const res = (
+      await http.getJson<TerraformProviderReleaseBackend>(backendURL)
+    ).body;
+    const dep: ReleaseResult = {
+      name: repository,
+      versions: {},
+      releases: null,
+    };
+    dep.releases = Object.keys(res[backendLookUpName].versions).map(
+      (version) => ({
+        version,
+      })
+    );
+    logger.trace({ dep }, 'dep');
+    return dep;
+  } catch (err) {
+    logger.debug(
+      { lookupName },
+      `Terraform registry ("${registryURL}") lookup failure: not found`
+    );
+    logger.debug({
+      err,
+    });
+    return null;
+  }
+}
+
+/**
+ * terraform-provider.getReleases
+ *
+ * This function will fetch a provider from the public Terraform registry and return all semver versions.
+ */
+export async function getReleases({
+  lookupName,
+  registryUrl,
+}: GetReleasesConfig): Promise<ReleaseResult | null> {
+  const repository = `hashicorp/${lookupName}`;
+
+  logger.debug({ lookupName }, 'terraform-provider.getDependencies()');
+  let dep: ReleaseResult = null;
+  const registryHost = URL.parse(registryUrl).host;
+  if (registryHost === 'registry.terraform.io') {
+    dep = await queryRegistry(lookupName, registryUrl, repository);
+  } else if (registryHost === 'releases.hashicorp.com') {
+    dep = await queryReleaseBackend(lookupName, registryUrl, repository);
+  }
+  return dep;
 }
