@@ -2,7 +2,7 @@ import fs from 'fs';
 import { getPkgReleases } from '..';
 import * as httpMock from '../../../test/httpMock';
 import { getName } from '../../../test/util';
-import { DATASOURCE_FAILURE } from '../../constants/error-messages';
+import { EXTERNAL_HOST_ERROR } from '../../constants/error-messages';
 import { id as versioning } from '../../versioning/loose';
 import { RepologyPackage, id as datasource } from '.';
 
@@ -127,7 +127,7 @@ describe(getName(__filename), () => {
           versioning,
           depName: 'debian_stable/nginx',
         })
-      ).rejects.toThrow(DATASOURCE_FAILURE);
+      ).rejects.toThrow(EXTERNAL_HOST_ERROR);
       expect(httpMock.getTrace()).toMatchSnapshot();
     });
 
@@ -140,7 +140,7 @@ describe(getName(__filename), () => {
           versioning,
           depName: 'debian_stable/nginx',
         })
-      ).rejects.toThrow(DATASOURCE_FAILURE);
+      ).rejects.toThrow(EXTERNAL_HOST_ERROR);
       expect(httpMock.getTrace()).toMatchSnapshot();
     });
 
@@ -151,7 +151,7 @@ describe(getName(__filename), () => {
           versioning,
           depName: 'invalid-lookup-name',
         })
-      ).rejects.toThrow(DATASOURCE_FAILURE);
+      ).rejects.toThrow(EXTERNAL_HOST_ERROR);
       expect(httpMock.getTrace()).toMatchSnapshot();
     });
 

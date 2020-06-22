@@ -3,7 +3,7 @@ import nock from 'nock';
 import _registryAuthToken from 'registry-auth-token';
 import { getPkgReleases } from '..';
 import { getName } from '../../../test/util';
-import { DATASOURCE_FAILURE } from '../../constants/error-messages';
+import { EXTERNAL_HOST_ERROR } from '../../constants/error-messages';
 import * as hostRules from '../../util/host-rules';
 import { id as datasource, getNpmrc, resetCache, setNpmrc } from '.';
 
@@ -204,13 +204,13 @@ describe(getName(__filename), () => {
     nock('https://registry.npmjs.org').get('/foobar').reply(503);
     await expect(
       getPkgReleases({ datasource, depName: 'foobar' })
-    ).rejects.toThrow(Error(DATASOURCE_FAILURE));
+    ).rejects.toThrow(EXTERNAL_HOST_ERROR);
   });
   it('should throw error for 408', async () => {
     nock('https://registry.npmjs.org').get('/foobar').reply(408);
     await expect(
       getPkgReleases({ datasource, depName: 'foobar' })
-    ).rejects.toThrow(Error(DATASOURCE_FAILURE));
+    ).rejects.toThrow(EXTERNAL_HOST_ERROR);
   });
   it('should throw error for others', async () => {
     nock('https://registry.npmjs.org').get('/foobar').reply(451);

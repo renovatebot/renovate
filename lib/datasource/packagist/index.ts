@@ -2,11 +2,12 @@ import URL from 'url';
 
 import pAll from 'p-all';
 import { logger } from '../../logger';
+import { ExternalHostError } from '../../types/error';
 import * as globalCache from '../../util/cache/global';
 import * as runCache from '../../util/cache/run';
 import * as hostRules from '../../util/host-rules';
 import { Http, HttpOptions } from '../../util/http';
-import { DatasourceError, GetReleasesConfig, ReleaseResult } from '../common';
+import { GetReleasesConfig, ReleaseResult } from '../common';
 
 export const id = 'packagist';
 export const defaultRegistryUrls = ['https://packagist.org'];
@@ -313,10 +314,10 @@ async function packageLookup(
     }
     if (err.host === 'packagist.org') {
       if (err.code === 'ECONNRESET' || err.code === 'ETIMEDOUT') {
-        throw new DatasourceError(err);
+        throw new ExternalHostError(err);
       }
       if (err.statusCode && err.statusCode >= 500 && err.statusCode < 600) {
-        throw new DatasourceError(err);
+        throw new ExternalHostError(err);
       }
     }
     logger.warn({ err, name }, 'packagist registry failure: Unknown error');

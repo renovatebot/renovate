@@ -6,10 +6,11 @@ import parseLinkHeader from 'parse-link-header';
 import wwwAuthenticate from 'www-authenticate';
 import { logger } from '../../logger';
 import { HostRule } from '../../types';
+import { ExternalHostError } from '../../types/error';
 import * as globalCache from '../../util/cache/global';
 import * as hostRules from '../../util/host-rules';
 import { Http, HttpResponse } from '../../util/http';
-import { DatasourceError, GetReleasesConfig, ReleaseResult } from '../common';
+import { GetReleasesConfig, ReleaseResult } from '../common';
 
 // TODO: add got typings when available
 // TODO: replace www-authenticate with https://www.npmjs.com/package/auth-header ?
@@ -220,14 +221,14 @@ async function getAuthHeaders(
     }
     // prettier-ignore
     if (err.name === 'RequestError' && registry.endsWith('docker.io')) { // lgtm [js/incomplete-url-substring-sanitization]
-      throw new DatasourceError(err);
+      throw new ExternalHostError(err);
     }
     // prettier-ignore
     if (err.statusCode === 429 && registry.endsWith('docker.io')) { // lgtm [js/incomplete-url-substring-sanitization]
-      throw new DatasourceError(err);
+      throw new ExternalHostError(err);
     }
     if (err.statusCode >= 500 && err.statusCode < 600) {
-      throw new DatasourceError(err);
+      throw new ExternalHostError(err);
     }
     logger.warn(
       { registry, dockerRepository: repository, err },
@@ -267,7 +268,7 @@ async function getManifestResponse(
     });
     return manifestResponse;
   } catch (err) /* istanbul ignore next */ {
-    if (err instanceof DatasourceError) {
+    if (err instanceof ExternalHostError) {
       throw err;
     }
     if (err.statusCode === 401) {
@@ -292,10 +293,10 @@ async function getManifestResponse(
     }
     // prettier-ignore
     if (err.statusCode === 429 && registry.endsWith('docker.io')) { // lgtm [js/incomplete-url-substring-sanitization]
-      throw new DatasourceError(err);
+      throw new ExternalHostError(err);
     }
     if (err.statusCode >= 500 && err.statusCode < 600) {
-      throw new DatasourceError(err);
+      throw new ExternalHostError(err);
     }
     if (err.code === 'ETIMEDOUT') {
       logger.debug(
@@ -356,7 +357,7 @@ export async function getDigest(
       logger.debug({ digest }, 'Got docker digest');
     }
   } catch (err) /* istanbul ignore next */ {
-    if (err instanceof DatasourceError) {
+    if (err instanceof ExternalHostError) {
       throw err;
     }
     logger.debug(
@@ -413,7 +414,7 @@ async function getTags(
     await globalCache.set(cacheNamespace, cacheKey, tags, cacheMinutes);
     return tags;
   } catch (err) /* istanbul ignore next */ {
-    if (err instanceof DatasourceError) {
+    if (err instanceof ExternalHostError) {
       throw err;
     }
     logger.debug(
@@ -441,14 +442,14 @@ async function getTags(
         { registry, dockerRepository: repository, err },
         'docker registry failure: too many requests'
       );
-      throw new DatasourceError(err);
+      throw new ExternalHostError(err);
     }
     if (err.statusCode >= 500 && err.statusCode < 600) {
       logger.warn(
         { registry, dockerRepository: repository, err },
         'docker registry failure: internal error'
       );
-      throw new DatasourceError(err);
+      throw new ExternalHostError(err);
     }
     if (err.code === 'ETIMEDOUT') {
       logger.debug(
@@ -543,7 +544,7 @@ async function getLabels(
     await globalCache.set(cacheNamespace, cacheKey, labels, cacheMinutes);
     return labels;
   } catch (err) {
-    if (err instanceof DatasourceError) {
+    if (err instanceof ExternalHostError) {
       throw err;
     }
     if (err.statusCode === 400 || err.statusCode === 401) {

@@ -3,9 +3,9 @@ import * as os from 'os';
 import * as fs from 'fs-extra';
 import upath from 'upath';
 import { LANGUAGE_JAVA } from '../../constants/languages';
-import { DatasourceError } from '../../datasource';
 import * as datasourceMaven from '../../datasource/maven';
 import { logger } from '../../logger';
+import { ExternalHostError } from '../../types/error';
 import { ExecOptions, exec } from '../../util/exec';
 import { BinarySource } from '../../util/exec/common';
 import { readLocalFile } from '../../util/fs';
@@ -106,9 +106,7 @@ export async function executeGradle(
     ({ stdout, stderr } = await exec(cmd, execOptions));
   } catch (err) /* istanbul ignore next */ {
     if (err.code === TIMEOUT_CODE) {
-      const error = new DatasourceError(err);
-      error.datasource = 'gradle';
-      throw error;
+      throw new ExternalHostError(err, 'gradle');
     }
     logger.warn({ errMessage: err.message }, 'Gradle extraction failed');
     return;

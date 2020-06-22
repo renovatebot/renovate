@@ -1,7 +1,8 @@
 import { logger } from '../../logger';
+import { ExternalHostError } from '../../types/error';
 import { Http } from '../../util/http';
 import { CachePromise, cacheAble } from '../cache';
-import { DatasourceError, GetReleasesConfig, ReleaseResult } from '../common';
+import { GetReleasesConfig, ReleaseResult } from '../common';
 
 export const id = 'cdnjs';
 
@@ -60,7 +61,7 @@ export async function getReleases({
       logger.debug({ library }, 'cdnjs library not found');
       return null;
     }
-    // Throw a DatasourceError for all other types of errors
-    throw new DatasourceError(err);
+    // Throw an ExternalHostError for all other types of errors
+    throw new ExternalHostError(err);
   }
 }

@@ -7,13 +7,11 @@ import { configFileNames } from '../../../config/app-strings';
 import { decryptConfig } from '../../../config/decrypt';
 import { migrateAndValidate } from '../../../config/migrate-validate';
 import * as presets from '../../../config/presets';
-import {
-  CONFIG_VALIDATION,
-  PLATFORM_FAILURE,
-} from '../../../constants/error-messages';
+import { CONFIG_VALIDATION } from '../../../constants/error-messages';
 import * as npmApi from '../../../datasource/npm';
 import { logger } from '../../../logger';
 import { platform } from '../../../platform';
+import { ExternalHostError } from '../../../types/error';
 import { readLocalFile } from '../../../util/fs';
 import * as hostRules from '../../../util/host-rules';
 import { flattenPackageRules } from './flatten';
@@ -59,7 +57,10 @@ export async function mergeRenovateConfig(
     // istanbul ignore if
     if (renovateConfig === null) {
       logger.warn('Fetching renovate config returns null');
-      throw new Error(PLATFORM_FAILURE);
+      throw new ExternalHostError(
+        Error('Fetching renovate config returns null'),
+        config.platform
+      );
     }
     // istanbul ignore if
     if (!renovateConfig.length) {

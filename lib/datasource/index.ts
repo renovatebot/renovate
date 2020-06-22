@@ -1,13 +1,13 @@
 import is from '@sindresorhus/is';
 import _ from 'lodash';
 import { logger } from '../logger';
+import { ExternalHostError } from '../types/error';
 import * as runCache from '../util/cache/run';
 import { clone } from '../util/clone';
 import * as allVersioning from '../versioning';
 import datasources from './api.generated';
 import {
   Datasource,
-  DatasourceError,
   DigestConfig,
   GetPkgReleasesConfig,
   GetReleasesConfig,
@@ -65,7 +65,7 @@ async function huntRegistries(
         break;
       }
     } catch (err) {
-      if (err instanceof DatasourceError) {
+      if (err instanceof ExternalHostError) {
         throw err;
       }
       // We'll always save the last-thrown error
@@ -100,7 +100,7 @@ async function mergeRegistries(
         combinedRes = res;
       }
     } catch (err) {
-      if (err instanceof DatasourceError) {
+      if (err instanceof ExternalHostError) {
         throw err;
       }
       // We'll always save the last-thrown error
@@ -221,8 +221,8 @@ export async function getPkgReleases(
       })
     );
   } catch (e) /* istanbul ignore next */ {
-    if (e instanceof DatasourceError) {
-      e.datasource = config.datasource;
+    if (e instanceof ExternalHostError) {
+      e.hostType = config.datasource;
       e.lookupName = lookupName;
     }
     throw e;

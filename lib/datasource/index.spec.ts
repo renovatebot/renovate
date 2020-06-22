@@ -1,7 +1,7 @@
 import { mocked } from '../../test/util';
-import { DATASOURCE_FAILURE } from '../constants/error-messages';
+import { EXTERNAL_HOST_ERROR } from '../constants/error-messages';
+import { ExternalHostError } from '../types/error';
 import { loadModules } from '../util/modules';
-import { DatasourceError } from './common';
 import * as datasourceDocker from './docker';
 import * as datasourceGithubTags from './github-tags';
 import * as datasourceMaven from './maven';
@@ -131,9 +131,9 @@ describe('datasource/index', () => {
     });
     expect(res).not.toBeNull();
   });
-  it('hunts registries and aborts on DatasourceError', async () => {
+  it('hunts registries and aborts on ExternalHostError', async () => {
     packagistDatasource.getReleases.mockImplementationOnce(() => {
-      throw new DatasourceError(new Error());
+      throw new ExternalHostError(new Error());
     });
     await expect(
       datasource.getPkgReleases({
@@ -141,7 +141,7 @@ describe('datasource/index', () => {
         depName: 'something',
         registryUrls: ['https://reg1.com', 'https://reg2.io'],
       })
-    ).rejects.toThrow(DATASOURCE_FAILURE);
+    ).rejects.toThrow(EXTERNAL_HOST_ERROR);
   });
   it('hunts registries and passes on error', async () => {
     packagistDatasource.getReleases.mockImplementationOnce(() => {
@@ -173,9 +173,9 @@ describe('datasource/index', () => {
     expect(res).toMatchSnapshot();
     expect(res.releases).toHaveLength(2);
   });
-  it('merges registries and aborts on DatasourceError', async () => {
+  it('merges registries and aborts on ExternalHostError', async () => {
     mavenDatasource.getReleases.mockImplementationOnce(() => {
-      throw new DatasourceError(new Error());
+      throw new ExternalHostError(new Error());
     });
     await expect(
       datasource.getPkgReleases({
@@ -183,7 +183,7 @@ describe('datasource/index', () => {
         depName: 'something',
         registryUrls: ['https://reg1.com', 'https://reg2.io'],
       })
-    ).rejects.toThrow(DATASOURCE_FAILURE);
+    ).rejects.toThrow(EXTERNAL_HOST_ERROR);
   });
   it('merges registries and passes on error', async () => {
     mavenDatasource.getReleases.mockImplementationOnce(() => {

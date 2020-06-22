@@ -4,13 +4,13 @@ import fs from 'fs-extra';
 import Git from 'simple-git/promise';
 import {
   CONFIG_VALIDATION,
-  PLATFORM_FAILURE,
   REPOSITORY_CHANGED,
   REPOSITORY_EMPTY,
   REPOSITORY_TEMPORARY_ERROR,
   SYSTEM_INSUFFICIENT_DISK_SPACE,
 } from '../../constants/error-messages';
 import { logger } from '../../logger';
+import { ExternalHostError } from '../../types/error';
 import * as limits from '../../workers/global/limits';
 import { CommitFilesConfig } from '../common';
 import { writePrivateKey } from './private-key';
@@ -54,7 +54,7 @@ function checkForPlatformFailure(err: Error): void {
   ];
   for (const errorStr of platformFailureStrings) {
     if (err.message.includes(errorStr)) {
-      throw new Error(PLATFORM_FAILURE);
+      throw new ExternalHostError(err, 'git');
     }
   }
 }
@@ -176,7 +176,7 @@ export class Storage {
         if (err.message?.includes('write error: No space left on device')) {
           throw new Error(SYSTEM_INSUFFICIENT_DISK_SPACE);
         }
-        throw new Error(PLATFORM_FAILURE);
+        throw new ExternalHostError(err, 'git');
       }
       const durationMs = Math.round(Date.now() - cloneStart);
       logger.debug({ durationMs }, 'git clone completed');

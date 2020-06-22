@@ -1,10 +1,7 @@
 import is from '@sindresorhus/is';
-import {
-  CONFIG_VALIDATION,
-  DATASOURCE_FAILURE,
-  PLATFORM_FAILURE,
-} from '../../constants/error-messages';
+import { CONFIG_VALIDATION } from '../../constants/error-messages';
 import { logger } from '../../logger';
+import { ExternalHostError } from '../../types/error';
 import { regEx } from '../../util/regex';
 import { RenovateConfig } from '../common';
 import * as massage from '../massage';
@@ -207,10 +204,7 @@ export async function resolveConfigPresets(
         } catch (err) {
           logger.debug({ preset, err }, 'Preset fetch error');
           // istanbul ignore if
-          if (
-            err.message === PLATFORM_FAILURE ||
-            err.message === DATASOURCE_FAILURE
-          ) {
+          if (err instanceof ExternalHostError) {
             throw err;
           }
           const error = new Error(CONFIG_VALIDATION);

@@ -1,5 +1,6 @@
 import crypto from 'crypto';
 import { logger } from '../../logger';
+import { ExternalHostError } from '../../types/error';
 import * as globalCache from '../../util/cache/global';
 import { Http } from '../../util/http';
 import { GithubHttp } from '../../util/http/github';
@@ -44,7 +45,7 @@ function handleError(lookupName: string, err: Error): void {
     (err.statusCode >= 500 && err.statusCode < 600)
   ) {
     logger.warn({ lookupName, err }, `CocoaPods registry failure`);
-    throw new Error('registry-failure');
+    throw new ExternalHostError(err);
   }
 
   if (err.statusCode === 401) {

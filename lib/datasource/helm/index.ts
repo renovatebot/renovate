@@ -1,10 +1,11 @@
 import yaml from 'js-yaml';
 
 import { logger } from '../../logger';
+import { ExternalHostError } from '../../types/error';
 import * as globalCache from '../../util/cache/global';
 import { Http } from '../../util/http';
 import { ensureTrailingSlash } from '../../util/url';
-import { DatasourceError, GetReleasesConfig, ReleaseResult } from '../common';
+import { GetReleasesConfig, ReleaseResult } from '../common';
 
 export const id = 'helm';
 
@@ -60,7 +61,7 @@ export async function getRepositoryData(
       err.statusCode === 429 ||
       (err.statusCode >= 500 && err.statusCode < 600)
     ) {
-      throw new DatasourceError(err);
+      throw new ExternalHostError(err);
     }
     // istanbul ignore if
     if (err.name === 'UnsupportedProtocolError') {

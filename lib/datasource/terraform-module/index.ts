@@ -1,7 +1,8 @@
 import { logger } from '../../logger';
+import { ExternalHostError } from '../../types/error';
 import * as globalCache from '../../util/cache/global';
 import { Http } from '../../util/http';
-import { DatasourceError, GetReleasesConfig, ReleaseResult } from '../common';
+import { GetReleasesConfig, ReleaseResult } from '../common';
 
 export const id = 'terraform-module';
 export const defaultRegistryUrls = ['https://registry.terraform.io'];
@@ -113,7 +114,7 @@ export async function getReleases({
     const failureCodes = ['EAI_AGAIN'];
     // istanbul ignore if
     if (failureCodes.includes(err.code)) {
-      throw new DatasourceError(err);
+      throw new ExternalHostError(err);
     }
     logger.warn(
       { err, lookupName },

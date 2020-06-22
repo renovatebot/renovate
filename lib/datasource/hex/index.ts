@@ -1,6 +1,7 @@
 import { logger } from '../../logger';
+import { ExternalHostError } from '../../types/error';
 import { Http } from '../../util/http';
-import { DatasourceError, GetReleasesConfig, ReleaseResult } from '../common';
+import { GetReleasesConfig, ReleaseResult } from '../common';
 
 export const id = 'hex';
 
@@ -69,7 +70,7 @@ export async function getReleases({
       err.statusCode === 429 ||
       (err.statusCode >= 500 && err.statusCode < 600)
     ) {
-      throw new DatasourceError(err);
+      throw new ExternalHostError(err);
     }
 
     if (err.statusCode === 401) {

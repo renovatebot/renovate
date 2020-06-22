@@ -3,7 +3,6 @@ import is from '@sindresorhus/is';
 import delay from 'delay';
 import { configFileNames } from '../../config/app-strings';
 import {
-  PLATFORM_FAILURE,
   PLATFORM_INTEGRATION_UNAUTHORIZED,
   REPOSITORY_ACCESS_FORBIDDEN,
   REPOSITORY_ARCHIVED,
@@ -24,6 +23,7 @@ import {
 } from '../../constants/pull-requests';
 import { logger } from '../../logger';
 import { BranchStatus } from '../../types';
+import { ExternalHostError } from '../../types/error';
 import * as hostRules from '../../util/host-rules';
 import * as githubHttp from '../../util/http/github';
 import { sanitize } from '../../util/sanitize';
@@ -397,7 +397,7 @@ export async function initRepo({
           }
         );
       } catch (err) /* istanbul ignore next */ {
-        if (err.message === PLATFORM_FAILURE) {
+        if (err instanceof ExternalHostError) {
           throw err;
         }
         if (
@@ -965,7 +965,7 @@ export async function getPrList(): Promise<Pr[]> {
       );
     } catch (err) /* istanbul ignore next */ {
       logger.debug({ err }, 'getPrList err');
-      throw new Error('platform-failure');
+      throw new ExternalHostError(err, PLATFORM_TYPE_GITHUB);
     }
     config.prList = res.body.map((pr) => ({
       number: pr.number,
@@ -1094,7 +1094,7 @@ export async function getBranchStatus(
         logger.debug({ result: checkRunsRaw }, 'No check runs found');
       }
     } catch (err) /* istanbul ignore next */ {
-      if (err.message === PLATFORM_FAILURE) {
+      if (err instanceof ExternalHostError) {
         throw err;
       }
       if (
@@ -1506,7 +1506,7 @@ async function getComments(issueNo: number): Promise<Comment[]> {
   } catch (err) /* istanbul ignore next */ {
     if (err.statusCode === 404) {
       logger.debug('404 respose when retrieving comments');
-      throw new Error(PLATFORM_FAILURE);
+      throw new ExternalHostError(err, PLATFORM_TYPE_GITHUB);
     }
     throw err;
   }
@@ -1559,7 +1559,7 @@ export async function ensureComment({
     }
     return true;
   } catch (err) /* istanbul ignore next */ {
-    if (err.message === PLATFORM_FAILURE) {
+    if (err instanceof ExternalHostError) {
       throw err;
     }
     if (err.body?.message?.includes('is locked')) {
@@ -1690,7 +1690,7 @@ export async function updatePr(
     );
     logger.debug({ pr: prNo }, 'PR updated');
   } catch (err) /* istanbul ignore next */ {
-    if (err.message === PLATFORM_FAILURE) {
+    if (err instanceof ExternalHostError) {
       throw err;
     }
     logger.warn({ err }, 'Error updating PR');

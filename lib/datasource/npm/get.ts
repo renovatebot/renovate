@@ -6,11 +6,12 @@ import moment from 'moment';
 import registryAuthToken from 'registry-auth-token';
 import getRegistryUrl from 'registry-auth-token/registry-url';
 import { logger } from '../../logger';
+import { ExternalHostError } from '../../types/error';
 import * as globalCache from '../../util/cache/global';
 import { find } from '../../util/host-rules';
 import { Http, HttpOptions } from '../../util/http';
 import { maskToken } from '../../util/mask';
-import { DatasourceError, Release, ReleaseResult } from '../common';
+import { Release, ReleaseResult } from '../common';
 import { id } from './common';
 import { getNpmrc } from './npmrc';
 
@@ -280,7 +281,7 @@ export async function getDependency(
       if (err.name === 'ParseError' && err.body) {
         err.body = 'err.body deleted by Renovate';
       }
-      throw new DatasourceError(err);
+      throw new ExternalHostError(err);
     }
     return null;
   }

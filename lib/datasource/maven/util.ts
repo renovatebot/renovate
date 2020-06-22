@@ -1,7 +1,7 @@
 import url from 'url';
 import { logger } from '../../logger';
+import { ExternalHostError } from '../../types/error';
 import { Http } from '../../util/http';
-import { DatasourceError } from '../common';
 
 import { MAVEN_REPO, id } from './common';
 
@@ -77,7 +77,7 @@ export async function downloadHttpProtocol(
     } else if (isTemporalError(err)) {
       logger.debug({ failedUrl, err }, 'Temporary error');
       if (isMavenCentral(pkgUrl)) {
-        throw new DatasourceError(err);
+        throw new ExternalHostError(err);
       }
     } else if (isConnectionError(err)) {
       // istanbul ignore next
