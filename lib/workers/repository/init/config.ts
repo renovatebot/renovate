@@ -59,7 +59,7 @@ export async function mergeRenovateConfig(
       logger.warn('Fetching renovate config returns null');
       throw new ExternalHostError(
         Error('Fetching renovate config returns null'),
-        process.env.RENOVATE_PLATFORM
+        config.platform
       );
     }
     // istanbul ignore if
