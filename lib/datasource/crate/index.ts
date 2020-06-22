@@ -1,12 +1,8 @@
 import { logger } from '../../logger';
+import { ExternalHostError } from '../../types/error';
 import * as globalCache from '../../util/cache/global';
 import { Http } from '../../util/http';
-import {
-  DatasourceError,
-  GetReleasesConfig,
-  Release,
-  ReleaseResult,
-} from '../common';
+import { GetReleasesConfig, Release, ReleaseResult } from '../common';
 
 export const id = 'crate';
 
@@ -105,7 +101,7 @@ export async function getReleases({
       err.statusCode === 429 ||
       (err.statusCode >= 500 && err.statusCode < 600)
     ) {
-      throw new DatasourceError(err);
+      throw new ExternalHostError(err);
     }
     logger.warn({ err, lookupName }, 'crates.io lookup failure: Unknown error');
     return null;

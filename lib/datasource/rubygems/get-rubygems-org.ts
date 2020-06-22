@@ -1,6 +1,7 @@
 import { logger } from '../../logger';
+import { ExternalHostError } from '../../types/error';
 import { Http } from '../../util/http';
-import { DatasourceError, ReleaseResult } from '../common';
+import { ReleaseResult } from '../common';
 import { id } from './common';
 
 const http = new Http(id);
@@ -38,7 +39,7 @@ async function updateRubyGemsVersions(): Promise<void> {
     if (err.statusCode !== 416) {
       contentLength = 0;
       packageReleases = Object.create(null); // Because we might need a "constructor" key
-      throw new DatasourceError(
+      throw new ExternalHostError(
         new Error('Rubygems fetch error - need to reset cache')
       );
     }

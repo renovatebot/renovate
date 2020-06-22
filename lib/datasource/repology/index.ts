@@ -1,8 +1,9 @@
 import { URLSearchParams } from 'url';
 import { logger } from '../../logger';
+import { ExternalHostError } from '../../types/error';
 import * as globalCache from '../../util/cache/global';
 import { Http } from '../../util/http';
-import { DatasourceError, GetReleasesConfig, ReleaseResult } from '../common';
+import { GetReleasesConfig, ReleaseResult } from '../common';
 
 export const id = 'repology';
 
@@ -117,7 +118,7 @@ export async function getReleases({
   // Ensure lookup name contains both repository and package
   const [repoName, pkgName] = lookupName.split('/', 2);
   if (!repoName || !pkgName) {
-    throw new DatasourceError(
+    throw new ExternalHostError(
       new Error(
         'Repology lookup name must contain repository and package separated by slash (<repo>/<pkg>)'
       )
@@ -142,6 +143,6 @@ export async function getReleases({
       { lookupName, err },
       'Repology lookup failed with unexpected error'
     );
-    throw new DatasourceError(err);
+    throw new ExternalHostError(err);
   }
 }

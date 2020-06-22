@@ -1,6 +1,6 @@
-import { PLATFORM_FAILURE } from '../../../constants/error-messages';
 import { PLATFORM_TYPE_GITHUB } from '../../../constants/platforms';
 import { logger } from '../../../logger';
+import { ExternalHostError } from '../../../types/error';
 import { Http, HttpOptions } from '../../../util/http';
 import { Preset, PresetConfig } from '../common';
 import { PRESET_DEP_NOT_FOUND, fetchPreset } from '../util';
@@ -27,7 +27,7 @@ export async function fetchJSONFile(
     res = await http.getJson(url, opts);
   } catch (err) {
     // istanbul ignore if: not testable with nock
-    if (err.message === PLATFORM_FAILURE) {
+    if (err instanceof ExternalHostError) {
       throw err;
     }
     logger.debug(

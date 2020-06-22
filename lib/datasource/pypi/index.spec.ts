@@ -82,20 +82,6 @@ describe('datasource/pypi', () => {
       });
       expect(httpMock.getTrace()).toMatchSnapshot();
     });
-    it('supports custom datasource url from environmental variable', async () => {
-      httpMock
-        .scope('https://my.pypi.python/pypi/')
-        .get('/azure-cli-monitor/json')
-        .reply(200, JSON.parse(res1));
-      const pipIndexUrl = process.env.PIP_INDEX_URL;
-      process.env.PIP_INDEX_URL = 'https://my.pypi.python/pypi/';
-      await getPkgReleases({
-        datasource,
-        depName: 'azure-cli-monitor',
-      });
-      expect(httpMock.getTrace()).toMatchSnapshot();
-      process.env.PIP_INDEX_URL = pipIndexUrl;
-    });
     it('supports multiple custom datasource urls', async () => {
       httpMock
         .scope('https://custom.pypi.net/foo')

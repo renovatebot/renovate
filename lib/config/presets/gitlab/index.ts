@@ -1,5 +1,5 @@
-import { PLATFORM_FAILURE } from '../../../constants/error-messages';
 import { logger } from '../../../logger';
+import { ExternalHostError } from '../../../types/error';
 import type { GitLabBranch } from '../../../types/platform/gitlab';
 import { GitlabHttp } from '../../../util/http/gitlab';
 import { Preset, PresetConfig } from '../common';
@@ -42,7 +42,7 @@ export async function fetchJSONFile(
     const url = `${endpoint}projects/${urlEncodedRepo}/repository/files/${urlEncodedPkgName}/raw?ref=${defautlBranchName}`;
     return (await gitlabApi.getJson<Preset>(url)).body;
   } catch (err) {
-    if (err.message === PLATFORM_FAILURE) {
+    if (err instanceof ExternalHostError) {
       throw err;
     }
     logger.debug(

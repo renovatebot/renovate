@@ -1,15 +1,17 @@
 import URL from 'url';
-import is from '@sindresorhus/is';
 
 import pAll from 'p-all';
 import { logger } from '../../logger';
+import { ExternalHostError } from '../../types/error';
 import * as globalCache from '../../util/cache/global';
 import * as runCache from '../../util/cache/run';
 import * as hostRules from '../../util/host-rules';
 import { Http, HttpOptions } from '../../util/http';
-import { DatasourceError, GetReleasesConfig, ReleaseResult } from '../common';
+import { GetReleasesConfig, ReleaseResult } from '../common';
 
 export const id = 'packagist';
+export const defaultRegistryUrls = ['https://packagist.org'];
+export const registryStrategy = 'hunt';
 
 const http = new Http(id);
 
@@ -312,10 +314,10 @@ async function packageLookup(
     }
     if (err.host === 'packagist.org') {
       if (err.code === 'ECONNRESET' || err.code === 'ETIMEDOUT') {
-        throw new DatasourceError(err);
+        throw new ExternalHostError(err);
       }
       if (err.statusCode && err.statusCode >= 500 && err.statusCode < 600) {
-        throw new DatasourceError(err);
+        throw new ExternalHostError(err);
       }
     }
     logger.warn({ err, name }, 'packagist registry failure: Unknown error');
@@ -325,19 +327,8 @@ async function packageLookup(
 
 export async function getReleases({
   lookupName,
-  registryUrls,
+  registryUrl,
 }: GetReleasesConfig): Promise<ReleaseResult> {
   logger.trace(`getReleases(${lookupName})`);
-
-  let res: ReleaseResult;
-  const registries = is.nonEmptyArray(registryUrls)
-    ? registryUrls
-    : ['https://packagist.org'];
-  for (const regUrl of registries) {
-    res = await packageLookup(regUrl, lookupName);
-    if (res) {
-      break;
-    }
-  }
-  return res;
+  return packageLookup(registryUrl, lookupName);
 }

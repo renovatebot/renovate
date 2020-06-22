@@ -1,10 +1,11 @@
 import yaml from 'js-yaml';
 
 import { logger } from '../../logger';
+import { ExternalHostError } from '../../types/error';
 import * as globalCache from '../../util/cache/global';
 import { Http } from '../../util/http';
 import { ensureTrailingSlash } from '../../util/url';
-import { DatasourceError, GetReleasesConfig, ReleaseResult } from '../common';
+import { GetReleasesConfig, ReleaseResult } from '../common';
 
 export const id = 'helm';
 
@@ -13,6 +14,7 @@ const http = new Http(id);
 export const defaultRegistryUrls = [
   'https://kubernetes-charts.storage.googleapis.com/',
 ];
+export const registryStrategy = 'first';
 
 export async function getRepositoryData(
   repository: string
@@ -59,7 +61,7 @@ export async function getRepositoryData(
       err.statusCode === 429 ||
       (err.statusCode >= 500 && err.statusCode < 600)
     ) {
-      throw new DatasourceError(err);
+      throw new ExternalHostError(err);
     }
     // istanbul ignore if
     if (err.name === 'UnsupportedProtocolError') {
@@ -101,9 +103,8 @@ export async function getRepositoryData(
 
 export async function getReleases({
   lookupName,
-  registryUrls,
+  registryUrl: helmRepository,
 }: GetReleasesConfig): Promise<ReleaseResult | null> {
-  const [helmRepository] = registryUrls;
   const repositoryData = await getRepositoryData(helmRepository);
   if (!repositoryData) {
     logger.debug(`Couldn't get index.yaml file from ${helmRepository}`);

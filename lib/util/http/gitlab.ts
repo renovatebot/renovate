@@ -1,8 +1,8 @@
 import { URL } from 'url';
 import parseLinkHeader from 'parse-link-header';
-import { PLATFORM_FAILURE } from '../../constants/error-messages';
 import { PLATFORM_TYPE_GITLAB } from '../../constants/platforms';
 import { logger } from '../../logger';
+import { ExternalHostError } from '../../types/error';
 import { Http, HttpResponse, InternalHttpOptions } from '.';
 
 let baseUrl = 'https://gitlab.com/api/v4/';
@@ -63,7 +63,7 @@ export class GitlabHttp extends Http<GitlabHttpOptions, GitlabHttpOptions> {
         err.statusCode === 429 ||
         (err.statusCode >= 500 && err.statusCode < 600)
       ) {
-        throw new Error(PLATFORM_FAILURE);
+        throw new ExternalHostError(err, PLATFORM_TYPE_GITLAB);
       }
       const platformFailureCodes = [
         'EAI_AGAIN',
@@ -72,10 +72,10 @@ export class GitlabHttp extends Http<GitlabHttpOptions, GitlabHttpOptions> {
         'UNABLE_TO_VERIFY_LEAF_SIGNATURE',
       ];
       if (platformFailureCodes.includes(err.code)) {
-        throw new Error(PLATFORM_FAILURE);
+        throw new ExternalHostError(err, PLATFORM_TYPE_GITLAB);
       }
       if (err.name === 'ParseError') {
-        throw new Error(PLATFORM_FAILURE);
+        throw new ExternalHostError(err, PLATFORM_TYPE_GITLAB);
       }
       throw err;
     }

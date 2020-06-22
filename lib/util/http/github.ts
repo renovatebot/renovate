@@ -4,13 +4,13 @@ import pAll from 'p-all';
 import parseLinkHeader from 'parse-link-header';
 import {
   PLATFORM_BAD_CREDENTIALS,
-  PLATFORM_FAILURE,
   PLATFORM_INTEGRATION_UNAUTHORIZED,
   PLATFORM_RATE_LIMIT_EXCEEDED,
   REPOSITORY_CHANGED,
 } from '../../constants/error-messages';
 import { PLATFORM_TYPE_GITHUB } from '../../constants/platforms';
 import { logger } from '../../logger';
+import { ExternalHostError } from '../../types/error';
 import { maskToken } from '../mask';
 import { Http, HttpPostOptions, HttpResponse, InternalHttpOptions } from '.';
 
@@ -61,15 +61,15 @@ export function handleGotError(
       err.code === 'EAI_AGAIN')
   ) {
     logger.debug({ err }, 'GitHub failure: RequestError');
-    throw new Error(PLATFORM_FAILURE);
+    throw new ExternalHostError(err, PLATFORM_TYPE_GITHUB);
   }
   if (err.name === 'ParseError') {
     logger.debug({ err }, '');
-    throw new Error(PLATFORM_FAILURE);
+    throw new ExternalHostError(err, PLATFORM_TYPE_GITHUB);
   }
   if (err.statusCode >= 500 && err.statusCode < 600) {
     logger.debug({ err }, 'GitHub failure: 5xx');
-    throw new Error(PLATFORM_FAILURE);
+    throw new ExternalHostError(err, PLATFORM_TYPE_GITHUB);
   }
   if (
     err.statusCode === 403 &&
@@ -106,7 +106,7 @@ export function handleGotError(
       'GitHub failure: Bad credentials'
     );
     if (rateLimit === '60') {
-      throw new Error(PLATFORM_FAILURE);
+      throw new ExternalHostError(err, PLATFORM_TYPE_GITHUB);
     }
     throw new Error(PLATFORM_BAD_CREDENTIALS);
   }
@@ -123,7 +123,7 @@ export function handleGotError(
       throw new Error(REPOSITORY_CHANGED);
     }
     logger.debug({ err }, '422 Error thrown from GitHub');
-    throw new Error(PLATFORM_FAILURE);
+    throw new ExternalHostError(err, PLATFORM_TYPE_GITHUB);
   }
   if (err.statusCode === 404) {
     logger.debug({ url: err.url }, 'GitHub 404');

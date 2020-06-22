@@ -70,7 +70,7 @@ Array [
 ]
 `;
 
-exports[`config/presets/gitlab/index getPreset() throws platform-failure 1`] = `
+exports[`config/presets/gitlab/index getPreset() throws EXTERNAL_HOST_ERROR 1`] = `
 Array [
   Object {
     "headers": Object {

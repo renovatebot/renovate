@@ -5,7 +5,6 @@ export const SYSTEM_INSUFFICIENT_MEMORY = 'out-of-memory';
 // Platform Error
 export const PLATFORM_AUTHENTICATION_ERROR = 'authentication-error';
 export const PLATFORM_BAD_CREDENTIALS = 'bad-credentials';
-export const PLATFORM_FAILURE = 'platform-failure';
 export const PLATFORM_GPG_FAILED = 'gpg-failed';
 export const PLATFORM_INTEGRATION_UNAUTHORIZED = 'integration-unauthorized';
 export const PLATFORM_NOT_FOUND = 'platform-not-found';
@@ -34,8 +33,8 @@ export const REPOSITORY_UNINITIATED = 'uninitiated';
 export const MANAGER_LOCKFILE_ERROR = 'lockfile-error';
 export const MANAGER_NO_PACKAGE_FILES = 'no-package-files';
 
-// Datasource error
-export const DATASOURCE_FAILURE = 'registry-failure';
+// Host error
+export const EXTERNAL_HOST_ERROR = 'external-host-error';
 
 // Worker Error
 export const WORKER_FILE_UPDATE_FAILED = 'update-failure';

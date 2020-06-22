@@ -4,11 +4,9 @@ import { DateTime } from 'luxon';
 import minimatch from 'minimatch';
 import { RenovateConfig } from '../../config';
 import {
-  DATASOURCE_FAILURE,
   MANAGER_LOCKFILE_ERROR,
   PLATFORM_AUTHENTICATION_ERROR,
   PLATFORM_BAD_CREDENTIALS,
-  PLATFORM_FAILURE,
   PLATFORM_INTEGRATION_UNAUTHORIZED,
   PLATFORM_RATE_LIMIT_EXCEEDED,
   REPOSITORY_CHANGED,
@@ -24,6 +22,7 @@ import { logger } from '../../logger';
 import { getAdditionalFiles } from '../../manager/npm/post-update';
 import { platform } from '../../platform';
 import { BranchStatus } from '../../types';
+import { ExternalHostError } from '../../types/error';
 import { emojify } from '../../util/emoji';
 import { exec } from '../../util/exec';
 import { readLocalFile, writeLocalFile } from '../../util/fs';
@@ -541,10 +540,7 @@ export async function processBranch(
       err.message.includes('fatal: Authentication failed')
     ) {
       throw new Error(PLATFORM_AUTHENTICATION_ERROR);
-    } else if (
-      err.message !== DATASOURCE_FAILURE &&
-      err.message !== PLATFORM_FAILURE
-    ) {
+    } else if (!(err instanceof ExternalHostError)) {
       logger.error({ err }, `Error updating branch: ${err.message}`);
     }
     // Don't throw here - we don't want to stop the other renovations
@@ -655,11 +651,8 @@ export async function processBranch(
     }
   } catch (err) /* istanbul ignore next */ {
     if (
-      [
-        PLATFORM_RATE_LIMIT_EXCEEDED,
-        PLATFORM_FAILURE,
-        REPOSITORY_CHANGED,
-      ].includes(err.message)
+      err instanceof ExternalHostError ||
+      [PLATFORM_RATE_LIMIT_EXCEEDED, REPOSITORY_CHANGED].includes(err.message)
     ) {
       logger.debug('Passing PR error up');
       throw err;

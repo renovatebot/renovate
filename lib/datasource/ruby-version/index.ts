@@ -1,9 +1,10 @@
 import { parse } from 'node-html-parser';
 
+import { ExternalHostError } from '../../types/error';
 import * as globalCache from '../../util/cache/global';
 import { Http } from '../../util/http';
 import { isVersion } from '../../versioning/ruby';
-import { DatasourceError, GetReleasesConfig, ReleaseResult } from '../common';
+import { GetReleasesConfig, ReleaseResult } from '../common';
 
 export const id = 'ruby-version';
 
@@ -51,6 +52,6 @@ export async function getReleases(
     await globalCache.set(cacheNamespace, 'all', res, 15);
     return res;
   } catch (err) {
-    throw new DatasourceError(err);
+    throw new ExternalHostError(err);
   }
 }

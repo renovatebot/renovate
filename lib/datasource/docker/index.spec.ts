@@ -2,7 +2,7 @@ import AWS from 'aws-sdk';
 import AWSMock from 'aws-sdk-mock';
 import { getDigest, getPkgReleases } from '..';
 import * as httpMock from '../../../test/httpMock';
-import { DATASOURCE_FAILURE } from '../../constants/error-messages';
+import { EXTERNAL_HOST_ERROR } from '../../constants/error-messages';
 import * as _hostRules from '../../util/host-rules';
 import * as docker from '.';
 
@@ -31,13 +31,16 @@ describe('api/docker', () => {
 
   describe('getRegistryRepository', () => {
     it('handles local registries', () => {
-      const res = docker.getRegistryRepository('registry:5000/org/package', []);
+      const res = docker.getRegistryRepository(
+        'registry:5000/org/package',
+        'https://index.docker.io'
+      );
       expect(res).toMatchSnapshot();
     });
     it('supports registryUrls', () => {
       const res = docker.getRegistryRepository(
         'my.local.registry/prefix/image',
-        ['https://my.local.registry/prefix']
+        'https://my.local.registry/prefix'
       );
       expect(res).toMatchSnapshot();
     });
@@ -328,13 +331,13 @@ describe('api/docker', () => {
       httpMock.scope(baseUrl).get('/').replyWithError({ statusCode: 429 });
       await expect(
         getDigest({ datasource: 'docker', depName: 'some-dep' }, 'latest')
-      ).rejects.toThrow(Error(DATASOURCE_FAILURE));
+      ).rejects.toThrow(EXTERNAL_HOST_ERROR);
     });
     it('should throw error for 5xx', async () => {
       httpMock.scope(baseUrl).get('/').replyWithError({ statusCode: 504 });
       await expect(
         getDigest({ datasource: 'docker', depName: 'some-dep' }, 'latest')
-      ).rejects.toThrow(Error(DATASOURCE_FAILURE));
+      ).rejects.toThrow(EXTERNAL_HOST_ERROR);
     });
   });
   describe('getReleases', () => {
