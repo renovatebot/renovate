@@ -1,25 +1,24 @@
-import got from 'got';
-import { getName, partial } from '../../../test/util';
-import * as _got from '../../util/got';
+import * as httpMock from '../../../test/httpMock';
+import { getName } from '../../../test/util';
 import { DatasourceError } from '../common';
 import { getDependency, resetMemCache } from './get';
 import { setNpmrc } from './npmrc';
 
-jest.mock('../../util/got');
-
-const api: jest.Mock<got.GotPromise<object>> = _got.api as never;
+function getPath(s = ''): string {
+  const [x] = s.split('\n');
+  const prePath = x.replace(/^.*https:\/\/test\.org/, '');
+  return `${prePath}/@myco%2Ftest`;
+}
 
 describe(getName(__filename), () => {
-  function mock(body: object): void {
-    api.mockResolvedValueOnce(
-      partial<got.Response<object>>({ body })
-    );
-  }
-
   beforeEach(() => {
     jest.clearAllMocks();
     resetMemCache();
-    mock({ body: { name: '@myco/test' } });
+    httpMock.setup();
+  });
+
+  afterEach(() => {
+    httpMock.reset();
   });
 
   describe('has bearer auth', () => {
@@ -34,11 +33,18 @@ describe(getName(__filename), () => {
     ];
 
     it.each(configs)('%p', async (npmrc) => {
-      expect.assertions(1);
+      expect.assertions(2);
+      httpMock
+        .scope('https://test.org')
+        .get(getPath(npmrc))
+        .reply(200, { name: '@myco/test' });
+
       setNpmrc(npmrc);
       await getDependency('@myco/test', 0);
 
-      expect(api.mock.calls[0][1].headers.authorization).toEqual('Bearer XXX');
+      const trace = httpMock.getTrace();
+      expect(trace[0].headers.authorization).toEqual('Bearer XXX');
+      expect(trace).toMatchSnapshot();
     });
   });
 
@@ -56,13 +62,17 @@ describe(getName(__filename), () => {
     ];
 
     it.each(configs)('%p', async (npmrc) => {
-      expect.assertions(1);
+      expect.assertions(2);
+      httpMock
+        .scope('https://test.org')
+        .get(getPath(npmrc))
+        .reply(200, { name: '@myco/test' });
       setNpmrc(npmrc);
       await getDependency('@myco/test', 0);
 
-      expect(api.mock.calls[0][1].headers.authorization).toEqual(
-        'Basic dGVzdDp0ZXN0'
-      );
+      const trace = httpMock.getTrace();
+      expect(trace[0].headers.authorization).toEqual('Basic dGVzdDp0ZXN0');
+      expect(trace).toMatchSnapshot();
     });
   });
 
@@ -76,53 +86,79 @@ describe(getName(__filename), () => {
     ];
 
     it.each(configs)('%p', async (npmrc) => {
-      expect.assertions(1);
+      expect.assertions(2);
+      httpMock
+        .scope('https://test.org')
+        .get(getPath(npmrc))
+        .reply(200, { name: '@myco/test' });
       setNpmrc(npmrc);
       await getDependency('@myco/test', 0);
 
-      expect(api.mock.calls[0][1].headers.authorization).toBeUndefined();
+      const trace = httpMock.getTrace();
+      expect(trace[0].headers.authorization).toBeUndefined();
+      expect(trace).toMatchSnapshot();
     });
   });
 
   it('cover all paths', async () => {
-    expect.assertions(9);
+    expect.assertions(10);
 
     setNpmrc('registry=https://test.org\n_authToken=XXX');
 
+    httpMock
+      .scope('https://test.org')
+      .get('/none')
+      .reply(200, { name: '@myco/test' });
     expect(await getDependency('none', 0)).toBeNull();
 
-    mock({
-      name: '@myco/test',
-      repository: {},
-      versions: { '1.0.0': {} },
-      'dist-tags': { latest: '1.0.0' },
-    });
+    httpMock
+      .scope('https://test.org')
+      .get('/@myco%2Ftest')
+      .reply(200, {
+        name: '@myco/test',
+        repository: {},
+        versions: { '1.0.0': {} },
+        'dist-tags': { latest: '1.0.0' },
+      });
     expect(await getDependency('@myco/test', 0)).toBeDefined();
 
-    mock({
-      name: '@myco/test2',
-      versions: { '1.0.0': {} },
-      'dist-tags': { latest: '1.0.0' },
-    });
+    httpMock
+      .scope('https://test.org')
+      .get('/@myco%2Ftest2')
+      .reply(200, {
+        name: '@myco/test2',
+        versions: { '1.0.0': {} },
+        'dist-tags': { latest: '1.0.0' },
+      });
     expect(await getDependency('@myco/test2', 0)).toBeDefined();
 
-    api.mockRejectedValueOnce({ statusCode: 401 });
+    httpMock.scope('https://test.org').get('/error-401').reply(401);
     expect(await getDependency('error-401', 0)).toBeNull();
-    api.mockRejectedValueOnce({ statusCode: 402 });
+
+    httpMock.scope('https://test.org').get('/error-402').reply(402);
     expect(await getDependency('error-402', 0)).toBeNull();
-    api.mockRejectedValueOnce({ statusCode: 404 });
+
+    httpMock.scope('https://test.org').get('/error-404').reply(404);
     expect(await getDependency('error-404', 0)).toBeNull();
 
-    api.mockRejectedValueOnce({});
+    httpMock.scope('https://test.org').get('/error4').reply(200, null);
     expect(await getDependency('error4', 0)).toBeNull();
 
     setNpmrc();
-    api.mockRejectedValueOnce({ name: 'ParseError', body: 'parse-error' });
+    httpMock
+      .scope('https://registry.npmjs.org')
+      .get('/npm-parse-error')
+      .reply(200, 'not-a-json');
     await expect(getDependency('npm-parse-error', 0)).rejects.toThrow(
       DatasourceError
     );
 
-    api.mockRejectedValueOnce({ statusCode: 402 });
+    httpMock
+      .scope('https://registry.npmjs.org')
+      .get('/npm-error-402')
+      .reply(402);
     expect(await getDependency('npm-error-402', 0)).toBeNull();
+
+    expect(httpMock.getTrace()).toMatchSnapshot();
   });
 });

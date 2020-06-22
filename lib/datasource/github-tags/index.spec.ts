@@ -1,3 +1,4 @@
+import { getPkgReleases } from '..';
 import * as httpMock from '../../../test/httpMock';
 import * as _hostRules from '../../util/host-rules';
 import * as github from '.';
@@ -88,15 +89,15 @@ describe('datasource/github-tags', () => {
     });
   });
   describe('getReleases', () => {
-    const lookupName = 'some/dep2';
+    const depName = 'some/dep2';
 
     it('returns tags', async () => {
       const body = [{ name: 'v1.0.0' }, { name: 'v1.1.0' }];
       httpMock
         .scope(githubApiHost)
-        .get(`/repos/${lookupName}/tags?per_page=100`)
+        .get(`/repos/${depName}/tags?per_page=100`)
         .reply(200, body);
-      const res = await github.getReleases({ lookupName });
+      const res = await getPkgReleases({ datasource: github.id, depName });
       expect(res).toMatchSnapshot();
       expect(res.releases).toHaveLength(2);
       expect(httpMock.getTrace()).toMatchSnapshot();

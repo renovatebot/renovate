@@ -1,9 +1,9 @@
 import crypto from 'crypto';
 import URL from 'url';
-import { GotPromise } from 'got';
+import got from 'got';
 import * as runCache from '../cache/run';
 import { clone } from '../clone';
-import got from '../got';
+import { applyAuthorization } from './auth';
 import { applyHostRules } from './host-rules';
 
 interface OutgoingHttpHeaders {
@@ -33,10 +33,7 @@ export interface HttpResponse<T = string> {
   headers: any;
 }
 
-async function cloneResponse<T>(
-  promisedResponse: GotPromise<any>
-): Promise<HttpResponse<T>> {
-  const response = await promisedResponse;
+function cloneResponse<T>(response: any): HttpResponse<T> {
   // clone body and headers so that the cached result doesn't get accidentally mutated
   return {
     body: clone<T>(response.body),
@@ -47,7 +44,7 @@ async function cloneResponse<T>(
 export class Http<GetOptions = HttpOptions, PostOptions = HttpPostOptions> {
   constructor(private hostType: string, private options?: HttpOptions) {}
 
-  protected request<T>(
+  protected async request<T>(
     requestUrl: string | URL,
     httpOptions?: InternalHttpOptions
   ): Promise<HttpResponse<T> | null> {
@@ -62,6 +59,9 @@ export class Http<GetOptions = HttpOptions, PostOptions = HttpPostOptions> {
       hostType: this.hostType,
       ...httpOptions,
     };
+    if (process.env.NODE_ENV === 'test') {
+      options.retry = 0;
+    }
     options.hooks = {
       beforeRedirect: [
         (opts: any): void => {
@@ -90,26 +90,35 @@ export class Http<GetOptions = HttpOptions, PostOptions = HttpPostOptions> {
     };
 
     options = applyHostRules(url, options);
+    options = applyAuthorization(options);
 
     // Cache GET requests unless useCache=false
-    let promisedRes: GotPromise<any>;
-    if (options.method === 'get') {
-      const cacheKey = crypto
-        .createHash('md5')
-        .update('got-' + JSON.stringify({ url, headers: options.headers }))
-        .digest('hex');
-      if (options.useCache !== false) {
-        // check cache unless bypassing it
-        promisedRes = runCache.get(cacheKey);
+    const cacheKey = crypto
+      .createHash('md5')
+      .update('got-' + JSON.stringify({ url, headers: options.headers }))
+      .digest('hex');
+    if (options.method === 'get' && options.useCache !== false) {
+      // return from cache if present
+      const cachedRes = runCache.get(cacheKey);
+      // istanbul ignore if
+      if (cachedRes) {
+        return cloneResponse<T>(await cachedRes);
       }
-      if (promisedRes === undefined) {
-        // cache miss OR cache bypass
-        promisedRes = got(url, options);
-      }
-      runCache.set(cacheKey, promisedRes); // always set
-      return cloneResponse<T>(promisedRes);
     }
-    return cloneResponse<T>(got(url, options));
+    const startTime = Date.now();
+    const promisedRes = got(url, options);
+    if (options.method === 'get') {
+      runCache.set(cacheKey, promisedRes); // always set if it's a get
+    }
+    const res = await promisedRes;
+    const httpRequests = runCache.get('http-requests') || [];
+    httpRequests.push({
+      method: options.method,
+      url,
+      duration: Date.now() - startTime,
+    });
+    runCache.set('http-requests', httpRequests);
+    return cloneResponse<T>(res);
   }
 
   get(url: string, options: HttpOptions = {}): Promise<HttpResponse> {

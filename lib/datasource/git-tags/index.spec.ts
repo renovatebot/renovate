@@ -1,11 +1,12 @@
 import fs from 'fs-extra';
 import _simpleGit from 'simple-git/promise';
-import { getDigest, getReleases } from '.';
+import { getPkgReleases } from '..';
+import { id as datasource, getDigest } from '.';
 
 jest.mock('simple-git/promise');
 const simpleGit: any = _simpleGit;
 
-const lookupName = 'https://github.com/example/example.git';
+const depName = 'https://github.com/example/example.git';
 
 const lsRemote1 = fs.readFileSync(
   'lib/datasource/git-refs/__fixtures__/ls-remote-1.txt',
@@ -20,7 +21,7 @@ describe('datasource/git-tags', () => {
           return Promise.resolve(null);
         },
       });
-      const versions = await getReleases({ lookupName });
+      const versions = await getPkgReleases({ datasource, depName });
       expect(versions).toBeNull();
     });
     it('returns nil if remote call throws exception', async () => {
@@ -29,7 +30,7 @@ describe('datasource/git-tags', () => {
           throw new Error();
         },
       });
-      const versions = await getReleases({ lookupName });
+      const versions = await getPkgReleases({ datasource, depName });
       expect(versions).toBeNull();
     });
     it('returns versions filtered from tags', async () => {
@@ -39,8 +40,9 @@ describe('datasource/git-tags', () => {
         },
       });
 
-      const versions = await getReleases({
-        lookupName,
+      const versions = await getPkgReleases({
+        datasource,
+        depName,
       });
       expect(versions).toMatchSnapshot();
     });
@@ -53,7 +55,7 @@ describe('datasource/git-tags', () => {
         },
       });
       const digest = await getDigest(
-        { lookupName: 'a tag to look up' },
+        { datasource, depName: 'a tag to look up' },
         'notfound'
       );
       expect(digest).toBeNull();
@@ -65,7 +67,7 @@ describe('datasource/git-tags', () => {
         },
       });
       const digest = await getDigest(
-        { lookupName: 'a tag to look up' },
+        { datasource, depName: 'a tag to look up' },
         'v1.0.2'
       );
       expect(digest).toMatchSnapshot();
@@ -77,7 +79,7 @@ describe('datasource/git-tags', () => {
         },
       });
       const digest = await getDigest(
-        { lookupName: 'another tag to look up' },
+        { datasource, depName: 'another tag to look up' },
         undefined
       );
       expect(digest).toMatchSnapshot();

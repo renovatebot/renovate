@@ -5,3 +5,5 @@ exports[`workers/repository/onboarding/pr/base-branch getBaseBranchDesc() descri
 
 "
 `;
+
+exports[`workers/repository/onboarding/pr/base-branch getBaseBranchDesc() describes baseBranches 1`] = `"You have configured Renovate to use the following baseBranches: \`some-branch\`, \`some-other-branch\`."`;

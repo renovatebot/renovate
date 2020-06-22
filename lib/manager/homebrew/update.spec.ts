@@ -1,11 +1,7 @@
 import fs from 'fs';
-import { fromStream as _fromStream } from 'hasha';
+import { Readable } from 'stream';
+import * as httpMock from '../../../test/httpMock';
 import { updateDependency } from './update';
-
-jest.mock('hasha');
-jest.mock('../../util/got');
-
-const fromStream: jest.Mock<Promise<string>> = _fromStream as any;
 
 const aide = fs.readFileSync(
   'lib/manager/homebrew/__fixtures__/aide.rb',
@@ -16,10 +12,19 @@ const ibazel = fs.readFileSync(
   'utf8'
 );
 
+const baseUrl = 'https://github.com';
+
 describe('manager/homebrew/update', () => {
   beforeEach(() => {
     jest.resetAllMocks();
+    jest.resetModules();
+    httpMock.setup();
   });
+
+  afterEach(() => {
+    httpMock.reset();
+  });
+
   it('updates "releases" github dependency', async () => {
     const upgrade = {
       currentValue: 'v0.16.1',
@@ -34,7 +39,10 @@ describe('manager/homebrew/update', () => {
       },
       newValue: 'v0.17.7',
     };
-    fromStream.mockResolvedValueOnce('new_hash_value');
+    httpMock
+      .scope(baseUrl)
+      .get('/aide/aide/releases/download/v0.17.7/aide-0.17.7.tar.gz')
+      .reply(200, Readable.from(['foo']));
     const newContent = await updateDependency({
       fileContent: aide,
       upgrade,
@@ -42,6 +50,7 @@ describe('manager/homebrew/update', () => {
     expect(newContent).not.toBeNull();
     expect(newContent).not.toBe(aide);
     expect(newContent).toMatchSnapshot();
+    expect(httpMock.getTrace()).toMatchSnapshot();
   });
   it('updates "archive" github dependency', async () => {
     const upgrade = {
@@ -57,7 +66,12 @@ describe('manager/homebrew/update', () => {
       },
       newValue: 'v0.9.3',
     };
-    fromStream.mockResolvedValueOnce('new_hash_value');
+    httpMock
+      .scope(baseUrl)
+      .get(
+        '/bazelbuild/bazel-watcher/releases/download/v0.9.3/bazel-watcher-0.9.3.tar.gz'
+      )
+      .reply(200, Readable.from(['foo']));
     const newContent = await updateDependency({
       fileContent: ibazel,
       upgrade,
@@ -65,6 +79,7 @@ describe('manager/homebrew/update', () => {
     expect(newContent).not.toBeNull();
     expect(newContent).not.toBe(ibazel);
     expect(newContent).toMatchSnapshot();
+    expect(httpMock.getTrace()).toMatchSnapshot();
   });
   it('returns unchanged content if fromStream promise rejects', async () => {
     const upgrade = {
@@ -80,13 +95,21 @@ describe('manager/homebrew/update', () => {
       },
       newValue: 'v0.9.3',
     };
-    fromStream.mockRejectedValueOnce('Request failed');
+    httpMock
+      .scope(baseUrl)
+      .get(
+        '/bazelbuild/bazel-watcher/releases/download/v0.9.3/bazel-watcher-0.9.3.tar.gz'
+      )
+      .replyWithError('')
+      .get('/bazelbuild/bazel-watcher/archive/v0.9.3.tar.gz')
+      .replyWithError('');
     const newContent = await updateDependency({
       fileContent: ibazel,
       upgrade,
     });
     expect(newContent).not.toBeNull();
     expect(newContent).toBe(ibazel);
+    expect(httpMock.getTrace()).toMatchSnapshot();
   });
   it('returns unchanged content if url field in upgrade object is invalid', async () => {
     const content = ibazel;
@@ -102,7 +125,6 @@ describe('manager/homebrew/update', () => {
       },
       newValue: 'v0.9.3',
     };
-    fromStream.mockResolvedValueOnce('some_content');
     const newContent = await updateDependency({
       fileContent: content,
       upgrade,
@@ -125,15 +147,21 @@ describe('manager/homebrew/update', () => {
       },
       newValue: 'v0.9.3',
     };
-    fromStream
-      .mockRejectedValueOnce('Request failed')
-      .mockResolvedValueOnce('some_content');
+    httpMock
+      .scope(baseUrl)
+      .get(
+        '/bazelbuild/invalid/repo/name/releases/download/v0.9.3/invalid/repo/name-0.9.3.tar.gz'
+      )
+      .replyWithError('')
+      .get('/bazelbuild/invalid/repo/name/archive/v0.9.3.tar.gz')
+      .reply(200, Readable.from(['foo']));
     const newContent = await updateDependency({
       fileContent: content,
       upgrade,
     });
     expect(newContent).not.toBeNull();
     expect(newContent).toBe(content);
+    expect(httpMock.getTrace()).toMatchSnapshot();
   });
   it('returns unchanged content if repoName in upgrade object is wrong', async () => {
     const content = ibazel;
@@ -150,15 +178,23 @@ describe('manager/homebrew/update', () => {
       },
       newValue: 'v0.9.3',
     };
-    fromStream
-      .mockRejectedValueOnce('Request failed')
-      .mockResolvedValueOnce('some_content');
+    httpMock
+      .scope(baseUrl)
+      .get(
+        '/bazelbuild/wrong-version/archive/v10.2.3.tar.gz/releases/download/v0.9.3/wrong-version/archive/v10.2.3.tar.gz-0.9.3.tar.gz'
+      )
+      .replyWithError('')
+      .get(
+        '/bazelbuild/wrong-version/archive/v10.2.3.tar.gz/archive/v0.9.3.tar.gz'
+      )
+      .reply(200, Readable.from(['foo']));
     const newContent = await updateDependency({
       fileContent: content,
       upgrade,
     });
     expect(newContent).not.toBeNull();
     expect(newContent).toBe(content);
+    expect(httpMock.getTrace()).toMatchSnapshot();
   });
   it('returns unchanged content if url field in Formula file is invalid', async () => {
     const content = `
@@ -182,13 +218,19 @@ describe('manager/homebrew/update', () => {
       },
       newValue: 'v0.9.3',
     };
-    fromStream.mockResolvedValueOnce('some_content');
+    httpMock
+      .scope(baseUrl)
+      .get(
+        '/bazelbuild/bazel-watcher/releases/download/v0.9.3/bazel-watcher-0.9.3.tar.gz'
+      )
+      .reply(200, Readable.from(['foo']));
     const newContent = await updateDependency({
       fileContent: content,
       upgrade,
     });
     expect(newContent).not.toBeNull();
     expect(newContent).toBe(content);
+    expect(httpMock.getTrace()).toMatchSnapshot();
   });
   it('returns unchanged content if url field in Formula file is missing', async () => {
     const content = `
@@ -211,13 +253,19 @@ describe('manager/homebrew/update', () => {
       },
       newValue: 'v0.9.3',
     };
-    fromStream.mockResolvedValueOnce('some_content');
+    httpMock
+      .scope(baseUrl)
+      .get(
+        '/bazelbuild/bazel-watcher/releases/download/v0.9.3/bazel-watcher-0.9.3.tar.gz'
+      )
+      .reply(200, Readable.from(['foo']));
     const newContent = await updateDependency({
       fileContent: content,
       upgrade,
     });
     expect(newContent).not.toBeNull();
     expect(newContent).toBe(content);
+    expect(httpMock.getTrace()).toMatchSnapshot();
   });
   it('returns unchanged content if sha256 field in Formula file is invalid', async () => {
     const content = `
@@ -241,13 +289,19 @@ describe('manager/homebrew/update', () => {
       },
       newValue: 'v0.9.3',
     };
-    fromStream.mockResolvedValueOnce('some_content');
+    httpMock
+      .scope(baseUrl)
+      .get(
+        '/bazelbuild/bazel-watcher/releases/download/v0.9.3/bazel-watcher-0.9.3.tar.gz'
+      )
+      .reply(200, Readable.from(['foo']));
     const newContent = await updateDependency({
       fileContent: content,
       upgrade,
     });
     expect(newContent).not.toBeNull();
     expect(newContent).toBe(content);
+    expect(httpMock.getTrace()).toMatchSnapshot();
   });
   it('returns unchanged content if sha256 field in Formula file is missing', async () => {
     const content = `
@@ -270,13 +324,19 @@ describe('manager/homebrew/update', () => {
       },
       newValue: 'v0.9.3',
     };
-    fromStream.mockResolvedValueOnce('some_content');
+    httpMock
+      .scope(baseUrl)
+      .get(
+        '/bazelbuild/bazel-watcher/releases/download/v0.9.3/bazel-watcher-0.9.3.tar.gz'
+      )
+      .reply(200, Readable.from(['foo']));
     const newContent = await updateDependency({
       fileContent: content,
       upgrade,
     });
     expect(newContent).not.toBeNull();
     expect(newContent).toBe(content);
+    expect(httpMock.getTrace()).toMatchSnapshot();
   });
   it('returns unchanged content if both got requests fail', async () => {
     const upgrade = {
@@ -292,9 +352,12 @@ describe('manager/homebrew/update', () => {
       },
       newValue: 'v0.17.7',
     };
-    fromStream
-      .mockRejectedValueOnce('Request failed.')
-      .mockRejectedValueOnce('Request failed.');
+    httpMock
+      .scope(baseUrl)
+      .get('/aide/aide/releases/download/v0.17.7/aide-0.17.7.tar.gz')
+      .replyWithError('')
+      .get('/aide/aide/archive/v0.17.7.tar.gz')
+      .replyWithError('');
     const newContent = await updateDependency({
       fileContent: aide,
       upgrade,
@@ -302,5 +365,6 @@ describe('manager/homebrew/update', () => {
     expect(newContent).not.toBeNull();
     expect(newContent).toBe(aide);
     expect(newContent).toMatchSnapshot();
+    expect(httpMock.getTrace()).toMatchSnapshot();
   });
 });

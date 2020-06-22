@@ -75,7 +75,6 @@ describe('platform/comments', () => {
         topic: 'some-subject',
         content: 'some\ncontent',
       });
-      httpMock.getTrace();
       expect(res).toBe(true);
       expect(httpMock.getTrace()).toMatchSnapshot();
     });

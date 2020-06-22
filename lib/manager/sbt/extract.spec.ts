@@ -59,5 +59,24 @@ describe('lib/manager/sbt/extract', () => {
     it('extract deps from native scala file with variables', () => {
       expect(extractPackageFile(sbtDependencyFile)).toMatchSnapshot();
     });
+    it('extracts deps when scala version is defined with a trailing comma', () => {
+      const content = `
+        lazy val commonSettings = Seq(
+          scalaVersion := "2.12.10",
+        )
+        libraryDependencies += "org.example" %% "bar" % "0.0.2"
+      `;
+      expect(extractPackageFile(content)).toMatchSnapshot();
+    });
+    it('extracts deps when scala version is defined in a variable with a trailing comma', () => {
+      const content = `
+        val ScalaVersion = "2.12.10"
+        lazy val commonSettings = Seq(
+          scalaVersion := ScalaVersion,
+        )
+        libraryDependencies += "org.example" %% "bar" % "0.0.2"
+      `;
+      expect(extractPackageFile(content)).toMatchSnapshot();
+    });
   });
 });
