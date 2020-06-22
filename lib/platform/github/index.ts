@@ -965,7 +965,7 @@ export async function getPrList(): Promise<Pr[]> {
       );
     } catch (err) /* istanbul ignore next */ {
       logger.debug({ err }, 'getPrList err');
-      throw new ExternalHostError(err, 'gitlab');
+      throw new ExternalHostError(err, PLATFORM_TYPE_GITHUB);
     }
     config.prList = res.body.map((pr) => ({
       number: pr.number,
