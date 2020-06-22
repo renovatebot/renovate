@@ -14,8 +14,6 @@ import { ExternalHostError } from '../../types/error';
 import { maskToken } from '../mask';
 import { Http, HttpPostOptions, HttpResponse, InternalHttpOptions } from '.';
 
-const hostType = 'github';
-
 let baseUrl = 'https://api.github.com/';
 export const setBaseUrl = (url: string): void => {
   baseUrl = url;
@@ -63,15 +61,15 @@ export function handleGotError(
       err.code === 'EAI_AGAIN')
   ) {
     logger.debug({ err }, 'GitHub failure: RequestError');
-    throw new ExternalHostError(err, hostType);
+    throw new ExternalHostError(err, PLATFORM_TYPE_GITHUB);
   }
   if (err.name === 'ParseError') {
     logger.debug({ err }, '');
-    throw new ExternalHostError(err, hostType);
+    throw new ExternalHostError(err, PLATFORM_TYPE_GITHUB);
   }
   if (err.statusCode >= 500 && err.statusCode < 600) {
     logger.debug({ err }, 'GitHub failure: 5xx');
-    throw new ExternalHostError(err, hostType);
+    throw new ExternalHostError(err, PLATFORM_TYPE_GITHUB);
   }
   if (
     err.statusCode === 403 &&
@@ -108,7 +106,7 @@ export function handleGotError(
       'GitHub failure: Bad credentials'
     );
     if (rateLimit === '60') {
-      throw new ExternalHostError(err, hostType);
+      throw new ExternalHostError(err, PLATFORM_TYPE_GITHUB);
     }
     throw new Error(PLATFORM_BAD_CREDENTIALS);
   }
@@ -125,7 +123,7 @@ export function handleGotError(
       throw new Error(REPOSITORY_CHANGED);
     }
     logger.debug({ err }, '422 Error thrown from GitHub');
-    throw new ExternalHostError(err, hostType);
+    throw new ExternalHostError(err, PLATFORM_TYPE_GITHUB);
   }
   if (err.statusCode === 404) {
     logger.debug({ url: err.url }, 'GitHub 404');
