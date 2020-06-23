@@ -40,54 +40,28 @@ export async function getReleases({
     'https://raw.githubusercontent.com/rust-lang/crates.io-index/master/';
   const crateUrl = baseUrl + path;
   try {
-    let res: any = await http.get(crateUrl);
-    if (!res || !res.body) {
-      logger.warn(
-        { dependency: lookupName },
-        `Received invalid crate data from ${crateUrl}`
-      );
-      return null;
-    }
-    res = res.body;
-    res = res.split('\n');
-    res = res.map((line) => line.trim()).filter((line) => line.length !== 0);
-    if (res.length === 0) {
-      logger.warn(
-        { dependency: lookupName },
-        `Received empty list from ${crateUrl}`
-      );
-      return null;
-    }
-    // Filter empty lines (takes care of trailing \n)
-    // eslint-disable-next-line @typescript-eslint/unbound-method
-    res = res.map(JSON.parse);
-    if (res[0].name !== lookupName) {
-      logger.warn(
-        { dependency: lookupName },
-        `Received invalid crate name from ${crateUrl}`
-      );
-      return null;
-    }
-    if (!res[0].vers) {
-      logger.warn(
-        { dependency: lookupName },
-        `Recieved invalid data (vers field doesn't exist) from ${crateUrl}`
-      );
-      return null;
-    }
+    const lines = (await http.get(crateUrl)).body
+      .split('\n') // break into lines
+      .map((line) => line.trim()) // remove whitespace
+      .filter((line) => line.length !== 0) // remove empty lines
+      .map((line) => JSON.parse(line)); // parse
     const result: ReleaseResult = {
       releases: [],
     };
-    result.releases = res.map((version: { vers: string; yanked: boolean }) => {
-      const release: Release = {
-        version: version.vers,
-      };
-      if (version.yanked) {
-        release.isDeprecated = true;
-      }
-      return release;
-    });
-
+    result.releases = lines
+      .map((version: { vers: string; yanked: boolean }) => {
+        const release: Release = {
+          version: version.vers,
+        };
+        if (version.yanked) {
+          release.isDeprecated = true;
+        }
+        return release;
+      })
+      .filter((release) => release.version);
+    if (!result.releases.length) {
+      return null;
+    }
     const cacheMinutes = 10;
     await globalCache.set(cacheNamespace, cacheKey, result, cacheMinutes);
     return result;
