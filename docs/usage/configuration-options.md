@@ -445,6 +445,23 @@ Example for configuring `docker` auth:
 }
 ```
 
+### abortIgnoreStatusCodes
+
+This field can be used to configure status codes that Renovate ignores and passes through when `abortOnError` is set to `true`. For example to also skip 404 responses then configure the following:
+
+```json
+{
+  "hostRules": [
+    {
+      "abortOnError": true,
+      "abortStatusCodes": [404]
+    }
+  ]
+}
+```
+
+Note that this field is _not_ mergeable, so the last-applied host rule will take precedence.
+
 ### abortOnError
 
 Use this field to configure Renovate to abort runs for custom hosts. By default, Renovate will only abort for known public hosts, which has the downside that transient errors for other hosts can cause autoclosing of PRs.
@@ -487,36 +504,7 @@ To abort Renovate for errors for a specific `docker` host:
 }
 ```
 
-When this field is enabled, Renovate will abort its run if it encounters either (a) any low-level http error (e.g. `ETIMEDOUT`) or (b) receives a response matching any of the configured `abortStatusCodes` (e.g. `500 Internal Error`);
-
-### abortStatusCodes
-
-This field can be used to override the default status codes that Renovate decides should cause an abort. For example to also abort for 401 and 403 responses then configure the following:
-
-```json
-{
-  "hostRules": [
-    {
-      "abortStatusCodes": [
-        401,
-        403,
-        408,
-        413,
-        429,
-        500,
-        502,
-        503,
-        504,
-        521,
-        522,
-        524
-      ]
-    }
-  ]
-}
-```
-
-Note that this field is _not_ mergeable, so if you want to add any status codes to the defaults then you need to include the full list. However, this also means you can make the default list smaller, if needed.
+When this field is enabled, Renovate will abort its run if it encounters either (a) any low-level http error (e.g. `ETIMEDOUT`) or (b) receives a response _not_ matching any of the configured `abortIgnoreStatusCodes` (e.g. `500 Internal Error`);
 
 ### baseUrl
 
