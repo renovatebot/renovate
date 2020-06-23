@@ -30,6 +30,15 @@ function load(datasource: string): Promise<Datasource> {
 
 type GetReleasesInternalConfig = GetReleasesConfig & GetPkgReleasesConfig;
 
+async function getRegistryReleases(
+  datasource,
+  config: GetReleasesConfig,
+  registryUrl: string
+): Promise<ReleaseResult> {
+  const res = await datasource.getReleases({ ...config, registryUrl });
+  return res;
+}
+
 function firstRegistry(
   config: GetReleasesInternalConfig,
   datasource: Datasource,
@@ -42,10 +51,7 @@ function firstRegistry(
     );
   }
   const registryUrl = registryUrls[0];
-  return datasource.getReleases({
-    ...config,
-    registryUrl,
-  });
+  return getRegistryReleases(datasource, config, registryUrl);
 }
 
 async function huntRegistries(
@@ -57,10 +63,7 @@ async function huntRegistries(
   let datasourceError;
   for (const registryUrl of registryUrls) {
     try {
-      res = await datasource.getReleases({
-        ...config,
-        registryUrl,
-      });
+      res = await getRegistryReleases(datasource, config, registryUrl);
       if (res) {
         break;
       }
@@ -89,10 +92,7 @@ async function mergeRegistries(
   let datasourceError;
   for (const registryUrl of registryUrls) {
     try {
-      const res = await datasource.getReleases({
-        ...config,
-        registryUrl,
-      });
+      const res = await getRegistryReleases(datasource, config, registryUrl);
       if (combinedRes) {
         combinedRes = { ...res, ...combinedRes };
         combinedRes.releases = [...combinedRes.releases, ...res.releases];
