@@ -1,7 +1,7 @@
 import crypto from 'crypto';
 import URL from 'url';
 import got from 'got';
-import { ExternalHostError } from '../../types/error';
+import { ExternalHostError } from '../../types/errors/external-host-error';
 import * as runCache from '../cache/run';
 import { clone } from '../clone';
 import { applyAuthorization } from './auth';

@@ -1,6 +1,6 @@
 import url from 'url';
 import { logger } from '../../logger';
-import { ExternalHostError } from '../../types/error';
+import { ExternalHostError } from '../../types/errors/external-host-error';
 import { Http } from '../../util/http';
 
 import { MAVEN_REPO, id } from './common';

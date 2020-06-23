@@ -26,7 +26,7 @@ import {
   SYSTEM_INSUFFICIENT_MEMORY,
   UNKNOWN_ERROR,
 } from '../../constants/error-messages';
-import { ExternalHostError } from '../../types/error';
+import { ExternalHostError } from '../../types/errors/external-host-error';
 import handleError from './error';
 
 jest.mock('./error-config');

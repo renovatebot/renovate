@@ -9,7 +9,7 @@ import {
 import { logger } from '../../logger';
 import { PlatformPrOptions, Pr, platform } from '../../platform';
 import { BranchStatus } from '../../types';
-import { ExternalHostError } from '../../types/error';
+import { ExternalHostError } from '../../types/errors/external-host-error';
 import { BranchConfig, PrResult } from '../common';
 import { getPrBody } from './body';
 import { ChangeLogError } from './changelog';

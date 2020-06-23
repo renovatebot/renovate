@@ -1,6 +1,6 @@
 import * as httpMock from '../../../test/httpMock';
 import { getName } from '../../../test/util';
-import { ExternalHostError } from '../../types/error';
+import { ExternalHostError } from '../../types/errors/external-host-error';
 import { getDependency, resetMemCache } from './get';
 import { setNpmrc } from './npmrc';
 

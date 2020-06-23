@@ -6,7 +6,7 @@ import moment from 'moment';
 import registryAuthToken from 'registry-auth-token';
 import getRegistryUrl from 'registry-auth-token/registry-url';
 import { logger } from '../../logger';
-import { ExternalHostError } from '../../types/error';
+import { ExternalHostError } from '../../types/errors/external-host-error';
 import * as globalCache from '../../util/cache/global';
 import { find } from '../../util/host-rules';
 import { Http, HttpOptions } from '../../util/http';

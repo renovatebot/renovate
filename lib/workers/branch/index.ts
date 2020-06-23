@@ -22,7 +22,7 @@ import { logger } from '../../logger';
 import { getAdditionalFiles } from '../../manager/npm/post-update';
 import { platform } from '../../platform';
 import { BranchStatus } from '../../types';
-import { ExternalHostError } from '../../types/error';
+import { ExternalHostError } from '../../types/errors/external-host-error';
 import { emojify } from '../../util/emoji';
 import { exec } from '../../util/exec';
 import { readLocalFile, writeLocalFile } from '../../util/fs';

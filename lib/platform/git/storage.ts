@@ -10,7 +10,7 @@ import {
   SYSTEM_INSUFFICIENT_DISK_SPACE,
 } from '../../constants/error-messages';
 import { logger } from '../../logger';
-import { ExternalHostError } from '../../types/error';
+import { ExternalHostError } from '../../types/errors/external-host-error';
 import * as limits from '../../workers/global/limits';
 import { CommitFilesConfig } from '../common';
 import { writePrivateKey } from './private-key';

@@ -6,7 +6,7 @@ import parseLinkHeader from 'parse-link-header';
 import wwwAuthenticate from 'www-authenticate';
 import { logger } from '../../logger';
 import { HostRule } from '../../types';
-import { ExternalHostError } from '../../types/error';
+import { ExternalHostError } from '../../types/errors/external-host-error';
 import * as globalCache from '../../util/cache/global';
 import * as hostRules from '../../util/host-rules';
 import { Http, HttpResponse } from '../../util/http';

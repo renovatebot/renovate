@@ -6,7 +6,7 @@ import { SYSTEM_INSUFFICIENT_DISK_SPACE } from '../../../constants/error-message
 import { id as npmId } from '../../../datasource/npm';
 import { logger } from '../../../logger';
 import { platform } from '../../../platform';
-import { ExternalHostError } from '../../../types/error';
+import { ExternalHostError } from '../../../types/errors/external-host-error';
 import { getChildProcessEnv } from '../../../util/exec/env';
 import { deleteLocalFile } from '../../../util/fs';
 import * as hostRules from '../../../util/host-rules';

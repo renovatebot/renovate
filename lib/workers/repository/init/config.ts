@@ -11,7 +11,7 @@ import { CONFIG_VALIDATION } from '../../../constants/error-messages';
 import * as npmApi from '../../../datasource/npm';
 import { logger } from '../../../logger';
 import { platform } from '../../../platform';
-import { ExternalHostError } from '../../../types/error';
+import { ExternalHostError } from '../../../types/errors/external-host-error';
 import { readLocalFile } from '../../../util/fs';
 import * as hostRules from '../../../util/host-rules';
 import { flattenPackageRules } from './flatten';

@@ -1,5 +1,5 @@
 import { logger } from '../../../logger';
-import { ExternalHostError } from '../../../types/error';
+import { ExternalHostError } from '../../../types/errors/external-host-error';
 import type { GitLabBranch } from '../../../types/platform/gitlab';
 import { GitlabHttp } from '../../../util/http/gitlab';
 import { Preset, PresetConfig } from '../common';

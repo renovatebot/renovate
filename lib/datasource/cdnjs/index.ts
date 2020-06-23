@@ -1,5 +1,5 @@
 import { logger } from '../../logger';
-import { ExternalHostError } from '../../types/error';
+import { ExternalHostError } from '../../types/errors/external-host-error';
 import { Http } from '../../util/http';
 import { CachePromise, cacheAble } from '../cache';
 import { GetReleasesConfig, ReleaseResult } from '../common';

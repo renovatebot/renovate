@@ -1,6 +1,6 @@
 import { mocked } from '../../test/util';
 import { EXTERNAL_HOST_ERROR } from '../constants/error-messages';
-import { ExternalHostError } from '../types/error';
+import { ExternalHostError } from '../types/errors/external-host-error';
 import { loadModules } from '../util/modules';
 import * as datasourceDocker from './docker';
 import * as datasourceGithubTags from './github-tags';

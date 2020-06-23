@@ -2,7 +2,7 @@ import URL from 'url';
 
 import pAll from 'p-all';
 import { logger } from '../../logger';
-import { ExternalHostError } from '../../types/error';
+import { ExternalHostError } from '../../types/errors/external-host-error';
 import * as globalCache from '../../util/cache/global';
 import * as runCache from '../../util/cache/run';
 import * as hostRules from '../../util/host-rules';

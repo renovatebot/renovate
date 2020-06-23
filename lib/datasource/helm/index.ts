@@ -1,7 +1,7 @@
 import yaml from 'js-yaml';
 
 import { logger } from '../../logger';
-import { ExternalHostError } from '../../types/error';
+import { ExternalHostError } from '../../types/errors/external-host-error';
 import * as globalCache from '../../util/cache/global';
 import { Http } from '../../util/http';
 import { ensureTrailingSlash } from '../../util/url';

@@ -1,7 +1,7 @@
 import is from '@sindresorhus/is';
 import { CONFIG_VALIDATION } from '../../constants/error-messages';
 import { logger } from '../../logger';
-import { ExternalHostError } from '../../types/error';
+import { ExternalHostError } from '../../types/errors/external-host-error';
 import { regEx } from '../../util/regex';
 import { RenovateConfig } from '../common';
 import * as massage from '../massage';

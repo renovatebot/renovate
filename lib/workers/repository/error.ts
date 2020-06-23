@@ -28,7 +28,7 @@ import {
   UNKNOWN_ERROR,
 } from '../../constants/error-messages';
 import { logger } from '../../logger';
-import { ExternalHostError } from '../../types/error';
+import { ExternalHostError } from '../../types/errors/external-host-error';
 import { raiseConfigWarningIssue } from './error-config';
 
 export default async function handleError(

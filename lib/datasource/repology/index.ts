@@ -1,6 +1,6 @@
 import { URLSearchParams } from 'url';
 import { logger } from '../../logger';
-import { ExternalHostError } from '../../types/error';
+import { ExternalHostError } from '../../types/errors/external-host-error';
 import * as globalCache from '../../util/cache/global';
 import { Http } from '../../util/http';
 import { GetReleasesConfig, ReleaseResult } from '../common';

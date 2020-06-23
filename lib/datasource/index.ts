@@ -1,7 +1,7 @@
 import is from '@sindresorhus/is';
 import _ from 'lodash';
 import { logger } from '../logger';
-import { ExternalHostError } from '../types/error';
+import { ExternalHostError } from '../types/errors/external-host-error';
 import * as runCache from '../util/cache/run';
 import { clone } from '../util/clone';
 import * as allVersioning from '../versioning';

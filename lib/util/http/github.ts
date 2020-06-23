@@ -10,7 +10,7 @@ import {
 } from '../../constants/error-messages';
 import { PLATFORM_TYPE_GITHUB } from '../../constants/platforms';
 import { logger } from '../../logger';
-import { ExternalHostError } from '../../types/error';
+import { ExternalHostError } from '../../types/errors/external-host-error';
 import { maskToken } from '../mask';
 import { Http, HttpPostOptions, HttpResponse, InternalHttpOptions } from '.';
 

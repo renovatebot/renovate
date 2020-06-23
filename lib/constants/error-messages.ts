@@ -35,6 +35,7 @@ export const MANAGER_NO_PACKAGE_FILES = 'no-package-files';
 
 // Host error
 export const EXTERNAL_HOST_ERROR = 'external-host-error';
+export const IGNORABLE_HOST_ERROR = 'ignorable-host-error';
 
 // Worker Error
 export const WORKER_FILE_UPDATE_FAILED = 'update-failure';

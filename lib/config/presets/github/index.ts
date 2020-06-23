@@ -1,6 +1,6 @@
 import { PLATFORM_TYPE_GITHUB } from '../../../constants/platforms';
 import { logger } from '../../../logger';
-import { ExternalHostError } from '../../../types/error';
+import { ExternalHostError } from '../../../types/errors/external-host-error';
 import { Http, HttpOptions } from '../../../util/http';
 import { Preset, PresetConfig } from '../common';
 import { PRESET_DEP_NOT_FOUND, fetchPreset } from '../util';
