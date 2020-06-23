@@ -1,6 +1,7 @@
 import crypto from 'crypto';
 import URL from 'url';
 import got from 'got';
+import { ExternalHostError } from '../../types/error';
 import * as runCache from '../cache/run';
 import { clone } from '../clone';
 import { applyAuthorization } from './auth';
@@ -39,6 +40,21 @@ function cloneResponse<T>(response: any): HttpResponse<T> {
     body: clone<T>(response.body),
     headers: clone(response.headers),
   };
+}
+
+async function resolveResponse<T>(
+  promisedRes: Promise<HttpResponse<T>>,
+  { abortOnError, abortIgnoreStatusCodes }
+): Promise<HttpResponse<T>> {
+  try {
+    const res = await promisedRes;
+    return cloneResponse(res);
+  } catch (err) {
+    if (abortOnError && !abortIgnoreStatusCodes?.includes(err.statusCode)) {
+      throw new ExternalHostError(err);
+    }
+    throw err;
+  }
 }
 
 export class Http<GetOptions = HttpOptions, PostOptions = HttpPostOptions> {
@@ -102,7 +118,7 @@ export class Http<GetOptions = HttpOptions, PostOptions = HttpPostOptions> {
       const cachedRes = runCache.get(cacheKey);
       // istanbul ignore if
       if (cachedRes) {
-        return cloneResponse<T>(await cachedRes);
+        return resolveResponse<T>(cachedRes, options);
       }
     }
     const startTime = Date.now();
@@ -110,7 +126,7 @@ export class Http<GetOptions = HttpOptions, PostOptions = HttpPostOptions> {
     if (options.method === 'get') {
       runCache.set(cacheKey, promisedRes); // always set if it's a get
     }
-    const res = await promisedRes;
+    const res = await resolveResponse<T>(promisedRes, options);
     const httpRequests = runCache.get('http-requests') || [];
     httpRequests.push({
       method: options.method,
@@ -118,7 +134,7 @@ export class Http<GetOptions = HttpOptions, PostOptions = HttpPostOptions> {
       duration: Date.now() - startTime,
     });
     runCache.set('http-requests', httpRequests);
-    return cloneResponse<T>(res);
+    return res;
   }
 
   get(url: string, options: HttpOptions = {}): Promise<HttpResponse> {
