@@ -34,6 +34,21 @@ export interface HttpResponse<T = string> {
   headers: any;
 }
 
+async function resolveResponse<T>(
+  promisedRes: Promise<HttpResponse<T>>,
+  { abortOnError, abortIgnoreStatusCodes }
+): Promise<HttpResponse<T>> {
+  try {
+    const res = await promisedRes;
+    return res;
+  } catch (err) {
+    if (abortOnError && !abortIgnoreStatusCodes?.includes(err.statusCode)) {
+      throw new ExternalHostError(err);
+    }
+    throw err;
+  }
+}
+
 function cloneResponse<T>(response: any): HttpResponse<T> {
   // clone body and headers so that the cached result doesn't get accidentally mutated
   return {
@@ -103,7 +118,7 @@ export class Http<GetOptions = HttpOptions, PostOptions = HttpPostOptions> {
       const cachedRes = runCache.get(cacheKey);
       // istanbul ignore if
       if (cachedRes) {
-        return cloneResponse<T>(await cachedRes);
+        return cloneResponse<T>(await resolveResponse<T>(cachedRes, options));
       }
     }
     const startTime = Date.now();
@@ -111,26 +126,15 @@ export class Http<GetOptions = HttpOptions, PostOptions = HttpPostOptions> {
     if (options.method === 'get') {
       runCache.set(cacheKey, promisedRes); // always set if it's a get
     }
-    // TODO: make this try/catch shared with the earlier cachedRes
-    try {
-      const res = await promisedRes;
-      const httpRequests = runCache.get('http-requests') || [];
-      httpRequests.push({
-        method: options.method,
-        url,
-        duration: Date.now() - startTime,
-      });
-      runCache.set('http-requests', httpRequests);
-      return cloneResponse<T>(res);
-    } catch (err) {
-      if (
-        options.abortOnError &&
-        !options.abortIgnoreStatusCodes?.includes(err.statusCode)
-      ) {
-        throw new ExternalHostError(err);
-      }
-      throw err;
-    }
+    const res = await resolveResponse<T>(promisedRes, options);
+    const httpRequests = runCache.get('http-requests') || [];
+    httpRequests.push({
+      method: options.method,
+      url,
+      duration: Date.now() - startTime,
+    });
+    runCache.set('http-requests', httpRequests);
+    return cloneResponse<T>(res);
   }
 
   get(url: string, options: HttpOptions = {}): Promise<HttpResponse> {
