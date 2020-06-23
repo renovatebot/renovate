@@ -21,7 +21,7 @@ export function applyHostRules(url: string, inOptions: any): any {
     options.token = token;
   }
   // Apply optional params
-  ['abortOnError', 'abortStatusCodes', 'timeout'].forEach((param) => {
+  ['abortOnError', 'abortIgnoreStatusCodes', 'timeout'].forEach((param) => {
     if (foundRules[param]) {
       options[param] = foundRules[param];
     }

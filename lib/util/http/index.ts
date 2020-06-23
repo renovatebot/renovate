@@ -125,7 +125,7 @@ export class Http<GetOptions = HttpOptions, PostOptions = HttpPostOptions> {
     } catch (err) {
       if (
         options.abortOnError &&
-        options.abortStatusCodes?.includes(err.statusCode)
+        !options.abortIgnoreStatusCodes?.includes(err.statusCode)
       ) {
         throw new ExternalHostError(err);
       }

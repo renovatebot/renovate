@@ -1631,14 +1631,13 @@ const options: RenovateOptions[] = [
     env: false,
   },
   {
-    name: 'abortStatusCodes',
+    name: 'abortIgnoreStatusCodes',
     description:
-      'A list of HTTP status codes to trigger a run abort if received.',
+      'A list of HTTP status codes to ignore and *not* abort the run because of when abortOnError=true.',
     type: 'array',
     subType: 'number',
     stage: 'repository',
     parent: 'hostRules',
-    default: [408, 413, 429, 500, 502, 503, 504, 521, 522, 524],
     cli: false,
     env: false,
   },

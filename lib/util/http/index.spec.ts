@@ -26,12 +26,19 @@ describe(getName(__filename), () => {
     );
     expect(nock.isDone()).toBe(true);
   });
-  it('converts 429 error to ExternalHostError', async () => {
-    nock(baseUrl).get('/test').reply(429);
-    // TODO: set abortStatusCodes default value
-    hostRules.add({ abortOnError: true, abortStatusCodes: [429] });
+  it('converts 404 error to ExternalHostError', async () => {
+    nock(baseUrl).get('/test').reply(404);
+    hostRules.add({ abortOnError: true });
     await expect(http.get('http://renovate.com/test')).rejects.toThrow(
       EXTERNAL_HOST_ERROR
+    );
+    expect(nock.isDone()).toBe(true);
+  });
+  it('ignores 404 error and does not throw ExternalHostError', async () => {
+    nock(baseUrl).get('/test').reply(404);
+    hostRules.add({ abortOnError: true, abortIgnoreStatusCodes: [404] });
+    await expect(http.get('http://renovate.com/test')).rejects.toThrow(
+      'Response code 404 (Not Found)'
     );
     expect(nock.isDone()).toBe(true);
   });
