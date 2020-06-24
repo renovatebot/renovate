@@ -9,7 +9,7 @@ function getKey(namespace: string, key: string): string {
 
 let cacheFileName: string;
 
-export async function rm(namespace: string, key: string): Promise<void> {
+async function rm(namespace: string, key: string): Promise<void> {
   logger.trace({ namespace, key }, 'Removing cache entry');
   await cacache.rm.entry(cacheFileName, getKey(namespace, key));
 }
@@ -18,6 +18,9 @@ export async function get<T = never>(
   namespace: string,
   key: string
 ): Promise<T> {
+  if (!cacheFileName) {
+    return undefined;
+  }
   try {
     const res = await cacache.get(cacheFileName, getKey(namespace, key));
     const cachedValue = JSON.parse(res.data.toString());
@@ -40,6 +43,9 @@ export async function set(
   value: unknown,
   ttlMinutes = 5
 ): Promise<void> {
+  if (!cacheFileName) {
+    return;
+  }
   logger.trace({ namespace, key, ttlMinutes }, 'Saving cached value');
   await cacache.put(
     cacheFileName,

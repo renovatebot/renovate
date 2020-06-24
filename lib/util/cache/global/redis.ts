@@ -17,7 +17,7 @@ export function end(): void {
   }
 }
 
-export async function rm(namespace: string, key: string): Promise<void> {
+async function rm(namespace: string, key: string): Promise<void> {
   logger.trace({ namespace, key }, 'Removing cache entry');
   await client?.del(getKey(namespace, key));
 }
@@ -26,6 +26,9 @@ export async function get<T = never>(
   namespace: string,
   key: string
 ): Promise<T> {
+  if (!client) {
+    return undefined;
+  }
   logger.trace(`cache.get(${namespace}, ${key})`);
   try {
     const res = await client?.get(getKey(namespace, key));
