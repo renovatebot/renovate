@@ -1,6 +1,6 @@
 import { mocked } from '../../../../test/util';
 import * as _branchify from '../updates/branchify';
-import { extract, update } from './extract-update';
+import { extract, lookup, update } from './extract-update';
 
 jest.mock('./write');
 jest.mock('./sort');
@@ -22,7 +22,8 @@ describe('workers/repository/process/extract-update', () => {
         repoIsOnboarded: true,
         suppressNotifications: ['deprecationWarningIssues'],
       };
-      const res = await extract(config);
+      const packageFiles = await extract(config);
+      const res = await lookup(config, packageFiles);
       expect(res).toMatchSnapshot();
       await expect(update(config, res.branches)).resolves.not.toThrow();
     });

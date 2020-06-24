@@ -44,7 +44,9 @@ function extractStats(packageFiles: Record<string, PackageFile[]>): any {
   return stats;
 }
 
-export async function extract(config: RenovateConfig): Promise<ExtractResult> {
+export async function extract(
+  config: RenovateConfig
+): Promise<Record<string, PackageFile[]>> {
   logger.debug('extractAndUpdate()');
   const packageFiles = await extractAllDependencies(config);
   const stats = extractStats(packageFiles);
@@ -56,6 +58,13 @@ export async function extract(config: RenovateConfig): Promise<ExtractResult> {
     config.baseBranches?.length ? `extract:${config.baseBranch}` : 'extract'
   );
   logger.trace({ config: packageFiles }, 'packageFiles');
+  return packageFiles;
+}
+
+export async function lookup(
+  config: RenovateConfig,
+  packageFiles: Record<string, PackageFile[]>
+): Promise<ExtractResult> {
   await fetchUpdates(config, packageFiles);
   logger.debug({ config: packageFiles }, 'packageFiles with updates');
   await raiseDeprecationWarnings(config, packageFiles);
