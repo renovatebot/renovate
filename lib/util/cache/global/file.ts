@@ -7,16 +7,19 @@ function getKey(namespace: string, key: string): string {
   return `${namespace}-${key}`;
 }
 
-let renovateCache: string;
+let cacheFileName: string;
 
-async function rm(namespace: string, key: string): Promise<void> {
+export async function rm(namespace: string, key: string): Promise<void> {
   logger.trace({ namespace, key }, 'Removing cache entry');
-  await cacache.rm.entry(renovateCache, getKey(namespace, key));
+  await cacache.rm.entry(cacheFileName, getKey(namespace, key));
 }
 
-async function get<T = never>(namespace: string, key: string): Promise<T> {
+export async function get<T = never>(
+  namespace: string,
+  key: string
+): Promise<T> {
   try {
-    const res = await cacache.get(renovateCache, getKey(namespace, key));
+    const res = await cacache.get(cacheFileName, getKey(namespace, key));
     const cachedValue = JSON.parse(res.data.toString());
     if (cachedValue) {
       if (DateTime.local() < DateTime.fromISO(cachedValue.expiry)) {
@@ -31,7 +34,7 @@ async function get<T = never>(namespace: string, key: string): Promise<T> {
   return undefined;
 }
 
-async function set(
+export async function set(
   namespace: string,
   key: string,
   value: unknown,
@@ -39,7 +42,7 @@ async function set(
 ): Promise<void> {
   logger.trace({ namespace, key, ttlMinutes }, 'Saving cached value');
   await cacache.put(
-    renovateCache,
+    cacheFileName,
     getKey(namespace, key),
     JSON.stringify({
       value,
@@ -49,7 +52,6 @@ async function set(
 }
 
 export function init(cacheDir: string): void {
-  renovateCache = path.join(cacheDir, '/renovate/renovate-cache-v1');
-  logger.debug('Initializing Renovate internal cache into ' + renovateCache);
-  global.renovateCache = global.renovateCache || { get, set, rm };
+  cacheFileName = path.join(cacheDir, '/renovate/renovate-cache-v1');
+  logger.debug('Initializing Renovate internal cache into ' + cacheFileName);
 }

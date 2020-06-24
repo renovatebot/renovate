@@ -1,5 +1,5 @@
 import os from 'os';
-import { init } from './file';
+import { get, init, set } from './file';
 
 describe('lib/util/cache/global/file', () => {
   beforeAll(() => {
@@ -7,18 +7,16 @@ describe('lib/util/cache/global/file', () => {
   });
 
   it('gets null', async () => {
-    expect(
-      await global.renovateCache.get('test', 'missing-key')
-    ).toBeUndefined();
+    expect(await get('test', 'missing-key')).toBeUndefined();
   });
 
   it('sets and gets', async () => {
-    await global.renovateCache.set('test', 'key', 1234);
-    expect(await global.renovateCache.get('test', 'key')).toBe(1234);
+    await set('test', 'key', 1234);
+    expect(await get('test', 'key')).toBe(1234);
   });
 
   it('expires', async () => {
-    await global.renovateCache.set('test', 'key', 1234, -5);
-    expect(await global.renovateCache.get('test', 'key')).toBeUndefined();
+    await set('test', 'key', 1234, -5);
+    expect(await get('test', 'key')).toBeUndefined();
   });
 });

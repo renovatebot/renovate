@@ -17,12 +17,15 @@ export function end(): void {
   }
 }
 
-async function rm(namespace: string, key: string): Promise<void> {
+export async function rm(namespace: string, key: string): Promise<void> {
   logger.trace({ namespace, key }, 'Removing cache entry');
   await client?.del(getKey(namespace, key));
 }
 
-async function get<T = never>(namespace: string, key: string): Promise<T> {
+export async function get<T = never>(
+  namespace: string,
+  key: string
+): Promise<T> {
   logger.trace(`cache.get(${namespace}, ${key})`);
   try {
     const res = await client?.get(getKey(namespace, key));
@@ -41,7 +44,7 @@ async function get<T = never>(namespace: string, key: string): Promise<T> {
   return undefined;
 }
 
-async function set(
+export async function set(
   namespace: string,
   key: string,
   value: unknown,
@@ -73,5 +76,4 @@ export function init(url: string): void {
       return Math.min(options.attempt * 100, 3000);
     },
   });
-  global.renovateCache = { get, set, rm };
 }
