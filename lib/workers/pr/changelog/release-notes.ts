@@ -4,7 +4,7 @@ import { linkify } from 'linkify-markdown';
 import MarkdownIt from 'markdown-it';
 
 import { logger } from '../../../logger';
-import * as globalCache from '../../../util/cache/global';
+import * as packageCache from '../../../util/cache/package';
 import * as runCache from '../../../util/cache/run';
 import { GithubHttp } from '../../../util/http/github';
 import { GitlabHttp } from '../../../util/http/gitlab';
@@ -354,7 +354,7 @@ export async function addReleaseNotes(
   for (const v of input.versions) {
     let releaseNotes: ChangeLogNotes;
     const cacheKey = getCacheKey(v.version);
-    releaseNotes = await globalCache.get(cacheNamespace, cacheKey);
+    releaseNotes = await packageCache.get(cacheNamespace, cacheKey);
     if (!releaseNotes) {
       if (input.project.github != null) {
         releaseNotes = await getReleaseNotesMd(
@@ -385,7 +385,7 @@ export async function addReleaseNotes(
         releaseNotes = { url: v.compare.url };
       }
       const cacheMinutes = 55;
-      await globalCache.set(
+      await packageCache.set(
         cacheNamespace,
         cacheKey,
         releaseNotes,

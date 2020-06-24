@@ -2,7 +2,7 @@ import yaml from 'js-yaml';
 
 import { logger } from '../../logger';
 import { ExternalHostError } from '../../types/errors/external-host-error';
-import * as globalCache from '../../util/cache/global';
+import * as packageCache from '../../util/cache/package';
 import { Http } from '../../util/http';
 import { ensureTrailingSlash } from '../../util/url';
 import { GetReleasesConfig, ReleaseResult } from '../common';
@@ -21,7 +21,7 @@ export async function getRepositoryData(
 ): Promise<ReleaseResult[]> {
   const cacheNamespace = 'datasource-helm';
   const cacheKey = repository;
-  const cachedIndex = await globalCache.get(cacheNamespace, cacheKey);
+  const cachedIndex = await packageCache.get(cacheNamespace, cacheKey);
   // istanbul ignore if
   if (cachedIndex) {
     return cachedIndex;
@@ -92,7 +92,7 @@ export async function getRepositoryData(
       })
     );
     const cacheMinutes = 20;
-    await globalCache.set(cacheNamespace, cacheKey, result, cacheMinutes);
+    await packageCache.set(cacheNamespace, cacheKey, result, cacheMinutes);
     return result;
   } catch (err) {
     logger.warn(`Failed to parse index.yaml from ${repository}`);

@@ -1,6 +1,6 @@
 import { logger } from '../../logger';
 import { ExternalHostError } from '../../types/errors/external-host-error';
-import * as globalCache from '../../util/cache/global';
+import * as packageCache from '../../util/cache/package';
 import { Http } from '../../util/http';
 import { GetReleasesConfig, ReleaseResult } from '../common';
 
@@ -66,7 +66,7 @@ export async function getReleases({
   );
   const cacheNamespace = 'terraform-module';
   const pkgUrl = `${registry}/v1/modules/${repository}`;
-  const cachedResult = await globalCache.get<ReleaseResult>(
+  const cachedResult = await packageCache.get<ReleaseResult>(
     cacheNamespace,
     pkgUrl
   );
@@ -98,7 +98,7 @@ export async function getReleases({
     }
     logger.trace({ dep }, 'dep');
     const cacheMinutes = 30;
-    await globalCache.set(cacheNamespace, pkgUrl, dep, cacheMinutes);
+    await packageCache.set(cacheNamespace, pkgUrl, dep, cacheMinutes);
     return dep;
   } catch (err) {
     if (err.statusCode === 404 || err.code === 'ENOTFOUND') {

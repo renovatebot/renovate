@@ -1,10 +1,10 @@
 import { RenovateConfig } from '../../../config/common';
 import * as runCache from '../run';
-import { GlobalCache } from './common';
+import { PackageCache } from './common';
 import * as fileCache from './file';
 import * as redisCache from './redis';
 
-let cacheProxy: GlobalCache;
+let cacheProxy: PackageCache;
 
 function getGlobalKey(namespace: string, key: string): string {
   return `global%%${namespace}%%${key}`;

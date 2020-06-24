@@ -1,7 +1,7 @@
 import { parse } from 'node-html-parser';
 
 import { ExternalHostError } from '../../types/errors/external-host-error';
-import * as globalCache from '../../util/cache/global';
+import * as packageCache from '../../util/cache/package';
 import { Http } from '../../util/http';
 import { isVersion } from '../../versioning/ruby';
 import { GetReleasesConfig, ReleaseResult } from '../common';
@@ -17,7 +17,7 @@ export async function getReleases(
 ): Promise<ReleaseResult> {
   // First check the persistent cache
   const cacheNamespace = 'datasource-ruby-version';
-  const cachedResult = await globalCache.get<ReleaseResult>(
+  const cachedResult = await packageCache.get<ReleaseResult>(
     cacheNamespace,
     'all'
   );
@@ -49,7 +49,7 @@ export async function getReleases(
         }
       }
     }
-    await globalCache.set(cacheNamespace, 'all', res, 15);
+    await packageCache.set(cacheNamespace, 'all', res, 15);
     return res;
   } catch (err) {
     throw new ExternalHostError(err);

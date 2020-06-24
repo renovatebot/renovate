@@ -1,6 +1,6 @@
 import { logger } from '../../logger';
 import { ExternalHostError } from '../../types/errors/external-host-error';
-import * as globalCache from '../../util/cache/global';
+import * as packageCache from '../../util/cache/package';
 import { Http } from '../../util/http';
 import { GetReleasesConfig, Release, ReleaseResult } from '../common';
 
@@ -13,7 +13,7 @@ export async function getReleases({
 }: GetReleasesConfig): Promise<ReleaseResult | null> {
   const cacheNamespace = 'datasource-crate';
   const cacheKey = lookupName;
-  const cachedResult = await globalCache.get<ReleaseResult>(
+  const cachedResult = await packageCache.get<ReleaseResult>(
     cacheNamespace,
     cacheKey
   );
@@ -63,7 +63,7 @@ export async function getReleases({
       return null;
     }
     const cacheMinutes = 10;
-    await globalCache.set(cacheNamespace, cacheKey, result, cacheMinutes);
+    await packageCache.set(cacheNamespace, cacheKey, result, cacheMinutes);
     return result;
   } catch (err) {
     if (err.statusCode === 404 || err.code === 'ENOTFOUND') {

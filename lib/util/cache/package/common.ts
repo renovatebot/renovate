@@ -1,4 +1,4 @@
-export interface GlobalCache {
+export interface PackageCache {
   get<T = any>(namespace: string, key: string): Promise<T>;
 
   set<T = any>(

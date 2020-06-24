@@ -4,7 +4,7 @@ import fs from 'fs-extra';
 import { RenovateConfig } from '../../config/common';
 import { logger } from '../../logger';
 import { initPlatform } from '../../platform';
-import * as globalCache from '../../util/cache/global';
+import * as packageCache from '../../util/cache/package';
 import { setEmojiConfig } from '../../util/emoji';
 import * as limits from './limits';
 
@@ -34,12 +34,12 @@ export async function globalInitialize(
   let config = config_;
   config = await initPlatform(config);
   config = await setDirectories(config);
-  globalCache.init(config);
+  packageCache.init(config);
   limits.init(config);
   setEmojiConfig(config);
   return config;
 }
 
 export function globalFinalize(config: RenovateConfig): void {
-  globalCache.cleanup(config);
+  packageCache.cleanup(config);
 }
