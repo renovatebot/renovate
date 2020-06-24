@@ -20,7 +20,7 @@ Array [
     },
   },
   Object {
-    "cmd": "lerna bootstrap --no-ci -- --ignore-scripts  --no-audit --package-lock-only",
+    "cmd": "lerna bootstrap --no-ci --  --no-audit --package-lock-only",
     "options": Object {
       "cwd": "some-dir",
       "encoding": "utf-8",

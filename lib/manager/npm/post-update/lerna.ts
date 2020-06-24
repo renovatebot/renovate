@@ -55,11 +55,12 @@ export async function generateLockFiles(
       logger.warn({ lernaClient }, 'Unknown lernaClient');
       return { error: false };
     }
-    let lernaCommand = `lerna bootstrap --no-ci --ignore-scripts -- ${cmdOptions}`;
+    let lernaCommand = `lerna bootstrap --no-ci --ignore-scripts -- `;
     if (global.trustLevel === 'high' && config.ignoreScripts !== false) {
       cmdOptions = cmdOptions.replace('--ignore-scripts ', '');
       lernaCommand = lernaCommand.replace('--ignore-scripts ', '');
     }
+    lernaCommand += cmdOptions;
     const tagConstraint = await getNodeConstraint(config);
     const execOptions: ExecOptions = {
       cwd,
