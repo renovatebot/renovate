@@ -2,11 +2,10 @@ import { RenovateConfig, mergeChildConfig } from '../../../config';
 import { logger } from '../../../logger';
 import { PackageFile } from '../../../manager/common';
 import { platform } from '../../../platform';
+import { addSplit } from '../../../util/split';
 import { BranchConfig } from '../../common';
 import { ExtractResult, extract, lookup, update } from './extract-update';
 import { WriteUpdateResult } from './write';
-import { addSplit } from '../../../util/split';
-import delay from 'delay';
 
 async function setBaseBranch(
   baseBranch: string,
