@@ -457,4 +457,14 @@ describe('semver.getNewValue()', () => {
       })
     ).toEqual('~2');
   });
+  it('widens range', () => {
+    expect(
+      semver.getNewValue({
+        currentValue: '^2.2',
+        rangeStrategy: 'widen',
+        fromVersion: '2.2.0',
+        toVersion: '3.0.0',
+      })
+    ).toEqual('^2.2 || ^3.0.0');
+  });
 });
