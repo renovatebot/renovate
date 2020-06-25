@@ -1,4 +1,3 @@
-import { logger } from '../../logger';
 import * as packageCache from '../../util/cache/package';
 import { GithubHttp } from '../../util/http/github';
 import { GetReleasesConfig, ReleaseResult } from '../common';
@@ -27,7 +26,6 @@ type GithubRelease = {
 export async function getReleases({
   lookupName: repo,
 }: GetReleasesConfig): Promise<ReleaseResult | null> {
-  let githubReleases: GithubRelease[];
   const cachedResult = await packageCache.get<ReleaseResult>(
     cacheNamespace,
     repo
@@ -36,19 +34,11 @@ export async function getReleases({
   if (cachedResult) {
     return cachedResult;
   }
-  try {
-    const url = `https://api.github.com/repos/${repo}/releases?per_page=100`;
-    const res = await http.getJson<GithubRelease[]>(url, {
-      paginate: true,
-    });
-    githubReleases = res.body;
-  } catch (err) /* istanbul ignore next */ {
-    logger.debug({ repo, err }, 'Error retrieving from github');
-  }
-  // istanbul ignore if
-  if (!githubReleases) {
-    return null;
-  }
+  const url = `https://api.github.com/repos/${repo}/releases?per_page=100`;
+  const res = await http.getJson<GithubRelease[]>(url, {
+    paginate: true,
+  });
+  const githubReleases = res.body;
   const dependency: ReleaseResult = {
     sourceUrl: 'https://github.com/' + repo,
     releases: null,

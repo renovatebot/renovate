@@ -101,25 +101,11 @@ export async function getReleases({
     await packageCache.set(cacheNamespace, pkgUrl, dep, cacheMinutes);
     return dep;
   } catch (err) {
-    if (err.statusCode === 404 || err.code === 'ENOTFOUND') {
-      logger.debug(
-        { lookupName },
-        `Terraform registry lookup failure: not found`
-      );
-      logger.debug({
-        err,
-      });
-      return null;
-    }
     const failureCodes = ['EAI_AGAIN'];
     // istanbul ignore if
     if (failureCodes.includes(err.code)) {
       throw new ExternalHostError(err);
     }
-    logger.warn(
-      { err, lookupName },
-      'Terraform registry failure: Unknown error'
-    );
-    return null;
+    throw err;
   }
 }

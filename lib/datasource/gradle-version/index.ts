@@ -1,4 +1,3 @@
-import { logger } from '../../logger';
 import { ExternalHostError } from '../../types/errors/external-host-error';
 import { Http } from '../../util/http';
 import { regEx } from '../../util/regex';
@@ -53,8 +52,7 @@ export async function getReleases({
     if (err.host === 'services.gradle.org') {
       throw new ExternalHostError(err);
     }
-    logger.debug({ err }, 'gradle-version err');
-    return null;
+    throw err;
   }
 
   const res: ReleaseResult = {
