@@ -30,6 +30,18 @@ function load(datasource: string): Promise<Datasource> {
 
 type GetReleasesInternalConfig = GetReleasesConfig & GetPkgReleasesConfig;
 
+// istanbul ignore next
+function logError(datasource, lookupName, err): void {
+  const { statusCode, url } = err;
+  if (statusCode === 404) {
+    logger.debug({ datasource, lookupName, url }, 'Datasource 404');
+  } else if (statusCode === 401 || statusCode === 403) {
+    logger.debug({ datasource, lookupName, url }, 'Datasource unauthorized');
+  } else {
+    logger.debug({ datasource, lookupName, err }, 'Datasource unknown error');
+  }
+}
+
 async function getRegistryReleases(
   datasource,
   config: GetReleasesConfig,
@@ -39,7 +51,7 @@ async function getRegistryReleases(
   return res;
 }
 
-function firstRegistry(
+async function firstRegistry(
   config: GetReleasesInternalConfig,
   datasource: Datasource,
   registryUrls: string[]
@@ -51,7 +63,16 @@ function firstRegistry(
     );
   }
   const registryUrl = registryUrls[0];
-  return getRegistryReleases(datasource, config, registryUrl);
+  try {
+    const res = await getRegistryReleases(datasource, config, registryUrl);
+    return res;
+  } catch (err) /* istanbul ignore next */ {
+    if (err instanceof ExternalHostError) {
+      throw err;
+    }
+    logError(datasource.id, config.lookupName, err);
+    return null;
+  }
 }
 
 async function huntRegistries(
@@ -76,11 +97,13 @@ async function huntRegistries(
       logger.trace({ err }, 'datasource hunt failure');
     }
   }
-  if (res === undefined && datasourceError) {
-    // if we failed to get a result and also got an error then throw it
-    throw datasourceError;
+  if (res) {
+    return res;
   }
-  return res;
+  if (datasourceError) {
+    logError(datasource.id, config.lookupName, datasourceError);
+  }
+  return null;
 }
 
 async function mergeRegistries(
@@ -108,10 +131,6 @@ async function mergeRegistries(
       logger.trace({ err }, 'datasource merge failure');
     }
   }
-  if (combinedRes === undefined && datasourceError) {
-    // if we failed to get a result and also got an error then throw it
-    throw datasourceError;
-  }
   // De-duplicate releases
   if (combinedRes?.releases?.length) {
     const seenVersions = new Set<string>();
@@ -123,7 +142,13 @@ async function mergeRegistries(
       return true;
     });
   }
-  return combinedRes;
+  if (combinedRes) {
+    return combinedRes;
+  }
+  if (datasourceError) {
+    logError(datasource.id, config.lookupName, datasourceError);
+  }
+  return null;
 }
 
 function resolveRegistryUrls(
