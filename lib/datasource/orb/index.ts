@@ -39,42 +39,32 @@ export async function getReleases({
     query: `{orb(name:"${lookupName}"){name, homeUrl, versions {version, createdAt}}}`,
     variables: {},
   };
-  try {
-    const res: OrbRelease = (
-      await http.postJson<{ data: { orb: OrbRelease } }>(url, {
-        body,
-      })
-    ).body.data.orb;
-    if (!res) {
-      logger.debug({ lookupName }, 'Failed to look up orb');
-      return null;
-    }
-    // Simplify response before caching and returning
-    const dep: ReleaseResult = {
-      name: lookupName,
-      versions: {},
-      releases: null,
-    };
-    if (res.homeUrl && res.homeUrl.length) {
-      dep.homepage = res.homeUrl;
-    }
-    dep.homepage =
-      dep.homepage || `https://circleci.com/orbs/registry/orb/${lookupName}`;
-    dep.releases = res.versions.map(({ version, createdAt }) => ({
-      version,
-      releaseTimestamp: createdAt || null,
-    }));
-    logger.trace({ dep }, 'dep');
-    const cacheMinutes = 15;
-    await packageCache.set(cacheNamespace, cacheKey, dep, cacheMinutes);
-    return dep;
-  } catch (err) /* istanbul ignore next */ {
-    logger.debug({ err }, 'CircleCI Orb lookup error');
-    if (err.statusCode === 404 || err.code === 'ENOTFOUND') {
-      logger.debug({ lookupName }, `CircleCI Orb lookup failure: not found`);
-      return null;
-    }
-    logger.warn({ lookupName }, 'CircleCI Orb lookup failure: Unknown error');
+  const res: OrbRelease = (
+    await http.postJson<{ data: { orb: OrbRelease } }>(url, {
+      body,
+    })
+  ).body.data.orb;
+  if (!res) {
+    logger.debug({ lookupName }, 'Failed to look up orb');
     return null;
   }
+  // Simplify response before caching and returning
+  const dep: ReleaseResult = {
+    name: lookupName,
+    versions: {},
+    releases: null,
+  };
+  if (res.homeUrl && res.homeUrl.length) {
+    dep.homepage = res.homeUrl;
+  }
+  dep.homepage =
+    dep.homepage || `https://circleci.com/orbs/registry/orb/${lookupName}`;
+  dep.releases = res.versions.map(({ version, createdAt }) => ({
+    version,
+    releaseTimestamp: createdAt || null,
+  }));
+  logger.trace({ dep }, 'dep');
+  const cacheMinutes = 15;
+  await packageCache.set(cacheNamespace, cacheKey, dep, cacheMinutes);
+  return dep;
 }

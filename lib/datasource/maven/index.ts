@@ -32,15 +32,7 @@ function getMavenUrl(
   repoUrl: string,
   path: string
 ): url.URL | null {
-  try {
-    return new url.URL(`${dependency.dependencyUrl}/${path}`, repoUrl);
-  } catch (err) {
-    logger.debug(
-      { err, dependency, repoUrl, path },
-      `Error constructing URL for ${dependency.display}`
-    );
-  }
-  return null;
+  return new url.URL(`${dependency.dependencyUrl}/${path}`, repoUrl);
 }
 
 async function downloadMavenXml(
@@ -74,12 +66,7 @@ async function downloadMavenXml(
     return null;
   }
 
-  try {
-    return new XmlDocument(rawContent);
-  } catch (e) {
-    logger.debug(`Can not parse ${pkgUrl.href}`);
-    return null;
-  }
+  return new XmlDocument(rawContent);
 }
 
 async function getDependencyInfo(
@@ -152,9 +139,6 @@ async function getVersionsFromMetadata(
   repoUrl: string
 ): Promise<string[] | null> {
   const metadataUrl = getMavenUrl(dependency, repoUrl, 'maven-metadata.xml');
-  if (!metadataUrl) {
-    return null;
-  }
 
   const cacheNamespace = 'datasource-maven-metadata';
   const cacheKey = metadataUrl.toString();

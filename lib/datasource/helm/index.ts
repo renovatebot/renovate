@@ -36,43 +36,13 @@ export async function getRepositoryData(
       return null;
     }
   } catch (err) {
-    // istanbul ignore if
-    if (err.code === 'ERR_INVALID_URL') {
-      logger.debug(
-        { helmRepository: repository },
-        'helm repository is not a valid URL - skipping'
-      );
-      return null;
-    }
-    // istanbul ignore if
-    if (
-      err.code === 'ENOTFOUND' ||
-      err.code === 'EAI_AGAIN' ||
-      err.code === 'ETIMEDOUT'
-    ) {
-      logger.debug({ err }, 'Could not connect to helm repository');
-      return null;
-    }
-    if (err.statusCode === 404 || err.code === 'ENOTFOUND') {
-      logger.debug({ err }, 'Helm Chart not found');
-      return null;
-    }
     if (
       err.statusCode === 429 ||
       (err.statusCode >= 500 && err.statusCode < 600)
     ) {
       throw new ExternalHostError(err);
     }
-    // istanbul ignore if
-    if (err.name === 'UnsupportedProtocolError') {
-      logger.debug({ repository }, 'Unsupported protocol');
-      return null;
-    }
-    logger.warn(
-      { err },
-      `helm datasource ${repository} lookup failure: Unknown error`
-    );
-    return null;
+    throw err;
   }
   try {
     const doc = yaml.safeLoad(res.body, { json: true });

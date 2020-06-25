@@ -1,5 +1,4 @@
 import URL from 'url';
-import { logger } from '../../logger';
 import * as packageCache from '../../util/cache/package';
 import { GitlabHttp } from '../../util/http/gitlab';
 import { GetReleasesConfig, ReleaseResult } from '../common';
@@ -27,7 +26,6 @@ export async function getReleases({
   registryUrl: depHost,
   lookupName: repo,
 }: GetReleasesConfig): Promise<ReleaseResult | null> {
-  let gitlabTags: GitlabTag[];
   const cachedResult = await packageCache.get<ReleaseResult>(
     cacheNamespace,
     getCacheKey(depHost, repo)
@@ -39,27 +37,17 @@ export async function getReleases({
 
   const urlEncodedRepo = encodeURIComponent(repo);
 
-  try {
-    // tag
-    const url = URL.resolve(
-      depHost,
-      `/api/v4/projects/${urlEncodedRepo}/repository/tags?per_page=100`
-    );
+  // tag
+  const url = URL.resolve(
+    depHost,
+    `/api/v4/projects/${urlEncodedRepo}/repository/tags?per_page=100`
+  );
 
-    gitlabTags = (
-      await gitlabApi.getJson<GitlabTag[]>(url, {
-        paginate: true,
-      })
-    ).body;
-  } catch (err) {
-    // istanbul ignore next
-    logger.debug({ repo, err }, 'Error retrieving from Gitlab');
-  }
-
-  // istanbul ignore if
-  if (!gitlabTags) {
-    return null;
-  }
+  const gitlabTags = (
+    await gitlabApi.getJson<GitlabTag[]>(url, {
+      paginate: true,
+    })
+  ).body;
 
   const dependency: ReleaseResult = {
     sourceUrl: URL.resolve(depHost, repo),

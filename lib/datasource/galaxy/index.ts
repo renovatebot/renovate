@@ -99,6 +99,6 @@ export async function getReleases({
     ) {
       throw new ExternalHostError(err);
     }
-    return null;
+    throw err;
   }
 }

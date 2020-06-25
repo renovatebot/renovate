@@ -417,24 +417,11 @@ async function getTags(
     if (err instanceof ExternalHostError) {
       throw err;
     }
-    logger.debug(
-      {
-        err,
-      },
-      'docker.getTags() error'
-    );
     if (err.statusCode === 404 && !repository.includes('/')) {
       logger.debug(
         `Retrying Tags for ${registry}/${repository} using library/ prefix`
       );
       return getTags(registry, 'library/' + repository);
-    }
-    if (err.statusCode === 401 || err.statusCode === 403) {
-      logger.debug(
-        { registry, dockerRepository: repository, err },
-        'Not authorised to look up docker tags'
-      );
-      return null;
     }
     // prettier-ignore
     if (err.statusCode === 429 && registry.endsWith('docker.io')) { // lgtm [js/incomplete-url-substring-sanitization]
@@ -451,18 +438,7 @@ async function getTags(
       );
       throw new ExternalHostError(err);
     }
-    if (err.code === 'ETIMEDOUT') {
-      logger.debug(
-        { registry },
-        'Timeout when attempting to connect to docker registry'
-      );
-      return null;
-    }
-    logger.warn(
-      { registry, dockerRepository: repository, err },
-      'Error getting docker image tags'
-    );
-    return null;
+    throw err;
   }
 }
 
