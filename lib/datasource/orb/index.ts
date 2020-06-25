@@ -1,5 +1,5 @@
 import { logger } from '../../logger';
-import * as globalCache from '../../util/cache/global';
+import * as packageCache from '../../util/cache/package';
 import { Http } from '../../util/http';
 import { GetReleasesConfig, ReleaseResult } from '../common';
 
@@ -26,7 +26,7 @@ export async function getReleases({
   logger.debug({ lookupName }, 'orb.getReleases()');
   const cacheNamespace = 'orb';
   const cacheKey = lookupName;
-  const cachedResult = await globalCache.get<ReleaseResult>(
+  const cachedResult = await packageCache.get<ReleaseResult>(
     cacheNamespace,
     cacheKey
   );
@@ -66,7 +66,7 @@ export async function getReleases({
     }));
     logger.trace({ dep }, 'dep');
     const cacheMinutes = 15;
-    await globalCache.set(cacheNamespace, cacheKey, dep, cacheMinutes);
+    await packageCache.set(cacheNamespace, cacheKey, dep, cacheMinutes);
     return dep;
   } catch (err) /* istanbul ignore next */ {
     logger.debug({ err }, 'CircleCI Orb lookup error');

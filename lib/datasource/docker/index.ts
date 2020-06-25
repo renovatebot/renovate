@@ -7,7 +7,7 @@ import wwwAuthenticate from 'www-authenticate';
 import { logger } from '../../logger';
 import { HostRule } from '../../types';
 import { ExternalHostError } from '../../types/errors/external-host-error';
-import * as globalCache from '../../util/cache/global';
+import * as packageCache from '../../util/cache/package';
 import * as hostRules from '../../util/host-rules';
 import { Http, HttpResponse } from '../../util/http';
 import { GetReleasesConfig, ReleaseResult } from '../common';
@@ -342,7 +342,7 @@ export async function getDigest(
   const cacheKey = `${registry}:${repository}:${newTag}`;
   let digest = null;
   try {
-    const cachedResult = await globalCache.get(cacheNamespace, cacheKey);
+    const cachedResult = await packageCache.get(cacheNamespace, cacheKey);
     // istanbul ignore if
     if (cachedResult !== undefined) {
       return cachedResult;
@@ -370,7 +370,7 @@ export async function getDigest(
     );
   }
   const cacheMinutes = 30;
-  await globalCache.set(cacheNamespace, cacheKey, digest, cacheMinutes);
+  await packageCache.set(cacheNamespace, cacheKey, digest, cacheMinutes);
   return digest;
 }
 
@@ -382,7 +382,7 @@ async function getTags(
   try {
     const cacheNamespace = 'datasource-docker-tags';
     const cacheKey = `${registry}:${repository}`;
-    const cachedResult = await globalCache.get<string[]>(
+    const cachedResult = await packageCache.get<string[]>(
       cacheNamespace,
       cacheKey
     );
@@ -411,7 +411,7 @@ async function getTags(
       page += 1;
     } while (url && page < 20);
     const cacheMinutes = 15;
-    await globalCache.set(cacheNamespace, cacheKey, tags, cacheMinutes);
+    await packageCache.set(cacheNamespace, cacheKey, tags, cacheMinutes);
     return tags;
   } catch (err) /* istanbul ignore next */ {
     if (err instanceof ExternalHostError) {
@@ -482,7 +482,7 @@ async function getLabels(
   logger.debug(`getLabels(${registry}, ${repository}, ${tag})`);
   const cacheNamespace = 'datasource-docker-labels';
   const cacheKey = `${registry}:${repository}:${tag}`;
-  const cachedResult = await globalCache.get<Record<string, string>>(
+  const cachedResult = await packageCache.get<Record<string, string>>(
     cacheNamespace,
     cacheKey
   );
@@ -541,7 +541,7 @@ async function getLabels(
       );
     }
     const cacheMinutes = 60;
-    await globalCache.set(cacheNamespace, cacheKey, labels, cacheMinutes);
+    await packageCache.set(cacheNamespace, cacheKey, labels, cacheMinutes);
     return labels;
   } catch (err) {
     if (err instanceof ExternalHostError) {

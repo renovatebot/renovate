@@ -1,5 +1,5 @@
 import { logger } from '../../logger';
-import * as globalCache from '../../util/cache/global';
+import * as packageCache from '../../util/cache/package';
 import { GithubHttp } from '../../util/http/github';
 import { GetReleasesConfig, ReleaseResult } from '../common';
 
@@ -28,7 +28,7 @@ export async function getReleases({
   lookupName: repo,
 }: GetReleasesConfig): Promise<ReleaseResult | null> {
   let githubReleases: GithubRelease[];
-  const cachedResult = await globalCache.get<ReleaseResult>(
+  const cachedResult = await packageCache.get<ReleaseResult>(
     cacheNamespace,
     repo
   );
@@ -59,6 +59,6 @@ export async function getReleases({
     releaseTimestamp: published_at,
   }));
   const cacheMinutes = 10;
-  await globalCache.set(cacheNamespace, repo, dependency, cacheMinutes);
+  await packageCache.set(cacheNamespace, repo, dependency, cacheMinutes);
   return dependency;
 }

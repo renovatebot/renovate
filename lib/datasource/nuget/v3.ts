@@ -1,7 +1,7 @@
 import * as semver from 'semver';
 import { XmlDocument } from 'xmldoc';
 import { logger } from '../../logger';
-import * as globalCache from '../../util/cache/global';
+import * as packageCache from '../../util/cache/package';
 import { Http } from '../../util/http';
 import { ReleaseResult } from '../common';
 
@@ -21,7 +21,7 @@ export async function getQueryUrl(url: string): Promise<string | null> {
   // https://docs.microsoft.com/en-us/nuget/api/search-query-service-resource
   const resourceType = 'SearchQueryService';
   const cacheKey = `${url}:${resourceType}`;
-  const cachedResult = await globalCache.get<string>(cacheNamespace, cacheKey);
+  const cachedResult = await packageCache.get<string>(cacheNamespace, cacheKey);
 
   // istanbul ignore if
   if (cachedResult) {
@@ -38,7 +38,7 @@ export async function getQueryUrl(url: string): Promise<string | null> {
     const searchQueryServiceId = searchQueryService['@id'];
 
     const cacheMinutes = 60;
-    await globalCache.set(
+    await packageCache.set(
       cacheNamespace,
       cacheKey,
       searchQueryServiceId,

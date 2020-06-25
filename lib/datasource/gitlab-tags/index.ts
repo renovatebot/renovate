@@ -1,6 +1,6 @@
 import URL from 'url';
 import { logger } from '../../logger';
-import * as globalCache from '../../util/cache/global';
+import * as packageCache from '../../util/cache/package';
 import { GitlabHttp } from '../../util/http/gitlab';
 import { GetReleasesConfig, ReleaseResult } from '../common';
 
@@ -28,7 +28,7 @@ export async function getReleases({
   lookupName: repo,
 }: GetReleasesConfig): Promise<ReleaseResult | null> {
   let gitlabTags: GitlabTag[];
-  const cachedResult = await globalCache.get<ReleaseResult>(
+  const cachedResult = await packageCache.get<ReleaseResult>(
     cacheNamespace,
     getCacheKey(depHost, repo)
   );
@@ -72,7 +72,7 @@ export async function getReleases({
   }));
 
   const cacheMinutes = 10;
-  await globalCache.set(
+  await packageCache.set(
     cacheNamespace,
     getCacheKey(depHost, repo),
     dependency,

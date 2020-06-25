@@ -7,7 +7,7 @@ import registryAuthToken from 'registry-auth-token';
 import getRegistryUrl from 'registry-auth-token/registry-url';
 import { logger } from '../../logger';
 import { ExternalHostError } from '../../types/errors/external-host-error';
-import * as globalCache from '../../util/cache/global';
+import * as packageCache from '../../util/cache/package';
 import { find } from '../../util/host-rules';
 import { Http, HttpOptions } from '../../util/http';
 import { maskToken } from '../../util/mask';
@@ -71,7 +71,7 @@ export async function getDependency(
   );
   // Now check the persistent cache
   const cacheNamespace = 'datasource-npm';
-  const cachedResult = await globalCache.get<NpmDependency>(
+  const cachedResult = await packageCache.get<NpmDependency>(
     cacheNamespace,
     pkgUrl
   );
@@ -220,7 +220,7 @@ export async function getDependency(
       whitelistedPublicScopes.includes(scope) ||
       !packageName.startsWith('@')
     ) {
-      await globalCache.set(cacheNamespace, pkgUrl, dep, cacheMinutes);
+      await packageCache.set(cacheNamespace, pkgUrl, dep, cacheMinutes);
     }
     return dep;
   } catch (err) {
