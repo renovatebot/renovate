@@ -2,7 +2,7 @@ import is from '@sindresorhus/is';
 import _ from 'lodash';
 import { logger } from '../logger';
 import { ExternalHostError } from '../types/errors/external-host-error';
-import * as runCache from '../util/cache/run';
+import * as memCache from '../util/cache/memory';
 import { clone } from '../util/clone';
 import * as allVersioning from '../versioning';
 import datasources from './api.generated';
@@ -190,13 +190,13 @@ function getRawReleases(
     config.lookupName +
     config.registryUrls;
   // By returning a Promise and reusing it, we should only fetch each package at most once
-  const cachedResult = runCache.get(cacheKey);
+  const cachedResult = memCache.get(cacheKey);
   // istanbul ignore if
   if (cachedResult) {
     return cachedResult;
   }
   const promisedRes = fetchReleases(config);
-  runCache.set(cacheKey, promisedRes);
+  memCache.set(cacheKey, promisedRes);
   return promisedRes;
 }
 

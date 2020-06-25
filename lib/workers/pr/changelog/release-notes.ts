@@ -4,8 +4,8 @@ import { linkify } from 'linkify-markdown';
 import MarkdownIt from 'markdown-it';
 
 import { logger } from '../../../logger';
+import * as memCache from '../../../util/cache/memory';
 import * as packageCache from '../../../util/cache/package';
-import * as runCache from '../../../util/cache/run';
 import { GithubHttp } from '../../../util/http/github';
 import { GitlabHttp } from '../../../util/http/gitlab';
 import { ChangeLogNotes, ChangeLogResult } from './common';
@@ -83,13 +83,13 @@ export function getCachedReleaseList(
   repository: string
 ): Promise<ChangeLogNotes[]> {
   const cacheKey = `getReleaseList-${apiBaseUrl}-${repository}`;
-  const cachedResult = runCache.get(cacheKey);
+  const cachedResult = memCache.get(cacheKey);
   // istanbul ignore if
   if (cachedResult) {
     return cachedResult;
   }
   const promisedRes = getReleaseList(apiBaseUrl, repository);
-  runCache.set(cacheKey, promisedRes);
+  memCache.set(cacheKey, promisedRes);
   return promisedRes;
 }
 
@@ -254,13 +254,13 @@ export async function getReleaseNotesMdFile(
   apiBaseUrl: string
 ): Promise<{ changelogFile: string; changelogMd: string }> | null {
   const cacheKey = `getReleaseNotesMdFile-${repository}-${apiBaseUrl}`;
-  const cachedResult = runCache.get(cacheKey);
+  const cachedResult = memCache.get(cacheKey);
   // istanbul ignore if
   if (cachedResult !== undefined) {
     return cachedResult;
   }
   const promisedRes = getReleaseNotesMdFileInner(repository, apiBaseUrl);
-  runCache.set(cacheKey, promisedRes);
+  memCache.set(cacheKey, promisedRes);
   return promisedRes;
 }
 

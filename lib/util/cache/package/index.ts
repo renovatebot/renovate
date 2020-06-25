@@ -1,5 +1,5 @@
 import { RenovateConfig } from '../../../config/common';
-import * as runCache from '../run';
+import * as memCache from '../memory';
 import { PackageCache } from './common';
 import * as fileCache from './file';
 import * as redisCache from './redis';
@@ -15,10 +15,10 @@ export function get<T = any>(namespace: string, key: string): Promise<T> {
     return undefined;
   }
   const globalKey = getGlobalKey(namespace, key);
-  if (!runCache.get(globalKey)) {
-    runCache.set(globalKey, cacheProxy.get(namespace, key));
+  if (!memCache.get(globalKey)) {
+    memCache.set(globalKey, cacheProxy.get(namespace, key));
   }
-  return runCache.get(globalKey);
+  return memCache.get(globalKey);
 }
 
 export function set(
@@ -31,7 +31,7 @@ export function set(
     return undefined;
   }
   const globalKey = getGlobalKey(namespace, key);
-  runCache.set(globalKey, value);
+  memCache.set(globalKey, value);
   return cacheProxy.set(namespace, key, value, minutes);
 }
 

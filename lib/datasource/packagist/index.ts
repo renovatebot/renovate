@@ -3,8 +3,8 @@ import URL from 'url';
 import pAll from 'p-all';
 import { logger } from '../../logger';
 import { ExternalHostError } from '../../types/errors/external-host-error';
+import * as memCache from '../../util/cache/memory';
 import * as packageCache from '../../util/cache/package';
-import * as runCache from '../../util/cache/run';
 import * as hostRules from '../../util/host-rules';
 import { Http, HttpOptions } from '../../util/http';
 import { GetReleasesConfig, ReleaseResult } from '../common';
@@ -221,13 +221,13 @@ async function getAllPackages(regUrl: string): Promise<AllPackages | null> {
 
 function getAllCachedPackages(regUrl: string): Promise<AllPackages | null> {
   const cacheKey = `packagist-${regUrl}`;
-  const cachedResult = runCache.get(cacheKey);
+  const cachedResult = memCache.get(cacheKey);
   // istanbul ignore if
   if (cachedResult) {
     return cachedResult;
   }
   const promisedRes = getAllPackages(regUrl);
-  runCache.set(cacheKey, promisedRes);
+  memCache.set(cacheKey, promisedRes);
   return promisedRes;
 }
 
