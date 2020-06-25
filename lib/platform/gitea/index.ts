@@ -15,6 +15,7 @@ import { PR_STATE_ALL, PR_STATE_OPEN } from '../../constants/pull-requests';
 import { logger } from '../../logger';
 import { BranchStatus } from '../../types';
 import * as hostRules from '../../util/host-rules';
+import { setBaseUrl } from '../../util/http/gitea';
 import { sanitize } from '../../util/sanitize';
 import { ensureTrailingSlash } from '../../util/url';
 import {
@@ -35,7 +36,6 @@ import {
 } from '../common';
 import GitStorage, { StatusResult } from '../git/storage';
 import { smartTruncate } from '../utils/pr-body';
-import { api } from './gitea-got-wrapper';
 import * as helper from './gitea-helper';
 
 type GiteaRenovateConfig = {
@@ -45,7 +45,6 @@ type GiteaRenovateConfig = {
 
 interface GiteaRepoConfig {
   storage: GitStorage;
-  gitPrivateKey?: string;
   repository: string;
   localDir: string;
   defaultBranch: string;
@@ -225,7 +224,7 @@ const platform: Platform = {
     } else {
       logger.debug('Using default Gitea endpoint: ' + defaults.endpoint);
     }
-    api.setBaseUrl(defaults.endpoint);
+    setBaseUrl(defaults.endpoint);
 
     let gitAuthor: string;
     try {
@@ -248,7 +247,6 @@ const platform: Platform = {
 
   async initRepo({
     repository,
-    gitPrivateKey,
     localDir,
     optimizeForDisabled,
   }: RepoParams): Promise<RepoConfig> {
@@ -257,7 +255,6 @@ const platform: Platform = {
 
     config = {} as any;
     config.repository = repository;
-    config.gitPrivateKey = gitPrivateKey;
     config.localDir = localDir;
 
     // Attempt to fetch information about repository
@@ -477,6 +474,11 @@ const platform: Platform = {
     }
 
     return config.prList;
+  },
+
+  /* istanbul ignore next */
+  async getPrFiles(pr: Pr): Promise<string[]> {
+    return config.storage.getBranchFiles(pr.branchName, pr.targetBranch);
   },
 
   async getPr(number: number): Promise<Pr | null> {
@@ -756,13 +758,6 @@ const platform: Platform = {
     topic,
     content,
   }: EnsureCommentConfig): Promise<boolean> {
-    if (topic === 'Renovate Ignore Notification') {
-      logger.debug(
-        `Skipping ensureComment(${topic}) as ignoring PRs is unsupported on Gitea.`
-      );
-      return false;
-    }
-
     try {
       let body = sanitize(content);
       const commentList = await helper.getComments(config.repository, issue);
@@ -863,29 +858,12 @@ const platform: Platform = {
     return Promise.resolve();
   },
 
-  commitFiles({
-    branchName,
-    files,
-    message,
-  }: CommitFilesConfig): Promise<string | null> {
-    return config.storage.commitFiles({
-      branchName,
-      files,
-      message,
-    });
+  commitFiles(commitFilesConfig: CommitFilesConfig): Promise<string | null> {
+    return config.storage.commitFiles(commitFilesConfig);
   },
 
   getPrBody(prBody: string): string {
-    // Gitea does not preserve the branch name once the head branch gets deleted, so ignoring a PR by simply closing it
-    // results in an endless loop of Renovate creating the PR over and over again. This is not pretty, but can not be
-    // avoided without storing that information somewhere else, so at least warn the user about it.
-    return smartTruncate(
-      prBody.replace(
-        /:no_bell: \*\*Ignore\*\*: Close this PR and you won't be reminded about (this update|these updates) again./,
-        `:ghost: **Immortal**: This PR will be recreated if closed unmerged, as Gitea does not support ignoring PRs.`
-      ),
-      1000000
-    );
+    return smartTruncate(prBody, 1000000);
   },
 
   isBranchStale(branchName: string): Promise<boolean> {
@@ -960,6 +938,7 @@ export const {
   getPr,
   getPrBody,
   getPrList,
+  getPrFiles,
   getRepoForceRebase,
   getRepoStatus,
   getRepos,

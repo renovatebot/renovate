@@ -3,6 +3,7 @@ import * as httpMock from '../../../test/httpMock';
 import { REPOSITORY_DISABLED } from '../../constants/error-messages';
 import { logger as _logger } from '../../logger';
 import { BranchStatus } from '../../types';
+import { setBaseUrl } from '../../util/http/bitbucket';
 import { Platform, RepoParams } from '../common';
 
 const baseUrl = 'https://api.bitbucket.org';
@@ -83,6 +84,8 @@ describe('platform/bitbucket', () => {
       username: 'abc',
       password: '123',
     });
+
+    setBaseUrl(baseUrl);
   });
 
   afterEach(async () => {

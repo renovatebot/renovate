@@ -2,8 +2,8 @@ import delay from 'delay';
 import * as httpMock from '../../../test/httpMock';
 import { getName } from '../../../test/util';
 import {
+  EXTERNAL_HOST_ERROR,
   PLATFORM_BAD_CREDENTIALS,
-  PLATFORM_FAILURE,
   PLATFORM_INTEGRATION_UNAUTHORIZED,
   PLATFORM_RATE_LIMIT_EXCEEDED,
   REPOSITORY_CHANGED,
@@ -126,7 +126,7 @@ describe(getName(__filename), () => {
         },
       });
       expect(e).toBeDefined();
-      expect(e.message).toEqual(PLATFORM_FAILURE);
+      expect(e.message).toEqual(EXTERNAL_HOST_ERROR);
     });
     it('should throw platform failure for ENOTFOUND, ETIMEDOUT or EAI_AGAIN', () => {
       const codes = ['ENOTFOUND', 'ETIMEDOUT', 'EAI_AGAIN'];
@@ -137,7 +137,7 @@ describe(getName(__filename), () => {
           code,
         });
         expect(e).toBeDefined();
-        expect(e.message).toEqual(PLATFORM_FAILURE);
+        expect(e.message).toEqual(EXTERNAL_HOST_ERROR);
       }
     });
     it('should throw platform failure for 500', () => {
@@ -146,14 +146,14 @@ describe(getName(__filename), () => {
         message: 'Internal Server Error',
       });
       expect(e).toBeDefined();
-      expect(e.message).toEqual(PLATFORM_FAILURE);
+      expect(e.message).toEqual(EXTERNAL_HOST_ERROR);
     });
     it('should throw platform failure ParseError', () => {
       const e = getError({
         name: 'ParseError',
       });
       expect(e).toBeDefined();
-      expect(e.message).toEqual(PLATFORM_FAILURE);
+      expect(e.message).toEqual(EXTERNAL_HOST_ERROR);
     });
     it('should throw for unauthorized integration', () => {
       const e = getError({
@@ -200,7 +200,7 @@ describe(getName(__filename), () => {
       };
       const e = getError(gotErr);
       expect(e).toBeDefined();
-      expect(e.message).toEqual(PLATFORM_FAILURE);
+      expect(e.message).toEqual(EXTERNAL_HOST_ERROR);
     });
     it('should throw original error when failed to add reviewers', () => {
       const gotErr = {

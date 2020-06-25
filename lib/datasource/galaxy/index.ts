@@ -1,12 +1,8 @@
 import { logger } from '../../logger';
-import * as globalCache from '../../util/cache/global';
+import { ExternalHostError } from '../../types/errors/external-host-error';
+import * as packageCache from '../../util/cache/package';
 import { Http } from '../../util/http';
-import {
-  DatasourceError,
-  GetReleasesConfig,
-  Release,
-  ReleaseResult,
-} from '../common';
+import { GetReleasesConfig, Release, ReleaseResult } from '../common';
 
 export const id = 'galaxy';
 
@@ -17,7 +13,7 @@ export async function getReleases({
 }: GetReleasesConfig): Promise<ReleaseResult | null> {
   const cacheNamespace = 'datasource-galaxy';
   const cacheKey = lookupName;
-  const cachedResult = await globalCache.get<ReleaseResult>(
+  const cachedResult = await packageCache.get<ReleaseResult>(
     cacheNamespace,
     cacheKey
   );
@@ -94,15 +90,15 @@ export async function getReleases({
       }
     );
     const cacheMinutes = 10;
-    await globalCache.set(cacheNamespace, cacheKey, result, cacheMinutes);
+    await packageCache.set(cacheNamespace, cacheKey, result, cacheMinutes);
     return result;
   } catch (err) {
     if (
       err.statusCode === 429 ||
       (err.statusCode >= 500 && err.statusCode < 600)
     ) {
-      throw new DatasourceError(err);
+      throw new ExternalHostError(err);
     }
-    return null;
+    throw err;
   }
 }

@@ -43,7 +43,8 @@ export interface BranchUpgradeConfig
   packageFile?: string;
 
   reuseExistingBranch?: boolean;
-  prBanner?: string;
+  prHeader?: string;
+  prFooter?: string;
   prBodyNotes?: string[];
   prBodyTemplate?: string;
   prPriority?: number;
@@ -99,6 +100,8 @@ export interface BranchConfig
   hasTypes?: boolean;
   masterIssueChecks?: Record<string, string>;
   releaseTimestamp?: string;
+  forceCommit?: boolean;
+  rebaseRequested?: boolean;
 
   res?: ProcessBranchResult;
   upgrades: BranchUpgradeConfig[];

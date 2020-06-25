@@ -32,6 +32,7 @@ export const exposedConfigOptions = [
 
 export const allowedFields = {
   baseDir: 'The full directory with path that the dependency has been found in',
+  body: 'The body of the release notes',
   currentValue: 'The extracted current value of the dependency being updated',
   currentVersion: 'The current version that is being updated',
   datasource: 'The datasource used to look up the upgrade',
@@ -46,12 +47,14 @@ export const allowedFields = {
   displayTo: 'The to value, formatted for display',
   fromVersion:
     'The version that would be currently installed. For example, if currentValue is ^3.0.0 then currentVersion might be 3.1.0.',
+  hasReleaseNotes: 'true if the upgrade has release notes',
   isLockfileUpdate: 'true if the branch is a lock file update',
   isMajor: 'true if the upgrade is major',
   isPatch: 'true if the upgrade is a patch upgrade',
   isRange: 'true if the new value is a range',
   isSingleVersion:
     'true if the upgrade is to a single version rather than a range',
+  logJSON: 'ChangeLogResult object for the upgrade',
   lookupName: 'The full name that was used to look up the dependency.',
   newDigest: 'The new digest value',
   newDigestShort:
@@ -67,13 +70,18 @@ export const allowedFields = {
   parentDir:
     'The name of the directory that the dependency was found in, without full path',
   platform: 'VCS platform in use, e.g. "github", "gitlab", etc.',
+  project: 'ChangeLogProject object',
   recreateClosed: 'If true, this PR will be recreated if closed',
   references: 'A list of references for the upgrade',
   releases: 'An array of releases for an upgrade',
+  releaseNotes: 'A ChangeLogNotes object for the release',
   repository: 'The current repository',
   toVersion: 'The new version in the upgrade, e.g. "3.1.0"',
   updateType: 'One of digest, pin, rollback, patch, minor, major',
   upgrades: 'An array of upgrade objects in the branch',
+  url: 'The url of the release notes',
+  version: 'The version number of the changelog',
+  versions: 'An array of ChangeLogRelease objects in the upgrade',
 };
 
 function getFilteredObject(input: any): any {

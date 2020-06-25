@@ -70,7 +70,7 @@ describe(getName(__filename), () => {
     const execSnapshots = mockExecAll(exec);
 
     const res = await dcUpdate.updateArtifacts({
-      packageFileName: 'gradle-wrapper.properties',
+      packageFileName: 'gradle/wrapper/gradle-wrapper.properties',
       updatedDeps: [],
       newPackageFileContent: await readString(
         `./expectedFiles/gradle/wrapper/gradle-wrapper.properties`

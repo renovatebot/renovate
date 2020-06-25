@@ -2,7 +2,8 @@ import URL from 'url';
 import { PLATFORM_TYPE_GITHUB } from '../../../constants/platforms';
 import { Release } from '../../../datasource';
 import { logger } from '../../../logger';
-import * as globalCache from '../../../util/cache/global';
+import * as memCache from '../../../util/cache/memory';
+import * as packageCache from '../../../util/cache/package';
 import * as hostRules from '../../../util/host-rules';
 import { GithubHttp } from '../../../util/http/github';
 import * as allVersioning from '../../../versioning';
@@ -12,7 +13,7 @@ import { addReleaseNotes } from './release-notes';
 
 const http = new GithubHttp();
 
-async function getTags(
+async function getTagsInner(
   endpoint: string,
   repository: string
 ): Promise<string[]> {
@@ -39,6 +40,21 @@ async function getTags(
     }
     return [];
   }
+}
+
+async function getTags(
+  endpoint: string,
+  repository: string
+): Promise<string[]> {
+  const cacheKey = `getTags-${endpoint}-${repository}`;
+  const cachedResult = memCache.get(cacheKey);
+  // istanbul ignore if
+  if (cachedResult !== undefined) {
+    return cachedResult;
+  }
+  const promisedRes = getTagsInner(endpoint, repository);
+  memCache.set(cacheKey, promisedRes);
+  return promisedRes;
 }
 
 export async function getChangeLogJSON({
@@ -75,7 +91,7 @@ export async function getChangeLogJSON({
     }
     logger.debug(
       { manager, depName, sourceUrl },
-      'Repository URL does not match any known hosts - skipping changelog retrieval'
+      'Repository URL does not match any known github hosts - skipping changelog retrieval'
     );
     return null;
   }
@@ -134,7 +150,7 @@ export async function getChangeLogJSON({
     const prev = validReleases[i - 1];
     const next = validReleases[i];
     if (include(next.version)) {
-      let release = await globalCache.get(
+      let release = await packageCache.get(
         cacheNamespace,
         getCacheKey(prev.version, next.version)
       );
@@ -153,7 +169,7 @@ export async function getChangeLogJSON({
           release.compare.url = `${baseUrl}${repository}/compare/${prevHead}...${nextHead}`;
         }
         const cacheMinutes = 55;
-        await globalCache.set(
+        await packageCache.set(
           cacheNamespace,
           getCacheKey(prev.version, next.version),
           release,

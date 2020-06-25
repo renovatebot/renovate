@@ -1,15 +1,12 @@
-import { join } from 'path';
 import is from '@sindresorhus/is';
 import { concat } from 'lodash';
 import { DateTime } from 'luxon';
 import minimatch from 'minimatch';
 import { RenovateConfig } from '../../config';
 import {
-  DATASOURCE_FAILURE,
   MANAGER_LOCKFILE_ERROR,
   PLATFORM_AUTHENTICATION_ERROR,
   PLATFORM_BAD_CREDENTIALS,
-  PLATFORM_FAILURE,
   PLATFORM_INTEGRATION_UNAUTHORIZED,
   PLATFORM_RATE_LIMIT_EXCEEDED,
   REPOSITORY_CHANGED,
@@ -25,6 +22,7 @@ import { logger } from '../../logger';
 import { getAdditionalFiles } from '../../manager/npm/post-update';
 import { platform } from '../../platform';
 import { BranchStatus } from '../../types';
+import { ExternalHostError } from '../../types/errors/external-host-error';
 import { emojify } from '../../util/emoji';
 import { exec } from '../../util/exec';
 import { readLocalFile, writeLocalFile } from '../../util/fs';
@@ -174,6 +172,7 @@ export async function processBranch(
                   branchPr.number
               );
             } else {
+              // Remove any "PR has been edited" comment only when rebasing
               await platform.ensureCommentRemoval({
                 number: branchPr.number,
                 topic,
@@ -184,6 +183,7 @@ export async function processBranch(
               `:construction_worker: This PR has received other commits, so Renovate will stop updating it to avoid conflicts or other problems.`
             );
             content += ` If you wish to abandon your changes and have Renovate start over you may click the "rebase" checkbox in the PR body/description.`;
+            content += `\n\nIf you think this comment is in error and the branch is *not* modified, try deleting this comment. If it comes back again the next time Renovate runs, please submit an issue or seek config help.`;
             if (!config.suppressNotifications.includes('prEditNotification')) {
               if (config.dryRun) {
                 logger.info(
@@ -199,11 +199,6 @@ export async function processBranch(
             }
             return 'pr-edited';
           }
-        } else {
-          await platform.ensureCommentRemoval({
-            number: branchPr.number,
-            topic,
-          });
         }
       }
     }
@@ -359,7 +354,7 @@ export async function processBranch(
             } else {
               contents = file.contents;
             }
-            await writeLocalFile(join(config.localDir, file.name), contents);
+            await writeLocalFile(file.name, contents);
           }
         }
 
@@ -442,7 +437,8 @@ export async function processBranch(
         logger.debug('PR has no releaseTimestamp');
       }
     }
-
+    config.forceCommit =
+      !!masterIssueCheck || config.rebaseRequested || branchPr?.isConflicted;
     const commitHash = await commitFilesToBranch(config);
     if (!commitHash && !branchExists) {
       return 'no-work';
@@ -544,10 +540,7 @@ export async function processBranch(
       err.message.includes('fatal: Authentication failed')
     ) {
       throw new Error(PLATFORM_AUTHENTICATION_ERROR);
-    } else if (
-      err.message !== DATASOURCE_FAILURE &&
-      err.message !== PLATFORM_FAILURE
-    ) {
+    } else if (!(err instanceof ExternalHostError)) {
       logger.error({ err }, `Error updating branch: ${err.message}`);
     }
     // Don't throw here - we don't want to stop the other renovations
@@ -613,11 +606,6 @@ export async function processBranch(
               topic,
               content,
             });
-            // TODO: remoe this soon once they're all cleared out
-            await platform.ensureCommentRemoval({
-              number: pr.number,
-              topic: ':warning: Lock file problem',
-            });
           }
         }
         const context = `renovate/artifacts`;
@@ -651,6 +639,7 @@ export async function processBranch(
               'DRY-RUN: Would ensure comment removal in PR #' + pr.number
             );
           } else {
+            // Remove artifacts error comment only if this run has successfully updated artifacts
             await platform.ensureCommentRemoval({ number: pr.number, topic });
           }
         }
@@ -662,11 +651,8 @@ export async function processBranch(
     }
   } catch (err) /* istanbul ignore next */ {
     if (
-      [
-        PLATFORM_RATE_LIMIT_EXCEEDED,
-        PLATFORM_FAILURE,
-        REPOSITORY_CHANGED,
-      ].includes(err.message)
+      err instanceof ExternalHostError ||
+      [PLATFORM_RATE_LIMIT_EXCEEDED, REPOSITORY_CHANGED].includes(err.message)
     ) {
       logger.debug('Passing PR error up');
       throw err;
