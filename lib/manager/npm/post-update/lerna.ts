@@ -55,9 +55,12 @@ export async function generateLockFiles(
       logger.warn({ lernaClient }, 'Unknown lernaClient');
       return { error: false };
     }
+    let lernaCommand = `lerna bootstrap --no-ci --ignore-scripts -- `;
     if (global.trustLevel === 'high' && config.ignoreScripts !== false) {
       cmdOptions = cmdOptions.replace('--ignore-scripts ', '');
+      lernaCommand = lernaCommand.replace('--ignore-scripts ', '');
     }
+    lernaCommand += cmdOptions;
     const tagConstraint = await getNodeConstraint(config);
     const execOptions: ExecOptions = {
       cwd,
@@ -93,7 +96,7 @@ export async function generateLockFiles(
     }
     logger.debug('Using lerna version ' + lernaVersion);
     preCommands.push(`npm i -g lerna@${quote(lernaVersion)}`);
-    cmd.push(`lerna bootstrap --no-ci -- ${cmdOptions}`);
+    cmd.push(lernaCommand);
     await exec(cmd, execOptions);
   } catch (err) /* istanbul ignore next */ {
     logger.debug(
