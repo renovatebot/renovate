@@ -45,6 +45,8 @@ export interface RenovateSharedConfig {
   rebaseLabel?: string;
   rebaseWhen?: string;
   recreateClosed?: boolean;
+  repository?: string;
+  repositoryCache?: 'disabled' | 'enabled' | 'reset';
   requiredStatusChecks?: string[];
   schedule?: string[];
   semanticCommits?: boolean;

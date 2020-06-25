@@ -149,6 +149,10 @@ If this value is set then Renovate will use Redis for its global cache instead o
 
 ## repositories
 
+## repositoryCache
+
+Set this to `"enabled"` to have Renovate maintain a JSON file cache per-repository to speed up extractions. Set to `"reset"` if you ever need to bypass the cache and have it overwritten.
+
 ## requireConfig
 
 ## skipInstalls

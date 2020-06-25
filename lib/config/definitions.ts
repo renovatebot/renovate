@@ -205,6 +205,16 @@ const options: RenovateOptions[] = [
     env: false,
   },
   {
+    name: 'repositoryCache',
+    description:
+      'Enabling will skip/overwrite any existing cached repository data.',
+    admin: true,
+    type: 'string',
+    allowedValues: ['disabled', 'enabled', 'reset'],
+    stage: 'repository',
+    default: 'disabled',
+  },
+  {
     name: 'force',
     description:
       'Any configuration defined within this object will force override existing settings',

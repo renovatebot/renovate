@@ -2,6 +2,7 @@ import { RenovateConfig } from '../../../config';
 import { logger } from '../../../logger';
 import { platform } from '../../../platform';
 import * as memCache from '../../../util/cache/memory';
+import * as repositoryCache from '../../../util/cache/repository';
 import { checkIfConfigured } from '../configured';
 import { checkOnboardingBranch } from '../onboarding/branch';
 import { initApis } from './apis';
@@ -26,6 +27,7 @@ export async function initRepo(input: RenovateConfig): Promise<RenovateConfig> {
   checkIfConfigured(config);
   config = await checkBaseBranch(config);
   await platform.setBranchPrefix(config.branchPrefix);
+  await repositoryCache.initialize(config);
   config = await detectVulnerabilityAlerts(config);
   // istanbul ignore if
   if (config.printConfig) {
