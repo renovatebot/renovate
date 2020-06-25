@@ -61,6 +61,9 @@ const getNewValue = ({
   fromVersion,
   toVersion,
 }: NewValueConfig): string => {
+  if (rangeStrategy === 'pin') {
+    return `== ${toVersion}`;
+  }
   let newSemver = npm.getNewValue({
     currentValue: hex2npm(currentValue),
     rangeStrategy,
@@ -68,7 +71,14 @@ const getNewValue = ({
     toVersion,
   });
   newSemver = npm2hex(newSemver);
-  if (/~>\s*(\d+\.\d+)$/.test(currentValue)) {
+  if (/^==\s*(\d+\.\d+(\.\d+)?)$/.test(currentValue)) {
+    if (rangeStrategy === 'bump') {
+      return `~> ${toVersion}`;
+    }
+    if (rangeStrategy === 'replace') {
+      return `~> ${newSemver}`;
+    }
+  } else if (/~>\s*(\d+\.\d+)$/.test(currentValue)) {
     newSemver = newSemver.replace(
       /\^\s*(\d+\.\d+(\.\d)?)/,
       (_str, p1) => '~> ' + p1.slice(0, -2)
