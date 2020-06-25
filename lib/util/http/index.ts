@@ -2,7 +2,7 @@ import crypto from 'crypto';
 import URL from 'url';
 import got from 'got';
 import { ExternalHostError } from '../../types/errors/external-host-error';
-import * as runCache from '../cache/run';
+import * as memCache from '../cache/memory';
 import { clone } from '../clone';
 import { applyAuthorization } from './auth';
 import { applyHostRules } from './host-rules';
@@ -115,7 +115,7 @@ export class Http<GetOptions = HttpOptions, PostOptions = HttpPostOptions> {
       .digest('hex');
     if (options.method === 'get' && options.useCache !== false) {
       // return from cache if present
-      const cachedRes = runCache.get(cacheKey);
+      const cachedRes = memCache.get(cacheKey);
       // istanbul ignore if
       if (cachedRes) {
         return resolveResponse<T>(cachedRes, options);
@@ -124,16 +124,16 @@ export class Http<GetOptions = HttpOptions, PostOptions = HttpPostOptions> {
     const startTime = Date.now();
     const promisedRes = got(url, options);
     if (options.method === 'get') {
-      runCache.set(cacheKey, promisedRes); // always set if it's a get
+      memCache.set(cacheKey, promisedRes); // always set if it's a get
     }
     const res = await resolveResponse<T>(promisedRes, options);
-    const httpRequests = runCache.get('http-requests') || [];
+    const httpRequests = memCache.get('http-requests') || [];
     httpRequests.push({
       method: options.method,
       url,
       duration: Date.now() - startTime,
     });
-    runCache.set('http-requests', httpRequests);
+    memCache.set('http-requests', httpRequests);
     return res;
   }
 

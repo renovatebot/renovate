@@ -2,8 +2,8 @@ import URL from 'url';
 import { PLATFORM_TYPE_GITHUB } from '../../../constants/platforms';
 import { Release } from '../../../datasource';
 import { logger } from '../../../logger';
+import * as memCache from '../../../util/cache/memory';
 import * as packageCache from '../../../util/cache/package';
-import * as runCache from '../../../util/cache/run';
 import * as hostRules from '../../../util/host-rules';
 import { GithubHttp } from '../../../util/http/github';
 import * as allVersioning from '../../../versioning';
@@ -47,13 +47,13 @@ async function getTags(
   repository: string
 ): Promise<string[]> {
   const cacheKey = `getTags-${endpoint}-${repository}`;
-  const cachedResult = runCache.get(cacheKey);
+  const cachedResult = memCache.get(cacheKey);
   // istanbul ignore if
   if (cachedResult !== undefined) {
     return cachedResult;
   }
   const promisedRes = getTagsInner(endpoint, repository);
-  runCache.set(cacheKey, promisedRes);
+  memCache.set(cacheKey, promisedRes);
   return promisedRes;
 }
 
