@@ -74,7 +74,7 @@ describe('lib/versioning/hex', () => {
     });
   });
   describe('hexScheme.getNewValue()', () => {
-    it('handles exact', () => {
+    it('handles exact pin', () => {
       expect(
         hexScheme.getNewValue({
           currentValue: '== 1.2.3',
@@ -83,6 +83,8 @@ describe('lib/versioning/hex', () => {
           toVersion: '2.0.7',
         })
       ).toEqual('== 2.0.7');
+    });
+    it('handles exact bump', () => {
       expect(
         hexScheme.getNewValue({
           currentValue: '== 3.6.1',
@@ -90,7 +92,9 @@ describe('lib/versioning/hex', () => {
           fromVersion: '3.6.1',
           toVersion: '3.6.2',
         })
-      ).toEqual('~> 3.6.2');
+      ).toEqual('== 3.6.2');
+    });
+    it('handles exact replace', () => {
       expect(
         hexScheme.getNewValue({
           currentValue: '== 3.6.1',
@@ -98,7 +102,7 @@ describe('lib/versioning/hex', () => {
           fromVersion: '3.6.1',
           toVersion: '3.6.2',
         })
-      ).toEqual('~> 3.6');
+      ).toEqual('== 3.6.2');
     });
     it('handles tilde greater than', () => {
       expect(
