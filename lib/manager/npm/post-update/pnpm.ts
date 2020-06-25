@@ -1,8 +1,11 @@
-import { readFile } from 'fs-extra';
+import { readFile, remove } from 'fs-extra';
+import { validRange } from 'semver';
+import { quote } from 'shlex';
 import { join } from 'upath';
 import { logger } from '../../../logger';
 import { ExecOptions, exec } from '../../../util/exec';
-import { PostUpdateConfig } from '../../common';
+import { PostUpdateConfig, Upgrade } from '../../common';
+import { getNodeConstraint } from './node-version';
 
 export interface GenerateLockFileResult {
   error?: boolean;
@@ -14,23 +17,33 @@ export interface GenerateLockFileResult {
 export async function generateLockFile(
   cwd: string,
   env: NodeJS.ProcessEnv,
-  config: PostUpdateConfig
+  config: PostUpdateConfig,
+  upgrades: Upgrade[] = []
 ): Promise<GenerateLockFileResult> {
-  logger.debug(`Spawning pnpm install to create ${cwd}/pnpm-lock.yaml`);
+  const lockFileName = join(cwd, 'pnpm-lock.yaml');
+  logger.debug(`Spawning pnpm install to create ${lockFileName}`);
   let lockFile = null;
   let stdout: string;
   let stderr: string;
   let cmd = 'pnpm';
   try {
-    const preCommands = ['npm i -g pnpm'];
+    let installPnpm = 'npm i -g pnpm';
+    const pnpmCompatibility = config.compatibility?.pnpm;
+    if (validRange(pnpmCompatibility)) {
+      installPnpm += `@${quote(pnpmCompatibility)}`;
+    }
+    const preCommands = [installPnpm];
+    const tagConstraint = await getNodeConstraint(config);
     const execOptions: ExecOptions = {
       cwd,
       extraEnv: {
-        NPM_CONFIG_CACHE: process.env.NPM_CONFIG_CACHE,
-        npm_config_store: process.env.npm_config_store,
+        NPM_CONFIG_CACHE: env.NPM_CONFIG_CACHE,
+        npm_config_store: env.npm_config_store,
       },
       docker: {
         image: 'renovate/node',
+        tagScheme: 'npm',
+        tagConstraint,
         preCommands,
       },
     };
@@ -47,8 +60,23 @@ export async function generateLockFile(
       args += ' --ignore-pnpmfile';
     }
     logger.debug({ cmd, args }, 'pnpm command');
+
+    if (upgrades.find((upgrade) => upgrade.isLockFileMaintenance)) {
+      logger.debug(
+        `Removing ${lockFileName} first due to lock file maintenance upgrade`
+      );
+      try {
+        await remove(lockFileName);
+      } catch (err) /* istanbul ignore next */ {
+        logger.debug(
+          { err, lockFileName },
+          'Error removing yarn.lock for lock file maintenance'
+        );
+      }
+    }
+
     await exec(`${cmd} ${args}`, execOptions);
-    lockFile = await readFile(join(cwd, 'pnpm-lock.yaml'), 'utf8');
+    lockFile = await readFile(lockFileName, 'utf8');
   } catch (err) /* istanbul ignore next */ {
     logger.debug(
       {

@@ -3,7 +3,6 @@ import is from '@sindresorhus/is';
 import delay from 'delay';
 import { configFileNames } from '../../config/app-strings';
 import {
-  PLATFORM_FAILURE,
   PLATFORM_INTEGRATION_UNAUTHORIZED,
   REPOSITORY_ACCESS_FORBIDDEN,
   REPOSITORY_ARCHIVED,
@@ -24,6 +23,7 @@ import {
 } from '../../constants/pull-requests';
 import { logger } from '../../logger';
 import { BranchStatus } from '../../types';
+import { ExternalHostError } from '../../types/errors/external-host-error';
 import * as hostRules from '../../util/host-rules';
 import * as githubHttp from '../../util/http/github';
 import { sanitize } from '../../util/sanitize';
@@ -204,7 +204,6 @@ export async function initRepo({
   repository,
   forkMode,
   forkToken,
-  gitPrivateKey,
   localDir,
   includeForks,
   renovateUsername,
@@ -216,7 +215,7 @@ export async function initRepo({
   // istanbul ignore if
   if (endpoint) {
     // Necessary for Renovate Pro - do not remove
-    logger.debug('Overriding default GitHub endpoint');
+    logger.debug({ endpoint }, 'Overriding default GitHub endpoint');
     defaults.endpoint = endpoint;
     githubHttp.setBaseUrl(endpoint);
   }
@@ -229,7 +228,6 @@ export async function initRepo({
   config.localDir = localDir;
   config.repository = repository;
   [config.repositoryOwner, config.repositoryName] = repository.split('/');
-  config.gitPrivateKey = gitPrivateKey;
   let res;
   try {
     res = await githubApi.getJson<{ fork: boolean }>(`repos/${repository}`);
@@ -399,7 +397,7 @@ export async function initRepo({
           }
         );
       } catch (err) /* istanbul ignore next */ {
-        if (err.message === PLATFORM_FAILURE) {
+        if (err instanceof ExternalHostError) {
           throw err;
         }
         if (
@@ -570,16 +568,10 @@ export function mergeBranch(branchName: string): Promise<void> {
 }
 
 // istanbul ignore next
-export function commitFiles({
-  branchName,
-  files,
-  message,
-}: CommitFilesConfig): Promise<string | null> {
-  return config.storage.commitFiles({
-    branchName,
-    files,
-    message,
-  });
+export function commitFiles(
+  commitFilesConfig: CommitFilesConfig
+): Promise<string | null> {
+  return config.storage.commitFiles(commitFilesConfig);
 }
 
 // istanbul ignore next
@@ -973,7 +965,7 @@ export async function getPrList(): Promise<Pr[]> {
       );
     } catch (err) /* istanbul ignore next */ {
       logger.debug({ err }, 'getPrList err');
-      throw new Error('platform-failure');
+      throw new ExternalHostError(err, PLATFORM_TYPE_GITHUB);
     }
     config.prList = res.body.map((pr) => ({
       number: pr.number,
@@ -991,6 +983,11 @@ export async function getPrList(): Promise<Pr[]> {
     logger.debug(`Retrieved ${config.prList.length} Pull Requests`);
   }
   return config.prList;
+}
+
+/* istanbul ignore next */
+export async function getPrFiles(pr: Pr): Promise<string[]> {
+  return config.storage.getBranchFiles(pr.branchName, pr.targetBranch);
 }
 
 export async function findPr({
@@ -1097,7 +1094,7 @@ export async function getBranchStatus(
         logger.debug({ result: checkRunsRaw }, 'No check runs found');
       }
     } catch (err) /* istanbul ignore next */ {
-      if (err.message === PLATFORM_FAILURE) {
+      if (err instanceof ExternalHostError) {
         throw err;
       }
       if (
@@ -1509,7 +1506,7 @@ async function getComments(issueNo: number): Promise<Comment[]> {
   } catch (err) /* istanbul ignore next */ {
     if (err.statusCode === 404) {
       logger.debug('404 respose when retrieving comments');
-      throw new Error(PLATFORM_FAILURE);
+      throw new ExternalHostError(err, PLATFORM_TYPE_GITHUB);
     }
     throw err;
   }
@@ -1562,7 +1559,7 @@ export async function ensureComment({
     }
     return true;
   } catch (err) /* istanbul ignore next */ {
-    if (err.message === PLATFORM_FAILURE) {
+    if (err instanceof ExternalHostError) {
       throw err;
     }
     if (err.body?.message?.includes('is locked')) {
@@ -1616,6 +1613,7 @@ export async function createPr({
   labels,
   useDefaultBranch,
   platformOptions = {},
+  draftPR = false,
 }: CreatePRConfig): Promise<Pr> {
   const body = sanitize(rawBody);
   const base = useDefaultBranch ? config.defaultBranch : config.baseBranch;
@@ -1627,6 +1625,7 @@ export async function createPr({
       head,
       base,
       body,
+      draft: draftPR,
     },
   };
   // istanbul ignore if
@@ -1634,14 +1633,17 @@ export async function createPr({
     options.token = config.forkToken;
     options.body.maintainer_can_modify = true;
   }
-  logger.debug({ title, head, base }, 'Creating PR');
+  logger.debug({ title, head, base, draft: draftPR }, 'Creating PR');
   const pr = (
     await githubApi.postJson<GhPr>(
       `repos/${config.parentRepo || config.repository}/pulls`,
       options
     )
   ).body;
-  logger.debug({ branch: branchName, pr: pr.number }, 'PR created');
+  logger.debug(
+    { branch: branchName, pr: pr.number, draft: draftPR },
+    'PR created'
+  );
   // istanbul ignore if
   if (config.prList) {
     config.prList.push(pr);
@@ -1688,7 +1690,7 @@ export async function updatePr(
     );
     logger.debug({ pr: prNo }, 'PR updated');
   } catch (err) /* istanbul ignore next */ {
-    if (err.message === PLATFORM_FAILURE) {
+    if (err instanceof ExternalHostError) {
       throw err;
     }
     logger.warn({ err }, 'Error updating PR');

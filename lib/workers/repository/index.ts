@@ -3,7 +3,6 @@ import { RenovateConfig } from '../../config';
 import { logger, setMeta } from '../../logger';
 import { platform } from '../../platform';
 import { addSplit, getSplits, splitInit } from '../../util/split';
-import { embedChangelogs } from './changelog';
 import handleError from './error';
 import { finaliseRepo } from './finalise';
 import { initRepo } from './init';
@@ -11,6 +10,7 @@ import { ensureMasterIssue } from './master-issue';
 import { ensureOnboardingPr } from './onboarding/pr';
 import { extractDependencies, updateRepo } from './process';
 import { ProcessResult, processResult } from './result';
+import { printRequestStats } from './stats';
 
 let renovateVersion = 'unknown';
 try {
@@ -38,8 +38,6 @@ export async function renovateRepository(
       config
     );
     await ensureOnboardingPr(config, packageFiles, branches);
-    await embedChangelogs(branches);
-    addSplit('changelogs');
     const res = await updateRepo(config, branches, branchList);
     addSplit('update');
     if (res !== 'automerged') {
@@ -58,6 +56,7 @@ export async function renovateRepository(
   }
   const splits = getSplits();
   logger.debug(splits, 'Repository timing splits (milliseconds)');
+  printRequestStats();
   logger.info({ durationMs: splits.total }, 'Repository finished');
   return repoResult;
 }

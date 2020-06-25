@@ -4,15 +4,16 @@ import fs from 'fs-extra';
 import Git from 'simple-git/promise';
 import {
   CONFIG_VALIDATION,
-  PLATFORM_FAILURE,
   REPOSITORY_CHANGED,
   REPOSITORY_EMPTY,
   REPOSITORY_TEMPORARY_ERROR,
   SYSTEM_INSUFFICIENT_DISK_SPACE,
 } from '../../constants/error-messages';
 import { logger } from '../../logger';
+import { ExternalHostError } from '../../types/errors/external-host-error';
 import * as limits from '../../workers/global/limits';
 import { CommitFilesConfig } from '../common';
+import { writePrivateKey } from './private-key';
 
 declare module 'fs-extra' {
   export function exists(pathLike: string): Promise<boolean>;
@@ -20,11 +21,12 @@ declare module 'fs-extra' {
 
 export type StatusResult = Git.StatusResult;
 
+export type DiffResult = Git.DiffResult;
+
 interface StorageConfig {
   localDir: string;
   baseBranch?: string;
   url: string;
-  gitPrivateKey?: string;
   extraCloneOpts?: Git.Options;
 }
 
@@ -52,7 +54,7 @@ function checkForPlatformFailure(err: Error): void {
   ];
   for (const errorStr of platformFailureStrings) {
     if (err.message.includes(errorStr)) {
-      throw new Error(PLATFORM_FAILURE);
+      throw new ExternalHostError(err, 'git');
     }
   }
 }
@@ -83,6 +85,8 @@ export class Storage {
   private _git: Git.SimpleGit | undefined;
 
   private _cwd: string | undefined;
+
+  private _privateKeySet = false;
 
   private async _resetToBranch(branchName: string): Promise<void> {
     logger.debug(`resetToBranch(${branchName})`);
@@ -172,7 +176,7 @@ export class Storage {
         if (err.message?.includes('write error: No space left on device')) {
           throw new Error(SYSTEM_INSUFFICIENT_DISK_SPACE);
         }
-        throw new Error(PLATFORM_FAILURE);
+        throw new ExternalHostError(err, 'git');
       }
       const durationMs = Math.round(Date.now() - cloneStart);
       logger.debug({ durationMs }, 'git clone completed');
@@ -196,14 +200,6 @@ export class Storage {
       }
       logger.warn({ err }, 'Cannot retrieve latest commit date');
     }
-    // istanbul ignore if
-    if (config.gitPrivateKey) {
-      logger.debug('Git private key configured, but not being set');
-    } else {
-      logger.debug('No git private key present - commits will be unsigned');
-      await this._git.raw(['config', 'commit.gpgsign', 'false']);
-    }
-
     if (global.gitAuthor) {
       logger.debug({ gitAuthor: global.gitAuthor }, 'Setting git author');
       try {
@@ -437,6 +433,22 @@ export class Storage {
     }
   }
 
+  async getBranchFiles(
+    branchName: string,
+    baseBranchName?: string
+  ): Promise<string[]> {
+    try {
+      const diff = await this._git.diffSummary([
+        branchName,
+        baseBranchName || this._config.baseBranch,
+      ]);
+      return diff.files.map((file) => file.file);
+    } catch (err) /* istanbul ignore next */ {
+      checkForPlatformFailure(err);
+      return null;
+    }
+  }
+
   async getFile(filePath: string, branchName?: string): Promise<string | null> {
     if (branchName) {
       const exists = await this.branchExists(branchName);
@@ -468,8 +480,13 @@ export class Storage {
     branchName,
     files,
     message,
+    force = false,
   }: CommitFilesConfig): Promise<string | null> {
     logger.debug(`Committing files to branch ${branchName}`);
+    if (!this._privateKeySet) {
+      await writePrivateKey(this._cwd);
+      this._privateKeySet = true;
+    }
     try {
       await this._git.reset('hard');
       await this._git.raw(['clean', '-fd']);
@@ -516,9 +533,11 @@ export class Storage {
           }
         }
       }
-      const commitRes = await this._git.commit(message);
+      const commitRes = await this._git.commit(message, [], {
+        '--no-verify': true,
+      });
       const commit = commitRes?.commit || 'unknown';
-      if (!(await this.hasDiff(`origin/${branchName}`))) {
+      if (!force && !(await this.hasDiff(`origin/${branchName}`))) {
         logger.debug(
           { branchName, fileNames },
           'No file changes detected. Skipping commit'
@@ -528,6 +547,7 @@ export class Storage {
       await this._git.push('origin', `${branchName}:${branchName}`, {
         '--force': true,
         '-u': true,
+        '--no-verify': true,
       });
       // Fetch it after create
       const ref = `refs/heads/${branchName}:refs/remotes/origin/${branchName}`;

@@ -6,13 +6,17 @@ import { BranchStatus } from '../../types';
 import { BranchConfig, PrResult } from '../common';
 import * as _changelogHelper from './changelog';
 import { getChangeLogJSON } from './changelog';
+import * as codeOwners from './code-owners';
 import * as prWorker from '.';
 
+const codeOwnersMock = mocked(codeOwners);
 const changelogHelper = mocked(_changelogHelper);
+const gitlabChangelogHelper = mocked(_changelogHelper);
 const platform = mocked(_platform);
 const defaultConfig = getConfig();
 
 jest.mock('./changelog');
+jest.mock('./code-owners');
 
 function setupChangelogMock() {
   changelogHelper.getChangeLogJSON = jest.fn();
@@ -49,6 +53,45 @@ function setupChangelogMock() {
   changelogHelper.getChangeLogJSON.mockResolvedValueOnce(resultValue);
   changelogHelper.getChangeLogJSON.mockResolvedValueOnce(errorValue);
   changelogHelper.getChangeLogJSON.mockResolvedValue(resultValue);
+}
+
+function setupGitlabChangelogMock() {
+  gitlabChangelogHelper.getChangeLogJSON = jest.fn();
+  const resultValue = {
+    project: {
+      baseUrl: 'https://gitlab.com/',
+      gitlab: 'renovateapp/gitlabdummy',
+      repository: 'https://gitlab.com/renovateapp/gitlabdummy',
+    },
+    hasReleaseNotes: true,
+    versions: [
+      {
+        date: new Date('2017-01-01'),
+        version: '1.1.0',
+        changes: [
+          {
+            date: new Date('2017-01-01'),
+            sha: 'abcdefghijklmnopqrstuvwxyz',
+            message: 'foo #3\nbar',
+          },
+        ],
+        releaseNotes: {
+          url:
+            'https://gitlab.com/renovateapp/gitlabdummy/compare/v1.0.0...v1.1.0',
+        },
+        compare: {
+          url:
+            'https://gitlab.com/renovateapp/gitlabdummy/compare/v1.0.0...v1.1.0',
+        },
+      },
+    ],
+  };
+  const errorValue = {
+    error: _changelogHelper.ChangeLogError.MissingGithubToken,
+  };
+  gitlabChangelogHelper.getChangeLogJSON.mockResolvedValueOnce(resultValue);
+  gitlabChangelogHelper.getChangeLogJSON.mockResolvedValueOnce(errorValue);
+  gitlabChangelogHelper.getChangeLogJSON.mockResolvedValue(resultValue);
 }
 
 describe('workers/pr', () => {
@@ -188,6 +231,27 @@ describe('workers/pr', () => {
       expect(prResult).toEqual(PrResult.AwaitingApproval);
       expect(pr).toBeUndefined();
     });
+    it('should create PR if success for gitlab deps', async () => {
+      setupGitlabChangelogMock();
+      config.branchName = 'renovate/gitlabdummy-1.x';
+      config.depName = 'gitlabdummy';
+      config.sourceUrl = 'https://gitlab.com/renovateapp/gitlabdummy';
+      config.changelogUrl =
+        'https://gitlab.com/renovateapp/gitlabdummy/changelog.md';
+      platform.getBranchStatus.mockResolvedValueOnce(BranchStatus.green);
+      config.prCreation = 'status-success';
+      config.automerge = true;
+      config.schedule = ['before 5am'];
+      const { prResult, pr } = await prWorker.ensurePr(config);
+      expect(prResult).toEqual(PrResult.Created);
+      expect(pr).toMatchObject({ displayNumber: 'New Pull Request' });
+      expect(platform.createPr.mock.calls[0]).toMatchSnapshot();
+      existingPr.body = platform.createPr.mock.calls[0][0].prBody;
+      config.branchName = 'renovate/dummy-1.x';
+      config.depName = 'dummy';
+      config.sourceUrl = 'https://github.com/renovateapp/dummy';
+      config.changelogUrl = 'https://github.com/renovateapp/dummy/changelog.md';
+    });
     it('should create PR if success', async () => {
       platform.getBranchStatus.mockResolvedValueOnce(BranchStatus.green);
       config.logJSON = await getChangeLogJSON(config);
@@ -306,6 +370,28 @@ describe('workers/pr', () => {
       expect(platform.addAssignees.mock.calls).toMatchSnapshot();
       expect(platform.addReviewers).toHaveBeenCalledTimes(1);
       expect(platform.addReviewers.mock.calls).toMatchSnapshot();
+    });
+    it('should determine assignees from code owners', async () => {
+      config.assigneesFromCodeOwners = true;
+      codeOwnersMock.codeOwnersForPr.mockResolvedValueOnce(['@john', '@maria']);
+      await prWorker.ensurePr(config);
+      expect(platform.addAssignees).toHaveBeenCalledTimes(1);
+      expect(platform.addAssignees.mock.calls).toMatchSnapshot();
+    });
+    it('should determine reviewers from code owners', async () => {
+      config.reviewersFromCodeOwners = true;
+      codeOwnersMock.codeOwnersForPr.mockResolvedValueOnce(['@john', '@maria']);
+      await prWorker.ensurePr(config);
+      expect(platform.addReviewers).toHaveBeenCalledTimes(1);
+      expect(platform.addReviewers.mock.calls).toMatchSnapshot();
+    });
+    it('should combine assignees from code owners and config', async () => {
+      codeOwnersMock.codeOwnersForPr.mockResolvedValueOnce(['@jimmy']);
+      config.assignees = ['@mike', '@julie'];
+      config.assigneesFromCodeOwners = true;
+      await prWorker.ensurePr(config);
+      expect(platform.addAssignees).toHaveBeenCalledTimes(1);
+      expect(platform.addAssignees.mock.calls).toMatchSnapshot();
     });
     it('should add reviewers even if assignees fails', async () => {
       platform.addAssignees.mockImplementationOnce(() => {
@@ -474,6 +560,8 @@ describe('workers/pr', () => {
       config.prCreation = 'status-success';
       config.privateRepo = false;
       config.logJSON = await getChangeLogJSON(config);
+      config.logJSON.project.gitlab = 'someproject';
+      delete config.logJSON.project.github;
       const { prResult, pr } = await prWorker.ensurePr(config);
       expect(prResult).toEqual(PrResult.Created);
       expect(pr).toMatchObject({ displayNumber: 'New Pull Request' });

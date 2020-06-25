@@ -15,6 +15,7 @@ jest.mock('fs-extra');
 jest.mock('child_process');
 jest.mock('../../util/exec/env');
 jest.mock('../../util/host-rules');
+jest.mock('../../util/http');
 
 const fs: jest.Mocked<typeof _fs> = _fs as any;
 const exec: jest.Mock<typeof _exec> = _exec as any;
@@ -38,6 +39,7 @@ const config = {
   localDir: join('/tmp/github/some/repo'),
   cacheDir: join('/tmp/renovate/cache'),
   dockerUser: 'foobar',
+  compatibility: { go: '1.14' },
 };
 
 const goEnv = {

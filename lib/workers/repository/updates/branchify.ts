@@ -4,6 +4,7 @@ import { RenovateConfig, ValidationMessage } from '../../../config';
 import { addMeta, logger, removeMeta } from '../../../logger';
 import * as template from '../../../util/template';
 import { BranchConfig, BranchUpgradeConfig } from '../../common';
+import { embedChangelogs } from '../changelog';
 import { flattenUpdates } from './flatten';
 import { generateBranchConfig } from './generate';
 import { Merge } from 'type-fest';
@@ -109,6 +110,7 @@ export async function branchifyUpgrades(
     );
   }
   logger.debug(`Returning ${Object.keys(branchUpgrades).length} branch(es)`);
+  await embedChangelogs(branchUpgrades);
   for (const branchName of Object.keys(branchUpgrades)) {
     // Add branch name to metadata before generating branch config
     addMeta({
@@ -116,8 +118,9 @@ export async function branchifyUpgrades(
     });
     const seenUpdates = {};
     // Filter out duplicates
-    branchUpgrades[branchName] = branchUpgrades[branchName].filter(
-      (upgrade) => {
+    branchUpgrades[branchName] = branchUpgrades[branchName]
+      .reverse()
+      .filter((upgrade) => {
         const {
           manager,
           packageFile,
@@ -143,8 +146,8 @@ export async function branchifyUpgrades(
         }
         seenUpdates[upgradeKey] = newValue;
         return true;
-      }
-    );
+      })
+      .reverse();
     const branch = generateBranchConfig(branchUpgrades[branchName]);
     branch.branchName = branchName;
     branch.packageFiles = packageFiles;

@@ -193,6 +193,7 @@ export interface Upgrade<T = Record<string, any>>
   toVersion?: string;
   updateType?: UpdateType;
   version?: string;
+  isLockFileMaintenance?: boolean;
 }
 
 export interface ArtifactError {

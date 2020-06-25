@@ -54,12 +54,11 @@ export async function extractSetupFile(
 ): Promise<PythonSetup> {
   const cwd = config.localDir;
   let cmd: string;
-  const file = await resolveFile('data/extract.py');
-  const args = [`"${file}"`, `"${packageFile}"`];
+  extractPy = extractPy || (await resolveFile('data/extract.py'));
+  const args = [`"${extractPy}"`, `"${packageFile}"`];
   if (config.binarySource === BinarySource.Docker) {
     logger.debug('Running python via docker');
     await exec(`docker pull renovate/pip`);
-    extractPy = extractPy || (await resolveFile('data/extract.py'));
     cmd = 'docker';
     args.unshift(
       'run',
