@@ -5,6 +5,8 @@ import { platform } from '../../../platform';
 import { BranchConfig } from '../../common';
 import { ExtractResult, extract, lookup, update } from './extract-update';
 import { WriteUpdateResult } from './write';
+import { addSplit } from '../../../util/split';
+import delay from 'delay';
 
 async function setBaseBranch(
   baseBranch: string,
@@ -70,6 +72,7 @@ export async function extractDependencies(
       const baseBranchConfig = await setBaseBranch(baseBranch, config);
       extracted[baseBranch] = await extract(baseBranchConfig);
     }
+    addSplit('extract');
     for (const baseBranch of config.baseBranches) {
       const baseBranchConfig = await setBaseBranch(baseBranch, config);
       const packageFiles = extracted[baseBranch];
@@ -81,8 +84,10 @@ export async function extractDependencies(
   } else {
     logger.debug('No baseBranches');
     const packageFiles = await extract(config);
+    addSplit('extract');
     res = await lookup(config, packageFiles);
   }
+  addSplit('lookup');
   return res;
 }
 

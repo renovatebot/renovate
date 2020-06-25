@@ -1,7 +1,6 @@
 import { RenovateConfig } from '../../../config';
 import { logger } from '../../../logger';
 import { PackageFile } from '../../../manager/common';
-import { addSplit } from '../../../util/split';
 import { BranchConfig } from '../../common';
 import { extractAllDependencies } from '../extract';
 import { branchifyUpgrades } from '../updates/branchify';
@@ -47,15 +46,12 @@ function extractStats(packageFiles: Record<string, PackageFile[]>): any {
 export async function extract(
   config: RenovateConfig
 ): Promise<Record<string, PackageFile[]>> {
-  logger.debug('extractAndUpdate()');
+  logger.debug('extract()');
   const packageFiles = await extractAllDependencies(config);
   const stats = extractStats(packageFiles);
   logger.info(
     { baseBranch: config.baseBranch, stats },
     `Dependency extraction complete`
-  );
-  addSplit(
-    config.baseBranches?.length ? `extract:${config.baseBranch}` : 'extract'
   );
   logger.trace({ config: packageFiles }, 'packageFiles');
   return packageFiles;
@@ -73,9 +69,6 @@ export async function lookup(
     packageFiles
   );
   sortBranches(branches);
-  addSplit(
-    config.baseBranches?.length ? `lookup:${config.baseBranch}` : 'lookup'
-  );
   return { branches, branchList, packageFiles };
 }
 
