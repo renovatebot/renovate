@@ -63,16 +63,7 @@ async function firstRegistry(
     );
   }
   const registryUrl = registryUrls[0];
-  try {
-    const res = await getRegistryReleases(datasource, config, registryUrl);
-    return res;
-  } catch (err) /* istanbul ignore next */ {
-    if (err instanceof ExternalHostError) {
-      throw err;
-    }
-    logError(datasource.id, config.lookupName, err);
-    return null;
-  }
+  return getRegistryReleases(datasource, config, registryUrl);
 }
 
 async function huntRegistries(
@@ -81,7 +72,7 @@ async function huntRegistries(
   registryUrls: string[]
 ): Promise<ReleaseResult> {
   let res: ReleaseResult;
-  let datasourceError;
+  let caughtError;
   for (const registryUrl of registryUrls) {
     try {
       res = await getRegistryReleases(datasource, config, registryUrl);
@@ -93,15 +84,15 @@ async function huntRegistries(
         throw err;
       }
       // We'll always save the last-thrown error
-      datasourceError = err;
+      caughtError = err;
       logger.trace({ err }, 'datasource hunt failure');
     }
   }
   if (res) {
     return res;
   }
-  if (datasourceError) {
-    logError(datasource.id, config.lookupName, datasourceError);
+  if (caughtError) {
+    throw caughtError;
   }
   return null;
 }
@@ -112,7 +103,7 @@ async function mergeRegistries(
   registryUrls: string[]
 ): Promise<ReleaseResult> {
   let combinedRes: ReleaseResult;
-  let datasourceError;
+  let caughtError;
   for (const registryUrl of registryUrls) {
     try {
       const res = await getRegistryReleases(datasource, config, registryUrl);
@@ -127,7 +118,7 @@ async function mergeRegistries(
         throw err;
       }
       // We'll always save the last-thrown error
-      datasourceError = err;
+      caughtError = err;
       logger.trace({ err }, 'datasource merge failure');
     }
   }
@@ -145,8 +136,8 @@ async function mergeRegistries(
   if (combinedRes) {
     return combinedRes;
   }
-  if (datasourceError) {
-    logError(datasource.id, config.lookupName, datasourceError);
+  if (caughtError) {
+    throw caughtError;
   }
   return null;
 }
@@ -176,28 +167,35 @@ async function fetchReleases(
   }
   const datasource = await load(datasourceName);
   const registryUrls = resolveRegistryUrls(datasource, config.registryUrls);
-  let dep: ReleaseResult;
-  if (datasource.registryStrategy) {
-    // istanbul ignore if
-    if (!registryUrls.length) {
-      logger.warn(
-        { datasource: datasourceName, depName: config.depName },
-        'Missing registryUrls for registryStrategy'
-      );
-      return null;
+  let dep: ReleaseResult = null;
+  try {
+    if (datasource.registryStrategy) {
+      // istanbul ignore if
+      if (!registryUrls.length) {
+        logger.warn(
+          { datasource: datasourceName, depName: config.depName },
+          'Missing registryUrls for registryStrategy'
+        );
+        return null;
+      }
+      if (datasource.registryStrategy === 'first') {
+        dep = await firstRegistry(config, datasource, registryUrls);
+      } else if (datasource.registryStrategy === 'hunt') {
+        dep = await huntRegistries(config, datasource, registryUrls);
+      } else if (datasource.registryStrategy === 'merge') {
+        dep = await mergeRegistries(config, datasource, registryUrls);
+      }
+    } else {
+      dep = await datasource.getReleases({
+        ...config,
+        registryUrls,
+      });
     }
-    if (datasource.registryStrategy === 'first') {
-      dep = await firstRegistry(config, datasource, registryUrls);
-    } else if (datasource.registryStrategy === 'hunt') {
-      dep = await huntRegistries(config, datasource, registryUrls);
-    } else if (datasource.registryStrategy === 'merge') {
-      dep = await mergeRegistries(config, datasource, registryUrls);
+  } catch (err) {
+    if (err instanceof ExternalHostError) {
+      throw err;
     }
-  } else {
-    dep = await datasource.getReleases({
-      ...config,
-      registryUrls,
-    });
+    logError(datasource.id, config.lookupName, err);
   }
   if (!dep || _.isEqual(dep, { releases: [] })) {
     return null;
