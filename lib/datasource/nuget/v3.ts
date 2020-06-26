@@ -68,68 +68,60 @@ export async function getReleases(
     pkgName,
     releases: [],
   };
-  try {
-    // TODO: fix types
-    const pkgUrlListRaw = await http.getJson<any>(queryUrl);
-    const match = pkgUrlListRaw.body.data.find(
-      (item) => item.id.toLowerCase() === pkgName.toLowerCase()
-    );
-    // https://docs.microsoft.com/en-us/nuget/api/search-query-service-resource#search-result
-    if (!match) {
-      // There are no pkgName or releases in current feed
-      return null;
-    }
-    dep.releases = match.versions.map((item) => ({
-      version: item.version,
-    }));
-
-    try {
-      // For nuget.org we have a way to get nuspec file
-      const sanitizedVersions = dep.releases
-        .map((release) => semver.valid(release.version))
-        .filter(Boolean)
-        .filter((version) => !semver.prerelease(version));
-      let lastVersion: string;
-      // istanbul ignore else
-      if (sanitizedVersions.length) {
-        // Use the last stable version we found
-        lastVersion = sanitizedVersions.pop();
-      } else {
-        // Just use the last one from the list and hope for the best
-        lastVersion = [...dep.releases].pop().version;
-      }
-      if (registryUrl.toLowerCase() === defaultNugetFeed.toLowerCase()) {
-        const nugetOrgApi = `https://api.nuget.org/v3-flatcontainer/${pkgName.toLowerCase()}/${lastVersion}/${pkgName.toLowerCase()}.nuspec`;
-        let metaresult: { body: string };
-        try {
-          metaresult = await http.get(nugetOrgApi);
-        } catch (err) /* istanbul ignore next */ {
-          logger.debug(
-            `Cannot fetch metadata for ${pkgName} using popped version ${lastVersion}`
-          );
-          return dep;
-        }
-        const nuspec = new XmlDocument(metaresult.body);
-        const sourceUrl = nuspec.valueWithPath('metadata.repository@url');
-        if (sourceUrl) {
-          dep.sourceUrl = sourceUrl;
-        }
-      } else if (match.projectUrl) {
-        dep.sourceUrl = match.projectUrl;
-      }
-    } catch (err) /* istanbul ignore next */ {
-      logger.debug(
-        { err, pkgName, feedUrl },
-        `nuget registry failure: can't parse pkg info for project url`
-      );
-    }
-
-    return dep;
-  } catch (err) {
-    logger.debug(
-      { err, pkgName, feedUrl },
-      'nuget registry failure: Unknown error'
-    );
+  // TODO: fix types
+  const pkgUrlListRaw = await http.getJson<any>(queryUrl);
+  const match = pkgUrlListRaw.body.data.find(
+    (item) => item.id.toLowerCase() === pkgName.toLowerCase()
+  );
+  // https://docs.microsoft.com/en-us/nuget/api/search-query-service-resource#search-result
+  if (!match) {
+    // There are no pkgName or releases in current feed
     return null;
   }
+  dep.releases = match.versions.map((item) => ({
+    version: item.version,
+  }));
+
+  try {
+    // For nuget.org we have a way to get nuspec file
+    const sanitizedVersions = dep.releases
+      .map((release) => semver.valid(release.version))
+      .filter(Boolean)
+      .filter((version) => !semver.prerelease(version));
+    let lastVersion: string;
+    // istanbul ignore else
+    if (sanitizedVersions.length) {
+      // Use the last stable version we found
+      lastVersion = sanitizedVersions.pop();
+    } else {
+      // Just use the last one from the list and hope for the best
+      lastVersion = [...dep.releases].pop().version;
+    }
+    if (registryUrl.toLowerCase() === defaultNugetFeed.toLowerCase()) {
+      const nugetOrgApi = `https://api.nuget.org/v3-flatcontainer/${pkgName.toLowerCase()}/${lastVersion}/${pkgName.toLowerCase()}.nuspec`;
+      let metaresult: { body: string };
+      try {
+        metaresult = await http.get(nugetOrgApi);
+      } catch (err) /* istanbul ignore next */ {
+        logger.debug(
+          `Cannot fetch metadata for ${pkgName} using popped version ${lastVersion}`
+        );
+        return dep;
+      }
+      const nuspec = new XmlDocument(metaresult.body);
+      const sourceUrl = nuspec.valueWithPath('metadata.repository@url');
+      if (sourceUrl) {
+        dep.sourceUrl = sourceUrl;
+      }
+    } else if (match.projectUrl) {
+      dep.sourceUrl = match.projectUrl;
+    }
+  } catch (err) /* istanbul ignore next */ {
+    logger.debug(
+      { err, pkgName, feedUrl },
+      `nuget registry failure: can't parse pkg info for project url`
+    );
+  }
+
+  return dep;
 }

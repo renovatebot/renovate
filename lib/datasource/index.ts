@@ -30,13 +30,17 @@ function load(datasource: string): Promise<Datasource> {
 
 type GetReleasesInternalConfig = GetReleasesConfig & GetPkgReleasesConfig;
 
-// istanbul ignore next
 function logError(datasource, lookupName, err): void {
-  const { statusCode, url } = err;
+  const { statusCode, code: errCode, url } = err;
   if (statusCode === 404) {
     logger.debug({ datasource, lookupName, url }, 'Datasource 404');
   } else if (statusCode === 401 || statusCode === 403) {
     logger.debug({ datasource, lookupName, url }, 'Datasource unauthorized');
+  } else if (errCode) {
+    logger.debug(
+      { datasource, lookupName, url, errCode },
+      'Datasource connection error'
+    );
   } else {
     logger.debug({ datasource, lookupName, err }, 'Datasource unknown error');
   }

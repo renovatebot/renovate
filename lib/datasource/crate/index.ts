@@ -1,4 +1,3 @@
-import { logger } from '../../logger';
 import { ExternalHostError } from '../../types/errors/external-host-error';
 import * as packageCache from '../../util/cache/package';
 import { Http } from '../../util/http';
@@ -66,18 +65,12 @@ export async function getReleases({
     await packageCache.set(cacheNamespace, cacheKey, result, cacheMinutes);
     return result;
   } catch (err) {
-    if (err.statusCode === 404 || err.code === 'ENOTFOUND') {
-      logger.debug({ lookupName }, `Dependency lookup failure: not found`);
-      logger.debug({ err }, 'Crate lookup error');
-      return null;
-    }
     if (
       err.statusCode === 429 ||
       (err.statusCode >= 500 && err.statusCode < 600)
     ) {
       throw new ExternalHostError(err);
     }
-    logger.warn({ err, lookupName }, 'crates.io lookup failure: Unknown error');
-    return null;
+    throw err;
   }
 }

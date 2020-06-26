@@ -64,23 +64,12 @@ export async function getReleases({
 
     return result;
   } catch (err) {
-    const errorData = { lookupName, err };
-
     if (
       err.statusCode === 429 ||
       (err.statusCode >= 500 && err.statusCode < 600)
     ) {
       throw new ExternalHostError(err);
     }
-
-    if (err.statusCode === 401) {
-      logger.debug(errorData, 'Authorization error');
-    } else if (err.statusCode === 404) {
-      logger.debug(errorData, 'Package lookup error');
-    } else {
-      logger.warn(errorData, 'hex lookup failure: Unknown error');
-    }
+    throw err;
   }
-
-  return null;
 }
