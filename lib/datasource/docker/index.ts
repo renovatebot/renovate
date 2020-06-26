@@ -6,10 +6,11 @@ import parseLinkHeader from 'parse-link-header';
 import wwwAuthenticate from 'www-authenticate';
 import { logger } from '../../logger';
 import { HostRule } from '../../types';
-import * as globalCache from '../../util/cache/global';
+import { ExternalHostError } from '../../types/errors/external-host-error';
+import * as packageCache from '../../util/cache/package';
 import * as hostRules from '../../util/host-rules';
 import { Http, HttpResponse } from '../../util/http';
-import { DatasourceError, GetReleasesConfig, ReleaseResult } from '../common';
+import { GetReleasesConfig, ReleaseResult } from '../common';
 
 // TODO: add got typings when available
 // TODO: replace www-authenticate with https://www.npmjs.com/package/auth-header ?
@@ -220,14 +221,14 @@ async function getAuthHeaders(
     }
     // prettier-ignore
     if (err.name === 'RequestError' && registry.endsWith('docker.io')) { // lgtm [js/incomplete-url-substring-sanitization]
-      throw new DatasourceError(err);
+      throw new ExternalHostError(err);
     }
     // prettier-ignore
     if (err.statusCode === 429 && registry.endsWith('docker.io')) { // lgtm [js/incomplete-url-substring-sanitization]
-      throw new DatasourceError(err);
+      throw new ExternalHostError(err);
     }
     if (err.statusCode >= 500 && err.statusCode < 600) {
-      throw new DatasourceError(err);
+      throw new ExternalHostError(err);
     }
     logger.warn(
       { registry, dockerRepository: repository, err },
@@ -267,7 +268,7 @@ async function getManifestResponse(
     });
     return manifestResponse;
   } catch (err) /* istanbul ignore next */ {
-    if (err instanceof DatasourceError) {
+    if (err instanceof ExternalHostError) {
       throw err;
     }
     if (err.statusCode === 401) {
@@ -292,10 +293,10 @@ async function getManifestResponse(
     }
     // prettier-ignore
     if (err.statusCode === 429 && registry.endsWith('docker.io')) { // lgtm [js/incomplete-url-substring-sanitization]
-      throw new DatasourceError(err);
+      throw new ExternalHostError(err);
     }
     if (err.statusCode >= 500 && err.statusCode < 600) {
-      throw new DatasourceError(err);
+      throw new ExternalHostError(err);
     }
     if (err.code === 'ETIMEDOUT') {
       logger.debug(
@@ -341,7 +342,7 @@ export async function getDigest(
   const cacheKey = `${registry}:${repository}:${newTag}`;
   let digest = null;
   try {
-    const cachedResult = await globalCache.get(cacheNamespace, cacheKey);
+    const cachedResult = await packageCache.get(cacheNamespace, cacheKey);
     // istanbul ignore if
     if (cachedResult !== undefined) {
       return cachedResult;
@@ -356,7 +357,7 @@ export async function getDigest(
       logger.debug({ digest }, 'Got docker digest');
     }
   } catch (err) /* istanbul ignore next */ {
-    if (err instanceof DatasourceError) {
+    if (err instanceof ExternalHostError) {
       throw err;
     }
     logger.debug(
@@ -369,7 +370,7 @@ export async function getDigest(
     );
   }
   const cacheMinutes = 30;
-  await globalCache.set(cacheNamespace, cacheKey, digest, cacheMinutes);
+  await packageCache.set(cacheNamespace, cacheKey, digest, cacheMinutes);
   return digest;
 }
 
@@ -381,7 +382,7 @@ async function getTags(
   try {
     const cacheNamespace = 'datasource-docker-tags';
     const cacheKey = `${registry}:${repository}`;
-    const cachedResult = await globalCache.get<string[]>(
+    const cachedResult = await packageCache.get<string[]>(
       cacheNamespace,
       cacheKey
     );
@@ -410,30 +411,17 @@ async function getTags(
       page += 1;
     } while (url && page < 20);
     const cacheMinutes = 15;
-    await globalCache.set(cacheNamespace, cacheKey, tags, cacheMinutes);
+    await packageCache.set(cacheNamespace, cacheKey, tags, cacheMinutes);
     return tags;
   } catch (err) /* istanbul ignore next */ {
-    if (err instanceof DatasourceError) {
+    if (err instanceof ExternalHostError) {
       throw err;
     }
-    logger.debug(
-      {
-        err,
-      },
-      'docker.getTags() error'
-    );
     if (err.statusCode === 404 && !repository.includes('/')) {
       logger.debug(
         `Retrying Tags for ${registry}/${repository} using library/ prefix`
       );
       return getTags(registry, 'library/' + repository);
-    }
-    if (err.statusCode === 401 || err.statusCode === 403) {
-      logger.debug(
-        { registry, dockerRepository: repository, err },
-        'Not authorised to look up docker tags'
-      );
-      return null;
     }
     // prettier-ignore
     if (err.statusCode === 429 && registry.endsWith('docker.io')) { // lgtm [js/incomplete-url-substring-sanitization]
@@ -441,27 +429,16 @@ async function getTags(
         { registry, dockerRepository: repository, err },
         'docker registry failure: too many requests'
       );
-      throw new DatasourceError(err);
+      throw new ExternalHostError(err);
     }
     if (err.statusCode >= 500 && err.statusCode < 600) {
       logger.warn(
         { registry, dockerRepository: repository, err },
         'docker registry failure: internal error'
       );
-      throw new DatasourceError(err);
+      throw new ExternalHostError(err);
     }
-    if (err.code === 'ETIMEDOUT') {
-      logger.debug(
-        { registry },
-        'Timeout when attempting to connect to docker registry'
-      );
-      return null;
-    }
-    logger.warn(
-      { registry, dockerRepository: repository, err },
-      'Error getting docker image tags'
-    );
-    return null;
+    throw err;
   }
 }
 
@@ -481,7 +458,7 @@ async function getLabels(
   logger.debug(`getLabels(${registry}, ${repository}, ${tag})`);
   const cacheNamespace = 'datasource-docker-labels';
   const cacheKey = `${registry}:${repository}:${tag}`;
-  const cachedResult = await globalCache.get<Record<string, string>>(
+  const cachedResult = await packageCache.get<Record<string, string>>(
     cacheNamespace,
     cacheKey
   );
@@ -540,10 +517,10 @@ async function getLabels(
       );
     }
     const cacheMinutes = 60;
-    await globalCache.set(cacheNamespace, cacheKey, labels, cacheMinutes);
+    await packageCache.set(cacheNamespace, cacheKey, labels, cacheMinutes);
     return labels;
   } catch (err) {
-    if (err instanceof DatasourceError) {
+    if (err instanceof ExternalHostError) {
       throw err;
     }
     if (err.statusCode === 400 || err.statusCode === 401) {

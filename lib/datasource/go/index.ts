@@ -33,40 +33,25 @@ async function getDatasource(goModule: string): Promise<DataSource | null> {
     };
   }
   const pkgUrl = `https://${goModule}?go-get=1`;
-  try {
-    const res = (await http.get(pkgUrl)).body;
-    const sourceMatch = regEx(
-      `<meta\\s+name="go-source"\\s+content="${goModule}\\s+([^\\s]+)`
-    ).exec(res);
-    if (sourceMatch) {
-      const [, goSourceUrl] = sourceMatch;
-      logger.debug({ goModule, goSourceUrl }, 'Go lookup source url');
-      if (goSourceUrl && goSourceUrl.startsWith('https://github.com/')) {
-        return {
-          datasource: github.id,
-          lookupName: goSourceUrl
-            .replace('https://github.com/', '')
-            .replace(/\/$/, ''),
-        };
-      }
-    } else {
-      logger.trace({ goModule }, 'No go-source header found');
+  const res = (await http.get(pkgUrl)).body;
+  const sourceMatch = regEx(
+    `<meta\\s+name="go-source"\\s+content="${goModule}\\s+([^\\s]+)`
+  ).exec(res);
+  if (sourceMatch) {
+    const [, goSourceUrl] = sourceMatch;
+    logger.debug({ goModule, goSourceUrl }, 'Go lookup source url');
+    if (goSourceUrl && goSourceUrl.startsWith('https://github.com/')) {
+      return {
+        datasource: github.id,
+        lookupName: goSourceUrl
+          .replace('https://github.com/', '')
+          .replace(/\/$/, ''),
+      };
     }
-    return null;
-  } catch (err) {
-    if (err.statusCode === 404 || err.code === 'ENOTFOUND') {
-      logger.debug(
-        { dependency: goModule },
-        `Dependency lookup failure: not found`
-      );
-      logger.debug({
-        err,
-      });
-      return null;
-    }
-    logger.debug({ err, goModule }, 'go lookup failure: Unknown error');
-    return null;
+  } else {
+    logger.trace({ goModule }, 'No go-source header found');
   }
+  return null;
 }
 
 /**

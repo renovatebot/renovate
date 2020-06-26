@@ -1,14 +1,14 @@
-import * as runCache_ from '../../util/cache/run';
+import * as memCache_ from '../../util/cache/memory';
 import { printRequestStats } from './stats';
 
-jest.mock('../../util/cache/run');
+jest.mock('../../util/cache/memory');
 
-const runCache: any = runCache_ as any;
+const memCache: any = memCache_ as any;
 
 describe('workers/repository/stats', () => {
   describe('printRequestStats()', () => {
     it('runs', () => {
-      runCache.get = jest.fn(() => [
+      memCache.get = jest.fn(() => [
         {
           method: 'get',
           url: 'https://api.github.com/api/v3/user',

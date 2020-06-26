@@ -10,7 +10,6 @@ describe(getName(__filename), () => {
     expect(await set('test', 'some-key', 'some-value', 5)).toBeUndefined();
   });
   it('sets and gets file', async () => {
-    global.renovateCache = { get: jest.fn(), set: jest.fn(), rm: jest.fn() };
     init({ cacheDir: 'some-dir' });
     expect(
       await set('some-namespace', 'some-key', 'some-value', 1)
@@ -18,7 +17,6 @@ describe(getName(__filename), () => {
     expect(await get('some-namespace', 'unknown-key')).toBeUndefined();
   });
   it('sets and gets redis', async () => {
-    global.renovateCache = { get: jest.fn(), set: jest.fn(), rm: jest.fn() };
     init({ redisUrl: 'some-url' });
     expect(
       await set('some-namespace', 'some-key', 'some-value', 1)

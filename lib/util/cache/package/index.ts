@@ -1,21 +1,24 @@
 import { RenovateConfig } from '../../../config/common';
-import * as runCache from '../run';
+import * as memCache from '../memory';
+import { PackageCache } from './common';
 import * as fileCache from './file';
 import * as redisCache from './redis';
+
+let cacheProxy: PackageCache;
 
 function getGlobalKey(namespace: string, key: string): string {
   return `global%%${namespace}%%${key}`;
 }
 
 export function get<T = any>(namespace: string, key: string): Promise<T> {
-  if (!global.renovateCache) {
+  if (!cacheProxy) {
     return undefined;
   }
   const globalKey = getGlobalKey(namespace, key);
-  if (!runCache.get(globalKey)) {
-    runCache.set(globalKey, global.renovateCache.get(namespace, key));
+  if (!memCache.get(globalKey)) {
+    memCache.set(globalKey, cacheProxy.get(namespace, key));
   }
-  return runCache.get(globalKey);
+  return memCache.get(globalKey);
 }
 
 export function set(
@@ -24,19 +27,27 @@ export function set(
   value: any,
   minutes: number
 ): Promise<void> {
-  if (!global.renovateCache) {
+  if (!cacheProxy) {
     return undefined;
   }
   const globalKey = getGlobalKey(namespace, key);
-  runCache.set(globalKey, value);
-  return global.renovateCache.set(namespace, key, value, minutes);
+  memCache.set(globalKey, value);
+  return cacheProxy.set(namespace, key, value, minutes);
 }
 
 export function init(config: RenovateConfig): void {
   if (config.redisUrl) {
     redisCache.init(config.redisUrl);
+    cacheProxy = {
+      get: redisCache.get,
+      set: redisCache.set,
+    };
   } else {
     fileCache.init(config.cacheDir);
+    cacheProxy = {
+      get: fileCache.get,
+      set: fileCache.set,
+    };
   }
 }
 

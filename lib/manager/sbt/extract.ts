@@ -66,20 +66,26 @@ const getResolverUrl = (str: string): string =>
     .replace(/"[\s,)]*$/, '');
 
 const isVarDependency = (str: string): boolean =>
-  /^\s*(lazy\s*)?val\s[_a-zA-Z][_a-zA-Z0-9]*\s*=.*(%%?).*%.*/.test(str);
+  /^\s*(private\s*)?(lazy\s*)?val\s[_a-zA-Z][_a-zA-Z0-9]*\s*=.*(%%?).*%.*/.test(
+    str
+  );
 
 const isVarDef = (str: string): boolean =>
-  /^\s*(lazy\s*)?val\s+[_a-zA-Z][_a-zA-Z0-9]*\s*=\s*"[^"]*"\s*$/.test(str);
+  /^\s*(private\s*)?(lazy\s*)?val\s+[_a-zA-Z][_a-zA-Z0-9]*\s*=\s*"[^"]*"\s*$/.test(
+    str
+  );
 
 const getVarName = (str: string): string =>
-  str.replace(/^\s*(lazy\s*)?val\s+/, '').replace(/\s*=\s*"[^"]*"\s*$/, '');
+  str
+    .replace(/^\s*(private\s*)?(lazy\s*)?val\s+/, '')
+    .replace(/\s*=\s*"[^"]*"\s*$/, '');
 
 const isVarName = (str: string): boolean =>
   /^[_a-zA-Z][_a-zA-Z0-9]*$/.test(str);
 
 const getVarInfo = (str: string, ctx: ParseContext): { val: string } => {
   const rightPart = str.replace(
-    /^\s*(lazy\s*)?val\s+[_a-zA-Z][_a-zA-Z0-9]*\s*=\s*"/,
+    /^\s*(private\s*)?(lazy\s*)?val\s+[_a-zA-Z][_a-zA-Z0-9]*\s*=\s*"/,
     ''
   );
   const val = rightPart.replace(/"\s*$/, '');
@@ -210,7 +216,7 @@ function parseSbtLine(
     } else if (isVarDependency(line)) {
       isMultiDeps = false;
       const depExpr = line.replace(
-        /^\s*(lazy\s*)?val\s[_a-zA-Z][_a-zA-Z0-9]*\s*=\s*/,
+        /^\s*(private\s*)?(lazy\s*)?val\s[_a-zA-Z][_a-zA-Z0-9]*\s*=\s*/,
         ''
       );
       dep = parseDepExpr(depExpr, {
