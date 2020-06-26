@@ -210,3 +210,17 @@ Object {
   "platform": "bitbucket",
 }
 `;
+
+exports[`platform parses bot email 1`] = `
+Object {
+  "address": "some[bot]@users.noreply.github.com",
+  "name": "some[bot]",
+}
+`;
+
+exports[`platform parses bot name and email 1`] = `
+Object {
+  "address": "some[bot]@users.noreply.github.com",
+  "name": "some[bot]",
+}
+`;

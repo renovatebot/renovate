@@ -37,6 +37,42 @@ export function setPlatformApi(name: string): void {
   _platform = platforms.get(name);
 }
 
+interface GitAuthor {
+  name?: string;
+  address?: string;
+}
+
+export function parseGitAuthor(input: string): GitAuthor | null {
+  let result: GitAuthor = null;
+  if (!input) {
+    return null;
+  }
+  if (input.includes('[bot]@')) {
+    // invalid github app/bot addresses
+    const parsed = addrs.parseOneAddress(
+      input.replace('[bot]@', '@')
+    ) as addrs.ParsedMailbox;
+    if (parsed?.address) {
+      result = {
+        name: parsed.name || input.replace(/@.*/, ''),
+        address: parsed.address.replace('@', '[bot]@'),
+      };
+      return result;
+    }
+  }
+  result = addrs.parseOneAddress(input);
+  if (result) {
+    return result;
+  }
+  if (input.includes('<') && input.includes('>')) {
+    result = addrs.parseOneAddress('"' + input.replace(/(\s?<)/, '"$1'));
+    if (result) {
+      return result;
+    }
+  }
+  return null;
+}
+
 export async function initPlatform(
   config: RenovateConfig
 ): Promise<RenovateConfig> {
@@ -56,12 +92,7 @@ export async function initPlatform(
     logger.debug('Using platform gitAuthor: ' + platformInfo.gitAuthor);
     gitAuthor = platformInfo.gitAuthor;
   }
-  let gitAuthorParsed: addrs.ParsedMailbox | null = null;
-  try {
-    gitAuthorParsed = addrs.parseOneAddress(gitAuthor) as addrs.ParsedMailbox;
-  } catch (err) /* istanbul ignore next */ {
-    logger.debug({ gitAuthor, err }, 'Error parsing gitAuthor');
-  }
+  const gitAuthorParsed = parseGitAuthor(gitAuthor);
   // istanbul ignore if
   if (!gitAuthorParsed) {
     throw new Error('Init: gitAuthor is not parsed as valid RFC5322 format');
