@@ -9,6 +9,9 @@ const yamlFile3 = readFileSync(
 describe('lib/manager/docker-compose/extract', () => {
   describe('extractPackageFile()', () => {
     it('returns null for empty', () => {
+      expect(extractPackageFile('')).toBeNull();
+    });
+    it('returns null for non-object YAML', () => {
       expect(extractPackageFile('nothing here')).toBeNull();
     });
     it('returns null for malformed YAML', () => {

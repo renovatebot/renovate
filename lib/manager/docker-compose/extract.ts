@@ -47,7 +47,6 @@ export function extractPackageFile(
   let config: DockerComposeConfig;
   try {
     config = safeLoad(content, { json: true });
-    // istanbul ignore if
     if (!config) {
       logger.debug(
         { fileName },
