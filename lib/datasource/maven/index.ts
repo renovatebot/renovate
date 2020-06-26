@@ -157,7 +157,7 @@ async function getVersionsFromMetadata(
   }
 
   const versions = extractVersions(mavenMetadata);
-  await packageCache.set(cacheNamespace, cacheKey, versions, 10);
+  await packageCache.set(cacheNamespace, cacheKey, versions, 30);
   return versions;
 }
 
