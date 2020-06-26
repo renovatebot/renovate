@@ -11,6 +11,10 @@ export interface BaseBranchCache {
 }
 
 export interface Cache {
+  config?: {
+    configFile: string;
+    contents: RenovateConfig;
+  };
   extract?: Record<string, BaseBranchCache>;
 }
 

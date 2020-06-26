@@ -13,6 +13,7 @@ import { detectVulnerabilityAlerts } from './vulnerability';
 
 export async function initRepo(input: RenovateConfig): Promise<RenovateConfig> {
   memCache.init();
+  await repositoryCache.initialize(input);
   let config: RenovateConfig = {
     ...input,
     errors: [],
@@ -27,7 +28,6 @@ export async function initRepo(input: RenovateConfig): Promise<RenovateConfig> {
   checkIfConfigured(config);
   config = await checkBaseBranch(config);
   await platform.setBranchPrefix(config.branchPrefix);
-  await repositoryCache.initialize(config);
   config = await detectVulnerabilityAlerts(config);
   // istanbul ignore if
   if (config.printConfig) {
