@@ -14,3 +14,18 @@ Object {
   "packageFiles": undefined,
 }
 `;
+
+exports[`workers/repository/process/extract-update extract() uses repository cache 1`] = `
+Object {
+  "branchList": Array [
+    "branchName",
+  ],
+  "branches": Array [
+    Object {
+      "branchName": "some-branch",
+      "upgrades": Array [],
+    },
+  ],
+  "packageFiles": Array [],
+}
+`;

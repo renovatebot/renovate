@@ -4,13 +4,13 @@ import { RenovateConfig } from '../../../config/common';
 import { logger } from '../../../logger';
 import { PackageFile } from '../../../manager/common';
 
-interface BaseBranchCache {
+export interface BaseBranchCache {
   sha: string; // branch commit sha
   configHash: string; // object hash of config
   packageFiles: PackageFile[]; // extract result
 }
 
-interface Cache {
+export interface Cache {
   extract?: Record<string, BaseBranchCache>;
 }
 
