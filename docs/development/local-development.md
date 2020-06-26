@@ -142,7 +142,7 @@ You also need to make sure that you don't have a local `.npmrc` file that overri
 The Renovate project maintains 100% test coverage, so any Pull Request will fail if it does not contain full coverage for code.
 Using `// istanbul ignore` is not ideal but sometimes is a pragmatic solution if an additional test wouldn't really prove anything.
 
-To view the current test coverage locally, open up `coverage/lcov-report/index.html` in your browser.
+To view the current test coverage locally, open up `coverage/index.html` in your browser.
 
 Do not let coverage put you off submitting a PR! Maybe we can help, or at least guide.
 Also, it can be good to submit your PR as a work in progress (WIP) without tests first so that you can get a thumbs up from others about the changes, and write tests after.
