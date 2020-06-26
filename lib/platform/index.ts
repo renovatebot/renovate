@@ -47,29 +47,35 @@ export function parseGitAuthor(input: string): GitAuthor | null {
   if (!input) {
     return null;
   }
-  if (input.includes('[bot]@')) {
-    // invalid github app/bot addresses
-    const parsed = addrs.parseOneAddress(
-      input.replace('[bot]@', '@')
-    ) as addrs.ParsedMailbox;
-    if (parsed?.address) {
-      result = {
-        name: parsed.name || input.replace(/@.*/, ''),
-        address: parsed.address.replace('@', '[bot]@'),
-      };
-      return result;
-    }
-  }
-  result = addrs.parseOneAddress(input);
-  if (result) {
-    return result;
-  }
-  if (input.includes('<') && input.includes('>')) {
-    result = addrs.parseOneAddress('"' + input.replace(/(\s?<)/, '"$1'));
+  try {
+    result = addrs.parseOneAddress(input);
     if (result) {
       return result;
     }
+    if (input.includes('[bot]@')) {
+      // invalid github app/bot addresses
+      const parsed = addrs.parseOneAddress(
+        input.replace('[bot]@', '@')
+      ) as addrs.ParsedMailbox;
+      if (parsed?.address) {
+        result = {
+          name: parsed.name || input.replace(/@.*/, ''),
+          address: parsed.address.replace('@', '[bot]@'),
+        };
+        return result;
+      }
+    }
+    if (input.includes('<') && input.includes('>')) {
+      // try wrapping the name part in quotations
+      result = addrs.parseOneAddress('"' + input.replace(/(\s?<)/, '"$1'));
+      if (result) {
+        return result;
+      }
+    }
+  } catch (err) /* istanbul ignore next */ {
+    logger.error({ err }, 'Unknown error parsing gitAuthor');
   }
+  // give up
   return null;
 }
 
