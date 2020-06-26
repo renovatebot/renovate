@@ -206,8 +206,7 @@ const options: RenovateOptions[] = [
   },
   {
     name: 'repositoryCache',
-    description:
-      'Enabling will skip/overwrite any existing cached repository data.',
+    description: 'Option to do repository extract caching.',
     admin: true,
     type: 'string',
     allowedValues: ['disabled', 'enabled', 'reset'],
