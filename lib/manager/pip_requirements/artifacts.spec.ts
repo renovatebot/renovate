@@ -1,13 +1,7 @@
-import { exec as _exec } from 'child_process';
 import _fs from 'fs-extra';
-import { envMock, mockExecAll } from '../../../test/execUtil';
-import { mocked } from '../../../test/util';
-import { BinarySource } from '../../util/exec/common';
-import * as _env from '../../util/exec/env';
 import { updateArtifacts } from './artifacts';
 
 const fs: jest.Mocked<typeof _fs> = _fs as any;
-const exec: jest.Mock<typeof _exec> = _exec as any;
 
 jest.mock('fs-extra');
 jest.mock('child_process');
