@@ -21,7 +21,7 @@ branchify.branchifyUpgrades.mockResolvedValueOnce({
 
 describe('workers/repository/process/extract-update', () => {
   describe('extract()', () => {
-    it('runs', async () => {
+    it('runs with no baseBranches', async () => {
       const config = {
         repoIsOnboarded: true,
         suppressNotifications: ['deprecationWarningIssues'],
@@ -31,6 +31,16 @@ describe('workers/repository/process/extract-update', () => {
       const res = await lookup(config, packageFiles);
       expect(res).toMatchSnapshot();
       await expect(update(config, res.branches)).resolves.not.toThrow();
+    });
+    it('runs with baseBranches', async () => {
+      const config = {
+        baseBranches: ['master', 'dev'],
+        repoIsOnboarded: true,
+        suppressNotifications: ['deprecationWarningIssues'],
+      };
+      repositoryCache.getCache.mockReturnValueOnce({});
+      const packageFiles = await extract(config);
+      expect(packageFiles).toMatchSnapshot();
     });
     it('uses repository cache', async () => {
       const packageFiles = [];

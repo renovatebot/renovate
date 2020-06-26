@@ -1,6 +1,8 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
-exports[`workers/repository/process/extract-update extract() runs 1`] = `
+exports[`workers/repository/process/extract-update extract() runs with baseBranches 1`] = `undefined`;
+
+exports[`workers/repository/process/extract-update extract() runs with no baseBranches 1`] = `
 Object {
   "branchList": Array [
     "branchName",
@@ -12,20 +14,5 @@ Object {
     },
   ],
   "packageFiles": undefined,
-}
-`;
-
-exports[`workers/repository/process/extract-update extract() uses repository cache 1`] = `
-Object {
-  "branchList": Array [
-    "branchName",
-  ],
-  "branches": Array [
-    Object {
-      "branchName": "some-branch",
-      "upgrades": Array [],
-    },
-  ],
-  "packageFiles": Array [],
 }
 `;
