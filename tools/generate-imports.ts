@@ -1,5 +1,4 @@
 import fs from 'fs-extra';
-import _ from 'lodash';
 import shell from 'shelljs';
 
 shell.echo('generating imports');
@@ -26,6 +25,14 @@ async function updateFile(file: string, code: string): Promise<void> {
   newFiles.add(file);
 }
 
+function camelCase(input: string): string {
+  return input
+    .replace(/(?:^\w|[A-Z]|\b\w)/g, (char, index) => {
+      return index === 0 ? char.toLowerCase() : char.toUpperCase();
+    })
+    .replace(/-/g, '');
+}
+
 async function generate({
   path,
   types,
@@ -43,7 +50,7 @@ async function generate({
   for (const ds of findModules(`lib/${path}`).filter(
     (n) => !excludes?.includes(n)
   )) {
-    const name = _.camelCase(ds);
+    const name = camelCase(ds);
     imports += `import * as ${name} from './${ds}';\n`;
     maps += `api.set('${ds}', ${name}${map});\n`;
   }

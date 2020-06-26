@@ -57,7 +57,7 @@ export function extractPackageFile(
         dep.skipReason = SkipReason.Ignored;
       }
       regex.lastIndex = 0;
-      const matches = regex.exec(line);
+      const matches = regex.exec(line.split(' \\')[0]);
       if (!matches) {
         return null;
       }

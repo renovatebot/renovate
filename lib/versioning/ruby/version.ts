@@ -1,6 +1,5 @@
 import { diff, major, minor, patch, prerelease } from '@snyk/ruby-semver';
 import { create } from '@snyk/ruby-semver/lib/ruby/gem-version';
-import last from 'lodash/last';
 
 interface RubyVersion {
   major: number;
@@ -25,9 +24,9 @@ const floor = (version: string): string =>
 // istanbul ignore next
 const incrementLastSegment = (version: string): string => {
   const segments = create(version).release().getSegments();
-  const nextLast = parseInt(last(segments), 10) + 1;
+  const nextLast = parseInt(segments.pop(), 10) + 1;
 
-  return [...segments.slice(0, -1), nextLast].join('.');
+  return [...segments, nextLast].join('.');
 };
 
 // istanbul ignore next

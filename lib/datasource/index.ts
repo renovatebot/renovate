@@ -1,5 +1,5 @@
 import is from '@sindresorhus/is';
-import _ from 'lodash';
+import equal from 'fast-deep-equal';
 import { logger } from '../logger';
 import { ExternalHostError } from '../types/errors/external-host-error';
 import * as memCache from '../util/cache/memory';
@@ -201,7 +201,7 @@ async function fetchReleases(
     }
     logError(datasource.id, config.lookupName, err);
   }
-  if (!dep || _.isEqual(dep, { releases: [] })) {
+  if (!dep || equal(dep, { releases: [] })) {
     return null;
   }
   addMetaData(dep, datasourceName, config.lookupName);

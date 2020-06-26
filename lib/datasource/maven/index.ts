@@ -157,7 +157,7 @@ async function getVersionsFromMetadata(
   }
 
   const versions = extractVersions(mavenMetadata);
-  await packageCache.set(cacheNamespace, cacheKey, versions, 10);
+  await packageCache.set(cacheNamespace, cacheKey, versions, 30);
   return versions;
 }
 
@@ -244,11 +244,14 @@ export async function getReleases({
   logger.debug(`Looking up ${dependency.display} in repository ${repoUrl}`);
   const metadataVersions = await getVersionsFromMetadata(dependency, repoUrl);
   if (metadataVersions) {
-    const availableVersions = await filterMissingArtifacts(
-      dependency,
-      repoUrl,
-      metadataVersions
-    );
+    let availableVersions = metadataVersions;
+    if (!process.env.RENOVATE_EXPERIMENTAL_NO_MAVEN_POM_CHECK) {
+      availableVersions = await filterMissingArtifacts(
+        dependency,
+        repoUrl,
+        metadataVersions
+      );
+    }
     const filteredVersions = availableVersions.filter(
       (version) => !versions.includes(version)
     );
