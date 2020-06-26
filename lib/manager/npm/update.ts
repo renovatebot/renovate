@@ -1,4 +1,4 @@
-import { isEqual } from 'lodash';
+import equal from 'fast-deep-equal';
 import { ReleaseType, inc } from 'semver';
 import { logger } from '../../logger';
 import { matchAt, replaceAt } from '../../util/string';
@@ -117,7 +117,7 @@ export function updateDependency({
           newString
         );
         // Compare the parsed JSON structure of old and new
-        if (isEqual(parsedContents, JSON.parse(testContent))) {
+        if (equal(parsedContents, JSON.parse(testContent))) {
           newFileContent = testContent;
           break;
         }
@@ -172,7 +172,7 @@ export function updateDependency({
               newResolution
             );
             // Compare the parsed JSON structure of old and new
-            if (isEqual(parsedContents, JSON.parse(testContent))) {
+            if (equal(parsedContents, JSON.parse(testContent))) {
               newFileContent = testContent;
               break;
             }

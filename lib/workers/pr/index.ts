@@ -1,5 +1,3 @@
-import sampleSize from 'lodash/sampleSize';
-import uniq from 'lodash/uniq';
 import { RenovateConfig } from '../../config/common';
 import {
   PLATFORM_INTEGRATION_UNAUTHORIZED,
@@ -10,6 +8,7 @@ import { logger } from '../../logger';
 import { PlatformPrOptions, Pr, platform } from '../../platform';
 import { BranchStatus } from '../../types';
 import { ExternalHostError } from '../../types/errors/external-host-error';
+import { sampleSize } from '../../util';
 import { BranchConfig, PrResult } from '../common';
 import { getPrBody } from './body';
 import { ChangeLogError } from './changelog';
@@ -27,7 +26,7 @@ async function addCodeOwners(
   assigneesOrReviewers: string[],
   pr: Pr
 ): Promise<string[]> {
-  return uniq(assigneesOrReviewers.concat(await codeOwnersForPr(pr)));
+  return [...new Set(assigneesOrReviewers.concat(await codeOwnersForPr(pr)))];
 }
 
 export async function addAssigneesReviewers(
@@ -69,7 +68,7 @@ export async function addAssigneesReviewers(
         const additionalReviewers = config.additionalReviewers.map(
           noLeadingAtSymbol
         );
-        reviewers = uniq(reviewers.concat(additionalReviewers));
+        reviewers = [...new Set(reviewers.concat(additionalReviewers))];
       }
       if (config.reviewersSampleSize !== null) {
         reviewers = sampleSize(reviewers, config.reviewersSampleSize);
