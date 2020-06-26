@@ -1,8 +1,8 @@
 import { readFileSync } from 'fs';
 import { extractPackageFile } from './extract';
 
-const yamlFile = readFileSync(
-  'lib/manager/docker-compose/__fixtures__/docker-compose.1.yml',
+const yamlFile3 = readFileSync(
+  'lib/manager/docker-compose/__fixtures__/docker-compose.3.yml',
   'utf8'
 );
 
@@ -14,8 +14,8 @@ describe('lib/manager/docker-compose/extract', () => {
     it('returns null for malformed YAML', () => {
       expect(extractPackageFile('nothing here\n:::::::')).toBeNull();
     });
-    it('extracts multiple image lines', () => {
-      const res = extractPackageFile(yamlFile);
+    it('extracts multiple image lines for version 3', () => {
+      const res = extractPackageFile(yamlFile3);
       expect(res.deps).toMatchSnapshot();
       expect(res.deps).toHaveLength(8);
     });
