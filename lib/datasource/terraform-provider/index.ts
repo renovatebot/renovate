@@ -36,33 +36,22 @@ async function queryRegistry(
   registryURL: string,
   repository: string
 ): Promise<ReleaseResult> {
-  try {
-    const backendURL = `${registryURL}/v1/providers/${repository}`;
-    const res = (await http.getJson<TerraformProvider>(backendURL)).body;
-    const dep: ReleaseResult = {
-      name: repository,
-      versions: {},
-      releases: null,
-    };
-    if (res.source) {
-      dep.sourceUrl = res.source;
-    }
-    dep.releases = res.versions.map((version) => ({
-      version,
-    }));
-    dep.homepage = `${registryURL}/providers/${repository}`;
-    logger.trace({ dep }, 'dep');
-    return dep;
-  } catch (err) {
-    logger.debug(
-      { lookupName },
-      `Terraform registry ("${registryURL}") lookup failure: not found`
-    );
-    logger.debug({
-      err,
-    });
-    return null;
+  const backendURL = `${registryURL}/v1/providers/${repository}`;
+  const res = (await http.getJson<TerraformProvider>(backendURL)).body;
+  const dep: ReleaseResult = {
+    name: repository,
+    versions: {},
+    releases: null,
+  };
+  if (res.source) {
+    dep.sourceUrl = res.source;
   }
+  dep.releases = res.versions.map((version) => ({
+    version,
+  }));
+  dep.homepage = `${registryURL}/providers/${repository}`;
+  logger.trace({ dep }, 'dep');
+  return dep;
 }
 
 async function queryReleaseBackend(
@@ -72,32 +61,20 @@ async function queryReleaseBackend(
 ): Promise<ReleaseResult> {
   const backendLookUpName = `terraform-provider-${lookupName}`;
   const backendURL = registryURL + `/index.json`;
-  try {
-    const res = (
-      await http.getJson<TerraformProviderReleaseBackend>(backendURL)
-    ).body;
-    const dep: ReleaseResult = {
-      name: repository,
-      versions: {},
-      releases: null,
-    };
-    dep.releases = Object.keys(res[backendLookUpName].versions).map(
-      (version) => ({
-        version,
-      })
-    );
-    logger.trace({ dep }, 'dep');
-    return dep;
-  } catch (err) {
-    logger.debug(
-      { lookupName },
-      `Terraform registry ("${registryURL}") lookup failure: not found`
-    );
-    logger.debug({
-      err,
-    });
-    return null;
-  }
+  const res = (await http.getJson<TerraformProviderReleaseBackend>(backendURL))
+    .body;
+  const dep: ReleaseResult = {
+    name: repository,
+    versions: {},
+    releases: null,
+  };
+  dep.releases = Object.keys(res[backendLookUpName].versions).map(
+    (version) => ({
+      version,
+    })
+  );
+  logger.trace({ dep }, 'dep');
+  return dep;
 }
 
 /**

@@ -2,7 +2,7 @@ import AWS from 'aws-sdk';
 import AWSMock from 'aws-sdk-mock';
 import { getDigest, getPkgReleases } from '..';
 import * as httpMock from '../../../test/httpMock';
-import { DATASOURCE_FAILURE } from '../../constants/error-messages';
+import { EXTERNAL_HOST_ERROR } from '../../constants/error-messages';
 import * as _hostRules from '../../util/host-rules';
 import * as docker from '.';
 
@@ -331,13 +331,13 @@ describe('api/docker', () => {
       httpMock.scope(baseUrl).get('/').replyWithError({ statusCode: 429 });
       await expect(
         getDigest({ datasource: 'docker', depName: 'some-dep' }, 'latest')
-      ).rejects.toThrow(Error(DATASOURCE_FAILURE));
+      ).rejects.toThrow(EXTERNAL_HOST_ERROR);
     });
     it('should throw error for 5xx', async () => {
       httpMock.scope(baseUrl).get('/').replyWithError({ statusCode: 504 });
       await expect(
         getDigest({ datasource: 'docker', depName: 'some-dep' }, 'latest')
-      ).rejects.toThrow(Error(DATASOURCE_FAILURE));
+      ).rejects.toThrow(EXTERNAL_HOST_ERROR);
     });
   });
   describe('getReleases', () => {

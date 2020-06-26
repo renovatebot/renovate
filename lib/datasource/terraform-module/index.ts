@@ -1,7 +1,8 @@
 import { logger } from '../../logger';
-import * as globalCache from '../../util/cache/global';
+import { ExternalHostError } from '../../types/errors/external-host-error';
+import * as packageCache from '../../util/cache/package';
 import { Http } from '../../util/http';
-import { DatasourceError, GetReleasesConfig, ReleaseResult } from '../common';
+import { GetReleasesConfig, ReleaseResult } from '../common';
 
 export const id = 'terraform-module';
 export const defaultRegistryUrls = ['https://registry.terraform.io'];
@@ -65,7 +66,7 @@ export async function getReleases({
   );
   const cacheNamespace = 'terraform-module';
   const pkgUrl = `${registry}/v1/modules/${repository}`;
-  const cachedResult = await globalCache.get<ReleaseResult>(
+  const cachedResult = await packageCache.get<ReleaseResult>(
     cacheNamespace,
     pkgUrl
   );
@@ -97,28 +98,14 @@ export async function getReleases({
     }
     logger.trace({ dep }, 'dep');
     const cacheMinutes = 30;
-    await globalCache.set(cacheNamespace, pkgUrl, dep, cacheMinutes);
+    await packageCache.set(cacheNamespace, pkgUrl, dep, cacheMinutes);
     return dep;
   } catch (err) {
-    if (err.statusCode === 404 || err.code === 'ENOTFOUND') {
-      logger.debug(
-        { lookupName },
-        `Terraform registry lookup failure: not found`
-      );
-      logger.debug({
-        err,
-      });
-      return null;
-    }
     const failureCodes = ['EAI_AGAIN'];
     // istanbul ignore if
     if (failureCodes.includes(err.code)) {
-      throw new DatasourceError(err);
+      throw new ExternalHostError(err);
     }
-    logger.warn(
-      { err, lookupName },
-      'Terraform registry failure: Unknown error'
-    );
-    return null;
+    throw err;
   }
 }

@@ -1,6 +1,7 @@
 import crypto from 'crypto';
 import { logger } from '../../logger';
-import * as globalCache from '../../util/cache/global';
+import { ExternalHostError } from '../../types/errors/external-host-error';
+import * as packageCache from '../../util/cache/package';
 import { Http } from '../../util/http';
 import { GithubHttp } from '../../util/http/github';
 import { GetReleasesConfig, ReleaseResult } from '../common';
@@ -44,7 +45,7 @@ function handleError(lookupName: string, err: Error): void {
     (err.statusCode >= 500 && err.statusCode < 600)
   ) {
     logger.warn({ lookupName, err }, `CocoaPods registry failure`);
-    throw new Error('registry-failure');
+    throw new ExternalHostError(err);
   }
 
   if (err.statusCode === 401) {
@@ -154,7 +155,7 @@ export async function getReleases({
 }: GetReleasesConfig): Promise<ReleaseResult | null> {
   const podName = lookupName.replace(/\/.*$/, '');
 
-  const cachedResult = await globalCache.get<ReleaseResult>(
+  const cachedResult = await packageCache.get<ReleaseResult>(
     cacheNamespace,
     registryUrl + podName
   );
@@ -179,7 +180,7 @@ export async function getReleases({
     result = await getReleasesFromCDN(podName, baseUrl);
   }
 
-  await globalCache.set(cacheNamespace, podName, result, cacheMinutes);
+  await packageCache.set(cacheNamespace, podName, result, cacheMinutes);
 
   return result;
 }

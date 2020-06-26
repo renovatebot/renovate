@@ -1,5 +1,7 @@
 import nock from 'nock';
 import { getName } from '../../../test/util';
+import { EXTERNAL_HOST_ERROR } from '../../constants/error-messages';
+import * as hostRules from '../host-rules';
 import { Http } from '.';
 
 const baseUrl = 'http://renovate.com';
@@ -10,10 +12,34 @@ describe(getName(__filename), () => {
   beforeEach(() => {
     http = new Http('dummy');
     nock.cleanAll();
+    hostRules.clear();
   });
   it('get', async () => {
     nock(baseUrl).get('/test').reply(200);
     expect(await http.get('http://renovate.com/test')).toMatchSnapshot();
+    expect(nock.isDone()).toBe(true);
+  });
+  it('returns 429 error', async () => {
+    nock(baseUrl).get('/test').reply(429);
+    await expect(http.get('http://renovate.com/test')).rejects.toThrow(
+      'Response code 429 (Too Many Requests)'
+    );
+    expect(nock.isDone()).toBe(true);
+  });
+  it('converts 404 error to ExternalHostError', async () => {
+    nock(baseUrl).get('/test').reply(404);
+    hostRules.add({ abortOnError: true });
+    await expect(http.get('http://renovate.com/test')).rejects.toThrow(
+      EXTERNAL_HOST_ERROR
+    );
+    expect(nock.isDone()).toBe(true);
+  });
+  it('ignores 404 error and does not throw ExternalHostError', async () => {
+    nock(baseUrl).get('/test').reply(404);
+    hostRules.add({ abortOnError: true, abortIgnoreStatusCodes: [404] });
+    await expect(http.get('http://renovate.com/test')).rejects.toThrow(
+      'Response code 404 (Not Found)'
+    );
     expect(nock.isDone()).toBe(true);
   });
   it('getJson', async () => {

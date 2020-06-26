@@ -1,7 +1,7 @@
-import { logger } from '../../logger';
+import { ExternalHostError } from '../../types/errors/external-host-error';
 import { Http } from '../../util/http';
 import { regEx } from '../../util/regex';
-import { DatasourceError, GetReleasesConfig, ReleaseResult } from '../common';
+import { GetReleasesConfig, ReleaseResult } from '../common';
 
 export const id = 'gradle-version';
 export const defaultRegistryUrls = ['https://services.gradle.org/versions/all'];
@@ -50,10 +50,9 @@ export async function getReleases({
       }));
   } catch (err) /* istanbul ignore next */ {
     if (err.host === 'services.gradle.org') {
-      throw new DatasourceError(err);
+      throw new ExternalHostError(err);
     }
-    logger.debug({ err }, 'gradle-version err');
-    return null;
+    throw err;
   }
 
   const res: ReleaseResult = {

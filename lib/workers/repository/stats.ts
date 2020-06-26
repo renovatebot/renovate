@@ -1,9 +1,9 @@
 import URL from 'url';
 import { logger } from '../../logger';
-import * as runCache from '../../util/cache/run';
+import * as memCache from '../../util/cache/memory';
 
 export function printRequestStats(): void {
-  const httpRequests = runCache.get('http-requests');
+  const httpRequests = memCache.get('http-requests');
   if (!httpRequests) {
     return;
   }

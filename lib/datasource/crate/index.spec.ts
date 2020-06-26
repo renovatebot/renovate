@@ -9,10 +9,6 @@ const res2 = fs.readFileSync(
   'lib/datasource/crate/__fixtures__/amethyst',
   'utf8'
 );
-const res3 = fs.readFileSync(
-  'lib/datasource/crate/__fixtures__/invalid_crate_data',
-  'utf8'
-);
 
 const baseUrl =
   'https://raw.githubusercontent.com/rust-lang/crates.io-index/master/';
@@ -98,24 +94,6 @@ describe('datasource/crate', () => {
       expect(res).toMatchSnapshot();
       expect(res).not.toBeNull();
       expect(res).toBeDefined();
-      expect(httpMock.getTrace()).toMatchSnapshot();
-    });
-    it('returns null if crate name is invalid', async () => {
-      httpMock.scope(baseUrl).get('/in/va/invalid-crate-name').reply(200, res2);
-      const res = await getPkgReleases({
-        datasource,
-        depName: 'invalid-crate-name',
-      });
-      expect(res).toBeNull();
-      expect(httpMock.getTrace()).toMatchSnapshot();
-    });
-    it('returns null for invalid crate data', async () => {
-      httpMock.scope(baseUrl).get('/so/me/some_crate').reply(200, res3);
-      const res = await getPkgReleases({
-        datasource,
-        depName: 'some_crate',
-      });
-      expect(res).toBeNull();
       expect(httpMock.getTrace()).toMatchSnapshot();
     });
   });

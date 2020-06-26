@@ -19,7 +19,10 @@ describe('lib/manager/gitlabci/extract', () => {
     it('extracts multiple image lines', () => {
       const res = extractPackageFile(yamlFile);
       expect(res.deps).toMatchSnapshot();
-      expect(res.deps).toHaveLength(6);
+      expect(res.deps).toHaveLength(7);
+      expect(res.deps.some((dep) => dep.currentValue.includes("'"))).toBe(
+        false
+      );
     });
 
     it('extracts multiple image lines with comments', () => {

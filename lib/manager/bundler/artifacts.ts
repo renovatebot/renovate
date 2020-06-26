@@ -3,7 +3,7 @@ import { BUNDLER_INVALID_CREDENTIALS } from '../../constants/error-messages';
 import { logger } from '../../logger';
 import { platform } from '../../platform';
 import { HostRule } from '../../types';
-import { get, set } from '../../util/cache/run';
+import * as memCache from '../../util/cache/memory';
 import { ExecOptions, exec } from '../../util/exec';
 import {
   deleteLocalFile,
@@ -74,7 +74,7 @@ export async function updateArtifacts(
   } = updateArtifact;
   const { compatibility = {} } = config;
   logger.debug(`bundler.updateArtifacts(${packageFileName})`);
-  const existingError = get<string>('bundlerArtifactsError');
+  const existingError = memCache.get<string>('bundlerArtifactsError');
   // istanbul ignore if
   if (existingError) {
     logger.debug('Aborting Bundler artifacts due to previous failed attempt');
@@ -182,7 +182,7 @@ export async function updateArtifacts(
         'Gemfile.lock update failed due to missing credentials - skipping branch'
       );
       // Do not generate these PRs because we don't yet support Bundler authentication
-      set('bundlerArtifactsError', BUNDLER_INVALID_CREDENTIALS);
+      memCache.set('bundlerArtifactsError', BUNDLER_INVALID_CREDENTIALS);
       throw new Error(BUNDLER_INVALID_CREDENTIALS);
     }
     const resolveMatchRe = new RegExp('\\s+(.*) was resolved to', 'g');
