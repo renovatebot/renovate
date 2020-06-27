@@ -742,10 +742,16 @@ export async function setBranchStatus({
 
 export async function getIssueList(): Promise<any[]> {
   if (!config.issueList) {
+    const query = new URLSearchParams({
+      per_page: '100',
+      author_id: `${authorId}`,
+      state: 'opened',
+    }).toString();
     const res = await gitlabApi.getJson<{ iid: number; title: string }[]>(
-      `projects/${config.repository}/issues?state=opened`,
+      `projects/${config.repository}/issues?${query}`,
       {
         useCache: false,
+        paginate: true,
       }
     );
     // istanbul ignore if
