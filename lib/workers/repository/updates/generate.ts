@@ -6,7 +6,7 @@ import { logger } from '../../../logger';
 import * as template from '../../../util/template';
 import { BranchConfig, BranchUpgradeConfig } from '../../common';
 
-function ifTypesGroup(
+function isTypesGroup(
   depNames: string[],
   hasGroupName: boolean,
   branchUpgrades: any[]
@@ -167,10 +167,11 @@ export function generateBranchConfig(
     delete upgrade.group;
     delete upgrade.lazyGrouping;
 
-    const isTypesGroup = ifTypesGroup(depNames, hasGroupName, branchUpgrades);
-
     // istanbul ignore else
-    if (toVersions.length > 1 && !isTypesGroup) {
+    if (
+      toVersions.length > 1 &&
+      !isTypesGroup(depNames, hasGroupName, branchUpgrades)
+    ) {
       logger.trace({ toVersions });
       delete upgrade.commitMessageExtra;
       upgrade.recreateClosed = true;
@@ -268,8 +269,7 @@ export function generateBranchConfig(
     }
   }
 
-  const isTypesGroup = ifTypesGroup(depNames, hasGroupName, branchUpgrades);
-  if (isTypesGroup) {
+  if (isTypesGroup(depNames, hasGroupName, branchUpgrades)) {
     if (config.upgrades[0].depName?.startsWith('@types/')) {
       logger.debug('Found @types - reversing upgrades to use depName in PR');
       sortTypesGroup(config.upgrades);
