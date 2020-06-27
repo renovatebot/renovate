@@ -85,10 +85,6 @@ export function extractPackageFile(
       .filter(Boolean);
 
     logger.trace({ deps }, 'Docker Compose image');
-    // istanbul ignore if
-    if (!deps.length) {
-      return null;
-    }
     return { deps };
   } catch (err) /* istanbul ignore next */ {
     logger.warn(
