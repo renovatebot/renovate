@@ -134,8 +134,8 @@ describe('platform', () => {
   });
   it('escapes names', () => {
     expect(
-      platform.parseGitAuthor('name [what] <name@what.com>')
-    ).not.toBeNull();
+      platform.parseGitAuthor('name [what] <name@what.com>').name
+    ).toMatchSnapshot();
   });
   it('gives up', () => {
     expect(platform.parseGitAuthor('a.b.c')).toBeNull();

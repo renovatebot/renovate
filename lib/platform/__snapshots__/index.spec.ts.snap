@@ -1,5 +1,7 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
+exports[`platform escapes names 1`] = `"name [what]"`;
+
 exports[`platform has a list of supported methods for azure 1`] = `
 Array [
   "addAssignees",
