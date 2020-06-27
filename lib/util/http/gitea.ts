@@ -57,7 +57,7 @@ export class GiteaHttp extends Http<GiteaHttpOptions, GiteaHttpOptions> {
         if (nextPc === null) {
           break;
         }
-        
+
         pc.push(...nextPc);
       }
     }
