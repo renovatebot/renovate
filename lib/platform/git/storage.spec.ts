@@ -47,16 +47,14 @@ describe('platform/git/storage', () => {
     const repo = Git(origin.path);
     await repo.clone(base.path, '.', ['--bare']);
     tmpDir = await tmp.dir({ unsafeCleanup: true });
-    global.gitAuthor = {
-      name: 'test',
-      email: 'test@example.com',
-    };
     await git.initRepo({
       localDir: tmpDir.path,
       url: origin.path,
       extraCloneOpts: {
         '--config': 'extra.clone.config=test-extra-config-value',
       },
+      gitAuthorName: 'test',
+      gitAuthorEmail: 'test@example.com',
     });
   });
 
