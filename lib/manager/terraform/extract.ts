@@ -174,12 +174,8 @@ export function extractPackageFile(content: string): PackageFile | null {
       dep.depName = dep.managerData.moduleName;
       dep.depNameShort = dep.managerData.moduleName;
       dep.datasource = datasourceTerraformProvider.id;
-      if (dep.managerData.versionLine) {
-        if (!isValid(dep.currentValue)) {
-          dep.skipReason = SkipReason.UnsupportedVersion;
-        }
-      } else if (!dep.skipReason) {
-        dep.skipReason = SkipReason.NoVersion;
+      if (!isValid(dep.currentValue)) {
+        dep.skipReason = SkipReason.UnsupportedVersion;
       }
     }
     delete dep.managerData;

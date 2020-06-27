@@ -140,7 +140,7 @@ Object {
       "depName": "helm",
       "depNameShort": "helm",
       "depType": "terraform",
-      "skipReason": "no-version",
+      "skipReason": "unsupported-version",
     },
     Object {
       "currentValue": "V1.9",
