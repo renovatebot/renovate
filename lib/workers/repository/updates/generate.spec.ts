@@ -395,10 +395,22 @@ describe('workers/repository/updates/generate', () => {
           newValue: '0.6.0',
           group: {},
         },
+        {
+          commitBodyTable: true,
+          datasource: datasourceNpm.id,
+          depName: 'some-dep',
+          groupName: null,
+          branchName: 'some-branch',
+          prTitle: 'some-other-title',
+          lazyGrouping: true,
+          newValue: '1.0.0',
+          group: {},
+        },
       ];
       const res = generateBranchConfig(branch);
       expect(res.recreateClosed).toBe(false);
       expect(res.groupName).toBeUndefined();
+      expect(generateBranchConfig(branch)).toMatchSnapshot();
     });
     it('handles @types specially (reversed)', () => {
       const branch: BranchUpgradeConfig[] = [
@@ -409,6 +421,17 @@ describe('workers/repository/updates/generate', () => {
           prTitle: 'some-title',
           lazyGrouping: true,
           newValue: '0.6.0',
+          group: {},
+        },
+        {
+          commitBodyTable: true,
+          datasource: datasourceNpm.id,
+          depName: 'some-dep',
+          groupName: null,
+          branchName: 'some-branch',
+          prTitle: 'some-other-title',
+          lazyGrouping: true,
+          newValue: '1.0.0',
           group: {},
         },
         {
