@@ -809,7 +809,7 @@ describe('platform/gitlab', () => {
       httpMock
         .scope(gitlabApiHost)
         .get(
-          '/api/v4/projects/undefined/issuess?per_page=100&author_id=undefined&state=opened'
+          '/api/v4/projects/undefined/issues?per_page=100&author_id=undefined&state=opened'
         )
         .reply(200, [
           {
