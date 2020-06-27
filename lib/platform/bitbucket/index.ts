@@ -160,6 +160,8 @@ export async function initRepo({
     ...config,
     localDir,
     url,
+    gitAuthorName: global.gitAuthor?.name,
+    gitAuthorEmail: global.gitAuthor?.email,
   });
   const repoConfig: RepoConfig = {
     baseBranch: config.baseBranch,
