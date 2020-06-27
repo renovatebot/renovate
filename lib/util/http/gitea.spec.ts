@@ -60,9 +60,12 @@ describe(getName(__filename), () => {
       .get('/pagination-example-2?page=3')
       .reply(200, { data: ['mno', 'pqr'] });
 
-    const res = await giteaHttp.getJson<{ data: string[] }>('pagination-example-2', {
-      paginate: true,
-    });
+    const res = await giteaHttp.getJson<{ data: string[] }>(
+      'pagination-example-2',
+      {
+        paginate: true,
+      }
+    );
     expect(res.body.data).toHaveLength(6);
     expect(res.body.data).toEqual(['abc', 'def', 'ghi', 'jkl', 'mno', 'pqr']);
     expect(httpMock.getTrace()).toMatchSnapshot();
@@ -75,9 +78,12 @@ describe(getName(__filename), () => {
       .get('/pagination-example-3?page=2')
       .reply(200, { data: [] });
 
-    const res = await giteaHttp.getJson<{ data: string[] }>('pagination-example-3', {
-      paginate: true,
-    });
+    const res = await giteaHttp.getJson<{ data: string[] }>(
+      'pagination-example-3',
+      {
+        paginate: true,
+      }
+    );
     expect(res.body.data).toHaveLength(3);
     expect(res.body.data).toEqual(['abc', 'def', 'ghi']);
     expect(httpMock.getTrace()).toMatchSnapshot();
