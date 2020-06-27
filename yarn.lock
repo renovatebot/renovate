@@ -7153,10 +7153,10 @@ node-gyp@^7.0.0:
     tar "^6.0.1"
     which "^2.0.2"
 
-node-html-parser@1.2.19:
-  version "1.2.19"
-  resolved "https://registry.yarnpkg.com/node-html-parser/-/node-html-parser-1.2.19.tgz#2cb14ce7981dfe2c0f5af53cf8654a3d49cded7d"
-  integrity sha512-MQvBz+qk7SbqNPp0c7hR0F8lRTPXK5n2tww4eFmXf+cXp5hZHtL5rJHlAWlcjzRep+T5Pd5lz3lqFgN7IFYEiw==
+node-html-parser@1.2.20:
+  version "1.2.20"
+  resolved "https://registry.yarnpkg.com/node-html-parser/-/node-html-parser-1.2.20.tgz#37e9ebc627dbe3ff446eea4ac93e3d254b7c6ee4"
+  integrity sha512-1fUpYjAducDrrBSE0etRUV1tM+wSFTudmrslMXuk35wL/L29E7e1CLQn4CNzFLnqtYpmDlWhkD6VUloyHA0dwA==
   dependencies:
     he "1.1.1"
 
