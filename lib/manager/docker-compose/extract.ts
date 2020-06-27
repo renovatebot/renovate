@@ -54,6 +54,13 @@ export function extractPackageFile(
       );
       return null;
     }
+    if (typeof config !== 'object') {
+      logger.debug(
+        { fileName, type: typeof config },
+        'Unexpected type for Docker Compose content'
+      );
+      return null;
+    }
   } catch (err) {
     logger.debug({ err }, 'err');
     logger.debug({ fileName }, 'Parsing Docker Compose config YAML');
@@ -78,6 +85,7 @@ export function extractPackageFile(
       .filter(Boolean);
 
     logger.trace({ deps }, 'Docker Compose image');
+    // istanbul ignore if
     if (!deps.length) {
       return null;
     }
