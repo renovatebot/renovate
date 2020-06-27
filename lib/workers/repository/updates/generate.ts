@@ -27,7 +27,7 @@ function isTypesGroup(
 
 function sortTypesGroup(upgrades: BranchUpgradeConfig[]): void {
   const isTypesUpgrade = ({ depName }: BranchUpgradeConfig): boolean =>
-    depName.startsWith('@types/');
+    depName?.startsWith('@types/');
   const regularUpgrades = upgrades.filter(
     (upgrade) => !isTypesUpgrade(upgrade)
   );
