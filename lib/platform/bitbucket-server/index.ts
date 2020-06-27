@@ -191,6 +191,8 @@ export async function initRepo({
     ...config,
     localDir,
     url: gitUrl,
+    gitAuthorName: global.gitAuthor?.name,
+    gitAuthorEmail: global.gitAuthor?.email,
   });
 
   try {

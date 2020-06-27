@@ -28,6 +28,8 @@ interface StorageConfig {
   baseBranch?: string;
   url: string;
   extraCloneOpts?: Git.Options;
+  gitAuthorName?: string;
+  gitAuthorEmail?: string;
 }
 
 interface LocalConfig extends StorageConfig {
@@ -200,16 +202,20 @@ export class Storage {
       }
       logger.warn({ err }, 'Cannot retrieve latest commit date');
     }
-    if (global.gitAuthor) {
-      logger.debug({ gitAuthor: global.gitAuthor }, 'Setting git author');
-      try {
-        await this._git.raw(['config', 'user.name', global.gitAuthor.name]);
-        await this._git.raw(['config', 'user.email', global.gitAuthor.email]);
-      } catch (err) /* istanbul ignore next */ {
-        checkForPlatformFailure(err);
-        logger.debug({ err }, 'Error setting git config');
-        throw new Error(REPOSITORY_TEMPORARY_ERROR);
+    try {
+      const { gitAuthorName, gitAuthorEmail } = args;
+      if (gitAuthorName) {
+        logger.debug({ gitAuthorName }, 'Setting git author name');
+        await this._git.raw(['config', 'user.name', gitAuthorName]);
       }
+      if (gitAuthorEmail) {
+        logger.debug({ gitAuthorEmail }, 'Setting git author email');
+        await this._git.raw(['config', 'user.email', gitAuthorEmail]);
+      }
+    } catch (err) /* istanbul ignore next */ {
+      checkForPlatformFailure(err);
+      logger.debug({ err }, 'Error setting git author config');
+      throw new Error(REPOSITORY_TEMPORARY_ERROR);
     }
 
     await setBaseBranchToDefault(this._git);

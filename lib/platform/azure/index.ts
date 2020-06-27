@@ -169,6 +169,8 @@ export async function initRepo({
     localDir,
     url,
     extraCloneOpts: azureHelper.getStorageExtraCloneOpts(opts),
+    gitAuthorName: global.gitAuthor?.name,
+    gitAuthorEmail: global.gitAuthor?.email,
   });
   const repoConfig: RepoConfig = {
     baseBranch: config.baseBranch,

@@ -338,6 +338,8 @@ const platform: Platform = {
     await config.storage.initRepo({
       ...config,
       url: URL.format(gitEndpoint),
+      gitAuthorName: global.gitAuthor?.name,
+      gitAuthorEmail: global.gitAuthor?.email,
     });
 
     // Reset cached resources

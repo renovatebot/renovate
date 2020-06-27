@@ -249,6 +249,8 @@ export async function initRepo({
     await config.storage.initRepo({
       ...config,
       url,
+      gitAuthorName: global.gitAuthor?.name,
+      gitAuthorEmail: global.gitAuthor?.email,
     });
   } catch (err) /* istanbul ignore next */ {
     logger.debug({ err }, 'Caught initRepo error');
