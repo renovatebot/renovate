@@ -11,16 +11,29 @@ function ifTypesGroup(
   hasGroupName: boolean,
   branchUpgrades: any[]
 ): boolean {
-  return (
-    depNames.length === 2 &&
-    !hasGroupName &&
-    ((branchUpgrades[0].depName &&
-      branchUpgrades[0].depName.startsWith('@types/') &&
-      branchUpgrades[0].depName.endsWith(branchUpgrades[1].depName)) ||
-      (branchUpgrades[1].depName &&
-        branchUpgrades[1].depName.startsWith('@types/') &&
-        branchUpgrades[1].depName.endsWith(branchUpgrades[0].depName)))
+  const hasTypes = (): boolean =>
+    branchUpgrades.some(({ depName }) => depName?.startsWith('@types/'));
+
+  const hasSameName = (): boolean => {
+    const names = branchUpgrades.map(({ depName }) =>
+      depName?.replace(/^@types\//, '')
+    );
+    const namesSet = new Set(names);
+    return namesSet.size === 1;
+  };
+
+  return depNames.length > 1 && !hasGroupName && hasTypes() && hasSameName();
+}
+
+function sortTypesGroup(upgrades: BranchUpgradeConfig[]): void {
+  const isTypesUpgrade = ({ depName }: BranchUpgradeConfig): boolean =>
+    depName.startsWith('@types/');
+  const regularUpgrades = upgrades.filter(
+    (upgrade) => !isTypesUpgrade(upgrade)
   );
+  const typesUpgrades = upgrades.filter(isTypesUpgrade);
+  upgrades.splice(0, upgrades.length);
+  upgrades.push(...regularUpgrades, ...typesUpgrades);
 }
 
 function getTableValues(
@@ -254,25 +267,15 @@ export function generateBranchConfig(
       }
     }
   }
-  if (
-    depNames.length === 2 &&
-    !hasGroupName &&
-    config.upgrades[0].depName &&
-    config.upgrades[0].depName.startsWith('@types/') &&
-    config.upgrades[0].depName.endsWith(config.upgrades[1].depName)
-  ) {
-    logger.debug('Found @types - reversing upgrades to use depName in PR');
-    config.upgrades.reverse();
-    config.upgrades[0].recreateClosed = false;
-    config.hasTypes = true;
-  } else if (
-    depNames.length === 2 &&
-    !hasGroupName &&
-    config.upgrades[1].depName &&
-    config.upgrades[1].depName.startsWith('@types/') &&
-    config.upgrades[1].depName.endsWith(config.upgrades[0].depName)
-  ) {
-    // do nothing
+
+  const isTypesGroup = ifTypesGroup(depNames, hasGroupName, branchUpgrades);
+  if (isTypesGroup) {
+    if (config.upgrades[0].depName?.startsWith('@types/')) {
+      logger.debug('Found @types - reversing upgrades to use depName in PR');
+      sortTypesGroup(config.upgrades);
+      config.upgrades[0].recreateClosed = false;
+      config.hasTypes = true;
+    }
   } else {
     config.upgrades.sort((a, b) => {
       if (a.fileReplacePosition && b.fileReplacePosition) {
