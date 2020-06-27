@@ -29,7 +29,7 @@ export async function updateArtifacts({
       }
     }
     const execOptions: ExecOptions = {
-      cwdFile: packageFileName,
+      cwdFile: '.',
       docker: {
         image: 'renovate/python',
         tagScheme: 'pip_requirements',
