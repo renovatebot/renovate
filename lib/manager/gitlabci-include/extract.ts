@@ -3,18 +3,15 @@ import yaml from 'js-yaml';
 import * as datasourceGitlabTags from '../../datasource/gitlab-tags';
 import { logger } from '../../logger';
 import { SkipReason } from '../../types';
+import { readLocalFile } from '../../util/gitfs';
 import { ExtractConfig, PackageDependency, PackageFile } from '../common';
 import * as gitlabci from '../gitlabci/extract';
-import { readLocalFile } from '../../util/gitfs';
 
 function extractDepFromIncludeFile(includeObj: {
   file: any;
   project: string;
   ref: string;
 }): PackageDependency | null {
-  if (!includeObj.file || !includeObj.project) {
-    return null;
-  }
   const dep: PackageDependency = {
     datasource: datasourceGitlabTags.id,
     depName: includeObj.project,
@@ -46,7 +43,7 @@ export async function extractPackageFile(
     const doc = yaml.safeLoad(content, { json: true });
     if (doc?.include && is.array(doc.include)) {
       for (const includeObj of doc.include) {
-        if (includeObj.file) {
+        if (includeObj.file && includeObj.project) {
           const dep = extractDepFromIncludeFile(includeObj);
           if (dep) {
             if (config.endpoint) {
@@ -55,7 +52,7 @@ export async function extractPackageFile(
             deps.push(dep);
           }
         } else if (includeObj.local) {
-          var includedDeps = await extractDepsFromIncludeLocal(includeObj);
+          const includedDeps = await extractDepsFromIncludeLocal(includeObj);
           for (const includedDep of includedDeps) {
             deps.push(includedDep);
           }

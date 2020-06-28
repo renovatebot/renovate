@@ -1,6 +1,5 @@
 import fs from 'fs';
 import { extractPackageFile } from './extract';
-import { re } from 'github-url-from-git';
 
 const yamlFile = fs.readFileSync(
   'lib/manager/gitlabci-include/__fixtures__/gitlab-ci.1.yaml',
@@ -42,17 +41,18 @@ describe('lib/manager/gitlabci-include/extract', () => {
       expect(res.deps).toMatchSnapshot();
       expect(res.deps).toHaveLength(2);
     });
-    it('normalizes configured endpoints', () => {
+    it('normalizes configured endpoints', async () => {
       const endpoints = [
         'http://gitlab.test/api/v4',
         'http://gitlab.test/api/v4/',
       ];
-      endpoints.forEach(async (endpoint) => {
+
+      for (const endpoint of endpoints) {
         const res = await extractPackageFile(yamlFile, '.gitlab-ci.yml', {
           endpoint,
         });
         expect(res.deps[0].registryUrls[0]).toEqual('http://gitlab.test');
-      });
+      }
     });
   });
 });
