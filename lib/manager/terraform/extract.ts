@@ -45,6 +45,8 @@ function checkFileContainsDependency(
 const dependencyBlockExtractionRegex = /^\s*(?<type>module|provider|required_providers)\s+("(?<lookupName>[^"]+)"\s+)?{\s*$/;
 const contentCheckList = ['module "', 'provider "', 'required_providers '];
 const keyValueExtractionRegex = /^\s*(?<key>[^\s]+)\s+=\s+"(?<value>[^"]+)"\s*$/; // extracts `exampleKey = exampleValue`
+const githubRefMatchRegex = /github.com(\/|:)([^/]+\/[a-z0-9-.]+).*\?ref=(.*)$/;
+const gitTagsRefMatchRegex = /(?:git::)?((?:http|https|ssh):\/\/(?:.*@)?(.*.*\/(.*\/.*)))\?ref=(.*)$/;
 
 export function extractPackageFile(content: string): PackageFile | null {
   logger.trace({ content }, 'terraform.extractPackageFile()');
@@ -120,12 +122,8 @@ export function extractPackageFile(content: string): PackageFile | null {
       dep.managerData.terraformDependencyType ===
       TerraformDependencyTypes.module
     ) {
-      const githubRefMatch = /github.com(\/|:)([^/]+\/[a-z0-9-.]+).*\?ref=(.*)$/.exec(
-        dep.managerData.source
-      );
-      const gitTagsRefMatch = /git::((?:http|https|ssh):\/\/(?:.*@)?(.*.*\/(.*\/.*)))\?ref=(.*)$/.exec(
-        dep.managerData.source
-      );
+      const githubRefMatch = githubRefMatchRegex.exec(dep.managerData.source);
+      const gitTagsRefMatch = gitTagsRefMatchRegex.exec(dep.managerData.source);
       /* eslint-disable no-param-reassign */
       if (githubRefMatch) {
         const depNameShort = githubRefMatch[2].replace(/\.git$/, '');
