@@ -464,7 +464,7 @@ function coerceRangeValue(prev: string, next: string): string {
   return tokensToStr(resultTokens);
 }
 
-function incrementValue(value: string): string {
+function incrementRangeValue(value: string): string {
   if (value === null) {
     return value;
   }
@@ -517,7 +517,7 @@ function autoExtendMavenRange(
   }
   const interval = range[nearestIntervalIdx];
   if (interval.rightValue !== null) {
-    const newLeftValue = incrementValue(interval.leftValue);
+    const newLeftValue = incrementRangeValue(interval.leftValue);
     const newRightValue = coerceRangeValue(interval.rightValue, newValue);
 
     if (
