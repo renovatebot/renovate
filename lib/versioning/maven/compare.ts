@@ -464,6 +464,19 @@ function coerceRangeValue(prev: string, next: string): string {
   return tokensToStr(resultTokens);
 }
 
+function incrementValue(value: string): string {
+  if (value === null) {
+    return value;
+  }
+  const tokens = tokenize(value);
+  const lastToken = tokens[tokens.length - 1];
+  if (typeof lastToken.val === 'number') {
+    lastToken.val += 1;
+    return tokensToStr(tokens);
+  }
+  return value;
+}
+
 function autoExtendMavenRange(
   currentRepresentation: string,
   newValue: string
@@ -504,7 +517,17 @@ function autoExtendMavenRange(
   }
   const interval = range[nearestIntervalIdx];
   if (interval.rightValue !== null) {
-    interval.rightValue = coerceRangeValue(interval.rightValue, newValue);
+    const newLeftValue = incrementValue(interval.leftValue);
+    const newRightValue = coerceRangeValue(interval.rightValue, newValue);
+
+    if (
+      newLeftValue &&
+      newLeftValue === interval.rightValue &&
+      newLeftValue !== newRightValue
+    ) {
+      interval.leftValue = newLeftValue;
+    }
+    interval.rightValue = newRightValue;
   } else {
     interval.leftValue = coerceRangeValue(interval.leftValue, newValue);
   }
