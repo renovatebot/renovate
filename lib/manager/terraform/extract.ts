@@ -33,16 +33,22 @@ export function getTerraformDependencyType(
   }
 }
 
+function checkFileContainsDependency(
+  content: string,
+  checkList: string[]
+): boolean {
+  return checkList.some((check) => {
+    return content.includes(check);
+  });
+}
+
 const dependencyBlockExtractionRegex = /^\s*(?<type>module|provider|required_providers)\s+("(?<lookupName>[^"]+)"\s+)?{\s*$/;
+const contentCheckList = ['module "', 'provider "', 'required_providers '];
 const keyValueExtractionRegex = /^\s*(?<key>[^\s]+)\s+=\s+"(?<value>[^"]+)"\s*$/; // extracts `exampleKey = exampleValue`
 
 export function extractPackageFile(content: string): PackageFile | null {
   logger.trace({ content }, 'terraform.extractPackageFile()');
-  if (
-    !content.includes('module "') &&
-    !content.includes('provider "') &&
-    !content.includes('required_providers ')
-  ) {
+  if (!checkFileContainsDependency(content, contentCheckList)) {
     return null;
   }
   const deps: PackageDependency[] = [];
