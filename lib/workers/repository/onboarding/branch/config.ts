@@ -2,7 +2,7 @@ import is from '@sindresorhus/is';
 import { RenovateConfig } from '../../../../config';
 import { logger } from '../../../../logger';
 import { clone } from '../../../../util/clone';
-import { readLocalFile } from '../../../../util/fs';
+import { readLocalFile } from '../../../../util/gitfs';
 
 export async function getOnboardingConfig(
   config: RenovateConfig

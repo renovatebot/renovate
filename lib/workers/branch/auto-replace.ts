@@ -2,7 +2,7 @@ import { WORKER_FILE_UPDATE_FAILED } from '../../constants/error-messages';
 import { logger } from '../../logger';
 import { get } from '../../manager';
 import { PackageDependency } from '../../manager/common';
-import { writeLocalFile } from '../../util/fs';
+import { writeLocalFile } from '../../util/gitfs';
 import { escapeRegExp, regEx } from '../../util/regex';
 import { matchAt, replaceAt } from '../../util/string';
 import { compile } from '../../util/template';
