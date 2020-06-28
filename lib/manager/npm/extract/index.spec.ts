@@ -1,10 +1,8 @@
 import fs from 'fs';
 import path from 'path';
 import { getConfig } from '../../../config/defaults';
-import * as _gitfs from '../../../util/gitfs';
+import * as _gitfs from '../../../util/gitfs/fs';
 import * as npmExtract from '.';
-
-jest.mock('../../../util/gitfs');
 
 const gitfs: any = _gitfs;
 
