@@ -1,4 +1,4 @@
-import { getName } from '../../test/util';
+import { getName } from '../../../test/util';
 import { readLocalFile } from './fs';
 
 describe(getName(__filename), () => {

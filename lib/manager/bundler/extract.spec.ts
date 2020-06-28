@@ -1,11 +1,11 @@
 import { readFileSync } from 'fs';
-import * as _fs from '../../util/fs';
+import * as _gitfs from '../../util/gitfs';
 import { isValid } from '../../versioning/ruby';
 import { extractPackageFile } from './extract';
 
-jest.mock('../../util/fs');
+jest.mock('../../util/gitfs');
 
-const fs: any = _fs;
+const gitfs: any = _gitfs;
 
 const railsGemfile = readFileSync(
   'lib/manager/bundler/__fixtures__/Gemfile.rails',
@@ -74,7 +74,7 @@ describe('lib/manager/bundler/extract', () => {
       expect(await extractPackageFile('nothing here', 'Gemfile')).toBeNull();
     });
     it('parses rails Gemfile', async () => {
-      fs.readLocalFile.mockReturnValueOnce(railsGemfileLock);
+      gitfs.readLocalFile.mockReturnValueOnce(railsGemfileLock);
       const res = await extractPackageFile(railsGemfile, 'Gemfile');
       expect(res).toMatchSnapshot();
       // couple of dependency of ruby rails are not present in the lock file. Filter out those before processing
@@ -98,7 +98,7 @@ describe('lib/manager/bundler/extract', () => {
       validateGems(sourceGroupGemfile, res);
     });
     it('parse webpacker Gemfile', async () => {
-      fs.readLocalFile.mockReturnValueOnce(webPackerGemfileLock);
+      gitfs.readLocalFile.mockReturnValueOnce(webPackerGemfileLock);
       const res = await extractPackageFile(webPackerGemfile, 'Gemfile');
       expect(res).toMatchSnapshot();
       expect(
@@ -112,7 +112,7 @@ describe('lib/manager/bundler/extract', () => {
       validateGems(webPackerGemfile, res);
     });
     it('parse mastodon Gemfile', async () => {
-      fs.readLocalFile.mockReturnValueOnce(mastodonGemfileLock);
+      gitfs.readLocalFile.mockReturnValueOnce(mastodonGemfileLock);
       const res = await extractPackageFile(mastodonGemfile, 'Gemfile');
       expect(res).toMatchSnapshot();
       expect(
@@ -130,7 +130,7 @@ describe('lib/manager/bundler/extract', () => {
       validateGems(mastodonGemfile, res);
     });
     it('parse Ruby CI Gemfile', async () => {
-      fs.readLocalFile.mockReturnValueOnce(rubyCIGemfileLock);
+      gitfs.readLocalFile.mockReturnValueOnce(rubyCIGemfileLock);
       const res = await extractPackageFile(rubyCIGemfile, 'Gemfile');
       expect(res).toMatchSnapshot();
       expect(
@@ -145,7 +145,7 @@ describe('lib/manager/bundler/extract', () => {
     });
   });
   it('parse Gitlab Foss Gemfile', async () => {
-    fs.readLocalFile.mockReturnValueOnce(gitlabFossGemfileLock);
+    gitfs.readLocalFile.mockReturnValueOnce(gitlabFossGemfileLock);
     const res = await extractPackageFile(gitlabFossGemfile, 'Gemfile');
     expect(res).toMatchSnapshot();
     expect(
@@ -160,7 +160,7 @@ describe('lib/manager/bundler/extract', () => {
   });
 
   it('parse source blocks with spaces in Gemfile', async () => {
-    fs.readLocalFile.mockReturnValueOnce(sourceBlockWithNewLinesGemfileLock);
+    gitfs.readLocalFile.mockReturnValueOnce(sourceBlockWithNewLinesGemfileLock);
     const res = await extractPackageFile(
       sourceBlockWithNewLinesGemfile,
       'Gemfile'

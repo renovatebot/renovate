@@ -8,7 +8,7 @@ import { logger } from '../../../logger';
 import { platform } from '../../../platform';
 import { ExternalHostError } from '../../../types/errors/external-host-error';
 import { getChildProcessEnv } from '../../../util/exec/env';
-import { deleteLocalFile } from '../../../util/fs';
+import { deleteLocalFile } from '../../../util/gitfs';
 import * as hostRules from '../../../util/host-rules';
 import { PackageFile, PostUpdateConfig, Upgrade } from '../../common';
 import * as lerna from './lerna';
