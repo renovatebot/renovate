@@ -6,6 +6,7 @@ const tf2 = `module "relative" {
   source = "../../modules/fe"
 }
 `;
+const helm = readFileSync('lib/manager/terraform/__fixtures__/helm.tf', 'utf8');
 
 describe('lib/manager/terraform/extract', () => {
   describe('extractPackageFile()', () => {
@@ -20,6 +21,12 @@ describe('lib/manager/terraform/extract', () => {
     });
     it('returns null if only local deps', () => {
       expect(extractPackageFile(tf2)).toBeNull();
+    });
+    it('extract helm releases', () => {
+      const res = extractPackageFile(helm);
+      expect(res).toMatchSnapshot();
+      expect(res.deps).toHaveLength(6);
+      expect(res.deps.filter((dep) => dep.skipReason)).toHaveLength(3);
     });
   });
 });

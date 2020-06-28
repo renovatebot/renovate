@@ -12,6 +12,7 @@ export enum TerraformDependencyTypes {
   module = 'module',
   provider = 'provider',
   required_providers = 'required_providers',
+  resource = 'resource',
 }
 
 export function getTerraformDependencyType(
@@ -27,6 +28,9 @@ export function getTerraformDependencyType(
     case 'required_providers': {
       return TerraformDependencyTypes.required_providers;
     }
+    case 'resource': {
+      return TerraformDependencyTypes.resource;
+    }
     default: {
       return TerraformDependencyTypes.unknown;
     }
@@ -40,4 +44,10 @@ export function checkFileContainsDependency(
   return checkList.some((check) => {
     return content.includes(check);
   });
+}
+
+export function checkIfStringIsPath(path: string): boolean {
+  const regex = /(.|..)?(\/[^/])+/;
+  const match = regex.exec(path);
+  return !!match;
 }
