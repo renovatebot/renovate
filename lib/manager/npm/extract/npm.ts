@@ -1,5 +1,5 @@
 import { logger } from '../../../logger';
-import { readLocalFile } from '../../../util/fs';
+import { readLocalFile } from '../../../util/gitfs';
 import { LockFileEntry } from './common';
 
 export async function getNpmLock(

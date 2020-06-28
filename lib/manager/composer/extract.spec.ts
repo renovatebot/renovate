@@ -1,10 +1,10 @@
 import { readFileSync } from 'fs';
-import * as _fs from '../../util/fs';
+import * as _gitfs from '../../util/gitfs';
 import { extractPackageFile } from './extract';
 
-jest.mock('../../util/fs');
+jest.mock('../../util/gitfs');
 
-const fs: any = _fs;
+const gitfs: any = _gitfs;
 
 const requirements1 = readFileSync(
   'lib/manager/composer/__fixtures__/composer1.json',
@@ -63,13 +63,13 @@ describe('lib/manager/composer/extract', () => {
       expect(res.registryUrls).toHaveLength(2);
     });
     it('extracts object repositories and registryUrls with lock file', async () => {
-      fs.readLocalFile.mockResolvedValue(requirements5Lock);
+      gitfs.readLocalFile.mockResolvedValue(requirements5Lock);
       const res = await extractPackageFile(requirements5, packageFile);
       expect(res).toMatchSnapshot();
       expect(res.registryUrls).toHaveLength(2);
     });
     it('extracts dependencies with lock file', async () => {
-      fs.readLocalFile.mockResolvedValue('some content');
+      gitfs.readLocalFile.mockResolvedValue('some content');
       const res = await extractPackageFile(requirements1, packageFile);
       expect(res).toMatchSnapshot();
     });

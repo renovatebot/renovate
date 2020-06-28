@@ -8,7 +8,7 @@ import { logger } from '../../logger';
 import { ExternalHostError } from '../../types/errors/external-host-error';
 import { ExecOptions, exec } from '../../util/exec';
 import { BinarySource } from '../../util/exec/common';
-import { readLocalFile } from '../../util/fs';
+import { readLocalFile } from '../../util/gitfs';
 import * as gradleVersioning from '../../versioning/gradle';
 import {
   ExtractConfig,

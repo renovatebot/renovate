@@ -1,6 +1,6 @@
 import { parse } from '@yarnpkg/lockfile';
 import { logger } from '../../../logger';
-import { readLocalFile } from '../../../util/fs';
+import { readLocalFile } from '../../../util/gitfs';
 import { LockFileEntry } from './common';
 
 export type YarnLock = Record<string, string>;

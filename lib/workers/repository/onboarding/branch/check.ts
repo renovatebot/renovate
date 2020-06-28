@@ -4,7 +4,7 @@ import { REPOSITORY_DISABLED } from '../../../../constants/error-messages';
 import { PR_STATE_NOT_OPEN } from '../../../../constants/pull-requests';
 import { logger } from '../../../../logger';
 import { platform } from '../../../../platform';
-import { readLocalFile } from '../../../../util/fs';
+import { readLocalFile } from '../../../../util/gitfs';
 
 const findFile = async (fileName: string): Promise<boolean> => {
   logger.debug(`findFile(${fileName})`);

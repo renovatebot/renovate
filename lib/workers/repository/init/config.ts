@@ -12,7 +12,7 @@ import * as npmApi from '../../../datasource/npm';
 import { logger } from '../../../logger';
 import { platform } from '../../../platform';
 import { ExternalHostError } from '../../../types/errors/external-host-error';
-import { readLocalFile } from '../../../util/fs';
+import { readLocalFile } from '../../../util/gitfs';
 import * as hostRules from '../../../util/host-rules';
 import { flattenPackageRules } from './flatten';
 
