@@ -447,7 +447,9 @@ function rangeToStr(fullRange: Range[]): string | null {
 function tokensToStr(tokens: Token[]): string {
   return tokens.reduce((result, token, idx) => {
     const prefix = token.prefix === PREFIX_DOT ? '.' : '-';
-    return `${result}${idx ? prefix : ''}${token.val}`;
+    return `${result}${idx !== 0 && token.val !== '' ? prefix : ''}${
+      token.val
+    }`;
   }, '');
 }
 
