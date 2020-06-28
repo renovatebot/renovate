@@ -113,7 +113,7 @@ const zeroToken: NumberToken = {
   isTransition: false,
 };
 
-function tokenize(versionStr: string): Token[] {
+function tokenize(versionStr: string, preserveMinorZeroes = false): Token[] {
   let buf: Token[] = [];
   let result: Token[] = [];
   let leadingZero = true;
@@ -126,7 +126,7 @@ function tokenize(versionStr: string): Token[] {
       leadingZero = false;
       result = result.concat(buf);
       buf = [];
-    } else if (leadingZero) {
+    } else if (leadingZero || preserveMinorZeroes) {
       result = result.concat(buf);
       buf = [];
     }
@@ -444,6 +444,26 @@ function rangeToStr(fullRange: Range[]): string | null {
   return intervals.join(',');
 }
 
+function tokensToStr(tokens: Token[]): string {
+  return tokens.reduce((result, token, idx) => {
+    const prefix = token.prefix === PREFIX_DOT ? '.' : '-';
+    return `${result}${idx ? prefix : ''}${token.val}`;
+  }, '');
+}
+
+function coerceRangeValue(prev: string, next: string): string {
+  const prevTokens = tokenize(prev, true);
+  const nextTokens = tokenize(next, true);
+  const resultTokens = nextTokens.slice(0, prevTokens.length);
+  const align = Math.max(0, prevTokens.length - nextTokens.length);
+  for (let i = 0; i < align; i += 1) {
+    const tokenIdx = prevTokens.length + i - 1;
+    const token = prevTokens[tokenIdx];
+    resultTokens.push(nullFor(token));
+  }
+  return tokensToStr(resultTokens);
+}
+
 function autoExtendMavenRange(
   currentRepresentation: string,
   newValue: string
@@ -484,9 +504,9 @@ function autoExtendMavenRange(
   }
   const interval = range[nearestIntervalIdx];
   if (interval.rightValue !== null) {
-    interval.rightValue = newValue;
+    interval.rightValue = coerceRangeValue(interval.rightValue, newValue);
   } else {
-    interval.leftValue = newValue;
+    interval.leftValue = coerceRangeValue(interval.leftValue, newValue);
   }
   if (interval.leftValue && interval.rightValue) {
     if (compare(interval.leftValue, interval.rightValue) !== 1) {
