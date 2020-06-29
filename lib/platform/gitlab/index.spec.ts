@@ -21,7 +21,7 @@ const gitlabApiHost = 'https://gitlab.com';
 describe('platform/gitlab', () => {
   let gitlab: Platform;
   let hostRules: jest.Mocked<typeof _hostRules>;
-  let GitStorage: jest.Mocked<typeof import('../git/storage')> & jest.Mock;
+  let GitStorage: jest.Mocked<typeof import('../git')> & jest.Mock;
   beforeEach(async () => {
     // reset module
     jest.resetModules();
@@ -30,8 +30,8 @@ describe('platform/gitlab', () => {
     jest.mock('../../util/host-rules');
     jest.mock('delay');
     hostRules = require('../../util/host-rules');
-    jest.mock('../git/storage');
-    GitStorage = require('../git/storage').Storage;
+    jest.mock('../git');
+    GitStorage = require('../git').Storage;
     GitStorage.mockImplementation(() => ({
       initRepo: jest.fn(),
       cleanRepo: jest.fn(),
