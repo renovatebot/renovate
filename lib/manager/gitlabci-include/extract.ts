@@ -45,10 +45,10 @@ export async function extractPackageFile(
       for (const includeObj of doc.include) {
         if (includeObj.file && includeObj.project) {
           const dep = extractDepFromIncludeFile(includeObj);
-            if (config.endpoint) {
-              dep.registryUrls = [config.endpoint.replace(/\/api\/v4\/?/, '')];
-            }
-            deps.push(dep);
+          if (config.endpoint) {
+            dep.registryUrls = [config.endpoint.replace(/\/api\/v4\/?/, '')];
+          }
+          deps.push(dep);
         } else if (includeObj.local) {
           const includedDeps = await extractDepsFromIncludeLocal(includeObj);
           for (const includedDep of includedDeps) {
