@@ -34,7 +34,7 @@ import {
   RepoParams,
   VulnerabilityAlert,
 } from '../common';
-import GitStorage, { StatusResult } from '../git/storage';
+import GitStorage, { StatusResult } from '../git';
 import { smartTruncate } from '../utils/pr-body';
 import * as helper from './gitea-helper';
 
@@ -338,6 +338,8 @@ const platform: Platform = {
     await config.storage.initRepo({
       ...config,
       url: URL.format(gitEndpoint),
+      gitAuthorName: global.gitAuthor?.name,
+      gitAuthorEmail: global.gitAuthor?.email,
     });
 
     // Reset cached resources
@@ -465,7 +467,7 @@ const platform: Platform = {
   getPrList(): Promise<Pr[]> {
     if (config.prList === null) {
       config.prList = helper
-        .searchPRs(config.repository, {}, { useCache: false })
+        .searchPRs(config.repository, { state: 'all' }, { useCache: false })
         .then((prs) => {
           const prList = prs.map(toRenovatePR).filter(Boolean);
           logger.debug(`Retrieved ${prList.length} Pull Requests`);
@@ -630,7 +632,7 @@ const platform: Platform = {
   getIssueList(): Promise<Issue[]> {
     if (config.issueList === null) {
       config.issueList = helper
-        .searchIssues(config.repository, {}, { useCache: false })
+        .searchIssues(config.repository, { state: 'all' }, { useCache: false })
         .then((issues) => {
           const issueList = issues.map(toRenovateIssue);
           logger.debug(`Retrieved ${issueList.length} Issues`);

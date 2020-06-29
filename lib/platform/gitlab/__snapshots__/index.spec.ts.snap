@@ -714,7 +714,7 @@ Array [
       "user-agent": "https://github.com/renovatebot/renovate",
     },
     "method": "GET",
-    "url": "https://gitlab.com/api/v4/projects/undefined/issues?state=opened",
+    "url": "https://gitlab.com/api/v4/projects/undefined/issues?per_page=100&author_id=undefined&state=opened",
   },
   Object {
     "body": "{\\"title\\":\\"new-title\\",\\"description\\":\\"new-content\\"}",
@@ -744,7 +744,7 @@ Array [
       "user-agent": "https://github.com/renovatebot/renovate",
     },
     "method": "GET",
-    "url": "https://gitlab.com/api/v4/projects/undefined/issues?state=opened",
+    "url": "https://gitlab.com/api/v4/projects/undefined/issues?per_page=100&author_id=undefined&state=opened",
   },
   Object {
     "headers": Object {
@@ -771,7 +771,7 @@ Array [
       "user-agent": "https://github.com/renovatebot/renovate",
     },
     "method": "GET",
-    "url": "https://gitlab.com/api/v4/projects/undefined/issues?state=opened",
+    "url": "https://gitlab.com/api/v4/projects/undefined/issues?per_page=100&author_id=undefined&state=opened",
   },
   Object {
     "headers": Object {
@@ -812,7 +812,7 @@ Array [
       "user-agent": "https://github.com/renovatebot/renovate",
     },
     "method": "GET",
-    "url": "https://gitlab.com/api/v4/projects/undefined/issues?state=opened",
+    "url": "https://gitlab.com/api/v4/projects/undefined/issues?per_page=100&author_id=undefined&state=opened",
   },
   Object {
     "body": "{\\"state_event\\":\\"close\\"}",
@@ -842,7 +842,7 @@ Array [
       "user-agent": "https://github.com/renovatebot/renovate",
     },
     "method": "GET",
-    "url": "https://gitlab.com/api/v4/projects/undefined/issues?state=opened",
+    "url": "https://gitlab.com/api/v4/projects/undefined/issues?per_page=100&author_id=undefined&state=opened",
   },
   Object {
     "headers": Object {
@@ -869,7 +869,7 @@ Array [
       "user-agent": "https://github.com/renovatebot/renovate",
     },
     "method": "GET",
-    "url": "https://gitlab.com/api/v4/projects/undefined/issues?state=opened",
+    "url": "https://gitlab.com/api/v4/projects/undefined/issues?per_page=100&author_id=undefined&state=opened",
   },
 ]
 `;

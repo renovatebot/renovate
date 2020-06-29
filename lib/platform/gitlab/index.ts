@@ -38,7 +38,7 @@ import {
   RepoParams,
   VulnerabilityAlert,
 } from '../common';
-import GitStorage, { StatusResult } from '../git/storage';
+import GitStorage, { StatusResult } from '../git';
 import { smartTruncate } from '../utils/pr-body';
 
 const gitlabApi = new GitlabHttp();
@@ -249,6 +249,8 @@ export async function initRepo({
     await config.storage.initRepo({
       ...config,
       url,
+      gitAuthorName: global.gitAuthor?.name,
+      gitAuthorEmail: global.gitAuthor?.email,
     });
   } catch (err) /* istanbul ignore next */ {
     logger.debug({ err }, 'Caught initRepo error');
@@ -742,10 +744,16 @@ export async function setBranchStatus({
 
 export async function getIssueList(): Promise<any[]> {
   if (!config.issueList) {
+    const query = new URLSearchParams({
+      per_page: '100',
+      author_id: `${authorId}`,
+      state: 'opened',
+    }).toString();
     const res = await gitlabApi.getJson<{ iid: number; title: string }[]>(
-      `projects/${config.repository}/issues?state=opened`,
+      `projects/${config.repository}/issues?${query}`,
       {
         useCache: false,
+        paginate: true,
       }
     );
     // istanbul ignore if

@@ -379,7 +379,7 @@ export async function searchIssues(
   params: IssueSearchParams,
   options?: GiteaHttpOptions
 ): Promise<Issue[]> {
-  const query = queryParams(params).toString();
+  const query = queryParams({ ...params, type: 'issues' }).toString();
   const url = `repos/${repoPath}/issues?${query}`;
   const res = await giteaHttp.getJson<Issue[]>(url, {
     ...options,

@@ -140,7 +140,7 @@ Object {
       "depName": "helm",
       "depNameShort": "helm",
       "depType": "terraform",
-      "skipReason": "no-version",
+      "skipReason": "unsupported-version",
     },
     Object {
       "currentValue": "V1.9",
@@ -191,6 +191,27 @@ Object {
       "depNameShort": "hashicorp/example",
       "depType": "gitTags",
       "lookupName": "ssh://git@bitbucket.com/hashicorp/example",
+    },
+    Object {
+      "currentValue": ">= 2.7.0",
+      "datasource": "terraform-provider",
+      "depName": "aws",
+      "depNameShort": "aws",
+      "depType": "terraform",
+    },
+    Object {
+      "currentValue": ">= 2.5.0",
+      "datasource": "terraform-provider",
+      "depName": "aws",
+      "depNameShort": "aws",
+      "depType": "terraform",
+    },
+    Object {
+      "currentValue": ">= 2.0.0",
+      "datasource": "terraform-provider",
+      "depName": "azurerm",
+      "depNameShort": "azurerm",
+      "depType": "terraform",
     },
   ],
 }

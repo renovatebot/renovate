@@ -4,7 +4,7 @@ import { BranchStatus } from '../../types';
 import { HttpResponse } from '../../util/http';
 import { BitbucketHttp } from '../../util/http/bitbucket';
 import { Pr } from '../common';
-import { Storage } from '../git/storage';
+import { Storage } from '../git';
 
 const bitbucketHttp = new BitbucketHttp();
 

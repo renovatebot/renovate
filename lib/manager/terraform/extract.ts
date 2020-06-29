@@ -11,6 +11,7 @@ export enum TerraformDependencyTypes {
   unknown = 'unknown',
   module = 'module',
   provider = 'provider',
+  required_providers = 'required_providers',
 }
 
 export function getTerraformDependencyType(
@@ -23,15 +24,25 @@ export function getTerraformDependencyType(
     case 'provider': {
       return TerraformDependencyTypes.provider;
     }
+    case 'required_providers': {
+      return TerraformDependencyTypes.required_providers;
+    }
     default: {
       return TerraformDependencyTypes.unknown;
     }
   }
 }
 
+const dependencyBlockExtractionRegex = /^\s*(?<type>module|provider|required_providers)\s+("(?<lookupName>[^"]+)"\s+)?{\s*$/;
+const keyValueExtractionRegex = /^\s*(?<key>[^\s]+)\s+=\s+"(?<value>[^"]+)"\s*$/; // extracts `exampleKey = exampleValue`
+
 export function extractPackageFile(content: string): PackageFile | null {
   logger.trace({ content }, 'terraform.extractPackageFile()');
-  if (!content.includes('module "') && !content.includes('provider "')) {
+  if (
+    !content.includes('module "') &&
+    !content.includes('provider "') &&
+    !content.includes('required_providers ')
+  ) {
     return null;
   }
   const deps: PackageDependency[] = [];
@@ -39,36 +50,54 @@ export function extractPackageFile(content: string): PackageFile | null {
     const lines = content.split('\n');
     for (let lineNumber = 0; lineNumber < lines.length; lineNumber += 1) {
       let line = lines[lineNumber];
-      const terraformDependency = /^(module|provider)\s+"([^"]+)"\s+{\s*$/.exec(
-        line
-      );
+      const terraformDependency = dependencyBlockExtractionRegex.exec(line);
       if (terraformDependency) {
-        logger.trace(`Matched ${terraformDependency[1]} on line ${lineNumber}`);
-        const tfDepType: TerraformDependencyTypes = getTerraformDependencyType(
-          terraformDependency[1]
+        logger.trace(
+          `Matched ${terraformDependency.groups.type} on line ${lineNumber}`
         );
-        const dep: PackageDependency = {
-          managerData: {
-            moduleName: terraformDependency[2],
-            terraformDependencyType: tfDepType,
-          },
-        };
+        const tfDepType = getTerraformDependencyType(
+          terraformDependency.groups.type
+        );
+
         if (tfDepType === TerraformDependencyTypes.unknown) {
-          /* istanbul ignore next */ logger.trace(
-            `Could not identify TerraformDependencyType ${terraformDependency[1]} on line ${lineNumber}.`
+          /* istanbul ignore next */ logger.warn(
+            `Could not identify TerraformDependencyType ${terraformDependency.groups.type} on line ${lineNumber}.`
           );
+        } else if (tfDepType === TerraformDependencyTypes.required_providers) {
+          do {
+            const dep: PackageDependency = {
+              managerData: {
+                terraformDependencyType: tfDepType,
+              },
+            };
+
+            lineNumber += 1;
+            line = lines[lineNumber];
+            const kvMatch = keyValueExtractionRegex.exec(line);
+            if (kvMatch) {
+              dep.currentValue = kvMatch.groups.value;
+              dep.managerData.moduleName = kvMatch.groups.key;
+              dep.managerData.versionLine = lineNumber;
+              deps.push(dep);
+            }
+          } while (line.trim() !== '}');
         } else {
+          const dep: PackageDependency = {
+            managerData: {
+              moduleName: terraformDependency.groups.lookupName,
+              terraformDependencyType: tfDepType,
+            },
+          };
           do {
             lineNumber += 1;
             line = lines[lineNumber];
-            const kvMatch = /^\s*([^\s]+)\s+=\s+"([^"]+)"\s*$/.exec(line);
+            const kvMatch = keyValueExtractionRegex.exec(line);
             if (kvMatch) {
-              const [, key, value] = kvMatch;
-              if (key === 'version') {
-                dep.currentValue = value;
+              if (kvMatch.groups.key === 'version') {
+                dep.currentValue = kvMatch.groups.value;
                 dep.managerData.versionLine = lineNumber;
-              } else if (key === 'source') {
-                dep.managerData.source = value;
+              } else if (kvMatch.groups.key === 'source') {
+                dep.managerData.source = kvMatch.groups.value;
                 dep.managerData.sourceLine = lineNumber;
               }
             }
@@ -100,7 +129,6 @@ export function extractPackageFile(content: string): PackageFile | null {
         dep.currentValue = githubRefMatch[3];
         dep.datasource = datasourceGithubTags.id;
         dep.lookupName = depNameShort;
-        dep.managerData.lineNumber = dep.managerData.sourceLine;
         if (!isVersion(dep.currentValue)) {
           dep.skipReason = SkipReason.UnsupportedVersion;
         }
@@ -119,7 +147,6 @@ export function extractPackageFile(content: string): PackageFile | null {
         }
         dep.currentValue = gitTagsRefMatch[4];
         dep.datasource = datasourceGitTags.id;
-        dep.managerData.lineNumber = dep.managerData.sourceLine;
         if (!isVersion(dep.currentValue)) {
           dep.skipReason = SkipReason.UnsupportedVersion;
         }
@@ -131,7 +158,6 @@ export function extractPackageFile(content: string): PackageFile | null {
           dep.depType = 'terraform';
           dep.depName = moduleParts.join('/');
           dep.depNameShort = dep.depName;
-          dep.managerData.lineNumber = dep.managerData.versionLine;
           dep.datasource = datasourceTerraformModule.id;
         }
       } else {
@@ -140,19 +166,16 @@ export function extractPackageFile(content: string): PackageFile | null {
       }
     } else if (
       dep.managerData.terraformDependencyType ===
-      TerraformDependencyTypes.provider
+        TerraformDependencyTypes.provider ||
+      dep.managerData.terraformDependencyType ===
+        TerraformDependencyTypes.required_providers
     ) {
       dep.depType = 'terraform';
       dep.depName = dep.managerData.moduleName;
       dep.depNameShort = dep.managerData.moduleName;
-      dep.managerData.lineNumber = dep.managerData.versionLine;
       dep.datasource = datasourceTerraformProvider.id;
-      if (dep.managerData.lineNumber) {
-        if (!isValid(dep.currentValue)) {
-          dep.skipReason = SkipReason.UnsupportedVersion;
-        }
-      } else if (!dep.skipReason) {
-        dep.skipReason = SkipReason.NoVersion;
+      if (!isValid(dep.currentValue)) {
+        dep.skipReason = SkipReason.UnsupportedVersion;
       }
     }
     delete dep.managerData;

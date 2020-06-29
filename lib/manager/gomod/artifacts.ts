@@ -6,7 +6,7 @@ import { logger } from '../../logger';
 import { platform } from '../../platform';
 import { ExecOptions, exec } from '../../util/exec';
 import { BinarySource } from '../../util/exec/common';
-import { readLocalFile, writeLocalFile } from '../../util/fs';
+import { readLocalFile, writeLocalFile } from '../../util/gitfs';
 import { find } from '../../util/host-rules';
 import { UpdateArtifact, UpdateArtifactsResult } from '../common';
 

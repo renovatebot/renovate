@@ -34,7 +34,7 @@ import {
   RepoParams,
   VulnerabilityAlert,
 } from '../common';
-import GitStorage, { StatusResult } from '../git/storage';
+import GitStorage, { StatusResult } from '../git';
 import { smartTruncate } from '../utils/pr-body';
 import { BbbsRestPr, BbsConfig, BbsPr, BbsRestUserRef } from './types';
 import * as utils from './utils';
@@ -191,6 +191,8 @@ export async function initRepo({
     ...config,
     localDir,
     url: gitUrl,
+    gitAuthorName: global.gitAuthor?.name,
+    gitAuthorEmail: global.gitAuthor?.email,
   });
 
   try {

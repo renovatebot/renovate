@@ -44,7 +44,7 @@ import {
   RepoParams,
   VulnerabilityAlert,
 } from '../common';
-import GitStorage, { StatusResult } from '../git/storage';
+import GitStorage, { StatusResult } from '../git';
 import { smartTruncate } from '../utils/pr-body';
 import {
   BranchProtection,
@@ -436,6 +436,8 @@ export async function initRepo({
   await config.storage.initRepo({
     ...config,
     url,
+    gitAuthorName: global.gitAuthor?.name,
+    gitAuthorEmail: global.gitAuthor?.email,
   });
   const repoConfig: RepoConfig = {
     baseBranch: config.baseBranch,

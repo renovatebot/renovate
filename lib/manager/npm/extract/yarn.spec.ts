@@ -1,15 +1,15 @@
 import { readFileSync } from 'fs';
-import * as _fs from '../../../util/fs';
+import * as _gitfs from '../../../util/gitfs';
 import { getYarnLock } from './yarn';
 
-jest.mock('../../../util/fs');
+jest.mock('../../../util/gitfs');
 
-const fs: any = _fs;
+const gitfs: any = _gitfs;
 
 describe('manager/npm/extract/yarn', () => {
   describe('.getYarnLock()', () => {
     it('returns empty if exception parsing', async () => {
-      fs.readLocalFile.mockReturnValueOnce('abcd');
+      gitfs.readLocalFile.mockReturnValueOnce('abcd');
       const res = await getYarnLock('package.json');
       expect(Object.keys(res)).toHaveLength(0);
     });
@@ -18,7 +18,7 @@ describe('manager/npm/extract/yarn', () => {
         'lib/manager/npm/__fixtures__/plocktest1/yarn.lock',
         'utf8'
       );
-      fs.readLocalFile.mockReturnValueOnce(plocktest1Lock);
+      gitfs.readLocalFile.mockReturnValueOnce(plocktest1Lock);
       const res = await getYarnLock('package.json');
       expect(res).toMatchSnapshot();
       expect(Object.keys(res)).toHaveLength(7);

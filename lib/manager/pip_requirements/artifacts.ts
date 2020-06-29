@@ -1,7 +1,7 @@
 import is from '@sindresorhus/is';
 import { logger } from '../../logger';
 import { ExecOptions, exec } from '../../util/exec';
-import { readLocalFile } from '../../util/fs';
+import { readLocalFile } from '../../util/gitfs';
 import { UpdateArtifact, UpdateArtifactsResult } from '../common';
 
 export async function updateArtifacts({
@@ -29,7 +29,7 @@ export async function updateArtifacts({
       }
     }
     const execOptions: ExecOptions = {
-      cwdFile: packageFileName,
+      cwdFile: '.',
       docker: {
         image: 'renovate/python',
         tagScheme: 'pip_requirements',

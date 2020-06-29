@@ -21,7 +21,7 @@ const gitlabApiHost = 'https://gitlab.com';
 describe('platform/gitlab', () => {
   let gitlab: Platform;
   let hostRules: jest.Mocked<typeof _hostRules>;
-  let GitStorage: jest.Mocked<typeof import('../git/storage')> & jest.Mock;
+  let GitStorage: jest.Mocked<typeof import('../git')> & jest.Mock;
   beforeEach(async () => {
     // reset module
     jest.resetModules();
@@ -30,8 +30,8 @@ describe('platform/gitlab', () => {
     jest.mock('../../util/host-rules');
     jest.mock('delay');
     hostRules = require('../../util/host-rules');
-    jest.mock('../git/storage');
-    GitStorage = require('../git/storage').Storage;
+    jest.mock('../git');
+    GitStorage = require('../git').Storage;
     GitStorage.mockImplementation(() => ({
       initRepo: jest.fn(),
       cleanRepo: jest.fn(),
@@ -712,7 +712,9 @@ describe('platform/gitlab', () => {
     it('returns null if no issue', async () => {
       httpMock
         .scope(gitlabApiHost)
-        .get('/api/v4/projects/undefined/issues?state=opened')
+        .get(
+          '/api/v4/projects/undefined/issues?per_page=100&author_id=undefined&state=opened'
+        )
         .reply(200, [
           {
             iid: 1,
@@ -730,7 +732,9 @@ describe('platform/gitlab', () => {
     it('finds issue', async () => {
       httpMock
         .scope(gitlabApiHost)
-        .get('/api/v4/projects/undefined/issues?state=opened')
+        .get(
+          '/api/v4/projects/undefined/issues?per_page=100&author_id=undefined&state=opened'
+        )
         .reply(200, [
           {
             iid: 1,
@@ -752,7 +756,9 @@ describe('platform/gitlab', () => {
     it('creates issue', async () => {
       httpMock
         .scope(gitlabApiHost)
-        .get('/api/v4/projects/undefined/issues?state=opened')
+        .get(
+          '/api/v4/projects/undefined/issues?per_page=100&author_id=undefined&state=opened'
+        )
         .reply(200, [
           {
             iid: 1,
@@ -775,7 +781,9 @@ describe('platform/gitlab', () => {
     it('updates issue', async () => {
       httpMock
         .scope(gitlabApiHost)
-        .get('/api/v4/projects/undefined/issues?state=opened')
+        .get(
+          '/api/v4/projects/undefined/issues?per_page=100&author_id=undefined&state=opened'
+        )
         .reply(200, [
           {
             iid: 1,
@@ -800,7 +808,9 @@ describe('platform/gitlab', () => {
     it('skips update if unchanged', async () => {
       httpMock
         .scope(gitlabApiHost)
-        .get('/api/v4/projects/undefined/issues?state=opened')
+        .get(
+          '/api/v4/projects/undefined/issues?per_page=100&author_id=undefined&state=opened'
+        )
         .reply(200, [
           {
             iid: 1,
@@ -825,7 +835,9 @@ describe('platform/gitlab', () => {
     it('closes issue', async () => {
       httpMock
         .scope(gitlabApiHost)
-        .get('/api/v4/projects/undefined/issues?state=opened')
+        .get(
+          '/api/v4/projects/undefined/issues?per_page=100&author_id=undefined&state=opened'
+        )
         .reply(200, [
           {
             iid: 1,
