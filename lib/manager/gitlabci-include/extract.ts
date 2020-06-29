@@ -11,7 +11,7 @@ function extractDepFromIncludeFile(includeObj: {
   file: any;
   project: string;
   ref: string;
-}): PackageDependency | null {
+}): PackageDependency {
   const dep: PackageDependency = {
     datasource: datasourceGitlabTags.id,
     depName: includeObj.project,
@@ -29,7 +29,7 @@ async function extractDepsFromIncludeLocal(includeObj: {
   local: string;
 }): Promise<PackageDependency[] | null> {
   const content = await readLocalFile(includeObj.local, 'utf8');
-  const deps: PackageDependency[] = gitlabci.extractPackageFile(content).deps;
+  const deps = gitlabci.extractPackageFile(content)?.deps;
   return deps;
 }
 
@@ -45,12 +45,10 @@ export async function extractPackageFile(
       for (const includeObj of doc.include) {
         if (includeObj.file && includeObj.project) {
           const dep = extractDepFromIncludeFile(includeObj);
-          if (dep) {
             if (config.endpoint) {
               dep.registryUrls = [config.endpoint.replace(/\/api\/v4\/?/, '')];
             }
             deps.push(dep);
-          }
         } else if (includeObj.local) {
           const includedDeps = await extractDepsFromIncludeLocal(includeObj);
           for (const includedDep of includedDeps) {
