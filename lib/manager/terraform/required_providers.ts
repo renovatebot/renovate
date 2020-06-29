@@ -1,6 +1,9 @@
-import { TerraformDependencyTypes } from '../../../dist/manager/terraform/extract';
 import { PackageDependency } from '../common';
-import { ExtractionResult, keyValueExtractionRegex } from './util';
+import {
+  ExtractionResult,
+  TerraformDependencyTypes,
+  keyValueExtractionRegex,
+} from './util';
 
 export function extractTerraformRequiredProviders(
   startingLine: number,
