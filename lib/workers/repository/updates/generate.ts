@@ -7,15 +7,12 @@ import * as template from '../../../util/template';
 import { BranchConfig, BranchUpgradeConfig } from '../../common';
 
 function isTypesGroup(branchUpgrades: any[]): boolean {
-  if (!branchUpgrades.some(({ depName }) => depName?.startsWith('@types/'))) {
-    return false;
-  }
-
-  const names = branchUpgrades.map(({ depName }) =>
-    depName?.replace(/^@types\//, '')
+  return (
+    branchUpgrades.some(({ depName }) => depName?.startsWith('@types/')) &&
+    new Set(
+      branchUpgrades.map(({ depName }) => depName?.replace(/^@types\//, ''))
+    ).size === 1
   );
-  const namesSet = new Set(names);
-  return namesSet.size === 1;
 }
 
 function sortTypesGroup(upgrades: BranchUpgradeConfig[]): void {
