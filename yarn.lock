@@ -1485,6 +1485,11 @@
   resolved "https://registry.yarnpkg.com/@types/color-name/-/color-name-1.1.1.tgz#1c1261bbeaa10a8055bbc5d8ab84b7b2afc846a0"
   integrity sha512-rr+OQyAjxze7GgWrSaJwydHStIhHq2lvY3BOC2Mj7KnzI7XK0Uw1TOOdI9lDoajEbSWLiYgoo4f1R51erQfhPQ==
 
+"@types/conventional-commits-detector@1.0.0":
+  version "1.0.0"
+  resolved "https://registry.yarnpkg.com/@types/conventional-commits-detector/-/conventional-commits-detector-1.0.0.tgz#27e143c481d6fa6146863d77e6b91de877d4f09e"
+  integrity sha512-ZB+G1yG5pQoWaaHg0D4H9c29q61Y0O/kyOtEx0IKL3Gca3EGEcN3jh5OHnoQp00/pFoqJR63htsviivOkTXuCw==
+
 "@types/convert-hrtime@2.0.0":
   version "2.0.0"
   resolved "https://registry.yarnpkg.com/@types/convert-hrtime/-/convert-hrtime-2.0.0.tgz#48d8215750e602a8ea439591c741cc927c116bb1"

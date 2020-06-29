@@ -1,8 +1,3 @@
-declare module 'conventional-commits-detector' {
-  function detector(commits: string[]): string;
-  export = detector;
-}
-
 declare module 'json-dup-key-validator' {
   export function validate(
     jsonString: string,
