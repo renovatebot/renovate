@@ -1,7 +1,3 @@
-declare module 'conventional-commits-detector' {
-  function detector(commits: string[]): string;
-  export = detector;
-}
 
 declare module 'changelog-filename-regex' {
   const re: RegExp;
