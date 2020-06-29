@@ -65,12 +65,12 @@ export async function downloadHttpProtocol(
   } catch (err) {
     const failedUrl = pkgUrl.toString();
     if (isNotFoundError(err)) {
-      logger.debug({ failedUrl }, `Url not found`);
+      logger.trace({ failedUrl }, `Url not found`);
     } else if (isHostError(err)) {
       // istanbul ignore next
-      logger.warn({ failedUrl }, `Cannot connect to ${hostType} host`);
+      logger.debug({ failedUrl }, `Cannot connect to ${hostType} host`);
     } else if (isPermissionsIssue(err)) {
-      logger.warn(
+      logger.debug(
         { failedUrl },
         'Dependency lookup unauthorized. Please add authentication with a hostRule'
       );
