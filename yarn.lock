@@ -1592,6 +1592,11 @@
   resolved "https://registry.yarnpkg.com/@types/js-yaml/-/js-yaml-3.12.4.tgz#7d3b534ec35a0585128e2d332db1403ebe057e25"
   integrity sha512-fYMgzN+9e28R81weVN49inn/u798ruU91En1ZnGvSZzCRc5jXx9B2EDhlRaWmcO1RIxFHL8AajRXzxDuJu93+A==
 
+"@types/json-dup-key-validator@1.0.0":
+  version "1.0.0"
+  resolved "https://registry.yarnpkg.com/@types/json-dup-key-validator/-/json-dup-key-validator-1.0.0.tgz#3a666ab980e5e957960e9341e13eabd4fd9a24f3"
+  integrity sha512-D/pvJeKintUSW4G+aBRSvReECxCHbMcE9IuSU7cfWQAtYStE/vH8OLXFw38JJ37dSEnpcOkEV7q4WmdvtV0zHg==
+
 "@types/json-schema@*", "@types/json-schema@^7.0.3":
   version "7.0.5"
   resolved "https://registry.yarnpkg.com/@types/json-schema/-/json-schema-7.0.5.tgz#dcce4430e64b443ba8945f0290fb564ad5bac6dd"

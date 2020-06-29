@@ -1,15 +1,3 @@
-declare module 'json-dup-key-validator' {
-  export function validate(
-    jsonString: string,
-    allowDuplicatedKeys?: boolean
-  ): string | undefined;
-
-  export function parse<T = unknown>(
-    jsonString: string,
-    allowDuplicatedKeys?: boolean
-  ): T;
-}
-
 declare module 'changelog-filename-regex' {
   const re: RegExp;
   export = re;
