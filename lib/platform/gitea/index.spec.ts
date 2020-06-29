@@ -25,8 +25,7 @@ describe('platform/gitea', () => {
   let gitea: Platform;
   let helper: jest.Mocked<typeof import('./gitea-helper')>;
   let logger: jest.Mocked<typeof _logger>;
-  let GitStorage: jest.Mocked<typeof import('../git/storage').Storage> &
-    jest.Mock;
+  let GitStorage: jest.Mocked<typeof import('../git').Storage> & jest.Mock;
 
   const mockCommitHash = '0d9c7726c3d628b7e28af234595cfd20febdbf8e';
 
@@ -174,13 +173,13 @@ describe('platform/gitea', () => {
     jest.resetModules();
     jest.clearAllMocks();
     jest.mock('./gitea-helper');
-    jest.mock('../git/storage');
+    jest.mock('../git');
     jest.mock('../../logger');
 
     gitea = await import('.');
     helper = (await import('./gitea-helper')) as any;
     logger = (await import('../../logger')).logger as any;
-    GitStorage = (await import('../git/storage')).Storage as any;
+    GitStorage = (await import('../git')).Storage as any;
 
     GitStorage.mockImplementation(() => ({
       initRepo: gsmInitRepo,

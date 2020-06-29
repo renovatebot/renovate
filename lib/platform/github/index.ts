@@ -44,7 +44,7 @@ import {
   RepoParams,
   VulnerabilityAlert,
 } from '../common';
-import GitStorage, { StatusResult } from '../git/storage';
+import GitStorage, { StatusResult } from '../git';
 import { smartTruncate } from '../utils/pr-body';
 import {
   BranchProtection,

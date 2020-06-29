@@ -2,7 +2,7 @@ import { exec as _exec } from 'child_process';
 import { join } from 'upath';
 import { envMock, mockExecAll } from '../../../test/execUtil';
 import { mocked, platform } from '../../../test/util';
-import { StatusResult } from '../../platform/git/storage';
+import { StatusResult } from '../../platform/git';
 import { setUtilConfig } from '../../util';
 import { BinarySource } from '../../util/exec/common';
 import * as docker from '../../util/exec/docker';
