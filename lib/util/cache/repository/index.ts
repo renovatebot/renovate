@@ -1,6 +1,6 @@
 import * as fs from 'fs-extra';
 import { join } from 'upath';
-import { RenovateConfig } from '../../../config/common';
+import { RenovateConfig, RepositoryCacheConfig } from '../../../config/common';
 import { logger } from '../../../logger';
 import { PackageFile } from '../../../manager/common';
 
@@ -18,7 +18,7 @@ export interface Cache {
   scan?: Record<string, BaseBranchCache>;
 }
 
-let repositoryCache = 'disabled';
+let repositoryCache: RepositoryCacheConfig = 'disabled';
 let cacheFileName: string;
 let cache: Cache = {};
 

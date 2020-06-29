@@ -9,6 +9,8 @@ export type RenovateConfigStage =
   | 'branch'
   | 'pr';
 
+export type RepositoryCacheConfig = 'disabled' | 'enabled' | 'reset';
+
 export interface GroupConfig extends Record<string, unknown> {
   branchName?: string;
   branchTopic?: string;
@@ -46,7 +48,7 @@ export interface RenovateSharedConfig {
   rebaseWhen?: string;
   recreateClosed?: boolean;
   repository?: string;
-  repositoryCache?: 'disabled' | 'enabled' | 'reset';
+  repositoryCache?: RepositoryCacheConfig;
   requiredStatusChecks?: string[];
   schedule?: string[];
   semanticCommits?: boolean;
