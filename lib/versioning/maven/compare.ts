@@ -458,23 +458,18 @@ function coerceRangeValue(prev: string, next: string): string {
   const nextTokens = tokenize(next, true);
   const resultTokens = nextTokens.slice(0, prevTokens.length);
   const align = Math.max(0, prevTokens.length - nextTokens.length);
-  for (let i = 0; i < align; i += 1) {
-    const tokenIdx = prevTokens.length + i - 1;
-    const token = prevTokens[tokenIdx];
-    resultTokens.push(nullFor(token));
+  if (align > 0) {
+    resultTokens.push(...prevTokens.slice(prevTokens.length - align));
   }
   return tokensToStr(resultTokens);
 }
 
 function incrementRangeValue(value: string): string {
-  if (value === null) {
-    return value;
-  }
   const tokens = tokenize(value);
   const lastToken = tokens[tokens.length - 1];
   if (typeof lastToken.val === 'number') {
     lastToken.val += 1;
-    return tokensToStr(tokens);
+    return coerceRangeValue(value, tokensToStr(tokens));
   }
   return value;
 }
@@ -517,27 +512,40 @@ function autoExtendMavenRange(
       return currentRepresentation;
     }
   }
-  const interval = range[nearestIntervalIdx];
-  if (interval.rightValue !== null) {
-    const newLeftValue = incrementRangeValue(interval.leftValue);
-    const newRightValue = coerceRangeValue(interval.rightValue, newValue);
 
-    if (
-      newLeftValue &&
-      newLeftValue === interval.rightValue &&
-      newLeftValue !== newRightValue
-    ) {
-      interval.leftValue = newLeftValue;
+  const interval = range[nearestIntervalIdx];
+  let { leftValue, rightValue } = interval;
+  if (
+    leftValue !== null &&
+    rightValue !== null &&
+    incrementRangeValue(leftValue) === rightValue
+  ) {
+    interval.leftValue = coerceRangeValue(leftValue, newValue);
+    interval.rightValue = incrementRangeValue(interval.leftValue);
+  } else if (rightValue !== null) {
+    if (interval.rightType === INCLUDING_POINT) {
+      const tokens = tokenize(rightValue);
+      const lastToken = tokens[tokens.length - 1];
+      if (typeof lastToken.val === 'number') {
+        interval.rightValue = coerceRangeValue(rightValue, newValue);
+      } else {
+        interval.rightValue = newValue;
+      }
+    } else {
+      interval.rightValue = incrementRangeValue(
+        coerceRangeValue(rightValue, newValue)
+      );
     }
-    interval.rightValue = newRightValue;
-  } else {
-    interval.leftValue = coerceRangeValue(interval.leftValue, newValue);
+  } else if (leftValue !== null) {
+    interval.leftValue = coerceRangeValue(leftValue, newValue);
   }
+
   if (interval.leftValue && interval.rightValue) {
-    if (compare(interval.leftValue, interval.rightValue) !== 1) {
-      return rangeToStr(range);
-    }
-    return currentRepresentation;
+    const correctRepresentation =
+      compare(interval.leftValue, interval.rightValue) !== 1
+        ? rangeToStr(range)
+        : null;
+    return correctRepresentation || currentRepresentation;
   }
   return rangeToStr(range);
 }
