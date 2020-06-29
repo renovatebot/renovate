@@ -124,7 +124,7 @@ export async function mergeRenovateConfig(
     logger.debug({ configFile, config: renovateJson }, 'Repository config');
   }
   const cache = getCache();
-  cache.config = {
+  cache.init = {
     configFile,
     contents: clone(renovateJson),
   };

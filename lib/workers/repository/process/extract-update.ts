@@ -53,7 +53,7 @@ export async function extract(
   const { baseBranch, baseBranchSha } = config;
   let packageFiles;
   const cache = getCache();
-  const cachedExtract = cache?.extract?.[baseBranch];
+  const cachedExtract = cache?.scan?.[baseBranch];
   const configHash = hash(config);
   // istanbul ignore if
   if (
@@ -64,8 +64,8 @@ export async function extract(
     packageFiles = cachedExtract.packageFiles;
   } else {
     packageFiles = await extractAllDependencies(config);
-    cache.extract = cache.extract || {};
-    cache.extract[baseBranch] = {
+    cache.scan = cache.scan || {};
+    cache.scan[baseBranch] = {
       sha: baseBranchSha,
       configHash,
       packageFiles,
@@ -74,9 +74,9 @@ export async function extract(
     const baseBranches = is.nonEmptyArray(config.baseBranches)
       ? config.baseBranches
       : [baseBranch];
-    Object.keys(cache.extract).forEach((branchName) => {
+    Object.keys(cache.scan).forEach((branchName) => {
       if (!baseBranches.includes(branchName)) {
-        delete cache.extract[branchName];
+        delete cache.scan[branchName];
       }
     });
   }

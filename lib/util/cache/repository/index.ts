@@ -11,25 +11,29 @@ export interface BaseBranchCache {
 }
 
 export interface Cache {
-  config?: {
+  init?: {
     configFile: string;
     contents: RenovateConfig;
   };
-  extract?: Record<string, BaseBranchCache>;
+  scan?: Record<string, BaseBranchCache>;
 }
 
 let repositoryCache = 'disabled';
 let cacheFileName: string;
 let cache: Cache = {};
 
+export function getCacheFileName(config: RenovateConfig): string {
+  return join(
+    config.cacheDir,
+    '/renovate/repository/',
+    config.platform,
+    config.repository + '.json'
+  );
+}
+
 export async function initialize(config: RenovateConfig): Promise<void> {
   try {
-    cacheFileName = join(
-      config.cacheDir,
-      '/renovate/repository/',
-      config.platform,
-      config.repository + '.json'
-    );
+    cacheFileName = getCacheFileName(config);
     repositoryCache = config.repositoryCache;
     if (repositoryCache !== 'enabled') {
       logger.debug('Skipping repository cache');

@@ -51,7 +51,7 @@ describe('workers/repository/process/extract-update', () => {
         baseBranchSha: 'abc123',
       };
       repositoryCache.getCache.mockReturnValueOnce({
-        extract: {
+        scan: {
           master: {
             sha: config.baseBranchSha,
             configHash: hash(config).toString(),
