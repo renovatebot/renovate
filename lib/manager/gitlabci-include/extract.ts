@@ -51,8 +51,10 @@ export async function extractPackageFile(
           deps.push(dep);
         } else if (includeObj.local) {
           const includedDeps = await extractDepsFromIncludeLocal(includeObj);
-          for (const includedDep of includedDeps) {
-            deps.push(includedDep);
+          if (includedDeps) {
+            for (const includedDep of includedDeps) {
+              deps.push(includedDep);
+            }
           }
         }
       }
