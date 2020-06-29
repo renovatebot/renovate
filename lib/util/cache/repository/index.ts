@@ -20,7 +20,7 @@ export interface Cache {
 
 let repositoryCache: RepositoryCacheConfig = 'disabled';
 let cacheFileName: string;
-let cache: Cache = {};
+let cache: Cache = Object.create({});
 
 export function getCacheFileName(config: RenovateConfig): string {
   return join(
