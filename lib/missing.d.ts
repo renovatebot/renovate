@@ -1,4 +1,3 @@
-
 declare module 'changelog-filename-regex' {
   const re: RegExp;
   export = re;
