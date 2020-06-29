@@ -52,7 +52,7 @@ export function extractPackageFile(content: string): PackageFile | null {
             );
             break;
           }
-          case TerraformDependencyTypes.unknown:
+          /* istanbul ignore next */
           default:
             logger.warn(
               `Could not identify TerraformDependencyType ${terraformDependency.groups.type} on line ${lineNumber}.`
