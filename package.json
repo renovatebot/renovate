@@ -151,6 +151,7 @@
     "moment-timezone": "0.5.31",
     "node-emoji": "1.10.0",
     "node-html-parser": "1.2.20",
+    "object-hash": "2.0.3",
     "p-all": "2.1.0",
     "p-map": "4.0.0",
     "parse-diff": "0.7.0",

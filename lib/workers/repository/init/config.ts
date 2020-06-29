@@ -12,6 +12,8 @@ import * as npmApi from '../../../datasource/npm';
 import { logger } from '../../../logger';
 import { platform } from '../../../platform';
 import { ExternalHostError } from '../../../types/errors/external-host-error';
+import { getCache } from '../../../util/cache/repository';
+import { clone } from '../../../util/clone';
 import { readLocalFile } from '../../../util/gitfs';
 import * as hostRules from '../../../util/host-rules';
 import { flattenPackageRules } from './flatten';
@@ -121,6 +123,11 @@ export async function mergeRenovateConfig(
     }
     logger.debug({ configFile, config: renovateJson }, 'Repository config');
   }
+  const cache = getCache();
+  cache.init = {
+    configFile,
+    contents: clone(renovateJson),
+  };
   const migratedConfig = await migrateAndValidate(config, renovateJson);
   if (migratedConfig.errors.length) {
     const error = new Error(CONFIG_VALIDATION);

@@ -1,6 +1,9 @@
+import is from '@sindresorhus/is';
+import hash from 'object-hash';
 import { RenovateConfig } from '../../../config';
 import { logger } from '../../../logger';
 import { PackageFile } from '../../../manager/common';
+import { getCache } from '../../../util/cache/repository';
 import { BranchConfig } from '../../common';
 import { extractAllDependencies } from '../extract';
 import { branchifyUpgrades } from '../updates/branchify';
@@ -47,7 +50,36 @@ export async function extract(
   config: RenovateConfig
 ): Promise<Record<string, PackageFile[]>> {
   logger.debug('extract()');
-  const packageFiles = await extractAllDependencies(config);
+  const { baseBranch, baseBranchSha } = config;
+  let packageFiles;
+  const cache = getCache();
+  const cachedExtract = cache?.scan?.[baseBranch];
+  const configHash = hash(config);
+  // istanbul ignore if
+  if (
+    cachedExtract?.sha === baseBranchSha &&
+    cachedExtract?.configHash === configHash
+  ) {
+    logger.debug({ baseBranch, baseBranchSha }, 'Found cached extract');
+    packageFiles = cachedExtract.packageFiles;
+  } else {
+    packageFiles = await extractAllDependencies(config);
+    cache.scan = cache.scan || Object.create({});
+    cache.scan[baseBranch] = {
+      sha: baseBranchSha,
+      configHash,
+      packageFiles,
+    };
+    // Clean up cached branch extracts
+    const baseBranches = is.nonEmptyArray(config.baseBranches)
+      ? config.baseBranches
+      : [baseBranch];
+    Object.keys(cache.scan).forEach((branchName) => {
+      if (!baseBranches.includes(branchName)) {
+        delete cache.scan[branchName];
+      }
+    });
+  }
   const stats = extractStats(packageFiles);
   logger.info(
     { baseBranch: config.baseBranch, stats },
