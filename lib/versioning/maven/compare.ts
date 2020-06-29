@@ -514,7 +514,7 @@ function autoExtendMavenRange(
   }
 
   const interval = range[nearestIntervalIdx];
-  let { leftValue, rightValue } = interval;
+  const { leftValue, rightValue } = interval;
   if (
     leftValue !== null &&
     rightValue !== null &&
