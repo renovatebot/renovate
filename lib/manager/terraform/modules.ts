@@ -5,7 +5,7 @@ import { logger } from '../../logger';
 import { SkipReason } from '../../types';
 import { isVersion } from '../../versioning/hashicorp';
 import { PackageDependency } from '../common';
-import { extractTerraformProvider } from './provider';
+import { extractTerraformProvider } from './providers';
 import {
   ExtractionResult,
   TerraformDependencyTypes,

@@ -1,7 +1,10 @@
 import { logger } from '../../logger';
 import { PackageDependency, PackageFile } from '../common';
 import { analyseTerraformModule, extractTerraformModule } from './modules';
-import { analyzeTerraformProvider, extractTerraformProvider } from './provider';
+import {
+  analyzeTerraformProvider,
+  extractTerraformProvider,
+} from './providers';
 import { extractTerraformRequiredProviders } from './required_providers';
 import {
   TerraformDependencyTypes,
