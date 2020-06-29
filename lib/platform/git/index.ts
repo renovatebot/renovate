@@ -81,6 +81,24 @@ async function isDirectory(dir: string): Promise<boolean> {
   }
 }
 
+async function getDefaultBranch(git: Git.SimpleGit): Promise<string> {
+  // see https://stackoverflow.com/a/44750379/1438522
+  try {
+    const res = await git.raw(['symbolic-ref', 'refs/remotes/origin/HEAD']);
+    return res.replace('refs/remotes/origin/', '').trim();
+  } catch (err) /* istanbul ignore next */ {
+    checkForPlatformFailure(err);
+    if (
+      err.message.startsWith(
+        'fatal: ref refs/remotes/origin/HEAD is not a symbolic ref'
+      )
+    ) {
+      throw new Error(REPOSITORY_EMPTY);
+    }
+    throw err;
+  }
+}
+
 export class Storage {
   private _config: LocalConfig = {} as any;
 
@@ -121,35 +139,14 @@ export class Storage {
     const gitHead = join(cwd, '.git/HEAD');
     let clone = true;
 
-    // TODO: move to private class scope
-    async function setBaseBranchToDefault(git: Git.SimpleGit): Promise<void> {
-      // see https://stackoverflow.com/a/44750379/1438522
-      try {
-        config.baseBranch =
-          config.baseBranch ||
-          (await git.raw(['symbolic-ref', 'refs/remotes/origin/HEAD']))
-            .replace('refs/remotes/origin/', '')
-            .trim();
-      } catch (err) /* istanbul ignore next */ {
-        checkForPlatformFailure(err);
-        if (
-          err.message.startsWith(
-            'fatal: ref refs/remotes/origin/HEAD is not a symbolic ref'
-          )
-        ) {
-          throw new Error(REPOSITORY_EMPTY);
-        }
-        throw err;
-      }
-    }
-
     if (await fs.exists(gitHead)) {
       try {
         this._git = Git(cwd).silent(true);
         await this._git.raw(['remote', 'set-url', 'origin', config.url]);
         const fetchStart = Date.now();
         await this._git.fetch(['--depth=10']);
-        await setBaseBranchToDefault(this._git);
+        config.baseBranch =
+          config.baseBranch || (await getDefaultBranch(this._git));
         await this._resetToBranch(config.baseBranch);
         await this._cleanLocalBranches();
         await this._git.raw(['remote', 'prune', 'origin']);
@@ -218,7 +215,8 @@ export class Storage {
       throw new Error(REPOSITORY_TEMPORARY_ERROR);
     }
 
-    await setBaseBranchToDefault(this._git);
+    config.baseBranch =
+      config.baseBranch || (await getDefaultBranch(this._git));
   }
 
   // istanbul ignore next
