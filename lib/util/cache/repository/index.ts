@@ -37,6 +37,7 @@ export async function initialize(config: RenovateConfig): Promise<void> {
     repositoryCache = config.repositoryCache;
     if (repositoryCache !== 'enabled') {
       logger.debug('Skipping repository cache');
+      cache = {};
       return;
     }
     cache = JSON.parse(await fs.readFile(cacheFileName, 'utf8'));
