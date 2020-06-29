@@ -6,23 +6,16 @@ import { logger } from '../../../logger';
 import * as template from '../../../util/template';
 import { BranchConfig, BranchUpgradeConfig } from '../../common';
 
-function isTypesGroup(
-  depNames: string[],
-  hasGroupName: boolean,
-  branchUpgrades: any[]
-): boolean {
-  const hasTypes = (): boolean =>
-    branchUpgrades.some(({ depName }) => depName?.startsWith('@types/'));
+function isTypesGroup(branchUpgrades: any[]): boolean {
+  if (!branchUpgrades.some(({ depName }) => depName?.startsWith('@types/'))) {
+    return false;
+  }
 
-  const hasSameName = (): boolean => {
-    const names = branchUpgrades.map(({ depName }) =>
-      depName?.replace(/^@types\//, '')
-    );
-    const namesSet = new Set(names);
-    return namesSet.size === 1;
-  };
-
-  return depNames.length > 1 && !hasGroupName && hasTypes() && hasSameName();
+  const names = branchUpgrades.map(({ depName }) =>
+    depName?.replace(/^@types\//, '')
+  );
+  const namesSet = new Set(names);
+  return namesSet.size === 1;
 }
 
 function sortTypesGroup(upgrades: BranchUpgradeConfig[]): void {
@@ -108,6 +101,8 @@ export function generateBranchConfig(
     // eslint-disable-next-line no-param-reassign
     branchUpgrades[0].commitMessageExtra = `to v${toVersions[0]}`;
   }
+  const typesGroup =
+    depNames.length > 1 && !hasGroupName && isTypesGroup(branchUpgrades);
   logger.trace(`groupEligible: ${groupEligible}`);
   const useGroupSettings = hasGroupName && groupEligible;
   logger.trace(`useGroupSettings: ${useGroupSettings}`);
@@ -168,10 +163,7 @@ export function generateBranchConfig(
     delete upgrade.lazyGrouping;
 
     // istanbul ignore else
-    if (
-      toVersions.length > 1 &&
-      !isTypesGroup(depNames, hasGroupName, branchUpgrades)
-    ) {
+    if (toVersions.length > 1 && !typesGroup) {
       logger.trace({ toVersions });
       delete upgrade.commitMessageExtra;
       upgrade.recreateClosed = true;
@@ -269,7 +261,7 @@ export function generateBranchConfig(
     }
   }
 
-  if (isTypesGroup(depNames, hasGroupName, branchUpgrades)) {
+  if (typesGroup) {
     if (config.upgrades[0].depName?.startsWith('@types/')) {
       logger.debug('Found @types - reversing upgrades to use depName in PR');
       sortTypesGroup(config.upgrades);
