@@ -15,14 +15,14 @@ describe('platform/azure', () => {
     jest.resetModules();
     jest.mock('./azure-got-wrapper');
     jest.mock('./azure-helper');
-    jest.mock('../git/storage');
+    jest.mock('../git');
     jest.mock('../../util/host-rules');
     hostRules = require('../../util/host-rules');
     require('../../util/sanitize').sanitize = jest.fn((input) => input);
     azure = await import('.');
     azureApi = require('./azure-got-wrapper');
     azureHelper = require('./azure-helper');
-    GitStorage = require('../git/storage').Storage;
+    GitStorage = require('../git').Storage;
     GitStorage.mockImplementation(() => ({
       initRepo: jest.fn(),
       cleanRepo: jest.fn(),

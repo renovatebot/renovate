@@ -47,20 +47,20 @@ const commits = {
 describe('platform/bitbucket', () => {
   let bitbucket: Platform;
   let hostRules: jest.Mocked<typeof import('../../util/host-rules')>;
-  let GitStorage: jest.Mocked<import('../git/storage').Storage> & jest.Mock;
+  let GitStorage: jest.Mocked<import('../git').Storage> & jest.Mock;
   let logger: jest.Mocked<typeof _logger>;
   beforeEach(async () => {
     // reset module
     jest.resetModules();
     httpMock.reset();
     httpMock.setup();
-    jest.mock('../git/storage');
+    jest.mock('../git');
     jest.mock('../../util/host-rules');
     jest.mock('../../logger');
     hostRules = require('../../util/host-rules');
     bitbucket = await import('.');
     logger = (await import('../../logger')).logger as any;
-    GitStorage = require('../git/storage').Storage;
+    GitStorage = require('../git').Storage;
     GitStorage.mockImplementation(() => ({
       initRepo: jest.fn(),
       cleanRepo: jest.fn(),

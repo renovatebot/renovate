@@ -8,7 +8,7 @@ import {
 import { PR_STATE_CLOSED, PR_STATE_OPEN } from '../../constants/pull-requests';
 import { BranchStatus } from '../../types';
 import { Platform } from '../common';
-import { Storage } from '../git/storage';
+import { Storage } from '../git';
 
 function repoMock(
   endpoint: URL | string,
@@ -174,11 +174,11 @@ describe('platform/bitbucket-server', () => {
         httpMock.reset();
         httpMock.setup();
         jest.mock('delay');
-        jest.mock('../git/storage');
+        jest.mock('../git');
         jest.mock('../../util/host-rules');
         hostRules = require('../../util/host-rules');
         bitbucket = await import('.');
-        GitStorage = require('../git/storage').Storage;
+        GitStorage = require('../git').Storage;
         GitStorage.mockImplementation(
           () =>
             ({

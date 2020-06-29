@@ -24,7 +24,7 @@ import { BranchStatus } from '../../types';
 import { ExternalHostError } from '../../types/errors/external-host-error';
 import { emojify } from '../../util/emoji';
 import { exec } from '../../util/exec';
-import { readLocalFile, writeLocalFile } from '../../util/fs';
+import { readLocalFile, writeLocalFile } from '../../util/gitfs';
 import { regEx } from '../../util/regex';
 import { BranchConfig, PrResult, ProcessBranchResult } from '../common';
 import { checkAutoMerge, ensurePr } from '../pr';

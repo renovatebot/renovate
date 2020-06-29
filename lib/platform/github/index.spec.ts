@@ -14,7 +14,7 @@ const githubApiHost = 'https://api.github.com';
 describe('platform/github', () => {
   let github: Platform;
   let hostRules: jest.Mocked<typeof import('../../util/host-rules')>;
-  let GitStorage: jest.Mock<typeof import('../git/storage')>;
+  let GitStorage: jest.Mock<typeof import('../git')>;
   beforeEach(async () => {
     // reset module
     jest.resetModules();
@@ -23,8 +23,8 @@ describe('platform/github', () => {
     jest.mock('../../util/host-rules');
     github = await import('.');
     hostRules = mocked(await import('../../util/host-rules'));
-    jest.mock('../git/storage');
-    GitStorage = (await import('../git/storage')).Storage as any;
+    jest.mock('../git');
+    GitStorage = (await import('../git')).Storage as any;
     GitStorage.mockImplementation(
       () =>
         ({

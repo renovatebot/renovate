@@ -1,5 +1,5 @@
 import { Pr } from '../common';
-import GitStorage from '../git/storage';
+import GitStorage from '../git';
 
 // https://developer.github.com/v3/repos/statuses
 // https://developer.github.com/v3/checks/runs/
