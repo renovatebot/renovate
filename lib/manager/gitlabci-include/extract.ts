@@ -3,16 +3,15 @@ import yaml from 'js-yaml';
 import * as datasourceGitlabTags from '../../datasource/gitlab-tags';
 import { logger } from '../../logger';
 import { SkipReason } from '../../types';
+import { readLocalFile } from '../../util/gitfs';
 import { ExtractConfig, PackageDependency, PackageFile } from '../common';
+import * as gitlabci from '../gitlabci/extract';
 
-function extractDepFromInclude(includeObj: {
+function extractDepFromIncludeFile(includeObj: {
   file: any;
   project: string;
   ref: string;
-}): PackageDependency | null {
-  if (!includeObj.file || !includeObj.project) {
-    return null;
-  }
+}): PackageDependency {
   const dep: PackageDependency = {
     datasource: datasourceGitlabTags.id,
     depName: includeObj.project,
@@ -26,22 +25,37 @@ function extractDepFromInclude(includeObj: {
   return dep;
 }
 
-export function extractPackageFile(
+async function extractDepsFromIncludeLocal(includeObj: {
+  local: string;
+}): Promise<PackageDependency[] | null> {
+  const content = await readLocalFile(includeObj.local, 'utf8');
+  const deps = gitlabci.extractPackageFile(content)?.deps;
+  return deps;
+}
+
+export async function extractPackageFile(
   content: string,
   _packageFile: string,
   config: ExtractConfig
-): PackageFile | null {
+): Promise<PackageFile | null> {
   const deps: PackageDependency[] = [];
   try {
     const doc = yaml.safeLoad(content, { json: true });
     if (doc?.include && is.array(doc.include)) {
       for (const includeObj of doc.include) {
-        const dep = extractDepFromInclude(includeObj);
-        if (dep) {
+        if (includeObj.file && includeObj.project) {
+          const dep = extractDepFromIncludeFile(includeObj);
           if (config.endpoint) {
             dep.registryUrls = [config.endpoint.replace(/\/api\/v4\/?/, '')];
           }
           deps.push(dep);
+        } else if (includeObj.local) {
+          const includedDeps = await extractDepsFromIncludeLocal(includeObj);
+          if (includedDeps) {
+            for (const includedDep of includedDeps) {
+              deps.push(includedDep);
+            }
+          }
         }
       }
     }
@@ -53,7 +67,6 @@ export function extractPackageFile(
       logger.warn({ err }, 'Error extracting GitLab CI includes');
     }
   }
-
   if (!deps.length) {
     return null;
   }
