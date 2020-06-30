@@ -10,6 +10,7 @@ import { PLATFORM_TYPE_BITBUCKET } from '../../constants/platforms';
 import { PR_STATE_ALL, PR_STATE_OPEN } from '../../constants/pull-requests';
 import { logger } from '../../logger';
 import { BranchStatus } from '../../types';
+import * as gitfs from '../../util/gitfs';
 import * as hostRules from '../../util/host-rules';
 import { BitbucketHttp, setBaseUrl } from '../../util/http/bitbucket';
 import { sanitize } from '../../util/sanitize';
@@ -29,7 +30,6 @@ import {
   RepoParams,
   VulnerabilityAlert,
 } from '../common';
-import * as gitfs from '../git';
 import { smartTruncate } from '../utils/pr-body';
 import { readOnlyIssueBody } from '../utils/read-only-issue-body';
 import * as comments from './comments';

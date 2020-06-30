@@ -13,6 +13,7 @@ import {
 } from '../../constants/pull-requests';
 import { logger } from '../../logger';
 import { BranchStatus } from '../../types';
+import * as gitfs from '../../util/gitfs';
 import * as hostRules from '../../util/host-rules';
 import { sanitize } from '../../util/sanitize';
 import { ensureTrailingSlash } from '../../util/url';
@@ -31,7 +32,6 @@ import {
   RepoParams,
   VulnerabilityAlert,
 } from '../common';
-import * as gitfs from '../git';
 import { smartTruncate } from '../utils/pr-body';
 import * as azureApi from './azure-got-wrapper';
 import * as azureHelper from './azure-helper';

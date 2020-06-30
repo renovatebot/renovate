@@ -24,6 +24,7 @@ import {
 import { logger } from '../../logger';
 import { BranchStatus } from '../../types';
 import { ExternalHostError } from '../../types/errors/external-host-error';
+import * as gitfs from '../../util/gitfs';
 import * as hostRules from '../../util/host-rules';
 import * as githubHttp from '../../util/http/github';
 import { sanitize } from '../../util/sanitize';
@@ -44,7 +45,6 @@ import {
   RepoParams,
   VulnerabilityAlert,
 } from '../common';
-import * as gitfs from '../git';
 import { smartTruncate } from '../utils/pr-body';
 import {
   BranchProtection,

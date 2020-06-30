@@ -7,8 +7,8 @@ import {
   REPOSITORY_RENAMED,
 } from '../../constants/error-messages';
 import { BranchStatus } from '../../types';
+import * as _gitfs from '../../util/gitfs';
 import { Platform } from '../common';
-import * as _gitfs from '../git';
 
 const githubApiHost = 'https://api.github.com';
 
@@ -24,8 +24,8 @@ describe('platform/github', () => {
     jest.mock('../../util/host-rules');
     github = await import('.');
     hostRules = mocked(await import('../../util/host-rules'));
-    jest.mock('../git');
-    gitfs = mocked(await import('../git'));
+    jest.mock('../../util/gitfs');
+    gitfs = mocked(await import('../../util/gitfs'));
     gitfs.branchExists.mockResolvedValue(true);
     gitfs.isBranchStale.mockResolvedValue(true);
     gitfs.getBranchCommit.mockResolvedValue(
