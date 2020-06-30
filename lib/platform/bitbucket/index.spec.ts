@@ -5,6 +5,7 @@ import { logger as _logger } from '../../logger';
 import { BranchStatus } from '../../types';
 import { setBaseUrl } from '../../util/http/bitbucket';
 import { Platform, RepoParams } from '../common';
+import * as _gitfs from '../git';
 
 const baseUrl = 'https://api.bitbucket.org';
 
@@ -47,7 +48,7 @@ const commits = {
 describe('platform/bitbucket', () => {
   let bitbucket: Platform;
   let hostRules: jest.Mocked<typeof import('../../util/host-rules')>;
-  let GitStorage: jest.Mocked<import('../git').Storage> & jest.Mock;
+  let gitfs: jest.Mocked<typeof _gitfs>;
   let logger: jest.Mocked<typeof _logger>;
   beforeEach(async () => {
     // reset module
@@ -60,24 +61,9 @@ describe('platform/bitbucket', () => {
     hostRules = require('../../util/host-rules');
     bitbucket = await import('.');
     logger = (await import('../../logger')).logger as any;
-    GitStorage = require('../git').Storage;
-    GitStorage.mockImplementation(() => ({
-      initRepo: jest.fn(),
-      cleanRepo: jest.fn(),
-      getFileList: jest.fn(),
-      branchExists: jest.fn(() => true),
-      isBranchStale: jest.fn(() => false),
-      setBaseBranch: jest.fn(),
-      getBranchLastCommitTime: jest.fn(),
-      getAllRenovateBranches: jest.fn(),
-      getCommitMessages: jest.fn(),
-      getFile: jest.fn(),
-      commitFiles: jest.fn(),
-      mergeBranch: jest.fn(),
-      deleteBranch: jest.fn(),
-      getRepoStatus: jest.fn(),
-    }));
-
+    gitfs = require('../git');
+    gitfs.branchExists.mockResolvedValue(true);
+    gitfs.isBranchStale.mockResolvedValue(false);
     // clean up hostRules
     hostRules.clear();
     hostRules.find.mockReturnValue({

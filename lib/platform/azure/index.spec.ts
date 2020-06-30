@@ -3,13 +3,14 @@ import { REPOSITORY_DISABLED } from '../../constants/error-messages';
 import { BranchStatus } from '../../types';
 import * as _hostRules from '../../util/host-rules';
 import { Platform, RepoParams } from '../common';
+import * as _gitfs from '../git';
 
 describe('platform/azure', () => {
   let hostRules: jest.Mocked<typeof _hostRules>;
   let azure: Platform;
   let azureApi: jest.Mocked<typeof import('./azure-got-wrapper')>;
   let azureHelper: jest.Mocked<typeof import('./azure-helper')>;
-  let GitStorage;
+  let gitfs: jest.Mocked<typeof _gitfs>;
   beforeEach(async () => {
     // reset module
     jest.resetModules();
@@ -22,23 +23,9 @@ describe('platform/azure', () => {
     azure = await import('.');
     azureApi = require('./azure-got-wrapper');
     azureHelper = require('./azure-helper');
-    GitStorage = require('../git').Storage;
-    GitStorage.mockImplementation(() => ({
-      initRepo: jest.fn(),
-      cleanRepo: jest.fn(),
-      getFileList: jest.fn(),
-      branchExists: jest.fn(() => true),
-      isBranchStale: jest.fn(() => false),
-      setBaseBranch: jest.fn(),
-      getBranchLastCommitTime: jest.fn(),
-      getAllRenovateBranches: jest.fn(),
-      getCommitMessages: jest.fn(),
-      getFile: jest.fn(),
-      commitFiles: jest.fn(),
-      mergeBranch: jest.fn(),
-      deleteBranch: jest.fn(),
-      getRepoStatus: jest.fn(),
-    }));
+    gitfs = require('../git');
+    gitfs.branchExists.mockResolvedValue(true);
+    gitfs.isBranchStale.mockResolvedValue(false);
     hostRules.find.mockReturnValue({
       token: 'token',
     });

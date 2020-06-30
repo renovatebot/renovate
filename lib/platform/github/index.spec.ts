@@ -8,13 +8,14 @@ import {
 } from '../../constants/error-messages';
 import { BranchStatus } from '../../types';
 import { Platform } from '../common';
+import * as _gitfs from '../git';
 
 const githubApiHost = 'https://api.github.com';
 
 describe('platform/github', () => {
   let github: Platform;
   let hostRules: jest.Mocked<typeof import('../../util/host-rules')>;
-  let GitStorage: jest.Mock<typeof import('../git')>;
+  let gitfs: jest.Mocked<typeof _gitfs>;
   beforeEach(async () => {
     // reset module
     jest.resetModules();
@@ -24,28 +25,11 @@ describe('platform/github', () => {
     github = await import('.');
     hostRules = mocked(await import('../../util/host-rules'));
     jest.mock('../git');
-    GitStorage = (await import('../git')).Storage as any;
-    GitStorage.mockImplementation(
-      () =>
-        ({
-          initRepo: jest.fn(),
-          cleanRepo: jest.fn(),
-          getFileList: jest.fn(),
-          branchExists: jest.fn(() => true),
-          isBranchStale: jest.fn(() => false),
-          setBaseBranch: jest.fn(),
-          getBranchLastCommitTime: jest.fn(),
-          getAllRenovateBranches: jest.fn(),
-          getCommitMessages: jest.fn(),
-          getFile: jest.fn(),
-          commitFiles: jest.fn(),
-          mergeBranch: jest.fn(),
-          deleteBranch: jest.fn(),
-          getRepoStatus: jest.fn(),
-          getBranchCommit: jest.fn(
-            () => '0d9c7726c3d628b7e28af234595cfd20febdbf8e'
-          ),
-        } as any)
+    gitfs = mocked(await import('../git'));
+    gitfs.branchExists.mockResolvedValue(true);
+    gitfs.isBranchStale.mockResolvedValue(true);
+    gitfs.getBranchCommit.mockResolvedValue(
+      '0d9c7726c3d628b7e28af234595cfd20febdbf8e'
     );
     delete global.gitAuthor;
     hostRules.find.mockReturnValue({
