@@ -256,7 +256,7 @@
     "shelljs": "0.8.4",
     "strip-ansi": "6.0.0",
     "tmp-promise": "2.1.1",
-    "type-fest": "0.15.1",
+    "type-fest": "0.16.0",
     "typescript": "3.9.5"
   },
   "resolutions": {
