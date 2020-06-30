@@ -49,4 +49,5 @@ export function analyzeTerraformProvider(dep: PackageDependency): void {
   if (!isValid(dep.currentValue)) {
     dep.skipReason = SkipReason.UnsupportedVersion;
   }
+  /* eslint-enable no-param-reassign */
 }

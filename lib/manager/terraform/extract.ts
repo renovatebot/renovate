@@ -81,6 +81,7 @@ export function extractPackageFile(content: string): PackageFile | null {
       case TerraformDependencyTypes.module:
         analyseTerraformModule(dep);
         break;
+      /* istanbul ignore next */
       default:
     }
     // eslint-disable-next-line no-param-reassign
