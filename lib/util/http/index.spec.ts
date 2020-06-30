@@ -2,7 +2,7 @@ import nock from 'nock';
 import { getName } from '../../../test/util';
 import { EXTERNAL_HOST_ERROR } from '../../constants/error-messages';
 import * as hostRules from '../host-rules';
-import { Http } from '.';
+import { Http, removeAuthorizationHeaders } from '.';
 
 const baseUrl = 'http://renovate.com';
 
@@ -105,5 +105,85 @@ describe(getName(__filename), () => {
 
     expect(data).toBe('{}');
     expect(nock.isDone()).toBe(true);
+  });
+
+  it('removeAuthorizationHeaders Amazon', async () => {
+    expect(
+      await removeAuthorizationHeaders({
+        auth: 'auth',
+        headers: {
+          authorization: 'auth',
+        },
+        hostname: 'amazon.com',
+        href: 'https://amazon.com',
+        search: 'something X-Amz-Algorithm something',
+      })
+    ).toEqual({
+      headers: {},
+      hostname: 'amazon.com',
+      href: 'https://amazon.com',
+      search: 'something X-Amz-Algorithm something',
+    });
+  });
+
+  it('removeAuthorizationHeaders Amazon ports', async () => {
+    expect(
+      await removeAuthorizationHeaders({
+        auth: 'auth',
+        headers: {
+          authorization: 'auth',
+        },
+        hostname: 'amazon.com',
+        href: 'https://amazon.com',
+        port: 3000,
+        search: 'something X-Amz-Algorithm something',
+      })
+    ).toEqual({
+      headers: {},
+      hostname: 'amazon.com',
+      href: 'https://amazon.com',
+      search: 'something X-Amz-Algorithm something',
+    });
+  });
+
+  it('removeAuthorizationHeaders Azure blob', async () => {
+    expect(
+      await removeAuthorizationHeaders({
+        auth: 'auth',
+        headers: {
+          authorization: 'auth',
+        },
+        hostname: 'store123.blob.core.windows.net',
+        href:
+          'https://<store>.blob.core.windows.net/<some id>//docker/registry/v2/blobs',
+      })
+    ).toEqual({
+      headers: {},
+      hostname: 'store123.blob.core.windows.net',
+      href:
+        'https://<store>.blob.core.windows.net/<some id>//docker/registry/v2/blobs',
+    });
+  });
+
+  it('removeAuthorizationHeaders keep auth', async () => {
+    expect(
+      await removeAuthorizationHeaders({
+        auth: 'auth',
+        headers: {
+          authorization: 'auth',
+        },
+        hostname: 'renovate.com',
+        href: 'https://renovate.com',
+        search: 'something',
+      })
+    ).toEqual({
+      auth: 'auth',
+      headers: {
+        authorization: 'auth',
+      },
+      hostname: 'renovate.com',
+      href: 'https://renovate.com',
+      search: 'something',
+    });
   });
 });
