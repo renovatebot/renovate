@@ -18,9 +18,6 @@ Array [
     "lernaClient": undefined,
     "lernaDir": undefined,
     "lernaPackages": undefined,
-    "managerPackageFileList": Array [
-      "package.json",
-    ],
     "npmLock": undefined,
     "npmrc": undefined,
     "packageFile": "package.json",
