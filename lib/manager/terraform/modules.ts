@@ -6,12 +6,10 @@ import { SkipReason } from '../../types';
 import { isVersion } from '../../versioning/hashicorp';
 import { PackageDependency } from '../common';
 import { extractTerraformProvider } from './providers';
-import {
-  ExtractionResult,
-  TerraformDependencyTypes,
-  gitTagsRefMatchRegex,
-  githubRefMatchRegex,
-} from './util';
+import { ExtractionResult, TerraformDependencyTypes } from './util';
+
+const githubRefMatchRegex = /github.com([/:])(?<project>[^/]+\/[a-z0-9-.]+).*\?ref=(?<tag>.*)$/;
+const gitTagsRefMatchRegex = /(?:git::)?(?<url>(?:http|https|ssh):\/\/(?:.*@)?(?<path>.*.*\/(?<project>.*\/.*)))\?ref=(?<tag>.*)$/;
 
 export function extractTerraformModule(
   startingLine: number,
