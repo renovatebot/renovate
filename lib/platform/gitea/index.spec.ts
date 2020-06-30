@@ -331,7 +331,7 @@ describe('platform/gitea', () => {
   describe('cleanRepo', () => {
     it('does not throw an error with uninitialized repo', async () => {
       await gitea.cleanRepo();
-      expect(gitfs.cleanRepo).not.toHaveBeenCalled();
+      expect(gitfs.cleanRepo).toHaveBeenCalledTimes(1);
     });
 
     it('propagates call to storage class with initialized repo', async () => {

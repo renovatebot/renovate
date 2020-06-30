@@ -44,7 +44,6 @@ type GiteaRenovateConfig = {
 } & RenovateConfig;
 
 interface GiteaRepoConfig {
-  isGitInitialized: boolean;
   repository: string;
   localDir: string;
   defaultBranch: string;
@@ -340,7 +339,6 @@ const platform: Platform = {
       gitAuthorName: global.gitAuthor?.name,
       gitAuthorEmail: global.gitAuthor?.email,
     });
-    config.isGitInitialized = true;
 
     // Reset cached resources
     config.prList = null;
@@ -365,9 +363,7 @@ const platform: Platform = {
   },
 
   cleanRepo(): Promise<void> {
-    if (config.isGitInitialized) {
-      gitfs.cleanRepo();
-    }
+    gitfs.cleanRepo();
     config = {} as any;
     return Promise.resolve();
   },

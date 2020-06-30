@@ -58,7 +58,6 @@ type RepoResponse = {
 };
 const defaultConfigFile = configFileNames[0];
 let config: {
-  isGitInitialized: boolean;
   repository: string;
   localDir: string;
   defaultBranch: string;
@@ -141,9 +140,7 @@ function urlEscape(str: string): string {
 
 export function cleanRepo(): Promise<void> {
   // istanbul ignore if
-  if (config.isGitInitialized) {
-    gitfs.cleanRepo();
-  }
+  gitfs.cleanRepo();
   // In theory most of this isn't necessary. In practice..
   config = {} as any;
   return Promise.resolve();
@@ -251,7 +248,6 @@ export async function initRepo({
       gitAuthorName: global.gitAuthor?.name,
       gitAuthorEmail: global.gitAuthor?.email,
     });
-    config.isGitInitialized = true;
   } catch (err) /* istanbul ignore next */ {
     logger.debug({ err }, 'Caught initRepo error');
     if (err.message.includes('HEAD is not a symbolic ref')) {

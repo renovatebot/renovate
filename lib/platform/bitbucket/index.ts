@@ -874,9 +874,7 @@ export async function mergePr(
 
 export function cleanRepo(): Promise<void> {
   // istanbul ignore if
-  if (gitfs && gitfs.cleanRepo) {
-    gitfs.cleanRepo();
-  }
+  gitfs.cleanRepo();
   config = {} as any;
   return Promise.resolve();
 }

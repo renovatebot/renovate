@@ -146,8 +146,15 @@ export async function getSubmodules(): Promise<string[]> {
     .filter((_e: string, i: number) => i % 2);
 }
 
-// eslint-disable-next-line
-export function cleanRepo(): void {}
+export function isInitialized(): boolean {
+  return !!git;
+}
+
+export function cleanRepo(): void {
+  if (isInitialized()) {
+    // no-op
+  }
+}
 
 export async function initRepo(args: StorageConfig): Promise<void> {
   cleanRepo();

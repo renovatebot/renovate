@@ -29,7 +29,6 @@ export interface LocalRepoConfig {
   pushProtection: boolean;
   prReviewsRequired: boolean;
   repoForceRebase?: boolean;
-  isGitInitialized: boolean;
   parentRepo: string;
   baseCommitSHA: string | null;
   forkMode?: boolean;

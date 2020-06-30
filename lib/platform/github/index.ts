@@ -151,9 +151,7 @@ export async function getRepos(): Promise<string[]> {
 
 export function cleanRepo(): Promise<void> {
   // istanbul ignore if
-  if (config.isGitInitialized) {
-    gitfs.cleanRepo();
-  }
+  gitfs.cleanRepo();
   // In theory most of this isn't necessary. In practice..
   config = {} as any;
   return Promise.resolve();
@@ -438,7 +436,6 @@ export async function initRepo({
     gitAuthorName: global.gitAuthor?.name,
     gitAuthorEmail: global.gitAuthor?.email,
   });
-  config.isGitInitialized = true;
   const repoConfig: RepoConfig = {
     baseBranch: config.baseBranch,
     isFork: res.body.fork === true,
