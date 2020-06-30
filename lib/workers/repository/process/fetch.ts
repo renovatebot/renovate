@@ -33,15 +33,6 @@ async function fetchDepUpdates(
   if (depConfig.ignoreDeps.includes(depName)) {
     logger.debug({ dependency: dep.depName }, 'Dependency is ignored');
     dep.skipReason = SkipReason.Ignored;
-  } else if (
-    depConfig.internalPackages &&
-    depConfig.internalPackages.includes(depName)
-  ) {
-    logger.debug(
-      { dependency: dep.depName },
-      'Dependency is ignored due to being internal'
-    );
-    dep.skipReason = SkipReason.InternalPackage;
   } else if (depConfig.enabled === false) {
     logger.debug({ dependency: dep.depName }, 'Dependency is disabled');
     dep.skipReason = SkipReason.Disabled;
