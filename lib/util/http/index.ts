@@ -4,7 +4,7 @@ import got from 'got';
 import { ExternalHostError } from '../../types/errors/external-host-error';
 import * as memCache from '../cache/memory';
 import { clone } from '../clone';
-import { applyAuthorization } from './auth';
+import { applyAuthorization, removeAuthorization } from './auth';
 import { applyHostRules } from './host-rules';
 
 interface OutgoingHttpHeaders {
@@ -79,24 +79,7 @@ export class Http<GetOptions = HttpOptions, PostOptions = HttpPostOptions> {
       options.retry = 0;
     }
     options.hooks = {
-      beforeRedirect: [
-        (opts: any): void => {
-          // Check if request has been redirected to Amazon
-          if (opts.search?.includes('X-Amz-Algorithm')) {
-            // if there is no port in the redirect URL string, then delete it from the redirect options.
-            // This can be evaluated for removal after upgrading to Got v10
-            const portInUrl = opts.href.split('/')[2].split(':')[1];
-            if (!portInUrl) {
-              // eslint-disable-next-line no-param-reassign
-              delete opts.port; // Redirect will instead use 80 or 443 for HTTP or HTTPS respectively
-            }
-
-            // registry is hosted on amazon, redirect url includes authentication.
-            delete opts.headers.authorization; // eslint-disable-line no-param-reassign
-            delete opts.auth; // eslint-disable-line no-param-reassign
-          }
-        },
-      ],
+      beforeRedirect: [removeAuthorization],
     };
     options.headers = {
       ...options.headers,
