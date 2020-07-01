@@ -4,6 +4,7 @@ import is from '@sindresorhus/is';
 import minimatch from 'minimatch';
 import upath from 'upath';
 import { logger } from '../../../logger';
+import { SkipReason } from '../../../types';
 import { PackageFile } from '../../common';
 
 function matchesAnyPattern(val: string, patterns: string[]): boolean {
@@ -40,15 +41,15 @@ export function detectMonorepos(packageFiles: Partial<PackageFile>[]): void {
       const internalPackageFiles = packageFiles.filter((sp) =>
         matchesAnyPattern(path.dirname(sp.packageFile), internalPackagePatterns)
       );
-      const internalPackages = internalPackageFiles
+      const internalPackageNames = internalPackageFiles
         .map((sp) => sp.packageJsonName)
         .filter(Boolean);
-      // add all names to main package.json
-      p.internalPackages = internalPackages;
+      p.deps?.forEach((dep) => {
+        if (internalPackageNames.includes(dep.depName)) {
+          dep.skipReason = SkipReason.InternalPackage; // eslint-disable-line no-param-reassign
+        }
+      });
       for (const subPackage of internalPackageFiles) {
-        subPackage.internalPackages = internalPackages.filter(
-          (name) => name !== subPackage.packageJsonName
-        );
         subPackage.lernaDir = lernaDir;
         subPackage.lernaClient = lernaClient;
         subPackage.yarnLock = subPackage.yarnLock || yarnLock;
@@ -56,6 +57,11 @@ export function detectMonorepos(packageFiles: Partial<PackageFile>[]): void {
         if (subPackage.yarnLock) {
           subPackage.hasYarnWorkspaces = !!yarnWorkspacesPackages;
         }
+        subPackage.deps?.forEach((dep) => {
+          if (internalPackageNames.includes(dep.depName)) {
+            dep.skipReason = SkipReason.InternalPackage; // eslint-disable-line no-param-reassign
+          }
+        });
       }
     }
   }

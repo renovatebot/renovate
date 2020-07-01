@@ -1,5 +1,4 @@
 import { Pr } from '../common';
-import GitStorage from '../git/storage';
 
 // https://developer.github.com/v3/repos/statuses
 // https://developer.github.com/v3/checks/runs/
@@ -30,7 +29,6 @@ export interface LocalRepoConfig {
   pushProtection: boolean;
   prReviewsRequired: boolean;
   repoForceRebase?: boolean;
-  storage: GitStorage;
   parentRepo: string;
   baseCommitSHA: string | null;
   forkMode?: boolean;

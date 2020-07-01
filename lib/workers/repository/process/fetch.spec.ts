@@ -39,11 +39,9 @@ describe('workers/repository/process/fetch', () => {
             packageFile: 'package.json',
             deps: [
               { depName: 'abcd' },
-              { depName: 'zzzz' },
               { depName: 'foo' },
               { depName: 'skipped', skipReason: 'some-reason' as never },
             ],
-            internalPackages: ['zzzz'],
           },
         ],
       };
@@ -51,12 +49,8 @@ describe('workers/repository/process/fetch', () => {
       expect(packageFiles).toMatchSnapshot();
       expect(packageFiles.npm[0].deps[0].skipReason).toEqual('ignored');
       expect(packageFiles.npm[0].deps[0].updates).toHaveLength(0);
-      expect(packageFiles.npm[0].deps[1].skipReason).toEqual(
-        'internal-package'
-      );
+      expect(packageFiles.npm[0].deps[1].skipReason).toEqual('disabled');
       expect(packageFiles.npm[0].deps[1].updates).toHaveLength(0);
-      expect(packageFiles.npm[0].deps[2].skipReason).toEqual('disabled');
-      expect(packageFiles.npm[0].deps[2].updates).toHaveLength(0);
     });
     it('fetches updates', async () => {
       config.rangeStrategy = 'auto';

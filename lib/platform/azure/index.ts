@@ -13,6 +13,7 @@ import {
 } from '../../constants/pull-requests';
 import { logger } from '../../logger';
 import { BranchStatus } from '../../types';
+import * as gitfs from '../../util/gitfs';
 import * as hostRules from '../../util/host-rules';
 import { sanitize } from '../../util/sanitize';
 import { ensureTrailingSlash } from '../../util/url';
@@ -31,14 +32,12 @@ import {
   RepoParams,
   VulnerabilityAlert,
 } from '../common';
-import GitStorage, { StatusResult } from '../git/storage';
 import { smartTruncate } from '../utils/pr-body';
 import * as azureApi from './azure-got-wrapper';
 import * as azureHelper from './azure-helper';
 import { AzurePr } from './types';
 
 interface Config {
-  storage: GitStorage;
   repoForceRebase: boolean;
   mergeMethod: GitPullRequestMergeStrategy;
   baseCommitSHA: string | undefined;
@@ -139,6 +138,7 @@ export async function initRepo({
     interface RenovateConfig {
       enabled: boolean;
     }
+
     let renovateConfig: RenovateConfig;
     try {
       const json = await azureHelper.getFile(
@@ -155,7 +155,6 @@ export async function initRepo({
     }
   }
 
-  config.storage = new GitStorage();
   const [projectName, repoName] = repository.split('/');
   const opts = hostRules.find({
     hostType: defaults.hostType,
@@ -164,7 +163,7 @@ export async function initRepo({
   const url =
     defaults.endpoint +
     `${encodeURIComponent(projectName)}/_git/${encodeURIComponent(repoName)}`;
-  await config.storage.initRepo({
+  await gitfs.initRepo({
     ...config,
     localDir,
     url,
@@ -186,7 +185,7 @@ export function getRepoForceRebase(): Promise<boolean> {
 // Search
 
 export /* istanbul ignore next */ function getFileList(): Promise<string[]> {
-  return config.storage.getFileList();
+  return gitfs.getFileList();
 }
 
 export /* istanbul ignore next */ async function setBaseBranch(
@@ -195,14 +194,14 @@ export /* istanbul ignore next */ async function setBaseBranch(
   logger.debug(`Setting baseBranch to ${branchName}`);
   config.baseBranch = branchName;
   delete config.baseCommitSHA;
-  const baseBranchSha = await config.storage.setBaseBranch(branchName);
+  const baseBranchSha = await gitfs.setBaseBranch(branchName);
   return baseBranchSha;
 }
 
 export /* istanbul ignore next */ function setBranchPrefix(
   branchPrefix: string
 ): Promise<void> {
-  return config.storage.setBranchPrefix(branchPrefix);
+  return gitfs.setBranchPrefix(branchPrefix);
 }
 
 // Branch
@@ -210,26 +209,26 @@ export /* istanbul ignore next */ function setBranchPrefix(
 export /* istanbul ignore next */ function branchExists(
   branchName: string
 ): Promise<boolean> {
-  return config.storage.branchExists(branchName);
+  return gitfs.branchExists(branchName);
 }
 
 export /* istanbul ignore next */ function getAllRenovateBranches(
   branchPrefix: string
 ): Promise<string[]> {
-  return config.storage.getAllRenovateBranches(branchPrefix);
+  return gitfs.getAllRenovateBranches(branchPrefix);
 }
 
 export /* istanbul ignore next */ function isBranchStale(
   branchName: string
 ): Promise<boolean> {
-  return config.storage.isBranchStale(branchName);
+  return gitfs.isBranchStale(branchName);
 }
 
 export /* istanbul ignore next */ function getFile(
   filePath: string,
   branchName: string
 ): Promise<string> {
-  return config.storage.getFile(filePath, branchName);
+  return gitfs.getFile(filePath, branchName);
 }
 
 // istanbul ignore next
@@ -273,7 +272,7 @@ export async function getPrList(): Promise<AzurePr[]> {
 
 /* istanbul ignore next */
 export async function getPrFiles(pr: Pr): Promise<string[]> {
-  return config.storage.getBranchFiles(pr.branchName, pr.targetBranch);
+  return gitfs.getBranchFiles(pr.branchName, pr.targetBranch);
 }
 
 export async function getPr(pullRequestId: number): Promise<Pr | null> {
@@ -309,6 +308,7 @@ export async function getPr(pullRequestId: number): Promise<Pr | null> {
 
   return azurePr;
 }
+
 export async function findPr({
   branchName,
   prTitle,
@@ -361,7 +361,7 @@ export /* istanbul ignore next */ async function deleteBranch(
   branchName: string,
   abandonAssociatedPr = false
 ): Promise<void> {
-  await config.storage.deleteBranch(branchName);
+  await gitfs.deleteBranch(branchName);
   if (abandonAssociatedPr) {
     const pr = await getBranchPr(branchName);
     await abandonPr(pr.number);
@@ -371,19 +371,19 @@ export /* istanbul ignore next */ async function deleteBranch(
 export /* istanbul ignore next */ function getBranchLastCommitTime(
   branchName: string
 ): Promise<Date> {
-  return config.storage.getBranchLastCommitTime(branchName);
+  return gitfs.getBranchLastCommitTime(branchName);
 }
 
 export /* istanbul ignore next */ function getRepoStatus(): Promise<
-  StatusResult
+  gitfs.StatusResult
 > {
-  return config.storage.getRepoStatus();
+  return gitfs.getRepoStatus();
 }
 
 export /* istanbul ignore next */ function mergeBranch(
   branchName: string
 ): Promise<void> {
-  return config.storage.mergeBranch(branchName);
+  return gitfs.mergeBranch(branchName);
 }
 
 export /* istanbul ignore next */ function commitFiles({
@@ -391,7 +391,7 @@ export /* istanbul ignore next */ function commitFiles({
   files,
   message,
 }: CommitFilesConfig): Promise<string | null> {
-  return config.storage.commitFiles({
+  return gitfs.commitFiles({
     branchName,
     files,
     message,
@@ -401,7 +401,7 @@ export /* istanbul ignore next */ function commitFiles({
 export /* istanbul ignore next */ function getCommitMessages(): Promise<
   string[]
 > {
-  return config.storage.getCommitMessages();
+  return gitfs.getCommitMessages();
 }
 
 export async function getBranchStatusCheck(
@@ -769,10 +769,7 @@ export function getVulnerabilityAlerts(): Promise<VulnerabilityAlert[]> {
 }
 
 export function cleanRepo(): Promise<void> {
-  // istanbul ignore if
-  if (config.storage && config.storage.cleanRepo) {
-    config.storage.cleanRepo();
-  }
+  gitfs.cleanRepo();
   config = {} as any;
   return Promise.resolve();
 }
