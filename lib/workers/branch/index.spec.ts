@@ -11,8 +11,8 @@ import {
 } from '../../constants/pull-requests';
 import * as _npmPostExtract from '../../manager/npm/post-update';
 import { File } from '../../platform';
-import { StatusResult } from '../../platform/git';
 import * as _exec from '../../util/exec';
+import { StatusResult } from '../../util/gitfs';
 import { BranchConfig, PrResult } from '../common';
 import * as _prWorker from '../pr';
 import * as _automerge from './automerge';
