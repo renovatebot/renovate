@@ -107,9 +107,7 @@ export async function getRepos(): Promise<string[]> {
 
 export function cleanRepo(): Promise<void> {
   logger.debug(`cleanRepo()`);
-  if (gitfs) {
-    gitfs.cleanRepo();
-  }
+  gitfs.cleanRepo();
   config = {} as any;
   return Promise.resolve();
 }
