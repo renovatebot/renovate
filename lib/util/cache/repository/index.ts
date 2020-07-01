@@ -11,6 +11,7 @@ export interface BaseBranchCache {
 }
 
 export interface Cache {
+  repository?: string;
   init?: {
     configFile: string;
     contents: RenovateConfig;
@@ -31,21 +32,29 @@ export function getCacheFileName(config: RenovateConfig): string {
   );
 }
 
+function validate(config: RenovateConfig, input: any): Cache | null {
+  if (input?.repository === config.repository) {
+    return input as Cache;
+  }
+  // reset
+  return null;
+}
+
 export async function initialize(config: RenovateConfig): Promise<void> {
+  cache = null;
   try {
     cacheFileName = getCacheFileName(config);
     repositoryCache = config.repositoryCache;
-    if (repositoryCache !== 'enabled') {
-      logger.debug('Skipping repository cache');
-      cache = {};
-      return;
+    if (repositoryCache === 'enabled') {
+      cache = validate(
+        config,
+        JSON.parse(await fs.readFile(cacheFileName, 'utf8'))
+      );
     }
-    cache = JSON.parse(await fs.readFile(cacheFileName, 'utf8'));
-    logger.debug({ cacheFileName }, 'Read repository cache');
   } catch (err) {
     logger.debug({ cacheFileName }, 'No repository cache found');
-    cache = {};
   }
+  cache = cache || { repository: config.repository };
 }
 
 export function getCache(): Cache {
