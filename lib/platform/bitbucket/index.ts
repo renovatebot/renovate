@@ -873,7 +873,6 @@ export async function mergePr(
 // Pull Request
 
 export function cleanRepo(): Promise<void> {
-  // istanbul ignore if
   gitfs.cleanRepo();
   config = {} as any;
   return Promise.resolve();

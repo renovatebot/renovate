@@ -139,7 +139,6 @@ function urlEscape(str: string): string {
 }
 
 export function cleanRepo(): Promise<void> {
-  // istanbul ignore if
   gitfs.cleanRepo();
   // In theory most of this isn't necessary. In practice..
   config = {} as any;
