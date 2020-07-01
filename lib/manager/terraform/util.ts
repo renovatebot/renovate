@@ -46,8 +46,8 @@ export function checkFileContainsDependency(
   });
 }
 
+const pathStringRegex = /(.|..)?(\/[^/])+/;
 export function checkIfStringIsPath(path: string): boolean {
-  const regex = /(.|..)?(\/[^/])+/;
-  const match = regex.exec(path);
+  const match = pathStringRegex.exec(path);
   return !!match;
 }
