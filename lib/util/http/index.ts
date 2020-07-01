@@ -65,9 +65,9 @@ function isAmazon(opts: any): boolean {
 // isAzureBlob return true if request options contains Azure container registry related data
 function isAzureBlob(opts: any): boolean {
   return (
-    opts.hostname?.endsWith('blob.core.windows.net') && // lgtm [js/incomplete-url-substring-sanitization]
+    opts.hostname?.endsWith('blob.core.windows.net') &&
     opts.href?.includes('/docker/registry')
-  );
+  ); // lgtm [js/incomplete-url-substring-sanitization]
 }
 
 // removeAuthorizationHeaders from the redirect options
