@@ -1,6 +1,6 @@
 import * as datasourceHelm from '../../datasource/helm';
 import { SkipReason } from '../../types';
-import { isValid } from '../../versioning/cargo';
+import { isValid } from '../../versioning/hashicorp';
 import { PackageDependency } from '../common';
 import {
   ExtractionResult,
