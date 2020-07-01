@@ -211,6 +211,26 @@ Array [
           "https://jitpack.io",
         ],
       },
+      Object {
+        "currentValue": "1.2.3",
+        "depGroup": "foo",
+        "depName": "foo:foo",
+        "name": "foo",
+        "registryUrls": Array [
+          "https://repo.maven.apache.org/maven2/",
+          "https://jitpack.io",
+        ],
+      },
+      Object {
+        "currentValue": "3.4.5",
+        "depGroup": "bar",
+        "depName": "bar:bar",
+        "name": "bar",
+        "registryUrls": Array [
+          "https://repo.maven.apache.org/maven2/",
+          "https://jitpack.io",
+        ],
+      },
     ],
     "packageFile": "build.gradle",
   },
@@ -264,6 +284,26 @@ Array [
         "depGroup": "com.typesafe.scala-logging",
         "depName": "com.typesafe.scala-logging:scala-logging",
         "name": "scala-logging_%%",
+        "registryUrls": Array [
+          "https://repo.maven.apache.org/maven2/",
+          "https://jitpack.io",
+        ],
+      },
+      Object {
+        "currentValue": "1.2.3",
+        "depGroup": "foo",
+        "depName": "foo:foo",
+        "name": "foo",
+        "registryUrls": Array [
+          "https://repo.maven.apache.org/maven2/",
+          "https://jitpack.io",
+        ],
+      },
+      Object {
+        "currentValue": "3.4.5",
+        "depGroup": "bar",
+        "depName": "bar:bar",
+        "name": "bar",
         "registryUrls": Array [
           "https://repo.maven.apache.org/maven2/",
           "https://jitpack.io",
@@ -354,6 +394,26 @@ Array [
           "https://jitpack.io",
         ],
       },
+      Object {
+        "currentValue": "1.2.3",
+        "depGroup": "foo",
+        "depName": "foo:foo",
+        "name": "foo",
+        "registryUrls": Array [
+          "https://repo.maven.apache.org/maven2/",
+          "https://jitpack.io",
+        ],
+      },
+      Object {
+        "currentValue": "3.4.5",
+        "depGroup": "bar",
+        "depName": "bar:bar",
+        "name": "bar",
+        "registryUrls": Array [
+          "https://repo.maven.apache.org/maven2/",
+          "https://jitpack.io",
+        ],
+      },
     ],
     "packageFile": "foo/build.gradle",
   },
@@ -439,6 +499,26 @@ Array [
           "https://jitpack.io",
         ],
       },
+      Object {
+        "currentValue": "1.2.3",
+        "depGroup": "foo",
+        "depName": "foo:foo",
+        "name": "foo",
+        "registryUrls": Array [
+          "https://repo.maven.apache.org/maven2/",
+          "https://jitpack.io",
+        ],
+      },
+      Object {
+        "currentValue": "3.4.5",
+        "depGroup": "bar",
+        "depName": "bar:bar",
+        "name": "bar",
+        "registryUrls": Array [
+          "https://repo.maven.apache.org/maven2/",
+          "https://jitpack.io",
+        ],
+      },
     ],
     "packageFile": "build.gradle.kts",
   },
@@ -492,6 +572,26 @@ Array [
         "depGroup": "com.typesafe.scala-logging",
         "depName": "com.typesafe.scala-logging:scala-logging",
         "name": "scala-logging_%%",
+        "registryUrls": Array [
+          "https://repo.maven.apache.org/maven2/",
+          "https://jitpack.io",
+        ],
+      },
+      Object {
+        "currentValue": "1.2.3",
+        "depGroup": "foo",
+        "depName": "foo:foo",
+        "name": "foo",
+        "registryUrls": Array [
+          "https://repo.maven.apache.org/maven2/",
+          "https://jitpack.io",
+        ],
+      },
+      Object {
+        "currentValue": "3.4.5",
+        "depGroup": "bar",
+        "depName": "bar:bar",
+        "name": "bar",
         "registryUrls": Array [
           "https://repo.maven.apache.org/maven2/",
           "https://jitpack.io",

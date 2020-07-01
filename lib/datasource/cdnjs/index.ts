@@ -1,19 +1,19 @@
-import { logger } from '../../logger';
+import { ExternalHostError } from '../../types/errors/external-host-error';
 import { Http } from '../../util/http';
 import { CachePromise, cacheAble } from '../cache';
-import { DatasourceError, GetReleasesConfig, ReleaseResult } from '../common';
+import { GetReleasesConfig, ReleaseResult } from '../common';
 
 export const id = 'cdnjs';
 
 const http = new Http(id);
 
-export interface CdnjsAsset {
+interface CdnjsAsset {
   version: string;
   files: string[];
   sri?: Record<string, string>;
 }
 
-export interface CdnjsResponse {
+interface CdnjsResponse {
   homepage?: string;
   repository?: {
     type: 'git' | unknown;
@@ -30,6 +30,7 @@ async function downloadLibrary(library: string): CachePromise<CdnjsResponse> {
 export async function getReleases({
   lookupName,
 }: GetReleasesConfig): Promise<ReleaseResult | null> {
+  // Each library contains multiple assets, so we cache at the library level instead of per-asset
   const library = lookupName.split('/')[0];
   try {
     const { assets, homepage, repository } = await cacheAble({
@@ -55,11 +56,9 @@ export async function getReleases({
     }
     return result;
   } catch (err) {
-    if (err.statusCode === 404) {
-      logger.debug({ library, err }, 'Package lookup error');
-      return null;
+    if (err.statusCode !== 404) {
+      throw new ExternalHostError(err);
     }
-    // Throw a DatasourceError for all other types of errors
-    throw new DatasourceError(err);
+    throw err;
   }
 }

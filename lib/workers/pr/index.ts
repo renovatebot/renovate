@@ -1,8 +1,5 @@
-import sampleSize from 'lodash/sampleSize';
-import uniq from 'lodash/uniq';
 import { RenovateConfig } from '../../config/common';
 import {
-  PLATFORM_FAILURE,
   PLATFORM_INTEGRATION_UNAUTHORIZED,
   PLATFORM_RATE_LIMIT_EXCEEDED,
   REPOSITORY_CHANGED,
@@ -10,6 +7,8 @@ import {
 import { logger } from '../../logger';
 import { PlatformPrOptions, Pr, platform } from '../../platform';
 import { BranchStatus } from '../../types';
+import { ExternalHostError } from '../../types/errors/external-host-error';
+import { sampleSize } from '../../util';
 import { BranchConfig, PrResult } from '../common';
 import { getPrBody } from './body';
 import { ChangeLogError } from './changelog';
@@ -27,7 +26,7 @@ async function addCodeOwners(
   assigneesOrReviewers: string[],
   pr: Pr
 ): Promise<string[]> {
-  return uniq(assigneesOrReviewers.concat(await codeOwnersForPr(pr)));
+  return [...new Set(assigneesOrReviewers.concat(await codeOwnersForPr(pr)))];
 }
 
 export async function addAssigneesReviewers(
@@ -69,7 +68,7 @@ export async function addAssigneesReviewers(
         const additionalReviewers = config.additionalReviewers.map(
           noLeadingAtSymbol
         );
-        reviewers = uniq(reviewers.concat(additionalReviewers));
+        reviewers = [...new Set(reviewers.concat(additionalReviewers))];
       }
       if (config.reviewersSampleSize !== null) {
         reviewers = sampleSize(reviewers, config.reviewersSampleSize);
@@ -153,7 +152,7 @@ export async function ensurePr(
       logger.debug(`Branch tests failed, so will create PR`);
     } else {
       // Branch should be automerged, so we don't want to create a PR
-      return { prResult: PrResult.BlockeddByBranchAutomerge };
+      return { prResult: PrResult.BlockedByBranchAutomerge };
     }
   }
   if (config.prCreation === 'status-success') {
@@ -427,9 +426,9 @@ export async function ensurePr(
   } catch (err) {
     // istanbul ignore if
     if (
+      err instanceof ExternalHostError ||
       err.message === REPOSITORY_CHANGED ||
       err.message === PLATFORM_RATE_LIMIT_EXCEEDED ||
-      err.message === PLATFORM_FAILURE ||
       err.message === PLATFORM_INTEGRATION_UNAUTHORIZED
     ) {
       logger.debug('Passing error up');

@@ -1,7 +1,7 @@
 import url from 'url';
 import { logger } from '../../logger';
+import { ExternalHostError } from '../../types/errors/external-host-error';
 import { Http } from '../../util/http';
-import { DatasourceError } from '../common';
 
 import { MAVEN_REPO, id } from './common';
 
@@ -65,19 +65,19 @@ export async function downloadHttpProtocol(
   } catch (err) {
     const failedUrl = pkgUrl.toString();
     if (isNotFoundError(err)) {
-      logger.debug({ failedUrl }, `Url not found`);
+      logger.trace({ failedUrl }, `Url not found`);
     } else if (isHostError(err)) {
       // istanbul ignore next
-      logger.warn({ failedUrl }, `Cannot connect to ${hostType} host`);
+      logger.debug({ failedUrl }, `Cannot connect to ${hostType} host`);
     } else if (isPermissionsIssue(err)) {
-      logger.warn(
+      logger.debug(
         { failedUrl },
         'Dependency lookup unauthorized. Please add authentication with a hostRule'
       );
     } else if (isTemporalError(err)) {
       logger.debug({ failedUrl, err }, 'Temporary error');
       if (isMavenCentral(pkgUrl)) {
-        throw new DatasourceError(err);
+        throw new ExternalHostError(err);
       }
     } else if (isConnectionError(err)) {
       // istanbul ignore next

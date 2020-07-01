@@ -43,7 +43,8 @@ export interface BranchUpgradeConfig
   packageFile?: string;
 
   reuseExistingBranch?: boolean;
-  prBanner?: string;
+  prHeader?: string;
+  prFooter?: string;
   prBodyNotes?: string[];
   prBodyTemplate?: string;
   prPriority?: number;
@@ -64,7 +65,7 @@ export enum PrResult {
   AwaitingApproval = 'AwaitingApproval',
   AwaitingGreenBranch = 'AwaitingGreenBranch',
   AwaitingNotPending = 'AwaitingNotPending',
-  BlockeddByBranchAutomerge = 'BlockeddByBranchAutomerge',
+  BlockedByBranchAutomerge = 'BlockedByBranchAutomerge',
   Created = 'Created',
   Error = 'Error',
   ErrorAlreadyExists = 'ErrorAlreadyExists',

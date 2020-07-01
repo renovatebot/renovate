@@ -18,6 +18,7 @@ import { PLATFORM_TYPE_GITLAB } from '../../constants/platforms';
 import { PR_STATE_ALL, PR_STATE_OPEN } from '../../constants/pull-requests';
 import { logger } from '../../logger';
 import { BranchStatus } from '../../types';
+import * as gitfs from '../../util/gitfs';
 import * as hostRules from '../../util/host-rules';
 import { HttpResponse } from '../../util/http';
 import { GitlabHttp, setBaseUrl } from '../../util/http/gitlab';
@@ -38,15 +39,25 @@ import {
   RepoParams,
   VulnerabilityAlert,
 } from '../common';
-import GitStorage, { StatusResult } from '../git/storage';
 import { smartTruncate } from '../utils/pr-body';
 
 const gitlabApi = new GitlabHttp();
 
 type MergeMethod = 'merge' | 'rebase_merge' | 'ff';
+type RepoResponse = {
+  archived: boolean;
+  mirror: boolean;
+  default_branch: string;
+  empty_repo: boolean;
+  http_url_to_repo: string;
+  forked_from_project: boolean;
+  repository_access_level: 'disabled' | 'private' | 'enabled';
+  merge_requests_access_level: 'disabled' | 'private' | 'enabled';
+  merge_method: MergeMethod;
+  path_with_namespace: string;
+};
 const defaultConfigFile = configFileNames[0];
 let config: {
-  storage: GitStorage;
   repository: string;
   localDir: string;
   defaultBranch: string;
@@ -110,12 +121,13 @@ export async function getRepos(): Promise<string[]> {
   logger.debug('Autodiscovering GitLab repositories');
   try {
     const url = `projects?membership=true&per_page=100&with_merge_requests_enabled=true&min_access_level=30`;
-    const res = await gitlabApi.getJson<{ path_with_namespace: string }[]>(
-      url,
-      { paginate: true }
-    );
+    const res = await gitlabApi.getJson<RepoResponse[]>(url, {
+      paginate: true,
+    });
     logger.debug(`Discovered ${res.body.length} project(s)`);
-    return res.body.map((repo) => repo.path_with_namespace);
+    return res.body
+      .filter((repo) => !repo.mirror && !repo.archived)
+      .map((repo) => repo.path_with_namespace);
   } catch (err) {
     logger.error({ err }, `GitLab getRepos error`);
     throw err;
@@ -127,10 +139,7 @@ function urlEscape(str: string): string {
 }
 
 export function cleanRepo(): Promise<void> {
-  // istanbul ignore if
-  if (config.storage) {
-    config.storage.cleanRepo();
-  }
+  gitfs.cleanRepo();
   // In theory most of this isn't necessary. In practice..
   config = {} as any;
   return Promise.resolve();
@@ -146,17 +155,6 @@ export async function initRepo({
   config.repository = urlEscape(repository);
   config.localDir = localDir;
 
-  type RepoResponse = {
-    archived: boolean;
-    mirror: boolean;
-    default_branch: string;
-    empty_repo: boolean;
-    http_url_to_repo: string;
-    forked_from_project: boolean;
-    repository_access_level: 'disabled' | 'private' | 'enabled';
-    merge_requests_access_level: 'disabled' | 'private' | 'enabled';
-    merge_method: MergeMethod;
-  };
   let res: HttpResponse<RepoResponse>;
   try {
     res = await gitlabApi.getJson<RepoResponse>(
@@ -231,7 +229,7 @@ export async function initRepo({
     ) {
       logger.debug('no http_url_to_repo found. Falling back to old behaviour.');
       const { host, protocol } = URL.parse(defaults.endpoint);
-      url = GitStorage.getUrl({
+      url = gitfs.getUrl({
         protocol: protocol.slice(0, -1) as any,
         auth: 'oauth2:' + opts.token,
         host,
@@ -243,10 +241,11 @@ export async function initRepo({
       repoUrl.auth = 'oauth2:' + opts.token;
       url = URL.format(repoUrl);
     }
-    config.storage = new GitStorage();
-    await config.storage.initRepo({
+    await gitfs.initRepo({
       ...config,
       url,
+      gitAuthorName: global.gitAuthor?.name,
+      gitAuthorEmail: global.gitAuthor?.email,
     });
   } catch (err) /* istanbul ignore next */ {
     logger.debug({ err }, 'Caught initRepo error');
@@ -284,26 +283,26 @@ export async function setBaseBranch(
 ): Promise<string> {
   logger.debug(`Setting baseBranch to ${branchName}`);
   config.baseBranch = branchName;
-  const baseBranchSha = await config.storage.setBaseBranch(branchName);
+  const baseBranchSha = await gitfs.setBaseBranch(branchName);
   return baseBranchSha;
 }
 
 export /* istanbul ignore next */ function setBranchPrefix(
   branchPrefix: string
 ): Promise<void> {
-  return config.storage.setBranchPrefix(branchPrefix);
+  return gitfs.setBranchPrefix(branchPrefix);
 }
 
 // Search
 
 // Get full file list
 export function getFileList(): Promise<string[]> {
-  return config.storage.getFileList();
+  return gitfs.getFileList();
 }
 
 // Returns true if branch exists, otherwise false
 export function branchExists(branchName: string): Promise<boolean> {
-  return config.storage.branchExists(branchName);
+  return gitfs.branchExists(branchName);
 }
 
 type BranchState = 'pending' | 'running' | 'success' | 'failed' | 'canceled';
@@ -318,7 +317,7 @@ async function getStatus(
   branchName: string,
   useCache = true
 ): Promise<GitlabBranchStatus[]> {
-  const branchSha = await config.storage.getBranchCommit(branchName);
+  const branchSha = await gitfs.getBranchCommit(branchName);
   const url = `projects/${config.repository}/repository/commits/${branchSha}/statuses`;
 
   return (
@@ -625,25 +624,25 @@ export async function getBranchPr(branchName: string): Promise<Pr> {
 export function getAllRenovateBranches(
   branchPrefix: string
 ): Promise<string[]> {
-  return config.storage.getAllRenovateBranches(branchPrefix);
+  return gitfs.getAllRenovateBranches(branchPrefix);
 }
 
 export function isBranchStale(branchName: string): Promise<boolean> {
-  return config.storage.isBranchStale(branchName);
+  return gitfs.isBranchStale(branchName);
 }
 
 // istanbul ignore next
 export function commitFiles(
   commitFilesConfig: CommitFilesConfig
 ): Promise<string | null> {
-  return config.storage.commitFiles(commitFilesConfig);
+  return gitfs.commitFiles(commitFilesConfig);
 }
 
 export function getFile(
   filePath: string,
   branchName?: string
 ): Promise<string> {
-  return config.storage.getFile(filePath, branchName);
+  return gitfs.getFile(filePath, branchName);
 }
 
 export async function deleteBranch(
@@ -658,20 +657,20 @@ export async function deleteBranch(
       await closePr(pr.number);
     }
   }
-  return config.storage.deleteBranch(branchName);
+  return gitfs.deleteBranch(branchName);
 }
 
 export function mergeBranch(branchName: string): Promise<void> {
-  return config.storage.mergeBranch(branchName);
+  return gitfs.mergeBranch(branchName);
 }
 
 export function getBranchLastCommitTime(branchName: string): Promise<Date> {
-  return config.storage.getBranchLastCommitTime(branchName);
+  return gitfs.getBranchLastCommitTime(branchName);
 }
 
 // istanbul ignore next
-export function getRepoStatus(): Promise<StatusResult> {
-  return config.storage.getRepoStatus();
+export function getRepoStatus(): Promise<gitfs.StatusResult> {
+  return gitfs.getRepoStatus();
 }
 
 export async function getBranchStatusCheck(
@@ -697,7 +696,7 @@ export async function setBranchStatus({
   url: targetUrl,
 }: BranchStatusConfig): Promise<void> {
   // First, get the branch commit SHA
-  const branchSha = await config.storage.getBranchCommit(branchName);
+  const branchSha = await gitfs.getBranchCommit(branchName);
   // Now, check the statuses for that commit
   const url = `projects/${config.repository}/statuses/${branchSha}`;
   let state = 'success';
@@ -740,10 +739,16 @@ export async function setBranchStatus({
 
 export async function getIssueList(): Promise<any[]> {
   if (!config.issueList) {
+    const query = new URLSearchParams({
+      per_page: '100',
+      author_id: `${authorId}`,
+      state: 'opened',
+    }).toString();
     const res = await gitlabApi.getJson<{ iid: number; title: string }[]>(
-      `projects/${config.repository}/issues?state=opened`,
+      `projects/${config.repository}/issues?${query}`,
       {
         useCache: false,
+        paginate: true,
       }
     );
     // istanbul ignore if
@@ -1075,7 +1080,7 @@ export async function getPrList(): Promise<Pr[]> {
 
 /* istanbul ignore next */
 export async function getPrFiles(pr: Pr): Promise<string[]> {
-  return config.storage.getBranchFiles(pr.branchName, pr.targetBranch);
+  return gitfs.getBranchFiles(pr.branchName, pr.targetBranch);
 }
 
 function matchesState(state: string, desiredState: string): boolean {
@@ -1104,7 +1109,7 @@ export async function findPr({
 }
 
 export function getCommitMessages(): Promise<string[]> {
-  return config.storage.getCommitMessages();
+  return gitfs.getCommitMessages();
 }
 
 export function getVulnerabilityAlerts(): Promise<VulnerabilityAlert[]> {

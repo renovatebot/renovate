@@ -1,7 +1,7 @@
 import * as datasourceRubygems from '../../datasource/rubygems';
 import { logger } from '../../logger';
 import { SkipReason } from '../../types';
-import { readLocalFile } from '../../util/fs';
+import { readLocalFile } from '../../util/gitfs';
 import { regEx } from '../../util/regex';
 import { PackageDependency, PackageFile } from '../common';
 import { extractLockFileEntries } from './locked-version';
@@ -116,7 +116,7 @@ export async function extractPackageFile(
           sourceLine = lines[lineNumber];
           // istanbul ignore if
           if (sourceLine === null || sourceLine === undefined) {
-            logger.error({ content, fileName }, 'Undefined sourceLine');
+            logger.info({ content, fileName }, 'Undefined sourceLine');
             sourceLine = 'end';
           }
           if (sourceLine !== 'end') {

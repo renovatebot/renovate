@@ -1,13 +1,9 @@
 import { readFileSync } from 'fs';
 import { resolve } from 'path';
-import { fromStream as _fromStream } from 'hasha';
+import { Readable } from 'stream';
+import * as httpMock from '../../../test/httpMock';
 import { UpdateType } from '../../config';
 import { updateDependency } from './update';
-
-jest.mock('hasha');
-jest.mock('../../util/got');
-
-const fromStream: jest.Mock<Promise<string>> = _fromStream as any;
 
 const content = readFileSync(
   resolve('lib/manager/bazel/__fixtures__/WORKSPACE1'),
@@ -36,7 +32,13 @@ describe('manager/bazel/update', () => {
   describe('updateDependency', () => {
     beforeEach(() => {
       jest.resetAllMocks();
+      httpMock.setup();
     });
+
+    afterEach(() => {
+      httpMock.reset();
+    });
+
     it('updates tag', async () => {
       const upgrade = {
         depName: 'build_bazel_rules_nodejs',
@@ -122,12 +124,18 @@ describe('manager/bazel/update', () => {
         },
         newDigest: '033387ac8853e6cc1cd47df6c346bc53cbc490d8',
       };
-      fromStream.mockResolvedValueOnce('abc123');
+      httpMock
+        .scope('https://github.com')
+        .get(
+          '/GoogleContainerTools/distroless/archive/033387ac8853e6cc1cd47df6c346bc53cbc490d8.tar.gz'
+        )
+        .reply(200, Readable.from(['foo']));
       const res = await updateDependency({
         fileContent: content,
         upgrade,
       });
       expect(res).not.toEqual(content);
+      expect(httpMock.getTrace()).toMatchSnapshot();
     });
     it('updates http archive with content other then WORKSPACE', async () => {
       const upgrade = {
@@ -145,13 +153,17 @@ describe('manager/bazel/update', () => {
         currentValue: '0.6.0',
         newValue: '0.8.0',
       };
-      fromStream.mockResolvedValueOnce('abc123');
+      httpMock
+        .scope('https://github.com')
+        .get('/bazelbuild/bazel-skylib/archive/0.8.0.tar.gz')
+        .reply(200, Readable.from(['foo']));
       const res = await updateDependency({
         fileContent: content,
         upgrade,
       });
       expect(res).not.toEqual(fileWithBzlExtension);
       expect(res.indexOf('0.8.0')).not.toBe(-1);
+      expect(httpMock.getTrace()).toMatchSnapshot();
     });
     it('updates finds url instead of urls', async () => {
       const upgrade = {
@@ -169,13 +181,17 @@ describe('manager/bazel/update', () => {
         currentValue: '0.6.0',
         newValue: '0.8.0',
       };
-      fromStream.mockResolvedValueOnce('abc123');
+      httpMock
+        .scope('https://github.com')
+        .get('/bazelbuild/bazel-skylib/archive/0.8.0.tar.gz')
+        .reply(200, Readable.from(['foo']));
       const res = await updateDependency({
         fileContent: content,
         upgrade,
       });
       expect(res).not.toEqual(fileWithBzlExtension);
       expect(res.indexOf('0.8.0')).not.toBe(-1);
+      expect(httpMock.getTrace()).toMatchSnapshot();
     });
     it('returns null if no urls resolve hashes', async () => {
       const upgrade = {
@@ -217,7 +233,6 @@ http_archive(
         currentValue: '0.5.0',
         newValue: '0.6.2',
       };
-      fromStream.mockResolvedValueOnce('abc123');
       const res = await updateDependency({
         fileContent: content,
         upgrade,
@@ -246,7 +261,14 @@ http_archive(
         currentValue: '0.5.0',
         newValue: '0.6.2',
       };
-      fromStream.mockResolvedValueOnce('abc123');
+      httpMock
+        .scope('https://github.com')
+        .get('/bazelbuild/bazel-skylib/archive/0.6.2.tar.gz')
+        .reply(200, Readable.from(['foo']));
+      httpMock
+        .scope('https://mirror.bazel.build')
+        .get('/github.com/bazelbuild/bazel-skylib/archive/0.6.2.tar.gz')
+        .reply(200, Readable.from(['foo']));
       const res = await updateDependency({
         fileContent: content,
         upgrade,
@@ -254,6 +276,7 @@ http_archive(
       expect(res).not.toEqual(content);
       expect(res.indexOf('0.5.0')).toBe(-1);
       expect(res.indexOf('0.6.2')).not.toBe(-1);
+      expect(httpMock.getTrace()).toMatchSnapshot();
     });
   });
 });

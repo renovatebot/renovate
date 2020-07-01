@@ -2,11 +2,11 @@ import { platform } from '../../../platform';
 import * as template from '../../../util/template';
 import { get } from '../../../versioning';
 import { BranchConfig } from '../../common';
-import { getPrBanner } from './banner';
 import { getChangelogs } from './changelogs';
 import { getPrConfigDescription } from './config-description';
 import { getControls } from './controls';
 import { getPrFooter } from './footer';
+import { getPrHeader } from './header';
 import { getPrExtraNotes, getPrNotes } from './notes';
 import { getPrUpdatesTable } from './updates-table';
 
@@ -67,7 +67,7 @@ function massageUpdateMetadata(config: BranchConfig): void {
 export async function getPrBody(config: BranchConfig): Promise<string> {
   massageUpdateMetadata(config);
   const content = {
-    banner: getPrBanner(config),
+    header: getPrHeader(config),
     table: getPrUpdatesTable(config),
     notes: getPrNotes(config) + getPrExtraNotes(config),
     changelogs: getChangelogs(config),
@@ -76,7 +76,7 @@ export async function getPrBody(config: BranchConfig): Promise<string> {
     footer: getPrFooter(config),
   };
   const defaultPrBodyTemplate =
-    '{{{banner}}}{{{table}}}{{{notes}}}{{{changelogs}}}{{{configDescription}}}{{{controls}}}{{{footer}}}';
+    '{{{header}}}{{{table}}}{{{notes}}}{{{changelogs}}}{{{configDescription}}}{{{controls}}}{{{footer}}}';
   const prBodyTemplate = config.prBodyTemplate || defaultPrBodyTemplate;
   let prBody = template.compile(prBodyTemplate, content, false);
   prBody = prBody.trim();

@@ -11,8 +11,8 @@ import {
 } from '../../constants/pull-requests';
 import * as _npmPostExtract from '../../manager/npm/post-update';
 import { File } from '../../platform';
-import { StatusResult } from '../../platform/git/storage';
 import * as _exec from '../../util/exec';
+import { StatusResult } from '../../util/gitfs';
 import { BranchConfig, PrResult } from '../common';
 import * as _prWorker from '../pr';
 import * as _automerge from './automerge';
@@ -376,7 +376,6 @@ describe('workers/branch', () => {
       commit.commitFilesToBranch.mockResolvedValueOnce(null);
       await branchWorker.processBranch(config);
       expect(platform.ensureComment).toHaveBeenCalledTimes(1);
-      // expect(platform.ensureCommentRemoval.mock.calls).toHaveLength(0);
       expect(prWorker.ensurePr).toHaveBeenCalledTimes(1);
       expect(prWorker.checkAutoMerge).toHaveBeenCalledTimes(0);
     });
@@ -399,7 +398,6 @@ describe('workers/branch', () => {
       commit.commitFilesToBranch.mockResolvedValueOnce(null);
       await branchWorker.processBranch(config);
       expect(platform.ensureComment).toHaveBeenCalledTimes(1);
-      // expect(platform.ensureCommentRemoval.mock.calls).toHaveLength(0);
       expect(prWorker.ensurePr).toHaveBeenCalledTimes(1);
       expect(prWorker.checkAutoMerge).toHaveBeenCalledTimes(0);
     });
@@ -422,7 +420,6 @@ describe('workers/branch', () => {
       commit.commitFilesToBranch.mockResolvedValueOnce(null);
       await branchWorker.processBranch(config);
       expect(platform.ensureComment).toHaveBeenCalledTimes(1);
-      // expect(platform.ensureCommentRemoval.mock.calls).toHaveLength(0);
       expect(prWorker.ensurePr).toHaveBeenCalledTimes(1);
       expect(prWorker.checkAutoMerge).toHaveBeenCalledTimes(0);
     });
@@ -465,7 +462,6 @@ describe('workers/branch', () => {
       commit.commitFilesToBranch.mockResolvedValueOnce(null);
       await branchWorker.processBranch(config);
       expect(platform.ensureComment).toHaveBeenCalledTimes(1);
-      // expect(platform.ensureCommentRemoval.mock.calls).toHaveLength(0);
       expect(prWorker.ensurePr).toHaveBeenCalledTimes(1);
       expect(prWorker.checkAutoMerge).toHaveBeenCalledTimes(0);
     });

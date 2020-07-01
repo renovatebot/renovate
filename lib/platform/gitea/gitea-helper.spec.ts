@@ -461,7 +461,7 @@ describe('platform/gitea/gitea-helper', () => {
     it('should call /api/v1/repos/[repo]/issues endpoint', async () => {
       httpMock
         .scope(baseUrl)
-        .get(`/repos/${mockRepo.full_name}/issues`)
+        .get(`/repos/${mockRepo.full_name}/issues?type=issues`)
         .reply(200, [mockIssue]);
 
       const res = await ght.searchIssues(mockRepo.full_name, {});
@@ -472,7 +472,7 @@ describe('platform/gitea/gitea-helper', () => {
     it('should construct proper query parameters', async () => {
       httpMock
         .scope(baseUrl)
-        .get(`/repos/${mockRepo.full_name}/issues?state=open`)
+        .get(`/repos/${mockRepo.full_name}/issues?state=open&type=issues`)
         .reply(200, [mockIssue]);
 
       const res = await ght.searchIssues(mockRepo.full_name, {

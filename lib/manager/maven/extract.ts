@@ -5,7 +5,7 @@ import * as datasourceMaven from '../../datasource/maven';
 import { MAVEN_REPO } from '../../datasource/maven/common';
 import { logger } from '../../logger';
 import { SkipReason } from '../../types';
-import { readLocalFile } from '../../util/fs';
+import { readLocalFile } from '../../util/gitfs';
 import { ExtractConfig, PackageDependency, PackageFile } from '../common';
 
 export function parsePom(raw: string): XmlDocument | null {

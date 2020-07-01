@@ -53,7 +53,12 @@ export class GiteaHttp extends Http<GiteaHttpOptions, GiteaHttpOptions> {
         resolvedUrl.searchParams.set('page', nextPage.toString());
 
         const nextRes = await super.request<T>(resolvedUrl.toString(), opts);
-        pc.push(...getPaginationContainer(nextRes.body));
+        const nextPc = getPaginationContainer(nextRes.body);
+        if (nextPc === null) {
+          break;
+        }
+
+        pc.push(...nextPc);
       }
     }
 

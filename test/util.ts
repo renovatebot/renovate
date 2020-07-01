@@ -4,7 +4,7 @@ import { RenovateConfig as _RenovateConfig } from '../lib/config';
 import { getConfig } from '../lib/config/defaults';
 import { platform as _platform } from '../lib/platform';
 import * as _env from '../lib/util/exec/env';
-import * as _fs from '../lib/util/fs';
+import * as _gitfs from '../lib/util/gitfs';
 import * as _hostRules from '../lib/util/host-rules';
 
 /**
@@ -23,7 +23,7 @@ export function partial<T>(obj: Partial<T>): T {
   return obj as T;
 }
 
-export const fs = mocked(_fs);
+export const gitfs = mocked(_gitfs);
 export const platform = mocked(_platform);
 export const env = mocked(_env);
 export const hostRules = mocked(_hostRules);

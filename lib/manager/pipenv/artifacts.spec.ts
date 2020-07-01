@@ -3,17 +3,18 @@ import _fs from 'fs-extra';
 import { join } from 'upath';
 import { envMock, mockExecAll } from '../../../test/execUtil';
 import { mocked, platform } from '../../../test/util';
-import { StatusResult } from '../../platform/git/storage';
 import { setUtilConfig } from '../../util';
 import { BinarySource } from '../../util/exec/common';
 import * as docker from '../../util/exec/docker';
 import * as _env from '../../util/exec/env';
+import { StatusResult } from '../../util/gitfs';
 import * as pipenv from './artifacts';
 
 jest.mock('fs-extra');
 jest.mock('child_process');
 jest.mock('../../util/exec/env');
 jest.mock('../../util/host-rules');
+jest.mock('../../util/http');
 
 const fs: jest.Mocked<typeof _fs> = _fs as any;
 const exec: jest.Mock<typeof _exec> = _exec as any;

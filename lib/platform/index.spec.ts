@@ -116,4 +116,28 @@ describe('platform', () => {
     const bitbucketMethods = Object.keys(bitbucketServer).sort();
     expect(bitbucketMethods).toMatchObject(githubMethods);
   });
+
+  it('returns null if empty email given', () => {
+    expect(platform.parseGitAuthor(undefined)).toBeNull();
+  });
+  it('parses bot email', () => {
+    expect(
+      platform.parseGitAuthor('some[bot]@users.noreply.github.com')
+    ).toMatchSnapshot();
+  });
+  it('parses bot name and email', () => {
+    expect(
+      platform.parseGitAuthor(
+        '"some[bot]" <some[bot]@users.noreply.github.com>'
+      )
+    ).toMatchSnapshot();
+  });
+  it('escapes names', () => {
+    expect(
+      platform.parseGitAuthor('name [what] <name@what.com>').name
+    ).toMatchSnapshot();
+  });
+  it('gives up', () => {
+    expect(platform.parseGitAuthor('a.b.c')).toBeNull();
+  });
 });

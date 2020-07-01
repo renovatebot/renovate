@@ -7,14 +7,14 @@ import { configFileNames } from '../../../config/app-strings';
 import { decryptConfig } from '../../../config/decrypt';
 import { migrateAndValidate } from '../../../config/migrate-validate';
 import * as presets from '../../../config/presets';
-import {
-  CONFIG_VALIDATION,
-  PLATFORM_FAILURE,
-} from '../../../constants/error-messages';
+import { CONFIG_VALIDATION } from '../../../constants/error-messages';
 import * as npmApi from '../../../datasource/npm';
 import { logger } from '../../../logger';
 import { platform } from '../../../platform';
-import { readLocalFile } from '../../../util/fs';
+import { ExternalHostError } from '../../../types/errors/external-host-error';
+import { getCache } from '../../../util/cache/repository';
+import { clone } from '../../../util/clone';
+import { readLocalFile } from '../../../util/gitfs';
 import * as hostRules from '../../../util/host-rules';
 import { flattenPackageRules } from './flatten';
 
@@ -59,7 +59,10 @@ export async function mergeRenovateConfig(
     // istanbul ignore if
     if (renovateConfig === null) {
       logger.warn('Fetching renovate config returns null');
-      throw new Error(PLATFORM_FAILURE);
+      throw new ExternalHostError(
+        Error('Fetching renovate config returns null'),
+        config.platform
+      );
     }
     // istanbul ignore if
     if (!renovateConfig.length) {
@@ -120,6 +123,11 @@ export async function mergeRenovateConfig(
     }
     logger.debug({ configFile, config: renovateJson }, 'Repository config');
   }
+  const cache = getCache();
+  cache.init = {
+    configFile,
+    contents: clone(renovateJson),
+  };
   const migratedConfig = await migrateAndValidate(config, renovateJson);
   if (migratedConfig.errors.length) {
     const error = new Error(CONFIG_VALIDATION);

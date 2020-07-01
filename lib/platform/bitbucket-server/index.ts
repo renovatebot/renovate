@@ -10,6 +10,7 @@ import { PLATFORM_TYPE_BITBUCKET_SERVER } from '../../constants/platforms';
 import { PR_STATE_ALL, PR_STATE_OPEN } from '../../constants/pull-requests';
 import { logger } from '../../logger';
 import { BranchStatus } from '../../types';
+import * as gitfs from '../../util/gitfs';
 import * as hostRules from '../../util/host-rules';
 import { HttpResponse } from '../../util/http';
 import {
@@ -34,7 +35,6 @@ import {
   RepoParams,
   VulnerabilityAlert,
 } from '../common';
-import GitStorage, { StatusResult } from '../git/storage';
 import { smartTruncate } from '../utils/pr-body';
 import { BbbsRestPr, BbsConfig, BbsPr, BbsRestUserRef } from './types';
 import * as utils from './utils';
@@ -107,9 +107,7 @@ export async function getRepos(): Promise<string[]> {
 
 export function cleanRepo(): Promise<void> {
   logger.debug(`cleanRepo()`);
-  if (config.storage) {
-    config.storage.cleanRepo();
-  }
+  gitfs.cleanRepo();
   config = {} as any;
   return Promise.resolve();
 }
@@ -177,7 +175,7 @@ export async function initRepo({
   }
 
   const { host, pathname } = url.parse(defaults.endpoint!);
-  const gitUrl = GitStorage.getUrl({
+  const gitUrl = gitfs.getUrl({
     protocol: defaults.endpoint!.split(':')[0],
     auth: `${opts.username}:${opts.password}`,
     host: `${host}${pathname}${
@@ -186,11 +184,12 @@ export async function initRepo({
     repository,
   });
 
-  config.storage = new GitStorage();
-  await config.storage.initRepo({
+  await gitfs.initRepo({
     ...config,
     localDir,
     url: gitUrl,
+    gitAuthorName: global.gitAuthor?.name,
+    gitAuthorEmail: global.gitAuthor?.email,
   });
 
   try {
@@ -251,21 +250,21 @@ export async function setBaseBranch(
   branchName: string = config.defaultBranch
 ): Promise<string> {
   config.baseBranch = branchName;
-  const baseBranchSha = await config.storage.setBaseBranch(branchName);
+  const baseBranchSha = await gitfs.setBaseBranch(branchName);
   return baseBranchSha;
 }
 
 export /* istanbul ignore next */ function setBranchPrefix(
   branchPrefix: string
 ): Promise<void> {
-  return config.storage.setBranchPrefix(branchPrefix);
+  return gitfs.setBranchPrefix(branchPrefix);
 }
 
 // Search
 
 // Get full file list
 export function getFileList(): Promise<string[]> {
-  return config.storage.getFileList();
+  return gitfs.getFileList();
 }
 
 // Branch
@@ -273,12 +272,12 @@ export function getFileList(): Promise<string[]> {
 // Returns true if branch exists, otherwise false
 export function branchExists(branchName: string): Promise<boolean> {
   logger.debug(`branchExists(${branchName})`);
-  return config.storage.branchExists(branchName);
+  return gitfs.branchExists(branchName);
 }
 
 export function isBranchStale(branchName: string): Promise<boolean> {
   logger.debug(`isBranchStale(${branchName})`);
-  return config.storage.isBranchStale(branchName);
+  return gitfs.isBranchStale(branchName);
 }
 
 // Gets details for a PR
@@ -401,7 +400,7 @@ export async function getPrList(_args?: any): Promise<Pr[]> {
 
 /* istanbul ignore next */
 export async function getPrFiles(pr: Pr): Promise<string[]> {
-  return config.storage.getBranchFiles(pr.branchName, pr.targetBranch);
+  return gitfs.getBranchFiles(pr.branchName, pr.targetBranch);
 }
 
 // TODO: coverage
@@ -440,13 +439,13 @@ export function getAllRenovateBranches(
   branchPrefix: string
 ): Promise<string[]> {
   logger.debug('getAllRenovateBranches');
-  return config.storage.getAllRenovateBranches(branchPrefix);
+  return gitfs.getAllRenovateBranches(branchPrefix);
 }
 
 export async function commitFiles(
   commitFilesConfig: CommitFilesConfig
 ): Promise<string | null> {
-  const commit = config.storage.commitFiles(commitFilesConfig);
+  const commit = gitfs.commitFiles(commitFilesConfig);
 
   // wait for pr change propagation
   await delay(1000);
@@ -457,7 +456,7 @@ export async function commitFiles(
 
 export function getFile(filePath: string, branchName: string): Promise<string> {
   logger.debug(`getFile(${filePath}, ${branchName})`);
-  return config.storage.getFile(filePath, branchName);
+  return gitfs.getFile(filePath, branchName);
 }
 
 export async function deleteBranch(
@@ -478,30 +477,30 @@ export async function deleteBranch(
       updatePrVersion(pr.number, body.version);
     }
   }
-  return config.storage.deleteBranch(branchName);
+  return gitfs.deleteBranch(branchName);
 }
 
 export function mergeBranch(branchName: string): Promise<void> {
   logger.debug(`mergeBranch(${branchName})`);
-  return config.storage.mergeBranch(branchName);
+  return gitfs.mergeBranch(branchName);
 }
 
 export function getBranchLastCommitTime(branchName: string): Promise<Date> {
   logger.debug(`getBranchLastCommitTime(${branchName})`);
-  return config.storage.getBranchLastCommitTime(branchName);
+  return gitfs.getBranchLastCommitTime(branchName);
 }
 
 export /* istanbul ignore next */ function getRepoStatus(): Promise<
-  StatusResult
+  gitfs.StatusResult
 > {
-  return config.storage.getRepoStatus();
+  return gitfs.getRepoStatus();
 }
 
 async function getStatus(
   branchName: string,
   useCache = true
 ): Promise<utils.BitbucketCommitStatus> {
-  const branchCommit = await config.storage.getBranchCommit(branchName);
+  const branchCommit = await gitfs.getBranchCommit(branchName);
 
   return (
     await bitbucketServerHttp.getJson<utils.BitbucketCommitStatus>(
@@ -558,7 +557,7 @@ async function getStatusCheck(
   branchName: string,
   useCache = true
 ): Promise<utils.BitbucketStatus[]> {
-  const branchCommit = await config.storage.getBranchCommit(branchName);
+  const branchCommit = await gitfs.getBranchCommit(branchName);
 
   return utils.accumulateValues(
     `./rest/build-status/1.0/commits/${branchCommit}`,
@@ -611,7 +610,7 @@ export async function setBranchStatus({
   }
   logger.debug({ branch: branchName, context, state }, 'Setting branch status');
 
-  const branchCommit = await config.storage.getBranchCommit(branchName);
+  const branchCommit = await gitfs.getBranchCommit(branchName);
 
   try {
     const body: any = {
@@ -1078,7 +1077,7 @@ export function getPrBody(input: string): string {
 
 export function getCommitMessages(): Promise<string[]> {
   logger.debug(`getCommitMessages()`);
-  return config.storage.getCommitMessages();
+  return gitfs.getCommitMessages();
 }
 
 export function getVulnerabilityAlerts(): Promise<VulnerabilityAlert[]> {

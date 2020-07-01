@@ -8,8 +8,8 @@ import * as httpMock from '../../../test/httpMock';
 import {
   addReplacingSerializer,
   env,
-  fs,
   getName,
+  gitfs,
   partial,
   platform,
 } from '../../../test/util';
@@ -19,7 +19,7 @@ import { resetPrefetchedImages } from '../../util/exec/docker';
 import * as dcUpdate from '.';
 
 jest.mock('child_process');
-jest.mock('../../util/fs');
+jest.mock('../../util/gitfs');
 jest.mock('../../util/exec/env');
 
 const exec: jest.Mock<typeof _exec> = _exec as any;
@@ -51,7 +51,7 @@ describe(getName(__filename), () => {
     await setUtilConfig(config);
     resetPrefetchedImages();
 
-    fs.readLocalFile.mockResolvedValue('test');
+    gitfs.readLocalFile.mockResolvedValue('test');
   });
 
   afterEach(() => {
@@ -70,7 +70,7 @@ describe(getName(__filename), () => {
     const execSnapshots = mockExecAll(exec);
 
     const res = await dcUpdate.updateArtifacts({
-      packageFileName: 'gradle-wrapper.properties',
+      packageFileName: 'gradle/wrapper/gradle-wrapper.properties',
       updatedDeps: [],
       newPackageFileContent: await readString(
         `./expectedFiles/gradle/wrapper/gradle-wrapper.properties`

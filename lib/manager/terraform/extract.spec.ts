@@ -19,7 +19,7 @@ describe('lib/manager/terraform/extract', () => {
     it('extracts', () => {
       const res = extractPackageFile(tf1);
       expect(res).toMatchSnapshot();
-      expect(res.deps).toHaveLength(27);
+      expect(res.deps).toHaveLength(30);
       expect(res.deps.filter((dep) => dep.skipReason)).toHaveLength(6);
     });
     it('returns null if only local deps', () => {
@@ -40,6 +40,11 @@ describe('lib/manager/terraform/extract', () => {
     it('returns TerraformDependencyTypes.unknown', () => {
       expect(getTerraformDependencyType('unknown')).toBe(
         TerraformDependencyTypes.unknown
+      );
+    });
+    it('returns TerraformDependencyTypes.required_providers', () => {
+      expect(getTerraformDependencyType('required_providers')).toBe(
+        TerraformDependencyTypes.required_providers
       );
     });
     it('returns TerraformDependencyTypes.unknown on empty string', () => {

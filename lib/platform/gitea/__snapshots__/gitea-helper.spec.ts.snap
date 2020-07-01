@@ -571,7 +571,7 @@ Array [
       "user-agent": "https://github.com/renovatebot/renovate",
     },
     "method": "GET",
-    "url": "https://gitea.renovatebot.com/api/v1/repos/some/repo/issues?",
+    "url": "https://gitea.renovatebot.com/api/v1/repos/some/repo/issues?type=issues",
   },
 ]
 `;
@@ -586,7 +586,7 @@ Array [
       "user-agent": "https://github.com/renovatebot/renovate",
     },
     "method": "GET",
-    "url": "https://gitea.renovatebot.com/api/v1/repos/some/repo/issues?state=open",
+    "url": "https://gitea.renovatebot.com/api/v1/repos/some/repo/issues?state=open&type=issues",
   },
 ]
 `;
