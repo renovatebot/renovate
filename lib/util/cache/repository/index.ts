@@ -44,6 +44,7 @@ export async function initialize(config: RenovateConfig): Promise<void> {
     logger.debug({ cacheFileName }, 'Read repository cache');
   } catch (err) {
     logger.debug({ cacheFileName }, 'No repository cache found');
+    cache = {};
   }
 }
 
