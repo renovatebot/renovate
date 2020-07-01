@@ -167,9 +167,13 @@ export class GithubHttp extends Http<GithubHttpOptions, GithubHttpOptions> {
       opts.baseUrl = opts.baseUrl.replace('/v3/', '/');
     }
     opts.headers = { ...opts.headers };
-    const accept = appMode // TODO: need to check it's the app host
-      ? 'application/vnd.github.machine-man-preview+json'
-      : 'application/vnd.github.v3+json';
+    const isDefaultHost =
+      url.toString().startsWith(baseUrl) ||
+      !url.toString().startsWith('https://');
+    const accept =
+      isDefaultHost && appMode
+        ? 'application/vnd.github.machine-man-preview+json'
+        : 'application/vnd.github.v3+json';
     if (opts.headers.accept) {
       opts.headers.accept = `${accept}, ${opts.headers.accept}`;
     } else {
