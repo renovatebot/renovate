@@ -54,7 +54,7 @@ describe('platform/github', () => {
   describe('initPlatform()', () => {
     it('should throw if no token', async () => {
       await expect(github.initPlatform({} as any)).rejects.toThrow(
-        'Init: You must configure a GitHub personal access token'
+        'Init: You must configure a GitHub token'
       );
     });
     it('should throw if user failure', async () => {

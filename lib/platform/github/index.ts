@@ -91,7 +91,13 @@ export async function initPlatform({
   }
   let gitAuthor: string;
   let renovateUsername: string;
+  // istanbul ignore if
   if (appMode) {
+    if (!username) {
+      throw new Error(
+        "Init: You must configure the bot's username if using an app token"
+      );
+    }
     renovateUsername = username;
     gitAuthor = `${username}@noreply.users.github.com`;
   } else {
@@ -1069,7 +1075,7 @@ export async function getBranchStatus(
       )}/check-runs`;
       const opts = {
         headers: {
-          Accept: 'application/vnd.github.antiope-preview+json',
+          accept: 'application/vnd.github.antiope-preview+json',
         },
       };
       const checkRunsRaw = (

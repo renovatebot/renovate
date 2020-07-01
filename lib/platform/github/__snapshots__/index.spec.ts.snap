@@ -2024,7 +2024,7 @@ Array [
   },
   Object {
     "headers": Object {
-      "accept": "application/vnd.github.antiope-preview+json",
+      "accept": "application/vnd.github.v3+json, application/vnd.github.antiope-preview+json",
       "accept-encoding": "gzip, deflate",
       "authorization": "token abc123",
       "host": "api.github.com",
@@ -2094,7 +2094,7 @@ Array [
   },
   Object {
     "headers": Object {
-      "accept": "application/vnd.github.antiope-preview+json",
+      "accept": "application/vnd.github.v3+json, application/vnd.github.antiope-preview+json",
       "accept-encoding": "gzip, deflate",
       "authorization": "token abc123",
       "host": "api.github.com",
@@ -2132,7 +2132,7 @@ Array [
   },
   Object {
     "headers": Object {
-      "accept": "application/vnd.github.antiope-preview+json",
+      "accept": "application/vnd.github.v3+json, application/vnd.github.antiope-preview+json",
       "accept-encoding": "gzip, deflate",
       "authorization": "token abc123",
       "host": "api.github.com",
@@ -2170,7 +2170,7 @@ Array [
   },
   Object {
     "headers": Object {
-      "accept": "application/vnd.github.antiope-preview+json",
+      "accept": "application/vnd.github.v3+json, application/vnd.github.antiope-preview+json",
       "accept-encoding": "gzip, deflate",
       "authorization": "token abc123",
       "host": "api.github.com",
@@ -2208,7 +2208,7 @@ Array [
   },
   Object {
     "headers": Object {
-      "accept": "application/vnd.github.antiope-preview+json",
+      "accept": "application/vnd.github.v3+json, application/vnd.github.antiope-preview+json",
       "accept-encoding": "gzip, deflate",
       "authorization": "token abc123",
       "host": "api.github.com",
@@ -2246,7 +2246,7 @@ Array [
   },
   Object {
     "headers": Object {
-      "accept": "application/vnd.github.antiope-preview+json",
+      "accept": "application/vnd.github.v3+json, application/vnd.github.antiope-preview+json",
       "accept-encoding": "gzip, deflate",
       "authorization": "token abc123",
       "host": "api.github.com",
@@ -4601,6 +4601,7 @@ Array [
 
 exports[`platform/github initPlatform() should support custom endpoint 1`] = `
 Object {
+  "appMode": false,
   "endpoint": "https://ghe.renovatebot.com/",
   "gitAuthor": "undefined <user@domain.com>",
   "renovateUsername": "renovate-bot",
@@ -4636,6 +4637,7 @@ Array [
 
 exports[`platform/github initPlatform() should support default endpoint no email access 1`] = `
 Object {
+  "appMode": false,
   "endpoint": "https://api.github.com/",
   "gitAuthor": undefined,
   "renovateUsername": "renovate-bot",
@@ -4671,6 +4673,7 @@ Array [
 
 exports[`platform/github initPlatform() should support default endpoint no email result 1`] = `
 Object {
+  "appMode": false,
   "endpoint": "https://api.github.com/",
   "gitAuthor": undefined,
   "renovateUsername": "renovate-bot",
@@ -4706,6 +4709,7 @@ Array [
 
 exports[`platform/github initPlatform() should support default endpoint with email 1`] = `
 Object {
+  "appMode": false,
   "endpoint": "https://api.github.com/",
   "gitAuthor": "undefined <user@domain.com>",
   "renovateUsername": "renovate-bot",

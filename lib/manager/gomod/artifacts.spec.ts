@@ -170,6 +170,35 @@ describe('.updateArtifacts()', () => {
     ).not.toBeNull();
     expect(execSnapshots).toMatchSnapshot();
   });
+  it('supports docker mode with credentials and goModTidy', async () => {
+    jest.spyOn(docker, 'removeDanglingContainers').mockResolvedValueOnce();
+    await setUtilConfig({ ...config, binarySource: BinarySource.Docker });
+    hostRules.find.mockReturnValueOnce({
+      token: 'some-token',
+    });
+    fs.readFile.mockResolvedValueOnce('Current go.sum' as any);
+    const execSnapshots = mockExecAll(exec);
+    platform.getRepoStatus.mockResolvedValueOnce({
+      modified: ['go.sum'],
+    } as StatusResult);
+    fs.readFile.mockResolvedValueOnce('New go.sum 1' as any);
+    fs.readFile.mockResolvedValueOnce(null as any); // vendor modules filename
+    fs.readFile.mockResolvedValueOnce('New go.sum 2' as any);
+    fs.readFile.mockResolvedValueOnce('New go.sum 3' as any);
+    expect(
+      await gomod.updateArtifacts({
+        packageFileName: 'go.mod',
+        updatedDeps: [],
+        newPackageFileContent: gomod1,
+        config: {
+          ...config,
+          binarySource: BinarySource.Docker,
+          postUpdateOptions: ['gomodTidy'],
+        },
+      })
+    ).not.toBeNull();
+    expect(execSnapshots).toMatchSnapshot();
+  });
   it('catches errors', async () => {
     const execSnapshots = mockExecAll(exec);
     fs.readFile.mockResolvedValueOnce('Current go.sum' as any);
