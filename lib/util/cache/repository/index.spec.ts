@@ -7,6 +7,9 @@ jest.mock('fs-extra');
 const fs = mocked(_fs);
 
 describe('lib/util/cache/repository', () => {
+  beforeEach(() => {
+    jest.resetAllMocks();
+  });
   const config = {
     cacheDir: '/tmp/renovate/cache/',
     platform: 'github',
@@ -23,8 +26,16 @@ describe('lib/util/cache/repository', () => {
     });
     expect(fs.readFile.mock.calls).toHaveLength(0);
   });
-  it('reads from cache and finalizes', async () => {
+  it('resets if invalid', async () => {
     fs.readFile.mockResolvedValueOnce('{}' as any);
+    await repositoryCache.initialize({
+      ...config,
+      repositoryCache: 'enabled',
+    });
+    expect(repositoryCache.getCache()).toEqual({ repository: 'abc/def' });
+  });
+  it('reads from cache and finalizes', async () => {
+    fs.readFile.mockResolvedValueOnce('{"repository":"abc/def"}' as any);
     await repositoryCache.initialize({
       ...config,
       repositoryCache: 'enabled',
@@ -34,6 +45,6 @@ describe('lib/util/cache/repository', () => {
     expect(fs.outputFile.mock.calls).toHaveLength(1);
   });
   it('gets', () => {
-    expect(repositoryCache.getCache()).toEqual({});
+    expect(repositoryCache.getCache()).toEqual({ repository: 'abc/def' });
   });
 });
