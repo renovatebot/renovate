@@ -1,9 +1,9 @@
-import { getName, mocked } from '../../../test/util';
-import * as exec_ from '../../util/exec';
+import { getName, mocked } from '../../../../test/util';
+import * as exec_ from '../../exec';
 import { setPrivateKey, writePrivateKey } from './private-key';
 
 jest.mock('fs-extra');
-jest.mock('../../util/exec');
+jest.mock('../../exec');
 
 const exec = mocked(exec_);
 
