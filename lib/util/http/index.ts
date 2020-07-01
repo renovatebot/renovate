@@ -4,7 +4,7 @@ import got from 'got';
 import { ExternalHostError } from '../../types/errors/external-host-error';
 import * as memCache from '../cache/memory';
 import { clone } from '../clone';
-import { applyAuthorization } from './auth';
+import { applyAuthorization, removeAuthorization } from './auth';
 import { applyHostRules } from './host-rules';
 
 interface OutgoingHttpHeaders {
@@ -57,40 +57,6 @@ async function resolveResponse<T>(
   }
 }
 
-// isAmazon return true if request options contains Amazon related headers
-function isAmazon(opts: any): boolean {
-  return opts.search?.includes('X-Amz-Algorithm');
-}
-
-// isAzureBlob return true if request options contains Azure container registry related data
-function isAzureBlob(opts: any): boolean {
-  return (
-    opts.hostname?.endsWith('blob.core.windows.net') &&
-    opts.href?.includes('/docker/registry')
-  ); // lgtm [js/incomplete-url-substring-sanitization]
-}
-
-// removeAuthorizationHeaders from the redirect options
-export function removeAuthorizationHeaders(opts: any): any {
-  // Check if request has been redirected to Amazon or an Azure blob (ACR)
-  if (isAmazon(opts) || isAzureBlob(opts)) {
-    // if there is no port in the redirect URL string, then delete it from the redirect options.
-    // This can be evaluated for removal after upgrading to Got v10
-    const portInUrl = opts.href.split('/')[2].split(':')[1];
-    if (!portInUrl) {
-      // eslint-disable-next-line no-param-reassign
-      delete opts.port; // Redirect will instead use 80 or 443 for HTTP or HTTPS respectively
-    }
-
-    // registry is hosted on Amazon or Azure blob, redirect url includes
-    // authentication which is not required and should be removed
-    delete opts.headers.authorization; // eslint-disable-line no-param-reassign
-    delete opts.auth; // eslint-disable-line no-param-reassign
-  }
-
-  return opts;
-}
-
 export class Http<GetOptions = HttpOptions, PostOptions = HttpPostOptions> {
   constructor(private hostType: string, private options?: HttpOptions) {}
 
@@ -113,7 +79,7 @@ export class Http<GetOptions = HttpOptions, PostOptions = HttpPostOptions> {
       options.retry = 0;
     }
     options.hooks = {
-      beforeRedirect: [removeAuthorizationHeaders],
+      beforeRedirect: [removeAuthorization],
     };
     options.headers = {
       ...options.headers,
