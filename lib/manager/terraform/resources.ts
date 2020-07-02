@@ -39,6 +39,7 @@ export function extractTerraformResource(
   deps.push(dep);
   return { lineNumber, dependencies: deps };
 }
+
 export function analyseTerraformResource(dep: PackageDependency): void {
   /* eslint-disable no-param-reassign */
   if (dep.managerData.chart == null) {
