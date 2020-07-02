@@ -6,7 +6,7 @@ import { HostRule } from '../../types';
 import * as memCache from '../../util/cache/memory';
 import { ExecOptions, exec } from '../../util/exec';
 import {
-  deleteLocalFile,
+  deleteFile,
   getSiblingFileName,
   readLocalFile,
   writeLocalFile,
@@ -88,7 +88,7 @@ export async function updateArtifacts(
   }
 
   if (config.isLockFileMaintenance) {
-    await deleteLocalFile(lockFileName);
+    await deleteFile(lockFileName);
   }
 
   try {

@@ -7,7 +7,7 @@ import * as datasourceNpm from '../../../datasource/npm';
 import { logger } from '../../../logger';
 import { SkipReason } from '../../../types';
 import {
-  deleteLocalFile,
+  deleteFile,
   getSiblingFileName,
   readLocalFile,
 } from '../../../util/gitfs';
@@ -99,7 +99,7 @@ export async function extractPackageFile(
   const npmrcFileName = getSiblingFileName(fileName, '.npmrc');
   // istanbul ignore if
   if (config.ignoreNpmrcFile) {
-    await deleteLocalFile(npmrcFileName);
+    await deleteFile(npmrcFileName);
   } else {
     npmrc = await readLocalFile(npmrcFileName, 'utf8');
     if (npmrc && npmrc.includes('package-lock')) {
@@ -111,7 +111,7 @@ export async function extractPackageFile(
         logger.debug('Discarding .npmrc file with variables');
         ignoreNpmrcFile = true;
         npmrc = undefined;
-        await deleteLocalFile(npmrcFileName);
+        await deleteFile(npmrcFileName);
       }
     } else {
       npmrc = undefined;

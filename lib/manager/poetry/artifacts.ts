@@ -1,9 +1,9 @@
 import is from '@sindresorhus/is';
-import fs from 'fs-extra';
 import { quote } from 'shlex';
 import { parse } from 'toml';
 import { logger } from '../../logger';
 import { ExecOptions, exec } from '../../util/exec';
+import { deleteFile } from '../../util/gitfs';
 import {
   getSiblingFileName,
   readLocalFile,
@@ -65,7 +65,7 @@ export async function updateArtifacts({
     await writeLocalFile(packageFileName, newPackageFileContent);
     const cmd: string[] = [];
     if (config.isLockFileMaintenance) {
-      await fs.remove(lockFileName);
+      await deleteFile(lockFileName);
       cmd.push('poetry update --lock --no-interaction');
     } else {
       for (let i = 0; i < updatedDeps.length; i += 1) {

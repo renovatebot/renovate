@@ -12,7 +12,7 @@ import { logger } from '../../logger';
 import { platform } from '../../platform';
 import { ExecOptions, exec } from '../../util/exec';
 import {
-  deleteLocalFile,
+  deleteFile,
   ensureDir,
   ensureLocalDir,
   getSiblingFileName,
@@ -46,7 +46,7 @@ export async function updateArtifacts({
   try {
     await writeLocalFile(packageFileName, newPackageFileContent);
     if (config.isLockFileMaintenance) {
-      await deleteLocalFile(lockFileName);
+      await deleteFile(lockFileName);
     }
     const authJson = {};
     let credentials = hostRules.find({

@@ -8,7 +8,7 @@ import { logger } from '../../../logger';
 import { platform } from '../../../platform';
 import { ExternalHostError } from '../../../types/errors/external-host-error';
 import { getChildProcessEnv } from '../../../util/exec/env';
-import { deleteLocalFile } from '../../../util/gitfs';
+import { deleteFile, ensureCacheDir } from '../../../util/gitfs';
 import * as hostRules from '../../../util/host-rules';
 import { PackageFile, PostUpdateConfig, Upgrade } from '../../common';
 import * as lerna from './lerna';
@@ -196,11 +196,11 @@ export async function writeExistingFiles(
     }
     const { yarnLock } = packageFile;
     if (yarnLock && config.reuseLockFiles === false) {
-      await deleteLocalFile(yarnLock);
+      await deleteFile(yarnLock);
     }
     // istanbul ignore next
     if (packageFile.pnpmShrinkwrap && config.reuseLockFiles === false) {
-      await deleteLocalFile(packageFile.pnpmShrinkwrap);
+      await deleteFile(packageFile.pnpmShrinkwrap);
     }
   }
 }
@@ -370,20 +370,19 @@ export async function getAdditionalFiles(
     }
   }
 
-  const env = getChildProcessEnv([
-    'NPM_CONFIG_CACHE',
-    'YARN_CACHE_FOLDER',
-    'npm_config_store',
-  ]);
-  env.NPM_CONFIG_CACHE =
-    env.NPM_CONFIG_CACHE || upath.join(config.cacheDir, './others/npm');
-  await fs.ensureDir(env.NPM_CONFIG_CACHE);
-  env.YARN_CACHE_FOLDER =
-    env.YARN_CACHE_FOLDER || upath.join(config.cacheDir, './others/yarn');
-  await fs.ensureDir(env.YARN_CACHE_FOLDER);
-  env.npm_config_store =
-    env.npm_config_store || upath.join(config.cacheDir, './others/pnpm');
-  await fs.ensureDir(env.npm_config_store);
+  const env = getChildProcessEnv();
+  env.NPM_CONFIG_CACHE = await ensureCacheDir(
+    './others/npm',
+    'NPM_CONFIG_CACHE'
+  );
+  env.YARN_CACHE_FOLDER = await ensureCacheDir(
+    './others/yarn',
+    'YARN_CACHE_FOLDER'
+  );
+  env.npm_config_store = await ensureCacheDir(
+    './others/pnpm',
+    'npm_config_store'
+  );
   env.NODE_ENV = 'dev';
 
   let token = '';
