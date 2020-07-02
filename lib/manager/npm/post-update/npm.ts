@@ -1,10 +1,10 @@
-import { move, pathExists, readFile, remove } from 'fs-extra';
 import { validRange } from 'semver';
 import { quote } from 'shlex';
 import { join } from 'upath';
 import { SYSTEM_INSUFFICIENT_DISK_SPACE } from '../../../constants/error-messages';
 import { logger } from '../../../logger';
 import { ExecOptions, exec } from '../../../util/exec';
+import * as gitfs from '../../../util/gitfs';
 import { PostUpdateConfig, Upgrade } from '../../common';
 import { getNodeConstraint } from './node-version';
 
@@ -94,7 +94,7 @@ export async function generateLockFile(
         `Removing ${lockFileName} first due to lock file maintenance upgrade`
       );
       try {
-        await remove(lockFileName);
+        await gitfs.deleteFile(lockFileName);
       } catch (err) /* istanbul ignore next */ {
         logger.debug(
           { err, lockFileName },
@@ -109,16 +109,16 @@ export async function generateLockFile(
     // massage to shrinkwrap if necessary
     if (
       filename === 'npm-shrinkwrap.json' &&
-      (await pathExists(join(cwd, 'package-lock.json')))
+      (await gitfs.exists(join(cwd, 'package-lock.json')))
     ) {
-      await move(
+      await gitfs.move(
         join(cwd, 'package-lock.json'),
         join(cwd, 'npm-shrinkwrap.json')
       );
     }
 
     // Read the result
-    lockFile = await readFile(join(cwd, filename), 'utf8');
+    lockFile = await gitfs.readFile(join(cwd, filename), 'utf8');
   } catch (err) /* istanbul ignore next */ {
     logger.debug(
       {

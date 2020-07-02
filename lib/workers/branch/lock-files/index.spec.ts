@@ -1,4 +1,3 @@
-import _fs from 'fs-extra';
 import { mocked } from '../../../../test/util';
 import { getConfig } from '../../../config/defaults';
 import { PostUpdateConfig } from '../../../manager/common';
@@ -8,9 +7,12 @@ import * as _npm from '../../../manager/npm/post-update/npm';
 import * as _pnpm from '../../../manager/npm/post-update/pnpm';
 import * as _yarn from '../../../manager/npm/post-update/yarn';
 import { platform as _platform } from '../../../platform';
+import * as _fs from '../../../util/gitfs';
 import * as _hostRules from '../../../util/host-rules';
 
 const defaultConfig = getConfig();
+
+jest.mock('../../../util/gitfs');
 
 const fs = mocked(_fs);
 const lockFiles = mocked(_lockFiles);

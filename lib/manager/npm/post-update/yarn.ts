@@ -1,5 +1,4 @@
 import is from '@sindresorhus/is';
-import { readFile, remove } from 'fs-extra';
 import { validRange } from 'semver';
 import { quote } from 'shlex';
 import { join } from 'upath';
@@ -8,6 +7,7 @@ import { id as npmId } from '../../../datasource/npm';
 import { logger } from '../../../logger';
 import { ExternalHostError } from '../../../types/errors/external-host-error';
 import { ExecOptions, exec } from '../../../util/exec';
+import * as gitfs from '../../../util/gitfs';
 import { PostUpdateConfig, Upgrade } from '../../common';
 import { getNodeConstraint } from './node-version';
 
@@ -19,7 +19,7 @@ export interface GenerateLockFileResult {
 
 export async function hasYarnOfflineMirror(cwd: string): Promise<boolean> {
   try {
-    const yarnrc = await readFile(`${cwd}/.yarnrc`, 'utf8');
+    const yarnrc = await gitfs.readFile(`${cwd}/.yarnrc`, 'utf8');
     if (is.string(yarnrc)) {
       const mirrorLine = yarnrc
         .split('\n')
@@ -121,7 +121,7 @@ export async function generateLockFile(
         `Removing ${lockFileName} first due to lock file maintenance upgrade`
       );
       try {
-        await remove(lockFileName);
+        await gitfs.deleteFile(lockFileName);
       } catch (err) /* istanbul ignore next */ {
         logger.debug(
           { err, lockFileName },
@@ -134,7 +134,7 @@ export async function generateLockFile(
     await exec(commands, execOptions);
 
     // Read the result
-    lockFile = await readFile(lockFileName, 'utf8');
+    lockFile = await gitfs.readFile(lockFileName, 'utf8');
   } catch (err) /* istanbul ignore next */ {
     logger.debug(
       {

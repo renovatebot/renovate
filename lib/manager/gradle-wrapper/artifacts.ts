@@ -1,10 +1,9 @@
 import { resolve } from 'path';
-import * as fs from 'fs-extra';
 import Git from 'simple-git/promise';
 import { logger } from '../../logger';
 import { platform } from '../../platform';
 import { ExecOptions, exec } from '../../util/exec';
-import { readLocalFile, writeLocalFile } from '../../util/gitfs';
+import * as gitfs from '../../util/gitfs';
 import { Http } from '../../util/http';
 import { UpdateArtifact, UpdateArtifactsResult } from '../common';
 import { gradleWrapperFileName, prepareGradleCommand } from '../gradle/index';
@@ -19,7 +18,7 @@ async function addIfUpdated(
     return {
       file: {
         name: fileProjectPath,
-        contents: await readLocalFile(fileProjectPath),
+        contents: await gitfs.readLocalFile(fileProjectPath),
       },
     };
   }
@@ -57,7 +56,7 @@ export async function updateArtifacts({
     let cmd = await prepareGradleCommand(
       gradlew,
       projectDir,
-      await fs.stat(gradlewPath).catch(() => null),
+      await gitfs.stat(gradlewPath).catch(() => null),
       `wrapper`
     );
     if (!cmd) {
@@ -69,7 +68,7 @@ export async function updateArtifacts({
       cmd += ` --gradle-distribution-url ${distributionUrl}`;
       if (newPackageFileContent.includes('distributionSha256Sum=')) {
         // need to reset version, otherwise we have a checksum missmatch
-        await writeLocalFile(
+        await gitfs.writeLocalFile(
           packageFileName,
           newPackageFileContent.replace(config.toVersion, config.currentValue)
         );

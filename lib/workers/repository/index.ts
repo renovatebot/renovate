@@ -30,7 +30,7 @@ export async function renovateRepository(
   logger.trace({ config });
   let repoResult: ProcessResult;
   try {
-    await gitfs.ensureLocalDir(config.localDir);
+    await gitfs.ensureDir(config.localDir);
     logger.debug('Using localDir: ' + config.localDir);
     config = await initRepo(config);
     addSplit('init');
@@ -52,7 +52,7 @@ export async function renovateRepository(
   }
   await platform.cleanRepo();
   if (config.localDir && !config.persistRepoData) {
-    await gitfs.deleteFile(config.localDir);
+    await gitfs.deleteLocalFile('.');
   }
   const splits = getSplits();
   logger.debug(splits, 'Repository timing splits (milliseconds)');

@@ -1,14 +1,14 @@
 import { exec as _exec } from 'child_process';
-import _fs from 'fs-extra';
 import { envMock, mockExecAll } from '../../../../test/execUtil';
 import { mocked } from '../../../../test/util';
 import * as _env from '../../../util/exec/env';
+import * as _fs from '../../../util/gitfs';
 import { PostUpdateConfig } from '../../common';
 import * as _pnpmHelper from './pnpm';
 
-jest.mock('fs-extra');
 jest.mock('child_process');
 jest.mock('../../../util/exec/env');
+jest.mock('../../../util/gitfs');
 jest.mock('./node-version');
 
 const exec: jest.Mock<typeof _exec> = _exec as any;
@@ -58,7 +58,7 @@ describe('generateLockFile', () => {
       { isLockFileMaintenance: true },
     ]);
     expect(fs.readFile).toHaveBeenCalledTimes(1);
-    expect(fs.remove).toHaveBeenCalledTimes(1);
+    expect(fs.deleteFile).toHaveBeenCalledTimes(1);
     expect(res.lockFile).toEqual('package-lock-contents');
     expect(execSnapshots).toMatchSnapshot();
   });

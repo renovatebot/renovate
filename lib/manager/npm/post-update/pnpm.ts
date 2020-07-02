@@ -1,9 +1,9 @@
-import { readFile, remove } from 'fs-extra';
 import { validRange } from 'semver';
 import { quote } from 'shlex';
 import { join } from 'upath';
 import { logger } from '../../../logger';
 import { ExecOptions, exec } from '../../../util/exec';
+import * as gitfs from '../../../util/gitfs';
 import { PostUpdateConfig, Upgrade } from '../../common';
 import { getNodeConstraint } from './node-version';
 
@@ -66,7 +66,7 @@ export async function generateLockFile(
         `Removing ${lockFileName} first due to lock file maintenance upgrade`
       );
       try {
-        await remove(lockFileName);
+        await gitfs.deleteFile(lockFileName);
       } catch (err) /* istanbul ignore next */ {
         logger.debug(
           { err, lockFileName },
@@ -76,7 +76,7 @@ export async function generateLockFile(
     }
 
     await exec(`${cmd} ${args}`, execOptions);
-    lockFile = await readFile(lockFileName, 'utf8');
+    lockFile = await gitfs.readFile(lockFileName, 'utf8');
   } catch (err) /* istanbul ignore next */ {
     logger.debug(
       {

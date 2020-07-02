@@ -2,10 +2,10 @@ import { logger } from '../../logger';
 import { platform } from '../../platform';
 import { ExecOptions, exec } from '../../util/exec';
 import {
+  deleteLocalFile,
   ensureCacheDir,
   readLocalFile,
   writeLocalFile,
-  deleteLocalFile,
 } from '../../util/gitfs';
 import {
   UpdateArtifact,

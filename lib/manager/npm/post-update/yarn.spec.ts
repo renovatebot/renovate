@@ -1,13 +1,13 @@
 import { exec as _exec } from 'child_process';
-import _fs from 'fs-extra';
 import { ExecSnapshots, envMock, mockExecAll } from '../../../../test/execUtil';
 import { getName, mocked } from '../../../../test/util';
 import * as _env from '../../../util/exec/env';
+import * as _fs from '../../../util/gitfs';
 import * as _yarnHelper from './yarn';
 
-jest.mock('fs-extra');
 jest.mock('child_process');
 jest.mock('../../../util/exec/env');
+jest.mock('../../../util/gitfs');
 jest.mock('./node-version');
 
 const exec: jest.Mock<typeof _exec> = _exec as any;
@@ -47,7 +47,7 @@ describe(getName(__filename), () => {
       };
       const res = await yarnHelper.generateLockFile('some-dir', {}, config);
       expect(fs.readFile).toHaveBeenCalledTimes(2);
-      expect(fs.remove).toHaveBeenCalledTimes(0);
+      expect(fs.deleteFile).toHaveBeenCalledTimes(0);
       expect(res.lockFile).toEqual('package-lock-contents');
       expect(fixSnapshots(execSnapshots)).toMatchSnapshot();
     }
@@ -114,7 +114,7 @@ describe(getName(__filename), () => {
         { isLockFileMaintenance: true },
       ]);
       expect(fs.readFile).toHaveBeenCalledTimes(2);
-      expect(fs.remove).toHaveBeenCalledTimes(1);
+      expect(fs.deleteFile).toHaveBeenCalledTimes(1);
       expect(res.lockFile).toEqual('package-lock-contents');
       expect(fixSnapshots(execSnapshots)).toMatchSnapshot();
     }

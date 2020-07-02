@@ -4,6 +4,17 @@ import { RenovateConfig } from '../../../config/common';
 import { logger } from '../../../logger';
 import { getChildProcessEnv } from '../../exec/env';
 
+export {
+  pathExists as exists,
+  readFile,
+  writeFile,
+  outputFile,
+  unlink,
+  stat,
+  chmod,
+  move,
+} from 'fs-extra';
+
 let localDir = '';
 let cacheDir = '';
 

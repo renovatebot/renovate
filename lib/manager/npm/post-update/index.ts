@@ -1,5 +1,4 @@
 import path from 'path';
-import fs from 'fs-extra';
 import upath from 'upath';
 // eslint-disable-next-line import/no-unresolved
 import { SYSTEM_INSUFFICIENT_DISK_SPACE } from '../../../constants/error-messages';
@@ -8,7 +7,7 @@ import { logger } from '../../../logger';
 import { platform } from '../../../platform';
 import { ExternalHostError } from '../../../types/errors/external-host-error';
 import { getChildProcessEnv } from '../../../util/exec/env';
-import { deleteFile, ensureCacheDir } from '../../../util/gitfs';
+import * as gitfs from '../../../util/gitfs';
 import * as hostRules from '../../../util/host-rules';
 import { PackageFile, PostUpdateConfig, Upgrade } from '../../common';
 import * as lerna from './lerna';
@@ -115,17 +114,16 @@ export async function writeExistingFiles(
   config: PostUpdateConfig,
   packageFiles: AdditionalPackageFiles
 ): Promise<void> {
-  const npmrcFile = upath.join(config.localDir, '.npmrc');
   if (config.npmrc) {
     logger.debug(`Writing repo .npmrc (${config.localDir})`);
-    await fs.outputFile(npmrcFile, config.npmrc);
+    await gitfs.writeLocalFile('.npmrc', config.npmrc);
   } else if (config.ignoreNpmrcFile) {
     logger.debug('Removing ignored .npmrc file before artifact generation');
-    await fs.remove(npmrcFile);
+    await gitfs.deleteLocalFile('.npmrc');
   }
   if (config.yarnrc) {
     logger.debug(`Writing repo .yarnrc (${config.localDir})`);
-    await fs.outputFile(upath.join(config.localDir, '.yarnrc'), config.yarnrc);
+    await gitfs.writeLocalFile('.yarnrc', config.yarnrc);
   }
   if (!packageFiles.npm) {
     return;
@@ -142,11 +140,11 @@ export async function writeExistingFiles(
     );
     const npmrc = packageFile.npmrc || config.npmrc;
     if (npmrc) {
-      await fs.outputFile(upath.join(basedir, '.npmrc'), npmrc);
+      await gitfs.outputFile(upath.join(basedir, '.npmrc'), npmrc);
     }
     if (packageFile.yarnrc) {
       logger.debug(`Writing .yarnrc to ${basedir}`);
-      await fs.outputFile(
+      await gitfs.outputFile(
         upath.join(basedir, '.yarnrc'),
         packageFile.yarnrc
           .replace('--install.pure-lockfile true', '')
@@ -161,7 +159,7 @@ export async function writeExistingFiles(
         config.reuseLockFiles === false
       ) {
         logger.debug(`Ensuring ${npmLock} is removed`);
-        await fs.remove(npmLockPath);
+        await gitfs.deleteFile(npmLockPath);
       } else {
         logger.debug(`Writing ${npmLock}`);
         let existingNpmLock = await platform.getFile(npmLock);
@@ -191,16 +189,16 @@ export async function writeExistingFiles(
             );
           }
         }
-        await fs.outputFile(npmLockPath, existingNpmLock);
+        await gitfs.outputFile(npmLockPath, existingNpmLock);
       }
     }
     const { yarnLock } = packageFile;
     if (yarnLock && config.reuseLockFiles === false) {
-      await deleteFile(yarnLock);
+      await gitfs.deleteFile(yarnLock);
     }
     // istanbul ignore next
     if (packageFile.pnpmShrinkwrap && config.reuseLockFiles === false) {
-      await deleteFile(packageFile.pnpmShrinkwrap);
+      await gitfs.deleteFile(packageFile.pnpmShrinkwrap);
     }
   }
 }
@@ -239,7 +237,7 @@ export async function writeUpdatedPackageFiles(
     } catch (err) {
       logger.warn({ err }, 'Error adding token to package files');
     }
-    await fs.outputFile(
+    await gitfs.outputFile(
       upath.join(config.localDir, packageFile.name),
       JSON.stringify(massagedFile)
     );
@@ -265,7 +263,7 @@ async function getNpmrcContent(dir: string): Promise<string | null> {
   const npmrcFilePath = upath.join(dir, '.npmrc');
   let originalNpmrcContent = null;
   try {
-    originalNpmrcContent = await fs.readFile(npmrcFilePath, 'utf8');
+    originalNpmrcContent = await gitfs.readFile(npmrcFilePath, 'utf8');
     logger.debug('npmrc file found in repository');
   } catch {
     logger.debug('No npmrc file found in repository');
@@ -288,7 +286,7 @@ async function updateNpmrcContent(
   try {
     const newContent = newNpmrc.join('\n');
     if (newContent !== originalContent) {
-      await fs.writeFile(npmrcFilePath, newContent);
+      await gitfs.writeFile(npmrcFilePath, newContent);
     }
   } catch {
     logger.warn('Unable to write custom npmrc file');
@@ -303,13 +301,13 @@ async function resetNpmrcContent(
   const npmrcFilePath = upath.join(dir, '.npmrc');
   if (originalContent) {
     try {
-      await fs.writeFile(npmrcFilePath, originalContent);
+      await gitfs.writeFile(npmrcFilePath, originalContent);
     } catch {
       logger.warn('Unable to reset npmrc to original contents');
     }
   } else {
     try {
-      await fs.unlink(npmrcFilePath);
+      await gitfs.unlink(npmrcFilePath);
     } catch {
       logger.warn('Unable to delete custom npmrc');
     }
@@ -371,15 +369,15 @@ export async function getAdditionalFiles(
   }
 
   const env = getChildProcessEnv();
-  env.NPM_CONFIG_CACHE = await ensureCacheDir(
+  env.NPM_CONFIG_CACHE = await gitfs.ensureCacheDir(
     './others/npm',
     'NPM_CONFIG_CACHE'
   );
-  env.YARN_CACHE_FOLDER = await ensureCacheDir(
+  env.YARN_CACHE_FOLDER = await gitfs.ensureCacheDir(
     './others/yarn',
     'YARN_CACHE_FOLDER'
   );
-  env.npm_config_store = await ensureCacheDir(
+  env.npm_config_store = await gitfs.ensureCacheDir(
     './others/pnpm',
     'npm_config_store'
   );
@@ -539,7 +537,7 @@ export async function getAdditionalFiles(
                   const localModified = upath.join(config.localDir, f);
                   updatedArtifacts.push({
                     name: f,
-                    contents: await fs.readFile(localModified),
+                    contents: await gitfs.readFile(localModified),
                   });
                 }
               }
@@ -718,9 +716,9 @@ export async function getAdditionalFiles(
           try {
             let newContent: string;
             try {
-              newContent = await fs.readFile(lockFilePath, 'utf8');
+              newContent = await gitfs.readFile(lockFilePath, 'utf8');
             } catch (err) {
-              newContent = await fs.readFile(
+              newContent = await gitfs.readFile(
                 lockFilePath.replace(
                   'npm-shrinkwrap.json',
                   'package-lock.json'

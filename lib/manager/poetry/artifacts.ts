@@ -3,12 +3,13 @@ import { quote } from 'shlex';
 import { parse } from 'toml';
 import { logger } from '../../logger';
 import { ExecOptions, exec } from '../../util/exec';
-import { deleteFile } from '../../util/gitfs';
 import {
+  deleteFile,
   getSiblingFileName,
   readLocalFile,
   writeLocalFile,
 } from '../../util/gitfs';
+
 import {
   UpdateArtifact,
   UpdateArtifactsConfig,

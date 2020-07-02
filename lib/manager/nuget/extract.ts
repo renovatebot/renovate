@@ -1,11 +1,11 @@
 import * as path from 'path';
 import findUp from 'find-up';
-import { readFile } from 'fs-extra';
 import { XmlDocument } from 'xmldoc';
 import * as datasourceNuget from '../../datasource/nuget';
 import { logger } from '../../logger';
 import { SkipReason } from '../../types';
 import { clone } from '../../util/clone';
+import { readFile } from '../../util/gitfs';
 import { get } from '../../versioning';
 import * as semverVersioning from '../../versioning/semver';
 import { ExtractConfig, PackageDependency, PackageFile } from '../common';
