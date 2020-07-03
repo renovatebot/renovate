@@ -9,7 +9,7 @@ import * as _util from '../../util';
 import { BinarySource } from '../../util/exec/common';
 import * as _docker from '../../util/exec/docker';
 import * as _env from '../../util/exec/env';
-import * as _fs from '../../util/git/fs';
+import * as _fs from '../../util/gitfs/fs';
 import { ExtractConfig } from '../common';
 import { ifSystemSupportsGradle } from './__testutil__/gradle';
 import { GRADLE_DEPENDENCY_REPORT_FILENAME } from './gradle-updates-report';
@@ -44,11 +44,11 @@ async function setupMocks() {
 
   jest.mock('child_process');
   jest.mock('../../util/exec/env');
-  jest.mock('../../util/git/fs');
+  jest.mock('../../util/gitfs/fs');
   jest.mock('os');
 
   const os: jest.Mocked<typeof _os> = require('os');
-  const fs: jest.Mocked<typeof _fs> = require('../../util/git/fs');
+  const fs: jest.Mocked<typeof _fs> = require('../../util/gitfs/fs');
   const env: jest.Mocked<typeof _env> = require('../../util/exec/env');
   const exec: jest.Mock<typeof _exec> = require('child_process').exec;
   const util: jest.Mocked<typeof _util> = require('../../util');
