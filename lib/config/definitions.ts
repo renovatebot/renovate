@@ -166,6 +166,17 @@ const options: RenovateOptions[] = [
     },
   },
   {
+    name: 'secrets',
+    description:
+      'Object containing secrets, may be encrypted if in repository config',
+    type: 'object',
+    mergeable: true,
+    default: {},
+    additionalProperties: {
+      type: 'string',
+    },
+  },
+  {
     name: 'extends',
     description:
       'Configuration presets to use/extend. Note: does not work if configured in config.js',

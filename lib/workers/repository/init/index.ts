@@ -8,6 +8,7 @@ import { checkOnboardingBranch } from '../onboarding/branch';
 import { initApis } from './apis';
 import { checkBaseBranch } from './base';
 import { mergeRenovateConfig } from './config';
+import { applySecrets } from './secrets';
 import { detectSemanticCommits } from './semantic';
 import { detectVulnerabilityAlerts } from './vulnerability';
 
@@ -29,6 +30,7 @@ export async function initRepo(input: RenovateConfig): Promise<RenovateConfig> {
   config = await checkBaseBranch(config);
   await platform.setBranchPrefix(config.branchPrefix);
   config = await detectVulnerabilityAlerts(config);
+  config = applySecrets(config);
   // istanbul ignore if
   if (config.printConfig) {
     logger.debug({ config }, 'Full resolved config including presets');
