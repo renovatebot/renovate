@@ -2,17 +2,15 @@ import { exec as _exec } from 'child_process';
 import Git from 'simple-git/promise';
 import { join } from 'upath';
 import { envMock, mockExecAll } from '../../../test/execUtil';
-import { mocked, platform } from '../../../test/util';
+import { gitfs, mocked, platform } from '../../../test/util';
 import * as _datasource from '../../datasource';
 import { setUtilConfig } from '../../util';
 import { BinarySource } from '../../util/exec/common';
 import * as docker from '../../util/exec/docker';
 import * as _env from '../../util/exec/env';
-import * as _gitfs from '../../util/git';
 import * as _bundlerHostRules from './host-rules';
 import { updateArtifacts } from '.';
 
-const gitfs: jest.Mocked<typeof _gitfs> = _gitfs as any;
 const exec: jest.Mock<typeof _exec> = _exec as any;
 const env = mocked(_env);
 const datasource = mocked(_datasource);
@@ -22,7 +20,7 @@ jest.mock('fs-extra');
 jest.mock('child_process');
 jest.mock('../../../lib/util/exec/env');
 jest.mock('../../../lib/datasource');
-jest.mock('../../../lib/util/git');
+jest.mock('../../../lib/util/git/fs');
 jest.mock('../../../lib/util/host-rules');
 jest.mock('./host-rules');
 

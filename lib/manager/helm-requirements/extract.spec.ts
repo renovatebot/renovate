@@ -1,9 +1,7 @@
-import * as _gitfs from '../../util/git';
+import { gitfs } from '../../../test/util';
 import { extractPackageFile } from './extract';
 
-jest.mock('../../util/git');
-
-const gitfs: any = _gitfs;
+jest.mock('../../util/git/fs');
 
 describe('lib/manager/helm-requirements/extract', () => {
   describe('extractPackageFile()', () => {

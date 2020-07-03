@@ -14,7 +14,7 @@ import {
   PR_STATE_OPEN,
 } from '../../constants/pull-requests';
 import { BranchStatus } from '../../types';
-import * as _gitfs from '../../util/git';
+import * as _gitvcs from '../../util/git/vcs';
 import * as _hostRules from '../../util/host-rules';
 
 const gitlabApiHost = 'https://gitlab.com';
@@ -22,7 +22,7 @@ const gitlabApiHost = 'https://gitlab.com';
 describe('platform/gitlab', () => {
   let gitlab: Platform;
   let hostRules: jest.Mocked<typeof _hostRules>;
-  let gitfs: jest.Mocked<typeof _gitfs>;
+  let gitvcs: jest.Mocked<typeof _gitvcs>;
   beforeEach(async () => {
     // reset module
     jest.resetModules();
@@ -31,11 +31,11 @@ describe('platform/gitlab', () => {
     jest.mock('../../util/host-rules');
     jest.mock('delay');
     hostRules = require('../../util/host-rules');
-    jest.mock('../../util/git');
-    gitfs = require('../../util/git');
-    gitfs.branchExists.mockResolvedValue(true);
-    gitfs.isBranchStale.mockResolvedValue(true);
-    gitfs.getBranchCommit.mockResolvedValue(
+    jest.mock('../../util/git/vcs');
+    gitvcs = require('../../util/git/vcs');
+    gitvcs.branchExists.mockResolvedValue(true);
+    gitvcs.isBranchStale.mockResolvedValue(true);
+    gitvcs.getBranchCommit.mockResolvedValue(
       '0d9c7726c3d628b7e28af234595cfd20febdbf8e'
     );
     hostRules.find.mockReturnValue({
@@ -578,7 +578,7 @@ describe('platform/gitlab', () => {
     });
     it('throws repository-changed', async () => {
       expect.assertions(2);
-      gitfs.branchExists.mockResolvedValue(false);
+      gitvcs.branchExists.mockResolvedValue(false);
       await initRepo();
       await expect(gitlab.getBranchStatus('somebranch', [])).rejects.toThrow(
         REPOSITORY_CHANGED

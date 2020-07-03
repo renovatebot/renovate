@@ -7,7 +7,7 @@ import {
   REPOSITORY_RENAMED,
 } from '../../constants/error-messages';
 import { BranchStatus } from '../../types';
-import * as _gitfs from '../../util/git';
+import * as _gitvcs from '../../util/git/vcs';
 import { Platform } from '../common';
 
 const githubApiHost = 'https://api.github.com';
@@ -15,7 +15,7 @@ const githubApiHost = 'https://api.github.com';
 describe('platform/github', () => {
   let github: Platform;
   let hostRules: jest.Mocked<typeof import('../../util/host-rules')>;
-  let gitfs: jest.Mocked<typeof _gitfs>;
+  let gitvcs: jest.Mocked<typeof _gitvcs>;
   beforeEach(async () => {
     // reset module
     jest.resetModules();
@@ -24,11 +24,11 @@ describe('platform/github', () => {
     jest.mock('../../util/host-rules');
     github = await import('.');
     hostRules = mocked(await import('../../util/host-rules'));
-    jest.mock('../../util/git');
-    gitfs = mocked(await import('../../util/git'));
-    gitfs.branchExists.mockResolvedValue(true);
-    gitfs.isBranchStale.mockResolvedValue(true);
-    gitfs.getBranchCommit.mockResolvedValue(
+    jest.mock('../../util/git/vcs');
+    gitvcs = mocked(await import('../../util/git/vcs'));
+    gitvcs.branchExists.mockResolvedValue(true);
+    gitvcs.isBranchStale.mockResolvedValue(true);
+    gitvcs.getBranchCommit.mockResolvedValue(
       '0d9c7726c3d628b7e28af234595cfd20febdbf8e'
     );
     delete global.gitAuthor;

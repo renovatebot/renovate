@@ -1,23 +1,21 @@
 import { exec as _exec } from 'child_process';
 import { join } from 'upath';
 import { envMock, mockExecAll } from '../../../test/execUtil';
-import { mocked, platform } from '../../../test/util';
+import { gitfs, mocked, platform } from '../../../test/util';
 import { setUtilConfig } from '../../util';
 import { BinarySource } from '../../util/exec/common';
 import * as docker from '../../util/exec/docker';
 import * as _env from '../../util/exec/env';
 import { StatusResult } from '../../util/git';
-import * as _gitfs from '../../util/git';
 import * as composer from './artifacts';
 
 jest.mock('child_process');
 jest.mock('../../util/exec/env');
-jest.mock('../../util/git');
+jest.mock('../../util/git/fs');
 jest.mock('../../util/host-rules');
 
 const hostRules = require('../../util/host-rules');
 
-const gitfs: jest.Mocked<typeof _gitfs> = _gitfs as any;
 const exec: jest.Mock<typeof _exec> = _exec as any;
 const env = mocked(_env);
 

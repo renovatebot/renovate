@@ -1,10 +1,8 @@
 import { readFileSync } from 'fs';
-import * as _gitfs from '../../util/git';
+import { gitfs } from '../../../test/util';
 import { extractPackageFile } from './extract';
 
-jest.mock('../../util/git');
-
-const gitfs: any = _gitfs;
+jest.mock('../../util/git/fs');
 
 const requirements1 = readFileSync(
   'lib/manager/composer/__fixtures__/composer1.json',

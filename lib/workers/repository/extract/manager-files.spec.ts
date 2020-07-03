@@ -1,15 +1,13 @@
-import { getConfig, mocked } from '../../../../test/util';
+import { getConfig, gitfs, mocked } from '../../../../test/util';
 import { RenovateConfig } from '../../../config';
 import * as _html from '../../../manager/html';
-import * as _gitfs from '../../../util/git';
 import * as _fileMatch from './file-match';
 import { getManagerPackageFiles } from './manager-files';
 
 jest.mock('./file-match');
 jest.mock('../../../manager/html');
-jest.mock('../../../util/git');
+jest.mock('../../../util/git/fs');
 
-const gitfs: any = _gitfs;
 const fileMatch = mocked(_fileMatch);
 const html = mocked(_html);
 

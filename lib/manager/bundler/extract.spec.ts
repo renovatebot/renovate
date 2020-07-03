@@ -1,11 +1,9 @@
 import { readFileSync } from 'fs';
-import * as _gitfs from '../../util/git';
+import { gitfs } from '../../../test/util';
 import { isValid } from '../../versioning/ruby';
 import { extractPackageFile } from './extract';
 
-jest.mock('../../util/git');
-
-const gitfs: any = _gitfs;
+jest.mock('../../util/git/fs');
 
 const railsGemfile = readFileSync(
   'lib/manager/bundler/__fixtures__/Gemfile.rails',

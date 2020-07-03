@@ -8,7 +8,7 @@ import {
 import * as _migrateAndValidate from '../../../config/migrate-validate';
 import { mergeRenovateConfig } from './config';
 
-jest.mock('../../../util/git');
+jest.mock('../../../util/git/fs');
 
 const migrateAndValidate = mocked(_migrateAndValidate);
 

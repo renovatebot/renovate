@@ -10,7 +10,7 @@ const sampleHtml = readFileSync(
   'utf8'
 );
 
-jest.mock('../../util/git');
+jest.mock('../../util/git/fs');
 
 describe('workers/branch/auto-replace', () => {
   describe('doAutoReplace', () => {
