@@ -14,7 +14,7 @@ import {
   PR_STATE_OPEN,
 } from '../../constants/pull-requests';
 import { BranchStatus } from '../../types';
-import * as _git from '../../util/gitfs/git';
+import * as _git from '../../util/git';
 import * as _hostRules from '../../util/host-rules';
 
 const gitlabApiHost = 'https://gitlab.com';
@@ -31,8 +31,8 @@ describe('platform/gitlab', () => {
     jest.mock('../../util/host-rules');
     jest.mock('delay');
     hostRules = require('../../util/host-rules');
-    jest.mock('../../util/gitfs/git');
-    git = require('../../util/gitfs/git');
+    jest.mock('../../util/git');
+    git = require('../../util/git');
     git.branchExists.mockResolvedValue(true);
     git.isBranchStale.mockResolvedValue(true);
     git.getBranchCommit.mockResolvedValue(

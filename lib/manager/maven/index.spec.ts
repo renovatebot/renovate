@@ -4,7 +4,7 @@ import { PackageDependency, PackageFile } from '../common';
 import { extractPackage, resolveParents } from './extract';
 import { extractAllPackageFiles, updateDependency } from './index';
 
-jest.mock('../../util/gitfs/fs');
+jest.mock('../../util/fs');
 
 const pomContent = readFileSync(
   'lib/manager/maven/__fixtures__/simple.pom.xml',

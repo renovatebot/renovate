@@ -10,7 +10,7 @@ import { PLATFORM_TYPE_BITBUCKET_SERVER } from '../../constants/platforms';
 import { PR_STATE_ALL, PR_STATE_OPEN } from '../../constants/pull-requests';
 import { logger } from '../../logger';
 import { BranchStatus } from '../../types';
-import * as gitfs from '../../util/gitfs';
+import * as git from '../../util/git';
 import * as hostRules from '../../util/host-rules';
 import { HttpResponse } from '../../util/http';
 import {
@@ -107,7 +107,7 @@ export async function getRepos(): Promise<string[]> {
 
 export function cleanRepo(): Promise<void> {
   logger.debug(`cleanRepo()`);
-  gitfs.cleanRepo();
+  git.cleanRepo();
   config = {} as any;
   return Promise.resolve();
 }
@@ -175,7 +175,7 @@ export async function initRepo({
   }
 
   const { host, pathname } = url.parse(defaults.endpoint!);
-  const gitUrl = gitfs.getUrl({
+  const gitUrl = git.getUrl({
     protocol: defaults.endpoint!.split(':')[0],
     auth: `${opts.username}:${opts.password}`,
     host: `${host}${pathname}${
@@ -184,7 +184,7 @@ export async function initRepo({
     repository,
   });
 
-  await gitfs.initRepo({
+  await git.initRepo({
     ...config,
     localDir,
     url: gitUrl,
@@ -250,21 +250,21 @@ export async function setBaseBranch(
   branchName: string = config.defaultBranch
 ): Promise<string> {
   config.baseBranch = branchName;
-  const baseBranchSha = await gitfs.setBaseBranch(branchName);
+  const baseBranchSha = await git.setBaseBranch(branchName);
   return baseBranchSha;
 }
 
 export /* istanbul ignore next */ function setBranchPrefix(
   branchPrefix: string
 ): Promise<void> {
-  return gitfs.setBranchPrefix(branchPrefix);
+  return git.setBranchPrefix(branchPrefix);
 }
 
 // Search
 
 // Get full file list
 export function getFileList(): Promise<string[]> {
-  return gitfs.getFileList();
+  return git.getFileList();
 }
 
 // Branch
@@ -272,12 +272,12 @@ export function getFileList(): Promise<string[]> {
 // Returns true if branch exists, otherwise false
 export function branchExists(branchName: string): Promise<boolean> {
   logger.debug(`branchExists(${branchName})`);
-  return gitfs.branchExists(branchName);
+  return git.branchExists(branchName);
 }
 
 export function isBranchStale(branchName: string): Promise<boolean> {
   logger.debug(`isBranchStale(${branchName})`);
-  return gitfs.isBranchStale(branchName);
+  return git.isBranchStale(branchName);
 }
 
 // Gets details for a PR
@@ -400,7 +400,7 @@ export async function getPrList(_args?: any): Promise<Pr[]> {
 
 /* istanbul ignore next */
 export async function getPrFiles(pr: Pr): Promise<string[]> {
-  return gitfs.getBranchFiles(pr.branchName, pr.targetBranch);
+  return git.getBranchFiles(pr.branchName, pr.targetBranch);
 }
 
 // TODO: coverage
@@ -439,13 +439,13 @@ export function getAllRenovateBranches(
   branchPrefix: string
 ): Promise<string[]> {
   logger.debug('getAllRenovateBranches');
-  return gitfs.getAllRenovateBranches(branchPrefix);
+  return git.getAllRenovateBranches(branchPrefix);
 }
 
 export async function commitFiles(
   commitFilesConfig: CommitFilesConfig
 ): Promise<string | null> {
-  const commit = gitfs.commitFiles(commitFilesConfig);
+  const commit = git.commitFiles(commitFilesConfig);
 
   // wait for pr change propagation
   await delay(1000);
@@ -456,7 +456,7 @@ export async function commitFiles(
 
 export function getFile(filePath: string, branchName: string): Promise<string> {
   logger.debug(`getFile(${filePath}, ${branchName})`);
-  return gitfs.getFile(filePath, branchName);
+  return git.getFile(filePath, branchName);
 }
 
 export async function deleteBranch(
@@ -477,30 +477,30 @@ export async function deleteBranch(
       updatePrVersion(pr.number, body.version);
     }
   }
-  return gitfs.deleteBranch(branchName);
+  return git.deleteBranch(branchName);
 }
 
 export function mergeBranch(branchName: string): Promise<void> {
   logger.debug(`mergeBranch(${branchName})`);
-  return gitfs.mergeBranch(branchName);
+  return git.mergeBranch(branchName);
 }
 
 export function getBranchLastCommitTime(branchName: string): Promise<Date> {
   logger.debug(`getBranchLastCommitTime(${branchName})`);
-  return gitfs.getBranchLastCommitTime(branchName);
+  return git.getBranchLastCommitTime(branchName);
 }
 
 export /* istanbul ignore next */ function getRepoStatus(): Promise<
-  gitfs.StatusResult
+  git.StatusResult
 > {
-  return gitfs.getRepoStatus();
+  return git.getRepoStatus();
 }
 
 async function getStatus(
   branchName: string,
   useCache = true
 ): Promise<utils.BitbucketCommitStatus> {
-  const branchCommit = await gitfs.getBranchCommit(branchName);
+  const branchCommit = await git.getBranchCommit(branchName);
 
   return (
     await bitbucketServerHttp.getJson<utils.BitbucketCommitStatus>(
@@ -557,7 +557,7 @@ async function getStatusCheck(
   branchName: string,
   useCache = true
 ): Promise<utils.BitbucketStatus[]> {
-  const branchCommit = await gitfs.getBranchCommit(branchName);
+  const branchCommit = await git.getBranchCommit(branchName);
 
   return utils.accumulateValues(
     `./rest/build-status/1.0/commits/${branchCommit}`,
@@ -610,7 +610,7 @@ export async function setBranchStatus({
   }
   logger.debug({ branch: branchName, context, state }, 'Setting branch status');
 
-  const branchCommit = await gitfs.getBranchCommit(branchName);
+  const branchCommit = await git.getBranchCommit(branchName);
 
   try {
     const body: any = {
@@ -1077,7 +1077,7 @@ export function getPrBody(input: string): string {
 
 export function getCommitMessages(): Promise<string[]> {
   logger.debug(`getCommitMessages()`);
-  return gitfs.getCommitMessages();
+  return git.getCommitMessages();
 }
 
 export function getVulnerabilityAlerts(): Promise<VulnerabilityAlert[]> {

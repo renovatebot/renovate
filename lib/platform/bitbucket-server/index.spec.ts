@@ -7,7 +7,7 @@ import {
 } from '../../constants/error-messages';
 import { PR_STATE_CLOSED, PR_STATE_OPEN } from '../../constants/pull-requests';
 import { BranchStatus } from '../../types';
-import * as _git from '../../util/gitfs/git';
+import * as _git from '../../util/git';
 import { Platform } from '../common';
 
 function repoMock(
@@ -172,11 +172,11 @@ describe('platform/bitbucket-server', () => {
         httpMock.reset();
         httpMock.setup();
         jest.mock('delay');
-        jest.mock('../../util/gitfs/git');
+        jest.mock('../../util/git');
         jest.mock('../../util/host-rules');
         hostRules = require('../../util/host-rules');
         bitbucket = await import('.');
-        git = require('../../util/gitfs/git');
+        git = require('../../util/git');
         git.branchExists.mockResolvedValue(true);
         git.isBranchStale.mockResolvedValue(false);
         git.getBranchCommit.mockResolvedValue(

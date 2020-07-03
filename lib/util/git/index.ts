@@ -8,11 +8,11 @@ import {
   REPOSITORY_EMPTY,
   REPOSITORY_TEMPORARY_ERROR,
   SYSTEM_INSUFFICIENT_DISK_SPACE,
-} from '../../../constants/error-messages';
-import { logger } from '../../../logger';
-import { CommitFilesConfig } from '../../../platform/common';
-import { ExternalHostError } from '../../../types/errors/external-host-error';
-import * as limits from '../../../workers/global/limits';
+} from '../../constants/error-messages';
+import { logger } from '../../logger';
+import { CommitFilesConfig } from '../../platform/common';
+import { ExternalHostError } from '../../types/errors/external-host-error';
+import * as limits from '../../workers/global/limits';
 import { writePrivateKey } from './private-key';
 
 export * from './private-key';

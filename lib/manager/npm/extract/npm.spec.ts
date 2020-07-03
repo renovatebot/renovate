@@ -2,7 +2,7 @@ import { readFileSync } from 'fs';
 import { fs } from '../../../../test/util';
 import { getNpmLock } from './npm';
 
-jest.mock('../../../util/gitfs/fs');
+jest.mock('../../../util/fs');
 
 describe('manager/npm/extract/npm', () => {
   describe('.getNpmLock()', () => {

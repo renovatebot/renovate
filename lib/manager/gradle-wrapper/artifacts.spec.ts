@@ -19,7 +19,7 @@ import { resetPrefetchedImages } from '../../util/exec/docker';
 import * as dcUpdate from '.';
 
 jest.mock('child_process');
-jest.mock('../../util/gitfs/fs');
+jest.mock('../../util/fs');
 jest.mock('../../util/exec/env');
 
 const exec: jest.Mock<typeof _exec> = _exec as any;

@@ -1,7 +1,7 @@
 import fs from 'fs-extra';
 import Git from 'simple-git/promise';
 import tmp from 'tmp-promise';
-import * as git from '.';
+import * as git from './index';
 
 describe('platform/git', () => {
   jest.setTimeout(15000);

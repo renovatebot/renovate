@@ -10,7 +10,7 @@ import { PLATFORM_TYPE_BITBUCKET } from '../../constants/platforms';
 import { PR_STATE_ALL, PR_STATE_OPEN } from '../../constants/pull-requests';
 import { logger } from '../../logger';
 import { BranchStatus } from '../../types';
-import * as gitfs from '../../util/gitfs';
+import * as git from '../../util/git';
 import * as hostRules from '../../util/host-rules';
 import { BitbucketHttp, setBaseUrl } from '../../util/http/bitbucket';
 import { sanitize } from '../../util/sanitize';
@@ -148,14 +148,14 @@ export async function initRepo({
   // `api-staging.<host>` to `staging.<host>`
   const hostnameWithoutApiPrefix = /api[.|-](.+)/.exec(hostname)[1];
 
-  const url = gitfs.getUrl({
+  const url = git.getUrl({
     protocol: 'https',
     auth: `${opts.username}:${opts.password}`,
     hostname: hostnameWithoutApiPrefix,
     repository,
   });
 
-  await gitfs.initRepo({
+  await git.initRepo({
     ...config,
     localDir,
     url,
@@ -179,7 +179,7 @@ export function getRepoForceRebase(): Promise<boolean> {
 
 // Get full file list
 export function getFileList(): Promise<string[]> {
-  return gitfs.getFileList();
+  return git.getFileList();
 }
 
 export async function setBaseBranch(
@@ -188,38 +188,38 @@ export async function setBaseBranch(
   logger.debug(`Setting baseBranch to ${branchName}`);
   config.baseBranch = branchName;
   delete config.baseCommitSHA;
-  const baseBranchSha = await gitfs.setBaseBranch(branchName);
+  const baseBranchSha = await git.setBaseBranch(branchName);
   return baseBranchSha;
 }
 
 export /* istanbul ignore next */ function setBranchPrefix(
   branchPrefix: string
 ): Promise<void> {
-  return gitfs.setBranchPrefix(branchPrefix);
+  return git.setBranchPrefix(branchPrefix);
 }
 
 // Branch
 
 // Returns true if branch exists, otherwise false
 export function branchExists(branchName: string): Promise<boolean> {
-  return gitfs.branchExists(branchName);
+  return git.branchExists(branchName);
 }
 
 export function getAllRenovateBranches(
   branchPrefix: string
 ): Promise<string[]> {
-  return gitfs.getAllRenovateBranches(branchPrefix);
+  return git.getAllRenovateBranches(branchPrefix);
 }
 
 export function isBranchStale(branchName: string): Promise<boolean> {
-  return gitfs.isBranchStale(branchName);
+  return git.isBranchStale(branchName);
 }
 
 export function getFile(
   filePath: string,
   branchName?: string
 ): Promise<string> {
-  return gitfs.getFile(filePath, branchName);
+  return git.getFile(filePath, branchName);
 }
 
 // istanbul ignore next
@@ -248,7 +248,7 @@ export async function getPrList(): Promise<Pr[]> {
 
 /* istanbul ignore next */
 export async function getPrFiles(pr: Pr): Promise<string[]> {
-  return gitfs.getBranchFiles(pr.branchName, pr.targetBranch);
+  return git.getBranchFiles(pr.branchName, pr.targetBranch);
 }
 
 export async function findPr({
@@ -282,31 +282,31 @@ export async function deleteBranch(
       );
     }
   }
-  return gitfs.deleteBranch(branchName);
+  return git.deleteBranch(branchName);
 }
 
 export function getBranchLastCommitTime(branchName: string): Promise<Date> {
-  return gitfs.getBranchLastCommitTime(branchName);
+  return git.getBranchLastCommitTime(branchName);
 }
 
 // istanbul ignore next
-export function getRepoStatus(): Promise<gitfs.StatusResult> {
-  return gitfs.getRepoStatus();
+export function getRepoStatus(): Promise<git.StatusResult> {
+  return git.getRepoStatus();
 }
 
 export function mergeBranch(branchName: string): Promise<void> {
-  return gitfs.mergeBranch(branchName);
+  return git.mergeBranch(branchName);
 }
 
 // istanbul ignore next
 export function commitFiles(
   commitFilesConfig: CommitFilesConfig
 ): Promise<string | null> {
-  return gitfs.commitFiles(commitFilesConfig);
+  return git.commitFiles(commitFilesConfig);
 }
 
 export function getCommitMessages(): Promise<string[]> {
-  return gitfs.getCommitMessages();
+  return git.getCommitMessages();
 }
 
 async function isPrConflicted(prNo: number): Promise<boolean> {
@@ -873,7 +873,7 @@ export async function mergePr(
 // Pull Request
 
 export function cleanRepo(): Promise<void> {
-  gitfs.cleanRepo();
+  git.cleanRepo();
   config = {} as any;
   return Promise.resolve();
 }
