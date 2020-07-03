@@ -55,9 +55,8 @@ export async function updateArtifacts({
   }
   try {
     await writeLocalFile(pipfileName, newPipfileContent);
-    const localLockFileName = join(config.localDir, lockFileName);
     if (config.isLockFileMaintenance) {
-      await deleteLocalFile(localLockFileName);
+      await deleteLocalFile(lockFileName);
     }
     const cmd = 'pipenv lock';
     const tagConstraint = getPythonConstraint(existingLockFileContent, config);
