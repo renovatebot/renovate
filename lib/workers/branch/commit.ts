@@ -1,7 +1,9 @@
 import is from '@sindresorhus/is';
 import minimatch from 'minimatch';
+import { CONFIG_SECRETS_EXPOSED } from '../../constants/error-messages';
 import { logger } from '../../logger';
 import { platform } from '../../platform';
+import { sanitize } from '../../util/sanitize';
 import { BranchConfig } from '../common';
 
 export async function commitFilesToBranch(
@@ -32,6 +34,13 @@ export async function commitFilesToBranch(
   if (config.dryRun) {
     logger.info('DRY-RUN: Would commit files to branch ' + config.branchName);
     return null;
+  }
+  // istanbul ignore if
+  if (
+    config.branchName !== sanitize(config.branchName) ||
+    config.commitMessage !== sanitize(config.commitMessage)
+  ) {
+    throw new Error(CONFIG_SECRETS_EXPOSED);
   }
   // API will know whether to create new branch or not
   return platform.commitFiles({
