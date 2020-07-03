@@ -2,7 +2,7 @@ import { readFileSync } from 'fs';
 import { fs } from '../../../test/util';
 import { PackageDependency, PackageFile } from '../common';
 import { extractPackage, resolveParents } from './extract';
-import { extractAllPackageFiles, updateDependency } from './index';
+import { extractAllPackageFiles, updateDependency } from '.';
 
 jest.mock('../../util/fs');
 
