@@ -138,6 +138,7 @@ describe(getName(__filename), () => {
         presetName: 'custom',
       });
       expect(content).toEqual({ foo: 'bar' });
+      expect(httpMock.getTrace()).toMatchSnapshot();
     });
 
     it('should throws not-found', async () => {
