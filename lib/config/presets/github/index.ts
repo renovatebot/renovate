@@ -1,13 +1,12 @@
-import { PLATFORM_TYPE_GITHUB } from '../../../constants/platforms';
 import { logger } from '../../../logger';
 import { ExternalHostError } from '../../../types/errors/external-host-error';
-import { Http, HttpOptions } from '../../../util/http';
+import { GithubHttp } from '../../../util/http/github';
 import { Preset, PresetConfig } from '../common';
 import { PRESET_DEP_NOT_FOUND, fetchPreset } from '../util';
 
 export const Endpoint = 'https://api.github.com/';
 
-const http = new Http(PLATFORM_TYPE_GITHUB);
+const http = new GithubHttp();
 
 export async function fetchJSONFile(
   repo: string,
@@ -15,14 +14,9 @@ export async function fetchJSONFile(
   endpoint: string
 ): Promise<Preset> {
   const url = `${endpoint}repos/${repo}/contents/${fileName}`;
-  const opts: HttpOptions = {
-    headers: {
-      accept: 'application/vnd.github.v3+json',
-    },
-  };
   let res: { body: { content: string } };
   try {
-    res = await http.getJson(url, opts);
+    res = await http.getJson(url);
   } catch (err) {
     // istanbul ignore if: not testable with nock
     if (err instanceof ExternalHostError) {

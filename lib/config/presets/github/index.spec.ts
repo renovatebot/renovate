@@ -43,9 +43,9 @@ describe(getName(__filename), () => {
       httpMock
         .scope(githubApiHost)
         .get(`${basePath}/default.json`)
-        .reply(500, {})
+        .reply(404, {})
         .get(`${basePath}/renovate.json`)
-        .reply(500, {});
+        .reply(200, {});
 
       await expect(
         github.getPreset({ packageName: 'some/repo' })
@@ -132,7 +132,6 @@ describe(getName(__filename), () => {
         .reply(200, {
           content: Buffer.from('{"foo":"bar"}').toString('base64'),
         });
-
       const content = await github.getPreset({
         packageName: 'some/repo',
         presetName: 'custom',
@@ -148,7 +147,6 @@ describe(getName(__filename), () => {
         .reply(200, {
           content: Buffer.from('{}').toString('base64'),
         });
-
       await expect(
         github.getPreset({
           packageName: 'some/repo',
