@@ -43,9 +43,9 @@ describe(getName(__filename), () => {
       httpMock
         .scope(githubApiHost)
         .get(`${basePath}/default.json`)
-        .reply(500, {})
+        .reply(404, {})
         .get(`${basePath}/renovate.json`)
-        .reply(500, {});
+        .reply(200, {});
 
       await expect(
         github.getPreset({ packageName: 'some/repo' })
