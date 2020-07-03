@@ -6,12 +6,12 @@ import { setUtilConfig } from '../../util';
 import { BinarySource } from '../../util/exec/common';
 import * as docker from '../../util/exec/docker';
 import * as _env from '../../util/exec/env';
-import { StatusResult } from '../../util/gitfs';
+import { StatusResult } from '../../util/git';
 import * as composer from './artifacts';
 
 jest.mock('child_process');
 jest.mock('../../util/exec/env');
-jest.mock('../../util/gitfs/fs');
+jest.mock('../../util/fs');
 jest.mock('../../util/host-rules');
 
 const hostRules = require('../../util/host-rules');

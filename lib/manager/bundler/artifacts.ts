@@ -10,7 +10,7 @@ import {
   getSiblingFileName,
   readLocalFile,
   writeLocalFile,
-} from '../../util/gitfs';
+} from '../../util/fs';
 import { isValid } from '../../versioning/ruby';
 import { UpdateArtifact, UpdateArtifactsResult } from '../common';
 import {

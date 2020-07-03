@@ -14,7 +14,7 @@ import { platform } from '../../../platform';
 import { ExternalHostError } from '../../../types/errors/external-host-error';
 import { getCache } from '../../../util/cache/repository';
 import { clone } from '../../../util/clone';
-import { readLocalFile } from '../../../util/gitfs';
+import { readLocalFile } from '../../../util/fs';
 import * as hostRules from '../../../util/host-rules';
 import { flattenPackageRules } from './flatten';
 

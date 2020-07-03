@@ -1,7 +1,7 @@
 import is from '@sindresorhus/is';
 import { REPOSITORY_DISABLED } from '../../constants/error-messages';
 import { BranchStatus } from '../../types';
-import * as _git from '../../util/gitfs/git';
+import * as _git from '../../util/git';
 import * as _hostRules from '../../util/host-rules';
 import { Platform, RepoParams } from '../common';
 
@@ -16,14 +16,14 @@ describe('platform/azure', () => {
     jest.resetModules();
     jest.mock('./azure-got-wrapper');
     jest.mock('./azure-helper');
-    jest.mock('../../util/gitfs/git');
+    jest.mock('../../util/git');
     jest.mock('../../util/host-rules');
     hostRules = require('../../util/host-rules');
     require('../../util/sanitize').sanitize = jest.fn((input) => input);
     azure = await import('.');
     azureApi = require('./azure-got-wrapper');
     azureHelper = require('./azure-helper');
-    git = require('../../util/gitfs/git');
+    git = require('../../util/git');
     git.branchExists.mockResolvedValue(true);
     git.isBranchStale.mockResolvedValue(false);
     hostRules.find.mockReturnValue({

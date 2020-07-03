@@ -20,7 +20,7 @@ jest.mock('fs-extra');
 jest.mock('child_process');
 jest.mock('../../../lib/util/exec/env');
 jest.mock('../../../lib/datasource');
-jest.mock('../../../lib/util/gitfs/fs');
+jest.mock('../../../lib/util/fs');
 jest.mock('../../../lib/util/host-rules');
 jest.mock('./host-rules');
 

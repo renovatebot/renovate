@@ -18,7 +18,7 @@ import {
 } from '../../constants/error-messages';
 import { logger as _logger } from '../../logger';
 import { BranchStatus } from '../../types';
-import * as _git from '../../util/gitfs/git';
+import * as _git from '../../util/git';
 import { setBaseUrl } from '../../util/http/gitea';
 import * as ght from './gitea-helper';
 
@@ -157,13 +157,13 @@ describe('platform/gitea', () => {
     jest.resetModules();
     jest.clearAllMocks();
     jest.mock('./gitea-helper');
-    jest.mock('../../util/gitfs/git');
+    jest.mock('../../util/git');
     jest.mock('../../logger');
 
     gitea = await import('.');
     helper = (await import('./gitea-helper')) as any;
     logger = (await import('../../logger')).logger as any;
-    gitvcs = require('../../util/gitfs/git');
+    gitvcs = require('../../util/git');
     gitvcs.isBranchStale.mockResolvedValue(false);
     gitvcs.getBranchCommit.mockResolvedValue(mockCommitHash);
 

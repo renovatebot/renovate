@@ -1,9 +1,9 @@
 import os from 'os';
 import path from 'path';
 import fs from 'fs-extra';
-import { PLATFORM_GPG_FAILED } from '../../../constants/error-messages';
-import { logger } from '../../../logger';
-import { exec } from '../../exec';
+import { PLATFORM_GPG_FAILED } from '../../constants/error-messages';
+import { logger } from '../../logger';
+import { exec } from '../exec';
 
 let gitPrivateKey: string;
 let keyId: string;

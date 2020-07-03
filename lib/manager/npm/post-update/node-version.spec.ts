@@ -1,7 +1,7 @@
 import { fs } from '../../../../test/util';
 import { getNodeConstraint } from './node-version';
 
-jest.mock('../../../util/gitfs/fs');
+jest.mock('../../../util/fs');
 
 describe('getNodeConstraint', () => {
   const config = {

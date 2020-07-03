@@ -6,7 +6,7 @@ import { getManagerPackageFiles } from './manager-files';
 
 jest.mock('./file-match');
 jest.mock('../../../manager/html');
-jest.mock('../../../util/gitfs/fs');
+jest.mock('../../../util/fs');
 
 const fileMatch = mocked(_fileMatch);
 const html = mocked(_html);
