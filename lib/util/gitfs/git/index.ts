@@ -15,6 +15,8 @@ import { ExternalHostError } from '../../../types/errors/external-host-error';
 import * as limits from '../../../workers/global/limits';
 import { writePrivateKey } from './private-key';
 
+export * from './private-key';
+
 declare module 'fs-extra' {
   export function exists(pathLike: string): Promise<boolean>;
 }

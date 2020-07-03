@@ -1,12 +1,10 @@
 import { readFileSync } from 'fs';
-import * as _gitfs from '../../util/gitfs';
+import { fs } from '../../../test/util';
 import { PackageDependency, PackageFile } from '../common';
 import { extractPackage, resolveParents } from './extract';
 import { extractAllPackageFiles, updateDependency } from './index';
 
-jest.mock('../../util/gitfs');
-
-const gitfs: any = _gitfs;
+jest.mock('../../util/gitfs/fs');
 
 const pomContent = readFileSync(
   'lib/manager/maven/__fixtures__/simple.pom.xml',
@@ -32,19 +30,19 @@ function selectDep(deps: PackageDependency[], name = 'org.example:quuz') {
 describe('manager/maven', () => {
   describe('extractAllPackageFiles', () => {
     it('should return empty if package has no content', async () => {
-      gitfs.readLocalFile.mockReturnValueOnce(null);
+      fs.readLocalFile.mockResolvedValueOnce(null);
       const res = await extractAllPackageFiles({}, ['random.pom.xml']);
       expect(res).toEqual([]);
     });
 
     it('should return empty for packages with invalid content', async () => {
-      gitfs.readLocalFile.mockReturnValueOnce('invalid content');
+      fs.readLocalFile.mockResolvedValueOnce('invalid content');
       const res = await extractAllPackageFiles({}, ['random.pom.xml']);
       expect(res).toEqual([]);
     });
 
     it('should return package files info', async () => {
-      gitfs.readLocalFile.mockReturnValueOnce(pomContent);
+      fs.readLocalFile.mockResolvedValueOnce(pomContent);
       const packages = await extractAllPackageFiles({}, ['random.pom.xml']);
       // windows path fix
       for (const p of packages) {
@@ -99,9 +97,9 @@ describe('manager/maven', () => {
     });
 
     it('should include registryUrls from parent pom files', async () => {
-      gitfs.readLocalFile
-        .mockReturnValueOnce(pomParent)
-        .mockReturnValueOnce(pomChild);
+      fs.readLocalFile
+        .mockResolvedValueOnce(pomParent)
+        .mockResolvedValueOnce(pomChild);
       const packages = await extractAllPackageFiles({}, [
         'parent.pom.xml',
         'child.pom.xml',
@@ -134,7 +132,7 @@ describe('manager/maven', () => {
     });
 
     it('should update to version of the latest dep in implicit group', async () => {
-      gitfs.readLocalFile.mockReturnValueOnce(origContent);
+      fs.readLocalFile.mockResolvedValueOnce(origContent);
       const [{ deps }] = await extractAllPackageFiles({}, ['pom.xml']);
 
       const dep1 = selectDep(deps, 'org.example:foo-1');
@@ -179,7 +177,7 @@ describe('manager/maven', () => {
     });
 
     it('should return null for ungrouped deps if content was updated outside', async () => {
-      gitfs.readLocalFile.mockReturnValueOnce(origContent);
+      fs.readLocalFile.mockResolvedValueOnce(origContent);
       const [{ deps }] = await extractAllPackageFiles({}, ['pom.xml']);
       const dep = selectDep(deps, 'org.example:bar');
       const upgrade = { ...dep, newValue: '2.0.2' };

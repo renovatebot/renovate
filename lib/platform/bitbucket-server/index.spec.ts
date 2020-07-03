@@ -7,7 +7,7 @@ import {
 } from '../../constants/error-messages';
 import { PR_STATE_CLOSED, PR_STATE_OPEN } from '../../constants/pull-requests';
 import { BranchStatus } from '../../types';
-import * as _gitfs from '../../util/gitfs';
+import * as _git from '../../util/gitfs/git';
 import { Platform } from '../common';
 
 function repoMock(
@@ -143,7 +143,7 @@ describe('platform/bitbucket-server', () => {
     describe(scenarioName, () => {
       let bitbucket: Platform;
       let hostRules: jest.Mocked<typeof import('../../util/host-rules')>;
-      let gitfs: jest.Mocked<typeof _gitfs>;
+      let git: jest.Mocked<typeof _git>;
 
       async function initRepo(config = {}): Promise<nock.Scope> {
         const scope = httpMock
@@ -172,14 +172,14 @@ describe('platform/bitbucket-server', () => {
         httpMock.reset();
         httpMock.setup();
         jest.mock('delay');
-        jest.mock('../../util/gitfs');
+        jest.mock('../../util/gitfs/git');
         jest.mock('../../util/host-rules');
         hostRules = require('../../util/host-rules');
         bitbucket = await import('.');
-        gitfs = require('../../util/gitfs');
-        gitfs.branchExists.mockResolvedValue(true);
-        gitfs.isBranchStale.mockResolvedValue(false);
-        gitfs.getBranchCommit.mockResolvedValue(
+        git = require('../../util/gitfs/git');
+        git.branchExists.mockResolvedValue(true);
+        git.isBranchStale.mockResolvedValue(false);
+        git.getBranchCommit.mockResolvedValue(
           '0d9c7726c3d628b7e28af234595cfd20febdbf8e'
         );
         const endpoint =
@@ -1788,7 +1788,7 @@ Followed by some information.
         });
 
         it('throws repository-changed', async () => {
-          gitfs.branchExists.mockResolvedValue(false);
+          git.branchExists.mockResolvedValue(false);
           await initRepo();
           await expect(
             bitbucket.getBranchStatus('somebranch', [])

@@ -1,18 +1,16 @@
-import * as _gitfs from '../../util/gitfs';
+import { fs } from '../../../test/util';
 import { extractPackageFile } from './extract';
 
-jest.mock('../../util/gitfs');
-
-const gitfs: any = _gitfs;
+jest.mock('../../util/gitfs/fs');
 
 describe('lib/manager/helm-requirements/extract', () => {
   describe('extractPackageFile()', () => {
     beforeEach(() => {
       jest.resetAllMocks();
-      gitfs.readLocalFile = jest.fn();
+      fs.readLocalFile = jest.fn();
     });
     it('skips invalid registry urls', async () => {
-      gitfs.readLocalFile.mockResolvedValueOnce(`
+      fs.readLocalFile.mockResolvedValueOnce(`
       apiVersion: v1
       appVersion: "1.0"
       description: A Helm chart for Kubernetes
@@ -41,7 +39,7 @@ describe('lib/manager/helm-requirements/extract', () => {
       expect(result.deps.every((dep) => dep.skipReason)).toEqual(true);
     });
     it('parses simple requirements.yaml correctly', async () => {
-      gitfs.readLocalFile.mockResolvedValueOnce(`
+      fs.readLocalFile.mockResolvedValueOnce(`
       apiVersion: v1
       appVersion: "1.0"
       description: A Helm chart for Kubernetes
@@ -67,7 +65,7 @@ describe('lib/manager/helm-requirements/extract', () => {
       expect(result).toMatchSnapshot();
     });
     it('parses simple requirements.yaml but skips if necessary fields missing', async () => {
-      gitfs.readLocalFile.mockResolvedValueOnce(`
+      fs.readLocalFile.mockResolvedValueOnce(`
       apiVersion: v1
       appVersion: "1.0"
       description: A Helm chart for Kubernetes
@@ -82,7 +80,7 @@ describe('lib/manager/helm-requirements/extract', () => {
       expect(result).toBeNull();
     });
     it('resolves aliased registry urls', async () => {
-      gitfs.readLocalFile.mockResolvedValueOnce(`
+      fs.readLocalFile.mockResolvedValueOnce(`
       apiVersion: v1
       appVersion: "1.0"
       description: A Helm chart for Kubernetes
@@ -106,7 +104,7 @@ describe('lib/manager/helm-requirements/extract', () => {
       expect(result.deps.every((dep) => dep.skipReason)).toEqual(false);
     });
     it("doesn't fail if Chart.yaml is invalid", async () => {
-      gitfs.readLocalFile.mockResolvedValueOnce(`
+      fs.readLocalFile.mockResolvedValueOnce(`
       Invalid Chart.yaml content.
       arr:
       [
@@ -129,7 +127,7 @@ describe('lib/manager/helm-requirements/extract', () => {
       expect(result).toBeNull();
     });
     it('skips local dependencies', async () => {
-      gitfs.readLocalFile.mockResolvedValueOnce(`
+      fs.readLocalFile.mockResolvedValueOnce(`
       apiVersion: v1
       appVersion: "1.0"
       description: A Helm chart for Kubernetes
@@ -155,7 +153,7 @@ describe('lib/manager/helm-requirements/extract', () => {
       expect(result).toMatchSnapshot();
     });
     it('returns null if no dependencies', async () => {
-      gitfs.readLocalFile.mockResolvedValueOnce(`
+      fs.readLocalFile.mockResolvedValueOnce(`
       apiVersion: v1
       appVersion: "1.0"
       description: A Helm chart for Kubernetes
@@ -174,7 +172,7 @@ describe('lib/manager/helm-requirements/extract', () => {
       expect(result).toBeNull();
     });
     it('returns null if requirements.yaml is invalid', async () => {
-      gitfs.readLocalFile.mockResolvedValueOnce(`
+      fs.readLocalFile.mockResolvedValueOnce(`
       apiVersion: v1
       appVersion: "1.0"
       description: A Helm chart for Kubernetes
