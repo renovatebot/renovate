@@ -1,8 +1,8 @@
 import { readFileSync } from 'fs';
-import * as _gitfs from '../../../util/gitfs';
+import * as _gitfs from '../../../util/git';
 import { getYarnLock } from './yarn';
 
-jest.mock('../../../util/gitfs');
+jest.mock('../../../util/git');
 
 const gitfs: any = _gitfs;
 

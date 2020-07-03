@@ -1,7 +1,7 @@
 import * as datasourceRubygems from '../../datasource/rubygems';
 import { logger } from '../../logger';
 import { SkipReason } from '../../types';
-import { readLocalFile } from '../../util/gitfs';
+import { readLocalFile } from '../../util/git';
 import { regEx } from '../../util/regex';
 import { PackageDependency, PackageFile } from '../common';
 import { extractLockFileEntries } from './locked-version';

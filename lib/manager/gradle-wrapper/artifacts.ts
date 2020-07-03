@@ -4,7 +4,7 @@ import Git from 'simple-git/promise';
 import { logger } from '../../logger';
 import { platform } from '../../platform';
 import { ExecOptions, exec } from '../../util/exec';
-import { readLocalFile, writeLocalFile } from '../../util/gitfs';
+import { readLocalFile, writeLocalFile } from '../../util/git';
 import { Http } from '../../util/http';
 import { UpdateArtifact, UpdateArtifactsResult } from '../common';
 import { gradleWrapperFileName, prepareGradleCommand } from '../gradle/index';

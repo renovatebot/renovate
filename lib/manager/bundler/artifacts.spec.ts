@@ -8,7 +8,7 @@ import { setUtilConfig } from '../../util';
 import { BinarySource } from '../../util/exec/common';
 import * as docker from '../../util/exec/docker';
 import * as _env from '../../util/exec/env';
-import * as _gitfs from '../../util/gitfs';
+import * as _gitfs from '../../util/git';
 import * as _bundlerHostRules from './host-rules';
 import { updateArtifacts } from '.';
 
@@ -22,7 +22,7 @@ jest.mock('fs-extra');
 jest.mock('child_process');
 jest.mock('../../../lib/util/exec/env');
 jest.mock('../../../lib/datasource');
-jest.mock('../../../lib/util/gitfs');
+jest.mock('../../../lib/util/git');
 jest.mock('../../../lib/util/host-rules');
 jest.mock('./host-rules');
 

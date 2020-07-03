@@ -3,7 +3,7 @@ import yaml from 'js-yaml';
 import * as datasourceGitlabTags from '../../datasource/gitlab-tags';
 import { logger } from '../../logger';
 import { SkipReason } from '../../types';
-import { readLocalFile } from '../../util/gitfs';
+import { readLocalFile } from '../../util/git';
 import { ExtractConfig, PackageDependency, PackageFile } from '../common';
 import * as gitlabci from '../gitlabci/extract';
 

@@ -1,7 +1,7 @@
 import fs from 'fs';
 import path from 'path';
 import { getConfig } from '../../../config/defaults';
-import * as _gitfs from '../../../util/gitfs/fs';
+import * as _gitfs from '../../../util/git/fs';
 import * as npmExtract from '.';
 
 const gitfs: any = _gitfs;

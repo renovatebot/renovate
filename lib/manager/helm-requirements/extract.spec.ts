@@ -1,7 +1,7 @@
-import * as _gitfs from '../../util/gitfs';
+import * as _gitfs from '../../util/git';
 import { extractPackageFile } from './extract';
 
-jest.mock('../../util/gitfs');
+jest.mock('../../util/git');
 
 const gitfs: any = _gitfs;
 

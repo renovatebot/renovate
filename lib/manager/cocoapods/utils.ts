@@ -1,6 +1,6 @@
 import { join } from 'upath';
 import { logger } from '../../logger';
-import { ensureDir } from '../../util/gitfs';
+import { ensureDir } from '../../util/git';
 import { UpdateArtifactsConfig } from '../common';
 
 export async function getCocoaPodsHome(

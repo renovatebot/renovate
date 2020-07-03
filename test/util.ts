@@ -4,7 +4,7 @@ import { RenovateConfig as _RenovateConfig } from '../lib/config';
 import { getConfig } from '../lib/config/defaults';
 import { platform as _platform } from '../lib/platform';
 import * as _env from '../lib/util/exec/env';
-import * as _gitfs from '../lib/util/gitfs';
+import * as _gitfs from '../lib/util/git';
 import * as _hostRules from '../lib/util/host-rules';
 
 /**

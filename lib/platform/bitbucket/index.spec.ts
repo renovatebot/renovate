@@ -3,7 +3,7 @@ import * as httpMock from '../../../test/httpMock';
 import { REPOSITORY_DISABLED } from '../../constants/error-messages';
 import { logger as _logger } from '../../logger';
 import { BranchStatus } from '../../types';
-import * as _gitfs from '../../util/gitfs';
+import * as _gitfs from '../../util/git';
 import { setBaseUrl } from '../../util/http/bitbucket';
 import { Platform, RepoParams } from '../common';
 
@@ -55,13 +55,13 @@ describe('platform/bitbucket', () => {
     jest.resetModules();
     httpMock.reset();
     httpMock.setup();
-    jest.mock('../../util/gitfs');
+    jest.mock('../../util/git');
     jest.mock('../../util/host-rules');
     jest.mock('../../logger');
     hostRules = require('../../util/host-rules');
     bitbucket = await import('.');
     logger = (await import('../../logger')).logger as any;
-    gitfs = require('../../util/gitfs');
+    gitfs = require('../../util/git');
     gitfs.branchExists.mockResolvedValue(true);
     gitfs.isBranchStale.mockResolvedValue(false);
     // clean up hostRules

@@ -2,7 +2,7 @@ import findUp from 'find-up';
 import { join } from 'upath';
 import { RenovateConfig } from '../config/common';
 import { setExecConfig } from './exec';
-import { setFsConfig } from './gitfs';
+import { setFsConfig } from './git';
 
 export async function setUtilConfig(
   config: Partial<RenovateConfig>

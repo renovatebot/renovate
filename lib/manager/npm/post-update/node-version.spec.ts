@@ -1,8 +1,8 @@
 import { mocked } from '../../../../test/util';
-import * as _gitfs from '../../../util/gitfs';
+import * as _gitfs from '../../../util/git';
 import { getNodeConstraint } from './node-version';
 
-jest.mock('../../../util/gitfs');
+jest.mock('../../../util/git');
 
 const gitfs = mocked(_gitfs);
 

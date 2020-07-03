@@ -3,7 +3,7 @@ import { join } from 'upath';
 import { logger } from '../../logger';
 import { platform } from '../../platform';
 import { ExecOptions, exec } from '../../util/exec';
-import { readLocalFile } from '../../util/gitfs';
+import { readLocalFile } from '../../util/git';
 import {
   UpdateArtifact,
   UpdateArtifactsConfig,

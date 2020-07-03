@@ -18,7 +18,7 @@ import { PLATFORM_TYPE_GITLAB } from '../../constants/platforms';
 import { PR_STATE_ALL, PR_STATE_OPEN } from '../../constants/pull-requests';
 import { logger } from '../../logger';
 import { BranchStatus } from '../../types';
-import * as gitfs from '../../util/gitfs';
+import * as gitfs from '../../util/git';
 import * as hostRules from '../../util/host-rules';
 import { HttpResponse } from '../../util/http';
 import { GitlabHttp, setBaseUrl } from '../../util/http/gitlab';
