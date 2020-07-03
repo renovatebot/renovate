@@ -7,7 +7,7 @@ import {
   get,
 } from '../../../manager';
 import { PackageFile } from '../../../manager/common';
-import { readLocalFile } from '../../../util/git';
+import { readLocalFile } from '../../../util/gitfs';
 
 export async function getManagerPackageFiles(
   config: RenovateConfig

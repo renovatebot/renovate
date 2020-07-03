@@ -3,7 +3,7 @@ import * as httpMock from '../../../test/httpMock';
 import { REPOSITORY_DISABLED } from '../../constants/error-messages';
 import { logger as _logger } from '../../logger';
 import { BranchStatus } from '../../types';
-import * as _gitvcs from '../../util/git/vcs';
+import * as _git from '../../util/gitfs/git';
 import { setBaseUrl } from '../../util/http/bitbucket';
 import { Platform, RepoParams } from '../common';
 
@@ -48,22 +48,22 @@ const commits = {
 describe('platform/bitbucket', () => {
   let bitbucket: Platform;
   let hostRules: jest.Mocked<typeof import('../../util/host-rules')>;
-  let gitvcs: jest.Mocked<typeof _gitvcs>;
+  let git: jest.Mocked<typeof _git>;
   let logger: jest.Mocked<typeof _logger>;
   beforeEach(async () => {
     // reset module
     jest.resetModules();
     httpMock.reset();
     httpMock.setup();
-    jest.mock('../../util/git/vcs');
+    jest.mock('../../util/gitfs/git');
     jest.mock('../../util/host-rules');
     jest.mock('../../logger');
     hostRules = require('../../util/host-rules');
     bitbucket = await import('.');
     logger = (await import('../../logger')).logger as any;
-    gitvcs = require('../../util/git/vcs');
-    gitvcs.branchExists.mockResolvedValue(true);
-    gitvcs.isBranchStale.mockResolvedValue(false);
+    git = require('../../util/gitfs/git');
+    git.branchExists.mockResolvedValue(true);
+    git.isBranchStale.mockResolvedValue(false);
     // clean up hostRules
     hostRules.clear();
     hostRules.find.mockReturnValue({

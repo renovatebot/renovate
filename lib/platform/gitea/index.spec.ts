@@ -18,7 +18,7 @@ import {
 } from '../../constants/error-messages';
 import { logger as _logger } from '../../logger';
 import { BranchStatus } from '../../types';
-import * as _gitvcs from '../../util/git/vcs';
+import * as _git from '../../util/gitfs/git';
 import { setBaseUrl } from '../../util/http/gitea';
 import * as ght from './gitea-helper';
 
@@ -26,7 +26,7 @@ describe('platform/gitea', () => {
   let gitea: Platform;
   let helper: jest.Mocked<typeof import('./gitea-helper')>;
   let logger: jest.Mocked<typeof _logger>;
-  let gitvcs: jest.Mocked<typeof _gitvcs>;
+  let gitvcs: jest.Mocked<typeof _git>;
 
   const mockCommitHash = '0d9c7726c3d628b7e28af234595cfd20febdbf8e';
 
@@ -157,13 +157,13 @@ describe('platform/gitea', () => {
     jest.resetModules();
     jest.clearAllMocks();
     jest.mock('./gitea-helper');
-    jest.mock('../../util/git/vcs');
+    jest.mock('../../util/gitfs/git');
     jest.mock('../../logger');
 
     gitea = await import('.');
     helper = (await import('./gitea-helper')) as any;
     logger = (await import('../../logger')).logger as any;
-    gitvcs = require('../../util/git/vcs');
+    gitvcs = require('../../util/gitfs/git');
     gitvcs.isBranchStale.mockResolvedValue(false);
     gitvcs.getBranchCommit.mockResolvedValue(mockCommitHash);
 

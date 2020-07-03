@@ -4,7 +4,7 @@ import upath from 'upath';
 import { logger } from '../../logger';
 import { exec } from '../../util/exec';
 import { BinarySource } from '../../util/exec/common';
-import { readLocalFile } from '../../util/git';
+import { readLocalFile } from '../../util/gitfs';
 import { UpdateArtifact, UpdateArtifactsResult } from '../common';
 
 export async function updateArtifacts({

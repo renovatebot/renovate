@@ -7,7 +7,7 @@ import {
   getSiblingFileName,
   readLocalFile,
   writeLocalFile,
-} from '../../util/git';
+} from '../../util/gitfs';
 import { UpdateArtifact, UpdateArtifactsResult } from '../common';
 import { getCocoaPodsHome } from './utils';
 

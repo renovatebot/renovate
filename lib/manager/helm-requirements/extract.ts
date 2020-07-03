@@ -3,7 +3,7 @@ import yaml from 'js-yaml';
 import * as datasourceHelm from '../../datasource/helm';
 import { logger } from '../../logger';
 import { SkipReason } from '../../types';
-import { getSiblingFileName, readLocalFile } from '../../util/git';
+import { getSiblingFileName, readLocalFile } from '../../util/gitfs';
 import { ExtractConfig, PackageDependency, PackageFile } from '../common';
 
 export async function extractPackageFile(

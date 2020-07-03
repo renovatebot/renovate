@@ -8,8 +8,8 @@ import * as httpMock from '../../../test/httpMock';
 import {
   addReplacingSerializer,
   env,
+  fs,
   getName,
-  gitfs,
   partial,
   platform,
 } from '../../../test/util';
@@ -19,7 +19,7 @@ import { resetPrefetchedImages } from '../../util/exec/docker';
 import * as dcUpdate from '.';
 
 jest.mock('child_process');
-jest.mock('../../util/git/fs');
+jest.mock('../../util/gitfs/fs');
 jest.mock('../../util/exec/env');
 
 const exec: jest.Mock<typeof _exec> = _exec as any;
@@ -51,7 +51,7 @@ describe(getName(__filename), () => {
     await setUtilConfig(config);
     resetPrefetchedImages();
 
-    gitfs.readLocalFile.mockResolvedValue('test');
+    fs.readLocalFile.mockResolvedValue('test');
   });
 
   afterEach(() => {

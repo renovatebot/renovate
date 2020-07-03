@@ -1,6 +1,6 @@
 import { validRange } from 'semver';
 import { logger } from '../../../logger';
-import { getSiblingFileName, readLocalFile } from '../../../util/git';
+import { getSiblingFileName, readLocalFile } from '../../../util/gitfs';
 import { PostUpdateConfig } from '../../common';
 
 async function getNodeFile(filename: string): Promise<string> | null {

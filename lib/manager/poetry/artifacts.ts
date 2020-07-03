@@ -8,7 +8,7 @@ import {
   getSiblingFileName,
   readLocalFile,
   writeLocalFile,
-} from '../../util/git';
+} from '../../util/gitfs';
 import {
   UpdateArtifact,
   UpdateArtifactsConfig,
