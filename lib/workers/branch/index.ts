@@ -25,7 +25,7 @@ import { ExternalHostError } from '../../types/errors/external-host-error';
 import { emojify } from '../../util/emoji';
 import { exec } from '../../util/exec';
 import { readLocalFile, writeLocalFile } from '../../util/fs';
-import { branchExists, getRepoStatus } from '../../util/git';
+import { getRepoStatus, branchExists as gitBranchExists } from '../../util/git';
 import { regEx } from '../../util/regex';
 import { BranchConfig, PrResult, ProcessBranchResult } from '../common';
 import { checkAutoMerge, ensurePr } from '../pr';
@@ -63,9 +63,9 @@ export async function processBranch(
   );
   logger.trace({ config }, 'branch config');
   await platform.setBaseBranch(config.baseBranch);
-  const isBranchExisting = await branchExists(config.branchName);
+  const branchExists = await gitBranchExists(config.branchName);
   const branchPr = await platform.getBranchPr(config.branchName);
-  logger.debug(`branchExists=${isBranchExisting}`);
+  logger.debug(`branchExists=${branchExists}`);
   const masterIssueCheck = (config.masterIssueChecks || {})[config.branchName];
   // istanbul ignore if
   if (masterIssueCheck) {
@@ -113,7 +113,7 @@ export async function processBranch(
             });
           }
         }
-        if (isBranchExisting) {
+        if (branchExists) {
           if (config.dryRun) {
             logger.info('DRY-RUN: Would delete branch ' + config.branchName);
           } else {
@@ -129,7 +129,7 @@ export async function processBranch(
       return 'already-existed';
     }
     // istanbul ignore if
-    if (!isBranchExisting && config.masterIssueApproval) {
+    if (!branchExists && config.masterIssueApproval) {
       if (masterIssueCheck) {
         logger.debug(`Branch ${config.branchName} is approved for creation`);
       } else {
@@ -138,7 +138,7 @@ export async function processBranch(
       }
     }
     if (
-      !isBranchExisting &&
+      !branchExists &&
       prHourlyLimitReached &&
       !masterIssueCheck &&
       !config.vulnerabilityAlert
@@ -148,7 +148,7 @@ export async function processBranch(
       );
       return 'pr-hourly-limit-reached';
     }
-    if (isBranchExisting) {
+    if (branchExists) {
       logger.debug('Checking if PR has been edited');
       if (branchPr) {
         logger.debug('Found existing branch PR');
@@ -206,7 +206,7 @@ export async function processBranch(
     // Check schedule
     config.isScheduledNow = isScheduledNow(config);
     if (!config.isScheduledNow && !masterIssueCheck) {
-      if (!isBranchExisting) {
+      if (!branchExists) {
         logger.debug('Skipping branch creation as not within schedule');
         return 'not-scheduled';
       }
@@ -270,7 +270,7 @@ export async function processBranch(
       // Don't create a branch if we know it will be status 'pending'
       if (
         !masterIssueCheck &&
-        !isBranchExisting &&
+        !branchExists &&
         config.stabilityStatus === BranchStatus.yellow &&
         ['not-pending', 'status-success'].includes(config.prCreation)
       ) {
@@ -424,7 +424,7 @@ export async function processBranch(
           logger.debug(
             'PR is older than a day, raise PR with lock file errors'
           );
-        } else if (isBranchExisting) {
+        } else if (branchExists) {
           logger.debug(
             'PR is less than a day old but branchExists so updating anyway'
           );
@@ -439,11 +439,11 @@ export async function processBranch(
     config.forceCommit =
       !!masterIssueCheck || config.rebaseRequested || branchPr?.isConflicted;
     const commitHash = await commitFilesToBranch(config);
-    if (!commitHash && !isBranchExisting) {
+    if (!commitHash && !branchExists) {
       return 'no-work';
     }
     if (commitHash) {
-      const action = isBranchExisting ? 'updated' : 'created';
+      const action = branchExists ? 'updated' : 'created';
       logger.info({ commitHash }, `Branch ${action}`);
     }
     // Set branch statuses
@@ -461,7 +461,7 @@ export async function processBranch(
     }
 
     // Try to automerge branch and finish if successful, but only if branch already existed before this run
-    if (isBranchExisting || !config.requiredStatusChecks) {
+    if (branchExists || !config.requiredStatusChecks) {
       const mergeStatus = await tryBranchAutomerge(config);
       logger.debug(`mergeStatus=${mergeStatus}`);
       if (mergeStatus === 'automerged') {
@@ -659,7 +659,7 @@ export async function processBranch(
     // Otherwise don't throw here - we don't want to stop the other renovations
     logger.error({ err }, `Error ensuring PR: ${err.message}`);
   }
-  if (!isBranchExisting) {
+  if (!branchExists) {
     return 'pr-created';
   }
   return 'done';
