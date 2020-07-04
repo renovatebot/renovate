@@ -2,6 +2,7 @@ import { RenovateConfig } from '../../../config';
 import { logger } from '../../../logger';
 import { platform } from '../../../platform';
 import * as memCache from '../../../util/cache/memory';
+import * as repositoryCache from '../../../util/cache/repository';
 import { checkIfConfigured } from '../configured';
 import { checkOnboardingBranch } from '../onboarding/branch';
 import { initApis } from './apis';
@@ -12,6 +13,7 @@ import { detectVulnerabilityAlerts } from './vulnerability';
 
 export async function initRepo(input: RenovateConfig): Promise<RenovateConfig> {
   memCache.init();
+  await repositoryCache.initialize(input);
   let config: RenovateConfig = {
     ...input,
     errors: [],

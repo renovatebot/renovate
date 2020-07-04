@@ -7,8 +7,8 @@ import {
 } from '../../constants/error-messages';
 import { PR_STATE_CLOSED, PR_STATE_OPEN } from '../../constants/pull-requests';
 import { BranchStatus } from '../../types';
+import * as _git from '../../util/git';
 import { Platform } from '../common';
-import { Storage } from '../git';
 
 function repoMock(
   endpoint: URL | string,
@@ -143,9 +143,7 @@ describe('platform/bitbucket-server', () => {
     describe(scenarioName, () => {
       let bitbucket: Platform;
       let hostRules: jest.Mocked<typeof import('../../util/host-rules')>;
-      let GitStorage: jest.Mock<Storage> & {
-        getUrl: jest.MockInstance<any, any>;
-      };
+      let git: jest.Mocked<typeof _git>;
 
       async function initRepo(config = {}): Promise<nock.Scope> {
         const scope = httpMock
@@ -174,32 +172,15 @@ describe('platform/bitbucket-server', () => {
         httpMock.reset();
         httpMock.setup();
         jest.mock('delay');
-        jest.mock('../git');
+        jest.mock('../../util/git');
         jest.mock('../../util/host-rules');
         hostRules = require('../../util/host-rules');
         bitbucket = await import('.');
-        GitStorage = require('../git').Storage;
-        GitStorage.mockImplementation(
-          () =>
-            ({
-              initRepo: jest.fn(),
-              cleanRepo: jest.fn(),
-              getFileList: jest.fn(),
-              branchExists: jest.fn(() => true),
-              isBranchStale: jest.fn(() => false),
-              setBaseBranch: jest.fn(),
-              getBranchLastCommitTime: jest.fn(),
-              getAllRenovateBranches: jest.fn(),
-              getCommitMessages: jest.fn(),
-              getFile: jest.fn(),
-              commitFiles: jest.fn(),
-              mergeBranch: jest.fn(),
-              deleteBranch: jest.fn(),
-              getRepoStatus: jest.fn(),
-              getBranchCommit: jest.fn(
-                () => '0d9c7726c3d628b7e28af234595cfd20febdbf8e'
-              ),
-            } as any)
+        git = require('../../util/git');
+        git.branchExists.mockResolvedValue(true);
+        git.isBranchStale.mockResolvedValue(false);
+        git.getBranchCommit.mockResolvedValue(
+          '0d9c7726c3d628b7e28af234595cfd20febdbf8e'
         );
         const endpoint =
           scenarioName === 'endpoint with path'
@@ -214,10 +195,6 @@ describe('platform/bitbucket-server', () => {
           username: 'abc',
           password: '123',
         });
-      });
-
-      afterEach(async () => {
-        await bitbucket.cleanRepo();
       });
 
       describe('initPlatform()', () => {
@@ -1807,15 +1784,7 @@ Followed by some information.
         });
 
         it('throws repository-changed', async () => {
-          GitStorage.mockImplementationOnce(
-            () =>
-              ({
-                initRepo: jest.fn(),
-                branchExists: jest.fn(() => Promise.resolve(false)),
-                cleanRepo: jest.fn(),
-              } as any)
-          );
-
+          git.branchExists.mockResolvedValue(false);
           await initRepo();
           await expect(
             bitbucket.getBranchStatus('somebranch', [])

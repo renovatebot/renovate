@@ -10,7 +10,7 @@ import {
   deleteLocalFile,
   getSiblingFileName,
   readLocalFile,
-} from '../../../util/gitfs';
+} from '../../../util/fs';
 import * as nodeVersioning from '../../../versioning/node';
 import { isValid, isVersion } from '../../../versioning/npm';
 import {

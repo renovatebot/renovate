@@ -18,6 +18,7 @@ import {
 } from '../../constants/error-messages';
 import { logger as _logger } from '../../logger';
 import { BranchStatus } from '../../types';
+import * as _git from '../../util/git';
 import { setBaseUrl } from '../../util/http/gitea';
 import * as ght from './gitea-helper';
 
@@ -25,7 +26,7 @@ describe('platform/gitea', () => {
   let gitea: Platform;
   let helper: jest.Mocked<typeof import('./gitea-helper')>;
   let logger: jest.Mocked<typeof _logger>;
-  let GitStorage: jest.Mocked<typeof import('../git').Storage> & jest.Mock;
+  let gitvcs: jest.Mocked<typeof _git>;
 
   const mockCommitHash = '0d9c7726c3d628b7e28af234595cfd20febdbf8e';
 
@@ -152,53 +153,19 @@ describe('platform/gitea', () => {
     },
   ];
 
-  const gsmInitRepo = jest.fn();
-  const gsmCleanRepo = jest.fn();
-  const gsmSetBaseBranch = jest.fn();
-  const gsmGetCommitMessages = jest.fn();
-  const gsmGetAllRenovateBranches = jest.fn();
-  const gsmGetFileList = jest.fn();
-  const gsmGetRepoStatus = jest.fn();
-  const gsmGetFile = jest.fn();
-  const gsmGetBranchLastCommitTime = jest.fn();
-  const gsmMergeBranch = jest.fn();
-  const gsmBranchExists = jest.fn();
-  const gsmSetBranchPrefix = jest.fn();
-  const gsmCommitFilesToBranch = jest.fn();
-  const gsmDeleteBranch = jest.fn();
-  const gsmIsBranchStale = jest.fn(() => false);
-  const gsmGetBranchCommit = jest.fn(() => mockCommitHash);
-
   beforeEach(async () => {
     jest.resetModules();
     jest.clearAllMocks();
     jest.mock('./gitea-helper');
-    jest.mock('../git');
+    jest.mock('../../util/git');
     jest.mock('../../logger');
 
     gitea = await import('.');
     helper = (await import('./gitea-helper')) as any;
     logger = (await import('../../logger')).logger as any;
-    GitStorage = (await import('../git')).Storage as any;
-
-    GitStorage.mockImplementation(() => ({
-      initRepo: gsmInitRepo,
-      cleanRepo: gsmCleanRepo,
-      setBaseBranch: gsmSetBaseBranch,
-      getCommitMessages: gsmGetCommitMessages,
-      getAllRenovateBranches: gsmGetAllRenovateBranches,
-      getFileList: gsmGetFileList,
-      getRepoStatus: gsmGetRepoStatus,
-      getFile: gsmGetFile,
-      getBranchLastCommitTime: gsmGetBranchLastCommitTime,
-      mergeBranch: gsmMergeBranch,
-      branchExists: gsmBranchExists,
-      setBranchPrefix: gsmSetBranchPrefix,
-      isBranchStale: gsmIsBranchStale,
-      getBranchCommit: gsmGetBranchCommit,
-      commitFiles: gsmCommitFilesToBranch,
-      deleteBranch: gsmDeleteBranch,
-    }));
+    gitvcs = require('../../util/git');
+    gitvcs.isBranchStale.mockResolvedValue(false);
+    gitvcs.getBranchCommit.mockResolvedValue(mockCommitHash);
 
     global.gitAuthor = { name: 'Renovate', email: 'renovate@example.com' };
 
@@ -361,19 +328,6 @@ describe('platform/gitea', () => {
     });
   });
 
-  describe('cleanRepo', () => {
-    it('does not throw an error with uninitialized repo', async () => {
-      await gitea.cleanRepo();
-      expect(gsmCleanRepo).not.toHaveBeenCalled();
-    });
-
-    it('propagates call to storage class with initialized repo', async () => {
-      await initFakeRepo();
-      await gitea.cleanRepo();
-      expect(gsmCleanRepo).toHaveBeenCalledTimes(1);
-    });
-  });
-
   describe('setBranchStatus', () => {
     const setBranchStatus = async (bsc?: Partial<BranchStatusConfig>) => {
       await initFakeRepo();
@@ -443,16 +397,18 @@ describe('platform/gitea', () => {
       await initFakeRepo();
       await gitea.setBaseBranch();
 
-      expect(gsmSetBaseBranch).toHaveBeenCalledTimes(1);
-      expect(gsmSetBaseBranch).toHaveBeenCalledWith(mockRepo.default_branch);
+      expect(gitvcs.setBaseBranch).toHaveBeenCalledTimes(1);
+      expect(gitvcs.setBaseBranch).toHaveBeenCalledWith(
+        mockRepo.default_branch
+      );
     });
 
     it('should set custom base branch', async () => {
       await initFakeRepo();
       await gitea.setBaseBranch('devel');
 
-      expect(gsmSetBaseBranch).toHaveBeenCalledTimes(1);
-      expect(gsmSetBaseBranch).toHaveBeenCalledWith('devel');
+      expect(gitvcs.setBaseBranch).toHaveBeenCalledTimes(1);
+      expect(gitvcs.setBaseBranch).toHaveBeenCalledWith('devel');
     });
   });
 
@@ -1322,8 +1278,8 @@ describe('platform/gitea', () => {
       await initFakeRepo();
       await gitea.deleteBranch('some-branch');
 
-      expect(gsmDeleteBranch).toHaveBeenCalledTimes(1);
-      expect(gsmDeleteBranch).toHaveBeenCalledWith('some-branch');
+      expect(gitvcs.deleteBranch).toHaveBeenCalledTimes(1);
+      expect(gitvcs.deleteBranch).toHaveBeenCalledWith('some-branch');
     });
 
     it('should not close pull request by default', async () => {
@@ -1344,8 +1300,8 @@ describe('platform/gitea', () => {
         mockRepo.full_name,
         mockPR.number
       );
-      expect(gsmDeleteBranch).toHaveBeenCalledTimes(1);
-      expect(gsmDeleteBranch).toHaveBeenCalledWith(mockPR.head.label);
+      expect(gitvcs.deleteBranch).toHaveBeenCalledTimes(1);
+      expect(gitvcs.deleteBranch).toHaveBeenCalledWith(mockPR.head.label);
     });
 
     it('should skip closing pull request if missing', async () => {
@@ -1354,8 +1310,8 @@ describe('platform/gitea', () => {
       await gitea.deleteBranch('missing', true);
 
       expect(helper.closePR).not.toHaveBeenCalled();
-      expect(gsmDeleteBranch).toHaveBeenCalledTimes(1);
-      expect(gsmDeleteBranch).toHaveBeenCalledWith('missing');
+      expect(gitvcs.deleteBranch).toHaveBeenCalledTimes(1);
+      expect(gitvcs.deleteBranch).toHaveBeenCalledWith('missing');
     });
   });
 
@@ -1391,8 +1347,8 @@ describe('platform/gitea', () => {
       await initFakeRepo();
       await gitea.commitFiles(commitConfig);
 
-      expect(gsmCommitFilesToBranch).toHaveBeenCalledTimes(1);
-      expect(gsmCommitFilesToBranch).toHaveBeenCalledWith({
+      expect(gitvcs.commitFiles).toHaveBeenCalledTimes(1);
+      expect(gitvcs.commitFiles).toHaveBeenCalledWith({
         ...commitConfig,
       });
     });
@@ -1411,8 +1367,8 @@ describe('platform/gitea', () => {
       await initFakeRepo();
       await gitea.isBranchStale('some-branch');
 
-      expect(gsmIsBranchStale).toHaveBeenCalledTimes(1);
-      expect(gsmIsBranchStale).toHaveBeenCalledWith('some-branch');
+      expect(gitvcs.isBranchStale).toHaveBeenCalledTimes(1);
+      expect(gitvcs.isBranchStale).toHaveBeenCalledWith('some-branch');
     });
   });
 
@@ -1421,8 +1377,8 @@ describe('platform/gitea', () => {
       await initFakeRepo();
       await gitea.setBranchPrefix('some-branch');
 
-      expect(gsmSetBranchPrefix).toHaveBeenCalledTimes(1);
-      expect(gsmSetBranchPrefix).toHaveBeenCalledWith('some-branch');
+      expect(gitvcs.setBranchPrefix).toHaveBeenCalledTimes(1);
+      expect(gitvcs.setBranchPrefix).toHaveBeenCalledWith('some-branch');
     });
   });
 
@@ -1431,8 +1387,8 @@ describe('platform/gitea', () => {
       await initFakeRepo();
       await gitea.branchExists('some-branch');
 
-      expect(gsmBranchExists).toHaveBeenCalledTimes(1);
-      expect(gsmBranchExists).toHaveBeenCalledWith('some-branch');
+      expect(gitvcs.branchExists).toHaveBeenCalledTimes(1);
+      expect(gitvcs.branchExists).toHaveBeenCalledWith('some-branch');
     });
   });
 
@@ -1441,8 +1397,8 @@ describe('platform/gitea', () => {
       await initFakeRepo();
       await gitea.mergeBranch('some-branch');
 
-      expect(gsmMergeBranch).toHaveBeenCalledTimes(1);
-      expect(gsmMergeBranch).toHaveBeenCalledWith('some-branch');
+      expect(gitvcs.mergeBranch).toHaveBeenCalledTimes(1);
+      expect(gitvcs.mergeBranch).toHaveBeenCalledWith('some-branch');
     });
   });
 
@@ -1451,8 +1407,10 @@ describe('platform/gitea', () => {
       await initFakeRepo();
       await gitea.getBranchLastCommitTime('some-branch');
 
-      expect(gsmGetBranchLastCommitTime).toHaveBeenCalledTimes(1);
-      expect(gsmGetBranchLastCommitTime).toHaveBeenCalledWith('some-branch');
+      expect(gitvcs.getBranchLastCommitTime).toHaveBeenCalledTimes(1);
+      expect(gitvcs.getBranchLastCommitTime).toHaveBeenCalledWith(
+        'some-branch'
+      );
     });
   });
 
@@ -1461,8 +1419,8 @@ describe('platform/gitea', () => {
       await initFakeRepo();
       await gitea.getFile('some-file', 'some-branch');
 
-      expect(gsmGetFile).toHaveBeenCalledTimes(1);
-      expect(gsmGetFile).toHaveBeenCalledWith('some-file', 'some-branch');
+      expect(gitvcs.getFile).toHaveBeenCalledTimes(1);
+      expect(gitvcs.getFile).toHaveBeenCalledWith('some-file', 'some-branch');
     });
   });
 
@@ -1471,7 +1429,7 @@ describe('platform/gitea', () => {
       await initFakeRepo();
       await gitea.getRepoStatus();
 
-      expect(gsmGetRepoStatus).toHaveBeenCalledTimes(1);
+      expect(gitvcs.getRepoStatus).toHaveBeenCalledTimes(1);
     });
   });
 
@@ -1480,7 +1438,7 @@ describe('platform/gitea', () => {
       await initFakeRepo();
       await gitea.getFileList();
 
-      expect(gsmGetFileList).toHaveBeenCalledTimes(1);
+      expect(gitvcs.getFileList).toHaveBeenCalledTimes(1);
     });
   });
 
@@ -1489,8 +1447,8 @@ describe('platform/gitea', () => {
       await initFakeRepo();
       await gitea.getAllRenovateBranches('some-prefix');
 
-      expect(gsmGetAllRenovateBranches).toHaveBeenCalledTimes(1);
-      expect(gsmGetAllRenovateBranches).toHaveBeenCalledWith('some-prefix');
+      expect(gitvcs.getAllRenovateBranches).toHaveBeenCalledTimes(1);
+      expect(gitvcs.getAllRenovateBranches).toHaveBeenCalledWith('some-prefix');
     });
   });
 
@@ -1499,7 +1457,7 @@ describe('platform/gitea', () => {
       await initFakeRepo();
       await gitea.getCommitMessages();
 
-      expect(gsmGetCommitMessages).toHaveBeenCalledTimes(1);
+      expect(gitvcs.getCommitMessages).toHaveBeenCalledTimes(1);
     });
   });
 

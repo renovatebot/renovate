@@ -10,6 +10,7 @@ import { PLATFORM_TYPE_BITBUCKET } from '../../constants/platforms';
 import { PR_STATE_ALL, PR_STATE_OPEN } from '../../constants/pull-requests';
 import { logger } from '../../logger';
 import { BranchStatus } from '../../types';
+import * as git from '../../util/git';
 import * as hostRules from '../../util/host-rules';
 import { BitbucketHttp, setBaseUrl } from '../../util/http/bitbucket';
 import { sanitize } from '../../util/sanitize';
@@ -29,7 +30,6 @@ import {
   RepoParams,
   VulnerabilityAlert,
 } from '../common';
-import GitStorage, { StatusResult } from '../git';
 import { smartTruncate } from '../utils/pr-body';
 import { readOnlyIssueBody } from '../utils/read-only-issue-body';
 import * as comments from './comments';
@@ -148,15 +148,14 @@ export async function initRepo({
   // `api-staging.<host>` to `staging.<host>`
   const hostnameWithoutApiPrefix = /api[.|-](.+)/.exec(hostname)[1];
 
-  const url = GitStorage.getUrl({
+  const url = git.getUrl({
     protocol: 'https',
     auth: `${opts.username}:${opts.password}`,
     hostname: hostnameWithoutApiPrefix,
     repository,
   });
 
-  config.storage = new GitStorage();
-  await config.storage.initRepo({
+  await git.initRepo({
     ...config,
     localDir,
     url,
@@ -180,7 +179,7 @@ export function getRepoForceRebase(): Promise<boolean> {
 
 // Get full file list
 export function getFileList(): Promise<string[]> {
-  return config.storage.getFileList();
+  return git.getFileList();
 }
 
 export async function setBaseBranch(
@@ -189,38 +188,38 @@ export async function setBaseBranch(
   logger.debug(`Setting baseBranch to ${branchName}`);
   config.baseBranch = branchName;
   delete config.baseCommitSHA;
-  const baseBranchSha = await config.storage.setBaseBranch(branchName);
+  const baseBranchSha = await git.setBaseBranch(branchName);
   return baseBranchSha;
 }
 
 export /* istanbul ignore next */ function setBranchPrefix(
   branchPrefix: string
 ): Promise<void> {
-  return config.storage.setBranchPrefix(branchPrefix);
+  return git.setBranchPrefix(branchPrefix);
 }
 
 // Branch
 
 // Returns true if branch exists, otherwise false
 export function branchExists(branchName: string): Promise<boolean> {
-  return config.storage.branchExists(branchName);
+  return git.branchExists(branchName);
 }
 
 export function getAllRenovateBranches(
   branchPrefix: string
 ): Promise<string[]> {
-  return config.storage.getAllRenovateBranches(branchPrefix);
+  return git.getAllRenovateBranches(branchPrefix);
 }
 
 export function isBranchStale(branchName: string): Promise<boolean> {
-  return config.storage.isBranchStale(branchName);
+  return git.isBranchStale(branchName);
 }
 
 export function getFile(
   filePath: string,
   branchName?: string
 ): Promise<string> {
-  return config.storage.getFile(filePath, branchName);
+  return git.getFile(filePath, branchName);
 }
 
 // istanbul ignore next
@@ -249,7 +248,7 @@ export async function getPrList(): Promise<Pr[]> {
 
 /* istanbul ignore next */
 export async function getPrFiles(pr: Pr): Promise<string[]> {
-  return config.storage.getBranchFiles(pr.branchName, pr.targetBranch);
+  return git.getBranchFiles(pr.branchName, pr.targetBranch);
 }
 
 export async function findPr({
@@ -283,31 +282,31 @@ export async function deleteBranch(
       );
     }
   }
-  return config.storage.deleteBranch(branchName);
+  return git.deleteBranch(branchName);
 }
 
 export function getBranchLastCommitTime(branchName: string): Promise<Date> {
-  return config.storage.getBranchLastCommitTime(branchName);
+  return git.getBranchLastCommitTime(branchName);
 }
 
 // istanbul ignore next
-export function getRepoStatus(): Promise<StatusResult> {
-  return config.storage.getRepoStatus();
+export function getRepoStatus(): Promise<git.StatusResult> {
+  return git.getRepoStatus();
 }
 
 export function mergeBranch(branchName: string): Promise<void> {
-  return config.storage.mergeBranch(branchName);
+  return git.mergeBranch(branchName);
 }
 
 // istanbul ignore next
 export function commitFiles(
   commitFilesConfig: CommitFilesConfig
 ): Promise<string | null> {
-  return config.storage.commitFiles(commitFilesConfig);
+  return git.commitFiles(commitFilesConfig);
 }
 
 export function getCommitMessages(): Promise<string[]> {
-  return config.storage.getCommitMessages();
+  return git.getCommitMessages();
 }
 
 async function isPrConflicted(prNo: number): Promise<boolean> {
@@ -869,17 +868,6 @@ export async function mergePr(
     return false;
   }
   return true;
-}
-
-// Pull Request
-
-export function cleanRepo(): Promise<void> {
-  // istanbul ignore if
-  if (config.storage && config.storage.cleanRepo) {
-    config.storage.cleanRepo();
-  }
-  config = {} as any;
-  return Promise.resolve();
 }
 
 export function getVulnerabilityAlerts(): Promise<VulnerabilityAlert[]> {

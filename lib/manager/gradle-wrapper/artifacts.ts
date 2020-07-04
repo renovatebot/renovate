@@ -1,10 +1,10 @@
 import { resolve } from 'path';
-import * as fs from 'fs-extra';
+import { stat } from 'fs-extra';
 import Git from 'simple-git/promise';
 import { logger } from '../../logger';
 import { platform } from '../../platform';
 import { ExecOptions, exec } from '../../util/exec';
-import { readLocalFile, writeLocalFile } from '../../util/gitfs';
+import { readLocalFile, writeLocalFile } from '../../util/fs';
 import { Http } from '../../util/http';
 import { UpdateArtifact, UpdateArtifactsResult } from '../common';
 import { gradleWrapperFileName, prepareGradleCommand } from '../gradle/index';
@@ -57,7 +57,7 @@ export async function updateArtifacts({
     let cmd = await prepareGradleCommand(
       gradlew,
       projectDir,
-      await fs.stat(gradlewPath).catch(() => null),
+      await stat(gradlewPath).catch(() => null),
       `wrapper`
     );
     if (!cmd) {

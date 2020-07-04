@@ -1,12 +1,11 @@
 import fs from 'fs-extra';
 import Git from 'simple-git/promise';
 import tmp from 'tmp-promise';
-import GitStorage from '.';
+import * as git from '.';
 
 describe('platform/git', () => {
   jest.setTimeout(15000);
 
-  const git = new GitStorage();
   const masterCommitDate = new Date();
   masterCommitDate.setMilliseconds(0);
   let base: tmp.DirectoryResult;
@@ -61,7 +60,6 @@ describe('platform/git', () => {
   afterEach(async () => {
     await tmpDir.cleanup();
     await origin.cleanup();
-    git.cleanRepo();
   });
 
   afterAll(async () => {
@@ -313,7 +311,7 @@ describe('platform/git', () => {
   });
 
   describe('Storage.getUrl()', () => {
-    const getUrl = GitStorage.getUrl;
+    const getUrl = git.getUrl;
     it('returns https url', () => {
       expect(
         getUrl({

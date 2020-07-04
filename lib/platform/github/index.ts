@@ -24,6 +24,7 @@ import {
 import { logger } from '../../logger';
 import { BranchStatus } from '../../types';
 import { ExternalHostError } from '../../types/errors/external-host-error';
+import * as git from '../../util/git';
 import * as hostRules from '../../util/host-rules';
 import * as githubHttp from '../../util/http/github';
 import { sanitize } from '../../util/sanitize';
@@ -44,7 +45,6 @@ import {
   RepoParams,
   VulnerabilityAlert,
 } from '../common';
-import GitStorage, { StatusResult } from '../git';
 import { smartTruncate } from '../utils/pr-body';
 import {
   BranchProtection,
@@ -149,16 +149,6 @@ export async function getRepos(): Promise<string[]> {
   }
 }
 
-export function cleanRepo(): Promise<void> {
-  // istanbul ignore if
-  if (config.storage) {
-    config.storage.cleanRepo();
-  }
-  // In theory most of this isn't necessary. In practice..
-  config = {} as any;
-  return Promise.resolve();
-}
-
 async function getBranchProtection(
   branchName: string
 ): Promise<BranchProtection> {
@@ -211,7 +201,7 @@ export async function initRepo({
 }: RepoParams): Promise<RepoConfig> {
   logger.debug(`initRepo("${repository}")`);
   // config is used by the platform api itself, not necessary for the app layer to know
-  await cleanRepo();
+  config = { localDir, repository } as any;
   // istanbul ignore if
   if (endpoint) {
     // Necessary for Renovate Pro - do not remove
@@ -225,8 +215,6 @@ export async function initRepo({
   });
   config.isGhe = URL.parse(defaults.endpoint).host !== 'api.github.com';
   config.renovateUsername = renovateUsername;
-  config.localDir = localDir;
-  config.repository = repository;
   [config.repositoryOwner, config.repositoryName] = repository.split('/');
   let res;
   try {
@@ -432,8 +420,7 @@ export async function initRepo({
   );
   parsedEndpoint.pathname = config.repository + '.git';
   const url = URL.format(parsedEndpoint);
-  config.storage = new GitStorage();
-  await config.storage.initRepo({
+  await git.initRepo({
     ...config,
     url,
     gitAuthorName: global.gitAuthor?.name,
@@ -497,39 +484,39 @@ export async function setBaseBranch(
 ): Promise<string> {
   config.baseBranch = branchName;
   config.baseCommitSHA = null;
-  const baseBranchSha = await config.storage.setBaseBranch(branchName);
+  const baseBranchSha = await git.setBaseBranch(branchName);
   return baseBranchSha;
 }
 
 // istanbul ignore next
 export function setBranchPrefix(branchPrefix: string): Promise<void> {
-  return config.storage.setBranchPrefix(branchPrefix);
+  return git.setBranchPrefix(branchPrefix);
 }
 
 // Search
 
 // istanbul ignore next
 export function getFileList(): Promise<string[]> {
-  return config.storage.getFileList();
+  return git.getFileList();
 }
 
 // Branch
 
 // istanbul ignore next
 export function branchExists(branchName: string): Promise<boolean> {
-  return config.storage.branchExists(branchName);
+  return git.branchExists(branchName);
 }
 
 // istanbul ignore next
 export function getAllRenovateBranches(
   branchPrefix: string
 ): Promise<string[]> {
-  return config.storage.getAllRenovateBranches(branchPrefix);
+  return git.getAllRenovateBranches(branchPrefix);
 }
 
 // istanbul ignore next
 export function isBranchStale(branchName: string): Promise<boolean> {
-  return config.storage.isBranchStale(branchName);
+  return git.isBranchStale(branchName);
 }
 
 // istanbul ignore next
@@ -537,7 +524,7 @@ export function getFile(
   filePath: string,
   branchName?: string
 ): Promise<string> {
-  return config.storage.getFile(filePath, branchName);
+  return git.getFile(filePath, branchName);
 }
 
 // istanbul ignore next
@@ -545,17 +532,17 @@ export function deleteBranch(
   branchName: string,
   closePr?: boolean
 ): Promise<void> {
-  return config.storage.deleteBranch(branchName);
+  return git.deleteBranch(branchName);
 }
 
 // istanbul ignore next
 export function getBranchLastCommitTime(branchName: string): Promise<Date> {
-  return config.storage.getBranchLastCommitTime(branchName);
+  return git.getBranchLastCommitTime(branchName);
 }
 
 // istanbul ignore next
-export function getRepoStatus(): Promise<StatusResult> {
-  return config.storage.getRepoStatus();
+export function getRepoStatus(): Promise<git.StatusResult> {
+  return git.getRepoStatus();
 }
 
 // istanbul ignore next
@@ -566,19 +553,19 @@ export function mergeBranch(branchName: string): Promise<void> {
       'Branch protection: Attempting to merge branch when push protection is enabled'
     );
   }
-  return config.storage.mergeBranch(branchName);
+  return git.mergeBranch(branchName);
 }
 
 // istanbul ignore next
 export function commitFiles(
   commitFilesConfig: CommitFilesConfig
 ): Promise<string | null> {
-  return config.storage.commitFiles(commitFilesConfig);
+  return git.commitFiles(commitFilesConfig);
 }
 
 // istanbul ignore next
 export function getCommitMessages(): Promise<string[]> {
-  return config.storage.getCommitMessages();
+  return git.getCommitMessages();
 }
 
 async function getClosedPrs(): Promise<PrList> {
@@ -989,7 +976,7 @@ export async function getPrList(): Promise<Pr[]> {
 
 /* istanbul ignore next */
 export async function getPrFiles(pr: Pr): Promise<string[]> {
-  return config.storage.getBranchFiles(pr.branchName, pr.targetBranch);
+  return git.getBranchFiles(pr.branchName, pr.targetBranch);
 }
 
 export async function findPr({
@@ -1139,7 +1126,7 @@ async function getStatusCheck(
   branchName: string,
   useCache = true
 ): Promise<GhBranchStatus[]> {
-  const branchCommit = await config.storage.getBranchCommit(branchName);
+  const branchCommit = await git.getBranchCommit(branchName);
 
   const url = `repos/${config.repository}/commits/${branchCommit}/statuses`;
 
@@ -1194,7 +1181,7 @@ export async function setBranchStatus({
   }
   logger.debug({ branch: branchName, context, state }, 'Setting branch status');
   try {
-    const branchCommit = await config.storage.getBranchCommit(branchName);
+    const branchCommit = await git.getBranchCommit(branchName);
     const url = `repos/${config.repository}/statuses/${branchCommit}`;
     const renovateToGitHubStateMapping = {
       green: 'success',

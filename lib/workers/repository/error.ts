@@ -1,6 +1,7 @@
 import { RenovateConfig } from '../../config';
 
 import {
+  CONFIG_SECRETS_EXPOSED,
   CONFIG_VALIDATION,
   EXTERNAL_HOST_ERROR,
   MANAGER_LOCKFILE_ERROR,
@@ -104,6 +105,14 @@ export default async function handleError(
     delete config.branchList; // eslint-disable-line no-param-reassign
     logger.info({ error: err }, 'Repository has invalid config');
     await raiseConfigWarningIssue(config, err);
+    return err.message;
+  }
+  if (err.message === CONFIG_SECRETS_EXPOSED) {
+    delete config.branchList; // eslint-disable-line no-param-reassign
+    logger.warn(
+      { error: err },
+      'Repository aborted due to potential secrets exposure'
+    );
     return err.message;
   }
   if (err instanceof ExternalHostError) {

@@ -3,10 +3,10 @@ import addrs from 'email-addresses';
 import { RenovateConfig } from '../config/common';
 import { PLATFORM_NOT_FOUND } from '../constants/error-messages';
 import { logger } from '../logger';
+import { setPrivateKey } from '../util/git';
 import * as hostRules from '../util/host-rules';
 import platforms from './api.generated';
 import { Platform } from './common';
-import { setPrivateKey } from './git/private-key';
 
 export * from './common';
 

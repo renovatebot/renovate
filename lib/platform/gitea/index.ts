@@ -14,6 +14,7 @@ import { PLATFORM_TYPE_GITEA } from '../../constants/platforms';
 import { PR_STATE_ALL, PR_STATE_OPEN } from '../../constants/pull-requests';
 import { logger } from '../../logger';
 import { BranchStatus } from '../../types';
+import * as git from '../../util/git';
 import * as hostRules from '../../util/host-rules';
 import { setBaseUrl } from '../../util/http/gitea';
 import { sanitize } from '../../util/sanitize';
@@ -34,7 +35,6 @@ import {
   RepoParams,
   VulnerabilityAlert,
 } from '../common';
-import GitStorage, { StatusResult } from '../git';
 import { smartTruncate } from '../utils/pr-body';
 import * as helper from './gitea-helper';
 
@@ -44,7 +44,6 @@ type GiteaRenovateConfig = {
 } & RenovateConfig;
 
 interface GiteaRepoConfig {
-  storage: GitStorage;
   repository: string;
   localDir: string;
   defaultBranch: string;
@@ -334,8 +333,7 @@ const platform: Platform = {
     gitEndpoint.auth = opts.token;
 
     // Initialize Git storage
-    config.storage = new GitStorage();
-    await config.storage.initRepo({
+    await git.initRepo({
       ...config,
       url: URL.format(gitEndpoint),
       gitAuthorName: global.gitAuthor?.name,
@@ -364,14 +362,6 @@ const platform: Platform = {
     }
   },
 
-  cleanRepo(): Promise<void> {
-    if (config.storage) {
-      config.storage.cleanRepo();
-    }
-    config = {} as any;
-    return Promise.resolve();
-  },
-
   async setBranchStatus({
     branchName,
     context,
@@ -381,7 +371,7 @@ const platform: Platform = {
   }: BranchStatusConfig): Promise<void> {
     try {
       // Create new status for branch commit
-      const branchCommit = await config.storage.getBranchCommit(branchName);
+      const branchCommit = await git.getBranchCommit(branchName);
       await helper.createCommitStatus(config.repository, branchCommit, {
         state: helper.renovateToGiteaStatusMapping[state] || 'pending',
         context,
@@ -460,7 +450,7 @@ const platform: Platform = {
     baseBranch: string = config.defaultBranch
   ): Promise<string> {
     config.baseBranch = baseBranch;
-    const baseBranchSha = await config.storage.setBaseBranch(baseBranch);
+    const baseBranchSha = await git.setBaseBranch(baseBranch);
     return baseBranchSha;
   },
 
@@ -480,7 +470,7 @@ const platform: Platform = {
 
   /* istanbul ignore next */
   async getPrFiles(pr: Pr): Promise<string[]> {
-    return config.storage.getBranchFiles(pr.branchName, pr.targetBranch);
+    return git.getBranchFiles(pr.branchName, pr.targetBranch);
   },
 
   async getPr(number: number): Promise<Pr | null> {
@@ -842,7 +832,7 @@ const platform: Platform = {
       }
     }
 
-    return config.storage.deleteBranch(branchName);
+    return git.deleteBranch(branchName);
   },
 
   async addAssignees(number: number, assignees: string[]): Promise<void> {
@@ -861,7 +851,7 @@ const platform: Platform = {
   },
 
   commitFiles(commitFilesConfig: CommitFilesConfig): Promise<string | null> {
-    return config.storage.commitFiles(commitFilesConfig);
+    return git.commitFiles(commitFilesConfig);
   },
 
   getPrBody(prBody: string): string {
@@ -869,43 +859,43 @@ const platform: Platform = {
   },
 
   isBranchStale(branchName: string): Promise<boolean> {
-    return config.storage.isBranchStale(branchName);
+    return git.isBranchStale(branchName);
   },
 
   setBranchPrefix(branchPrefix: string): Promise<void> {
-    return config.storage.setBranchPrefix(branchPrefix);
+    return git.setBranchPrefix(branchPrefix);
   },
 
   branchExists(branchName: string): Promise<boolean> {
-    return config.storage.branchExists(branchName);
+    return git.branchExists(branchName);
   },
 
   mergeBranch(branchName: string): Promise<void> {
-    return config.storage.mergeBranch(branchName);
+    return git.mergeBranch(branchName);
   },
 
   getBranchLastCommitTime(branchName: string): Promise<Date> {
-    return config.storage.getBranchLastCommitTime(branchName);
+    return git.getBranchLastCommitTime(branchName);
   },
 
   getFile(lockFileName: string, branchName?: string): Promise<string> {
-    return config.storage.getFile(lockFileName, branchName);
+    return git.getFile(lockFileName, branchName);
   },
 
-  getRepoStatus(): Promise<StatusResult> {
-    return config.storage.getRepoStatus();
+  getRepoStatus(): Promise<git.StatusResult> {
+    return git.getRepoStatus();
   },
 
   getFileList(): Promise<string[]> {
-    return config.storage.getFileList();
+    return git.getFileList();
   },
 
   getAllRenovateBranches(branchPrefix: string): Promise<string[]> {
-    return config.storage.getAllRenovateBranches(branchPrefix);
+    return git.getAllRenovateBranches(branchPrefix);
   },
 
   getCommitMessages(): Promise<string[]> {
-    return config.storage.getCommitMessages();
+    return git.getCommitMessages();
   },
 
   getVulnerabilityAlerts(): Promise<VulnerabilityAlert[]> {
@@ -917,7 +907,6 @@ export const {
   addAssignees,
   addReviewers,
   branchExists,
-  cleanRepo,
   commitFiles,
   createPr,
   deleteBranch,

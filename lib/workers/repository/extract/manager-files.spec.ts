@@ -1,15 +1,13 @@
-import { getConfig, mocked } from '../../../../test/util';
+import { fs, getConfig, mocked } from '../../../../test/util';
 import { RenovateConfig } from '../../../config';
 import * as _html from '../../../manager/html';
-import * as _gitfs from '../../../util/gitfs';
 import * as _fileMatch from './file-match';
 import { getManagerPackageFiles } from './manager-files';
 
 jest.mock('./file-match');
 jest.mock('../../../manager/html');
-jest.mock('../../../util/gitfs');
+jest.mock('../../../util/fs');
 
-const gitfs: any = _gitfs;
 const fileMatch = mocked(_fileMatch);
 const html = mocked(_html);
 
@@ -44,7 +42,7 @@ describe('workers/repository/extract/manager-files', () => {
         fileList: ['Dockerfile'],
       };
       fileMatch.getMatchingFiles.mockResolvedValue(['Dockerfile']);
-      gitfs.readLocalFile.mockResolvedValueOnce('some content');
+      fs.readLocalFile.mockResolvedValueOnce('some content');
       html.extractPackageFile = jest.fn(() => ({
         deps: [{}, { replaceString: 'abc' }],
       })) as never;
@@ -58,7 +56,7 @@ describe('workers/repository/extract/manager-files', () => {
         fileList: ['package.json'],
       };
       fileMatch.getMatchingFiles.mockResolvedValue(['package.json']);
-      gitfs.readLocalFile.mockResolvedValueOnce(
+      fs.readLocalFile.mockResolvedValueOnce(
         '{"dependencies":{"chalk":"2.0.0"}}'
       );
       const res = await getManagerPackageFiles(managerConfig);

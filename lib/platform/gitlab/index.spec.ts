@@ -14,6 +14,7 @@ import {
   PR_STATE_OPEN,
 } from '../../constants/pull-requests';
 import { BranchStatus } from '../../types';
+import * as _git from '../../util/git';
 import * as _hostRules from '../../util/host-rules';
 
 const gitlabApiHost = 'https://gitlab.com';
@@ -21,7 +22,7 @@ const gitlabApiHost = 'https://gitlab.com';
 describe('platform/gitlab', () => {
   let gitlab: Platform;
   let hostRules: jest.Mocked<typeof _hostRules>;
-  let GitStorage: jest.Mocked<typeof import('../git')> & jest.Mock;
+  let git: jest.Mocked<typeof _git>;
   beforeEach(async () => {
     // reset module
     jest.resetModules();
@@ -30,36 +31,18 @@ describe('platform/gitlab', () => {
     jest.mock('../../util/host-rules');
     jest.mock('delay');
     hostRules = require('../../util/host-rules');
-    jest.mock('../git');
-    GitStorage = require('../git').Storage;
-    GitStorage.mockImplementation(() => ({
-      initRepo: jest.fn(),
-      cleanRepo: jest.fn(),
-      getFileList: jest.fn(),
-      branchExists: jest.fn(() => true),
-      isBranchStale: jest.fn(() => false),
-      setBaseBranch: jest.fn(),
-      getBranchLastCommitTime: jest.fn(),
-      getAllRenovateBranches: jest.fn(),
-      getCommitMessages: jest.fn(),
-      getFile: jest.fn(),
-      commitFiles: jest.fn(),
-      mergeBranch: jest.fn(),
-      deleteBranch: jest.fn(),
-      getRepoStatus: jest.fn(),
-      getBranchCommit: jest.fn(
-        () => '0d9c7726c3d628b7e28af234595cfd20febdbf8e'
-      ),
-    }));
+    jest.mock('../../util/git');
+    git = require('../../util/git');
+    git.branchExists.mockResolvedValue(true);
+    git.isBranchStale.mockResolvedValue(true);
+    git.getBranchCommit.mockResolvedValue(
+      '0d9c7726c3d628b7e28af234595cfd20febdbf8e'
+    );
     hostRules.find.mockReturnValue({
       token: 'abc123',
     });
     httpMock.reset();
     httpMock.setup();
-  });
-
-  afterEach(async () => {
-    await gitlab.cleanRepo();
   });
 
   describe('initPlatform()', () => {
@@ -176,11 +159,6 @@ describe('platform/gitlab', () => {
       await initRepo();
       await gitlab.getRepoStatus();
       expect(httpMock.getTrace()).toMatchSnapshot();
-    });
-  });
-  describe('cleanRepo()', () => {
-    it('exists', async () => {
-      expect(await gitlab.cleanRepo()).toMatchSnapshot();
     });
   });
 
@@ -591,11 +569,7 @@ describe('platform/gitlab', () => {
     });
     it('throws repository-changed', async () => {
       expect.assertions(2);
-      GitStorage.mockImplementationOnce(() => ({
-        initRepo: jest.fn(),
-        branchExists: jest.fn(() => Promise.resolve(false)),
-        cleanRepo: jest.fn(),
-      }));
+      git.branchExists.mockResolvedValue(false);
       await initRepo();
       await expect(gitlab.getBranchStatus('somebranch', [])).rejects.toThrow(
         REPOSITORY_CHANGED

@@ -3,11 +3,11 @@ import _fs from 'fs-extra';
 import { join } from 'upath';
 import { envMock, mockExecAll } from '../../../test/execUtil';
 import { mocked, platform } from '../../../test/util';
-import { StatusResult } from '../../platform/git';
 import { setUtilConfig } from '../../util';
 import { BinarySource } from '../../util/exec/common';
 import * as docker from '../../util/exec/docker';
 import * as _env from '../../util/exec/env';
+import { StatusResult } from '../../util/git';
 import * as _hostRules from '../../util/host-rules';
 import * as gomod from './artifacts';
 

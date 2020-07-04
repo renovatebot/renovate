@@ -2,7 +2,9 @@ import { DateTime } from 'luxon';
 import mdTable from 'markdown-table';
 import semver from 'semver';
 import { mergeChildConfig } from '../../../config';
+import { CONFIG_SECRETS_EXPOSED } from '../../../constants/error-messages';
 import { logger } from '../../../logger';
+import { sanitize } from '../../../util/sanitize';
 import * as template from '../../../util/template';
 import { BranchConfig, BranchUpgradeConfig } from '../../common';
 
@@ -197,6 +199,10 @@ export function generateBranchConfig(
     );
     upgrade.commitMessage = template.compile(upgrade.commitMessage, upgrade);
     upgrade.commitMessage = template.compile(upgrade.commitMessage, upgrade);
+    // istanbul ignore if
+    if (upgrade.commitMessage !== sanitize(upgrade.commitMessage)) {
+      throw new Error(CONFIG_SECRETS_EXPOSED);
+    }
     upgrade.commitMessage = upgrade.commitMessage.trim(); // Trim exterior whitespace
     upgrade.commitMessage = upgrade.commitMessage.replace(/\s+/g, ' '); // Trim extra whitespace inside string
     upgrade.commitMessage = upgrade.commitMessage.replace(
@@ -223,6 +229,10 @@ export function generateBranchConfig(
         .compile(upgrade.prTitle, upgrade)
         .trim()
         .replace(/\s+/g, ' ');
+      // istanbul ignore if
+      if (upgrade.prTitle !== sanitize(upgrade.prTitle)) {
+        throw new Error(CONFIG_SECRETS_EXPOSED);
+      }
       if (upgrade.toLowerCase) {
         upgrade.prTitle = upgrade.prTitle.toLowerCase();
       }

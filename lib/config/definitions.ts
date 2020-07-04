@@ -205,6 +205,15 @@ const options: RenovateOptions[] = [
     env: false,
   },
   {
+    name: 'repositoryCache',
+    description: 'Option to do repository extract caching.',
+    admin: true,
+    type: 'string',
+    allowedValues: ['disabled', 'enabled', 'reset'],
+    stage: 'repository',
+    default: 'disabled',
+  },
+  {
     name: 'force',
     description:
       'Any configuration defined within this object will force override existing settings',
@@ -602,6 +611,7 @@ const options: RenovateOptions[] = [
     type: 'string',
     cli: false,
     admin: true,
+    stage: 'global',
   },
   {
     name: 'enabledManagers',
