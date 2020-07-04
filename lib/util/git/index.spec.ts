@@ -123,6 +123,7 @@ describe('platform/git', () => {
       await expect(git.isBranchStale('not_found')).rejects.toMatchSnapshot();
     });
   });
+
   describe('getBranchCommit(branchName)', () => {
     it('should return same value for equal refs', async () => {
       const hex = await git.getBranchCommit('renovate/past_branch');
