@@ -7,6 +7,8 @@ import { setUtilConfig } from '../../util';
 import { ifSystemSupportsGradle } from '../gradle/__testutil__/gradle';
 import * as dcUpdate from '.';
 
+jest.mock('../../util/git');
+
 const fixtures = resolve(__dirname, './__fixtures__');
 const config = {
   localDir: resolve(fixtures, './testFiles'),
