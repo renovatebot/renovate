@@ -7,13 +7,22 @@ import {
 } from './providers';
 import { extractTerraformRequiredProviders } from './required_providers';
 import {
+  analyseTerraformResource,
+  extractTerraformResource,
+} from './resources';
+import {
   TerraformDependencyTypes,
   checkFileContainsDependency,
   getTerraformDependencyType,
 } from './util';
 
-const dependencyBlockExtractionRegex = /^\s*(?<type>module|provider|required_providers)\s+("(?<lookupName>[^"]+)"\s+)?{\s*$/;
-const contentCheckList = ['module "', 'provider "', 'required_providers '];
+const dependencyBlockExtractionRegex = /^\s*(?<type>[a-z_]+)\s+("(?<lookupName>[^"]+)"\s+)?("(?<terraformName>[^"]+)"\s+)?{\s*$/;
+const contentCheckList = [
+  'module "',
+  'provider "',
+  'required_providers ',
+  ' "helm_release" ',
+];
 
 export function extractPackageFile(content: string): PackageFile | null {
   logger.trace({ content }, 'terraform.extractPackageFile()');
@@ -55,6 +64,10 @@ export function extractPackageFile(content: string): PackageFile | null {
             );
             break;
           }
+          case TerraformDependencyTypes.resource: {
+            result = extractTerraformResource(lineNumber, lines);
+            break;
+          }
           /* istanbul ignore next */
           default:
             logger.warn(
@@ -80,6 +93,9 @@ export function extractPackageFile(content: string): PackageFile | null {
         break;
       case TerraformDependencyTypes.module:
         analyseTerraformModule(dep);
+        break;
+      case TerraformDependencyTypes.resource:
+        analyseTerraformResource(dep);
         break;
       /* istanbul ignore next */
       default:

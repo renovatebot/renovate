@@ -2,25 +2,30 @@ import { DateTime } from 'luxon';
 import mdTable from 'markdown-table';
 import semver from 'semver';
 import { mergeChildConfig } from '../../../config';
+import { CONFIG_SECRETS_EXPOSED } from '../../../constants/error-messages';
 import { logger } from '../../../logger';
+import { sanitize } from '../../../util/sanitize';
 import * as template from '../../../util/template';
 import { BranchConfig, BranchUpgradeConfig } from '../../common';
 
-function ifTypesGroup(
-  depNames: string[],
-  hasGroupName: boolean,
-  branchUpgrades: any[]
-): boolean {
+function isTypesGroup(branchUpgrades: any[]): boolean {
   return (
-    depNames.length === 2 &&
-    !hasGroupName &&
-    ((branchUpgrades[0].depName &&
-      branchUpgrades[0].depName.startsWith('@types/') &&
-      branchUpgrades[0].depName.endsWith(branchUpgrades[1].depName)) ||
-      (branchUpgrades[1].depName &&
-        branchUpgrades[1].depName.startsWith('@types/') &&
-        branchUpgrades[1].depName.endsWith(branchUpgrades[0].depName)))
+    branchUpgrades.some(({ depName }) => depName?.startsWith('@types/')) &&
+    new Set(
+      branchUpgrades.map(({ depName }) => depName?.replace(/^@types\//, ''))
+    ).size === 1
   );
+}
+
+function sortTypesGroup(upgrades: BranchUpgradeConfig[]): void {
+  const isTypesUpgrade = ({ depName }: BranchUpgradeConfig): boolean =>
+    depName?.startsWith('@types/');
+  const regularUpgrades = upgrades.filter(
+    (upgrade) => !isTypesUpgrade(upgrade)
+  );
+  const typesUpgrades = upgrades.filter(isTypesUpgrade);
+  upgrades.splice(0, upgrades.length);
+  upgrades.push(...regularUpgrades, ...typesUpgrades);
 }
 
 function getTableValues(
@@ -95,6 +100,8 @@ export function generateBranchConfig(
     // eslint-disable-next-line no-param-reassign
     branchUpgrades[0].commitMessageExtra = `to v${toVersions[0]}`;
   }
+  const typesGroup =
+    depNames.length > 1 && !hasGroupName && isTypesGroup(branchUpgrades);
   logger.trace(`groupEligible: ${groupEligible}`);
   const useGroupSettings = hasGroupName && groupEligible;
   logger.trace(`useGroupSettings: ${useGroupSettings}`);
@@ -154,10 +161,8 @@ export function generateBranchConfig(
     delete upgrade.group;
     delete upgrade.lazyGrouping;
 
-    const isTypesGroup = ifTypesGroup(depNames, hasGroupName, branchUpgrades);
-
     // istanbul ignore else
-    if (toVersions.length > 1 && !isTypesGroup) {
+    if (toVersions.length > 1 && !typesGroup) {
       logger.trace({ toVersions });
       delete upgrade.commitMessageExtra;
       upgrade.recreateClosed = true;
@@ -194,6 +199,10 @@ export function generateBranchConfig(
     );
     upgrade.commitMessage = template.compile(upgrade.commitMessage, upgrade);
     upgrade.commitMessage = template.compile(upgrade.commitMessage, upgrade);
+    // istanbul ignore if
+    if (upgrade.commitMessage !== sanitize(upgrade.commitMessage)) {
+      throw new Error(CONFIG_SECRETS_EXPOSED);
+    }
     upgrade.commitMessage = upgrade.commitMessage.trim(); // Trim exterior whitespace
     upgrade.commitMessage = upgrade.commitMessage.replace(/\s+/g, ' '); // Trim extra whitespace inside string
     upgrade.commitMessage = upgrade.commitMessage.replace(
@@ -220,6 +229,10 @@ export function generateBranchConfig(
         .compile(upgrade.prTitle, upgrade)
         .trim()
         .replace(/\s+/g, ' ');
+      // istanbul ignore if
+      if (upgrade.prTitle !== sanitize(upgrade.prTitle)) {
+        throw new Error(CONFIG_SECRETS_EXPOSED);
+      }
       if (upgrade.toLowerCase) {
         upgrade.prTitle = upgrade.prTitle.toLowerCase();
       }
@@ -254,25 +267,14 @@ export function generateBranchConfig(
       }
     }
   }
-  if (
-    depNames.length === 2 &&
-    !hasGroupName &&
-    config.upgrades[0].depName &&
-    config.upgrades[0].depName.startsWith('@types/') &&
-    config.upgrades[0].depName.endsWith(config.upgrades[1].depName)
-  ) {
-    logger.debug('Found @types - reversing upgrades to use depName in PR');
-    config.upgrades.reverse();
-    config.upgrades[0].recreateClosed = false;
-    config.hasTypes = true;
-  } else if (
-    depNames.length === 2 &&
-    !hasGroupName &&
-    config.upgrades[1].depName &&
-    config.upgrades[1].depName.startsWith('@types/') &&
-    config.upgrades[1].depName.endsWith(config.upgrades[0].depName)
-  ) {
-    // do nothing
+
+  if (typesGroup) {
+    if (config.upgrades[0].depName?.startsWith('@types/')) {
+      logger.debug('Found @types - reversing upgrades to use depName in PR');
+      sortTypesGroup(config.upgrades);
+      config.upgrades[0].recreateClosed = false;
+      config.hasTypes = true;
+    }
   } else {
     config.upgrades.sort((a, b) => {
       if (a.fileReplacePosition && b.fileReplacePosition) {

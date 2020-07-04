@@ -13,7 +13,7 @@ import {
 } from '../../constants/pull-requests';
 import { logger } from '../../logger';
 import { BranchStatus } from '../../types';
-import * as gitfs from '../../util/gitfs';
+import * as git from '../../util/git';
 import * as hostRules from '../../util/host-rules';
 import { sanitize } from '../../util/sanitize';
 import { ensureTrailingSlash } from '../../util/url';
@@ -163,7 +163,7 @@ export async function initRepo({
   const url =
     defaults.endpoint +
     `${encodeURIComponent(projectName)}/_git/${encodeURIComponent(repoName)}`;
-  await gitfs.initRepo({
+  await git.initRepo({
     ...config,
     localDir,
     url,
@@ -184,51 +184,14 @@ export function getRepoForceRebase(): Promise<boolean> {
 
 // Search
 
-export /* istanbul ignore next */ function getFileList(): Promise<string[]> {
-  return gitfs.getFileList();
-}
-
 export /* istanbul ignore next */ async function setBaseBranch(
   branchName = config.baseBranch
 ): Promise<string> {
   logger.debug(`Setting baseBranch to ${branchName}`);
   config.baseBranch = branchName;
   delete config.baseCommitSHA;
-  const baseBranchSha = await gitfs.setBaseBranch(branchName);
+  const baseBranchSha = await git.setBaseBranch(branchName);
   return baseBranchSha;
-}
-
-export /* istanbul ignore next */ function setBranchPrefix(
-  branchPrefix: string
-): Promise<void> {
-  return gitfs.setBranchPrefix(branchPrefix);
-}
-
-// Branch
-
-export /* istanbul ignore next */ function branchExists(
-  branchName: string
-): Promise<boolean> {
-  return gitfs.branchExists(branchName);
-}
-
-export /* istanbul ignore next */ function getAllRenovateBranches(
-  branchPrefix: string
-): Promise<string[]> {
-  return gitfs.getAllRenovateBranches(branchPrefix);
-}
-
-export /* istanbul ignore next */ function isBranchStale(
-  branchName: string
-): Promise<boolean> {
-  return gitfs.isBranchStale(branchName);
-}
-
-export /* istanbul ignore next */ function getFile(
-  filePath: string,
-  branchName: string
-): Promise<string> {
-  return gitfs.getFile(filePath, branchName);
 }
 
 // istanbul ignore next
@@ -272,7 +235,7 @@ export async function getPrList(): Promise<AzurePr[]> {
 
 /* istanbul ignore next */
 export async function getPrFiles(pr: Pr): Promise<string[]> {
-  return gitfs.getBranchFiles(pr.branchName, pr.targetBranch);
+  return git.getBranchFiles(pr.branchName, pr.targetBranch);
 }
 
 export async function getPr(pullRequestId: number): Promise<Pr | null> {
@@ -361,29 +324,11 @@ export /* istanbul ignore next */ async function deleteBranch(
   branchName: string,
   abandonAssociatedPr = false
 ): Promise<void> {
-  await gitfs.deleteBranch(branchName);
+  await git.deleteBranch(branchName);
   if (abandonAssociatedPr) {
     const pr = await getBranchPr(branchName);
     await abandonPr(pr.number);
   }
-}
-
-export /* istanbul ignore next */ function getBranchLastCommitTime(
-  branchName: string
-): Promise<Date> {
-  return gitfs.getBranchLastCommitTime(branchName);
-}
-
-export /* istanbul ignore next */ function getRepoStatus(): Promise<
-  gitfs.StatusResult
-> {
-  return gitfs.getRepoStatus();
-}
-
-export /* istanbul ignore next */ function mergeBranch(
-  branchName: string
-): Promise<void> {
-  return gitfs.mergeBranch(branchName);
 }
 
 export /* istanbul ignore next */ function commitFiles({
@@ -391,17 +336,11 @@ export /* istanbul ignore next */ function commitFiles({
   files,
   message,
 }: CommitFilesConfig): Promise<string | null> {
-  return gitfs.commitFiles({
+  return git.commitFiles({
     branchName,
     files,
     message,
   });
-}
-
-export /* istanbul ignore next */ function getCommitMessages(): Promise<
-  string[]
-> {
-  return gitfs.getCommitMessages();
 }
 
 export async function getBranchStatusCheck(
@@ -766,10 +705,4 @@ export /* istanbul ignore next */ async function deleteLabel(
 
 export function getVulnerabilityAlerts(): Promise<VulnerabilityAlert[]> {
   return Promise.resolve([]);
-}
-
-export function cleanRepo(): Promise<void> {
-  gitfs.cleanRepo();
-  config = {} as any;
-  return Promise.resolve();
 }

@@ -9,6 +9,7 @@ import { PlatformPrOptions, Pr, platform } from '../../platform';
 import { BranchStatus } from '../../types';
 import { ExternalHostError } from '../../types/errors/external-host-error';
 import { sampleSize } from '../../util';
+import { getBranchLastCommitTime } from '../../util/git';
 import { BranchConfig, PrResult } from '../common';
 import { getPrBody } from './body';
 import { ChangeLogError } from './changelog';
@@ -137,7 +138,7 @@ export async function ensurePr(
     );
     if ((await getBranchStatus()) === BranchStatus.yellow) {
       logger.debug('Checking how long this branch has been pending');
-      const lastCommitTime = await platform.getBranchLastCommitTime(branchName);
+      const lastCommitTime = await getBranchLastCommitTime(branchName);
       const currentTime = new Date();
       const millisecondsPerHour = 1000 * 60 * 60;
       const elapsedHours = Math.round(
@@ -180,7 +181,7 @@ export async function ensurePr(
       logger.debug(
         `Branch status is "${await getBranchStatus()}" - checking timeout`
       );
-      const lastCommitTime = await platform.getBranchLastCommitTime(branchName);
+      const lastCommitTime = await getBranchLastCommitTime(branchName);
       const currentTime = new Date();
       const millisecondsPerHour = 1000 * 60 * 60;
       const elapsedHours = Math.round(

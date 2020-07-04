@@ -1,5 +1,5 @@
 import _fs from 'fs-extra';
-import { mocked } from '../../../../test/util';
+import { git, mocked } from '../../../../test/util';
 import { getConfig } from '../../../config/defaults';
 import { PostUpdateConfig } from '../../../manager/common';
 import * as _lockFiles from '../../../manager/npm/post-update';
@@ -7,7 +7,6 @@ import * as _lerna from '../../../manager/npm/post-update/lerna';
 import * as _npm from '../../../manager/npm/post-update/npm';
 import * as _pnpm from '../../../manager/npm/post-update/pnpm';
 import * as _yarn from '../../../manager/npm/post-update/yarn';
-import { platform as _platform } from '../../../platform';
 import * as _hostRules from '../../../util/host-rules';
 
 const defaultConfig = getConfig();
@@ -19,7 +18,8 @@ const yarn = mocked(_yarn);
 const pnpm = mocked(_pnpm);
 const lerna = mocked(_lerna);
 const hostRules = mocked(_hostRules);
-const platform = mocked(_platform);
+
+jest.mock('../../../util/git');
 
 hostRules.find = jest.fn((_) => ({
   token: 'abc',
@@ -76,7 +76,7 @@ describe('manager/npm/post-update', () => {
         ...defaultConfig,
         localDir: 'some-tmp-dir',
       };
-      platform.getFile.mockResolvedValueOnce('some lock file contents');
+      git.getFile.mockResolvedValueOnce('some lock file contents');
       npm.generateLockFile = jest.fn();
       npm.generateLockFile.mockResolvedValueOnce({
         lockFile: 'some lock file contents',
@@ -105,7 +105,7 @@ describe('manager/npm/post-update', () => {
     it('returns no error and empty lockfiles if lock file maintenance exists', async () => {
       config.updateType = 'lockFileMaintenance';
       config.reuseExistingBranch = true;
-      platform.branchExists.mockResolvedValueOnce(true);
+      git.branchExists.mockResolvedValueOnce(true);
       const res = await getAdditionalFiles(config, { npm: [{}] });
       expect(res).toMatchSnapshot();
       expect(res.artifactErrors).toHaveLength(0);

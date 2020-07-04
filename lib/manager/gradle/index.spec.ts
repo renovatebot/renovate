@@ -1,6 +1,6 @@
 import { exec as _exec } from 'child_process';
 import * as _os from 'os';
-import fs from 'fs-extra';
+import fsExtra from 'fs-extra';
 import tmp, { DirectoryResult } from 'tmp-promise';
 import * as upath from 'upath';
 import { envMock, mockExecAll } from '../../../test/execUtil';
@@ -9,7 +9,7 @@ import * as _util from '../../util';
 import { BinarySource } from '../../util/exec/common';
 import * as _docker from '../../util/exec/docker';
 import * as _env from '../../util/exec/env';
-import * as _utilfs from '../../util/gitfs';
+import * as _fs from '../../util/fs';
 import { ExtractConfig } from '../common';
 import { ifSystemSupportsGradle } from './__testutil__/gradle';
 import { GRADLE_DEPENDENCY_REPORT_FILENAME } from './gradle-updates-report';
@@ -17,11 +17,11 @@ import * as _manager from '.';
 
 const fixtures = 'lib/manager/gradle/__fixtures__';
 const standardUpdatesReport = () =>
-  fs.readFile(`${fixtures}/updatesReport.json`, 'utf8');
+  fsExtra.readFile(`${fixtures}/updatesReport.json`, 'utf8');
 const emptyUpdatesReport = () =>
-  fs.readFile(`${fixtures}/updatesReportEmpty.json`, 'utf8');
+  fsExtra.readFile(`${fixtures}/updatesReportEmpty.json`, 'utf8');
 const multiProjectUpdatesReport = () =>
-  fs.readFile(`${fixtures}/MultiProjectUpdatesReport.json`, 'utf8');
+  fsExtra.readFile(`${fixtures}/MultiProjectUpdatesReport.json`, 'utf8');
 
 const baseConfig = {
   gradle: {
@@ -44,16 +44,16 @@ async function setupMocks() {
 
   jest.mock('child_process');
   jest.mock('../../util/exec/env');
-  jest.mock('../../util/gitfs');
+  jest.mock('../../util/fs');
   jest.mock('os');
 
   const os: jest.Mocked<typeof _os> = require('os');
-  const gitfs: jest.Mocked<typeof _utilfs> = require('../../util/gitfs');
+  const fs: jest.Mocked<typeof _fs> = require('../../util/fs');
   const env: jest.Mocked<typeof _env> = require('../../util/exec/env');
   const exec: jest.Mock<typeof _exec> = require('child_process').exec;
   const util: jest.Mocked<typeof _util> = require('../../util');
 
-  gitfs.readLocalFile.mockResolvedValue(`
+  fs.readLocalFile.mockResolvedValue(`
     dependency 'foo:foo:1.2.3'
     dependency "bar:bar:3.4.5"
   `);
@@ -97,10 +97,10 @@ describe(getName(__filename), () => {
       dir: string = config.localDir
     ) {
       if (addGradleWrapper) {
-        await fs.copy(`${fixtures}/gradle-wrappers/6`, dir);
+        await fsExtra.copy(`${fixtures}/gradle-wrappers/6`, dir);
       }
       if (updatesReport) {
-        await fs.writeFile(
+        await fsExtra.writeFile(
           `${dir}/${GRADLE_DEPENDENCY_REPORT_FILENAME}`,
           await updatesReport
         );
@@ -224,7 +224,7 @@ describe(getName(__filename), () => {
     it('should return gradle dependencies for build.gradle in subdirectories if there is gradlew in the same directory', async () => {
       const execSnapshots = mockExecAll(exec, gradleOutput);
       await initializeWorkingDir(true, standardUpdatesReport());
-      await fs.mkdirs(`${config.localDir}/foo`);
+      await fsExtra.mkdirs(`${config.localDir}/foo`);
       await initializeWorkingDir(
         true,
         standardUpdatesReport(),
@@ -245,9 +245,9 @@ describe(getName(__filename), () => {
       await manager.extractAllPackageFiles(config, ['build.gradle']);
 
       await expect(
-        fs.access(
+        fsExtra.access(
           `${config.localDir}/renovate-plugin.gradle`,
-          fs.constants.F_OK
+          fsExtra.constants.F_OK
         )
       ).resolves.toBeUndefined();
       expect(execSnapshots).toMatchSnapshot();
@@ -303,7 +303,7 @@ describe(getName(__filename), () => {
     it('should update an existing module dependency', async () => {
       const execSnapshots = mockExecAll(exec, gradleOutput);
 
-      const buildGradleContent = await fs.readFile(
+      const buildGradleContent = await fsExtra.readFile(
         `${fixtures}/build.gradle.example1`,
         'utf8'
       );
@@ -403,8 +403,8 @@ describe(getName(__filename), () => {
       workingDir = await tmp.dir({ unsafeCleanup: true });
       successFile = '';
       testRunConfig = { ...baseConfig, localDir: workingDir.path };
-      await fs.copy(`${fixtures}/minimal-project`, workingDir.path);
-      await fs.copy(`${fixtures}/gradle-wrappers/6`, workingDir.path);
+      await fsExtra.copy(`${fixtures}/minimal-project`, workingDir.path);
+      await fsExtra.copy(`${fixtures}/gradle-wrappers/6`, workingDir.path);
 
       const mockPluginContent = `
 allprojects {
@@ -414,7 +414,7 @@ allprojects {
     }
   }
 }`;
-      await fs.writeFile(
+      await fsExtra.writeFile(
         `${workingDir.path}/renovate-plugin.gradle`,
         mockPluginContent
       );
@@ -422,16 +422,20 @@ allprojects {
     });
 
     it('executes an executable gradle wrapper', async () => {
-      const gradlew = await fs.stat(`${workingDir.path}/gradlew`);
+      const gradlew = await fsExtra.stat(`${workingDir.path}/gradlew`);
       await manager.executeGradle(testRunConfig, workingDir.path, gradlew);
-      await expect(fs.readFile(successFile, 'utf8')).resolves.toBe('success');
+      await expect(fsExtra.readFile(successFile, 'utf8')).resolves.toBe(
+        'success'
+      );
     }, 120000);
 
     it('executes a not-executable gradle wrapper', async () => {
-      await fs.chmod(`${workingDir.path}/gradlew`, '444');
-      const gradlew = await fs.stat(`${workingDir.path}/gradlew`);
+      await fsExtra.chmod(`${workingDir.path}/gradlew`, '444');
+      const gradlew = await fsExtra.stat(`${workingDir.path}/gradlew`);
       await manager.executeGradle(testRunConfig, workingDir.path, gradlew);
-      await expect(fs.readFile(successFile, 'utf8')).resolves.toBe('success');
+      await expect(fsExtra.readFile(successFile, 'utf8')).resolves.toBe(
+        'success'
+      );
     }, 120000);
   });
 });

@@ -1,7 +1,7 @@
 import * as fs from 'fs-extra';
 import { join, parse } from 'upath';
-import { RenovateConfig } from '../../../config/common';
-import { logger } from '../../../logger';
+import { RenovateConfig } from '../../config/common';
+import { logger } from '../../logger';
 
 let localDir = '';
 
@@ -49,7 +49,8 @@ export async function writeLocalFile(
 }
 
 export async function deleteLocalFile(fileName: string): Promise<void> {
-  await fs.remove(fileName);
+  const localFileName = join(localDir, fileName);
+  await fs.remove(localFileName);
 }
 
 // istanbul ignore next

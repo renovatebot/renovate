@@ -7,7 +7,7 @@ import {
 } from '../../constants/error-messages';
 import { PR_STATE_CLOSED, PR_STATE_OPEN } from '../../constants/pull-requests';
 import { BranchStatus } from '../../types';
-import * as _gitfs from '../../util/gitfs';
+import * as _git from '../../util/git';
 import { Platform } from '../common';
 
 function repoMock(
@@ -143,7 +143,7 @@ describe('platform/bitbucket-server', () => {
     describe(scenarioName, () => {
       let bitbucket: Platform;
       let hostRules: jest.Mocked<typeof import('../../util/host-rules')>;
-      let gitfs: jest.Mocked<typeof _gitfs>;
+      let git: jest.Mocked<typeof _git>;
 
       async function initRepo(config = {}): Promise<nock.Scope> {
         const scope = httpMock
@@ -172,14 +172,14 @@ describe('platform/bitbucket-server', () => {
         httpMock.reset();
         httpMock.setup();
         jest.mock('delay');
-        jest.mock('../../util/gitfs');
+        jest.mock('../../util/git');
         jest.mock('../../util/host-rules');
         hostRules = require('../../util/host-rules');
         bitbucket = await import('.');
-        gitfs = require('../../util/gitfs');
-        gitfs.branchExists.mockResolvedValue(true);
-        gitfs.isBranchStale.mockResolvedValue(false);
-        gitfs.getBranchCommit.mockResolvedValue(
+        git = require('../../util/git');
+        git.branchExists.mockResolvedValue(true);
+        git.isBranchStale.mockResolvedValue(false);
+        git.getBranchCommit.mockResolvedValue(
           '0d9c7726c3d628b7e28af234595cfd20febdbf8e'
         );
         const endpoint =
@@ -195,10 +195,6 @@ describe('platform/bitbucket-server', () => {
           username: 'abc',
           password: '123',
         });
-      });
-
-      afterEach(async () => {
-        await bitbucket.cleanRepo();
       });
 
       describe('initPlatform()', () => {
@@ -404,48 +400,10 @@ describe('platform/bitbucket-server', () => {
         });
       });
 
-      describe('getFileList()', () => {
-        it('sends to gitFs', async () => {
-          await initRepo();
-          expect(await bitbucket.getFileList()).toMatchSnapshot();
-          expect(httpMock.getTrace()).toMatchSnapshot();
-        });
-      });
-
-      describe('branchExists()', () => {
-        describe('getFileList()', () => {
-          it('sends to gitFs', async () => {
-            await initRepo();
-            expect(
-              await bitbucket.branchExists(undefined as any)
-            ).toMatchSnapshot();
-            expect(httpMock.getTrace()).toMatchSnapshot();
-          });
-        });
-      });
-
-      describe('isBranchStale()', () => {
-        it('sends to gitFs', async () => {
-          await initRepo();
-          expect(
-            await bitbucket.isBranchStale(undefined as any)
-          ).toMatchSnapshot();
-          expect(httpMock.getTrace()).toMatchSnapshot();
-        });
-      });
-
       describe('deleteBranch()', () => {
         it('sends to gitFs', async () => {
           await initRepo();
           expect(await bitbucket.deleteBranch('branch')).toMatchSnapshot();
-          expect(httpMock.getTrace()).toMatchSnapshot();
-        });
-      });
-
-      describe('mergeBranch()', () => {
-        it('sends to gitFs', async () => {
-          await initRepo();
-          expect(await bitbucket.mergeBranch('branch')).toMatchSnapshot();
           expect(httpMock.getTrace()).toMatchSnapshot();
         });
       });
@@ -467,30 +425,6 @@ describe('platform/bitbucket-server', () => {
             files: [{ name: 'test', contents: 'dummy' }],
             message: 'message',
           });
-          expect(httpMock.getTrace()).toMatchSnapshot();
-        });
-      });
-
-      describe('getFile()', () => {
-        it('sends to gitFs', async () => {
-          await initRepo();
-          expect(await bitbucket.getFile('', '')).toMatchSnapshot();
-          expect(httpMock.getTrace()).toMatchSnapshot();
-        });
-      });
-
-      describe('getAllRenovateBranches()', () => {
-        it('sends to gitFs', async () => {
-          await initRepo();
-          expect(await bitbucket.getAllRenovateBranches('')).toMatchSnapshot();
-          expect(httpMock.getTrace()).toMatchSnapshot();
-        });
-      });
-
-      describe('getBranchLastCommitTime()', () => {
-        it('sends to gitFs', async () => {
-          await initRepo();
-          expect(await bitbucket.getBranchLastCommitTime('')).toMatchSnapshot();
           expect(httpMock.getTrace()).toMatchSnapshot();
         });
       });
@@ -1686,14 +1620,6 @@ Followed by some information.
         });
       });
 
-      describe('getCommitMessages()', () => {
-        it('sends to gitFs', async () => {
-          await initRepo();
-          expect(await bitbucket.getCommitMessages()).toMatchSnapshot();
-          expect(httpMock.getTrace()).toMatchSnapshot();
-        });
-      });
-
       describe('getVulnerabilityAlerts()', () => {
         it('returns empty array', async () => {
           expect.assertions(1);
@@ -1788,7 +1714,7 @@ Followed by some information.
         });
 
         it('throws repository-changed', async () => {
-          gitfs.branchExists.mockResolvedValue(false);
+          git.branchExists.mockResolvedValue(false);
           await initRepo();
           await expect(
             bitbucket.getBranchStatus('somebranch', [])

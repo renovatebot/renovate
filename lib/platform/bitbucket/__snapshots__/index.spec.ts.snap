@@ -64,22 +64,6 @@ Array [
 ]
 `;
 
-exports[`platform/bitbucket branchExists() getFileList() sends to gitFs 1`] = `
-Array [
-  Object {
-    "headers": Object {
-      "accept": "application/json",
-      "accept-encoding": "gzip, deflate",
-      "authorization": "Basic YWJjOjEyMw==",
-      "host": "api.bitbucket.org",
-      "user-agent": "https://github.com/renovatebot/renovate",
-    },
-    "method": "GET",
-    "url": "https://api.bitbucket.org/2.0/repositories/some/repo",
-  },
-]
-`;
-
 exports[`platform/bitbucket commitFiles() sends to gitFs 1`] = `undefined`;
 
 exports[`platform/bitbucket commitFiles() sends to gitFs 2`] = `
@@ -534,42 +518,6 @@ Array [
 ]
 `;
 
-exports[`platform/bitbucket getAllRenovateBranches() sends to gitFs 1`] = `undefined`;
-
-exports[`platform/bitbucket getAllRenovateBranches() sends to gitFs 2`] = `
-Array [
-  Object {
-    "headers": Object {
-      "accept": "application/json",
-      "accept-encoding": "gzip, deflate",
-      "authorization": "Basic YWJjOjEyMw==",
-      "host": "api.bitbucket.org",
-      "user-agent": "https://github.com/renovatebot/renovate",
-    },
-    "method": "GET",
-    "url": "https://api.bitbucket.org/2.0/repositories/some/repo",
-  },
-]
-`;
-
-exports[`platform/bitbucket getBranchLastCommitTime() sends to gitFs 1`] = `undefined`;
-
-exports[`platform/bitbucket getBranchLastCommitTime() sends to gitFs 2`] = `
-Array [
-  Object {
-    "headers": Object {
-      "accept": "application/json",
-      "accept-encoding": "gzip, deflate",
-      "authorization": "Basic YWJjOjEyMw==",
-      "host": "api.bitbucket.org",
-      "user-agent": "https://github.com/renovatebot/renovate",
-    },
-    "method": "GET",
-    "url": "https://api.bitbucket.org/2.0/repositories/some/repo",
-  },
-]
-`;
-
 exports[`platform/bitbucket getBranchPr() bitbucket finds PR for branch 1`] = `
 Object {
   "body": "summary",
@@ -971,58 +919,6 @@ Array [
 ]
 `;
 
-exports[`platform/bitbucket getCommitMessages() sends to gitFs 1`] = `undefined`;
-
-exports[`platform/bitbucket getCommitMessages() sends to gitFs 2`] = `
-Array [
-  Object {
-    "headers": Object {
-      "accept": "application/json",
-      "accept-encoding": "gzip, deflate",
-      "authorization": "Basic YWJjOjEyMw==",
-      "host": "api.bitbucket.org",
-      "user-agent": "https://github.com/renovatebot/renovate",
-    },
-    "method": "GET",
-    "url": "https://api.bitbucket.org/2.0/repositories/some/repo",
-  },
-]
-`;
-
-exports[`platform/bitbucket getFile() sends to gitFs 1`] = `undefined`;
-
-exports[`platform/bitbucket getFile() sends to gitFs 2`] = `
-Array [
-  Object {
-    "headers": Object {
-      "accept": "application/json",
-      "accept-encoding": "gzip, deflate",
-      "authorization": "Basic YWJjOjEyMw==",
-      "host": "api.bitbucket.org",
-      "user-agent": "https://github.com/renovatebot/renovate",
-    },
-    "method": "GET",
-    "url": "https://api.bitbucket.org/2.0/repositories/some/repo",
-  },
-]
-`;
-
-exports[`platform/bitbucket getFileList() sends to gitFs 1`] = `
-Array [
-  Object {
-    "headers": Object {
-      "accept": "application/json",
-      "accept-encoding": "gzip, deflate",
-      "authorization": "Basic YWJjOjEyMw==",
-      "host": "api.bitbucket.org",
-      "user-agent": "https://github.com/renovatebot/renovate",
-    },
-    "method": "GET",
-    "url": "https://api.bitbucket.org/2.0/repositories/some/repo",
-  },
-]
-`;
-
 exports[`platform/bitbucket getPr() canRebase 1`] = `
 Object {
   "body": "summary",
@@ -1253,24 +1149,6 @@ Array [
 
 exports[`platform/bitbucket getPrBody() returns diff files 1`] = `"**foo**bartext"`;
 
-exports[`platform/bitbucket getRepoStatus() sends to gitFs 1`] = `undefined`;
-
-exports[`platform/bitbucket getRepoStatus() sends to gitFs 2`] = `
-Array [
-  Object {
-    "headers": Object {
-      "accept": "application/json",
-      "accept-encoding": "gzip, deflate",
-      "authorization": "Basic YWJjOjEyMw==",
-      "host": "api.bitbucket.org",
-      "user-agent": "https://github.com/renovatebot/renovate",
-    },
-    "method": "GET",
-    "url": "https://api.bitbucket.org/2.0/repositories/some/repo",
-  },
-]
-`;
-
 exports[`platform/bitbucket getRepos() returns repos 1`] = `
 Array [
   Object {
@@ -1328,42 +1206,6 @@ Object {
 `;
 
 exports[`platform/bitbucket initRepo() works 2`] = `
-Array [
-  Object {
-    "headers": Object {
-      "accept": "application/json",
-      "accept-encoding": "gzip, deflate",
-      "authorization": "Basic YWJjOjEyMw==",
-      "host": "api.bitbucket.org",
-      "user-agent": "https://github.com/renovatebot/renovate",
-    },
-    "method": "GET",
-    "url": "https://api.bitbucket.org/2.0/repositories/some/repo",
-  },
-]
-`;
-
-exports[`platform/bitbucket isBranchStale() sends to gitFs 1`] = `false`;
-
-exports[`platform/bitbucket isBranchStale() sends to gitFs 2`] = `
-Array [
-  Object {
-    "headers": Object {
-      "accept": "application/json",
-      "accept-encoding": "gzip, deflate",
-      "authorization": "Basic YWJjOjEyMw==",
-      "host": "api.bitbucket.org",
-      "user-agent": "https://github.com/renovatebot/renovate",
-    },
-    "method": "GET",
-    "url": "https://api.bitbucket.org/2.0/repositories/some/repo",
-  },
-]
-`;
-
-exports[`platform/bitbucket mergeBranch() sends to gitFs 1`] = `undefined`;
-
-exports[`platform/bitbucket mergeBranch() sends to gitFs 2`] = `
 Array [
   Object {
     "headers": Object {

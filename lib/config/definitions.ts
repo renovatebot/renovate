@@ -611,6 +611,7 @@ const options: RenovateOptions[] = [
     type: 'string',
     cli: false,
     admin: true,
+    stage: 'global',
   },
   {
     name: 'enabledManagers',

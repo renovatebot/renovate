@@ -1,7 +1,7 @@
 import is from '@sindresorhus/is';
 import { REPOSITORY_DISABLED } from '../../constants/error-messages';
 import { BranchStatus } from '../../types';
-import * as _gitfs from '../../util/gitfs';
+import * as _git from '../../util/git';
 import * as _hostRules from '../../util/host-rules';
 import { Platform, RepoParams } from '../common';
 
@@ -10,22 +10,22 @@ describe('platform/azure', () => {
   let azure: Platform;
   let azureApi: jest.Mocked<typeof import('./azure-got-wrapper')>;
   let azureHelper: jest.Mocked<typeof import('./azure-helper')>;
-  let gitfs: jest.Mocked<typeof _gitfs>;
+  let git: jest.Mocked<typeof _git>;
   beforeEach(async () => {
     // reset module
     jest.resetModules();
     jest.mock('./azure-got-wrapper');
     jest.mock('./azure-helper');
-    jest.mock('../../util/gitfs');
+    jest.mock('../../util/git');
     jest.mock('../../util/host-rules');
     hostRules = require('../../util/host-rules');
     require('../../util/sanitize').sanitize = jest.fn((input) => input);
     azure = await import('.');
     azureApi = require('./azure-got-wrapper');
     azureHelper = require('./azure-helper');
-    gitfs = require('../../util/gitfs');
-    gitfs.branchExists.mockResolvedValue(true);
-    gitfs.isBranchStale.mockResolvedValue(false);
+    git = require('../../util/git');
+    git.branchExists.mockResolvedValue(true);
+    git.isBranchStale.mockResolvedValue(false);
     hostRules.find.mockReturnValue({
       token: 'token',
     });
@@ -33,10 +33,6 @@ describe('platform/azure', () => {
       endpoint: 'https://dev.azure.com/renovate12345',
       token: 'token',
     });
-  });
-
-  afterEach(async () => {
-    await azure.cleanRepo();
   });
 
   // do we need the args?
@@ -162,19 +158,6 @@ describe('platform/azure', () => {
       ...args,
     } as any);
   }
-
-  describe('getRepoStatus()', () => {
-    it('exists', async () => {
-      await initRepo();
-      expect(await azure.getRepoStatus()).toBeUndefined();
-    });
-  });
-
-  describe('cleanRepo()', () => {
-    it('exists', async () => {
-      await expect(azure.cleanRepo()).resolves.not.toThrow();
-    });
-  });
 
   describe('initRepo', () => {
     it(`should initialise the config for a repo`, async () => {

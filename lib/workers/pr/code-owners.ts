@@ -1,14 +1,15 @@
 import ignore from 'ignore';
 import { logger } from '../../logger';
 import { Pr, platform } from '../../platform';
+import { getFile } from '../../util/git';
 
 export async function codeOwnersForPr(pr: Pr): Promise<string[]> {
   try {
     const codeOwnersFile =
-      (await platform.getFile('CODEOWNERS', pr.targetBranch)) ||
-      (await platform.getFile('.github/CODEOWNERS', pr.targetBranch)) ||
-      (await platform.getFile('.gitlab/CODEOWNERS', pr.targetBranch)) ||
-      (await platform.getFile('docs/CODEOWNERS', pr.targetBranch));
+      (await getFile('CODEOWNERS', pr.targetBranch)) ||
+      (await getFile('.github/CODEOWNERS', pr.targetBranch)) ||
+      (await getFile('.gitlab/CODEOWNERS', pr.targetBranch)) ||
+      (await getFile('docs/CODEOWNERS', pr.targetBranch));
 
     if (!codeOwnersFile) {
       return [];
