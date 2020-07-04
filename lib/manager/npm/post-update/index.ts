@@ -16,6 +16,7 @@ import { platform } from '../../../platform';
 import { ExternalHostError } from '../../../types/errors/external-host-error';
 import { getChildProcessEnv } from '../../../util/exec/env';
 import { deleteLocalFile } from '../../../util/fs';
+import { getRepoStatus } from '../../../util/git';
 import * as hostRules from '../../../util/host-rules';
 import { PackageFile, PostUpdateConfig, Upgrade } from '../../common';
 import * as lerna from './lerna';
@@ -541,7 +542,7 @@ export async function getAdditionalFiles(
                 .replace(/\/?$/, '/');
               const resolvedPath = upath.join(lockFileDir, mirrorPath);
               logger.debug('Found yarn offline  mirror: ' + resolvedPath);
-              const status = await platform.getRepoStatus();
+              const status = await getRepoStatus();
               for (const f of status.modified.concat(status.not_added)) {
                 if (f.startsWith(resolvedPath)) {
                   const localModified = upath.join(config.localDir, f);

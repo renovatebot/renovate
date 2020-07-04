@@ -447,14 +447,6 @@ describe('platform/bitbucket', () => {
     });
   });
 
-  describe('getRepoStatus()', () => {
-    it('sends to gitFs', async () => {
-      await initRepoMock();
-      expect(await bitbucket.getRepoStatus()).toMatchSnapshot();
-      expect(httpMock.getTrace()).toMatchSnapshot();
-    });
-  });
-
   describe('deleteBranch()', () => {
     it('sends to gitFs', async () => {
       await initRepoMock();

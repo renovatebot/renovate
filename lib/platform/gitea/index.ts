@@ -882,10 +882,6 @@ const platform: Platform = {
     return git.getFile(lockFileName, branchName);
   },
 
-  getRepoStatus(): Promise<git.StatusResult> {
-    return git.getRepoStatus();
-  },
-
   getFileList(): Promise<string[]> {
     return git.getFileList();
   },
@@ -931,7 +927,6 @@ export const {
   getPrList,
   getPrFiles,
   getRepoForceRebase,
-  getRepoStatus,
   getRepos,
   getVulnerabilityAlerts,
   initPlatform,

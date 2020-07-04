@@ -1,5 +1,4 @@
 import got from 'got';
-import Git from 'simple-git/promise';
 import { RenovateConfig } from '../config/common';
 import {
   BranchStatus,
@@ -232,7 +231,6 @@ export interface Platform {
     requiredStatusChecks?: string[] | null
   ): Promise<BranchStatus>;
   getBranchPr(branchName: string): Promise<Pr | null>;
-  getRepoStatus(): Promise<Git.StatusResult>;
   getFile(lockFileName: string, branchName?: string): Promise<string | null>;
   initPlatform(config: RenovateConfig): Promise<PlatformConfig>;
 }

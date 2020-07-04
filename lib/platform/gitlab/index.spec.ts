@@ -154,14 +154,6 @@ describe('platform/gitlab', () => {
     return scope;
   }
 
-  describe('getRepoStatus()', () => {
-    it('exists', async () => {
-      await initRepo();
-      await gitlab.getRepoStatus();
-      expect(httpMock.getTrace()).toMatchSnapshot();
-    });
-  });
-
   describe('initRepo', () => {
     it(`should throw error if disabled in renovate.json`, async () => {
       httpMock

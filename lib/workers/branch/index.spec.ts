@@ -1,5 +1,5 @@
 import * as _fs from 'fs-extra';
-import { defaultConfig, mocked, platform } from '../../../test/util';
+import { defaultConfig, git, mocked, platform } from '../../../test/util';
 import {
   MANAGER_LOCKFILE_ERROR,
   REPOSITORY_CHANGED,
@@ -34,6 +34,7 @@ jest.mock('./automerge');
 jest.mock('./commit');
 jest.mock('../pr');
 jest.mock('../../util/exec');
+jest.mock('../../util/git');
 jest.mock('fs-extra');
 
 const getUpdated = mocked(_getUpdated);
@@ -638,7 +639,7 @@ describe('workers/branch', () => {
         body: `- [x] <!-- rebase-check -->`,
         isModified: true,
       } as never);
-      platform.getRepoStatus.mockResolvedValueOnce({
+      git.getRepoStatus.mockResolvedValueOnce({
         modified: ['modified_file'],
         not_added: [],
         deleted: ['deleted_file'],
