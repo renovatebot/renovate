@@ -138,13 +138,6 @@ function urlEscape(str: string): string {
   return str ? str.replace(/\//g, '%2F') : str;
 }
 
-export function cleanRepo(): Promise<void> {
-  git.cleanRepo();
-  // In theory most of this isn't necessary. In practice..
-  config = {} as any;
-  return Promise.resolve();
-}
-
 // Initialize GitLab by getting base branch
 export async function initRepo({
   repository,

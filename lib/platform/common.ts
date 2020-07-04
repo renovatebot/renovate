@@ -189,7 +189,6 @@ export interface Platform {
   getCommitMessages(): Promise<string[]>;
   setBranchPrefix(branchPrefix: string): Promise<void>;
   initRepo(config: RepoParams): Promise<RepoConfig>;
-  cleanRepo(): Promise<void>;
   getPrList(): Promise<Pr[]>;
   getPrFiles(pr: Pr): Promise<string[]>;
   getAllRenovateBranches(branchPrefix: string): Promise<string[]>;

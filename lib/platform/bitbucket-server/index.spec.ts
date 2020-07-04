@@ -197,10 +197,6 @@ describe('platform/bitbucket-server', () => {
         });
       });
 
-      afterEach(async () => {
-        await bitbucket.cleanRepo();
-      });
-
       describe('initPlatform()', () => {
         it('should throw if no endpoint', () => {
           expect.assertions(1);

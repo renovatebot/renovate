@@ -45,10 +45,6 @@ describe('platform/gitlab', () => {
     httpMock.setup();
   });
 
-  afterEach(async () => {
-    await gitlab.cleanRepo();
-  });
-
   describe('initPlatform()', () => {
     it(`should throw if no token`, async () => {
       await expect(gitlab.initPlatform({} as any)).rejects.toThrow();
@@ -157,12 +153,6 @@ describe('platform/gitlab', () => {
     await gitlab.initRepo(repoParams);
     return scope;
   }
-
-  describe('cleanRepo()', () => {
-    it('exists', async () => {
-      expect(await gitlab.cleanRepo()).toMatchSnapshot();
-    });
-  });
 
   describe('initRepo', () => {
     it(`should throw error if disabled in renovate.json`, async () => {
