@@ -158,13 +158,6 @@ describe('platform/gitlab', () => {
     return scope;
   }
 
-  describe('getRepoStatus()', () => {
-    it('exists', async () => {
-      await initRepo();
-      await gitlab.getRepoStatus();
-      expect(httpMock.getTrace()).toMatchSnapshot();
-    });
-  });
   describe('cleanRepo()', () => {
     it('exists', async () => {
       expect(await gitlab.cleanRepo()).toMatchSnapshot();

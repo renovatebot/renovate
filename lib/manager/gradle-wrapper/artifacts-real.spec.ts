@@ -2,7 +2,7 @@ import { resolve } from 'path';
 import { readFile, readFileSync } from 'fs-extra';
 import Git from 'simple-git/promise';
 import * as httpMock from '../../../test/httpMock';
-import { getName, partial, platform } from '../../../test/util';
+import { getName, git, partial } from '../../../test/util';
 import { setUtilConfig } from '../../util';
 import { ifSystemSupportsGradle } from '../gradle/__testutil__/gradle';
 import * as dcUpdate from '.';
@@ -43,7 +43,7 @@ describe(getName(__filename), () => {
     });
 
     it('replaces existing value', async () => {
-      platform.getRepoStatus.mockResolvedValue({
+      git.getRepoStatus.mockResolvedValue({
         modified: [
           'gradle/wrapper/gradle-wrapper.properties',
           'gradle/wrapper/gradle-wrapper.jar',
@@ -88,7 +88,7 @@ describe(getName(__filename), () => {
     });
 
     it('updates from version', async () => {
-      platform.getRepoStatus.mockResolvedValueOnce(
+      git.getRepoStatus.mockResolvedValueOnce(
         partial<Git.StatusResult>({
           modified: ['gradle/wrapper/gradle-wrapper.properties'],
         })
@@ -108,7 +108,7 @@ describe(getName(__filename), () => {
     });
 
     it('up to date', async () => {
-      platform.getRepoStatus.mockResolvedValue({
+      git.getRepoStatus.mockResolvedValue({
         modified: [],
       } as Git.StatusResult);
 
@@ -132,7 +132,7 @@ describe(getName(__filename), () => {
     });
 
     it('getRepoStatus fails', async () => {
-      platform.getRepoStatus.mockImplementation(() => {
+      git.getRepoStatus.mockImplementation(() => {
         throw new Error('failed');
       });
 
@@ -203,7 +203,7 @@ describe(getName(__filename), () => {
           '038794feef1f4745c6347107b6726279d1c824f3fc634b60f86ace1e9fbd1768'
         );
 
-      platform.getRepoStatus.mockResolvedValueOnce(
+      git.getRepoStatus.mockResolvedValueOnce(
         partial<Git.StatusResult>({
           modified: ['gradle/wrapper/gradle-wrapper.properties'],
         })

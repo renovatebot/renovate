@@ -163,13 +163,6 @@ describe('platform/azure', () => {
     } as any);
   }
 
-  describe('getRepoStatus()', () => {
-    it('exists', async () => {
-      await initRepo();
-      expect(await azure.getRepoStatus()).toBeUndefined();
-    });
-  });
-
   describe('cleanRepo()', () => {
     it('exists', async () => {
       await expect(azure.cleanRepo()).resolves.not.toThrow();

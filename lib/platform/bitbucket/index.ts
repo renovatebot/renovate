@@ -289,11 +289,6 @@ export function getBranchLastCommitTime(branchName: string): Promise<Date> {
   return git.getBranchLastCommitTime(branchName);
 }
 
-// istanbul ignore next
-export function getRepoStatus(): Promise<git.StatusResult> {
-  return git.getRepoStatus();
-}
-
 export function mergeBranch(branchName: string): Promise<void> {
   return git.mergeBranch(branchName);
 }
