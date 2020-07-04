@@ -4,7 +4,8 @@ import * as datasourceGitSubmodules from '../../datasource/git-submodules';
 import { logger } from '../../logger';
 import { get } from '../../manager';
 import { ArtifactError } from '../../manager/common';
-import { File, platform } from '../../platform';
+import { File } from '../../platform';
+import { getFile } from '../../util/git';
 import { BranchConfig } from '../common';
 import { doAutoReplace } from './auto-replace';
 
@@ -39,7 +40,7 @@ export async function getUpdatedPackageFiles(
     } else {
       let existingContent = updatedFileContents[packageFile];
       if (!existingContent) {
-        existingContent = await platform.getFile(
+        existingContent = await getFile(
           packageFile,
           reuseExistingBranch ? config.branchName : config.baseBranch
         );
@@ -160,7 +161,7 @@ export async function getUpdatedPackageFiles(
       if (updateArtifacts) {
         const packageFileContents =
           updatedFileContents[packageFile] ||
-          (await platform.getFile(
+          (await getFile(
             packageFile,
             config.reuseExistingBranch ? config.branchName : config.baseBranch
           ));

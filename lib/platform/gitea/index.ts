@@ -878,14 +878,6 @@ const platform: Platform = {
     return git.getBranchLastCommitTime(branchName);
   },
 
-  getFile(lockFileName: string, branchName?: string): Promise<string> {
-    return git.getFile(lockFileName, branchName);
-  },
-
-  getFileList(): Promise<string[]> {
-    return git.getFileList();
-  },
-
   getAllRenovateBranches(branchPrefix: string): Promise<string[]> {
     return git.getAllRenovateBranches(branchPrefix);
   },
@@ -919,8 +911,6 @@ export const {
   getBranchStatus,
   getBranchStatusCheck,
   getCommitMessages,
-  getFile,
-  getFileList,
   getIssueList,
   getPr,
   getPrBody,

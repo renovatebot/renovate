@@ -16,7 +16,7 @@ import { platform } from '../../../platform';
 import { ExternalHostError } from '../../../types/errors/external-host-error';
 import { getChildProcessEnv } from '../../../util/exec/env';
 import { deleteLocalFile } from '../../../util/fs';
-import { getRepoStatus } from '../../../util/git';
+import { getFile, getRepoStatus } from '../../../util/git';
 import * as hostRules from '../../../util/host-rules';
 import { PackageFile, PostUpdateConfig, Upgrade } from '../../common';
 import * as lerna from './lerna';
@@ -172,7 +172,7 @@ export async function writeExistingFiles(
         await remove(npmLockPath);
       } else {
         logger.debug(`Writing ${npmLock}`);
-        let existingNpmLock = await platform.getFile(npmLock);
+        let existingNpmLock = await getFile(npmLock);
         const widens = [];
         for (const upgrade of config.upgrades) {
           if (
@@ -450,7 +450,7 @@ export async function getAdditionalFiles(
         stderr: res.stderr,
       });
     } else {
-      const existingContent = await platform.getFile(
+      const existingContent = await getFile(
         lockFile,
         config.reuseExistingBranch ? config.branchName : config.baseBranch
       );
@@ -516,7 +516,7 @@ export async function getAdditionalFiles(
         stderr: res.stderr,
       });
     } else {
-      const existingContent = await platform.getFile(
+      const existingContent = await getFile(
         lockFileName,
         config.reuseExistingBranch ? config.branchName : config.baseBranch
       );
@@ -528,9 +528,7 @@ export async function getAdditionalFiles(
         });
         // istanbul ignore next
         try {
-          const yarnrc = await platform.getFile(
-            upath.join(lockFileDir, '.yarnrc')
-          );
+          const yarnrc = await getFile(upath.join(lockFileDir, '.yarnrc'));
           if (yarnrc) {
             const mirrorLine = yarnrc
               .split('\n')
@@ -618,7 +616,7 @@ export async function getAdditionalFiles(
         stderr: res.stderr,
       });
     } else {
-      const existingContent = await platform.getFile(
+      const existingContent = await getFile(
         lockFile,
         config.reuseExistingBranch ? config.branchName : config.baseBranch
       );
@@ -716,7 +714,7 @@ export async function getAdditionalFiles(
       for (const packageFile of packageFiles.npm) {
         const filename = packageFile.npmLock || packageFile.yarnLock;
         logger.trace('Checking for ' + filename);
-        const existingContent = await platform.getFile(
+        const existingContent = await getFile(
           filename,
           config.reuseExistingBranch ? config.branchName : config.baseBranch
         );

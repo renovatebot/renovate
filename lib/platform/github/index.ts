@@ -495,11 +495,6 @@ export function setBranchPrefix(branchPrefix: string): Promise<void> {
 
 // Search
 
-// istanbul ignore next
-export function getFileList(): Promise<string[]> {
-  return git.getFileList();
-}
-
 // Branch
 
 // istanbul ignore next
@@ -517,14 +512,6 @@ export function getAllRenovateBranches(
 // istanbul ignore next
 export function isBranchStale(branchName: string): Promise<boolean> {
   return git.isBranchStale(branchName);
-}
-
-// istanbul ignore next
-export function getFile(
-  filePath: string,
-  branchName?: string
-): Promise<string> {
-  return git.getFile(filePath, branchName);
 }
 
 // istanbul ignore next

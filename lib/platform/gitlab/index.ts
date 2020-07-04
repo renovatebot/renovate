@@ -286,13 +286,6 @@ export /* istanbul ignore next */ function setBranchPrefix(
   return git.setBranchPrefix(branchPrefix);
 }
 
-// Search
-
-// Get full file list
-export function getFileList(): Promise<string[]> {
-  return git.getFileList();
-}
-
 // Returns true if branch exists, otherwise false
 export function branchExists(branchName: string): Promise<boolean> {
   return git.branchExists(branchName);
@@ -629,13 +622,6 @@ export function commitFiles(
   commitFilesConfig: CommitFilesConfig
 ): Promise<string | null> {
   return git.commitFiles(commitFilesConfig);
-}
-
-export function getFile(
-  filePath: string,
-  branchName?: string
-): Promise<string> {
-  return git.getFile(filePath, branchName);
 }
 
 export async function deleteBranch(
