@@ -194,14 +194,6 @@ describe('platform/bitbucket', () => {
     });
   });
 
-  describe('isBranchStale()', () => {
-    it('sends to gitFs', async () => {
-      await initRepoMock();
-      expect(await bitbucket.isBranchStale('test')).toMatchSnapshot();
-      expect(httpMock.getTrace()).toMatchSnapshot();
-    });
-  });
-
   describe('getBranchPr()', () => {
     it('bitbucket finds PR for branch', async () => {
       const scope = await initRepoMock();

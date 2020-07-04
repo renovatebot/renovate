@@ -1,6 +1,7 @@
 import { RenovateConfig } from '../../config';
 import { logger } from '../../logger';
 import { platform } from '../../platform';
+import { isBranchStale } from '../../util/git';
 
 type ParentBranch = {
   reuseExistingBranch: boolean;
@@ -50,8 +51,7 @@ export async function shouldReuseExistingBranch(
     (config.rebaseWhen === 'auto' && (await platform.getRepoForceRebase())) ||
     (config.automerge && config.automergeType === 'branch')
   ) {
-    const isBranchStale = await platform.isBranchStale(branchName);
-    if (isBranchStale) {
+    if (await isBranchStale(branchName)) {
       logger.debug(`Branch is stale and needs rebasing`);
       // We can rebase the branch only if no PR or PR can be rebased
       if (!pr || !pr.isModified) {

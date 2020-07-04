@@ -613,10 +613,6 @@ export function getAllRenovateBranches(
   return git.getAllRenovateBranches(branchPrefix);
 }
 
-export function isBranchStale(branchName: string): Promise<boolean> {
-  return git.isBranchStale(branchName);
-}
-
 // istanbul ignore next
 export function commitFiles(
   commitFilesConfig: CommitFilesConfig

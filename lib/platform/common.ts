@@ -204,7 +204,6 @@ export interface Platform {
   createPr(prConfig: CreatePRConfig): Promise<Pr>;
   getBranchLastCommitTime(branchName: string): Promise<Date>;
   getRepos(): Promise<string[]>;
-  isBranchStale(branchName: string): Promise<boolean>;
   getRepoForceRebase(): Promise<boolean>;
   deleteLabel(number: number, label: string): Promise<void>;
   setBranchStatus(branchStatusConfig: BranchStatusConfig): Promise<void>;

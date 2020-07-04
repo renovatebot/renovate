@@ -402,13 +402,7 @@ describe('platform/gitlab', () => {
       expect(httpMock.getTrace()).toMatchSnapshot();
     });
   });
-  describe('isBranchStale()', () => {
-    it('sends to gitFs', async () => {
-      await initRepo();
-      await gitlab.isBranchStale('');
-      expect(httpMock.getTrace()).toMatchSnapshot();
-    });
-  });
+
   describe('getBranchPr(branchName)', () => {
     it('should return null if no PR exists', async () => {
       const scope = await initRepo();

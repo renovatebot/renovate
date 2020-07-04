@@ -400,16 +400,6 @@ describe('platform/bitbucket-server', () => {
         });
       });
 
-      describe('isBranchStale()', () => {
-        it('sends to gitFs', async () => {
-          await initRepo();
-          expect(
-            await bitbucket.isBranchStale(undefined as any)
-          ).toMatchSnapshot();
-          expect(httpMock.getTrace()).toMatchSnapshot();
-        });
-      });
-
       describe('deleteBranch()', () => {
         it('sends to gitFs', async () => {
           await initRepo();

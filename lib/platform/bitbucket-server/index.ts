@@ -261,11 +261,6 @@ export function branchExists(branchName: string): Promise<boolean> {
   return git.branchExists(branchName);
 }
 
-export function isBranchStale(branchName: string): Promise<boolean> {
-  logger.debug(`isBranchStale(${branchName})`);
-  return git.isBranchStale(branchName);
-}
-
 // Gets details for a PR
 export async function getPr(
   prNo: number,
@@ -332,7 +327,7 @@ export async function getPr(
   }
 
   if (await branchExists(pr.branchName)) {
-    pr.isStale = await isBranchStale(pr.branchName);
+    pr.isStale = await git.isBranchStale(pr.branchName);
   }
 
   return pr;

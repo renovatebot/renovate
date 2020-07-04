@@ -510,11 +510,6 @@ export function getAllRenovateBranches(
 }
 
 // istanbul ignore next
-export function isBranchStale(branchName: string): Promise<boolean> {
-  return git.isBranchStale(branchName);
-}
-
-// istanbul ignore next
 export function deleteBranch(
   branchName: string,
   closePr?: boolean

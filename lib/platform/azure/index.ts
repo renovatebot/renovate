@@ -214,12 +214,6 @@ export /* istanbul ignore next */ function getAllRenovateBranches(
   return git.getAllRenovateBranches(branchPrefix);
 }
 
-export /* istanbul ignore next */ function isBranchStale(
-  branchName: string
-): Promise<boolean> {
-  return git.isBranchStale(branchName);
-}
-
 // istanbul ignore next
 async function abandonPr(prNo: number): Promise<void> {
   logger.debug(`abandonPr(prNo)(${prNo})`);

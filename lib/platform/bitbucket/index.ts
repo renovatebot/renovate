@@ -206,10 +206,6 @@ export function getAllRenovateBranches(
   return git.getAllRenovateBranches(branchPrefix);
 }
 
-export function isBranchStale(branchName: string): Promise<boolean> {
-  return git.isBranchStale(branchName);
-}
-
 // istanbul ignore next
 function matchesState(state: string, desiredState: string): boolean {
   if (desiredState === PR_STATE_ALL) {
@@ -372,7 +368,7 @@ export async function getPr(prNo: number): Promise<Pr | null> {
     }
   }
   if (await branchExists(pr.source.branch.name)) {
-    res.isStale = await isBranchStale(pr.source.branch.name);
+    res.isStale = await git.isBranchStale(pr.source.branch.name);
   }
 
   return res;

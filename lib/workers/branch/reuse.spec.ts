@@ -1,8 +1,10 @@
-import { platform } from '../../../test/util';
+import { git, platform } from '../../../test/util';
 import { RenovateConfig } from '../../config';
 import { PR_STATE_OPEN } from '../../constants/pull-requests';
 import { Pr } from '../../platform';
 import { shouldReuseExistingBranch } from './reuse';
+
+jest.mock('../../util/git');
 
 describe('workers/branch/parent', () => {
   describe('getParentBranch(config)', () => {
@@ -18,9 +20,6 @@ describe('workers/branch/parent', () => {
         rebaseLabel: 'rebase',
         rebaseWhen: 'behind-base-branch',
       };
-    });
-    afterEach(() => {
-      jest.resetAllMocks();
     });
     it('returns undefined if branch does not exist', async () => {
       platform.branchExists.mockResolvedValueOnce(false);
@@ -113,14 +112,14 @@ describe('workers/branch/parent', () => {
       config.automerge = true;
       config.automergeType = 'branch';
       platform.branchExists.mockResolvedValueOnce(true);
-      platform.isBranchStale.mockResolvedValueOnce(true);
+      git.isBranchStale.mockResolvedValueOnce(true);
       const res = await shouldReuseExistingBranch(config);
       expect(res.reuseExistingBranch).toBe(false);
     });
     it('returns branch if rebaseWhen=behind-base-branch but cannot rebase', async () => {
       config.rebaseWhen = 'behind-base-branch';
       platform.branchExists.mockResolvedValueOnce(true);
-      platform.isBranchStale.mockResolvedValueOnce(true);
+      git.isBranchStale.mockResolvedValueOnce(true);
       platform.getBranchPr.mockResolvedValueOnce({
         ...pr,
         isConflicted: true,

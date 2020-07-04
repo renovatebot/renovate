@@ -498,7 +498,7 @@ const platform: Platform = {
     // Enrich pull request with additional information which is more expensive to fetch
     if (pr.state !== 'closed') {
       if (pr.isStale === undefined) {
-        pr.isStale = await platform.isBranchStale(pr.branchName);
+        pr.isStale = await git.isBranchStale(pr.branchName);
       }
       if (pr.isModified === undefined) {
         pr.isModified = await isPRModified(config.repository, pr.branchName);
@@ -858,10 +858,6 @@ const platform: Platform = {
     return smartTruncate(prBody, 1000000);
   },
 
-  isBranchStale(branchName: string): Promise<boolean> {
-    return git.isBranchStale(branchName);
-  },
-
   setBranchPrefix(branchPrefix: string): Promise<void> {
     return git.setBranchPrefix(branchPrefix);
   },
@@ -921,7 +917,6 @@ export const {
   getVulnerabilityAlerts,
   initPlatform,
   initRepo,
-  isBranchStale,
   mergeBranch,
   mergePr,
   setBaseBranch,

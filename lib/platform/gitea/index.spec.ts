@@ -1362,16 +1362,6 @@ describe('platform/gitea', () => {
     });
   });
 
-  describe('isBranchStale', () => {
-    it('propagates call to storage class', async () => {
-      await initFakeRepo();
-      await gitea.isBranchStale('some-branch');
-
-      expect(gitvcs.isBranchStale).toHaveBeenCalledTimes(1);
-      expect(gitvcs.isBranchStale).toHaveBeenCalledWith('some-branch');
-    });
-  });
-
   describe('setBranchPrefix', () => {
     it('should propagate call to storage class', async () => {
       await initFakeRepo();
