@@ -621,13 +621,7 @@ describe('platform/gitlab', () => {
       }
     );
   });
-  describe('mergeBranch()', () => {
-    it('sends to gitFs', async () => {
-      await initRepo();
-      await gitlab.mergeBranch('branch');
-      expect(httpMock.getTrace()).toMatchSnapshot();
-    });
-  });
+
   describe('deleteBranch()', () => {
     it('sends to gitFs', async () => {
       const scope = await initRepo();

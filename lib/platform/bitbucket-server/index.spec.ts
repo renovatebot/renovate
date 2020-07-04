@@ -408,14 +408,6 @@ describe('platform/bitbucket-server', () => {
         });
       });
 
-      describe('mergeBranch()', () => {
-        it('sends to gitFs', async () => {
-          await initRepo();
-          expect(await bitbucket.mergeBranch('branch')).toMatchSnapshot();
-          expect(httpMock.getTrace()).toMatchSnapshot();
-        });
-      });
-
       describe('commitFiles()', () => {
         it('sends to gitFs', async () => {
           expect.assertions(1);

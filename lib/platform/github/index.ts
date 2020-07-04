@@ -523,17 +523,6 @@ export function getBranchLastCommitTime(branchName: string): Promise<Date> {
 }
 
 // istanbul ignore next
-export function mergeBranch(branchName: string): Promise<void> {
-  if (config.pushProtection) {
-    logger.debug(
-      { branch: branchName },
-      'Branch protection: Attempting to merge branch when push protection is enabled'
-    );
-  }
-  return git.mergeBranch(branchName);
-}
-
-// istanbul ignore next
 export function commitFiles(
   commitFilesConfig: CommitFilesConfig
 ): Promise<string | null> {

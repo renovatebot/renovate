@@ -866,10 +866,6 @@ const platform: Platform = {
     return git.branchExists(branchName);
   },
 
-  mergeBranch(branchName: string): Promise<void> {
-    return git.mergeBranch(branchName);
-  },
-
   getBranchLastCommitTime(branchName: string): Promise<Date> {
     return git.getBranchLastCommitTime(branchName);
   },
@@ -917,7 +913,6 @@ export const {
   getVulnerabilityAlerts,
   initPlatform,
   initRepo,
-  mergeBranch,
   mergePr,
   setBaseBranch,
   setBranchPrefix,

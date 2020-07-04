@@ -223,7 +223,6 @@ export interface Platform {
   commitFiles(commitFile: CommitFilesConfig): Promise<string | null>;
   getPr(number: number): Promise<Pr>;
   findPr(findPRConfig: FindPRConfig): Promise<Pr>;
-  mergeBranch(branchName: string): Promise<void>;
   getBranchStatus(
     branchName: string,
     requiredStatusChecks?: string[] | null

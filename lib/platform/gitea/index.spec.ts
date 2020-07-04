@@ -1382,16 +1382,6 @@ describe('platform/gitea', () => {
     });
   });
 
-  describe('mergeBranch', () => {
-    it('should propagate call to storage class', async () => {
-      await initFakeRepo();
-      await gitea.mergeBranch('some-branch');
-
-      expect(gitvcs.mergeBranch).toHaveBeenCalledTimes(1);
-      expect(gitvcs.mergeBranch).toHaveBeenCalledWith('some-branch');
-    });
-  });
-
   describe('getBranchLastCommitTime', () => {
     it('should propagate call to storage class', async () => {
       await initFakeRepo();

@@ -357,12 +357,6 @@ export /* istanbul ignore next */ function getBranchLastCommitTime(
   return git.getBranchLastCommitTime(branchName);
 }
 
-export /* istanbul ignore next */ function mergeBranch(
-  branchName: string
-): Promise<void> {
-  return git.mergeBranch(branchName);
-}
-
 export /* istanbul ignore next */ function commitFiles({
   branchName,
   files,

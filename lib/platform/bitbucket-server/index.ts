@@ -456,11 +456,6 @@ export async function deleteBranch(
   return git.deleteBranch(branchName);
 }
 
-export function mergeBranch(branchName: string): Promise<void> {
-  logger.debug(`mergeBranch(${branchName})`);
-  return git.mergeBranch(branchName);
-}
-
 export function getBranchLastCommitTime(branchName: string): Promise<Date> {
   logger.debug(`getBranchLastCommitTime(${branchName})`);
   return git.getBranchLastCommitTime(branchName);

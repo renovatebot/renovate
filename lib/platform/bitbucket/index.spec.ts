@@ -449,14 +449,6 @@ describe('platform/bitbucket', () => {
     });
   });
 
-  describe('mergeBranch()', () => {
-    it('sends to gitFs', async () => {
-      await initRepoMock();
-      expect(await bitbucket.mergeBranch('test')).toMatchSnapshot();
-      expect(httpMock.getTrace()).toMatchSnapshot();
-    });
-  });
-
   describe('getBranchLastCommitTime()', () => {
     it('sends to gitFs', async () => {
       await initRepoMock();
