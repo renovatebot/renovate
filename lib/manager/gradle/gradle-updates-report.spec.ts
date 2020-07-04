@@ -8,7 +8,7 @@ import {
   GRADLE_DEPENDENCY_REPORT_FILENAME,
   createRenovateGradlePlugin,
 } from './gradle-updates-report';
-import { GRADLE_DEPENDENCY_REPORT_OPTIONS } from './index';
+import { GRADLE_DEPENDENCY_REPORT_OPTIONS } from '.';
 
 const fixtures = 'lib/manager/gradle/__fixtures__';
 

@@ -5,7 +5,7 @@ import {
   getSiblingFileName,
   readLocalFile,
   writeLocalFile,
-} from '../../util/gitfs';
+} from '../../util/fs';
 import { UpdateArtifact, UpdateArtifactsResult } from '../common';
 
 export async function updateArtifacts({

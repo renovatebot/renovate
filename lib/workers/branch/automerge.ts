@@ -2,6 +2,7 @@ import { RenovateConfig } from '../../config';
 import { logger } from '../../logger';
 import { platform } from '../../platform';
 import { BranchStatus } from '../../types';
+import { mergeBranch } from '../../util/git';
 
 export type AutomergeResult =
   | 'automerged'
@@ -32,7 +33,7 @@ export async function tryBranchAutomerge(
       if (config.dryRun) {
         logger.info('DRY-RUN: Would automerge branch' + config.branchName);
       } else {
-        await platform.mergeBranch(config.branchName);
+        await mergeBranch(config.branchName);
       }
       logger.info({ branch: config.branchName }, 'Branch automerged');
       return 'automerged'; // Branch no longer exists

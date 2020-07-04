@@ -1,10 +1,8 @@
-import fs from 'fs-extra';
 import { quote } from 'shlex';
-import upath from 'upath';
 import { logger } from '../../logger';
 import { exec } from '../../util/exec';
 import { BinarySource } from '../../util/exec/common';
-import { readLocalFile } from '../../util/gitfs';
+import { readLocalFile, writeLocalFile } from '../../util/fs';
 import { UpdateArtifact, UpdateArtifactsResult } from '../common';
 
 export async function updateArtifacts({
@@ -27,8 +25,7 @@ export async function updateArtifacts({
 
   const lockFileName = 'mix.lock';
   try {
-    const localPackageFileName = upath.join(cwd, packageFileName);
-    await fs.outputFile(localPackageFileName, newPackageFileContent);
+    await writeLocalFile(packageFileName, newPackageFileContent);
   } catch (err) {
     logger.warn({ err }, 'mix.exs could not be written');
     return [
@@ -80,8 +77,7 @@ export async function updateArtifacts({
     ];
   }
 
-  const localLockFileName = upath.join(cwd, lockFileName);
-  const newMixLockContent = await fs.readFile(localLockFileName, 'utf8');
+  const newMixLockContent = await readLocalFile(lockFileName, 'utf8');
   if (existingLockFileContent === newMixLockContent) {
     logger.debug('mix.lock is unchanged');
     return null;

@@ -1,7 +1,7 @@
 import minimatch from 'minimatch';
 import { RenovateConfig } from '../../../config/common';
 import { logger } from '../../../logger';
-import { platform } from '../../../platform';
+import { getFileList } from '../../../util/git';
 import { regEx } from '../../../util/regex';
 
 export function getIncludedFiles(
@@ -34,10 +34,6 @@ export function filterIgnoredFiles(
           minimatch(file, ignorePath, { dot: true })
       )
   );
-}
-
-export function getFileList(): Promise<string[]> {
-  return platform.getFileList();
 }
 
 export function getFilteredFileList(

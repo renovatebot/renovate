@@ -8,10 +8,10 @@ import * as httpMock from '../../../test/httpMock';
 import {
   addReplacingSerializer,
   env,
+  fs,
   getName,
-  gitfs,
+  git,
   partial,
-  platform,
 } from '../../../test/util';
 import { setUtilConfig } from '../../util';
 import { BinarySource } from '../../util/exec/common';
@@ -19,7 +19,8 @@ import { resetPrefetchedImages } from '../../util/exec/docker';
 import * as dcUpdate from '.';
 
 jest.mock('child_process');
-jest.mock('../../util/gitfs');
+jest.mock('../../util/fs');
+jest.mock('../../util/git');
 jest.mock('../../util/exec/env');
 
 const exec: jest.Mock<typeof _exec> = _exec as any;
@@ -51,7 +52,7 @@ describe(getName(__filename), () => {
     await setUtilConfig(config);
     resetPrefetchedImages();
 
-    gitfs.readLocalFile.mockResolvedValue('test');
+    fs.readLocalFile.mockResolvedValue('test');
   });
 
   afterEach(() => {
@@ -59,7 +60,7 @@ describe(getName(__filename), () => {
   });
 
   it('replaces existing value', async () => {
-    platform.getRepoStatus.mockResolvedValue({
+    git.getRepoStatus.mockResolvedValue({
       modified: [
         'gradle/wrapper/gradle-wrapper.properties',
         'gradlew',
@@ -110,7 +111,7 @@ describe(getName(__filename), () => {
 
   it('gradlew failed', async () => {
     const execSnapshots = mockExecAll(exec, new Error('failed'));
-    platform.getRepoStatus.mockResolvedValueOnce(
+    git.getRepoStatus.mockResolvedValueOnce(
       partial<Git.StatusResult>({
         modified: [],
       })
@@ -135,7 +136,7 @@ describe(getName(__filename), () => {
         '038794feef1f4745c6347107b6726279d1c824f3fc634b60f86ace1e9fbd1768'
       );
 
-    platform.getRepoStatus.mockResolvedValueOnce(
+    git.getRepoStatus.mockResolvedValueOnce(
       partial<Git.StatusResult>({
         modified: ['gradle/wrapper/gradle-wrapper.properties'],
       })

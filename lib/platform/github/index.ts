@@ -24,7 +24,7 @@ import {
 import { logger } from '../../logger';
 import { BranchStatus } from '../../types';
 import { ExternalHostError } from '../../types/errors/external-host-error';
-import * as gitfs from '../../util/gitfs';
+import * as git from '../../util/git';
 import * as hostRules from '../../util/host-rules';
 import * as githubHttp from '../../util/http/github';
 import { sanitize } from '../../util/sanitize';
@@ -149,13 +149,6 @@ export async function getRepos(): Promise<string[]> {
   }
 }
 
-export function cleanRepo(): Promise<void> {
-  gitfs.cleanRepo();
-  // In theory most of this isn't necessary. In practice..
-  config = {} as any;
-  return Promise.resolve();
-}
-
 async function getBranchProtection(
   branchName: string
 ): Promise<BranchProtection> {
@@ -208,7 +201,7 @@ export async function initRepo({
 }: RepoParams): Promise<RepoConfig> {
   logger.debug(`initRepo("${repository}")`);
   // config is used by the platform api itself, not necessary for the app layer to know
-  await cleanRepo();
+  config = { localDir, repository } as any;
   // istanbul ignore if
   if (endpoint) {
     // Necessary for Renovate Pro - do not remove
@@ -222,8 +215,6 @@ export async function initRepo({
   });
   config.isGhe = URL.parse(defaults.endpoint).host !== 'api.github.com';
   config.renovateUsername = renovateUsername;
-  config.localDir = localDir;
-  config.repository = repository;
   [config.repositoryOwner, config.repositoryName] = repository.split('/');
   let res;
   try {
@@ -429,7 +420,7 @@ export async function initRepo({
   );
   parsedEndpoint.pathname = config.repository + '.git';
   const url = URL.format(parsedEndpoint);
-  await gitfs.initRepo({
+  await git.initRepo({
     ...config,
     url,
     gitAuthorName: global.gitAuthor?.name,
@@ -493,88 +484,25 @@ export async function setBaseBranch(
 ): Promise<string> {
   config.baseBranch = branchName;
   config.baseCommitSHA = null;
-  const baseBranchSha = await gitfs.setBaseBranch(branchName);
+  const baseBranchSha = await git.setBaseBranch(branchName);
   return baseBranchSha;
 }
 
-// istanbul ignore next
-export function setBranchPrefix(branchPrefix: string): Promise<void> {
-  return gitfs.setBranchPrefix(branchPrefix);
-}
-
-// Search
-
-// istanbul ignore next
-export function getFileList(): Promise<string[]> {
-  return gitfs.getFileList();
-}
-
 // Branch
-
-// istanbul ignore next
-export function branchExists(branchName: string): Promise<boolean> {
-  return gitfs.branchExists(branchName);
-}
-
-// istanbul ignore next
-export function getAllRenovateBranches(
-  branchPrefix: string
-): Promise<string[]> {
-  return gitfs.getAllRenovateBranches(branchPrefix);
-}
-
-// istanbul ignore next
-export function isBranchStale(branchName: string): Promise<boolean> {
-  return gitfs.isBranchStale(branchName);
-}
-
-// istanbul ignore next
-export function getFile(
-  filePath: string,
-  branchName?: string
-): Promise<string> {
-  return gitfs.getFile(filePath, branchName);
-}
 
 // istanbul ignore next
 export function deleteBranch(
   branchName: string,
   closePr?: boolean
 ): Promise<void> {
-  return gitfs.deleteBranch(branchName);
-}
-
-// istanbul ignore next
-export function getBranchLastCommitTime(branchName: string): Promise<Date> {
-  return gitfs.getBranchLastCommitTime(branchName);
-}
-
-// istanbul ignore next
-export function getRepoStatus(): Promise<gitfs.StatusResult> {
-  return gitfs.getRepoStatus();
-}
-
-// istanbul ignore next
-export function mergeBranch(branchName: string): Promise<void> {
-  if (config.pushProtection) {
-    logger.debug(
-      { branch: branchName },
-      'Branch protection: Attempting to merge branch when push protection is enabled'
-    );
-  }
-  return gitfs.mergeBranch(branchName);
+  return git.deleteBranch(branchName);
 }
 
 // istanbul ignore next
 export function commitFiles(
   commitFilesConfig: CommitFilesConfig
 ): Promise<string | null> {
-  return gitfs.commitFiles(commitFilesConfig);
-}
-
-// istanbul ignore next
-export function getCommitMessages(): Promise<string[]> {
-  return gitfs.getCommitMessages();
+  return git.commitFiles(commitFilesConfig);
 }
 
 async function getClosedPrs(): Promise<PrList> {
@@ -985,7 +913,7 @@ export async function getPrList(): Promise<Pr[]> {
 
 /* istanbul ignore next */
 export async function getPrFiles(pr: Pr): Promise<string[]> {
-  return gitfs.getBranchFiles(pr.branchName, pr.targetBranch);
+  return git.getBranchFiles(pr.branchName, pr.targetBranch);
 }
 
 export async function findPr({
@@ -1135,7 +1063,7 @@ async function getStatusCheck(
   branchName: string,
   useCache = true
 ): Promise<GhBranchStatus[]> {
-  const branchCommit = await gitfs.getBranchCommit(branchName);
+  const branchCommit = await git.getBranchCommit(branchName);
 
   const url = `repos/${config.repository}/commits/${branchCommit}/statuses`;
 
@@ -1190,7 +1118,7 @@ export async function setBranchStatus({
   }
   logger.debug({ branch: branchName, context, state }, 'Setting branch status');
   try {
-    const branchCommit = await gitfs.getBranchCommit(branchName);
+    const branchCommit = await git.getBranchCommit(branchName);
     const url = `repos/${config.repository}/statuses/${branchCommit}`;
     const renovateToGitHubStateMapping = {
       green: 'success',

@@ -14,7 +14,7 @@ import { PLATFORM_TYPE_GITEA } from '../../constants/platforms';
 import { PR_STATE_ALL, PR_STATE_OPEN } from '../../constants/pull-requests';
 import { logger } from '../../logger';
 import { BranchStatus } from '../../types';
-import * as gitfs from '../../util/gitfs';
+import * as git from '../../util/git';
 import * as hostRules from '../../util/host-rules';
 import { setBaseUrl } from '../../util/http/gitea';
 import { sanitize } from '../../util/sanitize';
@@ -333,7 +333,7 @@ const platform: Platform = {
     gitEndpoint.auth = opts.token;
 
     // Initialize Git storage
-    await gitfs.initRepo({
+    await git.initRepo({
       ...config,
       url: URL.format(gitEndpoint),
       gitAuthorName: global.gitAuthor?.name,
@@ -362,12 +362,6 @@ const platform: Platform = {
     }
   },
 
-  cleanRepo(): Promise<void> {
-    gitfs.cleanRepo();
-    config = {} as any;
-    return Promise.resolve();
-  },
-
   async setBranchStatus({
     branchName,
     context,
@@ -377,7 +371,7 @@ const platform: Platform = {
   }: BranchStatusConfig): Promise<void> {
     try {
       // Create new status for branch commit
-      const branchCommit = await gitfs.getBranchCommit(branchName);
+      const branchCommit = await git.getBranchCommit(branchName);
       await helper.createCommitStatus(config.repository, branchCommit, {
         state: helper.renovateToGiteaStatusMapping[state] || 'pending',
         context,
@@ -456,7 +450,7 @@ const platform: Platform = {
     baseBranch: string = config.defaultBranch
   ): Promise<string> {
     config.baseBranch = baseBranch;
-    const baseBranchSha = await gitfs.setBaseBranch(baseBranch);
+    const baseBranchSha = await git.setBaseBranch(baseBranch);
     return baseBranchSha;
   },
 
@@ -476,7 +470,7 @@ const platform: Platform = {
 
   /* istanbul ignore next */
   async getPrFiles(pr: Pr): Promise<string[]> {
-    return gitfs.getBranchFiles(pr.branchName, pr.targetBranch);
+    return git.getBranchFiles(pr.branchName, pr.targetBranch);
   },
 
   async getPr(number: number): Promise<Pr | null> {
@@ -504,7 +498,7 @@ const platform: Platform = {
     // Enrich pull request with additional information which is more expensive to fetch
     if (pr.state !== 'closed') {
       if (pr.isStale === undefined) {
-        pr.isStale = await platform.isBranchStale(pr.branchName);
+        pr.isStale = await git.isBranchStale(pr.branchName);
       }
       if (pr.isModified === undefined) {
         pr.isModified = await isPRModified(config.repository, pr.branchName);
@@ -838,7 +832,7 @@ const platform: Platform = {
       }
     }
 
-    return gitfs.deleteBranch(branchName);
+    return git.deleteBranch(branchName);
   },
 
   async addAssignees(number: number, assignees: string[]): Promise<void> {
@@ -857,51 +851,11 @@ const platform: Platform = {
   },
 
   commitFiles(commitFilesConfig: CommitFilesConfig): Promise<string | null> {
-    return gitfs.commitFiles(commitFilesConfig);
+    return git.commitFiles(commitFilesConfig);
   },
 
   getPrBody(prBody: string): string {
     return smartTruncate(prBody, 1000000);
-  },
-
-  isBranchStale(branchName: string): Promise<boolean> {
-    return gitfs.isBranchStale(branchName);
-  },
-
-  setBranchPrefix(branchPrefix: string): Promise<void> {
-    return gitfs.setBranchPrefix(branchPrefix);
-  },
-
-  branchExists(branchName: string): Promise<boolean> {
-    return gitfs.branchExists(branchName);
-  },
-
-  mergeBranch(branchName: string): Promise<void> {
-    return gitfs.mergeBranch(branchName);
-  },
-
-  getBranchLastCommitTime(branchName: string): Promise<Date> {
-    return gitfs.getBranchLastCommitTime(branchName);
-  },
-
-  getFile(lockFileName: string, branchName?: string): Promise<string> {
-    return gitfs.getFile(lockFileName, branchName);
-  },
-
-  getRepoStatus(): Promise<gitfs.StatusResult> {
-    return gitfs.getRepoStatus();
-  },
-
-  getFileList(): Promise<string[]> {
-    return gitfs.getFileList();
-  },
-
-  getAllRenovateBranches(branchPrefix: string): Promise<string[]> {
-    return gitfs.getAllRenovateBranches(branchPrefix);
-  },
-
-  getCommitMessages(): Promise<string[]> {
-    return gitfs.getCommitMessages();
   },
 
   getVulnerabilityAlerts(): Promise<VulnerabilityAlert[]> {
@@ -912,8 +866,6 @@ const platform: Platform = {
 export const {
   addAssignees,
   addReviewers,
-  branchExists,
-  cleanRepo,
   commitFiles,
   createPr,
   deleteBranch,
@@ -924,30 +876,21 @@ export const {
   ensureIssueClosing,
   findIssue,
   findPr,
-  getAllRenovateBranches,
-  getBranchLastCommitTime,
   getBranchPr,
   getBranchStatus,
   getBranchStatusCheck,
-  getCommitMessages,
-  getFile,
-  getFileList,
   getIssueList,
   getPr,
   getPrBody,
   getPrList,
   getPrFiles,
   getRepoForceRebase,
-  getRepoStatus,
   getRepos,
   getVulnerabilityAlerts,
   initPlatform,
   initRepo,
-  isBranchStale,
-  mergeBranch,
   mergePr,
   setBaseBranch,
-  setBranchPrefix,
   setBranchStatus,
   updatePr,
 } = platform;

@@ -8,12 +8,14 @@ import {
   REPOSITORY_EMPTY,
   REPOSITORY_TEMPORARY_ERROR,
   SYSTEM_INSUFFICIENT_DISK_SPACE,
-} from '../../../constants/error-messages';
-import { logger } from '../../../logger';
-import { CommitFilesConfig } from '../../../platform/common';
-import { ExternalHostError } from '../../../types/errors/external-host-error';
-import * as limits from '../../../workers/global/limits';
+} from '../../constants/error-messages';
+import { logger } from '../../logger';
+import { CommitFilesConfig } from '../../platform/common';
+import { ExternalHostError } from '../../types/errors/external-host-error';
+import * as limits from '../../workers/global/limits';
 import { writePrivateKey } from './private-key';
+
+export * from './private-key';
 
 declare module 'fs-extra' {
   export function exists(pathLike: string): Promise<boolean>;
@@ -103,8 +105,6 @@ let config: LocalConfig = {} as any;
 
 let git: Git.SimpleGit | undefined;
 
-let cwd: string | undefined;
-
 let privateKeySet = false;
 
 async function resetToBranch(branchName: string): Promise<void> {
@@ -146,39 +146,22 @@ export async function getSubmodules(): Promise<string[]> {
     .filter((_e: string, i: number) => i % 2);
 }
 
-export function isInitialized(): boolean {
-  return !!git;
-}
-
-export function cleanRepo(): void {
-  if (isInitialized()) {
-    // no-op
-  }
-}
-
 export async function initRepo(args: StorageConfig): Promise<void> {
-  cleanRepo();
-
   config = { ...args } as any;
-  const newConfig: LocalConfig = config;
 
-  cwd = newConfig.localDir;
-  const newCwd = cwd;
-
-  newConfig.branchExists = {};
-  logger.debug('Initializing git repository into ' + newCwd);
-  const gitHead = join(newCwd, '.git/HEAD');
+  config.branchExists = {};
+  logger.debug('Initializing git repository into ' + config.localDir);
+  const gitHead = join(config.localDir, '.git/HEAD');
   let clone = true;
 
   if (await fs.exists(gitHead)) {
     try {
-      git = Git(newCwd).silent(true);
-      await git.raw(['remote', 'set-url', 'origin', newConfig.url]);
+      git = Git(config.localDir).silent(true);
+      await git.raw(['remote', 'set-url', 'origin', config.url]);
       const fetchStart = Date.now();
       await git.fetch(['--depth=10']);
-      newConfig.baseBranch =
-        newConfig.baseBranch || (await getDefaultBranch(git));
-      await resetToBranch(newConfig.baseBranch);
+      config.baseBranch = config.baseBranch || (await getDefaultBranch(git));
+      await resetToBranch(config.baseBranch);
       await cleanLocalBranches();
       await git.raw(['remote', 'prune', 'origin']);
       const durationMs = Math.round(Date.now() - fetchStart);
@@ -189,18 +172,18 @@ export async function initRepo(args: StorageConfig): Promise<void> {
     }
   }
   if (clone) {
-    await fs.emptyDir(newCwd);
-    git = Git(newCwd).silent(true);
+    await fs.emptyDir(config.localDir);
+    git = Git(config.localDir).silent(true);
     const cloneStart = Date.now();
     try {
       // clone only the default branch
       let opts = ['--depth=2'];
-      if (newConfig.extraCloneOpts) {
+      if (config.extraCloneOpts) {
         opts = opts.concat(
-          Object.entries(newConfig.extraCloneOpts).map((e) => `${e[0]}=${e[1]}`)
+          Object.entries(config.extraCloneOpts).map((e) => `${e[0]}=${e[1]}`)
         );
       }
-      await git.clone(newConfig.url, '.', opts);
+      await git.clone(config.url, '.', opts);
     } catch (err) /* istanbul ignore next */ {
       logger.debug({ err }, 'git clone error');
       if (err.message?.includes('write error: No space left on device')) {
@@ -246,7 +229,7 @@ export async function initRepo(args: StorageConfig): Promise<void> {
     throw new Error(REPOSITORY_TEMPORARY_ERROR);
   }
 
-  newConfig.baseBranch = newConfig.baseBranch || (await getDefaultBranch(git));
+  config.baseBranch = config.baseBranch || (await getDefaultBranch(git));
 }
 
 // istanbul ignore next
@@ -499,7 +482,7 @@ export async function commitFiles({
 }: CommitFilesConfig): Promise<string | null> {
   logger.debug(`Committing files to branch ${branchName}`);
   if (!privateKeySet) {
-    await writePrivateKey(cwd);
+    await writePrivateKey(config.localDir);
     privateKeySet = true;
   }
   try {
@@ -512,7 +495,7 @@ export async function commitFiles({
       // istanbul ignore if
       if (file.name === '|delete|') {
         deleted.push(file.contents);
-      } else if (await isDirectory(join(cwd, file.name))) {
+      } else if (await isDirectory(join(config.localDir, file.name))) {
         fileNames.push(file.name);
         await git.add(file.name);
       } else {
@@ -524,7 +507,7 @@ export async function commitFiles({
         } else {
           contents = file.contents;
         }
-        await fs.outputFile(join(cwd, file.name), contents);
+        await fs.outputFile(join(config.localDir, file.name), contents);
       }
     }
     // istanbul ignore if

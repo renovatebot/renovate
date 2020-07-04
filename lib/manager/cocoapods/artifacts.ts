@@ -1,13 +1,13 @@
 import { quote } from 'shlex';
 import { dirname, join } from 'upath';
 import { logger } from '../../logger';
-import { platform } from '../../platform';
 import { ExecOptions, exec } from '../../util/exec';
 import {
   getSiblingFileName,
   readLocalFile,
   writeLocalFile,
-} from '../../util/gitfs';
+} from '../../util/fs';
+import { getRepoStatus } from '../../util/git';
 import { UpdateArtifact, UpdateArtifactsResult } from '../common';
 import { getCocoaPodsHome } from './utils';
 
@@ -93,7 +93,7 @@ export async function updateArtifacts({
     ];
   }
 
-  const status = await platform.getRepoStatus();
+  const status = await getRepoStatus();
   if (!status.modified.includes(lockFileName)) {
     return null;
   }

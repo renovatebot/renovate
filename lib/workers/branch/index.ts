@@ -24,7 +24,8 @@ import { BranchStatus } from '../../types';
 import { ExternalHostError } from '../../types/errors/external-host-error';
 import { emojify } from '../../util/emoji';
 import { exec } from '../../util/exec';
-import { readLocalFile, writeLocalFile } from '../../util/gitfs';
+import { readLocalFile, writeLocalFile } from '../../util/fs';
+import { getRepoStatus, branchExists as gitBranchExists } from '../../util/git';
 import { regEx } from '../../util/regex';
 import { BranchConfig, PrResult, ProcessBranchResult } from '../common';
 import { checkAutoMerge, ensurePr } from '../pr';
@@ -62,7 +63,7 @@ export async function processBranch(
   );
   logger.trace({ config }, 'branch config');
   await platform.setBaseBranch(config.baseBranch);
-  const branchExists = await platform.branchExists(config.branchName);
+  const branchExists = await gitBranchExists(config.branchName);
   const branchPr = await platform.getBranchPr(config.branchName);
   logger.debug(`branchExists=${branchExists}`);
   const masterIssueCheck = (config.masterIssueChecks || {})[config.branchName];
@@ -380,7 +381,7 @@ export async function processBranch(
           }
         }
 
-        const status = await platform.getRepoStatus();
+        const status = await getRepoStatus();
 
         for (const relativePath of status.modified.concat(status.not_added)) {
           for (const pattern of fileFilters) {
