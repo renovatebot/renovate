@@ -7,7 +7,6 @@ import * as _lerna from '../../../manager/npm/post-update/lerna';
 import * as _npm from '../../../manager/npm/post-update/npm';
 import * as _pnpm from '../../../manager/npm/post-update/pnpm';
 import * as _yarn from '../../../manager/npm/post-update/yarn';
-import { platform as _platform } from '../../../platform';
 import * as _hostRules from '../../../util/host-rules';
 
 const defaultConfig = getConfig();
@@ -19,7 +18,6 @@ const yarn = mocked(_yarn);
 const pnpm = mocked(_pnpm);
 const lerna = mocked(_lerna);
 const hostRules = mocked(_hostRules);
-const platform = mocked(_platform);
 
 jest.mock('../../../util/git');
 
@@ -107,7 +105,7 @@ describe('manager/npm/post-update', () => {
     it('returns no error and empty lockfiles if lock file maintenance exists', async () => {
       config.updateType = 'lockFileMaintenance';
       config.reuseExistingBranch = true;
-      platform.branchExists.mockResolvedValueOnce(true);
+      git.branchExists.mockResolvedValueOnce(true);
       const res = await getAdditionalFiles(config, { npm: [{}] });
       expect(res).toMatchSnapshot();
       expect(res.artifactErrors).toHaveLength(0);

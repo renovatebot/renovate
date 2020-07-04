@@ -1,5 +1,12 @@
-import { RenovateConfig, getConfig, platform } from '../../../../test/util';
+import {
+  RenovateConfig,
+  getConfig,
+  git,
+  platform,
+} from '../../../../test/util';
 import { checkBaseBranch } from './base';
+
+jest.mock('../../../util/git');
 
 let config: RenovateConfig;
 beforeEach(() => {
@@ -18,7 +25,7 @@ describe('workers/repository/init/base', () => {
     });
     it('sets baseBranch', async () => {
       config.baseBranch = 'ssome-base';
-      platform.branchExists.mockResolvedValue(true);
+      git.branchExists.mockResolvedValue(true);
       const res = await checkBaseBranch(config);
       expect(res.errors).toHaveLength(0);
       expect(platform.setBaseBranch).toHaveBeenCalledTimes(1);

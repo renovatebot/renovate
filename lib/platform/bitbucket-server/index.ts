@@ -247,25 +247,6 @@ export async function setBaseBranch(
   return baseBranchSha;
 }
 
-export /* istanbul ignore next */ function setBranchPrefix(
-  branchPrefix: string
-): Promise<void> {
-  return git.setBranchPrefix(branchPrefix);
-}
-
-// Branch
-
-// Returns true if branch exists, otherwise false
-export function branchExists(branchName: string): Promise<boolean> {
-  logger.debug(`branchExists(${branchName})`);
-  return git.branchExists(branchName);
-}
-
-export function isBranchStale(branchName: string): Promise<boolean> {
-  logger.debug(`isBranchStale(${branchName})`);
-  return git.isBranchStale(branchName);
-}
-
 // Gets details for a PR
 export async function getPr(
   prNo: number,
@@ -331,8 +312,8 @@ export async function getPr(
     }
   }
 
-  if (await branchExists(pr.branchName)) {
-    pr.isStale = await isBranchStale(pr.branchName);
+  if (await git.branchExists(pr.branchName)) {
+    pr.isStale = await git.isBranchStale(pr.branchName);
   }
 
   return pr;
@@ -421,13 +402,6 @@ export async function getBranchPr(
   return existingPr ? getPr(existingPr.number, refreshCache) : null;
 }
 
-export function getAllRenovateBranches(
-  branchPrefix: string
-): Promise<string[]> {
-  logger.debug('getAllRenovateBranches');
-  return git.getAllRenovateBranches(branchPrefix);
-}
-
 export async function commitFiles(
   commitFilesConfig: CommitFilesConfig
 ): Promise<string | null> {
@@ -459,16 +433,6 @@ export async function deleteBranch(
     }
   }
   return git.deleteBranch(branchName);
-}
-
-export function mergeBranch(branchName: string): Promise<void> {
-  logger.debug(`mergeBranch(${branchName})`);
-  return git.mergeBranch(branchName);
-}
-
-export function getBranchLastCommitTime(branchName: string): Promise<Date> {
-  logger.debug(`getBranchLastCommitTime(${branchName})`);
-  return git.getBranchLastCommitTime(branchName);
 }
 
 async function getStatus(
@@ -504,7 +468,7 @@ export async function getBranchStatus(
     return BranchStatus.green;
   }
 
-  if (!(await branchExists(branchName))) {
+  if (!(await git.branchExists(branchName))) {
     throw new Error(REPOSITORY_CHANGED);
   }
 
@@ -1048,11 +1012,6 @@ export function getPrBody(input: string): string {
     .replace(/<\/?details>/g, '')
     .replace(new RegExp(`\n---\n\n.*?<!-- rebase-check -->.*?(\n|$)`), '')
     .replace(new RegExp('<!--.*?-->', 'g'), '');
-}
-
-export function getCommitMessages(): Promise<string[]> {
-  logger.debug(`getCommitMessages()`);
-  return git.getCommitMessages();
 }
 
 export function getVulnerabilityAlerts(): Promise<VulnerabilityAlert[]> {

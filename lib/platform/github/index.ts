@@ -488,31 +488,7 @@ export async function setBaseBranch(
   return baseBranchSha;
 }
 
-// istanbul ignore next
-export function setBranchPrefix(branchPrefix: string): Promise<void> {
-  return git.setBranchPrefix(branchPrefix);
-}
-
-// Search
-
 // Branch
-
-// istanbul ignore next
-export function branchExists(branchName: string): Promise<boolean> {
-  return git.branchExists(branchName);
-}
-
-// istanbul ignore next
-export function getAllRenovateBranches(
-  branchPrefix: string
-): Promise<string[]> {
-  return git.getAllRenovateBranches(branchPrefix);
-}
-
-// istanbul ignore next
-export function isBranchStale(branchName: string): Promise<boolean> {
-  return git.isBranchStale(branchName);
-}
 
 // istanbul ignore next
 export function deleteBranch(
@@ -523,31 +499,10 @@ export function deleteBranch(
 }
 
 // istanbul ignore next
-export function getBranchLastCommitTime(branchName: string): Promise<Date> {
-  return git.getBranchLastCommitTime(branchName);
-}
-
-// istanbul ignore next
-export function mergeBranch(branchName: string): Promise<void> {
-  if (config.pushProtection) {
-    logger.debug(
-      { branch: branchName },
-      'Branch protection: Attempting to merge branch when push protection is enabled'
-    );
-  }
-  return git.mergeBranch(branchName);
-}
-
-// istanbul ignore next
 export function commitFiles(
   commitFilesConfig: CommitFilesConfig
 ): Promise<string | null> {
   return git.commitFiles(commitFilesConfig);
-}
-
-// istanbul ignore next
-export function getCommitMessages(): Promise<string[]> {
-  return git.getCommitMessages();
 }
 
 async function getClosedPrs(): Promise<PrList> {

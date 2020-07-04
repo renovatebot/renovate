@@ -1,7 +1,9 @@
-import { defaultConfig, platform } from '../../../test/util';
+import { defaultConfig, git, platform } from '../../../test/util';
 import { RenovateConfig } from '../../config';
 import { BranchStatus } from '../../types';
 import { tryBranchAutomerge } from './automerge';
+
+jest.mock('../../util/git');
 
 describe('workers/branch/automerge', () => {
   describe('tryBranchAutomerge', () => {
@@ -45,7 +47,7 @@ describe('workers/branch/automerge', () => {
       config.automerge = true;
       config.automergeType = 'branch';
       platform.getBranchStatus.mockResolvedValueOnce(BranchStatus.green);
-      platform.mergeBranch.mockImplementationOnce(() => {
+      git.mergeBranch.mockImplementationOnce(() => {
         throw new Error('merge error');
       });
       expect(await tryBranchAutomerge(config)).toBe('failed');
