@@ -3,6 +3,8 @@ import {
   gt,
   maxSatisfying,
   minSatisfying,
+  valid,
+  satisfies,
 } from '@renovatebot/ruby-semver';
 import { logger } from '../../logger';
 import { NewValueConfig, VersioningApi } from '../common';
