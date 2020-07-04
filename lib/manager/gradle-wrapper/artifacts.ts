@@ -1,5 +1,5 @@
 import { resolve } from 'path';
-import * as fs from 'fs-extra';
+import { stat } from 'fs-extra';
 import Git from 'simple-git/promise';
 import { logger } from '../../logger';
 import { platform } from '../../platform';
@@ -57,7 +57,7 @@ export async function updateArtifacts({
     let cmd = await prepareGradleCommand(
       gradlew,
       projectDir,
-      await fs.stat(gradlewPath).catch(() => null),
+      await stat(gradlewPath).catch(() => null),
       `wrapper`
     );
     if (!cmd) {

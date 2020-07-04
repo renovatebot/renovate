@@ -1,6 +1,6 @@
 import { Stats } from 'fs';
 import * as os from 'os';
-import * as fs from 'fs-extra';
+import { chmod, stat } from 'fs-extra';
 import upath from 'upath';
 import { LANGUAGE_JAVA } from '../../constants/languages';
 import * as datasourceMaven from '../../datasource/maven';
@@ -53,7 +53,7 @@ export async function prepareGradleCommand(
     // if the file is not executable by others
     if ((gradlew.mode & 0o1) === 0) {
       // add the execution permission to the owner, group and others
-      await fs.chmod(upath.join(cwd, gradlewName), gradlew.mode | 0o111);
+      await chmod(upath.join(cwd, gradlewName), gradlew.mode | 0o111);
     }
     if (args === null) {
       return gradlewName;
@@ -124,9 +124,9 @@ export async function extractAllPackageFiles(
   for (const packageFile of packageFiles) {
     const dirname = upath.dirname(packageFile);
     const gradlewPath = upath.join(dirname, gradleWrapperFileName(config));
-    gradlew = await fs
-      .stat(upath.join(config.localDir, gradlewPath))
-      .catch(() => null);
+    gradlew = await stat(upath.join(config.localDir, gradlewPath)).catch(
+      () => null
+    );
 
     if (['build.gradle', 'build.gradle.kts'].includes(packageFile)) {
       rootBuildGradle = packageFile;
