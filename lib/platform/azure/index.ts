@@ -200,14 +200,6 @@ export /* istanbul ignore next */ function setBranchPrefix(
   return git.setBranchPrefix(branchPrefix);
 }
 
-// Branch
-
-export /* istanbul ignore next */ function branchExists(
-  branchName: string
-): Promise<boolean> {
-  return git.branchExists(branchName);
-}
-
 // istanbul ignore next
 async function abandonPr(prNo: number): Promise<void> {
   logger.debug(`abandonPr(prNo)(${prNo})`);

@@ -286,11 +286,6 @@ export /* istanbul ignore next */ function setBranchPrefix(
   return git.setBranchPrefix(branchPrefix);
 }
 
-// Returns true if branch exists, otherwise false
-export function branchExists(branchName: string): Promise<boolean> {
-  return git.branchExists(branchName);
-}
-
 type BranchState = 'pending' | 'running' | 'success' | 'failed' | 'canceled';
 
 interface GitlabBranchStatus {
@@ -341,7 +336,7 @@ export async function getBranchStatus(
     return BranchStatus.red;
   }
 
-  if (!(await branchExists(branchName))) {
+  if (!(await git.branchExists(branchName))) {
     throw new Error(REPOSITORY_CHANGED);
   }
 
@@ -582,7 +577,7 @@ export function getPrBody(input: string): string {
 export async function getBranchPr(branchName: string): Promise<Pr> {
   logger.debug(`getBranchPr(${branchName})`);
   // istanbul ignore if
-  if (!(await branchExists(branchName))) {
+  if (!(await git.branchExists(branchName))) {
     return null;
   }
   const query = new URLSearchParams({

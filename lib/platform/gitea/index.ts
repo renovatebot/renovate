@@ -862,10 +862,6 @@ const platform: Platform = {
     return git.setBranchPrefix(branchPrefix);
   },
 
-  branchExists(branchName: string): Promise<boolean> {
-    return git.branchExists(branchName);
-  },
-
   getCommitMessages(): Promise<string[]> {
     return git.getCommitMessages();
   },
@@ -878,7 +874,6 @@ const platform: Platform = {
 export const {
   addAssignees,
   addReviewers,
-  branchExists,
   commitFiles,
   createPr,
   deleteBranch,

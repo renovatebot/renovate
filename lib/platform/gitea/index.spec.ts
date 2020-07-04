@@ -1372,16 +1372,6 @@ describe('platform/gitea', () => {
     });
   });
 
-  describe('branchExists', () => {
-    it('should propagate call to storage class', async () => {
-      await initFakeRepo();
-      await gitea.branchExists('some-branch');
-
-      expect(gitvcs.branchExists).toHaveBeenCalledTimes(1);
-      expect(gitvcs.branchExists).toHaveBeenCalledWith('some-branch');
-    });
-  });
-
   describe('getCommitMessages', () => {
     it('should propagate call to storage class', async () => {
       await initFakeRepo();

@@ -6,7 +6,6 @@ exports[`platform has a list of supported methods for azure 1`] = `
 Array [
   "addAssignees",
   "addReviewers",
-  "branchExists",
   "commitFiles",
   "createPr",
   "deleteBranch",
@@ -43,7 +42,6 @@ exports[`platform has a list of supported methods for gitea 1`] = `
 Array [
   "addAssignees",
   "addReviewers",
-  "branchExists",
   "commitFiles",
   "createPr",
   "deleteBranch",
@@ -80,7 +78,6 @@ exports[`platform has a list of supported methods for github 1`] = `
 Array [
   "addAssignees",
   "addReviewers",
-  "branchExists",
   "commitFiles",
   "createPr",
   "deleteBranch",
@@ -117,7 +114,6 @@ exports[`platform has a list of supported methods for gitlab 1`] = `
 Array [
   "addAssignees",
   "addReviewers",
-  "branchExists",
   "commitFiles",
   "createPr",
   "deleteBranch",

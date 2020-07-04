@@ -1,7 +1,7 @@
 import { RenovateConfig } from '../../config';
 import { logger } from '../../logger';
 import { platform } from '../../platform';
-import { isBranchStale } from '../../util/git';
+import { branchExists, isBranchStale } from '../../util/git';
 
 type ParentBranch = {
   reuseExistingBranch: boolean;
@@ -13,8 +13,7 @@ export async function shouldReuseExistingBranch(
 ): Promise<ParentBranch> {
   const { branchName } = config;
   // Check if branch exists
-  const branchExists = await platform.branchExists(branchName);
-  if (!branchExists) {
+  if (!(await branchExists(branchName))) {
     logger.debug(`Branch needs creating`);
     return { reuseExistingBranch: false };
   }

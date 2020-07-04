@@ -493,14 +493,7 @@ export function setBranchPrefix(branchPrefix: string): Promise<void> {
   return git.setBranchPrefix(branchPrefix);
 }
 
-// Search
-
 // Branch
-
-// istanbul ignore next
-export function branchExists(branchName: string): Promise<boolean> {
-  return git.branchExists(branchName);
-}
 
 // istanbul ignore next
 export function deleteBranch(

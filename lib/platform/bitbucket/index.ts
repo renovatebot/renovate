@@ -193,13 +193,6 @@ export /* istanbul ignore next */ function setBranchPrefix(
   return git.setBranchPrefix(branchPrefix);
 }
 
-// Branch
-
-// Returns true if branch exists, otherwise false
-export function branchExists(branchName: string): Promise<boolean> {
-  return git.branchExists(branchName);
-}
-
 // istanbul ignore next
 function matchesState(state: string, desiredState: string): boolean {
   if (desiredState === PR_STATE_ALL) {
@@ -353,7 +346,7 @@ export async function getPr(prNo: number): Promise<Pr | null> {
       res.isModified = true;
     }
   }
-  if (await branchExists(pr.source.branch.name)) {
+  if (await git.branchExists(pr.source.branch.name)) {
     res.isStale = await git.isBranchStale(pr.source.branch.name);
   }
 
