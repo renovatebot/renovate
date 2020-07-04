@@ -1059,10 +1059,6 @@ export async function findPr({
   );
 }
 
-export function getCommitMessages(): Promise<string[]> {
-  return git.getCommitMessages();
-}
-
 export function getVulnerabilityAlerts(): Promise<VulnerabilityAlert[]> {
   return Promise.resolve([]);
 }

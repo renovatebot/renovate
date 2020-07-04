@@ -510,11 +510,6 @@ export function commitFiles(
   return git.commitFiles(commitFilesConfig);
 }
 
-// istanbul ignore next
-export function getCommitMessages(): Promise<string[]> {
-  return git.getCommitMessages();
-}
-
 async function getClosedPrs(): Promise<PrList> {
   if (!config.closedPrList) {
     config.closedPrList = {};

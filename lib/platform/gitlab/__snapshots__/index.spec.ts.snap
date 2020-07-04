@@ -1409,8 +1409,6 @@ Array [
 ]
 `;
 
-exports[`platform/gitlab getCommitMessages() passes to git 1`] = `undefined`;
-
 exports[`platform/gitlab getPr(prNo) returns the PR 1`] = `
 Object {
   "body": "a merge request",

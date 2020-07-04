@@ -1372,15 +1372,6 @@ describe('platform/gitea', () => {
     });
   });
 
-  describe('getCommitMessages', () => {
-    it('should propagate call to storage class', async () => {
-      await initFakeRepo();
-      await gitea.getCommitMessages();
-
-      expect(gitvcs.getCommitMessages).toHaveBeenCalledTimes(1);
-    });
-  });
-
   describe('getVulnerabilityAlerts', () => {
     it('should return an empty list - unsupported by platform', async () => {
       expect(await gitea.getVulnerabilityAlerts()).toEqual([]);

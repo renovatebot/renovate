@@ -862,10 +862,6 @@ const platform: Platform = {
     return git.setBranchPrefix(branchPrefix);
   },
 
-  getCommitMessages(): Promise<string[]> {
-    return git.getCommitMessages();
-  },
-
   getVulnerabilityAlerts(): Promise<VulnerabilityAlert[]> {
     return Promise.resolve([]);
   },
@@ -887,7 +883,6 @@ export const {
   getBranchPr,
   getBranchStatus,
   getBranchStatusCheck,
-  getCommitMessages,
   getIssueList,
   getPr,
   getPrBody,

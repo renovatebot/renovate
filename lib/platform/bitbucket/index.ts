@@ -263,10 +263,6 @@ export function commitFiles(
   return git.commitFiles(commitFilesConfig);
 }
 
-export function getCommitMessages(): Promise<string[]> {
-  return git.getCommitMessages();
-}
-
 async function isPrConflicted(prNo: number): Promise<boolean> {
   const diff = (
     await bitbucketHttp.get(

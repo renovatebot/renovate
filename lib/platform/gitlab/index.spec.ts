@@ -1194,12 +1194,6 @@ These updates have all been created already. Click a checkbox below to force a r
       expect(httpMock.getTrace()).toMatchSnapshot();
     });
   });
-  describe('getCommitMessages()', () => {
-    it('passes to git', async () => {
-      await initRepo();
-      expect(await gitlab.getCommitMessages()).toMatchSnapshot();
-    });
-  });
   describe('getVulnerabilityAlerts()', () => {
     it('returns empty', async () => {
       const res = await gitlab.getVulnerabilityAlerts();

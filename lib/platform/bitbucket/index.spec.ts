@@ -802,14 +802,6 @@ describe('platform/bitbucket', () => {
     });
   });
 
-  describe('getCommitMessages()', () => {
-    it('sends to gitFs', async () => {
-      await initRepoMock();
-      expect(await bitbucket.getCommitMessages()).toMatchSnapshot();
-      expect(httpMock.getTrace()).toMatchSnapshot();
-    });
-  });
-
   describe('getVulnerabilityAlerts()', () => {
     it('returns empty array', async () => {
       expect(await bitbucket.getVulnerabilityAlerts()).toEqual([]);

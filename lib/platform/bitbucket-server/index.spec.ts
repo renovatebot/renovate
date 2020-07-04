@@ -1620,14 +1620,6 @@ Followed by some information.
         });
       });
 
-      describe('getCommitMessages()', () => {
-        it('sends to gitFs', async () => {
-          await initRepo();
-          expect(await bitbucket.getCommitMessages()).toMatchSnapshot();
-          expect(httpMock.getTrace()).toMatchSnapshot();
-        });
-      });
-
       describe('getVulnerabilityAlerts()', () => {
         it('returns empty array', async () => {
           expect.assertions(1);

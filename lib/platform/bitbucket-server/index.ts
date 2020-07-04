@@ -1020,11 +1020,6 @@ export function getPrBody(input: string): string {
     .replace(new RegExp('<!--.*?-->', 'g'), '');
 }
 
-export function getCommitMessages(): Promise<string[]> {
-  logger.debug(`getCommitMessages()`);
-  return git.getCommitMessages();
-}
-
 export function getVulnerabilityAlerts(): Promise<VulnerabilityAlert[]> {
   logger.debug(`getVulnerabilityAlerts()`);
   return Promise.resolve([]);

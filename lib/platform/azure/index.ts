@@ -349,12 +349,6 @@ export /* istanbul ignore next */ function commitFiles({
   });
 }
 
-export /* istanbul ignore next */ function getCommitMessages(): Promise<
-  string[]
-> {
-  return git.getCommitMessages();
-}
-
 export async function getBranchStatusCheck(
   branchName: string,
   context: string
