@@ -404,22 +404,6 @@ describe('platform/gitlab', () => {
       expect(httpMock.getTrace()).toMatchSnapshot();
     });
   });
-  describe('getFileList()', () => {
-    it('sends to gitFs', async () => {
-      await initRepo();
-      await gitlab.getFileList();
-      expect(httpMock.getTrace()).toMatchSnapshot();
-    });
-  });
-  describe('branchExists()', () => {
-    describe('getFileList()', () => {
-      it('sends to gitFs', async () => {
-        await initRepo();
-        await gitlab.branchExists('');
-        expect(httpMock.getTrace()).toMatchSnapshot();
-      });
-    });
-  });
   describe('getAllRenovateBranches()', () => {
     it('sends to gitFs', async () => {
       await initRepo();
@@ -1240,12 +1224,6 @@ These updates have all been created already. Click a checkbox below to force a r
   describe('getPrBody(input)', () => {
     it('returns updated pr body', () => {
       expect(gitlab.getPrBody(prBody)).toMatchSnapshot();
-    });
-  });
-  describe('getFile()', () => {
-    it('sends to gitFs', async () => {
-      await initRepo();
-      expect(await gitlab.getFile('')).toMatchSnapshot();
     });
   });
   describe('commitFiles()', () => {

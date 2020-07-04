@@ -177,11 +177,6 @@ export function getRepoForceRebase(): Promise<boolean> {
 
 // Search
 
-// Get full file list
-export function getFileList(): Promise<string[]> {
-  return git.getFileList();
-}
-
 export async function setBaseBranch(
   branchName = config.baseBranch
 ): Promise<string> {
@@ -213,13 +208,6 @@ export function getAllRenovateBranches(
 
 export function isBranchStale(branchName: string): Promise<boolean> {
   return git.isBranchStale(branchName);
-}
-
-export function getFile(
-  filePath: string,
-  branchName?: string
-): Promise<string> {
-  return git.getFile(filePath, branchName);
 }
 
 // istanbul ignore next

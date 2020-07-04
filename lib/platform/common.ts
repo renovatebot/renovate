@@ -195,7 +195,6 @@ export interface Platform {
   getPrFiles(pr: Pr): Promise<string[]>;
   getAllRenovateBranches(branchPrefix: string): Promise<string[]>;
   ensureIssueClosing(title: string): Promise<void>;
-  getFileList(): Promise<string[]>;
   ensureIssue(
     issueConfig: EnsureIssueConfig
   ): Promise<EnsureIssueResult | null>;
@@ -234,6 +233,5 @@ export interface Platform {
   ): Promise<BranchStatus>;
   getBranchPr(branchName: string): Promise<Pr | null>;
   getRepoStatus(): Promise<Git.StatusResult>;
-  getFile(lockFileName: string, branchName?: string): Promise<string | null>;
   initPlatform(config: RenovateConfig): Promise<PlatformConfig>;
 }

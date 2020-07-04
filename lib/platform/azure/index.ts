@@ -184,10 +184,6 @@ export function getRepoForceRebase(): Promise<boolean> {
 
 // Search
 
-export /* istanbul ignore next */ function getFileList(): Promise<string[]> {
-  return git.getFileList();
-}
-
 export /* istanbul ignore next */ async function setBaseBranch(
   branchName = config.baseBranch
 ): Promise<string> {
@@ -222,13 +218,6 @@ export /* istanbul ignore next */ function isBranchStale(
   branchName: string
 ): Promise<boolean> {
   return git.isBranchStale(branchName);
-}
-
-export /* istanbul ignore next */ function getFile(
-  filePath: string,
-  branchName: string
-): Promise<string> {
-  return git.getFile(filePath, branchName);
 }
 
 // istanbul ignore next

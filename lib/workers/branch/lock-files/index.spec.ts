@@ -1,5 +1,5 @@
 import _fs from 'fs-extra';
-import { mocked } from '../../../../test/util';
+import { git, mocked } from '../../../../test/util';
 import { getConfig } from '../../../config/defaults';
 import { PostUpdateConfig } from '../../../manager/common';
 import * as _lockFiles from '../../../manager/npm/post-update';
@@ -20,6 +20,8 @@ const pnpm = mocked(_pnpm);
 const lerna = mocked(_lerna);
 const hostRules = mocked(_hostRules);
 const platform = mocked(_platform);
+
+jest.mock('../../../util/git');
 
 hostRules.find = jest.fn((_) => ({
   token: 'abc',
@@ -76,7 +78,7 @@ describe('manager/npm/post-update', () => {
         ...defaultConfig,
         localDir: 'some-tmp-dir',
       };
-      platform.getFile.mockResolvedValueOnce('some lock file contents');
+      git.getFile.mockResolvedValueOnce('some lock file contents');
       npm.generateLockFile = jest.fn();
       npm.generateLockFile.mockResolvedValueOnce({
         lockFile: 'some lock file contents',

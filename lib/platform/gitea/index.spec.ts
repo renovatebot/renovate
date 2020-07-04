@@ -1427,31 +1427,12 @@ describe('platform/gitea', () => {
     });
   });
 
-  describe('getFile', () => {
-    it('should propagate call to storage class', async () => {
-      await initFakeRepo();
-      await gitea.getFile('some-file', 'some-branch');
-
-      expect(gitvcs.getFile).toHaveBeenCalledTimes(1);
-      expect(gitvcs.getFile).toHaveBeenCalledWith('some-file', 'some-branch');
-    });
-  });
-
   describe('getRepoStatus', () => {
     it('should propagate call to storage class', async () => {
       await initFakeRepo();
       await gitea.getRepoStatus();
 
       expect(gitvcs.getRepoStatus).toHaveBeenCalledTimes(1);
-    });
-  });
-
-  describe('getFileList', () => {
-    it('propagates call to storage class', async () => {
-      await initFakeRepo();
-      await gitea.getFileList();
-
-      expect(gitvcs.getFileList).toHaveBeenCalledTimes(1);
     });
   });
 

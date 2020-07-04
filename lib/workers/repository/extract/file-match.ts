@@ -1,7 +1,7 @@
 import minimatch from 'minimatch';
 import { RenovateConfig } from '../../../config/common';
 import { logger } from '../../../logger';
-import { platform } from '../../../platform';
+import * as git from '../../../util/git';
 import { regEx } from '../../../util/regex';
 
 export function getIncludedFiles(
@@ -36,10 +36,6 @@ export function filterIgnoredFiles(
   );
 }
 
-export function getFileList(): Promise<string[]> {
-  return platform.getFileList();
-}
-
 export function getFilteredFileList(
   config: RenovateConfig,
   fileList: string[]
@@ -53,7 +49,7 @@ export function getFilteredFileList(
 export async function getMatchingFiles(
   config: RenovateConfig
 ): Promise<string[]> {
-  const allFiles = await getFileList();
+  const allFiles = await git.getFileList();
   const fileList = getFilteredFileList(config, allFiles);
   const { fileMatch, manager } = config;
   let matchedFiles: string[] = [];

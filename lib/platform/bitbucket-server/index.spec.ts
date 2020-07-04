@@ -404,26 +404,6 @@ describe('platform/bitbucket-server', () => {
         });
       });
 
-      describe('getFileList()', () => {
-        it('sends to gitFs', async () => {
-          await initRepo();
-          expect(await bitbucket.getFileList()).toMatchSnapshot();
-          expect(httpMock.getTrace()).toMatchSnapshot();
-        });
-      });
-
-      describe('branchExists()', () => {
-        describe('getFileList()', () => {
-          it('sends to gitFs', async () => {
-            await initRepo();
-            expect(
-              await bitbucket.branchExists(undefined as any)
-            ).toMatchSnapshot();
-            expect(httpMock.getTrace()).toMatchSnapshot();
-          });
-        });
-      });
-
       describe('isBranchStale()', () => {
         it('sends to gitFs', async () => {
           await initRepo();
@@ -467,14 +447,6 @@ describe('platform/bitbucket-server', () => {
             files: [{ name: 'test', contents: 'dummy' }],
             message: 'message',
           });
-          expect(httpMock.getTrace()).toMatchSnapshot();
-        });
-      });
-
-      describe('getFile()', () => {
-        it('sends to gitFs', async () => {
-          await initRepo();
-          expect(await bitbucket.getFile('', '')).toMatchSnapshot();
           expect(httpMock.getTrace()).toMatchSnapshot();
         });
       });
