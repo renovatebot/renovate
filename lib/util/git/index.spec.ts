@@ -60,7 +60,6 @@ describe('platform/git', () => {
   afterEach(async () => {
     await tmpDir.cleanup();
     await origin.cleanup();
-    git.cleanRepo();
   });
 
   afterAll(async () => {

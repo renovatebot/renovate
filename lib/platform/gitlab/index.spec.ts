@@ -45,10 +45,6 @@ describe('platform/gitlab', () => {
     httpMock.setup();
   });
 
-  afterEach(async () => {
-    await gitlab.cleanRepo();
-  });
-
   describe('initPlatform()', () => {
     it(`should throw if no token`, async () => {
       await expect(gitlab.initPlatform({} as any)).rejects.toThrow();
@@ -163,11 +159,6 @@ describe('platform/gitlab', () => {
       await initRepo();
       await gitlab.getRepoStatus();
       expect(httpMock.getTrace()).toMatchSnapshot();
-    });
-  });
-  describe('cleanRepo()', () => {
-    it('exists', async () => {
-      expect(await gitlab.cleanRepo()).toMatchSnapshot();
     });
   });
 

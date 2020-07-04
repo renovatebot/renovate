@@ -74,10 +74,6 @@ describe('platform/bitbucket', () => {
     setBaseUrl(baseUrl);
   });
 
-  afterEach(async () => {
-    await bitbucket.cleanRepo();
-  });
-
   async function initRepoMock(
     config?: Partial<RepoParams>,
     repoResp?: any
