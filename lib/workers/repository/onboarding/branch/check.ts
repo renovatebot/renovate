@@ -5,11 +5,11 @@ import { PR_STATE_NOT_OPEN } from '../../../../constants/pull-requests';
 import { logger } from '../../../../logger';
 import { platform } from '../../../../platform';
 import { readLocalFile } from '../../../../util/fs';
-import * as git from '../../../../util/git';
+import { getFileList } from '../../../../util/git';
 
 const findFile = async (fileName: string): Promise<boolean> => {
   logger.debug(`findFile(${fileName})`);
-  const fileList = await git.getFileList();
+  const fileList = await getFileList();
   return fileList.includes(fileName);
 };
 

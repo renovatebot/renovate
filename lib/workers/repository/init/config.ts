@@ -14,7 +14,7 @@ import { ExternalHostError } from '../../../types/errors/external-host-error';
 import { getCache } from '../../../util/cache/repository';
 import { clone } from '../../../util/clone';
 import { readLocalFile } from '../../../util/fs';
-import * as git from '../../../util/git';
+import { getFileList } from '../../../util/git';
 import * as hostRules from '../../../util/host-rules';
 import { flattenPackageRules } from './flatten';
 
@@ -23,7 +23,7 @@ export async function mergeRenovateConfig(
   config: RenovateConfig
 ): Promise<RenovateConfig> {
   let returnConfig = { ...config };
-  const fileList = await git.getFileList();
+  const fileList = await getFileList();
   async function detectConfigFile(): Promise<string | null> {
     for (const fileName of configFileNames) {
       if (fileName === 'package.json') {

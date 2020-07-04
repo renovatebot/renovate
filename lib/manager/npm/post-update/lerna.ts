@@ -3,7 +3,7 @@ import { quote } from 'shlex';
 import { join } from 'upath';
 import { logger } from '../../../logger';
 import { ExecOptions, exec } from '../../../util/exec';
-import * as git from '../../../util/git';
+import { getFile } from '../../../util/git';
 import { PostUpdateConfig } from '../../common';
 import { getNodeConstraint } from './node-version';
 import { optimizeCommand } from './yarn';
@@ -84,7 +84,7 @@ export async function generateLockFiles(
     cmd.push(`${lernaClient} install ${cmdOptions}`);
     let lernaVersion: string;
     try {
-      const pJson = JSON.parse(await git.getFile('package.json'));
+      const pJson = JSON.parse(await getFile('package.json'));
       lernaVersion =
         (pJson.dependencies && pJson.dependencies.lerna) ||
         (pJson.devDependencies && pJson.devDependencies.lerna);

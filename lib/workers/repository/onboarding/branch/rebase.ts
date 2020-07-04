@@ -2,7 +2,7 @@ import { RenovateConfig } from '../../../../config';
 import { configFileNames } from '../../../../config/app-strings';
 import { logger } from '../../../../logger';
 import { platform } from '../../../../platform';
-import * as git from '../../../../util/git';
+import { getFile } from '../../../../util/git';
 import { getOnboardingConfig } from './config';
 
 const defaultConfigFile = configFileNames[0];
@@ -32,7 +32,7 @@ export async function rebaseOnboardingBranch(
     logger.debug('Onboarding branch has been edited and cannot be rebased');
     return null;
   }
-  const existingContents = await git.getFile(
+  const existingContents = await getFile(
     defaultConfigFile,
     config.onboardingBranch
   );

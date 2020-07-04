@@ -450,7 +450,7 @@ export async function getAdditionalFiles(
         stderr: res.stderr,
       });
     } else {
-      const existingContent = await git.getFile(
+      const existingContent = await getFile(
         lockFile,
         config.reuseExistingBranch ? config.branchName : config.baseBranch
       );
@@ -516,7 +516,7 @@ export async function getAdditionalFiles(
         stderr: res.stderr,
       });
     } else {
-      const existingContent = await git.getFile(
+      const existingContent = await getFile(
         lockFileName,
         config.reuseExistingBranch ? config.branchName : config.baseBranch
       );
@@ -528,7 +528,7 @@ export async function getAdditionalFiles(
         });
         // istanbul ignore next
         try {
-          const yarnrc = await git.getFile(upath.join(lockFileDir, '.yarnrc'));
+          const yarnrc = await getFile(upath.join(lockFileDir, '.yarnrc'));
           if (yarnrc) {
             const mirrorLine = yarnrc
               .split('\n')
@@ -616,7 +616,7 @@ export async function getAdditionalFiles(
         stderr: res.stderr,
       });
     } else {
-      const existingContent = await git.getFile(
+      const existingContent = await getFile(
         lockFile,
         config.reuseExistingBranch ? config.branchName : config.baseBranch
       );
@@ -714,7 +714,7 @@ export async function getAdditionalFiles(
       for (const packageFile of packageFiles.npm) {
         const filename = packageFile.npmLock || packageFile.yarnLock;
         logger.trace('Checking for ' + filename);
-        const existingContent = await git.getFile(
+        const existingContent = await getFile(
           filename,
           config.reuseExistingBranch ? config.branchName : config.baseBranch
         );
