@@ -4,7 +4,7 @@ import { join } from 'upath';
 import { logger } from '../../../logger';
 import { ExecOptions, exec } from '../../../util/exec';
 import { getFile } from '../../../util/git';
-import { PostUpdateConfig } from '../../common';
+import { PackageFile, PostUpdateConfig } from '../../common';
 import { getNodeConstraint } from './node-version';
 import { optimizeCommand } from './yarn';
 
@@ -14,12 +14,14 @@ export interface GenerateLockFileResult {
 }
 
 export async function generateLockFiles(
-  lernaClient: string,
+  lernaPackageFile: Partial<PackageFile>,
   cwd: string,
   config: PostUpdateConfig,
   env: NodeJS.ProcessEnv,
   skipInstalls?: boolean
 ): Promise<GenerateLockFileResult> {
+  const lernaClient = lernaPackageFile.lernaClient;
+  const packageJson = lernaPackageFile.packageFile;
   if (!lernaClient) {
     logger.warn('No lernaClient specified - returning');
     return { error: false };
@@ -84,12 +86,12 @@ export async function generateLockFiles(
     cmd.push(`${lernaClient} install ${cmdOptions}`);
     let lernaVersion: string;
     try {
-      const pJson = JSON.parse(await getFile('package.json'));
+      const pJson = JSON.parse(await getFile(packageJson));
       lernaVersion =
         (pJson.dependencies && pJson.dependencies.lerna) ||
         (pJson.devDependencies && pJson.devDependencies.lerna);
     } catch (err) {
-      logger.warn('Could not detect lerna version in package.json');
+      logger.warn(`Could not detect lerna version in ${packageJson}`);
     }
     if (!lernaVersion || !semver.validRange(lernaVersion)) {
       lernaVersion = 'latest';

@@ -20,16 +20,16 @@ describe('generateLockFiles()', () => {
     env.getChildProcessEnv.mockReturnValue(envMock.basic);
   });
   it('returns if no lernaClient', async () => {
+    const res = await lernaHelper.generateLockFiles({}, 'some-dir', {}, {});
+    expect(res.error).toBe(false);
+  });
+  it('returns if invalid lernaClient', async () => {
     const res = await lernaHelper.generateLockFiles(
-      undefined,
+      { lernaClient: 'foo' },
       'some-dir',
       {},
       {}
     );
-    expect(res.error).toBe(false);
-  });
-  it('returns if invalid lernaClient', async () => {
-    const res = await lernaHelper.generateLockFiles('foo', 'some-dir', {}, {});
     expect(res.error).toBe(false);
   });
   it('generates package-lock.json files', async () => {
@@ -39,7 +39,7 @@ describe('generateLockFiles()', () => {
     const execSnapshots = mockExecAll(exec);
     const skipInstalls = true;
     const res = await lernaHelper.generateLockFiles(
-      'npm',
+      { lernaClient: 'npm' },
       'some-dir',
       {},
       {},
@@ -55,7 +55,7 @@ describe('generateLockFiles()', () => {
     const execSnapshots = mockExecAll(exec);
     const skipInstalls = false;
     const res = await lernaHelper.generateLockFiles(
-      'npm',
+      { lernaClient: 'npm' },
       'some-dir',
       {},
       {},
@@ -70,7 +70,7 @@ describe('generateLockFiles()', () => {
     );
     const execSnapshots = mockExecAll(exec);
     const res = await lernaHelper.generateLockFiles(
-      'yarn',
+      { lernaClient: 'yarn' },
       'some-dir',
       { compatibility: { yarn: '^1.10.0' } },
       {}
@@ -81,7 +81,12 @@ describe('generateLockFiles()', () => {
   it('defaults to latest', async () => {
     git.getFile.mockReturnValueOnce(undefined);
     const execSnapshots = mockExecAll(exec);
-    const res = await lernaHelper.generateLockFiles('npm', 'some-dir', {}, {});
+    const res = await lernaHelper.generateLockFiles(
+      { lernaClient: 'npm' },
+      'some-dir',
+      {},
+      {}
+    );
     expect(res.error).toBe(false);
     expect(execSnapshots).toMatchSnapshot();
   });
@@ -89,7 +94,7 @@ describe('generateLockFiles()', () => {
     git.getFile.mockReturnValueOnce(undefined);
     const execSnapshots = mockExecAll(exec);
     const res = await lernaHelper.generateLockFiles(
-      'npm',
+      { lernaClient: 'npm' },
       'some-dir',
       {
         dockerMapDotfiles: true,
@@ -104,7 +109,12 @@ describe('generateLockFiles()', () => {
     git.getFile.mockReturnValueOnce(undefined);
     const execSnapshots = mockExecAll(exec);
     global.trustLevel = 'high';
-    const res = await lernaHelper.generateLockFiles('npm', 'some-dir', {}, {});
+    const res = await lernaHelper.generateLockFiles(
+      { lernaClient: 'npm' },
+      'some-dir',
+      {},
+      {}
+    );
     delete global.trustLevel;
     expect(res.error).toBe(false);
     expect(execSnapshots).toMatchSnapshot();
