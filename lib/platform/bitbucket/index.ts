@@ -870,14 +870,6 @@ export async function mergePr(
   return true;
 }
 
-// Pull Request
-
-export function cleanRepo(): Promise<void> {
-  git.cleanRepo();
-  config = {} as any;
-  return Promise.resolve();
-}
-
 export function getVulnerabilityAlerts(): Promise<VulnerabilityAlert[]> {
   return Promise.resolve([]);
 }

@@ -175,8 +175,6 @@ Array [
 ]
 `;
 
-exports[`platform/gitlab cleanRepo() exists 1`] = `undefined`;
-
 exports[`platform/gitlab commitFiles() sends to gitFs 1`] = `
 Array [
   Object {

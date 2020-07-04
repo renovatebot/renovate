@@ -35,10 +35,6 @@ describe('platform/azure', () => {
     });
   });
 
-  afterEach(async () => {
-    await azure.cleanRepo();
-  });
-
   // do we need the args?
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
   function getRepos(_token: string, _endpoint: string) {
@@ -167,12 +163,6 @@ describe('platform/azure', () => {
     it('exists', async () => {
       await initRepo();
       expect(await azure.getRepoStatus()).toBeUndefined();
-    });
-  });
-
-  describe('cleanRepo()', () => {
-    it('exists', async () => {
-      await expect(azure.cleanRepo()).resolves.not.toThrow();
     });
   });
 
