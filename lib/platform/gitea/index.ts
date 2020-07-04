@@ -866,10 +866,6 @@ const platform: Platform = {
     return git.branchExists(branchName);
   },
 
-  getAllRenovateBranches(branchPrefix: string): Promise<string[]> {
-    return git.getAllRenovateBranches(branchPrefix);
-  },
-
   getCommitMessages(): Promise<string[]> {
     return git.getCommitMessages();
   },
@@ -893,7 +889,6 @@ export const {
   ensureIssueClosing,
   findIssue,
   findPr,
-  getAllRenovateBranches,
   getBranchPr,
   getBranchStatus,
   getBranchStatusCheck,

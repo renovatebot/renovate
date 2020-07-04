@@ -503,13 +503,6 @@ export function branchExists(branchName: string): Promise<boolean> {
 }
 
 // istanbul ignore next
-export function getAllRenovateBranches(
-  branchPrefix: string
-): Promise<string[]> {
-  return git.getAllRenovateBranches(branchPrefix);
-}
-
-// istanbul ignore next
 export function deleteBranch(
   branchName: string,
   closePr?: boolean

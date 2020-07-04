@@ -200,12 +200,6 @@ export function branchExists(branchName: string): Promise<boolean> {
   return git.branchExists(branchName);
 }
 
-export function getAllRenovateBranches(
-  branchPrefix: string
-): Promise<string[]> {
-  return git.getAllRenovateBranches(branchPrefix);
-}
-
 // istanbul ignore next
 function matchesState(state: string, desiredState: string): boolean {
   if (desiredState === PR_STATE_ALL) {

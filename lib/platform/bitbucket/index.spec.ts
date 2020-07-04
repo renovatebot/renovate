@@ -810,14 +810,6 @@ describe('platform/bitbucket', () => {
     });
   });
 
-  describe('getAllRenovateBranches()', () => {
-    it('sends to gitFs', async () => {
-      await initRepoMock();
-      expect(await bitbucket.getAllRenovateBranches('test')).toMatchSnapshot();
-      expect(httpMock.getTrace()).toMatchSnapshot();
-    });
-  });
-
   describe('getVulnerabilityAlerts()', () => {
     it('returns empty array', async () => {
       expect(await bitbucket.getVulnerabilityAlerts()).toEqual([]);

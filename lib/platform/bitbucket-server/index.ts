@@ -416,13 +416,6 @@ export async function getBranchPr(
   return existingPr ? getPr(existingPr.number, refreshCache) : null;
 }
 
-export function getAllRenovateBranches(
-  branchPrefix: string
-): Promise<string[]> {
-  logger.debug('getAllRenovateBranches');
-  return git.getAllRenovateBranches(branchPrefix);
-}
-
 export async function commitFiles(
   commitFilesConfig: CommitFilesConfig
 ): Promise<string | null> {

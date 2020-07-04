@@ -387,13 +387,6 @@ describe('platform/gitlab', () => {
       expect(httpMock.getTrace()).toMatchSnapshot();
     });
   });
-  describe('getAllRenovateBranches()', () => {
-    it('sends to gitFs', async () => {
-      await initRepo();
-      await gitlab.getAllRenovateBranches('');
-      expect(httpMock.getTrace()).toMatchSnapshot();
-    });
-  });
 
   describe('getBranchPr(branchName)', () => {
     it('should return null if no PR exists', async () => {

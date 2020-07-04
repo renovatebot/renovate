@@ -607,12 +607,6 @@ export async function getBranchPr(branchName: string): Promise<Pr> {
   return getPr(pr.iid);
 }
 
-export function getAllRenovateBranches(
-  branchPrefix: string
-): Promise<string[]> {
-  return git.getAllRenovateBranches(branchPrefix);
-}
-
 // istanbul ignore next
 export function commitFiles(
   commitFilesConfig: CommitFilesConfig

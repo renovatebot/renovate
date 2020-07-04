@@ -208,12 +208,6 @@ export /* istanbul ignore next */ function branchExists(
   return git.branchExists(branchName);
 }
 
-export /* istanbul ignore next */ function getAllRenovateBranches(
-  branchPrefix: string
-): Promise<string[]> {
-  return git.getAllRenovateBranches(branchPrefix);
-}
-
 // istanbul ignore next
 async function abandonPr(prNo: number): Promise<void> {
   logger.debug(`abandonPr(prNo)(${prNo})`);

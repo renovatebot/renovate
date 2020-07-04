@@ -103,15 +103,6 @@ describe('platform/git', () => {
       expect(await git.branchExists('not_found')).toBe(false);
     });
   });
-  describe('getAllRenovateBranches()', () => {
-    it('should return all renovate branches', async () => {
-      await git.setBranchPrefix('renovate/');
-      const res = await git.getAllRenovateBranches('renovate/');
-      expect(res).toContain('renovate/past_branch');
-      expect(res).toContain('renovate/future_branch');
-      expect(res).not.toContain('master');
-    });
-  });
   describe('isBranchStale()', () => {
     it('should return false if same SHA as master', async () => {
       expect(await git.isBranchStale('renovate/future_branch')).toBe(false);
@@ -123,7 +114,11 @@ describe('platform/git', () => {
       await expect(git.isBranchStale('not_found')).rejects.toMatchSnapshot();
     });
   });
-
+  describe('getAllRenovateBranches()', () => {
+    it('should return all', async () => {
+      expect(await git.getAllRenovateBranches('renovate/')).toMatchSnapshot();
+    });
+  });
   describe('getBranchCommit(branchName)', () => {
     it('should return same value for equal refs', async () => {
       const hex = await git.getBranchCommit('renovate/past_branch');

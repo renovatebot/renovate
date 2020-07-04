@@ -1382,16 +1382,6 @@ describe('platform/gitea', () => {
     });
   });
 
-  describe('getAllRenovateBranches', () => {
-    it('should propagate call to storage class', async () => {
-      await initFakeRepo();
-      await gitea.getAllRenovateBranches('some-prefix');
-
-      expect(gitvcs.getAllRenovateBranches).toHaveBeenCalledTimes(1);
-      expect(gitvcs.getAllRenovateBranches).toHaveBeenCalledWith('some-prefix');
-    });
-  });
-
   describe('getCommitMessages', () => {
     it('should propagate call to storage class', async () => {
       await initFakeRepo();
