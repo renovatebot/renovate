@@ -1,9 +1,9 @@
 import { mock } from 'jest-mock-extended';
-import { git, platform } from '../../../test/util';
+import { fs, platform } from '../../../test/util';
 import { Pr } from '../../platform';
 import { codeOwnersForPr } from './code-owners';
 
-jest.mock('../../util/git');
+jest.mock('../../util/fs');
 
 describe('workers/pr/code-owners', () => {
   describe('codeOwnersForPr', () => {
@@ -13,13 +13,13 @@ describe('workers/pr/code-owners', () => {
       pr = mock<Pr>();
     });
     it('returns global code owner', async () => {
-      git.getFile.mockResolvedValueOnce(['* @jimmy'].join('\n'));
+      fs.readLocalFile.mockResolvedValueOnce(['* @jimmy'].join('\n'));
       platform.getPrFiles.mockResolvedValueOnce(['README.md']);
       const codeOwners = await codeOwnersForPr(pr);
       expect(codeOwners).toEqual(['@jimmy']);
     });
     it('returns more specific code owners', async () => {
-      git.getFile.mockResolvedValueOnce(
+      fs.readLocalFile.mockResolvedValueOnce(
         ['* @jimmy', 'package.json @john @maria'].join('\n')
       );
       platform.getPrFiles.mockResolvedValueOnce(['package.json']);
@@ -27,7 +27,7 @@ describe('workers/pr/code-owners', () => {
       expect(codeOwners).toEqual(['@john', '@maria']);
     });
     it('ignores comments and leading/trailing whitespace', async () => {
-      git.getFile.mockResolvedValueOnce(
+      fs.readLocalFile.mockResolvedValueOnce(
         [
           '# comment line',
           '    \t    ',
@@ -41,19 +41,21 @@ describe('workers/pr/code-owners', () => {
       expect(codeOwners).toEqual(['@john', '@maria']);
     });
     it('returns empty array when no code owners set', async () => {
-      git.getFile.mockResolvedValueOnce(null);
+      fs.readLocalFile.mockResolvedValueOnce(null);
       platform.getPrFiles.mockResolvedValueOnce(['package.json']);
       const codeOwners = await codeOwnersForPr(pr);
       expect(codeOwners).toEqual([]);
     });
     it('returns empty array when no code owners match', async () => {
-      git.getFile.mockResolvedValueOnce(['package-lock.json @mike'].join('\n'));
+      fs.readLocalFile.mockResolvedValueOnce(
+        ['package-lock.json @mike'].join('\n')
+      );
       platform.getPrFiles.mockResolvedValueOnce(['yarn.lock']);
       const codeOwners = await codeOwnersForPr(pr);
       expect(codeOwners).toEqual([]);
     });
     it('returns empty array when error occurs', async () => {
-      git.getFile.mockImplementationOnce((_, __) => {
+      fs.readLocalFile.mockImplementationOnce((_, __) => {
         throw new Error();
       });
       const codeOwners = await codeOwnersForPr(pr);
@@ -67,7 +69,7 @@ describe('workers/pr/code-owners', () => {
     ];
     codeOwnerFilePaths.forEach((codeOwnerFilePath) => {
       it(`detects code owner file at '${codeOwnerFilePath}'`, async () => {
-        git.getFile.mockImplementation((path, _) => {
+        fs.readLocalFile.mockImplementation((path, _) => {
           if (path === codeOwnerFilePath) {
             return Promise.resolve(['* @mike'].join('\n'));
           }
