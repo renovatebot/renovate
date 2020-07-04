@@ -90,6 +90,19 @@ describe('generateLockFiles()', () => {
     expect(res.error).toBe(false);
     expect(execSnapshots).toMatchSnapshot();
   });
+  it('uses the given package.json', async () => {
+    git.getFile.mockReturnValueOnce(undefined);
+    const execSnapshots = mockExecAll(exec);
+    const res = await lernaHelper.generateLockFiles(
+      { lernaClient: 'npm', packageFile: 'foo/package.json' },
+      'some-dir',
+      {},
+      {}
+    );
+    expect(res.error).toBe(false);
+    expect(git.getFile).toHaveBeenCalledWith('foo/package.json');
+    expect(execSnapshots).toMatchSnapshot();
+  });
   it('maps dot files', async () => {
     git.getFile.mockReturnValueOnce(undefined);
     const execSnapshots = mockExecAll(exec);
