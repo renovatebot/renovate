@@ -1,9 +1,9 @@
 import { ensureDir } from 'fs-extra';
 import { join } from 'upath';
 import { logger } from '../../logger';
-import { platform } from '../../platform';
 import { ExecOptions, exec } from '../../util/exec';
 import { deleteLocalFile, readLocalFile, writeLocalFile } from '../../util/fs';
+import { getRepoStatus } from '../../util/git';
 import {
   UpdateArtifact,
   UpdateArtifactsConfig,
@@ -74,7 +74,7 @@ export async function updateArtifacts({
     };
     logger.debug({ cmd }, 'pipenv lock command');
     await exec(cmd, execOptions);
-    const status = await platform.getRepoStatus();
+    const status = await getRepoStatus();
     if (!(status && status.modified.includes(lockFileName))) {
       return null;
     }

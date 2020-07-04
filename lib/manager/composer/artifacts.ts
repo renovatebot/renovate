@@ -9,7 +9,6 @@ import {
 } from '../../constants/platforms';
 import * as datasourcePackagist from '../../datasource/packagist';
 import { logger } from '../../logger';
-import { platform } from '../../platform';
 import { ExecOptions, exec } from '../../util/exec';
 import {
   deleteLocalFile,
@@ -19,6 +18,7 @@ import {
   readLocalFile,
   writeLocalFile,
 } from '../../util/fs';
+import { getRepoStatus } from '../../util/git';
 import * as hostRules from '../../util/host-rules';
 import { UpdateArtifact, UpdateArtifactsResult } from '../common';
 
@@ -131,7 +131,7 @@ export async function updateArtifacts({
     }
     logger.debug({ cmd, args }, 'composer command');
     await exec(`${cmd} ${args}`, execOptions);
-    const status = await platform.getRepoStatus();
+    const status = await getRepoStatus();
     if (!status.modified.includes(lockFileName)) {
       return null;
     }

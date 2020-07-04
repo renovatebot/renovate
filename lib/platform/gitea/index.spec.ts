@@ -1414,15 +1414,6 @@ describe('platform/gitea', () => {
     });
   });
 
-  describe('getRepoStatus', () => {
-    it('should propagate call to storage class', async () => {
-      await initFakeRepo();
-      await gitea.getRepoStatus();
-
-      expect(gitvcs.getRepoStatus).toHaveBeenCalledTimes(1);
-    });
-  });
-
   describe('getAllRenovateBranches', () => {
     it('should propagate call to storage class', async () => {
       await initFakeRepo();

@@ -159,13 +159,6 @@ describe('platform/azure', () => {
     } as any);
   }
 
-  describe('getRepoStatus()', () => {
-    it('exists', async () => {
-      await initRepo();
-      expect(await azure.getRepoStatus()).toBeUndefined();
-    });
-  });
-
   describe('initRepo', () => {
     it(`should initialise the config for a repo`, async () => {
       const config = await initRepo({

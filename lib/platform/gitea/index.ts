@@ -878,10 +878,6 @@ const platform: Platform = {
     return git.getBranchLastCommitTime(branchName);
   },
 
-  getRepoStatus(): Promise<git.StatusResult> {
-    return git.getRepoStatus();
-  },
-
   getAllRenovateBranches(branchPrefix: string): Promise<string[]> {
     return git.getAllRenovateBranches(branchPrefix);
   },
@@ -921,7 +917,6 @@ export const {
   getPrList,
   getPrFiles,
   getRepoForceRebase,
-  getRepoStatus,
   getRepos,
   getVulnerabilityAlerts,
   initPlatform,

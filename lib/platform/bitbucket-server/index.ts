@@ -471,12 +471,6 @@ export function getBranchLastCommitTime(branchName: string): Promise<Date> {
   return git.getBranchLastCommitTime(branchName);
 }
 
-export /* istanbul ignore next */ function getRepoStatus(): Promise<
-  git.StatusResult
-> {
-  return git.getRepoStatus();
-}
-
 async function getStatus(
   branchName: string,
   useCache = true
