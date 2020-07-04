@@ -395,14 +395,6 @@ describe('platform/gitlab', () => {
     });
   });
 
-  describe('getBranchLastCommitTime()', () => {
-    it('sends to gitFs', async () => {
-      await initRepo();
-      await gitlab.getBranchLastCommitTime('');
-      expect(httpMock.getTrace()).toMatchSnapshot();
-    });
-  });
-
   describe('getBranchPr(branchName)', () => {
     it('should return null if no PR exists', async () => {
       const scope = await initRepo();

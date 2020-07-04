@@ -269,10 +269,6 @@ export async function deleteBranch(
   return git.deleteBranch(branchName);
 }
 
-export function getBranchLastCommitTime(branchName: string): Promise<Date> {
-  return git.getBranchLastCommitTime(branchName);
-}
-
 // istanbul ignore next
 export function commitFiles(
   commitFilesConfig: CommitFilesConfig

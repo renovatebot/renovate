@@ -1382,18 +1382,6 @@ describe('platform/gitea', () => {
     });
   });
 
-  describe('getBranchLastCommitTime', () => {
-    it('should propagate call to storage class', async () => {
-      await initFakeRepo();
-      await gitea.getBranchLastCommitTime('some-branch');
-
-      expect(gitvcs.getBranchLastCommitTime).toHaveBeenCalledTimes(1);
-      expect(gitvcs.getBranchLastCommitTime).toHaveBeenCalledWith(
-        'some-branch'
-      );
-    });
-  });
-
   describe('getAllRenovateBranches', () => {
     it('should propagate call to storage class', async () => {
       await initFakeRepo();

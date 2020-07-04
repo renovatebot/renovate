@@ -1527,37 +1527,6 @@ Array [
 ]
 `;
 
-exports[`platform/bitbucket-server endpoint with no path getBranchLastCommitTime() sends to gitFs 1`] = `undefined`;
-
-exports[`platform/bitbucket-server endpoint with no path getBranchLastCommitTime() sends to gitFs 2`] = `
-Array [
-  Object {
-    "headers": Object {
-      "accept": "application/json",
-      "accept-encoding": "gzip, deflate",
-      "authorization": "Basic YWJjOjEyMw==",
-      "host": "stash.renovatebot.com",
-      "user-agent": "https://github.com/renovatebot/renovate",
-      "x-atlassian-token": "no-check",
-    },
-    "method": "GET",
-    "url": "https://stash.renovatebot.com/rest/api/1.0/projects/SOME/repos/repo",
-  },
-  Object {
-    "headers": Object {
-      "accept": "application/json",
-      "accept-encoding": "gzip, deflate",
-      "authorization": "Basic YWJjOjEyMw==",
-      "host": "stash.renovatebot.com",
-      "user-agent": "https://github.com/renovatebot/renovate",
-      "x-atlassian-token": "no-check",
-    },
-    "method": "GET",
-    "url": "https://stash.renovatebot.com/rest/api/1.0/projects/SOME/repos/repo/branches/default",
-  },
-]
-`;
-
 exports[`platform/bitbucket-server endpoint with no path getBranchPr() has no pr 1`] = `
 Array [
   Object {
@@ -5495,37 +5464,6 @@ Array [
 exports[`platform/bitbucket-server endpoint with path getAllRenovateBranches() sends to gitFs 1`] = `undefined`;
 
 exports[`platform/bitbucket-server endpoint with path getAllRenovateBranches() sends to gitFs 2`] = `
-Array [
-  Object {
-    "headers": Object {
-      "accept": "application/json",
-      "accept-encoding": "gzip, deflate",
-      "authorization": "Basic YWJjOjEyMw==",
-      "host": "stash.renovatebot.com",
-      "user-agent": "https://github.com/renovatebot/renovate",
-      "x-atlassian-token": "no-check",
-    },
-    "method": "GET",
-    "url": "https://stash.renovatebot.com/vcs/rest/api/1.0/projects/SOME/repos/repo",
-  },
-  Object {
-    "headers": Object {
-      "accept": "application/json",
-      "accept-encoding": "gzip, deflate",
-      "authorization": "Basic YWJjOjEyMw==",
-      "host": "stash.renovatebot.com",
-      "user-agent": "https://github.com/renovatebot/renovate",
-      "x-atlassian-token": "no-check",
-    },
-    "method": "GET",
-    "url": "https://stash.renovatebot.com/vcs/rest/api/1.0/projects/SOME/repos/repo/branches/default",
-  },
-]
-`;
-
-exports[`platform/bitbucket-server endpoint with path getBranchLastCommitTime() sends to gitFs 1`] = `undefined`;
-
-exports[`platform/bitbucket-server endpoint with path getBranchLastCommitTime() sends to gitFs 2`] = `
 Array [
   Object {
     "headers": Object {

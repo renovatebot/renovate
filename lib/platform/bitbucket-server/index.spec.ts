@@ -437,14 +437,6 @@ describe('platform/bitbucket-server', () => {
         });
       });
 
-      describe('getBranchLastCommitTime()', () => {
-        it('sends to gitFs', async () => {
-          await initRepo();
-          expect(await bitbucket.getBranchLastCommitTime('')).toMatchSnapshot();
-          expect(httpMock.getTrace()).toMatchSnapshot();
-        });
-      });
-
       describe('addAssignees()', () => {
         it('does not throw', async () => {
           expect(await bitbucket.addAssignees(3, ['some'])).toMatchSnapshot();

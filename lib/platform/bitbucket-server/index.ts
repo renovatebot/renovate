@@ -456,11 +456,6 @@ export async function deleteBranch(
   return git.deleteBranch(branchName);
 }
 
-export function getBranchLastCommitTime(branchName: string): Promise<Date> {
-  logger.debug(`getBranchLastCommitTime(${branchName})`);
-  return git.getBranchLastCommitTime(branchName);
-}
-
 async function getStatus(
   branchName: string,
   useCache = true

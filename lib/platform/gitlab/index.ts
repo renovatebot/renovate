@@ -635,10 +635,6 @@ export async function deleteBranch(
   return git.deleteBranch(branchName);
 }
 
-export function getBranchLastCommitTime(branchName: string): Promise<Date> {
-  return git.getBranchLastCommitTime(branchName);
-}
-
 export async function getBranchStatusCheck(
   branchName: string,
   context: string

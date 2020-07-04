@@ -518,11 +518,6 @@ export function deleteBranch(
 }
 
 // istanbul ignore next
-export function getBranchLastCommitTime(branchName: string): Promise<Date> {
-  return git.getBranchLastCommitTime(branchName);
-}
-
-// istanbul ignore next
 export function commitFiles(
   commitFilesConfig: CommitFilesConfig
 ): Promise<string | null> {

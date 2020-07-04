@@ -449,14 +449,6 @@ describe('platform/bitbucket', () => {
     });
   });
 
-  describe('getBranchLastCommitTime()', () => {
-    it('sends to gitFs', async () => {
-      await initRepoMock();
-      expect(await bitbucket.getBranchLastCommitTime('test')).toMatchSnapshot();
-      expect(httpMock.getTrace()).toMatchSnapshot();
-    });
-  });
-
   describe('findIssue()', () => {
     it('does not throw', async () => {
       const scope = await initRepoMock({}, { has_issues: true });
