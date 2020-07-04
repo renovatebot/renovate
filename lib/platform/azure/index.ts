@@ -756,9 +756,3 @@ export /* istanbul ignore next */ async function deleteLabel(
 export function getVulnerabilityAlerts(): Promise<VulnerabilityAlert[]> {
   return Promise.resolve([]);
 }
-
-export function cleanRepo(): Promise<void> {
-  git.cleanRepo();
-  config = {} as any;
-  return Promise.resolve();
-}

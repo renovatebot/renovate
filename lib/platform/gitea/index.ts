@@ -362,12 +362,6 @@ const platform: Platform = {
     }
   },
 
-  cleanRepo(): Promise<void> {
-    git.cleanRepo();
-    config = {} as any;
-    return Promise.resolve();
-  },
-
   async setBranchStatus({
     branchName,
     context,
@@ -905,7 +899,6 @@ export const {
   addAssignees,
   addReviewers,
   branchExists,
-  cleanRepo,
   commitFiles,
   createPr,
   deleteBranch,

@@ -146,19 +146,7 @@ export async function getSubmodules(): Promise<string[]> {
     .filter((_e: string, i: number) => i % 2);
 }
 
-export function isInitialized(): boolean {
-  return !!git;
-}
-
-export function cleanRepo(): void {
-  if (isInitialized()) {
-    // no-op
-  }
-}
-
 export async function initRepo(args: StorageConfig): Promise<void> {
-  cleanRepo();
-
   config = { ...args } as any;
 
   config.branchExists = {};

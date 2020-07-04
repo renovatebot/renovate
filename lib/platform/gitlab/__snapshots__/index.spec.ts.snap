@@ -148,8 +148,6 @@ Array [
 
 exports[`platform/gitlab addReviewers(issueNo, reviewers) should add the given reviewers to the PR 1`] = `Array []`;
 
-exports[`platform/gitlab cleanRepo() exists 1`] = `undefined`;
-
 exports[`platform/gitlab commitFiles() sends to gitFs 1`] = `
 Array [
   Object {
