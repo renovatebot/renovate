@@ -187,12 +187,6 @@ export async function setBaseBranch(
   return baseBranchSha;
 }
 
-export /* istanbul ignore next */ function setBranchPrefix(
-  branchPrefix: string
-): Promise<void> {
-  return git.setBranchPrefix(branchPrefix);
-}
-
 // istanbul ignore next
 function matchesState(state: string, desiredState: string): boolean {
   if (desiredState === PR_STATE_ALL) {

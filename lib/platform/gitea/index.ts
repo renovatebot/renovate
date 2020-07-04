@@ -858,10 +858,6 @@ const platform: Platform = {
     return smartTruncate(prBody, 1000000);
   },
 
-  setBranchPrefix(branchPrefix: string): Promise<void> {
-    return git.setBranchPrefix(branchPrefix);
-  },
-
   getVulnerabilityAlerts(): Promise<VulnerabilityAlert[]> {
     return Promise.resolve([]);
   },
@@ -895,7 +891,6 @@ export const {
   initRepo,
   mergePr,
   setBaseBranch,
-  setBranchPrefix,
   setBranchStatus,
   updatePr,
 } = platform;

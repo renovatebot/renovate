@@ -1362,16 +1362,6 @@ describe('platform/gitea', () => {
     });
   });
 
-  describe('setBranchPrefix', () => {
-    it('should propagate call to storage class', async () => {
-      await initFakeRepo();
-      await gitea.setBranchPrefix('some-branch');
-
-      expect(gitvcs.setBranchPrefix).toHaveBeenCalledTimes(1);
-      expect(gitvcs.setBranchPrefix).toHaveBeenCalledWith('some-branch');
-    });
-  });
-
   describe('getVulnerabilityAlerts', () => {
     it('should return an empty list - unsupported by platform', async () => {
       expect(await gitea.getVulnerabilityAlerts()).toEqual([]);

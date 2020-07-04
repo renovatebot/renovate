@@ -280,12 +280,6 @@ export async function setBaseBranch(
   return baseBranchSha;
 }
 
-export /* istanbul ignore next */ function setBranchPrefix(
-  branchPrefix: string
-): Promise<void> {
-  return git.setBranchPrefix(branchPrefix);
-}
-
 type BranchState = 'pending' | 'running' | 'success' | 'failed' | 'canceled';
 
 interface GitlabBranchStatus {

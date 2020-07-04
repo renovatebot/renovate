@@ -31,7 +31,6 @@ Array [
   "initRepo",
   "mergePr",
   "setBaseBranch",
-  "setBranchPrefix",
   "setBranchStatus",
   "updatePr",
 ]
@@ -66,7 +65,6 @@ Array [
   "initRepo",
   "mergePr",
   "setBaseBranch",
-  "setBranchPrefix",
   "setBranchStatus",
   "updatePr",
 ]
@@ -101,7 +99,6 @@ Array [
   "initRepo",
   "mergePr",
   "setBaseBranch",
-  "setBranchPrefix",
   "setBranchStatus",
   "updatePr",
 ]
@@ -136,7 +133,6 @@ Array [
   "initRepo",
   "mergePr",
   "setBaseBranch",
-  "setBranchPrefix",
   "setBranchStatus",
   "updatePr",
 ]

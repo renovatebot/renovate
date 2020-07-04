@@ -247,12 +247,6 @@ export async function setBaseBranch(
   return baseBranchSha;
 }
 
-export /* istanbul ignore next */ function setBranchPrefix(
-  branchPrefix: string
-): Promise<void> {
-  return git.setBranchPrefix(branchPrefix);
-}
-
 // Gets details for a PR
 export async function getPr(
   prNo: number,

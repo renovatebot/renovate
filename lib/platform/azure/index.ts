@@ -194,12 +194,6 @@ export /* istanbul ignore next */ async function setBaseBranch(
   return baseBranchSha;
 }
 
-export /* istanbul ignore next */ function setBranchPrefix(
-  branchPrefix: string
-): Promise<void> {
-  return git.setBranchPrefix(branchPrefix);
-}
-
 // istanbul ignore next
 async function abandonPr(prNo: number): Promise<void> {
   logger.debug(`abandonPr(prNo)(${prNo})`);

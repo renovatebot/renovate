@@ -186,7 +186,6 @@ export interface Platform {
   findIssue(title: string): Promise<Issue | null>;
   getIssueList(): Promise<Issue[]>;
   getVulnerabilityAlerts(): Promise<VulnerabilityAlert[]>;
-  setBranchPrefix(branchPrefix: string): Promise<void>;
   initRepo(config: RepoParams): Promise<RepoConfig>;
   getPrList(): Promise<Pr[]>;
   getPrFiles(pr: Pr): Promise<string[]>;
