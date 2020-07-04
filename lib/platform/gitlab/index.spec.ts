@@ -154,14 +154,6 @@ describe('platform/gitlab', () => {
     return scope;
   }
 
-  describe('getRepoStatus()', () => {
-    it('exists', async () => {
-      await initRepo();
-      await gitlab.getRepoStatus();
-      expect(httpMock.getTrace()).toMatchSnapshot();
-    });
-  });
-
   describe('initRepo', () => {
     it(`should throw error if disabled in renovate.json`, async () => {
       httpMock
@@ -395,44 +387,7 @@ describe('platform/gitlab', () => {
       expect(httpMock.getTrace()).toMatchSnapshot();
     });
   });
-  describe('getFileList()', () => {
-    it('sends to gitFs', async () => {
-      await initRepo();
-      await gitlab.getFileList();
-      expect(httpMock.getTrace()).toMatchSnapshot();
-    });
-  });
-  describe('branchExists()', () => {
-    describe('getFileList()', () => {
-      it('sends to gitFs', async () => {
-        await initRepo();
-        await gitlab.branchExists('');
-        expect(httpMock.getTrace()).toMatchSnapshot();
-      });
-    });
-  });
-  describe('getAllRenovateBranches()', () => {
-    it('sends to gitFs', async () => {
-      await initRepo();
-      await gitlab.getAllRenovateBranches('');
-      expect(httpMock.getTrace()).toMatchSnapshot();
-    });
-  });
 
-  describe('getBranchLastCommitTime()', () => {
-    it('sends to gitFs', async () => {
-      await initRepo();
-      await gitlab.getBranchLastCommitTime('');
-      expect(httpMock.getTrace()).toMatchSnapshot();
-    });
-  });
-  describe('isBranchStale()', () => {
-    it('sends to gitFs', async () => {
-      await initRepo();
-      await gitlab.isBranchStale('');
-      expect(httpMock.getTrace()).toMatchSnapshot();
-    });
-  });
   describe('getBranchPr(branchName)', () => {
     it('should return null if no PR exists', async () => {
       const scope = await initRepo();
@@ -651,13 +606,7 @@ describe('platform/gitlab', () => {
       }
     );
   });
-  describe('mergeBranch()', () => {
-    it('sends to gitFs', async () => {
-      await initRepo();
-      await gitlab.mergeBranch('branch');
-      expect(httpMock.getTrace()).toMatchSnapshot();
-    });
-  });
+
   describe('deleteBranch()', () => {
     it('sends to gitFs', async () => {
       const scope = await initRepo();
@@ -1233,12 +1182,6 @@ These updates have all been created already. Click a checkbox below to force a r
       expect(gitlab.getPrBody(prBody)).toMatchSnapshot();
     });
   });
-  describe('getFile()', () => {
-    it('sends to gitFs', async () => {
-      await initRepo();
-      expect(await gitlab.getFile('')).toMatchSnapshot();
-    });
-  });
   describe('commitFiles()', () => {
     it('sends to gitFs', async () => {
       expect.assertions(1);
@@ -1249,12 +1192,6 @@ These updates have all been created already. Click a checkbox below to force a r
         message: '',
       });
       expect(httpMock.getTrace()).toMatchSnapshot();
-    });
-  });
-  describe('getCommitMessages()', () => {
-    it('passes to git', async () => {
-      await initRepo();
-      expect(await gitlab.getCommitMessages()).toMatchSnapshot();
     });
   });
   describe('getVulnerabilityAlerts()', () => {

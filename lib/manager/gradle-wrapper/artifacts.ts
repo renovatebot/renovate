@@ -2,9 +2,9 @@ import { resolve } from 'path';
 import { stat } from 'fs-extra';
 import Git from 'simple-git/promise';
 import { logger } from '../../logger';
-import { platform } from '../../platform';
 import { ExecOptions, exec } from '../../util/exec';
 import { readLocalFile, writeLocalFile } from '../../util/fs';
+import { getRepoStatus } from '../../util/git';
 import { Http } from '../../util/http';
 import { UpdateArtifact, UpdateArtifactsResult } from '../common';
 import { gradleWrapperFileName, prepareGradleCommand } from '../gradle/index';
@@ -94,7 +94,7 @@ export async function updateArtifacts({
         'Error executing gradle wrapper update command. It can be not a critical one though.'
       );
     }
-    const status = await platform.getRepoStatus();
+    const status = await getRepoStatus();
     const artifactFileNames = [
       'gradle/wrapper/gradle-wrapper.properties',
       'gradle/wrapper/gradle-wrapper.jar',

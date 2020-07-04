@@ -400,48 +400,10 @@ describe('platform/bitbucket-server', () => {
         });
       });
 
-      describe('getFileList()', () => {
-        it('sends to gitFs', async () => {
-          await initRepo();
-          expect(await bitbucket.getFileList()).toMatchSnapshot();
-          expect(httpMock.getTrace()).toMatchSnapshot();
-        });
-      });
-
-      describe('branchExists()', () => {
-        describe('getFileList()', () => {
-          it('sends to gitFs', async () => {
-            await initRepo();
-            expect(
-              await bitbucket.branchExists(undefined as any)
-            ).toMatchSnapshot();
-            expect(httpMock.getTrace()).toMatchSnapshot();
-          });
-        });
-      });
-
-      describe('isBranchStale()', () => {
-        it('sends to gitFs', async () => {
-          await initRepo();
-          expect(
-            await bitbucket.isBranchStale(undefined as any)
-          ).toMatchSnapshot();
-          expect(httpMock.getTrace()).toMatchSnapshot();
-        });
-      });
-
       describe('deleteBranch()', () => {
         it('sends to gitFs', async () => {
           await initRepo();
           expect(await bitbucket.deleteBranch('branch')).toMatchSnapshot();
-          expect(httpMock.getTrace()).toMatchSnapshot();
-        });
-      });
-
-      describe('mergeBranch()', () => {
-        it('sends to gitFs', async () => {
-          await initRepo();
-          expect(await bitbucket.mergeBranch('branch')).toMatchSnapshot();
           expect(httpMock.getTrace()).toMatchSnapshot();
         });
       });
@@ -463,30 +425,6 @@ describe('platform/bitbucket-server', () => {
             files: [{ name: 'test', contents: 'dummy' }],
             message: 'message',
           });
-          expect(httpMock.getTrace()).toMatchSnapshot();
-        });
-      });
-
-      describe('getFile()', () => {
-        it('sends to gitFs', async () => {
-          await initRepo();
-          expect(await bitbucket.getFile('', '')).toMatchSnapshot();
-          expect(httpMock.getTrace()).toMatchSnapshot();
-        });
-      });
-
-      describe('getAllRenovateBranches()', () => {
-        it('sends to gitFs', async () => {
-          await initRepo();
-          expect(await bitbucket.getAllRenovateBranches('')).toMatchSnapshot();
-          expect(httpMock.getTrace()).toMatchSnapshot();
-        });
-      });
-
-      describe('getBranchLastCommitTime()', () => {
-        it('sends to gitFs', async () => {
-          await initRepo();
-          expect(await bitbucket.getBranchLastCommitTime('')).toMatchSnapshot();
           expect(httpMock.getTrace()).toMatchSnapshot();
         });
       });
@@ -1679,14 +1617,6 @@ Empty comment.
 Followed by some information.
 <!-- followed by some more comments -->`);
           expect(prBody).toMatchSnapshot();
-        });
-      });
-
-      describe('getCommitMessages()', () => {
-        it('sends to gitFs', async () => {
-          await initRepo();
-          expect(await bitbucket.getCommitMessages()).toMatchSnapshot();
-          expect(httpMock.getTrace()).toMatchSnapshot();
         });
       });
 

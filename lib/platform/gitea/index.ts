@@ -498,7 +498,7 @@ const platform: Platform = {
     // Enrich pull request with additional information which is more expensive to fetch
     if (pr.state !== 'closed') {
       if (pr.isStale === undefined) {
-        pr.isStale = await platform.isBranchStale(pr.branchName);
+        pr.isStale = await git.isBranchStale(pr.branchName);
       }
       if (pr.isModified === undefined) {
         pr.isModified = await isPRModified(config.repository, pr.branchName);
@@ -858,46 +858,6 @@ const platform: Platform = {
     return smartTruncate(prBody, 1000000);
   },
 
-  isBranchStale(branchName: string): Promise<boolean> {
-    return git.isBranchStale(branchName);
-  },
-
-  setBranchPrefix(branchPrefix: string): Promise<void> {
-    return git.setBranchPrefix(branchPrefix);
-  },
-
-  branchExists(branchName: string): Promise<boolean> {
-    return git.branchExists(branchName);
-  },
-
-  mergeBranch(branchName: string): Promise<void> {
-    return git.mergeBranch(branchName);
-  },
-
-  getBranchLastCommitTime(branchName: string): Promise<Date> {
-    return git.getBranchLastCommitTime(branchName);
-  },
-
-  getFile(lockFileName: string, branchName?: string): Promise<string> {
-    return git.getFile(lockFileName, branchName);
-  },
-
-  getRepoStatus(): Promise<git.StatusResult> {
-    return git.getRepoStatus();
-  },
-
-  getFileList(): Promise<string[]> {
-    return git.getFileList();
-  },
-
-  getAllRenovateBranches(branchPrefix: string): Promise<string[]> {
-    return git.getAllRenovateBranches(branchPrefix);
-  },
-
-  getCommitMessages(): Promise<string[]> {
-    return git.getCommitMessages();
-  },
-
   getVulnerabilityAlerts(): Promise<VulnerabilityAlert[]> {
     return Promise.resolve([]);
   },
@@ -906,7 +866,6 @@ const platform: Platform = {
 export const {
   addAssignees,
   addReviewers,
-  branchExists,
   commitFiles,
   createPr,
   deleteBranch,
@@ -917,30 +876,21 @@ export const {
   ensureIssueClosing,
   findIssue,
   findPr,
-  getAllRenovateBranches,
-  getBranchLastCommitTime,
   getBranchPr,
   getBranchStatus,
   getBranchStatusCheck,
-  getCommitMessages,
-  getFile,
-  getFileList,
   getIssueList,
   getPr,
   getPrBody,
   getPrList,
   getPrFiles,
   getRepoForceRebase,
-  getRepoStatus,
   getRepos,
   getVulnerabilityAlerts,
   initPlatform,
   initRepo,
-  isBranchStale,
-  mergeBranch,
   mergePr,
   setBaseBranch,
-  setBranchPrefix,
   setBranchStatus,
   updatePr,
 } = platform;

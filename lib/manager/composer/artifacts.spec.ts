@@ -1,7 +1,7 @@
 import { exec as _exec } from 'child_process';
 import { join } from 'upath';
 import { envMock, mockExecAll } from '../../../test/execUtil';
-import { fs, mocked, platform } from '../../../test/util';
+import { fs, git, mocked } from '../../../test/util';
 import { setUtilConfig } from '../../util';
 import { BinarySource } from '../../util/exec/common';
 import * as docker from '../../util/exec/docker';
@@ -12,6 +12,7 @@ import * as composer from './artifacts';
 jest.mock('child_process');
 jest.mock('../../util/exec/env');
 jest.mock('../../util/fs');
+jest.mock('../../util/git');
 jest.mock('../../util/host-rules');
 
 const hostRules = require('../../util/host-rules');
@@ -49,7 +50,7 @@ describe('.updateArtifacts()', () => {
     fs.readLocalFile.mockResolvedValueOnce('Current composer.lock' as any);
     const execSnapshots = mockExecAll(exec);
     fs.readLocalFile.mockReturnValueOnce('Current composer.lock' as any);
-    platform.getRepoStatus.mockResolvedValue({ modified: [] } as StatusResult);
+    git.getRepoStatus.mockResolvedValue({ modified: [] } as StatusResult);
     expect(
       await composer.updateArtifacts({
         packageFileName: 'composer.json',
@@ -72,7 +73,7 @@ describe('.updateArtifacts()', () => {
       username: 'some-username',
       password: 'some-password',
     });
-    platform.getRepoStatus.mockResolvedValue({ modified: [] } as StatusResult);
+    git.getRepoStatus.mockResolvedValue({ modified: [] } as StatusResult);
     expect(
       await composer.updateArtifacts({
         packageFileName: 'composer.json',
@@ -87,7 +88,7 @@ describe('.updateArtifacts()', () => {
     fs.readLocalFile.mockResolvedValueOnce('Current composer.lock' as any);
     const execSnapshots = mockExecAll(exec);
     fs.readLocalFile.mockReturnValueOnce('New composer.lock' as any);
-    platform.getRepoStatus.mockResolvedValue({
+    git.getRepoStatus.mockResolvedValue({
       modified: ['composer.lock'],
     } as StatusResult);
     expect(
@@ -104,7 +105,7 @@ describe('.updateArtifacts()', () => {
     fs.readLocalFile.mockResolvedValueOnce('Current composer.lock' as any);
     const execSnapshots = mockExecAll(exec);
     fs.readLocalFile.mockReturnValueOnce('New composer.lock' as any);
-    platform.getRepoStatus.mockResolvedValue({
+    git.getRepoStatus.mockResolvedValue({
       modified: ['composer.lock'],
     } as StatusResult);
     expect(
@@ -205,7 +206,7 @@ describe('.updateArtifacts()', () => {
     fs.readLocalFile.mockResolvedValueOnce('Current composer.lock' as any);
     const execSnapshots = mockExecAll(exec);
     fs.readLocalFile.mockReturnValueOnce('New composer.lock' as any);
-    platform.getRepoStatus.mockResolvedValue({
+    git.getRepoStatus.mockResolvedValue({
       modified: ['composer.lock'],
     } as StatusResult);
     expect(

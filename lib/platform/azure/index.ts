@@ -184,10 +184,6 @@ export function getRepoForceRebase(): Promise<boolean> {
 
 // Search
 
-export /* istanbul ignore next */ function getFileList(): Promise<string[]> {
-  return git.getFileList();
-}
-
 export /* istanbul ignore next */ async function setBaseBranch(
   branchName = config.baseBranch
 ): Promise<string> {
@@ -196,39 +192,6 @@ export /* istanbul ignore next */ async function setBaseBranch(
   delete config.baseCommitSHA;
   const baseBranchSha = await git.setBaseBranch(branchName);
   return baseBranchSha;
-}
-
-export /* istanbul ignore next */ function setBranchPrefix(
-  branchPrefix: string
-): Promise<void> {
-  return git.setBranchPrefix(branchPrefix);
-}
-
-// Branch
-
-export /* istanbul ignore next */ function branchExists(
-  branchName: string
-): Promise<boolean> {
-  return git.branchExists(branchName);
-}
-
-export /* istanbul ignore next */ function getAllRenovateBranches(
-  branchPrefix: string
-): Promise<string[]> {
-  return git.getAllRenovateBranches(branchPrefix);
-}
-
-export /* istanbul ignore next */ function isBranchStale(
-  branchName: string
-): Promise<boolean> {
-  return git.isBranchStale(branchName);
-}
-
-export /* istanbul ignore next */ function getFile(
-  filePath: string,
-  branchName: string
-): Promise<string> {
-  return git.getFile(filePath, branchName);
 }
 
 // istanbul ignore next
@@ -368,24 +331,6 @@ export /* istanbul ignore next */ async function deleteBranch(
   }
 }
 
-export /* istanbul ignore next */ function getBranchLastCommitTime(
-  branchName: string
-): Promise<Date> {
-  return git.getBranchLastCommitTime(branchName);
-}
-
-export /* istanbul ignore next */ function getRepoStatus(): Promise<
-  git.StatusResult
-> {
-  return git.getRepoStatus();
-}
-
-export /* istanbul ignore next */ function mergeBranch(
-  branchName: string
-): Promise<void> {
-  return git.mergeBranch(branchName);
-}
-
 export /* istanbul ignore next */ function commitFiles({
   branchName,
   files,
@@ -396,12 +341,6 @@ export /* istanbul ignore next */ function commitFiles({
     files,
     message,
   });
-}
-
-export /* istanbul ignore next */ function getCommitMessages(): Promise<
-  string[]
-> {
-  return git.getCommitMessages();
 }
 
 export async function getBranchStatusCheck(

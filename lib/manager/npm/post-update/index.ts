@@ -12,10 +12,10 @@ import upath from 'upath';
 import { SYSTEM_INSUFFICIENT_DISK_SPACE } from '../../../constants/error-messages';
 import { id as npmId } from '../../../datasource/npm';
 import { logger } from '../../../logger';
-import { platform } from '../../../platform';
 import { ExternalHostError } from '../../../types/errors/external-host-error';
 import { getChildProcessEnv } from '../../../util/exec/env';
 import { deleteLocalFile } from '../../../util/fs';
+import { branchExists, getFile, getRepoStatus } from '../../../util/git';
 import * as hostRules from '../../../util/host-rules';
 import { PackageFile, PostUpdateConfig, Upgrade } from '../../common';
 import * as lerna from './lerna';
@@ -171,7 +171,7 @@ export async function writeExistingFiles(
         await remove(npmLockPath);
       } else {
         logger.debug(`Writing ${npmLock}`);
-        let existingNpmLock = await platform.getFile(npmLock);
+        let existingNpmLock = await getFile(npmLock);
         const widens = [];
         for (const upgrade of config.upgrades) {
           if (
@@ -346,7 +346,7 @@ export async function getAdditionalFiles(
   if (
     config.updateType === 'lockFileMaintenance' &&
     config.reuseExistingBranch &&
-    (await platform.branchExists(config.branchName))
+    (await branchExists(config.branchName))
   ) {
     logger.debug('Skipping lockFileMaintenance update');
     return { artifactErrors, updatedArtifacts };
@@ -449,7 +449,7 @@ export async function getAdditionalFiles(
         stderr: res.stderr,
       });
     } else {
-      const existingContent = await platform.getFile(
+      const existingContent = await getFile(
         lockFile,
         config.reuseExistingBranch ? config.branchName : config.baseBranch
       );
@@ -515,7 +515,7 @@ export async function getAdditionalFiles(
         stderr: res.stderr,
       });
     } else {
-      const existingContent = await platform.getFile(
+      const existingContent = await getFile(
         lockFileName,
         config.reuseExistingBranch ? config.branchName : config.baseBranch
       );
@@ -527,9 +527,7 @@ export async function getAdditionalFiles(
         });
         // istanbul ignore next
         try {
-          const yarnrc = await platform.getFile(
-            upath.join(lockFileDir, '.yarnrc')
-          );
+          const yarnrc = await getFile(upath.join(lockFileDir, '.yarnrc'));
           if (yarnrc) {
             const mirrorLine = yarnrc
               .split('\n')
@@ -541,7 +539,7 @@ export async function getAdditionalFiles(
                 .replace(/\/?$/, '/');
               const resolvedPath = upath.join(lockFileDir, mirrorPath);
               logger.debug('Found yarn offline  mirror: ' + resolvedPath);
-              const status = await platform.getRepoStatus();
+              const status = await getRepoStatus();
               for (const f of status.modified.concat(status.not_added)) {
                 if (f.startsWith(resolvedPath)) {
                   const localModified = upath.join(config.localDir, f);
@@ -617,7 +615,7 @@ export async function getAdditionalFiles(
         stderr: res.stderr,
       });
     } else {
-      const existingContent = await platform.getFile(
+      const existingContent = await getFile(
         lockFile,
         config.reuseExistingBranch ? config.branchName : config.baseBranch
       );
@@ -715,7 +713,7 @@ export async function getAdditionalFiles(
       for (const packageFile of packageFiles.npm) {
         const filename = packageFile.npmLock || packageFile.yarnLock;
         logger.trace('Checking for ' + filename);
-        const existingContent = await platform.getFile(
+        const existingContent = await getFile(
           filename,
           config.reuseExistingBranch ? config.branchName : config.baseBranch
         );

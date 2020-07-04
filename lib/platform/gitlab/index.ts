@@ -280,24 +280,6 @@ export async function setBaseBranch(
   return baseBranchSha;
 }
 
-export /* istanbul ignore next */ function setBranchPrefix(
-  branchPrefix: string
-): Promise<void> {
-  return git.setBranchPrefix(branchPrefix);
-}
-
-// Search
-
-// Get full file list
-export function getFileList(): Promise<string[]> {
-  return git.getFileList();
-}
-
-// Returns true if branch exists, otherwise false
-export function branchExists(branchName: string): Promise<boolean> {
-  return git.branchExists(branchName);
-}
-
 type BranchState = 'pending' | 'running' | 'success' | 'failed' | 'canceled';
 
 interface GitlabBranchStatus {
@@ -348,7 +330,7 @@ export async function getBranchStatus(
     return BranchStatus.red;
   }
 
-  if (!(await branchExists(branchName))) {
+  if (!(await git.branchExists(branchName))) {
     throw new Error(REPOSITORY_CHANGED);
   }
 
@@ -589,7 +571,7 @@ export function getPrBody(input: string): string {
 export async function getBranchPr(branchName: string): Promise<Pr> {
   logger.debug(`getBranchPr(${branchName})`);
   // istanbul ignore if
-  if (!(await branchExists(branchName))) {
+  if (!(await git.branchExists(branchName))) {
     return null;
   }
   const query = new URLSearchParams({
@@ -614,28 +596,11 @@ export async function getBranchPr(branchName: string): Promise<Pr> {
   return getPr(pr.iid);
 }
 
-export function getAllRenovateBranches(
-  branchPrefix: string
-): Promise<string[]> {
-  return git.getAllRenovateBranches(branchPrefix);
-}
-
-export function isBranchStale(branchName: string): Promise<boolean> {
-  return git.isBranchStale(branchName);
-}
-
 // istanbul ignore next
 export function commitFiles(
   commitFilesConfig: CommitFilesConfig
 ): Promise<string | null> {
   return git.commitFiles(commitFilesConfig);
-}
-
-export function getFile(
-  filePath: string,
-  branchName?: string
-): Promise<string> {
-  return git.getFile(filePath, branchName);
 }
 
 export async function deleteBranch(
@@ -651,19 +616,6 @@ export async function deleteBranch(
     }
   }
   return git.deleteBranch(branchName);
-}
-
-export function mergeBranch(branchName: string): Promise<void> {
-  return git.mergeBranch(branchName);
-}
-
-export function getBranchLastCommitTime(branchName: string): Promise<Date> {
-  return git.getBranchLastCommitTime(branchName);
-}
-
-// istanbul ignore next
-export function getRepoStatus(): Promise<git.StatusResult> {
-  return git.getRepoStatus();
 }
 
 export async function getBranchStatusCheck(
@@ -1099,10 +1051,6 @@ export async function findPr({
       (!prTitle || p.title === prTitle) &&
       matchesState(p.state, state)
   );
-}
-
-export function getCommitMessages(): Promise<string[]> {
-  return git.getCommitMessages();
 }
 
 export function getVulnerabilityAlerts(): Promise<VulnerabilityAlert[]> {

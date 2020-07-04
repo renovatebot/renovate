@@ -1,4 +1,4 @@
-import { mocked, partial } from '../../../test/util';
+import { git, mocked, partial } from '../../../test/util';
 import { getConfig } from '../../config/defaults';
 import { PLATFORM_TYPE_GITLAB } from '../../constants/platforms';
 import { Pr, platform as _platform } from '../../platform';
@@ -15,6 +15,7 @@ const gitlabChangelogHelper = mocked(_changelogHelper);
 const platform = mocked(_platform);
 const defaultConfig = getConfig();
 
+jest.mock('../../util/git');
 jest.mock('./changelog');
 jest.mock('./code-owners');
 
@@ -330,7 +331,7 @@ describe('workers/pr', () => {
     });
     it('should return null if waiting for not pending', async () => {
       platform.getBranchStatus.mockResolvedValueOnce(BranchStatus.yellow);
-      platform.getBranchLastCommitTime.mockImplementationOnce(() =>
+      git.getBranchLastCommitTime.mockImplementationOnce(() =>
         Promise.resolve(new Date())
       );
       config.prCreation = 'not-pending';
@@ -340,7 +341,7 @@ describe('workers/pr', () => {
     });
     it('should create PR if pending timeout hit', async () => {
       platform.getBranchStatus.mockResolvedValueOnce(BranchStatus.yellow);
-      platform.getBranchLastCommitTime.mockImplementationOnce(() =>
+      git.getBranchLastCommitTime.mockImplementationOnce(() =>
         Promise.resolve(new Date('2017-01-01'))
       );
       config.prCreation = 'not-pending';
@@ -533,7 +534,7 @@ describe('workers/pr', () => {
       config.automerge = true;
       config.automergeType = 'branch';
       platform.getBranchStatus.mockResolvedValueOnce(BranchStatus.yellow);
-      platform.getBranchLastCommitTime.mockResolvedValueOnce(new Date());
+      git.getBranchLastCommitTime.mockResolvedValueOnce(new Date());
       const { prResult, pr } = await prWorker.ensurePr(config);
       expect(prResult).toEqual(PrResult.BlockedByBranchAutomerge);
       expect(pr).toBeUndefined();
@@ -542,9 +543,7 @@ describe('workers/pr', () => {
       config.automerge = true;
       config.automergeType = 'branch';
       platform.getBranchStatus.mockResolvedValueOnce(BranchStatus.yellow);
-      platform.getBranchLastCommitTime.mockResolvedValueOnce(
-        new Date('2018-01-01')
-      );
+      git.getBranchLastCommitTime.mockResolvedValueOnce(new Date('2018-01-01'));
       const { prResult, pr } = await prWorker.ensurePr(config);
       expect(prResult).toEqual(PrResult.Created);
       expect(pr).toBeDefined();
@@ -570,7 +569,7 @@ describe('workers/pr', () => {
     });
     it('should create PR if waiting for not pending but artifactErrors', async () => {
       platform.getBranchStatus.mockResolvedValueOnce(BranchStatus.yellow);
-      platform.getBranchLastCommitTime.mockResolvedValueOnce(new Date());
+      git.getBranchLastCommitTime.mockResolvedValueOnce(new Date());
       config.prCreation = 'not-pending';
       config.artifactErrors = [{}];
       config.platform = PLATFORM_TYPE_GITLAB;

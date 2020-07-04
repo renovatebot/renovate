@@ -177,11 +177,6 @@ export function getRepoForceRebase(): Promise<boolean> {
 
 // Search
 
-// Get full file list
-export function getFileList(): Promise<string[]> {
-  return git.getFileList();
-}
-
 export async function setBaseBranch(
   branchName = config.baseBranch
 ): Promise<string> {
@@ -190,36 +185,6 @@ export async function setBaseBranch(
   delete config.baseCommitSHA;
   const baseBranchSha = await git.setBaseBranch(branchName);
   return baseBranchSha;
-}
-
-export /* istanbul ignore next */ function setBranchPrefix(
-  branchPrefix: string
-): Promise<void> {
-  return git.setBranchPrefix(branchPrefix);
-}
-
-// Branch
-
-// Returns true if branch exists, otherwise false
-export function branchExists(branchName: string): Promise<boolean> {
-  return git.branchExists(branchName);
-}
-
-export function getAllRenovateBranches(
-  branchPrefix: string
-): Promise<string[]> {
-  return git.getAllRenovateBranches(branchPrefix);
-}
-
-export function isBranchStale(branchName: string): Promise<boolean> {
-  return git.isBranchStale(branchName);
-}
-
-export function getFile(
-  filePath: string,
-  branchName?: string
-): Promise<string> {
-  return git.getFile(filePath, branchName);
 }
 
 // istanbul ignore next
@@ -285,28 +250,11 @@ export async function deleteBranch(
   return git.deleteBranch(branchName);
 }
 
-export function getBranchLastCommitTime(branchName: string): Promise<Date> {
-  return git.getBranchLastCommitTime(branchName);
-}
-
-// istanbul ignore next
-export function getRepoStatus(): Promise<git.StatusResult> {
-  return git.getRepoStatus();
-}
-
-export function mergeBranch(branchName: string): Promise<void> {
-  return git.mergeBranch(branchName);
-}
-
 // istanbul ignore next
 export function commitFiles(
   commitFilesConfig: CommitFilesConfig
 ): Promise<string | null> {
   return git.commitFiles(commitFilesConfig);
-}
-
-export function getCommitMessages(): Promise<string[]> {
-  return git.getCommitMessages();
 }
 
 async function isPrConflicted(prNo: number): Promise<boolean> {
@@ -388,8 +336,8 @@ export async function getPr(prNo: number): Promise<Pr | null> {
       res.isModified = true;
     }
   }
-  if (await branchExists(pr.source.branch.name)) {
-    res.isStale = await isBranchStale(pr.source.branch.name);
+  if (await git.branchExists(pr.source.branch.name)) {
+    res.isStale = await git.isBranchStale(pr.source.branch.name);
   }
 
   return res;

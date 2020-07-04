@@ -1,7 +1,6 @@
 import { quote } from 'shlex';
 import { BUNDLER_INVALID_CREDENTIALS } from '../../constants/error-messages';
 import { logger } from '../../logger';
-import { platform } from '../../platform';
 import { HostRule } from '../../types';
 import * as memCache from '../../util/cache/memory';
 import { ExecOptions, exec } from '../../util/exec';
@@ -11,6 +10,7 @@ import {
   readLocalFile,
   writeLocalFile,
 } from '../../util/fs';
+import { getRepoStatus } from '../../util/git';
 import { isValid } from '../../versioning/ruby';
 import { UpdateArtifact, UpdateArtifactsResult } from '../common';
 import {
@@ -139,7 +139,7 @@ export async function updateArtifacts(
       },
     };
     await exec(cmd, execOptions);
-    const status = await platform.getRepoStatus();
+    const status = await getRepoStatus();
     if (!status.modified.includes(lockFileName)) {
       return null;
     }
