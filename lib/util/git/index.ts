@@ -214,7 +214,7 @@ export async function initRepo(args: StorageConfig): Promise<void> {
     logger.warn({ err }, 'Cannot retrieve latest commit date');
   }
   try {
-    const { gitAuthorName, gitAuthorEmail } = args;
+    const { gitAuthorName, gitAuthorEmail } = config;
     if (gitAuthorName) {
       logger.debug({ gitAuthorName }, 'Setting git author name');
       await git.raw(['config', 'user.name', gitAuthorName]);
