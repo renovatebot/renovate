@@ -1,15 +1,15 @@
 import { exec as _exec } from 'child_process';
 import path from 'path';
-import _fs from 'fs-extra';
 import { envMock, mockExecAll } from '../../../../test/execUtil';
 import { mocked } from '../../../../test/util';
 import { BinarySource } from '../../../util/exec/common';
 import * as _env from '../../../util/exec/env';
+import * as _fs from '../../../util/fs/proxies';
 import * as npmHelper from './npm';
 
-jest.mock('fs-extra');
 jest.mock('child_process');
 jest.mock('../../../util/exec/env');
+jest.mock('../../../util/fs/proxies');
 jest.mock('./node-version');
 
 const exec: jest.Mock<typeof _exec> = _exec as any;
@@ -64,7 +64,7 @@ describe('generateLockFile', () => {
   });
   it('performs npm-shrinkwrap.json updates', async () => {
     const execSnapshots = mockExecAll(exec);
-    fs.pathExists.mockImplementationOnce(() => true);
+    fs.pathExists.mockResolvedValueOnce(true);
     fs.move = jest.fn();
     fs.readFile = jest.fn(() => 'package-lock-contents') as never;
     const skipInstalls = true;
@@ -93,7 +93,7 @@ describe('generateLockFile', () => {
   });
   it('performs npm-shrinkwrap.json updates (no package-lock.json)', async () => {
     const execSnapshots = mockExecAll(exec);
-    fs.pathExists.mockImplementationOnce(() => false);
+    fs.pathExists.mockResolvedValueOnce(false);
     fs.move = jest.fn();
     fs.readFile = jest.fn((_, _1) => 'package-lock-contents') as never;
     const skipInstalls = true;
