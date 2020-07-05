@@ -55,6 +55,7 @@ describe('platform/git', () => {
       gitAuthorName: 'test',
       gitAuthorEmail: 'test@example.com',
     });
+    await git.syncGit();
   });
 
   afterEach(async () => {

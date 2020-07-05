@@ -39,7 +39,6 @@ interface LocalConfig extends StorageConfig {
   baseBranchSha: string;
   branchExists: Record<string, boolean>;
   branchPrefix: string;
-  syncCompleted: boolean;
 }
 
 // istanbul ignore next
@@ -148,10 +147,9 @@ export async function getSubmodules(): Promise<string[]> {
 }
 
 export async function syncGit(): Promise<void> {
-  if (config.syncCompleted) {
+  if (git) {
     return;
   }
-  config.syncCompleted = true;
   logger.debug('Initializing git repository into ' + config.localDir);
   const gitHead = join(config.localDir, '.git/HEAD');
   let clone = true;
@@ -237,6 +235,7 @@ export async function syncGit(): Promise<void> {
 export async function initRepo(args: StorageConfig): Promise<void> {
   config = { ...args } as any;
   config.branchExists = {};
+  git = undefined;
   await syncGit();
 }
 
