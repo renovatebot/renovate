@@ -14,7 +14,7 @@ const lernaHelper = mocked(_lernaHelper);
 
 function lernaPkgFieldWithClient(lernaClient: string) {
   return {
-    lernaClient: lernaClient,
+    lernaClient,
     deps: [{ depName: 'lerna', currentValue: '2.0.0' }],
   };
 }

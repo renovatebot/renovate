@@ -12,16 +12,15 @@ export interface GenerateLockFileResult {
   stderr?: string;
 }
 
-function getLernaVersion(lernaPackageFile: Partial<PackageFile>) {
+function getLernaVersion(lernaPackageFile: Partial<PackageFile>): string {
   const lernaDep = lernaPackageFile.deps.find((d) => d.depName === 'lerna');
   if (!lernaDep || !semver.validRange(lernaDep.currentValue)) {
     logger.warn(
       `Could not detect lerna version in ${lernaPackageFile.packageFile}, using 'latest'`
     );
     return 'latest';
-  } else {
-    return lernaDep.currentValue;
   }
+  return lernaDep.currentValue;
 }
 
 export async function generateLockFiles(
