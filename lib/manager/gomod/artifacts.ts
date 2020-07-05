@@ -1,11 +1,10 @@
-import { ensureDir } from 'fs-extra';
 import { quote } from 'shlex';
 import { dirname, join } from 'upath';
 import { PLATFORM_TYPE_GITHUB } from '../../constants/platforms';
 import { logger } from '../../logger';
 import { ExecOptions, exec } from '../../util/exec';
 import { BinarySource } from '../../util/exec/common';
-import { readLocalFile, writeLocalFile } from '../../util/fs';
+import { ensureCacheDir, readLocalFile, writeLocalFile } from '../../util/fs';
 import { getRepoStatus } from '../../util/git';
 import { find } from '../../util/host-rules';
 import { UpdateArtifact, UpdateArtifactsResult } from '../common';
@@ -36,8 +35,7 @@ export async function updateArtifacts({
 }: UpdateArtifact): Promise<UpdateArtifactsResult[] | null> {
   logger.debug(`gomod.updateArtifacts(${goModFileName})`);
 
-  const goPath = process.env.GOPATH || join(config.cacheDir, './others/go');
-  await ensureDir(goPath);
+  const goPath = await ensureCacheDir('./others/go', 'GOPATH');
   logger.debug(`Using GOPATH: ${goPath}`);
 
   const sumFileName = goModFileName.replace(/\.mod$/, '.sum');
