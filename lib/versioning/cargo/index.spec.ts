@@ -423,6 +423,14 @@ describe('semver.getNewValue()', () => {
     ).toEqual('>= 1.2.4, <= 2.0.0');
     expect(
       semver.getNewValue({
+        currentValue: '>= 1.2.3, <= 1.2.0',
+        rangeStrategy: 'bump',
+        fromVersion: '1.2.3',
+        toVersion: '1.2.4',
+      })
+    ).toEqual('>= 1.2.4, <= 1.3.0');
+    expect(
+      semver.getNewValue({
         currentValue: '>= 1.2.3, <= 1.0',
         rangeStrategy: 'bump',
         fromVersion: '1.2.3',
