@@ -281,6 +281,7 @@ interface PrResponse {
       name: string;
     };
   };
+  reviewers: Array<any>;
 }
 
 // Gets details for a PR
@@ -785,10 +786,21 @@ export async function updatePr(
   description: string
 ): Promise<void> {
   logger.debug(`updatePr(${prNo}, ${title}, body)`);
+  // Updating a PR in Bitbucket will clear the reviewers if reviewers is not present
+  const pr = (
+    await bitbucketHttp.getJson<PrResponse>(
+      `/2.0/repositories/${config.repository}/pullrequests/${prNo}`
+    )
+  ).body;
+
   await bitbucketHttp.putJson(
     `/2.0/repositories/${config.repository}/pullrequests/${prNo}`,
     {
-      body: { title, description: sanitize(description) },
+      body: {
+        title,
+        description: sanitize(description),
+        reviewers: pr.reviewers,
+      },
     }
   );
 }
