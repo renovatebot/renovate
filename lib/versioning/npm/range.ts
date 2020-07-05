@@ -7,7 +7,7 @@ import {
   prerelease,
   satisfies,
 } from 'semver';
-import { parseRange, stringifyRange } from 'semver-utils';
+import { parseRange } from 'semver-utils';
 import { logger } from '../../logger';
 import { NewValueConfig } from '../common';
 
