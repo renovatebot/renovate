@@ -7,7 +7,7 @@ import {
   prerelease,
   satisfies,
 } from 'semver';
-import { parseRange } from 'semver-utils';
+import { parseRange, stringifyRange } from 'semver-utils';
 import { logger } from '../../logger';
 import { NewValueConfig } from '../common';
 
@@ -113,6 +113,39 @@ export function getNewValue({
           ? `>= ${toVersion}`
           : `>=${toVersion}`;
       }
+    } else {
+      const newRange = parseRange(currentValue);
+      const versions = newRange.map((x) => {
+        const subRange = x.semver;
+        const bumpedSubRange = getNewValue({
+          currentValue: subRange,
+          rangeStrategy: 'bump',
+          fromVersion,
+          toVersion,
+        });
+        if (satisfies(toVersion, bumpedSubRange)) {
+          return bumpedSubRange;
+        }
+        if (satisfies(toVersion, subRange)) {
+          return subRange;
+        }
+        let incremented;
+        if (x.patch !== '0') {
+          incremented = increment(toVersion, 'patch');
+        } else if (x.minor !== '0') {
+          incremented = increment(toVersion, 'minor');
+        } else {
+          incremented = increment(toVersion, 'major');
+        }
+        const replaced = getNewValue({
+          currentValue: subRange,
+          rangeStrategy: 'replace',
+          fromVersion,
+          toVersion: incremented,
+        });
+        return satisfies(toVersion, replaced) ? replaced : null;
+      });
+      return versions.filter((x) => x !== null && x !== '').join(', ');
     }
     logger.debug(
       'Unsupported range type for rangeStrategy=bump: ' + currentValue
