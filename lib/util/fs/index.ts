@@ -2,7 +2,6 @@ import * as fs from 'fs-extra';
 import { join, parse } from 'upath';
 import { RenovateConfig } from '../../config/common';
 import { logger } from '../../logger';
-import { getChildProcessEnv } from '../exec/env';
 
 let localDir = '';
 let cacheDir = '';
@@ -71,11 +70,7 @@ export async function ensureCacheDir(
   dirName,
   envPathVar?: string
 ): Promise<string> {
-  let envCacheDirName;
-  if (envPathVar) {
-    const env = getChildProcessEnv([envPathVar]);
-    envCacheDirName = env[envPathVar];
-  }
+  const envCacheDirName = envPathVar ? process.env[envPathVar] : null;
   const cacheDirName = envCacheDirName || join(cacheDir, dirName);
   await fs.ensureDir(cacheDirName);
   return cacheDirName;
