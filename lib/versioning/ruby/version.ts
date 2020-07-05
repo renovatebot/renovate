@@ -1,9 +1,8 @@
-import {
-  create,
-  SegmentElement,
-} from '@renovatebot/ruby-semver/dist/ruby/version';
 import { eq, major, minor, patch, prerelease } from '@renovatebot/ruby-semver';
-import { popd } from 'shelljs';
+import {
+  SegmentElement,
+  create,
+} from '@renovatebot/ruby-semver/dist/ruby/version';
 
 interface RubyVersion {
   major: number;
