@@ -1277,10 +1277,10 @@
   dependencies:
     xregexp "4.2.0"
 
-"@renovatebot/ruby-semver@0.1.5":
-  version "0.1.5"
-  resolved "https://registry.yarnpkg.com/@renovatebot/ruby-semver/-/ruby-semver-0.1.5.tgz#5c4af1af78901832e84c1341a2986c7756ea61f2"
-  integrity sha512-BXGW4QABOiHY96gSgFD1qB1lP7NUVQ2QVCsoxX12SA67jPFWBx+TBOtc4gtWMME8JZAP1FxrofmA1RZScODhuA==
+"@renovatebot/ruby-semver@0.1.6":
+  version "0.1.6"
+  resolved "https://registry.yarnpkg.com/@renovatebot/ruby-semver/-/ruby-semver-0.1.6.tgz#5f31ef2299254263084a3340a94b9d5fb2de46dc"
+  integrity sha512-dxIRRJBLpIdrGOgqJU3nLbnp1BDUtGC4yVH9OliEjRx0yx8wDgRWg7SGKze5B5uQxnPV8e7UKvbByBh0X8G+aA==
 
 "@semantic-release/commit-analyzer@^8.0.0":
   version "8.0.1"

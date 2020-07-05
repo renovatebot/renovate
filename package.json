@@ -110,7 +110,7 @@
   "dependencies": {
     "@renovate/pep440": "0.4.1",
     "@sindresorhus/is": "2.1.1",
-    "@renovatebot/ruby-semver": "0.1.5",
+    "@renovatebot/ruby-semver": "0.1.6",
     "@yarnpkg/lockfile": "1.1.0",
     "aws-sdk": "2.709.0",
     "azure-devops-node-api": "10.1.1",
