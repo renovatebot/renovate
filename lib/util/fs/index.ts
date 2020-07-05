@@ -2,11 +2,14 @@ import * as fs from 'fs-extra';
 import { join, parse } from 'upath';
 import { RenovateConfig } from '../../config/common';
 import { logger } from '../../logger';
+import { getChildProcessEnv } from '../exec/env';
 
 let localDir = '';
+let cacheDir = '';
 
 export function setFsConfig(config: Partial<RenovateConfig>): void {
   localDir = config.localDir;
+  cacheDir = config.cacheDir;
 }
 
 export function getSubDirectory(fileName: string): string {
@@ -62,4 +65,18 @@ export async function ensureDir(dirName): Promise<void> {
 export async function ensureLocalDir(dirName): Promise<void> {
   const localDirName = join(localDir, dirName);
   await fs.ensureDir(localDirName);
+}
+
+export async function ensureCacheDir(
+  dirName,
+  envPathVar?: string
+): Promise<string> {
+  let envCacheDirName;
+  if (envPathVar) {
+    const env = getChildProcessEnv([envPathVar]);
+    envCacheDirName = env[envPathVar];
+  }
+  const cacheDirName = envCacheDirName || join(cacheDir, dirName);
+  await fs.ensureDir(cacheDirName);
+  return cacheDirName;
 }

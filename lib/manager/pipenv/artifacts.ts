@@ -1,8 +1,11 @@
-import { ensureDir } from 'fs-extra';
-import { join } from 'upath';
 import { logger } from '../../logger';
 import { ExecOptions, exec } from '../../util/exec';
-import { deleteLocalFile, readLocalFile, writeLocalFile } from '../../util/fs';
+import {
+  deleteLocalFile,
+  ensureCacheDir,
+  readLocalFile,
+  writeLocalFile,
+} from '../../util/fs';
 import { getRepoStatus } from '../../util/git';
 import {
   UpdateArtifact,
@@ -42,9 +45,7 @@ export async function updateArtifacts({
 }: UpdateArtifact): Promise<UpdateArtifactsResult[] | null> {
   logger.debug(`pipenv.updateArtifacts(${pipfileName})`);
 
-  const cacheDir =
-    process.env.PIPENV_CACHE_DIR || join(config.cacheDir, './others/pipenv');
-  await ensureDir(cacheDir);
+  const cacheDir = await ensureCacheDir('./others/pipenv', 'PIPENV_CACHE_DIR');
   logger.debug('Using pipenv cache ' + cacheDir);
 
   const lockFileName = pipfileName + '.lock';
