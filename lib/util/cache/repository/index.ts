@@ -34,8 +34,10 @@ export function getCacheFileName(config: RenovateConfig): string {
 
 function validate(config: RenovateConfig, input: any): Cache | null {
   if (input?.repository === config.repository) {
+    logger.debug('Repository cache is valid');
     return input as Cache;
   }
+  logger.info('Repository cache invalidated');
   // reset
   return null;
 }
@@ -52,7 +54,7 @@ export async function initialize(config: RenovateConfig): Promise<void> {
       );
     }
   } catch (err) {
-    logger.debug({ cacheFileName }, 'No repository cache found');
+    logger.debug({ cacheFileName }, 'Repository cache not found');
   }
   cache = cache || { repository: config.repository };
 }
