@@ -36,7 +36,7 @@ export async function rebaseOnboardingBranch(
     defaultConfigFile,
     config.onboardingBranch
   );
-  const contents = await getOnboardingConfig(config);
+  const contents = getOnboardingConfig(config);
   if (contents === existingContents && !pr.isStale) {
     logger.debug('Onboarding branch is up to date');
     return null;
