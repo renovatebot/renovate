@@ -90,24 +90,6 @@ describe('workers/repository/onboarding/branch', () => {
       ]);
       await expect(checkOnboardingBranch(config)).rejects.toThrow();
     });
-    it('creates onboarding branch with greenkeeper migration', async () => {
-      git.getFileList.mockResolvedValue(['package.json']);
-      const pJsonContent = JSON.stringify({
-        name: 'some-name',
-        version: '0.0.1',
-        greenkeeper: {
-          label: 'greenkeeper',
-          branchName: 'greenkeeper--',
-          ignore: ['foo', 'bar'],
-        },
-      });
-      fs.readLocalFile.mockResolvedValue(pJsonContent);
-      platform.commitFiles.mockResolvedValueOnce('abc123');
-      await checkOnboardingBranch(config);
-      expect(
-        platform.commitFiles.mock.calls[0][0].files[0].contents
-      ).toMatchSnapshot();
-    });
     it('updates onboarding branch', async () => {
       git.getFileList.mockResolvedValue(['package.json']);
       platform.findPr.mockResolvedValue(null);

@@ -1,20 +1,19 @@
 import path from 'path';
+import upath from 'upath';
+import { SYSTEM_INSUFFICIENT_DISK_SPACE } from '../../../constants/error-messages';
+import { id as npmId } from '../../../datasource/npm';
+import { logger } from '../../../logger';
+import { ExternalHostError } from '../../../types/errors/external-host-error';
+import { getChildProcessEnv } from '../../../util/exec/env';
 import {
+  deleteLocalFile,
   ensureDir,
   outputFile,
   readFile,
   remove,
   unlink,
   writeFile,
-} from 'fs-extra';
-import upath from 'upath';
-// eslint-disable-next-line import/no-unresolved
-import { SYSTEM_INSUFFICIENT_DISK_SPACE } from '../../../constants/error-messages';
-import { id as npmId } from '../../../datasource/npm';
-import { logger } from '../../../logger';
-import { ExternalHostError } from '../../../types/errors/external-host-error';
-import { getChildProcessEnv } from '../../../util/exec/env';
-import { deleteLocalFile } from '../../../util/fs';
+} from '../../../util/fs';
 import { branchExists, getFile, getRepoStatus } from '../../../util/git';
 import * as hostRules from '../../../util/host-rules';
 import { PackageFile, PostUpdateConfig, Upgrade } from '../../common';
