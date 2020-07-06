@@ -1,6 +1,5 @@
 import path from 'path';
 import upath from 'upath';
-// eslint-disable-next-line import/no-unresolved
 import { SYSTEM_INSUFFICIENT_DISK_SPACE } from '../../../constants/error-messages';
 import { id as npmId } from '../../../datasource/npm';
 import { logger } from '../../../logger';
