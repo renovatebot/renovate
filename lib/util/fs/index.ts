@@ -3,6 +3,8 @@ import { join, parse } from 'upath';
 import { RenovateConfig } from '../../config/common';
 import { logger } from '../../logger';
 
+export * from './proxies';
+
 let localDir = '';
 let cacheDir = '';
 
