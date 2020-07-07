@@ -12,10 +12,16 @@ const exec: jest.Mock<typeof _exec> = _exec as any;
 const env = mocked(_env);
 const lernaHelper = mocked(_lernaHelper);
 
-function lernaPkgFieldWithClient(lernaClient: string) {
+function lernaPkgFile(lernaClient: string) {
   return {
     lernaClient,
     deps: [{ depName: 'lerna', currentValue: '2.0.0' }],
+  };
+}
+
+function lernaPkgFileWithoutLernaDep(lernaClient: string) {
+  return {
+    lernaClient,
   };
 }
 
@@ -31,7 +37,7 @@ describe('generateLockFiles()', () => {
   });
   it('returns if invalid lernaClient', async () => {
     const res = await lernaHelper.generateLockFiles(
-      lernaPkgFieldWithClient('foo'),
+      lernaPkgFile('foo'),
       'some-dir',
       {},
       {}
@@ -42,7 +48,7 @@ describe('generateLockFiles()', () => {
     const execSnapshots = mockExecAll(exec);
     const skipInstalls = true;
     const res = await lernaHelper.generateLockFiles(
-      lernaPkgFieldWithClient('npm'),
+      lernaPkgFile('npm'),
       'some-dir',
       {},
       {},
@@ -55,7 +61,7 @@ describe('generateLockFiles()', () => {
     const execSnapshots = mockExecAll(exec);
     const skipInstalls = false;
     const res = await lernaHelper.generateLockFiles(
-      lernaPkgFieldWithClient('npm'),
+      lernaPkgFile('npm'),
       'some-dir',
       {},
       {},
@@ -67,7 +73,7 @@ describe('generateLockFiles()', () => {
   it('generates yarn.lock files', async () => {
     const execSnapshots = mockExecAll(exec);
     const res = await lernaHelper.generateLockFiles(
-      lernaPkgFieldWithClient('yarn'),
+      lernaPkgFile('yarn'),
       'some-dir',
       { compatibility: { yarn: '^1.10.0' } },
       {}
@@ -75,13 +81,10 @@ describe('generateLockFiles()', () => {
     expect(execSnapshots).toMatchSnapshot();
     expect(res.error).toBe(false);
   });
-  it('uses specified lerna version', async () => {
-    // TODO: Docker preCommands don't seem to be captured in snapshots, so how could I test this?
-  });
   it('defaults to latest if lerna version unspecified', async () => {
     const execSnapshots = mockExecAll(exec);
     const res = await lernaHelper.generateLockFiles(
-      lernaPkgFieldWithClient('npm'),
+      lernaPkgFileWithoutLernaDep('npm'),
       'some-dir',
       {},
       {}
@@ -92,7 +95,7 @@ describe('generateLockFiles()', () => {
   it('maps dot files', async () => {
     const execSnapshots = mockExecAll(exec);
     const res = await lernaHelper.generateLockFiles(
-      lernaPkgFieldWithClient('npm'),
+      lernaPkgFile('npm'),
       'some-dir',
       {
         dockerMapDotfiles: true,
@@ -107,7 +110,7 @@ describe('generateLockFiles()', () => {
     const execSnapshots = mockExecAll(exec);
     global.trustLevel = 'high';
     const res = await lernaHelper.generateLockFiles(
-      lernaPkgFieldWithClient('npm'),
+      lernaPkgFile('npm'),
       'some-dir',
       {},
       {}
@@ -115,5 +118,40 @@ describe('generateLockFiles()', () => {
     delete global.trustLevel;
     expect(res.error).toBe(false);
     expect(execSnapshots).toMatchSnapshot();
+  });
+});
+
+describe('getLernaVersion()', () => {
+  it('returns specified version', async () => {
+    const pkg = {
+      deps: [{ depName: 'lerna', currentValue: '2.0.0' }],
+    };
+    expect(lernaHelper.getLernaVersion(pkg)).toBe('2.0.0');
+  });
+  it('returns specified range', async () => {
+    const pkg = {
+      deps: [
+        { depName: 'lerna', currentValue: '1.x || >=2.5.0 || 5.0.0 - 7.2.3' },
+      ],
+    };
+    expect(lernaHelper.getLernaVersion(pkg)).toBe(
+      '1.x || >=2.5.0 || 5.0.0 - 7.2.3'
+    );
+  });
+  it('returns latest if no lerna dep is specified', async () => {
+    const pkg = {
+      deps: [{ depName: 'something-else', currentValue: '1.2.3' }],
+    };
+    expect(lernaHelper.getLernaVersion(pkg)).toBe('latest');
+  });
+  it('returns latest if pkg has no deps at all', async () => {
+    const pkg = {};
+    expect(lernaHelper.getLernaVersion(pkg)).toBe('latest');
+  });
+  it('returns latest if specified lerna version is not a valid semVer range', async () => {
+    const pkg = {
+      deps: [{ depName: 'lerna', currentValue: '[a.b.c;' }],
+    };
+    expect(lernaHelper.getLernaVersion(pkg)).toBe('latest');
   });
 });

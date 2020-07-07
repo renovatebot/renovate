@@ -12,8 +12,11 @@ export interface GenerateLockFileResult {
   stderr?: string;
 }
 
-function getLernaVersion(lernaPackageFile: Partial<PackageFile>): string {
-  const lernaDep = lernaPackageFile.deps.find((d) => d.depName === 'lerna');
+// Exported for testability
+export function getLernaVersion(
+  lernaPackageFile: Partial<PackageFile>
+): string {
+  const lernaDep = lernaPackageFile.deps?.find((d) => d.depName === 'lerna');
   if (!lernaDep || !semver.validRange(lernaDep.currentValue)) {
     logger.warn(
       `Could not detect lerna version in ${lernaPackageFile.packageFile}, using 'latest'`
