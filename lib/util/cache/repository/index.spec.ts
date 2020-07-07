@@ -45,6 +45,6 @@ describe('lib/util/cache/repository', () => {
     expect(fs.outputFile.mock.calls).toHaveLength(1);
   });
   it('gets', () => {
-    expect(repositoryCache.getCache()).toEqual({ repository: 'abc/def' });
+    expect(repositoryCache.getCache()).toEqual({});
   });
 });
