@@ -40,7 +40,6 @@ export interface LocalRepoConfig {
   mergeMethod: string;
   baseBranch: string;
   defaultBranch: string;
-  enterpriseVersion: string;
   repositoryOwner: string;
   repository: string | null;
   localDir: string;
