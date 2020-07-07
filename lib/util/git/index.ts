@@ -413,12 +413,14 @@ export async function isBranchModified(branchName: string): Promise<boolean> {
   ).trim();
   const { gitAuthorEmail } = config;
   if (lastAuthor === gitAuthorEmail) {
+    config.branchIsModified[branchName] = false;
     return false;
   }
   logger.debug(
     { branchName, lastAuthor, gitAuthorEmail },
     'Last commit author does not match git author email - branch has been modified'
   );
+  config.branchIsModified[branchName] = true;
   return true;
 }
 

@@ -54,6 +54,8 @@ Array [
 ]
 `;
 
+exports[`platform/git isBranchModified() should throw if branch does not exist 1`] = `[Error: Cannot check modification for branch that does not exist: not_found]`;
+
 exports[`platform/git isBranchStale() should throw if branch does not exist 1`] = `[Error: Cannot check staleness for branch that does not exist: not_found]`;
 
 exports[`platform/git setBaseBranch(branchName) should throw if branch does not exist 1`] = `[Error: config-validation]`;
