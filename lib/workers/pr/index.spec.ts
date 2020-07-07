@@ -143,6 +143,7 @@ describe('workers/pr', () => {
     it('should not automerge if enabled and pr is mergeable but cannot rebase', async () => {
       config.automerge = true;
       platform.getBranchStatus.mockResolvedValueOnce(BranchStatus.green);
+      git.isBranchModified.mockResolvedValueOnce(true);
       await prWorker.checkAutoMerge(pr, config);
       expect(platform.mergePr).toHaveBeenCalledTimes(0);
     });
@@ -173,7 +174,6 @@ describe('workers/pr', () => {
       title: 'Update dependency dummy to v1.1.0',
       body:
         'Some body<!-- Reviewable:start -->something<!-- Reviewable:end -->\n\n',
-      isModified: false,
     } as never;
     beforeEach(() => {
       setupChangelogMock();

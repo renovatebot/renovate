@@ -9,6 +9,8 @@ import { Pr } from '../../../../platform';
 import { BranchConfig } from '../../../common';
 import { ensureOnboardingPr } from '.';
 
+jest.mock('../../../../util/git');
+
 describe('workers/repository/onboarding/pr', () => {
   describe('ensureOnboardingPr()', () => {
     let config: RenovateConfig;

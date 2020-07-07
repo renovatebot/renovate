@@ -115,8 +115,8 @@ describe('workers/branch', () => {
       git.branchExists.mockResolvedValueOnce(true);
       platform.getBranchPr.mockResolvedValueOnce({
         state: PR_STATE_OPEN,
-        isModified: false,
       } as never);
+      git.isBranchModified.mockResolvedValueOnce(false);
       await branchWorker.processBranch(config);
       expect(reuse.shouldReuseExistingBranch).toHaveBeenCalled();
     });
@@ -167,8 +167,8 @@ describe('workers/branch', () => {
       git.branchExists.mockResolvedValueOnce(true);
       platform.getBranchPr.mockResolvedValueOnce({
         state: PR_STATE_MERGED,
-        isModified: true,
       } as never);
+      git.isBranchModified.mockResolvedValueOnce(true);
       await expect(branchWorker.processBranch(config)).rejects.toThrow(
         REPOSITORY_CHANGED
       );
@@ -178,9 +178,9 @@ describe('workers/branch', () => {
       git.branchExists.mockResolvedValueOnce(true);
       platform.getBranchPr.mockResolvedValueOnce({
         state: PR_STATE_OPEN,
-        isModified: true,
         labels: ['rebase'],
       } as never);
+      git.isBranchModified.mockResolvedValueOnce(true);
       const res = await branchWorker.processBranch(config);
       expect(res).not.toEqual('pr-edited');
     });
@@ -189,9 +189,9 @@ describe('workers/branch', () => {
       git.branchExists.mockResolvedValueOnce(true);
       platform.getBranchPr.mockResolvedValueOnce({
         state: PR_STATE_OPEN,
-        isModified: true,
         body: '**Rebasing**: something',
       } as never);
+      git.isBranchModified.mockResolvedValueOnce(true);
       const res = await branchWorker.processBranch(config);
       expect(res).toEqual('pr-edited');
     });
@@ -200,9 +200,9 @@ describe('workers/branch', () => {
       git.branchExists.mockResolvedValueOnce(true);
       platform.getBranchPr.mockResolvedValueOnce({
         state: PR_STATE_OPEN,
-        isModified: false,
         targetBranch: 'v6',
       } as never);
+      git.isBranchModified.mockResolvedValueOnce(false);
       config.baseBranch = 'master';
       const res = await branchWorker.processBranch(config);
       expect(res).toEqual('pr-edited');
@@ -516,8 +516,8 @@ describe('workers/branch', () => {
       git.branchExists.mockResolvedValueOnce(true);
       platform.getBranchPr.mockResolvedValueOnce({
         state: PR_STATE_OPEN,
-        isModified: true,
       } as never);
+      git.isBranchModified.mockResolvedValueOnce(true);
       expect(
         await branchWorker.processBranch({ ...config, dryRun: true })
       ).toEqual('pr-edited');
@@ -537,7 +537,6 @@ describe('workers/branch', () => {
         title: 'rebase!',
         state: PR_STATE_OPEN,
         body: `- [x] <!-- rebase-check -->`,
-        isModified: true,
       } as never);
 
       schedule.isScheduledNow.mockReturnValueOnce(false);
@@ -568,7 +567,6 @@ describe('workers/branch', () => {
         title: 'rebase!',
         state: PR_STATE_OPEN,
         body: `- [x] <!-- rebase-check -->`,
-        isModified: true,
       } as never);
 
       schedule.isScheduledNow.mockReturnValueOnce(false);
@@ -600,7 +598,6 @@ describe('workers/branch', () => {
         title: 'rebase!',
         state: PR_STATE_OPEN,
         body: `- [x] <!-- rebase-check -->`,
-        isModified: true,
       } as never);
 
       schedule.isScheduledNow.mockReturnValueOnce(false);
@@ -638,7 +635,6 @@ describe('workers/branch', () => {
         title: 'rebase!',
         state: 'open',
         body: `- [x] <!-- rebase-check -->`,
-        isModified: true,
       } as never);
       git.getRepoStatus.mockResolvedValueOnce({
         modified: ['modified_file'],

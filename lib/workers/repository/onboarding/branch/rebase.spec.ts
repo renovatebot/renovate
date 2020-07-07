@@ -23,6 +23,7 @@ describe('workers/repository/onboarding/branch/rebase', () => {
       platform.getBranchPr.mockResolvedValueOnce({
         ...mock<Pr>(),
       });
+      git.isBranchModified.mockResolvedValueOnce(true);
       await rebaseOnboardingBranch(config);
       expect(platform.commitFiles).toHaveBeenCalledTimes(0);
     });

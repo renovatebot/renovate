@@ -94,6 +94,7 @@ describe('workers/branch/parent', () => {
         ...pr,
         isConflicted: true,
       });
+      git.isBranchModified.mockResolvedValueOnce(false);
       const res = await shouldReuseExistingBranch(config);
       expect(res.reuseExistingBranch).toBe(false);
     });
@@ -120,6 +121,7 @@ describe('workers/branch/parent', () => {
         ...pr,
         isConflicted: true,
       });
+      git.isBranchModified.mockResolvedValueOnce(true);
       const res = await shouldReuseExistingBranch(config);
       expect(res.reuseExistingBranch).toBe(true);
     });
