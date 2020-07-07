@@ -122,13 +122,13 @@ describe('generateLockFiles()', () => {
 });
 
 describe('getLernaVersion()', () => {
-  it('returns specified version', async () => {
+  it('returns specified version', () => {
     const pkg = {
       deps: [{ depName: 'lerna', currentValue: '2.0.0' }],
     };
     expect(lernaHelper.getLernaVersion(pkg)).toBe('2.0.0');
   });
-  it('returns specified range', async () => {
+  it('returns specified range', () => {
     const pkg = {
       deps: [
         { depName: 'lerna', currentValue: '1.x || >=2.5.0 || 5.0.0 - 7.2.3' },
@@ -138,17 +138,17 @@ describe('getLernaVersion()', () => {
       '1.x || >=2.5.0 || 5.0.0 - 7.2.3'
     );
   });
-  it('returns latest if no lerna dep is specified', async () => {
+  it('returns latest if no lerna dep is specified', () => {
     const pkg = {
       deps: [{ depName: 'something-else', currentValue: '1.2.3' }],
     };
     expect(lernaHelper.getLernaVersion(pkg)).toBe('latest');
   });
-  it('returns latest if pkg has no deps at all', async () => {
+  it('returns latest if pkg has no deps at all', () => {
     const pkg = {};
     expect(lernaHelper.getLernaVersion(pkg)).toBe('latest');
   });
-  it('returns latest if specified lerna version is not a valid semVer range', async () => {
+  it('returns latest if specified lerna version is not a valid semVer range', () => {
     const pkg = {
       deps: [{ depName: 'lerna', currentValue: '[a.b.c;' }],
     };
