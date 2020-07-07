@@ -75,6 +75,7 @@ describe('workers/repository/onboarding/pr', () => {
           body: createPrBody,
         })
       );
+      git.isBranchModified.mockResolvedValueOnce(true);
       await ensureOnboardingPr(config, {}, branches);
       expect(platform.createPr).toHaveBeenCalledTimes(0);
       expect(platform.updatePr).toHaveBeenCalledTimes(1);
