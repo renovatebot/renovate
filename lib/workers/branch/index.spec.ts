@@ -190,6 +190,7 @@ describe('workers/branch', () => {
       platform.getBranchPr.mockResolvedValueOnce({
         state: PR_STATE_OPEN,
         isModified: true,
+        body: '**Rebasing**: something',
       } as never);
       const res = await branchWorker.processBranch(config);
       expect(res).toEqual('pr-edited');

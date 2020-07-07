@@ -149,6 +149,7 @@ Object {
   "separateMajorReleases": true,
   "separateMinorPatch": true,
   "suppressNotifications": Array [
+    "lockFileErrors",
     "deprecationWarningIssues",
   ],
   "travis": Object {
