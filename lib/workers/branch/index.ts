@@ -48,6 +48,8 @@ function rebaseCheck(config: RenovateConfig, branchPr: any): boolean {
   return titleRebase || labelRebase || prRebaseChecked;
 }
 
+const rebasingRegex = /\*\*Rebasing\*\*: .*/;
+
 export async function processBranch(
   branchConfig: BranchConfig,
   prHourlyLimitReached?: boolean
@@ -168,7 +170,7 @@ export async function processBranch(
             logger.debug('Manual rebase has been requested for PR');
           } else {
             const newBody = branchPr.body?.replace(
-              /\*\*Rebasing\*\*: .*/,
+              rebasingRegex,
               '**Rebasing**: Renovate will not automatically rebase this PR, because other commits have been found.'
             );
             if (newBody !== branchPr.body) {
