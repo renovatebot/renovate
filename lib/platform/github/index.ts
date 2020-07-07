@@ -220,8 +220,6 @@ export async function initRepo({
   try {
     res = await githubApi.getJson<{ fork: boolean }>(`repos/${repository}`);
     logger.trace({ repositoryDetails: res.body }, 'Repository details');
-    config.enterpriseVersion =
-      res.headers && (res.headers['x-github-enterprise-version'] as string);
     // istanbul ignore if
     if (res.body.fork && !includeForks) {
       try {
@@ -275,8 +273,6 @@ export async function initRepo({
         throw new Error(REPOSITORY_DISABLED);
       }
     }
-    const owner = res.body.owner.login;
-    logger.debug(`${repository} owner = ${owner}`);
     // Use default branch as PR target unless later overridden.
     config.defaultBranch = res.body.default_branch;
     // Base branch may be configured but defaultBranch is always fixed
