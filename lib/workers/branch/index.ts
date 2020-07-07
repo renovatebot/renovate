@@ -453,6 +453,7 @@ export async function processBranch(
     // break if we pushed a new commit because status check are pretty sure pending but maybe not reported yet
     if (
       !masterIssueCheck &&
+      !config.rebaseRequested &&
       commitHash &&
       (config.requiredStatusChecks?.length || config.prCreation !== 'immediate')
     ) {
