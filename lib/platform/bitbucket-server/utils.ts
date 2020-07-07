@@ -28,7 +28,6 @@ export function prInfo(pr: BbbsRestPr): BbsPr {
     title: pr.title,
     state: prStateMapping[pr.state],
     createdAt: pr.createdDate,
-    isModified: true,
   };
 }
 

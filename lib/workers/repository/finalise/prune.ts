@@ -3,7 +3,7 @@ import { REPOSITORY_CHANGED } from '../../../constants/error-messages';
 import { PR_STATE_OPEN } from '../../../constants/pull-requests';
 import { logger } from '../../../logger';
 import { platform } from '../../../platform';
-import { getAllRenovateBranches } from '../../../util/git';
+import { getAllRenovateBranches, isBranchModified } from '../../../util/git';
 
 async function cleanUpBranches(
   { dryRun, pruneStaleBranches: enabled }: RenovateConfig,
@@ -15,9 +15,8 @@ async function cleanUpBranches(
         branchName,
         state: PR_STATE_OPEN,
       });
-      const branchPr = await platform.getBranchPr(branchName);
-      const skipAutoclose = branchPr && branchPr.isModified;
-      if (pr && !skipAutoclose) {
+      const branchIsModified = await isBranchModified(branchName);
+      if (pr && !branchIsModified) {
         if (!pr.title.endsWith('- autoclosed')) {
           if (dryRun) {
             logger.info(

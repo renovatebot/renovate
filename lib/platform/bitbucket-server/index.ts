@@ -266,7 +266,6 @@ export async function getPr(
     displayNumber: `Pull Request #${res.body.id}`,
     ...utils.prInfo(res.body),
     reviewers: res.body.reviewers.map((r) => r.user.name),
-    isModified: false,
   };
 
   pr.version = updatePrVersion(pr.number, pr.version);
@@ -281,35 +280,6 @@ export async function getPr(
     );
     pr.isConflicted = !!mergeRes.body.conflicted;
     pr.canMerge = !!mergeRes.body.canMerge;
-
-    const prCommits = (
-      await bitbucketServerHttp.getJson<{
-        totalCount: number;
-        values: { author: { emailAddress: string } }[];
-      }>(
-        `./rest/api/1.0/projects/${config.projectKey}/repos/${config.repositorySlug}/pull-requests/${prNo}/commits?withCounts=true`,
-        { useCache: !refreshCache }
-      )
-    ).body;
-
-    if (prCommits.totalCount === 1) {
-      if (global.gitAuthor) {
-        const commitAuthorEmail = prCommits.values[0].author.emailAddress;
-        if (commitAuthorEmail !== global.gitAuthor.email) {
-          logger.debug(
-            { prNo },
-            'PR is modified: 1 commit but not by configured gitAuthor'
-          );
-          pr.isModified = true;
-        }
-      }
-    } else {
-      logger.debug(
-        { prNo },
-        `PR is modified: Found ${prCommits.totalCount} commits`
-      );
-      pr.isModified = true;
-    }
   }
 
   if (await git.branchExists(pr.branchName)) {
@@ -913,7 +883,6 @@ export async function createPr({
 
   const pr: BbsPr = {
     displayNumber: `Pull Request #${prInfoRes.body.id}`,
-    isModified: false,
     ...utils.prInfo(prInfoRes.body),
   };
 

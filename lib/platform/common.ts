@@ -106,7 +106,6 @@ export interface Pr {
   createdAt?: string;
   displayNumber?: string;
   isConflicted?: boolean;
-  isModified?: boolean;
   isStale?: boolean;
   labels?: string[];
   number?: number;

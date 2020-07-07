@@ -38,6 +38,7 @@ interface LocalConfig extends StorageConfig {
   baseBranch: string;
   baseBranchSha: string;
   branchExists: Record<string, boolean>;
+  branchIsModified: Record<string, boolean>;
   branchPrefix: string;
 }
 
@@ -235,6 +236,7 @@ export async function syncGit(): Promise<void> {
 export async function initRepo(args: StorageConfig): Promise<void> {
   config = { ...args } as any;
   config.branchExists = {};
+  config.branchIsModified = {};
   git = undefined;
   await syncGit();
 }
@@ -254,6 +256,7 @@ export async function createBranch(
   await git.checkout(['-B', branchName, sha]);
   await git.push('origin', branchName, { '--force': true });
   config.branchExists[branchName] = true;
+  config.branchIsModified[branchName] = false;
 }
 
 export async function branchExists(branchName: string): Promise<boolean> {
@@ -393,6 +396,30 @@ export async function isBranchStale(branchName: string): Promise<boolean> {
     config.baseBranchSha || `origin/${config.baseBranch}`,
   ]);
   return !branches.all.map(localName).includes(branchName);
+}
+
+export async function isBranchModified(branchName: string): Promise<boolean> {
+  // First check cache
+  if (config.branchIsModified[branchName] !== undefined) {
+    return config.branchIsModified[branchName];
+  }
+  if (!(await branchExists(branchName))) {
+    throw Error(
+      'Cannot check modification for branch that does not exist: ' + branchName
+    );
+  }
+  const lastAuthor = (
+    await git.raw(['log', '-1', '--pretty=format:%ae', `origin/${branchName}`])
+  ).trim();
+  const { gitAuthorEmail } = config;
+  if (lastAuthor === gitAuthorEmail) {
+    return false;
+  }
+  logger.debug(
+    { branchName, lastAuthor, gitAuthorEmail },
+    'Last commit author does not match git author email - branch has been modified'
+  );
+  return true;
 }
 
 export async function deleteBranch(branchName: string): Promise<void> {
