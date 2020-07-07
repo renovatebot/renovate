@@ -435,15 +435,9 @@ export async function getBranchLastCommitTime(
   }
 }
 
-export async function getBranchFiles(
-  branchName: string,
-  baseBranchName?: string
-): Promise<string[]> {
+export async function getBranchFiles(branchName: string): Promise<string[]> {
   try {
-    const diff = await git.diffSummary([
-      branchName,
-      baseBranchName || config.baseBranch,
-    ]);
+    const diff = await git.diffSummary([branchName, config.baseBranch]);
     return diff.files.map((file) => file.file);
   } catch (err) /* istanbul ignore next */ {
     checkForPlatformFailure(err);
