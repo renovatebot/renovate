@@ -1479,6 +1479,11 @@
   resolved "https://registry.yarnpkg.com/@types/chai/-/chai-4.2.11.tgz#d3614d6c5f500142358e6ed24e1bf16657536c50"
   integrity sha512-t7uW6eFafjO+qJ3BIV2gGUyZs27egcNRkUdalkud+Qa3+kg//f129iuOFivHDXQ+vnU3fDXuwgv0cqMCbcE8sw==
 
+"@types/changelog-filename-regex@2.0.0":
+  version "2.0.0"
+  resolved "https://registry.yarnpkg.com/@types/changelog-filename-regex/-/changelog-filename-regex-2.0.0.tgz#b5af0ee9b36106f593dfd6ac6b6514ec166c4ef2"
+  integrity sha512-FqMVulrjqvt5Ud1HoHI56dfKqxEiF6wOdQ40nP81Pm022Q4I+U60Zccvg/Jof3zHiOSh7N5DEEv+pk0gzh6acA==
+
 "@types/clean-git-ref@2.0.0":
   version "2.0.0"
   resolved "https://registry.yarnpkg.com/@types/clean-git-ref/-/clean-git-ref-2.0.0.tgz#309687ad1bcdd7012025b5bc76e7a209c378fb63"
@@ -1523,6 +1528,11 @@
   integrity sha512-B42Sxuaz09MhC3DDeW5kubRcQ5by4iuVQ0cRRWM2lggLzAa/KVom0Aft/208NgMvNQQZ86s5rVcqDdn/SH0/mg==
   dependencies:
     "@types/node" "*"
+
+"@types/get-installed-path@4.0.0":
+  version "4.0.0"
+  resolved "https://registry.yarnpkg.com/@types/get-installed-path/-/get-installed-path-4.0.0.tgz#5d33294b2eba71cfd55b4e7fc561483caafad3a1"
+  integrity sha512-KD+kFvs68e2dZbvzaWg8HRY3Qr7NhUBhdLglqafj/yyBt/9a9KE1uYhclwx/tSwn4lTW80V2BNJDYkcetXn14g==
 
 "@types/github-url-from-git@1.5.0":
   version "1.5.0"
@@ -1625,6 +1635,11 @@
   version "2.1.0"
   resolved "https://registry.yarnpkg.com/@types/linkify-it/-/linkify-it-2.1.0.tgz#ea3dd64c4805597311790b61e872cbd1ed2cd806"
   integrity sha512-Q7DYAOi9O/+cLLhdaSvKdaumWyHbm7HAk/bFwwyTuU0arR5yyCeW5GOoqt4tJTpDRxhpx9Q8kQL6vMpuw9hDSw==
+
+"@types/linkify-markdown@1.0.0":
+  version "1.0.0"
+  resolved "https://registry.yarnpkg.com/@types/linkify-markdown/-/linkify-markdown-1.0.0.tgz#50c357a0a60bb220209f19310a79b939e1b8e2a3"
+  integrity sha512-p3rl2HtugwjkH8qjEjUi5JByoZkVc2lz6E7D96X5/FqNyj2/jlgIrMlyrbck0U+HyjhOIy0XyTwES3RRz+1koQ==
 
 "@types/lodash@4.14.157":
   version "4.14.157"
