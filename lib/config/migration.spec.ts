@@ -32,6 +32,7 @@ describe('config/migration', () => {
         gitFs: false,
         separateMajorReleases: true,
         separatePatchReleases: true,
+        suppressNotifications: ['lockFileErrors', 'prEditNotification'],
         automerge: 'none' as never,
         automergeMajor: false,
         automergeMinor: true,

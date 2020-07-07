@@ -48,6 +48,8 @@ function rebaseCheck(config: RenovateConfig, branchPr: any): boolean {
   return titleRebase || labelRebase || prRebaseChecked;
 }
 
+const rebasingRegex = /\*\*Rebasing\*\*: .*/;
+
 export async function processBranch(
   branchConfig: BranchConfig,
   prHourlyLimitReached?: boolean
@@ -158,7 +160,6 @@ export async function processBranch(
           );
           throw new Error(REPOSITORY_CHANGED);
         }
-        const topic = 'PR has been edited';
         if (
           branchPr.isModified ||
           (branchPr.targetBranch &&
@@ -166,36 +167,17 @@ export async function processBranch(
         ) {
           logger.debug({ prNo: branchPr.number }, 'PR has been edited');
           if (masterIssueCheck || config.rebaseRequested) {
-            if (config.dryRun) {
-              logger.info(
-                'DRY-RUN: Would ensure PR edited comment removal in PR #' +
-                  branchPr.number
-              );
-            } else {
-              // Remove any "PR has been edited" comment only when rebasing
-              await platform.ensureCommentRemoval({
-                number: branchPr.number,
-                topic,
-              });
-            }
+            logger.debug('Manual rebase has been requested for PR');
           } else {
-            let content = emojify(
-              `:construction_worker: This PR has received other commits, so Renovate will stop updating it to avoid conflicts or other problems.`
+            const newBody = branchPr.body?.replace(
+              rebasingRegex,
+              '**Rebasing**: Renovate will not automatically rebase this PR, because other commits have been found.'
             );
-            content += ` If you wish to abandon your changes and have Renovate start over you may click the "rebase" checkbox in the PR body/description.`;
-            content += `\n\nIf you think this comment is in error and the branch is *not* modified, try deleting this comment. If it comes back again the next time Renovate runs, please submit an issue or seek config help.`;
-            if (!config.suppressNotifications.includes('prEditNotification')) {
-              if (config.dryRun) {
-                logger.info(
-                  'DRY-RUN: ensure comment in PR #' + branchPr.number
-                );
-              } else {
-                await platform.ensureComment({
-                  number: branchPr.number,
-                  topic,
-                  content,
-                });
-              }
+            if (newBody !== branchPr.body) {
+              logger.debug(
+                'Updating existing PR to indicate that rebasing is not possible'
+              );
+              await platform.updatePr(branchPr.number, branchPr.title, newBody);
             }
             return 'pr-edited';
           }
