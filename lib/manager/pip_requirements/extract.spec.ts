@@ -35,8 +35,12 @@ const requirements7 = readFileSync(
 );
 
 describe('lib/manager/pip_requirements/extract', () => {
-  delete process.env.PIP_TEST_TOKEN;
   beforeEach(() => {
+    delete process.env.PIP_TEST_TOKEN;
+    global.trustLevel = 'low';
+  });
+  afterEach(() => {
+    delete process.env.PIP_TEST_TOKEN;
     global.trustLevel = 'low';
   });
   describe('extractPackageFile()', () => {
