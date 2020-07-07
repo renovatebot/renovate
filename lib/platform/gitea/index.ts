@@ -21,7 +21,6 @@ import { sanitize } from '../../util/sanitize';
 import { ensureTrailingSlash } from '../../util/url';
 import {
   BranchStatusConfig,
-  CommitFilesConfig,
   CreatePRConfig,
   EnsureCommentConfig,
   EnsureCommentRemovalConfig,
@@ -850,10 +849,6 @@ const platform: Platform = {
     return Promise.resolve();
   },
 
-  commitFiles(commitFilesConfig: CommitFilesConfig): Promise<string | null> {
-    return git.commitFiles(commitFilesConfig);
-  },
-
   getPrBody(prBody: string): string {
     return smartTruncate(prBody, 1000000);
   },
@@ -866,7 +861,6 @@ const platform: Platform = {
 export const {
   addAssignees,
   addReviewers,
-  commitFiles,
   createPr,
   deleteBranch,
   deleteLabel,

@@ -215,7 +215,7 @@ export interface Platform {
   deleteBranch(branchName: string, closePr?: boolean): Promise<void>;
   ensureComment(ensureComment: EnsureCommentConfig): Promise<boolean>;
   setBaseBranch(baseBranch?: string): Promise<string>;
-  commitFiles(commitFile: CommitFilesConfig): Promise<string | null>;
+  commitFiles?(commitFile: CommitFilesConfig): Promise<string | null>;
   getPr(number: number): Promise<Pr>;
   findPr(findPRConfig: FindPRConfig): Promise<Pr>;
   getBranchStatus(
