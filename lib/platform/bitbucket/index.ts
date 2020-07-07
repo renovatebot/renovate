@@ -1,5 +1,4 @@
 import URL from 'url';
-import addrs from 'email-addresses';
 import parseDiff from 'parse-diff';
 import { RenovateConfig } from '../../config/common';
 import {

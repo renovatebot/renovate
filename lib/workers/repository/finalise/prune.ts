@@ -33,7 +33,7 @@ async function cleanUpBranches(
       }
       const closePr = true;
       logger.debug({ branch: branchName }, `Deleting orphan branch`);
-      if (skipAutoclose) {
+      if (branchIsModified) {
         if (pr) {
           logger.debug(
             { prNo: pr?.number, prTitle: pr?.title },
@@ -59,7 +59,7 @@ async function cleanUpBranches(
       } else {
         await platform.deleteBranch(branchName, closePr);
       }
-      if (pr && !skipAutoclose) {
+      if (pr && !branchIsModified) {
         logger.info({ prNo: pr.number, prTitle: pr.title }, 'PR autoclosed');
       }
     } catch (err) /* istanbul ignore next */ {

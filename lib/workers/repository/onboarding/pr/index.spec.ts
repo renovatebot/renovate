@@ -44,7 +44,6 @@ describe('workers/repository/onboarding/pr', () => {
         partial<Pr>({
           title: 'Configure Renovate',
           body: createPrBody,
-          isModified: false,
         })
       );
       await ensureOnboardingPr(config, packageFiles, branches);
@@ -58,7 +57,6 @@ describe('workers/repository/onboarding/pr', () => {
           title: 'Configure Renovate',
           body: createPrBody,
           isConflicted: true,
-          isModified: true,
         })
       );
       await ensureOnboardingPr(config, {}, branches);
@@ -71,7 +69,6 @@ describe('workers/repository/onboarding/pr', () => {
         partial<Pr>({
           title: 'Configure Renovate',
           body: createPrBody,
-          isModified: true,
         })
       );
       await ensureOnboardingPr(config, {}, branches);

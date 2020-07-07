@@ -46,7 +46,6 @@ describe('workers/branch/parent', () => {
       platform.getBranchPr.mockResolvedValueOnce({
         ...pr,
         isConflicted: true,
-        isModified: true,
       });
       const res = await shouldReuseExistingBranch(config);
       expect(res.reuseExistingBranch).toBe(true);
@@ -57,7 +56,6 @@ describe('workers/branch/parent', () => {
       platform.getBranchPr.mockResolvedValueOnce({
         ...pr,
         isConflicted: true,
-        isModified: false,
       });
       const res = await shouldReuseExistingBranch(config);
       expect(res.reuseExistingBranch).toBe(true);
@@ -85,7 +83,6 @@ describe('workers/branch/parent', () => {
       git.branchExists.mockResolvedValueOnce(true);
       platform.getBranchPr.mockResolvedValueOnce({
         ...pr,
-        isModified: true,
         labels: ['rebase'],
       });
       const res = await shouldReuseExistingBranch(config);
@@ -96,7 +93,6 @@ describe('workers/branch/parent', () => {
       platform.getBranchPr.mockResolvedValueOnce({
         ...pr,
         isConflicted: true,
-        isModified: false,
       });
       const res = await shouldReuseExistingBranch(config);
       expect(res.reuseExistingBranch).toBe(false);
@@ -123,7 +119,6 @@ describe('workers/branch/parent', () => {
       platform.getBranchPr.mockResolvedValueOnce({
         ...pr,
         isConflicted: true,
-        isModified: true,
       });
       const res = await shouldReuseExistingBranch(config);
       expect(res.reuseExistingBranch).toBe(true);

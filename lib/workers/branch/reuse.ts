@@ -1,7 +1,7 @@
 import { RenovateConfig } from '../../config';
 import { logger } from '../../logger';
 import { platform } from '../../platform';
-import { branchExists, isBranchStale, isBranchModified } from '../../util/git';
+import { branchExists, isBranchModified, isBranchStale } from '../../util/git';
 
 type ParentBranch = {
   reuseExistingBranch: boolean;

@@ -1815,25 +1815,7 @@ describe('platform/github', () => {
           state: 'open',
           mergeable_state: 'dirty',
           base: { sha: '1234' },
-          commits: 2,
         })
-        .get('/repos/some/repo/pulls/1234/commits')
-        .reply(200, [
-          {
-            author: {
-              login: 'foo',
-            },
-          },
-          {
-            committer: {
-              login: 'web-flow',
-            },
-            commit: {
-              message: "Merge branch 'master' into renovate/foo",
-            },
-            parents: [1, 2],
-          },
-        ])
         .get('/repos/some/repo/git/refs/heads/master')
         .reply(200, {
           object: {
@@ -1842,7 +1824,6 @@ describe('platform/github', () => {
         });
       await github.initRepo({ repository: 'some/repo', token: 'token' } as any);
       const pr = await github.getPr(1234);
-      expect(pr.isModified).toBe(false);
       expect(pr).toMatchSnapshot();
       expect(httpMock.getTrace()).toMatchSnapshot();
     });
@@ -1859,18 +1840,7 @@ describe('platform/github', () => {
           state: 'open',
           mergeable_state: 'dirty',
           base: { sha: '1234' },
-          commits: 1,
         })
-        .get('/repos/some/repo/pulls/1234/commits')
-        .reply(200, [
-          {
-            commit: {
-              author: {
-                email: 'bot@renovateapp.com',
-              },
-            },
-          },
-        ])
         .get('/repos/some/repo/git/refs/heads/master')
         .reply(200, {
           object: {
@@ -1885,7 +1855,6 @@ describe('platform/github', () => {
         repository: 'some/repo',
       } as any);
       const pr = await github.getPr(1234);
-      expect(pr.isModified).toBe(false);
       expect(pr).toMatchSnapshot();
       expect(httpMock.getTrace()).toMatchSnapshot();
     });
@@ -1904,16 +1873,6 @@ describe('platform/github', () => {
           base: { sha: '1234' },
           commits: 1,
         })
-        .get('/repos/some/repo/pulls/1234/commits')
-        .reply(200, [
-          {
-            commit: {
-              author: {
-                email: 'foo@bar.com',
-              },
-            },
-          },
-        ])
         .get('/repos/some/repo/git/refs/heads/master')
         .reply(200, {
           object: {
@@ -1928,7 +1887,6 @@ describe('platform/github', () => {
         repository: 'some/repo',
       } as any);
       const pr = await github.getPr(1234);
-      expect(pr.isModified).toBe(true);
       expect(pr).toMatchSnapshot();
       expect(httpMock.getTrace()).toMatchSnapshot();
     });

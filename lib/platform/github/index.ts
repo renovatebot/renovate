@@ -639,8 +639,6 @@ async function getOpenPrs(): Promise<PrList> {
         pr.displayNumber = `Pull Request #${pr.number}`;
         pr.state = PR_STATE_OPEN;
         pr.branchName = pr.headRefName;
-        const branchName = pr.branchName;
-        const prNo = pr.number;
         delete pr.headRefName;
         pr.targetBranch = pr.baseRefName;
         delete pr.baseRefName;

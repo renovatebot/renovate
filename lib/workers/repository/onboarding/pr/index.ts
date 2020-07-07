@@ -4,13 +4,13 @@ import { logger } from '../../../../logger';
 import { PackageFile } from '../../../../manager/common';
 import { platform } from '../../../../platform';
 import { emojify } from '../../../../util/emoji';
+import { isBranchModified } from '../../../../util/git';
 import { BranchConfig } from '../../../common';
 import { addAssigneesReviewers } from '../../../pr';
 import { getBaseBranchDesc } from './base-branch';
 import { getConfigDesc } from './config-description';
 import { getDepWarnings, getErrors, getWarnings } from './errors-warnings';
 import { getPrList } from './pr-list';
-import { isBranchModified } from '../../../../util/git';
 
 export async function ensureOnboardingPr(
   config: RenovateConfig,

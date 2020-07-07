@@ -116,7 +116,6 @@ describe('workers/pr', () => {
     });
     it('should automerge if enabled and pr is mergeable', async () => {
       config.automerge = true;
-      pr.isModified = false;
       platform.getBranchStatus.mockResolvedValueOnce(BranchStatus.green);
       platform.mergePr.mockResolvedValueOnce(true);
       await prWorker.checkAutoMerge(pr, config);
@@ -126,7 +125,6 @@ describe('workers/pr', () => {
       config.automerge = true;
       config.automergeType = 'pr-comment';
       config.automergeComment = '!merge';
-      pr.isModified = false;
       platform.getBranchStatus.mockResolvedValueOnce(BranchStatus.green);
       await prWorker.checkAutoMerge(pr, config);
       expect(platform.ensureCommentRemoval).toHaveBeenCalledTimes(0);
@@ -137,7 +135,6 @@ describe('workers/pr', () => {
       config.automergeType = 'pr-comment';
       config.automergeComment = '!merge';
       config.rebaseRequested = true;
-      pr.isModified = false;
       platform.getBranchStatus.mockResolvedValueOnce(BranchStatus.green);
       await prWorker.checkAutoMerge(pr, config);
       expect(platform.ensureCommentRemoval).toHaveBeenCalledTimes(1);
@@ -145,7 +142,6 @@ describe('workers/pr', () => {
     });
     it('should not automerge if enabled and pr is mergeable but cannot rebase', async () => {
       config.automerge = true;
-      pr.isModified = true;
       platform.getBranchStatus.mockResolvedValueOnce(BranchStatus.green);
       await prWorker.checkAutoMerge(pr, config);
       expect(platform.mergePr).toHaveBeenCalledTimes(0);
