@@ -1,6 +1,7 @@
 import {
   RenovateConfig,
   defaultConfig,
+  git,
   partial,
   platform,
 } from '../../../../../test/util';
@@ -61,6 +62,7 @@ describe('workers/repository/onboarding/pr', () => {
           isConflicted: true,
         })
       );
+      git.isBranchModified.mockResolvedValueOnce(true);
       await ensureOnboardingPr(config, {}, branches);
       expect(platform.createPr).toHaveBeenCalledTimes(0);
       expect(platform.updatePr).toHaveBeenCalledTimes(1);
