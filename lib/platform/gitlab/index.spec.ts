@@ -137,19 +137,13 @@ describe('platform/gitlab', () => {
   ): Promise<nock.Scope> {
     const repo = repoParams.repository;
     const justRepo = repo.split('/').slice(0, 2).join('/');
-    scope
-      .get(`/api/v4/projects/${encodeURIComponent(repo)}`)
-      .reply(
-        200,
-        repoResp || {
-          default_branch: 'master',
-          http_url_to_repo: `https://gitlab.com/${justRepo}.git`,
-        }
-      )
-      .get('/api/v4/user')
-      .reply(200, {
-        email: 'a@b.com',
-      });
+    scope.get(`/api/v4/projects/${encodeURIComponent(repo)}`).reply(
+      200,
+      repoResp || {
+        default_branch: 'master',
+        http_url_to_repo: `https://gitlab.com/${justRepo}.git`,
+      }
+    );
     await gitlab.initRepo(repoParams);
     return scope;
   }
@@ -182,11 +176,7 @@ describe('platform/gitlab', () => {
       httpMock
         .scope(gitlabApiHost)
         .get('/api/v4/projects/some%2Frepo%2Fproject')
-        .reply(200, [])
-        .get('/api/v4/user')
-        .reply(200, {
-          email: 'a@b.com',
-        });
+        .reply(200, []);
       await gitlab.initRepo({
         repository: 'some/repo/project',
         localDir: '',
@@ -295,8 +285,6 @@ describe('platform/gitlab', () => {
     it('should fall back if http_url_to_repo is empty', async () => {
       httpMock
         .scope(gitlabApiHost)
-        .get('/api/v4/user')
-        .reply(200, {})
         .get('/api/v4/projects/some%2Frepo%2Fproject')
         .reply(200, {
           default_branch: 'master',
@@ -353,10 +341,6 @@ describe('platform/gitlab', () => {
         .reply(200, {
           default_branch: 'master',
           http_url_to_repo: `https://gitlab.com/some/repo.git`,
-        })
-        .get('/api/v4/user')
-        .reply(200, {
-          email: 'a@b.com',
         });
       await gitlab.initRepo({
         repository: 'some/repo',
@@ -373,10 +357,6 @@ describe('platform/gitlab', () => {
         .reply(200, {
           default_branch: 'master',
           http_url_to_repo: `https://gitlab.com/some/repo.git`,
-        })
-        .get('/api/v4/user')
-        .reply(200, {
-          email: 'a@b.com',
         });
       await gitlab.initRepo({
         repository: 'some/repo',
@@ -1075,6 +1055,15 @@ describe('platform/gitlab', () => {
     });
   });
   describe('getPr(prNo)', () => {
+    beforeEach(() => {
+      global.gitAuthor = {
+        name: 'abccom',
+        email: 'a@b.com',
+      };
+    });
+    afterEach(() => {
+      delete global.gitAuthor;
+    });
     it('returns the PR', async () => {
       httpMock
         .scope(gitlabApiHost)
@@ -1092,7 +1081,7 @@ describe('platform/gitlab', () => {
           target_branch: 'master',
         })
         .get('/api/v4/projects/undefined/repository/branches/some-branch')
-        .reply(200, { commit: {} });
+        .reply(200, { commit: { author_email: global.gitAuthor.email } });
       const pr = await gitlab.getPr(12345);
       expect(pr).toMatchSnapshot();
       expect(httpMock.getTrace()).toMatchSnapshot();
