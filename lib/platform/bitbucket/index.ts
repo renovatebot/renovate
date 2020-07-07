@@ -187,29 +187,6 @@ export async function setBaseBranch(
   return baseBranchSha;
 }
 
-export /* istanbul ignore next */ function setBranchPrefix(
-  branchPrefix: string
-): Promise<void> {
-  return git.setBranchPrefix(branchPrefix);
-}
-
-// Branch
-
-// Returns true if branch exists, otherwise false
-export function branchExists(branchName: string): Promise<boolean> {
-  return git.branchExists(branchName);
-}
-
-export function getAllRenovateBranches(
-  branchPrefix: string
-): Promise<string[]> {
-  return git.getAllRenovateBranches(branchPrefix);
-}
-
-export function isBranchStale(branchName: string): Promise<boolean> {
-  return git.isBranchStale(branchName);
-}
-
 // istanbul ignore next
 function matchesState(state: string, desiredState: string): boolean {
   if (desiredState === PR_STATE_ALL) {
@@ -273,23 +250,11 @@ export async function deleteBranch(
   return git.deleteBranch(branchName);
 }
 
-export function getBranchLastCommitTime(branchName: string): Promise<Date> {
-  return git.getBranchLastCommitTime(branchName);
-}
-
-export function mergeBranch(branchName: string): Promise<void> {
-  return git.mergeBranch(branchName);
-}
-
 // istanbul ignore next
 export function commitFiles(
   commitFilesConfig: CommitFilesConfig
 ): Promise<string | null> {
   return git.commitFiles(commitFilesConfig);
-}
-
-export function getCommitMessages(): Promise<string[]> {
-  return git.getCommitMessages();
 }
 
 async function isPrConflicted(prNo: number): Promise<boolean> {
@@ -316,6 +281,7 @@ interface PrResponse {
       name: string;
     };
   };
+  reviewers: Array<any>;
 }
 
 // Gets details for a PR
@@ -371,8 +337,8 @@ export async function getPr(prNo: number): Promise<Pr | null> {
       res.isModified = true;
     }
   }
-  if (await branchExists(pr.source.branch.name)) {
-    res.isStale = await isBranchStale(pr.source.branch.name);
+  if (await git.branchExists(pr.source.branch.name)) {
+    res.isStale = await git.isBranchStale(pr.source.branch.name);
   }
 
   return res;
@@ -820,10 +786,21 @@ export async function updatePr(
   description: string
 ): Promise<void> {
   logger.debug(`updatePr(${prNo}, ${title}, body)`);
+  // Updating a PR in Bitbucket will clear the reviewers if reviewers is not present
+  const pr = (
+    await bitbucketHttp.getJson<PrResponse>(
+      `/2.0/repositories/${config.repository}/pullrequests/${prNo}`
+    )
+  ).body;
+
   await bitbucketHttp.putJson(
     `/2.0/repositories/${config.repository}/pullrequests/${prNo}`,
     {
-      body: { title, description: sanitize(description) },
+      body: {
+        title,
+        description: sanitize(description),
+        reviewers: pr.reviewers,
+      },
     }
   );
 }

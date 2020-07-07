@@ -10,7 +10,7 @@ export async function createOnboardingBranch(
   config: Partial<RenovateConfig>
 ): Promise<string | null> {
   logger.debug('createOnboardingBranch()');
-  const contents = await getOnboardingConfig(config);
+  const contents = getOnboardingConfig(config);
   logger.debug('Creating onboarding branch');
   let commitMessage;
   // istanbul ignore if

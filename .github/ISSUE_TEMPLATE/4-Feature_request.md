@@ -4,13 +4,15 @@ about: Suggest an idea for this project
 ---
 
 **What would you like Renovate to be able to do?**
-A clear and concise description of what the problem is. Ex. I'm always frustrated when [...]
 
-**Describe the solution you'd like**
-A clear and concise description of what you want to happen.
+<!-- A clear and concise description of what problem needs solving. Make sure you describe what you "really" are trying to achieve (the bigger picture) as that often helps. -->
 
-**Describe alternatives you've considered**
-A clear and concise description of any alternative solutions or features you've considered.
+**Did you already have any implementation ideas?**
 
-**Additional context**
-Add any other context or screenshots about the feature request here.
+<!-- This is totally optional, but we know many people dig into the source code already before raising a request. Try to keep implementation ideas separate from *requirements* above -->
+
+**Are there any workarounds or alternative ideas you've tried to avoid needing this feature?**
+
+**Is this a feature you'd be interested in implementing yourself?**
+
+<!-- Again, totally optional. But let us know if you're interested and if you need any particular help -->

@@ -1,6 +1,7 @@
 import { RenovateConfig, ValidationMessage } from '../../../config';
 import { logger } from '../../../logger';
 import { platform } from '../../../platform';
+import { branchExists } from '../../../util/git';
 
 export async function checkBaseBranch(
   config: RenovateConfig
@@ -12,7 +13,7 @@ export async function checkBaseBranch(
   // istanbul ignore else
   if (config.baseBranch) {
     // Read content and target PRs here
-    if (await platform.branchExists(config.baseBranch)) {
+    if (await branchExists(config.baseBranch)) {
       baseBranchSha = await platform.setBaseBranch(config.baseBranch);
     } else {
       // Warn and ignore setting (use default branch)

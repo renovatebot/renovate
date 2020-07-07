@@ -3,6 +3,7 @@ import { REPOSITORY_CHANGED } from '../../../constants/error-messages';
 import { PR_STATE_OPEN } from '../../../constants/pull-requests';
 import { logger } from '../../../logger';
 import { platform } from '../../../platform';
+import { getAllRenovateBranches } from '../../../util/git';
 
 async function cleanUpBranches(
   { dryRun, pruneStaleBranches: enabled }: RenovateConfig,
@@ -81,9 +82,7 @@ export async function pruneStaleBranches(
     logger.debug('No branchList');
     return;
   }
-  let renovateBranches = await platform.getAllRenovateBranches(
-    config.branchPrefix
-  );
+  let renovateBranches = await getAllRenovateBranches(config.branchPrefix);
   if (!(renovateBranches && renovateBranches.length)) {
     logger.debug('No renovate branches found');
     return;

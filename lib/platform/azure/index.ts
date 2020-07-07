@@ -194,32 +194,6 @@ export /* istanbul ignore next */ async function setBaseBranch(
   return baseBranchSha;
 }
 
-export /* istanbul ignore next */ function setBranchPrefix(
-  branchPrefix: string
-): Promise<void> {
-  return git.setBranchPrefix(branchPrefix);
-}
-
-// Branch
-
-export /* istanbul ignore next */ function branchExists(
-  branchName: string
-): Promise<boolean> {
-  return git.branchExists(branchName);
-}
-
-export /* istanbul ignore next */ function getAllRenovateBranches(
-  branchPrefix: string
-): Promise<string[]> {
-  return git.getAllRenovateBranches(branchPrefix);
-}
-
-export /* istanbul ignore next */ function isBranchStale(
-  branchName: string
-): Promise<boolean> {
-  return git.isBranchStale(branchName);
-}
-
 // istanbul ignore next
 async function abandonPr(prNo: number): Promise<void> {
   logger.debug(`abandonPr(prNo)(${prNo})`);
@@ -357,18 +331,6 @@ export /* istanbul ignore next */ async function deleteBranch(
   }
 }
 
-export /* istanbul ignore next */ function getBranchLastCommitTime(
-  branchName: string
-): Promise<Date> {
-  return git.getBranchLastCommitTime(branchName);
-}
-
-export /* istanbul ignore next */ function mergeBranch(
-  branchName: string
-): Promise<void> {
-  return git.mergeBranch(branchName);
-}
-
 export /* istanbul ignore next */ function commitFiles({
   branchName,
   files,
@@ -379,12 +341,6 @@ export /* istanbul ignore next */ function commitFiles({
     files,
     message,
   });
-}
-
-export /* istanbul ignore next */ function getCommitMessages(): Promise<
-  string[]
-> {
-  return git.getCommitMessages();
 }
 
 export async function getBranchStatusCheck(

@@ -220,8 +220,6 @@ export async function initRepo({
   try {
     res = await githubApi.getJson<{ fork: boolean }>(`repos/${repository}`);
     logger.trace({ repositoryDetails: res.body }, 'Repository details');
-    config.enterpriseVersion =
-      res.headers && (res.headers['x-github-enterprise-version'] as string);
     // istanbul ignore if
     if (res.body.fork && !includeForks) {
       try {
@@ -275,8 +273,6 @@ export async function initRepo({
         throw new Error(REPOSITORY_DISABLED);
       }
     }
-    const owner = res.body.owner.login;
-    logger.debug(`${repository} owner = ${owner}`);
     // Use default branch as PR target unless later overridden.
     config.defaultBranch = res.body.default_branch;
     // Base branch may be configured but defaultBranch is always fixed
@@ -488,31 +484,7 @@ export async function setBaseBranch(
   return baseBranchSha;
 }
 
-// istanbul ignore next
-export function setBranchPrefix(branchPrefix: string): Promise<void> {
-  return git.setBranchPrefix(branchPrefix);
-}
-
-// Search
-
 // Branch
-
-// istanbul ignore next
-export function branchExists(branchName: string): Promise<boolean> {
-  return git.branchExists(branchName);
-}
-
-// istanbul ignore next
-export function getAllRenovateBranches(
-  branchPrefix: string
-): Promise<string[]> {
-  return git.getAllRenovateBranches(branchPrefix);
-}
-
-// istanbul ignore next
-export function isBranchStale(branchName: string): Promise<boolean> {
-  return git.isBranchStale(branchName);
-}
 
 // istanbul ignore next
 export function deleteBranch(
@@ -523,31 +495,10 @@ export function deleteBranch(
 }
 
 // istanbul ignore next
-export function getBranchLastCommitTime(branchName: string): Promise<Date> {
-  return git.getBranchLastCommitTime(branchName);
-}
-
-// istanbul ignore next
-export function mergeBranch(branchName: string): Promise<void> {
-  if (config.pushProtection) {
-    logger.debug(
-      { branch: branchName },
-      'Branch protection: Attempting to merge branch when push protection is enabled'
-    );
-  }
-  return git.mergeBranch(branchName);
-}
-
-// istanbul ignore next
 export function commitFiles(
   commitFilesConfig: CommitFilesConfig
 ): Promise<string | null> {
   return git.commitFiles(commitFilesConfig);
-}
-
-// istanbul ignore next
-export function getCommitMessages(): Promise<string[]> {
-  return git.getCommitMessages();
 }
 
 async function getClosedPrs(): Promise<PrList> {

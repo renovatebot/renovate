@@ -84,7 +84,7 @@ describe('workers/branch', () => {
     it('skips branch if not scheduled and not updating out of schedule', async () => {
       schedule.isScheduledNow.mockReturnValueOnce(false);
       config.updateNotScheduled = false;
-      platform.branchExists.mockResolvedValueOnce(true);
+      git.branchExists.mockResolvedValueOnce(true);
       const res = await branchWorker.processBranch(config);
       expect(res).toEqual('not-scheduled');
     });
@@ -93,7 +93,7 @@ describe('workers/branch', () => {
       config.unpublishSafe = true;
       config.canBeUnpublished = true;
       config.prCreation = 'not-pending';
-      platform.branchExists.mockResolvedValueOnce(true);
+      git.branchExists.mockResolvedValueOnce(true);
       const res = await branchWorker.processBranch(config);
       expect(res).toEqual('pending');
     });
@@ -112,7 +112,7 @@ describe('workers/branch', () => {
     it('processes branch if not scheduled but updating out of schedule', async () => {
       schedule.isScheduledNow.mockReturnValueOnce(false);
       config.updateNotScheduled = true;
-      platform.branchExists.mockResolvedValueOnce(true);
+      git.branchExists.mockResolvedValueOnce(true);
       platform.getBranchPr.mockResolvedValueOnce({
         state: PR_STATE_OPEN,
         isModified: false,
@@ -122,7 +122,7 @@ describe('workers/branch', () => {
     });
     it('skips branch if closed major PR found', async () => {
       schedule.isScheduledNow.mockReturnValueOnce(false);
-      platform.branchExists.mockResolvedValueOnce(true);
+      git.branchExists.mockResolvedValueOnce(true);
       config.updateType = 'major';
       checkExisting.prAlreadyExisted.mockResolvedValueOnce({
         number: 13,
@@ -133,7 +133,7 @@ describe('workers/branch', () => {
     });
     it('skips branch if closed digest PR found', async () => {
       schedule.isScheduledNow.mockReturnValueOnce(false);
-      platform.branchExists.mockResolvedValueOnce(true);
+      git.branchExists.mockResolvedValueOnce(true);
       config.updateType = 'digest';
       checkExisting.prAlreadyExisted.mockResolvedValueOnce({
         number: 13,
@@ -144,7 +144,7 @@ describe('workers/branch', () => {
     });
     it('skips branch if closed minor PR found', async () => {
       schedule.isScheduledNow.mockReturnValueOnce(false);
-      platform.branchExists.mockResolvedValueOnce(true);
+      git.branchExists.mockResolvedValueOnce(true);
       checkExisting.prAlreadyExisted.mockResolvedValueOnce({
         number: 13,
         state: PR_STATE_CLOSED,
@@ -154,7 +154,7 @@ describe('workers/branch', () => {
     });
     it('skips branch if merged PR found', async () => {
       schedule.isScheduledNow.mockReturnValueOnce(false);
-      platform.branchExists.mockResolvedValueOnce(true);
+      git.branchExists.mockResolvedValueOnce(true);
       checkExisting.prAlreadyExisted.mockResolvedValueOnce({
         number: 13,
         state: PR_STATE_MERGED,
@@ -164,7 +164,7 @@ describe('workers/branch', () => {
     });
     it('throws error if closed PR found', async () => {
       schedule.isScheduledNow.mockReturnValueOnce(false);
-      platform.branchExists.mockResolvedValueOnce(true);
+      git.branchExists.mockResolvedValueOnce(true);
       platform.getBranchPr.mockResolvedValueOnce({
         state: PR_STATE_MERGED,
         isModified: true,
@@ -175,7 +175,7 @@ describe('workers/branch', () => {
     });
     it('does not skip branch if edited PR found with rebaseLabel', async () => {
       schedule.isScheduledNow.mockReturnValueOnce(false);
-      platform.branchExists.mockResolvedValueOnce(true);
+      git.branchExists.mockResolvedValueOnce(true);
       platform.getBranchPr.mockResolvedValueOnce({
         state: PR_STATE_OPEN,
         isModified: true,
@@ -186,7 +186,7 @@ describe('workers/branch', () => {
     });
     it('skips branch if edited PR found', async () => {
       schedule.isScheduledNow.mockReturnValueOnce(false);
-      platform.branchExists.mockResolvedValueOnce(true);
+      git.branchExists.mockResolvedValueOnce(true);
       platform.getBranchPr.mockResolvedValueOnce({
         state: PR_STATE_OPEN,
         isModified: true,
@@ -196,7 +196,7 @@ describe('workers/branch', () => {
     });
     it('skips branch if target branch changed', async () => {
       schedule.isScheduledNow.mockReturnValueOnce(false);
-      platform.branchExists.mockResolvedValueOnce(true);
+      git.branchExists.mockResolvedValueOnce(true);
       platform.getBranchPr.mockResolvedValueOnce({
         state: PR_STATE_OPEN,
         isModified: false,
@@ -214,7 +214,7 @@ describe('workers/branch', () => {
         artifactErrors: [],
         updatedArtifacts: [],
       });
-      platform.branchExists.mockResolvedValue(false);
+      git.branchExists.mockResolvedValue(false);
       expect(await branchWorker.processBranch(config, true)).toEqual(
         'pr-hourly-limit-reached'
       );
@@ -227,7 +227,7 @@ describe('workers/branch', () => {
         artifactErrors: [],
         updatedArtifacts: [],
       });
-      platform.branchExists.mockResolvedValueOnce(false);
+      git.branchExists.mockResolvedValueOnce(false);
       commit.commitFilesToBranch.mockResolvedValueOnce(null);
       expect(await branchWorker.processBranch(config)).toEqual('no-work');
     });
@@ -239,7 +239,7 @@ describe('workers/branch', () => {
         artifactErrors: [],
         updatedArtifacts: [{}],
       } as never);
-      platform.branchExists.mockResolvedValueOnce(true);
+      git.branchExists.mockResolvedValueOnce(true);
       commit.commitFilesToBranch.mockResolvedValueOnce(null);
       automerge.tryBranchAutomerge.mockResolvedValueOnce('automerged');
       await branchWorker.processBranch(config);
@@ -256,7 +256,7 @@ describe('workers/branch', () => {
         artifactErrors: [],
         updatedArtifacts: [{}],
       } as never);
-      platform.branchExists.mockResolvedValueOnce(false);
+      git.branchExists.mockResolvedValueOnce(false);
       automerge.tryBranchAutomerge.mockResolvedValueOnce('automerged');
       await branchWorker.processBranch({
         ...config,
@@ -275,7 +275,7 @@ describe('workers/branch', () => {
         artifactErrors: [],
         updatedArtifacts: [{}],
       } as never);
-      platform.branchExists.mockResolvedValueOnce(true);
+      git.branchExists.mockResolvedValueOnce(true);
       commit.commitFilesToBranch.mockResolvedValueOnce(null);
       automerge.tryBranchAutomerge.mockResolvedValueOnce('automerged');
       await branchWorker.processBranch({ ...config, dryRun: true });
@@ -291,7 +291,7 @@ describe('workers/branch', () => {
         artifactErrors: [],
         updatedArtifacts: [{}],
       } as never);
-      platform.branchExists.mockResolvedValueOnce(true);
+      git.branchExists.mockResolvedValueOnce(true);
       commit.commitFilesToBranch.mockResolvedValueOnce(null);
       automerge.tryBranchAutomerge.mockResolvedValueOnce('failed');
       prWorker.ensurePr.mockResolvedValueOnce({
@@ -310,7 +310,7 @@ describe('workers/branch', () => {
         artifactErrors: [],
         updatedArtifacts: [{}],
       } as never);
-      platform.branchExists.mockResolvedValueOnce(true);
+      git.branchExists.mockResolvedValueOnce(true);
       commit.commitFilesToBranch.mockResolvedValueOnce(null);
       automerge.tryBranchAutomerge.mockResolvedValueOnce('failed');
       prWorker.ensurePr.mockResolvedValueOnce({
@@ -346,7 +346,7 @@ describe('workers/branch', () => {
         artifactErrors: [],
         updatedArtifacts: [{}],
       } as never);
-      platform.branchExists.mockResolvedValueOnce(true);
+      git.branchExists.mockResolvedValueOnce(true);
       automerge.tryBranchAutomerge.mockResolvedValueOnce('failed');
       prWorker.ensurePr.mockResolvedValueOnce({
         result: PrResult.Created,
@@ -367,7 +367,7 @@ describe('workers/branch', () => {
         artifactErrors: [{}],
         updatedArtifacts: [{}],
       } as never);
-      platform.branchExists.mockResolvedValueOnce(true);
+      git.branchExists.mockResolvedValueOnce(true);
       automerge.tryBranchAutomerge.mockResolvedValueOnce('failed');
       prWorker.ensurePr.mockResolvedValueOnce({
         result: PrResult.Created,
@@ -388,7 +388,7 @@ describe('workers/branch', () => {
         artifactErrors: [{}],
         updatedArtifacts: [{}],
       } as never);
-      platform.branchExists.mockResolvedValueOnce(true);
+      git.branchExists.mockResolvedValueOnce(true);
       automerge.tryBranchAutomerge.mockResolvedValueOnce('failed');
       prWorker.ensurePr.mockResolvedValueOnce({
         result: PrResult.Created,
@@ -410,7 +410,7 @@ describe('workers/branch', () => {
         artifactErrors: [{}],
         updatedArtifacts: [{}],
       } as never);
-      platform.branchExists.mockResolvedValueOnce(true);
+      git.branchExists.mockResolvedValueOnce(true);
       automerge.tryBranchAutomerge.mockResolvedValueOnce('failed');
       prWorker.ensurePr.mockResolvedValueOnce({
         result: PrResult.Created,
@@ -432,7 +432,7 @@ describe('workers/branch', () => {
         artifactErrors: [{}],
         updatedArtifacts: [{}],
       } as never);
-      platform.branchExists.mockResolvedValueOnce(false);
+      git.branchExists.mockResolvedValueOnce(false);
       automerge.tryBranchAutomerge.mockResolvedValueOnce('failed');
       prWorker.ensurePr.mockResolvedValueOnce({
         result: PrResult.Created,
@@ -453,7 +453,7 @@ describe('workers/branch', () => {
         updatedArtifacts: [{}],
       } as never);
       config.recreateClosed = true;
-      platform.branchExists.mockResolvedValueOnce(true);
+      git.branchExists.mockResolvedValueOnce(true);
       automerge.tryBranchAutomerge.mockResolvedValueOnce('failed');
       prWorker.ensurePr.mockResolvedValueOnce({
         result: PrResult.Created,
@@ -492,7 +492,7 @@ describe('workers/branch', () => {
         artifactErrors: [],
         updatedArtifacts: [{}],
       } as never);
-      platform.branchExists.mockResolvedValueOnce(true);
+      git.branchExists.mockResolvedValueOnce(true);
       automerge.tryBranchAutomerge.mockResolvedValueOnce(false as never);
       prWorker.ensurePr.mockImplementationOnce(() => {
         throw new Error('some error');
@@ -502,7 +502,7 @@ describe('workers/branch', () => {
     });
 
     it('closed pr (dry run)', async () => {
-      platform.branchExists.mockResolvedValueOnce(true);
+      git.branchExists.mockResolvedValueOnce(true);
       checkExisting.prAlreadyExisted.mockResolvedValueOnce({
         state: PR_STATE_CLOSED,
       });
@@ -512,7 +512,7 @@ describe('workers/branch', () => {
     });
 
     it('branch pr no rebase (dry run)', async () => {
-      platform.branchExists.mockResolvedValueOnce(true);
+      git.branchExists.mockResolvedValueOnce(true);
       platform.getBranchPr.mockResolvedValueOnce({
         state: PR_STATE_OPEN,
         isModified: true,
@@ -531,7 +531,7 @@ describe('workers/branch', () => {
         artifactErrors: [],
         updatedArtifacts: [{}],
       } as never);
-      platform.branchExists.mockResolvedValueOnce(true);
+      git.branchExists.mockResolvedValueOnce(true);
       platform.getBranchPr.mockResolvedValueOnce({
         title: 'rebase!',
         state: PR_STATE_OPEN,
@@ -562,7 +562,7 @@ describe('workers/branch', () => {
         artifactErrors: [],
         updatedArtifacts: [{}],
       } as never);
-      platform.branchExists.mockResolvedValueOnce(true);
+      git.branchExists.mockResolvedValueOnce(true);
       platform.getBranchPr.mockResolvedValueOnce({
         title: 'rebase!',
         state: PR_STATE_OPEN,
@@ -594,7 +594,7 @@ describe('workers/branch', () => {
         artifactErrors: [],
         updatedArtifacts: [{}],
       } as never);
-      platform.branchExists.mockResolvedValueOnce(true);
+      git.branchExists.mockResolvedValueOnce(true);
       platform.getBranchPr.mockResolvedValueOnce({
         title: 'rebase!',
         state: PR_STATE_OPEN,
@@ -632,7 +632,7 @@ describe('workers/branch', () => {
           },
         ],
       } as never);
-      platform.branchExists.mockResolvedValueOnce(true);
+      git.branchExists.mockResolvedValueOnce(true);
       platform.getBranchPr.mockResolvedValueOnce({
         title: 'rebase!',
         state: 'open',

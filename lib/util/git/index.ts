@@ -146,10 +146,10 @@ export async function getSubmodules(): Promise<string[]> {
     .filter((_e: string, i: number) => i % 2);
 }
 
-export async function initRepo(args: StorageConfig): Promise<void> {
-  config = { ...args } as any;
-
-  config.branchExists = {};
+export async function syncGit(): Promise<void> {
+  if (git) {
+    return;
+  }
   logger.debug('Initializing git repository into ' + config.localDir);
   const gitHead = join(config.localDir, '.git/HEAD');
   let clone = true;
@@ -214,7 +214,7 @@ export async function initRepo(args: StorageConfig): Promise<void> {
     logger.warn({ err }, 'Cannot retrieve latest commit date');
   }
   try {
-    const { gitAuthorName, gitAuthorEmail } = args;
+    const { gitAuthorName, gitAuthorEmail } = config;
     if (gitAuthorName) {
       logger.debug({ gitAuthorName }, 'Setting git author name');
       await git.raw(['config', 'user.name', gitAuthorName]);
@@ -230,6 +230,13 @@ export async function initRepo(args: StorageConfig): Promise<void> {
   }
 
   config.baseBranch = config.baseBranch || (await getDefaultBranch(git));
+}
+
+export async function initRepo(args: StorageConfig): Promise<void> {
+  config = { ...args } as any;
+  config.branchExists = {};
+  git = undefined;
+  await syncGit();
 }
 
 // istanbul ignore next

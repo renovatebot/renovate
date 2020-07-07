@@ -25,7 +25,7 @@ import { ExternalHostError } from '../../types/errors/external-host-error';
 import { emojify } from '../../util/emoji';
 import { exec } from '../../util/exec';
 import { readLocalFile, writeLocalFile } from '../../util/fs';
-import { getRepoStatus } from '../../util/git';
+import { getRepoStatus, branchExists as gitBranchExists } from '../../util/git';
 import { regEx } from '../../util/regex';
 import { BranchConfig, PrResult, ProcessBranchResult } from '../common';
 import { checkAutoMerge, ensurePr } from '../pr';
@@ -63,7 +63,7 @@ export async function processBranch(
   );
   logger.trace({ config }, 'branch config');
   await platform.setBaseBranch(config.baseBranch);
-  const branchExists = await platform.branchExists(config.branchName);
+  const branchExists = await gitBranchExists(config.branchName);
   const branchPr = await platform.getBranchPr(config.branchName);
   logger.debug(`branchExists=${branchExists}`);
   const masterIssueCheck = (config.masterIssueChecks || {})[config.branchName];
@@ -453,6 +453,7 @@ export async function processBranch(
     // break if we pushed a new commit because status check are pretty sure pending but maybe not reported yet
     if (
       !masterIssueCheck &&
+      !config.rebaseRequested &&
       commitHash &&
       (config.requiredStatusChecks?.length || config.prCreation !== 'immediate')
     ) {
