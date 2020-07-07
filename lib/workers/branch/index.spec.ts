@@ -538,7 +538,7 @@ describe('workers/branch', () => {
         state: PR_STATE_OPEN,
         body: `- [x] <!-- rebase-check -->`,
       } as never);
-
+      git.isBranchModified.mockResolvedValueOnce(true);
       schedule.isScheduledNow.mockReturnValueOnce(false);
       commit.commitFilesToBranch.mockResolvedValueOnce(null);
 
@@ -568,7 +568,7 @@ describe('workers/branch', () => {
         state: PR_STATE_OPEN,
         body: `- [x] <!-- rebase-check -->`,
       } as never);
-
+      git.isBranchModified.mockResolvedValueOnce(true);
       schedule.isScheduledNow.mockReturnValueOnce(false);
       prWorker.ensurePr.mockResolvedValueOnce({
         result: PrResult.Created,
@@ -599,7 +599,7 @@ describe('workers/branch', () => {
         state: PR_STATE_OPEN,
         body: `- [x] <!-- rebase-check -->`,
       } as never);
-
+      git.isBranchModified.mockResolvedValueOnce(true);
       schedule.isScheduledNow.mockReturnValueOnce(false);
       commit.commitFilesToBranch.mockResolvedValueOnce(null);
       expect(
@@ -636,6 +636,7 @@ describe('workers/branch', () => {
         state: 'open',
         body: `- [x] <!-- rebase-check -->`,
       } as never);
+      git.isBranchModified.mockResolvedValueOnce(true);
       git.getRepoStatus.mockResolvedValueOnce({
         modified: ['modified_file'],
         not_added: [],
