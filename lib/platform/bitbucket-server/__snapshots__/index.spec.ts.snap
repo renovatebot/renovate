@@ -55,18 +55,6 @@ Array [
     "url": "https://stash.renovatebot.com/rest/api/1.0/projects/SOME/repos/repo/pull-requests/5/merge",
   },
   Object {
-    "headers": Object {
-      "accept": "application/json",
-      "accept-encoding": "gzip, deflate",
-      "authorization": "Basic YWJjOjEyMw==",
-      "host": "stash.renovatebot.com",
-      "user-agent": "https://github.com/renovatebot/renovate",
-      "x-atlassian-token": "no-check",
-    },
-    "method": "GET",
-    "url": "https://stash.renovatebot.com/rest/api/1.0/projects/SOME/repos/repo/pull-requests/5/commits?withCounts=true",
-  },
-  Object {
     "body": "{\\"title\\":\\"title\\",\\"version\\":1,\\"reviewers\\":[{\\"user\\":{\\"name\\":\\"userName2\\"}},{\\"user\\":{\\"name\\":\\"name\\"}}]}",
     "headers": Object {
       "accept": "application/json",
@@ -104,18 +92,6 @@ Array [
     },
     "method": "GET",
     "url": "https://stash.renovatebot.com/rest/api/1.0/projects/SOME/repos/repo/pull-requests/5/merge",
-  },
-  Object {
-    "headers": Object {
-      "accept": "application/json",
-      "accept-encoding": "gzip, deflate",
-      "authorization": "Basic YWJjOjEyMw==",
-      "host": "stash.renovatebot.com",
-      "user-agent": "https://github.com/renovatebot/renovate",
-      "x-atlassian-token": "no-check",
-    },
-    "method": "GET",
-    "url": "https://stash.renovatebot.com/rest/api/1.0/projects/SOME/repos/repo/pull-requests/5/commits?withCounts=true",
   },
 ]
 `;
@@ -171,18 +147,6 @@ Array [
     "url": "https://stash.renovatebot.com/rest/api/1.0/projects/SOME/repos/repo/pull-requests/5/merge",
   },
   Object {
-    "headers": Object {
-      "accept": "application/json",
-      "accept-encoding": "gzip, deflate",
-      "authorization": "Basic YWJjOjEyMw==",
-      "host": "stash.renovatebot.com",
-      "user-agent": "https://github.com/renovatebot/renovate",
-      "x-atlassian-token": "no-check",
-    },
-    "method": "GET",
-    "url": "https://stash.renovatebot.com/rest/api/1.0/projects/SOME/repos/repo/pull-requests/5/commits?withCounts=true",
-  },
-  Object {
     "body": "{\\"title\\":\\"title\\",\\"version\\":1,\\"reviewers\\":[{\\"user\\":{\\"name\\":\\"userName2\\"}},{\\"user\\":{\\"name\\":\\"name\\"}}]}",
     "headers": Object {
       "accept": "application/json",
@@ -220,18 +184,6 @@ Array [
     },
     "method": "GET",
     "url": "https://stash.renovatebot.com/rest/api/1.0/projects/SOME/repos/repo/pull-requests/5/merge",
-  },
-  Object {
-    "headers": Object {
-      "accept": "application/json",
-      "accept-encoding": "gzip, deflate",
-      "authorization": "Basic YWJjOjEyMw==",
-      "host": "stash.renovatebot.com",
-      "user-agent": "https://github.com/renovatebot/renovate",
-      "x-atlassian-token": "no-check",
-    },
-    "method": "GET",
-    "url": "https://stash.renovatebot.com/rest/api/1.0/projects/SOME/repos/repo/pull-requests/5/commits?withCounts=true",
   },
 ]
 `;
@@ -285,18 +237,6 @@ Array [
     },
     "method": "GET",
     "url": "https://stash.renovatebot.com/rest/api/1.0/projects/SOME/repos/repo/pull-requests/5/merge",
-  },
-  Object {
-    "headers": Object {
-      "accept": "application/json",
-      "accept-encoding": "gzip, deflate",
-      "authorization": "Basic YWJjOjEyMw==",
-      "host": "stash.renovatebot.com",
-      "user-agent": "https://github.com/renovatebot/renovate",
-      "x-atlassian-token": "no-check",
-    },
-    "method": "GET",
-    "url": "https://stash.renovatebot.com/rest/api/1.0/projects/SOME/repos/repo/pull-requests/5/commits?withCounts=true",
   },
   Object {
     "body": "{\\"title\\":\\"title\\",\\"version\\":1,\\"reviewers\\":[{\\"user\\":{\\"name\\":\\"userName2\\"}},{\\"user\\":{\\"name\\":\\"name\\"}}]}",
@@ -437,18 +377,6 @@ Array [
     "url": "https://stash.renovatebot.com/rest/api/1.0/projects/SOME/repos/repo/pull-requests/5/merge",
   },
   Object {
-    "headers": Object {
-      "accept": "application/json",
-      "accept-encoding": "gzip, deflate",
-      "authorization": "Basic YWJjOjEyMw==",
-      "host": "stash.renovatebot.com",
-      "user-agent": "https://github.com/renovatebot/renovate",
-      "x-atlassian-token": "no-check",
-    },
-    "method": "GET",
-    "url": "https://stash.renovatebot.com/rest/api/1.0/projects/SOME/repos/repo/pull-requests/5/commits?withCounts=true",
-  },
-  Object {
     "body": "{\\"title\\":\\"title\\",\\"version\\":1,\\"reviewers\\":[{\\"user\\":{\\"name\\":\\"userName2\\"}},{\\"user\\":{\\"name\\":\\"name\\"}}]}",
     "headers": Object {
       "accept": "application/json",
@@ -515,18 +443,6 @@ Array [
     },
     "method": "GET",
     "url": "https://stash.renovatebot.com/rest/api/1.0/projects/SOME/repos/repo/pull-requests/5/merge",
-  },
-  Object {
-    "headers": Object {
-      "accept": "application/json",
-      "accept-encoding": "gzip, deflate",
-      "authorization": "Basic YWJjOjEyMw==",
-      "host": "stash.renovatebot.com",
-      "user-agent": "https://github.com/renovatebot/renovate",
-      "x-atlassian-token": "no-check",
-    },
-    "method": "GET",
-    "url": "https://stash.renovatebot.com/rest/api/1.0/projects/SOME/repos/repo/pull-requests/5/commits?withCounts=true",
   },
   Object {
     "body": "{\\"title\\":\\"title\\",\\"version\\":1,\\"reviewers\\":[{\\"user\\":{\\"name\\":\\"userName2\\"}},{\\"user\\":{\\"name\\":\\"name\\"}}]}",
@@ -1446,7 +1362,6 @@ Object {
 * Line 2",
   "branchName": "userName1/pullRequest5",
   "createdAt": 1547853840016,
-  "isModified": true,
   "number": 5,
   "state": "open",
   "targetBranch": "master",
@@ -1546,7 +1461,6 @@ Object {
   "createdAt": 1547853840016,
   "displayNumber": "Pull Request #5",
   "isConflicted": false,
-  "isModified": false,
   "isStale": false,
   "number": 5,
   "reviewers": Array [
@@ -1620,18 +1534,6 @@ Array [
     },
     "method": "GET",
     "url": "https://stash.renovatebot.com/rest/api/1.0/projects/SOME/repos/repo/pull-requests/5/merge",
-  },
-  Object {
-    "headers": Object {
-      "accept": "application/json",
-      "accept-encoding": "gzip, deflate",
-      "authorization": "Basic YWJjOjEyMw==",
-      "host": "stash.renovatebot.com",
-      "user-agent": "https://github.com/renovatebot/renovate",
-      "x-atlassian-token": "no-check",
-    },
-    "method": "GET",
-    "url": "https://stash.renovatebot.com/rest/api/1.0/projects/SOME/repos/repo/pull-requests/5/commits?withCounts=true",
   },
 ]
 `;
@@ -1997,7 +1899,6 @@ Object {
   "createdAt": 1547853840016,
   "displayNumber": "Pull Request #5",
   "isConflicted": false,
-  "isModified": true,
   "isStale": false,
   "number": 5,
   "reviewers": Array [
@@ -2019,7 +1920,6 @@ Object {
   "createdAt": 1547853840016,
   "displayNumber": "Pull Request #5",
   "isConflicted": false,
-  "isModified": false,
   "isStale": false,
   "number": 5,
   "reviewers": Array [
@@ -2041,7 +1941,6 @@ Object {
   "createdAt": 1547853840016,
   "displayNumber": "Pull Request #5",
   "isConflicted": false,
-  "isModified": true,
   "isStale": false,
   "number": 5,
   "reviewers": Array [
@@ -2114,18 +2013,6 @@ Array [
       "x-atlassian-token": "no-check",
     },
     "method": "GET",
-    "url": "https://stash.renovatebot.com/rest/api/1.0/projects/SOME/repos/repo/pull-requests/3/commits?withCounts=true",
-  },
-  Object {
-    "headers": Object {
-      "accept": "application/json",
-      "accept-encoding": "gzip, deflate",
-      "authorization": "Basic YWJjOjEyMw==",
-      "host": "stash.renovatebot.com",
-      "user-agent": "https://github.com/renovatebot/renovate",
-      "x-atlassian-token": "no-check",
-    },
-    "method": "GET",
     "url": "https://stash.renovatebot.com/rest/api/1.0/projects/SOME/repos/repo/pull-requests/5",
   },
   Object {
@@ -2150,18 +2037,6 @@ Array [
       "x-atlassian-token": "no-check",
     },
     "method": "GET",
-    "url": "https://stash.renovatebot.com/rest/api/1.0/projects/SOME/repos/repo/pull-requests/5/commits?withCounts=true",
-  },
-  Object {
-    "headers": Object {
-      "accept": "application/json",
-      "accept-encoding": "gzip, deflate",
-      "authorization": "Basic YWJjOjEyMw==",
-      "host": "stash.renovatebot.com",
-      "user-agent": "https://github.com/renovatebot/renovate",
-      "x-atlassian-token": "no-check",
-    },
-    "method": "GET",
     "url": "https://stash.renovatebot.com/rest/api/1.0/projects/SOME/repos/repo/pull-requests/5",
   },
   Object {
@@ -2175,18 +2050,6 @@ Array [
     },
     "method": "GET",
     "url": "https://stash.renovatebot.com/rest/api/1.0/projects/SOME/repos/repo/pull-requests/5/merge",
-  },
-  Object {
-    "headers": Object {
-      "accept": "application/json",
-      "accept-encoding": "gzip, deflate",
-      "authorization": "Basic YWJjOjEyMw==",
-      "host": "stash.renovatebot.com",
-      "user-agent": "https://github.com/renovatebot/renovate",
-      "x-atlassian-token": "no-check",
-    },
-    "method": "GET",
-    "url": "https://stash.renovatebot.com/rest/api/1.0/projects/SOME/repos/repo/pull-requests/5/commits?withCounts=true",
   },
 ]
 `;
@@ -2200,7 +2063,6 @@ Object {
   "createdAt": 1547853840016,
   "displayNumber": "Pull Request #5",
   "isConflicted": false,
-  "isModified": false,
   "isStale": false,
   "number": 5,
   "reviewers": Array [
@@ -2263,18 +2125,6 @@ Array [
     "method": "GET",
     "url": "https://stash.renovatebot.com/rest/api/1.0/projects/SOME/repos/repo/pull-requests/5/merge",
   },
-  Object {
-    "headers": Object {
-      "accept": "application/json",
-      "accept-encoding": "gzip, deflate",
-      "authorization": "Basic YWJjOjEyMw==",
-      "host": "stash.renovatebot.com",
-      "user-agent": "https://github.com/renovatebot/renovate",
-      "x-atlassian-token": "no-check",
-    },
-    "method": "GET",
-    "url": "https://stash.renovatebot.com/rest/api/1.0/projects/SOME/repos/repo/pull-requests/5/commits?withCounts=true",
-  },
 ]
 `;
 
@@ -2284,7 +2134,6 @@ Object {
   "branchName": undefined,
   "createdAt": undefined,
   "displayNumber": "Pull Request #undefined",
-  "isModified": false,
   "isStale": false,
   "number": undefined,
   "reviewers": Array [],
@@ -2361,7 +2210,6 @@ Array [
 * Line 2",
     "branchName": "userName1/pullRequest5",
     "createdAt": 1547853840016,
-    "isModified": true,
     "number": 5,
     "state": "open",
     "targetBranch": "master",
@@ -2595,18 +2443,6 @@ Array [
       "user-agent": "https://github.com/renovatebot/renovate",
       "x-atlassian-token": "no-check",
     },
-    "method": "GET",
-    "url": "https://stash.renovatebot.com/rest/api/1.0/projects/SOME/repos/repo/pull-requests/5/commits?withCounts=true",
-  },
-  Object {
-    "headers": Object {
-      "accept": "application/json",
-      "accept-encoding": "gzip, deflate",
-      "authorization": "Basic YWJjOjEyMw==",
-      "host": "stash.renovatebot.com",
-      "user-agent": "https://github.com/renovatebot/renovate",
-      "x-atlassian-token": "no-check",
-    },
     "method": "POST",
     "url": "https://stash.renovatebot.com/rest/api/1.0/projects/SOME/repos/repo/pull-requests/5/merge?version=1",
   },
@@ -2662,18 +2498,6 @@ Array [
     },
     "method": "GET",
     "url": "https://stash.renovatebot.com/rest/api/1.0/projects/SOME/repos/repo/pull-requests/5/merge",
-  },
-  Object {
-    "headers": Object {
-      "accept": "application/json",
-      "accept-encoding": "gzip, deflate",
-      "authorization": "Basic YWJjOjEyMw==",
-      "host": "stash.renovatebot.com",
-      "user-agent": "https://github.com/renovatebot/renovate",
-      "x-atlassian-token": "no-check",
-    },
-    "method": "GET",
-    "url": "https://stash.renovatebot.com/rest/api/1.0/projects/SOME/repos/repo/pull-requests/5/commits?withCounts=true",
   },
   Object {
     "headers": Object {
@@ -2819,18 +2643,6 @@ Array [
       "user-agent": "https://github.com/renovatebot/renovate",
       "x-atlassian-token": "no-check",
     },
-    "method": "GET",
-    "url": "https://stash.renovatebot.com/rest/api/1.0/projects/SOME/repos/repo/pull-requests/5/commits?withCounts=true",
-  },
-  Object {
-    "headers": Object {
-      "accept": "application/json",
-      "accept-encoding": "gzip, deflate",
-      "authorization": "Basic YWJjOjEyMw==",
-      "host": "stash.renovatebot.com",
-      "user-agent": "https://github.com/renovatebot/renovate",
-      "x-atlassian-token": "no-check",
-    },
     "method": "POST",
     "url": "https://stash.renovatebot.com/rest/api/1.0/projects/SOME/repos/repo/pull-requests/5/merge?version=1",
   },
@@ -2886,18 +2698,6 @@ Array [
     },
     "method": "GET",
     "url": "https://stash.renovatebot.com/rest/api/1.0/projects/SOME/repos/repo/pull-requests/5/merge",
-  },
-  Object {
-    "headers": Object {
-      "accept": "application/json",
-      "accept-encoding": "gzip, deflate",
-      "authorization": "Basic YWJjOjEyMw==",
-      "host": "stash.renovatebot.com",
-      "user-agent": "https://github.com/renovatebot/renovate",
-      "x-atlassian-token": "no-check",
-    },
-    "method": "GET",
-    "url": "https://stash.renovatebot.com/rest/api/1.0/projects/SOME/repos/repo/pull-requests/5/commits?withCounts=true",
   },
   Object {
     "headers": Object {
@@ -3564,18 +3364,6 @@ Array [
     "url": "https://stash.renovatebot.com/rest/api/1.0/projects/SOME/repos/repo/pull-requests/5/merge",
   },
   Object {
-    "headers": Object {
-      "accept": "application/json",
-      "accept-encoding": "gzip, deflate",
-      "authorization": "Basic YWJjOjEyMw==",
-      "host": "stash.renovatebot.com",
-      "user-agent": "https://github.com/renovatebot/renovate",
-      "x-atlassian-token": "no-check",
-    },
-    "method": "GET",
-    "url": "https://stash.renovatebot.com/rest/api/1.0/projects/SOME/repos/repo/pull-requests/5/commits?withCounts=true",
-  },
-  Object {
     "body": "{\\"title\\":\\"title\\",\\"description\\":\\"body\\",\\"version\\":1,\\"reviewers\\":[{\\"user\\":{\\"name\\":\\"userName2\\"}}]}",
     "headers": Object {
       "accept": "application/json",
@@ -3642,18 +3430,6 @@ Array [
     },
     "method": "GET",
     "url": "https://stash.renovatebot.com/rest/api/1.0/projects/SOME/repos/repo/pull-requests/5/merge",
-  },
-  Object {
-    "headers": Object {
-      "accept": "application/json",
-      "accept-encoding": "gzip, deflate",
-      "authorization": "Basic YWJjOjEyMw==",
-      "host": "stash.renovatebot.com",
-      "user-agent": "https://github.com/renovatebot/renovate",
-      "x-atlassian-token": "no-check",
-    },
-    "method": "GET",
-    "url": "https://stash.renovatebot.com/rest/api/1.0/projects/SOME/repos/repo/pull-requests/5/commits?withCounts=true",
   },
   Object {
     "body": "{\\"title\\":\\"title\\",\\"description\\":\\"body\\",\\"version\\":1,\\"reviewers\\":[{\\"user\\":{\\"name\\":\\"userName2\\"}}]}",
@@ -3794,18 +3570,6 @@ Array [
     "url": "https://stash.renovatebot.com/rest/api/1.0/projects/SOME/repos/repo/pull-requests/5/merge",
   },
   Object {
-    "headers": Object {
-      "accept": "application/json",
-      "accept-encoding": "gzip, deflate",
-      "authorization": "Basic YWJjOjEyMw==",
-      "host": "stash.renovatebot.com",
-      "user-agent": "https://github.com/renovatebot/renovate",
-      "x-atlassian-token": "no-check",
-    },
-    "method": "GET",
-    "url": "https://stash.renovatebot.com/rest/api/1.0/projects/SOME/repos/repo/pull-requests/5/commits?withCounts=true",
-  },
-  Object {
     "body": "{\\"title\\":\\"title\\",\\"description\\":\\"body\\",\\"version\\":1,\\"reviewers\\":[{\\"user\\":{\\"name\\":\\"userName2\\"}}]}",
     "headers": Object {
       "accept": "application/json",
@@ -3872,18 +3636,6 @@ Array [
     },
     "method": "GET",
     "url": "https://stash.renovatebot.com/rest/api/1.0/projects/SOME/repos/repo/pull-requests/5/merge",
-  },
-  Object {
-    "headers": Object {
-      "accept": "application/json",
-      "accept-encoding": "gzip, deflate",
-      "authorization": "Basic YWJjOjEyMw==",
-      "host": "stash.renovatebot.com",
-      "user-agent": "https://github.com/renovatebot/renovate",
-      "x-atlassian-token": "no-check",
-    },
-    "method": "GET",
-    "url": "https://stash.renovatebot.com/rest/api/1.0/projects/SOME/repos/repo/pull-requests/5/commits?withCounts=true",
   },
   Object {
     "body": "{\\"title\\":\\"title\\",\\"description\\":\\"body\\",\\"version\\":1,\\"reviewers\\":[{\\"user\\":{\\"name\\":\\"userName2\\"}}]}",
@@ -3958,18 +3710,6 @@ Array [
     "url": "https://stash.renovatebot.com/vcs/rest/api/1.0/projects/SOME/repos/repo/pull-requests/5/merge",
   },
   Object {
-    "headers": Object {
-      "accept": "application/json",
-      "accept-encoding": "gzip, deflate",
-      "authorization": "Basic YWJjOjEyMw==",
-      "host": "stash.renovatebot.com",
-      "user-agent": "https://github.com/renovatebot/renovate",
-      "x-atlassian-token": "no-check",
-    },
-    "method": "GET",
-    "url": "https://stash.renovatebot.com/vcs/rest/api/1.0/projects/SOME/repos/repo/pull-requests/5/commits?withCounts=true",
-  },
-  Object {
     "body": "{\\"title\\":\\"title\\",\\"version\\":1,\\"reviewers\\":[{\\"user\\":{\\"name\\":\\"userName2\\"}},{\\"user\\":{\\"name\\":\\"name\\"}}]}",
     "headers": Object {
       "accept": "application/json",
@@ -4007,18 +3747,6 @@ Array [
     },
     "method": "GET",
     "url": "https://stash.renovatebot.com/vcs/rest/api/1.0/projects/SOME/repos/repo/pull-requests/5/merge",
-  },
-  Object {
-    "headers": Object {
-      "accept": "application/json",
-      "accept-encoding": "gzip, deflate",
-      "authorization": "Basic YWJjOjEyMw==",
-      "host": "stash.renovatebot.com",
-      "user-agent": "https://github.com/renovatebot/renovate",
-      "x-atlassian-token": "no-check",
-    },
-    "method": "GET",
-    "url": "https://stash.renovatebot.com/vcs/rest/api/1.0/projects/SOME/repos/repo/pull-requests/5/commits?withCounts=true",
   },
 ]
 `;
@@ -4074,18 +3802,6 @@ Array [
     "url": "https://stash.renovatebot.com/vcs/rest/api/1.0/projects/SOME/repos/repo/pull-requests/5/merge",
   },
   Object {
-    "headers": Object {
-      "accept": "application/json",
-      "accept-encoding": "gzip, deflate",
-      "authorization": "Basic YWJjOjEyMw==",
-      "host": "stash.renovatebot.com",
-      "user-agent": "https://github.com/renovatebot/renovate",
-      "x-atlassian-token": "no-check",
-    },
-    "method": "GET",
-    "url": "https://stash.renovatebot.com/vcs/rest/api/1.0/projects/SOME/repos/repo/pull-requests/5/commits?withCounts=true",
-  },
-  Object {
     "body": "{\\"title\\":\\"title\\",\\"version\\":1,\\"reviewers\\":[{\\"user\\":{\\"name\\":\\"userName2\\"}},{\\"user\\":{\\"name\\":\\"name\\"}}]}",
     "headers": Object {
       "accept": "application/json",
@@ -4123,18 +3839,6 @@ Array [
     },
     "method": "GET",
     "url": "https://stash.renovatebot.com/vcs/rest/api/1.0/projects/SOME/repos/repo/pull-requests/5/merge",
-  },
-  Object {
-    "headers": Object {
-      "accept": "application/json",
-      "accept-encoding": "gzip, deflate",
-      "authorization": "Basic YWJjOjEyMw==",
-      "host": "stash.renovatebot.com",
-      "user-agent": "https://github.com/renovatebot/renovate",
-      "x-atlassian-token": "no-check",
-    },
-    "method": "GET",
-    "url": "https://stash.renovatebot.com/vcs/rest/api/1.0/projects/SOME/repos/repo/pull-requests/5/commits?withCounts=true",
   },
 ]
 `;
@@ -4188,18 +3892,6 @@ Array [
     },
     "method": "GET",
     "url": "https://stash.renovatebot.com/vcs/rest/api/1.0/projects/SOME/repos/repo/pull-requests/5/merge",
-  },
-  Object {
-    "headers": Object {
-      "accept": "application/json",
-      "accept-encoding": "gzip, deflate",
-      "authorization": "Basic YWJjOjEyMw==",
-      "host": "stash.renovatebot.com",
-      "user-agent": "https://github.com/renovatebot/renovate",
-      "x-atlassian-token": "no-check",
-    },
-    "method": "GET",
-    "url": "https://stash.renovatebot.com/vcs/rest/api/1.0/projects/SOME/repos/repo/pull-requests/5/commits?withCounts=true",
   },
   Object {
     "body": "{\\"title\\":\\"title\\",\\"version\\":1,\\"reviewers\\":[{\\"user\\":{\\"name\\":\\"userName2\\"}},{\\"user\\":{\\"name\\":\\"name\\"}}]}",
@@ -4340,18 +4032,6 @@ Array [
     "url": "https://stash.renovatebot.com/vcs/rest/api/1.0/projects/SOME/repos/repo/pull-requests/5/merge",
   },
   Object {
-    "headers": Object {
-      "accept": "application/json",
-      "accept-encoding": "gzip, deflate",
-      "authorization": "Basic YWJjOjEyMw==",
-      "host": "stash.renovatebot.com",
-      "user-agent": "https://github.com/renovatebot/renovate",
-      "x-atlassian-token": "no-check",
-    },
-    "method": "GET",
-    "url": "https://stash.renovatebot.com/vcs/rest/api/1.0/projects/SOME/repos/repo/pull-requests/5/commits?withCounts=true",
-  },
-  Object {
     "body": "{\\"title\\":\\"title\\",\\"version\\":1,\\"reviewers\\":[{\\"user\\":{\\"name\\":\\"userName2\\"}},{\\"user\\":{\\"name\\":\\"name\\"}}]}",
     "headers": Object {
       "accept": "application/json",
@@ -4418,18 +4098,6 @@ Array [
     },
     "method": "GET",
     "url": "https://stash.renovatebot.com/vcs/rest/api/1.0/projects/SOME/repos/repo/pull-requests/5/merge",
-  },
-  Object {
-    "headers": Object {
-      "accept": "application/json",
-      "accept-encoding": "gzip, deflate",
-      "authorization": "Basic YWJjOjEyMw==",
-      "host": "stash.renovatebot.com",
-      "user-agent": "https://github.com/renovatebot/renovate",
-      "x-atlassian-token": "no-check",
-    },
-    "method": "GET",
-    "url": "https://stash.renovatebot.com/vcs/rest/api/1.0/projects/SOME/repos/repo/pull-requests/5/commits?withCounts=true",
   },
   Object {
     "body": "{\\"title\\":\\"title\\",\\"version\\":1,\\"reviewers\\":[{\\"user\\":{\\"name\\":\\"userName2\\"}},{\\"user\\":{\\"name\\":\\"name\\"}}]}",
@@ -5349,7 +5017,6 @@ Object {
 * Line 2",
   "branchName": "userName1/pullRequest5",
   "createdAt": 1547853840016,
-  "isModified": true,
   "number": 5,
   "state": "open",
   "targetBranch": "master",
@@ -5449,7 +5116,6 @@ Object {
   "createdAt": 1547853840016,
   "displayNumber": "Pull Request #5",
   "isConflicted": false,
-  "isModified": false,
   "isStale": false,
   "number": 5,
   "reviewers": Array [
@@ -5523,18 +5189,6 @@ Array [
     },
     "method": "GET",
     "url": "https://stash.renovatebot.com/vcs/rest/api/1.0/projects/SOME/repos/repo/pull-requests/5/merge",
-  },
-  Object {
-    "headers": Object {
-      "accept": "application/json",
-      "accept-encoding": "gzip, deflate",
-      "authorization": "Basic YWJjOjEyMw==",
-      "host": "stash.renovatebot.com",
-      "user-agent": "https://github.com/renovatebot/renovate",
-      "x-atlassian-token": "no-check",
-    },
-    "method": "GET",
-    "url": "https://stash.renovatebot.com/vcs/rest/api/1.0/projects/SOME/repos/repo/pull-requests/5/commits?withCounts=true",
   },
 ]
 `;
@@ -5900,7 +5554,6 @@ Object {
   "createdAt": 1547853840016,
   "displayNumber": "Pull Request #5",
   "isConflicted": false,
-  "isModified": true,
   "isStale": false,
   "number": 5,
   "reviewers": Array [
@@ -5922,7 +5575,6 @@ Object {
   "createdAt": 1547853840016,
   "displayNumber": "Pull Request #5",
   "isConflicted": false,
-  "isModified": false,
   "isStale": false,
   "number": 5,
   "reviewers": Array [
@@ -5944,7 +5596,6 @@ Object {
   "createdAt": 1547853840016,
   "displayNumber": "Pull Request #5",
   "isConflicted": false,
-  "isModified": true,
   "isStale": false,
   "number": 5,
   "reviewers": Array [
@@ -6017,18 +5668,6 @@ Array [
       "x-atlassian-token": "no-check",
     },
     "method": "GET",
-    "url": "https://stash.renovatebot.com/vcs/rest/api/1.0/projects/SOME/repos/repo/pull-requests/3/commits?withCounts=true",
-  },
-  Object {
-    "headers": Object {
-      "accept": "application/json",
-      "accept-encoding": "gzip, deflate",
-      "authorization": "Basic YWJjOjEyMw==",
-      "host": "stash.renovatebot.com",
-      "user-agent": "https://github.com/renovatebot/renovate",
-      "x-atlassian-token": "no-check",
-    },
-    "method": "GET",
     "url": "https://stash.renovatebot.com/vcs/rest/api/1.0/projects/SOME/repos/repo/pull-requests/5",
   },
   Object {
@@ -6053,18 +5692,6 @@ Array [
       "x-atlassian-token": "no-check",
     },
     "method": "GET",
-    "url": "https://stash.renovatebot.com/vcs/rest/api/1.0/projects/SOME/repos/repo/pull-requests/5/commits?withCounts=true",
-  },
-  Object {
-    "headers": Object {
-      "accept": "application/json",
-      "accept-encoding": "gzip, deflate",
-      "authorization": "Basic YWJjOjEyMw==",
-      "host": "stash.renovatebot.com",
-      "user-agent": "https://github.com/renovatebot/renovate",
-      "x-atlassian-token": "no-check",
-    },
-    "method": "GET",
     "url": "https://stash.renovatebot.com/vcs/rest/api/1.0/projects/SOME/repos/repo/pull-requests/5",
   },
   Object {
@@ -6078,18 +5705,6 @@ Array [
     },
     "method": "GET",
     "url": "https://stash.renovatebot.com/vcs/rest/api/1.0/projects/SOME/repos/repo/pull-requests/5/merge",
-  },
-  Object {
-    "headers": Object {
-      "accept": "application/json",
-      "accept-encoding": "gzip, deflate",
-      "authorization": "Basic YWJjOjEyMw==",
-      "host": "stash.renovatebot.com",
-      "user-agent": "https://github.com/renovatebot/renovate",
-      "x-atlassian-token": "no-check",
-    },
-    "method": "GET",
-    "url": "https://stash.renovatebot.com/vcs/rest/api/1.0/projects/SOME/repos/repo/pull-requests/5/commits?withCounts=true",
   },
 ]
 `;
@@ -6103,7 +5718,6 @@ Object {
   "createdAt": 1547853840016,
   "displayNumber": "Pull Request #5",
   "isConflicted": false,
-  "isModified": false,
   "isStale": false,
   "number": 5,
   "reviewers": Array [
@@ -6166,18 +5780,6 @@ Array [
     "method": "GET",
     "url": "https://stash.renovatebot.com/vcs/rest/api/1.0/projects/SOME/repos/repo/pull-requests/5/merge",
   },
-  Object {
-    "headers": Object {
-      "accept": "application/json",
-      "accept-encoding": "gzip, deflate",
-      "authorization": "Basic YWJjOjEyMw==",
-      "host": "stash.renovatebot.com",
-      "user-agent": "https://github.com/renovatebot/renovate",
-      "x-atlassian-token": "no-check",
-    },
-    "method": "GET",
-    "url": "https://stash.renovatebot.com/vcs/rest/api/1.0/projects/SOME/repos/repo/pull-requests/5/commits?withCounts=true",
-  },
 ]
 `;
 
@@ -6187,7 +5789,6 @@ Object {
   "branchName": undefined,
   "createdAt": undefined,
   "displayNumber": "Pull Request #undefined",
-  "isModified": false,
   "isStale": false,
   "number": undefined,
   "reviewers": Array [],
@@ -6264,7 +5865,6 @@ Array [
 * Line 2",
     "branchName": "userName1/pullRequest5",
     "createdAt": 1547853840016,
-    "isModified": true,
     "number": 5,
     "state": "open",
     "targetBranch": "master",
@@ -6498,18 +6098,6 @@ Array [
       "user-agent": "https://github.com/renovatebot/renovate",
       "x-atlassian-token": "no-check",
     },
-    "method": "GET",
-    "url": "https://stash.renovatebot.com/vcs/rest/api/1.0/projects/SOME/repos/repo/pull-requests/5/commits?withCounts=true",
-  },
-  Object {
-    "headers": Object {
-      "accept": "application/json",
-      "accept-encoding": "gzip, deflate",
-      "authorization": "Basic YWJjOjEyMw==",
-      "host": "stash.renovatebot.com",
-      "user-agent": "https://github.com/renovatebot/renovate",
-      "x-atlassian-token": "no-check",
-    },
     "method": "POST",
     "url": "https://stash.renovatebot.com/vcs/rest/api/1.0/projects/SOME/repos/repo/pull-requests/5/merge?version=1",
   },
@@ -6565,18 +6153,6 @@ Array [
     },
     "method": "GET",
     "url": "https://stash.renovatebot.com/vcs/rest/api/1.0/projects/SOME/repos/repo/pull-requests/5/merge",
-  },
-  Object {
-    "headers": Object {
-      "accept": "application/json",
-      "accept-encoding": "gzip, deflate",
-      "authorization": "Basic YWJjOjEyMw==",
-      "host": "stash.renovatebot.com",
-      "user-agent": "https://github.com/renovatebot/renovate",
-      "x-atlassian-token": "no-check",
-    },
-    "method": "GET",
-    "url": "https://stash.renovatebot.com/vcs/rest/api/1.0/projects/SOME/repos/repo/pull-requests/5/commits?withCounts=true",
   },
   Object {
     "headers": Object {
@@ -6722,18 +6298,6 @@ Array [
       "user-agent": "https://github.com/renovatebot/renovate",
       "x-atlassian-token": "no-check",
     },
-    "method": "GET",
-    "url": "https://stash.renovatebot.com/vcs/rest/api/1.0/projects/SOME/repos/repo/pull-requests/5/commits?withCounts=true",
-  },
-  Object {
-    "headers": Object {
-      "accept": "application/json",
-      "accept-encoding": "gzip, deflate",
-      "authorization": "Basic YWJjOjEyMw==",
-      "host": "stash.renovatebot.com",
-      "user-agent": "https://github.com/renovatebot/renovate",
-      "x-atlassian-token": "no-check",
-    },
     "method": "POST",
     "url": "https://stash.renovatebot.com/vcs/rest/api/1.0/projects/SOME/repos/repo/pull-requests/5/merge?version=1",
   },
@@ -6789,18 +6353,6 @@ Array [
     },
     "method": "GET",
     "url": "https://stash.renovatebot.com/vcs/rest/api/1.0/projects/SOME/repos/repo/pull-requests/5/merge",
-  },
-  Object {
-    "headers": Object {
-      "accept": "application/json",
-      "accept-encoding": "gzip, deflate",
-      "authorization": "Basic YWJjOjEyMw==",
-      "host": "stash.renovatebot.com",
-      "user-agent": "https://github.com/renovatebot/renovate",
-      "x-atlassian-token": "no-check",
-    },
-    "method": "GET",
-    "url": "https://stash.renovatebot.com/vcs/rest/api/1.0/projects/SOME/repos/repo/pull-requests/5/commits?withCounts=true",
   },
   Object {
     "headers": Object {
@@ -7467,18 +7019,6 @@ Array [
     "url": "https://stash.renovatebot.com/vcs/rest/api/1.0/projects/SOME/repos/repo/pull-requests/5/merge",
   },
   Object {
-    "headers": Object {
-      "accept": "application/json",
-      "accept-encoding": "gzip, deflate",
-      "authorization": "Basic YWJjOjEyMw==",
-      "host": "stash.renovatebot.com",
-      "user-agent": "https://github.com/renovatebot/renovate",
-      "x-atlassian-token": "no-check",
-    },
-    "method": "GET",
-    "url": "https://stash.renovatebot.com/vcs/rest/api/1.0/projects/SOME/repos/repo/pull-requests/5/commits?withCounts=true",
-  },
-  Object {
     "body": "{\\"title\\":\\"title\\",\\"description\\":\\"body\\",\\"version\\":1,\\"reviewers\\":[{\\"user\\":{\\"name\\":\\"userName2\\"}}]}",
     "headers": Object {
       "accept": "application/json",
@@ -7545,18 +7085,6 @@ Array [
     },
     "method": "GET",
     "url": "https://stash.renovatebot.com/vcs/rest/api/1.0/projects/SOME/repos/repo/pull-requests/5/merge",
-  },
-  Object {
-    "headers": Object {
-      "accept": "application/json",
-      "accept-encoding": "gzip, deflate",
-      "authorization": "Basic YWJjOjEyMw==",
-      "host": "stash.renovatebot.com",
-      "user-agent": "https://github.com/renovatebot/renovate",
-      "x-atlassian-token": "no-check",
-    },
-    "method": "GET",
-    "url": "https://stash.renovatebot.com/vcs/rest/api/1.0/projects/SOME/repos/repo/pull-requests/5/commits?withCounts=true",
   },
   Object {
     "body": "{\\"title\\":\\"title\\",\\"description\\":\\"body\\",\\"version\\":1,\\"reviewers\\":[{\\"user\\":{\\"name\\":\\"userName2\\"}}]}",
@@ -7697,18 +7225,6 @@ Array [
     "url": "https://stash.renovatebot.com/vcs/rest/api/1.0/projects/SOME/repos/repo/pull-requests/5/merge",
   },
   Object {
-    "headers": Object {
-      "accept": "application/json",
-      "accept-encoding": "gzip, deflate",
-      "authorization": "Basic YWJjOjEyMw==",
-      "host": "stash.renovatebot.com",
-      "user-agent": "https://github.com/renovatebot/renovate",
-      "x-atlassian-token": "no-check",
-    },
-    "method": "GET",
-    "url": "https://stash.renovatebot.com/vcs/rest/api/1.0/projects/SOME/repos/repo/pull-requests/5/commits?withCounts=true",
-  },
-  Object {
     "body": "{\\"title\\":\\"title\\",\\"description\\":\\"body\\",\\"version\\":1,\\"reviewers\\":[{\\"user\\":{\\"name\\":\\"userName2\\"}}]}",
     "headers": Object {
       "accept": "application/json",
@@ -7775,18 +7291,6 @@ Array [
     },
     "method": "GET",
     "url": "https://stash.renovatebot.com/vcs/rest/api/1.0/projects/SOME/repos/repo/pull-requests/5/merge",
-  },
-  Object {
-    "headers": Object {
-      "accept": "application/json",
-      "accept-encoding": "gzip, deflate",
-      "authorization": "Basic YWJjOjEyMw==",
-      "host": "stash.renovatebot.com",
-      "user-agent": "https://github.com/renovatebot/renovate",
-      "x-atlassian-token": "no-check",
-    },
-    "method": "GET",
-    "url": "https://stash.renovatebot.com/vcs/rest/api/1.0/projects/SOME/repos/repo/pull-requests/5/commits?withCounts=true",
   },
   Object {
     "body": "{\\"title\\":\\"title\\",\\"description\\":\\"body\\",\\"version\\":1,\\"reviewers\\":[{\\"user\\":{\\"name\\":\\"userName2\\"}}]}",
