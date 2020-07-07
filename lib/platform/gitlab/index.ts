@@ -476,7 +476,6 @@ export async function getPr(iid: number): Promise<Pr> {
     ).body;
     const branchCommitEmail =
       branch && branch.commit ? branch.commit.author_email : null;
-    // istanbul ignore if
     if (branchCommitEmail === global.gitAuthor.email) {
       pr.isModified = false;
     } else {
