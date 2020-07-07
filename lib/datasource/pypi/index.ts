@@ -204,7 +204,11 @@ export async function getReleases({
     const releases = await getDependency(lookupName, hostUrl, compatibility);
     // the dep was found in the json api, return as-is
     return releases;
-  } catch (e) {
+  } catch (err) {
+    if (err.statusCode !== 404) {
+      throw err;
+    }
+
     // error contacting json-style api -- attempt to fallback to a simple-style api
     logger.trace(
       { lookupName, hostUrl },

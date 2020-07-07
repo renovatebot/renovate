@@ -89,10 +89,6 @@ describe('datasource/pypi', () => {
         .get('/azure-cli-monitor/json')
         .replyWithError('error');
       httpMock
-        .scope('https://custom.pypi.net/foo')
-        .get('/azure-cli-monitor')
-        .replyWithError('error');
-      httpMock
         .scope('https://second-index/foo')
         .get('/azure-cli-monitor/json')
         .reply(200, JSON.parse(res1));
