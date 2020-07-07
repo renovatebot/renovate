@@ -408,11 +408,13 @@ export async function isBranchModified(branchName: string): Promise<boolean> {
       'Cannot check modification for branch that does not exist: ' + branchName
     );
   }
+  // Retrieve the author of the most recent commit
   const lastAuthor = (
     await git.raw(['log', '-1', '--pretty=format:%ae', `origin/${branchName}`])
   ).trim();
   const { gitAuthorEmail } = config;
   if (lastAuthor === gitAuthorEmail) {
+    // author matches - branch has not been modified
     config.branchIsModified[branchName] = false;
     return false;
   }
