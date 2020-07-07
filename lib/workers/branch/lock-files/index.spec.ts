@@ -1,4 +1,3 @@
-import _fs from 'fs-extra';
 import { git, mocked } from '../../../../test/util';
 import { getConfig } from '../../../config/defaults';
 import { PostUpdateConfig } from '../../../manager/common';
@@ -7,6 +6,7 @@ import * as _lerna from '../../../manager/npm/post-update/lerna';
 import * as _npm from '../../../manager/npm/post-update/npm';
 import * as _pnpm from '../../../manager/npm/post-update/pnpm';
 import * as _yarn from '../../../manager/npm/post-update/yarn';
+import * as _fs from '../../../util/fs/proxies';
 import * as _hostRules from '../../../util/host-rules';
 
 const defaultConfig = getConfig();

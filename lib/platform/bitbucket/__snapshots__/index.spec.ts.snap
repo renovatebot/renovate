@@ -1344,17 +1344,57 @@ Array [
     "url": "https://api.bitbucket.org/2.0/repositories/some/repo",
   },
   Object {
-    "body": "{\\"title\\":\\"title\\",\\"description\\":\\"body\\"}",
     "headers": Object {
       "accept": "application/json",
       "accept-encoding": "gzip, deflate",
       "authorization": "Basic YWJjOjEyMw==",
-      "content-length": 38,
+      "host": "api.bitbucket.org",
+      "user-agent": "https://github.com/renovatebot/renovate",
+    },
+    "method": "GET",
+    "url": "https://api.bitbucket.org/2.0/repositories/some/repo/pullrequests/5",
+  },
+  Object {
+    "body": "{\\"title\\":\\"title\\",\\"description\\":\\"body\\",\\"reviewers\\":[{\\"display_name\\":\\"Jane Smith\\",\\"uuid\\":\\"{90b6646d-1724-4a64-9fd9-539515fe94e9}\\"}]}",
+    "headers": Object {
+      "accept": "application/json",
+      "accept-encoding": "gzip, deflate",
+      "authorization": "Basic YWJjOjEyMw==",
+      "content-length": 130,
       "content-type": "application/json",
       "host": "api.bitbucket.org",
       "user-agent": "https://github.com/renovatebot/renovate",
     },
     "method": "PUT",
+    "url": "https://api.bitbucket.org/2.0/repositories/some/repo/pullrequests/5",
+  },
+]
+`;
+
+exports[`platform/bitbucket updatePr() throws an error on failure to get current list of reviewers 1`] = `"Response code 500 (Internal Server Error)"`;
+
+exports[`platform/bitbucket updatePr() throws an error on failure to get current list of reviewers 2`] = `
+Array [
+  Object {
+    "headers": Object {
+      "accept": "application/json",
+      "accept-encoding": "gzip, deflate",
+      "authorization": "Basic YWJjOjEyMw==",
+      "host": "api.bitbucket.org",
+      "user-agent": "https://github.com/renovatebot/renovate",
+    },
+    "method": "GET",
+    "url": "https://api.bitbucket.org/2.0/repositories/some/repo",
+  },
+  Object {
+    "headers": Object {
+      "accept": "application/json",
+      "accept-encoding": "gzip, deflate",
+      "authorization": "Basic YWJjOjEyMw==",
+      "host": "api.bitbucket.org",
+      "user-agent": "https://github.com/renovatebot/renovate",
+    },
+    "method": "GET",
     "url": "https://api.bitbucket.org/2.0/repositories/some/repo/pullrequests/5",
   },
 ]

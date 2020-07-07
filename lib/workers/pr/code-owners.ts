@@ -1,15 +1,15 @@
 import ignore from 'ignore';
 import { logger } from '../../logger';
 import { Pr, platform } from '../../platform';
-import { getFile } from '../../util/git';
+import { readLocalFile } from '../../util/fs';
 
 export async function codeOwnersForPr(pr: Pr): Promise<string[]> {
   try {
     const codeOwnersFile =
-      (await getFile('CODEOWNERS', pr.targetBranch)) ||
-      (await getFile('.github/CODEOWNERS', pr.targetBranch)) ||
-      (await getFile('.gitlab/CODEOWNERS', pr.targetBranch)) ||
-      (await getFile('docs/CODEOWNERS', pr.targetBranch));
+      (await readLocalFile('CODEOWNERS', 'utf8')) ||
+      (await readLocalFile('.github/CODEOWNERS', 'utf8')) ||
+      (await readLocalFile('.gitlab/CODEOWNERS', 'utf8')) ||
+      (await readLocalFile('docs/CODEOWNERS', 'utf8'));
 
     if (!codeOwnersFile) {
       return [];

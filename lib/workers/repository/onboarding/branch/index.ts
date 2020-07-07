@@ -40,6 +40,7 @@ export async function checkOnboardingBranch(
     }
     logger.debug('Need to create onboarding PR');
     const commit = await createOnboardingBranch(config);
+    // istanbul ignore if
     if (commit) {
       logger.info(
         { branch: config.onboardingBranch, commit, onboarding: true },
