@@ -188,7 +188,6 @@ export interface Platform {
   getVulnerabilityAlerts(): Promise<VulnerabilityAlert[]>;
   initRepo(config: RepoParams): Promise<RepoConfig>;
   getPrList(): Promise<Pr[]>;
-  getPrFiles(pr: Pr): Promise<string[]>;
   ensureIssueClosing(title: string): Promise<void>;
   ensureIssue(
     issueConfig: EnsureIssueConfig
