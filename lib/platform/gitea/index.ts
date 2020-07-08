@@ -468,11 +468,6 @@ const platform: Platform = {
     return config.prList;
   },
 
-  /* istanbul ignore next */
-  async getPrFiles(pr: Pr): Promise<string[]> {
-    return git.getBranchFiles(pr.branchName, pr.targetBranch);
-  },
-
   async getPr(number: number): Promise<Pr | null> {
     // Search for pull request in cached list or attempt to query directly
     const prList = await platform.getPrList();
@@ -883,7 +878,6 @@ export const {
   getPr,
   getPrBody,
   getPrList,
-  getPrFiles,
   getRepoForceRebase,
   getRepos,
   getVulnerabilityAlerts,
