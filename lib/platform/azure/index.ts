@@ -19,7 +19,6 @@ import { sanitize } from '../../util/sanitize';
 import { ensureTrailingSlash } from '../../util/url';
 import {
   BranchStatusConfig,
-  CommitFilesConfig,
   CreatePRConfig,
   EnsureCommentConfig,
   EnsureCommentRemovalConfig,
@@ -316,18 +315,6 @@ export /* istanbul ignore next */ async function deleteBranch(
     const pr = await getBranchPr(branchName);
     await abandonPr(pr.number);
   }
-}
-
-export /* istanbul ignore next */ function commitFiles({
-  branchName,
-  files,
-  message,
-}: CommitFilesConfig): Promise<string | null> {
-  return git.commitFiles({
-    branchName,
-    files,
-    message,
-  });
 }
 
 export async function getBranchStatusCheck(

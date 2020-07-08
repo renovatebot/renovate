@@ -1,11 +1,4 @@
-import {
-  BranchStatusConfig,
-  CommitFilesConfig,
-  File,
-  Platform,
-  RepoConfig,
-  RepoParams,
-} from '..';
+import { BranchStatusConfig, Platform, RepoConfig, RepoParams } from '..';
 import { partial } from '../../../test/util';
 import {
   REPOSITORY_ACCESS_FORBIDDEN,
@@ -1322,24 +1315,6 @@ describe('platform/gitea', () => {
       await expect(
         gitea.addReviewers(mockPR.number, ['me', 'you'])
       ).resolves.not.toThrow();
-    });
-  });
-
-  describe('commitFiles', () => {
-    it('should propagate call to storage class with default parent branch', async () => {
-      const commitConfig: CommitFilesConfig = {
-        branchName: 'some-branch',
-        files: [partial<File>({})],
-        message: 'some-message',
-      };
-
-      await initFakeRepo();
-      await gitea.commitFiles(commitConfig);
-
-      expect(gitvcs.commitFiles).toHaveBeenCalledTimes(1);
-      expect(gitvcs.commitFiles).toHaveBeenCalledWith({
-        ...commitConfig,
-      });
     });
   });
 
