@@ -145,7 +145,7 @@ export function getNewValue({
         });
         return satisfies(toVersion, replaced) ? replaced : null;
       });
-      return versions.filter((x) => x !== null && x !== '').join(', ');
+      return versions.filter((x) => x !== null && x !== '').join(' ');
     }
     logger.debug(
       'Unsupported range type for rangeStrategy=bump: ' + currentValue

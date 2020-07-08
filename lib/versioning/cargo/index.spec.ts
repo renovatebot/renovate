@@ -380,7 +380,7 @@ describe('semver.getNewValue()', () => {
       })
     ).toEqual('<= 1.5.0');
   });
-  it('returns null when attempting to bump complex ranges', () => {
+  it('bumps complex ranges', () => {
     expect(
       semver.getNewValue({
         currentValue: '>= 0.1.21, < 0.2.0',
