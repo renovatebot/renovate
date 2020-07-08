@@ -10,9 +10,8 @@ import {
   PR_STATE_OPEN,
 } from '../../constants/pull-requests';
 import * as _npmPostExtract from '../../manager/npm/post-update';
-import { File } from '../../platform';
 import * as _exec from '../../util/exec';
-import { StatusResult } from '../../util/git';
+import { File, StatusResult } from '../../util/git';
 import { BranchConfig, PrResult } from '../common';
 import * as _prWorker from '../pr';
 import * as _automerge from './automerge';
@@ -190,6 +189,7 @@ describe('workers/branch', () => {
       platform.getBranchPr.mockResolvedValueOnce({
         state: PR_STATE_OPEN,
         isModified: true,
+        body: '**Rebasing**: something',
       } as never);
       const res = await branchWorker.processBranch(config);
       expect(res).toEqual('pr-edited');

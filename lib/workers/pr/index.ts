@@ -309,7 +309,7 @@ export async function ensurePr(
           },
           'PR title changed'
         );
-      } else if (!config.committedFiles) {
+      } else if (!config.committedFiles && !config.rebaseRequested) {
         logger.debug(
           {
             prTitle,

@@ -773,9 +773,27 @@ describe('platform/bitbucket', () => {
 
   describe('updatePr()', () => {
     it('puts PR', async () => {
+      const reviewer = {
+        display_name: 'Jane Smith',
+        uuid: '{90b6646d-1724-4a64-9fd9-539515fe94e9}',
+      };
       const scope = await initRepoMock();
-      scope.put('/2.0/repositories/some/repo/pullrequests/5').reply(200);
+      scope
+        .get('/2.0/repositories/some/repo/pullrequests/5')
+        .reply(200, { reviewers: [reviewer] })
+        .put('/2.0/repositories/some/repo/pullrequests/5')
+        .reply(200);
       await bitbucket.updatePr(5, 'title', 'body');
+      expect(httpMock.getTrace()).toMatchSnapshot();
+    });
+    it('throws an error on failure to get current list of reviewers', async () => {
+      const scope = await initRepoMock();
+      scope
+        .get('/2.0/repositories/some/repo/pullrequests/5')
+        .reply(500, undefined);
+      await expect(() =>
+        bitbucket.updatePr(5, 'title', 'body')
+      ).rejects.toThrowErrorMatchingSnapshot();
       expect(httpMock.getTrace()).toMatchSnapshot();
     });
   });
@@ -785,19 +803,6 @@ describe('platform/bitbucket', () => {
       const scope = await initRepoMock();
       scope.post('/2.0/repositories/some/repo/pullrequests/5/merge').reply(200);
       await bitbucket.mergePr(5, 'branch');
-      expect(httpMock.getTrace()).toMatchSnapshot();
-    });
-  });
-
-  describe('commitFiles()', () => {
-    it('sends to gitFs', async () => {
-      await initRepoMock();
-      const res = await bitbucket.commitFiles({
-        branchName: 'test',
-        files: [],
-        message: 'message',
-      });
-      expect(res).toMatchSnapshot();
       expect(httpMock.getTrace()).toMatchSnapshot();
     });
   });

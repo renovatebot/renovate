@@ -21,7 +21,6 @@ import { sanitize } from '../../util/sanitize';
 import { ensureTrailingSlash } from '../../util/url';
 import {
   BranchStatusConfig,
-  CommitFilesConfig,
   CreatePRConfig,
   EnsureCommentConfig,
   EnsureCommentRemovalConfig,
@@ -365,11 +364,6 @@ export async function getPrList(_args?: any): Promise<Pr[]> {
   return config.prList;
 }
 
-/* istanbul ignore next */
-export async function getPrFiles(pr: Pr): Promise<string[]> {
-  return git.getBranchFiles(pr.branchName, pr.targetBranch);
-}
-
 // TODO: coverage
 // istanbul ignore next
 export async function findPr({
@@ -390,28 +384,21 @@ export async function findPr({
 }
 
 // Returns the Pull Request for a branch. Null if not exists.
-export async function getBranchPr(
-  branchName: string,
-  refreshCache?: boolean
-): Promise<BbsPr | null> {
+export async function getBranchPr(branchName: string): Promise<BbsPr | null> {
   logger.debug(`getBranchPr(${branchName})`);
   const existingPr = await findPr({
     branchName,
     state: PR_STATE_OPEN,
   });
-  return existingPr ? getPr(existingPr.number, refreshCache) : null;
+  return existingPr ? getPr(existingPr.number) : null;
 }
 
-export async function commitFiles(
-  commitFilesConfig: CommitFilesConfig
-): Promise<string | null> {
-  const commit = git.commitFiles(commitFilesConfig);
-
+// istanbul ignore next
+export async function refreshPr(number: number): Promise<void> {
   // wait for pr change propagation
   await delay(1000);
   // refresh cache
-  await getBranchPr(commitFilesConfig.branchName, true);
-  return commit;
+  await getPr(number, true);
 }
 
 export async function deleteBranch(

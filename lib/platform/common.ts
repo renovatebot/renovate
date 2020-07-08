@@ -7,28 +7,6 @@ import {
 
 export type VulnerabilityAlert = _VulnerabilityAlert;
 
-/**
- * File to commit to branch
- */
-export interface File {
-  /**
-   * Relative file path
-   */
-  name: string;
-
-  /**
-   * file contents
-   */
-  contents: string | Buffer;
-}
-
-export type CommitFilesConfig = {
-  branchName: string;
-  files: File[];
-  message: string;
-  force?: boolean;
-};
-
 export interface GotApiOptions {
   useCache?: boolean;
   hostType?: string;
@@ -188,7 +166,6 @@ export interface Platform {
   getVulnerabilityAlerts(): Promise<VulnerabilityAlert[]>;
   initRepo(config: RepoParams): Promise<RepoConfig>;
   getPrList(): Promise<Pr[]>;
-  getPrFiles(pr: Pr): Promise<string[]>;
   ensureIssueClosing(title: string): Promise<void>;
   ensureIssue(
     issueConfig: EnsureIssueConfig
@@ -215,9 +192,9 @@ export interface Platform {
   deleteBranch(branchName: string, closePr?: boolean): Promise<void>;
   ensureComment(ensureComment: EnsureCommentConfig): Promise<boolean>;
   setBaseBranch(baseBranch?: string): Promise<string>;
-  commitFiles(commitFile: CommitFilesConfig): Promise<string | null>;
   getPr(number: number): Promise<Pr>;
   findPr(findPRConfig: FindPRConfig): Promise<Pr>;
+  refreshPr?(number: number): Promise<void>;
   getBranchStatus(
     branchName: string,
     requiredStatusChecks?: string[] | null

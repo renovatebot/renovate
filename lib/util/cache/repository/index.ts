@@ -56,15 +56,19 @@ export async function initialize(config: RenovateConfig): Promise<void> {
   } catch (err) {
     logger.debug({ cacheFileName }, 'Repository cache not found');
   }
-  cache = cache || { repository: config.repository };
+  cache = cache || Object.create({});
+  cache.repository = config.repository;
 }
 
 export function getCache(): Cache {
+  cache = cache || Object.create({});
   return cache;
 }
 
 export async function finalize(): Promise<void> {
-  if (repositoryCache !== 'disabled') {
+  if (cacheFileName && cache && repositoryCache !== 'disabled') {
     await fs.outputFile(cacheFileName, JSON.stringify(cache));
   }
+  cacheFileName = null;
+  cache = Object.create({});
 }

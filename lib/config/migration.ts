@@ -76,6 +76,13 @@ export function migrateConfig(
           );
         }
         delete migratedConfig.pathRules;
+      } else if (key === 'suppressNotifications') {
+        if (is.nonEmptyArray(val) && val.includes('prEditNotification')) {
+          isMigrated = true;
+          migratedConfig.suppressNotifications = migratedConfig.suppressNotifications.filter(
+            (item) => item !== 'prEditNotification'
+          );
+        }
       } else if (key === 'gomodTidy') {
         isMigrated = true;
         if (val) {

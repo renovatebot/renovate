@@ -16,7 +16,6 @@ import { BitbucketHttp, setBaseUrl } from '../../util/http/bitbucket';
 import { sanitize } from '../../util/sanitize';
 import {
   BranchStatusConfig,
-  CommitFilesConfig,
   CreatePRConfig,
   EnsureCommentConfig,
   EnsureCommentRemovalConfig,
@@ -211,11 +210,6 @@ export async function getPrList(): Promise<Pr[]> {
   return config.prList;
 }
 
-/* istanbul ignore next */
-export async function getPrFiles(pr: Pr): Promise<string[]> {
-  return git.getBranchFiles(pr.branchName, pr.targetBranch);
-}
-
 export async function findPr({
   branchName,
   prTitle,
@@ -250,13 +244,6 @@ export async function deleteBranch(
   return git.deleteBranch(branchName);
 }
 
-// istanbul ignore next
-export function commitFiles(
-  commitFilesConfig: CommitFilesConfig
-): Promise<string | null> {
-  return git.commitFiles(commitFilesConfig);
-}
-
 async function isPrConflicted(prNo: number): Promise<boolean> {
   const diff = (
     await bitbucketHttp.get(
@@ -281,6 +268,7 @@ interface PrResponse {
       name: string;
     };
   };
+  reviewers: Array<any>;
 }
 
 // Gets details for a PR
@@ -785,10 +773,21 @@ export async function updatePr(
   description: string
 ): Promise<void> {
   logger.debug(`updatePr(${prNo}, ${title}, body)`);
+  // Updating a PR in Bitbucket will clear the reviewers if reviewers is not present
+  const pr = (
+    await bitbucketHttp.getJson<PrResponse>(
+      `/2.0/repositories/${config.repository}/pullrequests/${prNo}`
+    )
+  ).body;
+
   await bitbucketHttp.putJson(
     `/2.0/repositories/${config.repository}/pullrequests/${prNo}`,
     {
-      body: { title, description: sanitize(description) },
+      body: {
+        title,
+        description: sanitize(description),
+        reviewers: pr.reviewers,
+      },
     }
   );
 }

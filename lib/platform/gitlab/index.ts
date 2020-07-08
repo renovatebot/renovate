@@ -26,7 +26,6 @@ import { sanitize } from '../../util/sanitize';
 import { ensureTrailingSlash } from '../../util/url';
 import {
   BranchStatusConfig,
-  CommitFilesConfig,
   CreatePRConfig,
   EnsureCommentConfig,
   EnsureCommentRemovalConfig,
@@ -204,11 +203,6 @@ export async function initRepo({
     config.baseBranch = config.defaultBranch;
     config.mergeMethod = res.body.merge_method || 'merge';
     logger.debug(`${repository} default branch = ${config.baseBranch}`);
-    // Discover our user email
-    config.email = (
-      await gitlabApi.getJson<{ email: string }>(`user`)
-    ).body.email;
-    logger.debug('Bot email=' + config.email);
     delete config.prList;
     logger.debug('Enabling Git FS');
     const opts = hostRules.find({
@@ -481,12 +475,11 @@ export async function getPr(iid: number): Promise<Pr> {
     ).body;
     const branchCommitEmail =
       branch && branch.commit ? branch.commit.author_email : null;
-    // istanbul ignore if
-    if (branchCommitEmail === config.email) {
+    if (branchCommitEmail === global.gitAuthor.email) {
       pr.isModified = false;
     } else {
       logger.debug(
-        { branchCommitEmail, configEmail: config.email, iid: pr.iid },
+        { branchCommitEmail, configEmail: global.gitAuthor.email, iid: pr.iid },
         'Last committer to branch does not match bot email, so PR cannot be rebased.'
       );
       pr.isModified = true;
@@ -594,13 +587,6 @@ export async function getBranchPr(branchName: string): Promise<Pr> {
     return null;
   }
   return getPr(pr.iid);
-}
-
-// istanbul ignore next
-export function commitFiles(
-  commitFilesConfig: CommitFilesConfig
-): Promise<string | null> {
-  return git.commitFiles(commitFilesConfig);
 }
 
 export async function deleteBranch(
@@ -1021,11 +1007,6 @@ export async function getPrList(): Promise<Pr[]> {
     config.prList = await fetchPrList();
   }
   return config.prList;
-}
-
-/* istanbul ignore next */
-export async function getPrFiles(pr: Pr): Promise<string[]> {
-  return git.getBranchFiles(pr.branchName, pr.targetBranch);
 }
 
 function matchesState(state: string, desiredState: string): boolean {

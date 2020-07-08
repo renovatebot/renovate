@@ -31,7 +31,6 @@ import { sanitize } from '../../util/sanitize';
 import { ensureTrailingSlash } from '../../util/url';
 import {
   BranchStatusConfig,
-  CommitFilesConfig,
   CreatePRConfig,
   EnsureCommentConfig,
   EnsureCommentRemovalConfig,
@@ -220,8 +219,6 @@ export async function initRepo({
   try {
     res = await githubApi.getJson<{ fork: boolean }>(`repos/${repository}`);
     logger.trace({ repositoryDetails: res.body }, 'Repository details');
-    config.enterpriseVersion =
-      res.headers && (res.headers['x-github-enterprise-version'] as string);
     // istanbul ignore if
     if (res.body.fork && !includeForks) {
       try {
@@ -275,8 +272,6 @@ export async function initRepo({
         throw new Error(REPOSITORY_DISABLED);
       }
     }
-    const owner = res.body.owner.login;
-    logger.debug(`${repository} owner = ${owner}`);
     // Use default branch as PR target unless later overridden.
     config.defaultBranch = res.body.default_branch;
     // Base branch may be configured but defaultBranch is always fixed
@@ -496,13 +491,6 @@ export function deleteBranch(
   closePr?: boolean
 ): Promise<void> {
   return git.deleteBranch(branchName);
-}
-
-// istanbul ignore next
-export function commitFiles(
-  commitFilesConfig: CommitFilesConfig
-): Promise<string | null> {
-  return git.commitFiles(commitFilesConfig);
 }
 
 async function getClosedPrs(): Promise<PrList> {
@@ -909,11 +897,6 @@ export async function getPrList(): Promise<Pr[]> {
     logger.debug(`Retrieved ${config.prList.length} Pull Requests`);
   }
   return config.prList;
-}
-
-/* istanbul ignore next */
-export async function getPrFiles(pr: Pr): Promise<string[]> {
-  return git.getBranchFiles(pr.branchName, pr.targetBranch);
 }
 
 export async function findPr({

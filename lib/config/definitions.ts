@@ -1694,7 +1694,6 @@ const options: RenovateOptions[] = [
     default: ['deprecationWarningIssues'],
     allowedValues: [
       'prIgnoreNotification',
-      'prEditNotification',
       'branchAutomergeFailure',
       'lockFileErrors',
       'artifactErrors',
