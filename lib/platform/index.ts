@@ -3,7 +3,7 @@ import addrs from 'email-addresses';
 import { RenovateConfig } from '../config/common';
 import { PLATFORM_NOT_FOUND } from '../constants/error-messages';
 import { logger } from '../logger';
-import * as git from '../util/git';
+import { setPrivateKey } from '../util/git';
 import * as hostRules from '../util/host-rules';
 import platforms from './api.generated';
 import { Platform } from './common';
@@ -82,7 +82,7 @@ export function parseGitAuthor(input: string): GitAuthor | null {
 export async function initPlatform(
   config: RenovateConfig
 ): Promise<RenovateConfig> {
-  git.setPrivateKey(config.gitPrivateKey);
+  setPrivateKey(config.gitPrivateKey);
   setPlatformApi(config.platform);
   // TODO: types
   const platformInfo = await platform.initPlatform(config);
