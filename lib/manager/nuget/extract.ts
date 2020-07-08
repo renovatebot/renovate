@@ -74,7 +74,7 @@ async function determineRegistryUrls(
   return registryUrls;
 }
 
-const packageRe = /<(?:PackageReference|DotNetCliToolReference|GlobalPackageReference).*(?:Include|Update)\s*=\s*"([^"]+)".*Version\s*=\s*"(?:[[])?(?:([^"(,[\]]+)\s*(?:,\s*[)\]]|])?)"/;
+const packageRe = /<(?:PackageReference|DotNetCliToolReference|GlobalPackageReference).*(?:Include|Update)\s*=\s*"([^"]+)".*(?:Version|VersionOverride)\s*=\s*"(?:[[])?(?:([^"(,[\]]+)\s*(?:,\s*[)\]]|])?)"/;
 export async function extractPackageFile(
   content: string,
   packageFile: string,
