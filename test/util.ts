@@ -30,8 +30,6 @@ export const platform = mocked(_platform);
 export const env = mocked(_env);
 export const hostRules = mocked(_hostRules);
 
-Object.assign(platform, { commitFiles: jest.fn() });
-
 // Required because of isolatedModules
 export type RenovateConfig = _RenovateConfig;
 
