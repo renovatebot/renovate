@@ -36,6 +36,14 @@ describe('platform/git', () => {
     await repo.add(['future_file']);
     await repo.commit('future message');
 
+    await repo.checkoutBranch('renovate/modified_branch', 'master');
+    await fs.writeFile(base.path + '/base_file', 'base');
+    await repo.add(['base_file']);
+    await repo.commit('base message');
+    await fs.writeFile(base.path + '/modified_file', 'modified');
+    await repo.add(['modified_file']);
+    await repo.commit('modification');
+
     await repo.checkoutBranch('renovate/custom_author', 'master');
     await fs.writeFile(base.path + '/custom_file', 'custom');
     await repo.add(['custom_file']);
@@ -137,6 +145,9 @@ describe('platform/git', () => {
     it('should return true when author matches', async () => {
       expect(await git.isBranchModified('renovate/future_branch')).toBe(false);
       expect(await git.isBranchModified('renovate/future_branch')).toBe(false);
+    });
+    it('should return false when more than one commit', async () => {
+      expect(await git.isBranchModified('renovate/modified_branch')).toBe(true);
     });
     it('should return false when custom author', async () => {
       expect(await git.isBranchModified('renovate/custom_author')).toBe(true);
