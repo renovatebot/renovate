@@ -1,7 +1,7 @@
 import { ReleaseType } from 'semver';
 import { GlobalConfig, UpdateType, ValidationMessage } from '../config/common';
-import { File } from '../platform/common';
 import { RangeStrategy, SkipReason } from '../types';
+import { File } from '../util/git';
 
 export type Result<T> = T | Promise<T>;
 

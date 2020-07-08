@@ -33,6 +33,11 @@ export async function checkOnboardingBranch(
         'Branch updated'
       );
     }
+    // istanbul ignore if
+    if (platform.refreshPr) {
+      const onboardingPr = await platform.getBranchPr(config.onboardingBranch);
+      await platform.refreshPr(onboardingPr.number);
+    }
   } else {
     logger.debug('Onboarding PR does not exist');
     if (Object.entries(await extractAllDependencies(config)).length === 0) {

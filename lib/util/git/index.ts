@@ -10,7 +10,6 @@ import {
   SYSTEM_INSUFFICIENT_DISK_SPACE,
 } from '../../constants/error-messages';
 import { logger } from '../../logger';
-import { CommitFilesConfig } from '../../platform/common';
 import { ExternalHostError } from '../../types/errors/external-host-error';
 import * as limits from '../../workers/global/limits';
 import { writePrivateKey } from './private-key';
@@ -474,6 +473,28 @@ export async function hasDiff(branchName: string): Promise<boolean> {
     return true;
   }
 }
+
+/**
+ * File to commit
+ */
+export interface File {
+  /**
+   * Relative file path
+   */
+  name: string;
+
+  /**
+   * file contents
+   */
+  contents: string | Buffer;
+}
+
+export type CommitFilesConfig = {
+  branchName: string;
+  files: File[];
+  message: string;
+  force?: boolean;
+};
 
 export async function commitFiles({
   branchName,

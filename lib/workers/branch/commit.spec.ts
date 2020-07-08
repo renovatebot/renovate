@@ -1,6 +1,8 @@
-import { defaultConfig, partial, platform } from '../../../test/util';
+import { defaultConfig, git, partial } from '../../../test/util';
 import { BranchConfig } from '../common';
 import { commitFilesToBranch } from './commit';
+
+jest.mock('../../util/git');
 
 describe('workers/branch/automerge', () => {
   describe('commitFilesToBranch', () => {
@@ -17,11 +19,11 @@ describe('workers/branch/automerge', () => {
         updatedArtifacts: [],
       });
       jest.resetAllMocks();
-      platform.commitFiles.mockResolvedValueOnce('abc123');
+      git.commitFiles.mockResolvedValueOnce('abc123');
     });
     it('handles empty files', async () => {
       await commitFilesToBranch(config);
-      expect(platform.commitFiles).toHaveBeenCalledTimes(0);
+      expect(git.commitFiles).toHaveBeenCalledTimes(0);
     });
     it('commits files', async () => {
       config.updatedPackageFiles.push({
@@ -29,8 +31,8 @@ describe('workers/branch/automerge', () => {
         contents: 'some contents',
       });
       await commitFilesToBranch(config);
-      expect(platform.commitFiles).toHaveBeenCalledTimes(1);
-      expect(platform.commitFiles.mock.calls).toMatchSnapshot();
+      expect(git.commitFiles).toHaveBeenCalledTimes(1);
+      expect(git.commitFiles.mock.calls).toMatchSnapshot();
     });
     it('dry runs', async () => {
       config.dryRun = true;
@@ -39,7 +41,7 @@ describe('workers/branch/automerge', () => {
         contents: 'some contents',
       });
       await commitFilesToBranch(config);
-      expect(platform.commitFiles).toHaveBeenCalledTimes(0);
+      expect(git.commitFiles).toHaveBeenCalledTimes(0);
     });
   });
 });

@@ -4,8 +4,7 @@ import * as datasourceGitSubmodules from '../../datasource/git-submodules';
 import { logger } from '../../logger';
 import { get } from '../../manager';
 import { ArtifactError } from '../../manager/common';
-import { File } from '../../platform';
-import { getFile } from '../../util/git';
+import { File, getFile } from '../../util/git';
 import { BranchConfig } from '../common';
 import { doAutoReplace } from './auto-replace';
 

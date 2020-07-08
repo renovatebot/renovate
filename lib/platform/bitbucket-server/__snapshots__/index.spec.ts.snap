@@ -546,47 +546,6 @@ Array [
 ]
 `;
 
-exports[`platform/bitbucket-server endpoint with no path commitFiles() sends to gitFs 1`] = `
-Array [
-  Object {
-    "headers": Object {
-      "accept": "application/json",
-      "accept-encoding": "gzip, deflate",
-      "authorization": "Basic YWJjOjEyMw==",
-      "host": "stash.renovatebot.com",
-      "user-agent": "https://github.com/renovatebot/renovate",
-      "x-atlassian-token": "no-check",
-    },
-    "method": "GET",
-    "url": "https://stash.renovatebot.com/rest/api/1.0/projects/SOME/repos/repo",
-  },
-  Object {
-    "headers": Object {
-      "accept": "application/json",
-      "accept-encoding": "gzip, deflate",
-      "authorization": "Basic YWJjOjEyMw==",
-      "host": "stash.renovatebot.com",
-      "user-agent": "https://github.com/renovatebot/renovate",
-      "x-atlassian-token": "no-check",
-    },
-    "method": "GET",
-    "url": "https://stash.renovatebot.com/rest/api/1.0/projects/SOME/repos/repo/branches/default",
-  },
-  Object {
-    "headers": Object {
-      "accept": "application/json",
-      "accept-encoding": "gzip, deflate",
-      "authorization": "Basic YWJjOjEyMw==",
-      "host": "stash.renovatebot.com",
-      "user-agent": "https://github.com/renovatebot/renovate",
-      "x-atlassian-token": "no-check",
-    },
-    "method": "GET",
-    "url": "https://stash.renovatebot.com/rest/api/1.0/projects/SOME/repos/repo/pull-requests?state=ALL&role.1=AUTHOR&username.1=abc&limit=100",
-  },
-]
-`;
-
 exports[`platform/bitbucket-server endpoint with no path createPr() posts PR 1`] = `
 Array [
   Object {
@@ -4445,47 +4404,6 @@ Array [
     },
     "method": "PUT",
     "url": "https://stash.renovatebot.com/vcs/rest/api/1.0/projects/SOME/repos/repo/pull-requests/5",
-  },
-]
-`;
-
-exports[`platform/bitbucket-server endpoint with path commitFiles() sends to gitFs 1`] = `
-Array [
-  Object {
-    "headers": Object {
-      "accept": "application/json",
-      "accept-encoding": "gzip, deflate",
-      "authorization": "Basic YWJjOjEyMw==",
-      "host": "stash.renovatebot.com",
-      "user-agent": "https://github.com/renovatebot/renovate",
-      "x-atlassian-token": "no-check",
-    },
-    "method": "GET",
-    "url": "https://stash.renovatebot.com/vcs/rest/api/1.0/projects/SOME/repos/repo",
-  },
-  Object {
-    "headers": Object {
-      "accept": "application/json",
-      "accept-encoding": "gzip, deflate",
-      "authorization": "Basic YWJjOjEyMw==",
-      "host": "stash.renovatebot.com",
-      "user-agent": "https://github.com/renovatebot/renovate",
-      "x-atlassian-token": "no-check",
-    },
-    "method": "GET",
-    "url": "https://stash.renovatebot.com/vcs/rest/api/1.0/projects/SOME/repos/repo/branches/default",
-  },
-  Object {
-    "headers": Object {
-      "accept": "application/json",
-      "accept-encoding": "gzip, deflate",
-      "authorization": "Basic YWJjOjEyMw==",
-      "host": "stash.renovatebot.com",
-      "user-agent": "https://github.com/renovatebot/renovate",
-      "x-atlassian-token": "no-check",
-    },
-    "method": "GET",
-    "url": "https://stash.renovatebot.com/vcs/rest/api/1.0/projects/SOME/repos/repo/pull-requests?state=ALL&role.1=AUTHOR&username.1=abc&limit=100",
   },
 ]
 `;

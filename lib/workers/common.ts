@@ -12,7 +12,8 @@ import {
   PackageDependency,
   PackageFile,
 } from '../manager/common';
-import { File, PlatformPrOptions } from '../platform';
+import { PlatformPrOptions } from '../platform';
+import { File } from '../util/git';
 import { ChangeLogResult } from './pr/changelog/common';
 import { Merge } from 'type-fest';
 

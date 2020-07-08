@@ -1171,18 +1171,6 @@ These updates have all been created already. Click a checkbox below to force a r
       expect(gitlab.getPrBody(prBody)).toMatchSnapshot();
     });
   });
-  describe('commitFiles()', () => {
-    it('sends to gitFs', async () => {
-      expect.assertions(1);
-      await initRepo();
-      await gitlab.commitFiles({
-        branchName: 'some-branch',
-        files: [{ name: 'SomeFile', contents: 'Some Content' }],
-        message: '',
-      });
-      expect(httpMock.getTrace()).toMatchSnapshot();
-    });
-  });
   describe('getVulnerabilityAlerts()', () => {
     it('returns empty', async () => {
       const res = await gitlab.getVulnerabilityAlerts();

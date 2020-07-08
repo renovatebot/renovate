@@ -2,7 +2,7 @@ import is from '@sindresorhus/is';
 import minimatch from 'minimatch';
 import { CONFIG_SECRETS_EXPOSED } from '../../constants/error-messages';
 import { logger } from '../../logger';
-import { platform } from '../../platform';
+import { commitFiles } from '../../util/git';
 import { sanitize } from '../../util/sanitize';
 import { BranchConfig } from '../common';
 
@@ -43,7 +43,7 @@ export async function commitFilesToBranch(
     throw new Error(CONFIG_SECRETS_EXPOSED);
   }
   // API will know whether to create new branch or not
-  return platform.commitFiles({
+  return commitFiles({
     branchName: config.branchName,
     files: updatedFiles,
     message: config.commitMessage,
