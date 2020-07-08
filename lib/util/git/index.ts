@@ -489,7 +489,7 @@ export interface File {
   contents: string | Buffer;
 }
 
-type CommitFilesConfig = {
+export type CommitFilesConfig = {
   branchName: string;
   files: File[];
   message: string;
