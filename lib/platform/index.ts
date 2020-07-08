@@ -35,9 +35,6 @@ export function setPlatformApi(name: string): void {
     );
   }
   _platform = platforms.get(name);
-  if (!_platform.commitFiles) {
-    _platform.commitFiles = git.commitFiles;
-  }
 }
 
 interface GitAuthor {

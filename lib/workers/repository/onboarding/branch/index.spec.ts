@@ -37,7 +37,7 @@ describe('workers/repository/onboarding/branch', () => {
       fs.readLocalFile.mockResolvedValue('{}');
       await checkOnboardingBranch(config);
       expect(
-        platform.commitFiles.mock.calls[0][0].files[0].contents
+        git.commitFiles.mock.calls[0][0].files[0].contents
       ).toMatchSnapshot();
     });
     it('handles skipped onboarding combined with requireConfig = false', async () => {
@@ -99,7 +99,7 @@ describe('workers/repository/onboarding/branch', () => {
       expect(res.repoIsOnboarded).toBe(false);
       expect(res.branchList).toEqual(['renovate/configure']);
       expect(platform.setBaseBranch).toHaveBeenCalledTimes(1);
-      expect(platform.commitFiles).toHaveBeenCalledTimes(0);
+      expect(git.commitFiles).toHaveBeenCalledTimes(0);
     });
   });
 });

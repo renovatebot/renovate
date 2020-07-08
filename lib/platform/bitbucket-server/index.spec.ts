@@ -408,27 +408,6 @@ describe('platform/bitbucket-server', () => {
         });
       });
 
-      describe('commitFiles()', () => {
-        it('sends to gitFs', async () => {
-          expect.assertions(1);
-          const scope = await initRepo();
-          scope
-            .get(
-              `${urlPath}/rest/api/1.0/projects/SOME/repos/repo/pull-requests?state=ALL&role.1=AUTHOR&username.1=abc&limit=100`
-            )
-            .reply(200, {
-              isLastPage: true,
-              values: [prMock(url, 'SOME', 'repo')],
-            });
-          await bitbucket.commitFiles({
-            branchName: 'some-branch',
-            files: [{ name: 'test', contents: 'dummy' }],
-            message: 'message',
-          });
-          expect(httpMock.getTrace()).toMatchSnapshot();
-        });
-      });
-
       describe('addAssignees()', () => {
         it('does not throw', async () => {
           expect(await bitbucket.addAssignees(3, ['some'])).toMatchSnapshot();

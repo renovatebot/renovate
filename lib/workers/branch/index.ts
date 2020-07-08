@@ -421,6 +421,10 @@ export async function processBranch(
     config.forceCommit =
       !!masterIssueCheck || config.rebaseRequested || branchPr?.isConflicted;
     const commitHash = await commitFilesToBranch(config);
+    // istanbul ignore if
+    if (branchPr && platform.refreshPr) {
+      await platform.refreshPr(branchPr.number);
+    }
     if (!commitHash && !branchExists) {
       return 'no-work';
     }
