@@ -585,6 +585,7 @@ export async function commitFiles({
     const ref = `refs/heads/${branchName}:refs/remotes/origin/${branchName}`;
     await git.fetch(['origin', ref, '--depth=2', '--force']);
     config.branchExists[branchName] = true;
+    config.branchIsModified[branchName] = false;
     limits.incrementLimit('prCommitsPerRunLimit');
     return commit;
   } catch (err) /* istanbul ignore next */ {
