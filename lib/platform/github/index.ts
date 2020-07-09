@@ -380,15 +380,19 @@ export async function initRepo({
           }
         );
       } catch (err) /* istanbul ignore next */ {
+        logger.debug(
+          'Error updating fork reference - will try deleting fork to try again next time'
+        );
+        try {
+          await githubApi.deleteJson(`repos/${config.repository}`);
+          logger.info('Fork deleted');
+        } catch (deleteErr) {
+          logger.warn({ err: deleteErr }, 'Could not delete fork');
+        }
         if (err instanceof ExternalHostError) {
           throw err;
         }
-        if (
-          err.statusCode === 422 &&
-          err.message.startsWith('Object does not exist')
-        ) {
-          throw new Error(REPOSITORY_CHANGED);
-        }
+        throw new ExternalHostError(err);
       }
     } else {
       logger.debug({ repository_fork: config.repository }, 'Created fork');
@@ -660,9 +664,8 @@ async function getOpenPrs(): Promise<PrList> {
         } else {
           const baseCommitSHA = await getBaseCommitSHA();
           if (
-            pr.commits.nodes[0].commit.parents.edges.length &&
-            pr.commits.nodes[0].commit.parents.edges[0].node.oid !==
-              baseCommitSHA
+            pr.commits?.nodes[0]?.commit?.parents?.edges?.[0]?.node?.oid !==
+            baseCommitSHA
           ) {
             pr.isStale = true;
           }
