@@ -51,9 +51,9 @@ import {
   Comment,
   GhBranchStatus,
   GhPr,
+  GhRepo,
   LocalRepoConfig,
   PrList,
-  GhRepo,
 } from './types';
 
 const githubApi = new githubHttp.GithubHttp();
@@ -218,7 +218,7 @@ export async function initRepo({
   [config.repositoryOwner, config.repositoryName] = repository.split('/');
   let repo: GhRepo;
   try {
-    const repo = await githubApi.getGraphql<GhRepo>(`{
+    repo = await githubApi.getGraphql<GhRepo>(`{
       repository(owner: "${config.repositoryOwner}", name: "${config.repositoryName}") {
         isFork
         isArchived
@@ -248,7 +248,6 @@ export async function initRepo({
           throw new Error();
         }
       } catch (err) {
-        debugger;
         throw new Error(REPOSITORY_FORKED);
       }
     }
@@ -257,7 +256,6 @@ export async function initRepo({
         { repository, this_repository: repo?.nameWithOwner },
         'Repository has been renamed'
       );
-      debugger;
       throw new Error(REPOSITORY_RENAMED);
     }
     if (repo?.isArchived) {
