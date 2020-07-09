@@ -107,7 +107,6 @@ Array [
 
 exports[`datasource/terraform-module getReleases processes real data on changed subpath 1`] = `
 Object {
-  "homepage": "https://registry.terraform.io/modules/hashicorp/consul/aws",
   "name": "hashicorp/consul/aws",
   "releases": Array [
     Object {
@@ -191,21 +190,21 @@ Array [
     "headers": Object {
       "accept": "application/json",
       "accept-encoding": "gzip, deflate",
-      "host": "registry.terraform.io",
+      "host": "terraform.foo.bar",
       "user-agent": "https://github.com/renovatebot/renovate",
     },
     "method": "GET",
-    "url": "https://registry.terraform.io/.well-known/terraform.json",
+    "url": "https://terraform.foo.bar/.well-known/terraform.json",
   },
   Object {
     "headers": Object {
       "accept": "application/json",
       "accept-encoding": "gzip, deflate",
-      "host": "registry.terraform.io",
+      "host": "terraform.foo.bar",
       "user-agent": "https://github.com/renovatebot/renovate",
     },
     "method": "GET",
-    "url": "https://registry.terraform.io/api/registry/v1/modules/hashicorp/consul/aws",
+    "url": "https://terraform.foo.bar/api/registry/v1/modules/hashicorp/consul/aws",
   },
 ]
 `;

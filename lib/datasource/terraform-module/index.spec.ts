@@ -14,6 +14,7 @@ const serviceDiscoveryCustomResult: any = fs.readFileSync(
 );
 
 const baseUrl = 'https://registry.terraform.io';
+const localTerraformEnterprisebaseUrl = 'https://terraform.foo.bar';
 
 describe('datasource/terraform-module', () => {
   describe('getReleases', () => {
@@ -131,13 +132,14 @@ describe('datasource/terraform-module', () => {
     });
     it('processes real data on changed subpath', async () => {
       httpMock
-        .scope(baseUrl)
+        .scope(localTerraformEnterprisebaseUrl)
         .get('/api/registry/v1/modules/hashicorp/consul/aws')
         .reply(200, consulData)
         .get('/.well-known/terraform.json')
         .reply(200, serviceDiscoveryCustomResult);
       const res = await getPkgReleases({
         datasource,
+        registryUrls: ['terraform.foo.bar'],
         depName: 'hashicorp/consul/aws',
       });
       expect(res).toMatchSnapshot();
