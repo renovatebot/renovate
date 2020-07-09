@@ -44,6 +44,10 @@ interface TerraformRelease {
   versions: string[];
 }
 
+interface ServiceDiscoveryResult {
+  'modules.v1': string;
+}
+
 /**
  * terraform.getReleases
  *
@@ -64,6 +68,13 @@ export async function getReleases({
     'terraform.getDependencies()'
   );
   try {
+    const serviceDiscovery = (
+      await http.getJson<ServiceDiscoveryResult>(
+        `${registryUrl}/.well-known/terraform.json`
+      )
+    ).body;
+
+    const pkgUrl = `${registry}${serviceDiscovery['modules.v1']}${repository}`;
     const res = (await http.getJson<TerraformRelease>(pkgUrl)).body;
     const returnedName = res.namespace + '/' + res.name + '/' + res.provider;
     if (returnedName !== repository) {
