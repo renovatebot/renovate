@@ -51,7 +51,7 @@ describe(getName(__filename), () => {
       const [req] = httpMock.getTrace();
       expect(req).toBeDefined();
       expect(req.headers.accept).toBe(
-        'application/vnd.github.v3+json, some-accept, application/vnd.github.machine-man-preview+json'
+        'some-accept, application/vnd.github.machine-man-preview+json'
       );
     });
     it('strips v3 for graphql', async () => {
@@ -247,7 +247,7 @@ describe(getName(__filename), () => {
       const [req] = httpMock.getTrace();
       expect(req).toBeDefined();
       expect(req.headers.accept).toBe(
-        'application/vnd.github.v3+json, application/vnd.github.merge-info-preview+json, application/vnd.github.machine-man-preview+json'
+        'application/vnd.github.merge-info-preview+json, application/vnd.github.machine-man-preview+json'
       );
     });
     it('supports default header with app mode', async () => {
@@ -259,7 +259,7 @@ describe(getName(__filename), () => {
       const [req] = httpMock.getTrace();
       expect(req).toBeDefined();
       expect(req.headers.accept).toBe(
-        'application/vnd.github.v3+json, application/vnd.github.machine-man-preview+json'
+        'application/vnd.github.machine-man-preview+json, application/vnd.github.v3+json'
       );
     });
     it('returns empty array for undefined data', async () => {
