@@ -7,7 +7,6 @@ import * as sanitize from './sanitize';
 let hostRules: HostRule[] = [];
 
 export function add(params: HostRule): void {
-  debugger;
   if (params.domainName && params.hostName) {
     throw new Error('hostRules cannot contain both a domainName and hostName');
   }

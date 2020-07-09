@@ -1,5 +1,6 @@
 import is from '@sindresorhus/is';
 import equal from 'fast-deep-equal';
+import { HOST_DISABLED } from '../constants/error-messages';
 import { logger } from '../logger';
 import { ExternalHostError } from '../types/errors/external-host-error';
 import * as memCache from '../util/cache/memory';
@@ -15,7 +16,6 @@ import {
   ReleaseResult,
 } from './common';
 import { addMetaData } from './metadata';
-import { HOST_DISABLED } from '../constants/error-messages';
 
 export * from './common';
 

@@ -1,12 +1,12 @@
 import crypto from 'crypto';
 import URL from 'url';
 import got from 'got';
+import { HOST_DISABLED } from '../../constants/error-messages';
 import { ExternalHostError } from '../../types/errors/external-host-error';
 import * as memCache from '../cache/memory';
 import { clone } from '../clone';
 import { applyAuthorization, removeAuthorization } from './auth';
 import { applyHostRules } from './host-rules';
-import { HOST_DISABLED } from '../../constants/error-messages';
 
 interface OutgoingHttpHeaders {
   [header: string]: number | string | string[] | undefined;
