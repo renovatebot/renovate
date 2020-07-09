@@ -663,7 +663,8 @@ async function getOpenPrs(): Promise<PrList> {
         if (pr.commits.nodes.length === 1) {
           if (global.gitAuthor) {
             // Check against gitAuthor
-            const commitAuthorEmail = pr.commits.nodes[0].commit.author.email;
+            const commitAuthorEmail =
+              pr.commits?.nodes?.[0]?.commit?.author?.email;
             if (commitAuthorEmail === global.gitAuthor.email) {
               pr.isModified = false;
             } else {
@@ -700,9 +701,8 @@ async function getOpenPrs(): Promise<PrList> {
         } else {
           const baseCommitSHA = await getBaseCommitSHA();
           if (
-            pr.commits.nodes[0].commit.parents.edges.length &&
-            pr.commits.nodes[0].commit.parents.edges[0].node.oid !==
-              baseCommitSHA
+            pr.commits?.nodes[0]?.commit?.parents?.edges?.[0]?.node?.oid !==
+            baseCommitSHA
           ) {
             pr.isStale = true;
           }
