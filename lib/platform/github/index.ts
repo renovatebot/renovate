@@ -251,14 +251,14 @@ export async function initRepo({
         throw new Error(REPOSITORY_FORKED);
       }
     }
-    if (repo?.nameWithOwner && repo?.nameWithOwner !== repository) {
+    if (repo.nameWithOwner && repo.nameWithOwner !== repository) {
       logger.debug(
-        { repository, this_repository: repo?.nameWithOwner },
+        { repository, this_repository: repo.nameWithOwner },
         'Repository has been renamed'
       );
       throw new Error(REPOSITORY_RENAMED);
     }
-    if (repo?.isArchived) {
+    if (repo.isArchived) {
       logger.debug(
         'Repository is archived - throwing error to abort renovation'
       );
@@ -285,16 +285,16 @@ export async function initRepo({
       }
     }
     // Use default branch as PR target unless later overridden.
-    config.defaultBranch = repo?.defaultBranchRef?.name;
+    config.defaultBranch = repo.defaultBranchRef?.name;
     // Base branch may be configured but defaultBranch is always fixed
     config.baseBranch = config.defaultBranch;
     logger.debug(`${repository} default branch = ${config.baseBranch}`);
     // GitHub allows administrators to block certain types of merge, so we need to check it
-    if (repo?.rebaseMergeAllowed) {
+    if (repo.rebaseMergeAllowed) {
       config.mergeMethod = 'rebase';
-    } else if (repo?.squashMergeAllowed) {
+    } else if (repo.squashMergeAllowed) {
       config.mergeMethod = 'squash';
-    } else if (repo?.mergeCommitAllowed) {
+    } else if (repo.mergeCommitAllowed) {
       config.mergeMethod = 'merge';
     } else {
       // This happens if we don't have Administrator read access, it is not a critical error
@@ -439,7 +439,7 @@ export async function initRepo({
   });
   const repoConfig: RepoConfig = {
     baseBranch: config.baseBranch,
-    isFork: repo?.isFork === true,
+    isFork: repo.isFork === true,
   };
   return repoConfig;
 }
