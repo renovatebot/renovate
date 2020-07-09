@@ -23,7 +23,7 @@ Array [
       },
     },
     "headers": Object {
-      "accept": "application/json",
+      "accept": "application/vnd.github.v3+json",
       "accept-encoding": "gzip, deflate",
       "authorization": "token abc123",
       "content-length": 280,
@@ -74,7 +74,7 @@ Array [
       },
     },
     "headers": Object {
-      "accept": "application/json",
+      "accept": "application/vnd.github.v3+json",
       "accept-encoding": "gzip, deflate",
       "authorization": "token abc123",
       "content-length": 280,
@@ -134,7 +134,7 @@ Array [
       },
     },
     "headers": Object {
-      "accept": "application/json",
+      "accept": "application/vnd.github.v3+json",
       "accept-encoding": "gzip, deflate",
       "authorization": "token abc123",
       "content-length": 280,
@@ -194,7 +194,7 @@ Array [
       },
     },
     "headers": Object {
-      "accept": "application/json",
+      "accept": "application/vnd.github.v3+json",
       "accept-encoding": "gzip, deflate",
       "authorization": "token abc123",
       "content-length": 280,
@@ -315,7 +315,7 @@ Array [
       },
     },
     "headers": Object {
-      "accept": "application/json",
+      "accept": "application/vnd.github.v3+json",
       "accept-encoding": "gzip, deflate",
       "authorization": "token abc123",
       "content-length": 280,
@@ -366,7 +366,7 @@ Array [
       },
     },
     "headers": Object {
-      "accept": "application/json",
+      "accept": "application/vnd.github.v3+json",
       "accept-encoding": "gzip, deflate",
       "authorization": "token abc123",
       "content-length": 280,
@@ -414,7 +414,7 @@ Array [
       },
     },
     "headers": Object {
-      "accept": "application/json",
+      "accept": "application/vnd.github.v3+json",
       "accept-encoding": "gzip, deflate",
       "authorization": "token abc123",
       "content-length": 280,
@@ -457,7 +457,7 @@ Array [
       },
     },
     "headers": Object {
-      "accept": "application/json",
+      "accept": "application/vnd.github.v3+json",
       "accept-encoding": "gzip, deflate",
       "authorization": "token abc123",
       "content-length": 513,
@@ -519,7 +519,7 @@ Array [
       },
     },
     "headers": Object {
-      "accept": "application/json",
+      "accept": "application/vnd.github.v3+json",
       "accept-encoding": "gzip, deflate",
       "authorization": "token abc123",
       "content-length": 280,
@@ -562,7 +562,7 @@ Array [
       },
     },
     "headers": Object {
-      "accept": "application/json",
+      "accept": "application/vnd.github.v3+json",
       "accept-encoding": "gzip, deflate",
       "authorization": "token abc123",
       "content-length": 513,
@@ -624,7 +624,7 @@ Array [
       },
     },
     "headers": Object {
-      "accept": "application/json",
+      "accept": "application/vnd.github.v3+json",
       "accept-encoding": "gzip, deflate",
       "authorization": "token abc123",
       "content-length": 280,
@@ -667,7 +667,7 @@ Array [
       },
     },
     "headers": Object {
-      "accept": "application/json",
+      "accept": "application/vnd.github.v3+json",
       "accept-encoding": "gzip, deflate",
       "authorization": "token abc123",
       "content-length": 513,
@@ -718,7 +718,7 @@ Array [
       },
     },
     "headers": Object {
-      "accept": "application/json",
+      "accept": "application/vnd.github.v3+json",
       "accept-encoding": "gzip, deflate",
       "authorization": "token abc123",
       "content-length": 280,
@@ -761,7 +761,7 @@ Array [
       },
     },
     "headers": Object {
-      "accept": "application/json",
+      "accept": "application/vnd.github.v3+json",
       "accept-encoding": "gzip, deflate",
       "authorization": "token abc123",
       "content-length": 513,
@@ -809,7 +809,7 @@ Array [
       },
     },
     "headers": Object {
-      "accept": "application/json",
+      "accept": "application/vnd.github.v3+json",
       "accept-encoding": "gzip, deflate",
       "authorization": "token abc123",
       "content-length": 280,
@@ -852,7 +852,7 @@ Array [
       },
     },
     "headers": Object {
-      "accept": "application/json",
+      "accept": "application/vnd.github.v3+json",
       "accept-encoding": "gzip, deflate",
       "authorization": "token abc123",
       "content-length": 513,
@@ -900,7 +900,7 @@ Array [
       },
     },
     "headers": Object {
-      "accept": "application/json",
+      "accept": "application/vnd.github.v3+json",
       "accept-encoding": "gzip, deflate",
       "authorization": "token abc123",
       "content-length": 280,
@@ -943,7 +943,7 @@ Array [
       },
     },
     "headers": Object {
-      "accept": "application/json",
+      "accept": "application/vnd.github.v3+json",
       "accept-encoding": "gzip, deflate",
       "authorization": "token abc123",
       "content-length": 513,
@@ -1002,7 +1002,7 @@ Array [
       },
     },
     "headers": Object {
-      "accept": "application/json",
+      "accept": "application/vnd.github.v3+json",
       "accept-encoding": "gzip, deflate",
       "authorization": "token abc123",
       "content-length": 280,
@@ -1045,7 +1045,7 @@ Array [
       },
     },
     "headers": Object {
-      "accept": "application/json",
+      "accept": "application/vnd.github.v3+json",
       "accept-encoding": "gzip, deflate",
       "authorization": "token abc123",
       "content-length": 513,
@@ -1110,7 +1110,7 @@ Array [
       },
     },
     "headers": Object {
-      "accept": "application/json",
+      "accept": "application/vnd.github.v3+json",
       "accept-encoding": "gzip, deflate",
       "authorization": "token abc123",
       "content-length": 425,
@@ -1164,7 +1164,7 @@ Array [
       },
     },
     "headers": Object {
-      "accept": "application/json",
+      "accept": "application/vnd.github.v3+json",
       "accept-encoding": "gzip, deflate",
       "authorization": "token abc123",
       "content-length": 425,
@@ -1221,7 +1221,7 @@ Array [
       },
     },
     "headers": Object {
-      "accept": "application/json",
+      "accept": "application/vnd.github.v3+json",
       "accept-encoding": "gzip, deflate",
       "authorization": "token abc123",
       "content-length": 425,
@@ -1275,7 +1275,7 @@ Array [
       },
     },
     "headers": Object {
-      "accept": "application/json",
+      "accept": "application/vnd.github.v3+json",
       "accept-encoding": "gzip, deflate",
       "authorization": "token abc123",
       "content-length": 425,
@@ -1343,7 +1343,7 @@ Array [
       },
     },
     "headers": Object {
-      "accept": "application/json",
+      "accept": "application/vnd.github.v3+json",
       "accept-encoding": "gzip, deflate",
       "authorization": "token abc123",
       "content-length": 425,
@@ -1411,7 +1411,7 @@ Array [
       },
     },
     "headers": Object {
-      "accept": "application/json",
+      "accept": "application/vnd.github.v3+json",
       "accept-encoding": "gzip, deflate",
       "authorization": "token abc123",
       "content-length": 425,
@@ -1454,7 +1454,7 @@ Array [
       },
     },
     "headers": Object {
-      "accept": "application/json",
+      "accept": "application/vnd.github.v3+json",
       "accept-encoding": "gzip, deflate",
       "authorization": "token abc123",
       "content-length": 425,
@@ -1508,7 +1508,7 @@ Array [
       },
     },
     "headers": Object {
-      "accept": "application/json",
+      "accept": "application/vnd.github.v3+json",
       "accept-encoding": "gzip, deflate",
       "authorization": "token abc123",
       "content-length": 425,
@@ -1562,7 +1562,7 @@ Array [
       },
     },
     "headers": Object {
-      "accept": "application/json",
+      "accept": "application/vnd.github.v3+json",
       "accept-encoding": "gzip, deflate",
       "authorization": "token abc123",
       "content-length": 425,
@@ -1630,7 +1630,7 @@ Array [
       },
     },
     "headers": Object {
-      "accept": "application/json",
+      "accept": "application/vnd.github.v3+json",
       "accept-encoding": "gzip, deflate",
       "authorization": "token abc123",
       "content-length": 425,
@@ -1687,7 +1687,7 @@ Array [
       },
     },
     "headers": Object {
-      "accept": "application/json",
+      "accept": "application/vnd.github.v3+json",
       "accept-encoding": "gzip, deflate",
       "authorization": "token abc123",
       "content-length": 425,
@@ -1741,7 +1741,7 @@ Array [
       },
     },
     "headers": Object {
-      "accept": "application/json",
+      "accept": "application/vnd.github.v3+json",
       "accept-encoding": "gzip, deflate",
       "authorization": "token abc123",
       "content-length": 425,
@@ -1826,7 +1826,7 @@ Array [
       },
     },
     "headers": Object {
-      "accept": "application/json",
+      "accept": "application/vnd.github.v3+json",
       "accept-encoding": "gzip, deflate",
       "authorization": "token abc123",
       "content-length": 280,
@@ -1900,7 +1900,7 @@ Array [
       },
     },
     "headers": Object {
-      "accept": "application/json",
+      "accept": "application/vnd.github.v3+json",
       "accept-encoding": "gzip, deflate",
       "authorization": "token abc123",
       "content-length": 280,
@@ -1990,7 +1990,7 @@ Array [
       },
     },
     "headers": Object {
-      "accept": "application/json",
+      "accept": "application/vnd.github.v3+json",
       "accept-encoding": "gzip, deflate",
       "authorization": "token abc123",
       "content-length": 1264,
@@ -2033,7 +2033,7 @@ Array [
       },
     },
     "headers": Object {
-      "accept": "application/json",
+      "accept": "application/vnd.github.v3+json",
       "accept-encoding": "gzip, deflate",
       "authorization": "token abc123",
       "content-length": 513,
@@ -2118,7 +2118,7 @@ Array [
       },
     },
     "headers": Object {
-      "accept": "application/json",
+      "accept": "application/vnd.github.v3+json",
       "accept-encoding": "gzip, deflate",
       "authorization": "token abc123",
       "content-length": 280,
@@ -2255,7 +2255,7 @@ Array [
       },
     },
     "headers": Object {
-      "accept": "application/json",
+      "accept": "application/vnd.github.v3+json",
       "accept-encoding": "gzip, deflate",
       "authorization": "token abc123",
       "content-length": 1264,
@@ -2298,7 +2298,7 @@ Array [
       },
     },
     "headers": Object {
-      "accept": "application/json",
+      "accept": "application/vnd.github.v3+json",
       "accept-encoding": "gzip, deflate",
       "authorization": "token abc123",
       "content-length": 513,
@@ -2357,7 +2357,7 @@ Array [
       },
     },
     "headers": Object {
-      "accept": "application/json",
+      "accept": "application/vnd.github.v3+json",
       "accept-encoding": "gzip, deflate",
       "authorization": "token abc123",
       "content-length": 280,
@@ -2381,7 +2381,7 @@ Array [
   },
   Object {
     "headers": Object {
-      "accept": "application/vnd.github.antiope-preview+json",
+      "accept": "application/vnd.github.v3+json, application/vnd.github.antiope-preview+json",
       "accept-encoding": "gzip, deflate",
       "authorization": "token abc123",
       "host": "api.github.com",
@@ -2416,7 +2416,7 @@ Array [
       },
     },
     "headers": Object {
-      "accept": "application/json",
+      "accept": "application/vnd.github.v3+json",
       "accept-encoding": "gzip, deflate",
       "authorization": "token abc123",
       "content-length": 280,
@@ -2453,7 +2453,7 @@ Array [
       },
     },
     "headers": Object {
-      "accept": "application/json",
+      "accept": "application/vnd.github.v3+json",
       "accept-encoding": "gzip, deflate",
       "authorization": "token abc123",
       "content-length": 280,
@@ -2490,7 +2490,7 @@ Array [
       },
     },
     "headers": Object {
-      "accept": "application/json",
+      "accept": "application/vnd.github.v3+json",
       "accept-encoding": "gzip, deflate",
       "authorization": "token abc123",
       "content-length": 280,
@@ -2514,7 +2514,7 @@ Array [
   },
   Object {
     "headers": Object {
-      "accept": "application/vnd.github.antiope-preview+json",
+      "accept": "application/vnd.github.v3+json, application/vnd.github.antiope-preview+json",
       "accept-encoding": "gzip, deflate",
       "authorization": "token abc123",
       "host": "api.github.com",
@@ -2549,7 +2549,7 @@ Array [
       },
     },
     "headers": Object {
-      "accept": "application/json",
+      "accept": "application/vnd.github.v3+json",
       "accept-encoding": "gzip, deflate",
       "authorization": "token abc123",
       "content-length": 280,
@@ -2573,7 +2573,7 @@ Array [
   },
   Object {
     "headers": Object {
-      "accept": "application/vnd.github.antiope-preview+json",
+      "accept": "application/vnd.github.v3+json, application/vnd.github.antiope-preview+json",
       "accept-encoding": "gzip, deflate",
       "authorization": "token abc123",
       "host": "api.github.com",
@@ -2608,7 +2608,7 @@ Array [
       },
     },
     "headers": Object {
-      "accept": "application/json",
+      "accept": "application/vnd.github.v3+json",
       "accept-encoding": "gzip, deflate",
       "authorization": "token abc123",
       "content-length": 280,
@@ -2632,7 +2632,7 @@ Array [
   },
   Object {
     "headers": Object {
-      "accept": "application/vnd.github.antiope-preview+json",
+      "accept": "application/vnd.github.v3+json, application/vnd.github.antiope-preview+json",
       "accept-encoding": "gzip, deflate",
       "authorization": "token abc123",
       "host": "api.github.com",
@@ -2667,7 +2667,7 @@ Array [
       },
     },
     "headers": Object {
-      "accept": "application/json",
+      "accept": "application/vnd.github.v3+json",
       "accept-encoding": "gzip, deflate",
       "authorization": "token abc123",
       "content-length": 280,
@@ -2691,7 +2691,7 @@ Array [
   },
   Object {
     "headers": Object {
-      "accept": "application/vnd.github.antiope-preview+json",
+      "accept": "application/vnd.github.v3+json, application/vnd.github.antiope-preview+json",
       "accept-encoding": "gzip, deflate",
       "authorization": "token abc123",
       "host": "api.github.com",
@@ -2726,7 +2726,7 @@ Array [
       },
     },
     "headers": Object {
-      "accept": "application/json",
+      "accept": "application/vnd.github.v3+json",
       "accept-encoding": "gzip, deflate",
       "authorization": "token abc123",
       "content-length": 280,
@@ -2750,7 +2750,7 @@ Array [
   },
   Object {
     "headers": Object {
-      "accept": "application/vnd.github.antiope-preview+json",
+      "accept": "application/vnd.github.v3+json, application/vnd.github.antiope-preview+json",
       "accept-encoding": "gzip, deflate",
       "authorization": "token abc123",
       "host": "api.github.com",
@@ -2785,7 +2785,7 @@ Array [
       },
     },
     "headers": Object {
-      "accept": "application/json",
+      "accept": "application/vnd.github.v3+json",
       "accept-encoding": "gzip, deflate",
       "authorization": "token abc123",
       "content-length": 280,
@@ -2833,7 +2833,7 @@ Array [
       },
     },
     "headers": Object {
-      "accept": "application/json",
+      "accept": "application/vnd.github.v3+json",
       "accept-encoding": "gzip, deflate",
       "authorization": "token abc123",
       "content-length": 280,
@@ -2904,7 +2904,7 @@ Array [
       },
     },
     "headers": Object {
-      "accept": "application/json",
+      "accept": "application/vnd.github.v3+json",
       "accept-encoding": "gzip, deflate",
       "authorization": "token abc123",
       "content-length": 280,
@@ -2983,7 +2983,7 @@ Array [
       },
     },
     "headers": Object {
-      "accept": "application/json",
+      "accept": "application/vnd.github.v3+json",
       "accept-encoding": "gzip, deflate",
       "authorization": "token abc123",
       "content-length": 1264,
@@ -3037,7 +3037,7 @@ Array [
       },
     },
     "headers": Object {
-      "accept": "application/json",
+      "accept": "application/vnd.github.v3+json",
       "accept-encoding": "gzip, deflate",
       "authorization": "token abc123",
       "content-length": 513,
@@ -3090,7 +3090,7 @@ Array [
       },
     },
     "headers": Object {
-      "accept": "application/json",
+      "accept": "application/vnd.github.v3+json",
       "accept-encoding": "gzip, deflate",
       "authorization": "token abc123",
       "content-length": 280,
@@ -3169,7 +3169,7 @@ Array [
       },
     },
     "headers": Object {
-      "accept": "application/json",
+      "accept": "application/vnd.github.v3+json",
       "accept-encoding": "gzip, deflate",
       "authorization": "token abc123",
       "content-length": 1264,
@@ -3230,7 +3230,7 @@ Array [
       },
     },
     "headers": Object {
-      "accept": "application/json",
+      "accept": "application/vnd.github.v3+json",
       "accept-encoding": "gzip, deflate",
       "authorization": "token abc123",
       "content-length": 280,
@@ -3309,7 +3309,7 @@ Array [
       },
     },
     "headers": Object {
-      "accept": "application/json",
+      "accept": "application/vnd.github.v3+json",
       "accept-encoding": "gzip, deflate",
       "authorization": "token abc123",
       "content-length": 1264,
@@ -3352,7 +3352,7 @@ Array [
       },
     },
     "headers": Object {
-      "accept": "application/json",
+      "accept": "application/vnd.github.v3+json",
       "accept-encoding": "gzip, deflate",
       "authorization": "token abc123",
       "content-length": 513,
@@ -3419,7 +3419,7 @@ Array [
       },
     },
     "headers": Object {
-      "accept": "application/json",
+      "accept": "application/vnd.github.v3+json",
       "accept-encoding": "gzip, deflate",
       "authorization": "token abc123",
       "content-length": 280,
@@ -3498,7 +3498,7 @@ Array [
       },
     },
     "headers": Object {
-      "accept": "application/json",
+      "accept": "application/vnd.github.v3+json",
       "accept-encoding": "gzip, deflate",
       "authorization": "token abc123",
       "content-length": 1264,
@@ -3541,7 +3541,7 @@ Array [
       },
     },
     "headers": Object {
-      "accept": "application/json",
+      "accept": "application/vnd.github.v3+json",
       "accept-encoding": "gzip, deflate",
       "authorization": "token abc123",
       "content-length": 513,
@@ -3618,7 +3618,7 @@ Array [
       },
     },
     "headers": Object {
-      "accept": "application/json",
+      "accept": "application/vnd.github.v3+json",
       "accept-encoding": "gzip, deflate",
       "authorization": "token abc123",
       "content-length": 280,
@@ -3697,7 +3697,7 @@ Array [
       },
     },
     "headers": Object {
-      "accept": "application/json",
+      "accept": "application/vnd.github.v3+json",
       "accept-encoding": "gzip, deflate",
       "authorization": "token abc123",
       "content-length": 1264,
@@ -3740,7 +3740,7 @@ Array [
       },
     },
     "headers": Object {
-      "accept": "application/json",
+      "accept": "application/vnd.github.v3+json",
       "accept-encoding": "gzip, deflate",
       "authorization": "token abc123",
       "content-length": 513,
@@ -3818,7 +3818,7 @@ Array [
       },
     },
     "headers": Object {
-      "accept": "application/json",
+      "accept": "application/vnd.github.v3+json",
       "accept-encoding": "gzip, deflate",
       "authorization": "token abc123",
       "content-length": 280,
@@ -3897,7 +3897,7 @@ Array [
       },
     },
     "headers": Object {
-      "accept": "application/json",
+      "accept": "application/vnd.github.v3+json",
       "accept-encoding": "gzip, deflate",
       "authorization": "token abc123",
       "content-length": 1264,
@@ -3940,7 +3940,7 @@ Array [
       },
     },
     "headers": Object {
-      "accept": "application/json",
+      "accept": "application/vnd.github.v3+json",
       "accept-encoding": "gzip, deflate",
       "authorization": "token abc123",
       "content-length": 513,
@@ -4029,7 +4029,7 @@ Array [
       },
     },
     "headers": Object {
-      "accept": "application/json",
+      "accept": "application/vnd.github.v3+json",
       "accept-encoding": "gzip, deflate",
       "authorization": "token abc123",
       "content-length": 280,
@@ -4108,7 +4108,7 @@ Array [
       },
     },
     "headers": Object {
-      "accept": "application/json",
+      "accept": "application/vnd.github.v3+json",
       "accept-encoding": "gzip, deflate",
       "authorization": "token abc123",
       "content-length": 1264,
@@ -4151,7 +4151,7 @@ Array [
       },
     },
     "headers": Object {
-      "accept": "application/json",
+      "accept": "application/vnd.github.v3+json",
       "accept-encoding": "gzip, deflate",
       "authorization": "token abc123",
       "content-length": 513,
@@ -4240,7 +4240,7 @@ Array [
       },
     },
     "headers": Object {
-      "accept": "application/json",
+      "accept": "application/vnd.github.v3+json",
       "accept-encoding": "gzip, deflate",
       "authorization": "token abc123",
       "content-length": 280,
@@ -4319,7 +4319,7 @@ Array [
       },
     },
     "headers": Object {
-      "accept": "application/json",
+      "accept": "application/vnd.github.v3+json",
       "accept-encoding": "gzip, deflate",
       "authorization": "token abc123",
       "content-length": 1264,
@@ -4362,7 +4362,7 @@ Array [
       },
     },
     "headers": Object {
-      "accept": "application/json",
+      "accept": "application/vnd.github.v3+json",
       "accept-encoding": "gzip, deflate",
       "authorization": "token abc123",
       "content-length": 513,
@@ -4451,7 +4451,7 @@ Array [
       },
     },
     "headers": Object {
-      "accept": "application/json",
+      "accept": "application/vnd.github.v3+json",
       "accept-encoding": "gzip, deflate",
       "authorization": "token abc123",
       "content-length": 280,
@@ -4530,7 +4530,7 @@ Array [
       },
     },
     "headers": Object {
-      "accept": "application/json",
+      "accept": "application/vnd.github.v3+json",
       "accept-encoding": "gzip, deflate",
       "authorization": "token abc123",
       "content-length": 1264,
@@ -4573,7 +4573,7 @@ Array [
       },
     },
     "headers": Object {
-      "accept": "application/json",
+      "accept": "application/vnd.github.v3+json",
       "accept-encoding": "gzip, deflate",
       "authorization": "token abc123",
       "content-length": 513,
@@ -4662,7 +4662,7 @@ Array [
       },
     },
     "headers": Object {
-      "accept": "application/json",
+      "accept": "application/vnd.github.v3+json",
       "accept-encoding": "gzip, deflate",
       "authorization": "token abc123",
       "content-length": 280,
@@ -4741,7 +4741,7 @@ Array [
       },
     },
     "headers": Object {
-      "accept": "application/json",
+      "accept": "application/vnd.github.v3+json",
       "accept-encoding": "gzip, deflate",
       "authorization": "token abc123",
       "content-length": 1264,
@@ -4784,7 +4784,7 @@ Array [
       },
     },
     "headers": Object {
-      "accept": "application/json",
+      "accept": "application/vnd.github.v3+json",
       "accept-encoding": "gzip, deflate",
       "authorization": "token abc123",
       "content-length": 513,
@@ -4854,7 +4854,7 @@ Array [
       },
     },
     "headers": Object {
-      "accept": "application/json",
+      "accept": "application/vnd.github.v3+json",
       "accept-encoding": "gzip, deflate",
       "authorization": "token abc123",
       "content-length": 280,
@@ -4933,7 +4933,7 @@ Array [
       },
     },
     "headers": Object {
-      "accept": "application/json",
+      "accept": "application/vnd.github.v3+json",
       "accept-encoding": "gzip, deflate",
       "authorization": "token abc123",
       "content-length": 1264,
@@ -4976,7 +4976,7 @@ Array [
       },
     },
     "headers": Object {
-      "accept": "application/json",
+      "accept": "application/vnd.github.v3+json",
       "accept-encoding": "gzip, deflate",
       "authorization": "token abc123",
       "content-length": 513,
@@ -5046,7 +5046,7 @@ Array [
       },
     },
     "headers": Object {
-      "accept": "application/json",
+      "accept": "application/vnd.github.v3+json",
       "accept-encoding": "gzip, deflate",
       "authorization": "token abc123",
       "content-length": 280,
@@ -5583,7 +5583,7 @@ Array [
       },
     },
     "headers": Object {
-      "accept": "application/json",
+      "accept": "application/vnd.github.v3+json",
       "accept-encoding": "gzip, deflate",
       "authorization": "token abc123",
       "content-length": 280,
@@ -5660,7 +5660,7 @@ Array [
       },
     },
     "headers": Object {
-      "accept": "application/json",
+      "accept": "application/vnd.github.v3+json",
       "accept-encoding": "gzip, deflate",
       "authorization": "token abc123",
       "content-length": 280,
@@ -5704,7 +5704,7 @@ Array [
       },
     },
     "headers": Object {
-      "accept": "application/json",
+      "accept": "application/vnd.github.v3+json",
       "accept-encoding": "gzip, deflate",
       "authorization": "token abc123",
       "content-length": 280,
@@ -5748,7 +5748,7 @@ Array [
       },
     },
     "headers": Object {
-      "accept": "application/json",
+      "accept": "application/vnd.github.v3+json",
       "accept-encoding": "gzip, deflate",
       "authorization": "token abc123",
       "content-length": 280,
@@ -5792,7 +5792,7 @@ Array [
       },
     },
     "headers": Object {
-      "accept": "application/json",
+      "accept": "application/vnd.github.v3+json",
       "accept-encoding": "gzip, deflate",
       "authorization": "token abc123",
       "content-length": 280,
@@ -5829,7 +5829,7 @@ Array [
       },
     },
     "headers": Object {
-      "accept": "application/json",
+      "accept": "application/vnd.github.v3+json",
       "accept-encoding": "gzip, deflate",
       "authorization": "token abc123",
       "content-length": 280,
@@ -5877,7 +5877,7 @@ Array [
       },
     },
     "headers": Object {
-      "accept": "application/json",
+      "accept": "application/vnd.github.v3+json",
       "accept-encoding": "gzip, deflate",
       "authorization": "token abc123",
       "content-length": 280,
@@ -5914,7 +5914,7 @@ Array [
       },
     },
     "headers": Object {
-      "accept": "application/json",
+      "accept": "application/vnd.github.v3+json",
       "accept-encoding": "gzip, deflate",
       "authorization": "token abc123",
       "content-length": 280,
@@ -5958,7 +5958,7 @@ Array [
       },
     },
     "headers": Object {
-      "accept": "application/json",
+      "accept": "application/vnd.github.v3+json",
       "accept-encoding": "gzip, deflate",
       "authorization": "token abc123",
       "content-length": 280,
@@ -6042,7 +6042,7 @@ Array [
       },
     },
     "headers": Object {
-      "accept": "application/json",
+      "accept": "application/vnd.github.v3+json",
       "accept-encoding": "gzip, deflate",
       "authorization": "token abc123",
       "content-length": 280,
@@ -6079,7 +6079,7 @@ Array [
       },
     },
     "headers": Object {
-      "accept": "application/json",
+      "accept": "application/vnd.github.v3+json",
       "accept-encoding": "gzip, deflate",
       "authorization": "token abc123",
       "content-length": 280,
@@ -6172,7 +6172,7 @@ Array [
       },
     },
     "headers": Object {
-      "accept": "application/json",
+      "accept": "application/vnd.github.v3+json",
       "accept-encoding": "gzip, deflate",
       "authorization": "token abc123",
       "content-length": 280,
@@ -6251,7 +6251,7 @@ Array [
       },
     },
     "headers": Object {
-      "accept": "application/json",
+      "accept": "application/vnd.github.v3+json",
       "accept-encoding": "gzip, deflate",
       "authorization": "token abc123",
       "content-length": 280,
@@ -6302,7 +6302,7 @@ Array [
       },
     },
     "headers": Object {
-      "accept": "application/json",
+      "accept": "application/vnd.github.v3+json",
       "accept-encoding": "gzip, deflate",
       "authorization": "token abc123",
       "content-length": 280,
@@ -6353,7 +6353,7 @@ Array [
       },
     },
     "headers": Object {
-      "accept": "application/json",
+      "accept": "application/vnd.github.v3+json",
       "accept-encoding": "gzip, deflate",
       "authorization": "token abc123",
       "content-length": 280,
@@ -6404,7 +6404,7 @@ Array [
       },
     },
     "headers": Object {
-      "accept": "application/json",
+      "accept": "application/vnd.github.v3+json",
       "accept-encoding": "gzip, deflate",
       "authorization": "token abc123",
       "content-length": 280,
@@ -6455,7 +6455,7 @@ Array [
       },
     },
     "headers": Object {
-      "accept": "application/json",
+      "accept": "application/vnd.github.v3+json",
       "accept-encoding": "gzip, deflate",
       "authorization": "token abc123",
       "content-length": 280,
@@ -6503,7 +6503,7 @@ Array [
       },
     },
     "headers": Object {
-      "accept": "application/json",
+      "accept": "application/vnd.github.v3+json",
       "accept-encoding": "gzip, deflate",
       "authorization": "token abc123",
       "content-length": 280,
@@ -6587,7 +6587,7 @@ Array [
       },
     },
     "headers": Object {
-      "accept": "application/json",
+      "accept": "application/vnd.github.v3+json",
       "accept-encoding": "gzip, deflate",
       "authorization": "token abc123",
       "content-length": 280,

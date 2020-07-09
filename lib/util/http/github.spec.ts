@@ -51,7 +51,7 @@ describe(getName(__filename), () => {
       const [req] = httpMock.getTrace();
       expect(req).toBeDefined();
       expect(req.headers.accept).toBe(
-        'application/vnd.github.machine-man-preview+json, some-accept'
+        'application/vnd.github.v3+json, some-accept, application/vnd.github.machine-man-preview+json'
       );
     });
     it('strips v3 for graphql', async () => {
@@ -240,11 +240,26 @@ describe(getName(__filename), () => {
     it('supports app mode', async () => {
       httpMock.scope(githubApiHost).post('/graphql').reply(200, {});
       global.appMode = true;
-      await githubApi.getGraphqlNodes(query, 'testItem', { paginate: false });
+      await githubApi.getGraphqlNodes(query, 'testItem', {
+        paginate: false,
+        acceptHeader: 'application/vnd.github.merge-info-preview+json',
+      });
       const [req] = httpMock.getTrace();
       expect(req).toBeDefined();
       expect(req.headers.accept).toBe(
-        'application/vnd.github.machine-man-preview+json, application/vnd.github.merge-info-preview+json'
+        'application/vnd.github.v3+json, application/vnd.github.merge-info-preview+json, application/vnd.github.machine-man-preview+json'
+      );
+    });
+    it('supports default header with app mode', async () => {
+      httpMock.scope(githubApiHost).post('/graphql').reply(200, {});
+      global.appMode = true;
+      await githubApi.getGraphqlNodes(query, 'testItem', {
+        paginate: false,
+      });
+      const [req] = httpMock.getTrace();
+      expect(req).toBeDefined();
+      expect(req.headers.accept).toBe(
+        'application/vnd.github.v3+json, application/vnd.github.machine-man-preview+json'
       );
     });
     it('returns empty array for undefined data', async () => {
