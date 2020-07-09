@@ -153,14 +153,20 @@ describe('platform/github', () => {
   });
 
   function initRepoMock(scope: httpMock.Scope, repository: string): void {
-    scope.get(`/repos/${repository}`).reply(200, {
-      owner: {
-        login: 'theowner',
+    scope.post(`/graphql`).reply(200, {
+      data: {
+        repository: {
+          isFork: false,
+          isArchived: false,
+          nameWithOwner: repository,
+          mergeCommitAllowed: true,
+          rebaseMergeAllowed: true,
+          squashMergeAllowed: true,
+          defaultBranchRef: {
+            name: 'master',
+          },
+        },
       },
-      default_branch: 'master',
-      allow_rebase_merge: true,
-      allow_squash_merge: true,
-      allow_merge_commit: true,
     });
   }
 
@@ -171,15 +177,21 @@ describe('platform/github', () => {
   ): void {
     scope
       // repo info
-      .get(`/repos/${repository}`)
+      .post(`/graphql`)
       .reply(200, {
-        owner: {
-          login: 'theowner',
+        data: {
+          repository: {
+            isFork: false,
+            isArchived: false,
+            nameWithOwner: repository,
+            mergeCommitAllowed: true,
+            rebaseMergeAllowed: true,
+            squashMergeAllowed: true,
+            defaultBranchRef: {
+              name: 'master',
+            },
+          },
         },
-        default_branch: 'master',
-        allow_rebase_merge: true,
-        allow_squash_merge: true,
-        allow_merge_commit: true,
       })
       // getBranchCommit
       .get(`/repos/${repository}/git/refs/heads/master`)
@@ -245,15 +257,21 @@ describe('platform/github', () => {
     it('should squash', async () => {
       httpMock
         .scope(githubApiHost)
-        .get(`/repos/some/repo`)
+        .post(`/graphql`)
         .reply(200, {
-          owner: {
-            login: 'theowner',
+          data: {
+            repository: {
+              isFork: false,
+              isArchived: false,
+              nameWithOwner: 'some/repo',
+              mergeCommitAllowed: true,
+              rebaseMergeAllowed: false,
+              squashMergeAllowed: true,
+              defaultBranchRef: {
+                name: 'master',
+              },
+            },
           },
-          default_branch: 'master',
-          allow_rebase_merge: false,
-          allow_squash_merge: true,
-          allow_merge_commit: true,
         });
       const config = await github.initRepo({
         repository: 'some/repo',
@@ -264,15 +282,21 @@ describe('platform/github', () => {
     it('should merge', async () => {
       httpMock
         .scope(githubApiHost)
-        .get(`/repos/some/repo`)
+        .post(`/graphql`)
         .reply(200, {
-          owner: {
-            login: 'theowner',
+          data: {
+            repository: {
+              isFork: false,
+              isArchived: false,
+              nameWithOwner: 'some/repo',
+              mergeCommitAllowed: true,
+              rebaseMergeAllowed: false,
+              squashMergeAllowed: false,
+              defaultBranchRef: {
+                name: 'master',
+              },
+            },
           },
-          default_branch: 'master',
-          allow_rebase_merge: false,
-          allow_squash_merge: false,
-          allow_merge_commit: true,
         });
       const config = await github.initRepo({
         repository: 'some/repo',
@@ -283,12 +307,15 @@ describe('platform/github', () => {
     it('should not guess at merge', async () => {
       httpMock
         .scope(githubApiHost)
-        .get(`/repos/some/repo`)
+        .post(`/graphql`)
         .reply(200, {
-          owner: {
-            login: 'theowner',
+          data: {
+            repository: {
+              defaultBranchRef: {
+                name: 'master',
+              },
+            },
           },
-          default_branch: 'master',
         });
       const config = await github.initRepo({
         repository: 'some/repo',
@@ -297,10 +324,20 @@ describe('platform/github', () => {
       expect(httpMock.getTrace()).toMatchSnapshot();
     });
     it('should throw error if archived', async () => {
-      httpMock.scope(githubApiHost).get(`/repos/some/repo`).reply(200, {
-        archived: true,
-        owner: {},
-      });
+      httpMock
+        .scope(githubApiHost)
+        .post(`/graphql`)
+        .reply(200, {
+          data: {
+            repository: {
+              isArchived: true,
+              nameWithOwner: 'some/repo',
+              defaultBranchRef: {
+                name: 'master',
+              },
+            },
+          },
+        });
       await expect(
         github.initRepo({
           repository: 'some/repo',
@@ -309,7 +346,7 @@ describe('platform/github', () => {
       expect(httpMock.getTrace()).toMatchSnapshot();
     });
     it('throws not-found', async () => {
-      httpMock.scope(githubApiHost).get(`/repos/some/repo`).reply(404);
+      httpMock.scope(githubApiHost).post(`/graphql`).reply(404);
       await expect(
         github.initRepo({
           repository: 'some/repo',
@@ -318,11 +355,16 @@ describe('platform/github', () => {
       expect(httpMock.getTrace()).toMatchSnapshot();
     });
     it('should throw error if renamed', async () => {
-      httpMock.scope(githubApiHost).get(`/repos/some/repo`).reply(200, {
-        fork: true,
-        full_name: 'some/other',
-        owner: {},
-      });
+      httpMock
+        .scope(githubApiHost)
+        .post(`/graphql`)
+        .reply(200, {
+          data: {
+            repository: {
+              nameWithOwner: 'some/other',
+            },
+          },
+        });
       await expect(
         github.initRepo({
           includeForks: true,

@@ -53,6 +53,7 @@ import {
   GhPr,
   LocalRepoConfig,
   PrList,
+  GhRepo,
 } from './types';
 
 const githubApi = new githubHttp.GithubHttp();
@@ -215,12 +216,23 @@ export async function initRepo({
   config.isGhe = URL.parse(defaults.endpoint).host !== 'api.github.com';
   config.renovateUsername = renovateUsername;
   [config.repositoryOwner, config.repositoryName] = repository.split('/');
-  let res;
+  let repo: GhRepo;
   try {
-    res = await githubApi.getJson<{ fork: boolean }>(`repos/${repository}`);
-    logger.trace({ repositoryDetails: res.body }, 'Repository details');
+    const repo = await githubApi.getGraphql<GhRepo>(`{
+      repository(owner: "${config.repositoryOwner}", name: "${config.repositoryName}") {
+        isFork
+        isArchived
+        nameWithOwner
+        mergeCommitAllowed
+        rebaseMergeAllowed
+        squashMergeAllowed
+        defaultBranchRef {
+          name
+        }
+      }
+    }`);
     // istanbul ignore if
-    if (res.body.fork && !includeForks) {
+    if (repo.isFork && !includeForks) {
       try {
         const renovateConfig = JSON.parse(
           Buffer.from(
@@ -236,17 +248,19 @@ export async function initRepo({
           throw new Error();
         }
       } catch (err) {
+        debugger;
         throw new Error(REPOSITORY_FORKED);
       }
     }
-    if (res.body.full_name && res.body.full_name !== repository) {
+    if (repo?.nameWithOwner && repo?.nameWithOwner !== repository) {
       logger.debug(
-        { repository, this_repository: res.body.full_name },
+        { repository, this_repository: repo?.nameWithOwner },
         'Repository has been renamed'
       );
+      debugger;
       throw new Error(REPOSITORY_RENAMED);
     }
-    if (res.body.archived) {
+    if (repo?.isArchived) {
       logger.debug(
         'Repository is archived - throwing error to abort renovation'
       );
@@ -273,16 +287,16 @@ export async function initRepo({
       }
     }
     // Use default branch as PR target unless later overridden.
-    config.defaultBranch = res.body.default_branch;
+    config.defaultBranch = repo?.defaultBranchRef?.name;
     // Base branch may be configured but defaultBranch is always fixed
     config.baseBranch = config.defaultBranch;
     logger.debug(`${repository} default branch = ${config.baseBranch}`);
     // GitHub allows administrators to block certain types of merge, so we need to check it
-    if (res.body.allow_rebase_merge) {
+    if (repo?.rebaseMergeAllowed) {
       config.mergeMethod = 'rebase';
-    } else if (res.body.allow_squash_merge) {
+    } else if (repo?.squashMergeAllowed) {
       config.mergeMethod = 'squash';
-    } else if (res.body.allow_merge_commit) {
+    } else if (repo?.mergeCommitAllowed) {
       config.mergeMethod = 'merge';
     } else {
       // This happens if we don't have Administrator read access, it is not a critical error
@@ -427,7 +441,7 @@ export async function initRepo({
   });
   const repoConfig: RepoConfig = {
     baseBranch: config.baseBranch,
-    isFork: res.body.fork === true,
+    isFork: repo?.isFork === true,
   };
   return repoConfig;
 }
