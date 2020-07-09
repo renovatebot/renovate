@@ -1,6 +1,7 @@
 import crypto from 'crypto';
 import URL from 'url';
 import got from 'got';
+import { HOST_DISABLED } from '../../constants/error-messages';
 import { ExternalHostError } from '../../types/errors/external-host-error';
 import * as memCache from '../cache/memory';
 import { clone } from '../clone';
@@ -89,6 +90,9 @@ export class Http<GetOptions = HttpOptions, PostOptions = HttpPostOptions> {
     };
 
     options = applyHostRules(url, options);
+    if (options.enabled === false) {
+      throw new Error(HOST_DISABLED);
+    }
     options = applyAuthorization(options);
 
     // Cache GET requests unless useCache=false
