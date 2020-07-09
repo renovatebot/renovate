@@ -44,8 +44,9 @@ interface TerraformRelease {
   versions: string[];
 }
 
-interface ServiceDiscoveryResult {
-  'modules.v1': string;
+export interface ServiceDiscoveryResult {
+  'modules.v1'?: string;
+  'providers.v1'?: string;
 }
 
 /**
