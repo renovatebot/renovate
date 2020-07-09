@@ -1,5 +1,6 @@
 import is from '@sindresorhus/is';
 import equal from 'fast-deep-equal';
+import { HOST_DISABLED } from '../constants/error-messages';
 import { logger } from '../logger';
 import { ExternalHostError } from '../types/errors/external-host-error';
 import * as memCache from '../util/cache/memory';
@@ -196,6 +197,9 @@ async function fetchReleases(
       });
     }
   } catch (err) {
+    if (err.message === HOST_DISABLED || err.err?.message === HOST_DISABLED) {
+      return null;
+    }
     if (err instanceof ExternalHostError) {
       throw err;
     }

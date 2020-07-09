@@ -1,6 +1,9 @@
 import nock from 'nock';
 import { getName } from '../../../test/util';
-import { EXTERNAL_HOST_ERROR } from '../../constants/error-messages';
+import {
+  EXTERNAL_HOST_ERROR,
+  HOST_DISABLED,
+} from '../../constants/error-messages';
 import * as hostRules from '../host-rules';
 import { Http } from '.';
 
@@ -33,6 +36,12 @@ describe(getName(__filename), () => {
       EXTERNAL_HOST_ERROR
     );
     expect(nock.isDone()).toBe(true);
+  });
+  it('disables hosts', async () => {
+    hostRules.add({ hostName: 'renovate.com', enabled: false });
+    await expect(http.get('http://renovate.com/test')).rejects.toThrow(
+      HOST_DISABLED
+    );
   });
   it('ignores 404 error and does not throw ExternalHostError', async () => {
     nock(baseUrl).get('/test').reply(404);

@@ -15,4 +15,5 @@ export interface HostRule {
   encrypted?: HostRule;
   abortOnError?: boolean;
   abortIgnoreStatusCodes?: number[];
+  enabled?: boolean;
 }
