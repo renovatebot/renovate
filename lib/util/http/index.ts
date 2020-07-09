@@ -6,6 +6,7 @@ import * as memCache from '../cache/memory';
 import { clone } from '../clone';
 import { applyAuthorization, removeAuthorization } from './auth';
 import { applyHostRules } from './host-rules';
+import { HOST_DISABLED } from '../../constants/error-messages';
 
 interface OutgoingHttpHeaders {
   [header: string]: number | string | string[] | undefined;
@@ -89,6 +90,9 @@ export class Http<GetOptions = HttpOptions, PostOptions = HttpPostOptions> {
     };
 
     options = applyHostRules(url, options);
+    if (options.enabled === false) {
+      throw new Error(HOST_DISABLED);
+    }
     options = applyAuthorization(options);
 
     // Cache GET requests unless useCache=false

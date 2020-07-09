@@ -15,6 +15,7 @@ import {
   ReleaseResult,
 } from './common';
 import { addMetaData } from './metadata';
+import { HOST_DISABLED } from '../constants/error-messages';
 
 export * from './common';
 
@@ -196,6 +197,9 @@ async function fetchReleases(
       });
     }
   } catch (err) {
+    if (err.messages === HOST_DISABLED || err.err?.message === HOST_DISABLED) {
+      return null;
+    }
     if (err instanceof ExternalHostError) {
       throw err;
     }
