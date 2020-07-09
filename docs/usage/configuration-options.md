@@ -466,7 +466,7 @@ A preset alternative to the above is:
 }
 ```
 
-Note: Disabling a host is only 100% effective if added to self-hosted config. Renovate currently still checks its *cache* for results first before making connection attempts, so if a public host is blocked in your repository config (e.g. `renovate.json`) then it's possible you may get cached *results* from that host if another repository using the same bot has successfully queried for the same dependency recently.
+Note: Disabling a host is only 100% effective if added to self-hosted config. Renovate currently still checks its _cache_ for results first before making connection attempts, so if a public host is blocked in your repository config (e.g. `renovate.json`) then it's possible you may get cached _results_ from that host if another repository using the same bot has successfully queried for the same dependency recently.
 
 ### abortIgnoreStatusCodes
 

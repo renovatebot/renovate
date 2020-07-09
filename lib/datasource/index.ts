@@ -197,7 +197,7 @@ async function fetchReleases(
       });
     }
   } catch (err) {
-    if (err.messages === HOST_DISABLED || err.err?.message === HOST_DISABLED) {
+    if (err.message === HOST_DISABLED || err.err?.message === HOST_DISABLED) {
       return null;
     }
     if (err instanceof ExternalHostError) {

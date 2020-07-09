@@ -19,7 +19,7 @@ export function applyHostRules(url: string, inOptions: any): any {
   } else if (token) {
     logger.trace('Applying Bearer authentication for host ' + options.hostname);
     options.token = token;
-  } else if (enabled !== undefined) {
+  } else if (enabled === false) {
     options.enabled = false;
   }
   // Apply optional params
