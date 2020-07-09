@@ -1,6 +1,5 @@
 import { logger } from '../../logger';
 import { ExternalHostError } from '../../types/errors/external-host-error';
-import * as packageCache from '../../util/cache/package';
 import { Http } from '../../util/http';
 import { GetReleasesConfig, ReleaseResult } from '../common';
 
@@ -64,16 +63,6 @@ export async function getReleases({
     { registry, terraformRepository: repository },
     'terraform.getDependencies()'
   );
-  const cacheNamespace = 'terraform-module';
-  const pkgUrl = `${registry}/v1/modules/${repository}`;
-  const cachedResult = await packageCache.get<ReleaseResult>(
-    cacheNamespace,
-    pkgUrl
-  );
-  // istanbul ignore if
-  if (cachedResult) {
-    return cachedResult;
-  }
   try {
     const res = (await http.getJson<TerraformRelease>(pkgUrl)).body;
     const returnedName = res.namespace + '/' + res.name + '/' + res.provider;
@@ -97,8 +86,6 @@ export async function getReleases({
       dep.homepage = `https://registry.terraform.io/modules/${repository}`;
     }
     logger.trace({ dep }, 'dep');
-    const cacheMinutes = 30;
-    await packageCache.set(cacheNamespace, pkgUrl, dep, cacheMinutes);
     return dep;
   } catch (err) {
     const failureCodes = ['EAI_AGAIN'];
