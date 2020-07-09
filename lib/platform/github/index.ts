@@ -380,15 +380,19 @@ export async function initRepo({
           }
         );
       } catch (err) /* istanbul ignore next */ {
+        logger.debug(
+          'Error updating fork reference - will try deleting fork to try again next time'
+        );
+        try {
+          await githubApi.deleteJson(`repos/${config.repository}`);
+          logger.info('Fork deleted');
+        } catch (deleteErr) {
+          logger.warn({ err: deleteErr }, 'Could not delete fork');
+        }
         if (err instanceof ExternalHostError) {
           throw err;
         }
-        if (
-          err.statusCode === 422 &&
-          err.message.startsWith('Object does not exist')
-        ) {
-          throw new Error(REPOSITORY_CHANGED);
-        }
+        throw new ExternalHostError(err);
       }
     } else {
       logger.debug({ repository_fork: config.repository }, 'Created fork');
