@@ -4312,7 +4312,9 @@ Array [
 ]
 `;
 
-exports[`platform/github getRepoForceRebase should throw 401 1`] = `
+exports[`platform/github getRepoForceRebase should throw 401 1`] = `"Response code 401 (Unauthorized)"`;
+
+exports[`platform/github getRepoForceRebase should throw 401 2`] = `
 Array [
   Object {
     "headers": Object {
