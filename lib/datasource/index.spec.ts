@@ -1,5 +1,8 @@
 import { mocked } from '../../test/util';
-import { EXTERNAL_HOST_ERROR } from '../constants/error-messages';
+import {
+  EXTERNAL_HOST_ERROR,
+  HOST_DISABLED,
+} from '../constants/error-messages';
 import { ExternalHostError } from '../types/errors/external-host-error';
 import { loadModules } from '../util/modules';
 import * as datasourceDocker from './docker';
@@ -130,6 +133,18 @@ describe('datasource/index', () => {
       registryUrls: ['https://reg1.com', 'https://reg2.io'],
     });
     expect(res).not.toBeNull();
+  });
+  it('returns null for HOST_DISABLED', async () => {
+    packagistDatasource.getReleases.mockImplementationOnce(() => {
+      throw new ExternalHostError(new Error(HOST_DISABLED));
+    });
+    expect(
+      await datasource.getPkgReleases({
+        datasource: datasourcePackagist.id,
+        depName: 'something',
+        registryUrls: ['https://reg1.com'],
+      })
+    ).toBeNull();
   });
   it('hunts registries and aborts on ExternalHostError', async () => {
     packagistDatasource.getReleases.mockImplementationOnce(() => {

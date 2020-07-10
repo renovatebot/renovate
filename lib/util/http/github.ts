@@ -1,5 +1,4 @@
 import URL from 'url';
-import { GotError } from 'got';
 import pAll from 'p-all';
 import parseLinkHeader from 'parse-link-header';
 import {
@@ -12,6 +11,7 @@ import { PLATFORM_TYPE_GITHUB } from '../../constants/platforms';
 import { logger } from '../../logger';
 import { ExternalHostError } from '../../types/errors/external-host-error';
 import { maskToken } from '../mask';
+import { HttpError } from './types';
 import { Http, HttpPostOptions, HttpResponse, InternalHttpOptions } from '.';
 
 let baseUrl = 'https://api.github.com/';
@@ -19,7 +19,7 @@ export const setBaseUrl = (url: string): void => {
   baseUrl = url;
 };
 
-type GotRequestError<E = unknown, T = unknown> = GotError & {
+type GotRequestError<E = unknown, T = unknown> = HttpError & {
   body: {
     message?: string;
     errors?: E[];

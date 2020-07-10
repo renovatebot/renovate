@@ -807,19 +807,6 @@ describe('platform/bitbucket', () => {
     });
   });
 
-  describe('commitFiles()', () => {
-    it('sends to gitFs', async () => {
-      await initRepoMock();
-      const res = await bitbucket.commitFiles({
-        branchName: 'test',
-        files: [],
-        message: 'message',
-      });
-      expect(res).toMatchSnapshot();
-      expect(httpMock.getTrace()).toMatchSnapshot();
-    });
-  });
-
   describe('getVulnerabilityAlerts()', () => {
     it('returns empty array', async () => {
       expect(await bitbucket.getVulnerabilityAlerts()).toEqual([]);

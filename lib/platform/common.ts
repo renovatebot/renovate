@@ -1,4 +1,3 @@
-import got from 'got';
 import { RenovateConfig } from '../config/common';
 import {
   BranchStatus,
@@ -6,67 +5,6 @@ import {
 } from '../types';
 
 export type VulnerabilityAlert = _VulnerabilityAlert;
-
-/**
- * File to commit to branch
- */
-export interface File {
-  /**
-   * Relative file path
-   */
-  name: string;
-
-  /**
-   * file contents
-   */
-  contents: string | Buffer;
-}
-
-export type CommitFilesConfig = {
-  branchName: string;
-  files: File[];
-  message: string;
-  force?: boolean;
-};
-
-export interface GotApiOptions {
-  useCache?: boolean;
-  hostType?: string;
-  body?: any;
-}
-
-export type GotResponse<T extends object = any> = got.Response<T>;
-
-export interface GotApi<TOptions extends object = any> {
-  get<T extends object = any>(
-    url: string,
-    options?: GotApiOptions & TOptions
-  ): Promise<GotResponse<T>>;
-  post<T extends object = any>(
-    url: string,
-    options?: GotApiOptions & TOptions
-  ): Promise<GotResponse<T>>;
-  put<T extends object = any>(
-    url: string,
-    options?: GotApiOptions & TOptions
-  ): Promise<GotResponse<T>>;
-  patch<T extends object = any>(
-    url: string,
-    options?: GotApiOptions & TOptions
-  ): Promise<GotResponse<T>>;
-  head<T extends object = any>(
-    url: string,
-    options?: GotApiOptions & TOptions
-  ): Promise<GotResponse<T>>;
-  delete<T extends object = any>(
-    url: string,
-    options?: GotApiOptions & TOptions
-  ): Promise<GotResponse<T>>;
-
-  reset(): void;
-
-  setBaseUrl(endpoint: string): void;
-}
 
 export interface PlatformConfig {
   endpoint: string;
@@ -188,7 +126,6 @@ export interface Platform {
   getVulnerabilityAlerts(): Promise<VulnerabilityAlert[]>;
   initRepo(config: RepoParams): Promise<RepoConfig>;
   getPrList(): Promise<Pr[]>;
-  getPrFiles(pr: Pr): Promise<string[]>;
   ensureIssueClosing(title: string): Promise<void>;
   ensureIssue(
     issueConfig: EnsureIssueConfig
@@ -215,9 +152,9 @@ export interface Platform {
   deleteBranch(branchName: string, closePr?: boolean): Promise<void>;
   ensureComment(ensureComment: EnsureCommentConfig): Promise<boolean>;
   setBaseBranch(baseBranch?: string): Promise<string>;
-  commitFiles(commitFile: CommitFilesConfig): Promise<string | null>;
   getPr(number: number): Promise<Pr>;
   findPr(findPRConfig: FindPRConfig): Promise<Pr>;
+  refreshPr?(number: number): Promise<void>;
   getBranchStatus(
     branchName: string,
     requiredStatusChecks?: string[] | null

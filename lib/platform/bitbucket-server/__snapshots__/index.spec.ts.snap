@@ -1,10 +1,10 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
-exports[`platform/bitbucket-server endpoint with no path addAssignees() does not throw 1`] = `undefined`;
+exports[`platform/bitbucket-server/index endpoint with no path addAssignees() does not throw 1`] = `undefined`;
 
-exports[`platform/bitbucket-server endpoint with no path addReviewers does not throw 1`] = `undefined`;
+exports[`platform/bitbucket-server/index endpoint with no path addReviewers does not throw 1`] = `undefined`;
 
-exports[`platform/bitbucket-server endpoint with no path addReviewers does not throw 2`] = `
+exports[`platform/bitbucket-server/index endpoint with no path addReviewers does not throw 2`] = `
 Array [
   Object {
     "headers": Object {
@@ -120,7 +120,7 @@ Array [
 ]
 `;
 
-exports[`platform/bitbucket-server endpoint with no path addReviewers sends the reviewer name as a reviewer 1`] = `
+exports[`platform/bitbucket-server/index endpoint with no path addReviewers sends the reviewer name as a reviewer 1`] = `
 Array [
   Object {
     "headers": Object {
@@ -236,7 +236,9 @@ Array [
 ]
 `;
 
-exports[`platform/bitbucket-server endpoint with no path addReviewers throws 1`] = `
+exports[`platform/bitbucket-server/index endpoint with no path addReviewers throws 1`] = `"Response code 405 (Method Not Allowed)"`;
+
+exports[`platform/bitbucket-server/index endpoint with no path addReviewers throws 2`] = `
 Array [
   Object {
     "headers": Object {
@@ -316,7 +318,7 @@ Array [
 ]
 `;
 
-exports[`platform/bitbucket-server endpoint with no path addReviewers throws not-found 1 1`] = `
+exports[`platform/bitbucket-server/index endpoint with no path addReviewers throws not-found 1 1`] = `
 Array [
   Object {
     "headers": Object {
@@ -345,7 +347,7 @@ Array [
 ]
 `;
 
-exports[`platform/bitbucket-server endpoint with no path addReviewers throws not-found 2 1`] = `
+exports[`platform/bitbucket-server/index endpoint with no path addReviewers throws not-found 2 1`] = `
 Array [
   Object {
     "headers": Object {
@@ -386,7 +388,7 @@ Array [
 ]
 `;
 
-exports[`platform/bitbucket-server endpoint with no path addReviewers throws not-found 3 1`] = `
+exports[`platform/bitbucket-server/index endpoint with no path addReviewers throws not-found 3 1`] = `
 Array [
   Object {
     "headers": Object {
@@ -466,7 +468,7 @@ Array [
 ]
 `;
 
-exports[`platform/bitbucket-server endpoint with no path addReviewers throws repository-changed 1`] = `
+exports[`platform/bitbucket-server/index endpoint with no path addReviewers throws repository-changed 1`] = `
 Array [
   Object {
     "headers": Object {
@@ -546,48 +548,7 @@ Array [
 ]
 `;
 
-exports[`platform/bitbucket-server endpoint with no path commitFiles() sends to gitFs 1`] = `
-Array [
-  Object {
-    "headers": Object {
-      "accept": "application/json",
-      "accept-encoding": "gzip, deflate",
-      "authorization": "Basic YWJjOjEyMw==",
-      "host": "stash.renovatebot.com",
-      "user-agent": "https://github.com/renovatebot/renovate",
-      "x-atlassian-token": "no-check",
-    },
-    "method": "GET",
-    "url": "https://stash.renovatebot.com/rest/api/1.0/projects/SOME/repos/repo",
-  },
-  Object {
-    "headers": Object {
-      "accept": "application/json",
-      "accept-encoding": "gzip, deflate",
-      "authorization": "Basic YWJjOjEyMw==",
-      "host": "stash.renovatebot.com",
-      "user-agent": "https://github.com/renovatebot/renovate",
-      "x-atlassian-token": "no-check",
-    },
-    "method": "GET",
-    "url": "https://stash.renovatebot.com/rest/api/1.0/projects/SOME/repos/repo/branches/default",
-  },
-  Object {
-    "headers": Object {
-      "accept": "application/json",
-      "accept-encoding": "gzip, deflate",
-      "authorization": "Basic YWJjOjEyMw==",
-      "host": "stash.renovatebot.com",
-      "user-agent": "https://github.com/renovatebot/renovate",
-      "x-atlassian-token": "no-check",
-    },
-    "method": "GET",
-    "url": "https://stash.renovatebot.com/rest/api/1.0/projects/SOME/repos/repo/pull-requests?state=ALL&role.1=AUTHOR&username.1=abc&limit=100",
-  },
-]
-`;
-
-exports[`platform/bitbucket-server endpoint with no path createPr() posts PR 1`] = `
+exports[`platform/bitbucket-server/index endpoint with no path createPr() posts PR 1`] = `
 Array [
   Object {
     "headers": Object {
@@ -655,7 +616,7 @@ Array [
 ]
 `;
 
-exports[`platform/bitbucket-server endpoint with no path createPr() posts PR default branch 1`] = `
+exports[`platform/bitbucket-server/index endpoint with no path createPr() posts PR default branch 1`] = `
 Array [
   Object {
     "headers": Object {
@@ -723,9 +684,9 @@ Array [
 ]
 `;
 
-exports[`platform/bitbucket-server endpoint with no path deleteBranch() sends to gitFs 1`] = `undefined`;
+exports[`platform/bitbucket-server/index endpoint with no path deleteBranch() sends to gitFs 1`] = `undefined`;
 
-exports[`platform/bitbucket-server endpoint with no path deleteBranch() sends to gitFs 2`] = `
+exports[`platform/bitbucket-server/index endpoint with no path deleteBranch() sends to gitFs 2`] = `
 Array [
   Object {
     "headers": Object {
@@ -754,9 +715,9 @@ Array [
 ]
 `;
 
-exports[`platform/bitbucket-server endpoint with no path deleteLAbel() does not throw 1`] = `undefined`;
+exports[`platform/bitbucket-server/index endpoint with no path deleteLAbel() does not throw 1`] = `undefined`;
 
-exports[`platform/bitbucket-server endpoint with no path ensureComment() add comment if not found 1 1`] = `
+exports[`platform/bitbucket-server/index endpoint with no path ensureComment() add comment if not found 1 1`] = `
 Array [
   Object {
     "headers": Object {
@@ -824,7 +785,7 @@ Array [
 ]
 `;
 
-exports[`platform/bitbucket-server endpoint with no path ensureComment() add comment if not found 2 1`] = `
+exports[`platform/bitbucket-server/index endpoint with no path ensureComment() add comment if not found 2 1`] = `
 Array [
   Object {
     "headers": Object {
@@ -892,7 +853,7 @@ Array [
 ]
 `;
 
-exports[`platform/bitbucket-server endpoint with no path ensureComment() add updates comment if necessary 1 1`] = `
+exports[`platform/bitbucket-server/index endpoint with no path ensureComment() add updates comment if necessary 1 1`] = `
 Array [
   Object {
     "headers": Object {
@@ -972,7 +933,7 @@ Array [
 ]
 `;
 
-exports[`platform/bitbucket-server endpoint with no path ensureComment() add updates comment if necessary 2 1`] = `
+exports[`platform/bitbucket-server/index endpoint with no path ensureComment() add updates comment if necessary 2 1`] = `
 Array [
   Object {
     "headers": Object {
@@ -1040,7 +1001,7 @@ Array [
 ]
 `;
 
-exports[`platform/bitbucket-server endpoint with no path ensureComment() does not throw 1`] = `
+exports[`platform/bitbucket-server/index endpoint with no path ensureComment() does not throw 1`] = `
 Array [
   Object {
     "headers": Object {
@@ -1057,7 +1018,7 @@ Array [
 ]
 `;
 
-exports[`platform/bitbucket-server endpoint with no path ensureComment() skips comment 1 1`] = `
+exports[`platform/bitbucket-server/index endpoint with no path ensureComment() skips comment 1 1`] = `
 Array [
   Object {
     "headers": Object {
@@ -1110,7 +1071,7 @@ Array [
 ]
 `;
 
-exports[`platform/bitbucket-server endpoint with no path ensureComment() skips comment 2 1`] = `
+exports[`platform/bitbucket-server/index endpoint with no path ensureComment() skips comment 2 1`] = `
 Array [
   Object {
     "headers": Object {
@@ -1163,7 +1124,7 @@ Array [
 ]
 `;
 
-exports[`platform/bitbucket-server endpoint with no path ensureCommentRemoval() deletes comment by content if found 1`] = `
+exports[`platform/bitbucket-server/index endpoint with no path ensureCommentRemoval() deletes comment by content if found 1`] = `
 Array [
   Object {
     "headers": Object {
@@ -1240,7 +1201,7 @@ Array [
 ]
 `;
 
-exports[`platform/bitbucket-server endpoint with no path ensureCommentRemoval() deletes comment by topic if found 1`] = `
+exports[`platform/bitbucket-server/index endpoint with no path ensureCommentRemoval() deletes comment by topic if found 1`] = `
 Array [
   Object {
     "headers": Object {
@@ -1317,7 +1278,7 @@ Array [
 ]
 `;
 
-exports[`platform/bitbucket-server endpoint with no path ensureCommentRemoval() deletes nothing 1`] = `
+exports[`platform/bitbucket-server/index endpoint with no path ensureCommentRemoval() deletes nothing 1`] = `
 Array [
   Object {
     "headers": Object {
@@ -1370,7 +1331,7 @@ Array [
 ]
 `;
 
-exports[`platform/bitbucket-server endpoint with no path ensureCommentRemoval() does not throw 1`] = `
+exports[`platform/bitbucket-server/index endpoint with no path ensureCommentRemoval() does not throw 1`] = `
 Array [
   Object {
     "headers": Object {
@@ -1399,7 +1360,7 @@ Array [
 ]
 `;
 
-exports[`platform/bitbucket-server endpoint with no path findPr() has no pr 1`] = `
+exports[`platform/bitbucket-server/index endpoint with no path findPr() has no pr 1`] = `
 Array [
   Object {
     "headers": Object {
@@ -1440,7 +1401,7 @@ Array [
 ]
 `;
 
-exports[`platform/bitbucket-server endpoint with no path findPr() has pr 1`] = `
+exports[`platform/bitbucket-server/index endpoint with no path findPr() has pr 1`] = `
 Object {
   "body": "* Line 1
 * Line 2",
@@ -1455,7 +1416,7 @@ Object {
 }
 `;
 
-exports[`platform/bitbucket-server endpoint with no path findPr() has pr 2`] = `
+exports[`platform/bitbucket-server/index endpoint with no path findPr() has pr 2`] = `
 Array [
   Object {
     "headers": Object {
@@ -1496,7 +1457,7 @@ Array [
 ]
 `;
 
-exports[`platform/bitbucket-server endpoint with no path getBranchPr() has no pr 1`] = `
+exports[`platform/bitbucket-server/index endpoint with no path getBranchPr() has no pr 1`] = `
 Array [
   Object {
     "headers": Object {
@@ -1537,7 +1498,7 @@ Array [
 ]
 `;
 
-exports[`platform/bitbucket-server endpoint with no path getBranchPr() has pr 1`] = `
+exports[`platform/bitbucket-server/index endpoint with no path getBranchPr() has pr 1`] = `
 Object {
   "body": "* Line 1
 * Line 2",
@@ -1559,7 +1520,7 @@ Object {
 }
 `;
 
-exports[`platform/bitbucket-server endpoint with no path getBranchPr() has pr 2`] = `
+exports[`platform/bitbucket-server/index endpoint with no path getBranchPr() has pr 2`] = `
 Array [
   Object {
     "headers": Object {
@@ -1636,7 +1597,7 @@ Array [
 ]
 `;
 
-exports[`platform/bitbucket-server endpoint with no path getBranchStatus() should be failed 1`] = `
+exports[`platform/bitbucket-server/index endpoint with no path getBranchStatus() should be failed 1`] = `
 Array [
   Object {
     "headers": Object {
@@ -1689,7 +1650,7 @@ Array [
 ]
 `;
 
-exports[`platform/bitbucket-server endpoint with no path getBranchStatus() should be pending 1`] = `
+exports[`platform/bitbucket-server/index endpoint with no path getBranchStatus() should be pending 1`] = `
 Array [
   Object {
     "headers": Object {
@@ -1742,7 +1703,7 @@ Array [
 ]
 `;
 
-exports[`platform/bitbucket-server endpoint with no path getBranchStatus() should be success 1`] = `
+exports[`platform/bitbucket-server/index endpoint with no path getBranchStatus() should be success 1`] = `
 Array [
   Object {
     "headers": Object {
@@ -1783,7 +1744,7 @@ Array [
 ]
 `;
 
-exports[`platform/bitbucket-server endpoint with no path getBranchStatus() throws repository-changed 1`] = `
+exports[`platform/bitbucket-server/index endpoint with no path getBranchStatus() throws repository-changed 1`] = `
 Array [
   Object {
     "headers": Object {
@@ -1812,101 +1773,7 @@ Array [
 ]
 `;
 
-exports[`platform/bitbucket-server endpoint with no path getBranchStatusCheck() should be failure 1`] = `
-Array [
-  Object {
-    "headers": Object {
-      "accept": "application/json",
-      "accept-encoding": "gzip, deflate",
-      "authorization": "Basic YWJjOjEyMw==",
-      "host": "stash.renovatebot.com",
-      "user-agent": "https://github.com/renovatebot/renovate",
-      "x-atlassian-token": "no-check",
-    },
-    "method": "GET",
-    "url": "https://stash.renovatebot.com/rest/api/1.0/projects/SOME/repos/repo",
-  },
-  Object {
-    "headers": Object {
-      "accept": "application/json",
-      "accept-encoding": "gzip, deflate",
-      "authorization": "Basic YWJjOjEyMw==",
-      "host": "stash.renovatebot.com",
-      "user-agent": "https://github.com/renovatebot/renovate",
-      "x-atlassian-token": "no-check",
-    },
-    "method": "GET",
-    "url": "https://stash.renovatebot.com/rest/api/1.0/projects/SOME/repos/repo/branches/default",
-  },
-  Object {
-    "headers": Object {
-      "accept": "application/json",
-      "accept-encoding": "gzip, deflate",
-      "authorization": "Basic YWJjOjEyMw==",
-      "host": "stash.renovatebot.com",
-      "user-agent": "https://github.com/renovatebot/renovate",
-      "x-atlassian-token": "no-check",
-    },
-    "method": "GET",
-    "url": "https://stash.renovatebot.com/rest/build-status/1.0/commits/0d9c7726c3d628b7e28af234595cfd20febdbf8e?limit=100",
-  },
-]
-`;
-
-exports[`platform/bitbucket-server endpoint with no path getBranchStatusCheck() should be null 1`] = `
-Array [
-  Object {
-    "headers": Object {
-      "accept": "application/json",
-      "accept-encoding": "gzip, deflate",
-      "authorization": "Basic YWJjOjEyMw==",
-      "host": "stash.renovatebot.com",
-      "user-agent": "https://github.com/renovatebot/renovate",
-      "x-atlassian-token": "no-check",
-    },
-    "method": "GET",
-    "url": "https://stash.renovatebot.com/rest/api/1.0/projects/SOME/repos/repo",
-  },
-  Object {
-    "headers": Object {
-      "accept": "application/json",
-      "accept-encoding": "gzip, deflate",
-      "authorization": "Basic YWJjOjEyMw==",
-      "host": "stash.renovatebot.com",
-      "user-agent": "https://github.com/renovatebot/renovate",
-      "x-atlassian-token": "no-check",
-    },
-    "method": "GET",
-    "url": "https://stash.renovatebot.com/rest/api/1.0/projects/SOME/repos/repo/branches/default",
-  },
-  Object {
-    "headers": Object {
-      "accept": "application/json",
-      "accept-encoding": "gzip, deflate",
-      "authorization": "Basic YWJjOjEyMw==",
-      "host": "stash.renovatebot.com",
-      "user-agent": "https://github.com/renovatebot/renovate",
-      "x-atlassian-token": "no-check",
-    },
-    "method": "GET",
-    "url": "https://stash.renovatebot.com/rest/build-status/1.0/commits/0d9c7726c3d628b7e28af234595cfd20febdbf8e?limit=100",
-  },
-  Object {
-    "headers": Object {
-      "accept": "application/json",
-      "accept-encoding": "gzip, deflate",
-      "authorization": "Basic YWJjOjEyMw==",
-      "host": "stash.renovatebot.com",
-      "user-agent": "https://github.com/renovatebot/renovate",
-      "x-atlassian-token": "no-check",
-    },
-    "method": "GET",
-    "url": "https://stash.renovatebot.com/rest/build-status/1.0/commits/0d9c7726c3d628b7e28af234595cfd20febdbf8e?limit=100",
-  },
-]
-`;
-
-exports[`platform/bitbucket-server endpoint with no path getBranchStatusCheck() should be pending 1`] = `
+exports[`platform/bitbucket-server/index endpoint with no path getBranchStatusCheck() should be failure 1`] = `
 Array [
   Object {
     "headers": Object {
@@ -1947,7 +1814,60 @@ Array [
 ]
 `;
 
-exports[`platform/bitbucket-server endpoint with no path getBranchStatusCheck() should be success 1`] = `
+exports[`platform/bitbucket-server/index endpoint with no path getBranchStatusCheck() should be null 1`] = `
+Array [
+  Object {
+    "headers": Object {
+      "accept": "application/json",
+      "accept-encoding": "gzip, deflate",
+      "authorization": "Basic YWJjOjEyMw==",
+      "host": "stash.renovatebot.com",
+      "user-agent": "https://github.com/renovatebot/renovate",
+      "x-atlassian-token": "no-check",
+    },
+    "method": "GET",
+    "url": "https://stash.renovatebot.com/rest/api/1.0/projects/SOME/repos/repo",
+  },
+  Object {
+    "headers": Object {
+      "accept": "application/json",
+      "accept-encoding": "gzip, deflate",
+      "authorization": "Basic YWJjOjEyMw==",
+      "host": "stash.renovatebot.com",
+      "user-agent": "https://github.com/renovatebot/renovate",
+      "x-atlassian-token": "no-check",
+    },
+    "method": "GET",
+    "url": "https://stash.renovatebot.com/rest/api/1.0/projects/SOME/repos/repo/branches/default",
+  },
+  Object {
+    "headers": Object {
+      "accept": "application/json",
+      "accept-encoding": "gzip, deflate",
+      "authorization": "Basic YWJjOjEyMw==",
+      "host": "stash.renovatebot.com",
+      "user-agent": "https://github.com/renovatebot/renovate",
+      "x-atlassian-token": "no-check",
+    },
+    "method": "GET",
+    "url": "https://stash.renovatebot.com/rest/build-status/1.0/commits/0d9c7726c3d628b7e28af234595cfd20febdbf8e?limit=100",
+  },
+  Object {
+    "headers": Object {
+      "accept": "application/json",
+      "accept-encoding": "gzip, deflate",
+      "authorization": "Basic YWJjOjEyMw==",
+      "host": "stash.renovatebot.com",
+      "user-agent": "https://github.com/renovatebot/renovate",
+      "x-atlassian-token": "no-check",
+    },
+    "method": "GET",
+    "url": "https://stash.renovatebot.com/rest/build-status/1.0/commits/0d9c7726c3d628b7e28af234595cfd20febdbf8e?limit=100",
+  },
+]
+`;
+
+exports[`platform/bitbucket-server/index endpoint with no path getBranchStatusCheck() should be pending 1`] = `
 Array [
   Object {
     "headers": Object {
@@ -1988,7 +1908,48 @@ Array [
 ]
 `;
 
-exports[`platform/bitbucket-server endpoint with no path getPr() canRebase 1`] = `
+exports[`platform/bitbucket-server/index endpoint with no path getBranchStatusCheck() should be success 1`] = `
+Array [
+  Object {
+    "headers": Object {
+      "accept": "application/json",
+      "accept-encoding": "gzip, deflate",
+      "authorization": "Basic YWJjOjEyMw==",
+      "host": "stash.renovatebot.com",
+      "user-agent": "https://github.com/renovatebot/renovate",
+      "x-atlassian-token": "no-check",
+    },
+    "method": "GET",
+    "url": "https://stash.renovatebot.com/rest/api/1.0/projects/SOME/repos/repo",
+  },
+  Object {
+    "headers": Object {
+      "accept": "application/json",
+      "accept-encoding": "gzip, deflate",
+      "authorization": "Basic YWJjOjEyMw==",
+      "host": "stash.renovatebot.com",
+      "user-agent": "https://github.com/renovatebot/renovate",
+      "x-atlassian-token": "no-check",
+    },
+    "method": "GET",
+    "url": "https://stash.renovatebot.com/rest/api/1.0/projects/SOME/repos/repo/branches/default",
+  },
+  Object {
+    "headers": Object {
+      "accept": "application/json",
+      "accept-encoding": "gzip, deflate",
+      "authorization": "Basic YWJjOjEyMw==",
+      "host": "stash.renovatebot.com",
+      "user-agent": "https://github.com/renovatebot/renovate",
+      "x-atlassian-token": "no-check",
+    },
+    "method": "GET",
+    "url": "https://stash.renovatebot.com/rest/build-status/1.0/commits/0d9c7726c3d628b7e28af234595cfd20febdbf8e?limit=100",
+  },
+]
+`;
+
+exports[`platform/bitbucket-server/index endpoint with no path getPr() canRebase 1`] = `
 Object {
   "body": "* Line 1
 * Line 2",
@@ -2010,7 +1971,7 @@ Object {
 }
 `;
 
-exports[`platform/bitbucket-server endpoint with no path getPr() canRebase 2`] = `
+exports[`platform/bitbucket-server/index endpoint with no path getPr() canRebase 2`] = `
 Object {
   "body": "* Line 1
 * Line 2",
@@ -2032,7 +1993,7 @@ Object {
 }
 `;
 
-exports[`platform/bitbucket-server endpoint with no path getPr() canRebase 3`] = `
+exports[`platform/bitbucket-server/index endpoint with no path getPr() canRebase 3`] = `
 Object {
   "body": "* Line 1
 * Line 2",
@@ -2054,7 +2015,7 @@ Object {
 }
 `;
 
-exports[`platform/bitbucket-server endpoint with no path getPr() canRebase 4`] = `
+exports[`platform/bitbucket-server/index endpoint with no path getPr() canRebase 4`] = `
 Array [
   Object {
     "headers": Object {
@@ -2191,7 +2152,7 @@ Array [
 ]
 `;
 
-exports[`platform/bitbucket-server endpoint with no path getPr() gets a PR 1`] = `
+exports[`platform/bitbucket-server/index endpoint with no path getPr() gets a PR 1`] = `
 Object {
   "body": "* Line 1
 * Line 2",
@@ -2213,7 +2174,7 @@ Object {
 }
 `;
 
-exports[`platform/bitbucket-server endpoint with no path getPr() gets a PR 2`] = `
+exports[`platform/bitbucket-server/index endpoint with no path getPr() gets a PR 2`] = `
 Array [
   Object {
     "headers": Object {
@@ -2278,7 +2239,7 @@ Array [
 ]
 `;
 
-exports[`platform/bitbucket-server endpoint with no path getPr() gets a closed PR 1`] = `
+exports[`platform/bitbucket-server/index endpoint with no path getPr() gets a closed PR 1`] = `
 Object {
   "body": undefined,
   "branchName": undefined,
@@ -2295,7 +2256,7 @@ Object {
 }
 `;
 
-exports[`platform/bitbucket-server endpoint with no path getPr() gets a closed PR 2`] = `
+exports[`platform/bitbucket-server/index endpoint with no path getPr() gets a closed PR 2`] = `
 Array [
   Object {
     "headers": Object {
@@ -2336,11 +2297,11 @@ Array [
 ]
 `;
 
-exports[`platform/bitbucket-server endpoint with no path getPr() returns null for no prNo 1`] = `Array []`;
+exports[`platform/bitbucket-server/index endpoint with no path getPr() returns null for no prNo 1`] = `Array []`;
 
-exports[`platform/bitbucket-server endpoint with no path getPrBody() returns diff files 1`] = `"**foo**bartext"`;
+exports[`platform/bitbucket-server/index endpoint with no path getPrBody() returns diff files 1`] = `"**foo**bartext"`;
 
-exports[`platform/bitbucket-server endpoint with no path getPrBody() sanitizes HTML comments in the body 1`] = `
+exports[`platform/bitbucket-server/index endpoint with no path getPrBody() sanitizes HTML comments in the body 1`] = `
 "---
 
 - [ ] If you want to rebase/retry this PR, check this box
@@ -2354,7 +2315,7 @@ Followed by some information.
 "
 `;
 
-exports[`platform/bitbucket-server endpoint with no path getPrList() has pr 1`] = `
+exports[`platform/bitbucket-server/index endpoint with no path getPrList() has pr 1`] = `
 Array [
   Object {
     "body": "* Line 1
@@ -2371,7 +2332,7 @@ Array [
 ]
 `;
 
-exports[`platform/bitbucket-server endpoint with no path getPrList() has pr 2`] = `
+exports[`platform/bitbucket-server/index endpoint with no path getPrList() has pr 2`] = `
 Array [
   Object {
     "headers": Object {
@@ -2412,7 +2373,7 @@ Array [
 ]
 `;
 
-exports[`platform/bitbucket-server endpoint with no path getRepos() returns repos 1`] = `
+exports[`platform/bitbucket-server/index endpoint with no path getRepos() returns repos 1`] = `
 Array [
   Object {
     "headers": Object {
@@ -2429,20 +2390,20 @@ Array [
 ]
 `;
 
-exports[`platform/bitbucket-server endpoint with no path initPlatform() should init 1`] = `
+exports[`platform/bitbucket-server/index endpoint with no path initPlatform() should init 1`] = `
 Object {
   "endpoint": "https://stash.renovatebot.com/",
 }
 `;
 
-exports[`platform/bitbucket-server endpoint with no path initRepo() does not throw 1`] = `
+exports[`platform/bitbucket-server/index endpoint with no path initRepo() does not throw 1`] = `
 Object {
   "baseBranch": "master",
   "isFork": false,
 }
 `;
 
-exports[`platform/bitbucket-server endpoint with no path initRepo() does not throw 2`] = `
+exports[`platform/bitbucket-server/index endpoint with no path initRepo() does not throw 2`] = `
 Array [
   Object {
     "headers": Object {
@@ -2483,7 +2444,7 @@ Array [
 ]
 `;
 
-exports[`platform/bitbucket-server endpoint with no path initRepo() throws disabled 1`] = `
+exports[`platform/bitbucket-server/index endpoint with no path initRepo() throws disabled 1`] = `
 Array [
   Object {
     "headers": Object {
@@ -2500,14 +2461,14 @@ Array [
 ]
 `;
 
-exports[`platform/bitbucket-server endpoint with no path initRepo() works 1`] = `
+exports[`platform/bitbucket-server/index endpoint with no path initRepo() works 1`] = `
 Object {
   "baseBranch": "master",
   "isFork": false,
 }
 `;
 
-exports[`platform/bitbucket-server endpoint with no path initRepo() works 2`] = `
+exports[`platform/bitbucket-server/index endpoint with no path initRepo() works 2`] = `
 Array [
   Object {
     "headers": Object {
@@ -2536,7 +2497,7 @@ Array [
 ]
 `;
 
-exports[`platform/bitbucket-server endpoint with no path mergePr() posts Merge 1`] = `
+exports[`platform/bitbucket-server/index endpoint with no path mergePr() posts Merge 1`] = `
 Array [
   Object {
     "headers": Object {
@@ -2613,7 +2574,7 @@ Array [
 ]
 `;
 
-exports[`platform/bitbucket-server endpoint with no path mergePr() throws conflicted 1`] = `
+exports[`platform/bitbucket-server/index endpoint with no path mergePr() throws conflicted 1`] = `
 Array [
   Object {
     "headers": Object {
@@ -2690,7 +2651,7 @@ Array [
 ]
 `;
 
-exports[`platform/bitbucket-server endpoint with no path mergePr() throws not-found 1 1`] = `
+exports[`platform/bitbucket-server/index endpoint with no path mergePr() throws not-found 1 1`] = `
 Array [
   Object {
     "headers": Object {
@@ -2719,7 +2680,7 @@ Array [
 ]
 `;
 
-exports[`platform/bitbucket-server endpoint with no path mergePr() throws not-found 2 1`] = `
+exports[`platform/bitbucket-server/index endpoint with no path mergePr() throws not-found 2 1`] = `
 Array [
   Object {
     "headers": Object {
@@ -2760,7 +2721,7 @@ Array [
 ]
 `;
 
-exports[`platform/bitbucket-server endpoint with no path mergePr() throws not-found 3 1`] = `
+exports[`platform/bitbucket-server/index endpoint with no path mergePr() throws not-found 3 1`] = `
 Array [
   Object {
     "headers": Object {
@@ -2837,7 +2798,7 @@ Array [
 ]
 `;
 
-exports[`platform/bitbucket-server endpoint with no path mergePr() unknown error 1`] = `
+exports[`platform/bitbucket-server/index endpoint with no path mergePr() unknown error 1`] = `
 Array [
   Object {
     "headers": Object {
@@ -2914,7 +2875,7 @@ Array [
 ]
 `;
 
-exports[`platform/bitbucket-server endpoint with no path repoForceRebase() return false if ff strategy is enabled 1`] = `
+exports[`platform/bitbucket-server/index endpoint with no path repoForceRebase() return false if ff strategy is enabled 1`] = `
 Array [
   Object {
     "headers": Object {
@@ -2931,7 +2892,7 @@ Array [
 ]
 `;
 
-exports[`platform/bitbucket-server endpoint with no path repoForceRebase() return false if no-ff strategy is enabled 1`] = `
+exports[`platform/bitbucket-server/index endpoint with no path repoForceRebase() return false if no-ff strategy is enabled 1`] = `
 Array [
   Object {
     "headers": Object {
@@ -2948,7 +2909,7 @@ Array [
 ]
 `;
 
-exports[`platform/bitbucket-server endpoint with no path repoForceRebase() return false if rebase-no-ff strategy is enabled 1`] = `
+exports[`platform/bitbucket-server/index endpoint with no path repoForceRebase() return false if rebase-no-ff strategy is enabled 1`] = `
 Array [
   Object {
     "headers": Object {
@@ -2965,7 +2926,7 @@ Array [
 ]
 `;
 
-exports[`platform/bitbucket-server endpoint with no path repoForceRebase() return false if squash strategy is enabled 1`] = `
+exports[`platform/bitbucket-server/index endpoint with no path repoForceRebase() return false if squash strategy is enabled 1`] = `
 Array [
   Object {
     "headers": Object {
@@ -2982,7 +2943,7 @@ Array [
 ]
 `;
 
-exports[`platform/bitbucket-server endpoint with no path repoForceRebase() return true if ff-only strategy is enabled 1`] = `
+exports[`platform/bitbucket-server/index endpoint with no path repoForceRebase() return true if ff-only strategy is enabled 1`] = `
 Array [
   Object {
     "headers": Object {
@@ -2999,7 +2960,7 @@ Array [
 ]
 `;
 
-exports[`platform/bitbucket-server endpoint with no path repoForceRebase() return true if rebase-ff-only strategy is enabled 1`] = `
+exports[`platform/bitbucket-server/index endpoint with no path repoForceRebase() return true if rebase-ff-only strategy is enabled 1`] = `
 Array [
   Object {
     "headers": Object {
@@ -3016,7 +2977,7 @@ Array [
 ]
 `;
 
-exports[`platform/bitbucket-server endpoint with no path repoForceRebase() return true if squash-ff-only strategy is enabled 1`] = `
+exports[`platform/bitbucket-server/index endpoint with no path repoForceRebase() return true if squash-ff-only strategy is enabled 1`] = `
 Array [
   Object {
     "headers": Object {
@@ -3033,7 +2994,7 @@ Array [
 ]
 `;
 
-exports[`platform/bitbucket-server endpoint with no path repoForceRebase() returns false on missing defaultStrategy 1`] = `
+exports[`platform/bitbucket-server/index endpoint with no path repoForceRebase() returns false on missing defaultStrategy 1`] = `
 Array [
   Object {
     "headers": Object {
@@ -3050,7 +3011,7 @@ Array [
 ]
 `;
 
-exports[`platform/bitbucket-server endpoint with no path repoForceRebase() returns false on missing mergeConfig 1`] = `
+exports[`platform/bitbucket-server/index endpoint with no path repoForceRebase() returns false on missing mergeConfig 1`] = `
 Array [
   Object {
     "headers": Object {
@@ -3067,7 +3028,7 @@ Array [
 ]
 `;
 
-exports[`platform/bitbucket-server endpoint with no path setBaseBranch() updates file list 1`] = `
+exports[`platform/bitbucket-server/index endpoint with no path setBaseBranch() updates file list 1`] = `
 Array [
   Object {
     "headers": Object {
@@ -3096,7 +3057,7 @@ Array [
 ]
 `;
 
-exports[`platform/bitbucket-server endpoint with no path setBranchStatus() should be success 1 1`] = `
+exports[`platform/bitbucket-server/index endpoint with no path setBranchStatus() should be success 1 1`] = `
 Array [
   Object {
     "headers": Object {
@@ -3176,7 +3137,7 @@ Array [
 ]
 `;
 
-exports[`platform/bitbucket-server endpoint with no path setBranchStatus() should be success 2 1`] = `
+exports[`platform/bitbucket-server/index endpoint with no path setBranchStatus() should be success 2 1`] = `
 Array [
   Object {
     "headers": Object {
@@ -3256,7 +3217,7 @@ Array [
 ]
 `;
 
-exports[`platform/bitbucket-server endpoint with no path setBranchStatus() should be success 3 1`] = `
+exports[`platform/bitbucket-server/index endpoint with no path setBranchStatus() should be success 3 1`] = `
 Array [
   Object {
     "headers": Object {
@@ -3336,7 +3297,7 @@ Array [
 ]
 `;
 
-exports[`platform/bitbucket-server endpoint with no path setBranchStatus() should be success 4 1`] = `
+exports[`platform/bitbucket-server/index endpoint with no path setBranchStatus() should be success 4 1`] = `
 Array [
   Object {
     "headers": Object {
@@ -3416,7 +3377,7 @@ Array [
 ]
 `;
 
-exports[`platform/bitbucket-server endpoint with no path setBranchStatus() should be success 5 1`] = `
+exports[`platform/bitbucket-server/index endpoint with no path setBranchStatus() should be success 5 1`] = `
 Array [
   Object {
     "headers": Object {
@@ -3472,7 +3433,7 @@ Array [
 ]
 `;
 
-exports[`platform/bitbucket-server endpoint with no path setBranchStatus() should be success 6 1`] = `
+exports[`platform/bitbucket-server/index endpoint with no path setBranchStatus() should be success 6 1`] = `
 Array [
   Object {
     "headers": Object {
@@ -3513,7 +3474,7 @@ Array [
 ]
 `;
 
-exports[`platform/bitbucket-server endpoint with no path updatePr() puts PR 1`] = `
+exports[`platform/bitbucket-server/index endpoint with no path updatePr() puts PR 1`] = `
 Array [
   Object {
     "headers": Object {
@@ -3593,7 +3554,9 @@ Array [
 ]
 `;
 
-exports[`platform/bitbucket-server endpoint with no path updatePr() throws 1`] = `
+exports[`platform/bitbucket-server/index endpoint with no path updatePr() throws 1`] = `"Response code 405 (Method Not Allowed)"`;
+
+exports[`platform/bitbucket-server/index endpoint with no path updatePr() throws 2`] = `
 Array [
   Object {
     "headers": Object {
@@ -3673,7 +3636,7 @@ Array [
 ]
 `;
 
-exports[`platform/bitbucket-server endpoint with no path updatePr() throws not-found 1 1`] = `
+exports[`platform/bitbucket-server/index endpoint with no path updatePr() throws not-found 1 1`] = `
 Array [
   Object {
     "headers": Object {
@@ -3702,7 +3665,7 @@ Array [
 ]
 `;
 
-exports[`platform/bitbucket-server endpoint with no path updatePr() throws not-found 2 1`] = `
+exports[`platform/bitbucket-server/index endpoint with no path updatePr() throws not-found 2 1`] = `
 Array [
   Object {
     "headers": Object {
@@ -3743,7 +3706,7 @@ Array [
 ]
 `;
 
-exports[`platform/bitbucket-server endpoint with no path updatePr() throws not-found 3 1`] = `
+exports[`platform/bitbucket-server/index endpoint with no path updatePr() throws not-found 3 1`] = `
 Array [
   Object {
     "headers": Object {
@@ -3823,7 +3786,7 @@ Array [
 ]
 `;
 
-exports[`platform/bitbucket-server endpoint with no path updatePr() throws repository-changed 1`] = `
+exports[`platform/bitbucket-server/index endpoint with no path updatePr() throws repository-changed 1`] = `
 Array [
   Object {
     "headers": Object {
@@ -3903,11 +3866,11 @@ Array [
 ]
 `;
 
-exports[`platform/bitbucket-server endpoint with path addAssignees() does not throw 1`] = `undefined`;
+exports[`platform/bitbucket-server/index endpoint with path addAssignees() does not throw 1`] = `undefined`;
 
-exports[`platform/bitbucket-server endpoint with path addReviewers does not throw 1`] = `undefined`;
+exports[`platform/bitbucket-server/index endpoint with path addReviewers does not throw 1`] = `undefined`;
 
-exports[`platform/bitbucket-server endpoint with path addReviewers does not throw 2`] = `
+exports[`platform/bitbucket-server/index endpoint with path addReviewers does not throw 2`] = `
 Array [
   Object {
     "headers": Object {
@@ -4023,7 +3986,7 @@ Array [
 ]
 `;
 
-exports[`platform/bitbucket-server endpoint with path addReviewers sends the reviewer name as a reviewer 1`] = `
+exports[`platform/bitbucket-server/index endpoint with path addReviewers sends the reviewer name as a reviewer 1`] = `
 Array [
   Object {
     "headers": Object {
@@ -4139,7 +4102,9 @@ Array [
 ]
 `;
 
-exports[`platform/bitbucket-server endpoint with path addReviewers throws 1`] = `
+exports[`platform/bitbucket-server/index endpoint with path addReviewers throws 1`] = `"Response code 405 (Method Not Allowed)"`;
+
+exports[`platform/bitbucket-server/index endpoint with path addReviewers throws 2`] = `
 Array [
   Object {
     "headers": Object {
@@ -4219,7 +4184,7 @@ Array [
 ]
 `;
 
-exports[`platform/bitbucket-server endpoint with path addReviewers throws not-found 1 1`] = `
+exports[`platform/bitbucket-server/index endpoint with path addReviewers throws not-found 1 1`] = `
 Array [
   Object {
     "headers": Object {
@@ -4248,7 +4213,7 @@ Array [
 ]
 `;
 
-exports[`platform/bitbucket-server endpoint with path addReviewers throws not-found 2 1`] = `
+exports[`platform/bitbucket-server/index endpoint with path addReviewers throws not-found 2 1`] = `
 Array [
   Object {
     "headers": Object {
@@ -4289,7 +4254,7 @@ Array [
 ]
 `;
 
-exports[`platform/bitbucket-server endpoint with path addReviewers throws not-found 3 1`] = `
+exports[`platform/bitbucket-server/index endpoint with path addReviewers throws not-found 3 1`] = `
 Array [
   Object {
     "headers": Object {
@@ -4369,7 +4334,7 @@ Array [
 ]
 `;
 
-exports[`platform/bitbucket-server endpoint with path addReviewers throws repository-changed 1`] = `
+exports[`platform/bitbucket-server/index endpoint with path addReviewers throws repository-changed 1`] = `
 Array [
   Object {
     "headers": Object {
@@ -4449,48 +4414,7 @@ Array [
 ]
 `;
 
-exports[`platform/bitbucket-server endpoint with path commitFiles() sends to gitFs 1`] = `
-Array [
-  Object {
-    "headers": Object {
-      "accept": "application/json",
-      "accept-encoding": "gzip, deflate",
-      "authorization": "Basic YWJjOjEyMw==",
-      "host": "stash.renovatebot.com",
-      "user-agent": "https://github.com/renovatebot/renovate",
-      "x-atlassian-token": "no-check",
-    },
-    "method": "GET",
-    "url": "https://stash.renovatebot.com/vcs/rest/api/1.0/projects/SOME/repos/repo",
-  },
-  Object {
-    "headers": Object {
-      "accept": "application/json",
-      "accept-encoding": "gzip, deflate",
-      "authorization": "Basic YWJjOjEyMw==",
-      "host": "stash.renovatebot.com",
-      "user-agent": "https://github.com/renovatebot/renovate",
-      "x-atlassian-token": "no-check",
-    },
-    "method": "GET",
-    "url": "https://stash.renovatebot.com/vcs/rest/api/1.0/projects/SOME/repos/repo/branches/default",
-  },
-  Object {
-    "headers": Object {
-      "accept": "application/json",
-      "accept-encoding": "gzip, deflate",
-      "authorization": "Basic YWJjOjEyMw==",
-      "host": "stash.renovatebot.com",
-      "user-agent": "https://github.com/renovatebot/renovate",
-      "x-atlassian-token": "no-check",
-    },
-    "method": "GET",
-    "url": "https://stash.renovatebot.com/vcs/rest/api/1.0/projects/SOME/repos/repo/pull-requests?state=ALL&role.1=AUTHOR&username.1=abc&limit=100",
-  },
-]
-`;
-
-exports[`platform/bitbucket-server endpoint with path createPr() posts PR 1`] = `
+exports[`platform/bitbucket-server/index endpoint with path createPr() posts PR 1`] = `
 Array [
   Object {
     "headers": Object {
@@ -4558,7 +4482,7 @@ Array [
 ]
 `;
 
-exports[`platform/bitbucket-server endpoint with path createPr() posts PR default branch 1`] = `
+exports[`platform/bitbucket-server/index endpoint with path createPr() posts PR default branch 1`] = `
 Array [
   Object {
     "headers": Object {
@@ -4626,9 +4550,9 @@ Array [
 ]
 `;
 
-exports[`platform/bitbucket-server endpoint with path deleteBranch() sends to gitFs 1`] = `undefined`;
+exports[`platform/bitbucket-server/index endpoint with path deleteBranch() sends to gitFs 1`] = `undefined`;
 
-exports[`platform/bitbucket-server endpoint with path deleteBranch() sends to gitFs 2`] = `
+exports[`platform/bitbucket-server/index endpoint with path deleteBranch() sends to gitFs 2`] = `
 Array [
   Object {
     "headers": Object {
@@ -4657,9 +4581,9 @@ Array [
 ]
 `;
 
-exports[`platform/bitbucket-server endpoint with path deleteLAbel() does not throw 1`] = `undefined`;
+exports[`platform/bitbucket-server/index endpoint with path deleteLAbel() does not throw 1`] = `undefined`;
 
-exports[`platform/bitbucket-server endpoint with path ensureComment() add comment if not found 1 1`] = `
+exports[`platform/bitbucket-server/index endpoint with path ensureComment() add comment if not found 1 1`] = `
 Array [
   Object {
     "headers": Object {
@@ -4727,7 +4651,7 @@ Array [
 ]
 `;
 
-exports[`platform/bitbucket-server endpoint with path ensureComment() add comment if not found 2 1`] = `
+exports[`platform/bitbucket-server/index endpoint with path ensureComment() add comment if not found 2 1`] = `
 Array [
   Object {
     "headers": Object {
@@ -4795,7 +4719,7 @@ Array [
 ]
 `;
 
-exports[`platform/bitbucket-server endpoint with path ensureComment() add updates comment if necessary 1 1`] = `
+exports[`platform/bitbucket-server/index endpoint with path ensureComment() add updates comment if necessary 1 1`] = `
 Array [
   Object {
     "headers": Object {
@@ -4875,7 +4799,7 @@ Array [
 ]
 `;
 
-exports[`platform/bitbucket-server endpoint with path ensureComment() add updates comment if necessary 2 1`] = `
+exports[`platform/bitbucket-server/index endpoint with path ensureComment() add updates comment if necessary 2 1`] = `
 Array [
   Object {
     "headers": Object {
@@ -4943,7 +4867,7 @@ Array [
 ]
 `;
 
-exports[`platform/bitbucket-server endpoint with path ensureComment() does not throw 1`] = `
+exports[`platform/bitbucket-server/index endpoint with path ensureComment() does not throw 1`] = `
 Array [
   Object {
     "headers": Object {
@@ -4960,7 +4884,7 @@ Array [
 ]
 `;
 
-exports[`platform/bitbucket-server endpoint with path ensureComment() skips comment 1 1`] = `
+exports[`platform/bitbucket-server/index endpoint with path ensureComment() skips comment 1 1`] = `
 Array [
   Object {
     "headers": Object {
@@ -5013,7 +4937,7 @@ Array [
 ]
 `;
 
-exports[`platform/bitbucket-server endpoint with path ensureComment() skips comment 2 1`] = `
+exports[`platform/bitbucket-server/index endpoint with path ensureComment() skips comment 2 1`] = `
 Array [
   Object {
     "headers": Object {
@@ -5066,7 +4990,7 @@ Array [
 ]
 `;
 
-exports[`platform/bitbucket-server endpoint with path ensureCommentRemoval() deletes comment by content if found 1`] = `
+exports[`platform/bitbucket-server/index endpoint with path ensureCommentRemoval() deletes comment by content if found 1`] = `
 Array [
   Object {
     "headers": Object {
@@ -5143,7 +5067,7 @@ Array [
 ]
 `;
 
-exports[`platform/bitbucket-server endpoint with path ensureCommentRemoval() deletes comment by topic if found 1`] = `
+exports[`platform/bitbucket-server/index endpoint with path ensureCommentRemoval() deletes comment by topic if found 1`] = `
 Array [
   Object {
     "headers": Object {
@@ -5220,7 +5144,7 @@ Array [
 ]
 `;
 
-exports[`platform/bitbucket-server endpoint with path ensureCommentRemoval() deletes nothing 1`] = `
+exports[`platform/bitbucket-server/index endpoint with path ensureCommentRemoval() deletes nothing 1`] = `
 Array [
   Object {
     "headers": Object {
@@ -5273,7 +5197,7 @@ Array [
 ]
 `;
 
-exports[`platform/bitbucket-server endpoint with path ensureCommentRemoval() does not throw 1`] = `
+exports[`platform/bitbucket-server/index endpoint with path ensureCommentRemoval() does not throw 1`] = `
 Array [
   Object {
     "headers": Object {
@@ -5302,7 +5226,7 @@ Array [
 ]
 `;
 
-exports[`platform/bitbucket-server endpoint with path findPr() has no pr 1`] = `
+exports[`platform/bitbucket-server/index endpoint with path findPr() has no pr 1`] = `
 Array [
   Object {
     "headers": Object {
@@ -5343,7 +5267,7 @@ Array [
 ]
 `;
 
-exports[`platform/bitbucket-server endpoint with path findPr() has pr 1`] = `
+exports[`platform/bitbucket-server/index endpoint with path findPr() has pr 1`] = `
 Object {
   "body": "* Line 1
 * Line 2",
@@ -5358,7 +5282,7 @@ Object {
 }
 `;
 
-exports[`platform/bitbucket-server endpoint with path findPr() has pr 2`] = `
+exports[`platform/bitbucket-server/index endpoint with path findPr() has pr 2`] = `
 Array [
   Object {
     "headers": Object {
@@ -5399,7 +5323,7 @@ Array [
 ]
 `;
 
-exports[`platform/bitbucket-server endpoint with path getBranchPr() has no pr 1`] = `
+exports[`platform/bitbucket-server/index endpoint with path getBranchPr() has no pr 1`] = `
 Array [
   Object {
     "headers": Object {
@@ -5440,7 +5364,7 @@ Array [
 ]
 `;
 
-exports[`platform/bitbucket-server endpoint with path getBranchPr() has pr 1`] = `
+exports[`platform/bitbucket-server/index endpoint with path getBranchPr() has pr 1`] = `
 Object {
   "body": "* Line 1
 * Line 2",
@@ -5462,7 +5386,7 @@ Object {
 }
 `;
 
-exports[`platform/bitbucket-server endpoint with path getBranchPr() has pr 2`] = `
+exports[`platform/bitbucket-server/index endpoint with path getBranchPr() has pr 2`] = `
 Array [
   Object {
     "headers": Object {
@@ -5539,7 +5463,7 @@ Array [
 ]
 `;
 
-exports[`platform/bitbucket-server endpoint with path getBranchStatus() should be failed 1`] = `
+exports[`platform/bitbucket-server/index endpoint with path getBranchStatus() should be failed 1`] = `
 Array [
   Object {
     "headers": Object {
@@ -5592,7 +5516,7 @@ Array [
 ]
 `;
 
-exports[`platform/bitbucket-server endpoint with path getBranchStatus() should be pending 1`] = `
+exports[`platform/bitbucket-server/index endpoint with path getBranchStatus() should be pending 1`] = `
 Array [
   Object {
     "headers": Object {
@@ -5645,7 +5569,7 @@ Array [
 ]
 `;
 
-exports[`platform/bitbucket-server endpoint with path getBranchStatus() should be success 1`] = `
+exports[`platform/bitbucket-server/index endpoint with path getBranchStatus() should be success 1`] = `
 Array [
   Object {
     "headers": Object {
@@ -5686,7 +5610,7 @@ Array [
 ]
 `;
 
-exports[`platform/bitbucket-server endpoint with path getBranchStatus() throws repository-changed 1`] = `
+exports[`platform/bitbucket-server/index endpoint with path getBranchStatus() throws repository-changed 1`] = `
 Array [
   Object {
     "headers": Object {
@@ -5715,101 +5639,7 @@ Array [
 ]
 `;
 
-exports[`platform/bitbucket-server endpoint with path getBranchStatusCheck() should be failure 1`] = `
-Array [
-  Object {
-    "headers": Object {
-      "accept": "application/json",
-      "accept-encoding": "gzip, deflate",
-      "authorization": "Basic YWJjOjEyMw==",
-      "host": "stash.renovatebot.com",
-      "user-agent": "https://github.com/renovatebot/renovate",
-      "x-atlassian-token": "no-check",
-    },
-    "method": "GET",
-    "url": "https://stash.renovatebot.com/vcs/rest/api/1.0/projects/SOME/repos/repo",
-  },
-  Object {
-    "headers": Object {
-      "accept": "application/json",
-      "accept-encoding": "gzip, deflate",
-      "authorization": "Basic YWJjOjEyMw==",
-      "host": "stash.renovatebot.com",
-      "user-agent": "https://github.com/renovatebot/renovate",
-      "x-atlassian-token": "no-check",
-    },
-    "method": "GET",
-    "url": "https://stash.renovatebot.com/vcs/rest/api/1.0/projects/SOME/repos/repo/branches/default",
-  },
-  Object {
-    "headers": Object {
-      "accept": "application/json",
-      "accept-encoding": "gzip, deflate",
-      "authorization": "Basic YWJjOjEyMw==",
-      "host": "stash.renovatebot.com",
-      "user-agent": "https://github.com/renovatebot/renovate",
-      "x-atlassian-token": "no-check",
-    },
-    "method": "GET",
-    "url": "https://stash.renovatebot.com/vcs/rest/build-status/1.0/commits/0d9c7726c3d628b7e28af234595cfd20febdbf8e?limit=100",
-  },
-]
-`;
-
-exports[`platform/bitbucket-server endpoint with path getBranchStatusCheck() should be null 1`] = `
-Array [
-  Object {
-    "headers": Object {
-      "accept": "application/json",
-      "accept-encoding": "gzip, deflate",
-      "authorization": "Basic YWJjOjEyMw==",
-      "host": "stash.renovatebot.com",
-      "user-agent": "https://github.com/renovatebot/renovate",
-      "x-atlassian-token": "no-check",
-    },
-    "method": "GET",
-    "url": "https://stash.renovatebot.com/vcs/rest/api/1.0/projects/SOME/repos/repo",
-  },
-  Object {
-    "headers": Object {
-      "accept": "application/json",
-      "accept-encoding": "gzip, deflate",
-      "authorization": "Basic YWJjOjEyMw==",
-      "host": "stash.renovatebot.com",
-      "user-agent": "https://github.com/renovatebot/renovate",
-      "x-atlassian-token": "no-check",
-    },
-    "method": "GET",
-    "url": "https://stash.renovatebot.com/vcs/rest/api/1.0/projects/SOME/repos/repo/branches/default",
-  },
-  Object {
-    "headers": Object {
-      "accept": "application/json",
-      "accept-encoding": "gzip, deflate",
-      "authorization": "Basic YWJjOjEyMw==",
-      "host": "stash.renovatebot.com",
-      "user-agent": "https://github.com/renovatebot/renovate",
-      "x-atlassian-token": "no-check",
-    },
-    "method": "GET",
-    "url": "https://stash.renovatebot.com/vcs/rest/build-status/1.0/commits/0d9c7726c3d628b7e28af234595cfd20febdbf8e?limit=100",
-  },
-  Object {
-    "headers": Object {
-      "accept": "application/json",
-      "accept-encoding": "gzip, deflate",
-      "authorization": "Basic YWJjOjEyMw==",
-      "host": "stash.renovatebot.com",
-      "user-agent": "https://github.com/renovatebot/renovate",
-      "x-atlassian-token": "no-check",
-    },
-    "method": "GET",
-    "url": "https://stash.renovatebot.com/vcs/rest/build-status/1.0/commits/0d9c7726c3d628b7e28af234595cfd20febdbf8e?limit=100",
-  },
-]
-`;
-
-exports[`platform/bitbucket-server endpoint with path getBranchStatusCheck() should be pending 1`] = `
+exports[`platform/bitbucket-server/index endpoint with path getBranchStatusCheck() should be failure 1`] = `
 Array [
   Object {
     "headers": Object {
@@ -5850,7 +5680,60 @@ Array [
 ]
 `;
 
-exports[`platform/bitbucket-server endpoint with path getBranchStatusCheck() should be success 1`] = `
+exports[`platform/bitbucket-server/index endpoint with path getBranchStatusCheck() should be null 1`] = `
+Array [
+  Object {
+    "headers": Object {
+      "accept": "application/json",
+      "accept-encoding": "gzip, deflate",
+      "authorization": "Basic YWJjOjEyMw==",
+      "host": "stash.renovatebot.com",
+      "user-agent": "https://github.com/renovatebot/renovate",
+      "x-atlassian-token": "no-check",
+    },
+    "method": "GET",
+    "url": "https://stash.renovatebot.com/vcs/rest/api/1.0/projects/SOME/repos/repo",
+  },
+  Object {
+    "headers": Object {
+      "accept": "application/json",
+      "accept-encoding": "gzip, deflate",
+      "authorization": "Basic YWJjOjEyMw==",
+      "host": "stash.renovatebot.com",
+      "user-agent": "https://github.com/renovatebot/renovate",
+      "x-atlassian-token": "no-check",
+    },
+    "method": "GET",
+    "url": "https://stash.renovatebot.com/vcs/rest/api/1.0/projects/SOME/repos/repo/branches/default",
+  },
+  Object {
+    "headers": Object {
+      "accept": "application/json",
+      "accept-encoding": "gzip, deflate",
+      "authorization": "Basic YWJjOjEyMw==",
+      "host": "stash.renovatebot.com",
+      "user-agent": "https://github.com/renovatebot/renovate",
+      "x-atlassian-token": "no-check",
+    },
+    "method": "GET",
+    "url": "https://stash.renovatebot.com/vcs/rest/build-status/1.0/commits/0d9c7726c3d628b7e28af234595cfd20febdbf8e?limit=100",
+  },
+  Object {
+    "headers": Object {
+      "accept": "application/json",
+      "accept-encoding": "gzip, deflate",
+      "authorization": "Basic YWJjOjEyMw==",
+      "host": "stash.renovatebot.com",
+      "user-agent": "https://github.com/renovatebot/renovate",
+      "x-atlassian-token": "no-check",
+    },
+    "method": "GET",
+    "url": "https://stash.renovatebot.com/vcs/rest/build-status/1.0/commits/0d9c7726c3d628b7e28af234595cfd20febdbf8e?limit=100",
+  },
+]
+`;
+
+exports[`platform/bitbucket-server/index endpoint with path getBranchStatusCheck() should be pending 1`] = `
 Array [
   Object {
     "headers": Object {
@@ -5891,7 +5774,48 @@ Array [
 ]
 `;
 
-exports[`platform/bitbucket-server endpoint with path getPr() canRebase 1`] = `
+exports[`platform/bitbucket-server/index endpoint with path getBranchStatusCheck() should be success 1`] = `
+Array [
+  Object {
+    "headers": Object {
+      "accept": "application/json",
+      "accept-encoding": "gzip, deflate",
+      "authorization": "Basic YWJjOjEyMw==",
+      "host": "stash.renovatebot.com",
+      "user-agent": "https://github.com/renovatebot/renovate",
+      "x-atlassian-token": "no-check",
+    },
+    "method": "GET",
+    "url": "https://stash.renovatebot.com/vcs/rest/api/1.0/projects/SOME/repos/repo",
+  },
+  Object {
+    "headers": Object {
+      "accept": "application/json",
+      "accept-encoding": "gzip, deflate",
+      "authorization": "Basic YWJjOjEyMw==",
+      "host": "stash.renovatebot.com",
+      "user-agent": "https://github.com/renovatebot/renovate",
+      "x-atlassian-token": "no-check",
+    },
+    "method": "GET",
+    "url": "https://stash.renovatebot.com/vcs/rest/api/1.0/projects/SOME/repos/repo/branches/default",
+  },
+  Object {
+    "headers": Object {
+      "accept": "application/json",
+      "accept-encoding": "gzip, deflate",
+      "authorization": "Basic YWJjOjEyMw==",
+      "host": "stash.renovatebot.com",
+      "user-agent": "https://github.com/renovatebot/renovate",
+      "x-atlassian-token": "no-check",
+    },
+    "method": "GET",
+    "url": "https://stash.renovatebot.com/vcs/rest/build-status/1.0/commits/0d9c7726c3d628b7e28af234595cfd20febdbf8e?limit=100",
+  },
+]
+`;
+
+exports[`platform/bitbucket-server/index endpoint with path getPr() canRebase 1`] = `
 Object {
   "body": "* Line 1
 * Line 2",
@@ -5913,7 +5837,7 @@ Object {
 }
 `;
 
-exports[`platform/bitbucket-server endpoint with path getPr() canRebase 2`] = `
+exports[`platform/bitbucket-server/index endpoint with path getPr() canRebase 2`] = `
 Object {
   "body": "* Line 1
 * Line 2",
@@ -5935,7 +5859,7 @@ Object {
 }
 `;
 
-exports[`platform/bitbucket-server endpoint with path getPr() canRebase 3`] = `
+exports[`platform/bitbucket-server/index endpoint with path getPr() canRebase 3`] = `
 Object {
   "body": "* Line 1
 * Line 2",
@@ -5957,7 +5881,7 @@ Object {
 }
 `;
 
-exports[`platform/bitbucket-server endpoint with path getPr() canRebase 4`] = `
+exports[`platform/bitbucket-server/index endpoint with path getPr() canRebase 4`] = `
 Array [
   Object {
     "headers": Object {
@@ -6094,7 +6018,7 @@ Array [
 ]
 `;
 
-exports[`platform/bitbucket-server endpoint with path getPr() gets a PR 1`] = `
+exports[`platform/bitbucket-server/index endpoint with path getPr() gets a PR 1`] = `
 Object {
   "body": "* Line 1
 * Line 2",
@@ -6116,7 +6040,7 @@ Object {
 }
 `;
 
-exports[`platform/bitbucket-server endpoint with path getPr() gets a PR 2`] = `
+exports[`platform/bitbucket-server/index endpoint with path getPr() gets a PR 2`] = `
 Array [
   Object {
     "headers": Object {
@@ -6181,7 +6105,7 @@ Array [
 ]
 `;
 
-exports[`platform/bitbucket-server endpoint with path getPr() gets a closed PR 1`] = `
+exports[`platform/bitbucket-server/index endpoint with path getPr() gets a closed PR 1`] = `
 Object {
   "body": undefined,
   "branchName": undefined,
@@ -6198,7 +6122,7 @@ Object {
 }
 `;
 
-exports[`platform/bitbucket-server endpoint with path getPr() gets a closed PR 2`] = `
+exports[`platform/bitbucket-server/index endpoint with path getPr() gets a closed PR 2`] = `
 Array [
   Object {
     "headers": Object {
@@ -6239,11 +6163,11 @@ Array [
 ]
 `;
 
-exports[`platform/bitbucket-server endpoint with path getPr() returns null for no prNo 1`] = `Array []`;
+exports[`platform/bitbucket-server/index endpoint with path getPr() returns null for no prNo 1`] = `Array []`;
 
-exports[`platform/bitbucket-server endpoint with path getPrBody() returns diff files 1`] = `"**foo**bartext"`;
+exports[`platform/bitbucket-server/index endpoint with path getPrBody() returns diff files 1`] = `"**foo**bartext"`;
 
-exports[`platform/bitbucket-server endpoint with path getPrBody() sanitizes HTML comments in the body 1`] = `
+exports[`platform/bitbucket-server/index endpoint with path getPrBody() sanitizes HTML comments in the body 1`] = `
 "---
 
 - [ ] If you want to rebase/retry this PR, check this box
@@ -6257,7 +6181,7 @@ Followed by some information.
 "
 `;
 
-exports[`platform/bitbucket-server endpoint with path getPrList() has pr 1`] = `
+exports[`platform/bitbucket-server/index endpoint with path getPrList() has pr 1`] = `
 Array [
   Object {
     "body": "* Line 1
@@ -6274,7 +6198,7 @@ Array [
 ]
 `;
 
-exports[`platform/bitbucket-server endpoint with path getPrList() has pr 2`] = `
+exports[`platform/bitbucket-server/index endpoint with path getPrList() has pr 2`] = `
 Array [
   Object {
     "headers": Object {
@@ -6315,7 +6239,7 @@ Array [
 ]
 `;
 
-exports[`platform/bitbucket-server endpoint with path getRepos() returns repos 1`] = `
+exports[`platform/bitbucket-server/index endpoint with path getRepos() returns repos 1`] = `
 Array [
   Object {
     "headers": Object {
@@ -6332,20 +6256,20 @@ Array [
 ]
 `;
 
-exports[`platform/bitbucket-server endpoint with path initPlatform() should init 1`] = `
+exports[`platform/bitbucket-server/index endpoint with path initPlatform() should init 1`] = `
 Object {
   "endpoint": "https://stash.renovatebot.com/",
 }
 `;
 
-exports[`platform/bitbucket-server endpoint with path initRepo() does not throw 1`] = `
+exports[`platform/bitbucket-server/index endpoint with path initRepo() does not throw 1`] = `
 Object {
   "baseBranch": "master",
   "isFork": false,
 }
 `;
 
-exports[`platform/bitbucket-server endpoint with path initRepo() does not throw 2`] = `
+exports[`platform/bitbucket-server/index endpoint with path initRepo() does not throw 2`] = `
 Array [
   Object {
     "headers": Object {
@@ -6386,7 +6310,7 @@ Array [
 ]
 `;
 
-exports[`platform/bitbucket-server endpoint with path initRepo() throws disabled 1`] = `
+exports[`platform/bitbucket-server/index endpoint with path initRepo() throws disabled 1`] = `
 Array [
   Object {
     "headers": Object {
@@ -6403,14 +6327,14 @@ Array [
 ]
 `;
 
-exports[`platform/bitbucket-server endpoint with path initRepo() works 1`] = `
+exports[`platform/bitbucket-server/index endpoint with path initRepo() works 1`] = `
 Object {
   "baseBranch": "master",
   "isFork": false,
 }
 `;
 
-exports[`platform/bitbucket-server endpoint with path initRepo() works 2`] = `
+exports[`platform/bitbucket-server/index endpoint with path initRepo() works 2`] = `
 Array [
   Object {
     "headers": Object {
@@ -6439,7 +6363,7 @@ Array [
 ]
 `;
 
-exports[`platform/bitbucket-server endpoint with path mergePr() posts Merge 1`] = `
+exports[`platform/bitbucket-server/index endpoint with path mergePr() posts Merge 1`] = `
 Array [
   Object {
     "headers": Object {
@@ -6516,7 +6440,7 @@ Array [
 ]
 `;
 
-exports[`platform/bitbucket-server endpoint with path mergePr() throws conflicted 1`] = `
+exports[`platform/bitbucket-server/index endpoint with path mergePr() throws conflicted 1`] = `
 Array [
   Object {
     "headers": Object {
@@ -6593,7 +6517,7 @@ Array [
 ]
 `;
 
-exports[`platform/bitbucket-server endpoint with path mergePr() throws not-found 1 1`] = `
+exports[`platform/bitbucket-server/index endpoint with path mergePr() throws not-found 1 1`] = `
 Array [
   Object {
     "headers": Object {
@@ -6622,7 +6546,7 @@ Array [
 ]
 `;
 
-exports[`platform/bitbucket-server endpoint with path mergePr() throws not-found 2 1`] = `
+exports[`platform/bitbucket-server/index endpoint with path mergePr() throws not-found 2 1`] = `
 Array [
   Object {
     "headers": Object {
@@ -6663,7 +6587,7 @@ Array [
 ]
 `;
 
-exports[`platform/bitbucket-server endpoint with path mergePr() throws not-found 3 1`] = `
+exports[`platform/bitbucket-server/index endpoint with path mergePr() throws not-found 3 1`] = `
 Array [
   Object {
     "headers": Object {
@@ -6740,7 +6664,7 @@ Array [
 ]
 `;
 
-exports[`platform/bitbucket-server endpoint with path mergePr() unknown error 1`] = `
+exports[`platform/bitbucket-server/index endpoint with path mergePr() unknown error 1`] = `
 Array [
   Object {
     "headers": Object {
@@ -6817,7 +6741,7 @@ Array [
 ]
 `;
 
-exports[`platform/bitbucket-server endpoint with path repoForceRebase() return false if ff strategy is enabled 1`] = `
+exports[`platform/bitbucket-server/index endpoint with path repoForceRebase() return false if ff strategy is enabled 1`] = `
 Array [
   Object {
     "headers": Object {
@@ -6834,7 +6758,7 @@ Array [
 ]
 `;
 
-exports[`platform/bitbucket-server endpoint with path repoForceRebase() return false if no-ff strategy is enabled 1`] = `
+exports[`platform/bitbucket-server/index endpoint with path repoForceRebase() return false if no-ff strategy is enabled 1`] = `
 Array [
   Object {
     "headers": Object {
@@ -6851,7 +6775,7 @@ Array [
 ]
 `;
 
-exports[`platform/bitbucket-server endpoint with path repoForceRebase() return false if rebase-no-ff strategy is enabled 1`] = `
+exports[`platform/bitbucket-server/index endpoint with path repoForceRebase() return false if rebase-no-ff strategy is enabled 1`] = `
 Array [
   Object {
     "headers": Object {
@@ -6868,7 +6792,7 @@ Array [
 ]
 `;
 
-exports[`platform/bitbucket-server endpoint with path repoForceRebase() return false if squash strategy is enabled 1`] = `
+exports[`platform/bitbucket-server/index endpoint with path repoForceRebase() return false if squash strategy is enabled 1`] = `
 Array [
   Object {
     "headers": Object {
@@ -6885,7 +6809,7 @@ Array [
 ]
 `;
 
-exports[`platform/bitbucket-server endpoint with path repoForceRebase() return true if ff-only strategy is enabled 1`] = `
+exports[`platform/bitbucket-server/index endpoint with path repoForceRebase() return true if ff-only strategy is enabled 1`] = `
 Array [
   Object {
     "headers": Object {
@@ -6902,7 +6826,7 @@ Array [
 ]
 `;
 
-exports[`platform/bitbucket-server endpoint with path repoForceRebase() return true if rebase-ff-only strategy is enabled 1`] = `
+exports[`platform/bitbucket-server/index endpoint with path repoForceRebase() return true if rebase-ff-only strategy is enabled 1`] = `
 Array [
   Object {
     "headers": Object {
@@ -6919,7 +6843,7 @@ Array [
 ]
 `;
 
-exports[`platform/bitbucket-server endpoint with path repoForceRebase() return true if squash-ff-only strategy is enabled 1`] = `
+exports[`platform/bitbucket-server/index endpoint with path repoForceRebase() return true if squash-ff-only strategy is enabled 1`] = `
 Array [
   Object {
     "headers": Object {
@@ -6936,7 +6860,7 @@ Array [
 ]
 `;
 
-exports[`platform/bitbucket-server endpoint with path repoForceRebase() returns false on missing defaultStrategy 1`] = `
+exports[`platform/bitbucket-server/index endpoint with path repoForceRebase() returns false on missing defaultStrategy 1`] = `
 Array [
   Object {
     "headers": Object {
@@ -6953,7 +6877,7 @@ Array [
 ]
 `;
 
-exports[`platform/bitbucket-server endpoint with path repoForceRebase() returns false on missing mergeConfig 1`] = `
+exports[`platform/bitbucket-server/index endpoint with path repoForceRebase() returns false on missing mergeConfig 1`] = `
 Array [
   Object {
     "headers": Object {
@@ -6970,7 +6894,7 @@ Array [
 ]
 `;
 
-exports[`platform/bitbucket-server endpoint with path setBaseBranch() updates file list 1`] = `
+exports[`platform/bitbucket-server/index endpoint with path setBaseBranch() updates file list 1`] = `
 Array [
   Object {
     "headers": Object {
@@ -6999,7 +6923,7 @@ Array [
 ]
 `;
 
-exports[`platform/bitbucket-server endpoint with path setBranchStatus() should be success 1 1`] = `
+exports[`platform/bitbucket-server/index endpoint with path setBranchStatus() should be success 1 1`] = `
 Array [
   Object {
     "headers": Object {
@@ -7079,7 +7003,7 @@ Array [
 ]
 `;
 
-exports[`platform/bitbucket-server endpoint with path setBranchStatus() should be success 2 1`] = `
+exports[`platform/bitbucket-server/index endpoint with path setBranchStatus() should be success 2 1`] = `
 Array [
   Object {
     "headers": Object {
@@ -7159,7 +7083,7 @@ Array [
 ]
 `;
 
-exports[`platform/bitbucket-server endpoint with path setBranchStatus() should be success 3 1`] = `
+exports[`platform/bitbucket-server/index endpoint with path setBranchStatus() should be success 3 1`] = `
 Array [
   Object {
     "headers": Object {
@@ -7239,7 +7163,7 @@ Array [
 ]
 `;
 
-exports[`platform/bitbucket-server endpoint with path setBranchStatus() should be success 4 1`] = `
+exports[`platform/bitbucket-server/index endpoint with path setBranchStatus() should be success 4 1`] = `
 Array [
   Object {
     "headers": Object {
@@ -7319,7 +7243,7 @@ Array [
 ]
 `;
 
-exports[`platform/bitbucket-server endpoint with path setBranchStatus() should be success 5 1`] = `
+exports[`platform/bitbucket-server/index endpoint with path setBranchStatus() should be success 5 1`] = `
 Array [
   Object {
     "headers": Object {
@@ -7375,7 +7299,7 @@ Array [
 ]
 `;
 
-exports[`platform/bitbucket-server endpoint with path setBranchStatus() should be success 6 1`] = `
+exports[`platform/bitbucket-server/index endpoint with path setBranchStatus() should be success 6 1`] = `
 Array [
   Object {
     "headers": Object {
@@ -7416,7 +7340,7 @@ Array [
 ]
 `;
 
-exports[`platform/bitbucket-server endpoint with path updatePr() puts PR 1`] = `
+exports[`platform/bitbucket-server/index endpoint with path updatePr() puts PR 1`] = `
 Array [
   Object {
     "headers": Object {
@@ -7496,7 +7420,9 @@ Array [
 ]
 `;
 
-exports[`platform/bitbucket-server endpoint with path updatePr() throws 1`] = `
+exports[`platform/bitbucket-server/index endpoint with path updatePr() throws 1`] = `"Response code 405 (Method Not Allowed)"`;
+
+exports[`platform/bitbucket-server/index endpoint with path updatePr() throws 2`] = `
 Array [
   Object {
     "headers": Object {
@@ -7576,7 +7502,7 @@ Array [
 ]
 `;
 
-exports[`platform/bitbucket-server endpoint with path updatePr() throws not-found 1 1`] = `
+exports[`platform/bitbucket-server/index endpoint with path updatePr() throws not-found 1 1`] = `
 Array [
   Object {
     "headers": Object {
@@ -7605,7 +7531,7 @@ Array [
 ]
 `;
 
-exports[`platform/bitbucket-server endpoint with path updatePr() throws not-found 2 1`] = `
+exports[`platform/bitbucket-server/index endpoint with path updatePr() throws not-found 2 1`] = `
 Array [
   Object {
     "headers": Object {
@@ -7646,7 +7572,7 @@ Array [
 ]
 `;
 
-exports[`platform/bitbucket-server endpoint with path updatePr() throws not-found 3 1`] = `
+exports[`platform/bitbucket-server/index endpoint with path updatePr() throws not-found 3 1`] = `
 Array [
   Object {
     "headers": Object {
@@ -7726,7 +7652,7 @@ Array [
 ]
 `;
 
-exports[`platform/bitbucket-server endpoint with path updatePr() throws repository-changed 1`] = `
+exports[`platform/bitbucket-server/index endpoint with path updatePr() throws repository-changed 1`] = `
 Array [
   Object {
     "headers": Object {

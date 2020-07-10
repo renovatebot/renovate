@@ -21,7 +21,6 @@ import { sanitize } from '../../util/sanitize';
 import { ensureTrailingSlash } from '../../util/url';
 import {
   BranchStatusConfig,
-  CommitFilesConfig,
   CreatePRConfig,
   EnsureCommentConfig,
   EnsureCommentRemovalConfig,
@@ -468,11 +467,6 @@ const platform: Platform = {
     return config.prList;
   },
 
-  /* istanbul ignore next */
-  async getPrFiles(pr: Pr): Promise<string[]> {
-    return git.getBranchFiles(pr.branchName, pr.targetBranch);
-  },
-
   async getPr(number: number): Promise<Pr | null> {
     // Search for pull request in cached list or attempt to query directly
     const prList = await platform.getPrList();
@@ -850,10 +844,6 @@ const platform: Platform = {
     return Promise.resolve();
   },
 
-  commitFiles(commitFilesConfig: CommitFilesConfig): Promise<string | null> {
-    return git.commitFiles(commitFilesConfig);
-  },
-
   getPrBody(prBody: string): string {
     return smartTruncate(prBody, 1000000);
   },
@@ -866,7 +856,6 @@ const platform: Platform = {
 export const {
   addAssignees,
   addReviewers,
-  commitFiles,
   createPr,
   deleteBranch,
   deleteLabel,
@@ -883,7 +872,6 @@ export const {
   getPr,
   getPrBody,
   getPrList,
-  getPrFiles,
   getRepoForceRebase,
   getRepos,
   getVulnerabilityAlerts,

@@ -31,7 +31,6 @@ import { sanitize } from '../../util/sanitize';
 import { ensureTrailingSlash } from '../../util/url';
 import {
   BranchStatusConfig,
-  CommitFilesConfig,
   CreatePRConfig,
   EnsureCommentConfig,
   EnsureCommentRemovalConfig,
@@ -381,15 +380,19 @@ export async function initRepo({
           }
         );
       } catch (err) /* istanbul ignore next */ {
+        logger.debug(
+          'Error updating fork reference - will try deleting fork to try again next time'
+        );
+        try {
+          await githubApi.deleteJson(`repos/${config.repository}`);
+          logger.info('Fork deleted');
+        } catch (deleteErr) {
+          logger.warn({ err: deleteErr }, 'Could not delete fork');
+        }
         if (err instanceof ExternalHostError) {
           throw err;
         }
-        if (
-          err.statusCode === 422 &&
-          err.message.startsWith('Object does not exist')
-        ) {
-          throw new Error(REPOSITORY_CHANGED);
-        }
+        throw new ExternalHostError(err);
       }
     } else {
       logger.debug({ repository_fork: config.repository }, 'Created fork');
@@ -492,13 +495,6 @@ export function deleteBranch(
   closePr?: boolean
 ): Promise<void> {
   return git.deleteBranch(branchName);
-}
-
-// istanbul ignore next
-export function commitFiles(
-  commitFilesConfig: CommitFilesConfig
-): Promise<string | null> {
-  return git.commitFiles(commitFilesConfig);
 }
 
 async function getClosedPrs(): Promise<PrList> {
@@ -667,7 +663,8 @@ async function getOpenPrs(): Promise<PrList> {
         if (pr.commits.nodes.length === 1) {
           if (global.gitAuthor) {
             // Check against gitAuthor
-            const commitAuthorEmail = pr.commits.nodes[0].commit.author.email;
+            const commitAuthorEmail =
+              pr.commits?.nodes?.[0]?.commit?.author?.email;
             if (commitAuthorEmail === global.gitAuthor.email) {
               pr.isModified = false;
             } else {
@@ -704,9 +701,8 @@ async function getOpenPrs(): Promise<PrList> {
         } else {
           const baseCommitSHA = await getBaseCommitSHA();
           if (
-            pr.commits.nodes[0].commit.parents.edges.length &&
-            pr.commits.nodes[0].commit.parents.edges[0].node.oid !==
-              baseCommitSHA
+            pr.commits?.nodes[0]?.commit?.parents?.edges?.[0]?.node?.oid !==
+            baseCommitSHA
           ) {
             pr.isStale = true;
           }
@@ -905,11 +901,6 @@ export async function getPrList(): Promise<Pr[]> {
     logger.debug(`Retrieved ${config.prList.length} Pull Requests`);
   }
   return config.prList;
-}
-
-/* istanbul ignore next */
-export async function getPrFiles(pr: Pr): Promise<string[]> {
-  return git.getBranchFiles(pr.branchName, pr.targetBranch);
 }
 
 export async function findPr({

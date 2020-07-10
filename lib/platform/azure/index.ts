@@ -19,7 +19,6 @@ import { sanitize } from '../../util/sanitize';
 import { ensureTrailingSlash } from '../../util/url';
 import {
   BranchStatusConfig,
-  CommitFilesConfig,
   CreatePRConfig,
   EnsureCommentConfig,
   EnsureCommentRemovalConfig,
@@ -233,11 +232,6 @@ export async function getPrList(): Promise<AzurePr[]> {
   return config.prList;
 }
 
-/* istanbul ignore next */
-export async function getPrFiles(pr: Pr): Promise<string[]> {
-  return git.getBranchFiles(pr.branchName, pr.targetBranch);
-}
-
 export async function getPr(pullRequestId: number): Promise<Pr | null> {
   logger.debug(`getPr(${pullRequestId})`);
   if (!pullRequestId) {
@@ -329,18 +323,6 @@ export /* istanbul ignore next */ async function deleteBranch(
     const pr = await getBranchPr(branchName);
     await abandonPr(pr.number);
   }
-}
-
-export /* istanbul ignore next */ function commitFiles({
-  branchName,
-  files,
-  message,
-}: CommitFilesConfig): Promise<string | null> {
-  return git.commitFiles({
-    branchName,
-    files,
-    message,
-  });
 }
 
 export async function getBranchStatusCheck(
