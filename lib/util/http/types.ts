@@ -1,6 +1,6 @@
-import { OptionsOfJSONResponseBody } from 'got';
+import { OptionsOfJSONResponseBody, RequestError as RequestError_ } from 'got';
 
-// TODO: move to context
+// TODO: Move options to context
 export type GotOptions = OptionsOfJSONResponseBody & {
   abortOnError?: boolean;
   abortIgnoreStatusCodes?: number[];
@@ -9,3 +9,5 @@ export type GotOptions = OptionsOfJSONResponseBody & {
   enabled?: boolean;
   useCache?: boolean;
 };
+
+export type HttpError = RequestError_;

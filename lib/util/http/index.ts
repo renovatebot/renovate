@@ -9,6 +9,8 @@ import { applyAuthorization, removeAuthorization } from './auth';
 import { applyHostRules } from './host-rules';
 import { GotOptions } from './types';
 
+export * from './types';
+
 // TODO: remove when code is refactord
 Object.defineProperty(got.RequestError.prototype, 'statusCode', {
   get: function statusCode(this: any) {

@@ -2,7 +2,7 @@ import crypto from 'crypto';
 import { logger } from '../../logger';
 import { ExternalHostError } from '../../types/errors/external-host-error';
 import * as packageCache from '../../util/cache/package';
-import { Http } from '../../util/http';
+import { Http, HttpError } from '../../util/http';
 import { GithubHttp } from '../../util/http/github';
 import { GetReleasesConfig, ReleaseResult } from '../common';
 
@@ -37,20 +37,18 @@ function releasesGithubUrl(
   return `${prefix}/${account}/${repo}/contents/Specs/${suffix}`;
 }
 
-function handleError(lookupName: string, err: Error): void {
+function handleError(lookupName: string, err: HttpError): void {
   const errorData = { lookupName, err };
 
-  if (
-    err.statusCode === 429 ||
-    (err.statusCode >= 500 && err.statusCode < 600)
-  ) {
+  const statusCode = err.response?.statusCode;
+  if (statusCode === 429 || (statusCode >= 500 && statusCode < 600)) {
     logger.warn({ lookupName, err }, `CocoaPods registry failure`);
     throw new ExternalHostError(err);
   }
 
-  if (err.statusCode === 401) {
+  if (statusCode === 401) {
     logger.debug(errorData, 'Authorization error');
-  } else if (err.statusCode === 404) {
+  } else if (statusCode === 404) {
     logger.debug(errorData, 'Package lookup error');
   } else {
     logger.warn(errorData, 'CocoaPods lookup failure: Unknown error');
