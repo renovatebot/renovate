@@ -718,9 +718,9 @@ async function getOpenPrs(): Promise<PrList> {
             (label: { name: string }) => label.name
           );
         }
-        pr.hasAssignees = is.nonEmptyArray(pr.assignees);
+        pr.hasAssignees = !!(pr.assignees?.totalCount > 0);
         delete pr.assignees;
-        pr.hasReviewers = is.nonEmptyArray(pr.reviewRequests);
+        pr.hasReviewers = !!(pr.reviewRequests?.totalCount > 0);
         delete pr.reviewRequests;
         delete pr.mergeable;
         delete pr.mergeStateStatus;
