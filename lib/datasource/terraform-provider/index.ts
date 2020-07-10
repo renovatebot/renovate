@@ -1,5 +1,6 @@
 import URL from 'url';
 import { logger } from '../../logger';
+import * as packageCache from '../../util/cache/package';
 import { Http } from '../../util/http';
 import { GetReleasesConfig, ReleaseResult } from '../common';
 
@@ -88,6 +89,17 @@ export async function getReleases({
 }: GetReleasesConfig): Promise<ReleaseResult | null> {
   const repository = `hashicorp/${lookupName}`;
 
+  const cacheNamespace = 'terraform-provider';
+  const pkgUrl = `${registryUrl}/${repository}`;
+  const cachedResult = await packageCache.get<ReleaseResult>(
+    cacheNamespace,
+    pkgUrl
+  );
+  // istanbul ignore if
+  if (cachedResult) {
+    return cachedResult;
+  }
+
   logger.debug({ lookupName }, 'terraform-provider.getDependencies()');
   let dep: ReleaseResult = null;
   const registryHost = URL.parse(registryUrl).host;
@@ -96,5 +108,7 @@ export async function getReleases({
   } else if (registryHost === 'releases.hashicorp.com') {
     dep = await queryReleaseBackend(lookupName, registryUrl, repository);
   }
+  const cacheMinutes = 30;
+  await packageCache.set(cacheNamespace, pkgUrl, dep, cacheMinutes);
   return dep;
 }
