@@ -1,3 +1,4 @@
+import is from '@sindresorhus/is';
 import {
   GitPullRequest,
   GitPullRequestCommentThread,
@@ -262,7 +263,7 @@ export async function getPr(pullRequestId: number): Promise<Pr | null> {
   azurePr.isModified =
     commits.length > 0 &&
     commits[0].author.name !== commits[commits.length - 1].author.name;
-
+  azurePr.hasReviewers = is.nonEmptyArray(azurePr.reviewers);
   return azurePr;
 }
 

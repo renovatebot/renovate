@@ -588,6 +588,12 @@ async function getOpenPrs(): Promise<PrList> {
                   name
                 }
               }
+              assignees {
+                totalCount
+              }
+              reviewRequests {
+                totalCount
+              }
               commits(first: 2) {
                 nodes {
                   commit {
@@ -712,6 +718,10 @@ async function getOpenPrs(): Promise<PrList> {
             (label: { name: string }) => label.name
           );
         }
+        pr.hasAssignees = is.nonEmptyArray(pr.assignees);
+        delete pr.assignees;
+        pr.hasReviewers = is.nonEmptyArray(pr.reviewRequests);
+        delete pr.reviewRequests;
         delete pr.mergeable;
         delete pr.mergeStateStatus;
         delete pr.commits;

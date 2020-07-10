@@ -1,4 +1,5 @@
 import URL from 'url';
+import is from '@sindresorhus/is';
 import addrs from 'email-addresses';
 import parseDiff from 'parse-diff';
 import { RenovateConfig } from '../../config/common';
@@ -327,6 +328,8 @@ export async function getPr(prNo: number): Promise<Pr | null> {
   if (await git.branchExists(pr.source.branch.name)) {
     res.isStale = await git.isBranchStale(pr.source.branch.name);
   }
+
+  res.hasReviewers = is.nonEmptyArray(pr.reviewers);
 
   return res;
 }

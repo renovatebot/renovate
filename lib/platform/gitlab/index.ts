@@ -457,6 +457,7 @@ export async function getPr(iid: number): Promise<Pr> {
   pr.state = pr.state === 'opened' ? PR_STATE_OPEN : pr.state;
   pr.isModified = true;
   pr.hasAssignees = !!(pr.assignee?.id || pr.assignees?.[0]?.id);
+  pr.hasReviewers = false;
   if (pr.merge_status === 'cannot_be_merged') {
     logger.debug('pr cannot be merged');
     pr.canMerge = false;

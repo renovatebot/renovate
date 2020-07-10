@@ -279,6 +279,7 @@ export async function ensurePr(
       // istanbul ignore if
       if (
         !existingPr.hasAssignees &&
+        !existingPr.hasReviewers &&
         config.automerge &&
         (await getBranchStatus()) === BranchStatus.red
       ) {

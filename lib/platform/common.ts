@@ -84,6 +84,7 @@ export interface Pr {
   createdAt?: string;
   displayNumber?: string;
   hasAssignees?: boolean;
+  hasReviewers?: boolean;
   isConflicted?: boolean;
   isModified?: boolean;
   isStale?: boolean;

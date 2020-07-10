@@ -1,4 +1,5 @@
 import URL from 'url';
+import is from '@sindresorhus/is';
 import { configFileNames } from '../../config/app-strings';
 import { RenovateConfig } from '../../config/common';
 import {
@@ -104,6 +105,7 @@ function toRenovatePR(data: helper.PR): Pr | null {
     isConflicted: !data.mergeable,
     isStale: undefined,
     isModified: undefined,
+    hasAssignees: !!(data.assignee?.login || is.nonEmptyArray(data.assignees)),
   };
 }
 
