@@ -1,7 +1,7 @@
 import { ReleaseType } from 'semver';
 import { GlobalConfig, UpdateType, ValidationMessage } from '../config/common';
-import { File } from '../platform/common';
 import { RangeStrategy, SkipReason } from '../types';
+import { File } from '../util/git';
 
 export type Result<T> = T | Promise<T>;
 
@@ -76,7 +76,7 @@ export interface PackageFile<T = Record<string, any>>
   extends NpmLockFiles,
     ManagerData<T> {
   hasYarnWorkspaces?: boolean;
-  internalPackages?: string[];
+  internalPackages?: string[]; // TODO: remove
   compatibility?: Record<string, string>;
   datasource?: string;
   registryUrls?: string[];

@@ -4,6 +4,7 @@ import * as _base from './base';
 import * as _config from './config';
 import { initRepo } from '.';
 
+jest.mock('../../../util/git');
 jest.mock('../../../workers/repository/onboarding/branch');
 jest.mock('../../../workers/repository/configured');
 jest.mock('../../../workers/repository/init/apis');

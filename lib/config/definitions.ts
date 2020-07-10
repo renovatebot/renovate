@@ -38,17 +38,22 @@ export interface RenovateOptionBase {
   stage?: RenovateConfigStage;
 }
 
-export interface RenovateArrayOption<T extends string | object = object>
-  extends RenovateOptionBase {
+export interface RenovateArrayOption<
+  T extends string | number | object = object
+> extends RenovateOptionBase {
   default?: T[];
   mergeable?: boolean;
   type: 'array';
-  subType?: 'string' | 'object';
+  subType?: 'string' | 'object' | 'number';
 }
 
 export interface RenovateStringArrayOption extends RenovateArrayOption<string> {
   format?: 'regex';
   subType: 'string';
+}
+
+export interface RenovateNumberArrayOption extends RenovateArrayOption<number> {
+  subType: 'number';
 }
 
 export interface RenovateBooleanOption extends RenovateOptionBase {
@@ -79,6 +84,7 @@ export interface RenovateObjectOption extends RenovateOptionBase {
 
 export type RenovateOptions =
   | RenovateStringOption
+  | RenovateNumberArrayOption
   | RenovateStringArrayOption
   | RenovateIntegerOption
   | RenovateBooleanOption
@@ -197,6 +203,15 @@ const options: RenovateOptions[] = [
     type: 'boolean',
     cli: false,
     env: false,
+  },
+  {
+    name: 'repositoryCache',
+    description: 'Option to do repository extract caching.',
+    admin: true,
+    type: 'string',
+    allowedValues: ['disabled', 'enabled', 'reset'],
+    stage: 'repository',
+    default: 'disabled',
   },
   {
     name: 'force',
@@ -596,6 +611,7 @@ const options: RenovateOptions[] = [
     type: 'string',
     cli: false,
     admin: true,
+    stage: 'global',
   },
   {
     name: 'enabledManagers',
@@ -1614,6 +1630,28 @@ const options: RenovateOptions[] = [
     env: false,
   },
   {
+    name: 'abortOnError',
+    description:
+      'If enabled, Renovate will abort its run when http request errors occur.',
+    type: 'boolean',
+    stage: 'repository',
+    parent: 'hostRules',
+    default: false,
+    cli: false,
+    env: false,
+  },
+  {
+    name: 'abortIgnoreStatusCodes',
+    description:
+      'A list of HTTP status codes to ignore and *not* abort the run because of when abortOnError=true.',
+    type: 'array',
+    subType: 'number',
+    stage: 'repository',
+    parent: 'hostRules',
+    cli: false,
+    env: false,
+  },
+  {
     name: 'prBodyDefinitions',
     description: 'Table column definitions for use in PR tables',
     type: 'object',
@@ -1656,7 +1694,6 @@ const options: RenovateOptions[] = [
     default: ['deprecationWarningIssues'],
     allowedValues: [
       'prIgnoreNotification',
-      'prEditNotification',
       'branchAutomergeFailure',
       'lockFileErrors',
       'artifactErrors',

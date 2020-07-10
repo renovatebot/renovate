@@ -1,6 +1,7 @@
 import fs from 'fs';
+import { getPkgReleases } from '..';
 import * as httpMock from '../../../test/httpMock';
-import * as terraform from '.';
+import { id as datasource } from '.';
 
 const consulData: any = fs.readFileSync(
   'lib/datasource/terraform-module/__fixtures__/registry-consul.json'
@@ -25,8 +26,9 @@ describe('datasource/terraform-module', () => {
         .get('/v1/modules/hashicorp/consul/aws')
         .reply(200, {});
       expect(
-        await terraform.getReleases({
-          lookupName: 'hashicorp/consul/aws',
+        await getPkgReleases({
+          datasource,
+          depName: 'hashicorp/consul/aws',
         })
       ).toBeNull();
       expect(httpMock.getTrace()).toMatchSnapshot();
@@ -37,8 +39,9 @@ describe('datasource/terraform-module', () => {
         .get('/v1/modules/hashicorp/consul/aws')
         .reply(404, {});
       expect(
-        await terraform.getReleases({
-          lookupName: 'hashicorp/consul/aws',
+        await getPkgReleases({
+          datasource,
+          depName: 'hashicorp/consul/aws',
         })
       ).toBeNull();
       expect(httpMock.getTrace()).toMatchSnapshot();
@@ -49,8 +52,9 @@ describe('datasource/terraform-module', () => {
         .get('/v1/modules/hashicorp/consul/aws')
         .replyWithError('');
       expect(
-        await terraform.getReleases({
-          lookupName: 'hashicorp/consul/aws',
+        await getPkgReleases({
+          datasource,
+          depName: 'hashicorp/consul/aws',
         })
       ).toBeNull();
       expect(httpMock.getTrace()).toMatchSnapshot();
@@ -60,8 +64,9 @@ describe('datasource/terraform-module', () => {
         .scope(baseUrl)
         .get('/v1/modules/hashicorp/consul/aws')
         .reply(200, consulData);
-      const res = await terraform.getReleases({
-        lookupName: 'hashicorp/consul/aws',
+      const res = await getPkgReleases({
+        datasource,
+        depName: 'hashicorp/consul/aws',
       });
       expect(res).toMatchSnapshot();
       expect(res).not.toBeNull();
@@ -72,8 +77,9 @@ describe('datasource/terraform-module', () => {
         .scope(baseUrl)
         .get('/v1/modules/hashicorp/consul/aws')
         .reply(200, consulData);
-      const res = await terraform.getReleases({
-        lookupName: 'registry.terraform.io/hashicorp/consul/aws',
+      const res = await getPkgReleases({
+        datasource,
+        depName: 'registry.terraform.io/hashicorp/consul/aws',
       });
       expect(res).toMatchSnapshot();
       expect(res).not.toBeNull();
@@ -84,8 +90,9 @@ describe('datasource/terraform-module', () => {
         .scope('https://terraform.company.com')
         .get('/v1/modules/consul/foo')
         .reply(200, consulData);
-      const res = await terraform.getReleases({
-        lookupName: 'consul/foo',
+      const res = await getPkgReleases({
+        datasource,
+        depName: 'consul/foo',
         registryUrls: ['https://terraform.company.com'],
       });
       expect(res).toBeNull();

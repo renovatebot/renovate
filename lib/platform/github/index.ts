@@ -3,7 +3,6 @@ import is from '@sindresorhus/is';
 import delay from 'delay';
 import { configFileNames } from '../../config/app-strings';
 import {
-  PLATFORM_FAILURE,
   PLATFORM_INTEGRATION_UNAUTHORIZED,
   REPOSITORY_ACCESS_FORBIDDEN,
   REPOSITORY_ARCHIVED,
@@ -24,13 +23,14 @@ import {
 } from '../../constants/pull-requests';
 import { logger } from '../../logger';
 import { BranchStatus } from '../../types';
+import { ExternalHostError } from '../../types/errors/external-host-error';
+import * as git from '../../util/git';
 import * as hostRules from '../../util/host-rules';
 import * as githubHttp from '../../util/http/github';
 import { sanitize } from '../../util/sanitize';
 import { ensureTrailingSlash } from '../../util/url';
 import {
   BranchStatusConfig,
-  CommitFilesConfig,
   CreatePRConfig,
   EnsureCommentConfig,
   EnsureCommentRemovalConfig,
@@ -44,7 +44,6 @@ import {
   RepoParams,
   VulnerabilityAlert,
 } from '../common';
-import GitStorage, { StatusResult } from '../git/storage';
 import { smartTruncate } from '../utils/pr-body';
 import {
   BranchProtection,
@@ -149,16 +148,6 @@ export async function getRepos(): Promise<string[]> {
   }
 }
 
-export function cleanRepo(): Promise<void> {
-  // istanbul ignore if
-  if (config.storage) {
-    config.storage.cleanRepo();
-  }
-  // In theory most of this isn't necessary. In practice..
-  config = {} as any;
-  return Promise.resolve();
-}
-
 async function getBranchProtection(
   branchName: string
 ): Promise<BranchProtection> {
@@ -211,7 +200,7 @@ export async function initRepo({
 }: RepoParams): Promise<RepoConfig> {
   logger.debug(`initRepo("${repository}")`);
   // config is used by the platform api itself, not necessary for the app layer to know
-  await cleanRepo();
+  config = { localDir, repository } as any;
   // istanbul ignore if
   if (endpoint) {
     // Necessary for Renovate Pro - do not remove
@@ -225,15 +214,11 @@ export async function initRepo({
   });
   config.isGhe = URL.parse(defaults.endpoint).host !== 'api.github.com';
   config.renovateUsername = renovateUsername;
-  config.localDir = localDir;
-  config.repository = repository;
   [config.repositoryOwner, config.repositoryName] = repository.split('/');
   let res;
   try {
     res = await githubApi.getJson<{ fork: boolean }>(`repos/${repository}`);
     logger.trace({ repositoryDetails: res.body }, 'Repository details');
-    config.enterpriseVersion =
-      res.headers && (res.headers['x-github-enterprise-version'] as string);
     // istanbul ignore if
     if (res.body.fork && !includeForks) {
       try {
@@ -287,8 +272,6 @@ export async function initRepo({
         throw new Error(REPOSITORY_DISABLED);
       }
     }
-    const owner = res.body.owner.login;
-    logger.debug(`${repository} owner = ${owner}`);
     // Use default branch as PR target unless later overridden.
     config.defaultBranch = res.body.default_branch;
     // Base branch may be configured but defaultBranch is always fixed
@@ -397,15 +380,19 @@ export async function initRepo({
           }
         );
       } catch (err) /* istanbul ignore next */ {
-        if (err.message === PLATFORM_FAILURE) {
+        logger.debug(
+          'Error updating fork reference - will try deleting fork to try again next time'
+        );
+        try {
+          await githubApi.deleteJson(`repos/${config.repository}`);
+          logger.info('Fork deleted');
+        } catch (deleteErr) {
+          logger.warn({ err: deleteErr }, 'Could not delete fork');
+        }
+        if (err instanceof ExternalHostError) {
           throw err;
         }
-        if (
-          err.statusCode === 422 &&
-          err.message.startsWith('Object does not exist')
-        ) {
-          throw new Error(REPOSITORY_CHANGED);
-        }
+        throw new ExternalHostError(err);
       }
     } else {
       logger.debug({ repository_fork: config.repository }, 'Created fork');
@@ -432,10 +419,11 @@ export async function initRepo({
   );
   parsedEndpoint.pathname = config.repository + '.git';
   const url = URL.format(parsedEndpoint);
-  config.storage = new GitStorage();
-  await config.storage.initRepo({
+  await git.initRepo({
     ...config,
     url,
+    gitAuthorName: global.gitAuthor?.name,
+    gitAuthorEmail: global.gitAuthor?.email,
   });
   const repoConfig: RepoConfig = {
     baseBranch: config.baseBranch,
@@ -495,88 +483,18 @@ export async function setBaseBranch(
 ): Promise<string> {
   config.baseBranch = branchName;
   config.baseCommitSHA = null;
-  const baseBranchSha = await config.storage.setBaseBranch(branchName);
+  const baseBranchSha = await git.setBaseBranch(branchName);
   return baseBranchSha;
 }
 
-// istanbul ignore next
-export function setBranchPrefix(branchPrefix: string): Promise<void> {
-  return config.storage.setBranchPrefix(branchPrefix);
-}
-
-// Search
-
-// istanbul ignore next
-export function getFileList(): Promise<string[]> {
-  return config.storage.getFileList();
-}
-
 // Branch
-
-// istanbul ignore next
-export function branchExists(branchName: string): Promise<boolean> {
-  return config.storage.branchExists(branchName);
-}
-
-// istanbul ignore next
-export function getAllRenovateBranches(
-  branchPrefix: string
-): Promise<string[]> {
-  return config.storage.getAllRenovateBranches(branchPrefix);
-}
-
-// istanbul ignore next
-export function isBranchStale(branchName: string): Promise<boolean> {
-  return config.storage.isBranchStale(branchName);
-}
-
-// istanbul ignore next
-export function getFile(
-  filePath: string,
-  branchName?: string
-): Promise<string> {
-  return config.storage.getFile(filePath, branchName);
-}
 
 // istanbul ignore next
 export function deleteBranch(
   branchName: string,
   closePr?: boolean
 ): Promise<void> {
-  return config.storage.deleteBranch(branchName);
-}
-
-// istanbul ignore next
-export function getBranchLastCommitTime(branchName: string): Promise<Date> {
-  return config.storage.getBranchLastCommitTime(branchName);
-}
-
-// istanbul ignore next
-export function getRepoStatus(): Promise<StatusResult> {
-  return config.storage.getRepoStatus();
-}
-
-// istanbul ignore next
-export function mergeBranch(branchName: string): Promise<void> {
-  if (config.pushProtection) {
-    logger.debug(
-      { branch: branchName },
-      'Branch protection: Attempting to merge branch when push protection is enabled'
-    );
-  }
-  return config.storage.mergeBranch(branchName);
-}
-
-// istanbul ignore next
-export function commitFiles(
-  commitFilesConfig: CommitFilesConfig
-): Promise<string | null> {
-  return config.storage.commitFiles(commitFilesConfig);
-}
-
-// istanbul ignore next
-export function getCommitMessages(): Promise<string[]> {
-  return config.storage.getCommitMessages();
+  return git.deleteBranch(branchName);
 }
 
 async function getClosedPrs(): Promise<PrList> {
@@ -745,7 +663,8 @@ async function getOpenPrs(): Promise<PrList> {
         if (pr.commits.nodes.length === 1) {
           if (global.gitAuthor) {
             // Check against gitAuthor
-            const commitAuthorEmail = pr.commits.nodes[0].commit.author.email;
+            const commitAuthorEmail =
+              pr.commits?.nodes?.[0]?.commit?.author?.email;
             if (commitAuthorEmail === global.gitAuthor.email) {
               pr.isModified = false;
             } else {
@@ -782,9 +701,8 @@ async function getOpenPrs(): Promise<PrList> {
         } else {
           const baseCommitSHA = await getBaseCommitSHA();
           if (
-            pr.commits.nodes[0].commit.parents.edges.length &&
-            pr.commits.nodes[0].commit.parents.edges[0].node.oid !==
-              baseCommitSHA
+            pr.commits?.nodes[0]?.commit?.parents?.edges?.[0]?.node?.oid !==
+            baseCommitSHA
           ) {
             pr.isStale = true;
           }
@@ -965,7 +883,7 @@ export async function getPrList(): Promise<Pr[]> {
       );
     } catch (err) /* istanbul ignore next */ {
       logger.debug({ err }, 'getPrList err');
-      throw new Error('platform-failure');
+      throw new ExternalHostError(err, PLATFORM_TYPE_GITHUB);
     }
     config.prList = res.body.map((pr) => ({
       number: pr.number,
@@ -983,11 +901,6 @@ export async function getPrList(): Promise<Pr[]> {
     logger.debug(`Retrieved ${config.prList.length} Pull Requests`);
   }
   return config.prList;
-}
-
-/* istanbul ignore next */
-export async function getPrFiles(pr: Pr): Promise<string[]> {
-  return config.storage.getBranchFiles(pr.branchName, pr.targetBranch);
 }
 
 export async function findPr({
@@ -1094,7 +1007,7 @@ export async function getBranchStatus(
         logger.debug({ result: checkRunsRaw }, 'No check runs found');
       }
     } catch (err) /* istanbul ignore next */ {
-      if (err.message === PLATFORM_FAILURE) {
+      if (err instanceof ExternalHostError) {
         throw err;
       }
       if (
@@ -1137,7 +1050,7 @@ async function getStatusCheck(
   branchName: string,
   useCache = true
 ): Promise<GhBranchStatus[]> {
-  const branchCommit = await config.storage.getBranchCommit(branchName);
+  const branchCommit = await git.getBranchCommit(branchName);
 
   const url = `repos/${config.repository}/commits/${branchCommit}/statuses`;
 
@@ -1192,7 +1105,7 @@ export async function setBranchStatus({
   }
   logger.debug({ branch: branchName, context, state }, 'Setting branch status');
   try {
-    const branchCommit = await config.storage.getBranchCommit(branchName);
+    const branchCommit = await git.getBranchCommit(branchName);
     const url = `repos/${config.repository}/statuses/${branchCommit}`;
     const renovateToGitHubStateMapping = {
       green: 'success',
@@ -1506,7 +1419,7 @@ async function getComments(issueNo: number): Promise<Comment[]> {
   } catch (err) /* istanbul ignore next */ {
     if (err.statusCode === 404) {
       logger.debug('404 respose when retrieving comments');
-      throw new Error(PLATFORM_FAILURE);
+      throw new ExternalHostError(err, PLATFORM_TYPE_GITHUB);
     }
     throw err;
   }
@@ -1559,7 +1472,7 @@ export async function ensureComment({
     }
     return true;
   } catch (err) /* istanbul ignore next */ {
-    if (err.message === PLATFORM_FAILURE) {
+    if (err instanceof ExternalHostError) {
       throw err;
     }
     if (err.body?.message?.includes('is locked')) {
@@ -1690,7 +1603,7 @@ export async function updatePr(
     );
     logger.debug({ pr: prNo }, 'PR updated');
   } catch (err) /* istanbul ignore next */ {
-    if (err.message === PLATFORM_FAILURE) {
+    if (err instanceof ExternalHostError) {
       throw err;
     }
     logger.warn({ err }, 'Error updating PR');

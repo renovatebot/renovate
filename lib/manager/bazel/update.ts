@@ -1,6 +1,6 @@
 import { fromStream } from 'hasha';
 import { logger } from '../../logger';
-import * as globalCache from '../../util/cache/global';
+import * as packageCache from '../../util/cache/package';
 import { Http } from '../../util/http';
 import { regEx } from '../../util/regex';
 import { UpdateDependencyConfig } from '../common';
@@ -46,7 +46,7 @@ function extractUrls(content: string): string[] | null {
 
 async function getHashFromUrl(url: string): Promise<string | null> {
   const cacheNamespace = 'url-sha256';
-  const cachedResult = await globalCache.get<string | null>(
+  const cachedResult = await packageCache.get<string | null>(
     cacheNamespace,
     url
   );
@@ -59,7 +59,7 @@ async function getHashFromUrl(url: string): Promise<string | null> {
       algorithm: 'sha256',
     });
     const cacheMinutes = 3 * 24 * 60; // 3 days
-    await globalCache.set(cacheNamespace, url, hash, cacheMinutes);
+    await packageCache.set(cacheNamespace, url, hash, cacheMinutes);
     return hash;
   } catch (err) /* istanbul ignore next */ {
     return null;

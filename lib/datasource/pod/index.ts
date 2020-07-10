@@ -1,6 +1,7 @@
 import crypto from 'crypto';
 import { logger } from '../../logger';
-import * as globalCache from '../../util/cache/global';
+import { ExternalHostError } from '../../types/errors/external-host-error';
+import * as packageCache from '../../util/cache/package';
 import { Http } from '../../util/http';
 import { GithubHttp } from '../../util/http/github';
 import { GetReleasesConfig, ReleaseResult } from '../common';
@@ -8,6 +9,7 @@ import { GetReleasesConfig, ReleaseResult } from '../common';
 export const id = 'pod';
 
 export const defaultRegistryUrls = ['https://cdn.cocoapods.org'];
+export const registryStrategy = 'hunt';
 
 const cacheNamespace = `datasource-${id}`;
 const cacheMinutes = 30;
@@ -43,7 +45,7 @@ function handleError(lookupName: string, err: Error): void {
     (err.statusCode >= 500 && err.statusCode < 600)
   ) {
     logger.warn({ lookupName, err }, `CocoaPods registry failure`);
-    throw new Error('registry-failure');
+    throw new ExternalHostError(err);
   }
 
   if (err.statusCode === 401) {
@@ -149,39 +151,36 @@ function isDefaultRepo(url: string): boolean {
 
 export async function getReleases({
   lookupName,
-  registryUrls,
+  registryUrl,
 }: GetReleasesConfig): Promise<ReleaseResult | null> {
   const podName = lookupName.replace(/\/.*$/, '');
 
-  const cachedResult = await globalCache.get<ReleaseResult>(
+  const cachedResult = await packageCache.get<ReleaseResult>(
     cacheNamespace,
-    podName
+    registryUrl + podName
   );
-  /* istanbul ignore next line */
-  if (cachedResult) {
-    logger.debug(`CocoaPods: Return cached result for ${podName}`);
+
+  // istanbul ignore if
+  if (cachedResult !== undefined) {
+    logger.trace(`CocoaPods: Return cached result for ${podName}`);
     return cachedResult;
   }
 
+  let baseUrl = registryUrl.replace(/\/+$/, '');
+
+  // In order to not abuse github API limits, query CDN instead
+  if (isDefaultRepo(baseUrl)) {
+    [baseUrl] = defaultRegistryUrls;
+  }
+
   let result: ReleaseResult | null = null;
-  for (let idx = 0; !result && idx < registryUrls.length; idx += 1) {
-    let registryUrl = registryUrls[idx].replace(/\/+$/, '');
-
-    // In order to not abuse github API limits, query CDN instead
-    if (isDefaultRepo(registryUrl)) {
-      [registryUrl] = defaultRegistryUrls;
-    }
-
-    if (githubRegex.exec(registryUrl)) {
-      result = await getReleasesFromGithub(podName, registryUrl);
-    } else {
-      result = await getReleasesFromCDN(podName, registryUrl);
-    }
+  if (githubRegex.exec(baseUrl)) {
+    result = await getReleasesFromGithub(podName, baseUrl);
+  } else {
+    result = await getReleasesFromCDN(podName, baseUrl);
   }
 
-  if (result) {
-    await globalCache.set(cacheNamespace, podName, result, cacheMinutes);
-  }
+  await packageCache.set(cacheNamespace, podName, result, cacheMinutes);
 
   return result;
 }

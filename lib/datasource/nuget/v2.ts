@@ -19,53 +19,45 @@ export async function getReleases(
     pkgName,
     releases: [],
   };
-  try {
-    let pkgUrlList = `${feedUrl}/FindPackagesById()?id=%27${pkgName}%27&$select=Version,IsLatestVersion,ProjectUrl`;
-    do {
-      const pkgVersionsListRaw = await http.get(pkgUrlList);
-      const pkgVersionsListDoc = new XmlDocument(pkgVersionsListRaw.body);
+  let pkgUrlList = `${feedUrl}/FindPackagesById()?id=%27${pkgName}%27&$select=Version,IsLatestVersion,ProjectUrl`;
+  do {
+    const pkgVersionsListRaw = await http.get(pkgUrlList);
+    const pkgVersionsListDoc = new XmlDocument(pkgVersionsListRaw.body);
 
-      const pkgInfoList = pkgVersionsListDoc.childrenNamed('entry');
+    const pkgInfoList = pkgVersionsListDoc.childrenNamed('entry');
 
-      for (const pkgInfo of pkgInfoList) {
-        const pkgVersion = getPkgProp(pkgInfo, 'Version');
-        dep.releases.push({
-          version: pkgVersion,
-        });
-        try {
-          const pkgIsLatestVersion = getPkgProp(pkgInfo, 'IsLatestVersion');
-          if (pkgIsLatestVersion === 'true') {
-            const projectUrl = getPkgProp(pkgInfo, 'ProjectUrl');
-            if (projectUrl) {
-              dep.sourceUrl = projectUrl;
-            }
+    for (const pkgInfo of pkgInfoList) {
+      const pkgVersion = getPkgProp(pkgInfo, 'Version');
+      dep.releases.push({
+        version: pkgVersion,
+      });
+      try {
+        const pkgIsLatestVersion = getPkgProp(pkgInfo, 'IsLatestVersion');
+        if (pkgIsLatestVersion === 'true') {
+          const projectUrl = getPkgProp(pkgInfo, 'ProjectUrl');
+          if (projectUrl) {
+            dep.sourceUrl = projectUrl;
           }
-        } catch (err) /* istanbul ignore next */ {
-          logger.debug(
-            { err, pkgName, feedUrl },
-            `nuget registry failure: can't parse pkg info for project url`
-          );
         }
+      } catch (err) /* istanbul ignore next */ {
+        logger.debug(
+          { err, pkgName, feedUrl },
+          `nuget registry failure: can't parse pkg info for project url`
+        );
       }
-
-      const nextPkgUrlListLink = pkgVersionsListDoc
-        .childrenNamed('link')
-        .find((node) => node.attr.rel === 'next');
-
-      pkgUrlList = nextPkgUrlListLink ? nextPkgUrlListLink.attr.href : null;
-    } while (pkgUrlList !== null);
-
-    // dep not found if no release, so we can try next registry
-    if (dep.releases.length === 0) {
-      return null;
     }
 
-    return dep;
-  } catch (err) {
-    logger.debug(
-      { err, pkgName, feedUrl },
-      'nuget registry failure: Unknown error'
-    );
+    const nextPkgUrlListLink = pkgVersionsListDoc
+      .childrenNamed('link')
+      .find((node) => node.attr.rel === 'next');
+
+    pkgUrlList = nextPkgUrlListLink ? nextPkgUrlListLink.attr.href : null;
+  } while (pkgUrlList !== null);
+
+  // dep not found if no release, so we can try next registry
+  if (dep.releases.length === 0) {
     return null;
   }
+
+  return dep;
 }

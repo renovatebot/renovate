@@ -1,9 +1,12 @@
-import { ensureDir, outputFile, readFile, remove } from 'fs-extra';
-import { join } from 'upath';
 import { logger } from '../../logger';
-import { platform } from '../../platform';
 import { ExecOptions, exec } from '../../util/exec';
-import { readLocalFile } from '../../util/fs';
+import {
+  deleteLocalFile,
+  ensureCacheDir,
+  readLocalFile,
+  writeLocalFile,
+} from '../../util/fs';
+import { getRepoStatus } from '../../util/git';
 import {
   UpdateArtifact,
   UpdateArtifactsConfig,
@@ -42,9 +45,7 @@ export async function updateArtifacts({
 }: UpdateArtifact): Promise<UpdateArtifactsResult[] | null> {
   logger.debug(`pipenv.updateArtifacts(${pipfileName})`);
 
-  const cacheDir =
-    process.env.PIPENV_CACHE_DIR || join(config.cacheDir, './others/pipenv');
-  await ensureDir(cacheDir);
+  const cacheDir = await ensureCacheDir('./others/pipenv', 'PIPENV_CACHE_DIR');
   logger.debug('Using pipenv cache ' + cacheDir);
 
   const lockFileName = pipfileName + '.lock';
@@ -54,11 +55,9 @@ export async function updateArtifacts({
     return null;
   }
   try {
-    const localPipfileFileName = join(config.localDir, pipfileName);
-    await outputFile(localPipfileFileName, newPipfileContent);
-    const localLockFileName = join(config.localDir, lockFileName);
+    await writeLocalFile(pipfileName, newPipfileContent);
     if (config.isLockFileMaintenance) {
-      await remove(localLockFileName);
+      await deleteLocalFile(lockFileName);
     }
     const cmd = 'pipenv lock';
     const tagConstraint = getPythonConstraint(existingLockFileContent, config);
@@ -76,7 +75,7 @@ export async function updateArtifacts({
     };
     logger.debug({ cmd }, 'pipenv lock command');
     await exec(cmd, execOptions);
-    const status = await platform.getRepoStatus();
+    const status = await getRepoStatus();
     if (!(status && status.modified.includes(lockFileName))) {
       return null;
     }
@@ -85,7 +84,7 @@ export async function updateArtifacts({
       {
         file: {
           name: lockFileName,
-          contents: await readFile(localLockFileName, 'utf8'),
+          contents: await readLocalFile(lockFileName, 'utf8'),
         },
       },
     ];

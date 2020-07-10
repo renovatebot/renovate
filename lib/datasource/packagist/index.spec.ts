@@ -1,8 +1,10 @@
 import fs from 'fs';
+import { getPkgReleases } from '..';
 import * as httpMock from '../../../test/httpMock';
 import * as _hostRules from '../../util/host-rules';
 import * as composerVersioning from '../../versioning/composer';
-import * as packagist from '.';
+import { id as versioning } from '../../versioning/loose';
+import { id as datasource } from '.';
 
 jest.mock('../../util/host-rules');
 
@@ -45,9 +47,11 @@ describe('datasource/packagist', () => {
       config = {
         registryUrls: ['https://composer.renovatebot.com'],
       };
-      const res = await packagist.getReleases({
+      const res = await getPkgReleases({
         ...config,
-        lookupName: 'something/one',
+        datasource,
+        versioning,
+        depName: 'something/one',
       });
       expect(res).toBeNull();
     });
@@ -66,9 +70,11 @@ describe('datasource/packagist', () => {
         .scope('https://composer.renovatebot.com')
         .get('/packages.json')
         .reply(200, packagesOnly);
-      const res = await packagist.getReleases({
+      const res = await getPkgReleases({
         ...config,
-        lookupName: 'vendor/package-name',
+        datasource,
+        versioning,
+        depName: 'vendor/package-name',
       });
       expect(res).toMatchSnapshot();
       expect(httpMock.getTrace()).toMatchSnapshot();
@@ -79,9 +85,11 @@ describe('datasource/packagist', () => {
         .get('/packages.json')
         .replyWithError({ code: 'ETIMEDOUT' });
       httpMock.scope(baseUrl).get('/p/vendor/package-name2.json').reply(200);
-      const res = await packagist.getReleases({
+      const res = await getPkgReleases({
         ...config,
-        lookupName: 'vendor/package-name2',
+        datasource,
+        versioning,
+        depName: 'vendor/package-name2',
       });
       expect(res).toBeNull();
       expect(httpMock.getTrace()).toMatchSnapshot();
@@ -92,9 +100,11 @@ describe('datasource/packagist', () => {
         .get('/packages.json')
         .reply(403);
       httpMock.scope(baseUrl).get('/p/vendor/package-name.json').reply(200);
-      const res = await packagist.getReleases({
+      const res = await getPkgReleases({
         ...config,
-        lookupName: 'vendor/package-name',
+        datasource,
+        versioning,
+        depName: 'vendor/package-name',
       });
       expect(res).toBeNull();
       expect(httpMock.getTrace()).toMatchSnapshot();
@@ -105,9 +115,11 @@ describe('datasource/packagist', () => {
         .get('/packages.json')
         .reply(404);
       httpMock.scope(baseUrl).get('/p/drewm/mailchip-api.json').reply(200);
-      const res = await packagist.getReleases({
+      const res = await getPkgReleases({
         ...config,
-        lookupName: 'drewm/mailchip-api',
+        datasource,
+        versioning,
+        depName: 'drewm/mailchip-api',
       });
       expect(res).toBeNull();
       expect(httpMock.getTrace()).toMatchSnapshot();
@@ -131,9 +143,11 @@ describe('datasource/packagist', () => {
         .reply(200, packagesJson)
         .get('/include/all$afbf74d51f31c7cbb5ff10304f9290bfb4f4e68b.json')
         .reply(200, JSON.parse(includesJson));
-      const res = await packagist.getReleases({
+      const res = await getPkgReleases({
         ...config,
-        lookupName: 'guzzlehttp/guzzle',
+        datasource,
+        versioning,
+        depName: 'guzzlehttp/guzzle',
       });
       expect(res).toMatchSnapshot();
       expect(res).not.toBeNull();
@@ -174,9 +188,11 @@ describe('datasource/packagist', () => {
           '/p/wpackagist-plugin/1beyt$b574a802b5bf20a58c0f027e73aea2a75d23a6f654afc298a8dc467331be316a.json'
         )
         .reply(200, JSON.parse(beytJson));
-      const res = await packagist.getReleases({
+      const res = await getPkgReleases({
         ...config,
-        lookupName: 'wpackagist-plugin/1beyt',
+        datasource,
+        versioning,
+        depName: 'wpackagist-plugin/1beyt',
       });
       expect(res).toMatchSnapshot();
       expect(res).not.toBeNull();
@@ -217,9 +233,11 @@ describe('datasource/packagist', () => {
         .scope(baseUrl)
         .get('/p/some/other.json')
         .reply(200, JSON.parse(beytJson));
-      const res = await packagist.getReleases({
+      const res = await getPkgReleases({
         ...config,
-        lookupName: 'some/other',
+        datasource,
+        versioning,
+        depName: 'some/other',
       });
       expect(res).toBeNull();
       expect(httpMock.getTrace()).toMatchSnapshot();
@@ -247,9 +265,11 @@ describe('datasource/packagist', () => {
           '/p/wpackagist-plugin/1beyt$b574a802b5bf20a58c0f027e73aea2a75d23a6f654afc298a8dc467331be316a.json'
         )
         .reply(200, JSON.parse(beytJson));
-      const res = await packagist.getReleases({
+      const res = await getPkgReleases({
         ...config,
-        lookupName: 'wpackagist-plugin/1beyt',
+        datasource,
+        versioning,
+        depName: 'wpackagist-plugin/1beyt',
       });
       expect(res).toMatchSnapshot();
       expect(res).not.toBeNull();
@@ -278,9 +298,11 @@ describe('datasource/packagist', () => {
         .scope(baseUrl)
         .get('/p/some/other.json')
         .reply(200, JSON.parse(beytJson));
-      const res = await packagist.getReleases({
+      const res = await getPkgReleases({
         ...config,
-        lookupName: 'some/other',
+        datasource,
+        versioning,
+        depName: 'some/other',
       });
       expect(res).toBeNull();
       expect(httpMock.getTrace()).toMatchSnapshot();
@@ -292,9 +314,11 @@ describe('datasource/packagist', () => {
         .reply(200, JSON.parse(mailchimpJson));
       config.registryUrls = ['https://packagist.org'];
       expect(
-        await packagist.getReleases({
+        await getPkgReleases({
           ...config,
-          lookupName: 'drewm/mailchimp-api',
+          datasource,
+          versioning,
+          depName: 'drewm/mailchimp-api',
         })
       ).toMatchSnapshot();
       expect(httpMock.getTrace()).toMatchSnapshot();
@@ -306,9 +330,11 @@ describe('datasource/packagist', () => {
         .reply(200, JSON.parse(mailchimpJson));
       config.registryUrls = [];
       expect(
-        await packagist.getReleases({
+        await getPkgReleases({
           ...config,
-          lookupName: 'drewm/mailchimp-api',
+          datasource,
+          versioning,
+          depName: 'drewm/mailchimp-api',
         })
       ).toMatchSnapshot();
       expect(httpMock.getTrace()).toMatchSnapshot();

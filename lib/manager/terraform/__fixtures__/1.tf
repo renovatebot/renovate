@@ -159,3 +159,16 @@ module "gittags_http" {
 module "gittags_ssh" {
   source = "git::ssh://git@bitbucket.com/hashicorp/example?ref=v1.0.3"
 }
+
+terraform {
+  required_providers {
+    aws = ">= 2.7.0"
+  }
+}
+
+terraform {
+  required_providers {
+    aws = ">= 2.5.0"
+    azurerm = ">= 2.0.0"
+  }
+}

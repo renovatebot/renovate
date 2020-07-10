@@ -67,11 +67,6 @@ Object {
           "updates": Array [],
         },
         Object {
-          "depName": "zzzz",
-          "skipReason": "internal-package",
-          "updates": Array [],
-        },
-        Object {
           "depName": "foo",
           "skipReason": "disabled",
           "updates": Array [],
@@ -81,9 +76,6 @@ Object {
           "skipReason": "some-reason",
           "updates": Array [],
         },
-      ],
-      "internalPackages": Array [
-        "zzzz",
       ],
       "packageFile": "package.json",
     },

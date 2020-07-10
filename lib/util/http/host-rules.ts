@@ -10,7 +10,7 @@ export function applyHostRules(url: string, inOptions: any): any {
       hostType: options.hostType,
       url,
     }) || {};
-  const { username, password, token, timeout } = foundRules;
+  const { username, password, token, enabled } = foundRules;
   if (options.headers?.authorization || options.auth || options.token) {
     logger.trace('Authorization already set for host: ' + options.hostname);
   } else if (password) {
@@ -20,9 +20,14 @@ export function applyHostRules(url: string, inOptions: any): any {
   } else if (token) {
     logger.trace('Applying Bearer authentication for host ' + options.hostname);
     options.token = token;
+  } else if (enabled === false) {
+    options.enabled = false;
   }
-  if (timeout) {
-    options.timeout = timeout;
-  }
+  // Apply optional params
+  ['abortOnError', 'abortIgnoreStatusCodes', 'timeout'].forEach((param) => {
+    if (foundRules[param]) {
+      options[param] = foundRules[param];
+    }
+  });
   return options;
 }

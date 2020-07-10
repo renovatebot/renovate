@@ -1,5 +1,6 @@
 import { getPkgReleases } from '..';
 import * as httpMock from '../../../test/httpMock';
+import { EXTERNAL_HOST_ERROR } from '../../constants/error-messages';
 import * as rubyVersioning from '../../versioning/ruby';
 import * as pod from '.';
 
@@ -63,7 +64,7 @@ describe('datasource/cocoapods', () => {
         .scope(cocoapodsHost)
         .get('/all_pods_versions_a_c_b.txt')
         .reply(429);
-      await expect(getPkgReleases(config)).rejects.toThrow('registry-failure');
+      await expect(getPkgReleases(config)).rejects.toThrow(EXTERNAL_HOST_ERROR);
       expect(httpMock.getTrace()).toMatchSnapshot();
     });
     it('returns null for unknown error', async () => {

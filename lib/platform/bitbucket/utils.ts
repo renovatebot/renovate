@@ -4,7 +4,6 @@ import { BranchStatus } from '../../types';
 import { HttpResponse } from '../../util/http';
 import { BitbucketHttp } from '../../util/http/bitbucket';
 import { Pr } from '../common';
-import { Storage } from '../git/storage';
 
 const bitbucketHttp = new BitbucketHttp();
 
@@ -17,7 +16,6 @@ export interface Config {
   owner: string;
   prList: Pr[];
   repository: string;
-  storage: Storage;
   bbUseDefaultReviewers: boolean;
 
   username: string;

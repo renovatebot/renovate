@@ -18,6 +18,7 @@ import { PLATFORM_TYPE_GITLAB } from '../../constants/platforms';
 import { PR_STATE_ALL, PR_STATE_OPEN } from '../../constants/pull-requests';
 import { logger } from '../../logger';
 import { BranchStatus } from '../../types';
+import * as git from '../../util/git';
 import * as hostRules from '../../util/host-rules';
 import { HttpResponse } from '../../util/http';
 import { GitlabHttp, setBaseUrl } from '../../util/http/gitlab';
@@ -25,7 +26,6 @@ import { sanitize } from '../../util/sanitize';
 import { ensureTrailingSlash } from '../../util/url';
 import {
   BranchStatusConfig,
-  CommitFilesConfig,
   CreatePRConfig,
   EnsureCommentConfig,
   EnsureCommentRemovalConfig,
@@ -38,7 +38,6 @@ import {
   RepoParams,
   VulnerabilityAlert,
 } from '../common';
-import GitStorage, { StatusResult } from '../git/storage';
 import { smartTruncate } from '../utils/pr-body';
 
 const gitlabApi = new GitlabHttp();
@@ -58,7 +57,6 @@ type RepoResponse = {
 };
 const defaultConfigFile = configFileNames[0];
 let config: {
-  storage: GitStorage;
   repository: string;
   localDir: string;
   defaultBranch: string;
@@ -139,16 +137,6 @@ function urlEscape(str: string): string {
   return str ? str.replace(/\//g, '%2F') : str;
 }
 
-export function cleanRepo(): Promise<void> {
-  // istanbul ignore if
-  if (config.storage) {
-    config.storage.cleanRepo();
-  }
-  // In theory most of this isn't necessary. In practice..
-  config = {} as any;
-  return Promise.resolve();
-}
-
 // Initialize GitLab by getting base branch
 export async function initRepo({
   repository,
@@ -215,11 +203,6 @@ export async function initRepo({
     config.baseBranch = config.defaultBranch;
     config.mergeMethod = res.body.merge_method || 'merge';
     logger.debug(`${repository} default branch = ${config.baseBranch}`);
-    // Discover our user email
-    config.email = (
-      await gitlabApi.getJson<{ email: string }>(`user`)
-    ).body.email;
-    logger.debug('Bot email=' + config.email);
     delete config.prList;
     logger.debug('Enabling Git FS');
     const opts = hostRules.find({
@@ -233,7 +216,7 @@ export async function initRepo({
     ) {
       logger.debug('no http_url_to_repo found. Falling back to old behaviour.');
       const { host, protocol } = URL.parse(defaults.endpoint);
-      url = GitStorage.getUrl({
+      url = git.getUrl({
         protocol: protocol.slice(0, -1) as any,
         auth: 'oauth2:' + opts.token,
         host,
@@ -245,10 +228,11 @@ export async function initRepo({
       repoUrl.auth = 'oauth2:' + opts.token;
       url = URL.format(repoUrl);
     }
-    config.storage = new GitStorage();
-    await config.storage.initRepo({
+    await git.initRepo({
       ...config,
       url,
+      gitAuthorName: global.gitAuthor?.name,
+      gitAuthorEmail: global.gitAuthor?.email,
     });
   } catch (err) /* istanbul ignore next */ {
     logger.debug({ err }, 'Caught initRepo error');
@@ -286,26 +270,8 @@ export async function setBaseBranch(
 ): Promise<string> {
   logger.debug(`Setting baseBranch to ${branchName}`);
   config.baseBranch = branchName;
-  const baseBranchSha = await config.storage.setBaseBranch(branchName);
+  const baseBranchSha = await git.setBaseBranch(branchName);
   return baseBranchSha;
-}
-
-export /* istanbul ignore next */ function setBranchPrefix(
-  branchPrefix: string
-): Promise<void> {
-  return config.storage.setBranchPrefix(branchPrefix);
-}
-
-// Search
-
-// Get full file list
-export function getFileList(): Promise<string[]> {
-  return config.storage.getFileList();
-}
-
-// Returns true if branch exists, otherwise false
-export function branchExists(branchName: string): Promise<boolean> {
-  return config.storage.branchExists(branchName);
 }
 
 type BranchState = 'pending' | 'running' | 'success' | 'failed' | 'canceled';
@@ -320,7 +286,7 @@ async function getStatus(
   branchName: string,
   useCache = true
 ): Promise<GitlabBranchStatus[]> {
-  const branchSha = await config.storage.getBranchCommit(branchName);
+  const branchSha = await git.getBranchCommit(branchName);
   const url = `projects/${config.repository}/repository/commits/${branchSha}/statuses`;
 
   return (
@@ -358,7 +324,7 @@ export async function getBranchStatus(
     return BranchStatus.red;
   }
 
-  if (!(await branchExists(branchName))) {
+  if (!(await git.branchExists(branchName))) {
     throw new Error(REPOSITORY_CHANGED);
   }
 
@@ -509,12 +475,11 @@ export async function getPr(iid: number): Promise<Pr> {
     ).body;
     const branchCommitEmail =
       branch && branch.commit ? branch.commit.author_email : null;
-    // istanbul ignore if
-    if (branchCommitEmail === config.email) {
+    if (branchCommitEmail === global.gitAuthor.email) {
       pr.isModified = false;
     } else {
       logger.debug(
-        { branchCommitEmail, configEmail: config.email, iid: pr.iid },
+        { branchCommitEmail, configEmail: global.gitAuthor.email, iid: pr.iid },
         'Last committer to branch does not match bot email, so PR cannot be rebased.'
       );
       pr.isModified = true;
@@ -589,7 +554,7 @@ export function getPrBody(input: string): string {
       .replace(/Pull Request/g, 'Merge Request')
       .replace(/PR/g, 'MR')
       .replace(/\]\(\.\.\/pull\//g, '](!'),
-    60000
+    50000
   );
 }
 
@@ -599,7 +564,7 @@ export function getPrBody(input: string): string {
 export async function getBranchPr(branchName: string): Promise<Pr> {
   logger.debug(`getBranchPr(${branchName})`);
   // istanbul ignore if
-  if (!(await branchExists(branchName))) {
+  if (!(await git.branchExists(branchName))) {
     return null;
   }
   const query = new URLSearchParams({
@@ -624,30 +589,6 @@ export async function getBranchPr(branchName: string): Promise<Pr> {
   return getPr(pr.iid);
 }
 
-export function getAllRenovateBranches(
-  branchPrefix: string
-): Promise<string[]> {
-  return config.storage.getAllRenovateBranches(branchPrefix);
-}
-
-export function isBranchStale(branchName: string): Promise<boolean> {
-  return config.storage.isBranchStale(branchName);
-}
-
-// istanbul ignore next
-export function commitFiles(
-  commitFilesConfig: CommitFilesConfig
-): Promise<string | null> {
-  return config.storage.commitFiles(commitFilesConfig);
-}
-
-export function getFile(
-  filePath: string,
-  branchName?: string
-): Promise<string> {
-  return config.storage.getFile(filePath, branchName);
-}
-
 export async function deleteBranch(
   branchName: string,
   shouldClosePr = false
@@ -660,20 +601,7 @@ export async function deleteBranch(
       await closePr(pr.number);
     }
   }
-  return config.storage.deleteBranch(branchName);
-}
-
-export function mergeBranch(branchName: string): Promise<void> {
-  return config.storage.mergeBranch(branchName);
-}
-
-export function getBranchLastCommitTime(branchName: string): Promise<Date> {
-  return config.storage.getBranchLastCommitTime(branchName);
-}
-
-// istanbul ignore next
-export function getRepoStatus(): Promise<StatusResult> {
-  return config.storage.getRepoStatus();
+  return git.deleteBranch(branchName);
 }
 
 export async function getBranchStatusCheck(
@@ -699,7 +627,7 @@ export async function setBranchStatus({
   url: targetUrl,
 }: BranchStatusConfig): Promise<void> {
   // First, get the branch commit SHA
-  const branchSha = await config.storage.getBranchCommit(branchName);
+  const branchSha = await git.getBranchCommit(branchName);
   // Now, check the statuses for that commit
   const url = `projects/${config.repository}/statuses/${branchSha}`;
   let state = 'success';
@@ -742,10 +670,16 @@ export async function setBranchStatus({
 
 export async function getIssueList(): Promise<any[]> {
   if (!config.issueList) {
+    const query = new URLSearchParams({
+      per_page: '100',
+      author_id: `${authorId}`,
+      state: 'opened',
+    }).toString();
     const res = await gitlabApi.getJson<{ iid: number; title: string }[]>(
-      `projects/${config.repository}/issues?state=opened`,
+      `projects/${config.repository}/issues?${query}`,
       {
         useCache: false,
+        paginate: true,
       }
     );
     // istanbul ignore if
@@ -1075,11 +1009,6 @@ export async function getPrList(): Promise<Pr[]> {
   return config.prList;
 }
 
-/* istanbul ignore next */
-export async function getPrFiles(pr: Pr): Promise<string[]> {
-  return config.storage.getBranchFiles(pr.branchName, pr.targetBranch);
-}
-
 function matchesState(state: string, desiredState: string): boolean {
   if (desiredState === PR_STATE_ALL) {
     return true;
@@ -1103,10 +1032,6 @@ export async function findPr({
       (!prTitle || p.title === prTitle) &&
       matchesState(p.state, state)
   );
-}
-
-export function getCommitMessages(): Promise<string[]> {
-  return config.storage.getCommitMessages();
 }
 
 export function getVulnerabilityAlerts(): Promise<VulnerabilityAlert[]> {

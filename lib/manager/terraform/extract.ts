@@ -1,79 +1,84 @@
-import * as datasourceGitTags from '../../datasource/git-tags';
-import * as datasourceGithubTags from '../../datasource/github-tags';
-import * as datasourceTerraformModule from '../../datasource/terraform-module';
-import * as datasourceTerraformProvider from '../../datasource/terraform-provider';
 import { logger } from '../../logger';
-import { SkipReason } from '../../types';
-import { isValid, isVersion } from '../../versioning/hashicorp';
 import { PackageDependency, PackageFile } from '../common';
+import { analyseTerraformModule, extractTerraformModule } from './modules';
+import {
+  analyzeTerraformProvider,
+  extractTerraformProvider,
+} from './providers';
+import { extractTerraformRequiredProviders } from './required_providers';
+import {
+  analyseTerraformResource,
+  extractTerraformResource,
+} from './resources';
+import {
+  TerraformDependencyTypes,
+  checkFileContainsDependency,
+  getTerraformDependencyType,
+} from './util';
 
-export enum TerraformDependencyTypes {
-  unknown = 'unknown',
-  module = 'module',
-  provider = 'provider',
-}
-
-export function getTerraformDependencyType(
-  value: string
-): TerraformDependencyTypes {
-  switch (value) {
-    case 'module': {
-      return TerraformDependencyTypes.module;
-    }
-    case 'provider': {
-      return TerraformDependencyTypes.provider;
-    }
-    default: {
-      return TerraformDependencyTypes.unknown;
-    }
-  }
-}
+const dependencyBlockExtractionRegex = /^\s*(?<type>[a-z_]+)\s+("(?<lookupName>[^"]+)"\s+)?("(?<terraformName>[^"]+)"\s+)?{\s*$/;
+const contentCheckList = [
+  'module "',
+  'provider "',
+  'required_providers ',
+  ' "helm_release" ',
+];
 
 export function extractPackageFile(content: string): PackageFile | null {
   logger.trace({ content }, 'terraform.extractPackageFile()');
-  if (!content.includes('module "') && !content.includes('provider "')) {
+  if (!checkFileContainsDependency(content, contentCheckList)) {
     return null;
   }
-  const deps: PackageDependency[] = [];
+  let deps: PackageDependency[] = [];
   try {
     const lines = content.split('\n');
     for (let lineNumber = 0; lineNumber < lines.length; lineNumber += 1) {
-      let line = lines[lineNumber];
-      const terraformDependency = /^(module|provider)\s+"([^"]+)"\s+{\s*$/.exec(
-        line
-      );
+      const line = lines[lineNumber];
+      const terraformDependency = dependencyBlockExtractionRegex.exec(line);
       if (terraformDependency) {
-        logger.trace(`Matched ${terraformDependency[1]} on line ${lineNumber}`);
-        const tfDepType: TerraformDependencyTypes = getTerraformDependencyType(
-          terraformDependency[1]
+        logger.trace(
+          `Matched ${terraformDependency.groups.type} on line ${lineNumber}`
         );
-        const dep: PackageDependency = {
-          managerData: {
-            moduleName: terraformDependency[2],
-            terraformDependencyType: tfDepType,
-          },
-        };
-        if (tfDepType === TerraformDependencyTypes.unknown) {
-          /* istanbul ignore next */ logger.trace(
-            `Could not identify TerraformDependencyType ${terraformDependency[1]} on line ${lineNumber}.`
-          );
-        } else {
-          do {
-            lineNumber += 1;
-            line = lines[lineNumber];
-            const kvMatch = /^\s*([^\s]+)\s+=\s+"([^"]+)"\s*$/.exec(line);
-            if (kvMatch) {
-              const [, key, value] = kvMatch;
-              if (key === 'version') {
-                dep.currentValue = value;
-                dep.managerData.versionLine = lineNumber;
-              } else if (key === 'source') {
-                dep.managerData.source = value;
-                dep.managerData.sourceLine = lineNumber;
-              }
-            }
-          } while (line.trim() !== '}');
-          deps.push(dep);
+        const tfDepType = getTerraformDependencyType(
+          terraformDependency.groups.type
+        );
+        let result = null;
+        switch (tfDepType) {
+          case TerraformDependencyTypes.required_providers: {
+            result = extractTerraformRequiredProviders(lineNumber, lines);
+            break;
+          }
+          case TerraformDependencyTypes.provider: {
+            result = extractTerraformProvider(
+              lineNumber,
+              lines,
+              terraformDependency.groups.lookupName
+            );
+            break;
+          }
+          case TerraformDependencyTypes.module: {
+            result = extractTerraformModule(
+              lineNumber,
+              lines,
+              terraformDependency.groups.lookupName
+            );
+            break;
+          }
+          case TerraformDependencyTypes.resource: {
+            result = extractTerraformResource(lineNumber, lines);
+            break;
+          }
+          /* istanbul ignore next */
+          default:
+            logger.trace(
+              `Could not identify TerraformDependencyType ${terraformDependency.groups.type} on line ${lineNumber}.`
+            );
+            break;
+        }
+        if (result) {
+          lineNumber = result.lineNumber;
+          deps = deps.concat(result.dependencies);
+          result = null;
         }
       }
     }
@@ -81,82 +86,22 @@ export function extractPackageFile(content: string): PackageFile | null {
     logger.warn({ err }, 'Error extracting buildkite plugins');
   }
   deps.forEach((dep) => {
-    if (
-      dep.managerData.terraformDependencyType ===
-      TerraformDependencyTypes.module
-    ) {
-      const githubRefMatch = /github.com(\/|:)([^/]+\/[a-z0-9-.]+).*\?ref=(.*)$/.exec(
-        dep.managerData.source
-      );
-      const gitTagsRefMatch = /git::((?:http|https|ssh):\/\/(?:.*@)?(.*.*\/(.*\/.*)))\?ref=(.*)$/.exec(
-        dep.managerData.source
-      );
-      /* eslint-disable no-param-reassign */
-      if (githubRefMatch) {
-        const depNameShort = githubRefMatch[2].replace(/\.git$/, '');
-        dep.depType = 'github';
-        dep.depName = 'github.com/' + depNameShort;
-        dep.depNameShort = depNameShort;
-        dep.currentValue = githubRefMatch[3];
-        dep.datasource = datasourceGithubTags.id;
-        dep.lookupName = depNameShort;
-        dep.managerData.lineNumber = dep.managerData.sourceLine;
-        if (!isVersion(dep.currentValue)) {
-          dep.skipReason = SkipReason.UnsupportedVersion;
-        }
-      } else if (gitTagsRefMatch) {
-        dep.depType = 'gitTags';
-        if (gitTagsRefMatch[2].includes('//')) {
-          logger.debug('Terraform module contains subdirectory');
-          dep.depName = gitTagsRefMatch[2].split('//')[0];
-          dep.depNameShort = dep.depName.split(/\/(.+)/)[1];
-          const tempLookupName = gitTagsRefMatch[1].split('//');
-          dep.lookupName = tempLookupName[0] + '//' + tempLookupName[1];
-        } else {
-          dep.depName = gitTagsRefMatch[2].replace('.git', '');
-          dep.depNameShort = gitTagsRefMatch[3].replace('.git', '');
-          dep.lookupName = gitTagsRefMatch[1];
-        }
-        dep.currentValue = gitTagsRefMatch[4];
-        dep.datasource = datasourceGitTags.id;
-        dep.managerData.lineNumber = dep.managerData.sourceLine;
-        if (!isVersion(dep.currentValue)) {
-          dep.skipReason = SkipReason.UnsupportedVersion;
-        }
-      } else if (dep.managerData.source) {
-        const moduleParts = dep.managerData.source.split('//')[0].split('/');
-        if (moduleParts[0] === '..') {
-          dep.skipReason = SkipReason.Local;
-        } else if (moduleParts.length >= 3) {
-          dep.depType = 'terraform';
-          dep.depName = moduleParts.join('/');
-          dep.depNameShort = dep.depName;
-          dep.managerData.lineNumber = dep.managerData.versionLine;
-          dep.datasource = datasourceTerraformModule.id;
-        }
-      } else {
-        logger.debug({ dep }, 'terraform dep has no source');
-        dep.skipReason = SkipReason.NoSource;
-      }
-    } else if (
-      dep.managerData.terraformDependencyType ===
-      TerraformDependencyTypes.provider
-    ) {
-      dep.depType = 'terraform';
-      dep.depName = dep.managerData.moduleName;
-      dep.depNameShort = dep.managerData.moduleName;
-      dep.managerData.lineNumber = dep.managerData.versionLine;
-      dep.datasource = datasourceTerraformProvider.id;
-      if (dep.managerData.lineNumber) {
-        if (!isValid(dep.currentValue)) {
-          dep.skipReason = SkipReason.UnsupportedVersion;
-        }
-      } else if (!dep.skipReason) {
-        dep.skipReason = SkipReason.NoVersion;
-      }
+    switch (dep.managerData.terraformDependencyType) {
+      case TerraformDependencyTypes.required_providers:
+      case TerraformDependencyTypes.provider:
+        analyzeTerraformProvider(dep);
+        break;
+      case TerraformDependencyTypes.module:
+        analyseTerraformModule(dep);
+        break;
+      case TerraformDependencyTypes.resource:
+        analyseTerraformResource(dep);
+        break;
+      /* istanbul ignore next */
+      default:
     }
+    // eslint-disable-next-line no-param-reassign
     delete dep.managerData;
-    /* eslint-enable no-param-reassign */
   });
   if (deps.some((dep) => dep.skipReason !== 'local')) {
     return { deps };

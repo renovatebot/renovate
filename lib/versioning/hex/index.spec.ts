@@ -7,6 +7,8 @@ describe('lib/versioning/hex', () => {
       expect(hexScheme.matches('2.1.0', '~> 2.0.0')).toBe(false);
       expect(hexScheme.matches('2.0.0', '>= 2.0.0 and < 2.1.0')).toBe(true);
       expect(hexScheme.matches('2.1.0', '== 2.0.0 or < 2.1.0')).toBe(false);
+      expect(hexScheme.matches('1.9.4', '== 1.9.4')).toBe(true);
+      expect(hexScheme.matches('1.9.5', '== 1.9.4')).toBe(false);
     });
   });
   it('handles tilde greater than', () => {
@@ -32,6 +34,9 @@ describe('lib/versioning/hex', () => {
     });
     it('handles !=', () => {
       expect(hexScheme.isValid('!= 1.0.0')).toBeTruthy();
+    });
+    it('handles ==', () => {
+      expect(hexScheme.isValid('== 1.0.0')).toBeTruthy();
     });
   });
   describe('hexScheme.isLessThanRange()', () => {
@@ -69,6 +74,36 @@ describe('lib/versioning/hex', () => {
     });
   });
   describe('hexScheme.getNewValue()', () => {
+    it('handles exact pin', () => {
+      expect(
+        hexScheme.getNewValue({
+          currentValue: '== 1.2.3',
+          rangeStrategy: 'pin',
+          fromVersion: '1.2.3',
+          toVersion: '2.0.7',
+        })
+      ).toEqual('== 2.0.7');
+    });
+    it('handles exact bump', () => {
+      expect(
+        hexScheme.getNewValue({
+          currentValue: '== 3.6.1',
+          rangeStrategy: 'bump',
+          fromVersion: '3.6.1',
+          toVersion: '3.6.2',
+        })
+      ).toEqual('== 3.6.2');
+    });
+    it('handles exact replace', () => {
+      expect(
+        hexScheme.getNewValue({
+          currentValue: '== 3.6.1',
+          rangeStrategy: 'replace',
+          fromVersion: '3.6.1',
+          toVersion: '3.6.2',
+        })
+      ).toEqual('== 3.6.2');
+    });
     it('handles tilde greater than', () => {
       expect(
         hexScheme.getNewValue({
@@ -85,7 +120,7 @@ describe('lib/versioning/hex', () => {
           fromVersion: '1.2.3',
           toVersion: '2.0.7',
         })
-      ).toEqual('2.0.7');
+      ).toEqual('== 2.0.7');
       expect(
         hexScheme.getNewValue({
           currentValue: '~> 1.2',
@@ -109,7 +144,7 @@ describe('lib/versioning/hex', () => {
           fromVersion: '1.2.3',
           toVersion: '2.0.7',
         })
-      ).toEqual('2.0.7');
+      ).toEqual('== 2.0.7');
       expect(
         hexScheme.getNewValue({
           currentValue: '~> 1.2.0',
@@ -144,7 +179,7 @@ describe('lib/versioning/hex', () => {
         fromVersion: '1.2.3',
         toVersion: '2.0.7',
       })
-    ).toEqual('2.0.7');
+    ).toEqual('== 2.0.7');
   });
   it('handles or', () => {
     expect(
@@ -170,6 +205,6 @@ describe('lib/versioning/hex', () => {
         fromVersion: '1.2.3',
         toVersion: '2.0.7',
       })
-    ).toEqual('2.0.7');
+    ).toEqual('== 2.0.7');
   });
 });

@@ -1,5 +1,30 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
+exports[`lib/manager/sbt/extract extractPackageFile() extract deps from native scala file with private variables 1`] = `
+Object {
+  "deps": Array [
+    Object {
+      "currentValue": "0.7.1",
+      "datasource": "sbt-package",
+      "depName": "com.example:foo",
+      "lookupName": "com.example:foo_2.13.0-RC5",
+      "registryUrls": Array [
+        "https://repo.maven.apache.org/maven2",
+      ],
+    },
+    Object {
+      "currentValue": "1.2.3",
+      "datasource": "sbt-package",
+      "depName": "com.abc:abc",
+      "lookupName": "com.abc:abc",
+      "registryUrls": Array [
+        "https://repo.maven.apache.org/maven2",
+      ],
+    },
+  ],
+}
+`;
+
 exports[`lib/manager/sbt/extract extractPackageFile() extract deps from native scala file with variables 1`] = `
 Object {
   "deps": Array [
