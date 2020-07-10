@@ -429,7 +429,7 @@ Currently the purpose of `hostRules` is to configure credentials for host authen
 
 The lookup keys for a hostRule are: `hostType`, `domainName`, `hostName`, and `baseUrl`. All are optional, but you can only have one of the last three per rule.
 
-Supported credential fields are `token`, `username`, `password`, `timeout` and `insecureRegistry`.
+Supported credential fields are `token`, `username`, `password`, `timeout`, `enabled` and `insecureRegistry`.
 
 Example for configuring `docker` auth:
 
@@ -444,6 +444,29 @@ Example for configuring `docker` auth:
   ]
 }
 ```
+
+To disable requests to a particular host, you can configure a rule like:
+
+```json
+{
+  "hostRules": [
+    {
+      "hostName": "registry.npmjs.org",
+      "enabled": false
+    }
+  ]
+}
+```
+
+A preset alternative to the above is:
+
+```json
+{
+  "extends": [":disableHost(registry.npmjs.org)"]
+}
+```
+
+Note: Disabling a host is only 100% effective if added to self-hosted config. Renovate currently still checks its _cache_ for results first before making connection attempts, so if a public host is blocked in your repository config (e.g. `renovate.json`) then it's possible you may get cached _results_ from that host if another repository using the same bot has successfully queried for the same dependency recently.
 
 ### abortIgnoreStatusCodes
 

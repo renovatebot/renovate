@@ -10,7 +10,7 @@ export function applyHostRules(url: string, inOptions: any): any {
       hostType: options.hostType,
       url,
     }) || {};
-  const { username, password, token } = foundRules;
+  const { username, password, token, enabled } = foundRules;
   if (options.headers?.authorization || options.auth || options.token) {
     logger.trace('Authorization already set for host: ' + options.hostname);
   } else if (password) {
@@ -19,6 +19,8 @@ export function applyHostRules(url: string, inOptions: any): any {
   } else if (token) {
     logger.trace('Applying Bearer authentication for host ' + options.hostname);
     options.token = token;
+  } else if (enabled === false) {
+    options.enabled = false;
   }
   // Apply optional params
   ['abortOnError', 'abortIgnoreStatusCodes', 'timeout'].forEach((param) => {
