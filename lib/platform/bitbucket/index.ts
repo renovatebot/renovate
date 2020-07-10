@@ -247,8 +247,7 @@ export async function deleteBranch(
 async function isPrConflicted(prNo: number): Promise<boolean> {
   const diff = (
     await bitbucketHttp.get(
-      `/2.0/repositories/${config.repository}/pullrequests/${prNo}/diff`,
-      { json: false } as any
+      `/2.0/repositories/${config.repository}/pullrequests/${prNo}/diff`
     )
   ).body;
 
