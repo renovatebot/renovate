@@ -10,7 +10,7 @@ import { ExtractionResult, TerraformDependencyTypes } from './util';
 
 const githubRefMatchRegex = /github.com([/:])(?<project>[^/]+\/[a-z0-9-.]+).*\?ref=(?<tag>.*)$/;
 const gitTagsRefMatchRegex = /(?:git::)?(?<url>(?:http|https|ssh):\/\/(?:.*@)?(?<path>.*.*\/(?<project>.*\/.*)))\?ref=(?<tag>.*)$/;
-const hostnameMatchRegex = /^(http(s)?:\/\/)?(?<hostname>([\w|\d]+\.)+[\w|\d]+)/;
+const hostnameMatchRegex = /^(?<hostname>([\w|\d]+\.)+[\w|\d]+)/;
 
 export function extractTerraformModule(
   startingLine: number,
@@ -65,7 +65,7 @@ export function analyseTerraformModule(dep: PackageDependency): void {
     } else if (moduleParts.length >= 3) {
       const hostnameMatch = hostnameMatchRegex.exec(dep.managerData.source);
       if (hostnameMatch) {
-        dep.registryUrls = [hostnameMatch.groups.hostname];
+        dep.registryUrls = [`https://${hostnameMatch.groups.hostname}`];
       }
       dep.depType = 'terraform';
       dep.depName = moduleParts.join('/');

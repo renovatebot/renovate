@@ -155,7 +155,7 @@ Object {
       "depNameShort": "app.terraform.io/example-corp/k8s-cluster/azurerm",
       "depType": "terraform",
       "registryUrls": Array [
-        "app.terraform.io",
+        "https://app.terraform.io",
       ],
     },
     Object {
@@ -165,7 +165,7 @@ Object {
       "depNameShort": "app.terraform.io/example-corp/k8s-cluster/azurerm",
       "depType": "terraform",
       "registryUrls": Array [
-        "app.terraform.io",
+        "https://app.terraform.io",
       ],
     },
     Object {
@@ -175,7 +175,7 @@ Object {
       "depNameShort": "app.terraform.io/example-corp/k8s-cluster/azurerm",
       "depType": "terraform",
       "registryUrls": Array [
-        "app.terraform.io",
+        "https://app.terraform.io",
       ],
     },
     Object {
