@@ -1167,7 +1167,6 @@ Array [
 
 exports[`platform/gitlab getPr(prNo) returns the PR 1`] = `
 Object {
-  "assignees": Array [],
   "body": "a merge request",
   "branchName": "some-branch",
   "canMerge": false,
@@ -1219,11 +1218,6 @@ Array [
 
 exports[`platform/gitlab getPr(prNo) returns the PR with nonexisting branch 1`] = `
 Object {
-  "assignees": Array [
-    Object {
-      "id": 1,
-    },
-  ],
   "body": "a merge request",
   "branchName": "some-branch",
   "canMerge": false,
@@ -1275,9 +1269,6 @@ Array [
 
 exports[`platform/gitlab getPr(prNo) returns the mergeable PR 1`] = `
 Object {
-  "assignee": Object {
-    "id": 1,
-  },
   "body": "a merge request",
   "branchName": "some-branch",
   "canMerge": true,
