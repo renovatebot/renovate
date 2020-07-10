@@ -285,7 +285,7 @@ export async function initRepo({
       }
     }
     // Use default branch as PR target unless later overridden.
-    config.defaultBranch = repo.defaultBranchRef?.name;
+    config.defaultBranch = repo.defaultBranchRef.name;
     // Base branch may be configured but defaultBranch is always fixed
     config.baseBranch = config.defaultBranch;
     logger.debug(`${repository} default branch = ${config.baseBranch}`);
