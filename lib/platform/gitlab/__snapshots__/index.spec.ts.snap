@@ -17,7 +17,6 @@ Array [
     "headers": Object {
       "accept": "application/json",
       "accept-encoding": "gzip, deflate",
-      "content-length": 0,
       "host": "gitlab.com",
       "private-token": "abc123",
       "user-agent": "https://github.com/renovatebot/renovate",
@@ -45,7 +44,6 @@ Array [
     "headers": Object {
       "accept": "application/json",
       "accept-encoding": "gzip, deflate",
-      "content-length": 0,
       "host": "gitlab.com",
       "private-token": "abc123",
       "user-agent": "https://github.com/renovatebot/renovate",
@@ -68,7 +66,6 @@ Array [
     "headers": Object {
       "accept": "application/json",
       "accept-encoding": "gzip, deflate",
-      "content-length": 0,
       "host": "gitlab.com",
       "private-token": "abc123",
       "user-agent": "https://github.com/renovatebot/renovate",
@@ -112,7 +109,6 @@ Array [
     "headers": Object {
       "accept": "application/json",
       "accept-encoding": "gzip, deflate",
-      "content-length": 0,
       "host": "gitlab.com",
       "private-token": "abc123",
       "user-agent": "https://github.com/renovatebot/renovate",
@@ -135,7 +131,6 @@ Array [
     "headers": Object {
       "accept": "application/json",
       "accept-encoding": "gzip, deflate",
-      "content-length": 0,
       "host": "gitlab.com",
       "private-token": "abc123",
       "user-agent": "https://github.com/renovatebot/renovate",
@@ -155,7 +150,7 @@ Array [
     "headers": Object {
       "accept": "application/json",
       "accept-encoding": "gzip, deflate",
-      "content-length": 117,
+      "content-length": "117",
       "content-type": "application/json",
       "host": "gitlab.com",
       "private-token": "abc123",
@@ -191,7 +186,7 @@ Array [
     "headers": Object {
       "accept": "application/json",
       "accept-encoding": "gzip, deflate",
-      "content-length": 72,
+      "content-length": "72",
       "content-type": "application/json",
       "host": "gitlab.com",
       "private-token": "abc123",
@@ -221,7 +216,7 @@ Array [
     "headers": Object {
       "accept": "application/json",
       "accept-encoding": "gzip, deflate",
-      "content-length": 119,
+      "content-length": "119",
       "content-type": "application/json",
       "host": "gitlab.com",
       "private-token": "abc123",
@@ -251,7 +246,7 @@ Array [
     "headers": Object {
       "accept": "application/json",
       "accept-encoding": "gzip, deflate",
-      "content-length": 117,
+      "content-length": "117",
       "content-type": "application/json",
       "host": "gitlab.com",
       "private-token": "abc123",
@@ -335,7 +330,7 @@ Array [
     "headers": Object {
       "accept": "application/json",
       "accept-encoding": "gzip, deflate",
-      "content-length": 25,
+      "content-length": "25",
       "content-type": "application/json",
       "host": "gitlab.com",
       "private-token": "abc123",
@@ -376,7 +371,7 @@ Array [
     "headers": Object {
       "accept": "application/json",
       "accept-encoding": "gzip, deflate",
-      "content-length": 44,
+      "content-length": "44",
       "content-type": "application/json",
       "host": "gitlab.com",
       "private-token": "abc123",
@@ -417,7 +412,7 @@ Array [
     "headers": Object {
       "accept": "application/json",
       "accept-encoding": "gzip, deflate",
-      "content-length": 44,
+      "content-length": "44",
       "content-type": "application/json",
       "host": "gitlab.com",
       "private-token": "abc123",
@@ -577,7 +572,7 @@ Array [
     "headers": Object {
       "accept": "application/json",
       "accept-encoding": "gzip, deflate",
-      "content-length": 49,
+      "content-length": "49",
       "content-type": "application/json",
       "host": "gitlab.com",
       "private-token": "abc123",
@@ -645,7 +640,7 @@ Array [
     "headers": Object {
       "accept": "application/json",
       "accept-encoding": "gzip, deflate",
-      "content-length": 31,
+      "content-length": "31",
       "content-type": "application/json",
       "host": "gitlab.com",
       "private-token": "abc123",
@@ -675,7 +670,7 @@ Array [
     "headers": Object {
       "accept": "application/json",
       "accept-encoding": "gzip, deflate",
-      "content-length": 23,
+      "content-length": "23",
       "content-type": "application/json",
       "host": "gitlab.com",
       "private-token": "abc123",
@@ -1654,7 +1649,7 @@ Array [
     "headers": Object {
       "accept": "application/json",
       "accept-encoding": "gzip, deflate",
-      "content-length": 36,
+      "content-length": "36",
       "content-type": "application/json",
       "host": "gitlab.com",
       "private-token": "abc123",
@@ -1716,7 +1711,7 @@ Array [
     "headers": Object {
       "accept": "application/json",
       "accept-encoding": "gzip, deflate",
-      "content-length": 101,
+      "content-length": "101",
       "content-type": "application/json",
       "host": "gitlab.com",
       "private-token": "abc123",
@@ -1757,7 +1752,7 @@ Array [
     "headers": Object {
       "accept": "application/json",
       "accept-encoding": "gzip, deflate",
-      "content-length": 100,
+      "content-length": "100",
       "content-type": "application/json",
       "host": "gitlab.com",
       "private-token": "abc123",
@@ -1798,7 +1793,7 @@ Array [
     "headers": Object {
       "accept": "application/json",
       "accept-encoding": "gzip, deflate",
-      "content-length": 101,
+      "content-length": "101",
       "content-type": "application/json",
       "host": "gitlab.com",
       "private-token": "abc123",
@@ -1828,7 +1823,7 @@ Array [
     "headers": Object {
       "accept": "application/json",
       "accept-encoding": "gzip, deflate",
-      "content-length": 38,
+      "content-length": "38",
       "content-type": "application/json",
       "host": "gitlab.com",
       "private-token": "abc123",

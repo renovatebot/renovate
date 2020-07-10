@@ -1,12 +1,13 @@
 import crypto from 'crypto';
 import URL from 'url';
-import got from 'got';
+import got, { Options } from 'got';
 import { HOST_DISABLED } from '../../constants/error-messages';
 import { ExternalHostError } from '../../types/errors/external-host-error';
 import * as memCache from '../cache/memory';
 import { clone } from '../clone';
 import { applyAuthorization, removeAuthorization } from './auth';
 import { applyHostRules } from './host-rules';
+import { GotOptions } from './types';
 
 // TODO: remove when code is refactord
 Object.defineProperty(got.RequestError.prototype, 'statusCode', {
@@ -21,7 +22,8 @@ interface OutgoingHttpHeaders {
 
 export interface HttpOptions {
   body?: any;
-  auth?: string;
+  username?: string;
+  password?: string;
   baseUrl?: string;
   headers?: OutgoingHttpHeaders;
   throwHttpErrors?: boolean;
@@ -53,7 +55,7 @@ function cloneResponse<T>(response: any): HttpResponse<T> {
 
 async function resolveResponse<T>(
   promisedRes: Promise<HttpResponse<T>>,
-  { abortOnError, abortIgnoreStatusCodes }
+  { abortOnError, abortIgnoreStatusCodes }: GotOptions
 ): Promise<HttpResponse<T>> {
   try {
     const res = await promisedRes;
@@ -64,6 +66,18 @@ async function resolveResponse<T>(
     }
     throw err;
   }
+}
+
+function applyDefaultHeaders(options: Options): void {
+  // eslint-disable-next-line no-param-reassign
+  options.headers = {
+    // will be "gzip, deflate, br" by new got default
+    'accept-encoding': 'gzip, deflate',
+    ...options.headers,
+    'user-agent':
+      process.env.RENOVATE_USER_AGENT ||
+      'https://github.com/renovatebot/renovate',
+  };
 }
 
 export class Http<GetOptions = HttpOptions, PostOptions = HttpPostOptions> {
@@ -78,26 +92,27 @@ export class Http<GetOptions = HttpOptions, PostOptions = HttpPostOptions> {
       url = URL.resolve(httpOptions.baseUrl, url);
     }
     // TODO: deep merge in order to merge headers
-    let options: any = {
+    let options: GotOptions = {
       method: 'get',
       ...this.options,
       hostType: this.hostType,
       ...httpOptions,
-    };
+    } as unknown; // TODO: fixme
     if (process.env.NODE_ENV === 'test') {
       options.retry = 0;
+    }
+    // istanbul ignore if: only for easier testing
+    if (
+      ['GET'].includes(options.method?.toUpperCase()) &&
+      ('json' in options || 'body' in options)
+    ) {
+      throw new Error(`Method '${options.method}' does not support body`);
     }
     options.hooks = {
       beforeRedirect: [removeAuthorization],
     };
-    options.headers = {
-      // will be "gzip, deflate, br" by new got default
-      'accept-encoding': 'gzip, deflate',
-      ...options.headers,
-      'user-agent':
-        process.env.RENOVATE_USER_AGENT ||
-        'https://github.com/renovatebot/renovate',
-    };
+
+    applyDefaultHeaders(options);
 
     options = applyHostRules(url, options);
     if (options.enabled === false) {
@@ -210,6 +225,8 @@ export class Http<GetOptions = HttpOptions, PostOptions = HttpPostOptions> {
       // eslint-disable-next-line no-param-reassign
       url = URL.resolve(options.baseUrl, url);
     }
+
+    applyDefaultHeaders(combinedOptions);
     return got.stream(url, combinedOptions);
   }
 }

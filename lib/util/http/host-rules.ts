@@ -1,9 +1,10 @@
 import { logger } from '../../logger';
 import * as hostRules from '../host-rules';
+import { GotOptions } from './types';
 
 // Apply host rules to requests
 
-export function applyHostRules(url: string, inOptions: any): any {
+export function applyHostRules(url: string, inOptions: GotOptions): GotOptions {
   const options = { ...inOptions };
   const foundRules =
     hostRules.find({
@@ -11,7 +12,7 @@ export function applyHostRules(url: string, inOptions: any): any {
       url,
     }) || {};
   const { username, password, token, enabled } = foundRules;
-  if (options.headers?.authorization || options.auth || options.token) {
+  if (options.headers?.authorization || options.password || options.token) {
     logger.trace('Authorization already set for host: ' + options.hostname);
   } else if (password) {
     logger.trace('Applying Basic authentication for host ' + options.hostname);

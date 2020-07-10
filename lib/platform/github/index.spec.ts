@@ -385,9 +385,9 @@ describe('platform/github', () => {
         .scope(githubApiHost)
         .get('/repos/undefined/branches/undefined/protection')
         .reply(401);
-      await expect(github.getRepoForceRebase()).rejects.toMatchObject({
-        statusCode: 401,
-      });
+      await expect(
+        github.getRepoForceRebase()
+      ).rejects.toThrowErrorMatchingSnapshot();
       expect(httpMock.getTrace()).toMatchSnapshot();
     });
   });

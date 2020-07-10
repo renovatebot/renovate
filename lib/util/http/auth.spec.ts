@@ -1,4 +1,5 @@
-import { getName } from '../../../test/util';
+import { NormalizedOptions } from 'got';
+import { getName, partial } from '../../../test/util';
 import { removeAuthorization } from './auth';
 
 describe(getName(__filename), () => {
@@ -9,7 +10,7 @@ describe(getName(__filename), () => {
       search: 'something X-Amz-Algorithm something',
     };
 
-    removeAuthorization(opts);
+    removeAuthorization(partial<NormalizedOptions>(opts));
 
     expect(opts).toEqual({
       hostname: 'amazon.com',
@@ -20,7 +21,7 @@ describe(getName(__filename), () => {
 
   it('removeAuthorization Amazon', () => {
     const opts = {
-      auth: 'auth',
+      password: 'auth',
       headers: {
         authorization: 'auth',
       },
@@ -29,7 +30,7 @@ describe(getName(__filename), () => {
       search: 'something X-Amz-Algorithm something',
     };
 
-    removeAuthorization(opts);
+    removeAuthorization(partial<NormalizedOptions>(opts));
 
     expect(opts).toEqual({
       headers: {},
@@ -41,7 +42,7 @@ describe(getName(__filename), () => {
 
   it('removeAuthorization Amazon ports', () => {
     const opts = {
-      auth: 'auth',
+      password: 'auth',
       headers: {
         authorization: 'auth',
       },
@@ -51,7 +52,7 @@ describe(getName(__filename), () => {
       search: 'something X-Amz-Algorithm something',
     };
 
-    removeAuthorization(opts);
+    removeAuthorization(partial<NormalizedOptions>(opts));
 
     expect(opts).toEqual({
       headers: {},
@@ -63,7 +64,7 @@ describe(getName(__filename), () => {
 
   it('removeAuthorization Azure blob', () => {
     const opts = {
-      auth: 'auth',
+      password: 'auth',
       headers: {
         authorization: 'auth',
       },
@@ -72,7 +73,7 @@ describe(getName(__filename), () => {
         'https://<store>.blob.core.windows.net/<some id>//docker/registry/v2/blobs',
     };
 
-    removeAuthorization(opts);
+    removeAuthorization(partial<NormalizedOptions>(opts));
 
     expect(opts).toEqual({
       headers: {},
@@ -84,7 +85,7 @@ describe(getName(__filename), () => {
 
   it('removeAuthorization keep auth', () => {
     const opts = {
-      auth: 'auth',
+      password: 'auth',
       headers: {
         authorization: 'auth',
       },
@@ -93,10 +94,10 @@ describe(getName(__filename), () => {
       search: 'something',
     };
 
-    removeAuthorization(opts);
+    removeAuthorization(partial<NormalizedOptions>(opts));
 
     expect(opts).toEqual({
-      auth: 'auth',
+      password: 'auth',
       headers: {
         authorization: 'auth',
       },

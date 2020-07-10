@@ -155,7 +155,6 @@ async function getAuthHeaders(
     const opts: HostRule & {
       headers?: Record<string, string>;
     } = hostRules.find({ hostType: id, url: apiCheckUrl });
-    opts.json = true;
     if (ecrRegex.test(registry)) {
       const [, region] = ecrRegex.exec(registry);
       const auth = await getECRAuthToken(region, opts);

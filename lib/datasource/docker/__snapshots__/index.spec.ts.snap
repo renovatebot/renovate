@@ -1,6 +1,6 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
-exports[`api/docker getDigest continues without token if ECR authentication could not be extracted 1`] = `
+exports[`datasource/docker/index getDigest continues without token if ECR authentication could not be extracted 1`] = `
 Array [
   Object {
     "headers": Object {
@@ -14,7 +14,6 @@ Array [
   },
   Object {
     "headers": Object {
-      "accept": "application/json",
       "accept-encoding": "gzip, deflate",
       "host": "123456789.dkr.ecr.us-east-1.amazonaws.com",
       "user-agent": "https://github.com/renovatebot/renovate",
@@ -25,7 +24,7 @@ Array [
 ]
 `;
 
-exports[`api/docker getDigest continues without token if ECR authentication fails 1`] = `
+exports[`datasource/docker/index getDigest continues without token if ECR authentication fails 1`] = `
 Array [
   Object {
     "headers": Object {
@@ -39,7 +38,6 @@ Array [
   },
   Object {
     "headers": Object {
-      "accept": "application/json",
       "accept-encoding": "gzip, deflate",
       "host": "123456789.dkr.ecr.us-east-1.amazonaws.com",
       "user-agent": "https://github.com/renovatebot/renovate",
@@ -50,7 +48,7 @@ Array [
 ]
 `;
 
-exports[`api/docker getDigest continues without token, when no header is present 1`] = `
+exports[`datasource/docker/index getDigest continues without token, when no header is present 1`] = `
 Array [
   Object {
     "headers": Object {
@@ -76,7 +74,7 @@ Array [
 ]
 `;
 
-exports[`api/docker getDigest falls back to body for digest 1`] = `
+exports[`datasource/docker/index getDigest falls back to body for digest 1`] = `
 Array [
   Object {
     "headers": Object {
@@ -113,7 +111,7 @@ Array [
 ]
 `;
 
-exports[`api/docker getDigest returns digest 1`] = `
+exports[`datasource/docker/index getDigest returns digest 1`] = `
 Array [
   Object {
     "headers": Object {
@@ -150,7 +148,7 @@ Array [
 ]
 `;
 
-exports[`api/docker getDigest returns null for 403 with basic authentication 1`] = `
+exports[`datasource/docker/index getDigest returns null for 403 with basic authentication 1`] = `
 Array [
   Object {
     "headers": Object {
@@ -164,7 +162,6 @@ Array [
   },
   Object {
     "headers": Object {
-      "accept": "application/json",
       "accept-encoding": "gzip, deflate",
       "authorization": "Basic c29tZS11c2VybmFtZTpzb21lLXBhc3N3b3Jk",
       "host": "index.docker.io",
@@ -176,33 +173,7 @@ Array [
 ]
 `;
 
-exports[`api/docker getDigest returns null if errored 1`] = `
-Array [
-  Object {
-    "headers": Object {
-      "accept-encoding": "gzip, deflate",
-      "authorization": "Basic c29tZS11c2VybmFtZTpzb21lLXBhc3N3b3Jk",
-      "host": "index.docker.io",
-      "user-agent": "https://github.com/renovatebot/renovate",
-    },
-    "method": "GET",
-    "url": "https://index.docker.io/v2/",
-  },
-  Object {
-    "headers": Object {
-      "accept": "application/vnd.docker.distribution.manifest.v2+json",
-      "accept-encoding": "gzip, deflate",
-      "authorization": "Basic c29tZS11c2VybmFtZTpzb21lLXBhc3N3b3Jk",
-      "host": "index.docker.io",
-      "user-agent": "https://github.com/renovatebot/renovate",
-    },
-    "method": "GET",
-    "url": "https://index.docker.io/v2/library/some-dep/manifests/some-new-value",
-  },
-]
-`;
-
-exports[`api/docker getDigest returns null if no token 1`] = `
+exports[`datasource/docker/index getDigest returns null if errored 1`] = `
 Array [
   Object {
     "headers": Object {
@@ -228,7 +199,33 @@ Array [
 ]
 `;
 
-exports[`api/docker getDigest supports ECR authentication 1`] = `
+exports[`datasource/docker/index getDigest returns null if no token 1`] = `
+Array [
+  Object {
+    "headers": Object {
+      "accept-encoding": "gzip, deflate",
+      "authorization": "Basic c29tZS11c2VybmFtZTpzb21lLXBhc3N3b3Jk",
+      "host": "index.docker.io",
+      "user-agent": "https://github.com/renovatebot/renovate",
+    },
+    "method": "GET",
+    "url": "https://index.docker.io/v2/",
+  },
+  Object {
+    "headers": Object {
+      "accept": "application/vnd.docker.distribution.manifest.v2+json",
+      "accept-encoding": "gzip, deflate",
+      "authorization": "Basic c29tZS11c2VybmFtZTpzb21lLXBhc3N3b3Jk",
+      "host": "index.docker.io",
+      "user-agent": "https://github.com/renovatebot/renovate",
+    },
+    "method": "GET",
+    "url": "https://index.docker.io/v2/library/some-dep/manifests/some-new-value",
+  },
+]
+`;
+
+exports[`datasource/docker/index getDigest supports ECR authentication 1`] = `
 Array [
   Object {
     "headers": Object {
@@ -242,7 +239,6 @@ Array [
   },
   Object {
     "headers": Object {
-      "accept": "application/json",
       "accept-encoding": "gzip, deflate",
       "authorization": "Basic abcdef",
       "host": "123456789.dkr.ecr.us-east-1.amazonaws.com",
@@ -265,7 +261,7 @@ Array [
 ]
 `;
 
-exports[`api/docker getDigest supports basic authentication 1`] = `
+exports[`datasource/docker/index getDigest supports basic authentication 1`] = `
 Array [
   Object {
     "headers": Object {
@@ -279,7 +275,6 @@ Array [
   },
   Object {
     "headers": Object {
-      "accept": "application/json",
       "accept-encoding": "gzip, deflate",
       "authorization": "Basic c29tZS11c2VybmFtZTpzb21lLXBhc3N3b3Jk",
       "host": "index.docker.io",
@@ -302,7 +297,7 @@ Array [
 ]
 `;
 
-exports[`api/docker getDigest supports docker insecure registry 1`] = `
+exports[`datasource/docker/index getDigest supports docker insecure registry 1`] = `
 Array [
   Object {
     "headers": Object {
@@ -328,7 +323,7 @@ Array [
 ]
 `;
 
-exports[`api/docker getDigest supports scoped names 1`] = `
+exports[`datasource/docker/index getDigest supports scoped names 1`] = `
 Array [
   Object {
     "headers": Object {
@@ -365,21 +360,21 @@ Array [
 ]
 `;
 
-exports[`api/docker getRegistryRepository handles local registries 1`] = `
+exports[`datasource/docker/index getRegistryRepository handles local registries 1`] = `
 Object {
   "registry": "https://registry:5000",
   "repository": "org/package",
 }
 `;
 
-exports[`api/docker getRegistryRepository supports registryUrls 1`] = `
+exports[`datasource/docker/index getRegistryRepository supports registryUrls 1`] = `
 Object {
   "registry": "my.local.registry/prefix/",
   "repository": "image",
 }
 `;
 
-exports[`api/docker getReleases adds library/ prefix for Docker Hub (explicit) 1`] = `
+exports[`datasource/docker/index getReleases adds library/ prefix for Docker Hub (explicit) 1`] = `
 Array [
   Object {
     "headers": Object {
@@ -435,7 +430,7 @@ Array [
 ]
 `;
 
-exports[`api/docker getReleases adds library/ prefix for Docker Hub (implicit) 1`] = `
+exports[`datasource/docker/index getReleases adds library/ prefix for Docker Hub (implicit) 1`] = `
 Array [
   Object {
     "headers": Object {
@@ -491,7 +486,7 @@ Array [
 ]
 `;
 
-exports[`api/docker getReleases adds no library/ prefix for other registries 1`] = `
+exports[`datasource/docker/index getReleases adds no library/ prefix for other registries 1`] = `
 Array [
   Object {
     "headers": Object {
@@ -547,7 +542,7 @@ Array [
 ]
 `;
 
-exports[`api/docker getReleases returns null if no token 1`] = `
+exports[`datasource/docker/index getReleases returns null if no token 1`] = `
 Array [
   Object {
     "headers": Object {
@@ -573,7 +568,7 @@ Array [
 ]
 `;
 
-exports[`api/docker getReleases returns null on error 1`] = `
+exports[`datasource/docker/index getReleases returns null on error 1`] = `
 Array [
   Object {
     "headers": Object {
@@ -599,7 +594,7 @@ Array [
 ]
 `;
 
-exports[`api/docker getReleases uses custom registry in depName 1`] = `
+exports[`datasource/docker/index getReleases uses custom registry in depName 1`] = `
 Array [
   Object {
     "headers": Object {
@@ -646,7 +641,7 @@ Array [
 ]
 `;
 
-exports[`api/docker getReleases uses custom registry with registryUrls 1`] = `
+exports[`datasource/docker/index getReleases uses custom registry with registryUrls 1`] = `
 Array [
   Object {
     "headers": Object {
@@ -704,7 +699,7 @@ Array [
 ]
 `;
 
-exports[`api/docker getReleases uses lower tag limit for ECR deps 1`] = `
+exports[`datasource/docker/index getReleases uses lower tag limit for ECR deps 1`] = `
 Array [
   Object {
     "headers": Object {
