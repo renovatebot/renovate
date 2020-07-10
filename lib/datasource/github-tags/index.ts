@@ -1,5 +1,5 @@
 import { logger } from '../../logger';
-import * as globalCache from '../../util/cache/global';
+import * as packageCache from '../../util/cache/package';
 import { GithubHttp } from '../../util/http/github';
 import { DigestConfig, GetReleasesConfig, ReleaseResult } from '../common';
 
@@ -24,7 +24,7 @@ async function getTagCommit(
   githubRepo: string,
   tag: string
 ): Promise<string | null> {
-  const cachedResult = await globalCache.get<string>(
+  const cachedResult = await packageCache.get<string>(
     cacheNamespace,
     getCacheKey(githubRepo, `tag-${tag}`)
   );
@@ -53,7 +53,7 @@ async function getTagCommit(
     return null;
   }
   const cacheMinutes = 120;
-  await globalCache.set(
+  await packageCache.set(
     cacheNamespace,
     getCacheKey(githubRepo, `tag-${tag}`),
     digest,
@@ -76,7 +76,7 @@ export async function getDigest(
   if (newValue && newValue.length) {
     return getTagCommit(githubRepo, newValue);
   }
-  const cachedResult = await globalCache.get(
+  const cachedResult = await packageCache.get(
     cacheNamespace,
     getCacheKey(githubRepo, 'commit')
   );
@@ -99,7 +99,7 @@ export async function getDigest(
     return null;
   }
   const cacheMinutes = 10;
-  await globalCache.set(
+  await packageCache.set(
     cacheNamespace,
     getCacheKey(githubRepo, 'commit'),
     digest,
@@ -121,8 +121,7 @@ export async function getDigest(
 export async function getReleases({
   lookupName: repo,
 }: GetReleasesConfig): Promise<ReleaseResult | null> {
-  let versions: string[];
-  const cachedResult = await globalCache.get<ReleaseResult>(
+  const cachedResult = await packageCache.get<ReleaseResult>(
     cacheNamespace,
     getCacheKey(repo, 'tags')
   );
@@ -130,24 +129,17 @@ export async function getReleases({
   if (cachedResult) {
     return cachedResult;
   }
-  try {
-    // tag
-    const url = `https://api.github.com/repos/${repo}/tags?per_page=100`;
-    type GitHubTag = {
-      name: string;
-    }[];
+  // tag
+  const url = `https://api.github.com/repos/${repo}/tags?per_page=100`;
+  type GitHubTag = {
+    name: string;
+  }[];
 
-    versions = (
-      await http.getJson<GitHubTag>(url, {
-        paginate: true,
-      })
-    ).body.map((o) => o.name);
-  } catch (err) {
-    logger.debug({ repo, err }, 'Error retrieving from github');
-  }
-  if (!versions) {
-    return null;
-  }
+  const versions = (
+    await http.getJson<GitHubTag>(url, {
+      paginate: true,
+    })
+  ).body.map((o) => o.name);
   const dependency: ReleaseResult = {
     sourceUrl: 'https://github.com/' + repo,
     releases: null,
@@ -157,7 +149,7 @@ export async function getReleases({
     gitRef: version,
   }));
   const cacheMinutes = 10;
-  await globalCache.set(
+  await packageCache.set(
     cacheNamespace,
     getCacheKey(repo, 'tags'),
     dependency,

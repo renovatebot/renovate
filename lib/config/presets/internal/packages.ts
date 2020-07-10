@@ -21,7 +21,7 @@ export const presets: Record<string, Preset> = {
   eslint: {
     description: 'All eslint packages',
     packageNames: ['babel-eslint'],
-    packagePatterns: ['^eslint'],
+    packagePatterns: ['^@typescript-eslint/', '^eslint'],
   },
   stylelint: {
     description: 'All stylelint packages',

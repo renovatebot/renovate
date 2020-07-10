@@ -1,10 +1,9 @@
-<!--
-    Before submitting a Pull Request, please ensure you have signed the CLA using this GitHub App:
-    https://cla-assistant.io/renovateapp/renovate
+<!-- Before submitting a Pull Request, please ensure you have signed the CLA using this GitHub App: https://cla-assistant.io/renovatebot/renovate -->
 
-    Please ensure `Allow edits from maintainers.` checkbox is checked
--->
+<!-- When creating this PR on GitHub, please ensure `Allow edits from maintainers.` checkbox is checked -->
 
-<!-- Replace this text with a description of what this PR fixes or adds -->
+<!-- Please use a conventional commit message (https://www.conventionalcommits.org/en/v1.0.0/) as your PR title -->
 
-Closes # <!-- Ideally each PR should be closing an open issue -->
+<!-- Ideally include at least one sentence saying what this PR achieves -->
+
+<!-- Finish the PR with `Closes #` and then the issue number if it closes any associated issue -->

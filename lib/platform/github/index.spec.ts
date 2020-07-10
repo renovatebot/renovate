@@ -7,6 +7,7 @@ import {
   REPOSITORY_RENAMED,
 } from '../../constants/error-messages';
 import { BranchStatus } from '../../types';
+import * as _git from '../../util/git';
 import { Platform } from '../common';
 
 const githubApiHost = 'https://api.github.com';
@@ -14,7 +15,7 @@ const githubApiHost = 'https://api.github.com';
 describe('platform/github', () => {
   let github: Platform;
   let hostRules: jest.Mocked<typeof import('../../util/host-rules')>;
-  let GitStorage: jest.Mock<typeof import('../git/storage')>;
+  let git: jest.Mocked<typeof _git>;
   beforeEach(async () => {
     // reset module
     jest.resetModules();
@@ -23,29 +24,12 @@ describe('platform/github', () => {
     jest.mock('../../util/host-rules');
     github = await import('.');
     hostRules = mocked(await import('../../util/host-rules'));
-    jest.mock('../git/storage');
-    GitStorage = (await import('../git/storage')).Storage as any;
-    GitStorage.mockImplementation(
-      () =>
-        ({
-          initRepo: jest.fn(),
-          cleanRepo: jest.fn(),
-          getFileList: jest.fn(),
-          branchExists: jest.fn(() => true),
-          isBranchStale: jest.fn(() => false),
-          setBaseBranch: jest.fn(),
-          getBranchLastCommitTime: jest.fn(),
-          getAllRenovateBranches: jest.fn(),
-          getCommitMessages: jest.fn(),
-          getFile: jest.fn(),
-          commitFiles: jest.fn(),
-          mergeBranch: jest.fn(),
-          deleteBranch: jest.fn(),
-          getRepoStatus: jest.fn(),
-          getBranchCommit: jest.fn(
-            () => '0d9c7726c3d628b7e28af234595cfd20febdbf8e'
-          ),
-        } as any)
+    jest.mock('../../util/git');
+    git = mocked(await import('../../util/git'));
+    git.branchExists.mockResolvedValue(true);
+    git.isBranchStale.mockResolvedValue(true);
+    git.getBranchCommit.mockResolvedValue(
+      '0d9c7726c3d628b7e28af234595cfd20febdbf8e'
     );
     delete global.gitAuthor;
     hostRules.find.mockReturnValue({
@@ -1573,6 +1557,24 @@ describe('platform/github', () => {
         prBody: 'Hello world',
         labels: null,
         useDefaultBranch: true,
+      });
+      expect(pr).toMatchSnapshot();
+      expect(httpMock.getTrace()).toMatchSnapshot();
+    });
+    it('should create a draftPR if set in the settings', async () => {
+      const scope = httpMock.scope(githubApiHost);
+      initRepoMock(scope, 'some/repo');
+      scope.post('/repos/some/repo/pulls').reply(200, {
+        number: 123,
+      });
+      await github.initRepo({ repository: 'some/repo', token: 'token' } as any);
+      const pr = await github.createPr({
+        branchName: 'some-branch',
+        prTitle: 'PR draft',
+        prBody: 'This is a result of a draft',
+        labels: null,
+        useDefaultBranch: true,
+        draftPR: true,
       });
       expect(pr).toMatchSnapshot();
       expect(httpMock.getTrace()).toMatchSnapshot();

@@ -1,16 +1,31 @@
 import { mocked } from '../../test/util';
+import {
+  EXTERNAL_HOST_ERROR,
+  HOST_DISABLED,
+} from '../constants/error-messages';
+import { ExternalHostError } from '../types/errors/external-host-error';
 import { loadModules } from '../util/modules';
 import * as datasourceDocker from './docker';
 import * as datasourceGithubTags from './github-tags';
+import * as datasourceMaven from './maven';
 import * as datasourceNpm from './npm';
+import * as datasourcePackagist from './packagist';
 import * as datasource from '.';
 
 jest.mock('./docker');
+jest.mock('./maven');
 jest.mock('./npm');
+jest.mock('./packagist');
 
+const dockerDatasource = mocked(datasourceDocker);
+const mavenDatasource = mocked(datasourceMaven);
 const npmDatasource = mocked(datasourceNpm);
+const packagistDatasource = mocked(datasourcePackagist);
 
 describe('datasource/index', () => {
+  beforeEach(() => {
+    jest.resetAllMocks();
+  });
   it('returns datasources', () => {
     expect(datasource.getDatasources()).toBeDefined();
     expect(datasource.getDatasourceList()).toBeDefined();
@@ -76,7 +91,9 @@ describe('datasource/index', () => {
     ).toBeUndefined();
   });
   it('adds changelogUrl', async () => {
-    npmDatasource.getReleases.mockResolvedValue({ releases: [] });
+    npmDatasource.getReleases.mockResolvedValue({
+      releases: [{ version: '1.0.0' }],
+    });
     const res = await datasource.getPkgReleases({
       datasource: datasourceNpm.id,
       depName: 'react-native',
@@ -86,7 +103,9 @@ describe('datasource/index', () => {
     expect(res.sourceUrl).toBeDefined();
   });
   it('adds sourceUrl', async () => {
-    npmDatasource.getReleases.mockResolvedValue({ releases: [] });
+    npmDatasource.getReleases.mockResolvedValue({
+      releases: [{ version: '1.0.0' }],
+    });
     const res = await datasource.getPkgReleases({
       datasource: datasourceNpm.id,
       depName: 'node',
@@ -94,10 +113,112 @@ describe('datasource/index', () => {
     expect(res).toMatchSnapshot();
     expect(res.sourceUrl).toBeDefined();
   });
+  it('warns if multiple registryUrls for registryStrategy=first', async () => {
+    dockerDatasource.getReleases.mockResolvedValue(null);
+    const res = await datasource.getPkgReleases({
+      datasource: datasourceDocker.id,
+      depName: 'something',
+      registryUrls: ['https://docker.com', 'https://docker.io'],
+    });
+    expect(res).toMatchSnapshot();
+  });
+  it('hunts registries and returns success', async () => {
+    packagistDatasource.getReleases.mockResolvedValueOnce(null);
+    packagistDatasource.getReleases.mockResolvedValueOnce({
+      releases: [{ version: '1.0.0' }],
+    });
+    const res = await datasource.getPkgReleases({
+      datasource: datasourcePackagist.id,
+      depName: 'something',
+      registryUrls: ['https://reg1.com', 'https://reg2.io'],
+    });
+    expect(res).not.toBeNull();
+  });
+  it('returns null for HOST_DISABLED', async () => {
+    packagistDatasource.getReleases.mockImplementationOnce(() => {
+      throw new ExternalHostError(new Error(HOST_DISABLED));
+    });
+    expect(
+      await datasource.getPkgReleases({
+        datasource: datasourcePackagist.id,
+        depName: 'something',
+        registryUrls: ['https://reg1.com'],
+      })
+    ).toBeNull();
+  });
+  it('hunts registries and aborts on ExternalHostError', async () => {
+    packagistDatasource.getReleases.mockImplementationOnce(() => {
+      throw new ExternalHostError(new Error());
+    });
+    await expect(
+      datasource.getPkgReleases({
+        datasource: datasourcePackagist.id,
+        depName: 'something',
+        registryUrls: ['https://reg1.com', 'https://reg2.io'],
+      })
+    ).rejects.toThrow(EXTERNAL_HOST_ERROR);
+  });
+  it('hunts registries and returns null', async () => {
+    packagistDatasource.getReleases.mockImplementationOnce(() => {
+      throw new Error('a');
+    });
+    packagistDatasource.getReleases.mockImplementationOnce(() => {
+      throw new Error('b');
+    });
+    expect(
+      await datasource.getPkgReleases({
+        datasource: datasourcePackagist.id,
+        depName: 'something',
+        registryUrls: ['https://reg1.com', 'https://reg2.io'],
+      })
+    ).toBeNull();
+  });
+  it('merges registries and returns success', async () => {
+    mavenDatasource.getReleases.mockResolvedValueOnce({
+      releases: [{ version: '1.0.0' }, { version: '1.1.0' }],
+    });
+    mavenDatasource.getReleases.mockResolvedValueOnce({
+      releases: [{ version: '1.0.0' }],
+    });
+    const res = await datasource.getPkgReleases({
+      datasource: datasourceMaven.id,
+      depName: 'something',
+      registryUrls: ['https://reg1.com', 'https://reg2.io'],
+    });
+    expect(res).toMatchSnapshot();
+    expect(res.releases).toHaveLength(2);
+  });
+  it('merges registries and aborts on ExternalHostError', async () => {
+    mavenDatasource.getReleases.mockImplementationOnce(() => {
+      throw new ExternalHostError(new Error());
+    });
+    await expect(
+      datasource.getPkgReleases({
+        datasource: datasourceMaven.id,
+        depName: 'something',
+        registryUrls: ['https://reg1.com', 'https://reg2.io'],
+      })
+    ).rejects.toThrow(EXTERNAL_HOST_ERROR);
+  });
+  it('merges registries and returns null for error', async () => {
+    mavenDatasource.getReleases.mockImplementationOnce(() => {
+      throw new Error('a');
+    });
+    mavenDatasource.getReleases.mockImplementationOnce(() => {
+      throw new Error('b');
+    });
+    expect(
+      await datasource.getPkgReleases({
+        datasource: datasourceMaven.id,
+        depName: 'something',
+        registryUrls: ['https://reg1.com', 'https://reg2.io'],
+      })
+    ).toBeNull();
+  });
   it('trims sourceUrl', async () => {
     npmDatasource.getReleases.mockResolvedValue({
       sourceUrl: ' https://abc.com',
-      releases: [],
+      releases: [{ version: '1.0.0' }],
     });
     const res = await datasource.getPkgReleases({
       datasource: datasourceNpm.id,
@@ -108,7 +229,7 @@ describe('datasource/index', () => {
   it('massages sourceUrl', async () => {
     npmDatasource.getReleases.mockResolvedValue({
       sourceUrl: 'scm:git@github.com:Jasig/cas.git',
-      releases: [],
+      releases: [{ version: '1.0.0' }],
     });
     const res = await datasource.getPkgReleases({
       datasource: datasourceNpm.id,

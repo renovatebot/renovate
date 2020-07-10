@@ -124,8 +124,6 @@ Set this to true if you wish for Renovate to persist repo data between runs. The
 
 Parameter to reduce CI load. CI jobs are usually triggered by these events: pull-request creation, pull-request update, automerge events. Set as an integer. Default is no limit.
 
-## prFooter
-
 ## printConfig
 
 This option is useful for troubleshooting, particularly if using presets. e.g. run `renovate foo/bar --print-config > config.log` and the fully-resolved config will be included in the log file.
@@ -150,6 +148,12 @@ Override this object if you wish to change the URLs that Renovate links to, e.g.
 If this value is set then Renovate will use Redis for its global cache instead of the local file system. The global cache is used to store lookup results (e.g. dependency versions and release notes) between repositories and runs. Example url: `redis://localhost`.
 
 ## repositories
+
+## repositoryCache
+
+Set this to `"enabled"` to have Renovate maintain a JSON file cache per-repository to speed up extractions. Set to `"reset"` if you ever need to bypass the cache and have it overwritten. JSON files will be stored inside the `cacheDir` beside the existing file-based package cache.
+
+Warning: this is an experimental feature and may be modified or removed in a future non-major release.
 
 ## requireConfig
 

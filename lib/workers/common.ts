@@ -12,7 +12,8 @@ import {
   PackageDependency,
   PackageFile,
 } from '../manager/common';
-import { File, PlatformPrOptions } from '../platform';
+import { PlatformPrOptions } from '../platform';
+import { File } from '../util/git';
 import { ChangeLogResult } from './pr/changelog/common';
 import { Merge } from 'type-fest';
 
@@ -43,7 +44,8 @@ export interface BranchUpgradeConfig
   packageFile?: string;
 
   reuseExistingBranch?: boolean;
-  prBanner?: string;
+  prHeader?: string;
+  prFooter?: string;
   prBodyNotes?: string[];
   prBodyTemplate?: string;
   prPriority?: number;
@@ -64,7 +66,7 @@ export enum PrResult {
   AwaitingApproval = 'AwaitingApproval',
   AwaitingGreenBranch = 'AwaitingGreenBranch',
   AwaitingNotPending = 'AwaitingNotPending',
-  BlockeddByBranchAutomerge = 'BlockeddByBranchAutomerge',
+  BlockedByBranchAutomerge = 'BlockedByBranchAutomerge',
   Created = 'Created',
   Error = 'Error',
   ErrorAlreadyExists = 'ErrorAlreadyExists',
@@ -99,6 +101,8 @@ export interface BranchConfig
   hasTypes?: boolean;
   masterIssueChecks?: Record<string, string>;
   releaseTimestamp?: string;
+  forceCommit?: boolean;
+  rebaseRequested?: boolean;
 
   res?: ProcessBranchResult;
   upgrades: BranchUpgradeConfig[];

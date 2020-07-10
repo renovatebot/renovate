@@ -1,5 +1,12 @@
+import crypto from 'crypto';
 import URL from 'url';
-import got from '../got';
+import got from 'got';
+import { HOST_DISABLED } from '../../constants/error-messages';
+import { ExternalHostError } from '../../types/errors/external-host-error';
+import * as memCache from '../cache/memory';
+import { clone } from '../clone';
+import { applyAuthorization, removeAuthorization } from './auth';
+import { applyHostRules } from './host-rules';
 
 interface OutgoingHttpHeaders {
   [header: string]: number | string | string[] | undefined;
@@ -28,47 +35,93 @@ export interface HttpResponse<T = string> {
   headers: any;
 }
 
+function cloneResponse<T>(response: any): HttpResponse<T> {
+  // clone body and headers so that the cached result doesn't get accidentally mutated
+  return {
+    body: clone<T>(response.body),
+    headers: clone(response.headers),
+  };
+}
+
+async function resolveResponse<T>(
+  promisedRes: Promise<HttpResponse<T>>,
+  { abortOnError, abortIgnoreStatusCodes }
+): Promise<HttpResponse<T>> {
+  try {
+    const res = await promisedRes;
+    return cloneResponse(res);
+  } catch (err) {
+    if (abortOnError && !abortIgnoreStatusCodes?.includes(err.statusCode)) {
+      throw new ExternalHostError(err);
+    }
+    throw err;
+  }
+}
+
 export class Http<GetOptions = HttpOptions, PostOptions = HttpPostOptions> {
   constructor(private hostType: string, private options?: HttpOptions) {}
 
   protected async request<T>(
-    url: string | URL,
-    httpOpts?: InternalHttpOptions
+    requestUrl: string | URL,
+    httpOptions?: InternalHttpOptions
   ): Promise<HttpResponse<T> | null> {
-    const options = { ...httpOpts };
-    let resolvedUrl = url.toString();
-    if (options?.baseUrl) {
-      resolvedUrl = URL.resolve(options.baseUrl, resolvedUrl);
+    let url = requestUrl.toString();
+    if (httpOptions?.baseUrl) {
+      url = URL.resolve(httpOptions.baseUrl, url);
     }
     // TODO: deep merge in order to merge headers
-    const combinedOptions: any = {
+    let options: any = {
       method: 'get',
       ...this.options,
       hostType: this.hostType,
-      ...options,
+      ...httpOptions,
     };
-    combinedOptions.hooks = {
-      beforeRedirect: [
-        (opts: any): void => {
-          // Check if request has been redirected to Amazon
-          if (opts.search?.includes('X-Amz-Algorithm')) {
-            // if there is no port in the redirect URL string, then delete it from the redirect options.
-            // This can be evaluated for removal after upgrading to Got v10
-            const portInUrl = opts.href.split('/')[2].split(':')[1];
-            if (!portInUrl) {
-              // eslint-disable-next-line no-param-reassign
-              delete opts.port; // Redirect will instead use 80 or 443 for HTTP or HTTPS respectively
-            }
+    if (process.env.NODE_ENV === 'test') {
+      options.retry = 0;
+    }
+    options.hooks = {
+      beforeRedirect: [removeAuthorization],
+    };
+    options.headers = {
+      ...options.headers,
+      'user-agent':
+        process.env.RENOVATE_USER_AGENT ||
+        'https://github.com/renovatebot/renovate',
+    };
 
-            // registry is hosted on amazon, redirect url includes authentication.
-            delete opts.headers.authorization; // eslint-disable-line no-param-reassign
-            delete opts.auth; // eslint-disable-line no-param-reassign
-          }
-        },
-      ],
-    };
-    const res = await got(resolvedUrl, combinedOptions);
-    return { body: res.body, headers: res.headers };
+    options = applyHostRules(url, options);
+    if (options.enabled === false) {
+      throw new Error(HOST_DISABLED);
+    }
+    options = applyAuthorization(options);
+
+    // Cache GET requests unless useCache=false
+    const cacheKey = crypto
+      .createHash('md5')
+      .update('got-' + JSON.stringify({ url, headers: options.headers }))
+      .digest('hex');
+    if (options.method === 'get' && options.useCache !== false) {
+      // return from cache if present
+      const cachedRes = memCache.get(cacheKey);
+      // istanbul ignore if
+      if (cachedRes) {
+        return resolveResponse<T>(cachedRes, options);
+      }
+    }
+    const startTime = Date.now();
+    const promisedRes = got(url, options);
+    if (options.method === 'get') {
+      memCache.set(cacheKey, promisedRes); // always set if it's a get
+    }
+    const res = await resolveResponse<T>(promisedRes, options);
+    const httpRequests = memCache.get('http-requests') || [];
+    httpRequests.push({
+      method: options.method,
+      url,
+      duration: Date.now() - startTime,
+    });
+    memCache.set('http-requests', httpRequests);
+    return res;
   }
 
   get(url: string, options: HttpOptions = {}): Promise<HttpResponse> {

@@ -3,7 +3,7 @@
 exports[`manager/npm/post-update/yarn catches errors 1`] = `
 Array [
   Object {
-    "cmd": "yarn install --ignore-scripts --ignore-engines --ignore-platform",
+    "cmd": "yarn install --ignore-engines --ignore-platform --network-timeout 100000 --ignore-scripts",
     "options": Object {
       "cwd": "some-dir",
       "encoding": "utf-8",
@@ -25,7 +25,7 @@ Array [
 exports[`manager/npm/post-update/yarn generates lock files using yarn v1.22.0 1`] = `
 Array [
   Object {
-    "cmd": "yarn install --ignore-scripts --ignore-engines --ignore-platform",
+    "cmd": "yarn install --ignore-engines --ignore-platform --network-timeout 100000 --ignore-scripts",
     "options": Object {
       "cwd": "some-dir",
       "encoding": "utf-8",
@@ -59,7 +59,7 @@ Array [
     },
   },
   Object {
-    "cmd": "yarn install --ignore-scripts --ignore-engines --ignore-platform",
+    "cmd": "yarn install --ignore-engines --ignore-platform --network-timeout 100000 --ignore-scripts",
     "options": Object {
       "cwd": "some-dir",
       "encoding": "utf-8",
@@ -93,7 +93,97 @@ Array [
     },
   },
   Object {
-    "cmd": "yarn install --ignore-scripts --ignore-engines --ignore-platform",
+    "cmd": "yarn install --ignore-engines --ignore-platform --network-timeout 100000 --ignore-scripts",
+    "options": Object {
+      "cwd": "some-dir",
+      "encoding": "utf-8",
+      "env": Object {
+        "HOME": "/home/user",
+        "HTTPS_PROXY": "https://example.com",
+        "HTTP_PROXY": "http://example.com",
+        "LANG": "en_US.UTF-8",
+        "LC_ALL": "en_US",
+        "NO_PROXY": "localhost",
+        "PATH": "/tmp/path",
+      },
+      "timeout": 900000,
+    },
+  },
+]
+`;
+
+exports[`manager/npm/post-update/yarn performs lock file maintenance using yarn v1.22.0 1`] = `
+Array [
+  Object {
+    "cmd": "yarn install --ignore-engines --ignore-platform --network-timeout 100000 --ignore-scripts",
+    "options": Object {
+      "cwd": "some-dir",
+      "encoding": "utf-8",
+      "env": Object {
+        "HOME": "/home/user",
+        "HTTPS_PROXY": "https://example.com",
+        "HTTP_PROXY": "http://example.com",
+        "LANG": "en_US.UTF-8",
+        "LC_ALL": "en_US",
+        "NO_PROXY": "localhost",
+        "PATH": "/tmp/path",
+      },
+      "timeout": 900000,
+    },
+  },
+  Object {
+    "cmd": "npx yarn-deduplicate --strategy fewer",
+    "options": Object {
+      "cwd": "some-dir",
+      "encoding": "utf-8",
+      "env": Object {
+        "HOME": "/home/user",
+        "HTTPS_PROXY": "https://example.com",
+        "HTTP_PROXY": "http://example.com",
+        "LANG": "en_US.UTF-8",
+        "LC_ALL": "en_US",
+        "NO_PROXY": "localhost",
+        "PATH": "/tmp/path",
+      },
+      "timeout": 900000,
+    },
+  },
+  Object {
+    "cmd": "yarn install --ignore-engines --ignore-platform --network-timeout 100000 --ignore-scripts",
+    "options": Object {
+      "cwd": "some-dir",
+      "encoding": "utf-8",
+      "env": Object {
+        "HOME": "/home/user",
+        "HTTPS_PROXY": "https://example.com",
+        "HTTP_PROXY": "http://example.com",
+        "LANG": "en_US.UTF-8",
+        "LC_ALL": "en_US",
+        "NO_PROXY": "localhost",
+        "PATH": "/tmp/path",
+      },
+      "timeout": 900000,
+    },
+  },
+  Object {
+    "cmd": "npx yarn-deduplicate --strategy highest",
+    "options": Object {
+      "cwd": "some-dir",
+      "encoding": "utf-8",
+      "env": Object {
+        "HOME": "/home/user",
+        "HTTPS_PROXY": "https://example.com",
+        "HTTP_PROXY": "http://example.com",
+        "LANG": "en_US.UTF-8",
+        "LC_ALL": "en_US",
+        "NO_PROXY": "localhost",
+        "PATH": "/tmp/path",
+      },
+      "timeout": 900000,
+    },
+  },
+  Object {
+    "cmd": "yarn install --ignore-engines --ignore-platform --network-timeout 100000 --ignore-scripts",
     "options": Object {
       "cwd": "some-dir",
       "encoding": "utf-8",
@@ -115,7 +205,7 @@ Array [
 exports[`manager/npm/post-update/yarn performs lock file updates and full install using yarn v1.22.0 1`] = `
 Array [
   Object {
-    "cmd": "yarn install --ignore-scripts --ignore-engines --ignore-platform",
+    "cmd": "yarn install --ignore-engines --ignore-platform --network-timeout 100000 --ignore-scripts",
     "options": Object {
       "cwd": "some-dir",
       "encoding": "utf-8",
@@ -132,7 +222,7 @@ Array [
     },
   },
   Object {
-    "cmd": "yarn upgrade some-dep --ignore-scripts --ignore-engines --ignore-platform",
+    "cmd": "yarn upgrade some-dep --ignore-engines --ignore-platform --network-timeout 100000 --ignore-scripts",
     "options": Object {
       "cwd": "some-dir",
       "encoding": "utf-8",
@@ -154,7 +244,7 @@ Array [
 exports[`manager/npm/post-update/yarn performs lock file updates using yarn v1.22.0 1`] = `
 Array [
   Object {
-    "cmd": "yarn install --ignore-scripts --ignore-engines --ignore-platform",
+    "cmd": "yarn install --ignore-engines --ignore-platform --network-timeout 100000 --ignore-scripts",
     "options": Object {
       "cwd": "some-dir",
       "encoding": "utf-8",
@@ -171,7 +261,7 @@ Array [
     },
   },
   Object {
-    "cmd": "yarn upgrade some-dep --ignore-scripts --ignore-engines --ignore-platform",
+    "cmd": "yarn upgrade some-dep --ignore-engines --ignore-platform --network-timeout 100000 --ignore-scripts",
     "options": Object {
       "cwd": "some-dir",
       "encoding": "utf-8",

@@ -1,8 +1,8 @@
 import URL from 'url';
 import { Release } from '../../../datasource';
 import { logger } from '../../../logger';
-import * as globalCache from '../../../util/cache/global';
-import * as runCache from '../../../util/cache/run';
+import * as memCache from '../../../util/cache/memory';
+import * as packageCache from '../../../util/cache/package';
 import { GitlabHttp } from '../../../util/http/gitlab';
 import { regEx } from '../../../util/regex';
 import * as allVersioning from '../../../versioning';
@@ -52,13 +52,13 @@ async function getTags(
   repository: string
 ): Promise<string[]> {
   const cacheKey = `getTags-${endpoint}-${versionScheme}-${repository}`;
-  const cachedResult = runCache.get(cacheKey);
+  const cachedResult = memCache.get(cacheKey);
   // istanbul ignore if
   if (cachedResult !== undefined) {
     return cachedResult;
   }
   const promisedRes = getTagsInner(endpoint, versionScheme, repository);
-  runCache.set(cacheKey, promisedRes);
+  memCache.set(cacheKey, promisedRes);
   return promisedRes;
 }
 
@@ -131,7 +131,7 @@ export async function getChangeLogJSON({
     const prev = validReleases[i - 1];
     const next = validReleases[i];
     if (include(next.version)) {
-      let release = await globalCache.get(
+      let release = await packageCache.get(
         cacheNamespace,
         getCacheKey(prev.version, next.version)
       );
@@ -149,7 +149,7 @@ export async function getChangeLogJSON({
           release.compare.url = `${baseUrl}${repository}/compare/${prevHead}...${nextHead}`;
         }
         const cacheMinutes = 55;
-        await globalCache.set(
+        await packageCache.set(
           cacheNamespace,
           getCacheKey(prev.version, next.version),
           release,

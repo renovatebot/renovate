@@ -1,10 +1,8 @@
 import { readFileSync } from 'fs';
-import * as _fs from '../../util/fs';
+import { fs } from '../../../test/util';
 import { extractPackageFile } from './extract';
 
 jest.mock('../../util/fs');
-
-const fs: any = _fs;
 
 const requirements1 = readFileSync(
   'lib/manager/composer/__fixtures__/composer1.json',

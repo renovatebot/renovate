@@ -1,15 +1,19 @@
 import * as httpMock from '../../../test/httpMock';
+import { setBaseUrl } from '../../util/http/bitbucket';
 import * as utils from './utils';
 
 const range = (count: number) => [...Array(count).keys()];
+
+const baseUrl = 'https://api.bitbucket.org';
 
 describe('accumulateValues()', () => {
   it('paginates', async () => {
     httpMock.reset();
     httpMock.setup();
+    setBaseUrl(baseUrl);
 
     httpMock
-      .scope('https://api.bitbucket.org')
+      .scope(baseUrl)
       .get('/some-url?pagelen=10')
       .reply(200, {
         values: range(10),

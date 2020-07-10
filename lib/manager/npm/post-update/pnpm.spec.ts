@@ -1,14 +1,15 @@
 import { exec as _exec } from 'child_process';
-import _fs from 'fs-extra';
 import { envMock, mockExecAll } from '../../../../test/execUtil';
 import { mocked } from '../../../../test/util';
 import * as _env from '../../../util/exec/env';
+import * as _fs from '../../../util/fs/proxies';
 import { PostUpdateConfig } from '../../common';
 import * as _pnpmHelper from './pnpm';
 
-jest.mock('fs-extra');
 jest.mock('child_process');
 jest.mock('../../../util/exec/env');
+jest.mock('../../../util/fs/proxies');
+jest.mock('./node-version');
 
 const exec: jest.Mock<typeof _exec> = _exec as any;
 const env = mocked(_env);
@@ -19,7 +20,7 @@ delete process.env.NPM_CONFIG_CACHE;
 describe('generateLockFile', () => {
   let config: PostUpdateConfig;
   beforeEach(() => {
-    config = { cacheDir: 'some-cache-dir' };
+    config = { cacheDir: 'some-cache-dir', compatibility: { pnpm: '^2.0.0' } };
     env.getChildProcessEnv.mockReturnValue(envMock.basic);
   });
   it('generates lock files', async () => {
@@ -47,6 +48,17 @@ describe('generateLockFile', () => {
     fs.readFile = jest.fn(() => 'package-lock-contents') as never;
     const res = await pnpmHelper.generateLockFile('some-dir', {}, config);
     expect(fs.readFile).toHaveBeenCalledTimes(1);
+    expect(res.lockFile).toEqual('package-lock-contents');
+    expect(execSnapshots).toMatchSnapshot();
+  });
+  it('performs lock file maintenance', async () => {
+    const execSnapshots = mockExecAll(exec);
+    fs.readFile = jest.fn(() => 'package-lock-contents') as never;
+    const res = await pnpmHelper.generateLockFile('some-dir', {}, config, [
+      { isLockFileMaintenance: true },
+    ]);
+    expect(fs.readFile).toHaveBeenCalledTimes(1);
+    expect(fs.remove).toHaveBeenCalledTimes(1);
     expect(res.lockFile).toEqual('package-lock-contents');
     expect(execSnapshots).toMatchSnapshot();
   });

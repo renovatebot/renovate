@@ -40,7 +40,7 @@ function npm2poetry(input: string): string {
       res.splice(i, 2, newValue);
     }
   }
-  return res.join(', ');
+  return res.join(', ').replace(/\s*,?\s*\|\|\s*,?\s*/, ' || ');
 }
 
 const isLessThanRange = (version: string, range: string): boolean =>

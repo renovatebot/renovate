@@ -1,6 +1,7 @@
 import { logger } from '../../logger';
+import { ExternalHostError } from '../../types/errors/external-host-error';
 import { Http } from '../../util/http';
-import { DatasourceError, ReleaseResult } from '../common';
+import { ReleaseResult } from '../common';
 import { id } from './common';
 
 const http = new Http(id);
@@ -8,6 +9,13 @@ const http = new Http(id);
 let lastSync = new Date('2000-01-01');
 let packageReleases: Record<string, string[]> = Object.create(null); // Because we might need a "constructor" key
 let contentLength = 0;
+
+// Note: use only for tests
+export function resetCache(): void {
+  lastSync = new Date('2000-01-01');
+  packageReleases = Object.create(null);
+  contentLength = 0;
+}
 
 /* https://bugs.chromium.org/p/v8/issues/detail?id=2869 */
 const copystr = (x: string): string => (' ' + x).slice(1);
@@ -31,7 +39,7 @@ async function updateRubyGemsVersions(): Promise<void> {
     if (err.statusCode !== 416) {
       contentLength = 0;
       packageReleases = Object.create(null); // Because we might need a "constructor" key
-      throw new DatasourceError(
+      throw new ExternalHostError(
         new Error('Rubygems fetch error - need to reset cache')
       );
     }

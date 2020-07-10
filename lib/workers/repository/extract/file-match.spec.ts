@@ -1,5 +1,7 @@
-import { RenovateConfig, platform } from '../../../../test/util';
+import { RenovateConfig, git } from '../../../../test/util';
 import * as fileMatch from './file-match';
+
+jest.mock('../../../util/git');
 
 describe('workers/repository/extract/file-match', () => {
   const fileList = ['package.json', 'frontend/package.json'];
@@ -47,14 +49,14 @@ describe('workers/repository/extract/file-match', () => {
       fileMatch: ['(^|/)package.json$'],
     };
     it('returns npm files', async () => {
-      platform.getFileList.mockResolvedValue(fileList);
+      git.getFileList.mockResolvedValue(fileList);
       fileList.push('Dockerfile');
       const res = await fileMatch.getMatchingFiles(config);
       expect(res).toMatchSnapshot();
       expect(res).toHaveLength(2);
     });
     it('deduplicates', async () => {
-      platform.getFileList.mockResolvedValue(fileList);
+      git.getFileList.mockResolvedValue(fileList);
       config.fileMatch.push('package.json');
       const res = await fileMatch.getMatchingFiles(config);
       expect(res).toMatchSnapshot();

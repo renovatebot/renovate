@@ -15,6 +15,24 @@ export const presets: Record<string, Preset> = {
       enabled: false,
     },
   },
+  disableDomain: {
+    description: 'Disable requests to a particular domain',
+    hostRules: [
+      {
+        domainName: '{{arg0}}',
+        enabled: false,
+      },
+    ],
+  },
+  disableHost: {
+    description: 'Disable requests to a particular hostName',
+    hostRules: [
+      {
+        hostName: '{{arg0}}',
+        enabled: false,
+      },
+    ],
+  },
   ignoreModulesAndTests: {
     description:
       'Ignore `node_modules`, `bower_components`, `vendor` and various test/tests directories',
