@@ -1616,14 +1616,6 @@ export async function mergePr(
 ): Promise<boolean> {
   logger.debug(`mergePr(${prNo}, ${branchName})`);
   // istanbul ignore if
-  if (config.isGhe && config.pushProtection) {
-    logger.debug(
-      { branch: branchName, prNo },
-      'Branch protection: Cannot automerge PR when push protection is enabled'
-    );
-    return false;
-  }
-  // istanbul ignore if
   if (config.prReviewsRequired) {
     logger.debug(
       { branch: branchName, prNo },
