@@ -7,7 +7,7 @@ import {
   REPOSITORY_RENAMED,
 } from '../../constants/error-messages';
 import { BranchStatus } from '../../types';
-import * as runCache from '../../util/cache/run';
+import * as _git from '../../util/git';
 import { Platform } from '../common';
 
 const githubApiHost = 'https://api.github.com';
@@ -15,7 +15,7 @@ const githubApiHost = 'https://api.github.com';
 describe('platform/github', () => {
   let github: Platform;
   let hostRules: jest.Mocked<typeof import('../../util/host-rules')>;
-  let GitStorage: jest.Mock<typeof import('../git/storage')>;
+  let git: jest.Mocked<typeof _git>;
   beforeEach(async () => {
     // reset module
     jest.resetModules();
@@ -24,29 +24,12 @@ describe('platform/github', () => {
     jest.mock('../../util/host-rules');
     github = await import('.');
     hostRules = mocked(await import('../../util/host-rules'));
-    jest.mock('../git/storage');
-    GitStorage = (await import('../git/storage')).Storage as any;
-    GitStorage.mockImplementation(
-      () =>
-        ({
-          initRepo: jest.fn(),
-          cleanRepo: jest.fn(),
-          getFileList: jest.fn(),
-          branchExists: jest.fn(() => true),
-          isBranchStale: jest.fn(() => false),
-          setBaseBranch: jest.fn(),
-          getBranchLastCommitTime: jest.fn(),
-          getAllRenovateBranches: jest.fn(),
-          getCommitMessages: jest.fn(),
-          getFile: jest.fn(),
-          commitFiles: jest.fn(),
-          mergeBranch: jest.fn(),
-          deleteBranch: jest.fn(),
-          getRepoStatus: jest.fn(),
-          getBranchCommit: jest.fn(
-            () => '0d9c7726c3d628b7e28af234595cfd20febdbf8e'
-          ),
-        } as any)
+    jest.mock('../../util/git');
+    git = mocked(await import('../../util/git'));
+    git.branchExists.mockResolvedValue(true);
+    git.isBranchStale.mockResolvedValue(true);
+    git.getBranchCommit.mockResolvedValue(
+      '0d9c7726c3d628b7e28af234595cfd20febdbf8e'
     );
     delete global.gitAuthor;
     hostRules.find.mockReturnValue({
@@ -57,14 +40,13 @@ describe('platform/github', () => {
 
   afterEach(() => {
     httpMock.reset();
-    runCache.clear();
   });
 
   const graphqlOpenPullRequests = fs.readFileSync(
     'lib/platform/github/__fixtures__/graphql/pullrequest-1.json',
     'utf8'
   );
-  const graphqlClosedPullrequests = fs.readFileSync(
+  const graphqlClosedPullRequests = fs.readFileSync(
     'lib/platform/github/__fixtures__/graphql/pullrequests-closed.json',
     'utf8'
   );
@@ -403,9 +385,9 @@ describe('platform/github', () => {
         .scope(githubApiHost)
         .get('/repos/undefined/branches/undefined/protection')
         .reply(401);
-      await expect(github.getRepoForceRebase()).rejects.toMatchObject({
-        statusCode: 401,
-      });
+      await expect(
+        github.getRepoForceRebase()
+      ).rejects.toThrowErrorMatchingSnapshot();
       expect(httpMock.getTrace()).toMatchSnapshot();
     });
   });
@@ -426,8 +408,8 @@ describe('platform/github', () => {
       const scope = httpMock.scope(githubApiHost);
       initRepoMock(scope, 'some/repo');
       scope
-        .persist()
         .post('/graphql')
+        .twice()
         .reply(200, {})
         .get('/repos/some/repo/pulls?per_page=100&state=all')
         .reply(200, [
@@ -468,8 +450,8 @@ describe('platform/github', () => {
       const scope = httpMock.scope(githubApiHost);
       forkInitRepoMock(scope, 'some/repo', 'forked/repo');
       scope
-        .persist()
         .post('/graphql')
+        .twice()
         .reply(200, {})
         .get('/repos/some/repo/pulls?per_page=100&state=all')
         .reply(200, [
@@ -659,7 +641,7 @@ describe('platform/github', () => {
       expect(res).toEqual(BranchStatus.green);
       expect(httpMock.getTrace()).toMatchSnapshot();
     });
-    it('should fail if a check run has failed', async () => {
+    it('should fail if a check run is pending', async () => {
       const scope = httpMock.scope(githubApiHost);
       initRepoMock(scope, 'some/repo');
       scope
@@ -1090,7 +1072,8 @@ describe('platform/github', () => {
         .patch('/repos/undefined/issues/2')
         .reply(200);
       const res = await github.ensureIssue({
-        title: 'title-2',
+        title: 'title-3',
+        reuseTitle: 'title-2',
         body: 'newer-content',
       });
       expect(res).toEqual('updated');
@@ -1243,7 +1226,7 @@ describe('platform/github', () => {
         once: false,
         shouldReOpen: false,
       });
-      expect(res).toEqual(null);
+      expect(res).toBeNull();
       expect(httpMock.getTrace()).toMatchSnapshot();
     });
   });
@@ -1329,7 +1312,6 @@ describe('platform/github', () => {
       initRepoMock(scope, 'some/repo');
       scope
         .post('/graphql')
-        .twice()
         .reply(200, {})
         .get('/repos/some/repo/issues/42/comments?per_page=100')
         .reply(200, [])
@@ -1351,8 +1333,7 @@ describe('platform/github', () => {
       initRepoMock(scope, 'some/repo');
       scope
         .post('/graphql')
-        .twice()
-        .reply(200, graphqlClosedPullrequests)
+        .reply(200, graphqlClosedPullRequests)
         .post('/repos/some/repo/issues/2499/comments')
         .reply(200);
       await github.initRepo({
@@ -1370,7 +1351,6 @@ describe('platform/github', () => {
       initRepoMock(scope, 'some/repo');
       scope
         .post('/graphql')
-        .twice()
         .reply(200, {})
         .get('/repos/some/repo/issues/42/comments?per_page=100')
         .reply(200, [{ id: 1234, body: '### some-subject\n\nblablabla' }])
@@ -1391,7 +1371,6 @@ describe('platform/github', () => {
       initRepoMock(scope, 'some/repo');
       scope
         .post('/graphql')
-        .twice()
         .reply(200, {})
         .get('/repos/some/repo/issues/42/comments?per_page=100')
         .reply(200, [{ id: 1234, body: '### some-subject\n\nsome\ncontent' }]);
@@ -1410,7 +1389,6 @@ describe('platform/github', () => {
       initRepoMock(scope, 'some/repo');
       scope
         .post('/graphql')
-        .twice()
         .reply(200, {})
         .get('/repos/some/repo/issues/42/comments?per_page=100')
         .reply(200, [{ id: 1234, body: '!merge' }]);
@@ -1431,7 +1409,6 @@ describe('platform/github', () => {
       initRepoMock(scope, 'some/repo');
       scope
         .post('/graphql')
-        .twice()
         .reply(200, {})
         .get('/repos/some/repo/issues/42/comments?per_page=100')
         .reply(200, [{ id: 1234, body: '### some-subject\n\nblablabla' }])
@@ -1446,7 +1423,6 @@ describe('platform/github', () => {
       initRepoMock(scope, 'some/repo');
       scope
         .post('/graphql')
-        .twice()
         .reply(200, {})
         .get('/repos/some/repo/issues/42/comments?per_page=100')
         .reply(200, [{ id: 1234, body: 'some-content' }])
@@ -1586,6 +1562,24 @@ describe('platform/github', () => {
       expect(pr).toMatchSnapshot();
       expect(httpMock.getTrace()).toMatchSnapshot();
     });
+    it('should create a draftPR if set in the settings', async () => {
+      const scope = httpMock.scope(githubApiHost);
+      initRepoMock(scope, 'some/repo');
+      scope.post('/repos/some/repo/pulls').reply(200, {
+        number: 123,
+      });
+      await github.initRepo({ repository: 'some/repo', token: 'token' } as any);
+      const pr = await github.createPr({
+        branchName: 'some-branch',
+        prTitle: 'PR draft',
+        prBody: 'This is a result of a draft',
+        labels: null,
+        useDefaultBranch: true,
+        draftPR: true,
+      });
+      expect(pr).toMatchSnapshot();
+      expect(httpMock.getTrace()).toMatchSnapshot();
+    });
   });
   describe('getPr(prNo)', () => {
     it('should return null if no prNo is passed', async () => {
@@ -1596,7 +1590,6 @@ describe('platform/github', () => {
       const scope = httpMock.scope(githubApiHost);
       initRepoMock(scope, 'some/repo');
       scope
-        .persist()
         .post('/graphql')
         .reply(200, graphqlOpenPullRequests)
         .get('/repos/some/repo/git/refs/heads/master')
@@ -1624,11 +1617,13 @@ describe('platform/github', () => {
         .post('/graphql')
         .reply(200, graphqlOpenPullRequests)
         .post('/graphql')
-        .times(2)
-        .reply(200, {})
-
-        .post('/graphql')
-        .reply(200, graphqlClosedPullrequests);
+        .reply(200, graphqlClosedPullRequests)
+        .get('/repos/some/repo/git/refs/heads/master')
+        .reply(200, {
+          object: {
+            sha: '1234123412341234123412341234123412341234',
+          },
+        });
       await github.initRepo({
         repository: 'some/repo',
       } as any);
@@ -1939,25 +1934,6 @@ describe('platform/github', () => {
       expect(httpMock.getTrace()).toMatchSnapshot();
     });
   });
-  describe('getPrFiles()', () => {
-    it('should return empty if no prNo is passed', async () => {
-      const prFiles = await github.getPrFiles(0);
-      expect(prFiles).toEqual([]);
-    });
-    it('returns files', async () => {
-      httpMock
-        .scope(githubApiHost)
-        .get('/repos/undefined/pulls/123/files')
-        .reply(200, [
-          { filename: 'renovate.json' },
-          { filename: 'not renovate.json' },
-        ]);
-      const prFiles = await github.getPrFiles(123);
-      expect(prFiles).toMatchSnapshot();
-      expect(prFiles).toHaveLength(2);
-      expect(httpMock.getTrace()).toMatchSnapshot();
-    });
-  });
   describe('updatePr(prNo, title, body)', () => {
     it('should update the PR', async () => {
       const scope = httpMock.scope(githubApiHost);
@@ -2108,28 +2084,43 @@ describe('platform/github', () => {
   });
   describe('getVulnerabilityAlerts()', () => {
     it('returns empty if error', async () => {
-      httpMock.scope(githubApiHost).post('/graphql').twice().reply(200, {});
+      httpMock.scope(githubApiHost).post('/graphql').reply(200, {});
       const res = await github.getVulnerabilityAlerts();
       expect(res).toHaveLength(0);
       expect(httpMock.getTrace()).toMatchSnapshot();
     });
     it('returns array if found', async () => {
       // prettier-ignore
-      httpMock.scope(githubApiHost).post('/graphql').reply(200, "{\"data\":{\"repository\":{\"vulnerabilityAlerts\":{\"edges\":[{\"node\":{\"externalIdentifier\":\"CVE-2018-1000136\",\"externalReference\":\"https://nvd.nist.gov/vuln/detail/CVE-2018-1000136\",\"affectedRange\":\">= 1.8, < 1.8.3\",\"fixedIn\":\"1.8.3\",\"id\":\"MDI4OlJlcG9zaXRvcnlWdWxuZXJhYmlsaXR5QWxlcnQ1MzE3NDk4MQ==\",\"packageName\":\"electron\"}}]}}}}");
+      httpMock.scope(githubApiHost).post('/graphql').reply(200, {
+        "data": {
+          "repository": {
+            "vulnerabilityAlerts": {
+              "edges": [{
+                "node": {
+                  "externalIdentifier": "CVE-2018-1000136",
+                  "externalReference": "https://nvd.nist.gov/vuln/detail/CVE-2018-1000136",
+                  "affectedRange": ">= 1.8, < 1.8.3", "fixedIn": "1.8.3",
+                  "id": "MDI4OlJlcG9zaXRvcnlWdWxuZXJhYmlsaXR5QWxlcnQ1MzE3NDk4MQ==", "packageName": "electron"
+                }
+              }]
+            }
+          }
+        }
+      });
       const res = await github.getVulnerabilityAlerts();
       expect(res).toHaveLength(1);
       expect(httpMock.getTrace()).toMatchSnapshot();
     });
     it('returns empty if disabled', async () => {
       // prettier-ignore
-      httpMock.scope(githubApiHost).post('/graphql').reply(200, "{\"data\":{\"repository\":{}}}");
+      httpMock.scope(githubApiHost).post('/graphql').reply(200, {data: { repository: {} }} );
       const res = await github.getVulnerabilityAlerts();
       expect(res).toHaveLength(0);
       expect(httpMock.getTrace()).toMatchSnapshot();
     });
     it('handles network error', async () => {
       // prettier-ignore
-      httpMock.scope(githubApiHost).persist().post('/graphql').replyWithError('unknown error');
+      httpMock.scope(githubApiHost).post('/graphql').replyWithError('unknown error');
       const res = await github.getVulnerabilityAlerts();
       expect(res).toHaveLength(0);
       expect(httpMock.getTrace()).toMatchSnapshot();

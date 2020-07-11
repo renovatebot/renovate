@@ -4,16 +4,6 @@ exports[`datasource/github-releases getReleases returns releases 1`] = `
 Object {
   "releases": Array [
     Object {
-      "gitRef": "a",
-      "releaseTimestamp": "2020-03-09T13:00:00Z",
-      "version": "a",
-    },
-    Object {
-      "gitRef": "v",
-      "releaseTimestamp": "2020-03-09T12:00:00Z",
-      "version": "v",
-    },
-    Object {
       "gitRef": "1.0.0",
       "releaseTimestamp": "2020-03-09T11:00:00Z",
       "version": "1.0.0",
@@ -26,4 +16,20 @@ Object {
   ],
   "sourceUrl": "https://github.com/some/dep",
 }
+`;
+
+exports[`datasource/github-releases getReleases returns releases 2`] = `
+Array [
+  Object {
+    "headers": Object {
+      "accept": "application/vnd.github.v3+json",
+      "accept-encoding": "gzip, deflate",
+      "authorization": "token some-token",
+      "host": "api.github.com",
+      "user-agent": "https://github.com/renovatebot/renovate",
+    },
+    "method": "GET",
+    "url": "https://api.github.com/repos/some/dep/releases?per_page=100",
+  },
+]
 `;

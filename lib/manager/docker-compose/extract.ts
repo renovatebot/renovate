@@ -47,11 +47,17 @@ export function extractPackageFile(
   let config: DockerComposeConfig;
   try {
     config = safeLoad(content, { json: true });
-    // istanbul ignore if
     if (!config) {
       logger.debug(
         { fileName },
         'Null config when parsing Docker Compose content'
+      );
+      return null;
+    }
+    if (typeof config !== 'object') {
+      logger.debug(
+        { fileName, type: typeof config },
+        'Unexpected type for Docker Compose content'
       );
       return null;
     }
@@ -63,9 +69,14 @@ export function extractPackageFile(
   try {
     const lineMapper = new LineMapper(content, /^\s*image:/);
 
+    const services =
+      'version' in config
+        ? config.services // docker-compose version 2+
+        : config; // docker-compose version 1 (services at top level)
+
     // Image name/tags for services are only eligible for update if they don't
     // use variables and if the image is not built locally
-    const deps = Object.values(config.services || {})
+    const deps = Object.values(services || {})
       .filter((service) => service && service.image && !service.build)
       .map((service) => {
         const dep = getDep(service.image);
@@ -79,9 +90,6 @@ export function extractPackageFile(
       .filter(Boolean);
 
     logger.trace({ deps }, 'Docker Compose image');
-    if (!deps.length) {
-      return null;
-    }
     return { deps };
   } catch (err) /* istanbul ignore next */ {
     logger.warn(

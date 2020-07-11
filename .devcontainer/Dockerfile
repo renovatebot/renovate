@@ -1,4 +1,4 @@
-FROM mcr.microsoft.com/vscode/devcontainers/typescript-node:0.117.1-12@sha256:620227454fee7f57119d21972eb63b5352718319cc5db4fbc7cdae25e98d6f1c
+FROM mcr.microsoft.com/vscode/devcontainers/typescript-node:0.128.0-14@sha256:95f36080a8a6ba2df1f24bc1639d89a8f64dc36d6554c78f33b794983ccbee55
 
 # see https://mcr.microsoft.com/v2/vscode/devcontainers/typescript-node/tags/list for tags
 # Add missing renovate dev tools

@@ -2,23 +2,24 @@ import URL from 'url';
 import { PLATFORM_TYPE_GITHUB } from '../../../constants/platforms';
 import { Release } from '../../../datasource';
 import { logger } from '../../../logger';
-import { api } from '../../../platform/github/gh-got-wrapper';
-import * as globalCache from '../../../util/cache/global';
+import * as memCache from '../../../util/cache/memory';
+import * as packageCache from '../../../util/cache/package';
 import * as hostRules from '../../../util/host-rules';
+import { GithubHttp } from '../../../util/http/github';
 import * as allVersioning from '../../../versioning';
 import { BranchUpgradeConfig } from '../../common';
 import { ChangeLogError, ChangeLogRelease, ChangeLogResult } from './common';
 import { addReleaseNotes } from './release-notes';
 
-const { get: ghGot } = api;
+const http = new GithubHttp();
 
-async function getTags(
+async function getTagsInner(
   endpoint: string,
   repository: string
 ): Promise<string[]> {
   const url = `${endpoint}repos/${repository}/tags?per_page=100`;
   try {
-    const res = await ghGot<{ name: string }[]>(url, {
+    const res = await http.getJson<{ name: string }[]>(url, {
       paginate: true,
     });
 
@@ -41,6 +42,21 @@ async function getTags(
   }
 }
 
+async function getTags(
+  endpoint: string,
+  repository: string
+): Promise<string[]> {
+  const cacheKey = `getTags-${endpoint}-${repository}`;
+  const cachedResult = memCache.get(cacheKey);
+  // istanbul ignore if
+  if (cachedResult !== undefined) {
+    return cachedResult;
+  }
+  const promisedRes = getTagsInner(endpoint, repository);
+  memCache.set(cacheKey, promisedRes);
+  return promisedRes;
+}
+
 export async function getChangeLogJSON({
   versioning,
   fromVersion,
@@ -51,7 +67,7 @@ export async function getChangeLogJSON({
   manager,
 }: BranchUpgradeConfig): Promise<ChangeLogResult | null> {
   if (sourceUrl === 'https://github.com/DefinitelyTyped/DefinitelyTyped') {
-    logger.debug('No release notes for @types');
+    logger.trace('No release notes for @types');
     return null;
   }
   const version = allVersioning.get(versioning);
@@ -75,13 +91,13 @@ export async function getChangeLogJSON({
     }
     logger.debug(
       { manager, depName, sourceUrl },
-      'Repository URL does not match any known hosts - skipping changelog retrieval'
+      'Repository URL does not match any known github hosts - skipping changelog retrieval'
     );
     return null;
   }
   const apiBaseUrl = sourceUrl.startsWith('https://github.com/')
     ? 'https://api.github.com/'
-    : baseUrl;
+    : baseUrl + 'api/v3/';
   const repository = pathname.slice(1).replace(/\/$/, '');
   if (repository.split('/').length !== 2) {
     logger.debug({ sourceUrl }, 'Invalid github URL found');
@@ -134,7 +150,7 @@ export async function getChangeLogJSON({
     const prev = validReleases[i - 1];
     const next = validReleases[i];
     if (include(next.version)) {
-      let release = await globalCache.get(
+      let release = await packageCache.get(
         cacheNamespace,
         getCacheKey(prev.version, next.version)
       );
@@ -153,7 +169,7 @@ export async function getChangeLogJSON({
           release.compare.url = `${baseUrl}${repository}/compare/${prevHead}...${nextHead}`;
         }
         const cacheMinutes = 55;
-        await globalCache.set(
+        await packageCache.set(
           cacheNamespace,
           getCacheKey(prev.version, next.version),
           release,

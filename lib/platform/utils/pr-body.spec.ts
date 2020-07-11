@@ -19,7 +19,7 @@ describe('platform/utils/pr-body', () => {
     it('truncates to 300 not smart', () => {
       const body = smartTruncate(prBody, 300);
       expect(body).toMatchSnapshot();
-      expect(body.length).toEqual(300);
+      expect(body).toHaveLength(300);
     });
 
     it('truncates to 10', () => {

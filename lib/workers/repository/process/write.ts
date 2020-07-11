@@ -28,6 +28,7 @@ export async function writeUpdates(
     return true;
   });
   let prsRemaining = await getPrsRemaining(config, branches);
+  logger.debug({ prsRemaining }, 'Calculated maximum PRs remaining this run');
   for (const branch of branches) {
     addMeta({ branch: branch.branchName });
     const res = await processBranch(
@@ -35,11 +36,23 @@ export async function writeUpdates(
       prsRemaining <= 0 || getLimitRemaining('prCommitsPerRunLimit') <= 0
     );
     branch.res = res;
-    if (res === 'automerged' && config.automergeType !== 'pr-comment') {
+    if (res === 'automerged' && branch.automergeType !== 'pr-comment') {
       // Stop procesing other branches because base branch has been changed
       return res;
     }
-    prsRemaining -= res === 'pr-created' ? 1 : 0;
+    let deductPrRemainingCount = 0;
+    if (res === 'pr-created') {
+      deductPrRemainingCount = 1;
+    }
+    // istanbul ignore if
+    if (
+      res === 'automerged' &&
+      branch.automergeType === 'pr-comment' &&
+      branch.requiredStatusChecks === null
+    ) {
+      deductPrRemainingCount = 1;
+    }
+    prsRemaining -= deductPrRemainingCount;
   }
   removeMeta(['branch']);
   return 'done';

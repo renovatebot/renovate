@@ -104,7 +104,7 @@ describe('datasource/sbt', () => {
           depName: 'org.scalatest:scalatest',
           registryUrls: ['https://failed_repo/maven'],
         })
-      ).toEqual(null);
+      ).toBeNull();
     });
     it('fetches releases from Maven', async () => {
       expect(

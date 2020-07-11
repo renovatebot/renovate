@@ -1,15 +1,17 @@
 import URL from 'url';
-import is from '@sindresorhus/is';
 
 import pAll from 'p-all';
 import { logger } from '../../logger';
-import * as globalCache from '../../util/cache/global';
-import { get, set } from '../../util/cache/run';
+import { ExternalHostError } from '../../types/errors/external-host-error';
+import * as memCache from '../../util/cache/memory';
+import * as packageCache from '../../util/cache/package';
 import * as hostRules from '../../util/host-rules';
 import { Http, HttpOptions } from '../../util/http';
-import { DatasourceError, GetReleasesConfig, ReleaseResult } from '../common';
+import { GetReleasesConfig, ReleaseResult } from '../common';
 
 export const id = 'packagist';
+export const defaultRegistryUrls = ['https://packagist.org'];
+export const registryStrategy = 'hunt';
 
 const http = new Http(id);
 
@@ -47,63 +49,42 @@ interface RegistryMeta {
 }
 
 async function getRegistryMeta(regUrl: string): Promise<RegistryMeta | null> {
-  try {
-    const url = URL.resolve(regUrl.replace(/\/?$/, '/'), 'packages.json');
-    const opts = getHostOpts(url);
-    const res = (await http.getJson<PackageMeta>(url, opts)).body;
-    const meta: RegistryMeta = {
-      providerPackages: {},
-    };
-    meta.packages = res.packages;
-    if (res.includes) {
-      meta.includesFiles = [];
-      for (const [name, val] of Object.entries(res.includes)) {
-        const file = {
-          key: name.replace(val.sha256, '%hash%'),
-          sha256: val.sha256,
-        };
-        meta.includesFiles.push(file);
-      }
+  const url = URL.resolve(regUrl.replace(/\/?$/, '/'), 'packages.json');
+  const opts = getHostOpts(url);
+  const res = (await http.getJson<PackageMeta>(url, opts)).body;
+  const meta: RegistryMeta = {
+    providerPackages: {},
+  };
+  meta.packages = res.packages;
+  if (res.includes) {
+    meta.includesFiles = [];
+    for (const [name, val] of Object.entries(res.includes)) {
+      const file = {
+        key: name.replace(val.sha256, '%hash%'),
+        sha256: val.sha256,
+      };
+      meta.includesFiles.push(file);
     }
-    if (res['providers-url']) {
-      meta.providersUrl = res['providers-url'];
-    }
-    if (res['provider-includes']) {
-      meta.files = [];
-      for (const [key, val] of Object.entries(res['provider-includes'])) {
-        const file = {
-          key,
-          sha256: val.sha256,
-        };
-        meta.files.push(file);
-      }
-    }
-    if (res.providers) {
-      for (const [key, val] of Object.entries(res.providers)) {
-        meta.providerPackages[key] = val.sha256;
-      }
-    }
-    return meta;
-  } catch (err) {
-    if (err.code === 'ETIMEDOUT') {
-      logger.debug({ regUrl }, 'Packagist timeout');
-      return null;
-    }
-    if (err.statusCode === 401 || err.statusCode === 403) {
-      logger.debug({ regUrl }, 'Unauthorized Packagist repository');
-      return null;
-    }
-    if (
-      err.statusCode === 404 &&
-      err.url &&
-      err.url.endsWith('/packages.json')
-    ) {
-      logger.debug({ regUrl }, 'Packagist repository not found');
-      return null;
-    }
-    logger.warn({ err }, 'Packagist download error');
-    return null;
   }
+  if (res['providers-url']) {
+    meta.providersUrl = res['providers-url'];
+  }
+  if (res['provider-includes']) {
+    meta.files = [];
+    for (const [key, val] of Object.entries(res['provider-includes'])) {
+      const file = {
+        key,
+        sha256: val.sha256,
+      };
+      meta.files.push(file);
+    }
+  }
+  if (res.providers) {
+    for (const [key, val] of Object.entries(res.providers)) {
+      meta.providerPackages[key] = val.sha256;
+    }
+  }
+  return meta;
 }
 
 interface PackagistFile {
@@ -125,7 +106,7 @@ async function getPackagistFile(
   const cacheNamespace = 'datasource-packagist-files';
   const cacheKey = regUrl + key;
   // Check the persistent cache for public registries
-  const cachedResult = await globalCache.get(cacheNamespace, cacheKey);
+  const cachedResult = await packageCache.get(cacheNamespace, cacheKey);
   // istanbul ignore if
   if (cachedResult && cachedResult.sha256 === sha256) {
     return cachedResult.res;
@@ -133,7 +114,7 @@ async function getPackagistFile(
   const res = (await http.getJson<PackagistFile>(regUrl + '/' + fileName, opts))
     .body;
   const cacheMinutes = 1440; // 1 day
-  await globalCache.set(
+  await packageCache.set(
     cacheNamespace,
     cacheKey,
     { res, sha256 },
@@ -174,9 +155,6 @@ interface AllPackages {
 
 async function getAllPackages(regUrl: string): Promise<AllPackages | null> {
   const registryMeta = await getRegistryMeta(regUrl);
-  if (!registryMeta) {
-    return null;
-  }
   const {
     packages,
     providersUrl,
@@ -219,15 +197,19 @@ async function getAllPackages(regUrl: string): Promise<AllPackages | null> {
 
 function getAllCachedPackages(regUrl: string): Promise<AllPackages | null> {
   const cacheKey = `packagist-${regUrl}`;
-  if (get(cacheKey) === undefined) {
-    set(cacheKey, getAllPackages(regUrl));
+  const cachedResult = memCache.get(cacheKey);
+  // istanbul ignore if
+  if (cachedResult) {
+    return cachedResult;
   }
-  return get(cacheKey);
+  const promisedRes = getAllPackages(regUrl);
+  memCache.set(cacheKey, promisedRes);
+  return promisedRes;
 }
 
 async function packagistOrgLookup(name: string): Promise<ReleaseResult> {
   const cacheNamespace = 'datasource-packagist-org';
-  const cachedResult = await globalCache.get<ReleaseResult>(
+  const cachedResult = await packageCache.get<ReleaseResult>(
     cacheNamespace,
     name
   );
@@ -246,7 +228,7 @@ async function packagistOrgLookup(name: string): Promise<ReleaseResult> {
     logger.trace({ dep }, 'dep');
   }
   const cacheMinutes = 10;
-  await globalCache.set(cacheNamespace, name, dep, cacheMinutes);
+  await packageCache.set(cacheNamespace, name, dep, cacheMinutes);
   return dep;
 }
 
@@ -260,9 +242,6 @@ async function packageLookup(
       return packagistResult;
     }
     const allPackages = await getAllCachedPackages(regUrl);
-    if (!allPackages) {
-      return null;
-    }
     const {
       packages,
       providersUrl,
@@ -296,44 +275,22 @@ async function packageLookup(
     logger.trace({ dep }, 'dep');
     return dep;
   } catch (err) /* istanbul ignore next */ {
-    if (err.statusCode === 404 || err.code === 'ENOTFOUND') {
-      logger.debug(
-        { dependency: name },
-        `Dependency lookup failure: not found`
-      );
-      logger.debug({
-        err,
-      });
-      return null;
-    }
     if (err.host === 'packagist.org') {
       if (err.code === 'ECONNRESET' || err.code === 'ETIMEDOUT') {
-        throw new DatasourceError(err);
+        throw new ExternalHostError(err);
       }
       if (err.statusCode && err.statusCode >= 500 && err.statusCode < 600) {
-        throw new DatasourceError(err);
+        throw new ExternalHostError(err);
       }
     }
-    logger.warn({ err, name }, 'packagist registry failure: Unknown error');
-    return null;
+    throw err;
   }
 }
 
 export async function getReleases({
   lookupName,
-  registryUrls,
+  registryUrl,
 }: GetReleasesConfig): Promise<ReleaseResult> {
   logger.trace(`getReleases(${lookupName})`);
-
-  let res: ReleaseResult;
-  const registries = is.nonEmptyArray(registryUrls)
-    ? registryUrls
-    : ['https://packagist.org'];
-  for (const regUrl of registries) {
-    res = await packageLookup(regUrl, lookupName);
-    if (res) {
-      break;
-    }
-  }
-  return res;
+  return packageLookup(registryUrl, lookupName);
 }

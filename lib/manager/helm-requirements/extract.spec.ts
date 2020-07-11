@@ -1,7 +1,7 @@
-import * as _fs from '../../util/fs';
+import { fs } from '../../../test/util';
 import { extractPackageFile } from './extract';
 
-const fs: any = _fs;
+jest.mock('../../util/fs');
 
 describe('lib/manager/helm-requirements/extract', () => {
   describe('extractPackageFile()', () => {
@@ -36,7 +36,7 @@ describe('lib/manager/helm-requirements/extract', () => {
       });
       expect(result).not.toBeNull();
       expect(result).toMatchSnapshot();
-      expect(result.deps.every((dep) => dep.skipReason));
+      expect(result.deps.every((dep) => dep.skipReason)).toEqual(true);
     });
     it('parses simple requirements.yaml correctly', async () => {
       fs.readLocalFile.mockResolvedValueOnce(`
@@ -101,7 +101,7 @@ describe('lib/manager/helm-requirements/extract', () => {
       });
       expect(result).not.toBeNull();
       expect(result).toMatchSnapshot();
-      expect(result.deps.every((dep) => dep.skipReason));
+      expect(result.deps.every((dep) => dep.skipReason)).toEqual(false);
     });
     it("doesn't fail if Chart.yaml is invalid", async () => {
       fs.readLocalFile.mockResolvedValueOnce(`

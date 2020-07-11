@@ -4,7 +4,7 @@ import shell from 'shelljs';
 (async () => {
   shell.echo('-n', 'Checking re2 ... ');
   try {
-    const { default: RE2 } = await import('re2');
+    const { default: RE2 } = await import('re2'); // eslint-disable-line import/no-extraneous-dependencies
     new RE2('.*').exec('test');
     shell.echo(`ok.`);
   } catch (e) {

@@ -102,31 +102,4 @@ describe('lib/manager/pip_setup/index', () => {
       expect(fixSnapshots(execSnapshots)).toMatchSnapshot();
     });
   });
-  /*
-  describe('extractSetupFile()', () => {
-    it('should return parsed setup() call', async () => {
-      expect(
-        await extractSetupFile(content, packageFile, config)
-      ).toMatchSnapshot();
-    });
-    it('should support setuptools', async () => {
-      expect(
-        await extractSetupFile(
-          'from setuptools import setup\nsetup(name="talisker")\n',
-          await tmpFile(),
-          config
-        )
-      ).toEqual({ name: 'talisker' });
-    });
-    it('should support distutils.core', async () => {
-      expect(
-        await extractSetupFile(
-          'from distutils.core import setup\nsetup(name="talisker")\n',
-          await tmpFile(),
-          config
-        )
-      ).toEqual({ name: 'talisker' });
-    });
-  });
-  */
 });

@@ -214,7 +214,7 @@ describe('versioning/gradle', () => {
     expect(api.matches('1', '(,1)')).toBe(false);
     expect(api.matches('1', '[1,)')).toBe(true);
     expect(api.matches('1', '(1,)')).toBe(false);
-    expect(api.matches('1', '[[]]')).toBe(null);
+    expect(api.matches('1', '[[]]')).toBeNull();
     expect(api.matches('0', '')).toBe(false);
     expect(api.matches('1', '1')).toBe(true);
     expect(api.matches('1.2.3', '1.2.+')).toBe(true);
@@ -243,7 +243,7 @@ describe('versioning/gradle', () => {
         fromVersion: null,
         toVersion: '1.2.4',
       })
-    ).toBe(null);
+    ).toBeNull();
   });
   it('pins maven ranges', () => {
     const sample = [

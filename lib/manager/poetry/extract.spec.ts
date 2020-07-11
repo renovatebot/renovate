@@ -61,7 +61,7 @@ describe('lib/manager/poetry/extract', () => {
     it('extracts multiple dependencies', () => {
       const res = extractPackageFile(pyproject1toml, filename);
       expect(res.deps).toMatchSnapshot();
-      expect(res.deps).toHaveLength(10);
+      expect(res.deps).toHaveLength(9);
       expect(res.compatibility).toEqual({
         poetry: 'poetry>=1.0 wheel',
         python: '~2.7 || ^3.4',
@@ -111,7 +111,7 @@ describe('lib/manager/poetry/extract', () => {
       expect(res[0].skipReason).toBe('git-dependency');
       expect(res).toHaveLength(2);
     });
-    it('skips git dependencies', () => {
+    it('skips git dependencies with version', () => {
       const content =
         '[tool.poetry.dependencies]\r\nflask = {git = "https://github.com/pallets/flask.git", version="1.2.3"}\r\nwerkzeug = ">=0.14"';
       const res = extractPackageFile(content, filename).deps;
@@ -129,7 +129,7 @@ describe('lib/manager/poetry/extract', () => {
       expect(res[0].skipReason).toBe('path-dependency');
       expect(res).toHaveLength(2);
     });
-    it('skips path dependencies', () => {
+    it('skips path dependencies with version', () => {
       const content =
         '[tool.poetry.dependencies]\r\nflask = {path = "/some/path/", version = "1.2.3"}\r\nwerkzeug = ">=0.14"';
       const res = extractPackageFile(content, filename).deps;

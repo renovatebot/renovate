@@ -2,25 +2,22 @@
 
 exports[`datasource/npm/index should fetch package info from custom registry 1`] = `
 Object {
-  "homepage": "https://github.com/renovateapp/dummy",
   "latestVersion": "0.0.1",
   "name": "foobar",
   "releases": Array [
     Object {
       "canBeUnpublished": false,
-      "gitRef": undefined,
       "releaseTimestamp": "2018-05-06T07:21:53+02:00",
       "version": "0.0.1",
     },
     Object {
       "canBeUnpublished": false,
-      "gitRef": undefined,
       "releaseTimestamp": "2018-05-07T07:21:53+02:00",
       "version": "0.0.2",
     },
   ],
   "sourceDirectory": "src/a",
-  "sourceUrl": "git://github.com/renovateapp/dummy.git",
+  "sourceUrl": "https://github.com/renovateapp/dummy",
   "tags": Object {
     "latest": "0.0.1",
   },
@@ -30,25 +27,22 @@ Object {
 
 exports[`datasource/npm/index should fetch package info from npm 1`] = `
 Object {
-  "homepage": "https://github.com/renovateapp/dummy",
   "latestVersion": "0.0.1",
   "name": "foobar",
   "releases": Array [
     Object {
       "canBeUnpublished": false,
-      "gitRef": undefined,
       "releaseTimestamp": "2018-05-06T07:21:53+02:00",
       "version": "0.0.1",
     },
     Object {
       "canBeUnpublished": false,
-      "gitRef": undefined,
       "releaseTimestamp": "2018-05-07T07:21:53+02:00",
       "version": "0.0.2",
     },
   ],
   "sourceDirectory": "src/a",
-  "sourceUrl": "git://github.com/renovateapp/dummy.git",
+  "sourceUrl": "https://github.com/renovateapp/dummy",
   "tags": Object {
     "latest": "0.0.1",
   },
@@ -58,25 +52,22 @@ Object {
 
 exports[`datasource/npm/index should handle foobar 1`] = `
 Object {
-  "homepage": "https://github.com/renovateapp/dummy",
   "latestVersion": "0.0.1",
   "name": "foobar",
   "releases": Array [
     Object {
       "canBeUnpublished": false,
-      "gitRef": undefined,
       "releaseTimestamp": "2018-05-06T07:21:53+02:00",
       "version": "0.0.1",
     },
     Object {
       "canBeUnpublished": false,
-      "gitRef": undefined,
       "releaseTimestamp": "2018-05-07T07:21:53+02:00",
       "version": "0.0.2",
     },
   ],
   "sourceDirectory": "src/a",
-  "sourceUrl": "git://github.com/renovateapp/dummy.git",
+  "sourceUrl": "https://github.com/renovateapp/dummy",
   "tags": Object {
     "latest": "0.0.1",
   },
@@ -86,23 +77,20 @@ Object {
 
 exports[`datasource/npm/index should handle no time 1`] = `
 Object {
-  "homepage": "https://github.com/renovateapp/dummy",
   "latestVersion": "0.0.1",
   "name": "foobar",
   "releases": Array [
     Object {
       "canBeUnpublished": false,
-      "gitRef": undefined,
       "releaseTimestamp": "2018-05-06T07:21:53+02:00",
       "version": "0.0.1",
     },
     Object {
-      "gitRef": undefined,
       "version": "0.0.2",
     },
   ],
   "sourceDirectory": "src/a",
-  "sourceUrl": "git://github.com/renovateapp/dummy.git",
+  "sourceUrl": "https://github.com/renovateapp/dummy",
   "tags": Object {
     "latest": "0.0.1",
   },
@@ -112,18 +100,16 @@ Object {
 
 exports[`datasource/npm/index should parse repo url (string) 1`] = `
 Object {
-  "homepage": undefined,
   "latestVersion": "0.0.1",
   "name": "foobar",
   "releases": Array [
     Object {
       "canBeUnpublished": false,
-      "gitRef": undefined,
       "releaseTimestamp": "2018-05-06T07:21:53+02:00",
       "version": "0.0.1",
     },
   ],
-  "sourceUrl": "git:github.com/renovateapp/dummy",
+  "sourceUrl": "https://github.com/renovateapp/dummy",
   "tags": Object {
     "latest": "0.0.1",
   },
@@ -133,18 +119,16 @@ Object {
 
 exports[`datasource/npm/index should parse repo url 1`] = `
 Object {
-  "homepage": undefined,
   "latestVersion": "0.0.1",
   "name": "foobar",
   "releases": Array [
     Object {
       "canBeUnpublished": false,
-      "gitRef": undefined,
       "releaseTimestamp": "2018-05-06T07:21:53+02:00",
       "version": "0.0.1",
     },
   ],
-  "sourceUrl": "git:github.com/renovateapp/dummy",
+  "sourceUrl": "https://github.com/renovateapp/dummy",
   "tags": Object {
     "latest": "0.0.1",
   },
@@ -154,25 +138,22 @@ Object {
 
 exports[`datasource/npm/index should replace any environment variable in npmrc 1`] = `
 Object {
-  "homepage": "https://github.com/renovateapp/dummy",
   "latestVersion": "0.0.1",
   "name": "foobar",
   "releases": Array [
     Object {
       "canBeUnpublished": false,
-      "gitRef": undefined,
       "releaseTimestamp": "2018-05-06T07:21:53+02:00",
       "version": "0.0.1",
     },
     Object {
       "canBeUnpublished": false,
-      "gitRef": undefined,
       "releaseTimestamp": "2018-05-07T07:21:53+02:00",
       "version": "0.0.2",
     },
   ],
   "sourceDirectory": "src/a",
-  "sourceUrl": "git://github.com/renovateapp/dummy.git",
+  "sourceUrl": "https://github.com/renovateapp/dummy",
   "tags": Object {
     "latest": "0.0.1",
   },
@@ -188,25 +169,22 @@ Object {
 
 Marking the latest version of an npm package as deprecated results in the entire package being considered deprecated, so contact the package author you think this is a mistake.",
   "deprecationSource": "npm",
-  "homepage": undefined,
   "latestVersion": "0.0.2",
   "name": "foobar",
   "releases": Array [
     Object {
       "canBeUnpublished": false,
-      "gitRef": undefined,
       "releaseTimestamp": "2018-05-06T07:21:53+02:00",
       "version": "0.0.1",
     },
     Object {
       "canBeUnpublished": false,
-      "gitRef": undefined,
       "isDeprecated": true,
       "releaseTimestamp": "2018-05-07T07:21:53+02:00",
       "version": "0.0.2",
     },
   ],
-  "sourceUrl": "git://github.com/renovateapp/dummy.git",
+  "sourceUrl": "https://github.com/renovateapp/dummy",
   "tags": Object {
     "latest": "0.0.2",
   },
@@ -224,25 +202,22 @@ Marking the latest version of an npm package as deprecated results in the entire
 
 exports[`datasource/npm/index should send an authorization header if provided 1`] = `
 Object {
-  "homepage": "https://github.com/renovateapp/dummy",
   "latestVersion": "0.0.1",
   "name": "foobar",
   "releases": Array [
     Object {
       "canBeUnpublished": false,
-      "gitRef": undefined,
       "releaseTimestamp": "2018-05-06T07:21:53+02:00",
       "version": "0.0.1",
     },
     Object {
       "canBeUnpublished": false,
-      "gitRef": undefined,
       "releaseTimestamp": "2018-05-07T07:21:53+02:00",
       "version": "0.0.2",
     },
   ],
   "sourceDirectory": "src/a",
-  "sourceUrl": "git://github.com/renovateapp/dummy.git",
+  "sourceUrl": "https://github.com/renovateapp/dummy",
   "tags": Object {
     "latest": "0.0.1",
   },
@@ -252,25 +227,22 @@ Object {
 
 exports[`datasource/npm/index should use NPM_TOKEN if provided 1`] = `
 Object {
-  "homepage": "https://github.com/renovateapp/dummy",
   "latestVersion": "0.0.1",
   "name": "foobar",
   "releases": Array [
     Object {
       "canBeUnpublished": false,
-      "gitRef": undefined,
       "releaseTimestamp": "2018-05-06T07:21:53+02:00",
       "version": "0.0.1",
     },
     Object {
       "canBeUnpublished": false,
-      "gitRef": undefined,
       "releaseTimestamp": "2018-05-07T07:21:53+02:00",
       "version": "0.0.2",
     },
   ],
   "sourceDirectory": "src/a",
-  "sourceUrl": "git://github.com/renovateapp/dummy.git",
+  "sourceUrl": "https://github.com/renovateapp/dummy",
   "tags": Object {
     "latest": "0.0.1",
   },
@@ -280,25 +252,22 @@ Object {
 
 exports[`datasource/npm/index should use default registry if missing from npmrc 1`] = `
 Object {
-  "homepage": "https://github.com/renovateapp/dummy",
   "latestVersion": "0.0.1",
   "name": "foobar",
   "releases": Array [
     Object {
       "canBeUnpublished": false,
-      "gitRef": undefined,
       "releaseTimestamp": "2018-05-06T07:21:53+02:00",
       "version": "0.0.1",
     },
     Object {
       "canBeUnpublished": false,
-      "gitRef": undefined,
       "releaseTimestamp": "2018-05-07T07:21:53+02:00",
       "version": "0.0.2",
     },
   ],
   "sourceDirectory": "src/a",
-  "sourceUrl": "git://github.com/renovateapp/dummy.git",
+  "sourceUrl": "https://github.com/renovateapp/dummy",
   "tags": Object {
     "latest": "0.0.1",
   },
@@ -308,25 +277,22 @@ Object {
 
 exports[`datasource/npm/index should use host rules by baseUrl if provided 1`] = `
 Object {
-  "homepage": "https://github.com/renovateapp/dummy",
   "latestVersion": "0.0.1",
   "name": "foobar",
   "releases": Array [
     Object {
       "canBeUnpublished": false,
-      "gitRef": undefined,
       "releaseTimestamp": "2018-05-06T07:21:53+02:00",
       "version": "0.0.1",
     },
     Object {
       "canBeUnpublished": false,
-      "gitRef": undefined,
       "releaseTimestamp": "2018-05-07T07:21:53+02:00",
       "version": "0.0.2",
     },
   ],
   "sourceDirectory": "src/a",
-  "sourceUrl": "git://github.com/renovateapp/dummy.git",
+  "sourceUrl": "https://github.com/renovateapp/dummy",
   "tags": Object {
     "latest": "0.0.1",
   },
@@ -336,25 +302,22 @@ Object {
 
 exports[`datasource/npm/index should use host rules by hostName if provided 1`] = `
 Object {
-  "homepage": "https://github.com/renovateapp/dummy",
   "latestVersion": "0.0.1",
   "name": "foobar",
   "releases": Array [
     Object {
       "canBeUnpublished": false,
-      "gitRef": undefined,
       "releaseTimestamp": "2018-05-06T07:21:53+02:00",
       "version": "0.0.1",
     },
     Object {
       "canBeUnpublished": false,
-      "gitRef": undefined,
       "releaseTimestamp": "2018-05-07T07:21:53+02:00",
       "version": "0.0.2",
     },
   ],
   "sourceDirectory": "src/a",
-  "sourceUrl": "git://github.com/renovateapp/dummy.git",
+  "sourceUrl": "https://github.com/renovateapp/dummy",
   "tags": Object {
     "latest": "0.0.1",
   },

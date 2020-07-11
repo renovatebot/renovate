@@ -62,7 +62,9 @@ export function getPrUpdatesTable(config: BranchConfig): string {
     let val = '|';
     for (const column of tableColumns) {
       val += ' ';
-      val += row[column].replace(/^@/, '@&#8203;').replace(/\|/g, '\\|');
+      val += row[column]
+        ? row[column].replace(/^@/, '@&#8203;').replace(/\|/g, '\\|')
+        : '';
       val += ' |';
     }
     val += '\n';

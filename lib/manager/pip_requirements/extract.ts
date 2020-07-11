@@ -57,7 +57,7 @@ export function extractPackageFile(
         dep.skipReason = SkipReason.Ignored;
       }
       regex.lastIndex = 0;
-      const matches = regex.exec(line);
+      const matches = regex.exec(line.split(' \\')[0]);
       if (!matches) {
         return null;
       }
@@ -79,7 +79,22 @@ export function extractPackageFile(
   }
   const res: PackageFile = { deps };
   if (registryUrls.length > 0) {
-    res.registryUrls = registryUrls;
+    res.registryUrls = registryUrls.map((url) => {
+      // handle the optional quotes in eg. `--extra-index-url "https://foo.bar"`
+      const cleaned = url.replace(/^"/, '').replace(/"$/, '');
+      if (global.trustLevel !== 'high') {
+        return cleaned;
+      }
+      // interpolate any environment variables
+      return cleaned.replace(
+        /(\$[A-Za-z\d_]+)|(\${[A-Za-z\d_]+})/g,
+        (match) => {
+          const envvar = match.substring(1).replace(/^{/, '').replace(/}$/, '');
+          const sub = process.env[envvar];
+          return sub || match;
+        }
+      );
+    });
   }
   return res;
 }

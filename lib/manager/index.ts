@@ -64,10 +64,7 @@ export async function extractAllPackageFiles(
     if (!res) {
       return null;
     }
-    return res.map((packageFile) => ({
-      ...packageFile,
-      managerPackageFileList: files,
-    }));
+    return res;
   }
   return null;
 }

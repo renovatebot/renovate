@@ -1,5 +1,73 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
+exports[`lib/manager/terraform/extract extractPackageFile() extract helm releases 1`] = `
+Object {
+  "deps": Array [
+    Object {
+      "currentValue": "1.0.1",
+      "datasource": "helm",
+      "depName": "redis",
+      "depNameShort": "redis",
+      "depType": "helm",
+      "registryUrls": Array [
+        "https://kubernetes-charts.storage.googleapis.com",
+      ],
+    },
+    Object {
+      "datasource": "helm",
+      "depName": "redis",
+      "depNameShort": "redis",
+      "depType": "helm",
+      "registryUrls": Array [
+        "https://kubernetes-charts.storage.googleapis.com",
+      ],
+      "skipReason": "unsupported-version",
+    },
+    Object {
+      "datasource": "helm",
+      "depName": "./charts/example",
+      "depNameShort": "./charts/example",
+      "depType": "helm",
+      "registryUrls": Array [
+        undefined,
+      ],
+      "skipReason": "local-chart",
+    },
+    Object {
+      "currentValue": "4.0.1",
+      "datasource": "helm",
+      "depName": undefined,
+      "depNameShort": undefined,
+      "depType": "helm",
+      "registryUrls": Array [
+        "https://kubernetes-charts.storage.googleapis.com",
+      ],
+      "skipReason": "invalid-name",
+    },
+    Object {
+      "currentValue": "5.0.1",
+      "datasource": "helm",
+      "depName": "redis",
+      "depNameShort": "redis",
+      "depType": "helm",
+      "registryUrls": Array [
+        "https://kubernetes-charts.storage.googleapis.com",
+      ],
+    },
+    Object {
+      "currentValue": "6.0.1",
+      "datasource": "helm",
+      "depName": "redis",
+      "depNameShort": "redis",
+      "depType": "helm",
+      "registryUrls": Array [
+        undefined,
+      ],
+    },
+  ],
+}
+`;
+
 exports[`lib/manager/terraform/extract extractPackageFile() extracts 1`] = `
 Object {
   "deps": Array [
@@ -140,7 +208,7 @@ Object {
       "depName": "helm",
       "depNameShort": "helm",
       "depType": "terraform",
-      "skipReason": "no-version",
+      "skipReason": "unsupported-version",
     },
     Object {
       "currentValue": "V1.9",
@@ -150,7 +218,14 @@ Object {
       "depType": "terraform",
       "skipReason": "unsupported-version",
     },
-    Object {},
+    Object {
+      "currentValue": "v1.0.0",
+      "datasource": "git-tags",
+      "depName": "bitbucket.com/hashicorp/example",
+      "depNameShort": "hashicorp/example",
+      "depType": "gitTags",
+      "lookupName": "https://bitbucket.com/hashicorp/example",
+    },
     Object {
       "currentValue": "v1.0.0",
       "datasource": "git-tags",
@@ -167,6 +242,51 @@ Object {
       "depType": "gitTags",
       "lookupName": "https://bitbucket.com/hashicorp/example",
       "skipReason": "unsupported-version",
+    },
+    Object {
+      "currentValue": "v1.0.1",
+      "datasource": "git-tags",
+      "depName": "bitbucket.com/hashicorp/example",
+      "depNameShort": "hashicorp/example",
+      "depType": "gitTags",
+      "lookupName": "https://bitbucket.com/hashicorp/example",
+    },
+    Object {
+      "currentValue": "v1.0.2",
+      "datasource": "git-tags",
+      "depName": "bitbucket.com/hashicorp/example",
+      "depNameShort": "hashicorp/example",
+      "depType": "gitTags",
+      "lookupName": "http://bitbucket.com/hashicorp/example",
+    },
+    Object {
+      "currentValue": "v1.0.3",
+      "datasource": "git-tags",
+      "depName": "bitbucket.com/hashicorp/example",
+      "depNameShort": "hashicorp/example",
+      "depType": "gitTags",
+      "lookupName": "ssh://git@bitbucket.com/hashicorp/example",
+    },
+    Object {
+      "currentValue": ">= 2.7.0",
+      "datasource": "terraform-provider",
+      "depName": "aws",
+      "depNameShort": "aws",
+      "depType": "terraform",
+    },
+    Object {
+      "currentValue": ">= 2.5.0",
+      "datasource": "terraform-provider",
+      "depName": "aws",
+      "depNameShort": "aws",
+      "depType": "terraform",
+    },
+    Object {
+      "currentValue": ">= 2.0.0",
+      "datasource": "terraform-provider",
+      "depName": "azurerm",
+      "depNameShort": "azurerm",
+      "depType": "terraform",
     },
   ],
 }

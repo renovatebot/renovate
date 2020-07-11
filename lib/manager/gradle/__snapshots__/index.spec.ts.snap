@@ -1,6 +1,6 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
-exports[`manager/gradle extractPackageFile should configure the renovate report plugin 1`] = `
+exports[`manager/gradle/index extractPackageFile should configure the renovate report plugin 1`] = `
 Array [
   Object {
     "cmd": "./gradlew --init-script renovate-plugin.gradle renovate",
@@ -22,7 +22,7 @@ Array [
 ]
 `;
 
-exports[`manager/gradle extractPackageFile should execute gradle if gradlew is not available 1`] = `
+exports[`manager/gradle/index extractPackageFile should execute gradle if gradlew is not available 1`] = `
 Array [
   Object {
     "cmd": "gradle --init-script renovate-plugin.gradle renovate",
@@ -44,7 +44,7 @@ Array [
 ]
 `;
 
-exports[`manager/gradle extractPackageFile should execute gradlew when available 1`] = `
+exports[`manager/gradle/index extractPackageFile should execute gradlew when available 1`] = `
 Array [
   Object {
     "cmd": "./gradlew --init-script renovate-plugin.gradle renovate",
@@ -66,7 +66,7 @@ Array [
 ]
 `;
 
-exports[`manager/gradle extractPackageFile should execute gradlew.bat when available on Windows 1`] = `
+exports[`manager/gradle/index extractPackageFile should execute gradlew.bat when available on Windows 1`] = `
 Array [
   Object {
     "cmd": "gradlew.bat --init-script renovate-plugin.gradle renovate",
@@ -88,7 +88,7 @@ Array [
 ]
 `;
 
-exports[`manager/gradle extractPackageFile should return empty if renovate report is invalid 1`] = `
+exports[`manager/gradle/index extractPackageFile should return empty if renovate report is invalid 1`] = `
 Array [
   Object {
     "cmd": "./gradlew --init-script renovate-plugin.gradle renovate",
@@ -110,7 +110,7 @@ Array [
 ]
 `;
 
-exports[`manager/gradle extractPackageFile should return empty if there are no dependencies 1`] = `
+exports[`manager/gradle/index extractPackageFile should return empty if there are no dependencies 1`] = `
 Array [
   Object {
     "cmd": "./gradlew --init-script renovate-plugin.gradle renovate",
@@ -132,7 +132,7 @@ Array [
 ]
 `;
 
-exports[`manager/gradle extractPackageFile should return empty if there is no dependency report 1`] = `
+exports[`manager/gradle/index extractPackageFile should return empty if there is no dependency report 1`] = `
 Array [
   Object {
     "cmd": "./gradlew --init-script renovate-plugin.gradle renovate",
@@ -154,7 +154,7 @@ Array [
 ]
 `;
 
-exports[`manager/gradle extractPackageFile should return gradle dependencies 1`] = `
+exports[`manager/gradle/index extractPackageFile should return gradle dependencies 1`] = `
 Array [
   Object {
     "datasource": "maven",
@@ -206,6 +206,26 @@ Array [
         "depGroup": "com.typesafe.scala-logging",
         "depName": "com.typesafe.scala-logging:scala-logging",
         "name": "scala-logging_%%",
+        "registryUrls": Array [
+          "https://repo.maven.apache.org/maven2/",
+          "https://jitpack.io",
+        ],
+      },
+      Object {
+        "currentValue": "1.2.3",
+        "depGroup": "foo",
+        "depName": "foo:foo",
+        "name": "foo",
+        "registryUrls": Array [
+          "https://repo.maven.apache.org/maven2/",
+          "https://jitpack.io",
+        ],
+      },
+      Object {
+        "currentValue": "3.4.5",
+        "depGroup": "bar",
+        "depName": "bar:bar",
+        "name": "bar",
         "registryUrls": Array [
           "https://repo.maven.apache.org/maven2/",
           "https://jitpack.io",
@@ -269,13 +289,33 @@ Array [
           "https://jitpack.io",
         ],
       },
+      Object {
+        "currentValue": "1.2.3",
+        "depGroup": "foo",
+        "depName": "foo:foo",
+        "name": "foo",
+        "registryUrls": Array [
+          "https://repo.maven.apache.org/maven2/",
+          "https://jitpack.io",
+        ],
+      },
+      Object {
+        "currentValue": "3.4.5",
+        "depGroup": "bar",
+        "depName": "bar:bar",
+        "name": "bar",
+        "registryUrls": Array [
+          "https://repo.maven.apache.org/maven2/",
+          "https://jitpack.io",
+        ],
+      },
     ],
     "packageFile": "subproject/build.gradle",
   },
 ]
 `;
 
-exports[`manager/gradle extractPackageFile should return gradle dependencies 2`] = `
+exports[`manager/gradle/index extractPackageFile should return gradle dependencies 2`] = `
 Array [
   Object {
     "cmd": "./gradlew --init-script renovate-plugin.gradle renovate",
@@ -297,7 +337,7 @@ Array [
 ]
 `;
 
-exports[`manager/gradle extractPackageFile should return gradle dependencies for build.gradle in subdirectories if there is gradlew in the same directory 1`] = `
+exports[`manager/gradle/index extractPackageFile should return gradle dependencies for build.gradle in subdirectories if there is gradlew in the same directory 1`] = `
 Array [
   Object {
     "datasource": "maven",
@@ -354,13 +394,33 @@ Array [
           "https://jitpack.io",
         ],
       },
+      Object {
+        "currentValue": "1.2.3",
+        "depGroup": "foo",
+        "depName": "foo:foo",
+        "name": "foo",
+        "registryUrls": Array [
+          "https://repo.maven.apache.org/maven2/",
+          "https://jitpack.io",
+        ],
+      },
+      Object {
+        "currentValue": "3.4.5",
+        "depGroup": "bar",
+        "depName": "bar:bar",
+        "name": "bar",
+        "registryUrls": Array [
+          "https://repo.maven.apache.org/maven2/",
+          "https://jitpack.io",
+        ],
+      },
     ],
     "packageFile": "foo/build.gradle",
   },
 ]
 `;
 
-exports[`manager/gradle extractPackageFile should return gradle dependencies for build.gradle in subdirectories if there is gradlew in the same directory 2`] = `
+exports[`manager/gradle/index extractPackageFile should return gradle dependencies for build.gradle in subdirectories if there is gradlew in the same directory 2`] = `
 Array [
   Object {
     "cmd": "./gradlew --init-script renovate-plugin.gradle renovate",
@@ -382,7 +442,7 @@ Array [
 ]
 `;
 
-exports[`manager/gradle extractPackageFile should return gradle.kts dependencies 1`] = `
+exports[`manager/gradle/index extractPackageFile should return gradle.kts dependencies 1`] = `
 Array [
   Object {
     "datasource": "maven",
@@ -434,6 +494,26 @@ Array [
         "depGroup": "com.typesafe.scala-logging",
         "depName": "com.typesafe.scala-logging:scala-logging",
         "name": "scala-logging_%%",
+        "registryUrls": Array [
+          "https://repo.maven.apache.org/maven2/",
+          "https://jitpack.io",
+        ],
+      },
+      Object {
+        "currentValue": "1.2.3",
+        "depGroup": "foo",
+        "depName": "foo:foo",
+        "name": "foo",
+        "registryUrls": Array [
+          "https://repo.maven.apache.org/maven2/",
+          "https://jitpack.io",
+        ],
+      },
+      Object {
+        "currentValue": "3.4.5",
+        "depGroup": "bar",
+        "depName": "bar:bar",
+        "name": "bar",
         "registryUrls": Array [
           "https://repo.maven.apache.org/maven2/",
           "https://jitpack.io",
@@ -497,13 +577,33 @@ Array [
           "https://jitpack.io",
         ],
       },
+      Object {
+        "currentValue": "1.2.3",
+        "depGroup": "foo",
+        "depName": "foo:foo",
+        "name": "foo",
+        "registryUrls": Array [
+          "https://repo.maven.apache.org/maven2/",
+          "https://jitpack.io",
+        ],
+      },
+      Object {
+        "currentValue": "3.4.5",
+        "depGroup": "bar",
+        "depName": "bar:bar",
+        "name": "bar",
+        "registryUrls": Array [
+          "https://repo.maven.apache.org/maven2/",
+          "https://jitpack.io",
+        ],
+      },
     ],
     "packageFile": "subproject/build.gradle.kts",
   },
 ]
 `;
 
-exports[`manager/gradle extractPackageFile should return gradle.kts dependencies 2`] = `
+exports[`manager/gradle/index extractPackageFile should return gradle.kts dependencies 2`] = `
 Array [
   Object {
     "cmd": "./gradlew --init-script renovate-plugin.gradle renovate",
@@ -525,9 +625,9 @@ Array [
 ]
 `;
 
-exports[`manager/gradle extractPackageFile should return null and gradle should not be executed if no root build.gradle 1`] = `Array []`;
+exports[`manager/gradle/index extractPackageFile should return null and gradle should not be executed if no root build.gradle 1`] = `Array []`;
 
-exports[`manager/gradle extractPackageFile should use docker even if gradlew is available 1`] = `
+exports[`manager/gradle/index extractPackageFile should use docker even if gradlew is available 1`] = `
 Array [
   Object {
     "cmd": "docker pull renovate/gradle",
@@ -567,7 +667,7 @@ Array [
 ]
 `;
 
-exports[`manager/gradle extractPackageFile should use docker even if gradlew.bat is available on Windows 1`] = `
+exports[`manager/gradle/index extractPackageFile should use docker even if gradlew.bat is available on Windows 1`] = `
 Array [
   Object {
     "cmd": "docker pull renovate/gradle",
@@ -607,7 +707,7 @@ Array [
 ]
 `;
 
-exports[`manager/gradle extractPackageFile should use docker if required 1`] = `
+exports[`manager/gradle/index extractPackageFile should use docker if required 1`] = `
 Array [
   Object {
     "cmd": "docker pull renovate/gradle",
@@ -647,7 +747,7 @@ Array [
 ]
 `;
 
-exports[`manager/gradle extractPackageFile should use repositories only for current project 1`] = `
+exports[`manager/gradle/index extractPackageFile should use repositories only for current project 1`] = `
 Array [
   Object {
     "datasource": "maven",
@@ -687,7 +787,7 @@ Array [
 ]
 `;
 
-exports[`manager/gradle extractPackageFile should use repositories only for current project 2`] = `
+exports[`manager/gradle/index extractPackageFile should use repositories only for current project 2`] = `
 Array [
   Object {
     "cmd": "./gradlew --init-script renovate-plugin.gradle renovate",
@@ -709,8 +809,8 @@ Array [
 ]
 `;
 
-exports[`manager/gradle updateDependency should update an existing module dependency 1`] = `Array []`;
+exports[`manager/gradle/index updateDependency should update an existing module dependency 1`] = `Array []`;
 
-exports[`manager/gradle updateDependency should update an existing plugin dependency 1`] = `Array []`;
+exports[`manager/gradle/index updateDependency should update an existing plugin dependency 1`] = `Array []`;
 
-exports[`manager/gradle updateDependency should update an existing plugin dependency with Kotlin DSL 1`] = `Array []`;
+exports[`manager/gradle/index updateDependency should update an existing plugin dependency with Kotlin DSL 1`] = `Array []`;

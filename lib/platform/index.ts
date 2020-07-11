@@ -3,6 +3,7 @@ import addrs from 'email-addresses';
 import { RenovateConfig } from '../config/common';
 import { PLATFORM_NOT_FOUND } from '../constants/error-messages';
 import { logger } from '../logger';
+import { setPrivateKey } from '../util/git';
 import * as hostRules from '../util/host-rules';
 import platforms from './api.generated';
 import { Platform } from './common';
@@ -36,9 +37,52 @@ export function setPlatformApi(name: string): void {
   _platform = platforms.get(name);
 }
 
+interface GitAuthor {
+  name?: string;
+  address?: string;
+}
+
+export function parseGitAuthor(input: string): GitAuthor | null {
+  let result: GitAuthor = null;
+  if (!input) {
+    return null;
+  }
+  try {
+    result = addrs.parseOneAddress(input);
+    if (result) {
+      return result;
+    }
+    if (input.includes('[bot]@')) {
+      // invalid github app/bot addresses
+      const parsed = addrs.parseOneAddress(
+        input.replace('[bot]@', '@')
+      ) as addrs.ParsedMailbox;
+      if (parsed?.address) {
+        result = {
+          name: parsed.name || input.replace(/@.*/, ''),
+          address: parsed.address.replace('@', '[bot]@'),
+        };
+        return result;
+      }
+    }
+    if (input.includes('<') && input.includes('>')) {
+      // try wrapping the name part in quotations
+      result = addrs.parseOneAddress('"' + input.replace(/(\s?<)/, '"$1'));
+      if (result) {
+        return result;
+      }
+    }
+  } catch (err) /* istanbul ignore next */ {
+    logger.error({ err }, 'Unknown error parsing gitAuthor');
+  }
+  // give up
+  return null;
+}
+
 export async function initPlatform(
   config: RenovateConfig
 ): Promise<RenovateConfig> {
+  setPrivateKey(config.gitPrivateKey);
   setPlatformApi(config.platform);
   // TODO: types
   const platformInfo = await platform.initPlatform(config);
@@ -54,12 +98,7 @@ export async function initPlatform(
     logger.debug('Using platform gitAuthor: ' + platformInfo.gitAuthor);
     gitAuthor = platformInfo.gitAuthor;
   }
-  let gitAuthorParsed: addrs.ParsedMailbox | null = null;
-  try {
-    gitAuthorParsed = addrs.parseOneAddress(gitAuthor) as addrs.ParsedMailbox;
-  } catch (err) /* istanbul ignore next */ {
-    logger.debug({ gitAuthor, err }, 'Error parsing gitAuthor');
-  }
+  const gitAuthorParsed = parseGitAuthor(gitAuthor);
   // istanbul ignore if
   if (!gitAuthorParsed) {
     throw new Error('Init: gitAuthor is not parsed as valid RFC5322 format');

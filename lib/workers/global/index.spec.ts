@@ -29,7 +29,7 @@ describe('lib/workers/global', () => {
       maintainYarnLock: true,
       foo: 1,
     });
-    await globalWorker.start();
+    await expect(globalWorker.start()).resolves.toEqual(0);
   });
   it('handles zero repos', async () => {
     configParser.parseConfigs.mockResolvedValueOnce({
@@ -37,7 +37,7 @@ describe('lib/workers/global', () => {
       cacheDir: '/tmp/cache',
       repositories: [],
     });
-    await globalWorker.start();
+    await expect(globalWorker.start()).resolves.toEqual(0);
   });
   it('processes repositories', async () => {
     configParser.parseConfigs.mockResolvedValueOnce({

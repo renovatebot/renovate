@@ -2,13 +2,12 @@ import delay from 'delay';
 import * as httpMock from '../../../test/httpMock';
 import { getName } from '../../../test/util';
 import {
+  EXTERNAL_HOST_ERROR,
   PLATFORM_BAD_CREDENTIALS,
-  PLATFORM_FAILURE,
   PLATFORM_INTEGRATION_UNAUTHORIZED,
   PLATFORM_RATE_LIMIT_EXCEEDED,
   REPOSITORY_CHANGED,
 } from '../../constants/error-messages';
-import * as runCache from '../cache/run';
 import { GithubHttp, handleGotError, setBaseUrl } from './github';
 
 const githubApiHost = 'https://api.github.com';
@@ -27,7 +26,6 @@ describe(getName(__filename), () => {
 
   afterEach(() => {
     httpMock.reset();
-    runCache.clear();
   });
 
   describe('HTTP', () => {
@@ -67,7 +65,7 @@ describe(getName(__filename), () => {
       });
       const [req] = httpMock.getTrace();
       expect(req).toBeDefined();
-      expect(req.url.includes('/v3')).toBe(false);
+      expect(req.url).not.toContain('/v3');
     });
     it('paginates', async () => {
       const url = '/some-url';
@@ -128,7 +126,7 @@ describe(getName(__filename), () => {
         },
       });
       expect(e).toBeDefined();
-      expect(e.message).toEqual(PLATFORM_FAILURE);
+      expect(e.message).toEqual(EXTERNAL_HOST_ERROR);
     });
     it('should throw platform failure for ENOTFOUND, ETIMEDOUT or EAI_AGAIN', () => {
       const codes = ['ENOTFOUND', 'ETIMEDOUT', 'EAI_AGAIN'];
@@ -139,7 +137,7 @@ describe(getName(__filename), () => {
           code,
         });
         expect(e).toBeDefined();
-        expect(e.message).toEqual(PLATFORM_FAILURE);
+        expect(e.message).toEqual(EXTERNAL_HOST_ERROR);
       }
     });
     it('should throw platform failure for 500', () => {
@@ -148,14 +146,14 @@ describe(getName(__filename), () => {
         message: 'Internal Server Error',
       });
       expect(e).toBeDefined();
-      expect(e.message).toEqual(PLATFORM_FAILURE);
+      expect(e.message).toEqual(EXTERNAL_HOST_ERROR);
     });
     it('should throw platform failure ParseError', () => {
       const e = getError({
         name: 'ParseError',
       });
       expect(e).toBeDefined();
-      expect(e.message).toEqual(PLATFORM_FAILURE);
+      expect(e.message).toEqual(EXTERNAL_HOST_ERROR);
     });
     it('should throw for unauthorized integration', () => {
       const e = getError({
@@ -165,7 +163,7 @@ describe(getName(__filename), () => {
       expect(e).toBeDefined();
       expect(e.message).toEqual(PLATFORM_INTEGRATION_UNAUTHORIZED);
     });
-    it('should throw for unauthorized integration', () => {
+    it('should throw for unauthorized integration2', () => {
       const gotErr = {
         statusCode: 403,
         body: { message: 'Upgrade to GitHub Pro' },
@@ -202,7 +200,7 @@ describe(getName(__filename), () => {
       };
       const e = getError(gotErr);
       expect(e).toBeDefined();
-      expect(e.message).toEqual(PLATFORM_FAILURE);
+      expect(e.message).toEqual(EXTERNAL_HOST_ERROR);
     });
     it('should throw original error when failed to add reviewers', () => {
       const gotErr = {
@@ -363,7 +361,7 @@ describe(getName(__filename), () => {
 
       const items = await githubApi.getGraphqlNodes(query, 'testItem');
       expect(httpMock.getTrace()).toHaveLength(3);
-      expect(items.length).toEqual(3);
+      expect(items).toHaveLength(3);
     });
   });
 });

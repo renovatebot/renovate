@@ -1,5 +1,70 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
+exports[`datasource/nuget getReleases can't get packages list (v3) 1`] = `
+Array [
+  Object {
+    "headers": Object {
+      "accept": "application/json",
+      "accept-encoding": "gzip, deflate",
+      "host": "api.nuget.org",
+      "user-agent": "https://github.com/renovatebot/renovate",
+    },
+    "method": "GET",
+    "url": "https://api.nuget.org/v3/index.json",
+  },
+  Object {
+    "headers": Object {
+      "accept": "application/json",
+      "accept-encoding": "gzip, deflate",
+      "host": "api-v2v3search-0.nuget.org",
+      "user-agent": "https://github.com/renovatebot/renovate",
+    },
+    "method": "GET",
+    "url": "https://api-v2v3search-0.nuget.org/query?q=PackageId:nunit&semVerLevel=2.0.0&prerelease=true",
+  },
+]
+`;
+
+exports[`datasource/nuget getReleases empty packages list (v3) 1`] = `
+Array [
+  Object {
+    "headers": Object {
+      "accept": "application/json",
+      "accept-encoding": "gzip, deflate",
+      "host": "api.nuget.org",
+      "user-agent": "https://github.com/renovatebot/renovate",
+    },
+    "method": "GET",
+    "url": "https://api.nuget.org/v3/index.json",
+  },
+  Object {
+    "headers": Object {
+      "accept": "application/json",
+      "accept-encoding": "gzip, deflate",
+      "host": "api-v2v3search-0.nuget.org",
+      "user-agent": "https://github.com/renovatebot/renovate",
+    },
+    "method": "GET",
+    "url": "https://api-v2v3search-0.nuget.org/query?q=PackageId:nunit&semVerLevel=2.0.0&prerelease=true",
+  },
+]
+`;
+
+exports[`datasource/nuget getReleases extracts feed version from registry URL hash 1`] = `
+Array [
+  Object {
+    "headers": Object {
+      "accept": "application/json",
+      "accept-encoding": "gzip, deflate",
+      "host": "my-registry",
+      "user-agent": "https://github.com/renovatebot/renovate",
+    },
+    "method": "GET",
+    "url": "https://my-registry/",
+  },
+]
+`;
+
 exports[`datasource/nuget getReleases handles paginated results (v2) 1`] = `
 Object {
   "pkgName": "nunit",
@@ -14,99 +79,44 @@ Object {
 }
 `;
 
+exports[`datasource/nuget getReleases handles paginated results (v2) 2`] = `
+Array [
+  Object {
+    "headers": Object {
+      "accept-encoding": "gzip, deflate",
+      "host": "www.nuget.org",
+      "user-agent": "https://github.com/renovatebot/renovate",
+    },
+    "method": "GET",
+    "url": "https://www.nuget.org/api/v2//FindPackagesById()?id=%27nunit%27&$select=Version,IsLatestVersion,ProjectUrl",
+  },
+  Object {
+    "headers": Object {
+      "accept-encoding": "gzip, deflate",
+      "host": "example.org",
+      "user-agent": "https://github.com/renovatebot/renovate",
+    },
+    "method": "GET",
+    "url": "https://example.org/",
+  },
+]
+`;
+
 exports[`datasource/nuget getReleases processes real data (v2) 1`] = `
 Object {
   "pkgName": "nunit",
   "releases": Array [
     Object {
-      "version": "3.11.0",
+      "version": "2.5.7.10213",
     },
     Object {
-      "version": "2.7.0",
+      "version": "2.5.9.10348",
     },
     Object {
-      "version": "2.6.7",
+      "version": "2.5.10.11092",
     },
     Object {
-      "version": "2.6.6",
-    },
-    Object {
-      "version": "2.6.5",
-    },
-    Object {
-      "version": "3.10.1",
-    },
-    Object {
-      "version": "3.10.0",
-    },
-    Object {
-      "version": "3.9.0",
-    },
-    Object {
-      "version": "3.8.1",
-    },
-    Object {
-      "version": "3.8.0",
-    },
-    Object {
-      "version": "3.7.1",
-    },
-    Object {
-      "version": "3.7.0",
-    },
-    Object {
-      "version": "3.6.1",
-    },
-    Object {
-      "version": "3.6.0",
-    },
-    Object {
-      "version": "3.5.0",
-    },
-    Object {
-      "version": "3.4.1",
-    },
-    Object {
-      "version": "3.4.0",
-    },
-    Object {
-      "version": "3.2.1",
-    },
-    Object {
-      "version": "3.2.0",
-    },
-    Object {
-      "version": "3.0.1",
-    },
-    Object {
-      "version": "3.0.0",
-    },
-    Object {
-      "version": "2.6.4",
-    },
-    Object {
-      "version": "3.0.0-rc-3",
-    },
-    Object {
-      "version": "3.0.0-rc-2",
-    },
-    Object {
-      "version": "3.0.0-rc",
-    },
-    Object {
-      "version": "3.0.0-beta-5",
-    },
-    Object {
-      "version": "3.0.0-beta-4",
-    },
-    Object {
-      "version": "2.6.3",
-    },
-    Object {
-      "version": "2.6.2",
-    },
-    Object {
-      "version": "3.0.0-alpha",
+      "version": "2.6.0.12051",
     },
     Object {
       "version": "2.6.0.12054",
@@ -115,41 +125,133 @@ Object {
       "version": "2.6.1",
     },
     Object {
+      "version": "2.6.2",
+    },
+    Object {
+      "version": "2.6.3",
+    },
+    Object {
+      "version": "2.6.4",
+    },
+    Object {
+      "version": "2.6.5",
+    },
+    Object {
+      "version": "2.6.6",
+    },
+    Object {
+      "version": "2.6.7",
+    },
+    Object {
+      "version": "2.7.0",
+    },
+    Object {
+      "version": "3.0.0-alpha",
+    },
+    Object {
+      "version": "3.0.0-alpha-2",
+    },
+    Object {
+      "version": "3.0.0-alpha-3",
+    },
+    Object {
+      "version": "3.0.0-alpha-4",
+    },
+    Object {
+      "version": "3.0.0-alpha-5",
+    },
+    Object {
+      "version": "3.0.0-beta-1",
+    },
+    Object {
       "version": "3.0.0-beta-2",
     },
     Object {
       "version": "3.0.0-beta-3",
     },
     Object {
-      "version": "2.5.10.11092",
+      "version": "3.0.0-beta-4",
     },
     Object {
-      "version": "2.5.7.10213",
+      "version": "3.0.0-beta-5",
     },
     Object {
-      "version": "2.6.0.12051",
+      "version": "3.0.0-rc",
     },
     Object {
-      "version": "3.0.0-alpha-3",
+      "version": "3.0.0-rc-2",
     },
     Object {
-      "version": "3.0.0-beta-1",
+      "version": "3.0.0-rc-3",
     },
     Object {
-      "version": "3.0.0-alpha-4",
+      "version": "3.0.0",
     },
     Object {
-      "version": "2.5.9.10348",
+      "version": "3.0.1",
     },
     Object {
-      "version": "3.0.0-alpha-2",
+      "version": "3.2.0",
     },
     Object {
-      "version": "3.0.0-alpha-5",
+      "version": "3.2.1",
+    },
+    Object {
+      "version": "3.4.0",
+    },
+    Object {
+      "version": "3.4.1",
+    },
+    Object {
+      "version": "3.5.0",
+    },
+    Object {
+      "version": "3.6.0",
+    },
+    Object {
+      "version": "3.6.1",
+    },
+    Object {
+      "version": "3.7.0",
+    },
+    Object {
+      "version": "3.7.1",
+    },
+    Object {
+      "version": "3.8.0",
+    },
+    Object {
+      "version": "3.8.1",
+    },
+    Object {
+      "version": "3.9.0",
+    },
+    Object {
+      "version": "3.10.0",
+    },
+    Object {
+      "version": "3.10.1",
+    },
+    Object {
+      "version": "3.11.0",
     },
   ],
   "sourceUrl": "https://github.com/nunit/nunit",
 }
+`;
+
+exports[`datasource/nuget getReleases processes real data (v2) 2`] = `
+Array [
+  Object {
+    "headers": Object {
+      "accept-encoding": "gzip, deflate",
+      "host": "www.nuget.org",
+      "user-agent": "https://github.com/renovatebot/renovate",
+    },
+    "method": "GET",
+    "url": "https://www.nuget.org/api/v2//FindPackagesById()?id=%27nunit%27&$select=Version,IsLatestVersion,ProjectUrl",
+  },
+]
 `;
 
 exports[`datasource/nuget getReleases processes real data (v3) feed is a nuget.org 1`] = `
@@ -248,6 +350,40 @@ Object {
 }
 `;
 
+exports[`datasource/nuget getReleases processes real data (v3) feed is a nuget.org 2`] = `
+Array [
+  Object {
+    "headers": Object {
+      "accept": "application/json",
+      "accept-encoding": "gzip, deflate",
+      "host": "api.nuget.org",
+      "user-agent": "https://github.com/renovatebot/renovate",
+    },
+    "method": "GET",
+    "url": "https://api.nuget.org/v3/index.json",
+  },
+  Object {
+    "headers": Object {
+      "accept": "application/json",
+      "accept-encoding": "gzip, deflate",
+      "host": "api-v2v3search-0.nuget.org",
+      "user-agent": "https://github.com/renovatebot/renovate",
+    },
+    "method": "GET",
+    "url": "https://api-v2v3search-0.nuget.org/query?q=PackageId:nunit&semVerLevel=2.0.0&prerelease=true",
+  },
+  Object {
+    "headers": Object {
+      "accept-encoding": "gzip, deflate",
+      "host": "api.nuget.org",
+      "user-agent": "https://github.com/renovatebot/renovate",
+    },
+    "method": "GET",
+    "url": "https://api.nuget.org/v3-flatcontainer/nunit/3.11.0/nunit.nuspec",
+  },
+]
+`;
+
 exports[`datasource/nuget getReleases processes real data (v3) feed is not a nuget.org 1`] = `
 Object {
   "pkgName": "nunit",
@@ -344,6 +480,70 @@ Object {
 }
 `;
 
+exports[`datasource/nuget getReleases processes real data (v3) feed is not a nuget.org 2`] = `
+Array [
+  Object {
+    "headers": Object {
+      "accept": "application/json",
+      "accept-encoding": "gzip, deflate",
+      "host": "myprivatefeed",
+      "user-agent": "https://github.com/renovatebot/renovate",
+    },
+    "method": "GET",
+    "url": "https://myprivatefeed/index.json",
+  },
+  Object {
+    "headers": Object {
+      "accept": "application/json",
+      "accept-encoding": "gzip, deflate",
+      "host": "api-v2v3search-0.nuget.org",
+      "user-agent": "https://github.com/renovatebot/renovate",
+    },
+    "method": "GET",
+    "url": "https://api-v2v3search-0.nuget.org/query?q=nunit",
+  },
+]
+`;
+
+exports[`datasource/nuget getReleases processes real data (v3) feed is not a nuget.org with mismatch 1`] = `
+Array [
+  Object {
+    "headers": Object {
+      "accept": "application/json",
+      "accept-encoding": "gzip, deflate",
+      "host": "myprivatefeed",
+      "user-agent": "https://github.com/renovatebot/renovate",
+    },
+    "method": "GET",
+    "url": "https://myprivatefeed/index.json",
+  },
+  Object {
+    "headers": Object {
+      "accept": "application/json",
+      "accept-encoding": "gzip, deflate",
+      "host": "api-v2v3search-0.nuget.org",
+      "user-agent": "https://github.com/renovatebot/renovate",
+    },
+    "method": "GET",
+    "url": "https://api-v2v3search-0.nuget.org/query?q=nun",
+  },
+]
+`;
+
+exports[`datasource/nuget getReleases processes real data no relase (v2) 1`] = `
+Array [
+  Object {
+    "headers": Object {
+      "accept-encoding": "gzip, deflate",
+      "host": "www.nuget.org",
+      "user-agent": "https://github.com/renovatebot/renovate",
+    },
+    "method": "GET",
+    "url": "https://www.nuget.org/api/v2//FindPackagesById()?id=%27nunit%27&$select=Version,IsLatestVersion,ProjectUrl",
+  },
+]
+`;
+
 exports[`datasource/nuget getReleases processes real data with no github project url (v2) 1`] = `
 Object {
   "pkgName": "nunit",
@@ -354,6 +554,20 @@ Object {
   ],
   "sourceUrl": "https://nunit.org",
 }
+`;
+
+exports[`datasource/nuget getReleases processes real data with no github project url (v2) 2`] = `
+Array [
+  Object {
+    "headers": Object {
+      "accept-encoding": "gzip, deflate",
+      "host": "www.nuget.org",
+      "user-agent": "https://github.com/renovatebot/renovate",
+    },
+    "method": "GET",
+    "url": "https://www.nuget.org/api/v2//FindPackagesById()?id=%27nunit%27&$select=Version,IsLatestVersion,ProjectUrl",
+  },
+]
 `;
 
 exports[`datasource/nuget getReleases processes real data with no github project url (v3) 1`] = `
@@ -368,99 +582,46 @@ Object {
 }
 `;
 
+exports[`datasource/nuget getReleases processes real data with no github project url (v3) 2`] = `
+Array [
+  Object {
+    "headers": Object {
+      "accept": "application/json",
+      "accept-encoding": "gzip, deflate",
+      "host": "myprivatefeed",
+      "user-agent": "https://github.com/renovatebot/renovate",
+    },
+    "method": "GET",
+    "url": "https://myprivatefeed/index.json",
+  },
+  Object {
+    "headers": Object {
+      "accept": "application/json",
+      "accept-encoding": "gzip, deflate",
+      "host": "api-v2v3search-0.nuget.org",
+      "user-agent": "https://github.com/renovatebot/renovate",
+    },
+    "method": "GET",
+    "url": "https://api-v2v3search-0.nuget.org/query?q=nunit",
+  },
+]
+`;
+
 exports[`datasource/nuget getReleases processes real data without project url (v2) 1`] = `
 Object {
   "pkgName": "nunit",
   "releases": Array [
     Object {
-      "version": "3.11.0",
+      "version": "2.5.7.10213",
     },
     Object {
-      "version": "2.7.0",
+      "version": "2.5.9.10348",
     },
     Object {
-      "version": "2.6.7",
+      "version": "2.5.10.11092",
     },
     Object {
-      "version": "2.6.6",
-    },
-    Object {
-      "version": "2.6.5",
-    },
-    Object {
-      "version": "3.10.1",
-    },
-    Object {
-      "version": "3.10.0",
-    },
-    Object {
-      "version": "3.9.0",
-    },
-    Object {
-      "version": "3.8.1",
-    },
-    Object {
-      "version": "3.8.0",
-    },
-    Object {
-      "version": "3.7.1",
-    },
-    Object {
-      "version": "3.7.0",
-    },
-    Object {
-      "version": "3.6.1",
-    },
-    Object {
-      "version": "3.6.0",
-    },
-    Object {
-      "version": "3.5.0",
-    },
-    Object {
-      "version": "3.4.1",
-    },
-    Object {
-      "version": "3.4.0",
-    },
-    Object {
-      "version": "3.2.1",
-    },
-    Object {
-      "version": "3.2.0",
-    },
-    Object {
-      "version": "3.0.1",
-    },
-    Object {
-      "version": "3.0.0",
-    },
-    Object {
-      "version": "2.6.4",
-    },
-    Object {
-      "version": "3.0.0-rc-3",
-    },
-    Object {
-      "version": "3.0.0-rc-2",
-    },
-    Object {
-      "version": "3.0.0-rc",
-    },
-    Object {
-      "version": "3.0.0-beta-5",
-    },
-    Object {
-      "version": "3.0.0-beta-4",
-    },
-    Object {
-      "version": "2.6.3",
-    },
-    Object {
-      "version": "2.6.2",
-    },
-    Object {
-      "version": "3.0.0-alpha",
+      "version": "2.6.0.12051",
     },
     Object {
       "version": "2.6.0.12054",
@@ -469,40 +630,132 @@ Object {
       "version": "2.6.1",
     },
     Object {
+      "version": "2.6.2",
+    },
+    Object {
+      "version": "2.6.3",
+    },
+    Object {
+      "version": "2.6.4",
+    },
+    Object {
+      "version": "2.6.5",
+    },
+    Object {
+      "version": "2.6.6",
+    },
+    Object {
+      "version": "2.6.7",
+    },
+    Object {
+      "version": "2.7.0",
+    },
+    Object {
+      "version": "3.0.0-alpha",
+    },
+    Object {
+      "version": "3.0.0-alpha-2",
+    },
+    Object {
+      "version": "3.0.0-alpha-3",
+    },
+    Object {
+      "version": "3.0.0-alpha-4",
+    },
+    Object {
+      "version": "3.0.0-alpha-5",
+    },
+    Object {
+      "version": "3.0.0-beta-1",
+    },
+    Object {
       "version": "3.0.0-beta-2",
     },
     Object {
       "version": "3.0.0-beta-3",
     },
     Object {
-      "version": "2.5.10.11092",
+      "version": "3.0.0-beta-4",
     },
     Object {
-      "version": "2.5.7.10213",
+      "version": "3.0.0-beta-5",
     },
     Object {
-      "version": "2.6.0.12051",
+      "version": "3.0.0-rc",
     },
     Object {
-      "version": "3.0.0-alpha-3",
+      "version": "3.0.0-rc-2",
     },
     Object {
-      "version": "3.0.0-beta-1",
+      "version": "3.0.0-rc-3",
     },
     Object {
-      "version": "3.0.0-alpha-4",
+      "version": "3.0.0",
     },
     Object {
-      "version": "2.5.9.10348",
+      "version": "3.0.1",
     },
     Object {
-      "version": "3.0.0-alpha-2",
+      "version": "3.2.0",
     },
     Object {
-      "version": "3.0.0-alpha-5",
+      "version": "3.2.1",
+    },
+    Object {
+      "version": "3.4.0",
+    },
+    Object {
+      "version": "3.4.1",
+    },
+    Object {
+      "version": "3.5.0",
+    },
+    Object {
+      "version": "3.6.0",
+    },
+    Object {
+      "version": "3.6.1",
+    },
+    Object {
+      "version": "3.7.0",
+    },
+    Object {
+      "version": "3.7.1",
+    },
+    Object {
+      "version": "3.8.0",
+    },
+    Object {
+      "version": "3.8.1",
+    },
+    Object {
+      "version": "3.9.0",
+    },
+    Object {
+      "version": "3.10.0",
+    },
+    Object {
+      "version": "3.10.1",
+    },
+    Object {
+      "version": "3.11.0",
     },
   ],
 }
+`;
+
+exports[`datasource/nuget getReleases processes real data without project url (v2) 2`] = `
+Array [
+  Object {
+    "headers": Object {
+      "accept-encoding": "gzip, deflate",
+      "host": "www.nuget.org",
+      "user-agent": "https://github.com/renovatebot/renovate",
+    },
+    "method": "GET",
+    "url": "https://www.nuget.org/api/v2//FindPackagesById()?id=%27nunit%27&$select=Version,IsLatestVersion,ProjectUrl",
+  },
+]
 `;
 
 exports[`datasource/nuget getReleases processes real data without project url (v3) 1`] = `
@@ -598,4 +851,366 @@ Object {
     },
   ],
 }
+`;
+
+exports[`datasource/nuget getReleases processes real data without project url (v3) 2`] = `
+Array [
+  Object {
+    "headers": Object {
+      "accept": "application/json",
+      "accept-encoding": "gzip, deflate",
+      "host": "myprivatefeed",
+      "user-agent": "https://github.com/renovatebot/renovate",
+    },
+    "method": "GET",
+    "url": "https://myprivatefeed/index.json",
+  },
+  Object {
+    "headers": Object {
+      "accept": "application/json",
+      "accept-encoding": "gzip, deflate",
+      "host": "api-v2v3search-0.nuget.org",
+      "user-agent": "https://github.com/renovatebot/renovate",
+    },
+    "method": "GET",
+    "url": "https://api-v2v3search-0.nuget.org/query?q=nunit",
+  },
+]
+`;
+
+exports[`datasource/nuget getReleases returns deduplicated results 1`] = `
+Object {
+  "pkgName": "nunit",
+  "releases": Array [
+    Object {
+      "version": "2.5.7.10213",
+    },
+    Object {
+      "version": "2.5.9.10348",
+    },
+    Object {
+      "version": "2.5.10.11092",
+    },
+    Object {
+      "version": "2.6.0.12054",
+    },
+    Object {
+      "version": "2.6.1",
+    },
+    Object {
+      "version": "2.6.2",
+    },
+    Object {
+      "version": "2.6.3",
+    },
+    Object {
+      "version": "2.6.4",
+    },
+    Object {
+      "version": "2.6.5",
+    },
+    Object {
+      "version": "2.6.6",
+    },
+    Object {
+      "version": "2.6.7",
+    },
+    Object {
+      "version": "2.7.0",
+    },
+    Object {
+      "version": "3.0.0",
+    },
+    Object {
+      "version": "3.0.1",
+    },
+    Object {
+      "version": "3.2.0",
+    },
+    Object {
+      "version": "3.2.1",
+    },
+    Object {
+      "version": "3.4.0",
+    },
+    Object {
+      "version": "3.4.1",
+    },
+    Object {
+      "version": "3.5.0",
+    },
+    Object {
+      "version": "3.6.0",
+    },
+    Object {
+      "version": "3.6.1",
+    },
+    Object {
+      "version": "3.7.0",
+    },
+    Object {
+      "version": "3.7.1",
+    },
+    Object {
+      "version": "3.8.0",
+    },
+    Object {
+      "version": "3.8.1",
+    },
+    Object {
+      "version": "3.9.0",
+    },
+    Object {
+      "version": "3.10.0",
+    },
+    Object {
+      "version": "3.10.1",
+    },
+    Object {
+      "version": "3.11.0",
+    },
+    Object {
+      "version": "3.12.0",
+    },
+  ],
+  "sourceUrl": "https://github.com/nunit/nunit",
+}
+`;
+
+exports[`datasource/nuget getReleases returns deduplicated results 2`] = `
+Array [
+  Object {
+    "headers": Object {
+      "accept": "application/json",
+      "accept-encoding": "gzip, deflate",
+      "host": "api.nuget.org",
+      "user-agent": "https://github.com/renovatebot/renovate",
+    },
+    "method": "GET",
+    "url": "https://api.nuget.org/v3/index.json",
+  },
+  Object {
+    "headers": Object {
+      "accept": "application/json",
+      "accept-encoding": "gzip, deflate",
+      "host": "api-v2v3search-0.nuget.org",
+      "user-agent": "https://github.com/renovatebot/renovate",
+    },
+    "method": "GET",
+    "url": "https://api-v2v3search-0.nuget.org/query?q=PackageId:nunit&semVerLevel=2.0.0&prerelease=true",
+  },
+  Object {
+    "headers": Object {
+      "accept-encoding": "gzip, deflate",
+      "host": "api.nuget.org",
+      "user-agent": "https://github.com/renovatebot/renovate",
+    },
+    "method": "GET",
+    "url": "https://api.nuget.org/v3-flatcontainer/nunit/3.11.0/nunit.nuspec",
+  },
+  Object {
+    "headers": Object {
+      "accept": "application/json",
+      "accept-encoding": "gzip, deflate",
+      "host": "myprivatefeed",
+      "user-agent": "https://github.com/renovatebot/renovate",
+    },
+    "method": "GET",
+    "url": "https://myprivatefeed/index.json",
+  },
+  Object {
+    "headers": Object {
+      "accept": "application/json",
+      "accept-encoding": "gzip, deflate",
+      "host": "api-v2v3search-0.nuget.org",
+      "user-agent": "https://github.com/renovatebot/renovate",
+    },
+    "method": "GET",
+    "url": "https://api-v2v3search-0.nuget.org/query?q=nunit",
+  },
+]
+`;
+
+exports[`datasource/nuget getReleases returns null for empty result (v2) 1`] = `
+Array [
+  Object {
+    "headers": Object {
+      "accept-encoding": "gzip, deflate",
+      "host": "www.nuget.org",
+      "user-agent": "https://github.com/renovatebot/renovate",
+    },
+    "method": "GET",
+    "url": "https://www.nuget.org/api/v2//FindPackagesById()?id=%27nunit%27&$select=Version,IsLatestVersion,ProjectUrl",
+  },
+]
+`;
+
+exports[`datasource/nuget getReleases returns null for empty result (v3) 1`] = `
+Array [
+  Object {
+    "headers": Object {
+      "accept": "application/json",
+      "accept-encoding": "gzip, deflate",
+      "host": "api.nuget.org",
+      "user-agent": "https://github.com/renovatebot/renovate",
+    },
+    "method": "GET",
+    "url": "https://api.nuget.org/v3/index.json",
+  },
+]
+`;
+
+exports[`datasource/nuget getReleases returns null for empty result (v3v2) 1`] = `
+Array [
+  Object {
+    "headers": Object {
+      "accept": "application/json",
+      "accept-encoding": "gzip, deflate",
+      "host": "api.nuget.org",
+      "user-agent": "https://github.com/renovatebot/renovate",
+    },
+    "method": "GET",
+    "url": "https://api.nuget.org/v3/index.json",
+  },
+  Object {
+    "headers": Object {
+      "accept-encoding": "gzip, deflate",
+      "host": "www.nuget.org",
+      "user-agent": "https://github.com/renovatebot/renovate",
+    },
+    "method": "GET",
+    "url": "https://www.nuget.org/api/v2//FindPackagesById()?id=%27nunit%27&$select=Version,IsLatestVersion,ProjectUrl",
+  },
+]
+`;
+
+exports[`datasource/nuget getReleases returns null for non 200 (v2) 1`] = `
+Array [
+  Object {
+    "headers": Object {
+      "accept-encoding": "gzip, deflate",
+      "host": "www.nuget.org",
+      "user-agent": "https://github.com/renovatebot/renovate",
+    },
+    "method": "GET",
+    "url": "https://www.nuget.org/api/v2//FindPackagesById()?id=%27nunit%27&$select=Version,IsLatestVersion,ProjectUrl",
+  },
+]
+`;
+
+exports[`datasource/nuget getReleases returns null for non 200 (v3) 1`] = `
+Array [
+  Object {
+    "headers": Object {
+      "accept": "application/json",
+      "accept-encoding": "gzip, deflate",
+      "host": "api.nuget.org",
+      "user-agent": "https://github.com/renovatebot/renovate",
+    },
+    "method": "GET",
+    "url": "https://api.nuget.org/v3/index.json",
+  },
+]
+`;
+
+exports[`datasource/nuget getReleases returns null for non 200 (v3v2) 1`] = `
+Array [
+  Object {
+    "headers": Object {
+      "accept": "application/json",
+      "accept-encoding": "gzip, deflate",
+      "host": "api.nuget.org",
+      "user-agent": "https://github.com/renovatebot/renovate",
+    },
+    "method": "GET",
+    "url": "https://api.nuget.org/v3/index.json",
+  },
+  Object {
+    "headers": Object {
+      "accept-encoding": "gzip, deflate",
+      "host": "www.nuget.org",
+      "user-agent": "https://github.com/renovatebot/renovate",
+    },
+    "method": "GET",
+    "url": "https://www.nuget.org/api/v2//FindPackagesById()?id=%27nunit%27&$select=Version,IsLatestVersion,ProjectUrl",
+  },
+]
+`;
+
+exports[`datasource/nuget getReleases returns null for unknown error (v2) 1`] = `
+Array [
+  Object {
+    "headers": Object {
+      "accept-encoding": "gzip, deflate",
+      "host": "www.nuget.org",
+      "user-agent": "https://github.com/renovatebot/renovate",
+    },
+    "method": "GET",
+    "url": "https://www.nuget.org/api/v2//FindPackagesById()?id=%27nunit%27&$select=Version,IsLatestVersion,ProjectUrl",
+  },
+]
+`;
+
+exports[`datasource/nuget getReleases returns null for unknown error (v3v2) 1`] = `
+Array [
+  Object {
+    "headers": Object {
+      "accept": "application/json",
+      "accept-encoding": "gzip, deflate",
+      "host": "api.nuget.org",
+      "user-agent": "https://github.com/renovatebot/renovate",
+    },
+    "method": "GET",
+    "url": "https://api.nuget.org/v3/index.json",
+  },
+  Object {
+    "headers": Object {
+      "accept-encoding": "gzip, deflate",
+      "host": "www.nuget.org",
+      "user-agent": "https://github.com/renovatebot/renovate",
+    },
+    "method": "GET",
+    "url": "https://www.nuget.org/api/v2//FindPackagesById()?id=%27nunit%27&$select=Version,IsLatestVersion,ProjectUrl",
+  },
+]
+`;
+
+exports[`datasource/nuget getReleases returns null for unknown error in getQueryUrlForV3Feed  (v3) 1`] = `
+Array [
+  Object {
+    "headers": Object {
+      "accept": "application/json",
+      "accept-encoding": "gzip, deflate",
+      "host": "api.nuget.org",
+      "user-agent": "https://github.com/renovatebot/renovate",
+    },
+    "method": "GET",
+    "url": "https://api.nuget.org/v3/index.json",
+  },
+  Object {
+    "headers": Object {
+      "accept": "application/json",
+      "accept-encoding": "gzip, deflate",
+      "host": "api-v2v3search-0.nuget.org",
+      "user-agent": "https://github.com/renovatebot/renovate",
+    },
+    "method": "GET",
+    "url": "https://api-v2v3search-0.nuget.org/query?q=PackageId:nunit&semVerLevel=2.0.0&prerelease=true",
+  },
+]
+`;
+
+exports[`datasource/nuget getReleases returns null for unknown error in getReleasesFromV3Feed (v3) 1`] = `
+Array [
+  Object {
+    "headers": Object {
+      "accept": "application/json",
+      "accept-encoding": "gzip, deflate",
+      "host": "api.nuget.org",
+      "user-agent": "https://github.com/renovatebot/renovate",
+    },
+    "method": "GET",
+    "url": "https://api.nuget.org/v3/index.json",
+  },
+]
 `;

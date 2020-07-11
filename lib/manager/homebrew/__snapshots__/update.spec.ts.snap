@@ -63,6 +63,154 @@ end
 "
 `;
 
+exports[`manager/homebrew/update returns unchanged content if both got requests fail 2`] = `
+Array [
+  Object {
+    "headers": Object {
+      "accept-encoding": "gzip, deflate",
+      "host": "github.com",
+      "user-agent": "https://github.com/renovatebot/renovate",
+    },
+    "method": "GET",
+    "url": "https://github.com/aide/aide/releases/download/v0.17.7/aide-0.17.7.tar.gz",
+  },
+  Object {
+    "headers": Object {
+      "accept-encoding": "gzip, deflate",
+      "host": "github.com",
+      "user-agent": "https://github.com/renovatebot/renovate",
+    },
+    "method": "GET",
+    "url": "https://github.com/aide/aide/archive/v0.17.7.tar.gz",
+  },
+]
+`;
+
+exports[`manager/homebrew/update returns unchanged content if fromStream promise rejects 1`] = `
+Array [
+  Object {
+    "headers": Object {
+      "accept-encoding": "gzip, deflate",
+      "host": "github.com",
+      "user-agent": "https://github.com/renovatebot/renovate",
+    },
+    "method": "GET",
+    "url": "https://github.com/bazelbuild/bazel-watcher/releases/download/v0.9.3/bazel-watcher-0.9.3.tar.gz",
+  },
+  Object {
+    "headers": Object {
+      "accept-encoding": "gzip, deflate",
+      "host": "github.com",
+      "user-agent": "https://github.com/renovatebot/renovate",
+    },
+    "method": "GET",
+    "url": "https://github.com/bazelbuild/bazel-watcher/archive/v0.9.3.tar.gz",
+  },
+]
+`;
+
+exports[`manager/homebrew/update returns unchanged content if repoName in upgrade object is invalid 1`] = `
+Array [
+  Object {
+    "headers": Object {
+      "accept-encoding": "gzip, deflate",
+      "host": "github.com",
+      "user-agent": "https://github.com/renovatebot/renovate",
+    },
+    "method": "GET",
+    "url": "https://github.com/bazelbuild/invalid/repo/name/releases/download/v0.9.3/invalid/repo/name-0.9.3.tar.gz",
+  },
+  Object {
+    "headers": Object {
+      "accept-encoding": "gzip, deflate",
+      "host": "github.com",
+      "user-agent": "https://github.com/renovatebot/renovate",
+    },
+    "method": "GET",
+    "url": "https://github.com/bazelbuild/invalid/repo/name/archive/v0.9.3.tar.gz",
+  },
+]
+`;
+
+exports[`manager/homebrew/update returns unchanged content if repoName in upgrade object is wrong 1`] = `
+Array [
+  Object {
+    "headers": Object {
+      "accept-encoding": "gzip, deflate",
+      "host": "github.com",
+      "user-agent": "https://github.com/renovatebot/renovate",
+    },
+    "method": "GET",
+    "url": "https://github.com/bazelbuild/wrong-version/archive/v10.2.3.tar.gz/releases/download/v0.9.3/wrong-version/archive/v10.2.3.tar.gz-0.9.3.tar.gz",
+  },
+  Object {
+    "headers": Object {
+      "accept-encoding": "gzip, deflate",
+      "host": "github.com",
+      "user-agent": "https://github.com/renovatebot/renovate",
+    },
+    "method": "GET",
+    "url": "https://github.com/bazelbuild/wrong-version/archive/v10.2.3.tar.gz/archive/v0.9.3.tar.gz",
+  },
+]
+`;
+
+exports[`manager/homebrew/update returns unchanged content if sha256 field in Formula file is invalid 1`] = `
+Array [
+  Object {
+    "headers": Object {
+      "accept-encoding": "gzip, deflate",
+      "host": "github.com",
+      "user-agent": "https://github.com/renovatebot/renovate",
+    },
+    "method": "GET",
+    "url": "https://github.com/bazelbuild/bazel-watcher/releases/download/v0.9.3/bazel-watcher-0.9.3.tar.gz",
+  },
+]
+`;
+
+exports[`manager/homebrew/update returns unchanged content if sha256 field in Formula file is missing 1`] = `
+Array [
+  Object {
+    "headers": Object {
+      "accept-encoding": "gzip, deflate",
+      "host": "github.com",
+      "user-agent": "https://github.com/renovatebot/renovate",
+    },
+    "method": "GET",
+    "url": "https://github.com/bazelbuild/bazel-watcher/releases/download/v0.9.3/bazel-watcher-0.9.3.tar.gz",
+  },
+]
+`;
+
+exports[`manager/homebrew/update returns unchanged content if url field in Formula file is invalid 1`] = `
+Array [
+  Object {
+    "headers": Object {
+      "accept-encoding": "gzip, deflate",
+      "host": "github.com",
+      "user-agent": "https://github.com/renovatebot/renovate",
+    },
+    "method": "GET",
+    "url": "https://github.com/bazelbuild/bazel-watcher/releases/download/v0.9.3/bazel-watcher-0.9.3.tar.gz",
+  },
+]
+`;
+
+exports[`manager/homebrew/update returns unchanged content if url field in Formula file is missing 1`] = `
+Array [
+  Object {
+    "headers": Object {
+      "accept-encoding": "gzip, deflate",
+      "host": "github.com",
+      "user-agent": "https://github.com/renovatebot/renovate",
+    },
+    "method": "GET",
+    "url": "https://github.com/bazelbuild/bazel-watcher/releases/download/v0.9.3/bazel-watcher-0.9.3.tar.gz",
+  },
+]
+`;
+
 exports[`manager/homebrew/update updates "archive" github dependency 1`] = `
 "# Copyright 2018 The Bazel Authors. All rights reserved.
 #
@@ -93,7 +241,7 @@ class Ibazel < Formula
 
   # To generate run:
   # curl https://codeload.github.com/bazelbuild/bazel-watcher/tar.gz/v0.8.2 | sha256sum
-  sha256 'new_hash_value'
+  sha256 '2c26b46b68ffc68ff99b453c1d30413413422d706483bfa0f98a5e886266e7ae'
 
   bottle :unneeded
 
@@ -114,6 +262,20 @@ end
 "
 `;
 
+exports[`manager/homebrew/update updates "archive" github dependency 2`] = `
+Array [
+  Object {
+    "headers": Object {
+      "accept-encoding": "gzip, deflate",
+      "host": "github.com",
+      "user-agent": "https://github.com/renovatebot/renovate",
+    },
+    "method": "GET",
+    "url": "https://github.com/bazelbuild/bazel-watcher/releases/download/v0.9.3/bazel-watcher-0.9.3.tar.gz",
+  },
+]
+`;
+
 exports[`manager/homebrew/update updates "releases" github dependency 1`] = `
 "=begin
   url \\"https://github.com/aide/aide/releases/download/v0.16.1/aide-0.16.1.tar.gz\\"
@@ -127,7 +289,7 @@ class Aide < Formula
   desc \\"File and directory integrity checker\\"
   homepage \\"https://aide.github.io/\\"
   url \\"https://github.com/aide/aide/releases/download/v0.17.7/aide-0.17.7.tar.gz\\"
-  sha256 \\"new_hash_value\\"
+  sha256 \\"2c26b46b68ffc68ff99b453c1d30413413422d706483bfa0f98a5e886266e7ae\\"
 
   bottle do
     cellar :any
@@ -175,4 +337,18 @@ class Aide < Formula
   end
 end
 "
+`;
+
+exports[`manager/homebrew/update updates "releases" github dependency 2`] = `
+Array [
+  Object {
+    "headers": Object {
+      "accept-encoding": "gzip, deflate",
+      "host": "github.com",
+      "user-agent": "https://github.com/renovatebot/renovate",
+    },
+    "method": "GET",
+    "url": "https://github.com/aide/aide/releases/download/v0.17.7/aide-0.17.7.tar.gz",
+  },
+]
 `;

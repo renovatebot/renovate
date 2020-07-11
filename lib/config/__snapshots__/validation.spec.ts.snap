@@ -88,6 +88,24 @@ Array [
 ]
 `;
 
+exports[`config/validation validateConfig(config) errors if aliases depth is more than 1 1`] = `
+Array [
+  Object {
+    "depName": "Configuration Error",
+    "message": "Invalid alias object configuration",
+  },
+]
+`;
+
+exports[`config/validation validateConfig(config) errors if aliases have invalid url 1`] = `
+Array [
+  Object {
+    "depName": "Configuration Error",
+    "message": "Invalid alias object configuration",
+  },
+]
+`;
+
 exports[`config/validation validateConfig(config) errors if regexManager fields are missing 1`] = `
 Array [
   Object {
@@ -150,3 +168,5 @@ Array [
   },
 ]
 `;
+
+exports[`config/validation validateConfig(config) validates valid alias objects 1`] = `Array []`;

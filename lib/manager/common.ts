@@ -1,7 +1,7 @@
 import { ReleaseType } from 'semver';
 import { GlobalConfig, UpdateType, ValidationMessage } from '../config/common';
-import { File } from '../platform/common';
 import { RangeStrategy, SkipReason } from '../types';
+import { File } from '../util/git';
 
 export type Result<T> = T | Promise<T>;
 
@@ -40,6 +40,7 @@ export interface UpdateArtifactsConfig extends ManagerConfig {
   compatibility?: Record<string, string>;
   cacheDir?: string;
   composerIgnorePlatformReqs?: boolean;
+  currentValue?: string;
   postUpdateOptions?: string[];
   ignoreScripts?: boolean;
 
@@ -63,7 +64,6 @@ export interface RangeConfig<T = Record<string, any>> extends ManagerData<T> {
 }
 
 export interface NpmLockFiles {
-  yarnIntegrity?: boolean;
   yarnLock?: string;
   packageLock?: string;
   shrinkwrapJson?: string;
@@ -76,7 +76,7 @@ export interface PackageFile<T = Record<string, any>>
   extends NpmLockFiles,
     ManagerData<T> {
   hasYarnWorkspaces?: boolean;
-  internalPackages?: string[];
+  internalPackages?: string[]; // TODO: remove
   compatibility?: Record<string, string>;
   datasource?: string;
   registryUrls?: string[];
@@ -193,6 +193,7 @@ export interface Upgrade<T = Record<string, any>>
   toVersion?: string;
   updateType?: UpdateType;
   version?: string;
+  isLockFileMaintenance?: boolean;
 }
 
 export interface ArtifactError {
@@ -258,5 +259,5 @@ export interface PostUpdateConfig extends ManagerConfig, Record<string, any> {
   npmLock?: string;
   yarnLock?: string;
   branchName?: string;
-  parentBranch?: string;
+  reuseExistingBranch?: boolean;
 }

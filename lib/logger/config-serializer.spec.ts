@@ -1,14 +1,6 @@
 import configSerializer from './config-serializer';
 
 describe('logger/config-serializer', () => {
-  it('redacts sensitive fields', () => {
-    const config = {
-      token: 'a',
-      nottoken: 'b',
-      githubAppKey: 'c',
-    };
-    expect(configSerializer(config)).toMatchSnapshot();
-  });
   it('squashes templates', () => {
     const config = {
       nottoken: 'b',

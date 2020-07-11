@@ -13,4 +13,7 @@ export interface HostRule {
   platform?: string;
   timeout?: number;
   encrypted?: HostRule;
+  abortOnError?: boolean;
+  abortIgnoreStatusCodes?: number[];
+  enabled?: boolean;
 }

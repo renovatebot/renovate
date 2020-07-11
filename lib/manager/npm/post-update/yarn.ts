@@ -1,13 +1,15 @@
-import { readFile } from 'fs-extra';
-import { getInstalledPath } from 'get-installed-path';
+import is from '@sindresorhus/is';
+import { validRange } from 'semver';
+import { quote } from 'shlex';
 import { join } from 'upath';
 import { SYSTEM_INSUFFICIENT_DISK_SPACE } from '../../../constants/error-messages';
-import { DatasourceError } from '../../../datasource';
+import { id as npmId } from '../../../datasource/npm';
 import { logger } from '../../../logger';
-import { exec } from '../../../util/exec';
-import { BinarySource } from '../../../util/exec/common';
-import { api as semver } from '../../../versioning/semver';
+import { ExternalHostError } from '../../../types/errors/external-host-error';
+import { ExecOptions, exec } from '../../../util/exec';
+import { readFile, remove } from '../../../util/fs';
 import { PostUpdateConfig, Upgrade } from '../../common';
+import { getNodeConstraint } from './node-version';
 
 export interface GenerateLockFileResult {
   error?: boolean;
@@ -15,164 +17,128 @@ export interface GenerateLockFileResult {
   stderr?: string;
 }
 
+export async function hasYarnOfflineMirror(cwd: string): Promise<boolean> {
+  try {
+    const yarnrc = await readFile(`${cwd}/.yarnrc`, 'utf8');
+    if (is.string(yarnrc)) {
+      const mirrorLine = yarnrc
+        .split('\n')
+        .find((line) => line.startsWith('yarn-offline-mirror '));
+      if (mirrorLine) {
+        return true;
+      }
+    }
+  } catch (err) /* istanbul ignore next */ {
+    // not found
+  }
+  return false;
+}
+
+export const optimizeCommand =
+  "sed -i 's/ steps,/ steps.slice(0,1),/' /home/ubuntu/.npm-global/lib/node_modules/yarn/lib/cli.js";
+
 export async function generateLockFile(
   cwd: string,
-  env?: NodeJS.ProcessEnv,
+  env: NodeJS.ProcessEnv,
   config: PostUpdateConfig = {},
   upgrades: Upgrade[] = []
 ): Promise<GenerateLockFileResult> {
-  const { binarySource } = config;
-  logger.debug(`Spawning yarn install to create ${cwd}/yarn.lock`);
+  const lockFileName = join(cwd, 'yarn.lock');
+  logger.debug(`Spawning yarn install to create ${lockFileName}`);
   let lockFile = null;
-  let stdout = '';
-  let stderr = '';
-  let cmd: string;
   try {
-    try {
-      // See if renovate is installed locally
-      const installedPath = join(
-        await getInstalledPath('yarn', {
-          local: true,
-        }),
-        'bin/yarn.js'
-      );
-      cmd = `node ${installedPath}`;
-      const yarnIntegrity =
-        config.upgrades &&
-        config.upgrades.some((upgrade) => upgrade.yarnIntegrity);
-      if (!yarnIntegrity) {
-        logger.warn('Using yarn@1.9.4 for install is deprecated');
-        try {
-          const renovatePath = await getInstalledPath('renovate', {
-            local: true,
-          });
-          logger.debug('Using nested bundled yarn@1.9.4 for install');
-          cmd = 'node ' + join(renovatePath, 'bin/yarn-1.9.4.js');
-        } catch (err) {
-          logger.debug('Using bundled yarn@1.9.4 for install');
-          cmd = cmd.replace(
-            'node_modules/yarn/bin/yarn.js',
-            'bin/yarn-1.9.4.js'
-          );
-        }
-      }
-    } catch (localerr) {
-      logger.debug('No locally installed yarn found');
-      // Look inside globally installed renovate
-      try {
-        const renovateLocation = await getInstalledPath('renovate');
-        const installedPath = join(
-          await getInstalledPath('yarn', {
-            local: true,
-            cwd: renovateLocation,
-          }),
-          'bin/yarn.js'
-        );
-        cmd = `node ${installedPath}`;
-      } catch (nestederr) {
-        logger.debug('Could not find globally nested yarn');
-        // look for global yarn
-        try {
-          const installedPath = join(
-            await getInstalledPath('yarn'),
-            'bin/yarn.js'
-          );
-          cmd = `node ${installedPath}`;
-        } catch (globalerr) {
-          logger.warn('Could not find globally installed yarn');
-          cmd = 'yarn';
-        }
-      }
+    let installYarn = 'npm i -g yarn';
+    const yarnCompatibility = config.compatibility?.yarn;
+    if (validRange(yarnCompatibility)) {
+      installYarn += `@${quote(yarnCompatibility)}`;
     }
-    if (binarySource === BinarySource.Global) {
-      cmd = 'yarn';
+    const preCommands = [installYarn];
+    if (
+      config.skipInstalls !== false &&
+      (await hasYarnOfflineMirror(cwd)) === false
+    ) {
+      logger.debug('Updating yarn.lock only - skipping node_modules');
+      // The following change causes Yarn 1.x to exit gracefully after updating the lock file but without installing node_modules
+      preCommands.push(optimizeCommand);
     }
-
-    const { stdout: yarnVersion } = await exec(`${cmd} --version`);
-
-    logger.debug(`Using yarn: ${cmd} ${yarnVersion}`);
-
-    const yarnMajorVersion = semver.getMajor(yarnVersion);
-
-    let cmdExtras = '';
-    const cmdEnv = { ...env };
-    if (yarnMajorVersion < 2) {
-      cmdExtras += ' --ignore-scripts';
-    } else {
-      cmdEnv.YARN_ENABLE_SCRIPTS = '0';
+    const commands = [];
+    let cmdOptions =
+      '--ignore-engines --ignore-platform --network-timeout 100000';
+    if (global.trustLevel !== 'high' || config.ignoreScripts) {
+      cmdOptions += ' --ignore-scripts';
     }
-    cmdExtras += ' --ignore-engines';
-    cmdExtras += ' --ignore-platform';
-    const installCmd = cmd + ' install' + cmdExtras;
-    // TODO: Switch to native util.promisify once using only node 8
-    await exec(installCmd, {
+    const tagConstraint = await getNodeConstraint(config);
+    const execOptions: ExecOptions = {
       cwd,
-      env: cmdEnv,
-    });
+      extraEnv: {
+        NPM_CONFIG_CACHE: env.NPM_CONFIG_CACHE,
+        npm_config_store: env.npm_config_store,
+      },
+      docker: {
+        image: 'renovate/node',
+        tagScheme: 'npm',
+        tagConstraint,
+        preCommands,
+      },
+    };
+    if (config.dockerMapDotfiles) {
+      const homeDir =
+        process.env.HOME || process.env.HOMEPATH || process.env.USERPROFILE;
+      const homeNpmrc = join(homeDir, '.npmrc');
+      execOptions.docker.volumes = [[homeNpmrc, '/home/ubuntu/.npmrc']];
+    }
+
+    // This command updates the lock file based on package.json
+    commands.push(`yarn install ${cmdOptions}`.trim());
+
+    // rangeStrategy = update-lockfile
     const lockUpdates = upgrades
       .filter((upgrade) => upgrade.isLockfileUpdate)
       .map((upgrade) => upgrade.depName);
     if (lockUpdates.length) {
       logger.debug('Performing lockfileUpdate (yarn)');
-      const updateCmd =
-        cmd +
-        ' upgrade' +
-        lockUpdates.map((depName) => ` ${depName}`).join('') +
-        cmdExtras;
-      const updateRes = await exec(updateCmd, {
-        cwd,
-        env,
-      });
-      // istanbul ignore next
-      stdout += updateRes.stdout || '';
-      stderr += updateRes.stderr || '';
+      commands.push(
+        `yarn upgrade ${lockUpdates.join(' ')} ${cmdOptions}`.trim()
+      );
     }
 
-    if (yarnMajorVersion < 2) {
-      if (
-        config.postUpdateOptions &&
-        config.postUpdateOptions.includes('yarnDedupeFewer')
-      ) {
-        logger.debug('Performing yarn dedupe fewer');
-        const dedupeCommand =
-          'npx yarn-deduplicate@1.1.1 --strategy fewer && yarn';
-        const dedupeRes = await exec(dedupeCommand, {
-          cwd,
-          env,
-        });
-        // istanbul ignore next
-        stdout += dedupeRes.stdout || '';
-        stderr += dedupeRes.stderr || '';
-      }
-      if (
-        config.postUpdateOptions &&
-        config.postUpdateOptions.includes('yarnDedupeHighest')
-      ) {
-        logger.debug('Performing yarn dedupe highest');
-        const dedupeCommand =
-          'npx yarn-deduplicate@1.1.1 --strategy highest && yarn';
-        const dedupeRes = await exec(dedupeCommand, {
-          cwd,
-          env,
-        });
-        // istanbul ignore next
-        stdout += dedupeRes.stdout || '';
-        stderr += dedupeRes.stderr || '';
-      }
-    } else if (
-      config.postUpdateOptions &&
-      config.postUpdateOptions.some((option) => option.startsWith('yarnDedupe'))
-    ) {
-      logger.warn('yarn-deduplicate is not supported since yarn 2');
+    // postUpdateOptions
+    if (config.postUpdateOptions?.includes('yarnDedupeFewer')) {
+      logger.debug('Performing yarn dedupe fewer');
+      commands.push('npx yarn-deduplicate --strategy fewer');
+      // Run yarn again in case any changes are necessary
+      commands.push(`yarn install ${cmdOptions}`.trim());
     }
-    lockFile = await readFile(join(cwd, 'yarn.lock'), 'utf8');
+    if (config.postUpdateOptions?.includes('yarnDedupeHighest')) {
+      logger.debug('Performing yarn dedupe highest');
+      commands.push('npx yarn-deduplicate --strategy highest');
+      // Run yarn again in case any changes are necessary
+      commands.push(`yarn install ${cmdOptions}`.trim());
+    }
+
+    if (upgrades.find((upgrade) => upgrade.isLockFileMaintenance)) {
+      logger.debug(
+        `Removing ${lockFileName} first due to lock file maintenance upgrade`
+      );
+      try {
+        await remove(lockFileName);
+      } catch (err) /* istanbul ignore next */ {
+        logger.debug(
+          { err, lockFileName },
+          'Error removing yarn.lock for lock file maintenance'
+        );
+      }
+    }
+
+    // Run the commands
+    await exec(commands, execOptions);
+
+    // Read the result
+    lockFile = await readFile(lockFileName, 'utf8');
   } catch (err) /* istanbul ignore next */ {
     logger.debug(
       {
-        cmd,
         err,
-        stdout,
-        stderr,
         type: 'yarn',
       },
       'lock file error'
@@ -186,7 +152,7 @@ export async function generateLockFile(
         err.stderr.includes('getaddrinfo ENOTFOUND registry.yarnpkg.com') ||
         err.stderr.includes('getaddrinfo ENOTFOUND registry.npmjs.org')
       ) {
-        throw new DatasourceError(err);
+        throw new ExternalHostError(err, npmId);
       }
     }
     return { error: true, stderr: err.stderr };

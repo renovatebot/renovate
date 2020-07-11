@@ -14,30 +14,30 @@ jest.mock('../../util/fs');
 
 describe('workers/branch/auto-replace', () => {
   describe('doAutoReplace', () => {
-    let parentBranch: string;
+    let reuseExistingBranch: boolean;
     let upgrade: BranchUpgradeConfig;
     beforeEach(() => {
       upgrade = {
         ...JSON.parse(JSON.stringify(defaultConfig)),
         manager: 'html',
       };
-      parentBranch = undefined;
+      reuseExistingBranch = false;
     });
     it('rebases if the deps list has changed', async () => {
       upgrade.baseDeps = extractPackageFile(sampleHtml).deps;
-      parentBranch = 'some existing branch';
+      reuseExistingBranch = true;
       const res = await doAutoReplace(
         upgrade,
         'existing content',
-        parentBranch
+        reuseExistingBranch
       );
       expect(res).toBeNull();
     });
     it('rebases if the deps to update has changed', async () => {
       upgrade.baseDeps = extractPackageFile(sampleHtml).deps;
       upgrade.baseDeps[0].currentValue = '1.0.0';
-      parentBranch = 'some existing branch';
-      const res = await doAutoReplace(upgrade, sampleHtml, parentBranch);
+      reuseExistingBranch = true;
+      const res = await doAutoReplace(upgrade, sampleHtml, reuseExistingBranch);
       expect(res).toBeNull();
     });
     it('updates version only', async () => {
@@ -51,7 +51,7 @@ describe('workers/branch/auto-replace', () => {
       upgrade.newValue = '7.1.1';
       upgrade.newDigest = 'some-digest';
       upgrade.depIndex = 0;
-      const res = await doAutoReplace(upgrade, src, parentBranch);
+      const res = await doAutoReplace(upgrade, src, reuseExistingBranch);
       expect(res).toMatchSnapshot();
     });
     it('handles a double attempt', async () => {
@@ -64,7 +64,7 @@ describe('workers/branch/auto-replace', () => {
       upgrade.currentValue = '7.1.0';
       upgrade.newValue = '7.1.1';
       upgrade.depIndex = 1;
-      const res = await doAutoReplace(upgrade, src, parentBranch);
+      const res = await doAutoReplace(upgrade, src, reuseExistingBranch);
       expect(res).toMatchSnapshot();
     });
     it('handles already updated', async () => {
@@ -78,9 +78,13 @@ describe('workers/branch/auto-replace', () => {
       upgrade.newValue = '7.1.1';
       upgrade.depIndex = 0;
       upgrade.replaceString = script;
-      parentBranch = 'something';
+      reuseExistingBranch = true;
       const srcAlreadyUpdated = src.replace('7.1.0', '7.1.1');
-      const res = await doAutoReplace(upgrade, srcAlreadyUpdated, parentBranch);
+      const res = await doAutoReplace(
+        upgrade,
+        srcAlreadyUpdated,
+        reuseExistingBranch
+      );
       expect(res).toMatchSnapshot();
     });
     it('returns existing content if replaceString mismatch', async () => {
@@ -94,7 +98,11 @@ describe('workers/branch/auto-replace', () => {
       upgrade.newValue = '7.1.1';
       upgrade.depIndex = 0;
       upgrade.replaceString = script;
-      const res = await doAutoReplace(upgrade, 'wrong source', parentBranch);
+      const res = await doAutoReplace(
+        upgrade,
+        'wrong source',
+        reuseExistingBranch
+      );
       expect(res).toEqual('wrong source');
     });
     it('updates version and integrity', async () => {
@@ -111,7 +119,7 @@ describe('workers/branch/auto-replace', () => {
       upgrade.newDigest = 'sha256-aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa';
       upgrade.depIndex = 0;
       upgrade.replaceString = script;
-      const res = await doAutoReplace(upgrade, src, parentBranch);
+      const res = await doAutoReplace(upgrade, src, reuseExistingBranch);
       expect(res).toMatchSnapshot();
     });
     it('updates with autoReplaceNewString', async () => {
@@ -130,7 +138,7 @@ describe('workers/branch/auto-replace', () => {
         'node:8.11.3-alpine@sha256:d743b4141b02fcfb8beb68f92b4cd164f60ee457bf2d053f36785bf86de16b0d';
       upgrade.autoReplaceStringTemplate =
         '{{depName}}{{#if newValue}}:{{newValue}}{{/if}}{{#if newDigest}}@{{newDigest}}{{/if}}';
-      const res = await doAutoReplace(upgrade, dockerfile, parentBranch);
+      const res = await doAutoReplace(upgrade, dockerfile, reuseExistingBranch);
       expect(res).toMatchSnapshot();
     });
   });

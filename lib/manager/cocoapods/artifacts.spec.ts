@@ -3,9 +3,8 @@ import _fs from 'fs-extra';
 import Git from 'simple-git/promise';
 import { join } from 'upath';
 import { envMock, mockExecAll } from '../../../test/execUtil';
-import { mocked } from '../../../test/util';
-import * as _datasource from '../../datasource/docker';
-import { platform as _platform } from '../../platform';
+import { git, mocked } from '../../../test/util';
+import * as _datasource from '../../datasource';
 import { setExecConfig } from '../../util/exec';
 import { BinarySource } from '../../util/exec/common';
 import * as _env from '../../util/exec/env';
@@ -14,17 +13,20 @@ import { updateArtifacts } from '.';
 jest.mock('fs-extra');
 jest.mock('child_process');
 jest.mock('../../util/exec/env');
+jest.mock('../../util/git');
 jest.mock('../../platform');
-jest.mock('../../datasource/docker');
+jest.mock('../../datasource');
 
 const fs: jest.Mocked<typeof _fs> = _fs as any;
 const exec: jest.Mock<typeof _exec> = _exec as any;
 const env = mocked(_env);
-const platform = mocked(_platform);
 const datasource = mocked(_datasource);
+
+delete process.env.CP_HOME_DIR;
 
 const config = {
   localDir: join('/tmp/github/some/repo'),
+  cacheDir: join('/tmp/cache'),
 };
 
 describe('.updateArtifacts()', () => {
@@ -33,7 +35,7 @@ describe('.updateArtifacts()', () => {
     env.getChildProcessEnv.mockReturnValue(envMock.basic);
     await setExecConfig(config);
 
-    datasource.getReleases.mockResolvedValue({
+    datasource.getPkgReleases.mockResolvedValue({
       releases: [
         { version: '1.2.0' },
         { version: '1.2.1' },
@@ -98,7 +100,7 @@ describe('.updateArtifacts()', () => {
   it('returns null if unchanged', async () => {
     const execSnapshots = mockExecAll(exec);
     fs.readFile.mockResolvedValueOnce('Current Podfile' as any);
-    platform.getRepoStatus.mockResolvedValueOnce({
+    git.getRepoStatus.mockResolvedValueOnce({
       modified: [],
     } as Git.StatusResult);
     fs.readFile.mockResolvedValueOnce('Current Podfile' as any);
@@ -116,7 +118,7 @@ describe('.updateArtifacts()', () => {
     const execSnapshots = mockExecAll(exec);
     await setExecConfig({ ...config, binarySource: BinarySource.Docker });
     fs.readFile.mockResolvedValueOnce('Old Podfile' as any);
-    platform.getRepoStatus.mockResolvedValueOnce({
+    git.getRepoStatus.mockResolvedValueOnce({
       modified: ['Podfile.lock'],
     } as Git.StatusResult);
     fs.readFile.mockResolvedValueOnce('New Podfile' as any);
@@ -136,7 +138,7 @@ describe('.updateArtifacts()', () => {
     fs.readFile.mockResolvedValueOnce('Old Manifest.lock' as any);
     fs.readFile.mockResolvedValueOnce('New Podfile' as any);
     fs.readFile.mockResolvedValueOnce('Pods manifest' as any);
-    platform.getRepoStatus.mockResolvedValueOnce({
+    git.getRepoStatus.mockResolvedValueOnce({
       not_added: ['Pods/New'],
       modified: ['Podfile.lock', 'Pods/Manifest.lock'],
       deleted: ['Pods/Deleted'],
@@ -195,7 +197,7 @@ describe('.updateArtifacts()', () => {
 
     fs.readFile.mockResolvedValueOnce('New Podfile' as any);
 
-    platform.getRepoStatus.mockResolvedValueOnce({
+    git.getRepoStatus.mockResolvedValueOnce({
       modified: ['Podfile.lock'],
     } as Git.StatusResult);
 
@@ -217,13 +219,13 @@ describe('.updateArtifacts()', () => {
     });
 
     fs.readFile.mockResolvedValueOnce('COCOAPODS: 1.2.4' as any);
-    datasource.getReleases.mockResolvedValueOnce({
+    datasource.getPkgReleases.mockResolvedValueOnce({
       releases: [],
     });
 
     fs.readFile.mockResolvedValueOnce('New Podfile' as any);
 
-    platform.getRepoStatus.mockResolvedValueOnce({
+    git.getRepoStatus.mockResolvedValueOnce({
       modified: ['Podfile.lock'],
     } as Git.StatusResult);
 

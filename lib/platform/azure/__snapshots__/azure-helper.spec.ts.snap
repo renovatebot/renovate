@@ -1,31 +1,13 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
-exports[`platform/azure/helpers getStorageExtraCloneOpts should configure basic auth 1`] = `
-Object {
-  "--config": "http.extraheader=AUTHORIZATION: basic dXNlcjpwYXNz",
-}
-`;
-
-exports[`platform/azure/helpers getStorageExtraCloneOpts should configure personal access token 1`] = `
-Object {
-  "--config": "http.extraheader=AUTHORIZATION: basic OjEyMzQ1Njc4OTAxMjM0NTY3ODkwMTIzNDU2Nzg5MDEyMzQ1Njc4OTAxMjM0NTY3ODkwMTI=",
-}
-`;
-
-exports[`platform/azure/helpers getStorageExtraCloneOpts should configure bearer token 1`] = `
-Object {
-  "--config": "http.extraheader=AUTHORIZATION: bearer token",
-}
-`;
-
-exports[`platform/azure/helpers getAzureBranchObj should be the branch object formated 1`] = `
+exports[`platform/azure/helpers getAzureBranchObj should get the branch object 1`] = `
 Object {
   "name": "refs/heads/branchName",
   "oldObjectId": "132",
 }
 `;
 
-exports[`platform/azure/helpers getAzureBranchObj should be the branch object formated 2`] = `
+exports[`platform/azure/helpers getAzureBranchObj should get the branch object when ref missing 1`] = `
 Object {
   "name": "refs/heads/branchName",
   "oldObjectId": "0000000000000000000000000000000000000000",
@@ -56,18 +38,18 @@ Object {
 }
 `;
 
-exports[`platform/azure/helpers getRef should get the ref 1`] = `
+exports[`platform/azure/helpers getRef should get the ref with full ref name 1`] = `
 Array [
   Object {
-    "objectId": 132,
+    "objectId": "132",
   },
 ]
 `;
 
-exports[`platform/azure/helpers getRef should get the ref 2`] = `
+exports[`platform/azure/helpers getRef should get the ref with short ref name 1`] = `
 Array [
   Object {
-    "objectId": "132",
+    "objectId": 132,
   },
 ]
 `;
@@ -126,6 +108,24 @@ Object {
   "state": "open",
   "status": 1,
   "targetBranch": undefined,
+}
+`;
+
+exports[`platform/azure/helpers getStorageExtraCloneOpts should configure basic auth 1`] = `
+Object {
+  "--config": "http.extraheader=AUTHORIZATION: basic dXNlcjpwYXNz",
+}
+`;
+
+exports[`platform/azure/helpers getStorageExtraCloneOpts should configure bearer token 1`] = `
+Object {
+  "--config": "http.extraheader=AUTHORIZATION: bearer token",
+}
+`;
+
+exports[`platform/azure/helpers getStorageExtraCloneOpts should configure personal access token 1`] = `
+Object {
+  "--config": "http.extraheader=AUTHORIZATION: basic OjEyMzQ1Njc4OTAxMjM0NTY3ODkwMTIzNDU2Nzg5MDEyMzQ1Njc4OTAxMjM0NTY3ODkwMTI=",
 }
 `;
 

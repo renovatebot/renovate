@@ -76,6 +76,17 @@ export function migrateConfig(
           );
         }
         delete migratedConfig.pathRules;
+      } else if (key === 'suppressNotifications') {
+        if (is.nonEmptyArray(val) && val.includes('prEditNotification')) {
+          isMigrated = true;
+          migratedConfig.suppressNotifications = migratedConfig.suppressNotifications.filter(
+            (item) => item !== 'prEditNotification'
+          );
+        }
+      } else if (key.startsWith('masterIssue')) {
+        isMigrated = true;
+        migratedConfig[key.replace('masterIssue', 'dependencyDashboard')] = val;
+        delete migratedConfig[key];
       } else if (key === 'gomodTidy') {
         isMigrated = true;
         if (val) {
@@ -204,6 +215,12 @@ export function migrateConfig(
           } else if (val[i] === ':library' || val[i] === 'config:library') {
             isMigrated = true;
             migratedConfig.extends[i] = 'config:js-lib';
+          } else if (val[i].startsWith(':masterIssue')) {
+            isMigrated = true;
+            migratedConfig.extends[i] = val[i].replace(
+              'masterIssue',
+              'dependencyDashboard'
+            );
           }
         }
       } else if (key === 'versionScheme') {

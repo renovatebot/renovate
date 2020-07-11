@@ -13,7 +13,8 @@ function hex2npm(input: string): string {
     .replace(/~>\s*(\d+\.\d+\.\d+)/, '~$1')
     .replace(/==|and/, '')
     .replace('or', '||')
-    .replace(/!=\s*(\d+\.\d+(\.\d+.*)?)/, '>$1 <$1');
+    .replace(/!=\s*(\d+\.\d+(\.\d+.*)?)/, '>$1 <$1')
+    .trim();
 }
 
 function npm2hex(input: string): string {
@@ -76,7 +77,9 @@ const getNewValue = ({
   } else {
     newSemver = newSemver.replace(/~\s*(\d+\.\d+\.\d)/, '~> $1');
   }
-
+  if (npm.isVersion(newSemver)) {
+    newSemver = `== ${newSemver}`;
+  }
   return newSemver;
 };
 

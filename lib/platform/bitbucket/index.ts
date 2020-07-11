@@ -10,11 +10,12 @@ import { PLATFORM_TYPE_BITBUCKET } from '../../constants/platforms';
 import { PR_STATE_ALL, PR_STATE_OPEN } from '../../constants/pull-requests';
 import { logger } from '../../logger';
 import { BranchStatus } from '../../types';
+import * as git from '../../util/git';
 import * as hostRules from '../../util/host-rules';
+import { BitbucketHttp, setBaseUrl } from '../../util/http/bitbucket';
 import { sanitize } from '../../util/sanitize';
 import {
   BranchStatusConfig,
-  CommitFilesConfig,
   CreatePRConfig,
   EnsureCommentConfig,
   EnsureCommentRemovalConfig,
@@ -28,16 +29,18 @@ import {
   RepoParams,
   VulnerabilityAlert,
 } from '../common';
-import GitStorage, { StatusResult } from '../git/storage';
 import { smartTruncate } from '../utils/pr-body';
 import { readOnlyIssueBody } from '../utils/read-only-issue-body';
-import { api } from './bb-got-wrapper';
 import * as comments from './comments';
 import * as utils from './utils';
+
+const bitbucketHttp = new BitbucketHttp();
 
 const BITBUCKET_PROD_ENDPOINT = 'https://api.bitbucket.org/';
 
 let config: utils.Config = {} as any;
+
+let endpoint_ = BITBUCKET_PROD_ENDPOINT;
 
 export function initPlatform({
   endpoint,
@@ -53,7 +56,9 @@ export function initPlatform({
     logger.warn(
       `Init: Bitbucket Cloud endpoint should generally be ${BITBUCKET_PROD_ENDPOINT} but is being configured to a different value. Did you mean to use Bitbucket Server?`
     );
+    endpoint_ = endpoint;
   }
+  setBaseUrl(endpoint_);
   // TODO: Add a connection check that endpoint/username/password combination are valid
   const platformConfig: PlatformConfig = {
     endpoint: endpoint || BITBUCKET_PROD_ENDPOINT,
@@ -81,14 +86,12 @@ export async function initRepo({
   localDir,
   optimizeForDisabled,
   bbUseDefaultReviewers,
-  endpoint = BITBUCKET_PROD_ENDPOINT,
 }: RepoParams): Promise<RepoConfig> {
   logger.debug(`initRepo("${repository}")`);
   const opts = hostRules.find({
     hostType: PLATFORM_TYPE_BITBUCKET,
-    url: endpoint,
+    url: endpoint_,
   });
-  api.setBaseUrl(endpoint);
   config = {
     repository,
     username: opts.username,
@@ -97,7 +100,7 @@ export async function initRepo({
   let info: utils.RepoInfo;
   try {
     info = utils.repoInfoTransformer(
-      (await api.get(`/2.0/repositories/${repository}`)).body
+      (await bitbucketHttp.getJson(`/2.0/repositories/${repository}`)).body
     );
 
     if (optimizeForDisabled) {
@@ -108,7 +111,7 @@ export async function initRepo({
       let renovateConfig: RenovateConfig;
       try {
         renovateConfig = (
-          await api.get<RenovateConfig>(
+          await bitbucketHttp.getJson<RenovateConfig>(
             `/2.0/repositories/${repository}/src/${info.mainbranch}/renovate.json`
           )
         ).body;
@@ -137,25 +140,26 @@ export async function initRepo({
     throw err;
   }
 
-  const { hostname } = URL.parse(endpoint);
+  const { hostname } = URL.parse(endpoint_);
 
   // Converts API hostnames to their respective HTTP git hosts:
   // `api.bitbucket.org`  to `bitbucket.org`
   // `api-staging.<host>` to `staging.<host>`
   const hostnameWithoutApiPrefix = /api[.|-](.+)/.exec(hostname)[1];
 
-  const url = GitStorage.getUrl({
+  const url = git.getUrl({
     protocol: 'https',
     auth: `${opts.username}:${opts.password}`,
     hostname: hostnameWithoutApiPrefix,
     repository,
   });
 
-  config.storage = new GitStorage();
-  await config.storage.initRepo({
+  await git.initRepo({
     ...config,
     localDir,
     url,
+    gitAuthorName: global.gitAuthor?.name,
+    gitAuthorEmail: global.gitAuthor?.email,
   });
   const repoConfig: RepoConfig = {
     baseBranch: config.baseBranch,
@@ -172,49 +176,14 @@ export function getRepoForceRebase(): Promise<boolean> {
 
 // Search
 
-// Get full file list
-export function getFileList(): Promise<string[]> {
-  return config.storage.getFileList();
-}
-
 export async function setBaseBranch(
   branchName = config.baseBranch
 ): Promise<string> {
   logger.debug(`Setting baseBranch to ${branchName}`);
   config.baseBranch = branchName;
   delete config.baseCommitSHA;
-  const baseBranchSha = await config.storage.setBaseBranch(branchName);
+  const baseBranchSha = await git.setBaseBranch(branchName);
   return baseBranchSha;
-}
-
-export /* istanbul ignore next */ function setBranchPrefix(
-  branchPrefix: string
-): Promise<void> {
-  return config.storage.setBranchPrefix(branchPrefix);
-}
-
-// Branch
-
-// Returns true if branch exists, otherwise false
-export function branchExists(branchName: string): Promise<boolean> {
-  return config.storage.branchExists(branchName);
-}
-
-export function getAllRenovateBranches(
-  branchPrefix: string
-): Promise<string[]> {
-  return config.storage.getAllRenovateBranches(branchPrefix);
-}
-
-export function isBranchStale(branchName: string): Promise<boolean> {
-  return config.storage.isBranchStale(branchName);
-}
-
-export function getFile(
-  filePath: string,
-  branchName?: string
-): Promise<string> {
-  return config.storage.getFile(filePath, branchName);
 }
 
 // istanbul ignore next
@@ -267,58 +236,46 @@ export async function deleteBranch(
   if (closePr) {
     const pr = await findPr({ branchName, state: PR_STATE_OPEN });
     if (pr) {
-      await api.post(
+      await bitbucketHttp.postJson(
         `/2.0/repositories/${config.repository}/pullrequests/${pr.number}/decline`
       );
     }
   }
-  return config.storage.deleteBranch(branchName);
-}
-
-export function getBranchLastCommitTime(branchName: string): Promise<Date> {
-  return config.storage.getBranchLastCommitTime(branchName);
-}
-
-// istanbul ignore next
-export function getRepoStatus(): Promise<StatusResult> {
-  return config.storage.getRepoStatus();
-}
-
-export function mergeBranch(branchName: string): Promise<void> {
-  return config.storage.mergeBranch(branchName);
-}
-
-export function commitFiles({
-  branchName,
-  files,
-  message,
-}: CommitFilesConfig): Promise<string | null> {
-  return config.storage.commitFiles({
-    branchName,
-    files,
-    message,
-  });
-}
-
-export function getCommitMessages(): Promise<string[]> {
-  return config.storage.getCommitMessages();
+  return git.deleteBranch(branchName);
 }
 
 async function isPrConflicted(prNo: number): Promise<boolean> {
   const diff = (
-    await api.get(
-      `/2.0/repositories/${config.repository}/pullrequests/${prNo}/diff`,
-      { json: false } as any
+    await bitbucketHttp.get(
+      `/2.0/repositories/${config.repository}/pullrequests/${prNo}/diff`
     )
   ).body;
 
   return utils.isConflicted(parseDiff(diff));
 }
 
+interface PrResponse {
+  id: string;
+  state: string;
+  links: {
+    commits: {
+      href: string;
+    };
+  };
+  source: {
+    branch: {
+      name: string;
+    };
+  };
+  reviewers: Array<any>;
+}
+
 // Gets details for a PR
 export async function getPr(prNo: number): Promise<Pr | null> {
   const pr = (
-    await api.get(`/2.0/repositories/${config.repository}/pullrequests/${prNo}`)
+    await bitbucketHttp.getJson<PrResponse>(
+      `/2.0/repositories/${config.repository}/pullrequests/${prNo}`
+    )
   ).body;
 
   // istanbul ignore if
@@ -340,7 +297,9 @@ export async function getPr(prNo: number): Promise<Pr | null> {
 
     // we only want the first two commits, because size tells us the overall number
     const url = pr.links.commits.href + '?pagelen=2';
-    const { body } = await api.get<utils.PagedResult<Commit>>(url);
+    const { body } = await bitbucketHttp.getJson<utils.PagedResult<Commit>>(
+      url
+    );
     const size = body.size || body.values.length;
 
     // istanbul ignore if
@@ -364,8 +323,8 @@ export async function getPr(prNo: number): Promise<Pr | null> {
       res.isModified = true;
     }
   }
-  if (await branchExists(pr.source.branch.name)) {
-    res.isStale = await isBranchStale(pr.source.branch.name);
+  if (await git.branchExists(pr.source.branch.name)) {
+    res.isStale = await git.isBranchStale(pr.source.branch.name);
   }
 
   return res;
@@ -374,11 +333,17 @@ export async function getPr(prNo: number): Promise<Pr | null> {
 const escapeHash = (input: string): string =>
   input ? input.replace(/#/g, '%23') : input;
 
+interface BranchResponse {
+  target: {
+    hash: string;
+  };
+}
+
 // Return the commit SHA for a branch
 async function getBranchCommit(branchName: string): Promise<string | null> {
   try {
     const branch = (
-      await api.get(
+      await bitbucketHttp.getJson<BranchResponse>(
         `/2.0/repositories/${config.repository}/refs/branches/${escapeHash(
           branchName
         )}`
@@ -486,7 +451,7 @@ export async function setBranchStatus({
     url,
   };
 
-  await api.post(
+  await bitbucketHttp.postJson(
     `/2.0/repositories/${config.repository}/commit/${sha}/statuses/build`,
     { body }
   );
@@ -494,7 +459,7 @@ export async function setBranchStatus({
   await getStatus(branchName, false);
 }
 
-type BbIssue = { id: number; content?: { raw: string } };
+type BbIssue = { id: number; title: string; content?: { raw: string } };
 
 async function findOpenIssues(title: string): Promise<BbIssue[]> {
   try {
@@ -507,7 +472,7 @@ async function findOpenIssues(title: string): Promise<BbIssue[]> {
     );
     return (
       (
-        await api.get(
+        await bitbucketHttp.getJson<{ values: BbIssue[] }>(
           `/2.0/repositories/${config.repository}/issues?q=${filter}`
         )
       ).body.values || /* istanbul ignore next */ []
@@ -538,7 +503,7 @@ export async function findIssue(title: string): Promise<Issue> {
 }
 
 async function closeIssue(issueNumber: number): Promise<void> {
-  await api.put(
+  await bitbucketHttp.putJson(
     `/2.0/repositories/${config.repository}/issues/${issueNumber}`,
     {
       body: { state: 'closed' },
@@ -561,6 +526,7 @@ export function getPrBody(input: string): string {
 
 export async function ensureIssue({
   title,
+  reuseTitle,
   body,
 }: EnsureIssueConfig): Promise<EnsureIssueResult | null> {
   logger.debug(`ensureIssue()`);
@@ -573,16 +539,22 @@ export async function ensureIssue({
     return null;
   }
   try {
-    const issues = await findOpenIssues(title);
+    let issues = await findOpenIssues(title);
+    if (!issues.length) {
+      issues = await findOpenIssues(reuseTitle);
+    }
     if (issues.length) {
       // Close any duplicates
       for (const issue of issues.slice(1)) {
         await closeIssue(issue.id);
       }
       const [issue] = issues;
-      if (String(issue.content.raw).trim() !== description.trim()) {
+      if (
+        issue.title !== title ||
+        String(issue.content.raw).trim() !== description.trim()
+      ) {
         logger.debug('Issue updated');
-        await api.put(
+        await bitbucketHttp.putJson(
           `/2.0/repositories/${config.repository}/issues/${issue.id}`,
           {
             body: {
@@ -597,12 +569,18 @@ export async function ensureIssue({
       }
     } else {
       logger.info('Issue created');
-      await api.post(`/2.0/repositories/${config.repository}/issues`, {
-        body: {
-          title,
-          content: { raw: readOnlyIssueBody(description), markup: 'markdown' },
-        },
-      });
+      await bitbucketHttp.postJson(
+        `/2.0/repositories/${config.repository}/issues`,
+        {
+          body: {
+            title,
+            content: {
+              raw: readOnlyIssueBody(description),
+              markup: 'markdown',
+            },
+          },
+        }
+      );
       return 'created';
     }
   } catch (err) /* istanbul ignore next */ {
@@ -636,7 +614,7 @@ export /* istanbul ignore next */ async function getIssueList(): Promise<
     );
     return (
       (
-        await api.get(
+        await bitbucketHttp.getJson<{ values: Issue[] }>(
           `/2.0/repositories/${config.repository}/issues?q=${filter}`
         )
       ).body.values || /* istanbul ignore next */ []
@@ -682,9 +660,12 @@ export async function addReviewers(
     reviewers: reviewers.map((username: string) => ({ username })),
   };
 
-  await api.put(`/2.0/repositories/${config.repository}/pullrequests/${prId}`, {
-    body,
-  });
+  await bitbucketHttp.putJson(
+    `/2.0/repositories/${config.repository}/pullrequests/${prId}`,
+    {
+      body,
+    }
+  );
 }
 
 export /* istanbul ignore next */ function deleteLabel(): never {
@@ -732,7 +713,7 @@ export async function createPr({
 
   if (config.bbUseDefaultReviewers) {
     const reviewersResponse = (
-      await api.get<utils.PagedResult<Reviewer>>(
+      await bitbucketHttp.getJson<utils.PagedResult<Reviewer>>(
         `/2.0/repositories/${config.repository}/default-reviewers`
       )
     ).body;
@@ -760,9 +741,12 @@ export async function createPr({
 
   try {
     const prInfo = (
-      await api.post(`/2.0/repositories/${config.repository}/pullrequests`, {
-        body,
-      })
+      await bitbucketHttp.postJson<PrResponse>(
+        `/2.0/repositories/${config.repository}/pullrequests`,
+        {
+          body,
+        }
+      )
     ).body;
     // TODO: fix types
     const pr: Pr = {
@@ -789,28 +773,29 @@ interface Commit {
   author: { raw: string };
 }
 
-// Return a list of all modified files in a PR
-export async function getPrFiles(prNo: number): Promise<string[]> {
-  logger.debug({ prNo }, 'getPrFiles');
-  const diff = (
-    await api.get(
-      `/2.0/repositories/${config.repository}/pullrequests/${prNo}/diff`,
-      { json: false } as any
-    )
-  ).body;
-  const files = parseDiff(diff).map((file) => file.to);
-  return files;
-}
-
 export async function updatePr(
   prNo: number,
   title: string,
   description: string
 ): Promise<void> {
   logger.debug(`updatePr(${prNo}, ${title}, body)`);
-  await api.put(`/2.0/repositories/${config.repository}/pullrequests/${prNo}`, {
-    body: { title, description: sanitize(description) },
-  });
+  // Updating a PR in Bitbucket will clear the reviewers if reviewers is not present
+  const pr = (
+    await bitbucketHttp.getJson<PrResponse>(
+      `/2.0/repositories/${config.repository}/pullrequests/${prNo}`
+    )
+  ).body;
+
+  await bitbucketHttp.putJson(
+    `/2.0/repositories/${config.repository}/pullrequests/${prNo}`,
+    {
+      body: {
+        title,
+        description: sanitize(description),
+        reviewers: pr.reviewers,
+      },
+    }
+  );
 }
 
 export async function mergePr(
@@ -820,7 +805,7 @@ export async function mergePr(
   logger.debug(`mergePr(${prNo}, ${branchName})`);
 
   try {
-    await api.post(
+    await bitbucketHttp.postJson(
       `/2.0/repositories/${config.repository}/pullrequests/${prNo}/merge`,
       {
         body: {
@@ -836,17 +821,6 @@ export async function mergePr(
     return false;
   }
   return true;
-}
-
-// Pull Request
-
-export function cleanRepo(): Promise<void> {
-  // istanbul ignore if
-  if (config.storage && config.storage.cleanRepo) {
-    config.storage.cleanRepo();
-  }
-  config = {} as any;
-  return Promise.resolve();
 }
 
 export function getVulnerabilityAlerts(): Promise<VulnerabilityAlert[]> {

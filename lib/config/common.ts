@@ -9,6 +9,8 @@ export type RenovateConfigStage =
   | 'branch'
   | 'pr';
 
+export type RepositoryCacheConfig = 'disabled' | 'enabled' | 'reset';
+
 export interface GroupConfig extends Record<string, unknown> {
   branchName?: string;
   branchTopic?: string;
@@ -21,6 +23,7 @@ export interface RenovateSharedConfig {
   branchName?: string;
   manager?: string;
   commitMessage?: string;
+  draftPR?: boolean;
   enabled?: boolean;
   enabledManagers?: string[];
   fileMatch?: string[];
@@ -32,7 +35,7 @@ export interface RenovateSharedConfig {
   ignorePaths?: string[];
   labels?: string[];
   managers?: string | string[];
-  masterIssueApproval?: boolean;
+  dependencyDashboardApproval?: boolean;
   npmrc?: string;
   platform?: string;
   postUpgradeTasks?: PostUpgradeTasks;
@@ -44,6 +47,8 @@ export interface RenovateSharedConfig {
   rebaseLabel?: string;
   rebaseWhen?: string;
   recreateClosed?: boolean;
+  repository?: string;
+  repositoryCache?: RepositoryCacheConfig;
   requiredStatusChecks?: string[];
   schedule?: string[];
   semanticCommits?: boolean;
@@ -91,6 +96,8 @@ export interface RenovateAdminConfig {
   repositories?: RenovateRepository[];
   requireConfig?: boolean;
   trustLevel?: 'low' | 'high';
+  redisUrl?: string;
+  gitPrivateKey?: string;
 }
 
 export type PostUpgradeTasks = {
@@ -122,6 +129,7 @@ export interface RenovateConfig
   extends RenovateAdminConfig,
     RenovateSharedConfig,
     UpdateConfig<PackageRule>,
+    AssigneesAndReviewersConfig,
     Record<string, unknown> {
   depName?: string;
   baseBranches?: string[];
@@ -143,11 +151,11 @@ export interface RenovateConfig
 
   fileList?: string[];
 
-  masterIssue?: boolean;
-  masterIssueAutoclose?: boolean;
-  masterIssueChecks?: Record<string, string>;
-  masterIssueRebaseAllOpen?: boolean;
-  masterIssueTitle?: string;
+  dependencyDashboard?: boolean;
+  dependencyDashboardAutoclose?: boolean;
+  dependencyDashboardChecks?: Record<string, string>;
+  dependencyDashboardRebaseAllOpen?: boolean;
+  dependencyDashboardTitle?: string;
   packageFile?: string;
   packageRules?: PackageRule[];
   prConcurrentLimit?: number;
@@ -159,6 +167,16 @@ export interface RenovateConfig
   warnings?: ValidationMessage[];
   vulnerabilityAlerts?: RenovateSharedConfig;
   regexManagers?: CustomManager[];
+}
+
+export interface AssigneesAndReviewersConfig {
+  assigneesFromCodeOwners?: boolean;
+  assignees?: string[];
+  assigneesSampleSize?: number;
+  reviewersFromCodeOwners?: boolean;
+  reviewers?: string[];
+  reviewersSampleSize?: number;
+  additionalReviewers?: string[];
 }
 
 export type UpdateType =

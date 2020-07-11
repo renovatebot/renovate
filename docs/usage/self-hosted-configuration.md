@@ -77,6 +77,15 @@ RFC5322-compliant string if you wish to customise the git author for commits.
 
 ## gitPrivateKey
 
+This should be an armored private key, e.g. the type you get from running `gpg --export-secret-keys --armor 92066A17F0D1707B4E96863955FEF5171C45FAE5 > private.key`. Replace the newlines with `\n` before adding the resulting single-line value to your bot's config.
+
+It will be loaded _lazily_. Before the first commit in a repository, Renovate will:
+
+- First, run `gpg import` if it hasn't been run before
+- Then, run `git config user.signingkey` and `git config commit.gpgsign true`
+
+The `git` commands are run locally in the cloned repo instead of globally to reduce the chance of causing unintended consequences with global git configs on shared systems.
+
 ## logContext
 
 `logContext` is included with each log entry only if `logFormat="json"` - it is not included in the pretty log output. If left as default (null), a random short ID will be selected.
@@ -115,8 +124,6 @@ Set this to true if you wish for Renovate to persist repo data between runs. The
 
 Parameter to reduce CI load. CI jobs are usually triggered by these events: pull-request creation, pull-request update, automerge events. Set as an integer. Default is no limit.
 
-## prFooter
-
 ## printConfig
 
 This option is useful for troubleshooting, particularly if using presets. e.g. run `renovate foo/bar --print-config > config.log` and the fully-resolved config will be included in the log file.
@@ -136,7 +143,17 @@ To create the key pair with openssl use the following commands:
 
 Override this object if you wish to change the URLs that Renovate links to, e.g. if you have an internal forum for asking for help.
 
+## redisUrl
+
+If this value is set then Renovate will use Redis for its global cache instead of the local file system. The global cache is used to store lookup results (e.g. dependency versions and release notes) between repositories and runs. Example url: `redis://localhost`.
+
 ## repositories
+
+## repositoryCache
+
+Set this to `"enabled"` to have Renovate maintain a JSON file cache per-repository to speed up extractions. Set to `"reset"` if you ever need to bypass the cache and have it overwritten. JSON files will be stored inside the `cacheDir` beside the existing file-based package cache.
+
+Warning: this is an experimental feature and may be modified or removed in a future non-major release.
 
 ## requireConfig
 

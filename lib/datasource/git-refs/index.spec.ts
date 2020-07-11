@@ -1,12 +1,12 @@
 import fs from 'fs-extra';
 import _simpleGit from 'simple-git/promise';
-import * as globalCache from '../../util/cache/global';
-import { getDigest, getReleases } from '.';
+import { getPkgReleases } from '..';
+import { id as datasource, getDigest } from '.';
 
 jest.mock('simple-git/promise');
 const simpleGit: any = _simpleGit;
 
-const lookupName = 'https://github.com/example/example.git';
+const depName = 'https://github.com/example/example.git';
 
 const lsRemote1 = fs.readFileSync(
   'lib/datasource/git-refs/__fixtures__/ls-remote-1.txt',
@@ -14,7 +14,6 @@ const lsRemote1 = fs.readFileSync(
 );
 
 describe('datasource/git-refs', () => {
-  beforeEach(() => globalCache.rmAll());
   describe('getReleases', () => {
     it('returns nil if response is wrong', async () => {
       simpleGit.mockReturnValue({
@@ -22,8 +21,11 @@ describe('datasource/git-refs', () => {
           return Promise.resolve(null);
         },
       });
-      const versions = await getReleases({ lookupName });
-      expect(versions).toEqual(null);
+      const versions = await getPkgReleases({
+        datasource,
+        depName,
+      });
+      expect(versions).toBeNull();
     });
     it('returns nil if remote call throws exception', async () => {
       simpleGit.mockReturnValue({
@@ -31,8 +33,11 @@ describe('datasource/git-refs', () => {
           throw new Error();
         },
       });
-      const versions = await getReleases({ lookupName });
-      expect(versions).toEqual(null);
+      const versions = await getPkgReleases({
+        datasource,
+        depName,
+      });
+      expect(versions).toBeNull();
     });
     it('returns versions filtered from tags', async () => {
       simpleGit.mockReturnValue({
@@ -41,8 +46,9 @@ describe('datasource/git-refs', () => {
         },
       });
 
-      const versions = await getReleases({
-        lookupName,
+      const versions = await getPkgReleases({
+        datasource,
+        depName,
       });
       expect(versions).toMatchSnapshot();
       const result = versions.releases.map((x) => x.version).sort();

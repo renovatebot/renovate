@@ -8,10 +8,36 @@ describe('manager/npm/extract', () => {
           packageFile: 'package.json',
           lernaDir: '.',
           lernaPackages: ['packages/*'],
+          packages: ['packages/*'],
+          deps: [
+            {
+              depName: '@org/a',
+            },
+            {
+              depName: '@org/b',
+            },
+            {
+              depName: '@org/c',
+            },
+            {
+              depName: 'foo',
+            },
+          ],
         },
         {
           packageFile: 'packages/a/package.json',
           packageJsonName: '@org/a',
+          deps: [
+            {
+              depName: '@org/b',
+            },
+            {
+              depName: '@org/c',
+            },
+            {
+              depName: 'bar',
+            },
+          ],
         },
         {
           packageFile: 'packages/b/package.json',
@@ -21,9 +47,8 @@ describe('manager/npm/extract', () => {
       detectMonorepos(packageFiles);
       expect(packageFiles).toMatchSnapshot();
       expect(packageFiles[1].lernaDir).toEqual('.');
-      expect((packageFiles[1] as any).internalPackages).toEqual(['@org/b']);
     });
-    it('uses yarn workspaces package settings', () => {
+    it('uses yarn workspaces package settings with lerna', () => {
       const packageFiles = [
         {
           packageFile: 'package.json',
@@ -44,9 +69,8 @@ describe('manager/npm/extract', () => {
       detectMonorepos(packageFiles);
       expect(packageFiles).toMatchSnapshot();
       expect(packageFiles[1].lernaDir).toEqual('.');
-      expect((packageFiles[1] as any).internalPackages).toEqual(['@org/b']);
     });
-    it('uses yarn workspaces package settings', () => {
+    it('uses yarn workspaces package settings without lerna', () => {
       const packageFiles = [
         {
           packageFile: 'package.json',
@@ -64,7 +88,6 @@ describe('manager/npm/extract', () => {
       ];
       detectMonorepos(packageFiles);
       expect(packageFiles).toMatchSnapshot();
-      expect((packageFiles[1] as any).internalPackages).toEqual(['@org/b']);
     });
   });
 });

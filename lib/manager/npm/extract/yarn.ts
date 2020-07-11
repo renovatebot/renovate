@@ -3,9 +3,7 @@ import { logger } from '../../../logger';
 import { readLocalFile } from '../../../util/fs';
 import { LockFileEntry } from './common';
 
-export type YarnLock = Record<string, string> & {
-  '@renovate_yarn_integrity'?: boolean;
-};
+export type YarnLock = Record<string, string>;
 
 export async function getYarnLock(filePath: string): Promise<YarnLock> {
   const yarnLockRaw = await readLocalFile(filePath, 'utf8');
@@ -26,10 +24,6 @@ export async function getYarnLock(filePath: string): Promise<YarnLock> {
     )) {
       logger.trace({ entry, version: val.version });
       lockFile[entry] = val.version;
-      // istanbul ignore if
-      if (val.integrity) {
-        lockFile['@renovate_yarn_integrity'] = true;
-      }
     }
     return lockFile;
   } catch (err) {

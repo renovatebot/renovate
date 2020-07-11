@@ -3,19 +3,43 @@
 exports[`manager/npm/extract .extractPackageFile() uses lerna package settings 1`] = `
 Array [
   Object {
-    "internalPackages": Array [
-      "@org/a",
-      "@org/b",
+    "deps": Array [
+      Object {
+        "depName": "@org/a",
+        "skipReason": "internal-package",
+      },
+      Object {
+        "depName": "@org/b",
+        "skipReason": "internal-package",
+      },
+      Object {
+        "depName": "@org/c",
+      },
+      Object {
+        "depName": "foo",
+      },
     ],
     "lernaDir": ".",
     "lernaPackages": Array [
       "packages/*",
     ],
     "packageFile": "package.json",
+    "packages": Array [
+      "packages/*",
+    ],
   },
   Object {
-    "internalPackages": Array [
-      "@org/b",
+    "deps": Array [
+      Object {
+        "depName": "@org/b",
+        "skipReason": "internal-package",
+      },
+      Object {
+        "depName": "@org/c",
+      },
+      Object {
+        "depName": "bar",
+      },
     ],
     "lernaClient": undefined,
     "lernaDir": ".",
@@ -25,9 +49,6 @@ Array [
     "yarnLock": undefined,
   },
   Object {
-    "internalPackages": Array [
-      "@org/a",
-    ],
     "lernaClient": undefined,
     "lernaDir": ".",
     "npmLock": undefined,
@@ -38,13 +59,9 @@ Array [
 ]
 `;
 
-exports[`manager/npm/extract .extractPackageFile() uses yarn workspaces package settings 1`] = `
+exports[`manager/npm/extract .extractPackageFile() uses yarn workspaces package settings with lerna 1`] = `
 Array [
   Object {
-    "internalPackages": Array [
-      "@org/a",
-      "@org/b",
-    ],
     "lernaClient": "yarn",
     "lernaDir": ".",
     "lernaPackages": Array [
@@ -56,9 +73,6 @@ Array [
     ],
   },
   Object {
-    "internalPackages": Array [
-      "@org/b",
-    ],
     "lernaClient": "yarn",
     "lernaDir": ".",
     "npmLock": undefined,
@@ -67,9 +81,6 @@ Array [
     "yarnLock": undefined,
   },
   Object {
-    "internalPackages": Array [
-      "@org/a",
-    ],
     "lernaClient": "yarn",
     "lernaDir": ".",
     "npmLock": undefined,
@@ -80,21 +91,14 @@ Array [
 ]
 `;
 
-exports[`manager/npm/extract .extractPackageFile() uses yarn workspaces package settings 2`] = `
+exports[`manager/npm/extract .extractPackageFile() uses yarn workspaces package settings without lerna 1`] = `
 Array [
   Object {
-    "internalPackages": Array [
-      "@org/a",
-      "@org/b",
-    ],
     "packageFile": "package.json",
     "yarnWorkspacesPackages": "packages/*",
   },
   Object {
     "hasYarnWorkspaces": true,
-    "internalPackages": Array [
-      "@org/b",
-    ],
     "lernaClient": undefined,
     "lernaDir": undefined,
     "npmLock": undefined,
@@ -103,9 +107,6 @@ Array [
     "yarnLock": "yarn.lock",
   },
   Object {
-    "internalPackages": Array [
-      "@org/a",
-    ],
     "lernaClient": undefined,
     "lernaDir": undefined,
     "npmLock": undefined,

@@ -1,6 +1,7 @@
 import is from '@sindresorhus/is';
 import { REPOSITORY_DISABLED } from '../../constants/error-messages';
 import { BranchStatus } from '../../types';
+import * as _git from '../../util/git';
 import * as _hostRules from '../../util/host-rules';
 import { Platform, RepoParams } from '../common';
 
@@ -9,36 +10,22 @@ describe('platform/azure', () => {
   let azure: Platform;
   let azureApi: jest.Mocked<typeof import('./azure-got-wrapper')>;
   let azureHelper: jest.Mocked<typeof import('./azure-helper')>;
-  let GitStorage;
+  let git: jest.Mocked<typeof _git>;
   beforeEach(async () => {
     // reset module
     jest.resetModules();
     jest.mock('./azure-got-wrapper');
     jest.mock('./azure-helper');
-    jest.mock('../git/storage');
+    jest.mock('../../util/git');
     jest.mock('../../util/host-rules');
     hostRules = require('../../util/host-rules');
     require('../../util/sanitize').sanitize = jest.fn((input) => input);
     azure = await import('.');
     azureApi = require('./azure-got-wrapper');
     azureHelper = require('./azure-helper');
-    GitStorage = require('../git/storage').Storage;
-    GitStorage.mockImplementation(() => ({
-      initRepo: jest.fn(),
-      cleanRepo: jest.fn(),
-      getFileList: jest.fn(),
-      branchExists: jest.fn(() => true),
-      isBranchStale: jest.fn(() => false),
-      setBaseBranch: jest.fn(),
-      getBranchLastCommitTime: jest.fn(),
-      getAllRenovateBranches: jest.fn(),
-      getCommitMessages: jest.fn(),
-      getFile: jest.fn(),
-      commitFiles: jest.fn(),
-      mergeBranch: jest.fn(),
-      deleteBranch: jest.fn(),
-      getRepoStatus: jest.fn(),
-    }));
+    git = require('../../util/git');
+    git.branchExists.mockResolvedValue(true);
+    git.isBranchStale.mockResolvedValue(false);
     hostRules.find.mockReturnValue({
       token: 'token',
     });
@@ -46,10 +33,6 @@ describe('platform/azure', () => {
       endpoint: 'https://dev.azure.com/renovate12345',
       token: 'token',
     });
-  });
-
-  afterEach(async () => {
-    await azure.cleanRepo();
   });
 
   // do we need the args?
@@ -175,19 +158,6 @@ describe('platform/azure', () => {
       ...args,
     } as any);
   }
-
-  describe('getRepoStatus()', () => {
-    it('exists', async () => {
-      await initRepo();
-      expect(await azure.getRepoStatus()).toBeUndefined();
-    });
-  });
-
-  describe('cleanRepo()', () => {
-    it('exists', async () => {
-      await azure.cleanRepo();
-    });
-  });
 
   describe('initRepo', () => {
     it(`should initialise the config for a repo`, async () => {
@@ -884,56 +854,6 @@ describe('platform/azure', () => {
       const input =
         '<details>https://github.com/foo/bar/issues/5 plus also [a link](https://github.com/foo/bar/issues/5)';
       expect(azure.getPrBody(input)).toMatchSnapshot();
-    });
-  });
-
-  describe('getPrFiles', () => {
-    it('single change', async () => {
-      azureApi.gitApi.mockImplementationOnce(
-        () =>
-          ({
-            getPullRequestIterations: jest.fn(() => [{ id: 1 }]),
-            getPullRequestIterationChanges: jest.fn(() => ({
-              changeEntries: [{ item: { path: '/index.js' } }],
-            })),
-          } as any)
-      );
-      const res = await azure.getPrFiles(46);
-      expect(res).toHaveLength(1);
-      expect(res).toEqual(['index.js']);
-    });
-    it('multiple changes', async () => {
-      azureApi.gitApi.mockImplementationOnce(
-        () =>
-          ({
-            getPullRequestIterations: jest.fn(() => [{ id: 1 }, { id: 2 }]),
-            getPullRequestIterationChanges: jest
-              .fn()
-              .mockResolvedValueOnce({
-                changeEntries: [{ item: { path: '/index.js' } }],
-              })
-              .mockResolvedValueOnce({
-                changeEntries: [{ item: { path: '/package.json' } }],
-              }),
-          } as any)
-      );
-      const res = await azure.getPrFiles(46);
-      expect(res).toHaveLength(2);
-      expect(res).toEqual(['index.js', 'package.json']);
-    });
-    it('deduplicate changes', async () => {
-      azureApi.gitApi.mockImplementationOnce(
-        () =>
-          ({
-            getPullRequestIterations: jest.fn(() => [{ id: 1 }, { id: 2 }]),
-            getPullRequestIterationChanges: jest.fn().mockResolvedValue({
-              changeEntries: [{ item: { path: '/index.js' } }],
-            }),
-          } as any)
-      );
-      const res = await azure.getPrFiles(46);
-      expect(res).toHaveLength(1);
-      expect(res).toEqual(['index.js']);
     });
   });
 

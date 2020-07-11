@@ -1,5 +1,4 @@
 import nock from 'nock';
-import * as globalCache from '../../../util/cache/global';
 import * as npm from '.';
 
 jest.mock('registry-auth-token');
@@ -11,7 +10,6 @@ describe('config/presets/npm', () => {
     jest.resetAllMocks();
     global.trustLevel = 'low';
     nock.cleanAll();
-    return globalCache.rmAll();
   });
   afterEach(() => {
     delete process.env.RENOVATE_CACHE_NPM_MINUTES;

@@ -8,6 +8,7 @@ import { parseIndexDir } from '../sbt-plugin/util';
 export const id = 'sbt-package';
 
 export const defaultRegistryUrls = [MAVEN_REPO];
+export const registryStrategy = 'hunt';
 
 const ensureTrailingSlash = (str: string): string => str.replace(/\/?$/, '/');
 
@@ -65,20 +66,18 @@ export async function resolvePackageReleases(
 
 export async function getReleases({
   lookupName,
-  registryUrls,
+  registryUrl,
 }: GetReleasesConfig): Promise<ReleaseResult | null> {
   const [groupId, artifactId] = lookupName.split(':');
   const groupIdSplit = groupId.split('.');
   const artifactIdSplit = artifactId.split('_');
   const [artifact, scalaVersion] = artifactIdSplit;
 
-  const repoRoots = registryUrls.map((x) => x.replace(/\/?$/, ''));
+  const repoRoot = ensureTrailingSlash(registryUrl);
   const searchRoots: string[] = [];
-  repoRoots.forEach((repoRoot) => {
-    // Optimize lookup order
-    searchRoots.push(`${repoRoot}/${groupIdSplit.join('/')}`);
-    searchRoots.push(`${repoRoot}/${groupIdSplit.join('.')}`);
-  });
+  // Optimize lookup order
+  searchRoots.push(`${repoRoot}${groupIdSplit.join('/')}`);
+  searchRoots.push(`${repoRoot}${groupIdSplit.join('.')}`);
 
   for (let idx = 0; idx < searchRoots.length; idx += 1) {
     const searchRoot = searchRoots[idx];
