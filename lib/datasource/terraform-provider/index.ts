@@ -3,7 +3,7 @@ import { logger } from '../../logger';
 import * as packageCache from '../../util/cache/package';
 import { Http } from '../../util/http';
 import { GetReleasesConfig, ReleaseResult } from '../common';
-import { ServiceDiscoveryResult } from '../terraform-module';
+import { getTerraformServiceDiscoveryResult } from '../terraform-module';
 
 export const id = 'terraform-provider';
 export const defaultRegistryUrls = [
@@ -38,11 +38,9 @@ async function queryRegistry(
   registryURL: string,
   repository: string
 ): Promise<ReleaseResult> {
-  const serviceDiscovery = (
-    await http.getJson<ServiceDiscoveryResult>(
-      `${registryURL}/.well-known/terraform.json`
-    )
-  ).body;
+  const serviceDiscovery = await getTerraformServiceDiscoveryResult(
+    registryURL
+  );
   const backendURL = `${registryURL}${serviceDiscovery['providers.v1']}${repository}`;
   const res = (await http.getJson<TerraformProvider>(backendURL)).body;
   const dep: ReleaseResult = {
