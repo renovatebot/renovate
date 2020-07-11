@@ -1072,7 +1072,8 @@ describe('platform/github', () => {
         .patch('/repos/undefined/issues/2')
         .reply(200);
       const res = await github.ensureIssue({
-        title: 'title-2',
+        title: 'title-3',
+        reuseTitle: 'title-2',
         body: 'newer-content',
       });
       expect(res).toEqual('updated');

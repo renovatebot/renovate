@@ -217,6 +217,17 @@ Array [
     "url": "https://api.bitbucket.org/2.0/repositories/some/empty/issues?q=title%3D%22title%22%20AND%20(state%20%3D%20%22new%22%20OR%20state%20%3D%20%22open%22)%20AND%20reporter.username%3D%22abc%22",
   },
   Object {
+    "headers": Object {
+      "accept": "application/json",
+      "accept-encoding": "gzip, deflate",
+      "authorization": "Basic YWJjOjEyMw==",
+      "host": "api.bitbucket.org",
+      "user-agent": "https://github.com/renovatebot/renovate",
+    },
+    "method": "GET",
+    "url": "https://api.bitbucket.org/2.0/repositories/some/empty/issues?q=title%3D%22old-title%22%20AND%20(state%20%3D%20%22new%22%20OR%20state%20%3D%20%22open%22)%20AND%20reporter.username%3D%22abc%22",
+  },
+  Object {
     "body": "{\\"title\\":\\"title\\",\\"content\\":{\\"raw\\":\\"body\\",\\"markup\\":\\"markdown\\"}}",
     "headers": Object {
       "accept": "application/json",
