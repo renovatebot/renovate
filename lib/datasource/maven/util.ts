@@ -1,10 +1,10 @@
 import url from 'url';
+import { HOST_DISABLED } from '../../constants/error-messages';
 import { logger } from '../../logger';
 import { ExternalHostError } from '../../types/errors/external-host-error';
 import { Http } from '../../util/http';
 
 import { MAVEN_REPO, id } from './common';
-import { HOST_DISABLED } from '../../constants/error-messages';
 
 const http: Record<string, Http> = {};
 
