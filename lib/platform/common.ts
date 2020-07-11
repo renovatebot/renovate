@@ -81,6 +81,7 @@ export interface CreatePRConfig {
 }
 export interface EnsureIssueConfig {
   title: string;
+  reuseTitle?: string;
   body: string;
   once?: boolean;
   shouldReOpen?: boolean;

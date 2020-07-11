@@ -956,6 +956,7 @@ describe('platform/gitea', () => {
         {
           body: closedIssue.body,
           state: closedIssue.state,
+          title: 'closed-issue',
         }
       );
     });
@@ -980,6 +981,7 @@ describe('platform/gitea', () => {
         {
           body: closedIssue.body,
           state: 'open',
+          title: 'closed-issue',
         }
       );
     });
