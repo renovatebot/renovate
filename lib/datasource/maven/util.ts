@@ -4,6 +4,7 @@ import { ExternalHostError } from '../../types/errors/external-host-error';
 import { Http } from '../../util/http';
 
 import { MAVEN_REPO, id } from './common';
+import { HOST_DISABLED } from '../../constants/error-messages';
 
 const http: Record<string, Http> = {};
 
@@ -64,7 +65,10 @@ export async function downloadHttpProtocol(
     return raw.body;
   } catch (err) {
     const failedUrl = pkgUrl.toString();
-    if (isNotFoundError(err)) {
+    if (err.message === HOST_DISABLED) {
+      // istanbul ignore next
+      logger.trace({ failedUrl }, 'Host disabled');
+    } else if (isNotFoundError(err)) {
       logger.trace({ failedUrl }, `Url not found`);
     } else if (isHostError(err)) {
       // istanbul ignore next
