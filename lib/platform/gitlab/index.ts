@@ -255,7 +255,7 @@ export async function initRepo({
     throw err;
   }
   const repoConfig: RepoConfig = {
-    baseBranch: config.baseBranch,
+    defaultBranch: config.baseBranch,
     isFork: !!res.body.forked_from_project,
   };
   return repoConfig;
@@ -720,25 +720,29 @@ export async function findIssue(title: string): Promise<Issue | null> {
 
 export async function ensureIssue({
   title,
+  reuseTitle,
   body,
 }: EnsureIssueConfig): Promise<'updated' | 'created' | null> {
   logger.debug(`ensureIssue()`);
   const description = getPrBody(sanitize(body));
   try {
     const issueList = await getIssueList();
-    const issue = issueList.find((i: { title: string }) => i.title === title);
+    let issue = issueList.find((i: { title: string }) => i.title === title);
+    if (!issue) {
+      issue = issueList.find((i: { title: string }) => i.title === reuseTitle);
+    }
     if (issue) {
       const existingDescription = (
         await gitlabApi.getJson<{ description: string }>(
           `projects/${config.repository}/issues/${issue.iid}`
         )
       ).body.description;
-      if (existingDescription !== description) {
-        logger.debug('Updating issue body');
+      if (issue.title !== title || existingDescription !== description) {
+        logger.debug('Updating issue');
         await gitlabApi.putJson(
           `projects/${config.repository}/issues/${issue.iid}`,
           {
-            body: { description },
+            body: { title, description },
           }
         );
         return 'updated';

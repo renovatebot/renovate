@@ -8,6 +8,8 @@ import { clone } from '../clone';
 import { applyAuthorization, removeAuthorization } from './auth';
 import { applyHostRules } from './host-rules';
 
+export * from './types';
+
 interface OutgoingHttpHeaders {
   [header: string]: number | string | string[] | undefined;
 }
@@ -58,6 +60,16 @@ async function resolveResponse<T>(
   }
 }
 
+function applyDefaultHeaders(options: any): void {
+  // eslint-disable-next-line no-param-reassign
+  options.headers = {
+    ...options.headers,
+    'user-agent':
+      process.env.RENOVATE_USER_AGENT ||
+      'https://github.com/renovatebot/renovate',
+  };
+}
+
 export class Http<GetOptions = HttpOptions, PostOptions = HttpPostOptions> {
   constructor(private hostType: string, private options?: HttpOptions) {}
 
@@ -82,12 +94,8 @@ export class Http<GetOptions = HttpOptions, PostOptions = HttpPostOptions> {
     options.hooks = {
       beforeRedirect: [removeAuthorization],
     };
-    options.headers = {
-      ...options.headers,
-      'user-agent':
-        process.env.RENOVATE_USER_AGENT ||
-        'https://github.com/renovatebot/renovate',
-    };
+
+    applyDefaultHeaders(options);
 
     options = applyHostRules(url, options);
     if (options.enabled === false) {
@@ -190,6 +198,8 @@ export class Http<GetOptions = HttpOptions, PostOptions = HttpPostOptions> {
       hostType: this.hostType,
       ...options,
     };
+
+    applyDefaultHeaders(combinedOptions);
     return got.stream(url, combinedOptions);
   }
 }

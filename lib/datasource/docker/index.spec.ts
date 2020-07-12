@@ -2,11 +2,12 @@ import AWS from 'aws-sdk';
 import AWSMock from 'aws-sdk-mock';
 import { getDigest, getPkgReleases } from '..';
 import * as httpMock from '../../../test/httpMock';
+import { getName, mocked } from '../../../test/util';
 import { EXTERNAL_HOST_ERROR } from '../../constants/error-messages';
 import * as _hostRules from '../../util/host-rules';
 import * as docker from '.';
 
-const hostRules: any = _hostRules;
+const hostRules = mocked(_hostRules);
 
 jest.mock('../../util/host-rules');
 
@@ -14,14 +15,14 @@ const baseUrl = 'https://index.docker.io/v2';
 const authUrl = 'https://auth.docker.io';
 const amazonUrl = 'https://123456789.dkr.ecr.us-east-1.amazonaws.com/v2';
 
-describe('api/docker', () => {
+describe(getName(__filename), () => {
   beforeEach(() => {
     httpMock.setup();
     hostRules.find.mockReturnValue({
       username: 'some-username',
       password: 'some-password',
     });
-    hostRules.hosts = jest.fn(() => []);
+    hostRules.hosts.mockReturnValue([]);
   });
 
   afterEach(() => {

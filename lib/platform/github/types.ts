@@ -50,3 +50,15 @@ export interface LocalRepoConfig {
 
 export type BranchProtection = any;
 export type PrList = Record<number, GhPr>;
+
+export interface GhRepo {
+  isFork: boolean;
+  isArchived: boolean;
+  nameWithOwner: string;
+  mergeCommitAllowed: boolean;
+  rebaseMergeAllowed: boolean;
+  squashMergeAllowed: boolean;
+  defaultBranchRef: {
+    name: string;
+  };
+}

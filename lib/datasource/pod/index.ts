@@ -2,7 +2,7 @@ import crypto from 'crypto';
 import { logger } from '../../logger';
 import { ExternalHostError } from '../../types/errors/external-host-error';
 import * as packageCache from '../../util/cache/package';
-import { Http } from '../../util/http';
+import { Http, HttpError } from '../../util/http';
 import { GithubHttp } from '../../util/http/github';
 import { GetReleasesConfig, ReleaseResult } from '../common';
 
@@ -37,7 +37,7 @@ function releasesGithubUrl(
   return `${prefix}/${account}/${repo}/contents/Specs/${suffix}`;
 }
 
-function handleError(lookupName: string, err: Error): void {
+function handleError(lookupName: string, err: HttpError): void {
   const errorData = { lookupName, err };
 
   if (
