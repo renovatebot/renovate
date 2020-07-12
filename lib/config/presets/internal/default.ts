@@ -539,13 +539,13 @@ export const presets: Record<string, Preset> = {
       },
     ],
   },
-  masterIssue: {
-    description: 'Enable Renovate master issue creation',
-    masterIssue: true,
+  dependencyDashboard: {
+    description: 'Enable Renovate Dependency Dashboard creation',
+    dependencyDashboard: true,
   },
-  masterIssueApproval: {
-    description: 'Enable Renovate master issue approval workflow',
-    masterIssueApproval: true,
+  dependencyDashboardApproval: {
+    description: 'Enable Renovate Dependency Dashboard approval workflow',
+    dependencyDashboardApproval: true,
   },
   timezone: {
     description: 'Evaluate schedules according to timezone {{arg0}}',

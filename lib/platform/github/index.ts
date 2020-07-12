@@ -218,7 +218,7 @@ export async function initRepo({
   [config.repositoryOwner, config.repositoryName] = repository.split('/');
   let repo: GhRepo;
   try {
-    repo = await githubApi.getGraphql<GhRepo>(`{
+    repo = await githubApi.queryRepo<GhRepo>(`{
       repository(owner: "${config.repositoryOwner}", name: "${config.repositoryName}") {
         isFork
         isArchived
@@ -535,11 +535,9 @@ async function getClosedPrs(): Promise<PrList> {
         }
       }
       `;
-      const nodes = await githubApi.getGraphqlNodes<any>(
-        query,
-        'pullRequests',
-        { paginate: false }
-      );
+      const nodes = await githubApi.queryRepoField<any>(query, 'pullRequests', {
+        paginate: false,
+      });
       const prNumbers: number[] = [];
       // istanbul ignore if
       if (!nodes?.length) {
@@ -631,11 +629,9 @@ async function getOpenPrs(): Promise<PrList> {
         }
       }
       `;
-      const nodes = await githubApi.getGraphqlNodes<any>(
-        query,
-        'pullRequests',
-        { paginate: false }
-      );
+      const nodes = await githubApi.queryRepoField<any>(query, 'pullRequests', {
+        paginate: false,
+      });
       const prNumbers: number[] = [];
       // istanbul ignore if
       if (!nodes?.length) {
@@ -1167,7 +1163,7 @@ async function getIssues(): Promise<Issue[]> {
     }
   `;
 
-  const result = await githubApi.getGraphqlNodes<Issue>(query, 'issues');
+  const result = await githubApi.queryRepoField<Issue>(query, 'issues');
 
   logger.debug(`Retrieved ${result.length} issues`);
   return result.map((issue) => ({
@@ -1216,6 +1212,7 @@ async function closeIssue(issueNumber: number): Promise<void> {
 
 export async function ensureIssue({
   title,
+  reuseTitle,
   body: rawBody,
   once = false,
   shouldReOpen = true,
@@ -1224,7 +1221,13 @@ export async function ensureIssue({
   const body = sanitize(rawBody);
   try {
     const issueList = await getIssueList();
-    const issues = issueList.filter((i) => i.title === title);
+    let issues = issueList.filter((i) => i.title === title);
+    if (!issues.length) {
+      issues = issueList.filter((i) => i.title === reuseTitle);
+      if (issues.length) {
+        logger.debug({ reuseTitle, title }, 'Reusing issue title');
+      }
+    }
     if (issues.length) {
       let issue = issues.find((i) => i.state === 'open');
       if (!issue) {
@@ -1250,7 +1253,11 @@ export async function ensureIssue({
           }`
         )
       ).body.body;
-      if (issueBody === body && issue.state === 'open') {
+      if (
+        issue.title === title &&
+        issueBody === body &&
+        issue.state === 'open'
+      ) {
         logger.debug('Issue is open and up to date - nothing to do');
         return null;
       }
@@ -1261,7 +1268,7 @@ export async function ensureIssue({
             issue.number
           }`,
           {
-            body: { body, state: 'open' },
+            body: { body, state: 'open', title },
           }
         );
         logger.debug('Issue updated');
@@ -1628,14 +1635,6 @@ export async function mergePr(
 ): Promise<boolean> {
   logger.debug(`mergePr(${prNo}, ${branchName})`);
   // istanbul ignore if
-  if (config.isGhe && config.pushProtection) {
-    logger.debug(
-      { branch: branchName, prNo },
-      'Branch protection: Cannot automerge PR when push protection is enabled'
-    );
-    return false;
-  }
-  // istanbul ignore if
   if (config.prReviewsRequired) {
     logger.debug(
       { branch: branchName, prNo },
@@ -1769,7 +1768,7 @@ export async function getVulnerabilityAlerts(): Promise<VulnerabilityAlert[]> {
   }`;
   let alerts = [];
   try {
-    const vulnerabilityAlerts = await githubApi.getGraphqlNodes<{ node: any }>(
+    const vulnerabilityAlerts = await githubApi.queryRepoField<{ node: any }>(
       query,
       'vulnerabilityAlerts',
       {

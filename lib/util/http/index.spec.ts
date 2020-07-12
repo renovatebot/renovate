@@ -86,7 +86,7 @@ describe(getName(__filename), () => {
   it('headJson', async () => {
     nock(baseUrl).head('/').reply(200, {});
     expect(
-      await http.headJson('http://renovate.com', { body: {}, baseUrl })
+      await http.headJson('http://renovate.com', { baseUrl })
     ).toMatchSnapshot();
     expect(nock.isDone()).toBe(true);
   });

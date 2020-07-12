@@ -1,5 +1,4 @@
 import URL from 'url';
-import { GotError } from 'got';
 import pAll from 'p-all';
 import parseLinkHeader from 'parse-link-header';
 import {
@@ -12,6 +11,7 @@ import { PLATFORM_TYPE_GITHUB } from '../../constants/platforms';
 import { logger } from '../../logger';
 import { ExternalHostError } from '../../types/errors/external-host-error';
 import { maskToken } from '../mask';
+import { HttpError } from './types';
 import { Http, HttpPostOptions, HttpResponse, InternalHttpOptions } from '.';
 
 let baseUrl = 'https://api.github.com/';
@@ -19,7 +19,7 @@ export const setBaseUrl = (url: string): void => {
   baseUrl = url;
 };
 
-type GotRequestError<E = unknown, T = unknown> = GotError & {
+type GotRequestError<E = unknown, T = unknown> = HttpError & {
   body: {
     message?: string;
     errors?: E[];
@@ -232,13 +232,17 @@ export class GithubHttp extends Http<GithubHttpOptions, GithubHttpOptions> {
     return result;
   }
 
-  public async getGraphql<T = unknown>(
+  public async queryRepo<T = unknown>(
     query: string,
     options: GraphqlOptions = {}
   ): Promise<T> {
     let result = null;
 
     const path = 'graphql';
+
+    const {
+      acceptHeader: accept = 'application/vnd.github.merge-info-preview+json',
+    } = options;
 
     const opts: HttpPostOptions = {
       body: { query },
@@ -259,7 +263,7 @@ export class GithubHttp extends Http<GithubHttpOptions, GithubHttpOptions> {
     return result;
   }
 
-  async getGraphqlNodes<T = Record<string, unknown>>(
+  async queryRepoField<T = Record<string, unknown>>(
     queryOrig: string,
     fieldName: string,
     options: GraphqlOptions = {}
@@ -280,7 +284,7 @@ export class GithubHttp extends Http<GithubHttpOptions, GithubHttpOptions> {
         replacement += cursor ? `, after: "${cursor}", ` : ', ';
         query = query.replace(regex, replacement);
       }
-      const gqlRes = await this.getGraphql<T>(query, options);
+      const gqlRes = await this.queryRepo<T>(query, options);
       if (gqlRes && gqlRes[fieldName]) {
         const { nodes = [], edges = [], pageInfo } = gqlRes[fieldName];
         result.push(...nodes);
