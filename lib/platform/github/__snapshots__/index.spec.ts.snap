@@ -6021,6 +6021,50 @@ Array [
 ]
 `;
 
+exports[`platform/github initRepo should use different header in app mode 1`] = `
+Object {
+  "baseBranch": "master",
+  "isFork": false,
+}
+`;
+
+exports[`platform/github initRepo should use different header in app mode 2`] = `
+Array [
+  Object {
+    "graphql": Object {
+      "query": Object {
+        "repository": Object {
+          "__args": Object {
+            "name": "repo",
+            "owner": "some",
+          },
+          "defaultBranchRef": Object {
+            "name": null,
+          },
+          "isArchived": null,
+          "isFork": null,
+          "mergeCommitAllowed": null,
+          "nameWithOwner": null,
+          "rebaseMergeAllowed": null,
+          "squashMergeAllowed": null,
+        },
+      },
+    },
+    "headers": Object {
+      "accept": "application/vnd.github.machine-man-preview+json, application/vnd.github.v3+json",
+      "accept-encoding": "gzip, deflate",
+      "authorization": "token abc123",
+      "content-length": 280,
+      "content-type": "application/json",
+      "host": "api.github.com",
+      "user-agent": "https://github.com/renovatebot/renovate",
+    },
+    "method": "POST",
+    "url": "https://api.github.com/graphql",
+  },
+]
+`;
+
 exports[`platform/github initRepo throws not-found 1`] = `
 Array [
   Object {
