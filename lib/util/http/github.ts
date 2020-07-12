@@ -241,13 +241,9 @@ export class GithubHttp extends Http<GithubHttpOptions, GithubHttpOptions> {
 
     const path = 'graphql';
 
-    const {
-      acceptHeader: accept = 'application/vnd.github.merge-info-preview+json',
-    } = options;
-
     const opts: HttpPostOptions = {
       body: { query },
-      headers: { accept },
+      headers: { accept: options?.acceptHeader },
     };
 
     logger.trace(`Performing Github GraphQL request`);
