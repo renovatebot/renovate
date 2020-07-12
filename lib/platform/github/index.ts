@@ -218,7 +218,8 @@ export async function initRepo({
   [config.repositoryOwner, config.repositoryName] = repository.split('/');
   let repo: GhRepo;
   try {
-    repo = await githubApi.queryRepo<GhRepo>(`{
+    repo = await githubApi.queryRepo<GhRepo>(
+      `{
       repository(owner: "${config.repositoryOwner}", name: "${config.repositoryName}") {
         isFork
         isArchived
@@ -230,7 +231,11 @@ export async function initRepo({
           name
         }
       }
-    }`);
+    }`,
+      {
+        acceptHeader: 'application/vnd.github.v3+json',
+      }
+    );
     // istanbul ignore if
     if (repo.isFork && !includeForks) {
       try {
