@@ -223,13 +223,17 @@ export class GithubHttp extends Http<GithubHttpOptions, GithubHttpOptions> {
     return result;
   }
 
-  private async getGraphql<T = unknown>(
+  public async queryRepo<T = unknown>(
     query: string,
-    accept = 'application/vnd.github.merge-info-preview+json'
-  ): Promise<GithubGraphqlResponse<T>> {
+    options: GraphqlOptions = {}
+  ): Promise<T> {
     let result = null;
 
     const path = 'graphql';
+
+    const {
+      acceptHeader: accept = 'application/vnd.github.merge-info-preview+json',
+    } = options;
 
     const opts: HttpPostOptions = {
       body: { query },
@@ -239,15 +243,18 @@ export class GithubHttp extends Http<GithubHttpOptions, GithubHttpOptions> {
     logger.trace(`Performing Github GraphQL request`);
 
     try {
-      const res = await this.postJson('graphql', opts);
-      result = res?.body;
+      const res = await this.postJson<GithubGraphqlResponse<T>>(
+        'graphql',
+        opts
+      );
+      result = res?.body?.data?.repository;
     } catch (gotErr) {
       handleGotError(gotErr, path, opts);
     }
     return result;
   }
 
-  async getGraphqlNodes<T = Record<string, unknown>>(
+  async queryRepoField<T = Record<string, unknown>>(
     queryOrig: string,
     fieldName: string,
     options: GraphqlOptions = {}
@@ -256,7 +263,7 @@ export class GithubHttp extends Http<GithubHttpOptions, GithubHttpOptions> {
 
     const regex = new RegExp(`(\\W)${fieldName}(\\s*)\\(`);
 
-    const { paginate = true, acceptHeader } = options;
+    const { paginate = true } = options;
     let count = options.count || 100;
     let cursor = null;
 
@@ -268,16 +275,9 @@ export class GithubHttp extends Http<GithubHttpOptions, GithubHttpOptions> {
         replacement += cursor ? `, after: "${cursor}", ` : ', ';
         query = query.replace(regex, replacement);
       }
-      const gqlRes = await this.getGraphql<T>(query, acceptHeader);
-      if (
-        gqlRes &&
-        gqlRes.data &&
-        gqlRes.data.repository &&
-        gqlRes.data.repository[fieldName]
-      ) {
-        const { nodes = [], edges = [], pageInfo } = gqlRes.data.repository[
-          fieldName
-        ];
+      const gqlRes = await this.queryRepo<T>(query, options);
+      if (gqlRes && gqlRes[fieldName]) {
+        const { nodes = [], edges = [], pageInfo } = gqlRes[fieldName];
         result.push(...nodes);
         result.push(...edges);
 

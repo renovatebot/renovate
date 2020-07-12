@@ -523,11 +523,9 @@ async function getClosedPrs(): Promise<PrList> {
         }
       }
       `;
-      const nodes = await githubApi.getGraphqlNodes<any>(
-        query,
-        'pullRequests',
-        { paginate: false }
-      );
+      const nodes = await githubApi.queryRepoField<any>(query, 'pullRequests', {
+        paginate: false,
+      });
       const prNumbers: number[] = [];
       // istanbul ignore if
       if (!nodes?.length) {
@@ -619,11 +617,9 @@ async function getOpenPrs(): Promise<PrList> {
         }
       }
       `;
-      const nodes = await githubApi.getGraphqlNodes<any>(
-        query,
-        'pullRequests',
-        { paginate: false }
-      );
+      const nodes = await githubApi.queryRepoField<any>(query, 'pullRequests', {
+        paginate: false,
+      });
       const prNumbers: number[] = [];
       // istanbul ignore if
       if (!nodes?.length) {
@@ -1155,7 +1151,7 @@ async function getIssues(): Promise<Issue[]> {
     }
   `;
 
-  const result = await githubApi.getGraphqlNodes<Issue>(query, 'issues');
+  const result = await githubApi.queryRepoField<Issue>(query, 'issues');
 
   logger.debug(`Retrieved ${result.length} issues`);
   return result.map((issue) => ({
@@ -1760,7 +1756,7 @@ export async function getVulnerabilityAlerts(): Promise<VulnerabilityAlert[]> {
   }`;
   let alerts = [];
   try {
-    const vulnerabilityAlerts = await githubApi.getGraphqlNodes<{ node: any }>(
+    const vulnerabilityAlerts = await githubApi.queryRepoField<{ node: any }>(
       query,
       'vulnerabilityAlerts',
       {
