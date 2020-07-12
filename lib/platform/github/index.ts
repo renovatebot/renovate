@@ -747,7 +747,12 @@ export async function getPr(prNo: number): Promise<Pr | null> {
   );
   const pr = (
     await githubApi.getJson<any>(
-      `repos/${config.parentRepo || config.repository}/pulls/${prNo}`
+      `repos/${config.parentRepo || config.repository}/pulls/${prNo}`,
+      {
+        headers: {
+          accept: 'application/vnd.github.merge-info-preview+json',
+        },
+      }
     )
   ).body;
   if (!pr) {
