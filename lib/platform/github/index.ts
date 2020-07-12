@@ -636,6 +636,7 @@ async function getOpenPrs(): Promise<PrList> {
       `;
       const nodes = await githubApi.queryRepoField<any>(query, 'pullRequests', {
         paginate: false,
+        acceptHeader: 'application/vnd.github.merge-info-preview+json',
       });
       const prNumbers: number[] = [];
       // istanbul ignore if
@@ -1000,7 +1001,7 @@ export async function getBranchStatus(
       )}/check-runs`;
       const opts = {
         headers: {
-          Accept: 'application/vnd.github.antiope-preview+json',
+          accept: 'application/vnd.github.antiope-preview+json',
         },
       };
       const checkRunsRaw = (
