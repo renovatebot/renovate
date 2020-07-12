@@ -135,6 +135,7 @@ export interface RenovateConfig
   baseBranches?: string[];
   baseBranch?: string;
   baseBranchSha?: string;
+  defaultBranch?: string;
   branchList?: string[];
   description?: string | string[];
 

@@ -143,21 +143,21 @@ Object {
 
 exports[`platform/gitea initRepo should fall back to merge method "merge" 1`] = `
 Object {
-  "baseBranch": "master",
+  "defaultBranch": "master",
   "isFork": false,
 }
 `;
 
 exports[`platform/gitea initRepo should fall back to merge method "rebase-merge" 1`] = `
 Object {
-  "baseBranch": "master",
+  "defaultBranch": "master",
   "isFork": false,
 }
 `;
 
 exports[`platform/gitea initRepo should fall back to merge method "squash" 1`] = `
 Object {
-  "baseBranch": "master",
+  "defaultBranch": "master",
   "isFork": false,
 }
 `;

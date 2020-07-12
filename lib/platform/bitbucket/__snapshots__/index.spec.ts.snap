@@ -1193,7 +1193,7 @@ Array [
 
 exports[`platform/bitbucket initRepo() works 1`] = `
 Object {
-  "baseBranch": "master",
+  "defaultBranch": "master",
   "isFork": false,
 }
 `;
