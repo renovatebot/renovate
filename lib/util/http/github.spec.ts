@@ -240,7 +240,7 @@ describe(getName(__filename), () => {
     it('supports app mode', async () => {
       httpMock.scope(githubApiHost).post('/graphql').reply(200, {});
       global.appMode = true;
-      await githubApi.getGraphqlNodes(query, 'testItem', { paginate: false });
+      await githubApi.queryRepoField(query, 'testItem', { paginate: false });
       const [req] = httpMock.getTrace();
       expect(req).toBeDefined();
       expect(req.headers.accept).toBe(
@@ -257,7 +257,7 @@ describe(getName(__filename), () => {
           },
         });
       expect(
-        await githubApi.getGraphqlNodes(query, 'testItem', { paginate: false })
+        await githubApi.queryRepoField(query, 'testItem', { paginate: false })
       ).toEqual([]);
     });
     it('returns empty array for undefined data.', async () => {
@@ -268,13 +268,13 @@ describe(getName(__filename), () => {
           data: { repository: { otherField: 'someval' } },
         });
       expect(
-        await githubApi.getGraphqlNodes(query, 'testItem', { paginate: false })
+        await githubApi.queryRepoField(query, 'testItem', { paginate: false })
       ).toEqual([]);
     });
     it('throws errors for invalid responses', async () => {
       httpMock.scope(githubApiHost).post('/graphql').reply(418);
       await expect(
-        githubApi.getGraphqlNodes(query, 'someItem', {
+        githubApi.queryRepoField(query, 'someItem', {
           paginate: false,
         })
       ).rejects.toThrow("Response code 418 (I'm a Teapot)");
@@ -289,10 +289,24 @@ describe(getName(__filename), () => {
             someprop: 'someval',
           },
         });
-      await githubApi.getGraphqlNodes(query, 'testItem');
+      await githubApi.queryRepoField(query, 'testItem');
       expect(httpMock.getTrace()).toHaveLength(7);
     });
-    it('retrieves all data from all pages', async () => {
+    it('queryRepo', async () => {
+      const repository = {
+        foo: 'foo',
+        bar: 'bar',
+      };
+      httpMock
+        .scope(githubApiHost)
+        .post('/graphql')
+        .reply(200, { data: { repository } });
+
+      const result = await githubApi.queryRepo(query);
+      expect(httpMock.getTrace()).toHaveLength(1);
+      expect(result).toStrictEqual(repository);
+    });
+    it('queryRepoField', async () => {
       httpMock
         .scope(githubApiHost)
         .post('/graphql')
@@ -359,7 +373,7 @@ describe(getName(__filename), () => {
           },
         });
 
-      const items = await githubApi.getGraphqlNodes(query, 'testItem');
+      const items = await githubApi.queryRepoField(query, 'testItem');
       expect(httpMock.getTrace()).toHaveLength(3);
       expect(items).toHaveLength(3);
     });
