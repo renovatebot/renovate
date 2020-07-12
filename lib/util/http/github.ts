@@ -140,6 +140,22 @@ interface GraphqlOptions {
   fromEnd?: boolean;
 }
 
+function constructAcceptString(input?: any): string {
+  const defaultAccept = 'application/vnd.github.v3+json';
+  const appModeAccept = 'application/vnd.github.machine-man-preview+json';
+  const acceptStrings = typeof input === 'string' ? input.split(/\s*,\s*/) : [];
+  if (global.appMode && !acceptStrings.includes(appModeAccept)) {
+    acceptStrings.unshift(appModeAccept);
+  }
+  if (
+    !acceptStrings.some((x) => x.startsWith('application/vnd.github.')) ||
+    acceptStrings.length < 2
+  ) {
+    acceptStrings.push(defaultAccept);
+  }
+  return acceptStrings.join(', ');
+}
+
 export class GithubHttp extends Http<GithubHttpOptions, GithubHttpOptions> {
   constructor(options?: GithubHttpOptions) {
     super(PLATFORM_TYPE_GITHUB, options);
@@ -165,18 +181,12 @@ export class GithubHttp extends Http<GithubHttpOptions, GithubHttpOptions> {
       opts.baseUrl = opts.baseUrl.replace('/v3/', '/');
     }
 
-    const accept = global.appMode
-      ? 'application/vnd.github.machine-man-preview+json'
-      : 'application/vnd.github.v3+json';
+    const accept = constructAcceptString(opts.headers?.accept);
 
     opts.headers = {
-      accept,
       ...opts.headers,
+      accept,
     };
-    const optsAccept = opts.headers.accept;
-    if (typeof optsAccept === 'string' && !optsAccept.includes(accept)) {
-      opts.headers.accept = `${accept}, ${optsAccept}`;
-    }
 
     try {
       result = await super.request<T>(url, opts);
