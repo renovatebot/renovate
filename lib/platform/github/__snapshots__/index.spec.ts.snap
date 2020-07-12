@@ -85,7 +85,7 @@ Array [
   Object {
     "body": "{\\"title\\":\\"PR draft\\",\\"head\\":\\"some:some-branch\\",\\"base\\":\\"master\\",\\"body\\":\\"This is a result of a draft\\",\\"draft\\":true}",
     "headers": Object {
-      "accept": "application/vnd.github.merge-info-preview+json, application/vnd.github.v3+json",
+      "accept": "application/vnd.github.v3+json",
       "accept-encoding": "gzip, deflate",
       "authorization": "token abc123",
       "content-length": 112,
@@ -124,7 +124,7 @@ Array [
   Object {
     "body": "{\\"title\\":\\"The Title\\",\\"head\\":\\"some:some-branch\\",\\"base\\":\\"master\\",\\"body\\":\\"Hello world\\",\\"draft\\":false}",
     "headers": Object {
-      "accept": "application/vnd.github.merge-info-preview+json, application/vnd.github.v3+json",
+      "accept": "application/vnd.github.v3+json",
       "accept-encoding": "gzip, deflate",
       "authorization": "token abc123",
       "content-length": 98,
@@ -224,7 +224,7 @@ Array [
   Object {
     "body": "{\\"title\\":\\"The Title\\",\\"head\\":\\"some:some-branch\\",\\"base\\":\\"master\\",\\"body\\":\\"Hello world\\",\\"draft\\":false}",
     "headers": Object {
-      "accept": "application/vnd.github.merge-info-preview+json, application/vnd.github.v3+json",
+      "accept": "application/vnd.github.v3+json",
       "accept-encoding": "gzip, deflate",
       "authorization": "token abc123",
       "content-length": 98,
@@ -1675,7 +1675,7 @@ Array [
       },
     },
     "headers": Object {
-      "accept": "application/vnd.github.v3+json",
+      "accept": "application/vnd.github.merge-info-preview+json, application/vnd.github.v3+json",
       "accept-encoding": "gzip, deflate",
       "authorization": "token abc123",
       "content-length": 1264,
@@ -1731,7 +1731,7 @@ Array [
   },
   Object {
     "headers": Object {
-      "accept": "application/vnd.github.v3+json",
+      "accept": "application/vnd.github.merge-info-preview+json, application/vnd.github.v3+json",
       "accept-encoding": "gzip, deflate",
       "authorization": "token abc123",
       "host": "api.github.com",
@@ -1919,7 +1919,7 @@ Array [
       },
     },
     "headers": Object {
-      "accept": "application/vnd.github.v3+json",
+      "accept": "application/vnd.github.merge-info-preview+json, application/vnd.github.v3+json",
       "accept-encoding": "gzip, deflate",
       "authorization": "token abc123",
       "content-length": 1264,
@@ -1975,7 +1975,7 @@ Array [
   },
   Object {
     "headers": Object {
-      "accept": "application/vnd.github.v3+json",
+      "accept": "application/vnd.github.merge-info-preview+json, application/vnd.github.v3+json",
       "accept-encoding": "gzip, deflate",
       "authorization": "token abc123",
       "host": "api.github.com",
@@ -2416,7 +2416,7 @@ Array [
       },
     },
     "headers": Object {
-      "accept": "application/vnd.github.v3+json",
+      "accept": "application/vnd.github.merge-info-preview+json, application/vnd.github.v3+json",
       "accept-encoding": "gzip, deflate",
       "authorization": "token abc123",
       "content-length": 1264,
@@ -2581,7 +2581,7 @@ Array [
       },
     },
     "headers": Object {
-      "accept": "application/vnd.github.v3+json",
+      "accept": "application/vnd.github.merge-info-preview+json, application/vnd.github.v3+json",
       "accept-encoding": "gzip, deflate",
       "authorization": "token abc123",
       "content-length": 1264,
@@ -2700,7 +2700,7 @@ Array [
       },
     },
     "headers": Object {
-      "accept": "application/vnd.github.v3+json",
+      "accept": "application/vnd.github.merge-info-preview+json, application/vnd.github.v3+json",
       "accept-encoding": "gzip, deflate",
       "authorization": "token abc123",
       "content-length": 1264,
@@ -2756,7 +2756,7 @@ Array [
   },
   Object {
     "headers": Object {
-      "accept": "application/vnd.github.v3+json",
+      "accept": "application/vnd.github.merge-info-preview+json, application/vnd.github.v3+json",
       "accept-encoding": "gzip, deflate",
       "authorization": "token abc123",
       "host": "api.github.com",
@@ -2868,7 +2868,7 @@ Array [
       },
     },
     "headers": Object {
-      "accept": "application/vnd.github.v3+json",
+      "accept": "application/vnd.github.merge-info-preview+json, application/vnd.github.v3+json",
       "accept-encoding": "gzip, deflate",
       "authorization": "token abc123",
       "content-length": 1264,
@@ -2924,7 +2924,7 @@ Array [
   },
   Object {
     "headers": Object {
-      "accept": "application/vnd.github.v3+json",
+      "accept": "application/vnd.github.merge-info-preview+json, application/vnd.github.v3+json",
       "accept-encoding": "gzip, deflate",
       "authorization": "token abc123",
       "host": "api.github.com",
@@ -3046,7 +3046,7 @@ Array [
       },
     },
     "headers": Object {
-      "accept": "application/vnd.github.v3+json",
+      "accept": "application/vnd.github.merge-info-preview+json, application/vnd.github.v3+json",
       "accept-encoding": "gzip, deflate",
       "authorization": "token abc123",
       "content-length": 1264,
@@ -3102,7 +3102,7 @@ Array [
   },
   Object {
     "headers": Object {
-      "accept": "application/vnd.github.v3+json",
+      "accept": "application/vnd.github.merge-info-preview+json, application/vnd.github.v3+json",
       "accept-encoding": "gzip, deflate",
       "authorization": "token abc123",
       "host": "api.github.com",
@@ -3225,7 +3225,7 @@ Array [
       },
     },
     "headers": Object {
-      "accept": "application/vnd.github.v3+json",
+      "accept": "application/vnd.github.merge-info-preview+json, application/vnd.github.v3+json",
       "accept-encoding": "gzip, deflate",
       "authorization": "token abc123",
       "content-length": 1264,
@@ -3281,7 +3281,7 @@ Array [
   },
   Object {
     "headers": Object {
-      "accept": "application/vnd.github.v3+json",
+      "accept": "application/vnd.github.merge-info-preview+json, application/vnd.github.v3+json",
       "accept-encoding": "gzip, deflate",
       "authorization": "token abc123",
       "host": "api.github.com",
@@ -3415,7 +3415,7 @@ Array [
       },
     },
     "headers": Object {
-      "accept": "application/vnd.github.v3+json",
+      "accept": "application/vnd.github.merge-info-preview+json, application/vnd.github.v3+json",
       "accept-encoding": "gzip, deflate",
       "authorization": "token abc123",
       "content-length": 1264,
@@ -3471,7 +3471,7 @@ Array [
   },
   Object {
     "headers": Object {
-      "accept": "application/vnd.github.v3+json",
+      "accept": "application/vnd.github.merge-info-preview+json, application/vnd.github.v3+json",
       "accept-encoding": "gzip, deflate",
       "authorization": "token abc123",
       "host": "api.github.com",
@@ -3605,7 +3605,7 @@ Array [
       },
     },
     "headers": Object {
-      "accept": "application/vnd.github.v3+json",
+      "accept": "application/vnd.github.merge-info-preview+json, application/vnd.github.v3+json",
       "accept-encoding": "gzip, deflate",
       "authorization": "token abc123",
       "content-length": 1264,
@@ -3661,7 +3661,7 @@ Array [
   },
   Object {
     "headers": Object {
-      "accept": "application/vnd.github.v3+json",
+      "accept": "application/vnd.github.merge-info-preview+json, application/vnd.github.v3+json",
       "accept-encoding": "gzip, deflate",
       "authorization": "token abc123",
       "host": "api.github.com",
@@ -3795,7 +3795,7 @@ Array [
       },
     },
     "headers": Object {
-      "accept": "application/vnd.github.v3+json",
+      "accept": "application/vnd.github.merge-info-preview+json, application/vnd.github.v3+json",
       "accept-encoding": "gzip, deflate",
       "authorization": "token abc123",
       "content-length": 1264,
@@ -3851,7 +3851,7 @@ Array [
   },
   Object {
     "headers": Object {
-      "accept": "application/vnd.github.v3+json",
+      "accept": "application/vnd.github.merge-info-preview+json, application/vnd.github.v3+json",
       "accept-encoding": "gzip, deflate",
       "authorization": "token abc123",
       "host": "api.github.com",
@@ -3985,7 +3985,7 @@ Array [
       },
     },
     "headers": Object {
-      "accept": "application/vnd.github.v3+json",
+      "accept": "application/vnd.github.merge-info-preview+json, application/vnd.github.v3+json",
       "accept-encoding": "gzip, deflate",
       "authorization": "token abc123",
       "content-length": 1264,
@@ -4041,7 +4041,7 @@ Array [
   },
   Object {
     "headers": Object {
-      "accept": "application/vnd.github.v3+json",
+      "accept": "application/vnd.github.merge-info-preview+json, application/vnd.github.v3+json",
       "accept-encoding": "gzip, deflate",
       "authorization": "token abc123",
       "host": "api.github.com",
@@ -4156,7 +4156,7 @@ Array [
       },
     },
     "headers": Object {
-      "accept": "application/vnd.github.v3+json",
+      "accept": "application/vnd.github.merge-info-preview+json, application/vnd.github.v3+json",
       "accept-encoding": "gzip, deflate",
       "authorization": "token abc123",
       "content-length": 1264,
@@ -4212,7 +4212,7 @@ Array [
   },
   Object {
     "headers": Object {
-      "accept": "application/vnd.github.v3+json",
+      "accept": "application/vnd.github.merge-info-preview+json, application/vnd.github.v3+json",
       "accept-encoding": "gzip, deflate",
       "authorization": "token abc123",
       "host": "api.github.com",
@@ -5406,7 +5406,7 @@ Array [
   Object {
     "body": "{\\"title\\":\\"The New Title\\",\\"body\\":\\"Hello world again\\"}",
     "headers": Object {
-      "accept": "application/vnd.github.merge-info-preview+json, application/vnd.github.v3+json",
+      "accept": "application/vnd.github.v3+json",
       "accept-encoding": "gzip, deflate",
       "authorization": "token abc123",
       "content-length": 52,

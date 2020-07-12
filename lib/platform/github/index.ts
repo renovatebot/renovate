@@ -619,6 +619,7 @@ async function getOpenPrs(): Promise<PrList> {
       `;
       const nodes = await githubApi.queryRepoField<any>(query, 'pullRequests', {
         paginate: false,
+        acceptHeader: 'application/vnd.github.merge-info-preview+json',
       });
       const prNumbers: number[] = [];
       // istanbul ignore if
@@ -746,7 +747,12 @@ export async function getPr(prNo: number): Promise<Pr | null> {
   );
   const pr = (
     await githubApi.getJson<any>(
-      `repos/${config.parentRepo || config.repository}/pulls/${prNo}`
+      `repos/${config.parentRepo || config.repository}/pulls/${prNo}`,
+      {
+        headers: {
+          accept: 'application/vnd.github.merge-info-preview+json',
+        },
+      }
     )
   ).body;
   if (!pr) {
@@ -1547,9 +1553,6 @@ export async function createPr({
       body,
       draft: draftPR,
     },
-    headers: {
-      accept: 'application/vnd.github.merge-info-preview+json',
-    },
   };
   // istanbul ignore if
   if (config.forkToken) {
@@ -1601,9 +1604,6 @@ export async function updatePr(
   }
   const options: any = {
     body: patchBody,
-    headers: {
-      accept: 'application/vnd.github.merge-info-preview+json',
-    },
   };
   // istanbul ignore if
   if (config.forkToken) {
