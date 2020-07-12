@@ -2024,7 +2024,7 @@ Array [
   },
   Object {
     "headers": Object {
-      "accept": "application/vnd.github.v3+json",
+      "accept": "application/vnd.github.antiope-preview+json, application/vnd.github.v3+json",
       "accept-encoding": "gzip, deflate",
       "authorization": "token abc123",
       "host": "api.github.com",
@@ -2094,7 +2094,7 @@ Array [
   },
   Object {
     "headers": Object {
-      "accept": "application/vnd.github.v3+json",
+      "accept": "application/vnd.github.antiope-preview+json, application/vnd.github.v3+json",
       "accept-encoding": "gzip, deflate",
       "authorization": "token abc123",
       "host": "api.github.com",
@@ -2132,7 +2132,7 @@ Array [
   },
   Object {
     "headers": Object {
-      "accept": "application/vnd.github.v3+json",
+      "accept": "application/vnd.github.antiope-preview+json, application/vnd.github.v3+json",
       "accept-encoding": "gzip, deflate",
       "authorization": "token abc123",
       "host": "api.github.com",
@@ -2170,7 +2170,7 @@ Array [
   },
   Object {
     "headers": Object {
-      "accept": "application/vnd.github.v3+json",
+      "accept": "application/vnd.github.antiope-preview+json, application/vnd.github.v3+json",
       "accept-encoding": "gzip, deflate",
       "authorization": "token abc123",
       "host": "api.github.com",
@@ -2208,7 +2208,7 @@ Array [
   },
   Object {
     "headers": Object {
-      "accept": "application/vnd.github.v3+json",
+      "accept": "application/vnd.github.antiope-preview+json, application/vnd.github.v3+json",
       "accept-encoding": "gzip, deflate",
       "authorization": "token abc123",
       "host": "api.github.com",
@@ -2246,7 +2246,7 @@ Array [
   },
   Object {
     "headers": Object {
-      "accept": "application/vnd.github.v3+json",
+      "accept": "application/vnd.github.antiope-preview+json, application/vnd.github.v3+json",
       "accept-encoding": "gzip, deflate",
       "authorization": "token abc123",
       "host": "api.github.com",
