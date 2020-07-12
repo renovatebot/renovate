@@ -26,20 +26,21 @@ export async function extractDependencies(
 ): Promise<ExtractResult> {
   logger.debug('processRepo()');
   /* eslint-disable no-param-reassign */
-  config.masterIssueChecks = {};
+  config.dependencyDashboardChecks = {};
   // istanbul ignore next
   if (
-    config.masterIssue ||
-    config.masterIssueApproval ||
+    config.dependencyDashboard ||
+    config.dependencyDashboardApproval ||
     config.prCreation === 'approval' ||
     (config.packageRules &&
       config.packageRules.some(
-        (rule) => rule.masterIssueApproval || rule.prCreation === 'approval'
+        (rule) =>
+          rule.dependencyDashboardApproval || rule.prCreation === 'approval'
       ))
   ) {
-    config.masterIssueTitle =
-      config.masterIssueTitle || `Update Dependencies (Renovate Bot)`;
-    const issue = await platform.findIssue(config.masterIssueTitle);
+    config.dependencyDashboardTitle =
+      config.dependencyDashboardTitle || `Dependency Dashboard`;
+    const issue = await platform.findIssue(config.dependencyDashboardTitle);
     if (issue) {
       const checkMatch = ' - \\[x\\] <!-- ([a-zA-Z]+)-branch=([^\\s]+) -->';
       const checked = issue.body.match(new RegExp(checkMatch, 'g'));
@@ -47,14 +48,14 @@ export async function extractDependencies(
         const re = new RegExp(checkMatch);
         checked.forEach((check) => {
           const [, type, branchName] = re.exec(check);
-          config.masterIssueChecks[branchName] = type;
+          config.dependencyDashboardChecks[branchName] = type;
         });
       }
       const checkedRebaseAll = issue.body.includes(
         ' - [x] <!-- rebase-all-open-prs -->'
       );
       if (checkedRebaseAll) {
-        config.masterIssueRebaseAllOpen = true;
+        config.dependencyDashboardRebaseAllOpen = true;
         /* eslint-enable no-param-reassign */
       }
     }

@@ -5,7 +5,7 @@ import { PLATFORM_TYPE_GITHUB } from '../../constants/platforms';
 import { PR_STATE_NOT_OPEN } from '../../constants/pull-requests';
 import { Platform, Pr } from '../../platform';
 import { BranchConfig, BranchUpgradeConfig } from '../common';
-import * as masterIssue from './master-issue';
+import * as dependencyDashboard from './master-issue';
 
 type PrUpgrade = BranchUpgradeConfig;
 
@@ -29,7 +29,7 @@ async function dryRun(
 ) {
   jest.resetAllMocks();
   config.dryRun = true;
-  await masterIssue.ensureMasterIssue(config, branches);
+  await dependencyDashboard.ensureMasterIssue(config, branches);
   expect(platform.ensureIssueClosing).toHaveBeenCalledTimes(
     ensureIssueClosingCalls
   );
@@ -42,7 +42,7 @@ describe('workers/repository/master-issue', () => {
   describe('ensureMasterIssue()', () => {
     it('do nothing if masterissue is disable', async () => {
       const branches: BranchConfig[] = [];
-      await masterIssue.ensureMasterIssue(config, branches);
+      await dependencyDashboard.ensureMasterIssue(config, branches);
       expect(platform.ensureIssueClosing).toHaveBeenCalledTimes(0);
       expect(platform.ensureIssue).toHaveBeenCalledTimes(0);
       expect(platform.getBranchPr).toHaveBeenCalledTimes(0);
@@ -61,10 +61,10 @@ describe('workers/repository/master-issue', () => {
         {
           ...mock<BranchConfig>(),
           prTitle: 'pr2',
-          masterIssueApproval: false,
+          dependencyDashboardApproval: false,
         },
       ];
-      await masterIssue.ensureMasterIssue(config, branches);
+      await dependencyDashboard.ensureMasterIssue(config, branches);
       expect(platform.ensureIssueClosing).toHaveBeenCalledTimes(0);
       expect(platform.ensureIssue).toHaveBeenCalledTimes(0);
       expect(platform.getBranchPr).toHaveBeenCalledTimes(0);
@@ -74,14 +74,14 @@ describe('workers/repository/master-issue', () => {
       await dryRun(branches, platform);
     });
 
-    it('closes master issue when there is 0 PR opened and masterIssueAutoclose is true', async () => {
+    it('closes Dependency Dashboard when there is 0 PR opened and dependencyDashboardAutoclose is true', async () => {
       const branches: BranchConfig[] = [];
-      config.masterIssue = true;
-      config.masterIssueAutoclose = true;
-      await masterIssue.ensureMasterIssue(config, branches);
+      config.dependencyDashboard = true;
+      config.dependencyDashboardAutoclose = true;
+      await dependencyDashboard.ensureMasterIssue(config, branches);
       expect(platform.ensureIssueClosing).toHaveBeenCalledTimes(1);
       expect(platform.ensureIssueClosing.mock.calls[0][0]).toBe(
-        config.masterIssueTitle
+        config.dependencyDashboardTitle
       );
       expect(platform.ensureIssue).toHaveBeenCalledTimes(0);
       expect(platform.getBranchPr).toHaveBeenCalledTimes(0);
@@ -91,22 +91,22 @@ describe('workers/repository/master-issue', () => {
       await dryRun(branches, platform);
     });
 
-    it('closes master issue when all branches are automerged and masterIssueAutoclose is true', async () => {
+    it('closes Dependency Dashboard when all branches are automerged and dependencyDashboardAutoclose is true', async () => {
       const branches: BranchConfig[] = [
         { ...mock<BranchConfig>(), prTitle: 'pr1', res: 'automerged' },
         {
           ...mock<BranchConfig>(),
           prTitle: 'pr2',
           res: 'automerged',
-          masterIssueApproval: false,
+          dependencyDashboardApproval: false,
         },
       ];
-      config.masterIssue = true;
-      config.masterIssueAutoclose = true;
-      await masterIssue.ensureMasterIssue(config, branches);
+      config.dependencyDashboard = true;
+      config.dependencyDashboardAutoclose = true;
+      await dependencyDashboard.ensureMasterIssue(config, branches);
       expect(platform.ensureIssueClosing).toHaveBeenCalledTimes(1);
       expect(platform.ensureIssueClosing.mock.calls[0][0]).toBe(
-        config.masterIssueTitle
+        config.dependencyDashboardTitle
       );
       expect(platform.ensureIssue).toHaveBeenCalledTimes(0);
       expect(platform.getBranchPr).toHaveBeenCalledTimes(0);
@@ -116,14 +116,14 @@ describe('workers/repository/master-issue', () => {
       await dryRun(branches, platform);
     });
 
-    it('open or update master issue when all branches are closed and masterIssueAutoclose is false', async () => {
+    it('open or update Dependency Dashboard when all branches are closed and dependencyDashboardAutoclose is false', async () => {
       const branches: BranchConfig[] = [];
-      config.masterIssue = true;
-      await masterIssue.ensureMasterIssue(config, branches);
+      config.dependencyDashboard = true;
+      await dependencyDashboard.ensureMasterIssue(config, branches);
       expect(platform.ensureIssueClosing).toHaveBeenCalledTimes(0);
       expect(platform.ensureIssue).toHaveBeenCalledTimes(1);
       expect(platform.ensureIssue.mock.calls[0][0].title).toBe(
-        config.masterIssueTitle
+        config.dependencyDashboardTitle
       );
       expect(platform.ensureIssue.mock.calls[0][0].body).toBe(
         'This repository is up-to-date and has no outstanding updates open or pending.'
@@ -194,12 +194,12 @@ describe('workers/repository/master-issue', () => {
           branchName: 'branchName8',
         },
       ];
-      config.masterIssue = true;
-      await masterIssue.ensureMasterIssue(config, branches);
+      config.dependencyDashboard = true;
+      await dependencyDashboard.ensureMasterIssue(config, branches);
       expect(platform.ensureIssueClosing).toHaveBeenCalledTimes(0);
       expect(platform.ensureIssue).toHaveBeenCalledTimes(1);
       expect(platform.ensureIssue.mock.calls[0][0].title).toBe(
-        config.masterIssueTitle
+        config.dependencyDashboardTitle
       );
       expect(platform.ensureIssue.mock.calls[0][0].body).toBe(
         fs.readFileSync(
@@ -234,15 +234,15 @@ describe('workers/repository/master-issue', () => {
           branchName: 'branchName2',
         },
       ];
-      config.masterIssue = true;
+      config.dependencyDashboard = true;
       platform.getBranchPr
         .mockResolvedValueOnce({ ...mock<Pr>(), number: 1 })
         .mockResolvedValueOnce(undefined);
-      await masterIssue.ensureMasterIssue(config, branches);
+      await dependencyDashboard.ensureMasterIssue(config, branches);
       expect(platform.ensureIssueClosing).toHaveBeenCalledTimes(0);
       expect(platform.ensureIssue).toHaveBeenCalledTimes(1);
       expect(platform.ensureIssue.mock.calls[0][0].title).toBe(
-        config.masterIssueTitle
+        config.dependencyDashboardTitle
       );
       expect(platform.ensureIssue.mock.calls[0][0].body).toBe(
         fs.readFileSync(
@@ -286,16 +286,16 @@ describe('workers/repository/master-issue', () => {
           branchName: 'branchName3',
         },
       ];
-      config.masterIssue = true;
+      config.dependencyDashboard = true;
       platform.getBranchPr
         .mockResolvedValueOnce({ ...mock<Pr>(), number: 1 })
         .mockResolvedValueOnce(undefined)
         .mockResolvedValueOnce({ ...mock<Pr>(), number: 3 });
-      await masterIssue.ensureMasterIssue(config, branches);
+      await dependencyDashboard.ensureMasterIssue(config, branches);
       expect(platform.ensureIssueClosing).toHaveBeenCalledTimes(0);
       expect(platform.ensureIssue).toHaveBeenCalledTimes(1);
       expect(platform.ensureIssue.mock.calls[0][0].title).toBe(
-        config.masterIssueTitle
+        config.dependencyDashboardTitle
       );
       expect(platform.ensureIssue.mock.calls[0][0].body).toBe(
         fs.readFileSync(
@@ -333,16 +333,16 @@ describe('workers/repository/master-issue', () => {
           branchName: 'branchName2',
         },
       ];
-      config.masterIssue = true;
+      config.dependencyDashboard = true;
       platform.getBranchPr
         .mockResolvedValueOnce({ ...mock<Pr>(), number: 1 })
         .mockResolvedValueOnce(undefined)
         .mockResolvedValueOnce({ ...mock<Pr>(), number: 3 });
-      await masterIssue.ensureMasterIssue(config, branches);
+      await dependencyDashboard.ensureMasterIssue(config, branches);
       expect(platform.ensureIssueClosing).toHaveBeenCalledTimes(0);
       expect(platform.ensureIssue).toHaveBeenCalledTimes(1);
       expect(platform.ensureIssue.mock.calls[0][0].title).toBe(
-        config.masterIssueTitle
+        config.dependencyDashboardTitle
       );
       expect(platform.ensureIssue.mock.calls[0][0].body).toBe(
         fs.readFileSync(
@@ -397,13 +397,13 @@ describe('workers/repository/master-issue', () => {
           branchName: 'branchName4',
         },
       ];
-      config.masterIssue = true;
-      config.masterIssuePrApproval = true;
-      await masterIssue.ensureMasterIssue(config, branches);
+      config.dependencyDashboard = true;
+      config.dependencyDashboardPrApproval = true;
+      await dependencyDashboard.ensureMasterIssue(config, branches);
       expect(platform.ensureIssueClosing).toHaveBeenCalledTimes(0);
       expect(platform.ensureIssue).toHaveBeenCalledTimes(1);
       expect(platform.ensureIssue.mock.calls[0][0].title).toBe(
-        config.masterIssueTitle
+        config.dependencyDashboardTitle
       );
       expect(platform.ensureIssue.mock.calls[0][0].body).toBe(
         fs.readFileSync(

@@ -427,9 +427,9 @@ describe('platform/github', () => {
         .scope(githubApiHost)
         .get('/repos/undefined/branches/undefined/protection')
         .reply(401);
-      await expect(github.getRepoForceRebase()).rejects.toMatchObject({
-        statusCode: 401,
-      });
+      await expect(
+        github.getRepoForceRebase()
+      ).rejects.toThrowErrorMatchingSnapshot();
       expect(httpMock.getTrace()).toMatchSnapshot();
     });
   });
@@ -1114,7 +1114,8 @@ describe('platform/github', () => {
         .patch('/repos/undefined/issues/2')
         .reply(200);
       const res = await github.ensureIssue({
-        title: 'title-2',
+        title: 'title-3',
+        reuseTitle: 'title-2',
         body: 'newer-content',
       });
       expect(res).toEqual('updated');

@@ -1,5 +1,6 @@
 import nock from 'nock';
 import * as httpMock from '../../../test/httpMock';
+import { getName } from '../../../test/util';
 import {
   REPOSITORY_CHANGED,
   REPOSITORY_DISABLED,
@@ -135,7 +136,7 @@ const scenarios = {
   'endpoint with path': new URL('https://stash.renovatebot.com/vcs'),
 };
 
-describe('platform/bitbucket-server', () => {
+describe(getName(__filename), () => {
   Object.entries(scenarios).forEach(([scenarioName, url]) => {
     const urlHost = url.origin;
     const urlPath = url.pathname === '/' ? '' : url.pathname;
@@ -582,9 +583,7 @@ describe('platform/bitbucket-server', () => {
             .reply(405);
           await expect(
             bitbucket.addReviewers(5, ['name'])
-          ).rejects.toMatchObject({
-            statusCode: 405,
-          });
+          ).rejects.toThrowErrorMatchingSnapshot();
           expect(httpMock.getTrace()).toMatchSnapshot();
         });
       });
@@ -1434,9 +1433,7 @@ describe('platform/bitbucket-server', () => {
 
           await expect(
             bitbucket.updatePr(5, 'title', 'body')
-          ).rejects.toMatchObject({
-            statusCode: 405,
-          });
+          ).rejects.toThrowErrorMatchingSnapshot();
           expect(httpMock.getTrace()).toMatchSnapshot();
         });
       });

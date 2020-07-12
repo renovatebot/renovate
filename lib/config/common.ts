@@ -35,7 +35,7 @@ export interface RenovateSharedConfig {
   ignorePaths?: string[];
   labels?: string[];
   managers?: string | string[];
-  masterIssueApproval?: boolean;
+  dependencyDashboardApproval?: boolean;
   npmrc?: string;
   platform?: string;
   postUpgradeTasks?: PostUpgradeTasks;
@@ -151,11 +151,11 @@ export interface RenovateConfig
 
   fileList?: string[];
 
-  masterIssue?: boolean;
-  masterIssueAutoclose?: boolean;
-  masterIssueChecks?: Record<string, string>;
-  masterIssueRebaseAllOpen?: boolean;
-  masterIssueTitle?: string;
+  dependencyDashboard?: boolean;
+  dependencyDashboardAutoclose?: boolean;
+  dependencyDashboardChecks?: Record<string, string>;
+  dependencyDashboardRebaseAllOpen?: boolean;
+  dependencyDashboardTitle?: string;
   packageFile?: string;
   packageRules?: PackageRule[];
   prConcurrentLimit?: number;

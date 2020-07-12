@@ -99,7 +99,7 @@ export interface BranchConfig
   canBeUnpublished?: boolean;
   errors?: ValidationMessage[];
   hasTypes?: boolean;
-  masterIssueChecks?: Record<string, string>;
+  dependencyDashboardChecks?: Record<string, string>;
   releaseTimestamp?: string;
   forceCommit?: boolean;
   rebaseRequested?: boolean;

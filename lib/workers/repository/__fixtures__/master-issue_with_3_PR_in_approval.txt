@@ -1,4 +1,4 @@
-This [master issue](https://renovatebot.com/blog/master-issue) contains a list of Renovate updates and their statuses.
+This issue contains a list of Renovate updates and their statuses.
 
 ## PR Creation Approval Required
 

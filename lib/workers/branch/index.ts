@@ -68,11 +68,14 @@ export async function processBranch(
   const branchExists = await gitBranchExists(config.branchName);
   const branchPr = await platform.getBranchPr(config.branchName);
   logger.debug(`branchExists=${branchExists}`);
-  const masterIssueCheck = (config.masterIssueChecks || {})[config.branchName];
+  const dependencyDashboardCheck = (config.dependencyDashboardChecks || {})[
+    config.branchName
+  ];
   // istanbul ignore if
-  if (masterIssueCheck) {
+  if (dependencyDashboardCheck) {
     logger.debug(
-      'Branch has been checked in master issue: ' + masterIssueCheck
+      'Branch has been checked in Dependency Dashboard: ' +
+        dependencyDashboardCheck
     );
   }
   if (branchPr) {
@@ -84,7 +87,7 @@ export async function processBranch(
 
     // Check if branch already existed
     const existingPr = branchPr ? undefined : await prAlreadyExisted(config);
-    if (existingPr && !masterIssueCheck) {
+    if (existingPr && !dependencyDashboardCheck) {
       logger.debug(
         { prTitle: config.prTitle },
         'Closed PR already exists. Skipping branch.'
@@ -131,8 +134,8 @@ export async function processBranch(
       return 'already-existed';
     }
     // istanbul ignore if
-    if (!branchExists && config.masterIssueApproval) {
-      if (masterIssueCheck) {
+    if (!branchExists && config.dependencyDashboardApproval) {
+      if (dependencyDashboardCheck) {
         logger.debug(`Branch ${config.branchName} is approved for creation`);
       } else {
         logger.debug(`Branch ${config.branchName} needs approval`);
@@ -142,7 +145,7 @@ export async function processBranch(
     if (
       !branchExists &&
       prHourlyLimitReached &&
-      !masterIssueCheck &&
+      !dependencyDashboardCheck &&
       !config.vulnerabilityAlert
     ) {
       logger.debug(
@@ -166,7 +169,7 @@ export async function processBranch(
             branchPr.targetBranch !== branchConfig.baseBranch)
         ) {
           logger.debug({ prNo: branchPr.number }, 'PR has been edited');
-          if (masterIssueCheck || config.rebaseRequested) {
+          if (dependencyDashboardCheck || config.rebaseRequested) {
             logger.debug('Manual rebase has been requested for PR');
           } else {
             const newBody = branchPr.body?.replace(
@@ -187,7 +190,7 @@ export async function processBranch(
 
     // Check schedule
     config.isScheduledNow = isScheduledNow(config);
-    if (!config.isScheduledNow && !masterIssueCheck) {
+    if (!config.isScheduledNow && !dependencyDashboardCheck) {
       if (!branchExists) {
         logger.debug('Skipping branch creation as not within schedule');
         return 'not-scheduled';
@@ -236,7 +239,10 @@ export async function processBranch(
               new Date(upgrade.releaseTimestamp).getTime()) /
               oneDay
           );
-          if (!masterIssueCheck && daysElapsed < upgrade.stabilityDays) {
+          if (
+            !dependencyDashboardCheck &&
+            daysElapsed < upgrade.stabilityDays
+          ) {
             logger.debug(
               {
                 depName: upgrade.depName,
@@ -251,7 +257,7 @@ export async function processBranch(
       }
       // Don't create a branch if we know it will be status 'pending'
       if (
-        !masterIssueCheck &&
+        !dependencyDashboardCheck &&
         !branchExists &&
         config.stabilityStatus === BranchStatus.yellow &&
         ['not-pending', 'status-success'].includes(config.prCreation)
@@ -262,8 +268,11 @@ export async function processBranch(
     }
 
     // istanbul ignore if
-    if (masterIssueCheck === 'rebase' || config.masterIssueRebaseAllOpen) {
-      logger.debug('Manual rebase requested via master issue');
+    if (
+      dependencyDashboardCheck === 'rebase' ||
+      config.dependencyDashboardRebaseAllOpen
+    ) {
+      logger.debug('Manual rebase requested via Dependency Dashboard');
       config.reuseExistingBranch = false;
     } else {
       Object.assign(config, await shouldReuseExistingBranch(config));
@@ -419,7 +428,9 @@ export async function processBranch(
       }
     }
     config.forceCommit =
-      !!masterIssueCheck || config.rebaseRequested || branchPr?.isConflicted;
+      !!dependencyDashboardCheck ||
+      config.rebaseRequested ||
+      branchPr?.isConflicted;
     const commitHash = await commitFilesToBranch(config);
     // istanbul ignore if
     if (branchPr && platform.refreshPr) {
@@ -438,7 +449,7 @@ export async function processBranch(
 
     // break if we pushed a new commit because status check are pretty sure pending but maybe not reported yet
     if (
-      !masterIssueCheck &&
+      !dependencyDashboardCheck &&
       !config.rebaseRequested &&
       commitHash &&
       (config.requiredStatusChecks?.length || config.prCreation !== 'immediate')
