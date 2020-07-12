@@ -231,10 +231,7 @@ export async function initRepo({
           name
         }
       }
-    }`,
-      {
-        acceptHeader: 'application/vnd.github.v3+json',
-      }
+    }`
     );
     // istanbul ignore if
     if (repo.isFork && !includeForks) {
