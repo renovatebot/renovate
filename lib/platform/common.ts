@@ -13,7 +13,7 @@ export interface PlatformConfig {
 }
 
 export interface RepoConfig {
-  baseBranch: string;
+  defaultBranch: string;
   endpoint?: string;
   renovateUsername?: any;
   gitAuthor?: any;
