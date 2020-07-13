@@ -171,13 +171,6 @@ describe(getName(__filename), () => {
         .get('/')
         .reply(200)
         .get('/library/some-dep/manifests/some-tag')
-        .reply(302, undefined, {
-          location: 'https://abc.s3.amazon.com/_dummy?X-Amz-Algorithm=xxxx',
-        });
-      httpMock
-        .scope('https://abc.s3.amazon.com')
-        .get('/_dummy')
-        .query({ 'X-Amz-Algorithm': 'xxxx' })
         .reply(200, '', { 'docker-content-digest': 'some-digest' });
       const res = await getDigest(
         { datasource: 'docker', depName: 'some-dep' },
@@ -188,7 +181,6 @@ describe(getName(__filename), () => {
       expect(trace[1].headers.authorization).toBe(
         'Basic c29tZS11c2VybmFtZTpzb21lLXBhc3N3b3Jk'
       );
-      expect(trace[3].headers.authorization).toBeUndefined();
       expect(trace).toMatchSnapshot();
     });
     it('returns null for 403 with basic authentication', async () => {
