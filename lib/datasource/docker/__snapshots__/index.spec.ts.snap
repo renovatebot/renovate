@@ -604,6 +604,91 @@ Array [
 ]
 `;
 
+exports[`datasource/docker/index getReleases supports redirect 1`] = `
+Object {
+  "dockerRegistry": "https://registry.company.com",
+  "dockerRepository": "node",
+  "releases": Array [],
+  "sourceUrl": "https://github.com/renovatebot/renovate",
+}
+`;
+
+exports[`datasource/docker/index getReleases supports redirect 2`] = `
+Array [
+  Object {
+    "headers": Object {
+      "accept-encoding": "gzip, deflate",
+      "authorization": "Basic c29tZS11c2VybmFtZTpzb21lLXBhc3N3b3Jk",
+      "host": "registry.company.com",
+      "user-agent": "https://github.com/renovatebot/renovate",
+    },
+    "method": "GET",
+    "url": "https://registry.company.com/v2/",
+  },
+  Object {
+    "headers": Object {
+      "accept": "application/json",
+      "accept-encoding": "gzip, deflate",
+      "authorization": "Basic c29tZS11c2VybmFtZTpzb21lLXBhc3N3b3Jk",
+      "host": "registry.company.com",
+      "user-agent": "https://github.com/renovatebot/renovate",
+    },
+    "method": "GET",
+    "url": "https://registry.company.com/v2/node/tags/list?n=10000",
+  },
+  Object {
+    "headers": Object {
+      "accept-encoding": "gzip, deflate",
+      "authorization": "Basic c29tZS11c2VybmFtZTpzb21lLXBhc3N3b3Jk",
+      "host": "registry.company.com",
+      "user-agent": "https://github.com/renovatebot/renovate",
+    },
+    "method": "GET",
+    "url": "https://registry.company.com/v2/",
+  },
+  Object {
+    "headers": Object {
+      "accept": "application/vnd.docker.distribution.manifest.v2+json",
+      "accept-encoding": "gzip, deflate",
+      "authorization": "Basic c29tZS11c2VybmFtZTpzb21lLXBhc3N3b3Jk",
+      "host": "registry.company.com",
+      "user-agent": "https://github.com/renovatebot/renovate",
+    },
+    "method": "GET",
+    "url": "https://registry.company.com/v2/node/manifests/latest",
+  },
+  Object {
+    "headers": Object {
+      "accept-encoding": "gzip, deflate",
+      "authorization": "Basic c29tZS11c2VybmFtZTpzb21lLXBhc3N3b3Jk",
+      "host": "registry.company.com",
+      "user-agent": "https://github.com/renovatebot/renovate",
+    },
+    "method": "GET",
+    "url": "https://registry.company.com/v2/",
+  },
+  Object {
+    "headers": Object {
+      "accept-encoding": "gzip, deflate",
+      "authorization": "Basic c29tZS11c2VybmFtZTpzb21lLXBhc3N3b3Jk",
+      "host": "registry.company.com",
+      "user-agent": "https://github.com/renovatebot/renovate",
+    },
+    "method": "GET",
+    "url": "https://registry.company.com/v2/node/blobs/some-config-digest",
+  },
+  Object {
+    "headers": Object {
+      "accept-encoding": "gzip, deflate",
+      "host": "abc.s3.amazon.com",
+      "user-agent": "https://github.com/renovatebot/renovate",
+    },
+    "method": "GET",
+    "url": "https://abc.s3.amazon.com/some-config-digest?X-Amz-Algorithm=xxxx",
+  },
+]
+`;
+
 exports[`datasource/docker/index getReleases uses custom registry in depName 1`] = `
 Array [
   Object {

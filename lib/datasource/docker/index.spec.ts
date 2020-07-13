@@ -328,7 +328,7 @@ describe(getName(__filename), () => {
         .get(
           '/token?service=registry.docker.io&scope=repository:library/some-other-dep:pull'
         )
-        .reply(200, { token: 'some-token' });
+        .reply(200, { access_token: 'some-token' });
       const res = await getDigest(
         { datasource: 'docker', depName: 'some-other-dep' },
         '8.0.0-alpine'
@@ -529,6 +529,49 @@ describe(getName(__filename), () => {
       });
       expect(res).toBeNull();
       expect(httpMock.getTrace()).toMatchSnapshot();
+    });
+
+    it('supports redirect', async () => {
+      httpMock
+        .scope('https://registry.company.com/v2')
+        .get('/')
+        .times(3)
+        .reply(200)
+        .get('/node/tags/list?n=10000')
+        .reply(200, { tags: ['latest'] })
+        .get('/node/manifests/latest')
+        .reply(200, {
+          schemaVersion: 2,
+          config: { digest: 'some-config-digest' },
+        })
+        .get('/node/blobs/some-config-digest')
+        .reply(302, undefined, {
+          location:
+            'https://abc.s3.amazon.com/some-config-digest?X-Amz-Algorithm=xxxx',
+        });
+      httpMock
+        .scope('https://abc.s3.amazon.com')
+        .get('/some-config-digest')
+        .query({ 'X-Amz-Algorithm': 'xxxx' })
+        .reply(200, {
+          config: {
+            Labels: {
+              'org.opencontainers.image.source':
+                'https://github.com/renovatebot/renovate',
+            },
+          },
+        });
+      const res = await getPkgReleases({
+        datasource: docker.id,
+        depName: 'registry.company.com/node',
+      });
+      const trace = httpMock.getTrace();
+      expect(res).toMatchSnapshot();
+      expect(trace).toMatchSnapshot();
+      expect(trace[1].headers.authorization).toBe(
+        'Basic c29tZS11c2VybmFtZTpzb21lLXBhc3N3b3Jk'
+      );
+      expect(trace[trace.length - 1].headers.authorization).toBeUndefined();
     });
   });
 });

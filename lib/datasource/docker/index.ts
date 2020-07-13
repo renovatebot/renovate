@@ -448,7 +448,6 @@ async function getTags(
  *  - Return the labels for the requested image
  */
 
-// istanbul ignore next
 async function getLabels(
   registry: string,
   repository: string,
