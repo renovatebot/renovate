@@ -294,6 +294,16 @@ Array [
     "method": "GET",
     "url": "https://index.docker.io/v2/library/some-dep/manifests/some-tag",
   },
+  Object {
+    "headers": Object {
+      "accept": "application/vnd.docker.distribution.manifest.v2+json",
+      "accept-encoding": "gzip, deflate",
+      "host": "abc.s3.amazon.com",
+      "user-agent": "https://github.com/renovatebot/renovate",
+    },
+    "method": "GET",
+    "url": "https://abc.s3.amazon.com/_dummy?X-Amz-Algorithm=xxxx",
+  },
 ]
 `;
 
