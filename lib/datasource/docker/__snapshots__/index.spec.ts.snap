@@ -14,7 +14,6 @@ Array [
   },
   Object {
     "headers": Object {
-      "accept": "application/json",
       "accept-encoding": "gzip, deflate",
       "host": "123456789.dkr.ecr.us-east-1.amazonaws.com",
       "user-agent": "https://github.com/renovatebot/renovate",
@@ -39,7 +38,6 @@ Array [
   },
   Object {
     "headers": Object {
-      "accept": "application/json",
       "accept-encoding": "gzip, deflate",
       "host": "123456789.dkr.ecr.us-east-1.amazonaws.com",
       "user-agent": "https://github.com/renovatebot/renovate",
@@ -164,7 +162,6 @@ Array [
   },
   Object {
     "headers": Object {
-      "accept": "application/json",
       "accept-encoding": "gzip, deflate",
       "authorization": "Basic c29tZS11c2VybmFtZTpzb21lLXBhc3N3b3Jk",
       "host": "index.docker.io",
@@ -242,7 +239,6 @@ Array [
   },
   Object {
     "headers": Object {
-      "accept": "application/json",
       "accept-encoding": "gzip, deflate",
       "authorization": "Basic abcdef",
       "host": "123456789.dkr.ecr.us-east-1.amazonaws.com",
@@ -279,7 +275,6 @@ Array [
   },
   Object {
     "headers": Object {
-      "accept": "application/json",
       "accept-encoding": "gzip, deflate",
       "authorization": "Basic c29tZS11c2VybmFtZTpzb21lLXBhc3N3b3Jk",
       "host": "index.docker.io",
