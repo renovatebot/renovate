@@ -242,7 +242,7 @@ export async function setBaseBranch(
   branchName: string = config.defaultBranch
 ): Promise<string> {
   config.baseBranch = branchName;
-  const baseBranchSha = await git.setBaseBranch(branchName);
+  const baseBranchSha = await git.setBranch(branchName);
   return baseBranchSha;
 }
 

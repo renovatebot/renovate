@@ -497,7 +497,7 @@ export async function setBaseBranch(
 ): Promise<string> {
   config.baseBranch = branchName;
   config.baseCommitSHA = null;
-  const baseBranchSha = await git.setBaseBranch(branchName);
+  const baseBranchSha = await git.setBranch(branchName);
   return baseBranchSha;
 }
 

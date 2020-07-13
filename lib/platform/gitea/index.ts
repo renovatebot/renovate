@@ -449,7 +449,7 @@ const platform: Platform = {
     baseBranch: string = config.defaultBranch
   ): Promise<string> {
     config.baseBranch = baseBranch;
-    const baseBranchSha = await git.setBaseBranch(baseBranch);
+    const baseBranchSha = await git.setBranch(baseBranch);
     return baseBranchSha;
   },
 
