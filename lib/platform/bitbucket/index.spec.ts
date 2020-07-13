@@ -42,7 +42,9 @@ mccabe==0.6.1
 
 const commits = {
   size: 1,
-  values: [{ author: { raw: 'Renovate Bot <bot@renovateapp.com>' } }],
+  values: [
+    { author: { raw: 'Renovate Bot <renovate@whitesourcesoftware.com>' } },
+  ],
 };
 
 describe('platform/bitbucket', () => {
@@ -756,7 +758,10 @@ describe('platform/bitbucket', () => {
       try {
         expect(await bitbucket.getPr(3)).toMatchSnapshot();
 
-        global.gitAuthor = { email: 'bot@renovateapp.com', name: 'bot' };
+        global.gitAuthor = {
+          email: 'renovate@whitesourcesoftware.com',
+          name: 'bot',
+        };
         expect(await bitbucket.getPr(5)).toMatchSnapshot();
 
         global.gitAuthor = { email: 'jane@example.com', name: 'jane' };

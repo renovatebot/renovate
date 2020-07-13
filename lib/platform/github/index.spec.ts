@@ -1653,7 +1653,7 @@ describe('platform/github', () => {
         });
       global.gitAuthor = {
         name: 'Renovate Bot',
-        email: 'bot@renovateapp.com',
+        email: 'renovate@whitesourcesoftware.com',
       };
       await github.initRepo({
         repository: 'some/repo',
@@ -1920,7 +1920,7 @@ describe('platform/github', () => {
           {
             commit: {
               author: {
-                email: 'bot@renovateapp.com',
+                email: 'renovate@whitesourcesoftware.com',
               },
             },
           },
@@ -1933,7 +1933,7 @@ describe('platform/github', () => {
         });
       global.gitAuthor = {
         name: 'Renovate Bot',
-        email: 'bot@renovateapp.com',
+        email: 'renovate@whitesourcesoftware.com',
       };
       await github.initRepo({
         repository: 'some/repo',
@@ -1976,7 +1976,7 @@ describe('platform/github', () => {
         });
       global.gitAuthor = {
         name: 'Renovate Bot',
-        email: 'bot@renovateapp.com',
+        email: 'renovate@whitesourcesoftware.com',
       };
       await github.initRepo({
         repository: 'some/repo',

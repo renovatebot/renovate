@@ -430,7 +430,11 @@ describe(getName(__filename), () => {
             .twice()
             .reply(200, {
               totalCount: 1,
-              values: [{ author: { emailAddress: 'bot@renovateapp.com' } }],
+              values: [
+                {
+                  author: { emailAddress: 'renovate@whitesourcesoftware.com' },
+                },
+              ],
             })
             .get(
               `${urlPath}/rest/api/1.0/projects/SOME/repos/repo/pull-requests/5`
@@ -461,7 +465,11 @@ describe(getName(__filename), () => {
             .twice()
             .reply(200, {
               totalCount: 1,
-              values: [{ author: { emailAddress: 'bot@renovateapp.com' } }],
+              values: [
+                {
+                  author: { emailAddress: 'renovate@whitesourcesoftware.com' },
+                },
+              ],
             })
             .get(
               `${urlPath}/rest/api/1.0/projects/SOME/repos/repo/pull-requests/5`
@@ -517,7 +525,11 @@ describe(getName(__filename), () => {
             )
             .reply(200, {
               totalCount: 1,
-              values: [{ author: { emailAddress: 'bot@renovateapp.com' } }],
+              values: [
+                {
+                  author: { emailAddress: 'renovate@whitesourcesoftware.com' },
+                },
+              ],
             })
             .put(
               `${urlPath}/rest/api/1.0/projects/SOME/repos/repo/pull-requests/5`
@@ -547,7 +559,11 @@ describe(getName(__filename), () => {
             )
             .reply(200, {
               totalCount: 1,
-              values: [{ author: { emailAddress: 'bot@renovateapp.com' } }],
+              values: [
+                {
+                  author: { emailAddress: 'renovate@whitesourcesoftware.com' },
+                },
+              ],
             })
             .put(
               `${urlPath}/rest/api/1.0/projects/SOME/repos/repo/pull-requests/5`
@@ -575,7 +591,11 @@ describe(getName(__filename), () => {
             )
             .reply(200, {
               totalCount: 1,
-              values: [{ author: { emailAddress: 'bot@renovateapp.com' } }],
+              values: [
+                {
+                  author: { emailAddress: 'renovate@whitesourcesoftware.com' },
+                },
+              ],
             })
             .put(
               `${urlPath}/rest/api/1.0/projects/SOME/repos/repo/pull-requests/5`
@@ -1076,7 +1096,11 @@ describe(getName(__filename), () => {
             )
             .reply(200, {
               totalCount: 1,
-              values: [{ author: { emailAddress: 'bot@renovateapp.com' } }],
+              values: [
+                {
+                  author: { emailAddress: 'renovate@whitesourcesoftware.com' },
+                },
+              ],
             });
 
           expect(
@@ -1219,7 +1243,11 @@ describe(getName(__filename), () => {
             )
             .reply(200, {
               totalCount: 1,
-              values: [{ author: { emailAddress: 'bot@renovateapp.com' } }],
+              values: [
+                {
+                  author: { emailAddress: 'renovate@whitesourcesoftware.com' },
+                },
+              ],
             });
 
           expect(await bitbucket.getPr(5)).toMatchSnapshot();
@@ -1259,14 +1287,21 @@ describe(getName(__filename), () => {
             .twice()
             .reply(200, {
               totalCount: 1,
-              values: [{ author: { emailAddress: 'bot@renovateapp.com' } }],
+              values: [
+                {
+                  author: { emailAddress: 'renovate@whitesourcesoftware.com' },
+                },
+              ],
             });
 
           const author = global.gitAuthor;
           try {
             expect(await bitbucket.getPr(3)).toMatchSnapshot();
 
-            global.gitAuthor = { email: 'bot@renovateapp.com', name: 'bot' };
+            global.gitAuthor = {
+              email: 'renovate@whitesourcesoftware.com',
+              name: 'bot',
+            };
             expect(await bitbucket.getPr(5)).toMatchSnapshot();
 
             global.gitAuthor = { email: 'jane@example.com', name: 'jane' };
@@ -1315,7 +1350,11 @@ describe(getName(__filename), () => {
             )
             .reply(200, {
               totalCount: 1,
-              values: [{ author: { emailAddress: 'bot@renovateapp.com' } }],
+              values: [
+                {
+                  author: { emailAddress: 'renovate@whitesourcesoftware.com' },
+                },
+              ],
             })
             .put(
               `${urlPath}/rest/api/1.0/projects/SOME/repos/repo/pull-requests/5`
@@ -1365,7 +1404,11 @@ describe(getName(__filename), () => {
             )
             .reply(200, {
               totalCount: 1,
-              values: [{ author: { emailAddress: 'bot@renovateapp.com' } }],
+              values: [
+                {
+                  author: { emailAddress: 'renovate@whitesourcesoftware.com' },
+                },
+              ],
             })
             .put(
               `${urlPath}/rest/api/1.0/projects/SOME/repos/repo/pull-requests/5`
@@ -1395,7 +1438,11 @@ describe(getName(__filename), () => {
             )
             .reply(200, {
               totalCount: 1,
-              values: [{ author: { emailAddress: 'bot@renovateapp.com' } }],
+              values: [
+                {
+                  author: { emailAddress: 'renovate@whitesourcesoftware.com' },
+                },
+              ],
             })
             .put(
               `${urlPath}/rest/api/1.0/projects/SOME/repos/repo/pull-requests/5`
@@ -1424,7 +1471,11 @@ describe(getName(__filename), () => {
             )
             .reply(200, {
               totalCount: 1,
-              values: [{ author: { emailAddress: 'bot@renovateapp.com' } }],
+              values: [
+                {
+                  author: { emailAddress: 'renovate@whitesourcesoftware.com' },
+                },
+              ],
             })
             .put(
               `${urlPath}/rest/api/1.0/projects/SOME/repos/repo/pull-requests/5`
@@ -1455,7 +1506,11 @@ describe(getName(__filename), () => {
             )
             .reply(200, {
               totalCount: 1,
-              values: [{ author: { emailAddress: 'bot@renovateapp.com' } }],
+              values: [
+                {
+                  author: { emailAddress: 'renovate@whitesourcesoftware.com' },
+                },
+              ],
             })
             .post(
               `${urlPath}/rest/api/1.0/projects/SOME/repos/repo/pull-requests/5/merge?version=1`
@@ -1503,7 +1558,11 @@ describe(getName(__filename), () => {
             )
             .reply(200, {
               totalCount: 1,
-              values: [{ author: { emailAddress: 'bot@renovateapp.com' } }],
+              values: [
+                {
+                  author: { emailAddress: 'renovate@whitesourcesoftware.com' },
+                },
+              ],
             })
             .post(
               `${urlPath}/rest/api/1.0/projects/SOME/repos/repo/pull-requests/5/merge?version=1`
@@ -1532,7 +1591,11 @@ describe(getName(__filename), () => {
             )
             .reply(200, {
               totalCount: 1,
-              values: [{ author: { emailAddress: 'bot@renovateapp.com' } }],
+              values: [
+                {
+                  author: { emailAddress: 'renovate@whitesourcesoftware.com' },
+                },
+              ],
             })
             .post(
               `${urlPath}/rest/api/1.0/projects/SOME/repos/repo/pull-requests/5/merge?version=1`
@@ -1559,7 +1622,11 @@ describe(getName(__filename), () => {
             )
             .reply(200, {
               totalCount: 1,
-              values: [{ author: { emailAddress: 'bot@renovateapp.com' } }],
+              values: [
+                {
+                  author: { emailAddress: 'renovate@whitesourcesoftware.com' },
+                },
+              ],
             })
             .post(
               `${urlPath}/rest/api/1.0/projects/SOME/repos/repo/pull-requests/5/merge?version=1`
