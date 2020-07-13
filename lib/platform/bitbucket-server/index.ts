@@ -203,7 +203,7 @@ export async function initRepo({
     config.baseBranch = config.defaultBranch;
     config.mergeMethod = 'merge';
     const repoConfig: RepoConfig = {
-      baseBranch: config.baseBranch,
+      defaultBranch: config.baseBranch,
       isFork: !!info.parent,
     };
     return repoConfig;
@@ -242,7 +242,7 @@ export async function setBaseBranch(
   branchName: string = config.defaultBranch
 ): Promise<string> {
   config.baseBranch = branchName;
-  const baseBranchSha = await git.setBaseBranch(branchName);
+  const baseBranchSha = await git.setBranch(branchName);
   return baseBranchSha;
 }
 
@@ -576,7 +576,7 @@ export async function setBranchStatus({
 // function getIssueList() {
 //   logger.debug(`getIssueList()`);
 //   // TODO: Needs implementation
-//   // This is used by Renovate when creating its own issues, e.g. for deprecated package warnings, config error notifications, or "masterIssue"
+//   // This is used by Renovate when creating its own issues, e.g. for deprecated package warnings, config error notifications, or "dependencyDashboard"
 //   // BB Server doesnt have issues
 //   return [];
 // }
@@ -586,7 +586,7 @@ export /* istanbul ignore next */ function findIssue(
 ): Promise<Issue | null> {
   logger.debug(`findIssue(${title})`);
   // TODO: Needs implementation
-  // This is used by Renovate when creating its own issues, e.g. for deprecated package warnings, config error notifications, or "masterIssue"
+  // This is used by Renovate when creating its own issues, e.g. for deprecated package warnings, config error notifications, or "dependencyDashboard"
   // BB Server doesnt have issues
   return null;
 }
@@ -596,7 +596,7 @@ export /* istanbul ignore next */ function ensureIssue({
 }: EnsureIssueConfig): Promise<EnsureIssueResult | null> {
   logger.warn({ title }, 'Cannot ensure issue');
   // TODO: Needs implementation
-  // This is used by Renovate when creating its own issues, e.g. for deprecated package warnings, config error notifications, or "masterIssue"
+  // This is used by Renovate when creating its own issues, e.g. for deprecated package warnings, config error notifications, or "dependencyDashboard"
   // BB Server doesnt have issues
   return null;
 }
@@ -612,7 +612,7 @@ export /* istanbul ignore next */ function ensureIssueClosing(
 ): Promise<void> {
   logger.debug(`ensureIssueClosing(${title})`);
   // TODO: Needs implementation
-  // This is used by Renovate when creating its own issues, e.g. for deprecated package warnings, config error notifications, or "masterIssue"
+  // This is used by Renovate when creating its own issues, e.g. for deprecated package warnings, config error notifications, or "dependencyDashboard"
   // BB Server doesnt have issues
   return Promise.resolve();
 }

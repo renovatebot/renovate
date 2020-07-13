@@ -2398,7 +2398,7 @@ Object {
 
 exports[`platform/bitbucket-server/index endpoint with no path initRepo() does not throw 1`] = `
 Object {
-  "baseBranch": "master",
+  "defaultBranch": "master",
   "isFork": false,
 }
 `;
@@ -2463,7 +2463,7 @@ Array [
 
 exports[`platform/bitbucket-server/index endpoint with no path initRepo() works 1`] = `
 Object {
-  "baseBranch": "master",
+  "defaultBranch": "master",
   "isFork": false,
 }
 `;
@@ -6264,7 +6264,7 @@ Object {
 
 exports[`platform/bitbucket-server/index endpoint with path initRepo() does not throw 1`] = `
 Object {
-  "baseBranch": "master",
+  "defaultBranch": "master",
   "isFork": false,
 }
 `;
@@ -6329,7 +6329,7 @@ Array [
 
 exports[`platform/bitbucket-server/index endpoint with path initRepo() works 1`] = `
 Object {
-  "baseBranch": "master",
+  "defaultBranch": "master",
   "isFork": false,
 }
 `;

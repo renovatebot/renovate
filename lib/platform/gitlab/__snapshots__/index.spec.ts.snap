@@ -636,11 +636,11 @@ Array [
     "url": "https://gitlab.com/api/v4/projects/undefined/issues/2",
   },
   Object {
-    "body": "{\\"description\\":\\"newer-content\\"}",
+    "body": "{\\"title\\":\\"title-2\\",\\"description\\":\\"newer-content\\"}",
     "headers": Object {
       "accept": "application/json",
       "accept-encoding": "gzip, deflate",
-      "content-length": "31",
+      "content-length": "49",
       "content-type": "application/json",
       "host": "gitlab.com",
       "private-token": "abc123",

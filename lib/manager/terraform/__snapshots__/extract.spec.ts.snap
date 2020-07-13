@@ -154,6 +154,9 @@ Object {
       "depName": "app.terraform.io/example-corp/k8s-cluster/azurerm",
       "depNameShort": "app.terraform.io/example-corp/k8s-cluster/azurerm",
       "depType": "terraform",
+      "registryUrls": Array [
+        "https://app.terraform.io",
+      ],
     },
     Object {
       "currentValue": "~> 1.1",
@@ -161,6 +164,9 @@ Object {
       "depName": "app.terraform.io/example-corp/k8s-cluster/azurerm",
       "depNameShort": "app.terraform.io/example-corp/k8s-cluster/azurerm",
       "depType": "terraform",
+      "registryUrls": Array [
+        "https://app.terraform.io",
+      ],
     },
     Object {
       "currentValue": "~~ 1.1",
@@ -168,6 +174,9 @@ Object {
       "depName": "app.terraform.io/example-corp/k8s-cluster/azurerm",
       "depNameShort": "app.terraform.io/example-corp/k8s-cluster/azurerm",
       "depType": "terraform",
+      "registryUrls": Array [
+        "https://app.terraform.io",
+      ],
     },
     Object {
       "currentValue": ">= 1.0.0, <= 2.0.0",

@@ -51,6 +51,7 @@ import {
   Comment,
   GhBranchStatus,
   GhPr,
+  GhRepo,
   LocalRepoConfig,
   PrList,
 } from './types';
@@ -215,12 +216,25 @@ export async function initRepo({
   config.isGhe = URL.parse(defaults.endpoint).host !== 'api.github.com';
   config.renovateUsername = renovateUsername;
   [config.repositoryOwner, config.repositoryName] = repository.split('/');
-  let res;
+  let repo: GhRepo;
   try {
-    res = await githubApi.getJson<{ fork: boolean }>(`repos/${repository}`);
-    logger.trace({ repositoryDetails: res.body }, 'Repository details');
+    repo = await githubApi.queryRepo<GhRepo>(
+      `{
+      repository(owner: "${config.repositoryOwner}", name: "${config.repositoryName}") {
+        isFork
+        isArchived
+        nameWithOwner
+        mergeCommitAllowed
+        rebaseMergeAllowed
+        squashMergeAllowed
+        defaultBranchRef {
+          name
+        }
+      }
+    }`
+    );
     // istanbul ignore if
-    if (res.body.fork && !includeForks) {
+    if (repo.isFork && !includeForks) {
       try {
         const renovateConfig = JSON.parse(
           Buffer.from(
@@ -239,14 +253,14 @@ export async function initRepo({
         throw new Error(REPOSITORY_FORKED);
       }
     }
-    if (res.body.full_name && res.body.full_name !== repository) {
+    if (repo.nameWithOwner && repo.nameWithOwner !== repository) {
       logger.debug(
-        { repository, this_repository: res.body.full_name },
+        { repository, this_repository: repo.nameWithOwner },
         'Repository has been renamed'
       );
       throw new Error(REPOSITORY_RENAMED);
     }
-    if (res.body.archived) {
+    if (repo.isArchived) {
       logger.debug(
         'Repository is archived - throwing error to abort renovation'
       );
@@ -273,16 +287,16 @@ export async function initRepo({
       }
     }
     // Use default branch as PR target unless later overridden.
-    config.defaultBranch = res.body.default_branch;
+    config.defaultBranch = repo.defaultBranchRef.name;
     // Base branch may be configured but defaultBranch is always fixed
     config.baseBranch = config.defaultBranch;
     logger.debug(`${repository} default branch = ${config.baseBranch}`);
     // GitHub allows administrators to block certain types of merge, so we need to check it
-    if (res.body.allow_rebase_merge) {
+    if (repo.rebaseMergeAllowed) {
       config.mergeMethod = 'rebase';
-    } else if (res.body.allow_squash_merge) {
+    } else if (repo.squashMergeAllowed) {
       config.mergeMethod = 'squash';
-    } else if (res.body.allow_merge_commit) {
+    } else if (repo.mergeCommitAllowed) {
       config.mergeMethod = 'merge';
     } else {
       // This happens if we don't have Administrator read access, it is not a critical error
@@ -426,8 +440,8 @@ export async function initRepo({
     gitAuthorEmail: global.gitAuthor?.email,
   });
   const repoConfig: RepoConfig = {
-    baseBranch: config.baseBranch,
-    isFork: res.body.fork === true,
+    defaultBranch: config.baseBranch,
+    isFork: repo.isFork === true,
   };
   return repoConfig;
 }
@@ -483,7 +497,7 @@ export async function setBaseBranch(
 ): Promise<string> {
   config.baseBranch = branchName;
   config.baseCommitSHA = null;
-  const baseBranchSha = await git.setBaseBranch(branchName);
+  const baseBranchSha = await git.setBranch(branchName);
   return baseBranchSha;
 }
 
@@ -523,11 +537,9 @@ async function getClosedPrs(): Promise<PrList> {
         }
       }
       `;
-      const nodes = await githubApi.getGraphqlNodes<any>(
-        query,
-        'pullRequests',
-        { paginate: false }
-      );
+      const nodes = await githubApi.queryRepoField<any>(query, 'pullRequests', {
+        paginate: false,
+      });
       const prNumbers: number[] = [];
       // istanbul ignore if
       if (!nodes?.length) {
@@ -619,11 +631,10 @@ async function getOpenPrs(): Promise<PrList> {
         }
       }
       `;
-      const nodes = await githubApi.getGraphqlNodes<any>(
-        query,
-        'pullRequests',
-        { paginate: false }
-      );
+      const nodes = await githubApi.queryRepoField<any>(query, 'pullRequests', {
+        paginate: false,
+        acceptHeader: 'application/vnd.github.merge-info-preview+json',
+      });
       const prNumbers: number[] = [];
       // istanbul ignore if
       if (!nodes?.length) {
@@ -987,7 +998,7 @@ export async function getBranchStatus(
       )}/check-runs`;
       const opts = {
         headers: {
-          Accept: 'application/vnd.github.antiope-preview+json',
+          accept: 'application/vnd.github.antiope-preview+json',
         },
       };
       const checkRunsRaw = (
@@ -1155,7 +1166,7 @@ async function getIssues(): Promise<Issue[]> {
     }
   `;
 
-  const result = await githubApi.getGraphqlNodes<Issue>(query, 'issues');
+  const result = await githubApi.queryRepoField<Issue>(query, 'issues');
 
   logger.debug(`Retrieved ${result.length} issues`);
   return result.map((issue) => ({
@@ -1204,6 +1215,7 @@ async function closeIssue(issueNumber: number): Promise<void> {
 
 export async function ensureIssue({
   title,
+  reuseTitle,
   body: rawBody,
   once = false,
   shouldReOpen = true,
@@ -1212,7 +1224,13 @@ export async function ensureIssue({
   const body = sanitize(rawBody);
   try {
     const issueList = await getIssueList();
-    const issues = issueList.filter((i) => i.title === title);
+    let issues = issueList.filter((i) => i.title === title);
+    if (!issues.length) {
+      issues = issueList.filter((i) => i.title === reuseTitle);
+      if (issues.length) {
+        logger.debug({ reuseTitle, title }, 'Reusing issue title');
+      }
+    }
     if (issues.length) {
       let issue = issues.find((i) => i.state === 'open');
       if (!issue) {
@@ -1238,7 +1256,11 @@ export async function ensureIssue({
           }`
         )
       ).body.body;
-      if (issueBody === body && issue.state === 'open') {
+      if (
+        issue.title === title &&
+        issueBody === body &&
+        issue.state === 'open'
+      ) {
         logger.debug('Issue is open and up to date - nothing to do');
         return null;
       }
@@ -1249,7 +1271,7 @@ export async function ensureIssue({
             issue.number
           }`,
           {
-            body: { body, state: 'open' },
+            body: { body, state: 'open', title },
           }
         );
         logger.debug('Issue updated');
@@ -1616,14 +1638,6 @@ export async function mergePr(
 ): Promise<boolean> {
   logger.debug(`mergePr(${prNo}, ${branchName})`);
   // istanbul ignore if
-  if (config.isGhe && config.pushProtection) {
-    logger.debug(
-      { branch: branchName, prNo },
-      'Branch protection: Cannot automerge PR when push protection is enabled'
-    );
-    return false;
-  }
-  // istanbul ignore if
   if (config.prReviewsRequired) {
     logger.debug(
       { branch: branchName, prNo },
@@ -1757,7 +1771,7 @@ export async function getVulnerabilityAlerts(): Promise<VulnerabilityAlert[]> {
   }`;
   let alerts = [];
   try {
-    const vulnerabilityAlerts = await githubApi.getGraphqlNodes<{ node: any }>(
+    const vulnerabilityAlerts = await githubApi.queryRepoField<{ node: any }>(
       query,
       'vulnerabilityAlerts',
       {

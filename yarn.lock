@@ -2172,10 +2172,10 @@ aws-sdk-mock@5.1.0:
     sinon "^9.0.1"
     traverse "^0.6.6"
 
-aws-sdk@2.709.0, aws-sdk@^2.637.0:
-  version "2.709.0"
-  resolved "https://registry.yarnpkg.com/aws-sdk/-/aws-sdk-2.709.0.tgz#33b0c0fe8b9420c65610545394be047ac2d93c8f"
-  integrity sha512-F3sKXsCiutj9RglVXdqb/XJ3Ko3G+pX081Nf1YjVJpLydwE2v16FGxrLqE5pqyWMDeUf5nZHnBoMuOYD8ip+Kw==
+aws-sdk@2.713.0, aws-sdk@^2.637.0:
+  version "2.713.0"
+  resolved "https://registry.yarnpkg.com/aws-sdk/-/aws-sdk-2.713.0.tgz#e87404ddcba093d36afafb48f119ec66f654a83f"
+  integrity sha512-axR1eOVn134KXJc1IT+Au2TXcK6oswY+4nvGe5GfU3pXeehhe0xNeP9Bw9yF36TRBxuvu4IJ2hRHDKma05smgA==
   dependencies:
     buffer "4.9.2"
     events "1.1.1"
@@ -8232,10 +8232,10 @@ rc@^1.0.1, rc@^1.1.6, rc@^1.2.8:
     minimist "^1.2.0"
     strip-json-comments "~2.0.1"
 
-re2@1.15.0:
-  version "1.15.0"
-  resolved "https://registry.yarnpkg.com/re2/-/re2-1.15.0.tgz#0ed916df52150c4f9ddea4d859870465886cadcb"
-  integrity sha512-xyhczzpXSZ7tUZ2ss6SPBNbqnZ0g729IQPcyZ9mt7rZR06nURNu/zdy5DFVFCBFnOizNmmJfY27AnGHHrZex9g==
+re2@1.15.2:
+  version "1.15.2"
+  resolved "https://registry.yarnpkg.com/re2/-/re2-1.15.2.tgz#dc046b8dcaf8e26583b4f5e9c57e176a444899a2"
+  integrity sha512-XVOmdex9j1dokTwJRCJoB6/Bzd78HS/JypwNYbPE6OcWAzxJazL+Oqu7wphpt70JdCOjiPxk7ISWWKmOavBlbA==
   dependencies:
     nan "^2.14.1"
     node-gyp "^7.0.0"

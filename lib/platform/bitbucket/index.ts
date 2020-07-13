@@ -162,7 +162,7 @@ export async function initRepo({
     gitAuthorEmail: global.gitAuthor?.email,
   });
   const repoConfig: RepoConfig = {
-    baseBranch: config.baseBranch,
+    defaultBranch: config.baseBranch,
     isFork: info.isFork,
   };
   return repoConfig;
@@ -182,7 +182,7 @@ export async function setBaseBranch(
   logger.debug(`Setting baseBranch to ${branchName}`);
   config.baseBranch = branchName;
   delete config.baseCommitSHA;
-  const baseBranchSha = await git.setBaseBranch(branchName);
+  const baseBranchSha = await git.setBranch(branchName);
   return baseBranchSha;
 }
 
@@ -459,7 +459,7 @@ export async function setBranchStatus({
   await getStatus(branchName, false);
 }
 
-type BbIssue = { id: number; content?: { raw: string } };
+type BbIssue = { id: number; title: string; content?: { raw: string } };
 
 async function findOpenIssues(title: string): Promise<BbIssue[]> {
   try {
@@ -526,6 +526,7 @@ export function getPrBody(input: string): string {
 
 export async function ensureIssue({
   title,
+  reuseTitle,
   body,
 }: EnsureIssueConfig): Promise<EnsureIssueResult | null> {
   logger.debug(`ensureIssue()`);
@@ -538,14 +539,20 @@ export async function ensureIssue({
     return null;
   }
   try {
-    const issues = await findOpenIssues(title);
+    let issues = await findOpenIssues(title);
+    if (!issues.length) {
+      issues = await findOpenIssues(reuseTitle);
+    }
     if (issues.length) {
       // Close any duplicates
       for (const issue of issues.slice(1)) {
         await closeIssue(issue.id);
       }
       const [issue] = issues;
-      if (String(issue.content.raw).trim() !== description.trim()) {
+      if (
+        issue.title !== title ||
+        String(issue.content.raw).trim() !== description.trim()
+      ) {
         logger.debug('Issue updated');
         await bitbucketHttp.putJson(
           `/2.0/repositories/${config.repository}/issues/${issue.id}`,

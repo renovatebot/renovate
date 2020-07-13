@@ -13,7 +13,7 @@ export interface PlatformConfig {
 }
 
 export interface RepoConfig {
-  baseBranch: string;
+  defaultBranch: string;
   endpoint?: string;
   renovateUsername?: any;
   gitAuthor?: any;
@@ -81,6 +81,7 @@ export interface CreatePRConfig {
 }
 export interface EnsureIssueConfig {
   title: string;
+  reuseTitle?: string;
   body: string;
   once?: boolean;
   shouldReOpen?: boolean;
