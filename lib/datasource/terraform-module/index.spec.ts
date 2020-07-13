@@ -139,12 +139,12 @@ describe('datasource/terraform-module', () => {
         .reply(200, serviceDiscoveryCustomResult);
       const res = await getPkgReleases({
         datasource,
-        registryUrls: ['terraform.foo.bar'],
+        registryUrls: ['https://terraform.foo.bar'],
         depName: 'hashicorp/consul/aws',
       });
+      expect(httpMock.getTrace()).toMatchSnapshot();
       expect(res).toMatchSnapshot();
       expect(res).not.toBeNull();
-      expect(httpMock.getTrace()).toMatchSnapshot();
     });
   });
 });
