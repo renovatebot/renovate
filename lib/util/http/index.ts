@@ -103,13 +103,6 @@ export class Http<GetOptions = HttpOptions, PostOptions = HttpPostOptions> {
     if (process.env.NODE_ENV === 'test') {
       options.retry = 0;
     }
-    // istanbul ignore if: only for easier testing
-    if (
-      ['GET'].includes(options.method?.toUpperCase()) &&
-      ('json' in options || 'body' in options)
-    ) {
-      throw new Error(`Method '${options.method}' does not support body`);
-    }
     options.hooks = {
       beforeRedirect: [removeAuthorization],
     };
