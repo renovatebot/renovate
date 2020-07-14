@@ -60,5 +60,8 @@ export interface GhRepo {
   squashMergeAllowed: boolean;
   defaultBranchRef: {
     name: string;
+    target: {
+      oid: string;
+    };
   };
 }

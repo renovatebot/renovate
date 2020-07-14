@@ -165,6 +165,9 @@ describe('platform/github', () => {
           squashMergeAllowed: true,
           defaultBranchRef: {
             name: 'master',
+            target: {
+              oid: 'default-branch-hash',
+            },
           },
         },
       },
@@ -190,6 +193,9 @@ describe('platform/github', () => {
             squashMergeAllowed: true,
             defaultBranchRef: {
               name: 'master',
+              target: {
+                oid: 'default-branch-hash',
+              },
             },
           },
         },
@@ -280,6 +286,9 @@ describe('platform/github', () => {
               squashMergeAllowed: true,
               defaultBranchRef: {
                 name: 'master',
+                target: {
+                  oid: 'default-branch-hash',
+                },
               },
             },
           },
@@ -305,6 +314,9 @@ describe('platform/github', () => {
               squashMergeAllowed: false,
               defaultBranchRef: {
                 name: 'master',
+                target: {
+                  oid: 'default-branch-hash',
+                },
               },
             },
           },
@@ -324,6 +336,9 @@ describe('platform/github', () => {
             repository: {
               defaultBranchRef: {
                 name: 'master',
+                target: {
+                  oid: 'default-branch-hash',
+                },
               },
             },
           },
@@ -345,6 +360,9 @@ describe('platform/github', () => {
               nameWithOwner: 'some/repo',
               defaultBranchRef: {
                 name: 'master',
+                target: {
+                  oid: 'default-branch-hash',
+                },
               },
             },
           },

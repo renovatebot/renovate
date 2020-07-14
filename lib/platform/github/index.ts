@@ -229,6 +229,9 @@ export async function initRepo({
         squashMergeAllowed
         defaultBranchRef {
           name
+          target {
+            oid
+          }
         }
       }
     }`
@@ -441,6 +444,7 @@ export async function initRepo({
   });
   const repoConfig: RepoConfig = {
     defaultBranch: config.baseBranch,
+    defaultBranchSha: repo.defaultBranchRef.target.oid,
     isFork: repo.isFork === true,
   };
   return repoConfig;
