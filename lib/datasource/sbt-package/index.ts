@@ -13,7 +13,7 @@ export const registryStrategy = 'hunt';
 
 const ensureTrailingSlash = (str: string): string => str.replace(/\/?$/, '/');
 
-async function getArtifactSubdirs(
+export async function getArtifactSubdirs(
   searchRoot: string,
   artifact: string,
   scalaVersion: string
@@ -49,7 +49,7 @@ async function getArtifactSubdirs(
   return null;
 }
 
-async function getPackageReleases(
+export async function getPackageReleases(
   searchRoot: string,
   artifactSubdirs: string[]
 ): Promise<string[]> {
@@ -75,20 +75,7 @@ async function getPackageReleases(
   return null;
 }
 
-export async function resolvePackageReleases(
-  searchRoot: string,
-  artifact: string,
-  scalaVersion: string
-): Promise<string[]> {
-  const searchSubdirs = await getArtifactSubdirs(
-    searchRoot,
-    artifact,
-    scalaVersion
-  );
-  return getPackageReleases(searchRoot, searchSubdirs);
-}
-
-function getLatestVersion(versions: string[]): string | null {
+export function getLatestVersion(versions: string[]): string | null {
   if (versions && versions.length) {
     return versions.reduce((latestVersion, version) =>
       compare(version, latestVersion) === 1 ? version : latestVersion
@@ -97,7 +84,7 @@ function getLatestVersion(versions: string[]): string | null {
   return null;
 }
 
-async function getUrls(
+export async function getUrls(
   searchRoot: string,
   artifactDirs: string[],
   version: string
