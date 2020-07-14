@@ -448,7 +448,6 @@ async function getTags(
  *  - Return the labels for the requested image
  */
 
-// istanbul ignore next
 async function getLabels(
   registry: string,
   repository: string,
@@ -474,6 +473,7 @@ async function getLabels(
     // If getting the manifest fails here, then abort
     // This means that the latest tag doesn't have a manifest, which shouldn't
     // be possible
+    // istanbul ignore if
     if (!manifestResponse) {
       logger.debug(
         {
@@ -497,6 +497,7 @@ async function getLabels(
     let labels: Record<string, string> = {};
     const configDigest = manifest.config.digest;
     const headers = await getAuthHeaders(registry, repository);
+    // istanbul ignore if: Should never be happen
     if (!headers) {
       logger.debug('No docker auth found - returning');
       return {};
@@ -518,7 +519,7 @@ async function getLabels(
     const cacheMinutes = 60;
     await packageCache.set(cacheNamespace, cacheKey, labels, cacheMinutes);
     return labels;
-  } catch (err) {
+  } catch (err) /* istanbul ignore next: should be tested in future */ {
     if (err instanceof ExternalHostError) {
       throw err;
     }
@@ -604,7 +605,6 @@ export async function getReleases({
 
   const latestTag = tags.includes('latest') ? 'latest' : tags[tags.length - 1];
   const labels = await getLabels(registry, repository, latestTag);
-  // istanbul ignore if
   if (labels && 'org.opencontainers.image.source' in labels) {
     ret.sourceUrl = labels['org.opencontainers.image.source'];
   }
