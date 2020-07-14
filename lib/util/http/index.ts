@@ -7,16 +7,9 @@ import * as memCache from '../cache/memory';
 import { clone } from '../clone';
 import { applyAuthorization, removeAuthorization } from './auth';
 import { applyHostRules } from './host-rules';
-import { GotOptions } from './types';
+import { GotOptions, HttpError } from './types';
 
 export * from './types';
-
-// TODO: remove when code is refactord
-Object.defineProperty(got.RequestError.prototype, 'statusCode', {
-  get: function statusCode(this: any) {
-    return this.response?.statusCode;
-  },
-});
 
 interface OutgoingHttpHeaders {
   [header: string]: number | string | string[] | undefined;
@@ -63,7 +56,11 @@ async function resolveResponse<T>(
     const res = await promisedRes;
     return cloneResponse(res);
   } catch (err) {
-    if (abortOnError && !abortIgnoreStatusCodes?.includes(err.statusCode)) {
+    if (
+      err instanceof HttpError &&
+      abortOnError &&
+      !abortIgnoreStatusCodes?.includes(err.response?.statusCode)
+    ) {
       throw new ExternalHostError(err);
     }
     throw err;

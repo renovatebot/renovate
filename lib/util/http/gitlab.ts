@@ -53,16 +53,14 @@ export class GitlabHttp extends Http<GitlabHttpOptions, GitlabHttpOptions> {
       }
       return result;
     } catch (err) {
-      if (err.statusCode === 404) {
+      const statusCode = err.response?.statusCode;
+      if (statusCode === 404) {
         logger.trace({ err }, 'GitLab 404');
         logger.debug({ url: err.url }, 'GitLab API 404');
         throw err;
       }
       logger.debug({ err }, 'Gitlab API error');
-      if (
-        err.statusCode === 429 ||
-        (err.statusCode >= 500 && err.statusCode < 600)
-      ) {
+      if (statusCode === 429 || (statusCode >= 500 && statusCode < 600)) {
         throw new ExternalHostError(err, PLATFORM_TYPE_GITLAB);
       }
       const platformFailureCodes = [

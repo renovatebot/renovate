@@ -10,4 +10,4 @@ export type GotOptions = OptionsOfJSONResponseBody & {
   useCache?: boolean;
 };
 
-export type HttpError = RequestError_;
+export { RequestError_ as HttpError };

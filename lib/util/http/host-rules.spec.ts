@@ -45,8 +45,9 @@ describe(getName(__filename), () => {
     expect(applyHostRules(url, { hostType: PLATFORM_TYPE_GITEA }))
       .toMatchInlineSnapshot(`
       Object {
-        "auth": ":password",
         "hostType": "gitea",
+        "password": "password",
+        "username": undefined,
       }
     `);
   });

@@ -2,29 +2,52 @@ import { NormalizedOptions } from 'got';
 import { getName, partial } from '../../../test/util';
 import { PLATFORM_TYPE_GITEA } from '../../constants/platforms';
 import { applyAuthorization, removeAuthorization } from './auth';
+import { GotOptions } from './types';
 
 describe(getName(__filename), () => {
   describe('applyAuthorization', () => {
     it('does nothing', () => {
-      const opts = {
+      const opts: GotOptions = {
+        headers: { authorization: 'token' },
         hostname: 'amazon.com',
         href: 'https://amazon.com',
-        auth: 'XXXX',
       };
 
       applyAuthorization(opts);
 
       expect(opts).toMatchInlineSnapshot(`
         Object {
-          "auth": "XXXX",
+          "headers": Object {
+            "authorization": "token",
+          },
           "hostname": "amazon.com",
           "href": "https://amazon.com",
         }
       `);
     });
 
+    it('gittea password', () => {
+      const opts: GotOptions = {
+        headers: {},
+        hostType: PLATFORM_TYPE_GITEA,
+        password: 'XXXX',
+      };
+
+      applyAuthorization(opts);
+
+      expect(opts).toMatchInlineSnapshot(`
+        Object {
+          "headers": Object {
+            "authorization": "Basic OlhYWFg=",
+          },
+          "hostType": "gitea",
+          "password": "XXXX",
+        }
+      `);
+    });
+
     it('gittea token', () => {
-      const opts = {
+      const opts: GotOptions = {
         headers: {},
         token: 'XXXX',
         hostType: PLATFORM_TYPE_GITEA,
@@ -139,7 +162,7 @@ describe(getName(__filename), () => {
       removeAuthorization(opts);
 
       expect(opts).toEqual({
-        auth: 'auth',
+        password: 'auth',
         headers: {
           authorization: 'auth',
         },
