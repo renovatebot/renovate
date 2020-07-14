@@ -70,4 +70,48 @@ describe(getName(__filename), () => {
       setBaseUrl('https://gitlab.renovatebot.com/api/v4/')
     ).not.toThrow();
   });
+
+  describe('fails with', () => {
+    it('403', async () => {
+      httpMock.scope(gitlabApiHost).get('/api/v4/some-url').reply(403);
+      await expect(
+        gitlabApi.get('some-url')
+      ).rejects.toThrowErrorMatchingInlineSnapshot(
+        `"Response code 403 (Forbidden)"`
+      );
+    });
+
+    it('404', async () => {
+      httpMock.scope(gitlabApiHost).get('/api/v4/some-url').reply(404);
+      await expect(
+        gitlabApi.get('some-url')
+      ).rejects.toThrowErrorMatchingInlineSnapshot(
+        `"Response code 404 (Not Found)"`
+      );
+    });
+
+    it('500', async () => {
+      httpMock.scope(gitlabApiHost).get('/api/v4/some-url').reply(500);
+      await expect(
+        gitlabApi.get('some-url')
+      ).rejects.toThrowErrorMatchingInlineSnapshot(`"external-host-error"`);
+    });
+
+    it('EAI_AGAIN', async () => {
+      httpMock
+        .scope(gitlabApiHost)
+        .get('/api/v4/some-url')
+        .replyWithError({ code: 'EAI_AGAIN' });
+      await expect(
+        gitlabApi.get('some-url')
+      ).rejects.toThrowErrorMatchingInlineSnapshot(`"external-host-error"`);
+    });
+
+    it('ParseError', async () => {
+      httpMock.scope(gitlabApiHost).get('/api/v4/some-url').reply(200, '{{');
+      await expect(
+        gitlabApi.getJson('some-url')
+      ).rejects.toThrowErrorMatchingInlineSnapshot(`"external-host-error"`);
+    });
+  });
 });
