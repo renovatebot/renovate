@@ -1,109 +1,152 @@
 import { NormalizedOptions } from 'got';
 import { getName, partial } from '../../../test/util';
-import { removeAuthorization } from './auth';
+import { PLATFORM_TYPE_GITEA } from '../../constants/platforms';
+import { applyAuthorization, removeAuthorization } from './auth';
 
 describe(getName(__filename), () => {
-  it('removeAuthorization no authorization', () => {
-    const opts = {
-      hostname: 'amazon.com',
-      href: 'https://amazon.com',
-      search: 'something X-Amz-Algorithm something',
-    };
+  describe('applyAuthorization', () => {
+    it('does nothing', () => {
+      const opts = {
+        hostname: 'amazon.com',
+        href: 'https://amazon.com',
+        auth: 'XXXX',
+      };
 
-    removeAuthorization(partial<NormalizedOptions>(opts));
+      applyAuthorization(opts);
 
-    expect(opts).toEqual({
-      hostname: 'amazon.com',
-      href: 'https://amazon.com',
-      search: 'something X-Amz-Algorithm something',
+      expect(opts).toMatchInlineSnapshot(`
+        Object {
+          "auth": "XXXX",
+          "hostname": "amazon.com",
+          "href": "https://amazon.com",
+        }
+      `);
+    });
+
+    it('gittea token', () => {
+      const opts = {
+        headers: {},
+        token: 'XXXX',
+        hostType: PLATFORM_TYPE_GITEA,
+      };
+
+      applyAuthorization(opts);
+
+      expect(opts).toMatchInlineSnapshot(`
+        Object {
+          "headers": Object {
+            "authorization": "token XXXX",
+          },
+          "hostType": "gitea",
+          "token": "XXXX",
+        }
+      `);
     });
   });
 
-  it('removeAuthorization Amazon', () => {
-    const opts = {
-      password: 'auth',
-      headers: {
-        authorization: 'auth',
-      },
-      hostname: 'amazon.com',
-      href: 'https://amazon.com',
-      search: 'something X-Amz-Algorithm something',
-    };
+  describe('removeAuthorization', () => {
+    it('no authorization', () => {
+      const opts = partial<NormalizedOptions>({
+        hostname: 'amazon.com',
+        href: 'https://amazon.com',
+        search: 'something X-Amz-Algorithm something',
+      });
 
-    removeAuthorization(partial<NormalizedOptions>(opts));
+      removeAuthorization(opts);
 
-    expect(opts).toEqual({
-      headers: {},
-      hostname: 'amazon.com',
-      href: 'https://amazon.com',
-      search: 'something X-Amz-Algorithm something',
+      expect(opts).toEqual({
+        hostname: 'amazon.com',
+        href: 'https://amazon.com',
+        search: 'something X-Amz-Algorithm something',
+      });
     });
-  });
 
-  it('removeAuthorization Amazon ports', () => {
-    const opts = {
-      password: 'auth',
-      headers: {
-        authorization: 'auth',
-      },
-      hostname: 'amazon.com',
-      href: 'https://amazon.com',
-      port: 3000,
-      search: 'something X-Amz-Algorithm something',
-    };
+    it('Amazon', () => {
+      const opts = partial<NormalizedOptions>({
+        password: 'auth',
+        headers: {
+          authorization: 'auth',
+        },
+        hostname: 'amazon.com',
+        href: 'https://amazon.com',
+        search: 'something X-Amz-Algorithm something',
+      });
 
-    removeAuthorization(partial<NormalizedOptions>(opts));
+      removeAuthorization(opts);
 
-    expect(opts).toEqual({
-      headers: {},
-      hostname: 'amazon.com',
-      href: 'https://amazon.com',
-      search: 'something X-Amz-Algorithm something',
+      expect(opts).toEqual({
+        headers: {},
+        hostname: 'amazon.com',
+        href: 'https://amazon.com',
+        search: 'something X-Amz-Algorithm something',
+      });
     });
-  });
 
-  it('removeAuthorization Azure blob', () => {
-    const opts = {
-      password: 'auth',
-      headers: {
-        authorization: 'auth',
-      },
-      hostname: 'store123.blob.core.windows.net',
-      href:
-        'https://<store>.blob.core.windows.net/<some id>//docker/registry/v2/blobs',
-    };
+    it('Amazon ports', () => {
+      const opts = partial<NormalizedOptions>({
+        password: 'auth',
+        headers: {
+          authorization: 'auth',
+        },
+        hostname: 'amazon.com',
+        href: 'https://amazon.com',
+        port: 3000,
+        search: 'something X-Amz-Algorithm something',
+      });
 
-    removeAuthorization(partial<NormalizedOptions>(opts));
+      removeAuthorization(opts);
 
-    expect(opts).toEqual({
-      headers: {},
-      hostname: 'store123.blob.core.windows.net',
-      href:
-        'https://<store>.blob.core.windows.net/<some id>//docker/registry/v2/blobs',
+      expect(opts).toEqual({
+        headers: {},
+        hostname: 'amazon.com',
+        href: 'https://amazon.com',
+        search: 'something X-Amz-Algorithm something',
+      });
     });
-  });
 
-  it('removeAuthorization keep auth', () => {
-    const opts = {
-      password: 'auth',
-      headers: {
-        authorization: 'auth',
-      },
-      hostname: 'renovate.com',
-      href: 'https://renovate.com',
-      search: 'something',
-    };
+    it('Azure blob', () => {
+      const opts = partial<NormalizedOptions>({
+        password: 'auth',
+        headers: {
+          authorization: 'auth',
+        },
+        hostname: 'store123.blob.core.windows.net',
+        href:
+          'https://<store>.blob.core.windows.net/<some id>//docker/registry/v2/blobs',
+      });
 
-    removeAuthorization(partial<NormalizedOptions>(opts));
+      removeAuthorization(opts);
 
-    expect(opts).toEqual({
-      password: 'auth',
-      headers: {
-        authorization: 'auth',
-      },
-      hostname: 'renovate.com',
-      href: 'https://renovate.com',
-      search: 'something',
+      expect(opts).toEqual({
+        headers: {},
+        hostname: 'store123.blob.core.windows.net',
+        href:
+          'https://<store>.blob.core.windows.net/<some id>//docker/registry/v2/blobs',
+      });
+    });
+
+    it('keep auth', () => {
+      const opts = partial<NormalizedOptions>({
+        password: 'auth',
+        headers: {
+          authorization: 'auth',
+        },
+        hostname: 'renovate.com',
+        href: 'https://renovate.com',
+        search: 'something',
+      });
+
+      removeAuthorization(opts);
+
+      expect(opts).toEqual({
+        auth: 'auth',
+        headers: {
+          authorization: 'auth',
+        },
+        hostname: 'renovate.com',
+        href: 'https://renovate.com',
+        search: 'something',
+      });
     });
   });
 });

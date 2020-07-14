@@ -115,4 +115,20 @@ describe(getName(__filename), () => {
     expect(data).toBe('{}');
     expect(nock.isDone()).toBe(true);
   });
+
+  it('retries', async () => {
+    const NODE_ENV = process.env.NODE_ENV;
+    try {
+      delete process.env.NODE_ENV;
+      nock(baseUrl)
+        .head('/')
+        .reply(500)
+        .head('/')
+        .reply(200, undefined, { 'x-some-header': 'abc' });
+      expect(await http.head('http://renovate.com')).toMatchSnapshot();
+      expect(nock.isDone()).toBe(true);
+    } finally {
+      process.env.NODE_ENV = NODE_ENV;
+    }
+  });
 });
