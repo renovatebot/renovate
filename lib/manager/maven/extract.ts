@@ -137,6 +137,10 @@ function applyProps(
     result.skipReason = SkipReason.VersionPlaceholder;
   }
 
+  if (propSource) {
+    result.editFile = propSource;
+  }
+
   return result;
 }
 

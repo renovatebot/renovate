@@ -81,6 +81,7 @@ Array [
         "currentValue": "1.2.3.4",
         "datasource": "maven",
         "depName": "org.example:quux",
+        "editFile": "random.pom.xml",
         "fileReplacePosition": 698,
         "groupName": "quuxVersion",
         "registryUrls": Array [
@@ -92,6 +93,7 @@ Array [
         "currentValue": "1.2.3.4",
         "datasource": "maven",
         "depName": "org.example:quux-test",
+        "editFile": "random.pom.xml",
         "fileReplacePosition": 698,
         "groupName": "quuxVersion",
         "registryUrls": Array [
