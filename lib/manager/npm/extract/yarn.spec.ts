@@ -28,7 +28,7 @@ describe('manager/npm/extract/yarn', () => {
         'lib/manager/npm/__fixtures__/yarn2/yarn.lock',
         'utf8'
       );
-      fs.readLocalFile.mockReturnValueOnce(plocktest1Lock);
+      fs.readLocalFile.mockResolvedValueOnce(plocktest1Lock);
       const res = await getYarnLock('package.json');
       expect(res).toMatchSnapshot();
       expect(Object.keys(res)).toHaveLength(9);

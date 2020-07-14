@@ -15,7 +15,7 @@ export async function getYarnLock(filePath: string): Promise<YarnLock> {
     Object.keys(parsed).forEach((key) => {
       if (key === '__metadata') {
         // yarn 2 uses integrity
-        lockFile['@renovate_yarn_integrity'] = true;
+        lockFile['@renovate_yarn_integrity'] = '0.0.0';
         return;
       }
 
@@ -32,7 +32,7 @@ export async function getYarnLock(filePath: string): Promise<YarnLock> {
 
       // istanbul ignore if
       if (val.integrity) {
-        lockFile['@renovate_yarn_integrity'] = true;
+        lockFile['@renovate_yarn_integrity'] = '0.0.0';
       }
     });
     return lockFile;
