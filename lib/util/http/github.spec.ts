@@ -98,6 +98,7 @@ describe(getName(__filename), () => {
           .reply(
             code,
             function reply() {
+              // https://github.com/nock/nock/issues/1979
               if (typeof body === 'object' && 'message' in body) {
                 (this.req as any).response.statusMessage = body?.message;
               }
