@@ -1,5 +1,6 @@
 import * as httpMock from '../../../test/httpMock';
 import { getName } from '../../../test/util';
+import { EXTERNAL_HOST_ERROR } from '../../constants/error-messages';
 import { PLATFORM_TYPE_GITLAB } from '../../constants/platforms';
 import * as hostRules from '../host-rules';
 import { GitlabHttp, setBaseUrl } from './gitlab';
@@ -92,9 +93,9 @@ describe(getName(__filename), () => {
 
     it('500', async () => {
       httpMock.scope(gitlabApiHost).get('/api/v4/some-url').reply(500);
-      await expect(
-        gitlabApi.get('some-url')
-      ).rejects.toThrowErrorMatchingInlineSnapshot(`"external-host-error"`);
+      await expect(gitlabApi.get('some-url')).rejects.toThrow(
+        EXTERNAL_HOST_ERROR
+      );
     });
 
     it('EAI_AGAIN', async () => {
@@ -102,16 +103,16 @@ describe(getName(__filename), () => {
         .scope(gitlabApiHost)
         .get('/api/v4/some-url')
         .replyWithError({ code: 'EAI_AGAIN' });
-      await expect(
-        gitlabApi.get('some-url')
-      ).rejects.toThrowErrorMatchingInlineSnapshot(`"external-host-error"`);
+      await expect(gitlabApi.get('some-url')).rejects.toThrow(
+        EXTERNAL_HOST_ERROR
+      );
     });
 
     it('ParseError', async () => {
       httpMock.scope(gitlabApiHost).get('/api/v4/some-url').reply(200, '{{');
-      await expect(
-        gitlabApi.getJson('some-url')
-      ).rejects.toThrowErrorMatchingInlineSnapshot(`"external-host-error"`);
+      await expect(gitlabApi.getJson('some-url')).rejects.toThrow(
+        EXTERNAL_HOST_ERROR
+      );
     });
   });
 });
