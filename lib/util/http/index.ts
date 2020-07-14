@@ -7,7 +7,7 @@ import * as memCache from '../cache/memory';
 import { clone } from '../clone';
 import { applyAuthorization, removeAuthorization } from './auth';
 import { applyHostRules } from './host-rules';
-import { GotOptions, HttpError } from './types';
+import { GotOptions } from './types';
 
 // TODO: refactor code to remove this
 import './legacy';
@@ -59,11 +59,7 @@ async function resolveResponse<T>(
     const res = await promisedRes;
     return cloneResponse(res);
   } catch (err) {
-    if (
-      err instanceof HttpError &&
-      abortOnError &&
-      !abortIgnoreStatusCodes?.includes(err.response?.statusCode)
-    ) {
+    if (abortOnError && !abortIgnoreStatusCodes?.includes(err.statusCode)) {
       throw new ExternalHostError(err);
     }
     throw err;

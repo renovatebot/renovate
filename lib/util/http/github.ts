@@ -11,7 +11,7 @@ import { PLATFORM_TYPE_GITHUB } from '../../constants/platforms';
 import { logger } from '../../logger';
 import { ExternalHostError } from '../../types/errors/external-host-error';
 import { maskToken } from '../mask';
-import { HttpError } from './types';
+import { GotLegacyError } from './legacy';
 import { Http, HttpPostOptions, HttpResponse, InternalHttpOptions } from '.';
 
 let baseUrl = 'https://api.github.com/';
@@ -37,17 +37,14 @@ interface GithubGraphqlResponse<T = unknown> {
 }
 
 function handleGotError(
-  err: HttpError,
+  err: GotLegacyError,
   url: string | URL,
   opts: GithubHttpOptions
 ): never {
-  const statusCode = err.response?.statusCode;
-  const body = err.response?.body as any; // TODO: fix types
-  const headers = err.response?.headers;
   const path = url.toString();
   let message = err.message || '';
-  if (body?.message) {
-    message = body.message;
+  if (err.body?.message) {
+    message = err.body.message;
   }
   if (
     err.name === 'RequestError' &&
@@ -62,27 +59,27 @@ function handleGotError(
     logger.debug({ err }, '');
     throw new ExternalHostError(err, PLATFORM_TYPE_GITHUB);
   }
-  if (statusCode >= 500 && statusCode < 600) {
+  if (err.statusCode >= 500 && err.statusCode < 600) {
     logger.debug({ err }, 'GitHub failure: 5xx');
     throw new ExternalHostError(err, PLATFORM_TYPE_GITHUB);
   }
   if (
-    statusCode === 403 &&
+    err.statusCode === 403 &&
     message.startsWith('You have triggered an abuse detection mechanism')
   ) {
     logger.debug({ err }, 'GitHub failure: abuse detection');
     throw new Error(PLATFORM_RATE_LIMIT_EXCEEDED);
   }
-  if (statusCode === 403 && message.includes('Upgrade to GitHub Pro')) {
+  if (err.statusCode === 403 && message.includes('Upgrade to GitHub Pro')) {
     logger.debug({ path }, 'Endpoint needs paid GitHub plan');
     throw err;
   }
-  if (statusCode === 403 && message.includes('rate limit exceeded')) {
+  if (err.statusCode === 403 && message.includes('rate limit exceeded')) {
     logger.debug({ err }, 'GitHub failure: rate limit');
     throw new Error(PLATFORM_RATE_LIMIT_EXCEEDED);
   }
   if (
-    statusCode === 403 &&
+    err.statusCode === 403 &&
     message.startsWith('Resource not accessible by integration')
   ) {
     logger.debug(
@@ -91,8 +88,8 @@ function handleGotError(
     );
     throw new Error(PLATFORM_INTEGRATION_UNAUTHORIZED);
   }
-  if (statusCode === 401 && message.includes('Bad credentials')) {
-    const rateLimit = headers?.['x-ratelimit-limit'] ?? -1;
+  if (err.statusCode === 401 && message.includes('Bad credentials')) {
+    const rateLimit = err.headers?.['x-ratelimit-limit'] ?? -1;
     logger.debug(
       {
         token: maskToken(opts.token),
@@ -105,18 +102,18 @@ function handleGotError(
     }
     throw new Error(PLATFORM_BAD_CREDENTIALS);
   }
-  if (statusCode === 422) {
+  if (err.statusCode === 422) {
     if (
       message.includes('Review cannot be requested from pull request author')
     ) {
       throw err;
-    } else if (body?.errors?.find((e: any) => e.code === 'invalid')) {
+    } else if (err.body?.errors?.find((e: any) => e.code === 'invalid')) {
       throw new Error(REPOSITORY_CHANGED);
     }
     logger.debug({ err }, '422 Error thrown from GitHub');
     throw new ExternalHostError(err, PLATFORM_TYPE_GITHUB);
   }
-  if (statusCode === 404) {
+  if (err.statusCode === 404) {
     logger.debug({ url: err.options?.url }, 'GitHub 404');
   } else {
     logger.debug({ err }, 'Unknown GitHub error');

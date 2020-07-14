@@ -19,3 +19,18 @@ Object.defineProperty(HttpError.prototype, 'body', {
     }
   },
 });
+
+Object.defineProperty(HttpError.prototype, 'headers', {
+  get: function headers(this: HttpError) {
+    return this.response?.headers;
+  },
+});
+
+export type GotLegacyError<E = unknown, T = unknown> = HttpError & {
+  statusCode?: number;
+  body: {
+    message?: string;
+    errors?: E[];
+  };
+  headers?: Record<string, T>;
+};
