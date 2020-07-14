@@ -9,6 +9,9 @@ import { applyAuthorization, removeAuthorization } from './auth';
 import { applyHostRules } from './host-rules';
 import { GotOptions, HttpError } from './types';
 
+// TODO: refactor code to remove this
+import './legacy';
+
 export * from './types';
 
 interface OutgoingHttpHeaders {
@@ -70,7 +73,7 @@ async function resolveResponse<T>(
 function applyDefaultHeaders(options: Options): void {
   // eslint-disable-next-line no-param-reassign
   options.headers = {
-    // will be "gzip, deflate, br" by new got default
+    // TODO: remove. Will be "gzip, deflate, br" by new got default
     'accept-encoding': 'gzip, deflate',
     ...options.headers,
     'user-agent':
@@ -213,6 +216,8 @@ export class Http<GetOptions = HttpOptions, PostOptions = HttpPostOptions> {
       hostType: this.hostType,
       ...options,
     };
+
+    // istanbul ignore else: needs test
     if (options?.baseUrl) {
       // eslint-disable-next-line no-param-reassign
       url = URL.resolve(options.baseUrl, url);
