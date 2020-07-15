@@ -94,7 +94,7 @@ export async function generateLockFile(
     // rangeStrategy = update-lockfile
     const lockUpdates = upgrades
       .filter((upgrade) => upgrade.isLockfileUpdate)
-      .map((upgrade) => upgrade.depName);
+      .map((upgrade) => [upgrade.depName, upgrade.currentValue].filter(Boolean).join('@'));
     if (lockUpdates.length) {
       logger.debug('Performing lockfileUpdate (yarn)');
       commands.push(
