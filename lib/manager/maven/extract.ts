@@ -89,6 +89,7 @@ function deepExtract(
 
 function applyProps(
   dep: PackageDependency<Record<string, any>>,
+  depPackageFile: string,
   props: MavenProp
 ): PackageDependency<Record<string, any>> {
   const replaceAll = (str: string): string =>
@@ -135,6 +136,10 @@ function applyProps(
     result.skipReason = SkipReason.NamePlaceholder;
   } else if (containsPlaceholder(currentValue)) {
     result.skipReason = SkipReason.VersionPlaceholder;
+  }
+
+  if (propSource && depPackageFile !== propSource) {
+    result.editFile = propSource;
   }
 
   return result;
@@ -270,7 +275,7 @@ export function resolveParents(packages: PackageFile[]): PackageFile[] {
   packageFileNames.forEach((name) => {
     const pkg = extractedPackages[name];
     pkg.deps.forEach((rawDep) => {
-      const dep = applyProps(rawDep, extractedProps[name]);
+      const dep = applyProps(rawDep, name, extractedProps[name]);
       const sourceName = dep.propSource || name;
       extractedDeps[sourceName].push(dep);
     });
