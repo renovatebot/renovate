@@ -115,6 +115,7 @@ describe('manager/maven', () => {
           expect(depUrls).toEqual(urls);
         });
       });
+      expect(packages).toMatchSnapshot();
     });
 
     it('should not touch content if new and old versions are equal', () => {
