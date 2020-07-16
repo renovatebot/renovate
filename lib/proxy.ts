@@ -27,6 +27,7 @@ export function bootstrap(): void {
       environmentVariableNamespace: '',
     });
   } else {
+    // for testing only, does not reset global agent
     agent = undefined;
   }
 }
