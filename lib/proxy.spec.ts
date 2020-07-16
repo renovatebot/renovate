@@ -14,19 +14,17 @@ describe('proxy', () => {
 
   it('respects HTTP_PROXY', () => {
     process.env.HTTP_PROXY = httpProxy;
-    const result = bootstrap();
-    expect(result.HTTP_PROXY).toEqual(httpProxy);
+    bootstrap();
     expect(hasProxy()).toBeTrue();
   });
   it('respects HTTPS_PROXY', () => {
     process.env.HTTPS_PROXY = httpsProxy;
-    const result = bootstrap();
-    expect(result.HTTPS_PROXY).toEqual(httpsProxy);
+    bootstrap();
+    expect(hasProxy()).toBeTrue();
   });
   it('does nothing', () => {
     process.env.no_proxy = noProxy;
-    const result = bootstrap();
-    expect(result).toBeUndefined();
+    bootstrap();
     expect(hasProxy()).toBeFalse();
   });
 });

@@ -8,7 +8,7 @@ const envVars = ['HTTP_PROXY', 'HTTPS_PROXY', 'NO_PROXY'];
 
 let agent: ProxyAgentConfigurationType | undefined;
 
-export function bootstrap(): ProxyAgentConfigurationType | undefined {
+export function bootstrap(): void {
   envVars.forEach((envVar) => {
     /* istanbul ignore if: env is case-insensitive on windows */
     if (
@@ -29,8 +29,6 @@ export function bootstrap(): ProxyAgentConfigurationType | undefined {
   } else {
     agent = undefined;
   }
-
-  return agent;
 }
 
 // will be used by our http layer later
