@@ -171,6 +171,7 @@ export interface PackageDependency<T = Record<string, any>> extends Package<T> {
   replaceString?: string;
   autoReplaceStringTemplate?: string;
   depIndex?: number;
+  editFile?: string;
 }
 
 export interface Upgrade<T = Record<string, any>>

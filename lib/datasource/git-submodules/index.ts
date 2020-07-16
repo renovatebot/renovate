@@ -6,6 +6,10 @@ import { DigestConfig, GetReleasesConfig, ReleaseResult } from '../common';
 
 export const id = 'git-submodules';
 
+export const defaultConfig = {
+  pinDigests: false,
+};
+
 export async function getReleases({
   lookupName,
   registryUrls,

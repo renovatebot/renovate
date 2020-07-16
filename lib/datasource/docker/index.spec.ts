@@ -2,11 +2,12 @@ import AWS from 'aws-sdk';
 import AWSMock from 'aws-sdk-mock';
 import { getDigest, getPkgReleases } from '..';
 import * as httpMock from '../../../test/httpMock';
+import { getName, mocked } from '../../../test/util';
 import { EXTERNAL_HOST_ERROR } from '../../constants/error-messages';
 import * as _hostRules from '../../util/host-rules';
 import * as docker from '.';
 
-const hostRules: any = _hostRules;
+const hostRules = mocked(_hostRules);
 
 jest.mock('../../util/host-rules');
 
@@ -14,14 +15,14 @@ const baseUrl = 'https://index.docker.io/v2';
 const authUrl = 'https://auth.docker.io';
 const amazonUrl = 'https://123456789.dkr.ecr.us-east-1.amazonaws.com/v2';
 
-describe('api/docker', () => {
+describe(getName(__filename), () => {
   beforeEach(() => {
     httpMock.setup();
     hostRules.find.mockReturnValue({
       username: 'some-username',
       password: 'some-password',
     });
-    hostRules.hosts = jest.fn(() => []);
+    hostRules.hosts.mockReturnValue([]);
   });
 
   afterEach(() => {
@@ -74,6 +75,20 @@ describe('api/docker', () => {
       expect(res).toBeNull();
       expect(httpMock.getTrace()).toMatchSnapshot();
     });
+    it('returns null if empty header', async () => {
+      httpMock
+        .scope(baseUrl)
+        .get('/')
+        .reply(200, { token: 'some-token' })
+        .get('/library/some-dep/manifests/some-new-value')
+        .reply(200, undefined, { 'docker-content-digest': '' });
+      const res = await getDigest(
+        { datasource: 'docker', depName: 'some-dep' },
+        'some-new-value'
+      );
+      expect(res).toBeNull();
+      expect(httpMock.getTrace()).toMatchSnapshot();
+    });
     it('returns digest', async () => {
       httpMock
         .scope(baseUrl)
@@ -90,6 +105,8 @@ describe('api/docker', () => {
           '/token?service=registry.docker.io&scope=repository:library/some-dep:pull'
         )
         .reply(200, { token: 'some-token' });
+
+      hostRules.find.mockReturnValue({});
       const res = await getDigest({
         datasource: 'docker',
         depName: 'some-dep',
@@ -261,6 +278,7 @@ describe('api/docker', () => {
       AWSMock.restore('ECR');
     });
     it('continues without token if ECR authentication fails', async () => {
+      hostRules.find.mockReturnValue({});
       httpMock
         .scope(amazonUrl)
         .get('/')
@@ -319,7 +337,7 @@ describe('api/docker', () => {
         .get(
           '/token?service=registry.docker.io&scope=repository:library/some-other-dep:pull'
         )
-        .reply(200, { token: 'some-token' });
+        .reply(200, { access_token: 'some-token' });
       const res = await getDigest(
         { datasource: 'docker', depName: 'some-other-dep' },
         '8.0.0-alpine'
@@ -520,6 +538,93 @@ describe('api/docker', () => {
       });
       expect(res).toBeNull();
       expect(httpMock.getTrace()).toMatchSnapshot();
+    });
+
+    it('returns null if no auth', async () => {
+      hostRules.find.mockReturnValue({});
+      httpMock
+        .scope(baseUrl)
+        .get('/')
+        .reply(200, undefined, {
+          'www-authenticate': 'Basic realm="My Private Docker Registry Server"',
+        })
+        .get('/')
+        .reply(403);
+      const res = await getPkgReleases({
+        datasource: docker.id,
+        depName: 'node',
+      });
+      expect(res).toBeNull();
+      expect(httpMock.getTrace()).toMatchSnapshot();
+    });
+
+    it('supports labels', async () => {
+      httpMock
+        .scope('https://registry.company.com/v2')
+        .get('/')
+        .times(3)
+        .reply(200)
+        .get('/node/tags/list?n=10000')
+        .reply(200, { tags: ['latest'] })
+        .get('/node/manifests/latest')
+        .reply(200, {
+          schemaVersion: 2,
+          config: { digest: 'some-config-digest' },
+        })
+        .get('/node/blobs/some-config-digest')
+        .reply(200, {
+          config: {
+            Labels: {
+              'org.opencontainers.image.source':
+                'https://github.com/renovatebot/renovate',
+            },
+          },
+        });
+      const res = await getPkgReleases({
+        datasource: docker.id,
+        depName: 'registry.company.com/node',
+      });
+      const trace = httpMock.getTrace();
+      expect(res).toMatchSnapshot();
+      expect(trace).toMatchSnapshot();
+    });
+
+    it('supports redirect', async () => {
+      httpMock
+        .scope('https://registry.company.com/v2')
+        .get('/')
+        .times(3)
+        .reply(200)
+        .get('/node/tags/list?n=10000')
+        .reply(200, { tags: ['latest'] })
+        .get('/node/manifests/latest')
+        .reply(200, {
+          schemaVersion: 2,
+          config: { digest: 'some-config-digest' },
+        })
+        .get('/node/blobs/some-config-digest')
+        .reply(302, undefined, {
+          location:
+            'https://abc.s3.amazon.com/some-config-digest?X-Amz-Algorithm=xxxx',
+        });
+      httpMock
+        .scope('https://abc.s3.amazon.com')
+        .get('/some-config-digest')
+        .query({ 'X-Amz-Algorithm': 'xxxx' })
+        .reply(200, {
+          config: {},
+        });
+      const res = await getPkgReleases({
+        datasource: docker.id,
+        depName: 'registry.company.com/node',
+      });
+      const trace = httpMock.getTrace();
+      expect(res).toMatchSnapshot();
+      expect(trace).toMatchSnapshot();
+      expect(trace[1].headers.authorization).toBe(
+        'Basic c29tZS11c2VybmFtZTpzb21lLXBhc3N3b3Jk'
+      );
+      expect(trace[trace.length - 1].headers.authorization).toBeUndefined();
     });
   });
 });

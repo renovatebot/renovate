@@ -52,7 +52,7 @@ export class GitlabHttp extends Http<GitlabHttpOptions, GitlabHttpOptions> {
         }
       }
       return result;
-    } catch (err) /* istanbul ignore next */ {
+    } catch (err) {
       if (err.statusCode === 404) {
         logger.trace({ err }, 'GitLab 404');
         logger.debug({ url: err.url }, 'GitLab API 404');

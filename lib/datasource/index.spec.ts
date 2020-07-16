@@ -30,7 +30,7 @@ describe('datasource/index', () => {
     expect(datasource.getDatasources()).toBeDefined();
     expect(datasource.getDatasourceList()).toBeDefined();
   });
-  it('validates dataource', async () => {
+  it('validates dataource', () => {
     function validateDatasource(
       module: datasource.Datasource,
       name: string
@@ -49,13 +49,13 @@ describe('datasource/index', () => {
     expect(Array.from(dss.keys())).toEqual(Object.keys(loadedDs));
 
     for (const dsName of dss.keys()) {
-      const ds = await dss.get(dsName);
+      const ds = dss.get(dsName);
       expect(validateDatasource(ds, dsName)).toBe(true);
     }
   });
-  it('returns if digests are supported', async () => {
+  it('returns if digests are supported', () => {
     expect(
-      await datasource.supportsDigests({ datasource: datasourceGithubTags.id })
+      datasource.supportsDigests({ datasource: datasourceGithubTags.id })
     ).toBe(true);
   });
   it('returns null for no datasource', async () => {

@@ -115,7 +115,8 @@ export function scope(basePath: BasePath, options?: nock.Options): nock.Scope {
     const { headers, method } = req;
     const url = req.options?.href;
     const result: RequestLogItem = { headers, method, url };
-    const body = req.options?.body;
+    const body = req.requestBodyBuffers?.[0]?.toString();
+
     if (body) {
       try {
         const strQuery = JSON.parse(body).query;

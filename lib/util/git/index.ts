@@ -26,7 +26,7 @@ export type DiffResult = Git.DiffResult;
 
 interface StorageConfig {
   localDir: string;
-  baseBranch?: string;
+  currentBranch?: string;
   url: string;
   extraCloneOpts?: Git.Options;
   gitAuthorName?: string;
@@ -34,8 +34,8 @@ interface StorageConfig {
 }
 
 interface LocalConfig extends StorageConfig {
-  baseBranch: string;
-  baseBranchSha: string;
+  currentBranch: string;
+  currentBranchSha: string;
   branchExists: Record<string, boolean>;
   branchPrefix: string;
 }
@@ -66,11 +66,11 @@ function localName(branchName: string): string {
   return branchName.replace(/^origin\//, '');
 }
 
-function throwBaseBranchValidationError(branchName: string): never {
+function throwBranchValidationError(branchName: string): never {
   const error = new Error(CONFIG_VALIDATION);
-  error.validationError = 'baseBranch not found';
+  error.validationError = 'branch not found';
   error.validationMessage =
-    'The following configured baseBranch could not be found: ' + branchName;
+    'The following branch could not be found: ' + branchName;
   throw error;
 }
 
@@ -159,8 +159,9 @@ export async function syncGit(): Promise<void> {
       await git.raw(['remote', 'set-url', 'origin', config.url]);
       const fetchStart = Date.now();
       await git.fetch(['--depth=10']);
-      config.baseBranch = config.baseBranch || (await getDefaultBranch(git));
-      await resetToBranch(config.baseBranch);
+      config.currentBranch =
+        config.currentBranch || (await getDefaultBranch(git));
+      await resetToBranch(config.currentBranch);
       await cleanLocalBranches();
       await git.raw(['remote', 'prune', 'origin']);
       const durationMs = Math.round(Date.now() - fetchStart);
@@ -228,7 +229,7 @@ export async function syncGit(): Promise<void> {
     throw new Error(REPOSITORY_TEMPORARY_ERROR);
   }
 
-  config.baseBranch = config.baseBranch || (await getDefaultBranch(git));
+  config.currentBranch = config.currentBranch || (await getDefaultBranch(git));
 }
 
 export async function initRepo(args: StorageConfig): Promise<void> {
@@ -300,16 +301,16 @@ export async function getCommitMessages(): Promise<string[]> {
   return res.all.map((commit) => commit.message);
 }
 
-export async function setBaseBranch(branchName: string): Promise<string> {
+export async function setBranch(branchName: string): Promise<string> {
   if (branchName) {
     if (!(await branchExists(branchName))) {
-      throwBaseBranchValidationError(branchName);
+      throwBranchValidationError(branchName);
     }
-    logger.debug(`Setting baseBranch to ${branchName}`);
-    config.baseBranch = branchName;
+    logger.debug(`Setting current branch to ${branchName}`);
+    config.currentBranch = branchName;
     try {
       if (branchName !== 'master') {
-        config.baseBranchSha = (
+        config.currentBranchSha = (
           await git.raw(['rev-parse', 'origin/' + branchName])
         ).trim();
       }
@@ -325,13 +326,13 @@ export async function setBaseBranch(branchName: string): Promise<string> {
         ) ||
         err.message.includes('did not match any file(s) known to git')
       ) {
-        throwBaseBranchValidationError(branchName);
+        throwBranchValidationError(branchName);
       }
       throw err;
     }
   }
   return (
-    config.baseBranchSha ||
+    config.currentBranchSha ||
     (await git.raw(['rev-parse', 'origin/master'])).trim()
   );
 }
@@ -353,7 +354,7 @@ export async function setBranchPrefix(branchPrefix: string): Promise<void> {
 }
 
 export async function getFileList(): Promise<string[]> {
-  const branch = config.baseBranch;
+  const branch = config.currentBranch;
   const submodules = await getSubmodules();
   const files: string = await git.raw(['ls-tree', '-r', branch]);
   // istanbul ignore if
@@ -389,7 +390,7 @@ export async function isBranchStale(branchName: string): Promise<boolean> {
     '--remotes',
     '--verbose',
     '--contains',
-    config.baseBranchSha || `origin/${config.baseBranch}`,
+    config.currentBranchSha || `origin/${config.currentBranch}`,
   ]);
   return !branches.all.map(localName).includes(branchName);
 }
@@ -416,9 +417,9 @@ export async function deleteBranch(branchName: string): Promise<void> {
 export async function mergeBranch(branchName: string): Promise<void> {
   await git.reset('hard');
   await git.checkout(['-B', branchName, 'origin/' + branchName]);
-  await git.checkout(config.baseBranch);
+  await git.checkout(config.currentBranch);
   await git.merge(['--ff-only', branchName]);
-  await git.push('origin', config.baseBranch);
+  await git.push('origin', config.currentBranch);
   limits.incrementLimit('prCommitsPerRunLimit');
 }
 
@@ -436,7 +437,7 @@ export async function getBranchLastCommitTime(
 
 export async function getBranchFiles(branchName: string): Promise<string[]> {
   try {
-    const diff = await git.diffSummary([branchName, config.baseBranch]);
+    const diff = await git.diffSummary([branchName, config.currentBranch]);
     return diff.files.map((file) => file.file);
   } catch (err) /* istanbul ignore next */ {
     checkForPlatformFailure(err);
@@ -457,7 +458,7 @@ export async function getFile(
   }
   try {
     const content = await git.show([
-      'origin/' + (branchName || config.baseBranch) + ':' + filePath,
+      'origin/' + (branchName || config.currentBranch) + ':' + filePath,
     ]);
     return content;
   } catch (err) {
@@ -510,7 +511,7 @@ export async function commitFiles({
   try {
     await git.reset('hard');
     await git.raw(['clean', '-fd']);
-    await git.checkout(['-B', branchName, 'origin/' + config.baseBranch]);
+    await git.checkout(['-B', branchName, 'origin/' + config.currentBranch]);
     const fileNames = [];
     const deleted = [];
     for (const file of files) {

@@ -69,7 +69,7 @@ export interface ReleaseResult {
   registryUrl?: string;
 }
 
-export interface Datasource {
+export interface DatasourceApi {
   id: string;
   getDigest?(config: DigestConfig, newValue?: string): Promise<string | null>;
   getReleases(config: GetReleasesConfig): Promise<ReleaseResult | null>;
@@ -78,3 +78,6 @@ export interface Datasource {
   defaultConfig?: object;
   registryStrategy?: 'first' | 'hunt' | 'merge';
 }
+
+// TODO: remove, only for compatabillity
+export type Datasource = DatasourceApi;

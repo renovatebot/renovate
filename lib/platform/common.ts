@@ -1,4 +1,3 @@
-import got from 'got';
 import { RenovateConfig } from '../config/common';
 import {
   BranchStatus,
@@ -7,45 +6,6 @@ import {
 
 export type VulnerabilityAlert = _VulnerabilityAlert;
 
-export interface GotApiOptions {
-  useCache?: boolean;
-  hostType?: string;
-  body?: any;
-}
-
-export type GotResponse<T extends object = any> = got.Response<T>;
-
-export interface GotApi<TOptions extends object = any> {
-  get<T extends object = any>(
-    url: string,
-    options?: GotApiOptions & TOptions
-  ): Promise<GotResponse<T>>;
-  post<T extends object = any>(
-    url: string,
-    options?: GotApiOptions & TOptions
-  ): Promise<GotResponse<T>>;
-  put<T extends object = any>(
-    url: string,
-    options?: GotApiOptions & TOptions
-  ): Promise<GotResponse<T>>;
-  patch<T extends object = any>(
-    url: string,
-    options?: GotApiOptions & TOptions
-  ): Promise<GotResponse<T>>;
-  head<T extends object = any>(
-    url: string,
-    options?: GotApiOptions & TOptions
-  ): Promise<GotResponse<T>>;
-  delete<T extends object = any>(
-    url: string,
-    options?: GotApiOptions & TOptions
-  ): Promise<GotResponse<T>>;
-
-  reset(): void;
-
-  setBaseUrl(endpoint: string): void;
-}
-
 export interface PlatformConfig {
   endpoint: string;
   renovateUsername?: any;
@@ -53,7 +13,7 @@ export interface PlatformConfig {
 }
 
 export interface RepoConfig {
-  baseBranch: string;
+  defaultBranch: string;
   endpoint?: string;
   renovateUsername?: any;
   gitAuthor?: any;
@@ -123,6 +83,7 @@ export interface CreatePRConfig {
 }
 export interface EnsureIssueConfig {
   title: string;
+  reuseTitle?: string;
   body: string;
   once?: boolean;
   shouldReOpen?: boolean;
