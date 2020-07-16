@@ -156,7 +156,7 @@
     "p-map": "4.0.0",
     "parse-diff": "0.7.0",
     "parse-link-header": "1.0.1",
-    "registry-auth-token": "4.1.1",
+    "registry-auth-token": "4.2.0",
     "semver": "7.3.2",
     "semver-stable": "3.0.0",
     "semver-utils": "1.1.4",
