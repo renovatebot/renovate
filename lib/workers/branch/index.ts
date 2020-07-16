@@ -142,8 +142,9 @@ export async function processBranch(
         return 'needs-approval';
       }
     }
+    const willCommit = branchExists ? branchPr?.isStale : true;
     if (
-      !branchExists &&
+      willCommit &&
       prHourlyLimitReached &&
       !dependencyDashboardCheck &&
       !config.vulnerabilityAlert
