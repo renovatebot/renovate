@@ -1,3 +1,4 @@
+import is from '@sindresorhus/is';
 import {
   ProxyAgentConfigurationType,
   createGlobalProxyAgent,
@@ -5,7 +6,9 @@ import {
 
 const envVars = ['HTTP_PROXY', 'HTTPS_PROXY', 'NO_PROXY'];
 
-export function bootstrap(): ProxyAgentConfigurationType {
+let agent: ProxyAgentConfigurationType | undefined;
+
+export function bootstrap(): ProxyAgentConfigurationType | undefined {
   envVars.forEach((envVar) => {
     /* istanbul ignore if: env is case-insensitive on windows */
     if (
@@ -15,7 +18,22 @@ export function bootstrap(): ProxyAgentConfigurationType {
       process.env[envVar] = process.env[envVar.toLowerCase()];
     }
   });
-  return createGlobalProxyAgent({
-    environmentVariableNamespace: '',
-  });
+
+  if (
+    is.nonEmptyString(process.env.HTTP_PROXY) ||
+    is.nonEmptyString(process.env.HTTPS_PROXY)
+  ) {
+    agent = createGlobalProxyAgent({
+      environmentVariableNamespace: '',
+    });
+  } else {
+    agent = undefined;
+  }
+
+  return agent;
+}
+
+// will be used by our http layer later
+export function hasProxy(): boolean {
+  return agent !== undefined;
 }

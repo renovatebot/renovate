@@ -1,4 +1,4 @@
-import { bootstrap } from './proxy';
+import { bootstrap, hasProxy } from './proxy';
 
 describe('proxy', () => {
   const httpProxy = 'http://example.org/http-proxy';
@@ -16,6 +16,7 @@ describe('proxy', () => {
     process.env.HTTP_PROXY = httpProxy;
     const result = bootstrap();
     expect(result.HTTP_PROXY).toEqual(httpProxy);
+    expect(hasProxy()).toBeTrue();
   });
   it('respects HTTPS_PROXY', () => {
     process.env.HTTPS_PROXY = httpsProxy;
@@ -26,5 +27,10 @@ describe('proxy', () => {
     process.env.no_proxy = noProxy;
     const result = bootstrap();
     expect(result.NO_PROXY).toEqual(noProxy);
+  });
+  it('does nothing', () => {
+    const result = bootstrap();
+    expect(result).toBeUndefined();
+    expect(hasProxy()).toBeFalse();
   });
 });
