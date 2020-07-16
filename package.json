@@ -109,7 +109,7 @@
   },
   "dependencies": {
     "@renovate/pep440": "0.4.1",
-    "@renovatebot/ruby-semver": "0.1.6",
+    "@renovatebot/ruby-semver": "0.2.1",
     "@sindresorhus/is": "2.1.1",
     "@yarnpkg/lockfile": "1.1.0",
     "aws-sdk": "2.713.0",
