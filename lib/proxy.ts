@@ -1,12 +1,9 @@
 import is from '@sindresorhus/is';
-import {
-  ProxyAgentConfigurationType,
-  createGlobalProxyAgent,
-} from 'global-agent';
+import { createGlobalProxyAgent } from 'global-agent';
 
 const envVars = ['HTTP_PROXY', 'HTTPS_PROXY', 'NO_PROXY'];
 
-let agent: ProxyAgentConfigurationType | undefined;
+let agent = false;
 
 export function bootstrap(): void {
   envVars.forEach((envVar) => {
@@ -23,16 +20,17 @@ export function bootstrap(): void {
     is.nonEmptyString(process.env.HTTP_PROXY) ||
     is.nonEmptyString(process.env.HTTPS_PROXY)
   ) {
-    agent = createGlobalProxyAgent({
+    createGlobalProxyAgent({
       environmentVariableNamespace: '',
     });
+    agent = true;
   } else {
     // for testing only, does not reset global agent
-    agent = undefined;
+    agent = false;
   }
 }
 
 // will be used by our http layer later
 export function hasProxy(): boolean {
-  return agent !== undefined;
+  return agent === true;
 }
