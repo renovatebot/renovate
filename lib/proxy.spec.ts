@@ -5,7 +5,7 @@ describe('proxy', () => {
   const httpsProxy = 'http://example.org/https-proxy';
   const noProxy = 'http://example.org/no-proxy';
 
-  beforeAll(() => {
+  beforeEach(() => {
     delete process.env.HTTP_PROXY;
     delete process.env.HTTPS_PROXY;
     delete process.env.NO_PROXY;
@@ -23,12 +23,8 @@ describe('proxy', () => {
     const result = bootstrap();
     expect(result.HTTPS_PROXY).toEqual(httpsProxy);
   });
-  it('respects no_proxy', () => {
-    process.env.no_proxy = noProxy;
-    const result = bootstrap();
-    expect(result.NO_PROXY).toEqual(noProxy);
-  });
   it('does nothing', () => {
+    process.env.no_proxy = noProxy;
     const result = bootstrap();
     expect(result).toBeUndefined();
     expect(hasProxy()).toBeFalse();
