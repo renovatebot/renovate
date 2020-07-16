@@ -93,7 +93,7 @@ function matchesRule(inputConfig: Config, packageRule: PackageRule): boolean {
   if (depTypeList.length) {
     const isMatch =
       depTypeList.includes(depType) ||
-      (depTypes && depTypes.some((dt) => depTypeList.includes(dt)));
+      depTypes?.some((dt) => depTypeList.includes(dt));
     if (!isMatch) {
       return false;
     }
@@ -181,8 +181,8 @@ function matchesRule(inputConfig: Config, packageRule: PackageRule): boolean {
     positiveMatch = true;
   }
   if (sourceUrlPrefixes.length) {
-    const isMatch = sourceUrlPrefixes.some(
-      (prefix) => sourceUrl && sourceUrl.startsWith(prefix)
+    const isMatch = sourceUrlPrefixes.some((prefix) =>
+      sourceUrl?.startsWith(prefix)
     );
     if (!isMatch) {
       return false;
