@@ -1,4 +1,5 @@
 import url, { URLSearchParams } from 'url';
+import is from '@sindresorhus/is';
 import delay from 'delay';
 import { RenovateConfig } from '../../config/common';
 import {
@@ -267,7 +268,7 @@ export async function getPr(
     reviewers: res.body.reviewers.map((r) => r.user.name),
     isModified: false,
   };
-
+  pr.hasReviewers = is.nonEmptyArray(pr.reviewers);
   pr.version = updatePrVersion(pr.number, pr.version);
 
   if (pr.state === PR_STATE_OPEN) {
