@@ -76,7 +76,7 @@ export async function getPackageReleases(
 }
 
 export function getLatestVersion(versions: string[]): string | null {
-  if (versions && versions.length) {
+  if (versions?.length) {
     return versions.reduce((latestVersion, version) =>
       compare(version, latestVersion) === 1 ? version : latestVersion
     );
@@ -91,7 +91,7 @@ export async function getUrls(
 ): Promise<Partial<ReleaseResult>> {
   const result: Partial<ReleaseResult> = {};
 
-  if (!artifactDirs || !artifactDirs.length) {
+  if (!artifactDirs?.length) {
     return result;
   }
 
@@ -124,7 +124,7 @@ export async function getUrls(
             .replace(/^scm:/, '')
             .replace(/^git:/, '')
             .replace(/^git@github.com:/, 'https://github.com/')
-            .replace(/[.]git$/, '');
+            .replace(/\.git$/, '');
         }
 
         return result;
