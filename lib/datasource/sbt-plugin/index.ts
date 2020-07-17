@@ -2,7 +2,12 @@ import { logger } from '../../logger';
 import { compare } from '../../versioning/maven/compare';
 import { GetReleasesConfig, ReleaseResult } from '../common';
 import { downloadHttpProtocol } from '../maven/util';
-import { resolvePackageReleases } from '../sbt-package';
+import {
+  getArtifactSubdirs,
+  getLatestVersion,
+  getPackageReleases,
+  getUrls,
+} from '../sbt-package';
 import { SBT_PLUGINS_REPO, parseIndexDir } from './util';
 
 export const id = 'sbt-plugin';
@@ -58,7 +63,7 @@ async function resolvePluginReleases(
       return [...new Set(releases)].sort(compare);
     }
   }
-  return resolvePackageReleases(rootUrl, artifact, scalaVersion);
+  return null;
 }
 
 export async function getReleases({
@@ -78,16 +83,29 @@ export async function getReleases({
 
   for (let idx = 0; idx < searchRoots.length; idx += 1) {
     const searchRoot = searchRoots[idx];
-    const versions = await resolvePluginReleases(
+    let versions = await resolvePluginReleases(
       searchRoot,
       artifact,
       scalaVersion
     );
+    let urls = {};
+
+    if (!versions?.length) {
+      const artifactSubdirs = await getArtifactSubdirs(
+        searchRoot,
+        artifact,
+        scalaVersion
+      );
+      versions = await getPackageReleases(searchRoot, artifactSubdirs);
+      const latestVersion = getLatestVersion(versions);
+      urls = await getUrls(searchRoot, artifactSubdirs, latestVersion);
+    }
 
     const dependencyUrl = `${searchRoot}/${artifact}`;
 
     if (versions) {
       return {
+        ...urls,
         display: lookupName,
         group: groupId,
         name: artifactId,
