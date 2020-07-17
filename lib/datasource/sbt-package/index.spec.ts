@@ -30,7 +30,6 @@ describe('datasource/sbt', () => {
       nock.disableNetConnect();
       nock('https://failed_repo').get('/maven/org/scalatest/').reply(404, null);
       nock('https://repo.maven.apache.org')
-        .persist()
         .get('/maven2/com/example/')
         .reply(200, '<a href="empty/">empty_2.12/</a>\n');
       nock('https://repo.maven.apache.org')
