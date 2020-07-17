@@ -214,9 +214,6 @@ function updateVersionLiterals(
     ...moduleMapVersionFormatMatch(dependency),
     ...moduleKotlinNamedArgumentVersionFormatMatch(dependency),
   ];
-  if (dependency.name === 'openjpa') {
-    debugger;
-  }
   let result = buildGradleContent;
   for (const regex of regexes) {
     const match = regex.exec(result);
