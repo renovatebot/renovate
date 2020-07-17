@@ -65,7 +65,6 @@ describe(getName(__filename), () => {
       const res = await yarnHelper.generateLockFile('some-dir', {}, {}, [
         {
           depName: 'some-dep',
-          currentValue: '^1.2.3',
           isLockfileUpdate: true,
         },
       ]);
@@ -88,7 +87,6 @@ describe(getName(__filename), () => {
       const res = await yarnHelper.generateLockFile('some-dir', {}, {}, [
         {
           depName: 'some-dep',
-          currentValue: '^1.2.3',
           isLockfileUpdate: true,
         },
       ]);

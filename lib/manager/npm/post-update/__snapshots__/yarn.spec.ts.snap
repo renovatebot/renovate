@@ -222,7 +222,7 @@ Array [
     },
   },
   Object {
-    "cmd": "yarn upgrade some-dep@^1.2.3 --ignore-engines --ignore-platform --network-timeout 100000 --ignore-scripts",
+    "cmd": "yarn upgrade some-dep --ignore-engines --ignore-platform --network-timeout 100000 --ignore-scripts",
     "options": Object {
       "cwd": "some-dir",
       "encoding": "utf-8",
@@ -261,7 +261,7 @@ Array [
     },
   },
   Object {
-    "cmd": "yarn upgrade some-dep@^1.2.3 --ignore-engines --ignore-platform --network-timeout 100000 --ignore-scripts",
+    "cmd": "yarn upgrade some-dep --ignore-engines --ignore-platform --network-timeout 100000 --ignore-scripts",
     "options": Object {
       "cwd": "some-dir",
       "encoding": "utf-8",
