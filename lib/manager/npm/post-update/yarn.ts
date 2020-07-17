@@ -94,7 +94,7 @@ export async function generateLockFile(
     // rangeStrategy = update-lockfile
     const lockUpdates = upgrades
       .filter((upgrade) => upgrade.isLockfileUpdate)
-      .map((upgrade) => `${upgrade.depName}@${upgrade.currentValue}`);
+      .map((upgrade) => upgrade.depName); // note - this can hit a yarn bug, see https://github.com/yarnpkg/yarn/issues/8236
     if (lockUpdates.length) {
       logger.debug('Performing lockfileUpdate (yarn)');
       commands.push(
