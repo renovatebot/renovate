@@ -1,3 +1,4 @@
+import { XmlDocument } from 'xmldoc';
 import { logger } from '../../logger';
 import { compare } from '../../versioning/maven/compare';
 import { GetReleasesConfig, ReleaseResult } from '../common';
@@ -12,7 +13,7 @@ export const registryStrategy = 'hunt';
 
 const ensureTrailingSlash = (str: string): string => str.replace(/\/?$/, '/');
 
-export async function resolvePackageReleases(
+export async function getArtifactSubdirs(
   searchRoot: string,
   artifact: string,
   scalaVersion: string
@@ -22,7 +23,6 @@ export async function resolvePackageReleases(
     'sbt'
   );
   if (indexContent) {
-    const releases: string[] = [];
     const parseSubdirs = (content: string): string[] =>
       parseIndexDir(content, (x) => {
         if (x === artifact) {
@@ -36,17 +36,28 @@ export async function resolvePackageReleases(
         }
         return x.startsWith(`${artifact}_`);
       });
-    const artifactSubdirs = parseSubdirs(indexContent);
-    let searchSubdirs = artifactSubdirs;
+    let artifactSubdirs = parseSubdirs(indexContent);
     if (
       scalaVersion &&
       artifactSubdirs.includes(`${artifact}_${scalaVersion}`)
     ) {
-      searchSubdirs = [`${artifact}_${scalaVersion}`];
+      artifactSubdirs = [`${artifact}_${scalaVersion}`];
     }
+    return artifactSubdirs;
+  }
+
+  return null;
+}
+
+export async function getPackageReleases(
+  searchRoot: string,
+  artifactSubdirs: string[]
+): Promise<string[]> {
+  if (artifactSubdirs) {
+    const releases: string[] = [];
     const parseReleases = (content: string): string[] =>
       parseIndexDir(content, (x) => !/^\.+$/.test(x));
-    for (const searchSubdir of searchSubdirs) {
+    for (const searchSubdir of artifactSubdirs) {
       const content = await downloadHttpProtocol(
         ensureTrailingSlash(`${searchRoot}/${searchSubdir}`),
         'sbt'
@@ -62,6 +73,66 @@ export async function resolvePackageReleases(
   }
 
   return null;
+}
+
+export function getLatestVersion(versions: string[]): string | null {
+  if (versions?.length) {
+    return versions.reduce((latestVersion, version) =>
+      compare(version, latestVersion) === 1 ? version : latestVersion
+    );
+  }
+  return null;
+}
+
+export async function getUrls(
+  searchRoot: string,
+  artifactDirs: string[],
+  version: string
+): Promise<Partial<ReleaseResult>> {
+  const result: Partial<ReleaseResult> = {};
+
+  if (!artifactDirs?.length) {
+    return result;
+  }
+
+  if (!version) {
+    return result;
+  }
+
+  for (const artifactDir of artifactDirs) {
+    const [artifact] = artifactDir.split('_');
+    const pomFileNames = [
+      `${artifactDir}-${version}.pom`,
+      `${artifact}-${version}.pom`,
+    ];
+
+    for (const pomFileName of pomFileNames) {
+      const pomUrl = `${searchRoot}/${artifactDir}/${version}/${pomFileName}`;
+      const content = await downloadHttpProtocol(pomUrl, 'sbt');
+
+      if (content) {
+        const pomXml = new XmlDocument(content);
+
+        const homepage = pomXml.valueWithPath('url');
+        if (homepage) {
+          result.homepage = homepage;
+        }
+
+        const sourceUrl = pomXml.valueWithPath('scm.url');
+        if (sourceUrl) {
+          result.sourceUrl = sourceUrl
+            .replace(/^scm:/, '')
+            .replace(/^git:/, '')
+            .replace(/^git@github.com:/, 'https://github.com/')
+            .replace(/\.git$/, '');
+        }
+
+        return result;
+      }
+    }
+  }
+
+  return result;
 }
 
 export async function getReleases({
@@ -81,16 +152,20 @@ export async function getReleases({
 
   for (let idx = 0; idx < searchRoots.length; idx += 1) {
     const searchRoot = searchRoots[idx];
-    const versions = await resolvePackageReleases(
+    const artifactSubdirs = await getArtifactSubdirs(
       searchRoot,
       artifact,
       scalaVersion
     );
+    const versions = await getPackageReleases(searchRoot, artifactSubdirs);
+    const latestVersion = getLatestVersion(versions);
+    const urls = await getUrls(searchRoot, artifactSubdirs, latestVersion);
 
     const dependencyUrl = searchRoot;
 
     if (versions) {
       return {
+        ...urls,
         display: lookupName,
         group: groupId,
         name: artifactId,
