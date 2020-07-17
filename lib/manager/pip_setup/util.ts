@@ -2,8 +2,8 @@ import { resolveFile } from '../../util';
 import { readFile, readLocalFile, writeLocalFile } from '../../util/fs';
 
 // need to match filename in `data/extract.py`
-const REPORT = 'renovate-python-report.json';
-const EXTRACT = 'renovate-python-extract.py';
+const REPORT = 'renovate-pip_setup-report.json';
+const EXTRACT = 'renovate-pip_setup-extract.py';
 
 let extractPy: string | undefined;
 
