@@ -176,9 +176,9 @@
   },
   "devDependencies": {
     "@actions/core": "1.2.4",
-    "@babel/cli": "7.10.4",
-    "@babel/core": "7.10.4",
-    "@babel/node": "7.10.4",
+    "@babel/cli": "7.10.5",
+    "@babel/core": "7.10.5",
+    "@babel/node": "7.10.5",
     "@babel/plugin-proposal-class-properties": "7.10.4",
     "@babel/plugin-proposal-object-rest-spread": "7.10.4",
     "@babel/plugin-syntax-dynamic-import": "7.8.3",
