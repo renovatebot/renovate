@@ -1935,6 +1935,9 @@ Array [
               "first": "100",
             },
             "nodes": Object {
+              "assignees": Object {
+                "totalCount": null,
+              },
               "baseRefName": null,
               "body": null,
               "commits": Object {
@@ -1975,6 +1978,9 @@ Array [
               "mergeStateStatus": null,
               "mergeable": null,
               "number": null,
+              "reviewRequests": Object {
+                "totalCount": null,
+              },
               "reviews": Object {
                 "__args": Object {
                   "first": "1",
@@ -1993,7 +1999,7 @@ Array [
       "accept": "application/vnd.github.merge-info-preview+json, application/vnd.github.v3+json",
       "accept-encoding": "gzip, deflate",
       "authorization": "token abc123",
-      "content-length": "1264",
+      "content-length": "1413",
       "content-type": "application/json",
       "host": "api.github.com",
       "user-agent": "https://github.com/renovatebot/renovate",
@@ -2200,6 +2206,9 @@ Array [
               "first": "100",
             },
             "nodes": Object {
+              "assignees": Object {
+                "totalCount": null,
+              },
               "baseRefName": null,
               "body": null,
               "commits": Object {
@@ -2240,6 +2249,9 @@ Array [
               "mergeStateStatus": null,
               "mergeable": null,
               "number": null,
+              "reviewRequests": Object {
+                "totalCount": null,
+              },
               "reviews": Object {
                 "__args": Object {
                   "first": "1",
@@ -2258,7 +2270,7 @@ Array [
       "accept": "application/vnd.github.merge-info-preview+json, application/vnd.github.v3+json",
       "accept-encoding": "gzip, deflate",
       "authorization": "token abc123",
-      "content-length": "1264",
+      "content-length": "1413",
       "content-type": "application/json",
       "host": "api.github.com",
       "user-agent": "https://github.com/renovatebot/renovate",
@@ -2928,6 +2940,9 @@ Array [
               "first": "100",
             },
             "nodes": Object {
+              "assignees": Object {
+                "totalCount": null,
+              },
               "baseRefName": null,
               "body": null,
               "commits": Object {
@@ -2968,6 +2983,9 @@ Array [
               "mergeStateStatus": null,
               "mergeable": null,
               "number": null,
+              "reviewRequests": Object {
+                "totalCount": null,
+              },
               "reviews": Object {
                 "__args": Object {
                   "first": "1",
@@ -2986,7 +3004,7 @@ Array [
       "accept": "application/vnd.github.merge-info-preview+json, application/vnd.github.v3+json",
       "accept-encoding": "gzip, deflate",
       "authorization": "token abc123",
-      "content-length": "1264",
+      "content-length": "1413",
       "content-type": "application/json",
       "host": "api.github.com",
       "user-agent": "https://github.com/renovatebot/renovate",
@@ -3057,6 +3075,8 @@ Object {
   "canMerge": false,
   "canMergeReason": "mergeStateStatus = DIRTY",
   "displayNumber": "Pull Request #2500",
+  "hasAssignees": false,
+  "hasReviewers": false,
   "isConflicted": true,
   "isModified": false,
   "isStale": true,
@@ -3114,6 +3134,9 @@ Array [
               "first": "100",
             },
             "nodes": Object {
+              "assignees": Object {
+                "totalCount": null,
+              },
               "baseRefName": null,
               "body": null,
               "commits": Object {
@@ -3154,6 +3177,9 @@ Array [
               "mergeStateStatus": null,
               "mergeable": null,
               "number": null,
+              "reviewRequests": Object {
+                "totalCount": null,
+              },
               "reviews": Object {
                 "__args": Object {
                   "first": "1",
@@ -3172,7 +3198,7 @@ Array [
       "accept": "application/vnd.github.merge-info-preview+json, application/vnd.github.v3+json",
       "accept-encoding": "gzip, deflate",
       "authorization": "token abc123",
-      "content-length": "1264",
+      "content-length": "1413",
       "content-type": "application/json",
       "host": "api.github.com",
       "user-agent": "https://github.com/renovatebot/renovate",
@@ -3254,6 +3280,9 @@ Array [
               "first": "100",
             },
             "nodes": Object {
+              "assignees": Object {
+                "totalCount": null,
+              },
               "baseRefName": null,
               "body": null,
               "commits": Object {
@@ -3294,6 +3323,9 @@ Array [
               "mergeStateStatus": null,
               "mergeable": null,
               "number": null,
+              "reviewRequests": Object {
+                "totalCount": null,
+              },
               "reviews": Object {
                 "__args": Object {
                   "first": "1",
@@ -3312,7 +3344,7 @@ Array [
       "accept": "application/vnd.github.merge-info-preview+json, application/vnd.github.v3+json",
       "accept-encoding": "gzip, deflate",
       "authorization": "token abc123",
-      "content-length": "1264",
+      "content-length": "1413",
       "content-type": "application/json",
       "host": "api.github.com",
       "user-agent": "https://github.com/renovatebot/renovate",
@@ -3443,6 +3475,9 @@ Array [
               "first": "100",
             },
             "nodes": Object {
+              "assignees": Object {
+                "totalCount": null,
+              },
               "baseRefName": null,
               "body": null,
               "commits": Object {
@@ -3483,6 +3518,9 @@ Array [
               "mergeStateStatus": null,
               "mergeable": null,
               "number": null,
+              "reviewRequests": Object {
+                "totalCount": null,
+              },
               "reviews": Object {
                 "__args": Object {
                   "first": "1",
@@ -3501,7 +3539,7 @@ Array [
       "accept": "application/vnd.github.merge-info-preview+json, application/vnd.github.v3+json",
       "accept-encoding": "gzip, deflate",
       "authorization": "token abc123",
-      "content-length": "1264",
+      "content-length": "1413",
       "content-type": "application/json",
       "host": "api.github.com",
       "user-agent": "https://github.com/renovatebot/renovate",
@@ -3642,6 +3680,9 @@ Array [
               "first": "100",
             },
             "nodes": Object {
+              "assignees": Object {
+                "totalCount": null,
+              },
               "baseRefName": null,
               "body": null,
               "commits": Object {
@@ -3682,6 +3723,9 @@ Array [
               "mergeStateStatus": null,
               "mergeable": null,
               "number": null,
+              "reviewRequests": Object {
+                "totalCount": null,
+              },
               "reviews": Object {
                 "__args": Object {
                   "first": "1",
@@ -3700,7 +3744,7 @@ Array [
       "accept": "application/vnd.github.merge-info-preview+json, application/vnd.github.v3+json",
       "accept-encoding": "gzip, deflate",
       "authorization": "token abc123",
-      "content-length": "1264",
+      "content-length": "1413",
       "content-type": "application/json",
       "host": "api.github.com",
       "user-agent": "https://github.com/renovatebot/renovate",
@@ -3842,6 +3886,9 @@ Array [
               "first": "100",
             },
             "nodes": Object {
+              "assignees": Object {
+                "totalCount": null,
+              },
               "baseRefName": null,
               "body": null,
               "commits": Object {
@@ -3882,6 +3929,9 @@ Array [
               "mergeStateStatus": null,
               "mergeable": null,
               "number": null,
+              "reviewRequests": Object {
+                "totalCount": null,
+              },
               "reviews": Object {
                 "__args": Object {
                   "first": "1",
@@ -3900,7 +3950,7 @@ Array [
       "accept": "application/vnd.github.merge-info-preview+json, application/vnd.github.v3+json",
       "accept-encoding": "gzip, deflate",
       "authorization": "token abc123",
-      "content-length": "1264",
+      "content-length": "1413",
       "content-type": "application/json",
       "host": "api.github.com",
       "user-agent": "https://github.com/renovatebot/renovate",
@@ -4053,6 +4103,9 @@ Array [
               "first": "100",
             },
             "nodes": Object {
+              "assignees": Object {
+                "totalCount": null,
+              },
               "baseRefName": null,
               "body": null,
               "commits": Object {
@@ -4093,6 +4146,9 @@ Array [
               "mergeStateStatus": null,
               "mergeable": null,
               "number": null,
+              "reviewRequests": Object {
+                "totalCount": null,
+              },
               "reviews": Object {
                 "__args": Object {
                   "first": "1",
@@ -4111,7 +4167,7 @@ Array [
       "accept": "application/vnd.github.merge-info-preview+json, application/vnd.github.v3+json",
       "accept-encoding": "gzip, deflate",
       "authorization": "token abc123",
-      "content-length": "1264",
+      "content-length": "1413",
       "content-type": "application/json",
       "host": "api.github.com",
       "user-agent": "https://github.com/renovatebot/renovate",
@@ -4264,6 +4320,9 @@ Array [
               "first": "100",
             },
             "nodes": Object {
+              "assignees": Object {
+                "totalCount": null,
+              },
               "baseRefName": null,
               "body": null,
               "commits": Object {
@@ -4304,6 +4363,9 @@ Array [
               "mergeStateStatus": null,
               "mergeable": null,
               "number": null,
+              "reviewRequests": Object {
+                "totalCount": null,
+              },
               "reviews": Object {
                 "__args": Object {
                   "first": "1",
@@ -4322,7 +4384,7 @@ Array [
       "accept": "application/vnd.github.merge-info-preview+json, application/vnd.github.v3+json",
       "accept-encoding": "gzip, deflate",
       "authorization": "token abc123",
-      "content-length": "1264",
+      "content-length": "1413",
       "content-type": "application/json",
       "host": "api.github.com",
       "user-agent": "https://github.com/renovatebot/renovate",
@@ -4475,6 +4537,9 @@ Array [
               "first": "100",
             },
             "nodes": Object {
+              "assignees": Object {
+                "totalCount": null,
+              },
               "baseRefName": null,
               "body": null,
               "commits": Object {
@@ -4515,6 +4580,9 @@ Array [
               "mergeStateStatus": null,
               "mergeable": null,
               "number": null,
+              "reviewRequests": Object {
+                "totalCount": null,
+              },
               "reviews": Object {
                 "__args": Object {
                   "first": "1",
@@ -4533,7 +4601,7 @@ Array [
       "accept": "application/vnd.github.merge-info-preview+json, application/vnd.github.v3+json",
       "accept-encoding": "gzip, deflate",
       "authorization": "token abc123",
-      "content-length": "1264",
+      "content-length": "1413",
       "content-type": "application/json",
       "host": "api.github.com",
       "user-agent": "https://github.com/renovatebot/renovate",
@@ -4686,6 +4754,9 @@ Array [
               "first": "100",
             },
             "nodes": Object {
+              "assignees": Object {
+                "totalCount": null,
+              },
               "baseRefName": null,
               "body": null,
               "commits": Object {
@@ -4726,6 +4797,9 @@ Array [
               "mergeStateStatus": null,
               "mergeable": null,
               "number": null,
+              "reviewRequests": Object {
+                "totalCount": null,
+              },
               "reviews": Object {
                 "__args": Object {
                   "first": "1",
@@ -4744,7 +4818,7 @@ Array [
       "accept": "application/vnd.github.merge-info-preview+json, application/vnd.github.v3+json",
       "accept-encoding": "gzip, deflate",
       "authorization": "token abc123",
-      "content-length": "1264",
+      "content-length": "1413",
       "content-type": "application/json",
       "host": "api.github.com",
       "user-agent": "https://github.com/renovatebot/renovate",
@@ -4878,6 +4952,9 @@ Array [
               "first": "100",
             },
             "nodes": Object {
+              "assignees": Object {
+                "totalCount": null,
+              },
               "baseRefName": null,
               "body": null,
               "commits": Object {
@@ -4918,6 +4995,9 @@ Array [
               "mergeStateStatus": null,
               "mergeable": null,
               "number": null,
+              "reviewRequests": Object {
+                "totalCount": null,
+              },
               "reviews": Object {
                 "__args": Object {
                   "first": "1",
@@ -4936,7 +5016,7 @@ Array [
       "accept": "application/vnd.github.merge-info-preview+json, application/vnd.github.v3+json",
       "accept-encoding": "gzip, deflate",
       "authorization": "token abc123",
-      "content-length": "1264",
+      "content-length": "1413",
       "content-type": "application/json",
       "host": "api.github.com",
       "user-agent": "https://github.com/renovatebot/renovate",
