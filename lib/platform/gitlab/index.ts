@@ -442,6 +442,8 @@ export async function getPr(iid: number): Promise<Pr> {
         description: string;
         diverged_commits_count: number;
         merge_status: string;
+        assignee?: { id?: number };
+        assignees?: { id?: number }[];
       }
     >(url)
   ).body;
@@ -454,6 +456,10 @@ export async function getPr(iid: number): Promise<Pr> {
   pr.isStale = pr.diverged_commits_count > 0;
   pr.state = pr.state === 'opened' ? PR_STATE_OPEN : pr.state;
   pr.isModified = true;
+  pr.hasAssignees = !!(pr.assignee?.id || pr.assignees?.[0]?.id);
+  delete pr.assignee;
+  delete pr.assignees;
+  pr.hasReviewers = false;
   if (pr.merge_status === 'cannot_be_merged') {
     logger.debug('pr cannot be merged');
     pr.canMerge = false;
