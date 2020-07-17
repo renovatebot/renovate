@@ -65,6 +65,7 @@ describe(getName(__filename), () => {
       const res = await yarnHelper.generateLockFile('some-dir', {}, {}, [
         {
           depName: 'some-dep',
+          currentValue: '^1.2.3',
           isLockfileUpdate: true,
         },
       ]);
@@ -87,33 +88,12 @@ describe(getName(__filename), () => {
       const res = await yarnHelper.generateLockFile('some-dir', {}, {}, [
         {
           depName: 'some-dep',
+          currentValue: '^1.2.3',
           isLockfileUpdate: true,
         },
       ]);
       expect(res.lockFile).toEqual('package-lock-contents');
       expect(fixSnapshots(execSnapshots)).toMatchSnapshot();
-    }
-  );
-  it.each([['1.22.0']])(
-    'yarn upgrade uses current version as range v%s',
-    async (yarnVersion) => {
-      const execSnapshots = mockExecAll(exec, {
-        stdout: yarnVersion,
-        stderr: '',
-      });
-
-      fs.readFile.mockReturnValueOnce(
-        'yarn-offline-mirror ./npm-packages-offline-cache' as never
-      );
-      fs.readFile.mockReturnValueOnce('package-lock-contents' as never);
-      await yarnHelper.generateLockFile('some-dir', {}, {}, [
-        {
-          depName: 'some-dep',
-          currentValue: '^1.2.3',
-          isLockfileUpdate: true,
-        },
-      ]);
-      expect(execSnapshots[1].cmd).toStartWith('yarn upgrade some-dep@^1.2.3');
     }
   );
   it.each([['1.22.0']])(
