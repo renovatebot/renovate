@@ -36,8 +36,8 @@ describe('datasource/sbt', () => {
         .get('/maven2/com/example/empty/')
         .reply(200, '');
       nock('https://repo.maven.apache.org')
-        .persist()
         .get('/maven2/org/scalatest/')
+        .times(3)
         .reply(
           200,
           '<a href="scalatest/" title=\'scalatest/\'>scalatest_2.12/</a>\n' +
