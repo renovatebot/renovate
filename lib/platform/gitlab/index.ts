@@ -479,7 +479,7 @@ export async function getPr(iid: number): Promise<Pr> {
     const branch = (
       await gitlabApi.getJson<{ commit: { author_email: string } }>(branchUrl)
     ).body;
-    const branchCommitEmail = branch.commit.author_email;
+    const branchCommitEmail = branch?.commit?.author_email ?? null;
     if (branchCommitEmail === global.gitAuthor.email) {
       pr.isModified = false;
     } else {
