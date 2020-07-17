@@ -82,7 +82,7 @@ export async function mergeRenovateConfig(
         const error = new Error(CONFIG_VALIDATION);
         error.configFile = configFile;
         error.validationError = 'Invalid JSON5 (parsing failed)';
-        error.validationMessage = 'JSON5.parse error: ' + err.message;
+        error.validationMessage = `JSON5.parse error:  ${err.message}`;
         throw error;
       }
     } else {
@@ -117,7 +117,7 @@ export async function mergeRenovateConfig(
         const error = new Error(CONFIG_VALIDATION);
         error.configFile = configFile;
         error.validationError = 'Invalid JSON (parsing failed)';
-        error.validationMessage = 'JSON.parse error: ' + err.message;
+        error.validationMessage = `JSON.parse error:  ${err.message}`;
         throw error;
       }
     }
