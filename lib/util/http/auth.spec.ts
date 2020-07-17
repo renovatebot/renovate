@@ -26,7 +26,7 @@ describe(getName(__filename), () => {
       `);
     });
 
-    it('gittea password', () => {
+    it('gitea password', () => {
       const opts: GotOptions = {
         headers: {},
         hostType: PLATFORM_TYPE_GITEA,
