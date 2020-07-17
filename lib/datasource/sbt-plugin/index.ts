@@ -90,7 +90,7 @@ export async function getReleases({
     );
     let urls = {};
 
-    if (!versions || !versions.length) {
+    if (!versions?.length) {
       const artifactSubdirs = await getArtifactSubdirs(
         searchRoot,
         artifact,
