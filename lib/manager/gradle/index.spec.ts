@@ -400,7 +400,7 @@ describe(getName(__filename), () => {
 
       const upgrade = {
         depGroup: 'org.apache.openjpa',
-        name: 'opejpa',
+        name: 'openjpa',
         version: '3.1.1',
         newValue: '3.1.2',
       };
@@ -410,20 +410,21 @@ describe(getName(__filename), () => {
         upgrade,
       });
 
-      expect(buildGradleContent).not.toMatch(
-        'org.apache.openjpa:openjpa:3.1.1'
+      expect(buildGradleContent).not.toContain(
+        'org.apache.openjpa:openjpa:3.1.2'
       );
-      expect(buildGradleContentUpdated).not.toMatch(
+
+      expect(buildGradleContentUpdated).not.toContain(
         "dependency 'org.apache.openjpa:openjpa:3.1.1'"
       );
-      expect(buildGradleContentUpdated).not.toMatch(
+      expect(buildGradleContentUpdated).not.toContain(
         "dependency 'org.apache.openjpa:openjpa:3.1.1'"
       );
 
-      expect(buildGradleContentUpdated).toMatch(
+      expect(buildGradleContentUpdated).toContain(
         "classpath 'org.apache.openjpa:openjpa:3.1.2'"
       );
-      expect(buildGradleContentUpdated).toMatch(
+      expect(buildGradleContentUpdated).toContain(
         "classpath 'org.apache.openjpa:openjpa:3.1.2'"
       );
 
