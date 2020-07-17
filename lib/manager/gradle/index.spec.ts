@@ -309,7 +309,7 @@ describe(getName(__filename), () => {
       );
       // prettier-ignore
       const upgrade = {
-        depGroup: 'cglib', name: 'cglib-nodep', version: '3.1', newValue: '3.2.8',
+        depGroup: "cglib", name: "cglib-nodep", version: "3.1", newValue: "3.2.8"
       };
       const buildGradleContentUpdated = manager.updateDependency({
         fileContent: buildGradleContent,
@@ -385,6 +385,46 @@ describe(getName(__filename), () => {
       );
       expect(buildGradleContentUpdated).not.toMatch(
         'id("com.github.ben-manes.versions") version "0.20.0"'
+      );
+
+      expect(execSnapshots).toMatchSnapshot();
+    });
+
+    it('should update dependencies in same file', async () => {
+      const execSnapshots = mockExecAll(exec, gradleOutput);
+
+      const buildGradleContent = await fsExtra.readFile(
+        `${fixtures}/build.gradle.example1`,
+        'utf8'
+      );
+
+      const upgrade = {
+        depGroup: 'org.apache.openjpa',
+        name: 'opejpa',
+        version: '3.1.1',
+        newValue: '3.1.2',
+      };
+
+      const buildGradleContentUpdated = manager.updateDependency({
+        fileContent: buildGradleContent,
+        upgrade,
+      });
+
+      expect(buildGradleContent).not.toMatch(
+        'org.apache.openjpa:openjpa:3.1.1'
+      );
+      expect(buildGradleContentUpdated).not.toMatch(
+        "dependency 'org.apache.openjpa:openjpa:3.1.1'"
+      );
+      expect(buildGradleContentUpdated).not.toMatch(
+        "dependency 'org.apache.openjpa:openjpa:3.1.1'"
+      );
+
+      expect(buildGradleContentUpdated).toMatch(
+        "classpath 'org.apache.openjpa:openjpa:3.1.2'"
+      );
+      expect(buildGradleContentUpdated).toMatch(
+        "classpath 'org.apache.openjpa:openjpa:3.1.2'"
       );
 
       expect(execSnapshots).toMatchSnapshot();
