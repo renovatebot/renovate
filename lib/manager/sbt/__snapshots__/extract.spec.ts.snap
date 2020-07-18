@@ -110,6 +110,21 @@ Object {
       ],
     },
     Object {
+      "currentValue": "2.13.3",
+      "datasource": "sbt-package",
+      "depName": "org.scala-lang:scala-library",
+      "depType": "sources",
+      "lookupName": "org.scala-lang:scala-library",
+      "registryUrls": Array [
+        "https://repo.maven.apache.org/maven2",
+        "https://example.com/repos/1/",
+        "https://example.com/repos/2/",
+        "https://example.com/repos/3/",
+        "https://example.com/repos/4/",
+        "https://example.com/repos/5/",
+      ],
+    },
+    Object {
       "currentValue": "0.0.5",
       "datasource": "sbt-package",
       "depName": "org.example:quux",
