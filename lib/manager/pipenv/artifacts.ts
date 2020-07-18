@@ -76,7 +76,7 @@ export async function updateArtifacts({
     logger.debug({ cmd }, 'pipenv lock command');
     await exec(cmd, execOptions);
     const status = await getRepoStatus();
-    if (!(status && status.modified.includes(lockFileName))) {
+    if (!status?.modified.includes(lockFileName)) {
       return null;
     }
     logger.debug('Returning updated Pipfile.lock');

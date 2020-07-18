@@ -32,7 +32,7 @@ export function parseLine(line: string): ParsedLine {
   }
   for (const regex of Object.values(regexMappings)) {
     const match = regex.exec(line.replace(/#.*$/, ''));
-    if (match && match.groups) {
+    if (match?.groups) {
       Object.assign(result, match.groups);
     }
   }
@@ -57,11 +57,11 @@ export function parseLine(line: string): ParsedLine {
 
 export function gitDep(parsedLine: ParsedLine): PackageDependency | null {
   const { depName, git, tag } = parsedLine;
-  if (git && git.startsWith('https://github.com/')) {
+  if (git?.startsWith('https://github.com/')) {
     const githubMatch = /https:\/\/github\.com\/(?<account>[^/]+)\/(?<repo>[^/]+)/.exec(
       git
     );
-    const { account, repo } = (githubMatch && githubMatch.groups) || {};
+    const { account, repo } = githubMatch?.groups || {};
     if (account && repo) {
       return {
         datasource: datasourceGithubTags.id,

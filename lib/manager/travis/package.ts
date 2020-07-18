@@ -89,7 +89,7 @@ export async function getPackageUpdates(
 ): Promise<LookupUpdate[]> {
   logger.trace('travis.getPackageUpdates()');
   const { supportPolicy } = config;
-  if (!(supportPolicy && supportPolicy.length)) {
+  if (!supportPolicy?.length) {
     return [];
   }
   await checkPolicies();

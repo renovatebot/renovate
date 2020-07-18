@@ -180,7 +180,7 @@ export function extractPackage(
 
   const propsNode = project.childNamed('properties');
   const props: Record<string, MavenProp> = {};
-  if (propsNode && propsNode.children) {
+  if (propsNode?.children) {
     for (const propNode of propsNode.children as XmlElement[]) {
       const key = propNode.name;
       const val = propNode.val && propNode.val.trim();
@@ -193,7 +193,7 @@ export function extractPackage(
   result.mavenProps = props;
 
   const repositories = project.childNamed('repositories');
-  if (repositories && repositories.children) {
+  if (repositories?.children) {
     const repoUrls = [];
     for (const repo of repositories.childrenNamed('repository')) {
       const repoUrl = repo.valueWithPath('url');

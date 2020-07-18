@@ -233,11 +233,7 @@ export async function resolveConfigPresets(
           existingPresets.concat([preset])
         );
         // istanbul ignore if
-        if (
-          inputConfig &&
-          inputConfig.ignoreDeps &&
-          inputConfig.ignoreDeps.length === 0
-        ) {
+        if (inputConfig?.ignoreDeps?.length === 0) {
           delete presetConfig.description;
         }
         config = mergeChildConfig(config, presetConfig);

@@ -199,7 +199,7 @@ export class GithubHttp extends Http<GithubHttpOptions, GithubHttpOptions> {
           const linkHeader =
             result?.headers?.link &&
             parseLinkHeader(result.headers.link as string);
-          if (linkHeader && linkHeader.next && linkHeader.last) {
+          if (linkHeader?.next && linkHeader?.last) {
             let lastPage = +linkHeader.last.page;
             // istanbul ignore else: needs a test
             if (!process.env.RENOVATE_PAGINATE_ALL && opts.paginate !== 'all') {
@@ -284,7 +284,7 @@ export class GithubHttp extends Http<GithubHttpOptions, GithubHttpOptions> {
         query = query.replace(regex, replacement);
       }
       const gqlRes = await this.queryRepo<T>(query, options);
-      if (gqlRes && gqlRes[fieldName]) {
+      if (gqlRes?.[fieldName]) {
         const { nodes = [], edges = [], pageInfo } = gqlRes[fieldName];
         result.push(...nodes);
         result.push(...edges);

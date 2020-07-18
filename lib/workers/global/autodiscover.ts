@@ -22,7 +22,7 @@ export async function autodiscoverRepositories(
   }
   // Autodiscover list of repositories
   let discovered = await platform.getRepos();
-  if (!(discovered && discovered.length)) {
+  if (!discovered?.length) {
     // Soft fail (no error thrown) if no accessible repositories
     logger.debug(
       'The account associated with your token does not have access to any repos'

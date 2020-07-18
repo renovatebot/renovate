@@ -73,7 +73,7 @@ export async function getDigest(
   { lookupName: githubRepo }: Partial<DigestConfig>,
   newValue?: string
 ): Promise<string | null> {
-  if (newValue && newValue.length) {
+  if (newValue?.length) {
     return getTagCommit(githubRepo, newValue);
   }
   const cachedResult = await packageCache.get(

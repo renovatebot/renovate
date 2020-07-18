@@ -23,7 +23,7 @@ async function getTagsInner(
       paginate: true,
     });
 
-    const tags = (res && res.body) || [];
+    const tags = res?.body || [];
 
     if (!tags.length) {
       logger.debug({ repository }, 'repository has no Github tags');
@@ -103,7 +103,7 @@ export async function getChangeLogJSON({
     logger.debug({ sourceUrl }, 'Invalid github URL found');
     return null;
   }
-  if (!(releases && releases.length)) {
+  if (!releases?.length) {
     logger.debug('No releases');
     return null;
   }

@@ -54,7 +54,7 @@ export async function updateArtifacts({
       url: 'https://api.github.com/',
     });
     // istanbul ignore if
-    if (credentials && credentials.token) {
+    if (credentials?.token) {
       authJson['github-oauth'] = {
         'github.com': credentials.token,
       };
@@ -64,7 +64,7 @@ export async function updateArtifacts({
       url: 'https://gitlab.com/api/v4/',
     });
     // istanbul ignore if
-    if (credentials && credentials.token) {
+    if (credentials?.token) {
       authJson['gitlab-token'] = {
         'gitlab.com': credentials.token,
       };
