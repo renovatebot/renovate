@@ -74,7 +74,7 @@ async function determineRegistryUrls(
   return registryUrls;
 }
 
-const packageRe = /<(?:PackageReference|DotNetCliToolReference).*Include\s*=\s*"([^"]+)".*Version\s*=\s*"(?:[[])?(?:([^"(,[\]]+)\s*(?:,\s*[)\]]|])?)"/;
+const packageRe = /<(?:PackageReference|DotNetCliToolReference|GlobalPackageReference).*(?:Include|Update)\s*=\s*"(?<depName>[^"]+)".*(?:Version|VersionOverride)\s*=\s*"(?:[[])?(?:(?<currentValue>[^"(,[\]]+)\s*(?:,\s*[)\]]|])?)"/;
 export async function extractPackageFile(
   content: string,
   packageFile: string,
@@ -138,8 +138,7 @@ export async function extractPackageFile(
 
     const match = packageRe.exec(line);
     if (match) {
-      const depName = match[1];
-      const currentValue = match[2];
+      const { currentValue, depName } = match.groups;
       const dep: PackageDependency = {
         depType: 'nuget',
         depName,

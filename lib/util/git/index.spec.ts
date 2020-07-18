@@ -83,13 +83,13 @@ describe('platform/git', () => {
 
   describe('setBaseBranch(branchName)', () => {
     it('sets the base branch as master', async () => {
-      await expect(git.setBaseBranch('master')).resolves.not.toThrow();
+      await expect(git.setBranch('master')).resolves.not.toThrow();
     });
     it('sets non-master base branch', async () => {
-      await expect(git.setBaseBranch('develop')).resolves.not.toThrow();
+      await expect(git.setBranch('develop')).resolves.not.toThrow();
     });
     it('should throw if branch does not exist', async () => {
-      await expect(git.setBaseBranch('not_found')).rejects.toMatchSnapshot();
+      await expect(git.setBranch('not_found')).rejects.toMatchSnapshot();
     });
   });
   describe('getFileList()', () => {
@@ -367,7 +367,7 @@ describe('platform/git', () => {
 
       expect(await git.getCommitMessages()).toMatchSnapshot();
 
-      await git.setBaseBranch('develop');
+      await git.setBranch('develop');
 
       await git.initRepo({
         localDir: tmpDir.path,
@@ -376,7 +376,7 @@ describe('platform/git', () => {
 
       expect(await git.branchExists('test')).toBeTruthy();
 
-      await git.setBaseBranch('test');
+      await git.setBranch('test');
 
       const msg = await git.getCommitMessages();
       expect(msg).toMatchSnapshot();

@@ -82,7 +82,7 @@ export async function pruneStaleBranches(
     return;
   }
   let renovateBranches = await getAllRenovateBranches(config.branchPrefix);
-  if (!(renovateBranches && renovateBranches.length)) {
+  if (!renovateBranches?.length) {
     logger.debug('No renovate branches found');
     return;
   }

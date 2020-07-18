@@ -1,4 +1,5 @@
 import URL from 'url';
+import is from '@sindresorhus/is';
 import { configFileNames } from '../../config/app-strings';
 import { RenovateConfig } from '../../config/common';
 import {
@@ -103,6 +104,7 @@ function toRenovatePR(data: helper.PR): Pr | null {
     canMerge: data.mergeable,
     isConflicted: !data.mergeable,
     isStale: undefined,
+    hasAssignees: !!(data.assignee?.login || is.nonEmptyArray(data.assignees)),
   };
 }
 
@@ -320,7 +322,7 @@ const platform: Platform = {
     config.labelList = null;
 
     return {
-      baseBranch: config.baseBranch,
+      defaultBranch: config.baseBranch,
       isFork: !!repo.fork,
     };
   },
@@ -424,7 +426,7 @@ const platform: Platform = {
     baseBranch: string = config.defaultBranch
   ): Promise<string> {
     config.baseBranch = baseBranch;
-    const baseBranchSha = await git.setBaseBranch(baseBranch);
+    const baseBranchSha = await git.setBranch(baseBranch);
     return baseBranchSha;
   },
 
@@ -613,6 +615,7 @@ const platform: Platform = {
 
   async ensureIssue({
     title,
+    reuseTitle,
     body,
     shouldReOpen,
     once,
@@ -620,8 +623,10 @@ const platform: Platform = {
     logger.debug(`ensureIssue(${title})`);
     try {
       const issueList = await platform.getIssueList();
-      const issues = issueList.filter((i) => i.title === title);
-
+      let issues = issueList.filter((i) => i.title === title);
+      if (!issues.length) {
+        issues = issueList.filter((i) => i.title === reuseTitle);
+      }
       // Update any matching issues which currently exist
       if (issues.length) {
         let activeIssue = issues.find((i) => i.state === 'open');
@@ -649,7 +654,11 @@ const platform: Platform = {
         }
 
         // Check if issue has already correct state
-        if (activeIssue.body === body && activeIssue.state === 'open') {
+        if (
+          activeIssue.title === title &&
+          activeIssue.body === body &&
+          activeIssue.state === 'open'
+        ) {
           logger.debug(
             `Issue #${activeIssue.number} is open and up to date - nothing to do`
           );
@@ -660,6 +669,7 @@ const platform: Platform = {
         logger.debug(`Updating Issue #${activeIssue.number}`);
         await helper.updateIssue(config.repository, activeIssue.number, {
           body,
+          title,
           state: shouldReOpen
             ? 'open'
             : (activeIssue.state as helper.IssueState),

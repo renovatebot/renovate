@@ -72,7 +72,7 @@ export async function raiseDeprecationWarnings(
       'Checking for existing deprecated package issues missing in current deprecatedPackages'
     );
     const issueList = await platform.getIssueList();
-    if (issueList && issueList.length) {
+    if (issueList?.length) {
       const deprecatedIssues = issueList.filter(
         (i) => i.title.startsWith(issueTitlePrefix) && i.state === 'open'
       );

@@ -298,10 +298,10 @@ export function generateBranchConfig(
   config.reuseLockFiles = config.upgrades.every(
     (upgrade) => upgrade.updateType !== 'lockFileMaintenance'
   );
-  config.masterIssueApproval = config.upgrades.some(
-    (upgrade) => upgrade.masterIssueApproval
+  config.dependencyDashboardApproval = config.upgrades.some(
+    (upgrade) => upgrade.dependencyDashboardApproval
   );
-  config.masterIssuePrApproval = config.upgrades.some(
+  config.dependencyDashboardPrApproval = config.upgrades.some(
     (upgrade) => upgrade.prCreation === 'approval'
   );
   config.automerge = config.upgrades.every((upgrade) => upgrade.automerge);

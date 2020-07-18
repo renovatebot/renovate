@@ -58,7 +58,7 @@ export async function getReleases({
       result.homepage = homepage;
     }
 
-    if (meta && meta.links && meta.links.Github) {
+    if (meta?.links?.Github) {
       result.sourceUrl = hexRelease.meta.links.Github;
     }
 

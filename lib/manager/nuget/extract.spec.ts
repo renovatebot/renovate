@@ -25,7 +25,15 @@ describe('lib/manager/nuget/extract', () => {
       const res = await extractPackageFile(sample, packageFile, config);
       expect(res.deps).toMatchSnapshot();
     });
-
+    it('extracts all dependencies from global packages file', async () => {
+      const packageFile = 'packages.props';
+      const sample = readFileSync(
+        path.join(config.localDir, packageFile),
+        'utf8'
+      );
+      const res = await extractPackageFile(sample, packageFile, config);
+      expect(res.deps).toMatchSnapshot();
+    });
     it('considers NuGet.config', async () => {
       const packageFile = 'with-config-file/with-config-file.csproj';
       const contents = readFileSync(

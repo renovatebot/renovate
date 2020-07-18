@@ -390,18 +390,16 @@ describe('platform/gitea', () => {
       await initFakeRepo();
       await gitea.setBaseBranch();
 
-      expect(gitvcs.setBaseBranch).toHaveBeenCalledTimes(1);
-      expect(gitvcs.setBaseBranch).toHaveBeenCalledWith(
-        mockRepo.default_branch
-      );
+      expect(gitvcs.setBranch).toHaveBeenCalledTimes(1);
+      expect(gitvcs.setBranch).toHaveBeenCalledWith(mockRepo.default_branch);
     });
 
     it('should set custom base branch', async () => {
       await initFakeRepo();
       await gitea.setBaseBranch('devel');
 
-      expect(gitvcs.setBaseBranch).toHaveBeenCalledTimes(1);
-      expect(gitvcs.setBaseBranch).toHaveBeenCalledWith('devel');
+      expect(gitvcs.setBranch).toHaveBeenCalledTimes(1);
+      expect(gitvcs.setBranch).toHaveBeenCalledWith('devel');
     });
   });
 
@@ -945,6 +943,7 @@ describe('platform/gitea', () => {
         {
           body: closedIssue.body,
           state: closedIssue.state,
+          title: 'closed-issue',
         }
       );
     });
@@ -969,6 +968,7 @@ describe('platform/gitea', () => {
         {
           body: closedIssue.body,
           state: 'open',
+          title: 'closed-issue',
         }
       );
     });

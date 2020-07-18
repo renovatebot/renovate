@@ -68,16 +68,7 @@ async function generate({
 (async () => {
   try {
     // datasources
-    shell.echo('> datasources');
-    let code = `
-import { Datasource } from './common';
-const api = new Map<string, Promise<Datasource>>();
-export default api;
-`;
-    for (const ds of findModules('lib/datasource')) {
-      code += `api.set('${ds}', import('./${ds}'));\n`;
-    }
-    await updateFile('lib/datasource/api.generated.ts', code);
+    await generate({ path: 'datasource', types: ['DatasourceApi'] });
 
     // managers
     await generate({ path: 'manager', types: ['ManagerApi'] });

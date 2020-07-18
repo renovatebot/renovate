@@ -89,6 +89,7 @@ function deepExtract(
 
 function applyProps(
   dep: PackageDependency<Record<string, any>>,
+  depPackageFile: string,
   props: MavenProp
 ): PackageDependency<Record<string, any>> {
   const replaceAll = (str: string): string =>
@@ -137,6 +138,10 @@ function applyProps(
     result.skipReason = SkipReason.VersionPlaceholder;
   }
 
+  if (propSource && depPackageFile !== propSource) {
+    result.editFile = propSource;
+  }
+
   return result;
 }
 
@@ -175,7 +180,7 @@ export function extractPackage(
 
   const propsNode = project.childNamed('properties');
   const props: Record<string, MavenProp> = {};
-  if (propsNode && propsNode.children) {
+  if (propsNode?.children) {
     for (const propNode of propsNode.children as XmlElement[]) {
       const key = propNode.name;
       const val = propNode.val && propNode.val.trim();
@@ -188,7 +193,7 @@ export function extractPackage(
   result.mavenProps = props;
 
   const repositories = project.childNamed('repositories');
-  if (repositories && repositories.children) {
+  if (repositories?.children) {
     const repoUrls = [];
     for (const repo of repositories.childrenNamed('repository')) {
       const repoUrl = repo.valueWithPath('url');
@@ -270,7 +275,7 @@ export function resolveParents(packages: PackageFile[]): PackageFile[] {
   packageFileNames.forEach((name) => {
     const pkg = extractedPackages[name];
     pkg.deps.forEach((rawDep) => {
-      const dep = applyProps(rawDep, extractedProps[name]);
+      const dep = applyProps(rawDep, name, extractedProps[name]);
       const sourceName = dep.propSource || name;
       extractedDeps[sourceName].push(dep);
     });

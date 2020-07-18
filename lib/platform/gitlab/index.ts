@@ -255,7 +255,7 @@ export async function initRepo({
     throw err;
   }
   const repoConfig: RepoConfig = {
-    baseBranch: config.baseBranch,
+    defaultBranch: config.baseBranch,
     isFork: !!res.body.forked_from_project,
   };
   return repoConfig;
@@ -270,7 +270,7 @@ export async function setBaseBranch(
 ): Promise<string> {
   logger.debug(`Setting baseBranch to ${branchName}`);
   config.baseBranch = branchName;
-  const baseBranchSha = await git.setBaseBranch(branchName);
+  const baseBranchSha = await git.setBranch(branchName);
   return baseBranchSha;
 }
 
@@ -394,7 +394,7 @@ export async function createPr({
   if (config.prList) {
     config.prList.push(pr);
   }
-  if (platformOptions && platformOptions.gitLabAutomerge) {
+  if (platformOptions?.gitLabAutomerge) {
     try {
       const desiredStatus = 'can_be_merged';
       const retryTimes = 5;
@@ -441,6 +441,8 @@ export async function getPr(iid: number): Promise<Pr> {
         description: string;
         diverged_commits_count: number;
         merge_status: string;
+        assignee?: { id?: number };
+        assignees?: { id?: number }[];
       }
     >(url)
   ).body;
@@ -452,6 +454,10 @@ export async function getPr(iid: number): Promise<Pr> {
   pr.body = pr.description;
   pr.isStale = pr.diverged_commits_count > 0;
   pr.state = pr.state === 'opened' ? PR_STATE_OPEN : pr.state;
+  pr.hasAssignees = !!(pr.assignee?.id || pr.assignees?.[0]?.id);
+  delete pr.assignee;
+  delete pr.assignees;
+  pr.hasReviewers = false;
   if (pr.merge_status === 'cannot_be_merged') {
     logger.debug('pr cannot be merged');
     pr.canMerge = false;
@@ -691,25 +697,29 @@ export async function findIssue(title: string): Promise<Issue | null> {
 
 export async function ensureIssue({
   title,
+  reuseTitle,
   body,
 }: EnsureIssueConfig): Promise<'updated' | 'created' | null> {
   logger.debug(`ensureIssue()`);
   const description = getPrBody(sanitize(body));
   try {
     const issueList = await getIssueList();
-    const issue = issueList.find((i: { title: string }) => i.title === title);
+    let issue = issueList.find((i: { title: string }) => i.title === title);
+    if (!issue) {
+      issue = issueList.find((i: { title: string }) => i.title === reuseTitle);
+    }
     if (issue) {
       const existingDescription = (
         await gitlabApi.getJson<{ description: string }>(
           `projects/${config.repository}/issues/${issue.iid}`
         )
       ).body.description;
-      if (existingDescription !== description) {
-        logger.debug('Updating issue body');
+      if (issue.title !== title || existingDescription !== description) {
+        logger.debug('Updating issue');
         await gitlabApi.putJson(
           `projects/${config.repository}/issues/${issue.iid}`,
           {
-            body: { description },
+            body: { title, description },
           }
         );
         return 'updated';
