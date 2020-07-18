@@ -131,7 +131,7 @@ export async function updateDependency({
         newDef = newDef.replace(from, to);
       }
       const urls = extractUrls(newDef);
-      if (!(urls && urls.length)) {
+      if (!urls?.length) {
         logger.debug({ newDef }, 'urls is empty');
         return null;
       }

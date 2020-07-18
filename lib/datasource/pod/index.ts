@@ -63,7 +63,7 @@ async function requestCDN(
 ): Promise<string | null> {
   try {
     const resp = await http.get(url);
-    if (resp && resp.body) {
+    if (resp?.body) {
       return resp.body;
     }
   } catch (err) {
@@ -79,7 +79,7 @@ async function requestGithub<T = unknown>(
 ): Promise<T | null> {
   try {
     const resp = await githubHttp.getJson<T>(url);
-    if (resp && resp.body) {
+    if (resp?.body) {
       return resp.body;
     }
   } catch (err) {
@@ -97,7 +97,7 @@ async function getReleasesFromGithub(
   useShard = false
 ): Promise<ReleaseResult | null> {
   const match = githubRegex.exec(registryUrl);
-  const { account, repo } = (match && match.groups) || {};
+  const { account, repo } = match?.groups || {};
   const opts = { account, repo, useShard };
   const url = releasesGithubUrl(lookupName, opts);
   const resp = await requestGithub<{ name: string }[]>(url, lookupName);

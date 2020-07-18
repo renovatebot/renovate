@@ -15,7 +15,7 @@ function getPreCommands(): string[] | null {
     url: 'https://api.github.com/',
   });
   let preCommands = null;
-  if (credentials && credentials.token) {
+  if (credentials?.token) {
     let token = global.appMode
       ? `x-access-token:${credentials.token}`
       : credentials.token;

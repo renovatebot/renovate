@@ -65,7 +65,7 @@ If you need any further assistance then you can also [request help here](${confi
     prBody = prBody.replace('{{PACKAGE FILES}}\n', '');
   }
   let configDesc = '';
-  if (!(existingPr && existingPr.isModified)) {
+  if (!existingPr?.isModified) {
     configDesc = getConfigDesc(config, packageFiles);
   } else {
     configDesc = emojify(

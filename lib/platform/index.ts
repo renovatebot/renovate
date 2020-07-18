@@ -88,10 +88,10 @@ export async function initPlatform(
   const platformInfo = await platform.initPlatform(config);
   const returnConfig: any = { ...config, ...platformInfo };
   let gitAuthor: string;
-  if (config && config.gitAuthor) {
+  if (config?.gitAuthor) {
     logger.debug(`Using configured gitAuthor (${config.gitAuthor})`);
     gitAuthor = config.gitAuthor;
-  } else if (!(platformInfo && platformInfo.gitAuthor)) {
+  } else if (!platformInfo?.gitAuthor) {
     logger.debug('Using default gitAuthor: Renovate Bot <bot@renovateapp.com>');
     gitAuthor = 'Renovate Bot <bot@renovateapp.com>';
   } /* istanbul ignore next */ else {

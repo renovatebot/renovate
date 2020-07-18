@@ -153,7 +153,7 @@ export async function getFile(
     }
   );
 
-  if (item && item.readable) {
+  if (item?.readable) {
     const fileContent = await streamToString(item);
     try {
       const jTmp = JSON.parse(fileContent);
