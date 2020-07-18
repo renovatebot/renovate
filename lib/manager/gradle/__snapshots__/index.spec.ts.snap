@@ -814,3 +814,5 @@ exports[`manager/gradle/index updateDependency should update an existing module 
 exports[`manager/gradle/index updateDependency should update an existing plugin dependency 1`] = `Array []`;
 
 exports[`manager/gradle/index updateDependency should update an existing plugin dependency with Kotlin DSL 1`] = `Array []`;
+
+exports[`manager/gradle/index updateDependency should update dependencies in same file 1`] = `Array []`;

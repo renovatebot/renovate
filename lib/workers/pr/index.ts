@@ -102,7 +102,9 @@ export async function ensurePr(
   logger.trace({ config }, 'ensurePr');
   // If there is a group, it will use the config of the first upgrade in the array
   const { branchName, prTitle, upgrades } = config;
-  const masterIssueCheck = (config.masterIssueChecks || {})[config.branchName];
+  const dependencyDashboardCheck = (config.dependencyDashboardChecks || {})[
+    config.branchName
+  ];
   // Check if existing PR exists
   const existingPr = await platform.getBranchPr(branchName);
   if (existingPr) {
@@ -168,7 +170,7 @@ export async function ensurePr(
   } else if (
     config.prCreation === 'approval' &&
     !existingPr &&
-    masterIssueCheck !== 'approvePr'
+    dependencyDashboardCheck !== 'approvePr'
   ) {
     return { prResult: PrResult.AwaitingApproval };
   } else if (
@@ -187,7 +189,10 @@ export async function ensurePr(
       const elapsedHours = Math.round(
         (currentTime.getTime() - lastCommitTime.getTime()) / millisecondsPerHour
       );
-      if (!masterIssueCheck && elapsedHours < config.prNotPendingHours) {
+      if (
+        !dependencyDashboardCheck &&
+        elapsedHours < config.prNotPendingHours
+      ) {
         logger.debug(
           `Branch is ${elapsedHours} hours old - skipping PR creation`
         );
@@ -277,7 +282,12 @@ export async function ensurePr(
     if (existingPr) {
       logger.debug('Processing existing PR');
       // istanbul ignore if
-      if (config.automerge && (await getBranchStatus()) === BranchStatus.red) {
+      if (
+        !existingPr.hasAssignees &&
+        !existingPr.hasReviewers &&
+        config.automerge &&
+        (await getBranchStatus()) === BranchStatus.red
+      ) {
         logger.debug(`Setting assignees and reviewers as status checks failed`);
         await addAssigneesReviewers(config, existingPr);
       }

@@ -137,19 +137,13 @@ describe('platform/gitlab', () => {
   ): Promise<nock.Scope> {
     const repo = repoParams.repository;
     const justRepo = repo.split('/').slice(0, 2).join('/');
-    scope
-      .get(`/api/v4/projects/${encodeURIComponent(repo)}`)
-      .reply(
-        200,
-        repoResp || {
-          default_branch: 'master',
-          http_url_to_repo: `https://gitlab.com/${justRepo}.git`,
-        }
-      )
-      .get('/api/v4/user')
-      .reply(200, {
-        email: 'a@b.com',
-      });
+    scope.get(`/api/v4/projects/${encodeURIComponent(repo)}`).reply(
+      200,
+      repoResp || {
+        default_branch: 'master',
+        http_url_to_repo: `https://gitlab.com/${justRepo}.git`,
+      }
+    );
     await gitlab.initRepo(repoParams);
     return scope;
   }
@@ -182,11 +176,7 @@ describe('platform/gitlab', () => {
       httpMock
         .scope(gitlabApiHost)
         .get('/api/v4/projects/some%2Frepo%2Fproject')
-        .reply(200, [])
-        .get('/api/v4/user')
-        .reply(200, {
-          email: 'a@b.com',
-        });
+        .reply(200, []);
       await gitlab.initRepo({
         repository: 'some/repo/project',
         localDir: '',
@@ -295,8 +285,6 @@ describe('platform/gitlab', () => {
     it('should fall back if http_url_to_repo is empty', async () => {
       httpMock
         .scope(gitlabApiHost)
-        .get('/api/v4/user')
-        .reply(200, {})
         .get('/api/v4/projects/some%2Frepo%2Fproject')
         .reply(200, {
           default_branch: 'master',
@@ -353,10 +341,6 @@ describe('platform/gitlab', () => {
         .reply(200, {
           default_branch: 'master',
           http_url_to_repo: `https://gitlab.com/some/repo.git`,
-        })
-        .get('/api/v4/user')
-        .reply(200, {
-          email: 'a@b.com',
         });
       await gitlab.initRepo({
         repository: 'some/repo',
@@ -373,10 +357,6 @@ describe('platform/gitlab', () => {
         .reply(200, {
           default_branch: 'master',
           http_url_to_repo: `https://gitlab.com/some/repo.git`,
-        })
-        .get('/api/v4/user')
-        .reply(200, {
-          email: 'a@b.com',
         });
       await gitlab.initRepo({
         repository: 'some/repo',
@@ -1075,6 +1055,15 @@ describe('platform/gitlab', () => {
     });
   });
   describe('getPr(prNo)', () => {
+    beforeEach(() => {
+      global.gitAuthor = {
+        name: 'abccom',
+        email: 'a@b.com',
+      };
+    });
+    afterEach(() => {
+      delete global.gitAuthor;
+    });
     it('returns the PR', async () => {
       httpMock
         .scope(gitlabApiHost)
@@ -1090,11 +1079,13 @@ describe('platform/gitlab', () => {
           diverged_commits_count: 5,
           source_branch: 'some-branch',
           target_branch: 'master',
+          assignees: [],
         })
         .get('/api/v4/projects/undefined/repository/branches/some-branch')
-        .reply(200, { commit: {} });
+        .reply(200, { commit: { author_email: global.gitAuthor.email } });
       const pr = await gitlab.getPr(12345);
       expect(pr).toMatchSnapshot();
+      expect(pr.hasAssignees).toBe(false);
       expect(httpMock.getTrace()).toMatchSnapshot();
     });
     it('returns the mergeable PR', async () => {
@@ -1111,6 +1102,9 @@ describe('platform/gitlab', () => {
           diverged_commits_count: 5,
           source_branch: 'some-branch',
           target_branch: 'master',
+          assignee: {
+            id: 1,
+          },
         })
         .get(
           '/api/v4/projects/some%2Frepo/repository/commits/0d9c7726c3d628b7e28af234595cfd20febdbf8e/statuses'
@@ -1120,6 +1114,7 @@ describe('platform/gitlab', () => {
         .reply(200, { commit: null });
       const pr = await gitlab.getPr(12345);
       expect(pr).toMatchSnapshot();
+      expect(pr.hasAssignees).toBe(true);
       expect(httpMock.getTrace()).toMatchSnapshot();
     });
     it('returns the PR with nonexisting branch', async () => {
@@ -1137,11 +1132,17 @@ describe('platform/gitlab', () => {
           diverged_commits_count: 2,
           source_branch: 'some-branch',
           target_branch: 'master',
+          assignees: [
+            {
+              id: 1,
+            },
+          ],
         })
         .get('/api/v4/projects/undefined/repository/branches/some-branch')
         .reply(404);
       const pr = await gitlab.getPr(12345);
       expect(pr).toMatchSnapshot();
+      expect(pr.hasAssignees).toBe(true);
       expect(httpMock.getTrace()).toMatchSnapshot();
     });
   });
@@ -1180,18 +1181,6 @@ These updates have all been created already. Click a checkbox below to force a r
   describe('getPrBody(input)', () => {
     it('returns updated pr body', () => {
       expect(gitlab.getPrBody(prBody)).toMatchSnapshot();
-    });
-  });
-  describe('commitFiles()', () => {
-    it('sends to gitFs', async () => {
-      expect.assertions(1);
-      await initRepo();
-      await gitlab.commitFiles({
-        branchName: 'some-branch',
-        files: [{ name: 'SomeFile', contents: 'Some Content' }],
-        message: '',
-      });
-      expect(httpMock.getTrace()).toMatchSnapshot();
     });
   });
   describe('getVulnerabilityAlerts()', () => {

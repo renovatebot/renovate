@@ -1,9 +1,10 @@
 import { mock } from 'jest-mock-extended';
-import { fs, platform } from '../../../test/util';
+import { fs, git } from '../../../test/util';
 import { Pr } from '../../platform';
 import { codeOwnersForPr } from './code-owners';
 
 jest.mock('../../util/fs');
+jest.mock('../../util/git');
 
 describe('workers/pr/code-owners', () => {
   describe('codeOwnersForPr', () => {
@@ -14,7 +15,7 @@ describe('workers/pr/code-owners', () => {
     });
     it('returns global code owner', async () => {
       fs.readLocalFile.mockResolvedValueOnce(['* @jimmy'].join('\n'));
-      platform.getPrFiles.mockResolvedValueOnce(['README.md']);
+      git.getBranchFiles.mockResolvedValueOnce(['README.md']);
       const codeOwners = await codeOwnersForPr(pr);
       expect(codeOwners).toEqual(['@jimmy']);
     });
@@ -22,7 +23,7 @@ describe('workers/pr/code-owners', () => {
       fs.readLocalFile.mockResolvedValueOnce(
         ['* @jimmy', 'package.json @john @maria'].join('\n')
       );
-      platform.getPrFiles.mockResolvedValueOnce(['package.json']);
+      git.getBranchFiles.mockResolvedValueOnce(['package.json']);
       const codeOwners = await codeOwnersForPr(pr);
       expect(codeOwners).toEqual(['@john', '@maria']);
     });
@@ -36,13 +37,13 @@ describe('workers/pr/code-owners', () => {
           ' package.json @john @maria  ',
         ].join('\n')
       );
-      platform.getPrFiles.mockResolvedValueOnce(['package.json']);
+      git.getBranchFiles.mockResolvedValueOnce(['package.json']);
       const codeOwners = await codeOwnersForPr(pr);
       expect(codeOwners).toEqual(['@john', '@maria']);
     });
     it('returns empty array when no code owners set', async () => {
       fs.readLocalFile.mockResolvedValueOnce(null);
-      platform.getPrFiles.mockResolvedValueOnce(['package.json']);
+      git.getBranchFiles.mockResolvedValueOnce(['package.json']);
       const codeOwners = await codeOwnersForPr(pr);
       expect(codeOwners).toEqual([]);
     });
@@ -50,7 +51,7 @@ describe('workers/pr/code-owners', () => {
       fs.readLocalFile.mockResolvedValueOnce(
         ['package-lock.json @mike'].join('\n')
       );
-      platform.getPrFiles.mockResolvedValueOnce(['yarn.lock']);
+      git.getBranchFiles.mockResolvedValueOnce(['yarn.lock']);
       const codeOwners = await codeOwnersForPr(pr);
       expect(codeOwners).toEqual([]);
     });
@@ -75,7 +76,7 @@ describe('workers/pr/code-owners', () => {
           }
           return Promise.resolve(null);
         });
-        platform.getPrFiles.mockResolvedValueOnce(['README.md']);
+        git.getBranchFiles.mockResolvedValueOnce(['README.md']);
         const codeOwners = await codeOwnersForPr(pr);
         expect(codeOwners).toEqual(['@mike']);
       });

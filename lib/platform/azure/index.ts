@@ -1,3 +1,4 @@
+import is from '@sindresorhus/is';
 import {
   GitPullRequest,
   GitPullRequestCommentThread,
@@ -19,7 +20,6 @@ import { sanitize } from '../../util/sanitize';
 import { ensureTrailingSlash } from '../../util/url';
 import {
   BranchStatusConfig,
-  CommitFilesConfig,
   CreatePRConfig,
   EnsureCommentConfig,
   EnsureCommentRemovalConfig,
@@ -172,7 +172,7 @@ export async function initRepo({
     gitAuthorEmail: global.gitAuthor?.email,
   });
   const repoConfig: RepoConfig = {
-    baseBranch: config.baseBranch,
+    defaultBranch: config.baseBranch,
     isFork: false,
   };
   return repoConfig;
@@ -190,7 +190,7 @@ export /* istanbul ignore next */ async function setBaseBranch(
   logger.debug(`Setting baseBranch to ${branchName}`);
   config.baseBranch = branchName;
   delete config.baseCommitSHA;
-  const baseBranchSha = await git.setBaseBranch(branchName);
+  const baseBranchSha = await git.setBranch(branchName);
   return baseBranchSha;
 }
 
@@ -233,11 +233,6 @@ export async function getPrList(): Promise<AzurePr[]> {
   return config.prList;
 }
 
-/* istanbul ignore next */
-export async function getPrFiles(pr: Pr): Promise<string[]> {
-  return git.getBranchFiles(pr.branchName, pr.targetBranch);
-}
-
 export async function getPr(pullRequestId: number): Promise<Pr | null> {
   logger.debug(`getPr(${pullRequestId})`);
   if (!pullRequestId) {
@@ -268,7 +263,7 @@ export async function getPr(pullRequestId: number): Promise<Pr | null> {
   azurePr.isModified =
     commits.length > 0 &&
     commits[0].author.name !== commits[commits.length - 1].author.name;
-
+  azurePr.hasReviewers = is.nonEmptyArray(azurePr.reviewers);
   return azurePr;
 }
 
@@ -329,18 +324,6 @@ export /* istanbul ignore next */ async function deleteBranch(
     const pr = await getBranchPr(branchName);
     await abandonPr(pr.number);
   }
-}
-
-export /* istanbul ignore next */ function commitFiles({
-  branchName,
-  files,
-  message,
-}: CommitFilesConfig): Promise<string | null> {
-  return git.commitFiles({
-    branchName,
-    files,
-    message,
-  });
 }
 
 export async function getBranchStatusCheck(

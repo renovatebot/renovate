@@ -1,5 +1,6 @@
 import nock from 'nock';
 import * as httpMock from '../../../test/httpMock';
+import { getName } from '../../../test/util';
 import {
   REPOSITORY_CHANGED,
   REPOSITORY_DISABLED,
@@ -135,7 +136,7 @@ const scenarios = {
   'endpoint with path': new URL('https://stash.renovatebot.com/vcs'),
 };
 
-describe('platform/bitbucket-server', () => {
+describe(getName(__filename), () => {
   Object.entries(scenarios).forEach(([scenarioName, url]) => {
     const urlHost = url.origin;
     const urlPath = url.pathname === '/' ? '' : url.pathname;
@@ -408,27 +409,6 @@ describe('platform/bitbucket-server', () => {
         });
       });
 
-      describe('commitFiles()', () => {
-        it('sends to gitFs', async () => {
-          expect.assertions(1);
-          const scope = await initRepo();
-          scope
-            .get(
-              `${urlPath}/rest/api/1.0/projects/SOME/repos/repo/pull-requests?state=ALL&role.1=AUTHOR&username.1=abc&limit=100`
-            )
-            .reply(200, {
-              isLastPage: true,
-              values: [prMock(url, 'SOME', 'repo')],
-            });
-          await bitbucket.commitFiles({
-            branchName: 'some-branch',
-            files: [{ name: 'test', contents: 'dummy' }],
-            message: 'message',
-          });
-          expect(httpMock.getTrace()).toMatchSnapshot();
-        });
-      });
-
       describe('addAssignees()', () => {
         it('does not throw', async () => {
           expect(await bitbucket.addAssignees(3, ['some'])).toMatchSnapshot();
@@ -603,9 +583,7 @@ describe('platform/bitbucket-server', () => {
             .reply(405);
           await expect(
             bitbucket.addReviewers(5, ['name'])
-          ).rejects.toMatchObject({
-            statusCode: 405,
-          });
+          ).rejects.toThrowErrorMatchingSnapshot();
           expect(httpMock.getTrace()).toMatchSnapshot();
         });
       });
@@ -1455,9 +1433,7 @@ describe('platform/bitbucket-server', () => {
 
           await expect(
             bitbucket.updatePr(5, 'title', 'body')
-          ).rejects.toMatchObject({
-            statusCode: 405,
-          });
+          ).rejects.toThrowErrorMatchingSnapshot();
           expect(httpMock.getTrace()).toMatchSnapshot();
         });
       });

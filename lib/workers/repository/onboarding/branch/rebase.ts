@@ -2,7 +2,7 @@ import { RenovateConfig } from '../../../../config';
 import { configFileNames } from '../../../../config/app-strings';
 import { logger } from '../../../../logger';
 import { platform } from '../../../../platform';
-import { getFile } from '../../../../util/git';
+import { commitFiles, getFile } from '../../../../util/git';
 import { getOnboardingConfig } from './config';
 
 const defaultConfigFile = configFileNames[0];
@@ -50,7 +50,7 @@ export async function rebaseOnboardingBranch(
     logger.info('DRY-RUN: Would rebase files in onboarding branch');
     return null;
   }
-  return platform.commitFiles({
+  return commitFiles({
     branchName: config.onboardingBranch,
     files: [
       {

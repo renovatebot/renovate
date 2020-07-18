@@ -1,4 +1,5 @@
 import URL from 'url';
+import is from '@sindresorhus/is';
 import addrs from 'email-addresses';
 import parseDiff from 'parse-diff';
 import { RenovateConfig } from '../../config/common';
@@ -16,7 +17,6 @@ import { BitbucketHttp, setBaseUrl } from '../../util/http/bitbucket';
 import { sanitize } from '../../util/sanitize';
 import {
   BranchStatusConfig,
-  CommitFilesConfig,
   CreatePRConfig,
   EnsureCommentConfig,
   EnsureCommentRemovalConfig,
@@ -163,7 +163,7 @@ export async function initRepo({
     gitAuthorEmail: global.gitAuthor?.email,
   });
   const repoConfig: RepoConfig = {
-    baseBranch: config.baseBranch,
+    defaultBranch: config.baseBranch,
     isFork: info.isFork,
   };
   return repoConfig;
@@ -183,7 +183,7 @@ export async function setBaseBranch(
   logger.debug(`Setting baseBranch to ${branchName}`);
   config.baseBranch = branchName;
   delete config.baseCommitSHA;
-  const baseBranchSha = await git.setBaseBranch(branchName);
+  const baseBranchSha = await git.setBranch(branchName);
   return baseBranchSha;
 }
 
@@ -209,11 +209,6 @@ export async function getPrList(): Promise<Pr[]> {
     logger.debug({ length: config.prList.length }, 'Retrieved Pull Requests');
   }
   return config.prList;
-}
-
-/* istanbul ignore next */
-export async function getPrFiles(pr: Pr): Promise<string[]> {
-  return git.getBranchFiles(pr.branchName, pr.targetBranch);
 }
 
 export async function findPr({
@@ -250,18 +245,10 @@ export async function deleteBranch(
   return git.deleteBranch(branchName);
 }
 
-// istanbul ignore next
-export function commitFiles(
-  commitFilesConfig: CommitFilesConfig
-): Promise<string | null> {
-  return git.commitFiles(commitFilesConfig);
-}
-
 async function isPrConflicted(prNo: number): Promise<boolean> {
   const diff = (
     await bitbucketHttp.get(
-      `/2.0/repositories/${config.repository}/pullrequests/${prNo}/diff`,
-      { json: false } as any
+      `/2.0/repositories/${config.repository}/pullrequests/${prNo}/diff`
     )
   ).body;
 
@@ -340,6 +327,8 @@ export async function getPr(prNo: number): Promise<Pr | null> {
   if (await git.branchExists(pr.source.branch.name)) {
     res.isStale = await git.isBranchStale(pr.source.branch.name);
   }
+
+  res.hasReviewers = is.nonEmptyArray(pr.reviewers);
 
   return res;
 }
@@ -473,7 +462,7 @@ export async function setBranchStatus({
   await getStatus(branchName, false);
 }
 
-type BbIssue = { id: number; content?: { raw: string } };
+type BbIssue = { id: number; title: string; content?: { raw: string } };
 
 async function findOpenIssues(title: string): Promise<BbIssue[]> {
   try {
@@ -540,6 +529,7 @@ export function getPrBody(input: string): string {
 
 export async function ensureIssue({
   title,
+  reuseTitle,
   body,
 }: EnsureIssueConfig): Promise<EnsureIssueResult | null> {
   logger.debug(`ensureIssue()`);
@@ -552,14 +542,20 @@ export async function ensureIssue({
     return null;
   }
   try {
-    const issues = await findOpenIssues(title);
+    let issues = await findOpenIssues(title);
+    if (!issues.length) {
+      issues = await findOpenIssues(reuseTitle);
+    }
     if (issues.length) {
       // Close any duplicates
       for (const issue of issues.slice(1)) {
         await closeIssue(issue.id);
       }
       const [issue] = issues;
-      if (String(issue.content.raw).trim() !== description.trim()) {
+      if (
+        issue.title !== title ||
+        String(issue.content.raw).trim() !== description.trim()
+      ) {
         logger.debug('Issue updated');
         await bitbucketHttp.putJson(
           `/2.0/repositories/${config.repository}/issues/${issue.id}`,

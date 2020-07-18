@@ -26,7 +26,6 @@ import { sanitize } from '../../util/sanitize';
 import { ensureTrailingSlash } from '../../util/url';
 import {
   BranchStatusConfig,
-  CommitFilesConfig,
   CreatePRConfig,
   EnsureCommentConfig,
   EnsureCommentRemovalConfig,
@@ -204,11 +203,6 @@ export async function initRepo({
     config.baseBranch = config.defaultBranch;
     config.mergeMethod = res.body.merge_method || 'merge';
     logger.debug(`${repository} default branch = ${config.baseBranch}`);
-    // Discover our user email
-    config.email = (
-      await gitlabApi.getJson<{ email: string }>(`user`)
-    ).body.email;
-    logger.debug('Bot email=' + config.email);
     delete config.prList;
     logger.debug('Enabling Git FS');
     const opts = hostRules.find({
@@ -261,7 +255,7 @@ export async function initRepo({
     throw err;
   }
   const repoConfig: RepoConfig = {
-    baseBranch: config.baseBranch,
+    defaultBranch: config.baseBranch,
     isFork: !!res.body.forked_from_project,
   };
   return repoConfig;
@@ -276,7 +270,7 @@ export async function setBaseBranch(
 ): Promise<string> {
   logger.debug(`Setting baseBranch to ${branchName}`);
   config.baseBranch = branchName;
-  const baseBranchSha = await git.setBaseBranch(branchName);
+  const baseBranchSha = await git.setBranch(branchName);
   return baseBranchSha;
 }
 
@@ -401,7 +395,7 @@ export async function createPr({
   if (config.prList) {
     config.prList.push(pr);
   }
-  if (platformOptions && platformOptions.gitLabAutomerge) {
+  if (platformOptions?.gitLabAutomerge) {
     try {
       const desiredStatus = 'can_be_merged';
       const retryTimes = 5;
@@ -448,6 +442,8 @@ export async function getPr(iid: number): Promise<Pr> {
         description: string;
         diverged_commits_count: number;
         merge_status: string;
+        assignee?: { id?: number };
+        assignees?: { id?: number }[];
       }
     >(url)
   ).body;
@@ -460,6 +456,10 @@ export async function getPr(iid: number): Promise<Pr> {
   pr.isStale = pr.diverged_commits_count > 0;
   pr.state = pr.state === 'opened' ? PR_STATE_OPEN : pr.state;
   pr.isModified = true;
+  pr.hasAssignees = !!(pr.assignee?.id || pr.assignees?.[0]?.id);
+  delete pr.assignee;
+  delete pr.assignees;
+  pr.hasReviewers = false;
   if (pr.merge_status === 'cannot_be_merged') {
     logger.debug('pr cannot be merged');
     pr.canMerge = false;
@@ -479,14 +479,12 @@ export async function getPr(iid: number): Promise<Pr> {
     const branch = (
       await gitlabApi.getJson<{ commit: { author_email: string } }>(branchUrl)
     ).body;
-    const branchCommitEmail =
-      branch && branch.commit ? branch.commit.author_email : null;
-    // istanbul ignore if
-    if (branchCommitEmail === config.email) {
+    const branchCommitEmail = branch?.commit?.author_email ?? null;
+    if (branchCommitEmail === global.gitAuthor.email) {
       pr.isModified = false;
     } else {
       logger.debug(
-        { branchCommitEmail, configEmail: config.email, iid: pr.iid },
+        { branchCommitEmail, configEmail: global.gitAuthor.email, iid: pr.iid },
         'Last committer to branch does not match bot email, so PR cannot be rebased.'
       );
       pr.isModified = true;
@@ -561,7 +559,7 @@ export function getPrBody(input: string): string {
       .replace(/Pull Request/g, 'Merge Request')
       .replace(/PR/g, 'MR')
       .replace(/\]\(\.\.\/pull\//g, '](!'),
-    60000
+    50000
   );
 }
 
@@ -594,13 +592,6 @@ export async function getBranchPr(branchName: string): Promise<Pr> {
     return null;
   }
   return getPr(pr.iid);
-}
-
-// istanbul ignore next
-export function commitFiles(
-  commitFilesConfig: CommitFilesConfig
-): Promise<string | null> {
-  return git.commitFiles(commitFilesConfig);
 }
 
 export async function deleteBranch(
@@ -734,25 +725,29 @@ export async function findIssue(title: string): Promise<Issue | null> {
 
 export async function ensureIssue({
   title,
+  reuseTitle,
   body,
 }: EnsureIssueConfig): Promise<'updated' | 'created' | null> {
   logger.debug(`ensureIssue()`);
   const description = getPrBody(sanitize(body));
   try {
     const issueList = await getIssueList();
-    const issue = issueList.find((i: { title: string }) => i.title === title);
+    let issue = issueList.find((i: { title: string }) => i.title === title);
+    if (!issue) {
+      issue = issueList.find((i: { title: string }) => i.title === reuseTitle);
+    }
     if (issue) {
       const existingDescription = (
         await gitlabApi.getJson<{ description: string }>(
           `projects/${config.repository}/issues/${issue.iid}`
         )
       ).body.description;
-      if (existingDescription !== description) {
-        logger.debug('Updating issue body');
+      if (issue.title !== title || existingDescription !== description) {
+        logger.debug('Updating issue');
         await gitlabApi.putJson(
           `projects/${config.repository}/issues/${issue.iid}`,
           {
-            body: { description },
+            body: { title, description },
           }
         );
         return 'updated';
@@ -1021,11 +1016,6 @@ export async function getPrList(): Promise<Pr[]> {
     config.prList = await fetchPrList();
   }
   return config.prList;
-}
-
-/* istanbul ignore next */
-export async function getPrFiles(pr: Pr): Promise<string[]> {
-  return git.getBranchFiles(pr.branchName, pr.targetBranch);
 }
 
 function matchesState(state: string, desiredState: string): boolean {

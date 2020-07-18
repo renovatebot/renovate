@@ -98,7 +98,7 @@ export function withSanitizer(streamConfig): bunyan.Stream {
   }
 
   const stream = streamConfig.stream;
-  if (stream && stream.writable) {
+  if (stream?.writable) {
     const write = (chunk: BunyanRecord, enc, cb): void => {
       const raw = sanitizeValue(chunk);
       const result =

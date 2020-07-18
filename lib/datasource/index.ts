@@ -1,5 +1,6 @@
 import is from '@sindresorhus/is';
 import equal from 'fast-deep-equal';
+import { HOST_DISABLED } from '../constants/error-messages';
 import { logger } from '../logger';
 import { ExternalHostError } from '../types/errors/external-host-error';
 import * as memCache from '../util/cache/memory';
@@ -18,13 +19,12 @@ import { addMetaData } from './metadata';
 
 export * from './common';
 
-export const getDatasources = (): Map<string, Promise<Datasource>> =>
-  datasources;
+export const getDatasources = (): Map<string, Datasource> => datasources;
 export const getDatasourceList = (): string[] => Array.from(datasources.keys());
 
 const cacheNamespace = 'datasource-releases';
 
-function load(datasource: string): Promise<Datasource> {
+function load(datasource: string): Datasource {
   return datasources.get(datasource);
 }
 
@@ -169,7 +169,7 @@ async function fetchReleases(
     logger.warn('Unknown datasource: ' + datasourceName);
     return null;
   }
-  const datasource = await load(datasourceName);
+  const datasource = load(datasourceName);
   const registryUrls = resolveRegistryUrls(datasource, config.registryUrls);
   let dep: ReleaseResult = null;
   try {
@@ -196,6 +196,9 @@ async function fetchReleases(
       });
     }
   } catch (err) {
+    if (err.message === HOST_DISABLED || err.err?.message === HOST_DISABLED) {
+      return null;
+    }
     if (err instanceof ExternalHostError) {
       throw err;
     }
@@ -271,15 +274,15 @@ export async function getPkgReleases(
   return res;
 }
 
-export async function supportsDigests(config: DigestConfig): Promise<boolean> {
-  return 'getDigest' in (await load(config.datasource));
+export function supportsDigests(config: DigestConfig): boolean {
+  return 'getDigest' in load(config.datasource);
 }
 
 export async function getDigest(
   config: DigestConfig,
   value?: string
 ): Promise<string | null> {
-  const datasource = await load(config.datasource);
+  const datasource = load(config.datasource);
   const lookupName = config.lookupName || config.depName;
   const registryUrls = resolveRegistryUrls(datasource, config.registryUrls);
   return datasource.getDigest(
@@ -288,7 +291,7 @@ export async function getDigest(
   );
 }
 
-export async function getDefaultConfig(datasource: string): Promise<object> {
-  const loadedDatasource = await load(datasource);
-  return loadedDatasource?.defaultConfig || {};
+export function getDefaultConfig(datasource: string): Promise<object> {
+  const loadedDatasource = load(datasource);
+  return Promise.resolve(loadedDatasource?.defaultConfig || {});
 }

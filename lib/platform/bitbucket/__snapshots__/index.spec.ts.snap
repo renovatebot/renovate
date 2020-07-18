@@ -64,24 +64,6 @@ Array [
 ]
 `;
 
-exports[`platform/bitbucket commitFiles() sends to gitFs 1`] = `undefined`;
-
-exports[`platform/bitbucket commitFiles() sends to gitFs 2`] = `
-Array [
-  Object {
-    "headers": Object {
-      "accept": "application/json",
-      "accept-encoding": "gzip, deflate",
-      "authorization": "Basic YWJjOjEyMw==",
-      "host": "api.bitbucket.org",
-      "user-agent": "https://github.com/renovatebot/renovate",
-    },
-    "method": "GET",
-    "url": "https://api.bitbucket.org/2.0/repositories/some/repo",
-  },
-]
-`;
-
 exports[`platform/bitbucket createPr() posts PR 1`] = `
 Array [
   Object {
@@ -233,6 +215,17 @@ Array [
     },
     "method": "GET",
     "url": "https://api.bitbucket.org/2.0/repositories/some/empty/issues?q=title%3D%22title%22%20AND%20(state%20%3D%20%22new%22%20OR%20state%20%3D%20%22open%22)%20AND%20reporter.username%3D%22abc%22",
+  },
+  Object {
+    "headers": Object {
+      "accept": "application/json",
+      "accept-encoding": "gzip, deflate",
+      "authorization": "Basic YWJjOjEyMw==",
+      "host": "api.bitbucket.org",
+      "user-agent": "https://github.com/renovatebot/renovate",
+    },
+    "method": "GET",
+    "url": "https://api.bitbucket.org/2.0/repositories/some/empty/issues?q=title%3D%22old-title%22%20AND%20(state%20%3D%20%22new%22%20OR%20state%20%3D%20%22open%22)%20AND%20reporter.username%3D%22abc%22",
   },
   Object {
     "body": "{\\"title\\":\\"title\\",\\"content\\":{\\"raw\\":\\"body\\",\\"markup\\":\\"markdown\\"}}",
@@ -525,6 +518,7 @@ Object {
   "canMerge": true,
   "createdAt": "2018-07-02T07:02:25.275030+00:00",
   "displayNumber": "Pull Request #5",
+  "hasReviewers": false,
   "isConflicted": false,
   "isModified": false,
   "isStale": false,
@@ -926,6 +920,7 @@ Object {
   "canMerge": true,
   "createdAt": "2018-07-02T07:02:25.275030+00:00",
   "displayNumber": "Pull Request #3",
+  "hasReviewers": false,
   "isConflicted": false,
   "isModified": true,
   "isStale": false,
@@ -943,6 +938,7 @@ Object {
   "canMerge": true,
   "createdAt": "2018-07-02T07:02:25.275030+00:00",
   "displayNumber": "Pull Request #5",
+  "hasReviewers": false,
   "isConflicted": false,
   "isModified": false,
   "isStale": false,
@@ -960,6 +956,7 @@ Object {
   "canMerge": true,
   "createdAt": "2018-07-02T07:02:25.275030+00:00",
   "displayNumber": "Pull Request #5",
+  "hasReviewers": false,
   "isConflicted": false,
   "isModified": true,
   "isStale": false,
@@ -1089,6 +1086,7 @@ Object {
   "canMerge": true,
   "createdAt": "2018-07-02T07:02:25.275030+00:00",
   "displayNumber": "Pull Request #5",
+  "hasReviewers": false,
   "isConflicted": false,
   "isModified": false,
   "isStale": false,
@@ -1200,7 +1198,7 @@ Array [
 
 exports[`platform/bitbucket initRepo() works 1`] = `
 Object {
-  "baseBranch": "master",
+  "defaultBranch": "master",
   "isFork": false,
 }
 `;

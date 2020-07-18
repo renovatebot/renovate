@@ -1,7 +1,8 @@
 import ignore from 'ignore';
 import { logger } from '../../logger';
-import { Pr, platform } from '../../platform';
+import { Pr } from '../../platform';
 import { readLocalFile } from '../../util/fs';
+import { getBranchFiles } from '../../util/git';
 
 export async function codeOwnersForPr(pr: Pr): Promise<string[]> {
   try {
@@ -15,7 +16,7 @@ export async function codeOwnersForPr(pr: Pr): Promise<string[]> {
       return [];
     }
 
-    const prFiles = await platform.getPrFiles(pr);
+    const prFiles = await getBranchFiles(pr.branchName);
     const rules = codeOwnersFile
       .split('\n')
       .map((line) => line.trim())

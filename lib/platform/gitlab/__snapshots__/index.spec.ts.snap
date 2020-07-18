@@ -148,33 +148,6 @@ Array [
 
 exports[`platform/gitlab addReviewers(issueNo, reviewers) should add the given reviewers to the PR 1`] = `Array []`;
 
-exports[`platform/gitlab commitFiles() sends to gitFs 1`] = `
-Array [
-  Object {
-    "headers": Object {
-      "accept": "application/json",
-      "accept-encoding": "gzip, deflate",
-      "host": "gitlab.com",
-      "private-token": "abc123",
-      "user-agent": "https://github.com/renovatebot/renovate",
-    },
-    "method": "GET",
-    "url": "https://gitlab.com/api/v4/projects/some%2Frepo",
-  },
-  Object {
-    "headers": Object {
-      "accept": "application/json",
-      "accept-encoding": "gzip, deflate",
-      "host": "gitlab.com",
-      "private-token": "abc123",
-      "user-agent": "https://github.com/renovatebot/renovate",
-    },
-    "method": "GET",
-    "url": "https://gitlab.com/api/v4/user",
-  },
-]
-`;
-
 exports[`platform/gitlab createPr(branchName, title, body) auto-accepts the MR when requested 1`] = `
 Array [
   Object {
@@ -303,17 +276,6 @@ Array [
     "method": "GET",
     "url": "https://gitlab.com/api/v4/projects/some%2Frepo",
   },
-  Object {
-    "headers": Object {
-      "accept": "application/json",
-      "accept-encoding": "gzip, deflate",
-      "host": "gitlab.com",
-      "private-token": "abc123",
-      "user-agent": "https://github.com/renovatebot/renovate",
-    },
-    "method": "GET",
-    "url": "https://gitlab.com/api/v4/user",
-  },
 ]
 `;
 
@@ -329,17 +291,6 @@ Array [
     },
     "method": "GET",
     "url": "https://gitlab.com/api/v4/projects/some%2Frepo",
-  },
-  Object {
-    "headers": Object {
-      "accept": "application/json",
-      "accept-encoding": "gzip, deflate",
-      "host": "gitlab.com",
-      "private-token": "abc123",
-      "user-agent": "https://github.com/renovatebot/renovate",
-    },
-    "method": "GET",
-    "url": "https://gitlab.com/api/v4/user",
   },
   Object {
     "headers": Object {
@@ -418,17 +369,6 @@ Array [
       "user-agent": "https://github.com/renovatebot/renovate",
     },
     "method": "GET",
-    "url": "https://gitlab.com/api/v4/user",
-  },
-  Object {
-    "headers": Object {
-      "accept": "application/json",
-      "accept-encoding": "gzip, deflate",
-      "host": "gitlab.com",
-      "private-token": "abc123",
-      "user-agent": "https://github.com/renovatebot/renovate",
-    },
-    "method": "GET",
     "url": "https://gitlab.com/api/v4/projects/some%2Frepo/merge_requests/42/notes",
   },
   Object {
@@ -460,17 +400,6 @@ Array [
     },
     "method": "GET",
     "url": "https://gitlab.com/api/v4/projects/some%2Frepo",
-  },
-  Object {
-    "headers": Object {
-      "accept": "application/json",
-      "accept-encoding": "gzip, deflate",
-      "host": "gitlab.com",
-      "private-token": "abc123",
-      "user-agent": "https://github.com/renovatebot/renovate",
-    },
-    "method": "GET",
-    "url": "https://gitlab.com/api/v4/user",
   },
   Object {
     "headers": Object {
@@ -522,17 +451,6 @@ Array [
       "user-agent": "https://github.com/renovatebot/renovate",
     },
     "method": "GET",
-    "url": "https://gitlab.com/api/v4/user",
-  },
-  Object {
-    "headers": Object {
-      "accept": "application/json",
-      "accept-encoding": "gzip, deflate",
-      "host": "gitlab.com",
-      "private-token": "abc123",
-      "user-agent": "https://github.com/renovatebot/renovate",
-    },
-    "method": "GET",
     "url": "https://gitlab.com/api/v4/projects/some%2Frepo/merge_requests/42/notes",
   },
 ]
@@ -560,17 +478,6 @@ Array [
       "user-agent": "https://github.com/renovatebot/renovate",
     },
     "method": "GET",
-    "url": "https://gitlab.com/api/v4/user",
-  },
-  Object {
-    "headers": Object {
-      "accept": "application/json",
-      "accept-encoding": "gzip, deflate",
-      "host": "gitlab.com",
-      "private-token": "abc123",
-      "user-agent": "https://github.com/renovatebot/renovate",
-    },
-    "method": "GET",
     "url": "https://gitlab.com/api/v4/projects/some%2Frepo/merge_requests/42/notes",
   },
 ]
@@ -588,17 +495,6 @@ Array [
     },
     "method": "GET",
     "url": "https://gitlab.com/api/v4/projects/some%2Frepo",
-  },
-  Object {
-    "headers": Object {
-      "accept": "application/json",
-      "accept-encoding": "gzip, deflate",
-      "host": "gitlab.com",
-      "private-token": "abc123",
-      "user-agent": "https://github.com/renovatebot/renovate",
-    },
-    "method": "GET",
-    "url": "https://gitlab.com/api/v4/user",
   },
   Object {
     "headers": Object {
@@ -637,17 +533,6 @@ Array [
     },
     "method": "GET",
     "url": "https://gitlab.com/api/v4/projects/some%2Frepo",
-  },
-  Object {
-    "headers": Object {
-      "accept": "application/json",
-      "accept-encoding": "gzip, deflate",
-      "host": "gitlab.com",
-      "private-token": "abc123",
-      "user-agent": "https://github.com/renovatebot/renovate",
-    },
-    "method": "GET",
-    "url": "https://gitlab.com/api/v4/user",
   },
   Object {
     "headers": Object {
@@ -756,11 +641,11 @@ Array [
     "url": "https://gitlab.com/api/v4/projects/undefined/issues/2",
   },
   Object {
-    "body": "{\\"description\\":\\"newer-content\\"}",
+    "body": "{\\"title\\":\\"title-2\\",\\"description\\":\\"newer-content\\"}",
     "headers": Object {
       "accept": "application/json",
       "accept-encoding": "gzip, deflate",
-      "content-length": 31,
+      "content-length": 49,
       "content-type": "application/json",
       "host": "gitlab.com",
       "private-token": "abc123",
@@ -931,17 +816,6 @@ Array [
       "user-agent": "https://github.com/renovatebot/renovate",
     },
     "method": "GET",
-    "url": "https://gitlab.com/api/v4/user",
-  },
-  Object {
-    "headers": Object {
-      "accept": "application/json",
-      "accept-encoding": "gzip, deflate",
-      "host": "gitlab.com",
-      "private-token": "abc123",
-      "user-agent": "https://github.com/renovatebot/renovate",
-    },
-    "method": "GET",
     "url": "https://gitlab.com/api/v4/projects/some%2Frepo/merge_requests?per_page=100&state=opened&source_branch=some-branch",
   },
 ]
@@ -958,7 +832,10 @@ Object {
   "commits": 1,
   "deletions": 1,
   "displayNumber": "Merge Request #91",
+  "hasAssignees": false,
+  "hasReviewers": false,
   "iid": 91,
+  "isConflicted": true,
   "isModified": true,
   "isStale": false,
   "number": 91,
@@ -981,17 +858,6 @@ Array [
     },
     "method": "GET",
     "url": "https://gitlab.com/api/v4/projects/some%2Frepo",
-  },
-  Object {
-    "headers": Object {
-      "accept": "application/json",
-      "accept-encoding": "gzip, deflate",
-      "host": "gitlab.com",
-      "private-token": "abc123",
-      "user-agent": "https://github.com/renovatebot/renovate",
-    },
-    "method": "GET",
-    "url": "https://gitlab.com/api/v4/user",
   },
   Object {
     "headers": Object {
@@ -1062,17 +928,6 @@ Array [
       "user-agent": "https://github.com/renovatebot/renovate",
     },
     "method": "GET",
-    "url": "https://gitlab.com/api/v4/user",
-  },
-  Object {
-    "headers": Object {
-      "accept": "application/json",
-      "accept-encoding": "gzip, deflate",
-      "host": "gitlab.com",
-      "private-token": "abc123",
-      "user-agent": "https://github.com/renovatebot/renovate",
-    },
-    "method": "GET",
     "url": "https://gitlab.com/api/v4/projects/some%2Frepo/repository/commits/0d9c7726c3d628b7e28af234595cfd20febdbf8e/statuses",
   },
 ]
@@ -1090,17 +945,6 @@ Array [
     },
     "method": "GET",
     "url": "https://gitlab.com/api/v4/projects/some%2Frepo",
-  },
-  Object {
-    "headers": Object {
-      "accept": "application/json",
-      "accept-encoding": "gzip, deflate",
-      "host": "gitlab.com",
-      "private-token": "abc123",
-      "user-agent": "https://github.com/renovatebot/renovate",
-    },
-    "method": "GET",
-    "url": "https://gitlab.com/api/v4/user",
   },
   Object {
     "headers": Object {
@@ -1138,17 +982,6 @@ Array [
       "user-agent": "https://github.com/renovatebot/renovate",
     },
     "method": "GET",
-    "url": "https://gitlab.com/api/v4/user",
-  },
-  Object {
-    "headers": Object {
-      "accept": "application/json",
-      "accept-encoding": "gzip, deflate",
-      "host": "gitlab.com",
-      "private-token": "abc123",
-      "user-agent": "https://github.com/renovatebot/renovate",
-    },
-    "method": "GET",
     "url": "https://gitlab.com/api/v4/projects/some%2Frepo/repository/commits/0d9c7726c3d628b7e28af234595cfd20febdbf8e/statuses",
   },
 ]
@@ -1166,17 +999,6 @@ Array [
     },
     "method": "GET",
     "url": "https://gitlab.com/api/v4/projects/some%2Frepo",
-  },
-  Object {
-    "headers": Object {
-      "accept": "application/json",
-      "accept-encoding": "gzip, deflate",
-      "host": "gitlab.com",
-      "private-token": "abc123",
-      "user-agent": "https://github.com/renovatebot/renovate",
-    },
-    "method": "GET",
-    "url": "https://gitlab.com/api/v4/user",
   },
   Object {
     "headers": Object {
@@ -1214,17 +1036,6 @@ Array [
       "user-agent": "https://github.com/renovatebot/renovate",
     },
     "method": "GET",
-    "url": "https://gitlab.com/api/v4/user",
-  },
-  Object {
-    "headers": Object {
-      "accept": "application/json",
-      "accept-encoding": "gzip, deflate",
-      "host": "gitlab.com",
-      "private-token": "abc123",
-      "user-agent": "https://github.com/renovatebot/renovate",
-    },
-    "method": "GET",
     "url": "https://gitlab.com/api/v4/projects/some%2Frepo/repository/commits/0d9c7726c3d628b7e28af234595cfd20febdbf8e/statuses",
   },
 ]
@@ -1242,17 +1053,6 @@ Array [
     },
     "method": "GET",
     "url": "https://gitlab.com/api/v4/projects/some%2Frepo",
-  },
-  Object {
-    "headers": Object {
-      "accept": "application/json",
-      "accept-encoding": "gzip, deflate",
-      "host": "gitlab.com",
-      "private-token": "abc123",
-      "user-agent": "https://github.com/renovatebot/renovate",
-    },
-    "method": "GET",
-    "url": "https://gitlab.com/api/v4/user",
   },
   Object {
     "headers": Object {
@@ -1281,17 +1081,6 @@ Array [
     "method": "GET",
     "url": "https://gitlab.com/api/v4/projects/some%2Frepo",
   },
-  Object {
-    "headers": Object {
-      "accept": "application/json",
-      "accept-encoding": "gzip, deflate",
-      "host": "gitlab.com",
-      "private-token": "abc123",
-      "user-agent": "https://github.com/renovatebot/renovate",
-    },
-    "method": "GET",
-    "url": "https://gitlab.com/api/v4/user",
-  },
 ]
 `;
 
@@ -1307,17 +1096,6 @@ Array [
     },
     "method": "GET",
     "url": "https://gitlab.com/api/v4/projects/some%2Frepo",
-  },
-  Object {
-    "headers": Object {
-      "accept": "application/json",
-      "accept-encoding": "gzip, deflate",
-      "host": "gitlab.com",
-      "private-token": "abc123",
-      "user-agent": "https://github.com/renovatebot/renovate",
-    },
-    "method": "GET",
-    "url": "https://gitlab.com/api/v4/user",
   },
   Object {
     "headers": Object {
@@ -1355,17 +1133,6 @@ Array [
       "user-agent": "https://github.com/renovatebot/renovate",
     },
     "method": "GET",
-    "url": "https://gitlab.com/api/v4/user",
-  },
-  Object {
-    "headers": Object {
-      "accept": "application/json",
-      "accept-encoding": "gzip, deflate",
-      "host": "gitlab.com",
-      "private-token": "abc123",
-      "user-agent": "https://github.com/renovatebot/renovate",
-    },
-    "method": "GET",
     "url": "https://gitlab.com/api/v4/projects/some%2Frepo/repository/commits/0d9c7726c3d628b7e28af234595cfd20febdbf8e/statuses",
   },
 ]
@@ -1393,17 +1160,6 @@ Array [
       "user-agent": "https://github.com/renovatebot/renovate",
     },
     "method": "GET",
-    "url": "https://gitlab.com/api/v4/user",
-  },
-  Object {
-    "headers": Object {
-      "accept": "application/json",
-      "accept-encoding": "gzip, deflate",
-      "host": "gitlab.com",
-      "private-token": "abc123",
-      "user-agent": "https://github.com/renovatebot/renovate",
-    },
-    "method": "GET",
     "url": "https://gitlab.com/api/v4/projects/some%2Frepo/repository/commits/0d9c7726c3d628b7e28af234595cfd20febdbf8e/statuses",
   },
 ]
@@ -1417,6 +1173,8 @@ Object {
   "description": "a merge request",
   "displayNumber": "Merge Request #12345",
   "diverged_commits_count": 5,
+  "hasAssignees": false,
+  "hasReviewers": false,
   "id": 1,
   "iid": 12345,
   "isConflicted": true,
@@ -1466,6 +1224,8 @@ Object {
   "description": "a merge request",
   "displayNumber": "Merge Request #12345",
   "diverged_commits_count": 2,
+  "hasAssignees": true,
+  "hasReviewers": false,
   "id": 1,
   "iid": 12345,
   "isConflicted": true,
@@ -1515,6 +1275,8 @@ Object {
   "description": "a merge request",
   "displayNumber": "Merge Request #12345",
   "diverged_commits_count": 5,
+  "hasAssignees": true,
+  "hasReviewers": false,
   "id": 1,
   "iid": 12345,
   "isModified": true,
@@ -1539,17 +1301,6 @@ Array [
     },
     "method": "GET",
     "url": "https://gitlab.com/api/v4/projects/some%2Frepo",
-  },
-  Object {
-    "headers": Object {
-      "accept": "application/json",
-      "accept-encoding": "gzip, deflate",
-      "host": "gitlab.com",
-      "private-token": "abc123",
-      "user-agent": "https://github.com/renovatebot/renovate",
-    },
-    "method": "GET",
-    "url": "https://gitlab.com/api/v4/user",
   },
   Object {
     "headers": Object {
@@ -1613,17 +1364,6 @@ Array [
     "method": "GET",
     "url": "https://gitlab.com/api/v4/projects/some%2Frepo%2Fproject",
   },
-  Object {
-    "headers": Object {
-      "accept": "application/json",
-      "accept-encoding": "gzip, deflate",
-      "host": "gitlab.com",
-      "private-token": "abc123",
-      "user-agent": "https://github.com/renovatebot/renovate",
-    },
-    "method": "GET",
-    "url": "https://gitlab.com/api/v4/user",
-  },
 ]
 `;
 
@@ -1639,17 +1379,6 @@ Array [
     },
     "method": "GET",
     "url": "https://gitlab.com/api/v4/projects/some%2Frepo%2Fproject",
-  },
-  Object {
-    "headers": Object {
-      "accept": "application/json",
-      "accept-encoding": "gzip, deflate",
-      "host": "gitlab.com",
-      "private-token": "abc123",
-      "user-agent": "https://github.com/renovatebot/renovate",
-    },
-    "method": "GET",
-    "url": "https://gitlab.com/api/v4/user",
   },
 ]
 `;
@@ -1768,17 +1497,6 @@ Array [
     "method": "GET",
     "url": "https://gitlab.com/api/v4/projects/some%2Frepo%2Fproject",
   },
-  Object {
-    "headers": Object {
-      "accept": "application/json",
-      "accept-encoding": "gzip, deflate",
-      "host": "gitlab.com",
-      "private-token": "abc123",
-      "user-agent": "https://github.com/renovatebot/renovate",
-    },
-    "method": "GET",
-    "url": "https://gitlab.com/api/v4/user",
-  },
 ]
 `;
 
@@ -1794,17 +1512,6 @@ Array [
     },
     "method": "GET",
     "url": "https://gitlab.com/api/v4/projects/some%2Frepo%2Fproject",
-  },
-  Object {
-    "headers": Object {
-      "accept": "application/json",
-      "accept-encoding": "gzip, deflate",
-      "host": "gitlab.com",
-      "private-token": "abc123",
-      "user-agent": "https://github.com/renovatebot/renovate",
-    },
-    "method": "GET",
-    "url": "https://gitlab.com/api/v4/user",
   },
 ]
 `;
@@ -1980,17 +1687,6 @@ Array [
     "method": "GET",
     "url": "https://gitlab.com/api/v4/projects/some%2Frepo",
   },
-  Object {
-    "headers": Object {
-      "accept": "application/json",
-      "accept-encoding": "gzip, deflate",
-      "host": "gitlab.com",
-      "private-token": "abc123",
-      "user-agent": "https://github.com/renovatebot/renovate",
-    },
-    "method": "GET",
-    "url": "https://gitlab.com/api/v4/user",
-  },
 ]
 `;
 
@@ -2007,17 +1703,6 @@ Array [
     "method": "GET",
     "url": "https://gitlab.com/api/v4/projects/some%2Frepo",
   },
-  Object {
-    "headers": Object {
-      "accept": "application/json",
-      "accept-encoding": "gzip, deflate",
-      "host": "gitlab.com",
-      "private-token": "abc123",
-      "user-agent": "https://github.com/renovatebot/renovate",
-    },
-    "method": "GET",
-    "url": "https://gitlab.com/api/v4/user",
-  },
 ]
 `;
 
@@ -2033,17 +1718,6 @@ Array [
     },
     "method": "GET",
     "url": "https://gitlab.com/api/v4/projects/some%2Frepo",
-  },
-  Object {
-    "headers": Object {
-      "accept": "application/json",
-      "accept-encoding": "gzip, deflate",
-      "host": "gitlab.com",
-      "private-token": "abc123",
-      "user-agent": "https://github.com/renovatebot/renovate",
-    },
-    "method": "GET",
-    "url": "https://gitlab.com/api/v4/user",
   },
   Object {
     "body": "{\\"state\\":\\"success\\",\\"description\\":\\"some-description\\",\\"context\\":\\"some-context\\",\\"target_url\\":\\"some-url\\"}",
@@ -2087,17 +1761,6 @@ Array [
     "url": "https://gitlab.com/api/v4/projects/some%2Frepo",
   },
   Object {
-    "headers": Object {
-      "accept": "application/json",
-      "accept-encoding": "gzip, deflate",
-      "host": "gitlab.com",
-      "private-token": "abc123",
-      "user-agent": "https://github.com/renovatebot/renovate",
-    },
-    "method": "GET",
-    "url": "https://gitlab.com/api/v4/user",
-  },
-  Object {
     "body": "{\\"state\\":\\"failed\\",\\"description\\":\\"some-description\\",\\"context\\":\\"some-context\\",\\"target_url\\":\\"some-url\\"}",
     "headers": Object {
       "accept": "application/json",
@@ -2137,17 +1800,6 @@ Array [
     },
     "method": "GET",
     "url": "https://gitlab.com/api/v4/projects/some%2Frepo",
-  },
-  Object {
-    "headers": Object {
-      "accept": "application/json",
-      "accept-encoding": "gzip, deflate",
-      "host": "gitlab.com",
-      "private-token": "abc123",
-      "user-agent": "https://github.com/renovatebot/renovate",
-    },
-    "method": "GET",
-    "url": "https://gitlab.com/api/v4/user",
   },
   Object {
     "body": "{\\"state\\":\\"pending\\",\\"description\\":\\"some-description\\",\\"context\\":\\"some-context\\",\\"target_url\\":\\"some-url\\"}",

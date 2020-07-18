@@ -531,10 +531,18 @@ describe('platform/bitbucket', () => {
           '/2.0/repositories/some/empty/issues?q=title%3D%22title%22%20AND%20(state%20%3D%20%22new%22%20OR%20state%20%3D%20%22open%22)%20AND%20reporter.username%3D%22abc%22'
         )
         .reply(200, { values: [] })
+        .get(
+          '/2.0/repositories/some/empty/issues?q=title%3D%22old-title%22%20AND%20(state%20%3D%20%22new%22%20OR%20state%20%3D%20%22open%22)%20AND%20reporter.username%3D%22abc%22'
+        )
+        .reply(200, { values: [] })
         .post('/2.0/repositories/some/empty/issues')
         .reply(200);
       expect(
-        await bitbucket.ensureIssue({ title: 'title', body: 'body' })
+        await bitbucket.ensureIssue({
+          title: 'title',
+          reuseTitle: 'old-title',
+          body: 'body',
+        })
       ).toEqual('created');
       expect(httpMock.getTrace()).toMatchSnapshot();
     });
@@ -803,19 +811,6 @@ describe('platform/bitbucket', () => {
       const scope = await initRepoMock();
       scope.post('/2.0/repositories/some/repo/pullrequests/5/merge').reply(200);
       await bitbucket.mergePr(5, 'branch');
-      expect(httpMock.getTrace()).toMatchSnapshot();
-    });
-  });
-
-  describe('commitFiles()', () => {
-    it('sends to gitFs', async () => {
-      await initRepoMock();
-      const res = await bitbucket.commitFiles({
-        branchName: 'test',
-        files: [],
-        message: 'message',
-      });
-      expect(res).toMatchSnapshot();
       expect(httpMock.getTrace()).toMatchSnapshot();
     });
   });

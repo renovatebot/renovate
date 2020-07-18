@@ -12,7 +12,8 @@ import {
   PackageDependency,
   PackageFile,
 } from '../manager/common';
-import { File, PlatformPrOptions } from '../platform';
+import { PlatformPrOptions } from '../platform';
+import { File } from '../util/git';
 import { ChangeLogResult } from './pr/changelog/common';
 import { Merge } from 'type-fest';
 
@@ -98,7 +99,7 @@ export interface BranchConfig
   canBeUnpublished?: boolean;
   errors?: ValidationMessage[];
   hasTypes?: boolean;
-  masterIssueChecks?: Record<string, string>;
+  dependencyDashboardChecks?: Record<string, string>;
   releaseTimestamp?: string;
   forceCommit?: boolean;
   rebaseRequested?: boolean;

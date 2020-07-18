@@ -156,3 +156,181 @@ Array [
   },
 ]
 `;
+
+exports[`manager/maven updateDependency should include registryUrls from parent pom files 1`] = `
+Array [
+  Object {
+    "datasource": "maven",
+    "deps": Array [
+      Object {
+        "currentValue": "42",
+        "datasource": "maven",
+        "depName": "org.example:child",
+        "fileReplacePosition": 185,
+        "registryUrls": Array [
+          "https://repo.maven.apache.org/maven2",
+          "http://example.com/nexus/xyz",
+          "http://example.com/",
+        ],
+      },
+      Object {
+        "currentValue": "1.2.3.4",
+        "datasource": "maven",
+        "depName": "org.example:quux",
+        "editFile": "parent.pom.xml",
+        "fileReplacePosition": 470,
+        "groupName": "quuxVersion",
+        "registryUrls": Array [
+          "https://repo.maven.apache.org/maven2",
+          "http://example.com/",
+          "http://example.com/nexus/xyz",
+        ],
+      },
+    ],
+    "packageFile": "parent.pom.xml",
+    "parent": "child.pom.xml",
+  },
+  Object {
+    "datasource": "maven",
+    "deps": Array [
+      Object {
+        "currentValue": "42",
+        "datasource": "maven",
+        "depName": "org.example:parent",
+        "fileReplacePosition": 186,
+        "registryUrls": Array [
+          "https://repo.maven.apache.org/maven2",
+          "http://example.com/",
+          "http://example.com/nexus/xyz",
+        ],
+      },
+      Object {
+        "currentValue": "0.0.1",
+        "datasource": "maven",
+        "depName": "org.example:foo",
+        "fileReplacePosition": 806,
+        "registryUrls": Array [
+          "https://repo.maven.apache.org/maven2",
+          "http://example.com/",
+          "http://example.com/nexus/xyz",
+        ],
+      },
+      Object {
+        "currentValue": "1.0.0",
+        "datasource": "maven",
+        "depName": "org.example:bar",
+        "fileReplacePosition": 954,
+        "registryUrls": Array [
+          "https://repo.maven.apache.org/maven2",
+          "http://example.com/",
+          "http://example.com/nexus/xyz",
+        ],
+      },
+      Object {
+        "currentValue": "2.4.2",
+        "datasource": "maven",
+        "depName": "org.apache.maven.plugins:maven-release-plugin",
+        "fileReplacePosition": 1188,
+        "registryUrls": Array [
+          "https://repo.maven.apache.org/maven2",
+          "http://example.com/",
+          "http://example.com/nexus/xyz",
+        ],
+      },
+      Object {
+        "currentValue": "1.8.1",
+        "datasource": "maven",
+        "depName": "org.apache.maven.scm:maven-scm-provider-gitexe",
+        "fileReplacePosition": 1386,
+        "registryUrls": Array [
+          "https://repo.maven.apache.org/maven2",
+          "http://example.com/",
+          "http://example.com/nexus/xyz",
+        ],
+      },
+      Object {
+        "currentValue": "0.0.1",
+        "datasource": "maven",
+        "depName": "org.example:\${artifact-id-placeholder}",
+        "fileReplacePosition": 2131,
+        "registryUrls": Array [
+          "https://repo.maven.apache.org/maven2",
+          "http://example.com/",
+          "http://example.com/nexus/xyz",
+        ],
+        "skipReason": "name-placeholder",
+      },
+      Object {
+        "currentValue": "0.0.1",
+        "datasource": "maven",
+        "depName": "\${group-id-placeholder}:baz",
+        "fileReplacePosition": 2281,
+        "registryUrls": Array [
+          "https://repo.maven.apache.org/maven2",
+          "http://example.com/",
+          "http://example.com/nexus/xyz",
+        ],
+        "skipReason": "name-placeholder",
+      },
+      Object {
+        "currentValue": "1.2.3",
+        "datasource": "maven",
+        "depName": "org.example:quuz",
+        "fileReplacePosition": 2574,
+        "registryUrls": Array [
+          "https://repo.maven.apache.org/maven2",
+          "http://example.com/",
+          "http://example.com/nexus/xyz",
+        ],
+      },
+      Object {
+        "currentValue": "it's not a version",
+        "datasource": "maven",
+        "depName": "org.example:quuuz",
+        "fileReplacePosition": 2714,
+        "registryUrls": Array [
+          "https://repo.maven.apache.org/maven2",
+          "http://example.com/",
+          "http://example.com/nexus/xyz",
+        ],
+      },
+      Object {
+        "currentValue": "[1.0.0]",
+        "datasource": "maven",
+        "depName": "org.example:hard-range",
+        "fileReplacePosition": 2872,
+        "registryUrls": Array [
+          "https://repo.maven.apache.org/maven2",
+          "http://example.com/",
+          "http://example.com/nexus/xyz",
+        ],
+      },
+      Object {
+        "currentValue": "\${profile-placeholder}",
+        "datasource": "maven",
+        "depName": "org.example:profile-artifact",
+        "fileReplacePosition": 3134,
+        "registryUrls": Array [
+          "https://repo.maven.apache.org/maven2",
+          "http://example.com/",
+          "http://example.com/nexus/xyz",
+        ],
+        "skipReason": "version-placeholder",
+      },
+      Object {
+        "currentValue": "2.17",
+        "datasource": "maven",
+        "depName": "org.apache.maven.plugins:maven-checkstyle-plugin",
+        "fileReplacePosition": 3410,
+        "registryUrls": Array [
+          "https://repo.maven.apache.org/maven2",
+          "http://example.com/",
+          "http://example.com/nexus/xyz",
+        ],
+      },
+    ],
+    "packageFile": "child.pom.xml",
+    "parent": "parent.pom.xml",
+  },
+]
+`;

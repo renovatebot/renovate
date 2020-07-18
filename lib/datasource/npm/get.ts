@@ -91,7 +91,7 @@ export async function getDependency(
     authInfo = { type: 'Bearer', token: npmrc._authToken };
   }
 
-  if (authInfo && authInfo.type && authInfo.token) {
+  if (authInfo?.type && authInfo.token) {
     headers.authorization = `${authInfo.type} ${authInfo.token}`;
     logger.trace(
       { token: maskToken(authInfo.token), npmName: packageName },
