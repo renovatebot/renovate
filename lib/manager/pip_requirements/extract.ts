@@ -68,7 +68,7 @@ export function extractPackageFile(
         currentValue,
         datasource: datasourcePypi.id,
       };
-      if (currentValue && currentValue.startsWith('==')) {
+      if (currentValue?.startsWith('==')) {
         dep.fromVersion = currentValue.replace(/^==/, '');
       }
       return dep;

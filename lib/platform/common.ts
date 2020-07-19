@@ -43,6 +43,8 @@ export interface Pr {
   canMergeReason?: string;
   createdAt?: string;
   displayNumber?: string;
+  hasAssignees?: boolean;
+  hasReviewers?: boolean;
   isConflicted?: boolean;
   isModified?: boolean;
   isStale?: boolean;

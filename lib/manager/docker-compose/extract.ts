@@ -77,7 +77,7 @@ export function extractPackageFile(
     // Image name/tags for services are only eligible for update if they don't
     // use variables and if the image is not built locally
     const deps = Object.values(services || {})
-      .filter((service) => service && service.image && !service.build)
+      .filter((service) => service?.image && !service?.build)
       .map((service) => {
         const dep = getDep(service.image);
         const lineNumber = lineMapper.pluckLineNumber(service.image);

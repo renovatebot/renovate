@@ -395,7 +395,7 @@ export async function createPr({
   if (config.prList) {
     config.prList.push(pr);
   }
-  if (platformOptions && platformOptions.gitLabAutomerge) {
+  if (platformOptions?.gitLabAutomerge) {
     try {
       const desiredStatus = 'can_be_merged';
       const retryTimes = 5;
@@ -442,6 +442,8 @@ export async function getPr(iid: number): Promise<Pr> {
         description: string;
         diverged_commits_count: number;
         merge_status: string;
+        assignee?: { id?: number };
+        assignees?: { id?: number }[];
       }
     >(url)
   ).body;
@@ -454,6 +456,10 @@ export async function getPr(iid: number): Promise<Pr> {
   pr.isStale = pr.diverged_commits_count > 0;
   pr.state = pr.state === 'opened' ? PR_STATE_OPEN : pr.state;
   pr.isModified = true;
+  pr.hasAssignees = !!(pr.assignee?.id || pr.assignees?.[0]?.id);
+  delete pr.assignee;
+  delete pr.assignees;
+  pr.hasReviewers = false;
   if (pr.merge_status === 'cannot_be_merged') {
     logger.debug('pr cannot be merged');
     pr.canMerge = false;
@@ -473,8 +479,7 @@ export async function getPr(iid: number): Promise<Pr> {
     const branch = (
       await gitlabApi.getJson<{ commit: { author_email: string } }>(branchUrl)
     ).body;
-    const branchCommitEmail =
-      branch && branch.commit ? branch.commit.author_email : null;
+    const branchCommitEmail = branch?.commit?.author_email ?? null;
     if (branchCommitEmail === global.gitAuthor.email) {
       pr.isModified = false;
     } else {

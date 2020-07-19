@@ -48,6 +48,14 @@ function kotlinPluginStringVersionFormatMatch(
   return regEx(`(id\\("${dependency.group}"\\)\\s+version\\s+")[^$].*?(")`);
 }
 
+function dependencyStringVersionFormatMatch(
+  dependency: GradleDependency
+): RegExp {
+  return regEx(
+    `(dependency\\s+['"]${dependency.group}:${dependency.name}:)[^'"]+(['"])`
+  );
+}
+
 function allMapFormatOrders(
   group: string,
   name: string,
@@ -202,19 +210,18 @@ function updateVersionLiterals(
     moduleStringVersionFormatMatch(dependency),
     groovyPluginStringVersionFormatMatch(dependency),
     kotlinPluginStringVersionFormatMatch(dependency),
+    dependencyStringVersionFormatMatch(dependency),
     ...moduleMapVersionFormatMatch(dependency),
     ...moduleKotlinNamedArgumentVersionFormatMatch(dependency),
   ];
+  let result = buildGradleContent;
   for (const regex of regexes) {
-    const match = regex.exec(buildGradleContent);
+    const match = regex.exec(result);
     if (match) {
-      return buildGradleContent.replace(
-        match[0],
-        `${match[1]}${newVersion}${match[2]}`
-      );
+      result = result.replace(match[0], `${match[1]}${newVersion}${match[2]}`);
     }
   }
-  return null;
+  return result === buildGradleContent ? null : result;
 }
 
 function updateLocalVariables(

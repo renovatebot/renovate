@@ -656,7 +656,7 @@ export async function getAdditionalFiles(
       additionalNpmrcContent
     );
     const res = await lerna.generateLockFiles(
-      lernaPackageFile.lernaClient,
+      lernaPackageFile,
       fullLearnaFileDir,
       config,
       env,
