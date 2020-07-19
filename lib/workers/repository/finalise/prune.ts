@@ -6,7 +6,7 @@ import { platform } from '../../../platform';
 import { getAllRenovateBranches } from '../../../util/git';
 
 async function cleanUpBranches(
-  { dryRun, pruneStaleBranches: enabled }: RenovateConfig,
+  { dryRun, speculativeRun, pruneStaleBranches: enabled }: RenovateConfig,
   remainingBranches: string[]
 ): Promise<void> {
   for (const branchName of remainingBranches) {
@@ -20,9 +20,12 @@ async function cleanUpBranches(
       if (pr && !skipAutoclose) {
         if (!pr.title.endsWith('- autoclosed')) {
           if (dryRun) {
-            logger.info(
-              `DRY-RUN: Would update pr ${pr.number} to ${pr.title} - autoclosed`
-            );
+            // istanbul ignore if
+            if (!speculativeRun) {
+              logger.info(
+                `DRY-RUN: Would update pr ${pr.number} to ${pr.title} - autoclosed`
+              );
+            }
           } else if (enabled === false) {
             logger.info(
               `PRUNING-DISABLED: Would update pr ${pr.number} to ${pr.title} - autoclosed`
@@ -41,7 +44,12 @@ async function cleanUpBranches(
             'Skip PR autoclosing'
           );
           if (dryRun) {
-            logger.info(`DRY-RUN: Would add Autoclosing Skipped comment to PR`);
+            // istanbul ignore if
+            if (!speculativeRun) {
+              logger.info(
+                `DRY-RUN: Would add Autoclosing Skipped comment to PR`
+              );
+            }
           } else {
             await platform.ensureComment({
               number: pr.number,
@@ -52,7 +60,10 @@ async function cleanUpBranches(
           }
         }
       } else if (dryRun) {
-        logger.info(`DRY-RUN: Would deleting orphan branch ${branchName}`);
+        // istanbul ignore if
+        if (!speculativeRun) {
+          logger.info(`DRY-RUN: Would deleting orphan branch ${branchName}`);
+        }
       } else if (enabled === false) {
         logger.info(
           `PRUNING-DISABLED: Would deleting orphan branch ${branchName}`

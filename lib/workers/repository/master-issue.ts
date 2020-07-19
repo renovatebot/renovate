@@ -47,20 +47,26 @@ export async function ensureMasterIssue(
     if (config.dependencyDashboardAutoclose) {
       logger.debug('Closing Dependency Dashboard');
       if (config.dryRun) {
-        logger.info(
-          'DRY-RUN: Would close Dependency Dashboard ' +
-            config.dependencyDashboardTitle
-        );
+        // istanbul ignore if
+        if (!config.speculativeRun) {
+          logger.info(
+            'DRY-RUN: Would close Dependency Dashboard ' +
+              config.dependencyDashboardTitle
+          );
+        }
       } else {
         await platform.ensureIssueClosing(config.dependencyDashboardTitle);
       }
       return;
     }
     if (config.dryRun) {
-      logger.info(
-        'DRY-RUN: Would ensure Dependency Dashboard ' +
-          config.dependencyDashboardTitle
-      );
+      // istanbul ignore if
+      if (!config.speculativeRun) {
+        logger.info(
+          'DRY-RUN: Would ensure Dependency Dashboard ' +
+            config.dependencyDashboardTitle
+        );
+      }
     } else {
       await platform.ensureIssue({
         title: config.dependencyDashboardTitle,
@@ -206,10 +212,13 @@ export async function ensureMasterIssue(
   }
 
   if (config.dryRun) {
-    logger.info(
-      'DRY-RUN: Would ensure Dependency Dashboard ' +
-        config.dependencyDashboardTitle
-    );
+    // istanbul ignore if
+    if (!config.speculativeRun) {
+      logger.info(
+        'DRY-RUN: Would ensure Dependency Dashboard ' +
+          config.dependencyDashboardTitle
+      );
+    }
   } else {
     await platform.ensureIssue({
       title: config.dependencyDashboardTitle,

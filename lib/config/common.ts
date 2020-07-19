@@ -74,6 +74,7 @@ export interface RenovateAdminConfig {
   cacheDir?: string;
   configWarningReuseIssue?: boolean;
   dryRun?: boolean;
+  speculativeRun?: boolean;
 
   endpoint?: string;
 

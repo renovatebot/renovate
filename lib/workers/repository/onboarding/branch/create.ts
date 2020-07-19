@@ -26,7 +26,9 @@ export async function createOnboardingBranch(
   }
   // istanbul ignore if
   if (config.dryRun) {
-    logger.info('DRY-RUN: Would commit files to onboarding branch');
+    if (!config.speculativeRun) {
+      logger.info('DRY-RUN: Would commit files to onboarding branch');
+    }
     return null;
   }
   return commitFiles({

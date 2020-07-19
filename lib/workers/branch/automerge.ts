@@ -31,7 +31,10 @@ export async function tryBranchAutomerge(
     logger.debug(`Automerging branch`);
     try {
       if (config.dryRun) {
-        logger.info('DRY-RUN: Would automerge branch' + config.branchName);
+        // istanbul ignore if
+        if (!config.speculativeRun) {
+          logger.info('DRY-RUN: Would automerge branch' + config.branchName);
+        }
       } else {
         await mergeBranch(config.branchName);
       }

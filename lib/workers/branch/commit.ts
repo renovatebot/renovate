@@ -32,7 +32,9 @@ export async function commitFilesToBranch(
   logger.debug(`${fileLength} file(s) to commit`);
   // istanbul ignore if
   if (config.dryRun) {
-    logger.info('DRY-RUN: Would commit files to branch ' + config.branchName);
+    if (!config.speculativeRun) {
+      logger.info('DRY-RUN: Would commit files to branch ' + config.branchName);
+    }
     return null;
   }
   // istanbul ignore if

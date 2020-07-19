@@ -106,10 +106,13 @@ export async function processBranch(
           '\n\nIf this PR was closed by mistake or you changed your mind, you can simply rename this PR and you will soon get a fresh replacement PR opened.';
         if (!config.suppressNotifications.includes('prIgnoreNotification')) {
           if (config.dryRun) {
-            logger.info(
-              'DRY-RUN: Would ensure closed PR comment in PR #' +
-                existingPr.number
-            );
+            // istanbul ignore if
+            if (!config.speculativeRun) {
+              logger.info(
+                'DRY-RUN: Would ensure closed PR comment in PR #' +
+                  existingPr.number
+              );
+            }
           } else {
             await platform.ensureComment({
               number: existingPr.number,
@@ -120,7 +123,10 @@ export async function processBranch(
         }
         if (branchExists) {
           if (config.dryRun) {
-            logger.info('DRY-RUN: Would delete branch ' + config.branchName);
+            // istanbul ignore if
+            if (!config.speculativeRun) {
+              logger.info('DRY-RUN: Would delete branch ' + config.branchName);
+            }
           } else {
             await platform.deleteBranch(config.branchName);
           }
@@ -593,10 +599,13 @@ export async function processBranch(
           )
         ) {
           if (config.dryRun) {
-            logger.info(
-              'DRY-RUN: Would ensure lock file error comment in PR #' +
-                pr.number
-            );
+            // istanbul ignore if
+            if (!config.speculativeRun) {
+              logger.info(
+                'DRY-RUN: Would ensure lock file error comment in PR #' +
+                  pr.number
+              );
+            }
           } else {
             await platform.ensureComment({
               number: pr.number,
@@ -616,9 +625,12 @@ export async function processBranch(
         if (existingState !== state) {
           logger.debug(`Updating status check state to failed`);
           if (config.dryRun) {
-            logger.info(
-              'DRY-RUN: Would set branch status in ' + config.branchName
-            );
+            // istanbul ignore if
+            if (!config.speculativeRun) {
+              logger.info(
+                'DRY-RUN: Would set branch status in ' + config.branchName
+              );
+            }
           } else {
             await platform.setBranchStatus({
               branchName: config.branchName,
@@ -632,9 +644,11 @@ export async function processBranch(
         if (config.updatedArtifacts && config.updatedArtifacts.length) {
           // istanbul ignore if
           if (config.dryRun) {
-            logger.info(
-              'DRY-RUN: Would ensure comment removal in PR #' + pr.number
-            );
+            if (!config.speculativeRun) {
+              logger.info(
+                'DRY-RUN: Would ensure comment removal in PR #' + pr.number
+              );
+            }
           } else {
             // Remove artifacts error comment only if this run has successfully updated artifacts
             await platform.ensureCommentRemoval({ number: pr.number, topic });

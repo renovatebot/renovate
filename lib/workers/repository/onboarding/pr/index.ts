@@ -119,7 +119,9 @@ If you need any further assistance then you can also [request help here](${confi
   try {
     // istanbul ignore if
     if (config.dryRun) {
-      logger.info('DRY-RUN: Would create onboarding PR');
+      if (!config.speculativeRun) {
+        logger.info('DRY-RUN: Would create onboarding PR');
+      }
     } else {
       const pr = await platform.createPr({
         branchName: config.onboardingBranch,

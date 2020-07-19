@@ -47,7 +47,9 @@ export async function rebaseOnboardingBranch(
 
   // istanbul ignore if
   if (config.dryRun) {
-    logger.info('DRY-RUN: Would rebase files in onboarding branch');
+    if (!config.speculativeRun) {
+      logger.info('DRY-RUN: Would rebase files in onboarding branch');
+    }
     return null;
   }
   return commitFiles({

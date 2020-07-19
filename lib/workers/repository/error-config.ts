@@ -22,12 +22,18 @@ export async function raiseConfigWarningIssue(
     body = `## Action Required: Fix Renovate Configuration\n\n${body}`;
     body += `\n\nOnce you have resolved this problem (in this onboarding branch), Renovate will return to providing you with a preview of your repository's configuration.`;
     if (config.dryRun) {
-      logger.info('DRY-RUN: Would update PR #' + pr.number);
+      // istanbul ignore if
+      if (!config.speculativeRun) {
+        logger.info('DRY-RUN: Would update PR #' + pr.number);
+      }
     } else {
       await platform.updatePr(pr.number, config.onboardingPrTitle, body);
     }
   } else if (config.dryRun) {
-    logger.info('DRY-RUN: Would ensure config error issue');
+    // istanbul ignore if
+    if (!config.speculativeRun) {
+      logger.info('DRY-RUN: Would ensure config error issue');
+    }
   } else {
     const once = false;
     const shouldReopen = config.configWarningReuseIssue;

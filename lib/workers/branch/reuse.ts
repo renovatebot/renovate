@@ -35,9 +35,11 @@ export async function shouldReuseExistingBranch(
       logger.debug('Manual rebase requested via PR labels for #' + pr.number);
       // istanbul ignore if
       if (config.dryRun) {
-        logger.info(
-          `DRY-RUN: Would delete label ${config.rebaseLabel} from #${pr.number}`
-        );
+        if (!config.speculativeRun) {
+          logger.info(
+            `DRY-RUN: Would delete label ${config.rebaseLabel} from #${pr.number}`
+          );
+        }
       } else {
         await platform.deleteLabel(pr.number, config.rebaseLabel);
       }
