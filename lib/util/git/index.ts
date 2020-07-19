@@ -1,7 +1,13 @@
 import { join } from 'path';
 import URL from 'url';
 import fs from 'fs-extra';
-import Git from 'simple-git/promise';
+import Git, {
+  DiffResult as DiffResult_,
+  Options,
+  ResetMode,
+  SimpleGit,
+  StatusResult as StatusResult_,
+} from 'simple-git';
 import {
   CONFIG_VALIDATION,
   REPOSITORY_CHANGED,
@@ -20,15 +26,15 @@ declare module 'fs-extra' {
   export function exists(pathLike: string): Promise<boolean>;
 }
 
-export type StatusResult = Git.StatusResult;
+export type StatusResult = StatusResult_;
 
-export type DiffResult = Git.DiffResult;
+export type DiffResult = DiffResult_;
 
 interface StorageConfig {
   localDir: string;
   currentBranch?: string;
   url: string;
-  extraCloneOpts?: Git.Options;
+  extraCloneOpts?: Options;
   gitAuthorName?: string;
   gitAuthorEmail?: string;
 }
@@ -82,7 +88,7 @@ async function isDirectory(dir: string): Promise<boolean> {
   }
 }
 
-async function getDefaultBranch(git: Git.SimpleGit): Promise<string> {
+async function getDefaultBranch(git: SimpleGit): Promise<string> {
   // see https://stackoverflow.com/a/44750379/1438522
   try {
     const res = await git.raw(['symbolic-ref', 'refs/remotes/origin/HEAD']);
@@ -102,7 +108,7 @@ async function getDefaultBranch(git: Git.SimpleGit): Promise<string> {
 
 let config: LocalConfig = {} as any;
 
-let git: Git.SimpleGit | undefined;
+let git: SimpleGit | undefined;
 
 let privateKeySet = false;
 
@@ -249,7 +255,7 @@ export async function createBranch(
   sha: string
 ): Promise<void> {
   logger.debug(`createBranch(${branchName})`);
-  await git.reset('hard');
+  await git.reset(ResetMode.HARD);
   await git.raw(['clean', '-fd']);
   await git.checkout(['-B', branchName, sha]);
   await git.push('origin', branchName, { '--force': true });
@@ -315,7 +321,7 @@ export async function setBranch(branchName: string): Promise<string> {
         ).trim();
       }
       await git.checkout([branchName, '-f']);
-      await git.reset('hard');
+      await git.reset(ResetMode.HARD);
       const latestCommitDate = (await git.log({ n: 1 })).latest.date;
       logger.debug({ branchName, latestCommitDate }, 'latest commit');
     } catch (err) /* istanbul ignore next */ {
@@ -415,7 +421,7 @@ export async function deleteBranch(branchName: string): Promise<void> {
 }
 
 export async function mergeBranch(branchName: string): Promise<void> {
-  await git.reset('hard');
+  await git.reset(ResetMode.HARD);
   await git.checkout(['-B', branchName, 'origin/' + branchName]);
   await git.checkout(config.currentBranch);
   await git.merge(['--ff-only', branchName]);
@@ -509,7 +515,7 @@ export async function commitFiles({
     privateKeySet = true;
   }
   try {
-    await git.reset('hard');
+    await git.reset(ResetMode.HARD);
     await git.raw(['clean', '-fd']);
     await git.checkout(['-B', branchName, 'origin/' + config.currentBranch]);
     const fileNames = [];

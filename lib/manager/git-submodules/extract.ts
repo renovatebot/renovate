@@ -1,5 +1,5 @@
 import URL from 'url';
-import Git from 'simple-git/promise';
+import Git, { SimpleGit } from 'simple-git';
 import upath from 'upath';
 
 import * as datasourceGitSubmodules from '../../datasource/git-submodules';
@@ -12,7 +12,7 @@ type GitModule = {
 };
 
 async function getUrl(
-  git: Git.SimpleGit,
+  git: SimpleGit,
   gitModulesPath: string,
   submoduleName: string
 ): Promise<string> {
@@ -50,7 +50,7 @@ async function getBranch(
 }
 
 async function getModules(
-  git: Git.SimpleGit,
+  git: SimpleGit,
   gitModulesPath: string
 ): Promise<GitModule[]> {
   const res: GitModule[] = [];

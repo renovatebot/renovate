@@ -1,9 +1,9 @@
-import _simpleGit from 'simple-git/promise';
+import _simpleGit from 'simple-git';
 import { getPkgReleases } from '..';
 import { id as versioning } from '../../versioning/git';
 import { id as datasource, getDigest } from '.';
 
-jest.mock('simple-git/promise');
+jest.mock('simple-git');
 const simpleGit: any = _simpleGit;
 
 const depName = 'https://github.com/example/example.git';

@@ -1,5 +1,5 @@
 import fs from 'fs-extra';
-import Git from 'simple-git/promise';
+import Git from 'simple-git';
 import tmp from 'tmp-promise';
 import * as git from '.';
 

@@ -1,6 +1,5 @@
 import { exec as _exec } from 'child_process';
 import _fs from 'fs-extra';
-import Git from 'simple-git/promise';
 import { join } from 'upath';
 import { envMock, mockExecAll } from '../../../test/execUtil';
 import { git, mocked } from '../../../test/util';
@@ -8,6 +7,7 @@ import * as _datasource from '../../datasource';
 import { setExecConfig } from '../../util/exec';
 import { BinarySource } from '../../util/exec/common';
 import * as _env from '../../util/exec/env';
+import { StatusResult } from '../../util/git';
 import { updateArtifacts } from '.';
 
 jest.mock('fs-extra');
@@ -102,7 +102,7 @@ describe('.updateArtifacts()', () => {
     fs.readFile.mockResolvedValueOnce('Current Podfile' as any);
     git.getRepoStatus.mockResolvedValueOnce({
       modified: [],
-    } as Git.StatusResult);
+    } as StatusResult);
     fs.readFile.mockResolvedValueOnce('Current Podfile' as any);
     expect(
       await updateArtifacts({
@@ -120,7 +120,7 @@ describe('.updateArtifacts()', () => {
     fs.readFile.mockResolvedValueOnce('Old Podfile' as any);
     git.getRepoStatus.mockResolvedValueOnce({
       modified: ['Podfile.lock'],
-    } as Git.StatusResult);
+    } as StatusResult);
     fs.readFile.mockResolvedValueOnce('New Podfile' as any);
     expect(
       await updateArtifacts({
@@ -142,7 +142,7 @@ describe('.updateArtifacts()', () => {
       not_added: ['Pods/New'],
       modified: ['Podfile.lock', 'Pods/Manifest.lock'],
       deleted: ['Pods/Deleted'],
-    } as Git.StatusResult);
+    } as StatusResult);
     expect(
       await updateArtifacts({
         packageFileName: 'Podfile',
@@ -199,7 +199,7 @@ describe('.updateArtifacts()', () => {
 
     git.getRepoStatus.mockResolvedValueOnce({
       modified: ['Podfile.lock'],
-    } as Git.StatusResult);
+    } as StatusResult);
 
     await updateArtifacts({
       packageFileName: 'Podfile',
@@ -227,7 +227,7 @@ describe('.updateArtifacts()', () => {
 
     git.getRepoStatus.mockResolvedValueOnce({
       modified: ['Podfile.lock'],
-    } as Git.StatusResult);
+    } as StatusResult);
 
     await updateArtifacts({
       packageFileName: 'Podfile',
