@@ -3,6 +3,7 @@ import { logger } from '../../logger';
 import { platform } from '../../platform';
 import { BranchStatus } from '../../types';
 import { mergeBranch } from '../../util/git';
+import * as limits from '../global/limits';
 
 export type AutomergeResult =
   | 'automerged'
@@ -35,6 +36,7 @@ export async function tryBranchAutomerge(
         if (!config.speculativeRun) {
           logger.info('DRY-RUN: Would automerge branch' + config.branchName);
         }
+        limits.incrementLimit('prCommitsPerRunLimit');
       } else {
         await mergeBranch(config.branchName);
       }

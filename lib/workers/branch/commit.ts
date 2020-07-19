@@ -5,6 +5,7 @@ import { logger } from '../../logger';
 import { commitFiles } from '../../util/git';
 import { sanitize } from '../../util/sanitize';
 import { BranchConfig } from '../common';
+import * as limits from '../global/limits';
 
 export async function commitFilesToBranch(
   config: BranchConfig
@@ -35,6 +36,7 @@ export async function commitFilesToBranch(
     if (!config.speculativeRun) {
       logger.info('DRY-RUN: Would commit files to branch ' + config.branchName);
     }
+    limits.incrementLimit('prCommitsPerRunLimit');
     return null;
   }
   // istanbul ignore if
