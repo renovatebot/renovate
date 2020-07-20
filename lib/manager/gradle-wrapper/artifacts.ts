@@ -7,7 +7,11 @@ import { readLocalFile, writeLocalFile } from '../../util/fs';
 import { getRepoStatus } from '../../util/git';
 import { Http } from '../../util/http';
 import { UpdateArtifact, UpdateArtifactsResult } from '../common';
-import { gradleWrapperFileName, prepareGradleCommand } from '../gradle/index';
+import {
+  extraEnv,
+  gradleWrapperFileName,
+  prepareGradleCommand,
+} from '../gradle/utils';
 
 const http = new Http('gradle-wrapper');
 
@@ -84,6 +88,7 @@ export async function updateArtifacts({
       docker: {
         image: 'renovate/gradle',
       },
+      extraEnv,
     };
     try {
       await exec(cmd, execOptions);
