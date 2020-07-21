@@ -373,6 +373,9 @@ describe('platform/github', () => {
           data: {
             repository: {
               nameWithOwner: 'some/other',
+              defaultBranchRef: {
+                name: 'master',
+              },
             },
           },
         });
