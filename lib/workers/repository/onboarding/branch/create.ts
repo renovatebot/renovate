@@ -6,7 +6,7 @@ import { getOnboardingConfig } from './config';
 
 const defaultConfigFile = configFileNames[0];
 
-export async function createOnboardingBranch(
+export function createOnboardingBranch(
   config: Partial<RenovateConfig>
 ): Promise<string | null> {
   logger.debug('createOnboardingBranch()');

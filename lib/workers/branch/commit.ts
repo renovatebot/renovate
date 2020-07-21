@@ -6,7 +6,7 @@ import { commitFiles } from '../../util/git';
 import { sanitize } from '../../util/sanitize';
 import { BranchConfig } from '../common';
 
-export async function commitFilesToBranch(
+export function commitFilesToBranch(
   config: BranchConfig
 ): Promise<string | null> {
   let updatedFiles = config.updatedPackageFiles.concat(config.updatedArtifacts);

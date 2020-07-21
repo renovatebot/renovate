@@ -112,7 +112,7 @@ export async function updateArtifacts({
     );
     const updateArtifactsResult = (
       await Promise.all(
-        artifactFileNames.map(async (fileProjectPath) =>
+        artifactFileNames.map((fileProjectPath) =>
           addIfUpdated(status, fileProjectPath)
         )
       )

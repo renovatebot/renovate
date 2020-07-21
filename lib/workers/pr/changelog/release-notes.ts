@@ -249,7 +249,7 @@ export async function getReleaseNotesMdFileInner(
   }
 }
 
-export async function getReleaseNotesMdFile(
+export function getReleaseNotesMdFile(
   repository: string,
   apiBaseUrl: string
 ): Promise<{ changelogFile: string; changelogMd: string }> | null {

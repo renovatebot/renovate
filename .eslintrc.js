@@ -83,6 +83,7 @@ module.exports = {
     '@typescript-eslint/prefer-optional-chain': 2,
     '@typescript-eslint/prefer-nullish-coalescing': 2,
     curly: [2, 'all'],
+    'require-await': 2,
   },
   settings: {
     // https://github.com/benmosher/eslint-plugin-import/issues/1618
