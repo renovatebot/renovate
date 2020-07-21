@@ -238,6 +238,10 @@ export async function initRepo({
       throw new Error(REPOSITORY_NOT_FOUND);
     }
     // istanbul ignore if
+    if (!repo.defaultBranchRef?.name) {
+      throw new Error(REPOSITORY_EMPTY);
+    }
+    // istanbul ignore if
     if (repo.isFork && !includeForks) {
       try {
         const renovateConfig = JSON.parse(
