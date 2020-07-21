@@ -4,7 +4,7 @@ import {
   GitPullRequestMergeStrategy,
   GitRef,
 } from 'azure-devops-node-api/interfaces/GitInterfaces';
-import { Options } from 'simple-git/promise';
+import { Options } from 'simple-git';
 import {
   PR_STATE_CLOSED,
   PR_STATE_MERGED,
