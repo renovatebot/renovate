@@ -430,6 +430,9 @@ export async function lookupUpdates(
       }
     }
   }
+  if (res.updates.length) {
+    delete res.skipReason;
+  }
   // Strip out any non-changed ones
   res.updates = res.updates
     .filter((update) => update.newDigest !== null)
