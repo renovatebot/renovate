@@ -79,14 +79,26 @@ module.exports = {
         args: 'none',
         ignoreRestSiblings: false,
       },
-    ], // disable until proper interfaced api
-    '@typescript-eslint/prefer-optional-chain': 2,
+    ],
+    '@typescript-eslint/prefer-optional-chain': 1,
     '@typescript-eslint/prefer-nullish-coalescing': 2,
     curly: [2, 'all'],
     'require-await': 2,
     // next 2 rules disabled due to https://github.com/microsoft/TypeScript/issues/20024
     '@typescript-eslint/no-unsafe-assignment': 0,
     '@typescript-eslint/no-unsafe-member-access': 0,
+
+    // TODO: fix me
+    '@typescript-eslint/no-unsafe-return': 0,
+    '@typescript-eslint/no-unsafe-call': 0,
+
+    '@typescript-eslint/restrict-template-expressions': 1,
+    '@typescript-eslint/restrict-plus-operands': 1,
+
+    '@typescript-eslint/naming-convention': 1,
+
+    '@typescript-eslint/unbound-method': 1,
+    '@typescript-eslint/ban-types': 1,
   },
   settings: {
     // https://github.com/benmosher/eslint-plugin-import/issues/1618

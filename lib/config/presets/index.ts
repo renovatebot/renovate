@@ -26,7 +26,7 @@ const presetSources: Record<string, PresetApi> = {
 };
 
 export function replaceArgs(
-  obj: string | string[] | object | object[],
+  obj: string | string[] | Record<string, any> | Record<string, any>[],
   argMapping: Record<string, any>
 ): any {
   if (is.string(obj)) {
