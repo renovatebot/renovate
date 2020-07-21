@@ -164,4 +164,5 @@ export interface Platform {
   ): Promise<BranchStatus>;
   getBranchPr(branchName: string): Promise<Pr | null>;
   initPlatform(config: RenovateConfig): Promise<PlatformConfig>;
+  reopenPr?(number: number, prTitle?: string): Promise<void>;
 }

@@ -237,6 +237,7 @@ export async function getReleases({
   lookupName,
   registryUrl,
 }: GetReleasesConfig): Promise<ReleaseResult | null> {
+  // return null;
   const dependency = getDependencyParts(lookupName);
   const versions: string[] = [];
   const repoForVersions = {};

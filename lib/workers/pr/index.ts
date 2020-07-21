@@ -90,6 +90,36 @@ export async function addAssigneesReviewers(
   }
 }
 
+async function getExistingPr(
+  branchName: string,
+  prTitle: string
+): Promise<Pr | null> {
+  const existingPr = await platform.getBranchPr(branchName);
+  if (existingPr) {
+    logger.debug('Found existing PR');
+    return existingPr;
+  }
+
+  if (platform.reopenPr) {
+    const closedPr = await platform.findPr({
+      branchName,
+      prTitle: `${prTitle} - autoclosed`,
+      state: 'closed',
+    });
+    if (closedPr && closedPr.number) {
+      try {
+        logger.debug('Found closed PR');
+        await platform.reopenPr(closedPr.number, prTitle);
+        return await platform.getPr(closedPr.number);
+      } catch (err) {
+        logger.error(`Unable to reopen PR: ${prTitle}`);
+      }
+    }
+  }
+
+  return null;
+}
+
 // Ensures that PR exists with matching title/body
 export async function ensurePr(
   prConfig: BranchConfig
@@ -106,10 +136,7 @@ export async function ensurePr(
     config.branchName
   ];
   // Check if existing PR exists
-  const existingPr = await platform.getBranchPr(branchName);
-  if (existingPr) {
-    logger.debug('Found existing PR');
-  }
+  const existingPr = await getExistingPr(branchName, prTitle);
   config.upgrades = [];
 
   if (config.artifactErrors && config.artifactErrors.length) {

@@ -1806,3 +1806,16 @@ export async function getVulnerabilityAlerts(): Promise<VulnerabilityAlert[]> {
   }
   return alerts;
 }
+
+export async function reopenPr(
+  number: number,
+  prTitle?: string
+): Promise<void> {
+  const url = `repos/${config.repositoryOwner}/${config.repositoryName}/pulls/${number}`;
+  const body: Record<string, any> = { state: 'open' };
+  if (prTitle) {
+    body.title = prTitle;
+  }
+  logger.debug(`reopenPr(${number})`);
+  await githubApi.patchJson(url, { body });
+}
