@@ -122,7 +122,7 @@
     "commander": "5.1.0",
     "conventional-commits-detector": "1.0.2",
     "deepmerge": "4.2.2",
-    "delay": "4.3.0",
+    "delay": "4.4.0",
     "detect-indent": "6.0.0",
     "email-addresses": "3.1.0",
     "fast-deep-equal": "3.1.3",
