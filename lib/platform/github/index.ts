@@ -234,6 +234,10 @@ export async function initRepo({
     }`
     );
     // istanbul ignore if
+    if (!repo) {
+      throw new Error(REPOSITORY_NOT_FOUND);
+    }
+    // istanbul ignore if
     if (repo.isFork && !includeForks) {
       try {
         const renovateConfig = JSON.parse(
