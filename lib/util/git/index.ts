@@ -308,34 +308,30 @@ export async function getCommitMessages(): Promise<string[]> {
 }
 
 export async function setBranch(branchName: string): Promise<string> {
-  if (branchName) {
-    if (!(await branchExists(branchName))) {
+  if (!(await branchExists(branchName))) {
+    throwBranchValidationError(branchName);
+  }
+  logger.debug(`Setting current branch to ${branchName}`);
+  try {
+    config.currentBranch = branchName;
+    config.currentBranchSha = (
+      await git.raw(['rev-parse', 'origin/' + branchName])
+    ).trim();
+    await git.checkout([branchName, '-f']);
+    const latestCommitDate = (await git.log({ n: 1 })).latest.date;
+    logger.debug({ branchName, latestCommitDate }, 'latest commit');
+    await git.reset(ResetMode.HARD);
+  } catch (err) /* istanbul ignore next */ {
+    checkForPlatformFailure(err);
+    if (
+      err.message.includes(
+        'unknown revision or path not in the working tree'
+      ) ||
+      err.message.includes('did not match any file(s) known to git')
+    ) {
       throwBranchValidationError(branchName);
     }
-    logger.debug(`Setting current branch to ${branchName}`);
-    config.currentBranch = branchName;
-    try {
-      if (branchName !== 'master') {
-        config.currentBranchSha = (
-          await git.raw(['rev-parse', 'origin/' + branchName])
-        ).trim();
-      }
-      await git.checkout([branchName, '-f']);
-      await git.reset(ResetMode.HARD);
-      const latestCommitDate = (await git.log({ n: 1 })).latest.date;
-      logger.debug({ branchName, latestCommitDate }, 'latest commit');
-    } catch (err) /* istanbul ignore next */ {
-      checkForPlatformFailure(err);
-      if (
-        err.message.includes(
-          'unknown revision or path not in the working tree'
-        ) ||
-        err.message.includes('did not match any file(s) known to git')
-      ) {
-        throwBranchValidationError(branchName);
-      }
-      throw err;
-    }
+    throw err;
   }
   return (
     config.currentBranchSha ||
@@ -396,7 +392,7 @@ export async function isBranchStale(branchName: string): Promise<boolean> {
     '--remotes',
     '--verbose',
     '--contains',
-    config.currentBranchSha || `origin/${config.currentBranch}`,
+    config.currentBranchSha,
   ]);
   return !branches.all.map(localName).includes(branchName);
 }
