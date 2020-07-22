@@ -444,11 +444,10 @@ export async function isBranchModified(branchName: string): Promise<boolean> {
   const lastAuthor = (
     await git.raw(['log', '-1', '--pretty=format:%ae', `origin/${branchName}`])
   ).trim();
-  logger.debug({ lastAuthor });
   const { gitAuthorEmail } = config;
   if (
-    lastAuthor === gitAuthorEmail ||
-    lastAuthor === process.env.RENOVATE_LEGACY_GIT_AUTHOR_EMAIL // remove in next major release
+    lastAuthor === process.env.RENOVATE_LEGACY_GIT_AUTHOR_EMAIL || // remove in next major release
+    lastAuthor === gitAuthorEmail
   ) {
     // author matches - branch has not been modified
     config.branchIsModified[branchName] = false;
