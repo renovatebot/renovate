@@ -9,7 +9,7 @@ import { PlatformPrOptions, Pr, platform } from '../../platform';
 import { BranchStatus } from '../../types';
 import { ExternalHostError } from '../../types/errors/external-host-error';
 import { sampleSize } from '../../util';
-import { getBranchLastCommitTime } from '../../util/git';
+import { getBranchLastCommitTime, isBranchModified } from '../../util/git';
 import { BranchConfig, PrResult } from '../common';
 import { getPrBody } from './body';
 import { ChangeLogError } from './changelog';
@@ -493,7 +493,7 @@ export async function checkAutoMerge(
       return false;
     }
     // Check if it's been touched
-    if (pr.isModified) {
+    if (await isBranchModified(branchName)) {
       logger.debug('PR is ready for automerge but has been modified');
       return false;
     }

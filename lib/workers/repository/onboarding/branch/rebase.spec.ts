@@ -22,8 +22,8 @@ describe('workers/repository/onboarding/branch/rebase', () => {
     it('does not rebase modified branch', async () => {
       platform.getBranchPr.mockResolvedValueOnce({
         ...mock<Pr>(),
-        isModified: true,
       });
+      git.isBranchModified.mockResolvedValueOnce(true);
       await rebaseOnboardingBranch(config);
       expect(git.commitFiles).toHaveBeenCalledTimes(0);
     });
@@ -35,7 +35,6 @@ describe('workers/repository/onboarding/branch/rebase', () => {
         .mockResolvedValueOnce(contents); // renovate.json
       platform.getBranchPr.mockResolvedValueOnce({
         ...mock<Pr>(),
-        isModified: false,
         isStale: false,
       });
       await rebaseOnboardingBranch(config);
@@ -45,7 +44,6 @@ describe('workers/repository/onboarding/branch/rebase', () => {
       platform.getBranchPr.mockResolvedValueOnce({
         ...mock<Pr>(),
         isStale: true,
-        isModified: false,
       });
       await rebaseOnboardingBranch(config);
       expect(git.commitFiles).toHaveBeenCalledTimes(1);
