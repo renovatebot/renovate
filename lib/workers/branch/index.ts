@@ -25,7 +25,11 @@ import { ExternalHostError } from '../../types/errors/external-host-error';
 import { emojify } from '../../util/emoji';
 import { exec } from '../../util/exec';
 import { readLocalFile, writeLocalFile } from '../../util/fs';
-import { getRepoStatus, branchExists as gitBranchExists } from '../../util/git';
+import {
+  getRepoStatus,
+  branchExists as gitBranchExists,
+  isBranchModified,
+} from '../../util/git';
 import { regEx } from '../../util/regex';
 import { BranchConfig, PrResult, ProcessBranchResult } from '../common';
 import { checkAutoMerge, ensurePr } from '../pr';
@@ -163,8 +167,9 @@ export async function processBranch(
           );
           throw new Error(REPOSITORY_CHANGED);
         }
+        const branchIsModified = await isBranchModified(config.branchName);
         if (
-          branchPr.isModified ||
+          branchIsModified ||
           (branchPr.targetBranch &&
             branchPr.targetBranch !== branchConfig.baseBranch)
         ) {

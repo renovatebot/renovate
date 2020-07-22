@@ -104,7 +104,6 @@ function toRenovatePR(data: helper.PR): Pr | null {
     canMerge: data.mergeable,
     isConflicted: !data.mergeable,
     isStale: undefined,
-    isModified: undefined,
     hasAssignees: !!(data.assignee?.login || is.nonEmptyArray(data.assignees)),
   };
 }
@@ -132,30 +131,6 @@ function findCommentByContent(
   content: string
 ): helper.Comment | null {
   return comments.find((c) => c.body.trim() === content);
-}
-
-async function isPRModified(
-  repoPath: string,
-  branchName: string
-): Promise<boolean> {
-  try {
-    const branch = await helper.getBranch(repoPath, branchName);
-    const branchCommitEmail = branch.commit.author.email;
-    const configEmail = global.gitAuthor.email;
-
-    if (branchCommitEmail === configEmail) {
-      return false;
-    }
-
-    logger.debug(
-      { branchCommitEmail, configEmail },
-      'Last committer to branch does not match bot, PR cannot be rebased'
-    );
-    return true;
-  } catch (err) {
-    logger.warn({ err }, 'Error getting PR branch, marking as modified');
-    return true;
-  }
 }
 
 async function retrieveDefaultConfig(
@@ -493,9 +468,6 @@ const platform: Platform = {
     if (pr.state !== 'closed') {
       if (pr.isStale === undefined) {
         pr.isStale = await git.isBranchStale(pr.branchName);
-      }
-      if (pr.isModified === undefined) {
-        pr.isModified = await isPRModified(config.repository, pr.branchName);
       }
     }
 

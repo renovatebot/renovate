@@ -582,21 +582,10 @@ describe('platform/gitea', () => {
     it('should block modified pull request for rebasing', async () => {
       const mockPR = mockPRs[0];
       helper.searchPRs.mockResolvedValueOnce(mockPRs);
-      helper.getBranch.mockResolvedValueOnce(
-        partial<ght.Branch>({
-          commit: {
-            id: mockCommitHash,
-            author: partial<ght.CommitUser>({
-              email: 'not-a-robot@renovatebot.com',
-            }),
-          },
-        })
-      );
       await initFakeRepo();
 
       const res = await gitea.getPr(mockPR.number);
       expect(res).toHaveProperty('number', mockPR.number);
-      expect(res).toHaveProperty('isModified', true);
     });
   });
 

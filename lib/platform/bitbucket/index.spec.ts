@@ -17,11 +17,6 @@ const pr = {
   summary: { raw: 'summary' },
   state: 'OPEN',
   created_on: '2018-07-02T07:02:25.275030+00:00',
-  links: {
-    commits: {
-      href: `https://api.bitbucket.org/2.0/repositories/some/repo/pullrequests/5/commits`,
-    },
-  },
 };
 
 const diff = `
@@ -39,13 +34,6 @@ lazy-object-proxy==1.3.1
 lxml==3.6.0
 mccabe==0.6.1
 `;
-
-const commits = {
-  size: 1,
-  values: [
-    { author: { raw: 'Renovate Bot <renovate@whitesourcesoftware.com>' } },
-  ],
-};
 
 describe('platform/bitbucket', () => {
   let bitbucket: Platform;
@@ -206,9 +194,7 @@ describe('platform/bitbucket', () => {
         .get('/2.0/repositories/some/repo/pullrequests/5')
         .reply(200, pr)
         .get('/2.0/repositories/some/repo/pullrequests/5/diff')
-        .reply(200, diff)
-        .get('/2.0/repositories/some/repo/pullrequests/5/commits?pagelen=2')
-        .reply(200, commits);
+        .reply(200, diff);
 
       expect(await bitbucket.getBranchPr('branch')).toMatchSnapshot();
       expect(httpMock.getTrace()).toMatchSnapshot();
@@ -628,8 +614,6 @@ describe('platform/bitbucket', () => {
         .reply(200, pr)
         .get('/2.0/repositories/some/repo/pullrequests/5/diff')
         .reply(200, diff)
-        .get('/2.0/repositories/some/repo/pullrequests/5/commits?pagelen=2')
-        .reply(200, commits)
         .put('/2.0/repositories/some/repo/pullrequests/5')
         .reply(200);
       await bitbucket.addReviewers(5, ['someuser', 'someotheruser']);
@@ -712,9 +696,7 @@ describe('platform/bitbucket', () => {
         .get('/2.0/repositories/some/repo/pullrequests/5')
         .reply(200, pr)
         .get('/2.0/repositories/some/repo/pullrequests/5/diff')
-        .reply(200, diff)
-        .get('/2.0/repositories/some/repo/pullrequests/5/commits?pagelen=2')
-        .reply(200, commits);
+        .reply(200, diff);
       expect(await bitbucket.getPr(5)).toMatchSnapshot();
       expect(httpMock.getTrace()).toMatchSnapshot();
     });
@@ -733,27 +715,15 @@ describe('platform/bitbucket', () => {
           summary: { raw: 'summary' },
           state: 'OPEN',
           created_on: '2018-07-02T07:02:25.275030+00:00',
-          links: {
-            commits: {
-              href: `https://api.bitbucket.org/2.0/repositories/some/repo/pullrequests/3/commits`,
-            },
-          },
         })
         .get('/2.0/repositories/some/repo/pullrequests/3/diff')
         .reply(200, ' ')
-        .get('/2.0/repositories/some/repo/pullrequests/3/commits?pagelen=2')
-        .reply(200, {
-          size: 2,
-        })
         .get('/2.0/repositories/some/repo/pullrequests/5')
         .twice()
         .reply(200, pr)
         .get('/2.0/repositories/some/repo/pullrequests/5/diff')
         .twice()
-        .reply(200, diff)
-        .get('/2.0/repositories/some/repo/pullrequests/5/commits?pagelen=2')
-        .twice()
-        .reply(200, commits);
+        .reply(200, diff);
       try {
         expect(await bitbucket.getPr(3)).toMatchSnapshot();
 
