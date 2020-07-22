@@ -321,6 +321,7 @@ export async function setBranch(branchName: string): Promise<string> {
     const latestCommitDate = (await git.log({ n: 1 })).latest.date;
     logger.debug({ branchName, latestCommitDate }, 'latest commit');
     await git.reset(ResetMode.HARD);
+    return config.currentBranchSha;
   } catch (err) /* istanbul ignore next */ {
     checkForPlatformFailure(err);
     if (
@@ -333,10 +334,6 @@ export async function setBranch(branchName: string): Promise<string> {
     }
     throw err;
   }
-  return (
-    config.currentBranchSha ||
-    (await git.raw(['rev-parse', 'origin/master'])).trim()
-  );
 }
 
 /*
