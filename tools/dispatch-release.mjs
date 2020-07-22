@@ -5,8 +5,6 @@ import { program } from './utils.mjs';
 const version = program.release;
 const dry = program.dryRun;
 
-const baseUrl = 'https://api.github.com/';
-
 shell.echo(`Dispatching version: ${version}`);
 
 (async () => {
