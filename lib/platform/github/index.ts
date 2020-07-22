@@ -1561,15 +1561,15 @@ export async function ensureCommentRemoval({
 // Creates PR and returns PR number
 export async function createPr({
   branchName,
+  targetBranch = config.defaultBranch,
   prTitle: title,
   prBody: rawBody,
   labels,
-  useDefaultBranch,
   platformOptions = {},
   draftPR = false,
 }: CreatePRConfig): Promise<Pr> {
   const body = sanitize(rawBody);
-  const base = useDefaultBranch ? config.defaultBranch : config.baseBranch;
+  const base = targetBranch;
   // Include the repository owner to handle forkMode and regular mode
   const head = `${config.repository.split('/')[0]}:${branchName}`;
   const options: any = {

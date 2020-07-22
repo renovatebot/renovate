@@ -362,16 +362,13 @@ export async function getBranchStatus(
 
 export async function createPr({
   branchName,
+  targetBranch = config.defaultBranch,
   prTitle: title,
   prBody: rawDescription,
   labels,
-  useDefaultBranch,
   platformOptions,
 }: CreatePRConfig): Promise<Pr> {
   const description = sanitize(rawDescription);
-  const targetBranch = useDefaultBranch
-    ? config.defaultBranch
-    : config.baseBranch;
   logger.debug(`Creating Merge Request: ${title}`);
   const res = await gitlabApi.postJson<Pr & { iid: number }>(
     `projects/${config.repository}/merge_requests`,

@@ -1012,7 +1012,6 @@ describe('platform/gitlab', () => {
         prTitle: 'some-title',
         prBody: 'the-body',
         labels: [],
-        useDefaultBranch: true,
       });
       expect(pr).toMatchSnapshot();
       expect(httpMock.getTrace()).toMatchSnapshot();
@@ -1044,7 +1043,6 @@ describe('platform/gitlab', () => {
         prTitle: 'some-title',
         prBody: 'the-body',
         labels: [],
-        useDefaultBranch: true,
         platformOptions: {
           azureAutoComplete: false,
           statusCheckVerify: false,

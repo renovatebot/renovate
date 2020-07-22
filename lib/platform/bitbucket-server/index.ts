@@ -832,13 +832,13 @@ const escapeHash = (input: string): string =>
 
 export async function createPr({
   branchName,
+  targetBranch = config.defaultBranch,
   prTitle: title,
   prBody: rawDescription,
-  useDefaultBranch,
 }: CreatePRConfig): Promise<Pr> {
   const description = sanitize(rawDescription);
   logger.debug(`createPr(${branchName}, title=${title})`);
-  const base = useDefaultBranch ? config.defaultBranch : config.baseBranch;
+  const base = targetBranch;
   let reviewers: BbsRestUserRef[] = [];
 
   /* istanbul ignore else */

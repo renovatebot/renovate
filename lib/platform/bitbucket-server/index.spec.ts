@@ -1190,7 +1190,6 @@ describe(getName(__filename), () => {
             prTitle: 'title',
             prBody: 'body',
             labels: null,
-            useDefaultBranch: true,
           });
           expect(id).toBe(5);
           expect(httpMock.getTrace()).toMatchSnapshot();

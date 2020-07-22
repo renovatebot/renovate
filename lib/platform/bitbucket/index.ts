@@ -700,15 +700,13 @@ export function ensureCommentRemoval({
 // Creates PR and returns PR number
 export async function createPr({
   branchName,
+  targetBranch = config.defaultBranch,
   prTitle: title,
   prBody: description,
-  useDefaultBranch = true,
 }: CreatePRConfig): Promise<Pr> {
   // labels is not supported in Bitbucket: https://bitbucket.org/site/master/issues/11976/ability-to-add-labels-to-pull-requests-bb
 
-  const base = useDefaultBranch
-    ? config.defaultBranch
-    : /* istanbul ignore next */ config.baseBranch;
+  const base = targetBranch;
 
   logger.debug({ repository: config.repository, title, base }, 'Creating PR');
 
