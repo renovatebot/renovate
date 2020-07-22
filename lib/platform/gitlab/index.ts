@@ -255,7 +255,7 @@ export async function initRepo({
     throw err;
   }
   const repoConfig: RepoConfig = {
-    defaultBranch: config.baseBranch,
+    defaultBranch: config.defaultBranch,
     isFork: !!res.body.forked_from_project,
   };
   return repoConfig;

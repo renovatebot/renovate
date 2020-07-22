@@ -172,7 +172,7 @@ export async function initRepo({
     gitAuthorEmail: global.gitAuthor?.email,
   });
   const repoConfig: RepoConfig = {
-    defaultBranch: config.baseBranch,
+    defaultBranch: config.defaultBranch,
     isFork: false,
   };
   return repoConfig;

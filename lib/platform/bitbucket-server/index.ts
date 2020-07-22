@@ -204,7 +204,7 @@ export async function initRepo({
     config.baseBranch = config.defaultBranch;
     config.mergeMethod = 'merge';
     const repoConfig: RepoConfig = {
-      defaultBranch: config.baseBranch,
+      defaultBranch: config.defaultBranch,
       isFork: !!info.parent,
     };
     return repoConfig;

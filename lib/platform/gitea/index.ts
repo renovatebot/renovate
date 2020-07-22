@@ -347,7 +347,7 @@ const platform: Platform = {
     config.labelList = null;
 
     return {
-      defaultBranch: config.baseBranch,
+      defaultBranch: config.defaultBranch,
       isFork: !!repo.fork,
     };
   },
