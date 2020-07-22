@@ -142,9 +142,9 @@ describe('datasource/terraform-module', () => {
         registryUrls: ['https://terraform.foo.bar'],
         depName: 'hashicorp/consul/aws',
       });
+      expect(httpMock.getTrace()).toMatchSnapshot();
       expect(res).toMatchSnapshot();
       expect(res).not.toBeNull();
-      expect(httpMock.getTrace()).toMatchSnapshot();
     });
   });
 });

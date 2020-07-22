@@ -40,17 +40,15 @@ function releasesGithubUrl(
 function handleError(lookupName: string, err: HttpError): void {
   const errorData = { lookupName, err };
 
-  if (
-    err.statusCode === 429 ||
-    (err.statusCode >= 500 && err.statusCode < 600)
-  ) {
+  const statusCode = err.response?.statusCode;
+  if (statusCode === 429 || (statusCode >= 500 && statusCode < 600)) {
     logger.warn({ lookupName, err }, `CocoaPods registry failure`);
     throw new ExternalHostError(err);
   }
 
-  if (err.statusCode === 401) {
+  if (statusCode === 401) {
     logger.debug(errorData, 'Authorization error');
-  } else if (err.statusCode === 404) {
+  } else if (statusCode === 404) {
     logger.debug(errorData, 'Package lookup error');
   } else {
     logger.warn(errorData, 'CocoaPods lookup failure: Unknown error');
