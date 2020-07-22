@@ -39,7 +39,7 @@ describe('config/file', () => {
         "logFileLevel": "warn",
         "logLevel": "info",
         "onboarding": false,
-        "gitAuthor": "Renovate Bot <bot@renovateapp.com>"
+        "gitAuthor": "Renovate Bot <renovate@whitesourcesoftware.com>"
         "onboardingConfig": {
           "extends": ["config:base"],
         },

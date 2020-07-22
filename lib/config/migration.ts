@@ -85,7 +85,11 @@ export function migrateConfig(
         }
       } else if (key.startsWith('masterIssue')) {
         isMigrated = true;
-        migratedConfig[key.replace('masterIssue', 'dependencyDashboard')] = val;
+        const newKey = key.replace('masterIssue', 'dependencyDashboard');
+        migratedConfig[newKey] = val;
+        if (optionTypes[newKey] === 'boolean' && val === 'true') {
+          migratedConfig[newKey] = true;
+        }
         delete migratedConfig[key];
       } else if (key === 'gomodTidy') {
         isMigrated = true;

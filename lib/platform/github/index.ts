@@ -658,8 +658,6 @@ async function getOpenPrs(): Promise<PrList> {
         pr.displayNumber = `Pull Request #${pr.number}`;
         pr.state = PR_STATE_OPEN;
         pr.branchName = pr.headRefName;
-        const branchName = pr.branchName;
-        const prNo = pr.number;
         delete pr.headRefName;
         pr.targetBranch = pr.baseRefName;
         delete pr.baseRefName;
@@ -682,41 +680,6 @@ async function getOpenPrs(): Promise<PrList> {
           pr.isConflicted = true;
         } else {
           pr.isConflicted = false;
-        }
-        if (pr.commits.nodes.length === 1) {
-          if (global.gitAuthor) {
-            // Check against gitAuthor
-            const commitAuthorEmail =
-              pr.commits?.nodes?.[0]?.commit?.author?.email;
-            if (commitAuthorEmail === global.gitAuthor.email) {
-              pr.isModified = false;
-            } else {
-              logger.trace(
-                {
-                  branchName,
-                  prNo,
-                  commitAuthorEmail,
-                  gitAuthorEmail: global.gitAuthor.email,
-                },
-                'PR isModified=true: last committer has different email to the bot'
-              );
-              pr.isModified = true;
-            }
-          } else {
-            // assume the author is us
-            // istanbul ignore next
-            pr.isModified = false;
-          }
-        } else {
-          // assume we can't rebase if more than 1
-          logger.trace(
-            {
-              branchName,
-              prNo,
-            },
-            'PR isModified=true: PR has more than one commit'
-          );
-          pr.isModified = true;
         }
         pr.isStale = false;
         if (pr.mergeStateStatus === 'BEHIND') {
@@ -786,7 +749,6 @@ export async function getPr(prNo: number): Promise<Pr | null> {
   // Harmonise PR values
   pr.displayNumber = `Pull Request #${pr.number}`;
   if (pr.state === PR_STATE_OPEN) {
-    pr.isModified = true;
     pr.branchName = pr.head ? pr.head.ref : undefined;
     pr.sha = pr.head ? pr.head.sha : undefined;
     if (pr.mergeable === true) {
@@ -798,77 +760,6 @@ export async function getPr(prNo: number): Promise<Pr | null> {
     if (pr.mergeable_state === 'dirty') {
       logger.debug({ prNo }, 'PR state is dirty so unmergeable');
       pr.isConflicted = true;
-    }
-    if (pr.commits === 1) {
-      if (global.gitAuthor) {
-        // Check against gitAuthor
-        const commitAuthorEmail = (
-          await githubApi.getJson<{ commit: { author: { email } } }[]>(
-            `repos/${
-              config.parentRepo || config.repository
-            }/pulls/${prNo}/commits`
-          )
-        ).body[0].commit.author.email;
-        if (commitAuthorEmail === global.gitAuthor.email) {
-          logger.debug(
-            { prNo },
-            '1 commit matches configured gitAuthor so can rebase'
-          );
-          pr.isModified = false;
-        } else {
-          logger.trace(
-            {
-              prNo,
-              commitAuthorEmail,
-              gitAuthorEmail: global.gitAuthor.email,
-            },
-            'PR isModified=true: 1 commit and not by configured gitAuthor so cannot rebase'
-          );
-          pr.isModified = true;
-        }
-      } else {
-        logger.debug(
-          { prNo },
-          '1 commit and no configured gitAuthor so can rebase'
-        );
-        pr.isModified = false;
-      }
-    } else {
-      // Check if only one author of all commits
-      logger.debug({ prNo }, 'Checking all commits');
-      const prCommits = (
-        await githubApi.getJson<
-          { committer: { login: string }; commit: { message: string } }[]
-        >(
-          `repos/${
-            config.parentRepo || config.repository
-          }/pulls/${prNo}/commits`
-        )
-      ).body;
-      // Filter out "Update branch" presses
-      const remainingCommits = prCommits.filter(
-        (commit: { committer; commit }) => {
-          const isWebflow =
-            commit.committer && commit.committer.login === 'web-flow';
-          if (!isWebflow) {
-            // Not a web UI commit, so keep it
-            return true;
-          }
-          const isUpdateBranch =
-            commit.commit &&
-            commit.commit.message &&
-            commit.commit.message.startsWith("Merge branch 'master' into");
-          if (isUpdateBranch) {
-            // They just clicked the button
-            return false;
-          }
-          // They must have done some other edit through the web UI
-          return true;
-        }
-      );
-      if (remainingCommits.length <= 1) {
-        pr.isModified = false;
-      }
     }
     const baseCommitSHA = await getBaseCommitSHA();
     if (!pr.base || pr.base.sha !== baseCommitSHA) {
@@ -1612,7 +1503,6 @@ export async function createPr({
       url: 'https://github.com/renovatebot/renovate',
     });
   }
-  pr.isModified = false;
   return pr;
 }
 

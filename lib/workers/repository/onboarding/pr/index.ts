@@ -4,6 +4,7 @@ import { logger } from '../../../../logger';
 import { PackageFile } from '../../../../manager/common';
 import { platform } from '../../../../platform';
 import { emojify } from '../../../../util/emoji';
+import { isBranchModified } from '../../../../util/git';
 import { BranchConfig } from '../../../common';
 import { addAssigneesReviewers } from '../../../pr';
 import { getBaseBranchDesc } from './base-branch';
@@ -65,9 +66,7 @@ If you need any further assistance then you can also [request help here](${confi
     prBody = prBody.replace('{{PACKAGE FILES}}\n', '');
   }
   let configDesc = '';
-  if (!existingPr?.isModified) {
-    configDesc = getConfigDesc(config, packageFiles);
-  } else {
+  if (await isBranchModified(config.onboardingBranch)) {
     configDesc = emojify(
       `### Configuration\n\n:abcd: Renovate has detected a custom config for this PR. Feel free to ask for [help](${config.productLinks.help}) if you have any doubts and would like it reviewed.\n\n`
     );
@@ -78,6 +77,8 @@ If you need any further assistance then you can also [request help here](${confi
     } else {
       configDesc += `Important: Now that this branch is edited, Renovate can't rebase it from the base branch any more. If you make changes to the base branch that could impact this onboarding PR, please merge them manually.\n\n`;
     }
+  } else {
+    configDesc = getConfigDesc(config, packageFiles);
   }
   prBody = prBody.replace('{{CONFIG}}\n', configDesc);
   prBody = prBody.replace(

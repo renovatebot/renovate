@@ -81,7 +81,8 @@ describe('workers/repository/finalise/prune', () => {
       git.getAllRenovateBranches.mockResolvedValueOnce(
         config.branchList.concat(['renovate/c'])
       );
-      platform.getBranchPr.mockResolvedValueOnce({ isModified: true } as never);
+      platform.getBranchPr.mockResolvedValueOnce({} as never);
+      git.isBranchModified.mockResolvedValueOnce(true);
       platform.findPr.mockResolvedValueOnce({ title: 'foo' } as never);
       await cleanup.pruneStaleBranches(config, config.branchList);
       expect(git.getAllRenovateBranches).toHaveBeenCalledTimes(1);
@@ -95,7 +96,8 @@ describe('workers/repository/finalise/prune', () => {
       git.getAllRenovateBranches.mockResolvedValueOnce(
         config.branchList.concat(['renovate/c'])
       );
-      platform.getBranchPr.mockResolvedValueOnce({ isModified: true } as never);
+      platform.getBranchPr.mockResolvedValueOnce({} as never);
+      git.isBranchModified.mockResolvedValueOnce(true);
       platform.findPr.mockResolvedValueOnce({ title: 'foo' } as never);
       await cleanup.pruneStaleBranches(config, config.branchList);
       expect(git.getAllRenovateBranches).toHaveBeenCalledTimes(1);

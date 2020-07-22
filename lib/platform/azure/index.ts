@@ -252,14 +252,6 @@ export async function getPr(pullRequestId: number): Promise<Pr | null> {
   azurePr.labels = labels
     .filter((label) => label.active)
     .map((label) => label.name);
-
-  const commits = await azureApiGit.getPullRequestCommits(
-    config.repoId,
-    pullRequestId
-  );
-  azurePr.isModified =
-    commits.length > 0 &&
-    commits[0].author.name !== commits[commits.length - 1].author.name;
   azurePr.hasReviewers = is.nonEmptyArray(azurePr.reviewers);
   return azurePr;
 }
