@@ -5,7 +5,7 @@ import { PLATFORM_TYPE_GITHUB } from '../../constants/platforms';
 import { PR_STATE_NOT_OPEN } from '../../constants/pull-requests';
 import { Platform, Pr } from '../../platform';
 import { BranchConfig, BranchUpgradeConfig } from '../common';
-import * as dependencyDashboard from './master-issue';
+import * as dependencyDashboard from './dependency-dashboard';
 
 type PrUpgrade = BranchUpgradeConfig;
 

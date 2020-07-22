@@ -11,7 +11,7 @@ export function getPrNotes(config: BranchConfig): string {
       for (const note of upgrade.prBodyNotes) {
         try {
           const res = template.compile(note, upgrade).trim();
-          if (res && res.length) {
+          if (res?.length) {
             notes.push(res);
           }
         } catch (err) {

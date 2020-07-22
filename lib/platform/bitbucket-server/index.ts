@@ -1,4 +1,5 @@
 import url, { URLSearchParams } from 'url';
+import is from '@sindresorhus/is';
 import delay from 'delay';
 import { RenovateConfig } from '../../config/common';
 import {
@@ -203,7 +204,7 @@ export async function initRepo({
     config.baseBranch = config.defaultBranch;
     config.mergeMethod = 'merge';
     const repoConfig: RepoConfig = {
-      defaultBranch: config.baseBranch,
+      defaultBranch: config.defaultBranch,
       isFork: !!info.parent,
     };
     return repoConfig;
@@ -238,9 +239,7 @@ export async function getRepoForceRebase(): Promise<boolean> {
   );
 }
 
-export async function setBaseBranch(
-  branchName: string = config.defaultBranch
-): Promise<string> {
+export async function setBaseBranch(branchName: string): Promise<string> {
   config.baseBranch = branchName;
   const baseBranchSha = await git.setBranch(branchName);
   return baseBranchSha;
@@ -267,7 +266,7 @@ export async function getPr(
     reviewers: res.body.reviewers.map((r) => r.user.name),
     isModified: false,
   };
-
+  pr.hasReviewers = is.nonEmptyArray(pr.reviewers);
   pr.version = updatePrVersion(pr.number, pr.version);
 
   if (pr.state === PR_STATE_OPEN) {
@@ -831,13 +830,13 @@ const escapeHash = (input: string): string =>
 
 export async function createPr({
   branchName,
+  targetBranch = config.defaultBranch,
   prTitle: title,
   prBody: rawDescription,
-  useDefaultBranch,
 }: CreatePRConfig): Promise<Pr> {
   const description = sanitize(rawDescription);
   logger.debug(`createPr(${branchName}, title=${title})`);
-  const base = useDefaultBranch ? config.defaultBranch : config.baseBranch;
+  const base = targetBranch;
   let reviewers: BbsRestUserRef[] = [];
 
   /* istanbul ignore else */

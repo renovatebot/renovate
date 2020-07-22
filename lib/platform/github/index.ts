@@ -234,6 +234,14 @@ export async function initRepo({
     }`
     );
     // istanbul ignore if
+    if (!repo) {
+      throw new Error(REPOSITORY_NOT_FOUND);
+    }
+    // istanbul ignore if
+    if (!repo.defaultBranchRef?.name) {
+      throw new Error(REPOSITORY_EMPTY);
+    }
+    // istanbul ignore if
     if (repo.isFork && !includeForks) {
       try {
         const renovateConfig = JSON.parse(
@@ -440,7 +448,7 @@ export async function initRepo({
     gitAuthorEmail: global.gitAuthor?.email,
   });
   const repoConfig: RepoConfig = {
-    defaultBranch: config.baseBranch,
+    defaultBranch: config.defaultBranch,
     isFork: repo.isFork === true,
   };
   return repoConfig;
@@ -492,9 +500,7 @@ export async function getRepoForceRebase(): Promise<boolean> {
 }
 
 // istanbul ignore next
-export async function setBaseBranch(
-  branchName = config.baseBranch
-): Promise<string> {
+export async function setBaseBranch(branchName: string): Promise<string> {
   config.baseBranch = branchName;
   config.baseCommitSHA = null;
   const baseBranchSha = await git.setBranch(branchName);
@@ -599,6 +605,12 @@ async function getOpenPrs(): Promise<PrList> {
                 nodes {
                   name
                 }
+              }
+              assignees {
+                totalCount
+              }
+              reviewRequests {
+                totalCount
               }
               commits(first: 2) {
                 nodes {
@@ -723,6 +735,10 @@ async function getOpenPrs(): Promise<PrList> {
             (label: { name: string }) => label.name
           );
         }
+        pr.hasAssignees = !!(pr.assignees?.totalCount > 0);
+        delete pr.assignees;
+        pr.hasReviewers = !!(pr.reviewRequests?.totalCount > 0);
+        delete pr.reviewRequests;
         delete pr.mergeable;
         delete pr.mergeStateStatus;
         delete pr.commits;
@@ -1543,15 +1559,15 @@ export async function ensureCommentRemoval({
 // Creates PR and returns PR number
 export async function createPr({
   branchName,
+  targetBranch = config.defaultBranch,
   prTitle: title,
   prBody: rawBody,
   labels,
-  useDefaultBranch,
   platformOptions = {},
   draftPR = false,
 }: CreatePRConfig): Promise<Pr> {
   const body = sanitize(rawBody);
-  const base = useDefaultBranch ? config.defaultBranch : config.baseBranch;
+  const base = targetBranch;
   // Include the repository owner to handle forkMode and regular mode
   const head = `${config.repository.split('/')[0]}:${branchName}`;
   const options: any = {

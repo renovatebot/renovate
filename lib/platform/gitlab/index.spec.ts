@@ -347,23 +347,7 @@ describe('platform/gitlab', () => {
         localDir: '',
         optimizeForDisabled: false,
       });
-      await gitlab.setBaseBranch();
-      expect(httpMock.getTrace()).toMatchSnapshot();
-    });
-    it('uses default base branch', async () => {
-      httpMock
-        .scope(gitlabApiHost)
-        .get(`/api/v4/projects/some%2Frepo`)
-        .reply(200, {
-          default_branch: 'master',
-          http_url_to_repo: `https://gitlab.com/some/repo.git`,
-        });
-      await gitlab.initRepo({
-        repository: 'some/repo',
-        localDir: '',
-        optimizeForDisabled: false,
-      });
-      await gitlab.setBaseBranch();
+      await gitlab.setBaseBranch('master');
       expect(httpMock.getTrace()).toMatchSnapshot();
     });
   });
@@ -1012,7 +996,6 @@ describe('platform/gitlab', () => {
         prTitle: 'some-title',
         prBody: 'the-body',
         labels: [],
-        useDefaultBranch: true,
       });
       expect(pr).toMatchSnapshot();
       expect(httpMock.getTrace()).toMatchSnapshot();
@@ -1044,7 +1027,6 @@ describe('platform/gitlab', () => {
         prTitle: 'some-title',
         prBody: 'the-body',
         labels: [],
-        useDefaultBranch: true,
         platformOptions: {
           azureAutoComplete: false,
           statusCheckVerify: false,
@@ -1079,11 +1061,13 @@ describe('platform/gitlab', () => {
           diverged_commits_count: 5,
           source_branch: 'some-branch',
           target_branch: 'master',
+          assignees: [],
         })
         .get('/api/v4/projects/undefined/repository/branches/some-branch')
         .reply(200, { commit: { author_email: global.gitAuthor.email } });
       const pr = await gitlab.getPr(12345);
       expect(pr).toMatchSnapshot();
+      expect(pr.hasAssignees).toBe(false);
       expect(httpMock.getTrace()).toMatchSnapshot();
     });
     it('returns the mergeable PR', async () => {
@@ -1100,6 +1084,9 @@ describe('platform/gitlab', () => {
           diverged_commits_count: 5,
           source_branch: 'some-branch',
           target_branch: 'master',
+          assignee: {
+            id: 1,
+          },
         })
         .get(
           '/api/v4/projects/some%2Frepo/repository/commits/0d9c7726c3d628b7e28af234595cfd20febdbf8e/statuses'
@@ -1109,6 +1096,7 @@ describe('platform/gitlab', () => {
         .reply(200, { commit: null });
       const pr = await gitlab.getPr(12345);
       expect(pr).toMatchSnapshot();
+      expect(pr.hasAssignees).toBe(true);
       expect(httpMock.getTrace()).toMatchSnapshot();
     });
     it('returns the PR with nonexisting branch', async () => {
@@ -1126,11 +1114,17 @@ describe('platform/gitlab', () => {
           diverged_commits_count: 2,
           source_branch: 'some-branch',
           target_branch: 'master',
+          assignees: [
+            {
+              id: 1,
+            },
+          ],
         })
         .get('/api/v4/projects/undefined/repository/branches/some-branch')
         .reply(404);
       const pr = await gitlab.getPr(12345);
       expect(pr).toMatchSnapshot();
+      expect(pr.hasAssignees).toBe(true);
       expect(httpMock.getTrace()).toMatchSnapshot();
     });
   });

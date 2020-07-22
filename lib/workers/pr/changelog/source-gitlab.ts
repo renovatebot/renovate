@@ -28,7 +28,7 @@ async function getTagsInner(
       paginate: true,
     });
 
-    const tags = (res && res.body) || [];
+    const tags = res?.body || [];
 
     if (!tags.length) {
       logger.debug({ sourceRepo: repository }, 'repository has no Gitlab tags');
@@ -46,7 +46,7 @@ async function getTagsInner(
   }
 }
 
-async function getTags(
+function getTags(
   endpoint: string,
   versionScheme: string,
   repository: string
@@ -85,7 +85,7 @@ export async function getChangeLogJSON({
     logger.info({ sourceUrl }, 'Invalid gitlab URL found');
     return null;
   }
-  if (!(releases && releases.length)) {
+  if (!releases?.length) {
     logger.debug('No releases');
     return null;
   }

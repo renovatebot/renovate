@@ -149,42 +149,42 @@ export class Http<GetOptions = HttpOptions, PostOptions = HttpPostOptions> {
     return { ...res, body };
   }
 
-  async getJson<T = unknown>(
+  getJson<T = unknown>(
     url: string,
     options?: GetOptions
   ): Promise<HttpResponse<T>> {
     return this.requestJson<T>(url, { ...options });
   }
 
-  async headJson<T = unknown>(
+  headJson<T = unknown>(
     url: string,
     options?: GetOptions
   ): Promise<HttpResponse<T>> {
     return this.requestJson<T>(url, { ...options, method: 'head' });
   }
 
-  async postJson<T = unknown>(
+  postJson<T = unknown>(
     url: string,
     options?: PostOptions
   ): Promise<HttpResponse<T>> {
     return this.requestJson<T>(url, { ...options, method: 'post' });
   }
 
-  async putJson<T = unknown>(
+  putJson<T = unknown>(
     url: string,
     options?: PostOptions
   ): Promise<HttpResponse<T>> {
     return this.requestJson<T>(url, { ...options, method: 'put' });
   }
 
-  async patchJson<T = unknown>(
+  patchJson<T = unknown>(
     url: string,
     options?: PostOptions
   ): Promise<HttpResponse<T>> {
     return this.requestJson<T>(url, { ...options, method: 'patch' });
   }
 
-  async deleteJson<T = unknown>(
+  deleteJson<T = unknown>(
     url: string,
     options?: PostOptions
   ): Promise<HttpResponse<T>> {

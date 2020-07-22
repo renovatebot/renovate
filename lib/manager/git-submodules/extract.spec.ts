@@ -1,10 +1,10 @@
-import _simpleGit from 'simple-git/promise';
+import _simpleGit, { SimpleGit } from 'simple-git';
 import { PackageFile } from '../common';
 import extractPackageFile from './extract';
 
-jest.mock('simple-git/promise');
-const simpleGit: jest.Mock<Partial<_simpleGit.SimpleGit>> = _simpleGit as never;
-const Git: typeof _simpleGit = jest.requireActual('simple-git/promise');
+jest.mock('simple-git');
+const simpleGit: jest.Mock<Partial<SimpleGit>> = _simpleGit as never;
+const Git: typeof _simpleGit = jest.requireActual('simple-git');
 
 const localDir = `${__dirname}/__fixtures__`;
 

@@ -1,9 +1,10 @@
 import { resolve } from 'path';
 import { readFile, readFileSync } from 'fs-extra';
-import Git from 'simple-git/promise';
+import Git from 'simple-git';
 import * as httpMock from '../../../test/httpMock';
 import { getName, git, partial } from '../../../test/util';
 import { setUtilConfig } from '../../util';
+import { StatusResult } from '../../util/git';
 import { ifSystemSupportsGradle } from '../gradle/__testutil__/gradle';
 import * as dcUpdate from '.';
 
@@ -52,7 +53,7 @@ describe(getName(__filename), () => {
           'gradlew',
           'gradlew.bat',
         ],
-      } as Git.StatusResult);
+      } as StatusResult);
 
       const res = await dcUpdate.updateArtifacts({
         packageFileName: 'gradle/wrapper/gradle-wrapper.properties',
@@ -91,7 +92,7 @@ describe(getName(__filename), () => {
 
     it('updates from version', async () => {
       git.getRepoStatus.mockResolvedValueOnce(
-        partial<Git.StatusResult>({
+        partial<StatusResult>({
           modified: ['gradle/wrapper/gradle-wrapper.properties'],
         })
       );
@@ -112,7 +113,7 @@ describe(getName(__filename), () => {
     it('up to date', async () => {
       git.getRepoStatus.mockResolvedValue({
         modified: [],
-      } as Git.StatusResult);
+      } as StatusResult);
 
       const res = await dcUpdate.updateArtifacts({
         packageFileName: 'gradle/wrapper/gradle-wrapper.properties',
@@ -206,7 +207,7 @@ describe(getName(__filename), () => {
         );
 
       git.getRepoStatus.mockResolvedValueOnce(
-        partial<Git.StatusResult>({
+        partial<StatusResult>({
           modified: ['gradle/wrapper/gradle-wrapper.properties'],
         })
       );

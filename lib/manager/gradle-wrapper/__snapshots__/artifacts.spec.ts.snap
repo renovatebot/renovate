@@ -8,6 +8,7 @@ Array [
       "cwd": "/root/project/lib/manager/gradle-wrapper/__fixtures__/testFiles",
       "encoding": "utf-8",
       "env": Object {
+        "GRADLE_OPTS": "-Dorg.gradle.parallel=true -Dorg.gradle.configureondemand=true -Dorg.gradle.daemon=false -Dorg.gradle.caching=false",
         "HOME": "/home/user",
         "HTTPS_PROXY": "https://example.com",
         "HTTP_PROXY": "http://example.com",
@@ -30,6 +31,7 @@ Array [
       "cwd": "/root/project/lib/manager/gradle-wrapper/__fixtures__/testFiles",
       "encoding": "utf-8",
       "env": Object {
+        "GRADLE_OPTS": "-Dorg.gradle.parallel=true -Dorg.gradle.configureondemand=true -Dorg.gradle.daemon=false -Dorg.gradle.caching=false",
         "HOME": "/home/user",
         "HTTPS_PROXY": "https://example.com",
         "HTTP_PROXY": "http://example.com",
@@ -52,6 +54,7 @@ Array [
       "cwd": "/root/project/lib/manager/gradle-wrapper/__fixtures__/testFiles",
       "encoding": "utf-8",
       "env": Object {
+        "GRADLE_OPTS": "-Dorg.gradle.parallel=true -Dorg.gradle.configureondemand=true -Dorg.gradle.daemon=false -Dorg.gradle.caching=false",
         "HOME": "/home/user",
         "HTTPS_PROXY": "https://example.com",
         "HTTP_PROXY": "http://example.com",

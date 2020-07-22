@@ -180,7 +180,6 @@ Object {
 
 exports[`workers/repository/process/lookup .lookupUpdates() handles git submodule update 1`] = `
 Object {
-  "skipReason": "unsupported-value",
   "updates": Array [
     Object {
       "fromVersion": undefined,

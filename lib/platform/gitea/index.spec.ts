@@ -386,9 +386,9 @@ describe('platform/gitea', () => {
       expect(logger.warn).toHaveBeenCalledTimes(1);
     });
 
-    it('should set default base branch', async () => {
+    it('should set base branch', async () => {
       await initFakeRepo();
-      await gitea.setBaseBranch();
+      await gitea.setBaseBranch('master');
 
       expect(gitvcs.setBranch).toHaveBeenCalledTimes(1);
       expect(gitvcs.setBranch).toHaveBeenCalledWith(mockRepo.default_branch);
@@ -702,6 +702,7 @@ describe('platform/gitea', () => {
       await gitea.setBaseBranch('devel');
       const res = await gitea.createPr({
         branchName: mockNewPR.head.label,
+        targetBranch: 'devel',
         prTitle: mockNewPR.title,
         prBody: mockNewPR.body,
       });
@@ -728,7 +729,6 @@ describe('platform/gitea', () => {
         branchName: mockNewPR.head.label,
         prTitle: mockNewPR.title,
         prBody: mockNewPR.body,
-        useDefaultBranch: true,
       });
 
       expect(res).toHaveProperty('number', mockNewPR.number);
@@ -779,7 +779,6 @@ describe('platform/gitea', () => {
         branchName: mockNewPR.head.label,
         prTitle: mockNewPR.title,
         prBody: mockNewPR.body,
-        useDefaultBranch: true,
       });
       const res = gitea.getPr(mockNewPR.number);
 
@@ -796,7 +795,6 @@ describe('platform/gitea', () => {
         branchName: mockNewPR.head.label,
         prTitle: mockNewPR.title,
         prBody: mockNewPR.body,
-        useDefaultBranch: true,
       });
 
       expect(res).toHaveProperty('number', mockNewPR.number);
@@ -811,7 +809,6 @@ describe('platform/gitea', () => {
         branchName: mockNewPR.head.label,
         prTitle: 'new-title',
         prBody: 'new-body',
-        useDefaultBranch: true,
       });
 
       expect(res).toHaveProperty('number', mockNewPR.number);

@@ -43,6 +43,8 @@ export interface Pr {
   canMergeReason?: string;
   createdAt?: string;
   displayNumber?: string;
+  hasAssignees?: boolean;
+  hasReviewers?: boolean;
   isConflicted?: boolean;
   isModified?: boolean;
   isStale?: boolean;
@@ -72,10 +74,10 @@ export type PlatformPrOptions = {
 };
 export interface CreatePRConfig {
   branchName: string;
+  targetBranch?: string;
   prTitle: string;
   prBody: string;
   labels?: string[] | null;
-  useDefaultBranch?: boolean;
   platformOptions?: PlatformPrOptions;
   draftPR?: boolean;
 }
@@ -152,7 +154,7 @@ export interface Platform {
   ): Promise<void>;
   deleteBranch(branchName: string, closePr?: boolean): Promise<void>;
   ensureComment(ensureComment: EnsureCommentConfig): Promise<boolean>;
-  setBaseBranch(baseBranch?: string): Promise<string>;
+  setBaseBranch(branchName: string): Promise<string>;
   getPr(number: number): Promise<Pr>;
   findPr(findPRConfig: FindPRConfig): Promise<Pr>;
   refreshPr?(number: number): Promise<void>;

@@ -1,10 +1,14 @@
 import { URL } from 'url';
-import Git from 'simple-git/promise';
+import Git from 'simple-git';
 
 import * as packageCache from '../../util/cache/package';
 import { DigestConfig, GetReleasesConfig, ReleaseResult } from '../common';
 
 export const id = 'git-submodules';
+
+export const defaultConfig = {
+  pinDigests: false,
+};
 
 export async function getReleases({
   lookupName,

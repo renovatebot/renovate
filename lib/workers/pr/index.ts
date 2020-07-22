@@ -282,7 +282,12 @@ export async function ensurePr(
     if (existingPr) {
       logger.debug('Processing existing PR');
       // istanbul ignore if
-      if (config.automerge && (await getBranchStatus()) === BranchStatus.red) {
+      if (
+        !existingPr.hasAssignees &&
+        !existingPr.hasReviewers &&
+        config.automerge &&
+        (await getBranchStatus()) === BranchStatus.red
+      ) {
         logger.debug(`Setting assignees and reviewers as status checks failed`);
         await addAssigneesReviewers(config, existingPr);
       }
@@ -355,10 +360,10 @@ export async function ensurePr(
         };
         pr = await platform.createPr({
           branchName,
+          targetBranch: config.baseBranch,
           prTitle,
           prBody,
           labels: config.labels,
-          useDefaultBranch: false,
           platformOptions,
           draftPR: config.draftPR,
         });

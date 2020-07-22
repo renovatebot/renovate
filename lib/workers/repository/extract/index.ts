@@ -53,7 +53,7 @@ export async function extractAllDependencies(
   const extractions: Record<string, PackageFile[]> = {};
   let fileCount = 0;
   for (const { manager, packageFiles } of extractResults) {
-    if (packageFiles && packageFiles.length) {
+    if (packageFiles?.length) {
       fileCount += packageFiles.length;
       logger.debug(`Found ${manager} package files`);
       extractions[manager] = (extractions[manager] || []).concat(packageFiles);

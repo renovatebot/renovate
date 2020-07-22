@@ -41,7 +41,7 @@ const addMaxLength = (inputUrl: string, limit = 100): string => {
   return maxedUrl;
 };
 
-async function callApi<T>(
+function callApi<T>(
   apiUrl: string,
   method: string,
   options?: any

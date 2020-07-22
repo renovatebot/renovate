@@ -1,4 +1,4 @@
-import Git from 'simple-git/promise';
+import Git from 'simple-git';
 
 import { UpdateDependencyConfig } from '../common';
 

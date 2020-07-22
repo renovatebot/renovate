@@ -44,7 +44,7 @@ interface GithubGraphqlResponse<T = unknown> {
   errors?: { message: string; locations: unknown }[];
 }
 
-export function handleGotError(
+function handleGotError(
   err: GotRequestError,
   url: string | URL,
   opts: GithubHttpOptions
@@ -97,7 +97,7 @@ export function handleGotError(
     throw new Error(PLATFORM_INTEGRATION_UNAUTHORIZED);
   }
   if (err.statusCode === 401 && message.includes('Bad credentials')) {
-    const rateLimit = err.headers ? err.headers['x-ratelimit-limit'] : -1;
+    const rateLimit = err.headers?.['x-ratelimit-limit'] ?? -1;
     logger.debug(
       {
         token: maskToken(opts.token),
@@ -191,6 +191,7 @@ export class GithubHttp extends Http<GithubHttpOptions, GithubHttpOptions> {
     try {
       result = await super.request<T>(url, opts);
 
+      // istanbul ignore else: Can result be null ???
       if (result !== null) {
         if (opts.paginate) {
           // Check if result is paginated
@@ -198,8 +199,9 @@ export class GithubHttp extends Http<GithubHttpOptions, GithubHttpOptions> {
           const linkHeader =
             result?.headers?.link &&
             parseLinkHeader(result.headers.link as string);
-          if (linkHeader && linkHeader.next && linkHeader.last) {
+          if (linkHeader?.next && linkHeader?.last) {
             let lastPage = +linkHeader.last.page;
+            // istanbul ignore else: needs a test
             if (!process.env.RENOVATE_PAGINATE_ALL && opts.paginate !== 'all') {
               lastPage = Math.min(pageLimit, lastPage);
             }
@@ -282,7 +284,7 @@ export class GithubHttp extends Http<GithubHttpOptions, GithubHttpOptions> {
         query = query.replace(regex, replacement);
       }
       const gqlRes = await this.queryRepo<T>(query, options);
-      if (gqlRes && gqlRes[fieldName]) {
+      if (gqlRes?.[fieldName]) {
         const { nodes = [], edges = [], pageInfo } = gqlRes[fieldName];
         result.push(...nodes);
         result.push(...edges);

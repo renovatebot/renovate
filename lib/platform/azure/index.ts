@@ -1,3 +1,4 @@
+import is from '@sindresorhus/is';
 import {
   GitPullRequest,
   GitPullRequestCommentThread,
@@ -171,7 +172,7 @@ export async function initRepo({
     gitAuthorEmail: global.gitAuthor?.email,
   });
   const repoConfig: RepoConfig = {
-    defaultBranch: config.baseBranch,
+    defaultBranch: config.defaultBranch,
     isFork: false,
   };
   return repoConfig;
@@ -181,11 +182,8 @@ export function getRepoForceRebase(): Promise<boolean> {
   return Promise.resolve(config.repoForceRebase === true);
 }
 
-// Search
-
-export /* istanbul ignore next */ async function setBaseBranch(
-  branchName = config.baseBranch
-): Promise<string> {
+// istanbul ignore next
+export async function setBaseBranch(branchName: string): Promise<string> {
   logger.debug(`Setting baseBranch to ${branchName}`);
   config.baseBranch = branchName;
   delete config.baseCommitSHA;
@@ -262,7 +260,7 @@ export async function getPr(pullRequestId: number): Promise<Pr | null> {
   azurePr.isModified =
     commits.length > 0 &&
     commits[0].author.name !== commits[commits.length - 1].author.name;
-
+  azurePr.hasReviewers = is.nonEmptyArray(azurePr.reviewers);
   return azurePr;
 }
 
@@ -361,16 +359,14 @@ export async function getBranchStatus(
 
 export async function createPr({
   branchName,
+  targetBranch = config.defaultBranch,
   prTitle: title,
   prBody: body,
   labels,
-  useDefaultBranch,
   platformOptions = {},
 }: CreatePRConfig): Promise<Pr> {
   const sourceRefName = azureHelper.getNewBranchName(branchName);
-  const targetRefName = azureHelper.getNewBranchName(
-    useDefaultBranch ? config.defaultBranch : config.baseBranch
-  );
+  const targetRefName = targetBranch;
   const description = azureHelper.max4000Chars(sanitize(body));
   const azureApiGit = await azureApi.gitApi();
   const workItemRefs = [

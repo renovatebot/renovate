@@ -248,15 +248,15 @@ async function packageLookup(
       providerPackages,
       includesPackages,
     } = allPackages;
-    if (packages && packages[name]) {
+    if (packages?.[name]) {
       const dep = extractDepReleases(packages[name]);
       dep.name = name;
       return dep;
     }
-    if (includesPackages && includesPackages[name]) {
+    if (includesPackages?.[name]) {
       return includesPackages[name];
     }
-    if (!(providerPackages && providerPackages[name])) {
+    if (!providerPackages?.[name]) {
       return null;
     }
     const pkgUrl = URL.resolve(
@@ -287,7 +287,7 @@ async function packageLookup(
   }
 }
 
-export async function getReleases({
+export function getReleases({
   lookupName,
   registryUrl,
 }: GetReleasesConfig): Promise<ReleaseResult> {
