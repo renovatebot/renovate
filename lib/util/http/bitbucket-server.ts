@@ -12,7 +12,7 @@ export class BitbucketServerHttp extends Http {
     super(PLATFORM_TYPE_BITBUCKET_SERVER, options);
   }
 
-  protected async request<T>(
+  protected request<T>(
     path: string,
     options?: InternalHttpOptions
   ): Promise<HttpResponse<T> | null> {

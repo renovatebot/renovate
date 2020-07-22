@@ -287,7 +287,7 @@ async function packageLookup(
   }
 }
 
-export async function getReleases({
+export function getReleases({
   lookupName,
   registryUrl,
 }: GetReleasesConfig): Promise<ReleaseResult> {

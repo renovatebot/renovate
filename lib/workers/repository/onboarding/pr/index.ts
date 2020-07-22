@@ -121,7 +121,6 @@ If you need any further assistance then you can also [request help here](${confi
   }
   logger.debug('Creating onboarding PR');
   const labels: string[] = [];
-  const useDefaultBranch = true;
   try {
     // istanbul ignore if
     if (config.dryRun) {
@@ -132,7 +131,6 @@ If you need any further assistance then you can also [request help here](${confi
         prTitle: config.onboardingPrTitle,
         prBody,
         labels,
-        useDefaultBranch,
       });
       logger.info({ pr: pr.displayNumber }, 'Onboarding PR created');
       await addAssigneesReviewers(config, pr);

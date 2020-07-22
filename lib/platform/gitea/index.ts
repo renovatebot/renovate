@@ -322,7 +322,7 @@ const platform: Platform = {
     config.labelList = null;
 
     return {
-      defaultBranch: config.baseBranch,
+      defaultBranch: config.defaultBranch,
       isFork: !!repo.fork,
     };
   },
@@ -422,9 +422,7 @@ const platform: Platform = {
     return BranchStatus.yellow;
   },
 
-  async setBaseBranch(
-    baseBranch: string = config.defaultBranch
-  ): Promise<string> {
+  async setBaseBranch(baseBranch: string): Promise<string> {
     config.baseBranch = baseBranch;
     const baseBranchSha = await git.setBranch(baseBranch);
     return baseBranchSha;
@@ -499,12 +497,12 @@ const platform: Platform = {
 
   async createPr({
     branchName,
+    targetBranch = config.defaultBranch,
     prTitle: title,
     prBody: rawBody,
     labels: labelNames,
-    useDefaultBranch,
   }: CreatePRConfig): Promise<Pr> {
-    const base = useDefaultBranch ? config.defaultBranch : config.baseBranch;
+    const base = targetBranch;
     const head = branchName;
     const body = sanitize(rawBody);
 

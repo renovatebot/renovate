@@ -7,6 +7,7 @@ libraryDependencies ++= Seq(
   "org.example" %% "baz" % "0.0.3",
   "org.example" % "qux" % "0.0.4"
 )
+libraryDependencies += ("org.scala-lang" % "scala-library" % "2.13.3" classifier "sources") % Test
 
 dependencyOverrides += "org.example" % "quux" % "0.0.5"
 dependencyOverrides ++= {

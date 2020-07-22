@@ -2,7 +2,6 @@
 import { exec as _exec } from 'child_process';
 import { resolve } from 'path';
 import { readFile } from 'fs-extra';
-import Git from 'simple-git/promise';
 import { envMock, mockExecAll } from '../../../test/execUtil';
 import * as httpMock from '../../../test/httpMock';
 import {
@@ -16,6 +15,7 @@ import {
 import { setUtilConfig } from '../../util';
 import { BinarySource } from '../../util/exec/common';
 import { resetPrefetchedImages } from '../../util/exec/docker';
+import { StatusResult } from '../../util/git';
 import * as dcUpdate from '.';
 
 jest.mock('child_process');
@@ -66,7 +66,7 @@ describe(getName(__filename), () => {
         'gradlew',
         'gradlew.bat',
       ],
-    } as Git.StatusResult);
+    } as StatusResult);
 
     const execSnapshots = mockExecAll(exec);
 
@@ -112,7 +112,7 @@ describe(getName(__filename), () => {
   it('gradlew failed', async () => {
     const execSnapshots = mockExecAll(exec, new Error('failed'));
     git.getRepoStatus.mockResolvedValueOnce(
-      partial<Git.StatusResult>({
+      partial<StatusResult>({
         modified: [],
       })
     );
@@ -137,7 +137,7 @@ describe(getName(__filename), () => {
       );
 
     git.getRepoStatus.mockResolvedValueOnce(
-      partial<Git.StatusResult>({
+      partial<StatusResult>({
         modified: ['gradle/wrapper/gradle-wrapper.properties'],
       })
     );

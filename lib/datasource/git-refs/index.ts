@@ -1,4 +1,4 @@
-import simpleGit from 'simple-git/promise';
+import simpleGit from 'simple-git';
 import * as packageCache from '../../util/cache/package';
 import * as semver from '../../versioning/semver';
 import { DigestConfig, GetReleasesConfig, ReleaseResult } from '../common';

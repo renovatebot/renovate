@@ -537,7 +537,6 @@ describe('platform/azure', () => {
         prTitle: 'The Title',
         prBody: 'Hello world',
         labels: ['deps', 'renovate'],
-        useDefaultBranch: true,
       });
       expect(pr).toMatchSnapshot();
     });
@@ -574,10 +573,10 @@ describe('platform/azure', () => {
       azureHelper.getRenovatePRFormat.mockImplementation((x) => x as any);
       const pr = await azure.createPr({
         branchName: 'some-branch',
+        targetBranch: 'dev',
         prTitle: 'The Title',
         prBody: 'Hello world',
         labels: ['deps', 'renovate'],
-        useDefaultBranch: false,
         platformOptions: { azureAutoComplete: true },
       });
       expect(updateFn).toHaveBeenCalled();

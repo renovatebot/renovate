@@ -438,7 +438,7 @@ describe(getName(__filename), () => {
     let testRunConfig: ExtractConfig;
     let successFile: string;
 
-    const manager = require('.');
+    const manager: typeof _manager = require('.');
 
     beforeEach(async () => {
       workingDir = await tmp.dir({ unsafeCleanup: true });

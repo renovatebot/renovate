@@ -373,6 +373,9 @@ describe('platform/github', () => {
           data: {
             repository: {
               nameWithOwner: 'some/other',
+              defaultBranchRef: {
+                name: 'master',
+              },
             },
           },
         });
@@ -1589,10 +1592,10 @@ describe('platform/github', () => {
       await github.initRepo({ repository: 'some/repo', token: 'token' } as any);
       const pr = await github.createPr({
         branchName: 'some-branch',
+        targetBranch: 'dev',
         prTitle: 'The Title',
         prBody: 'Hello world',
         labels: ['deps', 'renovate'],
-        useDefaultBranch: false,
         platformOptions: { statusCheckVerify: true },
       });
       expect(pr).toMatchSnapshot();
@@ -1610,7 +1613,6 @@ describe('platform/github', () => {
         prTitle: 'The Title',
         prBody: 'Hello world',
         labels: null,
-        useDefaultBranch: true,
       });
       expect(pr).toMatchSnapshot();
       expect(httpMock.getTrace()).toMatchSnapshot();
@@ -1627,7 +1629,6 @@ describe('platform/github', () => {
         prTitle: 'PR draft',
         prBody: 'This is a result of a draft',
         labels: null,
-        useDefaultBranch: true,
         draftPR: true,
       });
       expect(pr).toMatchSnapshot();

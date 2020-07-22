@@ -42,10 +42,7 @@ async function getTagsInner(
   }
 }
 
-async function getTags(
-  endpoint: string,
-  repository: string
-): Promise<string[]> {
+function getTags(endpoint: string, repository: string): Promise<string[]> {
   const cacheKey = `getTags-${endpoint}-${repository}`;
   const cachedResult = memCache.get(cacheKey);
   // istanbul ignore if

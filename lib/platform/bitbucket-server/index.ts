@@ -204,7 +204,7 @@ export async function initRepo({
     config.baseBranch = config.defaultBranch;
     config.mergeMethod = 'merge';
     const repoConfig: RepoConfig = {
-      defaultBranch: config.baseBranch,
+      defaultBranch: config.defaultBranch,
       isFork: !!info.parent,
     };
     return repoConfig;
@@ -239,9 +239,7 @@ export async function getRepoForceRebase(): Promise<boolean> {
   );
 }
 
-export async function setBaseBranch(
-  branchName: string = config.defaultBranch
-): Promise<string> {
+export async function setBaseBranch(branchName: string): Promise<string> {
   config.baseBranch = branchName;
   const baseBranchSha = await git.setBranch(branchName);
   return baseBranchSha;
@@ -802,13 +800,13 @@ const escapeHash = (input: string): string =>
 
 export async function createPr({
   branchName,
+  targetBranch = config.defaultBranch,
   prTitle: title,
   prBody: rawDescription,
-  useDefaultBranch,
 }: CreatePRConfig): Promise<Pr> {
   const description = sanitize(rawDescription);
   logger.debug(`createPr(${branchName}, title=${title})`);
-  const base = useDefaultBranch ? config.defaultBranch : config.baseBranch;
+  const base = targetBranch;
   let reviewers: BbsRestUserRef[] = [];
 
   /* istanbul ignore else */

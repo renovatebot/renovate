@@ -360,10 +360,10 @@ export async function ensurePr(
         };
         pr = await platform.createPr({
           branchName,
+          targetBranch: config.baseBranch,
           prTitle,
           prBody,
           labels: config.labels,
-          useDefaultBranch: false,
           platformOptions,
           draftPR: config.draftPR,
         });
