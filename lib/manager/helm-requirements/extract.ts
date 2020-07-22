@@ -19,7 +19,7 @@ export async function extractPackageFile(
       return null;
     }
     const chart = yaml.safeLoad(chartContents, { json: true });
-    if (!(chart && chart.apiVersion && chart.name && chart.version)) {
+    if (!(chart?.apiVersion && chart.name && chart.version)) {
       logger.debug(
         { fileName },
         'Failed to find required fields in Chart.yaml'

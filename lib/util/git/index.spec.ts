@@ -1,5 +1,5 @@
 import fs from 'fs-extra';
-import Git from 'simple-git/promise';
+import Git from 'simple-git';
 import tmp from 'tmp-promise';
 import * as git from '.';
 
@@ -20,8 +20,8 @@ describe('platform/git', () => {
     await repo.add(['past_file']);
     await repo.commit('past message');
 
-    await repo.checkoutBranch('renovate/past_branch', 'master');
-    await repo.checkoutBranch('develop', 'master');
+    await repo.checkout(['-b', 'renovate/past_branch', 'master']);
+    await repo.checkout(['-b', 'develop', 'master']);
 
     await repo.checkout('master');
     await fs.writeFile(base.path + '/master_file', 'master');
@@ -31,7 +31,7 @@ describe('platform/git', () => {
       '--date=' + masterCommitDate.toISOString(),
     ]);
 
-    await repo.checkoutBranch('renovate/future_branch', 'master');
+    await repo.checkout(['-b', 'renovate/future_branch', 'master']);
     await fs.writeFile(base.path + '/future_file', 'future');
     await repo.add(['future_file']);
     await repo.commit('future message');
@@ -328,7 +328,7 @@ describe('platform/git', () => {
   describe('initRepo())', () => {
     it('should fetch latest', async () => {
       const repo = Git(base.path).silent(true);
-      await repo.checkoutBranch('test', 'master');
+      await repo.checkout(['-b', 'test', 'master']);
       await fs.writeFile(base.path + '/test', 'lorem ipsum');
       await repo.add(['test']);
       await repo.commit('past message2');
@@ -356,7 +356,7 @@ describe('platform/git', () => {
 
     it('should set branch prefix', async () => {
       const repo = Git(base.path).silent(true);
-      await repo.checkoutBranch('renovate/test', 'master');
+      await repo.checkout(['-b', 'renovate/test', 'master']);
       await fs.writeFile(base.path + '/test', 'lorem ipsum');
       await repo.add(['test']);
       await repo.commit('past message2');

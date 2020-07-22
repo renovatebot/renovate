@@ -89,7 +89,7 @@ export function getRegistryRepository(
     registry = `https://${registry}`;
   }
   const opts = hostRules.find({ hostType: id, url: registry });
-  if (opts && opts.insecureRegistry) {
+  if (opts?.insecureRegistry) {
     registry = registry.replace('https', 'http');
   }
   if (registry.endsWith('.docker.io') && !repository.includes('/')) {
@@ -119,10 +119,7 @@ function getECRAuthToken(
         resolve(null);
       } else {
         const authorizationToken =
-          data &&
-          data.authorizationData &&
-          data.authorizationData[0] &&
-          data.authorizationData[0].authorizationToken;
+          data?.authorizationData?.[0]?.authorizationToken;
         if (authorizationToken) {
           resolve(authorizationToken);
         } else {
@@ -403,10 +400,7 @@ async function getTags(
       const res = await http.getJson<{ tags: string[] }>(url, { headers });
       tags = tags.concat(res.body.tags);
       const linkHeader = parseLinkHeader(res.headers.link as string);
-      url =
-        linkHeader && linkHeader.next
-          ? URL.resolve(url, linkHeader.next.url)
-          : null;
+      url = linkHeader?.next ? URL.resolve(url, linkHeader.next.url) : null;
       page += 1;
     } while (url && page < 20);
     const cacheMinutes = 15;

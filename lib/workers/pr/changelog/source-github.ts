@@ -23,7 +23,7 @@ async function getTagsInner(
       paginate: true,
     });
 
-    const tags = (res && res.body) || [];
+    const tags = res?.body || [];
 
     if (!tags.length) {
       logger.debug({ repository }, 'repository has no Github tags');
@@ -42,10 +42,7 @@ async function getTagsInner(
   }
 }
 
-async function getTags(
-  endpoint: string,
-  repository: string
-): Promise<string[]> {
+function getTags(endpoint: string, repository: string): Promise<string[]> {
   const cacheKey = `getTags-${endpoint}-${repository}`;
   const cachedResult = memCache.get(cacheKey);
   // istanbul ignore if
@@ -103,7 +100,7 @@ export async function getChangeLogJSON({
     logger.debug({ sourceUrl }, 'Invalid github URL found');
     return null;
   }
-  if (!(releases && releases.length)) {
+  if (!releases?.length) {
     logger.debug('No releases');
     return null;
   }

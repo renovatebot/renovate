@@ -42,7 +42,7 @@ export class GitlabHttp extends Http<GitlabHttpOptions, GitlabHttpOptions> {
         // Check if result is paginated
         try {
           const linkHeader = parseLinkHeader(result.headers.link as string);
-          if (linkHeader && linkHeader.next) {
+          if (linkHeader?.next) {
             result.body = result.body.concat(
               (await this.request<T>(linkHeader.next.url, opts)).body
             );

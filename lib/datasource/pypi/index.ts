@@ -62,7 +62,7 @@ async function getDependency(
   const dependency: ReleaseResult = { releases: null };
   logger.trace({ lookupUrl }, 'Pypi api got lookup');
   const rep = await http.getJson<PypiJSON>(lookupUrl);
-  const dep = rep && rep.body;
+  const dep = rep?.body;
   if (!dep) {
     logger.trace({ dependency: packageName }, 'pip package not found');
     return null;
@@ -162,7 +162,7 @@ async function getSimpleDependency(
   const lookupUrl = url.resolve(hostUrl, `${packageName}`);
   const dependency: ReleaseResult = { releases: null };
   const response = await http.get(lookupUrl);
-  const dep = response && response.body;
+  const dep = response?.body;
   if (!dep) {
     logger.trace({ dependency: packageName }, 'pip package not found');
     return null;

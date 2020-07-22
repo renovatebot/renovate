@@ -65,7 +65,7 @@ If you need any further assistance then you can also [request help here](${confi
     prBody = prBody.replace('{{PACKAGE FILES}}\n', '');
   }
   let configDesc = '';
-  if (!(existingPr && existingPr.isModified)) {
+  if (!existingPr?.isModified) {
     configDesc = getConfigDesc(config, packageFiles);
   } else {
     configDesc = emojify(
@@ -120,7 +120,6 @@ If you need any further assistance then you can also [request help here](${confi
   }
   logger.debug('Creating onboarding PR');
   const labels: string[] = [];
-  const useDefaultBranch = true;
   try {
     // istanbul ignore if
     if (config.dryRun) {
@@ -131,7 +130,6 @@ If you need any further assistance then you can also [request help here](${confi
         prTitle: config.onboardingPrTitle,
         prBody,
         labels,
-        useDefaultBranch,
       });
       logger.info({ pr: pr.displayNumber }, 'Onboarding PR created');
       await addAssigneesReviewers(config, pr);

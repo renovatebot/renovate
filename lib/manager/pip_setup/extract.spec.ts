@@ -1,8 +1,5 @@
-import { exec as _exec } from 'child_process';
-
-import { envMock, mockExecSequence } from '../../../test/execUtil';
-import { mocked } from '../../../test/util';
-import * as _env from '../../util/exec/env';
+import { envMock, exec, mockExecSequence } from '../../../test/execUtil';
+import { env, getName } from '../../../test/util';
 import {
   getPythonAlias,
   parsePythonVersion,
@@ -10,13 +7,10 @@ import {
   resetModule,
 } from './extract';
 
-const exec: jest.Mock<typeof _exec> = _exec as any;
-const env = mocked(_env);
-
 jest.mock('child_process');
 jest.mock('../../util/exec/env');
 
-describe('lib/manager/pip_setup/extract', () => {
+describe(getName(__filename), () => {
   beforeEach(() => {
     jest.resetAllMocks();
     jest.resetModules();
@@ -39,7 +33,9 @@ describe('lib/manager/pip_setup/extract', () => {
       const result = await getPythonAlias();
       expect(pythonVersions).toContain(result);
       expect(result).toMatchSnapshot();
+      expect(await getPythonAlias()).toEqual(result);
       expect(execSnapshots).toMatchSnapshot();
+      expect(execSnapshots).toHaveLength(3);
     });
   });
 });

@@ -163,7 +163,7 @@ export async function initRepo({
     gitAuthorEmail: global.gitAuthor?.email,
   });
   const repoConfig: RepoConfig = {
-    defaultBranch: config.baseBranch,
+    defaultBranch: config.defaultBranch,
     isFork: info.isFork,
   };
   return repoConfig;
@@ -175,11 +175,7 @@ export function getRepoForceRebase(): Promise<boolean> {
   return Promise.resolve(false);
 }
 
-// Search
-
-export async function setBaseBranch(
-  branchName = config.baseBranch
-): Promise<string> {
+export async function setBaseBranch(branchName: string): Promise<string> {
   logger.debug(`Setting baseBranch to ${branchName}`);
   config.baseBranch = branchName;
   delete config.baseCommitSHA;
@@ -700,15 +696,13 @@ export function ensureCommentRemoval({
 // Creates PR and returns PR number
 export async function createPr({
   branchName,
+  targetBranch = config.defaultBranch,
   prTitle: title,
   prBody: description,
-  useDefaultBranch = true,
 }: CreatePRConfig): Promise<Pr> {
   // labels is not supported in Bitbucket: https://bitbucket.org/site/master/issues/11976/ability-to-add-labels-to-pull-requests-bb
 
-  const base = useDefaultBranch
-    ? config.defaultBranch
-    : /* istanbul ignore next */ config.baseBranch;
+  const base = targetBranch;
 
   logger.debug({ repository: config.repository, title, base }, 'Creating PR');
 

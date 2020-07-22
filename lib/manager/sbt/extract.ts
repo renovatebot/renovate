@@ -113,7 +113,11 @@ function parseDepExpr(
       ? str.replace(/^"/, '').replace(/"$/, '')
       : variables[str].val;
 
-  const tokens = expr.trim().split(/\s*(%%?)\s*/);
+  const tokens = expr
+    .trim()
+    .replace(/[()]/g, '')
+    .split(/\s*(%%?)\s*|\s*classifier\s*/);
+
   const [
     rawGroupId,
     groupOp,

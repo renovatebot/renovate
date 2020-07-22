@@ -189,7 +189,6 @@ describe('platform/bitbucket', () => {
     it('updates file list', async () => {
       await initRepoMock();
       await bitbucket.setBaseBranch('branch');
-      await bitbucket.setBaseBranch();
       expect(httpMock.getTrace()).toMatchSnapshot();
     });
   });

@@ -55,7 +55,7 @@ async function getRegistryReleases(
   return res;
 }
 
-async function firstRegistry(
+function firstRegistry(
   config: GetReleasesInternalConfig,
   datasource: Datasource,
   registryUrls: string[]
@@ -278,7 +278,7 @@ export function supportsDigests(config: DigestConfig): boolean {
   return 'getDigest' in load(config.datasource);
 }
 
-export async function getDigest(
+export function getDigest(
   config: DigestConfig,
   value?: string
 ): Promise<string | null> {

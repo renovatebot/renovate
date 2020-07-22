@@ -16,7 +16,7 @@ async function cleanUpBranches(
         state: PR_STATE_OPEN,
       });
       const branchPr = await platform.getBranchPr(branchName);
-      const skipAutoclose = branchPr && branchPr.isModified;
+      const skipAutoclose = branchPr?.isModified;
       if (pr && !skipAutoclose) {
         if (!pr.title.endsWith('- autoclosed')) {
           if (dryRun) {
@@ -83,7 +83,7 @@ export async function pruneStaleBranches(
     return;
   }
   let renovateBranches = await getAllRenovateBranches(config.branchPrefix);
-  if (!(renovateBranches && renovateBranches.length)) {
+  if (!renovateBranches?.length) {
     logger.debug('No renovate branches found');
     return;
   }
