@@ -40,7 +40,7 @@ export function outputFile(
   data: any,
   options?: WriteFileOptions | string
 ): Promise<void> {
-  return fs.outputFile(file, data, options);
+  return fs.outputFile(file, data, options ?? {});
 }
 
 export function remove(dir: string): Promise<void> {
@@ -68,5 +68,5 @@ export function move(
   dest: string,
   options?: MoveOptions
 ): Promise<void> {
-  return fs.move(src, dest, options);
+  return fs.move(src, dest, options ?? {});
 }
