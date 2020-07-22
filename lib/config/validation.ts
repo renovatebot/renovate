@@ -208,6 +208,7 @@ export async function validateConfig(
               'excludePackagePatterns',
               'sourceUrlPrefixes',
               'updateTypes',
+              'matchCurrentVersion',
             ];
             if (key === 'packageRules') {
               for (const packageRule of val) {
