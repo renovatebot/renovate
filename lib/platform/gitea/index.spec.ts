@@ -386,9 +386,9 @@ describe('platform/gitea', () => {
       expect(logger.warn).toHaveBeenCalledTimes(1);
     });
 
-    it('should set default base branch', async () => {
+    it('should set base branch', async () => {
       await initFakeRepo();
-      await gitea.setBaseBranch();
+      await gitea.setBaseBranch('master');
 
       expect(gitvcs.setBranch).toHaveBeenCalledTimes(1);
       expect(gitvcs.setBranch).toHaveBeenCalledWith(mockRepo.default_branch);

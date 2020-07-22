@@ -265,9 +265,7 @@ export function getRepoForceRebase(): Promise<boolean> {
   return Promise.resolve(config?.mergeMethod !== 'merge');
 }
 
-export async function setBaseBranch(
-  branchName = config.baseBranch
-): Promise<string> {
+export async function setBaseBranch(branchName: string): Promise<string> {
   logger.debug(`Setting baseBranch to ${branchName}`);
   config.baseBranch = branchName;
   const baseBranchSha = await git.setBranch(branchName);

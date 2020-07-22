@@ -396,7 +396,6 @@ describe(getName(__filename), () => {
           expect.assertions(1);
           await initRepo();
           await bitbucket.setBaseBranch('branch');
-          await bitbucket.setBaseBranch();
           expect(httpMock.getTrace()).toMatchSnapshot();
         });
       });

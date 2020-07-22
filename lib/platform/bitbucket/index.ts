@@ -175,11 +175,7 @@ export function getRepoForceRebase(): Promise<boolean> {
   return Promise.resolve(false);
 }
 
-// Search
-
-export async function setBaseBranch(
-  branchName = config.baseBranch
-): Promise<string> {
+export async function setBaseBranch(branchName: string): Promise<string> {
   logger.debug(`Setting baseBranch to ${branchName}`);
   config.baseBranch = branchName;
   delete config.baseCommitSHA;

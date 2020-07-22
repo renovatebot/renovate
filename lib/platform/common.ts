@@ -154,7 +154,7 @@ export interface Platform {
   ): Promise<void>;
   deleteBranch(branchName: string, closePr?: boolean): Promise<void>;
   ensureComment(ensureComment: EnsureCommentConfig): Promise<boolean>;
-  setBaseBranch(baseBranch?: string): Promise<string>;
+  setBaseBranch(branchName: string): Promise<string>;
   getPr(number: number): Promise<Pr>;
   findPr(findPRConfig: FindPRConfig): Promise<Pr>;
   refreshPr?(number: number): Promise<void>;

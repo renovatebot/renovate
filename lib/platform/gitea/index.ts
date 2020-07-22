@@ -447,9 +447,7 @@ const platform: Platform = {
     return BranchStatus.yellow;
   },
 
-  async setBaseBranch(
-    baseBranch: string = config.defaultBranch
-  ): Promise<string> {
+  async setBaseBranch(baseBranch: string): Promise<string> {
     config.baseBranch = baseBranch;
     const baseBranchSha = await git.setBranch(baseBranch);
     return baseBranchSha;

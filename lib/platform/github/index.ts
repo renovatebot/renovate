@@ -500,9 +500,7 @@ export async function getRepoForceRebase(): Promise<boolean> {
 }
 
 // istanbul ignore next
-export async function setBaseBranch(
-  branchName = config.baseBranch
-): Promise<string> {
+export async function setBaseBranch(branchName: string): Promise<string> {
   config.baseBranch = branchName;
   config.baseCommitSHA = null;
   const baseBranchSha = await git.setBranch(branchName);

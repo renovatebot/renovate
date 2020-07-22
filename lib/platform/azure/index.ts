@@ -182,11 +182,8 @@ export function getRepoForceRebase(): Promise<boolean> {
   return Promise.resolve(config.repoForceRebase === true);
 }
 
-// Search
-
-export /* istanbul ignore next */ async function setBaseBranch(
-  branchName = config.baseBranch
-): Promise<string> {
+// istanbul ignore next
+export async function setBaseBranch(branchName: string): Promise<string> {
   logger.debug(`Setting baseBranch to ${branchName}`);
   config.baseBranch = branchName;
   delete config.baseCommitSHA;

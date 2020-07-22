@@ -239,9 +239,7 @@ export async function getRepoForceRebase(): Promise<boolean> {
   );
 }
 
-export async function setBaseBranch(
-  branchName: string = config.defaultBranch
-): Promise<string> {
+export async function setBaseBranch(branchName: string): Promise<string> {
   config.baseBranch = branchName;
   const baseBranchSha = await git.setBranch(branchName);
   return baseBranchSha;
