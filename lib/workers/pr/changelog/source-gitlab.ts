@@ -46,7 +46,7 @@ async function getTagsInner(
   }
 }
 
-async function getTags(
+function getTags(
   endpoint: string,
   versionScheme: string,
   repository: string

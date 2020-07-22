@@ -246,7 +246,7 @@ export async function initRepo(args: StorageConfig): Promise<void> {
 }
 
 // istanbul ignore next
-export async function getRepoStatus(): Promise<StatusResult> {
+export function getRepoStatus(): Promise<StatusResult> {
   return git.status();
 }
 
