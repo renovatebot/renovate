@@ -114,6 +114,9 @@ describe('platform/git', () => {
     });
   });
   describe('isBranchStale()', () => {
+    beforeEach(async () => {
+      await git.setBranch('master');
+    });
     it('should return false if same SHA as master', async () => {
       expect(await git.isBranchStale('renovate/future_branch')).toBe(false);
     });
