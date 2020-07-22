@@ -727,7 +727,10 @@ describe('platform/bitbucket', () => {
       try {
         expect(await bitbucket.getPr(3)).toMatchSnapshot();
 
-        global.gitAuthor = { email: 'bot@renovateapp.com', name: 'bot' };
+        global.gitAuthor = {
+          email: 'renovate@whitesourcesoftware.com',
+          name: 'bot',
+        };
         expect(await bitbucket.getPr(5)).toMatchSnapshot();
 
         global.gitAuthor = { email: 'jane@example.com', name: 'jane' };

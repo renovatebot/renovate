@@ -1654,7 +1654,7 @@ describe('platform/github', () => {
         });
       global.gitAuthor = {
         name: 'Renovate Bot',
-        email: 'bot@renovateapp.com',
+        email: 'renovate@whitesourcesoftware.com',
       };
       await github.initRepo({
         repository: 'some/repo',
