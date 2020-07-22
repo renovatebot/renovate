@@ -362,16 +362,14 @@ export async function getBranchStatus(
 
 export async function createPr({
   branchName,
+  targetBranch = config.defaultBranch,
   prTitle: title,
   prBody: body,
   labels,
-  useDefaultBranch,
   platformOptions = {},
 }: CreatePRConfig): Promise<Pr> {
   const sourceRefName = azureHelper.getNewBranchName(branchName);
-  const targetRefName = azureHelper.getNewBranchName(
-    useDefaultBranch ? config.defaultBranch : config.baseBranch
-  );
+  const targetRefName = targetBranch;
   const description = azureHelper.max4000Chars(sanitize(body));
   const azureApiGit = await azureApi.gitApi();
   const workItemRefs = [

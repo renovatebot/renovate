@@ -74,10 +74,10 @@ export type PlatformPrOptions = {
 };
 export interface CreatePRConfig {
   branchName: string;
+  targetBranch?: string;
   prTitle: string;
   prBody: string;
   labels?: string[] | null;
-  useDefaultBranch?: boolean;
   platformOptions?: PlatformPrOptions;
   draftPR?: boolean;
 }

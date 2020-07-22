@@ -527,12 +527,12 @@ const platform: Platform = {
 
   async createPr({
     branchName,
+    targetBranch = config.defaultBranch,
     prTitle: title,
     prBody: rawBody,
     labels: labelNames,
-    useDefaultBranch,
   }: CreatePRConfig): Promise<Pr> {
-    const base = useDefaultBranch ? config.defaultBranch : config.baseBranch;
+    const base = targetBranch;
     const head = branchName;
     const body = sanitize(rawBody);
 
