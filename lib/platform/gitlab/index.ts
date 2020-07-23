@@ -60,7 +60,6 @@ let config: {
   repository: string;
   localDir: string;
   defaultBranch: string;
-  baseBranch: string;
   email: string;
   prList: any[];
   issueList: any[];
@@ -200,9 +199,8 @@ export async function initRepo({
       }
     }
     config.defaultBranch = res.body.default_branch;
-    config.baseBranch = config.defaultBranch;
     config.mergeMethod = res.body.merge_method || 'merge';
-    logger.debug(`${repository} default branch = ${config.baseBranch}`);
+    logger.debug(`${repository} default branch = ${config.defaultBranch}`);
     delete config.prList;
     logger.debug('Enabling Git FS');
     const opts = hostRules.find({
@@ -266,8 +264,6 @@ export function getRepoForceRebase(): Promise<boolean> {
 }
 
 export async function setBaseBranch(branchName: string): Promise<string> {
-  logger.debug(`Setting baseBranch to ${branchName}`);
-  config.baseBranch = branchName;
   const baseBranchSha = await git.setBranch(branchName);
   return baseBranchSha;
 }
@@ -385,7 +381,6 @@ export async function createPr({
   pr.number = pr.iid;
   pr.branchName = branchName;
   pr.displayNumber = `Merge Request #${pr.iid}`;
-  pr.isModified = false;
   // istanbul ignore if
   if (config.prList) {
     config.prList.push(pr);
@@ -448,9 +443,7 @@ export async function getPr(iid: number): Promise<Pr> {
   pr.number = pr.iid;
   pr.displayNumber = `Merge Request #${pr.iid}`;
   pr.body = pr.description;
-  pr.isStale = pr.diverged_commits_count > 0;
   pr.state = pr.state === 'opened' ? PR_STATE_OPEN : pr.state;
-  pr.isModified = true;
   pr.hasAssignees = !!(pr.assignee?.id || pr.assignees?.[0]?.id);
   delete pr.assignee;
   delete pr.assignees;
@@ -463,32 +456,6 @@ export async function getPr(iid: number): Promise<Pr> {
     const branchStatus = await getBranchStatus(pr.branchName, []);
     if (branchStatus === BranchStatus.green) {
       pr.canMerge = true;
-    }
-  }
-  // Check if the most recent branch commit is by us
-  // If not then we don't allow it to be rebased, in case someone's changes would be lost
-  const branchUrl = `projects/${
-    config.repository
-  }/repository/branches/${urlEscape(pr.source_branch)}`;
-  try {
-    const branch = (
-      await gitlabApi.getJson<{ commit: { author_email: string } }>(branchUrl)
-    ).body;
-    const branchCommitEmail = branch?.commit?.author_email ?? null;
-    if (branchCommitEmail === global.gitAuthor.email) {
-      pr.isModified = false;
-    } else {
-      logger.debug(
-        { branchCommitEmail, configEmail: global.gitAuthor.email, iid: pr.iid },
-        'Last committer to branch does not match bot email, so PR cannot be rebased.'
-      );
-      pr.isModified = true;
-    }
-  } catch (err) {
-    logger.debug({ err }, 'Error getting PR branch');
-    if (pr.state === PR_STATE_OPEN || err.statusCode !== 404) {
-      logger.warn({ err }, 'Error getting PR branch');
-      pr.isConflicted = true;
     }
   }
   return pr;

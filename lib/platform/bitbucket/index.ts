@@ -1,6 +1,5 @@
 import URL from 'url';
 import is from '@sindresorhus/is';
-import addrs from 'email-addresses';
 import parseDiff from 'parse-diff';
 import { RenovateConfig } from '../../config/common';
 import {
@@ -127,7 +126,6 @@ export async function initRepo({
     Object.assign(config, {
       owner: info.owner,
       defaultBranch: info.mainbranch,
-      baseBranch: info.mainbranch,
       mergeMethod: info.mergeMethod,
       has_issues: info.has_issues,
     });
@@ -176,9 +174,6 @@ export function getRepoForceRebase(): Promise<boolean> {
 }
 
 export async function setBaseBranch(branchName: string): Promise<string> {
-  logger.debug(`Setting baseBranch to ${branchName}`);
-  config.baseBranch = branchName;
-  delete config.baseCommitSHA;
   const baseBranchSha = await git.setBranch(branchName);
   return baseBranchSha;
 }
@@ -283,7 +278,6 @@ export async function getPr(prNo: number): Promise<Pr | null> {
   const res: any = {
     displayNumber: `Pull Request #${pr.id}`,
     ...utils.prInfo(pr),
-    isModified: false,
   };
 
   if (utils.prStates.open.includes(pr.state)) {
@@ -291,39 +285,7 @@ export async function getPr(prNo: number): Promise<Pr | null> {
 
     // TODO: Is that correct? Should we check getBranchStatus like gitlab?
     res.canMerge = !res.isConflicted;
-
-    // we only want the first two commits, because size tells us the overall number
-    const url = pr.links.commits.href + '?pagelen=2';
-    const { body } = await bitbucketHttp.getJson<utils.PagedResult<Commit>>(
-      url
-    );
-    const size = body.size || body.values.length;
-
-    // istanbul ignore if
-    if (size === undefined) {
-      logger.warn({ prNo, url, body }, 'invalid response so can rebase');
-    } else if (size === 1) {
-      if (global.gitAuthor) {
-        const author = addrs.parseOneAddress(
-          body.values[0].author.raw
-        ) as addrs.ParsedMailbox;
-        if (author.address !== global.gitAuthor.email) {
-          logger.debug(
-            { prNo },
-            'PR is modified: 1 commit but not by configured gitAuthor'
-          );
-          res.isModified = true;
-        }
-      }
-    } else {
-      logger.debug({ prNo }, `PR is modified: Found ${size} commits`);
-      res.isModified = true;
-    }
   }
-  if (await git.branchExists(pr.source.branch.name)) {
-    res.isStale = await git.isBranchStale(pr.source.branch.name);
-  }
-
   res.hasReviewers = is.nonEmptyArray(pr.reviewers);
 
   return res;
@@ -749,7 +711,6 @@ export async function createPr({
     const pr: Pr = {
       number: prInfo.id,
       displayNumber: `Pull Request #${prInfo.id}`,
-      isModified: false,
     } as any;
     // istanbul ignore if
     if (config.prList) {
@@ -812,7 +773,6 @@ export async function mergePr(
         },
       }
     );
-    delete config.baseCommitSHA;
     logger.debug('Automerging succeeded');
   } catch (err) /* istanbul ignore next */ {
     return false;

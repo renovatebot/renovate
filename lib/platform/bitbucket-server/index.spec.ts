@@ -424,14 +424,6 @@ describe(getName(__filename), () => {
             .twice()
             .reply(200, { conflicted: false })
             .get(
-              `${urlPath}/rest/api/1.0/projects/SOME/repos/repo/pull-requests/5/commits?withCounts=true`
-            )
-            .twice()
-            .reply(200, {
-              totalCount: 1,
-              values: [{ author: { emailAddress: 'bot@renovateapp.com' } }],
-            })
-            .get(
               `${urlPath}/rest/api/1.0/projects/SOME/repos/repo/pull-requests/5`
             )
             .twice()
@@ -454,14 +446,6 @@ describe(getName(__filename), () => {
             )
             .twice()
             .reply(200, { conflicted: false })
-            .get(
-              `${urlPath}/rest/api/1.0/projects/SOME/repos/repo/pull-requests/5/commits?withCounts=true`
-            )
-            .twice()
-            .reply(200, {
-              totalCount: 1,
-              values: [{ author: { emailAddress: 'bot@renovateapp.com' } }],
-            })
             .get(
               `${urlPath}/rest/api/1.0/projects/SOME/repos/repo/pull-requests/5`
             )
@@ -511,13 +495,6 @@ describe(getName(__filename), () => {
               `${urlPath}/rest/api/1.0/projects/SOME/repos/repo/pull-requests/5/merge`
             )
             .reply(200, { conflicted: false })
-            .get(
-              `${urlPath}/rest/api/1.0/projects/SOME/repos/repo/pull-requests/5/commits?withCounts=true`
-            )
-            .reply(200, {
-              totalCount: 1,
-              values: [{ author: { emailAddress: 'bot@renovateapp.com' } }],
-            })
             .put(
               `${urlPath}/rest/api/1.0/projects/SOME/repos/repo/pull-requests/5`
             )
@@ -541,13 +518,6 @@ describe(getName(__filename), () => {
               `${urlPath}/rest/api/1.0/projects/SOME/repos/repo/pull-requests/5/merge`
             )
             .reply(200, { conflicted: false })
-            .get(
-              `${urlPath}/rest/api/1.0/projects/SOME/repos/repo/pull-requests/5/commits?withCounts=true`
-            )
-            .reply(200, {
-              totalCount: 1,
-              values: [{ author: { emailAddress: 'bot@renovateapp.com' } }],
-            })
             .put(
               `${urlPath}/rest/api/1.0/projects/SOME/repos/repo/pull-requests/5`
             )
@@ -569,13 +539,6 @@ describe(getName(__filename), () => {
               `${urlPath}/rest/api/1.0/projects/SOME/repos/repo/pull-requests/5/merge`
             )
             .reply(200, { conflicted: false })
-            .get(
-              `${urlPath}/rest/api/1.0/projects/SOME/repos/repo/pull-requests/5/commits?withCounts=true`
-            )
-            .reply(200, {
-              totalCount: 1,
-              values: [{ author: { emailAddress: 'bot@renovateapp.com' } }],
-            })
             .put(
               `${urlPath}/rest/api/1.0/projects/SOME/repos/repo/pull-requests/5`
             )
@@ -1069,14 +1032,7 @@ describe(getName(__filename), () => {
             .get(
               `${urlPath}/rest/api/1.0/projects/SOME/repos/repo/pull-requests/5/merge`
             )
-            .reply(200, { conflicted: false })
-            .get(
-              `${urlPath}/rest/api/1.0/projects/SOME/repos/repo/pull-requests/5/commits?withCounts=true`
-            )
-            .reply(200, {
-              totalCount: 1,
-              values: [{ author: { emailAddress: 'bot@renovateapp.com' } }],
-            });
+            .reply(200, { conflicted: false });
 
           expect(
             await bitbucket.getBranchPr('userName1/pullRequest5')
@@ -1211,14 +1167,7 @@ describe(getName(__filename), () => {
             .get(
               `${urlPath}/rest/api/1.0/projects/SOME/repos/repo/pull-requests/5/merge`
             )
-            .reply(200, { conflicted: false })
-            .get(
-              `${urlPath}/rest/api/1.0/projects/SOME/repos/repo/pull-requests/5/commits?withCounts=true`
-            )
-            .reply(200, {
-              totalCount: 1,
-              values: [{ author: { emailAddress: 'bot@renovateapp.com' } }],
-            });
+            .reply(200, { conflicted: false });
 
           expect(await bitbucket.getPr(5)).toMatchSnapshot();
           expect(httpMock.getTrace()).toMatchSnapshot();
@@ -1236,12 +1185,6 @@ describe(getName(__filename), () => {
             )
             .reply(200, { conflicted: false })
             .get(
-              `${urlPath}/rest/api/1.0/projects/SOME/repos/repo/pull-requests/3/commits?withCounts=true`
-            )
-            .reply(200, {
-              totalCount: 2,
-            })
-            .get(
               `${urlPath}/rest/api/1.0/projects/SOME/repos/repo/pull-requests/5`
             )
             .twice()
@@ -1250,24 +1193,14 @@ describe(getName(__filename), () => {
               `${urlPath}/rest/api/1.0/projects/SOME/repos/repo/pull-requests/5/merge`
             )
             .twice()
-            .reply(200, { conflicted: false })
-            .get(
-              `${urlPath}/rest/api/1.0/projects/SOME/repos/repo/pull-requests/5/commits?withCounts=true`
-            )
-            .twice()
-            .reply(200, {
-              totalCount: 1,
-              values: [{ author: { emailAddress: 'bot@renovateapp.com' } }],
-            });
+            .reply(200, { conflicted: false });
 
           const author = global.gitAuthor;
           try {
             expect(await bitbucket.getPr(3)).toMatchSnapshot();
 
-            global.gitAuthor = { email: 'bot@renovateapp.com', name: 'bot' };
             expect(await bitbucket.getPr(5)).toMatchSnapshot();
 
-            global.gitAuthor = { email: 'jane@example.com', name: 'jane' };
             expect(await bitbucket.getPr(5)).toMatchSnapshot();
 
             expect(httpMock.getTrace()).toMatchSnapshot();
@@ -1308,13 +1241,6 @@ describe(getName(__filename), () => {
               `${urlPath}/rest/api/1.0/projects/SOME/repos/repo/pull-requests/5/merge`
             )
             .reply(200, { conflicted: false })
-            .get(
-              `${urlPath}/rest/api/1.0/projects/SOME/repos/repo/pull-requests/5/commits?withCounts=true`
-            )
-            .reply(200, {
-              totalCount: 1,
-              values: [{ author: { emailAddress: 'bot@renovateapp.com' } }],
-            })
             .put(
               `${urlPath}/rest/api/1.0/projects/SOME/repos/repo/pull-requests/5`
             )
@@ -1358,13 +1284,6 @@ describe(getName(__filename), () => {
               `${urlPath}/rest/api/1.0/projects/SOME/repos/repo/pull-requests/5/merge`
             )
             .reply(200, { conflicted: false })
-            .get(
-              `${urlPath}/rest/api/1.0/projects/SOME/repos/repo/pull-requests/5/commits?withCounts=true`
-            )
-            .reply(200, {
-              totalCount: 1,
-              values: [{ author: { emailAddress: 'bot@renovateapp.com' } }],
-            })
             .put(
               `${urlPath}/rest/api/1.0/projects/SOME/repos/repo/pull-requests/5`
             )
@@ -1388,13 +1307,6 @@ describe(getName(__filename), () => {
               `${urlPath}/rest/api/1.0/projects/SOME/repos/repo/pull-requests/5/merge`
             )
             .reply(200, { conflicted: false })
-            .get(
-              `${urlPath}/rest/api/1.0/projects/SOME/repos/repo/pull-requests/5/commits?withCounts=true`
-            )
-            .reply(200, {
-              totalCount: 1,
-              values: [{ author: { emailAddress: 'bot@renovateapp.com' } }],
-            })
             .put(
               `${urlPath}/rest/api/1.0/projects/SOME/repos/repo/pull-requests/5`
             )
@@ -1417,13 +1329,6 @@ describe(getName(__filename), () => {
               `${urlPath}/rest/api/1.0/projects/SOME/repos/repo/pull-requests/5/merge`
             )
             .reply(200, { conflicted: false })
-            .get(
-              `${urlPath}/rest/api/1.0/projects/SOME/repos/repo/pull-requests/5/commits?withCounts=true`
-            )
-            .reply(200, {
-              totalCount: 1,
-              values: [{ author: { emailAddress: 'bot@renovateapp.com' } }],
-            })
             .put(
               `${urlPath}/rest/api/1.0/projects/SOME/repos/repo/pull-requests/5`
             )
@@ -1448,13 +1353,6 @@ describe(getName(__filename), () => {
               `${urlPath}/rest/api/1.0/projects/SOME/repos/repo/pull-requests/5/merge`
             )
             .reply(200, { conflicted: false })
-            .get(
-              `${urlPath}/rest/api/1.0/projects/SOME/repos/repo/pull-requests/5/commits?withCounts=true`
-            )
-            .reply(200, {
-              totalCount: 1,
-              values: [{ author: { emailAddress: 'bot@renovateapp.com' } }],
-            })
             .post(
               `${urlPath}/rest/api/1.0/projects/SOME/repos/repo/pull-requests/5/merge?version=1`
             )
@@ -1496,13 +1394,6 @@ describe(getName(__filename), () => {
               `${urlPath}/rest/api/1.0/projects/SOME/repos/repo/pull-requests/5/merge`
             )
             .reply(200, { conflicted: false })
-            .get(
-              `${urlPath}/rest/api/1.0/projects/SOME/repos/repo/pull-requests/5/commits?withCounts=true`
-            )
-            .reply(200, {
-              totalCount: 1,
-              values: [{ author: { emailAddress: 'bot@renovateapp.com' } }],
-            })
             .post(
               `${urlPath}/rest/api/1.0/projects/SOME/repos/repo/pull-requests/5/merge?version=1`
             )
@@ -1525,13 +1416,6 @@ describe(getName(__filename), () => {
               `${urlPath}/rest/api/1.0/projects/SOME/repos/repo/pull-requests/5/merge`
             )
             .reply(200, { conflicted: false })
-            .get(
-              `${urlPath}/rest/api/1.0/projects/SOME/repos/repo/pull-requests/5/commits?withCounts=true`
-            )
-            .reply(200, {
-              totalCount: 1,
-              values: [{ author: { emailAddress: 'bot@renovateapp.com' } }],
-            })
             .post(
               `${urlPath}/rest/api/1.0/projects/SOME/repos/repo/pull-requests/5/merge?version=1`
             )
@@ -1552,13 +1436,6 @@ describe(getName(__filename), () => {
               `${urlPath}/rest/api/1.0/projects/SOME/repos/repo/pull-requests/5/merge`
             )
             .reply(200, { conflicted: false })
-            .get(
-              `${urlPath}/rest/api/1.0/projects/SOME/repos/repo/pull-requests/5/commits?withCounts=true`
-            )
-            .reply(200, {
-              totalCount: 1,
-              values: [{ author: { emailAddress: 'bot@renovateapp.com' } }],
-            })
             .post(
               `${urlPath}/rest/api/1.0/projects/SOME/repos/repo/pull-requests/5/merge?version=1`
             )

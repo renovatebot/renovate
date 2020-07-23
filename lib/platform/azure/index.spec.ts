@@ -136,12 +136,6 @@ describe('platform/azure', () => {
           ]),
         } as any)
     );
-    azureApi.gitApi.mockImplementationOnce(
-      () =>
-        ({
-          getBranch: jest.fn(() => ({ commit: { commitId: '1234' } })),
-        } as any)
-    );
     azureHelper.getProjectAndRepo.mockImplementationOnce(() => ({
       project: 'some-repo',
       repo: 'some-repo',
@@ -481,44 +475,6 @@ describe('platform/azure', () => {
       const pr = await azure.getPr(1234);
       expect(pr).toMatchSnapshot();
     });
-    it('should return a pr thats been modified', async () => {
-      await initRepo({ repository: 'some/repo' });
-      azureApi.gitApi.mockImplementation(
-        () =>
-          ({
-            getPullRequests: jest
-              .fn()
-              .mockReturnValue([])
-              .mockReturnValueOnce([
-                {
-                  pullRequestId: 1234,
-                },
-              ]),
-            getPullRequestLabels: jest.fn().mockReturnValue([]),
-            getPullRequestCommits: jest.fn().mockReturnValue([
-              {
-                author: {
-                  name: 'renovate',
-                },
-              },
-              {
-                author: {
-                  name: 'end user',
-                },
-              },
-            ]),
-          } as any)
-      );
-      azureHelper.getRenovatePRFormat.mockImplementation(
-        () =>
-          ({
-            number: 1234,
-            isModified: false,
-          } as any)
-      );
-      const pr = await azure.getPr(1234);
-      expect(pr).toMatchSnapshot();
-    });
   });
 
   describe('createPr()', () => {
@@ -817,7 +773,7 @@ describe('platform/azure', () => {
           } as any)
       );
       await azure.addAssignees(123, ['test@bonjour.fr', 'jyc', 'def']);
-      expect(azureApi.gitApi).toHaveBeenCalledTimes(4);
+      expect(azureApi.gitApi).toHaveBeenCalledTimes(3);
     });
   });
 
@@ -844,7 +800,7 @@ describe('platform/azure', () => {
           } as any)
       );
       await azure.addReviewers(123, ['test@bonjour.fr', 'jyc', 'def']);
-      expect(azureApi.gitApi).toHaveBeenCalledTimes(4);
+      expect(azureApi.gitApi).toHaveBeenCalledTimes(3);
     });
   });
 

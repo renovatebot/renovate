@@ -46,8 +46,8 @@ describe('workers/branch/parent', () => {
       platform.getBranchPr.mockResolvedValueOnce({
         ...pr,
         isConflicted: true,
-        isModified: true,
       });
+      git.isBranchModified.mockResolvedValueOnce(true);
       const res = await shouldReuseExistingBranch(config);
       expect(res.reuseExistingBranch).toBe(true);
     });
@@ -57,8 +57,8 @@ describe('workers/branch/parent', () => {
       platform.getBranchPr.mockResolvedValueOnce({
         ...pr,
         isConflicted: true,
-        isModified: false,
       });
+      git.isBranchModified.mockResolvedValueOnce(false);
       const res = await shouldReuseExistingBranch(config);
       expect(res.reuseExistingBranch).toBe(true);
     });
@@ -81,23 +81,22 @@ describe('workers/branch/parent', () => {
       const res = await shouldReuseExistingBranch(config);
       expect(res.reuseExistingBranch).toBe(false);
     });
-    it('returns undefined if manual rebase by label', async () => {
+    it('aaa2 returns undefined if manual rebase by label', async () => {
       git.branchExists.mockResolvedValueOnce(true);
       platform.getBranchPr.mockResolvedValueOnce({
         ...pr,
-        isModified: true,
         labels: ['rebase'],
       });
       const res = await shouldReuseExistingBranch(config);
       expect(res.reuseExistingBranch).toBe(false);
     });
-    it('returns undefined if unmergeable and can rebase', async () => {
+    it('aaa1 returns undefined if unmergeable and can rebase', async () => {
       git.branchExists.mockResolvedValueOnce(true);
       platform.getBranchPr.mockResolvedValueOnce({
         ...pr,
         isConflicted: true,
-        isModified: false,
       });
+      git.isBranchModified.mockResolvedValueOnce(false);
       const res = await shouldReuseExistingBranch(config);
       expect(res.reuseExistingBranch).toBe(false);
     });
@@ -123,8 +122,8 @@ describe('workers/branch/parent', () => {
       platform.getBranchPr.mockResolvedValueOnce({
         ...pr,
         isConflicted: true,
-        isModified: true,
       });
+      git.isBranchModified.mockResolvedValueOnce(true);
       const res = await shouldReuseExistingBranch(config);
       expect(res.reuseExistingBranch).toBe(true);
     });
