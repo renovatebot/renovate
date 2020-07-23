@@ -255,6 +255,10 @@ Note: Enabling Dependency Dashboard Approval implicitly enables `dependencyDashb
 
 You can configure this to `true` if you prefer Renovate to close an existing Dependency Dashboard whenever there are no outstanding PRs left.
 
+## dependencyDashboardFooter
+
+## dependencyDashboardHeader
+
 ## dependencyDashboardTitle
 
 Configure this option if you prefer a different title for the Dependency Dashboard.
