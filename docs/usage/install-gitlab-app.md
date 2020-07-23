@@ -103,7 +103,7 @@ Currently there is no detection mechanism in the backend scheduler to determine 
 
 ##### Auto merging pull requests
 
-If you have auto merging enabled in your config, Gitlab needs permission to merge a branch into master.
+If you have auto merging enabled in your config, Renovate needs permission to merge a branch into master.
 
 There's four ways to make it work:
 
