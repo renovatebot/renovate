@@ -136,12 +136,6 @@ describe('platform/azure', () => {
           ]),
         } as any)
     );
-    azureApi.gitApi.mockImplementationOnce(
-      () =>
-        ({
-          getBranch: jest.fn(() => ({ commit: { commitId: '1234' } })),
-        } as any)
-    );
     azureHelper.getProjectAndRepo.mockImplementationOnce(() => ({
       project: 'some-repo',
       repo: 'some-repo',
@@ -779,7 +773,7 @@ describe('platform/azure', () => {
           } as any)
       );
       await azure.addAssignees(123, ['test@bonjour.fr', 'jyc', 'def']);
-      expect(azureApi.gitApi).toHaveBeenCalledTimes(4);
+      expect(azureApi.gitApi).toHaveBeenCalledTimes(3);
     });
   });
 
@@ -806,7 +800,7 @@ describe('platform/azure', () => {
           } as any)
       );
       await azure.addReviewers(123, ['test@bonjour.fr', 'jyc', 'def']);
-      expect(azureApi.gitApi).toHaveBeenCalledTimes(4);
+      expect(azureApi.gitApi).toHaveBeenCalledTimes(3);
     });
   });
 

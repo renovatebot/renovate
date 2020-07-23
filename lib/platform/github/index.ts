@@ -162,32 +162,6 @@ async function getBranchProtection(
   return res.body;
 }
 
-// Return the commit SHA for a branch
-async function getBranchCommit(branchName: string): Promise<string> {
-  try {
-    const res = await githubApi.getJson<{ object: { sha: string } }>(
-      `repos/${config.repository}/git/refs/heads/${escapeHash(branchName)}`
-    );
-    return res.body.object.sha;
-  } catch (err) /* istanbul ignore next */ {
-    logger.debug({ err }, 'Error getting branch commit');
-    if (err.statusCode === 404) {
-      throw new Error(REPOSITORY_CHANGED);
-    }
-    if (err.statusCode === 409) {
-      throw new Error(REPOSITORY_EMPTY);
-    }
-    throw err;
-  }
-}
-
-async function getBaseCommitSHA(): Promise<string> {
-  if (!config.baseCommitSHA) {
-    config.baseCommitSHA = await getBranchCommit(config.baseBranch);
-  }
-  return config.baseCommitSHA;
-}
-
 // Initialize GitHub by getting base branch and SHA
 export async function initRepo({
   endpoint,
@@ -229,6 +203,9 @@ export async function initRepo({
         squashMergeAllowed
         defaultBranchRef {
           name
+          target {
+            oid
+          }
         }
       }
     }`
@@ -350,8 +327,7 @@ export async function initRepo({
     logger.debug('Bot is in forkMode');
     config.forkToken = forkToken;
     // Save parent SHA then delete
-    const parentSha = await getBaseCommitSHA();
-    config.baseCommitSHA = null;
+    const parentSha = repo.defaultBranchRef.target.oid;
     // save parent name then delete
     config.parentRepo = config.repository;
     config.repository = null;
@@ -502,7 +478,6 @@ export async function getRepoForceRebase(): Promise<boolean> {
 // istanbul ignore next
 export async function setBaseBranch(branchName: string): Promise<string> {
   config.baseBranch = branchName;
-  config.baseCommitSHA = null;
   const baseBranchSha = await git.setBranch(branchName);
   return baseBranchSha;
 }
@@ -1612,8 +1587,6 @@ export async function mergePr(
     }
   }
   logger.debug({ pr: prNo }, 'PR merged');
-  // Update base branch SHA
-  config.baseCommitSHA = null;
   // Delete branch
   await deleteBranch(branchName);
   return true;
