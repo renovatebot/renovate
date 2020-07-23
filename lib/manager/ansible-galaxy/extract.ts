@@ -4,6 +4,8 @@ import { logger } from '../../logger';
 import { SkipReason } from '../../types';
 import { PackageDependency, PackageFile } from '../common';
 
+const galaxyRoleRegex = new RegExp(/.+\..+/);
+
 function interpretLine(
   lineMatch: RegExpMatchArray,
   lineNumber: number,
@@ -54,10 +56,14 @@ function finalize(dependency: PackageDependency): boolean {
     dep.depName = sourceMatch[4];
     // remove leading `git+` from URLs like `git+https://...`
     dep.lookupName = source.replace(/git\+/, '');
-  } else if (new RegExp(/.+\..+/).exec(source)) {
+  } else if (galaxyRoleRegex.exec(source)) {
     dep.datasource = datasourceGalaxy.id;
     dep.depName = dep.managerData.src;
     dep.lookupName = dep.managerData.src;
+  } else if (galaxyRoleRegex.exec(dep.managerData.name)) {
+    dep.datasource = datasourceGalaxy.id;
+    dep.depName = dep.managerData.name;
+    dep.lookupName = dep.managerData.name;
   } else {
     dep.skipReason = SkipReason.NoSourceMatch;
     return false;
