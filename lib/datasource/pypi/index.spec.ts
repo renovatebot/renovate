@@ -6,6 +6,9 @@ import { id as datasource } from '.';
 const res1: any = fs.readFileSync(
   'lib/datasource/pypi/__fixtures__/azure-cli-monitor.json'
 );
+const res2: any = fs.readFileSync(
+  'lib/datasource/pypi/__fixtures__/azure-cli-monitor-updated.json'
+);
 const htmlResponse = fs.readFileSync(
   'lib/datasource/pypi/__fixtures__/versions-html.html'
 );
@@ -92,6 +95,10 @@ describe('datasource/pypi', () => {
         .scope('https://second-index/foo')
         .get('/azure-cli-monitor/json')
         .reply(200, JSON.parse(res1));
+      httpMock
+        .scope('https://third-index/foo')
+        .get('/azure-cli-monitor/json')
+        .reply(200, JSON.parse(res2));
       const config = {
         registryUrls: [
           'https://custom.pypi.net/foo',
@@ -99,10 +106,14 @@ describe('datasource/pypi', () => {
           'https://third-index/foo',
         ],
       };
-      await getPkgReleases({
+      const res = await getPkgReleases({
         ...config,
         datasource,
         depName: 'azure-cli-monitor',
+      });
+      expect(res.releases.pop()).toMatchObject({
+        version: '0.2.15',
+        releaseTimestamp: '2019-06-18T13:58:55',
       });
       expect(httpMock.getTrace()).toMatchSnapshot();
     });

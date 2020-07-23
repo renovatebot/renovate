@@ -12,7 +12,7 @@ export const id = 'pypi';
 export const defaultRegistryUrls = [
   process.env.PIP_INDEX_URL || 'https://pypi.org/pypi/',
 ];
-export const registryStrategy = 'hunt';
+export const registryStrategy = 'merge';
 
 const github_repo_pattern = /^https?:\/\/github\.com\/[^\\/]+\/[^\\/]+$/;
 const http = new Http(id);
