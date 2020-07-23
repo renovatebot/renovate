@@ -1,12 +1,6 @@
 import { PLATFORM_NOT_FOUND } from '../constants/error-messages';
 import { PLATFORM_TYPE_BITBUCKET } from '../constants/platforms';
 import { loadModules } from '../util/modules';
-import * as azure from './azure';
-import * as bitbucket from './bitbucket';
-import * as bitbucketServer from './bitbucket-server';
-import * as gitea from './gitea';
-import * as github from './github';
-import * as gitlab from './gitlab';
 
 import * as platform from '.';
 import { Platform } from '.';
@@ -67,56 +61,6 @@ describe('platform', () => {
     };
     expect(await platform.initPlatform(config)).toMatchSnapshot();
   });
-  it('has a list of supported methods for github', () => {
-    const githubMethods = Object.keys(github).sort();
-    expect(githubMethods).toMatchSnapshot();
-  });
-
-  it('has a list of supported methods for gitlab', () => {
-    const gitlabMethods = Object.keys(gitlab).sort();
-    expect(gitlabMethods).toMatchSnapshot();
-  });
-
-  it('has a list of supported methods for gitea', () => {
-    const giteaMethods = Object.keys(gitea).sort();
-    expect(giteaMethods).toMatchSnapshot();
-  });
-
-  it('has a list of supported methods for azure', () => {
-    const azureMethods = Object.keys(azure).sort();
-    expect(azureMethods).toMatchSnapshot();
-  });
-
-  it('has same API for github and gitlab', () => {
-    const githubMethods = Object.keys(github).sort();
-    const gitlabMethods = Object.keys(gitlab).sort();
-    expect(githubMethods).toMatchObject(gitlabMethods);
-  });
-
-  it('has same API for github and gitea', () => {
-    const githubMethods = Object.keys(github).sort();
-    const giteaMethods = Object.keys(gitea).sort();
-    expect(githubMethods).toMatchObject(giteaMethods);
-  });
-
-  it('has same API for github and azure', () => {
-    const githubMethods = Object.keys(github).sort();
-    const azureMethods = Object.keys(azure).sort();
-    expect(githubMethods).toMatchObject(azureMethods);
-  });
-
-  it('has same API for github and Bitbucket', () => {
-    const githubMethods = Object.keys(github).sort();
-    const bitbucketMethods = Object.keys(bitbucket).sort();
-    expect(bitbucketMethods).toMatchObject(githubMethods);
-  });
-
-  it('has same API for github and Bitbucket Server', () => {
-    const githubMethods = Object.keys(github).sort();
-    const bitbucketMethods = Object.keys(bitbucketServer).sort();
-    expect(bitbucketMethods).toMatchObject(githubMethods);
-  });
-
   it('returns null if empty email given', () => {
     expect(platform.parseGitAuthor(undefined)).toBeNull();
   });

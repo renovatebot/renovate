@@ -1,41 +1,49 @@
 import { join } from 'path';
 import URL from 'url';
 import fs from 'fs-extra';
-import Git from 'simple-git/promise';
+import Git, {
+  DiffResult as DiffResult_,
+  Options,
+  ResetMode,
+  SimpleGit,
+  StatusResult as StatusResult_,
+} from 'simple-git';
 import {
   CONFIG_VALIDATION,
   REPOSITORY_CHANGED,
   REPOSITORY_EMPTY,
   REPOSITORY_TEMPORARY_ERROR,
   SYSTEM_INSUFFICIENT_DISK_SPACE,
-} from '../../../constants/error-messages';
-import { logger } from '../../../logger';
-import { CommitFilesConfig } from '../../../platform/common';
-import { ExternalHostError } from '../../../types/errors/external-host-error';
-import * as limits from '../../../workers/global/limits';
+} from '../../constants/error-messages';
+import { logger } from '../../logger';
+import { ExternalHostError } from '../../types/errors/external-host-error';
+import * as limits from '../../workers/global/limits';
 import { writePrivateKey } from './private-key';
+
+export * from './private-key';
 
 declare module 'fs-extra' {
   export function exists(pathLike: string): Promise<boolean>;
 }
 
-export type StatusResult = Git.StatusResult;
+export type StatusResult = StatusResult_;
 
-export type DiffResult = Git.DiffResult;
+export type DiffResult = DiffResult_;
 
 interface StorageConfig {
   localDir: string;
-  baseBranch?: string;
+  currentBranch?: string;
   url: string;
-  extraCloneOpts?: Git.Options;
+  extraCloneOpts?: Options;
   gitAuthorName?: string;
   gitAuthorEmail?: string;
 }
 
 interface LocalConfig extends StorageConfig {
-  baseBranch: string;
-  baseBranchSha: string;
+  currentBranch: string;
+  currentBranchSha: string;
   branchExists: Record<string, boolean>;
+  branchIsModified: Record<string, boolean>;
   branchPrefix: string;
 }
 
@@ -65,11 +73,11 @@ function localName(branchName: string): string {
   return branchName.replace(/^origin\//, '');
 }
 
-function throwBaseBranchValidationError(branchName: string): never {
+function throwBranchValidationError(branchName: string): never {
   const error = new Error(CONFIG_VALIDATION);
-  error.validationError = 'baseBranch not found';
+  error.validationError = 'branch not found';
   error.validationMessage =
-    'The following configured baseBranch could not be found: ' + branchName;
+    'The following branch could not be found: ' + branchName;
   throw error;
 }
 
@@ -81,7 +89,7 @@ async function isDirectory(dir: string): Promise<boolean> {
   }
 }
 
-async function getDefaultBranch(git: Git.SimpleGit): Promise<string> {
+async function getDefaultBranch(git: SimpleGit): Promise<string> {
   // see https://stackoverflow.com/a/44750379/1438522
   try {
     const res = await git.raw(['symbolic-ref', 'refs/remotes/origin/HEAD']);
@@ -101,9 +109,7 @@ async function getDefaultBranch(git: Git.SimpleGit): Promise<string> {
 
 let config: LocalConfig = {} as any;
 
-let git: Git.SimpleGit | undefined;
-
-let cwd: string | undefined;
+let git: SimpleGit | undefined;
 
 let privateKeySet = false;
 
@@ -146,39 +152,23 @@ export async function getSubmodules(): Promise<string[]> {
     .filter((_e: string, i: number) => i % 2);
 }
 
-export function isInitialized(): boolean {
-  return !!git;
-}
-
-export function cleanRepo(): void {
-  if (isInitialized()) {
-    // no-op
+export async function syncGit(): Promise<void> {
+  if (git) {
+    return;
   }
-}
-
-export async function initRepo(args: StorageConfig): Promise<void> {
-  cleanRepo();
-
-  config = { ...args } as any;
-  const newConfig: LocalConfig = config;
-
-  cwd = newConfig.localDir;
-  const newCwd = cwd;
-
-  newConfig.branchExists = {};
-  logger.debug('Initializing git repository into ' + newCwd);
-  const gitHead = join(newCwd, '.git/HEAD');
+  logger.debug('Initializing git repository into ' + config.localDir);
+  const gitHead = join(config.localDir, '.git/HEAD');
   let clone = true;
 
   if (await fs.exists(gitHead)) {
     try {
-      git = Git(newCwd).silent(true);
-      await git.raw(['remote', 'set-url', 'origin', newConfig.url]);
+      git = Git(config.localDir).silent(true);
+      await git.raw(['remote', 'set-url', 'origin', config.url]);
       const fetchStart = Date.now();
       await git.fetch(['--depth=10']);
-      newConfig.baseBranch =
-        newConfig.baseBranch || (await getDefaultBranch(git));
-      await resetToBranch(newConfig.baseBranch);
+      config.currentBranch =
+        config.currentBranch || (await getDefaultBranch(git));
+      await resetToBranch(config.currentBranch);
       await cleanLocalBranches();
       await git.raw(['remote', 'prune', 'origin']);
       const durationMs = Math.round(Date.now() - fetchStart);
@@ -189,18 +179,18 @@ export async function initRepo(args: StorageConfig): Promise<void> {
     }
   }
   if (clone) {
-    await fs.emptyDir(newCwd);
-    git = Git(newCwd).silent(true);
+    await fs.emptyDir(config.localDir);
+    git = Git(config.localDir).silent(true);
     const cloneStart = Date.now();
     try {
       // clone only the default branch
       let opts = ['--depth=2'];
-      if (newConfig.extraCloneOpts) {
+      if (config.extraCloneOpts) {
         opts = opts.concat(
-          Object.entries(newConfig.extraCloneOpts).map((e) => `${e[0]}=${e[1]}`)
+          Object.entries(config.extraCloneOpts).map((e) => `${e[0]}=${e[1]}`)
         );
       }
-      await git.clone(newConfig.url, '.', opts);
+      await git.clone(config.url, '.', opts);
     } catch (err) /* istanbul ignore next */ {
       logger.debug({ err }, 'git clone error');
       if (err.message?.includes('write error: No space left on device')) {
@@ -231,7 +221,7 @@ export async function initRepo(args: StorageConfig): Promise<void> {
     logger.warn({ err }, 'Cannot retrieve latest commit date');
   }
   try {
-    const { gitAuthorName, gitAuthorEmail } = args;
+    const { gitAuthorName, gitAuthorEmail } = config;
     if (gitAuthorName) {
       logger.debug({ gitAuthorName }, 'Setting git author name');
       await git.raw(['config', 'user.name', gitAuthorName]);
@@ -246,11 +236,19 @@ export async function initRepo(args: StorageConfig): Promise<void> {
     throw new Error(REPOSITORY_TEMPORARY_ERROR);
   }
 
-  newConfig.baseBranch = newConfig.baseBranch || (await getDefaultBranch(git));
+  config.currentBranch = config.currentBranch || (await getDefaultBranch(git));
+}
+
+export async function initRepo(args: StorageConfig): Promise<void> {
+  config = { ...args } as any;
+  config.branchExists = {};
+  config.branchIsModified = {};
+  git = undefined;
+  await syncGit();
 }
 
 // istanbul ignore next
-export async function getRepoStatus(): Promise<StatusResult> {
+export function getRepoStatus(): Promise<StatusResult> {
   return git.status();
 }
 
@@ -259,11 +257,12 @@ export async function createBranch(
   sha: string
 ): Promise<void> {
   logger.debug(`createBranch(${branchName})`);
-  await git.reset('hard');
+  await git.reset(ResetMode.HARD);
   await git.raw(['clean', '-fd']);
   await git.checkout(['-B', branchName, sha]);
   await git.push('origin', branchName, { '--force': true });
   config.branchExists[branchName] = true;
+  config.branchIsModified[branchName] = false;
 }
 
 export async function branchExists(branchName: string): Promise<boolean> {
@@ -311,40 +310,33 @@ export async function getCommitMessages(): Promise<string[]> {
   return res.all.map((commit) => commit.message);
 }
 
-export async function setBaseBranch(branchName: string): Promise<string> {
-  if (branchName) {
-    if (!(await branchExists(branchName))) {
-      throwBaseBranchValidationError(branchName);
-    }
-    logger.debug(`Setting baseBranch to ${branchName}`);
-    config.baseBranch = branchName;
-    try {
-      if (branchName !== 'master') {
-        config.baseBranchSha = (
-          await git.raw(['rev-parse', 'origin/' + branchName])
-        ).trim();
-      }
-      await git.checkout([branchName, '-f']);
-      await git.reset('hard');
-      const latestCommitDate = (await git.log({ n: 1 })).latest.date;
-      logger.debug({ branchName, latestCommitDate }, 'latest commit');
-    } catch (err) /* istanbul ignore next */ {
-      checkForPlatformFailure(err);
-      if (
-        err.message.includes(
-          'unknown revision or path not in the working tree'
-        ) ||
-        err.message.includes('did not match any file(s) known to git')
-      ) {
-        throwBaseBranchValidationError(branchName);
-      }
-      throw err;
-    }
+export async function setBranch(branchName: string): Promise<string> {
+  if (!(await branchExists(branchName))) {
+    throwBranchValidationError(branchName);
   }
-  return (
-    config.baseBranchSha ||
-    (await git.raw(['rev-parse', 'origin/master'])).trim()
-  );
+  logger.debug(`Setting current branch to ${branchName}`);
+  try {
+    config.currentBranch = branchName;
+    config.currentBranchSha = (
+      await git.raw(['rev-parse', 'origin/' + branchName])
+    ).trim();
+    await git.checkout([branchName, '-f']);
+    const latestCommitDate = (await git.log({ n: 1 })).latest.date;
+    logger.debug({ branchName, latestCommitDate }, 'latest commit');
+    await git.reset(ResetMode.HARD);
+    return config.currentBranchSha;
+  } catch (err) /* istanbul ignore next */ {
+    checkForPlatformFailure(err);
+    if (
+      err.message.includes(
+        'unknown revision or path not in the working tree'
+      ) ||
+      err.message.includes('did not match any file(s) known to git')
+    ) {
+      throwBranchValidationError(branchName);
+    }
+    throw err;
+  }
 }
 
 /*
@@ -364,7 +356,7 @@ export async function setBranchPrefix(branchPrefix: string): Promise<void> {
 }
 
 export async function getFileList(): Promise<string[]> {
-  const branch = config.baseBranch;
+  const branch = config.currentBranch;
   const submodules = await getSubmodules();
   const files: string = await git.raw(['ls-tree', '-r', branch]);
   // istanbul ignore if
@@ -400,9 +392,40 @@ export async function isBranchStale(branchName: string): Promise<boolean> {
     '--remotes',
     '--verbose',
     '--contains',
-    config.baseBranchSha || `origin/${config.baseBranch}`,
+    config.currentBranchSha,
   ]);
   return !branches.all.map(localName).includes(branchName);
+}
+
+export async function isBranchModified(branchName: string): Promise<boolean> {
+  // First check cache
+  if (config.branchIsModified[branchName] !== undefined) {
+    return config.branchIsModified[branchName];
+  }
+  if (!(await branchExists(branchName))) {
+    throw Error(
+      'Cannot check modification for branch that does not exist: ' + branchName
+    );
+  }
+  // Retrieve the author of the most recent commit
+  const lastAuthor = (
+    await git.raw(['log', '-1', '--pretty=format:%ae', `origin/${branchName}`])
+  ).trim();
+  const { gitAuthorEmail } = config;
+  if (
+    lastAuthor === process.env.RENOVATE_LEGACY_GIT_AUTHOR_EMAIL || // remove in next major release
+    lastAuthor === gitAuthorEmail
+  ) {
+    // author matches - branch has not been modified
+    config.branchIsModified[branchName] = false;
+    return false;
+  }
+  logger.debug(
+    { branchName, lastAuthor, gitAuthorEmail },
+    'Last commit author does not match git author email - branch has been modified'
+  );
+  config.branchIsModified[branchName] = true;
+  return true;
 }
 
 export async function deleteBranch(branchName: string): Promise<void> {
@@ -425,11 +448,11 @@ export async function deleteBranch(branchName: string): Promise<void> {
 }
 
 export async function mergeBranch(branchName: string): Promise<void> {
-  await git.reset('hard');
+  await git.reset(ResetMode.HARD);
   await git.checkout(['-B', branchName, 'origin/' + branchName]);
-  await git.checkout(config.baseBranch);
+  await git.checkout(config.currentBranch);
   await git.merge(['--ff-only', branchName]);
-  await git.push('origin', config.baseBranch);
+  await git.push('origin', config.currentBranch);
   limits.incrementLimit('prCommitsPerRunLimit');
 }
 
@@ -445,15 +468,9 @@ export async function getBranchLastCommitTime(
   }
 }
 
-export async function getBranchFiles(
-  branchName: string,
-  baseBranchName?: string
-): Promise<string[]> {
+export async function getBranchFiles(branchName: string): Promise<string[]> {
   try {
-    const diff = await git.diffSummary([
-      branchName,
-      baseBranchName || config.baseBranch,
-    ]);
+    const diff = await git.diffSummary([branchName, config.currentBranch]);
     return diff.files.map((file) => file.file);
   } catch (err) /* istanbul ignore next */ {
     checkForPlatformFailure(err);
@@ -474,7 +491,7 @@ export async function getFile(
   }
   try {
     const content = await git.show([
-      'origin/' + (branchName || config.baseBranch) + ':' + filePath,
+      'origin/' + (branchName || config.currentBranch) + ':' + filePath,
     ]);
     return content;
   } catch (err) {
@@ -491,6 +508,28 @@ export async function hasDiff(branchName: string): Promise<boolean> {
   }
 }
 
+/**
+ * File to commit
+ */
+export interface File {
+  /**
+   * Relative file path
+   */
+  name: string;
+
+  /**
+   * file contents
+   */
+  contents: string | Buffer;
+}
+
+export type CommitFilesConfig = {
+  branchName: string;
+  files: File[];
+  message: string;
+  force?: boolean;
+};
+
 export async function commitFiles({
   branchName,
   files,
@@ -499,20 +538,20 @@ export async function commitFiles({
 }: CommitFilesConfig): Promise<string | null> {
   logger.debug(`Committing files to branch ${branchName}`);
   if (!privateKeySet) {
-    await writePrivateKey(cwd);
+    await writePrivateKey(config.localDir);
     privateKeySet = true;
   }
   try {
-    await git.reset('hard');
+    await git.reset(ResetMode.HARD);
     await git.raw(['clean', '-fd']);
-    await git.checkout(['-B', branchName, 'origin/' + config.baseBranch]);
+    await git.checkout(['-B', branchName, 'origin/' + config.currentBranch]);
     const fileNames = [];
     const deleted = [];
     for (const file of files) {
       // istanbul ignore if
       if (file.name === '|delete|') {
         deleted.push(file.contents);
-      } else if (await isDirectory(join(cwd, file.name))) {
+      } else if (await isDirectory(join(config.localDir, file.name))) {
         fileNames.push(file.name);
         await git.add(file.name);
       } else {
@@ -524,7 +563,7 @@ export async function commitFiles({
         } else {
           contents = file.contents;
         }
-        await fs.outputFile(join(cwd, file.name), contents);
+        await fs.outputFile(join(config.localDir, file.name), contents);
       }
     }
     // istanbul ignore if
@@ -564,6 +603,7 @@ export async function commitFiles({
     const ref = `refs/heads/${branchName}:refs/remotes/origin/${branchName}`;
     await git.fetch(['origin', ref, '--depth=2', '--force']);
     config.branchExists[branchName] = true;
+    config.branchIsModified[branchName] = false;
     limits.incrementLimit('prCommitsPerRunLimit');
     return commit;
   } catch (err) /* istanbul ignore next */ {

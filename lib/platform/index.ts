@@ -3,7 +3,7 @@ import addrs from 'email-addresses';
 import { RenovateConfig } from '../config/common';
 import { PLATFORM_NOT_FOUND } from '../constants/error-messages';
 import { logger } from '../logger';
-import { setPrivateKey } from '../util/gitfs';
+import { setPrivateKey } from '../util/git';
 import * as hostRules from '../util/host-rules';
 import platforms from './api.generated';
 import { Platform } from './common';
@@ -88,12 +88,14 @@ export async function initPlatform(
   const platformInfo = await platform.initPlatform(config);
   const returnConfig: any = { ...config, ...platformInfo };
   let gitAuthor: string;
-  if (config && config.gitAuthor) {
+  if (config?.gitAuthor) {
     logger.debug(`Using configured gitAuthor (${config.gitAuthor})`);
     gitAuthor = config.gitAuthor;
-  } else if (!(platformInfo && platformInfo.gitAuthor)) {
-    logger.debug('Using default gitAuthor: Renovate Bot <bot@renovateapp.com>');
-    gitAuthor = 'Renovate Bot <bot@renovateapp.com>';
+  } else if (!platformInfo?.gitAuthor) {
+    logger.debug(
+      'Using default gitAuthor: Renovate Bot <renovate@whitesourcesoftware.com>'
+    );
+    gitAuthor = 'Renovate Bot <renovate@whitesourcesoftware.com>';
   } /* istanbul ignore next */ else {
     logger.debug('Using platform gitAuthor: ' + platformInfo.gitAuthor);
     gitAuthor = platformInfo.gitAuthor;

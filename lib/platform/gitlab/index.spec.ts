@@ -14,7 +14,7 @@ import {
   PR_STATE_OPEN,
 } from '../../constants/pull-requests';
 import { BranchStatus } from '../../types';
-import * as _gitfs from '../../util/gitfs';
+import * as _git from '../../util/git';
 import * as _hostRules from '../../util/host-rules';
 
 const gitlabApiHost = 'https://gitlab.com';
@@ -22,7 +22,7 @@ const gitlabApiHost = 'https://gitlab.com';
 describe('platform/gitlab', () => {
   let gitlab: Platform;
   let hostRules: jest.Mocked<typeof _hostRules>;
-  let gitfs: jest.Mocked<typeof _gitfs>;
+  let git: jest.Mocked<typeof _git>;
   beforeEach(async () => {
     // reset module
     jest.resetModules();
@@ -31,11 +31,11 @@ describe('platform/gitlab', () => {
     jest.mock('../../util/host-rules');
     jest.mock('delay');
     hostRules = require('../../util/host-rules');
-    jest.mock('../../util/gitfs');
-    gitfs = require('../../util/gitfs');
-    gitfs.branchExists.mockResolvedValue(true);
-    gitfs.isBranchStale.mockResolvedValue(true);
-    gitfs.getBranchCommit.mockResolvedValue(
+    jest.mock('../../util/git');
+    git = require('../../util/git');
+    git.branchExists.mockResolvedValue(true);
+    git.isBranchStale.mockResolvedValue(true);
+    git.getBranchCommit.mockResolvedValue(
       '0d9c7726c3d628b7e28af234595cfd20febdbf8e'
     );
     hostRules.find.mockReturnValue({
@@ -43,10 +43,6 @@ describe('platform/gitlab', () => {
     });
     httpMock.reset();
     httpMock.setup();
-  });
-
-  afterEach(async () => {
-    await gitlab.cleanRepo();
   });
 
   describe('initPlatform()', () => {
@@ -141,35 +137,16 @@ describe('platform/gitlab', () => {
   ): Promise<nock.Scope> {
     const repo = repoParams.repository;
     const justRepo = repo.split('/').slice(0, 2).join('/');
-    scope
-      .get(`/api/v4/projects/${encodeURIComponent(repo)}`)
-      .reply(
-        200,
-        repoResp || {
-          default_branch: 'master',
-          http_url_to_repo: `https://gitlab.com/${justRepo}.git`,
-        }
-      )
-      .get('/api/v4/user')
-      .reply(200, {
-        email: 'a@b.com',
-      });
+    scope.get(`/api/v4/projects/${encodeURIComponent(repo)}`).reply(
+      200,
+      repoResp || {
+        default_branch: 'master',
+        http_url_to_repo: `https://gitlab.com/${justRepo}.git`,
+      }
+    );
     await gitlab.initRepo(repoParams);
     return scope;
   }
-
-  describe('getRepoStatus()', () => {
-    it('exists', async () => {
-      await initRepo();
-      await gitlab.getRepoStatus();
-      expect(httpMock.getTrace()).toMatchSnapshot();
-    });
-  });
-  describe('cleanRepo()', () => {
-    it('exists', async () => {
-      expect(await gitlab.cleanRepo()).toMatchSnapshot();
-    });
-  });
 
   describe('initRepo', () => {
     it(`should throw error if disabled in renovate.json`, async () => {
@@ -199,11 +176,7 @@ describe('platform/gitlab', () => {
       httpMock
         .scope(gitlabApiHost)
         .get('/api/v4/projects/some%2Frepo%2Fproject')
-        .reply(200, [])
-        .get('/api/v4/user')
-        .reply(200, {
-          email: 'a@b.com',
-        });
+        .reply(200, []);
       await gitlab.initRepo({
         repository: 'some/repo/project',
         localDir: '',
@@ -312,8 +285,6 @@ describe('platform/gitlab', () => {
     it('should fall back if http_url_to_repo is empty', async () => {
       httpMock
         .scope(gitlabApiHost)
-        .get('/api/v4/user')
-        .reply(200, {})
         .get('/api/v4/projects/some%2Frepo%2Fproject')
         .reply(200, {
           default_branch: 'master',
@@ -370,78 +341,17 @@ describe('platform/gitlab', () => {
         .reply(200, {
           default_branch: 'master',
           http_url_to_repo: `https://gitlab.com/some/repo.git`,
-        })
-        .get('/api/v4/user')
-        .reply(200, {
-          email: 'a@b.com',
         });
       await gitlab.initRepo({
         repository: 'some/repo',
         localDir: '',
         optimizeForDisabled: false,
       });
-      await gitlab.setBaseBranch();
-      expect(httpMock.getTrace()).toMatchSnapshot();
-    });
-    it('uses default base branch', async () => {
-      httpMock
-        .scope(gitlabApiHost)
-        .get(`/api/v4/projects/some%2Frepo`)
-        .reply(200, {
-          default_branch: 'master',
-          http_url_to_repo: `https://gitlab.com/some/repo.git`,
-        })
-        .get('/api/v4/user')
-        .reply(200, {
-          email: 'a@b.com',
-        });
-      await gitlab.initRepo({
-        repository: 'some/repo',
-        localDir: '',
-        optimizeForDisabled: false,
-      });
-      await gitlab.setBaseBranch();
-      expect(httpMock.getTrace()).toMatchSnapshot();
-    });
-  });
-  describe('getFileList()', () => {
-    it('sends to gitFs', async () => {
-      await initRepo();
-      await gitlab.getFileList();
-      expect(httpMock.getTrace()).toMatchSnapshot();
-    });
-  });
-  describe('branchExists()', () => {
-    describe('getFileList()', () => {
-      it('sends to gitFs', async () => {
-        await initRepo();
-        await gitlab.branchExists('');
-        expect(httpMock.getTrace()).toMatchSnapshot();
-      });
-    });
-  });
-  describe('getAllRenovateBranches()', () => {
-    it('sends to gitFs', async () => {
-      await initRepo();
-      await gitlab.getAllRenovateBranches('');
+      await gitlab.setBaseBranch('master');
       expect(httpMock.getTrace()).toMatchSnapshot();
     });
   });
 
-  describe('getBranchLastCommitTime()', () => {
-    it('sends to gitFs', async () => {
-      await initRepo();
-      await gitlab.getBranchLastCommitTime('');
-      expect(httpMock.getTrace()).toMatchSnapshot();
-    });
-  });
-  describe('isBranchStale()', () => {
-    it('sends to gitFs', async () => {
-      await initRepo();
-      await gitlab.isBranchStale('');
-      expect(httpMock.getTrace()).toMatchSnapshot();
-    });
-  });
   describe('getBranchPr(branchName)', () => {
     it('should return null if no PR exists', async () => {
       const scope = await initRepo();
@@ -486,9 +396,7 @@ describe('platform/gitlab', () => {
         .get(
           '/api/v4/projects/some%2Frepo/repository/commits/0d9c7726c3d628b7e28af234595cfd20febdbf8e/statuses'
         )
-        .reply(200, [])
-        .get('/api/v4/projects/some%2Frepo/repository/branches/some-branch')
-        .reply(200, [{ status: 'success' }]);
+        .reply(200, []);
       const pr = await gitlab.getBranchPr('some-branch');
       expect(pr).toMatchSnapshot();
       expect(httpMock.getTrace()).toMatchSnapshot();
@@ -578,7 +486,7 @@ describe('platform/gitlab', () => {
     });
     it('throws repository-changed', async () => {
       expect.assertions(2);
-      gitfs.branchExists.mockResolvedValue(false);
+      git.branchExists.mockResolvedValue(false);
       await initRepo();
       await expect(gitlab.getBranchStatus('somebranch', [])).rejects.toThrow(
         REPOSITORY_CHANGED
@@ -660,13 +568,7 @@ describe('platform/gitlab', () => {
       }
     );
   });
-  describe('mergeBranch()', () => {
-    it('sends to gitFs', async () => {
-      await initRepo();
-      await gitlab.mergeBranch('branch');
-      expect(httpMock.getTrace()).toMatchSnapshot();
-    });
-  });
+
   describe('deleteBranch()', () => {
     it('sends to gitFs', async () => {
       const scope = await initRepo();
@@ -1072,6 +974,7 @@ describe('platform/gitlab', () => {
         });
       const pr = await gitlab.createPr({
         branchName: 'some-branch',
+        targetBranch: 'master',
         prTitle: 'some-title',
         prBody: 'the-body',
         labels: null,
@@ -1089,10 +992,10 @@ describe('platform/gitlab', () => {
         });
       const pr = await gitlab.createPr({
         branchName: 'some-branch',
+        targetBranch: 'master',
         prTitle: 'some-title',
         prBody: 'the-body',
         labels: [],
-        useDefaultBranch: true,
       });
       expect(pr).toMatchSnapshot();
       expect(httpMock.getTrace()).toMatchSnapshot();
@@ -1121,10 +1024,10 @@ describe('platform/gitlab', () => {
         .reply(200);
       await gitlab.createPr({
         branchName: 'some-branch',
+        targetBranch: 'master',
         prTitle: 'some-title',
         prBody: 'the-body',
         labels: [],
-        useDefaultBranch: true,
         platformOptions: {
           azureAutoComplete: false,
           statusCheckVerify: false,
@@ -1150,11 +1053,11 @@ describe('platform/gitlab', () => {
           diverged_commits_count: 5,
           source_branch: 'some-branch',
           target_branch: 'master',
-        })
-        .get('/api/v4/projects/undefined/repository/branches/some-branch')
-        .reply(200, { commit: {} });
+          assignees: [],
+        });
       const pr = await gitlab.getPr(12345);
       expect(pr).toMatchSnapshot();
+      expect(pr.hasAssignees).toBe(false);
       expect(httpMock.getTrace()).toMatchSnapshot();
     });
     it('returns the mergeable PR', async () => {
@@ -1171,15 +1074,17 @@ describe('platform/gitlab', () => {
           diverged_commits_count: 5,
           source_branch: 'some-branch',
           target_branch: 'master',
+          assignee: {
+            id: 1,
+          },
         })
         .get(
           '/api/v4/projects/some%2Frepo/repository/commits/0d9c7726c3d628b7e28af234595cfd20febdbf8e/statuses'
         )
-        .reply(200, [{ status: 'success' }])
-        .get('/api/v4/projects/some%2Frepo/repository/branches/some-branch')
-        .reply(200, { commit: null });
+        .reply(200, [{ status: 'success' }]);
       const pr = await gitlab.getPr(12345);
       expect(pr).toMatchSnapshot();
+      expect(pr.hasAssignees).toBe(true);
       expect(httpMock.getTrace()).toMatchSnapshot();
     });
     it('returns the PR with nonexisting branch', async () => {
@@ -1197,11 +1102,15 @@ describe('platform/gitlab', () => {
           diverged_commits_count: 2,
           source_branch: 'some-branch',
           target_branch: 'master',
-        })
-        .get('/api/v4/projects/undefined/repository/branches/some-branch')
-        .reply(404);
+          assignees: [
+            {
+              id: 1,
+            },
+          ],
+        });
       const pr = await gitlab.getPr(12345);
       expect(pr).toMatchSnapshot();
+      expect(pr.hasAssignees).toBe(true);
       expect(httpMock.getTrace()).toMatchSnapshot();
     });
   });
@@ -1242,30 +1151,6 @@ These updates have all been created already. Click a checkbox below to force a r
       expect(gitlab.getPrBody(prBody)).toMatchSnapshot();
     });
   });
-  describe('getFile()', () => {
-    it('sends to gitFs', async () => {
-      await initRepo();
-      expect(await gitlab.getFile('')).toMatchSnapshot();
-    });
-  });
-  describe('commitFiles()', () => {
-    it('sends to gitFs', async () => {
-      expect.assertions(1);
-      await initRepo();
-      await gitlab.commitFiles({
-        branchName: 'some-branch',
-        files: [{ name: 'SomeFile', contents: 'Some Content' }],
-        message: '',
-      });
-      expect(httpMock.getTrace()).toMatchSnapshot();
-    });
-  });
-  describe('getCommitMessages()', () => {
-    it('passes to git', async () => {
-      await initRepo();
-      expect(await gitlab.getCommitMessages()).toMatchSnapshot();
-    });
-  });
   describe('getVulnerabilityAlerts()', () => {
     it('returns empty', async () => {
       const res = await gitlab.getVulnerabilityAlerts();
@@ -1288,10 +1173,6 @@ These updates have all been created already. Click a checkbox below to force a r
           diverged_commits_count: 5,
           source_branch: 'some-branch',
           labels: ['foo', 'renovate', 'rebase'],
-        })
-        .get('/api/v4/projects/undefined/repository/branches/some-branch')
-        .reply(200, {
-          commit: {},
         })
         .put('/api/v4/projects/undefined/merge_requests/42')
         .reply(200);

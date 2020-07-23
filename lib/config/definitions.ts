@@ -387,32 +387,47 @@ const options: RenovateOptions[] = [
     default: false,
     admin: true,
   },
-  // Master Issue
+  // Dependency Dashboard
   {
-    name: 'masterIssue',
-    description: 'Whether to create a "Master Issue" within the repository.',
-    type: 'boolean',
-    default: false,
-  },
-  {
-    name: 'masterIssueApproval',
+    name: 'dependencyDashboard',
     description:
-      'Whether updates should require manual approval from within the Master Issue before creation.',
+      'Whether to create a "Dependency Dashboard" issue within the repository.',
     type: 'boolean',
     default: false,
   },
   {
-    name: 'masterIssueAutoclose',
+    name: 'dependencyDashboardApproval',
     description:
-      'Set to `true` and Renovate will autoclose the Master Issue if there are no updates.',
+      'Whether updates should require manual approval from within the Dependency Dashboard issue before creation.',
     type: 'boolean',
     default: false,
   },
   {
-    name: 'masterIssueTitle',
-    description: 'Title to use for the Master Issue',
+    name: 'dependencyDashboardAutoclose',
+    description:
+      'Set to `true` and Renovate will autoclose the Dependency Dashboard issue if there are no updates.',
+    type: 'boolean',
+    default: false,
+  },
+  {
+    name: 'dependencyDashboardTitle',
+    description: 'Title to use for the Dependency Dashboard issue',
     type: 'string',
-    default: `Update Dependencies (Renovate Bot)`,
+    default: `Dependency Dashboard`,
+  },
+  {
+    name: 'dependencyDashboardHeader',
+    description:
+      'Any text added here will be placed first in the Dependency Dashboard issue body.',
+    type: 'string',
+    default:
+      'This issue contains a list of Renovate updates and their statuses.',
+  },
+  {
+    name: 'dependencyDashboardFooter',
+    description:
+      'Any text added here will be placed last in the Dependency Dashboard issue body, with a divider separator before it.',
+    type: 'string',
   },
   {
     name: 'configWarningReuseIssue',
@@ -611,6 +626,7 @@ const options: RenovateOptions[] = [
     type: 'string',
     cli: false,
     admin: true,
+    stage: 'global',
   },
   {
     name: 'enabledManagers',
@@ -1188,7 +1204,7 @@ const options: RenovateOptions[] = [
     default: {
       groupName: null,
       schedule: [],
-      masterIssueApproval: false,
+      dependencyDashboardApproval: false,
       rangeStrategy: 'update-lockfile',
       commitMessageSuffix: '[SECURITY]',
     },
@@ -1693,7 +1709,6 @@ const options: RenovateOptions[] = [
     default: ['deprecationWarningIssues'],
     allowedValues: [
       'prIgnoreNotification',
-      'prEditNotification',
       'branchAutomergeFailure',
       'lockFileErrors',
       'artifactErrors',

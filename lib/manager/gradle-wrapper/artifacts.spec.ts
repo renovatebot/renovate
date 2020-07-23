@@ -2,24 +2,25 @@
 import { exec as _exec } from 'child_process';
 import { resolve } from 'path';
 import { readFile } from 'fs-extra';
-import Git from 'simple-git/promise';
 import { envMock, mockExecAll } from '../../../test/execUtil';
 import * as httpMock from '../../../test/httpMock';
 import {
   addReplacingSerializer,
   env,
+  fs,
   getName,
-  gitfs,
+  git,
   partial,
-  platform,
 } from '../../../test/util';
 import { setUtilConfig } from '../../util';
 import { BinarySource } from '../../util/exec/common';
 import { resetPrefetchedImages } from '../../util/exec/docker';
+import { StatusResult } from '../../util/git';
 import * as dcUpdate from '.';
 
 jest.mock('child_process');
-jest.mock('../../util/gitfs');
+jest.mock('../../util/fs');
+jest.mock('../../util/git');
 jest.mock('../../util/exec/env');
 
 const exec: jest.Mock<typeof _exec> = _exec as any;
@@ -51,7 +52,7 @@ describe(getName(__filename), () => {
     await setUtilConfig(config);
     resetPrefetchedImages();
 
-    gitfs.readLocalFile.mockResolvedValue('test');
+    fs.readLocalFile.mockResolvedValue('test');
   });
 
   afterEach(() => {
@@ -59,13 +60,13 @@ describe(getName(__filename), () => {
   });
 
   it('replaces existing value', async () => {
-    platform.getRepoStatus.mockResolvedValue({
+    git.getRepoStatus.mockResolvedValue({
       modified: [
         'gradle/wrapper/gradle-wrapper.properties',
         'gradlew',
         'gradlew.bat',
       ],
-    } as Git.StatusResult);
+    } as StatusResult);
 
     const execSnapshots = mockExecAll(exec);
 
@@ -110,8 +111,8 @@ describe(getName(__filename), () => {
 
   it('gradlew failed', async () => {
     const execSnapshots = mockExecAll(exec, new Error('failed'));
-    platform.getRepoStatus.mockResolvedValueOnce(
-      partial<Git.StatusResult>({
+    git.getRepoStatus.mockResolvedValueOnce(
+      partial<StatusResult>({
         modified: [],
       })
     );
@@ -135,8 +136,8 @@ describe(getName(__filename), () => {
         '038794feef1f4745c6347107b6726279d1c824f3fc634b60f86ace1e9fbd1768'
       );
 
-    platform.getRepoStatus.mockResolvedValueOnce(
-      partial<Git.StatusResult>({
+    git.getRepoStatus.mockResolvedValueOnce(
+      partial<StatusResult>({
         modified: ['gradle/wrapper/gradle-wrapper.properties'],
       })
     );

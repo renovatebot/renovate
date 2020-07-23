@@ -2,7 +2,7 @@ import { GetReleasesConfig, ReleaseResult } from '../common';
 import { getDependency } from './get';
 import { getRubygemsOrgDependency } from './get-rubygems-org';
 
-export async function getReleases({
+export function getReleases({
   lookupName,
   registryUrl,
 }: GetReleasesConfig): Promise<ReleaseResult | null> {

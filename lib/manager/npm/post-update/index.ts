@@ -1,14 +1,20 @@
 import path from 'path';
-import fs from 'fs-extra';
 import upath from 'upath';
-// eslint-disable-next-line import/no-unresolved
 import { SYSTEM_INSUFFICIENT_DISK_SPACE } from '../../../constants/error-messages';
 import { id as npmId } from '../../../datasource/npm';
 import { logger } from '../../../logger';
-import { platform } from '../../../platform';
 import { ExternalHostError } from '../../../types/errors/external-host-error';
 import { getChildProcessEnv } from '../../../util/exec/env';
-import { deleteLocalFile } from '../../../util/gitfs';
+import {
+  deleteLocalFile,
+  ensureDir,
+  outputFile,
+  readFile,
+  remove,
+  unlink,
+  writeFile,
+} from '../../../util/fs';
+import { branchExists, getFile, getRepoStatus } from '../../../util/git';
 import * as hostRules from '../../../util/host-rules';
 import { PackageFile, PostUpdateConfig, Upgrade } from '../../common';
 import * as lerna from './lerna';
@@ -118,14 +124,14 @@ export async function writeExistingFiles(
   const npmrcFile = upath.join(config.localDir, '.npmrc');
   if (config.npmrc) {
     logger.debug(`Writing repo .npmrc (${config.localDir})`);
-    await fs.outputFile(npmrcFile, config.npmrc);
+    await outputFile(npmrcFile, config.npmrc);
   } else if (config.ignoreNpmrcFile) {
     logger.debug('Removing ignored .npmrc file before artifact generation');
-    await fs.remove(npmrcFile);
+    await remove(npmrcFile);
   }
   if (config.yarnrc) {
     logger.debug(`Writing repo .yarnrc (${config.localDir})`);
-    await fs.outputFile(upath.join(config.localDir, '.yarnrc'), config.yarnrc);
+    await outputFile(upath.join(config.localDir, '.yarnrc'), config.yarnrc);
   }
   if (!packageFiles.npm) {
     return;
@@ -142,11 +148,11 @@ export async function writeExistingFiles(
     );
     const npmrc = packageFile.npmrc || config.npmrc;
     if (npmrc) {
-      await fs.outputFile(upath.join(basedir, '.npmrc'), npmrc);
+      await outputFile(upath.join(basedir, '.npmrc'), npmrc);
     }
     if (packageFile.yarnrc) {
       logger.debug(`Writing .yarnrc to ${basedir}`);
-      await fs.outputFile(
+      await outputFile(
         upath.join(basedir, '.yarnrc'),
         packageFile.yarnrc
           .replace('--install.pure-lockfile true', '')
@@ -161,10 +167,10 @@ export async function writeExistingFiles(
         config.reuseLockFiles === false
       ) {
         logger.debug(`Ensuring ${npmLock} is removed`);
-        await fs.remove(npmLockPath);
+        await remove(npmLockPath);
       } else {
         logger.debug(`Writing ${npmLock}`);
-        let existingNpmLock = await platform.getFile(npmLock);
+        let existingNpmLock = await getFile(npmLock);
         const widens = [];
         for (const upgrade of config.upgrades) {
           if (
@@ -191,7 +197,7 @@ export async function writeExistingFiles(
             );
           }
         }
-        await fs.outputFile(npmLockPath, existingNpmLock);
+        await outputFile(npmLockPath, existingNpmLock);
       }
     }
     const { yarnLock } = packageFile;
@@ -239,7 +245,7 @@ export async function writeUpdatedPackageFiles(
     } catch (err) {
       logger.warn({ err }, 'Error adding token to package files');
     }
-    await fs.outputFile(
+    await outputFile(
       upath.join(config.localDir, packageFile.name),
       JSON.stringify(massagedFile)
     );
@@ -265,7 +271,7 @@ async function getNpmrcContent(dir: string): Promise<string | null> {
   const npmrcFilePath = upath.join(dir, '.npmrc');
   let originalNpmrcContent = null;
   try {
-    originalNpmrcContent = await fs.readFile(npmrcFilePath, 'utf8');
+    originalNpmrcContent = await readFile(npmrcFilePath, 'utf8');
     logger.debug('npmrc file found in repository');
   } catch {
     logger.debug('No npmrc file found in repository');
@@ -288,7 +294,7 @@ async function updateNpmrcContent(
   try {
     const newContent = newNpmrc.join('\n');
     if (newContent !== originalContent) {
-      await fs.writeFile(npmrcFilePath, newContent);
+      await writeFile(npmrcFilePath, newContent);
     }
   } catch {
     logger.warn('Unable to write custom npmrc file');
@@ -303,13 +309,13 @@ async function resetNpmrcContent(
   const npmrcFilePath = upath.join(dir, '.npmrc');
   if (originalContent) {
     try {
-      await fs.writeFile(npmrcFilePath, originalContent);
+      await writeFile(npmrcFilePath, originalContent);
     } catch {
       logger.warn('Unable to reset npmrc to original contents');
     }
   } else {
     try {
-      await fs.unlink(npmrcFilePath);
+      await unlink(npmrcFilePath);
     } catch {
       logger.warn('Unable to delete custom npmrc');
     }
@@ -339,7 +345,7 @@ export async function getAdditionalFiles(
   if (
     config.updateType === 'lockFileMaintenance' &&
     config.reuseExistingBranch &&
-    (await platform.branchExists(config.branchName))
+    (await branchExists(config.branchName))
   ) {
     logger.debug('Skipping lockFileMaintenance update');
     return { artifactErrors, updatedArtifacts };
@@ -377,13 +383,13 @@ export async function getAdditionalFiles(
   ]);
   env.NPM_CONFIG_CACHE =
     env.NPM_CONFIG_CACHE || upath.join(config.cacheDir, './others/npm');
-  await fs.ensureDir(env.NPM_CONFIG_CACHE);
+  await ensureDir(env.NPM_CONFIG_CACHE);
   env.YARN_CACHE_FOLDER =
     env.YARN_CACHE_FOLDER || upath.join(config.cacheDir, './others/yarn');
-  await fs.ensureDir(env.YARN_CACHE_FOLDER);
+  await ensureDir(env.YARN_CACHE_FOLDER);
   env.npm_config_store =
     env.npm_config_store || upath.join(config.cacheDir, './others/pnpm');
-  await fs.ensureDir(env.npm_config_store);
+  await ensureDir(env.npm_config_store);
   env.NODE_ENV = 'dev';
 
   let token = '';
@@ -442,7 +448,7 @@ export async function getAdditionalFiles(
         stderr: res.stderr,
       });
     } else {
-      const existingContent = await platform.getFile(
+      const existingContent = await getFile(
         lockFile,
         config.reuseExistingBranch ? config.branchName : config.baseBranch
       );
@@ -508,7 +514,7 @@ export async function getAdditionalFiles(
         stderr: res.stderr,
       });
     } else {
-      const existingContent = await platform.getFile(
+      const existingContent = await getFile(
         lockFileName,
         config.reuseExistingBranch ? config.branchName : config.baseBranch
       );
@@ -520,9 +526,7 @@ export async function getAdditionalFiles(
         });
         // istanbul ignore next
         try {
-          const yarnrc = await platform.getFile(
-            upath.join(lockFileDir, '.yarnrc')
-          );
+          const yarnrc = await getFile(upath.join(lockFileDir, '.yarnrc'));
           if (yarnrc) {
             const mirrorLine = yarnrc
               .split('\n')
@@ -534,13 +538,13 @@ export async function getAdditionalFiles(
                 .replace(/\/?$/, '/');
               const resolvedPath = upath.join(lockFileDir, mirrorPath);
               logger.debug('Found yarn offline  mirror: ' + resolvedPath);
-              const status = await platform.getRepoStatus();
+              const status = await getRepoStatus();
               for (const f of status.modified.concat(status.not_added)) {
                 if (f.startsWith(resolvedPath)) {
                   const localModified = upath.join(config.localDir, f);
                   updatedArtifacts.push({
                     name: f,
-                    contents: await fs.readFile(localModified),
+                    contents: await readFile(localModified),
                   });
                 }
               }
@@ -610,7 +614,7 @@ export async function getAdditionalFiles(
         stderr: res.stderr,
       });
     } else {
-      const existingContent = await platform.getFile(
+      const existingContent = await getFile(
         lockFile,
         config.reuseExistingBranch ? config.branchName : config.baseBranch
       );
@@ -652,7 +656,7 @@ export async function getAdditionalFiles(
       additionalNpmrcContent
     );
     const res = await lerna.generateLockFiles(
-      lernaPackageFile.lernaClient,
+      lernaPackageFile,
       fullLearnaFileDir,
       config,
       env,
@@ -708,7 +712,7 @@ export async function getAdditionalFiles(
       for (const packageFile of packageFiles.npm) {
         const filename = packageFile.npmLock || packageFile.yarnLock;
         logger.trace('Checking for ' + filename);
-        const existingContent = await platform.getFile(
+        const existingContent = await getFile(
           filename,
           config.reuseExistingBranch ? config.branchName : config.baseBranch
         );
@@ -719,9 +723,9 @@ export async function getAdditionalFiles(
           try {
             let newContent: string;
             try {
-              newContent = await fs.readFile(lockFilePath, 'utf8');
+              newContent = await readFile(lockFilePath, 'utf8');
             } catch (err) {
-              newContent = await fs.readFile(
+              newContent = await readFile(
                 lockFilePath.replace(
                   'npm-shrinkwrap.json',
                   'package-lock.json'

@@ -62,7 +62,7 @@ async function getDependency(
   const dependency: ReleaseResult = { releases: null };
   logger.trace({ lookupUrl }, 'Pypi api got lookup');
   const rep = await http.getJson<PypiJSON>(lookupUrl);
-  const dep = rep && rep.body;
+  const dep = rep?.body;
   if (!dep) {
     logger.trace({ dependency: packageName }, 'pip package not found');
     return null;
@@ -162,7 +162,7 @@ async function getSimpleDependency(
   const lookupUrl = url.resolve(hostUrl, `${packageName}`);
   const dependency: ReleaseResult = { releases: null };
   const response = await http.get(lookupUrl);
-  const dep = response && response.body;
+  const dep = response?.body;
   if (!dep) {
     logger.trace({ dependency: packageName }, 'pip package not found');
     return null;
@@ -191,10 +191,30 @@ export async function getReleases({
   registryUrl,
 }: GetReleasesConfig): Promise<ReleaseResult | null> {
   const hostUrl = ensureTrailingSlash(registryUrl);
+
+  // not all simple indexes use this identifier, but most do
   if (hostUrl.endsWith('/simple/') || hostUrl.endsWith('/+simple/')) {
     logger.trace({ lookupName, hostUrl }, 'Looking up pypi simple dependency');
     return getSimpleDependency(lookupName, hostUrl);
   }
+
   logger.trace({ lookupName, hostUrl }, 'Looking up pypi api dependency');
-  return getDependency(lookupName, hostUrl, compatibility);
+  try {
+    // we need to resolve early here so we can catch any 404s and fallback to a simple lookup
+    const releases = await getDependency(lookupName, hostUrl, compatibility);
+    // the dep was found in the json api, return as-is
+    return releases;
+  } catch (err) {
+    if (err.statusCode !== 404) {
+      throw err;
+    }
+
+    // error contacting json-style api -- attempt to fallback to a simple-style api
+    logger.trace(
+      { lookupName, hostUrl },
+      'Looking up pypi simple dependency via fallback'
+    );
+    const releases = await getSimpleDependency(lookupName, hostUrl);
+    return releases;
+  }
 }

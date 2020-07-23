@@ -25,46 +25,56 @@ export async function ensureMasterIssue(
   config: RenovateConfig,
   branches: BranchConfig[]
 ): Promise<void> {
+  // legacy/migrated issue
+  const reuseTitle = 'Update Dependencies (Renovate Bot)';
   if (
     !(
-      config.masterIssue ||
+      config.dependencyDashboard ||
       branches.some(
-        (branch) => branch.masterIssueApproval || branch.masterIssuePrApproval
+        (branch) =>
+          branch.dependencyDashboardApproval ||
+          branch.dependencyDashboardPrApproval
       )
     )
   ) {
     return;
   }
-  logger.debug('Ensuring master issue');
+  logger.debug('Ensuring Dependency Dashboard');
   if (
     !branches.length ||
     branches.every((branch) => branch.res === 'automerged')
   ) {
-    if (config.masterIssueAutoclose) {
-      logger.debug('Closing master issue');
+    if (config.dependencyDashboardAutoclose) {
+      logger.debug('Closing Dependency Dashboard');
       if (config.dryRun) {
         logger.info(
-          'DRY-RUN: Would close Master Issue ' + config.masterIssueTitle
+          'DRY-RUN: Would close Dependency Dashboard ' +
+            config.dependencyDashboardTitle
         );
       } else {
-        await platform.ensureIssueClosing(config.masterIssueTitle);
+        await platform.ensureIssueClosing(config.dependencyDashboardTitle);
       }
       return;
     }
     if (config.dryRun) {
       logger.info(
-        'DRY-RUN: Would ensure Master Issue ' + config.masterIssueTitle
+        'DRY-RUN: Would ensure Dependency Dashboard ' +
+          config.dependencyDashboardTitle
       );
     } else {
       await platform.ensureIssue({
-        title: config.masterIssueTitle,
+        title: config.dependencyDashboardTitle,
+        reuseTitle,
         body:
           'This repository is up-to-date and has no outstanding updates open or pending.',
       });
     }
     return;
   }
-  let issueBody = `This [master issue](https://renovatebot.com/blog/master-issue) contains a list of Renovate updates and their statuses.\n\n`;
+  let issueBody = '';
+  if (config.dependencyDashboardHeader?.length) {
+    issueBody += `${config.dependencyDashboardHeader}\n\n`;
+  }
   const pendingApprovals = branches.filter(
     (branch) => branch.res === 'needs-approval'
   );
@@ -89,7 +99,8 @@ export async function ensureMasterIssue(
     issueBody += '\n';
   }
   const rateLimited = branches.filter(
-    (branch) => branch.res && branch.res.endsWith('pr-hourly-limit-reached')
+    (branch) =>
+      branch.res === 'pr-limit-reached' || branch.res === 'commit-limit-reached'
   );
   if (rateLimited.length) {
     issueBody += '## Rate Limited\n\n';
@@ -148,7 +159,8 @@ export async function ensureMasterIssue(
     'needs-approval',
     'needs-pr-approval',
     'not-scheduled',
-    'pr-hourly-limit-reached',
+    'pr-limit-reached',
+    'commit-limit-reached',
     'already-existed',
     'error',
     'automerged',
@@ -193,19 +205,19 @@ export async function ensureMasterIssue(
   }
 
   // istanbul ignore if
-  if (config.appMode) {
-    // TODO: how to know it's in appMode?
-    issueBody +=
-      '---\n<details><summary>Advanced</summary>\n\n- [ ] <!-- manual job -->Check this box to trigger a request for Renovate to run again on this repository\n\n</details>\n';
+  if (config.dependencyDashboardFooter?.length) {
+    issueBody += `---\n${config.dependencyDashboardFooter}\n`;
   }
 
   if (config.dryRun) {
     logger.info(
-      'DRY-RUN: Would ensure Master Issue ' + config.masterIssueTitle
+      'DRY-RUN: Would ensure Dependency Dashboard ' +
+        config.dependencyDashboardTitle
     );
   } else {
     await platform.ensureIssue({
-      title: config.masterIssueTitle,
+      title: config.dependencyDashboardTitle,
+      reuseTitle,
       body: issueBody,
     });
   }

@@ -37,7 +37,7 @@ export async function fetchJSONFile(
   }
 }
 
-export async function getPresetFromEndpoint(
+export function getPresetFromEndpoint(
   pkgName: string,
   filePreset: string,
   endpoint = Endpoint

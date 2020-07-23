@@ -1,10 +1,10 @@
-import { move, pathExists, readFile, remove } from 'fs-extra';
 import { validRange } from 'semver';
 import { quote } from 'shlex';
 import { join } from 'upath';
 import { SYSTEM_INSUFFICIENT_DISK_SPACE } from '../../../constants/error-messages';
 import { logger } from '../../../logger';
 import { ExecOptions, exec } from '../../../util/exec';
+import { move, pathExists, readFile, remove } from '../../../util/fs';
 import { PostUpdateConfig, Upgrade } from '../../common';
 import { getNodeConstraint } from './node-version';
 
@@ -34,10 +34,7 @@ export async function generateLockFile(
     const preCommands = [installNpm];
     const commands = [];
     let cmdOptions = '';
-    if (
-      (postUpdateOptions && postUpdateOptions.includes('npmDedupe')) ||
-      skipInstalls === false
-    ) {
+    if (postUpdateOptions?.includes('npmDedupe') || skipInstalls === false) {
       logger.debug('Performing node_modules install');
       cmdOptions += '--ignore-scripts --no-audit';
     } else {

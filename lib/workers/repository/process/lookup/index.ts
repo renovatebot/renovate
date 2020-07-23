@@ -364,7 +364,7 @@ export async function lookupUpdates(
     }
   }
   // Add digests if necessary
-  if (config.newDigest || (await supportsDigests(config))) {
+  if (config.newDigest || supportsDigests(config)) {
     if (
       config.currentDigest &&
       config.datasource !== datasourceGitSubmodules.id
@@ -429,6 +429,9 @@ export async function lookupUpdates(
         update.updateType = 'minor';
       }
     }
+  }
+  if (res.updates.length) {
+    delete res.skipReason;
   }
   // Strip out any non-changed ones
   res.updates = res.updates

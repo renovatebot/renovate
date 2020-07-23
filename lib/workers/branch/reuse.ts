@@ -1,6 +1,7 @@
 import { RenovateConfig } from '../../config';
 import { logger } from '../../logger';
 import { platform } from '../../platform';
+import { branchExists, isBranchModified, isBranchStale } from '../../util/git';
 
 type ParentBranch = {
   reuseExistingBranch: boolean;
@@ -12,8 +13,7 @@ export async function shouldReuseExistingBranch(
 ): Promise<ParentBranch> {
   const { branchName } = config;
   // Check if branch exists
-  const branchExists = await platform.branchExists(branchName);
-  if (!branchExists) {
+  if (!(await branchExists(branchName))) {
     logger.debug(`Branch needs creating`);
     return { reuseExistingBranch: false };
   }
@@ -50,24 +50,23 @@ export async function shouldReuseExistingBranch(
     (config.rebaseWhen === 'auto' && (await platform.getRepoForceRebase())) ||
     (config.automerge && config.automergeType === 'branch')
   ) {
-    const isBranchStale = await platform.isBranchStale(branchName);
-    if (isBranchStale) {
+    if (await isBranchStale(branchName)) {
       logger.debug(`Branch is stale and needs rebasing`);
       // We can rebase the branch only if no PR or PR can be rebased
-      if (!pr || !pr.isModified) {
-        return { reuseExistingBranch: false };
+      if (await isBranchModified(branchName)) {
+        // TODO: Warn here so that it appears in PR body
+        logger.debug('Cannot rebase branch as it has been modified');
+        return { reuseExistingBranch: true, isModified: true };
       }
-      // TODO: Warn here so that it appears in PR body
-      logger.debug('Cannot rebase branch');
-      return { reuseExistingBranch: true, isModified: true };
+      return { reuseExistingBranch: false };
     }
   }
 
   // Now check if PR is unmergeable. If so then we also rebase
-  if (pr && pr.isConflicted) {
+  if (pr?.isConflicted) {
     logger.debug('PR is conflicted');
 
-    if (!pr.isModified) {
+    if ((await isBranchModified(branchName)) === false) {
       logger.debug(`Branch is not mergeable and needs rebasing`);
       if (config.rebaseWhen === 'never') {
         logger.debug('Rebasing disabled by config');

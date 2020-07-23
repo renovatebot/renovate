@@ -1,7 +1,7 @@
 import is from '@sindresorhus/is';
 import { REPOSITORY_DISABLED } from '../../constants/error-messages';
 import { BranchStatus } from '../../types';
-import * as _gitfs from '../../util/gitfs';
+import * as _git from '../../util/git';
 import * as _hostRules from '../../util/host-rules';
 import { Platform, RepoParams } from '../common';
 
@@ -10,22 +10,22 @@ describe('platform/azure', () => {
   let azure: Platform;
   let azureApi: jest.Mocked<typeof import('./azure-got-wrapper')>;
   let azureHelper: jest.Mocked<typeof import('./azure-helper')>;
-  let gitfs: jest.Mocked<typeof _gitfs>;
+  let git: jest.Mocked<typeof _git>;
   beforeEach(async () => {
     // reset module
     jest.resetModules();
     jest.mock('./azure-got-wrapper');
     jest.mock('./azure-helper');
-    jest.mock('../../util/gitfs');
+    jest.mock('../../util/git');
     jest.mock('../../util/host-rules');
     hostRules = require('../../util/host-rules');
     require('../../util/sanitize').sanitize = jest.fn((input) => input);
     azure = await import('.');
     azureApi = require('./azure-got-wrapper');
     azureHelper = require('./azure-helper');
-    gitfs = require('../../util/gitfs');
-    gitfs.branchExists.mockResolvedValue(true);
-    gitfs.isBranchStale.mockResolvedValue(false);
+    git = require('../../util/git');
+    git.branchExists.mockResolvedValue(true);
+    git.isBranchStale.mockResolvedValue(false);
     hostRules.find.mockReturnValue({
       token: 'token',
     });
@@ -33,10 +33,6 @@ describe('platform/azure', () => {
       endpoint: 'https://dev.azure.com/renovate12345',
       token: 'token',
     });
-  });
-
-  afterEach(async () => {
-    await azure.cleanRepo();
   });
 
   // do we need the args?
@@ -140,12 +136,6 @@ describe('platform/azure', () => {
           ]),
         } as any)
     );
-    azureApi.gitApi.mockImplementationOnce(
-      () =>
-        ({
-          getBranch: jest.fn(() => ({ commit: { commitId: '1234' } })),
-        } as any)
-    );
     azureHelper.getProjectAndRepo.mockImplementationOnce(() => ({
       project: 'some-repo',
       repo: 'some-repo',
@@ -162,19 +152,6 @@ describe('platform/azure', () => {
       ...args,
     } as any);
   }
-
-  describe('getRepoStatus()', () => {
-    it('exists', async () => {
-      await initRepo();
-      expect(await azure.getRepoStatus()).toBeUndefined();
-    });
-  });
-
-  describe('cleanRepo()', () => {
-    it('exists', async () => {
-      await expect(azure.cleanRepo()).resolves.not.toThrow();
-    });
-  });
 
   describe('initRepo', () => {
     it(`should initialise the config for a repo`, async () => {
@@ -498,44 +475,6 @@ describe('platform/azure', () => {
       const pr = await azure.getPr(1234);
       expect(pr).toMatchSnapshot();
     });
-    it('should return a pr thats been modified', async () => {
-      await initRepo({ repository: 'some/repo' });
-      azureApi.gitApi.mockImplementation(
-        () =>
-          ({
-            getPullRequests: jest
-              .fn()
-              .mockReturnValue([])
-              .mockReturnValueOnce([
-                {
-                  pullRequestId: 1234,
-                },
-              ]),
-            getPullRequestLabels: jest.fn().mockReturnValue([]),
-            getPullRequestCommits: jest.fn().mockReturnValue([
-              {
-                author: {
-                  name: 'renovate',
-                },
-              },
-              {
-                author: {
-                  name: 'end user',
-                },
-              },
-            ]),
-          } as any)
-      );
-      azureHelper.getRenovatePRFormat.mockImplementation(
-        () =>
-          ({
-            number: 1234,
-            isModified: false,
-          } as any)
-      );
-      const pr = await azure.getPr(1234);
-      expect(pr).toMatchSnapshot();
-    });
   });
 
   describe('createPr()', () => {
@@ -561,6 +500,7 @@ describe('platform/azure', () => {
       );
       const pr = await azure.createPr({
         branchName: 'some-branch',
+        targetBranch: 'master',
         prTitle: 'The Title',
         prBody: 'Hello world',
         labels: ['deps', 'renovate'],
@@ -589,10 +529,10 @@ describe('platform/azure', () => {
       );
       const pr = await azure.createPr({
         branchName: 'some-branch',
+        targetBranch: 'master',
         prTitle: 'The Title',
         prBody: 'Hello world',
         labels: ['deps', 'renovate'],
-        useDefaultBranch: true,
       });
       expect(pr).toMatchSnapshot();
     });
@@ -629,10 +569,10 @@ describe('platform/azure', () => {
       azureHelper.getRenovatePRFormat.mockImplementation((x) => x as any);
       const pr = await azure.createPr({
         branchName: 'some-branch',
+        targetBranch: 'dev',
         prTitle: 'The Title',
         prBody: 'Hello world',
         labels: ['deps', 'renovate'],
-        useDefaultBranch: false,
         platformOptions: { azureAutoComplete: true },
       });
       expect(updateFn).toHaveBeenCalled();
@@ -835,7 +775,7 @@ describe('platform/azure', () => {
           } as any)
       );
       await azure.addAssignees(123, ['test@bonjour.fr', 'jyc', 'def']);
-      expect(azureApi.gitApi).toHaveBeenCalledTimes(4);
+      expect(azureApi.gitApi).toHaveBeenCalledTimes(3);
     });
   });
 
@@ -862,7 +802,7 @@ describe('platform/azure', () => {
           } as any)
       );
       await azure.addReviewers(123, ['test@bonjour.fr', 'jyc', 'def']);
-      expect(azureApi.gitApi).toHaveBeenCalledTimes(4);
+      expect(azureApi.gitApi).toHaveBeenCalledTimes(3);
     });
   });
 

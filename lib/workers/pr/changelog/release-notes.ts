@@ -249,7 +249,7 @@ export async function getReleaseNotesMdFileInner(
   }
 }
 
-export async function getReleaseNotesMdFile(
+export function getReleaseNotesMdFile(
   repository: string,
   apiBaseUrl: string
 ): Promise<{ changelogFile: string; changelogMd: string }> | null {
@@ -304,7 +304,7 @@ export async function getReleaseNotesMd(
               let url = `${baseUrl}${repository}/blob/master/${changelogFile}#`;
               url += title.join('-').replace(/[^A-Za-z0-9-]/g, '');
               body = massageBody(body, baseUrl);
-              if (body && body.length) {
+              if (body?.length) {
                 try {
                   body = linkify(body, {
                     repository: `${baseUrl}${repository}`,

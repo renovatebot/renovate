@@ -53,7 +53,7 @@ export async function fetchJSONFile(
   }
 }
 
-export async function getPresetFromEndpoint(
+export function getPresetFromEndpoint(
   pkgName: string,
   presetName: string,
   endpoint = Endpoint

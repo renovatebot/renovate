@@ -5,8 +5,6 @@
 declare interface Error {
   configFile?: string;
 
-  statusCode?: number;
-
   validationError?: string;
   validationMessage?: string;
 }

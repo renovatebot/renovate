@@ -33,7 +33,7 @@ export async function getReleases({
     throw err;
   }
 
-  const body = raw && raw.body;
+  const body = raw?.body;
   if (body) {
     const { versions, latest } = body;
     if (versions && latest) {

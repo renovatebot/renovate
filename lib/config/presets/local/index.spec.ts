@@ -17,26 +17,26 @@ describe(getName(__filename), () => {
   });
   describe('getPreset()', () => {
     it('throws for unsupported platform', async () => {
-      await expect(
-        local.getPreset({
+      await expect(async () => {
+        await local.getPreset({
           packageName: 'some/repo',
           presetName: 'default',
           baseConfig: {
             platform: 'unsupported-platform',
           },
-        })
-      ).rejects.toThrow();
+        });
+      }).rejects.toThrow();
     });
     it('throws for missing platform', async () => {
-      await expect(
-        local.getPreset({
+      await expect(async () => {
+        await local.getPreset({
           packageName: 'some/repo',
           presetName: 'default',
           baseConfig: {
             platform: undefined,
           },
-        })
-      ).rejects.toThrow();
+        });
+      }).rejects.toThrow();
     });
     it('forwards to gitlab', async () => {
       const content = await local.getPreset({

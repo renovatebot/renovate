@@ -1,11 +1,4 @@
-import {
-  BranchStatusConfig,
-  CommitFilesConfig,
-  File,
-  Platform,
-  RepoConfig,
-  RepoParams,
-} from '..';
+import { BranchStatusConfig, Platform, RepoConfig, RepoParams } from '..';
 import { partial } from '../../../test/util';
 import {
   REPOSITORY_ACCESS_FORBIDDEN,
@@ -18,7 +11,7 @@ import {
 } from '../../constants/error-messages';
 import { logger as _logger } from '../../logger';
 import { BranchStatus } from '../../types';
-import * as _gitfs from '../../util/gitfs';
+import * as _git from '../../util/git';
 import { setBaseUrl } from '../../util/http/gitea';
 import * as ght from './gitea-helper';
 
@@ -26,7 +19,7 @@ describe('platform/gitea', () => {
   let gitea: Platform;
   let helper: jest.Mocked<typeof import('./gitea-helper')>;
   let logger: jest.Mocked<typeof _logger>;
-  let gitfs: jest.Mocked<typeof _gitfs>;
+  let gitvcs: jest.Mocked<typeof _git>;
 
   const mockCommitHash = '0d9c7726c3d628b7e28af234595cfd20febdbf8e';
 
@@ -157,15 +150,15 @@ describe('platform/gitea', () => {
     jest.resetModules();
     jest.clearAllMocks();
     jest.mock('./gitea-helper');
-    jest.mock('../../util/gitfs');
+    jest.mock('../../util/git');
     jest.mock('../../logger');
 
     gitea = await import('.');
     helper = (await import('./gitea-helper')) as any;
     logger = (await import('../../logger')).logger as any;
-    gitfs = require('../../util/gitfs');
-    gitfs.isBranchStale.mockResolvedValue(false);
-    gitfs.getBranchCommit.mockResolvedValue(mockCommitHash);
+    gitvcs = require('../../util/git');
+    gitvcs.isBranchStale.mockResolvedValue(false);
+    gitvcs.getBranchCommit.mockResolvedValue(mockCommitHash);
 
     global.gitAuthor = { name: 'Renovate', email: 'renovate@example.com' };
 
@@ -328,19 +321,6 @@ describe('platform/gitea', () => {
     });
   });
 
-  describe('cleanRepo', () => {
-    it('does not throw an error with uninitialized repo', async () => {
-      await gitea.cleanRepo();
-      expect(gitfs.cleanRepo).toHaveBeenCalledTimes(1);
-    });
-
-    it('propagates call to storage class with initialized repo', async () => {
-      await initFakeRepo();
-      await gitea.cleanRepo();
-      expect(gitfs.cleanRepo).toHaveBeenCalledTimes(1);
-    });
-  });
-
   describe('setBranchStatus', () => {
     const setBranchStatus = async (bsc?: Partial<BranchStatusConfig>) => {
       await initFakeRepo();
@@ -406,20 +386,20 @@ describe('platform/gitea', () => {
       expect(logger.warn).toHaveBeenCalledTimes(1);
     });
 
-    it('should set default base branch', async () => {
+    it('should set base branch', async () => {
       await initFakeRepo();
-      await gitea.setBaseBranch();
+      await gitea.setBaseBranch('master');
 
-      expect(gitfs.setBaseBranch).toHaveBeenCalledTimes(1);
-      expect(gitfs.setBaseBranch).toHaveBeenCalledWith(mockRepo.default_branch);
+      expect(gitvcs.setBranch).toHaveBeenCalledTimes(1);
+      expect(gitvcs.setBranch).toHaveBeenCalledWith(mockRepo.default_branch);
     });
 
     it('should set custom base branch', async () => {
       await initFakeRepo();
       await gitea.setBaseBranch('devel');
 
-      expect(gitfs.setBaseBranch).toHaveBeenCalledTimes(1);
-      expect(gitfs.setBaseBranch).toHaveBeenCalledWith('devel');
+      expect(gitvcs.setBranch).toHaveBeenCalledTimes(1);
+      expect(gitvcs.setBranch).toHaveBeenCalledWith('devel');
     });
   });
 
@@ -602,21 +582,10 @@ describe('platform/gitea', () => {
     it('should block modified pull request for rebasing', async () => {
       const mockPR = mockPRs[0];
       helper.searchPRs.mockResolvedValueOnce(mockPRs);
-      helper.getBranch.mockResolvedValueOnce(
-        partial<ght.Branch>({
-          commit: {
-            id: mockCommitHash,
-            author: partial<ght.CommitUser>({
-              email: 'not-a-robot@renovatebot.com',
-            }),
-          },
-        })
-      );
       await initFakeRepo();
 
       const res = await gitea.getPr(mockPR.number);
       expect(res).toHaveProperty('number', mockPR.number);
-      expect(res).toHaveProperty('isModified', true);
     });
   });
 
@@ -722,6 +691,7 @@ describe('platform/gitea', () => {
       await gitea.setBaseBranch('devel');
       const res = await gitea.createPr({
         branchName: mockNewPR.head.label,
+        targetBranch: 'devel',
         prTitle: mockNewPR.title,
         prBody: mockNewPR.body,
       });
@@ -746,9 +716,9 @@ describe('platform/gitea', () => {
       await gitea.setBaseBranch('devel');
       const res = await gitea.createPr({
         branchName: mockNewPR.head.label,
+        targetBranch: 'master',
         prTitle: mockNewPR.title,
         prBody: mockNewPR.body,
-        useDefaultBranch: true,
       });
 
       expect(res).toHaveProperty('number', mockNewPR.number);
@@ -774,6 +744,7 @@ describe('platform/gitea', () => {
       await initFakeRepo();
       await gitea.createPr({
         branchName: mockNewPR.head.label,
+        targetBranch: 'master',
         prTitle: mockNewPR.title,
         prBody: mockNewPR.body,
         labels: mockLabels.map((l) => l.name),
@@ -797,9 +768,9 @@ describe('platform/gitea', () => {
       await gitea.getPrList();
       await gitea.createPr({
         branchName: mockNewPR.head.label,
+        targetBranch: 'master',
         prTitle: mockNewPR.title,
         prBody: mockNewPR.body,
-        useDefaultBranch: true,
       });
       const res = gitea.getPr(mockNewPR.number);
 
@@ -814,9 +785,9 @@ describe('platform/gitea', () => {
       await initFakeRepo();
       const res = await gitea.createPr({
         branchName: mockNewPR.head.label,
+        targetBranch: 'master',
         prTitle: mockNewPR.title,
         prBody: mockNewPR.body,
-        useDefaultBranch: true,
       });
 
       expect(res).toHaveProperty('number', mockNewPR.number);
@@ -829,9 +800,9 @@ describe('platform/gitea', () => {
       await initFakeRepo();
       const res = await gitea.createPr({
         branchName: mockNewPR.head.label,
+        targetBranch: 'master',
         prTitle: 'new-title',
         prBody: 'new-body',
-        useDefaultBranch: true,
       });
 
       expect(res).toHaveProperty('number', mockNewPR.number);
@@ -850,6 +821,7 @@ describe('platform/gitea', () => {
       await expect(
         gitea.createPr({
           branchName: mockNewPR.head.label,
+          targetBranch: 'master',
           prTitle: mockNewPR.title,
           prBody: mockNewPR.body,
         })
@@ -974,6 +946,7 @@ describe('platform/gitea', () => {
         {
           body: closedIssue.body,
           state: closedIssue.state,
+          title: 'closed-issue',
         }
       );
     });
@@ -998,6 +971,7 @@ describe('platform/gitea', () => {
         {
           body: closedIssue.body,
           state: 'open',
+          title: 'closed-issue',
         }
       );
     });
@@ -1289,8 +1263,8 @@ describe('platform/gitea', () => {
       await initFakeRepo();
       await gitea.deleteBranch('some-branch');
 
-      expect(gitfs.deleteBranch).toHaveBeenCalledTimes(1);
-      expect(gitfs.deleteBranch).toHaveBeenCalledWith('some-branch');
+      expect(gitvcs.deleteBranch).toHaveBeenCalledTimes(1);
+      expect(gitvcs.deleteBranch).toHaveBeenCalledWith('some-branch');
     });
 
     it('should not close pull request by default', async () => {
@@ -1311,8 +1285,8 @@ describe('platform/gitea', () => {
         mockRepo.full_name,
         mockPR.number
       );
-      expect(gitfs.deleteBranch).toHaveBeenCalledTimes(1);
-      expect(gitfs.deleteBranch).toHaveBeenCalledWith(mockPR.head.label);
+      expect(gitvcs.deleteBranch).toHaveBeenCalledTimes(1);
+      expect(gitvcs.deleteBranch).toHaveBeenCalledWith(mockPR.head.label);
     });
 
     it('should skip closing pull request if missing', async () => {
@@ -1321,8 +1295,8 @@ describe('platform/gitea', () => {
       await gitea.deleteBranch('missing', true);
 
       expect(helper.closePR).not.toHaveBeenCalled();
-      expect(gitfs.deleteBranch).toHaveBeenCalledTimes(1);
-      expect(gitfs.deleteBranch).toHaveBeenCalledWith('missing');
+      expect(gitvcs.deleteBranch).toHaveBeenCalledTimes(1);
+      expect(gitvcs.deleteBranch).toHaveBeenCalledWith('missing');
     });
   });
 
@@ -1347,126 +1321,11 @@ describe('platform/gitea', () => {
     });
   });
 
-  describe('commitFiles', () => {
-    it('should propagate call to storage class with default parent branch', async () => {
-      const commitConfig: CommitFilesConfig = {
-        branchName: 'some-branch',
-        files: [partial<File>({})],
-        message: 'some-message',
-      };
-
-      await initFakeRepo();
-      await gitea.commitFiles(commitConfig);
-
-      expect(gitfs.commitFiles).toHaveBeenCalledTimes(1);
-      expect(gitfs.commitFiles).toHaveBeenCalledWith({
-        ...commitConfig,
-      });
-    });
-  });
-
   describe('getPrBody', () => {
     it('should truncate body to 1000000 characters', () => {
       const excessiveBody = '*'.repeat(1000001);
 
       expect(gitea.getPrBody(excessiveBody)).toHaveLength(1000000);
-    });
-  });
-
-  describe('isBranchStale', () => {
-    it('propagates call to storage class', async () => {
-      await initFakeRepo();
-      await gitea.isBranchStale('some-branch');
-
-      expect(gitfs.isBranchStale).toHaveBeenCalledTimes(1);
-      expect(gitfs.isBranchStale).toHaveBeenCalledWith('some-branch');
-    });
-  });
-
-  describe('setBranchPrefix', () => {
-    it('should propagate call to storage class', async () => {
-      await initFakeRepo();
-      await gitea.setBranchPrefix('some-branch');
-
-      expect(gitfs.setBranchPrefix).toHaveBeenCalledTimes(1);
-      expect(gitfs.setBranchPrefix).toHaveBeenCalledWith('some-branch');
-    });
-  });
-
-  describe('branchExists', () => {
-    it('should propagate call to storage class', async () => {
-      await initFakeRepo();
-      await gitea.branchExists('some-branch');
-
-      expect(gitfs.branchExists).toHaveBeenCalledTimes(1);
-      expect(gitfs.branchExists).toHaveBeenCalledWith('some-branch');
-    });
-  });
-
-  describe('mergeBranch', () => {
-    it('should propagate call to storage class', async () => {
-      await initFakeRepo();
-      await gitea.mergeBranch('some-branch');
-
-      expect(gitfs.mergeBranch).toHaveBeenCalledTimes(1);
-      expect(gitfs.mergeBranch).toHaveBeenCalledWith('some-branch');
-    });
-  });
-
-  describe('getBranchLastCommitTime', () => {
-    it('should propagate call to storage class', async () => {
-      await initFakeRepo();
-      await gitea.getBranchLastCommitTime('some-branch');
-
-      expect(gitfs.getBranchLastCommitTime).toHaveBeenCalledTimes(1);
-      expect(gitfs.getBranchLastCommitTime).toHaveBeenCalledWith('some-branch');
-    });
-  });
-
-  describe('getFile', () => {
-    it('should propagate call to storage class', async () => {
-      await initFakeRepo();
-      await gitea.getFile('some-file', 'some-branch');
-
-      expect(gitfs.getFile).toHaveBeenCalledTimes(1);
-      expect(gitfs.getFile).toHaveBeenCalledWith('some-file', 'some-branch');
-    });
-  });
-
-  describe('getRepoStatus', () => {
-    it('should propagate call to storage class', async () => {
-      await initFakeRepo();
-      await gitea.getRepoStatus();
-
-      expect(gitfs.getRepoStatus).toHaveBeenCalledTimes(1);
-    });
-  });
-
-  describe('getFileList', () => {
-    it('propagates call to storage class', async () => {
-      await initFakeRepo();
-      await gitea.getFileList();
-
-      expect(gitfs.getFileList).toHaveBeenCalledTimes(1);
-    });
-  });
-
-  describe('getAllRenovateBranches', () => {
-    it('should propagate call to storage class', async () => {
-      await initFakeRepo();
-      await gitea.getAllRenovateBranches('some-prefix');
-
-      expect(gitfs.getAllRenovateBranches).toHaveBeenCalledTimes(1);
-      expect(gitfs.getAllRenovateBranches).toHaveBeenCalledWith('some-prefix');
-    });
-  });
-
-  describe('getCommitMessages', () => {
-    it('should propagate call to storage class', async () => {
-      await initFakeRepo();
-      await gitea.getCommitMessages();
-
-      expect(gitfs.getCommitMessages).toHaveBeenCalledTimes(1);
     });
   });
 

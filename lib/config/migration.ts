@@ -76,6 +76,21 @@ export function migrateConfig(
           );
         }
         delete migratedConfig.pathRules;
+      } else if (key === 'suppressNotifications') {
+        if (is.nonEmptyArray(val) && val.includes('prEditNotification')) {
+          isMigrated = true;
+          migratedConfig.suppressNotifications = migratedConfig.suppressNotifications.filter(
+            (item) => item !== 'prEditNotification'
+          );
+        }
+      } else if (key.startsWith('masterIssue')) {
+        isMigrated = true;
+        const newKey = key.replace('masterIssue', 'dependencyDashboard');
+        migratedConfig[newKey] = val;
+        if (optionTypes[newKey] === 'boolean' && val === 'true') {
+          migratedConfig[newKey] = true;
+        }
+        delete migratedConfig[key];
       } else if (key === 'gomodTidy') {
         isMigrated = true;
         if (val) {
@@ -204,6 +219,12 @@ export function migrateConfig(
           } else if (val[i] === ':library' || val[i] === 'config:library') {
             isMigrated = true;
             migratedConfig.extends[i] = 'config:js-lib';
+          } else if (val[i].startsWith(':masterIssue')) {
+            isMigrated = true;
+            migratedConfig.extends[i] = val[i].replace(
+              'masterIssue',
+              'dependencyDashboard'
+            );
           }
         }
       } else if (key === 'versionScheme') {
@@ -319,12 +340,7 @@ export function migrateConfig(
               schedules[i].replace(/( \d?\d)((a|p)m)/g, '$1:00$2')
             ).schedules[0];
             // Only migrate if the after time is greater than before, e.g. "after 10pm and before 5am"
-            if (
-              parsedSchedule &&
-              parsedSchedule.t_a &&
-              parsedSchedule.t_b &&
-              parsedSchedule.t_a[0] > parsedSchedule.t_b[0]
-            ) {
+            if (parsedSchedule?.t_a?.[0] > parsedSchedule?.t_b?.[0]) {
               isMigrated = true;
               const toSplit = schedules[i];
               schedules[i] = toSplit

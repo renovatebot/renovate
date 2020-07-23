@@ -42,7 +42,7 @@ export class GitlabHttp extends Http<GitlabHttpOptions, GitlabHttpOptions> {
         // Check if result is paginated
         try {
           const linkHeader = parseLinkHeader(result.headers.link as string);
-          if (linkHeader && linkHeader.next) {
+          if (linkHeader?.next) {
             result.body = result.body.concat(
               (await this.request<T>(linkHeader.next.url, opts)).body
             );
@@ -52,7 +52,7 @@ export class GitlabHttp extends Http<GitlabHttpOptions, GitlabHttpOptions> {
         }
       }
       return result;
-    } catch (err) /* istanbul ignore next */ {
+    } catch (err) {
       if (err.statusCode === 404) {
         logger.trace({ err }, 'GitLab 404');
         logger.debug({ url: err.url }, 'GitLab API 404');

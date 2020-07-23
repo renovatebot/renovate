@@ -5,11 +5,11 @@
     "@actions/core": "1.2.4",
     "@jest/reporters": "26.1.0",
     "@jest/test-result": "26.1.0",
-    "commander": "5.1.0",
+    "commander": "6.0.0",
     "eslint": "6.8.0",
     "fs-extra": "9.0.1",
     "got": "9.6.0",
-    "lodash": "4.17.15",
+    "lodash": "4.17.19",
     "shelljs": "0.8.4",
     "strip-ansi": "6.0.0"
   },

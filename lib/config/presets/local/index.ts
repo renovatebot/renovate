@@ -6,7 +6,7 @@ import { Preset, PresetConfig } from '../common';
 import * as github from '../github';
 import * as gitlab from '../gitlab';
 
-export async function getPreset({
+export function getPreset({
   packageName: pkgName,
   presetName = 'default',
   baseConfig,

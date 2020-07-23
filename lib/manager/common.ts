@@ -1,7 +1,7 @@
 import { ReleaseType } from 'semver';
 import { GlobalConfig, UpdateType, ValidationMessage } from '../config/common';
-import { File } from '../platform/common';
 import { RangeStrategy, SkipReason } from '../types';
+import { File } from '../util/git';
 
 export type Result<T> = T | Promise<T>;
 
@@ -171,6 +171,7 @@ export interface PackageDependency<T = Record<string, any>> extends Package<T> {
   replaceString?: string;
   autoReplaceStringTemplate?: string;
   depIndex?: number;
+  editFile?: string;
 }
 
 export interface Upgrade<T = Record<string, any>>

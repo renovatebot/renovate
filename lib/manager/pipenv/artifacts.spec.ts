@@ -2,17 +2,18 @@ import { exec as _exec } from 'child_process';
 import _fs from 'fs-extra';
 import { join } from 'upath';
 import { envMock, mockExecAll } from '../../../test/execUtil';
-import { mocked, platform } from '../../../test/util';
+import { git, mocked } from '../../../test/util';
 import { setUtilConfig } from '../../util';
 import { BinarySource } from '../../util/exec/common';
 import * as docker from '../../util/exec/docker';
 import * as _env from '../../util/exec/env';
-import { StatusResult } from '../../util/gitfs';
+import { StatusResult } from '../../util/git';
 import * as pipenv from './artifacts';
 
 jest.mock('fs-extra');
 jest.mock('child_process');
 jest.mock('../../util/exec/env');
+jest.mock('../../util/git');
 jest.mock('../../util/host-rules');
 jest.mock('../../util/http');
 
@@ -87,7 +88,7 @@ describe('.updateArtifacts()', () => {
   it('returns updated Pipfile.lock', async () => {
     fs.readFile.mockResolvedValueOnce('current pipfile.lock' as any);
     const execSnapshots = mockExecAll(exec);
-    platform.getRepoStatus.mockResolvedValue({
+    git.getRepoStatus.mockResolvedValue({
       modified: ['Pipfile.lock'],
     } as StatusResult);
     fs.readFile.mockReturnValueOnce('New Pipfile.lock' as any);
@@ -107,7 +108,7 @@ describe('.updateArtifacts()', () => {
     pipFileLock._meta.requires.python_version = '3.7';
     fs.readFile.mockResolvedValueOnce(JSON.stringify(pipFileLock) as any);
     const execSnapshots = mockExecAll(exec);
-    platform.getRepoStatus.mockResolvedValue({
+    git.getRepoStatus.mockResolvedValue({
       modified: ['Pipfile.lock'],
     } as StatusResult);
     fs.readFile.mockReturnValueOnce('new lock' as any);
@@ -138,7 +139,7 @@ describe('.updateArtifacts()', () => {
   it('returns updated Pipenv.lock when doing lockfile maintenance', async () => {
     fs.readFile.mockResolvedValueOnce('Current Pipfile.lock' as any);
     const execSnapshots = mockExecAll(exec);
-    platform.getRepoStatus.mockResolvedValue({
+    git.getRepoStatus.mockResolvedValue({
       modified: ['Pipfile.lock'],
     } as StatusResult);
     fs.readFile.mockReturnValueOnce('New Pipfile.lock' as any);

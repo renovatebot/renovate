@@ -8,6 +8,9 @@ type CallOptions = ExecOptions | null | undefined;
 
 export type ExecResult = { stdout: string; stderr: string } | Error;
 
+export type ExecMock = jest.Mock<typeof _exec>;
+export const exec: ExecMock = _exec as any;
+
 interface ExecSnapshot {
   cmd: string;
   options?: ExecOptions | null | undefined;
@@ -35,7 +38,7 @@ export function execSnapshot(cmd: string, options?: CallOptions): ExecSnapshot {
 const defaultExecResult = { stdout: '', stderr: '' };
 
 export function mockExecAll(
-  execFn: jest.Mock<typeof _exec>,
+  execFn: ExecMock,
   execResult: ExecResult = defaultExecResult
 ): ExecSnapshots {
   const snapshots: ExecSnapshots = [];
@@ -51,7 +54,7 @@ export function mockExecAll(
 }
 
 export function mockExecSequence(
-  execFn: jest.Mock<typeof _exec>,
+  execFn: ExecMock,
   execResults: ExecResult[]
 ): ExecSnapshots {
   const snapshots: ExecSnapshots = [];

@@ -1,8 +1,9 @@
 import { mock } from 'jest-mock-extended';
 import {
   RenovateConfig,
+  fs,
   getConfig,
-  gitfs,
+  git,
   platform,
 } from '../../../../../test/util';
 import { PR_STATE_OPEN } from '../../../../constants/pull-requests';
@@ -13,7 +14,8 @@ import { checkOnboardingBranch } from '.';
 const rebase: any = _rebase;
 
 jest.mock('../../../../workers/repository/onboarding/branch/rebase');
-jest.mock('../../../../util/gitfs');
+jest.mock('../../../../util/fs');
+jest.mock('../../../../util/git');
 
 describe('workers/repository/onboarding/branch', () => {
   describe('checkOnboardingBranch', () => {
@@ -21,7 +23,7 @@ describe('workers/repository/onboarding/branch', () => {
     beforeEach(() => {
       jest.resetAllMocks();
       config = getConfig();
-      platform.getFileList.mockResolvedValue([]);
+      git.getFileList.mockResolvedValue([]);
     });
     it('throws if no package files', async () => {
       await expect(checkOnboardingBranch(config)).rejects.toThrow();
@@ -31,11 +33,11 @@ describe('workers/repository/onboarding/branch', () => {
       await expect(checkOnboardingBranch(config)).rejects.toThrow();
     });
     it('has default onboarding config', async () => {
-      platform.getFileList.mockResolvedValue(['package.json']);
-      gitfs.readLocalFile.mockResolvedValue('{}');
+      git.getFileList.mockResolvedValue(['package.json']);
+      fs.readLocalFile.mockResolvedValue('{}');
       await checkOnboardingBranch(config);
       expect(
-        platform.commitFiles.mock.calls[0][0].files[0].contents
+        git.commitFiles.mock.calls[0][0].files[0].contents
       ).toMatchSnapshot();
     });
     it('handles skipped onboarding combined with requireConfig = false', async () => {
@@ -47,26 +49,26 @@ describe('workers/repository/onboarding/branch', () => {
     it('handles skipped onboarding, requireConfig=true, and a config file', async () => {
       config.requireConfig = true;
       config.onboarding = false;
-      platform.getFileList.mockResolvedValueOnce(['renovate.json']);
+      git.getFileList.mockResolvedValueOnce(['renovate.json']);
       const res = await checkOnboardingBranch(config);
       expect(res.repoIsOnboarded).toBe(true);
     });
     it('handles skipped onboarding, requireConfig=true, and no config file', async () => {
       config.requireConfig = true;
       config.onboarding = false;
-      platform.getFileList.mockResolvedValueOnce(['package.json']);
-      gitfs.readLocalFile.mockResolvedValueOnce('{}');
+      git.getFileList.mockResolvedValueOnce(['package.json']);
+      fs.readLocalFile.mockResolvedValueOnce('{}');
       const onboardingResult = checkOnboardingBranch(config);
       await expect(onboardingResult).rejects.toThrow('disabled');
     });
     it('detects repo is onboarded via file', async () => {
-      platform.getFileList.mockResolvedValueOnce(['renovate.json']);
+      git.getFileList.mockResolvedValueOnce(['renovate.json']);
       const res = await checkOnboardingBranch(config);
       expect(res.repoIsOnboarded).toBe(true);
     });
     it('detects repo is onboarded via package.json config', async () => {
-      platform.getFileList.mockResolvedValueOnce(['package.json']);
-      gitfs.readLocalFile.mockResolvedValueOnce('{"renovate":{}}');
+      git.getFileList.mockResolvedValueOnce(['package.json']);
+      fs.readLocalFile.mockResolvedValueOnce('{"renovate":{}}');
       const res = await checkOnboardingBranch(config);
       expect(res.repoIsOnboarded).toBe(true);
     });
@@ -88,26 +90,8 @@ describe('workers/repository/onboarding/branch', () => {
       ]);
       await expect(checkOnboardingBranch(config)).rejects.toThrow();
     });
-    it('creates onboarding branch with greenkeeper migration', async () => {
-      platform.getFileList.mockResolvedValue(['package.json']);
-      const pJsonContent = JSON.stringify({
-        name: 'some-name',
-        version: '0.0.1',
-        greenkeeper: {
-          label: 'greenkeeper',
-          branchName: 'greenkeeper--',
-          ignore: ['foo', 'bar'],
-        },
-      });
-      gitfs.readLocalFile.mockResolvedValue(pJsonContent);
-      platform.commitFiles.mockResolvedValueOnce('abc123');
-      await checkOnboardingBranch(config);
-      expect(
-        platform.commitFiles.mock.calls[0][0].files[0].contents
-      ).toMatchSnapshot();
-    });
     it('updates onboarding branch', async () => {
-      platform.getFileList.mockResolvedValue(['package.json']);
+      git.getFileList.mockResolvedValue(['package.json']);
       platform.findPr.mockResolvedValue(null);
       platform.getBranchPr.mockResolvedValueOnce(mock<Pr>());
       rebase.rebaseOnboardingBranch.mockResolvedValueOnce('abc123');
@@ -115,7 +99,7 @@ describe('workers/repository/onboarding/branch', () => {
       expect(res.repoIsOnboarded).toBe(false);
       expect(res.branchList).toEqual(['renovate/configure']);
       expect(platform.setBaseBranch).toHaveBeenCalledTimes(1);
-      expect(platform.commitFiles).toHaveBeenCalledTimes(0);
+      expect(git.commitFiles).toHaveBeenCalledTimes(0);
     });
   });
 });

@@ -127,7 +127,7 @@ function getDependencyParts(lookupName: string): MavenDependency {
 
 function extractVersions(metadata: XmlDocument): string[] {
   const versions = metadata.descendantWithPath('versioning.versions');
-  const elements = versions && versions.childrenNamed('version');
+  const elements = versions?.childrenNamed('version');
   if (!elements) {
     return [];
   }

@@ -40,7 +40,7 @@ async function getDatasource(goModule: string): Promise<DataSource | null> {
   if (sourceMatch) {
     const [, goSourceUrl] = sourceMatch;
     logger.debug({ goModule, goSourceUrl }, 'Go lookup source url');
-    if (goSourceUrl && goSourceUrl.startsWith('https://github.com/')) {
+    if (goSourceUrl?.startsWith('https://github.com/')) {
       return {
         datasource: github.id,
         lookupName: goSourceUrl
@@ -101,7 +101,7 @@ export async function getReleases({
         return res;
       }
     }
-    if (res && res.releases) {
+    if (res?.releases) {
       res.releases = res.releases.filter(
         (release) => release.version && release.version.startsWith('v')
       );

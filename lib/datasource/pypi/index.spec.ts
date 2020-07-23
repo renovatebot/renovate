@@ -46,6 +46,7 @@ describe('datasource/pypi', () => {
     });
     it('returns null for 404', async () => {
       httpMock.scope(baseUrl).get('/something/json').reply(404);
+      httpMock.scope(baseUrl).get('/something').reply(404);
       expect(
         await getPkgReleases({
           datasource,
@@ -302,6 +303,26 @@ describe('datasource/pypi', () => {
           depName: 'dj-database-url',
         })
       ).toBeNull();
+    });
+    it('fall back from json and process data from simple endpoint', async () => {
+      httpMock
+        .scope('https://custom.pypi.net/foo')
+        .get('/dj-database-url/json')
+        .reply(404);
+      httpMock
+        .scope('https://custom.pypi.net/foo')
+        .get('/dj-database-url')
+        .reply(200, htmlResponse + '');
+      const config = {
+        registryUrls: ['https://custom.pypi.net/foo'],
+      };
+      const result = await getPkgReleases({
+        datasource,
+        ...config,
+        depName: 'dj-database-url',
+      });
+      expect(result).toMatchSnapshot();
+      expect(httpMock.getTrace()).toMatchSnapshot();
     });
   });
 });
