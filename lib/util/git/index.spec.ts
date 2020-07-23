@@ -149,9 +149,6 @@ describe('platform/git', () => {
       expect(await git.isBranchModified('renovate/future_branch')).toBe(false);
       expect(await git.isBranchModified('renovate/future_branch')).toBe(false);
     });
-    it('should return false when more than one commit', async () => {
-      expect(await git.isBranchModified('renovate/modified_branch')).toBe(true);
-    });
     it('should return false when custom author', async () => {
       expect(await git.isBranchModified('renovate/custom_author')).toBe(true);
     });

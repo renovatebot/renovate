@@ -407,32 +407,6 @@ export async function isBranchModified(branchName: string): Promise<boolean> {
       'Cannot check modification for branch that does not exist: ' + branchName
     );
   }
-  try {
-    // Check that commit count is 1
-    const commitCount = (
-      await git.raw([
-        'rev-list',
-        '--count',
-        `origin/${branchName}`,
-        `^${config.currentBranch}`,
-      ])
-    ).trim();
-    if (commitCount !== '1') {
-      logger.debug(
-        { branchName, commitCount },
-        'Multiple commits found - branch has been modified'
-      );
-      config.branchIsModified[branchName] = true;
-      return true;
-    }
-    logger.debug('Branch has only one commit');
-  } catch (err) /* istanbul ignore next */ {
-    logger.warn(
-      { err },
-      'Error checking commit count - will assume that branch has been modified'
-    );
-    return true;
-  }
   // Retrieve the author of the most recent commit
   const lastAuthor = (
     await git.raw(['log', '-1', '--pretty=format:%ae', `origin/${branchName}`])
