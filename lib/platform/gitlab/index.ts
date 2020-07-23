@@ -447,7 +447,6 @@ export async function getPr(iid: number): Promise<Pr> {
   pr.number = pr.iid;
   pr.displayNumber = `Merge Request #${pr.iid}`;
   pr.body = pr.description;
-  pr.isStale = pr.diverged_commits_count > 0;
   pr.state = pr.state === 'opened' ? PR_STATE_OPEN : pr.state;
   pr.hasAssignees = !!(pr.assignee?.id || pr.assignees?.[0]?.id);
   delete pr.assignee;

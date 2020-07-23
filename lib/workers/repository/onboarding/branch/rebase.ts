@@ -1,8 +1,12 @@
 import { RenovateConfig } from '../../../../config';
 import { configFileNames } from '../../../../config/app-strings';
 import { logger } from '../../../../logger';
-import { platform } from '../../../../platform';
-import { commitFiles, getFile, isBranchModified } from '../../../../util/git';
+import {
+  commitFiles,
+  getFile,
+  isBranchModified,
+  isBranchStale,
+} from '../../../../util/git';
 import { getOnboardingConfig } from './config';
 
 const defaultConfigFile = configFileNames[0];
@@ -27,7 +31,6 @@ export async function rebaseOnboardingBranch(
   config: RenovateConfig
 ): Promise<string | null> {
   logger.debug('Checking if onboarding branch needs rebasing');
-  const pr = await platform.getBranchPr(config.onboardingBranch);
   if (await isBranchModified(config.onboardingBranch)) {
     logger.debug('Onboarding branch has been edited and cannot be rebased');
     return null;
@@ -37,7 +40,10 @@ export async function rebaseOnboardingBranch(
     config.onboardingBranch
   );
   const contents = getOnboardingConfig(config);
-  if (contents === existingContents && !pr.isStale) {
+  if (
+    contents === existingContents &&
+    !(await isBranchStale(config.onboardingBranch))
+  ) {
     logger.debug('Onboarding branch is up to date');
     return null;
   }

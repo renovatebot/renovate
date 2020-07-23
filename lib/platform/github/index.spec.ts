@@ -491,9 +491,7 @@ describe('platform/github', () => {
           },
           head: { ref: 'somebranch', repo: { full_name: 'some/repo' } },
           state: 'open',
-        })
-        .get('/repos/some/repo/git/refs/heads/master')
-        .reply(200, { object: { sha: '12345' } });
+        });
 
       await github.initRepo({
         repository: 'some/repo',
@@ -534,8 +532,6 @@ describe('platform/github', () => {
           head: { ref: 'somebranch', repo: { full_name: 'other/repo' } },
           state: 'open',
         })
-        .get('/repos/forked/repo/git/refs/heads/master')
-        .reply(200, { object: { sha: '12345' } })
         .patch('/repos/forked/repo/git/refs/heads/master')
         .reply(200);
       await github.initRepo({
@@ -1643,15 +1639,7 @@ describe('platform/github', () => {
     it('should return PR from graphql result', async () => {
       const scope = httpMock.scope(githubApiHost);
       initRepoMock(scope, 'some/repo');
-      scope
-        .post('/graphql')
-        .reply(200, graphqlOpenPullRequests)
-        .get('/repos/some/repo/git/refs/heads/master')
-        .reply(200, {
-          object: {
-            sha: '1234123412341234123412341234123412341234',
-          },
-        });
+      scope.post('/graphql').reply(200, graphqlOpenPullRequests);
       global.gitAuthor = {
         name: 'Renovate Bot',
         email: 'renovate@whitesourcesoftware.com',
@@ -1672,12 +1660,7 @@ describe('platform/github', () => {
         .reply(200, graphqlOpenPullRequests)
         .post('/graphql')
         .reply(200, graphqlClosedPullRequests)
-        .get('/repos/some/repo/git/refs/heads/master')
-        .reply(200, {
-          object: {
-            sha: '1234123412341234123412341234123412341234',
-          },
-        });
+        .get('/repos/some/repo/git/refs/heads/master');
       await github.initRepo({
         repository: 'some/repo',
       } as any);
@@ -1735,12 +1718,6 @@ describe('platform/github', () => {
           base: { sha: '1234' },
           commits: 1,
         })
-        .get('/repos/some/repo/git/refs/heads/master')
-        .reply(200, {
-          object: {
-            sha: '1234',
-          },
-        })
         .post('/graphql')
         .twice()
         .reply(404);
@@ -1763,12 +1740,6 @@ describe('platform/github', () => {
           base: { sha: '5678' },
           commits: 1,
           mergeable: true,
-        })
-        .get('/repos/some/repo/git/refs/heads/master')
-        .reply(200, {
-          object: {
-            sha: '1234',
-          },
         })
         .post('/graphql')
         .twice()

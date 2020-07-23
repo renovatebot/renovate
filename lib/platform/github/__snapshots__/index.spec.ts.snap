@@ -1866,7 +1866,6 @@ Object {
       "full_name": "some/repo",
     },
   },
-  "isStale": true,
   "number": 91,
   "sha": undefined,
   "state": "open",
@@ -2057,17 +2056,6 @@ Array [
     "method": "GET",
     "url": "https://api.github.com/repos/some/repo/pulls/91",
   },
-  Object {
-    "headers": Object {
-      "accept": "application/vnd.github.v3+json",
-      "accept-encoding": "gzip, deflate",
-      "authorization": "token abc123",
-      "host": "api.github.com",
-      "user-agent": "https://github.com/renovatebot/renovate",
-    },
-    "method": "GET",
-    "url": "https://api.github.com/repos/some/repo/git/refs/heads/master",
-  },
 ]
 `;
 
@@ -2089,7 +2077,6 @@ Object {
       "full_name": "other/repo",
     },
   },
-  "isStale": true,
   "number": 90,
   "sha": undefined,
   "state": "open",
@@ -2326,17 +2313,6 @@ Array [
     },
     "method": "GET",
     "url": "https://api.github.com/repos/some/repo/pulls/90",
-  },
-  Object {
-    "headers": Object {
-      "accept": "application/vnd.github.v3+json",
-      "accept-encoding": "gzip, deflate",
-      "authorization": "token abc123",
-      "host": "api.github.com",
-      "user-agent": "https://github.com/renovatebot/renovate",
-    },
-    "method": "GET",
-    "url": "https://api.github.com/repos/forked/repo/git/refs/heads/master",
   },
 ]
 `;
@@ -3008,17 +2984,6 @@ Array [
     "url": "https://api.github.com/graphql",
   },
   Object {
-    "headers": Object {
-      "accept": "application/vnd.github.v3+json",
-      "accept-encoding": "gzip, deflate",
-      "authorization": "token abc123",
-      "host": "api.github.com",
-      "user-agent": "https://github.com/renovatebot/renovate",
-    },
-    "method": "GET",
-    "url": "https://api.github.com/repos/some/repo/git/refs/heads/master",
-  },
-  Object {
     "graphql": Object {
       "query": Object {
         "repository": Object {
@@ -3073,7 +3038,6 @@ Object {
   "hasAssignees": false,
   "hasReviewers": false,
   "isConflicted": true,
-  "isStale": true,
   "number": 2500,
   "state": "open",
   "targetBranch": "master",
@@ -3199,17 +3163,6 @@ Array [
     },
     "method": "POST",
     "url": "https://api.github.com/graphql",
-  },
-  Object {
-    "headers": Object {
-      "accept": "application/vnd.github.v3+json",
-      "accept-encoding": "gzip, deflate",
-      "authorization": "token abc123",
-      "host": "api.github.com",
-      "user-agent": "https://github.com/renovatebot/renovate",
-    },
-    "method": "GET",
-    "url": "https://api.github.com/repos/some/repo/git/refs/heads/master",
   },
 ]
 `;
@@ -3594,17 +3547,6 @@ Array [
     "method": "GET",
     "url": "https://api.github.com/repos/some/repo/pulls/1234",
   },
-  Object {
-    "headers": Object {
-      "accept": "application/vnd.github.v3+json",
-      "accept-encoding": "gzip, deflate",
-      "authorization": "token abc123",
-      "host": "api.github.com",
-      "user-agent": "https://github.com/renovatebot/renovate",
-    },
-    "method": "GET",
-    "url": "https://api.github.com/repos/some/repo/git/refs/heads/master",
-  },
 ]
 `;
 
@@ -3617,7 +3559,6 @@ Object {
   "canMerge": true,
   "commits": 1,
   "displayNumber": "Pull Request #1",
-  "isStale": true,
   "mergeable": true,
   "number": 1,
   "sha": undefined,
@@ -3797,17 +3738,6 @@ Array [
     },
     "method": "GET",
     "url": "https://api.github.com/repos/some/repo/pulls/1234",
-  },
-  Object {
-    "headers": Object {
-      "accept": "application/vnd.github.v3+json",
-      "accept-encoding": "gzip, deflate",
-      "authorization": "token abc123",
-      "host": "api.github.com",
-      "user-agent": "https://github.com/renovatebot/renovate",
-    },
-    "method": "GET",
-    "url": "https://api.github.com/repos/some/repo/git/refs/heads/master",
   },
 ]
 `;

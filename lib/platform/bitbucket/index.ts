@@ -290,10 +290,6 @@ export async function getPr(prNo: number): Promise<Pr | null> {
     // TODO: Is that correct? Should we check getBranchStatus like gitlab?
     res.canMerge = !res.isConflicted;
   }
-  if (await git.branchExists(pr.source.branch.name)) {
-    res.isStale = await git.isBranchStale(pr.source.branch.name);
-  }
-
   res.hasReviewers = is.nonEmptyArray(pr.reviewers);
 
   return res;
