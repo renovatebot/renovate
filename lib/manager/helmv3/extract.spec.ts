@@ -47,9 +47,11 @@ describe('lib/manager/helm-requirements/extract', () => {
         - name: redis
           version: 0.9.0
           repository: https://kubernetes-charts.storage.googleapis.com/
+          enabled: true
         - name: postgresql
           version: 0.8.1
           repository: https://kubernetes-charts.storage.googleapis.com/
+          condition: postgresql.enabled
       `;
       const fileName = 'Chart.yaml';
       const result = extractPackageFile(content, fileName, {
@@ -139,7 +141,7 @@ describe('lib/manager/helm-requirements/extract', () => {
       });
       expect(result).toBeNull();
     });
-    it('returns empty deps if dependencies are an empty list', () => {
+    it('returns null if dependencies are an empty list', () => {
       fs.readLocalFile.mockResolvedValueOnce(`
       `);
       const content = `
@@ -156,7 +158,7 @@ describe('lib/manager/helm-requirements/extract', () => {
           stable: 'https://kubernetes-charts.storage.googleapis.com/',
         },
       });
-      expect(result.deps).toBeEmpty();
+      expect(result).toBeNull();
     });
     it('returns null if dependencies key is invalid', () => {
       const content = `
@@ -194,6 +196,26 @@ describe('lib/manager/helm-requirements/extract', () => {
       description: A Helm chart for Kubernetes
       name: example
       version: 0.1.0
+      `;
+      const fileName = 'Chart.yaml';
+      const result = extractPackageFile(content, fileName, {
+        aliases: {
+          stable: 'https://kubernetes-charts.storage.googleapis.com/',
+        },
+      });
+      expect(result).toBeNull();
+    });
+    it('returns null if name and version are missing for all dependencies', () => {
+      const content = `
+      apiVersion: v2
+      appVersion: "1.0"
+      description: A Helm chart for Kubernetes
+      name: example
+      version: 0.1.0
+      dependencies:
+        - repository: "test"
+        - repository: "test"
+          alias: "test"
       `;
       const fileName = 'Chart.yaml';
       const result = extractPackageFile(content, fileName, {

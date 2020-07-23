@@ -10,7 +10,12 @@ export function extractPackageFile(
   fileName: string,
   config: ExtractConfig
 ): PackageFile | null {
-  let chart;
+  let chart: {
+    apiVersion: string;
+    name: string;
+    version: string;
+    dependencies: Array<{ name: string; version: string; repository: string }>;
+  };
   try {
     chart = yaml.safeLoad(content, { json: true });
     if (!(chart?.apiVersion && chart.name && chart.version)) {
@@ -31,12 +36,19 @@ export function extractPackageFile(
     logger.debug({ fileName }, 'Failed to parse helm Chart.yaml');
     return null;
   }
-  let deps = [];
-  if (!(chart && is.array(chart.dependencies))) {
+  let deps: PackageDependency[] = [];
+  if (!is.nonEmptyArray(chart?.dependencies)) {
     logger.debug({ fileName }, 'Chart has no dependencies');
     return null;
   }
-  deps = chart.dependencies.map((dep) => {
+  const validDependencies = chart.dependencies.filter(
+    (dep) => is.nonEmptyString(dep.name) && is.nonEmptyString(dep.version)
+  );
+  if (!is.nonEmptyArray(validDependencies)) {
+    logger.debug('Name and/or version missing for all dependencies');
+    return null;
+  }
+  deps = validDependencies.map((dep) => {
     const res: PackageDependency = {
       depName: dep.name,
       currentValue: dep.version,
