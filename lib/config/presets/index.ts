@@ -1,5 +1,8 @@
 import is from '@sindresorhus/is';
-import { CONFIG_VALIDATION } from '../../constants/error-messages';
+import {
+  CONFIG_VALIDATION,
+  PLATFORM_RATE_LIMIT_EXCEEDED,
+} from '../../constants/error-messages';
 import { logger } from '../../logger';
 import { ExternalHostError } from '../../types/errors/external-host-error';
 import { regEx } from '../../util/regex';
@@ -205,6 +208,10 @@ export async function resolveConfigPresets(
           logger.debug({ preset, err }, 'Preset fetch error');
           // istanbul ignore if
           if (err instanceof ExternalHostError) {
+            throw err;
+          }
+          // istanbul ignore if
+          if (err.message === PLATFORM_RATE_LIMIT_EXCEEDED) {
             throw err;
           }
           const error = new Error(CONFIG_VALIDATION);

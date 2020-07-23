@@ -12,6 +12,9 @@ Array [
           },
           "defaultBranchRef": Object {
             "name": null,
+            "target": Object {
+              "oid": null,
+            },
           },
           "isArchived": null,
           "isFork": null,
@@ -26,7 +29,7 @@ Array [
       "accept": "application/vnd.github.v3+json",
       "accept-encoding": "gzip, deflate",
       "authorization": "token abc123",
-      "content-length": 280,
+      "content-length": "330",
       "content-type": "application/json",
       "host": "api.github.com",
       "user-agent": "https://github.com/renovatebot/renovate",
@@ -40,7 +43,7 @@ Array [
       "accept": "application/vnd.github.v3+json",
       "accept-encoding": "gzip, deflate",
       "authorization": "token abc123",
-      "content-length": 42,
+      "content-length": "42",
       "content-type": "application/json",
       "host": "api.github.com",
       "user-agent": "https://github.com/renovatebot/renovate",
@@ -63,6 +66,9 @@ Array [
           },
           "defaultBranchRef": Object {
             "name": null,
+            "target": Object {
+              "oid": null,
+            },
           },
           "isArchived": null,
           "isFork": null,
@@ -77,7 +83,7 @@ Array [
       "accept": "application/vnd.github.v3+json",
       "accept-encoding": "gzip, deflate",
       "authorization": "token abc123",
-      "content-length": 280,
+      "content-length": "330",
       "content-type": "application/json",
       "host": "api.github.com",
       "user-agent": "https://github.com/renovatebot/renovate",
@@ -91,7 +97,7 @@ Array [
       "accept": "application/vnd.github.v3+json",
       "accept-encoding": "gzip, deflate",
       "authorization": "token abc123",
-      "content-length": 72,
+      "content-length": "72",
       "content-type": "application/json",
       "host": "api.github.com",
       "user-agent": "https://github.com/renovatebot/renovate",
@@ -106,7 +112,6 @@ exports[`platform/github createPr() should create a draftPR if set in the settin
 Object {
   "branchName": "some-branch",
   "displayNumber": "Pull Request #123",
-  "isModified": false,
   "number": 123,
 }
 `;
@@ -123,6 +128,9 @@ Array [
           },
           "defaultBranchRef": Object {
             "name": null,
+            "target": Object {
+              "oid": null,
+            },
           },
           "isArchived": null,
           "isFork": null,
@@ -137,7 +145,7 @@ Array [
       "accept": "application/vnd.github.v3+json",
       "accept-encoding": "gzip, deflate",
       "authorization": "token abc123",
-      "content-length": 280,
+      "content-length": "330",
       "content-type": "application/json",
       "host": "api.github.com",
       "user-agent": "https://github.com/renovatebot/renovate",
@@ -151,7 +159,7 @@ Array [
       "accept": "application/vnd.github.v3+json",
       "accept-encoding": "gzip, deflate",
       "authorization": "token abc123",
-      "content-length": 112,
+      "content-length": "112",
       "content-type": "application/json",
       "host": "api.github.com",
       "user-agent": "https://github.com/renovatebot/renovate",
@@ -166,7 +174,6 @@ exports[`platform/github createPr() should create and return a PR object 1`] = `
 Object {
   "branchName": "some-branch",
   "displayNumber": "Pull Request #123",
-  "isModified": false,
   "number": 123,
 }
 `;
@@ -183,6 +190,9 @@ Array [
           },
           "defaultBranchRef": Object {
             "name": null,
+            "target": Object {
+              "oid": null,
+            },
           },
           "isArchived": null,
           "isFork": null,
@@ -197,7 +207,7 @@ Array [
       "accept": "application/vnd.github.v3+json",
       "accept-encoding": "gzip, deflate",
       "authorization": "token abc123",
-      "content-length": 280,
+      "content-length": "330",
       "content-type": "application/json",
       "host": "api.github.com",
       "user-agent": "https://github.com/renovatebot/renovate",
@@ -211,7 +221,7 @@ Array [
       "accept": "application/vnd.github.v3+json",
       "accept-encoding": "gzip, deflate",
       "authorization": "token abc123",
-      "content-length": 95,
+      "content-length": "95",
       "content-type": "application/json",
       "host": "api.github.com",
       "user-agent": "https://github.com/renovatebot/renovate",
@@ -225,7 +235,7 @@ Array [
       "accept": "application/vnd.github.v3+json",
       "accept-encoding": "gzip, deflate",
       "authorization": "token abc123",
-      "content-length": 19,
+      "content-length": "19",
       "content-type": "application/json",
       "host": "api.github.com",
       "user-agent": "https://github.com/renovatebot/renovate",
@@ -250,7 +260,7 @@ Array [
       "accept": "application/vnd.github.v3+json",
       "accept-encoding": "gzip, deflate",
       "authorization": "token abc123",
-      "content-length": 149,
+      "content-length": "149",
       "content-type": "application/json",
       "host": "api.github.com",
       "user-agent": "https://github.com/renovatebot/renovate",
@@ -287,7 +297,6 @@ exports[`platform/github createPr() should use defaultBranch 1`] = `
 Object {
   "branchName": "some-branch",
   "displayNumber": "Pull Request #123",
-  "isModified": false,
   "number": 123,
 }
 `;
@@ -304,6 +313,9 @@ Array [
           },
           "defaultBranchRef": Object {
             "name": null,
+            "target": Object {
+              "oid": null,
+            },
           },
           "isArchived": null,
           "isFork": null,
@@ -318,7 +330,7 @@ Array [
       "accept": "application/vnd.github.v3+json",
       "accept-encoding": "gzip, deflate",
       "authorization": "token abc123",
-      "content-length": 280,
+      "content-length": "330",
       "content-type": "application/json",
       "host": "api.github.com",
       "user-agent": "https://github.com/renovatebot/renovate",
@@ -332,7 +344,7 @@ Array [
       "accept": "application/vnd.github.v3+json",
       "accept-encoding": "gzip, deflate",
       "authorization": "token abc123",
-      "content-length": 98,
+      "content-length": "98",
       "content-type": "application/json",
       "host": "api.github.com",
       "user-agent": "https://github.com/renovatebot/renovate",
@@ -355,6 +367,9 @@ Array [
           },
           "defaultBranchRef": Object {
             "name": null,
+            "target": Object {
+              "oid": null,
+            },
           },
           "isArchived": null,
           "isFork": null,
@@ -369,7 +384,7 @@ Array [
       "accept": "application/vnd.github.v3+json",
       "accept-encoding": "gzip, deflate",
       "authorization": "token abc123",
-      "content-length": 280,
+      "content-length": "330",
       "content-type": "application/json",
       "host": "api.github.com",
       "user-agent": "https://github.com/renovatebot/renovate",
@@ -403,6 +418,9 @@ Array [
           },
           "defaultBranchRef": Object {
             "name": null,
+            "target": Object {
+              "oid": null,
+            },
           },
           "isArchived": null,
           "isFork": null,
@@ -417,7 +435,7 @@ Array [
       "accept": "application/vnd.github.v3+json",
       "accept-encoding": "gzip, deflate",
       "authorization": "token abc123",
-      "content-length": 280,
+      "content-length": "330",
       "content-type": "application/json",
       "host": "api.github.com",
       "user-agent": "https://github.com/renovatebot/renovate",
@@ -460,7 +478,7 @@ Array [
       "accept": "application/vnd.github.v3+json",
       "accept-encoding": "gzip, deflate",
       "authorization": "token abc123",
-      "content-length": 513,
+      "content-length": "513",
       "content-type": "application/json",
       "host": "api.github.com",
       "user-agent": "https://github.com/renovatebot/renovate",
@@ -485,7 +503,7 @@ Array [
       "accept": "application/vnd.github.v3+json",
       "accept-encoding": "gzip, deflate",
       "authorization": "token abc123",
-      "content-length": 44,
+      "content-length": "44",
       "content-type": "application/json",
       "host": "api.github.com",
       "user-agent": "https://github.com/renovatebot/renovate",
@@ -508,6 +526,9 @@ Array [
           },
           "defaultBranchRef": Object {
             "name": null,
+            "target": Object {
+              "oid": null,
+            },
           },
           "isArchived": null,
           "isFork": null,
@@ -522,7 +543,7 @@ Array [
       "accept": "application/vnd.github.v3+json",
       "accept-encoding": "gzip, deflate",
       "authorization": "token abc123",
-      "content-length": 280,
+      "content-length": "330",
       "content-type": "application/json",
       "host": "api.github.com",
       "user-agent": "https://github.com/renovatebot/renovate",
@@ -565,7 +586,7 @@ Array [
       "accept": "application/vnd.github.v3+json",
       "accept-encoding": "gzip, deflate",
       "authorization": "token abc123",
-      "content-length": 513,
+      "content-length": "513",
       "content-type": "application/json",
       "host": "api.github.com",
       "user-agent": "https://github.com/renovatebot/renovate",
@@ -590,7 +611,7 @@ Array [
       "accept": "application/vnd.github.v3+json",
       "accept-encoding": "gzip, deflate",
       "authorization": "token abc123",
-      "content-length": 44,
+      "content-length": "44",
       "content-type": "application/json",
       "host": "api.github.com",
       "user-agent": "https://github.com/renovatebot/renovate",
@@ -613,6 +634,9 @@ Array [
           },
           "defaultBranchRef": Object {
             "name": null,
+            "target": Object {
+              "oid": null,
+            },
           },
           "isArchived": null,
           "isFork": null,
@@ -627,7 +651,7 @@ Array [
       "accept": "application/vnd.github.v3+json",
       "accept-encoding": "gzip, deflate",
       "authorization": "token abc123",
-      "content-length": 280,
+      "content-length": "330",
       "content-type": "application/json",
       "host": "api.github.com",
       "user-agent": "https://github.com/renovatebot/renovate",
@@ -670,7 +694,7 @@ Array [
       "accept": "application/vnd.github.v3+json",
       "accept-encoding": "gzip, deflate",
       "authorization": "token abc123",
-      "content-length": 513,
+      "content-length": "513",
       "content-type": "application/json",
       "host": "api.github.com",
       "user-agent": "https://github.com/renovatebot/renovate",
@@ -684,7 +708,7 @@ Array [
       "accept": "application/vnd.github.v3+json",
       "accept-encoding": "gzip, deflate",
       "authorization": "token abc123",
-      "content-length": 44,
+      "content-length": "44",
       "content-type": "application/json",
       "host": "api.github.com",
       "user-agent": "https://github.com/renovatebot/renovate",
@@ -707,6 +731,9 @@ Array [
           },
           "defaultBranchRef": Object {
             "name": null,
+            "target": Object {
+              "oid": null,
+            },
           },
           "isArchived": null,
           "isFork": null,
@@ -721,7 +748,7 @@ Array [
       "accept": "application/vnd.github.v3+json",
       "accept-encoding": "gzip, deflate",
       "authorization": "token abc123",
-      "content-length": 280,
+      "content-length": "330",
       "content-type": "application/json",
       "host": "api.github.com",
       "user-agent": "https://github.com/renovatebot/renovate",
@@ -764,7 +791,7 @@ Array [
       "accept": "application/vnd.github.v3+json",
       "accept-encoding": "gzip, deflate",
       "authorization": "token abc123",
-      "content-length": 513,
+      "content-length": "513",
       "content-type": "application/json",
       "host": "api.github.com",
       "user-agent": "https://github.com/renovatebot/renovate",
@@ -798,6 +825,9 @@ Array [
           },
           "defaultBranchRef": Object {
             "name": null,
+            "target": Object {
+              "oid": null,
+            },
           },
           "isArchived": null,
           "isFork": null,
@@ -812,7 +842,7 @@ Array [
       "accept": "application/vnd.github.v3+json",
       "accept-encoding": "gzip, deflate",
       "authorization": "token abc123",
-      "content-length": 280,
+      "content-length": "330",
       "content-type": "application/json",
       "host": "api.github.com",
       "user-agent": "https://github.com/renovatebot/renovate",
@@ -855,7 +885,7 @@ Array [
       "accept": "application/vnd.github.v3+json",
       "accept-encoding": "gzip, deflate",
       "authorization": "token abc123",
-      "content-length": 513,
+      "content-length": "513",
       "content-type": "application/json",
       "host": "api.github.com",
       "user-agent": "https://github.com/renovatebot/renovate",
@@ -889,6 +919,9 @@ Array [
           },
           "defaultBranchRef": Object {
             "name": null,
+            "target": Object {
+              "oid": null,
+            },
           },
           "isArchived": null,
           "isFork": null,
@@ -903,7 +936,7 @@ Array [
       "accept": "application/vnd.github.v3+json",
       "accept-encoding": "gzip, deflate",
       "authorization": "token abc123",
-      "content-length": 280,
+      "content-length": "330",
       "content-type": "application/json",
       "host": "api.github.com",
       "user-agent": "https://github.com/renovatebot/renovate",
@@ -946,7 +979,7 @@ Array [
       "accept": "application/vnd.github.v3+json",
       "accept-encoding": "gzip, deflate",
       "authorization": "token abc123",
-      "content-length": 513,
+      "content-length": "513",
       "content-type": "application/json",
       "host": "api.github.com",
       "user-agent": "https://github.com/renovatebot/renovate",
@@ -991,6 +1024,9 @@ Array [
           },
           "defaultBranchRef": Object {
             "name": null,
+            "target": Object {
+              "oid": null,
+            },
           },
           "isArchived": null,
           "isFork": null,
@@ -1005,7 +1041,7 @@ Array [
       "accept": "application/vnd.github.v3+json",
       "accept-encoding": "gzip, deflate",
       "authorization": "token abc123",
-      "content-length": 280,
+      "content-length": "330",
       "content-type": "application/json",
       "host": "api.github.com",
       "user-agent": "https://github.com/renovatebot/renovate",
@@ -1048,7 +1084,7 @@ Array [
       "accept": "application/vnd.github.v3+json",
       "accept-encoding": "gzip, deflate",
       "authorization": "token abc123",
-      "content-length": 513,
+      "content-length": "513",
       "content-type": "application/json",
       "host": "api.github.com",
       "user-agent": "https://github.com/renovatebot/renovate",
@@ -1113,7 +1149,7 @@ Array [
       "accept": "application/vnd.github.v3+json",
       "accept-encoding": "gzip, deflate",
       "authorization": "token abc123",
-      "content-length": 425,
+      "content-length": "425",
       "content-type": "application/json",
       "host": "api.github.com",
       "user-agent": "https://github.com/renovatebot/renovate",
@@ -1167,7 +1203,7 @@ Array [
       "accept": "application/vnd.github.v3+json",
       "accept-encoding": "gzip, deflate",
       "authorization": "token abc123",
-      "content-length": 425,
+      "content-length": "425",
       "content-type": "application/json",
       "host": "api.github.com",
       "user-agent": "https://github.com/renovatebot/renovate",
@@ -1181,7 +1217,7 @@ Array [
       "accept": "application/vnd.github.v3+json",
       "accept-encoding": "gzip, deflate",
       "authorization": "token abc123",
-      "content-length": 42,
+      "content-length": "42",
       "content-type": "application/json",
       "host": "api.github.com",
       "user-agent": "https://github.com/renovatebot/renovate",
@@ -1224,7 +1260,7 @@ Array [
       "accept": "application/vnd.github.v3+json",
       "accept-encoding": "gzip, deflate",
       "authorization": "token abc123",
-      "content-length": 425,
+      "content-length": "425",
       "content-type": "application/json",
       "host": "api.github.com",
       "user-agent": "https://github.com/renovatebot/renovate",
@@ -1278,7 +1314,7 @@ Array [
       "accept": "application/vnd.github.v3+json",
       "accept-encoding": "gzip, deflate",
       "authorization": "token abc123",
-      "content-length": 425,
+      "content-length": "425",
       "content-type": "application/json",
       "host": "api.github.com",
       "user-agent": "https://github.com/renovatebot/renovate",
@@ -1303,7 +1339,7 @@ Array [
       "accept": "application/vnd.github.v3+json",
       "accept-encoding": "gzip, deflate",
       "authorization": "token abc123",
-      "content-length": 40,
+      "content-length": "40",
       "content-type": "application/json",
       "host": "api.github.com",
       "user-agent": "https://github.com/renovatebot/renovate",
@@ -1346,7 +1382,7 @@ Array [
       "accept": "application/vnd.github.v3+json",
       "accept-encoding": "gzip, deflate",
       "authorization": "token abc123",
-      "content-length": 425,
+      "content-length": "425",
       "content-type": "application/json",
       "host": "api.github.com",
       "user-agent": "https://github.com/renovatebot/renovate",
@@ -1360,7 +1396,7 @@ Array [
       "accept": "application/vnd.github.v3+json",
       "accept-encoding": "gzip, deflate",
       "authorization": "token abc123",
-      "content-length": 18,
+      "content-length": "18",
       "content-type": "application/json",
       "host": "api.github.com",
       "user-agent": "https://github.com/renovatebot/renovate",
@@ -1414,7 +1450,7 @@ Array [
       "accept": "application/vnd.github.v3+json",
       "accept-encoding": "gzip, deflate",
       "authorization": "token abc123",
-      "content-length": 425,
+      "content-length": "425",
       "content-type": "application/json",
       "host": "api.github.com",
       "user-agent": "https://github.com/renovatebot/renovate",
@@ -1457,7 +1493,7 @@ Array [
       "accept": "application/vnd.github.v3+json",
       "accept-encoding": "gzip, deflate",
       "authorization": "token abc123",
-      "content-length": 425,
+      "content-length": "425",
       "content-type": "application/json",
       "host": "api.github.com",
       "user-agent": "https://github.com/renovatebot/renovate",
@@ -1511,7 +1547,7 @@ Array [
       "accept": "application/vnd.github.v3+json",
       "accept-encoding": "gzip, deflate",
       "authorization": "token abc123",
-      "content-length": 425,
+      "content-length": "425",
       "content-type": "application/json",
       "host": "api.github.com",
       "user-agent": "https://github.com/renovatebot/renovate",
@@ -1565,7 +1601,7 @@ Array [
       "accept": "application/vnd.github.v3+json",
       "accept-encoding": "gzip, deflate",
       "authorization": "token abc123",
-      "content-length": 425,
+      "content-length": "425",
       "content-type": "application/json",
       "host": "api.github.com",
       "user-agent": "https://github.com/renovatebot/renovate",
@@ -1590,7 +1626,7 @@ Array [
       "accept": "application/vnd.github.v3+json",
       "accept-encoding": "gzip, deflate",
       "authorization": "token abc123",
-      "content-length": 57,
+      "content-length": "57",
       "content-type": "application/json",
       "host": "api.github.com",
       "user-agent": "https://github.com/renovatebot/renovate",
@@ -1633,7 +1669,7 @@ Array [
       "accept": "application/vnd.github.v3+json",
       "accept-encoding": "gzip, deflate",
       "authorization": "token abc123",
-      "content-length": 425,
+      "content-length": "425",
       "content-type": "application/json",
       "host": "api.github.com",
       "user-agent": "https://github.com/renovatebot/renovate",
@@ -1647,7 +1683,7 @@ Array [
       "accept": "application/vnd.github.v3+json",
       "accept-encoding": "gzip, deflate",
       "authorization": "token abc123",
-      "content-length": 18,
+      "content-length": "18",
       "content-type": "application/json",
       "host": "api.github.com",
       "user-agent": "https://github.com/renovatebot/renovate",
@@ -1690,7 +1726,7 @@ Array [
       "accept": "application/vnd.github.v3+json",
       "accept-encoding": "gzip, deflate",
       "authorization": "token abc123",
-      "content-length": 425,
+      "content-length": "425",
       "content-type": "application/json",
       "host": "api.github.com",
       "user-agent": "https://github.com/renovatebot/renovate",
@@ -1744,7 +1780,7 @@ Array [
       "accept": "application/vnd.github.v3+json",
       "accept-encoding": "gzip, deflate",
       "authorization": "token abc123",
-      "content-length": 425,
+      "content-length": "425",
       "content-type": "application/json",
       "host": "api.github.com",
       "user-agent": "https://github.com/renovatebot/renovate",
@@ -1815,6 +1851,9 @@ Array [
           },
           "defaultBranchRef": Object {
             "name": null,
+            "target": Object {
+              "oid": null,
+            },
           },
           "isArchived": null,
           "isFork": null,
@@ -1829,7 +1868,7 @@ Array [
       "accept": "application/vnd.github.v3+json",
       "accept-encoding": "gzip, deflate",
       "authorization": "token abc123",
-      "content-length": 280,
+      "content-length": "330",
       "content-type": "application/json",
       "host": "api.github.com",
       "user-agent": "https://github.com/renovatebot/renovate",
@@ -1869,8 +1908,6 @@ Object {
       "full_name": "some/repo",
     },
   },
-  "isModified": false,
-  "isStale": true,
   "number": 91,
   "sha": undefined,
   "state": "open",
@@ -1889,6 +1926,9 @@ Array [
           },
           "defaultBranchRef": Object {
             "name": null,
+            "target": Object {
+              "oid": null,
+            },
           },
           "isArchived": null,
           "isFork": null,
@@ -1903,7 +1943,7 @@ Array [
       "accept": "application/vnd.github.v3+json",
       "accept-encoding": "gzip, deflate",
       "authorization": "token abc123",
-      "content-length": 280,
+      "content-length": "330",
       "content-type": "application/json",
       "host": "api.github.com",
       "user-agent": "https://github.com/renovatebot/renovate",
@@ -1999,7 +2039,7 @@ Array [
       "accept": "application/vnd.github.merge-info-preview+json, application/vnd.github.v3+json",
       "accept-encoding": "gzip, deflate",
       "authorization": "token abc123",
-      "content-length": 1413,
+      "content-length": "1413",
       "content-type": "application/json",
       "host": "api.github.com",
       "user-agent": "https://github.com/renovatebot/renovate",
@@ -2042,7 +2082,7 @@ Array [
       "accept": "application/vnd.github.v3+json",
       "accept-encoding": "gzip, deflate",
       "authorization": "token abc123",
-      "content-length": 513,
+      "content-length": "513",
       "content-type": "application/json",
       "host": "api.github.com",
       "user-agent": "https://github.com/renovatebot/renovate",
@@ -2060,17 +2100,6 @@ Array [
     },
     "method": "GET",
     "url": "https://api.github.com/repos/some/repo/pulls/91",
-  },
-  Object {
-    "headers": Object {
-      "accept": "application/vnd.github.v3+json",
-      "accept-encoding": "gzip, deflate",
-      "authorization": "token abc123",
-      "host": "api.github.com",
-      "user-agent": "https://github.com/renovatebot/renovate",
-    },
-    "method": "GET",
-    "url": "https://api.github.com/repos/some/repo/git/refs/heads/master",
   },
 ]
 `;
@@ -2093,8 +2122,6 @@ Object {
       "full_name": "other/repo",
     },
   },
-  "isModified": false,
-  "isStale": true,
   "number": 90,
   "sha": undefined,
   "state": "open",
@@ -2113,6 +2140,9 @@ Array [
           },
           "defaultBranchRef": Object {
             "name": null,
+            "target": Object {
+              "oid": null,
+            },
           },
           "isArchived": null,
           "isFork": null,
@@ -2127,24 +2157,13 @@ Array [
       "accept": "application/vnd.github.v3+json",
       "accept-encoding": "gzip, deflate",
       "authorization": "token abc123",
-      "content-length": 280,
+      "content-length": "330",
       "content-type": "application/json",
       "host": "api.github.com",
       "user-agent": "https://github.com/renovatebot/renovate",
     },
     "method": "POST",
     "url": "https://api.github.com/graphql",
-  },
-  Object {
-    "headers": Object {
-      "accept": "application/vnd.github.v3+json",
-      "accept-encoding": "gzip, deflate",
-      "authorization": "token abc123",
-      "host": "api.github.com",
-      "user-agent": "https://github.com/renovatebot/renovate",
-    },
-    "method": "GET",
-    "url": "https://api.github.com/repos/some/repo/git/refs/heads/master",
   },
   Object {
     "headers": Object {
@@ -2174,7 +2193,7 @@ Array [
       "accept": "application/vnd.github.v3+json",
       "accept-encoding": "gzip, deflate",
       "authorization": "token abc123",
-      "content-length": 27,
+      "content-length": "27",
       "content-type": "application/json",
       "host": "api.github.com",
       "user-agent": "https://github.com/renovatebot/renovate",
@@ -2270,7 +2289,7 @@ Array [
       "accept": "application/vnd.github.merge-info-preview+json, application/vnd.github.v3+json",
       "accept-encoding": "gzip, deflate",
       "authorization": "token abc123",
-      "content-length": 1413,
+      "content-length": "1413",
       "content-type": "application/json",
       "host": "api.github.com",
       "user-agent": "https://github.com/renovatebot/renovate",
@@ -2313,7 +2332,7 @@ Array [
       "accept": "application/vnd.github.v3+json",
       "accept-encoding": "gzip, deflate",
       "authorization": "token abc123",
-      "content-length": 513,
+      "content-length": "513",
       "content-type": "application/json",
       "host": "api.github.com",
       "user-agent": "https://github.com/renovatebot/renovate",
@@ -2332,17 +2351,6 @@ Array [
     "method": "GET",
     "url": "https://api.github.com/repos/some/repo/pulls/90",
   },
-  Object {
-    "headers": Object {
-      "accept": "application/vnd.github.v3+json",
-      "accept-encoding": "gzip, deflate",
-      "authorization": "token abc123",
-      "host": "api.github.com",
-      "user-agent": "https://github.com/renovatebot/renovate",
-    },
-    "method": "GET",
-    "url": "https://api.github.com/repos/forked/repo/git/refs/heads/master",
-  },
 ]
 `;
 
@@ -2358,6 +2366,9 @@ Array [
           },
           "defaultBranchRef": Object {
             "name": null,
+            "target": Object {
+              "oid": null,
+            },
           },
           "isArchived": null,
           "isFork": null,
@@ -2372,7 +2383,7 @@ Array [
       "accept": "application/vnd.github.v3+json",
       "accept-encoding": "gzip, deflate",
       "authorization": "token abc123",
-      "content-length": 280,
+      "content-length": "330",
       "content-type": "application/json",
       "host": "api.github.com",
       "user-agent": "https://github.com/renovatebot/renovate",
@@ -2417,6 +2428,9 @@ Array [
           },
           "defaultBranchRef": Object {
             "name": null,
+            "target": Object {
+              "oid": null,
+            },
           },
           "isArchived": null,
           "isFork": null,
@@ -2431,7 +2445,7 @@ Array [
       "accept": "application/vnd.github.v3+json",
       "accept-encoding": "gzip, deflate",
       "authorization": "token abc123",
-      "content-length": 280,
+      "content-length": "330",
       "content-type": "application/json",
       "host": "api.github.com",
       "user-agent": "https://github.com/renovatebot/renovate",
@@ -2454,6 +2468,9 @@ Array [
           },
           "defaultBranchRef": Object {
             "name": null,
+            "target": Object {
+              "oid": null,
+            },
           },
           "isArchived": null,
           "isFork": null,
@@ -2468,7 +2485,7 @@ Array [
       "accept": "application/vnd.github.v3+json",
       "accept-encoding": "gzip, deflate",
       "authorization": "token abc123",
-      "content-length": 280,
+      "content-length": "330",
       "content-type": "application/json",
       "host": "api.github.com",
       "user-agent": "https://github.com/renovatebot/renovate",
@@ -2491,6 +2508,9 @@ Array [
           },
           "defaultBranchRef": Object {
             "name": null,
+            "target": Object {
+              "oid": null,
+            },
           },
           "isArchived": null,
           "isFork": null,
@@ -2505,7 +2525,7 @@ Array [
       "accept": "application/vnd.github.v3+json",
       "accept-encoding": "gzip, deflate",
       "authorization": "token abc123",
-      "content-length": 280,
+      "content-length": "330",
       "content-type": "application/json",
       "host": "api.github.com",
       "user-agent": "https://github.com/renovatebot/renovate",
@@ -2550,6 +2570,9 @@ Array [
           },
           "defaultBranchRef": Object {
             "name": null,
+            "target": Object {
+              "oid": null,
+            },
           },
           "isArchived": null,
           "isFork": null,
@@ -2564,7 +2587,7 @@ Array [
       "accept": "application/vnd.github.v3+json",
       "accept-encoding": "gzip, deflate",
       "authorization": "token abc123",
-      "content-length": 280,
+      "content-length": "330",
       "content-type": "application/json",
       "host": "api.github.com",
       "user-agent": "https://github.com/renovatebot/renovate",
@@ -2609,6 +2632,9 @@ Array [
           },
           "defaultBranchRef": Object {
             "name": null,
+            "target": Object {
+              "oid": null,
+            },
           },
           "isArchived": null,
           "isFork": null,
@@ -2623,7 +2649,7 @@ Array [
       "accept": "application/vnd.github.v3+json",
       "accept-encoding": "gzip, deflate",
       "authorization": "token abc123",
-      "content-length": 280,
+      "content-length": "330",
       "content-type": "application/json",
       "host": "api.github.com",
       "user-agent": "https://github.com/renovatebot/renovate",
@@ -2668,6 +2694,9 @@ Array [
           },
           "defaultBranchRef": Object {
             "name": null,
+            "target": Object {
+              "oid": null,
+            },
           },
           "isArchived": null,
           "isFork": null,
@@ -2682,7 +2711,7 @@ Array [
       "accept": "application/vnd.github.v3+json",
       "accept-encoding": "gzip, deflate",
       "authorization": "token abc123",
-      "content-length": 280,
+      "content-length": "330",
       "content-type": "application/json",
       "host": "api.github.com",
       "user-agent": "https://github.com/renovatebot/renovate",
@@ -2727,6 +2756,9 @@ Array [
           },
           "defaultBranchRef": Object {
             "name": null,
+            "target": Object {
+              "oid": null,
+            },
           },
           "isArchived": null,
           "isFork": null,
@@ -2741,7 +2773,7 @@ Array [
       "accept": "application/vnd.github.v3+json",
       "accept-encoding": "gzip, deflate",
       "authorization": "token abc123",
-      "content-length": 280,
+      "content-length": "330",
       "content-type": "application/json",
       "host": "api.github.com",
       "user-agent": "https://github.com/renovatebot/renovate",
@@ -2786,6 +2818,9 @@ Array [
           },
           "defaultBranchRef": Object {
             "name": null,
+            "target": Object {
+              "oid": null,
+            },
           },
           "isArchived": null,
           "isFork": null,
@@ -2800,7 +2835,7 @@ Array [
       "accept": "application/vnd.github.v3+json",
       "accept-encoding": "gzip, deflate",
       "authorization": "token abc123",
-      "content-length": 280,
+      "content-length": "330",
       "content-type": "application/json",
       "host": "api.github.com",
       "user-agent": "https://github.com/renovatebot/renovate",
@@ -2834,6 +2869,9 @@ Array [
           },
           "defaultBranchRef": Object {
             "name": null,
+            "target": Object {
+              "oid": null,
+            },
           },
           "isArchived": null,
           "isFork": null,
@@ -2848,7 +2886,7 @@ Array [
       "accept": "application/vnd.github.v3+json",
       "accept-encoding": "gzip, deflate",
       "authorization": "token abc123",
-      "content-length": 280,
+      "content-length": "330",
       "content-type": "application/json",
       "host": "api.github.com",
       "user-agent": "https://github.com/renovatebot/renovate",
@@ -2905,6 +2943,9 @@ Array [
           },
           "defaultBranchRef": Object {
             "name": null,
+            "target": Object {
+              "oid": null,
+            },
           },
           "isArchived": null,
           "isFork": null,
@@ -2919,7 +2960,7 @@ Array [
       "accept": "application/vnd.github.v3+json",
       "accept-encoding": "gzip, deflate",
       "authorization": "token abc123",
-      "content-length": 280,
+      "content-length": "330",
       "content-type": "application/json",
       "host": "api.github.com",
       "user-agent": "https://github.com/renovatebot/renovate",
@@ -3004,24 +3045,13 @@ Array [
       "accept": "application/vnd.github.merge-info-preview+json, application/vnd.github.v3+json",
       "accept-encoding": "gzip, deflate",
       "authorization": "token abc123",
-      "content-length": 1413,
+      "content-length": "1413",
       "content-type": "application/json",
       "host": "api.github.com",
       "user-agent": "https://github.com/renovatebot/renovate",
     },
     "method": "POST",
     "url": "https://api.github.com/graphql",
-  },
-  Object {
-    "headers": Object {
-      "accept": "application/vnd.github.v3+json",
-      "accept-encoding": "gzip, deflate",
-      "authorization": "token abc123",
-      "host": "api.github.com",
-      "user-agent": "https://github.com/renovatebot/renovate",
-    },
-    "method": "GET",
-    "url": "https://api.github.com/repos/some/repo/git/refs/heads/master",
   },
   Object {
     "graphql": Object {
@@ -3058,7 +3088,7 @@ Array [
       "accept": "application/vnd.github.v3+json",
       "accept-encoding": "gzip, deflate",
       "authorization": "token abc123",
-      "content-length": 513,
+      "content-length": "513",
       "content-type": "application/json",
       "host": "api.github.com",
       "user-agent": "https://github.com/renovatebot/renovate",
@@ -3078,8 +3108,6 @@ Object {
   "hasAssignees": false,
   "hasReviewers": false,
   "isConflicted": true,
-  "isModified": false,
-  "isStale": true,
   "number": 2500,
   "state": "open",
   "targetBranch": "master",
@@ -3099,6 +3127,9 @@ Array [
           },
           "defaultBranchRef": Object {
             "name": null,
+            "target": Object {
+              "oid": null,
+            },
           },
           "isArchived": null,
           "isFork": null,
@@ -3113,7 +3144,7 @@ Array [
       "accept": "application/vnd.github.v3+json",
       "accept-encoding": "gzip, deflate",
       "authorization": "token abc123",
-      "content-length": 280,
+      "content-length": "330",
       "content-type": "application/json",
       "host": "api.github.com",
       "user-agent": "https://github.com/renovatebot/renovate",
@@ -3198,24 +3229,13 @@ Array [
       "accept": "application/vnd.github.merge-info-preview+json, application/vnd.github.v3+json",
       "accept-encoding": "gzip, deflate",
       "authorization": "token abc123",
-      "content-length": 1413,
+      "content-length": "1413",
       "content-type": "application/json",
       "host": "api.github.com",
       "user-agent": "https://github.com/renovatebot/renovate",
     },
     "method": "POST",
     "url": "https://api.github.com/graphql",
-  },
-  Object {
-    "headers": Object {
-      "accept": "application/vnd.github.v3+json",
-      "accept-encoding": "gzip, deflate",
-      "authorization": "token abc123",
-      "host": "api.github.com",
-      "user-agent": "https://github.com/renovatebot/renovate",
-    },
-    "method": "GET",
-    "url": "https://api.github.com/repos/some/repo/git/refs/heads/master",
   },
 ]
 `;
@@ -3245,6 +3265,9 @@ Array [
           },
           "defaultBranchRef": Object {
             "name": null,
+            "target": Object {
+              "oid": null,
+            },
           },
           "isArchived": null,
           "isFork": null,
@@ -3259,7 +3282,7 @@ Array [
       "accept": "application/vnd.github.v3+json",
       "accept-encoding": "gzip, deflate",
       "authorization": "token abc123",
-      "content-length": 280,
+      "content-length": "330",
       "content-type": "application/json",
       "host": "api.github.com",
       "user-agent": "https://github.com/renovatebot/renovate",
@@ -3344,7 +3367,7 @@ Array [
       "accept": "application/vnd.github.merge-info-preview+json, application/vnd.github.v3+json",
       "accept-encoding": "gzip, deflate",
       "authorization": "token abc123",
-      "content-length": 1413,
+      "content-length": "1413",
       "content-type": "application/json",
       "host": "api.github.com",
       "user-agent": "https://github.com/renovatebot/renovate",
@@ -3387,7 +3410,7 @@ Array [
       "accept": "application/vnd.github.v3+json",
       "accept-encoding": "gzip, deflate",
       "authorization": "token abc123",
-      "content-length": 513,
+      "content-length": "513",
       "content-type": "application/json",
       "host": "api.github.com",
       "user-agent": "https://github.com/renovatebot/renovate",
@@ -3420,7 +3443,6 @@ Object {
   "commits": 1,
   "displayNumber": "Pull Request #1",
   "isConflicted": true,
-  "isModified": false,
   "mergeable_state": "dirty",
   "number": 1,
   "sha": undefined,
@@ -3440,6 +3462,9 @@ Array [
           },
           "defaultBranchRef": Object {
             "name": null,
+            "target": Object {
+              "oid": null,
+            },
           },
           "isArchived": null,
           "isFork": null,
@@ -3454,7 +3479,7 @@ Array [
       "accept": "application/vnd.github.v3+json",
       "accept-encoding": "gzip, deflate",
       "authorization": "token abc123",
-      "content-length": 280,
+      "content-length": "330",
       "content-type": "application/json",
       "host": "api.github.com",
       "user-agent": "https://github.com/renovatebot/renovate",
@@ -3539,7 +3564,7 @@ Array [
       "accept": "application/vnd.github.merge-info-preview+json, application/vnd.github.v3+json",
       "accept-encoding": "gzip, deflate",
       "authorization": "token abc123",
-      "content-length": 1413,
+      "content-length": "1413",
       "content-type": "application/json",
       "host": "api.github.com",
       "user-agent": "https://github.com/renovatebot/renovate",
@@ -3582,7 +3607,7 @@ Array [
       "accept": "application/vnd.github.v3+json",
       "accept-encoding": "gzip, deflate",
       "authorization": "token abc123",
-      "content-length": 513,
+      "content-length": "513",
       "content-type": "application/json",
       "host": "api.github.com",
       "user-agent": "https://github.com/renovatebot/renovate",
@@ -3601,17 +3626,6 @@ Array [
     "method": "GET",
     "url": "https://api.github.com/repos/some/repo/pulls/1234",
   },
-  Object {
-    "headers": Object {
-      "accept": "application/vnd.github.v3+json",
-      "accept-encoding": "gzip, deflate",
-      "authorization": "token abc123",
-      "host": "api.github.com",
-      "user-agent": "https://github.com/renovatebot/renovate",
-    },
-    "method": "GET",
-    "url": "https://api.github.com/repos/some/repo/git/refs/heads/master",
-  },
 ]
 `;
 
@@ -3624,8 +3638,6 @@ Object {
   "canMerge": true,
   "commits": 1,
   "displayNumber": "Pull Request #1",
-  "isModified": false,
-  "isStale": true,
   "mergeable": true,
   "number": 1,
   "sha": undefined,
@@ -3645,6 +3657,9 @@ Array [
           },
           "defaultBranchRef": Object {
             "name": null,
+            "target": Object {
+              "oid": null,
+            },
           },
           "isArchived": null,
           "isFork": null,
@@ -3659,7 +3674,7 @@ Array [
       "accept": "application/vnd.github.v3+json",
       "accept-encoding": "gzip, deflate",
       "authorization": "token abc123",
-      "content-length": 280,
+      "content-length": "330",
       "content-type": "application/json",
       "host": "api.github.com",
       "user-agent": "https://github.com/renovatebot/renovate",
@@ -3744,7 +3759,7 @@ Array [
       "accept": "application/vnd.github.merge-info-preview+json, application/vnd.github.v3+json",
       "accept-encoding": "gzip, deflate",
       "authorization": "token abc123",
-      "content-length": 1413,
+      "content-length": "1413",
       "content-type": "application/json",
       "host": "api.github.com",
       "user-agent": "https://github.com/renovatebot/renovate",
@@ -3787,7 +3802,7 @@ Array [
       "accept": "application/vnd.github.v3+json",
       "accept-encoding": "gzip, deflate",
       "authorization": "token abc123",
-      "content-length": 513,
+      "content-length": "513",
       "content-type": "application/json",
       "host": "api.github.com",
       "user-agent": "https://github.com/renovatebot/renovate",
@@ -3805,1102 +3820,6 @@ Array [
     },
     "method": "GET",
     "url": "https://api.github.com/repos/some/repo/pulls/1234",
-  },
-  Object {
-    "headers": Object {
-      "accept": "application/vnd.github.v3+json",
-      "accept-encoding": "gzip, deflate",
-      "authorization": "token abc123",
-      "host": "api.github.com",
-      "user-agent": "https://github.com/renovatebot/renovate",
-    },
-    "method": "GET",
-    "url": "https://api.github.com/repos/some/repo/git/refs/heads/master",
-  },
-]
-`;
-
-exports[`platform/github getPr(prNo) should return a not rebaseable PR if gitAuthor does not match 1 commit 1`] = `
-Object {
-  "base": Object {
-    "sha": "1234",
-  },
-  "branchName": undefined,
-  "canMerge": false,
-  "canMergeReason": "mergeable = undefined",
-  "commits": 1,
-  "displayNumber": "Pull Request #1",
-  "isConflicted": true,
-  "isModified": true,
-  "mergeable_state": "dirty",
-  "number": 1,
-  "sha": undefined,
-  "state": "open",
-}
-`;
-
-exports[`platform/github getPr(prNo) should return a not rebaseable PR if gitAuthor does not match 1 commit 2`] = `
-Array [
-  Object {
-    "graphql": Object {
-      "query": Object {
-        "repository": Object {
-          "__args": Object {
-            "name": "repo",
-            "owner": "some",
-          },
-          "defaultBranchRef": Object {
-            "name": null,
-          },
-          "isArchived": null,
-          "isFork": null,
-          "mergeCommitAllowed": null,
-          "nameWithOwner": null,
-          "rebaseMergeAllowed": null,
-          "squashMergeAllowed": null,
-        },
-      },
-    },
-    "headers": Object {
-      "accept": "application/vnd.github.v3+json",
-      "accept-encoding": "gzip, deflate",
-      "authorization": "token abc123",
-      "content-length": 280,
-      "content-type": "application/json",
-      "host": "api.github.com",
-      "user-agent": "https://github.com/renovatebot/renovate",
-    },
-    "method": "POST",
-    "url": "https://api.github.com/graphql",
-  },
-  Object {
-    "graphql": Object {
-      "query": Object {
-        "repository": Object {
-          "__args": Object {
-            "name": "repo",
-            "owner": "some",
-          },
-          "pullRequests": Object {
-            "__args": Object {
-              "first": "100",
-            },
-            "nodes": Object {
-              "assignees": Object {
-                "totalCount": null,
-              },
-              "baseRefName": null,
-              "body": null,
-              "commits": Object {
-                "__args": Object {
-                  "first": "2",
-                },
-                "nodes": Object {
-                  "commit": Object {
-                    "author": Object {
-                      "email": null,
-                    },
-                    "committer": Object {
-                      "email": null,
-                    },
-                    "parents": Object {
-                      "__args": Object {
-                        "last": "1",
-                      },
-                      "edges": Object {
-                        "node": Object {
-                          "abbreviatedOid": null,
-                          "oid": null,
-                        },
-                      },
-                    },
-                  },
-                },
-              },
-              "headRefName": null,
-              "labels": Object {
-                "__args": Object {
-                  "last": "100",
-                },
-                "nodes": Object {
-                  "name": null,
-                },
-              },
-              "mergeStateStatus": null,
-              "mergeable": null,
-              "number": null,
-              "reviewRequests": Object {
-                "totalCount": null,
-              },
-              "reviews": Object {
-                "__args": Object {
-                  "first": "1",
-                },
-                "nodes": Object {
-                  "state": null,
-                },
-              },
-              "title": null,
-            },
-          },
-        },
-      },
-    },
-    "headers": Object {
-      "accept": "application/vnd.github.merge-info-preview+json, application/vnd.github.v3+json",
-      "accept-encoding": "gzip, deflate",
-      "authorization": "token abc123",
-      "content-length": 1413,
-      "content-type": "application/json",
-      "host": "api.github.com",
-      "user-agent": "https://github.com/renovatebot/renovate",
-    },
-    "method": "POST",
-    "url": "https://api.github.com/graphql",
-  },
-  Object {
-    "graphql": Object {
-      "query": Object {
-        "repository": Object {
-          "__args": Object {
-            "name": "repo",
-            "owner": "some",
-          },
-          "pullRequests": Object {
-            "__args": Object {
-              "first": "100",
-            },
-            "nodes": Object {
-              "comments": Object {
-                "__args": Object {
-                  "last": "100",
-                },
-                "nodes": Object {
-                  "body": null,
-                  "databaseId": null,
-                },
-              },
-              "headRefName": null,
-              "number": null,
-              "state": null,
-              "title": null,
-            },
-          },
-        },
-      },
-    },
-    "headers": Object {
-      "accept": "application/vnd.github.v3+json",
-      "accept-encoding": "gzip, deflate",
-      "authorization": "token abc123",
-      "content-length": 513,
-      "content-type": "application/json",
-      "host": "api.github.com",
-      "user-agent": "https://github.com/renovatebot/renovate",
-    },
-    "method": "POST",
-    "url": "https://api.github.com/graphql",
-  },
-  Object {
-    "headers": Object {
-      "accept": "application/vnd.github.v3+json",
-      "accept-encoding": "gzip, deflate",
-      "authorization": "token abc123",
-      "host": "api.github.com",
-      "user-agent": "https://github.com/renovatebot/renovate",
-    },
-    "method": "GET",
-    "url": "https://api.github.com/repos/some/repo/pulls/1234",
-  },
-  Object {
-    "headers": Object {
-      "accept": "application/vnd.github.v3+json",
-      "accept-encoding": "gzip, deflate",
-      "authorization": "token abc123",
-      "host": "api.github.com",
-      "user-agent": "https://github.com/renovatebot/renovate",
-    },
-    "method": "GET",
-    "url": "https://api.github.com/repos/some/repo/pulls/1234/commits",
-  },
-  Object {
-    "headers": Object {
-      "accept": "application/vnd.github.v3+json",
-      "accept-encoding": "gzip, deflate",
-      "authorization": "token abc123",
-      "host": "api.github.com",
-      "user-agent": "https://github.com/renovatebot/renovate",
-    },
-    "method": "GET",
-    "url": "https://api.github.com/repos/some/repo/git/refs/heads/master",
-  },
-]
-`;
-
-exports[`platform/github getPr(prNo) should return a rebaseable PR despite multiple commits 1`] = `
-Object {
-  "base": Object {
-    "sha": "1234",
-  },
-  "branchName": undefined,
-  "canMerge": false,
-  "canMergeReason": "mergeable = undefined",
-  "commits": 2,
-  "displayNumber": "Pull Request #1",
-  "isConflicted": true,
-  "isModified": false,
-  "mergeable_state": "dirty",
-  "number": 1,
-  "sha": undefined,
-  "state": "open",
-}
-`;
-
-exports[`platform/github getPr(prNo) should return a rebaseable PR despite multiple commits 2`] = `
-Array [
-  Object {
-    "graphql": Object {
-      "query": Object {
-        "repository": Object {
-          "__args": Object {
-            "name": "repo",
-            "owner": "some",
-          },
-          "defaultBranchRef": Object {
-            "name": null,
-          },
-          "isArchived": null,
-          "isFork": null,
-          "mergeCommitAllowed": null,
-          "nameWithOwner": null,
-          "rebaseMergeAllowed": null,
-          "squashMergeAllowed": null,
-        },
-      },
-    },
-    "headers": Object {
-      "accept": "application/vnd.github.v3+json",
-      "accept-encoding": "gzip, deflate",
-      "authorization": "token abc123",
-      "content-length": 280,
-      "content-type": "application/json",
-      "host": "api.github.com",
-      "user-agent": "https://github.com/renovatebot/renovate",
-    },
-    "method": "POST",
-    "url": "https://api.github.com/graphql",
-  },
-  Object {
-    "graphql": Object {
-      "query": Object {
-        "repository": Object {
-          "__args": Object {
-            "name": "repo",
-            "owner": "some",
-          },
-          "pullRequests": Object {
-            "__args": Object {
-              "first": "100",
-            },
-            "nodes": Object {
-              "assignees": Object {
-                "totalCount": null,
-              },
-              "baseRefName": null,
-              "body": null,
-              "commits": Object {
-                "__args": Object {
-                  "first": "2",
-                },
-                "nodes": Object {
-                  "commit": Object {
-                    "author": Object {
-                      "email": null,
-                    },
-                    "committer": Object {
-                      "email": null,
-                    },
-                    "parents": Object {
-                      "__args": Object {
-                        "last": "1",
-                      },
-                      "edges": Object {
-                        "node": Object {
-                          "abbreviatedOid": null,
-                          "oid": null,
-                        },
-                      },
-                    },
-                  },
-                },
-              },
-              "headRefName": null,
-              "labels": Object {
-                "__args": Object {
-                  "last": "100",
-                },
-                "nodes": Object {
-                  "name": null,
-                },
-              },
-              "mergeStateStatus": null,
-              "mergeable": null,
-              "number": null,
-              "reviewRequests": Object {
-                "totalCount": null,
-              },
-              "reviews": Object {
-                "__args": Object {
-                  "first": "1",
-                },
-                "nodes": Object {
-                  "state": null,
-                },
-              },
-              "title": null,
-            },
-          },
-        },
-      },
-    },
-    "headers": Object {
-      "accept": "application/vnd.github.merge-info-preview+json, application/vnd.github.v3+json",
-      "accept-encoding": "gzip, deflate",
-      "authorization": "token abc123",
-      "content-length": 1413,
-      "content-type": "application/json",
-      "host": "api.github.com",
-      "user-agent": "https://github.com/renovatebot/renovate",
-    },
-    "method": "POST",
-    "url": "https://api.github.com/graphql",
-  },
-  Object {
-    "graphql": Object {
-      "query": Object {
-        "repository": Object {
-          "__args": Object {
-            "name": "repo",
-            "owner": "some",
-          },
-          "pullRequests": Object {
-            "__args": Object {
-              "first": "100",
-            },
-            "nodes": Object {
-              "comments": Object {
-                "__args": Object {
-                  "last": "100",
-                },
-                "nodes": Object {
-                  "body": null,
-                  "databaseId": null,
-                },
-              },
-              "headRefName": null,
-              "number": null,
-              "state": null,
-              "title": null,
-            },
-          },
-        },
-      },
-    },
-    "headers": Object {
-      "accept": "application/vnd.github.v3+json",
-      "accept-encoding": "gzip, deflate",
-      "authorization": "token abc123",
-      "content-length": 513,
-      "content-type": "application/json",
-      "host": "api.github.com",
-      "user-agent": "https://github.com/renovatebot/renovate",
-    },
-    "method": "POST",
-    "url": "https://api.github.com/graphql",
-  },
-  Object {
-    "headers": Object {
-      "accept": "application/vnd.github.v3+json",
-      "accept-encoding": "gzip, deflate",
-      "authorization": "token abc123",
-      "host": "api.github.com",
-      "user-agent": "https://github.com/renovatebot/renovate",
-    },
-    "method": "GET",
-    "url": "https://api.github.com/repos/some/repo/pulls/1234",
-  },
-  Object {
-    "headers": Object {
-      "accept": "application/vnd.github.v3+json",
-      "accept-encoding": "gzip, deflate",
-      "authorization": "token abc123",
-      "host": "api.github.com",
-      "user-agent": "https://github.com/renovatebot/renovate",
-    },
-    "method": "GET",
-    "url": "https://api.github.com/repos/some/repo/pulls/1234/commits",
-  },
-  Object {
-    "headers": Object {
-      "accept": "application/vnd.github.v3+json",
-      "accept-encoding": "gzip, deflate",
-      "authorization": "token abc123",
-      "host": "api.github.com",
-      "user-agent": "https://github.com/renovatebot/renovate",
-    },
-    "method": "GET",
-    "url": "https://api.github.com/repos/some/repo/git/refs/heads/master",
-  },
-]
-`;
-
-exports[`platform/github getPr(prNo) should return a rebaseable PR if gitAuthor matches 1 commit 1`] = `
-Object {
-  "base": Object {
-    "sha": "1234",
-  },
-  "branchName": undefined,
-  "canMerge": false,
-  "canMergeReason": "mergeable = undefined",
-  "commits": 1,
-  "displayNumber": "Pull Request #1",
-  "isConflicted": true,
-  "isModified": false,
-  "mergeable_state": "dirty",
-  "number": 1,
-  "sha": undefined,
-  "state": "open",
-}
-`;
-
-exports[`platform/github getPr(prNo) should return a rebaseable PR if gitAuthor matches 1 commit 2`] = `
-Array [
-  Object {
-    "graphql": Object {
-      "query": Object {
-        "repository": Object {
-          "__args": Object {
-            "name": "repo",
-            "owner": "some",
-          },
-          "defaultBranchRef": Object {
-            "name": null,
-          },
-          "isArchived": null,
-          "isFork": null,
-          "mergeCommitAllowed": null,
-          "nameWithOwner": null,
-          "rebaseMergeAllowed": null,
-          "squashMergeAllowed": null,
-        },
-      },
-    },
-    "headers": Object {
-      "accept": "application/vnd.github.v3+json",
-      "accept-encoding": "gzip, deflate",
-      "authorization": "token abc123",
-      "content-length": 280,
-      "content-type": "application/json",
-      "host": "api.github.com",
-      "user-agent": "https://github.com/renovatebot/renovate",
-    },
-    "method": "POST",
-    "url": "https://api.github.com/graphql",
-  },
-  Object {
-    "graphql": Object {
-      "query": Object {
-        "repository": Object {
-          "__args": Object {
-            "name": "repo",
-            "owner": "some",
-          },
-          "pullRequests": Object {
-            "__args": Object {
-              "first": "100",
-            },
-            "nodes": Object {
-              "assignees": Object {
-                "totalCount": null,
-              },
-              "baseRefName": null,
-              "body": null,
-              "commits": Object {
-                "__args": Object {
-                  "first": "2",
-                },
-                "nodes": Object {
-                  "commit": Object {
-                    "author": Object {
-                      "email": null,
-                    },
-                    "committer": Object {
-                      "email": null,
-                    },
-                    "parents": Object {
-                      "__args": Object {
-                        "last": "1",
-                      },
-                      "edges": Object {
-                        "node": Object {
-                          "abbreviatedOid": null,
-                          "oid": null,
-                        },
-                      },
-                    },
-                  },
-                },
-              },
-              "headRefName": null,
-              "labels": Object {
-                "__args": Object {
-                  "last": "100",
-                },
-                "nodes": Object {
-                  "name": null,
-                },
-              },
-              "mergeStateStatus": null,
-              "mergeable": null,
-              "number": null,
-              "reviewRequests": Object {
-                "totalCount": null,
-              },
-              "reviews": Object {
-                "__args": Object {
-                  "first": "1",
-                },
-                "nodes": Object {
-                  "state": null,
-                },
-              },
-              "title": null,
-            },
-          },
-        },
-      },
-    },
-    "headers": Object {
-      "accept": "application/vnd.github.merge-info-preview+json, application/vnd.github.v3+json",
-      "accept-encoding": "gzip, deflate",
-      "authorization": "token abc123",
-      "content-length": 1413,
-      "content-type": "application/json",
-      "host": "api.github.com",
-      "user-agent": "https://github.com/renovatebot/renovate",
-    },
-    "method": "POST",
-    "url": "https://api.github.com/graphql",
-  },
-  Object {
-    "graphql": Object {
-      "query": Object {
-        "repository": Object {
-          "__args": Object {
-            "name": "repo",
-            "owner": "some",
-          },
-          "pullRequests": Object {
-            "__args": Object {
-              "first": "100",
-            },
-            "nodes": Object {
-              "comments": Object {
-                "__args": Object {
-                  "last": "100",
-                },
-                "nodes": Object {
-                  "body": null,
-                  "databaseId": null,
-                },
-              },
-              "headRefName": null,
-              "number": null,
-              "state": null,
-              "title": null,
-            },
-          },
-        },
-      },
-    },
-    "headers": Object {
-      "accept": "application/vnd.github.v3+json",
-      "accept-encoding": "gzip, deflate",
-      "authorization": "token abc123",
-      "content-length": 513,
-      "content-type": "application/json",
-      "host": "api.github.com",
-      "user-agent": "https://github.com/renovatebot/renovate",
-    },
-    "method": "POST",
-    "url": "https://api.github.com/graphql",
-  },
-  Object {
-    "headers": Object {
-      "accept": "application/vnd.github.v3+json",
-      "accept-encoding": "gzip, deflate",
-      "authorization": "token abc123",
-      "host": "api.github.com",
-      "user-agent": "https://github.com/renovatebot/renovate",
-    },
-    "method": "GET",
-    "url": "https://api.github.com/repos/some/repo/pulls/1234",
-  },
-  Object {
-    "headers": Object {
-      "accept": "application/vnd.github.v3+json",
-      "accept-encoding": "gzip, deflate",
-      "authorization": "token abc123",
-      "host": "api.github.com",
-      "user-agent": "https://github.com/renovatebot/renovate",
-    },
-    "method": "GET",
-    "url": "https://api.github.com/repos/some/repo/pulls/1234/commits",
-  },
-  Object {
-    "headers": Object {
-      "accept": "application/vnd.github.v3+json",
-      "accept-encoding": "gzip, deflate",
-      "authorization": "token abc123",
-      "host": "api.github.com",
-      "user-agent": "https://github.com/renovatebot/renovate",
-    },
-    "method": "GET",
-    "url": "https://api.github.com/repos/some/repo/git/refs/heads/master",
-  },
-]
-`;
-
-exports[`platform/github getPr(prNo) should return a rebaseable PR if web-flow is second author 1`] = `
-Object {
-  "base": Object {
-    "sha": "1234",
-  },
-  "branchName": undefined,
-  "canMerge": false,
-  "canMergeReason": "mergeable = undefined",
-  "commits": 2,
-  "displayNumber": "Pull Request #1",
-  "isConflicted": true,
-  "isModified": false,
-  "mergeable_state": "dirty",
-  "number": 1,
-  "sha": undefined,
-  "state": "open",
-}
-`;
-
-exports[`platform/github getPr(prNo) should return a rebaseable PR if web-flow is second author 2`] = `
-Array [
-  Object {
-    "graphql": Object {
-      "query": Object {
-        "repository": Object {
-          "__args": Object {
-            "name": "repo",
-            "owner": "some",
-          },
-          "defaultBranchRef": Object {
-            "name": null,
-          },
-          "isArchived": null,
-          "isFork": null,
-          "mergeCommitAllowed": null,
-          "nameWithOwner": null,
-          "rebaseMergeAllowed": null,
-          "squashMergeAllowed": null,
-        },
-      },
-    },
-    "headers": Object {
-      "accept": "application/vnd.github.v3+json",
-      "accept-encoding": "gzip, deflate",
-      "authorization": "token abc123",
-      "content-length": 280,
-      "content-type": "application/json",
-      "host": "api.github.com",
-      "user-agent": "https://github.com/renovatebot/renovate",
-    },
-    "method": "POST",
-    "url": "https://api.github.com/graphql",
-  },
-  Object {
-    "graphql": Object {
-      "query": Object {
-        "repository": Object {
-          "__args": Object {
-            "name": "repo",
-            "owner": "some",
-          },
-          "pullRequests": Object {
-            "__args": Object {
-              "first": "100",
-            },
-            "nodes": Object {
-              "assignees": Object {
-                "totalCount": null,
-              },
-              "baseRefName": null,
-              "body": null,
-              "commits": Object {
-                "__args": Object {
-                  "first": "2",
-                },
-                "nodes": Object {
-                  "commit": Object {
-                    "author": Object {
-                      "email": null,
-                    },
-                    "committer": Object {
-                      "email": null,
-                    },
-                    "parents": Object {
-                      "__args": Object {
-                        "last": "1",
-                      },
-                      "edges": Object {
-                        "node": Object {
-                          "abbreviatedOid": null,
-                          "oid": null,
-                        },
-                      },
-                    },
-                  },
-                },
-              },
-              "headRefName": null,
-              "labels": Object {
-                "__args": Object {
-                  "last": "100",
-                },
-                "nodes": Object {
-                  "name": null,
-                },
-              },
-              "mergeStateStatus": null,
-              "mergeable": null,
-              "number": null,
-              "reviewRequests": Object {
-                "totalCount": null,
-              },
-              "reviews": Object {
-                "__args": Object {
-                  "first": "1",
-                },
-                "nodes": Object {
-                  "state": null,
-                },
-              },
-              "title": null,
-            },
-          },
-        },
-      },
-    },
-    "headers": Object {
-      "accept": "application/vnd.github.merge-info-preview+json, application/vnd.github.v3+json",
-      "accept-encoding": "gzip, deflate",
-      "authorization": "token abc123",
-      "content-length": 1413,
-      "content-type": "application/json",
-      "host": "api.github.com",
-      "user-agent": "https://github.com/renovatebot/renovate",
-    },
-    "method": "POST",
-    "url": "https://api.github.com/graphql",
-  },
-  Object {
-    "graphql": Object {
-      "query": Object {
-        "repository": Object {
-          "__args": Object {
-            "name": "repo",
-            "owner": "some",
-          },
-          "pullRequests": Object {
-            "__args": Object {
-              "first": "100",
-            },
-            "nodes": Object {
-              "comments": Object {
-                "__args": Object {
-                  "last": "100",
-                },
-                "nodes": Object {
-                  "body": null,
-                  "databaseId": null,
-                },
-              },
-              "headRefName": null,
-              "number": null,
-              "state": null,
-              "title": null,
-            },
-          },
-        },
-      },
-    },
-    "headers": Object {
-      "accept": "application/vnd.github.v3+json",
-      "accept-encoding": "gzip, deflate",
-      "authorization": "token abc123",
-      "content-length": 513,
-      "content-type": "application/json",
-      "host": "api.github.com",
-      "user-agent": "https://github.com/renovatebot/renovate",
-    },
-    "method": "POST",
-    "url": "https://api.github.com/graphql",
-  },
-  Object {
-    "headers": Object {
-      "accept": "application/vnd.github.v3+json",
-      "accept-encoding": "gzip, deflate",
-      "authorization": "token abc123",
-      "host": "api.github.com",
-      "user-agent": "https://github.com/renovatebot/renovate",
-    },
-    "method": "GET",
-    "url": "https://api.github.com/repos/some/repo/pulls/1234",
-  },
-  Object {
-    "headers": Object {
-      "accept": "application/vnd.github.v3+json",
-      "accept-encoding": "gzip, deflate",
-      "authorization": "token abc123",
-      "host": "api.github.com",
-      "user-agent": "https://github.com/renovatebot/renovate",
-    },
-    "method": "GET",
-    "url": "https://api.github.com/repos/some/repo/pulls/1234/commits",
-  },
-  Object {
-    "headers": Object {
-      "accept": "application/vnd.github.v3+json",
-      "accept-encoding": "gzip, deflate",
-      "authorization": "token abc123",
-      "host": "api.github.com",
-      "user-agent": "https://github.com/renovatebot/renovate",
-    },
-    "method": "GET",
-    "url": "https://api.github.com/repos/some/repo/git/refs/heads/master",
-  },
-]
-`;
-
-exports[`platform/github getPr(prNo) should return an unrebaseable PR if multiple authors 1`] = `
-Object {
-  "base": Object {
-    "sha": "1234",
-  },
-  "branchName": undefined,
-  "canMerge": false,
-  "canMergeReason": "mergeable = undefined",
-  "commits": 2,
-  "displayNumber": "Pull Request #1",
-  "isConflicted": true,
-  "isModified": true,
-  "mergeable_state": "dirty",
-  "number": 1,
-  "sha": undefined,
-  "state": "open",
-}
-`;
-
-exports[`platform/github getPr(prNo) should return an unrebaseable PR if multiple authors 2`] = `
-Array [
-  Object {
-    "graphql": Object {
-      "query": Object {
-        "repository": Object {
-          "__args": Object {
-            "name": "repo",
-            "owner": "some",
-          },
-          "defaultBranchRef": Object {
-            "name": null,
-          },
-          "isArchived": null,
-          "isFork": null,
-          "mergeCommitAllowed": null,
-          "nameWithOwner": null,
-          "rebaseMergeAllowed": null,
-          "squashMergeAllowed": null,
-        },
-      },
-    },
-    "headers": Object {
-      "accept": "application/vnd.github.v3+json",
-      "accept-encoding": "gzip, deflate",
-      "authorization": "token abc123",
-      "content-length": 280,
-      "content-type": "application/json",
-      "host": "api.github.com",
-      "user-agent": "https://github.com/renovatebot/renovate",
-    },
-    "method": "POST",
-    "url": "https://api.github.com/graphql",
-  },
-  Object {
-    "graphql": Object {
-      "query": Object {
-        "repository": Object {
-          "__args": Object {
-            "name": "repo",
-            "owner": "some",
-          },
-          "pullRequests": Object {
-            "__args": Object {
-              "first": "100",
-            },
-            "nodes": Object {
-              "assignees": Object {
-                "totalCount": null,
-              },
-              "baseRefName": null,
-              "body": null,
-              "commits": Object {
-                "__args": Object {
-                  "first": "2",
-                },
-                "nodes": Object {
-                  "commit": Object {
-                    "author": Object {
-                      "email": null,
-                    },
-                    "committer": Object {
-                      "email": null,
-                    },
-                    "parents": Object {
-                      "__args": Object {
-                        "last": "1",
-                      },
-                      "edges": Object {
-                        "node": Object {
-                          "abbreviatedOid": null,
-                          "oid": null,
-                        },
-                      },
-                    },
-                  },
-                },
-              },
-              "headRefName": null,
-              "labels": Object {
-                "__args": Object {
-                  "last": "100",
-                },
-                "nodes": Object {
-                  "name": null,
-                },
-              },
-              "mergeStateStatus": null,
-              "mergeable": null,
-              "number": null,
-              "reviewRequests": Object {
-                "totalCount": null,
-              },
-              "reviews": Object {
-                "__args": Object {
-                  "first": "1",
-                },
-                "nodes": Object {
-                  "state": null,
-                },
-              },
-              "title": null,
-            },
-          },
-        },
-      },
-    },
-    "headers": Object {
-      "accept": "application/vnd.github.merge-info-preview+json, application/vnd.github.v3+json",
-      "accept-encoding": "gzip, deflate",
-      "authorization": "token abc123",
-      "content-length": 1413,
-      "content-type": "application/json",
-      "host": "api.github.com",
-      "user-agent": "https://github.com/renovatebot/renovate",
-    },
-    "method": "POST",
-    "url": "https://api.github.com/graphql",
-  },
-  Object {
-    "graphql": Object {
-      "query": Object {
-        "repository": Object {
-          "__args": Object {
-            "name": "repo",
-            "owner": "some",
-          },
-          "pullRequests": Object {
-            "__args": Object {
-              "first": "100",
-            },
-            "nodes": Object {
-              "comments": Object {
-                "__args": Object {
-                  "last": "100",
-                },
-                "nodes": Object {
-                  "body": null,
-                  "databaseId": null,
-                },
-              },
-              "headRefName": null,
-              "number": null,
-              "state": null,
-              "title": null,
-            },
-          },
-        },
-      },
-    },
-    "headers": Object {
-      "accept": "application/vnd.github.v3+json",
-      "accept-encoding": "gzip, deflate",
-      "authorization": "token abc123",
-      "content-length": 513,
-      "content-type": "application/json",
-      "host": "api.github.com",
-      "user-agent": "https://github.com/renovatebot/renovate",
-    },
-    "method": "POST",
-    "url": "https://api.github.com/graphql",
-  },
-  Object {
-    "headers": Object {
-      "accept": "application/vnd.github.v3+json",
-      "accept-encoding": "gzip, deflate",
-      "authorization": "token abc123",
-      "host": "api.github.com",
-      "user-agent": "https://github.com/renovatebot/renovate",
-    },
-    "method": "GET",
-    "url": "https://api.github.com/repos/some/repo/pulls/1234",
-  },
-  Object {
-    "headers": Object {
-      "accept": "application/vnd.github.v3+json",
-      "accept-encoding": "gzip, deflate",
-      "authorization": "token abc123",
-      "host": "api.github.com",
-      "user-agent": "https://github.com/renovatebot/renovate",
-    },
-    "method": "GET",
-    "url": "https://api.github.com/repos/some/repo/pulls/1234/commits",
-  },
-  Object {
-    "headers": Object {
-      "accept": "application/vnd.github.v3+json",
-      "accept-encoding": "gzip, deflate",
-      "authorization": "token abc123",
-      "host": "api.github.com",
-      "user-agent": "https://github.com/renovatebot/renovate",
-    },
-    "method": "GET",
-    "url": "https://api.github.com/repos/some/repo/git/refs/heads/master",
   },
 ]
 `;
@@ -4917,6 +3836,9 @@ Array [
           },
           "defaultBranchRef": Object {
             "name": null,
+            "target": Object {
+              "oid": null,
+            },
           },
           "isArchived": null,
           "isFork": null,
@@ -4931,7 +3853,7 @@ Array [
       "accept": "application/vnd.github.v3+json",
       "accept-encoding": "gzip, deflate",
       "authorization": "token abc123",
-      "content-length": 280,
+      "content-length": "330",
       "content-type": "application/json",
       "host": "api.github.com",
       "user-agent": "https://github.com/renovatebot/renovate",
@@ -5016,7 +3938,7 @@ Array [
       "accept": "application/vnd.github.merge-info-preview+json, application/vnd.github.v3+json",
       "accept-encoding": "gzip, deflate",
       "authorization": "token abc123",
-      "content-length": 1413,
+      "content-length": "1413",
       "content-type": "application/json",
       "host": "api.github.com",
       "user-agent": "https://github.com/renovatebot/renovate",
@@ -5059,7 +3981,7 @@ Array [
       "accept": "application/vnd.github.v3+json",
       "accept-encoding": "gzip, deflate",
       "authorization": "token abc123",
-      "content-length": 513,
+      "content-length": "513",
       "content-type": "application/json",
       "host": "api.github.com",
       "user-agent": "https://github.com/renovatebot/renovate",
@@ -5115,6 +4037,9 @@ Array [
           },
           "defaultBranchRef": Object {
             "name": null,
+            "target": Object {
+              "oid": null,
+            },
           },
           "isArchived": null,
           "isFork": null,
@@ -5129,7 +4054,7 @@ Array [
       "accept": "application/vnd.github.v3+json",
       "accept-encoding": "gzip, deflate",
       "authorization": "token abc123",
-      "content-length": 280,
+      "content-length": "330",
       "content-type": "application/json",
       "host": "github.company.com",
       "user-agent": "https://github.com/renovatebot/renovate",
@@ -5282,7 +4207,7 @@ Array [
       "accept": "application/vnd.github.vixen-preview+json, application/vnd.github.v3+json",
       "accept-encoding": "gzip, deflate",
       "authorization": "token abc123",
-      "content-length": 697,
+      "content-length": "697",
       "content-type": "application/json",
       "host": "api.github.com",
       "user-agent": "https://github.com/renovatebot/renovate",
@@ -5344,7 +4269,7 @@ Array [
       "accept": "application/vnd.github.vixen-preview+json, application/vnd.github.v3+json",
       "accept-encoding": "gzip, deflate",
       "authorization": "token abc123",
-      "content-length": 697,
+      "content-length": "697",
       "content-type": "application/json",
       "host": "api.github.com",
       "user-agent": "https://github.com/renovatebot/renovate",
@@ -5406,7 +4331,7 @@ Array [
       "accept": "application/vnd.github.vixen-preview+json, application/vnd.github.v3+json",
       "accept-encoding": "gzip, deflate",
       "authorization": "token abc123",
-      "content-length": 697,
+      "content-length": "697",
       "content-type": "application/json",
       "host": "api.github.com",
       "user-agent": "https://github.com/renovatebot/renovate",
@@ -5468,7 +4393,7 @@ Array [
       "accept": "application/vnd.github.vixen-preview+json, application/vnd.github.v3+json",
       "accept-encoding": "gzip, deflate",
       "authorization": "token abc123",
-      "content-length": 697,
+      "content-length": "697",
       "content-type": "application/json",
       "host": "api.github.com",
       "user-agent": "https://github.com/renovatebot/renovate",
@@ -5654,6 +4579,9 @@ Array [
           },
           "defaultBranchRef": Object {
             "name": null,
+            "target": Object {
+              "oid": null,
+            },
           },
           "isArchived": null,
           "isFork": null,
@@ -5668,24 +4596,13 @@ Array [
       "accept": "application/vnd.github.v3+json",
       "accept-encoding": "gzip, deflate",
       "authorization": "token abc123",
-      "content-length": 280,
+      "content-length": "330",
       "content-type": "application/json",
       "host": "api.github.com",
       "user-agent": "https://github.com/renovatebot/renovate",
     },
     "method": "POST",
     "url": "https://api.github.com/graphql",
-  },
-  Object {
-    "headers": Object {
-      "accept": "application/vnd.github.v3+json",
-      "accept-encoding": "gzip, deflate",
-      "authorization": "token abc123",
-      "host": "api.github.com",
-      "user-agent": "https://github.com/renovatebot/renovate",
-    },
-    "method": "GET",
-    "url": "https://api.github.com/repos/some/repo/git/refs/heads/master",
   },
   Object {
     "headers": Object {
@@ -5731,6 +4648,9 @@ Array [
           },
           "defaultBranchRef": Object {
             "name": null,
+            "target": Object {
+              "oid": null,
+            },
           },
           "isArchived": null,
           "isFork": null,
@@ -5745,7 +4665,7 @@ Array [
       "accept": "application/vnd.github.v3+json",
       "accept-encoding": "gzip, deflate",
       "authorization": "token abc123",
-      "content-length": 280,
+      "content-length": "330",
       "content-type": "application/json",
       "host": "api.github.com",
       "user-agent": "https://github.com/renovatebot/renovate",
@@ -5775,6 +4695,9 @@ Array [
           },
           "defaultBranchRef": Object {
             "name": null,
+            "target": Object {
+              "oid": null,
+            },
           },
           "isArchived": null,
           "isFork": null,
@@ -5789,7 +4712,7 @@ Array [
       "accept": "application/vnd.github.v3+json",
       "accept-encoding": "gzip, deflate",
       "authorization": "token abc123",
-      "content-length": 280,
+      "content-length": "330",
       "content-type": "application/json",
       "host": "api.github.com",
       "user-agent": "https://github.com/renovatebot/renovate",
@@ -5819,6 +4742,9 @@ Array [
           },
           "defaultBranchRef": Object {
             "name": null,
+            "target": Object {
+              "oid": null,
+            },
           },
           "isArchived": null,
           "isFork": null,
@@ -5833,7 +4759,7 @@ Array [
       "accept": "application/vnd.github.v3+json",
       "accept-encoding": "gzip, deflate",
       "authorization": "token abc123",
-      "content-length": 280,
+      "content-length": "330",
       "content-type": "application/json",
       "host": "api.github.com",
       "user-agent": "https://github.com/renovatebot/renovate",
@@ -5863,6 +4789,9 @@ Array [
           },
           "defaultBranchRef": Object {
             "name": null,
+            "target": Object {
+              "oid": null,
+            },
           },
           "isArchived": null,
           "isFork": null,
@@ -5877,7 +4806,7 @@ Array [
       "accept": "application/vnd.github.v3+json",
       "accept-encoding": "gzip, deflate",
       "authorization": "token abc123",
-      "content-length": 280,
+      "content-length": "330",
       "content-type": "application/json",
       "host": "api.github.com",
       "user-agent": "https://github.com/renovatebot/renovate",
@@ -5900,6 +4829,9 @@ Array [
           },
           "defaultBranchRef": Object {
             "name": null,
+            "target": Object {
+              "oid": null,
+            },
           },
           "isArchived": null,
           "isFork": null,
@@ -5914,7 +4846,7 @@ Array [
       "accept": "application/vnd.github.v3+json",
       "accept-encoding": "gzip, deflate",
       "authorization": "token abc123",
-      "content-length": 280,
+      "content-length": "330",
       "content-type": "application/json",
       "host": "api.github.com",
       "user-agent": "https://github.com/renovatebot/renovate",
@@ -5948,6 +4880,9 @@ Array [
           },
           "defaultBranchRef": Object {
             "name": null,
+            "target": Object {
+              "oid": null,
+            },
           },
           "isArchived": null,
           "isFork": null,
@@ -5962,7 +4897,7 @@ Array [
       "accept": "application/vnd.github.v3+json",
       "accept-encoding": "gzip, deflate",
       "authorization": "token abc123",
-      "content-length": 280,
+      "content-length": "330",
       "content-type": "application/json",
       "host": "api.github.com",
       "user-agent": "https://github.com/renovatebot/renovate",
@@ -5985,6 +4920,9 @@ Array [
           },
           "defaultBranchRef": Object {
             "name": null,
+            "target": Object {
+              "oid": null,
+            },
           },
           "isArchived": null,
           "isFork": null,
@@ -5999,7 +4937,7 @@ Array [
       "accept": "application/vnd.github.v3+json",
       "accept-encoding": "gzip, deflate",
       "authorization": "token abc123",
-      "content-length": 280,
+      "content-length": "330",
       "content-type": "application/json",
       "host": "api.github.com",
       "user-agent": "https://github.com/renovatebot/renovate",
@@ -6029,6 +4967,9 @@ Array [
           },
           "defaultBranchRef": Object {
             "name": null,
+            "target": Object {
+              "oid": null,
+            },
           },
           "isArchived": null,
           "isFork": null,
@@ -6043,24 +4984,13 @@ Array [
       "accept": "application/vnd.github.v3+json",
       "accept-encoding": "gzip, deflate",
       "authorization": "token abc123",
-      "content-length": 280,
+      "content-length": "330",
       "content-type": "application/json",
       "host": "api.github.com",
       "user-agent": "https://github.com/renovatebot/renovate",
     },
     "method": "POST",
     "url": "https://api.github.com/graphql",
-  },
-  Object {
-    "headers": Object {
-      "accept": "application/vnd.github.v3+json",
-      "accept-encoding": "gzip, deflate",
-      "authorization": "token abc123",
-      "host": "api.github.com",
-      "user-agent": "https://github.com/renovatebot/renovate",
-    },
-    "method": "GET",
-    "url": "https://api.github.com/repos/some/repo/git/refs/heads/master",
   },
   Object {
     "headers": Object {
@@ -6090,7 +5020,7 @@ Array [
       "accept": "application/vnd.github.v3+json",
       "accept-encoding": "gzip, deflate",
       "authorization": "token abc123",
-      "content-length": 27,
+      "content-length": "27",
       "content-type": "application/json",
       "host": "api.github.com",
       "user-agent": "https://github.com/renovatebot/renovate",
@@ -6120,6 +5050,9 @@ Array [
           },
           "defaultBranchRef": Object {
             "name": null,
+            "target": Object {
+              "oid": null,
+            },
           },
           "isArchived": null,
           "isFork": null,
@@ -6134,7 +5067,7 @@ Array [
       "accept": "application/vnd.github.machine-man-preview+json, application/vnd.github.v3+json",
       "accept-encoding": "gzip, deflate",
       "authorization": "token abc123",
-      "content-length": 280,
+      "content-length": "330",
       "content-type": "application/json",
       "host": "api.github.com",
       "user-agent": "https://github.com/renovatebot/renovate",
@@ -6157,6 +5090,9 @@ Array [
           },
           "defaultBranchRef": Object {
             "name": null,
+            "target": Object {
+              "oid": null,
+            },
           },
           "isArchived": null,
           "isFork": null,
@@ -6171,7 +5107,7 @@ Array [
       "accept": "application/vnd.github.v3+json",
       "accept-encoding": "gzip, deflate",
       "authorization": "token abc123",
-      "content-length": 280,
+      "content-length": "330",
       "content-type": "application/json",
       "host": "api.github.com",
       "user-agent": "https://github.com/renovatebot/renovate",
@@ -6194,6 +5130,9 @@ Array [
           },
           "defaultBranchRef": Object {
             "name": null,
+            "target": Object {
+              "oid": null,
+            },
           },
           "isArchived": null,
           "isFork": null,
@@ -6208,7 +5147,7 @@ Array [
       "accept": "application/vnd.github.v3+json",
       "accept-encoding": "gzip, deflate",
       "authorization": "token abc123",
-      "content-length": 280,
+      "content-length": "330",
       "content-type": "application/json",
       "host": "api.github.com",
       "user-agent": "https://github.com/renovatebot/renovate",
@@ -6222,7 +5161,7 @@ Array [
       "accept": "application/vnd.github.v3+json",
       "accept-encoding": "gzip, deflate",
       "authorization": "token abc123",
-      "content-length": 25,
+      "content-length": "25",
       "content-type": "application/json",
       "host": "api.github.com",
       "user-agent": "https://github.com/renovatebot/renovate",
@@ -6236,7 +5175,7 @@ Array [
       "accept": "application/vnd.github.v3+json",
       "accept-encoding": "gzip, deflate",
       "authorization": "token abc123",
-      "content-length": 25,
+      "content-length": "25",
       "content-type": "application/json",
       "host": "api.github.com",
       "user-agent": "https://github.com/renovatebot/renovate",
@@ -6250,7 +5189,7 @@ Array [
       "accept": "application/vnd.github.v3+json",
       "accept-encoding": "gzip, deflate",
       "authorization": "token abc123",
-      "content-length": 25,
+      "content-length": "25",
       "content-type": "application/json",
       "host": "api.github.com",
       "user-agent": "https://github.com/renovatebot/renovate",
@@ -6264,7 +5203,7 @@ Array [
       "accept": "application/vnd.github.v3+json",
       "accept-encoding": "gzip, deflate",
       "authorization": "token abc123",
-      "content-length": 24,
+      "content-length": "24",
       "content-type": "application/json",
       "host": "api.github.com",
       "user-agent": "https://github.com/renovatebot/renovate",
@@ -6287,6 +5226,9 @@ Array [
           },
           "defaultBranchRef": Object {
             "name": null,
+            "target": Object {
+              "oid": null,
+            },
           },
           "isArchived": null,
           "isFork": null,
@@ -6301,7 +5243,7 @@ Array [
       "accept": "application/vnd.github.v3+json",
       "accept-encoding": "gzip, deflate",
       "authorization": "token abc123",
-      "content-length": 280,
+      "content-length": "330",
       "content-type": "application/json",
       "host": "api.github.com",
       "user-agent": "https://github.com/renovatebot/renovate",
@@ -6315,7 +5257,7 @@ Array [
       "accept": "application/vnd.github.v3+json",
       "accept-encoding": "gzip, deflate",
       "authorization": "token abc123",
-      "content-length": 25,
+      "content-length": "25",
       "content-type": "application/json",
       "host": "api.github.com",
       "user-agent": "https://github.com/renovatebot/renovate",
@@ -6329,7 +5271,7 @@ Array [
       "accept": "application/vnd.github.v3+json",
       "accept-encoding": "gzip, deflate",
       "authorization": "token abc123",
-      "content-length": 25,
+      "content-length": "25",
       "content-type": "application/json",
       "host": "api.github.com",
       "user-agent": "https://github.com/renovatebot/renovate",
@@ -6343,7 +5285,7 @@ Array [
       "accept": "application/vnd.github.v3+json",
       "accept-encoding": "gzip, deflate",
       "authorization": "token abc123",
-      "content-length": 25,
+      "content-length": "25",
       "content-type": "application/json",
       "host": "api.github.com",
       "user-agent": "https://github.com/renovatebot/renovate",
@@ -6366,6 +5308,9 @@ Array [
           },
           "defaultBranchRef": Object {
             "name": null,
+            "target": Object {
+              "oid": null,
+            },
           },
           "isArchived": null,
           "isFork": null,
@@ -6380,7 +5325,7 @@ Array [
       "accept": "application/vnd.github.v3+json",
       "accept-encoding": "gzip, deflate",
       "authorization": "token abc123",
-      "content-length": 280,
+      "content-length": "330",
       "content-type": "application/json",
       "host": "api.github.com",
       "user-agent": "https://github.com/renovatebot/renovate",
@@ -6394,7 +5339,7 @@ Array [
       "accept": "application/vnd.github.v3+json",
       "accept-encoding": "gzip, deflate",
       "authorization": "token abc123",
-      "content-length": 25,
+      "content-length": "25",
       "content-type": "application/json",
       "host": "api.github.com",
       "user-agent": "https://github.com/renovatebot/renovate",
@@ -6417,6 +5362,9 @@ Array [
           },
           "defaultBranchRef": Object {
             "name": null,
+            "target": Object {
+              "oid": null,
+            },
           },
           "isArchived": null,
           "isFork": null,
@@ -6431,7 +5379,7 @@ Array [
       "accept": "application/vnd.github.v3+json",
       "accept-encoding": "gzip, deflate",
       "authorization": "token abc123",
-      "content-length": 280,
+      "content-length": "330",
       "content-type": "application/json",
       "host": "api.github.com",
       "user-agent": "https://github.com/renovatebot/renovate",
@@ -6445,7 +5393,7 @@ Array [
       "accept": "application/vnd.github.v3+json",
       "accept-encoding": "gzip, deflate",
       "authorization": "token abc123",
-      "content-length": 25,
+      "content-length": "25",
       "content-type": "application/json",
       "host": "api.github.com",
       "user-agent": "https://github.com/renovatebot/renovate",
@@ -6468,6 +5416,9 @@ Array [
           },
           "defaultBranchRef": Object {
             "name": null,
+            "target": Object {
+              "oid": null,
+            },
           },
           "isArchived": null,
           "isFork": null,
@@ -6482,7 +5433,7 @@ Array [
       "accept": "application/vnd.github.v3+json",
       "accept-encoding": "gzip, deflate",
       "authorization": "token abc123",
-      "content-length": 280,
+      "content-length": "330",
       "content-type": "application/json",
       "host": "api.github.com",
       "user-agent": "https://github.com/renovatebot/renovate",
@@ -6496,7 +5447,7 @@ Array [
       "accept": "application/vnd.github.v3+json",
       "accept-encoding": "gzip, deflate",
       "authorization": "token abc123",
-      "content-length": 25,
+      "content-length": "25",
       "content-type": "application/json",
       "host": "api.github.com",
       "user-agent": "https://github.com/renovatebot/renovate",
@@ -6519,6 +5470,9 @@ Array [
           },
           "defaultBranchRef": Object {
             "name": null,
+            "target": Object {
+              "oid": null,
+            },
           },
           "isArchived": null,
           "isFork": null,
@@ -6533,7 +5487,7 @@ Array [
       "accept": "application/vnd.github.v3+json",
       "accept-encoding": "gzip, deflate",
       "authorization": "token abc123",
-      "content-length": 280,
+      "content-length": "330",
       "content-type": "application/json",
       "host": "api.github.com",
       "user-agent": "https://github.com/renovatebot/renovate",
@@ -6547,7 +5501,7 @@ Array [
       "accept": "application/vnd.github.v3+json",
       "accept-encoding": "gzip, deflate",
       "authorization": "token abc123",
-      "content-length": 25,
+      "content-length": "25",
       "content-type": "application/json",
       "host": "api.github.com",
       "user-agent": "https://github.com/renovatebot/renovate",
@@ -6570,6 +5524,9 @@ Array [
           },
           "defaultBranchRef": Object {
             "name": null,
+            "target": Object {
+              "oid": null,
+            },
           },
           "isArchived": null,
           "isFork": null,
@@ -6584,7 +5541,7 @@ Array [
       "accept": "application/vnd.github.v3+json",
       "accept-encoding": "gzip, deflate",
       "authorization": "token abc123",
-      "content-length": 280,
+      "content-length": "330",
       "content-type": "application/json",
       "host": "api.github.com",
       "user-agent": "https://github.com/renovatebot/renovate",
@@ -6618,6 +5575,9 @@ Array [
           },
           "defaultBranchRef": Object {
             "name": null,
+            "target": Object {
+              "oid": null,
+            },
           },
           "isArchived": null,
           "isFork": null,
@@ -6632,7 +5592,7 @@ Array [
       "accept": "application/vnd.github.v3+json",
       "accept-encoding": "gzip, deflate",
       "authorization": "token abc123",
-      "content-length": 280,
+      "content-length": "330",
       "content-type": "application/json",
       "host": "api.github.com",
       "user-agent": "https://github.com/renovatebot/renovate",
@@ -6657,7 +5617,7 @@ Array [
       "accept": "application/vnd.github.v3+json",
       "accept-encoding": "gzip, deflate",
       "authorization": "token abc123",
-      "content-length": 101,
+      "content-length": "101",
       "content-type": "application/json",
       "host": "api.github.com",
       "user-agent": "https://github.com/renovatebot/renovate",
@@ -6702,6 +5662,9 @@ Array [
           },
           "defaultBranchRef": Object {
             "name": null,
+            "target": Object {
+              "oid": null,
+            },
           },
           "isArchived": null,
           "isFork": null,
@@ -6716,7 +5679,7 @@ Array [
       "accept": "application/vnd.github.v3+json",
       "accept-encoding": "gzip, deflate",
       "authorization": "token abc123",
-      "content-length": 280,
+      "content-length": "330",
       "content-type": "application/json",
       "host": "api.github.com",
       "user-agent": "https://github.com/renovatebot/renovate",
@@ -6730,7 +5693,7 @@ Array [
       "accept": "application/vnd.github.v3+json",
       "accept-encoding": "gzip, deflate",
       "authorization": "token abc123",
-      "content-length": 52,
+      "content-length": "52",
       "content-type": "application/json",
       "host": "api.github.com",
       "user-agent": "https://github.com/renovatebot/renovate",

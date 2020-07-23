@@ -23,7 +23,7 @@ function getHostOpts(url: string): HttpOptions {
     url,
   });
   if (username && password) {
-    opts.auth = `${username}:${password}`;
+    Object.assign(opts, { username, password });
   }
   return opts;
 }
@@ -99,7 +99,7 @@ async function getPackagistFile(
   const { key, sha256 } = file;
   const fileName = key.replace('%hash%', sha256);
   const opts = getHostOpts(regUrl);
-  if (opts.auth || (opts.headers && opts.headers.authorization)) {
+  if (opts.password || opts.headers?.authorization) {
     return (await http.getJson<PackagistFile>(regUrl + '/' + fileName, opts))
       .body;
   }

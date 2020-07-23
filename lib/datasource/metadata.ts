@@ -49,6 +49,7 @@ const manualSourceUrls = {
   },
   docker: {
     node: 'https://github.com/nodejs/node',
+    traefik: 'https://github.com/containous/traefik',
   },
   kubernetes: {
     node: 'https://github.com/nodejs/node',

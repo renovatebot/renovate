@@ -396,9 +396,7 @@ describe('platform/gitlab', () => {
         .get(
           '/api/v4/projects/some%2Frepo/repository/commits/0d9c7726c3d628b7e28af234595cfd20febdbf8e/statuses'
         )
-        .reply(200, [])
-        .get('/api/v4/projects/some%2Frepo/repository/branches/some-branch')
-        .reply(200, [{ status: 'success' }]);
+        .reply(200, []);
       const pr = await gitlab.getBranchPr('some-branch');
       expect(pr).toMatchSnapshot();
       expect(httpMock.getTrace()).toMatchSnapshot();
@@ -976,6 +974,7 @@ describe('platform/gitlab', () => {
         });
       const pr = await gitlab.createPr({
         branchName: 'some-branch',
+        targetBranch: 'master',
         prTitle: 'some-title',
         prBody: 'the-body',
         labels: null,
@@ -993,6 +992,7 @@ describe('platform/gitlab', () => {
         });
       const pr = await gitlab.createPr({
         branchName: 'some-branch',
+        targetBranch: 'master',
         prTitle: 'some-title',
         prBody: 'the-body',
         labels: [],
@@ -1024,6 +1024,7 @@ describe('platform/gitlab', () => {
         .reply(200);
       await gitlab.createPr({
         branchName: 'some-branch',
+        targetBranch: 'master',
         prTitle: 'some-title',
         prBody: 'the-body',
         labels: [],
@@ -1037,15 +1038,6 @@ describe('platform/gitlab', () => {
     });
   });
   describe('getPr(prNo)', () => {
-    beforeEach(() => {
-      global.gitAuthor = {
-        name: 'abccom',
-        email: 'a@b.com',
-      };
-    });
-    afterEach(() => {
-      delete global.gitAuthor;
-    });
     it('returns the PR', async () => {
       httpMock
         .scope(gitlabApiHost)
@@ -1062,9 +1054,7 @@ describe('platform/gitlab', () => {
           source_branch: 'some-branch',
           target_branch: 'master',
           assignees: [],
-        })
-        .get('/api/v4/projects/undefined/repository/branches/some-branch')
-        .reply(200, { commit: { author_email: global.gitAuthor.email } });
+        });
       const pr = await gitlab.getPr(12345);
       expect(pr).toMatchSnapshot();
       expect(pr.hasAssignees).toBe(false);
@@ -1091,9 +1081,7 @@ describe('platform/gitlab', () => {
         .get(
           '/api/v4/projects/some%2Frepo/repository/commits/0d9c7726c3d628b7e28af234595cfd20febdbf8e/statuses'
         )
-        .reply(200, [{ status: 'success' }])
-        .get('/api/v4/projects/some%2Frepo/repository/branches/some-branch')
-        .reply(200, { commit: null });
+        .reply(200, [{ status: 'success' }]);
       const pr = await gitlab.getPr(12345);
       expect(pr).toMatchSnapshot();
       expect(pr.hasAssignees).toBe(true);
@@ -1119,9 +1107,7 @@ describe('platform/gitlab', () => {
               id: 1,
             },
           ],
-        })
-        .get('/api/v4/projects/undefined/repository/branches/some-branch')
-        .reply(404);
+        });
       const pr = await gitlab.getPr(12345);
       expect(pr).toMatchSnapshot();
       expect(pr.hasAssignees).toBe(true);
@@ -1187,10 +1173,6 @@ These updates have all been created already. Click a checkbox below to force a r
           diverged_commits_count: 5,
           source_branch: 'some-branch',
           labels: ['foo', 'renovate', 'rebase'],
-        })
-        .get('/api/v4/projects/undefined/repository/branches/some-branch')
-        .reply(200, {
-          commit: {},
         })
         .put('/api/v4/projects/undefined/merge_requests/42')
         .reply(200);

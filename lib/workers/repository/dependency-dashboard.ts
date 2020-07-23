@@ -71,7 +71,10 @@ export async function ensureMasterIssue(
     }
     return;
   }
-  let issueBody = `This issue contains a list of Renovate updates and their statuses.\n\n`;
+  let issueBody = '';
+  if (config.dependencyDashboardHeader?.length) {
+    issueBody += `${config.dependencyDashboardHeader}\n\n`;
+  }
   const pendingApprovals = branches.filter(
     (branch) => branch.res === 'needs-approval'
   );
@@ -96,7 +99,8 @@ export async function ensureMasterIssue(
     issueBody += '\n';
   }
   const rateLimited = branches.filter(
-    (branch) => branch.res && branch.res.endsWith('pr-hourly-limit-reached')
+    (branch) =>
+      branch.res === 'pr-limit-reached' || branch.res === 'commit-limit-reached'
   );
   if (rateLimited.length) {
     issueBody += '## Rate Limited\n\n';
@@ -155,7 +159,8 @@ export async function ensureMasterIssue(
     'needs-approval',
     'needs-pr-approval',
     'not-scheduled',
-    'pr-hourly-limit-reached',
+    'pr-limit-reached',
+    'commit-limit-reached',
     'already-existed',
     'error',
     'automerged',
@@ -200,9 +205,8 @@ export async function ensureMasterIssue(
   }
 
   // istanbul ignore if
-  if (global.appMode) {
-    issueBody +=
-      '---\n<details><summary>Advanced</summary>\n\n- [ ] <!-- manual job -->Check this box to trigger a request for Renovate to run again on this repository\n\n</details>\n';
+  if (config.dependencyDashboardFooter?.length) {
+    issueBody += `---\n${config.dependencyDashboardFooter}\n`;
   }
 
   if (config.dryRun) {

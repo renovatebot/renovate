@@ -46,8 +46,6 @@ type GiteaRenovateConfig = {
 interface GiteaRepoConfig {
   repository: string;
   localDir: string;
-  defaultBranch: string;
-  baseBranch: string;
   mergeMethod: helper.PRMergeMethod;
 
   prList: Promise<Pr[]> | null;
@@ -103,8 +101,6 @@ function toRenovatePR(data: helper.PR): Pr | null {
     createdAt: data.created_at,
     canMerge: data.mergeable,
     isConflicted: !data.mergeable,
-    isStale: undefined,
-    isModified: undefined,
     hasAssignees: !!(data.assignee?.login || is.nonEmptyArray(data.assignees)),
   };
 }
@@ -132,30 +128,6 @@ function findCommentByContent(
   content: string
 ): helper.Comment | null {
   return comments.find((c) => c.body.trim() === content);
-}
-
-async function isPRModified(
-  repoPath: string,
-  branchName: string
-): Promise<boolean> {
-  try {
-    const branch = await helper.getBranch(repoPath, branchName);
-    const branchCommitEmail = branch.commit.author.email;
-    const configEmail = global.gitAuthor.email;
-
-    if (branchCommitEmail === configEmail) {
-      return false;
-    }
-
-    logger.debug(
-      { branchCommitEmail, configEmail },
-      'Last committer to branch does not match bot, PR cannot be rebased'
-    );
-    return true;
-  } catch (err) {
-    logger.warn({ err }, 'Error getting PR branch, marking as modified');
-    return true;
-  }
 }
 
 async function retrieveDefaultConfig(
@@ -305,16 +277,15 @@ const platform: Platform = {
     }
 
     // Determine author email and branches
-    config.defaultBranch = repo.default_branch;
-    config.baseBranch = config.defaultBranch;
-    logger.debug(`${repository} default branch = ${config.baseBranch}`);
+    const defaultBranch = repo.default_branch;
+    logger.debug(`${repository} default branch = ${defaultBranch}`);
 
     // Optionally check if Renovate is disabled by attempting to fetch default configuration file
     if (optimizeForDisabled) {
       try {
         renovateConfig = await retrieveDefaultConfig(
           config.repository,
-          config.defaultBranch
+          defaultBranch
         );
       } catch (err) {
         // Do nothing
@@ -347,7 +318,7 @@ const platform: Platform = {
     config.labelList = null;
 
     return {
-      defaultBranch: config.defaultBranch,
+      defaultBranch,
       isFork: !!repo.fork,
     };
   },
@@ -447,9 +418,8 @@ const platform: Platform = {
     return BranchStatus.yellow;
   },
 
-  async setBaseBranch(baseBranch: string): Promise<string> {
-    config.baseBranch = baseBranch;
-    const baseBranchSha = await git.setBranch(baseBranch);
+  async setBaseBranch(branchName: string): Promise<string> {
+    const baseBranchSha = await git.setBranch(branchName);
     return baseBranchSha;
   },
 
@@ -489,16 +459,6 @@ const platform: Platform = {
       return null;
     }
 
-    // Enrich pull request with additional information which is more expensive to fetch
-    if (pr.state !== 'closed') {
-      if (pr.isStale === undefined) {
-        pr.isStale = await git.isBranchStale(pr.branchName);
-      }
-      if (pr.isModified === undefined) {
-        pr.isModified = await isPRModified(config.repository, pr.branchName);
-      }
-    }
-
     return pr;
   },
 
@@ -525,7 +485,7 @@ const platform: Platform = {
 
   async createPr({
     branchName,
-    targetBranch = config.defaultBranch,
+    targetBranch,
     prTitle: title,
     prBody: rawBody,
     labels: labelNames,

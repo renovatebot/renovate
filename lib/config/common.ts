@@ -157,6 +157,8 @@ export interface RenovateConfig
   dependencyDashboardChecks?: Record<string, string>;
   dependencyDashboardRebaseAllOpen?: boolean;
   dependencyDashboardTitle?: string;
+  dependencyDashboardHeader?: string;
+  dependencyDashboardFooter?: string;
   packageFile?: string;
   packageRules?: PackageRule[];
   prConcurrentLimit?: number;

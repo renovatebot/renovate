@@ -1,29 +1,53 @@
-import { getName } from '../../../test/util';
+import { NormalizedOptions } from 'got';
+import { getName, partial } from '../../../test/util';
 import { PLATFORM_TYPE_GITEA } from '../../constants/platforms';
 import { applyAuthorization, removeAuthorization } from './auth';
+import { GotOptions } from './types';
 
 describe(getName(__filename), () => {
   describe('applyAuthorization', () => {
     it('does nothing', () => {
-      const opts = {
+      const opts: GotOptions = {
+        headers: { authorization: 'token' },
         hostname: 'amazon.com',
         href: 'https://amazon.com',
-        auth: 'XXXX',
       };
 
       applyAuthorization(opts);
 
       expect(opts).toMatchInlineSnapshot(`
         Object {
-          "auth": "XXXX",
+          "headers": Object {
+            "authorization": "token",
+          },
           "hostname": "amazon.com",
           "href": "https://amazon.com",
         }
       `);
     });
 
+    it('gitea password', () => {
+      const opts: GotOptions = {
+        headers: {},
+        hostType: PLATFORM_TYPE_GITEA,
+        password: 'XXXX',
+      };
+
+      applyAuthorization(opts);
+
+      expect(opts).toMatchInlineSnapshot(`
+        Object {
+          "headers": Object {
+            "authorization": "Basic OlhYWFg=",
+          },
+          "hostType": "gitea",
+          "password": "XXXX",
+        }
+      `);
+    });
+
     it('gittea token', () => {
-      const opts = {
+      const opts: GotOptions = {
         headers: {},
         token: 'XXXX',
         hostType: PLATFORM_TYPE_GITEA,
@@ -45,11 +69,11 @@ describe(getName(__filename), () => {
 
   describe('removeAuthorization', () => {
     it('no authorization', () => {
-      const opts = {
+      const opts = partial<NormalizedOptions>({
         hostname: 'amazon.com',
         href: 'https://amazon.com',
         search: 'something X-Amz-Algorithm something',
-      };
+      });
 
       removeAuthorization(opts);
 
@@ -61,15 +85,15 @@ describe(getName(__filename), () => {
     });
 
     it('Amazon', () => {
-      const opts = {
-        auth: 'auth',
+      const opts = partial<NormalizedOptions>({
+        password: 'auth',
         headers: {
           authorization: 'auth',
         },
         hostname: 'amazon.com',
         href: 'https://amazon.com',
         search: 'something X-Amz-Algorithm something',
-      };
+      });
 
       removeAuthorization(opts);
 
@@ -82,8 +106,8 @@ describe(getName(__filename), () => {
     });
 
     it('Amazon ports', () => {
-      const opts = {
-        auth: 'auth',
+      const opts = partial<NormalizedOptions>({
+        password: 'auth',
         headers: {
           authorization: 'auth',
         },
@@ -91,7 +115,7 @@ describe(getName(__filename), () => {
         href: 'https://amazon.com',
         port: 3000,
         search: 'something X-Amz-Algorithm something',
-      };
+      });
 
       removeAuthorization(opts);
 
@@ -104,15 +128,15 @@ describe(getName(__filename), () => {
     });
 
     it('Azure blob', () => {
-      const opts = {
-        auth: 'auth',
+      const opts = partial<NormalizedOptions>({
+        password: 'auth',
         headers: {
           authorization: 'auth',
         },
         hostname: 'store123.blob.core.windows.net',
         href:
           'https://<store>.blob.core.windows.net/<some id>//docker/registry/v2/blobs',
-      };
+      });
 
       removeAuthorization(opts);
 
@@ -125,20 +149,20 @@ describe(getName(__filename), () => {
     });
 
     it('keep auth', () => {
-      const opts = {
-        auth: 'auth',
+      const opts = partial<NormalizedOptions>({
+        password: 'auth',
         headers: {
           authorization: 'auth',
         },
         hostname: 'renovate.com',
         href: 'https://renovate.com',
         search: 'something',
-      };
+      });
 
       removeAuthorization(opts);
 
       expect(opts).toEqual({
-        auth: 'auth',
+        password: 'auth',
         headers: {
           authorization: 'auth',
         },

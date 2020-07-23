@@ -46,8 +46,6 @@ export interface Pr {
   hasAssignees?: boolean;
   hasReviewers?: boolean;
   isConflicted?: boolean;
-  isModified?: boolean;
-  isStale?: boolean;
   labels?: string[];
   number?: number;
   reviewers?: string[];
@@ -74,7 +72,7 @@ export type PlatformPrOptions = {
 };
 export interface CreatePRConfig {
   branchName: string;
-  targetBranch?: string;
+  targetBranch: string;
   prTitle: string;
   prBody: string;
   labels?: string[] | null;

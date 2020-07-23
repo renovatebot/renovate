@@ -43,6 +43,7 @@ interface LocalConfig extends StorageConfig {
   currentBranch: string;
   currentBranchSha: string;
   branchExists: Record<string, boolean>;
+  branchIsModified: Record<string, boolean>;
   branchPrefix: string;
 }
 
@@ -241,6 +242,7 @@ export async function syncGit(): Promise<void> {
 export async function initRepo(args: StorageConfig): Promise<void> {
   config = { ...args } as any;
   config.branchExists = {};
+  config.branchIsModified = {};
   git = undefined;
   await syncGit();
 }
@@ -260,6 +262,7 @@ export async function createBranch(
   await git.checkout(['-B', branchName, sha]);
   await git.push('origin', branchName, { '--force': true });
   config.branchExists[branchName] = true;
+  config.branchIsModified[branchName] = false;
 }
 
 export async function branchExists(branchName: string): Promise<boolean> {
@@ -321,6 +324,7 @@ export async function setBranch(branchName: string): Promise<string> {
     const latestCommitDate = (await git.log({ n: 1 })).latest.date;
     logger.debug({ branchName, latestCommitDate }, 'latest commit');
     await git.reset(ResetMode.HARD);
+    return config.currentBranchSha;
   } catch (err) /* istanbul ignore next */ {
     checkForPlatformFailure(err);
     if (
@@ -333,10 +337,6 @@ export async function setBranch(branchName: string): Promise<string> {
     }
     throw err;
   }
-  return (
-    config.currentBranchSha ||
-    (await git.raw(['rev-parse', 'origin/master'])).trim()
-  );
 }
 
 /*
@@ -395,6 +395,37 @@ export async function isBranchStale(branchName: string): Promise<boolean> {
     config.currentBranchSha,
   ]);
   return !branches.all.map(localName).includes(branchName);
+}
+
+export async function isBranchModified(branchName: string): Promise<boolean> {
+  // First check cache
+  if (config.branchIsModified[branchName] !== undefined) {
+    return config.branchIsModified[branchName];
+  }
+  if (!(await branchExists(branchName))) {
+    throw Error(
+      'Cannot check modification for branch that does not exist: ' + branchName
+    );
+  }
+  // Retrieve the author of the most recent commit
+  const lastAuthor = (
+    await git.raw(['log', '-1', '--pretty=format:%ae', `origin/${branchName}`])
+  ).trim();
+  const { gitAuthorEmail } = config;
+  if (
+    lastAuthor === process.env.RENOVATE_LEGACY_GIT_AUTHOR_EMAIL || // remove in next major release
+    lastAuthor === gitAuthorEmail
+  ) {
+    // author matches - branch has not been modified
+    config.branchIsModified[branchName] = false;
+    return false;
+  }
+  logger.debug(
+    { branchName, lastAuthor, gitAuthorEmail },
+    'Last commit author does not match git author email - branch has been modified'
+  );
+  config.branchIsModified[branchName] = true;
+  return true;
 }
 
 export async function deleteBranch(branchName: string): Promise<void> {
@@ -572,6 +603,7 @@ export async function commitFiles({
     const ref = `refs/heads/${branchName}:refs/remotes/origin/${branchName}`;
     await git.fetch(['origin', ref, '--depth=2', '--force']);
     config.branchExists[branchName] = true;
+    config.branchIsModified[branchName] = false;
     limits.incrementLimit('prCommitsPerRunLimit');
     return commit;
   } catch (err) /* istanbul ignore next */ {
