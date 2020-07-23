@@ -280,10 +280,6 @@ export async function getPr(
     pr.canMerge = !!mergeRes.body.canMerge;
   }
 
-  if (await git.branchExists(pr.branchName)) {
-    pr.isStale = await git.isBranchStale(pr.branchName);
-  }
-
   return pr;
 }
 

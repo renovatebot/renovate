@@ -103,7 +103,6 @@ function toRenovatePR(data: helper.PR): Pr | null {
     createdAt: data.created_at,
     canMerge: data.mergeable,
     isConflicted: !data.mergeable,
-    isStale: undefined,
     hasAssignees: !!(data.assignee?.login || is.nonEmptyArray(data.assignees)),
   };
 }
@@ -462,13 +461,6 @@ const platform: Platform = {
     // Abort and return null if no match was found
     if (!pr) {
       return null;
-    }
-
-    // Enrich pull request with additional information which is more expensive to fetch
-    if (pr.state !== 'closed') {
-      if (pr.isStale === undefined) {
-        pr.isStale = await git.isBranchStale(pr.branchName);
-      }
     }
 
     return pr;

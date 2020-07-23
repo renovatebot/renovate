@@ -46,7 +46,6 @@ export interface Pr {
   hasAssignees?: boolean;
   hasReviewers?: boolean;
   isConflicted?: boolean;
-  isStale?: boolean;
   labels?: string[];
   number?: number;
   reviewers?: string[];

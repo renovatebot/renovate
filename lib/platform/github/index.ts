@@ -681,18 +681,6 @@ async function getOpenPrs(): Promise<PrList> {
         } else {
           pr.isConflicted = false;
         }
-        pr.isStale = false;
-        if (pr.mergeStateStatus === 'BEHIND') {
-          pr.isStale = true;
-        } else {
-          const baseCommitSHA = await getBaseCommitSHA();
-          if (
-            pr.commits?.nodes[0]?.commit?.parents?.edges?.[0]?.node?.oid !==
-            baseCommitSHA
-          ) {
-            pr.isStale = true;
-          }
-        }
         if (pr.labels) {
           pr.labels = pr.labels.nodes.map(
             (label: { name: string }) => label.name
@@ -760,10 +748,6 @@ export async function getPr(prNo: number): Promise<Pr | null> {
     if (pr.mergeable_state === 'dirty') {
       logger.debug({ prNo }, 'PR state is dirty so unmergeable');
       pr.isConflicted = true;
-    }
-    const baseCommitSHA = await getBaseCommitSHA();
-    if (!pr.base || pr.base.sha !== baseCommitSHA) {
-      pr.isStale = true;
     }
   }
   return pr;

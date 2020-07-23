@@ -1423,7 +1423,6 @@ Object {
   "displayNumber": "Pull Request #5",
   "hasReviewers": true,
   "isConflicted": false,
-  "isStale": false,
   "number": 5,
   "reviewers": Array [
     "userName2",
@@ -1862,7 +1861,6 @@ Object {
   "displayNumber": "Pull Request #5",
   "hasReviewers": true,
   "isConflicted": false,
-  "isStale": false,
   "number": 5,
   "reviewers": Array [
     "userName2",
@@ -1884,7 +1882,6 @@ Object {
   "displayNumber": "Pull Request #5",
   "hasReviewers": true,
   "isConflicted": false,
-  "isStale": false,
   "number": 5,
   "reviewers": Array [
     "userName2",
@@ -1906,7 +1903,6 @@ Object {
   "displayNumber": "Pull Request #5",
   "hasReviewers": true,
   "isConflicted": false,
-  "isStale": false,
   "number": 5,
   "reviewers": Array [
     "userName2",
@@ -2029,7 +2025,6 @@ Object {
   "displayNumber": "Pull Request #5",
   "hasReviewers": true,
   "isConflicted": false,
-  "isStale": false,
   "number": 5,
   "reviewers": Array [
     "userName2",
@@ -2101,7 +2096,6 @@ Object {
   "createdAt": undefined,
   "displayNumber": "Pull Request #undefined",
   "hasReviewers": false,
-  "isStale": false,
   "number": undefined,
   "reviewers": Array [],
   "state": "merged",
@@ -5047,7 +5041,6 @@ Object {
   "displayNumber": "Pull Request #5",
   "hasReviewers": true,
   "isConflicted": false,
-  "isStale": false,
   "number": 5,
   "reviewers": Array [
     "userName2",
@@ -5486,7 +5479,6 @@ Object {
   "displayNumber": "Pull Request #5",
   "hasReviewers": true,
   "isConflicted": false,
-  "isStale": false,
   "number": 5,
   "reviewers": Array [
     "userName2",
@@ -5508,7 +5500,6 @@ Object {
   "displayNumber": "Pull Request #5",
   "hasReviewers": true,
   "isConflicted": false,
-  "isStale": false,
   "number": 5,
   "reviewers": Array [
     "userName2",
@@ -5530,7 +5521,6 @@ Object {
   "displayNumber": "Pull Request #5",
   "hasReviewers": true,
   "isConflicted": false,
-  "isStale": false,
   "number": 5,
   "reviewers": Array [
     "userName2",
@@ -5653,7 +5643,6 @@ Object {
   "displayNumber": "Pull Request #5",
   "hasReviewers": true,
   "isConflicted": false,
-  "isStale": false,
   "number": 5,
   "reviewers": Array [
     "userName2",
@@ -5725,7 +5714,6 @@ Object {
   "createdAt": undefined,
   "displayNumber": "Pull Request #undefined",
   "hasReviewers": false,
-  "isStale": false,
   "number": undefined,
   "reviewers": Array [],
   "state": "merged",
