@@ -974,6 +974,7 @@ describe('platform/gitlab', () => {
         });
       const pr = await gitlab.createPr({
         branchName: 'some-branch',
+        targetBranch: 'master',
         prTitle: 'some-title',
         prBody: 'the-body',
         labels: null,
@@ -991,6 +992,7 @@ describe('platform/gitlab', () => {
         });
       const pr = await gitlab.createPr({
         branchName: 'some-branch',
+        targetBranch: 'master',
         prTitle: 'some-title',
         prBody: 'the-body',
         labels: [],
@@ -1022,6 +1024,7 @@ describe('platform/gitlab', () => {
         .reply(200);
       await gitlab.createPr({
         branchName: 'some-branch',
+        targetBranch: 'master',
         prTitle: 'some-title',
         prBody: 'the-body',
         labels: [],

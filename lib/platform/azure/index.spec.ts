@@ -500,6 +500,7 @@ describe('platform/azure', () => {
       );
       const pr = await azure.createPr({
         branchName: 'some-branch',
+        targetBranch: 'master',
         prTitle: 'The Title',
         prBody: 'Hello world',
         labels: ['deps', 'renovate'],
@@ -528,6 +529,7 @@ describe('platform/azure', () => {
       );
       const pr = await azure.createPr({
         branchName: 'some-branch',
+        targetBranch: 'master',
         prTitle: 'The Title',
         prBody: 'Hello world',
         labels: ['deps', 'renovate'],

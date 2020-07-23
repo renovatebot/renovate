@@ -356,7 +356,7 @@ export async function getBranchStatus(
 
 export async function createPr({
   branchName,
-  targetBranch = config.defaultBranch,
+  targetBranch,
   prTitle: title,
   prBody: rawDescription,
   labels,

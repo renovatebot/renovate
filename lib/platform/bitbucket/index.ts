@@ -658,7 +658,7 @@ export function ensureCommentRemoval({
 // Creates PR and returns PR number
 export async function createPr({
   branchName,
-  targetBranch = config.defaultBranch,
+  targetBranch,
   prTitle: title,
   prBody: description,
 }: CreatePRConfig): Promise<Pr> {

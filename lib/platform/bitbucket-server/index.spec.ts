@@ -1119,6 +1119,7 @@ describe(getName(__filename), () => {
 
           const { number: id } = await bitbucket.createPr({
             branchName: 'branch',
+            targetBranch: 'master',
             prTitle: 'title',
             prBody: 'body',
           });
@@ -1142,6 +1143,7 @@ describe(getName(__filename), () => {
 
           const { number: id } = await bitbucket.createPr({
             branchName: 'branch',
+            targetBranch: 'master',
             prTitle: 'title',
             prBody: 'body',
             labels: null,
