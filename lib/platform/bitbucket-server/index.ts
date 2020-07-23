@@ -201,7 +201,6 @@ export async function initRepo({
         `./rest/api/1.0/projects/${config.projectKey}/repos/${config.repositorySlug}/branches/default`
       )
     ).body.displayId;
-    config.baseBranch = config.defaultBranch;
     config.mergeMethod = 'merge';
     const repoConfig: RepoConfig = {
       defaultBranch: config.defaultBranch,
@@ -240,7 +239,6 @@ export async function getRepoForceRebase(): Promise<boolean> {
 }
 
 export async function setBaseBranch(branchName: string): Promise<string> {
-  config.baseBranch = branchName;
   const baseBranchSha = await git.setBranch(branchName);
   return baseBranchSha;
 }

@@ -60,7 +60,6 @@ let config: {
   repository: string;
   localDir: string;
   defaultBranch: string;
-  baseBranch: string;
   email: string;
   prList: any[];
   issueList: any[];
@@ -200,9 +199,8 @@ export async function initRepo({
       }
     }
     config.defaultBranch = res.body.default_branch;
-    config.baseBranch = config.defaultBranch;
     config.mergeMethod = res.body.merge_method || 'merge';
-    logger.debug(`${repository} default branch = ${config.baseBranch}`);
+    logger.debug(`${repository} default branch = ${config.defaultBranch}`);
     delete config.prList;
     logger.debug('Enabling Git FS');
     const opts = hostRules.find({
@@ -266,8 +264,6 @@ export function getRepoForceRebase(): Promise<boolean> {
 }
 
 export async function setBaseBranch(branchName: string): Promise<string> {
-  logger.debug(`Setting baseBranch to ${branchName}`);
-  config.baseBranch = branchName;
   const baseBranchSha = await git.setBranch(branchName);
   return baseBranchSha;
 }

@@ -40,7 +40,6 @@ import { AzurePr } from './types';
 interface Config {
   repoForceRebase: boolean;
   mergeMethod: GitPullRequestMergeStrategy;
-  baseBranch: string;
   defaultBranch: string;
   owner: string;
   repoId: string;
@@ -118,7 +117,6 @@ export async function initRepo({
   logger.debug(`${repository} owner = ${config.owner}`);
   // Use default branch as PR target unless later overridden
   config.defaultBranch = repo.defaultBranch.replace('refs/heads/', '');
-  config.baseBranch = config.defaultBranch;
   logger.debug(`${repository} default branch = ${config.defaultBranch}`);
   config.mergeMethod = await azureHelper.getMergeMethod(repo.id, names.project);
   config.repoForceRebase = false;
@@ -173,8 +171,7 @@ export function getRepoForceRebase(): Promise<boolean> {
 
 // istanbul ignore next
 export async function setBaseBranch(branchName: string): Promise<string> {
-  logger.debug(`Setting baseBranch to ${branchName}`);
-  config.baseBranch = branchName;
+  logger.debug(`Setting base branch to ${branchName}`);
   const baseBranchSha = await git.setBranch(branchName);
   return baseBranchSha;
 }

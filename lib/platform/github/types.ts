@@ -37,7 +37,6 @@ export interface LocalRepoConfig {
   prList: GhPr[] | null;
   issueList: any[] | null;
   mergeMethod: string;
-  baseBranch: string;
   defaultBranch: string;
   repositoryOwner: string;
   repository: string | null;
