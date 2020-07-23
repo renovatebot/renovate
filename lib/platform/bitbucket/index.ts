@@ -126,7 +126,6 @@ export async function initRepo({
     Object.assign(config, {
       owner: info.owner,
       defaultBranch: info.mainbranch,
-      baseBranch: info.mainbranch,
       mergeMethod: info.mergeMethod,
       has_issues: info.has_issues,
     });
@@ -175,9 +174,6 @@ export function getRepoForceRebase(): Promise<boolean> {
 }
 
 export async function setBaseBranch(branchName: string): Promise<string> {
-  logger.debug(`Setting baseBranch to ${branchName}`);
-  config.baseBranch = branchName;
-  delete config.baseCommitSHA;
   const baseBranchSha = await git.setBranch(branchName);
   return baseBranchSha;
 }
@@ -777,7 +773,6 @@ export async function mergePr(
         },
       }
     );
-    delete config.baseCommitSHA;
     logger.debug('Automerging succeeded');
   } catch (err) /* istanbul ignore next */ {
     return false;

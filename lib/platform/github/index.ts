@@ -162,32 +162,6 @@ async function getBranchProtection(
   return res.body;
 }
 
-// Return the commit SHA for a branch
-async function getBranchCommit(branchName: string): Promise<string> {
-  try {
-    const res = await githubApi.getJson<{ object: { sha: string } }>(
-      `repos/${config.repository}/git/refs/heads/${escapeHash(branchName)}`
-    );
-    return res.body.object.sha;
-  } catch (err) /* istanbul ignore next */ {
-    logger.debug({ err }, 'Error getting branch commit');
-    if (err.statusCode === 404) {
-      throw new Error(REPOSITORY_CHANGED);
-    }
-    if (err.statusCode === 409) {
-      throw new Error(REPOSITORY_EMPTY);
-    }
-    throw err;
-  }
-}
-
-async function getBaseCommitSHA(): Promise<string> {
-  if (!config.baseCommitSHA) {
-    config.baseCommitSHA = await getBranchCommit(config.baseBranch);
-  }
-  return config.baseCommitSHA;
-}
-
 // Initialize GitHub by getting base branch and SHA
 export async function initRepo({
   endpoint,
@@ -229,6 +203,9 @@ export async function initRepo({
         squashMergeAllowed
         defaultBranchRef {
           name
+          target {
+            oid
+          }
         }
       }
     }`
@@ -297,8 +274,7 @@ export async function initRepo({
     // Use default branch as PR target unless later overridden.
     config.defaultBranch = repo.defaultBranchRef.name;
     // Base branch may be configured but defaultBranch is always fixed
-    config.baseBranch = config.defaultBranch;
-    logger.debug(`${repository} default branch = ${config.baseBranch}`);
+    logger.debug(`${repository} default branch = ${config.defaultBranch}`);
     // GitHub allows administrators to block certain types of merge, so we need to check it
     if (repo.rebaseMergeAllowed) {
       config.mergeMethod = 'rebase';
@@ -350,8 +326,7 @@ export async function initRepo({
     logger.debug('Bot is in forkMode');
     config.forkToken = forkToken;
     // Save parent SHA then delete
-    const parentSha = await getBaseCommitSHA();
-    config.baseCommitSHA = null;
+    const parentSha = repo.defaultBranchRef.target.oid;
     // save parent name then delete
     config.parentRepo = config.repository;
     config.repository = null;
@@ -385,14 +360,14 @@ export async function initRepo({
       );
       // Need to update base branch
       logger.debug(
-        { baseBranch: config.baseBranch, parentSha },
-        'Setting baseBranch ref in fork'
+        { defaultBranch: config.defaultBranch, parentSha },
+        'Setting defaultBranch ref in fork'
       );
       // This is a lovely "hack" by GitHub that lets us force update our fork's master
       // with the base commit from the parent repository
       try {
         await githubApi.patchJson(
-          `repos/${config.repository}/git/refs/heads/${config.baseBranch}`,
+          `repos/${config.repository}/git/refs/heads/${config.defaultBranch}`,
           {
             body: {
               sha: parentSha,
@@ -458,7 +433,7 @@ export async function getRepoForceRebase(): Promise<boolean> {
   if (config.repoForceRebase === undefined) {
     try {
       config.repoForceRebase = false;
-      const branchProtection = await getBranchProtection(config.baseBranch);
+      const branchProtection = await getBranchProtection(config.defaultBranch);
       logger.debug('Found branch protection');
       if (branchProtection.required_pull_request_reviews) {
         logger.debug(
@@ -501,8 +476,6 @@ export async function getRepoForceRebase(): Promise<boolean> {
 
 // istanbul ignore next
 export async function setBaseBranch(branchName: string): Promise<string> {
-  config.baseBranch = branchName;
-  config.baseCommitSHA = null;
   const baseBranchSha = await git.setBranch(branchName);
   return baseBranchSha;
 }
@@ -1612,8 +1585,6 @@ export async function mergePr(
     }
   }
   logger.debug({ pr: prNo }, 'PR merged');
-  // Update base branch SHA
-  config.baseCommitSHA = null;
   // Delete branch
   await deleteBranch(branchName);
   return true;

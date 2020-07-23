@@ -47,7 +47,6 @@ interface GiteaRepoConfig {
   repository: string;
   localDir: string;
   defaultBranch: string;
-  baseBranch: string;
   mergeMethod: helper.PRMergeMethod;
 
   prList: Promise<Pr[]> | null;
@@ -280,8 +279,7 @@ const platform: Platform = {
 
     // Determine author email and branches
     config.defaultBranch = repo.default_branch;
-    config.baseBranch = config.defaultBranch;
-    logger.debug(`${repository} default branch = ${config.baseBranch}`);
+    logger.debug(`${repository} default branch = ${config.defaultBranch}`);
 
     // Optionally check if Renovate is disabled by attempting to fetch default configuration file
     if (optimizeForDisabled) {
@@ -421,9 +419,8 @@ const platform: Platform = {
     return BranchStatus.yellow;
   },
 
-  async setBaseBranch(baseBranch: string): Promise<string> {
-    config.baseBranch = baseBranch;
-    const baseBranchSha = await git.setBranch(baseBranch);
+  async setBaseBranch(branchName: string): Promise<string> {
+    const baseBranchSha = await git.setBranch(branchName);
     return baseBranchSha;
   },
 

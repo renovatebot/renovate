@@ -8,8 +8,6 @@ import { Pr } from '../common';
 const bitbucketHttp = new BitbucketHttp();
 
 export interface Config {
-  baseBranch: string;
-  baseCommitSHA: string;
   defaultBranch: string;
   has_issues: boolean;
   mergeMethod: string;

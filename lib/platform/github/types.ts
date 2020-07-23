@@ -30,7 +30,6 @@ export interface LocalRepoConfig {
   prReviewsRequired: boolean;
   repoForceRebase?: boolean;
   parentRepo: string;
-  baseCommitSHA: string | null;
   forkMode?: boolean;
   forkToken?: string;
   closedPrList: PrList | null;
@@ -38,7 +37,6 @@ export interface LocalRepoConfig {
   prList: GhPr[] | null;
   issueList: any[] | null;
   mergeMethod: string;
-  baseBranch: string;
   defaultBranch: string;
   repositoryOwner: string;
   repository: string | null;
@@ -60,5 +58,8 @@ export interface GhRepo {
   squashMergeAllowed: boolean;
   defaultBranchRef: {
     name: string;
+    target: {
+      oid: string;
+    };
   };
 }

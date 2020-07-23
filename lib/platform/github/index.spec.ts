@@ -165,6 +165,9 @@ describe('platform/github', () => {
           squashMergeAllowed: true,
           defaultBranchRef: {
             name: 'master',
+            target: {
+              oid: '1234',
+            },
           },
         },
       },
@@ -190,15 +193,11 @@ describe('platform/github', () => {
             squashMergeAllowed: true,
             defaultBranchRef: {
               name: 'master',
+              target: {
+                oid: '1234',
+              },
             },
           },
-        },
-      })
-      // getBranchCommit
-      .get(`/repos/${repository}/git/refs/heads/master`)
-      .reply(200, {
-        object: {
-          sha: '1234',
         },
       })
       // getRepos
@@ -280,6 +279,9 @@ describe('platform/github', () => {
               squashMergeAllowed: true,
               defaultBranchRef: {
                 name: 'master',
+                target: {
+                  oid: '1234',
+                },
               },
             },
           },
@@ -305,6 +307,9 @@ describe('platform/github', () => {
               squashMergeAllowed: false,
               defaultBranchRef: {
                 name: 'master',
+                target: {
+                  oid: '1234',
+                },
               },
             },
           },
@@ -324,6 +329,9 @@ describe('platform/github', () => {
             repository: {
               defaultBranchRef: {
                 name: 'master',
+                target: {
+                  oid: '1234',
+                },
               },
             },
           },
@@ -345,6 +353,9 @@ describe('platform/github', () => {
               nameWithOwner: 'some/repo',
               defaultBranchRef: {
                 name: 'master',
+                target: {
+                  oid: '1234',
+                },
               },
             },
           },
@@ -375,6 +386,9 @@ describe('platform/github', () => {
               nameWithOwner: 'some/other',
               defaultBranchRef: {
                 name: 'master',
+                target: {
+                  oid: '1234',
+                },
               },
             },
           },
@@ -1659,8 +1673,7 @@ describe('platform/github', () => {
         .post('/graphql')
         .reply(200, graphqlOpenPullRequests)
         .post('/graphql')
-        .reply(200, graphqlClosedPullRequests)
-        .get('/repos/some/repo/git/refs/heads/master');
+        .reply(200, graphqlClosedPullRequests);
       await github.initRepo({
         repository: 'some/repo',
       } as any);
