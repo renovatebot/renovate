@@ -125,7 +125,6 @@ export async function initRepo({
 
     Object.assign(config, {
       owner: info.owner,
-      defaultBranch: info.mainbranch,
       mergeMethod: info.mergeMethod,
       has_issues: info.has_issues,
     });
@@ -161,7 +160,7 @@ export async function initRepo({
     gitAuthorEmail: global.gitAuthor?.email,
   });
   const repoConfig: RepoConfig = {
-    defaultBranch: config.defaultBranch,
+    defaultBranch: info.mainbranch,
     isFork: info.isFork,
   };
   return repoConfig;

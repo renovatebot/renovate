@@ -196,14 +196,14 @@ export async function initRepo({
     ).body;
     config.owner = info.project.key;
     logger.debug(`${repository} owner = ${config.owner}`);
-    config.defaultBranch = (
+    const defaultBranch = (
       await bitbucketServerHttp.getJson<{ displayId: string }>(
         `./rest/api/1.0/projects/${config.projectKey}/repos/${config.repositorySlug}/branches/default`
       )
     ).body.displayId;
     config.mergeMethod = 'merge';
     const repoConfig: RepoConfig = {
-      defaultBranch: config.defaultBranch,
+      defaultBranch,
       isFork: !!info.parent,
     };
     return repoConfig;

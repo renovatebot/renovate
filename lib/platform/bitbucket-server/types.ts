@@ -2,7 +2,6 @@ import { Pr } from '../common';
 
 export interface BbsConfig {
   bbUseDefaultReviewers: boolean;
-  defaultBranch: string;
   fileList: any[];
   mergeMethod: string;
   owner: string;

@@ -40,7 +40,6 @@ import { AzurePr } from './types';
 interface Config {
   repoForceRebase: boolean;
   mergeMethod: GitPullRequestMergeStrategy;
-  defaultBranch: string;
   owner: string;
   repoId: string;
   project: string;
@@ -116,8 +115,8 @@ export async function initRepo({
   config.owner = '?owner?';
   logger.debug(`${repository} owner = ${config.owner}`);
   // Use default branch as PR target unless later overridden
-  config.defaultBranch = repo.defaultBranch.replace('refs/heads/', '');
-  logger.debug(`${repository} default branch = ${config.defaultBranch}`);
+  const defaultBranch = repo.defaultBranch.replace('refs/heads/', '');
+  logger.debug(`${repository} default branch = ${defaultBranch}`);
   config.mergeMethod = await azureHelper.getMergeMethod(repo.id, names.project);
   config.repoForceRebase = false;
 
@@ -131,7 +130,7 @@ export async function initRepo({
       const json = await azureHelper.getFile(
         repo.id,
         'renovate.json',
-        config.defaultBranch
+        defaultBranch
       );
       renovateConfig = JSON.parse(json);
     } catch {
@@ -159,7 +158,7 @@ export async function initRepo({
     gitAuthorEmail: global.gitAuthor?.email,
   });
   const repoConfig: RepoConfig = {
-    defaultBranch: config.defaultBranch,
+    defaultBranch,
     isFork: false,
   };
   return repoConfig;
