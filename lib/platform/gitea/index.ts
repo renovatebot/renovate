@@ -46,7 +46,6 @@ type GiteaRenovateConfig = {
 interface GiteaRepoConfig {
   repository: string;
   localDir: string;
-  defaultBranch: string;
   mergeMethod: helper.PRMergeMethod;
 
   prList: Promise<Pr[]> | null;
@@ -278,15 +277,15 @@ const platform: Platform = {
     }
 
     // Determine author email and branches
-    config.defaultBranch = repo.default_branch;
-    logger.debug(`${repository} default branch = ${config.defaultBranch}`);
+    const defaultBranch = repo.default_branch;
+    logger.debug(`${repository} default branch = ${defaultBranch}`);
 
     // Optionally check if Renovate is disabled by attempting to fetch default configuration file
     if (optimizeForDisabled) {
       try {
         renovateConfig = await retrieveDefaultConfig(
           config.repository,
-          config.defaultBranch
+          defaultBranch
         );
       } catch (err) {
         // Do nothing
@@ -319,7 +318,7 @@ const platform: Platform = {
     config.labelList = null;
 
     return {
-      defaultBranch: config.defaultBranch,
+      defaultBranch,
       isFork: !!repo.fork,
     };
   },

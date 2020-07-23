@@ -59,7 +59,6 @@ const defaultConfigFile = configFileNames[0];
 let config: {
   repository: string;
   localDir: string;
-  defaultBranch: string;
   email: string;
   prList: any[];
   issueList: any[];
@@ -147,6 +146,7 @@ export async function initRepo({
   config.localDir = localDir;
 
   let res: HttpResponse<RepoResponse>;
+  let defaultBranch: string;
   try {
     res = await gitlabApi.getJson<RepoResponse>(
       `projects/${config.repository}`
@@ -198,9 +198,9 @@ export async function initRepo({
         throw new Error(REPOSITORY_DISABLED);
       }
     }
-    config.defaultBranch = res.body.default_branch;
+    defaultBranch = res.body.default_branch;
     config.mergeMethod = res.body.merge_method || 'merge';
-    logger.debug(`${repository} default branch = ${config.defaultBranch}`);
+    logger.debug(`${repository} default branch = ${defaultBranch}`);
     delete config.prList;
     logger.debug('Enabling Git FS');
     const opts = hostRules.find({
@@ -253,7 +253,7 @@ export async function initRepo({
     throw err;
   }
   const repoConfig: RepoConfig = {
-    defaultBranch: config.defaultBranch,
+    defaultBranch,
     isFork: !!res.body.forked_from_project,
   };
   return repoConfig;
