@@ -96,7 +96,8 @@ export async function ensureMasterIssue(
     issueBody += '\n';
   }
   const rateLimited = branches.filter(
-    (branch) => branch.res === 'pr-limit-reached'
+    (branch) =>
+      branch.res === 'pr-limit-reached' || branch.res === 'commit-limit-reached'
   );
   if (rateLimited.length) {
     issueBody += '## Rate Limited\n\n';
