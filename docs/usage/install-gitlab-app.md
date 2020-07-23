@@ -100,3 +100,21 @@ Unlike on GitHub, it is not possible to have the option to install Renovate on "
 ##### Detecting new projects
 
 Currently there is no detection mechanism in the backend scheduler to determine when Renovate has been added to a new project, so the onboarding MR won't appear instantly. Instead, the new project should be picked up during hourly scheduled runs.
+
+##### Auto merging pull requests
+
+If you have auto merging enabled in your config, Gitlab needs permission to merge a branch into master.
+
+There's four ways to make it work:
+
+- Allow all developers to merge into master branch
+  ![Allow renovate-bot merge permission](assets/images/allow-developers-to-merge.png)
+
+- Change renovate-bot member permission from developer to **maintainer**
+  ![Allow renovate-bot merge permission](assets/images/change-renovate-bot-to-maintainer.png)
+
+- Allow **renovate-bot** to merge into master.
+  ![Allow renovate-bot merge permission](assets/images/allow-renovate-bot-to-merge.png)
+
+- Change master branch from protected branch to **unprotected** branch
+  ![Allow renovate-bot merge permission](assets/images/unprotect-master-branch.png)
