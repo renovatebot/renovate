@@ -96,7 +96,7 @@ export async function ensureMasterIssue(
     issueBody += '\n';
   }
   const rateLimited = branches.filter(
-    (branch) => branch.res && branch.res.endsWith('pr-hourly-limit-reached')
+    (branch) => branch.res === 'pr-limit-reached'
   );
   if (rateLimited.length) {
     issueBody += '## Rate Limited\n\n';
@@ -155,7 +155,8 @@ export async function ensureMasterIssue(
     'needs-approval',
     'needs-pr-approval',
     'not-scheduled',
-    'pr-hourly-limit-reached',
+    'pr-limit-reached',
+    'commit-limit-reached',
     'already-existed',
     'error',
     'automerged',

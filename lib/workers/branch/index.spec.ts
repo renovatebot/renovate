@@ -216,7 +216,20 @@ describe('workers/branch', () => {
       });
       git.branchExists.mockResolvedValue(false);
       expect(await branchWorker.processBranch(config, true)).toEqual(
-        'pr-hourly-limit-reached'
+        'pr-limit-reached'
+      );
+    });
+    it('returns if commit limit exceeded', async () => {
+      getUpdated.getUpdatedPackageFiles.mockResolvedValueOnce({
+        ...updatedPackageFiles,
+      });
+      npmPostExtract.getAdditionalFiles.mockResolvedValueOnce({
+        artifactErrors: [],
+        updatedArtifacts: [],
+      });
+      git.branchExists.mockResolvedValue(false);
+      expect(await branchWorker.processBranch(config, false, true)).toEqual(
+        'commit-limit-reached'
       );
     });
     it('returns if no work', async () => {
