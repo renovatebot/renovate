@@ -796,7 +796,7 @@ const escapeHash = (input: string): string =>
 
 export async function createPr({
   branchName,
-  targetBranch = config.defaultBranch,
+  targetBranch,
   prTitle: title,
   prBody: rawDescription,
 }: CreatePRConfig): Promise<Pr> {

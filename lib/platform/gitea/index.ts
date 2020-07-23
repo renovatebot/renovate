@@ -489,7 +489,7 @@ const platform: Platform = {
 
   async createPr({
     branchName,
-    targetBranch = config.defaultBranch,
+    targetBranch,
     prTitle: title,
     prBody: rawBody,
     labels: labelNames,

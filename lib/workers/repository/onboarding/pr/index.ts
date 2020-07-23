@@ -128,6 +128,7 @@ If you need any further assistance then you can also [request help here](${confi
     } else {
       const pr = await platform.createPr({
         branchName: config.onboardingBranch,
+        targetBranch: config.defaultBranch,
         prTitle: config.onboardingPrTitle,
         prBody,
         labels,
