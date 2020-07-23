@@ -56,7 +56,8 @@ const rebasingRegex = /\*\*Rebasing\*\*: .*/;
 
 export async function processBranch(
   branchConfig: BranchConfig,
-  prHourlyLimitReached?: boolean
+  prLimitReached?: boolean,
+  commitLimitReached?: boolean
 ): Promise<ProcessBranchResult> {
   const config: BranchConfig = { ...branchConfig };
   const dependencies = config.upgrades
@@ -148,14 +149,20 @@ export async function processBranch(
     }
     if (
       !branchExists &&
-      prHourlyLimitReached &&
+      prLimitReached &&
       !dependencyDashboardCheck &&
       !config.vulnerabilityAlert
     ) {
-      logger.debug(
-        'Reached PR creation limit or per run commits limit - skipping branch creation'
-      );
-      return 'pr-hourly-limit-reached';
+      logger.debug('Reached PR limit - skipping branch creation');
+      return 'pr-limit-reached';
+    }
+    if (
+      commitLimitReached &&
+      !dependencyDashboardCheck &&
+      !config.vulnerabilityAlert
+    ) {
+      logger.debug('Reached commits limit - skipping branch');
+      return 'commit-limit-reached';
     }
     if (branchExists) {
       logger.debug('Checking if PR has been edited');

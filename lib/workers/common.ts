@@ -86,7 +86,8 @@ export type ProcessBranchResult =
   | 'pending'
   | 'pr-created'
   | 'pr-edited'
-  | 'pr-hourly-limit-reached'
+  | 'pr-limit-reached'
+  | 'commit-limit-reached'
   | 'rebase';
 
 export interface BranchConfig
