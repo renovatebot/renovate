@@ -681,6 +681,7 @@ describe('platform/bitbucket', () => {
         .reply(200, { id: 5 });
       const { number } = await bitbucket.createPr({
         branchName: 'branch',
+        targetBranch: 'master',
         prTitle: 'title',
         prBody: 'body',
       });
