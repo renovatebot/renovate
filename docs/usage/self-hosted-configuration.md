@@ -75,6 +75,8 @@ You probably have no need for this option - it is an experimental setting for th
 
 RFC5322-compliant string if you wish to customise the git author for commits. If you need to transition from one git author to another, put the old gitAuthor into `RENOVATE_LEGACY_GIT_AUTHOR_EMAIL` in environment. Renovate will then check against it as well as the current git author value before deciding if a branch has been modified.
 
+**Note** It is strongly recommended that the git author email you provide should be unique to Renovate. Otherwise, if another bot or human shares the same email and pushes to one of Renovate's branches then Renovate will mistake the branch as unmodified and potentially force push over the changes.
+
 ## gitPrivateKey
 
 This should be an armored private key, e.g. the type you get from running `gpg --export-secret-keys --armor 92066A17F0D1707B4E96863955FEF5171C45FAE5 > private.key`. Replace the newlines with `\n` before adding the resulting single-line value to your bot's config.
