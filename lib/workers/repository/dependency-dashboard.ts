@@ -71,7 +71,10 @@ export async function ensureMasterIssue(
     }
     return;
   }
-  let issueBody = `This issue contains a list of Renovate updates and their statuses.\n\n`;
+  let issueBody = '';
+  if (config.dependencyDashboardHeader?.length) {
+    issueBody += `${config.dependencyDashboardHeader}\n\n`;
+  }
   const pendingApprovals = branches.filter(
     (branch) => branch.res === 'needs-approval'
   );
@@ -200,9 +203,8 @@ export async function ensureMasterIssue(
   }
 
   // istanbul ignore if
-  if (global.appMode) {
-    issueBody +=
-      '---\n<details><summary>Advanced</summary>\n\n- [ ] <!-- manual job -->Check this box to trigger a request for Renovate to run again on this repository\n\n</details>\n';
+  if (config.dependencyDashboardFooter?.length) {
+    issueBody += `---\n${config.dependencyDashboardFooter}\n`;
   }
 
   if (config.dryRun) {
