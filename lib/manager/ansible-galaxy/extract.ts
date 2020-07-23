@@ -4,7 +4,7 @@ import { logger } from '../../logger';
 import { SkipReason } from '../../types';
 import { PackageDependency, PackageFile } from '../common';
 
-const galaxyRoleRegex = new RegExp(/.+\..+/);
+const galaxyRoleRegex = /.+\..+/;
 
 function interpretLine(
   lineMatch: RegExpMatchArray,
