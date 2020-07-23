@@ -323,8 +323,6 @@ export async function ensurePr(
         logger.debug(
           {
             prTitle,
-            oldPrBody: existingPrBody,
-            newPrBody: prBody,
           },
           'PR body changed'
         );
