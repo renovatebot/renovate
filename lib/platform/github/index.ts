@@ -274,8 +274,7 @@ export async function initRepo({
     // Use default branch as PR target unless later overridden.
     config.defaultBranch = repo.defaultBranchRef.name;
     // Base branch may be configured but defaultBranch is always fixed
-    config.baseBranch = config.defaultBranch;
-    logger.debug(`${repository} default branch = ${config.baseBranch}`);
+    logger.debug(`${repository} default branch = ${config.defaultBranch}`);
     // GitHub allows administrators to block certain types of merge, so we need to check it
     if (repo.rebaseMergeAllowed) {
       config.mergeMethod = 'rebase';
@@ -361,14 +360,14 @@ export async function initRepo({
       );
       // Need to update base branch
       logger.debug(
-        { baseBranch: config.baseBranch, parentSha },
-        'Setting baseBranch ref in fork'
+        { defaultBranch: config.defaultBranch, parentSha },
+        'Setting defaultBranch ref in fork'
       );
       // This is a lovely "hack" by GitHub that lets us force update our fork's master
       // with the base commit from the parent repository
       try {
         await githubApi.patchJson(
-          `repos/${config.repository}/git/refs/heads/${config.baseBranch}`,
+          `repos/${config.repository}/git/refs/heads/${config.defaultBranch}`,
           {
             body: {
               sha: parentSha,
@@ -434,7 +433,7 @@ export async function getRepoForceRebase(): Promise<boolean> {
   if (config.repoForceRebase === undefined) {
     try {
       config.repoForceRebase = false;
-      const branchProtection = await getBranchProtection(config.baseBranch);
+      const branchProtection = await getBranchProtection(config.defaultBranch);
       logger.debug('Found branch protection');
       if (branchProtection.required_pull_request_reviews) {
         logger.debug(
@@ -477,7 +476,6 @@ export async function getRepoForceRebase(): Promise<boolean> {
 
 // istanbul ignore next
 export async function setBaseBranch(branchName: string): Promise<string> {
-  config.baseBranch = branchName;
   const baseBranchSha = await git.setBranch(branchName);
   return baseBranchSha;
 }
