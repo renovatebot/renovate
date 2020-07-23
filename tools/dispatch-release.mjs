@@ -19,6 +19,7 @@ shell.echo(`Dispatching version: ${version}`);
         'user-agent': 'Renovate release helper',
         authorization: `token ${process.env.GITHUB_TOKEN}`,
       },
+      method: 'POST',
       json: {
         event_type: 'renovate-release',
         // max 10 keys here, https://github.com/peter-evans/repository-dispatch#client-payload
