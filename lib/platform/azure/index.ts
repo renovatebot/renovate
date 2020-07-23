@@ -40,7 +40,6 @@ import { AzurePr } from './types';
 interface Config {
   repoForceRebase: boolean;
   mergeMethod: GitPullRequestMergeStrategy;
-  baseCommitSHA: string | undefined;
   baseBranch: string;
   defaultBranch: string;
   owner: string;
@@ -96,15 +95,6 @@ export async function getRepos(): Promise<string[]> {
   return repos.map((repo) => `${repo.project.name}/${repo.name}`);
 }
 
-async function getBranchCommit(fullBranchName: string): Promise<string> {
-  const azureApiGit = await azureApi.gitApi();
-  const commit = await azureApiGit.getBranch(
-    config.repoId,
-    azureHelper.getBranchNameWithoutRefsheadsPrefix(fullBranchName)!
-  );
-  return commit.commit.commitId;
-}
-
 export async function initRepo({
   repository,
   localDir,
@@ -130,7 +120,6 @@ export async function initRepo({
   config.defaultBranch = repo.defaultBranch.replace('refs/heads/', '');
   config.baseBranch = config.defaultBranch;
   logger.debug(`${repository} default branch = ${config.defaultBranch}`);
-  config.baseCommitSHA = await getBranchCommit(config.baseBranch);
   config.mergeMethod = await azureHelper.getMergeMethod(repo.id, names.project);
   config.repoForceRebase = false;
 
@@ -186,7 +175,6 @@ export function getRepoForceRebase(): Promise<boolean> {
 export async function setBaseBranch(branchName: string): Promise<string> {
   logger.debug(`Setting baseBranch to ${branchName}`);
   config.baseBranch = branchName;
-  delete config.baseCommitSHA;
   const baseBranchSha = await git.setBranch(branchName);
   return baseBranchSha;
 }
