@@ -14,9 +14,6 @@ export interface PlatformConfig {
 
 export interface RepoConfig {
   defaultBranch: string;
-  endpoint?: string;
-  renovateUsername?: any;
-  gitAuthor?: any;
   isFork: boolean;
 }
 
