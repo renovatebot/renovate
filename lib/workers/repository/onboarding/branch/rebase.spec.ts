@@ -1,11 +1,4 @@
-import { mock } from 'jest-mock-extended';
-import {
-  RenovateConfig,
-  defaultConfig,
-  git,
-  platform,
-} from '../../../../../test/util';
-import { Pr } from '../../../../platform';
+import { RenovateConfig, defaultConfig, git } from '../../../../../test/util';
 import { rebaseOnboardingBranch } from './rebase';
 
 jest.mock('../../../../util/git');
@@ -20,10 +13,7 @@ describe('workers/repository/onboarding/branch/rebase', () => {
       };
     });
     it('does not rebase modified branch', async () => {
-      platform.getBranchPr.mockResolvedValueOnce({
-        ...mock<Pr>(),
-        isModified: true,
-      });
+      git.isBranchModified.mockResolvedValueOnce(true);
       await rebaseOnboardingBranch(config);
       expect(git.commitFiles).toHaveBeenCalledTimes(0);
     });
@@ -33,20 +23,11 @@ describe('workers/repository/onboarding/branch/rebase', () => {
       git.getFile
         .mockResolvedValueOnce(contents) // package.json
         .mockResolvedValueOnce(contents); // renovate.json
-      platform.getBranchPr.mockResolvedValueOnce({
-        ...mock<Pr>(),
-        isModified: false,
-        isStale: false,
-      });
       await rebaseOnboardingBranch(config);
       expect(git.commitFiles).toHaveBeenCalledTimes(0);
     });
     it('rebases onboarding branch', async () => {
-      platform.getBranchPr.mockResolvedValueOnce({
-        ...mock<Pr>(),
-        isStale: true,
-        isModified: false,
-      });
+      git.isBranchStale.mockResolvedValueOnce(true);
       await rebaseOnboardingBranch(config);
       expect(git.commitFiles).toHaveBeenCalledTimes(1);
     });

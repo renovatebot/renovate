@@ -2,6 +2,9 @@
 - src: yatesr.timezone
   version: "0.1.0"
 
+- name: 'cloudalchemy.node-exporter'
+  version: '0.19.0'
+
 # GitHub repo, accessible by http(s)
 - version: master
   src: https://github.com/bennojoy/nginx

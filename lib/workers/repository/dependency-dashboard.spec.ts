@@ -169,14 +169,14 @@ describe('workers/repository/master-issue', () => {
           ...mock<BranchConfig>(),
           prTitle: 'pr5',
           upgrades: [{ ...mock<PrUpgrade>(), depName: 'dep5' }],
-          res: 'pr-hourly-limit-reached',
+          res: 'pr-limit-reached',
           branchName: 'branchName5',
         },
         {
           ...mock<BranchConfig>(),
           prTitle: 'pr6',
           upgrades: [{ ...mock<PrUpgrade>(), depName: 'dep6' }],
-          res: 'pr-hourly-limit-reached',
+          res: 'pr-limit-reached',
           branchName: 'branchName6',
         },
         {

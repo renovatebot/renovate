@@ -25,7 +25,11 @@ import { ExternalHostError } from '../../types/errors/external-host-error';
 import { emojify } from '../../util/emoji';
 import { exec } from '../../util/exec';
 import { readLocalFile, writeLocalFile } from '../../util/fs';
-import { getRepoStatus, branchExists as gitBranchExists } from '../../util/git';
+import {
+  getRepoStatus,
+  branchExists as gitBranchExists,
+  isBranchModified,
+} from '../../util/git';
 import { regEx } from '../../util/regex';
 import { BranchConfig, PrResult, ProcessBranchResult } from '../common';
 import { checkAutoMerge, ensurePr } from '../pr';
@@ -52,7 +56,8 @@ const rebasingRegex = /\*\*Rebasing\*\*: .*/;
 
 export async function processBranch(
   branchConfig: BranchConfig,
-  prHourlyLimitReached?: boolean
+  prLimitReached?: boolean,
+  commitLimitReached?: boolean
 ): Promise<ProcessBranchResult> {
   const config: BranchConfig = { ...branchConfig };
   const dependencies = config.upgrades
@@ -144,14 +149,20 @@ export async function processBranch(
     }
     if (
       !branchExists &&
-      prHourlyLimitReached &&
+      prLimitReached &&
       !dependencyDashboardCheck &&
       !config.vulnerabilityAlert
     ) {
-      logger.debug(
-        'Reached PR creation limit or per run commits limit - skipping branch creation'
-      );
-      return 'pr-hourly-limit-reached';
+      logger.debug('Reached PR limit - skipping branch creation');
+      return 'pr-limit-reached';
+    }
+    if (
+      commitLimitReached &&
+      !dependencyDashboardCheck &&
+      !config.vulnerabilityAlert
+    ) {
+      logger.debug('Reached commits limit - skipping branch');
+      return 'commit-limit-reached';
     }
     if (branchExists) {
       logger.debug('Checking if PR has been edited');
@@ -163,8 +174,9 @@ export async function processBranch(
           );
           throw new Error(REPOSITORY_CHANGED);
         }
+        const branchIsModified = await isBranchModified(config.branchName);
         if (
-          branchPr.isModified ||
+          branchIsModified ||
           (branchPr.targetBranch &&
             branchPr.targetBranch !== branchConfig.baseBranch)
         ) {

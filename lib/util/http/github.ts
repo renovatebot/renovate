@@ -11,20 +11,12 @@ import { PLATFORM_TYPE_GITHUB } from '../../constants/platforms';
 import { logger } from '../../logger';
 import { ExternalHostError } from '../../types/errors/external-host-error';
 import { maskToken } from '../mask';
-import { HttpError } from './types';
+import { GotLegacyError } from './legacy';
 import { Http, HttpPostOptions, HttpResponse, InternalHttpOptions } from '.';
 
 let baseUrl = 'https://api.github.com/';
 export const setBaseUrl = (url: string): void => {
   baseUrl = url;
-};
-
-type GotRequestError<E = unknown, T = unknown> = HttpError & {
-  body: {
-    message?: string;
-    errors?: E[];
-  };
-  headers?: Record<string, T>;
 };
 
 interface GithubInternalOptions extends InternalHttpOptions {
@@ -45,7 +37,7 @@ interface GithubGraphqlResponse<T = unknown> {
 }
 
 function handleGotError(
-  err: GotRequestError,
+  err: GotLegacyError,
   url: string | URL,
   opts: GithubHttpOptions
 ): never {
@@ -115,18 +107,14 @@ function handleGotError(
       message.includes('Review cannot be requested from pull request author')
     ) {
       throw err;
-    } else if (
-      err.body &&
-      err.body.errors &&
-      err.body.errors.find((e: any) => e.code === 'invalid')
-    ) {
+    } else if (err.body?.errors?.find((e: any) => e.code === 'invalid')) {
       throw new Error(REPOSITORY_CHANGED);
     }
     logger.debug({ err }, '422 Error thrown from GitHub');
     throw new ExternalHostError(err, PLATFORM_TYPE_GITHUB);
   }
   if (err.statusCode === 404) {
-    logger.debug({ url: err.url }, 'GitHub 404');
+    logger.debug({ url: err.options?.url }, 'GitHub 404');
   } else {
     logger.debug({ err }, 'Unknown GitHub error');
   }

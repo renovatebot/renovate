@@ -36,6 +36,20 @@ describe('platform/git', () => {
     await repo.add(['future_file']);
     await repo.commit('future message');
 
+    await repo.checkoutBranch('renovate/modified_branch', 'master');
+    await fs.writeFile(base.path + '/base_file', 'base');
+    await repo.add(['base_file']);
+    await repo.commit('base message');
+    await fs.writeFile(base.path + '/modified_file', 'modified');
+    await repo.add(['modified_file']);
+    await repo.commit('modification');
+
+    await repo.checkoutBranch('renovate/custom_author', 'master');
+    await fs.writeFile(base.path + '/custom_file', 'custom');
+    await repo.add(['custom_file']);
+    await repo.addConfig('user.email', 'custom@example.com');
+    await repo.commit('custom message');
+
     await repo.checkout('master');
   });
 
@@ -52,8 +66,8 @@ describe('platform/git', () => {
       extraCloneOpts: {
         '--config': 'extra.clone.config=test-extra-config-value',
       },
-      gitAuthorName: 'test',
-      gitAuthorEmail: 'test@example.com',
+      gitAuthorName: 'Jest',
+      gitAuthorEmail: 'Jest@example.com',
     });
     await git.syncGit();
   });
@@ -114,6 +128,9 @@ describe('platform/git', () => {
     });
   });
   describe('isBranchStale()', () => {
+    beforeEach(async () => {
+      await git.setBranch('master');
+    });
     it('should return false if same SHA as master', async () => {
       expect(await git.isBranchStale('renovate/future_branch')).toBe(false);
     });
@@ -122,6 +139,18 @@ describe('platform/git', () => {
     });
     it('should throw if branch does not exist', async () => {
       await expect(git.isBranchStale('not_found')).rejects.toMatchSnapshot();
+    });
+  });
+  describe('isBranchModified()', () => {
+    it('should throw if branch does not exist', async () => {
+      await expect(git.isBranchModified('not_found')).rejects.toMatchSnapshot();
+    });
+    it('should return true when author matches', async () => {
+      expect(await git.isBranchModified('renovate/future_branch')).toBe(false);
+      expect(await git.isBranchModified('renovate/future_branch')).toBe(false);
+    });
+    it('should return false when custom author', async () => {
+      expect(await git.isBranchModified('renovate/custom_author')).toBe(true);
     });
   });
 

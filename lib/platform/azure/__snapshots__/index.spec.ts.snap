@@ -37,7 +37,6 @@ exports[`platform/azure deleteLabel() Should delete a label 1`] = `
 Array [
   Array [],
   Array [],
-  Array [],
 ]
 `;
 
@@ -134,19 +133,9 @@ exports[`platform/azure getBranchPr(branchName) should return the pr 1`] = `null
 exports[`platform/azure getPr(prNo) should return a pr in the right format 1`] = `
 Object {
   "hasReviewers": false,
-  "isModified": false,
   "labels": Array [
     "renovate",
   ],
-  "number": 1234,
-}
-`;
-
-exports[`platform/azure getPr(prNo) should return a pr thats been modified 1`] = `
-Object {
-  "hasReviewers": false,
-  "isModified": true,
-  "labels": Array [],
   "number": 1234,
 }
 `;
@@ -174,7 +163,6 @@ Object {
 
 exports[`platform/azure initRepo should initialise the config for a repo 1`] = `
 Array [
-  Array [],
   Array [],
 ]
 `;

@@ -17,7 +17,7 @@ Array [
     "headers": Object {
       "accept": "application/json",
       "accept-encoding": "gzip, deflate",
-      "content-length": 42,
+      "content-length": "42",
       "content-type": "application/json",
       "host": "api.bitbucket.org",
       "user-agent": "https://github.com/renovatebot/renovate",
@@ -45,7 +45,7 @@ Array [
     "headers": Object {
       "accept": "application/json",
       "accept-encoding": "gzip, deflate",
-      "content-length": 55,
+      "content-length": "55",
       "content-type": "application/json",
       "host": "api.bitbucket.org",
       "user-agent": "https://github.com/renovatebot/renovate",

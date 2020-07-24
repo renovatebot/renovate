@@ -40,9 +40,6 @@ import { AzurePr } from './types';
 interface Config {
   repoForceRebase: boolean;
   mergeMethod: GitPullRequestMergeStrategy;
-  baseCommitSHA: string | undefined;
-  baseBranch: string;
-  defaultBranch: string;
   owner: string;
   repoId: string;
   project: string;
@@ -96,15 +93,6 @@ export async function getRepos(): Promise<string[]> {
   return repos.map((repo) => `${repo.project.name}/${repo.name}`);
 }
 
-async function getBranchCommit(fullBranchName: string): Promise<string> {
-  const azureApiGit = await azureApi.gitApi();
-  const commit = await azureApiGit.getBranch(
-    config.repoId,
-    azureHelper.getBranchNameWithoutRefsheadsPrefix(fullBranchName)!
-  );
-  return commit.commit.commitId;
-}
-
 export async function initRepo({
   repository,
   localDir,
@@ -127,10 +115,8 @@ export async function initRepo({
   config.owner = '?owner?';
   logger.debug(`${repository} owner = ${config.owner}`);
   // Use default branch as PR target unless later overridden
-  config.defaultBranch = repo.defaultBranch.replace('refs/heads/', '');
-  config.baseBranch = config.defaultBranch;
-  logger.debug(`${repository} default branch = ${config.defaultBranch}`);
-  config.baseCommitSHA = await getBranchCommit(config.baseBranch);
+  const defaultBranch = repo.defaultBranch.replace('refs/heads/', '');
+  logger.debug(`${repository} default branch = ${defaultBranch}`);
   config.mergeMethod = await azureHelper.getMergeMethod(repo.id, names.project);
   config.repoForceRebase = false;
 
@@ -144,7 +130,7 @@ export async function initRepo({
       const json = await azureHelper.getFile(
         repo.id,
         'renovate.json',
-        config.defaultBranch
+        defaultBranch
       );
       renovateConfig = JSON.parse(json);
     } catch {
@@ -172,7 +158,7 @@ export async function initRepo({
     gitAuthorEmail: global.gitAuthor?.email,
   });
   const repoConfig: RepoConfig = {
-    defaultBranch: config.defaultBranch,
+    defaultBranch,
     isFork: false,
   };
   return repoConfig;
@@ -184,9 +170,7 @@ export function getRepoForceRebase(): Promise<boolean> {
 
 // istanbul ignore next
 export async function setBaseBranch(branchName: string): Promise<string> {
-  logger.debug(`Setting baseBranch to ${branchName}`);
-  config.baseBranch = branchName;
-  delete config.baseCommitSHA;
+  logger.debug(`Setting base branch to ${branchName}`);
   const baseBranchSha = await git.setBranch(branchName);
   return baseBranchSha;
 }
@@ -252,14 +236,6 @@ export async function getPr(pullRequestId: number): Promise<Pr | null> {
   azurePr.labels = labels
     .filter((label) => label.active)
     .map((label) => label.name);
-
-  const commits = await azureApiGit.getPullRequestCommits(
-    config.repoId,
-    pullRequestId
-  );
-  azurePr.isModified =
-    commits.length > 0 &&
-    commits[0].author.name !== commits[commits.length - 1].author.name;
   azurePr.hasReviewers = is.nonEmptyArray(azurePr.reviewers);
   return azurePr;
 }
@@ -359,7 +335,7 @@ export async function getBranchStatus(
 
 export async function createPr({
   branchName,
-  targetBranch = config.defaultBranch,
+  targetBranch,
   prTitle: title,
   prBody: body,
   labels,

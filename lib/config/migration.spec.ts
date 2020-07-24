@@ -37,7 +37,7 @@ describe('config/migration', () => {
         automergeMajor: false,
         automergeMinor: true,
         automergePatch: true,
-        masterIssue: true,
+        masterIssue: 'true',
         masterIssueTitle: 'foo',
         gomodTidy: true,
         upgradeInRange: true,

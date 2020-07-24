@@ -92,8 +92,10 @@ export async function initPlatform(
     logger.debug(`Using configured gitAuthor (${config.gitAuthor})`);
     gitAuthor = config.gitAuthor;
   } else if (!platformInfo?.gitAuthor) {
-    logger.debug('Using default gitAuthor: Renovate Bot <bot@renovateapp.com>');
-    gitAuthor = 'Renovate Bot <bot@renovateapp.com>';
+    logger.debug(
+      'Using default gitAuthor: Renovate Bot <renovate@whitesourcesoftware.com>'
+    );
+    gitAuthor = 'Renovate Bot <renovate@whitesourcesoftware.com>';
   } /* istanbul ignore next */ else {
     logger.debug('Using platform gitAuthor: ' + platformInfo.gitAuthor);
     gitAuthor = platformInfo.gitAuthor;
