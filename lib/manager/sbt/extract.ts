@@ -213,7 +213,7 @@ function parseSbtLine(
       scalaVersion = normalizeScalaVersion(rawScalaVersion);
       dep = {
         datasource: datasourceMaven.id,
-        depName: 'scala-library',
+        depName: 'scala',
         lookupName: 'org.scala-lang:scala-library',
         currentValue: rawScalaVersion,
         separateMinorPatch: true,

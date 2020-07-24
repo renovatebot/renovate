@@ -6,7 +6,7 @@ Object {
     Object {
       "currentValue": "2.13.0-RC5",
       "datasource": "maven",
-      "depName": "scala-library",
+      "depName": "scala",
       "lookupName": "org.scala-lang:scala-library",
       "registryUrls": Array [
         "https://repo.maven.apache.org/maven2",
@@ -41,7 +41,7 @@ Object {
     Object {
       "currentValue": "2.13.0-RC5",
       "datasource": "maven",
-      "depName": "scala-library",
+      "depName": "scala",
       "lookupName": "org.scala-lang:scala-library",
       "registryUrls": Array [
         "https://repo.maven.apache.org/maven2",
@@ -76,7 +76,7 @@ Object {
     Object {
       "currentValue": "2.9.10",
       "datasource": "maven",
-      "depName": "scala-library",
+      "depName": "scala",
       "lookupName": "org.scala-lang:scala-library",
       "registryUrls": Array [
         "https://repo.maven.apache.org/maven2",
@@ -396,7 +396,7 @@ Object {
     Object {
       "currentValue": "2.12.10",
       "datasource": "maven",
-      "depName": "scala-library",
+      "depName": "scala",
       "lookupName": "org.scala-lang:scala-library",
       "registryUrls": Array [
         "https://repo.maven.apache.org/maven2",
