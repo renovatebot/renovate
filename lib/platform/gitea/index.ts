@@ -29,6 +29,7 @@ import {
   FindPRConfig,
   Issue,
   Platform,
+  PlatformParams,
   PlatformResult,
   Pr,
   RepoParams,
@@ -186,7 +187,7 @@ const platform: Platform = {
   async initPlatform({
     endpoint,
     token,
-  }: GiteaRenovateConfig): Promise<PlatformResult> {
+  }: PlatformParams): Promise<PlatformResult> {
     if (!token) {
       throw new Error('Init: You must configure a Gitea personal access token');
     }
