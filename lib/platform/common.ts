@@ -1,10 +1,16 @@
-import { RenovateConfig } from '../config/common';
 import {
   BranchStatus,
   VulnerabilityAlert as _VulnerabilityAlert,
 } from '../types';
 
 export type VulnerabilityAlert = _VulnerabilityAlert;
+
+export interface PlatformParams {
+  endpoint?: string;
+  token?: string;
+  username?: string;
+  password?: string;
+}
 
 export interface PlatformResult {
   endpoint: string;
@@ -158,5 +164,5 @@ export interface Platform {
     requiredStatusChecks?: string[] | null
   ): Promise<BranchStatus>;
   getBranchPr(branchName: string): Promise<Pr | null>;
-  initPlatform(config: RenovateConfig): Promise<PlatformResult>;
+  initPlatform(config: PlatformParams): Promise<PlatformResult>;
 }

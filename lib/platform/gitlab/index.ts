@@ -32,6 +32,7 @@ import {
   EnsureIssueConfig,
   FindPRConfig,
   Issue,
+  PlatformParams,
   PlatformResult,
   Pr,
   RepoParams,
@@ -76,10 +77,7 @@ let authorId: number;
 export async function initPlatform({
   endpoint,
   token,
-}: {
-  token: string;
-  endpoint: string;
-}): Promise<PlatformResult> {
+}: PlatformParams): Promise<PlatformResult> {
   if (!token) {
     throw new Error('Init: You must configure a GitLab personal access token');
   }

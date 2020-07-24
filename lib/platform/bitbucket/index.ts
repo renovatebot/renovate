@@ -23,6 +23,7 @@ import {
   EnsureIssueResult,
   FindPRConfig,
   Issue,
+  PlatformParams,
   PlatformResult,
   Pr,
   RepoParams,
@@ -46,7 +47,7 @@ export function initPlatform({
   endpoint,
   username,
   password,
-}: RenovateConfig): Promise<PlatformResult> {
+}: PlatformParams): Promise<PlatformResult> {
   if (!(username && password)) {
     throw new Error(
       'Init: You must configure a Bitbucket username and password'

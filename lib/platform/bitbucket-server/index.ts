@@ -29,6 +29,7 @@ import {
   EnsureIssueResult,
   FindPRConfig,
   Issue,
+  PlatformParams,
   PlatformResult,
   Pr,
   RepoParams,
@@ -68,7 +69,7 @@ export function initPlatform({
   endpoint,
   username,
   password,
-}: RenovateConfig): Promise<PlatformResult> {
+}: PlatformParams): Promise<PlatformResult> {
   if (!endpoint) {
     throw new Error('Init: You must configure a Bitbucket Server endpoint');
   }
