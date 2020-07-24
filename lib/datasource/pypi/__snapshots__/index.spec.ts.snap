@@ -489,5 +489,15 @@ Array [
     "method": "GET",
     "url": "https://second-index/foo/azure-cli-monitor/json",
   },
+  Object {
+    "headers": Object {
+      "accept": "application/json",
+      "accept-encoding": "gzip, deflate",
+      "host": "third-index",
+      "user-agent": "https://github.com/renovatebot/renovate",
+    },
+    "method": "GET",
+    "url": "https://third-index/foo/azure-cli-monitor/json",
+  },
 ]
 `;
