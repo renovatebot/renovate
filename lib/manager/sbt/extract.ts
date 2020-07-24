@@ -182,6 +182,7 @@ function parseDepExpr(
 
   return result;
 }
+
 interface ParseOptions {
   isMultiDeps?: boolean;
   scalaVersion?: string;
@@ -212,7 +213,8 @@ function parseSbtLine(
       scalaVersion = normalizeScalaVersion(rawScalaVersion);
       dep = {
         datasource: datasourceMaven.id,
-        depName: 'org.scala-lang:scala-library',
+        depName: 'scala-library',
+        lookupName: 'org.scala-lang:scala-library',
         currentValue: rawScalaVersion,
         separateMinorPatch: true,
       };
