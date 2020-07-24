@@ -29,10 +29,10 @@ import {
   FindPRConfig,
   Issue,
   Platform,
-  PlatformConfig,
+  PlatformResult,
   Pr,
-  RepoConfig,
   RepoParams,
+  RepoResult,
   VulnerabilityAlert,
 } from '../common';
 import { smartTruncate } from '../utils/pr-body';
@@ -186,7 +186,7 @@ const platform: Platform = {
   async initPlatform({
     endpoint,
     token,
-  }: GiteaRenovateConfig): Promise<PlatformConfig> {
+  }: GiteaRenovateConfig): Promise<PlatformResult> {
     if (!token) {
       throw new Error('Init: You must configure a Gitea personal access token');
     }
@@ -221,7 +221,7 @@ const platform: Platform = {
     repository,
     localDir,
     optimizeForDisabled,
-  }: RepoParams): Promise<RepoConfig> {
+  }: RepoParams): Promise<RepoResult> {
     let renovateConfig: RenovateConfig;
     let repo: helper.Repo;
 

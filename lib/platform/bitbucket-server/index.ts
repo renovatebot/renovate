@@ -29,10 +29,10 @@ import {
   EnsureIssueResult,
   FindPRConfig,
   Issue,
-  PlatformConfig,
+  PlatformResult,
   Pr,
-  RepoConfig,
   RepoParams,
+  RepoResult,
   VulnerabilityAlert,
 } from '../common';
 import { smartTruncate } from '../utils/pr-body';
@@ -68,7 +68,7 @@ export function initPlatform({
   endpoint,
   username,
   password,
-}: RenovateConfig): Promise<PlatformConfig> {
+}: RenovateConfig): Promise<PlatformResult> {
   if (!endpoint) {
     throw new Error('Init: You must configure a Bitbucket Server endpoint');
   }
@@ -80,7 +80,7 @@ export function initPlatform({
   // TODO: Add a connection check that endpoint/username/password combination are valid
   defaults.endpoint = ensureTrailingSlash(endpoint);
   setBaseUrl(defaults.endpoint);
-  const platformConfig: PlatformConfig = {
+  const platformConfig: PlatformResult = {
     endpoint: defaults.endpoint,
   };
   return Promise.resolve(platformConfig);
@@ -111,7 +111,7 @@ export async function initRepo({
   localDir,
   optimizeForDisabled,
   bbUseDefaultReviewers,
-}: RepoParams): Promise<RepoConfig> {
+}: RepoParams): Promise<RepoResult> {
   logger.debug(
     `initRepo("${JSON.stringify({ repository, localDir }, null, 2)}")`
   );
@@ -202,7 +202,7 @@ export async function initRepo({
       )
     ).body.displayId;
     config.mergeMethod = 'merge';
-    const repoConfig: RepoConfig = {
+    const repoConfig: RepoResult = {
       defaultBranch,
       isFork: !!info.parent,
     };

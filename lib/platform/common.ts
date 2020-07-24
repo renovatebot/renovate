@@ -6,13 +6,13 @@ import {
 
 export type VulnerabilityAlert = _VulnerabilityAlert;
 
-export interface PlatformConfig {
+export interface PlatformResult {
   endpoint: string;
   renovateUsername?: any;
   gitAuthor?: any;
 }
 
-export interface RepoConfig {
+export interface RepoResult {
   defaultBranch: string;
   isFork: boolean;
 }
@@ -122,7 +122,7 @@ export interface Platform {
   findIssue(title: string): Promise<Issue | null>;
   getIssueList(): Promise<Issue[]>;
   getVulnerabilityAlerts(): Promise<VulnerabilityAlert[]>;
-  initRepo(config: RepoParams): Promise<RepoConfig>;
+  initRepo(config: RepoParams): Promise<RepoResult>;
   getPrList(): Promise<Pr[]>;
   ensureIssueClosing(title: string): Promise<void>;
   ensureIssue(
@@ -158,5 +158,5 @@ export interface Platform {
     requiredStatusChecks?: string[] | null
   ): Promise<BranchStatus>;
   getBranchPr(branchName: string): Promise<Pr | null>;
-  initPlatform(config: RenovateConfig): Promise<PlatformConfig>;
+  initPlatform(config: RenovateConfig): Promise<PlatformResult>;
 }

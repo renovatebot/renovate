@@ -32,10 +32,10 @@ import {
   EnsureIssueConfig,
   FindPRConfig,
   Issue,
-  PlatformConfig,
+  PlatformResult,
   Pr,
-  RepoConfig,
   RepoParams,
+  RepoResult,
   VulnerabilityAlert,
 } from '../common';
 import { smartTruncate } from '../utils/pr-body';
@@ -79,7 +79,7 @@ export async function initPlatform({
 }: {
   token: string;
   endpoint: string;
-}): Promise<PlatformConfig> {
+}): Promise<PlatformResult> {
   if (!token) {
     throw new Error('Init: You must configure a GitLab personal access token');
   }
@@ -106,7 +106,7 @@ export async function initPlatform({
     );
     throw new Error('Init: Authentication failure');
   }
-  const platformConfig: PlatformConfig = {
+  const platformConfig: PlatformResult = {
     endpoint: defaults.endpoint,
     gitAuthor,
   };
@@ -140,7 +140,7 @@ export async function initRepo({
   repository,
   localDir,
   optimizeForDisabled,
-}: RepoParams): Promise<RepoConfig> {
+}: RepoParams): Promise<RepoResult> {
   config = {} as any;
   config.repository = urlEscape(repository);
   config.localDir = localDir;
@@ -252,7 +252,7 @@ export async function initRepo({
     logger.debug({ err }, 'Unknown GitLab initRepo error');
     throw err;
   }
-  const repoConfig: RepoConfig = {
+  const repoConfig: RepoResult = {
     defaultBranch,
     isFork: !!res.body.forked_from_project,
   };

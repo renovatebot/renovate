@@ -26,10 +26,10 @@ import {
   EnsureIssueResult,
   FindPRConfig,
   Issue,
-  PlatformConfig,
+  PlatformResult,
   Pr,
-  RepoConfig,
   RepoParams,
+  RepoResult,
   VulnerabilityAlert,
 } from '../common';
 import { smartTruncate } from '../utils/pr-body';
@@ -65,7 +65,7 @@ export function initPlatform({
   token,
   username,
   password,
-}: RenovateConfig): Promise<PlatformConfig> {
+}: RenovateConfig): Promise<PlatformResult> {
   if (!endpoint) {
     throw new Error('Init: You must configure an Azure DevOps endpoint');
   }
@@ -80,7 +80,7 @@ export function initPlatform({
   };
   defaults.endpoint = res.endpoint;
   azureApi.setEndpoint(res.endpoint);
-  const platformConfig: PlatformConfig = {
+  const platformConfig: PlatformResult = {
     endpoint: defaults.endpoint,
   };
   return Promise.resolve(platformConfig);
@@ -98,7 +98,7 @@ export async function initRepo({
   localDir,
   azureWorkItemId,
   optimizeForDisabled,
-}: RepoParams): Promise<RepoConfig> {
+}: RepoParams): Promise<RepoResult> {
   logger.debug(`initRepo("${repository}")`);
   config = { repository, azureWorkItemId } as any;
   const azureApiGit = await azureApi.gitApi();
@@ -157,7 +157,7 @@ export async function initRepo({
     gitAuthorName: global.gitAuthor?.name,
     gitAuthorEmail: global.gitAuthor?.email,
   });
-  const repoConfig: RepoConfig = {
+  const repoConfig: RepoResult = {
     defaultBranch,
     isFork: false,
   };
