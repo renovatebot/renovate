@@ -63,12 +63,10 @@ export async function generateLockFile(
       preCommands.push(installYarn);
     }
 
-    const yarnCmd = yarnPath || 'yarn';
-
     if (
       isYarn1 &&
       config.skipInstalls !== false &&
-      (yarnPath || (await hasYarnOfflineMirror(cwd))) === false
+      (await hasYarnOfflineMirror(cwd)) === false
     ) {
       logger.debug('Updating yarn.lock only - skipping node_modules');
       // The following change causes Yarn 1.x to exit gracefully after updating the lock file but without installing node_modules
@@ -103,7 +101,7 @@ export async function generateLockFile(
     }
 
     // This command updates the lock file based on package.json
-    commands.push(`${yarnCmd} install ${cmdOptions}`.trim());
+    commands.push(`yarn install ${cmdOptions}`.trim());
 
     // rangeStrategy = update-lockfile
     const lockUpdates = upgrades
@@ -112,7 +110,7 @@ export async function generateLockFile(
     if (lockUpdates.length) {
       logger.debug('Performing lockfileUpdate (yarn)');
       commands.push(
-        `${yarnCmd} upgrade ${lockUpdates.join(' ')} ${cmdOptions}`.trim()
+        `yarn upgrade ${lockUpdates.join(' ')} ${cmdOptions}`.trim()
       );
     }
 
