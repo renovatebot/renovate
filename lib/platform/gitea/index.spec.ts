@@ -1,4 +1,4 @@
-import { BranchStatusConfig, Platform, RepoConfig, RepoParams } from '..';
+import { BranchStatusConfig, Platform, RepoParams, RepoResult } from '..';
 import { partial } from '../../../test/util';
 import {
   REPOSITORY_ACCESS_FORBIDDEN,
@@ -168,7 +168,7 @@ describe('platform/gitea', () => {
   function initFakeRepo(
     repo?: Partial<ght.Repo>,
     config?: Partial<RepoParams>
-  ): Promise<RepoConfig> {
+  ): Promise<RepoResult> {
     helper.getRepo.mockResolvedValueOnce({ ...mockRepo, ...repo });
 
     return gitea.initRepo({

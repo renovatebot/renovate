@@ -38,10 +38,10 @@ import {
   EnsureIssueResult,
   FindPRConfig,
   Issue,
-  PlatformConfig,
+  PlatformResult,
   Pr,
-  RepoConfig,
   RepoParams,
+  RepoResult,
   VulnerabilityAlert,
 } from '../common';
 import { smartTruncate } from '../utils/pr-body';
@@ -76,7 +76,7 @@ export async function initPlatform({
 }: {
   endpoint: string;
   token: string;
-}): Promise<PlatformConfig> {
+}): Promise<PlatformResult> {
   if (!token) {
     throw new Error('Init: You must configure a GitHub personal access token');
   }
@@ -126,7 +126,7 @@ export async function initPlatform({
     gitAuthor = undefined;
   }
   logger.debug('Authenticated as GitHub user: ' + renovateUsername);
-  const platformConfig: PlatformConfig = {
+  const platformConfig: PlatformResult = {
     endpoint: defaults.endpoint,
     gitAuthor,
     renovateUsername,
@@ -172,7 +172,7 @@ export async function initRepo({
   includeForks,
   renovateUsername,
   optimizeForDisabled,
-}: RepoParams): Promise<RepoConfig> {
+}: RepoParams): Promise<RepoResult> {
   logger.debug(`initRepo("${repository}")`);
   // config is used by the platform api itself, not necessary for the app layer to know
   config = { localDir, repository } as any;
@@ -422,7 +422,7 @@ export async function initRepo({
     gitAuthorName: global.gitAuthor?.name,
     gitAuthorEmail: global.gitAuthor?.email,
   });
-  const repoConfig: RepoConfig = {
+  const repoConfig: RepoResult = {
     defaultBranch: config.defaultBranch,
     isFork: repo.isFork === true,
   };
