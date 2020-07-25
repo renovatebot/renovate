@@ -9,7 +9,8 @@ describe('manager/npm/extract/yarn', () => {
     it('returns empty if exception parsing', async () => {
       fs.readLocalFile.mockResolvedValueOnce('abcd');
       const res = await getYarnLock('package.json');
-      expect(Object.keys(res)).toHaveLength(0);
+      expect(res.isYarn1).toBe(true);
+      expect(Object.keys(res.lockedVersions)).toHaveLength(0);
     });
 
     it('extracts yarn 1', async () => {
@@ -19,8 +20,9 @@ describe('manager/npm/extract/yarn', () => {
       );
       fs.readLocalFile.mockResolvedValueOnce(plocktest1Lock);
       const res = await getYarnLock('package.json');
-      expect(res).toMatchSnapshot();
-      expect(Object.keys(res)).toHaveLength(7);
+      expect(res.isYarn1).toBe(true);
+      expect(res.lockedVersions).toMatchSnapshot();
+      expect(Object.keys(res.lockedVersions)).toHaveLength(7);
     });
 
     it('extracts yarn 2', async () => {
@@ -30,8 +32,9 @@ describe('manager/npm/extract/yarn', () => {
       );
       fs.readLocalFile.mockResolvedValueOnce(plocktest1Lock);
       const res = await getYarnLock('package.json');
-      expect(res).toMatchSnapshot();
-      expect(Object.keys(res)).toHaveLength(9);
+      expect(res.isYarn1).toBe(false);
+      expect(res.lockedVersions).toMatchSnapshot();
+      expect(Object.keys(res.lockedVersions)).toHaveLength(8);
     });
   });
 });

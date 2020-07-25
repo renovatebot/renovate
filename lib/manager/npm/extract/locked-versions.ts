@@ -15,7 +15,11 @@ export async function getLockedVersions(
       logger.trace('Found yarnLock');
       if (!lockFileCache[yarnLock]) {
         logger.trace('Retrieving/parsing ' + yarnLock);
-        lockFileCache[yarnLock] = await getYarnLock(yarnLock);
+        const { lockedVersions, isYarn1 } = await getYarnLock(yarnLock);
+        lockFileCache[yarnLock] = lockedVersions;
+        if (!isYarn1) {
+          packageFile.compatibility.isYarn1 = isYarn1 ? 'yes' : 'no';
+        }
       }
       for (const dep of packageFile.deps) {
         dep.lockedVersion =

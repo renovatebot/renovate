@@ -29,7 +29,7 @@ describe(getName(__filename), () => {
     jest.resetAllMocks();
     env.getChildProcessEnv.mockReturnValue(envMock.basic);
   });
-  it.each([['1.22.0']])(
+  it.each([['1.22.0'], ['2.1.0']])(
     'generates lock files using yarn v%s',
     async (yarnVersion) => {
       const execSnapshots = mockExecAll(exec, {
@@ -41,6 +41,7 @@ describe(getName(__filename), () => {
       const config = {
         dockerMapDotfiles: true,
         compatibility: {
+          isYarn1: yarnVersion === '1.22.0' ? 'yes' : 'no',
           yarn: '^1.10.0',
         },
         postUpdateOptions: ['yarnDedupeFewer', 'yarnDedupeHighest'],
@@ -94,7 +95,7 @@ describe(getName(__filename), () => {
       expect(fixSnapshots(execSnapshots)).toMatchSnapshot();
     }
   );
-  it.each([['1.22.0']])(
+  it.each([['1.22.0'], ['2.1.0']])(
     'performs lock file maintenance using yarn v%s',
     async (yarnVersion) => {
       const execSnapshots = mockExecAll(exec, {
@@ -106,6 +107,7 @@ describe(getName(__filename), () => {
       const config = {
         dockerMapDotfiles: true,
         compatibility: {
+          isYarn1: yarnVersion === '1.22.0' ? 'yes' : 'no',
           yarn: '^1.10.0',
         },
         postUpdateOptions: ['yarnDedupeFewer', 'yarnDedupeHighest'],

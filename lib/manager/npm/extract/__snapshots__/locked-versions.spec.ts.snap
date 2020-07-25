@@ -38,9 +38,10 @@ Array [
 ]
 `;
 
-exports[`manager/npm/extract/locked-versions .getLockedVersions() uses yarn.lock 1`] = `
+exports[`manager/npm/extract/locked-versions .getLockedVersions() uses yarn.lock with yarn v1.22.0 1`] = `
 Array [
   Object {
+    "compatibility": Object {},
     "deps": Array [
       Object {
         "currentValue": "1.0.0",

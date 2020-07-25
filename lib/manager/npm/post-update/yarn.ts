@@ -8,7 +8,6 @@ import { id as npmId } from '../../../datasource/npm';
 import { logger } from '../../../logger';
 import { ExternalHostError } from '../../../types/errors/external-host-error';
 import { ExecOptions, exec } from '../../../util/exec';
-import { api as semver } from '../../../versioning/semver';
 import { PostUpdateConfig, Upgrade } from '../../common';
 import { getNodeConstraint } from './node-version';
 
@@ -53,6 +52,8 @@ export async function generateLockFile(
       NPM_CONFIG_CACHE: env.NPM_CONFIG_CACHE,
       npm_config_store: env.npm_config_store,
     };
+
+    const isYarn1 = config.compatibility?.isYarn1 !== 'no';
 
     if (isYarn1) {
       let installYarn = 'npm i -g yarn';

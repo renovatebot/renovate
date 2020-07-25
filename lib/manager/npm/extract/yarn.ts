@@ -2,42 +2,35 @@ import { structUtils } from '@yarnpkg/core';
 import { parseSyml } from '@yarnpkg/parsers';
 import { logger } from '../../../logger';
 import { readLocalFile } from '../../../util/fs';
-import { LockFileEntry } from './common';
 
-export type YarnLock = Record<string, string>;
-
-export async function getYarnLock(filePath: string): Promise<YarnLock> {
+export async function getYarnLock(
+  filePath: string
+): Promise<{ isYarn1: boolean; lockedVersions: Record<string, string> }> {
   const yarnLockRaw = await readLocalFile(filePath, 'utf8');
   try {
     const parsed = parseSyml(yarnLockRaw);
-    const lockFile: YarnLock = {};
+    const lockFile: Record<string, string> = {};
 
-    Object.keys(parsed).forEach((key) => {
+    for (const [key, val] of Object.entries(parsed)) {
       if (key === '__metadata') {
-        // yarn 2 uses integrity
-        lockFile['@renovate_yarn_integrity'] = '0.0.0';
-        return;
+        // yarn 2
+      } else {
+        for (const entry of key.split(', ')) {
+          const { scope, name, range } = structUtils.parseDescriptor(entry);
+          const packageName = scope ? `${scope}/${name}` : name;
+          const { selector } = structUtils.parseRange(range);
+
+          logger.trace({ entry, version: val.version });
+          lockFile[packageName + '@' + selector] = parsed[key].version;
+        }
       }
-
-      const val: LockFileEntry = parsed[key];
-
-      key.split(', ').forEach((entry) => {
-        const { scope, name, range } = structUtils.parseDescriptor(entry);
-        const packageName = scope ? `${scope}/${name}` : name;
-        const { selector } = structUtils.parseRange(range);
-
-        logger.trace({ entry, version: val.version });
-        lockFile[packageName + '@' + selector] = parsed[key].version;
-      });
-
-      // istanbul ignore if
-      if (val.integrity) {
-        lockFile['@renovate_yarn_integrity'] = '0.0.0';
-      }
-    });
-    return lockFile;
+    }
+    return {
+      isYarn1: !('__metadata' in parsed),
+      lockedVersions: lockFile,
+    };
   } catch (err) {
     logger.debug({ filePath, err }, 'Warning: Exception parsing yarn.lock');
-    return {};
+    return { isYarn1: true, lockedVersions: {} };
   }
 }
