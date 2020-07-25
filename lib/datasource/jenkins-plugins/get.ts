@@ -42,18 +42,18 @@ interface JenkinsPluginsVersionsResponse {
   plugins: Record<string, Record<string, JenkinsPluginVersion>>;
 }
 
-function hasCacheExpired(refreshedAt: Date, cacheTimeInMin: number): boolean {
+function hasCacheExpired(cache: JenkinsCache<JenkinsCacheTypes>): boolean {
   const minutesElapsed = Math.floor(
-    (new Date().getTime() - refreshedAt.getTime()) / (60 * 1000)
+    (new Date().getTime() - cache.lastSync.getTime()) / (60 * 1000)
   );
-  return minutesElapsed >= cacheTimeInMin;
+  return minutesElapsed >= cache.cacheTimeMin;
 }
 
 async function updateJenkinsCache(
   cache: JenkinsCache<JenkinsCacheTypes>,
   updateHandler: () => Promise<void>
 ): Promise<void> {
-  if (hasCacheExpired(cache.lastSync, cache.cacheTimeMin)) {
+  if (hasCacheExpired(cache)) {
     // eslint-disable-next-line no-param-reassign
     cache.updatePromise =
       // eslint-disable-next-line @typescript-eslint/no-misused-promises

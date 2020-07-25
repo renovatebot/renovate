@@ -26,6 +26,9 @@ describe(getName(__filename), () => {
     });
 
     afterEach(() => {
+      if (!httpMock.allUsed()) {
+        throw new Error('Not all http mocks have been used!');
+      }
       httpMock.reset();
       process.env.RENOVATE_SKIP_CACHE = SKIP_CACHE;
     });
@@ -58,7 +61,7 @@ describe(getName(__filename), () => {
         .get('/current/plugin-versions.json')
         .reply(200, jenkinsPluginsVersions);
 
-      const res = await getPkgReleases(params);
+      let res = await getPkgReleases(params);
       expect(res.releases).toHaveLength(75);
       expect(res).toMatchSnapshot();
 
@@ -73,6 +76,10 @@ describe(getName(__filename), () => {
       expect(
         res.releases.find((release) => release.version === '12.98')
       ).toBeUndefined();
+
+      // check that caching is working and no http requests are done after the first call to getPkgReleases
+      res = await getPkgReleases(params);
+      expect(res.releases).toHaveLength(75);
     });
 
     it('returns package releases for a hit for info and miss for releases', async () => {
@@ -101,6 +108,7 @@ describe(getName(__filename), () => {
         .scope('https://updates.jenkins.io')
         .get('/current/update-center.actual.json')
         .reply(200, '{}');
+
       httpMock
         .scope('https://updates.jenkins.io')
         .get('/current/plugin-versions.json')
