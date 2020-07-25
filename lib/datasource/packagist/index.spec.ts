@@ -21,8 +21,6 @@ const mailchimpJson: any = fs.readFileSync(
 );
 
 const baseUrl = 'https://packagist.org';
-const customRegistryUrl =
-  'https://gitlab.vendor.com/api/v4/group/2/-/packages/composer/packages.json';
 
 describe('datasource/packagist', () => {
   describe('getReleases', () => {
@@ -37,7 +35,6 @@ describe('datasource/packagist', () => {
         registryUrls: [
           'https://composer.renovatebot.com',
           'https://packagist.org',
-          customRegistryUrl,
         ],
       };
     });
@@ -87,10 +84,6 @@ describe('datasource/packagist', () => {
         .scope('https://composer.renovatebot.com')
         .get('/packages.json')
         .replyWithError({ code: 'ETIMEDOUT' });
-      httpMock
-        .scope(customRegistryUrl)
-        .get(/.*/)
-        .replyWithError({ code: 'ETIMEDOUT' });
       httpMock.scope(baseUrl).get('/p/vendor/package-name2.json').reply(200);
       const res = await getPkgReleases({
         ...config,
@@ -106,7 +99,6 @@ describe('datasource/packagist', () => {
         .scope('https://composer.renovatebot.com')
         .get('/packages.json')
         .reply(403);
-      httpMock.scope(customRegistryUrl).get(/.*/).reply(403);
       httpMock.scope(baseUrl).get('/p/vendor/package-name.json').reply(200);
       const res = await getPkgReleases({
         ...config,
@@ -122,7 +114,6 @@ describe('datasource/packagist', () => {
         .scope('https://composer.renovatebot.com')
         .get('/packages.json')
         .reply(404);
-      httpMock.scope(customRegistryUrl).get(/.*/).reply(404);
       httpMock.scope(baseUrl).get('/p/drewm/mailchip-api.json').reply(200);
       const res = await getPkgReleases({
         ...config,
@@ -239,14 +230,6 @@ describe('datasource/packagist', () => {
         )
         .reply(200, fileJson);
       httpMock
-        .scope(customRegistryUrl.replace('/packages.json', ''))
-        .get('/packages.json')
-        .reply(200, packagesJson)
-        .get(
-          '/p/providers-2018-09$14346045d7a7261cb3a12a6b7a1a7c4151982530347b115e5e277d879cad1942.json'
-        )
-        .reply(200, fileJson);
-      httpMock
         .scope(baseUrl)
         .get('/p/some/other.json')
         .reply(200, JSON.parse(beytJson));
@@ -311,7 +294,6 @@ describe('datasource/packagist', () => {
         .scope('https://composer.renovatebot.com')
         .get('/packages.json')
         .reply(200, packagesJson);
-      httpMock.scope(customRegistryUrl).get(/.*/).reply(200, packagesJson);
       httpMock
         .scope(baseUrl)
         .get('/p/some/other.json')

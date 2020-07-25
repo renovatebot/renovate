@@ -28,11 +28,6 @@ function getHostOpts(url: string): HttpOptions {
   return opts;
 }
 
-// Remove packages.json from base url.
-function transformRegUrl(url: string): string {
-  return url.replace(/(\/packages\.json)$/, '');
-}
-
 interface PackageMeta {
   includes?: Record<string, { sha256: string }>;
   packages: Record<string, RegistryFile>;
@@ -54,10 +49,7 @@ interface RegistryMeta {
 }
 
 async function getRegistryMeta(regUrl: string): Promise<RegistryMeta | null> {
-  const url = URL.resolve(
-    transformRegUrl(regUrl).replace(/\/?$/, '/'),
-    'packages.json'
-  );
+  const url = URL.resolve(regUrl.replace(/\/?(packages\.json)?$/, '/'), 'packages.json');
   const opts = getHostOpts(url);
   const res = (await http.getJson<PackageMeta>(url, opts)).body;
   const meta: RegistryMeta = {
@@ -108,12 +100,8 @@ async function getPackagistFile(
   const fileName = key.replace('%hash%', sha256);
   const opts = getHostOpts(regUrl);
   if (opts.password || opts.headers?.authorization) {
-    return (
-      await http.getJson<PackagistFile>(
-        transformRegUrl(regUrl) + '/' + fileName,
-        opts
-      )
-    ).body;
+    return (await http.getJson<PackagistFile>(regUrl + '/' + fileName, opts))
+      .body;
   }
   const cacheNamespace = 'datasource-packagist-files';
   const cacheKey = regUrl + key;
@@ -123,12 +111,8 @@ async function getPackagistFile(
   if (cachedResult && cachedResult.sha256 === sha256) {
     return cachedResult.res;
   }
-  const res = (
-    await http.getJson<PackagistFile>(
-      transformRegUrl(regUrl) + '/' + fileName,
-      opts
-    )
-  ).body;
+  const res = (await http.getJson<PackagistFile>(regUrl + '/' + fileName, opts))
+    .body;
   const cacheMinutes = 1440; // 1 day
   await packageCache.set(
     cacheNamespace,
@@ -276,7 +260,7 @@ async function packageLookup(
       return null;
     }
     const pkgUrl = URL.resolve(
-      transformRegUrl(regUrl),
+      regUrl,
       providersUrl
         .replace('%package%', name)
         .replace('%hash%', providerPackages[name])

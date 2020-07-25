@@ -30,6 +30,17 @@ interface ComposerConfig {
 }
 
 /**
+ * The regUrl is expected to be a base URL. GitLab composer repository installation guide specifies
+ * to use a base URL containing packages.json. Composer still works in this scenario by determining
+ * whether to add / remove packages.json from the URL.
+ *
+ * See https://github.com/composer/composer/blob/750a92b4b7aecda0e5b2f9b963f1cb1421900675/src/Composer/Repository/ComposerRepository.php#L815
+ */
+function transformRegUrl(url: string): string {
+  return url.replace(/(\/packages\.json)$/, '');
+}
+
+/**
  * Parse the repositories field from a composer.json
  *
  * Entries with type vcs or git will be added to repositories,
@@ -53,7 +64,7 @@ function parseRepositories(
             repositories[name] = repo;
             break;
           case 'composer':
-            registryUrls.push(repo.url);
+            registryUrls.push(transformRegUrl(repo.url));
             break;
           case 'package':
             logger.debug(
