@@ -1,6 +1,4 @@
 import is from '@sindresorhus/is';
-import { Configuration } from '@yarnpkg/core';
-import { npath } from '@yarnpkg/fslib';
 import { readFile, remove } from 'fs-extra';
 import { validRange } from 'semver';
 import { quote } from 'shlex';
@@ -50,17 +48,6 @@ export async function generateLockFile(
   logger.debug(`Spawning yarn install to create ${lockFileName}`);
   let lockFile = null;
   try {
-    const configuration = await Configuration.find(
-      npath.toPortablePath(cwd),
-      null,
-      { strict: false }
-    ).catch(() => null);
-    const yarnPath = configuration && configuration.get('yarnPath');
-
-    const yarnVersion =
-      yarnPath && (await exec(`${yarnPath} --version`)).stdout;
-    const isYarn1 = !yarnVersion || semver.getMajor(yarnVersion) === 1;
-
     const preCommands = [];
     const extraEnv: ExecOptions['extraEnv'] = {
       NPM_CONFIG_CACHE: env.NPM_CONFIG_CACHE,
