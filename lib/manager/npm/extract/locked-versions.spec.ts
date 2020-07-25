@@ -10,7 +10,7 @@ jest.mock('./yarn');
 
 describe('manager/npm/extract/locked-versions', () => {
   describe('.getLockedVersions()', () => {
-    it.each([['1.22.0', '2.1.0']])(
+    it.each([['1.22.0'], ['2.1.0']])(
       'uses yarn.lock with yarn v%s',
       async (yarnVersion) => {
         yarn.getYarnLock.mockReturnValue({
