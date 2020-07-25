@@ -18,7 +18,7 @@ export async function getLockedVersions(
         const { lockedVersions, isYarn1 } = await getYarnLock(yarnLock);
         lockFileCache[yarnLock] = lockedVersions;
         if (!isYarn1) {
-          packageFile.compatibility.isYarn1 = isYarn1 ? 'yes' : 'no';
+          packageFile.compatibility.yarn = '>= 2.0.0';
         }
       }
       for (const dep of packageFile.deps) {

@@ -1,6 +1,6 @@
 import is from '@sindresorhus/is';
 import { readFile, remove } from 'fs-extra';
-import { validRange } from 'semver';
+import { major, validRange } from 'semver';
 import { quote } from 'shlex';
 import { join } from 'upath';
 import { SYSTEM_INSUFFICIENT_DISK_SPACE } from '../../../constants/error-messages';
@@ -47,22 +47,21 @@ export async function generateLockFile(
   logger.debug(`Spawning yarn install to create ${lockFileName}`);
   let lockFile = null;
   try {
-    const preCommands = [];
+    const yarnCompatibility = config.compatibility?.yarn;
+    const isValidYarnRange = validRange(yarnCompatibility);
+    const isYarn1 = !isValidYarnRange || major(yarnCompatibility) === 1;
+
+    let installYarn = 'npm i -g yarn';
+    if (isValidYarnRange) {
+      installYarn += `@${quote(yarnCompatibility)}`;
+    }
+
+    const preCommands = [installYarn];
+
     const extraEnv: ExecOptions['extraEnv'] = {
       NPM_CONFIG_CACHE: env.NPM_CONFIG_CACHE,
       npm_config_store: env.npm_config_store,
     };
-
-    const isYarn1 = config.compatibility?.isYarn1 !== 'no';
-
-    if (isYarn1) {
-      let installYarn = 'npm i -g yarn';
-      const yarnCompatibility = config.compatibility?.yarn;
-      if (validRange(yarnCompatibility)) {
-        installYarn += `@${quote(yarnCompatibility)}`;
-      }
-      preCommands.push(installYarn);
-    }
 
     if (
       isYarn1 &&

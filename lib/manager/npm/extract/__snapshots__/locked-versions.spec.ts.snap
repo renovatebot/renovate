@@ -64,7 +64,7 @@ exports[`manager/npm/extract/locked-versions .getLockedVersions() uses yarn.lock
 Array [
   Object {
     "compatibility": Object {
-      "isYarn1": "no",
+      "yarn": ">= 2.0.0",
     },
     "deps": Array [
       Object {
