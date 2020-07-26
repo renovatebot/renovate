@@ -93,6 +93,15 @@ describe('platform/github', () => {
       ).toMatchSnapshot();
       expect(httpMock.getTrace()).toMatchSnapshot();
     });
+    it('should support gitAuthor and username', async () => {
+      expect(
+        await github.initPlatform({
+          token: 'abc123',
+          username: 'renovate-bot',
+          gitAuthor: 'renovate@whitesourcesoftware.com',
+        } as any)
+      ).toMatchSnapshot();
+    });
     it('should support default endpoint with email', async () => {
       httpMock
         .scope(githubApiHost)
