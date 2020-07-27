@@ -46,7 +46,7 @@ type PackageJson = {
       console.log(`Validating ${file}`);
       try {
         let jsonContent;
-        if (file.endsWith('.json5'))) {
+        if (file.endsWith('.json5')) {
           jsonContent = JSON5.parse(rawContent) as PackageJson;
         } else {
           jsonContent = JSON.parse(rawContent) as PackageJson;
