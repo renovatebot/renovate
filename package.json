@@ -209,7 +209,7 @@
     "@types/markdown-table": "2.0.0",
     "@types/moment-timezone": "0.5.13",
     "@types/nock": "10.0.3",
-    "@types/node": "12.12.50",
+    "@types/node": "12.12.53",
     "@types/node-emoji": "1.8.1",
     "@types/parse-link-header": "1.0.0",
     "@types/registry-auth-token": "3.3.0",
