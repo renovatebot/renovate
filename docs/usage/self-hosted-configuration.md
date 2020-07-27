@@ -96,6 +96,13 @@ The `git` commands are run locally in the cloned repo instead of globally to red
 
 ## logFileLevel
 
+## logFormat
+
+The log format can’t be configured with a configuration option. Set the environment variable `LOG_FORMAT` to the desired format. Available options:
+
+- unset: Default multi-line log format
+- `JSON`: Each log message is a JSON object on one line.
+
 ## logLevel
 
 ## onboarding
