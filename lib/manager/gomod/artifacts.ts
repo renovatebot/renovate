@@ -16,10 +16,7 @@ function getPreCommands(): string[] | null {
   });
   let preCommands = null;
   if (credentials?.token) {
-    let token = global.appMode
-      ? `x-access-token:${credentials.token}`
-      : credentials.token;
-    token = quote(token);
+    const token = quote(credentials.token);
     preCommands = [
       `git config --global url.\"https://${token}@github.com/\".insteadOf \"https://github.com/\"`, // eslint-disable-line no-useless-escape
     ];

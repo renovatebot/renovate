@@ -171,12 +171,10 @@ describe('.updateArtifacts()', () => {
     ).not.toBeNull();
     expect(execSnapshots).toMatchSnapshot();
   });
-  it('supports docker mode with credentials and appMode enabled', async () => {
+  it('supports docker mode with goModTidy', async () => {
     jest.spyOn(docker, 'removeDanglingContainers').mockResolvedValueOnce();
     await setUtilConfig({ ...config, binarySource: BinarySource.Docker });
-    hostRules.find.mockReturnValueOnce({
-      token: 'some-token',
-    });
+    hostRules.find.mockReturnValueOnce({});
     fs.readFile.mockResolvedValueOnce('Current go.sum' as any);
     const execSnapshots = mockExecAll(exec);
     git.getRepoStatus.mockResolvedValueOnce({
@@ -186,24 +184,19 @@ describe('.updateArtifacts()', () => {
     fs.readFile.mockResolvedValueOnce(null as any); // vendor modules filename
     fs.readFile.mockResolvedValueOnce('New go.sum 2' as any);
     fs.readFile.mockResolvedValueOnce('New go.sum 3' as any);
-    try {
-      global.appMode = true;
-      expect(
-        await gomod.updateArtifacts({
-          packageFileName: 'go.mod',
-          updatedDeps: [],
-          newPackageFileContent: gomod1,
-          config: {
-            ...config,
-            binarySource: BinarySource.Docker,
-            postUpdateOptions: ['gomodTidy'],
-          },
-        })
-      ).not.toBeNull();
-      expect(execSnapshots).toMatchSnapshot();
-    } finally {
-      delete global.appMode;
-    }
+    expect(
+      await gomod.updateArtifacts({
+        packageFileName: 'go.mod',
+        updatedDeps: [],
+        newPackageFileContent: gomod1,
+        config: {
+          ...config,
+          binarySource: BinarySource.Docker,
+          postUpdateOptions: ['gomodTidy'],
+        },
+      })
+    ).not.toBeNull();
+    expect(execSnapshots).toMatchSnapshot();
   });
   it('catches errors', async () => {
     const execSnapshots = mockExecAll(exec);
