@@ -3,10 +3,10 @@ import * as httpMock from '../../../test/httpMock';
 import { mocked } from '../../../test/util';
 import * as _hostRules from '../../util/host-rules';
 import * as rubyVersioning from '../../versioning/ruby';
-import railsInfo from './__fixtures__/rails/info.json';
-import railsVersions from './__fixtures__/rails/versions.json';
 import onePassInfo from './__fixtures__/1pass/info.json';
 import onePassVersions from './__fixtures__/1pass/versions.json';
+import railsInfo from './__fixtures__/rails/info.json';
+import railsVersions from './__fixtures__/rails/versions.json';
 import { resetCache } from './get-gem';
 import * as rubygems from '.';
 
