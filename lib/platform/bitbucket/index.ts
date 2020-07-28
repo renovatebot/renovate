@@ -23,10 +23,11 @@ import {
   EnsureIssueResult,
   FindPRConfig,
   Issue,
-  PlatformConfig,
+  PlatformParams,
+  PlatformResult,
   Pr,
-  RepoConfig,
   RepoParams,
+  RepoResult,
   VulnerabilityAlert,
 } from '../common';
 import { smartTruncate } from '../utils/pr-body';
@@ -46,7 +47,7 @@ export function initPlatform({
   endpoint,
   username,
   password,
-}: RenovateConfig): Promise<PlatformConfig> {
+}: PlatformParams): Promise<PlatformResult> {
   if (!(username && password)) {
     throw new Error(
       'Init: You must configure a Bitbucket username and password'
@@ -60,7 +61,7 @@ export function initPlatform({
   }
   setBaseUrl(endpoint_);
   // TODO: Add a connection check that endpoint/username/password combination are valid
-  const platformConfig: PlatformConfig = {
+  const platformConfig: PlatformResult = {
     endpoint: endpoint || BITBUCKET_PROD_ENDPOINT,
   };
   return Promise.resolve(platformConfig);
@@ -86,7 +87,7 @@ export async function initRepo({
   localDir,
   optimizeForDisabled,
   bbUseDefaultReviewers,
-}: RepoParams): Promise<RepoConfig> {
+}: RepoParams): Promise<RepoResult> {
   logger.debug(`initRepo("${repository}")`);
   const opts = hostRules.find({
     hostType: PLATFORM_TYPE_BITBUCKET,
@@ -159,7 +160,7 @@ export async function initRepo({
     gitAuthorName: global.gitAuthor?.name,
     gitAuthorEmail: global.gitAuthor?.email,
   });
-  const repoConfig: RepoConfig = {
+  const repoConfig: RepoResult = {
     defaultBranch: info.mainbranch,
     isFork: info.isFork,
   };

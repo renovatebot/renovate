@@ -38,10 +38,10 @@ import {
   EnsureIssueResult,
   FindPRConfig,
   Issue,
-  PlatformConfig,
+  PlatformResult,
   Pr,
-  RepoConfig,
   RepoParams,
+  RepoResult,
   VulnerabilityAlert,
 } from '../common';
 import { smartTruncate } from '../utils/pr-body';
@@ -55,6 +55,7 @@ import {
   LocalRepoConfig,
   PrList,
 } from './types';
+import { UserDetails, getUserDetails, getUserEmail } from './user';
 
 const githubApi = new githubHttp.GithubHttp();
 
@@ -73,10 +74,14 @@ const escapeHash = (input: string): string =>
 export async function initPlatform({
   endpoint,
   token,
+  username,
+  gitAuthor,
 }: {
   endpoint: string;
   token: string;
-}): Promise<PlatformConfig> {
+  username?: string;
+  gitAuthor?: string;
+}): Promise<PlatformResult> {
   if (!token) {
     throw new Error('Init: You must configure a GitHub personal access token');
   }
@@ -87,48 +92,26 @@ export async function initPlatform({
   } else {
     logger.debug('Using default github endpoint: ' + defaults.endpoint);
   }
-  let gitAuthor: string;
+  let userDetails: UserDetails;
   let renovateUsername: string;
-  try {
-    const userData = (
-      await githubApi.getJson<{ login: string; name: string }>(
-        defaults.endpoint + 'user',
-        {
-          token,
-        }
-      )
-    ).body;
-    renovateUsername = userData.login;
-    gitAuthor = userData.name;
-  } catch (err) {
-    logger.debug({ err }, 'Error authenticating with GitHub');
-    throw new Error('Init: Authentication failure');
+  if (username) {
+    renovateUsername = username;
+  } else {
+    userDetails = await getUserDetails(defaults.endpoint, token);
+    renovateUsername = userDetails.username;
   }
-  try {
-    const userEmail = (
-      await githubApi.getJson<{ email: string }[]>(
-        defaults.endpoint + 'user/emails',
-        {
-          token,
-        }
-      )
-    ).body;
-    if (userEmail.length && userEmail[0].email) {
-      gitAuthor += ` <${userEmail[0].email}>`;
-    } else {
-      logger.debug('Cannot find an email address for Renovate user');
-      gitAuthor = undefined;
+  let discoveredGitAuthor: string;
+  if (!gitAuthor) {
+    userDetails = await getUserDetails(defaults.endpoint, token);
+    const userEmail = await getUserEmail(defaults.endpoint, token);
+    if (userEmail) {
+      discoveredGitAuthor = `${userDetails.name} <${userEmail}>`;
     }
-  } catch (err) {
-    logger.debug(
-      'Cannot read user/emails endpoint on GitHub to retrieve gitAuthor'
-    );
-    gitAuthor = undefined;
   }
   logger.debug('Authenticated as GitHub user: ' + renovateUsername);
-  const platformConfig: PlatformConfig = {
+  const platformConfig: PlatformResult = {
     endpoint: defaults.endpoint,
-    gitAuthor,
+    gitAuthor: gitAuthor || discoveredGitAuthor,
     renovateUsername,
   };
   return platformConfig;
@@ -172,7 +155,7 @@ export async function initRepo({
   includeForks,
   renovateUsername,
   optimizeForDisabled,
-}: RepoParams): Promise<RepoConfig> {
+}: RepoParams): Promise<RepoResult> {
   logger.debug(`initRepo("${repository}")`);
   // config is used by the platform api itself, not necessary for the app layer to know
   config = { localDir, repository } as any;
@@ -422,7 +405,7 @@ export async function initRepo({
     gitAuthorName: global.gitAuthor?.name,
     gitAuthorEmail: global.gitAuthor?.email,
   });
-  const repoConfig: RepoConfig = {
+  const repoConfig: RepoResult = {
     defaultBranch: config.defaultBranch,
     isFork: repo.isFork === true,
   };
