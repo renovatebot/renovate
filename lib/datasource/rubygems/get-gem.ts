@@ -1,6 +1,8 @@
 import { logger } from '../../logger';
 import { ExternalHostError } from '../../types/errors/external-host-error';
+import * as hostRules from '../../util/host-rules';
 import { Http } from '../../util/http';
+import { ensureTrailingSlash } from '../../util/url';
 import { ReleaseResult } from '../common';
 import { id } from './common';
 
@@ -20,22 +22,38 @@ export function resetCache(): void {
 /* https://bugs.chromium.org/p/v8/issues/detail?id=2869 */
 const copystr = (x: string): string => (' ' + x).slice(1);
 
-async function updateRubyGemsVersions(): Promise<void> {
-  const url = 'https://rubygems.org/versions';
+async function updateGemVersions(registryUrl: string): Promise<void> {
+  const url = `${ensureTrailingSlash(registryUrl)}versions`;
+
+  const { token } = hostRules.find({
+    hostType: 'bundler',
+    url: ensureTrailingSlash(registryUrl),
+  });
+
   const options = {
     headers: {
       'accept-encoding': 'identity',
       range: `bytes=${contentLength}-`,
     },
+    ...(token && { username: token, password: '' }),
   };
+
   let newLines: string;
   try {
-    logger.debug('Rubygems: Fetching rubygems.org versions');
+    logger.debug(`Rubygems: Fetching ${url}`);
     const startTime = Date.now();
     newLines = (await http.get(url, options)).body;
     const durationMs = Math.round(Date.now() - startTime);
-    logger.debug({ durationMs }, 'Rubygems: Fetched rubygems.org versions');
+    logger.debug({ durationMs }, `Rubygems: Fetched ${url}`);
   } catch (err) /* istanbul ignore next */ {
+    if (err.statusCode === 403) {
+      throw new ExternalHostError(
+        new Error(
+          `Rubygems fetch error - failed to fetch ${url} with status code 403`
+        )
+      );
+    }
+
     if (err.statusCode !== 416) {
       contentLength = 0;
       packageReleases = Object.create(null); // Because we might need a "constructor" key
@@ -94,29 +112,30 @@ function isDataStale(): boolean {
   return minutesElapsed >= 5;
 }
 
-let _updateRubyGemsVersions: Promise<void> | undefined;
+let _updateGemVersions: Promise<void> | undefined;
 
-async function syncVersions(): Promise<void> {
+async function syncVersions(registryUrl): Promise<void> {
   if (isDataStale()) {
-    _updateRubyGemsVersions =
+    _updateGemVersions =
       // eslint-disable-next-line @typescript-eslint/no-misused-promises
-      _updateRubyGemsVersions || updateRubyGemsVersions();
-    await _updateRubyGemsVersions;
-    _updateRubyGemsVersions = null;
+      _updateGemVersions || updateGemVersions(registryUrl);
+    await _updateGemVersions;
+    _updateGemVersions = null;
   }
 }
 
-export async function getRubygemsOrgDependency(
-  lookupName: string
-): Promise<ReleaseResult | null> {
-  logger.debug(`getRubygemsOrgDependency(${lookupName})`);
-  await syncVersions();
-  if (!packageReleases[lookupName]) {
+export async function getDependencyGem({
+  dependency,
+  registry,
+}): Promise<ReleaseResult | null> {
+  logger.debug(`getGemDependency(${dependency}, ${registry})`);
+  await syncVersions(registry);
+  if (!packageReleases[dependency]) {
     return null;
   }
   const dep: ReleaseResult = {
-    name: lookupName,
-    releases: packageReleases[lookupName].map((version) => ({ version })),
+    name: dependency,
+    releases: packageReleases[dependency].map((version) => ({ version })),
   };
   return dep;
 }

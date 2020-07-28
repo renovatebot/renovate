@@ -28,7 +28,7 @@ const fetch = async ({ dependency, registry, path }): Promise<any> => {
   return response.body;
 };
 
-export const getDependency = async ({
+export const getDependencyJson = async ({
   dependency,
   registry,
 }): Promise<ReleaseResult | null> => {

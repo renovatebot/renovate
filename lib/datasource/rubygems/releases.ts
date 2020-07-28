@@ -1,14 +1,24 @@
 import { GetReleasesConfig, ReleaseResult } from '../common';
-import { getDependency } from './get';
-import { getRubygemsOrgDependency } from './get-rubygems-org';
+import { getDependencyGem } from './get-gem';
+import { getDependencyJson } from './get-json';
+
+// Some registries don't provide a JSON API
+function useJsonApi(registryUrl: string): boolean {
+  if (registryUrl.includes('gem.fury.io')) {
+    return false;
+  }
+
+  return true;
+}
 
 export function getReleases({
   lookupName,
   registryUrl,
 }: GetReleasesConfig): Promise<ReleaseResult | null> {
   // prettier-ignore
-  if (registryUrl.endsWith('rubygems.org')) { // lgtm [js/incomplete-url-substring-sanitization]
-      return getRubygemsOrgDependency(lookupName);
-    }
-  return getDependency({ dependency: lookupName, registry: registryUrl });
+  if (useJsonApi(registryUrl)) {
+    return getDependencyJson({ dependency: lookupName, registry: registryUrl });
+  }
+
+  return getDependencyGem({ dependency: lookupName, registry: registryUrl });
 }

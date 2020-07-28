@@ -15,6 +15,30 @@ Renovate supports upgrading dependencies in Bundler's `Gemfile`s and their accom
 4.  A PR will be created with `Gemfile` and `Gemfile.lock` updated in the same commit
 5.  If the source repository has either a "changelog" file or uses GitHub releases, then Release Notes for each version will be embedded in the generated PR.
 
+## Gemfury
+
+Renovate supports private gem repositories such as Gemfury. In order to make authenticated requests to your Gemfury repository, you have to add the following hostRule:
+
+```json
+[
+  {
+    "baseUrl": "https://gem.fury.io/username",
+    "hostType": "bundler",
+    "token": "*********"
+  }
+]
+```
+
+where `token` is a Gemfury deploy token.
+
+Your Gemfile could look like this:
+
+```Gemfile
+source 'https://gem.fury.io/username' do
+  gem 'my_private_gem'
+end
+```
+
 ## Enabling
 
 Either install the [Renovate App](https://github.com/apps/renovate) on GitHub, or check out [Renovate OSS](https://github.com/renovatebot/renovate) for self-hosted. Bundler support is now enabled by default in both.

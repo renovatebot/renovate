@@ -1,0 +1,37 @@
+{
+  "name": "1pass",
+  "downloads": 14005,
+  "version": "0.1.2",
+  "version_downloads": 5304,
+  "platform": "ruby",
+  "authors": "Lokeshwaran",
+  "info": "Command line client for AgileBits 1Password",
+  "licenses": [
+    "MIT"
+  ],
+  "metadata": {},
+  "yanked": false,
+  "sha": "f2099eb2c6f423cb39b7bad6a44f683e74daaf1f1d2f26f65834c1efd98acfc6",
+  "project_uri": "https://rubygems.org/gems/1pass",
+  "gem_uri": "https://rubygems.org/gems/1pass-0.1.2.gem",
+  "homepage_uri": "https://github.com/dlokesh/1pass",
+  "wiki_uri": null,
+  "documentation_uri": "https://www.rubydoc.info/gems/1pass/0.1.2",
+  "mailing_list_uri": null,
+  "source_code_uri": null,
+  "bug_tracker_uri": null,
+  "changelog_uri": null,
+  "dependencies": {
+    "development": [
+      {
+        "name": "bundler",
+        "requirements": "~> 1.3"
+      },
+      {
+        "name": "rake",
+        "requirements": ">= 0"
+      }
+    ],
+    "runtime": []
+  }
+}
