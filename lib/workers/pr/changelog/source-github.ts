@@ -120,7 +120,7 @@ export async function getChangeLogJSON({
     if (!tags) {
       tags = await getTags(apiBaseUrl, repository);
     }
-    const regex = new RegExp(`${depName}[@-]`);
+    const regex = new RegExp(`(?:${depName}|release)[@-]`);
     const tagName = tags
       .filter((tag) => version.isVersion(tag.replace(regex, '')))
       .find((tag) => version.equals(tag.replace(regex, ''), release.version));
