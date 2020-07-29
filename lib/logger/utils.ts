@@ -72,9 +72,14 @@ function sanitizeValue(value: any, seen = new WeakMap()): any {
 
     const objectResult: Record<string, any> = {};
     seen.set(value, objectResult);
+
     for (const [key, val] of Object.entries<any>(value)) {
       let curValue: any;
-      if (redactedFields.includes(key)) {
+      // If there is a username but no password, consider username a secret
+      if (
+        redactedFields.includes(key) ||
+        (key === 'username' && !Object.keys(value).includes('password'))
+      ) {
         curValue = '***********';
       } else if (contentFields.includes(key)) {
         curValue = '[content]';

@@ -158,4 +158,52 @@ describe('logger', () => {
     expect(logged.content).toEqual('[content]');
     expect(logged.prBody).toEqual('[Template]');
   });
+
+  describe('sanitizing basic auth credentials', () => {
+    it('sanitizes username when no password key is present', () => {
+      let logged = null;
+      fs.createWriteStream.mockReturnValueOnce({
+        writable: true,
+        write(x) {
+          logged = JSON.parse(x);
+        },
+      });
+
+      addStream({
+        name: 'logfile',
+        path: 'file.log',
+        level: 'error',
+      });
+
+      logger.error({
+        username: 'secret"username',
+      });
+
+      expect(logged.username).not.toEqual('secret"username');
+    });
+
+    it('does not sanitize username when password key is present', () => {
+      let logged = null;
+      fs.createWriteStream.mockReturnValueOnce({
+        writable: true,
+        write(x) {
+          logged = JSON.parse(x);
+        },
+      });
+
+      addStream({
+        name: 'logfile',
+        path: 'file.log',
+        level: 'error',
+      });
+
+      logger.error({
+        username: 'username',
+        password: 'secret"password',
+      });
+
+      expect(logged.username).toEqual('username');
+      expect(logged.password).not.toEqual('secret"password');
+    });
+  });
 });
