@@ -14,7 +14,7 @@ export function applyHostRules(url: string, inOptions: GotOptions): GotOptions {
   const { username, password, token, enabled } = foundRules;
   if (options.headers?.authorization || options.password || options.token) {
     logger.trace('Authorization already set for host: ' + options.hostname);
-  } else if (password) {
+  } else if (password || username) {
     logger.trace('Applying Basic authentication for host ' + options.hostname);
     options.username = username;
     options.password = password;

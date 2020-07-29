@@ -24,7 +24,6 @@ const copystr = (x: string): string => (' ' + x).slice(1);
 async function updateGemVersions(registryUrl: string): Promise<void> {
   const url = `${ensureTrailingSlash(registryUrl)}versions`;
 
-
   const options = {
     headers: {
       'accept-encoding': 'identity',
@@ -52,7 +51,9 @@ async function updateGemVersions(registryUrl: string): Promise<void> {
       contentLength = 0;
       packageReleases = Object.create(null); // Because we might need a "constructor" key
       throw new ExternalHostError(
-        new Error('Rubygems fetch error - need to reset cache')
+        new Error(
+          `Rubygems fetch error - failed to fetch ${url} with status code ${err.statusCode} - need to reset cache`
+        )
       );
     }
     logger.debug('Rubygems: No update');
