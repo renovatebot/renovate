@@ -49,7 +49,7 @@ interface RegistryMeta {
 }
 
 async function getRegistryMeta(regUrl: string): Promise<RegistryMeta | null> {
-  const url = URL.resolve(regUrl.replace(/\/?(packages\.json)?$/, '/'), 'packages.json');
+  const url = URL.resolve(regUrl.replace(/\/?$/, '/'), 'packages.json');
   const opts = getHostOpts(url);
   const res = (await http.getJson<PackageMeta>(url, opts)).body;
   const meta: RegistryMeta = {
