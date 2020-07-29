@@ -110,6 +110,10 @@ export function reset(): void {
   nock.enableNetConnect();
 }
 
+export function allUsed(): boolean {
+  return nock.isDone();
+}
+
 export function scope(basePath: BasePath, options?: nock.Options): nock.Scope {
   return nock(basePath, options).on('request', (req) => {
     const { headers, method } = req;
