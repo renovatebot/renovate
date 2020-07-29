@@ -1,6 +1,5 @@
 import { logger } from '../../logger';
 import { ExternalHostError } from '../../types/errors/external-host-error';
-import * as hostRules from '../../util/host-rules';
 import { Http } from '../../util/http';
 import { ensureTrailingSlash } from '../../util/url';
 import { ReleaseResult } from '../common';
@@ -25,17 +24,12 @@ const copystr = (x: string): string => (' ' + x).slice(1);
 async function updateGemVersions(registryUrl: string): Promise<void> {
   const url = `${ensureTrailingSlash(registryUrl)}versions`;
 
-  const { token } = hostRules.find({
-    hostType: 'bundler',
-    url: ensureTrailingSlash(registryUrl),
-  });
 
   const options = {
     headers: {
       'accept-encoding': 'identity',
       range: `bytes=${contentLength}-`,
     },
-    ...(token && { username: token, password: '' }),
   };
 
   let newLines: string;
