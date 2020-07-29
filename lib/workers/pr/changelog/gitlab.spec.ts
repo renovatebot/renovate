@@ -84,7 +84,7 @@ describe(getName(__filename), () => {
     it('uses GitLab tags', async () => {
       httpMock
         .scope(baseUrl)
-        .get('/api/v4/projects/meno%2Fdropzone/repository/tags')
+        .get('/api/v4/projects/meno%2fdropzone/repository/tags')
         .reply(200, [
           { name: 'v5.2.0' },
           { name: 'v5.4.0' },
@@ -109,7 +109,7 @@ describe(getName(__filename), () => {
     it('handles empty GitLab tags response', async () => {
       httpMock
         .scope(baseUrl)
-        .get('/api/v4/projects/meno%2Fdropzone/repository/tags')
+        .get('/api/v4/projects/meno%2fdropzone/repository/tags')
         .reply(200, [])
         .persist()
         .get('/api/v4/projects/meno/dropzone/repository/tree/')
@@ -127,7 +127,7 @@ describe(getName(__filename), () => {
     it('uses GitLab tags with error', async () => {
       httpMock
         .scope(baseUrl)
-        .get('/api/v4/projects/meno%2Fdropzone/repository/tags')
+        .get('/api/v4/projects/meno%2fdropzone/repository/tags')
         .replyWithError('Unknown GitLab Repo')
         .persist()
         .get('/api/v4/projects/meno/dropzone/repository/tree/')

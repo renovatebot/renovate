@@ -21,7 +21,7 @@ async function getTagsInner(
 ): Promise<string[]> {
   logger.trace('getTags() from gitlab');
   let url = endpoint;
-  const repoid = repository.replace(/\//g, '%2F');
+  const repoid = repository.replace(/\//g, '%2f');
   url += `projects/${repoid}/repository/tags`;
   try {
     const res = await gitlabHttp.getJson<{ name: string }[]>(url, {
