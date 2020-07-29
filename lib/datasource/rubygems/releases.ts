@@ -2,9 +2,14 @@ import { GetReleasesConfig, ReleaseResult } from '../common';
 import { getDependencyGem } from './get-gem';
 import { getDependencyJson } from './get-json';
 
-// Some registries don't provide a JSON API
 function useJsonApi(registryUrl: string): boolean {
+  // gemfury does not provide a compatible JSON-API
   if (registryUrl.includes('gem.fury.io')) {
+    return false;
+  }
+
+  // rubygems.org JSON API is rate-limited, use the non JSON API instead
+  if (registryUrl.endsWith('rubygems.org')) {
     return false;
   }
 

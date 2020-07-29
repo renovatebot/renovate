@@ -130,6 +130,7 @@ export async function getDependencyGem({
 }): Promise<ReleaseResult | null> {
   logger.debug(`getGemDependency(${dependency}, ${registry})`);
   await syncVersions(registry);
+
   if (!packageReleases[dependency]) {
     return null;
   }
