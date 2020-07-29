@@ -1,5 +1,5 @@
 import * as httpMock from '../../../../test/httpMock';
-import { partial } from '../../../../test/util';
+import { getName, partial } from '../../../../test/util';
 import { PLATFORM_TYPE_GITHUB } from '../../../constants/platforms';
 import * as hostRules from '../../../util/host-rules';
 import * as semverVersioning from '../../../versioning/semver';
@@ -31,7 +31,7 @@ const upgrade: BranchConfig = partial<BranchConfig>({
   ],
 });
 
-describe('workers/pr/changelog', () => {
+describe(getName(__filename), () => {
   describe('getChangeLogJSON', () => {
     beforeEach(() => {
       httpMock.setup();
