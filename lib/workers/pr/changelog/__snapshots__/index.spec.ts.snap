@@ -1,6 +1,6 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
-exports[`workers/pr/changelog getChangeLogJSON filters unnecessary warns 1`] = `
+exports[`workers/pr/changelog/index getChangeLogJSON filters unnecessary warns 1`] = `
 Object {
   "hasReleaseNotes": true,
   "project": Object {
@@ -51,7 +51,7 @@ Object {
 }
 `;
 
-exports[`workers/pr/changelog getChangeLogJSON filters unnecessary warns 2`] = `
+exports[`workers/pr/changelog/index getChangeLogJSON filters unnecessary warns 2`] = `
 Array [
   Object {
     "headers": Object {
@@ -155,7 +155,7 @@ Array [
 ]
 `;
 
-exports[`workers/pr/changelog getChangeLogJSON supports github enterprise and github enterprise changelog 1`] = `
+exports[`workers/pr/changelog/index getChangeLogJSON supports github enterprise and github enterprise changelog 1`] = `
 Object {
   "hasReleaseNotes": true,
   "project": Object {
@@ -206,7 +206,7 @@ Object {
 }
 `;
 
-exports[`workers/pr/changelog getChangeLogJSON supports github enterprise and github enterprise changelog 2`] = `
+exports[`workers/pr/changelog/index getChangeLogJSON supports github enterprise and github enterprise changelog 2`] = `
 Array [
   Object {
     "headers": Object {
@@ -310,7 +310,7 @@ Array [
 ]
 `;
 
-exports[`workers/pr/changelog getChangeLogJSON supports github enterprise and github.com changelog 1`] = `
+exports[`workers/pr/changelog/index getChangeLogJSON supports github enterprise and github.com changelog 1`] = `
 Object {
   "hasReleaseNotes": true,
   "project": Object {
@@ -361,7 +361,7 @@ Object {
 }
 `;
 
-exports[`workers/pr/changelog getChangeLogJSON supports github enterprise and github.com changelog 2`] = `
+exports[`workers/pr/changelog/index getChangeLogJSON supports github enterprise and github.com changelog 2`] = `
 Array [
   Object {
     "headers": Object {
@@ -465,7 +465,7 @@ Array [
 ]
 `;
 
-exports[`workers/pr/changelog getChangeLogJSON supports github.com and github enterprise changelog 1`] = `
+exports[`workers/pr/changelog/index getChangeLogJSON supports github.com and github enterprise changelog 1`] = `
 Object {
   "hasReleaseNotes": true,
   "project": Object {
@@ -516,7 +516,7 @@ Object {
 }
 `;
 
-exports[`workers/pr/changelog getChangeLogJSON supports github.com and github enterprise changelog 2`] = `
+exports[`workers/pr/changelog/index getChangeLogJSON supports github.com and github enterprise changelog 2`] = `
 Array [
   Object {
     "headers": Object {
@@ -620,7 +620,7 @@ Array [
 ]
 `;
 
-exports[`workers/pr/changelog getChangeLogJSON supports node engines 1`] = `
+exports[`workers/pr/changelog/index getChangeLogJSON supports node engines 1`] = `
 Object {
   "hasReleaseNotes": true,
   "project": Object {
@@ -671,7 +671,7 @@ Object {
 }
 `;
 
-exports[`workers/pr/changelog getChangeLogJSON uses GitHub tags 1`] = `
+exports[`workers/pr/changelog/index getChangeLogJSON uses GitHub tags 1`] = `
 Object {
   "hasReleaseNotes": true,
   "project": Object {
@@ -726,7 +726,7 @@ Object {
 }
 `;
 
-exports[`workers/pr/changelog getChangeLogJSON uses GitHub tags 2`] = `
+exports[`workers/pr/changelog/index getChangeLogJSON uses GitHub tags 2`] = `
 Array [
   Object {
     "headers": Object {
@@ -830,7 +830,7 @@ Array [
 ]
 `;
 
-exports[`workers/pr/changelog getChangeLogJSON works without Github 1`] = `
+exports[`workers/pr/changelog/index getChangeLogJSON works without Github 1`] = `
 Object {
   "hasReleaseNotes": true,
   "project": Object {

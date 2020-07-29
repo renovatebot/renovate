@@ -8,7 +8,7 @@ import * as memCache from '../../../util/cache/memory';
 import * as packageCache from '../../../util/cache/package';
 import { GithubHttp } from '../../../util/http/github';
 import { GitlabHttp } from '../../../util/http/gitlab';
-import { ChangeLogNotes, ChangeLogResult } from './common';
+import { ChangeLogFile, ChangeLogNotes, ChangeLogResult } from './common';
 
 const markdown = new MarkdownIt('zero');
 markdown.enable(['heading', 'lheading']);
@@ -195,7 +195,7 @@ function isUrl(url: string): boolean {
 export async function getReleaseNotesMdFileInner(
   repository: string,
   apiBaseUrl: string
-): Promise<{ changelogFile: string; changelogMd: string }> | null {
+): Promise<ChangeLogFile> | null {
   let changelogFile: string;
   let apiTree: string;
   let apiFiles: string;
@@ -252,7 +252,7 @@ export async function getReleaseNotesMdFileInner(
 export function getReleaseNotesMdFile(
   repository: string,
   apiBaseUrl: string
-): Promise<{ changelogFile: string; changelogMd: string }> | null {
+): Promise<ChangeLogFile> | null {
   const cacheKey = `getReleaseNotesMdFile-${repository}-${apiBaseUrl}`;
   const cachedResult = memCache.get(cacheKey);
   // istanbul ignore if

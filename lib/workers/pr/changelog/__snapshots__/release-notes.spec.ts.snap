@@ -1,6 +1,6 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
-exports[`workers/pr/release-notes addReleaseNotes() returns ChangeLogResult 1`] = `
+exports[`workers/pr/changelog/release-notes addReleaseNotes() returns ChangeLogResult 1`] = `
 Object {
   "a": 1,
   "hasReleaseNotes": false,
@@ -19,7 +19,7 @@ Object {
 }
 `;
 
-exports[`workers/pr/release-notes addReleaseNotes() returns ChangeLogResult without release notes 1`] = `
+exports[`workers/pr/changelog/release-notes addReleaseNotes() returns ChangeLogResult without release notes 1`] = `
 Object {
   "a": 1,
   "hasReleaseNotes": false,
@@ -38,7 +38,7 @@ Object {
 }
 `;
 
-exports[`workers/pr/release-notes getReleaseList() should return release list for github repo 1`] = `
+exports[`workers/pr/changelog/release-notes getReleaseList() should return release list for github repo 1`] = `
 Array [
   Object {
     "body": undefined,
@@ -57,7 +57,7 @@ Array [
 ]
 `;
 
-exports[`workers/pr/release-notes getReleaseList() should return release list for github repo 2`] = `
+exports[`workers/pr/changelog/release-notes getReleaseList() should return release list for github repo 2`] = `
 Array [
   Object {
     "headers": Object {
@@ -72,7 +72,7 @@ Array [
 ]
 `;
 
-exports[`workers/pr/release-notes getReleaseList() should return release list for gitlab.com project 1`] = `
+exports[`workers/pr/changelog/release-notes getReleaseList() should return release list for gitlab.com project 1`] = `
 Array [
   Object {
     "body": undefined,
@@ -89,7 +89,7 @@ Array [
 ]
 `;
 
-exports[`workers/pr/release-notes getReleaseList() should return release list for gitlab.com project 2`] = `
+exports[`workers/pr/changelog/release-notes getReleaseList() should return release list for gitlab.com project 2`] = `
 Array [
   Object {
     "headers": Object {
@@ -104,7 +104,7 @@ Array [
 ]
 `;
 
-exports[`workers/pr/release-notes getReleaseNotes() gets release notes with body 1`] = `
+exports[`workers/pr/changelog/release-notes getReleaseNotes() gets release notes with body 1`] = `
 Object {
   "body": "some body [#123](https://github.com/some/other-repository/issues/123), [#124](https://github.com/some/yet-other-repository/issues/124)
 ",
@@ -115,7 +115,7 @@ Object {
 }
 `;
 
-exports[`workers/pr/release-notes getReleaseNotes() gets release notes with body 2`] = `
+exports[`workers/pr/changelog/release-notes getReleaseNotes() gets release notes with body 2`] = `
 Array [
   Object {
     "headers": Object {
@@ -130,7 +130,7 @@ Array [
 ]
 `;
 
-exports[`workers/pr/release-notes getReleaseNotes() gets release notes with body 3`] = `
+exports[`workers/pr/changelog/release-notes getReleaseNotes() gets release notes with body 3`] = `
 Object {
   "body": "some body [#123](https://github.com/some/other-repository/issues/123), [#124](https://github.com/some/yet-other-repository/issues/124)
 ",
@@ -141,7 +141,7 @@ Object {
 }
 `;
 
-exports[`workers/pr/release-notes getReleaseNotes() gets release notes with body 4`] = `
+exports[`workers/pr/changelog/release-notes getReleaseNotes() gets release notes with body 4`] = `
 Array [
   Object {
     "headers": Object {
@@ -156,7 +156,7 @@ Array [
 ]
 `;
 
-exports[`workers/pr/release-notes getReleaseNotes() gets release notes with body 5`] = `
+exports[`workers/pr/changelog/release-notes getReleaseNotes() gets release notes with body 5`] = `
 Object {
   "body": "some body [#123](https://github.com/some/other-repository/issues/123), [#124](https://github.com/some/yet-other-repository/issues/124)
 ",
@@ -167,7 +167,7 @@ Object {
 }
 `;
 
-exports[`workers/pr/release-notes getReleaseNotes() gets release notes with body 6`] = `
+exports[`workers/pr/changelog/release-notes getReleaseNotes() gets release notes with body 6`] = `
 Array [
   Object {
     "headers": Object {
@@ -182,9 +182,9 @@ Array [
 ]
 `;
 
-exports[`workers/pr/release-notes getReleaseNotes() gets release notes with body from gitlab repo  1`] = `null`;
+exports[`workers/pr/changelog/release-notes getReleaseNotes() gets release notes with body from gitlab repo  1`] = `null`;
 
-exports[`workers/pr/release-notes getReleaseNotes() gets release notes with body from gitlab repo  2`] = `
+exports[`workers/pr/changelog/release-notes getReleaseNotes() gets release notes with body from gitlab repo  2`] = `
 Array [
   Object {
     "headers": Object {
@@ -199,9 +199,9 @@ Array [
 ]
 `;
 
-exports[`workers/pr/release-notes getReleaseNotes() gets release notes with body from gitlab repo other- 1`] = `null`;
+exports[`workers/pr/changelog/release-notes getReleaseNotes() gets release notes with body from gitlab repo other- 1`] = `null`;
 
-exports[`workers/pr/release-notes getReleaseNotes() gets release notes with body from gitlab repo other- 2`] = `
+exports[`workers/pr/changelog/release-notes getReleaseNotes() gets release notes with body from gitlab repo other- 2`] = `
 Array [
   Object {
     "headers": Object {
@@ -216,9 +216,9 @@ Array [
 ]
 `;
 
-exports[`workers/pr/release-notes getReleaseNotes() gets release notes with body from gitlab repo v 1`] = `null`;
+exports[`workers/pr/changelog/release-notes getReleaseNotes() gets release notes with body from gitlab repo v 1`] = `null`;
 
-exports[`workers/pr/release-notes getReleaseNotes() gets release notes with body from gitlab repo v 2`] = `
+exports[`workers/pr/changelog/release-notes getReleaseNotes() gets release notes with body from gitlab repo v 2`] = `
 Array [
   Object {
     "headers": Object {
@@ -233,7 +233,7 @@ Array [
 ]
 `;
 
-exports[`workers/pr/release-notes getReleaseNotes() should return null for release notes without body 1`] = `
+exports[`workers/pr/changelog/release-notes getReleaseNotes() should return null for release notes without body 1`] = `
 Array [
   Object {
     "headers": Object {
@@ -248,7 +248,7 @@ Array [
 ]
 `;
 
-exports[`workers/pr/release-notes getReleaseNotesMd() ReleaseNotes Correctness parses adapter-utils 4.33.0 1`] = `
+exports[`workers/pr/changelog/release-notes getReleaseNotesMd() ReleaseNotes Correctness parses adapter-utils 4.33.0 1`] = `
 Object {
   "body": "-   add new auth, fix accept header and base path in mock
 
@@ -262,7 +262,7 @@ See merge request itentialopensource/adapter-utils!177
 }
 `;
 
-exports[`workers/pr/release-notes getReleaseNotesMd() ReleaseNotes Correctness parses adapter-utils 4.33.0 2`] = `
+exports[`workers/pr/changelog/release-notes getReleaseNotesMd() ReleaseNotes Correctness parses adapter-utils 4.33.0 2`] = `
 Array [
   Object {
     "headers": Object {
@@ -287,7 +287,7 @@ Array [
 ]
 `;
 
-exports[`workers/pr/release-notes getReleaseNotesMd() ReleaseNotes Correctness parses yargs 15.2.0 1`] = `
+exports[`workers/pr/changelog/release-notes getReleaseNotesMd() ReleaseNotes Correctness parses yargs 15.2.0 1`] = `
 Object {
   "body": "##### ⚠ BREAKING CHANGES
 
@@ -317,7 +317,7 @@ Object {
 }
 `;
 
-exports[`workers/pr/release-notes getReleaseNotesMd() ReleaseNotes Correctness parses yargs 15.2.0 2`] = `
+exports[`workers/pr/changelog/release-notes getReleaseNotesMd() ReleaseNotes Correctness parses yargs 15.2.0 2`] = `
 Array [
   Object {
     "headers": Object {
@@ -342,7 +342,7 @@ Array [
 ]
 `;
 
-exports[`workers/pr/release-notes getReleaseNotesMd() ReleaseNotes Correctness parses yargs 15.3.0 1`] = `
+exports[`workers/pr/changelog/release-notes getReleaseNotesMd() ReleaseNotes Correctness parses yargs 15.3.0 1`] = `
 Object {
   "body": "##### Features
 
@@ -357,7 +357,7 @@ Object {
 }
 `;
 
-exports[`workers/pr/release-notes getReleaseNotesMd() ReleaseNotes Correctness parses yargs 15.3.0 2`] = `
+exports[`workers/pr/changelog/release-notes getReleaseNotesMd() ReleaseNotes Correctness parses yargs 15.3.0 2`] = `
 Array [
   Object {
     "headers": Object {
@@ -382,7 +382,7 @@ Array [
 ]
 `;
 
-exports[`workers/pr/release-notes getReleaseNotesMd() handles bad markdown 1`] = `
+exports[`workers/pr/changelog/release-notes getReleaseNotesMd() handles bad markdown 1`] = `
 Array [
   Object {
     "headers": Object {
@@ -407,7 +407,7 @@ Array [
 ]
 `;
 
-exports[`workers/pr/release-notes getReleaseNotesMd() handles files mismatch 1`] = `
+exports[`workers/pr/changelog/release-notes getReleaseNotesMd() handles files mismatch 1`] = `
 Array [
   Object {
     "headers": Object {
@@ -422,7 +422,7 @@ Array [
 ]
 `;
 
-exports[`workers/pr/release-notes getReleaseNotesMd() handles wrong format 1`] = `
+exports[`workers/pr/changelog/release-notes getReleaseNotesMd() handles wrong format 1`] = `
 Array [
   Object {
     "headers": Object {
@@ -447,7 +447,7 @@ Array [
 ]
 `;
 
-exports[`workers/pr/release-notes getReleaseNotesMd() parses angular.js 1`] = `
+exports[`workers/pr/changelog/release-notes getReleaseNotesMd() parses angular.js 1`] = `
 Object {
   "body": "#### Bug Fixes
 
@@ -477,7 +477,7 @@ Object {
 }
 `;
 
-exports[`workers/pr/release-notes getReleaseNotesMd() parses angular.js 2`] = `
+exports[`workers/pr/changelog/release-notes getReleaseNotesMd() parses angular.js 2`] = `
 Array [
   Object {
     "headers": Object {
@@ -502,7 +502,7 @@ Array [
 ]
 `;
 
-exports[`workers/pr/release-notes getReleaseNotesMd() parses gitlab.com/gitlab-org/gitter/webapp 1`] = `
+exports[`workers/pr/changelog/release-notes getReleaseNotesMd() parses gitlab.com/gitlab-org/gitter/webapp 1`] = `
 Object {
   "body": "-   Removing markup from a part of the French translation, <https://gitlab.com/gitlab-org/gitter/webapp/-/merge_requests/1878>
 -   Fix typo documentation -> documentation, <https://gitlab.com/gitlab-org/gitter/webapp/-/merge_requests/1880>
@@ -518,7 +518,7 @@ Object {
 }
 `;
 
-exports[`workers/pr/release-notes getReleaseNotesMd() parses gitlab.com/gitlab-org/gitter/webapp 2`] = `
+exports[`workers/pr/changelog/release-notes getReleaseNotesMd() parses gitlab.com/gitlab-org/gitter/webapp 2`] = `
 Array [
   Object {
     "headers": Object {
@@ -543,7 +543,7 @@ Array [
 ]
 `;
 
-exports[`workers/pr/release-notes getReleaseNotesMd() parses jest 1`] = `
+exports[`workers/pr/changelog/release-notes getReleaseNotesMd() parses jest 1`] = `
 Object {
   "body": "##### Fixes
 
@@ -735,7 +735,7 @@ Object {
 }
 `;
 
-exports[`workers/pr/release-notes getReleaseNotesMd() parses jest 2`] = `
+exports[`workers/pr/changelog/release-notes getReleaseNotesMd() parses jest 2`] = `
 Array [
   Object {
     "headers": Object {
@@ -760,7 +760,7 @@ Array [
 ]
 `;
 
-exports[`workers/pr/release-notes getReleaseNotesMd() parses js-yaml 1`] = `
+exports[`workers/pr/changelog/release-notes getReleaseNotesMd() parses js-yaml 1`] = `
 Object {
   "body": "-   Fix \`condenseFlow\` output (quote keys for sure, instead of spaces), [#371](https://github.com/nodeca/js-yaml/issues/371), [#370](https://github.com/nodeca/js-yaml/issues/370).
 -   Dump astrals as codepoints instead of surrogate pair, [#368](https://github.com/nodeca/js-yaml/issues/368).
@@ -769,7 +769,7 @@ Object {
 }
 `;
 
-exports[`workers/pr/release-notes getReleaseNotesMd() parses js-yaml 2`] = `
+exports[`workers/pr/changelog/release-notes getReleaseNotesMd() parses js-yaml 2`] = `
 Array [
   Object {
     "headers": Object {

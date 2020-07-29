@@ -1,6 +1,6 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
-exports[`workers/pr/changelog getChangeLogJSON filters unnecessary warns 1`] = `
+exports[`workers/pr/changelog/github getChangeLogJSON filters unnecessary warns 1`] = `
 Object {
   "hasReleaseNotes": true,
   "project": Object {
@@ -51,7 +51,7 @@ Object {
 }
 `;
 
-exports[`workers/pr/changelog getChangeLogJSON supports github enterprise and github enterprise changelog 1`] = `
+exports[`workers/pr/changelog/github getChangeLogJSON supports github enterprise and github enterprise changelog 1`] = `
 Object {
   "hasReleaseNotes": true,
   "project": Object {
@@ -102,7 +102,7 @@ Object {
 }
 `;
 
-exports[`workers/pr/changelog getChangeLogJSON supports github enterprise and github.com changelog 1`] = `
+exports[`workers/pr/changelog/github getChangeLogJSON supports github enterprise and github.com changelog 1`] = `
 Object {
   "hasReleaseNotes": true,
   "project": Object {
@@ -153,7 +153,7 @@ Object {
 }
 `;
 
-exports[`workers/pr/changelog getChangeLogJSON supports node engines 1`] = `
+exports[`workers/pr/changelog/github getChangeLogJSON supports node engines 1`] = `
 Object {
   "hasReleaseNotes": true,
   "project": Object {
@@ -204,7 +204,7 @@ Object {
 }
 `;
 
-exports[`workers/pr/changelog getChangeLogJSON uses GitHub tags 1`] = `
+exports[`workers/pr/changelog/github getChangeLogJSON uses GitHub tags 1`] = `
 Object {
   "hasReleaseNotes": true,
   "project": Object {
@@ -255,7 +255,7 @@ Object {
 }
 `;
 
-exports[`workers/pr/changelog getChangeLogJSON works without Github 1`] = `
+exports[`workers/pr/changelog/github getChangeLogJSON works without Github 1`] = `
 Object {
   "hasReleaseNotes": true,
   "project": Object {
