@@ -23,7 +23,7 @@ Renovate supports private gem repositories such as Gemfury. In order to make aut
 [
   {
     "baseUrl": "https://gem.fury.io/username",
-    "hostType": "bundler",
+    "hostType": "rubygems",
     "username": "*********"
   }
 ]
