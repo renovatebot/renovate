@@ -54,7 +54,7 @@ Array [
       "user-agent": "https://github.com/renovatebot/renovate",
     },
     "method": "GET",
-    "url": "https://gitlab.com/api/v4/projects/meno%2Fdropzone/repository/tags",
+    "url": "https://gitlab.com/api/v4/projects/meno%2fdropzone/repository/tags",
   },
   Object {
     "headers": Object {
@@ -260,7 +260,7 @@ Array [
       "user-agent": "https://github.com/renovatebot/renovate",
     },
     "method": "GET",
-    "url": "https://gitlab.com/api/v4/projects/meno%2Fdropzone/repository/tags",
+    "url": "https://gitlab.com/api/v4/projects/meno%2fdropzone/repository/tags",
   },
   Object {
     "headers": Object {
@@ -407,7 +407,7 @@ Array [
       "user-agent": "https://github.com/renovatebot/renovate",
     },
     "method": "GET",
-    "url": "https://gitlab.com/api/v4/projects/meno%2Fdropzone/repository/tags",
+    "url": "https://gitlab.com/api/v4/projects/meno%2fdropzone/repository/tags",
   },
   Object {
     "headers": Object {
