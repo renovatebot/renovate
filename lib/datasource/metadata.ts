@@ -37,6 +37,8 @@ const manualChangelogUrls = {
   docker: {
     'gitlab/gitlab-ce':
       'https://gitlab.com/gitlab-org/omnibus-gitlab/-/blob/master/CHANGELOG.md',
+    'gitlab/gitlab-runner':
+      'https://gitlab.com/gitlab-org/gitlab-runner/-/blob/master/CHANGELOG.md',
   },
 };
 
