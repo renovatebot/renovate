@@ -3,13 +3,15 @@ import { getDependencyGem } from './get-gem';
 import { getDependencyJson } from './get-json';
 
 function useJsonApi(registryUrl: string): boolean {
+  const registryUrlHostname = new URL(registryUrl).hostname;
+
   // gemfury does not provide a compatible JSON-API
-  if (registryUrl.includes('gem.fury.io')) {
+  if (registryUrlHostname === 'gem.fury.io') {
     return false;
   }
 
   // rubygems.org JSON API is rate-limited, use the non JSON API instead
-  if (registryUrl.endsWith('rubygems.org')) {
+  if (registryUrlHostname === 'rubygems.org') {
     return false;
   }
 
