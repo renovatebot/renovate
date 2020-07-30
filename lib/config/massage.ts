@@ -32,7 +32,7 @@ export function massageConfig(config: RenovateConfig): RenovateConfig {
             massageConfig(item as RenovateConfig)
           );
         } else {
-          (massagedConfig[key] as RenovateConfig[]).push(item);
+          (massagedConfig[key] as unknown[]).push(item);
         }
       });
     } else if (is.object(val) && key !== 'encrypted') {
