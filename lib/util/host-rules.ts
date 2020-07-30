@@ -26,12 +26,9 @@ export function add(params: HostRule): void {
   });
 
   // if only username with no password is given, consider username a secret
-  if (
-    (params.username && params.password) ||
-    (params.username && !params.password)
-  ) {
+  if (params.username || params.password) {
     const secret = Buffer.from(
-      `${params.username}:${params.password ?? ''}`
+      `${params.username ?? ''}:${params.password ?? ''}`
     ).toString('base64');
     sanitize.add(secret);
   }

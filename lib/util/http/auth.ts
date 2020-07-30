@@ -26,7 +26,7 @@ export function applyAuthorization(inOptions: GotOptions): GotOptions {
   } else if (options.username || options.password) {
     // Otherwise got will add username and password to url and header - the password can be empty
     const auth = Buffer.from(
-      `${options.username || ''}:${options.password ?? ''}`
+      `${options.username ?? ''}:${options.password ?? ''}`
     ).toString('base64');
     options.headers.authorization = `Basic ${auth}`;
     delete options.username;

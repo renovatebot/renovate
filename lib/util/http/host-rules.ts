@@ -12,7 +12,7 @@ export function applyHostRules(url: string, inOptions: GotOptions): GotOptions {
       url,
     }) || /* istanbul ignore next: can only happen in tests */ {};
   const { username, password, token, enabled } = foundRules;
-  if (options.headers?.authorization || options.password || options.token) {
+  if (options.headers?.authorization || options.password || options.username || options.token) {
     logger.trace('Authorization already set for host: ' + options.hostname);
   } else if (password || username) {
     logger.trace('Applying Basic authentication for host ' + options.hostname);
