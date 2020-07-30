@@ -91,12 +91,12 @@ describe(getName(__filename), () => {
     it('works without Github', async () => {
       httpMock
         .scope(githubApiHost)
+        .get('/repos/chalk/chalk')
+        .times(4)
+        .reply(500)
         .get('/repos/chalk/chalk/tags?per_page=100')
         .reply(500)
         .get('/repos/chalk/chalk/releases?per_page=100')
-        .times(4)
-        .reply(500)
-        .get('/repos/chalk/chalk/contents/')
         .times(4)
         .reply(500);
       expect(

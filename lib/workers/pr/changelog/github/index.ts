@@ -1,6 +1,9 @@
 import changelogFilenameRegex from 'changelog-filename-regex';
 import { logger } from '../../../../logger';
-import { GithubGitBlob } from '../../../../types/platform/github';
+import {
+  GithubGitBlob,
+  GithubGitTree,
+} from '../../../../types/platform/github';
 import { GithubHttp } from '../../../../util/http/github';
 import { ensureTrailingSlash } from '../../../../util/url';
 import { ChangeLogFile, ChangeLogNotes } from '../common';
@@ -43,16 +46,29 @@ export async function getReleaseNotesMd(
 ): Promise<ChangeLogFile> | null {
   logger.trace('github.getReleaseNotesMd()');
   const apiPrefix = `${ensureTrailingSlash(apiBaseUrl)}repos/${repository}`;
+  const { default_branch = 'master' } = (
+    await http.getJson<{ default_branch: string }>(apiPrefix)
+  ).body;
 
-  const res = await http.getJson<{ name: string }[]>(`${apiPrefix}/contents/`);
+  // https://docs.github.com/en/rest/reference/git#get-a-tree
+  const res = await http.getJson<GithubGitTree>(
+    `${apiPrefix}/git/trees/${default_branch}`
+  );
 
-  const files = res.body.filter((f) => changelogFilenameRegex.test(f.name));
+  // istanbul ignore if
+  if (res.body.truncated) {
+    logger.debug({ repository }, 'Git tree truncated');
+  }
+
+  const files = res.body.tree
+    .filter((f) => f.type === 'blob')
+    .filter((f) => changelogFilenameRegex.test(f.path));
 
   if (!files.length) {
     logger.trace('no changelog file found');
     return null;
   }
-  const { name: changelogFile } = files.shift();
+  const { path: changelogFile, sha } = files.shift();
   /* istanbul ignore if */
   if (files.length > 1) {
     logger.debug(
@@ -60,8 +76,9 @@ export async function getReleaseNotesMd(
     );
   }
 
+  // https://docs.github.com/en/rest/reference/git#get-a-blob
   const fileRes = await http.getJson<GithubGitBlob>(
-    `${apiPrefix}/contents/${changelogFile}`
+    `${apiPrefix}/git/blobs/${sha}`
   );
 
   const changelogMd =
@@ -85,7 +102,7 @@ export async function getReleaseList(
       name: string;
       body: string;
     }[]
-  >(url);
+  >(url, { paginate: true });
   return res.body.map((release) => ({
     url: release.html_url,
     id: release.id,

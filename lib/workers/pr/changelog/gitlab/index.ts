@@ -18,9 +18,11 @@ export async function getTags(
   logger.trace('gitlab.getTags()');
   const url = `${ensureTrailingSlash(endpoint)}projects/${getRepoId(
     repository
-  )}/repository/tags`;
+  )}/repository/tags?per_page=100`;
   try {
-    const res = await http.getJson<{ name: string }[]>(url);
+    const res = await http.getJson<{ name: string }[]>(url, {
+      paginate: true,
+    });
 
     const tags = res.body;
 
@@ -45,19 +47,26 @@ export async function getReleaseNotesMd(
   apiBaseUrl: string
 ): Promise<ChangeLogFile> | null {
   logger.trace('gitlab.getReleaseNotesMd()');
+  const repoid = getRepoId(repository);
   const apiPrefix = `${ensureTrailingSlash(
     apiBaseUrl
-  )}projects/${repository}/repository/`;
+  )}projects/${repoid}/repository/`;
 
   // https://docs.gitlab.com/13.2/ee/api/repositories.html#list-repository-tree
-  let files = (await http.getJson<GitlabTreeNode[]>(`${apiPrefix}tree/`)).body;
+  let files = (
+    await http.getJson<GitlabTreeNode[]>(`${apiPrefix}tree?per_page=100`, {
+      paginate: true,
+    })
+  ).body;
 
-  files = files.filter((f) => changelogFilenameRegex.test(f.name));
+  files = files
+    .filter((f) => f.type === 'blob')
+    .filter((f) => changelogFilenameRegex.test(f.path));
   if (!files.length) {
     logger.trace('no changelog file found');
     return null;
   }
-  const { name: changelogFile } = files.shift();
+  const { path: changelogFile, id } = files.shift();
   /* istanbul ignore if */
   if (files.length > 1) {
     logger.debug(
@@ -65,11 +74,9 @@ export async function getReleaseNotesMd(
     );
   }
 
-  const fileRes = await http.getJson<{ content: string }>(
-    `${apiPrefix}files/${changelogFile}?ref=master`
-  );
-  const changelogMd =
-    Buffer.from(fileRes.body.content, 'base64').toString() + '\n#\n##';
+  // https://docs.gitlab.com/13.2/ee/api/repositories.html#raw-blob-content
+  const fileRes = await http.get(`${apiPrefix}blobs/${id}/raw`);
+  const changelogMd = fileRes.body + '\n#\n##';
   return { changelogFile, changelogMd };
 }
 
