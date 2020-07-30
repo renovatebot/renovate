@@ -1,4 +1,3 @@
-import { RenovateConfig } from '../config/common';
 import {
   BranchStatus,
   VulnerabilityAlert as _VulnerabilityAlert,
@@ -6,17 +5,21 @@ import {
 
 export type VulnerabilityAlert = _VulnerabilityAlert;
 
-export interface PlatformConfig {
+export interface PlatformParams {
+  endpoint?: string;
+  token?: string;
+  username?: string;
+  password?: string;
+}
+
+export interface PlatformResult {
   endpoint: string;
   renovateUsername?: any;
   gitAuthor?: any;
 }
 
-export interface RepoConfig {
-  baseBranch: string;
-  endpoint?: string;
-  renovateUsername?: any;
-  gitAuthor?: any;
+export interface RepoResult {
+  defaultBranch: string;
   isFork: boolean;
 }
 
@@ -43,9 +46,9 @@ export interface Pr {
   canMergeReason?: string;
   createdAt?: string;
   displayNumber?: string;
+  hasAssignees?: boolean;
+  hasReviewers?: boolean;
   isConflicted?: boolean;
-  isModified?: boolean;
-  isStale?: boolean;
   labels?: string[];
   number?: number;
   reviewers?: string[];
@@ -72,10 +75,10 @@ export type PlatformPrOptions = {
 };
 export interface CreatePRConfig {
   branchName: string;
+  targetBranch: string;
   prTitle: string;
   prBody: string;
   labels?: string[] | null;
-  useDefaultBranch?: boolean;
   platformOptions?: PlatformPrOptions;
   draftPR?: boolean;
 }
@@ -125,7 +128,7 @@ export interface Platform {
   findIssue(title: string): Promise<Issue | null>;
   getIssueList(): Promise<Issue[]>;
   getVulnerabilityAlerts(): Promise<VulnerabilityAlert[]>;
-  initRepo(config: RepoParams): Promise<RepoConfig>;
+  initRepo(config: RepoParams): Promise<RepoResult>;
   getPrList(): Promise<Pr[]>;
   ensureIssueClosing(title: string): Promise<void>;
   ensureIssue(
@@ -152,7 +155,7 @@ export interface Platform {
   ): Promise<void>;
   deleteBranch(branchName: string, closePr?: boolean): Promise<void>;
   ensureComment(ensureComment: EnsureCommentConfig): Promise<boolean>;
-  setBaseBranch(baseBranch?: string): Promise<string>;
+  setBaseBranch(branchName: string): Promise<string>;
   getPr(number: number): Promise<Pr>;
   findPr(findPRConfig: FindPRConfig): Promise<Pr>;
   refreshPr?(number: number): Promise<void>;
@@ -161,5 +164,5 @@ export interface Platform {
     requiredStatusChecks?: string[] | null
   ): Promise<BranchStatus>;
   getBranchPr(branchName: string): Promise<Pr | null>;
-  initPlatform(config: RenovateConfig): Promise<PlatformConfig>;
+  initPlatform(config: PlatformParams): Promise<PlatformResult>;
 }

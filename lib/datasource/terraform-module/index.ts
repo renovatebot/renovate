@@ -45,6 +45,38 @@ interface TerraformRelease {
   versions: string[];
 }
 
+export interface ServiceDiscoveryResult {
+  'modules.v1'?: string;
+  'providers.v1'?: string;
+}
+
+export async function getTerraformServiceDiscoveryResult(
+  registryUrl: string
+): Promise<ServiceDiscoveryResult> {
+  const discoveryURL = `${registryUrl}/.well-known/terraform.json`;
+  const cacheNamespace = 'terraform-service-discovery';
+  const cachedResult = await packageCache.get<ServiceDiscoveryResult>(
+    cacheNamespace,
+    registryUrl
+  );
+  // istanbul ignore if
+  if (cachedResult) {
+    return cachedResult;
+  }
+  const serviceDiscovery = (
+    await http.getJson<ServiceDiscoveryResult>(discoveryURL)
+  ).body;
+
+  const cacheMinutes = 1440; // 24h
+  await packageCache.set(
+    cacheNamespace,
+    registryUrl,
+    serviceDiscovery,
+    cacheMinutes
+  );
+
+  return serviceDiscovery;
+}
 /**
  * terraform.getReleases
  *
@@ -65,16 +97,20 @@ export async function getReleases({
     'terraform.getDependencies()'
   );
   const cacheNamespace = 'terraform-module';
-  const pkgUrl = `${registry}/v1/modules/${repository}`;
+  const cacheURL = `${registry}/${repository}`;
   const cachedResult = await packageCache.get<ReleaseResult>(
     cacheNamespace,
-    pkgUrl
+    cacheURL
   );
   // istanbul ignore if
   if (cachedResult) {
     return cachedResult;
   }
   try {
+    const serviceDiscovery = await getTerraformServiceDiscoveryResult(
+      registryUrl
+    );
+    const pkgUrl = `${registry}${serviceDiscovery['modules.v1']}${repository}`;
     const res = (await http.getJson<TerraformRelease>(pkgUrl)).body;
     const returnedName = res.namespace + '/' + res.name + '/' + res.provider;
     if (returnedName !== repository) {

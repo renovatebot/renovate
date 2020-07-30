@@ -3,6 +3,7 @@ import { logger } from '../../logger';
 import * as packageCache from '../../util/cache/package';
 import { Http } from '../../util/http';
 import { GetReleasesConfig, ReleaseResult } from '../common';
+import { getTerraformServiceDiscoveryResult } from '../terraform-module';
 
 export const id = 'terraform-provider';
 export const defaultRegistryUrls = [
@@ -37,7 +38,10 @@ async function queryRegistry(
   registryURL: string,
   repository: string
 ): Promise<ReleaseResult> {
-  const backendURL = `${registryURL}/v1/providers/${repository}`;
+  const serviceDiscovery = await getTerraformServiceDiscoveryResult(
+    registryURL
+  );
+  const backendURL = `${registryURL}${serviceDiscovery['providers.v1']}${repository}`;
   const res = (await http.getJson<TerraformProvider>(backendURL)).body;
   const dep: ReleaseResult = {
     name: repository,
@@ -103,10 +107,10 @@ export async function getReleases({
   logger.debug({ lookupName }, 'terraform-provider.getDependencies()');
   let dep: ReleaseResult = null;
   const registryHost = URL.parse(registryUrl).host;
-  if (registryHost === 'registry.terraform.io') {
-    dep = await queryRegistry(lookupName, registryUrl, repository);
-  } else if (registryHost === 'releases.hashicorp.com') {
+  if (registryHost === 'releases.hashicorp.com') {
     dep = await queryReleaseBackend(lookupName, registryUrl, repository);
+  } else {
+    dep = await queryRegistry(lookupName, registryUrl, repository);
   }
   const cacheMinutes = 30;
   await packageCache.set(cacheNamespace, pkgUrl, dep, cacheMinutes);

@@ -154,6 +154,9 @@ Object {
       "depName": "app.terraform.io/example-corp/k8s-cluster/azurerm",
       "depNameShort": "app.terraform.io/example-corp/k8s-cluster/azurerm",
       "depType": "terraform",
+      "registryUrls": Array [
+        "https://app.terraform.io",
+      ],
     },
     Object {
       "currentValue": "~> 1.1",
@@ -161,6 +164,9 @@ Object {
       "depName": "app.terraform.io/example-corp/k8s-cluster/azurerm",
       "depNameShort": "app.terraform.io/example-corp/k8s-cluster/azurerm",
       "depType": "terraform",
+      "registryUrls": Array [
+        "https://app.terraform.io",
+      ],
     },
     Object {
       "currentValue": "~~ 1.1",
@@ -168,6 +174,9 @@ Object {
       "depName": "app.terraform.io/example-corp/k8s-cluster/azurerm",
       "depNameShort": "app.terraform.io/example-corp/k8s-cluster/azurerm",
       "depType": "terraform",
+      "registryUrls": Array [
+        "https://app.terraform.io",
+      ],
     },
     Object {
       "currentValue": ">= 1.0.0, <= 2.0.0",
@@ -287,6 +296,48 @@ Object {
       "depName": "azurerm",
       "depNameShort": "azurerm",
       "depType": "terraform",
+    },
+    Object {
+      "autoReplaceStringTemplate": "{{depName}}{{#if newValue}}:{{newValue}}{{/if}}{{#if newDigest}}@{{newDigest}}{{/if}}",
+      "currentDigest": undefined,
+      "currentValue": "1.7.8",
+      "datasource": "docker",
+      "depName": "nginx",
+      "replaceString": "nginx:1.7.8",
+    },
+    Object {
+      "skipReason": "invalid-dependency-specification",
+    },
+    Object {
+      "autoReplaceStringTemplate": "{{depName}}{{#if newValue}}:{{newValue}}{{/if}}{{#if newDigest}}@{{newDigest}}{{/if}}",
+      "datasource": "docker",
+      "replaceString": "\${data.docker_registry_image.ubuntu.name}",
+      "skipReason": "contains-variable",
+    },
+    Object {
+      "autoReplaceStringTemplate": "{{depName}}{{#if newValue}}:{{newValue}}{{/if}}{{#if newDigest}}@{{newDigest}}{{/if}}",
+      "currentDigest": undefined,
+      "currentValue": "1.7.8",
+      "datasource": "docker",
+      "depName": "nginx",
+      "replaceString": "nginx:1.7.8",
+    },
+    Object {
+      "skipReason": "invalid-dependency-specification",
+    },
+    Object {
+      "autoReplaceStringTemplate": "{{depName}}{{#if newValue}}:{{newValue}}{{/if}}{{#if newDigest}}@{{newDigest}}{{/if}}",
+      "currentDigest": undefined,
+      "currentValue": "v1",
+      "datasource": "docker",
+      "depName": "repo.mycompany.com:8080/foo-service",
+      "replaceString": "repo.mycompany.com:8080/foo-service:v1",
+    },
+    Object {
+      "skipReason": "invalid-dependency-specification",
+    },
+    Object {
+      "skipReason": "unsupported-value",
     },
   ],
 }

@@ -44,7 +44,7 @@ export async function extractDependencies(
     if (issue) {
       const checkMatch = ' - \\[x\\] <!-- ([a-zA-Z]+)-branch=([^\\s]+) -->';
       const checked = issue.body.match(new RegExp(checkMatch, 'g'));
-      if (checked && checked.length) {
+      if (checked?.length) {
         const re = new RegExp(checkMatch);
         checked.forEach((check) => {
           const [, type, branchName] = re.exec(check);

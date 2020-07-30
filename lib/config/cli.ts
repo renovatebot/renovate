@@ -107,7 +107,7 @@ export function getConfig(input: string[]): RenovateCliConfig {
     .version(version, '-v, --version')
     .on('--help', helpConsole)
     .action((repositories: string[], opts: Record<string, unknown>) => {
-      if (repositories && repositories.length) {
+      if (repositories?.length) {
         config.repositories = repositories;
       }
 

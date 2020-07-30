@@ -20,13 +20,13 @@ async function validate(
   const res = await validateConfig(massageConfig(config), isPreset);
   if (res.errors.length) {
     console.log(
-      `${desc} contains errors:\n\n${JSON5.stringify(res.errors, null, 2)}`
+      `${desc} contains errors:\n\n${JSON.stringify(res.errors, null, 2)}`
     );
     returnVal = 1;
   }
   if (res.warnings.length) {
     console.log(
-      `${desc} contains warnings:\n\n${JSON5.stringify(res.warnings, null, 2)}`
+      `${desc} contains warnings:\n\n${JSON.stringify(res.warnings, null, 2)}`
     );
     returnVal = 1;
   }
@@ -45,7 +45,12 @@ type PackageJson = {
       const rawContent = readFileSync(file, 'utf8');
       console.log(`Validating ${file}`);
       try {
-        const jsonContent = JSON5.parse(rawContent) as PackageJson;
+        let jsonContent;
+        if (file.endsWith('.json5')) {
+          jsonContent = JSON5.parse(rawContent) as PackageJson;
+        } else {
+          jsonContent = JSON.parse(rawContent) as PackageJson;
+        }
         await validate(file, jsonContent);
       } catch (err) {
         console.log(`${file} is not valid Renovate config`, err);
@@ -56,7 +61,7 @@ type PackageJson = {
     }
   }
   try {
-    const pkgJson = JSON5.parse(
+    const pkgJson = JSON.parse(
       readFileSync('package.json', 'utf8')
     ) as PackageJson;
     if (pkgJson.renovate) {

@@ -416,6 +416,20 @@ const options: RenovateOptions[] = [
     default: `Dependency Dashboard`,
   },
   {
+    name: 'dependencyDashboardHeader',
+    description:
+      'Any text added here will be placed first in the Dependency Dashboard issue body.',
+    type: 'string',
+    default:
+      'This issue contains a list of Renovate updates and their statuses.',
+  },
+  {
+    name: 'dependencyDashboardFooter',
+    description:
+      'Any text added here will be placed last in the Dependency Dashboard issue body, with a divider separator before it.',
+    type: 'string',
+  },
+  {
     name: 'configWarningReuseIssue',
     description:
       'Set this to false and Renovate will open each config warning in a new issue instead of reopening/reusing an existing issue.',

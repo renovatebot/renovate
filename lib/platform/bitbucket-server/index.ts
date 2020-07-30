@@ -1,4 +1,5 @@
 import url, { URLSearchParams } from 'url';
+import is from '@sindresorhus/is';
 import delay from 'delay';
 import { RenovateConfig } from '../../config/common';
 import {
@@ -28,10 +29,11 @@ import {
   EnsureIssueResult,
   FindPRConfig,
   Issue,
-  PlatformConfig,
+  PlatformParams,
+  PlatformResult,
   Pr,
-  RepoConfig,
   RepoParams,
+  RepoResult,
   VulnerabilityAlert,
 } from '../common';
 import { smartTruncate } from '../utils/pr-body';
@@ -67,7 +69,7 @@ export function initPlatform({
   endpoint,
   username,
   password,
-}: RenovateConfig): Promise<PlatformConfig> {
+}: PlatformParams): Promise<PlatformResult> {
   if (!endpoint) {
     throw new Error('Init: You must configure a Bitbucket Server endpoint');
   }
@@ -79,7 +81,7 @@ export function initPlatform({
   // TODO: Add a connection check that endpoint/username/password combination are valid
   defaults.endpoint = ensureTrailingSlash(endpoint);
   setBaseUrl(defaults.endpoint);
-  const platformConfig: PlatformConfig = {
+  const platformConfig: PlatformResult = {
     endpoint: defaults.endpoint,
   };
   return Promise.resolve(platformConfig);
@@ -110,7 +112,7 @@ export async function initRepo({
   localDir,
   optimizeForDisabled,
   bbUseDefaultReviewers,
-}: RepoParams): Promise<RepoConfig> {
+}: RepoParams): Promise<RepoResult> {
   logger.debug(
     `initRepo("${JSON.stringify({ repository, localDir }, null, 2)}")`
   );
@@ -195,15 +197,14 @@ export async function initRepo({
     ).body;
     config.owner = info.project.key;
     logger.debug(`${repository} owner = ${config.owner}`);
-    config.defaultBranch = (
+    const defaultBranch = (
       await bitbucketServerHttp.getJson<{ displayId: string }>(
         `./rest/api/1.0/projects/${config.projectKey}/repos/${config.repositorySlug}/branches/default`
       )
     ).body.displayId;
-    config.baseBranch = config.defaultBranch;
     config.mergeMethod = 'merge';
-    const repoConfig: RepoConfig = {
-      baseBranch: config.baseBranch,
+    const repoConfig: RepoResult = {
+      defaultBranch,
       isFork: !!info.parent,
     };
     return repoConfig;
@@ -238,11 +239,8 @@ export async function getRepoForceRebase(): Promise<boolean> {
   );
 }
 
-export async function setBaseBranch(
-  branchName: string = config.defaultBranch
-): Promise<string> {
-  config.baseBranch = branchName;
-  const baseBranchSha = await git.setBaseBranch(branchName);
+export async function setBaseBranch(branchName: string): Promise<string> {
+  const baseBranchSha = await git.setBranch(branchName);
   return baseBranchSha;
 }
 
@@ -265,9 +263,8 @@ export async function getPr(
     displayNumber: `Pull Request #${res.body.id}`,
     ...utils.prInfo(res.body),
     reviewers: res.body.reviewers.map((r) => r.user.name),
-    isModified: false,
   };
-
+  pr.hasReviewers = is.nonEmptyArray(pr.reviewers);
   pr.version = updatePrVersion(pr.number, pr.version);
 
   if (pr.state === PR_STATE_OPEN) {
@@ -280,39 +277,6 @@ export async function getPr(
     );
     pr.isConflicted = !!mergeRes.body.conflicted;
     pr.canMerge = !!mergeRes.body.canMerge;
-
-    const prCommits = (
-      await bitbucketServerHttp.getJson<{
-        totalCount: number;
-        values: { author: { emailAddress: string } }[];
-      }>(
-        `./rest/api/1.0/projects/${config.projectKey}/repos/${config.repositorySlug}/pull-requests/${prNo}/commits?withCounts=true`,
-        { useCache: !refreshCache }
-      )
-    ).body;
-
-    if (prCommits.totalCount === 1) {
-      if (global.gitAuthor) {
-        const commitAuthorEmail = prCommits.values[0].author.emailAddress;
-        if (commitAuthorEmail !== global.gitAuthor.email) {
-          logger.debug(
-            { prNo },
-            'PR is modified: 1 commit but not by configured gitAuthor'
-          );
-          pr.isModified = true;
-        }
-      }
-    } else {
-      logger.debug(
-        { prNo },
-        `PR is modified: Found ${prCommits.totalCount} commits`
-      );
-      pr.isModified = true;
-    }
-  }
-
-  if (await git.branchExists(pr.branchName)) {
-    pr.isStale = await git.isBranchStale(pr.branchName);
   }
 
   return pr;
@@ -831,13 +795,13 @@ const escapeHash = (input: string): string =>
 
 export async function createPr({
   branchName,
+  targetBranch,
   prTitle: title,
   prBody: rawDescription,
-  useDefaultBranch,
 }: CreatePRConfig): Promise<Pr> {
   const description = sanitize(rawDescription);
   logger.debug(`createPr(${branchName}, title=${title})`);
-  const base = useDefaultBranch ? config.defaultBranch : config.baseBranch;
+  const base = targetBranch;
   let reviewers: BbsRestUserRef[] = [];
 
   /* istanbul ignore else */
@@ -900,7 +864,6 @@ export async function createPr({
 
   const pr: BbsPr = {
     displayNumber: `Pull Request #${prInfoRes.body.id}`,
-    isModified: false,
     ...utils.prInfo(prInfoRes.body),
   };
 

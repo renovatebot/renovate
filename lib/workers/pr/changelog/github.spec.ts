@@ -1,3 +1,4 @@
+import { getName } from '../../../../test/util';
 import { PLATFORM_TYPE_GITHUB } from '../../../constants/platforms';
 import * as hostRules from '../../../util/host-rules';
 import * as semverVersioning from '../../../versioning/semver';
@@ -28,7 +29,7 @@ const upgrade: BranchUpgradeConfig = {
   ],
 };
 
-describe('workers/pr/changelog', () => {
+describe(getName(__filename), () => {
   describe('getChangeLogJSON', () => {
     beforeEach(() => {
       hostRules.clear();

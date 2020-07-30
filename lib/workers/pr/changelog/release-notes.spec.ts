@@ -1,5 +1,6 @@
 import fs from 'fs-extra';
 import * as httpMock from '../../../../test/httpMock';
+import { getName } from '../../../../test/util';
 import { ChangeLogNotes } from './common';
 import {
   addReleaseNotes,
@@ -43,7 +44,7 @@ const contentsResponse = [
   { name: 'README.md' },
 ];
 
-describe('workers/pr/release-notes', () => {
+describe(getName(__filename), () => {
   beforeEach(() => {
     httpMock.setup();
   });

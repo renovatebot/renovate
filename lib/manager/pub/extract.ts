@@ -19,7 +19,7 @@ function getDeps(
     const section = depsObj[depName];
 
     let currentValue: string | null = null;
-    if (section && section.version) {
+    if (section?.version) {
       currentValue = section.version.toString();
     } else if (section) {
       if (typeof section === 'string') {

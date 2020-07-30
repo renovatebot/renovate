@@ -22,11 +22,11 @@
                 {
                   "commit": {
                     "author": {
-                      "email": "bot@renovateapp.com"
+                      "email": "renovate@whitesourcesoftware.com"
                     },
                     "committer": {
                       "name": "Renovate Bot",
-                      "email": "bot@renovateapp.com"
+                      "email": "renovate@whitesourcesoftware.com"
                     },
                     "parents": {
                       "edges": [
@@ -55,11 +55,11 @@
                 {
                   "commit": {
                     "author": {
-                      "email": "bot@renovateapp.com"
+                      "email": "renovate@whitesourcesoftware.com"
                     },
                     "committer": {
                       "name": "Renovate Bot",
-                      "email": "bot@renovateapp.com"
+                      "email": "renovate@whitesourcesoftware.com"
                     },
                     "parents": {
                       "edges": [

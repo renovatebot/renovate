@@ -8,8 +8,6 @@ import { Pr } from '../common';
 const bitbucketHttp = new BitbucketHttp();
 
 export interface Config {
-  baseBranch: string;
-  baseCommitSHA: string;
   defaultBranch: string;
   has_issues: boolean;
   mergeMethod: string;
@@ -75,7 +73,7 @@ const addMaxLength = (inputUrl: string, pagelen = 100): string => {
   return maxedUrl;
 };
 
-async function callApi<T>(
+function callApi<T>(
   apiUrl: string,
   method: string,
   options?: any

@@ -1,3 +1,4 @@
+import * as datasourceMaven from '../../datasource/maven';
 import { MAVEN_REPO } from '../../datasource/maven/common';
 import * as datasourceSbtPackage from '../../datasource/sbt-package';
 import * as datasourceSbtPlugin from '../../datasource/sbt-plugin';
@@ -113,7 +114,11 @@ function parseDepExpr(
       ? str.replace(/^"/, '').replace(/"$/, '')
       : variables[str].val;
 
-  const tokens = expr.trim().split(/\s*(%%?)\s*/);
+  const tokens = expr
+    .trim()
+    .replace(/[()]/g, '')
+    .split(/\s*(%%?)\s*|\s*classifier\s*/);
+
   const [
     rawGroupId,
     groupOp,
@@ -177,6 +182,7 @@ function parseDepExpr(
 
   return result;
 }
+
 interface ParseOptions {
   isMultiDeps?: boolean;
   scalaVersion?: string;
@@ -203,7 +209,15 @@ function parseSbtLine(
   if (!isComment(line)) {
     if (isScalaVersion(line)) {
       isMultiDeps = false;
-      scalaVersion = normalizeScalaVersion(getScalaVersion(line));
+      const rawScalaVersion = getScalaVersion(line);
+      scalaVersion = normalizeScalaVersion(rawScalaVersion);
+      dep = {
+        datasource: datasourceMaven.id,
+        depName: 'scala',
+        lookupName: 'org.scala-lang:scala-library',
+        currentValue: rawScalaVersion,
+        separateMinorPatch: true,
+      };
     } else if (isScalaVersionVariable(line)) {
       isMultiDeps = false;
       scalaVersionVariable = getScalaVersionVariable(line);
@@ -248,10 +262,12 @@ function parseSbtLine(
   }
 
   if (dep) {
-    if (dep.depType === 'plugin') {
-      dep.datasource = datasourceSbtPlugin.id;
-    } else {
-      dep.datasource = datasourceSbtPackage.id;
+    if (!dep.datasource) {
+      if (dep.depType === 'plugin') {
+        dep.datasource = datasourceSbtPlugin.id;
+      } else {
+        dep.datasource = datasourceSbtPackage.id;
+      }
     }
     deps.push({
       registryUrls,

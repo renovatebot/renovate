@@ -9,7 +9,7 @@ import { PlatformPrOptions, Pr, platform } from '../../platform';
 import { BranchStatus } from '../../types';
 import { ExternalHostError } from '../../types/errors/external-host-error';
 import { sampleSize } from '../../util';
-import { getBranchLastCommitTime } from '../../util/git';
+import { getBranchLastCommitTime, isBranchModified } from '../../util/git';
 import { BranchConfig, PrResult } from '../common';
 import { getPrBody } from './body';
 import { ChangeLogError } from './changelog';
@@ -282,7 +282,12 @@ export async function ensurePr(
     if (existingPr) {
       logger.debug('Processing existing PR');
       // istanbul ignore if
-      if (config.automerge && (await getBranchStatus()) === BranchStatus.red) {
+      if (
+        !existingPr.hasAssignees &&
+        !existingPr.hasReviewers &&
+        config.automerge &&
+        (await getBranchStatus()) === BranchStatus.red
+      ) {
         logger.debug(`Setting assignees and reviewers as status checks failed`);
         await addAssigneesReviewers(config, existingPr);
       }
@@ -318,8 +323,6 @@ export async function ensurePr(
         logger.debug(
           {
             prTitle,
-            oldPrBody: existingPrBody,
-            newPrBody: prBody,
           },
           'PR body changed'
         );
@@ -355,10 +358,10 @@ export async function ensurePr(
         };
         pr = await platform.createPr({
           branchName,
+          targetBranch: config.baseBranch,
           prTitle,
           prBody,
           labels: config.labels,
-          useDefaultBranch: false,
           platformOptions,
           draftPR: config.draftPR,
         });
@@ -488,7 +491,7 @@ export async function checkAutoMerge(
       return false;
     }
     // Check if it's been touched
-    if (pr.isModified) {
+    if (await isBranchModified(branchName)) {
       logger.debug('PR is ready for automerge but has been modified');
       return false;
     }

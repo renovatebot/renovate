@@ -115,6 +115,7 @@ describe('manager/maven', () => {
           expect(depUrls).toEqual(urls);
         });
       });
+      expect(packages).toMatchSnapshot();
     });
 
     it('should not touch content if new and old versions are equal', () => {
@@ -217,9 +218,7 @@ describe('manager/maven', () => {
     it('should preserve ranges', () => {
       const newValue = '[1.0.0]';
       const select = (depSet: PackageFile) =>
-        depSet && depSet.deps
-          ? selectDep(depSet.deps, 'org.example:hard-range')
-          : null;
+        depSet?.deps ? selectDep(depSet.deps, 'org.example:hard-range') : null;
       const oldContent = extractPackage(pomContent);
       const dep = select(oldContent);
       expect(dep).not.toBeNull();

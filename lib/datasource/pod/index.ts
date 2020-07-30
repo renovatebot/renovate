@@ -40,17 +40,15 @@ function releasesGithubUrl(
 function handleError(lookupName: string, err: HttpError): void {
   const errorData = { lookupName, err };
 
-  if (
-    err.statusCode === 429 ||
-    (err.statusCode >= 500 && err.statusCode < 600)
-  ) {
+  const statusCode = err.response?.statusCode;
+  if (statusCode === 429 || (statusCode >= 500 && statusCode < 600)) {
     logger.warn({ lookupName, err }, `CocoaPods registry failure`);
     throw new ExternalHostError(err);
   }
 
-  if (err.statusCode === 401) {
+  if (statusCode === 401) {
     logger.debug(errorData, 'Authorization error');
-  } else if (err.statusCode === 404) {
+  } else if (statusCode === 404) {
     logger.debug(errorData, 'Package lookup error');
   } else {
     logger.warn(errorData, 'CocoaPods lookup failure: Unknown error');
@@ -63,7 +61,7 @@ async function requestCDN(
 ): Promise<string | null> {
   try {
     const resp = await http.get(url);
-    if (resp && resp.body) {
+    if (resp?.body) {
       return resp.body;
     }
   } catch (err) {
@@ -79,7 +77,7 @@ async function requestGithub<T = unknown>(
 ): Promise<T | null> {
   try {
     const resp = await githubHttp.getJson<T>(url);
-    if (resp && resp.body) {
+    if (resp?.body) {
       return resp.body;
     }
   } catch (err) {
@@ -97,7 +95,7 @@ async function getReleasesFromGithub(
   useShard = false
 ): Promise<ReleaseResult | null> {
   const match = githubRegex.exec(registryUrl);
-  const { account, repo } = (match && match.groups) || {};
+  const { account, repo } = match?.groups || {};
   const opts = { account, repo, useShard };
   const url = releasesGithubUrl(lookupName, opts);
   const resp = await requestGithub<{ name: string }[]>(url, lookupName);
