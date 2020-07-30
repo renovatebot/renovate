@@ -600,6 +600,7 @@ Object {
   ],
   "registryUrls": Array [
     "https://wpackagist.org",
+    "https://gitlab.vendor.com/api/v4/group/2/-/packages/composer",
     "https://packagist.org",
   ],
 }
