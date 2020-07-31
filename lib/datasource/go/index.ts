@@ -3,6 +3,7 @@ import { Http } from '../../util/http';
 import { regEx } from '../../util/regex';
 import { DigestConfig, GetReleasesConfig, ReleaseResult } from '../common';
 import * as github from '../github-tags';
+import * as gitlab from '../gitlab-tags';
 
 export const id = 'go';
 
@@ -10,6 +11,7 @@ const http = new Http(id);
 
 interface DataSource {
   datasource: string;
+  registryUrl?: string;
   lookupName: string;
 }
 
@@ -48,6 +50,15 @@ async function getDatasource(goModule: string): Promise<DataSource | null> {
           .replace(/\/$/, ''),
       };
     }
+    if (goSourceUrl?.match('^https://[^/]*gitlab.[^/]*/.+')) {
+      const gitlabRegExp = /^(https:\/\/[^/]*gitlab.[^/]*)\/(.*)$/;
+      const gitlabRes = gitlabRegExp.exec(goSourceUrl);
+      return {
+        datasource: gitlab.id,
+        registryUrl: gitlabRes[1],
+        lookupName: gitlabRes[2].replace(/\/$/, ''),
+      };
+    }
   } else {
     logger.trace({ goModule }, 'No go-source header found');
   }
@@ -62,7 +73,7 @@ async function getDatasource(goModule: string): Promise<DataSource | null> {
  *
  * This function will:
  *  - Determine the source URL for the module
- *  - Call the respective getReleases in github to retrieve the tags
+ *  - Call the respective getReleases in github/gitlab to retrieve the tags
  *  - Filter module tags according to the module path
  */
 export async function getReleases({
@@ -70,8 +81,14 @@ export async function getReleases({
 }: GetReleasesConfig): Promise<ReleaseResult | null> {
   logger.trace(`go.getReleases(${lookupName})`);
   const source = await getDatasource(lookupName);
-  if (source && source.datasource === github.id) {
-    const res = await github.getReleases(source);
+  if (
+    source &&
+    (source.datasource === github.id || source.datasource === gitlab.id)
+  ) {
+    const res =
+      source.datasource === github.id
+        ? await github.getReleases(source)
+        : await gitlab.getReleases(source);
     // istanbul ignore if
     if (!res) {
       return res;
