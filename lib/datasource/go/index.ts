@@ -81,10 +81,7 @@ export async function getReleases({
 }: GetReleasesConfig): Promise<ReleaseResult | null> {
   logger.trace(`go.getReleases(${lookupName})`);
   const source = await getDatasource(lookupName);
-  if (
-    !source ||
-    (source.datasource !== github.id && source.datasource !== gitlab.id)
-  ) {
+  if (source?.datasource !== github.id && source?.datasource !== gitlab.id) {
     return null;
   }
   const res =
