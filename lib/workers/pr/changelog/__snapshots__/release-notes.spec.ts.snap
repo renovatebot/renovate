@@ -249,6 +249,30 @@ Array [
 `;
 
 exports[`workers/pr/changelog/release-notes getReleaseNotesMd() ReleaseNotes Correctness parses adapter-utils 4.33.0 1`] = `
+Array [
+  Object {
+    "headers": Object {
+      "accept": "application/json",
+      "accept-encoding": "gzip, deflate",
+      "host": "gitlab.com",
+      "user-agent": "https://github.com/renovatebot/renovate",
+    },
+    "method": "GET",
+    "url": "https://gitlab.com/api/v4/projects/itentialopensource%2fadapter-utils/repository/tree?per_page=100",
+  },
+  Object {
+    "headers": Object {
+      "accept-encoding": "gzip, deflate",
+      "host": "gitlab.com",
+      "user-agent": "https://github.com/renovatebot/renovate",
+    },
+    "method": "GET",
+    "url": "https://gitlab.com/api/v4/projects/itentialopensource%2fadapter-utils/repository/blobs/abcd/raw",
+  },
+]
+`;
+
+exports[`workers/pr/changelog/release-notes getReleaseNotesMd() ReleaseNotes Correctness parses adapter-utils 4.33.0 2`] = `
 Object {
   "body": "-   add new auth, fix accept header and base path in mock
 
@@ -262,32 +286,42 @@ See merge request itentialopensource/adapter-utils!177
 }
 `;
 
-exports[`workers/pr/changelog/release-notes getReleaseNotesMd() ReleaseNotes Correctness parses adapter-utils 4.33.0 2`] = `
+exports[`workers/pr/changelog/release-notes getReleaseNotesMd() ReleaseNotes Correctness parses yargs 15.2.0 1`] = `
 Array [
   Object {
     "headers": Object {
-      "accept": "application/json",
+      "accept": "application/vnd.github.v3+json",
       "accept-encoding": "gzip, deflate",
-      "host": "gitlab.com",
+      "host": "api.github.com",
       "user-agent": "https://github.com/renovatebot/renovate",
     },
     "method": "GET",
-    "url": "https://gitlab.com/api/v4/projects/itentialopensource/adapter-utils/repository/tree/",
+    "url": "https://api.github.com/repos/yargs/yargs",
   },
   Object {
     "headers": Object {
-      "accept": "application/json",
+      "accept": "application/vnd.github.v3+json",
       "accept-encoding": "gzip, deflate",
-      "host": "gitlab.com",
+      "host": "api.github.com",
       "user-agent": "https://github.com/renovatebot/renovate",
     },
     "method": "GET",
-    "url": "https://gitlab.com/api/v4/projects/itentialopensource/adapter-utils/repository/files/CHANGELOG.md?ref=master",
+    "url": "https://api.github.com/repos/yargs/yargs/git/trees/main",
+  },
+  Object {
+    "headers": Object {
+      "accept": "application/vnd.github.v3+json",
+      "accept-encoding": "gzip, deflate",
+      "host": "api.github.com",
+      "user-agent": "https://github.com/renovatebot/renovate",
+    },
+    "method": "GET",
+    "url": "https://api.github.com/repos/yargs/yargs/git/blobs/abcd",
   },
 ]
 `;
 
-exports[`workers/pr/changelog/release-notes getReleaseNotesMd() ReleaseNotes Correctness parses yargs 15.2.0 1`] = `
+exports[`workers/pr/changelog/release-notes getReleaseNotesMd() ReleaseNotes Correctness parses yargs 15.2.0 2`] = `
 Object {
   "body": "##### ⚠ BREAKING CHANGES
 
@@ -317,7 +351,7 @@ Object {
 }
 `;
 
-exports[`workers/pr/changelog/release-notes getReleaseNotesMd() ReleaseNotes Correctness parses yargs 15.2.0 2`] = `
+exports[`workers/pr/changelog/release-notes getReleaseNotesMd() ReleaseNotes Correctness parses yargs 15.3.0 1`] = `
 Array [
   Object {
     "headers": Object {
@@ -327,7 +361,7 @@ Array [
       "user-agent": "https://github.com/renovatebot/renovate",
     },
     "method": "GET",
-    "url": "https://api.github.com/repos/yargs/yargs/contents/",
+    "url": "https://api.github.com/repos/yargs/yargs",
   },
   Object {
     "headers": Object {
@@ -337,12 +371,22 @@ Array [
       "user-agent": "https://github.com/renovatebot/renovate",
     },
     "method": "GET",
-    "url": "https://api.github.com/repos/yargs/yargs/contents/CHANGELOG.md",
+    "url": "https://api.github.com/repos/yargs/yargs/git/trees/main",
+  },
+  Object {
+    "headers": Object {
+      "accept": "application/vnd.github.v3+json",
+      "accept-encoding": "gzip, deflate",
+      "host": "api.github.com",
+      "user-agent": "https://github.com/renovatebot/renovate",
+    },
+    "method": "GET",
+    "url": "https://api.github.com/repos/yargs/yargs/git/blobs/abcd",
   },
 ]
 `;
 
-exports[`workers/pr/changelog/release-notes getReleaseNotesMd() ReleaseNotes Correctness parses yargs 15.3.0 1`] = `
+exports[`workers/pr/changelog/release-notes getReleaseNotesMd() ReleaseNotes Correctness parses yargs 15.3.0 2`] = `
 Object {
   "body": "##### Features
 
@@ -357,31 +401,6 @@ Object {
 }
 `;
 
-exports[`workers/pr/changelog/release-notes getReleaseNotesMd() ReleaseNotes Correctness parses yargs 15.3.0 2`] = `
-Array [
-  Object {
-    "headers": Object {
-      "accept": "application/vnd.github.v3+json",
-      "accept-encoding": "gzip, deflate",
-      "host": "api.github.com",
-      "user-agent": "https://github.com/renovatebot/renovate",
-    },
-    "method": "GET",
-    "url": "https://api.github.com/repos/yargs/yargs/contents/",
-  },
-  Object {
-    "headers": Object {
-      "accept": "application/vnd.github.v3+json",
-      "accept-encoding": "gzip, deflate",
-      "host": "api.github.com",
-      "user-agent": "https://github.com/renovatebot/renovate",
-    },
-    "method": "GET",
-    "url": "https://api.github.com/repos/yargs/yargs/contents/CHANGELOG.md",
-  },
-]
-`;
-
 exports[`workers/pr/changelog/release-notes getReleaseNotesMd() handles bad markdown 1`] = `
 Array [
   Object {
@@ -392,7 +411,7 @@ Array [
       "user-agent": "https://github.com/renovatebot/renovate",
     },
     "method": "GET",
-    "url": "https://api.github.com/repos/some/repository2/contents/",
+    "url": "https://api.github.com/repos/some/repository2",
   },
   Object {
     "headers": Object {
@@ -402,7 +421,17 @@ Array [
       "user-agent": "https://github.com/renovatebot/renovate",
     },
     "method": "GET",
-    "url": "https://api.github.com/repos/some/repository2/contents/CHANGELOG.md",
+    "url": "https://api.github.com/repos/some/repository2/git/trees/master",
+  },
+  Object {
+    "headers": Object {
+      "accept": "application/vnd.github.v3+json",
+      "accept-encoding": "gzip, deflate",
+      "host": "api.github.com",
+      "user-agent": "https://github.com/renovatebot/renovate",
+    },
+    "method": "GET",
+    "url": "https://api.github.com/repos/some/repository2/git/blobs/abcd",
   },
 ]
 `;
@@ -417,7 +446,17 @@ Array [
       "user-agent": "https://github.com/renovatebot/renovate",
     },
     "method": "GET",
-    "url": "https://api.github.com/repos/chalk/contents/",
+    "url": "https://api.github.com/repos/chalk",
+  },
+  Object {
+    "headers": Object {
+      "accept": "application/vnd.github.v3+json",
+      "accept-encoding": "gzip, deflate",
+      "host": "api.github.com",
+      "user-agent": "https://github.com/renovatebot/renovate",
+    },
+    "method": "GET",
+    "url": "https://api.github.com/repos/chalk/git/trees/master",
   },
 ]
 `;
@@ -432,7 +471,7 @@ Array [
       "user-agent": "https://github.com/renovatebot/renovate",
     },
     "method": "GET",
-    "url": "https://api.github.com/repos/some/repository1/contents/",
+    "url": "https://api.github.com/repos/some/repository1",
   },
   Object {
     "headers": Object {
@@ -442,7 +481,17 @@ Array [
       "user-agent": "https://github.com/renovatebot/renovate",
     },
     "method": "GET",
-    "url": "https://api.github.com/repos/some/repository1/contents/CHANGELOG.md",
+    "url": "https://api.github.com/repos/some/repository1/git/trees/master",
+  },
+  Object {
+    "headers": Object {
+      "accept": "application/vnd.github.v3+json",
+      "accept-encoding": "gzip, deflate",
+      "host": "api.github.com",
+      "user-agent": "https://github.com/renovatebot/renovate",
+    },
+    "method": "GET",
+    "url": "https://api.github.com/repos/some/repository1/git/blobs/abcd",
   },
 ]
 `;
@@ -487,7 +536,7 @@ Array [
       "user-agent": "https://github.com/renovatebot/renovate",
     },
     "method": "GET",
-    "url": "https://api.github.com/repos/angular/angular.js/contents/",
+    "url": "https://api.github.com/repos/angular/angular.js",
   },
   Object {
     "headers": Object {
@@ -497,12 +546,46 @@ Array [
       "user-agent": "https://github.com/renovatebot/renovate",
     },
     "method": "GET",
-    "url": "https://api.github.com/repos/angular/angular.js/contents/CHANGELOG.md",
+    "url": "https://api.github.com/repos/angular/angular.js/git/trees/master",
+  },
+  Object {
+    "headers": Object {
+      "accept": "application/vnd.github.v3+json",
+      "accept-encoding": "gzip, deflate",
+      "host": "api.github.com",
+      "user-agent": "https://github.com/renovatebot/renovate",
+    },
+    "method": "GET",
+    "url": "https://api.github.com/repos/angular/angular.js/git/blobs/abcd",
   },
 ]
 `;
 
 exports[`workers/pr/changelog/release-notes getReleaseNotesMd() parses gitlab.com/gitlab-org/gitter/webapp 1`] = `
+Array [
+  Object {
+    "headers": Object {
+      "accept": "application/json",
+      "accept-encoding": "gzip, deflate",
+      "host": "api.gitlab.com",
+      "user-agent": "https://github.com/renovatebot/renovate",
+    },
+    "method": "GET",
+    "url": "https://api.gitlab.com/projects/gitlab-org%2fgitter%2fwebapp/repository/tree?per_page=100",
+  },
+  Object {
+    "headers": Object {
+      "accept-encoding": "gzip, deflate",
+      "host": "api.gitlab.com",
+      "user-agent": "https://github.com/renovatebot/renovate",
+    },
+    "method": "GET",
+    "url": "https://api.gitlab.com/projects/gitlab-org%2fgitter%2fwebapp/repository/blobs/abcd/raw",
+  },
+]
+`;
+
+exports[`workers/pr/changelog/release-notes getReleaseNotesMd() parses gitlab.com/gitlab-org/gitter/webapp 2`] = `
 Object {
   "body": "-   Removing markup from a part of the French translation, <https://gitlab.com/gitlab-org/gitter/webapp/-/merge_requests/1878>
 -   Fix typo documentation -> documentation, <https://gitlab.com/gitlab-org/gitter/webapp/-/merge_requests/1880>
@@ -518,32 +601,42 @@ Object {
 }
 `;
 
-exports[`workers/pr/changelog/release-notes getReleaseNotesMd() parses gitlab.com/gitlab-org/gitter/webapp 2`] = `
+exports[`workers/pr/changelog/release-notes getReleaseNotesMd() parses jest 1`] = `
 Array [
   Object {
     "headers": Object {
-      "accept": "application/json",
+      "accept": "application/vnd.github.v3+json",
       "accept-encoding": "gzip, deflate",
-      "host": "api.gitlab.com",
+      "host": "api.github.com",
       "user-agent": "https://github.com/renovatebot/renovate",
     },
     "method": "GET",
-    "url": "https://api.gitlab.com/projects/gitlab-org/gitter/webapp/repository/tree/",
+    "url": "https://api.github.com/repos/facebook/jest",
   },
   Object {
     "headers": Object {
-      "accept": "application/json",
+      "accept": "application/vnd.github.v3+json",
       "accept-encoding": "gzip, deflate",
-      "host": "api.gitlab.com",
+      "host": "api.github.com",
       "user-agent": "https://github.com/renovatebot/renovate",
     },
     "method": "GET",
-    "url": "https://api.gitlab.com/projects/gitlab-org/gitter/webapp/repository/files/CHANGELOG.md?ref=master",
+    "url": "https://api.github.com/repos/facebook/jest/git/trees/master",
+  },
+  Object {
+    "headers": Object {
+      "accept": "application/vnd.github.v3+json",
+      "accept-encoding": "gzip, deflate",
+      "host": "api.github.com",
+      "user-agent": "https://github.com/renovatebot/renovate",
+    },
+    "method": "GET",
+    "url": "https://api.github.com/repos/facebook/jest/git/blobs/abcd",
   },
 ]
 `;
 
-exports[`workers/pr/changelog/release-notes getReleaseNotesMd() parses jest 1`] = `
+exports[`workers/pr/changelog/release-notes getReleaseNotesMd() parses jest 2`] = `
 Object {
   "body": "##### Fixes
 
@@ -735,7 +828,7 @@ Object {
 }
 `;
 
-exports[`workers/pr/changelog/release-notes getReleaseNotesMd() parses jest 2`] = `
+exports[`workers/pr/changelog/release-notes getReleaseNotesMd() parses js-yaml 1`] = `
 Array [
   Object {
     "headers": Object {
@@ -745,7 +838,7 @@ Array [
       "user-agent": "https://github.com/renovatebot/renovate",
     },
     "method": "GET",
-    "url": "https://api.github.com/repos/facebook/jest/contents/",
+    "url": "https://api.github.com/repos/nodeca/js-yaml",
   },
   Object {
     "headers": Object {
@@ -755,41 +848,26 @@ Array [
       "user-agent": "https://github.com/renovatebot/renovate",
     },
     "method": "GET",
-    "url": "https://api.github.com/repos/facebook/jest/contents/CHANGELOG.md",
+    "url": "https://api.github.com/repos/nodeca/js-yaml/git/trees/master",
+  },
+  Object {
+    "headers": Object {
+      "accept": "application/vnd.github.v3+json",
+      "accept-encoding": "gzip, deflate",
+      "host": "api.github.com",
+      "user-agent": "https://github.com/renovatebot/renovate",
+    },
+    "method": "GET",
+    "url": "https://api.github.com/repos/nodeca/js-yaml/git/blobs/abcd",
   },
 ]
 `;
 
-exports[`workers/pr/changelog/release-notes getReleaseNotesMd() parses js-yaml 1`] = `
+exports[`workers/pr/changelog/release-notes getReleaseNotesMd() parses js-yaml 2`] = `
 Object {
   "body": "-   Fix \`condenseFlow\` output (quote keys for sure, instead of spaces), [#371](https://github.com/nodeca/js-yaml/issues/371), [#370](https://github.com/nodeca/js-yaml/issues/370).
 -   Dump astrals as codepoints instead of surrogate pair, [#368](https://github.com/nodeca/js-yaml/issues/368).
 ",
   "url": "https://github.com/nodeca/js-yaml/blob/master/CHANGELOG.md#3100--2017-09-10",
 }
-`;
-
-exports[`workers/pr/changelog/release-notes getReleaseNotesMd() parses js-yaml 2`] = `
-Array [
-  Object {
-    "headers": Object {
-      "accept": "application/vnd.github.v3+json",
-      "accept-encoding": "gzip, deflate",
-      "host": "api.github.com",
-      "user-agent": "https://github.com/renovatebot/renovate",
-    },
-    "method": "GET",
-    "url": "https://api.github.com/repos/nodeca/js-yaml/contents/",
-  },
-  Object {
-    "headers": Object {
-      "accept": "application/vnd.github.v3+json",
-      "accept-encoding": "gzip, deflate",
-      "host": "api.github.com",
-      "user-agent": "https://github.com/renovatebot/renovate",
-    },
-    "method": "GET",
-    "url": "https://api.github.com/repos/nodeca/js-yaml/contents/CHANGELOG.md",
-  },
-]
 `;

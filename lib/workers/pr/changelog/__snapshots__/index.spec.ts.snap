@@ -73,7 +73,7 @@ Array [
       "user-agent": "https://github.com/renovatebot/renovate",
     },
     "method": "GET",
-    "url": "https://api.github.com/repos/chalk/chalk/contents/",
+    "url": "https://api.github.com/repos/chalk/chalk",
   },
   Object {
     "headers": Object {
@@ -95,7 +95,7 @@ Array [
       "user-agent": "https://github.com/renovatebot/renovate",
     },
     "method": "GET",
-    "url": "https://api.github.com/repos/chalk/chalk/contents/",
+    "url": "https://api.github.com/repos/chalk/chalk",
   },
   Object {
     "headers": Object {
@@ -117,7 +117,7 @@ Array [
       "user-agent": "https://github.com/renovatebot/renovate",
     },
     "method": "GET",
-    "url": "https://api.github.com/repos/chalk/chalk/contents/",
+    "url": "https://api.github.com/repos/chalk/chalk",
   },
   Object {
     "headers": Object {
@@ -139,7 +139,7 @@ Array [
       "user-agent": "https://github.com/renovatebot/renovate",
     },
     "method": "GET",
-    "url": "https://api.github.com/repos/chalk/chalk/contents/",
+    "url": "https://api.github.com/repos/chalk/chalk",
   },
   Object {
     "headers": Object {
@@ -228,7 +228,18 @@ Array [
       "user-agent": "https://github.com/renovatebot/renovate",
     },
     "method": "GET",
-    "url": "https://github-enterprise.example.com/api/v3/repos/chalk/chalk/contents/",
+    "url": "https://github-enterprise.example.com/api/v3/repos/chalk/chalk",
+  },
+  Object {
+    "headers": Object {
+      "accept": "application/vnd.github.v3+json",
+      "accept-encoding": "gzip, deflate",
+      "authorization": "token abc",
+      "host": "github-enterprise.example.com",
+      "user-agent": "https://github.com/renovatebot/renovate",
+    },
+    "method": "GET",
+    "url": "https://github-enterprise.example.com/api/v3/repos/chalk/chalk/git/trees/master",
   },
   Object {
     "headers": Object {
@@ -250,7 +261,18 @@ Array [
       "user-agent": "https://github.com/renovatebot/renovate",
     },
     "method": "GET",
-    "url": "https://github-enterprise.example.com/api/v3/repos/chalk/chalk/contents/",
+    "url": "https://github-enterprise.example.com/api/v3/repos/chalk/chalk",
+  },
+  Object {
+    "headers": Object {
+      "accept": "application/vnd.github.v3+json",
+      "accept-encoding": "gzip, deflate",
+      "authorization": "token abc",
+      "host": "github-enterprise.example.com",
+      "user-agent": "https://github.com/renovatebot/renovate",
+    },
+    "method": "GET",
+    "url": "https://github-enterprise.example.com/api/v3/repos/chalk/chalk/git/trees/master",
   },
   Object {
     "headers": Object {
@@ -272,7 +294,18 @@ Array [
       "user-agent": "https://github.com/renovatebot/renovate",
     },
     "method": "GET",
-    "url": "https://github-enterprise.example.com/api/v3/repos/chalk/chalk/contents/",
+    "url": "https://github-enterprise.example.com/api/v3/repos/chalk/chalk",
+  },
+  Object {
+    "headers": Object {
+      "accept": "application/vnd.github.v3+json",
+      "accept-encoding": "gzip, deflate",
+      "authorization": "token abc",
+      "host": "github-enterprise.example.com",
+      "user-agent": "https://github.com/renovatebot/renovate",
+    },
+    "method": "GET",
+    "url": "https://github-enterprise.example.com/api/v3/repos/chalk/chalk/git/trees/master",
   },
   Object {
     "headers": Object {
@@ -294,7 +327,18 @@ Array [
       "user-agent": "https://github.com/renovatebot/renovate",
     },
     "method": "GET",
-    "url": "https://github-enterprise.example.com/api/v3/repos/chalk/chalk/contents/",
+    "url": "https://github-enterprise.example.com/api/v3/repos/chalk/chalk",
+  },
+  Object {
+    "headers": Object {
+      "accept": "application/vnd.github.v3+json",
+      "accept-encoding": "gzip, deflate",
+      "authorization": "token abc",
+      "host": "github-enterprise.example.com",
+      "user-agent": "https://github.com/renovatebot/renovate",
+    },
+    "method": "GET",
+    "url": "https://github-enterprise.example.com/api/v3/repos/chalk/chalk/git/trees/master",
   },
   Object {
     "headers": Object {
@@ -383,7 +427,18 @@ Array [
       "user-agent": "https://github.com/renovatebot/renovate",
     },
     "method": "GET",
-    "url": "https://api.github.com/repos/chalk/chalk/contents/",
+    "url": "https://api.github.com/repos/chalk/chalk",
+  },
+  Object {
+    "headers": Object {
+      "accept": "application/vnd.github.v3+json",
+      "accept-encoding": "gzip, deflate",
+      "authorization": "token abc",
+      "host": "api.github.com",
+      "user-agent": "https://github.com/renovatebot/renovate",
+    },
+    "method": "GET",
+    "url": "https://api.github.com/repos/chalk/chalk/git/trees/master",
   },
   Object {
     "headers": Object {
@@ -405,7 +460,18 @@ Array [
       "user-agent": "https://github.com/renovatebot/renovate",
     },
     "method": "GET",
-    "url": "https://api.github.com/repos/chalk/chalk/contents/",
+    "url": "https://api.github.com/repos/chalk/chalk",
+  },
+  Object {
+    "headers": Object {
+      "accept": "application/vnd.github.v3+json",
+      "accept-encoding": "gzip, deflate",
+      "authorization": "token abc",
+      "host": "api.github.com",
+      "user-agent": "https://github.com/renovatebot/renovate",
+    },
+    "method": "GET",
+    "url": "https://api.github.com/repos/chalk/chalk/git/trees/master",
   },
   Object {
     "headers": Object {
@@ -427,7 +493,18 @@ Array [
       "user-agent": "https://github.com/renovatebot/renovate",
     },
     "method": "GET",
-    "url": "https://api.github.com/repos/chalk/chalk/contents/",
+    "url": "https://api.github.com/repos/chalk/chalk",
+  },
+  Object {
+    "headers": Object {
+      "accept": "application/vnd.github.v3+json",
+      "accept-encoding": "gzip, deflate",
+      "authorization": "token abc",
+      "host": "api.github.com",
+      "user-agent": "https://github.com/renovatebot/renovate",
+    },
+    "method": "GET",
+    "url": "https://api.github.com/repos/chalk/chalk/git/trees/master",
   },
   Object {
     "headers": Object {
@@ -449,7 +526,18 @@ Array [
       "user-agent": "https://github.com/renovatebot/renovate",
     },
     "method": "GET",
-    "url": "https://api.github.com/repos/chalk/chalk/contents/",
+    "url": "https://api.github.com/repos/chalk/chalk",
+  },
+  Object {
+    "headers": Object {
+      "accept": "application/vnd.github.v3+json",
+      "accept-encoding": "gzip, deflate",
+      "authorization": "token abc",
+      "host": "api.github.com",
+      "user-agent": "https://github.com/renovatebot/renovate",
+    },
+    "method": "GET",
+    "url": "https://api.github.com/repos/chalk/chalk/git/trees/master",
   },
   Object {
     "headers": Object {
@@ -538,7 +626,18 @@ Array [
       "user-agent": "https://github.com/renovatebot/renovate",
     },
     "method": "GET",
-    "url": "https://github-enterprise.example.com/api/v3/repos/chalk/chalk/contents/",
+    "url": "https://github-enterprise.example.com/api/v3/repos/chalk/chalk",
+  },
+  Object {
+    "headers": Object {
+      "accept": "application/vnd.github.v3+json",
+      "accept-encoding": "gzip, deflate",
+      "authorization": "token abc",
+      "host": "github-enterprise.example.com",
+      "user-agent": "https://github.com/renovatebot/renovate",
+    },
+    "method": "GET",
+    "url": "https://github-enterprise.example.com/api/v3/repos/chalk/chalk/git/trees/master",
   },
   Object {
     "headers": Object {
@@ -560,7 +659,18 @@ Array [
       "user-agent": "https://github.com/renovatebot/renovate",
     },
     "method": "GET",
-    "url": "https://github-enterprise.example.com/api/v3/repos/chalk/chalk/contents/",
+    "url": "https://github-enterprise.example.com/api/v3/repos/chalk/chalk",
+  },
+  Object {
+    "headers": Object {
+      "accept": "application/vnd.github.v3+json",
+      "accept-encoding": "gzip, deflate",
+      "authorization": "token abc",
+      "host": "github-enterprise.example.com",
+      "user-agent": "https://github.com/renovatebot/renovate",
+    },
+    "method": "GET",
+    "url": "https://github-enterprise.example.com/api/v3/repos/chalk/chalk/git/trees/master",
   },
   Object {
     "headers": Object {
@@ -582,7 +692,18 @@ Array [
       "user-agent": "https://github.com/renovatebot/renovate",
     },
     "method": "GET",
-    "url": "https://github-enterprise.example.com/api/v3/repos/chalk/chalk/contents/",
+    "url": "https://github-enterprise.example.com/api/v3/repos/chalk/chalk",
+  },
+  Object {
+    "headers": Object {
+      "accept": "application/vnd.github.v3+json",
+      "accept-encoding": "gzip, deflate",
+      "authorization": "token abc",
+      "host": "github-enterprise.example.com",
+      "user-agent": "https://github.com/renovatebot/renovate",
+    },
+    "method": "GET",
+    "url": "https://github-enterprise.example.com/api/v3/repos/chalk/chalk/git/trees/master",
   },
   Object {
     "headers": Object {
@@ -604,7 +725,18 @@ Array [
       "user-agent": "https://github.com/renovatebot/renovate",
     },
     "method": "GET",
-    "url": "https://github-enterprise.example.com/api/v3/repos/chalk/chalk/contents/",
+    "url": "https://github-enterprise.example.com/api/v3/repos/chalk/chalk",
+  },
+  Object {
+    "headers": Object {
+      "accept": "application/vnd.github.v3+json",
+      "accept-encoding": "gzip, deflate",
+      "authorization": "token abc",
+      "host": "github-enterprise.example.com",
+      "user-agent": "https://github.com/renovatebot/renovate",
+    },
+    "method": "GET",
+    "url": "https://github-enterprise.example.com/api/v3/repos/chalk/chalk/git/trees/master",
   },
   Object {
     "headers": Object {
@@ -748,7 +880,18 @@ Array [
       "user-agent": "https://github.com/renovatebot/renovate",
     },
     "method": "GET",
-    "url": "https://api.github.com/repos/chalk/chalk/contents/",
+    "url": "https://api.github.com/repos/chalk/chalk",
+  },
+  Object {
+    "headers": Object {
+      "accept": "application/vnd.github.v3+json",
+      "accept-encoding": "gzip, deflate",
+      "authorization": "token abc",
+      "host": "api.github.com",
+      "user-agent": "https://github.com/renovatebot/renovate",
+    },
+    "method": "GET",
+    "url": "https://api.github.com/repos/chalk/chalk/git/trees/master",
   },
   Object {
     "headers": Object {
@@ -770,7 +913,18 @@ Array [
       "user-agent": "https://github.com/renovatebot/renovate",
     },
     "method": "GET",
-    "url": "https://api.github.com/repos/chalk/chalk/contents/",
+    "url": "https://api.github.com/repos/chalk/chalk",
+  },
+  Object {
+    "headers": Object {
+      "accept": "application/vnd.github.v3+json",
+      "accept-encoding": "gzip, deflate",
+      "authorization": "token abc",
+      "host": "api.github.com",
+      "user-agent": "https://github.com/renovatebot/renovate",
+    },
+    "method": "GET",
+    "url": "https://api.github.com/repos/chalk/chalk/git/trees/master",
   },
   Object {
     "headers": Object {
@@ -792,7 +946,18 @@ Array [
       "user-agent": "https://github.com/renovatebot/renovate",
     },
     "method": "GET",
-    "url": "https://api.github.com/repos/chalk/chalk/contents/",
+    "url": "https://api.github.com/repos/chalk/chalk",
+  },
+  Object {
+    "headers": Object {
+      "accept": "application/vnd.github.v3+json",
+      "accept-encoding": "gzip, deflate",
+      "authorization": "token abc",
+      "host": "api.github.com",
+      "user-agent": "https://github.com/renovatebot/renovate",
+    },
+    "method": "GET",
+    "url": "https://api.github.com/repos/chalk/chalk/git/trees/master",
   },
   Object {
     "headers": Object {
@@ -814,7 +979,18 @@ Array [
       "user-agent": "https://github.com/renovatebot/renovate",
     },
     "method": "GET",
-    "url": "https://api.github.com/repos/chalk/chalk/contents/",
+    "url": "https://api.github.com/repos/chalk/chalk",
+  },
+  Object {
+    "headers": Object {
+      "accept": "application/vnd.github.v3+json",
+      "accept-encoding": "gzip, deflate",
+      "authorization": "token abc",
+      "host": "api.github.com",
+      "user-agent": "https://github.com/renovatebot/renovate",
+    },
+    "method": "GET",
+    "url": "https://api.github.com/repos/chalk/chalk/git/trees/master",
   },
   Object {
     "headers": Object {
