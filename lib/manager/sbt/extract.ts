@@ -6,7 +6,7 @@ import { get } from '../../versioning';
 import * as mavenVersioning from '../../versioning/maven';
 import { PackageDependency, PackageFile } from '../common';
 
-const isComment = (str: string): boolean => /^\s*\/\//.test(str);
+const stripComment = (str: string): string => str.replace(/(^|\s+)\/\/.*$/, '');
 
 const isSingleLineDep = (str: string): boolean =>
   /^\s*(libraryDependencies|dependencyOverrides)\s*\+=\s*/.test(str);
@@ -206,7 +206,7 @@ function parseSbtLine(
 
   let dep: PackageDependency = null;
   let scalaVersionVariable: string = null;
-  if (!isComment(line)) {
+  if (line !== '') {
     if (isScalaVersion(line)) {
       isMultiDeps = false;
       const rawScalaVersion = getScalaVersion(line);
@@ -296,7 +296,7 @@ export function extractPackageFile(content: string): PackageFile {
   if (!content) {
     return null;
   }
-  const lines = content.split(/\n/);
+  const lines = content.split(/\n/).map(stripComment);
   return lines.reduce(parseSbtLine, {
     registryUrls: [MAVEN_REPO],
     deps: [],
