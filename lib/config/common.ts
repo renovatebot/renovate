@@ -165,7 +165,7 @@ export interface RenovateConfig
   prHourlyLimit?: number;
   repoIsOnboarded?: boolean;
 
-  updateType?: UpdateType;
+  matchUpdateTypes?: UpdateType[];
 
   warnings?: ValidationMessage[];
   vulnerabilityAlerts?: RenovateSharedConfig;

@@ -6,19 +6,19 @@ describe('workers/repository/process/sort', () => {
     it('sorts based on updateType and prTitle', () => {
       const branches = [
         {
-          updateType: 'major' as UpdateType,
+          matchUpdateTypes: ['major' as UpdateType],
           prTitle: 'some major update',
         },
         {
-          updateType: 'pin' as UpdateType,
+          matchUpdateTypes: ['pin' as UpdateType],
           prTitle: 'some pin',
         },
         {
-          updateType: 'pin' as UpdateType,
+          matchUpdateTypes: ['pin' as UpdateType],
           prTitle: 'some other pin',
         },
         {
-          updateType: 'minor' as UpdateType,
+          matchUpdateTypes: ['minor' as UpdateType],
           prTitle: 'a minor update',
         },
       ];
@@ -28,22 +28,22 @@ describe('workers/repository/process/sort', () => {
     it('sorts based on prPriority', () => {
       const branches = [
         {
-          updateType: 'major' as UpdateType,
+          matchUpdateTypes: ['major' as UpdateType],
           prTitle: 'some major update',
           prPriority: 1,
         },
         {
-          updateType: 'pin' as UpdateType,
+          matchUpdateTypes: ['pin' as UpdateType],
           prTitle: 'some pin',
           prPriority: -1,
         },
         {
-          updateType: 'pin' as UpdateType,
+          matchUpdateTypes: ['pin' as UpdateType],
           prTitle: 'some other pin',
           prPriority: 0,
         },
         {
-          updateType: 'minor' as UpdateType,
+          matchUpdateTypes: ['minor' as UpdateType],
           prTitle: 'a minor update',
           prPriority: -1,
         },

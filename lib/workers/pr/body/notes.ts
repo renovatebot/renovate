@@ -32,7 +32,7 @@ export function getPrExtraNotes(config: BranchConfig): string {
     );
   }
 
-  if (config.updateType === 'lockFileMaintenance') {
+  if (config.matchUpdateTypes?.includes('lockFileMaintenance')) {
     res += emojify(
       ':wrench: This Pull Request updates lock files to use the latest dependency versions.\n\n'
     );

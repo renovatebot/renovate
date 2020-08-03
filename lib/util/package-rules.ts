@@ -14,7 +14,7 @@ export interface Config extends Record<string, any> {
   currentValue?: string;
   fromVersion?: string;
   lockedVersion?: string;
-  updateType?: UpdateType;
+  matchUpdateTypes?: UpdateType[];
   isBump?: boolean;
   sourceUrl?: string;
   language?: string;
@@ -34,7 +34,7 @@ function matchesRule(inputConfig: Config, packageRule: PackageRule): boolean {
     currentValue,
     fromVersion,
     lockedVersion,
-    updateType,
+    matchUpdateTypes,
     isBump,
     sourceUrl,
     language,
@@ -129,7 +129,9 @@ function matchesRule(inputConfig: Config, packageRule: PackageRule): boolean {
   }
   if (updateTypes.length) {
     const isMatch =
-      updateTypes.includes(updateType) ||
+      matchUpdateTypes?.some((updateInputType) =>
+        updateTypes.includes(updateInputType)
+      ) ||
       (isBump && updateTypes.includes('bump'));
     if (!isMatch) {
       return false;

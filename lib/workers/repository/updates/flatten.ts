@@ -51,10 +51,12 @@ export async function flattenUpdates(
               updateConfig.packageRules
             );
             // apply major/minor/patch/pin/digest
-            updateConfig = mergeChildConfig(
-              updateConfig,
-              updateConfig[updateConfig.updateType]
-            );
+            updateConfig.matchUpdateTypes?.forEach((updateType) => {
+              updateConfig = mergeChildConfig(
+                updateConfig,
+                updateConfig[updateType]
+              );
+            });
             for (const updateType of updateTypes) {
               delete updateConfig[updateType];
             }
@@ -93,7 +95,7 @@ export async function flattenUpdates(
           packageFileConfig,
           packageFileConfig.lockFileMaintenance
         );
-        lockFileConfig.updateType = 'lockFileMaintenance';
+        lockFileConfig.matchUpdateTypes = ['lockFileMaintenance'];
         lockFileConfig = applyPackageRules(lockFileConfig);
         // Apply lockFileMaintenance and packageRules again
         lockFileConfig = mergeChildConfig(

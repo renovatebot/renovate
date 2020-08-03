@@ -102,7 +102,7 @@ describe('manager/bazel/update', () => {
         currentDigest: 'dec09d789f3dba190787f8b4454c7d3c936fed9e',
         newDigest: 'aaa09d789f3dba190787f8b4454c7d3c936fe123',
         newValue: 'v1.0.3',
-        updateType: 'major' as UpdateType,
+        matchUpdateTypes: ['major' as UpdateType],
       };
       const res = await updateDependency({
         fileContent: content,

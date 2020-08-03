@@ -335,7 +335,7 @@ describe('applyPackageRules()', () => {
     const dep = {
       depType: 'dependencies',
       depName: 'a',
-      updateType: 'patch' as UpdateType,
+      matchUpdateTypes: ['patch' as UpdateType],
     };
     const res = applyPackageRules({ ...config, ...dep });
     expect(res.x).toBe(1);
@@ -355,7 +355,7 @@ describe('applyPackageRules()', () => {
     const dep = {
       depType: 'dependencies',
       depName: 'a',
-      updateType: 'patch' as UpdateType,
+      matchUpdateTypes: ['patch' as UpdateType],
       sourceUrl: 'https://github.com/renovatebot/presets',
     };
     const res = applyPackageRules({ ...config, ...dep });
@@ -376,7 +376,7 @@ describe('applyPackageRules()', () => {
     const dep = {
       depType: 'dependencies',
       depName: 'a',
-      updateType: 'patch' as UpdateType,
+      matchUpdateTypes: ['patch' as UpdateType],
       sourceUrl: 'https://github.com/vuejs/vue',
     };
     const res = applyPackageRules({ ...config, ...dep });
@@ -397,7 +397,7 @@ describe('applyPackageRules()', () => {
     const dep = {
       depType: 'dependencies',
       depName: 'a',
-      updateType: 'patch' as UpdateType,
+      matchUpdateTypes: ['patch' as UpdateType],
     };
     const res = applyPackageRules({ ...config, ...dep });
     expect(res.x).toBeUndefined();

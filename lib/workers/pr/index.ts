@@ -338,7 +338,7 @@ export async function ensurePr(
     }
     logger.debug({ branch: branchName, prTitle }, `Creating PR`);
     // istanbul ignore if
-    if (config.updateType === 'rollback') {
+    if (config.matchUpdateTypes?.includes('rollback')) {
       logger.info('Creating Rollback PR');
     }
     let pr: Pr;

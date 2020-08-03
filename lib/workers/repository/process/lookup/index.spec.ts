@@ -203,8 +203,8 @@ describe('workers/repository/process/lookup', () => {
       const res = await lookup.lookupUpdates(config);
       expect(res.updates).toMatchSnapshot();
       expect(res.updates).toHaveLength(2);
-      expect(res.updates[0].updateType).not.toEqual('patch');
-      expect(res.updates[1].updateType).not.toEqual('patch');
+      expect(res.updates[0].matchUpdateTypes).not.toContain('patch');
+      expect(res.updates[1].matchUpdateTypes).not.toContain('patch');
     });
     it('returns patch update if automerging patch', async () => {
       config.patch = {
@@ -217,7 +217,7 @@ describe('workers/repository/process/lookup', () => {
       nock('https://registry.npmjs.org').get('/q').reply(200, qJson);
       const res = await lookup.lookupUpdates(config);
       expect(res.updates).toMatchSnapshot();
-      expect(res.updates[0].updateType).toEqual('patch');
+      expect(res.updates[0].matchUpdateTypes).toContain('patch');
     });
     it('returns minor update if automerging both patch and minor', async () => {
       config.patch = {
@@ -233,7 +233,7 @@ describe('workers/repository/process/lookup', () => {
       nock('https://registry.npmjs.org').get('/q').reply(200, qJson);
       const res = await lookup.lookupUpdates(config);
       expect(res.updates).toMatchSnapshot();
-      expect(res.updates[0].updateType).toEqual('minor');
+      expect(res.updates[0].matchUpdateTypes).toContain('minor');
     });
     it('returns patch update if separateMinorPatch', async () => {
       config.separateMinorPatch = true;

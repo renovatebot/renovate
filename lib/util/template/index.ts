@@ -77,7 +77,7 @@ export const allowedFields = {
   releaseNotes: 'A ChangeLogNotes object for the release',
   repository: 'The current repository',
   toVersion: 'The new version in the upgrade, e.g. "3.1.0"',
-  updateType: 'One of digest, pin, rollback, patch, minor, major',
+  matchUpdateTypes: 'An array of digest, pin, rollback, patch, minor or major',
   upgrades: 'An array of upgrade objects in the branch',
   url: 'The url of the release notes',
   version: 'The version number of the changelog',

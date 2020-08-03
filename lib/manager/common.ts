@@ -145,7 +145,7 @@ export interface LookupUpdate {
   newVersion?: string;
   semanticCommitType?: string;
   toVersion?: string;
-  updateType?: UpdateType;
+  matchUpdateTypes?: UpdateType[];
   sourceUrl?: string;
 }
 
@@ -193,7 +193,7 @@ export interface Upgrade<T = Record<string, any>>
   packageFile?: string;
   rangeStrategy?: RangeStrategy;
   toVersion?: string;
-  updateType?: UpdateType;
+  matchUpdateTypes?: UpdateType[];
   version?: string;
   isLockFileMaintenance?: boolean;
 }

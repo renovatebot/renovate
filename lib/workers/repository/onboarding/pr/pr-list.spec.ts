@@ -22,7 +22,7 @@ describe('workers/repository/onboarding/pr/pr-list', () => {
           branchName: 'renovate/lock-file-maintenance',
           upgrades: [
             {
-              updateType: 'lockFileMaintenance',
+              matchUpdateTypes: ['lockFileMaintenance'],
             } as never,
           ],
         },
@@ -38,14 +38,14 @@ describe('workers/repository/onboarding/pr/pr-list', () => {
           branchName: 'renovate/pin-dependencies',
           upgrades: [
             {
-              updateType: 'pin',
+              matchUpdateTypes: ['pin'],
               sourceUrl: 'https://a',
               depName: 'a',
               depType: 'devDependencies',
               newValue: '1.1.0',
             },
             {
-              updateType: 'pin',
+              matchUpdateTypes: ['pin'],
               depName: 'b',
               newValue: '1.5.3',
             },

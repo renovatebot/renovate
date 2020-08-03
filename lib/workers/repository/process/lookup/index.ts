@@ -112,9 +112,9 @@ function getFromVersion(
 
 function getBucket(config: LookupUpdateConfig, update: LookupUpdate): string {
   const { separateMajorMinor, separateMultipleMajor } = config;
-  const { updateType, newMajor } = update;
-  if (updateType === 'lockfileUpdate') {
-    return updateType;
+  const { matchUpdateTypes, newMajor } = update;
+  if (matchUpdateTypes?.includes('lockfileUpdate')) {
+    return 'lockfileUpdate';
   }
   if (
     !separateMajorMinor ||
@@ -123,10 +123,11 @@ function getBucket(config: LookupUpdateConfig, update: LookupUpdate): string {
   ) {
     return 'latest';
   }
-  if (separateMultipleMajor && updateType === 'major') {
+  if (separateMultipleMajor && matchUpdateTypes?.includes('major')) {
     return `major-${newMajor}`;
   }
-  return updateType;
+  const [result] = matchUpdateTypes;
+  return result;
 }
 
 export async function lookupUpdates(
@@ -249,7 +250,7 @@ export async function lookupUpdates(
       !version.isSingleVersion(currentValue)
     ) {
       res.updates.push({
-        updateType: 'pin',
+        matchUpdateTypes: ['pin'],
         isPin: true,
         newValue: version.getNewValue({
           currentValue,
@@ -308,7 +309,7 @@ export async function lookupUpdates(
           );
           continue; // eslint-disable-line no-continue
         }
-        update.updateType = 'lockfileUpdate';
+        update.matchUpdateTypes = ['lockfileUpdate'];
         update.fromVersion = lockedVersion;
         update.displayFrom = lockedVersion;
         update.displayTo = toVersion;
@@ -316,8 +317,9 @@ export async function lookupUpdates(
       }
       update.newMajor = version.getMajor(toVersion);
       update.newMinor = version.getMinor(toVersion);
-      update.updateType =
-        update.updateType || getType(config, update.fromVersion, toVersion);
+      update.matchUpdateTypes = update.matchUpdateTypes || [
+        getType(config, update.fromVersion, toVersion),
+      ];
       update.isSingleVersion =
         update.isSingleVersion || !!version.isSingleVersion(update.newValue);
       if (!version.isVersion(update.newValue)) {
@@ -372,23 +374,25 @@ export async function lookupUpdates(
       if (!config.digestOneAndOnly || !res.updates.length) {
         // digest update
         res.updates.push({
-          updateType: 'digest',
+          matchUpdateTypes: ['digest'],
           newValue: config.currentValue,
         });
       }
     } else if (config.pinDigests) {
       // Create a pin only if one doesn't already exists
-      if (!res.updates.some((update) => update.updateType === 'pin')) {
+      if (
+        !res.updates.some((update) => update.matchUpdateTypes.includes('pin'))
+      ) {
         // pin digest
         res.updates.push({
-          updateType: 'pin',
+          matchUpdateTypes: ['pin'],
           newValue: config.currentValue,
         });
       }
     } else if (config.datasource === datasourceGitSubmodules.id) {
       const dependency = clone(await getPkgReleases(config));
       res.updates.push({
-        updateType: 'digest',
+        matchUpdateTypes: ['digest'],
         newValue: dependency.releases[0].version,
       });
     }
@@ -415,18 +419,23 @@ export async function lookupUpdates(
     }
   }
   for (const update of res.updates) {
-    const { updateType, fromVersion, toVersion } = update;
-    if (['bump', 'lockfileUpdate'].includes(updateType)) {
-      update[updateType === 'bump' ? 'isBump' : 'isLockfileUpdate'] = true;
+    const { matchUpdateTypes, fromVersion, toVersion } = update;
+    if (
+      matchUpdateTypes?.includes('bump') ||
+      matchUpdateTypes?.includes('lockfileUpdate')
+    ) {
+      update[
+        matchUpdateTypes.includes('bump') ? 'isBump' : 'isLockfileUpdate'
+      ] = true;
       if (version.getMajor(toVersion) > version.getMajor(fromVersion)) {
-        update.updateType = 'major';
+        update.matchUpdateTypes = ['major'];
       } else if (
         config.separateMinorPatch &&
         version.getMinor(toVersion) === version.getMinor(fromVersion)
       ) {
-        update.updateType = 'patch';
+        update.matchUpdateTypes = ['patch'];
       } else {
-        update.updateType = 'minor';
+        update.matchUpdateTypes = ['minor'];
       }
     }
   }
@@ -442,9 +451,12 @@ export async function lookupUpdates(
         update.isLockfileUpdate ||
         (update.newDigest && !update.newDigest.startsWith(config.currentDigest))
     );
-  if (res.updates.some((update) => update.updateType === 'pin')) {
+  if (res.updates.some((update) => update.matchUpdateTypes?.includes('pin'))) {
     for (const update of res.updates) {
-      if (update.updateType !== 'pin' && update.updateType !== 'rollback') {
+      if (
+        !update.matchUpdateTypes?.includes('pin') &&
+        !update.matchUpdateTypes?.includes('rollback')
+      ) {
         update.blockedByPin = true;
       }
     }

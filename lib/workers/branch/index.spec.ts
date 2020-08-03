@@ -122,7 +122,7 @@ describe('workers/branch', () => {
     it('skips branch if closed major PR found', async () => {
       schedule.isScheduledNow.mockReturnValueOnce(false);
       git.branchExists.mockResolvedValueOnce(true);
-      config.updateType = 'major';
+      config.matchUpdateTypes = ['major'];
       checkExisting.prAlreadyExisted.mockResolvedValueOnce({
         number: 13,
         state: PR_STATE_CLOSED,
@@ -133,7 +133,7 @@ describe('workers/branch', () => {
     it('skips branch if closed digest PR found', async () => {
       schedule.isScheduledNow.mockReturnValueOnce(false);
       git.branchExists.mockResolvedValueOnce(true);
-      config.updateType = 'digest';
+      config.matchUpdateTypes = ['digest'];
       checkExisting.prAlreadyExisted.mockResolvedValueOnce({
         number: 13,
         state: PR_STATE_CLOSED,
@@ -558,7 +558,7 @@ describe('workers/branch', () => {
         await branchWorker.processBranch({
           ...config,
           dryRun: true,
-          updateType: 'lockFileMaintenance',
+          matchUpdateTypes: ['lockFileMaintenance'],
           reuseExistingBranch: false,
           updatedArtifacts: [{ name: '|delete|', contents: 'dummy' }],
         })
@@ -617,7 +617,7 @@ describe('workers/branch', () => {
       expect(
         await branchWorker.processBranch({
           ...config,
-          updateType: 'lockFileMaintenance',
+          matchUpdateTypes: ['lockFileMaintenance'],
           reuseExistingBranch: false,
           updatedArtifacts: [{ name: '|delete|', contents: 'dummy' }],
         })

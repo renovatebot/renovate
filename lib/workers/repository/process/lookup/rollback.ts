@@ -55,7 +55,7 @@ export function getRollbackUpdate(
     toVersion,
   });
   return {
-    updateType: 'rollback',
+    matchUpdateTypes: ['rollback'],
     branchName:
       '{{{branchPrefix}}}rollback-{{{depNameSanitized}}}-{{{newMajor}}}.x',
     commitMessageAction: 'Roll back',

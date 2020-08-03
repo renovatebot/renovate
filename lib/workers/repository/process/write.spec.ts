@@ -21,7 +21,7 @@ describe('workers/repository/write', () => {
   describe('writeUpdates()', () => {
     it('skips branches blocked by pin', async () => {
       const branches: BranchConfig[] = [
-        { updateType: 'pin' },
+        { matchUpdateTypes: ['pin'] },
         { blockedByPin: true },
         {},
       ] as never;

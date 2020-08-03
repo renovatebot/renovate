@@ -1675,7 +1675,8 @@ const options: RenovateOptions[] = [
     default: {
       Package: '{{{depNameLinked}}}',
       Type: '{{{depType}}}',
-      Update: '{{{updateType}}}',
+      Update:
+        '{{#each matchUpdateTypes}}{{{this}}}{{#unless @last}}, {{/unless}}{{/each}}',
       'Current value': '{{{currentValue}}}',
       'New value': '{{{newValue}}}',
       Change: '`{{{displayFrom}}}` -> `{{{displayTo}}}`',

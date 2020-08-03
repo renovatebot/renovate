@@ -107,7 +107,10 @@ export async function updateDependency({
       newDef = upgrade.managerData.def
         .replace(/(tag\s*=\s*)"[^"]+"/, `$1"${upgrade.newValue}"`)
         .replace(/(commit\s*=\s*)"[^"]+"/, `$1"${upgrade.newDigest}"`);
-      if (upgrade.currentDigest && upgrade.updateType !== 'digest') {
+      if (
+        upgrade.currentDigest &&
+        !upgrade.matchUpdateTypes?.includes('digest')
+      ) {
         newDef = newDef.replace(
           /(commit\s*=\s*)"[^"]+".*?\n/,
           `$1"${upgrade.newDigest}",  # ${upgrade.newValue}\n`

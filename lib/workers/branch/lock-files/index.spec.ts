@@ -103,7 +103,7 @@ describe('manager/npm/post-update', () => {
       expect(res.updatedArtifacts).toHaveLength(0);
     });
     it('returns no error and empty lockfiles if lock file maintenance exists', async () => {
-      config.updateType = 'lockFileMaintenance';
+      config.matchUpdateTypes = ['lockFileMaintenance'];
       config.reuseExistingBranch = true;
       git.branchExists.mockResolvedValueOnce(true);
       const res = await getAdditionalFiles(config, { npm: [{}] });

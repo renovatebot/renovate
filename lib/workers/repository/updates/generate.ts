@@ -143,7 +143,7 @@ export function generateBranchConfig(
     }
 
     if (
-      upgrade.updateType !== 'lockFileMaintenance' &&
+      !upgrade.matchUpdateTypes?.includes('lockFileMaintenance') &&
       upgrade.displayFrom.length * upgrade.displayTo.length === 0
     ) {
       logger.debug({ config: upgrade }, 'empty displayFrom/displayTo');
@@ -242,14 +242,18 @@ export function generateBranchConfig(
     upgrade.prTitle += upgrade.hasBaseBranches ? ' ({{baseBranch}})' : '';
     if (upgrade.isGroup) {
       upgrade.prTitle +=
-        upgrade.updateType === 'major' && upgrade.separateMajorMinor
+        upgrade.matchUpdateTypes?.includes('major') &&
+        upgrade.separateMajorMinor
           ? ' (major)'
           : '';
       upgrade.prTitle +=
-        upgrade.updateType === 'minor' && upgrade.separateMinorPatch
+        upgrade.matchUpdateTypes?.includes('minor') &&
+        upgrade.separateMinorPatch
           ? ' (minor)'
           : '';
-      upgrade.prTitle += upgrade.updateType === 'patch' ? ' (patch)' : '';
+      upgrade.prTitle += upgrade.matchUpdateTypes?.includes('patch')
+        ? ' (patch)'
+        : '';
     }
     // Compile again to allow for nested templates
     upgrade.prTitle = template.compile(upgrade.prTitle, upgrade);
@@ -296,7 +300,7 @@ export function generateBranchConfig(
     (upgrade) => upgrade.canBeUnpublished
   );
   config.reuseLockFiles = config.upgrades.every(
-    (upgrade) => upgrade.updateType !== 'lockFileMaintenance'
+    (upgrade) => !upgrade.matchUpdateTypes?.includes('lockFileMaintenance')
   );
   config.dependencyDashboardApproval = config.upgrades.some(
     (upgrade) => upgrade.dependencyDashboardApproval
