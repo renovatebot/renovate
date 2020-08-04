@@ -256,6 +256,7 @@ export async function initRepo({
     }
     // Use default branch as PR target unless later overridden.
     config.defaultBranch = repo.defaultBranchRef.name;
+    config.defaultBranchSha = repo.defaultBranchRef.target.oid;
     // Base branch may be configured but defaultBranch is always fixed
     logger.debug(`${repository} default branch = ${config.defaultBranch}`);
     // GitHub allows administrators to block certain types of merge, so we need to check it
@@ -308,8 +309,6 @@ export async function initRepo({
   if (forkMode) {
     logger.debug('Bot is in forkMode');
     config.forkToken = forkToken;
-    // Save parent SHA then delete
-    const parentSha = repo.defaultBranchRef.target.oid;
     // save parent name then delete
     config.parentRepo = config.repository;
     config.repository = null;
@@ -343,7 +342,10 @@ export async function initRepo({
       );
       // Need to update base branch
       logger.debug(
-        { defaultBranch: config.defaultBranch, parentSha },
+        {
+          defaultBranch: config.defaultBranch,
+          defaultBranchSha: config.defaultBranchSha,
+        },
         'Setting defaultBranch ref in fork'
       );
       // This is a lovely "hack" by GitHub that lets us force update our fork's master
@@ -353,7 +355,7 @@ export async function initRepo({
           `repos/${config.repository}/git/refs/heads/${config.defaultBranch}`,
           {
             body: {
-              sha: parentSha,
+              sha: config.defaultBranchSha,
               force: true,
             },
             token: forkToken || opts.token,
@@ -407,6 +409,7 @@ export async function initRepo({
   });
   const repoConfig: RepoResult = {
     defaultBranch: config.defaultBranch,
+    defaultBranchSha: config.defaultBranchSha,
     isFork: repo.isFork === true,
   };
   return repoConfig;
