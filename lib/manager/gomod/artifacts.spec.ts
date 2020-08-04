@@ -73,6 +73,7 @@ describe('.updateArtifacts()', () => {
   });
   it('returns null if unchanged', async () => {
     fs.readFile.mockResolvedValueOnce('Current go.sum' as any);
+    fs.readFile.mockResolvedValueOnce(null as any); // vendor modules filename
     const execSnapshots = mockExecAll(exec);
     git.getRepoStatus.mockResolvedValueOnce({
       modified: [],
@@ -103,6 +104,32 @@ describe('.updateArtifacts()', () => {
         config,
       })
     ).not.toBeNull();
+    expect(execSnapshots).toMatchSnapshot();
+  });
+  it('supports vendor directory update', async () => {
+    fs.readFile.mockResolvedValueOnce('Current go.sum' as any);
+    fs.readFile.mockResolvedValueOnce('modules.txt content' as any); // vendor modules filename
+    const execSnapshots = mockExecAll(exec);
+    git.getRepoStatus.mockResolvedValueOnce({
+      modified: ['go.sum', 'vendor/github.com/foo/foo/go.mod'],
+      not_added: ['vendor/github.com/bar/bar/go.mod'],
+      deleted: ['vendor/github.com/baz/baz/go.mod'],
+    } as StatusResult);
+    fs.readFile.mockResolvedValueOnce('New go.sum' as any);
+    fs.readFile.mockResolvedValueOnce('Foo go.sum' as any);
+    fs.readFile.mockResolvedValueOnce('Bar go.sum' as any);
+    fs.readFile.mockResolvedValueOnce('New go.mod' as any);
+    expect(
+      await gomod.updateArtifacts({
+        packageFileName: 'go.mod',
+        updatedDeps: [],
+        newPackageFileContent: gomod1,
+        config: {
+          ...config,
+          postUpdateOptions: ['gomodTidy'],
+        },
+      })
+    ).toMatchSnapshot();
     expect(execSnapshots).toMatchSnapshot();
   });
   it('supports docker mode without credentials', async () => {
@@ -190,6 +217,7 @@ describe('.updateArtifacts()', () => {
     fs.readFile.mockResolvedValueOnce('New go.sum 1' as any);
     fs.readFile.mockResolvedValueOnce('New go.sum 2' as any);
     fs.readFile.mockResolvedValueOnce('New go.sum 3' as any);
+    fs.readFile.mockResolvedValueOnce('New go.mod' as any);
     try {
       global.appMode = true;
       expect(

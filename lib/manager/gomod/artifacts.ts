@@ -47,7 +47,7 @@ export async function updateArtifacts({
 
   const vendorDir = join(dirname(goModFileName), 'vendor/');
   const vendorModulesFileName = join(vendorDir, 'modules.txt');
-  const useVendor = !!(await readLocalFile(vendorModulesFileName));
+  const useVendor = (await readLocalFile(vendorModulesFileName)) !== null;
 
   try {
     const massagedGoMod = newGoModContent.replace(
@@ -80,24 +80,17 @@ export async function updateArtifacts({
     logger.debug({ cmd, args }, 'go get command included');
     const execCommands = [`${cmd} ${args}`];
 
-    if (
-      config.postUpdateOptions &&
-      config.postUpdateOptions.includes('gomodTidy')
-    ) {
+    if (config.postUpdateOptions?.includes('gomodTidy')) {
       args = 'mod tidy';
       logger.debug({ cmd, args }, 'go mod tidy command included');
       execCommands.push(`${cmd} ${args}`);
     }
 
-    // istanbul ignore if
     if (useVendor) {
       args = 'mod vendor';
       logger.debug({ cmd, args }, 'go mod vendor command included');
       execCommands.push(`${cmd} ${args}`);
-      if (
-        config.postUpdateOptions &&
-        config.postUpdateOptions.includes('gomodTidy')
-      ) {
+      if (config.postUpdateOptions?.includes('gomodTidy')) {
         args = 'mod tidy';
         if (cmd.includes('.insteadOf')) {
           args += '"';
@@ -109,7 +102,7 @@ export async function updateArtifacts({
 
     await exec(execCommands, execOptions);
 
-    let status = await getRepoStatus();
+    const status = await getRepoStatus();
     if (!status.modified.includes(sumFileName)) {
       return null;
     }
@@ -124,9 +117,7 @@ export async function updateArtifacts({
       },
     ];
 
-    // istanbul ignore if
     if (useVendor) {
-      status = await getRepoStatus();
       for (const f of status.modified.concat(status.not_added)) {
         if (f.startsWith(vendorDir)) {
           res.push({

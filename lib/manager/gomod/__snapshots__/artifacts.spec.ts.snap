@@ -206,3 +206,127 @@ Array [
   },
 ]
 `;
+
+exports[`.updateArtifacts() supports vendor directory update 1`] = `
+Array [
+  Object {
+    "file": Object {
+      "contents": "New go.sum",
+      "name": "go.sum",
+    },
+  },
+  Object {
+    "file": Object {
+      "contents": "Foo go.sum",
+      "name": "vendor/github.com/foo/foo/go.mod",
+    },
+  },
+  Object {
+    "file": Object {
+      "contents": "Bar go.sum",
+      "name": "vendor/github.com/bar/bar/go.mod",
+    },
+  },
+  Object {
+    "file": Object {
+      "contents": "vendor/github.com/baz/baz/go.mod",
+      "name": "|delete|",
+    },
+  },
+  Object {
+    "file": Object {
+      "contents": "New go.mod",
+      "name": "go.mod",
+    },
+  },
+]
+`;
+
+exports[`.updateArtifacts() supports vendor directory update 2`] = `
+Array [
+  Object {
+    "cmd": "go get -d ./...",
+    "options": Object {
+      "cwd": "/tmp/github/some/repo",
+      "encoding": "utf-8",
+      "env": Object {
+        "CGO_ENABLED": "1",
+        "GONOSUMDB": "1",
+        "GOPATH": "/tmp/renovate/cache/others/go",
+        "GOPROXY": "proxy.example.com",
+        "HOME": "/home/user",
+        "HTTPS_PROXY": "https://example.com",
+        "HTTP_PROXY": "http://example.com",
+        "LANG": "en_US.UTF-8",
+        "LC_ALL": "en_US",
+        "NO_PROXY": "localhost",
+        "PATH": "/tmp/path",
+      },
+      "timeout": 900000,
+    },
+  },
+  Object {
+    "cmd": "go mod tidy",
+    "options": Object {
+      "cwd": "/tmp/github/some/repo",
+      "encoding": "utf-8",
+      "env": Object {
+        "CGO_ENABLED": "1",
+        "GONOSUMDB": "1",
+        "GOPATH": "/tmp/renovate/cache/others/go",
+        "GOPROXY": "proxy.example.com",
+        "HOME": "/home/user",
+        "HTTPS_PROXY": "https://example.com",
+        "HTTP_PROXY": "http://example.com",
+        "LANG": "en_US.UTF-8",
+        "LC_ALL": "en_US",
+        "NO_PROXY": "localhost",
+        "PATH": "/tmp/path",
+      },
+      "timeout": 900000,
+    },
+  },
+  Object {
+    "cmd": "go mod vendor",
+    "options": Object {
+      "cwd": "/tmp/github/some/repo",
+      "encoding": "utf-8",
+      "env": Object {
+        "CGO_ENABLED": "1",
+        "GONOSUMDB": "1",
+        "GOPATH": "/tmp/renovate/cache/others/go",
+        "GOPROXY": "proxy.example.com",
+        "HOME": "/home/user",
+        "HTTPS_PROXY": "https://example.com",
+        "HTTP_PROXY": "http://example.com",
+        "LANG": "en_US.UTF-8",
+        "LC_ALL": "en_US",
+        "NO_PROXY": "localhost",
+        "PATH": "/tmp/path",
+      },
+      "timeout": 900000,
+    },
+  },
+  Object {
+    "cmd": "go mod tidy",
+    "options": Object {
+      "cwd": "/tmp/github/some/repo",
+      "encoding": "utf-8",
+      "env": Object {
+        "CGO_ENABLED": "1",
+        "GONOSUMDB": "1",
+        "GOPATH": "/tmp/renovate/cache/others/go",
+        "GOPROXY": "proxy.example.com",
+        "HOME": "/home/user",
+        "HTTPS_PROXY": "https://example.com",
+        "HTTP_PROXY": "http://example.com",
+        "LANG": "en_US.UTF-8",
+        "LC_ALL": "en_US",
+        "NO_PROXY": "localhost",
+        "PATH": "/tmp/path",
+      },
+      "timeout": 900000,
+    },
+  },
+]
+`;
