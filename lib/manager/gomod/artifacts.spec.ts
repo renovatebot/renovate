@@ -89,7 +89,7 @@ describe('.updateArtifacts()', () => {
   });
   it('returns updated go.sum', async () => {
     fs.readFile.mockResolvedValueOnce('Current go.sum' as any);
-    fs.readFile.mockResolvedValueOnce(null as any);
+    fs.readFile.mockResolvedValueOnce(null as any); // vendor modules filename
     const execSnapshots = mockExecAll(exec);
     git.getRepoStatus.mockResolvedValueOnce({
       modified: ['go.sum'],
@@ -109,7 +109,7 @@ describe('.updateArtifacts()', () => {
     jest.spyOn(docker, 'removeDanglingContainers').mockResolvedValueOnce();
     await setUtilConfig({ ...config, binarySource: BinarySource.Docker });
     fs.readFile.mockResolvedValueOnce('Current go.sum' as any);
-    fs.readFile.mockResolvedValueOnce(null as any);
+    fs.readFile.mockResolvedValueOnce(null as any); // vendor modules filename
     const execSnapshots = mockExecAll(exec);
     git.getRepoStatus.mockResolvedValueOnce({
       modified: ['go.sum'],
@@ -130,7 +130,7 @@ describe('.updateArtifacts()', () => {
   });
   it('supports global mode', async () => {
     fs.readFile.mockResolvedValueOnce('Current go.sum' as any);
-    fs.readFile.mockResolvedValueOnce(null as any);
+    fs.readFile.mockResolvedValueOnce(null as any); // vendor modules filename
     const execSnapshots = mockExecAll(exec);
     git.getRepoStatus.mockResolvedValueOnce({
       modified: ['go.sum'],
@@ -156,7 +156,7 @@ describe('.updateArtifacts()', () => {
       token: 'some-token',
     });
     fs.readFile.mockResolvedValueOnce('Current go.sum' as any);
-    fs.readFile.mockResolvedValueOnce(null as any);
+    fs.readFile.mockResolvedValueOnce(null as any); // vendor modules filename
     const execSnapshots = mockExecAll(exec);
     git.getRepoStatus.mockResolvedValueOnce({
       modified: ['go.sum'],
@@ -182,13 +182,12 @@ describe('.updateArtifacts()', () => {
       token: 'some-token',
     });
     fs.readFile.mockResolvedValueOnce('Current go.sum' as any);
-    fs.readFile.mockResolvedValueOnce(null as any);
+    fs.readFile.mockResolvedValueOnce(null as any); // vendor modules filename
     const execSnapshots = mockExecAll(exec);
     git.getRepoStatus.mockResolvedValueOnce({
       modified: ['go.sum'],
     } as StatusResult);
     fs.readFile.mockResolvedValueOnce('New go.sum 1' as any);
-    fs.readFile.mockResolvedValueOnce(null as any); // vendor modules filename
     fs.readFile.mockResolvedValueOnce('New go.sum 2' as any);
     fs.readFile.mockResolvedValueOnce('New go.sum 3' as any);
     try {
@@ -213,7 +212,7 @@ describe('.updateArtifacts()', () => {
   it('catches errors', async () => {
     const execSnapshots = mockExecAll(exec);
     fs.readFile.mockResolvedValueOnce('Current go.sum' as any);
-    fs.readFile.mockResolvedValueOnce(null as any);
+    fs.readFile.mockResolvedValueOnce(null as any); // vendor modules filename
     fs.outputFile.mockImplementationOnce(() => {
       throw new Error('This update totally doesnt work');
     });
