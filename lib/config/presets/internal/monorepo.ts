@@ -52,6 +52,7 @@ const repoGroups = {
   chromely: 'https://github.com/chromelyapps/Chromely',
   clarity: 'https://github.com/vmware/clarity',
   commitlint: 'https://github.com/conventional-changelog/commitlint',
+  docusaurus: 'https://github.com/facebook/docusaurus',
   dropwizard: 'https://github.com/dropwizard/dropwizard',
   emotion: 'https://github.com/emotion-js/emotion',
   expo: 'https://github.com/expo/expo',
