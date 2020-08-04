@@ -92,9 +92,6 @@ export async function updateArtifacts({
       execCommands.push(`${cmd} ${args}`);
       if (config.postUpdateOptions?.includes('gomodTidy')) {
         args = 'mod tidy';
-        if (cmd.includes('.insteadOf')) {
-          args += '"';
-        }
         logger.debug({ cmd, args }, 'go mod tidy command included');
         execCommands.push(`${cmd} ${args}`);
       }
