@@ -4571,6 +4571,7 @@ Array [
 exports[`platform/github initRepo should fork when forkMode 1`] = `
 Object {
   "defaultBranch": "master",
+  "defaultBranchSha": "1234",
   "isFork": false,
 }
 `;
@@ -4640,6 +4641,7 @@ Array [
 exports[`platform/github initRepo should merge 1`] = `
 Object {
   "defaultBranch": "master",
+  "defaultBranchSha": "1234",
   "isFork": false,
 }
 `;
@@ -4687,6 +4689,7 @@ Array [
 exports[`platform/github initRepo should not guess at merge 1`] = `
 Object {
   "defaultBranch": "master",
+  "defaultBranchSha": "1234",
   "isFork": false,
 }
 `;
@@ -4734,6 +4737,7 @@ Array [
 exports[`platform/github initRepo should rebase 1`] = `
 Object {
   "defaultBranch": "master",
+  "defaultBranchSha": "1234",
   "isFork": false,
 }
 `;
@@ -4781,6 +4785,7 @@ Array [
 exports[`platform/github initRepo should squash 1`] = `
 Object {
   "defaultBranch": "master",
+  "defaultBranchSha": "1234",
   "isFork": false,
 }
 `;
@@ -4959,6 +4964,7 @@ Array [
 exports[`platform/github initRepo should update fork when forkMode 1`] = `
 Object {
   "defaultBranch": "master",
+  "defaultBranchSha": "1234",
   "isFork": false,
 }
 `;
@@ -5042,6 +5048,7 @@ Array [
 exports[`platform/github initRepo should use different header in app mode 1`] = `
 Object {
   "defaultBranch": "master",
+  "defaultBranchSha": "1234",
   "isFork": false,
 }
 `;

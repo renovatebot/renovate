@@ -20,6 +20,7 @@ export interface PlatformResult {
 
 export interface RepoResult {
   defaultBranch: string;
+  defaultBranchSha?: string;
   isFork: boolean;
 }
 
