@@ -107,13 +107,17 @@ describe('.updateArtifacts()', () => {
     expect(execSnapshots).toMatchSnapshot();
   });
   it('supports vendor directory update', async () => {
+    const foo = join('vendor/github.com/foo/foo/go.mod');
+    const bar = join('vendor/github.com/bar/bar/go.mod');
+    const baz = join('vendor/github.com/baz/baz/go.mod');
+
     fs.readFile.mockResolvedValueOnce('Current go.sum' as any);
     fs.readFile.mockResolvedValueOnce('modules.txt content' as any); // vendor modules filename
     const execSnapshots = mockExecAll(exec);
     git.getRepoStatus.mockResolvedValueOnce({
-      modified: ['go.sum', 'vendor/github.com/foo/foo/go.mod'],
-      not_added: ['vendor/github.com/bar/bar/go.mod'],
-      deleted: ['vendor/github.com/baz/baz/go.mod'],
+      modified: ['go.sum', foo],
+      not_added: [bar],
+      deleted: [baz],
     } as StatusResult);
     fs.readFile.mockResolvedValueOnce('New go.sum' as any);
     fs.readFile.mockResolvedValueOnce('Foo go.sum' as any);
@@ -131,9 +135,9 @@ describe('.updateArtifacts()', () => {
     expect(res).not.toBeNull();
     expect(res?.map(({ file }) => file)).toEqual([
       { contents: 'New go.sum', name: 'go.sum' },
-      { contents: 'Foo go.sum', name: 'vendor/github.com/foo/foo/go.mod' },
-      { contents: 'Bar go.sum', name: 'vendor/github.com/bar/bar/go.mod' },
-      { contents: 'vendor/github.com/baz/baz/go.mod', name: '|delete|' },
+      { contents: 'Foo go.sum', name: foo },
+      { contents: 'Bar go.sum', name: bar },
+      { contents: baz, name: '|delete|' },
       { contents: 'New go.mod', name: 'go.mod' },
     ]);
     expect(execSnapshots).toMatchSnapshot();
