@@ -210,41 +210,6 @@ Array [
 exports[`.updateArtifacts() supports vendor directory update 1`] = `
 Array [
   Object {
-    "file": Object {
-      "contents": "New go.sum",
-      "name": "go.sum",
-    },
-  },
-  Object {
-    "file": Object {
-      "contents": "Foo go.sum",
-      "name": "vendor/github.com/foo/foo/go.mod",
-    },
-  },
-  Object {
-    "file": Object {
-      "contents": "Bar go.sum",
-      "name": "vendor/github.com/bar/bar/go.mod",
-    },
-  },
-  Object {
-    "file": Object {
-      "contents": "vendor/github.com/baz/baz/go.mod",
-      "name": "|delete|",
-    },
-  },
-  Object {
-    "file": Object {
-      "contents": "New go.mod",
-      "name": "go.mod",
-    },
-  },
-]
-`;
-
-exports[`.updateArtifacts() supports vendor directory update 2`] = `
-Array [
-  Object {
     "cmd": "go get -d ./...",
     "options": Object {
       "cwd": "/tmp/github/some/repo",

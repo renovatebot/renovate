@@ -119,17 +119,23 @@ describe('.updateArtifacts()', () => {
     fs.readFile.mockResolvedValueOnce('Foo go.sum' as any);
     fs.readFile.mockResolvedValueOnce('Bar go.sum' as any);
     fs.readFile.mockResolvedValueOnce('New go.mod' as any);
-    expect(
-      await gomod.updateArtifacts({
-        packageFileName: 'go.mod',
-        updatedDeps: [],
-        newPackageFileContent: gomod1,
-        config: {
-          ...config,
-          postUpdateOptions: ['gomodTidy'],
-        },
-      })
-    ).toMatchSnapshot();
+    const res = await gomod.updateArtifacts({
+      packageFileName: 'go.mod',
+      updatedDeps: [],
+      newPackageFileContent: gomod1,
+      config: {
+        ...config,
+        postUpdateOptions: ['gomodTidy'],
+      },
+    });
+    expect(res).not.toBeNull();
+    expect(res?.map(({ file }) => file)).toEqual([
+      { contents: 'New go.sum', name: 'go.sum' },
+      { contents: 'Foo go.sum', name: 'vendor/github.com/foo/foo/go.mod' },
+      { contents: 'Bar go.sum', name: 'vendor/github.com/bar/bar/go.mod' },
+      { contents: 'vendor/github.com/baz/baz/go.mod', name: '|delete|' },
+      { contents: 'New go.mod', name: 'go.mod' },
+    ]);
     expect(execSnapshots).toMatchSnapshot();
   });
   it('supports docker mode without credentials', async () => {
