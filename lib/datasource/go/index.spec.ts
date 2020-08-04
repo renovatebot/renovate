@@ -2,11 +2,14 @@ import { ReleaseResult, getPkgReleases } from '..';
 import * as httpMock from '../../../test/httpMock';
 import { mocked, partial } from '../../../test/util';
 import * as _github from '../github-tags';
+import * as _gitlab from '../gitlab-tags';
 import { id as datasource, getDigest } from '.';
 
 jest.mock('../github-tags');
+jest.mock('../gitlab-tags');
 
 const github = mocked(_github);
+const gitlab = mocked(_gitlab);
 
 const res1 = `<!DOCTYPE html>
 <html>
@@ -98,6 +101,29 @@ describe('datasource/go', () => {
         .get('/x/text?go-get=1')
         .reply(200, res1);
       github.getReleases.mockResolvedValueOnce({
+        releases: [{ version: 'v1.0.0' }, { version: 'v2.0.0' }],
+      });
+      const res = await getPkgReleases({
+        datasource,
+        depName: 'golang.org/x/text',
+      });
+      expect(res).toMatchSnapshot();
+      expect(res).not.toBeNull();
+      expect(res).toBeDefined();
+      expect(httpMock.getTrace()).toMatchSnapshot();
+    });
+    it('support gitlab', async () => {
+      httpMock
+        .scope('https://golang.org/')
+        .get('/x/text?go-get=1')
+        .reply(
+          200,
+          res1.replace(
+            'https://github.com/golang/text/',
+            'https://gitlab.com/golang/text/'
+          )
+        );
+      gitlab.getReleases.mockResolvedValueOnce({
         releases: [{ version: 'v1.0.0' }, { version: 'v2.0.0' }],
       });
       const res = await getPkgReleases({
