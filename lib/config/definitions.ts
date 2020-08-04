@@ -866,7 +866,7 @@ const options: RenovateOptions[] = [
     env: false,
   },
   {
-    name: 'updateTypes',
+    name: 'matchUpdateTypes',
     description:
       'Update types to match against (major, minor, pin, etc). Valid only within `packageRules` object.',
     type: 'array',
@@ -1676,7 +1676,7 @@ const options: RenovateOptions[] = [
       Package: '{{{depNameLinked}}}',
       Type: '{{{depType}}}',
       Update:
-        '{{#each matchUpdateTypes}}{{{this}}}{{#unless @last}}, {{/unless}}{{/each}}',
+        '{{#each updateTypes}}{{{this}}}{{#unless @last}}, {{/unless}}{{/each}}',
       'Current value': '{{{currentValue}}}',
       'New value': '{{{newValue}}}',
       Change: '`{{{displayFrom}}}` -> `{{{displayTo}}}`',

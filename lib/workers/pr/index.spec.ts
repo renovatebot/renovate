@@ -187,7 +187,7 @@ describe('workers/pr', () => {
       config.privateRepo = true;
       config.displayFrom = '1.0.0';
       config.displayTo = '1.1.0';
-      config.matchUpdateTypes = ['minor'];
+      config.updateTypes = ['minor'];
       config.homepage = 'https://dummy.com';
       config.sourceUrl = 'https://github.com/renovateapp/dummy';
       config.sourceDirectory = 'packages/a';
@@ -274,7 +274,7 @@ describe('workers/pr', () => {
           newDigestShort: 'bbbbbbb',
           displayFrom: 'some_old_value',
           displayTo: 'some_new_value',
-          matchUpdateTypes: ['pin'],
+          updateTypes: ['pin'],
         },
         {
           depName: 'c',
@@ -282,11 +282,11 @@ describe('workers/pr', () => {
         },
         {
           depName: 'd',
-          matchUpdateTypes: ['lockFileMaintenance'],
+          updateTypes: ['lockFileMaintenance'],
           prBodyNotes: ['{{#if foo}}'],
         },
       ] as never);
-      config.matchUpdateTypes = ['lockFileMaintenance'];
+      config.updateTypes = ['lockFileMaintenance'];
       config.recreateClosed = true;
       config.rebaseWhen = 'never';
       for (const upgrade of config.upgrades) {
@@ -301,7 +301,7 @@ describe('workers/pr', () => {
       platform.getBranchStatus.mockResolvedValueOnce(BranchStatus.green);
       config.prCreation = 'status-success';
       config.isPin = true;
-      config.matchUpdateTypes = ['pin'];
+      config.updateTypes = ['pin'];
       config.schedule = ['before 5am'];
       config.timezone = 'some timezone';
       config.rebaseWhen = 'behind-base-branch';

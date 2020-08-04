@@ -44,7 +44,7 @@ export function determineLockFileDirs(
   const lernaDirs = [];
 
   for (const upgrade of config.upgrades) {
-    if (upgrade.matchUpdateTypes?.includes('lockFileMaintenance')) {
+    if (upgrade.updateTypes?.includes('lockFileMaintenance')) {
       // Return every directory that contains a lockfile
       if (upgrade.lernaDir && upgrade.npmLock) {
         lernaDirs.push(upgrade.lernaDir);
@@ -64,7 +64,7 @@ export function determineLockFileDirs(
   if (
     config.upgrades.every(
       (upgrade: Upgrade) =>
-        upgrade.matchUpdateTypes?.includes('lockFileMaintenance') ||
+        upgrade.updateTypes?.includes('lockFileMaintenance') ||
         upgrade.isLockfileUpdate
     )
   ) {
@@ -344,7 +344,7 @@ export async function getAdditionalFiles(
   }
   logger.debug('Getting updated lock files');
   if (
-    config.matchUpdateTypes?.includes('lockFileMaintenance') &&
+    config.updateTypes?.includes('lockFileMaintenance') &&
     config.reuseExistingBranch &&
     (await branchExists(config.branchName))
   ) {
@@ -744,7 +744,7 @@ export async function getAdditionalFiles(
               logger.trace('File is unchanged');
             }
           } catch (err) {
-            if (config.matchUpdateTypes?.includes('lockFileMaintenance')) {
+            if (config.updateTypes?.includes('lockFileMaintenance')) {
               logger.debug(
                 { packageFile, lockFilePath },
                 'No lock file found after lerna lockFileMaintenance'

@@ -100,10 +100,10 @@ export async function processBranch(
       if (existingPr.state === PR_STATE_CLOSED) {
         const topic = `Renovate Ignore Notification`;
         let content;
-        if (config.matchUpdateTypes?.includes('major')) {
+        if (config.updateTypes?.includes('major')) {
           content = `As this PR has been closed unmerged, Renovate will ignore this upgrade and you will not receive PRs for *any* future ${config.newMajor}.x releases. However, if you upgrade to ${config.newMajor}.x manually then Renovate will then reenable updates for minor and patch updates automatically.`;
-        } else if (config.matchUpdateTypes?.includes('digest')) {
-          content = `As this PR has been closed unmerged, Renovate will ignore this upgrade matchUpdateTypes and you will not receive PRs for *any* future ${config.depName}:${config.currentValue} digest updates. Digest updates will resume if you update the specified tag at any time.`;
+        } else if (config.updateTypes?.includes('digest')) {
+          content = `As this PR has been closed unmerged, Renovate will ignore this upgrade updateTypes and you will not receive PRs for *any* future ${config.depName}:${config.currentValue} digest updates. Digest updates will resume if you update the specified tag at any time.`;
         } else {
           content = `As this PR has been closed unmerged, Renovate will now ignore this update (${config.newValue}). You will still receive a PR once a newer version is released, so if you wish to permanently ignore this dependency, please add it to the \`ignoreDeps\` array of your renovate config.`;
         }
@@ -222,7 +222,7 @@ export async function processBranch(
     }
 
     if (
-      !config.matchUpdateTypes?.includes('lockFileMaintenance') &&
+      !config.updateTypes?.includes('lockFileMaintenance') &&
       config.unpublishSafe &&
       config.canBeUnpublished &&
       (config.prCreation === 'not-pending' ||

@@ -13,7 +13,7 @@ import { applyPackageRules } from '../../../util/package-rules';
 
 // Return only rules that contain an updateType
 function getUpdateTypeRules(packageRules: PackageRule[]): PackageRule[] {
-  return packageRules.filter((rule) => is.nonEmptyArray(rule.updateTypes));
+  return packageRules.filter((rule) => is.nonEmptyArray(rule.matchUpdateTypes));
 }
 
 export async function flattenUpdates(
@@ -51,7 +51,7 @@ export async function flattenUpdates(
               updateConfig.packageRules
             );
             // apply major/minor/patch/pin/digest
-            updateConfig.matchUpdateTypes?.forEach((updateType) => {
+            updateConfig.updateTypes?.forEach((updateType) => {
               updateConfig = mergeChildConfig(
                 updateConfig,
                 updateConfig[updateType]
@@ -95,7 +95,7 @@ export async function flattenUpdates(
           packageFileConfig,
           packageFileConfig.lockFileMaintenance
         );
-        lockFileConfig.matchUpdateTypes = ['lockFileMaintenance'];
+        lockFileConfig.updateTypes = ['lockFileMaintenance'];
         lockFileConfig = applyPackageRules(lockFileConfig);
         // Apply lockFileMaintenance and packageRules again
         lockFileConfig = mergeChildConfig(

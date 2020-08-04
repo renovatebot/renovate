@@ -34,7 +34,7 @@ export async function getUpdatedPackageFiles(
     packageFileUpdatedDeps[packageFile] =
       packageFileUpdatedDeps[packageFile] || [];
     packageFileUpdatedDeps[packageFile].push(depName);
-    if (upgrade.matchUpdateTypes?.includes('lockFileMaintenance')) {
+    if (upgrade.updateTypes?.includes('lockFileMaintenance')) {
       lockFileMaintenanceFiles.push(packageFile);
     } else {
       let existingContent = updatedFileContents[packageFile];

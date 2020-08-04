@@ -73,7 +73,7 @@ Usually you won't want to automerge _all_ PRs, for example most people would wan
 {
   "packageRules": [
     {
-      "updateTypes": ["minor", "patch", "pin", "digest"],
+      "matchUpdateTypes": ["minor", "patch", "pin", "digest"],
       "automerge": true
     }
   ]
@@ -428,7 +428,7 @@ The `groupName` field allows free text and does not have any semantic interpreta
   "packageRules": [
     {
       "depTypeList": ["devDependencies"],
-      "updateTypes": ["patch", "minor"],
+      "matchUpdateTypes": ["patch", "minor"],
       "groupName": "devDependencies (non-major)"
     }
   ]
@@ -444,7 +444,7 @@ By default, Renovate will "slugify" the groupName to determine the branch name. 
   "packageRules": [
     {
       "depTypeList": ["devDependencies"],
-      "updateTypes": ["patch", "minor"],
+      "matchUpdateTypes": ["patch", "minor"],
       "groupName": "devDependencies (non-major)",
       "groupSlug": "dev-dependencies"
     }
@@ -1056,7 +1056,7 @@ Here's an example of where you use this to group together all packages from the 
 }
 ```
 
-### updateTypes
+### matchUpdateTypes
 
 Use this field to match rules against types of updates. For example to apply a special label for Major updates:
 
@@ -1064,7 +1064,7 @@ Use this field to match rules against types of updates. For example to apply a s
 {
   "packageRules": [
     {
-      "updateTypes": ["major"],
+      "matchUpdateTypes": ["major"],
       "labels": ["UPDATE-MAJOR"]
     }
   ]

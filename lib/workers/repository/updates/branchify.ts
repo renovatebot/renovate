@@ -68,7 +68,7 @@ export async function branchifyUpgrades(
     update.newVersion = update.newVersion || update.newValue;
     const upper = (str: string): string =>
       str.charAt(0).toUpperCase() + str.substr(1);
-    update.matchUpdateTypes?.forEach((updateType) => {
+    update.updateTypes?.forEach((updateType) => {
       update[`is${upper(updateType)}`] = true;
     });
     // Check whether to use a group name
@@ -80,17 +80,14 @@ export async function branchifyUpgrades(
       update.groupSlug = slugify(update.groupSlug || update.groupName, {
         lower: true,
       });
-      if (
-        update.matchUpdateTypes?.includes('major') &&
-        update.separateMajorMinor
-      ) {
+      if (update.updateTypes?.includes('major') && update.separateMajorMinor) {
         if (update.separateMultipleMajor) {
           update.groupSlug = `major-${update.newMajor}-${update.groupSlug}`;
         } else {
           update.groupSlug = `major-${update.groupSlug}`;
         }
       }
-      if (update.matchUpdateTypes?.includes('patch')) {
+      if (update.updateTypes?.includes('patch')) {
         update.groupSlug = `patch-${update.groupSlug}`;
       }
       update.branchTopic = update.group.branchTopic || update.branchTopic;

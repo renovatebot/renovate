@@ -41,7 +41,7 @@ export function updateDependency({
       return null;
     }
     let newLine: string;
-    if (upgrade.matchUpdateTypes?.includes('digest')) {
+    if (upgrade.updateTypes?.includes('digest')) {
       const newDigestRightSized = upgrade.newDigest.substring(
         0,
         upgrade.currentDigest.length
@@ -60,7 +60,7 @@ export function updateDependency({
     } else {
       newLine = lineToChange.replace(updateLineExp, `$1$2${upgrade.newValue}`);
     }
-    if (upgrade.matchUpdateTypes?.includes('major')) {
+    if (upgrade.updateTypes?.includes('major')) {
       logger.debug({ depName }, 'gomod: major update');
       if (depName.startsWith('gopkg.in/')) {
         const oldV = depName.split('.').pop();
@@ -95,10 +95,7 @@ export function updateDependency({
     if (lineToChange.endsWith('+incompatible')) {
       let toAdd = '+incompatible';
 
-      if (
-        upgrade.matchUpdateTypes?.includes('major') &&
-        upgrade.newMajor >= 2
-      ) {
+      if (upgrade.updateTypes?.includes('major') && upgrade.newMajor >= 2) {
         toAdd = '';
       }
       newLine += toAdd;

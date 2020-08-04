@@ -14,7 +14,7 @@ export interface Config extends Record<string, any> {
   currentValue?: string;
   fromVersion?: string;
   lockedVersion?: string;
-  matchUpdateTypes?: UpdateType[];
+  updateTypes?: UpdateType[];
   isBump?: boolean;
   sourceUrl?: string;
   language?: string;
@@ -34,7 +34,7 @@ function matchesRule(inputConfig: Config, packageRule: PackageRule): boolean {
     currentValue,
     fromVersion,
     lockedVersion,
-    matchUpdateTypes,
+    updateTypes,
     isBump,
     sourceUrl,
     language,
@@ -55,7 +55,7 @@ function matchesRule(inputConfig: Config, packageRule: PackageRule): boolean {
     excludePackagePatterns,
     matchCurrentVersion,
     sourceUrlPrefixes,
-    updateTypes,
+    matchUpdateTypes,
   } = packageRule;
   // Setting empty arrays simplifies our logic later
   paths = paths || [];
@@ -70,7 +70,7 @@ function matchesRule(inputConfig: Config, packageRule: PackageRule): boolean {
   excludePackagePatterns = excludePackagePatterns || [];
   sourceUrlPrefixes = sourceUrlPrefixes || [];
   matchCurrentVersion = matchCurrentVersion || null;
-  updateTypes = updateTypes || [];
+  matchUpdateTypes = matchUpdateTypes || [];
   let positiveMatch = false;
   // Massage a positive patterns patch if an exclude one is present
   if (
@@ -127,12 +127,12 @@ function matchesRule(inputConfig: Config, packageRule: PackageRule): boolean {
     }
     positiveMatch = true;
   }
-  if (updateTypes.length) {
+  if (matchUpdateTypes.length) {
     const isMatch =
-      matchUpdateTypes?.some((updateInputType) =>
-        updateTypes.includes(updateInputType)
+      updateTypes?.some((updateInputType) =>
+        matchUpdateTypes.includes(updateInputType)
       ) ||
-      (isBump && updateTypes.includes('bump'));
+      (isBump && matchUpdateTypes.includes('bump'));
     if (!isMatch) {
       return false;
     }

@@ -18,7 +18,7 @@ export const presets: Record<string, Preset> = {
     packageRules: [
       {
         datasources: ['docker'],
-        updateTypes: ['major'],
+        matchUpdateTypes: ['major'],
         enabled: true,
       },
     ],
@@ -28,7 +28,7 @@ export const presets: Record<string, Preset> = {
     packageRules: [
       {
         datasources: ['docker'],
-        updateTypes: ['major'],
+        matchUpdateTypes: ['major'],
         enabled: false,
       },
     ],

@@ -32,10 +32,10 @@ export function getPrList(
     const seen: string[] = [];
     for (const upgrade of branch.upgrades) {
       let text = '';
-      if (upgrade.matchUpdateTypes?.includes('lockFileMaintenance')) {
+      if (upgrade.updateTypes?.includes('lockFileMaintenance')) {
         text += '  - Regenerate lock files to use latest dependency versions';
       } else {
-        if (upgrade.matchUpdateTypes?.includes('pin')) {
+        if (upgrade.updateTypes?.includes('pin')) {
           text += '  - Pin ';
         } else {
           text += '  - Upgrade ';

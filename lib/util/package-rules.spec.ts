@@ -48,7 +48,7 @@ describe('applyPackageRules()', () => {
           packageNames: ['b'],
         },
         {
-          updateTypes: ['bump'],
+          matchUpdateTypes: ['bump'],
         },
         {
           excludePackageNames: ['a'],
@@ -327,7 +327,7 @@ describe('applyPackageRules()', () => {
     const config: TestConfig = {
       packageRules: [
         {
-          updateTypes: ['minor', 'patch'],
+          matchUpdateTypes: ['minor', 'patch'],
           x: 1,
         },
       ],
@@ -335,7 +335,7 @@ describe('applyPackageRules()', () => {
     const dep = {
       depType: 'dependencies',
       depName: 'a',
-      matchUpdateTypes: ['patch' as UpdateType],
+      updateTypes: ['patch' as UpdateType],
     };
     const res = applyPackageRules({ ...config, ...dep });
     expect(res.x).toBe(1);
@@ -355,7 +355,7 @@ describe('applyPackageRules()', () => {
     const dep = {
       depType: 'dependencies',
       depName: 'a',
-      matchUpdateTypes: ['patch' as UpdateType],
+      updateTypes: ['patch' as UpdateType],
       sourceUrl: 'https://github.com/renovatebot/presets',
     };
     const res = applyPackageRules({ ...config, ...dep });
@@ -376,7 +376,7 @@ describe('applyPackageRules()', () => {
     const dep = {
       depType: 'dependencies',
       depName: 'a',
-      matchUpdateTypes: ['patch' as UpdateType],
+      updateTypes: ['patch' as UpdateType],
       sourceUrl: 'https://github.com/vuejs/vue',
     };
     const res = applyPackageRules({ ...config, ...dep });
@@ -397,7 +397,7 @@ describe('applyPackageRules()', () => {
     const dep = {
       depType: 'dependencies',
       depName: 'a',
-      matchUpdateTypes: ['patch' as UpdateType],
+      updateTypes: ['patch' as UpdateType],
     };
     const res = applyPackageRules({ ...config, ...dep });
     expect(res.x).toBeUndefined();

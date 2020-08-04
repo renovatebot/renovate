@@ -7,7 +7,7 @@ Object {
 }
 `;
 
-exports[`config/massage massageConfig massages packageRules updateTypes 1`] = `
+exports[`config/massage massageConfig massages packageRules matchUpdateTypes 1`] = `
 Object {
   "packageRules": Array [
     Object {
@@ -16,22 +16,22 @@ Object {
       ],
     },
     Object {
+      "matchUpdateTypes": Array [
+        "minor",
+      ],
       "packageNames": Array [
         "foo",
       ],
       "semanticCommitType": "feat",
-      "updateTypes": Array [
-        "minor",
-      ],
     },
     Object {
+      "matchUpdateTypes": Array [
+        "patch",
+      ],
       "packageNames": Array [
         "foo",
       ],
       "semanticCommitType": "fix",
-      "updateTypes": Array [
-        "patch",
-      ],
     },
   ],
 }

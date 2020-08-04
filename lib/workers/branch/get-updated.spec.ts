@@ -95,7 +95,7 @@ describe('workers/branch/get-updated', () => {
     it('handles lockFileMaintenance', async () => {
       config.upgrades.push({
         manager: 'composer',
-        matchUpdateTypes: ['lockFileMaintenance'],
+        updateTypes: ['lockFileMaintenance'],
       } as never);
       composer.updateArtifacts.mockResolvedValueOnce([
         {
@@ -111,7 +111,7 @@ describe('workers/branch/get-updated', () => {
     it('handles lockFileMaintenance error', async () => {
       config.upgrades.push({
         manager: 'composer',
-        matchUpdateTypes: ['lockFileMaintenance'],
+        updateTypes: ['lockFileMaintenance'],
       } as never);
       composer.updateArtifacts.mockResolvedValueOnce([
         {

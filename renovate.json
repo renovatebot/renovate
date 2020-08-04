@@ -32,7 +32,7 @@
       "automerge": false
     },
     {
-      "updateTypes": ["major"],
+      "matchUpdateTypes": ["major"],
       "masterIssueApproval": true
     },
     {

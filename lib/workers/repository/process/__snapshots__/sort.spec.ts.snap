@@ -3,32 +3,32 @@
 exports[`workers/repository/process/sort sortBranches() sorts based on prPriority 1`] = `
 Array [
   Object {
-    "matchUpdateTypes": Array [
-      "major",
-    ],
     "prPriority": 1,
     "prTitle": "some major update",
+    "updateTypes": Array [
+      "major",
+    ],
   },
   Object {
-    "matchUpdateTypes": Array [
-      "pin",
-    ],
     "prPriority": 0,
     "prTitle": "some other pin",
-  },
-  Object {
-    "matchUpdateTypes": Array [
+    "updateTypes": Array [
       "pin",
     ],
-    "prPriority": -1,
-    "prTitle": "some pin",
   },
   Object {
-    "matchUpdateTypes": Array [
-      "minor",
+    "prPriority": -1,
+    "prTitle": "some pin",
+    "updateTypes": Array [
+      "pin",
     ],
+  },
+  Object {
     "prPriority": -1,
     "prTitle": "a minor update",
+    "updateTypes": Array [
+      "minor",
+    ],
   },
 ]
 `;
@@ -36,28 +36,28 @@ Array [
 exports[`workers/repository/process/sort sortBranches() sorts based on updateType and prTitle 1`] = `
 Array [
   Object {
-    "matchUpdateTypes": Array [
-      "pin",
-    ],
     "prTitle": "some other pin",
-  },
-  Object {
-    "matchUpdateTypes": Array [
+    "updateTypes": Array [
       "pin",
     ],
-    "prTitle": "some pin",
   },
   Object {
-    "matchUpdateTypes": Array [
+    "prTitle": "some pin",
+    "updateTypes": Array [
+      "pin",
+    ],
+  },
+  Object {
+    "prTitle": "a minor update",
+    "updateTypes": Array [
       "minor",
     ],
-    "prTitle": "a minor update",
   },
   Object {
-    "matchUpdateTypes": Array [
+    "prTitle": "some major update",
+    "updateTypes": Array [
       "major",
     ],
-    "prTitle": "some major update",
   },
 ]
 `;

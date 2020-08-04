@@ -165,7 +165,7 @@ export interface RenovateConfig
   prHourlyLimit?: number;
   repoIsOnboarded?: boolean;
 
-  matchUpdateTypes?: UpdateType[];
+  updateTypes?: UpdateType[];
 
   warnings?: ValidationMessage[];
   vulnerabilityAlerts?: RenovateSharedConfig;
@@ -210,7 +210,7 @@ export interface PackageRule
   matchCurrentVersion?: string | Range;
   sourceUrlPrefixes?: string[];
 
-  updateTypes?: UpdateType[];
+  matchUpdateTypes?: UpdateType[];
 }
 
 export interface ValidationMessage {

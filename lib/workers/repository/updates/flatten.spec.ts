@@ -17,7 +17,7 @@ describe('workers/repository/updates/flatten', () => {
       config.lockFileMaintenance.enabled = true;
       config.packageRules = [
         {
-          updateTypes: ['minor'],
+          matchUpdateTypes: ['minor'],
           automerge: true,
         },
         {
@@ -35,7 +35,7 @@ describe('workers/repository/updates/flatten', () => {
               { depName: '@org/a', updates: [{ newValue: '1.0.0' }] },
               { depName: 'foo', updates: [{ newValue: '2.0.0' }] },
               {
-                matchUpdateTypes: ['pin'],
+                updateTypes: ['pin'],
                 updates: [{ newValue: '2.0.0' }],
               },
             ],
@@ -75,7 +75,7 @@ describe('workers/repository/updates/flatten', () => {
       const res = await flattenUpdates(config, packageFiles);
       expect(res).toHaveLength(9);
       expect(
-        res.filter((r) => r.matchUpdateTypes?.includes('lockFileMaintenance'))
+        res.filter((r) => r.updateTypes?.includes('lockFileMaintenance'))
       ).toHaveLength(2);
     });
   });

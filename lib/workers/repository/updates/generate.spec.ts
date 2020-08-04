@@ -464,7 +464,7 @@ describe('workers/repository/updates/generate', () => {
           newValue: '0.6.0',
           isGroup: true,
           separateMinorPatch: true,
-          matchUpdateTypes: ['minor' as UpdateType],
+          updateTypes: ['minor' as UpdateType],
           fileReplacePosition: 1,
         },
         {
@@ -475,7 +475,7 @@ describe('workers/repository/updates/generate', () => {
           newValue: '0.6.0',
           isGroup: true,
           separateMajorMinor: true,
-          matchUpdateTypes: ['major' as UpdateType],
+          updateTypes: ['major' as UpdateType],
           fileReplacePosition: 2,
         },
         {
@@ -486,7 +486,7 @@ describe('workers/repository/updates/generate', () => {
           newValue: '0.6.0',
           isGroup: true,
           separateMajorMinor: true,
-          matchUpdateTypes: ['patch' as UpdateType],
+          updateTypes: ['patch' as UpdateType],
           fileReplacePosition: 0,
         },
       ];

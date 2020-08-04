@@ -5,6 +5,9 @@ Object {
   "currentValue": "1.0.0",
   "depName": "a",
   "isBump": true,
+  "matchUpdateTypes": Array [
+    "bump",
+  ],
   "packageRules": Array [
     Object {
       "matchCurrentVersion": "<= 2.0.0",
@@ -27,7 +30,7 @@ Object {
       ],
     },
     Object {
-      "updateTypes": Array [
+      "matchUpdateTypes": Array [
         "bump",
       ],
     },
@@ -42,9 +45,6 @@ Object {
     Object {
       "matchCurrentVersion": "<= 2.0.0",
     },
-  ],
-  "updateTypes": Array [
-    "bump",
   ],
 }
 `;
