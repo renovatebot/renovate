@@ -26,6 +26,12 @@ Object.defineProperty(HttpError.prototype, 'headers', {
   },
 });
 
+Object.defineProperty(HttpError.prototype, 'url', {
+  get: function url(this: HttpError) {
+    return this.response?.url;
+  },
+});
+
 export type GotLegacyError<E = unknown, T = unknown> = HttpError & {
   statusCode?: number;
   body: {

@@ -1,5 +1,6 @@
 import fs from 'fs-extra';
 import * as httpMock from '../../../../test/httpMock';
+import { getName } from '../../../../test/util';
 import { ChangeLogNotes } from './common';
 import {
   addReleaseNotes,
@@ -37,13 +38,21 @@ const gitterWebappChangelogMd = fs.readFileSync(
   'utf8'
 );
 
-const contentsResponse = [
-  { name: 'lib' },
-  { name: 'CHANGELOG.md' },
-  { name: 'README.md' },
+const githubTreeResponse = {
+  tree: [
+    { path: 'lib', type: 'tree' },
+    { path: 'CHANGELOG.md', type: 'blob', sha: 'abcd' },
+    { path: 'README.md', type: 'blob' },
+  ],
+};
+
+const gitlabTreeResponse = [
+  { path: 'lib', type: 'tree' },
+  { path: 'CHANGELOG.md', type: 'blob', id: 'abcd' },
+  { path: 'README.md', type: 'blob' },
 ];
 
-describe('workers/pr/release-notes', () => {
+describe(getName(__filename), () => {
   beforeEach(() => {
     httpMock.setup();
   });
@@ -215,8 +224,15 @@ describe('workers/pr/release-notes', () => {
     it('handles files mismatch', async () => {
       httpMock
         .scope('https://api.github.com')
-        .get('/repos/chalk/contents/')
-        .reply(200, [{ name: 'lib' }, { name: 'README.md' }]);
+        .get('/repos/chalk')
+        .reply(200)
+        .get('/repos/chalk/git/trees/master')
+        .reply(200, {
+          tree: [
+            { name: 'lib', type: 'tree' },
+            { name: 'README.md', type: 'blob' },
+          ],
+        });
       const res = await getReleaseNotesMd(
         'chalk',
         '2.0.0',
@@ -229,9 +245,11 @@ describe('workers/pr/release-notes', () => {
     it('handles wrong format', async () => {
       httpMock
         .scope('https://api.github.com')
-        .get('/repos/some/repository1/contents/')
-        .reply(200, contentsResponse)
-        .get('/repos/some/repository1/contents/CHANGELOG.md')
+        .get('/repos/some/repository1')
+        .reply(200)
+        .get('/repos/some/repository1/git/trees/master')
+        .reply(200, githubTreeResponse)
+        .get('/repos/some/repository1/git/blobs/abcd')
         .reply(200, {
           content: Buffer.from('not really markdown').toString('base64'),
         });
@@ -247,9 +265,11 @@ describe('workers/pr/release-notes', () => {
     it('handles bad markdown', async () => {
       httpMock
         .scope('https://api.github.com')
-        .get('/repos/some/repository2/contents/')
-        .reply(200, contentsResponse)
-        .get('/repos/some/repository2/contents/CHANGELOG.md')
+        .get('/repos/some/repository2')
+        .reply(200)
+        .get('/repos/some/repository2/git/trees/master')
+        .reply(200, githubTreeResponse)
+        .get('/repos/some/repository2/git/blobs/abcd')
         .reply(200, {
           content: Buffer.from(`#\nha\nha\n#\nha\nha`).toString('base64'),
         });
@@ -265,9 +285,11 @@ describe('workers/pr/release-notes', () => {
     it('parses angular.js', async () => {
       httpMock
         .scope('https://api.github.com')
-        .get('/repos/angular/angular.js/contents/')
-        .reply(200, contentsResponse)
-        .get('/repos/angular/angular.js/contents/CHANGELOG.md')
+        .get('/repos/angular/angular.js')
+        .reply(200)
+        .get('/repos/angular/angular.js/git/trees/master')
+        .reply(200, githubTreeResponse)
+        .get('/repos/angular/angular.js/git/blobs/abcd')
         .reply(200, {
           content: Buffer.from(angularJsChangelogMd).toString('base64'),
         });
@@ -282,32 +304,33 @@ describe('workers/pr/release-notes', () => {
       expect(httpMock.getTrace()).toMatchSnapshot();
     });
     it('parses gitlab.com/gitlab-org/gitter/webapp', async () => {
+      jest.setTimeout(0);
       httpMock
         .scope('https://api.gitlab.com/')
-        .get('/projects/gitlab-org/gitter/webapp/repository/tree/')
-        .reply(200, contentsResponse)
         .get(
-          '/projects/gitlab-org/gitter/webapp/repository/files/CHANGELOG.md?ref=master'
+          '/projects/gitlab-org%2fgitter%2fwebapp/repository/tree?per_page=100'
         )
-        .reply(200, {
-          content: Buffer.from(gitterWebappChangelogMd).toString('base64'),
-        });
+        .reply(200, gitlabTreeResponse)
+        .get('/projects/gitlab-org%2fgitter%2fwebapp/repository/blobs/abcd/raw')
+        .reply(200, gitterWebappChangelogMd);
       const res = await getReleaseNotesMd(
         'gitlab-org/gitter/webapp',
         '20.26.0',
         'https://gitlab.com/',
         'https://api.gitlab.com/'
       );
+      expect(httpMock.getTrace()).toMatchSnapshot();
       expect(res).not.toBeNull();
       expect(res).toMatchSnapshot();
-      expect(httpMock.getTrace()).toMatchSnapshot();
     });
     it('parses jest', async () => {
       httpMock
         .scope('https://api.github.com')
-        .get('/repos/facebook/jest/contents/')
-        .reply(200, contentsResponse)
-        .get('/repos/facebook/jest/contents/CHANGELOG.md')
+        .get('/repos/facebook/jest')
+        .reply(200)
+        .get('/repos/facebook/jest/git/trees/master')
+        .reply(200, githubTreeResponse)
+        .get('/repos/facebook/jest/git/blobs/abcd')
         .reply(200, {
           content: Buffer.from(jestChangelogMd).toString('base64'),
         });
@@ -317,16 +340,18 @@ describe('workers/pr/release-notes', () => {
         'https://github.com/',
         'https://api.github.com/'
       );
+      expect(httpMock.getTrace()).toMatchSnapshot();
       expect(res).not.toBeNull();
       expect(res).toMatchSnapshot();
-      expect(httpMock.getTrace()).toMatchSnapshot();
     });
     it('parses js-yaml', async () => {
       httpMock
         .scope('https://api.github.com')
-        .get('/repos/nodeca/js-yaml/contents/')
-        .reply(200, contentsResponse)
-        .get('/repos/nodeca/js-yaml/contents/CHANGELOG.md')
+        .get('/repos/nodeca/js-yaml')
+        .reply(200)
+        .get('/repos/nodeca/js-yaml/git/trees/master')
+        .reply(200, githubTreeResponse)
+        .get('/repos/nodeca/js-yaml/git/blobs/abcd')
         .reply(200, {
           content: Buffer.from(jsYamlChangelogMd).toString('base64'),
         });
@@ -336,9 +361,9 @@ describe('workers/pr/release-notes', () => {
         'https://github.com/',
         'https://api.github.com/'
       );
+      expect(httpMock.getTrace()).toMatchSnapshot();
       expect(res).not.toBeNull();
       expect(res).toMatchSnapshot();
-      expect(httpMock.getTrace()).toMatchSnapshot();
     });
     describe('ReleaseNotes Correctness', () => {
       let versionOneNotes: ChangeLogNotes;
@@ -346,9 +371,11 @@ describe('workers/pr/release-notes', () => {
       it('parses yargs 15.3.0', async () => {
         httpMock
           .scope('https://api.github.com')
-          .get('/repos/yargs/yargs/contents/')
-          .reply(200, contentsResponse)
-          .get('/repos/yargs/yargs/contents/CHANGELOG.md')
+          .get('/repos/yargs/yargs')
+          .reply(200, { default_branch: 'main' })
+          .get('/repos/yargs/yargs/git/trees/main')
+          .reply(200, githubTreeResponse)
+          .get('/repos/yargs/yargs/git/blobs/abcd')
           .reply(200, {
             content: Buffer.from(yargsChangelogMd).toString('base64'),
           });
@@ -359,16 +386,18 @@ describe('workers/pr/release-notes', () => {
           'https://api.github.com/'
         );
         versionOneNotes = res;
+        expect(httpMock.getTrace()).toMatchSnapshot();
         expect(res).not.toBeNull();
         expect(res).toMatchSnapshot();
-        expect(httpMock.getTrace()).toMatchSnapshot();
       });
       it('parses yargs 15.2.0', async () => {
         httpMock
           .scope('https://api.github.com')
-          .get('/repos/yargs/yargs/contents/')
-          .reply(200, contentsResponse)
-          .get('/repos/yargs/yargs/contents/CHANGELOG.md')
+          .get('/repos/yargs/yargs')
+          .reply(200, { default_branch: 'main' })
+          .get('/repos/yargs/yargs/git/trees/main')
+          .reply(200, githubTreeResponse)
+          .get('/repos/yargs/yargs/git/blobs/abcd')
           .reply(200, {
             content: Buffer.from(yargsChangelogMd).toString('base64'),
           });
@@ -379,23 +408,21 @@ describe('workers/pr/release-notes', () => {
           'https://api.github.com/'
         );
         versionTwoNotes = res;
+        expect(httpMock.getTrace()).toMatchSnapshot();
         expect(res).not.toBeNull();
         expect(res).toMatchSnapshot();
-        expect(httpMock.getTrace()).toMatchSnapshot();
       });
       it('parses adapter-utils 4.33.0', async () => {
         httpMock
           .scope('https://gitlab.com/')
           .get(
-            '/api/v4/projects/itentialopensource/adapter-utils/repository/tree/'
+            '/api/v4/projects/itentialopensource%2fadapter-utils/repository/tree?per_page=100'
           )
-          .reply(200, contentsResponse)
+          .reply(200, gitlabTreeResponse)
           .get(
-            '/api/v4/projects/itentialopensource/adapter-utils/repository/files/CHANGELOG.md?ref=master'
+            '/api/v4/projects/itentialopensource%2fadapter-utils/repository/blobs/abcd/raw'
           )
-          .reply(200, {
-            content: Buffer.from(adapterutilsChangelogMd).toString('base64'),
-          });
+          .reply(200, adapterutilsChangelogMd);
         const res = await getReleaseNotesMd(
           'itentialopensource/adapter-utils',
           '4.33.0',
@@ -403,9 +430,9 @@ describe('workers/pr/release-notes', () => {
           'https://gitlab.com/api/v4/'
         );
         versionTwoNotes = res;
+        expect(httpMock.getTrace()).toMatchSnapshot();
         expect(res).not.toBeNull();
         expect(res).toMatchSnapshot();
-        expect(httpMock.getTrace()).toMatchSnapshot();
       });
       it('isUrl', () => {
         expect(versionOneNotes).not.toMatchObject(versionTwoNotes);

@@ -269,7 +269,7 @@ export async function resolveConfigPresets(
             )
           );
         } else {
-          (config[key] as RenovateConfig[]).push(element);
+          (config[key] as unknown[]).push(element);
         }
       }
     } else if (is.object(val) && !ignoredKeys.includes(key)) {

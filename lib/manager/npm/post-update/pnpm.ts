@@ -54,7 +54,7 @@ export async function generateLockFile(
       execOptions.docker.volumes = [[homeNpmrc, '/home/ubuntu/.npmrc']];
     }
     cmd = 'pnpm';
-    let args = 'install --lockfile-only';
+    let args = 'install --recursive --lockfile-only';
     if (global.trustLevel !== 'high' || config.ignoreScripts) {
       args += ' --ignore-scripts';
       args += ' --ignore-pnpmfile';
