@@ -34,8 +34,8 @@ export class ChildProcessMock extends EventEmitter {
   }
 
   kill(...args: any[]): boolean {
-    const result = !this.connected;
+    const result = this.connected;
     this.connected = false;
-    return !result;
+    return result;
   }
 }
