@@ -169,13 +169,11 @@ export async function updateArtifacts(
       ];
     }
     if (
-      (err.stdout &&
-        err.stdout.includes('Please supply credentials for this source')) ||
-      (err.stderr && err.stderr.includes('Authentication is required')) ||
-      (err.stderr &&
-        err.stderr.includes(
-          'Please make sure you have the correct access rights'
-        ))
+      err.stdout?.includes('Please supply credentials for this source') ||
+      err.stderr?.includes('Authentication is required') ||
+      err.stderr?.includes(
+        'Please make sure you have the correct access rights'
+      )
     ) {
       logger.debug(
         { err },

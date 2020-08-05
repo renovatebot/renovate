@@ -146,16 +146,12 @@ export async function updateArtifacts({
     ];
   } catch (err) {
     if (
-      err.message &&
-      err.message.includes(
+      err.message?.includes(
         'Your requirements could not be resolved to an installable set of packages.'
       )
     ) {
       logger.info('Composer requirements cannot be resolved');
-    } else if (
-      err.message &&
-      err.message.includes('write error (disk full?)')
-    ) {
+    } else if (err.message?.includes('write error (disk full?)')) {
       throw new Error(SYSTEM_INSUFFICIENT_DISK_SPACE);
     } else {
       logger.debug({ err }, 'Failed to generate composer.lock');

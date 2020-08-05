@@ -188,7 +188,7 @@ export async function mergeRenovateConfig(
   returnConfig.renovateJsonPresent = true;
   returnConfig.packageRules = flattenPackageRules(returnConfig.packageRules);
   // istanbul ignore if
-  if (returnConfig.ignorePaths && returnConfig.ignorePaths.length) {
+  if (returnConfig.ignorePaths?.length) {
     logger.debug(
       { ignorePaths: returnConfig.ignorePaths },
       `Found repo ignorePaths`

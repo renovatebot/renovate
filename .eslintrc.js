@@ -92,7 +92,10 @@ module.exports = {
     '@typescript-eslint/no-unsafe-return': 0,
     '@typescript-eslint/no-unsafe-call': 0,
 
-    '@typescript-eslint/restrict-template-expressions': 1,
+    '@typescript-eslint/restrict-template-expressions': [
+      1,
+      { allowNumber: true, allowBoolean: true },
+    ],
     '@typescript-eslint/restrict-plus-operands': 1,
 
     '@typescript-eslint/naming-convention': 1,

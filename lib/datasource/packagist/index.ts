@@ -133,7 +133,7 @@ function extractDepReleases(versions: RegistryFile): ReleaseResult {
   dep.releases = Object.keys(versions).map((version) => {
     const release = versions[version];
     dep.homepage = release.homepage || dep.homepage;
-    if (release.source && release.source.url) {
+    if (release.source?.url) {
       dep.sourceUrl = release.source.url;
     }
     return {

@@ -191,7 +191,7 @@ export async function resolveConfigPresets(
   );
   let config: RenovateConfig = {};
   // First, merge all the preset configs from left to right
-  if (inputConfig.extends && inputConfig.extends.length) {
+  if (inputConfig.extends?.length) {
     for (const preset of inputConfig.extends) {
       // istanbul ignore if
       if (existingPresets.includes(preset)) {

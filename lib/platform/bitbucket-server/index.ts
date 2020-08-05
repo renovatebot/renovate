@@ -233,9 +233,7 @@ export async function getRepoForceRebase(): Promise<boolean> {
   // The current options for id are:
   // no-ff, ff, ff-only, rebase-no-ff, rebase-ff-only, squash, squash-ff-only
   return Boolean(
-    res.body.mergeConfig &&
-      res.body.mergeConfig.defaultStrategy &&
-      res.body.mergeConfig.defaultStrategy.id.includes('ff-only')
+    res.body?.mergeConfig?.defaultStrategy?.id.includes('ff-only')
   );
 }
 
@@ -847,11 +845,8 @@ export async function createPr({
     );
   } catch (err) /* istanbul ignore next */ {
     if (
-      err.body &&
-      err.body.errors &&
-      err.body.errors.length &&
-      err.body.errors[0].exceptionName ===
-        'com.atlassian.bitbucket.pull.EmptyPullRequestException'
+      err.body?.errors?.[0].exceptionName ===
+      'com.atlassian.bitbucket.pull.EmptyPullRequestException'
     ) {
       logger.debug(
         'Empty pull request - deleting branch so it can be recreated next run'

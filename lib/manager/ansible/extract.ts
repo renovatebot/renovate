@@ -26,9 +26,7 @@ export default function extractPackageFile(
       deps.push(dep);
     }
   }
-  deps = deps.filter(
-    (dep) => !(dep.currentValue && dep.currentValue.includes('${'))
-  );
+  deps = deps.filter((dep) => !dep.currentValue?.includes('${'));
   if (!deps.length) {
     return null;
   }

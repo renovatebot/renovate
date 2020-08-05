@@ -112,7 +112,7 @@ export async function ensurePr(
   }
   config.upgrades = [];
 
-  if (config.artifactErrors && config.artifactErrors.length) {
+  if (config.artifactErrors?.length) {
     logger.debug('Forcing PR because of artifact errors');
     config.forcePr = true;
   }
@@ -369,19 +369,17 @@ export async function ensurePr(
       }
     } catch (err) /* istanbul ignore next */ {
       logger.debug({ err }, 'Pull request creation error');
-      if (err.body && err.body.message === 'Validation failed') {
-        if (err.body.errors && err.body.errors.length) {
-          if (
-            err.body.errors.some(
-              (error: { message?: string }) =>
-                error.message &&
-                error.message.startsWith('A pull request already exists')
-            )
-          ) {
-            logger.warn('A pull requests already exists');
-            return { prResult: PrResult.ErrorAlreadyExists };
-          }
-        }
+      if (
+        err.body?.message === 'Validation failed' &&
+        err.body.errors?.length &&
+        err.body.errors.some(
+          (error: { message?: string }) =>
+            error.message &&
+            error.message.startsWith('A pull request already exists')
+        )
+      ) {
+        logger.warn('A pull requests already exists');
+        return { prResult: PrResult.ErrorAlreadyExists };
       }
       if (err.statusCode === 502) {
         logger.warn(
