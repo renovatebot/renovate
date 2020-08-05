@@ -1,4 +1,5 @@
 import URL from 'url';
+import is from '@sindresorhus/is';
 import { configFileNames } from '../../config/app-strings';
 import { RenovateConfig } from '../../config/common';
 import {
@@ -28,10 +29,11 @@ import {
   FindPRConfig,
   Issue,
   Platform,
-  PlatformConfig,
+  PlatformParams,
+  PlatformResult,
   Pr,
-  RepoConfig,
   RepoParams,
+  RepoResult,
   VulnerabilityAlert,
 } from '../common';
 import { smartTruncate } from '../utils/pr-body';
@@ -45,8 +47,6 @@ type GiteaRenovateConfig = {
 interface GiteaRepoConfig {
   repository: string;
   localDir: string;
-  defaultBranch: string;
-  baseBranch: string;
   mergeMethod: helper.PRMergeMethod;
 
   prList: Promise<Pr[]> | null;
@@ -102,8 +102,7 @@ function toRenovatePR(data: helper.PR): Pr | null {
     createdAt: data.created_at,
     canMerge: data.mergeable,
     isConflicted: !data.mergeable,
-    isStale: undefined,
-    isModified: undefined,
+    hasAssignees: !!(data.assignee?.login || is.nonEmptyArray(data.assignees)),
   };
 }
 
@@ -130,30 +129,6 @@ function findCommentByContent(
   content: string
 ): helper.Comment | null {
   return comments.find((c) => c.body.trim() === content);
-}
-
-async function isPRModified(
-  repoPath: string,
-  branchName: string
-): Promise<boolean> {
-  try {
-    const branch = await helper.getBranch(repoPath, branchName);
-    const branchCommitEmail = branch.commit.author.email;
-    const configEmail = global.gitAuthor.email;
-
-    if (branchCommitEmail === configEmail) {
-      return false;
-    }
-
-    logger.debug(
-      { branchCommitEmail, configEmail },
-      'Last committer to branch does not match bot, PR cannot be rebased'
-    );
-    return true;
-  } catch (err) {
-    logger.warn({ err }, 'Error getting PR branch, marking as modified');
-    return true;
-  }
 }
 
 async function retrieveDefaultConfig(
@@ -212,7 +187,7 @@ const platform: Platform = {
   async initPlatform({
     endpoint,
     token,
-  }: GiteaRenovateConfig): Promise<PlatformConfig> {
+  }: PlatformParams): Promise<PlatformResult> {
     if (!token) {
       throw new Error('Init: You must configure a Gitea personal access token');
     }
@@ -247,7 +222,7 @@ const platform: Platform = {
     repository,
     localDir,
     optimizeForDisabled,
-  }: RepoParams): Promise<RepoConfig> {
+  }: RepoParams): Promise<RepoResult> {
     let renovateConfig: RenovateConfig;
     let repo: helper.Repo;
 
@@ -303,16 +278,15 @@ const platform: Platform = {
     }
 
     // Determine author email and branches
-    config.defaultBranch = repo.default_branch;
-    config.baseBranch = config.defaultBranch;
-    logger.debug(`${repository} default branch = ${config.baseBranch}`);
+    const defaultBranch = repo.default_branch;
+    logger.debug(`${repository} default branch = ${defaultBranch}`);
 
     // Optionally check if Renovate is disabled by attempting to fetch default configuration file
     if (optimizeForDisabled) {
       try {
         renovateConfig = await retrieveDefaultConfig(
           config.repository,
-          config.defaultBranch
+          defaultBranch
         );
       } catch (err) {
         // Do nothing
@@ -345,7 +319,7 @@ const platform: Platform = {
     config.labelList = null;
 
     return {
-      baseBranch: config.baseBranch,
+      defaultBranch,
       isFork: !!repo.fork,
     };
   },
@@ -445,11 +419,8 @@ const platform: Platform = {
     return BranchStatus.yellow;
   },
 
-  async setBaseBranch(
-    baseBranch: string = config.defaultBranch
-  ): Promise<string> {
-    config.baseBranch = baseBranch;
-    const baseBranchSha = await git.setBaseBranch(baseBranch);
+  async setBaseBranch(branchName: string): Promise<string> {
+    const baseBranchSha = await git.setBranch(branchName);
     return baseBranchSha;
   },
 
@@ -489,16 +460,6 @@ const platform: Platform = {
       return null;
     }
 
-    // Enrich pull request with additional information which is more expensive to fetch
-    if (pr.state !== 'closed') {
-      if (pr.isStale === undefined) {
-        pr.isStale = await git.isBranchStale(pr.branchName);
-      }
-      if (pr.isModified === undefined) {
-        pr.isModified = await isPRModified(config.repository, pr.branchName);
-      }
-    }
-
     return pr;
   },
 
@@ -525,12 +486,12 @@ const platform: Platform = {
 
   async createPr({
     branchName,
+    targetBranch,
     prTitle: title,
     prBody: rawBody,
     labels: labelNames,
-    useDefaultBranch,
   }: CreatePRConfig): Promise<Pr> {
-    const base = useDefaultBranch ? config.defaultBranch : config.baseBranch;
+    const base = targetBranch;
     const head = branchName;
     const body = sanitize(rawBody);
 
@@ -641,6 +602,7 @@ const platform: Platform = {
 
   async ensureIssue({
     title,
+    reuseTitle,
     body,
     shouldReOpen,
     once,
@@ -648,8 +610,10 @@ const platform: Platform = {
     logger.debug(`ensureIssue(${title})`);
     try {
       const issueList = await platform.getIssueList();
-      const issues = issueList.filter((i) => i.title === title);
-
+      let issues = issueList.filter((i) => i.title === title);
+      if (!issues.length) {
+        issues = issueList.filter((i) => i.title === reuseTitle);
+      }
       // Update any matching issues which currently exist
       if (issues.length) {
         let activeIssue = issues.find((i) => i.state === 'open');
@@ -677,7 +641,11 @@ const platform: Platform = {
         }
 
         // Check if issue has already correct state
-        if (activeIssue.body === body && activeIssue.state === 'open') {
+        if (
+          activeIssue.title === title &&
+          activeIssue.body === body &&
+          activeIssue.state === 'open'
+        ) {
           logger.debug(
             `Issue #${activeIssue.number} is open and up to date - nothing to do`
           );
@@ -688,6 +656,7 @@ const platform: Platform = {
         logger.debug(`Updating Issue #${activeIssue.number}`);
         await helper.updateIssue(config.repository, activeIssue.number, {
           body,
+          title,
           state: shouldReOpen
             ? 'open'
             : (activeIssue.state as helper.IssueState),

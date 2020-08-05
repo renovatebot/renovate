@@ -34,10 +34,7 @@ export async function generateLockFile(
     const preCommands = [installNpm];
     const commands = [];
     let cmdOptions = '';
-    if (
-      (postUpdateOptions && postUpdateOptions.includes('npmDedupe')) ||
-      skipInstalls === false
-    ) {
+    if (postUpdateOptions?.includes('npmDedupe') || skipInstalls === false) {
       logger.debug('Performing node_modules install');
       cmdOptions += '--ignore-scripts --no-audit';
     } else {

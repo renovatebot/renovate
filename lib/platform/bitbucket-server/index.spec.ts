@@ -1,5 +1,6 @@
 import nock from 'nock';
 import * as httpMock from '../../../test/httpMock';
+import { getName } from '../../../test/util';
 import {
   REPOSITORY_CHANGED,
   REPOSITORY_DISABLED,
@@ -135,7 +136,7 @@ const scenarios = {
   'endpoint with path': new URL('https://stash.renovatebot.com/vcs'),
 };
 
-describe('platform/bitbucket-server', () => {
+describe(getName(__filename), () => {
   Object.entries(scenarios).forEach(([scenarioName, url]) => {
     const urlHost = url.origin;
     const urlPath = url.pathname === '/' ? '' : url.pathname;
@@ -395,7 +396,6 @@ describe('platform/bitbucket-server', () => {
           expect.assertions(1);
           await initRepo();
           await bitbucket.setBaseBranch('branch');
-          await bitbucket.setBaseBranch();
           expect(httpMock.getTrace()).toMatchSnapshot();
         });
       });
@@ -424,14 +424,6 @@ describe('platform/bitbucket-server', () => {
             .twice()
             .reply(200, { conflicted: false })
             .get(
-              `${urlPath}/rest/api/1.0/projects/SOME/repos/repo/pull-requests/5/commits?withCounts=true`
-            )
-            .twice()
-            .reply(200, {
-              totalCount: 1,
-              values: [{ author: { emailAddress: 'bot@renovateapp.com' } }],
-            })
-            .get(
               `${urlPath}/rest/api/1.0/projects/SOME/repos/repo/pull-requests/5`
             )
             .twice()
@@ -454,14 +446,6 @@ describe('platform/bitbucket-server', () => {
             )
             .twice()
             .reply(200, { conflicted: false })
-            .get(
-              `${urlPath}/rest/api/1.0/projects/SOME/repos/repo/pull-requests/5/commits?withCounts=true`
-            )
-            .twice()
-            .reply(200, {
-              totalCount: 1,
-              values: [{ author: { emailAddress: 'bot@renovateapp.com' } }],
-            })
             .get(
               `${urlPath}/rest/api/1.0/projects/SOME/repos/repo/pull-requests/5`
             )
@@ -511,13 +495,6 @@ describe('platform/bitbucket-server', () => {
               `${urlPath}/rest/api/1.0/projects/SOME/repos/repo/pull-requests/5/merge`
             )
             .reply(200, { conflicted: false })
-            .get(
-              `${urlPath}/rest/api/1.0/projects/SOME/repos/repo/pull-requests/5/commits?withCounts=true`
-            )
-            .reply(200, {
-              totalCount: 1,
-              values: [{ author: { emailAddress: 'bot@renovateapp.com' } }],
-            })
             .put(
               `${urlPath}/rest/api/1.0/projects/SOME/repos/repo/pull-requests/5`
             )
@@ -541,13 +518,6 @@ describe('platform/bitbucket-server', () => {
               `${urlPath}/rest/api/1.0/projects/SOME/repos/repo/pull-requests/5/merge`
             )
             .reply(200, { conflicted: false })
-            .get(
-              `${urlPath}/rest/api/1.0/projects/SOME/repos/repo/pull-requests/5/commits?withCounts=true`
-            )
-            .reply(200, {
-              totalCount: 1,
-              values: [{ author: { emailAddress: 'bot@renovateapp.com' } }],
-            })
             .put(
               `${urlPath}/rest/api/1.0/projects/SOME/repos/repo/pull-requests/5`
             )
@@ -569,22 +539,13 @@ describe('platform/bitbucket-server', () => {
               `${urlPath}/rest/api/1.0/projects/SOME/repos/repo/pull-requests/5/merge`
             )
             .reply(200, { conflicted: false })
-            .get(
-              `${urlPath}/rest/api/1.0/projects/SOME/repos/repo/pull-requests/5/commits?withCounts=true`
-            )
-            .reply(200, {
-              totalCount: 1,
-              values: [{ author: { emailAddress: 'bot@renovateapp.com' } }],
-            })
             .put(
               `${urlPath}/rest/api/1.0/projects/SOME/repos/repo/pull-requests/5`
             )
             .reply(405);
           await expect(
             bitbucket.addReviewers(5, ['name'])
-          ).rejects.toMatchObject({
-            statusCode: 405,
-          });
+          ).rejects.toThrowErrorMatchingSnapshot();
           expect(httpMock.getTrace()).toMatchSnapshot();
         });
       });
@@ -1071,14 +1032,7 @@ describe('platform/bitbucket-server', () => {
             .get(
               `${urlPath}/rest/api/1.0/projects/SOME/repos/repo/pull-requests/5/merge`
             )
-            .reply(200, { conflicted: false })
-            .get(
-              `${urlPath}/rest/api/1.0/projects/SOME/repos/repo/pull-requests/5/commits?withCounts=true`
-            )
-            .reply(200, {
-              totalCount: 1,
-              values: [{ author: { emailAddress: 'bot@renovateapp.com' } }],
-            });
+            .reply(200, { conflicted: false });
 
           expect(
             await bitbucket.getBranchPr('userName1/pullRequest5')
@@ -1165,6 +1119,7 @@ describe('platform/bitbucket-server', () => {
 
           const { number: id } = await bitbucket.createPr({
             branchName: 'branch',
+            targetBranch: 'master',
             prTitle: 'title',
             prBody: 'body',
           });
@@ -1188,10 +1143,10 @@ describe('platform/bitbucket-server', () => {
 
           const { number: id } = await bitbucket.createPr({
             branchName: 'branch',
+            targetBranch: 'master',
             prTitle: 'title',
             prBody: 'body',
             labels: null,
-            useDefaultBranch: true,
           });
           expect(id).toBe(5);
           expect(httpMock.getTrace()).toMatchSnapshot();
@@ -1214,14 +1169,7 @@ describe('platform/bitbucket-server', () => {
             .get(
               `${urlPath}/rest/api/1.0/projects/SOME/repos/repo/pull-requests/5/merge`
             )
-            .reply(200, { conflicted: false })
-            .get(
-              `${urlPath}/rest/api/1.0/projects/SOME/repos/repo/pull-requests/5/commits?withCounts=true`
-            )
-            .reply(200, {
-              totalCount: 1,
-              values: [{ author: { emailAddress: 'bot@renovateapp.com' } }],
-            });
+            .reply(200, { conflicted: false });
 
           expect(await bitbucket.getPr(5)).toMatchSnapshot();
           expect(httpMock.getTrace()).toMatchSnapshot();
@@ -1239,12 +1187,6 @@ describe('platform/bitbucket-server', () => {
             )
             .reply(200, { conflicted: false })
             .get(
-              `${urlPath}/rest/api/1.0/projects/SOME/repos/repo/pull-requests/3/commits?withCounts=true`
-            )
-            .reply(200, {
-              totalCount: 2,
-            })
-            .get(
               `${urlPath}/rest/api/1.0/projects/SOME/repos/repo/pull-requests/5`
             )
             .twice()
@@ -1253,24 +1195,14 @@ describe('platform/bitbucket-server', () => {
               `${urlPath}/rest/api/1.0/projects/SOME/repos/repo/pull-requests/5/merge`
             )
             .twice()
-            .reply(200, { conflicted: false })
-            .get(
-              `${urlPath}/rest/api/1.0/projects/SOME/repos/repo/pull-requests/5/commits?withCounts=true`
-            )
-            .twice()
-            .reply(200, {
-              totalCount: 1,
-              values: [{ author: { emailAddress: 'bot@renovateapp.com' } }],
-            });
+            .reply(200, { conflicted: false });
 
           const author = global.gitAuthor;
           try {
             expect(await bitbucket.getPr(3)).toMatchSnapshot();
 
-            global.gitAuthor = { email: 'bot@renovateapp.com', name: 'bot' };
             expect(await bitbucket.getPr(5)).toMatchSnapshot();
 
-            global.gitAuthor = { email: 'jane@example.com', name: 'jane' };
             expect(await bitbucket.getPr(5)).toMatchSnapshot();
 
             expect(httpMock.getTrace()).toMatchSnapshot();
@@ -1311,13 +1243,6 @@ describe('platform/bitbucket-server', () => {
               `${urlPath}/rest/api/1.0/projects/SOME/repos/repo/pull-requests/5/merge`
             )
             .reply(200, { conflicted: false })
-            .get(
-              `${urlPath}/rest/api/1.0/projects/SOME/repos/repo/pull-requests/5/commits?withCounts=true`
-            )
-            .reply(200, {
-              totalCount: 1,
-              values: [{ author: { emailAddress: 'bot@renovateapp.com' } }],
-            })
             .put(
               `${urlPath}/rest/api/1.0/projects/SOME/repos/repo/pull-requests/5`
             )
@@ -1361,13 +1286,6 @@ describe('platform/bitbucket-server', () => {
               `${urlPath}/rest/api/1.0/projects/SOME/repos/repo/pull-requests/5/merge`
             )
             .reply(200, { conflicted: false })
-            .get(
-              `${urlPath}/rest/api/1.0/projects/SOME/repos/repo/pull-requests/5/commits?withCounts=true`
-            )
-            .reply(200, {
-              totalCount: 1,
-              values: [{ author: { emailAddress: 'bot@renovateapp.com' } }],
-            })
             .put(
               `${urlPath}/rest/api/1.0/projects/SOME/repos/repo/pull-requests/5`
             )
@@ -1391,13 +1309,6 @@ describe('platform/bitbucket-server', () => {
               `${urlPath}/rest/api/1.0/projects/SOME/repos/repo/pull-requests/5/merge`
             )
             .reply(200, { conflicted: false })
-            .get(
-              `${urlPath}/rest/api/1.0/projects/SOME/repos/repo/pull-requests/5/commits?withCounts=true`
-            )
-            .reply(200, {
-              totalCount: 1,
-              values: [{ author: { emailAddress: 'bot@renovateapp.com' } }],
-            })
             .put(
               `${urlPath}/rest/api/1.0/projects/SOME/repos/repo/pull-requests/5`
             )
@@ -1420,13 +1331,6 @@ describe('platform/bitbucket-server', () => {
               `${urlPath}/rest/api/1.0/projects/SOME/repos/repo/pull-requests/5/merge`
             )
             .reply(200, { conflicted: false })
-            .get(
-              `${urlPath}/rest/api/1.0/projects/SOME/repos/repo/pull-requests/5/commits?withCounts=true`
-            )
-            .reply(200, {
-              totalCount: 1,
-              values: [{ author: { emailAddress: 'bot@renovateapp.com' } }],
-            })
             .put(
               `${urlPath}/rest/api/1.0/projects/SOME/repos/repo/pull-requests/5`
             )
@@ -1434,9 +1338,7 @@ describe('platform/bitbucket-server', () => {
 
           await expect(
             bitbucket.updatePr(5, 'title', 'body')
-          ).rejects.toMatchObject({
-            statusCode: 405,
-          });
+          ).rejects.toThrowErrorMatchingSnapshot();
           expect(httpMock.getTrace()).toMatchSnapshot();
         });
       });
@@ -1453,13 +1355,6 @@ describe('platform/bitbucket-server', () => {
               `${urlPath}/rest/api/1.0/projects/SOME/repos/repo/pull-requests/5/merge`
             )
             .reply(200, { conflicted: false })
-            .get(
-              `${urlPath}/rest/api/1.0/projects/SOME/repos/repo/pull-requests/5/commits?withCounts=true`
-            )
-            .reply(200, {
-              totalCount: 1,
-              values: [{ author: { emailAddress: 'bot@renovateapp.com' } }],
-            })
             .post(
               `${urlPath}/rest/api/1.0/projects/SOME/repos/repo/pull-requests/5/merge?version=1`
             )
@@ -1501,13 +1396,6 @@ describe('platform/bitbucket-server', () => {
               `${urlPath}/rest/api/1.0/projects/SOME/repos/repo/pull-requests/5/merge`
             )
             .reply(200, { conflicted: false })
-            .get(
-              `${urlPath}/rest/api/1.0/projects/SOME/repos/repo/pull-requests/5/commits?withCounts=true`
-            )
-            .reply(200, {
-              totalCount: 1,
-              values: [{ author: { emailAddress: 'bot@renovateapp.com' } }],
-            })
             .post(
               `${urlPath}/rest/api/1.0/projects/SOME/repos/repo/pull-requests/5/merge?version=1`
             )
@@ -1530,13 +1418,6 @@ describe('platform/bitbucket-server', () => {
               `${urlPath}/rest/api/1.0/projects/SOME/repos/repo/pull-requests/5/merge`
             )
             .reply(200, { conflicted: false })
-            .get(
-              `${urlPath}/rest/api/1.0/projects/SOME/repos/repo/pull-requests/5/commits?withCounts=true`
-            )
-            .reply(200, {
-              totalCount: 1,
-              values: [{ author: { emailAddress: 'bot@renovateapp.com' } }],
-            })
             .post(
               `${urlPath}/rest/api/1.0/projects/SOME/repos/repo/pull-requests/5/merge?version=1`
             )
@@ -1557,13 +1438,6 @@ describe('platform/bitbucket-server', () => {
               `${urlPath}/rest/api/1.0/projects/SOME/repos/repo/pull-requests/5/merge`
             )
             .reply(200, { conflicted: false })
-            .get(
-              `${urlPath}/rest/api/1.0/projects/SOME/repos/repo/pull-requests/5/commits?withCounts=true`
-            )
-            .reply(200, {
-              totalCount: 1,
-              values: [{ author: { emailAddress: 'bot@renovateapp.com' } }],
-            })
             .post(
               `${urlPath}/rest/api/1.0/projects/SOME/repos/repo/pull-requests/5/merge?version=1`
             )

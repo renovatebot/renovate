@@ -1,5 +1,4 @@
 import URL from 'url';
-import { GotError } from 'got';
 import pAll from 'p-all';
 import parseLinkHeader from 'parse-link-header';
 import {
@@ -12,19 +11,12 @@ import { PLATFORM_TYPE_GITHUB } from '../../constants/platforms';
 import { logger } from '../../logger';
 import { ExternalHostError } from '../../types/errors/external-host-error';
 import { maskToken } from '../mask';
+import { GotLegacyError } from './legacy';
 import { Http, HttpPostOptions, HttpResponse, InternalHttpOptions } from '.';
 
 let baseUrl = 'https://api.github.com/';
 export const setBaseUrl = (url: string): void => {
   baseUrl = url;
-};
-
-type GotRequestError<E = unknown, T = unknown> = GotError & {
-  body: {
-    message?: string;
-    errors?: E[];
-  };
-  headers?: Record<string, T>;
 };
 
 interface GithubInternalOptions extends InternalHttpOptions {
@@ -44,8 +36,8 @@ interface GithubGraphqlResponse<T = unknown> {
   errors?: { message: string; locations: unknown }[];
 }
 
-export function handleGotError(
-  err: GotRequestError,
+function handleGotError(
+  err: GotLegacyError,
   url: string | URL,
   opts: GithubHttpOptions
 ): never {
@@ -97,7 +89,7 @@ export function handleGotError(
     throw new Error(PLATFORM_INTEGRATION_UNAUTHORIZED);
   }
   if (err.statusCode === 401 && message.includes('Bad credentials')) {
-    const rateLimit = err.headers ? err.headers['x-ratelimit-limit'] : -1;
+    const rateLimit = err.headers?.['x-ratelimit-limit'] ?? -1;
     logger.debug(
       {
         token: maskToken(opts.token),
@@ -115,18 +107,14 @@ export function handleGotError(
       message.includes('Review cannot be requested from pull request author')
     ) {
       throw err;
-    } else if (
-      err.body &&
-      err.body.errors &&
-      err.body.errors.find((e: any) => e.code === 'invalid')
-    ) {
+    } else if (err.body?.errors?.find((e: any) => e.code === 'invalid')) {
       throw new Error(REPOSITORY_CHANGED);
     }
     logger.debug({ err }, '422 Error thrown from GitHub');
     throw new ExternalHostError(err, PLATFORM_TYPE_GITHUB);
   }
   if (err.statusCode === 404) {
-    logger.debug({ url: err.url }, 'GitHub 404');
+    logger.debug({ url: err.options?.url }, 'GitHub 404');
   } else {
     logger.debug({ err }, 'Unknown GitHub error');
   }
@@ -138,6 +126,22 @@ interface GraphqlOptions {
   count?: number;
   acceptHeader?: string;
   fromEnd?: boolean;
+}
+
+function constructAcceptString(input?: any): string {
+  const defaultAccept = 'application/vnd.github.v3+json';
+  const appModeAccept = 'application/vnd.github.machine-man-preview+json';
+  const acceptStrings = typeof input === 'string' ? input.split(/\s*,\s*/) : [];
+  if (global.appMode && !acceptStrings.includes(appModeAccept)) {
+    acceptStrings.unshift(appModeAccept);
+  }
+  if (
+    !acceptStrings.some((x) => x.startsWith('application/vnd.github.')) ||
+    acceptStrings.length < 2
+  ) {
+    acceptStrings.push(defaultAccept);
+  }
+  return acceptStrings.join(', ');
 }
 
 export class GithubHttp extends Http<GithubHttpOptions, GithubHttpOptions> {
@@ -165,22 +169,17 @@ export class GithubHttp extends Http<GithubHttpOptions, GithubHttpOptions> {
       opts.baseUrl = opts.baseUrl.replace('/v3/', '/');
     }
 
-    const accept = global.appMode
-      ? 'application/vnd.github.machine-man-preview+json'
-      : 'application/vnd.github.v3+json';
+    const accept = constructAcceptString(opts.headers?.accept);
 
     opts.headers = {
-      accept,
       ...opts.headers,
+      accept,
     };
-    const optsAccept = opts.headers.accept;
-    if (typeof optsAccept === 'string' && !optsAccept.includes(accept)) {
-      opts.headers.accept = `${accept}, ${optsAccept}`;
-    }
 
     try {
       result = await super.request<T>(url, opts);
 
+      // istanbul ignore else: Can result be null ???
       if (result !== null) {
         if (opts.paginate) {
           // Check if result is paginated
@@ -188,8 +187,9 @@ export class GithubHttp extends Http<GithubHttpOptions, GithubHttpOptions> {
           const linkHeader =
             result?.headers?.link &&
             parseLinkHeader(result.headers.link as string);
-          if (linkHeader && linkHeader.next && linkHeader.last) {
+          if (linkHeader?.next && linkHeader?.last) {
             let lastPage = +linkHeader.last.page;
+            // istanbul ignore else: needs a test
             if (!process.env.RENOVATE_PAGINATE_ALL && opts.paginate !== 'all') {
               lastPage = Math.min(pageLimit, lastPage);
             }
@@ -223,31 +223,34 @@ export class GithubHttp extends Http<GithubHttpOptions, GithubHttpOptions> {
     return result;
   }
 
-  private async getGraphql<T = unknown>(
+  public async queryRepo<T = unknown>(
     query: string,
-    accept = 'application/vnd.github.merge-info-preview+json'
-  ): Promise<GithubGraphqlResponse<T>> {
+    options: GraphqlOptions = {}
+  ): Promise<T> {
     let result = null;
 
     const path = 'graphql';
 
     const opts: HttpPostOptions = {
       body: { query },
-      headers: { accept },
+      headers: { accept: options?.acceptHeader },
     };
 
     logger.trace(`Performing Github GraphQL request`);
 
     try {
-      const res = await this.postJson('graphql', opts);
-      result = res?.body;
+      const res = await this.postJson<GithubGraphqlResponse<T>>(
+        'graphql',
+        opts
+      );
+      result = res?.body?.data?.repository;
     } catch (gotErr) {
       handleGotError(gotErr, path, opts);
     }
     return result;
   }
 
-  async getGraphqlNodes<T = Record<string, unknown>>(
+  async queryRepoField<T = Record<string, unknown>>(
     queryOrig: string,
     fieldName: string,
     options: GraphqlOptions = {}
@@ -256,7 +259,7 @@ export class GithubHttp extends Http<GithubHttpOptions, GithubHttpOptions> {
 
     const regex = new RegExp(`(\\W)${fieldName}(\\s*)\\(`);
 
-    const { paginate = true, acceptHeader } = options;
+    const { paginate = true } = options;
     let count = options.count || 100;
     let cursor = null;
 
@@ -268,16 +271,9 @@ export class GithubHttp extends Http<GithubHttpOptions, GithubHttpOptions> {
         replacement += cursor ? `, after: "${cursor}", ` : ', ';
         query = query.replace(regex, replacement);
       }
-      const gqlRes = await this.getGraphql<T>(query, acceptHeader);
-      if (
-        gqlRes &&
-        gqlRes.data &&
-        gqlRes.data.repository &&
-        gqlRes.data.repository[fieldName]
-      ) {
-        const { nodes = [], edges = [], pageInfo } = gqlRes.data.repository[
-          fieldName
-        ];
+      const gqlRes = await this.queryRepo<T>(query, options);
+      if (gqlRes?.[fieldName]) {
+        const { nodes = [], edges = [], pageInfo } = gqlRes[fieldName];
         result.push(...nodes);
         result.push(...edges);
 

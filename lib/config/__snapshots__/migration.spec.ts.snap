@@ -16,10 +16,13 @@ Object {
   ],
   "commitMessage": "{{#if semanticCommitType}}{{semanticCommitType}}{{#if semanticCommitScope}}({{semanticCommitScope}}){{/if}}: {{/if}}some commit message",
   "commitMessageExtra": "{{currentValue}} something",
+  "dependencyDashboard": true,
+  "dependencyDashboardTitle": "foo",
   "enabled": true,
   "extends": Array [
     "config:js-app",
     "config:js-lib",
+    ":dependencyDashboard",
   ],
   "hostRules": Array [
     Object {},

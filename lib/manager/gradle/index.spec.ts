@@ -389,6 +389,47 @@ describe(getName(__filename), () => {
 
       expect(execSnapshots).toMatchSnapshot();
     });
+
+    it('should update dependencies in same file', async () => {
+      const execSnapshots = mockExecAll(exec, gradleOutput);
+
+      const buildGradleContent = await fsExtra.readFile(
+        `${fixtures}/build.gradle.example1`,
+        'utf8'
+      );
+
+      const upgrade = {
+        depGroup: 'org.apache.openjpa',
+        name: 'openjpa',
+        version: '3.1.1',
+        newValue: '3.1.2',
+      };
+
+      const buildGradleContentUpdated = manager.updateDependency({
+        fileContent: buildGradleContent,
+        upgrade,
+      });
+
+      expect(buildGradleContent).not.toContain(
+        'org.apache.openjpa:openjpa:3.1.2'
+      );
+
+      expect(buildGradleContentUpdated).not.toContain(
+        "dependency 'org.apache.openjpa:openjpa:3.1.1'"
+      );
+      expect(buildGradleContentUpdated).not.toContain(
+        "dependency 'org.apache.openjpa:openjpa:3.1.1'"
+      );
+
+      expect(buildGradleContentUpdated).toContain(
+        "classpath 'org.apache.openjpa:openjpa:3.1.2'"
+      );
+      expect(buildGradleContentUpdated).toContain(
+        "classpath 'org.apache.openjpa:openjpa:3.1.2'"
+      );
+
+      expect(execSnapshots).toMatchSnapshot();
+    });
   });
 
   ifSystemSupportsGradle(6).describe('executeGradle integration', () => {
@@ -397,7 +438,7 @@ describe(getName(__filename), () => {
     let testRunConfig: ExtractConfig;
     let successFile: string;
 
-    const manager = require('.');
+    const manager: typeof _manager = require('.');
 
     beforeEach(async () => {
       workingDir = await tmp.dir({ unsafeCleanup: true });

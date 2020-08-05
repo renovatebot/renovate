@@ -29,7 +29,7 @@ export function detectMonorepos(packageFiles: Partial<PackageFile>[]): void {
     } = p;
     const basePath = path.dirname(packageFile);
     const packages = yarnWorkspacesPackages || lernaPackages;
-    if (packages && packages.length) {
+    if (packages?.length) {
       logger.debug(
         { packageFile, yarnWorkspacesPackages, lernaPackages },
         'Found monorepo packages with base path ' + JSON.stringify(basePath)

@@ -23,7 +23,7 @@ function getHostOpts(url: string): HttpOptions {
     url,
   });
   if (username && password) {
-    opts.auth = `${username}:${password}`;
+    Object.assign(opts, { username, password });
   }
   return opts;
 }
@@ -99,7 +99,7 @@ async function getPackagistFile(
   const { key, sha256 } = file;
   const fileName = key.replace('%hash%', sha256);
   const opts = getHostOpts(regUrl);
-  if (opts.auth || (opts.headers && opts.headers.authorization)) {
+  if (opts.password || opts.headers?.authorization) {
     return (await http.getJson<PackagistFile>(regUrl + '/' + fileName, opts))
       .body;
   }
@@ -248,15 +248,15 @@ async function packageLookup(
       providerPackages,
       includesPackages,
     } = allPackages;
-    if (packages && packages[name]) {
+    if (packages?.[name]) {
       const dep = extractDepReleases(packages[name]);
       dep.name = name;
       return dep;
     }
-    if (includesPackages && includesPackages[name]) {
+    if (includesPackages?.[name]) {
       return includesPackages[name];
     }
-    if (!(providerPackages && providerPackages[name])) {
+    if (!providerPackages?.[name]) {
       return null;
     }
     const pkgUrl = URL.resolve(
@@ -287,7 +287,7 @@ async function packageLookup(
   }
 }
 
-export async function getReleases({
+export function getReleases({
   lookupName,
   registryUrl,
 }: GetReleasesConfig): Promise<ReleaseResult> {

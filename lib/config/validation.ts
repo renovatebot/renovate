@@ -208,6 +208,7 @@ export async function validateConfig(
               'excludePackagePatterns',
               'sourceUrlPrefixes',
               'updateTypes',
+              'matchCurrentVersion',
             ];
             if (key === 'packageRules') {
               for (const packageRule of val) {
@@ -251,7 +252,8 @@ export async function validateConfig(
                 'datasourceTemplate',
                 'versioningTemplate',
               ];
-              for (const regexManager of val) {
+              // TODO: fix types
+              for (const regexManager of val as any[]) {
                 if (
                   Object.keys(regexManager).some(
                     (k) => !allowedKeys.includes(k)
@@ -311,7 +313,7 @@ export async function validateConfig(
               }
             }
             if (key === 'packagePatterns' || key === 'excludePackagePatterns') {
-              for (const pattern of val) {
+              for (const pattern of val as string[]) {
                 if (pattern !== '*') {
                   try {
                     regEx(pattern);
@@ -325,7 +327,7 @@ export async function validateConfig(
               }
             }
             if (key === 'fileMatch') {
-              for (const fileMatch of val) {
+              for (const fileMatch of val as string[]) {
                 try {
                   regEx(fileMatch);
                 } catch (e) {

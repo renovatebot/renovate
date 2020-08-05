@@ -6,8 +6,15 @@ import { id as datasource } from '.';
 const consulData: any = fs.readFileSync(
   'lib/datasource/terraform-module/__fixtures__/registry-consul.json'
 );
+const serviceDiscoveryResult: any = fs.readFileSync(
+  'lib/datasource/terraform-module/__fixtures__/service-discovery.json'
+);
+const serviceDiscoveryCustomResult: any = fs.readFileSync(
+  'lib/datasource/terraform-module/__fixtures__/service-custom-discovery.json'
+);
 
 const baseUrl = 'https://registry.terraform.io';
+const localTerraformEnterprisebaseUrl = 'https://terraform.foo.bar';
 
 describe('datasource/terraform-module', () => {
   describe('getReleases', () => {
@@ -24,7 +31,9 @@ describe('datasource/terraform-module', () => {
       httpMock
         .scope(baseUrl)
         .get('/v1/modules/hashicorp/consul/aws')
-        .reply(200, {});
+        .reply(200, {})
+        .get('/.well-known/terraform.json')
+        .reply(200, serviceDiscoveryResult);
       expect(
         await getPkgReleases({
           datasource,
@@ -37,7 +46,9 @@ describe('datasource/terraform-module', () => {
       httpMock
         .scope(baseUrl)
         .get('/v1/modules/hashicorp/consul/aws')
-        .reply(404, {});
+        .reply(404, {})
+        .get('/.well-known/terraform.json')
+        .reply(200, serviceDiscoveryResult);
       expect(
         await getPkgReleases({
           datasource,
@@ -50,7 +61,9 @@ describe('datasource/terraform-module', () => {
       httpMock
         .scope(baseUrl)
         .get('/v1/modules/hashicorp/consul/aws')
-        .replyWithError('');
+        .replyWithError('')
+        .get('/.well-known/terraform.json')
+        .reply(200, serviceDiscoveryResult);
       expect(
         await getPkgReleases({
           datasource,
@@ -63,7 +76,9 @@ describe('datasource/terraform-module', () => {
       httpMock
         .scope(baseUrl)
         .get('/v1/modules/hashicorp/consul/aws')
-        .reply(200, consulData);
+        .reply(200, consulData)
+        .get('/.well-known/terraform.json')
+        .reply(200, serviceDiscoveryResult);
       const res = await getPkgReleases({
         datasource,
         depName: 'hashicorp/consul/aws',
@@ -76,7 +91,9 @@ describe('datasource/terraform-module', () => {
       httpMock
         .scope(baseUrl)
         .get('/v1/modules/hashicorp/consul/aws')
-        .reply(200, consulData);
+        .reply(200, consulData)
+        .get('/.well-known/terraform.json')
+        .reply(200, serviceDiscoveryResult);
       const res = await getPkgReleases({
         datasource,
         depName: 'registry.terraform.io/hashicorp/consul/aws',
@@ -89,7 +106,9 @@ describe('datasource/terraform-module', () => {
       httpMock
         .scope('https://terraform.company.com')
         .get('/v1/modules/consul/foo')
-        .reply(200, consulData);
+        .reply(200, consulData)
+        .get('/.well-known/terraform.json')
+        .reply(200, serviceDiscoveryResult);
       const res = await getPkgReleases({
         datasource,
         depName: 'consul/foo',
@@ -97,6 +116,35 @@ describe('datasource/terraform-module', () => {
       });
       expect(res).toBeNull();
       expect(httpMock.getTrace()).toMatchSnapshot();
+    });
+    it('rejects servicediscovery', async () => {
+      httpMock
+        .scope('https://terraform.company.com')
+        .get('/.well-known/terraform.json')
+        .reply(404);
+      const res = await getPkgReleases({
+        datasource,
+        depName: 'consul/foo',
+        registryUrls: ['https://terraform.company.com'],
+      });
+      expect(res).toBeNull();
+      expect(httpMock.getTrace()).toMatchSnapshot();
+    });
+    it('processes real data on changed subpath', async () => {
+      httpMock
+        .scope(localTerraformEnterprisebaseUrl)
+        .get('/api/registry/v1/modules/hashicorp/consul/aws')
+        .reply(200, consulData)
+        .get('/.well-known/terraform.json')
+        .reply(200, serviceDiscoveryCustomResult);
+      const res = await getPkgReleases({
+        datasource,
+        registryUrls: ['https://terraform.foo.bar'],
+        depName: 'hashicorp/consul/aws',
+      });
+      expect(httpMock.getTrace()).toMatchSnapshot();
+      expect(res).toMatchSnapshot();
+      expect(res).not.toBeNull();
     });
   });
 });

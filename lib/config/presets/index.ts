@@ -1,5 +1,8 @@
 import is from '@sindresorhus/is';
-import { CONFIG_VALIDATION } from '../../constants/error-messages';
+import {
+  CONFIG_VALIDATION,
+  PLATFORM_RATE_LIMIT_EXCEEDED,
+} from '../../constants/error-messages';
 import { logger } from '../../logger';
 import { ExternalHostError } from '../../types/errors/external-host-error';
 import { regEx } from '../../util/regex';
@@ -207,6 +210,10 @@ export async function resolveConfigPresets(
           if (err instanceof ExternalHostError) {
             throw err;
           }
+          // istanbul ignore if
+          if (err.message === PLATFORM_RATE_LIMIT_EXCEEDED) {
+            throw err;
+          }
           const error = new Error(CONFIG_VALIDATION);
           if (err.message === 'dep not found') {
             error.validationError = `Cannot find preset's package (${preset})`;
@@ -233,11 +240,7 @@ export async function resolveConfigPresets(
           existingPresets.concat([preset])
         );
         // istanbul ignore if
-        if (
-          inputConfig &&
-          inputConfig.ignoreDeps &&
-          inputConfig.ignoreDeps.length === 0
-        ) {
+        if (inputConfig?.ignoreDeps?.length === 0) {
           delete presetConfig.description;
         }
         config = mergeChildConfig(config, presetConfig);
@@ -266,7 +269,7 @@ export async function resolveConfigPresets(
             )
           );
         } else {
-          (config[key] as RenovateConfig[]).push(element);
+          (config[key] as unknown[]).push(element);
         }
       }
     } else if (is.object(val) && !ignoredKeys.includes(key)) {

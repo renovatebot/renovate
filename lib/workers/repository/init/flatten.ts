@@ -5,7 +5,7 @@ export function flattenPackageRules(
   packageRules: PackageRule[]
 ): PackageRule[] {
   const res: PackageRule[] = [];
-  if (!(packageRules && packageRules.length)) {
+  if (!packageRules?.length) {
     return res;
   }
   for (const rule of packageRules) {

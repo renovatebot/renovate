@@ -62,7 +62,7 @@ export function extractBase(base: string): PackageDependency | null {
 }
 
 export function extractImage(image: Image): PackageDependency | null {
-  if (image && image.name && image.newTag) {
+  if (image?.name && image.newTag) {
     return {
       datasource: datasourceDocker.id,
       depName: image.name,

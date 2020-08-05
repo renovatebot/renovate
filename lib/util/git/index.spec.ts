@@ -1,5 +1,5 @@
 import fs from 'fs-extra';
-import Git from 'simple-git/promise';
+import Git from 'simple-git';
 import tmp from 'tmp-promise';
 import * as git from '.';
 
@@ -20,8 +20,8 @@ describe('platform/git', () => {
     await repo.add(['past_file']);
     await repo.commit('past message');
 
-    await repo.checkoutBranch('renovate/past_branch', 'master');
-    await repo.checkoutBranch('develop', 'master');
+    await repo.checkout(['-b', 'renovate/past_branch', 'master']);
+    await repo.checkout(['-b', 'develop', 'master']);
 
     await repo.checkout('master');
     await fs.writeFile(base.path + '/master_file', 'master');
@@ -31,10 +31,24 @@ describe('platform/git', () => {
       '--date=' + masterCommitDate.toISOString(),
     ]);
 
-    await repo.checkoutBranch('renovate/future_branch', 'master');
+    await repo.checkout(['-b', 'renovate/future_branch', 'master']);
     await fs.writeFile(base.path + '/future_file', 'future');
     await repo.add(['future_file']);
     await repo.commit('future message');
+
+    await repo.checkoutBranch('renovate/modified_branch', 'master');
+    await fs.writeFile(base.path + '/base_file', 'base');
+    await repo.add(['base_file']);
+    await repo.commit('base message');
+    await fs.writeFile(base.path + '/modified_file', 'modified');
+    await repo.add(['modified_file']);
+    await repo.commit('modification');
+
+    await repo.checkoutBranch('renovate/custom_author', 'master');
+    await fs.writeFile(base.path + '/custom_file', 'custom');
+    await repo.add(['custom_file']);
+    await repo.addConfig('user.email', 'custom@example.com');
+    await repo.commit('custom message');
 
     await repo.checkout('master');
   });
@@ -52,8 +66,8 @@ describe('platform/git', () => {
       extraCloneOpts: {
         '--config': 'extra.clone.config=test-extra-config-value',
       },
-      gitAuthorName: 'test',
-      gitAuthorEmail: 'test@example.com',
+      gitAuthorName: 'Jest',
+      gitAuthorEmail: 'Jest@example.com',
     });
     await git.syncGit();
   });
@@ -69,13 +83,13 @@ describe('platform/git', () => {
 
   describe('setBaseBranch(branchName)', () => {
     it('sets the base branch as master', async () => {
-      await expect(git.setBaseBranch('master')).resolves.not.toThrow();
+      await expect(git.setBranch('master')).resolves.not.toThrow();
     });
     it('sets non-master base branch', async () => {
-      await expect(git.setBaseBranch('develop')).resolves.not.toThrow();
+      await expect(git.setBranch('develop')).resolves.not.toThrow();
     });
     it('should throw if branch does not exist', async () => {
-      await expect(git.setBaseBranch('not_found')).rejects.toMatchSnapshot();
+      await expect(git.setBranch('not_found')).rejects.toMatchSnapshot();
     });
   });
   describe('getFileList()', () => {
@@ -114,6 +128,9 @@ describe('platform/git', () => {
     });
   });
   describe('isBranchStale()', () => {
+    beforeEach(async () => {
+      await git.setBranch('master');
+    });
     it('should return false if same SHA as master', async () => {
       expect(await git.isBranchStale('renovate/future_branch')).toBe(false);
     });
@@ -122,6 +139,18 @@ describe('platform/git', () => {
     });
     it('should throw if branch does not exist', async () => {
       await expect(git.isBranchStale('not_found')).rejects.toMatchSnapshot();
+    });
+  });
+  describe('isBranchModified()', () => {
+    it('should throw if branch does not exist', async () => {
+      await expect(git.isBranchModified('not_found')).rejects.toMatchSnapshot();
+    });
+    it('should return true when author matches', async () => {
+      expect(await git.isBranchModified('renovate/future_branch')).toBe(false);
+      expect(await git.isBranchModified('renovate/future_branch')).toBe(false);
+    });
+    it('should return false when custom author', async () => {
+      expect(await git.isBranchModified('renovate/custom_author')).toBe(true);
     });
   });
 
@@ -328,7 +357,7 @@ describe('platform/git', () => {
   describe('initRepo())', () => {
     it('should fetch latest', async () => {
       const repo = Git(base.path).silent(true);
-      await repo.checkoutBranch('test', 'master');
+      await repo.checkout(['-b', 'test', 'master']);
       await fs.writeFile(base.path + '/test', 'lorem ipsum');
       await repo.add(['test']);
       await repo.commit('past message2');
@@ -338,7 +367,7 @@ describe('platform/git', () => {
 
       expect(await git.getCommitMessages()).toMatchSnapshot();
 
-      await git.setBaseBranch('develop');
+      await git.setBranch('develop');
 
       await git.initRepo({
         localDir: tmpDir.path,
@@ -347,7 +376,7 @@ describe('platform/git', () => {
 
       expect(await git.branchExists('test')).toBeTruthy();
 
-      await git.setBaseBranch('test');
+      await git.setBranch('test');
 
       const msg = await git.getCommitMessages();
       expect(msg).toMatchSnapshot();
@@ -356,7 +385,7 @@ describe('platform/git', () => {
 
     it('should set branch prefix', async () => {
       const repo = Git(base.path).silent(true);
-      await repo.checkoutBranch('renovate/test', 'master');
+      await repo.checkout(['-b', 'renovate/test', 'master']);
       await fs.writeFile(base.path + '/test', 'lorem ipsum');
       await repo.add(['test']);
       await repo.commit('past message2');

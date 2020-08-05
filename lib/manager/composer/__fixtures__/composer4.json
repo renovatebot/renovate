@@ -15,6 +15,10 @@
     {
       "type": "composer",
       "url": "https://wpackagist.org"
+    },
+    {
+      "type": "composer",
+      "url": "https://gitlab.vendor.com/api/v4/group/2/-/packages/composer/packages.json"
     }
   ],
   "require": {

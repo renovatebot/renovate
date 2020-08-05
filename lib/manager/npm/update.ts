@@ -131,7 +131,7 @@ export function updateDependency({
       );
       return fileContent;
     }
-    if (parsedContents && parsedContents.resolutions) {
+    if (parsedContents?.resolutions) {
       let depKey: string;
       if (parsedContents.resolutions[depName]) {
         depKey = depName;

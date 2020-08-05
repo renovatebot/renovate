@@ -17,7 +17,6 @@ Array [
     "headers": Object {
       "accept": "application/json",
       "accept-encoding": "gzip, deflate",
-      "content-length": 0,
       "host": "gitlab.com",
       "private-token": "abc123",
       "user-agent": "https://github.com/renovatebot/renovate",
@@ -45,7 +44,6 @@ Array [
     "headers": Object {
       "accept": "application/json",
       "accept-encoding": "gzip, deflate",
-      "content-length": 0,
       "host": "gitlab.com",
       "private-token": "abc123",
       "user-agent": "https://github.com/renovatebot/renovate",
@@ -68,7 +66,6 @@ Array [
     "headers": Object {
       "accept": "application/json",
       "accept-encoding": "gzip, deflate",
-      "content-length": 0,
       "host": "gitlab.com",
       "private-token": "abc123",
       "user-agent": "https://github.com/renovatebot/renovate",
@@ -112,7 +109,6 @@ Array [
     "headers": Object {
       "accept": "application/json",
       "accept-encoding": "gzip, deflate",
-      "content-length": 0,
       "host": "gitlab.com",
       "private-token": "abc123",
       "user-agent": "https://github.com/renovatebot/renovate",
@@ -135,7 +131,6 @@ Array [
     "headers": Object {
       "accept": "application/json",
       "accept-encoding": "gzip, deflate",
-      "content-length": 0,
       "host": "gitlab.com",
       "private-token": "abc123",
       "user-agent": "https://github.com/renovatebot/renovate",
@@ -151,11 +146,11 @@ exports[`platform/gitlab addReviewers(issueNo, reviewers) should add the given r
 exports[`platform/gitlab createPr(branchName, title, body) auto-accepts the MR when requested 1`] = `
 Array [
   Object {
-    "body": "{\\"source_branch\\":\\"some-branch\\",\\"remove_source_branch\\":true,\\"title\\":\\"some-title\\",\\"description\\":\\"the-body\\",\\"labels\\":\\"\\"}",
+    "body": "{\\"source_branch\\":\\"some-branch\\",\\"target_branch\\":\\"master\\",\\"remove_source_branch\\":true,\\"title\\":\\"some-title\\",\\"description\\":\\"the-body\\",\\"labels\\":\\"\\"}",
     "headers": Object {
       "accept": "application/json",
       "accept-encoding": "gzip, deflate",
-      "content-length": 117,
+      "content-length": "142",
       "content-type": "application/json",
       "host": "gitlab.com",
       "private-token": "abc123",
@@ -191,7 +186,7 @@ Array [
     "headers": Object {
       "accept": "application/json",
       "accept-encoding": "gzip, deflate",
-      "content-length": 72,
+      "content-length": "72",
       "content-type": "application/json",
       "host": "gitlab.com",
       "private-token": "abc123",
@@ -209,7 +204,6 @@ Object {
   "displayNumber": "Merge Request #12345",
   "id": 1,
   "iid": 12345,
-  "isModified": false,
   "number": 12345,
 }
 `;
@@ -217,11 +211,11 @@ Object {
 exports[`platform/gitlab createPr(branchName, title, body) returns the PR 2`] = `
 Array [
   Object {
-    "body": "{\\"source_branch\\":\\"some-branch\\",\\"remove_source_branch\\":true,\\"title\\":\\"some-title\\",\\"description\\":\\"the-body\\",\\"labels\\":null}",
+    "body": "{\\"source_branch\\":\\"some-branch\\",\\"target_branch\\":\\"master\\",\\"remove_source_branch\\":true,\\"title\\":\\"some-title\\",\\"description\\":\\"the-body\\",\\"labels\\":null}",
     "headers": Object {
       "accept": "application/json",
       "accept-encoding": "gzip, deflate",
-      "content-length": 119,
+      "content-length": "144",
       "content-type": "application/json",
       "host": "gitlab.com",
       "private-token": "abc123",
@@ -239,7 +233,6 @@ Object {
   "displayNumber": "Merge Request #12345",
   "id": 1,
   "iid": 12345,
-  "isModified": false,
   "number": 12345,
 }
 `;
@@ -247,11 +240,11 @@ Object {
 exports[`platform/gitlab createPr(branchName, title, body) uses default branch 2`] = `
 Array [
   Object {
-    "body": "{\\"source_branch\\":\\"some-branch\\",\\"remove_source_branch\\":true,\\"title\\":\\"some-title\\",\\"description\\":\\"the-body\\",\\"labels\\":\\"\\"}",
+    "body": "{\\"source_branch\\":\\"some-branch\\",\\"target_branch\\":\\"master\\",\\"remove_source_branch\\":true,\\"title\\":\\"some-title\\",\\"description\\":\\"the-body\\",\\"labels\\":\\"\\"}",
     "headers": Object {
       "accept": "application/json",
       "accept-encoding": "gzip, deflate",
-      "content-length": 117,
+      "content-length": "142",
       "content-type": "application/json",
       "host": "gitlab.com",
       "private-token": "abc123",
@@ -320,22 +313,11 @@ Array [
     "url": "https://gitlab.com/api/v4/projects/undefined/merge_requests/42?include_diverged_commits_count=1",
   },
   Object {
-    "headers": Object {
-      "accept": "application/json",
-      "accept-encoding": "gzip, deflate",
-      "host": "gitlab.com",
-      "private-token": "abc123",
-      "user-agent": "https://github.com/renovatebot/renovate",
-    },
-    "method": "GET",
-    "url": "https://gitlab.com/api/v4/projects/undefined/repository/branches/some-branch",
-  },
-  Object {
     "body": "{\\"labels\\":\\"foo,renovate\\"}",
     "headers": Object {
       "accept": "application/json",
       "accept-encoding": "gzip, deflate",
-      "content-length": 25,
+      "content-length": "25",
       "content-type": "application/json",
       "host": "gitlab.com",
       "private-token": "abc123",
@@ -376,7 +358,7 @@ Array [
     "headers": Object {
       "accept": "application/json",
       "accept-encoding": "gzip, deflate",
-      "content-length": 44,
+      "content-length": "44",
       "content-type": "application/json",
       "host": "gitlab.com",
       "private-token": "abc123",
@@ -417,7 +399,7 @@ Array [
     "headers": Object {
       "accept": "application/json",
       "accept-encoding": "gzip, deflate",
-      "content-length": 44,
+      "content-length": "44",
       "content-type": "application/json",
       "host": "gitlab.com",
       "private-token": "abc123",
@@ -577,7 +559,7 @@ Array [
     "headers": Object {
       "accept": "application/json",
       "accept-encoding": "gzip, deflate",
-      "content-length": 49,
+      "content-length": "49",
       "content-type": "application/json",
       "host": "gitlab.com",
       "private-token": "abc123",
@@ -641,11 +623,11 @@ Array [
     "url": "https://gitlab.com/api/v4/projects/undefined/issues/2",
   },
   Object {
-    "body": "{\\"description\\":\\"newer-content\\"}",
+    "body": "{\\"title\\":\\"title-2\\",\\"description\\":\\"newer-content\\"}",
     "headers": Object {
       "accept": "application/json",
       "accept-encoding": "gzip, deflate",
-      "content-length": 31,
+      "content-length": "49",
       "content-type": "application/json",
       "host": "gitlab.com",
       "private-token": "abc123",
@@ -675,7 +657,7 @@ Array [
     "headers": Object {
       "accept": "application/json",
       "accept-encoding": "gzip, deflate",
-      "content-length": 23,
+      "content-length": "23",
       "content-type": "application/json",
       "host": "gitlab.com",
       "private-token": "abc123",
@@ -832,10 +814,9 @@ Object {
   "commits": 1,
   "deletions": 1,
   "displayNumber": "Merge Request #91",
+  "hasAssignees": false,
+  "hasReviewers": false,
   "iid": 91,
-  "isConflicted": true,
-  "isModified": true,
-  "isStale": false,
   "number": 91,
   "source_branch": "some-branch",
   "state": "open",
@@ -889,17 +870,6 @@ Array [
     },
     "method": "GET",
     "url": "https://gitlab.com/api/v4/projects/some%2Frepo/repository/commits/0d9c7726c3d628b7e28af234595cfd20febdbf8e/statuses",
-  },
-  Object {
-    "headers": Object {
-      "accept": "application/json",
-      "accept-encoding": "gzip, deflate",
-      "host": "gitlab.com",
-      "private-token": "abc123",
-      "user-agent": "https://github.com/renovatebot/renovate",
-    },
-    "method": "GET",
-    "url": "https://gitlab.com/api/v4/projects/some%2Frepo/repository/branches/some-branch",
   },
 ]
 `;
@@ -1171,11 +1141,11 @@ Object {
   "description": "a merge request",
   "displayNumber": "Merge Request #12345",
   "diverged_commits_count": 5,
+  "hasAssignees": false,
+  "hasReviewers": false,
   "id": 1,
   "iid": 12345,
   "isConflicted": true,
-  "isModified": false,
-  "isStale": true,
   "merge_status": "cannot_be_merged",
   "number": 12345,
   "source_branch": "some-branch",
@@ -1198,17 +1168,6 @@ Array [
     "method": "GET",
     "url": "https://gitlab.com/api/v4/projects/undefined/merge_requests/12345?include_diverged_commits_count=1",
   },
-  Object {
-    "headers": Object {
-      "accept": "application/json",
-      "accept-encoding": "gzip, deflate",
-      "host": "gitlab.com",
-      "private-token": "abc123",
-      "user-agent": "https://github.com/renovatebot/renovate",
-    },
-    "method": "GET",
-    "url": "https://gitlab.com/api/v4/projects/undefined/repository/branches/some-branch",
-  },
 ]
 `;
 
@@ -1220,11 +1179,11 @@ Object {
   "description": "a merge request",
   "displayNumber": "Merge Request #12345",
   "diverged_commits_count": 2,
+  "hasAssignees": true,
+  "hasReviewers": false,
   "id": 1,
   "iid": 12345,
   "isConflicted": true,
-  "isModified": true,
-  "isStale": true,
   "merge_status": "cannot_be_merged",
   "number": 12345,
   "source_branch": "some-branch",
@@ -1247,17 +1206,6 @@ Array [
     "method": "GET",
     "url": "https://gitlab.com/api/v4/projects/undefined/merge_requests/12345?include_diverged_commits_count=1",
   },
-  Object {
-    "headers": Object {
-      "accept": "application/json",
-      "accept-encoding": "gzip, deflate",
-      "host": "gitlab.com",
-      "private-token": "abc123",
-      "user-agent": "https://github.com/renovatebot/renovate",
-    },
-    "method": "GET",
-    "url": "https://gitlab.com/api/v4/projects/undefined/repository/branches/some-branch",
-  },
 ]
 `;
 
@@ -1269,10 +1217,10 @@ Object {
   "description": "a merge request",
   "displayNumber": "Merge Request #12345",
   "diverged_commits_count": 5,
+  "hasAssignees": true,
+  "hasReviewers": false,
   "id": 1,
   "iid": 12345,
-  "isModified": true,
-  "isStale": true,
   "number": 12345,
   "source_branch": "some-branch",
   "state": "open",
@@ -1315,17 +1263,6 @@ Array [
     },
     "method": "GET",
     "url": "https://gitlab.com/api/v4/projects/some%2Frepo/repository/commits/0d9c7726c3d628b7e28af234595cfd20febdbf8e/statuses",
-  },
-  Object {
-    "headers": Object {
-      "accept": "application/json",
-      "accept-encoding": "gzip, deflate",
-      "host": "gitlab.com",
-      "private-token": "abc123",
-      "user-agent": "https://github.com/renovatebot/renovate",
-    },
-    "method": "GET",
-    "url": "https://gitlab.com/api/v4/projects/some%2Frepo/repository/branches/some-branch",
   },
 ]
 `;
@@ -1654,7 +1591,7 @@ Array [
     "headers": Object {
       "accept": "application/json",
       "accept-encoding": "gzip, deflate",
-      "content-length": 36,
+      "content-length": "36",
       "content-type": "application/json",
       "host": "gitlab.com",
       "private-token": "abc123",
@@ -1667,22 +1604,6 @@ Array [
 `;
 
 exports[`platform/gitlab setBaseBranch(branchName) sets the base branch 1`] = `
-Array [
-  Object {
-    "headers": Object {
-      "accept": "application/json",
-      "accept-encoding": "gzip, deflate",
-      "host": "gitlab.com",
-      "private-token": "abc123",
-      "user-agent": "https://github.com/renovatebot/renovate",
-    },
-    "method": "GET",
-    "url": "https://gitlab.com/api/v4/projects/some%2Frepo",
-  },
-]
-`;
-
-exports[`platform/gitlab setBaseBranch(branchName) uses default base branch 1`] = `
 Array [
   Object {
     "headers": Object {
@@ -1716,7 +1637,7 @@ Array [
     "headers": Object {
       "accept": "application/json",
       "accept-encoding": "gzip, deflate",
-      "content-length": 101,
+      "content-length": "101",
       "content-type": "application/json",
       "host": "gitlab.com",
       "private-token": "abc123",
@@ -1757,7 +1678,7 @@ Array [
     "headers": Object {
       "accept": "application/json",
       "accept-encoding": "gzip, deflate",
-      "content-length": 100,
+      "content-length": "100",
       "content-type": "application/json",
       "host": "gitlab.com",
       "private-token": "abc123",
@@ -1798,7 +1719,7 @@ Array [
     "headers": Object {
       "accept": "application/json",
       "accept-encoding": "gzip, deflate",
-      "content-length": 101,
+      "content-length": "101",
       "content-type": "application/json",
       "host": "gitlab.com",
       "private-token": "abc123",
@@ -1828,7 +1749,7 @@ Array [
     "headers": Object {
       "accept": "application/json",
       "accept-encoding": "gzip, deflate",
-      "content-length": 38,
+      "content-length": "38",
       "content-type": "application/json",
       "host": "gitlab.com",
       "private-token": "abc123",

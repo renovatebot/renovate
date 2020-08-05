@@ -106,7 +106,7 @@ stringData:
 ## Authentication
 
 You need to select a user account for `renovate` to assume the identity of, and generate a Personal Access Token. It is recommended to be `@renovate-bot` if you are using a self-hosted server and can pick any username you want.
-It is also recommended that you configure `config.gitAuthor` with the same identity as your Renovate user, e.g. like `"gitAuthor": "Renovate Bot <bot@renovateapp.com>"`.
+It is also recommended that you configure `config.gitAuthor` with the same identity as your Renovate user, e.g. like `"gitAuthor": "Renovate Bot <renovate@whitesourcesoftware.com>"`.
 
 #### GitHub Enterprise
 
@@ -348,3 +348,7 @@ spec:
                       name: renovate-env
           restartPolicy: Never
 ```
+
+## Logging
+
+It's recommended to configure `LOG_LEVEL=debug` and `LOG_FORMAT=json` in environment if you are ingesting/parsing logs into another system. Debug logging is usually necessary for any debugging, while JSON format will mean that the output is parseable.

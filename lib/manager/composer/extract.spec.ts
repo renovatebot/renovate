@@ -58,7 +58,7 @@ describe('lib/manager/composer/extract', () => {
     it('extracts repositories and registryUrls', async () => {
       const res = await extractPackageFile(requirements4, packageFile);
       expect(res).toMatchSnapshot();
-      expect(res.registryUrls).toHaveLength(2);
+      expect(res.registryUrls).toHaveLength(3);
     });
     it('extracts object repositories and registryUrls with lock file', async () => {
       fs.readLocalFile.mockResolvedValue(requirements5Lock);

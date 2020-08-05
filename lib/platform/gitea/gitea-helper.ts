@@ -33,6 +33,10 @@ export interface PR {
     sha: string;
     repo?: Repo;
   };
+  assignee?: {
+    login?: string;
+  };
+  assignees?: any[];
 }
 
 export interface Issue {

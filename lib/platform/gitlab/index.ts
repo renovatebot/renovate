@@ -32,10 +32,11 @@ import {
   EnsureIssueConfig,
   FindPRConfig,
   Issue,
-  PlatformConfig,
+  PlatformParams,
+  PlatformResult,
   Pr,
-  RepoConfig,
   RepoParams,
+  RepoResult,
   VulnerabilityAlert,
 } from '../common';
 import { smartTruncate } from '../utils/pr-body';
@@ -59,8 +60,6 @@ const defaultConfigFile = configFileNames[0];
 let config: {
   repository: string;
   localDir: string;
-  defaultBranch: string;
-  baseBranch: string;
   email: string;
   prList: any[];
   issueList: any[];
@@ -78,10 +77,7 @@ let authorId: number;
 export async function initPlatform({
   endpoint,
   token,
-}: {
-  token: string;
-  endpoint: string;
-}): Promise<PlatformConfig> {
+}: PlatformParams): Promise<PlatformResult> {
   if (!token) {
     throw new Error('Init: You must configure a GitLab personal access token');
   }
@@ -108,7 +104,7 @@ export async function initPlatform({
     );
     throw new Error('Init: Authentication failure');
   }
-  const platformConfig: PlatformConfig = {
+  const platformConfig: PlatformResult = {
     endpoint: defaults.endpoint,
     gitAuthor,
   };
@@ -142,12 +138,13 @@ export async function initRepo({
   repository,
   localDir,
   optimizeForDisabled,
-}: RepoParams): Promise<RepoConfig> {
+}: RepoParams): Promise<RepoResult> {
   config = {} as any;
   config.repository = urlEscape(repository);
   config.localDir = localDir;
 
   let res: HttpResponse<RepoResponse>;
+  let defaultBranch: string;
   try {
     res = await gitlabApi.getJson<RepoResponse>(
       `projects/${config.repository}`
@@ -199,10 +196,9 @@ export async function initRepo({
         throw new Error(REPOSITORY_DISABLED);
       }
     }
-    config.defaultBranch = res.body.default_branch;
-    config.baseBranch = config.defaultBranch;
+    defaultBranch = res.body.default_branch;
     config.mergeMethod = res.body.merge_method || 'merge';
-    logger.debug(`${repository} default branch = ${config.baseBranch}`);
+    logger.debug(`${repository} default branch = ${defaultBranch}`);
     delete config.prList;
     logger.debug('Enabling Git FS');
     const opts = hostRules.find({
@@ -254,8 +250,8 @@ export async function initRepo({
     logger.debug({ err }, 'Unknown GitLab initRepo error');
     throw err;
   }
-  const repoConfig: RepoConfig = {
-    baseBranch: config.baseBranch,
+  const repoConfig: RepoResult = {
+    defaultBranch,
     isFork: !!res.body.forked_from_project,
   };
   return repoConfig;
@@ -265,12 +261,8 @@ export function getRepoForceRebase(): Promise<boolean> {
   return Promise.resolve(config?.mergeMethod !== 'merge');
 }
 
-export async function setBaseBranch(
-  branchName = config.baseBranch
-): Promise<string> {
-  logger.debug(`Setting baseBranch to ${branchName}`);
-  config.baseBranch = branchName;
-  const baseBranchSha = await git.setBaseBranch(branchName);
+export async function setBaseBranch(branchName: string): Promise<string> {
+  const baseBranchSha = await git.setBranch(branchName);
   return baseBranchSha;
 }
 
@@ -362,16 +354,13 @@ export async function getBranchStatus(
 
 export async function createPr({
   branchName,
+  targetBranch,
   prTitle: title,
   prBody: rawDescription,
   labels,
-  useDefaultBranch,
   platformOptions,
 }: CreatePRConfig): Promise<Pr> {
   const description = sanitize(rawDescription);
-  const targetBranch = useDefaultBranch
-    ? config.defaultBranch
-    : config.baseBranch;
   logger.debug(`Creating Merge Request: ${title}`);
   const res = await gitlabApi.postJson<Pr & { iid: number }>(
     `projects/${config.repository}/merge_requests`,
@@ -390,12 +379,11 @@ export async function createPr({
   pr.number = pr.iid;
   pr.branchName = branchName;
   pr.displayNumber = `Merge Request #${pr.iid}`;
-  pr.isModified = false;
   // istanbul ignore if
   if (config.prList) {
     config.prList.push(pr);
   }
-  if (platformOptions && platformOptions.gitLabAutomerge) {
+  if (platformOptions?.gitLabAutomerge) {
     try {
       const desiredStatus = 'can_be_merged';
       const retryTimes = 5;
@@ -442,6 +430,8 @@ export async function getPr(iid: number): Promise<Pr> {
         description: string;
         diverged_commits_count: number;
         merge_status: string;
+        assignee?: { id?: number };
+        assignees?: { id?: number }[];
       }
     >(url)
   ).body;
@@ -451,9 +441,11 @@ export async function getPr(iid: number): Promise<Pr> {
   pr.number = pr.iid;
   pr.displayNumber = `Merge Request #${pr.iid}`;
   pr.body = pr.description;
-  pr.isStale = pr.diverged_commits_count > 0;
   pr.state = pr.state === 'opened' ? PR_STATE_OPEN : pr.state;
-  pr.isModified = true;
+  pr.hasAssignees = !!(pr.assignee?.id || pr.assignees?.[0]?.id);
+  delete pr.assignee;
+  delete pr.assignees;
+  pr.hasReviewers = false;
   if (pr.merge_status === 'cannot_be_merged') {
     logger.debug('pr cannot be merged');
     pr.canMerge = false;
@@ -462,33 +454,6 @@ export async function getPr(iid: number): Promise<Pr> {
     const branchStatus = await getBranchStatus(pr.branchName, []);
     if (branchStatus === BranchStatus.green) {
       pr.canMerge = true;
-    }
-  }
-  // Check if the most recent branch commit is by us
-  // If not then we don't allow it to be rebased, in case someone's changes would be lost
-  const branchUrl = `projects/${
-    config.repository
-  }/repository/branches/${urlEscape(pr.source_branch)}`;
-  try {
-    const branch = (
-      await gitlabApi.getJson<{ commit: { author_email: string } }>(branchUrl)
-    ).body;
-    const branchCommitEmail =
-      branch && branch.commit ? branch.commit.author_email : null;
-    if (branchCommitEmail === global.gitAuthor.email) {
-      pr.isModified = false;
-    } else {
-      logger.debug(
-        { branchCommitEmail, configEmail: global.gitAuthor.email, iid: pr.iid },
-        'Last committer to branch does not match bot email, so PR cannot be rebased.'
-      );
-      pr.isModified = true;
-    }
-  } catch (err) {
-    logger.debug({ err }, 'Error getting PR branch');
-    if (pr.state === PR_STATE_OPEN || err.statusCode !== 404) {
-      logger.warn({ err }, 'Error getting PR branch');
-      pr.isConflicted = true;
     }
   }
   return pr;
@@ -554,7 +519,7 @@ export function getPrBody(input: string): string {
       .replace(/Pull Request/g, 'Merge Request')
       .replace(/PR/g, 'MR')
       .replace(/\]\(\.\.\/pull\//g, '](!'),
-    60000
+    50000
   );
 }
 
@@ -720,25 +685,29 @@ export async function findIssue(title: string): Promise<Issue | null> {
 
 export async function ensureIssue({
   title,
+  reuseTitle,
   body,
 }: EnsureIssueConfig): Promise<'updated' | 'created' | null> {
   logger.debug(`ensureIssue()`);
   const description = getPrBody(sanitize(body));
   try {
     const issueList = await getIssueList();
-    const issue = issueList.find((i: { title: string }) => i.title === title);
+    let issue = issueList.find((i: { title: string }) => i.title === title);
+    if (!issue) {
+      issue = issueList.find((i: { title: string }) => i.title === reuseTitle);
+    }
     if (issue) {
       const existingDescription = (
         await gitlabApi.getJson<{ description: string }>(
           `projects/${config.repository}/issues/${issue.iid}`
         )
       ).body.description;
-      if (existingDescription !== description) {
-        logger.debug('Updating issue body');
+      if (issue.title !== title || existingDescription !== description) {
+        logger.debug('Updating issue');
         await gitlabApi.putJson(
           `projects/${config.repository}/issues/${issue.iid}`,
           {
-            body: { description },
+            body: { title, description },
           }
         );
         return 'updated';

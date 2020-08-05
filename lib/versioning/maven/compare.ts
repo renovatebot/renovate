@@ -520,8 +520,10 @@ function autoExtendMavenRange(
     rightValue !== null &&
     incrementRangeValue(leftValue) === rightValue
   ) {
-    interval.leftValue = coerceRangeValue(leftValue, newValue);
-    interval.rightValue = incrementRangeValue(interval.leftValue);
+    if (compare(newValue, leftValue) !== -1) {
+      interval.leftValue = coerceRangeValue(leftValue, newValue);
+      interval.rightValue = incrementRangeValue(interval.leftValue);
+    }
   } else if (rightValue !== null) {
     if (interval.rightType === INCLUDING_POINT) {
       const tokens = tokenize(rightValue);

@@ -64,8 +64,7 @@ export async function updateArtifacts({
   const match = new RegExp(/^COCOAPODS: (?<cocoapodsVersion>.*)$/m).exec(
     existingLockFileContent
   );
-  const tagConstraint =
-    match && match.groups ? match.groups.cocoapodsVersion : null;
+  const tagConstraint = match?.groups?.cocoapodsVersion ?? null;
 
   const cmd = [...getPluginCommands(newPackageFileContent), 'pod install'];
   const execOptions: ExecOptions = {

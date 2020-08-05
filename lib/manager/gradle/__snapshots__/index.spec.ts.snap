@@ -8,6 +8,7 @@ Array [
       "cwd": "localDir",
       "encoding": "utf-8",
       "env": Object {
+        "GRADLE_OPTS": "-Dorg.gradle.parallel=true -Dorg.gradle.configureondemand=true -Dorg.gradle.daemon=false -Dorg.gradle.caching=false",
         "HOME": "/home/user",
         "HTTPS_PROXY": "https://example.com",
         "HTTP_PROXY": "http://example.com",
@@ -30,6 +31,7 @@ Array [
       "cwd": "localDir",
       "encoding": "utf-8",
       "env": Object {
+        "GRADLE_OPTS": "-Dorg.gradle.parallel=true -Dorg.gradle.configureondemand=true -Dorg.gradle.daemon=false -Dorg.gradle.caching=false",
         "HOME": "/home/user",
         "HTTPS_PROXY": "https://example.com",
         "HTTP_PROXY": "http://example.com",
@@ -52,6 +54,7 @@ Array [
       "cwd": "localDir",
       "encoding": "utf-8",
       "env": Object {
+        "GRADLE_OPTS": "-Dorg.gradle.parallel=true -Dorg.gradle.configureondemand=true -Dorg.gradle.daemon=false -Dorg.gradle.caching=false",
         "HOME": "/home/user",
         "HTTPS_PROXY": "https://example.com",
         "HTTP_PROXY": "http://example.com",
@@ -74,6 +77,7 @@ Array [
       "cwd": "localDir",
       "encoding": "utf-8",
       "env": Object {
+        "GRADLE_OPTS": "-Dorg.gradle.parallel=true -Dorg.gradle.configureondemand=true -Dorg.gradle.daemon=false -Dorg.gradle.caching=false",
         "HOME": "/home/user",
         "HTTPS_PROXY": "https://example.com",
         "HTTP_PROXY": "http://example.com",
@@ -96,6 +100,7 @@ Array [
       "cwd": "localDir",
       "encoding": "utf-8",
       "env": Object {
+        "GRADLE_OPTS": "-Dorg.gradle.parallel=true -Dorg.gradle.configureondemand=true -Dorg.gradle.daemon=false -Dorg.gradle.caching=false",
         "HOME": "/home/user",
         "HTTPS_PROXY": "https://example.com",
         "HTTP_PROXY": "http://example.com",
@@ -118,6 +123,7 @@ Array [
       "cwd": "localDir",
       "encoding": "utf-8",
       "env": Object {
+        "GRADLE_OPTS": "-Dorg.gradle.parallel=true -Dorg.gradle.configureondemand=true -Dorg.gradle.daemon=false -Dorg.gradle.caching=false",
         "HOME": "/home/user",
         "HTTPS_PROXY": "https://example.com",
         "HTTP_PROXY": "http://example.com",
@@ -140,6 +146,7 @@ Array [
       "cwd": "localDir",
       "encoding": "utf-8",
       "env": Object {
+        "GRADLE_OPTS": "-Dorg.gradle.parallel=true -Dorg.gradle.configureondemand=true -Dorg.gradle.daemon=false -Dorg.gradle.caching=false",
         "HOME": "/home/user",
         "HTTPS_PROXY": "https://example.com",
         "HTTP_PROXY": "http://example.com",
@@ -323,6 +330,7 @@ Array [
       "cwd": "localDir",
       "encoding": "utf-8",
       "env": Object {
+        "GRADLE_OPTS": "-Dorg.gradle.parallel=true -Dorg.gradle.configureondemand=true -Dorg.gradle.daemon=false -Dorg.gradle.caching=false",
         "HOME": "/home/user",
         "HTTPS_PROXY": "https://example.com",
         "HTTP_PROXY": "http://example.com",
@@ -428,6 +436,7 @@ Array [
       "cwd": "localDir/foo",
       "encoding": "utf-8",
       "env": Object {
+        "GRADLE_OPTS": "-Dorg.gradle.parallel=true -Dorg.gradle.configureondemand=true -Dorg.gradle.daemon=false -Dorg.gradle.caching=false",
         "HOME": "/home/user",
         "HTTPS_PROXY": "https://example.com",
         "HTTP_PROXY": "http://example.com",
@@ -611,6 +620,7 @@ Array [
       "cwd": "localDir",
       "encoding": "utf-8",
       "env": Object {
+        "GRADLE_OPTS": "-Dorg.gradle.parallel=true -Dorg.gradle.configureondemand=true -Dorg.gradle.daemon=false -Dorg.gradle.caching=false",
         "HOME": "/home/user",
         "HTTPS_PROXY": "https://example.com",
         "HTTP_PROXY": "http://example.com",
@@ -648,11 +658,12 @@ Array [
     },
   },
   Object {
-    "cmd": "docker run --rm --name=renovate_gradle --label=renovate_child -v \\"localDir\\":\\"localDir\\" -w \\"localDir\\" renovate/gradle bash -l -c \\"./gradlew --init-script renovate-plugin.gradle renovate\\"",
+    "cmd": "docker run --rm --name=renovate_gradle --label=renovate_child -v \\"localDir\\":\\"localDir\\" -e GRADLE_OPTS -w \\"localDir\\" renovate/gradle bash -l -c \\"./gradlew --init-script renovate-plugin.gradle renovate\\"",
     "options": Object {
       "cwd": "localDir",
       "encoding": "utf-8",
       "env": Object {
+        "GRADLE_OPTS": "-Dorg.gradle.parallel=true -Dorg.gradle.configureondemand=true -Dorg.gradle.daemon=false -Dorg.gradle.caching=false",
         "HOME": "/home/user",
         "HTTPS_PROXY": "https://example.com",
         "HTTP_PROXY": "http://example.com",
@@ -688,11 +699,12 @@ Array [
     },
   },
   Object {
-    "cmd": "docker run --rm --name=renovate_gradle --label=renovate_child -v \\"localDir\\":\\"localDir\\" -w \\"localDir\\" renovate/gradle bash -l -c \\"./gradlew --init-script renovate-plugin.gradle renovate\\"",
+    "cmd": "docker run --rm --name=renovate_gradle --label=renovate_child -v \\"localDir\\":\\"localDir\\" -e GRADLE_OPTS -w \\"localDir\\" renovate/gradle bash -l -c \\"./gradlew --init-script renovate-plugin.gradle renovate\\"",
     "options": Object {
       "cwd": "localDir",
       "encoding": "utf-8",
       "env": Object {
+        "GRADLE_OPTS": "-Dorg.gradle.parallel=true -Dorg.gradle.configureondemand=true -Dorg.gradle.daemon=false -Dorg.gradle.caching=false",
         "HOME": "/home/user",
         "HTTPS_PROXY": "https://example.com",
         "HTTP_PROXY": "http://example.com",
@@ -728,11 +740,12 @@ Array [
     },
   },
   Object {
-    "cmd": "docker run --rm --name=renovate_gradle --label=renovate_child -v \\"localDir\\":\\"localDir\\" -w \\"localDir\\" renovate/gradle bash -l -c \\"gradle --init-script renovate-plugin.gradle renovate\\"",
+    "cmd": "docker run --rm --name=renovate_gradle --label=renovate_child -v \\"localDir\\":\\"localDir\\" -e GRADLE_OPTS -w \\"localDir\\" renovate/gradle bash -l -c \\"gradle --init-script renovate-plugin.gradle renovate\\"",
     "options": Object {
       "cwd": "localDir",
       "encoding": "utf-8",
       "env": Object {
+        "GRADLE_OPTS": "-Dorg.gradle.parallel=true -Dorg.gradle.configureondemand=true -Dorg.gradle.daemon=false -Dorg.gradle.caching=false",
         "HOME": "/home/user",
         "HTTPS_PROXY": "https://example.com",
         "HTTP_PROXY": "http://example.com",
@@ -795,6 +808,7 @@ Array [
       "cwd": "localDir",
       "encoding": "utf-8",
       "env": Object {
+        "GRADLE_OPTS": "-Dorg.gradle.parallel=true -Dorg.gradle.configureondemand=true -Dorg.gradle.daemon=false -Dorg.gradle.caching=false",
         "HOME": "/home/user",
         "HTTPS_PROXY": "https://example.com",
         "HTTP_PROXY": "http://example.com",
@@ -814,3 +828,5 @@ exports[`manager/gradle/index updateDependency should update an existing module 
 exports[`manager/gradle/index updateDependency should update an existing plugin dependency 1`] = `Array []`;
 
 exports[`manager/gradle/index updateDependency should update an existing plugin dependency with Kotlin DSL 1`] = `Array []`;
+
+exports[`manager/gradle/index updateDependency should update dependencies in same file 1`] = `Array []`;

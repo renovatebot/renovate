@@ -7,9 +7,8 @@ Object {
   "canMerge": true,
   "createdAt": "2014-04-01T05:14:20Z",
   "displayNumber": "Pull Request #42",
+  "hasAssignees": false,
   "isConflicted": false,
-  "isModified": undefined,
-  "isStale": undefined,
   "number": 42,
   "sha": "0d9c7726c3d628b7e28af234595cfd20febdbf8e",
   "sourceRepo": "some/repo",
@@ -26,9 +25,8 @@ Object {
   "canMerge": true,
   "createdAt": "2014-04-01T05:14:20Z",
   "displayNumber": "Pull Request #42",
+  "hasAssignees": false,
   "isConflicted": false,
-  "isModified": undefined,
-  "isStale": undefined,
   "number": 42,
   "sha": "0d9c7726c3d628b7e28af234595cfd20febdbf8e",
   "sourceRepo": "some/repo",
@@ -45,9 +43,8 @@ Object {
   "canMerge": true,
   "createdAt": "2015-03-22T20:36:16Z",
   "displayNumber": "Pull Request #1",
+  "hasAssignees": false,
   "isConflicted": false,
-  "isModified": true,
-  "isStale": false,
   "number": 1,
   "sha": "some-head-sha",
   "sourceRepo": "some/repo",
@@ -64,9 +61,8 @@ Object {
   "canMerge": true,
   "createdAt": "2015-03-22T20:36:16Z",
   "displayNumber": "Pull Request #1",
+  "hasAssignees": false,
   "isConflicted": false,
-  "isModified": false,
-  "isStale": false,
   "number": 1,
   "sha": "some-head-sha",
   "sourceRepo": "some/repo",
@@ -84,9 +80,8 @@ Array [
     "canMerge": true,
     "createdAt": "2015-03-22T20:36:16Z",
     "displayNumber": "Pull Request #1",
+    "hasAssignees": false,
     "isConflicted": false,
-    "isModified": undefined,
-    "isStale": undefined,
     "number": 1,
     "sha": "some-head-sha",
     "sourceRepo": "some/repo",
@@ -100,9 +95,8 @@ Array [
     "canMerge": true,
     "createdAt": "2011-08-18T22:30:38Z",
     "displayNumber": "Pull Request #2",
+    "hasAssignees": false,
     "isConflicted": false,
-    "isModified": undefined,
-    "isStale": undefined,
     "number": 2,
     "sha": "other-head-sha",
     "sourceRepo": "some/repo",
@@ -143,21 +137,21 @@ Object {
 
 exports[`platform/gitea initRepo should fall back to merge method "merge" 1`] = `
 Object {
-  "baseBranch": "master",
+  "defaultBranch": "master",
   "isFork": false,
 }
 `;
 
 exports[`platform/gitea initRepo should fall back to merge method "rebase-merge" 1`] = `
 Object {
-  "baseBranch": "master",
+  "defaultBranch": "master",
   "isFork": false,
 }
 `;
 
 exports[`platform/gitea initRepo should fall back to merge method "squash" 1`] = `
 Object {
-  "baseBranch": "master",
+  "defaultBranch": "master",
   "isFork": false,
 }
 `;

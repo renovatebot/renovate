@@ -11,7 +11,7 @@ export function getPrNotes(config: BranchConfig): string {
       for (const note of upgrade.prBodyNotes) {
         try {
           const res = template.compile(note, upgrade).trim();
-          if (res && res.length) {
+          if (res?.length) {
             notes.push(res);
           }
         } catch (err) {
@@ -40,7 +40,7 @@ export function getPrExtraNotes(config: BranchConfig): string {
 
   if (config.isPin) {
     res += emojify(
-      `:pushpin: **Important**: Renovate will wait until you have merged this Pin PR before creating any *upgrade* PRs for the affected packages. Add the preset \`:preserveSemverRanges\` your config if you instead don't wish to pin dependencies.\n\n`
+      `:pushpin: **Important**: Renovate will wait until you have merged this Pin PR before creating any *upgrade* PRs for the affected packages. Add the preset \`:preserveSemverRanges\` to your config if you instead don't wish to pin dependencies.\n\n`
     );
   }
 

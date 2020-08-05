@@ -230,6 +230,39 @@ This is used to manually restrict which versions are possible to upgrade to base
 
 Renovate's default behaviour is to reuse/reopen a single Config Warning issue in each repository so as to keep the "noise" down. However for some people this has the downside that the config warning won't be sorted near the top if you view issues by creation date. Configure this option to `false` if you prefer Renovate to open a new issue whenever there is a config warning.
 
+## dependencyDashboard
+
+Configuring `dependencyDashboard` to `true` will lead to the creation of a "Dependency Dashboard" issue within the repository. This issue contains a list of all PRs pending, open, closed (unmerged) or in error. The goal of this issue is to give visibility into all updates that Renovate is managing.
+
+Examples of what having a Dependency Dashboard will allow you to do:
+
+- View all PRs in one place, rather than having to filter PRs by author
+- Rebase/retry multiple PRs without having to open each individually
+- Override any rate limiting (e.g. concurrent PRs) or scheduling to force Renovate to create a PR that would otherwise be suppressed
+- Recreate an unmerged PR (e.g. for a major update that you postponed by closing the original PR)
+
+Note: Enabling the Dependency Dashboard does not itself change any of the "control flow" of Renovate, e.g. it will otherwise still create and manage PRs exactly as it always has, including scheduling and rate limiting. The Dependency Dashboard therefore provides visibility as well as additional control.
+
+## dependencyDashboardApproval
+
+Setting `dependencyDashboardApproval` to `true` means that Renovate will no longer create branches/PRs automatically but instead wait for manual approval from within the Dependency Dashboard.
+
+In this case, the Dependency Dashboard _does_ change the flow of Renovate, because PRs will stop appearing until you approve them within the issue. Instead of enabling this repository-wide, you may instead with to use package rules to enable it selectively, e.g. for major updates only, or for certain package managers, etc. i.e. it is possible to require approval for only certain types of updates only.
+
+Note: Enabling Dependency Dashboard Approval implicitly enables `dependencyDashboard` too, so it is not necessary to configure both to `true`.
+
+## dependencyDashboardAutoclose
+
+You can configure this to `true` if you prefer Renovate to close an existing Dependency Dashboard whenever there are no outstanding PRs left.
+
+## dependencyDashboardFooter
+
+## dependencyDashboardHeader
+
+## dependencyDashboardTitle
+
+Configure this option if you prefer a different title for the Dependency Dashboard.
+
 ## description
 
 The description field is used by config presets to describe what they do. They are then collated as part of the onboarding description.
@@ -429,7 +462,7 @@ Currently the purpose of `hostRules` is to configure credentials for host authen
 
 The lookup keys for a hostRule are: `hostType`, `domainName`, `hostName`, and `baseUrl`. All are optional, but you can only have one of the last three per rule.
 
-Supported credential fields are `token`, `username`, `password`, `timeout` and `insecureRegistry`.
+Supported credential fields are `token`, `username`, `password`, `timeout`, `enabled` and `insecureRegistry`.
 
 Example for configuring `docker` auth:
 
@@ -444,6 +477,29 @@ Example for configuring `docker` auth:
   ]
 }
 ```
+
+To disable requests to a particular host, you can configure a rule like:
+
+```json
+{
+  "hostRules": [
+    {
+      "hostName": "registry.npmjs.org",
+      "enabled": false
+    }
+  ]
+}
+```
+
+A preset alternative to the above is:
+
+```json
+{
+  "extends": [":disableHost(registry.npmjs.org)"]
+}
+```
+
+Note: Disabling a host is only 100% effective if added to self-hosted config. Renovate currently still checks its _cache_ for results first before making connection attempts, so if a public host is blocked in your repository config (e.g. `renovate.json`) then it's possible you may get cached _results_ from that host if another repository using the same bot has successfully queried for the same dependency recently.
 
 ### abortIgnoreStatusCodes
 
@@ -682,35 +738,6 @@ Add to this object if you wish to define rules that apply only to major updates.
 
 This value defaults to an empty string, because historically no prefix was necessary for when Renovate was JS-only. Now - for example - we use `docker-` for Docker branches, so they may look like `renovate/docker-ubuntu-16.x`. You normally don't need to configure this.
 
-## masterIssue
-
-Configuring `masterIssue` to `true` will lead to the creation of a mini-dashboard "Master Issue" within the repository. This Master Issue contains a list of all PRs pending, open, closed (unmerged) or in error. The goal of this master issue is to give visibility into all updates that Renovate is managing.
-
-Examples of what having a master issue will allow you to do:
-
-- View all PRs in one place, rather than having to filter PRs by author
-- Rebase/retry multiple PRs without having to open each individually
-- Override any rate limiting (e.g. concurrent PRs) or scheduling to force Renovate to create a PR that would otherwise be suppressed
-- Recreate an unmerged PR (e.g. for a major update that you postponed by closing the original PR)
-
-Note: Enabling the Master Issue does not itself change any of the "control flow" of Renovate, e.g. it will otherwise still create and manage PRs exactly as it always has, including scheduling and rate limiting. The Master Issue therefore provides visibility as well as additional control.
-
-## masterIssueApproval
-
-Setting `masterIssueApproval` to `true` means that Renovate will no longer create branches/PRs automatically but instead wait for manual approval from within the Master Issue.
-
-In this case, the Master Issue _does_ change the flow of Renovate, because PRs will stop appearing until you approve them within the issue. Instead of enabling this repository-wide, you may instead with to use package rules to enable it selectively, e.g. for major updates only, or for certain package managers, etc. i.e. it is possible to require approval for only certain types of updates only.
-
-Note: Enabling Master Issue Approval implicitly enables `masterIssue` too, so it is not necessary to configure both to `true`.
-
-## masterIssueAutoclose
-
-You can configure this to `true` if you prefer Renovate to close an existing Master Issue whenever there are no outstanding PRs left.
-
-## masterIssueTitle
-
-Configure this option if you prefer a different title for the Master Issue.
-
 ## minor
 
 Add to this object if you wish to define rules that apply only to minor updates.
@@ -790,14 +817,14 @@ Path rules are convenient to use if you wish to apply configuration rules to cer
 }
 ```
 
-If you wish to limit renovate to apply configuration rules to certain files in the root repository directory, you have to use `paths` with either a partial string match or a minimatch pattern. For example you have multiple `package.json` and want to use `masterIssueApproval` only on the root `package.json`:
+If you wish to limit renovate to apply configuration rules to certain files in the root repository directory, you have to use `paths` with either a partial string match or a minimatch pattern. For example you have multiple `package.json` and want to use `dependencyDashboardApproval` only on the root `package.json`:
 
 ```json
 {
   "packageRules": [
     {
       "paths": ["+(package.json)"],
-      "masterIssueApproval": true
+      "dependencyDashboardApproval": true
     }
   ]
 }
@@ -1443,7 +1470,7 @@ There are a couple of uses for this:
 
 #### Suppress branch/PR creation for X days
 
-If you combine `stabilityDays=3` and `prCreation="not-pending"` then Renovate will hold back from creating branches until 3 or more days have elapsed since the version was released. It's recommended that you enable `masterIssue=true` so you don't lose visibility of these pending PRs.
+If you combine `stabilityDays=3` and `prCreation="not-pending"` then Renovate will hold back from creating branches until 3 or more days have elapsed since the version was released. It's recommended that you enable `dependencyDashboard=true` so you don't lose visibility of these pending PRs.
 
 #### Await X days before Automerging
 

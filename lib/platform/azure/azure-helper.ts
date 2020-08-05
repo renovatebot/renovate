@@ -4,7 +4,7 @@ import {
   GitPullRequestMergeStrategy,
   GitRef,
 } from 'azure-devops-node-api/interfaces/GitInterfaces';
-import { Options } from 'simple-git/promise';
+import { Options } from 'simple-git';
 import {
   PR_STATE_CLOSED,
   PR_STATE_MERGED,
@@ -153,7 +153,7 @@ export async function getFile(
     }
   );
 
-  if (item && item.readable) {
+  if (item?.readable) {
     const fileContent = await streamToString(item);
     try {
       const jTmp = JSON.parse(fileContent);
@@ -218,10 +218,6 @@ export function getRenovatePRFormat(azurePr: GitPullRequest): AzurePr {
   if (azurePr.mergeStatus === 2) {
     pr.isConflicted = true;
   }
-
-  // value is updated later to be correct for
-  // specific pr's after filtering, for performance
-  pr.isModified = false;
 
   return pr;
 }

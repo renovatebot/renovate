@@ -86,7 +86,8 @@ export type ProcessBranchResult =
   | 'pending'
   | 'pr-created'
   | 'pr-edited'
-  | 'pr-hourly-limit-reached'
+  | 'pr-limit-reached'
+  | 'commit-limit-reached'
   | 'rebase';
 
 export interface BranchConfig
@@ -99,7 +100,7 @@ export interface BranchConfig
   canBeUnpublished?: boolean;
   errors?: ValidationMessage[];
   hasTypes?: boolean;
-  masterIssueChecks?: Record<string, string>;
+  dependencyDashboardChecks?: Record<string, string>;
   releaseTimestamp?: string;
   forceCommit?: boolean;
   rebaseRequested?: boolean;

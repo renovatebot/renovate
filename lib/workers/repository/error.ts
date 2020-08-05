@@ -175,7 +175,7 @@ export default async function handleError(
     return EXTERNAL_HOST_ERROR;
   }
   if (
-    err.message.includes('The remote end hung up unexpectedly') ||
+    err.message.includes('remote end hung up unexpectedly') ||
     err.message.includes('access denied or repository not exported')
   ) {
     logger.warn({ err }, 'Git error - aborting');

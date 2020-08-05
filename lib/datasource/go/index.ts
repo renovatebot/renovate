@@ -3,6 +3,7 @@ import { Http } from '../../util/http';
 import { regEx } from '../../util/regex';
 import { DigestConfig, GetReleasesConfig, ReleaseResult } from '../common';
 import * as github from '../github-tags';
+import * as gitlab from '../gitlab-tags';
 
 export const id = 'go';
 
@@ -10,6 +11,7 @@ const http = new Http(id);
 
 interface DataSource {
   datasource: string;
+  registryUrl?: string;
   lookupName: string;
 }
 
@@ -40,12 +42,21 @@ async function getDatasource(goModule: string): Promise<DataSource | null> {
   if (sourceMatch) {
     const [, goSourceUrl] = sourceMatch;
     logger.debug({ goModule, goSourceUrl }, 'Go lookup source url');
-    if (goSourceUrl && goSourceUrl.startsWith('https://github.com/')) {
+    if (goSourceUrl?.startsWith('https://github.com/')) {
       return {
         datasource: github.id,
         lookupName: goSourceUrl
           .replace('https://github.com/', '')
           .replace(/\/$/, ''),
+      };
+    }
+    if (goSourceUrl?.match('^https://[^/]*gitlab.[^/]*/.+')) {
+      const gitlabRegExp = /^(https:\/\/[^/]*gitlab.[^/]*)\/(.*)$/;
+      const gitlabRes = gitlabRegExp.exec(goSourceUrl);
+      return {
+        datasource: gitlab.id,
+        registryUrl: gitlabRes[1],
+        lookupName: gitlabRes[2].replace(/\/$/, ''),
       };
     }
   } else {
@@ -62,7 +73,7 @@ async function getDatasource(goModule: string): Promise<DataSource | null> {
  *
  * This function will:
  *  - Determine the source URL for the module
- *  - Call the respective getReleases in github to retrieve the tags
+ *  - Call the respective getReleases in github/gitlab to retrieve the tags
  *  - Filter module tags according to the module path
  */
 export async function getReleases({
@@ -70,45 +81,48 @@ export async function getReleases({
 }: GetReleasesConfig): Promise<ReleaseResult | null> {
   logger.trace(`go.getReleases(${lookupName})`);
   const source = await getDatasource(lookupName);
-  if (source && source.datasource === github.id) {
-    const res = await github.getReleases(source);
-    // istanbul ignore if
-    if (!res) {
-      return res;
-    }
-    /**
-     * github.com/org/mod/submodule should be tagged as submodule/va.b.c
-     * and that tag should be used instead of just va.b.c, although for compatibility
-     * the old behaviour stays the same.
-     */
-    const nameParts = lookupName.split('/');
-    logger.trace({ nameParts, releases: res.releases }, 'go.getReleases');
-    if (nameParts.length > 3) {
-      const prefix = nameParts.slice(3, nameParts.length).join('/');
-      logger.trace(`go.getReleases.prefix:${prefix}`);
-      const submodReleases = res.releases
-        .filter(
-          (release) => release.version && release.version.startsWith(prefix)
-        )
-        .map((release) => {
-          const r2 = release;
-          r2.version = r2.version.replace(`${prefix}/`, '');
-          return r2;
-        });
-      logger.trace({ submodReleases }, 'go.getReleases');
-      if (submodReleases.length > 0) {
-        res.releases = submodReleases;
-        return res;
-      }
-    }
-    if (res && res.releases) {
-      res.releases = res.releases.filter(
-        (release) => release.version && release.version.startsWith('v')
-      );
-    }
+  if (source?.datasource !== github.id && source?.datasource !== gitlab.id) {
+    return null;
+  }
+  const res =
+    source.datasource === github.id
+      ? await github.getReleases(source)
+      : await gitlab.getReleases(source);
+  // istanbul ignore if
+  if (!res) {
     return res;
   }
-  return null;
+  /**
+   * github.com/org/mod/submodule should be tagged as submodule/va.b.c
+   * and that tag should be used instead of just va.b.c, although for compatibility
+   * the old behaviour stays the same.
+   */
+  const nameParts = lookupName.split('/');
+  logger.trace({ nameParts, releases: res.releases }, 'go.getReleases');
+  if (nameParts.length > 3) {
+    const prefix = nameParts.slice(3, nameParts.length).join('/');
+    logger.trace(`go.getReleases.prefix:${prefix}`);
+    const submodReleases = res.releases
+      .filter(
+        (release) => release.version && release.version.startsWith(prefix)
+      )
+      .map((release) => {
+        const r2 = release;
+        r2.version = r2.version.replace(`${prefix}/`, '');
+        return r2;
+      });
+    logger.trace({ submodReleases }, 'go.getReleases');
+    if (submodReleases.length > 0) {
+      res.releases = submodReleases;
+      return res;
+    }
+  }
+  if (res?.releases) {
+    res.releases = res.releases.filter(
+      (release) => release.version && release.version.startsWith('v')
+    );
+  }
+  return res;
 }
 
 /**
