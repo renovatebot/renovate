@@ -83,6 +83,8 @@ export function rawExec(
 
     let running = true;
 
+    const timeoutId = setTimeout(stop, opts?.timeout || 15 * 60 * 1000);
+
     function stop(): void {
       clearTimeout(timeoutId);
       if (child.connected) {
@@ -90,8 +92,6 @@ export function rawExec(
       }
       running = false;
     }
-
-    const timeoutId = setTimeout(stop, opts?.timeout || 15 * 60 * 1000);
 
     pipeStreamToBuffers(child.stdout, stdoutBuf);
     pipeStreamToBuffers(child.stderr, stderrBuf);
