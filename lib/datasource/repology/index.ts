@@ -1,4 +1,5 @@
 import { URLSearchParams } from 'url';
+import { HOST_DISABLED } from '../../constants/error-messages';
 import { logger } from '../../logger';
 import { ExternalHostError } from '../../types/errors/external-host-error';
 import * as packageCache from '../../util/cache/package';
@@ -139,10 +140,16 @@ export async function getReleases({
     const version = pkg.origversion ?? pkg.version;
     return { releases: [{ version }] };
   } catch (err) {
-    logger.warn(
-      { lookupName, err },
-      'Repology lookup failed with unexpected error'
-    );
+    if (err.message === HOST_DISABLED) {
+      // istanbul ignore next
+      logger.trace({ lookupName, err }, 'Host disabled');
+    } else {
+      logger.warn(
+        { lookupName, err },
+        'Repology lookup failed with unexpected error'
+      );
+    }
+
     throw new ExternalHostError(err);
   }
 }
