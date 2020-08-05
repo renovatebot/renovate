@@ -6,10 +6,15 @@ export const displayName = 'Loose';
 export const urls = [];
 export const supportsRanges = false;
 
-const pattern = /^v?(\d+(?:\.\d+)*)(.*)$/;
+const versionPattern = /^v?(\d+(?:\.\d+)*)(.*)$/;
+const commitHashPattern = /^[a-f0-9]{7,40}$/;
+const numericPattern = /^[0-9]+$/;
 
 function parse(version: string): any {
-  const matches = pattern.exec(version);
+  if (commitHashPattern.test(version) && !numericPattern.test(version)) {
+    return null;
+  }
+  const matches = versionPattern.exec(version);
   if (!matches) {
     return null;
   }
