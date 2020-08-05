@@ -1,5 +1,4 @@
-import { exec as _exec } from 'child_process';
-import { envMock, mockExecAll } from '../../../../test/execUtil';
+import { envMock, mockExecAll, spawn } from '../../../../test/execUtil';
 import { getName, mocked } from '../../../../test/util';
 import * as _env from '../../../util/exec/env';
 import * as _lernaHelper from './lerna';
@@ -8,7 +7,6 @@ jest.mock('child_process');
 jest.mock('../../../util/exec/env');
 jest.mock('../../../manager/npm/post-update/node-version');
 
-const exec: jest.Mock<typeof _exec> = _exec as any;
 const env = mocked(_env);
 const lernaHelper = mocked(_lernaHelper);
 
@@ -45,7 +43,7 @@ describe(getName(__filename), () => {
       expect(res.error).toBe(false);
     });
     it('generates package-lock.json files', async () => {
-      const execSnapshots = mockExecAll(exec);
+      const execSnapshots = mockExecAll(spawn);
       const skipInstalls = true;
       const res = await lernaHelper.generateLockFiles(
         lernaPkgFile('npm'),
@@ -58,7 +56,7 @@ describe(getName(__filename), () => {
       expect(execSnapshots).toMatchSnapshot();
     });
     it('performs full npm install', async () => {
-      const execSnapshots = mockExecAll(exec);
+      const execSnapshots = mockExecAll(spawn);
       const skipInstalls = false;
       const res = await lernaHelper.generateLockFiles(
         lernaPkgFile('npm'),
@@ -71,7 +69,7 @@ describe(getName(__filename), () => {
       expect(execSnapshots).toMatchSnapshot();
     });
     it('generates yarn.lock files', async () => {
-      const execSnapshots = mockExecAll(exec);
+      const execSnapshots = mockExecAll(spawn);
       const res = await lernaHelper.generateLockFiles(
         lernaPkgFile('yarn'),
         'some-dir',
@@ -82,7 +80,7 @@ describe(getName(__filename), () => {
       expect(res.error).toBe(false);
     });
     it('defaults to latest if lerna version unspecified', async () => {
-      const execSnapshots = mockExecAll(exec);
+      const execSnapshots = mockExecAll(spawn);
       const res = await lernaHelper.generateLockFiles(
         lernaPkgFileWithoutLernaDep('npm'),
         'some-dir',
@@ -93,7 +91,7 @@ describe(getName(__filename), () => {
       expect(execSnapshots).toMatchSnapshot();
     });
     it('maps dot files', async () => {
-      const execSnapshots = mockExecAll(exec);
+      const execSnapshots = mockExecAll(spawn);
       const res = await lernaHelper.generateLockFiles(
         lernaPkgFile('npm'),
         'some-dir',
@@ -107,7 +105,7 @@ describe(getName(__filename), () => {
       expect(execSnapshots).toMatchSnapshot();
     });
     it('allows scripts for trust level high', async () => {
-      const execSnapshots = mockExecAll(exec);
+      const execSnapshots = mockExecAll(spawn);
       global.trustLevel = 'high';
       const res = await lernaHelper.generateLockFiles(
         lernaPkgFile('npm'),

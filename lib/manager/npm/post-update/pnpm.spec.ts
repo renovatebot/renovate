@@ -1,5 +1,4 @@
-import { exec as _exec } from 'child_process';
-import { envMock, mockExecAll } from '../../../../test/execUtil';
+import { envMock, mockExecAll, spawn } from '../../../../test/execUtil';
 import { mocked } from '../../../../test/util';
 import * as _env from '../../../util/exec/env';
 import * as _fs from '../../../util/fs/proxies';
@@ -11,7 +10,6 @@ jest.mock('../../../util/exec/env');
 jest.mock('../../../util/fs/proxies');
 jest.mock('./node-version');
 
-const exec: jest.Mock<typeof _exec> = _exec as any;
 const env = mocked(_env);
 const fs = mocked(_fs);
 const pnpmHelper = mocked(_pnpmHelper);
@@ -25,7 +23,7 @@ describe('generateLockFile', () => {
   });
   it('generates lock files', async () => {
     config.dockerMapDotfiles = true;
-    const execSnapshots = mockExecAll(exec);
+    const execSnapshots = mockExecAll(spawn);
     fs.readFile = jest.fn(() => 'package-lock-contents') as never;
     const res = await pnpmHelper.generateLockFile('some-dir', {}, config);
     expect(fs.readFile).toHaveBeenCalledTimes(1);
@@ -33,7 +31,7 @@ describe('generateLockFile', () => {
     expect(execSnapshots).toMatchSnapshot();
   });
   it('catches errors', async () => {
-    const execSnapshots = mockExecAll(exec);
+    const execSnapshots = mockExecAll(spawn);
     fs.readFile = jest.fn(() => {
       throw new Error('not found');
     }) as never;
@@ -44,7 +42,7 @@ describe('generateLockFile', () => {
     expect(execSnapshots).toMatchSnapshot();
   });
   it('finds pnpm globally', async () => {
-    const execSnapshots = mockExecAll(exec);
+    const execSnapshots = mockExecAll(spawn);
     fs.readFile = jest.fn(() => 'package-lock-contents') as never;
     const res = await pnpmHelper.generateLockFile('some-dir', {}, config);
     expect(fs.readFile).toHaveBeenCalledTimes(1);
@@ -52,7 +50,7 @@ describe('generateLockFile', () => {
     expect(execSnapshots).toMatchSnapshot();
   });
   it('performs lock file maintenance', async () => {
-    const execSnapshots = mockExecAll(exec);
+    const execSnapshots = mockExecAll(spawn);
     fs.readFile = jest.fn(() => 'package-lock-contents') as never;
     const res = await pnpmHelper.generateLockFile('some-dir', {}, config, [
       { isLockFileMaintenance: true },

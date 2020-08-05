@@ -111,7 +111,6 @@ export async function exec(
   delete execOptions.cwdFile;
 
   const rawExecOptions: RawExecOptions = {
-    encoding: 'utf-8',
     ...execOptions,
     env: childEnv,
     cwd,

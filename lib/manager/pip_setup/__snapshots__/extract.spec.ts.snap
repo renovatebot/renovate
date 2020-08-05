@@ -8,7 +8,6 @@ Array [
     "cmd": "python --version",
     "options": Object {
       "cwd": null,
-      "encoding": "utf-8",
       "env": Object {
         "HOME": "/home/user",
         "HTTPS_PROXY": "https://example.com",
@@ -18,6 +17,7 @@ Array [
         "NO_PROXY": "localhost",
         "PATH": "/tmp/path",
       },
+      "shell": true,
       "timeout": 900000,
     },
   },
@@ -25,7 +25,6 @@ Array [
     "cmd": "python3 --version",
     "options": Object {
       "cwd": null,
-      "encoding": "utf-8",
       "env": Object {
         "HOME": "/home/user",
         "HTTPS_PROXY": "https://example.com",
@@ -35,6 +34,7 @@ Array [
         "NO_PROXY": "localhost",
         "PATH": "/tmp/path",
       },
+      "shell": true,
       "timeout": 900000,
     },
   },
@@ -42,7 +42,6 @@ Array [
     "cmd": "python3.8 --version",
     "options": Object {
       "cwd": null,
-      "encoding": "utf-8",
       "env": Object {
         "HOME": "/home/user",
         "HTTPS_PROXY": "https://example.com",
@@ -52,6 +51,7 @@ Array [
         "NO_PROXY": "localhost",
         "PATH": "/tmp/path",
       },
+      "shell": true,
       "timeout": 900000,
     },
   },

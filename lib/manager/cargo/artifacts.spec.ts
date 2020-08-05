@@ -1,7 +1,6 @@
-import { exec as _exec } from 'child_process';
 import _fs from 'fs-extra';
 import { join } from 'upath';
-import { envMock, mockExecAll } from '../../../test/execUtil';
+import { envMock, mockExecAll, spawn } from '../../../test/execUtil';
 import { git, mocked } from '../../../test/util';
 import { setExecConfig } from '../../util/exec';
 import { BinarySource } from '../../util/exec/common';
@@ -16,7 +15,6 @@ jest.mock('../../util/git');
 jest.mock('../../util/http');
 
 const fs: jest.Mocked<typeof _fs> = _fs as any;
-const exec: jest.Mock<typeof _exec> = _exec as any;
 const env = mocked(_env);
 
 const config = {
@@ -57,7 +55,7 @@ describe('.updateArtifacts()', () => {
   });
   it('returns null if unchanged', async () => {
     fs.readFile.mockResolvedValueOnce('Current Cargo.lock' as any);
-    const execSnapshots = mockExecAll(exec);
+    const execSnapshots = mockExecAll(spawn);
     fs.readFile.mockResolvedValueOnce('Current Cargo.lock' as any);
     const updatedDeps = ['dep1'];
     expect(
@@ -72,7 +70,7 @@ describe('.updateArtifacts()', () => {
   });
   it('returns updated Cargo.lock', async () => {
     git.getFile.mockResolvedValueOnce('Old Cargo.lock');
-    const execSnapshots = mockExecAll(exec);
+    const execSnapshots = mockExecAll(spawn);
     fs.readFile.mockResolvedValueOnce('New Cargo.lock' as any);
     const updatedDeps = ['dep1'];
     expect(
@@ -89,7 +87,7 @@ describe('.updateArtifacts()', () => {
     jest.spyOn(docker, 'removeDanglingContainers').mockResolvedValueOnce();
     await setExecConfig({ ...config, binarySource: BinarySource.Docker });
     git.getFile.mockResolvedValueOnce('Old Cargo.lock');
-    const execSnapshots = mockExecAll(exec);
+    const execSnapshots = mockExecAll(spawn);
     fs.readFile.mockResolvedValueOnce('New Cargo.lock' as any);
     const updatedDeps = ['dep1'];
     expect(

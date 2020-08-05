@@ -17,7 +17,7 @@ async function prefetchDockerImage(taggedImage: string): Promise<void> {
   if (!prefetchedImages.has(taggedImage)) {
     logger.debug(`Fetching Docker image: ${taggedImage}`);
     prefetchedImages.add(taggedImage);
-    await rawExec(`docker pull ${taggedImage}`, { encoding: 'utf-8' });
+    await rawExec(`docker pull ${taggedImage}`);
     logger.debug(`Finished fetching Docker image`);
   }
 }
@@ -117,17 +117,13 @@ export async function removeDockerContainer(image): Promise<void> {
   const containerName = getContainerName(image);
   let cmd = `docker ps --filter name=${containerName} -aq`;
   try {
-    const res = await rawExec(cmd, {
-      encoding: 'utf-8',
-    });
+    const res = await rawExec(cmd);
     const containerId = res?.stdout?.trim() || '';
     // istanbul ignore if
     if (containerId.length) {
       logger.debug({ containerId }, 'Removing container');
       cmd = `docker rm -f ${containerId}`;
-      await rawExec(cmd, {
-        encoding: 'utf-8',
-      });
+      await rawExec(cmd);
     } else {
       logger.trace({ image, containerName }, 'No running containers to remove');
     }
@@ -143,9 +139,7 @@ export async function removeDockerContainer(image): Promise<void> {
 // istanbul ignore next
 export async function removeDanglingContainers(): Promise<void> {
   try {
-    const res = await rawExec(`docker ps --filter label=renovate_child -aq`, {
-      encoding: 'utf-8',
-    });
+    const res = await rawExec(`docker ps --filter label=renovate_child -aq`);
     if (res?.stdout?.trim().length) {
       const containerIds = res.stdout
         .trim()
@@ -153,9 +147,7 @@ export async function removeDanglingContainers(): Promise<void> {
         .map((container) => container.trim())
         .filter(Boolean);
       logger.debug({ containerIds }, 'Removing dangling child containers');
-      await rawExec(`docker rm -f ${containerIds.join(' ')}`, {
-        encoding: 'utf-8',
-      });
+      await rawExec(`docker rm -f ${containerIds.join(' ')}`);
     } else {
       logger.debug('No dangling containers to remove');
     }

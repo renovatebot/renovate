@@ -1,7 +1,6 @@
-import { exec as _exec } from 'child_process';
 import _fs from 'fs-extra';
 import { join } from 'upath';
-import { envMock, mockExecAll } from '../../../test/execUtil';
+import { envMock, mockExecAll, spawn } from '../../../test/execUtil';
 import { git, mocked } from '../../../test/util';
 import { setUtilConfig } from '../../util';
 import { BinarySource } from '../../util/exec/common';
@@ -18,7 +17,6 @@ jest.mock('../../util/host-rules');
 jest.mock('../../util/http');
 
 const fs: jest.Mocked<typeof _fs> = _fs as any;
-const exec: jest.Mock<typeof _exec> = _exec as any;
 const env = mocked(_env);
 
 const config = {
@@ -59,7 +57,7 @@ describe('.updateArtifacts()', () => {
   it('returns null if unchanged', async () => {
     pipFileLock._meta.requires.python_full_version = '3.7.6';
     fs.readFile.mockResolvedValueOnce(JSON.stringify(pipFileLock) as any);
-    const execSnapshots = mockExecAll(exec);
+    const execSnapshots = mockExecAll(spawn);
     fs.readFile.mockReturnValueOnce(JSON.stringify(pipFileLock) as any);
     expect(
       await pipenv.updateArtifacts({
@@ -73,7 +71,7 @@ describe('.updateArtifacts()', () => {
   });
   it('handles no constraint', async () => {
     fs.readFile.mockResolvedValueOnce('unparseable pipfile lock' as any);
-    const execSnapshots = mockExecAll(exec);
+    const execSnapshots = mockExecAll(spawn);
     fs.readFile.mockReturnValueOnce('unparseable pipfile lock' as any);
     expect(
       await pipenv.updateArtifacts({
@@ -87,7 +85,7 @@ describe('.updateArtifacts()', () => {
   });
   it('returns updated Pipfile.lock', async () => {
     fs.readFile.mockResolvedValueOnce('current pipfile.lock' as any);
-    const execSnapshots = mockExecAll(exec);
+    const execSnapshots = mockExecAll(spawn);
     git.getRepoStatus.mockResolvedValue({
       modified: ['Pipfile.lock'],
     } as StatusResult);
@@ -107,7 +105,7 @@ describe('.updateArtifacts()', () => {
     await setUtilConfig(dockerConfig);
     pipFileLock._meta.requires.python_version = '3.7';
     fs.readFile.mockResolvedValueOnce(JSON.stringify(pipFileLock) as any);
-    const execSnapshots = mockExecAll(exec);
+    const execSnapshots = mockExecAll(spawn);
     git.getRepoStatus.mockResolvedValue({
       modified: ['Pipfile.lock'],
     } as StatusResult);
@@ -138,7 +136,7 @@ describe('.updateArtifacts()', () => {
   });
   it('returns updated Pipenv.lock when doing lockfile maintenance', async () => {
     fs.readFile.mockResolvedValueOnce('Current Pipfile.lock' as any);
-    const execSnapshots = mockExecAll(exec);
+    const execSnapshots = mockExecAll(spawn);
     git.getRepoStatus.mockResolvedValue({
       modified: ['Pipfile.lock'],
     } as StatusResult);

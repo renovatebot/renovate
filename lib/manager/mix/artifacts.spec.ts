@@ -1,13 +1,11 @@
-import { exec as _exec } from 'child_process';
 import _fs from 'fs-extra';
-import { envMock, mockExecAll } from '../../../test/execUtil';
+import { envMock, mockExecAll, spawn } from '../../../test/execUtil';
 import { mocked } from '../../../test/util';
 import { BinarySource } from '../../util/exec/common';
 import * as _env from '../../util/exec/env';
 import { updateArtifacts } from '.';
 
 const fs: jest.Mocked<typeof _fs> = _fs as any;
-const exec: jest.Mock<typeof _exec> = _exec as any;
 const env = mocked(_env);
 
 jest.mock('fs-extra');
@@ -70,7 +68,7 @@ describe('.updateArtifacts()', () => {
   });
   it('returns null if unchanged', async () => {
     fs.readFile.mockResolvedValueOnce('Current mix.lock' as any);
-    const execSnapshots = mockExecAll(exec);
+    const execSnapshots = mockExecAll(spawn);
     fs.readFile.mockResolvedValueOnce('Current mix.lock' as any);
     expect(
       await updateArtifacts({
@@ -84,7 +82,7 @@ describe('.updateArtifacts()', () => {
   });
   it('returns updated mix.lock', async () => {
     fs.readFile.mockResolvedValueOnce('Old mix.lock' as any);
-    const execSnapshots = mockExecAll(exec);
+    const execSnapshots = mockExecAll(spawn);
     fs.readFile.mockResolvedValueOnce('New mix.lock' as any);
     expect(
       await updateArtifacts({

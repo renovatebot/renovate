@@ -1,22 +1,21 @@
-import { exec as _exec } from 'child_process';
+import { spawn as _spawn } from 'child_process';
 import is from '@sindresorhus/is';
 import traverse from 'traverse';
 import { toUnix } from 'upath';
-import { ExecOptions } from '../lib/util/exec';
+import {
+  CallOptions,
+  ExecResult,
+  ExecSnapshot,
+  ExecSnapshots,
+  SpawnMock,
+} from './common';
+import { ChildProcessMock } from './mocks/child-process';
 
-type CallOptions = ExecOptions | null | undefined;
+export * from './common';
+export * from './mocks/child-process';
+export * from './mocks/output-stream';
 
-export type ExecResult = { stdout: string; stderr: string } | Error;
-
-export type ExecMock = jest.Mock<typeof _exec>;
-export const exec: ExecMock = _exec as any;
-
-interface ExecSnapshot {
-  cmd: string;
-  options?: ExecOptions | null | undefined;
-}
-
-export type ExecSnapshots = ExecSnapshot[];
+export const spawn: SpawnMock = _spawn as any;
 
 export function execSnapshot(cmd: string, options?: CallOptions): ExecSnapshot {
   const snapshot = {
@@ -38,35 +37,27 @@ export function execSnapshot(cmd: string, options?: CallOptions): ExecSnapshot {
 const defaultExecResult = { stdout: '', stderr: '' };
 
 export function mockExecAll(
-  execFn: ExecMock,
+  spawnFn: SpawnMock,
   execResult: ExecResult = defaultExecResult
 ): ExecSnapshots {
   const snapshots: ExecSnapshots = [];
-  execFn.mockImplementation((cmd, options, callback) => {
+  spawnFn.mockImplementation(((cmd, _args, options) => {
     snapshots.push(execSnapshot(cmd, options));
-    if (execResult instanceof Error) {
-      throw execResult;
-    }
-    callback(null, execResult);
-    return undefined;
-  });
+    return new ChildProcessMock(execResult);
+  }) as any);
   return snapshots;
 }
 
 export function mockExecSequence(
-  execFn: ExecMock,
+  spawnFn: SpawnMock,
   execResults: ExecResult[]
 ): ExecSnapshots {
   const snapshots: ExecSnapshots = [];
   execResults.forEach((execResult) => {
-    execFn.mockImplementationOnce((cmd, options, callback) => {
+    spawnFn.mockImplementationOnce(((cmd, _args, options) => {
       snapshots.push(execSnapshot(cmd, options));
-      if (execResult instanceof Error) {
-        throw execResult;
-      }
-      callback(null, execResult);
-      return undefined;
-    });
+      return new ChildProcessMock(execResult);
+    }) as any);
   });
   return snapshots;
 }

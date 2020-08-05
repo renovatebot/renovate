@@ -1,6 +1,5 @@
-import { exec as _exec } from 'child_process';
 import path from 'path';
-import { envMock, mockExecAll } from '../../../../test/execUtil';
+import { envMock, mockExecAll, spawn } from '../../../../test/execUtil';
 import { mocked } from '../../../../test/util';
 import { BinarySource } from '../../../util/exec/common';
 import * as _env from '../../../util/exec/env';
@@ -12,7 +11,6 @@ jest.mock('../../../util/exec/env');
 jest.mock('../../../util/fs/proxies');
 jest.mock('./node-version');
 
-const exec: jest.Mock<typeof _exec> = _exec as any;
 const env = mocked(_env);
 const fs = mocked(_fs);
 
@@ -23,7 +21,7 @@ describe('generateLockFile', () => {
     env.getChildProcessEnv.mockReturnValue(envMock.basic);
   });
   it('generates lock files', async () => {
-    const execSnapshots = mockExecAll(exec);
+    const execSnapshots = mockExecAll(spawn);
     fs.readFile = jest.fn(() => 'package-lock-contents') as never;
     const skipInstalls = true;
     const dockerMapDotfiles = true;
@@ -44,7 +42,7 @@ describe('generateLockFile', () => {
     expect(execSnapshots).toMatchSnapshot();
   });
   it('performs lock file updates', async () => {
-    const execSnapshots = mockExecAll(exec);
+    const execSnapshots = mockExecAll(spawn);
     fs.readFile = jest.fn(() => 'package-lock-contents') as never;
     const skipInstalls = true;
     const updates = [
@@ -63,7 +61,7 @@ describe('generateLockFile', () => {
     expect(execSnapshots).toMatchSnapshot();
   });
   it('performs npm-shrinkwrap.json updates', async () => {
-    const execSnapshots = mockExecAll(exec);
+    const execSnapshots = mockExecAll(spawn);
     fs.pathExists.mockResolvedValueOnce(true);
     fs.move = jest.fn();
     fs.readFile = jest.fn(() => 'package-lock-contents') as never;
@@ -92,7 +90,7 @@ describe('generateLockFile', () => {
     expect(execSnapshots).toMatchSnapshot();
   });
   it('performs npm-shrinkwrap.json updates (no package-lock.json)', async () => {
-    const execSnapshots = mockExecAll(exec);
+    const execSnapshots = mockExecAll(spawn);
     fs.pathExists.mockResolvedValueOnce(false);
     fs.move = jest.fn();
     fs.readFile = jest.fn((_, _1) => 'package-lock-contents') as never;
@@ -117,7 +115,7 @@ describe('generateLockFile', () => {
     expect(execSnapshots).toMatchSnapshot();
   });
   it('performs full install', async () => {
-    const execSnapshots = mockExecAll(exec);
+    const execSnapshots = mockExecAll(spawn);
     fs.readFile = jest.fn(() => 'package-lock-contents') as never;
     const skipInstalls = false;
     const binarySource = BinarySource.Global;
@@ -133,7 +131,7 @@ describe('generateLockFile', () => {
     expect(execSnapshots).toMatchSnapshot();
   });
   it('catches errors', async () => {
-    const execSnapshots = mockExecAll(exec);
+    const execSnapshots = mockExecAll(spawn);
     fs.readFile = jest.fn(() => {
       throw new Error('not found');
     }) as never;
@@ -148,7 +146,7 @@ describe('generateLockFile', () => {
     expect(execSnapshots).toMatchSnapshot();
   });
   it('finds npm globally', async () => {
-    const execSnapshots = mockExecAll(exec);
+    const execSnapshots = mockExecAll(spawn);
     fs.readFile = jest.fn(() => 'package-lock-contents') as never;
     const res = await npmHelper.generateLockFile(
       'some-dir',
@@ -160,7 +158,7 @@ describe('generateLockFile', () => {
     expect(execSnapshots).toMatchSnapshot();
   });
   it('uses docker npm', async () => {
-    const execSnapshots = mockExecAll(exec);
+    const execSnapshots = mockExecAll(spawn);
     fs.readFile = jest.fn(() => 'package-lock-contents') as never;
     const res = await npmHelper.generateLockFile(
       'some-dir',
@@ -173,7 +171,7 @@ describe('generateLockFile', () => {
     expect(execSnapshots).toMatchSnapshot();
   });
   it('performs lock file maintenance', async () => {
-    const execSnapshots = mockExecAll(exec);
+    const execSnapshots = mockExecAll(spawn);
     fs.readFile = jest.fn(() => 'package-lock-contents') as never;
     const res = await npmHelper.generateLockFile(
       'some-dir',

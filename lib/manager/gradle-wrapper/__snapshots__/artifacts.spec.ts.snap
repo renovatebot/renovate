@@ -6,7 +6,6 @@ Array [
     "cmd": "<gradlew> wrapper --gradle-version 5.6.4",
     "options": Object {
       "cwd": "/root/project/lib/manager/gradle-wrapper/__fixtures__/testFiles",
-      "encoding": "utf-8",
       "env": Object {
         "GRADLE_OPTS": "-Dorg.gradle.parallel=true -Dorg.gradle.configureondemand=true -Dorg.gradle.daemon=false -Dorg.gradle.caching=false",
         "HOME": "/home/user",
@@ -17,6 +16,7 @@ Array [
         "NO_PROXY": "localhost",
         "PATH": "/tmp/path",
       },
+      "shell": true,
       "timeout": 900000,
     },
   },
@@ -29,7 +29,6 @@ Array [
     "cmd": "<gradlew> wrapper --gradle-distribution-url https://services.gradle.org/distributions/gradle-6.3-bin.zip",
     "options": Object {
       "cwd": "/root/project/lib/manager/gradle-wrapper/__fixtures__/testFiles",
-      "encoding": "utf-8",
       "env": Object {
         "GRADLE_OPTS": "-Dorg.gradle.parallel=true -Dorg.gradle.configureondemand=true -Dorg.gradle.daemon=false -Dorg.gradle.caching=false",
         "HOME": "/home/user",
@@ -40,6 +39,7 @@ Array [
         "NO_PROXY": "localhost",
         "PATH": "/tmp/path",
       },
+      "shell": true,
       "timeout": 900000,
     },
   },
@@ -52,7 +52,6 @@ Array [
     "cmd": "<gradlew> wrapper --gradle-distribution-url https://services.gradle.org/distributions/gradle-6.3-bin.zip --gradle-distribution-sha256-sum 038794feef1f4745c6347107b6726279d1c824f3fc634b60f86ace1e9fbd1768",
     "options": Object {
       "cwd": "/root/project/lib/manager/gradle-wrapper/__fixtures__/testFiles",
-      "encoding": "utf-8",
       "env": Object {
         "GRADLE_OPTS": "-Dorg.gradle.parallel=true -Dorg.gradle.configureondemand=true -Dorg.gradle.daemon=false -Dorg.gradle.caching=false",
         "HOME": "/home/user",
@@ -63,6 +62,7 @@ Array [
         "NO_PROXY": "localhost",
         "PATH": "/tmp/path",
       },
+      "shell": true,
       "timeout": 900000,
     },
   },

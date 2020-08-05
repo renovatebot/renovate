@@ -1,8 +1,7 @@
 /* eslint jest/no-standalone-expect: 0 */
-import { exec as _exec } from 'child_process';
 import { resolve } from 'path';
 import { readFile } from 'fs-extra';
-import { envMock, mockExecAll } from '../../../test/execUtil';
+import { envMock, mockExecAll, spawn } from '../../../test/execUtil';
 import * as httpMock from '../../../test/httpMock';
 import {
   addReplacingSerializer,
@@ -23,7 +22,6 @@ jest.mock('../../util/fs');
 jest.mock('../../util/git');
 jest.mock('../../util/exec/env');
 
-const exec: jest.Mock<typeof _exec> = _exec as any;
 const fixtures = resolve(__dirname, './__fixtures__');
 const config = {
   localDir: resolve(fixtures, './testFiles'),
@@ -68,7 +66,7 @@ describe(getName(__filename), () => {
       ],
     } as StatusResult);
 
-    const execSnapshots = mockExecAll(exec);
+    const execSnapshots = mockExecAll(spawn);
 
     const res = await dcUpdate.updateArtifacts({
       packageFileName: 'gradle/wrapper/gradle-wrapper.properties',
@@ -110,7 +108,7 @@ describe(getName(__filename), () => {
   });
 
   it('gradlew failed', async () => {
-    const execSnapshots = mockExecAll(exec, new Error('failed'));
+    const execSnapshots = mockExecAll(spawn, new Error('failed'));
     git.getRepoStatus.mockResolvedValueOnce(
       partial<StatusResult>({
         modified: [],
@@ -142,7 +140,7 @@ describe(getName(__filename), () => {
       })
     );
 
-    const execSnapshots = mockExecAll(exec);
+    const execSnapshots = mockExecAll(spawn);
 
     const result = await dcUpdate.updateArtifacts({
       packageFileName: 'gradle-wrapper.properties',

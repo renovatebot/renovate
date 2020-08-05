@@ -6,7 +6,6 @@ Array [
     "cmd": "yarn install --ignore-engines --ignore-platform --network-timeout 100000 --ignore-scripts",
     "options": Object {
       "cwd": "some-dir",
-      "encoding": "utf-8",
       "env": Object {
         "HOME": "/home/user",
         "HTTPS_PROXY": "https://example.com",
@@ -16,6 +15,7 @@ Array [
         "NO_PROXY": "localhost",
         "PATH": "/tmp/path",
       },
+      "shell": true,
       "timeout": 900000,
     },
   },
@@ -28,7 +28,6 @@ Array [
     "cmd": "yarn install --ignore-engines --ignore-platform --network-timeout 100000 --ignore-scripts",
     "options": Object {
       "cwd": "some-dir",
-      "encoding": "utf-8",
       "env": Object {
         "HOME": "/home/user",
         "HTTPS_PROXY": "https://example.com",
@@ -38,6 +37,7 @@ Array [
         "NO_PROXY": "localhost",
         "PATH": "/tmp/path",
       },
+      "shell": true,
       "timeout": 900000,
     },
   },
@@ -45,7 +45,6 @@ Array [
     "cmd": "npx yarn-deduplicate --strategy fewer",
     "options": Object {
       "cwd": "some-dir",
-      "encoding": "utf-8",
       "env": Object {
         "HOME": "/home/user",
         "HTTPS_PROXY": "https://example.com",
@@ -55,6 +54,7 @@ Array [
         "NO_PROXY": "localhost",
         "PATH": "/tmp/path",
       },
+      "shell": true,
       "timeout": 900000,
     },
   },
@@ -62,7 +62,6 @@ Array [
     "cmd": "yarn install --ignore-engines --ignore-platform --network-timeout 100000 --ignore-scripts",
     "options": Object {
       "cwd": "some-dir",
-      "encoding": "utf-8",
       "env": Object {
         "HOME": "/home/user",
         "HTTPS_PROXY": "https://example.com",
@@ -72,6 +71,7 @@ Array [
         "NO_PROXY": "localhost",
         "PATH": "/tmp/path",
       },
+      "shell": true,
       "timeout": 900000,
     },
   },
@@ -79,7 +79,6 @@ Array [
     "cmd": "npx yarn-deduplicate --strategy highest",
     "options": Object {
       "cwd": "some-dir",
-      "encoding": "utf-8",
       "env": Object {
         "HOME": "/home/user",
         "HTTPS_PROXY": "https://example.com",
@@ -89,6 +88,7 @@ Array [
         "NO_PROXY": "localhost",
         "PATH": "/tmp/path",
       },
+      "shell": true,
       "timeout": 900000,
     },
   },
@@ -96,7 +96,6 @@ Array [
     "cmd": "yarn install --ignore-engines --ignore-platform --network-timeout 100000 --ignore-scripts",
     "options": Object {
       "cwd": "some-dir",
-      "encoding": "utf-8",
       "env": Object {
         "HOME": "/home/user",
         "HTTPS_PROXY": "https://example.com",
@@ -106,6 +105,7 @@ Array [
         "NO_PROXY": "localhost",
         "PATH": "/tmp/path",
       },
+      "shell": true,
       "timeout": 900000,
     },
   },
@@ -118,7 +118,6 @@ Array [
     "cmd": "yarn install --ignore-engines --ignore-platform --network-timeout 100000 --ignore-scripts",
     "options": Object {
       "cwd": "some-dir",
-      "encoding": "utf-8",
       "env": Object {
         "HOME": "/home/user",
         "HTTPS_PROXY": "https://example.com",
@@ -128,6 +127,7 @@ Array [
         "NO_PROXY": "localhost",
         "PATH": "/tmp/path",
       },
+      "shell": true,
       "timeout": 900000,
     },
   },
@@ -135,7 +135,6 @@ Array [
     "cmd": "npx yarn-deduplicate --strategy fewer",
     "options": Object {
       "cwd": "some-dir",
-      "encoding": "utf-8",
       "env": Object {
         "HOME": "/home/user",
         "HTTPS_PROXY": "https://example.com",
@@ -145,6 +144,7 @@ Array [
         "NO_PROXY": "localhost",
         "PATH": "/tmp/path",
       },
+      "shell": true,
       "timeout": 900000,
     },
   },
@@ -152,7 +152,6 @@ Array [
     "cmd": "yarn install --ignore-engines --ignore-platform --network-timeout 100000 --ignore-scripts",
     "options": Object {
       "cwd": "some-dir",
-      "encoding": "utf-8",
       "env": Object {
         "HOME": "/home/user",
         "HTTPS_PROXY": "https://example.com",
@@ -162,6 +161,7 @@ Array [
         "NO_PROXY": "localhost",
         "PATH": "/tmp/path",
       },
+      "shell": true,
       "timeout": 900000,
     },
   },
@@ -169,7 +169,6 @@ Array [
     "cmd": "npx yarn-deduplicate --strategy highest",
     "options": Object {
       "cwd": "some-dir",
-      "encoding": "utf-8",
       "env": Object {
         "HOME": "/home/user",
         "HTTPS_PROXY": "https://example.com",
@@ -179,6 +178,7 @@ Array [
         "NO_PROXY": "localhost",
         "PATH": "/tmp/path",
       },
+      "shell": true,
       "timeout": 900000,
     },
   },
@@ -186,7 +186,6 @@ Array [
     "cmd": "yarn install --ignore-engines --ignore-platform --network-timeout 100000 --ignore-scripts",
     "options": Object {
       "cwd": "some-dir",
-      "encoding": "utf-8",
       "env": Object {
         "HOME": "/home/user",
         "HTTPS_PROXY": "https://example.com",
@@ -196,6 +195,7 @@ Array [
         "NO_PROXY": "localhost",
         "PATH": "/tmp/path",
       },
+      "shell": true,
       "timeout": 900000,
     },
   },
@@ -208,7 +208,6 @@ Array [
     "cmd": "yarn install --ignore-engines --ignore-platform --network-timeout 100000 --ignore-scripts",
     "options": Object {
       "cwd": "some-dir",
-      "encoding": "utf-8",
       "env": Object {
         "HOME": "/home/user",
         "HTTPS_PROXY": "https://example.com",
@@ -218,6 +217,7 @@ Array [
         "NO_PROXY": "localhost",
         "PATH": "/tmp/path",
       },
+      "shell": true,
       "timeout": 900000,
     },
   },
@@ -225,7 +225,6 @@ Array [
     "cmd": "yarn upgrade some-dep --ignore-engines --ignore-platform --network-timeout 100000 --ignore-scripts",
     "options": Object {
       "cwd": "some-dir",
-      "encoding": "utf-8",
       "env": Object {
         "HOME": "/home/user",
         "HTTPS_PROXY": "https://example.com",
@@ -235,6 +234,7 @@ Array [
         "NO_PROXY": "localhost",
         "PATH": "/tmp/path",
       },
+      "shell": true,
       "timeout": 900000,
     },
   },
@@ -247,7 +247,6 @@ Array [
     "cmd": "yarn install --ignore-engines --ignore-platform --network-timeout 100000 --ignore-scripts",
     "options": Object {
       "cwd": "some-dir",
-      "encoding": "utf-8",
       "env": Object {
         "HOME": "/home/user",
         "HTTPS_PROXY": "https://example.com",
@@ -257,6 +256,7 @@ Array [
         "NO_PROXY": "localhost",
         "PATH": "/tmp/path",
       },
+      "shell": true,
       "timeout": 900000,
     },
   },
@@ -264,7 +264,6 @@ Array [
     "cmd": "yarn upgrade some-dep --ignore-engines --ignore-platform --network-timeout 100000 --ignore-scripts",
     "options": Object {
       "cwd": "some-dir",
-      "encoding": "utf-8",
       "env": Object {
         "HOME": "/home/user",
         "HTTPS_PROXY": "https://example.com",
@@ -274,6 +273,7 @@ Array [
         "NO_PROXY": "localhost",
         "PATH": "/tmp/path",
       },
+      "shell": true,
       "timeout": 900000,
     },
   },

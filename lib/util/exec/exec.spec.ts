@@ -1,8 +1,6 @@
-import {
-  ExecOptions as ChildProcessExecOptions,
-  exec as _cpExec,
-} from 'child_process';
-import { envMock } from '../../../test/execUtil';
+import { ExecOptions as ChildProcessExecOptions } from 'child_process';
+import { ChildProcessMock, envMock, spawn } from '../../../test/execUtil';
+
 import {
   BinarySource,
   ExecConfig,
@@ -11,8 +9,6 @@ import {
 } from './common';
 import * as dockerModule from './docker';
 import { ExecOptions, exec, setExecConfig } from '.';
-
-const cpExec: jest.Mock<typeof _cpExec> = _cpExec as any;
 
 jest.mock('child_process');
 
@@ -69,12 +65,12 @@ describe(`Child process execution wrapper`, () => {
     undefined,
     [volume_2_from, volume_2_to],
   ];
-  const encoding = 'utf-8';
+  const shell = true;
   const docker = { image };
   const processEnv = envMock.full;
   const dockerPullCmd = `docker pull ${image}`;
   const dockerRemoveCmd = `docker ps --filter name=${name} -aq`;
-  const dockerPullOpts = { encoding };
+  const dockerPullOpts = { shell };
   const dockerRemoveOpts = dockerPullOpts;
 
   const testInputs: [string, TestInput][] = [
@@ -86,7 +82,7 @@ describe(`Child process execution wrapper`, () => {
         inCmd,
         inOpts: {},
         outCmd,
-        outOpts: [{ cwd, encoding, env: envMock.basic, timeout: 900000 }],
+        outOpts: [{ cwd, shell, env: envMock.basic, timeout: 900000 }],
       },
     ],
 
@@ -99,9 +95,9 @@ describe(`Child process execution wrapper`, () => {
         inOpts: {},
         outCmd: ['echo "begin"', ...outCmd, "echo 'end'"],
         outOpts: [
-          { cwd, encoding, env: envMock.basic, timeout: 900000 },
-          { cwd, encoding, env: envMock.basic, timeout: 900000 },
-          { cwd, encoding, env: envMock.basic, timeout: 900000 },
+          { cwd, shell, env: envMock.basic, timeout: 900000 },
+          { cwd, shell, env: envMock.basic, timeout: 900000 },
+          { cwd, shell, env: envMock.basic, timeout: 900000 },
         ],
       },
     ],
@@ -117,7 +113,7 @@ describe(`Child process execution wrapper`, () => {
         outOpts: [
           {
             cwd,
-            encoding,
+            shell,
             env: { ...envMock.basic, FOO: 'BAR' },
             timeout: 900000,
           },
@@ -133,7 +129,7 @@ describe(`Child process execution wrapper`, () => {
         inCmd,
         inOpts: {},
         outCmd,
-        outOpts: [{ cwd, encoding, env: envMock.basic, timeout: 900000 }],
+        outOpts: [{ cwd, shell, env: envMock.basic, timeout: 900000 }],
       },
     ],
 
@@ -145,7 +141,7 @@ describe(`Child process execution wrapper`, () => {
         inCmd,
         inOpts: {},
         outCmd,
-        outOpts: [{ cwd, encoding, env: envMock.full, timeout: 900000 }],
+        outOpts: [{ cwd, shell, env: envMock.full, timeout: 900000 }],
         trustLevel: 'high',
       },
     ],
@@ -165,7 +161,7 @@ describe(`Child process execution wrapper`, () => {
         outOpts: [
           dockerPullOpts,
           dockerRemoveOpts,
-          { cwd, encoding, env: envMock.basic, timeout: 900000 },
+          { cwd, shell, env: envMock.basic, timeout: 900000 },
         ],
       },
     ],
@@ -185,7 +181,7 @@ describe(`Child process execution wrapper`, () => {
           },
         },
         outCmd,
-        outOpts: [{ cwd, encoding, env: envMock.filtered, timeout: 900000 }],
+        outOpts: [{ cwd, shell, env: envMock.filtered, timeout: 900000 }],
       },
     ],
 
@@ -213,7 +209,7 @@ describe(`Child process execution wrapper`, () => {
         outOpts: [
           dockerPullOpts,
           dockerRemoveOpts,
-          { cwd, encoding, env: envMock.filtered, timeout: 900000 },
+          { cwd, shell, env: envMock.filtered, timeout: 900000 },
         ],
       },
     ],
@@ -229,7 +225,7 @@ describe(`Child process execution wrapper`, () => {
         outOpts: [
           {
             cwd,
-            encoding,
+            shell,
             env: { ...envMock.basic, SELECTED_ENV_VAR: 'Default value' },
             timeout: 900000,
           },
@@ -258,7 +254,7 @@ describe(`Child process execution wrapper`, () => {
           dockerRemoveOpts,
           {
             cwd,
-            encoding,
+            shell,
             env: { ...envMock.basic, SELECTED_ENV_VAR: 'Default value' },
             timeout: 900000,
           },
@@ -281,7 +277,7 @@ describe(`Child process execution wrapper`, () => {
         outOpts: [
           dockerPullOpts,
           dockerRemoveOpts,
-          { cwd, encoding, env: envMock.basic, timeout: 900000 },
+          { cwd, shell, env: envMock.basic, timeout: 900000 },
         ],
       },
     ],
@@ -301,7 +297,7 @@ describe(`Child process execution wrapper`, () => {
         outOpts: [
           dockerPullOpts,
           dockerRemoveOpts,
-          { cwd, encoding, env: envMock.basic, timeout: 900000 },
+          { cwd, shell, env: envMock.basic, timeout: 900000 },
         ],
       },
     ],
@@ -325,7 +321,7 @@ describe(`Child process execution wrapper`, () => {
         outOpts: [
           dockerPullOpts,
           dockerRemoveOpts,
-          { cwd, encoding, env: envMock.basic, timeout: 900000 },
+          { cwd, shell, env: envMock.basic, timeout: 900000 },
         ],
       },
     ],
@@ -354,7 +350,7 @@ describe(`Child process execution wrapper`, () => {
         outOpts: [
           dockerPullOpts,
           dockerRemoveOpts,
-          { cwd, encoding, env: envMock.basic, timeout: 900000 },
+          { cwd, shell, env: envMock.basic, timeout: 900000 },
         ],
       },
     ],
@@ -383,7 +379,7 @@ describe(`Child process execution wrapper`, () => {
         outOpts: [
           dockerPullOpts,
           dockerRemoveOpts,
-          { cwd, encoding, env: envMock.basic, timeout: 900000 },
+          { cwd, shell, env: envMock.basic, timeout: 900000 },
         ],
       },
     ],
@@ -414,14 +410,13 @@ describe(`Child process execution wrapper`, () => {
 
     const actualCmd: string[] = [];
     const actualOpts: ChildProcessExecOptions[] = [];
-    cpExec.mockImplementation((execCmd, execOpts, callback) => {
-      actualCmd.push(execCmd);
-      actualOpts.push(execOpts);
-      callback(null, { stdout: '', stderr: '' });
-      return undefined;
-    });
+    spawn.mockImplementation(((spawnCmd, _spawnArgs, spawnOpts) => {
+      actualCmd.push(spawnCmd);
+      actualOpts.push(spawnOpts);
+      return new ChildProcessMock({ stdout: '', stderr: '' });
+    }) as any);
 
-    await exec(cmd as string, inOpts);
+    await exec(cmd, inOpts);
 
     expect(actualCmd).toEqual(outCommand);
     expect(actualOpts).toEqual(outOpts);
@@ -431,11 +426,10 @@ describe(`Child process execution wrapper`, () => {
     process.env = processEnv;
 
     const actualCmd: string[] = [];
-    cpExec.mockImplementation((execCmd, execOpts, callback) => {
-      actualCmd.push(execCmd);
-      callback(null, { stdout: '', stderr: '' });
-      return undefined;
-    });
+    spawn.mockImplementation(((spawnCmd, _spawnArgs, _spawnOpts) => {
+      actualCmd.push(spawnCmd);
+      return new ChildProcessMock({ stdout: '', stderr: '' });
+    }) as any);
 
     await setExecConfig({ binarySource: BinarySource.Global });
     await exec(inCmd, { docker });
@@ -457,7 +451,7 @@ describe(`Child process execution wrapper`, () => {
   });
 
   it('only calls removeDockerContainer in catch block is useDocker is set', async () => {
-    cpExec.mockImplementation(() => {
+    spawn.mockImplementation(() => {
       throw new Error('some error occurred');
     });
 
@@ -472,13 +466,13 @@ describe(`Child process execution wrapper`, () => {
   });
 
   it('wraps error if removeDockerContainer throws an error', async () => {
-    cpExec.mockImplementationOnce((_execCmd, _execOpts, callback) =>
-      callback(null, { stdout: '', stderr: '' })
+    spawn.mockImplementationOnce(
+      (() => new ChildProcessMock({ stdout: '', stderr: '' })) as any
     );
     await setExecConfig({ binarySource: BinarySource.Docker });
-    cpExec.mockImplementation(() => {
-      throw new Error('some error occurred');
-    });
+    spawn.mockImplementationOnce(
+      (() => new ChildProcessMock(new Error('some error occurred'))) as any
+    );
     jest
       .spyOn(dockerModule, 'generateDockerCommand')
       .mockImplementation((): any => 'asdf');

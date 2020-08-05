@@ -6,7 +6,6 @@ Array [
     "cmd": "./gradlew --init-script renovate-plugin.gradle renovate",
     "options": Object {
       "cwd": "localDir",
-      "encoding": "utf-8",
       "env": Object {
         "GRADLE_OPTS": "-Dorg.gradle.parallel=true -Dorg.gradle.configureondemand=true -Dorg.gradle.daemon=false -Dorg.gradle.caching=false",
         "HOME": "/home/user",
@@ -17,6 +16,7 @@ Array [
         "NO_PROXY": "localhost",
         "PATH": "/tmp/path",
       },
+      "shell": true,
       "timeout": 60000,
     },
   },
@@ -29,7 +29,6 @@ Array [
     "cmd": "gradle --init-script renovate-plugin.gradle renovate",
     "options": Object {
       "cwd": "localDir",
-      "encoding": "utf-8",
       "env": Object {
         "GRADLE_OPTS": "-Dorg.gradle.parallel=true -Dorg.gradle.configureondemand=true -Dorg.gradle.daemon=false -Dorg.gradle.caching=false",
         "HOME": "/home/user",
@@ -40,6 +39,7 @@ Array [
         "NO_PROXY": "localhost",
         "PATH": "/tmp/path",
       },
+      "shell": true,
       "timeout": 60000,
     },
   },
@@ -52,7 +52,6 @@ Array [
     "cmd": "./gradlew --init-script renovate-plugin.gradle renovate",
     "options": Object {
       "cwd": "localDir",
-      "encoding": "utf-8",
       "env": Object {
         "GRADLE_OPTS": "-Dorg.gradle.parallel=true -Dorg.gradle.configureondemand=true -Dorg.gradle.daemon=false -Dorg.gradle.caching=false",
         "HOME": "/home/user",
@@ -63,6 +62,7 @@ Array [
         "NO_PROXY": "localhost",
         "PATH": "/tmp/path",
       },
+      "shell": true,
       "timeout": 60000,
     },
   },
@@ -75,7 +75,6 @@ Array [
     "cmd": "gradlew.bat --init-script renovate-plugin.gradle renovate",
     "options": Object {
       "cwd": "localDir",
-      "encoding": "utf-8",
       "env": Object {
         "GRADLE_OPTS": "-Dorg.gradle.parallel=true -Dorg.gradle.configureondemand=true -Dorg.gradle.daemon=false -Dorg.gradle.caching=false",
         "HOME": "/home/user",
@@ -86,6 +85,7 @@ Array [
         "NO_PROXY": "localhost",
         "PATH": "/tmp/path",
       },
+      "shell": true,
       "timeout": 60000,
     },
   },
@@ -98,7 +98,6 @@ Array [
     "cmd": "./gradlew --init-script renovate-plugin.gradle renovate",
     "options": Object {
       "cwd": "localDir",
-      "encoding": "utf-8",
       "env": Object {
         "GRADLE_OPTS": "-Dorg.gradle.parallel=true -Dorg.gradle.configureondemand=true -Dorg.gradle.daemon=false -Dorg.gradle.caching=false",
         "HOME": "/home/user",
@@ -109,6 +108,7 @@ Array [
         "NO_PROXY": "localhost",
         "PATH": "/tmp/path",
       },
+      "shell": true,
       "timeout": 60000,
     },
   },
@@ -121,7 +121,6 @@ Array [
     "cmd": "./gradlew --init-script renovate-plugin.gradle renovate",
     "options": Object {
       "cwd": "localDir",
-      "encoding": "utf-8",
       "env": Object {
         "GRADLE_OPTS": "-Dorg.gradle.parallel=true -Dorg.gradle.configureondemand=true -Dorg.gradle.daemon=false -Dorg.gradle.caching=false",
         "HOME": "/home/user",
@@ -132,6 +131,7 @@ Array [
         "NO_PROXY": "localhost",
         "PATH": "/tmp/path",
       },
+      "shell": true,
       "timeout": 60000,
     },
   },
@@ -144,7 +144,6 @@ Array [
     "cmd": "./gradlew --init-script renovate-plugin.gradle renovate",
     "options": Object {
       "cwd": "localDir",
-      "encoding": "utf-8",
       "env": Object {
         "GRADLE_OPTS": "-Dorg.gradle.parallel=true -Dorg.gradle.configureondemand=true -Dorg.gradle.daemon=false -Dorg.gradle.caching=false",
         "HOME": "/home/user",
@@ -155,6 +154,7 @@ Array [
         "NO_PROXY": "localhost",
         "PATH": "/tmp/path",
       },
+      "shell": true,
       "timeout": 60000,
     },
   },
@@ -328,7 +328,6 @@ Array [
     "cmd": "./gradlew --init-script renovate-plugin.gradle renovate",
     "options": Object {
       "cwd": "localDir",
-      "encoding": "utf-8",
       "env": Object {
         "GRADLE_OPTS": "-Dorg.gradle.parallel=true -Dorg.gradle.configureondemand=true -Dorg.gradle.daemon=false -Dorg.gradle.caching=false",
         "HOME": "/home/user",
@@ -339,6 +338,7 @@ Array [
         "NO_PROXY": "localhost",
         "PATH": "/tmp/path",
       },
+      "shell": true,
       "timeout": 60000,
     },
   },
@@ -434,7 +434,6 @@ Array [
     "cmd": "./gradlew --init-script renovate-plugin.gradle renovate",
     "options": Object {
       "cwd": "localDir/foo",
-      "encoding": "utf-8",
       "env": Object {
         "GRADLE_OPTS": "-Dorg.gradle.parallel=true -Dorg.gradle.configureondemand=true -Dorg.gradle.daemon=false -Dorg.gradle.caching=false",
         "HOME": "/home/user",
@@ -445,6 +444,7 @@ Array [
         "NO_PROXY": "localhost",
         "PATH": "/tmp/path",
       },
+      "shell": true,
       "timeout": 60000,
     },
   },
@@ -618,7 +618,6 @@ Array [
     "cmd": "./gradlew --init-script renovate-plugin.gradle renovate",
     "options": Object {
       "cwd": "localDir",
-      "encoding": "utf-8",
       "env": Object {
         "GRADLE_OPTS": "-Dorg.gradle.parallel=true -Dorg.gradle.configureondemand=true -Dorg.gradle.daemon=false -Dorg.gradle.caching=false",
         "HOME": "/home/user",
@@ -629,6 +628,7 @@ Array [
         "NO_PROXY": "localhost",
         "PATH": "/tmp/path",
       },
+      "shell": true,
       "timeout": 60000,
     },
   },
@@ -642,26 +642,25 @@ Array [
   Object {
     "cmd": "docker pull renovate/gradle",
     "options": Object {
-      "encoding": "utf-8",
+      "shell": true,
     },
   },
   Object {
     "cmd": "docker ps --filter name=renovate_gradle -aq",
     "options": Object {
-      "encoding": "utf-8",
+      "shell": true,
     },
   },
   Object {
     "cmd": "docker rm -f gradle output",
     "options": Object {
-      "encoding": "utf-8",
+      "shell": true,
     },
   },
   Object {
     "cmd": "docker run --rm --name=renovate_gradle --label=renovate_child -v \\"localDir\\":\\"localDir\\" -e GRADLE_OPTS -w \\"localDir\\" renovate/gradle bash -l -c \\"./gradlew --init-script renovate-plugin.gradle renovate\\"",
     "options": Object {
       "cwd": "localDir",
-      "encoding": "utf-8",
       "env": Object {
         "GRADLE_OPTS": "-Dorg.gradle.parallel=true -Dorg.gradle.configureondemand=true -Dorg.gradle.daemon=false -Dorg.gradle.caching=false",
         "HOME": "/home/user",
@@ -672,6 +671,7 @@ Array [
         "NO_PROXY": "localhost",
         "PATH": "/tmp/path",
       },
+      "shell": true,
       "timeout": 60000,
     },
   },
@@ -683,26 +683,25 @@ Array [
   Object {
     "cmd": "docker pull renovate/gradle",
     "options": Object {
-      "encoding": "utf-8",
+      "shell": true,
     },
   },
   Object {
     "cmd": "docker ps --filter name=renovate_gradle -aq",
     "options": Object {
-      "encoding": "utf-8",
+      "shell": true,
     },
   },
   Object {
     "cmd": "docker rm -f gradle output",
     "options": Object {
-      "encoding": "utf-8",
+      "shell": true,
     },
   },
   Object {
     "cmd": "docker run --rm --name=renovate_gradle --label=renovate_child -v \\"localDir\\":\\"localDir\\" -e GRADLE_OPTS -w \\"localDir\\" renovate/gradle bash -l -c \\"./gradlew --init-script renovate-plugin.gradle renovate\\"",
     "options": Object {
       "cwd": "localDir",
-      "encoding": "utf-8",
       "env": Object {
         "GRADLE_OPTS": "-Dorg.gradle.parallel=true -Dorg.gradle.configureondemand=true -Dorg.gradle.daemon=false -Dorg.gradle.caching=false",
         "HOME": "/home/user",
@@ -713,6 +712,7 @@ Array [
         "NO_PROXY": "localhost",
         "PATH": "/tmp/path",
       },
+      "shell": true,
       "timeout": 60000,
     },
   },
@@ -724,26 +724,25 @@ Array [
   Object {
     "cmd": "docker pull renovate/gradle",
     "options": Object {
-      "encoding": "utf-8",
+      "shell": true,
     },
   },
   Object {
     "cmd": "docker ps --filter name=renovate_gradle -aq",
     "options": Object {
-      "encoding": "utf-8",
+      "shell": true,
     },
   },
   Object {
     "cmd": "docker rm -f gradle output",
     "options": Object {
-      "encoding": "utf-8",
+      "shell": true,
     },
   },
   Object {
     "cmd": "docker run --rm --name=renovate_gradle --label=renovate_child -v \\"localDir\\":\\"localDir\\" -e GRADLE_OPTS -w \\"localDir\\" renovate/gradle bash -l -c \\"gradle --init-script renovate-plugin.gradle renovate\\"",
     "options": Object {
       "cwd": "localDir",
-      "encoding": "utf-8",
       "env": Object {
         "GRADLE_OPTS": "-Dorg.gradle.parallel=true -Dorg.gradle.configureondemand=true -Dorg.gradle.daemon=false -Dorg.gradle.caching=false",
         "HOME": "/home/user",
@@ -754,6 +753,7 @@ Array [
         "NO_PROXY": "localhost",
         "PATH": "/tmp/path",
       },
+      "shell": true,
       "timeout": 60000,
     },
   },
@@ -806,7 +806,6 @@ Array [
     "cmd": "./gradlew --init-script renovate-plugin.gradle renovate",
     "options": Object {
       "cwd": "localDir",
-      "encoding": "utf-8",
       "env": Object {
         "GRADLE_OPTS": "-Dorg.gradle.parallel=true -Dorg.gradle.configureondemand=true -Dorg.gradle.daemon=false -Dorg.gradle.caching=false",
         "HOME": "/home/user",
@@ -817,6 +816,7 @@ Array [
         "NO_PROXY": "localhost",
         "PATH": "/tmp/path",
       },
+      "shell": true,
       "timeout": 60000,
     },
   },

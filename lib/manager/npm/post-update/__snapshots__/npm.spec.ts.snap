@@ -10,7 +10,6 @@ Array [
     "cmd": "npm install --ignore-scripts --no-audit",
     "options": Object {
       "cwd": "some-dir",
-      "encoding": "utf-8",
       "env": Object {
         "HOME": "/home/user",
         "HTTPS_PROXY": "https://example.com",
@@ -20,6 +19,7 @@ Array [
         "NO_PROXY": "localhost",
         "PATH": "/tmp/path",
       },
+      "shell": true,
       "timeout": 900000,
     },
   },
@@ -27,7 +27,6 @@ Array [
     "cmd": "npm dedupe",
     "options": Object {
       "cwd": "some-dir",
-      "encoding": "utf-8",
       "env": Object {
         "HOME": "/home/user",
         "HTTPS_PROXY": "https://example.com",
@@ -37,6 +36,7 @@ Array [
         "NO_PROXY": "localhost",
         "PATH": "/tmp/path",
       },
+      "shell": true,
       "timeout": 900000,
     },
   },
@@ -51,7 +51,6 @@ Array [
     "cmd": "npm install --package-lock-only --ignore-scripts --no-audit",
     "options": Object {
       "cwd": "some-dir",
-      "encoding": "utf-8",
       "env": Object {
         "HOME": "/home/user",
         "HTTPS_PROXY": "https://example.com",
@@ -61,6 +60,7 @@ Array [
         "NO_PROXY": "localhost",
         "PATH": "/tmp/path",
       },
+      "shell": true,
       "timeout": 900000,
     },
   },
@@ -73,7 +73,6 @@ Array [
     "cmd": "npm install --package-lock-only --ignore-scripts --no-audit some-dep@1.0.1",
     "options": Object {
       "cwd": "some-dir",
-      "encoding": "utf-8",
       "env": Object {
         "HOME": "/home/user",
         "HTTPS_PROXY": "https://example.com",
@@ -83,6 +82,7 @@ Array [
         "NO_PROXY": "localhost",
         "PATH": "/tmp/path",
       },
+      "shell": true,
       "timeout": 900000,
     },
   },

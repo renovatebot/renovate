@@ -1,11 +1,11 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
+
 exports[`manager/npm/post-update/lerna generateLockFiles() allows scripts for trust level high 1`] = `
 Array [
   Object {
     "cmd": "npm install  --no-audit --package-lock-only",
     "options": Object {
       "cwd": "some-dir",
-      "encoding": "utf-8",
       "env": Object {
         "HOME": "/home/user",
         "HTTPS_PROXY": "https://example.com",
@@ -15,6 +15,7 @@ Array [
         "NO_PROXY": "localhost",
         "PATH": "/tmp/path",
       },
+      "shell": true,
       "timeout": 900000,
     },
   },
@@ -22,7 +23,6 @@ Array [
     "cmd": "lerna bootstrap --no-ci --  --no-audit --package-lock-only",
     "options": Object {
       "cwd": "some-dir",
-      "encoding": "utf-8",
       "env": Object {
         "HOME": "/home/user",
         "HTTPS_PROXY": "https://example.com",
@@ -32,6 +32,7 @@ Array [
         "NO_PROXY": "localhost",
         "PATH": "/tmp/path",
       },
+      "shell": true,
       "timeout": 900000,
     },
   },
@@ -44,7 +45,6 @@ Array [
     "cmd": "npm install --ignore-scripts  --no-audit --package-lock-only",
     "options": Object {
       "cwd": "some-dir",
-      "encoding": "utf-8",
       "env": Object {
         "HOME": "/home/user",
         "HTTPS_PROXY": "https://example.com",
@@ -54,6 +54,7 @@ Array [
         "NO_PROXY": "localhost",
         "PATH": "/tmp/path",
       },
+      "shell": true,
       "timeout": 900000,
     },
   },
@@ -61,7 +62,6 @@ Array [
     "cmd": "lerna bootstrap --no-ci --ignore-scripts -- --ignore-scripts  --no-audit --package-lock-only",
     "options": Object {
       "cwd": "some-dir",
-      "encoding": "utf-8",
       "env": Object {
         "HOME": "/home/user",
         "HTTPS_PROXY": "https://example.com",
@@ -71,6 +71,7 @@ Array [
         "NO_PROXY": "localhost",
         "PATH": "/tmp/path",
       },
+      "shell": true,
       "timeout": 900000,
     },
   },
@@ -83,7 +84,6 @@ Array [
     "cmd": "npm install --ignore-scripts  --no-audit --package-lock-only",
     "options": Object {
       "cwd": "some-dir",
-      "encoding": "utf-8",
       "env": Object {
         "HOME": "/home/user",
         "HTTPS_PROXY": "https://example.com",
@@ -93,6 +93,7 @@ Array [
         "NO_PROXY": "localhost",
         "PATH": "/tmp/path",
       },
+      "shell": true,
       "timeout": 900000,
     },
   },
@@ -100,7 +101,6 @@ Array [
     "cmd": "lerna bootstrap --no-ci --ignore-scripts -- --ignore-scripts  --no-audit --package-lock-only",
     "options": Object {
       "cwd": "some-dir",
-      "encoding": "utf-8",
       "env": Object {
         "HOME": "/home/user",
         "HTTPS_PROXY": "https://example.com",
@@ -110,6 +110,7 @@ Array [
         "NO_PROXY": "localhost",
         "PATH": "/tmp/path",
       },
+      "shell": true,
       "timeout": 900000,
     },
   },
@@ -122,7 +123,6 @@ Array [
     "cmd": "yarn install --ignore-scripts --ignore-engines --ignore-platform",
     "options": Object {
       "cwd": "some-dir",
-      "encoding": "utf-8",
       "env": Object {
         "HOME": "/home/user",
         "HTTPS_PROXY": "https://example.com",
@@ -132,6 +132,7 @@ Array [
         "NO_PROXY": "localhost",
         "PATH": "/tmp/path",
       },
+      "shell": true,
       "timeout": 900000,
     },
   },
@@ -139,7 +140,6 @@ Array [
     "cmd": "lerna bootstrap --no-ci --ignore-scripts -- --ignore-scripts --ignore-engines --ignore-platform",
     "options": Object {
       "cwd": "some-dir",
-      "encoding": "utf-8",
       "env": Object {
         "HOME": "/home/user",
         "HTTPS_PROXY": "https://example.com",
@@ -149,6 +149,7 @@ Array [
         "NO_PROXY": "localhost",
         "PATH": "/tmp/path",
       },
+      "shell": true,
       "timeout": 900000,
     },
   },
@@ -161,7 +162,6 @@ Array [
     "cmd": "npm install --ignore-scripts  --no-audit --package-lock-only",
     "options": Object {
       "cwd": "some-dir",
-      "encoding": "utf-8",
       "env": Object {
         "HOME": "/home/user",
         "HTTPS_PROXY": "https://example.com",
@@ -171,6 +171,7 @@ Array [
         "NO_PROXY": "localhost",
         "PATH": "/tmp/path",
       },
+      "shell": true,
       "timeout": 900000,
     },
   },
@@ -178,7 +179,6 @@ Array [
     "cmd": "lerna bootstrap --no-ci --ignore-scripts -- --ignore-scripts  --no-audit --package-lock-only",
     "options": Object {
       "cwd": "some-dir",
-      "encoding": "utf-8",
       "env": Object {
         "HOME": "/home/user",
         "HTTPS_PROXY": "https://example.com",
@@ -188,6 +188,7 @@ Array [
         "NO_PROXY": "localhost",
         "PATH": "/tmp/path",
       },
+      "shell": true,
       "timeout": 900000,
     },
   },
@@ -200,7 +201,6 @@ Array [
     "cmd": "npm install --ignore-scripts  --no-audit",
     "options": Object {
       "cwd": "some-dir",
-      "encoding": "utf-8",
       "env": Object {
         "HOME": "/home/user",
         "HTTPS_PROXY": "https://example.com",
@@ -210,6 +210,7 @@ Array [
         "NO_PROXY": "localhost",
         "PATH": "/tmp/path",
       },
+      "shell": true,
       "timeout": 900000,
     },
   },
@@ -217,7 +218,6 @@ Array [
     "cmd": "lerna bootstrap --no-ci --ignore-scripts -- --ignore-scripts  --no-audit",
     "options": Object {
       "cwd": "some-dir",
-      "encoding": "utf-8",
       "env": Object {
         "HOME": "/home/user",
         "HTTPS_PROXY": "https://example.com",
@@ -227,9 +227,9 @@ Array [
         "NO_PROXY": "localhost",
         "PATH": "/tmp/path",
       },
+      "shell": true,
       "timeout": 900000,
     },
   },
 ]
 `;
-

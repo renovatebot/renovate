@@ -1,8 +1,5 @@
-import {
-  ExecOptions as ChildProcessExecOptions,
-  exec as cpExec,
-} from 'child_process';
-import { promisify } from 'util';
+import { SpawnOptions, spawn } from 'child_process';
+import { Readable } from 'stream';
 
 export type Opt<T> = T | null | undefined;
 
@@ -37,16 +34,70 @@ export interface DockerOptions {
   postCommands?: DockerExtraCommands;
 }
 
-export interface RawExecOptions extends ChildProcessExecOptions {
-  encoding: string;
-}
+export type RawExecOptions = SpawnOptions;
 
 export interface ExecResult {
   stdout: string;
   stderr: string;
 }
 
-export const rawExec: (
+interface ChildProcess {
+  stdout: Readable;
+  stderr: Readable;
+
+  on(event: string | symbol, listener: (...args: any[]) => void): this;
+}
+
+function pipeStreamToBuffers(stream: Readable, ...buffers: string[][]): void {
+  stream.setEncoding('utf-8');
+  stream.on('data', (s) => {
+    buffers.forEach((buf) => buf.push(s));
+  });
+}
+
+export class ExecError extends Error {
+  constructor(
+    message: string,
+    public stdout: string,
+    public stderr: string,
+    public code?: number
+  ) {
+    super(message);
+  }
+}
+
+export function rawExec(
   cmd: string,
-  opts: RawExecOptions
-) => Promise<ExecResult> = promisify(cpExec);
+  opts?: RawExecOptions
+): Promise<ExecResult> {
+  const stdoutBuf: string[] = [];
+  const stderrBuf: string[] = [];
+
+  return new Promise<ExecResult>((resolve, reject) => {
+    const child: ChildProcess = spawn(cmd, [], {
+      ...opts,
+      shell: true,
+    });
+
+    pipeStreamToBuffers(child.stdout, stdoutBuf);
+    pipeStreamToBuffers(child.stderr, stderrBuf);
+
+    child.on('error', (err: Error) => {
+      reject(
+        new ExecError(err.message, stdoutBuf.join('\n'), stderrBuf.join('\n'))
+      );
+    });
+
+    child.on('close', (code: number) => {
+      const stdout = stdoutBuf.join('\n');
+      const stderr = stderrBuf.join('\n');
+      if (code === 0) {
+        resolve({ stdout, stderr });
+      } else {
+        reject(
+          new ExecError(`Process exit code: ${code}`, stdout, stderr, code)
+        );
+      }
+    });
+  });
+}

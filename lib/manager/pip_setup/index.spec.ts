@@ -2,9 +2,9 @@ import { readFileSync } from 'fs';
 import {
   ExecSnapshots,
   envMock,
-  exec,
   mockExecAll,
   mockExecSequence,
+  spawn,
 } from '../../../test/execUtil';
 import { env, getName } from '../../../test/util';
 import { BinarySource } from '../../util/exec/common';
@@ -52,7 +52,7 @@ describe(getName(__filename), () => {
     });
 
     it('returns found deps', async () => {
-      const execSnapshots = mockExecSequence(exec, [
+      const execSnapshots = mockExecSequence(spawn, [
         ...pythonVersionCallResults,
         {
           stdout: '',
@@ -64,12 +64,12 @@ describe(getName(__filename), () => {
       expect(
         await extractPackageFile(content, packageFile, config)
       ).toMatchSnapshot();
-      expect(exec).toHaveBeenCalledTimes(4);
+      expect(spawn).toHaveBeenCalledTimes(4);
       expect(fixSnapshots(execSnapshots)).toMatchSnapshot();
     });
 
     it('returns found deps (docker)', async () => {
-      const execSnapshots = mockExecSequence(exec, [
+      const execSnapshots = mockExecSequence(spawn, [
         { stdout: '', stderr: '' },
       ]);
 
@@ -84,7 +84,7 @@ describe(getName(__filename), () => {
     });
 
     it('returns no deps', async () => {
-      const execSnapshots = mockExecSequence(exec, [
+      const execSnapshots = mockExecSequence(spawn, [
         ...pythonVersionCallResults,
         {
           stdout: '',
@@ -93,12 +93,12 @@ describe(getName(__filename), () => {
       ]);
       jest.spyOn(fs, 'readLocalFile').mockResolvedValueOnce('{}');
       expect(await extractPackageFile(content, packageFile, config)).toBeNull();
-      expect(exec).toHaveBeenCalledTimes(4);
+      expect(spawn).toHaveBeenCalledTimes(4);
       expect(fixSnapshots(execSnapshots)).toMatchSnapshot();
     });
 
     it('should return null for invalid file', async () => {
-      const execSnapshots = mockExecSequence(exec, [
+      const execSnapshots = mockExecSequence(spawn, [
         ...pythonVersionCallResults,
         new Error(),
       ]);
@@ -109,11 +109,11 @@ describe(getName(__filename), () => {
           config
         )
       ).toBeNull();
-      expect(exec).toHaveBeenCalledTimes(4);
+      expect(spawn).toHaveBeenCalledTimes(4);
       expect(fixSnapshots(execSnapshots)).toMatchSnapshot();
     });
     it('catches error', async () => {
-      const execSnapshots = mockExecAll(exec, new Error());
+      const execSnapshots = mockExecAll(spawn, new Error());
       expect(
         await extractPackageFile(
           'raise Exception()',

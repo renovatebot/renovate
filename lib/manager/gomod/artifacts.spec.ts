@@ -1,7 +1,6 @@
-import { exec as _exec } from 'child_process';
 import _fs from 'fs-extra';
 import { join } from 'upath';
-import { envMock, mockExecAll } from '../../../test/execUtil';
+import { envMock, mockExecAll, spawn } from '../../../test/execUtil';
 import { git, mocked } from '../../../test/util';
 import { setUtilConfig } from '../../util';
 import { BinarySource } from '../../util/exec/common';
@@ -19,7 +18,6 @@ jest.mock('../../util/host-rules');
 jest.mock('../../util/http');
 
 const fs: jest.Mocked<typeof _fs> = _fs as any;
-const exec: jest.Mock<typeof _exec> = _exec as any;
 const env = mocked(_env);
 const hostRules = mocked(_hostRules);
 
@@ -60,7 +58,7 @@ describe('.updateArtifacts()', () => {
     docker.resetPrefetchedImages();
   });
   it('returns if no go.sum found', async () => {
-    const execSnapshots = mockExecAll(exec);
+    const execSnapshots = mockExecAll(spawn);
     expect(
       await gomod.updateArtifacts({
         packageFileName: 'go.mod',
@@ -74,7 +72,7 @@ describe('.updateArtifacts()', () => {
   it('returns null if unchanged', async () => {
     fs.readFile.mockResolvedValueOnce('Current go.sum' as any);
     fs.readFile.mockResolvedValueOnce(null as any); // vendor modules filename
-    const execSnapshots = mockExecAll(exec);
+    const execSnapshots = mockExecAll(spawn);
     git.getRepoStatus.mockResolvedValueOnce({
       modified: [],
     } as StatusResult);
@@ -91,7 +89,7 @@ describe('.updateArtifacts()', () => {
   it('returns updated go.sum', async () => {
     fs.readFile.mockResolvedValueOnce('Current go.sum' as any);
     fs.readFile.mockResolvedValueOnce(null as any); // vendor modules filename
-    const execSnapshots = mockExecAll(exec);
+    const execSnapshots = mockExecAll(spawn);
     git.getRepoStatus.mockResolvedValueOnce({
       modified: ['go.sum'],
     } as StatusResult);
@@ -113,7 +111,7 @@ describe('.updateArtifacts()', () => {
 
     fs.readFile.mockResolvedValueOnce('Current go.sum' as any);
     fs.readFile.mockResolvedValueOnce('modules.txt content' as any); // vendor modules filename
-    const execSnapshots = mockExecAll(exec);
+    const execSnapshots = mockExecAll(spawn);
     git.getRepoStatus.mockResolvedValueOnce({
       modified: ['go.sum', foo],
       not_added: [bar],
@@ -147,7 +145,7 @@ describe('.updateArtifacts()', () => {
     await setUtilConfig({ ...config, binarySource: BinarySource.Docker });
     fs.readFile.mockResolvedValueOnce('Current go.sum' as any);
     fs.readFile.mockResolvedValueOnce(null as any); // vendor modules filename
-    const execSnapshots = mockExecAll(exec);
+    const execSnapshots = mockExecAll(spawn);
     git.getRepoStatus.mockResolvedValueOnce({
       modified: ['go.sum'],
     } as StatusResult);
@@ -168,7 +166,7 @@ describe('.updateArtifacts()', () => {
   it('supports global mode', async () => {
     fs.readFile.mockResolvedValueOnce('Current go.sum' as any);
     fs.readFile.mockResolvedValueOnce(null as any); // vendor modules filename
-    const execSnapshots = mockExecAll(exec);
+    const execSnapshots = mockExecAll(spawn);
     git.getRepoStatus.mockResolvedValueOnce({
       modified: ['go.sum'],
     } as StatusResult);
@@ -194,7 +192,7 @@ describe('.updateArtifacts()', () => {
     });
     fs.readFile.mockResolvedValueOnce('Current go.sum' as any);
     fs.readFile.mockResolvedValueOnce(null as any); // vendor modules filename
-    const execSnapshots = mockExecAll(exec);
+    const execSnapshots = mockExecAll(spawn);
     git.getRepoStatus.mockResolvedValueOnce({
       modified: ['go.sum'],
     } as StatusResult);
@@ -220,7 +218,7 @@ describe('.updateArtifacts()', () => {
     });
     fs.readFile.mockResolvedValueOnce('Current go.sum' as any);
     fs.readFile.mockResolvedValueOnce(null as any); // vendor modules filename
-    const execSnapshots = mockExecAll(exec);
+    const execSnapshots = mockExecAll(spawn);
     git.getRepoStatus.mockResolvedValueOnce({
       modified: ['go.sum'],
     } as StatusResult);
@@ -248,7 +246,7 @@ describe('.updateArtifacts()', () => {
     }
   });
   it('catches errors', async () => {
-    const execSnapshots = mockExecAll(exec);
+    const execSnapshots = mockExecAll(spawn);
     fs.readFile.mockResolvedValueOnce('Current go.sum' as any);
     fs.readFile.mockResolvedValueOnce(null as any); // vendor modules filename
     fs.outputFile.mockImplementationOnce(() => {

@@ -1,6 +1,10 @@
-import { exec as _exec } from 'child_process';
 import _fs from 'fs-extra';
-import { ExecSnapshots, envMock, mockExecAll } from '../../../../test/execUtil';
+import {
+  ExecSnapshots,
+  envMock,
+  mockExecAll,
+  spawn,
+} from '../../../../test/execUtil';
 import { getName, mocked } from '../../../../test/util';
 import * as _env from '../../../util/exec/env';
 import * as _yarnHelper from './yarn';
@@ -10,7 +14,6 @@ jest.mock('child_process');
 jest.mock('../../../util/exec/env');
 jest.mock('./node-version');
 
-const exec: jest.Mock<typeof _exec> = _exec as any;
 const env = mocked(_env);
 const fs = mocked(_fs);
 const yarnHelper = mocked(_yarnHelper);
@@ -32,7 +35,7 @@ describe(getName(__filename), () => {
   it.each([['1.22.0']])(
     'generates lock files using yarn v%s',
     async (yarnVersion) => {
-      const execSnapshots = mockExecAll(exec, {
+      const execSnapshots = mockExecAll(spawn, {
         stdout: yarnVersion,
         stderr: '',
       });
@@ -55,7 +58,7 @@ describe(getName(__filename), () => {
   it.each([['1.22.0']])(
     'performs lock file updates using yarn v%s',
     async (yarnVersion) => {
-      const execSnapshots = mockExecAll(exec, {
+      const execSnapshots = mockExecAll(spawn, {
         stdout: yarnVersion,
         stderr: '',
       });
@@ -75,7 +78,7 @@ describe(getName(__filename), () => {
   it.each([['1.22.0']])(
     'performs lock file updates and full install using yarn v%s',
     async (yarnVersion) => {
-      const execSnapshots = mockExecAll(exec, {
+      const execSnapshots = mockExecAll(spawn, {
         stdout: yarnVersion,
         stderr: '',
       });
@@ -97,7 +100,7 @@ describe(getName(__filename), () => {
   it.each([['1.22.0']])(
     'performs lock file maintenance using yarn v%s',
     async (yarnVersion) => {
-      const execSnapshots = mockExecAll(exec, {
+      const execSnapshots = mockExecAll(spawn, {
         stdout: yarnVersion,
         stderr: '',
       });
@@ -120,7 +123,7 @@ describe(getName(__filename), () => {
     }
   );
   it('catches errors', async () => {
-    const execSnapshots = mockExecAll(exec, {
+    const execSnapshots = mockExecAll(spawn, {
       stdout: '1.9.4',
       stderr: 'some-error',
     });

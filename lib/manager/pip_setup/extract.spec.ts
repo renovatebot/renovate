@@ -1,4 +1,4 @@
-import { envMock, exec, mockExecSequence } from '../../../test/execUtil';
+import { envMock, mockExecSequence, spawn } from '../../../test/execUtil';
 import { env, getName } from '../../../test/util';
 import {
   getPythonAlias,
@@ -25,7 +25,7 @@ describe(getName(__filename), () => {
   });
   describe('getPythonAlias', () => {
     it('returns the python alias to use', async () => {
-      const execSnapshots = mockExecSequence(exec, [
+      const execSnapshots = mockExecSequence(spawn, [
         { stdout: '', stderr: 'Python 2.7.17\\n' },
         new Error(),
         { stdout: 'Python 3.8.0\\n', stderr: '' },

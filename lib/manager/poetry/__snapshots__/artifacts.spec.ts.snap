@@ -18,7 +18,6 @@ Array [
     "cmd": "poetry update --lock --no-interaction dep1",
     "options": Object {
       "cwd": "/tmp/github/some/repo",
-      "encoding": "utf-8",
       "env": Object {
         "HOME": "/home/user",
         "HTTPS_PROXY": "https://example.com",
@@ -28,6 +27,7 @@ Array [
         "NO_PROXY": "localhost",
         "PATH": "/tmp/path",
       },
+      "shell": true,
       "timeout": 900000,
     },
   },
@@ -40,7 +40,6 @@ Array [
     "cmd": "poetry update --lock --no-interaction dep1",
     "options": Object {
       "cwd": "/tmp/github/some/repo",
-      "encoding": "utf-8",
       "env": Object {
         "HOME": "/home/user",
         "HTTPS_PROXY": "https://example.com",
@@ -50,6 +49,7 @@ Array [
         "NO_PROXY": "localhost",
         "PATH": "/tmp/path",
       },
+      "shell": true,
       "timeout": 900000,
     },
   },
@@ -61,20 +61,19 @@ Array [
   Object {
     "cmd": "docker pull renovate/python:2.7.5",
     "options": Object {
-      "encoding": "utf-8",
+      "shell": true,
     },
   },
   Object {
     "cmd": "docker ps --filter name=renovate_python -aq",
     "options": Object {
-      "encoding": "utf-8",
+      "shell": true,
     },
   },
   Object {
     "cmd": "docker run --rm --name=renovate_python --label=renovate_child --user=foobar -v \\"/tmp/github/some/repo\\":\\"/tmp/github/some/repo\\" -w \\"/tmp/github/some/repo\\" renovate/python:2.7.5 bash -l -c \\"pip install 'poetry>=1.0' && poetry update --lock --no-interaction dep1\\"",
     "options": Object {
       "cwd": "/tmp/github/some/repo",
-      "encoding": "utf-8",
       "env": Object {
         "HOME": "/home/user",
         "HTTPS_PROXY": "https://example.com",
@@ -84,6 +83,7 @@ Array [
         "NO_PROXY": "localhost",
         "PATH": "/tmp/path",
       },
+      "shell": true,
       "timeout": 900000,
     },
   },
@@ -95,20 +95,19 @@ Array [
   Object {
     "cmd": "docker pull renovate/python:3.4.2",
     "options": Object {
-      "encoding": "utf-8",
+      "shell": true,
     },
   },
   Object {
     "cmd": "docker ps --filter name=renovate_python -aq",
     "options": Object {
-      "encoding": "utf-8",
+      "shell": true,
     },
   },
   Object {
     "cmd": "docker run --rm --name=renovate_python --label=renovate_child --user=foobar -v \\"/tmp/github/some/repo\\":\\"/tmp/github/some/repo\\" -w \\"/tmp/github/some/repo\\" renovate/python:3.4.2 bash -l -c \\"pip install poetry && poetry update --lock --no-interaction dep1\\"",
     "options": Object {
       "cwd": "/tmp/github/some/repo",
-      "encoding": "utf-8",
       "env": Object {
         "HOME": "/home/user",
         "HTTPS_PROXY": "https://example.com",
@@ -118,6 +117,7 @@ Array [
         "NO_PROXY": "localhost",
         "PATH": "/tmp/path",
       },
+      "shell": true,
       "timeout": 900000,
     },
   },
@@ -130,7 +130,6 @@ Array [
     "cmd": "poetry update --lock --no-interaction",
     "options": Object {
       "cwd": "/tmp/github/some/repo",
-      "encoding": "utf-8",
       "env": Object {
         "HOME": "/home/user",
         "HTTPS_PROXY": "https://example.com",
@@ -140,6 +139,7 @@ Array [
         "NO_PROXY": "localhost",
         "PATH": "/tmp/path",
       },
+      "shell": true,
       "timeout": 900000,
     },
   },
@@ -152,7 +152,6 @@ Array [
     "cmd": "poetry update --lock --no-interaction dep1",
     "options": Object {
       "cwd": "/tmp/github/some/repo",
-      "encoding": "utf-8",
       "env": Object {
         "HOME": "/home/user",
         "HTTPS_PROXY": "https://example.com",
@@ -162,6 +161,7 @@ Array [
         "NO_PROXY": "localhost",
         "PATH": "/tmp/path",
       },
+      "shell": true,
       "timeout": 900000,
     },
   },

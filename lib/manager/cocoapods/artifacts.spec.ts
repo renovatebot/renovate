@@ -1,7 +1,6 @@
-import { exec as _exec } from 'child_process';
 import _fs from 'fs-extra';
 import { join } from 'upath';
-import { envMock, mockExecAll } from '../../../test/execUtil';
+import { envMock, mockExecAll, spawn } from '../../../test/execUtil';
 import { git, mocked } from '../../../test/util';
 import * as _datasource from '../../datasource';
 import { setExecConfig } from '../../util/exec';
@@ -18,7 +17,6 @@ jest.mock('../../platform');
 jest.mock('../../datasource');
 
 const fs: jest.Mocked<typeof _fs> = _fs as any;
-const exec: jest.Mock<typeof _exec> = _exec as any;
 const env = mocked(_env);
 const datasource = mocked(_datasource);
 
@@ -47,7 +45,7 @@ describe('.updateArtifacts()', () => {
     });
   });
   it('returns null if no Podfile.lock found', async () => {
-    const execSnapshots = mockExecAll(exec);
+    const execSnapshots = mockExecAll(spawn);
     expect(
       await updateArtifacts({
         packageFileName: 'Podfile',
@@ -59,7 +57,7 @@ describe('.updateArtifacts()', () => {
     expect(execSnapshots).toMatchSnapshot();
   });
   it('returns null if no updatedDeps were provided', async () => {
-    const execSnapshots = mockExecAll(exec);
+    const execSnapshots = mockExecAll(spawn);
     expect(
       await updateArtifacts({
         packageFileName: 'Podfile',
@@ -71,7 +69,7 @@ describe('.updateArtifacts()', () => {
     expect(execSnapshots).toMatchSnapshot();
   });
   it('returns null for invalid local directory', async () => {
-    const execSnapshots = mockExecAll(exec);
+    const execSnapshots = mockExecAll(spawn);
     const noLocalDirConfig = {
       localDir: undefined,
     };
@@ -86,7 +84,7 @@ describe('.updateArtifacts()', () => {
     expect(execSnapshots).toMatchSnapshot();
   });
   it('returns null if updatedDeps is empty', async () => {
-    const execSnapshots = mockExecAll(exec);
+    const execSnapshots = mockExecAll(spawn);
     expect(
       await updateArtifacts({
         packageFileName: 'Podfile',
@@ -98,7 +96,7 @@ describe('.updateArtifacts()', () => {
     expect(execSnapshots).toMatchSnapshot();
   });
   it('returns null if unchanged', async () => {
-    const execSnapshots = mockExecAll(exec);
+    const execSnapshots = mockExecAll(spawn);
     fs.readFile.mockResolvedValueOnce('Current Podfile' as any);
     git.getRepoStatus.mockResolvedValueOnce({
       modified: [],
@@ -115,7 +113,7 @@ describe('.updateArtifacts()', () => {
     expect(execSnapshots).toMatchSnapshot();
   });
   it('returns updated Podfile', async () => {
-    const execSnapshots = mockExecAll(exec);
+    const execSnapshots = mockExecAll(spawn);
     await setExecConfig({ ...config, binarySource: BinarySource.Docker });
     fs.readFile.mockResolvedValueOnce('Old Podfile' as any);
     git.getRepoStatus.mockResolvedValueOnce({
@@ -133,7 +131,7 @@ describe('.updateArtifacts()', () => {
     expect(execSnapshots).toMatchSnapshot();
   });
   it('returns updated Podfile and Pods files', async () => {
-    const execSnapshots = mockExecAll(exec);
+    const execSnapshots = mockExecAll(spawn);
     await setExecConfig({ ...config, binarySource: BinarySource.Docker });
     fs.readFile.mockResolvedValueOnce('Old Manifest.lock' as any);
     fs.readFile.mockResolvedValueOnce('New Podfile' as any);
@@ -154,7 +152,7 @@ describe('.updateArtifacts()', () => {
     expect(execSnapshots).toMatchSnapshot();
   });
   it('catches write error', async () => {
-    const execSnapshots = mockExecAll(exec);
+    const execSnapshots = mockExecAll(spawn);
     fs.readFile.mockResolvedValueOnce('Current Podfile' as any);
     fs.outputFile.mockImplementationOnce(() => {
       throw new Error('not found');
@@ -170,7 +168,7 @@ describe('.updateArtifacts()', () => {
     expect(execSnapshots).toMatchSnapshot();
   });
   it('returns pod exec error', async () => {
-    const execSnapshots = mockExecAll(exec, new Error('exec exception'));
+    const execSnapshots = mockExecAll(spawn, new Error('exec exception'));
     fs.readFile.mockResolvedValueOnce('Old Podfile.lock' as any);
     fs.outputFile.mockResolvedValueOnce(null as never);
     fs.readFile.mockResolvedValueOnce('Old Podfile.lock' as any);
@@ -185,7 +183,7 @@ describe('.updateArtifacts()', () => {
     expect(execSnapshots).toMatchSnapshot();
   });
   it('dynamically selects Docker image tag', async () => {
-    const execSnapshots = mockExecAll(exec);
+    const execSnapshots = mockExecAll(spawn);
 
     await setExecConfig({
       ...config,
@@ -210,7 +208,7 @@ describe('.updateArtifacts()', () => {
     expect(execSnapshots).toMatchSnapshot();
   });
   it('falls back to the `latest` Docker image tag', async () => {
-    const execSnapshots = mockExecAll(exec);
+    const execSnapshots = mockExecAll(spawn);
 
     await setExecConfig({
       ...config,

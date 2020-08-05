@@ -6,7 +6,6 @@ Array [
     "cmd": "python --version",
     "options": Object {
       "cwd": null,
-      "encoding": "utf-8",
       "env": Object {
         "HOME": "/home/user",
         "HTTPS_PROXY": "https://example.com",
@@ -16,6 +15,7 @@ Array [
         "NO_PROXY": "localhost",
         "PATH": "/tmp/path",
       },
+      "shell": true,
       "timeout": 900000,
     },
   },
@@ -23,7 +23,6 @@ Array [
     "cmd": "python3 --version",
     "options": Object {
       "cwd": null,
-      "encoding": "utf-8",
       "env": Object {
         "HOME": "/home/user",
         "HTTPS_PROXY": "https://example.com",
@@ -33,6 +32,7 @@ Array [
         "NO_PROXY": "localhost",
         "PATH": "/tmp/path",
       },
+      "shell": true,
       "timeout": 900000,
     },
   },
@@ -40,7 +40,6 @@ Array [
     "cmd": "python3.8 --version",
     "options": Object {
       "cwd": null,
-      "encoding": "utf-8",
       "env": Object {
         "HOME": "/home/user",
         "HTTPS_PROXY": "https://example.com",
@@ -50,6 +49,7 @@ Array [
         "NO_PROXY": "localhost",
         "PATH": "/tmp/path",
       },
+      "shell": true,
       "timeout": 900000,
     },
   },
@@ -57,7 +57,6 @@ Array [
     "cmd": "<extract.py> \\"/tmp/folders/foobar.py\\"",
     "options": Object {
       "cwd": "/tmp/github/some/repo",
-      "encoding": "utf-8",
       "env": Object {
         "HOME": "/home/user",
         "HTTPS_PROXY": "https://example.com",
@@ -67,6 +66,7 @@ Array [
         "NO_PROXY": "localhost",
         "PATH": "/tmp/path",
       },
+      "shell": true,
       "timeout": 5000,
     },
   },
@@ -335,7 +335,6 @@ Array [
     "cmd": "python --version",
     "options": Object {
       "cwd": null,
-      "encoding": "utf-8",
       "env": Object {
         "HOME": "/home/user",
         "HTTPS_PROXY": "https://example.com",
@@ -345,6 +344,7 @@ Array [
         "NO_PROXY": "localhost",
         "PATH": "/tmp/path",
       },
+      "shell": true,
       "timeout": 900000,
     },
   },
@@ -352,7 +352,6 @@ Array [
     "cmd": "python3 --version",
     "options": Object {
       "cwd": null,
-      "encoding": "utf-8",
       "env": Object {
         "HOME": "/home/user",
         "HTTPS_PROXY": "https://example.com",
@@ -362,6 +361,7 @@ Array [
         "NO_PROXY": "localhost",
         "PATH": "/tmp/path",
       },
+      "shell": true,
       "timeout": 900000,
     },
   },
@@ -369,7 +369,6 @@ Array [
     "cmd": "python3.8 --version",
     "options": Object {
       "cwd": null,
-      "encoding": "utf-8",
       "env": Object {
         "HOME": "/home/user",
         "HTTPS_PROXY": "https://example.com",
@@ -379,6 +378,7 @@ Array [
         "NO_PROXY": "localhost",
         "PATH": "/tmp/path",
       },
+      "shell": true,
       "timeout": 900000,
     },
   },
@@ -386,7 +386,6 @@ Array [
     "cmd": "<extract.py> \\"lib/manager/pip_setup/__fixtures__/setup.py\\"",
     "options": Object {
       "cwd": "/tmp/github/some/repo",
-      "encoding": "utf-8",
       "env": Object {
         "HOME": "/home/user",
         "HTTPS_PROXY": "https://example.com",
@@ -396,6 +395,7 @@ Array [
         "NO_PROXY": "localhost",
         "PATH": "/tmp/path",
       },
+      "shell": true,
       "timeout": 5000,
     },
   },
@@ -408,7 +408,6 @@ Array [
     "cmd": "python --version",
     "options": Object {
       "cwd": null,
-      "encoding": "utf-8",
       "env": Object {
         "HOME": "/home/user",
         "HTTPS_PROXY": "https://example.com",
@@ -418,6 +417,7 @@ Array [
         "NO_PROXY": "localhost",
         "PATH": "/tmp/path",
       },
+      "shell": true,
       "timeout": 900000,
     },
   },
@@ -425,7 +425,6 @@ Array [
     "cmd": "python3 --version",
     "options": Object {
       "cwd": null,
-      "encoding": "utf-8",
       "env": Object {
         "HOME": "/home/user",
         "HTTPS_PROXY": "https://example.com",
@@ -435,6 +434,7 @@ Array [
         "NO_PROXY": "localhost",
         "PATH": "/tmp/path",
       },
+      "shell": true,
       "timeout": 900000,
     },
   },
@@ -442,7 +442,6 @@ Array [
     "cmd": "python3.8 --version",
     "options": Object {
       "cwd": null,
-      "encoding": "utf-8",
       "env": Object {
         "HOME": "/home/user",
         "HTTPS_PROXY": "https://example.com",
@@ -452,6 +451,7 @@ Array [
         "NO_PROXY": "localhost",
         "PATH": "/tmp/path",
       },
+      "shell": true,
       "timeout": 900000,
     },
   },
@@ -459,7 +459,6 @@ Array [
     "cmd": "<extract.py> \\"lib/manager/pip_setup/__fixtures__/setup.py\\"",
     "options": Object {
       "cwd": "/tmp/github/some/repo",
-      "encoding": "utf-8",
       "env": Object {
         "HOME": "/home/user",
         "HTTPS_PROXY": "https://example.com",
@@ -469,6 +468,7 @@ Array [
         "NO_PROXY": "localhost",
         "PATH": "/tmp/path",
       },
+      "shell": true,
       "timeout": 5000,
     },
   },
@@ -481,7 +481,6 @@ Array [
     "cmd": "python --version",
     "options": Object {
       "cwd": null,
-      "encoding": "utf-8",
       "env": Object {
         "HOME": "/home/user",
         "HTTPS_PROXY": "https://example.com",
@@ -491,6 +490,7 @@ Array [
         "NO_PROXY": "localhost",
         "PATH": "/tmp/path",
       },
+      "shell": true,
       "timeout": 900000,
     },
   },
@@ -498,7 +498,6 @@ Array [
     "cmd": "python3 --version",
     "options": Object {
       "cwd": null,
-      "encoding": "utf-8",
       "env": Object {
         "HOME": "/home/user",
         "HTTPS_PROXY": "https://example.com",
@@ -508,6 +507,7 @@ Array [
         "NO_PROXY": "localhost",
         "PATH": "/tmp/path",
       },
+      "shell": true,
       "timeout": 900000,
     },
   },
@@ -515,7 +515,6 @@ Array [
     "cmd": "python3.8 --version",
     "options": Object {
       "cwd": null,
-      "encoding": "utf-8",
       "env": Object {
         "HOME": "/home/user",
         "HTTPS_PROXY": "https://example.com",
@@ -525,6 +524,7 @@ Array [
         "NO_PROXY": "localhost",
         "PATH": "/tmp/path",
       },
+      "shell": true,
       "timeout": 900000,
     },
   },
@@ -532,7 +532,6 @@ Array [
     "cmd": "<extract.py> \\"/tmp/folders/foobar.py\\"",
     "options": Object {
       "cwd": "/tmp/github/some/repo",
-      "encoding": "utf-8",
       "env": Object {
         "HOME": "/home/user",
         "HTTPS_PROXY": "https://example.com",
@@ -542,6 +541,7 @@ Array [
         "NO_PROXY": "localhost",
         "PATH": "/tmp/path",
       },
+      "shell": true,
       "timeout": 5000,
     },
   },

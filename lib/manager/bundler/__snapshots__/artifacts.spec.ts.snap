@@ -16,20 +16,19 @@ Array [
   Object {
     "cmd": "docker pull renovate/ruby:1.2.0",
     "options": Object {
-      "encoding": "utf-8",
+      "shell": true,
     },
   },
   Object {
     "cmd": "docker ps --filter name=renovate_ruby -aq",
     "options": Object {
-      "encoding": "utf-8",
+      "shell": true,
     },
   },
   Object {
     "cmd": "docker run --rm --name=renovate_ruby --label=renovate_child --user=foobar -v \\"/tmp/github/some/repo\\":\\"/tmp/github/some/repo\\" -v \\"/tmp/cache\\":\\"/tmp/cache\\" -e GEM_HOME -w \\"/tmp/github/some/repo\\" renovate/ruby:1.2.0 bash -l -c \\"ruby --version && gem install bundler && bundle lock --update foo bar\\"",
     "options": Object {
       "cwd": "/tmp/github/some/repo",
-      "encoding": "utf-8",
       "env": Object {
         "GEM_HOME": "/tmp/cache/others/gem",
         "HOME": "/home/user",
@@ -40,6 +39,7 @@ Array [
         "NO_PROXY": "localhost",
         "PATH": "/tmp/path",
       },
+      "shell": true,
       "timeout": 900000,
     },
   },
@@ -62,20 +62,19 @@ Array [
   Object {
     "cmd": "docker pull renovate/ruby:latest",
     "options": Object {
-      "encoding": "utf-8",
+      "shell": true,
     },
   },
   Object {
     "cmd": "docker ps --filter name=renovate_ruby -aq",
     "options": Object {
-      "encoding": "utf-8",
+      "shell": true,
     },
   },
   Object {
     "cmd": "docker run --rm --name=renovate_ruby --label=renovate_child --user=foobar -v \\"/tmp/github/some/repo\\":\\"/tmp/github/some/repo\\" -v \\"/tmp/cache\\":\\"/tmp/cache\\" -e GEM_HOME -w \\"/tmp/github/some/repo\\" renovate/ruby:latest bash -l -c \\"ruby --version && gem install bundler -v 3.2.1 && bundle lock --update foo bar\\"",
     "options": Object {
       "cwd": "/tmp/github/some/repo",
-      "encoding": "utf-8",
       "env": Object {
         "GEM_HOME": "/tmp/cache/others/gem",
         "HOME": "/home/user",
@@ -86,6 +85,7 @@ Array [
         "NO_PROXY": "localhost",
         "PATH": "/tmp/path",
       },
+      "shell": true,
       "timeout": 900000,
     },
   },
@@ -108,20 +108,19 @@ Array [
   Object {
     "cmd": "docker pull renovate/ruby:1.2.0",
     "options": Object {
-      "encoding": "utf-8",
+      "shell": true,
     },
   },
   Object {
     "cmd": "docker ps --filter name=renovate_ruby -aq",
     "options": Object {
-      "encoding": "utf-8",
+      "shell": true,
     },
   },
   Object {
     "cmd": "docker run --rm --name=renovate_ruby --label=renovate_child --user=foobar -v \\"/tmp/github/some/repo\\":\\"/tmp/github/some/repo\\" -v \\"/tmp/cache\\":\\"/tmp/cache\\" -e BUNDLE_GEMS__PRIVATE__COM -e GEM_HOME -w \\"/tmp/github/some/repo\\" renovate/ruby:1.2.0 bash -l -c \\"ruby --version && gem install bundler && bundle lock --update foo bar\\"",
     "options": Object {
       "cwd": "/tmp/github/some/repo",
-      "encoding": "utf-8",
       "env": Object {
         "BUNDLE_GEMS__PRIVATE__COM": "some-user:some-password",
         "GEM_HOME": "/tmp/cache/others/gem",
@@ -133,6 +132,7 @@ Array [
         "NO_PROXY": "localhost",
         "PATH": "/tmp/path",
       },
+      "shell": true,
       "timeout": 900000,
     },
   },
@@ -155,20 +155,19 @@ Array [
   Object {
     "cmd": "docker pull renovate/ruby:latest",
     "options": Object {
-      "encoding": "utf-8",
+      "shell": true,
     },
   },
   Object {
     "cmd": "docker ps --filter name=renovate_ruby -aq",
     "options": Object {
-      "encoding": "utf-8",
+      "shell": true,
     },
   },
   Object {
     "cmd": "docker run --rm --name=renovate_ruby --label=renovate_child --user=foobar -v \\"/tmp/github/some/repo\\":\\"/tmp/github/some/repo\\" -v \\"/tmp/cache\\":\\"/tmp/cache\\" -e GEM_HOME -w \\"/tmp/github/some/repo\\" renovate/ruby:latest bash -l -c \\"ruby --version && gem install bundler && bundle lock --update foo bar\\"",
     "options": Object {
       "cwd": "/tmp/github/some/repo",
-      "encoding": "utf-8",
       "env": Object {
         "GEM_HOME": "/tmp/cache/others/gem",
         "HOME": "/home/user",
@@ -179,6 +178,7 @@ Array [
         "NO_PROXY": "localhost",
         "PATH": "/tmp/path",
       },
+      "shell": true,
       "timeout": 900000,
     },
   },
@@ -191,7 +191,6 @@ Array [
     "cmd": "bundle lock",
     "options": Object {
       "cwd": "/tmp/github/some/repo",
-      "encoding": "utf-8",
       "env": Object {
         "GEM_HOME": "/tmp/cache/others/gem",
         "HOME": "/home/user",
@@ -202,6 +201,7 @@ Array [
         "NO_PROXY": "localhost",
         "PATH": "/tmp/path",
       },
+      "shell": true,
       "timeout": 900000,
     },
   },
@@ -213,8 +213,8 @@ Array [
   Object {
     "artifactError": Object {
       "lockFile": "Gemfile.lock",
-      "stderr": " foo was resolved to
-",
+      "stderr": "
+ foo was resolved to",
     },
   },
 ]
@@ -226,7 +226,6 @@ Array [
     "cmd": "bundle lock",
     "options": Object {
       "cwd": "/tmp/github/some/repo",
-      "encoding": "utf-8",
       "env": Object {
         "GEM_HOME": "/tmp/cache/others/gem",
         "HOME": "/home/user",
@@ -237,6 +236,7 @@ Array [
         "NO_PROXY": "localhost",
         "PATH": "/tmp/path",
       },
+      "shell": true,
       "timeout": 900000,
     },
   },
@@ -251,7 +251,6 @@ Array [
     "cmd": "bundle lock --update foo bar",
     "options": Object {
       "cwd": "/tmp/github/some/repo",
-      "encoding": "utf-8",
       "env": Object {
         "GEM_HOME": "/tmp/cache/others/gem",
         "HOME": "/home/user",
@@ -262,6 +261,7 @@ Array [
         "NO_PROXY": "localhost",
         "PATH": "/tmp/path",
       },
+      "shell": true,
       "timeout": 900000,
     },
   },
@@ -285,7 +285,6 @@ Array [
     "cmd": "bundle lock --update foo bar",
     "options": Object {
       "cwd": "/tmp/github/some/repo",
-      "encoding": "utf-8",
       "env": Object {
         "GEM_HOME": "/tmp/cache/others/gem",
         "HOME": "/home/user",
@@ -296,6 +295,7 @@ Array [
         "NO_PROXY": "localhost",
         "PATH": "/tmp/path",
       },
+      "shell": true,
       "timeout": 900000,
     },
   },
@@ -319,7 +319,6 @@ Array [
     "cmd": "bundle lock --update foo bar",
     "options": Object {
       "cwd": "/tmp/github/some/repo",
-      "encoding": "utf-8",
       "env": Object {
         "GEM_HOME": "/tmp/cache/others/gem",
         "HOME": "/home/user",
@@ -330,6 +329,7 @@ Array [
         "NO_PROXY": "localhost",
         "PATH": "/tmp/path",
       },
+      "shell": true,
       "timeout": 900000,
     },
   },
