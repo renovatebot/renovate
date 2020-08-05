@@ -86,6 +86,8 @@ export function rawExec(
     let timeoutId: NodeJS.Timeout = null;
 
     function stop(): void {
+      running = false;
+
       if (timeoutId) {
         clearTimeout(timeoutId);
       }
@@ -93,8 +95,6 @@ export function rawExec(
       if (child.connected) {
         child.kill('SIGKILL');
       }
-
-      running = false;
     }
 
     timeoutId = setTimeout(stop, opts?.timeout || 15 * 60 * 1000);
@@ -118,9 +118,7 @@ export function rawExec(
       if (code === 0 && !signal) {
         resolve({ stdout, stderr });
       } else {
-        const msg = signal
-          ? `Process exit with signal: ${signal}`
-          : `Process exit code: ${code}`;
+        const msg = `Process exit: code=${code}, signal=${signal}`;
         reject(new ExecError(msg, stdout, stderr, code, signal));
       }
     });
