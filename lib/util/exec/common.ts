@@ -76,22 +76,28 @@ export function rawExec(
   const stderrBuf: string[] = [];
 
   return new Promise<ExecResult>((resolve, reject) => {
+    let running = true;
+
     const child: ChildProcess = spawn(cmd, [], {
       ...opts,
       shell: true,
     });
 
-    let running = true;
-
-    const timeoutId = setTimeout(stop, opts?.timeout || 15 * 60 * 1000);
+    let timeoutId: NodeJS.Timeout = null;
 
     function stop(): void {
-      clearTimeout(timeoutId);
+      if (timeoutId) {
+        clearTimeout(timeoutId);
+      }
+
       if (child.connected) {
         child.kill('SIGKILL');
       }
+
       running = false;
     }
+
+    timeoutId = setTimeout(stop, opts?.timeout || 15 * 60 * 1000);
 
     pipeStreamToBuffers(child.stdout, stdoutBuf);
     pipeStreamToBuffers(child.stderr, stderrBuf);
