@@ -1,6 +1,5 @@
 import URL from 'url';
 import is from '@sindresorhus/is';
-import fs from 'fs-extra';
 import { quote } from 'shlex';
 import upath from 'upath';
 import { SYSTEM_INSUFFICIENT_DISK_SPACE } from '../../constants/error-messages';
@@ -10,9 +9,16 @@ import {
 } from '../../constants/platforms';
 import * as datasourcePackagist from '../../datasource/packagist';
 import { logger } from '../../logger';
-import { platform } from '../../platform';
 import { ExecOptions, exec } from '../../util/exec';
-import { deleteLocalFile, readLocalFile, writeLocalFile } from '../../util/fs';
+import {
+  deleteLocalFile,
+  ensureDir,
+  ensureLocalDir,
+  getSiblingFileName,
+  readLocalFile,
+  writeLocalFile,
+} from '../../util/fs';
+import { getRepoStatus } from '../../util/git';
 import * as hostRules from '../../util/host-rules';
 import { UpdateArtifact, UpdateArtifactsResult } from '../common';
 
@@ -27,7 +33,7 @@ export async function updateArtifacts({
   const cacheDir =
     process.env.COMPOSER_CACHE_DIR ||
     upath.join(config.cacheDir, './others/composer');
-  await fs.ensureDir(cacheDir);
+  await ensureDir(cacheDir);
   logger.debug(`Using composer cache ${cacheDir}`);
 
   const lockFileName = packageFileName.replace(/\.json$/, '.lock');
@@ -36,8 +42,7 @@ export async function updateArtifacts({
     logger.debug('No composer.lock found');
     return null;
   }
-  const cwd = upath.join(config.localDir, upath.dirname(packageFileName));
-  await fs.ensureDir(upath.join(cwd, 'vendor'));
+  await ensureLocalDir(getSiblingFileName(packageFileName, 'vendor'));
   try {
     await writeLocalFile(packageFileName, newPackageFileContent);
     if (config.isLockFileMaintenance) {
@@ -49,7 +54,7 @@ export async function updateArtifacts({
       url: 'https://api.github.com/',
     });
     // istanbul ignore if
-    if (credentials && credentials.token) {
+    if (credentials?.token) {
       authJson['github-oauth'] = {
         'github.com': credentials.token,
       };
@@ -59,7 +64,7 @@ export async function updateArtifacts({
       url: 'https://gitlab.com/api/v4/',
     });
     // istanbul ignore if
-    if (credentials && credentials.token) {
+    if (credentials?.token) {
       authJson['gitlab-token'] = {
         'gitlab.com': credentials.token,
       };
@@ -100,7 +105,7 @@ export async function updateArtifacts({
       await writeLocalFile('auth.json', JSON.stringify(authJson));
     }
     const execOptions: ExecOptions = {
-      cwd,
+      cwdFile: packageFileName,
       extraEnv: {
         COMPOSER_CACHE_DIR: cacheDir,
       },
@@ -126,7 +131,7 @@ export async function updateArtifacts({
     }
     logger.debug({ cmd, args }, 'composer command');
     await exec(`${cmd} ${args}`, execOptions);
-    const status = await platform.getRepoStatus();
+    const status = await getRepoStatus();
     if (!status.modified.includes(lockFileName)) {
       return null;
     }

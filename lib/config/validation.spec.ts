@@ -80,7 +80,7 @@ describe('config/validation', () => {
       );
       expect(warnings).toHaveLength(0);
       expect(errors).toHaveLength(1);
-      expect(errors[0].message.includes('ansible')).toBe(true);
+      expect(errors[0].message).toContain('ansible');
     });
     it('included managers of the wrong type', async () => {
       const config = {
@@ -335,6 +335,52 @@ describe('config/validation', () => {
       );
       expect(warnings).toHaveLength(0);
       expect(errors).toHaveLength(0);
+    });
+
+    it('validates valid alias objects', async () => {
+      const config = {
+        aliases: {
+          example1: 'http://www.example.com',
+          example2: 'https://www.example2.com/example',
+        },
+      };
+      const { warnings, errors } = await configValidation.validateConfig(
+        config
+      );
+      expect(warnings).toHaveLength(0);
+      expect(errors).toHaveLength(0);
+      expect(errors).toMatchSnapshot();
+    });
+
+    it('errors if aliases depth is more than 1', async () => {
+      const config = {
+        aliases: {
+          sample: {
+            example1: 'http://www.example.com',
+          },
+        },
+      };
+      const { warnings, errors } = await configValidation.validateConfig(
+        config
+      );
+      expect(warnings).toHaveLength(0);
+      expect(errors).toHaveLength(1);
+      expect(errors).toMatchSnapshot();
+    });
+
+    it('errors if aliases have invalid url', async () => {
+      const config = {
+        aliases: {
+          example1: 'noturl',
+          example2: 'http://www.example.com',
+        },
+      };
+      const { warnings, errors } = await configValidation.validateConfig(
+        config
+      );
+      expect(warnings).toHaveLength(0);
+      expect(errors).toHaveLength(1);
+      expect(errors).toMatchSnapshot();
     });
   });
 });

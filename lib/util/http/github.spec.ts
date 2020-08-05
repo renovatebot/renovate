@@ -1,22 +1,19 @@
-import delay from 'delay';
+import nock from 'nock';
 import * as httpMock from '../../../test/httpMock';
 import { getName } from '../../../test/util';
 import {
+  EXTERNAL_HOST_ERROR,
   PLATFORM_BAD_CREDENTIALS,
-  PLATFORM_FAILURE,
   PLATFORM_INTEGRATION_UNAUTHORIZED,
   PLATFORM_RATE_LIMIT_EXCEEDED,
   REPOSITORY_CHANGED,
 } from '../../constants/error-messages';
-import * as runCache from '../cache/run';
-import { GithubHttp, handleGotError, setBaseUrl } from './github';
+import { GithubHttp, setBaseUrl } from './github';
 
 const githubApiHost = 'https://api.github.com';
 
-jest.mock('delay');
-
 describe(getName(__filename), () => {
-  let githubApi;
+  let githubApi: GithubHttp;
   beforeEach(() => {
     githubApi = new GithubHttp();
     setBaseUrl(githubApiHost);
@@ -27,23 +24,9 @@ describe(getName(__filename), () => {
 
   afterEach(() => {
     httpMock.reset();
-    runCache.clear();
   });
 
   describe('HTTP', () => {
-    function getError(errOrig: any): Error {
-      try {
-        return handleGotError(errOrig, `${githubApiHost}/some-url`, {});
-      } catch (err) {
-        return err;
-      }
-      return null;
-    }
-
-    beforeEach(() => {
-      (delay as any).mockImplementation(() => Promise.resolve());
-    });
-
     it('supports app mode', async () => {
       httpMock.scope(githubApiHost).get('/some-url').reply(200);
       global.appMode = true;
@@ -67,7 +50,7 @@ describe(getName(__filename), () => {
       });
       const [req] = httpMock.getTrace();
       expect(req).toBeDefined();
-      expect(req.url.includes('/v3')).toBe(false);
+      expect(req.url).not.toContain('/v3');
     });
     it('paginates', async () => {
       const url = '/some-url';
@@ -102,124 +85,127 @@ describe(getName(__filename), () => {
       const trace = httpMock.getTrace();
       expect(trace).toHaveLength(1);
     });
-    it('should throw rate limit exceeded', () => {
-      const e = getError({
-        statusCode: 403,
-        message:
-          'Error updating branch: API rate limit exceeded for installation ID 48411. (403)',
-      });
-      expect(e).toBeDefined();
-      expect(e.message).toEqual(PLATFORM_RATE_LIMIT_EXCEEDED);
-    });
-    it('should throw Bad credentials', () => {
-      const e = getError({
-        statusCode: 401,
-        message: 'Bad credentials. (401)',
-      });
-      expect(e).toBeDefined();
-      expect(e.message).toEqual(PLATFORM_BAD_CREDENTIALS);
-    });
-    it('should throw platform failure', () => {
-      const e = getError({
-        statusCode: 401,
-        message: 'Bad credentials. (401)',
-        headers: {
-          'x-ratelimit-limit': '60',
-        },
-      });
-      expect(e).toBeDefined();
-      expect(e.message).toEqual(PLATFORM_FAILURE);
-    });
-    it('should throw platform failure for ENOTFOUND, ETIMEDOUT or EAI_AGAIN', () => {
-      const codes = ['ENOTFOUND', 'ETIMEDOUT', 'EAI_AGAIN'];
-      for (let idx = 0; idx < codes.length; idx += 1) {
-        const code = codes[idx];
-        const e = getError({
-          name: 'RequestError',
-          code,
-        });
-        expect(e).toBeDefined();
-        expect(e.message).toEqual(PLATFORM_FAILURE);
+    describe('handleGotError', () => {
+      async function fail(
+        code: number,
+        body: any = undefined,
+        headers: nock.ReplyHeaders = undefined
+      ) {
+        const url = '/some-url';
+        httpMock
+          .scope(githubApiHost)
+          .get(url)
+          .reply(
+            code,
+            function reply() {
+              // https://github.com/nock/nock/issues/1979
+              if (typeof body === 'object' && 'message' in body) {
+                (this.req as any).response.statusMessage = body?.message;
+              }
+              return body;
+            },
+            headers
+          );
+        await githubApi.getJson(url);
       }
-    });
-    it('should throw platform failure for 500', () => {
-      const e = getError({
-        statusCode: 500,
-        message: 'Internal Server Error',
+      async function failWithError(error: object) {
+        const url = '/some-url';
+        httpMock.scope(githubApiHost).get(url).replyWithError(error);
+        await githubApi.getJson(url);
+      }
+
+      it('should throw Not found', async () => {
+        await expect(fail(404)).rejects.toThrow(
+          'Response code 404 (Not Found)'
+        );
       });
-      expect(e).toBeDefined();
-      expect(e.message).toEqual(PLATFORM_FAILURE);
-    });
-    it('should throw platform failure ParseError', () => {
-      const e = getError({
-        name: 'ParseError',
+      it('should throw rate limit exceeded', async () => {
+        await expect(
+          fail(403, {
+            message:
+              'Error updating branch: API rate limit exceeded for installation ID 48411. (403)',
+          })
+        ).rejects.toThrow(PLATFORM_RATE_LIMIT_EXCEEDED);
       });
-      expect(e).toBeDefined();
-      expect(e.message).toEqual(PLATFORM_FAILURE);
-    });
-    it('should throw for unauthorized integration', () => {
-      const e = getError({
-        statusCode: 403,
-        message: 'Resource not accessible by integration (403)',
+      it('should throw Bad credentials', async () => {
+        await expect(
+          fail(401, { message: 'Bad credentials. (401)' })
+        ).rejects.toThrow(PLATFORM_BAD_CREDENTIALS);
       });
-      expect(e).toBeDefined();
-      expect(e.message).toEqual(PLATFORM_INTEGRATION_UNAUTHORIZED);
-    });
-    it('should throw for unauthorized integration', () => {
-      const gotErr = {
-        statusCode: 403,
-        body: { message: 'Upgrade to GitHub Pro' },
-      };
-      const e = getError(gotErr);
-      expect(e).toBeDefined();
-      expect(e).toBe(gotErr);
-    });
-    it('should throw on abuse', () => {
-      const gotErr = {
-        statusCode: 403,
-        message: 'You have triggered an abuse detection mechanism',
-      };
-      const e = getError(gotErr);
-      expect(e).toBeDefined();
-      expect(e.message).toEqual(PLATFORM_RATE_LIMIT_EXCEEDED);
-    });
-    it('should throw on repository change', () => {
-      const gotErr = {
-        statusCode: 422,
-        body: {
-          message: 'foobar',
-          errors: [{ code: 'invalid' }],
-        },
-      };
-      const e = getError(gotErr);
-      expect(e).toBeDefined();
-      expect(e.message).toEqual(REPOSITORY_CHANGED);
-    });
-    it('should throw platform failure on 422 response', () => {
-      const gotErr = {
-        statusCode: 422,
-        message: 'foobar',
-      };
-      const e = getError(gotErr);
-      expect(e).toBeDefined();
-      expect(e.message).toEqual(PLATFORM_FAILURE);
-    });
-    it('should throw original error when failed to add reviewers', () => {
-      const gotErr = {
-        statusCode: 422,
-        message: 'Review cannot be requested from pull request author.',
-      };
-      const e = getError(gotErr);
-      expect(e).toBeDefined();
-      expect(e).toStrictEqual(gotErr);
-    });
-    it('should throw original error of unknown type', () => {
-      const gotErr = {
-        statusCode: 418,
-        message: 'Sorry, this is a teapot',
-      };
-      const e = getError(gotErr);
-      expect(e).toBe(gotErr);
+      it('should throw platform failure', async () => {
+        await expect(
+          fail(
+            401,
+            { message: 'Bad credentials. (401)' },
+            {
+              'x-ratelimit-limit': '60',
+            }
+          )
+        ).rejects.toThrow(EXTERNAL_HOST_ERROR);
+      });
+      it('should throw platform failure for ENOTFOUND, ETIMEDOUT or EAI_AGAIN', async () => {
+        const codes = ['ENOTFOUND', 'ETIMEDOUT', 'EAI_AGAIN'];
+        for (let idx = 0; idx < codes.length; idx += 1) {
+          const code = codes[idx];
+          await expect(failWithError({ code })).rejects.toThrow(
+            EXTERNAL_HOST_ERROR
+          );
+        }
+      });
+      it('should throw platform failure for 500', async () => {
+        await expect(fail(500)).rejects.toThrow(EXTERNAL_HOST_ERROR);
+      });
+      it('should throw platform failure ParseError', async () => {
+        await expect(fail(200, '{{')).rejects.toThrow(EXTERNAL_HOST_ERROR);
+      });
+      it('should throw for unauthorized integration', async () => {
+        await expect(
+          fail(403, { message: 'Resource not accessible by integration (403)' })
+        ).rejects.toThrow(PLATFORM_INTEGRATION_UNAUTHORIZED);
+      });
+      it('should throw for unauthorized integration2', async () => {
+        await expect(
+          fail(403, { message: 'Upgrade to GitHub Pro' })
+        ).rejects.toThrow('Upgrade to GitHub Pro');
+      });
+      it('should throw on abuse', async () => {
+        await expect(
+          fail(403, {
+            message: 'You have triggered an abuse detection mechanism',
+          })
+        ).rejects.toThrow(PLATFORM_RATE_LIMIT_EXCEEDED);
+      });
+      it('should throw on repository change', async () => {
+        await expect(
+          fail(422, {
+            message: 'foobar',
+            errors: [{ code: 'invalid' }],
+          })
+        ).rejects.toThrow(REPOSITORY_CHANGED);
+      });
+      it('should throw platform failure on 422 response', async () => {
+        await expect(
+          fail(422, {
+            message: 'foobar',
+          })
+        ).rejects.toThrow(EXTERNAL_HOST_ERROR);
+      });
+      it('should throw original error when failed to add reviewers', async () => {
+        await expect(
+          fail(422, {
+            message: 'Review cannot be requested from pull request author.',
+          })
+        ).rejects.toThrow(
+          'Review cannot be requested from pull request author.'
+        );
+      });
+      it('should throw original error of unknown type', async () => {
+        await expect(
+          fail(418, {
+            message: 'Sorry, this is a teapot',
+          })
+        ).rejects.toThrow('Sorry, this is a teapot');
+      });
     });
   });
 
@@ -240,13 +226,16 @@ describe(getName(__filename), () => {
       }`;
 
     it('supports app mode', async () => {
-      httpMock.scope(githubApiHost).post('/graphql').reply(200, {});
+      httpMock
+        .scope(githubApiHost)
+        .post('/graphql')
+        .reply(200, { data: { repository: { testItem: 'XXX' } } });
       global.appMode = true;
-      await githubApi.getGraphqlNodes(query, 'testItem', { paginate: false });
+      await githubApi.queryRepoField(query, 'testItem', { paginate: false });
       const [req] = httpMock.getTrace();
       expect(req).toBeDefined();
       expect(req.headers.accept).toBe(
-        'application/vnd.github.machine-man-preview+json, application/vnd.github.merge-info-preview+json'
+        'application/vnd.github.machine-man-preview+json, application/vnd.github.v3+json'
       );
     });
     it('returns empty array for undefined data', async () => {
@@ -259,7 +248,7 @@ describe(getName(__filename), () => {
           },
         });
       expect(
-        await githubApi.getGraphqlNodes(query, 'testItem', { paginate: false })
+        await githubApi.queryRepoField(query, 'testItem', { paginate: false })
       ).toEqual([]);
     });
     it('returns empty array for undefined data.', async () => {
@@ -270,13 +259,13 @@ describe(getName(__filename), () => {
           data: { repository: { otherField: 'someval' } },
         });
       expect(
-        await githubApi.getGraphqlNodes(query, 'testItem', { paginate: false })
+        await githubApi.queryRepoField(query, 'testItem', { paginate: false })
       ).toEqual([]);
     });
     it('throws errors for invalid responses', async () => {
       httpMock.scope(githubApiHost).post('/graphql').reply(418);
       await expect(
-        githubApi.getGraphqlNodes(query, 'someItem', {
+        githubApi.queryRepoField(query, 'someItem', {
           paginate: false,
         })
       ).rejects.toThrow("Response code 418 (I'm a Teapot)");
@@ -291,10 +280,24 @@ describe(getName(__filename), () => {
             someprop: 'someval',
           },
         });
-      await githubApi.getGraphqlNodes(query, 'testItem');
+      await githubApi.queryRepoField(query, 'testItem');
       expect(httpMock.getTrace()).toHaveLength(7);
     });
-    it('retrieves all data from all pages', async () => {
+    it('queryRepo', async () => {
+      const repository = {
+        foo: 'foo',
+        bar: 'bar',
+      };
+      httpMock
+        .scope(githubApiHost)
+        .post('/graphql')
+        .reply(200, { data: { repository } });
+
+      const result = await githubApi.queryRepo(query);
+      expect(httpMock.getTrace()).toHaveLength(1);
+      expect(result).toStrictEqual(repository);
+    });
+    it('queryRepoField', async () => {
       httpMock
         .scope(githubApiHost)
         .post('/graphql')
@@ -361,9 +364,9 @@ describe(getName(__filename), () => {
           },
         });
 
-      const items = await githubApi.getGraphqlNodes(query, 'testItem');
+      const items = await githubApi.queryRepoField(query, 'testItem');
       expect(httpMock.getTrace()).toHaveLength(3);
-      expect(items.length).toEqual(3);
+      expect(items).toHaveLength(3);
     });
   });
 });

@@ -1,5 +1,18 @@
 const secrets = new Set<string>();
 
+export const redactedFields = [
+  'authorization',
+  'token',
+  'githubAppKey',
+  'npmToken',
+  'npmrc',
+  'yarnrc',
+  'privateKey',
+  'gitPrivateKey',
+  'forkToken',
+  'password',
+];
+
 export function sanitize(input: string): string {
   if (!input) {
     return input;

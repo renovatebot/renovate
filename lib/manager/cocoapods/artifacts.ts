@@ -1,14 +1,15 @@
 import { quote } from 'shlex';
 import { dirname, join } from 'upath';
 import { logger } from '../../logger';
-import { platform } from '../../platform';
 import { ExecOptions, exec } from '../../util/exec';
 import {
   getSiblingFileName,
   readLocalFile,
   writeLocalFile,
 } from '../../util/fs';
+import { getRepoStatus } from '../../util/git';
 import { UpdateArtifact, UpdateArtifactsResult } from '../common';
+import { getCocoaPodsHome } from './utils';
 
 const pluginRegex = /^\s*plugin\s*(['"])(?<plugin>[^'"]+)\1/;
 
@@ -63,12 +64,14 @@ export async function updateArtifacts({
   const match = new RegExp(/^COCOAPODS: (?<cocoapodsVersion>.*)$/m).exec(
     existingLockFileContent
   );
-  const tagConstraint =
-    match && match.groups ? match.groups.cocoapodsVersion : null;
+  const tagConstraint = match?.groups?.cocoapodsVersion ?? null;
 
   const cmd = [...getPluginCommands(newPackageFileContent), 'pod install'];
   const execOptions: ExecOptions = {
     cwdFile: packageFileName,
+    extraEnv: {
+      CP_HOME_DIR: await getCocoaPodsHome(config),
+    },
     docker: {
       image: 'renovate/cocoapods',
       tagScheme: 'ruby',
@@ -89,7 +92,7 @@ export async function updateArtifacts({
     ];
   }
 
-  const status = await platform.getRepoStatus();
+  const status = await getRepoStatus();
   if (!status.modified.includes(lockFileName)) {
     return null;
   }

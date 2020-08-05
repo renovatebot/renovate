@@ -1,5 +1,7 @@
-import { RenovateConfig, getConfig, platform } from '../../../../test/util';
+import { RenovateConfig, getConfig, git } from '../../../../test/util';
 import { detectSemanticCommits } from './semantic';
+
+jest.mock('../../../util/git');
 
 let config: RenovateConfig;
 beforeEach(() => {
@@ -18,16 +20,13 @@ describe('workers/repository/init/semantic', () => {
     });
     it('detects false if unknown', async () => {
       config.semanticCommits = null;
-      platform.getCommitMessages.mockResolvedValue(['foo', 'bar']);
+      git.getCommitMessages.mockResolvedValue(['foo', 'bar']);
       const res = await detectSemanticCommits(config);
       expect(res).toBe(false);
     });
     it('detects true if known', async () => {
       config.semanticCommits = null;
-      platform.getCommitMessages.mockResolvedValue([
-        'fix: foo',
-        'refactor: bar',
-      ]);
+      git.getCommitMessages.mockResolvedValue(['fix: foo', 'refactor: bar']);
       const res = await detectSemanticCommits(config);
       expect(res).toBe(true);
     });

@@ -1,5 +1,3 @@
-import { DATASOURCE_FAILURE } from '../constants/error-messages';
-
 export interface Config {
   datasource?: string;
   depName?: string;
@@ -7,7 +5,9 @@ export interface Config {
   registryUrls?: string[];
 }
 
-export type DigestConfig = Config;
+export interface DigestConfig extends Config {
+  registryUrl?: string;
+}
 
 interface ReleasesConfigBase {
   compatibility?: Record<string, string>;
@@ -17,6 +17,7 @@ interface ReleasesConfigBase {
 
 export interface GetReleasesConfig extends ReleasesConfigBase {
   lookupName: string;
+  registryUrl?: string;
 }
 
 export interface GetPkgReleasesConfig extends ReleasesConfigBase {
@@ -65,28 +66,18 @@ export interface ReleaseResult {
   sourceUrl?: string;
   tags?: Record<string, string>;
   versions?: any;
+  registryUrl?: string;
 }
 
-export interface Datasource {
+export interface DatasourceApi {
   id: string;
   getDigest?(config: DigestConfig, newValue?: string): Promise<string | null>;
   getReleases(config: GetReleasesConfig): Promise<ReleaseResult | null>;
   defaultRegistryUrls?: string[];
   appendRegistryUrls?: string[];
   defaultConfig?: object;
+  registryStrategy?: 'first' | 'hunt' | 'merge';
 }
 
-export class DatasourceError extends Error {
-  err: Error;
-
-  datasource?: string;
-
-  lookupName?: string;
-
-  constructor(err: Error) {
-    super(DATASOURCE_FAILURE);
-    // Set the prototype explicitly: https://github.com/Microsoft/TypeScript/wiki/Breaking-Changes#extending-built-ins-like-error-array-and-map-may-no-longer-work
-    Object.setPrototypeOf(this, DatasourceError.prototype);
-    this.err = err;
-  }
-}
+// TODO: remove, only for compatabillity
+export type Datasource = DatasourceApi;

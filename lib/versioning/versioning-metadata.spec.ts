@@ -16,7 +16,7 @@ describe('versioning metadata', () => {
         // ignore missing file
       }
       if (readme) {
-        expect(RegExp(/(^|\n)#+ /).exec(readme)).toBe(null);
+        expect(RegExp(/(^|\n)#+ /).exec(readme)).toBeNull();
       }
     }
   });

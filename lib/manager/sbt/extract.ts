@@ -1,3 +1,4 @@
+import * as datasourceMaven from '../../datasource/maven';
 import { MAVEN_REPO } from '../../datasource/maven/common';
 import * as datasourceSbtPackage from '../../datasource/sbt-package';
 import * as datasourceSbtPlugin from '../../datasource/sbt-plugin';
@@ -5,7 +6,7 @@ import { get } from '../../versioning';
 import * as mavenVersioning from '../../versioning/maven';
 import { PackageDependency, PackageFile } from '../common';
 
-const isComment = (str: string): boolean => /^\s*\/\//.test(str);
+const stripComment = (str: string): string => str.replace(/(^|\s+)\/\/.*$/, '');
 
 const isSingleLineDep = (str: string): boolean =>
   /^\s*(libraryDependencies|dependencyOverrides)\s*\+=\s*/.test(str);
@@ -19,10 +20,10 @@ const isPluginDep = (str: string): boolean =>
 const isStringLiteral = (str: string): boolean => /^"[^"]*"$/.test(str);
 
 const isScalaVersion = (str: string): boolean =>
-  /^\s*scalaVersion\s*:=\s*"[^"]*"\s*$/.test(str);
+  /^\s*scalaVersion\s*:=\s*"[^"]*"[\s,]*$/.test(str);
 
 const getScalaVersion = (str: string): string =>
-  str.replace(/^\s*scalaVersion\s*:=\s*"/, '').replace(/"\s*$/, '');
+  str.replace(/^\s*scalaVersion\s*:=\s*"/, '').replace(/"[\s,]*$/, '');
 
 /*
   https://www.scala-sbt.org/release/docs/Cross-Build.html#Publishing+conventions
@@ -51,10 +52,10 @@ const normalizeScalaVersion = (str: string): string => {
 };
 
 const isScalaVersionVariable = (str: string): boolean =>
-  /^\s*scalaVersion\s*:=\s*[_a-zA-Z][_a-zA-Z0-9]*\s*$/.test(str);
+  /^\s*scalaVersion\s*:=\s*[_a-zA-Z][_a-zA-Z0-9]*[\s,]*$/.test(str);
 
 const getScalaVersionVariable = (str: string): string =>
-  str.replace(/^\s*scalaVersion\s*:=\s*/, '').replace(/\s*$/, '');
+  str.replace(/^\s*scalaVersion\s*:=\s*/, '').replace(/[\s,]*$/, '');
 
 const isResolver = (str: string): boolean =>
   /^\s*(resolvers\s*\+\+?=\s*(Seq\()?)?"[^"]*"\s*at\s*"[^"]*"[\s,)]*$/.test(
@@ -66,20 +67,26 @@ const getResolverUrl = (str: string): string =>
     .replace(/"[\s,)]*$/, '');
 
 const isVarDependency = (str: string): boolean =>
-  /^\s*(lazy\s*)?val\s[_a-zA-Z][_a-zA-Z0-9]*\s*=.*(%%?).*%.*/.test(str);
+  /^\s*(private\s*)?(lazy\s*)?val\s[_a-zA-Z][_a-zA-Z0-9]*\s*=.*(%%?).*%.*/.test(
+    str
+  );
 
 const isVarDef = (str: string): boolean =>
-  /^\s*(lazy\s*)?val\s+[_a-zA-Z][_a-zA-Z0-9]*\s*=\s*"[^"]*"\s*$/.test(str);
+  /^\s*(private\s*)?(lazy\s*)?val\s+[_a-zA-Z][_a-zA-Z0-9]*\s*=\s*"[^"]*"\s*$/.test(
+    str
+  );
 
 const getVarName = (str: string): string =>
-  str.replace(/^\s*(lazy\s*)?val\s+/, '').replace(/\s*=\s*"[^"]*"\s*$/, '');
+  str
+    .replace(/^\s*(private\s*)?(lazy\s*)?val\s+/, '')
+    .replace(/\s*=\s*"[^"]*"\s*$/, '');
 
 const isVarName = (str: string): boolean =>
   /^[_a-zA-Z][_a-zA-Z0-9]*$/.test(str);
 
 const getVarInfo = (str: string, ctx: ParseContext): { val: string } => {
   const rightPart = str.replace(
-    /^\s*(lazy\s*)?val\s+[_a-zA-Z][_a-zA-Z0-9]*\s*=\s*"/,
+    /^\s*(private\s*)?(lazy\s*)?val\s+[_a-zA-Z][_a-zA-Z0-9]*\s*=\s*"/,
     ''
   );
   const val = rightPart.replace(/"\s*$/, '');
@@ -107,7 +114,11 @@ function parseDepExpr(
       ? str.replace(/^"/, '').replace(/"$/, '')
       : variables[str].val;
 
-  const tokens = expr.trim().split(/\s*(%%?)\s*/);
+  const tokens = expr
+    .trim()
+    .replace(/[()]/g, '')
+    .split(/\s*(%%?)\s*|\s*classifier\s*/);
+
   const [
     rawGroupId,
     groupOp,
@@ -147,11 +158,12 @@ function parseDepExpr(
   }
 
   const groupId = resolveToken(rawGroupId);
+  const depName = `${groupId}:${resolveToken(rawArtifactId)}`;
   const artifactId =
     groupOp === '%%' && scalaVersion
       ? `${resolveToken(rawArtifactId)}_${scalaVersion}`
       : resolveToken(rawArtifactId);
-  const depName = `${groupId}:${artifactId}`;
+  const lookupName = `${groupId}:${artifactId}`;
   const currentValue = resolveToken(rawVersion);
 
   if (!depType && rawScope) {
@@ -160,6 +172,7 @@ function parseDepExpr(
 
   const result: PackageDependency = {
     depName,
+    lookupName,
     currentValue,
   };
 
@@ -169,6 +182,7 @@ function parseDepExpr(
 
   return result;
 }
+
 interface ParseOptions {
   isMultiDeps?: boolean;
   scalaVersion?: string;
@@ -192,10 +206,18 @@ function parseSbtLine(
 
   let dep: PackageDependency = null;
   let scalaVersionVariable: string = null;
-  if (!isComment(line)) {
+  if (line !== '') {
     if (isScalaVersion(line)) {
       isMultiDeps = false;
-      scalaVersion = normalizeScalaVersion(getScalaVersion(line));
+      const rawScalaVersion = getScalaVersion(line);
+      scalaVersion = normalizeScalaVersion(rawScalaVersion);
+      dep = {
+        datasource: datasourceMaven.id,
+        depName: 'scala',
+        lookupName: 'org.scala-lang:scala-library',
+        currentValue: rawScalaVersion,
+        separateMinorPatch: true,
+      };
     } else if (isScalaVersionVariable(line)) {
       isMultiDeps = false;
       scalaVersionVariable = getScalaVersionVariable(line);
@@ -208,7 +230,7 @@ function parseSbtLine(
     } else if (isVarDependency(line)) {
       isMultiDeps = false;
       const depExpr = line.replace(
-        /^\s*(lazy\s*)?val\s[_a-zA-Z][_a-zA-Z0-9]*\s*=\s*/,
+        /^\s*(private\s*)?(lazy\s*)?val\s[_a-zA-Z][_a-zA-Z0-9]*\s*=\s*/,
         ''
       );
       dep = parseDepExpr(depExpr, {
@@ -240,10 +262,12 @@ function parseSbtLine(
   }
 
   if (dep) {
-    if (dep.depType === 'plugin') {
-      dep.datasource = datasourceSbtPlugin.id;
-    } else {
-      dep.datasource = datasourceSbtPackage.id;
+    if (!dep.datasource) {
+      if (dep.depType === 'plugin') {
+        dep.datasource = datasourceSbtPlugin.id;
+      } else {
+        dep.datasource = datasourceSbtPackage.id;
+      }
     }
     deps.push({
       registryUrls,
@@ -272,7 +296,7 @@ export function extractPackageFile(content: string): PackageFile {
   if (!content) {
     return null;
   }
-  const lines = content.split(/\n/);
+  const lines = content.split(/\n/).map(stripComment);
   return lines.reduce(parseSbtLine, {
     registryUrls: [MAVEN_REPO],
     deps: [],

@@ -1,10 +1,10 @@
 import is from '@sindresorhus/is';
 import {
   CONFIG_VALIDATION,
-  DATASOURCE_FAILURE,
-  PLATFORM_FAILURE,
+  PLATFORM_RATE_LIMIT_EXCEEDED,
 } from '../../constants/error-messages';
 import { logger } from '../../logger';
+import { ExternalHostError } from '../../types/errors/external-host-error';
 import { regEx } from '../../util/regex';
 import { RenovateConfig } from '../common';
 import * as massage from '../massage';
@@ -207,10 +207,11 @@ export async function resolveConfigPresets(
         } catch (err) {
           logger.debug({ preset, err }, 'Preset fetch error');
           // istanbul ignore if
-          if (
-            err.message === PLATFORM_FAILURE ||
-            err.message === DATASOURCE_FAILURE
-          ) {
+          if (err instanceof ExternalHostError) {
+            throw err;
+          }
+          // istanbul ignore if
+          if (err.message === PLATFORM_RATE_LIMIT_EXCEEDED) {
             throw err;
           }
           const error = new Error(CONFIG_VALIDATION);
@@ -239,11 +240,7 @@ export async function resolveConfigPresets(
           existingPresets.concat([preset])
         );
         // istanbul ignore if
-        if (
-          inputConfig &&
-          inputConfig.ignoreDeps &&
-          inputConfig.ignoreDeps.length === 0
-        ) {
+        if (inputConfig?.ignoreDeps?.length === 0) {
           delete presetConfig.description;
         }
         config = mergeChildConfig(config, presetConfig);
@@ -272,7 +269,7 @@ export async function resolveConfigPresets(
             )
           );
         } else {
-          (config[key] as RenovateConfig[]).push(element);
+          (config[key] as unknown[]).push(element);
         }
       }
     } else if (is.object(val) && !ignoredKeys.includes(key)) {

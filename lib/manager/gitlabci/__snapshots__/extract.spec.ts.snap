@@ -5,6 +5,15 @@ Array [
   Object {
     "autoReplaceStringTemplate": "{{depName}}{{#if newValue}}:{{newValue}}{{/if}}{{#if newDigest}}@{{newDigest}}{{/if}}",
     "currentDigest": undefined,
+    "currentValue": "2.5.0",
+    "datasource": "docker",
+    "depName": "ruby",
+    "depType": "image",
+    "replaceString": "ruby:2.5.0",
+  },
+  Object {
+    "autoReplaceStringTemplate": "{{depName}}{{#if newValue}}:{{newValue}}{{/if}}{{#if newDigest}}@{{newDigest}}{{/if}}",
+    "currentDigest": undefined,
     "currentValue": "latest",
     "datasource": "docker",
     "depName": "hadolint/hadolint",

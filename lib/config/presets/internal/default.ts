@@ -15,6 +15,24 @@ export const presets: Record<string, Preset> = {
       enabled: false,
     },
   },
+  disableDomain: {
+    description: 'Disable requests to a particular domain',
+    hostRules: [
+      {
+        domainName: '{{arg0}}',
+        enabled: false,
+      },
+    ],
+  },
+  disableHost: {
+    description: 'Disable requests to a particular hostName',
+    hostRules: [
+      {
+        hostName: '{{arg0}}',
+        enabled: false,
+      },
+    ],
+  },
   ignoreModulesAndTests: {
     description:
       'Ignore `node_modules`, `bower_components`, `vendor` and various test/tests directories',
@@ -521,13 +539,13 @@ export const presets: Record<string, Preset> = {
       },
     ],
   },
-  masterIssue: {
-    description: 'Enable Renovate master issue creation',
-    masterIssue: true,
+  dependencyDashboard: {
+    description: 'Enable Renovate Dependency Dashboard creation',
+    dependencyDashboard: true,
   },
-  masterIssueApproval: {
-    description: 'Enable Renovate master issue approval workflow',
-    masterIssueApproval: true,
+  dependencyDashboardApproval: {
+    description: 'Enable Renovate Dependency Dashboard approval workflow',
+    dependencyDashboardApproval: true,
   },
   timezone: {
     description: 'Evaluate schedules according to timezone {{arg0}}',

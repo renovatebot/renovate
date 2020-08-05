@@ -143,14 +143,14 @@ describe('config/presets', () => {
       config.extends = ['packages:eslint'];
       const res = await presets.resolveConfigPresets(config);
       expect(res).toMatchSnapshot();
-      expect(res.packagePatterns).toHaveLength(1);
+      expect(res.packagePatterns).toHaveLength(2);
     });
     it('resolves linters', async () => {
       config.extends = ['packages:linters'];
       const res = await presets.resolveConfigPresets(config);
       expect(res).toMatchSnapshot();
       expect(res.packageNames).toHaveLength(3);
-      expect(res.packagePatterns).toHaveLength(3);
+      expect(res.packagePatterns).toHaveLength(4);
     });
     it('resolves nested groups', async () => {
       config.extends = [':automergeLinters'];
@@ -159,7 +159,7 @@ describe('config/presets', () => {
       const rule = res.packageRules[0];
       expect(rule.automerge).toBe(true);
       expect(rule.packageNames).toHaveLength(3);
-      expect(rule.packagePatterns).toHaveLength(3);
+      expect(rule.packagePatterns).toHaveLength(4);
     });
     it('migrates automerge in presets', async () => {
       config.extends = ['ikatyang:library'];

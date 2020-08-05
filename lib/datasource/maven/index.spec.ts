@@ -2,11 +2,10 @@ import fs from 'fs';
 import { resolve } from 'path';
 import nock from 'nock';
 import { getPkgReleases } from '..';
-import { DATASOURCE_FAILURE } from '../../constants/error-messages';
-import * as globalCache from '../../util/cache/global';
+import { EXTERNAL_HOST_ERROR } from '../../constants/error-messages';
 import * as hostRules from '../../util/host-rules';
 import * as mavenVersioning from '../../versioning/maven';
-import * as maven from '.';
+import { id as datasource } from '.';
 
 const MYSQL_VERSIONS = ['6.0.5', '6.0.6', '8.0.7', '8.0.8', '8.0.9'];
 
@@ -28,16 +27,17 @@ const MYSQL_MAVEN_MYSQL_POM = fs.readFileSync(
 
 const config = {
   versioning: mavenVersioning.id,
-  datasource: maven.id,
+  datasource,
 };
 
 describe('datasource/maven', () => {
   beforeEach(() => {
     hostRules.add({
-      hostType: maven.id,
+      hostType: datasource,
       hostName: 'frontend_for_private_s3_repository',
       username: 'username',
       password: 'password',
+      timeout: 20000,
     });
     jest.resetAllMocks();
     nock.cleanAll();
@@ -98,7 +98,6 @@ describe('datasource/maven', () => {
         .head(path)
         .reply(status, '', {});
     });
-    return globalCache.rmAll();
   });
 
   afterEach(() => {
@@ -183,7 +182,7 @@ describe('datasource/maven', () => {
       expect(releases.releases).toEqual(generateReleases(MYSQL_VERSIONS));
     });
 
-    it('should throw registry-failure if default maven repo fails', async () => {
+    it('should throw external-host-error if default maven repo fails', async () => {
       nock('https://repo.maven.apache.org')
         .get('/maven2/org/artifact/maven-metadata.xml')
         .times(4)
@@ -191,12 +190,12 @@ describe('datasource/maven', () => {
 
       expect.assertions(1);
       await expect(
-        maven.getReleases({
+        getPkgReleases({
           ...config,
-          lookupName: 'org:artifact',
+          depName: 'org:artifact',
           registryUrls: ['https://repo.maven.apache.org/maven2/'],
         })
-      ).rejects.toThrow(Error(DATASOURCE_FAILURE));
+      ).rejects.toThrow(EXTERNAL_HOST_ERROR);
     });
 
     it('should return all versions of a specific library if a repository fails because invalid protocol', async () => {

@@ -14,7 +14,12 @@ describe('workers/repository/onboarding/pr/base-branch', () => {
       expect(res).toEqual('');
     });
     it('describes baseBranch', () => {
-      config.baseBranch = 'some-branch';
+      config.baseBranches = ['some-branch'];
+      const res = getBaseBranchDesc(config);
+      expect(res).toMatchSnapshot();
+    });
+    it('describes baseBranches', () => {
+      config.baseBranches = ['some-branch', 'some-other-branch'];
       const res = getBaseBranchDesc(config);
       expect(res).toMatchSnapshot();
     });

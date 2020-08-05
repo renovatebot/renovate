@@ -20,12 +20,12 @@ export function extractPackageFile(content: string): PackageFile | null {
     const lines = content.split('\n');
     for (let lineNumber = 0; lineNumber < lines.length; lineNumber += 1) {
       const line = lines[lineNumber];
-      const imageMatch = /^\s*image:\s*'?"?([^\s]+|)'?"?\s*$/.exec(line);
+      const imageMatch = /^\s*image:\s*'?"?([^\s'"]+|)'?"?\s*$/.exec(line);
       if (imageMatch) {
         switch (imageMatch[1]) {
           case '': {
             const imageNameLine = skipCommentLines(lines, lineNumber + 1);
-            const imageNameMatch = /^\s*name:\s*'?"?([^\s]+|)'?"?\s*$/.exec(
+            const imageNameMatch = /^\s*name:\s*'?"?([^\s'"]+|)'?"?\s*$/.exec(
               imageNameLine.line
             );
 

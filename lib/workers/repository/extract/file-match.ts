@@ -1,13 +1,14 @@
 import minimatch from 'minimatch';
 import { RenovateConfig } from '../../../config/common';
 import { logger } from '../../../logger';
-import { platform } from '../../../platform';
+import { getFileList } from '../../../util/git';
+import { regEx } from '../../../util/regex';
 
 export function getIncludedFiles(
   fileList: string[],
   includePaths: string[]
 ): string[] {
-  if (!(includePaths && includePaths.length)) {
+  if (!includePaths?.length) {
     return [...fileList];
   }
   return fileList.filter((file) =>
@@ -22,7 +23,7 @@ export function filterIgnoredFiles(
   fileList: string[],
   ignorePaths: string[]
 ): string[] {
-  if (!(ignorePaths && ignorePaths.length)) {
+  if (!ignorePaths?.length) {
     return [...fileList];
   }
   return fileList.filter(
@@ -33,10 +34,6 @@ export function filterIgnoredFiles(
           minimatch(file, ignorePath, { dot: true })
       )
   );
-}
-
-export function getFileList(): Promise<string[]> {
-  return platform.getFileList();
 }
 
 export function getFilteredFileList(
@@ -58,7 +55,7 @@ export async function getMatchingFiles(
   let matchedFiles: string[] = [];
   for (const match of fileMatch) {
     logger.debug(`Using file match: ${match} for manager ${manager}`);
-    const re = new RegExp(match);
+    const re = regEx(match);
     matchedFiles = matchedFiles.concat(
       fileList.filter((file) => re.test(file))
     );

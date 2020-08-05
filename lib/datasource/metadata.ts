@@ -1,3 +1,4 @@
+import URL from 'url';
 import is from '@sindresorhus/is';
 import parse from 'github-url-from-git';
 import * as hostRules from '../util/host-rules';
@@ -17,8 +18,6 @@ const manualChangelogUrls = {
       'https://github.com/react-native-community/react-native-releases/blob/master/CHANGELOG.md',
   },
   pypi: {
-    'pytest-django':
-      'https://pytest-django.readthedocs.io/en/latest/changelog.html#changelog',
     django: 'https://github.com/django/django/tree/master/docs/releases',
     djangorestframework:
       'https://www.django-rest-framework.org/community/release-notes/',
@@ -32,9 +31,14 @@ const manualChangelogUrls = {
       'https://django-debug-toolbar.readthedocs.io/en/latest/changes.html',
     'firebase-admin':
       'https://firebase.google.com/support/release-notes/admin/python',
-    requests:
-      'http://docs.python-requests.org/en/master/community/updates/#release-and-version-history',
+    requests: 'https://github.com/psf/requests/blob/master/HISTORY.md',
     wagtail: 'https://github.com/wagtail/wagtail/tree/master/docs/releases',
+  },
+  docker: {
+    'gitlab/gitlab-ce':
+      'https://gitlab.com/gitlab-org/omnibus-gitlab/-/blob/master/CHANGELOG.md',
+    'gitlab/gitlab-runner':
+      'https://gitlab.com/gitlab-org/gitlab-runner/-/blob/master/CHANGELOG.md',
   },
 };
 
@@ -47,7 +51,12 @@ const manualSourceUrls = {
       'https://github.com/hyper-expanse/library-release-workflows',
   },
   docker: {
+    'gcr.io/kaniko-project/executor':
+      'https://github.com/GoogleContainerTools/kaniko',
+    'gitlab/gitlab-ce': 'https://gitlab.com/gitlab-org/omnibus-gitlab',
+    'gitlab/gitlab-runner': 'https://gitlab.com/gitlab-org/gitlab-runner',
     node: 'https://github.com/nodejs/node',
+    traefik: 'https://github.com/containous/traefik',
   },
   kubernetes: {
     node: 'https://github.com/nodejs/node',
@@ -59,9 +68,8 @@ const manualSourceUrls = {
     node: 'https://github.com/nodejs/node',
   },
   pypi: {
-    coverage: 'https://github.com/nedbat/coveragepy/', // bitbucket entry on pypi is wrong
     mkdocs: 'https://github.com/mkdocs/mkdocs',
-    pillow: 'https://github.com/python-pillow/Pillow',
+    mypy: 'https://github.com/python/mypy',
   },
 };
 
@@ -100,15 +108,26 @@ export function addMetaData(
       .slice(0, 5)
       .join('/');
   };
+  /**
+   * @param {string} url
+   */
+  const massageGitlabUrl = (url: string): string => {
+    return url
+      .replace('http:', 'https:')
+      .replace(/^git:\/?\/?/, 'https://')
+      .replace(/\/tree\/.*$/i, '')
+      .replace(/\/$/i, '')
+      .replace('.git', '');
+  };
+
   if (
-    dep.changelogUrl &&
-    dep.changelogUrl.includes('github.com') && // lgtm [js/incomplete-url-substring-sanitization]
+    dep.changelogUrl?.includes('github.com') && // lgtm [js/incomplete-url-substring-sanitization]
     !dep.sourceUrl
   ) {
     dep.sourceUrl = dep.changelogUrl;
   }
   // prettier-ignore
-  if (dep.homepage && dep.homepage.includes('github.com')) { // lgtm [js/incomplete-url-substring-sanitization]
+  if (dep.homepage?.includes('github.com')) { // lgtm [js/incomplete-url-substring-sanitization]
     if (!dep.sourceUrl) {
       dep.sourceUrl = dep.homepage;
     }
@@ -119,12 +138,24 @@ export function addMetaData(
   hostRules.hosts({ hostType: 'github' }).forEach((host) => {
     extraBaseUrls.push(host, `gist.${host}`);
   });
+  extraBaseUrls.push('gitlab.com');
   if (dep.sourceUrl) {
-    // try massaging it
-    dep.sourceUrl =
-      parse(massageGithubUrl(dep.sourceUrl), {
-        extraBaseUrls,
-      }) || dep.sourceUrl;
+    const parsedUrl = URL.parse(dep.sourceUrl);
+    if (parsedUrl?.hostname) {
+      let massagedUrl;
+      if (parsedUrl.hostname.includes('gitlab')) {
+        massagedUrl = massageGitlabUrl(dep.sourceUrl);
+      } else {
+        massagedUrl = massageGithubUrl(dep.sourceUrl);
+      }
+      // try massaging it
+      dep.sourceUrl =
+        parse(massagedUrl, {
+          extraBaseUrls,
+        }) || dep.sourceUrl;
+    } else {
+      delete dep.sourceUrl;
+    }
   }
 
   // Clean up any empty urls

@@ -73,9 +73,20 @@ You probably have no need for this option - it is an experimental setting for th
 
 ## gitAuthor
 
-RFC5322-compliant string if you wish to customise the git author for commits.
+RFC5322-compliant string if you wish to customise the git author for commits. If you need to transition from one git author to another, put the old gitAuthor into `RENOVATE_LEGACY_GIT_AUTHOR_EMAIL` in environment. Renovate will then check against it as well as the current git author value before deciding if a branch has been modified.
+
+**Note** It is strongly recommended that the git author email you provide should be unique to Renovate. Otherwise, if another bot or human shares the same email and pushes to one of Renovate's branches then Renovate will mistake the branch as unmodified and potentially force push over the changes.
 
 ## gitPrivateKey
+
+This should be an armored private key, e.g. the type you get from running `gpg --export-secret-keys --armor 92066A17F0D1707B4E96863955FEF5171C45FAE5 > private.key`. Replace the newlines with `\n` before adding the resulting single-line value to your bot's config.
+
+It will be loaded _lazily_. Before the first commit in a repository, Renovate will:
+
+- First, run `gpg import` if it hasn't been run before
+- Then, run `git config user.signingkey` and `git config commit.gpgsign true`
+
+The `git` commands are run locally in the cloned repo instead of globally to reduce the chance of causing unintended consequences with global git configs on shared systems.
 
 ## logContext
 
@@ -86,6 +97,10 @@ RFC5322-compliant string if you wish to customise the git author for commits.
 ## logFileLevel
 
 ## logLevel
+
+It's recommended to run at debug level if you can, and configure it using the environment variable `LOG_LEVEL=debug`. By configuring using the environment it means that debug logging starts from the beginning of the app, while if you configure it using file config then the debug logging can only start after the file config is parsed.
+
+Additionally, if you configure `LOG_FORMAT=json` in env then logging will be done in JSON format instead of "pretty" format, which is usually better if you're doing any ingestion or parsing of the logs.
 
 ## onboarding
 
@@ -115,8 +130,6 @@ Set this to true if you wish for Renovate to persist repo data between runs. The
 
 Parameter to reduce CI load. CI jobs are usually triggered by these events: pull-request creation, pull-request update, automerge events. Set as an integer. Default is no limit.
 
-## prFooter
-
 ## printConfig
 
 This option is useful for troubleshooting, particularly if using presets. e.g. run `renovate foo/bar --print-config > config.log` and the fully-resolved config will be included in the log file.
@@ -136,7 +149,17 @@ To create the key pair with openssl use the following commands:
 
 Override this object if you wish to change the URLs that Renovate links to, e.g. if you have an internal forum for asking for help.
 
+## redisUrl
+
+If this value is set then Renovate will use Redis for its global cache instead of the local file system. The global cache is used to store lookup results (e.g. dependency versions and release notes) between repositories and runs. Example url: `redis://localhost`.
+
 ## repositories
+
+## repositoryCache
+
+Set this to `"enabled"` to have Renovate maintain a JSON file cache per-repository to speed up extractions. Set to `"reset"` if you ever need to bypass the cache and have it overwritten. JSON files will be stored inside the `cacheDir` beside the existing file-based package cache.
+
+Warning: this is an experimental feature and may be modified or removed in a future non-major release.
 
 ## requireConfig
 

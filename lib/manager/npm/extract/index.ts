@@ -102,7 +102,7 @@ export async function extractPackageFile(
     await deleteLocalFile(npmrcFileName);
   } else {
     npmrc = await readLocalFile(npmrcFileName, 'utf8');
-    if (npmrc && npmrc.includes('package-lock')) {
+    if (npmrc?.includes('package-lock')) {
       logger.debug('Stripping package-lock setting from npmrc');
       npmrc = npmrc.replace(/(^|\n)package-lock.*?(\n|$)/g, '\n');
     }
@@ -148,6 +148,8 @@ export async function extractPackageFile(
     resolutions: 'resolutions',
   };
 
+  const compatibility: Record<string, any> = {};
+
   function extractDependency(
     depType: string,
     depName: string,
@@ -168,12 +170,19 @@ export async function extractPackageFile(
         dep.datasource = datasourceGithubTags.id;
         dep.lookupName = 'nodejs/node';
         dep.versioning = nodeVersioning.id;
+        compatibility.node = dep.currentValue;
       } else if (depName === 'yarn') {
         dep.datasource = datasourceNpm.id;
         dep.commitMessageTopic = 'Yarn';
+        compatibility.yarn = dep.currentValue;
       } else if (depName === 'npm') {
         dep.datasource = datasourceNpm.id;
         dep.commitMessageTopic = 'npm';
+        compatibility.npm = dep.currentValue;
+      } else if (depName === 'pnpm') {
+        dep.datasource = datasourceNpm.id;
+        dep.commitMessageTopic = 'pnpm';
+        compatibility.pnpm = dep.currentValue;
       } else {
         dep.skipReason = SkipReason.UnknownEngines;
       }
@@ -326,7 +335,7 @@ export async function extractPackageFile(
   let skipInstalls = config.skipInstalls;
   if (skipInstalls === null) {
     if (hasFileRefs) {
-      // https://npm.community/t/npm-i-package-lock-only-changes-lock-file-incorrectly-when-file-references-used-in-dependencies/1412
+      // https://github.com/npm/cli/issues/1432
       // Explanation:
       //  - npm install --package-lock-only is buggy for transitive deps in file: references
       //  - So we set skipInstalls to false if file: refs are found *and* the user hasn't explicitly set the value already
@@ -351,6 +360,7 @@ export async function extractPackageFile(
     lernaPackages,
     skipInstalls,
     yarnWorkspacesPackages,
+    compatibility,
   };
 }
 

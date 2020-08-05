@@ -1,9 +1,15 @@
 import { exec as _exec } from 'child_process';
+import is from '@sindresorhus/is';
+import traverse from 'traverse';
+import { toUnix } from 'upath';
 import { ExecOptions } from '../lib/util/exec';
 
 type CallOptions = ExecOptions | null | undefined;
 
 export type ExecResult = { stdout: string; stderr: string } | Error;
+
+export type ExecMock = jest.Mock<typeof _exec>;
+export const exec: ExecMock = _exec as any;
 
 interface ExecSnapshot {
   cmd: string;
@@ -18,21 +24,21 @@ export function execSnapshot(cmd: string, options?: CallOptions): ExecSnapshot {
     options,
   };
 
-  const str = JSON.stringify(snapshot, (k, v) => (v === undefined ? null : v));
+  const cwd = toUnix(process.cwd());
 
-  const cwd = process.cwd().replace(/\\(\w)/g, '/$1');
-  return JSON.parse(
-    str
-      .replace(/\\(\w)/g, '/$1')
-      .split(cwd)
-      .join('/root/project')
-  );
+  // eslint-disable-next-line array-callback-return
+  return traverse(snapshot).map(function fixup(v) {
+    if (is.string(v)) {
+      const val = v.replace(/\\(\w)/g, '/$1').replace(cwd, '/root/project');
+      this.update(val);
+    }
+  });
 }
 
 const defaultExecResult = { stdout: '', stderr: '' };
 
 export function mockExecAll(
-  execFn: jest.Mock<typeof _exec>,
+  execFn: ExecMock,
   execResult: ExecResult = defaultExecResult
 ): ExecSnapshots {
   const snapshots: ExecSnapshots = [];
@@ -48,7 +54,7 @@ export function mockExecAll(
 }
 
 export function mockExecSequence(
-  execFn: jest.Mock<typeof _exec>,
+  execFn: ExecMock,
   execResults: ExecResult[]
 ): ExecSnapshots {
   const snapshots: ExecSnapshots = [];

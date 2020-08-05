@@ -1,6 +1,6 @@
 import { RenovateConfig, getConfig, mocked } from '../../../../test/util';
 import * as _extractUpdate from './extract-update';
-import { extractDependencies, updateRepo } from './index';
+import { extractDependencies, updateRepo } from '.';
 
 jest.mock('./extract-update');
 

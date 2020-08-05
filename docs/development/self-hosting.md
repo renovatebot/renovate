@@ -12,6 +12,12 @@ Although Renovate is now best known as a "service" via the GitHub App, that serv
 $ npm install -g renovate
 ```
 
+Since renovate v20 `npm`, `pnpm` and `yarn` are no longer embedded, so you need to install them globally if you need to update lockfiles.
+
+```sh
+$ npm install -g yarn pnpm
+```
+
 #### Docker
 
 Renovate is available for Docker via an automated build [renovate/renovate](https://hub.docker.com/r/renovate/renovate/). It builds `latest` based on the `master` branch and all semver tags are published too. All the following are valid:
@@ -100,7 +106,7 @@ stringData:
 ## Authentication
 
 You need to select a user account for `renovate` to assume the identity of, and generate a Personal Access Token. It is recommended to be `@renovate-bot` if you are using a self-hosted server and can pick any username you want.
-It is also recommended that you configure `config.gitAuthor` with the same identity as your Renovate user, e.g. like `"gitAuthor": "Renovate Bot <bot@renovateapp.com>"`.
+It is also recommended that you configure `config.gitAuthor` with the same identity as your Renovate user, e.g. like `"gitAuthor": "Renovate Bot <renovate@whitesourcesoftware.com>"`.
 
 #### GitHub Enterprise
 
@@ -142,6 +148,8 @@ Don't forget to configure `platform=gitea` somewhere in config.
 ## GitHub.com token for release notes
 
 If you are running on any platform except github.com, it's important to also configure `GITHUB_COM_TOKEN` containing a personal access token for github.com. This account can actually be _any_ account on GitHub, and needs only read-only access. It's used when fetching release notes for repositories in order to increase the hourly API limit.
+
+**Note:** If you're using renovate in a project where dependencies are loaded from github (such as go modules hosted on github) it is highly reccomended to add a github token as you will run in the rate limit from the github api, which will lead to renovate closing and reopening PRs because it could not get reliable info on updated dependencies.
 
 ## File/directory usage
 
@@ -340,3 +348,7 @@ spec:
                       name: renovate-env
           restartPolicy: Never
 ```
+
+## Logging
+
+It's recommended to configure `LOG_LEVEL=debug` and `LOG_FORMAT=json` in environment if you are ingesting/parsing logs into another system. Debug logging is usually necessary for any debugging, while JSON format will mean that the output is parseable.

@@ -29,7 +29,20 @@ const requirements6 = readFileSync(
   'utf8'
 );
 
+const requirements7 = readFileSync(
+  'lib/manager/pip_requirements/__fixtures__/requirements7.txt',
+  'utf8'
+);
+
 describe('lib/manager/pip_requirements/extract', () => {
+  beforeEach(() => {
+    delete process.env.PIP_TEST_TOKEN;
+    global.trustLevel = 'low';
+  });
+  afterEach(() => {
+    delete process.env.PIP_TEST_TOKEN;
+    global.trustLevel = 'low';
+  });
   describe('extractPackageFile()', () => {
     let config;
     beforeEach(() => {
@@ -92,6 +105,31 @@ describe('lib/manager/pip_requirements/extract', () => {
         'http://example.com/private-pypi/',
       ]);
       expect(res.deps).toHaveLength(6);
+    });
+    it('should not replace env vars in low trust mode', () => {
+      process.env.PIP_TEST_TOKEN = 'its-a-secret';
+      const res = extractPackageFile(requirements7, 'unused_file_name', {});
+      expect(res.registryUrls).toEqual([
+        'https://pypi.org/pypi/',
+        'http://$PIP_TEST_TOKEN:example.com/private-pypi/',
+        // eslint-disable-next-line no-template-curly-in-string
+        'http://${PIP_TEST_TOKEN}:example.com/private-pypi/',
+        'http://$PIP_TEST_TOKEN:example.com/private-pypi/',
+        // eslint-disable-next-line no-template-curly-in-string
+        'http://${PIP_TEST_TOKEN}:example.com/private-pypi/',
+      ]);
+    });
+    it('should replace env vars in high trust mode', () => {
+      process.env.PIP_TEST_TOKEN = 'its-a-secret';
+      global.trustLevel = 'high';
+      const res = extractPackageFile(requirements7, 'unused_file_name', {});
+      expect(res.registryUrls).toEqual([
+        'https://pypi.org/pypi/',
+        'http://its-a-secret:example.com/private-pypi/',
+        'http://its-a-secret:example.com/private-pypi/',
+        'http://its-a-secret:example.com/private-pypi/',
+        'http://its-a-secret:example.com/private-pypi/',
+      ]);
     });
   });
 });

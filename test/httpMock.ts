@@ -82,8 +82,12 @@ function simplifyGraphqlAST(tree: any): any {
   return tree;
 }
 
-function onMissing(_: any, opts: any): void /* istanbul ignore next */ {
-  missingLog.push(`  ${opts.method} ${opts.href}`);
+function onMissing(req: any, opts: any): void /* istanbul ignore next */ {
+  if (!opts) {
+    missingLog.push(`  ${req.method} ${req.href}`);
+  } else {
+    missingLog.push(`  ${opts.method} ${opts.href}`);
+  }
 }
 
 export function setup(): void {
@@ -106,12 +110,17 @@ export function reset(): void {
   nock.enableNetConnect();
 }
 
+export function allUsed(): boolean {
+  return nock.isDone();
+}
+
 export function scope(basePath: BasePath, options?: nock.Options): nock.Scope {
   return nock(basePath, options).on('request', (req) => {
     const { headers, method } = req;
     const url = req.options?.href;
     const result: RequestLogItem = { headers, method, url };
-    const body = req.options?.body;
+    const body = req.requestBodyBuffers?.[0]?.toString();
+
     if (body) {
       try {
         const strQuery = JSON.parse(body).query;

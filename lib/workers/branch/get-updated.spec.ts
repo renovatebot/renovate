@@ -1,4 +1,4 @@
-import { defaultConfig, mocked, platform } from '../../../test/util';
+import { defaultConfig, git, mocked } from '../../../test/util';
 import * as datasourceGitSubmodules from '../../datasource/git-submodules';
 import * as _composer from '../../manager/composer';
 import * as _gitSubmodules from '../../manager/git-submodules';
@@ -15,6 +15,7 @@ const autoReplace = mocked(_autoReplace);
 jest.mock('../../manager/composer');
 jest.mock('../../manager/npm');
 jest.mock('../../manager/git-submodules');
+jest.mock('../../util/git');
 jest.mock('./auto-replace');
 
 describe('workers/branch/get-updated', () => {
@@ -26,7 +27,7 @@ describe('workers/branch/get-updated', () => {
         upgrades: [],
       } as never;
       npm.updateDependency = jest.fn();
-      platform.getFile.mockResolvedValueOnce('existing content');
+      git.getFile.mockResolvedValueOnce('existing content');
     });
     it('handles autoreplace base updated', async () => {
       config.upgrades.push({ manager: 'html', branchName: undefined });
@@ -46,7 +47,7 @@ describe('workers/branch/get-updated', () => {
       await expect(getUpdatedPackageFiles(config)).rejects.toThrow();
     });
     it('handles autoreplace branch needs update', async () => {
-      config.parentBranch = 'some branch';
+      config.reuseExistingBranch = true;
       config.upgrades.push({ manager: 'html', branchName: undefined });
       autoReplace.doAutoReplace.mockResolvedValueOnce(null);
       autoReplace.doAutoReplace.mockResolvedValueOnce('updated-file');
@@ -58,14 +59,14 @@ describe('workers/branch/get-updated', () => {
       expect(res).toMatchSnapshot();
     });
     it('handles null content', async () => {
-      config.parentBranch = 'some-branch';
+      config.reuseExistingBranch = true;
       config.upgrades.push({
         manager: 'npm',
       } as never);
       await expect(getUpdatedPackageFiles(config)).rejects.toThrow();
     });
     it('handles content change', async () => {
-      config.parentBranch = 'some-branch';
+      config.reuseExistingBranch = true;
       config.upgrades.push({
         manager: 'npm',
       } as never);
@@ -74,7 +75,7 @@ describe('workers/branch/get-updated', () => {
       expect(res).toMatchSnapshot();
     });
     it('handles lock files', async () => {
-      config.parentBranch = 'some-branch';
+      config.reuseExistingBranch = true;
       config.upgrades.push({
         manager: 'composer',
         branchName: undefined,
@@ -92,7 +93,6 @@ describe('workers/branch/get-updated', () => {
       expect(res).toMatchSnapshot();
     });
     it('handles lockFileMaintenance', async () => {
-      // config.parentBranch = 'some-branch';
       config.upgrades.push({
         manager: 'composer',
         updateType: 'lockFileMaintenance',
@@ -109,7 +109,6 @@ describe('workers/branch/get-updated', () => {
       expect(res).toMatchSnapshot();
     });
     it('handles lockFileMaintenance error', async () => {
-      // config.parentBranch = 'some-branch';
       config.upgrades.push({
         manager: 'composer',
         updateType: 'lockFileMaintenance',
@@ -126,7 +125,7 @@ describe('workers/branch/get-updated', () => {
       expect(res).toMatchSnapshot();
     });
     it('handles lock file errors', async () => {
-      config.parentBranch = 'some-branch';
+      config.reuseExistingBranch = true;
       config.upgrades.push({
         manager: 'composer',
         branchName: undefined,

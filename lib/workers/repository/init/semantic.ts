@@ -1,7 +1,7 @@
 import conventionalCommitsDetector from 'conventional-commits-detector';
 import { RenovateConfig } from '../../../config';
 import { logger } from '../../../logger';
-import { platform } from '../../../platform';
+import { getCommitMessages } from '../../../util/git';
 
 export async function detectSemanticCommits(
   config: RenovateConfig
@@ -15,7 +15,7 @@ export async function detectSemanticCommits(
     );
     return config.semanticCommits;
   }
-  const commitMessages = await platform.getCommitMessages();
+  const commitMessages = await getCommitMessages();
   if (commitMessages) {
     commitMessages.length = 10;
   }

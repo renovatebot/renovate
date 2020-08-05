@@ -1,9 +1,8 @@
 import fs from 'fs';
+import { getPkgReleases } from '..';
+import * as httpMock from '../../../test/httpMock';
 
-import _got from '../../util/got';
-import { getReleases } from './index';
-
-const got: any = _got;
+import { id as datasource } from '.';
 
 const res1 = fs.readFileSync(
   'lib/datasource/galaxy/__fixtures__/timezone',
@@ -14,84 +13,114 @@ const empty = fs.readFileSync(
   'utf8'
 );
 
-jest.mock('../../util/got');
+const baseUrl = 'https://galaxy.ansible.com/';
 
 describe('datasource/galaxy', () => {
   describe('getReleases', () => {
+    beforeEach(() => {
+      httpMock.setup();
+    });
+
+    afterEach(() => {
+      httpMock.reset();
+    });
+
     it('returns null for empty result', async () => {
-      got.mockReturnValueOnce(null);
+      httpMock
+        .scope(baseUrl)
+        .get('/api/v1/roles/?owner__username=non_existent_crate&name=undefined')
+        .reply(200);
       expect(
-        await getReleases({ lookupName: 'non_existent_crate' })
+        await getPkgReleases({ datasource, depName: 'non_existent_crate' })
       ).toBeNull();
+      expect(httpMock.getTrace()).toMatchSnapshot();
     });
     it('returns null for missing fields', async () => {
-      got.mockReturnValueOnce({
-        body: undefined,
-      });
+      httpMock
+        .scope(baseUrl)
+        .get('/api/v1/roles/?owner__username=non_existent_crate&name=undefined')
+        .reply(200, undefined);
       expect(
-        await getReleases({ lookupName: 'non_existent_crate' })
+        await getPkgReleases({ datasource, depName: 'non_existent_crate' })
       ).toBeNull();
+      expect(httpMock.getTrace()).toMatchSnapshot();
     });
     it('returns null for empty list', async () => {
-      got.mockReturnValueOnce({
-        body: '\n',
-      });
+      httpMock
+        .scope(baseUrl)
+        .get('/api/v1/roles/?owner__username=non_existent_crate&name=undefined')
+        .reply(200, '\n');
       expect(
-        await getReleases({ lookupName: 'non_existent_crate' })
+        await getPkgReleases({ datasource, depName: 'non_existent_crate' })
       ).toBeNull();
+      expect(httpMock.getTrace()).toMatchSnapshot();
     });
     it('returns null for 404', async () => {
-      got.mockImplementationOnce(() =>
-        Promise.reject({
-          statusCode: 404,
-        })
-      );
-      expect(await getReleases({ lookupName: 'some_crate' })).toBeNull();
+      httpMock
+        .scope(baseUrl)
+        .get('/api/v1/roles/?owner__username=some_crate&name=undefined')
+        .reply(404);
+      expect(
+        await getPkgReleases({ datasource, depName: 'some_crate' })
+      ).toBeNull();
+      expect(httpMock.getTrace()).toMatchSnapshot();
     });
     it('returns null for unknown error', async () => {
-      got.mockImplementationOnce(() => {
-        throw new Error();
-      });
-      expect(await getReleases({ lookupName: 'some_crate' })).toBeNull();
+      httpMock
+        .scope(baseUrl)
+        .get('/api/v1/roles/?owner__username=some_crate&name=undefined')
+        .replyWithError('some unknown error');
+      expect(
+        await getPkgReleases({ datasource, depName: 'some_crate' })
+      ).toBeNull();
+      expect(httpMock.getTrace()).toMatchSnapshot();
     });
     it('processes real data', async () => {
-      got.mockReturnValueOnce({
-        body: res1,
+      httpMock
+        .scope(baseUrl)
+        .get('/api/v1/roles/?owner__username=yatesr&name=timezone')
+        .reply(200, res1);
+      const res = await getPkgReleases({
+        datasource,
+        depName: 'yatesr.timezone',
       });
-      const res = await getReleases({ lookupName: 'yatesr.timezone' });
       expect(res).toMatchSnapshot();
       expect(res).not.toBeNull();
       expect(res).toBeDefined();
+      expect(httpMock.getTrace()).toMatchSnapshot();
     });
     it('return null if searching random username and project name', async () => {
-      got.mockReturnValueOnce({
-        body: empty,
-      });
-      const res = await getReleases({ lookupName: 'foo.bar' });
+      httpMock
+        .scope(baseUrl)
+        .get('/api/v1/roles/?owner__username=foo&name=bar')
+        .reply(200, empty);
+      const res = await getPkgReleases({ datasource, depName: 'foo.bar' });
       expect(res).toBeNull();
+      expect(httpMock.getTrace()).toMatchSnapshot();
     });
     it('throws for 5xx', async () => {
-      got.mockImplementationOnce(() =>
-        Promise.reject({
-          statusCode: 502,
-        })
-      );
+      httpMock
+        .scope(baseUrl)
+        .get('/api/v1/roles/?owner__username=some_crate&name=undefined')
+        .reply(502);
       let e;
       try {
-        await getReleases({ lookupName: 'some_crate' });
+        await getPkgReleases({ datasource, depName: 'some_crate' });
       } catch (err) {
         e = err;
       }
       expect(e).toBeDefined();
       expect(e).toMatchSnapshot();
+      expect(httpMock.getTrace()).toMatchSnapshot();
     });
     it('throws for 404', async () => {
-      const err = new Error();
-      err.statusCode = 404;
-      got.mockImplementationOnce(() => {
-        throw err;
-      });
-      expect(await getReleases({ lookupName: 'foo.bar' })).toBeNull();
+      httpMock
+        .scope(baseUrl)
+        .get('/api/v1/roles/?owner__username=foo&name=bar')
+        .reply(404);
+      const res = await getPkgReleases({ datasource, depName: 'foo.bar' });
+      expect(res).toBeNull();
+      expect(httpMock.getTrace()).toMatchSnapshot();
     });
   });
 });

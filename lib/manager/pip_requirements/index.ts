@@ -1,5 +1,6 @@
 import { LANGUAGE_PYTHON } from '../../constants/languages';
 
+export { updateArtifacts } from './artifacts';
 export { extractPackageFile } from './extract';
 export { getRangeStrategy } from './range';
 

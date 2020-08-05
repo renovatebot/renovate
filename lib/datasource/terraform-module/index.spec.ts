@@ -1,81 +1,150 @@
 import fs from 'fs';
-import * as globalCache from '../../util/cache/global';
-import _got from '../../util/got';
-import * as terraform from '.';
-
-jest.mock('../../util/got');
-
-const got: any = _got;
+import { getPkgReleases } from '..';
+import * as httpMock from '../../../test/httpMock';
+import { id as datasource } from '.';
 
 const consulData: any = fs.readFileSync(
   'lib/datasource/terraform-module/__fixtures__/registry-consul.json'
 );
+const serviceDiscoveryResult: any = fs.readFileSync(
+  'lib/datasource/terraform-module/__fixtures__/service-discovery.json'
+);
+const serviceDiscoveryCustomResult: any = fs.readFileSync(
+  'lib/datasource/terraform-module/__fixtures__/service-custom-discovery.json'
+);
+
+const baseUrl = 'https://registry.terraform.io';
+const localTerraformEnterprisebaseUrl = 'https://terraform.foo.bar';
 
 describe('datasource/terraform-module', () => {
   describe('getReleases', () => {
     beforeEach(() => {
       jest.clearAllMocks();
-      return globalCache.rmAll();
+      httpMock.setup();
     });
+
+    afterEach(() => {
+      httpMock.reset();
+    });
+
     it('returns null for empty result', async () => {
-      got.mockReturnValueOnce({ body: {} });
+      httpMock
+        .scope(baseUrl)
+        .get('/v1/modules/hashicorp/consul/aws')
+        .reply(200, {})
+        .get('/.well-known/terraform.json')
+        .reply(200, serviceDiscoveryResult);
       expect(
-        await terraform.getReleases({
-          lookupName: 'hashicorp/consul/aws',
+        await getPkgReleases({
+          datasource,
+          depName: 'hashicorp/consul/aws',
         })
       ).toBeNull();
+      expect(httpMock.getTrace()).toMatchSnapshot();
     });
     it('returns null for 404', async () => {
-      got.mockImplementationOnce(() =>
-        Promise.reject({
-          statusCode: 404,
-        })
-      );
+      httpMock
+        .scope(baseUrl)
+        .get('/v1/modules/hashicorp/consul/aws')
+        .reply(404, {})
+        .get('/.well-known/terraform.json')
+        .reply(200, serviceDiscoveryResult);
       expect(
-        await terraform.getReleases({
-          lookupName: 'hashicorp/consul/aws',
+        await getPkgReleases({
+          datasource,
+          depName: 'hashicorp/consul/aws',
         })
       ).toBeNull();
+      expect(httpMock.getTrace()).toMatchSnapshot();
     });
     it('returns null for unknown error', async () => {
-      got.mockImplementationOnce(() => {
-        throw new Error();
-      });
+      httpMock
+        .scope(baseUrl)
+        .get('/v1/modules/hashicorp/consul/aws')
+        .replyWithError('')
+        .get('/.well-known/terraform.json')
+        .reply(200, serviceDiscoveryResult);
       expect(
-        await terraform.getReleases({
-          lookupName: 'hashicorp/consul/aws',
+        await getPkgReleases({
+          datasource,
+          depName: 'hashicorp/consul/aws',
         })
       ).toBeNull();
+      expect(httpMock.getTrace()).toMatchSnapshot();
     });
     it('processes real data', async () => {
-      got.mockReturnValueOnce({
-        body: JSON.parse(consulData),
-      });
-      const res = await terraform.getReleases({
-        lookupName: 'hashicorp/consul/aws',
+      httpMock
+        .scope(baseUrl)
+        .get('/v1/modules/hashicorp/consul/aws')
+        .reply(200, consulData)
+        .get('/.well-known/terraform.json')
+        .reply(200, serviceDiscoveryResult);
+      const res = await getPkgReleases({
+        datasource,
+        depName: 'hashicorp/consul/aws',
       });
       expect(res).toMatchSnapshot();
       expect(res).not.toBeNull();
+      expect(httpMock.getTrace()).toMatchSnapshot();
     });
     it('processes with registry in name', async () => {
-      got.mockReturnValueOnce({
-        body: JSON.parse(consulData),
-      });
-      const res = await terraform.getReleases({
-        lookupName: 'registry.terraform.io/hashicorp/consul/aws',
+      httpMock
+        .scope(baseUrl)
+        .get('/v1/modules/hashicorp/consul/aws')
+        .reply(200, consulData)
+        .get('/.well-known/terraform.json')
+        .reply(200, serviceDiscoveryResult);
+      const res = await getPkgReleases({
+        datasource,
+        depName: 'registry.terraform.io/hashicorp/consul/aws',
       });
       expect(res).toMatchSnapshot();
       expect(res).not.toBeNull();
+      expect(httpMock.getTrace()).toMatchSnapshot();
     });
     it('rejects mismatch', async () => {
-      got.mockReturnValueOnce({
-        body: JSON.parse(consulData),
-      });
-      const res = await terraform.getReleases({
-        lookupName: 'consul/foo',
+      httpMock
+        .scope('https://terraform.company.com')
+        .get('/v1/modules/consul/foo')
+        .reply(200, consulData)
+        .get('/.well-known/terraform.json')
+        .reply(200, serviceDiscoveryResult);
+      const res = await getPkgReleases({
+        datasource,
+        depName: 'consul/foo',
         registryUrls: ['https://terraform.company.com'],
       });
       expect(res).toBeNull();
+      expect(httpMock.getTrace()).toMatchSnapshot();
+    });
+    it('rejects servicediscovery', async () => {
+      httpMock
+        .scope('https://terraform.company.com')
+        .get('/.well-known/terraform.json')
+        .reply(404);
+      const res = await getPkgReleases({
+        datasource,
+        depName: 'consul/foo',
+        registryUrls: ['https://terraform.company.com'],
+      });
+      expect(res).toBeNull();
+      expect(httpMock.getTrace()).toMatchSnapshot();
+    });
+    it('processes real data on changed subpath', async () => {
+      httpMock
+        .scope(localTerraformEnterprisebaseUrl)
+        .get('/api/registry/v1/modules/hashicorp/consul/aws')
+        .reply(200, consulData)
+        .get('/.well-known/terraform.json')
+        .reply(200, serviceDiscoveryCustomResult);
+      const res = await getPkgReleases({
+        datasource,
+        registryUrls: ['https://terraform.foo.bar'],
+        depName: 'hashicorp/consul/aws',
+      });
+      expect(httpMock.getTrace()).toMatchSnapshot();
+      expect(res).toMatchSnapshot();
+      expect(res).not.toBeNull();
     });
   });
 });

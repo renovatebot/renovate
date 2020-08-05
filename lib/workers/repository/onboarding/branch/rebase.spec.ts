@@ -1,11 +1,7 @@
-import { mock } from 'jest-mock-extended';
-import {
-  RenovateConfig,
-  defaultConfig,
-  platform,
-} from '../../../../../test/util';
-import { Pr } from '../../../../platform';
+import { RenovateConfig, defaultConfig, git } from '../../../../../test/util';
 import { rebaseOnboardingBranch } from './rebase';
+
+jest.mock('../../../../util/git');
 
 describe('workers/repository/onboarding/branch/rebase', () => {
   describe('rebaseOnboardingBranch()', () => {
@@ -17,35 +13,23 @@ describe('workers/repository/onboarding/branch/rebase', () => {
       };
     });
     it('does not rebase modified branch', async () => {
-      platform.getBranchPr.mockResolvedValueOnce({
-        ...mock<Pr>(),
-        isModified: true,
-      });
+      git.isBranchModified.mockResolvedValueOnce(true);
       await rebaseOnboardingBranch(config);
-      expect(platform.commitFiles).toHaveBeenCalledTimes(0);
+      expect(git.commitFiles).toHaveBeenCalledTimes(0);
     });
     it('does nothing if branch is up to date', async () => {
       const contents =
         JSON.stringify(defaultConfig.onboardingConfig, null, 2) + '\n';
-      platform.getFile
+      git.getFile
         .mockResolvedValueOnce(contents) // package.json
         .mockResolvedValueOnce(contents); // renovate.json
-      platform.getBranchPr.mockResolvedValueOnce({
-        ...mock<Pr>(),
-        isModified: false,
-        isStale: false,
-      });
       await rebaseOnboardingBranch(config);
-      expect(platform.commitFiles).toHaveBeenCalledTimes(0);
+      expect(git.commitFiles).toHaveBeenCalledTimes(0);
     });
     it('rebases onboarding branch', async () => {
-      platform.getBranchPr.mockResolvedValueOnce({
-        ...mock<Pr>(),
-        isStale: true,
-        isModified: false,
-      });
+      git.isBranchStale.mockResolvedValueOnce(true);
       await rebaseOnboardingBranch(config);
-      expect(platform.commitFiles).toHaveBeenCalledTimes(1);
+      expect(git.commitFiles).toHaveBeenCalledTimes(1);
     });
   });
 });

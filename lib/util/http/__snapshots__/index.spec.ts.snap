@@ -60,3 +60,12 @@ Object {
   },
 }
 `;
+
+exports[`util/http/index retries 1`] = `
+Object {
+  "body": "",
+  "headers": Object {
+    "x-some-header": "abc",
+  },
+}
+`;

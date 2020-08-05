@@ -1,5 +1,5 @@
 import { SYSTEM_INSUFFICIENT_MEMORY } from '../../../constants/error-messages';
-import { getReleases } from '../../../datasource/docker';
+import { getPkgReleases } from '../../../datasource';
 import { logger } from '../../../logger';
 import * as versioning from '../../../versioning';
 import {
@@ -68,7 +68,7 @@ function prepareCommands(commands: Opt<string>[]): string[] {
 }
 
 async function getDockerTag(
-  lookupName: string,
+  depName: string,
   constraint: string,
   scheme: string
 ): Promise<string> {
@@ -81,10 +81,10 @@ async function getDockerTag(
 
   logger.debug(
     { constraint },
-    `Found ${scheme} version constraint - checking for a compatible ${lookupName} image to use`
+    `Found ${scheme} version constraint - checking for a compatible ${depName} image to use`
   );
-  const imageReleases = await getReleases({ lookupName });
-  if (imageReleases && imageReleases.releases) {
+  const imageReleases = await getPkgReleases({ datasource: 'docker', depName });
+  if (imageReleases?.releases) {
     let versions = imageReleases.releases.map((release) => release.version);
     versions = versions.filter(
       (version) => isVersion(version) && matches(version, constraint)
@@ -99,12 +99,12 @@ async function getDockerTag(
       return version;
     }
   } /* istanbul ignore next */ else {
-    logger.error(`No ${lookupName} releases found`);
+    logger.error(`No ${depName} releases found`);
     return 'latest';
   }
   logger.warn(
-    { constraint },
-    'Failed to find a tag satisfying ruby constraint, using latest ruby image instead'
+    { depName, constraint, scheme },
+    'Failed to find a tag satisfying constraint, using "latest" tag instead'
   );
   return 'latest';
 }
@@ -164,7 +164,7 @@ export async function removeDanglingContainers(): Promise<void> {
       throw new Error(SYSTEM_INSUFFICIENT_MEMORY);
     }
     if (err.stderr?.includes('Cannot connect to the Docker daemon')) {
-      logger.info('No docker deamon found');
+      logger.info('No docker daemon found');
     } else {
       logger.warn({ err }, 'Error removing dangling containers');
     }

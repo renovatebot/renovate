@@ -1,7 +1,5 @@
-import sampleSize from 'lodash/sampleSize';
-import uniq from 'lodash/uniq';
+import { RenovateConfig } from '../../config/common';
 import {
-  PLATFORM_FAILURE,
   PLATFORM_INTEGRATION_UNAUTHORIZED,
   PLATFORM_RATE_LIMIT_EXCEEDED,
   REPOSITORY_CHANGED,
@@ -9,26 +7,40 @@ import {
 import { logger } from '../../logger';
 import { PlatformPrOptions, Pr, platform } from '../../platform';
 import { BranchStatus } from '../../types';
+import { ExternalHostError } from '../../types/errors/external-host-error';
+import { sampleSize } from '../../util';
+import { getBranchLastCommitTime, isBranchModified } from '../../util/git';
 import { BranchConfig, PrResult } from '../common';
 import { getPrBody } from './body';
 import { ChangeLogError } from './changelog';
+import { codeOwnersForPr } from './code-owners';
 
-function noWhitespace(input: string): string {
-  return input.replace(/\r?\n|\r|\s/g, '');
+function noWhitespaceOrHeadings(input: string): string {
+  return input.replace(/\r?\n|\r|\s|#/g, '');
 }
 
 function noLeadingAtSymbol(input: string): string {
   return input.length && input.startsWith('@') ? input.slice(1) : input;
 }
 
-// TODO: fix types
+async function addCodeOwners(
+  assigneesOrReviewers: string[],
+  pr: Pr
+): Promise<string[]> {
+  return [...new Set(assigneesOrReviewers.concat(await codeOwnersForPr(pr)))];
+}
+
 export async function addAssigneesReviewers(
-  config: any,
+  config: RenovateConfig,
   pr: Pr
 ): Promise<void> {
-  if (config.assignees.length > 0) {
+  let assignees = config.assignees;
+  if (config.assigneesFromCodeOwners) {
+    assignees = await addCodeOwners(assignees, pr);
+  }
+  if (assignees.length > 0) {
     try {
-      let assignees = config.assignees.map(noLeadingAtSymbol);
+      assignees = assignees.map(noLeadingAtSymbol);
       if (config.assigneesSampleSize !== null) {
         assignees = sampleSize(assignees, config.assigneesSampleSize);
       }
@@ -46,14 +58,18 @@ export async function addAssigneesReviewers(
       );
     }
   }
-  if (config.reviewers.length > 0) {
+  let reviewers = config.reviewers;
+  if (config.reviewersFromCodeOwners) {
+    reviewers = await addCodeOwners(reviewers, pr);
+  }
+  if (reviewers.length > 0) {
     try {
-      let reviewers = config.reviewers.map(noLeadingAtSymbol);
+      reviewers = reviewers.map(noLeadingAtSymbol);
       if (config.additionalReviewers.length > 0) {
         const additionalReviewers = config.additionalReviewers.map(
           noLeadingAtSymbol
         );
-        reviewers = uniq(reviewers.concat(additionalReviewers));
+        reviewers = [...new Set(reviewers.concat(additionalReviewers))];
       }
       if (config.reviewersSampleSize !== null) {
         reviewers = sampleSize(reviewers, config.reviewersSampleSize);
@@ -86,7 +102,9 @@ export async function ensurePr(
   logger.trace({ config }, 'ensurePr');
   // If there is a group, it will use the config of the first upgrade in the array
   const { branchName, prTitle, upgrades } = config;
-  const masterIssueCheck = (config.masterIssueChecks || {})[config.branchName];
+  const dependencyDashboardCheck = (config.dependencyDashboardChecks || {})[
+    config.branchName
+  ];
   // Check if existing PR exists
   const existingPr = await platform.getBranchPr(branchName);
   if (existingPr) {
@@ -122,7 +140,7 @@ export async function ensurePr(
     );
     if ((await getBranchStatus()) === BranchStatus.yellow) {
       logger.debug('Checking how long this branch has been pending');
-      const lastCommitTime = await platform.getBranchLastCommitTime(branchName);
+      const lastCommitTime = await getBranchLastCommitTime(branchName);
       const currentTime = new Date();
       const millisecondsPerHour = 1000 * 60 * 60;
       const elapsedHours = Math.round(
@@ -137,7 +155,7 @@ export async function ensurePr(
       logger.debug(`Branch tests failed, so will create PR`);
     } else {
       // Branch should be automerged, so we don't want to create a PR
-      return { prResult: PrResult.BlockeddByBranchAutomerge };
+      return { prResult: PrResult.BlockedByBranchAutomerge };
     }
   }
   if (config.prCreation === 'status-success') {
@@ -152,7 +170,7 @@ export async function ensurePr(
   } else if (
     config.prCreation === 'approval' &&
     !existingPr &&
-    masterIssueCheck !== 'approvePr'
+    dependencyDashboardCheck !== 'approvePr'
   ) {
     return { prResult: PrResult.AwaitingApproval };
   } else if (
@@ -165,13 +183,16 @@ export async function ensurePr(
       logger.debug(
         `Branch status is "${await getBranchStatus()}" - checking timeout`
       );
-      const lastCommitTime = await platform.getBranchLastCommitTime(branchName);
+      const lastCommitTime = await getBranchLastCommitTime(branchName);
       const currentTime = new Date();
       const millisecondsPerHour = 1000 * 60 * 60;
       const elapsedHours = Math.round(
         (currentTime.getTime() - lastCommitTime.getTime()) / millisecondsPerHour
       );
-      if (!masterIssueCheck && elapsedHours < config.prNotPendingHours) {
+      if (
+        !dependencyDashboardCheck &&
+        elapsedHours < config.prNotPendingHours
+      ) {
         logger.debug(
           `Branch is ${elapsedHours} hours old - skipping PR creation`
         );
@@ -202,7 +223,9 @@ export async function ensurePr(
     if (logJSON) {
       if (typeof logJSON.error === 'undefined') {
         if (logJSON.project) {
-          upgrade.repoName = logJSON.project.github;
+          upgrade.repoName = logJSON.project.github
+            ? logJSON.project.github
+            : logJSON.project.gitlab;
         }
         upgrade.hasReleaseNotes = logJSON.hasReleaseNotes;
         upgrade.releases = [];
@@ -225,7 +248,7 @@ export async function ensurePr(
           [
             '\n',
             ':warning: Release Notes retrieval for this PR were skipped because no github.com credentials were available.',
-            'To add credentials for github.com to your config, please see [this guide](https://docs.renovatebot.com/install-gitlab-app/#configuring-a-token-for-githubcom-hosted-release-notes).',
+            'If you are using the hosted GitLab app, please follow [this guide](https://docs.renovatebot.com/install-gitlab-app/#configuring-a-token-for-githubcom-hosted-release-notes). If you are self-hosted, please see [this instruction](https://github.com/renovatebot/renovate/blob/master/docs/development/self-hosting.md#githubcom-token-for-release-notes) instead.',
             '\n',
           ].join('\n'),
         ];
@@ -259,7 +282,12 @@ export async function ensurePr(
     if (existingPr) {
       logger.debug('Processing existing PR');
       // istanbul ignore if
-      if (config.automerge && (await getBranchStatus()) === BranchStatus.red) {
+      if (
+        !existingPr.hasAssignees &&
+        !existingPr.hasReviewers &&
+        config.automerge &&
+        (await getBranchStatus()) === BranchStatus.red
+      ) {
         logger.debug(`Setting assignees and reviewers as status checks failed`);
         await addAssigneesReviewers(config, existingPr);
       }
@@ -275,7 +303,8 @@ export async function ensurePr(
       existingPrBody = existingPrBody.trim();
       if (
         existingPr.title === prTitle &&
-        noWhitespace(existingPrBody) === noWhitespace(prBody)
+        noWhitespaceOrHeadings(existingPrBody) ===
+          noWhitespaceOrHeadings(prBody)
       ) {
         logger.debug(`${existingPr.displayNumber} does not need updating`);
         return { prResult: PrResult.NotUpdated, pr: existingPr };
@@ -290,18 +319,10 @@ export async function ensurePr(
           },
           'PR title changed'
         );
-      } else if (!config.committedFiles) {
+      } else if (!config.committedFiles && !config.rebaseRequested) {
         logger.debug(
           {
             prTitle,
-          },
-          'PR body changed'
-        );
-        logger.trace(
-          {
-            prTitle,
-            oldPrBody: existingPrBody,
-            newPrBody: prBody,
           },
           'PR body changed'
         );
@@ -337,11 +358,12 @@ export async function ensurePr(
         };
         pr = await platform.createPr({
           branchName,
+          targetBranch: config.baseBranch,
           prTitle,
           prBody,
           labels: config.labels,
-          useDefaultBranch: false,
           platformOptions,
+          draftPR: config.draftPR,
         });
         logger.info({ pr: pr.number, prTitle }, 'PR created');
       }
@@ -413,9 +435,9 @@ export async function ensurePr(
   } catch (err) {
     // istanbul ignore if
     if (
+      err instanceof ExternalHostError ||
       err.message === REPOSITORY_CHANGED ||
       err.message === PLATFORM_RATE_LIMIT_EXCEEDED ||
-      err.message === PLATFORM_FAILURE ||
       err.message === PLATFORM_INTEGRATION_UNAUTHORIZED
     ) {
       logger.debug('Passing error up');
@@ -469,7 +491,7 @@ export async function checkAutoMerge(
       return false;
     }
     // Check if it's been touched
-    if (pr.isModified) {
+    if (await isBranchModified(branchName)) {
       logger.debug('PR is ready for automerge but has been modified');
       return false;
     }

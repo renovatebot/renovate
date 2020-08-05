@@ -1,9 +1,8 @@
 import { quote } from 'shlex';
 import { BUNDLER_INVALID_CREDENTIALS } from '../../constants/error-messages';
 import { logger } from '../../logger';
-import { platform } from '../../platform';
 import { HostRule } from '../../types';
-import { get, set } from '../../util/cache/run';
+import * as memCache from '../../util/cache/memory';
 import { ExecOptions, exec } from '../../util/exec';
 import {
   deleteLocalFile,
@@ -11,6 +10,7 @@ import {
   readLocalFile,
   writeLocalFile,
 } from '../../util/fs';
+import { getRepoStatus } from '../../util/git';
 import { isValid } from '../../versioning/ruby';
 import { UpdateArtifact, UpdateArtifactsResult } from '../common';
 import {
@@ -18,6 +18,7 @@ import {
   getAuthenticationHeaderValue,
   getDomain,
 } from './host-rules';
+import { getGemHome } from './utils';
 
 const hostConfigVariablePrefix = 'BUNDLE_';
 
@@ -73,7 +74,7 @@ export async function updateArtifacts(
   } = updateArtifact;
   const { compatibility = {} } = config;
   logger.debug(`bundler.updateArtifacts(${packageFileName})`);
-  const existingError = get<string>('bundlerArtifactsError');
+  const existingError = memCache.get<string>('bundlerArtifactsError');
   // istanbul ignore if
   if (existingError) {
     logger.debug('Aborting Bundler artifacts due to previous failed attempt');
@@ -115,7 +116,7 @@ export async function updateArtifacts(
     }
     const preCommands = [
       'ruby --version',
-      `gem install bundler${bundlerVersion} --no-document`,
+      `gem install bundler${bundlerVersion}`,
     ];
 
     const bundlerHostRulesVariables = findAllAuthenticatable({
@@ -126,7 +127,10 @@ export async function updateArtifacts(
 
     const execOptions: ExecOptions = {
       cwdFile: packageFileName,
-      extraEnv: bundlerHostRulesVariables,
+      extraEnv: {
+        ...bundlerHostRulesVariables,
+        GEM_HOME: await getGemHome(config),
+      },
       docker: {
         image: 'renovate/ruby',
         tagScheme: 'ruby',
@@ -135,7 +139,7 @@ export async function updateArtifacts(
       },
     };
     await exec(cmd, execOptions);
-    const status = await platform.getRepoStatus();
+    const status = await getRepoStatus();
     if (!status.modified.includes(lockFileName)) {
       return null;
     }
@@ -178,7 +182,7 @@ export async function updateArtifacts(
         'Gemfile.lock update failed due to missing credentials - skipping branch'
       );
       // Do not generate these PRs because we don't yet support Bundler authentication
-      set('bundlerArtifactsError', BUNDLER_INVALID_CREDENTIALS);
+      memCache.set('bundlerArtifactsError', BUNDLER_INVALID_CREDENTIALS);
       throw new Error(BUNDLER_INVALID_CREDENTIALS);
     }
     const resolveMatchRe = new RegExp('\\s+(.*) was resolved to', 'g');

@@ -12,7 +12,8 @@ import {
   PackageDependency,
   PackageFile,
 } from '../manager/common';
-import { File, PlatformPrOptions } from '../platform';
+import { PlatformPrOptions } from '../platform';
+import { File } from '../util/git';
 import { ChangeLogResult } from './pr/changelog/common';
 import { Merge } from 'type-fest';
 
@@ -42,8 +43,9 @@ export interface BranchUpgradeConfig
   manager?: string;
   packageFile?: string;
 
-  parentBranch?: string;
-  prBanner?: string;
+  reuseExistingBranch?: boolean;
+  prHeader?: string;
+  prFooter?: string;
   prBodyNotes?: string[];
   prBodyTemplate?: string;
   prPriority?: number;
@@ -64,7 +66,7 @@ export enum PrResult {
   AwaitingApproval = 'AwaitingApproval',
   AwaitingGreenBranch = 'AwaitingGreenBranch',
   AwaitingNotPending = 'AwaitingNotPending',
-  BlockeddByBranchAutomerge = 'BlockeddByBranchAutomerge',
+  BlockedByBranchAutomerge = 'BlockedByBranchAutomerge',
   Created = 'Created',
   Error = 'Error',
   ErrorAlreadyExists = 'ErrorAlreadyExists',
@@ -84,7 +86,8 @@ export type ProcessBranchResult =
   | 'pending'
   | 'pr-created'
   | 'pr-edited'
-  | 'pr-hourly-limit-reached'
+  | 'pr-limit-reached'
+  | 'commit-limit-reached'
   | 'rebase';
 
 export interface BranchConfig
@@ -97,8 +100,10 @@ export interface BranchConfig
   canBeUnpublished?: boolean;
   errors?: ValidationMessage[];
   hasTypes?: boolean;
-  masterIssueChecks?: Record<string, string>;
+  dependencyDashboardChecks?: Record<string, string>;
   releaseTimestamp?: string;
+  forceCommit?: boolean;
+  rebaseRequested?: boolean;
 
   res?: ProcessBranchResult;
   upgrades: BranchUpgradeConfig[];

@@ -42,7 +42,6 @@ export async function validateConfig(
   function isIgnored(key: string): boolean {
     const ignoredNodes = [
       '$schema',
-      'prBanner',
       'depType',
       'npmToken',
       'packageFile',
@@ -54,6 +53,17 @@ export async function validateConfig(
       'prBody', // deprecated
     ];
     return ignoredNodes.includes(key);
+  }
+
+  function validateAliasObject(key: string, val: object): boolean {
+    if (key === 'aliases') {
+      for (const value of Object.values(val)) {
+        if (!is.urlString(value)) {
+          return false;
+        }
+      }
+    }
+    return true;
   }
 
   for (const [key, val] of Object.entries(config)) {
@@ -198,6 +208,7 @@ export async function validateConfig(
               'excludePackagePatterns',
               'sourceUrlPrefixes',
               'updateTypes',
+              'matchCurrentVersion',
             ];
             if (key === 'packageRules') {
               for (const packageRule of val) {
@@ -241,7 +252,8 @@ export async function validateConfig(
                 'datasourceTemplate',
                 'versioningTemplate',
               ];
-              for (const regexManager of val) {
+              // TODO: fix types
+              for (const regexManager of val as any[]) {
                 if (
                   Object.keys(regexManager).some(
                     (k) => !allowedKeys.includes(k)
@@ -301,7 +313,7 @@ export async function validateConfig(
               }
             }
             if (key === 'packagePatterns' || key === 'excludePackagePatterns') {
-              for (const pattern of val) {
+              for (const pattern of val as string[]) {
                 if (pattern !== '*') {
                   try {
                     regEx(pattern);
@@ -315,7 +327,7 @@ export async function validateConfig(
               }
             }
             if (key === 'fileMatch') {
-              for (const fileMatch of val) {
+              for (const fileMatch of val as string[]) {
                 try {
                   regEx(fileMatch);
                 } catch (e) {
@@ -346,17 +358,26 @@ export async function validateConfig(
           }
         } else if (type === 'object' && currentPath !== 'compatibility') {
           if (is.object(val)) {
-            const ignoredObjects = options
-              .filter((option) => option.freeChoice)
-              .map((option) => option.name);
-            if (!ignoredObjects.includes(key)) {
-              const subValidation = await module.exports.validateConfig(
-                val,
-                isPreset,
-                currentPath
-              );
-              warnings = warnings.concat(subValidation.warnings);
-              errors = errors.concat(subValidation.errors);
+            if (key === 'aliases') {
+              if (!validateAliasObject(key, val)) {
+                errors.push({
+                  depName: 'Configuration Error',
+                  message: `Invalid alias object configuration`,
+                });
+              }
+            } else {
+              const ignoredObjects = options
+                .filter((option) => option.freeChoice)
+                .map((option) => option.name);
+              if (!ignoredObjects.includes(key)) {
+                const subValidation = await module.exports.validateConfig(
+                  val,
+                  isPreset,
+                  currentPath
+                );
+                warnings = warnings.concat(subValidation.warnings);
+                errors = errors.concat(subValidation.errors);
+              }
             }
           } else {
             errors.push({

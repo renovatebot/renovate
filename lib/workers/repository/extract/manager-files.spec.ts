@@ -1,7 +1,6 @@
-import { getConfig, mocked } from '../../../../test/util';
+import { fs, getConfig, mocked } from '../../../../test/util';
 import { RenovateConfig } from '../../../config';
 import * as _html from '../../../manager/html';
-import * as _fs from '../../../util/fs';
 import * as _fileMatch from './file-match';
 import { getManagerPackageFiles } from './manager-files';
 
@@ -9,7 +8,6 @@ jest.mock('./file-match');
 jest.mock('../../../manager/html');
 jest.mock('../../../util/fs');
 
-const fs: any = _fs;
 const fileMatch = mocked(_fileMatch);
 const html = mocked(_html);
 

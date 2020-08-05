@@ -1,3 +1,4 @@
+import is from '@sindresorhus/is';
 import {
   GitPullRequest,
   GitPullRequestCommentThread,
@@ -13,37 +14,33 @@ import {
 } from '../../constants/pull-requests';
 import { logger } from '../../logger';
 import { BranchStatus } from '../../types';
+import * as git from '../../util/git';
 import * as hostRules from '../../util/host-rules';
 import { sanitize } from '../../util/sanitize';
 import { ensureTrailingSlash } from '../../util/url';
 import {
   BranchStatusConfig,
-  CommitFilesConfig,
   CreatePRConfig,
   EnsureCommentConfig,
   EnsureCommentRemovalConfig,
   EnsureIssueResult,
   FindPRConfig,
   Issue,
-  PlatformConfig,
+  PlatformParams,
+  PlatformResult,
   Pr,
-  RepoConfig,
   RepoParams,
+  RepoResult,
   VulnerabilityAlert,
 } from '../common';
-import GitStorage, { StatusResult } from '../git/storage';
 import { smartTruncate } from '../utils/pr-body';
 import * as azureApi from './azure-got-wrapper';
 import * as azureHelper from './azure-helper';
 import { AzurePr } from './types';
 
 interface Config {
-  storage: GitStorage;
   repoForceRebase: boolean;
   mergeMethod: GitPullRequestMergeStrategy;
-  baseCommitSHA: string | undefined;
-  baseBranch: string;
-  defaultBranch: string;
   owner: string;
   repoId: string;
   project: string;
@@ -69,7 +66,7 @@ export function initPlatform({
   token,
   username,
   password,
-}: RenovateConfig): Promise<PlatformConfig> {
+}: PlatformParams): Promise<PlatformResult> {
   if (!endpoint) {
     throw new Error('Init: You must configure an Azure DevOps endpoint');
   }
@@ -84,7 +81,7 @@ export function initPlatform({
   };
   defaults.endpoint = res.endpoint;
   azureApi.setEndpoint(res.endpoint);
-  const platformConfig: PlatformConfig = {
+  const platformConfig: PlatformResult = {
     endpoint: defaults.endpoint,
   };
   return Promise.resolve(platformConfig);
@@ -97,21 +94,12 @@ export async function getRepos(): Promise<string[]> {
   return repos.map((repo) => `${repo.project.name}/${repo.name}`);
 }
 
-async function getBranchCommit(fullBranchName: string): Promise<string> {
-  const azureApiGit = await azureApi.gitApi();
-  const commit = await azureApiGit.getBranch(
-    config.repoId,
-    azureHelper.getBranchNameWithoutRefsheadsPrefix(fullBranchName)!
-  );
-  return commit.commit.commitId;
-}
-
 export async function initRepo({
   repository,
   localDir,
   azureWorkItemId,
   optimizeForDisabled,
-}: RepoParams): Promise<RepoConfig> {
+}: RepoParams): Promise<RepoResult> {
   logger.debug(`initRepo("${repository}")`);
   config = { repository, azureWorkItemId } as any;
   const azureApiGit = await azureApi.gitApi();
@@ -128,10 +116,8 @@ export async function initRepo({
   config.owner = '?owner?';
   logger.debug(`${repository} owner = ${config.owner}`);
   // Use default branch as PR target unless later overridden
-  config.defaultBranch = repo.defaultBranch.replace('refs/heads/', '');
-  config.baseBranch = config.defaultBranch;
-  logger.debug(`${repository} default branch = ${config.defaultBranch}`);
-  config.baseCommitSHA = await getBranchCommit(config.baseBranch);
+  const defaultBranch = repo.defaultBranch.replace('refs/heads/', '');
+  logger.debug(`${repository} default branch = ${defaultBranch}`);
   config.mergeMethod = await azureHelper.getMergeMethod(repo.id, names.project);
   config.repoForceRebase = false;
 
@@ -139,12 +125,13 @@ export async function initRepo({
     interface RenovateConfig {
       enabled: boolean;
     }
+
     let renovateConfig: RenovateConfig;
     try {
       const json = await azureHelper.getFile(
         repo.id,
         'renovate.json',
-        config.defaultBranch
+        defaultBranch
       );
       renovateConfig = JSON.parse(json);
     } catch {
@@ -155,7 +142,6 @@ export async function initRepo({
     }
   }
 
-  config.storage = new GitStorage();
   const [projectName, repoName] = repository.split('/');
   const opts = hostRules.find({
     hostType: defaults.hostType,
@@ -164,14 +150,16 @@ export async function initRepo({
   const url =
     defaults.endpoint +
     `${encodeURIComponent(projectName)}/_git/${encodeURIComponent(repoName)}`;
-  await config.storage.initRepo({
+  await git.initRepo({
     ...config,
     localDir,
     url,
     extraCloneOpts: azureHelper.getStorageExtraCloneOpts(opts),
+    gitAuthorName: global.gitAuthor?.name,
+    gitAuthorEmail: global.gitAuthor?.email,
   });
-  const repoConfig: RepoConfig = {
-    baseBranch: config.baseBranch,
+  const repoConfig: RepoResult = {
+    defaultBranch,
     isFork: false,
   };
   return repoConfig;
@@ -181,53 +169,11 @@ export function getRepoForceRebase(): Promise<boolean> {
   return Promise.resolve(config.repoForceRebase === true);
 }
 
-// Search
-
-export /* istanbul ignore next */ function getFileList(): Promise<string[]> {
-  return config.storage.getFileList();
-}
-
-export /* istanbul ignore next */ async function setBaseBranch(
-  branchName = config.baseBranch
-): Promise<string> {
-  logger.debug(`Setting baseBranch to ${branchName}`);
-  config.baseBranch = branchName;
-  delete config.baseCommitSHA;
-  const baseBranchSha = await config.storage.setBaseBranch(branchName);
+// istanbul ignore next
+export async function setBaseBranch(branchName: string): Promise<string> {
+  logger.debug(`Setting base branch to ${branchName}`);
+  const baseBranchSha = await git.setBranch(branchName);
   return baseBranchSha;
-}
-
-export /* istanbul ignore next */ function setBranchPrefix(
-  branchPrefix: string
-): Promise<void> {
-  return config.storage.setBranchPrefix(branchPrefix);
-}
-
-// Branch
-
-export /* istanbul ignore next */ function branchExists(
-  branchName: string
-): Promise<boolean> {
-  return config.storage.branchExists(branchName);
-}
-
-export /* istanbul ignore next */ function getAllRenovateBranches(
-  branchPrefix: string
-): Promise<string[]> {
-  return config.storage.getAllRenovateBranches(branchPrefix);
-}
-
-export /* istanbul ignore next */ function isBranchStale(
-  branchName: string
-): Promise<boolean> {
-  return config.storage.isBranchStale(branchName);
-}
-
-export /* istanbul ignore next */ function getFile(
-  filePath: string,
-  branchName: string
-): Promise<string> {
-  return config.storage.getFile(filePath, branchName);
 }
 
 // istanbul ignore next
@@ -291,17 +237,10 @@ export async function getPr(pullRequestId: number): Promise<Pr | null> {
   azurePr.labels = labels
     .filter((label) => label.active)
     .map((label) => label.name);
-
-  const commits = await azureApiGit.getPullRequestCommits(
-    config.repoId,
-    pullRequestId
-  );
-  azurePr.isModified =
-    commits.length > 0 &&
-    commits[0].author.name !== commits[commits.length - 1].author.name;
-
+  azurePr.hasReviewers = is.nonEmptyArray(azurePr.reviewers);
   return azurePr;
 }
+
 export async function findPr({
   branchName,
   prTitle,
@@ -354,47 +293,11 @@ export /* istanbul ignore next */ async function deleteBranch(
   branchName: string,
   abandonAssociatedPr = false
 ): Promise<void> {
-  await config.storage.deleteBranch(branchName);
+  await git.deleteBranch(branchName);
   if (abandonAssociatedPr) {
     const pr = await getBranchPr(branchName);
     await abandonPr(pr.number);
   }
-}
-
-export /* istanbul ignore next */ function getBranchLastCommitTime(
-  branchName: string
-): Promise<Date> {
-  return config.storage.getBranchLastCommitTime(branchName);
-}
-
-export /* istanbul ignore next */ function getRepoStatus(): Promise<
-  StatusResult
-> {
-  return config.storage.getRepoStatus();
-}
-
-export /* istanbul ignore next */ function mergeBranch(
-  branchName: string
-): Promise<void> {
-  return config.storage.mergeBranch(branchName);
-}
-
-export /* istanbul ignore next */ function commitFiles({
-  branchName,
-  files,
-  message,
-}: CommitFilesConfig): Promise<string | null> {
-  return config.storage.commitFiles({
-    branchName,
-    files,
-    message,
-  });
-}
-
-export /* istanbul ignore next */ function getCommitMessages(): Promise<
-  string[]
-> {
-  return config.storage.getCommitMessages();
 }
 
 export async function getBranchStatusCheck(
@@ -433,16 +336,14 @@ export async function getBranchStatus(
 
 export async function createPr({
   branchName,
+  targetBranch,
   prTitle: title,
   prBody: body,
   labels,
-  useDefaultBranch,
   platformOptions = {},
 }: CreatePRConfig): Promise<Pr> {
   const sourceRefName = azureHelper.getNewBranchName(branchName);
-  const targetRefName = azureHelper.getNewBranchName(
-    useDefaultBranch ? config.defaultBranch : config.baseBranch
-  );
+  const targetRefName = azureHelper.getNewBranchName(targetBranch);
   const description = azureHelper.max4000Chars(sanitize(body));
   const azureApiGit = await azureApi.gitApi();
   const workItemRefs = [
@@ -757,43 +658,6 @@ export /* istanbul ignore next */ async function deleteLabel(
   await azureApiGit.deletePullRequestLabels(config.repoId, prNumber, label);
 }
 
-export async function getPrFiles(prId: number): Promise<string[]> {
-  const azureApiGit = await azureApi.gitApi();
-  const prIterations = await azureApiGit.getPullRequestIterations(
-    config.repoId,
-    prId
-  );
-  return [
-    ...new Set(
-      (
-        await Promise.all(
-          prIterations.map(
-            async (iteration) =>
-              (
-                await azureApiGit.getPullRequestIterationChanges(
-                  config.repoId,
-                  prId,
-                  iteration.id
-                )
-              ).changeEntries
-          )
-        )
-      )
-        .reduce((acc, val) => acc.concat(val), [])
-        .map((change) => change.item.path.slice(1))
-    ),
-  ];
-}
-
 export function getVulnerabilityAlerts(): Promise<VulnerabilityAlert[]> {
   return Promise.resolve([]);
-}
-
-export function cleanRepo(): Promise<void> {
-  // istanbul ignore if
-  if (config.storage && config.storage.cleanRepo) {
-    config.storage.cleanRepo();
-  }
-  config = {} as any;
-  return Promise.resolve();
 }

@@ -1,9 +1,9 @@
 import { RenovateConfig } from '../../../config';
 import * as npmApi from '../../../datasource/npm';
-import { RepoConfig, RepoParams, platform } from '../../../platform';
+import { RepoParams, RepoResult, platform } from '../../../platform';
 
 // TODO: fix types
-export type WorkerPlatformConfig = RepoConfig &
+export type WorkerPlatformConfig = RepoResult &
   RenovateConfig &
   Record<string, any>;
 
@@ -26,6 +26,5 @@ export async function initApis(
   config = await getPlatformConfig(config as never);
   npmApi.resetMemCache();
   npmApi.setNpmrc(config.npmrc);
-  delete config.gitPrivateKey;
   return config;
 }

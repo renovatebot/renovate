@@ -4,6 +4,7 @@ import { logger } from '../../../../logger';
 import { PackageFile } from '../../../../manager/common';
 import { platform } from '../../../../platform';
 import { emojify } from '../../../../util/emoji';
+import { isBranchModified } from '../../../../util/git';
 import { BranchConfig } from '../../../common';
 import { addAssigneesReviewers } from '../../../pr';
 import { getBaseBranchDesc } from './base-branch';
@@ -65,9 +66,7 @@ If you need any further assistance then you can also [request help here](${confi
     prBody = prBody.replace('{{PACKAGE FILES}}\n', '');
   }
   let configDesc = '';
-  if (!(existingPr && existingPr.isModified)) {
-    configDesc = getConfigDesc(config, packageFiles);
-  } else {
+  if (await isBranchModified(config.onboardingBranch)) {
     configDesc = emojify(
       `### Configuration\n\n:abcd: Renovate has detected a custom config for this PR. Feel free to ask for [help](${config.productLinks.help}) if you have any doubts and would like it reviewed.\n\n`
     );
@@ -78,6 +77,8 @@ If you need any further assistance then you can also [request help here](${confi
     } else {
       configDesc += `Important: Now that this branch is edited, Renovate can't rebase it from the base branch any more. If you make changes to the base branch that could impact this onboarding PR, please merge them manually.\n\n`;
     }
+  } else {
+    configDesc = getConfigDesc(config, packageFiles);
   }
   prBody = prBody.replace('{{CONFIG}}\n', configDesc);
   prBody = prBody.replace(
@@ -88,13 +89,12 @@ If you need any further assistance then you can also [request help here](${confi
   prBody = prBody.replace('{{BASEBRANCH}}\n', getBaseBranchDesc(config));
   prBody = prBody.replace('{{PRLIST}}\n', getPrList(config, branches));
   // istanbul ignore if
-  if (config.global) {
-    if (config.global.prBanner) {
-      prBody = config.global.prBanner + '\n\n' + prBody;
-    }
-    if (config.global.prFooter) {
-      prBody = prBody + '\n---\n\n' + config.global.prFooter + '\n';
-    }
+  if (config.prHeader) {
+    prBody = (config.prHeader || '') + '\n\n' + prBody;
+  }
+  // istanbul ignore if
+  if (config.prFooter) {
+    prBody = prBody + '\n---\n\n' + config.prFooter + '\n';
   }
   logger.trace('prBody:\n' + prBody);
 
@@ -110,13 +110,17 @@ If you need any further assistance then you can also [request help here](${confi
       return;
     }
     // PR must need updating
-    await platform.updatePr(existingPr.number, existingPr.title, prBody);
-    logger.info({ pr: existingPr.number }, 'Onboarding PR updated');
+    // istanbul ignore if
+    if (config.dryRun) {
+      logger.info('DRY-RUN: Would update onboarding PR');
+    } else {
+      await platform.updatePr(existingPr.number, existingPr.title, prBody);
+      logger.info({ pr: existingPr.number }, 'Onboarding PR updated');
+    }
     return;
   }
   logger.debug('Creating onboarding PR');
   const labels: string[] = [];
-  const useDefaultBranch = true;
   try {
     // istanbul ignore if
     if (config.dryRun) {
@@ -124,10 +128,10 @@ If you need any further assistance then you can also [request help here](${confi
     } else {
       const pr = await platform.createPr({
         branchName: config.onboardingBranch,
+        targetBranch: config.defaultBranch,
         prTitle: config.onboardingPrTitle,
         prBody,
         labels,
-        useDefaultBranch,
       });
       logger.info({ pr: pr.displayNumber }, 'Onboarding PR created');
       await addAssigneesReviewers(config, pr);

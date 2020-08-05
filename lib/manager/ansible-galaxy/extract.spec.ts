@@ -22,7 +22,7 @@ describe('lib/manager/ansible-galaxy/extract', () => {
     it('extracts multiple dependencies from requirements.yml', () => {
       const res = extractPackageFile(yamlFile1);
       expect(res.deps).toMatchSnapshot();
-      expect(res.deps).toHaveLength(9);
+      expect(res.deps).toHaveLength(10);
     });
     it('extracts dependencies from a not beautified requirements file', () => {
       const res = extractPackageFile(yamlFile2);

@@ -5,7 +5,7 @@ import {
   minSatisfying,
   satisfies,
   valid,
-} from '@snyk/ruby-semver';
+} from '@renovatebot/ruby-semver';
 import { logger } from '../../logger';
 import { NewValueConfig, VersioningApi } from '../common';
 import { isSingleOperator, isValidOperator } from './operator';
@@ -91,6 +91,18 @@ const getNewValue = ({
     newValue = currentValue.replace(fromVersion, toVersion);
   } else {
     switch (rangeStrategy) {
+      case 'update-lockfile':
+        if (satisfies(toVersion, currentValue)) {
+          newValue = currentValue;
+        } else {
+          newValue = getNewValue({
+            currentValue,
+            rangeStrategy: 'replace',
+            fromVersion,
+            toVersion,
+          });
+        }
+        break;
       case 'pin':
         newValue = pin({ to: vtrim(toVersion) });
         break;

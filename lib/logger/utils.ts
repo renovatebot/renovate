@@ -1,7 +1,7 @@
 import { Stream } from 'stream';
 import bunyan from 'bunyan';
 import fs from 'fs-extra';
-import { sanitize } from '../util/sanitize';
+import { redactedFields, sanitize } from '../util/sanitize';
 
 export interface BunyanRecord extends Record<string, any> {
   level: number;
@@ -37,6 +37,13 @@ export class ErrorStream extends Stream {
     return this._errors;
   }
 }
+const templateFields = ['prBody'];
+const contentFields = [
+  'content',
+  'contents',
+  'packageLockParsed',
+  'yarnLockParsed',
+];
 
 function sanitizeValue(value: any, seen = new WeakMap()): any {
   if (Array.isArray(value)) {
@@ -52,6 +59,10 @@ function sanitizeValue(value: any, seen = new WeakMap()): any {
     return arrayResult;
   }
 
+  if (value instanceof Buffer) {
+    return '[content]';
+  }
+
   const valueType = typeof value;
 
   if (value != null && valueType !== 'function' && valueType === 'object') {
@@ -62,9 +73,18 @@ function sanitizeValue(value: any, seen = new WeakMap()): any {
     const objectResult: Record<string, any> = {};
     seen.set(value, objectResult);
     for (const [key, val] of Object.entries<any>(value)) {
-      objectResult[key] = seen.has(val)
-        ? seen.get(val)
-        : sanitizeValue(val, seen);
+      let curValue: any;
+      if (redactedFields.includes(key)) {
+        curValue = '***********';
+      } else if (contentFields.includes(key)) {
+        curValue = '[content]';
+      } else if (templateFields.includes(key)) {
+        curValue = '[Template]';
+      } else {
+        curValue = seen.has(val) ? seen.get(val) : sanitizeValue(val, seen);
+      }
+
+      objectResult[key] = curValue;
     }
     return objectResult;
   }
@@ -78,7 +98,7 @@ export function withSanitizer(streamConfig): bunyan.Stream {
   }
 
   const stream = streamConfig.stream;
-  if (stream && stream.writable) {
+  if (stream?.writable) {
     const write = (chunk: BunyanRecord, enc, cb): void => {
       const raw = sanitizeValue(chunk);
       const result =

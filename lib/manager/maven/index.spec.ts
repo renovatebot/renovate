@@ -1,12 +1,10 @@
 import { readFileSync } from 'fs';
-import * as _fs from '../../util/fs';
+import { fs } from '../../../test/util';
 import { PackageDependency, PackageFile } from '../common';
 import { extractPackage, resolveParents } from './extract';
-import { extractAllPackageFiles, updateDependency } from './index';
+import { extractAllPackageFiles, updateDependency } from '.';
 
 jest.mock('../../util/fs');
-
-const fs: any = _fs;
 
 const pomContent = readFileSync(
   'lib/manager/maven/__fixtures__/simple.pom.xml',
@@ -32,19 +30,19 @@ function selectDep(deps: PackageDependency[], name = 'org.example:quuz') {
 describe('manager/maven', () => {
   describe('extractAllPackageFiles', () => {
     it('should return empty if package has no content', async () => {
-      fs.readLocalFile.mockReturnValueOnce(null);
+      fs.readLocalFile.mockResolvedValueOnce(null);
       const res = await extractAllPackageFiles({}, ['random.pom.xml']);
       expect(res).toEqual([]);
     });
 
     it('should return empty for packages with invalid content', async () => {
-      fs.readLocalFile.mockReturnValueOnce('invalid content');
+      fs.readLocalFile.mockResolvedValueOnce('invalid content');
       const res = await extractAllPackageFiles({}, ['random.pom.xml']);
       expect(res).toEqual([]);
     });
 
     it('should return package files info', async () => {
-      fs.readLocalFile.mockReturnValueOnce(pomContent);
+      fs.readLocalFile.mockResolvedValueOnce(pomContent);
       const packages = await extractAllPackageFiles({}, ['random.pom.xml']);
       // windows path fix
       for (const p of packages) {
@@ -100,8 +98,8 @@ describe('manager/maven', () => {
 
     it('should include registryUrls from parent pom files', async () => {
       fs.readLocalFile
-        .mockReturnValueOnce(pomParent)
-        .mockReturnValueOnce(pomChild);
+        .mockResolvedValueOnce(pomParent)
+        .mockResolvedValueOnce(pomChild);
       const packages = await extractAllPackageFiles({}, [
         'parent.pom.xml',
         'child.pom.xml',
@@ -117,6 +115,7 @@ describe('manager/maven', () => {
           expect(depUrls).toEqual(urls);
         });
       });
+      expect(packages).toMatchSnapshot();
     });
 
     it('should not touch content if new and old versions are equal', () => {
@@ -134,7 +133,7 @@ describe('manager/maven', () => {
     });
 
     it('should update to version of the latest dep in implicit group', async () => {
-      fs.readLocalFile.mockReturnValueOnce(origContent);
+      fs.readLocalFile.mockResolvedValueOnce(origContent);
       const [{ deps }] = await extractAllPackageFiles({}, ['pom.xml']);
 
       const dep1 = selectDep(deps, 'org.example:foo-1');
@@ -179,7 +178,7 @@ describe('manager/maven', () => {
     });
 
     it('should return null for ungrouped deps if content was updated outside', async () => {
-      fs.readLocalFile.mockReturnValueOnce(origContent);
+      fs.readLocalFile.mockResolvedValueOnce(origContent);
       const [{ deps }] = await extractAllPackageFiles({}, ['pom.xml']);
       const dep = selectDep(deps, 'org.example:bar');
       const upgrade = { ...dep, newValue: '2.0.2' };
@@ -219,12 +218,10 @@ describe('manager/maven', () => {
     it('should preserve ranges', () => {
       const newValue = '[1.0.0]';
       const select = (depSet: PackageFile) =>
-        depSet && depSet.deps
-          ? selectDep(depSet.deps, 'org.example:hard-range')
-          : null;
+        depSet?.deps ? selectDep(depSet.deps, 'org.example:hard-range') : null;
       const oldContent = extractPackage(pomContent);
       const dep = select(oldContent);
-      expect(dep).not.toEqual(null);
+      expect(dep).not.toBeNull();
       const upgrade = { ...dep, newValue };
       expect(updateDependency({ fileContent: pomContent, upgrade })).toEqual(
         pomContent

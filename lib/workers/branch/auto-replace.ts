@@ -103,7 +103,7 @@ export async function checkBranchDepsMatchBaseDeps(
 export async function doAutoReplace(
   upgrade: BranchUpgradeConfig,
   existingContent: string,
-  parentBranch: string | null
+  reuseExistingBranch: boolean
 ): Promise<string | null> {
   const {
     packageFile,
@@ -114,7 +114,7 @@ export async function doAutoReplace(
     newDigest,
     autoReplaceStringTemplate,
   } = upgrade;
-  if (parentBranch) {
+  if (reuseExistingBranch) {
     if (!(await checkBranchDepsMatchBaseDeps(upgrade, existingContent))) {
       logger.debug(
         { packageFile, depName },

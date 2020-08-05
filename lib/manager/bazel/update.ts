@@ -1,6 +1,6 @@
 import { fromStream } from 'hasha';
 import { logger } from '../../logger';
-import * as globalCache from '../../util/cache/global';
+import * as packageCache from '../../util/cache/package';
 import { Http } from '../../util/http';
 import { regEx } from '../../util/regex';
 import { UpdateDependencyConfig } from '../common';
@@ -46,7 +46,7 @@ function extractUrls(content: string): string[] | null {
 
 async function getHashFromUrl(url: string): Promise<string | null> {
   const cacheNamespace = 'url-sha256';
-  const cachedResult = await globalCache.get<string | null>(
+  const cachedResult = await packageCache.get<string | null>(
     cacheNamespace,
     url
   );
@@ -59,7 +59,7 @@ async function getHashFromUrl(url: string): Promise<string | null> {
       algorithm: 'sha256',
     });
     const cacheMinutes = 3 * 24 * 60; // 3 days
-    await globalCache.set(cacheNamespace, url, hash, cacheMinutes);
+    await packageCache.set(cacheNamespace, url, hash, cacheMinutes);
     return hash;
   } catch (err) /* istanbul ignore next */ {
     return null;
@@ -113,7 +113,10 @@ export async function updateDependency({
           `$1"${upgrade.newDigest}",  # ${upgrade.newValue}\n`
         );
       }
-    } else if (upgrade.depType === 'http_archive' && upgrade.newValue) {
+    } else if (
+      (upgrade.depType === 'http_archive' || upgrade.depType === 'http_file') &&
+      upgrade.newValue
+    ) {
       newDef = updateWithNewVersion(
         upgrade.managerData.def,
         upgrade.currentValue,
@@ -131,7 +134,7 @@ export async function updateDependency({
         newDef = newDef.replace(from, to);
       }
       const urls = extractUrls(newDef);
-      if (!(urls && urls.length)) {
+      if (!urls?.length) {
         logger.debug({ newDef }, 'urls is empty');
         return null;
       }
@@ -141,7 +144,10 @@ export async function updateDependency({
       }
       logger.debug({ hash }, 'Calculated hash');
       newDef = setNewHash(newDef, hash);
-    } else if (upgrade.depType === 'http_archive' && upgrade.newDigest) {
+    } else if (
+      (upgrade.depType === 'http_archive' || upgrade.depType === 'http_file') &&
+      upgrade.newDigest
+    ) {
       const [, shortRepo] = upgrade.repo.split('/');
       const url = `https://github.com/${upgrade.repo}/archive/${upgrade.newDigest}.tar.gz`;
       const hash = await getHashFromUrl(url);

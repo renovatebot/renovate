@@ -1,3 +1,5 @@
+image: 'ruby:2.5.0'
+
 .executor-docker: &executor-docker
     tags:
         - docker

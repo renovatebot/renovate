@@ -79,6 +79,7 @@ function parseContent(content: string): string[] {
   return [
     'container_pull',
     'http_archive',
+    'http_file',
     'go_repository',
     'git_repository',
   ].reduce(
@@ -215,7 +216,7 @@ export function extractPackageFile(content: string): PackageFile | null {
       }
       deps.push(dep);
     } else if (
-      depType === 'http_archive' &&
+      (depType === 'http_archive' || depType === 'http_file') &&
       depName &&
       parseUrl(url) &&
       sha256
@@ -244,6 +245,7 @@ export function extractPackageFile(content: string): PackageFile | null {
       dep.versioning = dockerVersioning.id;
       dep.datasource = datasourceDocker.id;
       dep.lookupName = repository;
+      dep.registryUrls = [registry];
       deps.push(dep);
     } else {
       logger.debug(

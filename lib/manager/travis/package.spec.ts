@@ -1,11 +1,11 @@
 import { getConfig } from '../../config/defaults';
-import { getReleases as _getReleases } from '../../datasource/github-tags';
+import { getPkgReleases as _getPkgReleases } from '../../datasource';
 import { getPackageUpdates } from './package';
 
 const defaultConfig = getConfig();
-const getReleases: any = _getReleases;
+const getPkgReleases: any = _getPkgReleases;
 
-jest.mock('../../datasource/github-tags');
+jest.mock('../../datasource');
 
 describe('lib/manager/travis/package', () => {
   describe('getPackageUpdates', () => {
@@ -26,7 +26,7 @@ describe('lib/manager/travis/package', () => {
       expect(await getPackageUpdates(config)).toEqual([]);
     });
     it('returns empty if matching', async () => {
-      config.currentValue = ['10', '12'];
+      config.currentValue = ['12'];
       config.supportPolicy = ['lts_active'];
       expect(await getPackageUpdates(config)).toEqual([]);
     });
@@ -38,7 +38,7 @@ describe('lib/manager/travis/package', () => {
     it('detects pinning', async () => {
       config.currentValue = ['8.4.0', '10.0.0', '12.0.0'];
       config.supportPolicy = ['lts'];
-      getReleases.mockReturnValueOnce({
+      getPkgReleases.mockReturnValueOnce({
         releases: [
           {
             version: '4.4.4',

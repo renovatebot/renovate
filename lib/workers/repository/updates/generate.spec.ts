@@ -291,7 +291,7 @@ describe('workers/repository/updates/generate', () => {
         'chore(): update dependency some-dep to v1.2.0'
       );
     });
-    it('scopes monorepo commits with nested package files', () => {
+    it('scopes monorepo commits with nested package files using parent directory', () => {
       const branch = [
         partial<BranchUpgradeConfig>({
           ...defaultConfig,
@@ -317,7 +317,7 @@ describe('workers/repository/updates/generate', () => {
         'chore(bar): update dependency some-dep to v1.2.0'
       );
     });
-    it('scopes monorepo commits with nested package files', () => {
+    it('scopes monorepo commits with nested package files using base directory', () => {
       const branch = [
         partial<BranchUpgradeConfig>({
           ...defaultConfig,
@@ -355,7 +355,7 @@ describe('workers/repository/updates/generate', () => {
       ];
       const res = generateBranchConfig(branch);
       expect(res.commitMessage).toMatchSnapshot();
-      expect(res.commitMessage.includes('\n')).toBe(true);
+      expect(res.commitMessage).toContain('\n');
     });
     it('supports manual prTitle', () => {
       const branch = [
@@ -395,10 +395,22 @@ describe('workers/repository/updates/generate', () => {
           newValue: '0.6.0',
           group: {},
         },
+        {
+          commitBodyTable: true,
+          datasource: datasourceNpm.id,
+          depName: 'some-dep',
+          groupName: null,
+          branchName: 'some-branch',
+          prTitle: 'some-other-title',
+          lazyGrouping: true,
+          newValue: '1.0.0',
+          group: {},
+        },
       ];
       const res = generateBranchConfig(branch);
       expect(res.recreateClosed).toBe(false);
       expect(res.groupName).toBeUndefined();
+      expect(generateBranchConfig(branch)).toMatchSnapshot();
     });
     it('handles @types specially (reversed)', () => {
       const branch: BranchUpgradeConfig[] = [
@@ -409,6 +421,17 @@ describe('workers/repository/updates/generate', () => {
           prTitle: 'some-title',
           lazyGrouping: true,
           newValue: '0.6.0',
+          group: {},
+        },
+        {
+          commitBodyTable: true,
+          datasource: datasourceNpm.id,
+          depName: 'some-dep',
+          groupName: null,
+          branchName: 'some-branch',
+          prTitle: 'some-other-title',
+          lazyGrouping: true,
+          newValue: '1.0.0',
           group: {},
         },
         {

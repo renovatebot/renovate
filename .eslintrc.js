@@ -8,6 +8,8 @@ module.exports = {
     'plugin:import/errors',
     'plugin:import/warnings',
     'plugin:import/typescript',
+    'plugin:jest/recommended',
+    'plugin:jest/style',
     // https://github.com/typescript-eslint/typescript-eslint/tree/master/packages/eslint-plugin/src/configs
     'plugin:@typescript-eslint/eslint-recommended',
     'plugin:@typescript-eslint/recommended',
@@ -78,7 +80,10 @@ module.exports = {
         ignoreRestSiblings: false,
       },
     ], // disable until proper interfaced api
+    '@typescript-eslint/prefer-optional-chain': 2,
+    '@typescript-eslint/prefer-nullish-coalescing': 2,
     curly: [2, 'all'],
+    'require-await': 2,
   },
   settings: {
     // https://github.com/benmosher/eslint-plugin-import/issues/1618

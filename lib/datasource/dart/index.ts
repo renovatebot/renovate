@@ -1,6 +1,6 @@
-import { logger } from '../../logger';
+import { ExternalHostError } from '../../types/errors/external-host-error';
 import { Http, HttpResponse } from '../../util/http';
-import { DatasourceError, GetReleasesConfig, ReleaseResult } from '../common';
+import { GetReleasesConfig, ReleaseResult } from '../common';
 
 export const id = 'dart';
 
@@ -24,25 +24,16 @@ export async function getReleases({
   try {
     raw = await http.getJson<DartResult>(pkgUrl);
   } catch (err) {
-    if (err.statusCode === 404 || err.code === 'ENOTFOUND') {
-      logger.debug({ lookupName }, `Dependency lookup failure: not found`);
-      logger.debug({ err }, 'Dart lookup error');
-      return null;
-    }
     if (
       err.statusCode === 429 ||
       (err.statusCode >= 500 && err.statusCode < 600)
     ) {
-      throw new DatasourceError(err);
+      throw new ExternalHostError(err);
     }
-    logger.warn(
-      { err, lookupName },
-      'pub.dartlang.org lookup failure: Unknown error'
-    );
-    return null;
+    throw err;
   }
 
-  const body = raw && raw.body;
+  const body = raw?.body;
   if (body) {
     const { versions, latest } = body;
     if (versions && latest) {

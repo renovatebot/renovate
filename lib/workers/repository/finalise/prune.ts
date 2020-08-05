@@ -3,6 +3,7 @@ import { REPOSITORY_CHANGED } from '../../../constants/error-messages';
 import { PR_STATE_OPEN } from '../../../constants/pull-requests';
 import { logger } from '../../../logger';
 import { platform } from '../../../platform';
+import { getAllRenovateBranches, isBranchModified } from '../../../util/git';
 
 async function cleanUpBranches(
   { dryRun, pruneStaleBranches: enabled }: RenovateConfig,
@@ -14,9 +15,8 @@ async function cleanUpBranches(
         branchName,
         state: PR_STATE_OPEN,
       });
-      const branchPr = await platform.getBranchPr(branchName);
-      const skipAutoclose = branchPr && branchPr.isModified;
-      if (pr && !skipAutoclose) {
+      const branchIsModified = await isBranchModified(branchName);
+      if (pr && !branchIsModified) {
         if (!pr.title.endsWith('- autoclosed')) {
           if (dryRun) {
             logger.info(
@@ -33,7 +33,7 @@ async function cleanUpBranches(
       }
       const closePr = true;
       logger.debug({ branch: branchName }, `Deleting orphan branch`);
-      if (skipAutoclose) {
+      if (branchIsModified) {
         if (pr) {
           logger.debug(
             { prNo: pr?.number, prTitle: pr?.title },
@@ -59,7 +59,7 @@ async function cleanUpBranches(
       } else {
         await platform.deleteBranch(branchName, closePr);
       }
-      if (pr && !skipAutoclose) {
+      if (pr && !branchIsModified) {
         logger.info({ prNo: pr.number, prTitle: pr.title }, 'PR autoclosed');
       }
     } catch (err) /* istanbul ignore next */ {
@@ -81,10 +81,8 @@ export async function pruneStaleBranches(
     logger.debug('No branchList');
     return;
   }
-  let renovateBranches = await platform.getAllRenovateBranches(
-    config.branchPrefix
-  );
-  if (!(renovateBranches && renovateBranches.length)) {
+  let renovateBranches = await getAllRenovateBranches(config.branchPrefix);
+  if (!renovateBranches?.length) {
     logger.debug('No renovate branches found');
     return;
   }
