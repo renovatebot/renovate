@@ -44,7 +44,8 @@ export interface ExecResult {
 interface ChildProcess {
   stdout: Readable;
   stderr: Readable;
-
+  readonly connected: boolean;
+  kill(signal?: NodeJS.Signals | number): boolean;
   on(event: string | symbol, listener: (...args: any[]) => void): this;
 }
 
@@ -60,7 +61,8 @@ export class ExecError extends Error {
     message: string,
     public stdout: string,
     public stderr: string,
-    public code?: number
+    public code?: number,
+    public signal?: number | string
   ) {
     super(message);
   }
@@ -79,24 +81,41 @@ export function rawExec(
       shell: true,
     });
 
+    let running = true;
+
+    function stop(): void {
+      clearTimeout(timeoutId);
+      if (child.connected) {
+        child.kill('SIGKILL');
+      }
+      running = false;
+    }
+
+    const timeoutId = setTimeout(stop, opts?.timeout || 15 * 60 * 1000);
+
     pipeStreamToBuffers(child.stdout, stdoutBuf);
     pipeStreamToBuffers(child.stderr, stderrBuf);
 
     child.on('error', (err: Error) => {
-      reject(
-        new ExecError(err.message, stdoutBuf.join('\n'), stderrBuf.join('\n'))
-      );
+      if (running) {
+        stop();
+        reject(
+          new ExecError(err.message, stdoutBuf.join('\n'), stderrBuf.join('\n'))
+        );
+      }
     });
 
-    child.on('close', (code: number) => {
+    child.on('exit', (code: number, signal: number | string) => {
+      stop();
       const stdout = stdoutBuf.join('\n');
       const stderr = stderrBuf.join('\n');
-      if (code === 0) {
+      if (code === 0 && !signal) {
         resolve({ stdout, stderr });
       } else {
-        reject(
-          new ExecError(`Process exit code: ${code}`, stdout, stderr, code)
-        );
+        const msg = signal
+          ? `Process exit with signal: ${signal}`
+          : `Process exit code: ${code}`;
+        reject(new ExecError(msg, stdout, stderr, code, signal));
       }
     });
   });

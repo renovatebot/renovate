@@ -7,6 +7,8 @@ export class ChildProcessMock extends EventEmitter {
 
   public stderr: OutputStreamMock;
 
+  public connected = true;
+
   constructor(private execResult: ExecResult) {
     super();
     if (execResult instanceof Error) {
@@ -23,11 +25,17 @@ export class ChildProcessMock extends EventEmitter {
       listener(this.execResult);
     }
 
-    if (event === 'close' && !(this.execResult instanceof Error)) {
+    if (event === 'exit' && !(this.execResult instanceof Error)) {
       const code = this.execResult.code;
       listener(typeof code === 'number' ? code : 0);
     }
 
     return this;
+  }
+
+  kill(...args: any[]): boolean {
+    const result = !this.connected;
+    this.connected = false;
+    return !result;
   }
 }
