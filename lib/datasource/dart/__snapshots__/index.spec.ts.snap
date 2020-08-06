@@ -180,7 +180,7 @@ Object {
       "version": "0.5.8",
     },
   ],
-  "sourceUrl": "https://github.com/flutter/plugins",
+  "sourceUrl": "http://example.com",
 }
 `;
 
