@@ -26,9 +26,7 @@ import {
   UpdateArtifactsResult,
 } from '../common';
 
-async function getAuthJson(
-  config: UpdateArtifactsConfig
-): Promise<string | null> {
+function getAuthJson(config: UpdateArtifactsConfig): string | null {
   const authJson = {};
   let credentials = hostRules.find({
     hostType: PLATFORM_TYPE_GITHUB,
@@ -116,7 +114,7 @@ export async function updateArtifacts({
       cwdFile: packageFileName,
       extraEnv: {
         COMPOSER_CACHE_DIR: cacheDir,
-        COMPOSER_AUTH: await getAuthJson(config),
+        COMPOSER_AUTH: getAuthJson(config),
       },
       docker: {
         image: 'renovate/composer',
