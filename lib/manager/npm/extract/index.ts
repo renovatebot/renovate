@@ -118,7 +118,10 @@ export async function extractPackageFile(
     }
   }
   const yarnrcFileName = getSiblingFileName(fileName, '.yarnrc');
-  const yarnrc = (await readLocalFile(yarnrcFileName, 'utf8')) || undefined;
+  let yarnrc;
+  if (!is.string(config.yarnrc)) {
+    yarnrc = (await readLocalFile(yarnrcFileName, 'utf8')) || undefined;
+  }
 
   let lernaDir: string;
   let lernaPackages: string[];

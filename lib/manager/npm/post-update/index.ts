@@ -1,4 +1,5 @@
 import path from 'path';
+import is from '@sindresorhus/is';
 import upath from 'upath';
 import { SYSTEM_INSUFFICIENT_DISK_SPACE } from '../../../constants/error-messages';
 import { id as npmId } from '../../../datasource/npm';
@@ -129,7 +130,7 @@ export async function writeExistingFiles(
     logger.debug('Removing ignored .npmrc file before artifact generation');
     await remove(npmrcFile);
   }
-  if (config.yarnrc) {
+  if (is.string(config.yarnrc)) {
     logger.debug(`Writing repo .yarnrc (${config.localDir})`);
     await outputFile(upath.join(config.localDir, '.yarnrc'), config.yarnrc);
   }
