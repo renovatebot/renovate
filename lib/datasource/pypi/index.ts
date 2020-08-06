@@ -6,7 +6,7 @@ import { Http } from '../../util/http';
 import { ensureTrailingSlash } from '../../util/url';
 import { matches } from '../../versioning/pep440';
 import * as pep440 from '../../versioning/pep440';
-import { GetReleasesConfig, ReleaseResult } from '../common';
+import { GetReleasesConfig, Release, ReleaseResult } from '../common';
 
 export const id = 'pypi';
 export const defaultRegistryUrls = [
@@ -19,7 +19,11 @@ const http = new Http(id);
 
 type Releases = Record<
   string,
-  { requires_python?: boolean; upload_time?: string }[]
+  {
+    requires_python?: boolean;
+    upload_time?: string;
+    yanked?: boolean;
+  }[]
 >;
 type PypiJSON = {
   info: {
@@ -120,10 +124,19 @@ async function getDependency(
   dependency.releases = [];
   if (dep.releases) {
     const versions = compatibleVersions(dep.releases, compatibility);
-    dependency.releases = versions.map((version) => ({
-      version,
-      releaseTimestamp: (dep.releases[version][0] || {}).upload_time,
-    }));
+    dependency.releases = versions.map((version) => {
+      const releases = dep.releases[version] || [];
+      const { upload_time: releaseTimestamp } = releases[0] || {};
+      const isDeprecated = releases.some(({ yanked }) => yanked);
+      const result: Release = {
+        version,
+        releaseTimestamp,
+      };
+      if (isDeprecated) {
+        result.isDeprecated = isDeprecated;
+      }
+      return result;
+    });
   }
   return dependency;
 }
@@ -169,19 +182,19 @@ async function getSimpleDependency(
   }
   const root: HTMLElement = parse(dep.replace(/<\/?pre>/, '')) as any;
   const links = root.querySelectorAll('a');
-  const versions = new Set<string>();
+  const releases = new Map<string, Release>();
   for (const link of Array.from(links)) {
-    const result = extractVersionFromLinkText(link.text, packageName);
-    if (result) {
-      versions.add(result);
+    const version = extractVersionFromLinkText(link.text, packageName);
+    if (version) {
+      const release = releases.get(version) || { version };
+      const isDeprecated = link.hasAttribute('data-yanked');
+      if (isDeprecated) {
+        release.isDeprecated = isDeprecated;
+      }
+      releases.set(version, release);
     }
   }
-  dependency.releases = [];
-  if (versions && versions.size > 0) {
-    dependency.releases = [...versions].map((version) => ({
-      version,
-    }));
-  }
+  dependency.releases = [...releases.values()];
   return dependency;
 }
 
