@@ -132,8 +132,7 @@ export async function writeExistingFiles(
   }
   if (is.string(config.yarnrc)) {
     logger.debug(`Writing repo .yarnrc (${config.localDir})`);
-    const yarnrcFileName = upath.join(config.localDir, '.yarnrc');
-    await outputFile(yarnrcFileName, config.yarnrc);
+    await outputFile(upath.join(config.localDir, '.yarnrc'), config.yarnrc);
   }
   if (!packageFiles.npm) {
     return;
