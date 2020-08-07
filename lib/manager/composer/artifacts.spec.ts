@@ -8,14 +8,13 @@ import * as docker from '../../util/exec/docker';
 import * as _env from '../../util/exec/env';
 import { StatusResult } from '../../util/git';
 import * as composer from './artifacts';
+import * as hostRules from '../../util/host-rules';
+import * as datasourcePackagist from '../../datasource/packagist';
 
 jest.mock('child_process');
 jest.mock('../../util/exec/env');
 jest.mock('../../util/fs');
 jest.mock('../../util/git');
-jest.mock('../../util/host-rules');
-
-const hostRules = require('../../util/host-rules');
 
 const exec: jest.Mock<typeof _exec> = _exec as any;
 const env = mocked(_env);
@@ -35,6 +34,9 @@ describe('.updateArtifacts()', () => {
     env.getChildProcessEnv.mockReturnValue(envMock.basic);
     await setUtilConfig(config);
     docker.resetPrefetchedImages();
+  });
+  afterEach(() => {
+    hostRules.clear();
   });
   it('returns if no composer.lock found', async () => {
     expect(
@@ -61,7 +63,13 @@ describe('.updateArtifacts()', () => {
     ).toBeNull();
     expect(execSnapshots).toMatchSnapshot();
   });
-  it('uses hostRules to write auth.json', async () => {
+  it('uses hostRules to set COMPOSER_AUTH', async () => {
+    hostRules.add({
+      hostType: datasourcePackagist.id,
+      hostName: 'packagist.renovatebot.com',
+      username: 'some-username',
+      password: 'some-password',
+    });
     fs.readLocalFile.mockResolvedValueOnce('Current composer.lock' as any);
     const execSnapshots = mockExecAll(exec);
     fs.readLocalFile.mockReturnValueOnce('Current composer.lock' as any);
@@ -69,10 +77,6 @@ describe('.updateArtifacts()', () => {
       ...config,
       registryUrls: ['https://packagist.renovatebot.com'],
     };
-    hostRules.find.mockReturnValue({
-      username: 'some-username',
-      password: 'some-password',
-    });
     git.getRepoStatus.mockResolvedValue({ modified: [] } as StatusResult);
     expect(
       await composer.updateArtifacts({

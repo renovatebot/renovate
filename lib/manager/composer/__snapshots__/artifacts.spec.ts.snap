@@ -172,7 +172,7 @@ Array [
 ]
 `;
 
-exports[`.updateArtifacts() uses hostRules to write auth.json 1`] = `
+exports[`.updateArtifacts() uses hostRules to set COMPOSER_AUTH 1`] = `
 Array [
   Object {
     "cmd": "composer update --with-dependencies --ignore-platform-reqs --no-ansi --no-interaction --no-scripts --no-autoloader",

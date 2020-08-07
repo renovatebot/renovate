@@ -48,38 +48,15 @@ function getAuthJson(config: UpdateArtifactsConfig): string | null {
       'gitlab.com': credentials.token,
     };
   }
-  try {
-    // istanbul ignore else
-    if (is.array(config.registryUrls)) {
-      for (const regUrl of config.registryUrls) {
-        if (regUrl) {
-          const { host } = URL.parse(regUrl);
-          const hostRule = hostRules.find({
-            hostType: datasourcePackagist.id,
-            url: regUrl,
-          });
-          // istanbul ignore else
-          if (hostRule.username && hostRule.password) {
-            logger.debug('Setting packagist auth for host ' + host);
-            authJson['http-basic'] = authJson['http-basic'] || {};
-            authJson['http-basic'][host] = {
-              username: hostRule.username,
-              password: hostRule.password,
-            };
-          } else {
-            logger.debug('No packagist auth found for ' + regUrl);
-          }
-        }
+  hostRules
+    .findAll({ hostType: datasourcePackagist.id })
+    ?.forEach(({ username, password, hostName, domainName }) => {
+      const host = hostName || domainName;
+      if (host && username && password) {
+        authJson['http-basic'] = authJson['http-basic'] || {};
+        authJson['http-basic'][host] = { username, password };
       }
-    } else if (config.registryUrls) {
-      logger.warn(
-        { registryUrls: config.registryUrls },
-        'Non-array composer registryUrls'
-      );
-    }
-  } catch (err) /* istanbul ignore next */ {
-    logger.warn({ err }, 'Error setting registryUrls auth for composer');
-  }
+    });
   return Object.keys(authJson).length ? JSON.stringify(authJson) : null;
 }
 
