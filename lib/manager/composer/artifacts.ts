@@ -1,5 +1,3 @@
-import URL from 'url';
-import is from '@sindresorhus/is';
 import { quote } from 'shlex';
 import upath from 'upath';
 import { SYSTEM_INSUFFICIENT_DISK_SPACE } from '../../constants/error-messages';

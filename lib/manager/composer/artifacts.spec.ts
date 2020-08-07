@@ -2,14 +2,14 @@ import { exec as _exec } from 'child_process';
 import { join } from 'upath';
 import { envMock, mockExecAll } from '../../../test/execUtil';
 import { fs, git, mocked } from '../../../test/util';
+import * as datasourcePackagist from '../../datasource/packagist';
 import { setUtilConfig } from '../../util';
 import { BinarySource } from '../../util/exec/common';
 import * as docker from '../../util/exec/docker';
 import * as _env from '../../util/exec/env';
 import { StatusResult } from '../../util/git';
-import * as composer from './artifacts';
 import * as hostRules from '../../util/host-rules';
-import * as datasourcePackagist from '../../datasource/packagist';
+import * as composer from './artifacts';
 
 jest.mock('child_process');
 jest.mock('../../util/exec/env');
