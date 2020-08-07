@@ -18,34 +18,31 @@ import {
 } from '../../util/fs';
 import { getRepoStatus } from '../../util/git';
 import * as hostRules from '../../util/host-rules';
-import {
-  UpdateArtifact,
-  UpdateArtifactsConfig,
-  UpdateArtifactsResult,
-} from '../common';
+import { UpdateArtifact, UpdateArtifactsResult } from '../common';
 
-function getAuthJson(config: UpdateArtifactsConfig): string | null {
+function getAuthJson(): string | null {
   const authJson = {};
-  let credentials = hostRules.find({
+
+  const githubCredentials = hostRules.find({
     hostType: PLATFORM_TYPE_GITHUB,
     url: 'https://api.github.com/',
   });
-  // istanbul ignore if
-  if (credentials?.token) {
+  if (githubCredentials?.token) {
     authJson['github-oauth'] = {
-      'github.com': credentials.token,
+      'github.com': githubCredentials.token,
     };
   }
-  credentials = hostRules.find({
+
+  const gitlabCredentials = hostRules.find({
     hostType: PLATFORM_TYPE_GITLAB,
     url: 'https://gitlab.com/api/v4/',
   });
-  // istanbul ignore if
-  if (credentials?.token) {
+  if (gitlabCredentials?.token) {
     authJson['gitlab-token'] = {
-      'gitlab.com': credentials.token,
+      'gitlab.com': gitlabCredentials.token,
     };
   }
+
   hostRules
     .findAll({ hostType: datasourcePackagist.id })
     ?.forEach(({ username, password, hostName, domainName }) => {
@@ -55,6 +52,7 @@ function getAuthJson(config: UpdateArtifactsConfig): string | null {
         authJson['http-basic'][host] = { username, password };
       }
     });
+
   return Object.keys(authJson).length ? JSON.stringify(authJson) : null;
 }
 
@@ -89,7 +87,7 @@ export async function updateArtifacts({
       cwdFile: packageFileName,
       extraEnv: {
         COMPOSER_CACHE_DIR: cacheDir,
-        COMPOSER_AUTH: getAuthJson(config),
+        COMPOSER_AUTH: getAuthJson(),
       },
       docker: {
         image: 'renovate/composer',

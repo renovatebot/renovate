@@ -2,6 +2,10 @@ import { exec as _exec } from 'child_process';
 import { join } from 'upath';
 import { envMock, mockExecAll } from '../../../test/execUtil';
 import { fs, git, mocked } from '../../../test/util';
+import {
+  PLATFORM_TYPE_GITHUB,
+  PLATFORM_TYPE_GITLAB,
+} from '../../constants/platforms';
 import * as datasourcePackagist from '../../datasource/packagist';
 import { setUtilConfig } from '../../util';
 import { BinarySource } from '../../util/exec/common';
@@ -64,6 +68,16 @@ describe('.updateArtifacts()', () => {
     expect(execSnapshots).toMatchSnapshot();
   });
   it('uses hostRules to set COMPOSER_AUTH', async () => {
+    hostRules.add({
+      hostType: PLATFORM_TYPE_GITHUB,
+      hostName: 'api.github.com',
+      token: 'github-token',
+    });
+    hostRules.add({
+      hostType: PLATFORM_TYPE_GITLAB,
+      hostName: 'gitlab.com',
+      token: 'gitlab-token',
+    });
     hostRules.add({
       hostType: datasourcePackagist.id,
       hostName: 'packagist.renovatebot.com',
