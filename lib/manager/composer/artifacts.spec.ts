@@ -38,8 +38,6 @@ describe('.updateArtifacts()', () => {
     env.getChildProcessEnv.mockReturnValue(envMock.basic);
     await setUtilConfig(config);
     docker.resetPrefetchedImages();
-  });
-  afterEach(() => {
     hostRules.clear();
   });
   it('returns if no composer.lock found', async () => {
