@@ -17,8 +17,8 @@ export const presets: Record<string, Preset> = {
     description: 'Enable docker major updates',
     packageRules: [
       {
-        datasources: ['docker'],
-        updateTypes: ['major'],
+        matchDatasources: ['docker'],
+        matchUpdateTypes: ['major'],
         enabled: true,
       },
     ],
@@ -27,8 +27,8 @@ export const presets: Record<string, Preset> = {
     description: 'Disable docker major updates',
     packageRules: [
       {
-        datasources: ['docker'],
-        updateTypes: ['major'],
+        matchDatasources: ['docker'],
+        matchUpdateTypes: ['major'],
         enabled: false,
       },
     ],

@@ -401,5 +401,32 @@ describe('config/migration', () => {
       expect(migratedConfig).toMatchSnapshot();
       expect(isMigrated).toBe(true);
     });
+
+    it('it migrates packageRules', () => {
+      const config: RenovateConfig = {
+        packageRules: [
+          {
+            paths: ['package.json'],
+            languages: ['python'],
+            baseBranchList: ['master'],
+            managers: ['dockerfile'],
+            datasources: ['orb'],
+            depTypeList: ['peerDependencies'],
+            packageNames: ['foo'],
+            packagePatterns: ['^bar'],
+            excludePackageNames: ['baz'],
+            excludePackagePatterns: ['^baz'],
+            sourceUrlPrefixes: ['https://github.com/vuejs/vue'],
+            updateTypes: ['major'],
+          },
+        ],
+      };
+      const { isMigrated, migratedConfig } = configMigration.migrateConfig(
+        config,
+        defaultConfig
+      );
+      expect(isMigrated).toBe(true);
+      expect(migratedConfig).toMatchSnapshot();
+    });
   });
 });

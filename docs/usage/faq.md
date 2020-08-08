@@ -83,7 +83,7 @@ To restrict `aws-sdk` to only weekly updates, you could add this package rule:
 ```
   "packageRules": [
     {
-      "packageNames": ["aws-sdk"],
+      "matchPackageNames": ["aws-sdk"],
       "schedule": ["after 9pm on sunday"]
     }
   ]
@@ -94,7 +94,7 @@ present. Multiple entries in the array means "or".
 
 ### Disable renovate for certain dependency types
 
-Define a packageRules entry which has the dependency type(s) in `depTypeList` and `"enabled": false`.
+Define a packageRules entry which has the dependency type(s) in `matchDepTypes` and `"enabled": false`.
 
 ### Use a single branch/PR for all dependency upgrades
 
@@ -134,7 +134,7 @@ Set the configuration option `labels` to an array of labels to use
 
 1.  Add a `packageRules` array to your configuration.
 2.  Create one object inside this array
-3.  Set field `packageNames` to value `["abc"]`
+3.  Set field `matchPackageNames` to value `["abc"]`
 4.  Add the configuration option to the same object.
 
 e.g.
@@ -142,7 +142,7 @@ e.g.
 ```
 "packageRules": [
   {
-    "packageNames": ["abc"],
+    "matchPackageNames": ["abc"],
     "assignees": ["importantreviewer"]
   }
 ]
@@ -150,13 +150,13 @@ e.g.
 
 ### Apply a rule, but only for packages starting with `abc`
 
-Do the same as above, but instead of using `packageNames`, use `packagePatterns`
+Do the same as above, but instead of using `matchPackageNames`, use `matchPackagePatterns`
 and a regex. e.g.
 
 ```
 "packageRules": [
   {
-    "packagePatterns": "^abc",
+    "matchPackagePatterns": "^abc",
     "assignees": ["importantreviewer"]
   }
 ]
@@ -169,7 +169,7 @@ As above, but apply a `groupName`, e.g.
 ```
 "packageRules": [
   {
-    "packagePatterns": "^abc",
+    "matchPackagePatterns": "^abc",
     "groupName": ["abc packages"]
   }
 ]

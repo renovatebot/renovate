@@ -28,31 +28,31 @@
   "prCreation": "not-pending",
   "packageRules": [
     {
-      "datasources": ["docker"],
+      "matchDatasources": ["docker"],
       "automerge": false
     },
     {
-      "updateTypes": ["major"],
+      "matchUpdateTypes": ["major"],
       "masterIssueApproval": true
     },
     {
-      "packageNames": ["npm", "yarn"],
+      "matchPackageNames": ["npm", "yarn"],
       "automerge": false
     },
     {
-      "depTypeList": ["dependencies"],
+      "matchDepTypes": ["dependencies"],
       "semanticCommitType": "build"
     },
     {
-      "packageNames": ["semantic-release"],
+      "matchPackageNames": ["semantic-release"],
       "semanticCommitType": "build"
     },
     {
-      "packageNames": ["@types/jest"],
+      "matchPackageNames": ["@types/jest"],
       "groupName": "jest monorepo"
     },
     {
-      "paths": ["**/__fixtures__/**"],
+      "matchPaths": ["**/__fixtures__/**"],
       "enabled": false
     }
   ],

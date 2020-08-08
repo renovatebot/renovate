@@ -6,8 +6,8 @@ Once Renovate's Managers are done scanning files and extracting dependencies, th
 {
   "packageRules": [
     {
-      "datasources": ["npm"],
-      "packageNames": ["lodash"],
+      "matchDatasources": ["npm"],
+      "matchPackageNames": ["lodash"],
       "automerge": true
     }
   ]

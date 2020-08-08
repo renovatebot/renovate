@@ -198,19 +198,19 @@ export interface PackageRule
   extends RenovateSharedConfig,
     UpdateConfig,
     Record<string, any> {
-  paths?: string[];
-  languages?: string[];
-  baseBranchList?: string[];
-  datasources?: string[];
-  depTypeList?: string[];
-  packageNames?: string[];
-  packagePatterns?: string[];
-  excludePackageNames?: string[];
-  excludePackagePatterns?: string[];
+  matchPaths?: string[];
+  matchLanguages?: string[];
+  matchBaseBranches?: string[];
+  matchManagers?: string | string[];
+  matchDatasources?: string[];
+  matchDepTypes?: string[];
+  matchPackageNames?: string[];
+  matchPackagePatterns?: string[];
+  matchNotPackageNames?: string[];
+  matchNotPackagePatterns?: string[];
   matchCurrentVersion?: string | Range;
-  sourceUrlPrefixes?: string[];
-
-  updateTypes?: UpdateType[];
+  matchSourceUrls?: string[];
+  matchUpdateTypes?: UpdateType[];
 }
 
 export interface ValidationMessage {

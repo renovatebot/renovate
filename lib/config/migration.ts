@@ -496,6 +496,32 @@ export function migrateConfig(
       delete migratedConfig.endpoints;
       isMigrated = true;
     }
+    if (is.array(migratedConfig.packageRules)) {
+      const renameMap = {
+        paths: 'matchPaths',
+        languages: 'matchLanguages',
+        baseBranchList: 'matchBaseBranches',
+        managers: 'matchManagers',
+        datasources: 'matchDatasources',
+        depTypeList: 'matchDepTypes',
+        packageNames: 'matchPackageNames',
+        packagePatterns: 'matchPackagePatterns',
+        excludePackageNames: 'matchNotPackageNames',
+        excludePackagePatterns: 'matchNotPackagePatterns',
+        sourceUrlPrefixes: 'matchSourceUrls',
+        updateTypes: 'matchUpdateTypes',
+      };
+      for (const packageRule of migratedConfig.packageRules) {
+        for (const [oldKey, ruleVal] of Object.entries(packageRule)) {
+          const newKey = renameMap[oldKey];
+          if (newKey) {
+            isMigrated = true;
+            packageRule[newKey] = ruleVal;
+            delete packageRule[oldKey];
+          }
+        }
+      }
+    }
     return { isMigrated, migratedConfig };
   } catch (err) /* istanbul ignore next */ {
     logger.debug({ config }, 'migrateConfig() error');

@@ -13,7 +13,7 @@ import { applyPackageRules } from '../../../util/package-rules';
 
 // Return only rules that contain an updateType
 function getUpdateTypeRules(packageRules: PackageRule[]): PackageRule[] {
-  return packageRules.filter((rule) => is.nonEmptyArray(rule.updateTypes));
+  return packageRules.filter((rule) => is.nonEmptyArray(rule.matchUpdateTypes));
 }
 
 export async function flattenUpdates(
@@ -46,7 +46,7 @@ export async function flattenUpdates(
             );
             updateConfig = mergeChildConfig(updateConfig, datasourceConfig);
             updateConfig = applyPackageRules(updateConfig);
-            // Keep only rules that haven't been applied yet (with updateTypes)
+            // Keep only rules that haven't been applied yet (with matchUpdateTypes)
             updateConfig.packageRules = getUpdateTypeRules(
               updateConfig.packageRules
             );

@@ -21,11 +21,11 @@ describe('config/massage', () => {
       };
       expect(massage.massageConfig(config)).toMatchSnapshot();
     });
-    it('massages packageRules updateTypes', () => {
+    it('massages packageRules matchUpdateTypes', () => {
       const config: RenovateConfig = {
         packageRules: [
           {
-            packageNames: ['foo'],
+            matchPackageNames: ['foo'],
             minor: {
               semanticCommitType: 'feat',
             },

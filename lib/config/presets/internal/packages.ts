@@ -3,7 +3,7 @@ import { Preset } from '../common';
 export const presets: Record<string, Preset> = {
   angularJs: {
     description: 'All angular.js packages',
-    packageNames: [
+    matchPackageNames: [
       'angular',
       'angular-animate',
       'angular-scroll',
@@ -12,39 +12,39 @@ export const presets: Record<string, Preset> = {
   },
   apollographql: {
     description: 'All packages published by Apollo GraphQL',
-    sourceUrlPrefixes: ['https://github.com/apollographql/'],
+    matchSourceUrls: ['https://github.com/apollographql/'],
   },
   mapbox: {
     description: 'All mapbox-related packages',
-    packagePatterns: ['^(leaflet|mapbox)'],
+    matchPackagePatterns: ['^(leaflet|mapbox)'],
   },
   eslint: {
     description: 'All eslint packages',
-    packageNames: ['babel-eslint'],
-    packagePatterns: ['^@typescript-eslint/', '^eslint'],
+    matchPackageNames: ['babel-eslint'],
+    matchPackagePatterns: ['^@typescript-eslint/', '^eslint'],
   },
   stylelint: {
     description: 'All stylelint packages',
-    packagePatterns: ['^stylelint'],
+    matchPackagePatterns: ['^stylelint'],
   },
   tslint: {
     description: 'All tslint packages',
-    packageNames: ['codelyzer'],
-    packagePatterns: ['\\btslint\\b'],
+    matchPackageNames: ['codelyzer'],
+    matchPackagePatterns: ['\\btslint\\b'],
   },
   linters: {
     description: 'All lint-related packages',
     extends: ['packages:eslint', 'packages:stylelint', 'packages:tslint'],
-    packageNames: ['remark-lint'],
+    matchPackageNames: ['remark-lint'],
   },
   postcss: {
     description: 'All postcss packages',
-    packageNames: ['postcss'],
-    packagePatterns: ['^postcss-'],
+    matchPackageNames: ['postcss'],
+    matchPackagePatterns: ['^postcss-'],
   },
   jsUnitTest: {
     description: 'Unit test packages for javascript',
-    packageNames: [
+    matchPackageNames: [
       'coveralls',
       'istanbul',
       'mock-fs',
@@ -53,7 +53,7 @@ export const presets: Record<string, Preset> = {
       'proxyquire',
       'supertest',
     ],
-    packagePatterns: [
+    matchPackagePatterns: [
       '^chai',
       '^jest',
       '^mocha',

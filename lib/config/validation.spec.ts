@@ -23,19 +23,19 @@ describe('config/validation', () => {
       const config = {
         packageRules: [
           {
-            packageNames: ['foo'],
+            matchPackageNames: ['foo'],
             allowedVersions: '/^2/',
           },
           {
-            packageNames: ['bar'],
+            matchPackageNames: ['bar'],
             allowedVersions: '/***$}{]][/',
           },
           {
-            packageNames: ['baz'],
+            matchPackageNames: ['baz'],
             allowedVersions: '!/^2/',
           },
           {
-            packageNames: ['quack'],
+            matchPackageNames: ['quack'],
             allowedVersions: '!/***$}{]][/',
           },
         ],
@@ -51,8 +51,8 @@ describe('config/validation', () => {
         timezone: 'Asia/Singapore',
         packageRules: [
           {
-            packagePatterns: ['*'],
-            excludePackagePatterns: ['abc ([a-z]+) ([a-z]+))'],
+            matchPackagePatterns: ['*'],
+            matchNotPackagePatterns: ['abc ([a-z]+) ([a-z]+))'],
           },
         ],
         lockFileMaintenance: {
@@ -71,7 +71,7 @@ describe('config/validation', () => {
       const config = {
         packageRules: [
           {
-            managers: ['foo'],
+            matchManagers: ['foo'],
           },
         ],
       };
@@ -86,7 +86,7 @@ describe('config/validation', () => {
       const config = {
         packageRules: [
           {
-            managers: 'string not an array',
+            matchManagers: 'string not an array',
           },
         ],
       };
@@ -109,7 +109,7 @@ describe('config/validation', () => {
         extends: [':timezone(Europe/Brussel)'],
         packageRules: [
           {
-            excludePackageNames: ['foo'],
+            matchNotPackageNames: ['foo'],
             enabled: true,
           },
           {
@@ -117,8 +117,8 @@ describe('config/validation', () => {
           },
           'what?' as any,
           {
-            packagePatterns: 'abc ([a-z]+) ([a-z]+))',
-            excludePackagePatterns: ['abc ([a-z]+) ([a-z]+))'],
+            matchPackagePatterns: 'abc ([a-z]+) ([a-z]+))',
+            matchNotPackagePatterns: ['abc ([a-z]+) ([a-z]+))'],
             enabled: false,
           },
         ],
@@ -133,17 +133,17 @@ describe('config/validation', () => {
     });
     it('selectors outside packageRules array trigger errors', async () => {
       const config = {
-        packageNames: ['angular'],
+        matchPackageNames: ['angular'],
         meteor: {
           packageRules: [
             {
-              packageNames: ['meteor'],
+              matchPackageNames: ['meteor'],
             },
           ],
         },
         docker: {
           minor: {
-            packageNames: ['testPackage'],
+            matchPackageNames: ['testPackage'],
           },
         },
       };
@@ -157,7 +157,7 @@ describe('config/validation', () => {
     it('ignore packageRule nesting validation for presets', async () => {
       const config = {
         description: ['All angular.js packages'],
-        packageNames: [
+        matchPackageNames: [
           'angular',
           'angular-animate',
           'angular-scroll',

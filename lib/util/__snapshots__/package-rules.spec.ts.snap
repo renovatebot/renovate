@@ -5,46 +5,46 @@ Object {
   "currentValue": "1.0.0",
   "depName": "a",
   "isBump": true,
+  "matchUpdateTypes": Array [
+    "bump",
+  ],
   "packageRules": Array [
     Object {
       "matchCurrentVersion": "<= 2.0.0",
-      "packagePatterns": Array [
+      "matchPackagePatterns": Array [
         "*",
       ],
     },
     Object {
       "matchCurrentVersion": "<= 2.0.0",
-      "packageNames": Array [
+      "matchPackageNames": Array [
         "b",
       ],
     },
     Object {
-      "excludePackagePatterns": Array [
+      "matchNotPackagePatterns": Array [
         "*",
       ],
-      "packageNames": Array [
+      "matchPackageNames": Array [
         "b",
       ],
     },
     Object {
-      "updateTypes": Array [
+      "matchUpdateTypes": Array [
         "bump",
       ],
     },
     Object {
-      "excludePackageNames": Array [
+      "matchNotPackageNames": Array [
         "a",
       ],
-      "packageNames": Array [
+      "matchPackageNames": Array [
         "b",
       ],
     },
     Object {
       "matchCurrentVersion": "<= 2.0.0",
     },
-  ],
-  "updateTypes": Array [
-    "bump",
   ],
 }
 `;

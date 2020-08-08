@@ -10,7 +10,7 @@ Object {
     "packages:stylelint",
     "packages:tslint",
   ],
-  "packageNames": Array [
+  "matchPackageNames": Array [
     "remark-lint",
   ],
 }
@@ -314,10 +314,10 @@ Object {
 
 exports[`config/presets resolvePreset combines two package alls 1`] = `
 Object {
-  "packageNames": Array [
+  "matchPackageNames": Array [
     "babel-eslint",
   ],
-  "packagePatterns": Array [
+  "matchPackagePatterns": Array [
     "^@typescript-eslint/",
     "^eslint",
     "^stylelint",
@@ -356,31 +356,31 @@ Object {
   },
   "packageRules": Array [
     Object {
-      "packagePatterns": Array [
+      "matchPackagePatterns": Array [
         "*",
       ],
       "semanticCommitType": "chore",
     },
     Object {
-      "depTypeList": Array [
+      "matchDepTypes": Array [
         "dependencies",
       ],
       "semanticCommitType": "fix",
     },
     Object {
-      "packagePatterns": Array [
+      "matchPackagePatterns": Array [
         "*",
       ],
       "rangeStrategy": "replace",
     },
     Object {
-      "depTypeList": Array [
+      "matchDepTypes": Array [
         "devDependencies",
       ],
       "rangeStrategy": "pin",
     },
     Object {
-      "depTypeList": Array [
+      "matchDepTypes": Array [
         "peerDependencies",
       ],
       "rangeStrategy": "widen",
@@ -403,10 +403,10 @@ Object {
 
 exports[`config/presets resolvePreset resolves eslint 1`] = `
 Object {
-  "packageNames": Array [
+  "matchPackageNames": Array [
     "babel-eslint",
   ],
-  "packagePatterns": Array [
+  "matchPackagePatterns": Array [
     "^@typescript-eslint/",
     "^eslint",
   ],
@@ -418,12 +418,12 @@ Object {
   "description": Array [
     "All lint-related packages",
   ],
-  "packageNames": Array [
+  "matchPackageNames": Array [
     "babel-eslint",
     "codelyzer",
     "remark-lint",
   ],
-  "packagePatterns": Array [
+  "matchPackagePatterns": Array [
     "^@typescript-eslint/",
     "^eslint",
     "^stylelint",
@@ -443,12 +443,12 @@ Object {
       "description": Array [
         "All lint-related packages",
       ],
-      "packageNames": Array [
+      "matchPackageNames": Array [
         "babel-eslint",
         "codelyzer",
         "remark-lint",
       ],
-      "packagePatterns": Array [
+      "matchPackagePatterns": Array [
         "^@typescript-eslint/",
         "^eslint",
         "^stylelint",
@@ -464,10 +464,10 @@ Object {
   "packageRules": Array [
     Object {
       "groupName": "eslint",
-      "packageNames": Array [
+      "matchPackageNames": Array [
         "babel-eslint",
       ],
-      "packagePatterns": Array [
+      "matchPackagePatterns": Array [
         "^@typescript-eslint/",
         "^eslint",
       ],

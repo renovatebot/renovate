@@ -10,8 +10,8 @@ There are times when you may need to manually configure/override the `versioning
 {
   "packageRules": [
     {
-      "datasources": ["docker"],
-      "packageNames": ["python"],
+      "matchDatasources": ["docker"],
+      "matchPackageNames": ["python"],
       "versioning": "pep440"
     }
   ]

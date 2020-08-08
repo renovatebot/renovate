@@ -33,8 +33,8 @@ If this behaviour does not suit a particular package you have, Renovate allows y
 {
   "packageRules": [
     {
-      "datasources": ["docker"],
-      "packageNames": ["foo/bar"],
+      "matchDatasources": ["docker"],
+      "matchPackageNames": ["foo/bar"],
       "versioning": "semver"
     }
   ]
@@ -47,8 +47,8 @@ Another example is the official `python` image, which follows `pep440` versionin
 {
   "packageRules": [
     {
-      "datasources": ["docker"],
-      "packageNames": ["python"],
+      "matchDatasources": ["docker"],
+      "matchPackageNames": ["python"],
       "versioning": "pep440"
     }
   ]

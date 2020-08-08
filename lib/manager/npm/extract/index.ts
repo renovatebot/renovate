@@ -57,7 +57,7 @@ export async function extractPackageFile(
     const error = new Error(CONFIG_VALIDATION);
     error.configFile = fileName;
     error.validationError =
-      'Nested package.json must not contain renovate configuration. Please use `packageRules` with `paths` in your main config instead.';
+      'Nested package.json must not contain renovate configuration. Please use `packageRules` with `matchPaths` in your main config instead.';
     throw error;
   }
   const packageJsonName = packageJson.name;

@@ -20,13 +20,13 @@ You may wish to take this further, for example you might want to group together 
 ```json
   "packageRules": [
     {
-      "packagePatterns": [ "eslint" ],
+      "matchPackagePatterns": [ "eslint" ],
       "groupName": "eslint"
     }
   ]
 ```
 
-By setting `packagePatterns` to "eslint", it means that any package with eslint anywhere in its name will be grouped into a `renovate/eslint` branch and related PR.
+By setting `matchPackagePatterns` to "eslint", it means that any package with eslint anywhere in its name will be grouped into a `renovate/eslint` branch and related PR.
 
 **Caution**: Any time you group dependencies together, you naturally increase the chance that the branch will have an error ("break" your build). When you have more than one package upgrade in a PR, it's going to take you longer to work out which one broke than if they were all in separate PRs. Also, you will be held up upgrading all those dependencies until they all pass. If you weren't grouping, then you could keep upgrading all dependencies except the one that fails, instead of being held up. You will also have less flexibility about what to do when one or more in the group have a major upgrade and may break the others.
 
@@ -55,7 +55,7 @@ Remember earlier our example of grouping all `eslint`? If you think about it.. u
 ```json
   "packageRules": [
     {
-      "packagePatterns": [ "eslint" ],
+      "matchPackagePatterns": [ "eslint" ],
       "groupName": "eslint",
       "schedule": ["on the first day of the month"]
     }
@@ -67,7 +67,7 @@ Or perhaps at least weekly:
 ```json
   "packageRules": [
     {
-      "packagePatterns": [ "eslint" ],
+      "matchPackagePatterns": [ "eslint" ],
       "groupName": "eslint",
       "schedule": ["before 2am on monday"]
     }
@@ -114,7 +114,7 @@ Remember our running `eslint` example? Let's automerge it if all the linting upd
 ```json
   "packageRules": [
     {
-      "packagePatterns": [ "eslint" ],
+      "matchPackagePatterns": [ "eslint" ],
       "groupName": "eslint",
       "schedule": ["before 2am on monday"],
       "automerge": true,

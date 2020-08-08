@@ -54,7 +54,7 @@ Here is an example configuration to work with custom Artifactory servers using a
 	    "password": "artifactorypassword"
 	}],
     "packageRules": [{
-        "managers": ["maven"],
+        "matchManagers": ["maven"],
 	    "registryUrls": ["https://artifactoryurl1/", "https://artifactoryurl2/"]
     }]
 }

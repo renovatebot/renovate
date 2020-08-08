@@ -164,10 +164,10 @@ export async function getPreset(
   }
   const packageListKeys = [
     'description',
-    'packageNames',
-    'excludePackageNames',
-    'packagePatterns',
-    'excludePackagePatterns',
+    'matchPackageNames',
+    'matchNotPackageNames',
+    'matchPackagePatterns',
+    'matchNotPackagePatterns',
   ];
   if (presetKeys.every((key) => packageListKeys.includes(key))) {
     delete presetConfig.description;

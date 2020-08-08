@@ -17,11 +17,11 @@ describe('workers/repository/updates/flatten', () => {
       config.lockFileMaintenance.enabled = true;
       config.packageRules = [
         {
-          updateTypes: ['minor'],
+          matchUpdateTypes: ['minor'],
           automerge: true,
         },
         {
-          paths: ['frontend/package.json'],
+          matchPaths: ['frontend/package.json'],
           lockFileMaintenance: {
             enabled: false,
           },
@@ -35,7 +35,7 @@ describe('workers/repository/updates/flatten', () => {
               { depName: '@org/a', updates: [{ newValue: '1.0.0' }] },
               { depName: 'foo', updates: [{ newValue: '2.0.0' }] },
               {
-                updateTypes: ['pin'],
+                matchUpdateTypes: ['pin'],
                 updates: [{ newValue: '2.0.0' }],
               },
             ],
