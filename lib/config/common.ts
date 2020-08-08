@@ -34,7 +34,6 @@ export interface RenovateSharedConfig {
   ignoreDeps?: string[];
   ignorePaths?: string[];
   labels?: string[];
-  managers?: string | string[];
   dependencyDashboardApproval?: boolean;
   npmrc?: string;
   platform?: string;
