@@ -3,9 +3,10 @@ import { XmlDocument } from 'xmldoc';
 import { logger } from '../../logger';
 import * as packageCache from '../../util/cache/package';
 import { Http } from '../../util/http';
-import { ReleaseResult } from '../common';
+import { Release, ReleaseResult } from '../common';
 
 import { id } from './common';
+import pAll from 'p-all';
 
 const http = new Http(id);
 
@@ -15,6 +16,13 @@ const cacheNamespace = 'datasource-nuget';
 
 export function getDefaultFeed(): string {
   return defaultNugetFeed;
+}
+
+interface ServicesIndexRaw {
+  resources: {
+    '@id': string;
+    '@type': string;
+  }[];
 }
 
 export async function getQueryUrl(url: string): Promise<string | null> {
@@ -29,8 +37,7 @@ export async function getQueryUrl(url: string): Promise<string | null> {
   }
 
   try {
-    // TODO: fix types
-    const servicesIndexRaw = await http.getJson<any>(url);
+    const servicesIndexRaw = await http.getJson<ServicesIndexRaw>(url);
     const searchQueryService = servicesIndexRaw.body.resources.find(
       (resource) =>
         resource['@type'] && resource['@type'].startsWith(resourceType)
@@ -54,6 +61,72 @@ export async function getQueryUrl(url: string): Promise<string | null> {
   }
 }
 
+interface UrlListRawItem {
+  version: string;
+  '@id': string;
+}
+
+interface UrlListRaw {
+  data: {
+    id: string;
+    projectUrl: string;
+    versions: UrlListRawItem[];
+  }[];
+}
+
+async function getReleaseWithTimestamp(
+  item: UrlListRawItem,
+  cachedTimestamps: Record<string, string>
+): Promise<Release> {
+  const version = item.version;
+  let releaseTimestamp = cachedTimestamps[version];
+  if (!releaseTimestamp) {
+    const itemUrl = item['@id'];
+    try {
+      const releaseInfo = await http.getJson<{ published?: string }>(itemUrl);
+      releaseTimestamp = releaseInfo.body.published;
+    } catch (err) /* istanbul ignore next */ {
+      return { version };
+    }
+  }
+  return { version, releaseTimestamp };
+}
+
+async function prepareTimestampedReleases(
+  pkgName: string,
+  items: UrlListRawItem[]
+): Promise<Release[]> {
+  const cacheTimestampNamespace = `${cacheNamespace}-timestamps`;
+  const cacheKey = `${pkgName}`;
+  const cachedTimestamps =
+    (await packageCache.get<Record<string, string>>(
+      cacheTimestampNamespace,
+      cacheKey
+    )) || {};
+  const queue = items.map((item) => (): Promise<Release> =>
+    getReleaseWithTimestamp(item, cachedTimestamps)
+  );
+  const result = await pAll(queue, { concurrency: 5 });
+
+  let updateCache = false;
+  result.forEach(({ version, releaseTimestamp }) => {
+    if (!cachedTimestamps[version] && releaseTimestamp) {
+      updateCache = true;
+      cachedTimestamps[version] = releaseTimestamp;
+    }
+  });
+  if (updateCache) {
+    await packageCache.set(
+      cacheTimestampNamespace,
+      cacheKey,
+      cachedTimestamps,
+      1440
+    );
+  }
+
+  return result;
+}
+
 export async function getReleases(
   registryUrl: string,
   feedUrl: string,
@@ -68,8 +141,7 @@ export async function getReleases(
     pkgName,
     releases: [],
   };
-  // TODO: fix types
-  const pkgUrlListRaw = await http.getJson<any>(queryUrl);
+  const pkgUrlListRaw = await http.getJson<UrlListRaw>(queryUrl);
   const match = pkgUrlListRaw.body.data.find(
     (item) => item.id.toLowerCase() === pkgName.toLowerCase()
   );
@@ -78,9 +150,7 @@ export async function getReleases(
     // There are no pkgName or releases in current feed
     return null;
   }
-  dep.releases = match.versions.map((item) => ({
-    version: item.version,
-  }));
+  dep.releases = await prepareTimestampedReleases(pkgName, match.versions);
 
   try {
     // For nuget.org we have a way to get nuspec file
