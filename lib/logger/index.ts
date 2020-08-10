@@ -6,7 +6,7 @@ import cmdSerializer from './cmd-serializer';
 import configSerializer from './config-serializer';
 import errSerializer from './err-serializer';
 import { RenovateStream } from './pretty-stdout';
-import { ErrorStream, withSanitizer } from './utils';
+import { BunyanRecord, ErrorStream, withSanitizer } from './utils';
 
 let logContext: string = process.env.LOG_CONTEXT || shortid.generate();
 let meta = {};
@@ -139,6 +139,6 @@ export function levels(name: string, level: bunyan.LogLevel): void {
   bunyanLogger.levels(name, level);
 }
 
-export function getErrors(): any {
+export function getErrors(): BunyanRecord[] {
   return errors.getErrors();
 }

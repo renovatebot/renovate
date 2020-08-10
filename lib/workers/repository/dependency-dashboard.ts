@@ -1,6 +1,6 @@
 import { RenovateConfig } from '../../config';
 import { PR_STATE_NOT_OPEN } from '../../constants/pull-requests';
-import { logger } from '../../logger';
+import { logger, getErrors } from '../../logger';
 import { Pr, platform } from '../../platform';
 import { BranchConfig } from '../common';
 
@@ -75,6 +75,19 @@ export async function ensureMasterIssue(
   if (config.dependencyDashboardHeader?.length) {
     issueBody += `${config.dependencyDashboardHeader}\n\n`;
   }
+
+  const repoErrors = getErrors().filter(
+    (err) => err.repository === config.repository
+  );
+  if (repoErrors.length) {
+    issueBody += '## Repository problems\n\n';
+    issueBody +=
+      'The problems below occurred while renovating this repository.\n\n';
+    for (const repoError of repoErrors) {
+      issueBody += `  - :warning: ${repoError.msg}\n`;
+    }
+  }
+
   const pendingApprovals = branches.filter(
     (branch) => branch.res === 'needs-approval'
   );
