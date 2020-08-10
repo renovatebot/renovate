@@ -296,7 +296,7 @@ export async function processBranch(
       res.artifactErrors = config.artifactErrors.concat(res.artifactErrors);
     }
     Object.assign(config, res);
-    if (config.updatedPackageFiles && config.updatedPackageFiles.length) {
+    if (config.updatedPackageFiles?.length) {
       logger.debug(
         `Updated ${config.updatedPackageFiles.length} package files`
       );
@@ -313,7 +313,7 @@ export async function processBranch(
     config.updatedArtifacts = (config.updatedArtifacts || []).concat(
       additionalFiles.updatedArtifacts
     );
-    if (config.updatedArtifacts && config.updatedArtifacts.length) {
+    if (config.updatedArtifacts?.length) {
       logger.debug(
         {
           updatedArtifacts: config.updatedArtifacts.map((f) =>
@@ -419,7 +419,7 @@ export async function processBranch(
       }
     }
 
-    if (config.artifactErrors && config.artifactErrors.length) {
+    if (config.artifactErrors?.length) {
       if (config.releaseTimestamp) {
         logger.debug(`Branch timestamp: ` + config.releaseTimestamp);
         const releaseTimestamp = DateTime.fromISO(config.releaseTimestamp);
@@ -573,7 +573,7 @@ export async function processBranch(
     }
     if (pr) {
       const topic = emojify(':warning: Artifact update problem');
-      if (config.artifactErrors && config.artifactErrors.length) {
+      if (config.artifactErrors?.length) {
         logger.warn(
           { artifactErrors: config.artifactErrors },
           'artifactErrors'
@@ -641,7 +641,7 @@ export async function processBranch(
           }
         }
       } else {
-        if (config.updatedArtifacts && config.updatedArtifacts.length) {
+        if (config.updatedArtifacts?.length) {
           // istanbul ignore if
           if (config.dryRun) {
             logger.info(

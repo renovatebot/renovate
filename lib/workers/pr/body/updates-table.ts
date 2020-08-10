@@ -24,7 +24,7 @@ function getNonEmptyColumns(
   for (const column of definitions) {
     const { header } = column;
     for (const row of rows) {
-      if (row[header] && row[header].length) {
+      if (row[header]?.length) {
         if (!res.includes(header)) {
           res.push(header);
         }

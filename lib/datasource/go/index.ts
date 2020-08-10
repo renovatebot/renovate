@@ -103,9 +103,7 @@ export async function getReleases({
     const prefix = nameParts.slice(3, nameParts.length).join('/');
     logger.trace(`go.getReleases.prefix:${prefix}`);
     const submodReleases = res.releases
-      .filter(
-        (release) => release.version && release.version.startsWith(prefix)
-      )
+      .filter((release) => release.version?.startsWith(prefix))
       .map((release) => {
         const r2 = release;
         r2.version = r2.version.replace(`${prefix}/`, '');
@@ -118,8 +116,8 @@ export async function getReleases({
     }
   }
   if (res?.releases) {
-    res.releases = res.releases.filter(
-      (release) => release.version && release.version.startsWith('v')
+    res.releases = res.releases.filter((release) =>
+      release.version?.startsWith('v')
     );
   }
   return res;

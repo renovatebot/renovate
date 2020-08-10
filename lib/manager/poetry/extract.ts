@@ -70,10 +70,7 @@ function extractFromSection(
 }
 
 function extractRegistries(pyprojectfile: PoetryFile): string[] {
-  const sources =
-    pyprojectfile.tool &&
-    pyprojectfile.tool.poetry &&
-    pyprojectfile.tool.poetry.source;
+  const sources = pyprojectfile.tool?.poetry?.source;
 
   if (!Array.isArray(sources) || sources.length === 0) {
     return null;
@@ -102,7 +99,7 @@ export function extractPackageFile(
     logger.debug({ err }, 'Error parsing pyproject.toml file');
     return null;
   }
-  if (!(pyprojectfile.tool && pyprojectfile.tool.poetry)) {
+  if (!pyprojectfile.tool?.poetry) {
     logger.debug(`${fileName} contains no poetry section`);
     return null;
   }
