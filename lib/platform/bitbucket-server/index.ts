@@ -845,7 +845,7 @@ export async function createPr({
     );
   } catch (err) /* istanbul ignore next */ {
     if (
-      err.body?.errors?.[0].exceptionName ===
+      err.body?.errors?.[0]?.exceptionName ===
       'com.atlassian.bitbucket.pull.EmptyPullRequestException'
     ) {
       logger.debug(
