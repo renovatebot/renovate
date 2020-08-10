@@ -5,9 +5,9 @@ import tmp, { DirectoryResult } from 'tmp-promise';
 import * as upath from 'upath';
 import { envMock, mockExecAll } from '../../../test/execUtil';
 import {
+  addReplacingSerializer,
   getName,
   replacingSerializer,
-  addReplacingSerializer,
 } from '../../../test/util';
 import * as _util from '../../util';
 import { BinarySource } from '../../util/exec/common';
