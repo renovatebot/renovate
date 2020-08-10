@@ -1,5 +1,5 @@
 import { exec as _exec } from 'child_process';
-import * as _os from 'os';
+import os from 'os';
 import fsExtra from 'fs-extra';
 import tmp, { DirectoryResult } from 'tmp-promise';
 import * as upath from 'upath';
@@ -45,9 +45,7 @@ async function setupMocks() {
   jest.mock('child_process');
   jest.mock('../../util/exec/env');
   jest.mock('../../util/fs');
-  jest.mock('os');
 
-  const os: jest.Mocked<typeof _os> = require('os');
   const fs: jest.Mocked<typeof _fs> = require('../../util/fs');
   const env: jest.Mocked<typeof _env> = require('../../util/exec/env');
   const exec: jest.Mock<typeof _exec> = require('child_process').exec;
@@ -57,10 +55,11 @@ async function setupMocks() {
     dependency 'foo:foo:1.2.3'
     dependency "bar:bar:3.4.5"
   `);
+  jest.spyOn(os, 'platform').mockReturnValueOnce('linux');
   env.getChildProcessEnv.mockReturnValue(envMock.basic);
   await util.setUtilConfig(baseConfig);
 
-  return [require('.'), exec, util, os];
+  return [require('.'), exec, util];
 }
 
 describe(getName(__filename), () => {
@@ -68,12 +67,11 @@ describe(getName(__filename), () => {
     let manager: typeof _manager;
     let exec: jest.Mock<typeof _exec>;
     let util: jest.Mocked<typeof _util>;
-    let os: jest.Mocked<typeof _os>;
     let docker: typeof _docker;
     let config: ExtractConfig;
 
     beforeAll(async () => {
-      [manager, exec, util, os] = await setupMocks();
+      [manager, exec, util] = await setupMocks();
       docker = require('../../util/exec/docker');
     });
 
@@ -82,7 +80,6 @@ describe(getName(__filename), () => {
     beforeEach(async () => {
       exec.mockReset();
       docker.resetPrefetchedImages();
-      os.platform.mockReturnValue('linux');
 
       const gradleDir = await tmp.dir({ unsafeCleanup: true });
       config = { ...baseConfig, localDir: gradleDir.path };
@@ -194,7 +191,7 @@ describe(getName(__filename), () => {
       const execSnapshots = mockExecAll(exec, gradleOutput);
       await initializeWorkingDir(true, standardUpdatesReport());
 
-      os.platform.mockReturnValue('win32');
+      jest.spyOn(os, 'platform').mockReturnValueOnce('win32');
 
       await manager.extractAllPackageFiles(config, ['build.gradle']);
       expect(execSnapshots).toMatchSnapshot();
@@ -281,7 +278,7 @@ describe(getName(__filename), () => {
       const configWithDocker = { binarySource: BinarySource.Docker, ...config };
       jest.spyOn(docker, 'removeDanglingContainers').mockResolvedValueOnce();
       await util.setUtilConfig(configWithDocker);
-      os.platform.mockReturnValue('win32');
+      jest.spyOn(os, 'platform').mockReturnValueOnce('win32');
       await initializeWorkingDir(true, standardUpdatesReport());
       const execSnapshots = mockExecAll(exec, gradleOutput);
 
