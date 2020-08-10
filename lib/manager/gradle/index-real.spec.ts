@@ -3,7 +3,7 @@ import tmp, { DirectoryResult } from 'tmp-promise';
 import { getName } from '../../../test/util';
 import { ExtractConfig } from '../common';
 import { ifSystemSupportsGradle } from './__testutil__/gradle';
-import * as _manager from '.';
+import * as manager from '.';
 
 const fixtures = 'lib/manager/gradle/__fixtures__';
 
@@ -19,8 +19,6 @@ describe(getName(__filename), () => {
     let workingDir: DirectoryResult;
     let testRunConfig: ExtractConfig;
     let successFile: string;
-
-    const manager: typeof _manager = require('.');
 
     beforeEach(async () => {
       workingDir = await tmp.dir({ unsafeCleanup: true });
