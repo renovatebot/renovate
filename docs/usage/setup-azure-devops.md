@@ -3,7 +3,7 @@ title: Azure DevOps Setup
 description: How to setup Renovate for Azure DevOps
 ---
 
-# Azure DevOps Setup
+# Azure DevOps Setup (for NPM/YARN)
 
 1. Create a brand new pipeline within Azure DevOps, and select your source.
 
@@ -15,7 +15,7 @@ description: How to setup Renovate for Azure DevOps
 
 ![Azure DevOps starter pipeline template](assets/images/azure-devops-setup-2.png)
 
-1. Replace all contents with next template (change all <i>PLACEHOLDER</i> strings with your values):
+1. Replace all contents with next NPM/YARN template (change all <i>PLACEHOLDER</i> strings with your values):
 
 ```
 schedules:
@@ -27,9 +27,6 @@ schedules:
     always: true
 
 trigger: none
-
-variables:
-  SYSTEM_ACCESSTOKEN: $(System.AccessToken)
 
 jobs:
   - job:
@@ -62,22 +59,9 @@ jobs:
               platform: 'azure',
               endpoint: 'https://dev.azure.com/PLACEHOLDER(ORGANIZATION)/',
               token: '$(System.AccessToken)',
-              azureWorkItemId: PLACEHOLDER,
-              dryRun: false,
-              includeForks: true,
-              logLevel: 'debug',
-              onboarding: false,
-              requireConfig: false,
               npmrc:
                 '$(sed ':a;N;$!ba;s/\n/\\n/g' .npmrc)',
               ignoreNpmrcFile: true,
-              hostRules: [
-                {
-                  hostName: 'pkgs.dev.azure.com',
-                  username: 'renovate',
-                  password: '$(System.AccessToken)'
-                }
-              ],
               repositories: ['PLACEHOLDER(PROJECT)/PLACEHOLDER(REPO NAME)']
             };
             EOF
