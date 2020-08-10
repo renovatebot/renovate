@@ -4,7 +4,11 @@ import fsExtra from 'fs-extra';
 import tmp, { DirectoryResult } from 'tmp-promise';
 import * as upath from 'upath';
 import { envMock, mockExecAll } from '../../../test/execUtil';
-import { getName, replacingSerializer } from '../../../test/util';
+import {
+  getName,
+  replacingSerializer,
+  addReplacingSerializer,
+} from '../../../test/util';
 import * as _util from '../../util';
 import { BinarySource } from '../../util/exec/common';
 import * as _docker from '../../util/exec/docker';
@@ -34,6 +38,9 @@ const gradleOutput = {
   stderr: '',
 };
 
+addReplacingSerializer('gradlew.bat', '<gradlew>');
+addReplacingSerializer('./gradlew', '<gradlew>');
+
 function resetMocks() {
   jest.resetAllMocks();
   jest.resetModules();
@@ -55,7 +62,6 @@ async function setupMocks() {
     dependency 'foo:foo:1.2.3'
     dependency "bar:bar:3.4.5"
   `);
-  jest.spyOn(os, 'platform').mockReturnValueOnce('linux');
   env.getChildProcessEnv.mockReturnValue(envMock.basic);
   await util.setUtilConfig(baseConfig);
 
@@ -239,6 +245,7 @@ describe(getName(__filename), () => {
       const execSnapshots = mockExecAll(exec, gradleOutput);
       await initializeWorkingDir(true, standardUpdatesReport());
 
+      jest.spyOn(os, 'platform').mockReturnValueOnce('linux');
       await manager.extractAllPackageFiles(config, ['build.gradle']);
 
       await expect(
@@ -470,6 +477,7 @@ allprojects {
     it('executes a not-executable gradle wrapper', async () => {
       await fsExtra.chmod(`${workingDir.path}/gradlew`, '444');
       const gradlew = await fsExtra.stat(`${workingDir.path}/gradlew`);
+
       await manager.executeGradle(testRunConfig, workingDir.path, gradlew);
       await expect(fsExtra.readFile(successFile, 'utf8')).resolves.toBe(
         'success'
