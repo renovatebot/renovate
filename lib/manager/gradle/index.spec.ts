@@ -1,7 +1,7 @@
 import { exec as _exec } from 'child_process';
 import os from 'os';
 import fsExtra from 'fs-extra';
-import tmp, { DirectoryResult } from 'tmp-promise';
+import tmp from 'tmp-promise';
 import * as upath from 'upath';
 import { envMock, mockExecAll } from '../../../test/execUtil';
 import {
@@ -15,7 +15,6 @@ import * as _docker from '../../util/exec/docker';
 import * as _env from '../../util/exec/env';
 import * as _fs from '../../util/fs';
 import { ExtractConfig } from '../common';
-import { ifSystemSupportsGradle } from './__testutil__/gradle';
 import { GRADLE_DEPENDENCY_REPORT_FILENAME } from './gradle-updates-report';
 import * as _manager from '.';
 
@@ -434,54 +433,5 @@ describe(getName(__filename), () => {
 
       expect(execSnapshots).toMatchSnapshot();
     });
-  });
-
-  ifSystemSupportsGradle(6).describe('executeGradle integration', () => {
-    const SUCCESS_FILE_NAME = 'success.indicator';
-    let workingDir: DirectoryResult;
-    let testRunConfig: ExtractConfig;
-    let successFile: string;
-
-    const manager: typeof _manager = require('.');
-
-    beforeEach(async () => {
-      workingDir = await tmp.dir({ unsafeCleanup: true });
-      successFile = '';
-      testRunConfig = { ...baseConfig, localDir: workingDir.path };
-      await fsExtra.copy(`${fixtures}/minimal-project`, workingDir.path);
-      await fsExtra.copy(`${fixtures}/gradle-wrappers/6`, workingDir.path);
-
-      const mockPluginContent = `
-allprojects {
-  tasks.register("renovate") {
-    doLast {
-      new File('${SUCCESS_FILE_NAME}').write 'success'
-    }
-  }
-}`;
-      await fsExtra.writeFile(
-        `${workingDir.path}/renovate-plugin.gradle`,
-        mockPluginContent
-      );
-      successFile = `${workingDir.path}/${SUCCESS_FILE_NAME}`;
-    });
-
-    it('executes an executable gradle wrapper', async () => {
-      const gradlew = await fsExtra.stat(`${workingDir.path}/gradlew`);
-      await manager.executeGradle(testRunConfig, workingDir.path, gradlew);
-      await expect(fsExtra.readFile(successFile, 'utf8')).resolves.toBe(
-        'success'
-      );
-    }, 120000);
-
-    it('executes a not-executable gradle wrapper', async () => {
-      await fsExtra.chmod(`${workingDir.path}/gradlew`, '444');
-      const gradlew = await fsExtra.stat(`${workingDir.path}/gradlew`);
-
-      await manager.executeGradle(testRunConfig, workingDir.path, gradlew);
-      await expect(fsExtra.readFile(successFile, 'utf8')).resolves.toBe(
-        'success'
-      );
-    }, 120000);
   });
 });
