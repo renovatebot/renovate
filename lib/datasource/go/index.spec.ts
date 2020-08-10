@@ -34,6 +34,16 @@ describe('datasource/go', () => {
   });
 
   describe('getDigest', () => {
+    it('returns null for no go-source tag', async () => {
+      httpMock
+        .scope('https://golang.org/')
+        .get('/y/text?go-get=1')
+        .reply(200, '');
+      github.getDigest.mockResolvedValueOnce('abcdefabcdefabcdefabcdef');
+      const res = await getDigest({ lookupName: 'golang.org/y/text' }, null);
+      expect(res).toBeNull();
+      expect(httpMock.getTrace()).toMatchSnapshot();
+    });
     it('returns null for wrong name', async () => {
       httpMock
         .scope('https://golang.org/')

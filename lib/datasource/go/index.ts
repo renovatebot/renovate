@@ -37,10 +37,14 @@ async function getDatasource(goModule: string): Promise<DataSource | null> {
   const pkgUrl = `https://${goModule}?go-get=1`;
   const res = (await http.get(pkgUrl)).body;
   const sourceMatch = regEx(
-    `<meta\\s+name="go-source"\\s+content="${goModule}\\s+([^\\s]+)`
+    `<meta\\s+name="go-source"\\s+content="([^\\s]+)\\s+([^\\s]+)`
   ).exec(res);
   if (sourceMatch) {
-    const [, goSourceUrl] = sourceMatch;
+    const [, prefix, goSourceUrl] = sourceMatch;
+    if (!goModule.startsWith(prefix)) {
+      logger.trace({ goModule }, 'go-source header prefix not match');
+      return null;
+    }
     logger.debug({ goModule, goSourceUrl }, 'Go lookup source url');
     if (goSourceUrl?.startsWith('https://github.com/')) {
       return {
