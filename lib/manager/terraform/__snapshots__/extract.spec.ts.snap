@@ -284,13 +284,6 @@ Object {
       "depType": "terraform",
     },
     Object {
-      "currentValue": ">= 2.5.0",
-      "datasource": "terraform-provider",
-      "depName": "aws",
-      "depNameShort": "aws",
-      "depType": "terraform",
-    },
-    Object {
       "currentValue": ">= 2.0.0",
       "datasource": "terraform-provider",
       "depName": "azurerm",
@@ -310,10 +303,21 @@ Object {
     Object {
       "currentValue": "1.2.4",
       "datasource": "terraform-provider",
+      "depName": "invalid",
+      "depNameShort": "invalid",
+      "depType": "terraform",
+      "skipReason": "unsupported-url",
+    },
+    Object {
+      "currentValue": "1.2.4",
+      "datasource": "terraform-provider",
       "depName": "helm",
       "depNameShort": "helm",
       "depType": "terraform",
-      "skipReason": "unsupported-url",
+      "lookupName": "hashicorp/helm",
+      "registryUrls": Array [
+        "https://registry.terraform.io",
+      ],
     },
     Object {
       "currentValue": ">= 1.0",

@@ -168,7 +168,6 @@ terraform {
 
 terraform {
   required_providers {
-    aws     = ">= 2.5.0"
     azurerm = ">= 2.0.0"
   }
 }
@@ -179,8 +178,12 @@ terraform {
       source  = "terraform-providers/docker"
       version = "2.7.2"
     }
-    helm = {
+    invalid = {
       source  = "//hashicorp/helm"
+      version = "1.2.4"
+    }
+    helm = {
+      source  = "hashicorp/helm"
       version = "1.2.4"
     }
     kubernetes = {
