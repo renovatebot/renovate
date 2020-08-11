@@ -1,3 +1,4 @@
+import pAll from 'p-all';
 import * as semver from 'semver';
 import { XmlDocument } from 'xmldoc';
 import { logger } from '../../logger';
@@ -6,7 +7,6 @@ import { Http } from '../../util/http';
 import { Release, ReleaseResult } from '../common';
 
 import { id } from './common';
-import pAll from 'p-all';
 
 const http = new Http(id);
 
@@ -25,9 +25,11 @@ interface ServicesIndexRaw {
   }[];
 }
 
-export async function getQueryUrl(url: string): Promise<string | null> {
-  // https://docs.microsoft.com/en-us/nuget/api/search-query-service-resource
-  const resourceType = 'SearchQueryService';
+export async function getResourceUrl(
+  url: string,
+  resourceType = 'RegistrationsBaseUrl'
+): Promise<string | null> {
+  // https://docs.microsoft.com/en-us/nuget/api/service-index
   const cacheKey = `${url}:${resourceType}`;
   const cachedResult = await packageCache.get<string>(cacheNamespace, cacheKey);
 
@@ -38,92 +40,50 @@ export async function getQueryUrl(url: string): Promise<string | null> {
 
   try {
     const servicesIndexRaw = await http.getJson<ServicesIndexRaw>(url);
-    const searchQueryService = servicesIndexRaw.body.resources.find(
-      (resource) => resource['@type']?.startsWith(resourceType)
+    const services = servicesIndexRaw.body.resources.find((resource) =>
+      resource['@type']?.startsWith(resourceType)
     );
-    const searchQueryServiceId = searchQueryService['@id'];
+    const serviceId = services['@id'];
 
     const cacheMinutes = 60;
-    await packageCache.set(
-      cacheNamespace,
-      cacheKey,
-      searchQueryServiceId,
-      cacheMinutes
-    );
-    return searchQueryServiceId;
+    await packageCache.set(cacheNamespace, cacheKey, serviceId, cacheMinutes);
+    return serviceId;
   } catch (e) {
     logger.debug(
       { e },
-      `nuget registry failure: can't get SearchQueryService form ${url}`
+      `nuget registry failure: can't get ${resourceType} form ${url}`
     );
     return null;
   }
 }
 
-interface UrlListRawItem {
+interface CatalogEntry {
   version: string;
-  '@id': string;
+  published?: string;
+  projectUrl?: string;
 }
 
-interface UrlListRaw {
-  data: {
-    id: string;
-    projectUrl: string;
-    versions: UrlListRawItem[];
+interface CatalogPage {
+  '@id': string;
+  items: {
+    catalogEntry: CatalogEntry;
   }[];
 }
 
-async function getReleaseWithTimestamp(
-  item: UrlListRawItem,
-  cachedTimestamps: Record<string, string>
-): Promise<Release> {
-  const version = item.version;
-  let releaseTimestamp = cachedTimestamps[version];
-  if (!releaseTimestamp) {
-    const itemUrl = item['@id'];
-    try {
-      const releaseInfo = await http.getJson<{ published?: string }>(itemUrl);
-      releaseTimestamp = releaseInfo.body.published;
-    } catch (err) /* istanbul ignore next */ {
-      return { version };
-    }
-  }
-  return { version, releaseTimestamp };
+interface PackageRegistration {
+  items: CatalogPage[];
 }
 
-async function prepareTimestampedReleases(
-  pkgName: string,
-  items: UrlListRawItem[]
-): Promise<Release[]> {
-  const cacheTimestampNamespace = `${cacheNamespace}-timestamps`;
-  const cacheKey = `${pkgName}`;
-  const cachedTimestamps =
-    (await packageCache.get<Record<string, string>>(
-      cacheTimestampNamespace,
-      cacheKey
-    )) || {};
-  const queue = items.map((item) => (): Promise<Release> =>
-    getReleaseWithTimestamp(item, cachedTimestamps)
-  );
-  const result = await pAll(queue, { concurrency: 5 });
-
-  let updateCache = false;
-  result.forEach(({ version, releaseTimestamp }) => {
-    if (!cachedTimestamps[version] && releaseTimestamp) {
-      updateCache = true;
-      cachedTimestamps[version] = releaseTimestamp;
-    }
-  });
-  if (updateCache) {
-    await packageCache.set(
-      cacheTimestampNamespace,
-      cacheKey,
-      cachedTimestamps,
-      1440
-    );
+async function getCatalogEntry(
+  catalogPage: CatalogPage
+): Promise<CatalogEntry[]> {
+  let items = catalogPage.items;
+  if (!items) {
+    const url = catalogPage['@id'];
+    const catalogPageFull = await http.getJson<CatalogPage>(url);
+    items = catalogPageFull.body.items;
   }
-
-  return result;
+  return items.map(({ catalogEntry }) => catalogEntry);
 }
 
 export async function getReleases(
@@ -131,65 +91,62 @@ export async function getReleases(
   feedUrl: string,
   pkgName: string
 ): Promise<ReleaseResult | null> {
-  let queryUrl = `${feedUrl}?q=${pkgName}`;
-  if (registryUrl.toLowerCase() === defaultNugetFeed.toLowerCase()) {
-    queryUrl = queryUrl.replace('q=', 'q=PackageId:');
-    queryUrl += '&semVerLevel=2.0.0&prerelease=true';
-  }
-  const dep: ReleaseResult = {
-    pkgName,
-    releases: [],
-  };
-  const pkgUrlListRaw = await http.getJson<UrlListRaw>(queryUrl);
-  const match = pkgUrlListRaw.body.data.find(
-    (item) => item.id.toLowerCase() === pkgName.toLowerCase()
+  const url = `${feedUrl.replace(/\/*$/, '')}/${pkgName}/index.json`;
+  const packageRegistration = await http.getJson<PackageRegistration>(url);
+  const catalogPages = packageRegistration.body.items || [];
+  const catalogPagesQueue = catalogPages.map((page) => (): Promise<
+    CatalogEntry[]
+  > => getCatalogEntry(page));
+  const catalogEntries = (
+    await pAll(catalogPagesQueue, { concurrency: 5 })
+  ).flat();
+
+  let homepage = null;
+  let latestStable = null;
+  const releases = catalogEntries.map(
+    ({ version, published: releaseTimestamp, projectUrl }) => {
+      const release: Release = { version };
+      if (releaseTimestamp) {
+        release.releaseTimestamp = releaseTimestamp;
+      }
+      if (semver.valid(version) && !semver.prerelease(version)) {
+        latestStable = version;
+        homepage = projectUrl || homepage;
+      }
+      return release;
+    }
   );
-  // https://docs.microsoft.com/en-us/nuget/api/search-query-service-resource#search-result
-  if (!match) {
-    // There are no pkgName or releases in current feed
+
+  if (!releases.length) {
     return null;
   }
-  dep.releases = await prepareTimestampedReleases(pkgName, match.versions);
 
-  try {
-    // For nuget.org we have a way to get nuspec file
-    const sanitizedVersions = dep.releases
-      .map((release) => semver.valid(release.version))
-      .filter(Boolean)
-      .filter((version) => !semver.prerelease(version));
-    let lastVersion: string;
-    // istanbul ignore else
-    if (sanitizedVersions.length) {
-      // Use the last stable version we found
-      lastVersion = sanitizedVersions.pop();
-    } else {
-      // Just use the last one from the list and hope for the best
-      lastVersion = [...dep.releases].pop().version;
-    }
-    if (registryUrl.toLowerCase() === defaultNugetFeed.toLowerCase()) {
-      const nugetOrgApi = `https://api.nuget.org/v3-flatcontainer/${pkgName.toLowerCase()}/${lastVersion}/${pkgName.toLowerCase()}.nuspec`;
-      let metaresult: { body: string };
-      try {
-        metaresult = await http.get(nugetOrgApi);
-      } catch (err) /* istanbul ignore next */ {
-        logger.debug(
-          `Cannot fetch metadata for ${pkgName} using popped version ${lastVersion}`
-        );
-        return dep;
-      }
+  const dep: ReleaseResult = {
+    pkgName,
+    releases,
+  };
+
+  if (registryUrl.toLowerCase() === defaultNugetFeed.toLowerCase()) {
+    try {
+      const nuspecUrl = `https://api.nuget.org/v3-flatcontainer/${pkgName.toLowerCase()}/${latestStable}/${pkgName.toLowerCase()}.nuspec`;
+      const metaresult = await http.get(nuspecUrl);
       const nuspec = new XmlDocument(metaresult.body);
       const sourceUrl = nuspec.valueWithPath('metadata.repository@url');
       if (sourceUrl) {
         dep.sourceUrl = sourceUrl;
       }
-    } else if (match.projectUrl) {
-      dep.sourceUrl = match.projectUrl;
+    } catch (err) /* istanbul ignore next */ {
+      logger.debug(
+        `Cannot obtain sourceUrl for ${pkgName} using version ${latestStable}`
+      );
+      return dep;
     }
-  } catch (err) /* istanbul ignore next */ {
-    logger.debug(
-      { err, pkgName, feedUrl },
-      `nuget registry failure: can't parse pkg info for project url`
-    );
+  } else if (homepage) {
+    dep.sourceUrl = homepage;
+  }
+
+  if (homepage) {
+    dep.homepage = homepage;
   }
 
   return dep;
