@@ -173,6 +173,24 @@ terraform {
   }
 }
 
+terraform {
+  required_providers {
+    docker = {
+      source  = "terraform-providers/docker"
+      version = "2.7.2"
+    }
+    helm = {
+      source  = "//hashicorp/helm"
+      version = "1.2.4"
+    }
+    kubernetes = {
+      source  = "terraform.example.com/hashicorp/kubernetes"
+      version = ">= 1.0"
+    }
+  }
+  required_version = ">= 0.13"
+}
+
 
 # docker_image resources
 # https://www.terraform.io/docs/providers/docker/r/image.html

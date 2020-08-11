@@ -298,6 +298,35 @@ Object {
       "depType": "terraform",
     },
     Object {
+      "currentValue": "2.7.2",
+      "datasource": "terraform-provider",
+      "depName": "docker",
+      "depNameShort": "docker",
+      "depType": "terraform",
+      "registryUrls": Array [
+        "https://releases.hashicorp.com",
+      ],
+    },
+    Object {
+      "currentValue": "1.2.4",
+      "datasource": "terraform-provider",
+      "depName": "helm",
+      "depNameShort": "helm",
+      "depType": "terraform",
+      "skipReason": "unsupported-url",
+    },
+    Object {
+      "currentValue": ">= 1.0",
+      "datasource": "terraform-provider",
+      "depName": "kubernetes",
+      "depNameShort": "kubernetes",
+      "depType": "terraform",
+      "lookupName": "hashicorp/kubernetes",
+      "registryUrls": Array [
+        "https://terraform.example.com",
+      ],
+    },
+    Object {
       "autoReplaceStringTemplate": "{{depName}}{{#if newValue}}:{{newValue}}{{/if}}{{#if newDigest}}@{{newDigest}}{{/if}}",
       "currentDigest": undefined,
       "currentValue": "1.7.8",
