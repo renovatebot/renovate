@@ -106,9 +106,13 @@ export async function getReleaseNotes(
       if (!releaseNotes.body.length) {
         releaseNotes = null;
       } else {
-        releaseNotes.body = linkify(releaseNotes.body, {
-          repository: `${baseUrl}${repository}`,
-        });
+        try {
+          releaseNotes.body = linkify(releaseNotes.body, {
+            repository: `${baseUrl}${repository}`,
+          });
+        } catch (err) /* istanbul ignore next */ {
+          logger.warn({ err, baseUrl, repository }, 'Error linkifying');
+        }
       }
     }
   });
