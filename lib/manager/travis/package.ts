@@ -95,7 +95,7 @@ export async function getPackageUpdates(
   await checkPolicies();
   for (const policy of supportPolicy) {
     if (!Object.keys(policies).includes(policy)) {
-      logger.warn(`Unknown supportPolicy: ${policy}`);
+      logger.warn({ policy }, `Unknown supportPolicy`);
       return [];
     }
   }
