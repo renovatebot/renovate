@@ -1,5 +1,5 @@
 import is from '@sindresorhus/is';
-import { major, validRange } from 'semver';
+import { minVersion, validRange } from 'semver';
 import { quote } from 'shlex';
 import { join } from 'upath';
 import { SYSTEM_INSUFFICIENT_DISK_SPACE } from '../../../constants/error-messages';
@@ -7,7 +7,7 @@ import { id as npmId } from '../../../datasource/npm';
 import { logger } from '../../../logger';
 import { ExternalHostError } from '../../../types/errors/external-host-error';
 import { ExecOptions, exec } from '../../../util/exec';
-import { readFile, remove } from '../../../util/fs';
+import { readLocalFile, remove } from '../../../util/fs';
 import { PostUpdateConfig, Upgrade } from '../../common';
 import { getNodeConstraint } from './node-version';
 
@@ -19,7 +19,7 @@ export interface GenerateLockFileResult {
 
 export async function hasYarnOfflineMirror(cwd: string): Promise<boolean> {
   try {
-    const yarnrc = await readFile(`${cwd}/.yarnrc`, 'utf8');
+    const yarnrc = await readLocalFile(`${cwd}/.yarnrc`, 'utf8');
     if (is.string(yarnrc)) {
       const mirrorLine = yarnrc
         .split('\n')
@@ -49,7 +49,8 @@ export async function generateLockFile(
   try {
     const yarnCompatibility = config.compatibility?.yarn;
     const isValidYarnRange = validRange(yarnCompatibility);
-    const isYarn1 = !isValidYarnRange || major(yarnCompatibility) === 1;
+    const isYarn1 =
+      !isValidYarnRange || minVersion(yarnCompatibility).major === 1;
 
     let installYarn = 'npm i -g yarn';
     if (isValidYarnRange) {
@@ -146,7 +147,7 @@ export async function generateLockFile(
     await exec(commands, execOptions);
 
     // Read the result
-    lockFile = await readFile(lockFileName, 'utf8');
+    lockFile = await readLocalFile(lockFileName, 'utf8');
   } catch (err) /* istanbul ignore next */ {
     logger.debug(
       {

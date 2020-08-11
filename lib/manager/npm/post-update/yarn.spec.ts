@@ -1,18 +1,16 @@
 import { exec as _exec } from 'child_process';
-import _fs from 'fs-extra';
 import { ExecSnapshots, envMock, mockExecAll } from '../../../../test/execUtil';
-import { getName, mocked } from '../../../../test/util';
+import { fs, getName, mocked } from '../../../../test/util';
 import * as _env from '../../../util/exec/env';
 import * as _yarnHelper from './yarn';
 
-jest.mock('fs-extra');
 jest.mock('child_process');
 jest.mock('../../../util/exec/env');
+jest.mock('../../../util/fs');
 jest.mock('./node-version');
 
 const exec: jest.Mock<typeof _exec> = _exec as any;
 const env = mocked(_env);
-const fs = mocked(_fs);
 const yarnHelper = mocked(_yarnHelper);
 
 delete process.env.NPM_CONFIG_CACHE;
@@ -27,17 +25,28 @@ const fixSnapshots = (snapshots: ExecSnapshots): ExecSnapshots =>
 describe(getName(__filename), () => {
   beforeEach(() => {
     jest.resetAllMocks();
+    jest.resetModules();
+    fs.readLocalFile = jest.fn();
     env.getChildProcessEnv.mockReturnValue(envMock.basic);
   });
-  it.each([['1.22.0'], ['2.1.0']])(
+  it.each([
+    ['1.22.0', 2],
+    ['2.1.0', 1],
+  ])(
     'generates lock files using yarn v%s',
-    async (yarnVersion) => {
+    async (yarnVersion, expectedFsCalls) => {
       const execSnapshots = mockExecAll(exec, {
         stdout: yarnVersion,
         stderr: '',
       });
-      fs.readFile.mockResolvedValue(null); // .yarnrc
-      fs.readFile.mockResolvedValue('package-lock-contents' as never);
+      fs.readLocalFile.mockImplementation((filename, encoding) => {
+        if (filename.endsWith('.yarnrc')) {
+          return new Promise<string>((resolve) => resolve(null));
+        }
+        return new Promise<string>((resolve) =>
+          resolve('package-lock-contents')
+        );
+      });
       const config = {
         dockerMapDotfiles: true,
         compatibility: {
@@ -46,7 +55,7 @@ describe(getName(__filename), () => {
         postUpdateOptions: ['yarnDedupeFewer', 'yarnDedupeHighest'],
       };
       const res = await yarnHelper.generateLockFile('some-dir', {}, config);
-      expect(fs.readFile).toHaveBeenCalledTimes(2);
+      expect(fs.readLocalFile).toHaveBeenCalledTimes(expectedFsCalls);
       expect(fs.remove).toHaveBeenCalledTimes(0);
       expect(res.lockFile).toEqual('package-lock-contents');
       expect(fixSnapshots(execSnapshots)).toMatchSnapshot();
@@ -59,9 +68,9 @@ describe(getName(__filename), () => {
         stdout: yarnVersion,
         stderr: '',
       });
-
-      fs.readFile.mockResolvedValue(null); // .yarnrc
-      fs.readFile.mockResolvedValue('package-lock-contents' as never);
+      fs.readLocalFile
+        .mockResolvedValueOnce(null)
+        .mockResolvedValueOnce('package-lock-contents');
       const res = await yarnHelper.generateLockFile('some-dir', {}, {}, [
         {
           depName: 'some-dep',
@@ -79,11 +88,11 @@ describe(getName(__filename), () => {
         stdout: yarnVersion,
         stderr: '',
       });
-
-      fs.readFile.mockReturnValueOnce(
-        'yarn-offline-mirror ./npm-packages-offline-cache' as never
-      );
-      fs.readFile.mockReturnValueOnce('package-lock-contents' as never);
+      fs.readLocalFile
+        .mockResolvedValueOnce(
+          'yarn-offline-mirror ./npm-packages-offline-cache'
+        )
+        .mockResolvedValueOnce('package-lock-contents');
       const res = await yarnHelper.generateLockFile('some-dir', {}, {}, [
         {
           depName: 'some-dep',
@@ -94,15 +103,24 @@ describe(getName(__filename), () => {
       expect(fixSnapshots(execSnapshots)).toMatchSnapshot();
     }
   );
-  it.each([['1.22.0'], ['2.1.0']])(
+  it.each([
+    ['1.22.0', 2],
+    ['2.1.0', 1],
+  ])(
     'performs lock file maintenance using yarn v%s',
-    async (yarnVersion) => {
+    async (yarnVersion, expectedFsCalls) => {
       const execSnapshots = mockExecAll(exec, {
         stdout: yarnVersion,
         stderr: '',
       });
-      fs.readFile.mockResolvedValue(null); // .yarnrc
-      fs.readFile.mockResolvedValue('package-lock-contents' as never);
+      fs.readLocalFile.mockImplementation((filename, encoding) => {
+        if (filename.endsWith('.yarnrc')) {
+          return new Promise<string>((resolve) => resolve(null));
+        }
+        return new Promise<string>((resolve) =>
+          resolve('package-lock-contents')
+        );
+      });
       const config = {
         dockerMapDotfiles: true,
         compatibility: {
@@ -113,7 +131,7 @@ describe(getName(__filename), () => {
       const res = await yarnHelper.generateLockFile('some-dir', {}, config, [
         { isLockFileMaintenance: true },
       ]);
-      expect(fs.readFile).toHaveBeenCalledTimes(2);
+      expect(fs.readLocalFile).toHaveBeenCalledTimes(expectedFsCalls);
       expect(fs.remove).toHaveBeenCalledTimes(1);
       expect(res.lockFile).toEqual('package-lock-contents');
       expect(fixSnapshots(execSnapshots)).toMatchSnapshot();
@@ -124,12 +142,11 @@ describe(getName(__filename), () => {
       stdout: '1.9.4',
       stderr: 'some-error',
     });
-    fs.readFile.mockImplementationOnce(() => null);
-    fs.readFile.mockImplementationOnce(() => {
+    fs.readLocalFile.mockResolvedValueOnce(null).mockRejectedValueOnce(() => {
       throw new Error('not-found');
     });
     const res = await yarnHelper.generateLockFile('some-dir', {});
-    expect(fs.readFile).toHaveBeenCalledTimes(2);
+    expect(fs.readLocalFile).toHaveBeenCalledTimes(2);
     expect(res.error).toBe(true);
     expect(res.lockFile).not.toBeDefined();
     expect(fixSnapshots(execSnapshots)).toMatchSnapshot();
