@@ -1,4 +1,5 @@
 import { logger } from '../../logger';
+import { hasProxy } from '../../proxy';
 import * as hostRules from '../host-rules';
 import { GotOptions } from './types';
 
@@ -30,5 +31,9 @@ export function applyHostRules(url: string, inOptions: GotOptions): GotOptions {
       options[param] = foundRules[param];
     }
   });
+
+  if (!hasProxy() && foundRules.enableHttp2 === true) {
+    options.http2 = true;
+  }
   return options;
 }
