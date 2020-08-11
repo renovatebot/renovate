@@ -374,6 +374,11 @@ export async function initRepo({
             token: forkToken || opts.token,
           });
           logger.info('Fork deleted');
+          if (is.nonEmptyArray(existingRepos)) {
+            existingRepos = existingRepos.filter(
+              (repo) => repo !== config.repository
+            );
+          }
         } catch (deleteErr) {
           logger.warn({ err: deleteErr }, 'Could not delete fork');
         }
