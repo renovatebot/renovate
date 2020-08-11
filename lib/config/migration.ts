@@ -219,7 +219,7 @@ export function migrateConfig(
           } else if (val[i] === ':library' || val[i] === 'config:library') {
             isMigrated = true;
             migratedConfig.extends[i] = 'config:js-lib';
-          } else if (val[i]?.startsWith(':masterIssue')) {
+          } else if (is.string(val[i]) && val[i].startsWith(':masterIssue')) {
             isMigrated = true;
             migratedConfig.extends[i] = val[i].replace(
               'masterIssue',
