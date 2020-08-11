@@ -193,7 +193,7 @@ export async function syncGit(): Promise<void> {
       await git.clone(config.url, '.', opts);
     } catch (err) /* istanbul ignore next */ {
       logger.debug({ err }, 'git clone error');
-      if (err.message?.includes('write error: No space left on device')) {
+      if (err.message?.includes('No space left on device')) {
         throw new Error(SYSTEM_INSUFFICIENT_DISK_SPACE);
       }
       throw new ExternalHostError(err, 'git');
