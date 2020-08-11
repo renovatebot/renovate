@@ -9,7 +9,7 @@ export default function errSerializer(err: any): any {
   };
   if (err.body) {
     response.body = err.body;
-  } else if (err.response && err.response.body) {
+  } else if (err.response?.body) {
     response.body = err.response.body;
   }
   if (err.message) {

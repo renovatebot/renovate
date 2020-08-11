@@ -181,7 +181,7 @@ export async function getDependency(
       'dist-tags': res['dist-tags'],
       'renovate-config': latestVersion['renovate-config'],
     };
-    if (res.repository && res.repository.directory) {
+    if (res.repository?.directory) {
       dep.sourceDirectory = res.repository.directory;
     }
     if (latestVersion.deprecated) {
@@ -193,7 +193,7 @@ export async function getDependency(
         version,
         gitRef: res.versions[version].gitHead,
       };
-      if (res.time && res.time[version]) {
+      if (res.time?.[version]) {
         release.releaseTimestamp = res.time[version];
         release.canBeUnpublished =
           moment().diff(moment(release.releaseTimestamp), 'days') === 0;

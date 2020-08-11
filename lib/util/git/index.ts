@@ -545,18 +545,18 @@ export async function commitFiles({
     await git.reset(ResetMode.HARD);
     await git.raw(['clean', '-fd']);
     await git.checkout(['-B', branchName, 'origin/' + config.currentBranch]);
-    const fileNames = [];
-    const deleted = [];
+    const fileNames: string[] = [];
+    const deleted: string[] = [];
     for (const file of files) {
       // istanbul ignore if
       if (file.name === '|delete|') {
-        deleted.push(file.contents);
+        deleted.push(file.contents as string);
       } else if (await isDirectory(join(config.localDir, file.name))) {
         fileNames.push(file.name);
         await git.add(file.name);
       } else {
         fileNames.push(file.name);
-        let contents;
+        let contents: Buffer;
         // istanbul ignore else
         if (typeof file.contents === 'string') {
           contents = Buffer.from(file.contents);

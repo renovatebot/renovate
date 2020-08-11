@@ -26,7 +26,7 @@ const presetSources: Record<string, PresetApi> = {
 };
 
 export function replaceArgs(
-  obj: string | string[] | object | object[],
+  obj: string | string[] | Record<string, any> | Record<string, any>[],
   argMapping: Record<string, any>
 ): any {
   if (is.string(obj)) {
@@ -191,7 +191,7 @@ export async function resolveConfigPresets(
   );
   let config: RenovateConfig = {};
   // First, merge all the preset configs from left to right
-  if (inputConfig.extends && inputConfig.extends.length) {
+  if (inputConfig.extends?.length) {
     for (const preset of inputConfig.extends) {
       // istanbul ignore if
       if (existingPresets.includes(preset)) {

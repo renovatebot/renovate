@@ -13,7 +13,7 @@ export async function autodiscoverRepositories(
   config: RenovateConfig
 ): Promise<RenovateConfig> {
   if (!config.autodiscover) {
-    if (!(config.repositories && config.repositories.length)) {
+    if (!config.repositories?.length) {
       logger.warn(
         'No repositories found - did you want to run with flag --autodiscover?'
       );
@@ -42,7 +42,7 @@ export async function autodiscoverRepositories(
     `Autodiscovered repositories`
   );
   // istanbul ignore if
-  if (config.repositories && config.repositories.length) {
+  if (config.repositories?.length) {
     logger.debug(
       'Checking autodiscovered repositories against configured repositories'
     );
