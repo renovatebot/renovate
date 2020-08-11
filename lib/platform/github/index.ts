@@ -366,7 +366,9 @@ export async function initRepo({
           'Error updating fork reference - will try deleting fork to try again next time'
         );
         try {
-          await githubApi.deleteJson(`repos/${config.repository}`);
+          await githubApi.deleteJson(`repos/${config.repository}`, {
+            token: forkToken || opts.token,
+          });
           logger.info('Fork deleted');
         } catch (deleteErr) {
           logger.warn({ err: deleteErr }, 'Could not delete fork');
