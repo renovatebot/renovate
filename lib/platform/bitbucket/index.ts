@@ -459,7 +459,7 @@ export async function findIssue(title: string): Promise<Issue> {
   const [issue] = issues;
   return {
     number: issue.id,
-    body: issue.content && issue.content.raw,
+    body: issue.content?.raw,
   };
 }
 
