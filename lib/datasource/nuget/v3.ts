@@ -39,8 +39,7 @@ export async function getQueryUrl(url: string): Promise<string | null> {
   try {
     const servicesIndexRaw = await http.getJson<ServicesIndexRaw>(url);
     const searchQueryService = servicesIndexRaw.body.resources.find(
-      (resource) =>
-        resource['@type'] && resource['@type'].startsWith(resourceType)
+      (resource) => resource['@type']?.startsWith(resourceType)
     );
     const searchQueryServiceId = searchQueryService['@id'];
 

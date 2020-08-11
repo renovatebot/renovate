@@ -83,16 +83,10 @@ export function addMetaData(
     return;
   }
   const lookupNameLowercase = lookupName ? lookupName.toLowerCase() : null;
-  if (
-    manualChangelogUrls[datasource] &&
-    manualChangelogUrls[datasource][lookupNameLowercase]
-  ) {
+  if (manualChangelogUrls[datasource]?.[lookupNameLowercase]) {
     dep.changelogUrl = manualChangelogUrls[datasource][lookupNameLowercase];
   }
-  if (
-    manualSourceUrls[datasource] &&
-    manualSourceUrls[datasource][lookupNameLowercase]
-  ) {
+  if (manualSourceUrls[datasource]?.[lookupNameLowercase]) {
     dep.sourceUrl = manualSourceUrls[datasource][lookupNameLowercase];
   }
 

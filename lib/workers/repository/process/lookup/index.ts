@@ -168,10 +168,7 @@ export async function lookupUpdates(
       logger.debug({ dependency: depName }, 'Found deprecationMessage');
       res.deprecationMessage = dependency.deprecationMessage;
     }
-    res.sourceUrl =
-      dependency.sourceUrl && dependency.sourceUrl.length
-        ? dependency.sourceUrl
-        : /* istanbul ignore next */ null;
+    res.sourceUrl = dependency?.sourceUrl;
     if (dependency.sourceDirectory) {
       res.sourceDirectory = dependency.sourceDirectory;
     }

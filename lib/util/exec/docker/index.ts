@@ -72,6 +72,8 @@ async function getDockerTag(
   constraint: string,
   scheme: string
 ): Promise<string> {
+  // TODO: fixme
+  // eslint-disable-next-line @typescript-eslint/unbound-method
   const { isValid, isVersion, matches, sortVersions } = versioning.get(scheme);
 
   if (!isValid(constraint)) {
