@@ -376,7 +376,7 @@ export async function initRepo({
           logger.info('Fork deleted');
           if (is.nonEmptyArray(existingRepos)) {
             existingRepos = existingRepos.filter(
-              (repo) => repo !== config.repository
+              (existingRepo) => existingRepo !== config.repository
             );
           }
         } catch (deleteErr) {
