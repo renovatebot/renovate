@@ -59,8 +59,6 @@ export function extractTerraformRequiredProviders(
     if (kvMatch) {
       dep.currentValue = kvMatch.groups.value;
       dep.managerData.moduleName = kvMatch.groups.key;
-      dep.managerData.versionLine = lineNumber;
-      // TODO: apply source from `hashicorp/:moduleName`
       deps.push(dep);
     } else {
       const nameMatch = providerBlockExtractionRegex.exec(line);

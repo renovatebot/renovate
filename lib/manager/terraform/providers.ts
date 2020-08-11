@@ -32,7 +32,6 @@ export function extractTerraformProvider(
     if (kvMatch) {
       if (kvMatch.groups.key === 'version') {
         dep.currentValue = kvMatch.groups.value;
-        dep.managerData.versionLine = lineNumber;
       } else if (kvMatch.groups.key === 'source') {
         dep.managerData.source = kvMatch.groups.value;
         dep.managerData.sourceLine = lineNumber;
