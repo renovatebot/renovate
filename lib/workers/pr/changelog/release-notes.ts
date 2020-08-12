@@ -107,9 +107,11 @@ export async function getReleaseNotes(
         releaseNotes = null;
       } else {
         try {
-          releaseNotes.body = linkify(releaseNotes.body, {
-            repository: `${baseUrl}${repository}`,
-          });
+          if (baseUrl !== 'https://gitlab.com/') {
+            releaseNotes.body = linkify(releaseNotes.body, {
+              repository: `${baseUrl}${repository}`,
+            });
+          }
         } catch (err) /* istanbul ignore next */ {
           logger.warn({ err, baseUrl, repository }, 'Error linkifying');
         }
