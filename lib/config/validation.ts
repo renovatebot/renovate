@@ -204,8 +204,8 @@ export async function validateConfig(
               'matchDepTypes',
               'matchPackageNames',
               'matchPackagePatterns',
-              'matchNotPackageNames',
-              'matchNotPackagePatterns',
+              'excludePackageNames',
+              'excludePackagePatterns',
               'matchCurrentVersion',
               'matchSourceUrlPrefixes',
               'matchUpdateTypes',
@@ -314,7 +314,7 @@ export async function validateConfig(
             }
             if (
               key === 'matchPackagePatterns' ||
-              key === 'matchNotPackagePatterns'
+              key === 'excludePackagePatterns'
             ) {
               for (const pattern of val as string[]) {
                 if (pattern !== '*') {

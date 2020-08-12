@@ -881,18 +881,18 @@ This field also supports a special negated regex syntax for ignoring certain ver
 
 Use this field if you want to limit a `packageRule` to certain `depType` values. Invalid if used outside of a `packageRule`.
 
-### matchNotPackageNames
+### excludePackageNames
 
 **Important**: Do not mix this up with the option `ignoreDeps`. Use `ignoreDeps` instead if all you want to do is have a list of package names for Renovate to ignore.
 
-Use `matchNotPackageNames` if you want to have one or more exact name matches excluded in your package rule. See also `matchPackageNames`.
+Use `excludePackageNames` if you want to have one or more exact name matches excluded in your package rule. See also `matchPackageNames`.
 
 ```json
 {
   "packageRules": [
     {
       "matchPackagePatterns": ["^eslint"],
-      "matchNotPackageNames": ["eslint-foo"]
+      "excludePackageNames": ["eslint-foo"]
     }
   ]
 }
@@ -900,7 +900,7 @@ Use `matchNotPackageNames` if you want to have one or more exact name matches ex
 
 The above will match all package names starting with `eslint` but exclude the specific package `eslint-foo`.
 
-### matchNotPackagePatterns
+### excludePackagePatterns
 
 Use this field if you want to have one or more package name patterns excluded in your package rule. See also `matchPackagePatterns`.
 
@@ -909,7 +909,7 @@ Use this field if you want to have one or more package name patterns excluded in
   "packageRules": [
     {
       "matchPackagePatterns": ["^eslint"],
-      "matchNotPackagePatterns": ["^eslint-foo"]
+      "excludePackagePatterns": ["^eslint-foo"]
     }
   ]
 }
@@ -942,7 +942,7 @@ Use this field to restrict rules to a particular branch. e.g.
   "packageRules": [
     {
       "matchBaseBranches": ["master"],
-      "matchNotPackagePatterns": ["^eslint"],
+      "excludePackagePatterns": ["^eslint"],
       "enabled": false
     }
   ]
@@ -986,7 +986,7 @@ Use this field to restrict rules to a particular datasource. e.g.
 
 ### matchPackageNames
 
-Use this field if you want to have one or more exact name matches in your package rule. See also `matchNotPackageNames`.
+Use this field if you want to have one or more exact name matches in your package rule. See also `excludePackageNames`.
 
 ```json
 {
@@ -1003,7 +1003,7 @@ The above will configure `rangeStrategy` to `pin` only for the package `angular`
 
 ### matchPackagePatterns
 
-Use this field if you want to have one or more package names patterns in your package rule. See also `matchNotPackagePatterns`.
+Use this field if you want to have one or more package names patterns in your package rule. See also `excludePackagePatterns`.
 
 ```json
 {

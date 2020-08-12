@@ -23,8 +23,8 @@ describe('applyPackageRules()', () => {
       },
       {
         matchPackagePatterns: ['a', 'b'],
-        matchNotPackageNames: ['aa'],
-        matchNotPackagePatterns: ['d'],
+        excludePackageNames: ['aa'],
+        excludePackagePatterns: ['d'],
         y: 2,
       },
     ],
@@ -44,14 +44,14 @@ describe('applyPackageRules()', () => {
           matchCurrentVersion: '<= 2.0.0',
         },
         {
-          matchNotPackagePatterns: ['*'],
+          excludePackagePatterns: ['*'],
           matchPackageNames: ['b'],
         },
         {
           matchUpdateTypes: ['bump'],
         },
         {
-          matchNotPackageNames: ['a'],
+          excludePackageNames: ['a'],
           matchPackageNames: ['b'],
         },
         {
@@ -113,7 +113,7 @@ describe('applyPackageRules()', () => {
     const config: TestConfig = {
       packageRules: [
         {
-          matchNotPackageNames: ['foo'],
+          excludePackageNames: ['foo'],
           x: 1,
         },
       ],

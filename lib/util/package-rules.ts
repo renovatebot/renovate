@@ -51,15 +51,15 @@ function matchesRule(inputConfig: Config, packageRule: PackageRule): boolean {
   const matchDepTypes = packageRule.matchDepTypes || [];
   const matchPackageNames = packageRule.matchPackageNames || [];
   let matchPackagePatterns = packageRule.matchPackagePatterns || [];
-  const matchNotPackageNames = packageRule.matchNotPackageNames || [];
-  const matchNotPackagePatterns = packageRule.matchNotPackagePatterns || [];
+  const excludePackageNames = packageRule.excludePackageNames || [];
+  const excludePackagePatterns = packageRule.excludePackagePatterns || [];
   const matchSourceUrlPrefixes = packageRule.matchSourceUrlPrefixes || [];
   const matchCurrentVersion = packageRule.matchCurrentVersion || null;
   const matchUpdateTypes = packageRule.matchUpdateTypes || [];
   let positiveMatch = false;
   // Massage a positive patterns patch if an exclude one is present
   if (
-    (matchNotPackageNames.length || matchNotPackagePatterns.length) &&
+    (excludePackageNames.length || excludePackagePatterns.length) &&
     !(matchPackageNames.length || matchPackagePatterns.length)
   ) {
     matchPackagePatterns = ['.*'];
@@ -142,16 +142,16 @@ function matchesRule(inputConfig: Config, packageRule: PackageRule): boolean {
     }
     positiveMatch = true;
   }
-  if (matchNotPackageNames.length) {
-    const isMatch = matchNotPackageNames.includes(depName);
+  if (excludePackageNames.length) {
+    const isMatch = excludePackageNames.includes(depName);
     if (isMatch) {
       return false;
     }
     positiveMatch = true;
   }
-  if (matchNotPackagePatterns.length) {
+  if (excludePackagePatterns.length) {
     let isMatch = false;
-    for (const pattern of matchNotPackagePatterns) {
+    for (const pattern of excludePackagePatterns) {
       const packageRegex = regEx(
         pattern === '^*$' || pattern === '*' ? '.*' : pattern
       );
@@ -231,8 +231,8 @@ export function applyPackageRules<T extends Config>(inputConfig: T): T {
       config = mergeChildConfig(config, packageRule);
       delete config.matchPackageNames;
       delete config.matchPackagePatterns;
-      delete config.matchNotPackageNames;
-      delete config.matchNotPackagePatterns;
+      delete config.excludePackageNames;
+      delete config.excludePackagePatterns;
       delete config.matchDepTypes;
       delete config.matchCurrentVersion;
     }

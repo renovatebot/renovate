@@ -22,7 +22,7 @@ Object {
       ],
     },
     Object {
-      "matchNotPackagePatterns": Array [
+      "excludePackagePatterns": Array [
         "*",
       ],
       "matchPackageNames": Array [
@@ -35,7 +35,7 @@ Object {
       ],
     },
     Object {
-      "matchNotPackageNames": Array [
+      "excludePackageNames": Array [
         "a",
       ],
       "matchPackageNames": Array [

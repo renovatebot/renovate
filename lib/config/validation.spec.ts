@@ -52,7 +52,7 @@ describe('config/validation', () => {
         packageRules: [
           {
             matchPackagePatterns: ['*'],
-            matchNotPackagePatterns: ['abc ([a-z]+) ([a-z]+))'],
+            excludePackagePatterns: ['abc ([a-z]+) ([a-z]+))'],
           },
         ],
         lockFileMaintenance: {
@@ -109,7 +109,7 @@ describe('config/validation', () => {
         extends: [':timezone(Europe/Brussel)'],
         packageRules: [
           {
-            matchNotPackageNames: ['foo'],
+            excludePackageNames: ['foo'],
             enabled: true,
           },
           {
@@ -118,7 +118,7 @@ describe('config/validation', () => {
           'what?' as any,
           {
             matchPackagePatterns: 'abc ([a-z]+) ([a-z]+))',
-            matchNotPackagePatterns: ['abc ([a-z]+) ([a-z]+))'],
+            excludePackagePatterns: ['abc ([a-z]+) ([a-z]+))'],
             enabled: false,
           },
         ],

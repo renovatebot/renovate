@@ -68,8 +68,8 @@ Object {
       ],
     },
     Object {
+      "excludePackageNames": "foo",
       "groupName": "angular packages",
-      "matchNotPackageNames": "foo",
       "matchPackagePatterns": "^(@angular|typescript)",
     },
     Object {
@@ -251,6 +251,12 @@ exports[`config/migration migrateConfig(config, parentConfig) it migrates packag
 Object {
   "packageRules": Array [
     Object {
+      "excludePackageNames": Array [
+        "baz",
+      ],
+      "excludePackagePatterns": Array [
+        "^baz",
+      ],
       "matchBaseBranches": Array [
         "master",
       ],
@@ -265,12 +271,6 @@ Object {
       ],
       "matchManagers": Array [
         "dockerfile",
-      ],
-      "matchNotPackageNames": Array [
-        "baz",
-      ],
-      "matchNotPackagePatterns": Array [
-        "^baz",
       ],
       "matchPackageNames": Array [
         "foo",

@@ -205,8 +205,8 @@ export interface PackageRule
   matchDepTypes?: string[];
   matchPackageNames?: string[];
   matchPackagePatterns?: string[];
-  matchNotPackageNames?: string[];
-  matchNotPackagePatterns?: string[];
+  excludePackageNames?: string[];
+  excludePackagePatterns?: string[];
   matchCurrentVersion?: string | Range;
   matchSourceUrlPrefixes?: string[];
   matchUpdateTypes?: UpdateType[];

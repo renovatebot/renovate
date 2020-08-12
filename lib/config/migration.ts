@@ -506,8 +506,6 @@ export function migrateConfig(
         depTypeList: 'matchDepTypes',
         packageNames: 'matchPackageNames',
         packagePatterns: 'matchPackagePatterns',
-        excludePackageNames: 'matchNotPackageNames',
-        excludePackagePatterns: 'matchNotPackagePatterns',
         sourceUrlPrefixes: 'matchSourceUrlPrefixes',
         updateTypes: 'matchUpdateTypes',
       };

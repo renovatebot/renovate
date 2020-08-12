@@ -801,7 +801,7 @@ const options: RenovateOptions[] = [
     env: false,
   },
   {
-    name: 'matchNotPackageNames',
+    name: 'excludePackageNames',
     description:
       'Package names to exclude. Valid only within `packageRules` object',
     type: 'array',
@@ -828,7 +828,7 @@ const options: RenovateOptions[] = [
     env: false,
   },
   {
-    name: 'matchNotPackagePatterns',
+    name: 'excludePackagePatterns',
     description:
       'Package name patterns to exclude. Valid only within `packageRules` object.',
     type: 'array',
