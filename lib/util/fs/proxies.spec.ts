@@ -1,4 +1,3 @@
-/* env jest */
 import * as fs from 'fs-extra';
 import { remove } from './proxies';
 
