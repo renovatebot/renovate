@@ -15,7 +15,6 @@ const cacheNamespace = `datasource-${id}`;
 const cacheMinutes = 30;
 
 const githubHttp = new GithubHttp();
-
 const http = new Http(id);
 
 function shardParts(lookupName: string): string[] {

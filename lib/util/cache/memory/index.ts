@@ -1,7 +1,7 @@
 let memCache: Record<string, any>[] | undefined;
 
 export enum MemCacheBucket {
-  default = 0,
+  default,
   datasource,
 }
 
