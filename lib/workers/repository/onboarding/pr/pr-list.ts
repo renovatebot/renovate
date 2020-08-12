@@ -22,7 +22,7 @@ export function getPrList(
       prTitleRe,
       '@&#8203;$1'
     )}</summary>\n\n`;
-    if (branch.schedule && branch.schedule.length) {
+    if (branch.schedule?.length) {
       prDesc += `  - Schedule: ${JSON.stringify(branch.schedule)}\n`;
     }
     prDesc += `  - Branch name: \`${branch.branchName}\`\n`;

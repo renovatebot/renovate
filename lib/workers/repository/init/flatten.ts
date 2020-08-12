@@ -9,7 +9,7 @@ export function flattenPackageRules(
     return res;
   }
   for (const rule of packageRules) {
-    if (rule.packageRules && rule.packageRules.length) {
+    if (rule.packageRules?.length) {
       logger.debug('Flattening nested packageRules');
       for (const subrule of rule.packageRules) {
         const combinedRule = mergeChildConfig(rule, subrule);

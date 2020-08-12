@@ -572,6 +572,10 @@ Renovate does not do a "longest match" algorithm to pick between multiple matchi
 
 If you have any uncertainty about exactly which hosts a service uses, then it can be more reliable to use `domainName` instead of `hostName` or `baseUrl`. e.g. configure `"hostName": "docker.io"` to cover both `index.docker.io` and `auth.docker.io` and any other host that's in use.
 
+### enableHttp2
+
+Enable got [http2](https://github.com/sindresorhus/got/blob/v11.5.2/readme.md#http2) support.
+
 ### hostName
 
 ### hostType

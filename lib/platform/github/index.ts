@@ -145,6 +145,8 @@ async function getBranchProtection(
   return res.body;
 }
 
+let existingRepos;
+
 // Initialize GitHub by getting base branch and SHA
 export async function initRepo({
   endpoint,
@@ -313,15 +315,17 @@ export async function initRepo({
     config.parentRepo = config.repository;
     config.repository = null;
     // Get list of existing repos
-    const existingRepos = (
-      await githubApi.getJson<{ full_name: string }[]>(
-        'user/repos?per_page=100',
-        {
-          token: forkToken || opts.token,
-          paginate: true,
-        }
-      )
-    ).body.map((r) => r.full_name);
+    existingRepos =
+      existingRepos ||
+      (
+        await githubApi.getJson<{ full_name: string }[]>(
+          'user/repos?per_page=100',
+          {
+            token: forkToken || opts.token,
+            paginate: true,
+          }
+        )
+      ).body.map((r) => r.full_name);
     try {
       config.repository = (
         await githubApi.postJson<{ full_name: string }>(
@@ -366,8 +370,15 @@ export async function initRepo({
           'Error updating fork reference - will try deleting fork to try again next time'
         );
         try {
-          await githubApi.deleteJson(`repos/${config.repository}`);
+          await githubApi.deleteJson(`repos/${config.repository}`, {
+            token: forkToken || opts.token,
+          });
           logger.info('Fork deleted');
+          if (is.nonEmptyArray(existingRepos)) {
+            existingRepos = existingRepos.filter(
+              (existingRepo) => existingRepo !== config.repository
+            );
+          }
         } catch (deleteErr) {
           logger.warn({ err: deleteErr }, 'Could not delete fork');
         }
@@ -378,6 +389,7 @@ export async function initRepo({
       }
     } else {
       logger.debug({ repository_fork: config.repository }, 'Created fork');
+      existingRepos.push(config.repository);
       // Wait an arbitrary 30s to hopefully give GitHub enough time for forking to complete
       await delay(30000);
     }
@@ -622,8 +634,7 @@ async function getOpenPrs(): Promise<PrList> {
         delete pr.baseRefName;
         // https://developer.github.com/v4/enum/mergeablestate
         const canMergeStates = ['BEHIND', 'CLEAN'];
-        const hasNegativeReview =
-          pr.reviews && pr.reviews.nodes && pr.reviews.nodes.length > 0;
+        const hasNegativeReview = pr.reviews?.nodes?.length > 0;
         // istanbul ignore if
         if (hasNegativeReview) {
           pr.canMerge = false;
@@ -752,12 +763,12 @@ export async function getPrList(): Promise<Pr[]> {
       sha: pr.head.sha,
       title: pr.title,
       state:
-        pr.state === PR_STATE_CLOSED && pr.merged_at && pr.merged_at.length
+        pr.state === PR_STATE_CLOSED && pr.merged_at?.length
           ? /* istanbul ignore next */ 'merged'
           : pr.state,
       createdAt: pr.created_at,
       closed_at: pr.closed_at,
-      sourceRepo: pr.head && pr.head.repo ? pr.head.repo.full_name : undefined,
+      sourceRepo: pr.head?.repo?.full_name,
     }));
     logger.debug(`Retrieved ${config.prList.length} Pull Requests`);
   }
@@ -856,7 +867,7 @@ export async function getBranchStatus(
           check_runs: { name: string; status: string; conclusion: string }[];
         }>(checkRunsUrl, opts)
       ).body;
-      if (checkRunsRaw.check_runs && checkRunsRaw.check_runs.length) {
+      if (checkRunsRaw.check_runs?.length) {
         checkRuns = checkRunsRaw.check_runs.map((run) => ({
           name: run.name,
           status: run.status,
@@ -1142,11 +1153,7 @@ export async function ensureIssue({
     delete config.issueList;
     return 'created';
   } catch (err) /* istanbul ignore next */ {
-    if (
-      err.body &&
-      err.body.message &&
-      err.body.message.startsWith('Issues are disabled for this repo')
-    ) {
+    if (err.body?.message?.startsWith('Issues are disabled for this repo')) {
       logger.debug(
         `Issues are disabled, so could not create issue: ${err.message}`
       );

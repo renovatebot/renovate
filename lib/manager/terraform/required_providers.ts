@@ -25,7 +25,6 @@ export function extractTerraformRequiredProviders(
     if (kvMatch) {
       dep.currentValue = kvMatch.groups.value;
       dep.managerData.moduleName = kvMatch.groups.key;
-      dep.managerData.versionLine = lineNumber;
       deps.push(dep);
     }
   } while (line.trim() !== '}');

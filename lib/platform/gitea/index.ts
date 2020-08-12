@@ -822,6 +822,7 @@ const platform: Platform = {
   },
 };
 
+// eslint-disable-next-line @typescript-eslint/unbound-method
 export const {
   addAssignees,
   addReviewers,
