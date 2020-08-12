@@ -32,14 +32,13 @@ describe(getName(__filename), () => {
       env.getChildProcessEnv.mockReturnValue(envMock.basic);
     });
     it('returns if no lernaClient', async () => {
-      const res = await lernaHelper.generateLockFiles({}, 'some-dir', {}, {});
+      const res = await lernaHelper.generateLockFiles({}, 'some-dir', {});
       expect(res.error).toBe(false);
     });
     it('returns if invalid lernaClient', async () => {
       const res = await lernaHelper.generateLockFiles(
         lernaPkgFile('foo'),
         'some-dir',
-        {},
         {}
       );
       expect(res.error).toBe(false);
@@ -50,7 +49,6 @@ describe(getName(__filename), () => {
       const res = await lernaHelper.generateLockFiles(
         lernaPkgFile('npm'),
         'some-dir',
-        {},
         {},
         skipInstalls
       );
@@ -64,7 +62,6 @@ describe(getName(__filename), () => {
         lernaPkgFile('npm'),
         'some-dir',
         {},
-        {},
         skipInstalls
       );
       expect(res.error).toBe(false);
@@ -75,8 +72,7 @@ describe(getName(__filename), () => {
       const res = await lernaHelper.generateLockFiles(
         lernaPkgFile('yarn'),
         'some-dir',
-        { compatibility: { yarn: '^1.10.0' } },
-        {}
+        { compatibility: { yarn: '^1.10.0' } }
       );
       expect(execSnapshots).toMatchSnapshot();
       expect(res.error).toBe(false);
@@ -86,7 +82,6 @@ describe(getName(__filename), () => {
       const res = await lernaHelper.generateLockFiles(
         lernaPkgFileWithoutLernaDep('npm'),
         'some-dir',
-        {},
         {}
       );
       expect(res.error).toBe(false);
@@ -100,8 +95,7 @@ describe(getName(__filename), () => {
         {
           dockerMapDotfiles: true,
           compatibility: { npm: '^6.0.0' },
-        },
-        {}
+        }
       );
       expect(res.error).toBe(false);
       expect(execSnapshots).toMatchSnapshot();
@@ -112,7 +106,6 @@ describe(getName(__filename), () => {
       const res = await lernaHelper.generateLockFiles(
         lernaPkgFile('npm'),
         'some-dir',
-        {},
         {}
       );
       delete global.trustLevel;

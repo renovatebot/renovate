@@ -429,7 +429,6 @@ export async function getAdditionalFiles(
     );
     const res = await npm.generateLockFile(
       fullLockFileDir,
-      env,
       fileName,
       config,
       upgrades
@@ -492,7 +491,6 @@ export async function getAdditionalFiles(
     );
     const res = await yarn.generateLockFile(
       upath.join(config.localDir, lockFileDir),
-      env,
       config,
       upgrades
     );
@@ -594,7 +592,6 @@ export async function getAdditionalFiles(
     );
     const res = await pnpm.generateLockFile(
       upath.join(config.localDir, lockFileDir),
-      env,
       config,
       upgrades
     );
@@ -670,7 +667,6 @@ export async function getAdditionalFiles(
       lernaPackageFile,
       fullLearnaFileDir,
       config,
-      env,
       skipInstalls
     );
     // istanbul ignore else

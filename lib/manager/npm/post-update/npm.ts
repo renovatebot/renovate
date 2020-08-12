@@ -4,6 +4,7 @@ import { join } from 'upath';
 import { SYSTEM_INSUFFICIENT_DISK_SPACE } from '../../../constants/error-messages';
 import { logger } from '../../../logger';
 import { ExecOptions, exec } from '../../../util/exec';
+import { getChildProcessEnv } from '../../../util/exec/env';
 import { move, pathExists, readFile, remove } from '../../../util/fs';
 import { PostUpdateConfig, Upgrade } from '../../common';
 import { getNodeConstraint } from './node-version';
@@ -16,7 +17,6 @@ export interface GenerateLockFileResult {
 
 export async function generateLockFile(
   cwd: string,
-  env: NodeJS.ProcessEnv,
   filename: string,
   config: PostUpdateConfig = {},
   upgrades: Upgrade[] = []
@@ -44,7 +44,14 @@ export async function generateLockFile(
     const tagConstraint = await getNodeConstraint(config);
     const execOptions: ExecOptions = {
       cwd,
-      extraEnv: env,
+      extraEnv: getChildProcessEnv([
+        'NPM_CONFIG_CACHE',
+        'YARN_CACHE_FOLDER',
+        'npm_config_store',
+        'NPM_AUTH',
+        'NPM_EMAIL',
+        'NPM_TOKEN',
+      ]),
       docker: {
         image: 'renovate/node',
         tagScheme: 'npm',

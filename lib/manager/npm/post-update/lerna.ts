@@ -3,6 +3,7 @@ import { quote } from 'shlex';
 import { join } from 'upath';
 import { logger } from '../../../logger';
 import { ExecOptions, exec } from '../../../util/exec';
+import { getChildProcessEnv } from '../../../util/exec/env';
 import { PackageFile, PostUpdateConfig } from '../../common';
 import { getNodeConstraint } from './node-version';
 import { optimizeCommand } from './yarn';
@@ -30,7 +31,6 @@ export async function generateLockFiles(
   lernaPackageFile: Partial<PackageFile>,
   cwd: string,
   config: PostUpdateConfig,
-  env: NodeJS.ProcessEnv,
   skipInstalls?: boolean
 ): Promise<GenerateLockFileResult> {
   const lernaClient = lernaPackageFile.lernaClient;
@@ -78,10 +78,14 @@ export async function generateLockFiles(
     const tagConstraint = await getNodeConstraint(config);
     const execOptions: ExecOptions = {
       cwd,
-      extraEnv: {
-        NPM_CONFIG_CACHE: env.NPM_CONFIG_CACHE,
-        npm_config_store: env.npm_config_store,
-      },
+      extraEnv: getChildProcessEnv([
+        'NPM_CONFIG_CACHE',
+        'YARN_CACHE_FOLDER',
+        'npm_config_store',
+        'NPM_AUTH',
+        'NPM_EMAIL',
+        'NPM_TOKEN',
+      ]),
       docker: {
         image: 'renovate/node',
         tagScheme: 'npm',

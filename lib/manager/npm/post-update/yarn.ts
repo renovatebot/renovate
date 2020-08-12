@@ -7,6 +7,7 @@ import { id as npmId } from '../../../datasource/npm';
 import { logger } from '../../../logger';
 import { ExternalHostError } from '../../../types/errors/external-host-error';
 import { ExecOptions, exec } from '../../../util/exec';
+import { getChildProcessEnv } from '../../../util/exec/env';
 import { readFile, remove } from '../../../util/fs';
 import { PostUpdateConfig, Upgrade } from '../../common';
 import { getNodeConstraint } from './node-version';
@@ -39,7 +40,6 @@ export const optimizeCommand =
 
 export async function generateLockFile(
   cwd: string,
-  env: NodeJS.ProcessEnv,
   config: PostUpdateConfig = {},
   upgrades: Upgrade[] = []
 ): Promise<GenerateLockFileResult> {
@@ -70,7 +70,14 @@ export async function generateLockFile(
     const tagConstraint = await getNodeConstraint(config);
     const execOptions: ExecOptions = {
       cwd,
-      extraEnv: env,
+      extraEnv: getChildProcessEnv([
+        'NPM_CONFIG_CACHE',
+        'YARN_CACHE_FOLDER',
+        'npm_config_store',
+        'NPM_AUTH',
+        'NPM_EMAIL',
+        'NPM_TOKEN',
+      ]),
       docker: {
         image: 'renovate/node',
         tagScheme: 'npm',

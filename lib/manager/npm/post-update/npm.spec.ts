@@ -33,7 +33,6 @@ describe('generateLockFile', () => {
     ];
     const res = await npmHelper.generateLockFile(
       'some-dir',
-      {},
       'package-lock.json',
       { dockerMapDotfiles, skipInstalls, postUpdateOptions },
       updates
@@ -52,7 +51,6 @@ describe('generateLockFile', () => {
     ];
     const res = await npmHelper.generateLockFile(
       'some-dir',
-      {},
       'package-lock.json',
       { skipInstalls },
       updates
@@ -70,7 +68,6 @@ describe('generateLockFile', () => {
     const skipInstalls = true;
     const res = await npmHelper.generateLockFile(
       'some-dir',
-      {},
       'npm-shrinkwrap.json',
       { skipInstalls }
     );
@@ -99,7 +96,6 @@ describe('generateLockFile', () => {
     const skipInstalls = true;
     const res = await npmHelper.generateLockFile(
       'some-dir',
-      {},
       'npm-shrinkwrap.json',
       { skipInstalls }
     );
@@ -123,7 +119,6 @@ describe('generateLockFile', () => {
     const binarySource = BinarySource.Global;
     const res = await npmHelper.generateLockFile(
       'some-dir',
-      {},
       'package-lock.json',
       { skipInstalls, binarySource }
     );
@@ -139,7 +134,6 @@ describe('generateLockFile', () => {
     }) as never;
     const res = await npmHelper.generateLockFile(
       'some-dir',
-      {},
       'package-lock.json'
     );
     expect(fs.readFile).toHaveBeenCalledTimes(1);
@@ -152,7 +146,6 @@ describe('generateLockFile', () => {
     fs.readFile = jest.fn(() => 'package-lock-contents') as never;
     const res = await npmHelper.generateLockFile(
       'some-dir',
-      {},
       'package-lock.json'
     );
     expect(fs.readFile).toHaveBeenCalledTimes(1);
@@ -164,7 +157,6 @@ describe('generateLockFile', () => {
     fs.readFile = jest.fn(() => 'package-lock-contents') as never;
     const res = await npmHelper.generateLockFile(
       'some-dir',
-      {},
       'package-lock.json',
       { binarySource: BinarySource.Docker, compatibility: { npm: '^6.0.0' } }
     );
@@ -177,7 +169,6 @@ describe('generateLockFile', () => {
     fs.readFile = jest.fn(() => 'package-lock-contents') as never;
     const res = await npmHelper.generateLockFile(
       'some-dir',
-      {},
       'package-lock.json',
       {},
       [{ isLockFileMaintenance: true }]

@@ -45,7 +45,7 @@ describe(getName(__filename), () => {
         },
         postUpdateOptions: ['yarnDedupeFewer', 'yarnDedupeHighest'],
       };
-      const res = await yarnHelper.generateLockFile('some-dir', {}, config);
+      const res = await yarnHelper.generateLockFile('some-dir', config);
       expect(fs.readFile).toHaveBeenCalledTimes(2);
       expect(fs.remove).toHaveBeenCalledTimes(0);
       expect(res.lockFile).toEqual('package-lock-contents');
@@ -62,7 +62,7 @@ describe(getName(__filename), () => {
 
       fs.readFile.mockResolvedValue(null); // .yarnrc
       fs.readFile.mockResolvedValue('package-lock-contents' as never);
-      const res = await yarnHelper.generateLockFile('some-dir', {}, {}, [
+      const res = await yarnHelper.generateLockFile('some-dir', {}, [
         {
           depName: 'some-dep',
           isLockfileUpdate: true,
@@ -84,7 +84,7 @@ describe(getName(__filename), () => {
         'yarn-offline-mirror ./npm-packages-offline-cache' as never
       );
       fs.readFile.mockReturnValueOnce('package-lock-contents' as never);
-      const res = await yarnHelper.generateLockFile('some-dir', {}, {}, [
+      const res = await yarnHelper.generateLockFile('some-dir', {}, [
         {
           depName: 'some-dep',
           isLockfileUpdate: true,
@@ -110,7 +110,7 @@ describe(getName(__filename), () => {
         },
         postUpdateOptions: ['yarnDedupeFewer', 'yarnDedupeHighest'],
       };
-      const res = await yarnHelper.generateLockFile('some-dir', {}, config, [
+      const res = await yarnHelper.generateLockFile('some-dir', config, [
         { isLockFileMaintenance: true },
       ]);
       expect(fs.readFile).toHaveBeenCalledTimes(2);
@@ -128,7 +128,7 @@ describe(getName(__filename), () => {
     fs.readFile.mockImplementationOnce(() => {
       throw new Error('not-found');
     });
-    const res = await yarnHelper.generateLockFile('some-dir', {});
+    const res = await yarnHelper.generateLockFile('some-dir');
     expect(fs.readFile).toHaveBeenCalledTimes(2);
     expect(res.error).toBe(true);
     expect(res.lockFile).not.toBeDefined();
