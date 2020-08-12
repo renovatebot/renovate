@@ -1,5 +1,6 @@
 import { logger } from '../../logger';
 import { ExternalHostError } from '../../types/errors/external-host-error';
+import { MemCacheBucket } from '../../util/cache/memory';
 import * as packageCache from '../../util/cache/package';
 import { Http } from '../../util/http';
 import { GetReleasesConfig, ReleaseResult } from '../common';
@@ -7,8 +8,7 @@ import { GetReleasesConfig, ReleaseResult } from '../common';
 export const id = 'terraform-module';
 export const defaultRegistryUrls = ['https://registry.terraform.io'];
 export const registryStrategy = 'first';
-
-const http = new Http(id);
+const http = new Http(id, { cacheBucket: MemCacheBucket.datasource });
 
 interface RegistryRepository {
   registry: string;

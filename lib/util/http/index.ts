@@ -4,6 +4,7 @@ import got, { Options } from 'got';
 import { HOST_DISABLED } from '../../constants/error-messages';
 import { ExternalHostError } from '../../types/errors/external-host-error';
 import * as memCache from '../cache/memory';
+import { MemCacheBucket } from '../cache/memory';
 import { clone } from '../clone';
 import { applyAuthorization, removeAuthorization } from './auth';
 import { applyHostRules } from './host-rules';
@@ -26,6 +27,7 @@ export interface HttpOptions {
   headers?: OutgoingHttpHeaders;
   throwHttpErrors?: boolean;
   useCache?: boolean;
+  cacheBucket?: MemCacheBucket;
 }
 
 export interface HttpPostOptions extends HttpOptions {
@@ -79,7 +81,16 @@ function applyDefaultHeaders(options: Options): void {
 }
 
 export class Http<GetOptions = HttpOptions, PostOptions = HttpPostOptions> {
-  constructor(private hostType: string, private options?: HttpOptions) {}
+  protected defaultCacheBucket = MemCacheBucket.default;
+
+  private readonly options: HttpOptions;
+
+  constructor(private hostType: string, options?: HttpOptions) {
+    this.options = {
+      cacheBucket: MemCacheBucket.default,
+      ...options,
+    };
+  }
 
   protected async request<T>(
     requestUrl: string | URL,
@@ -118,7 +129,7 @@ export class Http<GetOptions = HttpOptions, PostOptions = HttpPostOptions> {
       .digest('hex');
     if (options.method === 'get' && options.useCache !== false) {
       // return from cache if present
-      const cachedRes = memCache.get(cacheKey);
+      const cachedRes = memCache.get(cacheKey, this.options.cacheBucket);
       // istanbul ignore if
       if (cachedRes) {
         return resolveResponse<T>(cachedRes, options);
@@ -127,7 +138,7 @@ export class Http<GetOptions = HttpOptions, PostOptions = HttpPostOptions> {
     const startTime = Date.now();
     const promisedRes = got<T>(url, options);
     if (options.method === 'get') {
-      memCache.set(cacheKey, promisedRes); // always set if it's a get
+      memCache.set(cacheKey, promisedRes, this.options.cacheBucket); // always set if it's a get
     }
     const res = await resolveResponse<T>(promisedRes, options);
     const httpRequests = memCache.get('http-requests') || [];

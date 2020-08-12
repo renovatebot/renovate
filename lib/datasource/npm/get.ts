@@ -7,6 +7,7 @@ import registryAuthToken from 'registry-auth-token';
 import getRegistryUrl from 'registry-auth-token/registry-url';
 import { logger } from '../../logger';
 import { ExternalHostError } from '../../types/errors/external-host-error';
+import { MemCacheBucket } from '../../util/cache/memory';
 import * as packageCache from '../../util/cache/package';
 import { find } from '../../util/host-rules';
 import { Http, HttpOptions } from '../../util/http';
@@ -15,7 +16,7 @@ import { Release, ReleaseResult } from '../common';
 import { id } from './common';
 import { getNpmrc } from './npmrc';
 
-const http = new Http(id);
+const http = new Http(id, { cacheBucket: MemCacheBucket.datasource });
 
 let memcache: Record<string, string> = {};
 

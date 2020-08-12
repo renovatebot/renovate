@@ -2,6 +2,7 @@ import url from 'url';
 import changelogFilenameRegex from 'changelog-filename-regex';
 import { parse } from 'node-html-parser';
 import { logger } from '../../logger';
+import { MemCacheBucket } from '../../util/cache/memory';
 import { Http } from '../../util/http';
 import { ensureTrailingSlash } from '../../util/url';
 import { matches } from '../../versioning/pep440';
@@ -15,7 +16,7 @@ export const defaultRegistryUrls = [
 export const registryStrategy = 'merge';
 
 const github_repo_pattern = /^https?:\/\/github\.com\/[^\\/]+\/[^\\/]+$/;
-const http = new Http(id);
+const http = new Http(id, { cacheBucket: MemCacheBucket.datasource });
 
 type Releases = Record<
   string,

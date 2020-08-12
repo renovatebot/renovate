@@ -1,13 +1,14 @@
 import * as semver from 'semver';
 import { XmlDocument } from 'xmldoc';
 import { logger } from '../../logger';
+import { MemCacheBucket } from '../../util/cache/memory';
 import * as packageCache from '../../util/cache/package';
 import { Http } from '../../util/http';
 import { ReleaseResult } from '../common';
 
 import { id } from './common';
 
-const http = new Http(id);
+const http = new Http(id, { cacheBucket: MemCacheBucket.datasource });
 
 // https://api.nuget.org/v3/index.json is a default official nuget feed
 const defaultNugetFeed = 'https://api.nuget.org/v3/index.json';

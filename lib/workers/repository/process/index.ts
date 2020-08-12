@@ -2,6 +2,8 @@ import { RenovateConfig, mergeChildConfig } from '../../../config';
 import { logger } from '../../../logger';
 import { PackageFile } from '../../../manager/common';
 import { platform } from '../../../platform';
+import * as memCache from '../../../util/cache/memory';
+import { MemCacheBucket } from '../../../util/cache/memory';
 import { addSplit } from '../../../util/split';
 import { BranchConfig } from '../../common';
 import { ExtractResult, extract, lookup, update } from './extract-update';
@@ -87,6 +89,7 @@ export async function extractDependencies(
     addSplit('extract');
     res = await lookup(config, packageFiles);
   }
+  memCache.reset(MemCacheBucket.datasource);
   addSplit('lookup');
   return res;
 }

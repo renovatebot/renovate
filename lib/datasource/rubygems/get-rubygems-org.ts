@@ -1,10 +1,11 @@
 import { logger } from '../../logger';
 import { ExternalHostError } from '../../types/errors/external-host-error';
+import { MemCacheBucket } from '../../util/cache/memory';
 import { Http } from '../../util/http';
 import { ReleaseResult } from '../common';
 import { id } from './common';
 
-const http = new Http(id);
+const http = new Http(id, { cacheBucket: MemCacheBucket.datasource });
 
 let lastSync = new Date('2000-01-01');
 let packageReleases: Record<string, string[]> = Object.create(null); // Because we might need a "constructor" key

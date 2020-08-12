@@ -1,10 +1,10 @@
 import { ExternalHostError } from '../../types/errors/external-host-error';
+import { MemCacheBucket } from '../../util/cache/memory';
 import { Http, HttpResponse } from '../../util/http';
 import { GetReleasesConfig, ReleaseResult } from '../common';
 
 export const id = 'dart';
-
-const http = new Http(id);
+const http = new Http(id, { cacheBucket: MemCacheBucket.datasource });
 
 export async function getReleases({
   lookupName,

@@ -1,4 +1,5 @@
 import { logger } from '../../logger';
+import { MemCacheBucket } from '../../util/cache/memory';
 import { Http } from '../../util/http';
 import { regEx } from '../../util/regex';
 import { DigestConfig, GetReleasesConfig, ReleaseResult } from '../common';
@@ -6,8 +7,7 @@ import * as github from '../github-tags';
 import * as gitlab from '../gitlab-tags';
 
 export const id = 'go';
-
-const http = new Http(id);
+const http = new Http(id, { cacheBucket: MemCacheBucket.datasource });
 
 interface DataSource {
   datasource: string;

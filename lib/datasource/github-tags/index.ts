@@ -1,11 +1,11 @@
 import { logger } from '../../logger';
+import { MemCacheBucket } from '../../util/cache/memory';
 import * as packageCache from '../../util/cache/package';
 import { GithubHttp } from '../../util/http/github';
 import { DigestConfig, GetReleasesConfig, ReleaseResult } from '../common';
 
 export const id = 'github-tags';
-
-const http = new GithubHttp();
+const http = new GithubHttp({ cacheBucket: MemCacheBucket.datasource });
 
 const cacheNamespace = 'datasource-github-tags';
 function getCacheKey(repo: string, type: string): string {

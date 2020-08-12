@@ -4,6 +4,7 @@ import pAll from 'p-all';
 import { logger } from '../../logger';
 import { ExternalHostError } from '../../types/errors/external-host-error';
 import * as memCache from '../../util/cache/memory';
+import { MemCacheBucket } from '../../util/cache/memory';
 import * as packageCache from '../../util/cache/package';
 import * as hostRules from '../../util/host-rules';
 import { Http, HttpOptions } from '../../util/http';
@@ -12,8 +13,7 @@ import { GetReleasesConfig, ReleaseResult } from '../common';
 export const id = 'packagist';
 export const defaultRegistryUrls = ['https://packagist.org'];
 export const registryStrategy = 'hunt';
-
-const http = new Http(id);
+const http = new Http(id, { cacheBucket: MemCacheBucket.datasource });
 
 // We calculate auth at this datasource layer so that we can know whether it's safe to cache or not
 function getHostOpts(url: string): HttpOptions {

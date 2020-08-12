@@ -2,6 +2,7 @@ import crypto from 'crypto';
 import { HOST_DISABLED } from '../../constants/error-messages';
 import { logger } from '../../logger';
 import { ExternalHostError } from '../../types/errors/external-host-error';
+import { MemCacheBucket } from '../../util/cache/memory';
 import * as packageCache from '../../util/cache/package';
 import { Http, HttpError } from '../../util/http';
 import { GithubHttp } from '../../util/http/github';
@@ -14,9 +15,9 @@ export const registryStrategy = 'hunt';
 
 const cacheNamespace = `datasource-${id}`;
 const cacheMinutes = 30;
+const githubHttp = new GithubHttp({ cacheBucket: MemCacheBucket.datasource });
 
-const githubHttp = new GithubHttp();
-const http = new Http(id);
+const http = new Http(id, { cacheBucket: MemCacheBucket.datasource });
 
 function shardParts(lookupName: string): string[] {
   return crypto

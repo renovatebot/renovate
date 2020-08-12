@@ -1,11 +1,12 @@
 import { logger } from '../../logger';
 import { ExternalHostError } from '../../types/errors/external-host-error';
+import { MemCacheBucket } from '../../util/cache/memory';
 import { clone } from '../../util/clone';
 import { Http } from '../../util/http';
 import { GetReleasesConfig, Release, ReleaseResult } from '../common';
 import { id } from './common';
 
-const http = new Http(id);
+const http = new Http(id, { cacheBucket: MemCacheBucket.datasource });
 
 const packageInfoUrl =
   'https://updates.jenkins.io/current/update-center.actual.json';

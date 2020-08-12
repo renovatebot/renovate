@@ -1,3 +1,4 @@
+import { MemCacheBucket } from '../../util/cache/memory';
 import * as packageCache from '../../util/cache/package';
 import { GithubHttp } from '../../util/http/github';
 import { GetReleasesConfig, ReleaseResult } from '../common';
@@ -5,8 +6,7 @@ import { GetReleasesConfig, ReleaseResult } from '../common';
 export const id = 'github-releases';
 
 const cacheNamespace = 'datasource-github-releases';
-
-const http = new GithubHttp();
+const http = new GithubHttp({ cacheBucket: MemCacheBucket.datasource });
 
 type GithubRelease = {
   tag_name: string;

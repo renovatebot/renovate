@@ -1,9 +1,10 @@
 import URL from 'url';
+import { MemCacheBucket } from '../../util/cache/memory';
 import * as packageCache from '../../util/cache/package';
 import { GitlabHttp } from '../../util/http/gitlab';
 import { GetReleasesConfig, ReleaseResult } from '../common';
 
-const gitlabApi = new GitlabHttp();
+const gitlabApi = new GitlabHttp({ cacheBucket: MemCacheBucket.datasource });
 
 export const id = 'gitlab-tags';
 export const defaultRegistryUrls = ['https://gitlab.com'];
