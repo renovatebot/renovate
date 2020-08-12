@@ -145,6 +145,8 @@ async function getBranchProtection(
   return res.body;
 }
 
+let existingRepos;
+
 // Initialize GitHub by getting base branch and SHA
 export async function initRepo({
   endpoint,
@@ -313,15 +315,17 @@ export async function initRepo({
     config.parentRepo = config.repository;
     config.repository = null;
     // Get list of existing repos
-    const existingRepos = (
-      await githubApi.getJson<{ full_name: string }[]>(
-        'user/repos?per_page=100',
-        {
-          token: forkToken || opts.token,
-          paginate: true,
-        }
-      )
-    ).body.map((r) => r.full_name);
+    existingRepos =
+      existingRepos ||
+      (
+        await githubApi.getJson<{ full_name: string }[]>(
+          'user/repos?per_page=100',
+          {
+            token: forkToken || opts.token,
+            paginate: true,
+          }
+        )
+      ).body.map((r) => r.full_name);
     try {
       config.repository = (
         await githubApi.postJson<{ full_name: string }>(
@@ -366,8 +370,15 @@ export async function initRepo({
           'Error updating fork reference - will try deleting fork to try again next time'
         );
         try {
-          await githubApi.deleteJson(`repos/${config.repository}`);
+          await githubApi.deleteJson(`repos/${config.repository}`, {
+            token: forkToken || opts.token,
+          });
           logger.info('Fork deleted');
+          if (is.nonEmptyArray(existingRepos)) {
+            existingRepos = existingRepos.filter(
+              (existingRepo) => existingRepo !== config.repository
+            );
+          }
         } catch (deleteErr) {
           logger.warn({ err: deleteErr }, 'Could not delete fork');
         }
@@ -378,6 +389,7 @@ export async function initRepo({
       }
     } else {
       logger.debug({ repository_fork: config.repository }, 'Created fork');
+      existingRepos.push(config.repository);
       // Wait an arbitrary 30s to hopefully give GitHub enough time for forking to complete
       await delay(30000);
     }

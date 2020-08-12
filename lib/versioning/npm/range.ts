@@ -113,6 +113,9 @@ export function getNewValue({
           ? `>= ${toVersion}`
           : `>=${toVersion}`;
       }
+      if (element.operator.startsWith('<')) {
+        return currentValue;
+      }
     }
     logger.debug(
       'Unsupported range type for rangeStrategy=bump: ' + currentValue

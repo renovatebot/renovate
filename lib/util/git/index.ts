@@ -64,6 +64,7 @@ function checkForPlatformFailure(err: Error): void {
   ];
   for (const errorStr of platformFailureStrings) {
     if (err.message.includes(errorStr)) {
+      logger.debug({ err }, 'Converting git error to ExternalHostError');
       throw new ExternalHostError(err, 'git');
     }
   }
@@ -193,7 +194,7 @@ export async function syncGit(): Promise<void> {
       await git.clone(config.url, '.', opts);
     } catch (err) /* istanbul ignore next */ {
       logger.debug({ err }, 'git clone error');
-      if (err.message?.includes('write error: No space left on device')) {
+      if (err.message?.includes('No space left on device')) {
         throw new Error(SYSTEM_INSUFFICIENT_DISK_SPACE);
       }
       throw new ExternalHostError(err, 'git');
@@ -321,8 +322,10 @@ export async function setBranch(branchName: string): Promise<string> {
       await git.raw(['rev-parse', 'origin/' + branchName])
     ).trim();
     await git.checkout([branchName, '-f']);
-    const latestCommitDate = (await git.log({ n: 1 })).latest.date;
-    logger.debug({ branchName, latestCommitDate }, 'latest commit');
+    const latestCommitDate = (await git.log({ n: 1 }))?.latest?.date;
+    if (latestCommitDate) {
+      logger.debug({ branchName, latestCommitDate }, 'latest commit');
+    }
     await git.reset(ResetMode.HARD);
     return config.currentBranchSha;
   } catch (err) /* istanbul ignore next */ {
