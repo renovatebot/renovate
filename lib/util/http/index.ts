@@ -81,16 +81,9 @@ function applyDefaultHeaders(options: Options): void {
 }
 
 export class Http<GetOptions = HttpOptions, PostOptions = HttpPostOptions> {
-  protected defaultCacheBucket = MemCacheBucket.default;
+  protected cacheBucket = MemCacheBucket.default;
 
-  private readonly options: HttpOptions;
-
-  constructor(private hostType: string, options?: HttpOptions) {
-    this.options = {
-      cacheBucket: MemCacheBucket.default,
-      ...options,
-    };
-  }
+  constructor(private hostType: string, private options?: HttpOptions) {}
 
   protected async request<T>(
     requestUrl: string | URL,
@@ -129,7 +122,7 @@ export class Http<GetOptions = HttpOptions, PostOptions = HttpPostOptions> {
       .digest('hex');
     if (options.method === 'get' && options.useCache !== false) {
       // return from cache if present
-      const cachedRes = memCache.get(cacheKey, this.options.cacheBucket);
+      const cachedRes = memCache.get(cacheKey, this.cacheBucket);
       // istanbul ignore if
       if (cachedRes) {
         return resolveResponse<T>(cachedRes, options);
@@ -138,7 +131,7 @@ export class Http<GetOptions = HttpOptions, PostOptions = HttpPostOptions> {
     const startTime = Date.now();
     const promisedRes = got<T>(url, options);
     if (options.method === 'get') {
-      memCache.set(cacheKey, promisedRes, this.options.cacheBucket); // always set if it's a get
+      memCache.set(cacheKey, promisedRes, this.cacheBucket); // always set if it's a get
     }
     const res = await resolveResponse<T>(promisedRes, options);
     const httpRequests = memCache.get('http-requests') || [];

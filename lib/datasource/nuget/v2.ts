@@ -1,12 +1,11 @@
 import { XmlDocument, XmlElement } from 'xmldoc';
 import { logger } from '../../logger';
-import { MemCacheBucket } from '../../util/cache/memory';
-import { Http } from '../../util/http';
+import { Http } from '../../util/http/datasource';
 import { ReleaseResult } from '../common';
 
 import { id } from './common';
 
-const http = new Http(id, { cacheBucket: MemCacheBucket.datasource });
+const http = new Http(id);
 
 function getPkgProp(pkgInfo: XmlElement, propName: string): string {
   return pkgInfo.childNamed('m:properties').childNamed(`d:${propName}`)?.val;

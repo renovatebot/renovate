@@ -1,12 +1,11 @@
 import { OutgoingHttpHeaders } from 'http';
 import { logger } from '../../logger';
-import { MemCacheBucket } from '../../util/cache/memory';
-import { Http } from '../../util/http';
+import { Http } from '../../util/http/datasource';
 import { ensureTrailingSlash } from '../../util/url';
 import { ReleaseResult } from '../common';
 import { id } from './common';
 
-const http = new Http(id, { cacheBucket: MemCacheBucket.datasource });
+const http = new Http(id);
 
 const INFO_PATH = '/api/v1/gems';
 const VERSIONS_PATH = '/api/v1/versions';

@@ -1,11 +1,10 @@
 import { logger } from '../../logger';
-import { MemCacheBucket } from '../../util/cache/memory';
 import * as packageCache from '../../util/cache/package';
-import { Http } from '../../util/http';
+import { Http } from '../../util/http/datasource';
 import { GetReleasesConfig, ReleaseResult } from '../common';
 
 export const id = 'orb';
-const http = new Http(id, { cacheBucket: MemCacheBucket.datasource });
+const http = new Http(id);
 
 interface OrbRelease {
   homeUrl?: string;

@@ -8,10 +8,9 @@ import { HOST_DISABLED } from '../../constants/error-messages';
 import { logger } from '../../logger';
 import { HostRule } from '../../types';
 import { ExternalHostError } from '../../types/errors/external-host-error';
-import { MemCacheBucket } from '../../util/cache/memory';
 import * as packageCache from '../../util/cache/package';
 import * as hostRules from '../../util/host-rules';
-import { Http, HttpResponse } from '../../util/http';
+import { Http, HttpResponse } from '../../util/http/datasource';
 import { GetReleasesConfig, ReleaseResult } from '../common';
 
 // TODO: add got typings when available
@@ -49,7 +48,7 @@ export const defaultConfig = {
     commitMessageTopic: '{{{groupName}}} Docker tags',
   },
 };
-const http = new Http(id, { cacheBucket: MemCacheBucket.datasource });
+const http = new Http(id);
 
 const ecrRegex = /\d+\.dkr\.ecr\.([-a-z0-9]+)\.amazonaws\.com/;
 

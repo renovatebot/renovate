@@ -1,14 +1,13 @@
 import { parse } from 'node-html-parser';
 
 import { ExternalHostError } from '../../types/errors/external-host-error';
-import { MemCacheBucket } from '../../util/cache/memory';
 import * as packageCache from '../../util/cache/package';
-import { Http } from '../../util/http';
+import { Http } from '../../util/http/datasource';
 import { isVersion } from '../../versioning/ruby';
 import { GetReleasesConfig, ReleaseResult } from '../common';
 
 export const id = 'ruby-version';
-const http = new Http(id, { cacheBucket: MemCacheBucket.datasource });
+const http = new Http(id);
 
 const rubyVersionsUrl = 'https://www.ruby-lang.org/en/downloads/releases/';
 

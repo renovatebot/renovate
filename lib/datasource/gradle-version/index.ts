@@ -1,13 +1,12 @@
 import { ExternalHostError } from '../../types/errors/external-host-error';
-import { MemCacheBucket } from '../../util/cache/memory';
-import { Http } from '../../util/http';
+import { Http } from '../../util/http/datasource';
 import { regEx } from '../../util/regex';
 import { GetReleasesConfig, ReleaseResult } from '../common';
 
 export const id = 'gradle-version';
 export const defaultRegistryUrls = ['https://services.gradle.org/versions/all'];
 export const registryStrategy = 'merge';
-const http = new Http(id, { cacheBucket: MemCacheBucket.datasource });
+const http = new Http(id);
 
 interface GradleRelease {
   snapshot?: boolean;

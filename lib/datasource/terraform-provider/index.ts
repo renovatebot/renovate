@@ -1,8 +1,7 @@
 import URL from 'url';
 import { logger } from '../../logger';
-import { MemCacheBucket } from '../../util/cache/memory';
 import * as packageCache from '../../util/cache/package';
-import { Http } from '../../util/http';
+import { Http } from '../../util/http/datasource';
 import { GetReleasesConfig, ReleaseResult } from '../common';
 import { getTerraformServiceDiscoveryResult } from '../terraform-module';
 
@@ -12,7 +11,7 @@ export const defaultRegistryUrls = [
   'https://releases.hashicorp.com',
 ];
 export const registryStrategy = 'hunt';
-const http = new Http(id, { cacheBucket: MemCacheBucket.datasource });
+const http = new Http(id);
 
 interface TerraformProvider {
   namespace: string;

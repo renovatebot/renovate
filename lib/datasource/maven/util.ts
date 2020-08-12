@@ -2,7 +2,7 @@ import url from 'url';
 import { HOST_DISABLED } from '../../constants/error-messages';
 import { logger } from '../../logger';
 import { ExternalHostError } from '../../types/errors/external-host-error';
-import { Http } from '../../util/http';
+import { Http } from '../../util/http/datasource';
 
 import { MAVEN_REPO, id } from './common';
 

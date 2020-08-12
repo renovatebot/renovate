@@ -2,14 +2,13 @@ import yaml from 'js-yaml';
 
 import { logger } from '../../logger';
 import { ExternalHostError } from '../../types/errors/external-host-error';
-import { MemCacheBucket } from '../../util/cache/memory';
 import * as packageCache from '../../util/cache/package';
-import { Http } from '../../util/http';
+import { Http } from '../../util/http/datasource';
 import { ensureTrailingSlash } from '../../util/url';
 import { GetReleasesConfig, ReleaseResult } from '../common';
 
 export const id = 'helm';
-const http = new Http(id, { cacheBucket: MemCacheBucket.datasource });
+const http = new Http(id);
 
 export const defaultRegistryUrls = [
   'https://kubernetes-charts.storage.googleapis.com/',

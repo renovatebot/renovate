@@ -1,11 +1,10 @@
 import { ExternalHostError } from '../../types/errors/external-host-error';
-import { MemCacheBucket } from '../../util/cache/memory';
-import { Http } from '../../util/http';
+import { Http } from '../../util/http/datasource';
 import { CachePromise, cacheAble } from '../cache';
 import { GetReleasesConfig, ReleaseResult } from '../common';
 
 export const id = 'cdnjs';
-const http = new Http(id, { cacheBucket: MemCacheBucket.datasource });
+const http = new Http(id);
 
 interface CdnjsAsset {
   version: string;

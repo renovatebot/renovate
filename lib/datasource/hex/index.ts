@@ -1,11 +1,10 @@
 import { logger } from '../../logger';
 import { ExternalHostError } from '../../types/errors/external-host-error';
-import { MemCacheBucket } from '../../util/cache/memory';
-import { Http } from '../../util/http';
+import { Http } from '../../util/http/datasource';
 import { GetReleasesConfig, ReleaseResult } from '../common';
 
 export const id = 'hex';
-const http = new Http(id, { cacheBucket: MemCacheBucket.datasource });
+const http = new Http(id);
 
 interface HexRelease {
   html_url: string;

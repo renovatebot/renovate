@@ -2,13 +2,12 @@ import { URLSearchParams } from 'url';
 import { HOST_DISABLED } from '../../constants/error-messages';
 import { logger } from '../../logger';
 import { ExternalHostError } from '../../types/errors/external-host-error';
-import { MemCacheBucket } from '../../util/cache/memory';
 import * as packageCache from '../../util/cache/package';
-import { Http } from '../../util/http';
+import { Http } from '../../util/http/datasource';
 import { GetReleasesConfig, ReleaseResult } from '../common';
 
 export const id = 'repology';
-const http = new Http(id, { cacheBucket: MemCacheBucket.datasource });
+const http = new Http(id);
 const cacheNamespace = `datasource-${id}`;
 const cacheMinutes = 60;
 
