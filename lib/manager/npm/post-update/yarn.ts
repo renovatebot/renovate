@@ -70,10 +70,7 @@ export async function generateLockFile(
     const tagConstraint = await getNodeConstraint(config);
     const execOptions: ExecOptions = {
       cwd,
-      extraEnv: {
-        NPM_CONFIG_CACHE: env.NPM_CONFIG_CACHE,
-        npm_config_store: env.npm_config_store,
-      },
+      extraEnv: env,
       docker: {
         image: 'renovate/node',
         tagScheme: 'npm',
