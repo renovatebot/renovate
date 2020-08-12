@@ -321,8 +321,10 @@ export async function setBranch(branchName: string): Promise<string> {
       await git.raw(['rev-parse', 'origin/' + branchName])
     ).trim();
     await git.checkout([branchName, '-f']);
-    const latestCommitDate = (await git.log({ n: 1 })).latest.date;
-    logger.debug({ branchName, latestCommitDate }, 'latest commit');
+    const latestCommitDate = (await git.log({ n: 1 }))?.latest?.date;
+    if (latestCommitDate) {
+      logger.debug({ branchName, latestCommitDate }, 'latest commit');
+    }
     await git.reset(ResetMode.HARD);
     return config.currentBranchSha;
   } catch (err) /* istanbul ignore next */ {
