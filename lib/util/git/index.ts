@@ -64,6 +64,7 @@ function checkForPlatformFailure(err: Error): void {
   ];
   for (const errorStr of platformFailureStrings) {
     if (err.message.includes(errorStr)) {
+      logger.debug({ err }, 'Converting git error to ExternalHostError');
       throw new ExternalHostError(err, 'git');
     }
   }
