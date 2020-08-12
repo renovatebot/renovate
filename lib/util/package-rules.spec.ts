@@ -340,11 +340,11 @@ describe('applyPackageRules()', () => {
     const res = applyPackageRules({ ...config, ...dep });
     expect(res.x).toBe(1);
   });
-  it('matches matchSourceUrls', () => {
+  it('matches matchSourceUrlPrefixes', () => {
     const config: TestConfig = {
       packageRules: [
         {
-          matchSourceUrls: [
+          matchSourceUrlPrefixes: [
             'https://github.com/foo/bar',
             'https://github.com/renovatebot/',
           ],
@@ -361,11 +361,11 @@ describe('applyPackageRules()', () => {
     const res = applyPackageRules({ ...config, ...dep });
     expect(res.x).toBe(1);
   });
-  it('non-matches matchSourceUrls', () => {
+  it('non-matches matchSourceUrlPrefixes', () => {
     const config: TestConfig = {
       packageRules: [
         {
-          matchSourceUrls: [
+          matchSourceUrlPrefixes: [
             'https://github.com/foo/bar',
             'https://github.com/renovatebot/',
           ],
@@ -382,11 +382,11 @@ describe('applyPackageRules()', () => {
     const res = applyPackageRules({ ...config, ...dep });
     expect(res.x).toBeUndefined();
   });
-  it('handles matchSourceUrls when missing sourceUrl', () => {
+  it('handles matchSourceUrlPrefixes when missing sourceUrl', () => {
     const config: TestConfig = {
       packageRules: [
         {
-          matchSourceUrls: [
+          matchSourceUrlPrefixes: [
             'https://github.com/foo/bar',
             'https://github.com/renovatebot/',
           ],

@@ -508,7 +508,7 @@ export function migrateConfig(
         packagePatterns: 'matchPackagePatterns',
         excludePackageNames: 'matchNotPackageNames',
         excludePackagePatterns: 'matchNotPackagePatterns',
-        sourceUrlPrefixes: 'matchSourceUrls',
+        sourceUrlPrefixes: 'matchSourceUrlPrefixes',
         updateTypes: 'matchUpdateTypes',
       };
       for (const packageRule of migratedConfig.packageRules) {

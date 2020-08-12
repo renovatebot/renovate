@@ -853,7 +853,7 @@ const options: RenovateOptions[] = [
     env: false,
   },
   {
-    name: 'matchSourceUrls',
+    name: 'matchSourceUrlPrefixes',
     description:
       'A list of source URL prefixes to match against, commonly used for grouping of monorepos or packages from the same organization.',
     type: 'array',

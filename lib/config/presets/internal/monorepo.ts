@@ -131,7 +131,7 @@ export const presets: Record<string, Preset> = {};
 for (const [name, value] of Object.entries(repoGroups)) {
   presets[name] = {
     description: `${name} monorepo`,
-    matchSourceUrls: is.array(value) ? value : [value],
+    matchSourceUrlPrefixes: is.array(value) ? value : [value],
   };
 }
 for (const [name, value] of Object.entries(patternGroups)) {

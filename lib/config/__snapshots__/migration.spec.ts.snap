@@ -281,7 +281,7 @@ Object {
       "matchPaths": Array [
         "package.json",
       ],
-      "matchSourceUrls": Array [
+      "matchSourceUrlPrefixes": Array [
         "https://github.com/vuejs/vue",
       ],
       "matchUpdateTypes": Array [

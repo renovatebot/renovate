@@ -12,7 +12,7 @@ export const presets: Record<string, Preset> = {
   },
   apollographql: {
     description: 'All packages published by Apollo GraphQL',
-    matchSourceUrls: ['https://github.com/apollographql/'],
+    matchSourceUrlPrefixes: ['https://github.com/apollographql/'],
   },
   mapbox: {
     description: 'All mapbox-related packages',

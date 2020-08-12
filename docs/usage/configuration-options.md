@@ -1032,7 +1032,7 @@ The above will match only the root `package.json`, whereas the following would m
   "matchPaths": ["package.json"],
 ```
 
-### matchSourceUrls
+### matchSourceUrlPrefixes
 
 Here's an example of where you use this to group together all packages from the Vue monorepo:
 
@@ -1040,7 +1040,7 @@ Here's an example of where you use this to group together all packages from the 
 {
   "packageRules": [
     {
-      "matchSourceUrls": ["https://github.com/vuejs/vue"],
+      "matchSourceUrlPrefixes": ["https://github.com/vuejs/vue"],
       "groupName": "Vue monorepo packages"
     }
   ]
@@ -1053,7 +1053,7 @@ Here's an example of where you use this to group together all packages from the 
 {
   "packageRules": [
     {
-      "matchSourceUrls": ["https://github.com/renovatebot/"],
+      "matchSourceUrlPrefixes": ["https://github.com/renovatebot/"],
       "groupName": "All renovate packages"
     }
   ]

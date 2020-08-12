@@ -419,7 +419,7 @@ const staticGroups = {
     description: 'Group jekyll and related ruby packages together',
     packageRules: [
       {
-        matchSourceUrls: [
+        matchSourceUrlPrefixes: [
           'https://github.com/jekyll/',
           'https://github.com/github/pages-gem',
         ],

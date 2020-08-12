@@ -207,7 +207,7 @@ export async function validateConfig(
               'matchNotPackageNames',
               'matchNotPackagePatterns',
               'matchCurrentVersion',
-              'matchSourceUrls',
+              'matchSourceUrlPrefixes',
               'matchUpdateTypes',
             ];
             if (key === 'packageRules') {

@@ -208,7 +208,7 @@ export interface PackageRule
   matchNotPackageNames?: string[];
   matchNotPackagePatterns?: string[];
   matchCurrentVersion?: string | Range;
-  matchSourceUrls?: string[];
+  matchSourceUrlPrefixes?: string[];
   matchUpdateTypes?: UpdateType[];
 }
 
