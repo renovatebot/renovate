@@ -9,7 +9,7 @@ import {
 } from '.';
 
 export type HttpOptions = BaseHttpOptions;
-export type HttpResponse = BaseHttpResponse;
+export type HttpResponse<T = string> = BaseHttpResponse<T>;
 export { HttpError } from '.';
 
 export class Http extends BaseHttp {
