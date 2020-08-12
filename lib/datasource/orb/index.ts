@@ -4,6 +4,7 @@ import { Http } from '../../util/http/datasource';
 import { GetReleasesConfig, ReleaseResult } from '../common';
 
 export const id = 'orb';
+
 const http = new Http(id);
 
 interface OrbRelease {

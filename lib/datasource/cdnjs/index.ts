@@ -4,6 +4,7 @@ import { CachePromise, cacheAble } from '../cache';
 import { GetReleasesConfig, ReleaseResult } from '../common';
 
 export const id = 'cdnjs';
+
 const http = new Http(id);
 
 interface CdnjsAsset {

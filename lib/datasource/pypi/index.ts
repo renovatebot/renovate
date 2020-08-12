@@ -15,6 +15,7 @@ export const defaultRegistryUrls = [
 export const registryStrategy = 'merge';
 
 const github_repo_pattern = /^https?:\/\/github\.com\/[^\\/]+\/[^\\/]+$/;
+
 const http = new Http(id);
 
 type Releases = Record<

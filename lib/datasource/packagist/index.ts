@@ -12,6 +12,7 @@ import { GetReleasesConfig, ReleaseResult } from '../common';
 export const id = 'packagist';
 export const defaultRegistryUrls = ['https://packagist.org'];
 export const registryStrategy = 'hunt';
+
 const http = new Http(id);
 
 // We calculate auth at this datasource layer so that we can know whether it's safe to cache or not

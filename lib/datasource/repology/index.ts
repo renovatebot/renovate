@@ -7,6 +7,7 @@ import { Http } from '../../util/http/datasource';
 import { GetReleasesConfig, ReleaseResult } from '../common';
 
 export const id = 'repology';
+
 const http = new Http(id);
 const cacheNamespace = `datasource-${id}`;
 const cacheMinutes = 60;

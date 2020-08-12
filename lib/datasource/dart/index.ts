@@ -3,6 +3,7 @@ import { Http, HttpResponse } from '../../util/http/datasource';
 import { GetReleasesConfig, ReleaseResult } from '../common';
 
 export const id = 'dart';
+
 const http = new Http(id);
 
 export async function getReleases({

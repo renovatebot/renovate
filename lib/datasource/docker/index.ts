@@ -48,6 +48,7 @@ export const defaultConfig = {
     commitMessageTopic: '{{{groupName}}} Docker tags',
   },
 };
+
 const http = new Http(id);
 
 const ecrRegex = /\d+\.dkr\.ecr\.([-a-z0-9]+)\.amazonaws\.com/;

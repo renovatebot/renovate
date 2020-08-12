@@ -5,6 +5,7 @@ import { GetReleasesConfig, ReleaseResult } from '../common';
 export const id = 'github-releases';
 
 const cacheNamespace = 'datasource-github-releases';
+
 const http = new GithubHttp();
 
 type GithubRelease = {

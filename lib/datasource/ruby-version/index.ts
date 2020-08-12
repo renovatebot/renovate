@@ -7,6 +7,7 @@ import { isVersion } from '../../versioning/ruby';
 import { GetReleasesConfig, ReleaseResult } from '../common';
 
 export const id = 'ruby-version';
+
 const http = new Http(id);
 
 const rubyVersionsUrl = 'https://www.ruby-lang.org/en/downloads/releases/';

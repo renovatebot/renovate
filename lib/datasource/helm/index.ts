@@ -8,6 +8,7 @@ import { ensureTrailingSlash } from '../../util/url';
 import { GetReleasesConfig, ReleaseResult } from '../common';
 
 export const id = 'helm';
+
 const http = new Http(id);
 
 export const defaultRegistryUrls = [

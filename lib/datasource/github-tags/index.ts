@@ -4,6 +4,7 @@ import { GithubHttp } from '../../util/http/datasource';
 import { DigestConfig, GetReleasesConfig, ReleaseResult } from '../common';
 
 export const id = 'github-tags';
+
 const http = new GithubHttp();
 
 const cacheNamespace = 'datasource-github-tags';

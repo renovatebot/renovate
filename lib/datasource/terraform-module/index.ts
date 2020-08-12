@@ -7,6 +7,7 @@ import { GetReleasesConfig, ReleaseResult } from '../common';
 export const id = 'terraform-module';
 export const defaultRegistryUrls = ['https://registry.terraform.io'];
 export const registryStrategy = 'first';
+
 const http = new Http(id);
 
 interface RegistryRepository {

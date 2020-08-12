@@ -13,6 +13,7 @@ export const registryStrategy = 'hunt';
 
 const cacheNamespace = `datasource-${id}`;
 const cacheMinutes = 30;
+
 const githubHttp = new GithubHttp();
 
 const http = new Http(id);

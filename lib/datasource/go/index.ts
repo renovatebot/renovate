@@ -6,6 +6,7 @@ import * as github from '../github-tags';
 import * as gitlab from '../gitlab-tags';
 
 export const id = 'go';
+
 const http = new Http(id);
 
 interface DataSource {

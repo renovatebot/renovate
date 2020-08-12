@@ -11,6 +11,7 @@ export const defaultRegistryUrls = [
   'https://releases.hashicorp.com',
 ];
 export const registryStrategy = 'hunt';
+
 const http = new Http(id);
 
 interface TerraformProvider {

@@ -4,6 +4,7 @@ import { Http } from '../../util/http/datasource';
 import { GetReleasesConfig, Release, ReleaseResult } from '../common';
 
 export const id = 'crate';
+
 const http = new Http(id);
 
 export async function getReleases({

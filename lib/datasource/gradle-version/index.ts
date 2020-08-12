@@ -6,6 +6,7 @@ import { GetReleasesConfig, ReleaseResult } from '../common';
 export const id = 'gradle-version';
 export const defaultRegistryUrls = ['https://services.gradle.org/versions/all'];
 export const registryStrategy = 'merge';
+
 const http = new Http(id);
 
 interface GradleRelease {
