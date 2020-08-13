@@ -40,10 +40,16 @@ export async function getResourceUrl(
 
   try {
     const servicesIndexRaw = await http.getJson<ServicesIndexRaw>(url);
-    const services = servicesIndexRaw.body.resources.filter((resource) => {
-      const [type, version] = resource['@type']?.split('/') || [];
-      return type === resourceType && semver.valid(version);
-    });
+    const services = servicesIndexRaw.body.resources
+      .filter((resource) => {
+        const [type, version] = resource['@type']?.split('/') || [];
+        return type === resourceType && semver.valid(version);
+      })
+      .sort((x, y) => {
+        const [, xver] = x['@type']?.split('/');
+        const [, yver] = y['@type']?.split('/');
+        return semver.compare(xver, yver);
+      });
     const latestAvailableService = services.pop();
     const serviceId = latestAvailableService['@id'];
     const cacheMinutes = 60;
