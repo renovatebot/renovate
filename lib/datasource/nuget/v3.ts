@@ -30,8 +30,11 @@ export async function getResourceUrl(
   resourceType = 'RegistrationsBaseUrl'
 ): Promise<string | null> {
   // https://docs.microsoft.com/en-us/nuget/api/service-index
-  const cacheKey = `${url}:${resourceType}`;
-  const cachedResult = await packageCache.get<string>(cacheNamespace, cacheKey);
+  const resultCacheKey = `${url}:${resourceType}`;
+  const cachedResult = await packageCache.get<string>(
+    cacheNamespace,
+    resultCacheKey
+  );
 
   // istanbul ignore if
   if (cachedResult) {
@@ -39,10 +42,24 @@ export async function getResourceUrl(
   }
 
   try {
-    const servicesIndexRaw = await http.getJson<ServicesIndexRaw>(url);
-    const services = servicesIndexRaw.body.resources
-      .map(({ '@id': id, '@type': t }) => ({
-        id,
+    const responseCacheKey = url;
+    let servicesIndexRaw = await packageCache.get<ServicesIndexRaw>(
+      cacheNamespace,
+      responseCacheKey
+    );
+    if (!servicesIndexRaw) {
+      servicesIndexRaw = (await http.getJson<ServicesIndexRaw>(url)).body;
+      await packageCache.set(
+        cacheNamespace,
+        resultCacheKey,
+        servicesIndexRaw,
+        3 * 24 * 60
+      );
+    }
+
+    const services = servicesIndexRaw.resources
+      .map(({ '@id': serviceId, '@type': t }) => ({
+        serviceId,
         type: t?.split('/')?.shift(),
         version: t?.split('/')?.pop(),
       }))
@@ -50,10 +67,17 @@ export async function getResourceUrl(
         ({ type, version }) => type === resourceType && semver.valid(version)
       )
       .sort((x, y) => semver.compare(x.version, y.version));
-    const latestAvailableService = services.pop();
-    const serviceId = latestAvailableService.id;
-    const cacheMinutes = 60;
-    await packageCache.set(cacheNamespace, cacheKey, serviceId, cacheMinutes);
+    const { serviceId, version } = services.pop();
+
+    // istanbul ignore if
+    if (
+      resourceType === 'RegistrationsBaseUrl' &&
+      !semver.satisfies(version, '^3.0.0')
+    ) {
+      logger.warn(`Nuget: RegistrationsBaseUrl/${version} is the major update`);
+    }
+
+    await packageCache.set(cacheNamespace, resultCacheKey, serviceId, 60);
     return serviceId;
   } catch (e) {
     logger.debug(
