@@ -4,6 +4,7 @@ import AWS from 'aws-sdk';
 import hasha from 'hasha';
 import parseLinkHeader from 'parse-link-header';
 import wwwAuthenticate from 'www-authenticate';
+import { HOST_DISABLED } from '../../constants/error-messages';
 import { logger } from '../../logger';
 import { HostRule } from '../../types';
 import { ExternalHostError } from '../../types/errors/external-host-error';
@@ -225,6 +226,13 @@ async function getAuthHeaders(
     }
     if (err.statusCode >= 500 && err.statusCode < 600) {
       throw new ExternalHostError(err);
+    }
+    if (err.message === HOST_DISABLED) {
+      logger.trace(
+        { registry, dockerRepository: repository, err },
+        'Host disabled'
+      );
+      return null;
     }
     logger.warn(
       { registry, dockerRepository: repository, err },

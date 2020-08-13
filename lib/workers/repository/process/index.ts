@@ -65,7 +65,7 @@ export async function extractDependencies(
     branchList: [],
     packageFiles: null,
   };
-  if (config.baseBranches && config.baseBranches.length) {
+  if (config.baseBranches?.length) {
     logger.debug({ baseBranches: config.baseBranches }, 'baseBranches');
     const extracted: Record<string, Record<string, PackageFile[]>> = {};
     for (const baseBranch of config.baseBranches) {

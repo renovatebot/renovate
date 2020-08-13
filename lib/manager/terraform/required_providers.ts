@@ -5,6 +5,40 @@ import {
   keyValueExtractionRegex,
 } from './util';
 
+export const providerBlockExtractionRegex = /^\s*(?<key>[^\s]+)\s+=\s+{/;
+
+function extractBlock(
+  lineNum: number,
+  lines: string[],
+  dep: PackageDependency
+): number {
+  let lineNumber = lineNum;
+  let line: string;
+  do {
+    lineNumber += 1;
+    line = lines[lineNumber];
+    const kvMatch = keyValueExtractionRegex.exec(line);
+    if (kvMatch) {
+      /* eslint-disable no-param-reassign */
+      switch (kvMatch.groups.key) {
+        case 'source':
+          dep.managerData.source = kvMatch.groups.value;
+          break;
+
+        case 'version':
+          dep.currentValue = kvMatch.groups.value;
+          break;
+
+        /* istanbul ignore next */
+        default:
+          break;
+      }
+      /* eslint-enable no-param-reassign */
+    }
+  } while (line.trim() !== '}');
+  return lineNumber;
+}
+
 export function extractTerraformRequiredProviders(
   startingLine: number,
   lines: string[]
@@ -25,8 +59,15 @@ export function extractTerraformRequiredProviders(
     if (kvMatch) {
       dep.currentValue = kvMatch.groups.value;
       dep.managerData.moduleName = kvMatch.groups.key;
-      dep.managerData.versionLine = lineNumber;
       deps.push(dep);
+    } else {
+      const nameMatch = providerBlockExtractionRegex.exec(line);
+
+      if (nameMatch?.groups) {
+        dep.managerData.moduleName = nameMatch.groups.key;
+        lineNumber = extractBlock(lineNumber, lines, dep);
+        deps.push(dep);
+      }
     }
   } while (line.trim() !== '}');
   return { lineNumber, dependencies: deps };

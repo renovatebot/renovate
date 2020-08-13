@@ -34,6 +34,7 @@ Object {
       "version": "0.4.2",
     },
     Object {
+      "isDeprecated": true,
       "version": "0.5.0",
     },
   ],
@@ -113,6 +114,7 @@ Object {
       "version": "0.4.2",
     },
     Object {
+      "isDeprecated": true,
       "version": "0.5.0",
     },
   ],
@@ -167,6 +169,7 @@ Object {
       "version": "0.4.2",
     },
     Object {
+      "isDeprecated": true,
       "version": "0.5.0",
     },
   ],
@@ -295,6 +298,7 @@ Object {
       "version": "0.1.5",
     },
     Object {
+      "isDeprecated": true,
       "releaseTimestamp": "2018-05-07T17:59:09",
       "version": "0.1.6",
     },

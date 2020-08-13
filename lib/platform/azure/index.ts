@@ -340,6 +340,7 @@ export async function createPr({
   prTitle: title,
   prBody: body,
   labels,
+  draftPR = false,
   platformOptions = {},
 }: CreatePRConfig): Promise<Pr> {
   const sourceRefName = azureHelper.getNewBranchName(branchName);
@@ -358,6 +359,7 @@ export async function createPr({
       title,
       description,
       workItemRefs,
+      isDraft: draftPR,
     },
     config.repoId
   );

@@ -88,7 +88,7 @@ Array [
       "user-agent": "https://github.com/renovatebot/renovate",
     },
     "method": "GET",
-    "url": "https://www.nuget.org/api/v2//FindPackagesById()?id=%27nunit%27&$select=Version,IsLatestVersion,ProjectUrl",
+    "url": "https://www.nuget.org/api/v2/FindPackagesById()?id=%27nunit%27&$select=Version,IsLatestVersion,ProjectUrl,Published",
   },
   Object {
     "headers": Object {
@@ -107,136 +107,187 @@ Object {
   "pkgName": "nunit",
   "releases": Array [
     Object {
+      "releaseTimestamp": "2011-01-07T07:57:55.387+00:00",
       "version": "2.5.7.10213",
     },
     Object {
+      "releaseTimestamp": "2011-02-09T07:26:34.347+00:00",
       "version": "2.5.9.10348",
     },
     Object {
+      "releaseTimestamp": "2011-04-25T20:20:34.397+00:00",
       "version": "2.5.10.11092",
     },
     Object {
+      "releaseTimestamp": "1900-01-01T00:00:00",
       "version": "2.6.0.12051",
     },
     Object {
+      "releaseTimestamp": "2012-02-24T04:03:05.29+00:00",
       "version": "2.6.0.12054",
     },
     Object {
+      "releaseTimestamp": "2012-08-05T03:08:28.403+00:00",
       "version": "2.6.1",
     },
     Object {
+      "releaseTimestamp": "2012-10-23T15:37:48+00:00",
       "version": "2.6.2",
     },
     Object {
+      "releaseTimestamp": "2013-10-11T01:52:53.417+00:00",
       "version": "2.6.3",
     },
     Object {
+      "releaseTimestamp": "2014-12-17T17:30:47.607+00:00",
       "version": "2.6.4",
     },
     Object {
+      "releaseTimestamp": "2018-04-20T04:23:59.217+00:00",
       "version": "2.6.5",
     },
     Object {
+      "releaseTimestamp": "2018-06-07T15:24:16.807+00:00",
       "version": "2.6.6",
     },
     Object {
+      "releaseTimestamp": "2018-07-07T15:41:32.657+00:00",
       "version": "2.6.7",
     },
     Object {
+      "releaseTimestamp": "2018-08-10T20:45:24.08+00:00",
       "version": "2.7.0",
     },
     Object {
+      "releaseTimestamp": "2019-08-21T07:08:49.36+00:00",
+      "version": "2.7.1",
+    },
+    Object {
+      "releaseTimestamp": "2014-09-23T03:11:33.43+00:00",
       "version": "3.0.0-alpha",
     },
     Object {
+      "releaseTimestamp": "2014-11-03T06:24:59.217+00:00",
       "version": "3.0.0-alpha-2",
     },
     Object {
+      "releaseTimestamp": "2014-11-29T22:38:18.493+00:00",
       "version": "3.0.0-alpha-3",
     },
     Object {
+      "releaseTimestamp": "2014-12-31T04:47:39.507+00:00",
       "version": "3.0.0-alpha-4",
     },
     Object {
+      "releaseTimestamp": "2015-01-31T22:13:01.997+00:00",
       "version": "3.0.0-alpha-5",
     },
     Object {
+      "releaseTimestamp": "2015-03-26T11:33:22.173+00:00",
       "version": "3.0.0-beta-1",
     },
     Object {
+      "releaseTimestamp": "2015-05-13T00:51:22.43+00:00",
       "version": "3.0.0-beta-2",
     },
     Object {
+      "releaseTimestamp": "2015-07-15T23:44:47.403+00:00",
       "version": "3.0.0-beta-3",
     },
     Object {
+      "releaseTimestamp": "2015-08-25T23:24:11.473+00:00",
       "version": "3.0.0-beta-4",
     },
     Object {
+      "releaseTimestamp": "2015-10-17T03:39:18.1+00:00",
       "version": "3.0.0-beta-5",
     },
     Object {
+      "releaseTimestamp": "2015-11-01T21:56:49.637+00:00",
       "version": "3.0.0-rc",
     },
     Object {
+      "releaseTimestamp": "2015-11-08T16:27:15.11+00:00",
       "version": "3.0.0-rc-2",
     },
     Object {
+      "releaseTimestamp": "2015-11-14T05:30:57.323+00:00",
       "version": "3.0.0-rc-3",
     },
     Object {
+      "releaseTimestamp": "2015-11-16T00:02:51.807+00:00",
       "version": "3.0.0",
     },
     Object {
+      "releaseTimestamp": "2015-12-02T03:52:57.997+00:00",
       "version": "3.0.1",
     },
     Object {
+      "releaseTimestamp": "2016-03-05T21:12:58.99+00:00",
       "version": "3.2.0",
     },
     Object {
+      "releaseTimestamp": "2016-04-19T15:31:13.39+00:00",
       "version": "3.2.1",
     },
     Object {
+      "releaseTimestamp": "2016-06-25T17:44:56.253+00:00",
       "version": "3.4.0",
     },
     Object {
+      "releaseTimestamp": "2016-06-30T21:20:49.497+00:00",
       "version": "3.4.1",
     },
     Object {
+      "releaseTimestamp": "2016-10-04T01:19:19.447+00:00",
       "version": "3.5.0",
     },
     Object {
+      "releaseTimestamp": "2017-01-10T02:17:19.187+00:00",
       "version": "3.6.0",
     },
     Object {
+      "releaseTimestamp": "2017-02-26T14:56:04.407+00:00",
       "version": "3.6.1",
     },
     Object {
+      "releaseTimestamp": "2017-05-30T00:07:36.707+00:00",
       "version": "3.7.0",
     },
     Object {
+      "releaseTimestamp": "2017-06-06T01:59:11.787+00:00",
       "version": "3.7.1",
     },
     Object {
+      "releaseTimestamp": "2017-08-28T00:08:29.5+00:00",
       "version": "3.8.0",
     },
     Object {
+      "releaseTimestamp": "2017-08-29T01:11:58.86+00:00",
       "version": "3.8.1",
     },
     Object {
+      "releaseTimestamp": "2017-11-10T23:35:19.67+00:00",
       "version": "3.9.0",
     },
     Object {
+      "releaseTimestamp": "2018-03-13T00:29:56.4+00:00",
       "version": "3.10.0",
     },
     Object {
+      "releaseTimestamp": "2018-03-13T03:13:09.93+00:00",
       "version": "3.10.1",
     },
     Object {
+      "releaseTimestamp": "2018-10-07T01:17:31.31+00:00",
       "version": "3.11.0",
     },
+    Object {
+      "releaseTimestamp": "2019-05-15T00:24:28.39+00:00",
+      "version": "3.12.0",
+    },
   ],
-  "sourceUrl": "https://github.com/nunit/nunit",
+  "sourceUrl": "https://nunit.org/",
 }
 `;
 
@@ -249,7 +300,7 @@ Array [
       "user-agent": "https://github.com/renovatebot/renovate",
     },
     "method": "GET",
-    "url": "https://www.nuget.org/api/v2//FindPackagesById()?id=%27nunit%27&$select=Version,IsLatestVersion,ProjectUrl",
+    "url": "https://www.nuget.org/api/v2/FindPackagesById()?id=%27nunit%27&$select=Version,IsLatestVersion,ProjectUrl,Published",
   },
 ]
 `;
@@ -539,7 +590,7 @@ Array [
       "user-agent": "https://github.com/renovatebot/renovate",
     },
     "method": "GET",
-    "url": "https://www.nuget.org/api/v2//FindPackagesById()?id=%27nunit%27&$select=Version,IsLatestVersion,ProjectUrl",
+    "url": "https://www.nuget.org/api/v2/FindPackagesById()?id=%27nunit%27&$select=Version,IsLatestVersion,ProjectUrl,Published",
   },
 ]
 `;
@@ -565,7 +616,7 @@ Array [
       "user-agent": "https://github.com/renovatebot/renovate",
     },
     "method": "GET",
-    "url": "https://www.nuget.org/api/v2//FindPackagesById()?id=%27nunit%27&$select=Version,IsLatestVersion,ProjectUrl",
+    "url": "https://www.nuget.org/api/v2/FindPackagesById()?id=%27nunit%27&$select=Version,IsLatestVersion,ProjectUrl,Published",
   },
 ]
 `;
@@ -753,7 +804,7 @@ Array [
       "user-agent": "https://github.com/renovatebot/renovate",
     },
     "method": "GET",
-    "url": "https://www.nuget.org/api/v2//FindPackagesById()?id=%27nunit%27&$select=Version,IsLatestVersion,ProjectUrl",
+    "url": "https://www.nuget.org/api/v2/FindPackagesById()?id=%27nunit%27&$select=Version,IsLatestVersion,ProjectUrl,Published",
   },
 ]
 `;
@@ -1040,7 +1091,7 @@ Array [
       "user-agent": "https://github.com/renovatebot/renovate",
     },
     "method": "GET",
-    "url": "https://www.nuget.org/api/v2//FindPackagesById()?id=%27nunit%27&$select=Version,IsLatestVersion,ProjectUrl",
+    "url": "https://www.nuget.org/api/v2/FindPackagesById()?id=%27nunit%27&$select=Version,IsLatestVersion,ProjectUrl,Published",
   },
 ]
 `;
@@ -1079,7 +1130,7 @@ Array [
       "user-agent": "https://github.com/renovatebot/renovate",
     },
     "method": "GET",
-    "url": "https://www.nuget.org/api/v2//FindPackagesById()?id=%27nunit%27&$select=Version,IsLatestVersion,ProjectUrl",
+    "url": "https://www.nuget.org/api/v2/FindPackagesById()?id=%27nunit%27&$select=Version,IsLatestVersion,ProjectUrl,Published",
   },
 ]
 `;
@@ -1093,7 +1144,7 @@ Array [
       "user-agent": "https://github.com/renovatebot/renovate",
     },
     "method": "GET",
-    "url": "https://www.nuget.org/api/v2//FindPackagesById()?id=%27nunit%27&$select=Version,IsLatestVersion,ProjectUrl",
+    "url": "https://www.nuget.org/api/v2/FindPackagesById()?id=%27nunit%27&$select=Version,IsLatestVersion,ProjectUrl,Published",
   },
 ]
 `;
@@ -1132,7 +1183,7 @@ Array [
       "user-agent": "https://github.com/renovatebot/renovate",
     },
     "method": "GET",
-    "url": "https://www.nuget.org/api/v2//FindPackagesById()?id=%27nunit%27&$select=Version,IsLatestVersion,ProjectUrl",
+    "url": "https://www.nuget.org/api/v2/FindPackagesById()?id=%27nunit%27&$select=Version,IsLatestVersion,ProjectUrl,Published",
   },
 ]
 `;
@@ -1146,7 +1197,7 @@ Array [
       "user-agent": "https://github.com/renovatebot/renovate",
     },
     "method": "GET",
-    "url": "https://www.nuget.org/api/v2//FindPackagesById()?id=%27nunit%27&$select=Version,IsLatestVersion,ProjectUrl",
+    "url": "https://www.nuget.org/api/v2/FindPackagesById()?id=%27nunit%27&$select=Version,IsLatestVersion,ProjectUrl,Published",
   },
 ]
 `;
@@ -1170,7 +1221,7 @@ Array [
       "user-agent": "https://github.com/renovatebot/renovate",
     },
     "method": "GET",
-    "url": "https://www.nuget.org/api/v2//FindPackagesById()?id=%27nunit%27&$select=Version,IsLatestVersion,ProjectUrl",
+    "url": "https://www.nuget.org/api/v2/FindPackagesById()?id=%27nunit%27&$select=Version,IsLatestVersion,ProjectUrl,Published",
   },
 ]
 `;

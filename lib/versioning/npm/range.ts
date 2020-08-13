@@ -113,6 +113,9 @@ export function getNewValue({
           ? `>= ${toVersion}`
           : `>=${toVersion}`;
       }
+      if (element.operator.startsWith('<')) {
+        return currentValue;
+      }
     } else {
       const newRange = parseRange(currentValue);
       const versions = newRange.map((x) => {

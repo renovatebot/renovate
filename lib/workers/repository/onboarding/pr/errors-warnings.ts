@@ -41,7 +41,7 @@ export function getDepWarnings(
       for (const file of files || []) {
         if (file.deps) {
           for (const dep of file.deps || []) {
-            if (dep.warnings && dep.warnings.length) {
+            if (dep.warnings?.length) {
               const message = dep.warnings[0].message;
               if (!warnings.includes(message)) {
                 warnings.push(message);

@@ -616,9 +616,7 @@ export async function setBranchStatus({
     await getStatus(branchName, false);
   } catch (err) /* istanbul ignore next */ {
     if (
-      err.body &&
-      err.body.message &&
-      err.body.message.startsWith(
+      err.body?.message?.startsWith(
         'Cannot transition status via :enqueue from :pending'
       )
     ) {

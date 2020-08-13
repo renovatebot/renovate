@@ -133,7 +133,7 @@ export type RepoSearchParams = {
   uid?: number;
 };
 
-export type IssueCreateParams = {} & IssueUpdateParams;
+export type IssueCreateParams = IssueUpdateParams;
 
 export type IssueUpdateParams = {
   title?: string;
@@ -168,7 +168,7 @@ export type PRMergeParams = {
   Do: PRMergeMethod;
 };
 
-export type CommentCreateParams = {} & CommentUpdateParams;
+export type CommentCreateParams = CommentUpdateParams;
 
 export type CommentUpdateParams = {
   body: string;
@@ -456,7 +456,7 @@ export async function updateComment(
 }
 
 export async function deleteComment(
-  repoPath,
+  repoPath: string,
   idx: number,
   options?: GiteaHttpOptions
 ): Promise<void> {
@@ -465,7 +465,7 @@ export async function deleteComment(
 }
 
 export async function getComments(
-  repoPath,
+  repoPath: string,
   issue: number,
   options?: GiteaHttpOptions
 ): Promise<Comment[]> {

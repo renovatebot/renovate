@@ -11,7 +11,7 @@ export type HelmDockerImageDependency = {
  * @see https://github.com/microsoft/TypeScript/issues/21732
  * @see https://stackoverflow.com/a/58630274
  */
-function hasKey<K extends string>(k: K, o: {}): o is { [_ in K]: {} } {
+function hasKey<K extends string, T>(k: K, o: T): o is T & Record<K, unknown> {
   return typeof o === 'object' && k in o;
 }
 

@@ -1,4 +1,5 @@
 import crypto from 'crypto';
+import { HOST_DISABLED } from '../../constants/error-messages';
 import { logger } from '../../logger';
 import { ExternalHostError } from '../../types/errors/external-host-error';
 import * as packageCache from '../../util/cache/package';
@@ -50,6 +51,9 @@ function handleError(lookupName: string, err: HttpError): void {
     logger.debug(errorData, 'Authorization error');
   } else if (statusCode === 404) {
     logger.debug(errorData, 'Package lookup error');
+  } else if (err.message === HOST_DISABLED) {
+    // istanbul ignore next
+    logger.trace(errorData, 'Host disabled');
   } else {
     logger.warn(errorData, 'CocoaPods lookup failure: Unknown error');
   }

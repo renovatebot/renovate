@@ -13,3 +13,7 @@ It's pretty "wild west" for tagging and not always compliant with semver. Docker
 **Are ranges supported?**
 
 No. Although a tag like `12.15` might seem like it means `12.15.x`, it is a tag of its own and may or may not point to an of the available `12.15.x` tags, including `12.15.0`.
+
+**Are commit hashes supported?**
+
+No. An image tag that looks like a Git commit hash should be ignored by Renovate.

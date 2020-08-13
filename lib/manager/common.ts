@@ -22,7 +22,7 @@ export interface ExtractConfig extends ManagerConfig {
   gradle?: { timeout?: number };
   aliases?: Record<string, string>;
   ignoreNpmrcFile?: boolean;
-
+  yarnrc?: string;
   skipInstalls?: boolean;
   versioning?: string;
 }
@@ -167,7 +167,6 @@ export interface PackageDependency<T = Record<string, any>> extends Package<T> {
   sourceLine?: number;
   toVersion?: string;
   updates?: LookupUpdate[];
-  versionLine?: number;
   replaceString?: string;
   autoReplaceStringTemplate?: string;
   depIndex?: number;
