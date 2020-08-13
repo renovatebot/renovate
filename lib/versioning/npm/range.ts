@@ -129,9 +129,6 @@ export function getNewValue({
         if (satisfies(toVersion, bumpedSubRange)) {
           return bumpedSubRange;
         }
-        if (satisfies(toVersion, subRange)) {
-          return subRange;
-        }
         let incremented;
         if (x.patch !== '0') {
           incremented = increment(toVersion, 'patch');
