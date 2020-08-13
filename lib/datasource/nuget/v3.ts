@@ -41,17 +41,17 @@ export async function getResourceUrl(
   try {
     const servicesIndexRaw = await http.getJson<ServicesIndexRaw>(url);
     const services = servicesIndexRaw.body.resources
-      .filter((resource) => {
-        const [type, version] = resource['@type']?.split('/') || [];
-        return type === resourceType && semver.valid(version);
-      })
-      .sort((x, y) => {
-        const [, xver] = x['@type']?.split('/');
-        const [, yver] = y['@type']?.split('/');
-        return semver.compare(xver, yver);
-      });
+      .map(({ '@id': id, '@type': t }) => ({
+        id,
+        type: t?.split('/')?.shift(),
+        version: t?.split('/')?.pop(),
+      }))
+      .filter(
+        ({ type, version }) => type === resourceType && semver.valid(version)
+      )
+      .sort((x, y) => semver.compare(x.version, y.version));
     const latestAvailableService = services.pop();
-    const serviceId = latestAvailableService['@id'];
+    const serviceId = latestAvailableService.id;
     const cacheMinutes = 60;
     await packageCache.set(cacheNamespace, cacheKey, serviceId, cacheMinutes);
     return serviceId;
