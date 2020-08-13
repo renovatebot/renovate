@@ -1,36 +1,36 @@
 {
-  "@id": "https://api.nuget.org/v3/registration5-semver1/nlog/index.json",
+  "@id": "https://api.nuget.org/v3/registration5-gz-semver2/nlog/index.json",
   "@type": [
     "catalog:CatalogRoot",
     "PackageRegistration",
     "catalog:Permalink"
   ],
-  "commitId": "223a6b1b-1ece-4a4a-8521-bc79fe8c9cb7",
+  "commitId": "1ecce4df-d77c-414d-8c2d-0f39eeeab278",
   "commitTimeStamp": "2020-07-31T22:23:20.8406554+00:00",
   "count": 3,
   "items": [
     {
-      "@id": "https://api.nuget.org/v3/registration5-semver1/nlog/page/1.0.0.505/4.4.0-beta5.json",
+      "@id": "https://api.nuget.org/v3/registration5-gz-semver2/nlog/page/1.0.0.505/4.4.0-beta5.json",
       "@type": "catalog:CatalogPage",
-      "commitId": "861554f0-86b6-4327-942c-6a6065c99f5b",
+      "commitId": "008a216c-5f6c-48c7-94c8-d48217e028bb",
       "commitTimeStamp": "2020-02-07T22:40:40.4993259+00:00",
       "count": 64,
       "lower": "1.0.0.505",
       "upper": "4.4.0-beta5"
     },
     {
-      "@id": "https://api.nuget.org/v3/registration5-semver1/nlog/page/4.4.0-beta6/4.6.0-rc2.json",
+      "@id": "https://api.nuget.org/v3/registration5-gz-semver2/nlog/page/4.4.0-beta6/4.6.0-rc2.json",
       "@type": "catalog:CatalogPage",
-      "commitId": "861554f0-86b6-4327-942c-6a6065c99f5b",
+      "commitId": "008a216c-5f6c-48c7-94c8-d48217e028bb",
       "commitTimeStamp": "2020-02-07T22:40:40.4993259+00:00",
       "count": 64,
       "lower": "4.4.0-beta6",
       "upper": "4.6.0-rc2"
     },
     {
-      "@id": "https://api.nuget.org/v3/registration5-semver1/nlog/page/4.6.0-rc3/5.0.0-beta11.json",
+      "@id": "https://api.nuget.org/v3/registration5-gz-semver2/nlog/page/4.6.0-rc3/5.0.0-beta11.json",
       "@type": "catalog:CatalogPage",
-      "commitId": "223a6b1b-1ece-4a4a-8521-bc79fe8c9cb7",
+      "commitId": "1ecce4df-d77c-414d-8c2d-0f39eeeab278",
       "commitTimeStamp": "2020-07-31T22:23:20.8406554+00:00",
       "count": 28,
       "lower": "4.6.0-rc3",

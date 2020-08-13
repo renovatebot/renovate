@@ -1,25 +1,25 @@
 {
-  "@id": "https://api.nuget.org/v3/registration5-semver1/nunit/index.json",
+  "@id": "https://api.nuget.org/v3/registration5-gz-semver2/nunit/index.json",
   "@type": [
     "catalog:CatalogRoot",
     "PackageRegistration",
     "catalog:Permalink"
   ],
-  "commitId": "69641076-314b-47e0-9047-4c6cc3f04a28",
+  "commitId": "9b827e25-a7c0-4840-a0f3-eb3f46b8ef29",
   "commitTimeStamp": "2020-02-07T22:41:28.9136138+00:00",
   "count": 1,
   "items": [
     {
-      "@id": "https://api.nuget.org/v3/registration5-semver1/nunit/index.json#page/2.5.7.10213/3.12.0",
+      "@id": "https://api.nuget.org/v3/registration5-gz-semver2/nunit/index.json#page/2.5.7.10213/3.12.0",
       "@type": "catalog:CatalogPage",
-      "commitId": "69641076-314b-47e0-9047-4c6cc3f04a28",
+      "commitId": "9b827e25-a7c0-4840-a0f3-eb3f46b8ef29",
       "commitTimeStamp": "2020-02-07T22:41:28.9136138+00:00",
       "count": 45,
       "items": [
         {
-          "@id": "https://api.nuget.org/v3/registration5-semver1/nunit/2.5.7.10213.json",
+          "@id": "https://api.nuget.org/v3/registration5-gz-semver2/nunit/2.5.7.10213.json",
           "@type": "Package",
-          "commitId": "69641076-314b-47e0-9047-4c6cc3f04a28",
+          "commitId": "9b827e25-a7c0-4840-a0f3-eb3f46b8ef29",
           "commitTimeStamp": "2020-02-07T22:41:28.9136138+00:00",
           "catalogEntry": {
             "@id": "https://api.nuget.org/v3/catalog0/data/2018.10.16.13.04.27/nunit.2.5.7.10213.json",
@@ -45,12 +45,12 @@
             "version": "2.5.7.10213"
           },
           "packageContent": "https://api.nuget.org/v3-flatcontainer/nunit/2.5.7.10213/nunit.2.5.7.10213.nupkg",
-          "registration": "https://api.nuget.org/v3/registration5-semver1/nunit/index.json"
+          "registration": "https://api.nuget.org/v3/registration5-gz-semver2/nunit/index.json"
         },
         {
-          "@id": "https://api.nuget.org/v3/registration5-semver1/nunit/2.5.9.10348.json",
+          "@id": "https://api.nuget.org/v3/registration5-gz-semver2/nunit/2.5.9.10348.json",
           "@type": "Package",
-          "commitId": "69641076-314b-47e0-9047-4c6cc3f04a28",
+          "commitId": "9b827e25-a7c0-4840-a0f3-eb3f46b8ef29",
           "commitTimeStamp": "2020-02-07T22:41:28.9136138+00:00",
           "catalogEntry": {
             "@id": "https://api.nuget.org/v3/catalog0/data/2018.10.16.13.04.20/nunit.2.5.9.10348.json",
@@ -76,12 +76,12 @@
             "version": "2.5.9.10348"
           },
           "packageContent": "https://api.nuget.org/v3-flatcontainer/nunit/2.5.9.10348/nunit.2.5.9.10348.nupkg",
-          "registration": "https://api.nuget.org/v3/registration5-semver1/nunit/index.json"
+          "registration": "https://api.nuget.org/v3/registration5-gz-semver2/nunit/index.json"
         },
         {
-          "@id": "https://api.nuget.org/v3/registration5-semver1/nunit/2.5.10.11092.json",
+          "@id": "https://api.nuget.org/v3/registration5-gz-semver2/nunit/2.5.10.11092.json",
           "@type": "Package",
-          "commitId": "69641076-314b-47e0-9047-4c6cc3f04a28",
+          "commitId": "9b827e25-a7c0-4840-a0f3-eb3f46b8ef29",
           "commitTimeStamp": "2020-02-07T22:41:28.9136138+00:00",
           "catalogEntry": {
             "@id": "https://api.nuget.org/v3/catalog0/data/2018.10.16.13.04.13/nunit.2.5.10.11092.json",
@@ -107,12 +107,12 @@
             "version": "2.5.10.11092"
           },
           "packageContent": "https://api.nuget.org/v3-flatcontainer/nunit/2.5.10.11092/nunit.2.5.10.11092.nupkg",
-          "registration": "https://api.nuget.org/v3/registration5-semver1/nunit/index.json"
+          "registration": "https://api.nuget.org/v3/registration5-gz-semver2/nunit/index.json"
         },
         {
-          "@id": "https://api.nuget.org/v3/registration5-semver1/nunit/2.6.0.12051.json",
+          "@id": "https://api.nuget.org/v3/registration5-gz-semver2/nunit/2.6.0.12051.json",
           "@type": "Package",
-          "commitId": "69641076-314b-47e0-9047-4c6cc3f04a28",
+          "commitId": "9b827e25-a7c0-4840-a0f3-eb3f46b8ef29",
           "commitTimeStamp": "2020-02-07T22:41:28.9136138+00:00",
           "catalogEntry": {
             "@id": "https://api.nuget.org/v3/catalog0/data/2018.10.16.13.04.06/nunit.2.6.0.12051.json",
@@ -146,12 +146,12 @@
             "version": "2.6.0.12051"
           },
           "packageContent": "https://api.nuget.org/v3-flatcontainer/nunit/2.6.0.12051/nunit.2.6.0.12051.nupkg",
-          "registration": "https://api.nuget.org/v3/registration5-semver1/nunit/index.json"
+          "registration": "https://api.nuget.org/v3/registration5-gz-semver2/nunit/index.json"
         },
         {
-          "@id": "https://api.nuget.org/v3/registration5-semver1/nunit/2.6.0.12054.json",
+          "@id": "https://api.nuget.org/v3/registration5-gz-semver2/nunit/2.6.0.12054.json",
           "@type": "Package",
-          "commitId": "69641076-314b-47e0-9047-4c6cc3f04a28",
+          "commitId": "9b827e25-a7c0-4840-a0f3-eb3f46b8ef29",
           "commitTimeStamp": "2020-02-07T22:41:28.9136138+00:00",
           "catalogEntry": {
             "@id": "https://api.nuget.org/v3/catalog0/data/2018.10.16.13.03.59/nunit.2.6.0.12054.json",
@@ -185,12 +185,12 @@
             "version": "2.6.0.12054"
           },
           "packageContent": "https://api.nuget.org/v3-flatcontainer/nunit/2.6.0.12054/nunit.2.6.0.12054.nupkg",
-          "registration": "https://api.nuget.org/v3/registration5-semver1/nunit/index.json"
+          "registration": "https://api.nuget.org/v3/registration5-gz-semver2/nunit/index.json"
         },
         {
-          "@id": "https://api.nuget.org/v3/registration5-semver1/nunit/2.6.1.json",
+          "@id": "https://api.nuget.org/v3/registration5-gz-semver2/nunit/2.6.1.json",
           "@type": "Package",
-          "commitId": "69641076-314b-47e0-9047-4c6cc3f04a28",
+          "commitId": "9b827e25-a7c0-4840-a0f3-eb3f46b8ef29",
           "commitTimeStamp": "2020-02-07T22:41:28.9136138+00:00",
           "catalogEntry": {
             "@id": "https://api.nuget.org/v3/catalog0/data/2018.10.16.13.03.59/nunit.2.6.1.json",
@@ -224,12 +224,12 @@
             "version": "2.6.1"
           },
           "packageContent": "https://api.nuget.org/v3-flatcontainer/nunit/2.6.1/nunit.2.6.1.nupkg",
-          "registration": "https://api.nuget.org/v3/registration5-semver1/nunit/index.json"
+          "registration": "https://api.nuget.org/v3/registration5-gz-semver2/nunit/index.json"
         },
         {
-          "@id": "https://api.nuget.org/v3/registration5-semver1/nunit/2.6.2.json",
+          "@id": "https://api.nuget.org/v3/registration5-gz-semver2/nunit/2.6.2.json",
           "@type": "Package",
-          "commitId": "69641076-314b-47e0-9047-4c6cc3f04a28",
+          "commitId": "9b827e25-a7c0-4840-a0f3-eb3f46b8ef29",
           "commitTimeStamp": "2020-02-07T22:41:28.9136138+00:00",
           "catalogEntry": {
             "@id": "https://api.nuget.org/v3/catalog0/data/2018.10.16.13.03.59/nunit.2.6.2.json",
@@ -263,12 +263,12 @@
             "version": "2.6.2"
           },
           "packageContent": "https://api.nuget.org/v3-flatcontainer/nunit/2.6.2/nunit.2.6.2.nupkg",
-          "registration": "https://api.nuget.org/v3/registration5-semver1/nunit/index.json"
+          "registration": "https://api.nuget.org/v3/registration5-gz-semver2/nunit/index.json"
         },
         {
-          "@id": "https://api.nuget.org/v3/registration5-semver1/nunit/2.6.3.json",
+          "@id": "https://api.nuget.org/v3/registration5-gz-semver2/nunit/2.6.3.json",
           "@type": "Package",
-          "commitId": "69641076-314b-47e0-9047-4c6cc3f04a28",
+          "commitId": "9b827e25-a7c0-4840-a0f3-eb3f46b8ef29",
           "commitTimeStamp": "2020-02-07T22:41:28.9136138+00:00",
           "catalogEntry": {
             "@id": "https://api.nuget.org/v3/catalog0/data/2018.10.16.13.03.21/nunit.2.6.3.json",
@@ -303,12 +303,12 @@
             "version": "2.6.3"
           },
           "packageContent": "https://api.nuget.org/v3-flatcontainer/nunit/2.6.3/nunit.2.6.3.nupkg",
-          "registration": "https://api.nuget.org/v3/registration5-semver1/nunit/index.json"
+          "registration": "https://api.nuget.org/v3/registration5-gz-semver2/nunit/index.json"
         },
         {
-          "@id": "https://api.nuget.org/v3/registration5-semver1/nunit/2.6.4.json",
+          "@id": "https://api.nuget.org/v3/registration5-gz-semver2/nunit/2.6.4.json",
           "@type": "Package",
-          "commitId": "69641076-314b-47e0-9047-4c6cc3f04a28",
+          "commitId": "9b827e25-a7c0-4840-a0f3-eb3f46b8ef29",
           "commitTimeStamp": "2020-02-07T22:41:28.9136138+00:00",
           "catalogEntry": {
             "@id": "https://api.nuget.org/v3/catalog0/data/2018.10.16.13.03.14/nunit.2.6.4.json",
@@ -343,12 +343,12 @@
             "version": "2.6.4"
           },
           "packageContent": "https://api.nuget.org/v3-flatcontainer/nunit/2.6.4/nunit.2.6.4.nupkg",
-          "registration": "https://api.nuget.org/v3/registration5-semver1/nunit/index.json"
+          "registration": "https://api.nuget.org/v3/registration5-gz-semver2/nunit/index.json"
         },
         {
-          "@id": "https://api.nuget.org/v3/registration5-semver1/nunit/2.6.5.json",
+          "@id": "https://api.nuget.org/v3/registration5-gz-semver2/nunit/2.6.5.json",
           "@type": "Package",
-          "commitId": "69641076-314b-47e0-9047-4c6cc3f04a28",
+          "commitId": "9b827e25-a7c0-4840-a0f3-eb3f46b8ef29",
           "commitTimeStamp": "2020-02-07T22:41:28.9136138+00:00",
           "catalogEntry": {
             "@id": "https://api.nuget.org/v3/catalog0/data/2018.10.16.13.03.07/nunit.2.6.5.json",
@@ -383,12 +383,12 @@
             "version": "2.6.5"
           },
           "packageContent": "https://api.nuget.org/v3-flatcontainer/nunit/2.6.5/nunit.2.6.5.nupkg",
-          "registration": "https://api.nuget.org/v3/registration5-semver1/nunit/index.json"
+          "registration": "https://api.nuget.org/v3/registration5-gz-semver2/nunit/index.json"
         },
         {
-          "@id": "https://api.nuget.org/v3/registration5-semver1/nunit/2.6.6.json",
+          "@id": "https://api.nuget.org/v3/registration5-gz-semver2/nunit/2.6.6.json",
           "@type": "Package",
-          "commitId": "69641076-314b-47e0-9047-4c6cc3f04a28",
+          "commitId": "9b827e25-a7c0-4840-a0f3-eb3f46b8ef29",
           "commitTimeStamp": "2020-02-07T22:41:28.9136138+00:00",
           "catalogEntry": {
             "@id": "https://api.nuget.org/v3/catalog0/data/2018.10.16.13.03.07/nunit.2.6.6.json",
@@ -423,12 +423,12 @@
             "version": "2.6.6"
           },
           "packageContent": "https://api.nuget.org/v3-flatcontainer/nunit/2.6.6/nunit.2.6.6.nupkg",
-          "registration": "https://api.nuget.org/v3/registration5-semver1/nunit/index.json"
+          "registration": "https://api.nuget.org/v3/registration5-gz-semver2/nunit/index.json"
         },
         {
-          "@id": "https://api.nuget.org/v3/registration5-semver1/nunit/2.6.7.json",
+          "@id": "https://api.nuget.org/v3/registration5-gz-semver2/nunit/2.6.7.json",
           "@type": "Package",
-          "commitId": "69641076-314b-47e0-9047-4c6cc3f04a28",
+          "commitId": "9b827e25-a7c0-4840-a0f3-eb3f46b8ef29",
           "commitTimeStamp": "2020-02-07T22:41:28.9136138+00:00",
           "catalogEntry": {
             "@id": "https://api.nuget.org/v3/catalog0/data/2018.10.16.13.03.59/nunit.2.6.7.json",
@@ -463,12 +463,12 @@
             "version": "2.6.7"
           },
           "packageContent": "https://api.nuget.org/v3-flatcontainer/nunit/2.6.7/nunit.2.6.7.nupkg",
-          "registration": "https://api.nuget.org/v3/registration5-semver1/nunit/index.json"
+          "registration": "https://api.nuget.org/v3/registration5-gz-semver2/nunit/index.json"
         },
         {
-          "@id": "https://api.nuget.org/v3/registration5-semver1/nunit/2.7.0.json",
+          "@id": "https://api.nuget.org/v3/registration5-gz-semver2/nunit/2.7.0.json",
           "@type": "Package",
-          "commitId": "69641076-314b-47e0-9047-4c6cc3f04a28",
+          "commitId": "9b827e25-a7c0-4840-a0f3-eb3f46b8ef29",
           "commitTimeStamp": "2020-02-07T22:41:28.9136138+00:00",
           "catalogEntry": {
             "@id": "https://api.nuget.org/v3/catalog0/data/2018.08.10.20.51.54/nunit.2.7.0.json",
@@ -503,12 +503,12 @@
             "version": "2.7.0"
           },
           "packageContent": "https://api.nuget.org/v3-flatcontainer/nunit/2.7.0/nunit.2.7.0.nupkg",
-          "registration": "https://api.nuget.org/v3/registration5-semver1/nunit/index.json"
+          "registration": "https://api.nuget.org/v3/registration5-gz-semver2/nunit/index.json"
         },
         {
-          "@id": "https://api.nuget.org/v3/registration5-semver1/nunit/2.7.1.json",
+          "@id": "https://api.nuget.org/v3/registration5-gz-semver2/nunit/2.7.1.json",
           "@type": "Package",
-          "commitId": "69641076-314b-47e0-9047-4c6cc3f04a28",
+          "commitId": "9b827e25-a7c0-4840-a0f3-eb3f46b8ef29",
           "commitTimeStamp": "2020-02-07T22:41:28.9136138+00:00",
           "catalogEntry": {
             "@id": "https://api.nuget.org/v3/catalog0/data/2019.08.21.07.13.24/nunit.2.7.1.json",
@@ -543,12 +543,12 @@
             "version": "2.7.1"
           },
           "packageContent": "https://api.nuget.org/v3-flatcontainer/nunit/2.7.1/nunit.2.7.1.nupkg",
-          "registration": "https://api.nuget.org/v3/registration5-semver1/nunit/index.json"
+          "registration": "https://api.nuget.org/v3/registration5-gz-semver2/nunit/index.json"
         },
         {
-          "@id": "https://api.nuget.org/v3/registration5-semver1/nunit/3.0.0-alpha.json",
+          "@id": "https://api.nuget.org/v3/registration5-gz-semver2/nunit/3.0.0-alpha.json",
           "@type": "Package",
-          "commitId": "69641076-314b-47e0-9047-4c6cc3f04a28",
+          "commitId": "9b827e25-a7c0-4840-a0f3-eb3f46b8ef29",
           "commitTimeStamp": "2020-02-07T22:41:28.9136138+00:00",
           "catalogEntry": {
             "@id": "https://api.nuget.org/v3/catalog0/data/2018.10.16.13.03.07/nunit.3.0.0-alpha.json",
@@ -564,7 +564,7 @@
                     "@type": "PackageDependency",
                     "id": "Microsoft.Bcl.Async",
                     "range": "[1.0.165, )",
-                    "registration": "https://api.nuget.org/v3/registration5-semver1/microsoft.bcl.async/index.json"
+                    "registration": "https://api.nuget.org/v3/registration5-gz-semver2/microsoft.bcl.async/index.json"
                   }
                 ],
                 "targetFramework": ".NETFramework4.0"
@@ -604,12 +604,12 @@
             "version": "3.0.0-alpha"
           },
           "packageContent": "https://api.nuget.org/v3-flatcontainer/nunit/3.0.0-alpha/nunit.3.0.0-alpha.nupkg",
-          "registration": "https://api.nuget.org/v3/registration5-semver1/nunit/index.json"
+          "registration": "https://api.nuget.org/v3/registration5-gz-semver2/nunit/index.json"
         },
         {
-          "@id": "https://api.nuget.org/v3/registration5-semver1/nunit/3.0.0-alpha-2.json",
+          "@id": "https://api.nuget.org/v3/registration5-gz-semver2/nunit/3.0.0-alpha-2.json",
           "@type": "Package",
-          "commitId": "69641076-314b-47e0-9047-4c6cc3f04a28",
+          "commitId": "9b827e25-a7c0-4840-a0f3-eb3f46b8ef29",
           "commitTimeStamp": "2020-02-07T22:41:28.9136138+00:00",
           "catalogEntry": {
             "@id": "https://api.nuget.org/v3/catalog0/data/2018.10.16.13.02.29/nunit.3.0.0-alpha-2.json",
@@ -625,7 +625,7 @@
                     "@type": "PackageDependency",
                     "id": "Microsoft.Bcl.Async",
                     "range": "[1.0.165, )",
-                    "registration": "https://api.nuget.org/v3/registration5-semver1/microsoft.bcl.async/index.json"
+                    "registration": "https://api.nuget.org/v3/registration5-gz-semver2/microsoft.bcl.async/index.json"
                   }
                 ],
                 "targetFramework": ".NETFramework4.0"
@@ -665,12 +665,12 @@
             "version": "3.0.0-alpha-2"
           },
           "packageContent": "https://api.nuget.org/v3-flatcontainer/nunit/3.0.0-alpha-2/nunit.3.0.0-alpha-2.nupkg",
-          "registration": "https://api.nuget.org/v3/registration5-semver1/nunit/index.json"
+          "registration": "https://api.nuget.org/v3/registration5-gz-semver2/nunit/index.json"
         },
         {
-          "@id": "https://api.nuget.org/v3/registration5-semver1/nunit/3.0.0-alpha-3.json",
+          "@id": "https://api.nuget.org/v3/registration5-gz-semver2/nunit/3.0.0-alpha-3.json",
           "@type": "Package",
-          "commitId": "69641076-314b-47e0-9047-4c6cc3f04a28",
+          "commitId": "9b827e25-a7c0-4840-a0f3-eb3f46b8ef29",
           "commitTimeStamp": "2020-02-07T22:41:28.9136138+00:00",
           "catalogEntry": {
             "@id": "https://api.nuget.org/v3/catalog0/data/2018.10.16.13.02.13/nunit.3.0.0-alpha-3.json",
@@ -686,7 +686,7 @@
                     "@type": "PackageDependency",
                     "id": "Microsoft.Bcl.Async",
                     "range": "[1.0.165, )",
-                    "registration": "https://api.nuget.org/v3/registration5-semver1/microsoft.bcl.async/index.json"
+                    "registration": "https://api.nuget.org/v3/registration5-gz-semver2/microsoft.bcl.async/index.json"
                   }
                 ],
                 "targetFramework": ".NETFramework4.0"
@@ -726,12 +726,12 @@
             "version": "3.0.0-alpha-3"
           },
           "packageContent": "https://api.nuget.org/v3-flatcontainer/nunit/3.0.0-alpha-3/nunit.3.0.0-alpha-3.nupkg",
-          "registration": "https://api.nuget.org/v3/registration5-semver1/nunit/index.json"
+          "registration": "https://api.nuget.org/v3/registration5-gz-semver2/nunit/index.json"
         },
         {
-          "@id": "https://api.nuget.org/v3/registration5-semver1/nunit/3.0.0-alpha-4.json",
+          "@id": "https://api.nuget.org/v3/registration5-gz-semver2/nunit/3.0.0-alpha-4.json",
           "@type": "Package",
-          "commitId": "69641076-314b-47e0-9047-4c6cc3f04a28",
+          "commitId": "9b827e25-a7c0-4840-a0f3-eb3f46b8ef29",
           "commitTimeStamp": "2020-02-07T22:41:28.9136138+00:00",
           "catalogEntry": {
             "@id": "https://api.nuget.org/v3/catalog0/data/2018.10.16.13.02.05/nunit.3.0.0-alpha-4.json",
@@ -747,7 +747,7 @@
                     "@type": "PackageDependency",
                     "id": "Microsoft.Bcl.Async",
                     "range": "[1.0.165, )",
-                    "registration": "https://api.nuget.org/v3/registration5-semver1/microsoft.bcl.async/index.json"
+                    "registration": "https://api.nuget.org/v3/registration5-gz-semver2/microsoft.bcl.async/index.json"
                   }
                 ],
                 "targetFramework": ".NETFramework4.0"
@@ -787,12 +787,12 @@
             "version": "3.0.0-alpha-4"
           },
           "packageContent": "https://api.nuget.org/v3-flatcontainer/nunit/3.0.0-alpha-4/nunit.3.0.0-alpha-4.nupkg",
-          "registration": "https://api.nuget.org/v3/registration5-semver1/nunit/index.json"
+          "registration": "https://api.nuget.org/v3/registration5-gz-semver2/nunit/index.json"
         },
         {
-          "@id": "https://api.nuget.org/v3/registration5-semver1/nunit/3.0.0-alpha-5.json",
+          "@id": "https://api.nuget.org/v3/registration5-gz-semver2/nunit/3.0.0-alpha-5.json",
           "@type": "Package",
-          "commitId": "69641076-314b-47e0-9047-4c6cc3f04a28",
+          "commitId": "9b827e25-a7c0-4840-a0f3-eb3f46b8ef29",
           "commitTimeStamp": "2020-02-07T22:41:28.9136138+00:00",
           "catalogEntry": {
             "@id": "https://api.nuget.org/v3/catalog0/data/2018.10.16.13.01.58/nunit.3.0.0-alpha-5.json",
@@ -808,7 +808,7 @@
                     "@type": "PackageDependency",
                     "id": "Microsoft.Bcl.Async",
                     "range": "[1.0.165, )",
-                    "registration": "https://api.nuget.org/v3/registration5-semver1/microsoft.bcl.async/index.json"
+                    "registration": "https://api.nuget.org/v3/registration5-gz-semver2/microsoft.bcl.async/index.json"
                   }
                 ],
                 "targetFramework": ".NETFramework4.0"
@@ -848,12 +848,12 @@
             "version": "3.0.0-alpha-5"
           },
           "packageContent": "https://api.nuget.org/v3-flatcontainer/nunit/3.0.0-alpha-5/nunit.3.0.0-alpha-5.nupkg",
-          "registration": "https://api.nuget.org/v3/registration5-semver1/nunit/index.json"
+          "registration": "https://api.nuget.org/v3/registration5-gz-semver2/nunit/index.json"
         },
         {
-          "@id": "https://api.nuget.org/v3/registration5-semver1/nunit/3.0.0-beta-1.json",
+          "@id": "https://api.nuget.org/v3/registration5-gz-semver2/nunit/3.0.0-beta-1.json",
           "@type": "Package",
-          "commitId": "69641076-314b-47e0-9047-4c6cc3f04a28",
+          "commitId": "9b827e25-a7c0-4840-a0f3-eb3f46b8ef29",
           "commitTimeStamp": "2020-02-07T22:41:28.9136138+00:00",
           "catalogEntry": {
             "@id": "https://api.nuget.org/v3/catalog0/data/2018.10.16.13.01.51/nunit.3.0.0-beta-1.json",
@@ -869,7 +869,7 @@
                     "@type": "PackageDependency",
                     "id": "Microsoft.Bcl.Async",
                     "range": "[1.0.165, )",
-                    "registration": "https://api.nuget.org/v3/registration5-semver1/microsoft.bcl.async/index.json"
+                    "registration": "https://api.nuget.org/v3/registration5-gz-semver2/microsoft.bcl.async/index.json"
                   }
                 ],
                 "targetFramework": ".NETFramework4.0"
@@ -909,12 +909,12 @@
             "version": "3.0.0-beta-1"
           },
           "packageContent": "https://api.nuget.org/v3-flatcontainer/nunit/3.0.0-beta-1/nunit.3.0.0-beta-1.nupkg",
-          "registration": "https://api.nuget.org/v3/registration5-semver1/nunit/index.json"
+          "registration": "https://api.nuget.org/v3/registration5-gz-semver2/nunit/index.json"
         },
         {
-          "@id": "https://api.nuget.org/v3/registration5-semver1/nunit/3.0.0-beta-2.json",
+          "@id": "https://api.nuget.org/v3/registration5-gz-semver2/nunit/3.0.0-beta-2.json",
           "@type": "Package",
-          "commitId": "69641076-314b-47e0-9047-4c6cc3f04a28",
+          "commitId": "9b827e25-a7c0-4840-a0f3-eb3f46b8ef29",
           "commitTimeStamp": "2020-02-07T22:41:28.9136138+00:00",
           "catalogEntry": {
             "@id": "https://api.nuget.org/v3/catalog0/data/2018.10.16.13.01.44/nunit.3.0.0-beta-2.json",
@@ -930,7 +930,7 @@
                     "@type": "PackageDependency",
                     "id": "Microsoft.Bcl.Async",
                     "range": "[1.0.165, )",
-                    "registration": "https://api.nuget.org/v3/registration5-semver1/microsoft.bcl.async/index.json"
+                    "registration": "https://api.nuget.org/v3/registration5-gz-semver2/microsoft.bcl.async/index.json"
                   }
                 ],
                 "targetFramework": ".NETFramework4.0"
@@ -970,12 +970,12 @@
             "version": "3.0.0-beta-2"
           },
           "packageContent": "https://api.nuget.org/v3-flatcontainer/nunit/3.0.0-beta-2/nunit.3.0.0-beta-2.nupkg",
-          "registration": "https://api.nuget.org/v3/registration5-semver1/nunit/index.json"
+          "registration": "https://api.nuget.org/v3/registration5-gz-semver2/nunit/index.json"
         },
         {
-          "@id": "https://api.nuget.org/v3/registration5-semver1/nunit/3.0.0-beta-3.json",
+          "@id": "https://api.nuget.org/v3/registration5-gz-semver2/nunit/3.0.0-beta-3.json",
           "@type": "Package",
-          "commitId": "69641076-314b-47e0-9047-4c6cc3f04a28",
+          "commitId": "9b827e25-a7c0-4840-a0f3-eb3f46b8ef29",
           "commitTimeStamp": "2020-02-07T22:41:28.9136138+00:00",
           "catalogEntry": {
             "@id": "https://api.nuget.org/v3/catalog0/data/2018.10.16.13.01.37/nunit.3.0.0-beta-3.json",
@@ -1010,12 +1010,12 @@
             "version": "3.0.0-beta-3"
           },
           "packageContent": "https://api.nuget.org/v3-flatcontainer/nunit/3.0.0-beta-3/nunit.3.0.0-beta-3.nupkg",
-          "registration": "https://api.nuget.org/v3/registration5-semver1/nunit/index.json"
+          "registration": "https://api.nuget.org/v3/registration5-gz-semver2/nunit/index.json"
         },
         {
-          "@id": "https://api.nuget.org/v3/registration5-semver1/nunit/3.0.0-beta-4.json",
+          "@id": "https://api.nuget.org/v3/registration5-gz-semver2/nunit/3.0.0-beta-4.json",
           "@type": "Package",
-          "commitId": "69641076-314b-47e0-9047-4c6cc3f04a28",
+          "commitId": "9b827e25-a7c0-4840-a0f3-eb3f46b8ef29",
           "commitTimeStamp": "2020-02-07T22:41:28.9136138+00:00",
           "catalogEntry": {
             "@id": "https://api.nuget.org/v3/catalog0/data/2018.10.16.13.00.10/nunit.3.0.0-beta-4.json",
@@ -1050,12 +1050,12 @@
             "version": "3.0.0-beta-4"
           },
           "packageContent": "https://api.nuget.org/v3-flatcontainer/nunit/3.0.0-beta-4/nunit.3.0.0-beta-4.nupkg",
-          "registration": "https://api.nuget.org/v3/registration5-semver1/nunit/index.json"
+          "registration": "https://api.nuget.org/v3/registration5-gz-semver2/nunit/index.json"
         },
         {
-          "@id": "https://api.nuget.org/v3/registration5-semver1/nunit/3.0.0-beta-5.json",
+          "@id": "https://api.nuget.org/v3/registration5-gz-semver2/nunit/3.0.0-beta-5.json",
           "@type": "Package",
-          "commitId": "69641076-314b-47e0-9047-4c6cc3f04a28",
+          "commitId": "9b827e25-a7c0-4840-a0f3-eb3f46b8ef29",
           "commitTimeStamp": "2020-02-07T22:41:28.9136138+00:00",
           "catalogEntry": {
             "@id": "https://api.nuget.org/v3/catalog0/data/2018.10.16.13.00.10/nunit.3.0.0-beta-5.json",
@@ -1090,12 +1090,12 @@
             "version": "3.0.0-beta-5"
           },
           "packageContent": "https://api.nuget.org/v3-flatcontainer/nunit/3.0.0-beta-5/nunit.3.0.0-beta-5.nupkg",
-          "registration": "https://api.nuget.org/v3/registration5-semver1/nunit/index.json"
+          "registration": "https://api.nuget.org/v3/registration5-gz-semver2/nunit/index.json"
         },
         {
-          "@id": "https://api.nuget.org/v3/registration5-semver1/nunit/3.0.0-rc.json",
+          "@id": "https://api.nuget.org/v3/registration5-gz-semver2/nunit/3.0.0-rc.json",
           "@type": "Package",
-          "commitId": "69641076-314b-47e0-9047-4c6cc3f04a28",
+          "commitId": "9b827e25-a7c0-4840-a0f3-eb3f46b8ef29",
           "commitTimeStamp": "2020-02-07T22:41:28.9136138+00:00",
           "catalogEntry": {
             "@id": "https://api.nuget.org/v3/catalog0/data/2018.10.16.12.59.32/nunit.3.0.0-rc.json",
@@ -1130,12 +1130,12 @@
             "version": "3.0.0-rc"
           },
           "packageContent": "https://api.nuget.org/v3-flatcontainer/nunit/3.0.0-rc/nunit.3.0.0-rc.nupkg",
-          "registration": "https://api.nuget.org/v3/registration5-semver1/nunit/index.json"
+          "registration": "https://api.nuget.org/v3/registration5-gz-semver2/nunit/index.json"
         },
         {
-          "@id": "https://api.nuget.org/v3/registration5-semver1/nunit/3.0.0-rc-2.json",
+          "@id": "https://api.nuget.org/v3/registration5-gz-semver2/nunit/3.0.0-rc-2.json",
           "@type": "Package",
-          "commitId": "69641076-314b-47e0-9047-4c6cc3f04a28",
+          "commitId": "9b827e25-a7c0-4840-a0f3-eb3f46b8ef29",
           "commitTimeStamp": "2020-02-07T22:41:28.9136138+00:00",
           "catalogEntry": {
             "@id": "https://api.nuget.org/v3/catalog0/data/2018.10.16.13.01.25/nunit.3.0.0-rc-2.json",
@@ -1170,12 +1170,12 @@
             "version": "3.0.0-rc-2"
           },
           "packageContent": "https://api.nuget.org/v3-flatcontainer/nunit/3.0.0-rc-2/nunit.3.0.0-rc-2.nupkg",
-          "registration": "https://api.nuget.org/v3/registration5-semver1/nunit/index.json"
+          "registration": "https://api.nuget.org/v3/registration5-gz-semver2/nunit/index.json"
         },
         {
-          "@id": "https://api.nuget.org/v3/registration5-semver1/nunit/3.0.0-rc-3.json",
+          "@id": "https://api.nuget.org/v3/registration5-gz-semver2/nunit/3.0.0-rc-3.json",
           "@type": "Package",
-          "commitId": "69641076-314b-47e0-9047-4c6cc3f04a28",
+          "commitId": "9b827e25-a7c0-4840-a0f3-eb3f46b8ef29",
           "commitTimeStamp": "2020-02-07T22:41:28.9136138+00:00",
           "catalogEntry": {
             "@id": "https://api.nuget.org/v3/catalog0/data/2018.10.16.13.00.10/nunit.3.0.0-rc-3.json",
@@ -1210,12 +1210,12 @@
             "version": "3.0.0-rc-3"
           },
           "packageContent": "https://api.nuget.org/v3-flatcontainer/nunit/3.0.0-rc-3/nunit.3.0.0-rc-3.nupkg",
-          "registration": "https://api.nuget.org/v3/registration5-semver1/nunit/index.json"
+          "registration": "https://api.nuget.org/v3/registration5-gz-semver2/nunit/index.json"
         },
         {
-          "@id": "https://api.nuget.org/v3/registration5-semver1/nunit/3.0.0.json",
+          "@id": "https://api.nuget.org/v3/registration5-gz-semver2/nunit/3.0.0.json",
           "@type": "Package",
-          "commitId": "69641076-314b-47e0-9047-4c6cc3f04a28",
+          "commitId": "9b827e25-a7c0-4840-a0f3-eb3f46b8ef29",
           "commitTimeStamp": "2020-02-07T22:41:28.9136138+00:00",
           "catalogEntry": {
             "@id": "https://api.nuget.org/v3/catalog0/data/2018.10.16.13.09.47/nunit.3.0.0.json",
@@ -1250,12 +1250,12 @@
             "version": "3.0.0"
           },
           "packageContent": "https://api.nuget.org/v3-flatcontainer/nunit/3.0.0/nunit.3.0.0.nupkg",
-          "registration": "https://api.nuget.org/v3/registration5-semver1/nunit/index.json"
+          "registration": "https://api.nuget.org/v3/registration5-gz-semver2/nunit/index.json"
         },
         {
-          "@id": "https://api.nuget.org/v3/registration5-semver1/nunit/3.0.1.json",
+          "@id": "https://api.nuget.org/v3/registration5-gz-semver2/nunit/3.0.1.json",
           "@type": "Package",
-          "commitId": "69641076-314b-47e0-9047-4c6cc3f04a28",
+          "commitId": "9b827e25-a7c0-4840-a0f3-eb3f46b8ef29",
           "commitTimeStamp": "2020-02-07T22:41:28.9136138+00:00",
           "catalogEntry": {
             "@id": "https://api.nuget.org/v3/catalog0/data/2018.10.16.12.59.24/nunit.3.0.1.json",
@@ -1290,12 +1290,12 @@
             "version": "3.0.1"
           },
           "packageContent": "https://api.nuget.org/v3-flatcontainer/nunit/3.0.1/nunit.3.0.1.nupkg",
-          "registration": "https://api.nuget.org/v3/registration5-semver1/nunit/index.json"
+          "registration": "https://api.nuget.org/v3/registration5-gz-semver2/nunit/index.json"
         },
         {
-          "@id": "https://api.nuget.org/v3/registration5-semver1/nunit/3.2.0.json",
+          "@id": "https://api.nuget.org/v3/registration5-gz-semver2/nunit/3.2.0.json",
           "@type": "Package",
-          "commitId": "69641076-314b-47e0-9047-4c6cc3f04a28",
+          "commitId": "9b827e25-a7c0-4840-a0f3-eb3f46b8ef29",
           "commitTimeStamp": "2020-02-07T22:41:28.9136138+00:00",
           "catalogEntry": {
             "@id": "https://api.nuget.org/v3/catalog0/data/2018.10.16.12.58.41/nunit.3.2.0.json",
@@ -1330,12 +1330,12 @@
             "version": "3.2.0"
           },
           "packageContent": "https://api.nuget.org/v3-flatcontainer/nunit/3.2.0/nunit.3.2.0.nupkg",
-          "registration": "https://api.nuget.org/v3/registration5-semver1/nunit/index.json"
+          "registration": "https://api.nuget.org/v3/registration5-gz-semver2/nunit/index.json"
         },
         {
-          "@id": "https://api.nuget.org/v3/registration5-semver1/nunit/3.2.1.json",
+          "@id": "https://api.nuget.org/v3/registration5-gz-semver2/nunit/3.2.1.json",
           "@type": "Package",
-          "commitId": "69641076-314b-47e0-9047-4c6cc3f04a28",
+          "commitId": "9b827e25-a7c0-4840-a0f3-eb3f46b8ef29",
           "commitTimeStamp": "2020-02-07T22:41:28.9136138+00:00",
           "catalogEntry": {
             "@id": "https://api.nuget.org/v3/catalog0/data/2018.10.16.12.58.41/nunit.3.2.1.json",
@@ -1370,12 +1370,12 @@
             "version": "3.2.1"
           },
           "packageContent": "https://api.nuget.org/v3-flatcontainer/nunit/3.2.1/nunit.3.2.1.nupkg",
-          "registration": "https://api.nuget.org/v3/registration5-semver1/nunit/index.json"
+          "registration": "https://api.nuget.org/v3/registration5-gz-semver2/nunit/index.json"
         },
         {
-          "@id": "https://api.nuget.org/v3/registration5-semver1/nunit/3.4.0.json",
+          "@id": "https://api.nuget.org/v3/registration5-gz-semver2/nunit/3.4.0.json",
           "@type": "Package",
-          "commitId": "69641076-314b-47e0-9047-4c6cc3f04a28",
+          "commitId": "9b827e25-a7c0-4840-a0f3-eb3f46b8ef29",
           "commitTimeStamp": "2020-02-07T22:41:28.9136138+00:00",
           "catalogEntry": {
             "@id": "https://api.nuget.org/v3/catalog0/data/2018.10.16.12.58.19/nunit.3.4.0.json",
@@ -1410,12 +1410,12 @@
             "version": "3.4.0"
           },
           "packageContent": "https://api.nuget.org/v3-flatcontainer/nunit/3.4.0/nunit.3.4.0.nupkg",
-          "registration": "https://api.nuget.org/v3/registration5-semver1/nunit/index.json"
+          "registration": "https://api.nuget.org/v3/registration5-gz-semver2/nunit/index.json"
         },
         {
-          "@id": "https://api.nuget.org/v3/registration5-semver1/nunit/3.4.1.json",
+          "@id": "https://api.nuget.org/v3/registration5-gz-semver2/nunit/3.4.1.json",
           "@type": "Package",
-          "commitId": "69641076-314b-47e0-9047-4c6cc3f04a28",
+          "commitId": "9b827e25-a7c0-4840-a0f3-eb3f46b8ef29",
           "commitTimeStamp": "2020-02-07T22:41:28.9136138+00:00",
           "catalogEntry": {
             "@id": "https://api.nuget.org/v3/catalog0/data/2018.10.16.12.58.19/nunit.3.4.1.json",
@@ -1450,12 +1450,12 @@
             "version": "3.4.1"
           },
           "packageContent": "https://api.nuget.org/v3-flatcontainer/nunit/3.4.1/nunit.3.4.1.nupkg",
-          "registration": "https://api.nuget.org/v3/registration5-semver1/nunit/index.json"
+          "registration": "https://api.nuget.org/v3/registration5-gz-semver2/nunit/index.json"
         },
         {
-          "@id": "https://api.nuget.org/v3/registration5-semver1/nunit/3.5.0.json",
+          "@id": "https://api.nuget.org/v3/registration5-gz-semver2/nunit/3.5.0.json",
           "@type": "Package",
-          "commitId": "69641076-314b-47e0-9047-4c6cc3f04a28",
+          "commitId": "9b827e25-a7c0-4840-a0f3-eb3f46b8ef29",
           "commitTimeStamp": "2020-02-07T22:41:28.9136138+00:00",
           "catalogEntry": {
             "@id": "https://api.nuget.org/v3/catalog0/data/2018.10.16.12.58.19/nunit.3.5.0.json",
@@ -1490,12 +1490,12 @@
             "version": "3.5.0"
           },
           "packageContent": "https://api.nuget.org/v3-flatcontainer/nunit/3.5.0/nunit.3.5.0.nupkg",
-          "registration": "https://api.nuget.org/v3/registration5-semver1/nunit/index.json"
+          "registration": "https://api.nuget.org/v3/registration5-gz-semver2/nunit/index.json"
         },
         {
-          "@id": "https://api.nuget.org/v3/registration5-semver1/nunit/3.6.0.json",
+          "@id": "https://api.nuget.org/v3/registration5-gz-semver2/nunit/3.6.0.json",
           "@type": "Package",
-          "commitId": "69641076-314b-47e0-9047-4c6cc3f04a28",
+          "commitId": "9b827e25-a7c0-4840-a0f3-eb3f46b8ef29",
           "commitTimeStamp": "2020-02-07T22:41:28.9136138+00:00",
           "catalogEntry": {
             "@id": "https://api.nuget.org/v3/catalog0/data/2018.10.16.12.58.19/nunit.3.6.0.json",
@@ -1511,14 +1511,14 @@
                     "@type": "PackageDependency",
                     "id": "NETStandard.Library",
                     "range": "[1.6.0, )",
-                    "registration": "https://api.nuget.org/v3/registration5-semver1/netstandard.library/index.json"
+                    "registration": "https://api.nuget.org/v3/registration5-gz-semver2/netstandard.library/index.json"
                   },
                   {
                     "@id": "https://api.nuget.org/v3/catalog0/data/2018.10.16.12.58.19/nunit.3.6.0.json#dependencygroup/.netstandard1.6/system.runtime.loader",
                     "@type": "PackageDependency",
                     "id": "System.Runtime.Loader",
                     "range": "[4.0.0, )",
-                    "registration": "https://api.nuget.org/v3/registration5-semver1/system.runtime.loader/index.json"
+                    "registration": "https://api.nuget.org/v3/registration5-gz-semver2/system.runtime.loader/index.json"
                   }
                 ],
                 "targetFramework": ".NETStandard1.6"
@@ -1553,12 +1553,12 @@
             "version": "3.6.0"
           },
           "packageContent": "https://api.nuget.org/v3-flatcontainer/nunit/3.6.0/nunit.3.6.0.nupkg",
-          "registration": "https://api.nuget.org/v3/registration5-semver1/nunit/index.json"
+          "registration": "https://api.nuget.org/v3/registration5-gz-semver2/nunit/index.json"
         },
         {
-          "@id": "https://api.nuget.org/v3/registration5-semver1/nunit/3.6.1.json",
+          "@id": "https://api.nuget.org/v3/registration5-gz-semver2/nunit/3.6.1.json",
           "@type": "Package",
-          "commitId": "69641076-314b-47e0-9047-4c6cc3f04a28",
+          "commitId": "9b827e25-a7c0-4840-a0f3-eb3f46b8ef29",
           "commitTimeStamp": "2020-02-07T22:41:28.9136138+00:00",
           "catalogEntry": {
             "@id": "https://api.nuget.org/v3/catalog0/data/2018.10.16.12.58.19/nunit.3.6.1.json",
@@ -1574,14 +1574,14 @@
                     "@type": "PackageDependency",
                     "id": "NETStandard.Library",
                     "range": "[1.6.0, )",
-                    "registration": "https://api.nuget.org/v3/registration5-semver1/netstandard.library/index.json"
+                    "registration": "https://api.nuget.org/v3/registration5-gz-semver2/netstandard.library/index.json"
                   },
                   {
                     "@id": "https://api.nuget.org/v3/catalog0/data/2018.10.16.12.58.19/nunit.3.6.1.json#dependencygroup/.netstandard1.6/system.runtime.loader",
                     "@type": "PackageDependency",
                     "id": "System.Runtime.Loader",
                     "range": "[4.0.0, )",
-                    "registration": "https://api.nuget.org/v3/registration5-semver1/system.runtime.loader/index.json"
+                    "registration": "https://api.nuget.org/v3/registration5-gz-semver2/system.runtime.loader/index.json"
                   }
                 ],
                 "targetFramework": ".NETStandard1.6"
@@ -1616,12 +1616,12 @@
             "version": "3.6.1"
           },
           "packageContent": "https://api.nuget.org/v3-flatcontainer/nunit/3.6.1/nunit.3.6.1.nupkg",
-          "registration": "https://api.nuget.org/v3/registration5-semver1/nunit/index.json"
+          "registration": "https://api.nuget.org/v3/registration5-gz-semver2/nunit/index.json"
         },
         {
-          "@id": "https://api.nuget.org/v3/registration5-semver1/nunit/3.7.0.json",
+          "@id": "https://api.nuget.org/v3/registration5-gz-semver2/nunit/3.7.0.json",
           "@type": "Package",
-          "commitId": "69641076-314b-47e0-9047-4c6cc3f04a28",
+          "commitId": "9b827e25-a7c0-4840-a0f3-eb3f46b8ef29",
           "commitTimeStamp": "2020-02-07T22:41:28.9136138+00:00",
           "catalogEntry": {
             "@id": "https://api.nuget.org/v3/catalog0/data/2018.10.16.12.57.39/nunit.3.7.0.json",
@@ -1657,14 +1657,14 @@
                     "@type": "PackageDependency",
                     "id": "NETStandard.Library",
                     "range": "[1.6.0, )",
-                    "registration": "https://api.nuget.org/v3/registration5-semver1/netstandard.library/index.json"
+                    "registration": "https://api.nuget.org/v3/registration5-gz-semver2/netstandard.library/index.json"
                   },
                   {
                     "@id": "https://api.nuget.org/v3/catalog0/data/2018.10.16.12.57.39/nunit.3.7.0.json#dependencygroup/.netstandard1.3/system.threading.thread",
                     "@type": "PackageDependency",
                     "id": "System.Threading.Thread",
                     "range": "[4.3.0, )",
-                    "registration": "https://api.nuget.org/v3/registration5-semver1/system.threading.thread/index.json"
+                    "registration": "https://api.nuget.org/v3/registration5-gz-semver2/system.threading.thread/index.json"
                   }
                 ],
                 "targetFramework": ".NETStandard1.3"
@@ -1678,21 +1678,21 @@
                     "@type": "PackageDependency",
                     "id": "NETStandard.Library",
                     "range": "[1.6.0, )",
-                    "registration": "https://api.nuget.org/v3/registration5-semver1/netstandard.library/index.json"
+                    "registration": "https://api.nuget.org/v3/registration5-gz-semver2/netstandard.library/index.json"
                   },
                   {
                     "@id": "https://api.nuget.org/v3/catalog0/data/2018.10.16.12.57.39/nunit.3.7.0.json#dependencygroup/.netstandard1.6/system.runtime.loader",
                     "@type": "PackageDependency",
                     "id": "System.Runtime.Loader",
                     "range": "[4.3.0, )",
-                    "registration": "https://api.nuget.org/v3/registration5-semver1/system.runtime.loader/index.json"
+                    "registration": "https://api.nuget.org/v3/registration5-gz-semver2/system.runtime.loader/index.json"
                   },
                   {
                     "@id": "https://api.nuget.org/v3/catalog0/data/2018.10.16.12.57.39/nunit.3.7.0.json#dependencygroup/.netstandard1.6/system.threading.thread",
                     "@type": "PackageDependency",
                     "id": "System.Threading.Thread",
                     "range": "[4.3.0, )",
-                    "registration": "https://api.nuget.org/v3/registration5-semver1/system.threading.thread/index.json"
+                    "registration": "https://api.nuget.org/v3/registration5-gz-semver2/system.threading.thread/index.json"
                   }
                 ],
                 "targetFramework": ".NETStandard1.6"
@@ -1727,12 +1727,12 @@
             "version": "3.7.0"
           },
           "packageContent": "https://api.nuget.org/v3-flatcontainer/nunit/3.7.0/nunit.3.7.0.nupkg",
-          "registration": "https://api.nuget.org/v3/registration5-semver1/nunit/index.json"
+          "registration": "https://api.nuget.org/v3/registration5-gz-semver2/nunit/index.json"
         },
         {
-          "@id": "https://api.nuget.org/v3/registration5-semver1/nunit/3.7.1.json",
+          "@id": "https://api.nuget.org/v3/registration5-gz-semver2/nunit/3.7.1.json",
           "@type": "Package",
-          "commitId": "69641076-314b-47e0-9047-4c6cc3f04a28",
+          "commitId": "9b827e25-a7c0-4840-a0f3-eb3f46b8ef29",
           "commitTimeStamp": "2020-02-07T22:41:28.9136138+00:00",
           "catalogEntry": {
             "@id": "https://api.nuget.org/v3/catalog0/data/2018.10.16.12.57.39/nunit.3.7.1.json",
@@ -1768,14 +1768,14 @@
                     "@type": "PackageDependency",
                     "id": "NETStandard.Library",
                     "range": "[1.6.0, )",
-                    "registration": "https://api.nuget.org/v3/registration5-semver1/netstandard.library/index.json"
+                    "registration": "https://api.nuget.org/v3/registration5-gz-semver2/netstandard.library/index.json"
                   },
                   {
                     "@id": "https://api.nuget.org/v3/catalog0/data/2018.10.16.12.57.39/nunit.3.7.1.json#dependencygroup/.netstandard1.3/system.threading.thread",
                     "@type": "PackageDependency",
                     "id": "System.Threading.Thread",
                     "range": "[4.3.0, )",
-                    "registration": "https://api.nuget.org/v3/registration5-semver1/system.threading.thread/index.json"
+                    "registration": "https://api.nuget.org/v3/registration5-gz-semver2/system.threading.thread/index.json"
                   }
                 ],
                 "targetFramework": ".NETStandard1.3"
@@ -1789,21 +1789,21 @@
                     "@type": "PackageDependency",
                     "id": "NETStandard.Library",
                     "range": "[1.6.0, )",
-                    "registration": "https://api.nuget.org/v3/registration5-semver1/netstandard.library/index.json"
+                    "registration": "https://api.nuget.org/v3/registration5-gz-semver2/netstandard.library/index.json"
                   },
                   {
                     "@id": "https://api.nuget.org/v3/catalog0/data/2018.10.16.12.57.39/nunit.3.7.1.json#dependencygroup/.netstandard1.6/system.runtime.loader",
                     "@type": "PackageDependency",
                     "id": "System.Runtime.Loader",
                     "range": "[4.3.0, )",
-                    "registration": "https://api.nuget.org/v3/registration5-semver1/system.runtime.loader/index.json"
+                    "registration": "https://api.nuget.org/v3/registration5-gz-semver2/system.runtime.loader/index.json"
                   },
                   {
                     "@id": "https://api.nuget.org/v3/catalog0/data/2018.10.16.12.57.39/nunit.3.7.1.json#dependencygroup/.netstandard1.6/system.threading.thread",
                     "@type": "PackageDependency",
                     "id": "System.Threading.Thread",
                     "range": "[4.3.0, )",
-                    "registration": "https://api.nuget.org/v3/registration5-semver1/system.threading.thread/index.json"
+                    "registration": "https://api.nuget.org/v3/registration5-gz-semver2/system.threading.thread/index.json"
                   }
                 ],
                 "targetFramework": ".NETStandard1.6"
@@ -1838,12 +1838,12 @@
             "version": "3.7.1"
           },
           "packageContent": "https://api.nuget.org/v3-flatcontainer/nunit/3.7.1/nunit.3.7.1.nupkg",
-          "registration": "https://api.nuget.org/v3/registration5-semver1/nunit/index.json"
+          "registration": "https://api.nuget.org/v3/registration5-gz-semver2/nunit/index.json"
         },
         {
-          "@id": "https://api.nuget.org/v3/registration5-semver1/nunit/3.8.0.json",
+          "@id": "https://api.nuget.org/v3/registration5-gz-semver2/nunit/3.8.0.json",
           "@type": "Package",
-          "commitId": "69641076-314b-47e0-9047-4c6cc3f04a28",
+          "commitId": "9b827e25-a7c0-4840-a0f3-eb3f46b8ef29",
           "commitTimeStamp": "2020-02-07T22:41:28.9136138+00:00",
           "catalogEntry": {
             "@id": "https://api.nuget.org/v3/catalog0/data/2018.10.16.12.57.39/nunit.3.8.0.json",
@@ -1879,7 +1879,7 @@
                     "@type": "PackageDependency",
                     "id": "NETStandard.Library",
                     "range": "[1.6.0, )",
-                    "registration": "https://api.nuget.org/v3/registration5-semver1/netstandard.library/index.json"
+                    "registration": "https://api.nuget.org/v3/registration5-gz-semver2/netstandard.library/index.json"
                   }
                 ],
                 "targetFramework": "Xamarin.iOS0.0"
@@ -1893,7 +1893,7 @@
                     "@type": "PackageDependency",
                     "id": "NETStandard.Library",
                     "range": "[1.6.0, )",
-                    "registration": "https://api.nuget.org/v3/registration5-semver1/netstandard.library/index.json"
+                    "registration": "https://api.nuget.org/v3/registration5-gz-semver2/netstandard.library/index.json"
                   }
                 ],
                 "targetFramework": "MonoAndroid0.0"
@@ -1907,7 +1907,7 @@
                     "@type": "PackageDependency",
                     "id": "NETStandard.Library",
                     "range": "[1.6.0, )",
-                    "registration": "https://api.nuget.org/v3/registration5-semver1/netstandard.library/index.json"
+                    "registration": "https://api.nuget.org/v3/registration5-gz-semver2/netstandard.library/index.json"
                   }
                 ],
                 "targetFramework": "UAP0.0"
@@ -1921,7 +1921,7 @@
                     "@type": "PackageDependency",
                     "id": "NETStandard.Library",
                     "range": "[1.6.0, )",
-                    "registration": "https://api.nuget.org/v3/registration5-semver1/netstandard.library/index.json"
+                    "registration": "https://api.nuget.org/v3/registration5-gz-semver2/netstandard.library/index.json"
                   }
                 ],
                 "targetFramework": ".NETStandard1.3"
@@ -1935,21 +1935,21 @@
                     "@type": "PackageDependency",
                     "id": "NETStandard.Library",
                     "range": "[1.6.0, )",
-                    "registration": "https://api.nuget.org/v3/registration5-semver1/netstandard.library/index.json"
+                    "registration": "https://api.nuget.org/v3/registration5-gz-semver2/netstandard.library/index.json"
                   },
                   {
                     "@id": "https://api.nuget.org/v3/catalog0/data/2018.10.16.12.57.39/nunit.3.8.0.json#dependencygroup/.netstandard1.6/system.runtime.loader",
                     "@type": "PackageDependency",
                     "id": "System.Runtime.Loader",
                     "range": "[4.3.0, )",
-                    "registration": "https://api.nuget.org/v3/registration5-semver1/system.runtime.loader/index.json"
+                    "registration": "https://api.nuget.org/v3/registration5-gz-semver2/system.runtime.loader/index.json"
                   },
                   {
                     "@id": "https://api.nuget.org/v3/catalog0/data/2018.10.16.12.57.39/nunit.3.8.0.json#dependencygroup/.netstandard1.6/system.threading.thread",
                     "@type": "PackageDependency",
                     "id": "System.Threading.Thread",
                     "range": "[4.3.0, )",
-                    "registration": "https://api.nuget.org/v3/registration5-semver1/system.threading.thread/index.json"
+                    "registration": "https://api.nuget.org/v3/registration5-gz-semver2/system.threading.thread/index.json"
                   }
                 ],
                 "targetFramework": ".NETStandard1.6"
@@ -1984,12 +1984,12 @@
             "version": "3.8.0"
           },
           "packageContent": "https://api.nuget.org/v3-flatcontainer/nunit/3.8.0/nunit.3.8.0.nupkg",
-          "registration": "https://api.nuget.org/v3/registration5-semver1/nunit/index.json"
+          "registration": "https://api.nuget.org/v3/registration5-gz-semver2/nunit/index.json"
         },
         {
-          "@id": "https://api.nuget.org/v3/registration5-semver1/nunit/3.8.1.json",
+          "@id": "https://api.nuget.org/v3/registration5-gz-semver2/nunit/3.8.1.json",
           "@type": "Package",
-          "commitId": "69641076-314b-47e0-9047-4c6cc3f04a28",
+          "commitId": "9b827e25-a7c0-4840-a0f3-eb3f46b8ef29",
           "commitTimeStamp": "2020-02-07T22:41:28.9136138+00:00",
           "catalogEntry": {
             "@id": "https://api.nuget.org/v3/catalog0/data/2018.10.16.12.57.39/nunit.3.8.1.json",
@@ -2025,7 +2025,7 @@
                     "@type": "PackageDependency",
                     "id": "NETStandard.Library",
                     "range": "[1.6.0, )",
-                    "registration": "https://api.nuget.org/v3/registration5-semver1/netstandard.library/index.json"
+                    "registration": "https://api.nuget.org/v3/registration5-gz-semver2/netstandard.library/index.json"
                   }
                 ],
                 "targetFramework": "Xamarin.iOS0.0"
@@ -2039,7 +2039,7 @@
                     "@type": "PackageDependency",
                     "id": "NETStandard.Library",
                     "range": "[1.6.0, )",
-                    "registration": "https://api.nuget.org/v3/registration5-semver1/netstandard.library/index.json"
+                    "registration": "https://api.nuget.org/v3/registration5-gz-semver2/netstandard.library/index.json"
                   }
                 ],
                 "targetFramework": "MonoAndroid0.0"
@@ -2053,7 +2053,7 @@
                     "@type": "PackageDependency",
                     "id": "NETStandard.Library",
                     "range": "[1.6.0, )",
-                    "registration": "https://api.nuget.org/v3/registration5-semver1/netstandard.library/index.json"
+                    "registration": "https://api.nuget.org/v3/registration5-gz-semver2/netstandard.library/index.json"
                   }
                 ],
                 "targetFramework": "UAP0.0"
@@ -2067,7 +2067,7 @@
                     "@type": "PackageDependency",
                     "id": "NETStandard.Library",
                     "range": "[1.6.0, )",
-                    "registration": "https://api.nuget.org/v3/registration5-semver1/netstandard.library/index.json"
+                    "registration": "https://api.nuget.org/v3/registration5-gz-semver2/netstandard.library/index.json"
                   }
                 ],
                 "targetFramework": ".NETStandard1.3"
@@ -2081,21 +2081,21 @@
                     "@type": "PackageDependency",
                     "id": "NETStandard.Library",
                     "range": "[1.6.0, )",
-                    "registration": "https://api.nuget.org/v3/registration5-semver1/netstandard.library/index.json"
+                    "registration": "https://api.nuget.org/v3/registration5-gz-semver2/netstandard.library/index.json"
                   },
                   {
                     "@id": "https://api.nuget.org/v3/catalog0/data/2018.10.16.12.57.39/nunit.3.8.1.json#dependencygroup/.netstandard1.6/system.runtime.loader",
                     "@type": "PackageDependency",
                     "id": "System.Runtime.Loader",
                     "range": "[4.3.0, )",
-                    "registration": "https://api.nuget.org/v3/registration5-semver1/system.runtime.loader/index.json"
+                    "registration": "https://api.nuget.org/v3/registration5-gz-semver2/system.runtime.loader/index.json"
                   },
                   {
                     "@id": "https://api.nuget.org/v3/catalog0/data/2018.10.16.12.57.39/nunit.3.8.1.json#dependencygroup/.netstandard1.6/system.threading.thread",
                     "@type": "PackageDependency",
                     "id": "System.Threading.Thread",
                     "range": "[4.3.0, )",
-                    "registration": "https://api.nuget.org/v3/registration5-semver1/system.threading.thread/index.json"
+                    "registration": "https://api.nuget.org/v3/registration5-gz-semver2/system.threading.thread/index.json"
                   }
                 ],
                 "targetFramework": ".NETStandard1.6"
@@ -2130,12 +2130,12 @@
             "version": "3.8.1"
           },
           "packageContent": "https://api.nuget.org/v3-flatcontainer/nunit/3.8.1/nunit.3.8.1.nupkg",
-          "registration": "https://api.nuget.org/v3/registration5-semver1/nunit/index.json"
+          "registration": "https://api.nuget.org/v3/registration5-gz-semver2/nunit/index.json"
         },
         {
-          "@id": "https://api.nuget.org/v3/registration5-semver1/nunit/3.9.0.json",
+          "@id": "https://api.nuget.org/v3/registration5-gz-semver2/nunit/3.9.0.json",
           "@type": "Package",
-          "commitId": "69641076-314b-47e0-9047-4c6cc3f04a28",
+          "commitId": "9b827e25-a7c0-4840-a0f3-eb3f46b8ef29",
           "commitTimeStamp": "2020-02-07T22:41:28.9136138+00:00",
           "catalogEntry": {
             "@id": "https://api.nuget.org/v3/catalog0/data/2018.10.16.12.57.01/nunit.3.9.0.json",
@@ -2171,7 +2171,7 @@
                     "@type": "PackageDependency",
                     "id": "NETStandard.Library",
                     "range": "[1.6.0, )",
-                    "registration": "https://api.nuget.org/v3/registration5-semver1/netstandard.library/index.json"
+                    "registration": "https://api.nuget.org/v3/registration5-gz-semver2/netstandard.library/index.json"
                   }
                 ],
                 "targetFramework": "Xamarin.iOS0.0"
@@ -2185,7 +2185,7 @@
                     "@type": "PackageDependency",
                     "id": "NETStandard.Library",
                     "range": "[1.6.0, )",
-                    "registration": "https://api.nuget.org/v3/registration5-semver1/netstandard.library/index.json"
+                    "registration": "https://api.nuget.org/v3/registration5-gz-semver2/netstandard.library/index.json"
                   }
                 ],
                 "targetFramework": "MonoAndroid0.0"
@@ -2199,7 +2199,7 @@
                     "@type": "PackageDependency",
                     "id": "NETStandard.Library",
                     "range": "[1.6.0, )",
-                    "registration": "https://api.nuget.org/v3/registration5-semver1/netstandard.library/index.json"
+                    "registration": "https://api.nuget.org/v3/registration5-gz-semver2/netstandard.library/index.json"
                   }
                 ],
                 "targetFramework": "UAP0.0"
@@ -2213,7 +2213,7 @@
                     "@type": "PackageDependency",
                     "id": "NETStandard.Library",
                     "range": "[1.6.0, )",
-                    "registration": "https://api.nuget.org/v3/registration5-semver1/netstandard.library/index.json"
+                    "registration": "https://api.nuget.org/v3/registration5-gz-semver2/netstandard.library/index.json"
                   }
                 ],
                 "targetFramework": ".NETStandard1.3"
@@ -2227,21 +2227,21 @@
                     "@type": "PackageDependency",
                     "id": "NETStandard.Library",
                     "range": "[1.6.0, )",
-                    "registration": "https://api.nuget.org/v3/registration5-semver1/netstandard.library/index.json"
+                    "registration": "https://api.nuget.org/v3/registration5-gz-semver2/netstandard.library/index.json"
                   },
                   {
                     "@id": "https://api.nuget.org/v3/catalog0/data/2018.10.16.12.57.01/nunit.3.9.0.json#dependencygroup/.netstandard1.6/system.runtime.loader",
                     "@type": "PackageDependency",
                     "id": "System.Runtime.Loader",
                     "range": "[4.3.0, )",
-                    "registration": "https://api.nuget.org/v3/registration5-semver1/system.runtime.loader/index.json"
+                    "registration": "https://api.nuget.org/v3/registration5-gz-semver2/system.runtime.loader/index.json"
                   },
                   {
                     "@id": "https://api.nuget.org/v3/catalog0/data/2018.10.16.12.57.01/nunit.3.9.0.json#dependencygroup/.netstandard1.6/system.threading.thread",
                     "@type": "PackageDependency",
                     "id": "System.Threading.Thread",
                     "range": "[4.3.0, )",
-                    "registration": "https://api.nuget.org/v3/registration5-semver1/system.threading.thread/index.json"
+                    "registration": "https://api.nuget.org/v3/registration5-gz-semver2/system.threading.thread/index.json"
                   }
                 ],
                 "targetFramework": ".NETStandard1.6"
@@ -2276,12 +2276,12 @@
             "version": "3.9.0"
           },
           "packageContent": "https://api.nuget.org/v3-flatcontainer/nunit/3.9.0/nunit.3.9.0.nupkg",
-          "registration": "https://api.nuget.org/v3/registration5-semver1/nunit/index.json"
+          "registration": "https://api.nuget.org/v3/registration5-gz-semver2/nunit/index.json"
         },
         {
-          "@id": "https://api.nuget.org/v3/registration5-semver1/nunit/3.10.0.json",
+          "@id": "https://api.nuget.org/v3/registration5-gz-semver2/nunit/3.10.0.json",
           "@type": "Package",
-          "commitId": "69641076-314b-47e0-9047-4c6cc3f04a28",
+          "commitId": "9b827e25-a7c0-4840-a0f3-eb3f46b8ef29",
           "commitTimeStamp": "2020-02-07T22:41:28.9136138+00:00",
           "catalogEntry": {
             "@id": "https://api.nuget.org/v3/catalog0/data/2018.10.16.12.56.55/nunit.3.10.0.json",
@@ -2317,7 +2317,7 @@
                     "@type": "PackageDependency",
                     "id": "NETStandard.Library",
                     "range": "[1.6.1, )",
-                    "registration": "https://api.nuget.org/v3/registration5-semver1/netstandard.library/index.json"
+                    "registration": "https://api.nuget.org/v3/registration5-gz-semver2/netstandard.library/index.json"
                   }
                 ],
                 "targetFramework": ".NETStandard1.6"
@@ -2331,7 +2331,7 @@
                     "@type": "PackageDependency",
                     "id": "NETStandard.Library",
                     "range": "[2.0.0, )",
-                    "registration": "https://api.nuget.org/v3/registration5-semver1/netstandard.library/index.json"
+                    "registration": "https://api.nuget.org/v3/registration5-gz-semver2/netstandard.library/index.json"
                   }
                 ],
                 "targetFramework": ".NETStandard2.0"
@@ -2366,12 +2366,12 @@
             "version": "3.10.0"
           },
           "packageContent": "https://api.nuget.org/v3-flatcontainer/nunit/3.10.0/nunit.3.10.0.nupkg",
-          "registration": "https://api.nuget.org/v3/registration5-semver1/nunit/index.json"
+          "registration": "https://api.nuget.org/v3/registration5-gz-semver2/nunit/index.json"
         },
         {
-          "@id": "https://api.nuget.org/v3/registration5-semver1/nunit/3.10.1.json",
+          "@id": "https://api.nuget.org/v3/registration5-gz-semver2/nunit/3.10.1.json",
           "@type": "Package",
-          "commitId": "69641076-314b-47e0-9047-4c6cc3f04a28",
+          "commitId": "9b827e25-a7c0-4840-a0f3-eb3f46b8ef29",
           "commitTimeStamp": "2020-02-07T22:41:28.9136138+00:00",
           "catalogEntry": {
             "@id": "https://api.nuget.org/v3/catalog0/data/2018.10.16.12.56.48/nunit.3.10.1.json",
@@ -2407,7 +2407,7 @@
                     "@type": "PackageDependency",
                     "id": "NETStandard.Library",
                     "range": "[1.6.1, )",
-                    "registration": "https://api.nuget.org/v3/registration5-semver1/netstandard.library/index.json"
+                    "registration": "https://api.nuget.org/v3/registration5-gz-semver2/netstandard.library/index.json"
                   }
                 ],
                 "targetFramework": ".NETStandard1.6"
@@ -2421,7 +2421,7 @@
                     "@type": "PackageDependency",
                     "id": "NETStandard.Library",
                     "range": "[2.0.0, )",
-                    "registration": "https://api.nuget.org/v3/registration5-semver1/netstandard.library/index.json"
+                    "registration": "https://api.nuget.org/v3/registration5-gz-semver2/netstandard.library/index.json"
                   }
                 ],
                 "targetFramework": ".NETStandard2.0"
@@ -2456,12 +2456,12 @@
             "version": "3.10.1"
           },
           "packageContent": "https://api.nuget.org/v3-flatcontainer/nunit/3.10.1/nunit.3.10.1.nupkg",
-          "registration": "https://api.nuget.org/v3/registration5-semver1/nunit/index.json"
+          "registration": "https://api.nuget.org/v3/registration5-gz-semver2/nunit/index.json"
         },
         {
-          "@id": "https://api.nuget.org/v3/registration5-semver1/nunit/3.11.0.json",
+          "@id": "https://api.nuget.org/v3/registration5-gz-semver2/nunit/3.11.0.json",
           "@type": "Package",
-          "commitId": "69641076-314b-47e0-9047-4c6cc3f04a28",
+          "commitId": "9b827e25-a7c0-4840-a0f3-eb3f46b8ef29",
           "commitTimeStamp": "2020-02-07T22:41:28.9136138+00:00",
           "catalogEntry": {
             "@id": "https://api.nuget.org/v3/catalog0/data/2018.10.07.01.22.14/nunit.3.11.0.json",
@@ -2497,14 +2497,14 @@
                     "@type": "PackageDependency",
                     "id": "NETStandard.Library",
                     "range": "[1.6.1, )",
-                    "registration": "https://api.nuget.org/v3/registration5-semver1/netstandard.library/index.json"
+                    "registration": "https://api.nuget.org/v3/registration5-gz-semver2/netstandard.library/index.json"
                   },
                   {
                     "@id": "https://api.nuget.org/v3/catalog0/data/2018.10.07.01.22.14/nunit.3.11.0.json#dependencygroup/.netstandard1.4/system.reflection.typeextensions",
                     "@type": "PackageDependency",
                     "id": "System.Reflection.TypeExtensions",
                     "range": "[4.4.0, )",
-                    "registration": "https://api.nuget.org/v3/registration5-semver1/system.reflection.typeextensions/index.json"
+                    "registration": "https://api.nuget.org/v3/registration5-gz-semver2/system.reflection.typeextensions/index.json"
                   }
                 ],
                 "targetFramework": ".NETStandard1.4"
@@ -2518,7 +2518,7 @@
                     "@type": "PackageDependency",
                     "id": "NETStandard.Library",
                     "range": "[2.0.0, )",
-                    "registration": "https://api.nuget.org/v3/registration5-semver1/netstandard.library/index.json"
+                    "registration": "https://api.nuget.org/v3/registration5-gz-semver2/netstandard.library/index.json"
                   }
                 ],
                 "targetFramework": ".NETStandard2.0"
@@ -2553,12 +2553,12 @@
             "version": "3.11.0"
           },
           "packageContent": "https://api.nuget.org/v3-flatcontainer/nunit/3.11.0/nunit.3.11.0.nupkg",
-          "registration": "https://api.nuget.org/v3/registration5-semver1/nunit/index.json"
+          "registration": "https://api.nuget.org/v3/registration5-gz-semver2/nunit/index.json"
         },
         {
-          "@id": "https://api.nuget.org/v3/registration5-semver1/nunit/3.12.0.json",
+          "@id": "https://api.nuget.org/v3/registration5-gz-semver2/nunit/3.12.0.json",
           "@type": "Package",
-          "commitId": "69641076-314b-47e0-9047-4c6cc3f04a28",
+          "commitId": "9b827e25-a7c0-4840-a0f3-eb3f46b8ef29",
           "commitTimeStamp": "2020-02-07T22:41:28.9136138+00:00",
           "catalogEntry": {
             "@id": "https://api.nuget.org/v3/catalog0/data/2019.05.15.00.28.51/nunit.3.12.0.json",
@@ -2589,21 +2589,21 @@
                     "@type": "PackageDependency",
                     "id": "NETStandard.Library",
                     "range": "[1.6.1, )",
-                    "registration": "https://api.nuget.org/v3/registration5-semver1/netstandard.library/index.json"
+                    "registration": "https://api.nuget.org/v3/registration5-gz-semver2/netstandard.library/index.json"
                   },
                   {
                     "@id": "https://api.nuget.org/v3/catalog0/data/2019.05.15.00.28.51/nunit.3.12.0.json#dependencygroup/.netstandard1.4/system.componentmodel.typeconverter",
                     "@type": "PackageDependency",
                     "id": "System.ComponentModel.TypeConverter",
                     "range": "[4.3.0, )",
-                    "registration": "https://api.nuget.org/v3/registration5-semver1/system.componentmodel.typeconverter/index.json"
+                    "registration": "https://api.nuget.org/v3/registration5-gz-semver2/system.componentmodel.typeconverter/index.json"
                   },
                   {
                     "@id": "https://api.nuget.org/v3/catalog0/data/2019.05.15.00.28.51/nunit.3.12.0.json#dependencygroup/.netstandard1.4/system.reflection.typeextensions",
                     "@type": "PackageDependency",
                     "id": "System.Reflection.TypeExtensions",
                     "range": "[4.4.0, )",
-                    "registration": "https://api.nuget.org/v3/registration5-semver1/system.reflection.typeextensions/index.json"
+                    "registration": "https://api.nuget.org/v3/registration5-gz-semver2/system.reflection.typeextensions/index.json"
                   }
                 ],
                 "targetFramework": ".NETStandard1.4"
@@ -2617,7 +2617,7 @@
                     "@type": "PackageDependency",
                     "id": "NETStandard.Library",
                     "range": "[2.0.0, )",
-                    "registration": "https://api.nuget.org/v3/registration5-semver1/netstandard.library/index.json"
+                    "registration": "https://api.nuget.org/v3/registration5-gz-semver2/netstandard.library/index.json"
                   }
                 ],
                 "targetFramework": ".NETStandard2.0"
@@ -2652,10 +2652,10 @@
             "version": "3.12.0"
           },
           "packageContent": "https://api.nuget.org/v3-flatcontainer/nunit/3.12.0/nunit.3.12.0.nupkg",
-          "registration": "https://api.nuget.org/v3/registration5-semver1/nunit/index.json"
+          "registration": "https://api.nuget.org/v3/registration5-gz-semver2/nunit/index.json"
         }
       ],
-      "parent": "https://api.nuget.org/v3/registration5-semver1/nunit/index.json",
+      "parent": "https://api.nuget.org/v3/registration5-gz-semver2/nunit/index.json",
       "lower": "2.5.7.10213",
       "upper": "3.12.0"
     }

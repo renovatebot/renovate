@@ -51,28 +51,28 @@ const nugetIndexV3 = fs.readFileSync(
 
 const nlogMocks = [
   {
-    url: '/v3/registration5-semver1/nlog/index.json',
+    url: '/v3/registration5-gz-semver2/nlog/index.json',
     result: fs.readFileSync(
       'lib/datasource/nuget/__fixtures__/nlog/v3_registration.json',
       'utf8'
     ),
   },
   {
-    url: '/v3/registration5-semver1/nlog/page/1.0.0.505/4.4.0-beta5.json',
+    url: '/v3/registration5-gz-semver2/nlog/page/1.0.0.505/4.4.0-beta5.json',
     result: fs.readFileSync(
       'lib/datasource/nuget/__fixtures__/nlog/v3_catalog_1.json',
       'utf8'
     ),
   },
   {
-    url: '/v3/registration5-semver1/nlog/page/4.4.0-beta6/4.6.0-rc2.json',
+    url: '/v3/registration5-gz-semver2/nlog/page/4.4.0-beta6/4.6.0-rc2.json',
     result: fs.readFileSync(
       'lib/datasource/nuget/__fixtures__/nlog/v3_catalog_2.json',
       'utf8'
     ),
   },
   {
-    url: '/v3/registration5-semver1/nlog/page/4.6.0-rc3/5.0.0-beta11.json',
+    url: '/v3/registration5-gz-semver2/nlog/page/4.6.0-rc3/5.0.0-beta11.json',
     result: fs.readFileSync(
       'lib/datasource/nuget/__fixtures__/nlog/v3_catalog_3.json',
       'utf8'
@@ -176,7 +176,7 @@ describe('datasource/nuget', () => {
         .scope('https://api.nuget.org')
         .get('/v3/index.json')
         .reply(200, JSON.parse(nugetIndexV3))
-        .get('/v3/registration5-semver1/nunit/index.json')
+        .get('/v3/registration5-gz-semver2/nunit/index.json')
         .reply(500);
 
       const res = await getPkgReleases({
@@ -191,7 +191,7 @@ describe('datasource/nuget', () => {
         .scope('https://api.nuget.org')
         .get('/v3/index.json')
         .reply(200, JSON.parse(nugetIndexV3))
-        .get('/v3/registration5-semver1/nunit/index.json')
+        .get('/v3/registration5-gz-semver2/nunit/index.json')
         .reply(200, {});
 
       const res = await getPkgReleases({
@@ -310,7 +310,7 @@ describe('datasource/nuget', () => {
         .reply(200, JSON.parse(nugetIndexV3))
         .get('/v3-flatcontainer/nunit/3.12.0/nunit.nuspec')
         .reply(200, pkgInfoV3FromNuget)
-        .get('/v3/registration5-semver1/nunit/index.json')
+        .get('/v3/registration5-gz-semver2/nunit/index.json')
         .twice()
         .reply(200, pkgListV3Registration);
       httpMock
@@ -343,7 +343,7 @@ describe('datasource/nuget', () => {
         .scope('https://api.nuget.org')
         .get('/v3/index.json')
         .reply(200, JSON.parse(nugetIndexV3))
-        .get('/v3/registration5-semver1/nunit/index.json')
+        .get('/v3/registration5-gz-semver2/nunit/index.json')
         .replyWithError('');
       expect(
         await getPkgReleases({
@@ -371,7 +371,7 @@ describe('datasource/nuget', () => {
         .scope('https://api.nuget.org')
         .get('/v3/index.json')
         .reply(200, JSON.parse(nugetIndexV3))
-        .get('/v3/registration5-semver1/nunit/index.json')
+        .get('/v3/registration5-gz-semver2/nunit/index.json')
         .reply(200, pkgListV3Registration)
         .get('/v3-flatcontainer/nunit/3.12.0/nunit.nuspec')
         .reply(200, pkgInfoV3FromNuget);
@@ -395,7 +395,6 @@ describe('datasource/nuget', () => {
         ...configV3,
         depName: 'nlog',
       });
-      httpMock.getTrace();
       expect(res).not.toBeNull();
       expect(res).toMatchSnapshot();
       expect(res.sourceUrl).toBeDefined();
@@ -404,7 +403,7 @@ describe('datasource/nuget', () => {
     it('processes real data (v3) feed is not a nuget.org', async () => {
       httpMock
         .scope('https://api.nuget.org')
-        .get('/v3/registration5-semver1/nunit/index.json')
+        .get('/v3/registration5-gz-semver2/nunit/index.json')
         .reply(200, pkgListV3Registration);
       httpMock
         .scope('https://myprivatefeed')

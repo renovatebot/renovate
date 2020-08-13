@@ -20,7 +20,7 @@ Array [
       "user-agent": "https://github.com/renovatebot/renovate",
     },
     "method": "GET",
-    "url": "https://api.nuget.org/v3/registration5-semver1/nunit/index.json",
+    "url": "https://api.nuget.org/v3/registration5-gz-semver2/nunit/index.json",
   },
 ]
 `;
@@ -45,7 +45,7 @@ Array [
       "user-agent": "https://github.com/renovatebot/renovate",
     },
     "method": "GET",
-    "url": "https://api.nuget.org/v3/registration5-semver1/nunit/index.json",
+    "url": "https://api.nuget.org/v3/registration5-gz-semver2/nunit/index.json",
   },
 ]
 `;
@@ -515,7 +515,7 @@ Array [
       "user-agent": "https://github.com/renovatebot/renovate",
     },
     "method": "GET",
-    "url": "https://api.nuget.org/v3/registration5-semver1/nunit/index.json",
+    "url": "https://api.nuget.org/v3/registration5-gz-semver2/nunit/index.json",
   },
   Object {
     "headers": Object {
@@ -739,7 +739,7 @@ Array [
       "user-agent": "https://github.com/renovatebot/renovate",
     },
     "method": "GET",
-    "url": "https://api.nuget.org/v3/registration5-semver1/nunit/index.json",
+    "url": "https://api.nuget.org/v3/registration5-gz-semver2/nunit/index.json",
   },
 ]
 `;
@@ -1398,7 +1398,7 @@ Array [
       "user-agent": "https://github.com/renovatebot/renovate",
     },
     "method": "GET",
-    "url": "https://api.nuget.org/v3/registration5-semver1/nlog/index.json",
+    "url": "https://api.nuget.org/v3/registration5-gz-semver2/nlog/index.json",
   },
   Object {
     "headers": Object {
@@ -1408,7 +1408,7 @@ Array [
       "user-agent": "https://github.com/renovatebot/renovate",
     },
     "method": "GET",
-    "url": "https://api.nuget.org/v3/registration5-semver1/nlog/page/1.0.0.505/4.4.0-beta5.json",
+    "url": "https://api.nuget.org/v3/registration5-gz-semver2/nlog/page/1.0.0.505/4.4.0-beta5.json",
   },
   Object {
     "headers": Object {
@@ -1418,7 +1418,7 @@ Array [
       "user-agent": "https://github.com/renovatebot/renovate",
     },
     "method": "GET",
-    "url": "https://api.nuget.org/v3/registration5-semver1/nlog/page/4.4.0-beta6/4.6.0-rc2.json",
+    "url": "https://api.nuget.org/v3/registration5-gz-semver2/nlog/page/4.4.0-beta6/4.6.0-rc2.json",
   },
   Object {
     "headers": Object {
@@ -1428,7 +1428,7 @@ Array [
       "user-agent": "https://github.com/renovatebot/renovate",
     },
     "method": "GET",
-    "url": "https://api.nuget.org/v3/registration5-semver1/nlog/page/4.6.0-rc3/5.0.0-beta11.json",
+    "url": "https://api.nuget.org/v3/registration5-gz-semver2/nlog/page/4.6.0-rc3/5.0.0-beta11.json",
   },
   Object {
     "headers": Object {
@@ -1843,7 +1843,7 @@ Array [
       "user-agent": "https://github.com/renovatebot/renovate",
     },
     "method": "GET",
-    "url": "https://api.nuget.org/v3/registration5-semver1/nunit/index.json",
+    "url": "https://api.nuget.org/v3/registration5-gz-semver2/nunit/index.json",
   },
   Object {
     "headers": Object {
@@ -1872,7 +1872,7 @@ Array [
       "user-agent": "https://github.com/renovatebot/renovate",
     },
     "method": "GET",
-    "url": "https://api.nuget.org/v3/registration5-semver1/nunit/index.json",
+    "url": "https://api.nuget.org/v3/registration5-gz-semver2/nunit/index.json",
   },
 ]
 `;
@@ -2041,7 +2041,7 @@ Array [
       "user-agent": "https://github.com/renovatebot/renovate",
     },
     "method": "GET",
-    "url": "https://api.nuget.org/v3/registration5-semver1/nunit/index.json",
+    "url": "https://api.nuget.org/v3/registration5-gz-semver2/nunit/index.json",
   },
 ]
 `;

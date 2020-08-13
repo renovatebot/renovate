@@ -40,11 +40,12 @@ export async function getResourceUrl(
 
   try {
     const servicesIndexRaw = await http.getJson<ServicesIndexRaw>(url);
-    const services = servicesIndexRaw.body.resources.find((resource) =>
-      resource['@type']?.startsWith(resourceType)
-    );
-    const serviceId = services['@id'];
-
+    const services = servicesIndexRaw.body.resources.filter((resource) => {
+      const [type, version] = resource['@type']?.split('/') || [];
+      return type === resourceType && semver.valid(version);
+    });
+    const latestAvailableService = services.pop();
+    const serviceId = latestAvailableService['@id'];
     const cacheMinutes = 60;
     await packageCache.set(cacheNamespace, cacheKey, serviceId, cacheMinutes);
     return serviceId;
