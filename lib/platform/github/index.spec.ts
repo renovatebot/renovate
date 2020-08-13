@@ -1933,23 +1933,32 @@ describe('platform/github', () => {
       expect(httpMock.getTrace()).toMatchSnapshot();
     });
     it('returns array if found', async () => {
-      // prettier-ignore
-      httpMock.scope(githubApiHost).post('/graphql').reply(200, {
-        "data": {
-          "repository": {
-            "vulnerabilityAlerts": {
-              "edges": [{
-                "node": {
-                  "externalIdentifier": "CVE-2018-1000136",
-                  "externalReference": "https://nvd.nist.gov/vuln/detail/CVE-2018-1000136",
-                  "affectedRange": ">= 1.8, < 1.8.3", "fixedIn": "1.8.3",
-                  "id": "MDI4OlJlcG9zaXRvcnlWdWxuZXJhYmlsaXR5QWxlcnQ1MzE3NDk4MQ==", "packageName": "electron"
-                }
-              }]
-            }
-          }
-        }
-      });
+      httpMock
+        .scope(githubApiHost)
+        .post('/graphql')
+        .reply(200, {
+          data: {
+            repository: {
+              vulnerabilityAlerts: {
+                edges: [
+                  {
+                    node: {
+                      securityAdvisory: { severity: 'HIGH' },
+                      securityVulnerability: {
+                        package: {
+                          ecosystem: 'NPM',
+                          name: 'left-pad',
+                          range: '0.0.2',
+                          firstPatchedVersion: { identifier: '0.0.3' },
+                        },
+                      },
+                    },
+                  },
+                ],
+              },
+            },
+          },
+        });
       const res = await github.getVulnerabilityAlerts();
       expect(res).toHaveLength(1);
       expect(httpMock.getTrace()).toMatchSnapshot();

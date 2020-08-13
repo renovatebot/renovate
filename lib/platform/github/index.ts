@@ -1636,7 +1636,27 @@ export async function getVulnerabilityAlerts(): Promise<VulnerabilityAlert[]> {
     if (vulnerabilityAlerts?.length) {
       alerts = vulnerabilityAlerts.map((edge) => edge.node);
       if (alerts.length) {
-        logger.debug({ alerts }, 'Found GitHub vulnerability alerts');
+        const importantSeverities = ['HIGH', 'MODERATE'];
+        for (let alert of alerts) {
+          if (importantSeverities.includes(alert.securityAdvisory.severity)) {
+            const {
+              package: { name, ecosystem },
+              vulnerableVersionRange,
+              firstPatchedVersion,
+            } = alert.securityVulnerability;
+            const result: Record<string, string> = {
+              datasource: ecosystem.toLowerCase(),
+              dep: name,
+              range: vulnerableVersionRange,
+              patch: firstPatchedVersion?.identifier || 'N/A',
+            };
+            if (importantSeverities.length > 1) {
+              result.severety = alert.securityAdvisory.severity;
+            }
+            logger.debug('Important GitHub vulnerability');
+          }
+          logger.trace(alert, 'GitHub vulnerability details');
+        }
       }
     } else {
       logger.debug('Cannot read vulnerability alerts');
