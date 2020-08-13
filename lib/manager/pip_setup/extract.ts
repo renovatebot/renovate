@@ -55,7 +55,7 @@ export async function extractSetupFile(
   logger.debug({ cmd, args }, 'python command');
   const res = await exec(`${cmd} ${args.join(' ')}`, {
     cwd,
-    timeout: 5000,
+    timeout: 30000,
     docker: {
       image: 'renovate/pip',
     },

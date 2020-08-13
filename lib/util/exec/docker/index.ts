@@ -14,7 +14,9 @@ import {
 const prefetchedImages = new Set<string>();
 
 async function prefetchDockerImage(taggedImage: string): Promise<void> {
-  if (!prefetchedImages.has(taggedImage)) {
+  if (prefetchedImages.has(taggedImage)) {
+    logger.debug(`Docker image is already prefetched: ${taggedImage}`);
+  } else {
     logger.debug(`Fetching Docker image: ${taggedImage}`);
     prefetchedImages.add(taggedImage);
     await rawExec(`docker pull ${taggedImage}`, { encoding: 'utf-8' });

@@ -67,7 +67,7 @@ Array [
         "NO_PROXY": "localhost",
         "PATH": "/tmp/path",
       },
-      "timeout": 5000,
+      "timeout": 30000,
     },
   },
 ]
@@ -396,7 +396,7 @@ Array [
         "NO_PROXY": "localhost",
         "PATH": "/tmp/path",
       },
-      "timeout": 5000,
+      "timeout": 30000,
     },
   },
 ]
@@ -469,7 +469,7 @@ Array [
         "NO_PROXY": "localhost",
         "PATH": "/tmp/path",
       },
-      "timeout": 5000,
+      "timeout": 30000,
     },
   },
 ]
@@ -542,7 +542,7 @@ Array [
         "NO_PROXY": "localhost",
         "PATH": "/tmp/path",
       },
-      "timeout": 5000,
+      "timeout": 30000,
     },
   },
 ]
