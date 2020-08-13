@@ -1,3 +1,4 @@
+import is from '@sindresorhus/is';
 import * as datasourceTerraformProvider from '../../datasource/terraform-provider';
 import { SkipReason } from '../../types';
 import { isValid } from '../../versioning/hashicorp';
@@ -7,6 +8,8 @@ import {
   TerraformDependencyTypes,
   keyValueExtractionRegex,
 } from './util';
+
+export const sourceExtractionRegex = /^(?:(?<hostname>[^/]+)\/)?(?<namespace>[^/]+)\/(?<type>[^/]+)/;
 
 export function extractTerraformProvider(
   startingLine: number,
@@ -47,6 +50,25 @@ export function analyzeTerraformProvider(dep: PackageDependency): void {
   dep.datasource = datasourceTerraformProvider.id;
   if (!isValid(dep.currentValue)) {
     dep.skipReason = SkipReason.UnsupportedVersion;
+  }
+
+  if (is.nonEmptyString(dep.managerData.source)) {
+    const source = sourceExtractionRegex.exec(dep.managerData.source);
+    if (source) {
+      // buildin providers https://github.com/terraform-providers
+      if (source.groups.namespace === 'terraform-providers') {
+        dep.registryUrls = [`https://releases.hashicorp.com`];
+      } else {
+        dep.lookupName = `${source.groups.namespace}/${source.groups.type}`;
+        if (source.groups.hostname) {
+          dep.registryUrls = [`https://${source.groups.hostname}`];
+        } else {
+          dep.registryUrls = [`https://registry.terraform.io`];
+        }
+      }
+    } else {
+      dep.skipReason = SkipReason.UnsupportedUrl;
+    }
   }
   /* eslint-enable no-param-reassign */
 }
