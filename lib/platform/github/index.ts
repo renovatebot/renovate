@@ -1637,7 +1637,7 @@ export async function getVulnerabilityAlerts(): Promise<VulnerabilityAlert[]> {
       alerts = vulnerabilityAlerts.map((edge) => edge.node);
       if (alerts.length) {
         const importantSeverities = ['HIGH', 'MODERATE'];
-        for (let alert of alerts) {
+        for (const alert of alerts) {
           if (importantSeverities.includes(alert.securityAdvisory.severity)) {
             const {
               package: { name, ecosystem },
