@@ -11,7 +11,7 @@ export const packagePattern =
 const extrasPattern = '(?:\\s*\\[[^\\]]+\\])?';
 
 const specifierPartPattern = `\\s*${rangePattern.replace(/\?<\w+>/g, '?:')}`;
-const specifierPattern = `${specifierPartPattern}(?:\\s*,${specifierPartPattern})*`;
+const specifierPattern = `(${specifierPartPattern}(?:\\s*,${specifierPartPattern})*)?`;
 export const dependencyPattern = `(${packagePattern})(${extrasPattern})(${specifierPattern})`;
 
 export function extractPackageFile(

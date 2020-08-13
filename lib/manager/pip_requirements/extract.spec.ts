@@ -34,6 +34,11 @@ const requirements7 = readFileSync(
   'utf8'
 );
 
+const requirements8 = readFileSync(
+  'lib/manager/pip_requirements/__fixtures__/requirements8.txt',
+  'utf8'
+);
+
 describe('lib/manager/pip_requirements/extract', () => {
   beforeEach(() => {
     delete process.env.PIP_TEST_TOKEN;
@@ -130,6 +135,12 @@ describe('lib/manager/pip_requirements/extract', () => {
         'http://its-a-secret:example.com/private-pypi/',
         'http://its-a-secret:example.com/private-pypi/',
       ]);
+    });
+    it('should handle unpinned dependencies', () => {
+      const res = extractPackageFile(requirements8, 'unused_file_name', config)
+        .deps;
+      expect(res).toMatchSnapshot();
+      expect(res).toHaveLength(5);
     });
   });
 });

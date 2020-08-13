@@ -263,3 +263,33 @@ Object {
   ],
 }
 `;
+
+exports[`lib/manager/pip_requirements/extract extractPackageFile() should handle unpinned dependencies 1`] = `
+Array [
+  Object {
+    "currentValue": "",
+    "datasource": "pypi",
+    "depName": "Django",
+  },
+  Object {
+    "currentValue": "",
+    "datasource": "pypi",
+    "depName": "distribute",
+  },
+  Object {
+    "currentValue": "",
+    "datasource": "pypi",
+    "depName": "dj-database-url",
+  },
+  Object {
+    "currentValue": "",
+    "datasource": "pypi",
+    "depName": "psycopg2",
+  },
+  Object {
+    "currentValue": "",
+    "datasource": "pypi",
+    "depName": "wsgiref",
+  },
+]
+`;

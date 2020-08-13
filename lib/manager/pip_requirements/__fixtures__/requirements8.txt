@@ -1,0 +1,5 @@
+Django
+distribute
+dj-database-url
+psycopg2
+wsgiref
