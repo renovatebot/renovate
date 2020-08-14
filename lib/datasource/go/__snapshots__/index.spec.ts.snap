@@ -171,19 +171,19 @@ Array [
   Array [
     Object {
       "datasource": "github-tags",
-      "lookupName": "x/text",
+      "lookupName": "x/text|github.com/x/text",
     },
   ],
   Array [
     Object {
       "datasource": "github-tags",
-      "lookupName": "x/text",
+      "lookupName": "x/text|gopkg.in/x/text",
     },
   ],
   Array [
     Object {
       "datasource": "github-tags",
-      "lookupName": "go-x/x",
+      "lookupName": "go-x/x|gopkg.in/x",
     },
   ],
 ]
@@ -194,13 +194,13 @@ Array [
   Array [
     Object {
       "datasource": "github-tags",
-      "lookupName": "x/text",
+      "lookupName": "x/text|github.com/x/text/a",
     },
   ],
   Array [
     Object {
       "datasource": "github-tags",
-      "lookupName": "x/text",
+      "lookupName": "x/text|github.com/x/text/b",
     },
   ],
 ]

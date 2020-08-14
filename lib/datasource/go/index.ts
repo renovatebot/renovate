@@ -19,11 +19,14 @@ async function getDatasource(goModule: string): Promise<DataSource | null> {
   if (goModule.startsWith('gopkg.in/')) {
     const [pkg] = goModule.replace('gopkg.in/', '').split('.');
     if (pkg.includes('/')) {
-      return { datasource: github.id, lookupName: pkg };
+      return {
+        datasource: github.id,
+        lookupName: `${pkg}|${goModule}`,
+      };
     }
     return {
       datasource: github.id,
-      lookupName: `go-${pkg}/${pkg}`,
+      lookupName: `go-${pkg}/${pkg}|${goModule}`,
     };
   }
   if (goModule.startsWith('github.com/')) {
@@ -31,7 +34,7 @@ async function getDatasource(goModule: string): Promise<DataSource | null> {
     const lookupName = split[1] + '/' + split[2];
     return {
       datasource: github.id,
-      lookupName,
+      lookupName: `${lookupName}|${goModule}`,
     };
   }
   const pkgUrl = `https://${goModule}?go-get=1`;
@@ -49,9 +52,10 @@ async function getDatasource(goModule: string): Promise<DataSource | null> {
     if (goSourceUrl?.startsWith('https://github.com/')) {
       return {
         datasource: github.id,
-        lookupName: goSourceUrl
-          .replace('https://github.com/', '')
-          .replace(/\/$/, ''),
+        lookupName:
+          goSourceUrl.replace('https://github.com/', '').replace(/\/$/, '') +
+          '|' +
+          goModule,
       };
     }
     if (goSourceUrl?.match('^https://[^/]*gitlab.[^/]*/.+')) {
@@ -60,7 +64,7 @@ async function getDatasource(goModule: string): Promise<DataSource | null> {
       return {
         datasource: gitlab.id,
         registryUrl: gitlabRes[1],
-        lookupName: gitlabRes[2].replace(/\/$/, ''),
+        lookupName: gitlabRes[2].replace(/\/$/, '') + '|' + goModule,
       };
     }
   } else {
