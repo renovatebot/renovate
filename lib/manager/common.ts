@@ -25,6 +25,7 @@ export interface ExtractConfig extends ManagerConfig {
   yarnrc?: string;
   skipInstalls?: boolean;
   versioning?: string;
+  ignoreComments?: string[];
 }
 
 export interface CustomExtractConfig extends ExtractConfig {

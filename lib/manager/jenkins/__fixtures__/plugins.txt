@@ -6,3 +6,6 @@ blueocean:1.21.0 # another comment
 #blueocean:1.22.0
 
 # this line is completely ignored
+
+git:4.2.0         # [renovate-ignore] Renovate will not upgrade this
+git-client:3.3.1  # [ignore-renovate] Renovate will not upgrade this
