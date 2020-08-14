@@ -21,3 +21,5 @@ renovate-schema.json
 **/*.generated.ts
 tools/dist
 test/datasource/nuget/_fixtures/obj
+
+.clinic/
