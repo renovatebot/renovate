@@ -1,4 +1,4 @@
-import { mocked, partial } from '../../../../test/util';
+import { getName, mocked, partial } from '../../../../test/util';
 import * as datasource from '../../../datasource';
 import * as dockerVersioning from '../../../versioning/docker';
 import * as npmVersioning from '../../../versioning/npm';
@@ -9,7 +9,7 @@ jest.mock('../../../datasource');
 
 const ds = mocked(datasource);
 
-describe('workers/pr/changelog/releases', () => {
+describe(getName(__filename), () => {
   describe('getReleaseNotes()', () => {
     beforeEach(() => {
       ds.getPkgReleases.mockResolvedValueOnce({

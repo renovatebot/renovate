@@ -38,7 +38,7 @@ export function extractPackageFile(
   if (indexUrl) {
     // index url in file takes precedence
     registryUrls.push(indexUrl);
-  } else if (config.registryUrls && config.registryUrls.length) {
+  } else if (config.registryUrls?.length) {
     // configured registryURls takes next precedence
     registryUrls = registryUrls.concat(config.registryUrls);
   } else if (extraUrls.length) {

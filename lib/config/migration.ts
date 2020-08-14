@@ -211,7 +211,7 @@ export function migrateConfig(
         } else {
           migratedConfig.semanticCommitScope = null;
         }
-      } else if (key === 'extends' && is.array(val)) {
+      } else if (key === 'extends' && is.array<string>(val)) {
         for (let i = 0; i < val.length; i += 1) {
           if (val[i] === 'config:application' || val[i] === ':js-app') {
             isMigrated = true;
@@ -219,7 +219,7 @@ export function migrateConfig(
           } else if (val[i] === ':library' || val[i] === 'config:library') {
             isMigrated = true;
             migratedConfig.extends[i] = 'config:js-lib';
-          } else if (val[i].startsWith(':masterIssue')) {
+          } else if (is.string(val[i]) && val[i].startsWith(':masterIssue')) {
             isMigrated = true;
             migratedConfig.extends[i] = val[i].replace(
               'masterIssue',
@@ -322,7 +322,7 @@ export function migrateConfig(
         delete migratedConfig.packagePattern;
       } else if (key === 'baseBranch') {
         isMigrated = true;
-        migratedConfig.baseBranches = is.array(val) ? val : [val];
+        migratedConfig.baseBranches = (is.array(val) ? val : [val]) as string[];
         delete migratedConfig.baseBranch;
       } else if (key === 'schedule' && val) {
         // massage to array first

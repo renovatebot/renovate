@@ -38,6 +38,7 @@ export interface LocalRepoConfig {
   issueList: any[] | null;
   mergeMethod: string;
   defaultBranch: string;
+  defaultBranchSha?: string;
   repositoryOwner: string;
   repository: string | null;
   localDir: string;

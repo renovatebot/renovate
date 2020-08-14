@@ -340,10 +340,11 @@ export async function createPr({
   prTitle: title,
   prBody: body,
   labels,
+  draftPR = false,
   platformOptions = {},
 }: CreatePRConfig): Promise<Pr> {
   const sourceRefName = azureHelper.getNewBranchName(branchName);
-  const targetRefName = targetBranch;
+  const targetRefName = azureHelper.getNewBranchName(targetBranch);
   const description = azureHelper.max4000Chars(sanitize(body));
   const azureApiGit = await azureApi.gitApi();
   const workItemRefs = [
@@ -358,6 +359,7 @@ export async function createPr({
       title,
       description,
       workItemRefs,
+      isDraft: draftPR,
     },
     config.repoId
   );

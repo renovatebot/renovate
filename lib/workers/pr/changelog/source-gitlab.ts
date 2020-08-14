@@ -3,50 +3,16 @@ import { Release } from '../../../datasource';
 import { logger } from '../../../logger';
 import * as memCache from '../../../util/cache/memory';
 import * as packageCache from '../../../util/cache/package';
-import { GitlabHttp } from '../../../util/http/gitlab';
 import { regEx } from '../../../util/regex';
 import * as allVersioning from '../../../versioning';
 import { BranchUpgradeConfig } from '../../common';
 import { ChangeLogRelease, ChangeLogResult } from './common';
+import { getTags } from './gitlab';
 import { addReleaseNotes } from './release-notes';
-
-const gitlabHttp = new GitlabHttp();
 
 const cacheNamespace = 'changelog-gitlab-release';
 
-async function getTagsInner(
-  endpoint: string,
-  versionScheme: string,
-  repository: string
-): Promise<string[]> {
-  logger.trace('getTags() from gitlab');
-  let url = endpoint;
-  const repoid = repository.replace(/\//g, '%2F');
-  url += `projects/${repoid}/repository/tags`;
-  try {
-    const res = await gitlabHttp.getJson<{ name: string }[]>(url, {
-      paginate: true,
-    });
-
-    const tags = res?.body || [];
-
-    if (!tags.length) {
-      logger.debug({ sourceRepo: repository }, 'repository has no Gitlab tags');
-    }
-
-    return tags.map((tag) => tag.name).filter(Boolean);
-  } catch (err) {
-    logger.info({ sourceRepo: repository }, 'Failed to fetch Gitlab tags');
-    // istanbul ignore if
-    if (err.message && err.message.includes('Bad credentials')) {
-      logger.warn('Bad credentials triggering tag fail lookup in changelog');
-      throw err;
-    }
-    return [];
-  }
-}
-
-function getTags(
+function getCachedTags(
   endpoint: string,
   versionScheme: string,
   repository: string
@@ -57,7 +23,7 @@ function getTags(
   if (cachedResult !== undefined) {
     return cachedResult;
   }
-  const promisedRes = getTagsInner(endpoint, versionScheme, repository);
+  const promisedRes = getTags(endpoint, repository);
   memCache.set(cacheKey, promisedRes);
   return promisedRes;
 }
@@ -103,9 +69,9 @@ export async function getChangeLogJSON({
 
   async function getRef(release: Release): Promise<string | null> {
     if (!tags) {
-      tags = await getTags(apiBaseUrl, versioning, repository);
+      tags = await getCachedTags(apiBaseUrl, versioning, repository);
     }
-    const regex = regEx(`${depName}[@-]`);
+    const regex = regEx(`(?:${depName}|release)[@-]`);
     const tagName = tags
       .filter((tag) => version.isVersion(tag.replace(regex, '')))
       .find((tag) => version.equals(tag.replace(regex, ''), release.version));

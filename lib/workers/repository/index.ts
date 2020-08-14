@@ -14,6 +14,7 @@ import { printRequestStats } from './stats';
 
 let renovateVersion = 'unknown';
 try {
+  // eslint-disable-next-line @typescript-eslint/no-var-requires
   renovateVersion = require('../../../package.json').version; // eslint-disable-line global-require
 } catch (err) /* istanbul ignore next */ {
   logger.debug({ err }, 'Error getting renovate version');

@@ -28,9 +28,7 @@ export function extractPackageFile(content: string): PackageFile | null {
       deps.push(dep);
     }
   }
-  deps = deps.filter(
-    (dep) => !(dep.currentValue && dep.currentValue.includes('${'))
-  );
+  deps = deps.filter((dep) => !dep.currentValue?.includes('${'));
   if (!deps.length) {
     return null;
   }

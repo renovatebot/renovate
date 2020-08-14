@@ -1,6 +1,7 @@
 import { PackageDependency } from '../common';
 
 export const keyValueExtractionRegex = /^\s*(?<key>[^\s]+)\s+=\s+"(?<value>[^"]+)"\s*$/;
+export const resourceTypeExtractionRegex = /^\s*resource\s+"(?<type>[^\s]+)"\s+"(?<name>[^"]+)"\s*{/;
 
 export interface ExtractionResult {
   lineNumber: number;
@@ -13,6 +14,38 @@ export enum TerraformDependencyTypes {
   provider = 'provider',
   required_providers = 'required_providers',
   resource = 'resource',
+}
+
+export interface TerraformManagerData {
+  terraformDependencyType: TerraformDependencyTypes;
+}
+
+export enum TerraformResourceTypes {
+  unknown = 'unknown',
+  /**
+   * https://www.terraform.io/docs/providers/docker/r/container.html
+   */
+  docker_container = 'docker_container',
+  /**
+   * https://www.terraform.io/docs/providers/docker/r/image.html
+   */
+  docker_image = 'docker_image',
+  /**
+   * https://www.terraform.io/docs/providers/docker/r/service.html
+   */
+  docker_service = 'docker_service',
+  /**
+   * https://www.terraform.io/docs/providers/helm/r/release.html
+   */
+  helm_release = 'helm_release',
+}
+
+export interface ResourceManagerData extends TerraformManagerData {
+  resourceType?: TerraformResourceTypes;
+  chart?: string;
+  image?: string;
+  name?: string;
+  repository?: string;
 }
 
 export function getTerraformDependencyType(

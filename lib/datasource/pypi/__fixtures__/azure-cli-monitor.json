@@ -754,7 +754,8 @@
         "python_version": "source",
         "size": 32541,
         "upload_time": "2018-05-07T17:59:37",
-        "url": "https://files.pythonhosted.org/packages/3a/d6/ec2f81b036f1aefc24bb6bf6336051335c519a9976bd6529636e4c20121c/azure-cli-monitor-0.1.6.tar.gz"
+        "url": "https://files.pythonhosted.org/packages/3a/d6/ec2f81b036f1aefc24bb6bf6336051335c519a9976bd6529636e4c20121c/azure-cli-monitor-0.1.6.tar.gz",
+        "yanked": true
       }
     ],
     "0.1.7": [

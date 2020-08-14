@@ -39,7 +39,7 @@ export interface RenovateOptionBase {
 }
 
 export interface RenovateArrayOption<
-  T extends string | number | object = object
+  T extends string | number | Record<string, unknown> = Record<string, unknown>
 > extends RenovateOptionBase {
   default?: T[];
   mergeable?: boolean;
@@ -77,7 +77,7 @@ export interface RenovateStringOption extends RenovateOptionBase {
 
 export interface RenovateObjectOption extends RenovateOptionBase {
   default?: any;
-  additionalProperties?: {} | boolean;
+  additionalProperties?: Record<string, unknown> | boolean;
   mergeable?: boolean;
   type: 'object';
 }
@@ -1663,6 +1663,16 @@ const options: RenovateOptions[] = [
     subType: 'number',
     stage: 'repository',
     parent: 'hostRules',
+    cli: false,
+    env: false,
+  },
+  {
+    name: 'enableHttp2',
+    description: 'Enable got http2 support.',
+    type: 'boolean',
+    stage: 'repository',
+    parent: 'hostRules',
+    default: false,
     cli: false,
     env: false,
   },

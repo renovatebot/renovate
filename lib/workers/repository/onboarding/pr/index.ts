@@ -1,4 +1,3 @@
-import is from '@sindresorhus/is';
 import { RenovateConfig } from '../../../../config';
 import { logger } from '../../../../logger';
 import { PackageFile } from '../../../../manager/common';
@@ -139,11 +138,7 @@ If you need any further assistance then you can also [request help here](${confi
   } catch (err) /* istanbul ignore next */ {
     if (
       err.statusCode === 422 &&
-      err.response &&
-      err.response.body &&
-      is.nonEmptyArray(err.response.body.errors) &&
-      err.response.body.errors[0].message &&
-      err.response.body.errors[0].message.startsWith(
+      err.response?.body?.errors?.[0]?.message?.startsWith(
         'A pull request already exists'
       )
     ) {

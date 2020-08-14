@@ -1,5 +1,5 @@
 import * as httpMock from '../../../../test/httpMock';
-import { partial } from '../../../../test/util';
+import { getName, partial } from '../../../../test/util';
 import { PLATFORM_TYPE_GITHUB } from '../../../constants/platforms';
 import * as hostRules from '../../../util/host-rules';
 import * as semverVersioning from '../../../versioning/semver';
@@ -31,7 +31,7 @@ const upgrade: BranchConfig = partial<BranchConfig>({
   ],
 });
 
-describe('workers/pr/changelog', () => {
+describe(getName(__filename), () => {
   describe('getChangeLogJSON', () => {
     beforeEach(() => {
       httpMock.setup();
@@ -91,12 +91,12 @@ describe('workers/pr/changelog', () => {
     it('works without Github', async () => {
       httpMock
         .scope(githubApiHost)
+        .get('/repos/chalk/chalk')
+        .times(4)
+        .reply(500)
         .get('/repos/chalk/chalk/tags?per_page=100')
         .reply(500)
         .get('/repos/chalk/chalk/releases?per_page=100')
-        .times(4)
-        .reply(500)
-        .get('/repos/chalk/chalk/contents/')
         .times(4)
         .reply(500);
       expect(

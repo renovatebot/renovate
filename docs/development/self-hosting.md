@@ -348,3 +348,7 @@ spec:
                       name: renovate-env
           restartPolicy: Never
 ```
+
+## Logging
+
+It's recommended to configure `LOG_LEVEL=debug` and `LOG_FORMAT=json` in environment if you are ingesting/parsing logs into another system. Debug logging is usually necessary for any debugging, while JSON format will mean that the output is parseable.

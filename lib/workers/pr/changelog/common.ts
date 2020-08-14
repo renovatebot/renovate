@@ -40,3 +40,8 @@ export interface ChangeLogResult {
   versions?: ChangeLogRelease[];
   error?: ChangeLogError;
 }
+
+export interface ChangeLogFile {
+  changelogFile: string;
+  changelogMd: string;
+}

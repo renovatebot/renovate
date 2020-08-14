@@ -54,7 +54,7 @@ export async function getReleases({
     versions: {},
     releases: null,
   };
-  if (res.homeUrl && res.homeUrl.length) {
+  if (res.homeUrl?.length) {
     dep.homepage = res.homeUrl;
   }
   dep.homepage =

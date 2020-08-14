@@ -109,7 +109,7 @@ describe(getName(__filename), () => {
           );
         await githubApi.getJson(url);
       }
-      async function failWithError(error: object) {
+      async function failWithError(error: string | Record<string, unknown>) {
         const url = '/some-url';
         httpMock.scope(githubApiHost).get(url).replyWithError(error);
         await githubApi.getJson(url);
