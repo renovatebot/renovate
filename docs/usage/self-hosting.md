@@ -109,6 +109,8 @@ Self-hosted Renovate can be configured using any of the following (or a combinat
 - CLI params
 - Environment params
 
+Note that some Renovate configuratino options are _only_ available for self-hosting, and so can only be configured using one of the above methods. These are described in the [Self-hosted Configuration](./self-hosted-configuration.md) doc.
+
 ## Authentication
 
 Regardless of platform, you need to select a user account for `renovate` to assume the identity of, and generate a Personal Access Token. It is recommended to be `@renovate-bot` if you are using a self-hosted server with free choice of usernames.
