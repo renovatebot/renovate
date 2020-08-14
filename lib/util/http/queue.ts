@@ -42,7 +42,7 @@ export function getQueue(url: string): PQueue {
   return queue;
 }
 
-export function clear() {
+export function clear(): void {
   hostQueues = {};
   defaultQueue = undefined;
 }

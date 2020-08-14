@@ -144,7 +144,8 @@ export class Http<GetOptions = HttpOptions, PostOptions = HttpPostOptions> {
     if (options.method === 'get') {
       memCache.set(cacheKey, promisedRes); // always set if it's a get
     }
-    return resolveResponse<T>(promisedRes, options);
+    const resp = await resolveResponse<T>(promisedRes, options);
+    return resp;
   }
 
   get(url: string, options: HttpOptions = {}): Promise<HttpResponse> {
