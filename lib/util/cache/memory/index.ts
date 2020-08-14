@@ -16,6 +16,7 @@ export function init(): void {
 export function reset(bucket: MemCacheBucket = null): void {
   if (bucket === null) {
     memCache = undefined;
+    init();
   } else if (memCache) {
     memCache[bucket] = {};
   }
