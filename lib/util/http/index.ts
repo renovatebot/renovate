@@ -7,6 +7,7 @@ import * as memCache from '../cache/memory';
 import { clone } from '../clone';
 import { applyAuthorization, removeAuthorization } from './auth';
 import { applyHostRules } from './host-rules';
+import { getQueue } from './queue';
 import { GotOptions } from './types';
 
 // TODO: refactor code to remove this
@@ -124,20 +125,26 @@ export class Http<GetOptions = HttpOptions, PostOptions = HttpPostOptions> {
         return resolveResponse<T>(cachedRes, options);
       }
     }
-    const startTime = Date.now();
-    const promisedRes = got<T>(url, options);
+    const queue = getQueue(url);
+    let startTime: number;
+    const promisedRes = queue.add(() => {
+      startTime = Date.now();
+      return got<T>(url, options).then((resp) => {
+        const duration = Date.now() - startTime;
+        const httpRequests = memCache.get('http-requests') || [];
+        httpRequests.push({
+          method: options.method,
+          url,
+          duration,
+        });
+        memCache.set('http-requests', httpRequests);
+        return resp;
+      });
+    });
     if (options.method === 'get') {
       memCache.set(cacheKey, promisedRes); // always set if it's a get
     }
-    const res = await resolveResponse<T>(promisedRes, options);
-    const httpRequests = memCache.get('http-requests') || [];
-    httpRequests.push({
-      method: options.method,
-      url,
-      duration: Date.now() - startTime,
-    });
-    memCache.set('http-requests', httpRequests);
-    return res;
+    return resolveResponse<T>(promisedRes, options);
   }
 
   get(url: string, options: HttpOptions = {}): Promise<HttpResponse> {

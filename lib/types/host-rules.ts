@@ -17,4 +17,5 @@ export interface HostRule {
   abortIgnoreStatusCodes?: number[];
   enabled?: boolean;
   enableHttp2?: boolean;
+  concurrentRequestLimit?: number;
 }

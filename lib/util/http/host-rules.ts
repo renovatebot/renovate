@@ -37,3 +37,12 @@ export function applyHostRules(url: string, inOptions: GotOptions): GotOptions {
   }
   return options;
 }
+
+export function getRequestLimit(url: string): number | null {
+  const hostRule =
+    hostRules.find({
+      url,
+    }) || /* istanbul ignore next: can only happen in tests */ {};
+  const limit = hostRule.concurrentRequestLimit;
+  return typeof limit === 'number' && limit > 0 ? limit : null;
+}
