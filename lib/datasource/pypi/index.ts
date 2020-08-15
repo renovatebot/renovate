@@ -218,9 +218,7 @@ async function getSimpleDependency(
   dependency.releases = versions.map((version) => {
     const versionReleases = releases[version] || [];
     const isDeprecated = versionReleases.some(({ yanked }) => yanked);
-    const result: Release = {
-      version,
-    };
+    const result: Release = { version };
     if (isDeprecated) {
       result.isDeprecated = isDeprecated;
     }
