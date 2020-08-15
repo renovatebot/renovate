@@ -384,10 +384,12 @@ export async function lookupUpdates(
       }
     } else if (config.datasource === datasourceGitSubmodules.id) {
       const dependency = clone(await getPkgReleases(config));
-      res.updates.push({
-        updateType: 'digest',
-        newValue: dependency.releases[0].version,
-      });
+      if (dependency?.releases[0]?.version) {
+        res.updates.push({
+          updateType: 'digest',
+          newValue: dependency.releases[0].version,
+        });
+      }
     }
     if (version.valueToVersion) {
       for (const update of res.updates || []) {
