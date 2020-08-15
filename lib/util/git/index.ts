@@ -114,6 +114,13 @@ let git: SimpleGit | undefined;
 
 let privateKeySet = false;
 
+export function initRepo(args: StorageConfig): void {
+  config = { ...args } as any;
+  config.branchExists = {};
+  config.branchIsModified = {};
+  git = undefined;
+}
+
 async function resetToBranch(branchName: string): Promise<void> {
   logger.debug(`resetToBranch(${branchName})`);
   await git.raw(['reset', '--hard']);
@@ -143,14 +150,16 @@ async function cleanLocalBranches(): Promise<void> {
  * By calling this function once the repo's branchPrefix is known, we can fetch all of Renovate's branches in one command.
  */
 export async function setBranchPrefix(branchPrefix: string): Promise<void> {
-  logger.debug('Setting branchPrefix: ' + branchPrefix);
   config.branchPrefix = branchPrefix;
-  const ref = `refs/heads/${branchPrefix}*:refs/remotes/origin/${branchPrefix}*`;
-  try {
-    await git.fetch(['origin', ref, '--depth=2', '--force']);
-  } catch (err) /* istanbul ignore next */ {
-    checkForPlatformFailure(err);
-    throw err;
+  if (git) {
+    logger.debug('Setting branchPrefix: ' + branchPrefix);
+    const ref = `refs/heads/${branchPrefix}*:refs/remotes/origin/${branchPrefix}*`;
+    try {
+      await git.fetch(['origin', ref, '--depth=2', '--force']);
+    } catch (err) /* istanbul ignore next */ {
+      checkForPlatformFailure(err);
+      throw err;
+    }
   }
 }
 
@@ -252,20 +261,15 @@ export async function syncGit(): Promise<void> {
     logger.debug({ err }, 'Error setting git author config');
     throw new Error(REPOSITORY_TEMPORARY_ERROR);
   }
-
   config.currentBranch = config.currentBranch || (await getDefaultBranch(git));
-}
-
-export async function initRepo(args: StorageConfig): Promise<void> {
-  config = { ...args } as any;
-  config.branchExists = {};
-  config.branchIsModified = {};
-  git = undefined;
-  await syncGit();
+  if (config.branchPrefix) {
+    await setBranchPrefix(config.branchPrefix);
+  }
 }
 
 // istanbul ignore next
-export function getRepoStatus(): Promise<StatusResult> {
+export async function getRepoStatus(): Promise<StatusResult> {
+  await syncGit();
   return git.status();
 }
 
@@ -273,6 +277,7 @@ export async function createBranch(
   branchName: string,
   sha: string
 ): Promise<void> {
+  await syncGit();
   logger.debug(`createBranch(${branchName})`);
   await git.reset(ResetMode.HARD);
   await git.raw(['clean', '-fd']);
@@ -283,6 +288,7 @@ export async function createBranch(
 }
 
 export async function branchExists(branchName: string): Promise<boolean> {
+  await syncGit();
   // First check cache
   if (config.branchExists[branchName] !== undefined) {
     return config.branchExists[branchName];
@@ -309,6 +315,7 @@ export async function branchExists(branchName: string): Promise<boolean> {
 
 // Return the commit SHA for a branch
 export async function getBranchCommit(branchName: string): Promise<string> {
+  await syncGit();
   if (!(await branchExists(branchName))) {
     throw Error(
       'Cannot fetch commit for branch that does not exist: ' + branchName
@@ -319,6 +326,7 @@ export async function getBranchCommit(branchName: string): Promise<string> {
 }
 
 export async function getCommitMessages(): Promise<string[]> {
+  await syncGit();
   logger.debug('getCommitMessages');
   const res = await git.log({
     n: 10,
@@ -328,6 +336,7 @@ export async function getCommitMessages(): Promise<string[]> {
 }
 
 export async function setBranch(branchName: string): Promise<string> {
+  await syncGit();
   if (!(await branchExists(branchName))) {
     throwBranchValidationError(branchName);
   }
@@ -359,6 +368,7 @@ export async function setBranch(branchName: string): Promise<string> {
 }
 
 export async function getFileList(): Promise<string[]> {
+  await syncGit();
   const branch = config.currentBranch;
   const submodules = await getSubmodules();
   const files: string = await git.raw(['ls-tree', '-r', branch]);
@@ -379,6 +389,7 @@ export async function getFileList(): Promise<string[]> {
 export async function getAllRenovateBranches(
   branchPrefix: string
 ): Promise<string[]> {
+  await syncGit();
   const branches = await git.branch(['--remotes', '--verbose']);
   return branches.all
     .map(localName)
@@ -386,6 +397,7 @@ export async function getAllRenovateBranches(
 }
 
 export async function isBranchStale(branchName: string): Promise<boolean> {
+  await syncGit();
   if (!(await branchExists(branchName))) {
     throw Error(
       'Cannot check staleness for branch that does not exist: ' + branchName
@@ -401,6 +413,7 @@ export async function isBranchStale(branchName: string): Promise<boolean> {
 }
 
 export async function isBranchModified(branchName: string): Promise<boolean> {
+  await syncGit();
   // First check cache
   if (config.branchIsModified[branchName] !== undefined) {
     return config.branchIsModified[branchName];
@@ -432,6 +445,7 @@ export async function isBranchModified(branchName: string): Promise<boolean> {
 }
 
 export async function deleteBranch(branchName: string): Promise<void> {
+  await syncGit();
   try {
     await git.raw(['push', '--delete', 'origin', branchName]);
     logger.debug({ branchName }, 'Deleted remote branch');
@@ -451,6 +465,7 @@ export async function deleteBranch(branchName: string): Promise<void> {
 }
 
 export async function mergeBranch(branchName: string): Promise<void> {
+  await syncGit();
   await git.reset(ResetMode.HARD);
   await git.checkout(['-B', branchName, 'origin/' + branchName]);
   await git.checkout(config.currentBranch);
@@ -462,6 +477,7 @@ export async function mergeBranch(branchName: string): Promise<void> {
 export async function getBranchLastCommitTime(
   branchName: string
 ): Promise<Date> {
+  await syncGit();
   try {
     const time = await git.show(['-s', '--format=%ai', 'origin/' + branchName]);
     return new Date(Date.parse(time));
@@ -472,6 +488,7 @@ export async function getBranchLastCommitTime(
 }
 
 export async function getBranchFiles(branchName: string): Promise<string[]> {
+  await syncGit();
   try {
     const diff = await git.diffSummary([branchName, config.currentBranch]);
     return diff.files.map((file) => file.file);
@@ -485,6 +502,7 @@ export async function getFile(
   filePath: string,
   branchName?: string
 ): Promise<string | null> {
+  await syncGit();
   if (branchName) {
     const exists = await branchExists(branchName);
     if (!exists) {
@@ -504,6 +522,7 @@ export async function getFile(
 }
 
 export async function hasDiff(branchName: string): Promise<boolean> {
+  await syncGit();
   try {
     return (await git.diff(['HEAD', branchName])) !== '';
   } catch (err) {
@@ -539,6 +558,7 @@ export async function commitFiles({
   message,
   force = false,
 }: CommitFilesConfig): Promise<string | null> {
+  await syncGit();
   logger.debug(`Committing files to branch ${branchName}`);
   if (!privateKeySet) {
     await writePrivateKey(config.localDir);

@@ -413,7 +413,7 @@ export async function initRepo({
   );
   parsedEndpoint.pathname = config.repository + '.git';
   const url = URL.format(parsedEndpoint);
-  await git.initRepo({
+  git.initRepo({
     ...config,
     url,
     gitAuthorName: global.gitAuthor?.name,
