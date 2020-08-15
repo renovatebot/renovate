@@ -12,6 +12,7 @@ package.json
 **/__fixtures__/
 **/__mocks__/
 bin/yarn*
+.clinic/
 
 # generated code
 **/*.generated.ts
