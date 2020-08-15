@@ -151,6 +151,7 @@ async function cleanLocalBranches(): Promise<void> {
  */
 export async function setBranchPrefix(branchPrefix: string): Promise<void> {
   config.branchPrefix = branchPrefix;
+  // If the repo is already cloned then set branchPrefix now, otherwise it will be called again during syncGit()
   if (git) {
     logger.debug('Setting branchPrefix: ' + branchPrefix);
     const ref = `refs/heads/${branchPrefix}*:refs/remotes/origin/${branchPrefix}*`;
