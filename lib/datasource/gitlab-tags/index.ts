@@ -35,7 +35,7 @@ export async function getReleases({
     return cachedResult;
   }
 
-  const urlEncodedRepo = encodeURIComponent(repo.replace(/\|.*$/, ''));
+  const urlEncodedRepo = encodeURIComponent(repo);
 
   // tag
   const url = URL.resolve(
@@ -50,7 +50,7 @@ export async function getReleases({
   ).body;
 
   const dependency: ReleaseResult = {
-    sourceUrl: URL.resolve(depHost, repo.replace(/\|.*$/, '')),
+    sourceUrl: URL.resolve(depHost, repo),
     releases: null,
   };
   dependency.releases = gitlabTags.map(({ name, commit }) => ({

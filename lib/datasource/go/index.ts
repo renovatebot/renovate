@@ -19,14 +19,11 @@ async function getDatasource(goModule: string): Promise<DataSource | null> {
   if (goModule.startsWith('gopkg.in/')) {
     const [pkg] = goModule.replace('gopkg.in/', '').split('.');
     if (pkg.includes('/')) {
-      return {
-        datasource: github.id,
-        lookupName: `${pkg}|${goModule}`,
-      };
+      return { datasource: github.id, lookupName: pkg };
     }
     return {
       datasource: github.id,
-      lookupName: `go-${pkg}/${pkg}|${goModule}`,
+      lookupName: `go-${pkg}/${pkg}`,
     };
   }
   if (goModule.startsWith('github.com/')) {
@@ -34,7 +31,7 @@ async function getDatasource(goModule: string): Promise<DataSource | null> {
     const lookupName = split[1] + '/' + split[2];
     return {
       datasource: github.id,
-      lookupName: `${lookupName}|${goModule}`,
+      lookupName,
     };
   }
   const pkgUrl = `https://${goModule}?go-get=1`;
@@ -52,10 +49,9 @@ async function getDatasource(goModule: string): Promise<DataSource | null> {
     if (goSourceUrl?.startsWith('https://github.com/')) {
       return {
         datasource: github.id,
-        lookupName:
-          goSourceUrl.replace('https://github.com/', '').replace(/\/$/, '') +
-          '|' +
-          goModule,
+        lookupName: goSourceUrl
+          .replace('https://github.com/', '')
+          .replace(/\/$/, ''),
       };
     }
     if (goSourceUrl?.match('^https://[^/]*gitlab.[^/]*/.+')) {
@@ -64,7 +60,7 @@ async function getDatasource(goModule: string): Promise<DataSource | null> {
       return {
         datasource: gitlab.id,
         registryUrl: gitlabRes[1],
-        lookupName: gitlabRes[2].replace(/\/$/, '') + '|' + goModule,
+        lookupName: gitlabRes[2].replace(/\/$/, ''),
       };
     }
   } else {
@@ -119,8 +115,10 @@ export async function getReleases({
       });
     logger.trace({ submodReleases }, 'go.getReleases');
     if (submodReleases.length > 0) {
-      res.releases = submodReleases;
-      return res;
+      return {
+        sourceUrl: res.sourceUrl,
+        releases: submodReleases,
+      };
     }
   }
   if (res?.releases) {

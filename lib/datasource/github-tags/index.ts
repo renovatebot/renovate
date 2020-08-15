@@ -130,10 +130,7 @@ export async function getReleases({
     return cachedResult;
   }
   // tag
-  const url =
-    'https://api.github.com/repos/' +
-    repo.replace(/\|.*$/, '') +
-    '/tags?per_page=100';
+  const url = `https://api.github.com/repos/${repo}/tags?per_page=100`;
   type GitHubTag = {
     name: string;
   }[];
@@ -144,7 +141,7 @@ export async function getReleases({
     })
   ).body.map((o) => o.name);
   const dependency: ReleaseResult = {
-    sourceUrl: 'https://github.com/' + repo.replace(/\|.*$/, ''),
+    sourceUrl: 'https://github.com/' + repo,
     releases: null,
   };
   dependency.releases = versions.map((version) => ({
