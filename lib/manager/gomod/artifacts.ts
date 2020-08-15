@@ -65,6 +65,7 @@ export async function updateArtifacts({
       extraEnv: {
         GOPATH: goPath,
         GOPROXY: process.env.GOPROXY,
+        GOPRIVATE: process.env.GOPRIVATE,
         GONOSUMDB: process.env.GONOSUMDB,
         CGO_ENABLED: config.binarySource === BinarySource.Docker ? '0' : null,
       },

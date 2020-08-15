@@ -64,6 +64,7 @@ function checkForPlatformFailure(err: Error): void {
   ];
   for (const errorStr of platformFailureStrings) {
     if (err.message.includes(errorStr)) {
+      logger.debug({ err }, 'Converting git error to ExternalHostError');
       throw new ExternalHostError(err, 'git');
     }
   }
@@ -137,6 +138,22 @@ async function cleanLocalBranches(): Promise<void> {
   }
 }
 
+/*
+ * When we initially clone, we clone only the default branch so how no knowledge of other branches existing.
+ * By calling this function once the repo's branchPrefix is known, we can fetch all of Renovate's branches in one command.
+ */
+export async function setBranchPrefix(branchPrefix: string): Promise<void> {
+  logger.debug('Setting branchPrefix: ' + branchPrefix);
+  config.branchPrefix = branchPrefix;
+  const ref = `refs/heads/${branchPrefix}*:refs/remotes/origin/${branchPrefix}*`;
+  try {
+    await git.fetch(['origin', ref, '--depth=2', '--force']);
+  } catch (err) /* istanbul ignore next */ {
+    checkForPlatformFailure(err);
+    throw err;
+  }
+}
+
 export async function getSubmodules(): Promise<string[]> {
   return (
     (await git.raw([
@@ -193,7 +210,7 @@ export async function syncGit(): Promise<void> {
       await git.clone(config.url, '.', opts);
     } catch (err) /* istanbul ignore next */ {
       logger.debug({ err }, 'git clone error');
-      if (err.message?.includes('write error: No space left on device')) {
+      if (err.message?.includes('No space left on device')) {
         throw new Error(SYSTEM_INSUFFICIENT_DISK_SPACE);
       }
       throw new ExternalHostError(err, 'git');
@@ -321,8 +338,10 @@ export async function setBranch(branchName: string): Promise<string> {
       await git.raw(['rev-parse', 'origin/' + branchName])
     ).trim();
     await git.checkout([branchName, '-f']);
-    const latestCommitDate = (await git.log({ n: 1 })).latest.date;
-    logger.debug({ branchName, latestCommitDate }, 'latest commit');
+    const latestCommitDate = (await git.log({ n: 1 }))?.latest?.date;
+    if (latestCommitDate) {
+      logger.debug({ branchName, latestCommitDate }, 'latest commit');
+    }
     await git.reset(ResetMode.HARD);
     return config.currentBranchSha;
   } catch (err) /* istanbul ignore next */ {
@@ -335,22 +354,6 @@ export async function setBranch(branchName: string): Promise<string> {
     ) {
       throwBranchValidationError(branchName);
     }
-    throw err;
-  }
-}
-
-/*
- * When we initially clone, we clone only the default branch so how no knowledge of other branches existing.
- * By calling this function once the repo's branchPrefix is known, we can fetch all of Renovate's branches in one command.
- */
-export async function setBranchPrefix(branchPrefix: string): Promise<void> {
-  logger.debug('Setting branchPrefix: ' + branchPrefix);
-  config.branchPrefix = branchPrefix;
-  const ref = `refs/heads/${branchPrefix}*:refs/remotes/origin/${branchPrefix}*`;
-  try {
-    await git.fetch(['origin', ref, '--depth=2', '--force']);
-  } catch (err) /* istanbul ignore next */ {
-    checkForPlatformFailure(err);
     throw err;
   }
 }
@@ -608,6 +611,16 @@ export async function commitFiles({
     return commit;
   } catch (err) /* istanbul ignore next */ {
     checkForPlatformFailure(err);
+    if (
+      err.message.includes(
+        'refusing to allow a GitHub App to create or update workflow'
+      )
+    ) {
+      logger.warn(
+        'App has not been granted permissios to update Workflows - aborting branch.'
+      );
+      return null;
+    }
     logger.debug({ err }, 'Error commiting files');
     throw new Error(REPOSITORY_CHANGED);
   }
