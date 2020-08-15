@@ -55,30 +55,6 @@ function compatibleVersions(
   );
 }
 
-function getCompatibleReleases(
-  releases: Releases,
-  compatibility: Record<string, string>
-): Release[] {
-  let compatibleReleases = [];
-  if (releases) {
-    const versions = compatibleVersions(releases, compatibility);
-    compatibleReleases = versions.map((version) => {
-      const versionReleases = releases[version] || [];
-      const { upload_time: releaseTimestamp } = versionReleases[0] || {};
-      const isDeprecated = versionReleases.some(({ yanked }) => yanked);
-      const result: Release = {
-        version,
-        releaseTimestamp,
-      };
-      if (isDeprecated) {
-        result.isDeprecated = isDeprecated;
-      }
-      return result;
-    });
-  }
-  return compatibleReleases;
-}
-
 async function getDependency(
   packageName: string,
   hostUrl: string,
@@ -143,7 +119,23 @@ async function getDependency(
     }
   }
 
-  dependency.releases = getCompatibleReleases(dep.releases, compatibility);
+  dependency.releases = [];
+  if (dep.releases) {
+    const versions = compatibleVersions(dep.releases, compatibility);
+    dependency.releases = versions.map((version) => {
+      const releases = dep.releases[version] || [];
+      const { upload_time: releaseTimestamp } = releases[0] || {};
+      const isDeprecated = releases.some(({ yanked }) => yanked);
+      const result: Release = {
+        version,
+        releaseTimestamp,
+      };
+      if (isDeprecated) {
+        result.isDeprecated = isDeprecated;
+      }
+      return result;
+    });
+  }
   return dependency;
 }
 
@@ -222,7 +214,18 @@ async function getSimpleDependency(
       releases[version].push(release);
     }
   }
-  dependency.releases = getCompatibleReleases(releases, compatibility);
+  const versions = compatibleVersions(releases, compatibility);
+  dependency.releases = versions.map((version) => {
+    const versionReleases = releases[version] || [];
+    const isDeprecated = versionReleases.some(({ yanked }) => yanked);
+    const result: Release = {
+      version,
+    };
+    if (isDeprecated) {
+      result.isDeprecated = isDeprecated;
+    }
+    return result;
+  });
   return dependency;
 }
 
