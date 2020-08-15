@@ -1,6 +1,6 @@
 import crypto from 'crypto';
 import URL from 'url';
-import got, { Options } from 'got';
+import got, { Options, Response } from 'got';
 import { HOST_DISABLED } from '../../constants/error-messages';
 import { ExternalHostError } from '../../types/errors/external-host-error';
 import * as memCache from '../cache/memory';
@@ -125,22 +125,29 @@ export class Http<GetOptions = HttpOptions, PostOptions = HttpPostOptions> {
         return resolveResponse<T>(cachedRes, options);
       }
     }
-    const queue = getQueue(url);
     let startTime: number;
-    const promisedRes = queue.add(() => {
-      startTime = Date.now();
+    const queueTask = (): Promise<Response<T>> => {
+      const queueTime = Date.now();
+      const queueDuration = queueTime - startTime;
       return got<T>(url, options).then((resp) => {
-        const duration = Date.now() - startTime;
+        const respTime = Date.now();
+        const duration = respTime - queueTime;
         const httpRequests = memCache.get('http-requests') || [];
         httpRequests.push({
           method: options.method,
           url,
           duration,
+          queueDuration,
         });
         memCache.set('http-requests', httpRequests);
         return resp;
       });
-    });
+    };
+
+    const queue = getQueue(url);
+    startTime = Date.now();
+    const promisedRes = queue ? queue.add(queueTask) : queueTask();
+
     if (options.method === 'get') {
       memCache.set(cacheKey, promisedRes); // always set if it's a get
     }

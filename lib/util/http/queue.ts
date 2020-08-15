@@ -3,14 +3,6 @@ import PQueue from 'p-queue';
 import { getRequestLimit } from './host-rules';
 
 let hostQueues: Record<string, PQueue> = {};
-let defaultQueue: PQueue;
-
-function getDefaultQueue(): PQueue {
-  if (!defaultQueue) {
-    defaultQueue = new PQueue();
-  }
-  return defaultQueue;
-}
 
 function getUrlHost(url: string): string | null {
   try {
@@ -20,12 +12,12 @@ function getUrlHost(url: string): string | null {
   }
 }
 
-export function getQueue(url: string): PQueue {
+export function getQueue(url: string): PQueue | null {
   const host = getUrlHost(url);
 
   /* istanbul ignore if */
   if (!host) {
-    return getDefaultQueue();
+    return null;
   }
 
   let queue = hostQueues[host];
@@ -35,7 +27,7 @@ export function getQueue(url: string): PQueue {
       queue = new PQueue({ concurrency });
       hostQueues[host] = queue;
     } else {
-      queue = getDefaultQueue();
+      queue = null;
     }
   }
 
@@ -44,5 +36,4 @@ export function getQueue(url: string): PQueue {
 
 export function clear(): void {
   hostQueues = {};
-  defaultQueue = undefined;
 }
