@@ -9,11 +9,13 @@ import {
   readLocalFile,
   writeLocalFile,
 } from '../../util/fs';
+import { find } from '../../util/host-rules';
 import {
   UpdateArtifact,
   UpdateArtifactsConfig,
   UpdateArtifactsResult,
 } from '../common';
+import { getPoetrySources } from './extract';
 
 function getPythonConstraint(
   existingLockFileContent: string,
@@ -37,6 +39,40 @@ function getPythonConstraint(
   return undefined;
 }
 
+async function getSourceCredentialVars(
+  packageFileName: string
+): { [s: string]: string } {
+  const pyprojectFileName = getSiblingFileName(
+    packageFileName,
+    'pyproject.toml'
+  );
+  const pyprojectContent = await readLocalFile(pyprojectFileName, 'utf8');
+  if (!pyprojectContent) {
+    logger.debug(`No pyproject.toml found`);
+    return {};
+  }
+
+  const poetrySources = await getPoetrySources(
+    pyprojectContent,
+    pyprojectFileName
+  );
+  const envVars = {};
+
+  for (const source of sources) {
+    const matchingHostRule = find({ url: source.url });
+    const formattedSourceName = source.name.toUpperCase();
+    if (matchingHostRule.username) {
+      envVars[`POETRY_HTTP_BASIC_${formattedSourceName}_USERNAME`] =
+        matchingHostRule.username;
+    }
+    if (matchingHostRule.password) {
+      envVars[`POETRY_HTTP_BASIC_${formattedSourceName}_PASSWORD`] =
+        matchingHostRule.password;
+    }
+  }
+
+  return envVars;
+}
 export async function updateArtifacts({
   packageFileName,
   updatedDeps,
@@ -45,7 +81,7 @@ export async function updateArtifacts({
 }: UpdateArtifact): Promise<UpdateArtifactsResult[] | null> {
   logger.debug(`poetry.updateArtifacts(${packageFileName})`);
   if (!is.nonEmptyArray(updatedDeps) && !config.isLockFileMaintenance) {
-    logger.debug('No updated poetry deps - returning null');
+    logger.error('No updated poetry deps - returning null');
     return null;
   }
   // Try poetry.lock first
@@ -64,6 +100,7 @@ export async function updateArtifacts({
   try {
     await writeLocalFile(packageFileName, newPackageFileContent);
     const cmd: string[] = [];
+
     if (config.isLockFileMaintenance) {
       await deleteLocalFile(lockFileName);
       cmd.push('poetry update --lock --no-interaction');
@@ -76,8 +113,11 @@ export async function updateArtifacts({
     const tagConstraint = getPythonConstraint(existingLockFileContent, config);
     const poetryRequirement = config.compatibility?.poetry || 'poetry';
     const poetryInstall = 'pip install ' + quote(poetryRequirement);
+    const sourceCredentialVars = await getSourceCredentialVars(packageFileName);
+
     const execOptions: ExecOptions = {
       cwdFile: packageFileName,
+      extraEnv: sourceCredentialVars,
       docker: {
         image: 'renovate/python',
         tagConstraint,

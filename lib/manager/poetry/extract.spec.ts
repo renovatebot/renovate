@@ -1,5 +1,5 @@
 import { readFileSync } from 'fs';
-import { extractPackageFile } from './extract';
+import { extractPackageFile, getPoetrySources } from './extract';
 
 const pyproject1toml = readFileSync(
   'lib/manager/poetry/__fixtures__/pyproject.1.toml',
@@ -46,9 +46,14 @@ const pyproject9toml = readFileSync(
   'utf8'
 );
 
+const pyproject10toml = readFileSync(
+  'lib/manager/poetry/__fixtures__/pyproject.10.toml',
+  'utf8'
+);
+
 describe('lib/manager/poetry/extract', () => {
+  let filename: string;
   describe('extractPackageFile()', () => {
-    let filename: string;
     beforeEach(() => {
       filename = '';
     });
@@ -137,6 +142,47 @@ describe('lib/manager/poetry/extract', () => {
       expect(res[0].currentValue).toBe('1.2.3');
       expect(res[0].skipReason).toBe('path-dependency');
       expect(res).toHaveLength(2);
+    });
+  });
+  describe('getPoetrySources', () => {
+    beforeEach(() => {
+      filename = '';
+    });
+    it('returns no sources for empty', () => {
+      const res = getPoetrySources('nothing here', filename);
+      expect(res).toHaveLength(0);
+    });
+    it('returns no sources for parsed file without poetry section', () => {
+      const res = getPoetrySources(pyproject5toml, filename);
+      expect(res).toHaveLength(0);
+    });
+    it('returns array of sources', () => {
+      const res = getPoetrySources(pyproject6toml, filename);
+      expect(res[0]).toEqual({
+        name: 'foo',
+        url: 'https://foo.bar/simple/',
+      });
+      expect(res[1]).toEqual({
+        name: 'bar',
+        url: 'https://bar.baz/+simple/',
+      });
+      expect(res).toHaveLength(2);
+    });
+    it('ignores sources missing a name or url', () => {
+      const res = getPoetrySources(pyproject10toml, filename);
+      expect(res[0]).toEqual({
+        name: 'one',
+        url: 'some.url',
+      });
+      expect(res[1]).toEqual({
+        name: 'two',
+        url: 'another.url',
+      });
+      expect(res[2]).toEqual({
+        name: 'four',
+        url: 'last.url',
+      });
+      expect(res).toHaveLength(3);
     });
   });
 });
