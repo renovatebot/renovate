@@ -138,6 +138,22 @@ async function cleanLocalBranches(): Promise<void> {
   }
 }
 
+/*
+ * When we initially clone, we clone only the default branch so how no knowledge of other branches existing.
+ * By calling this function once the repo's branchPrefix is known, we can fetch all of Renovate's branches in one command.
+ */
+export async function setBranchPrefix(branchPrefix: string): Promise<void> {
+  logger.debug('Setting branchPrefix: ' + branchPrefix);
+  config.branchPrefix = branchPrefix;
+  const ref = `refs/heads/${branchPrefix}*:refs/remotes/origin/${branchPrefix}*`;
+  try {
+    await git.fetch(['origin', ref, '--depth=2', '--force']);
+  } catch (err) /* istanbul ignore next */ {
+    checkForPlatformFailure(err);
+    throw err;
+  }
+}
+
 export async function getSubmodules(): Promise<string[]> {
   return (
     (await git.raw([
@@ -338,22 +354,6 @@ export async function setBranch(branchName: string): Promise<string> {
     ) {
       throwBranchValidationError(branchName);
     }
-    throw err;
-  }
-}
-
-/*
- * When we initially clone, we clone only the default branch so how no knowledge of other branches existing.
- * By calling this function once the repo's branchPrefix is known, we can fetch all of Renovate's branches in one command.
- */
-export async function setBranchPrefix(branchPrefix: string): Promise<void> {
-  logger.debug('Setting branchPrefix: ' + branchPrefix);
-  config.branchPrefix = branchPrefix;
-  const ref = `refs/heads/${branchPrefix}*:refs/remotes/origin/${branchPrefix}*`;
-  try {
-    await git.fetch(['origin', ref, '--depth=2', '--force']);
-  } catch (err) /* istanbul ignore next */ {
-    checkForPlatformFailure(err);
     throw err;
   }
 }
@@ -611,6 +611,16 @@ export async function commitFiles({
     return commit;
   } catch (err) /* istanbul ignore next */ {
     checkForPlatformFailure(err);
+    if (
+      err.message.includes(
+        'refusing to allow a GitHub App to create or update workflow'
+      )
+    ) {
+      logger.warn(
+        'App has not been granted permissios to update Workflows - aborting branch.'
+      );
+      return null;
+    }
     logger.debug({ err }, 'Error commiting files');
     throw new Error(REPOSITORY_CHANGED);
   }
