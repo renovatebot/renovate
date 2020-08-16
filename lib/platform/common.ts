@@ -84,6 +84,12 @@ export interface CreatePRConfig {
   platformOptions?: PlatformPrOptions;
   draftPR?: boolean;
 }
+export interface UpdatePrConfig {
+  number: number;
+  prTitle: string;
+  prBody?: string;
+  state?: PrState.Open | PrState.Closed;
+}
 export interface EnsureIssueConfig {
   title: string;
   reuseTitle?: string;
@@ -137,7 +143,7 @@ export interface Platform {
     issueConfig: EnsureIssueConfig
   ): Promise<EnsureIssueResult | null>;
   getPrBody(prBody: string): string;
-  updatePr(number: number, prTitle: string, prBody?: string): Promise<void>;
+  updatePr(prConfig: UpdatePrConfig): Promise<void>;
   mergePr(number: number, branchName: string): Promise<boolean>;
   addReviewers(number: number, reviewers: string[]): Promise<void>;
   addAssignees(number: number, assignees: string[]): Promise<void>;

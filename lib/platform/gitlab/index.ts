@@ -36,6 +36,7 @@ import {
   Pr,
   RepoParams,
   RepoResult,
+  UpdatePrConfig,
   VulnerabilityAlert,
 } from '../common';
 import { smartTruncate } from '../utils/pr-body';
@@ -470,11 +471,11 @@ async function closePr(iid: number): Promise<void> {
   );
 }
 
-export async function updatePr(
-  iid: number,
-  title: string,
-  description: string
-): Promise<void> {
+export async function updatePr({
+  number: iid,
+  prTitle: title,
+  prBody: description,
+}: UpdatePrConfig): Promise<void> {
   await gitlabApi.putJson(
     `projects/${config.repository}/merge_requests/${iid}`,
     {

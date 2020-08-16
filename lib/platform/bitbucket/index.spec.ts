@@ -766,7 +766,7 @@ describe('platform/bitbucket', () => {
         .reply(200, { reviewers: [reviewer] })
         .put('/2.0/repositories/some/repo/pullrequests/5')
         .reply(200);
-      await bitbucket.updatePr(5, 'title', 'body');
+      await bitbucket.updatePr({ number: 5, prTitle: 'title', prBody: 'body' });
       expect(httpMock.getTrace()).toMatchSnapshot();
     });
     it('throws an error on failure to get current list of reviewers', async () => {
@@ -775,7 +775,7 @@ describe('platform/bitbucket', () => {
         .get('/2.0/repositories/some/repo/pullrequests/5')
         .reply(500, undefined);
       await expect(() =>
-        bitbucket.updatePr(5, 'title', 'body')
+        bitbucket.updatePr({ number: 5, prTitle: 'title', prBody: 'body' })
       ).rejects.toThrowErrorMatchingSnapshot();
       expect(httpMock.getTrace()).toMatchSnapshot();
     });

@@ -1117,7 +1117,7 @@ describe('platform/gitlab', () => {
         .scope(gitlabApiHost)
         .put('/api/v4/projects/undefined/merge_requests/1')
         .reply(200);
-      await gitlab.updatePr(1, 'title', 'body');
+      await gitlab.updatePr({ number: 1, prTitle: 'title', prBody: 'body' });
       expect(httpMock.getTrace()).toMatchSnapshot();
     });
   });

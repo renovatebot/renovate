@@ -1247,14 +1247,22 @@ describe(getName(__filename), () => {
             )
             .reply(200);
 
-          await bitbucket.updatePr(5, 'title', 'body');
+          await bitbucket.updatePr({
+            number: 5,
+            prTitle: 'title',
+            prBody: 'body',
+          });
           expect(httpMock.getTrace()).toMatchSnapshot();
         });
 
         it('throws not-found 1', async () => {
           await initRepo();
           await expect(
-            bitbucket.updatePr(null as any, 'title', 'body')
+            bitbucket.updatePr({
+              number: null as any,
+              prTitle: 'title',
+              prBody: 'body',
+            })
           ).rejects.toThrow(REPOSITORY_NOT_FOUND);
 
           expect(httpMock.getTrace()).toMatchSnapshot();
@@ -1267,9 +1275,9 @@ describe(getName(__filename), () => {
               `${urlPath}/rest/api/1.0/projects/SOME/repos/repo/pull-requests/4`
             )
             .reply(404);
-          await expect(bitbucket.updatePr(4, 'title', 'body')).rejects.toThrow(
-            REPOSITORY_NOT_FOUND
-          );
+          await expect(
+            bitbucket.updatePr({ number: 4, prTitle: 'title', prBody: 'body' })
+          ).rejects.toThrow(REPOSITORY_NOT_FOUND);
 
           expect(httpMock.getTrace()).toMatchSnapshot();
         });
@@ -1290,9 +1298,9 @@ describe(getName(__filename), () => {
             )
             .reply(404);
 
-          await expect(bitbucket.updatePr(5, 'title', 'body')).rejects.toThrow(
-            REPOSITORY_NOT_FOUND
-          );
+          await expect(
+            bitbucket.updatePr({ number: 5, prTitle: 'title', prBody: 'body' })
+          ).rejects.toThrow(REPOSITORY_NOT_FOUND);
 
           expect(httpMock.getTrace()).toMatchSnapshot();
         });
@@ -1313,9 +1321,9 @@ describe(getName(__filename), () => {
             )
             .reply(409);
 
-          await expect(bitbucket.updatePr(5, 'title', 'body')).rejects.toThrow(
-            REPOSITORY_CHANGED
-          );
+          await expect(
+            bitbucket.updatePr({ number: 5, prTitle: 'title', prBody: 'body' })
+          ).rejects.toThrow(REPOSITORY_CHANGED);
           expect(httpMock.getTrace()).toMatchSnapshot();
         });
 
@@ -1336,7 +1344,7 @@ describe(getName(__filename), () => {
             .reply(405);
 
           await expect(
-            bitbucket.updatePr(5, 'title', 'body')
+            bitbucket.updatePr({ number: 5, prTitle: 'title', prBody: 'body' })
           ).rejects.toThrowErrorMatchingSnapshot();
           expect(httpMock.getTrace()).toMatchSnapshot();
         });

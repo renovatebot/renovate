@@ -27,7 +27,10 @@ async function cleanUpBranches(
               `PRUNING-DISABLED: Would update pr ${pr.number} to ${pr.title} - autoclosed`
             );
           } else {
-            await platform.updatePr(pr.number, `${pr.title} - autoclosed`);
+            await platform.updatePr({
+              number: pr.number,
+              prTitle: `${pr.title} - autoclosed`,
+            });
           }
         }
       }

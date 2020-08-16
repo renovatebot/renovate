@@ -1783,7 +1783,11 @@ describe('platform/github', () => {
       initRepoMock(scope, 'some/repo');
       scope.patch('/repos/some/repo/pulls/1234').reply(200);
       await github.initRepo({ repository: 'some/repo', token: 'token' } as any);
-      await github.updatePr(1234, 'The New Title', 'Hello world again');
+      await github.updatePr({
+        number: 1234,
+        prTitle: 'The New Title',
+        prBody: 'Hello world again',
+      });
       expect(httpMock.getTrace()).toMatchSnapshot();
     });
   });

@@ -24,7 +24,11 @@ export async function raiseConfigWarningIssue(
     if (config.dryRun) {
       logger.info(`DRY-RUN: Would update PR #${pr.number}`);
     } else {
-      await platform.updatePr(pr.number, config.onboardingPrTitle, body);
+      await platform.updatePr({
+        number: pr.number,
+        prTitle: config.onboardingPrTitle,
+        prBody: body,
+      });
     }
   } else if (config.dryRun) {
     logger.info('DRY-RUN: Would ensure config error issue');

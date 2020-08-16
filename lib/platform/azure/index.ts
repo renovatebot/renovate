@@ -26,6 +26,7 @@ import {
   Pr,
   RepoParams,
   RepoResult,
+  UpdatePrConfig,
   VulnerabilityAlert,
 } from '../common';
 import { smartTruncate } from '../utils/pr-body';
@@ -385,11 +386,11 @@ export async function createPr({
   return azureHelper.getRenovatePRFormat(pr);
 }
 
-export async function updatePr(
-  prNo: number,
-  title: string,
-  body?: string
-): Promise<void> {
+export async function updatePr({
+  number: prNo,
+  prTitle: title,
+  prBody: body,
+}: UpdatePrConfig): Promise<void> {
   logger.debug(`updatePr(${prNo}, ${title}, body)`);
   const azureApiGit = await azureApi.gitApi();
   const objToUpdate: GitPullRequest = {
