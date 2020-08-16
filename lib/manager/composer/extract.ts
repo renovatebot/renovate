@@ -53,24 +53,24 @@ function parseRepositories(
   registryUrls: string[],
   packageRules?: PackageRule[]
 ): void {
-  try {
-    let packagist = true;
-    // adds repositories from config's packageRules
-    if (packageRules) {
-      packageRules.forEach((rule) => {
-        if (
-          !rule.datasources ||
-          rule.datasources.indexOf(datasourcePackagist.id) !== -1
-        ) {
-          packagist = rule?.packagist ?? true;
-          if (rule?.registryUrls) {
-            rule.registryUrls.forEach((repo) => {
-              registryUrls.push(repo);
-            });
-          }
+  let packagist = true;
+  // adds repositories from config's packageRules
+  if (packageRules) {
+    packageRules.forEach((rule) => {
+      if (
+        !rule.datasources ||
+        rule.datasources.indexOf(datasourcePackagist.id) !== -1
+      ) {
+        packagist = rule?.packagist ?? true;
+        if (rule?.registryUrls) {
+          rule.registryUrls.forEach((repo) => {
+            registryUrls.push(repo);
+          });
         }
-      });
-    }
+      }
+    });
+  }
+  try {
     if (repoJson) {
       Object.entries(repoJson).forEach(([key, repo]) => {
         if (is.object(repo)) {
