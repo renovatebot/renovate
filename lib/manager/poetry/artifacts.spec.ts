@@ -36,7 +36,6 @@ describe('.updateArtifacts()', () => {
   beforeEach(async () => {
     jest.resetAllMocks();
     env.getChildProcessEnv.mockReturnValue(envMock.basic);
-    find.mockReturnValue({ test: 'test' });
     await setExecConfig(config);
     docker.resetPrefetchedImages();
   });
