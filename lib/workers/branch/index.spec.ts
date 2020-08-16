@@ -4,12 +4,8 @@ import {
   MANAGER_LOCKFILE_ERROR,
   REPOSITORY_CHANGED,
 } from '../../constants/error-messages';
-import {
-  PR_STATE_CLOSED,
-  PR_STATE_MERGED,
-  PR_STATE_OPEN,
-} from '../../constants/pull-requests';
 import * as _npmPostExtract from '../../manager/npm/post-update';
+import { PrState } from '../../types';
 import * as _exec from '../../util/exec';
 import { File, StatusResult } from '../../util/git';
 import { BranchConfig, PrResult } from '../common';
@@ -113,7 +109,7 @@ describe('workers/branch', () => {
       config.updateNotScheduled = true;
       git.branchExists.mockResolvedValueOnce(true);
       platform.getBranchPr.mockResolvedValueOnce({
-        state: PR_STATE_OPEN,
+        state: PrState.Open,
       } as never);
       git.isBranchModified.mockResolvedValueOnce(false);
       await branchWorker.processBranch(config);
@@ -125,7 +121,7 @@ describe('workers/branch', () => {
       config.updateType = 'major';
       checkExisting.prAlreadyExisted.mockResolvedValueOnce({
         number: 13,
-        state: PR_STATE_CLOSED,
+        state: PrState.Closed,
       } as never);
       await branchWorker.processBranch(config);
       expect(reuse.shouldReuseExistingBranch).toHaveBeenCalledTimes(0);
@@ -136,7 +132,7 @@ describe('workers/branch', () => {
       config.updateType = 'digest';
       checkExisting.prAlreadyExisted.mockResolvedValueOnce({
         number: 13,
-        state: PR_STATE_CLOSED,
+        state: PrState.Closed,
       });
       await branchWorker.processBranch(config);
       expect(reuse.shouldReuseExistingBranch).toHaveBeenCalledTimes(0);
@@ -146,7 +142,7 @@ describe('workers/branch', () => {
       git.branchExists.mockResolvedValueOnce(true);
       checkExisting.prAlreadyExisted.mockResolvedValueOnce({
         number: 13,
-        state: PR_STATE_CLOSED,
+        state: PrState.Closed,
       });
       await branchWorker.processBranch(config);
       expect(reuse.shouldReuseExistingBranch).toHaveBeenCalledTimes(0);
@@ -156,7 +152,7 @@ describe('workers/branch', () => {
       git.branchExists.mockResolvedValueOnce(true);
       checkExisting.prAlreadyExisted.mockResolvedValueOnce({
         number: 13,
-        state: PR_STATE_MERGED,
+        state: PrState.Merged,
       });
       await branchWorker.processBranch(config);
       expect(reuse.shouldReuseExistingBranch).toHaveBeenCalledTimes(0);
@@ -165,7 +161,7 @@ describe('workers/branch', () => {
       schedule.isScheduledNow.mockReturnValueOnce(false);
       git.branchExists.mockResolvedValueOnce(true);
       platform.getBranchPr.mockResolvedValueOnce({
-        state: PR_STATE_MERGED,
+        state: PrState.Merged,
       } as never);
       git.isBranchModified.mockResolvedValueOnce(true);
       await expect(branchWorker.processBranch(config)).rejects.toThrow(
@@ -176,7 +172,7 @@ describe('workers/branch', () => {
       schedule.isScheduledNow.mockReturnValueOnce(false);
       git.branchExists.mockResolvedValueOnce(true);
       platform.getBranchPr.mockResolvedValueOnce({
-        state: PR_STATE_OPEN,
+        state: PrState.Open,
         labels: ['rebase'],
       } as never);
       git.isBranchModified.mockResolvedValueOnce(true);
@@ -187,7 +183,7 @@ describe('workers/branch', () => {
       schedule.isScheduledNow.mockReturnValueOnce(false);
       git.branchExists.mockResolvedValueOnce(true);
       platform.getBranchPr.mockResolvedValueOnce({
-        state: PR_STATE_OPEN,
+        state: PrState.Open,
         body: '**Rebasing**: something',
       } as never);
       git.isBranchModified.mockResolvedValueOnce(true);
@@ -198,7 +194,7 @@ describe('workers/branch', () => {
       schedule.isScheduledNow.mockReturnValueOnce(false);
       git.branchExists.mockResolvedValueOnce(true);
       platform.getBranchPr.mockResolvedValueOnce({
-        state: PR_STATE_OPEN,
+        state: PrState.Open,
         targetBranch: 'v6',
       } as never);
       git.isBranchModified.mockResolvedValueOnce(false);
@@ -517,7 +513,7 @@ describe('workers/branch', () => {
     it('closed pr (dry run)', async () => {
       git.branchExists.mockResolvedValueOnce(true);
       checkExisting.prAlreadyExisted.mockResolvedValueOnce({
-        state: PR_STATE_CLOSED,
+        state: PrState.Closed,
       });
       expect(
         await branchWorker.processBranch({ ...config, dryRun: true })
@@ -527,7 +523,7 @@ describe('workers/branch', () => {
     it('branch pr no rebase (dry run)', async () => {
       git.branchExists.mockResolvedValueOnce(true);
       platform.getBranchPr.mockResolvedValueOnce({
-        state: PR_STATE_OPEN,
+        state: PrState.Open,
       } as never);
       git.isBranchModified.mockResolvedValueOnce(true);
       expect(
@@ -547,7 +543,7 @@ describe('workers/branch', () => {
       git.branchExists.mockResolvedValueOnce(true);
       platform.getBranchPr.mockResolvedValueOnce({
         title: 'rebase!',
-        state: PR_STATE_OPEN,
+        state: PrState.Open,
         body: `- [x] <!-- rebase-check -->`,
       } as never);
       git.isBranchModified.mockResolvedValueOnce(true);
@@ -577,7 +573,7 @@ describe('workers/branch', () => {
       git.branchExists.mockResolvedValueOnce(true);
       platform.getBranchPr.mockResolvedValueOnce({
         title: 'rebase!',
-        state: PR_STATE_OPEN,
+        state: PrState.Open,
         body: `- [x] <!-- rebase-check -->`,
       } as never);
       git.isBranchModified.mockResolvedValueOnce(true);
@@ -608,7 +604,7 @@ describe('workers/branch', () => {
       git.branchExists.mockResolvedValueOnce(true);
       platform.getBranchPr.mockResolvedValueOnce({
         title: 'rebase!',
-        state: PR_STATE_OPEN,
+        state: PrState.Open,
         body: `- [x] <!-- rebase-check -->`,
       } as never);
       git.isBranchModified.mockResolvedValueOnce(true);

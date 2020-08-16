@@ -1,6 +1,5 @@
 import { URLSearchParams } from 'url';
-import { PR_STATE_CLOSED } from '../../constants/pull-requests';
-import { BranchStatus } from '../../types';
+import { BranchStatus, PrState } from '../../types';
 import { GiteaHttp, GiteaHttpOptions } from '../../util/http/gitea';
 
 const giteaHttp = new GiteaHttp();
@@ -295,7 +294,7 @@ export async function closePR(
 ): Promise<void> {
   await updatePR(repoPath, idx, {
     ...options,
-    state: PR_STATE_CLOSED,
+    state: PrState.Closed,
   });
 }
 

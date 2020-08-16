@@ -15,9 +15,8 @@ import {
   REPOSITORY_NOT_FOUND,
 } from '../../constants/error-messages';
 import { PLATFORM_TYPE_GITLAB } from '../../constants/platforms';
-import { PR_STATE_ALL, PR_STATE_OPEN } from '../../constants/pull-requests';
 import { logger } from '../../logger';
-import { BranchStatus } from '../../types';
+import { BranchStatus, PrState } from '../../types';
 import * as git from '../../util/git';
 import * as hostRules from '../../util/host-rules';
 import { HttpResponse } from '../../util/http';
@@ -441,7 +440,7 @@ export async function getPr(iid: number): Promise<Pr> {
   pr.number = pr.iid;
   pr.displayNumber = `Merge Request #${pr.iid}`;
   pr.body = pr.description;
-  pr.state = pr.state === 'opened' ? PR_STATE_OPEN : pr.state;
+  pr.state = pr.state === 'opened' ? PrState.Open : pr.state;
   pr.hasAssignees = !!(pr.assignee?.id || pr.assignees?.[0]?.id);
   delete pr.assignee;
   delete pr.assignees;
@@ -450,7 +449,7 @@ export async function getPr(iid: number): Promise<Pr> {
     logger.debug('pr cannot be merged');
     pr.canMerge = false;
     pr.isConflicted = true;
-  } else if (pr.state === PR_STATE_OPEN) {
+  } else if (pr.state === PrState.Open) {
     const branchStatus = await getBranchStatus(pr.branchName, []);
     if (branchStatus === BranchStatus.green) {
       pr.canMerge = true;
@@ -957,7 +956,7 @@ async function fetchPrList(): Promise<Pr[]> {
       number: pr.iid,
       branchName: pr.source_branch,
       title: pr.title,
-      state: pr.state === 'opened' ? PR_STATE_OPEN : pr.state,
+      state: pr.state === 'opened' ? PrState.Open : pr.state,
       createdAt: pr.created_at,
     }));
   } catch (err) /* istanbul ignore next */ {
@@ -977,7 +976,7 @@ export async function getPrList(): Promise<Pr[]> {
 }
 
 function matchesState(state: string, desiredState: string): boolean {
-  if (desiredState === PR_STATE_ALL) {
+  if (desiredState === PrState.All) {
     return true;
   }
   if (desiredState.startsWith('!')) {
@@ -989,7 +988,7 @@ function matchesState(state: string, desiredState: string): boolean {
 export async function findPr({
   branchName,
   prTitle,
-  state = PR_STATE_ALL,
+  state = PrState.All,
 }: FindPRConfig): Promise<Pr> {
   logger.debug(`findPr(${branchName}, ${prTitle}, ${state})`);
   const prList = await getPrList();

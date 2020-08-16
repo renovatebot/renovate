@@ -1,8 +1,8 @@
 import { RenovateConfig } from '../../../config';
 import { REPOSITORY_CHANGED } from '../../../constants/error-messages';
-import { PR_STATE_OPEN } from '../../../constants/pull-requests';
 import { logger } from '../../../logger';
 import { platform } from '../../../platform';
+import { PrState } from '../../../types';
 import { getAllRenovateBranches, isBranchModified } from '../../../util/git';
 
 async function cleanUpBranches(
@@ -13,7 +13,7 @@ async function cleanUpBranches(
     try {
       const pr = await platform.findPr({
         branchName,
-        state: PR_STATE_OPEN,
+        state: PrState.Open,
       });
       const branchIsModified = await isBranchModified(branchName);
       if (pr && !branchIsModified) {

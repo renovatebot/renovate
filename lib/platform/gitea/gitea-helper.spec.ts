@@ -1,5 +1,5 @@
 import * as httpMock from '../../../test/httpMock';
-import { PR_STATE_CLOSED } from '../../constants/pull-requests';
+import { PrState } from '../../types';
 import { setBaseUrl } from '../../util/http/gitea';
 import * as ght from './gitea-helper';
 
@@ -317,7 +317,7 @@ describe('platform/gitea/gitea-helper', () => {
         .reply(200, updatedMockPR);
 
       const res = await ght.updatePR(mockRepo.full_name, mockPR.number, {
-        state: PR_STATE_CLOSED,
+        state: PrState.Closed,
         title: 'new-title',
         body: 'new-body',
         assignees: [otherMockUser.username],

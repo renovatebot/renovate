@@ -6,8 +6,7 @@ import {
   REPOSITORY_DISABLED,
   REPOSITORY_NOT_FOUND,
 } from '../../constants/error-messages';
-import { PR_STATE_CLOSED, PR_STATE_OPEN } from '../../constants/pull-requests';
-import { BranchStatus } from '../../types';
+import { BranchStatus, PrState } from '../../types';
 import * as _git from '../../util/git';
 import { Platform } from '../common';
 
@@ -1075,7 +1074,7 @@ describe(getName(__filename), () => {
             await bitbucket.findPr({
               branchName: 'userName1/pullRequest5',
               prTitle: 'title',
-              state: PR_STATE_OPEN,
+              state: PrState.Open,
             })
           ).toMatchSnapshot();
           expect(httpMock.getTrace()).toMatchSnapshot();
@@ -1095,7 +1094,7 @@ describe(getName(__filename), () => {
             await bitbucket.findPr({
               branchName: 'userName1/pullRequest5',
               prTitle: 'title',
-              state: PR_STATE_CLOSED,
+              state: PrState.Closed,
             })
           ).toBeUndefined();
           expect(httpMock.getTrace()).toMatchSnapshot();

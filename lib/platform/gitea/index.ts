@@ -12,9 +12,8 @@ import {
   REPOSITORY_MIRRORED,
 } from '../../constants/error-messages';
 import { PLATFORM_TYPE_GITEA } from '../../constants/platforms';
-import { PR_STATE_ALL, PR_STATE_OPEN } from '../../constants/pull-requests';
 import { logger } from '../../logger';
-import { BranchStatus } from '../../types';
+import { BranchStatus, PrState } from '../../types';
 import * as git from '../../util/git';
 import * as hostRules from '../../util/host-rules';
 import { setBaseUrl } from '../../util/http/gitea';
@@ -107,7 +106,7 @@ function toRenovatePR(data: helper.PR): Pr | null {
 }
 
 function matchesState(actual: string, expected: string): boolean {
-  if (expected === PR_STATE_ALL) {
+  if (expected === PrState.All) {
     return true;
   }
   if (expected.startsWith('!')) {
@@ -466,7 +465,7 @@ const platform: Platform = {
   async findPr({
     branchName,
     prTitle: title,
-    state = PR_STATE_ALL,
+    state = PrState.All,
   }: FindPRConfig): Promise<Pr> {
     logger.debug(`findPr(${branchName}, ${title}, ${state})`);
     const prList = await platform.getPrList();
@@ -531,7 +530,7 @@ const platform: Platform = {
         config.prList = null;
         const pr = await platform.findPr({
           branchName,
-          state: PR_STATE_OPEN,
+          state: PrState.Open,
         });
 
         // If a valid PR was found, return and gracefully recover from the error. Otherwise, abort and throw error.
@@ -782,7 +781,7 @@ const platform: Platform = {
 
   async getBranchPr(branchName: string): Promise<Pr | null> {
     logger.debug(`getBranchPr(${branchName})`);
-    const pr = await platform.findPr({ branchName, state: PR_STATE_OPEN });
+    const pr = await platform.findPr({ branchName, state: PrState.Open });
     return pr ? platform.getPr(pr.number) : null;
   },
 
