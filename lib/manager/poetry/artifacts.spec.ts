@@ -9,7 +9,7 @@ import { setExecConfig } from '../../util/exec';
 import { BinarySource } from '../../util/exec/common';
 import * as docker from '../../util/exec/docker';
 import * as _env from '../../util/exec/env';
-import { find } from '../../util/host-rules';
+import * as _hostRules from '../../util/host-rules';
 import { updateArtifacts } from './artifacts';
 
 const pyproject10toml = readFileSync(
@@ -27,6 +27,7 @@ const fs: jest.Mocked<typeof _fs> = _fs as any;
 const exec: jest.Mock<typeof _exec> = _exec as any;
 const env = mocked(_env);
 const datasource = mocked(_datasource);
+const hostRules = mocked(_hostRules);
 
 const config = {
   localDir: join('/tmp/github/some/repo'),
@@ -98,12 +99,12 @@ describe('.updateArtifacts()', () => {
     const execSnapshots = mockExecAll(exec);
     fs.readFile.mockReturnValueOnce(pyproject10toml as any);
     fs.readFile.mockReturnValueOnce('New poetry.lock' as any);
-    find.mockReturnValueOnce({
+    hostRules.find.mockReturnValueOnce({
       username: 'usernameOne',
       password: 'passwordOne',
     });
-    find.mockReturnValueOnce({ username: 'usernameTwo' });
-    find.mockReturnValueOnce({ password: 'passwordFour' });
+    hostRules.find.mockReturnValueOnce({ username: 'usernameTwo' });
+    hostRules.find.mockReturnValueOnce({ password: 'passwordFour' });
     const updatedDeps = ['dep1'];
     expect(
       await updateArtifacts({
@@ -113,7 +114,7 @@ describe('.updateArtifacts()', () => {
         config,
       })
     ).not.toBeNull();
-    expect(find.mock.calls).toHaveLength(3);
+    expect(hostRules.find.mock.calls).toHaveLength(3);
     expect(execSnapshots).toMatchSnapshot();
   });
   it('returns updated pyproject.lock', async () => {
