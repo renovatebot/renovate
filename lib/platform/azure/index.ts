@@ -3,8 +3,8 @@ import {
   GitPullRequest,
   GitPullRequestCommentThread,
   GitPullRequestMergeStrategy,
+  PullRequestStatus,
 } from 'azure-devops-node-api/interfaces/GitInterfaces';
-import { RenovateConfig } from '../../config/common';
 import { REPOSITORY_DISABLED } from '../../constants/error-messages';
 import { PLATFORM_TYPE_AZURE } from '../../constants/platforms';
 import { logger } from '../../logger';
@@ -390,15 +390,25 @@ export async function updatePr({
   number: prNo,
   prTitle: title,
   prBody: body,
+  state,
 }: UpdatePrConfig): Promise<void> {
   logger.debug(`updatePr(${prNo}, ${title}, body)`);
+
+  const status = {
+    [PrState.Open]: PullRequestStatus.Active,
+    [PrState.Closed]: PullRequestStatus.Abandoned,
+  }[state];
+
   const azureApiGit = await azureApi.gitApi();
   const objToUpdate: GitPullRequest = {
     title,
+    ...(status && { status }),
   };
+
   if (body) {
     objToUpdate.description = azureHelper.max4000Chars(sanitize(body));
   }
+
   await azureApiGit.updatePullRequest(objToUpdate, config.repoId, prNo);
 }
 
