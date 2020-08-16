@@ -1,7 +1,6 @@
 import url, { URLSearchParams } from 'url';
 import is from '@sindresorhus/is';
 import delay from 'delay';
-import { RenovateConfig } from '../../config/common';
 import {
   REPOSITORY_CHANGED,
   REPOSITORY_DISABLED,
@@ -876,6 +875,7 @@ export async function updatePr({
   number: prNo,
   prTitle: title,
   prBody: rawDescription,
+  state,
 }: UpdatePrConfig): Promise<void> {
   const description = sanitize(rawDescription);
   logger.debug(`updatePr(${prNo}, title=${title})`);
@@ -886,7 +886,10 @@ export async function updatePr({
       throw Object.assign(new Error(REPOSITORY_NOT_FOUND), { statusCode: 404 });
     }
 
-    const { body } = await bitbucketServerHttp.putJson<{ version: number }>(
+    const { body: updatedPr } = await bitbucketServerHttp.putJson<{
+      version: number;
+      state: string;
+    }>(
       `./rest/api/1.0/projects/${config.projectKey}/repos/${config.repositorySlug}/pull-requests/${prNo}`,
       {
         body: {
@@ -898,7 +901,30 @@ export async function updatePr({
       }
     );
 
-    updatePrVersion(prNo, body.version);
+    updatePrVersion(prNo, updatedPr.version);
+
+    const currentState = updatedPr.state;
+    const newState = {
+      [PrState.Open]: 'OPEN',
+      [PrState.Closed]: 'DECLINED',
+    }[state];
+
+    /* TODO: write test for this branch */
+    /* istanbul ignore if */
+    if (
+      newState &&
+      ['OPEN', 'DECLINED'].includes(currentState) &&
+      currentState !== newState
+    ) {
+      const command = state === PrState.Open ? 'reopen' : 'decline';
+      const { body: updatedStatePr } = await bitbucketServerHttp.postJson<{
+        version: number;
+      }>(
+        `./rest/api/1.0/projects/${config.projectKey}/repos/${config.repositorySlug}/pull-requests/${pr.number}/${command}?version=${updatedPr.version}`
+      );
+
+      updatePrVersion(pr.number, updatedStatePr.version);
+    }
   } catch (err) {
     if (err.statusCode === 404) {
       throw new Error(REPOSITORY_NOT_FOUND);
