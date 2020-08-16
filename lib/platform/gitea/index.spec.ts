@@ -832,7 +832,7 @@ describe('platform/gitea', () => {
   describe('updatePr', () => {
     it('should update pull request with title', async () => {
       await initFakeRepo();
-      await gitea.updatePr(1, 'New Title');
+      await gitea.updatePr({ number: 1, prTitle: 'New Title' });
 
       expect(helper.updatePR).toHaveBeenCalledTimes(1);
       expect(helper.updatePR).toHaveBeenCalledWith(mockRepo.full_name, 1, {
@@ -842,7 +842,11 @@ describe('platform/gitea', () => {
 
     it('should update pull request with title and body', async () => {
       await initFakeRepo();
-      await gitea.updatePr(1, 'New Title', 'New Body');
+      await gitea.updatePr({
+        number: 1,
+        prTitle: 'New Title',
+        prBody: 'New Body',
+      });
 
       expect(helper.updatePR).toHaveBeenCalledTimes(1);
       expect(helper.updatePR).toHaveBeenCalledWith(mockRepo.full_name, 1, {

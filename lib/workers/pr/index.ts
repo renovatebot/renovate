@@ -331,7 +331,7 @@ export async function ensurePr(
       if (config.dryRun) {
         logger.info('DRY-RUN: Would update PR #' + existingPr.number);
       } else {
-        await platform.updatePr(existingPr.number, prTitle, prBody);
+        await platform.updatePr({ number: existingPr.number, prTitle, prBody });
         logger.info({ pr: existingPr.number, prTitle }, `PR updated`);
       }
       return { prResult: PrResult.Updated, pr: existingPr };

@@ -33,6 +33,7 @@ import {
   Pr,
   RepoParams,
   RepoResult,
+  UpdatePrConfig,
   VulnerabilityAlert,
 } from '../common';
 import { smartTruncate } from '../utils/pr-body';
@@ -543,7 +544,11 @@ const platform: Platform = {
             logger.debug(
               `Recovered from 409 Conflict, but PR for ${branchName} is outdated. Updating...`
             );
-            await platform.updatePr(pr.number, title, body);
+            await platform.updatePr({
+              number: pr.number,
+              prTitle: title,
+              prBody: body,
+            });
             pr.title = title;
             pr.body = body;
           } else {
@@ -560,7 +565,11 @@ const platform: Platform = {
     }
   },
 
-  async updatePr(number: number, title: string, body?: string): Promise<void> {
+  async updatePr({
+    number,
+    prTitle: title,
+    prBody: body,
+  }: UpdatePrConfig): Promise<void> {
     await helper.updatePR(config.repository, number, {
       title,
       ...(body && { body }),

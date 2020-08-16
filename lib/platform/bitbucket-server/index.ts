@@ -33,6 +33,7 @@ import {
   Pr,
   RepoParams,
   RepoResult,
+  UpdatePrConfig,
   VulnerabilityAlert,
 } from '../common';
 import { smartTruncate } from '../utils/pr-body';
@@ -871,11 +872,11 @@ export async function createPr({
   return pr;
 }
 
-export async function updatePr(
-  prNo: number,
-  title: string,
-  rawDescription: string
-): Promise<void> {
+export async function updatePr({
+  number: prNo,
+  prTitle: title,
+  prBody: rawDescription,
+}: UpdatePrConfig): Promise<void> {
   const description = sanitize(rawDescription);
   logger.debug(`updatePr(${prNo}, title=${title})`);
 

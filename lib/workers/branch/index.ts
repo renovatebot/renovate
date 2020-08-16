@@ -187,7 +187,11 @@ export async function processBranch(
               logger.debug(
                 'Updating existing PR to indicate that rebasing is not possible'
               );
-              await platform.updatePr(branchPr.number, branchPr.title, newBody);
+              await platform.updatePr({
+                number: branchPr.number,
+                prTitle: branchPr.title,
+                prBody: newBody,
+              });
             }
             return 'pr-edited';
           }

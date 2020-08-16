@@ -590,7 +590,11 @@ describe('platform/azure', () => {
             updatePullRequest,
           } as any)
       );
-      await azure.updatePr(1234, 'The New Title', 'Hello world again');
+      await azure.updatePr({
+        number: 1234,
+        prTitle: 'The New Title',
+        prBody: 'Hello world again',
+      });
       expect(updatePullRequest.mock.calls).toMatchSnapshot();
     });
 
@@ -603,7 +607,10 @@ describe('platform/azure', () => {
             updatePullRequest,
           } as any)
       );
-      await azure.updatePr(1234, 'The New Title - autoclose');
+      await azure.updatePr({
+        number: 1234,
+        prTitle: 'The New Title - autoclose',
+      });
       expect(updatePullRequest.mock.calls).toMatchSnapshot();
     });
   });
