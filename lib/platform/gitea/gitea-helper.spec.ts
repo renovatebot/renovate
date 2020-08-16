@@ -63,7 +63,7 @@ describe('platform/gitea/gitea-helper', () => {
 
   const mockPR: ght.PR = {
     number: 13,
-    state: 'open',
+    state: PrState.Open,
     title: 'Some PR',
     body: 'Lorem ipsum dolor sit amet',
     mergeable: true,
@@ -306,7 +306,7 @@ describe('platform/gitea/gitea-helper', () => {
     it('should call /api/v1/repos/[repo]/pulls/[pull] endpoint', async () => {
       const updatedMockPR: ght.PR = {
         ...mockPR,
-        state: 'closed',
+        state: PrState.Closed,
         title: 'new-title',
         body: 'new-body',
       };
@@ -392,7 +392,7 @@ describe('platform/gitea/gitea-helper', () => {
         .reply(200, [mockPR]);
 
       const res = await ght.searchPRs(mockRepo.full_name, {
-        state: 'open',
+        state: PrState.Open,
         labels: [mockLabel.id, otherMockLabel.id],
       });
       expect(res).toEqual([mockPR]);

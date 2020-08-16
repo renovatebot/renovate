@@ -4,7 +4,7 @@ import { GiteaHttp, GiteaHttpOptions } from '../../util/http/gitea';
 
 const giteaHttp = new GiteaHttp();
 
-export type PRState = 'open' | 'closed' | 'all';
+export type PRState = PrState.Open | PrState.Closed | PrState.All;
 export type IssueState = 'open' | 'closed' | 'all';
 export type CommitStatusType =
   | 'pending'

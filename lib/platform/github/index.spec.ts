@@ -6,7 +6,7 @@ import {
   REPOSITORY_NOT_FOUND,
   REPOSITORY_RENAMED,
 } from '../../constants/error-messages';
-import { BranchStatus } from '../../types';
+import { BranchStatus, PrState } from '../../types';
 import * as _git from '../../util/git';
 import { Platform } from '../common';
 
@@ -495,12 +495,12 @@ describe('platform/github', () => {
           {
             number: 90,
             head: { ref: 'somebranch', repo: { full_name: 'other/repo' } },
-            state: 'open',
+            state: PrState.Open,
           },
           {
             number: 91,
             head: { ref: 'somebranch', repo: { full_name: 'some/repo' } },
-            state: 'open',
+            state: PrState.Open,
           },
         ])
         .get('/repos/some/repo/pulls/91')
@@ -513,7 +513,7 @@ describe('platform/github', () => {
             sha: '1234',
           },
           head: { ref: 'somebranch', repo: { full_name: 'some/repo' } },
-          state: 'open',
+          state: PrState.Open,
         });
 
       await github.initRepo({
@@ -535,12 +535,12 @@ describe('platform/github', () => {
           {
             number: 90,
             head: { ref: 'somebranch', repo: { full_name: 'other/repo' } },
-            state: 'open',
+            state: PrState.Open,
           },
           {
             number: 91,
             head: { ref: 'somebranch', repo: { full_name: 'some/repo' } },
-            state: 'open',
+            state: PrState.Open,
           },
         ])
         .get('/repos/some/repo/pulls/90')
@@ -553,7 +553,7 @@ describe('platform/github', () => {
             sha: '1234',
           },
           head: { ref: 'somebranch', repo: { full_name: 'other/repo' } },
-          state: 'open',
+          state: PrState.Open,
         })
         .patch('/repos/forked/repo/git/refs/heads/master')
         .reply(200);
@@ -1521,7 +1521,7 @@ describe('platform/github', () => {
             number: 1,
             head: { ref: 'branch-a' },
             title: 'branch a pr',
-            state: 'open',
+            state: PrState.Open,
           },
         ]);
 
@@ -1540,13 +1540,13 @@ describe('platform/github', () => {
             number: 1,
             head: { ref: 'branch-a' },
             title: 'branch a pr',
-            state: 'closed',
+            state: PrState.Closed,
           },
         ]);
 
       const res = await github.findPr({
         branchName: 'branch-a',
-        state: '!open',
+        state: PrState.NotOpen,
       });
       expect(res).toBeDefined();
       expect(httpMock.getTrace()).toMatchSnapshot();
@@ -1560,7 +1560,7 @@ describe('platform/github', () => {
             number: 1,
             head: { ref: 'branch-a' },
             title: 'branch a pr',
-            state: 'open',
+            state: PrState.Open,
           },
         ]);
       let res = await github.findPr({ branchName: 'branch-a' });
@@ -1573,7 +1573,7 @@ describe('platform/github', () => {
       res = await github.findPr({
         branchName: 'branch-a',
         prTitle: 'branch a pr',
-        state: 'open',
+        state: PrState.Open,
       });
       expect(res).toBeDefined();
       res = await github.findPr({ branchName: 'branch-b' });
@@ -1714,7 +1714,7 @@ describe('platform/github', () => {
         .get('/repos/some/repo/pulls/1234')
         .reply(200, {
           number: 1,
-          state: 'closed',
+          state: PrState.Closed,
           base: { sha: '1234' },
           mergeable: true,
           merged_at: 'sometime',
@@ -1737,7 +1737,7 @@ describe('platform/github', () => {
         .get('/repos/some/repo/pulls/1234')
         .reply(200, {
           number: 1,
-          state: 'open',
+          state: PrState.Open,
           mergeable_state: 'dirty',
           base: { sha: '1234' },
           commits: 1,
@@ -1760,7 +1760,7 @@ describe('platform/github', () => {
         .get('/repos/some/repo/pulls/1234')
         .reply(200, {
           number: 1,
-          state: 'open',
+          state: PrState.Open,
           base: { sha: '5678' },
           commits: 1,
           mergeable: true,

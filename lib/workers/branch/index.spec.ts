@@ -641,7 +641,7 @@ describe('workers/branch', () => {
       git.branchExists.mockResolvedValueOnce(true);
       platform.getBranchPr.mockResolvedValueOnce({
         title: 'rebase!',
-        state: 'open',
+        state: PrState.Open,
         body: `- [x] <!-- rebase-check -->`,
       } as never);
       git.isBranchModified.mockResolvedValueOnce(true);
