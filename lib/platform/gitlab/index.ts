@@ -459,18 +459,6 @@ export async function getPr(iid: number): Promise<Pr> {
   return pr;
 }
 
-// istanbul ignore next
-async function closePr(iid: number): Promise<void> {
-  await gitlabApi.putJson(
-    `projects/${config.repository}/merge_requests/${iid}`,
-    {
-      body: {
-        state_event: 'close',
-      },
-    }
-  );
-}
-
 export async function updatePr({
   number: iid,
   prTitle: title,

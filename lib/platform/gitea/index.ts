@@ -39,11 +39,6 @@ import {
 import { smartTruncate } from '../utils/pr-body';
 import * as helper from './gitea-helper';
 
-type GiteaRenovateConfig = {
-  endpoint: string;
-  token: string;
-} & RenovateConfig;
-
 interface GiteaRepoConfig {
   repository: string;
   localDir: string;

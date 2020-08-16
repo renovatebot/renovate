@@ -172,19 +172,6 @@ export async function setBaseBranch(branchName: string): Promise<string> {
   return baseBranchSha;
 }
 
-// istanbul ignore next
-async function abandonPr(prNo: number): Promise<void> {
-  logger.debug(`abandonPr(prNo)(${prNo})`);
-  const azureApiGit = await azureApi.gitApi();
-  await azureApiGit.updatePullRequest(
-    {
-      status: 2,
-    },
-    config.repoId,
-    prNo
-  );
-}
-
 export async function getPrList(): Promise<AzurePr[]> {
   logger.debug('getPrList()');
   if (!config.prList) {

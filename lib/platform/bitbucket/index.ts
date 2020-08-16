@@ -1,7 +1,6 @@
 import URL from 'url';
 import is from '@sindresorhus/is';
 import parseDiff from 'parse-diff';
-import { RenovateConfig } from '../../config/common';
 import {
   REPOSITORY_DISABLED,
   REPOSITORY_NOT_FOUND,
@@ -710,10 +709,6 @@ export async function createPr({
 
 interface Reviewer {
   uuid: { raw: string };
-}
-
-interface Commit {
-  author: { raw: string };
 }
 
 export async function updatePr({
