@@ -209,6 +209,7 @@ export interface PackageRule
   excludePackagePatterns?: string[];
   matchCurrentVersion?: string | Range;
   sourceUrlPrefixes?: string[];
+  packagist?: boolean;
 
   updateTypes?: UpdateType[];
 }
