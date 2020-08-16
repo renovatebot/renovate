@@ -121,7 +121,7 @@ describe('.updateArtifacts()', () => {
     fs.readFile.mockResolvedValueOnce(null);
     fs.readFile.mockResolvedValueOnce('[metadata]\n' as never);
     const execSnapshots = mockExecAll(exec);
-    fs.readFile.mockReturnValueOnce('pyproject.toml contents' as any);
+    fs.readFile.mockReturnValueOnce('' as any);
     fs.readFile.mockReturnValueOnce('New poetry.lock' as any);
     const updatedDeps = ['dep1'];
     expect(
