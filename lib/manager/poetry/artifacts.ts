@@ -78,7 +78,7 @@ export async function updateArtifacts({
 }: UpdateArtifact): Promise<UpdateArtifactsResult[] | null> {
   logger.debug(`poetry.updateArtifacts(${packageFileName})`);
   if (!is.nonEmptyArray(updatedDeps) && !config.isLockFileMaintenance) {
-    logger.error('No updated poetry deps - returning null');
+    logger.debug('No updated poetry deps - returning null');
     return null;
   }
   // Try poetry.lock first
@@ -97,7 +97,6 @@ export async function updateArtifacts({
   try {
     await writeLocalFile(packageFileName, newPackageFileContent);
     const cmd: string[] = [];
-
     if (config.isLockFileMaintenance) {
       await deleteLocalFile(lockFileName);
       cmd.push('poetry update --lock --no-interaction');
