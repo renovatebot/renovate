@@ -854,6 +854,22 @@ describe('platform/gitea', () => {
         body: 'New Body',
       });
     });
+
+    it('should close pull request', async () => {
+      await initFakeRepo();
+      await gitea.updatePr({
+        number: 1,
+        prTitle: 'New Title',
+        prBody: 'New Body',
+        state: PrState.Closed,
+      });
+
+      expect(helper.updatePR).toHaveBeenCalledWith(mockRepo.full_name, 1, {
+        title: 'New Title',
+        body: 'New Body',
+        state: PrState.Closed,
+      });
+    });
   });
 
   describe('mergePr', () => {
