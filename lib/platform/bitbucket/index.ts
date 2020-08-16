@@ -735,6 +735,7 @@ export async function updatePr({
   number: prNo,
   prTitle: title,
   prBody: description,
+  state: _state,
 }: UpdatePrConfig): Promise<void> {
   logger.debug(`updatePr(${prNo}, ${title}, body)`);
   // Updating a PR in Bitbucket will clear the reviewers if reviewers is not present
@@ -744,6 +745,11 @@ export async function updatePr({
     )
   ).body;
 
+  const state = {
+    [PrState.Open]: 'OPEN',
+    [PrState.Closed]: 'DECLINED',
+  }[_state];
+
   await bitbucketHttp.putJson(
     `/2.0/repositories/${config.repository}/pullrequests/${prNo}`,
     {
@@ -751,6 +757,7 @@ export async function updatePr({
         title,
         description: sanitize(description),
         reviewers: pr.reviewers,
+        ...(state && { state }),
       },
     }
   );
