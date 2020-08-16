@@ -1,4 +1,5 @@
 import { exec as _exec } from 'child_process';
+import { readFileSync } from 'fs';
 import _fs from 'fs-extra';
 import { join } from 'upath';
 import { envMock, mockExecAll } from '../../../test/execUtil';
@@ -8,12 +9,19 @@ import { setExecConfig } from '../../util/exec';
 import { BinarySource } from '../../util/exec/common';
 import * as docker from '../../util/exec/docker';
 import * as _env from '../../util/exec/env';
+import { find } from '../../util/host-rules';
 import { updateArtifacts } from './artifacts';
+
+const pyproject10toml = readFileSync(
+  'lib/manager/poetry/__fixtures__/pyproject.10.toml',
+  'utf8'
+);
 
 jest.mock('fs-extra');
 jest.mock('child_process');
 jest.mock('../../util/exec/env');
 jest.mock('../../datasource');
+jest.mock('../../util/host-rules');
 
 const fs: jest.Mocked<typeof _fs> = _fs as any;
 const exec: jest.Mock<typeof _exec> = _exec as any;
@@ -28,6 +36,7 @@ describe('.updateArtifacts()', () => {
   beforeEach(async () => {
     jest.resetAllMocks();
     env.getChildProcessEnv.mockReturnValue(envMock.basic);
+    find.mockReturnValue({ test: 'test' });
     await setExecConfig(config);
     docker.resetPrefetchedImages();
   });
@@ -55,6 +64,7 @@ describe('.updateArtifacts()', () => {
   it('returns null if unchanged', async () => {
     fs.readFile.mockReturnValueOnce('Current poetry.lock' as any);
     const execSnapshots = mockExecAll(exec);
+    fs.readFile.mockReturnValueOnce('pyproject.toml contents' as any);
     fs.readFile.mockReturnValueOnce('Current poetry.lock' as any);
     const updatedDeps = ['dep1'];
     expect(
@@ -70,6 +80,7 @@ describe('.updateArtifacts()', () => {
   it('returns updated poetry.lock', async () => {
     fs.readFile.mockResolvedValueOnce('[metadata]\n' as never);
     const execSnapshots = mockExecAll(exec);
+    fs.readFile.mockReturnValueOnce('pyproject.toml contents' as any);
     fs.readFile.mockReturnValueOnce('New poetry.lock' as any);
     const updatedDeps = ['dep1'];
     expect(
@@ -82,11 +93,35 @@ describe('.updateArtifacts()', () => {
     ).not.toBeNull();
     expect(execSnapshots).toMatchSnapshot();
   });
-
+  it('passes private credential environment vars', async () => {
+    fs.readFile.mockResolvedValueOnce(null);
+    fs.readFile.mockResolvedValueOnce('[metadata]\n' as never);
+    const execSnapshots = mockExecAll(exec);
+    fs.readFile.mockReturnValueOnce(pyproject10toml as any);
+    fs.readFile.mockReturnValueOnce('New poetry.lock' as any);
+    find.mockReturnValueOnce({
+      username: 'usernameOne',
+      password: 'passwordOne',
+    });
+    find.mockReturnValueOnce({ username: 'usernameTwo' });
+    find.mockReturnValueOnce({ password: 'passwordFour' });
+    const updatedDeps = ['dep1'];
+    expect(
+      await updateArtifacts({
+        packageFileName: 'pyproject.toml',
+        updatedDeps,
+        newPackageFileContent: '{}',
+        config,
+      })
+    ).not.toBeNull();
+    expect(find.mock.calls.length).toBe(3);
+    expect(execSnapshots).toMatchSnapshot();
+  });
   it('returns updated pyproject.lock', async () => {
     fs.readFile.mockResolvedValueOnce(null);
     fs.readFile.mockResolvedValueOnce('[metadata]\n' as never);
     const execSnapshots = mockExecAll(exec);
+    fs.readFile.mockReturnValueOnce('pyproject.toml contents' as any);
     fs.readFile.mockReturnValueOnce('New poetry.lock' as any);
     const updatedDeps = ['dep1'];
     expect(
@@ -108,6 +143,7 @@ describe('.updateArtifacts()', () => {
     });
     fs.readFile.mockResolvedValueOnce('[metadata]\n' as any);
     const execSnapshots = mockExecAll(exec);
+    fs.readFile.mockReturnValueOnce('pyproject.toml contents' as any);
     fs.readFile.mockReturnValueOnce('New poetry.lock' as any);
     datasource.getPkgReleases.mockResolvedValueOnce({
       releases: [{ version: '2.7.5' }, { version: '3.4.2' }],
@@ -137,6 +173,7 @@ describe('.updateArtifacts()', () => {
       '[metadata]\npython-versions = "~2.7 || ^3.4"' as any
     );
     const execSnapshots = mockExecAll(exec);
+    fs.readFile.mockReturnValueOnce('pyproject.toml contents' as any);
     fs.readFile.mockReturnValueOnce('New poetry.lock' as any);
     datasource.getPkgReleases.mockResolvedValueOnce({
       releases: [{ version: '2.7.5' }, { version: '3.3.2' }],
@@ -157,6 +194,7 @@ describe('.updateArtifacts()', () => {
   });
   it('catches errors', async () => {
     fs.readFile.mockResolvedValueOnce('Current poetry.lock' as any);
+    fs.readFile.mockReturnValueOnce('pyproject.toml contents' as any);
     fs.outputFile.mockImplementationOnce(() => {
       throw new Error('not found');
     });
@@ -173,6 +211,7 @@ describe('.updateArtifacts()', () => {
   it('returns updated poetry.lock when doing lockfile maintenance', async () => {
     fs.readFile.mockResolvedValueOnce('Old poetry.lock' as any);
     const execSnapshots = mockExecAll(exec);
+    fs.readFile.mockReturnValueOnce('pyproject.toml contents' as any);
     fs.readFile.mockReturnValueOnce('New poetry.lock' as any);
     expect(
       await updateArtifacts({

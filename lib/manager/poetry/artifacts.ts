@@ -41,7 +41,7 @@ function getPythonConstraint(
 
 async function getSourceCredentialVars(
   packageFileName: string
-): { [s: string]: string } {
+): Promise<{ [s: string]: string }> {
   const pyprojectFileName = getSiblingFileName(
     packageFileName,
     'pyproject.toml'
@@ -52,13 +52,10 @@ async function getSourceCredentialVars(
     return {};
   }
 
-  const poetrySources = await getPoetrySources(
-    pyprojectContent,
-    pyprojectFileName
-  );
+  const poetrySources = getPoetrySources(pyprojectContent, pyprojectFileName);
   const envVars = {};
 
-  for (const source of sources) {
+  for (const source of poetrySources) {
     const matchingHostRule = find({ url: source.url });
     const formattedSourceName = source.name.toUpperCase();
     if (matchingHostRule.username) {
