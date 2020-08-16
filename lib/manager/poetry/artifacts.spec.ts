@@ -113,7 +113,7 @@ describe('.updateArtifacts()', () => {
         config,
       })
     ).not.toBeNull();
-    expect(find.mock.calls.length).toBe(3);
+    expect(find.mock.calls).toHaveLength(3);
     expect(execSnapshots).toMatchSnapshot();
   });
   it('returns updated pyproject.lock', async () => {
