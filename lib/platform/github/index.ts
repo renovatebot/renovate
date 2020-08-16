@@ -1453,12 +1453,16 @@ export async function updatePr({
   number: prNo,
   prTitle: title,
   prBody: rawBody,
+  state,
 }: UpdatePrConfig): Promise<void> {
   logger.debug(`updatePr(${prNo}, ${title}, body)`);
   const body = sanitize(rawBody);
   const patchBody: any = { title };
   if (body) {
     patchBody.body = body;
+  }
+  if (state) {
+    patchBody.state = state;
   }
   const options: any = {
     body: patchBody,
