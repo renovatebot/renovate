@@ -560,21 +560,6 @@ export async function getBranchPr(branchName: string): Promise<Pr> {
   return getPr(pr.iid);
 }
 
-export async function deleteBranch(
-  branchName: string,
-  shouldClosePr = false
-): Promise<void> {
-  if (shouldClosePr) {
-    logger.debug('Closing PR');
-    const pr = await getBranchPr(branchName);
-    // istanbul ignore if
-    if (pr) {
-      await closePr(pr.number);
-    }
-  }
-  return git.deleteBranch(branchName);
-}
-
 export async function getBranchStatusCheck(
   branchName: string,
   context: string

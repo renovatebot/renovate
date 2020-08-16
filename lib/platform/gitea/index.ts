@@ -800,18 +800,6 @@ const platform: Platform = {
     return pr ? platform.getPr(pr.number) : null;
   },
 
-  async deleteBranch(branchName: string, closePr?: boolean): Promise<void> {
-    logger.debug(`deleteBranch(${branchName})`);
-    if (closePr) {
-      const pr = await platform.getBranchPr(branchName);
-      if (pr) {
-        await helper.closePR(config.repository, pr.number);
-      }
-    }
-
-    return git.deleteBranch(branchName);
-  },
-
   async addAssignees(number: number, assignees: string[]): Promise<void> {
     logger.debug(`Updating assignees ${assignees} on Issue #${number}`);
     await helper.updateIssue(config.repository, number, {
@@ -841,7 +829,6 @@ export const {
   addAssignees,
   addReviewers,
   createPr,
-  deleteBranch,
   deleteLabel,
   ensureComment,
   ensureCommentRemoval,

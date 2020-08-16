@@ -399,14 +399,6 @@ describe(getName(__filename), () => {
         });
       });
 
-      describe('deleteBranch()', () => {
-        it('sends to gitFs', async () => {
-          await initRepo();
-          expect(await bitbucket.deleteBranch('branch')).toMatchSnapshot();
-          expect(httpMock.getTrace()).toMatchSnapshot();
-        });
-      });
-
       describe('addAssignees()', () => {
         it('does not throw', async () => {
           expect(await bitbucket.addAssignees(3, ['some'])).toMatchSnapshot();
@@ -1251,6 +1243,64 @@ describe(getName(__filename), () => {
             number: 5,
             prTitle: 'title',
             prBody: 'body',
+          });
+          expect(httpMock.getTrace()).toMatchSnapshot();
+        });
+
+        it('closes PR', async () => {
+          const scope = await initRepo();
+          scope
+            .get(
+              `${urlPath}/rest/api/1.0/projects/SOME/repos/repo/pull-requests/5`
+            )
+            .reply(200, prMock(url, 'SOME', 'repo'))
+            .get(
+              `${urlPath}/rest/api/1.0/projects/SOME/repos/repo/pull-requests/5/merge`
+            )
+            .reply(200, { conflicted: false })
+            .put(
+              `${urlPath}/rest/api/1.0/projects/SOME/repos/repo/pull-requests/5`
+            )
+            .reply(200, { state: 'OPEN', version: 42 })
+            .post(
+              `${urlPath}/rest/api/1.0/projects/SOME/repos/repo/pull-requests/5/decline?version=42`
+            )
+            .reply(200, { status: 'DECLINED' });
+
+          await bitbucket.updatePr({
+            number: 5,
+            prTitle: 'title',
+            prBody: 'body',
+            state: PrState.Closed,
+          });
+          expect(httpMock.getTrace()).toMatchSnapshot();
+        });
+
+        it('re-opens PR', async () => {
+          const scope = await initRepo();
+          scope
+            .get(
+              `${urlPath}/rest/api/1.0/projects/SOME/repos/repo/pull-requests/5`
+            )
+            .reply(200, prMock(url, 'SOME', 'repo'))
+            .get(
+              `${urlPath}/rest/api/1.0/projects/SOME/repos/repo/pull-requests/5/merge`
+            )
+            .reply(200, { conflicted: false })
+            .put(
+              `${urlPath}/rest/api/1.0/projects/SOME/repos/repo/pull-requests/5`
+            )
+            .reply(200, { state: 'DECLINED', version: 42 })
+            .post(
+              `${urlPath}/rest/api/1.0/projects/SOME/repos/repo/pull-requests/5/reopen?version=42`
+            )
+            .reply(200, { status: 'OPEN' });
+
+          await bitbucket.updatePr({
+            number: 5,
+            prTitle: 'title',
+            prBody: 'body',
+            state: PrState.Open,
           });
           expect(httpMock.getTrace()).toMatchSnapshot();
         });

@@ -565,30 +565,6 @@ describe('platform/gitlab', () => {
     );
   });
 
-  describe('deleteBranch()', () => {
-    it('sends to gitFs', async () => {
-      const scope = await initRepo();
-      scope
-        .get(
-          '/api/v4/projects/some%2Frepo/merge_requests?per_page=100&state=opened&source_branch=branch'
-        )
-        .reply(200, [
-          {
-            number: 1,
-            source_branch: 'branch-a',
-            title: 'branch a pr',
-            state: 'opened',
-          },
-        ]);
-      await gitlab.deleteBranch('branch', true);
-      expect(httpMock.getTrace()).toMatchSnapshot();
-    });
-    it('defaults to not closing associated PR', async () => {
-      await initRepo();
-      await gitlab.deleteBranch('branch2');
-      expect(httpMock.getTrace()).toMatchSnapshot();
-    });
-  });
   describe('findIssue()', () => {
     it('returns null if no issue', async () => {
       httpMock
@@ -1118,6 +1094,19 @@ describe('platform/gitlab', () => {
         .put('/api/v4/projects/undefined/merge_requests/1')
         .reply(200);
       await gitlab.updatePr({ number: 1, prTitle: 'title', prBody: 'body' });
+      expect(httpMock.getTrace()).toMatchSnapshot();
+    });
+    it('closes the PR', async () => {
+      httpMock
+        .scope(gitlabApiHost)
+        .put('/api/v4/projects/undefined/merge_requests/1')
+        .reply(200);
+      await gitlab.updatePr({
+        number: 1,
+        prTitle: 'title',
+        prBody: 'body',
+        state: PrState.Closed,
+      });
       expect(httpMock.getTrace()).toMatchSnapshot();
     });
   });

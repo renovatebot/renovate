@@ -1790,6 +1790,19 @@ describe('platform/github', () => {
       });
       expect(httpMock.getTrace()).toMatchSnapshot();
     });
+    it('should update and close the PR', async () => {
+      const scope = httpMock.scope(githubApiHost);
+      initRepoMock(scope, 'some/repo');
+      scope.patch('/repos/some/repo/pulls/1234').reply(200);
+      await github.initRepo({ repository: 'some/repo', token: 'token' } as any);
+      await github.updatePr({
+        number: 1234,
+        prTitle: 'The New Title',
+        prBody: 'Hello world again',
+        state: PrState.Closed,
+      });
+      expect(httpMock.getTrace()).toMatchSnapshot();
+    });
   });
   describe('mergePr(prNo)', () => {
     it('should merge the PR', async () => {

@@ -283,17 +283,6 @@ export async function getBranchPr(branchName: string): Promise<Pr | null> {
   return existingPr ? getPr(existingPr.number) : null;
 }
 
-export /* istanbul ignore next */ async function deleteBranch(
-  branchName: string,
-  abandonAssociatedPr = false
-): Promise<void> {
-  await git.deleteBranch(branchName);
-  if (abandonAssociatedPr) {
-    const pr = await getBranchPr(branchName);
-    await abandonPr(pr.number);
-  }
-}
-
 export async function getBranchStatusCheck(
   branchName: string,
   context: string
