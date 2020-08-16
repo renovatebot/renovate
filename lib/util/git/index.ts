@@ -277,7 +277,13 @@ export async function createBranch(
   await git.reset(ResetMode.HARD);
   await git.raw(['clean', '-fd']);
   await git.checkout(['-B', branchName, sha]);
-  await git.push('origin', branchName, { '--force': true });
+  try {
+    await git.push('origin', branchName, { '--delete': true });
+  } catch (err) {
+    checkForPlatformFailure(err);
+    logger.debug({ branchName }, 'No remote branch to delete');
+  }
+  await git.push('origin', branchName);
   config.branchExists[branchName] = true;
   config.branchIsModified[branchName] = false;
 }
@@ -597,8 +603,13 @@ export async function commitFiles({
       );
       return null;
     }
+    try {
+      await git.push('origin', `${branchName}`, { '--delete': true });
+    } catch (err) {
+      checkForPlatformFailure(err);
+      logger.debug({ err }, 'No remote branch to delete');
+    }
     await git.push('origin', `${branchName}:${branchName}`, {
-      '--force': true,
       '-u': true,
       '--no-verify': true,
     });
