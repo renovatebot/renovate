@@ -569,10 +569,12 @@ const platform: Platform = {
     number,
     prTitle: title,
     prBody: body,
+    state,
   }: UpdatePrConfig): Promise<void> {
     await helper.updatePR(config.repository, number, {
       title,
       ...(body && { body }),
+      ...(state && { state }),
     });
   },
 
