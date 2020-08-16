@@ -9,11 +9,7 @@ import {
   REPOSITORY_EMPTY,
   REPOSITORY_MIRRORED,
 } from '../../constants/error-messages';
-import {
-  PR_STATE_NOT_OPEN,
-  PR_STATE_OPEN,
-} from '../../constants/pull-requests';
-import { BranchStatus } from '../../types';
+import { BranchStatus, PrState } from '../../types';
 import * as _git from '../../util/git';
 import * as _hostRules from '../../util/host-rules';
 
@@ -912,7 +908,7 @@ describe('platform/gitlab', () => {
         ]);
       const res = await gitlab.findPr({
         branchName: 'branch-a',
-        state: PR_STATE_NOT_OPEN,
+        state: PrState.NotOpen,
       });
       expect(res).toBeDefined();
       expect(httpMock.getTrace()).toMatchSnapshot();
@@ -935,7 +931,7 @@ describe('platform/gitlab', () => {
       const res = await gitlab.findPr({
         branchName: 'branch-a',
         prTitle: 'branch a pr',
-        state: PR_STATE_OPEN,
+        state: PrState.Open,
       });
       expect(res).toBeDefined();
       expect(httpMock.getTrace()).toMatchSnapshot();
