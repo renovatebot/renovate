@@ -10,6 +10,7 @@ export interface ManagerConfig {
   dockerUser?: string;
   localDir?: string;
   registryUrls?: string[];
+  packagist?: boolean;
 }
 
 export interface ManagerData<T> {

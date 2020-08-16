@@ -24,6 +24,10 @@ const requirements5 = readFileSync(
   'lib/manager/composer/__fixtures__/composer5.json',
   'utf8'
 );
+const requirements6 = readFileSync(
+  'lib/manager/composer/__fixtures__/composer6.json',
+  'utf8'
+);
 const requirements5Lock = readFileSync(
   'lib/manager/composer/__fixtures__/composer5.lock',
   'utf8'
@@ -65,6 +69,71 @@ describe('lib/manager/composer/extract', () => {
       const res = await extractPackageFile(requirements5, packageFile);
       expect(res).toMatchSnapshot();
       expect(res.registryUrls).toHaveLength(2);
+    });
+    it('extracts object repositories and registryUrls with config', async () => {
+      const config = {
+        packageRules: [
+          {
+            registryUrls: ['https://composer.renovatebot.com'],
+            packagist: false,
+          },
+        ],
+      };
+      const res = await extractPackageFile(requirements6, packageFile, config);
+      expect(res).toMatchSnapshot();
+      expect(res.registryUrls).toHaveLength(1);
+      expect(res.registryUrls).not.toContain('https://packagist.org');
+      expect(res.registryUrls).toContain('https://composer.renovatebot.com');
+    });
+    it('extracts object repositories and registryUrls on with another datasource in config', async () => {
+      const config = {
+        packageRules: [
+          {
+            datasources: ['npm'],
+            registryUrls: ['https://npm.renovatebot.com'],
+            packagist: false,
+          },
+        ],
+      };
+      const res = await extractPackageFile(requirements6, packageFile, config);
+      expect(res).toMatchSnapshot();
+      expect(res.registryUrls).toHaveLength(1);
+      expect(res.registryUrls).toContain('https://packagist.org');
+      expect(res.registryUrls).not.toContain('https://npm.renovatebot.com');
+    });
+    it('extracts object repositories and registryUrls with datasource in config', async () => {
+      const config = {
+        packageRules: [
+          {
+            datasources: ['packagist'],
+            registryUrls: ['https://composer.renovatebot.com'],
+            packagist: false,
+          },
+          {
+            datasources: ['npm'],
+            registryUrls: ['https://npm.renovatebot.com'],
+          },
+        ],
+      };
+      const res = await extractPackageFile(requirements6, packageFile, config);
+      expect(res).toMatchSnapshot();
+      expect(res.registryUrls).toHaveLength(1);
+      expect(res.registryUrls).not.toContain('https://packagist.org');
+      expect(res.registryUrls).toContain('https://composer.renovatebot.com');
+    });
+    it('extracts object repositories and registryUrls using packagist with config', async () => {
+      const config = {
+        packageRules: [
+          {
+            registryUrls: ['https://composer.renovatebot.com'],
+          },
+        ],
+      };
+      const res = await extractPackageFile(requirements6, packageFile, config);
+      expect(res).toMatchSnapshot();
+      expect(res.registryUrls).toHaveLength(2);
+      expect(res.registryUrls).toContain('https://packagist.org');
+      expect(res.registryUrls).toContain('https://composer.renovatebot.com');
     });
     it('extracts dependencies with lock file', async () => {
       fs.readLocalFile.mockResolvedValue('some content');

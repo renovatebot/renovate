@@ -1,0 +1,12 @@
+{
+  "name": "acme/brilliant-wordpress-site",
+  "description": "My brilliant WordPress site",
+  "require": {
+    "aws/aws-sdk-php": "*"
+  },
+  "autoload": {
+    "psr-0": {
+      "Acme": "src/"
+    }
+  }
+}

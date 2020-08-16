@@ -1,4 +1,5 @@
 import is from '@sindresorhus/is';
+import { PackageRule, RenovateConfig } from '../../config/common';
 import * as datasourceGitTags from '../../datasource/git-tags';
 import * as datasourcePackagist from '../../datasource/packagist';
 import { logger } from '../../logger';
@@ -49,39 +50,55 @@ function transformRegUrl(url: string): string {
 function parseRepositories(
   repoJson: ComposerConfig['repositories'],
   repositories: Record<string, Repo>,
-  registryUrls: string[]
+  registryUrls: string[],
+  packageRules?: PackageRule[]
 ): void {
   try {
     let packagist = true;
-    Object.entries(repoJson).forEach(([key, repo]) => {
-      if (is.object(repo)) {
-        const name = is.array(repoJson) ? repo.name : key;
-        // eslint-disable-next-line default-case
-        switch (repo.type) {
-          case 'vcs':
-          case 'git':
-            // eslint-disable-next-line no-param-reassign
-            repositories[name] = repo;
-            break;
-          case 'composer':
-            registryUrls.push(transformRegUrl(repo.url));
-            break;
-          case 'package':
-            logger.debug(
-              { url: repo.url },
-              'type package is not supported yet'
-            );
+    // adds repositories from config registryUrls
+    if (packageRules) {
+      packageRules.forEach((rule) => {
+        if (!rule.datasources || rule.datasources.indexOf('packagist') !== -1) {
+          packagist = rule?.packagist ?? true;
+          if (rule?.registryUrls) {
+            rule.registryUrls.forEach((repo) => {
+              registryUrls.push(repo);
+            });
+          }
         }
-        if (repo.packagist === false || repo['packagist.org'] === false) {
+      });
+    }
+    if (repoJson) {
+      Object.entries(repoJson).forEach(([key, repo]) => {
+        if (is.object(repo)) {
+          const name = is.array(repoJson) ? repo.name : key;
+          // eslint-disable-next-line default-case
+          switch (repo.type) {
+            case 'vcs':
+            case 'git':
+              // eslint-disable-next-line no-param-reassign
+              repositories[name] = repo;
+              break;
+            case 'composer':
+              registryUrls.push(transformRegUrl(repo.url));
+              break;
+            case 'package':
+              logger.debug(
+                { url: repo.url },
+                'type package is not supported yet'
+              );
+          }
+          if (repo.packagist === false || repo['packagist.org'] === false) {
+            packagist = false;
+          }
+        } else if (
+          ['packagist', 'packagist.org'].includes(key) &&
+          repo === false
+        ) {
           packagist = false;
         }
-      } else if (
-        ['packagist', 'packagist.org'].includes(key) &&
-        repo === false
-      ) {
-        packagist = false;
-      }
-    });
+      });
+    }
     if (packagist) {
       registryUrls.push('https://packagist.org');
     } else {
@@ -97,7 +114,8 @@ function parseRepositories(
 
 export async function extractPackageFile(
   content: string,
-  fileName: string
+  fileName: string,
+  config?: RenovateConfig
 ): Promise<PackageFile | null> {
   logger.trace(`composer.extractPackageFile(${fileName})`);
   let composerJson: ComposerConfig;
@@ -125,12 +143,20 @@ export async function extractPackageFile(
   }
 
   // handle composer.json repositories
-  if (composerJson.repositories) {
-    parseRepositories(composerJson.repositories, repositories, registryUrls);
+  const packageRulesFromConfig = config?.packageRules ?? [];
+
+  if (composerJson.repositories || packageRulesFromConfig.length > 0) {
+    parseRepositories(
+      composerJson.repositories,
+      repositories,
+      registryUrls,
+      packageRulesFromConfig
+    );
   }
   if (registryUrls.length !== 0) {
     res.registryUrls = registryUrls;
   }
+
   const deps = [];
   const depTypes = ['require', 'require-dev'];
   for (const depType of depTypes) {
