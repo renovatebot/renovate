@@ -1456,6 +1456,7 @@ export async function updatePr({
   number: prNo,
   prTitle: title,
   prBody: rawBody,
+  state,
 }: UpdatePrConfig): Promise<void> {
   logger.debug(`updatePr(${prNo}, ${title}, body)`);
   const body = sanitize(rawBody);
@@ -1465,6 +1466,7 @@ export async function updatePr({
   }
   const options: any = {
     body: patchBody,
+    ...(state && { state }),
   };
   // istanbul ignore if
   if (config.forkToken) {
