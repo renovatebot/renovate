@@ -12,28 +12,6 @@ undefined",
 ]
 `;
 
-exports[`.updateArtifacts() passes private credential environment vars 1`] = `
-Array [
-  Object {
-    "cmd": "poetry update --lock --no-interaction dep1",
-    "options": Object {
-      "cwd": "/tmp/github/some/repo",
-      "encoding": "utf-8",
-      "env": Object {
-        "HOME": "/home/user",
-        "HTTPS_PROXY": "https://example.com",
-        "HTTP_PROXY": "http://example.com",
-        "LANG": "en_US.UTF-8",
-        "LC_ALL": "en_US",
-        "NO_PROXY": "localhost",
-        "PATH": "/tmp/path",
-      },
-      "timeout": 900000,
-    },
-  },
-]
-`;
-
 exports[`.updateArtifacts() returns null if unchanged 1`] = `
 Array [
   Object {
