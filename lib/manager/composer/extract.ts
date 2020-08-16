@@ -55,10 +55,13 @@ function parseRepositories(
 ): void {
   try {
     let packagist = true;
-    // adds repositories from config registryUrls
+    // adds repositories from config's packageRules
     if (packageRules) {
       packageRules.forEach((rule) => {
-        if (!rule.datasources || rule.datasources.indexOf('packagist') !== -1) {
+        if (
+          !rule.datasources ||
+          rule.datasources.indexOf(datasourcePackagist.id) !== -1
+        ) {
           packagist = rule?.packagist ?? true;
           if (rule?.registryUrls) {
             rule.registryUrls.forEach((repo) => {
