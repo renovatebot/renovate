@@ -759,7 +759,7 @@ export async function getPrList(): Promise<Pr[]> {
       title: pr.title,
       state:
         pr.state === PrState.Closed && pr.merged_at?.length
-          ? /* istanbul ignore next */ 'merged'
+          ? /* istanbul ignore next */ PrState.Merged
           : pr.state,
       createdAt: pr.created_at,
       closed_at: pr.closed_at,

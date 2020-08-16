@@ -1,5 +1,6 @@
 import {
   BranchStatus,
+  PrState,
   VulnerabilityAlert as _VulnerabilityAlert,
 } from '../types';
 
@@ -100,7 +101,7 @@ export interface BranchStatusConfig {
 export interface FindPRConfig {
   branchName: string;
   prTitle?: string | null;
-  state?: 'open' | 'closed' | '!open' | 'all';
+  state?: PrState.Open | PrState.Closed | PrState.NotOpen | PrState.All;
   refreshCache?: boolean;
 }
 export interface EnsureCommentConfig {

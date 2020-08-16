@@ -426,7 +426,11 @@ const platform: Platform = {
   getPrList(): Promise<Pr[]> {
     if (config.prList === null) {
       config.prList = helper
-        .searchPRs(config.repository, { state: 'all' }, { useCache: false })
+        .searchPRs(
+          config.repository,
+          { state: PrState.All },
+          { useCache: false }
+        )
         .then((prs) => {
           const prList = prs.map(toRenovatePR).filter(Boolean);
           logger.debug(`Retrieved ${prList.length} Pull Requests`);
