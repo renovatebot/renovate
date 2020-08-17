@@ -265,18 +265,17 @@ async function packageLookup(
       return includesPackages[name];
     }
     let pkgUrl;
-    if (providersLazyUrl) {
-      pkgUrl = URL.resolve(regUrl, providersLazyUrl.replace('%package%', name));
-    } else {
-      if (!providerPackages?.[name]) {
-        return null;
-      }
+    if (providerPackages?.[name]) {
       pkgUrl = URL.resolve(
         regUrl,
         providersUrl
           .replace('%package%', name)
           .replace('%hash%', providerPackages[name])
       );
+    } else if (providersLazyUrl) {
+      pkgUrl = URL.resolve(regUrl, providersLazyUrl.replace('%package%', name));
+    } else {
+      return null;
     }
     const opts = getHostOpts(regUrl);
     // TODO: fix types
