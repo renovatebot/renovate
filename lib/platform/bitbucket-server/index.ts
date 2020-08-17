@@ -308,11 +308,10 @@ const isRelevantPr = (
   matchesState(p.state, state);
 
 // TODO: coverage
-// eslint-disable-next-line @typescript-eslint/no-unused-vars
-export async function getPrList(_args?: any): Promise<Pr[]> {
+export async function getPrList(refreshCache?: boolean): Promise<Pr[]> {
   logger.debug(`getPrList()`);
   // istanbul ignore next
-  if (!config.prList) {
+  if (!config.prList || refreshCache) {
     const query = new URLSearchParams({
       state: 'ALL',
       'role.1': 'AUTHOR',
@@ -339,7 +338,7 @@ export async function findPr({
   refreshCache,
 }: FindPRConfig): Promise<Pr | null> {
   logger.debug(`findPr(${branchName}, "${prTitle}", "${state}")`);
-  const prList = await getPrList({ refreshCache });
+  const prList = await getPrList(refreshCache);
   const pr = prList.find(isRelevantPr(branchName, prTitle, state));
   if (pr) {
     logger.debug(`Found PR #${pr.number}`);
