@@ -179,11 +179,15 @@ export async function getSubmodules(): Promise<string[]> {
     .filter((_e: string, i: number) => i % 2);
 }
 
+export function isGitInitialized(): boolean {
+  return !!git;
+}
+
 export async function syncGit(): Promise<void> {
   if (git) {
     return;
   }
-  logger.debug('Initializing git repository into ' + config.localDir);
+  logger.info('Initializing git repository into ' + config.localDir);
   const gitHead = join(config.localDir, '.git/HEAD');
   let clone = true;
 
@@ -234,6 +238,7 @@ export async function syncGit(): Promise<void> {
     const durationMs = Math.round(Date.now() - cloneStart);
     logger.debug({ durationMs }, 'git clone completed');
   }
+  config.currentBranchSha = (await git.raw(['rev-parse', 'HEAD'])).trim();
   const submodules = await getSubmodules();
   for (const submodule of submodules) {
     try {
@@ -396,7 +401,9 @@ export async function getFileList(): Promise<string[]> {
 export async function getAllRenovateBranches(
   branchPrefix: string
 ): Promise<string[]> {
-  await syncGit();
+  if (!git) {
+    return [];
+  }
   const branches = await git.branch(['--remotes', '--verbose']);
   return branches.all
     .map(localName)

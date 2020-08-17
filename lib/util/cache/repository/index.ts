@@ -13,8 +13,11 @@ export interface BaseBranchCache {
 export interface Cache {
   repository?: string;
   init?: {
-    configFile: string;
-    contents: RenovateConfig;
+    defaultBranch?: string;
+    defaultBranchSha?: string;
+    configFile?: string;
+    configFileContents?: RenovateConfig;
+    resolvedConfig?: RenovateConfig;
   };
   scan?: Record<string, BaseBranchCache>;
 }

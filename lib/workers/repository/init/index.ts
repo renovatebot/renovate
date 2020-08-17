@@ -12,23 +12,55 @@ import { mergeRenovateConfig } from './config';
 import { detectSemanticCommits } from './semantic';
 import { detectVulnerabilityAlerts } from './vulnerability';
 
-export async function initRepo(input: RenovateConfig): Promise<RenovateConfig> {
+let cache: repositoryCache.Cache;
+
+function initializeConfig(config: RenovateConfig): RenovateConfig {
+  return { ...config, errors: [], warnings: [], branchList: [] };
+}
+
+async function initializeCaches(config: RenovateConfig): Promise<void> {
   memCache.init();
-  await repositoryCache.initialize(input);
-  let config: RenovateConfig = {
-    ...input,
-    errors: [],
-    warnings: [],
-    branchList: [],
-  };
-  config = await initApis(config);
+  await repositoryCache.initialize(config);
+  cache = repositoryCache.getCache();
+  cache.init = cache.init || {};
+}
+
+function validCache(config: RenovateConfig): boolean {
+  return !!(
+    config.defaultBranch === cache.init.defaultBranch &&
+    cache.init.defaultBranchSha &&
+    config.defaultBranchSha === cache.init.defaultBranchSha &&
+    cache.init.resolvedConfig
+  );
+}
+
+async function getRepoConfig(config_: RenovateConfig): Promise<RenovateConfig> {
+  let config = { ...config_ };
   config.semanticCommits = await detectSemanticCommits(config);
   config.baseBranch = config.defaultBranch;
   config.baseBranchSha = await platform.setBaseBranch(config.baseBranch);
-  config = await checkOnboardingBranch(config);
   config = await mergeRenovateConfig(config);
+  return config;
+}
+
+export async function initRepo(
+  config_: RenovateConfig
+): Promise<RenovateConfig> {
+  let config: RenovateConfig = initializeConfig(config_);
+  await initializeCaches(config);
+  config = await initApis(config);
+  if (validCache(config)) {
+    config = cache.init.resolvedConfig;
+  } else {
+    config = await getRepoConfig(config);
+    config = await checkOnboardingBranch(config);
+    cache.init.defaultBranch = config.defaultBranch;
+    cache.init.defaultBranchSha = config.defaultBranchSha;
+    cache.init.resolvedConfig = config;
+  }
   checkIfConfigured(config);
-  config = await checkBaseBranch(config);
+  // TODO: don't check base branches - warn instead
+  // config = await checkBaseBranch(config);
   await setBranchPrefix(config.branchPrefix);
   config = await detectVulnerabilityAlerts(config);
   // istanbul ignore if
