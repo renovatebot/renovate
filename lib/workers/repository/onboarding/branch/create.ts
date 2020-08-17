@@ -12,18 +12,23 @@ export function createOnboardingBranch(
   logger.debug('createOnboardingBranch()');
   const contents = getOnboardingConfig(config);
   logger.debug('Creating onboarding branch');
-  let commitMessage;
-  // istanbul ignore if
-  if (config.semanticCommits) {
-    commitMessage = config.semanticCommitType;
+
+  let prefix: string;
+  if (config.commitMessagePrefix) {
+    prefix = config.commitMessagePrefix;
+  } else if (config.semanticCommits) {
+    prefix = config.semanticCommitType;
     if (config.semanticCommitScope) {
-      commitMessage += `(${config.semanticCommitScope})`;
+      prefix += `(${config.semanticCommitScope})`;
     }
-    commitMessage += ': ';
-    commitMessage += 'add ' + defaultConfigFile;
-  } else {
-    commitMessage = 'Add ' + defaultConfigFile;
   }
+  let commitMessageBody = `${prefix ? ': add' : 'Add'} ${defaultConfigFile}`;
+  if (config.onboardingCommitMessageBody) {
+    commitMessageBody = config.onboardingCommitMessageBody;
+  }
+
+  const commitMessage = `${prefix || ''}${commitMessageBody}`;
+
   // istanbul ignore if
   if (config.dryRun) {
     logger.info('DRY-RUN: Would commit files to onboarding branch');
