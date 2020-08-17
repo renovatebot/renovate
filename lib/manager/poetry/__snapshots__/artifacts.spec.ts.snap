@@ -12,6 +12,32 @@ undefined",
 ]
 `;
 
+exports[`.updateArtifacts() passes private credential environment vars 1`] = `
+Array [
+  Object {
+    "cmd": "poetry update --lock --no-interaction dep1",
+    "options": Object {
+      "cwd": "/tmp/github/some/repo",
+      "encoding": "utf-8",
+      "env": Object {
+        "HOME": "/home/user",
+        "HTTPS_PROXY": "https://example.com",
+        "HTTP_PROXY": "http://example.com",
+        "LANG": "en_US.UTF-8",
+        "LC_ALL": "en_US",
+        "NO_PROXY": "localhost",
+        "PATH": "/tmp/path",
+        "POETRY_HTTP_BASIC_FOUR_PASSWORD": "passwordFour",
+        "POETRY_HTTP_BASIC_ONE_PASSWORD": "passwordOne",
+        "POETRY_HTTP_BASIC_ONE_USERNAME": "usernameOne",
+        "POETRY_HTTP_BASIC_TWO_USERNAME": "usernameTwo",
+      },
+      "timeout": 900000,
+    },
+  },
+]
+`;
+
 exports[`.updateArtifacts() returns null if unchanged 1`] = `
 Array [
   Object {
@@ -49,32 +75,6 @@ Array [
         "LC_ALL": "en_US",
         "NO_PROXY": "localhost",
         "PATH": "/tmp/path",
-      },
-      "timeout": 900000,
-    },
-  },
-]
-`;
-
-exports[`.updateArtifacts() passes private credential environment vars 1`] = `
-Array [
-  Object {
-    "cmd": "poetry update --lock --no-interaction dep1",
-    "options": Object {
-      "cwd": "/tmp/github/some/repo",
-      "encoding": "utf-8",
-      "env": Object {
-        "HOME": "/home/user",
-        "HTTPS_PROXY": "https://example.com",
-        "HTTP_PROXY": "http://example.com",
-        "LANG": "en_US.UTF-8",
-        "LC_ALL": "en_US",
-        "NO_PROXY": "localhost",
-        "PATH": "/tmp/path",
-        "POETRY_HTTP_BASIC_FOUR_PASSWORD": "passwordFour",
-        "POETRY_HTTP_BASIC_ONE_PASSWORD": "passwordOne",
-        "POETRY_HTTP_BASIC_ONE_USERNAME": "usernameOne",
-        "POETRY_HTTP_BASIC_TWO_USERNAME": "usernameTwo",
       },
       "timeout": 900000,
     },
@@ -193,3 +193,25 @@ Array [
   },
 ]
 `;
+
+exports[`lib/manager/poetry/artifacts .updateArtifacts() catches errors 1`] = `
+Array [
+  Object {
+    "artifactError": Object {
+      "lockFile": "poetry.lock",
+      "stderr": "undefined
+undefined",
+    },
+  },
+]
+`;
+
+exports[`lib/manager/poetry/artifacts .updateArtifacts() returns updated poetry.lock 1`] = `Array []`;
+
+exports[`lib/manager/poetry/artifacts .updateArtifacts() returns updated poetry.lock using docker (constaints) 1`] = `Array []`;
+
+exports[`lib/manager/poetry/artifacts .updateArtifacts() returns updated poetry.lock using docker 1`] = `Array []`;
+
+exports[`lib/manager/poetry/artifacts .updateArtifacts() returns updated poetry.lock when doing lockfile maintenance 1`] = `Array []`;
+
+exports[`lib/manager/poetry/artifacts .updateArtifacts() returns updated pyproject.lock 1`] = `Array []`;

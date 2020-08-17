@@ -6,7 +6,7 @@ import { SkipReason } from '../../types';
 import * as pep440Versioning from '../../versioning/pep440';
 import * as poetryVersioning from '../../versioning/poetry';
 import { PackageDependency, PackageFile } from '../common';
-import { PoetryFile, PoetrySection, PoetrySource } from './types';
+import { PoetryFile, PoetrySection } from './types';
 
 function extractFromSection(
   parsedFile: PoetryFile,
@@ -85,32 +85,6 @@ function extractRegistries(pyprojectfile: PoetryFile): string[] {
   registryUrls.add('https://pypi.org/pypi/');
 
   return Array.from(registryUrls);
-}
-
-export function getPoetrySources(
-  content: string,
-  fileName: string
-): PoetrySource[] {
-  let pyprojectFile: PoetryFile;
-  try {
-    pyprojectFile = parse(content);
-  } catch (err) {
-    logger.debug({ err }, 'Error parsing pyproject.toml file');
-    return [];
-  }
-  if (!pyprojectFile.tool?.poetry) {
-    logger.debug(`{$fileName} contains no poetry section`);
-    return [];
-  }
-
-  const sources = pyprojectFile.tool?.poetry?.source;
-  const sourceSet = new Set<PoetrySource>();
-  for (const source of sources) {
-    if (source.name && source.url) {
-      sourceSet.add({ name: source.name, url: source.url });
-    }
-  }
-  return Array.from(sourceSet);
 }
 
 export function extractPackageFile(

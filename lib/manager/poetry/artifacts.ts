@@ -15,7 +15,6 @@ import {
   UpdateArtifactsConfig,
   UpdateArtifactsResult,
 } from '../common';
-import { getPoetrySources } from './extract';
 
 function getPythonConstraint(
   existingLockFileContent: string,
@@ -39,20 +38,34 @@ function getPythonConstraint(
   return undefined;
 }
 
-async function getSourceCredentialVars(
-  packageFileName: string
-): Promise<{ [s: string]: string }> {
-  const pyprojectFileName = getSiblingFileName(
-    packageFileName,
-    'pyproject.toml'
-  );
-  const pyprojectContent = await readLocalFile(pyprojectFileName, 'utf8');
-  if (!pyprojectContent) {
-    logger.debug(`No pyproject.toml found`);
-    return {};
+function getPoetrySources(content: string, fileName: string): PoetrySource[] {
+  let pyprojectFile: PoetryFile;
+  try {
+    pyprojectFile = parse(content);
+  } catch (err) {
+    logger.debug({ err }, 'Error parsing pyproject.toml file');
+    return [];
+  }
+  if (!pyprojectFile.tool?.poetry) {
+    logger.debug(`{$fileName} contains no poetry section`);
+    return [];
   }
 
-  const poetrySources = getPoetrySources(pyprojectContent, pyprojectFileName);
+  const sources = pyprojectFile.tool?.poetry?.source;
+  const sourceSet = new Set<PoetrySource>();
+  for (const source of sources) {
+    if (source.name && source.url) {
+      sourceSet.add({ name: source.name, url: source.url });
+    }
+  }
+  return Array.from(sourceSet);
+}
+
+function getSourceCredentialVars(
+  pyprojectContent: string,
+  packageFileName: string
+): Promise<{ [s: string]: string }> {
+  const poetrySources = getPoetrySources(pyprojectContent, packageFileName);
   const envVars = {};
 
   for (const source of poetrySources) {
@@ -67,7 +80,6 @@ async function getSourceCredentialVars(
         matchingHostRule.password;
     }
   }
-
   return envVars;
 }
 export async function updateArtifacts({
@@ -109,7 +121,10 @@ export async function updateArtifacts({
     const tagConstraint = getPythonConstraint(existingLockFileContent, config);
     const poetryRequirement = config.compatibility?.poetry || 'poetry';
     const poetryInstall = 'pip install ' + quote(poetryRequirement);
-    const sourceCredentialVars = await getSourceCredentialVars(packageFileName);
+    const sourceCredentialVars = getSourceCredentialVars(
+      newPackageFileContent,
+      packageFileName
+    );
 
     const execOptions: ExecOptions = {
       cwdFile: packageFileName,
