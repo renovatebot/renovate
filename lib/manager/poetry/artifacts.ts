@@ -65,7 +65,7 @@ function getPoetrySources(content: string, fileName: string): PoetrySource[] {
 function getSourceCredentialVars(
   pyprojectContent: string,
   packageFileName: string
-): Promise<{ [s: string]: string }> {
+): { [s: string]: string } {
   const poetrySources = getPoetrySources(pyprojectContent, packageFileName);
   const envVars = {};
 
