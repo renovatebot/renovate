@@ -202,6 +202,9 @@ export async function syncGit(): Promise<void> {
       logger.debug({ durationMs }, 'git fetch completed');
       clone = false;
     } catch (err) /* istanbul ignore next */ {
+      if (err.message === REPOSITORY_EMPTY) {
+        throw err;
+      }
       logger.error({ err }, 'git fetch error');
     }
   }
@@ -222,6 +225,9 @@ export async function syncGit(): Promise<void> {
       logger.debug({ err }, 'git clone error');
       if (err.message?.includes('No space left on device')) {
         throw new Error(SYSTEM_INSUFFICIENT_DISK_SPACE);
+      }
+      if (err.message === REPOSITORY_EMPTY) {
+        throw err;
       }
       throw new ExternalHostError(err, 'git');
     }
