@@ -15,6 +15,7 @@ import {
   UpdateArtifactsConfig,
   UpdateArtifactsResult,
 } from '../common';
+import { PoetryFile, PoetrySource } from './types';
 
 function getPythonConstraint(
   existingLockFileContent: string,
