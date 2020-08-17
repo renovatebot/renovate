@@ -193,25 +193,3 @@ Array [
   },
 ]
 `;
-
-exports[`lib/manager/poetry/artifacts .updateArtifacts() catches errors 1`] = `
-Array [
-  Object {
-    "artifactError": Object {
-      "lockFile": "poetry.lock",
-      "stderr": "undefined
-undefined",
-    },
-  },
-]
-`;
-
-exports[`lib/manager/poetry/artifacts .updateArtifacts() returns updated poetry.lock 1`] = `Array []`;
-
-exports[`lib/manager/poetry/artifacts .updateArtifacts() returns updated poetry.lock using docker (constaints) 1`] = `Array []`;
-
-exports[`lib/manager/poetry/artifacts .updateArtifacts() returns updated poetry.lock using docker 1`] = `Array []`;
-
-exports[`lib/manager/poetry/artifacts .updateArtifacts() returns updated poetry.lock when doing lockfile maintenance 1`] = `Array []`;
-
-exports[`lib/manager/poetry/artifacts .updateArtifacts() returns updated pyproject.lock 1`] = `Array []`;
