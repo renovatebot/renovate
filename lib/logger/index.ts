@@ -111,11 +111,13 @@ export function getContext(): any {
 }
 
 // setMeta overrides existing meta, may remove fields if no longer existing
+// eslint-disable-next-lint @typescript-eslint/explicit-module-boundary-types
 export function setMeta(obj: any): void {
   meta = { ...obj };
 }
 
 // addMeta overrides or adds fields but does not remove any
+// eslint-disable-next-lint @typescript-eslint/explicit-module-boundary-types
 export function addMeta(obj: any): void {
   meta = { ...meta, ...obj };
 }
