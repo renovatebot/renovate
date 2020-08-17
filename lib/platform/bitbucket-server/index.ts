@@ -5,6 +5,7 @@ import { RenovateConfig } from '../../config/common';
 import {
   REPOSITORY_CHANGED,
   REPOSITORY_DISABLED,
+  REPOSITORY_EMPTY,
   REPOSITORY_NOT_FOUND,
 } from '../../constants/error-messages';
 import { PLATFORM_TYPE_BITBUCKET_SERVER } from '../../constants/platforms';
@@ -212,6 +213,9 @@ export async function initRepo({
     logger.debug(err);
     if (err.statusCode === 404) {
       throw new Error(REPOSITORY_NOT_FOUND);
+    }
+    if (err.statusCode === 204) {
+      throw new Error(REPOSITORY_EMPTY);
     }
     logger.debug({ err }, 'Unknown Bitbucket initRepo error');
     throw err;
