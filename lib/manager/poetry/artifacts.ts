@@ -53,13 +53,13 @@ function getPoetrySources(content: string, fileName: string): PoetrySource[] {
   }
 
   const sources = pyprojectFile.tool?.poetry?.source;
-  const sourceSet = new Set<PoetrySource>();
+  const sourceArray: PoetrySource[] = [];
   for (const source of sources) {
     if (source.name && source.url) {
-      sourceSet.add({ name: source.name, url: source.url });
+      sourceArray.push({ name: source.name, url: source.url });
     }
   }
-  return Array.from(sourceSet);
+  return sourceArray;
 }
 
 function getSourceCredentialVars(
