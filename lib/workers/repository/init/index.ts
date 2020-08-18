@@ -11,8 +11,6 @@ import { mergeRenovateConfig } from './config';
 import { detectSemanticCommits } from './semantic';
 import { detectVulnerabilityAlerts } from './vulnerability';
 
-let cache: repositoryCache.Cache;
-
 function initializeConfig(config: RenovateConfig): RenovateConfig {
   return { ...config, errors: [], warnings: [], branchList: [] };
 }
@@ -20,8 +18,6 @@ function initializeConfig(config: RenovateConfig): RenovateConfig {
 async function initializeCaches(config: RenovateConfig): Promise<void> {
   memCache.init();
   await repositoryCache.initialize(config);
-  cache = repositoryCache.getCache();
-  cache.init = cache.init || {};
 }
 
 async function getRepoConfig(config_: RenovateConfig): Promise<RenovateConfig> {
