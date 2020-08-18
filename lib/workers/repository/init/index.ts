@@ -11,21 +11,36 @@ import { mergeRenovateConfig } from './config';
 import { detectSemanticCommits } from './semantic';
 import { detectVulnerabilityAlerts } from './vulnerability';
 
-export async function initRepo(input: RenovateConfig): Promise<RenovateConfig> {
+let cache: repositoryCache.Cache;
+
+function initializeConfig(config: RenovateConfig): RenovateConfig {
+  return { ...config, errors: [], warnings: [], branchList: [] };
+}
+
+async function initializeCaches(config: RenovateConfig): Promise<void> {
   memCache.init();
-  await repositoryCache.initialize(input);
-  let config: RenovateConfig = {
-    ...input,
-    errors: [],
-    warnings: [],
-    branchList: [],
-  };
-  config = await initApis(config);
+  await repositoryCache.initialize(config);
+  cache = repositoryCache.getCache();
+  cache.init = cache.init || {};
+}
+
+async function getRepoConfig(config_: RenovateConfig): Promise<RenovateConfig> {
+  let config = { ...config_ };
   config.semanticCommits = await detectSemanticCommits(config);
   config.baseBranch = config.defaultBranch;
   config.baseBranchSha = await platform.setBaseBranch(config.baseBranch);
-  config = await checkOnboardingBranch(config);
   config = await mergeRenovateConfig(config);
+  return config;
+}
+
+export async function initRepo(
+  config_: RenovateConfig
+): Promise<RenovateConfig> {
+  let config: RenovateConfig = initializeConfig(config_);
+  await initializeCaches(config);
+  config = await initApis(config);
+  config = await getRepoConfig(config);
+  config = await checkOnboardingBranch(config);
   checkIfConfigured(config);
   await setBranchPrefix(config.branchPrefix);
   config = await detectVulnerabilityAlerts(config);
