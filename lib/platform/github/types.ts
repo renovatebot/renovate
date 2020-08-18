@@ -43,7 +43,6 @@ export interface GhGraphQlPr extends GhPr {
 }
 
 export interface LocalRepoConfig {
-  config: any;
   repositoryName: string;
   pushProtection: boolean;
   prReviewsRequired: boolean;
