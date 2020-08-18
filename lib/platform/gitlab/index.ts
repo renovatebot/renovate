@@ -475,13 +475,19 @@ export async function updatePr({
   number: iid,
   prTitle: title,
   prBody: description,
+  state,
 }: UpdatePrConfig): Promise<void> {
+  const newState = {
+    [PrState.Closed]: 'closed',
+    [PrState.Open]: 'reopen',
+  }[state];
   await gitlabApi.putJson(
     `projects/${config.repository}/merge_requests/${iid}`,
     {
       body: {
         title,
         description: sanitize(description),
+        ...(newState && { state_event: newState }),
       },
     }
   );

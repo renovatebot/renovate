@@ -1120,6 +1120,19 @@ describe('platform/gitlab', () => {
       await gitlab.updatePr({ number: 1, prTitle: 'title', prBody: 'body' });
       expect(httpMock.getTrace()).toMatchSnapshot();
     });
+    it('closes the PR', async () => {
+      httpMock
+        .scope(gitlabApiHost)
+        .put('/api/v4/projects/undefined/merge_requests/1')
+        .reply(200);
+      await gitlab.updatePr({
+        number: 1,
+        prTitle: 'title',
+        prBody: 'body',
+        state: PrState.Closed,
+      });
+      expect(httpMock.getTrace()).toMatchSnapshot();
+    });
   });
   describe('mergePr(pr)', () => {
     jest.resetAllMocks();
