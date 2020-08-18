@@ -6,7 +6,7 @@ import {
 } from '../../constants/error-messages';
 import { logger } from '../../logger';
 import { PlatformPrOptions, Pr, platform } from '../../platform';
-import { BranchStatus } from '../../types';
+import { BranchStatus, PrState } from '../../types';
 import { ExternalHostError } from '../../types/errors/external-host-error';
 import { sampleSize } from '../../util';
 import {
@@ -94,6 +94,39 @@ export async function addAssigneesReviewers(
   }
 }
 
+async function getExistingPr(
+  branchName: string,
+  prTitle: string
+): Promise<Pr | null> {
+  const existingPr = await platform.getBranchPr(branchName);
+  if (existingPr) {
+    logger.debug('Found existing PR');
+    return existingPr;
+  }
+
+  const closedPr = await platform.findPr({
+    branchName,
+    prTitle: `${prTitle} - autoclosed`,
+    state: PrState.Closed,
+  });
+  const number = closedPr?.number;
+  if (number) {
+    logger.debug('Found closed PR');
+    try {
+      await platform.updatePr({
+        number,
+        prTitle,
+        state: PrState.Open,
+      });
+      return await platform.getPr(number);
+    } catch (err) {
+      logger.debug(`Unable to reopen PR: ${prTitle}`);
+    }
+  }
+
+  return null;
+}
+
 // Ensures that PR exists with matching title/body
 export async function ensurePr(
   prConfig: BranchConfig
@@ -110,7 +143,7 @@ export async function ensurePr(
     config.branchName
   ];
   // Check if existing PR exists
-  const existingPr = await platform.getBranchPr(branchName);
+  const existingPr = await getExistingPr(branchName, prTitle);
   if (existingPr) {
     logger.debug('Found existing PR');
   }

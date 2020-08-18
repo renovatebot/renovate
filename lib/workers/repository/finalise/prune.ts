@@ -1,3 +1,4 @@
+import moment from 'moment';
 import { RenovateConfig } from '../../../config';
 import { REPOSITORY_CHANGED } from '../../../constants/error-messages';
 import { logger } from '../../../logger';
@@ -6,7 +7,9 @@ import { PrState } from '../../../types';
 import {
   deleteBranch,
   getAllRenovateBranches,
+  getBranchLastCommitTime,
   isBranchModified,
+  touchBranch,
 } from '../../../util/git';
 
 async function cleanUpBranches(
@@ -20,6 +23,7 @@ async function cleanUpBranches(
         state: PrState.Open,
       });
       const branchIsModified = await isBranchModified(branchName);
+      let closedRightNow = false;
       if (pr && !branchIsModified) {
         if (!pr.title.endsWith('- autoclosed')) {
           if (dryRun) {
@@ -31,6 +35,10 @@ async function cleanUpBranches(
               `PRUNING-DISABLED: Would update pr ${pr.number} to ${pr.title} - autoclosed`
             );
           } else {
+            if (!branchIsModified && pr.state === PrState.Open) {
+              await touchBranch(branchName);
+              closedRightNow = true;
+            }
             await platform.updatePr({
               number: pr.number,
               prTitle: `${pr.title} - autoclosed`,
@@ -64,8 +72,12 @@ async function cleanUpBranches(
         logger.info(
           `PRUNING-DISABLED: Would deleting orphan branch ${branchName}`
         );
-      } else {
-        await deleteBranch(branchName);
+      } else if (!closedRightNow) {
+        const lastCommitTime = await getBranchLastCommitTime(branchName);
+        const minutesFromLastCommit = moment().diff(lastCommitTime, 'm');
+        if (minutesFromLastCommit >= 60) {
+          await deleteBranch(branchName);
+        }
       }
       if (pr && !branchIsModified) {
         logger.info({ prNo: pr.number, prTitle: pr.title }, 'PR autoclosed');

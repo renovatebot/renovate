@@ -677,3 +677,29 @@ export function getUrl({
     pathname: repository + '.git',
   });
 }
+
+export async function touchBranch(branchName: string): Promise<void> {
+  await syncGit();
+  try {
+    logger.debug(`touchBranch(${branchName})`);
+    await git.reset(ResetMode.HARD);
+    await git.raw(['clean', '-fd']);
+    await git.checkout(['-B', branchName, `origin/${branchName}`]);
+    const lastMessage = (
+      await git.raw(['log', '-1', '--pretty=%B', branchName])
+    ).trim();
+    await git.commit(lastMessage, null, {
+      '--amend': true,
+      '--reset-author': true,
+    });
+    await git.push('origin', `${branchName}:${branchName}`, {
+      '--force': true,
+      '-u': true,
+      '--no-verify': true,
+    });
+  } catch (err) {
+    checkForPlatformFailure(err);
+    logger.warn(`Unable to touch branch`);
+    throw err;
+  }
+}
