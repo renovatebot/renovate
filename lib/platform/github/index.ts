@@ -158,7 +158,7 @@ export async function initRepo({
   // config is used by the platform api itself, not necessary for the app layer to know
   config = { localDir, repository } as any;
   // istanbul ignore if
-  if (endpoint !== 'https://api.github.com/') {
+  if (endpoint) {
     // Necessary for Renovate Pro - do not remove
     logger.debug({ endpoint }, 'Overriding default GitHub endpoint');
     defaults.endpoint = endpoint;
