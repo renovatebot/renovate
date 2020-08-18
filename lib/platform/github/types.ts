@@ -22,9 +22,28 @@ export interface Comment {
 
 export interface GhPr extends Pr {
   comments: Comment[];
+  mergeable: boolean;
+}
+
+export interface GhRestPr extends GhPr {
+  head: { ref: string; sha: string };
+  mergeable_state: string;
+}
+
+export interface GhGraphQlPr extends GhPr {
+  commits: any;
+  reviewRequests: any;
+  assignees: any;
+  mergeStateStatus: string;
+  reviews: any;
+  baseRefName: string;
+  headRefName: string;
+  comments: Comment[] & { nodes?: { databaseId: number; body: string }[] };
+  labels: string[] & { nodes?: { name: string }[] };
 }
 
 export interface LocalRepoConfig {
+  config: any;
   repositoryName: string;
   pushProtection: boolean;
   prReviewsRequired: boolean;
