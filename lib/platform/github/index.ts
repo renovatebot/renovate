@@ -528,12 +528,10 @@ async function getClosedPrs(): Promise<PrList> {
         pr.state = pr.state.toLowerCase();
         pr.branchName = pr.headRefName;
         delete pr.headRefName;
-        pr.comments = pr.comments.nodes.map(
-          (comment: { databaseId: number; body: string }) => ({
-            id: comment.databaseId,
-            body: comment.body,
-          })
-        );
+        pr.comments = pr.comments.nodes.map((comment) => ({
+          id: comment.databaseId,
+          body: comment.body,
+        }));
         pr.body = 'dummy body'; // just in case
         config.closedPrList[pr.number] = pr;
         prNumbers.push(pr.number);
@@ -655,9 +653,7 @@ async function getOpenPrs(): Promise<PrList> {
           pr.isConflicted = false;
         }
         if (pr.labels) {
-          (pr as Pr).labels = pr.labels.nodes.map(
-            (label: { name: string }) => label.name
-          );
+          pr.labels = pr.labels.nodes.map((label) => label.name);
         }
         pr.hasAssignees = !!(pr.assignees?.totalCount > 0);
         delete pr.assignees;
@@ -1632,16 +1628,14 @@ export async function getVulnerabilityAlerts(): Promise<VulnerabilityAlert[]> {
       }
     }
   }`;
-  let alerts = [];
+  let alerts: VulnerabilityAlert[] = [];
   try {
-    const vulnerabilityAlerts = await githubApi.queryRepoField<{ node: any }>(
-      query,
-      'vulnerabilityAlerts',
-      {
-        paginate: false,
-        acceptHeader: 'application/vnd.github.vixen-preview+json',
-      }
-    );
+    const vulnerabilityAlerts = await githubApi.queryRepoField<{
+      node: VulnerabilityAlert;
+    }>(query, 'vulnerabilityAlerts', {
+      paginate: false,
+      acceptHeader: 'application/vnd.github.vixen-preview+json',
+    });
     if (vulnerabilityAlerts?.length) {
       alerts = vulnerabilityAlerts.map((edge) => edge.node);
       if (alerts.length) {
