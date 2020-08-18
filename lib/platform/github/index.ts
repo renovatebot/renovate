@@ -1220,7 +1220,7 @@ async function addLabels(
   issueNo: number,
   labels: string[] | null
 ): Promise<void> {
-  logger.debug(`Adding labels '${labels.join(', ')}' to #${issueNo}`);
+  logger.debug(`Adding labels '${labels?.join(', ')}' to #${issueNo}`);
   const repository = config.parentRepo || config.repository;
   if (is.array(labels) && labels.length) {
     await githubApi.postJson(`repos/${repository}/issues/${issueNo}/labels`, {

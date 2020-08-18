@@ -8,6 +8,7 @@ import { Options } from 'simple-git';
 import { logger } from '../../logger';
 
 import { HostRule, PrState } from '../../types';
+import { GitOptions } from '../../types/git';
 import * as azureApi from './azure-got-wrapper';
 import { AzurePr } from './types';
 
@@ -17,7 +18,7 @@ function toBase64(from: string): string {
   return Buffer.from(from).toString('base64');
 }
 
-export function getStorageExtraCloneOpts(config: HostRule): Options {
+export function getStorageExtraCloneOpts(config: HostRule): GitOptions {
   let header: string;
   const headerName = 'AUTHORIZATION';
   if (!config.token && config.username && config.password) {

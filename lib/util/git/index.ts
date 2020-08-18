@@ -17,7 +17,7 @@ import {
 } from '../../constants/error-messages';
 import { logger } from '../../logger';
 import { ExternalHostError } from '../../types/errors/external-host-error';
-import { GitProtocol } from '../../types/git';
+import { GitOptions, GitProtocol } from '../../types/git';
 import * as limits from '../../workers/global/limits';
 import { writePrivateKey } from './private-key';
 
@@ -35,7 +35,7 @@ interface StorageConfig {
   localDir: string;
   currentBranch?: string;
   url: string;
-  extraCloneOpts?: Options;
+  extraCloneOpts?: GitOptions;
   gitAuthorName?: string;
   gitAuthorEmail?: string;
 }
@@ -215,7 +215,12 @@ export async function syncGit(): Promise<void> {
     const cloneStart = Date.now();
     try {
       // clone only the default branch
-      const opts: Options = { '--depth': 2, ...config.extraCloneOpts };
+      const opts = ['--depth=2'];
+      if (config.extraCloneOpts) {
+        opts.push(
+          ...Object.entries(config.extraCloneOpts).map((e) => `${e[0]}=${e[1]}`)
+        );
+      }
       await git.clone(config.url, '.', opts);
     } catch (err) /* istanbul ignore next */ {
       logger.debug({ err }, 'git clone error');

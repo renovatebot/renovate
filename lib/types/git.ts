@@ -5,3 +5,5 @@ export type GitTreeNode = {
 };
 
 export type GitProtocol = 'ssh' | 'http' | 'https';
+
+export type GitOptions = Record<string, null | string | number>;
