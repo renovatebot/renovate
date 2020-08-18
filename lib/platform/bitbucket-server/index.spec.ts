@@ -6,8 +6,7 @@ import {
   REPOSITORY_DISABLED,
   REPOSITORY_NOT_FOUND,
 } from '../../constants/error-messages';
-import { PR_STATE_CLOSED, PR_STATE_OPEN } from '../../constants/pull-requests';
-import { BranchStatus } from '../../types';
+import { BranchStatus, PrState } from '../../types';
 import * as _git from '../../util/git';
 import { Platform } from '../common';
 
@@ -1075,7 +1074,7 @@ describe(getName(__filename), () => {
             await bitbucket.findPr({
               branchName: 'userName1/pullRequest5',
               prTitle: 'title',
-              state: PR_STATE_OPEN,
+              state: PrState.Open,
             })
           ).toMatchSnapshot();
           expect(httpMock.getTrace()).toMatchSnapshot();
@@ -1095,7 +1094,7 @@ describe(getName(__filename), () => {
             await bitbucket.findPr({
               branchName: 'userName1/pullRequest5',
               prTitle: 'title',
-              state: PR_STATE_CLOSED,
+              state: PrState.Closed,
             })
           ).toBeUndefined();
           expect(httpMock.getTrace()).toMatchSnapshot();
@@ -1248,14 +1247,22 @@ describe(getName(__filename), () => {
             )
             .reply(200);
 
-          await bitbucket.updatePr(5, 'title', 'body');
+          await bitbucket.updatePr({
+            number: 5,
+            prTitle: 'title',
+            prBody: 'body',
+          });
           expect(httpMock.getTrace()).toMatchSnapshot();
         });
 
         it('throws not-found 1', async () => {
           await initRepo();
           await expect(
-            bitbucket.updatePr(null as any, 'title', 'body')
+            bitbucket.updatePr({
+              number: null as any,
+              prTitle: 'title',
+              prBody: 'body',
+            })
           ).rejects.toThrow(REPOSITORY_NOT_FOUND);
 
           expect(httpMock.getTrace()).toMatchSnapshot();
@@ -1268,9 +1275,9 @@ describe(getName(__filename), () => {
               `${urlPath}/rest/api/1.0/projects/SOME/repos/repo/pull-requests/4`
             )
             .reply(404);
-          await expect(bitbucket.updatePr(4, 'title', 'body')).rejects.toThrow(
-            REPOSITORY_NOT_FOUND
-          );
+          await expect(
+            bitbucket.updatePr({ number: 4, prTitle: 'title', prBody: 'body' })
+          ).rejects.toThrow(REPOSITORY_NOT_FOUND);
 
           expect(httpMock.getTrace()).toMatchSnapshot();
         });
@@ -1291,9 +1298,9 @@ describe(getName(__filename), () => {
             )
             .reply(404);
 
-          await expect(bitbucket.updatePr(5, 'title', 'body')).rejects.toThrow(
-            REPOSITORY_NOT_FOUND
-          );
+          await expect(
+            bitbucket.updatePr({ number: 5, prTitle: 'title', prBody: 'body' })
+          ).rejects.toThrow(REPOSITORY_NOT_FOUND);
 
           expect(httpMock.getTrace()).toMatchSnapshot();
         });
@@ -1314,9 +1321,9 @@ describe(getName(__filename), () => {
             )
             .reply(409);
 
-          await expect(bitbucket.updatePr(5, 'title', 'body')).rejects.toThrow(
-            REPOSITORY_CHANGED
-          );
+          await expect(
+            bitbucket.updatePr({ number: 5, prTitle: 'title', prBody: 'body' })
+          ).rejects.toThrow(REPOSITORY_CHANGED);
           expect(httpMock.getTrace()).toMatchSnapshot();
         });
 
@@ -1337,7 +1344,7 @@ describe(getName(__filename), () => {
             .reply(405);
 
           await expect(
-            bitbucket.updatePr(5, 'title', 'body')
+            bitbucket.updatePr({ number: 5, prTitle: 'title', prBody: 'body' })
           ).rejects.toThrowErrorMatchingSnapshot();
           expect(httpMock.getTrace()).toMatchSnapshot();
         });

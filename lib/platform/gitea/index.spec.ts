@@ -10,7 +10,7 @@ import {
   REPOSITORY_MIRRORED,
 } from '../../constants/error-messages';
 import { logger as _logger } from '../../logger';
-import { BranchStatus } from '../../types';
+import { BranchStatus, PrState } from '../../types';
 import * as _git from '../../util/git';
 import { setBaseUrl } from '../../util/http/gitea';
 import * as ght from './gitea-helper';
@@ -52,7 +52,7 @@ describe('platform/gitea', () => {
       number: 1,
       title: 'Some PR',
       body: 'some random pull request',
-      state: 'open',
+      state: PrState.Open,
       diff_url: 'https://gitea.renovatebot.com/some/repo/pulls/1.diff',
       created_at: '2015-03-22T20:36:16Z',
       closed_at: null,
@@ -68,7 +68,7 @@ describe('platform/gitea', () => {
       number: 2,
       title: 'Other PR',
       body: 'other random pull request',
-      state: 'closed',
+      state: PrState.Closed,
       diff_url: 'https://gitea.renovatebot.com/some/repo/pulls/2.diff',
       created_at: '2011-08-18T22:30:38Z',
       closed_at: '2016-01-09T10:03:21Z',
@@ -664,7 +664,7 @@ describe('platform/gitea', () => {
   describe('createPr', () => {
     const mockNewPR: ght.PR = {
       number: 42,
-      state: 'open',
+      state: PrState.Open,
       head: {
         label: 'pr-branch',
         sha: mockCommitHash,
@@ -832,7 +832,7 @@ describe('platform/gitea', () => {
   describe('updatePr', () => {
     it('should update pull request with title', async () => {
       await initFakeRepo();
-      await gitea.updatePr(1, 'New Title');
+      await gitea.updatePr({ number: 1, prTitle: 'New Title' });
 
       expect(helper.updatePR).toHaveBeenCalledTimes(1);
       expect(helper.updatePR).toHaveBeenCalledWith(mockRepo.full_name, 1, {
@@ -842,7 +842,11 @@ describe('platform/gitea', () => {
 
     it('should update pull request with title and body', async () => {
       await initFakeRepo();
-      await gitea.updatePr(1, 'New Title', 'New Body');
+      await gitea.updatePr({
+        number: 1,
+        prTitle: 'New Title',
+        prBody: 'New Body',
+      });
 
       expect(helper.updatePR).toHaveBeenCalledTimes(1);
       expect(helper.updatePR).toHaveBeenCalledWith(mockRepo.full_name, 1, {
