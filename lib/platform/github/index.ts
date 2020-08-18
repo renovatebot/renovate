@@ -396,9 +396,6 @@ export async function initRepo({
   if (forkMode) {
     logger.debug('Using forkToken for git init');
     parsedEndpoint.auth = config.forkToken;
-  } else if (global.appMode) {
-    logger.debug('Using app token for git init');
-    parsedEndpoint.auth = `x-access-token:${opts.token}`;
   } else {
     logger.debug('Using personal access token for git init');
     parsedEndpoint.auth = opts.token;
@@ -409,7 +406,7 @@ export async function initRepo({
   );
   parsedEndpoint.pathname = config.repository + '.git';
   const url = URL.format(parsedEndpoint);
-  await git.initRepo({
+  git.initRepo({
     ...config,
     url,
     gitAuthorName: global.gitAuthor?.name,

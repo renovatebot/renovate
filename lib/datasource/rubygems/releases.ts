@@ -10,5 +10,5 @@ export function getReleases({
   if (registryUrl.endsWith('rubygems.org')) { // lgtm [js/incomplete-url-substring-sanitization]
       return getRubygemsOrgDependency(lookupName);
     }
-  return getDependency({ dependency: lookupName, registry: registryUrl });
+  return getDependency(lookupName, registryUrl);
 }
