@@ -1,5 +1,4 @@
-// eslint-disable-next-line import/no-unresolved
-import { PackageJson } from 'type-fest';
+import type { PackageJson } from 'type-fest';
 
 export type NpmPackageDependeny = PackageJson.Dependency;
 

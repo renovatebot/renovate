@@ -3,3 +3,5 @@ export type GitTreeNode = {
   path: string;
   mode: string;
 };
+
+export type GitProtocol = 'ssh' | 'http' | 'https';

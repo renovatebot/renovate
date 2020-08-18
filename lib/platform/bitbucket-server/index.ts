@@ -1,6 +1,7 @@
 import url, { URLSearchParams } from 'url';
 import is from '@sindresorhus/is';
 import delay from 'delay';
+import type { PartialDeep } from 'type-fest';
 import {
   REPOSITORY_CHANGED,
   REPOSITORY_DISABLED,
@@ -10,6 +11,7 @@ import {
 import { PLATFORM_TYPE_BITBUCKET_SERVER } from '../../constants/platforms';
 import { logger } from '../../logger';
 import { BranchStatus, PrState } from '../../types';
+import { GitProtocol } from '../../types/git';
 import * as git from '../../util/git';
 import * as hostRules from '../../util/host-rules';
 import { HttpResponse } from '../../util/http';
@@ -39,7 +41,7 @@ import {
 import { smartTruncate } from '../utils/pr-body';
 import { BbbsRestPr, BbsConfig, BbsPr, BbsRestUserRef } from './types';
 import * as utils from './utils';
-import { PartialDeep } from 'type-fest';
+
 /*
  * Version: 5.3 (EOL Date: 15 Aug 2019)
  * See following docs for api information:
@@ -54,7 +56,10 @@ let config: BbsConfig = {} as any;
 
 const bitbucketServerHttp = new BitbucketServerHttp();
 
-const defaults: any = {
+const defaults: {
+  endpoint?: string;
+  hostType: string;
+} = {
   hostType: PLATFORM_TYPE_BITBUCKET_SERVER,
 };
 
@@ -142,7 +147,7 @@ export async function initRepo({
         `./rest/api/1.0/projects/${projectKey}/repos/${repositorySlug}/browse/renovate.json?limit=20000`
       );
       if (!body.isLastPage) {
-        logger.warn('Renovate config to big: ' + body.size);
+        logger.warn({ size: body.size }, `Renovate config to big`);
       } else {
         renovateConfig = JSON.parse(body.lines.join());
       }
@@ -168,9 +173,9 @@ export async function initRepo({
     config.bbUseDefaultReviewers = true;
   }
 
-  const { host, pathname } = url.parse(defaults.endpoint!);
+  const { host, pathname } = url.parse(defaults.endpoint);
   const gitUrl = git.getUrl({
-    protocol: defaults.endpoint!.split(':')[0],
+    protocol: defaults.endpoint.split(':')[0] as GitProtocol,
     auth: `${opts.username}:${opts.password}`,
     host: `${host}${pathname}${
       pathname.endsWith('/') ? '' : /* istanbul ignore next */ '/'
@@ -582,7 +587,7 @@ export /* istanbul ignore next */ function ensureIssueClosing(
 }
 
 export function addAssignees(iid: number, assignees: string[]): Promise<void> {
-  logger.debug(`addAssignees(${iid}, ${assignees})`);
+  logger.debug(`addAssignees(${iid}, [${assignees.join(', ')}])`);
   // TODO: Needs implementation
   // Currently Renovate does "Create PR" and then "Add assignee" as a two-step process, with this being the second step.
   // BB Server doesnt support assignees
@@ -593,7 +598,7 @@ export async function addReviewers(
   prNo: number,
   reviewers: string[]
 ): Promise<void> {
-  logger.debug(`Adding reviewers ${reviewers} to #${prNo}`);
+  logger.debug(`Adding reviewers '${reviewers.join(', ')}' to #${prNo}`);
 
   try {
     const pr = await getPr(prNo);
@@ -622,7 +627,10 @@ export async function addReviewers(
     } else if (err.statusCode === 409) {
       throw new Error(REPOSITORY_CHANGED);
     } else {
-      logger.fatal({ err }, `Failed to add reviewers ${reviewers} to #${prNo}`);
+      logger.fatal(
+        { err },
+        `Failed to add reviewers '${reviewers.join(', ')}' to #${prNo}`
+      );
       throw err;
     }
   }

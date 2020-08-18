@@ -1,7 +1,6 @@
 import URL from 'url';
 import is from '@sindresorhus/is';
 import parseDiff from 'parse-diff';
-import { RenovateConfig } from '../../config/common';
 import {
   REPOSITORY_DISABLED,
   REPOSITORY_NOT_FOUND,
@@ -41,7 +40,7 @@ const BITBUCKET_PROD_ENDPOINT = 'https://api.bitbucket.org/';
 
 let config: utils.Config = {} as any;
 
-let endpoint_ = BITBUCKET_PROD_ENDPOINT;
+const defaults = { endpoint: BITBUCKET_PROD_ENDPOINT };
 
 export function initPlatform({
   endpoint,
@@ -57,9 +56,9 @@ export function initPlatform({
     logger.warn(
       `Init: Bitbucket Cloud endpoint should generally be ${BITBUCKET_PROD_ENDPOINT} but is being configured to a different value. Did you mean to use Bitbucket Server?`
     );
-    endpoint_ = endpoint;
+    defaults.endpoint = endpoint;
   }
-  setBaseUrl(endpoint_);
+  setBaseUrl(defaults.endpoint);
   // TODO: Add a connection check that endpoint/username/password combination are valid
   const platformConfig: PlatformResult = {
     endpoint: endpoint || BITBUCKET_PROD_ENDPOINT,
@@ -91,7 +90,7 @@ export async function initRepo({
   logger.debug(`initRepo("${repository}")`);
   const opts = hostRules.find({
     hostType: PLATFORM_TYPE_BITBUCKET,
-    url: endpoint_,
+    url: defaults.endpoint,
   });
   config = {
     repository,
@@ -139,7 +138,7 @@ export async function initRepo({
     throw err;
   }
 
-  const { hostname } = URL.parse(endpoint_);
+  const { hostname } = URL.parse(defaults.endpoint);
 
   // Converts API hostnames to their respective HTTP git hosts:
   // `api.bitbucket.org`  to `bitbucket.org`
@@ -547,7 +546,9 @@ export async function ensureIssue({
   } catch (err) /* istanbul ignore next */ {
     if (err.message.startsWith('Repository has no issue tracker.')) {
       logger.debug(
-        `Issues are disabled, so could not create issue: ${err.message}`
+        `Issues are disabled, so could not create issue: ${
+          err.message as string
+        }`
       );
     } else {
       logger.warn({ err }, 'Could not ensure issue');
@@ -612,7 +613,7 @@ export async function addReviewers(
   prId: number,
   reviewers: string[]
 ): Promise<void> {
-  logger.debug(`Adding reviewers ${reviewers} to #${prId}`);
+  logger.debug(`Adding reviewers '${reviewers.join(', ')}' to #${prId}`);
 
   const { title } = await getPr(prId);
 
@@ -725,10 +726,6 @@ export async function createPr({
 
 interface Reviewer {
   uuid: { raw: string };
-}
-
-interface Commit {
-  author: { raw: string };
 }
 
 export async function updatePr({
