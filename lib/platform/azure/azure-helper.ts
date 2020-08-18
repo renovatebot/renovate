@@ -4,7 +4,6 @@ import {
   GitPullRequestMergeStrategy,
   GitRef,
 } from 'azure-devops-node-api/interfaces/GitInterfaces';
-import { Options } from 'simple-git';
 import { logger } from '../../logger';
 
 import { HostRule, PrState } from '../../types';

@@ -3,7 +3,6 @@ import URL from 'url';
 import fs from 'fs-extra';
 import Git, {
   DiffResult as DiffResult_,
-  Options,
   ResetMode,
   SimpleGit,
   StatusResult as StatusResult_,
