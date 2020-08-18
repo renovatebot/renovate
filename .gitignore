@@ -16,8 +16,10 @@ junit.xml
 /test-results
 renovate-schema.json
 **/gradle-wrapper/__fixtures__/**/.gradle
+.clinic/
 
 # generated code
 **/*.generated.ts
 tools/dist
 test/datasource/nuget/_fixtures/obj
+
