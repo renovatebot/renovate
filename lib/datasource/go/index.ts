@@ -115,8 +115,10 @@ export async function getReleases({
       });
     logger.trace({ submodReleases }, 'go.getReleases');
     if (submodReleases.length > 0) {
-      res.releases = submodReleases;
-      return res;
+      return {
+        sourceUrl: res.sourceUrl,
+        releases: submodReleases,
+      };
     }
   }
   if (res?.releases) {

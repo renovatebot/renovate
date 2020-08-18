@@ -301,7 +301,7 @@ const platform: Platform = {
     gitEndpoint.auth = opts.token;
 
     // Initialize Git storage
-    await git.initRepo({
+    git.initRepo({
       ...config,
       url: URL.format(gitEndpoint),
       gitAuthorName: global.gitAuthor?.name,

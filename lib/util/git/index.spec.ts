@@ -60,7 +60,7 @@ describe('platform/git', () => {
     const repo = Git(origin.path);
     await repo.clone(base.path, '.', ['--bare']);
     tmpDir = await tmp.dir({ unsafeCleanup: true });
-    await git.initRepo({
+    git.initRepo({
       localDir: tmpDir.path,
       url: origin.path,
       extraCloneOpts: {
@@ -100,10 +100,11 @@ describe('platform/git', () => {
       const repo = Git(base.path).silent(true);
       await repo.submoduleAdd(base.path, 'submodule');
       await repo.commit('Add submodule');
-      await git.initRepo({
+      git.initRepo({
         localDir: tmpDir.path,
         url: base.path,
       });
+      await git.syncGit();
       expect(await fs.exists(tmpDir.path + '/.gitmodules')).toBeTruthy();
       expect(await git.getFileList()).toMatchSnapshot();
       await repo.reset(['--hard', 'HEAD^']);
@@ -129,6 +130,7 @@ describe('platform/git', () => {
   });
   describe('isBranchStale()', () => {
     beforeEach(async () => {
+      await git.syncGit();
       await git.setBranch('master');
     });
     it('should return false if same SHA as master', async () => {
@@ -369,7 +371,7 @@ describe('platform/git', () => {
 
       await git.setBranch('develop');
 
-      await git.initRepo({
+      git.initRepo({
         localDir: tmpDir.path,
         url: base.path,
       });
@@ -391,7 +393,7 @@ describe('platform/git', () => {
       await repo.commit('past message2');
       await repo.checkout('master');
 
-      await git.initRepo({
+      git.initRepo({
         localDir: tmpDir.path,
         url: base.path,
       });
@@ -400,7 +402,7 @@ describe('platform/git', () => {
       expect(await git.branchExists('renovate/test')).toBe(true);
       const cid = await git.getBranchCommit('renovate/test');
 
-      await git.initRepo({
+      git.initRepo({
         localDir: tmpDir.path,
         url: base.path,
       });
@@ -429,10 +431,11 @@ describe('platform/git', () => {
         'test',
       ]);
       await repo.commit('Add submodule');
-      await git.initRepo({
+      git.initRepo({
         localDir: tmpDir.path,
         url: base.path,
       });
+      await git.syncGit();
       expect(await fs.exists(tmpDir.path + '/.gitmodules')).toBeTruthy();
       await repo.reset(['--hard', 'HEAD^']);
     });

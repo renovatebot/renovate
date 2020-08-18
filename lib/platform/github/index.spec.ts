@@ -40,7 +40,6 @@ describe('platform/github', () => {
 
   afterEach(() => {
     httpMock.reset();
-    global.appMode = false;
   });
 
   const graphqlOpenPullRequests = fs.readFileSync(
@@ -231,16 +230,6 @@ describe('platform/github', () => {
           optimizeForDisabled: true,
         } as any)
       ).rejects.toThrow(REPOSITORY_DISABLED);
-      expect(httpMock.getTrace()).toMatchSnapshot();
-    });
-    it('should use different header in app mode', async () => {
-      global.appMode = true;
-      const scope = httpMock.scope(githubApiHost);
-      initRepoMock(scope, 'some/repo');
-      const config = await github.initRepo({
-        repository: 'some/repo',
-      } as any);
-      expect(config).toMatchSnapshot();
       expect(httpMock.getTrace()).toMatchSnapshot();
     });
     it('should rebase', async () => {

@@ -224,7 +224,7 @@ export async function initRepo({
       repoUrl.auth = 'oauth2:' + opts.token;
       url = URL.format(repoUrl);
     }
-    await git.initRepo({
+    git.initRepo({
       ...config,
       url,
       gitAuthorName: global.gitAuthor?.name,

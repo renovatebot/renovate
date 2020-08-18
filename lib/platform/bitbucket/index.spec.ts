@@ -739,6 +739,16 @@ describe('platform/bitbucket', () => {
       await bitbucket.updatePr({ number: 5, prTitle: 'title', prBody: 'body' });
       expect(httpMock.getTrace()).toMatchSnapshot();
     });
+    it('throws an error on failure to get current list of reviewers', async () => {
+      const scope = await initRepoMock();
+      scope
+        .get('/2.0/repositories/some/repo/pullrequests/5')
+        .reply(500, undefined);
+      await expect(() =>
+        bitbucket.updatePr({ number: 5, prTitle: 'title', prBody: 'body' })
+      ).rejects.toThrowErrorMatchingSnapshot();
+      expect(httpMock.getTrace()).toMatchSnapshot();
+    });
     it('closes PR', async () => {
       const scope = await initRepoMock();
       scope
@@ -751,16 +761,6 @@ describe('platform/bitbucket', () => {
         prTitle: pr.title,
         state: PrState.Closed,
       });
-      expect(httpMock.getTrace()).toMatchSnapshot();
-    });
-    it('throws an error on failure to get current list of reviewers', async () => {
-      const scope = await initRepoMock();
-      scope
-        .get('/2.0/repositories/some/repo/pullrequests/5')
-        .reply(500, undefined);
-      await expect(() =>
-        bitbucket.updatePr({ number: 5, prTitle: 'title', prBody: 'body' })
-      ).rejects.toThrowErrorMatchingSnapshot();
       expect(httpMock.getTrace()).toMatchSnapshot();
     });
   });
