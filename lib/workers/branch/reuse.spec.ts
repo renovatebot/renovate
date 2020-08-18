@@ -1,7 +1,7 @@
 import { git, platform } from '../../../test/util';
 import { RenovateConfig } from '../../config';
-import { PR_STATE_OPEN } from '../../constants/pull-requests';
 import { Pr } from '../../platform';
+import { PrState } from '../../types';
 import { shouldReuseExistingBranch } from './reuse';
 
 jest.mock('../../util/git');
@@ -10,7 +10,7 @@ describe('workers/branch/parent', () => {
   describe('getParentBranch(config)', () => {
     const pr: Pr = {
       branchName: 'master',
-      state: PR_STATE_OPEN,
+      state: PrState.Open,
       title: 'any',
     };
     let config: RenovateConfig;

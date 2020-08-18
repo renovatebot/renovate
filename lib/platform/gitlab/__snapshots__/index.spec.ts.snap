@@ -1742,6 +1742,25 @@ Array [
 ]
 `;
 
+exports[`platform/gitlab updatePr(prNo, title, body) closes the PR 1`] = `
+Array [
+  Object {
+    "body": "{\\"title\\":\\"title\\",\\"description\\":\\"body\\",\\"state_event\\":\\"closed\\"}",
+    "headers": Object {
+      "accept": "application/json",
+      "accept-encoding": "gzip, deflate",
+      "content-length": "61",
+      "content-type": "application/json",
+      "host": "gitlab.com",
+      "private-token": "abc123",
+      "user-agent": "https://github.com/renovatebot/renovate",
+    },
+    "method": "PUT",
+    "url": "https://gitlab.com/api/v4/projects/undefined/merge_requests/1",
+  },
+]
+`;
+
 exports[`platform/gitlab updatePr(prNo, title, body) updates the PR 1`] = `
 Array [
   Object {

@@ -3,17 +3,12 @@ import {
   GitPullRequest,
   GitPullRequestCommentThread,
   GitPullRequestMergeStrategy,
+  PullRequestStatus,
 } from 'azure-devops-node-api/interfaces/GitInterfaces';
-import { RenovateConfig } from '../../config/common';
 import { REPOSITORY_DISABLED } from '../../constants/error-messages';
 import { PLATFORM_TYPE_AZURE } from '../../constants/platforms';
-import {
-  PR_STATE_ALL,
-  PR_STATE_NOT_OPEN,
-  PR_STATE_OPEN,
-} from '../../constants/pull-requests';
 import { logger } from '../../logger';
-import { BranchStatus } from '../../types';
+import { BranchStatus, PrState } from '../../types';
 import * as git from '../../util/git';
 import * as hostRules from '../../util/host-rules';
 import { sanitize } from '../../util/sanitize';
@@ -31,6 +26,7 @@ import {
   Pr,
   RepoParams,
   RepoResult,
+  UpdatePrConfig,
   VulnerabilityAlert,
 } from '../common';
 import { smartTruncate } from '../utils/pr-body';
@@ -244,7 +240,7 @@ export async function getPr(pullRequestId: number): Promise<Pr | null> {
 export async function findPr({
   branchName,
   prTitle,
-  state = PR_STATE_ALL,
+  state = PrState.All,
 }: FindPRConfig): Promise<Pr | null> {
   let prsFiltered: Pr[] = [];
   try {
@@ -259,13 +255,11 @@ export async function findPr({
     }
 
     switch (state) {
-      case PR_STATE_ALL:
+      case PrState.All:
         // no more filter needed, we can go further...
         break;
-      case PR_STATE_NOT_OPEN:
-        prsFiltered = prsFiltered.filter(
-          (item) => item.state !== PR_STATE_OPEN
-        );
+      case PrState.NotOpen:
+        prsFiltered = prsFiltered.filter((item) => item.state !== PrState.Open);
         break;
       default:
         prsFiltered = prsFiltered.filter((item) => item.state === state);
@@ -284,7 +278,7 @@ export async function getBranchPr(branchName: string): Promise<Pr | null> {
   logger.debug(`getBranchPr(${branchName})`);
   const existingPr = await findPr({
     branchName,
-    state: PR_STATE_OPEN,
+    state: PrState.Open,
   });
   return existingPr ? getPr(existingPr.number) : null;
 }
@@ -392,19 +386,29 @@ export async function createPr({
   return azureHelper.getRenovatePRFormat(pr);
 }
 
-export async function updatePr(
-  prNo: number,
-  title: string,
-  body?: string
-): Promise<void> {
+export async function updatePr({
+  number: prNo,
+  prTitle: title,
+  prBody: body,
+  state,
+}: UpdatePrConfig): Promise<void> {
   logger.debug(`updatePr(${prNo}, ${title}, body)`);
+
+  const status = {
+    [PrState.Open]: PullRequestStatus.Active,
+    [PrState.Closed]: PullRequestStatus.Abandoned,
+  }[state];
+
   const azureApiGit = await azureApi.gitApi();
   const objToUpdate: GitPullRequest = {
     title,
+    ...(status && { status }),
   };
+
   if (body) {
     objToUpdate.description = azureHelper.max4000Chars(sanitize(body));
   }
+
   await azureApiGit.updatePullRequest(objToUpdate, config.repoId, prNo);
 }
 

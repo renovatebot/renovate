@@ -7,9 +7,8 @@ import {
   REPOSITORY_NOT_FOUND,
 } from '../../constants/error-messages';
 import { PLATFORM_TYPE_BITBUCKET } from '../../constants/platforms';
-import { PR_STATE_ALL, PR_STATE_OPEN } from '../../constants/pull-requests';
 import { logger } from '../../logger';
-import { BranchStatus } from '../../types';
+import { BranchStatus, PrState } from '../../types';
 import * as git from '../../util/git';
 import * as hostRules from '../../util/host-rules';
 import { BitbucketHttp, setBaseUrl } from '../../util/http/bitbucket';
@@ -28,6 +27,7 @@ import {
   Pr,
   RepoParams,
   RepoResult,
+  UpdatePrConfig,
   VulnerabilityAlert,
 } from '../common';
 import { smartTruncate } from '../utils/pr-body';
@@ -180,7 +180,7 @@ export async function setBaseBranch(branchName: string): Promise<string> {
 
 // istanbul ignore next
 function matchesState(state: string, desiredState: string): boolean {
-  if (desiredState === PR_STATE_ALL) {
+  if (desiredState === PrState.All) {
     return true;
   }
   if (desiredState.startsWith('!')) {
@@ -205,7 +205,7 @@ export async function getPrList(): Promise<Pr[]> {
 export async function findPr({
   branchName,
   prTitle,
-  state = PR_STATE_ALL,
+  state = PrState.All,
 }: FindPRConfig): Promise<Pr | null> {
   logger.debug(`findPr(${branchName}, ${prTitle}, ${state})`);
   const prList = await getPrList();
@@ -226,7 +226,7 @@ export async function deleteBranch(
   closePr?: boolean
 ): Promise<void> {
   if (closePr) {
-    const pr = await findPr({ branchName, state: PR_STATE_OPEN });
+    const pr = await findPr({ branchName, state: PrState.Open });
     if (pr) {
       await bitbucketHttp.postJson(
         `/2.0/repositories/${config.repository}/pullrequests/${pr.number}/decline`
@@ -322,7 +322,7 @@ export async function getBranchPr(branchName: string): Promise<Pr | null> {
   logger.debug(`getBranchPr(${branchName})`);
   const existingPr = await findPr({
     branchName,
-    state: PR_STATE_OPEN,
+    state: PrState.Open,
   });
   return existingPr ? getPr(existingPr.number) : null;
 }
@@ -731,11 +731,12 @@ interface Commit {
   author: { raw: string };
 }
 
-export async function updatePr(
-  prNo: number,
-  title: string,
-  description: string
-): Promise<void> {
+export async function updatePr({
+  number: prNo,
+  prTitle: title,
+  prBody: description,
+  state: _state,
+}: UpdatePrConfig): Promise<void> {
   logger.debug(`updatePr(${prNo}, ${title}, body)`);
   // Updating a PR in Bitbucket will clear the reviewers if reviewers is not present
   const pr = (
@@ -744,6 +745,11 @@ export async function updatePr(
     )
   ).body;
 
+  const state = {
+    [PrState.Open]: 'OPEN',
+    [PrState.Closed]: 'DECLINED',
+  }[_state];
+
   await bitbucketHttp.putJson(
     `/2.0/repositories/${config.repository}/pullrequests/${prNo}`,
     {
@@ -751,6 +757,7 @@ export async function updatePr(
         title,
         description: sanitize(description),
         reviewers: pr.reviewers,
+        ...(state && { state }),
       },
     }
   );

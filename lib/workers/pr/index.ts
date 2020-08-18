@@ -248,7 +248,7 @@ export async function ensurePr(
           [
             '\n',
             ':warning: Release Notes retrieval for this PR were skipped because no github.com credentials were available.',
-            'If you are using the hosted GitLab app, please follow [this guide](https://docs.renovatebot.com/install-gitlab-app/#configuring-a-token-for-githubcom-hosted-release-notes). If you are self-hosted, please see [this instruction](https://github.com/renovatebot/renovate/blob/master/docs/development/self-hosting.md#githubcom-token-for-release-notes) instead.',
+            'If you are using the hosted GitLab app, please follow [this guide](https://docs.renovatebot.com/install-gitlab-app/#configuring-a-token-for-githubcom-hosted-release-notes). If you are self-hosted, please see [this instruction](https://github.com/renovatebot/renovate/blob/master/docs/usage/self-hosting.md#githubcom-token-for-release-notes) instead.',
             '\n',
           ].join('\n'),
         ];
@@ -331,7 +331,7 @@ export async function ensurePr(
       if (config.dryRun) {
         logger.info('DRY-RUN: Would update PR #' + existingPr.number);
       } else {
-        await platform.updatePr(existingPr.number, prTitle, prBody);
+        await platform.updatePr({ number: existingPr.number, prTitle, prBody });
         logger.info({ pr: existingPr.number, prTitle }, `PR updated`);
       }
       return { prResult: PrResult.Updated, pr: existingPr };

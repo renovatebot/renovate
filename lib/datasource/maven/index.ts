@@ -194,7 +194,7 @@ async function filterMissingArtifacts(
   versions: string[]
 ): Promise<string[]> {
   const cacheNamespace = 'datasource-maven-metadata';
-  const cacheKey = dependency.dependencyUrl;
+  const cacheKey = `${repoUrl}${dependency.dependencyUrl}`;
   let artifactsInfo: ArtifactsInfo | null = await packageCache.get<
     ArtifactsInfo
   >(cacheNamespace, cacheKey);

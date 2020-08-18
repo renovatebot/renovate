@@ -95,6 +95,13 @@ export async function updateArtifacts({
       }
     }
 
+    // We tidy one more time as a solution for #6795
+    if (config.postUpdateOptions?.includes('gomodTidy')) {
+      args = 'mod tidy';
+      logger.debug({ cmd, args }, 'additional go mod tidy command included');
+      execCommands.push(`${cmd} ${args}`);
+    }
+
     await exec(execCommands, execOptions);
 
     const status = await getRepoStatus();

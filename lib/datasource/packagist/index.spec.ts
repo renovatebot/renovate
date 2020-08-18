@@ -153,6 +153,45 @@ describe('datasource/packagist', () => {
       expect(res).not.toBeNull();
       expect(httpMock.getTrace()).toMatchSnapshot();
     });
+    it('supports lazy repositories', async () => {
+      const packagesJson = {
+        packages: [],
+        'providers-lazy-url':
+          'https://composer.renovatebot.com/composer/lazy/p/%package%.json',
+      };
+      config = {
+        registryUrls: ['https://composer.renovatebot.com/composer/lazy'],
+      };
+      const fileJson = {
+        packages: {
+          'guzzlehttp/guzzle': {
+            '5.3.4': {
+              name: 'guzzlehttp/guzzle',
+              version: '5.3.4',
+            },
+            '7.0.0-beta.1': {
+              name: 'guzzlehttp/guzzle',
+              version: '7.0.0-beta.1',
+            },
+          },
+        },
+      };
+      httpMock
+        .scope('https://composer.renovatebot.com')
+        .get('/composer/lazy/packages.json')
+        .reply(200, packagesJson)
+        .get('/composer/lazy/p/guzzlehttp/guzzle.json')
+        .reply(200, fileJson);
+      const res = await getPkgReleases({
+        ...config,
+        datasource,
+        versioning,
+        depName: 'guzzlehttp/guzzle',
+      });
+      expect(res).toMatchSnapshot();
+      expect(res).not.toBeNull();
+      expect(httpMock.getTrace()).toMatchSnapshot();
+    });
     it('supports provider-includes', async () => {
       const packagesJson = {
         packages: [],

@@ -1,5 +1,6 @@
 import {
   BranchStatus,
+  PrState,
   VulnerabilityAlert as _VulnerabilityAlert,
 } from '../types';
 
@@ -83,6 +84,12 @@ export interface CreatePRConfig {
   platformOptions?: PlatformPrOptions;
   draftPR?: boolean;
 }
+export interface UpdatePrConfig {
+  number: number;
+  prTitle: string;
+  prBody?: string;
+  state?: PrState.Open | PrState.Closed;
+}
 export interface EnsureIssueConfig {
   title: string;
   reuseTitle?: string;
@@ -100,7 +107,7 @@ export interface BranchStatusConfig {
 export interface FindPRConfig {
   branchName: string;
   prTitle?: string | null;
-  state?: 'open' | 'closed' | '!open' | 'all';
+  state?: PrState.Open | PrState.Closed | PrState.NotOpen | PrState.All;
   refreshCache?: boolean;
 }
 export interface EnsureCommentConfig {
@@ -136,7 +143,7 @@ export interface Platform {
     issueConfig: EnsureIssueConfig
   ): Promise<EnsureIssueResult | null>;
   getPrBody(prBody: string): string;
-  updatePr(number: number, prTitle: string, prBody?: string): Promise<void>;
+  updatePr(prConfig: UpdatePrConfig): Promise<void>;
   mergePr(number: number, branchName: string): Promise<boolean>;
   addReviewers(number: number, reviewers: string[]): Promise<void>;
   addAssignees(number: number, assignees: string[]): Promise<void>;
