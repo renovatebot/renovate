@@ -2,6 +2,7 @@ import { RenovateConfig } from '../../../../config';
 import { configFileNames } from '../../../../config/app-strings';
 import { logger } from '../../../../logger';
 import { commitFiles } from '../../../../util/git';
+import * as template from '../../../../util/template';
 import { getOnboardingConfig } from './config';
 
 const defaultConfigFile = configFileNames[0];
@@ -13,21 +14,42 @@ export function createOnboardingBranch(
   const contents = getOnboardingConfig(config);
   logger.debug('Creating onboarding branch');
 
-  let prefix: string;
-  if (config.commitMessagePrefix) {
-    prefix = config.commitMessagePrefix;
-  } else if (config.semanticCommits) {
-    prefix = config.semanticCommitType;
-    if (config.semanticCommitScope) {
-      prefix += `(${config.semanticCommitScope})`;
+  const onboardingConfig: Partial<RenovateConfig> = { ...config };
+
+  let prefix = '';
+  const compiledOnboardingCommitMessagePrefix = template.compile(
+    onboardingConfig.onboardingCommitMessagePrefix,
+    onboardingConfig
+  );
+  if (compiledOnboardingCommitMessagePrefix) {
+    prefix = compiledOnboardingCommitMessagePrefix;
+  } else if (onboardingConfig.semanticCommits) {
+    prefix = onboardingConfig.semanticCommitType;
+    if (onboardingConfig.semanticCommitScope) {
+      prefix += `(${onboardingConfig.semanticCommitScope})`;
     }
   }
-  let commitMessageBody = `${prefix ? ': add' : 'Add'} ${defaultConfigFile}`;
-  if (config.onboardingCommitMessageBody) {
-    commitMessageBody = config.onboardingCommitMessageBody;
-  }
+  prefix += `${prefix && (prefix?.endsWith(':') ? '' : ':')}`;
+  onboardingConfig.onboardingCommitMessagePrefix = prefix;
 
-  const commitMessage = `${prefix || ''}${commitMessageBody}`;
+  onboardingConfig.onboardingCommitMessageTopic =
+    onboardingConfig.onboardingCommitMessageTopic || defaultConfigFile;
+
+  // Compile a few times in case there are nested templates
+  onboardingConfig.onboardingCommitMessage = template.compile(
+    onboardingConfig.onboardingCommitMessage ?? '',
+    onboardingConfig
+  );
+  onboardingConfig.onboardingCommitMessage = template.compile(
+    onboardingConfig.onboardingCommitMessage,
+    onboardingConfig
+  );
+  onboardingConfig.onboardingCommitMessage = template.compile(
+    onboardingConfig.onboardingCommitMessage,
+    onboardingConfig
+  );
+
+  onboardingConfig.onboardingCommitMessage = onboardingConfig.onboardingCommitMessage.trim();
 
   // istanbul ignore if
   if (config.dryRun) {
@@ -42,6 +64,6 @@ export function createOnboardingBranch(
         contents,
       },
     ],
-    message: commitMessage,
+    message: onboardingConfig.onboardingCommitMessage,
   });
 }

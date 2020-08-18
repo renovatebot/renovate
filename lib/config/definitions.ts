@@ -141,12 +141,32 @@ const options: RenovateOptions[] = [
     cli: false,
   },
   {
-    name: 'onboardingCommitMessageBody',
-    description:
-      'Change this value in order to override the default onboarding commit message body.',
+    name: 'onboardingCommitMessage',
+    description: 'Message to use for the onboarding commit message',
     type: 'string',
-    default: null,
-    admin: true,
+    default:
+      '{{{onboardingCommitMessagePrefix}}} {{{onboardingCommitMessageAction}}} {{{onboardingCommitMessageTopic}}}',
+    cli: false,
+  },
+  {
+    name: 'onboardingCommitMessagePrefix',
+    description:
+      'Prefix to add to start of onboarding commit messages. Uses a semantic prefix if semanticCommits enabled',
+    type: 'string',
+    default: '{{commitMessagePrefix}}',
+    cli: false,
+  },
+  {
+    name: 'onboardingCommitMessageAction',
+    description: 'Action verb to use in onboarding commit messages',
+    type: 'string',
+    default: 'Add',
+    cli: false,
+  },
+  {
+    name: 'onboardingCommitMessageTopic',
+    description: 'The topic/noun used in onboarding commit messages',
+    type: 'string',
     cli: false,
   },
   {

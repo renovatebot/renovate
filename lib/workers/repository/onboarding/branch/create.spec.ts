@@ -28,57 +28,74 @@ describe('workers/repository/onboarding/branch', () => {
     config = getConfig();
   });
   describe('createOnboardingBranch', () => {
-    it('uses the default commit message', async () => {
+    it('uses the default onboarding commit message', async () => {
       await createOnboardingBranch(config);
       expect(commitFiles).toHaveBeenCalledWith(
         buildExpectedCommitFilesArgument('Add renovate.json')
       );
     });
-    it('applies the commitMessagePrefix value to the default commit message', async () => {
-      const prefix = 'My Test Prefix';
+    it('applies the onboardingCommitMessagePrefix value', async () => {
+      const prefix = 'RENOV-123';
+      config.onboardingCommitMessagePrefix = prefix;
+      await createOnboardingBranch(config);
+      expect(commitFiles).toHaveBeenCalledWith(
+        buildExpectedCommitFilesArgument(`${prefix}: Add renovate.json`)
+      );
+    });
+    it('applies the commitMessagePrefix', async () => {
+      const prefix = 'RENOV-123';
       config.commitMessagePrefix = prefix;
       await createOnboardingBranch(config);
       expect(commitFiles).toHaveBeenCalledWith(
-        buildExpectedCommitFilesArgument(`${prefix}: add renovate.json`)
+        buildExpectedCommitFilesArgument(`${prefix}: Add renovate.json`)
       );
     });
-    it('applies semanticCommit prefix to the default commit message', async () => {
+    it('applies the onboardingCommitMessageAction', async () => {
+      const action = 'Setup';
+      config.onboardingCommitMessageAction = action;
+      await createOnboardingBranch(config);
+      expect(commitFiles).toHaveBeenCalledWith(
+        buildExpectedCommitFilesArgument(`${action} renovate.json`)
+      );
+    });
+    it('applies the onboardingCommitMessageTopic', async () => {
+      const topic = 'a great new way to keep deps updated';
+      config.onboardingCommitMessageTopic = topic;
+      await createOnboardingBranch(config);
+      expect(commitFiles).toHaveBeenCalledWith(
+        buildExpectedCommitFilesArgument(`Add ${topic}`)
+      );
+    });
+    it('applies the onboardingCommitMessagePrefix, onboardingCommitMessageAction, and onboardingCommitMessageTopic', async () => {
+      const prefix = 'RENOV-123';
+      const action = 'Setup';
+      const topic = 'Renovate on My Cool App';
+      config.onboardingCommitMessagePrefix = prefix;
+      config.onboardingCommitMessageAction = action;
+      config.onboardingCommitMessageTopic = topic;
+      await createOnboardingBranch(config);
+      expect(commitFiles).toHaveBeenCalledWith(
+        buildExpectedCommitFilesArgument(`${prefix}: ${action} ${topic}`)
+      );
+    });
+    it('applies semanticCommit prefix to the default onboarding commit message', async () => {
       const prefix = 'chore(deps)';
       config.semanticCommits = true;
       await createOnboardingBranch(config);
       expect(commitFiles).toHaveBeenCalledWith(
-        buildExpectedCommitFilesArgument(`${prefix}: add renovate.json`)
+        buildExpectedCommitFilesArgument(`${prefix}: Add renovate.json`)
       );
     });
-    it('uses supplied commit message body', async () => {
-      const message =
-        'We can Renovate if we want to, we can leave PRs in decline';
-      config.onboardingCommitMessageBody = message;
-      await createOnboardingBranch(config);
-      expect(commitFiles).toHaveBeenCalledWith(
-        buildExpectedCommitFilesArgument(`${message}`)
-      );
-    });
-    it('applies the commitMessagePrefix to the supplied commit message body', async () => {
-      const prefix = 'My Test Prefix';
-      const message =
-        ": Cause your deps need an update and if they dont update, well they're no deps of mine";
-      config.commitMessagePrefix = prefix;
-      config.onboardingCommitMessageBody = message;
-      await createOnboardingBranch(config);
-      expect(commitFiles).toHaveBeenCalledWith(
-        buildExpectedCommitFilesArgument(`${prefix}${message}`)
-      );
-    });
-    it('applies semanticCommit prefix to the supplied commit message body', async () => {
+    it('applies semanticCommit prefix to the onboarding commit message', async () => {
       const prefix = 'chore(deps)';
-      const message =
-        ': I say, we can update when we want to, a commit they will never mind';
-      config.commitMessagePrefix = prefix;
-      config.onboardingCommitMessageBody = message;
+      const action = 'Onboard';
+      const topic = 'Renovate to my project';
+      config.semanticCommits = true;
+      config.onboardingCommitMessageAction = action;
+      config.onboardingCommitMessageTopic = topic;
       await createOnboardingBranch(config);
       expect(commitFiles).toHaveBeenCalledWith(
-        buildExpectedCommitFilesArgument(`${prefix}${message}`)
+        buildExpectedCommitFilesArgument(`${prefix}: ${action} ${topic}`)
       );
     });
   });
