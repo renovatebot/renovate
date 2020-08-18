@@ -57,9 +57,8 @@ export async function extract(
   const configHash = hash(config);
   // istanbul ignore if
   if (
-    cachedExtract &&
-    cachedExtract.sha === baseBranchSha &&
-    cachedExtract.configHash === configHash
+    cachedExtract?.sha === baseBranchSha &&
+    cachedExtract?.configHash === configHash
   ) {
     logger.debug({ baseBranch, baseBranchSha }, 'Found cached extract');
     packageFiles = cachedExtract.packageFiles;
