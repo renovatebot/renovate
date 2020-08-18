@@ -179,10 +179,6 @@ export async function getSubmodules(): Promise<string[]> {
     .filter((_e: string, i: number) => i % 2);
 }
 
-export function isGitInitialized(): boolean {
-  return !!git;
-}
-
 export async function syncGit(): Promise<void> {
   if (git) {
     return;
