@@ -161,7 +161,6 @@ export interface Platform {
       | EnsureCommentRemovalConfigByTopic
       | EnsureCommentRemovalConfigByContent
   ): Promise<void>;
-  deleteBranch(branchName: string, closePr?: boolean): Promise<void>;
   ensureComment(ensureComment: EnsureCommentConfig): Promise<boolean>;
   setBaseBranch(branchName: string): Promise<string>;
   getPr(number: number): Promise<Pr>;

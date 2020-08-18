@@ -399,14 +399,6 @@ describe(getName(__filename), () => {
         });
       });
 
-      describe('deleteBranch()', () => {
-        it('sends to gitFs', async () => {
-          await initRepo();
-          expect(await bitbucket.deleteBranch('branch')).toMatchSnapshot();
-          expect(httpMock.getTrace()).toMatchSnapshot();
-        });
-      });
-
       describe('addAssignees()', () => {
         it('does not throw', async () => {
           expect(await bitbucket.addAssignees(3, ['some'])).toMatchSnapshot();
