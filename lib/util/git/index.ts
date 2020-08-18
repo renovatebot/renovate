@@ -234,6 +234,7 @@ export async function syncGit(): Promise<void> {
     const durationMs = Math.round(Date.now() - cloneStart);
     logger.debug({ durationMs }, 'git clone completed');
   }
+  config.currentBranchSha = (await git.raw(['rev-parse', 'HEAD'])).trim();
   const submodules = await getSubmodules();
   for (const submodule of submodules) {
     try {
