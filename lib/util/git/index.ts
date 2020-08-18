@@ -402,6 +402,7 @@ export async function getAllRenovateBranches(
   branchPrefix: string
 ): Promise<string[]> {
   if (!git) {
+    logger.debug('git is uninitialized so returning empty branch set');
     return [];
   }
   const branches = await git.branch(['--remotes', '--verbose']);
