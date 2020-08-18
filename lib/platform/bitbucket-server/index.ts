@@ -912,8 +912,6 @@ export async function updatePr({
       [PrState.Closed]: 'DECLINED',
     }[state];
 
-    /* TODO: write test for this branch */
-    /* istanbul ignore if */
     if (
       newState &&
       ['OPEN', 'DECLINED'].includes(currentState) &&
