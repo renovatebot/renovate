@@ -187,7 +187,7 @@ export async function syncGit(): Promise<void> {
   if (git) {
     return;
   }
-  logger.info('Initializing git repository into ' + config.localDir);
+  logger.debug('Initializing git repository into ' + config.localDir);
   const gitHead = join(config.localDir, '.git/HEAD');
   let clone = true;
 
