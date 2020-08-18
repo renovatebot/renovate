@@ -613,6 +613,24 @@ describe('platform/azure', () => {
       });
       expect(updatePullRequest.mock.calls).toMatchSnapshot();
     });
+
+    it('should close the PR', async () => {
+      await initRepo({ repository: 'some/repo' });
+      const updatePullRequest = jest.fn();
+      azureApi.gitApi.mockImplementationOnce(
+        () =>
+          ({
+            updatePullRequest,
+          } as any)
+      );
+      await azure.updatePr({
+        number: 1234,
+        prTitle: 'The New Title',
+        prBody: 'Hello world again',
+        state: PrState.Closed,
+      });
+      expect(updatePullRequest.mock.calls).toMatchSnapshot();
+    });
   });
 
   describe('ensureComment', () => {
