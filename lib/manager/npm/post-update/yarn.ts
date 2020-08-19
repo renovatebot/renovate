@@ -1,5 +1,5 @@
 import is from '@sindresorhus/is';
-import { validRange } from 'semver';
+import { minVersion, validRange } from 'semver';
 import { quote } from 'shlex';
 import { join } from 'upath';
 import { SYSTEM_INSUFFICIENT_DISK_SPACE } from '../../../constants/error-messages';
@@ -7,7 +7,7 @@ import { id as npmId } from '../../../datasource/npm';
 import { logger } from '../../../logger';
 import { ExternalHostError } from '../../../types/errors/external-host-error';
 import { ExecOptions, exec } from '../../../util/exec';
-import { readFile, remove } from '../../../util/fs';
+import { readLocalFile, remove } from '../../../util/fs';
 import { PostUpdateConfig, Upgrade } from '../../common';
 import { getNodeConstraint } from './node-version';
 
@@ -19,7 +19,7 @@ export interface GenerateLockFileResult {
 
 export async function hasYarnOfflineMirror(cwd: string): Promise<boolean> {
   try {
-    const yarnrc = await readFile(`${cwd}/.yarnrc`, 'utf8');
+    const yarnrc = await readLocalFile(`${cwd}/.yarnrc`, 'utf8');
     if (is.string(yarnrc)) {
       const mirrorLine = yarnrc
         .split('\n')
@@ -47,13 +47,25 @@ export async function generateLockFile(
   logger.debug(`Spawning yarn install to create ${lockFileName}`);
   let lockFile = null;
   try {
-    let installYarn = 'npm i -g yarn';
     const yarnCompatibility = config.compatibility?.yarn;
-    if (validRange(yarnCompatibility)) {
+    const isValidYarnRange = validRange(yarnCompatibility);
+    const isYarn1 =
+      !isValidYarnRange || minVersion(yarnCompatibility).major === 1;
+
+    let installYarn = 'npm i -g yarn';
+    if (isValidYarnRange) {
       installYarn += `@${quote(yarnCompatibility)}`;
     }
+
     const preCommands = [installYarn];
+
+    const extraEnv: ExecOptions['extraEnv'] = {
+      NPM_CONFIG_CACHE: env.NPM_CONFIG_CACHE,
+      npm_config_store: env.npm_config_store,
+    };
+
     if (
+      isYarn1 &&
       config.skipInstalls !== false &&
       (await hasYarnOfflineMirror(cwd)) === false
     ) {
@@ -65,15 +77,16 @@ export async function generateLockFile(
     let cmdOptions =
       '--ignore-engines --ignore-platform --network-timeout 100000';
     if (global.trustLevel !== 'high' || config.ignoreScripts) {
-      cmdOptions += ' --ignore-scripts';
+      if (isYarn1) {
+        cmdOptions += ' --ignore-scripts';
+      } else {
+        extraEnv.YARN_ENABLE_SCRIPTS = '0';
+      }
     }
     const tagConstraint = await getNodeConstraint(config);
     const execOptions: ExecOptions = {
       cwd,
-      extraEnv: {
-        NPM_CONFIG_CACHE: env.NPM_CONFIG_CACHE,
-        npm_config_store: env.npm_config_store,
-      },
+      extraEnv,
       docker: {
         image: 'renovate/node',
         tagScheme: 'npm',
@@ -103,13 +116,13 @@ export async function generateLockFile(
     }
 
     // postUpdateOptions
-    if (config.postUpdateOptions?.includes('yarnDedupeFewer')) {
+    if (isYarn1 && config.postUpdateOptions?.includes('yarnDedupeFewer')) {
       logger.debug('Performing yarn dedupe fewer');
       commands.push('npx yarn-deduplicate --strategy fewer');
       // Run yarn again in case any changes are necessary
       commands.push(`yarn install ${cmdOptions}`.trim());
     }
-    if (config.postUpdateOptions?.includes('yarnDedupeHighest')) {
+    if (isYarn1 && config.postUpdateOptions?.includes('yarnDedupeHighest')) {
       logger.debug('Performing yarn dedupe highest');
       commands.push('npx yarn-deduplicate --strategy highest');
       // Run yarn again in case any changes are necessary
@@ -134,7 +147,7 @@ export async function generateLockFile(
     await exec(commands, execOptions);
 
     // Read the result
-    lockFile = await readFile(lockFileName, 'utf8');
+    lockFile = await readLocalFile(lockFileName, 'utf8');
   } catch (err) /* istanbul ignore next */ {
     logger.debug(
       {

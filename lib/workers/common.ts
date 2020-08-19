@@ -1,3 +1,4 @@
+import type { Merge } from 'type-fest';
 import {
   GroupConfig,
   RenovateAdminConfig,
@@ -15,7 +16,6 @@ import {
 import { PlatformPrOptions } from '../platform';
 import { File } from '../util/git';
 import { ChangeLogResult } from './pr/changelog/common';
-import { Merge } from 'type-fest';
 
 export interface BranchUpgradeConfig
   extends Merge<RenovateConfig, PackageDependency>,
