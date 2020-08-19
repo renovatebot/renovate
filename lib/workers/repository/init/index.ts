@@ -20,8 +20,9 @@ async function initializeCaches(config: RenovateConfig): Promise<void> {
 }
 
 async function getRepoConfig(config_: RenovateConfig): Promise<RenovateConfig> {
-  const config = { ...config_ };
+  let config = { ...config_ };
   config.semanticCommits = await detectSemanticCommits(config);
+  config = await checkOnboardingBranch(config);
   return config;
 }
 
@@ -32,7 +33,6 @@ export async function initRepo(
   await initializeCaches(config);
   config = await initApis(config);
   config = await getRepoConfig(config);
-  config = await checkOnboardingBranch(config);
   checkIfConfigured(config);
   await setBranchPrefix(config.branchPrefix);
   config = await detectVulnerabilityAlerts(config);
