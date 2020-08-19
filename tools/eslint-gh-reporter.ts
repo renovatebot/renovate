@@ -38,7 +38,7 @@ const formatter: CLIEngine.Formatter = (results) => {
       }
     }
   } catch (e) {
-    error(`Unexpected error: ${e}`);
+    error(`Unexpected error: ${(e as Error).toString()}`);
   }
   return '';
 };
