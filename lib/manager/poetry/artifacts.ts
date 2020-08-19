@@ -67,7 +67,7 @@ function getSourceCredentialVars(
   packageFileName: string
 ): { [s: string]: string } {
   const poetrySources = getPoetrySources(pyprojectContent, packageFileName);
-  const envVars = {};
+  const envVars: { [s: string]: string } = {};
 
   for (const source of poetrySources) {
     const matchingHostRule = find({ url: source.url });
@@ -122,14 +122,14 @@ export async function updateArtifacts({
     const tagConstraint = getPythonConstraint(existingLockFileContent, config);
     const poetryRequirement = config.compatibility?.poetry || 'poetry';
     const poetryInstall = 'pip install ' + quote(poetryRequirement);
-    const sourceCredentialVars = getSourceCredentialVars(
+    const extraEnv = getSourceCredentialVars(
       newPackageFileContent,
       packageFileName
     );
 
     const execOptions: ExecOptions = {
       cwdFile: packageFileName,
-      extraEnv: sourceCredentialVars,
+      extraEnv,
       docker: {
         image: 'renovate/python',
         tagConstraint,
