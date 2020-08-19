@@ -16,7 +16,7 @@ export async function checkOnboardingBranch(
 ): Promise<RenovateConfig> {
   logger.debug('checkOnboarding()');
   logger.trace({ config });
-  const repoIsOnboarded = config.repoIsOnboarded ?? (await isOnboarded(config));
+  const repoIsOnboarded = await isOnboarded(config);
   if (repoIsOnboarded) {
     logger.debug('Repo is onboarded');
     return { ...config, repoIsOnboarded };
