@@ -1,13 +1,12 @@
-import { PLATFORM_FAILURE } from '../../../constants/error-messages';
-import { PLATFORM_TYPE_GITHUB } from '../../../constants/platforms';
 import { logger } from '../../../logger';
-import { Http, HttpOptions } from '../../../util/http';
+import { ExternalHostError } from '../../../types/errors/external-host-error';
+import { GithubHttp } from '../../../util/http/github';
 import { Preset, PresetConfig } from '../common';
 import { PRESET_DEP_NOT_FOUND, fetchPreset } from '../util';
 
 export const Endpoint = 'https://api.github.com/';
 
-const http = new Http(PLATFORM_TYPE_GITHUB);
+const http = new GithubHttp();
 
 export async function fetchJSONFile(
   repo: string,
@@ -15,19 +14,12 @@ export async function fetchJSONFile(
   endpoint: string
 ): Promise<Preset> {
   const url = `${endpoint}repos/${repo}/contents/${fileName}`;
-  const opts: HttpOptions = {
-    headers: {
-      accept: global.appMode
-        ? 'application/vnd.github.machine-man-preview+json'
-        : 'application/vnd.github.v3+json',
-    },
-  };
   let res: { body: { content: string } };
   try {
-    res = await http.getJson(url, opts);
+    res = await http.getJson(url);
   } catch (err) {
     // istanbul ignore if: not testable with nock
-    if (err.message === PLATFORM_FAILURE) {
+    if (err instanceof ExternalHostError) {
       throw err;
     }
     logger.debug(
@@ -45,7 +37,7 @@ export async function fetchJSONFile(
   }
 }
 
-export async function getPresetFromEndpoint(
+export function getPresetFromEndpoint(
   pkgName: string,
   filePreset: string,
   endpoint = Endpoint

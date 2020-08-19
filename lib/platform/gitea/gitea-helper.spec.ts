@@ -1,5 +1,5 @@
 import * as httpMock from '../../../test/httpMock';
-import { PR_STATE_CLOSED } from '../../constants/pull-requests';
+import { PrState } from '../../types';
 import { setBaseUrl } from '../../util/http/gitea';
 import * as ght from './gitea-helper';
 
@@ -63,7 +63,7 @@ describe('platform/gitea/gitea-helper', () => {
 
   const mockPR: ght.PR = {
     number: 13,
-    state: 'open',
+    state: PrState.Open,
     title: 'Some PR',
     body: 'Lorem ipsum dolor sit amet',
     mergeable: true,
@@ -306,7 +306,7 @@ describe('platform/gitea/gitea-helper', () => {
     it('should call /api/v1/repos/[repo]/pulls/[pull] endpoint', async () => {
       const updatedMockPR: ght.PR = {
         ...mockPR,
-        state: 'closed',
+        state: PrState.Closed,
         title: 'new-title',
         body: 'new-body',
       };
@@ -317,7 +317,7 @@ describe('platform/gitea/gitea-helper', () => {
         .reply(200, updatedMockPR);
 
       const res = await ght.updatePR(mockRepo.full_name, mockPR.number, {
-        state: PR_STATE_CLOSED,
+        state: PrState.Closed,
         title: 'new-title',
         body: 'new-body',
         assignees: [otherMockUser.username],
@@ -392,7 +392,7 @@ describe('platform/gitea/gitea-helper', () => {
         .reply(200, [mockPR]);
 
       const res = await ght.searchPRs(mockRepo.full_name, {
-        state: 'open',
+        state: PrState.Open,
         labels: [mockLabel.id, otherMockLabel.id],
       });
       expect(res).toEqual([mockPR]);
@@ -461,7 +461,7 @@ describe('platform/gitea/gitea-helper', () => {
     it('should call /api/v1/repos/[repo]/issues endpoint', async () => {
       httpMock
         .scope(baseUrl)
-        .get(`/repos/${mockRepo.full_name}/issues`)
+        .get(`/repos/${mockRepo.full_name}/issues?type=issues`)
         .reply(200, [mockIssue]);
 
       const res = await ght.searchIssues(mockRepo.full_name, {});
@@ -472,7 +472,7 @@ describe('platform/gitea/gitea-helper', () => {
     it('should construct proper query parameters', async () => {
       httpMock
         .scope(baseUrl)
-        .get(`/repos/${mockRepo.full_name}/issues?state=open`)
+        .get(`/repos/${mockRepo.full_name}/issues?state=open&type=issues`)
         .reply(200, [mockIssue]);
 
       const res = await ght.searchIssues(mockRepo.full_name, {

@@ -1,4 +1,4 @@
-import { defaultConfig, mocked, platform } from '../../../test/util';
+import { defaultConfig, git, mocked } from '../../../test/util';
 import * as datasourceGitSubmodules from '../../datasource/git-submodules';
 import * as _composer from '../../manager/composer';
 import * as _gitSubmodules from '../../manager/git-submodules';
@@ -15,6 +15,7 @@ const autoReplace = mocked(_autoReplace);
 jest.mock('../../manager/composer');
 jest.mock('../../manager/npm');
 jest.mock('../../manager/git-submodules');
+jest.mock('../../util/git');
 jest.mock('./auto-replace');
 
 describe('workers/branch/get-updated', () => {
@@ -26,7 +27,7 @@ describe('workers/branch/get-updated', () => {
         upgrades: [],
       } as never;
       npm.updateDependency = jest.fn();
-      platform.getFile.mockResolvedValueOnce('existing content');
+      git.getFile.mockResolvedValueOnce('existing content');
     });
     it('handles autoreplace base updated', async () => {
       config.upgrades.push({ manager: 'html', branchName: undefined });

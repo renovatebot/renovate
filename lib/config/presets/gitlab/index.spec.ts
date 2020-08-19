@@ -1,6 +1,6 @@
 import * as httpMock from '../../../../test/httpMock';
 import { getName } from '../../../../test/util';
-import { PLATFORM_FAILURE } from '../../../constants/error-messages';
+import { EXTERNAL_HOST_ERROR } from '../../../constants/error-messages';
 import { PRESET_DEP_NOT_FOUND } from '../util';
 import * as gitlab from '.';
 
@@ -18,14 +18,14 @@ describe(getName(__filename), () => {
   });
 
   describe('getPreset()', () => {
-    it('throws platform-failure', async () => {
+    it('throws EXTERNAL_HOST_ERROR', async () => {
       httpMock.scope(gitlabApiHost).get(`${basePath}/branches`).reply(500);
       await expect(
         gitlab.getPreset({
           packageName: 'some/repo',
           presetName: 'non-default',
         })
-      ).rejects.toThrow(PLATFORM_FAILURE);
+      ).rejects.toThrow(EXTERNAL_HOST_ERROR);
       expect(httpMock.getTrace()).toMatchSnapshot();
     });
 

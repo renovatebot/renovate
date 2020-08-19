@@ -188,7 +188,7 @@ describe('datasource/nuget', () => {
       httpMock
         .scope('https://www.nuget.org')
         .get(
-          '/api/v2//FindPackagesById()?id=%27nunit%27&$select=Version,IsLatestVersion,ProjectUrl'
+          '/api/v2/FindPackagesById()?id=%27nunit%27&$select=Version,IsLatestVersion,ProjectUrl,Published'
         )
         .reply(200, null);
       expect(
@@ -202,7 +202,7 @@ describe('datasource/nuget', () => {
       httpMock
         .scope('https://www.nuget.org')
         .get(
-          '/api/v2//FindPackagesById()?id=%27nunit%27&$select=Version,IsLatestVersion,ProjectUrl'
+          '/api/v2/FindPackagesById()?id=%27nunit%27&$select=Version,IsLatestVersion,ProjectUrl,Published'
         )
         .reply(200, {});
       expect(
@@ -229,7 +229,7 @@ describe('datasource/nuget', () => {
       httpMock
         .scope('https://www.nuget.org')
         .get(
-          '/api/v2//FindPackagesById()?id=%27nunit%27&$select=Version,IsLatestVersion,ProjectUrl'
+          '/api/v2/FindPackagesById()?id=%27nunit%27&$select=Version,IsLatestVersion,ProjectUrl,Published'
         )
         .reply(500);
       expect(
@@ -252,7 +252,7 @@ describe('datasource/nuget', () => {
       httpMock
         .scope('https://www.nuget.org')
         .get(
-          '/api/v2//FindPackagesById()?id=%27nunit%27&$select=Version,IsLatestVersion,ProjectUrl'
+          '/api/v2/FindPackagesById()?id=%27nunit%27&$select=Version,IsLatestVersion,ProjectUrl,Published'
         )
         .reply(500);
       expect(
@@ -271,7 +271,7 @@ describe('datasource/nuget', () => {
       httpMock
         .scope('https://www.nuget.org')
         .get(
-          '/api/v2//FindPackagesById()?id=%27nunit%27&$select=Version,IsLatestVersion,ProjectUrl'
+          '/api/v2/FindPackagesById()?id=%27nunit%27&$select=Version,IsLatestVersion,ProjectUrl,Published'
         )
         .replyWithError('');
       expect(
@@ -339,7 +339,7 @@ describe('datasource/nuget', () => {
       httpMock
         .scope('https://www.nuget.org')
         .get(
-          '/api/v2//FindPackagesById()?id=%27nunit%27&$select=Version,IsLatestVersion,ProjectUrl'
+          '/api/v2/FindPackagesById()?id=%27nunit%27&$select=Version,IsLatestVersion,ProjectUrl,Published'
         )
         .replyWithError('');
       expect(
@@ -441,7 +441,7 @@ describe('datasource/nuget', () => {
       httpMock
         .scope('https://www.nuget.org')
         .get(
-          '/api/v2//FindPackagesById()?id=%27nunit%27&$select=Version,IsLatestVersion,ProjectUrl'
+          '/api/v2/FindPackagesById()?id=%27nunit%27&$select=Version,IsLatestVersion,ProjectUrl,Published'
         )
         .reply(200, pkgListV2);
       const res = await getPkgReleases({
@@ -456,7 +456,7 @@ describe('datasource/nuget', () => {
       httpMock
         .scope('https://www.nuget.org')
         .get(
-          '/api/v2//FindPackagesById()?id=%27nunit%27&$select=Version,IsLatestVersion,ProjectUrl'
+          '/api/v2/FindPackagesById()?id=%27nunit%27&$select=Version,IsLatestVersion,ProjectUrl,Published'
         )
         .reply(200, pkgListV2NoRelease);
       const res = await getPkgReleases({
@@ -469,7 +469,7 @@ describe('datasource/nuget', () => {
       httpMock
         .scope('https://www.nuget.org')
         .get(
-          '/api/v2//FindPackagesById()?id=%27nunit%27&$select=Version,IsLatestVersion,ProjectUrl'
+          '/api/v2/FindPackagesById()?id=%27nunit%27&$select=Version,IsLatestVersion,ProjectUrl,Published'
         )
         .reply(200, pkgListV2WithoutProjectUrl);
       const res = await getPkgReleases({
@@ -484,7 +484,7 @@ describe('datasource/nuget', () => {
       httpMock
         .scope('https://www.nuget.org')
         .get(
-          '/api/v2//FindPackagesById()?id=%27nunit%27&$select=Version,IsLatestVersion,ProjectUrl'
+          '/api/v2/FindPackagesById()?id=%27nunit%27&$select=Version,IsLatestVersion,ProjectUrl,Published'
         )
         .reply(200, pkgListV2NoGitHubProjectUrl);
       const res = await getPkgReleases({
@@ -498,7 +498,7 @@ describe('datasource/nuget', () => {
       httpMock
         .scope('https://www.nuget.org')
         .get(
-          '/api/v2//FindPackagesById()?id=%27nunit%27&$select=Version,IsLatestVersion,ProjectUrl'
+          '/api/v2/FindPackagesById()?id=%27nunit%27&$select=Version,IsLatestVersion,ProjectUrl,Published'
         )
         .reply(200, pkgListV2Page1of2);
       httpMock

@@ -1,7 +1,10 @@
 import { mocked } from '../../test/util';
-import { DATASOURCE_FAILURE } from '../constants/error-messages';
+import {
+  EXTERNAL_HOST_ERROR,
+  HOST_DISABLED,
+} from '../constants/error-messages';
+import { ExternalHostError } from '../types/errors/external-host-error';
 import { loadModules } from '../util/modules';
-import { DatasourceError } from './common';
 import * as datasourceDocker from './docker';
 import * as datasourceGithubTags from './github-tags';
 import * as datasourceMaven from './maven';
@@ -27,7 +30,7 @@ describe('datasource/index', () => {
     expect(datasource.getDatasources()).toBeDefined();
     expect(datasource.getDatasourceList()).toBeDefined();
   });
-  it('validates dataource', async () => {
+  it('validates dataource', () => {
     function validateDatasource(
       module: datasource.Datasource,
       name: string
@@ -46,13 +49,13 @@ describe('datasource/index', () => {
     expect(Array.from(dss.keys())).toEqual(Object.keys(loadedDs));
 
     for (const dsName of dss.keys()) {
-      const ds = await dss.get(dsName);
+      const ds = dss.get(dsName);
       expect(validateDatasource(ds, dsName)).toBe(true);
     }
   });
-  it('returns if digests are supported', async () => {
+  it('returns if digests are supported', () => {
     expect(
-      await datasource.supportsDigests({ datasource: datasourceGithubTags.id })
+      datasource.supportsDigests({ datasource: datasourceGithubTags.id })
     ).toBe(true);
   });
   it('returns null for no datasource', async () => {
@@ -131,9 +134,21 @@ describe('datasource/index', () => {
     });
     expect(res).not.toBeNull();
   });
-  it('hunts registries and aborts on DatasourceError', async () => {
+  it('returns null for HOST_DISABLED', async () => {
     packagistDatasource.getReleases.mockImplementationOnce(() => {
-      throw new DatasourceError(new Error());
+      throw new ExternalHostError(new Error(HOST_DISABLED));
+    });
+    expect(
+      await datasource.getPkgReleases({
+        datasource: datasourcePackagist.id,
+        depName: 'something',
+        registryUrls: ['https://reg1.com'],
+      })
+    ).toBeNull();
+  });
+  it('hunts registries and aborts on ExternalHostError', async () => {
+    packagistDatasource.getReleases.mockImplementationOnce(() => {
+      throw new ExternalHostError(new Error());
     });
     await expect(
       datasource.getPkgReleases({
@@ -141,22 +156,22 @@ describe('datasource/index', () => {
         depName: 'something',
         registryUrls: ['https://reg1.com', 'https://reg2.io'],
       })
-    ).rejects.toThrow(DATASOURCE_FAILURE);
+    ).rejects.toThrow(EXTERNAL_HOST_ERROR);
   });
-  it('hunts registries and passes on error', async () => {
+  it('hunts registries and returns null', async () => {
     packagistDatasource.getReleases.mockImplementationOnce(() => {
       throw new Error('a');
     });
     packagistDatasource.getReleases.mockImplementationOnce(() => {
       throw new Error('b');
     });
-    await expect(
-      datasource.getPkgReleases({
+    expect(
+      await datasource.getPkgReleases({
         datasource: datasourcePackagist.id,
         depName: 'something',
         registryUrls: ['https://reg1.com', 'https://reg2.io'],
       })
-    ).rejects.toThrow('b');
+    ).toBeNull();
   });
   it('merges registries and returns success', async () => {
     mavenDatasource.getReleases.mockResolvedValueOnce({
@@ -173,9 +188,9 @@ describe('datasource/index', () => {
     expect(res).toMatchSnapshot();
     expect(res.releases).toHaveLength(2);
   });
-  it('merges registries and aborts on DatasourceError', async () => {
+  it('merges registries and aborts on ExternalHostError', async () => {
     mavenDatasource.getReleases.mockImplementationOnce(() => {
-      throw new DatasourceError(new Error());
+      throw new ExternalHostError(new Error());
     });
     await expect(
       datasource.getPkgReleases({
@@ -183,22 +198,22 @@ describe('datasource/index', () => {
         depName: 'something',
         registryUrls: ['https://reg1.com', 'https://reg2.io'],
       })
-    ).rejects.toThrow(DATASOURCE_FAILURE);
+    ).rejects.toThrow(EXTERNAL_HOST_ERROR);
   });
-  it('merges registries and passes on error', async () => {
+  it('merges registries and returns null for error', async () => {
     mavenDatasource.getReleases.mockImplementationOnce(() => {
       throw new Error('a');
     });
     mavenDatasource.getReleases.mockImplementationOnce(() => {
       throw new Error('b');
     });
-    await expect(
-      datasource.getPkgReleases({
+    expect(
+      await datasource.getPkgReleases({
         datasource: datasourceMaven.id,
         depName: 'something',
         registryUrls: ['https://reg1.com', 'https://reg2.io'],
       })
-    ).rejects.toThrow('b');
+    ).toBeNull();
   });
   it('trims sourceUrl', async () => {
     npmDatasource.getReleases.mockResolvedValue({

@@ -92,13 +92,15 @@ function sanitizeValue(value: any, seen = new WeakMap()): any {
   return valueType === 'string' ? sanitize(value) : value;
 }
 
+// TODO
+// eslint-disable-next-lint @typescript-eslint/explicit-module-boundary-types
 export function withSanitizer(streamConfig): bunyan.Stream {
   if (streamConfig.type === 'rotating-file') {
     throw new Error("Rotating files aren't supported");
   }
 
   const stream = streamConfig.stream;
-  if (stream && stream.writable) {
+  if (stream?.writable) {
     const write = (chunk: BunyanRecord, enc, cb): void => {
       const raw = sanitizeValue(chunk);
       const result =

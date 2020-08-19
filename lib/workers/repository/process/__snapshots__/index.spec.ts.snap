@@ -4,10 +4,8 @@ exports[`workers/repository/process/index processRepo() processes baseBranches 1
 Object {
   "branchList": Array [
     undefined,
-    undefined,
   ],
   "branches": Array [
-    undefined,
     undefined,
   ],
   "packageFiles": undefined,

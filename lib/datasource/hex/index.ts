@@ -1,6 +1,7 @@
 import { logger } from '../../logger';
+import { ExternalHostError } from '../../types/errors/external-host-error';
 import { Http } from '../../util/http';
-import { DatasourceError, GetReleasesConfig, ReleaseResult } from '../common';
+import { GetReleasesConfig, ReleaseResult } from '../common';
 
 export const id = 'hex';
 
@@ -57,29 +58,18 @@ export async function getReleases({
       result.homepage = homepage;
     }
 
-    if (meta && meta.links && meta.links.Github) {
+    if (meta?.links?.Github) {
       result.sourceUrl = hexRelease.meta.links.Github;
     }
 
     return result;
   } catch (err) {
-    const errorData = { lookupName, err };
-
     if (
       err.statusCode === 429 ||
       (err.statusCode >= 500 && err.statusCode < 600)
     ) {
-      throw new DatasourceError(err);
+      throw new ExternalHostError(err);
     }
-
-    if (err.statusCode === 401) {
-      logger.debug(errorData, 'Authorization error');
-    } else if (err.statusCode === 404) {
-      logger.debug(errorData, 'Package lookup error');
-    } else {
-      logger.warn(errorData, 'hex lookup failure: Unknown error');
-    }
+    throw err;
   }
-
-  return null;
 }

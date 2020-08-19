@@ -121,6 +121,13 @@ container_pull(
     repository = \\"distroless/python3-debian10\\",
     tag = \\"latest\\",
 )
+
+http_file(
+    name=\\"distroless\\",
+    sha256=\\"f7a6ecfb8174a1dd4713ea3b21621072996ada7e8f1a69e6ae7581be137c6dd6\\",
+    strip_prefix=\\"distroless-446923c3756ceeaa75888f52fcbdd48bb314fbf8\\",
+    urls=[\\"https://github.com/GoogleContainerTools/distroless/archive/446923c3756ceeaa75888f52fcbdd48bb314fbf8.tar.gz\\"]
+)
 "
 `;
 
@@ -130,7 +137,7 @@ Array [
     "headers": Object {
       "accept-encoding": "gzip, deflate",
       "host": "github.com",
-      "user-agent": "got/9.6.0 (https://github.com/sindresorhus/got)",
+      "user-agent": "https://github.com/renovatebot/renovate",
     },
     "method": "GET",
     "url": "https://github.com/GoogleContainerTools/distroless/archive/033387ac8853e6cc1cd47df6c346bc53cbc490d8.tar.gz",
@@ -156,7 +163,7 @@ Array [
     "headers": Object {
       "accept-encoding": "gzip, deflate",
       "host": "github.com",
-      "user-agent": "got/9.6.0 (https://github.com/sindresorhus/got)",
+      "user-agent": "https://github.com/renovatebot/renovate",
     },
     "method": "GET",
     "url": "https://github.com/bazelbuild/bazel-skylib/archive/0.8.0.tar.gz",
@@ -170,7 +177,7 @@ Array [
     "headers": Object {
       "accept-encoding": "gzip, deflate",
       "host": "github.com",
-      "user-agent": "got/9.6.0 (https://github.com/sindresorhus/got)",
+      "user-agent": "https://github.com/renovatebot/renovate",
     },
     "method": "GET",
     "url": "https://github.com/bazelbuild/bazel-skylib/archive/0.8.0.tar.gz",
@@ -184,7 +191,7 @@ Array [
     "headers": Object {
       "accept-encoding": "gzip, deflate",
       "host": "mirror.bazel.build",
-      "user-agent": "got/9.6.0 (https://github.com/sindresorhus/got)",
+      "user-agent": "https://github.com/renovatebot/renovate",
     },
     "method": "GET",
     "url": "https://mirror.bazel.build/github.com/bazelbuild/bazel-skylib/archive/0.6.2.tar.gz",
@@ -193,7 +200,7 @@ Array [
     "headers": Object {
       "accept-encoding": "gzip, deflate",
       "host": "github.com",
-      "user-agent": "got/9.6.0 (https://github.com/sindresorhus/got)",
+      "user-agent": "https://github.com/renovatebot/renovate",
     },
     "method": "GET",
     "url": "https://github.com/bazelbuild/bazel-skylib/archive/0.6.2.tar.gz",

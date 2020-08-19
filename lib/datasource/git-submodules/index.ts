@@ -1,11 +1,14 @@
 import { URL } from 'url';
-import Git from 'simple-git/promise';
+import Git from 'simple-git';
 
-import { logger } from '../../logger';
-import * as globalCache from '../../util/cache/global';
+import * as packageCache from '../../util/cache/package';
 import { DigestConfig, GetReleasesConfig, ReleaseResult } from '../common';
 
 export const id = 'git-submodules';
+
+export const defaultConfig = {
+  pinDigests: false,
+};
 
 export async function getReleases({
   lookupName,
@@ -13,7 +16,7 @@ export async function getReleases({
 }: GetReleasesConfig): Promise<ReleaseResult | null> {
   const cacheNamespace = 'datasource-git-submodules';
   const cacheKey = `${registryUrls[0]}-${registryUrls[1]}`;
-  const cachedResult = await globalCache.get<ReleaseResult>(
+  const cachedResult = await packageCache.get<ReleaseResult>(
     cacheNamespace,
     cacheKey
   );
@@ -23,31 +26,26 @@ export async function getReleases({
   }
 
   const git = Git();
-  try {
-    const newHash = (
-      await git.listRemote(['--refs', registryUrls[0], registryUrls[1]])
-    )
-      .trim()
-      .split(/\t/)[0];
+  const newHash = (
+    await git.listRemote(['--refs', registryUrls[0], registryUrls[1]])
+  )
+    .trim()
+    .split(/\t/)[0];
 
-    const sourceUrl = new URL(registryUrls[0]);
-    sourceUrl.username = '';
+  const sourceUrl = new URL(registryUrls[0]);
+  sourceUrl.username = '';
 
-    const result = {
-      sourceUrl: sourceUrl.href,
-      releases: [
-        {
-          version: newHash,
-        },
-      ],
-    };
-    const cacheMinutes = 60;
-    await globalCache.set(cacheNamespace, cacheKey, result, cacheMinutes);
-    return result;
-  } catch (err) {
-    logger.debug({ err }, `Git-SubModules lookup error in ${lookupName}`);
-  }
-  return null;
+  const result = {
+    sourceUrl: sourceUrl.href,
+    releases: [
+      {
+        version: newHash,
+      },
+    ],
+  };
+  const cacheMinutes = 60;
+  await packageCache.set(cacheNamespace, cacheKey, result, cacheMinutes);
+  return result;
 }
 
 export const getDigest = (

@@ -1,7 +1,7 @@
 import fs from 'fs';
 import { getPkgReleases } from '..';
 import * as httpMock from '../../../test/httpMock';
-import { DATASOURCE_FAILURE } from '../../constants/error-messages';
+import { EXTERNAL_HOST_ERROR } from '../../constants/error-messages';
 import * as _hostRules from '../../util/host-rules';
 import { id as datasource } from '.';
 
@@ -67,14 +67,14 @@ describe('datasource/hex', () => {
       httpMock.scope(baseUrl).get('/some_crate').reply(429);
       await expect(
         getPkgReleases({ datasource, depName: 'some_crate' })
-      ).rejects.toThrow(DATASOURCE_FAILURE);
+      ).rejects.toThrow(EXTERNAL_HOST_ERROR);
       expect(httpMock.getTrace()).toMatchSnapshot();
     });
     it('throws for 5xx', async () => {
       httpMock.scope(baseUrl).get('/some_crate').reply(502);
       await expect(
         getPkgReleases({ datasource, depName: 'some_crate' })
-      ).rejects.toThrow(DATASOURCE_FAILURE);
+      ).rejects.toThrow(EXTERNAL_HOST_ERROR);
       expect(httpMock.getTrace()).toMatchSnapshot();
     });
     it('returns null for unknown error', async () => {

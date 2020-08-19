@@ -20,7 +20,7 @@ A real world example for this specific datasource would be maintaining system pa
       "matchStrings": [
         "#\\s*renovate:\\s*datasource=(?<datasource>.*?) depName=(?<depName>.*?)( versioning=(?<versioning>.*?))?\\sENV .*?_VERSION=(?<currentValue>.*)\\s"
       ],
-      "versioningTemplate": "{{#if versioning}}{{versioning}}{{else}}semver{{/if}}"
+      "versioningTemplate": "{{#if versioning}}{{{versioning}}}{{else}}semver{{/if}}"
     }
   ]
 }

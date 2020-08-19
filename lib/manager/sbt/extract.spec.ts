@@ -20,6 +20,11 @@ const sbtDependencyFile = readFileSync(
   'utf8'
 );
 
+const sbtPrivateVariableDependencyFile = readFileSync(
+  resolve(__dirname, `./__fixtures__/private-variable-dependency-file.scala`),
+  'utf8'
+);
+
 describe('lib/manager/sbt/extract', () => {
   describe('extractPackageFile()', () => {
     it('returns null for empty', () => {
@@ -77,6 +82,11 @@ describe('lib/manager/sbt/extract', () => {
         libraryDependencies += "org.example" %% "bar" % "0.0.2"
       `;
       expect(extractPackageFile(content)).toMatchSnapshot();
+    });
+    it('extract deps from native scala file with private variables', () => {
+      expect(
+        extractPackageFile(sbtPrivateVariableDependencyFile)
+      ).toMatchSnapshot();
     });
   });
 });

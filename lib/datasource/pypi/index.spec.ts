@@ -6,11 +6,17 @@ import { id as datasource } from '.';
 const res1: any = fs.readFileSync(
   'lib/datasource/pypi/__fixtures__/azure-cli-monitor.json'
 );
+const res2: any = fs.readFileSync(
+  'lib/datasource/pypi/__fixtures__/azure-cli-monitor-updated.json'
+);
 const htmlResponse = fs.readFileSync(
   'lib/datasource/pypi/__fixtures__/versions-html.html'
 );
 const badResponse = fs.readFileSync(
   'lib/datasource/pypi/__fixtures__/versions-html-badfile.html'
+);
+const dataRequiresPythonResponse = fs.readFileSync(
+  'lib/datasource/pypi/__fixtures__/versions-html-data-requires-python.html'
 );
 const mixedHyphensResponse = fs.readFileSync(
   'lib/datasource/pypi/__fixtures__/versions-html-mixed-hyphens.html'
@@ -46,6 +52,7 @@ describe('datasource/pypi', () => {
     });
     it('returns null for 404', async () => {
       httpMock.scope(baseUrl).get('/something/json').reply(404);
+      httpMock.scope(baseUrl).get('/something').reply(404);
       expect(
         await getPkgReleases({
           datasource,
@@ -91,6 +98,10 @@ describe('datasource/pypi', () => {
         .scope('https://second-index/foo')
         .get('/azure-cli-monitor/json')
         .reply(200, JSON.parse(res1));
+      httpMock
+        .scope('https://third-index/foo')
+        .get('/azure-cli-monitor/json')
+        .reply(200, JSON.parse(res2));
       const config = {
         registryUrls: [
           'https://custom.pypi.net/foo',
@@ -98,10 +109,14 @@ describe('datasource/pypi', () => {
           'https://third-index/foo',
         ],
       };
-      await getPkgReleases({
+      const res = await getPkgReleases({
         ...config,
         datasource,
         depName: 'azure-cli-monitor',
+      });
+      expect(res.releases.pop()).toMatchObject({
+        version: '0.2.15',
+        releaseTimestamp: '2019-06-18T13:58:55',
       });
       expect(httpMock.getTrace()).toMatchSnapshot();
     });
@@ -200,7 +215,7 @@ describe('datasource/pypi', () => {
       httpMock
         .scope('https://pypi.org/simple/')
         .get('/dj-database-url')
-        .reply(200, htmlResponse + '');
+        .reply(200, htmlResponse);
       const config = {
         registryUrls: ['https://pypi.org/simple/'],
       };
@@ -218,7 +233,7 @@ describe('datasource/pypi', () => {
       httpMock
         .scope('https://some.registry.org/+simple/')
         .get('/dj-database-url')
-        .reply(200, htmlResponse + '');
+        .reply(200, htmlResponse);
       const config = {
         registryUrls: ['https://some.registry.org/+simple/'],
       };
@@ -236,7 +251,7 @@ describe('datasource/pypi', () => {
       httpMock
         .scope('https://pypi.org/simple/')
         .get('/image-collector')
-        .reply(200, mixedHyphensResponse + '');
+        .reply(200, mixedHyphensResponse);
       const config = {
         registryUrls: ['https://pypi.org/simple/'],
       };
@@ -290,7 +305,7 @@ describe('datasource/pypi', () => {
       httpMock
         .scope('https://pypi.org/simple/')
         .get('/dj-database-url')
-        .reply(200, badResponse + '');
+        .reply(200, badResponse);
       const config = {
         registryUrls: ['https://pypi.org/simple/'],
       };
@@ -302,6 +317,44 @@ describe('datasource/pypi', () => {
           depName: 'dj-database-url',
         })
       ).toBeNull();
+    });
+    it('fall back from json and process data from simple endpoint', async () => {
+      httpMock
+        .scope('https://custom.pypi.net/foo')
+        .get('/dj-database-url/json')
+        .reply(404);
+      httpMock
+        .scope('https://custom.pypi.net/foo')
+        .get('/dj-database-url')
+        .reply(200, htmlResponse);
+      const config = {
+        registryUrls: ['https://custom.pypi.net/foo'],
+      };
+      const result = await getPkgReleases({
+        datasource,
+        ...config,
+        depName: 'dj-database-url',
+      });
+      expect(result).toMatchSnapshot();
+      expect(httpMock.getTrace()).toMatchSnapshot();
+    });
+    it('parses data-requires-python and respects compatibility from simple endpoint', async () => {
+      httpMock
+        .scope('https://pypi.org/simple/')
+        .get('/dj-database-url')
+        .reply(200, dataRequiresPythonResponse);
+      const config = {
+        registryUrls: ['https://pypi.org/simple/'],
+      };
+      expect(
+        await getPkgReleases({
+          datasource,
+          compatibility: { python: '2.7' },
+          ...config,
+          depName: 'dj-database-url',
+        })
+      ).toMatchSnapshot();
+      expect(httpMock.getTrace()).toMatchSnapshot();
     });
   });
 });

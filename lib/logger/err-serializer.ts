@@ -2,14 +2,14 @@ import is from '@sindresorhus/is';
 
 Error.stackTraceLimit = 20;
 
-// TODO: remove any type
+// eslint-disable-next-lint @typescript-eslint/explicit-module-boundary-types
 export default function errSerializer(err: any): any {
   const response = {
     ...err,
   };
   if (err.body) {
     response.body = err.body;
-  } else if (err.response && err.response.body) {
+  } else if (err.response?.body) {
     response.body = err.response.body;
   }
   if (err.message) {

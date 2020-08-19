@@ -37,7 +37,6 @@ exports[`platform/azure deleteLabel() Should delete a label 1`] = `
 Array [
   Array [],
   Array [],
-  Array [],
 ]
 `;
 
@@ -133,18 +132,10 @@ exports[`platform/azure getBranchPr(branchName) should return the pr 1`] = `null
 
 exports[`platform/azure getPr(prNo) should return a pr in the right format 1`] = `
 Object {
-  "isModified": false,
+  "hasReviewers": false,
   "labels": Array [
     "renovate",
   ],
-  "number": 1234,
-}
-`;
-
-exports[`platform/azure getPr(prNo) should return a pr thats been modified 1`] = `
-Object {
-  "isModified": true,
-  "labels": Array [],
   "number": 1234,
 }
 `;
@@ -173,15 +164,28 @@ Object {
 exports[`platform/azure initRepo should initialise the config for a repo 1`] = `
 Array [
   Array [],
-  Array [],
 ]
 `;
 
 exports[`platform/azure initRepo should initialise the config for a repo 2`] = `
 Object {
-  "baseBranch": "defBr",
+  "defaultBranch": "defBr",
   "isFork": false,
 }
+`;
+
+exports[`platform/azure updatePr(prNo, title, body) should close the PR 1`] = `
+Array [
+  Array [
+    Object {
+      "description": undefined,
+      "status": 2,
+      "title": "The New Title",
+    },
+    "1",
+    1234,
+  ],
+]
 `;
 
 exports[`platform/azure updatePr(prNo, title, body) should update the PR 1`] = `

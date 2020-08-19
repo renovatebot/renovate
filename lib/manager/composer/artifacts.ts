@@ -9,7 +9,6 @@ import {
 } from '../../constants/platforms';
 import * as datasourcePackagist from '../../datasource/packagist';
 import { logger } from '../../logger';
-import { platform } from '../../platform';
 import { ExecOptions, exec } from '../../util/exec';
 import {
   deleteLocalFile,
@@ -19,6 +18,7 @@ import {
   readLocalFile,
   writeLocalFile,
 } from '../../util/fs';
+import { getRepoStatus } from '../../util/git';
 import * as hostRules from '../../util/host-rules';
 import { UpdateArtifact, UpdateArtifactsResult } from '../common';
 
@@ -54,7 +54,7 @@ export async function updateArtifacts({
       url: 'https://api.github.com/',
     });
     // istanbul ignore if
-    if (credentials && credentials.token) {
+    if (credentials?.token) {
       authJson['github-oauth'] = {
         'github.com': credentials.token,
       };
@@ -64,7 +64,7 @@ export async function updateArtifacts({
       url: 'https://gitlab.com/api/v4/',
     });
     // istanbul ignore if
-    if (credentials && credentials.token) {
+    if (credentials?.token) {
       authJson['gitlab-token'] = {
         'gitlab.com': credentials.token,
       };
@@ -131,7 +131,7 @@ export async function updateArtifacts({
     }
     logger.debug({ cmd, args }, 'composer command');
     await exec(`${cmd} ${args}`, execOptions);
-    const status = await platform.getRepoStatus();
+    const status = await getRepoStatus();
     if (!status.modified.includes(lockFileName)) {
       return null;
     }
@@ -146,16 +146,12 @@ export async function updateArtifacts({
     ];
   } catch (err) {
     if (
-      err.message &&
-      err.message.includes(
+      err.message?.includes(
         'Your requirements could not be resolved to an installable set of packages.'
       )
     ) {
       logger.info('Composer requirements cannot be resolved');
-    } else if (
-      err.message &&
-      err.message.includes('write error (disk full?)')
-    ) {
+    } else if (err.message?.includes('write error (disk full?)')) {
       throw new Error(SYSTEM_INSUFFICIENT_DISK_SPACE);
     } else {
       logger.debug({ err }, 'Failed to generate composer.lock');

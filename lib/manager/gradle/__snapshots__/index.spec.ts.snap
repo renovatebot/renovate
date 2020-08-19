@@ -3,11 +3,12 @@
 exports[`manager/gradle/index extractPackageFile should configure the renovate report plugin 1`] = `
 Array [
   Object {
-    "cmd": "./gradlew --init-script renovate-plugin.gradle renovate",
+    "cmd": "<gradlew> --init-script renovate-plugin.gradle renovate",
     "options": Object {
       "cwd": "localDir",
       "encoding": "utf-8",
       "env": Object {
+        "GRADLE_OPTS": "-Dorg.gradle.parallel=true -Dorg.gradle.configureondemand=true -Dorg.gradle.daemon=false -Dorg.gradle.caching=false",
         "HOME": "/home/user",
         "HTTPS_PROXY": "https://example.com",
         "HTTP_PROXY": "http://example.com",
@@ -30,6 +31,7 @@ Array [
       "cwd": "localDir",
       "encoding": "utf-8",
       "env": Object {
+        "GRADLE_OPTS": "-Dorg.gradle.parallel=true -Dorg.gradle.configureondemand=true -Dorg.gradle.daemon=false -Dorg.gradle.caching=false",
         "HOME": "/home/user",
         "HTTPS_PROXY": "https://example.com",
         "HTTP_PROXY": "http://example.com",
@@ -47,11 +49,12 @@ Array [
 exports[`manager/gradle/index extractPackageFile should execute gradlew when available 1`] = `
 Array [
   Object {
-    "cmd": "./gradlew --init-script renovate-plugin.gradle renovate",
+    "cmd": "<gradlew> --init-script renovate-plugin.gradle renovate",
     "options": Object {
       "cwd": "localDir",
       "encoding": "utf-8",
       "env": Object {
+        "GRADLE_OPTS": "-Dorg.gradle.parallel=true -Dorg.gradle.configureondemand=true -Dorg.gradle.daemon=false -Dorg.gradle.caching=false",
         "HOME": "/home/user",
         "HTTPS_PROXY": "https://example.com",
         "HTTP_PROXY": "http://example.com",
@@ -69,11 +72,12 @@ Array [
 exports[`manager/gradle/index extractPackageFile should execute gradlew.bat when available on Windows 1`] = `
 Array [
   Object {
-    "cmd": "gradlew.bat --init-script renovate-plugin.gradle renovate",
+    "cmd": "<gradlew> --init-script renovate-plugin.gradle renovate",
     "options": Object {
       "cwd": "localDir",
       "encoding": "utf-8",
       "env": Object {
+        "GRADLE_OPTS": "-Dorg.gradle.parallel=true -Dorg.gradle.configureondemand=true -Dorg.gradle.daemon=false -Dorg.gradle.caching=false",
         "HOME": "/home/user",
         "HTTPS_PROXY": "https://example.com",
         "HTTP_PROXY": "http://example.com",
@@ -91,11 +95,12 @@ Array [
 exports[`manager/gradle/index extractPackageFile should return empty if renovate report is invalid 1`] = `
 Array [
   Object {
-    "cmd": "./gradlew --init-script renovate-plugin.gradle renovate",
+    "cmd": "<gradlew> --init-script renovate-plugin.gradle renovate",
     "options": Object {
       "cwd": "localDir",
       "encoding": "utf-8",
       "env": Object {
+        "GRADLE_OPTS": "-Dorg.gradle.parallel=true -Dorg.gradle.configureondemand=true -Dorg.gradle.daemon=false -Dorg.gradle.caching=false",
         "HOME": "/home/user",
         "HTTPS_PROXY": "https://example.com",
         "HTTP_PROXY": "http://example.com",
@@ -113,11 +118,12 @@ Array [
 exports[`manager/gradle/index extractPackageFile should return empty if there are no dependencies 1`] = `
 Array [
   Object {
-    "cmd": "./gradlew --init-script renovate-plugin.gradle renovate",
+    "cmd": "<gradlew> --init-script renovate-plugin.gradle renovate",
     "options": Object {
       "cwd": "localDir",
       "encoding": "utf-8",
       "env": Object {
+        "GRADLE_OPTS": "-Dorg.gradle.parallel=true -Dorg.gradle.configureondemand=true -Dorg.gradle.daemon=false -Dorg.gradle.caching=false",
         "HOME": "/home/user",
         "HTTPS_PROXY": "https://example.com",
         "HTTP_PROXY": "http://example.com",
@@ -135,11 +141,12 @@ Array [
 exports[`manager/gradle/index extractPackageFile should return empty if there is no dependency report 1`] = `
 Array [
   Object {
-    "cmd": "./gradlew --init-script renovate-plugin.gradle renovate",
+    "cmd": "<gradlew> --init-script renovate-plugin.gradle renovate",
     "options": Object {
       "cwd": "localDir",
       "encoding": "utf-8",
       "env": Object {
+        "GRADLE_OPTS": "-Dorg.gradle.parallel=true -Dorg.gradle.configureondemand=true -Dorg.gradle.daemon=false -Dorg.gradle.caching=false",
         "HOME": "/home/user",
         "HTTPS_PROXY": "https://example.com",
         "HTTP_PROXY": "http://example.com",
@@ -318,11 +325,12 @@ Array [
 exports[`manager/gradle/index extractPackageFile should return gradle dependencies 2`] = `
 Array [
   Object {
-    "cmd": "./gradlew --init-script renovate-plugin.gradle renovate",
+    "cmd": "<gradlew> --init-script renovate-plugin.gradle renovate",
     "options": Object {
       "cwd": "localDir",
       "encoding": "utf-8",
       "env": Object {
+        "GRADLE_OPTS": "-Dorg.gradle.parallel=true -Dorg.gradle.configureondemand=true -Dorg.gradle.daemon=false -Dorg.gradle.caching=false",
         "HOME": "/home/user",
         "HTTPS_PROXY": "https://example.com",
         "HTTP_PROXY": "http://example.com",
@@ -423,11 +431,12 @@ Array [
 exports[`manager/gradle/index extractPackageFile should return gradle dependencies for build.gradle in subdirectories if there is gradlew in the same directory 2`] = `
 Array [
   Object {
-    "cmd": "./gradlew --init-script renovate-plugin.gradle renovate",
+    "cmd": "<gradlew> --init-script renovate-plugin.gradle renovate",
     "options": Object {
       "cwd": "localDir/foo",
       "encoding": "utf-8",
       "env": Object {
+        "GRADLE_OPTS": "-Dorg.gradle.parallel=true -Dorg.gradle.configureondemand=true -Dorg.gradle.daemon=false -Dorg.gradle.caching=false",
         "HOME": "/home/user",
         "HTTPS_PROXY": "https://example.com",
         "HTTP_PROXY": "http://example.com",
@@ -606,11 +615,12 @@ Array [
 exports[`manager/gradle/index extractPackageFile should return gradle.kts dependencies 2`] = `
 Array [
   Object {
-    "cmd": "./gradlew --init-script renovate-plugin.gradle renovate",
+    "cmd": "<gradlew> --init-script renovate-plugin.gradle renovate",
     "options": Object {
       "cwd": "localDir",
       "encoding": "utf-8",
       "env": Object {
+        "GRADLE_OPTS": "-Dorg.gradle.parallel=true -Dorg.gradle.configureondemand=true -Dorg.gradle.daemon=false -Dorg.gradle.caching=false",
         "HOME": "/home/user",
         "HTTPS_PROXY": "https://example.com",
         "HTTP_PROXY": "http://example.com",
@@ -648,11 +658,12 @@ Array [
     },
   },
   Object {
-    "cmd": "docker run --rm --name=renovate_gradle --label=renovate_child -v \\"localDir\\":\\"localDir\\" -w \\"localDir\\" renovate/gradle bash -l -c \\"./gradlew --init-script renovate-plugin.gradle renovate\\"",
+    "cmd": "docker run --rm --name=renovate_gradle --label=renovate_child -v \\"localDir\\":\\"localDir\\" -e GRADLE_OPTS -w \\"localDir\\" renovate/gradle bash -l -c \\"<gradlew> --init-script renovate-plugin.gradle renovate\\"",
     "options": Object {
       "cwd": "localDir",
       "encoding": "utf-8",
       "env": Object {
+        "GRADLE_OPTS": "-Dorg.gradle.parallel=true -Dorg.gradle.configureondemand=true -Dorg.gradle.daemon=false -Dorg.gradle.caching=false",
         "HOME": "/home/user",
         "HTTPS_PROXY": "https://example.com",
         "HTTP_PROXY": "http://example.com",
@@ -688,11 +699,12 @@ Array [
     },
   },
   Object {
-    "cmd": "docker run --rm --name=renovate_gradle --label=renovate_child -v \\"localDir\\":\\"localDir\\" -w \\"localDir\\" renovate/gradle bash -l -c \\"./gradlew --init-script renovate-plugin.gradle renovate\\"",
+    "cmd": "docker run --rm --name=renovate_gradle --label=renovate_child -v \\"localDir\\":\\"localDir\\" -e GRADLE_OPTS -w \\"localDir\\" renovate/gradle bash -l -c \\"<gradlew> --init-script renovate-plugin.gradle renovate\\"",
     "options": Object {
       "cwd": "localDir",
       "encoding": "utf-8",
       "env": Object {
+        "GRADLE_OPTS": "-Dorg.gradle.parallel=true -Dorg.gradle.configureondemand=true -Dorg.gradle.daemon=false -Dorg.gradle.caching=false",
         "HOME": "/home/user",
         "HTTPS_PROXY": "https://example.com",
         "HTTP_PROXY": "http://example.com",
@@ -728,11 +740,12 @@ Array [
     },
   },
   Object {
-    "cmd": "docker run --rm --name=renovate_gradle --label=renovate_child -v \\"localDir\\":\\"localDir\\" -w \\"localDir\\" renovate/gradle bash -l -c \\"gradle --init-script renovate-plugin.gradle renovate\\"",
+    "cmd": "docker run --rm --name=renovate_gradle --label=renovate_child -v \\"localDir\\":\\"localDir\\" -e GRADLE_OPTS -w \\"localDir\\" renovate/gradle bash -l -c \\"gradle --init-script renovate-plugin.gradle renovate\\"",
     "options": Object {
       "cwd": "localDir",
       "encoding": "utf-8",
       "env": Object {
+        "GRADLE_OPTS": "-Dorg.gradle.parallel=true -Dorg.gradle.configureondemand=true -Dorg.gradle.daemon=false -Dorg.gradle.caching=false",
         "HOME": "/home/user",
         "HTTPS_PROXY": "https://example.com",
         "HTTP_PROXY": "http://example.com",
@@ -790,11 +803,12 @@ Array [
 exports[`manager/gradle/index extractPackageFile should use repositories only for current project 2`] = `
 Array [
   Object {
-    "cmd": "./gradlew --init-script renovate-plugin.gradle renovate",
+    "cmd": "<gradlew> --init-script renovate-plugin.gradle renovate",
     "options": Object {
       "cwd": "localDir",
       "encoding": "utf-8",
       "env": Object {
+        "GRADLE_OPTS": "-Dorg.gradle.parallel=true -Dorg.gradle.configureondemand=true -Dorg.gradle.daemon=false -Dorg.gradle.caching=false",
         "HOME": "/home/user",
         "HTTPS_PROXY": "https://example.com",
         "HTTP_PROXY": "http://example.com",
@@ -814,3 +828,5 @@ exports[`manager/gradle/index updateDependency should update an existing module 
 exports[`manager/gradle/index updateDependency should update an existing plugin dependency 1`] = `Array []`;
 
 exports[`manager/gradle/index updateDependency should update an existing plugin dependency with Kotlin DSL 1`] = `Array []`;
+
+exports[`manager/gradle/index updateDependency should update dependencies in same file 1`] = `Array []`;

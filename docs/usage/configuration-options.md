@@ -230,6 +230,39 @@ This is used to manually restrict which versions are possible to upgrade to base
 
 Renovate's default behaviour is to reuse/reopen a single Config Warning issue in each repository so as to keep the "noise" down. However for some people this has the downside that the config warning won't be sorted near the top if you view issues by creation date. Configure this option to `false` if you prefer Renovate to open a new issue whenever there is a config warning.
 
+## dependencyDashboard
+
+Configuring `dependencyDashboard` to `true` will lead to the creation of a "Dependency Dashboard" issue within the repository. This issue contains a list of all PRs pending, open, closed (unmerged) or in error. The goal of this issue is to give visibility into all updates that Renovate is managing.
+
+Examples of what having a Dependency Dashboard will allow you to do:
+
+- View all PRs in one place, rather than having to filter PRs by author
+- Rebase/retry multiple PRs without having to open each individually
+- Override any rate limiting (e.g. concurrent PRs) or scheduling to force Renovate to create a PR that would otherwise be suppressed
+- Recreate an unmerged PR (e.g. for a major update that you postponed by closing the original PR)
+
+Note: Enabling the Dependency Dashboard does not itself change any of the "control flow" of Renovate, e.g. it will otherwise still create and manage PRs exactly as it always has, including scheduling and rate limiting. The Dependency Dashboard therefore provides visibility as well as additional control.
+
+## dependencyDashboardApproval
+
+Setting `dependencyDashboardApproval` to `true` means that Renovate will no longer create branches/PRs automatically but instead wait for manual approval from within the Dependency Dashboard.
+
+In this case, the Dependency Dashboard _does_ change the flow of Renovate, because PRs will stop appearing until you approve them within the issue. Instead of enabling this repository-wide, you may instead with to use package rules to enable it selectively, e.g. for major updates only, or for certain package managers, etc. i.e. it is possible to require approval for only certain types of updates only.
+
+Note: Enabling Dependency Dashboard Approval implicitly enables `dependencyDashboard` too, so it is not necessary to configure both to `true`.
+
+## dependencyDashboardAutoclose
+
+You can configure this to `true` if you prefer Renovate to close an existing Dependency Dashboard whenever there are no outstanding PRs left.
+
+## dependencyDashboardFooter
+
+## dependencyDashboardHeader
+
+## dependencyDashboardTitle
+
+Configure this option if you prefer a different title for the Dependency Dashboard.
+
 ## description
 
 The description field is used by config presets to describe what they do. They are then collated as part of the onboarding description.
@@ -429,7 +462,7 @@ Currently the purpose of `hostRules` is to configure credentials for host authen
 
 The lookup keys for a hostRule are: `hostType`, `domainName`, `hostName`, and `baseUrl`. All are optional, but you can only have one of the last three per rule.
 
-Supported credential fields are `token`, `username`, `password`, `timeout` and `insecureRegistry`.
+Supported credential fields are `token`, `username`, `password`, `timeout`, `enabled` and `insecureRegistry`.
 
 Example for configuring `docker` auth:
 
@@ -445,6 +478,90 @@ Example for configuring `docker` auth:
 }
 ```
 
+To disable requests to a particular host, you can configure a rule like:
+
+```json
+{
+  "hostRules": [
+    {
+      "hostName": "registry.npmjs.org",
+      "enabled": false
+    }
+  ]
+}
+```
+
+A preset alternative to the above is:
+
+```json
+{
+  "extends": [":disableHost(registry.npmjs.org)"]
+}
+```
+
+Note: Disabling a host is only 100% effective if added to self-hosted config. Renovate currently still checks its _cache_ for results first before making connection attempts, so if a public host is blocked in your repository config (e.g. `renovate.json`) then it's possible you may get cached _results_ from that host if another repository using the same bot has successfully queried for the same dependency recently.
+
+### abortIgnoreStatusCodes
+
+This field can be used to configure status codes that Renovate ignores and passes through when `abortOnError` is set to `true`. For example to also skip 404 responses then configure the following:
+
+```json
+{
+  "hostRules": [
+    {
+      "abortOnError": true,
+      "abortStatusCodes": [404]
+    }
+  ]
+}
+```
+
+Note that this field is _not_ mergeable, so the last-applied host rule will take precedence.
+
+### abortOnError
+
+Use this field to configure Renovate to abort runs for custom hosts. By default, Renovate will only abort for known public hosts, which has the downside that transient errors for other hosts can cause autoclosing of PRs.
+
+To abort Renovate runs for http failures from _any_ host:
+
+```json
+{
+  "hostRules": [
+    {
+      "abortOnError": true
+    }
+  ]
+}
+```
+
+To abort Renovate runs for any `docker` datasource failures:
+
+```json
+{
+  "hostRules": [
+    {
+      "hostType": "docker",
+      "abortOnError": true
+    }
+  ]
+}
+```
+
+To abort Renovate for errors for a specific `docker` host:
+
+```json
+{
+  "hostRules": [
+    {
+      "hostName": "docker.company.com",
+      "abortOnError": true
+    }
+  ]
+}
+```
+
+When this field is enabled, Renovate will abort its run if it encounters either (a) any low-level http error (e.g. `ETIMEDOUT`) or (b) receives a response _not_ matching any of the configured `abortIgnoreStatusCodes` (e.g. `500 Internal Error`);
+
 ### baseUrl
 
 Use this instead of `domainName` or `hostName` if you need a rule to apply to a specific path on a host. For example, `"baseUrl": "https://api.github.com"` is equivalent to `"hostName": "api.github.com"` but `"baseUrl": "https://api.github.com/google/"` is not.
@@ -454,6 +571,10 @@ Renovate does not do a "longest match" algorithm to pick between multiple matchi
 ### domainName
 
 If you have any uncertainty about exactly which hosts a service uses, then it can be more reliable to use `domainName` instead of `hostName` or `baseUrl`. e.g. configure `"hostName": "docker.io"` to cover both `index.docker.io` and `auth.docker.io` and any other host that's in use.
+
+### enableHttp2
+
+Enable got [http2](https://github.com/sindresorhus/got/blob/v11.5.2/readme.md#http2) support.
 
 ### hostName
 
@@ -601,7 +722,7 @@ By default, Renovate will use group names in Pull Request titles only when the P
 
 ## lockFileMaintenance
 
-This feature can be used to refresh lock files and keep them up-to-date. "Maintaining" a lock file means recreating it so that every dependency version within it is updated to the latest. Supported lock files are `package-lock.json`, `yarn.lock`, `composer.lock` and `poetry.lock`. Others may be added via feature request.
+This feature can be used to refresh lock files and keep them up-to-date. "Maintaining" a lock file means recreating it so that every dependency version within it is updated to the latest. Supported lock files are `package-lock.json`, `yarn.lock`, `composer.lock`, `Gemfile.lock` and `poetry.lock`. Others may be added via feature request.
 
 This feature is disabled by default. If you wish to enable this feature then you could add this to your configuration:
 
@@ -620,35 +741,6 @@ Add to this object if you wish to define rules that apply only to major updates.
 ## managerBranchPrefix
 
 This value defaults to an empty string, because historically no prefix was necessary for when Renovate was JS-only. Now - for example - we use `docker-` for Docker branches, so they may look like `renovate/docker-ubuntu-16.x`. You normally don't need to configure this.
-
-## masterIssue
-
-Configuring `masterIssue` to `true` will lead to the creation of a mini-dashboard "Master Issue" within the repository. This Master Issue contains a list of all PRs pending, open, closed (unmerged) or in error. The goal of this master issue is to give visibility into all updates that Renovate is managing.
-
-Examples of what having a master issue will allow you to do:
-
-- View all PRs in one place, rather than having to filter PRs by author
-- Rebase/retry multiple PRs without having to open each individually
-- Override any rate limiting (e.g. concurrent PRs) or scheduling to force Renovate to create a PR that would otherwise be suppressed
-- Recreate an unmerged PR (e.g. for a major update that you postponed by closing the original PR)
-
-Note: Enabling the Master Issue does not itself change any of the "control flow" of Renovate, e.g. it will otherwise still create and manage PRs exactly as it always has, including scheduling and rate limiting. The Master Issue therefore provides visibility as well as additional control.
-
-## masterIssueApproval
-
-Setting `masterIssueApproval` to `true` means that Renovate will no longer create branches/PRs automatically but instead wait for manual approval from within the Master Issue.
-
-In this case, the Master Issue _does_ change the flow of Renovate, because PRs will stop appearing until you approve them within the issue. Instead of enabling this repository-wide, you may instead with to use package rules to enable it selectively, e.g. for major updates only, or for certain package managers, etc. i.e. it is possible to require approval for only certain types of updates only.
-
-Note: Enabling Master Issue Approval implicitly enables `masterIssue` too, so it is not necessary to configure both to `true`.
-
-## masterIssueAutoclose
-
-You can configure this to `true` if you prefer Renovate to close an existing Master Issue whenever there are no outstanding PRs left.
-
-## masterIssueTitle
-
-Configure this option if you prefer a different title for the Master Issue.
 
 ## minor
 
@@ -731,14 +823,14 @@ Path rules are convenient to use if you wish to apply configuration rules to cer
 }
 ```
 
-If you wish to limit renovate to apply configuration rules to certain files in the root repository directory, you have to use `paths` with either a partial string match or a minimatch pattern. For example you have multiple `package.json` and want to use `masterIssueApproval` only on the root `package.json`:
+If you wish to limit renovate to apply configuration rules to certain files in the root repository directory, you have to use `paths` with either a partial string match or a minimatch pattern. For example you have multiple `package.json` and want to use `dependencyDashboardApproval` only on the root `package.json`:
 
 ```json
 {
   "packageRules": [
     {
       "paths": ["+(package.json)"],
-      "masterIssueApproval": true
+      "dependencyDashboardApproval": true
     }
   ]
 }
@@ -1235,7 +1327,7 @@ Users can define custom managers for cases such as:
 
 The custom manager concept is based on using Regular Expression named capture groups. For the fields `datasource`, `depName` and `currentValue`, it's mandatory to have either a named capture group matching them (e.g. `(?<depName>.*)`) or to configure it's corresponding template (e.g. `depNameTemplate`). It's not recommended to do both, due to the potential for confusion. It is recommended to also include `versioning` however if it is missing then it will default to `semver`.
 
-For more details and examples, see the documentation page the for the regex manager [here](/modules/manager/regex/).
+For more details and examples, see the documentation page the for the regex manager [here](/modules/manager/regex/). For template fields, use the triple brace `{{{ }}}` notation to avoid `handlebars` escaping any special characters.
 
 ### matchStrings
 
@@ -1384,7 +1476,7 @@ There are a couple of uses for this:
 
 #### Suppress branch/PR creation for X days
 
-If you combine `stabilityDays=3` and `prCreation="not-pending"` then Renovate will hold back from creating branches until 3 or more days have elapsed since the version was released. It's recommended that you enable `masterIssue=true` so you don't lose visibility of these pending PRs.
+If you combine `stabilityDays=3` and `prCreation="not-pending"` then Renovate will hold back from creating branches until 3 or more days have elapsed since the version was released. It's recommended that you enable `dependencyDashboard=true` so you don't lose visibility of these pending PRs.
 
 #### Await X days before Automerging
 

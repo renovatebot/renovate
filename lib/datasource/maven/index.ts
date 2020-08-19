@@ -3,7 +3,7 @@ import fs from 'fs-extra';
 import pAll from 'p-all';
 import { XmlDocument } from 'xmldoc';
 import { logger } from '../../logger';
-import * as globalCache from '../../util/cache/global';
+import * as packageCache from '../../util/cache/package';
 import mavenVersion from '../../versioning/maven';
 import { compare } from '../../versioning/maven/compare';
 import { GetReleasesConfig, ReleaseResult } from '../common';
@@ -32,15 +32,7 @@ function getMavenUrl(
   repoUrl: string,
   path: string
 ): url.URL | null {
-  try {
-    return new url.URL(`${dependency.dependencyUrl}/${path}`, repoUrl);
-  } catch (err) {
-    logger.debug(
-      { err, dependency, repoUrl, path },
-      `Error constructing URL for ${dependency.display}`
-    );
-  }
-  return null;
+  return new url.URL(`${dependency.dependencyUrl}/${path}`, repoUrl);
 }
 
 async function downloadMavenXml(
@@ -74,12 +66,7 @@ async function downloadMavenXml(
     return null;
   }
 
-  try {
-    return new XmlDocument(rawContent);
-  } catch (e) {
-    logger.debug(`Can not parse ${pkgUrl.href}`);
-    return null;
-  }
+  return new XmlDocument(rawContent);
 }
 
 async function getDependencyInfo(
@@ -140,7 +127,7 @@ function getDependencyParts(lookupName: string): MavenDependency {
 
 function extractVersions(metadata: XmlDocument): string[] {
   const versions = metadata.descendantWithPath('versioning.versions');
-  const elements = versions && versions.childrenNamed('version');
+  const elements = versions?.childrenNamed('version');
   if (!elements) {
     return [];
   }
@@ -152,13 +139,10 @@ async function getVersionsFromMetadata(
   repoUrl: string
 ): Promise<string[] | null> {
   const metadataUrl = getMavenUrl(dependency, repoUrl, 'maven-metadata.xml');
-  if (!metadataUrl) {
-    return null;
-  }
 
   const cacheNamespace = 'datasource-maven-metadata';
   const cacheKey = metadataUrl.toString();
-  const cachedVersions = await globalCache.get<string[]>(
+  const cachedVersions = await packageCache.get<string[]>(
     cacheNamespace,
     cacheKey
   );
@@ -173,7 +157,7 @@ async function getVersionsFromMetadata(
   }
 
   const versions = extractVersions(mavenMetadata);
-  await globalCache.set(cacheNamespace, cacheKey, versions, 10);
+  await packageCache.set(cacheNamespace, cacheKey, versions, 30);
   return versions;
 }
 
@@ -210,8 +194,8 @@ async function filterMissingArtifacts(
   versions: string[]
 ): Promise<string[]> {
   const cacheNamespace = 'datasource-maven-metadata';
-  const cacheKey = dependency.dependencyUrl;
-  let artifactsInfo: ArtifactsInfo | null = await globalCache.get<
+  const cacheKey = `${repoUrl}${dependency.dependencyUrl}`;
+  let artifactsInfo: ArtifactsInfo | null = await packageCache.get<
     ArtifactsInfo
   >(cacheNamespace, cacheKey);
 
@@ -243,7 +227,7 @@ async function filterMissingArtifacts(
       ? 60
       : 24 * 60;
 
-    await globalCache.set(cacheNamespace, cacheKey, artifactsInfo, cacheTTL);
+    await packageCache.set(cacheNamespace, cacheKey, artifactsInfo, cacheTTL);
   }
 
   return versions.filter((v) => artifactsInfo[v]);
@@ -260,11 +244,14 @@ export async function getReleases({
   logger.debug(`Looking up ${dependency.display} in repository ${repoUrl}`);
   const metadataVersions = await getVersionsFromMetadata(dependency, repoUrl);
   if (metadataVersions) {
-    const availableVersions = await filterMissingArtifacts(
-      dependency,
-      repoUrl,
-      metadataVersions
-    );
+    let availableVersions = metadataVersions;
+    if (!process.env.RENOVATE_EXPERIMENTAL_NO_MAVEN_POM_CHECK) {
+      availableVersions = await filterMissingArtifacts(
+        dependency,
+        repoUrl,
+        metadataVersions
+      );
+    }
     const filteredVersions = availableVersions.filter(
       (version) => !versions.includes(version)
     );

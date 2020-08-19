@@ -1,5 +1,6 @@
 import { clean as cleanGitRef } from 'clean-git-ref';
 import slugify from 'slugify';
+import type { Merge } from 'type-fest';
 import { RenovateConfig, ValidationMessage } from '../../../config';
 import { addMeta, logger, removeMeta } from '../../../logger';
 import * as template from '../../../util/template';
@@ -7,7 +8,6 @@ import { BranchConfig, BranchUpgradeConfig } from '../../common';
 import { embedChangelogs } from '../changelog';
 import { flattenUpdates } from './flatten';
 import { generateBranchConfig } from './generate';
-import { Merge } from 'type-fest';
 
 /**
  * Clean git branch name
@@ -40,7 +40,7 @@ export async function branchifyUpgrades(
   logger.debug(
     `${updates.length} flattened updates found: ${updates
       .map((u) => u.depName)
-      .filter((txt) => txt && txt.length)
+      .filter((txt) => txt?.length)
       .join(', ')}`
   );
   const errors: ValidationMessage[] = [];

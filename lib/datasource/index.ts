@@ -1,13 +1,14 @@
 import is from '@sindresorhus/is';
-import _ from 'lodash';
+import equal from 'fast-deep-equal';
+import { HOST_DISABLED } from '../constants/error-messages';
 import { logger } from '../logger';
-import * as runCache from '../util/cache/run';
+import { ExternalHostError } from '../types/errors/external-host-error';
+import * as memCache from '../util/cache/memory';
 import { clone } from '../util/clone';
 import * as allVersioning from '../versioning';
 import datasources from './api.generated';
 import {
   Datasource,
-  DatasourceError,
   DigestConfig,
   GetPkgReleasesConfig,
   GetReleasesConfig,
@@ -18,17 +19,41 @@ import { addMetaData } from './metadata';
 
 export * from './common';
 
-export const getDatasources = (): Map<string, Promise<Datasource>> =>
-  datasources;
+export const getDatasources = (): Map<string, Datasource> => datasources;
 export const getDatasourceList = (): string[] => Array.from(datasources.keys());
 
 const cacheNamespace = 'datasource-releases';
 
-function load(datasource: string): Promise<Datasource> {
+function load(datasource: string): Datasource {
   return datasources.get(datasource);
 }
 
 type GetReleasesInternalConfig = GetReleasesConfig & GetPkgReleasesConfig;
+
+function logError(datasource, lookupName, err): void {
+  const { statusCode, code: errCode, url } = err;
+  if (statusCode === 404) {
+    logger.debug({ datasource, lookupName, url }, 'Datasource 404');
+  } else if (statusCode === 401 || statusCode === 403) {
+    logger.debug({ datasource, lookupName, url }, 'Datasource unauthorized');
+  } else if (errCode) {
+    logger.debug(
+      { datasource, lookupName, url, errCode },
+      'Datasource connection error'
+    );
+  } else {
+    logger.debug({ datasource, lookupName, err }, 'Datasource unknown error');
+  }
+}
+
+async function getRegistryReleases(
+  datasource,
+  config: GetReleasesConfig,
+  registryUrl: string
+): Promise<ReleaseResult> {
+  const res = await datasource.getReleases({ ...config, registryUrl });
+  return res;
+}
 
 function firstRegistry(
   config: GetReleasesInternalConfig,
@@ -42,10 +67,7 @@ function firstRegistry(
     );
   }
   const registryUrl = registryUrls[0];
-  return datasource.getReleases({
-    ...config,
-    registryUrl,
-  });
+  return getRegistryReleases(datasource, config, registryUrl);
 }
 
 async function huntRegistries(
@@ -54,30 +76,29 @@ async function huntRegistries(
   registryUrls: string[]
 ): Promise<ReleaseResult> {
   let res: ReleaseResult;
-  let datasourceError;
+  let caughtError;
   for (const registryUrl of registryUrls) {
     try {
-      res = await datasource.getReleases({
-        ...config,
-        registryUrl,
-      });
+      res = await getRegistryReleases(datasource, config, registryUrl);
       if (res) {
         break;
       }
     } catch (err) {
-      if (err instanceof DatasourceError) {
+      if (err instanceof ExternalHostError) {
         throw err;
       }
       // We'll always save the last-thrown error
-      datasourceError = err;
+      caughtError = err;
       logger.trace({ err }, 'datasource hunt failure');
     }
   }
-  if (res === undefined && datasourceError) {
-    // if we failed to get a result and also got an error then throw it
-    throw datasourceError;
+  if (res) {
+    return res;
   }
-  return res;
+  if (caughtError) {
+    throw caughtError;
+  }
+  return null;
 }
 
 async function mergeRegistries(
@@ -86,13 +107,10 @@ async function mergeRegistries(
   registryUrls: string[]
 ): Promise<ReleaseResult> {
   let combinedRes: ReleaseResult;
-  let datasourceError;
+  let caughtError;
   for (const registryUrl of registryUrls) {
     try {
-      const res = await datasource.getReleases({
-        ...config,
-        registryUrl,
-      });
+      const res = await getRegistryReleases(datasource, config, registryUrl);
       if (combinedRes) {
         combinedRes = { ...res, ...combinedRes };
         combinedRes.releases = [...combinedRes.releases, ...res.releases];
@@ -100,17 +118,13 @@ async function mergeRegistries(
         combinedRes = res;
       }
     } catch (err) {
-      if (err instanceof DatasourceError) {
+      if (err instanceof ExternalHostError) {
         throw err;
       }
       // We'll always save the last-thrown error
-      datasourceError = err;
+      caughtError = err;
       logger.trace({ err }, 'datasource merge failure');
     }
-  }
-  if (combinedRes === undefined && datasourceError) {
-    // if we failed to get a result and also got an error then throw it
-    throw datasourceError;
   }
   // De-duplicate releases
   if (combinedRes?.releases?.length) {
@@ -123,7 +137,13 @@ async function mergeRegistries(
       return true;
     });
   }
-  return combinedRes;
+  if (combinedRes) {
+    return combinedRes;
+  }
+  if (caughtError) {
+    throw caughtError;
+  }
+  return null;
 }
 
 function resolveRegistryUrls(
@@ -131,9 +151,14 @@ function resolveRegistryUrls(
   extractedUrls: string[]
 ): string[] {
   const { defaultRegistryUrls = [], appendRegistryUrls = [] } = datasource;
-  return is.nonEmptyArray(extractedUrls)
-    ? [...extractedUrls, ...appendRegistryUrls]
-    : [...defaultRegistryUrls, ...appendRegistryUrls];
+  const customUrls = extractedUrls?.filter(Boolean);
+  let registryUrls: string[];
+  if (is.nonEmptyArray(customUrls)) {
+    registryUrls = [...extractedUrls, ...appendRegistryUrls];
+  } else {
+    registryUrls = [...defaultRegistryUrls, ...appendRegistryUrls];
+  }
+  return registryUrls.filter(Boolean);
 }
 
 async function fetchReleases(
@@ -144,32 +169,42 @@ async function fetchReleases(
     logger.warn('Unknown datasource: ' + datasourceName);
     return null;
   }
-  const datasource = await load(datasourceName);
+  const datasource = load(datasourceName);
   const registryUrls = resolveRegistryUrls(datasource, config.registryUrls);
-  let dep: ReleaseResult;
-  if (datasource.registryStrategy) {
-    // istanbul ignore if
-    if (!registryUrls.length) {
-      logger.warn(
-        { datasource: datasourceName, depName: config.depName },
-        'Missing registryUrls for registryStrategy'
-      );
+  let dep: ReleaseResult = null;
+  try {
+    if (datasource.registryStrategy) {
+      // istanbul ignore if
+      if (!registryUrls.length) {
+        logger.warn(
+          { datasource: datasourceName, depName: config.depName },
+          'Missing registryUrls for registryStrategy'
+        );
+        return null;
+      }
+      if (datasource.registryStrategy === 'first') {
+        dep = await firstRegistry(config, datasource, registryUrls);
+      } else if (datasource.registryStrategy === 'hunt') {
+        dep = await huntRegistries(config, datasource, registryUrls);
+      } else if (datasource.registryStrategy === 'merge') {
+        dep = await mergeRegistries(config, datasource, registryUrls);
+      }
+    } else {
+      dep = await datasource.getReleases({
+        ...config,
+        registryUrls,
+      });
+    }
+  } catch (err) {
+    if (err.message === HOST_DISABLED || err.err?.message === HOST_DISABLED) {
       return null;
     }
-    if (datasource.registryStrategy === 'first') {
-      dep = await firstRegistry(config, datasource, registryUrls);
-    } else if (datasource.registryStrategy === 'hunt') {
-      dep = await huntRegistries(config, datasource, registryUrls);
-    } else if (datasource.registryStrategy === 'merge') {
-      dep = await mergeRegistries(config, datasource, registryUrls);
+    if (err instanceof ExternalHostError) {
+      throw err;
     }
-  } else {
-    dep = await datasource.getReleases({
-      ...config,
-      registryUrls,
-    });
+    logError(datasource.id, config.lookupName, err);
   }
-  if (!dep || _.isEqual(dep, { releases: [] })) {
+  if (!dep || equal(dep, { releases: [] })) {
     return null;
   }
   addMetaData(dep, datasourceName, config.lookupName);
@@ -185,13 +220,13 @@ function getRawReleases(
     config.lookupName +
     config.registryUrls;
   // By returning a Promise and reusing it, we should only fetch each package at most once
-  const cachedResult = runCache.get(cacheKey);
+  const cachedResult = memCache.get(cacheKey);
   // istanbul ignore if
   if (cachedResult) {
     return cachedResult;
   }
   const promisedRes = fetchReleases(config);
-  runCache.set(cacheKey, promisedRes);
+  memCache.set(cacheKey, promisedRes);
   return promisedRes;
 }
 
@@ -216,8 +251,8 @@ export async function getPkgReleases(
       })
     );
   } catch (e) /* istanbul ignore next */ {
-    if (e instanceof DatasourceError) {
-      e.datasource = config.datasource;
+    if (e instanceof ExternalHostError) {
+      e.hostType = config.datasource;
       e.lookupName = lookupName;
     }
     throw e;
@@ -239,15 +274,15 @@ export async function getPkgReleases(
   return res;
 }
 
-export async function supportsDigests(config: DigestConfig): Promise<boolean> {
-  return 'getDigest' in (await load(config.datasource));
+export function supportsDigests(config: DigestConfig): boolean {
+  return 'getDigest' in load(config.datasource);
 }
 
-export async function getDigest(
+export function getDigest(
   config: DigestConfig,
   value?: string
 ): Promise<string | null> {
-  const datasource = await load(config.datasource);
+  const datasource = load(config.datasource);
   const lookupName = config.lookupName || config.depName;
   const registryUrls = resolveRegistryUrls(datasource, config.registryUrls);
   return datasource.getDigest(
@@ -256,7 +291,7 @@ export async function getDigest(
   );
 }
 
-export async function getDefaultConfig(datasource: string): Promise<object> {
-  const loadedDatasource = await load(datasource);
-  return loadedDatasource?.defaultConfig || {};
+export function getDefaultConfig(datasource: string): Promise<object> {
+  const loadedDatasource = load(datasource);
+  return Promise.resolve(loadedDatasource?.defaultConfig || {});
 }

@@ -14,7 +14,9 @@ import {
 const prefetchedImages = new Set<string>();
 
 async function prefetchDockerImage(taggedImage: string): Promise<void> {
-  if (!prefetchedImages.has(taggedImage)) {
+  if (prefetchedImages.has(taggedImage)) {
+    logger.debug(`Docker image is already prefetched: ${taggedImage}`);
+  } else {
     logger.debug(`Fetching Docker image: ${taggedImage}`);
     prefetchedImages.add(taggedImage);
     await rawExec(`docker pull ${taggedImage}`, { encoding: 'utf-8' });
@@ -72,6 +74,8 @@ async function getDockerTag(
   constraint: string,
   scheme: string
 ): Promise<string> {
+  // TODO: fixme
+  // eslint-disable-next-line @typescript-eslint/unbound-method
   const { isValid, isVersion, matches, sortVersions } = versioning.get(scheme);
 
   if (!isValid(constraint)) {
@@ -84,7 +88,7 @@ async function getDockerTag(
     `Found ${scheme} version constraint - checking for a compatible ${depName} image to use`
   );
   const imageReleases = await getPkgReleases({ datasource: 'docker', depName });
-  if (imageReleases && imageReleases.releases) {
+  if (imageReleases?.releases) {
     let versions = imageReleases.releases.map((release) => release.version);
     versions = versions.filter(
       (version) => isVersion(version) && matches(version, constraint)
@@ -103,7 +107,7 @@ async function getDockerTag(
     return 'latest';
   }
   logger.warn(
-    { constraint },
+    { depName, constraint, scheme },
     'Failed to find a tag satisfying constraint, using "latest" tag instead'
   );
   return 'latest';

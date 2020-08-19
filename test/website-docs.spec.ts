@@ -84,7 +84,7 @@ describe('docs', () => {
     on an error, it throws a custom message.
   */
   expect.extend({
-    toContainOption<T>(received: T[], argument: T) {
+    toContainOption<T extends string>(received: T[], argument: T) {
       if (received.includes(argument)) {
         return {
           message: (): string =>

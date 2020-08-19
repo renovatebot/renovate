@@ -1,8 +1,10 @@
 import { URLSearchParams } from 'url';
+import { HOST_DISABLED } from '../../constants/error-messages';
 import { logger } from '../../logger';
-import * as globalCache from '../../util/cache/global';
+import { ExternalHostError } from '../../types/errors/external-host-error';
+import * as packageCache from '../../util/cache/package';
 import { Http } from '../../util/http';
-import { DatasourceError, GetReleasesConfig, ReleaseResult } from '../common';
+import { GetReleasesConfig, ReleaseResult } from '../common';
 
 export const id = 'repology';
 
@@ -84,7 +86,7 @@ async function getCachedPackage(
 ): Promise<RepologyPackage> {
   // Fetch previous result from cache if available
   const cacheKey = `${repoName}/${pkgName}`;
-  const cachedResult = await globalCache.get<RepologyPackage>(
+  const cachedResult = await packageCache.get<RepologyPackage>(
     cacheNamespace,
     cacheKey
   );
@@ -96,14 +98,14 @@ async function getCachedPackage(
   // Attempt a binary package lookup and return if successfully
   const binPkg = await queryPackage(repoName, pkgName, 'binname');
   if (binPkg) {
-    await globalCache.set(cacheNamespace, cacheKey, binPkg, cacheMinutes);
+    await packageCache.set(cacheNamespace, cacheKey, binPkg, cacheMinutes);
     return binPkg;
   }
 
   // Otherwise, attempt a source package lookup and return if successfully
   const srcPkg = await queryPackage(repoName, pkgName, 'srcname');
   if (srcPkg) {
-    await globalCache.set(cacheNamespace, cacheKey, srcPkg, cacheMinutes);
+    await packageCache.set(cacheNamespace, cacheKey, srcPkg, cacheMinutes);
     return srcPkg;
   }
 
@@ -117,7 +119,7 @@ export async function getReleases({
   // Ensure lookup name contains both repository and package
   const [repoName, pkgName] = lookupName.split('/', 2);
   if (!repoName || !pkgName) {
-    throw new DatasourceError(
+    throw new ExternalHostError(
       new Error(
         'Repology lookup name must contain repository and package separated by slash (<repo>/<pkg>)'
       )
@@ -138,10 +140,16 @@ export async function getReleases({
     const version = pkg.origversion ?? pkg.version;
     return { releases: [{ version }] };
   } catch (err) {
-    logger.warn(
-      { lookupName, err },
-      'Repology lookup failed with unexpected error'
-    );
-    throw new DatasourceError(err);
+    if (err.message === HOST_DISABLED) {
+      // istanbul ignore next
+      logger.trace({ lookupName, err }, 'Host disabled');
+    } else {
+      logger.warn(
+        { lookupName, err },
+        'Repology lookup failed with unexpected error'
+      );
+    }
+
+    throw new ExternalHostError(err);
   }
 }

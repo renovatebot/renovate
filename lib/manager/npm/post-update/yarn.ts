@@ -1,12 +1,13 @@
 import is from '@sindresorhus/is';
-import { readFile, remove } from 'fs-extra';
 import { validRange } from 'semver';
 import { quote } from 'shlex';
 import { join } from 'upath';
 import { SYSTEM_INSUFFICIENT_DISK_SPACE } from '../../../constants/error-messages';
-import { DatasourceError } from '../../../datasource';
+import { id as npmId } from '../../../datasource/npm';
 import { logger } from '../../../logger';
+import { ExternalHostError } from '../../../types/errors/external-host-error';
 import { ExecOptions, exec } from '../../../util/exec';
+import { readFile, remove } from '../../../util/fs';
 import { PostUpdateConfig, Upgrade } from '../../common';
 import { getNodeConstraint } from './node-version';
 
@@ -93,7 +94,7 @@ export async function generateLockFile(
     // rangeStrategy = update-lockfile
     const lockUpdates = upgrades
       .filter((upgrade) => upgrade.isLockfileUpdate)
-      .map((upgrade) => upgrade.depName);
+      .map((upgrade) => upgrade.depName); // note - this can hit a yarn bug, see https://github.com/yarnpkg/yarn/issues/8236
     if (lockUpdates.length) {
       logger.debug('Performing lockfileUpdate (yarn)');
       commands.push(
@@ -151,7 +152,7 @@ export async function generateLockFile(
         err.stderr.includes('getaddrinfo ENOTFOUND registry.yarnpkg.com') ||
         err.stderr.includes('getaddrinfo ENOTFOUND registry.npmjs.org')
       ) {
-        throw new DatasourceError(err);
+        throw new ExternalHostError(err, npmId);
       }
     }
     return { error: true, stderr: err.stderr };

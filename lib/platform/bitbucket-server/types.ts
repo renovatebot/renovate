@@ -1,10 +1,7 @@
 import { Pr } from '../common';
-import GitStorage from '../git/storage';
 
 export interface BbsConfig {
-  baseBranch: string;
   bbUseDefaultReviewers: boolean;
-  defaultBranch: string;
   fileList: any[];
   mergeMethod: string;
   owner: string;
@@ -12,7 +9,6 @@ export interface BbsConfig {
   projectKey: string;
   repository: string;
   repositorySlug: string;
-  storage: GitStorage;
 
   prVersions: Map<number, number>;
 

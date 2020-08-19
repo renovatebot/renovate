@@ -1,20 +1,22 @@
 import ignore from 'ignore';
 import { logger } from '../../logger';
-import { Pr, platform } from '../../platform';
+import { Pr } from '../../platform';
+import { readLocalFile } from '../../util/fs';
+import { getBranchFiles } from '../../util/git';
 
 export async function codeOwnersForPr(pr: Pr): Promise<string[]> {
   try {
     const codeOwnersFile =
-      (await platform.getFile('CODEOWNERS', pr.targetBranch)) ||
-      (await platform.getFile('.github/CODEOWNERS', pr.targetBranch)) ||
-      (await platform.getFile('.gitlab/CODEOWNERS', pr.targetBranch)) ||
-      (await platform.getFile('docs/CODEOWNERS', pr.targetBranch));
+      (await readLocalFile('CODEOWNERS', 'utf8')) ||
+      (await readLocalFile('.github/CODEOWNERS', 'utf8')) ||
+      (await readLocalFile('.gitlab/CODEOWNERS', 'utf8')) ||
+      (await readLocalFile('docs/CODEOWNERS', 'utf8'));
 
     if (!codeOwnersFile) {
       return [];
     }
 
-    const prFiles = await platform.getPrFiles(pr);
+    const prFiles = await getBranchFiles(pr.branchName);
     const rules = codeOwnersFile
       .split('\n')
       .map((line) => line.trim())

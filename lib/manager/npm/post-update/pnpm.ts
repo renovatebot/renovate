@@ -1,9 +1,9 @@
-import { readFile, remove } from 'fs-extra';
 import { validRange } from 'semver';
 import { quote } from 'shlex';
 import { join } from 'upath';
 import { logger } from '../../../logger';
 import { ExecOptions, exec } from '../../../util/exec';
+import { readFile, remove } from '../../../util/fs';
 import { PostUpdateConfig, Upgrade } from '../../common';
 import { getNodeConstraint } from './node-version';
 
@@ -54,7 +54,7 @@ export async function generateLockFile(
       execOptions.docker.volumes = [[homeNpmrc, '/home/ubuntu/.npmrc']];
     }
     cmd = 'pnpm';
-    let args = 'install --lockfile-only';
+    let args = 'install --recursive --lockfile-only';
     if (global.trustLevel !== 'high' || config.ignoreScripts) {
       args += ' --ignore-scripts';
       args += ' --ignore-pnpmfile';

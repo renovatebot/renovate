@@ -9,6 +9,8 @@ export type RenovateConfigStage =
   | 'branch'
   | 'pr';
 
+export type RepositoryCacheConfig = 'disabled' | 'enabled' | 'reset';
+
 export interface GroupConfig extends Record<string, unknown> {
   branchName?: string;
   branchTopic?: string;
@@ -33,7 +35,7 @@ export interface RenovateSharedConfig {
   ignorePaths?: string[];
   labels?: string[];
   managers?: string | string[];
-  masterIssueApproval?: boolean;
+  dependencyDashboardApproval?: boolean;
   npmrc?: string;
   platform?: string;
   postUpgradeTasks?: PostUpgradeTasks;
@@ -45,6 +47,8 @@ export interface RenovateSharedConfig {
   rebaseLabel?: string;
   rebaseWhen?: string;
   recreateClosed?: boolean;
+  repository?: string;
+  repositoryCache?: RepositoryCacheConfig;
   requiredStatusChecks?: string[];
   schedule?: string[];
   semanticCommits?: boolean;
@@ -131,6 +135,8 @@ export interface RenovateConfig
   baseBranches?: string[];
   baseBranch?: string;
   baseBranchSha?: string;
+  defaultBranch?: string;
+  defaultBranchSha?: string;
   branchList?: string[];
   description?: string | string[];
 
@@ -147,11 +153,13 @@ export interface RenovateConfig
 
   fileList?: string[];
 
-  masterIssue?: boolean;
-  masterIssueAutoclose?: boolean;
-  masterIssueChecks?: Record<string, string>;
-  masterIssueRebaseAllOpen?: boolean;
-  masterIssueTitle?: string;
+  dependencyDashboard?: boolean;
+  dependencyDashboardAutoclose?: boolean;
+  dependencyDashboardChecks?: Record<string, string>;
+  dependencyDashboardRebaseAllOpen?: boolean;
+  dependencyDashboardTitle?: string;
+  dependencyDashboardHeader?: string;
+  dependencyDashboardFooter?: string;
   packageFile?: string;
   packageRules?: PackageRule[];
   prConcurrentLimit?: number;

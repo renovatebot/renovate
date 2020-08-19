@@ -24,7 +24,7 @@ function getNonEmptyColumns(
   for (const column of definitions) {
     const { header } = column;
     for (const row of rows) {
-      if (row[header] && row[header].length) {
+      if (row[header]?.length) {
         if (!res.includes(header)) {
           res.push(header);
         }
@@ -62,8 +62,8 @@ export function getPrUpdatesTable(config: BranchConfig): string {
     let val = '|';
     for (const column of tableColumns) {
       const content = row[column]
-        .replace(/^@/, '@&#8203;')
-        .replace(/\|/g, '\\|');
+        ? row[column].replace(/^@/, '@&#8203;').replace(/\|/g, '\\|')
+        : '';
       val += ` ${content} |`;
     }
     val += '\n';

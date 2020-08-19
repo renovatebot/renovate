@@ -1,5 +1,3 @@
-import { DATASOURCE_FAILURE } from '../constants/error-messages';
-
 export interface Config {
   datasource?: string;
   depName?: string;
@@ -71,7 +69,7 @@ export interface ReleaseResult {
   registryUrl?: string;
 }
 
-export interface Datasource {
+export interface DatasourceApi {
   id: string;
   getDigest?(config: DigestConfig, newValue?: string): Promise<string | null>;
   getReleases(config: GetReleasesConfig): Promise<ReleaseResult | null>;
@@ -81,17 +79,5 @@ export interface Datasource {
   registryStrategy?: 'first' | 'hunt' | 'merge';
 }
 
-export class DatasourceError extends Error {
-  err: Error;
-
-  datasource?: string;
-
-  lookupName?: string;
-
-  constructor(err: Error) {
-    super(DATASOURCE_FAILURE);
-    // Set the prototype explicitly: https://github.com/Microsoft/TypeScript/wiki/Breaking-Changes#extending-built-ins-like-error-array-and-map-may-no-longer-work
-    Object.setPrototypeOf(this, DatasourceError.prototype);
-    this.err = err;
-  }
-}
+// TODO: remove, only for compatabillity
+export type Datasource = DatasourceApi;

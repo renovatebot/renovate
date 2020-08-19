@@ -1,5 +1,5 @@
 import is from '@sindresorhus/is';
-import { isEqual } from 'lodash';
+import equal from 'fast-deep-equal';
 import { getPkgReleases } from '../../datasource';
 import * as datasourceGithubTags from '../../datasource/github-tags';
 import { logger } from '../../logger';
@@ -89,13 +89,13 @@ export async function getPackageUpdates(
 ): Promise<LookupUpdate[]> {
   logger.trace('travis.getPackageUpdates()');
   const { supportPolicy } = config;
-  if (!(supportPolicy && supportPolicy.length)) {
+  if (!supportPolicy?.length) {
     return [];
   }
   await checkPolicies();
   for (const policy of supportPolicy) {
     if (!Object.keys(policies).includes(policy)) {
-      logger.warn(`Unknown supportPolicy: ${policy}`);
+      logger.warn({ policy }, `Unknown supportPolicy`);
       return [];
     }
   }
@@ -124,7 +124,7 @@ export async function getPackageUpdates(
 
   // TODO: `config.currentValue` is a string!
   (config.currentValue as any).sort((a, b) => a - b);
-  if (isEqual(config.currentValue, newValue)) {
+  if (equal(config.currentValue, newValue)) {
     return [];
   }
   return [

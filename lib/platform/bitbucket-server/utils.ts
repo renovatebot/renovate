@@ -1,10 +1,6 @@
 // SEE for the reference https://github.com/renovatebot/renovate/blob/c3e9e572b225085448d94aa121c7ec81c14d3955/lib/platform/bitbucket/utils.js
 import url from 'url';
-import {
-  PR_STATE_CLOSED,
-  PR_STATE_MERGED,
-  PR_STATE_OPEN,
-} from '../../constants/pull-requests';
+import { PrState } from '../../types';
 import { HttpResponse } from '../../util/http';
 import { BitbucketServerHttp } from '../../util/http/bitbucket-server';
 import { BbbsRestPr, BbsPr } from './types';
@@ -13,9 +9,9 @@ const bitbucketServerHttp = new BitbucketServerHttp();
 
 // https://docs.atlassian.com/bitbucket-server/rest/6.0.0/bitbucket-rest.html#idp250
 const prStateMapping: any = {
-  MERGED: PR_STATE_MERGED,
-  DECLINED: PR_STATE_CLOSED,
-  OPEN: PR_STATE_OPEN,
+  MERGED: PrState.Merged,
+  DECLINED: PrState.Closed,
+  OPEN: PrState.Open,
 };
 
 export function prInfo(pr: BbbsRestPr): BbsPr {
@@ -28,7 +24,6 @@ export function prInfo(pr: BbbsRestPr): BbsPr {
     title: pr.title,
     state: prStateMapping[pr.state],
     createdAt: pr.createdDate,
-    isModified: true,
   };
 }
 
@@ -41,7 +36,7 @@ const addMaxLength = (inputUrl: string, limit = 100): string => {
   return maxedUrl;
 };
 
-async function callApi<T>(
+function callApi<T>(
   apiUrl: string,
   method: string,
   options?: any

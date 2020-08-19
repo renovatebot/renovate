@@ -2,58 +2,27 @@ import URL from 'url';
 import { PLATFORM_TYPE_GITHUB } from '../../../constants/platforms';
 import { Release } from '../../../datasource';
 import { logger } from '../../../logger';
-import * as globalCache from '../../../util/cache/global';
-import * as runCache from '../../../util/cache/run';
+import * as memCache from '../../../util/cache/memory';
+import * as packageCache from '../../../util/cache/package';
 import * as hostRules from '../../../util/host-rules';
-import { GithubHttp } from '../../../util/http/github';
 import * as allVersioning from '../../../versioning';
 import { BranchUpgradeConfig } from '../../common';
 import { ChangeLogError, ChangeLogRelease, ChangeLogResult } from './common';
+import { getTags } from './github';
 import { addReleaseNotes } from './release-notes';
 
-const http = new GithubHttp();
-
-async function getTagsInner(
-  endpoint: string,
-  repository: string
-): Promise<string[]> {
-  const url = `${endpoint}repos/${repository}/tags?per_page=100`;
-  try {
-    const res = await http.getJson<{ name: string }[]>(url, {
-      paginate: true,
-    });
-
-    const tags = (res && res.body) || [];
-
-    if (!tags.length) {
-      logger.debug({ repository }, 'repository has no Github tags');
-    }
-
-    return tags.map((tag) => tag.name).filter(Boolean);
-  } catch (err) {
-    logger.debug({ sourceRepo: repository }, 'Failed to fetch Github tags');
-    logger.debug({ err });
-    // istanbul ignore if
-    if (err.message && err.message.includes('Bad credentials')) {
-      logger.warn('Bad credentials triggering tag fail lookup in changelog');
-      throw err;
-    }
-    return [];
-  }
-}
-
-async function getTags(
+function getCachedTags(
   endpoint: string,
   repository: string
 ): Promise<string[]> {
   const cacheKey = `getTags-${endpoint}-${repository}`;
-  const cachedResult = runCache.get(cacheKey);
+  const cachedResult = memCache.get(cacheKey);
   // istanbul ignore if
   if (cachedResult !== undefined) {
     return cachedResult;
   }
-  const promisedRes = getTagsInner(endpoint, repository);
-  runCache.set(cacheKey, promisedRes);
+  const promisedRes = getTags(endpoint, repository);
+  memCache.set(cacheKey, promisedRes);
   return promisedRes;
 }
 
@@ -67,7 +36,7 @@ export async function getChangeLogJSON({
   manager,
 }: BranchUpgradeConfig): Promise<ChangeLogResult | null> {
   if (sourceUrl === 'https://github.com/DefinitelyTyped/DefinitelyTyped') {
-    logger.debug('No release notes for @types');
+    logger.trace('No release notes for @types');
     return null;
   }
   const version = allVersioning.get(versioning);
@@ -103,7 +72,7 @@ export async function getChangeLogJSON({
     logger.debug({ sourceUrl }, 'Invalid github URL found');
     return null;
   }
-  if (!(releases && releases.length)) {
+  if (!releases?.length) {
     logger.debug('No releases');
     return null;
   }
@@ -121,9 +90,9 @@ export async function getChangeLogJSON({
 
   async function getRef(release: Release): Promise<string | null> {
     if (!tags) {
-      tags = await getTags(apiBaseUrl, repository);
+      tags = await getCachedTags(apiBaseUrl, repository);
     }
-    const regex = new RegExp(`${depName}[@-]`);
+    const regex = new RegExp(`(?:${depName}|release)[@-]`);
     const tagName = tags
       .filter((tag) => version.isVersion(tag.replace(regex, '')))
       .find((tag) => version.equals(tag.replace(regex, ''), release.version));
@@ -150,7 +119,7 @@ export async function getChangeLogJSON({
     const prev = validReleases[i - 1];
     const next = validReleases[i];
     if (include(next.version)) {
-      let release = await globalCache.get(
+      let release = await packageCache.get(
         cacheNamespace,
         getCacheKey(prev.version, next.version)
       );
@@ -169,7 +138,7 @@ export async function getChangeLogJSON({
           release.compare.url = `${baseUrl}${repository}/compare/${prevHead}...${nextHead}`;
         }
         const cacheMinutes = 55;
-        await globalCache.set(
+        await packageCache.set(
           cacheNamespace,
           getCacheKey(prev.version, next.version),
           release,

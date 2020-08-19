@@ -1,4 +1,4 @@
-import { satisfies } from '@snyk/ruby-semver';
+import { satisfies } from '@renovatebot/ruby-semver';
 import { logger } from '../../../logger';
 import bump from './bump';
 
@@ -10,7 +10,7 @@ function isMajorRange(range: string): boolean {
   const splitRange = range.split(',').map((part) => part.trim());
   return (
     splitRange.length === 1 &&
-    splitRange[0].startsWith('~>') &&
+    splitRange[0]?.startsWith('~>') &&
     countInstancesOf(splitRange[0], '.') === 0
   );
 }
@@ -19,9 +19,9 @@ function isCommonRubyMajorRange(range: string): boolean {
   const splitRange = range.split(',').map((part) => part.trim());
   return (
     splitRange.length === 2 &&
-    splitRange[0].startsWith('~>') &&
+    splitRange[0]?.startsWith('~>') &&
     countInstancesOf(splitRange[0], '.') === 1 &&
-    splitRange[1].startsWith('>=')
+    splitRange[1]?.startsWith('>=')
   );
 }
 
@@ -29,9 +29,9 @@ function isCommonRubyMinorRange(range: string): boolean {
   const splitRange = range.split(',').map((part) => part.trim());
   return (
     splitRange.length === 2 &&
-    splitRange[0].startsWith('~>') &&
+    splitRange[0]?.startsWith('~>') &&
     countInstancesOf(splitRange[0], '.') === 2 &&
-    splitRange[1].startsWith('>=')
+    splitRange[1]?.startsWith('>=')
   );
 }
 

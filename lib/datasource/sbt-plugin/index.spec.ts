@@ -3,6 +3,7 @@ import path from 'path';
 import nock from 'nock';
 import { getPkgReleases } from '..';
 import * as mavenVersioning from '../../versioning/maven';
+import { MAVEN_REPO } from '../maven/common';
 import { parseIndexDir } from './util';
 import * as sbtPlugin from '.';
 
@@ -89,6 +90,38 @@ describe('datasource/sbt', () => {
             '</body>\n' +
             '</html>\n'
         );
+
+      nock('https://repo.maven.apache.org')
+        .get('/maven2/io/get-coursier/')
+        .reply(
+          200,
+          '<a href="sbt-coursier_2.10_0.13/">sbt-coursier_2.10_0.13/</a>\n' +
+            '<a href="sbt-coursier_2.12_1.0/">sbt-coursier_2.12_1.0/</a>\n' +
+            '<a href="sbt-coursier_2.12_1.0.0-M5/">sbt-coursier_2.12_1.0.0-M5/</a>\n' +
+            '<a href="sbt-coursier_2.12_1.0.0-M6/">sbt-coursier_2.12_1.0.0-M6/</a>\n'
+        );
+      nock('https://repo.maven.apache.org')
+        .get('/maven2/io/get-coursier/sbt-coursier_2.12_1.0/')
+        .reply(
+          200,
+          '<a href="2.0.0-RC2/">2.0.0-RC2/</a>\n' +
+            '<a href="2.0.0-RC6-1/">2.0.0-RC6-1/</a>\n' +
+            '<a href="2.0.0-RC6-2/">2.0.0-RC6-2/</a>\n' +
+            '<a href="2.0.0-RC6-6/">2.0.0-RC6-6/</a>\n'
+        );
+      nock('https://repo.maven.apache.org')
+        .get(
+          '/maven2/io/get-coursier/sbt-coursier_2.12_1.0/2.0.0-RC6-6/sbt-coursier-2.0.0-RC6-6.pom'
+        )
+        .reply(
+          200,
+          '<project xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns="http://maven.apache.org/POM/4.0.0" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">\n' +
+            '<url>https://get-coursier.io/</url>\n' +
+            '<scm>\n' +
+            '<url>https://github.com/coursier/sbt-coursier</url>\n' +
+            '</scm>\n' +
+            '</project>\n'
+        );
     });
 
     afterEach(() => {
@@ -143,6 +176,31 @@ describe('datasource/sbt', () => {
         group: 'org.foundweekends',
         name: 'sbt-bintray_2.12',
         releases: [{ version: '0.5.5' }],
+      });
+    });
+
+    it('extracts URL from Maven POM file', async () => {
+      expect(
+        await getPkgReleases({
+          versioning: mavenVersioning.id,
+          datasource: sbtPlugin.id,
+          depName: 'io.get-coursier:sbt-coursier',
+          registryUrls: [MAVEN_REPO],
+        })
+      ).toEqual({
+        dependencyUrl:
+          'https://repo.maven.apache.org/maven2/io/get-coursier/sbt-coursier',
+        display: 'io.get-coursier:sbt-coursier',
+        group: 'io.get-coursier',
+        name: 'sbt-coursier',
+        releases: [
+          { version: '2.0.0-RC2' },
+          { version: '2.0.0-RC6-1' },
+          { version: '2.0.0-RC6-2' },
+          { version: '2.0.0-RC6-6' },
+        ],
+        homepage: 'https://get-coursier.io/',
+        sourceUrl: 'https://github.com/coursier/sbt-coursier',
       });
     });
   });

@@ -1,7 +1,8 @@
-import { RenovateConfig, getConfig, mocked } from '../../../../test/util';
+import { RenovateConfig, getConfig, git, mocked } from '../../../../test/util';
 import * as _extractUpdate from './extract-update';
-import { extractDependencies, updateRepo } from './index';
+import { extractDependencies, updateRepo } from '.';
 
+jest.mock('../../../util/git');
 jest.mock('./extract-update');
 
 const extract = mocked(_extractUpdate).extract;
@@ -21,6 +22,10 @@ describe('workers/repository/process/index', () => {
     it('processes baseBranches', async () => {
       extract.mockResolvedValue({} as never);
       config.baseBranches = ['branch1', 'branch2'];
+      git.branchExists.mockResolvedValueOnce(false);
+      git.branchExists.mockResolvedValueOnce(true);
+      git.branchExists.mockResolvedValueOnce(false);
+      git.branchExists.mockResolvedValueOnce(true);
       const res = await extractDependencies(config);
       await updateRepo(config, res.branches, res.branchList);
       expect(res).toMatchSnapshot();

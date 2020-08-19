@@ -6,11 +6,12 @@ import moment from 'moment';
 import registryAuthToken from 'registry-auth-token';
 import getRegistryUrl from 'registry-auth-token/registry-url';
 import { logger } from '../../logger';
-import * as globalCache from '../../util/cache/global';
+import { ExternalHostError } from '../../types/errors/external-host-error';
+import * as packageCache from '../../util/cache/package';
 import { find } from '../../util/host-rules';
 import { Http, HttpOptions } from '../../util/http';
 import { maskToken } from '../../util/mask';
-import { DatasourceError, Release, ReleaseResult } from '../common';
+import { Release, ReleaseResult } from '../common';
 import { id } from './common';
 import { getNpmrc } from './npmrc';
 
@@ -70,7 +71,7 @@ export async function getDependency(
   );
   // Now check the persistent cache
   const cacheNamespace = 'datasource-npm';
-  const cachedResult = await globalCache.get<NpmDependency>(
+  const cachedResult = await packageCache.get<NpmDependency>(
     cacheNamespace,
     pkgUrl
   );
@@ -90,7 +91,7 @@ export async function getDependency(
     authInfo = { type: 'Bearer', token: npmrc._authToken };
   }
 
-  if (authInfo && authInfo.type && authInfo.token) {
+  if (authInfo?.type && authInfo.token) {
     headers.authorization = `${authInfo.type} ${authInfo.token}`;
     logger.trace(
       { token: maskToken(authInfo.token), npmName: packageName },
@@ -180,7 +181,7 @@ export async function getDependency(
       'dist-tags': res['dist-tags'],
       'renovate-config': latestVersion['renovate-config'],
     };
-    if (res.repository && res.repository.directory) {
+    if (res.repository?.directory) {
       dep.sourceDirectory = res.repository.directory;
     }
     if (latestVersion.deprecated) {
@@ -192,7 +193,7 @@ export async function getDependency(
         version,
         gitRef: res.versions[version].gitHead,
       };
-      if (res.time && res.time[version]) {
+      if (res.time?.[version]) {
         release.releaseTimestamp = res.time[version];
         release.canBeUnpublished =
           moment().diff(moment(release.releaseTimestamp), 'days') === 0;
@@ -207,7 +208,7 @@ export async function getDependency(
     memcache[packageName] = JSON.stringify(dep);
     const cacheMinutes = process.env.RENOVATE_CACHE_NPM_MINUTES
       ? parseInt(process.env.RENOVATE_CACHE_NPM_MINUTES, 10)
-      : 5;
+      : 15;
     // TODO: use dynamic detection of public repos instead of a static list
     const whitelistedPublicScopes = [
       '@graphql-codegen',
@@ -219,7 +220,7 @@ export async function getDependency(
       whitelistedPublicScopes.includes(scope) ||
       !packageName.startsWith('@')
     ) {
-      await globalCache.set(cacheNamespace, pkgUrl, dep, cacheMinutes);
+      await packageCache.set(cacheNamespace, pkgUrl, dep, cacheMinutes);
     }
     return dep;
   } catch (err) {
@@ -280,7 +281,7 @@ export async function getDependency(
       if (err.name === 'ParseError' && err.body) {
         err.body = 'err.body deleted by Renovate';
       }
-      throw new DatasourceError(err);
+      throw new ExternalHostError(err);
     }
     return null;
   }

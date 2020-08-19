@@ -1,7 +1,8 @@
 import { logger } from '../../logger';
-import * as globalCache from '../../util/cache/global';
+import { ExternalHostError } from '../../types/errors/external-host-error';
+import * as packageCache from '../../util/cache/package';
 import { Http } from '../../util/http';
-import { DatasourceError, GetReleasesConfig, ReleaseResult } from '../common';
+import { GetReleasesConfig, ReleaseResult } from '../common';
 
 export const id = 'terraform-module';
 export const defaultRegistryUrls = ['https://registry.terraform.io'];
@@ -44,6 +45,38 @@ interface TerraformRelease {
   versions: string[];
 }
 
+export interface ServiceDiscoveryResult {
+  'modules.v1'?: string;
+  'providers.v1'?: string;
+}
+
+export async function getTerraformServiceDiscoveryResult(
+  registryUrl: string
+): Promise<ServiceDiscoveryResult> {
+  const discoveryURL = `${registryUrl}/.well-known/terraform.json`;
+  const cacheNamespace = 'terraform-service-discovery';
+  const cachedResult = await packageCache.get<ServiceDiscoveryResult>(
+    cacheNamespace,
+    registryUrl
+  );
+  // istanbul ignore if
+  if (cachedResult) {
+    return cachedResult;
+  }
+  const serviceDiscovery = (
+    await http.getJson<ServiceDiscoveryResult>(discoveryURL)
+  ).body;
+
+  const cacheMinutes = 1440; // 24h
+  await packageCache.set(
+    cacheNamespace,
+    registryUrl,
+    serviceDiscovery,
+    cacheMinutes
+  );
+
+  return serviceDiscovery;
+}
 /**
  * terraform.getReleases
  *
@@ -64,16 +97,20 @@ export async function getReleases({
     'terraform.getDependencies()'
   );
   const cacheNamespace = 'terraform-module';
-  const pkgUrl = `${registry}/v1/modules/${repository}`;
-  const cachedResult = await globalCache.get<ReleaseResult>(
+  const cacheURL = `${registry}/${repository}`;
+  const cachedResult = await packageCache.get<ReleaseResult>(
     cacheNamespace,
-    pkgUrl
+    cacheURL
   );
   // istanbul ignore if
   if (cachedResult) {
     return cachedResult;
   }
   try {
+    const serviceDiscovery = await getTerraformServiceDiscoveryResult(
+      registryUrl
+    );
+    const pkgUrl = `${registry}${serviceDiscovery['modules.v1']}${repository}`;
     const res = (await http.getJson<TerraformRelease>(pkgUrl)).body;
     const returnedName = res.namespace + '/' + res.name + '/' + res.provider;
     if (returnedName !== repository) {
@@ -97,28 +134,14 @@ export async function getReleases({
     }
     logger.trace({ dep }, 'dep');
     const cacheMinutes = 30;
-    await globalCache.set(cacheNamespace, pkgUrl, dep, cacheMinutes);
+    await packageCache.set(cacheNamespace, pkgUrl, dep, cacheMinutes);
     return dep;
   } catch (err) {
-    if (err.statusCode === 404 || err.code === 'ENOTFOUND') {
-      logger.debug(
-        { lookupName },
-        `Terraform registry lookup failure: not found`
-      );
-      logger.debug({
-        err,
-      });
-      return null;
-    }
     const failureCodes = ['EAI_AGAIN'];
     // istanbul ignore if
     if (failureCodes.includes(err.code)) {
-      throw new DatasourceError(err);
+      throw new ExternalHostError(err);
     }
-    logger.warn(
-      { err, lookupName },
-      'Terraform registry failure: Unknown error'
-    );
-    return null;
+    throw err;
   }
 }

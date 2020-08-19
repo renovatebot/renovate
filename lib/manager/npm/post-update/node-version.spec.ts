@@ -1,8 +1,7 @@
-import { mocked } from '../../../../test/util';
-import * as fs_ from '../../../util/fs';
+import { fs } from '../../../../test/util';
 import { getNodeConstraint } from './node-version';
 
-const fs = mocked(fs_);
+jest.mock('../../../util/fs');
 
 describe('getNodeConstraint', () => {
   const config = {

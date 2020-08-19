@@ -2,9 +2,8 @@ import semver, { validRange } from 'semver';
 import { quote } from 'shlex';
 import { join } from 'upath';
 import { logger } from '../../../logger';
-import { platform } from '../../../platform';
 import { ExecOptions, exec } from '../../../util/exec';
-import { PostUpdateConfig } from '../../common';
+import { PackageFile, PostUpdateConfig } from '../../common';
 import { getNodeConstraint } from './node-version';
 import { optimizeCommand } from './yarn';
 
@@ -13,13 +12,28 @@ export interface GenerateLockFileResult {
   stderr?: string;
 }
 
+// Exported for testability
+export function getLernaVersion(
+  lernaPackageFile: Partial<PackageFile>
+): string {
+  const lernaDep = lernaPackageFile.deps?.find((d) => d.depName === 'lerna');
+  if (!lernaDep || !semver.validRange(lernaDep.currentValue)) {
+    logger.warn(
+      `Could not detect lerna version in ${lernaPackageFile.packageFile}, using 'latest'`
+    );
+    return 'latest';
+  }
+  return lernaDep.currentValue;
+}
+
 export async function generateLockFiles(
-  lernaClient: string,
+  lernaPackageFile: Partial<PackageFile>,
   cwd: string,
   config: PostUpdateConfig,
   env: NodeJS.ProcessEnv,
   skipInstalls?: boolean
 ): Promise<GenerateLockFileResult> {
+  const lernaClient = lernaPackageFile.lernaClient;
   if (!lernaClient) {
     logger.warn('No lernaClient specified - returning');
     return { error: false };
@@ -55,9 +69,12 @@ export async function generateLockFiles(
       logger.warn({ lernaClient }, 'Unknown lernaClient');
       return { error: false };
     }
+    let lernaCommand = `lerna bootstrap --no-ci --ignore-scripts -- `;
     if (global.trustLevel === 'high' && config.ignoreScripts !== false) {
       cmdOptions = cmdOptions.replace('--ignore-scripts ', '');
+      lernaCommand = lernaCommand.replace('--ignore-scripts ', '');
     }
+    lernaCommand += cmdOptions;
     const tagConstraint = await getNodeConstraint(config);
     const execOptions: ExecOptions = {
       cwd,
@@ -79,21 +96,10 @@ export async function generateLockFiles(
       execOptions.docker.volumes = [[homeNpmrc, '/home/ubuntu/.npmrc']];
     }
     cmd.push(`${lernaClient} install ${cmdOptions}`);
-    let lernaVersion: string;
-    try {
-      const pJson = JSON.parse(await platform.getFile('package.json'));
-      lernaVersion =
-        (pJson.dependencies && pJson.dependencies.lerna) ||
-        (pJson.devDependencies && pJson.devDependencies.lerna);
-    } catch (err) {
-      logger.warn('Could not detect lerna version in package.json');
-    }
-    if (!lernaVersion || !semver.validRange(lernaVersion)) {
-      lernaVersion = 'latest';
-    }
+    const lernaVersion = getLernaVersion(lernaPackageFile);
     logger.debug('Using lerna version ' + lernaVersion);
     preCommands.push(`npm i -g lerna@${quote(lernaVersion)}`);
-    cmd.push(`lerna bootstrap --no-ci -- ${cmdOptions}`);
+    cmd.push(lernaCommand);
     await exec(cmd, execOptions);
   } catch (err) /* istanbul ignore next */ {
     logger.debug(

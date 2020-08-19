@@ -4,15 +4,10 @@ import {
   GitPullRequestMergeStrategy,
   GitRef,
 } from 'azure-devops-node-api/interfaces/GitInterfaces';
-import { Options } from 'simple-git/promise';
-import {
-  PR_STATE_CLOSED,
-  PR_STATE_MERGED,
-  PR_STATE_OPEN,
-} from '../../constants/pull-requests';
 import { logger } from '../../logger';
 
-import { HostRule } from '../../types';
+import { HostRule, PrState } from '../../types';
+import { GitOptions } from '../../types/git';
 import * as azureApi from './azure-got-wrapper';
 import { AzurePr } from './types';
 
@@ -22,7 +17,7 @@ function toBase64(from: string): string {
   return Buffer.from(from).toString('base64');
 }
 
-export function getStorageExtraCloneOpts(config: HostRule): Options {
+export function getStorageExtraCloneOpts(config: HostRule): GitOptions {
   let header: string;
   const headerName = 'AUTHORIZATION';
   if (!config.token && config.username && config.password) {
@@ -153,7 +148,7 @@ export async function getFile(
     }
   );
 
-  if (item && item.readable) {
+  if (item?.readable) {
     const fileContent = await streamToString(item);
     try {
       const jTmp = JSON.parse(fileContent);
@@ -199,11 +194,11 @@ export function getRenovatePRFormat(azurePr: GitPullRequest): AzurePr {
   //   All = 4,
   // }
   if (azurePr.status === 2) {
-    pr.state = PR_STATE_CLOSED;
+    pr.state = PrState.Closed;
   } else if (azurePr.status === 3) {
-    pr.state = PR_STATE_MERGED;
+    pr.state = PrState.Merged;
   } else {
-    pr.state = PR_STATE_OPEN;
+    pr.state = PrState.Open;
   }
 
   // mergeStatus
@@ -218,10 +213,6 @@ export function getRenovatePRFormat(azurePr: GitPullRequest): AzurePr {
   if (azurePr.mergeStatus === 2) {
     pr.isConflicted = true;
   }
-
-  // value is updated later to be correct for
-  // specific pr's after filtering, for performance
-  pr.isModified = false;
 
   return pr;
 }

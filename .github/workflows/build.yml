@@ -65,7 +65,7 @@ jobs:
         run: |
           git config --global core.autocrlf false
           git config --global core.symlinks true
-          git config --global user.email 'bot@renovateapp.com'
+          git config --global user.email 'renovate@whitesourcesoftware.com'
           git config --global user.name  'Renovate Bot'
           npm config set scripts-prepend-node-path true
           echo "Node $(node --version)"
@@ -139,7 +139,7 @@ jobs:
         run: |
           git config --global core.autocrlf false
           git config --global core.symlinks true
-          git config --global user.email 'bot@renovateapp.com'
+          git config --global user.email 'renovate@whitesourcesoftware.com'
           git config --global user.name  'Renovate Bot'
           npm config set scripts-prepend-node-path true
           echo "Node $(node --version)"
@@ -199,7 +199,7 @@ jobs:
         run: |
           git config --global core.autocrlf false
           git config --global core.symlinks true
-          git config --global user.email 'bot@renovateapp.com'
+          git config --global user.email 'renovate@whitesourcesoftware.com'
           git config --global user.name  'Renovate Bot'
           yarn config set version-git-tag false
           npm config set scripts-prepend-node-path true

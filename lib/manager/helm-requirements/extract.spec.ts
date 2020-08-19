@@ -1,7 +1,7 @@
-import * as _fs from '../../util/fs';
+import { fs } from '../../../test/util';
 import { extractPackageFile } from './extract';
 
-const fs: any = _fs;
+jest.mock('../../util/fs');
 
 describe('lib/manager/helm-requirements/extract', () => {
   describe('extractPackageFile()', () => {

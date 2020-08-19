@@ -8,7 +8,8 @@ import {
   GRADLE_DEPENDENCY_REPORT_FILENAME,
   createRenovateGradlePlugin,
 } from './gradle-updates-report';
-import { GRADLE_DEPENDENCY_REPORT_OPTIONS } from './index';
+import { extraEnv } from './utils';
+import { GRADLE_DEPENDENCY_REPORT_OPTIONS } from '.';
 
 const fixtures = 'lib/manager/gradle/__fixtures__';
 
@@ -34,6 +35,7 @@ describe(getName(__filename), () => {
           const gradlew = path.join(workingDir.path, 'gradlew');
           await exec(`${gradlew} ${GRADLE_DEPENDENCY_REPORT_OPTIONS}`, {
             cwd: workingDir.path,
+            extraEnv,
           });
           expect(
             fs.readJSONSync(

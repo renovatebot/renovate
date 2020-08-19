@@ -1,23 +1,18 @@
 import url from 'url';
-import { PR_STATE_CLOSED } from '../../constants/pull-requests';
-import { BranchStatus } from '../../types';
+import { BranchStatus, PrState } from '../../types';
 import { HttpResponse } from '../../util/http';
 import { BitbucketHttp } from '../../util/http/bitbucket';
 import { Pr } from '../common';
-import { Storage } from '../git/storage';
 
 const bitbucketHttp = new BitbucketHttp();
 
 export interface Config {
-  baseBranch: string;
-  baseCommitSHA: string;
   defaultBranch: string;
   has_issues: boolean;
   mergeMethod: string;
   owner: string;
   prList: Pr[];
   repository: string;
-  storage: Storage;
   bbUseDefaultReviewers: boolean;
 
   username: string;
@@ -77,7 +72,7 @@ const addMaxLength = (inputUrl: string, pagelen = 100): string => {
   return maxedUrl;
 };
 
-async function callApi<T>(
+function callApi<T>(
   apiUrl: string,
   method: string,
   options?: any
@@ -143,7 +138,7 @@ export function prInfo(pr: any): Pr {
     targetBranch: pr.destination.branch.name,
     title: pr.title,
     state: prStates.closed.includes(pr.state)
-      ? /* istanbul ignore next */ PR_STATE_CLOSED
+      ? /* istanbul ignore next */ PrState.Closed
       : pr.state.toLowerCase(),
     createdAt: pr.created_on,
   };
