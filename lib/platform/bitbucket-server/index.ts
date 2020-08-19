@@ -1,7 +1,6 @@
 import url, { URLSearchParams } from 'url';
 import is from '@sindresorhus/is';
 import delay from 'delay';
-import { RenovateConfig } from '../../config/common';
 import {
   REPOSITORY_CHANGED,
   REPOSITORY_DISABLED,
@@ -9,10 +8,10 @@ import {
   REPOSITORY_NOT_FOUND,
 } from '../../constants/error-messages';
 import { PLATFORM_TYPE_BITBUCKET_SERVER } from '../../constants/platforms';
-import { PR_STATE_ALL, PR_STATE_OPEN } from '../../constants/pull-requests';
 import { logger } from '../../logger';
-import { BranchStatus } from '../../types';
+import { BranchStatus, PrState } from '../../types';
 import * as git from '../../util/git';
+import { deleteBranch } from '../../util/git';
 import * as hostRules from '../../util/host-rules';
 import { HttpResponse } from '../../util/http';
 import {
@@ -35,6 +34,7 @@ import {
   Pr,
   RepoParams,
   RepoResult,
+  UpdatePrConfig,
   VulnerabilityAlert,
 } from '../common';
 import { smartTruncate } from '../utils/pr-body';
@@ -179,7 +179,7 @@ export async function initRepo({
     repository,
   });
 
-  await git.initRepo({
+  git.initRepo({
     ...config,
     localDir,
     url: gitUrl,
@@ -269,7 +269,7 @@ export async function getPr(
   pr.hasReviewers = is.nonEmptyArray(pr.reviewers);
   pr.version = updatePrVersion(pr.number, pr.version);
 
-  if (pr.state === PR_STATE_OPEN) {
+  if (pr.state === PrState.Open) {
     const mergeRes = await bitbucketServerHttp.getJson<{
       conflicted: string;
       canMerge: string;
@@ -287,7 +287,7 @@ export async function getPr(
 // TODO: coverage
 // istanbul ignore next
 function matchesState(state: string, desiredState: string): boolean {
-  if (desiredState === PR_STATE_ALL) {
+  if (desiredState === PrState.All) {
     return true;
   }
   if (desiredState.startsWith('!')) {
@@ -308,11 +308,10 @@ const isRelevantPr = (
   matchesState(p.state, state);
 
 // TODO: coverage
-// eslint-disable-next-line @typescript-eslint/no-unused-vars
-export async function getPrList(_args?: any): Promise<Pr[]> {
+export async function getPrList(refreshCache?: boolean): Promise<Pr[]> {
   logger.debug(`getPrList()`);
   // istanbul ignore next
-  if (!config.prList) {
+  if (!config.prList || refreshCache) {
     const query = new URLSearchParams({
       state: 'ALL',
       'role.1': 'AUTHOR',
@@ -335,11 +334,11 @@ export async function getPrList(_args?: any): Promise<Pr[]> {
 export async function findPr({
   branchName,
   prTitle,
-  state = PR_STATE_ALL,
+  state = PrState.All,
   refreshCache,
 }: FindPRConfig): Promise<Pr | null> {
   logger.debug(`findPr(${branchName}, "${prTitle}", "${state}")`);
-  const prList = await getPrList({ refreshCache });
+  const prList = await getPrList(refreshCache);
   const pr = prList.find(isRelevantPr(branchName, prTitle, state));
   if (pr) {
     logger.debug(`Found PR #${pr.number}`);
@@ -354,7 +353,7 @@ export async function getBranchPr(branchName: string): Promise<BbsPr | null> {
   logger.debug(`getBranchPr(${branchName})`);
   const existingPr = await findPr({
     branchName,
-    state: PR_STATE_OPEN,
+    state: PrState.Open,
   });
   return existingPr ? getPr(existingPr.number) : null;
 }
@@ -365,27 +364,6 @@ export async function refreshPr(number: number): Promise<void> {
   await delay(1000);
   // refresh cache
   await getPr(number, true);
-}
-
-export async function deleteBranch(
-  branchName: string,
-  closePr = false
-): Promise<void> {
-  logger.debug(`deleteBranch(${branchName}, closePr=${closePr})`);
-  // TODO: coverage
-  // istanbul ignore next
-  if (closePr) {
-    // getBranchPr
-    const pr = await getBranchPr(branchName);
-    if (pr) {
-      const { body } = await bitbucketServerHttp.postJson<{ version: number }>(
-        `./rest/api/1.0/projects/${config.projectKey}/repos/${config.repositorySlug}/pull-requests/${pr.number}/decline?version=${pr.version}`
-      );
-
-      updatePrVersion(pr.number, body.version);
-    }
-  }
-  return git.deleteBranch(branchName);
 }
 
 async function getStatus(
@@ -876,11 +854,12 @@ export async function createPr({
   return pr;
 }
 
-export async function updatePr(
-  prNo: number,
-  title: string,
-  rawDescription: string
-): Promise<void> {
+export async function updatePr({
+  number: prNo,
+  prTitle: title,
+  prBody: rawDescription,
+  state,
+}: UpdatePrConfig): Promise<void> {
   const description = sanitize(rawDescription);
   logger.debug(`updatePr(${prNo}, title=${title})`);
 
@@ -890,7 +869,10 @@ export async function updatePr(
       throw Object.assign(new Error(REPOSITORY_NOT_FOUND), { statusCode: 404 });
     }
 
-    const { body } = await bitbucketServerHttp.putJson<{ version: number }>(
+    const { body: updatedPr } = await bitbucketServerHttp.putJson<{
+      version: number;
+      state: string;
+    }>(
       `./rest/api/1.0/projects/${config.projectKey}/repos/${config.repositorySlug}/pull-requests/${prNo}`,
       {
         body: {
@@ -902,7 +884,28 @@ export async function updatePr(
       }
     );
 
-    updatePrVersion(prNo, body.version);
+    updatePrVersion(prNo, updatedPr.version);
+
+    const currentState = updatedPr.state;
+    const newState = {
+      [PrState.Open]: 'OPEN',
+      [PrState.Closed]: 'DECLINED',
+    }[state];
+
+    if (
+      newState &&
+      ['OPEN', 'DECLINED'].includes(currentState) &&
+      currentState !== newState
+    ) {
+      const command = state === PrState.Open ? 'reopen' : 'decline';
+      const { body: updatedStatePr } = await bitbucketServerHttp.postJson<{
+        version: number;
+      }>(
+        `./rest/api/1.0/projects/${config.projectKey}/repos/${config.repositorySlug}/pull-requests/${pr.number}/${command}?version=${updatedPr.version}`
+      );
+
+      updatePrVersion(pr.number, updatedStatePr.version);
+    }
   } catch (err) {
     if (err.statusCode === 404) {
       throw new Error(REPOSITORY_NOT_FOUND);

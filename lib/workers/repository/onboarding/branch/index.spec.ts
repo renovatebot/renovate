@@ -6,8 +6,8 @@ import {
   git,
   platform,
 } from '../../../../../test/util';
-import { PR_STATE_OPEN } from '../../../../constants/pull-requests';
 import { Pr } from '../../../../platform';
+import { PrState } from '../../../../types';
 import * as _rebase from './rebase';
 import { checkOnboardingBranch } from '.';
 
@@ -85,7 +85,7 @@ describe('workers/repository/onboarding/branch', () => {
         {
           ...mock<Pr>(),
           branchName: 'renovate/something',
-          state: PR_STATE_OPEN,
+          state: PrState.Open,
         },
       ]);
       await expect(checkOnboardingBranch(config)).rejects.toThrow();

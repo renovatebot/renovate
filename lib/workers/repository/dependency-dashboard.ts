@@ -1,7 +1,7 @@
 import { RenovateConfig } from '../../config';
-import { PR_STATE_NOT_OPEN } from '../../constants/pull-requests';
 import { logger } from '../../logger';
 import { Pr, platform } from '../../platform';
+import { PrState } from '../../types';
 import { BranchConfig } from '../common';
 
 function getListItem(branch: BranchConfig, type: string, pr?: Pr): string {
@@ -197,7 +197,7 @@ export async function ensureMasterIssue(
       const pr = await platform.findPr({
         branchName: branch.branchName,
         prTitle: branch.prTitle,
-        state: PR_STATE_NOT_OPEN,
+        state: PrState.NotOpen,
       });
       issueBody += getListItem(branch, 'recreate', pr);
     }

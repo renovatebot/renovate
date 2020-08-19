@@ -8,6 +8,7 @@ import {
   PLATFORM_RATE_LIMIT_EXCEEDED,
   REPOSITORY_CHANGED,
 } from '../../constants/error-messages';
+import * as hostRules from '../host-rules';
 import { GithubHttp, setBaseUrl } from './github';
 
 const githubApiHost = 'https://api.github.com';
@@ -18,25 +19,25 @@ describe(getName(__filename), () => {
     githubApi = new GithubHttp();
     setBaseUrl(githubApiHost);
     jest.resetAllMocks();
-    delete global.appMode;
     httpMock.setup();
   });
 
   afterEach(() => {
     httpMock.reset();
+    hostRules.clear();
   });
 
   describe('HTTP', () => {
     it('supports app mode', async () => {
+      hostRules.add({ hostType: 'github', token: 'x-access-token:abc123' });
       httpMock.scope(githubApiHost).get('/some-url').reply(200);
-      global.appMode = true;
       await githubApi.get('/some-url', {
         headers: { accept: 'some-accept' },
       });
       const [req] = httpMock.getTrace();
       expect(req).toBeDefined();
       expect(req.headers.accept).toBe(
-        'application/vnd.github.machine-man-preview+json, some-accept'
+        'some-accept, application/vnd.github.machine-man-preview+json'
       );
     });
     it('strips v3 for graphql', async () => {
@@ -226,16 +227,16 @@ describe(getName(__filename), () => {
       }`;
 
     it('supports app mode', async () => {
+      hostRules.add({ hostType: 'github', token: 'x-access-token:abc123' });
       httpMock
         .scope(githubApiHost)
         .post('/graphql')
         .reply(200, { data: { repository: { testItem: 'XXX' } } });
-      global.appMode = true;
       await githubApi.queryRepoField(query, 'testItem', { paginate: false });
       const [req] = httpMock.getTrace();
       expect(req).toBeDefined();
       expect(req.headers.accept).toBe(
-        'application/vnd.github.machine-man-preview+json, application/vnd.github.v3+json'
+        'application/vnd.github.machine-man-preview+json'
       );
     });
     it('returns empty array for undefined data', async () => {

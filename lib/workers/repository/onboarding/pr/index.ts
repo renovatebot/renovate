@@ -3,7 +3,7 @@ import { logger } from '../../../../logger';
 import { PackageFile } from '../../../../manager/common';
 import { platform } from '../../../../platform';
 import { emojify } from '../../../../util/emoji';
-import { isBranchModified } from '../../../../util/git';
+import { deleteBranch, isBranchModified } from '../../../../util/git';
 import { BranchConfig } from '../../../common';
 import { addAssigneesReviewers } from '../../../pr';
 import { getBaseBranchDesc } from './base-branch';
@@ -113,7 +113,11 @@ If you need any further assistance then you can also [request help here](${confi
     if (config.dryRun) {
       logger.info('DRY-RUN: Would update onboarding PR');
     } else {
-      await platform.updatePr(existingPr.number, existingPr.title, prBody);
+      await platform.updatePr({
+        number: existingPr.number,
+        prTitle: existingPr.title,
+        prBody,
+      });
       logger.info({ pr: existingPr.number }, 'Onboarding PR updated');
     }
     return;
@@ -143,7 +147,7 @@ If you need any further assistance then you can also [request help here](${confi
       )
     ) {
       logger.debug('Onboarding PR already exists but cannot find it');
-      await platform.deleteBranch(config.onboardingBranch);
+      await deleteBranch(config.onboardingBranch);
       return;
     }
     throw err;
