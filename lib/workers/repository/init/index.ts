@@ -10,7 +10,6 @@ import { checkOnboardingBranch } from '../onboarding/branch';
 import { initApis } from './apis';
 import { detectSemanticCommits } from './semantic';
 import { detectVulnerabilityAlerts } from './vulnerability';
-import { platform } from '../../../platform';
 
 let cache: repositoryCache.Cache;
 
@@ -70,8 +69,6 @@ export async function initRepo(
     config = cache.init.resolvedConfig;
   } else {
     config = await getRepoConfig(config);
-    config.baseBranch = config.defaultBranch;
-    config.baseBranchSha = await platform.setBaseBranch(config.baseBranch);
     cache.init.resolvedConfig = config;
   }
   checkIfConfigured(config);
