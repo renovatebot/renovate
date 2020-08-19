@@ -301,7 +301,7 @@ describe(getName(__filename), () => {
             )
             .reply(200, {
               isLastPage: true,
-              lines: [{ text: '{ "enabled": false }' }],
+              lines: [{ text: '{ "enabled": false' }, { text: '}' }],
             });
           await expect(
             bitbucket.initRepo({

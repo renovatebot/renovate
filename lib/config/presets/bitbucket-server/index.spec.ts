@@ -27,7 +27,7 @@ describe(getName(__filename), () => {
         .query({ limit: 20000 })
         .reply(200, {
           isLastPage: true,
-          lines: [{ text: '{"from":"api"}' }],
+          lines: [{ text: '{"from":"api"' }, { text: '}' }],
         });
 
       const res = await bitbucketServer.fetchJSONFile(

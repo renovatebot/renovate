@@ -143,7 +143,7 @@ export async function initRepo({
       if (!body.isLastPage) {
         logger.warn({ size: body.size }, `Renovate config to big`);
       } else {
-        renovateConfig = JSON.parse(body.lines.map((l) => l.text).join());
+        renovateConfig = JSON.parse(body.lines.map((l) => l.text).join(''));
       }
     } catch {
       // Do nothing
