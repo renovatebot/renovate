@@ -1,6 +1,5 @@
 import { RenovateConfig } from '../../../config';
 import { logger } from '../../../logger';
-import { platform } from '../../../platform';
 import * as memCache from '../../../util/cache/memory';
 import * as repositoryCache from '../../../util/cache/repository';
 import { clone } from '../../../util/clone';
@@ -23,8 +22,6 @@ async function initializeCaches(config: RenovateConfig): Promise<void> {
 async function getRepoConfig(config_: RenovateConfig): Promise<RenovateConfig> {
   const config = { ...config_ };
   config.semanticCommits = await detectSemanticCommits(config);
-  config.baseBranch = config.defaultBranch;
-  config.baseBranchSha = await platform.setBaseBranch(config.baseBranch);
   return config;
 }
 
