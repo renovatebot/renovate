@@ -141,9 +141,9 @@ const options: RenovateOptions[] = [
     cli: false,
   },
   {
-    name: 'onboardingCommitMessageBody',
+    name: 'onboardingCommitMessage',
     description:
-      'Change this value in order to override the default onboarding commit message body.',
+      'Change this value in order to override the default onboarding commit message.',
     type: 'string',
     default: null,
     admin: true,

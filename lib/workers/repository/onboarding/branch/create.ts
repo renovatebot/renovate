@@ -13,21 +13,29 @@ export function createOnboardingBranch(
   const contents = getOnboardingConfig(config);
   logger.debug('Creating onboarding branch');
 
-  let prefix: string;
+  let commitMessagePrefix = '';
   if (config.commitMessagePrefix) {
-    prefix = config.commitMessagePrefix;
+    commitMessagePrefix = config.commitMessagePrefix;
   } else if (config.semanticCommits) {
-    prefix = config.semanticCommitType;
+    commitMessagePrefix = config.semanticCommitType;
     if (config.semanticCommitScope) {
-      prefix += `(${config.semanticCommitScope})`;
+      commitMessagePrefix += `(${config.semanticCommitScope})`;
     }
   }
-  let commitMessageBody = `${prefix ? ': add' : 'Add'} ${defaultConfigFile}`;
-  if (config.onboardingCommitMessageBody) {
-    commitMessageBody = config.onboardingCommitMessageBody;
+  if (commitMessagePrefix) {
+    commitMessagePrefix += commitMessagePrefix.endsWith(':') ? ' ' : ':';
   }
 
-  const commitMessage = `${prefix || ''}${commitMessageBody}`;
+  let onboardingCommitMessage: string;
+  if (config.onboardingCommitMessage) {
+    onboardingCommitMessage = config.onboardingCommitMessage;
+  } else {
+    onboardingCommitMessage = `${
+      commitMessagePrefix ? 'add' : 'Add'
+    } ${defaultConfigFile}`;
+  }
+
+  const commitMessage = `${commitMessagePrefix} ${onboardingCommitMessage}`.trim();
 
   // istanbul ignore if
   if (config.dryRun) {
