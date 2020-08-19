@@ -1,5 +1,5 @@
 import crypto from 'crypto';
-import { expect, jest } from '@jest/globals';
+import { expect } from '@jest/globals';
 import { RenovateConfig as _RenovateConfig } from '../lib/config';
 import { getConfig } from '../lib/config/defaults';
 import { platform as _platform } from '../lib/platform';

@@ -3,7 +3,6 @@ import URL from 'url';
 import fs from 'fs-extra';
 import Git, {
   DiffResult as DiffResult_,
-  Options,
   ResetMode,
   SimpleGit,
   StatusResult as StatusResult_,
@@ -17,6 +16,7 @@ import {
 } from '../../constants/error-messages';
 import { logger } from '../../logger';
 import { ExternalHostError } from '../../types/errors/external-host-error';
+import { GitOptions, GitProtocol } from '../../types/git';
 import * as limits from '../../workers/global/limits';
 import { writePrivateKey } from './private-key';
 
@@ -34,7 +34,7 @@ interface StorageConfig {
   localDir: string;
   currentBranch?: string;
   url: string;
-  extraCloneOpts?: Options;
+  extraCloneOpts?: GitOptions;
   gitAuthorName?: string;
   gitAuthorEmail?: string;
 }
@@ -214,10 +214,10 @@ export async function syncGit(): Promise<void> {
     const cloneStart = Date.now();
     try {
       // clone only the default branch
-      let opts = ['--depth=2'];
+      const opts = ['--depth=2'];
       if (config.extraCloneOpts) {
-        opts = opts.concat(
-          Object.entries(config.extraCloneOpts).map((e) => `${e[0]}=${e[1]}`)
+        opts.push(
+          ...Object.entries(config.extraCloneOpts).map((e) => `${e[0]}=${e[1]}`)
         );
       }
       await git.clone(config.url, '.', opts);
@@ -665,7 +665,7 @@ export function getUrl({
   host,
   repository,
 }: {
-  protocol?: 'ssh' | 'http' | 'https';
+  protocol?: GitProtocol;
   auth?: string;
   hostname?: string;
   host?: string;
