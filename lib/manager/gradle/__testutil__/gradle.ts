@@ -49,7 +49,7 @@ function determineJavaVersion(): number {
       throw Error(
         `This test suite needs Java and ${failIfNoJavaEnv} is set.
 Result of java -version:
-${error}`
+${error.toString()}`
       );
     }
     cachedJavaVersion = parseJavaVersion(javaVersionCommand.stderr);
@@ -60,13 +60,16 @@ ${error}`
 class WithGradle {
   private gradleSupportsThisJavaVersion: boolean;
 
-  constructor(private gradleVersion: number) {
+  constructor(gradleVersion: number) {
     const javaVersion = determineJavaVersion();
     if (gradleJavaVersionSupport[gradleVersion] === undefined) {
       throw Error(`Unknown gradle version '${gradleVersion}'!`);
     }
 
-    const supportedJavaVersions = gradleJavaVersionSupport[gradleVersion];
+    const supportedJavaVersions = gradleJavaVersionSupport[gradleVersion] as {
+      min: number;
+      max: number;
+    };
     this.gradleSupportsThisJavaVersion =
       javaVersion >= supportedJavaVersions.min &&
       javaVersion <= supportedJavaVersions.max;

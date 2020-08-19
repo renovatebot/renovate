@@ -126,7 +126,7 @@ export async function mergeRenovateConfig(
   const cache = getCache();
   cache.init = {
     configFile,
-    contents: clone(renovateJson),
+    configFileContents: clone(renovateJson),
   };
   const migratedConfig = await migrateAndValidate(config, renovateJson);
   if (migratedConfig.errors.length) {

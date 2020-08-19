@@ -47,8 +47,10 @@ import {
   CombinedBranchStatus,
   Comment,
   GhBranchStatus,
+  GhGraphQlPr,
   GhPr,
   GhRepo,
+  GhRestPr,
   LocalRepoConfig,
   PrList,
 } from './types';
@@ -498,9 +500,13 @@ async function getClosedPrs(): Promise<PrList> {
         }
       }
       `;
-      const nodes = await githubApi.queryRepoField<any>(query, 'pullRequests', {
-        paginate: false,
-      });
+      const nodes = await githubApi.queryRepoField<GhGraphQlPr>(
+        query,
+        'pullRequests',
+        {
+          paginate: false,
+        }
+      );
       const prNumbers: number[] = [];
       // istanbul ignore if
       if (!nodes?.length) {
@@ -513,12 +519,10 @@ async function getClosedPrs(): Promise<PrList> {
         pr.state = pr.state.toLowerCase();
         pr.branchName = pr.headRefName;
         delete pr.headRefName;
-        pr.comments = pr.comments.nodes.map(
-          (comment: { databaseId: number; body: string }) => ({
-            id: comment.databaseId,
-            body: comment.body,
-          })
-        );
+        pr.comments = pr.comments.nodes.map((comment) => ({
+          id: comment.databaseId,
+          body: comment.body,
+        }));
         pr.body = 'dummy body'; // just in case
         config.closedPrList[pr.number] = pr;
         prNumbers.push(pr.number);
@@ -598,10 +602,14 @@ async function getOpenPrs(): Promise<PrList> {
         }
       }
       `;
-      const nodes = await githubApi.queryRepoField<any>(query, 'pullRequests', {
-        paginate: false,
-        acceptHeader: 'application/vnd.github.merge-info-preview+json',
-      });
+      const nodes = await githubApi.queryRepoField<GhGraphQlPr>(
+        query,
+        'pullRequests',
+        {
+          paginate: false,
+          acceptHeader: 'application/vnd.github.merge-info-preview+json',
+        }
+      );
       const prNumbers: number[] = [];
       // istanbul ignore if
       if (!nodes?.length) {
@@ -636,9 +644,7 @@ async function getOpenPrs(): Promise<PrList> {
           pr.isConflicted = false;
         }
         if (pr.labels) {
-          pr.labels = pr.labels.nodes.map(
-            (label: { name: string }) => label.name
-          );
+          pr.labels = pr.labels.nodes.map((label) => label.name);
         }
         pr.hasAssignees = !!(pr.assignees?.totalCount > 0);
         delete pr.assignees;
@@ -681,7 +687,7 @@ export async function getPr(prNo: number): Promise<Pr | null> {
     'PR not found in open or closed PRs list - trying to fetch it directly'
   );
   const pr = (
-    await githubApi.getJson<any>(
+    await githubApi.getJson<GhRestPr>(
       `repos/${config.parentRepo || config.repository}/pulls/${prNo}`
     )
   ).body;
@@ -805,7 +811,7 @@ async function getStatus(
 // Returns the combined status for a branch.
 export async function getBranchStatus(
   branchName: string,
-  requiredStatusChecks: any
+  requiredStatusChecks: any[] | undefined
 ): Promise<BranchStatus> {
   logger.debug(`getBranchStatus(${branchName})`);
   if (!requiredStatusChecks) {
@@ -1036,7 +1042,7 @@ export async function findIssue(title: string): Promise<Issue | null> {
   if (!issue) {
     return null;
   }
-  logger.debug('Found issue ' + issue.number);
+  logger.debug(`Found issue ${issue.number}`);
   const issueBody = (
     await githubApi.getJson<{ body: string }>(
       `repos/${config.parentRepo || config.repository}/issues/${issue.number}`
@@ -1090,7 +1096,7 @@ export async function ensureIssue({
       }
       for (const i of issues) {
         if (i.state === 'open' && i.number !== issue.number) {
-          logger.warn('Closing duplicate issue ' + i.number);
+          logger.warn(`Closing duplicate issue ${i.number}`);
           await closeIssue(i.number);
         }
       }
@@ -1139,7 +1145,9 @@ export async function ensureIssue({
   } catch (err) /* istanbul ignore next */ {
     if (err.body?.message?.startsWith('Issues are disabled for this repo')) {
       logger.debug(
-        `Issues are disabled, so could not create issue: ${err.message}`
+        `Issues are disabled, so could not create issue: ${
+          (err as Error).message
+        }`
       );
     } else {
       logger.warn({ err }, 'Could not ensure issue');
@@ -1163,7 +1171,7 @@ export async function addAssignees(
   issueNo: number,
   assignees: string[]
 ): Promise<void> {
-  logger.debug(`Adding assignees ${assignees} to #${issueNo}`);
+  logger.debug(`Adding assignees '${assignees.join(', ')}' to #${issueNo}`);
   const repository = config.parentRepo || config.repository;
   await githubApi.postJson(`repos/${repository}/issues/${issueNo}/assignees`, {
     body: {
@@ -1176,7 +1184,7 @@ export async function addReviewers(
   prNo: number,
   reviewers: string[]
 ): Promise<void> {
-  logger.debug(`Adding reviewers ${reviewers} to #${prNo}`);
+  logger.debug(`Adding reviewers '${reviewers.join(', ')}' to #${prNo}`);
 
   const userReviewers = reviewers.filter((e) => !e.startsWith('team:'));
   const teamReviewers = reviewers
@@ -1203,7 +1211,7 @@ async function addLabels(
   issueNo: number,
   labels: string[] | null
 ): Promise<void> {
-  logger.debug(`Adding labels ${labels} to #${issueNo}`);
+  logger.debug(`Adding labels '${labels?.join(', ')}' to #${issueNo}`);
   const repository = config.parentRepo || config.repository;
   if (is.array(labels) && labels.length) {
     await githubApi.postJson(`repos/${repository}/issues/${issueNo}/labels`, {
@@ -1507,7 +1515,7 @@ export async function mergePr(
     config.parentRepo || config.repository
   }/pulls/${prNo}/merge`;
   const options = {
-    body: {} as any,
+    body: {} as { merge_method?: string },
   };
   let automerged = false;
   if (config.mergeMethod) {
@@ -1611,16 +1619,14 @@ export async function getVulnerabilityAlerts(): Promise<VulnerabilityAlert[]> {
       }
     }
   }`;
-  let alerts = [];
+  let alerts: VulnerabilityAlert[] = [];
   try {
-    const vulnerabilityAlerts = await githubApi.queryRepoField<{ node: any }>(
-      query,
-      'vulnerabilityAlerts',
-      {
-        paginate: false,
-        acceptHeader: 'application/vnd.github.vixen-preview+json',
-      }
-    );
+    const vulnerabilityAlerts = await githubApi.queryRepoField<{
+      node: VulnerabilityAlert;
+    }>(query, 'vulnerabilityAlerts', {
+      paginate: false,
+      acceptHeader: 'application/vnd.github.vixen-preview+json',
+    });
     if (vulnerabilityAlerts?.length) {
       alerts = vulnerabilityAlerts.map((edge) => edge.node);
       if (alerts.length) {

@@ -53,7 +53,10 @@ interface User {
 
 let config: Config = {} as any;
 
-const defaults: any = {
+const defaults: {
+  endpoint?: string;
+  hostType: string;
+} = {
   hostType: PLATFORM_TYPE_AZURE,
 };
 
@@ -252,8 +255,8 @@ export async function findPr({
         prsFiltered = prsFiltered.filter((item) => item.state === state);
         break;
     }
-  } catch (error) {
-    logger.error('findPr ' + error);
+  } catch (err) {
+    logger.error({ err }, 'findPr error');
   }
   if (prsFiltered.length === 0) {
     return null;
@@ -595,7 +598,7 @@ export async function addAssignees(
   issueNo: number,
   assignees: string[]
 ): Promise<void> {
-  logger.trace(`addAssignees(${issueNo}, ${assignees})`);
+  logger.trace(`addAssignees(${issueNo}, [${assignees.join(', ')}])`);
   const ids = await getUserIds(assignees);
   await ensureComment({
     number: issueNo,
@@ -613,7 +616,7 @@ export async function addReviewers(
   prNo: number,
   reviewers: string[]
 ): Promise<void> {
-  logger.trace(`addReviewers(${prNo}, ${reviewers})`);
+  logger.trace(`addReviewers(${prNo}, [${reviewers.join(', ')}])`);
   const azureApiGit = await azureApi.gitApi();
 
   const ids = await getUserIds(reviewers);
