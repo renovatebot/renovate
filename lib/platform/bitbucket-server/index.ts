@@ -11,6 +11,7 @@ import { PLATFORM_TYPE_BITBUCKET_SERVER } from '../../constants/platforms';
 import { logger } from '../../logger';
 import { BranchStatus, PrState } from '../../types';
 import * as git from '../../util/git';
+import { deleteBranch } from '../../util/git';
 import * as hostRules from '../../util/host-rules';
 import { HttpResponse } from '../../util/http';
 import {
@@ -363,27 +364,6 @@ export async function refreshPr(number: number): Promise<void> {
   await delay(1000);
   // refresh cache
   await getPr(number, true);
-}
-
-export async function deleteBranch(
-  branchName: string,
-  closePr = false
-): Promise<void> {
-  logger.debug(`deleteBranch(${branchName}, closePr=${closePr})`);
-  // TODO: coverage
-  // istanbul ignore next
-  if (closePr) {
-    // getBranchPr
-    const pr = await getBranchPr(branchName);
-    if (pr) {
-      const { body } = await bitbucketServerHttp.postJson<{ version: number }>(
-        `./rest/api/1.0/projects/${config.projectKey}/repos/${config.repositorySlug}/pull-requests/${pr.number}/decline?version=${pr.version}`
-      );
-
-      updatePrVersion(pr.number, body.version);
-    }
-  }
-  return git.deleteBranch(branchName);
 }
 
 async function getStatus(

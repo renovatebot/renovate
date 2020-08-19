@@ -1,7 +1,6 @@
 import URL from 'url';
 import is from '@sindresorhus/is';
 import parseDiff from 'parse-diff';
-import { RenovateConfig } from '../../config/common';
 import {
   REPOSITORY_DISABLED,
   REPOSITORY_NOT_FOUND,
@@ -219,21 +218,6 @@ export async function findPr({
     logger.debug(`Found PR #${pr.number}`);
   }
   return pr;
-}
-
-export async function deleteBranch(
-  branchName: string,
-  closePr?: boolean
-): Promise<void> {
-  if (closePr) {
-    const pr = await findPr({ branchName, state: PrState.Open });
-    if (pr) {
-      await bitbucketHttp.postJson(
-        `/2.0/repositories/${config.repository}/pullrequests/${pr.number}/decline`
-      );
-    }
-  }
-  return git.deleteBranch(branchName);
 }
 
 async function isPrConflicted(prNo: number): Promise<boolean> {
@@ -725,10 +709,6 @@ export async function createPr({
 
 interface Reviewer {
   uuid: { raw: string };
-}
-
-interface Commit {
-  author: { raw: string };
 }
 
 export async function updatePr({

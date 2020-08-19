@@ -406,36 +406,6 @@ describe('platform/bitbucket', () => {
     });
   });
 
-  describe('deleteBranch()', () => {
-    it('sends to gitFs', async () => {
-      await initRepoMock();
-      expect(await bitbucket.deleteBranch('test')).toMatchSnapshot();
-      expect(httpMock.getTrace()).toMatchSnapshot();
-    });
-    it('should handle closing PRs when none exist', async () => {
-      const scope = await initRepoMock();
-      scope
-        .get(
-          '/2.0/repositories/some/repo/pullrequests?state=OPEN&state=MERGED&state=DECLINED&state=SUPERSEDED&pagelen=50'
-        )
-        .reply(200, { values: [pr] });
-      await bitbucket.deleteBranch('some-branch', true);
-      expect(httpMock.getTrace()).toMatchSnapshot();
-    });
-    it('should handle closing PRs when some exist', async () => {
-      const scope = await initRepoMock();
-      scope
-        .get(
-          '/2.0/repositories/some/repo/pullrequests?state=OPEN&state=MERGED&state=DECLINED&state=SUPERSEDED&pagelen=50'
-        )
-        .reply(200, { values: [pr] })
-        .post('/2.0/repositories/some/repo/pullrequests/5/decline')
-        .reply(200);
-      await bitbucket.deleteBranch('branch', true);
-      expect(httpMock.getTrace()).toMatchSnapshot();
-    });
-  });
-
   describe('findIssue()', () => {
     it('does not throw', async () => {
       const scope = await initRepoMock({}, { has_issues: true });

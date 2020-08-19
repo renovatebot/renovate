@@ -21,6 +21,7 @@ import { emojify } from '../../util/emoji';
 import { exec } from '../../util/exec';
 import { readLocalFile, writeLocalFile } from '../../util/fs';
 import {
+  deleteBranch,
   getRepoStatus,
   branchExists as gitBranchExists,
   isBranchModified,
@@ -122,7 +123,7 @@ export async function processBranch(
           if (config.dryRun) {
             logger.info('DRY-RUN: Would delete branch ' + config.branchName);
           } else {
-            await platform.deleteBranch(config.branchName);
+            await deleteBranch(config.branchName);
           }
         }
       } else if (existingPr.state === PrState.Merged) {
