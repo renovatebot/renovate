@@ -8,6 +8,7 @@ import { setBranchPrefix } from '../../../util/git';
 import { checkIfConfigured } from '../configured';
 import { checkOnboardingBranch } from '../onboarding/branch';
 import { initApis } from './apis';
+import { mergeRenovateConfig } from './config';
 import { detectSemanticCommits } from './semantic';
 import { detectVulnerabilityAlerts } from './vulnerability';
 
@@ -26,6 +27,7 @@ async function getRepoConfig(config_: RenovateConfig): Promise<RenovateConfig> {
   config.baseBranchSha = await platform.setBaseBranch(config.baseBranch);
   config.semanticCommits = await detectSemanticCommits(config);
   config = await checkOnboardingBranch(config);
+  config = await mergeRenovateConfig(config);
   return config;
 }
 
