@@ -1,4 +1,3 @@
-import is from '@sindresorhus/is';
 import { RenovateConfig } from '../../../../config';
 import {
   MANAGER_NO_PACKAGE_FILES,

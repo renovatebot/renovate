@@ -24,6 +24,7 @@ async function initializeCaches(config: RenovateConfig): Promise<void> {
   cache.init = cache.init || {};
 }
 
+// istanbul ignore next
 function validCache(config: RenovateConfig): boolean {
   return !!(
     config.defaultBranch === cache.init.defaultBranch &&
@@ -48,6 +49,7 @@ export async function initRepo(
   let config: RenovateConfig = initializeConfig(config_);
   await initializeCaches(config);
   config = await initApis(config);
+  // istanbul ignore if
   if (validCache(config)) {
     config = cache.init.resolvedConfig;
   } else {

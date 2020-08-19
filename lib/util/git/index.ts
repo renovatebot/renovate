@@ -397,6 +397,7 @@ export async function getFileList(): Promise<string[]> {
 export async function getAllRenovateBranches(
   branchPrefix: string
 ): Promise<string[]> {
+  // istanbul ignore if
   if (!git) {
     logger.debug('git is uninitialized so returning empty branch set');
     return [];
