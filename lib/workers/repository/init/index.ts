@@ -25,12 +25,27 @@ async function initializeCaches(config: RenovateConfig): Promise<void> {
 
 // istanbul ignore next
 function validCache(config: RenovateConfig): boolean {
-  return !!(
-    config.defaultBranch === cache.init.defaultBranch &&
-    cache.init.defaultBranchSha &&
-    config.defaultBranchSha === cache.init.defaultBranchSha &&
-    cache.init.resolvedConfig
-  );
+  if (cache.init.resolvedConfig?.defaultBranchSha) {
+    if (
+      config.defaultBranchSha === cache.init.resolvedConfig.defaultBranchSha
+    ) {
+      logger.debug(
+        { sha: config.defaultBranchSha },
+        'Cached resolvedConfig is valid'
+      );
+      return true;
+    }
+    logger.debug(
+      {
+        cachedSha: cache.init.resolvedConfig?.defaultBranchSha,
+        sha: config.defaultBranchSha,
+      },
+      'Cached resolvedConfig is out of date'
+    );
+    return false;
+  }
+  logger.debug('No cached defaultBranchSha found');
+  return false;
 }
 
 async function getRepoConfig(config_: RenovateConfig): Promise<RenovateConfig> {
@@ -51,8 +66,6 @@ export async function initRepo(
     config = cache.init.resolvedConfig;
   } else {
     config = await getRepoConfig(config);
-    cache.init.defaultBranch = config.defaultBranch;
-    cache.init.defaultBranchSha = config.defaultBranchSha;
     cache.init.resolvedConfig = config;
   }
   checkIfConfigured(config);
