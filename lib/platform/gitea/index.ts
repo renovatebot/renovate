@@ -49,7 +49,7 @@ interface GiteaRepoConfig {
   labelList: Promise<helper.Label[]> | null;
 }
 
-const defaults: any = {
+const defaults = {
   hostType: PLATFORM_TYPE_GITEA,
   endpoint: 'https://gitea.com/api/v1/',
 };
@@ -796,7 +796,9 @@ const platform: Platform = {
   },
 
   async addAssignees(number: number, assignees: string[]): Promise<void> {
-    logger.debug(`Updating assignees ${assignees} on Issue #${number}`);
+    logger.debug(
+      `Updating assignees '${assignees?.join(', ')}' on Issue #${number}`
+    );
     await helper.updateIssue(config.repository, number, {
       assignees,
     });
@@ -805,7 +807,9 @@ const platform: Platform = {
   addReviewers(number: number, reviewers: string[]): Promise<void> {
     // Adding reviewers to a PR through API is not supported by Gitea as of today
     // See tracking issue: https://github.com/go-gitea/gitea/issues/5733
-    logger.debug(`Updating reviewers ${reviewers} on Pull Request #${number}`);
+    logger.debug(
+      `Updating reviewers '${reviewers?.join(', ')}' on Pull Request #${number}`
+    );
     logger.warn('Unimplemented in Gitea: Reviewers');
     return Promise.resolve();
   },
