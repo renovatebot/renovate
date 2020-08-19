@@ -4,7 +4,7 @@
 export interface FileData {
   isLastPage: boolean;
 
-  lines: string[];
+  lines: { text: string }[];
 
   size: number;
 }
