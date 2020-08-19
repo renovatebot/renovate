@@ -12,6 +12,7 @@ import { PLATFORM_TYPE_BITBUCKET_SERVER } from '../../constants/platforms';
 import { logger } from '../../logger';
 import { BranchStatus, PrState } from '../../types';
 import { GitProtocol } from '../../types/git';
+import { FileData } from '../../types/platform/bitbucket-server';
 import * as git from '../../util/git';
 import { deleteBranch } from '../../util/git';
 import * as hostRules from '../../util/host-rules';
@@ -134,14 +135,6 @@ export async function initRepo({
       enabled: boolean;
     }
 
-    interface FileData {
-      isLastPage: boolean;
-
-      lines: string[];
-
-      size: number;
-    }
-
     let renovateConfig: RenovateConfig;
     try {
       const { body } = await bitbucketServerHttp.getJson<FileData>(
@@ -150,7 +143,7 @@ export async function initRepo({
       if (!body.isLastPage) {
         logger.warn({ size: body.size }, `Renovate config to big`);
       } else {
-        renovateConfig = JSON.parse(body.lines.join());
+        renovateConfig = JSON.parse(body.lines.map((l) => l.text).join(''));
       }
     } catch {
       // Do nothing
