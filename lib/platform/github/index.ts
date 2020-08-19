@@ -20,6 +20,7 @@ import { logger } from '../../logger';
 import { BranchStatus, PrState } from '../../types';
 import { ExternalHostError } from '../../types/errors/external-host-error';
 import * as git from '../../util/git';
+import { deleteBranch } from '../../util/git';
 import * as hostRules from '../../util/host-rules';
 import * as githubHttp from '../../util/http/github';
 import { sanitize } from '../../util/sanitize';
@@ -471,16 +472,6 @@ export async function getRepoForceRebase(): Promise<boolean> {
 export async function setBaseBranch(branchName: string): Promise<string> {
   const baseBranchSha = await git.setBranch(branchName);
   return baseBranchSha;
-}
-
-// Branch
-
-// istanbul ignore next
-export function deleteBranch(
-  branchName: string,
-  closePr?: boolean
-): Promise<void> {
-  return git.deleteBranch(branchName);
 }
 
 async function getClosedPrs(): Promise<PrList> {

@@ -3,7 +3,11 @@ import { REPOSITORY_CHANGED } from '../../../constants/error-messages';
 import { logger } from '../../../logger';
 import { platform } from '../../../platform';
 import { PrState } from '../../../types';
-import { getAllRenovateBranches, isBranchModified } from '../../../util/git';
+import {
+  deleteBranch,
+  getAllRenovateBranches,
+  isBranchModified,
+} from '../../../util/git';
 
 async function cleanUpBranches(
   { dryRun, pruneStaleBranches: enabled }: RenovateConfig,
@@ -30,11 +34,12 @@ async function cleanUpBranches(
             await platform.updatePr({
               number: pr.number,
               prTitle: `${pr.title} - autoclosed`,
+              state: PrState.Closed,
             });
           }
         }
       }
-      const closePr = true;
+
       logger.debug({ branch: branchName }, `Deleting orphan branch`);
       if (branchIsModified) {
         if (pr) {
@@ -60,7 +65,7 @@ async function cleanUpBranches(
           `PRUNING-DISABLED: Would deleting orphan branch ${branchName}`
         );
       } else {
-        await platform.deleteBranch(branchName, closePr);
+        await deleteBranch(branchName);
       }
       if (pr && !branchIsModified) {
         logger.info({ prNo: pr.number, prTitle: pr.title }, 'PR autoclosed');

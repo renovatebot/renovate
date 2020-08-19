@@ -9,7 +9,11 @@ import { PlatformPrOptions, Pr, platform } from '../../platform';
 import { BranchStatus } from '../../types';
 import { ExternalHostError } from '../../types/errors/external-host-error';
 import { sampleSize } from '../../util';
-import { getBranchLastCommitTime, isBranchModified } from '../../util/git';
+import {
+  deleteBranch,
+  getBranchLastCommitTime,
+  isBranchModified,
+} from '../../util/git';
 import { BranchConfig, PrResult } from '../common';
 import { getPrBody } from './body';
 import { ChangeLogError } from './changelog';
@@ -387,7 +391,7 @@ export async function ensurePr(
         if (config.dryRun) {
           logger.info('DRY-RUN: Would delete branch: ' + config.branchName);
         } else {
-          await platform.deleteBranch(branchName);
+          await deleteBranch(branchName);
         }
       }
       return { prResult: PrResult.Error };

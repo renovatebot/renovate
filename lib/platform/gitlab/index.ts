@@ -446,18 +446,6 @@ export async function getPr(iid: number): Promise<Pr> {
   return pr;
 }
 
-// istanbul ignore next
-async function closePr(iid: number): Promise<void> {
-  await gitlabApi.putJson(
-    `projects/${config.repository}/merge_requests/${iid}`,
-    {
-      body: {
-        state_event: 'close',
-      },
-    }
-  );
-}
-
 export async function updatePr({
   number: iid,
   prTitle: title,
@@ -545,21 +533,6 @@ export async function getBranchPr(branchName: string): Promise<Pr> {
     return null;
   }
   return getPr(pr.iid);
-}
-
-export async function deleteBranch(
-  branchName: string,
-  shouldClosePr = false
-): Promise<void> {
-  if (shouldClosePr) {
-    logger.debug('Closing PR');
-    const pr = await getBranchPr(branchName);
-    // istanbul ignore if
-    if (pr) {
-      await closePr(pr.number);
-    }
-  }
-  return git.deleteBranch(branchName);
 }
 
 export async function getBranchStatusCheck(

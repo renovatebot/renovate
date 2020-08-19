@@ -220,21 +220,6 @@ export async function findPr({
   return pr;
 }
 
-export async function deleteBranch(
-  branchName: string,
-  closePr?: boolean
-): Promise<void> {
-  if (closePr) {
-    const pr = await findPr({ branchName, state: PrState.Open });
-    if (pr) {
-      await bitbucketHttp.postJson(
-        `/2.0/repositories/${config.repository}/pullrequests/${pr.number}/decline`
-      );
-    }
-  }
-  return git.deleteBranch(branchName);
-}
-
 async function isPrConflicted(prNo: number): Promise<boolean> {
   const diff = (
     await bitbucketHttp.get(

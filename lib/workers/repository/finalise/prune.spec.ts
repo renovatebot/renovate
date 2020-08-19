@@ -37,7 +37,7 @@ describe('workers/repository/finalise/prune', () => {
       git.getAllRenovateBranches.mockResolvedValueOnce(config.branchList);
       await cleanup.pruneStaleBranches(config, config.branchList);
       expect(git.getAllRenovateBranches).toHaveBeenCalledTimes(1);
-      expect(platform.deleteBranch).toHaveBeenCalledTimes(0);
+      expect(git.deleteBranch).toHaveBeenCalledTimes(0);
     });
     it('renames deletes remaining branch', async () => {
       config.branchList = ['renovate/a', 'renovate/b'];
@@ -47,7 +47,7 @@ describe('workers/repository/finalise/prune', () => {
       platform.findPr.mockResolvedValueOnce({ title: 'foo' } as never);
       await cleanup.pruneStaleBranches(config, config.branchList);
       expect(git.getAllRenovateBranches).toHaveBeenCalledTimes(1);
-      expect(platform.deleteBranch).toHaveBeenCalledTimes(1);
+      expect(git.deleteBranch).toHaveBeenCalledTimes(1);
       expect(platform.updatePr).toHaveBeenCalledTimes(1);
     });
     it('does nothing on dryRun', async () => {
@@ -59,7 +59,7 @@ describe('workers/repository/finalise/prune', () => {
       platform.findPr.mockResolvedValueOnce({ title: 'foo' } as never);
       await cleanup.pruneStaleBranches(config, config.branchList);
       expect(git.getAllRenovateBranches).toHaveBeenCalledTimes(1);
-      expect(platform.deleteBranch).toHaveBeenCalledTimes(0);
+      expect(git.deleteBranch).toHaveBeenCalledTimes(0);
       expect(platform.updatePr).toHaveBeenCalledTimes(0);
     });
     it('does nothing on prune stale branches disabled', async () => {
@@ -72,7 +72,7 @@ describe('workers/repository/finalise/prune', () => {
       platform.findPr.mockResolvedValueOnce({ title: 'foo' } as never);
       await cleanup.pruneStaleBranches(config, config.branchList);
       expect(git.getAllRenovateBranches).toHaveBeenCalledTimes(1);
-      expect(platform.deleteBranch).toHaveBeenCalledTimes(0);
+      expect(git.deleteBranch).toHaveBeenCalledTimes(0);
       expect(platform.updatePr).toHaveBeenCalledTimes(0);
     });
     it('posts comment if someone pushed to PR', async () => {
@@ -86,7 +86,7 @@ describe('workers/repository/finalise/prune', () => {
       platform.findPr.mockResolvedValueOnce({ title: 'foo' } as never);
       await cleanup.pruneStaleBranches(config, config.branchList);
       expect(git.getAllRenovateBranches).toHaveBeenCalledTimes(1);
-      expect(platform.deleteBranch).toHaveBeenCalledTimes(0);
+      expect(git.deleteBranch).toHaveBeenCalledTimes(0);
       expect(platform.updatePr).toHaveBeenCalledTimes(0);
       expect(platform.ensureComment).toHaveBeenCalledTimes(1);
     });
@@ -101,7 +101,7 @@ describe('workers/repository/finalise/prune', () => {
       platform.findPr.mockResolvedValueOnce({ title: 'foo' } as never);
       await cleanup.pruneStaleBranches(config, config.branchList);
       expect(git.getAllRenovateBranches).toHaveBeenCalledTimes(1);
-      expect(platform.deleteBranch).toHaveBeenCalledTimes(0);
+      expect(git.deleteBranch).toHaveBeenCalledTimes(0);
       expect(platform.updatePr).toHaveBeenCalledTimes(0);
       expect(platform.ensureComment).toHaveBeenCalledTimes(0);
     });

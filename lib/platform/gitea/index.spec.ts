@@ -1278,48 +1278,6 @@ describe('platform/gitea', () => {
     });
   });
 
-  describe('deleteBranch', () => {
-    it('should propagate call to storage class', async () => {
-      await initFakeRepo();
-      await gitea.deleteBranch('some-branch');
-
-      expect(gitvcs.deleteBranch).toHaveBeenCalledTimes(1);
-      expect(gitvcs.deleteBranch).toHaveBeenCalledWith('some-branch');
-    });
-
-    it('should not close pull request by default', async () => {
-      await initFakeRepo();
-      await gitea.deleteBranch('some-branch');
-
-      expect(helper.closePR).not.toHaveBeenCalled();
-    });
-
-    it('should close existing pull request if desired', async () => {
-      const mockPR = mockPRs[0];
-      helper.searchPRs.mockResolvedValueOnce(mockPRs);
-      await initFakeRepo();
-      await gitea.deleteBranch(mockPR.head.label, true);
-
-      expect(helper.closePR).toHaveBeenCalledTimes(1);
-      expect(helper.closePR).toHaveBeenCalledWith(
-        mockRepo.full_name,
-        mockPR.number
-      );
-      expect(gitvcs.deleteBranch).toHaveBeenCalledTimes(1);
-      expect(gitvcs.deleteBranch).toHaveBeenCalledWith(mockPR.head.label);
-    });
-
-    it('should skip closing pull request if missing', async () => {
-      helper.searchPRs.mockResolvedValueOnce(mockPRs);
-      await initFakeRepo();
-      await gitea.deleteBranch('missing', true);
-
-      expect(helper.closePR).not.toHaveBeenCalled();
-      expect(gitvcs.deleteBranch).toHaveBeenCalledTimes(1);
-      expect(gitvcs.deleteBranch).toHaveBeenCalledWith('missing');
-    });
-  });
-
   describe('addAssignees', () => {
     it('should add assignees to the issue', async () => {
       await initFakeRepo();
