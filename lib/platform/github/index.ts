@@ -16,15 +16,11 @@ import {
   REPOSITORY_RENAMED,
 } from '../../constants/error-messages';
 import { PLATFORM_TYPE_GITHUB } from '../../constants/platforms';
-import {
-  PR_STATE_ALL,
-  PR_STATE_CLOSED,
-  PR_STATE_OPEN,
-} from '../../constants/pull-requests';
 import { logger } from '../../logger';
-import { BranchStatus } from '../../types';
+import { BranchStatus, PrState } from '../../types';
 import { ExternalHostError } from '../../types/errors/external-host-error';
 import * as git from '../../util/git';
+import { deleteBranch } from '../../util/git';
 import * as hostRules from '../../util/host-rules';
 import * as githubHttp from '../../util/http/github';
 import { sanitize } from '../../util/sanitize';
@@ -42,6 +38,7 @@ import {
   Pr,
   RepoParams,
   RepoResult,
+  UpdatePrConfig,
   VulnerabilityAlert,
 } from '../common';
 import { smartTruncate } from '../utils/pr-body';
@@ -144,6 +141,8 @@ async function getBranchProtection(
   );
   return res.body;
 }
+
+let existingRepos;
 
 // Initialize GitHub by getting base branch and SHA
 export async function initRepo({
@@ -313,15 +312,17 @@ export async function initRepo({
     config.parentRepo = config.repository;
     config.repository = null;
     // Get list of existing repos
-    const existingRepos = (
-      await githubApi.getJson<{ full_name: string }[]>(
-        'user/repos?per_page=100',
-        {
-          token: forkToken || opts.token,
-          paginate: true,
-        }
-      )
-    ).body.map((r) => r.full_name);
+    existingRepos =
+      existingRepos ||
+      (
+        await githubApi.getJson<{ full_name: string }[]>(
+          'user/repos?per_page=100',
+          {
+            token: forkToken || opts.token,
+            paginate: true,
+          }
+        )
+      ).body.map((r) => r.full_name);
     try {
       config.repository = (
         await githubApi.postJson<{ full_name: string }>(
@@ -370,6 +371,11 @@ export async function initRepo({
             token: forkToken || opts.token,
           });
           logger.info('Fork deleted');
+          if (is.nonEmptyArray(existingRepos)) {
+            existingRepos = existingRepos.filter(
+              (existingRepo) => existingRepo !== config.repository
+            );
+          }
         } catch (deleteErr) {
           logger.warn({ err: deleteErr }, 'Could not delete fork');
         }
@@ -380,6 +386,7 @@ export async function initRepo({
       }
     } else {
       logger.debug({ repository_fork: config.repository }, 'Created fork');
+      existingRepos.push(config.repository);
       // Wait an arbitrary 30s to hopefully give GitHub enough time for forking to complete
       await delay(30000);
     }
@@ -390,9 +397,6 @@ export async function initRepo({
   if (forkMode) {
     logger.debug('Using forkToken for git init');
     parsedEndpoint.auth = config.forkToken;
-  } else if (global.appMode) {
-    logger.debug('Using app token for git init');
-    parsedEndpoint.auth = `x-access-token:${opts.token}`;
   } else {
     logger.debug('Using personal access token for git init');
     parsedEndpoint.auth = opts.token;
@@ -403,7 +407,7 @@ export async function initRepo({
   );
   parsedEndpoint.pathname = config.repository + '.git';
   const url = URL.format(parsedEndpoint);
-  await git.initRepo({
+  git.initRepo({
     ...config,
     url,
     gitAuthorName: global.gitAuthor?.name,
@@ -466,16 +470,6 @@ export async function getRepoForceRebase(): Promise<boolean> {
 export async function setBaseBranch(branchName: string): Promise<string> {
   const baseBranchSha = await git.setBranch(branchName);
   return baseBranchSha;
-}
-
-// Branch
-
-// istanbul ignore next
-export function deleteBranch(
-  branchName: string,
-  closePr?: boolean
-): Promise<void> {
-  return git.deleteBranch(branchName);
 }
 
 async function getClosedPrs(): Promise<PrList> {
@@ -617,7 +611,7 @@ async function getOpenPrs(): Promise<PrList> {
       for (const pr of nodes) {
         // https://developer.github.com/v4/object/pullrequest/
         pr.displayNumber = `Pull Request #${pr.number}`;
-        pr.state = PR_STATE_OPEN;
+        pr.state = PrState.Open;
         pr.branchName = pr.headRefName;
         delete pr.headRefName;
         pr.targetBranch = pr.baseRefName;
@@ -696,7 +690,7 @@ export async function getPr(prNo: number): Promise<Pr | null> {
   }
   // Harmonise PR values
   pr.displayNumber = `Pull Request #${pr.number}`;
-  if (pr.state === PR_STATE_OPEN) {
+  if (pr.state === PrState.Open) {
     pr.branchName = pr.head ? pr.head.ref : undefined;
     pr.sha = pr.head ? pr.head.sha : undefined;
     if (pr.mergeable === true) {
@@ -714,7 +708,7 @@ export async function getPr(prNo: number): Promise<Pr | null> {
 }
 
 function matchesState(state: string, desiredState: string): boolean {
-  if (desiredState === PR_STATE_ALL) {
+  if (desiredState === PrState.All) {
     return true;
   }
   if (desiredState.startsWith('!')) {
@@ -753,8 +747,8 @@ export async function getPrList(): Promise<Pr[]> {
       sha: pr.head.sha,
       title: pr.title,
       state:
-        pr.state === PR_STATE_CLOSED && pr.merged_at?.length
-          ? /* istanbul ignore next */ 'merged'
+        pr.state === PrState.Closed && pr.merged_at?.length
+          ? /* istanbul ignore next */ PrState.Merged
           : pr.state,
       createdAt: pr.created_at,
       closed_at: pr.closed_at,
@@ -768,7 +762,7 @@ export async function getPrList(): Promise<Pr[]> {
 export async function findPr({
   branchName,
   prTitle,
-  state = PR_STATE_ALL,
+  state = PrState.All,
 }: FindPRConfig): Promise<Pr | null> {
   logger.debug(`findPr(${branchName}, ${prTitle}, ${state})`);
   const prList = await getPrList();
@@ -790,7 +784,7 @@ export async function getBranchPr(branchName: string): Promise<Pr | null> {
   logger.debug(`getBranchPr(${branchName})`);
   const existingPr = await findPr({
     branchName,
-    state: PR_STATE_OPEN,
+    state: PrState.Open,
   });
   return existingPr ? getPr(existingPr.number) : null;
 }
@@ -1446,16 +1440,20 @@ export async function createPr({
   return pr;
 }
 
-export async function updatePr(
-  prNo: number,
-  title: string,
-  rawBody?: string
-): Promise<void> {
+export async function updatePr({
+  number: prNo,
+  prTitle: title,
+  prBody: rawBody,
+  state,
+}: UpdatePrConfig): Promise<void> {
   logger.debug(`updatePr(${prNo}, ${title}, body)`);
   const body = sanitize(rawBody);
   const patchBody: any = { title };
   if (body) {
     patchBody.body = body;
+  }
+  if (state) {
+    patchBody.state = state;
   }
   const options: any = {
     body: patchBody,

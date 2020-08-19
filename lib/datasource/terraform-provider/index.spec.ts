@@ -90,6 +90,24 @@ describe('datasource/terraform', () => {
       expect(res).not.toBeNull();
       expect(httpMock.getTrace()).toMatchSnapshot();
     });
+
+    it('processes real data from lookupName', async () => {
+      httpMock
+        .scope('https://registry.company.com')
+        .get('/v1/providers/hashicorp/azurerm')
+        .reply(200, JSON.parse(consulData))
+        .get('/.well-known/terraform.json')
+        .reply(200, serviceDiscoveryResult);
+      const res = await getPkgReleases({
+        datasource,
+        depName: 'azure',
+        lookupName: 'hashicorp/azurerm',
+        registryUrls: ['https://registry.company.com'],
+      });
+      expect(res).toMatchSnapshot();
+      expect(res).not.toBeNull();
+      expect(httpMock.getTrace()).toMatchSnapshot();
+    });
     it('processes data with alternative backend', async () => {
       httpMock
         .scope(primaryUrl)
