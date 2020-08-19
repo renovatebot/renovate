@@ -146,7 +146,6 @@ const options: RenovateOptions[] = [
     type: 'string',
     default:
       '{{{onboardingCommitMessagePrefix}}} {{{onboardingCommitMessageAction}}} {{{onboardingCommitMessageTopic}}}',
-    admin: true,
     cli: false,
   },
   {
@@ -155,7 +154,6 @@ const options: RenovateOptions[] = [
       'Prefix to add to start of onboarding commit messages. Uses a semantic prefix if semanticCommits enabled',
     type: 'string',
     default: '{{commitMessagePrefix}}',
-    admin: true,
     cli: false,
   },
   {
@@ -163,14 +161,12 @@ const options: RenovateOptions[] = [
     description: 'Action verb to use in onboarding commit messages',
     type: 'string',
     default: 'Add',
-    admin: true,
     cli: false,
   },
   {
     name: 'onboardingCommitMessageTopic',
     description: 'The topic/noun used in onboarding commit messages',
     type: 'string',
-    admin: true,
     cli: false,
   },
   {
