@@ -1,52 +1,18 @@
 import { RenovateConfig } from '../../../config';
 import { logger } from '../../../logger';
 import { platform } from '../../../platform';
-import * as memCache from '../../../util/cache/memory';
-import * as repositoryCache from '../../../util/cache/repository';
 import { clone } from '../../../util/clone';
 import { setBranchPrefix } from '../../../util/git';
 import { checkIfConfigured } from '../configured';
 import { checkOnboardingBranch } from '../onboarding/branch';
 import { initApis } from './apis';
+import { getCachedConfig, initializeCaches, setResolvedConfig } from './cache';
 import { mergeRenovateConfig } from './config';
 import { detectSemanticCommits } from './semantic';
 import { detectVulnerabilityAlerts } from './vulnerability';
 
-let cache: repositoryCache.Cache;
-
 function initializeConfig(config: RenovateConfig): RenovateConfig {
   return { ...clone(config), errors: [], warnings: [], branchList: [] };
-}
-
-async function initializeCaches(config: RenovateConfig): Promise<void> {
-  memCache.init();
-  await repositoryCache.initialize(config);
-  cache = repositoryCache.getCache();
-  cache.init = cache.init || {};
-}
-
-export function validCache(config: RenovateConfig): boolean {
-  if (cache.init.resolvedConfig?.defaultBranchSha) {
-    if (
-      config.defaultBranchSha === cache.init.resolvedConfig.defaultBranchSha
-    ) {
-      logger.debug(
-        { sha: config.defaultBranchSha },
-        'Cached resolvedConfig is valid'
-      );
-      return true;
-    }
-    logger.debug(
-      {
-        cachedSha: cache.init.resolvedConfig?.defaultBranchSha,
-        sha: config.defaultBranchSha,
-      },
-      'Cached resolvedConfig is out of date'
-    );
-    return false;
-  }
-  logger.debug('No cached defaultBranchSha found');
-  return false;
 }
 
 async function getRepoConfig(config_: RenovateConfig): Promise<RenovateConfig> {
@@ -65,12 +31,12 @@ export async function initRepo(
   let config: RenovateConfig = initializeConfig(config_);
   await initializeCaches(config);
   config = await initApis(config);
-  // istanbul ignore if
-  if (validCache(config)) {
-    config = cache.init.resolvedConfig;
+  const resolvedConfig = getCachedConfig(config.defaultBranchSha);
+  if (resolvedConfig) {
+    config = resolvedConfig;
   } else {
     config = await getRepoConfig(config);
-    cache.init.resolvedConfig = config;
+    setResolvedConfig(config);
   }
   checkIfConfigured(config);
   await setBranchPrefix(config.branchPrefix);
