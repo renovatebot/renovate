@@ -27,7 +27,7 @@ describe(getName(__filename), () => {
         .query({ limit: 20000 })
         .reply(200, {
           isLastPage: true,
-          lines: ['{"from":"api"}'],
+          lines: [{ text: '{"from":"api"' }, { text: '}' }],
         });
 
       const res = await bitbucketServer.fetchJSONFile(
@@ -64,7 +64,7 @@ describe(getName(__filename), () => {
         .reply(200, {
           isLastPage: false,
           size: 50000,
-          lines: ['{"from":"api"}'],
+          lines: [{ text: '{"from":"api"}' }],
         });
 
       await expect(
@@ -84,7 +84,7 @@ describe(getName(__filename), () => {
         .query({ limit: 20000 })
         .reply(200, {
           isLastPage: true,
-          lines: ['{"from":"api"'],
+          lines: [{ text: '{"from":"api"' }],
         });
 
       await expect(
@@ -106,16 +106,14 @@ describe(getName(__filename), () => {
         .query({ limit: 20000 })
         .reply(200, {
           isLastPage: true,
-          lines: ['{"from":"api"}'],
+          lines: [{ text: '{"from":"api"}' }],
         });
       expect(
-        await bitbucketServer
-          .getPresetFromEndpoint(
-            'some/repo',
-            'default',
-            'https://api.github.example.org'
-          )
-          .catch(() => ({ from: 'api' }))
+        await bitbucketServer.getPresetFromEndpoint(
+          'some/repo',
+          'default',
+          'https://api.github.example.org'
+        )
       ).toEqual({ from: 'api' });
       expect(httpMock.getTrace()).toMatchSnapshot();
     });

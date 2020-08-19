@@ -37,7 +37,7 @@ export async function fetchJSONFile(
     throw new Error('invalid preset JSON');
   }
   try {
-    const content = res.body.lines.join();
+    const content = res.body.lines.map((l) => l.text).join('');
     const parsed = JSON.parse(content);
     return parsed;
   } catch (err) {
