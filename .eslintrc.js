@@ -42,6 +42,7 @@ module.exports = {
     'prefer-destructuring': 0,
     'prefer-template': 0,
     'no-underscore-dangle': 0,
+    // 'no-unused-vars': 2,
 
     'sort-imports': [
       'error',
@@ -104,8 +105,9 @@ module.exports = {
     '@typescript-eslint/ban-types': 1,
   },
   settings: {
-    // https://github.com/benmosher/eslint-plugin-import/issues/1618
-    'import/internal-regex': '^type\\-fest$',
+    'import/parsers': {
+      '@typescript-eslint/parser': ['.ts'],
+    },
   },
   overrides: [
     {
@@ -130,6 +132,8 @@ module.exports = {
 
       rules: {
         '@typescript-eslint/explicit-function-return-type': 0,
+        '@typescript-eslint/explicit-module-boundary-types': 0,
+        '@typescript-eslint/restrict-template-expressions': 0,
       },
     },
   ],
