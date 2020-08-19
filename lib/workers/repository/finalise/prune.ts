@@ -35,7 +35,11 @@ async function cleanUpBranches(
               `PRUNING-DISABLED: Would update pr ${pr.number} to ${pr.title} - autoclosed`
             );
           } else {
-            if (!branchIsModified && pr.state === PrState.Open) {
+            if (
+              platform.supportsPrReopen &&
+              !branchIsModified &&
+              pr.state === PrState.Open
+            ) {
               await touchBranch(branchName);
               closedRightNow = true;
             }
@@ -72,12 +76,14 @@ async function cleanUpBranches(
         logger.info(
           `PRUNING-DISABLED: Would deleting orphan branch ${branchName}`
         );
-      } else if (!closedRightNow) {
+      } else if (platform.supportsPrReopen && !closedRightNow) {
         const lastCommitTime = await getBranchLastCommitTime(branchName);
         const minutesFromLastCommit = moment().diff(lastCommitTime, 'm');
         if (minutesFromLastCommit >= 60) {
           await deleteBranch(branchName);
         }
+      } else {
+        await deleteBranch(branchName);
       }
       if (pr && !branchIsModified) {
         logger.info({ prNo: pr.number, prTitle: pr.title }, 'PR autoclosed');
