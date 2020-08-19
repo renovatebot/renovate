@@ -25,8 +25,7 @@ async function initializeCaches(config: RenovateConfig): Promise<void> {
   cache.init = cache.init || {};
 }
 
-// istanbul ignore next
-function validCache(config: RenovateConfig): boolean {
+export function validCache(config: RenovateConfig): boolean {
   if (cache.init.resolvedConfig?.defaultBranchSha) {
     if (
       config.defaultBranchSha === cache.init.resolvedConfig.defaultBranchSha
