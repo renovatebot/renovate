@@ -700,6 +700,8 @@ Here is an example where you might want to limit the "noisy" package `aws-sdk` t
 }
 ```
 
+For Maven dependencies, the package name is &lt;groupId:artefactId>, eg `"packageNames": ["com.thoughtworks.xstream:xstream"]`
+
 Note how the above uses `packageNames` instead of `packagePatterns` because it is an exact match package name. This is the equivalent of defining `"packagePatterns": ["^aws\-sdk$"]` and hence much simpler. However you can mix together both `packageNames` and `packagePatterns` in the same package rule and the rule will be applied if _either_ match. Example:
 
 ```json
