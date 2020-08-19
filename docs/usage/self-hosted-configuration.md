@@ -110,21 +110,9 @@ Set this to `false` if (a) you configure Renovate entirely on the bot side (i.e.
 
 Note that this setting is independent of `branchPrefix`. For example, if you configure `branchPrefix` to be `renovate-` then you'd still have the onboarding PR created with branch `renovate/configure` until you configure `onboardingBranch=renovate-configure` or similar. If you have an existing Renovate installation and you change `onboardingBranch` then it's possible that you'll get onboarding PRs for repositories that had previously closed the onboarding PR unmerged.
 
-## onboardingCommitMessage
+## onboardingCommitMessageBody
 
-Editing of `onboardingCommitMessage` directly should not be done. Please instead edit the fields `onboardingCommitMessagePrefix`, `onboardingCommitMessageAction`, and `onboardingCommitMessageTopic`.
-
-## onboardingCommitMessageAction
-
-This is used to alter `onboardingCommitMessage` without needing to copy/paste the whole string. Actions may be like `Add`, `Onboard`, `Setup`, etc. Check out the default value for `onboardingCommitMessage` to understand how this field is used.
-
-## onboardingCommitMessagePrefix
-
-This is used to alter `onboardingCommitMessage` without needing to copy/paste the whole string. The "prefix" is usually an automatically applied semantic commit prefix, however it can also be statically configured.
-
-## onboardingCommitMessageTopic
-
-This is used to alter `onboardingCommitMessage` without needing to copy/paste the whole string. The "topic" is usually refers to the Renovate configuration file being added, e.g. `"renvovate.json"`.
+Note that when using this option along with `commitMessagePrefix` or `semanticCommits` you will be responsible for adding a separation between the message prefix and the message body.
 
 ## onboardingConfig
 

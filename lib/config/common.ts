@@ -23,7 +23,6 @@ export interface RenovateSharedConfig {
   branchName?: string;
   manager?: string;
   commitMessage?: string;
-  commitMessageAction?: string;
   commitMessagePrefix?: string;
   draftPR?: boolean;
   enabled?: boolean;
@@ -39,6 +38,7 @@ export interface RenovateSharedConfig {
   managers?: string | string[];
   dependencyDashboardApproval?: boolean;
   npmrc?: string;
+  onboardingCommitMessageBody?: string;
   platform?: string;
   postUpgradeTasks?: PostUpgradeTasks;
   prBodyColumns?: string[];
@@ -89,10 +89,6 @@ export interface RenovateAdminConfig {
 
   onboarding?: boolean;
   onboardingBranch?: string;
-  onboardingCommitMessage?: string;
-  onboardingCommitMessagePrefix?: string;
-  onboardingCommitMessageAction?: string;
-  onboardingCommitMessageTopic?: string;
   onboardingPrTitle?: string;
   onboardingConfig?: RenovateSharedConfig;
 
