@@ -18,6 +18,7 @@ import { BranchConfig, PrResult } from '../common';
 import { getPrBody } from './body';
 import { ChangeLogError } from './changelog';
 import { codeOwnersForPr } from './code-owners';
+import { findPr, getPr } from '../../platform/github';
 
 function noWhitespaceOrHeadings(input: string): string {
   return input.replace(/\r?\n|\r|\s|#/g, '');
@@ -110,13 +111,15 @@ export async function ensurePr(
     config.branchName
   ];
   // Check if existing PR exists
-  let existingPr =
-    (await platform.getBranchPr(branchName)) ||
-    (await platform.findPr({
+  let existingPr = await platform.getBranchPr(branchName);
+  if (!existingPr) {
+    existingPr = await findPr({
       branchName,
       prTitle: `${prTitle} - autoclosed`,
       state: PrState.Closed,
-    }));
+    });
+    existingPr = existingPr ? await getPr(existingPr.number) : null;
+  }
   if (existingPr) {
     logger.debug('Found existing PR');
   }
