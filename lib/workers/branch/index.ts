@@ -12,20 +12,16 @@ import {
   SYSTEM_INSUFFICIENT_DISK_SPACE,
   WORKER_FILE_UPDATE_FAILED,
 } from '../../constants/error-messages';
-import {
-  PR_STATE_CLOSED,
-  PR_STATE_MERGED,
-  PR_STATE_OPEN,
-} from '../../constants/pull-requests';
 import { logger } from '../../logger';
 import { getAdditionalFiles } from '../../manager/npm/post-update';
 import { platform } from '../../platform';
-import { BranchStatus } from '../../types';
+import { BranchStatus, PrState } from '../../types';
 import { ExternalHostError } from '../../types/errors/external-host-error';
 import { emojify } from '../../util/emoji';
 import { exec } from '../../util/exec';
 import { readLocalFile, writeLocalFile } from '../../util/fs';
 import {
+  deleteBranch,
   getRepoStatus,
   branchExists as gitBranchExists,
   isBranchModified,
@@ -97,7 +93,7 @@ export async function processBranch(
         { prTitle: config.prTitle },
         'Closed PR already exists. Skipping branch.'
       );
-      if (existingPr.state === PR_STATE_CLOSED) {
+      if (existingPr.state === PrState.Closed) {
         const topic = `Renovate Ignore Notification`;
         let content;
         if (config.updateType === 'major') {
@@ -127,10 +123,10 @@ export async function processBranch(
           if (config.dryRun) {
             logger.info('DRY-RUN: Would delete branch ' + config.branchName);
           } else {
-            await platform.deleteBranch(config.branchName);
+            await deleteBranch(config.branchName);
           }
         }
-      } else if (existingPr.state === PR_STATE_MERGED) {
+      } else if (existingPr.state === PrState.Merged) {
         logger.debug(
           { pr: existingPr.number },
           'Merged PR is blocking this branch'
@@ -168,7 +164,7 @@ export async function processBranch(
       logger.debug('Checking if PR has been edited');
       if (branchPr) {
         logger.debug('Found existing branch PR');
-        if (branchPr.state !== PR_STATE_OPEN) {
+        if (branchPr.state !== PrState.Open) {
           logger.debug(
             'PR has been closed or merged since this run started - aborting'
           );
@@ -192,7 +188,11 @@ export async function processBranch(
               logger.debug(
                 'Updating existing PR to indicate that rebasing is not possible'
               );
-              await platform.updatePr(branchPr.number, branchPr.title, newBody);
+              await platform.updatePr({
+                number: branchPr.number,
+                prTitle: branchPr.title,
+                prBody: newBody,
+              });
             }
             return 'pr-edited';
           }

@@ -1,7 +1,7 @@
 import url, { URLSearchParams } from 'url';
 import is from '@sindresorhus/is';
 import delay from 'delay';
-import { RenovateConfig } from '../../config/common';
+import type { PartialDeep } from 'type-fest';
 import {
   REPOSITORY_CHANGED,
   REPOSITORY_DISABLED,
@@ -9,10 +9,11 @@ import {
   REPOSITORY_NOT_FOUND,
 } from '../../constants/error-messages';
 import { PLATFORM_TYPE_BITBUCKET_SERVER } from '../../constants/platforms';
-import { PR_STATE_ALL, PR_STATE_OPEN } from '../../constants/pull-requests';
 import { logger } from '../../logger';
-import { BranchStatus } from '../../types';
+import { BranchStatus, PrState } from '../../types';
+import { GitProtocol } from '../../types/git';
 import * as git from '../../util/git';
+import { deleteBranch } from '../../util/git';
 import * as hostRules from '../../util/host-rules';
 import { HttpResponse } from '../../util/http';
 import {
@@ -35,12 +36,13 @@ import {
   Pr,
   RepoParams,
   RepoResult,
+  UpdatePrConfig,
   VulnerabilityAlert,
 } from '../common';
 import { smartTruncate } from '../utils/pr-body';
 import { BbbsRestPr, BbsConfig, BbsPr, BbsRestUserRef } from './types';
 import * as utils from './utils';
-import { PartialDeep } from 'type-fest';
+
 /*
  * Version: 5.3 (EOL Date: 15 Aug 2019)
  * See following docs for api information:
@@ -55,7 +57,10 @@ let config: BbsConfig = {} as any;
 
 const bitbucketServerHttp = new BitbucketServerHttp();
 
-const defaults: any = {
+const defaults: {
+  endpoint?: string;
+  hostType: string;
+} = {
   hostType: PLATFORM_TYPE_BITBUCKET_SERVER,
 };
 
@@ -143,7 +148,7 @@ export async function initRepo({
         `./rest/api/1.0/projects/${projectKey}/repos/${repositorySlug}/browse/renovate.json?limit=20000`
       );
       if (!body.isLastPage) {
-        logger.warn('Renovate config to big: ' + body.size);
+        logger.warn({ size: body.size }, `Renovate config to big`);
       } else {
         renovateConfig = JSON.parse(body.lines.join());
       }
@@ -169,9 +174,9 @@ export async function initRepo({
     config.bbUseDefaultReviewers = true;
   }
 
-  const { host, pathname } = url.parse(defaults.endpoint!);
+  const { host, pathname } = url.parse(defaults.endpoint);
   const gitUrl = git.getUrl({
-    protocol: defaults.endpoint!.split(':')[0],
+    protocol: defaults.endpoint.split(':')[0] as GitProtocol,
     auth: `${opts.username}:${opts.password}`,
     host: `${host}${pathname}${
       pathname.endsWith('/') ? '' : /* istanbul ignore next */ '/'
@@ -269,7 +274,7 @@ export async function getPr(
   pr.hasReviewers = is.nonEmptyArray(pr.reviewers);
   pr.version = updatePrVersion(pr.number, pr.version);
 
-  if (pr.state === PR_STATE_OPEN) {
+  if (pr.state === PrState.Open) {
     const mergeRes = await bitbucketServerHttp.getJson<{
       conflicted: string;
       canMerge: string;
@@ -287,7 +292,7 @@ export async function getPr(
 // TODO: coverage
 // istanbul ignore next
 function matchesState(state: string, desiredState: string): boolean {
-  if (desiredState === PR_STATE_ALL) {
+  if (desiredState === PrState.All) {
     return true;
   }
   if (desiredState.startsWith('!')) {
@@ -334,7 +339,7 @@ export async function getPrList(refreshCache?: boolean): Promise<Pr[]> {
 export async function findPr({
   branchName,
   prTitle,
-  state = PR_STATE_ALL,
+  state = PrState.All,
   refreshCache,
 }: FindPRConfig): Promise<Pr | null> {
   logger.debug(`findPr(${branchName}, "${prTitle}", "${state}")`);
@@ -353,7 +358,7 @@ export async function getBranchPr(branchName: string): Promise<BbsPr | null> {
   logger.debug(`getBranchPr(${branchName})`);
   const existingPr = await findPr({
     branchName,
-    state: PR_STATE_OPEN,
+    state: PrState.Open,
   });
   return existingPr ? getPr(existingPr.number) : null;
 }
@@ -364,27 +369,6 @@ export async function refreshPr(number: number): Promise<void> {
   await delay(1000);
   // refresh cache
   await getPr(number, true);
-}
-
-export async function deleteBranch(
-  branchName: string,
-  closePr = false
-): Promise<void> {
-  logger.debug(`deleteBranch(${branchName}, closePr=${closePr})`);
-  // TODO: coverage
-  // istanbul ignore next
-  if (closePr) {
-    // getBranchPr
-    const pr = await getBranchPr(branchName);
-    if (pr) {
-      const { body } = await bitbucketServerHttp.postJson<{ version: number }>(
-        `./rest/api/1.0/projects/${config.projectKey}/repos/${config.repositorySlug}/pull-requests/${pr.number}/decline?version=${pr.version}`
-      );
-
-      updatePrVersion(pr.number, body.version);
-    }
-  }
-  return git.deleteBranch(branchName);
 }
 
 async function getStatus(
@@ -583,7 +567,7 @@ export /* istanbul ignore next */ function ensureIssueClosing(
 }
 
 export function addAssignees(iid: number, assignees: string[]): Promise<void> {
-  logger.debug(`addAssignees(${iid}, ${assignees})`);
+  logger.debug(`addAssignees(${iid}, [${assignees.join(', ')}])`);
   // TODO: Needs implementation
   // Currently Renovate does "Create PR" and then "Add assignee" as a two-step process, with this being the second step.
   // BB Server doesnt support assignees
@@ -594,7 +578,7 @@ export async function addReviewers(
   prNo: number,
   reviewers: string[]
 ): Promise<void> {
-  logger.debug(`Adding reviewers ${reviewers} to #${prNo}`);
+  logger.debug(`Adding reviewers '${reviewers.join(', ')}' to #${prNo}`);
 
   try {
     const pr = await getPr(prNo);
@@ -623,7 +607,10 @@ export async function addReviewers(
     } else if (err.statusCode === 409) {
       throw new Error(REPOSITORY_CHANGED);
     } else {
-      logger.fatal({ err }, `Failed to add reviewers ${reviewers} to #${prNo}`);
+      logger.fatal(
+        { err },
+        `Failed to add reviewers '${reviewers.join(', ')}' to #${prNo}`
+      );
       throw err;
     }
   }
@@ -875,11 +862,12 @@ export async function createPr({
   return pr;
 }
 
-export async function updatePr(
-  prNo: number,
-  title: string,
-  rawDescription: string
-): Promise<void> {
+export async function updatePr({
+  number: prNo,
+  prTitle: title,
+  prBody: rawDescription,
+  state,
+}: UpdatePrConfig): Promise<void> {
   const description = sanitize(rawDescription);
   logger.debug(`updatePr(${prNo}, title=${title})`);
 
@@ -889,7 +877,10 @@ export async function updatePr(
       throw Object.assign(new Error(REPOSITORY_NOT_FOUND), { statusCode: 404 });
     }
 
-    const { body } = await bitbucketServerHttp.putJson<{ version: number }>(
+    const { body: updatedPr } = await bitbucketServerHttp.putJson<{
+      version: number;
+      state: string;
+    }>(
       `./rest/api/1.0/projects/${config.projectKey}/repos/${config.repositorySlug}/pull-requests/${prNo}`,
       {
         body: {
@@ -901,7 +892,28 @@ export async function updatePr(
       }
     );
 
-    updatePrVersion(prNo, body.version);
+    updatePrVersion(prNo, updatedPr.version);
+
+    const currentState = updatedPr.state;
+    const newState = {
+      [PrState.Open]: 'OPEN',
+      [PrState.Closed]: 'DECLINED',
+    }[state];
+
+    if (
+      newState &&
+      ['OPEN', 'DECLINED'].includes(currentState) &&
+      currentState !== newState
+    ) {
+      const command = state === PrState.Open ? 'reopen' : 'decline';
+      const { body: updatedStatePr } = await bitbucketServerHttp.postJson<{
+        version: number;
+      }>(
+        `./rest/api/1.0/projects/${config.projectKey}/repos/${config.repositorySlug}/pull-requests/${pr.number}/${command}?version=${updatedPr.version}`
+      );
+
+      updatePrVersion(pr.number, updatedStatePr.version);
+    }
   } catch (err) {
     if (err.statusCode === 404) {
       throw new Error(REPOSITORY_NOT_FOUND);

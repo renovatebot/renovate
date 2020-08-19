@@ -1,5 +1,5 @@
 import is from '@sindresorhus/is';
-import hash from 'object-hash';
+import hasha from 'hasha';
 import { RenovateConfig } from '../../../config';
 import { logger } from '../../../logger';
 import { PackageFile } from '../../../manager/common';
@@ -54,7 +54,7 @@ export async function extract(
   let packageFiles;
   const cache = getCache();
   const cachedExtract = cache?.scan?.[baseBranch];
-  const configHash = hash(config);
+  const configHash = hasha(JSON.stringify(config));
   // istanbul ignore if
   if (
     cachedExtract?.sha === baseBranchSha &&
