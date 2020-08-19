@@ -698,7 +698,7 @@ export async function touchBranch(branchName: string): Promise<void> {
       '-u': true,
       '--no-verify': true,
     });
-  } catch (err) {
+  } catch (err) /* istanbul ignore next */ {
     checkForPlatformFailure(err);
     logger.warn(`Unable to touch branch`);
     throw err;

@@ -2,7 +2,7 @@ import { git, mocked, partial } from '../../../test/util';
 import { getConfig } from '../../config/defaults';
 import { PLATFORM_TYPE_GITLAB } from '../../constants/platforms';
 import { Pr, platform as _platform } from '../../platform';
-import { BranchStatus } from '../../types';
+import { BranchStatus, PrState } from '../../types';
 import { BranchConfig, PrResult } from '../common';
 import * as _changelogHelper from './changelog';
 import { getChangeLogJSON } from './changelog';
@@ -200,6 +200,7 @@ describe('workers/pr', () => {
       platform.getPrBody = jest.fn((input) => input);
       platform.getBranchPr = jest.fn();
       platform.getBranchStatus = jest.fn();
+      platform.findPr = jest.fn();
     });
     afterEach(() => {
       jest.clearAllMocks();
@@ -507,6 +508,31 @@ describe('workers/pr', () => {
       const { prResult, pr } = await prWorker.ensurePr(config);
       expect(prResult).toEqual(PrResult.Updated);
       expect(pr).toMatchSnapshot();
+    });
+    it('should reopen autoclosed PR', async () => {
+      config.newValue = '1.2.0';
+      config.automerge = true;
+      config.schedule = ['before 5am'];
+      config.logJSON = await getChangeLogJSON(config);
+      const prTitle = 'Update dependency dummy to v1.1.0';
+      const autoclosedPR = {
+        ...existingPr,
+        number: 42,
+        displayNumber: 'Autoclosed PR',
+        title: `${prTitle} - autoclosed`,
+        state: PrState.Closed,
+      } as never;
+      platform.getBranchPr.mockResolvedValueOnce(null);
+      platform.findPr.mockResolvedValueOnce(autoclosedPR);
+      platform.updatePr.mockResolvedValueOnce(null);
+      const { prResult, pr } = await prWorker.ensurePr({
+        ...config,
+        prTitle,
+      });
+      expect(prResult).toEqual(PrResult.Reopened);
+      expect(pr.title).toEqual(prTitle);
+      expect(pr.state).toEqual(PrState.Open);
+      expect(platform.updatePr).toHaveBeenCalledTimes(1);
     });
     it('should create PR if branch tests failed', async () => {
       config.automerge = true;

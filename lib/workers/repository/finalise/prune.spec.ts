@@ -1,3 +1,4 @@
+import moment from 'moment';
 import {
   RenovateConfig,
   getConfig,
@@ -5,6 +6,7 @@ import {
   platform,
 } from '../../../../test/util';
 import { PLATFORM_TYPE_GITHUB } from '../../../constants/platforms';
+import { PrState } from '../../../types';
 import * as cleanup from './prune';
 
 jest.mock('../../../util/git');
@@ -16,6 +18,7 @@ beforeEach(() => {
   config.platform = PLATFORM_TYPE_GITHUB;
   config.errors = [];
   config.warnings = [];
+  delete platform.supportsPrReopen;
 });
 
 describe('workers/repository/finalise/prune', () => {
@@ -104,6 +107,43 @@ describe('workers/repository/finalise/prune', () => {
       expect(git.deleteBranch).toHaveBeenCalledTimes(0);
       expect(platform.updatePr).toHaveBeenCalledTimes(0);
       expect(platform.ensureComment).toHaveBeenCalledTimes(0);
+    });
+    it('delays branch deletion', async () => {
+      config.branchList = ['renovate/a', 'renovate/b'];
+      platform.supportsPrReopen = true;
+      git.getAllRenovateBranches.mockResolvedValueOnce(
+        config.branchList.concat(['renovate/c'])
+      );
+      platform.findPr.mockResolvedValueOnce({
+        title: 'foo',
+        state: PrState.Open,
+      } as never);
+      git.isBranchModified.mockResolvedValueOnce(false);
+      git.touchBranch.mockResolvedValueOnce(null);
+      await cleanup.pruneStaleBranches(config, config.branchList);
+      expect(git.touchBranch).toHaveBeenCalledTimes(1);
+      expect(platform.updatePr).toHaveBeenCalledTimes(1);
+      expect(git.deleteBranch).toHaveBeenCalledTimes(0);
+    });
+    it('deletes delayed branch', async () => {
+      config.branchList = ['renovate/a', 'renovate/b'];
+      platform.supportsPrReopen = true;
+      git.getAllRenovateBranches.mockResolvedValueOnce(
+        config.branchList.concat(['renovate/c'])
+      );
+      platform.findPr.mockResolvedValueOnce({
+        title: 'foo',
+        state: PrState.Closed,
+      } as never);
+      git.isBranchModified.mockResolvedValueOnce(false);
+      git.touchBranch.mockResolvedValueOnce(null);
+      git.getBranchLastCommitTime.mockResolvedValueOnce(
+        moment().subtract(60, 'minutes').toDate()
+      );
+      await cleanup.pruneStaleBranches(config, config.branchList);
+      expect(git.touchBranch).toHaveBeenCalledTimes(0);
+      expect(platform.updatePr).toHaveBeenCalledTimes(1);
+      expect(git.deleteBranch).toHaveBeenCalledTimes(1);
     });
   });
 });

@@ -72,6 +72,7 @@ export enum PrResult {
   ErrorAlreadyExists = 'ErrorAlreadyExists',
   NotUpdated = 'NotUpdated',
   Updated = 'Updated',
+  Reopened = 'Reopened',
 }
 
 export type ProcessBranchResult =

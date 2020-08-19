@@ -94,39 +94,6 @@ export async function addAssigneesReviewers(
   }
 }
 
-async function getExistingPr(
-  branchName: string,
-  prTitle: string
-): Promise<Pr | null> {
-  const existingPr = await platform.getBranchPr(branchName);
-  if (existingPr) {
-    logger.debug('Found existing PR');
-    return existingPr;
-  }
-
-  const closedPr = await platform.findPr({
-    branchName,
-    prTitle: `${prTitle} - autoclosed`,
-    state: PrState.Closed,
-  });
-  const number = closedPr?.number;
-  if (number) {
-    logger.debug('Found closed PR');
-    try {
-      await platform.updatePr({
-        number,
-        prTitle,
-        state: PrState.Open,
-      });
-      return await platform.getPr(number);
-    } catch (err) {
-      logger.debug(`Unable to reopen PR: ${prTitle}`);
-    }
-  }
-
-  return null;
-}
-
 // Ensures that PR exists with matching title/body
 export async function ensurePr(
   prConfig: BranchConfig
@@ -143,7 +110,13 @@ export async function ensurePr(
     config.branchName
   ];
   // Check if existing PR exists
-  const existingPr = await getExistingPr(branchName, prTitle);
+  let existingPr =
+    (await platform.getBranchPr(branchName)) ||
+    (await platform.findPr({
+      branchName,
+      prTitle: `${prTitle} - autoclosed`,
+      state: PrState.Closed,
+    }));
   if (existingPr) {
     logger.debug('Found existing PR');
   }
@@ -364,14 +337,38 @@ export async function ensurePr(
           'PR body changed'
         );
       }
+
+      let prResult = PrResult.Updated;
+      let state = null;
+
+      if (
+        existingPr.state === PrState.Closed &&
+        existingPr.title?.endsWith(' - autoclosed')
+      ) {
+        logger.debug('Reopening autoclosed PR');
+        prResult = PrResult.Reopened;
+        state = PrState.Open;
+        existingPr = {
+          ...existingPr,
+          title: prTitle,
+          body: prBody,
+          state,
+        };
+      }
+
       // istanbul ignore if
       if (config.dryRun) {
         logger.info('DRY-RUN: Would update PR #' + existingPr.number);
       } else {
-        await platform.updatePr({ number: existingPr.number, prTitle, prBody });
+        await platform.updatePr({
+          number: existingPr.number,
+          prTitle,
+          prBody,
+          ...(state && { state }),
+        });
         logger.info({ pr: existingPr.number, prTitle }, `PR updated`);
       }
-      return { prResult: PrResult.Updated, pr: existingPr };
+      return { prResult, pr: existingPr };
     }
     logger.debug({ branch: branchName, prTitle }, `Creating PR`);
     // istanbul ignore if

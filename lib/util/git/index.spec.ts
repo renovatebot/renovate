@@ -1,10 +1,12 @@
+import delay from 'delay';
 import fs from 'fs-extra';
 import Git from 'simple-git';
 import tmp from 'tmp-promise';
 import * as git from '.';
+import { getBranchLastCommitTime, touchBranch } from '.';
 
 describe('platform/git', () => {
-  jest.setTimeout(15000);
+  jest.setTimeout(16000);
 
   const masterCommitDate = new Date();
   masterCommitDate.setMilliseconds(0);
@@ -81,6 +83,15 @@ describe('platform/git', () => {
     await base.cleanup();
   });
 
+  describe('touchBranch(branchName)', () => {
+    it('updates branch timestamp', async () => {
+      const t1 = await getBranchLastCommitTime('master');
+      await delay(1000);
+      await touchBranch('master');
+      const t2 = await getBranchLastCommitTime('master');
+      expect(t1).not.toEqual(t2);
+    });
+  });
   describe('setBaseBranch(branchName)', () => {
     it('sets the base branch as master', async () => {
       await expect(git.setBranch('master')).resolves.not.toThrow();

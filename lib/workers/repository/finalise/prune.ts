@@ -76,11 +76,13 @@ async function cleanUpBranches(
         logger.info(
           `PRUNING-DISABLED: Would deleting orphan branch ${branchName}`
         );
-      } else if (platform.supportsPrReopen && !closedRightNow) {
-        const lastCommitTime = await getBranchLastCommitTime(branchName);
-        const minutesFromLastCommit = moment().diff(lastCommitTime, 'm');
-        if (minutesFromLastCommit >= 60) {
-          await deleteBranch(branchName);
+      } else if (platform.supportsPrReopen) {
+        if (!closedRightNow) {
+          const lastCommitTime = await getBranchLastCommitTime(branchName);
+          const minutesFromLastCommit = moment().diff(lastCommitTime, 'm');
+          if (minutesFromLastCommit >= 60) {
+            await deleteBranch(branchName);
+          }
         }
       } else {
         await deleteBranch(branchName);
