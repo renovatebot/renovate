@@ -65,9 +65,9 @@ function getPoetrySources(content: string, fileName: string): PoetrySource[] {
 function getSourceCredentialVars(
   pyprojectContent: string,
   packageFileName: string
-): { [s: string]: string } {
+): Record<string, string> {
   const poetrySources = getPoetrySources(pyprojectContent, packageFileName);
-  const envVars: { [s: string]: string } = {};
+  const envVars: Record<string, string> = {};
 
   for (const source of poetrySources) {
     const matchingHostRule = find({ url: source.url });
