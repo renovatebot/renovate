@@ -8,7 +8,7 @@ import {
 } from '../../constants/error-messages';
 import { BranchStatus, PrState } from '../../types';
 import * as _git from '../../util/git';
-import { Platform } from '../common';
+import { Platform, VulnerabilityAlert } from '../common';
 
 const githubApiHost = 'https://api.github.com';
 
@@ -1949,16 +1949,19 @@ describe('platform/github', () => {
                 edges: [
                   {
                     node: {
-                      securityAdvisory: { severity: 'HIGH' },
+                      securityAdvisory: { severity: 'HIGH', references: [] },
                       securityVulnerability: {
                         package: {
                           ecosystem: 'NPM',
                           name: 'left-pad',
                           range: '0.0.2',
-                          firstPatchedVersion: { identifier: '0.0.3' },
                         },
+                        vulnerableVersionRange: '0.0.2',
+                        firstPatchedVersion: { identifier: '0.0.3' },
                       },
-                    },
+                      vulnerableManifestFilename: 'foo',
+                      vulnerableManifestPath: 'bar',
+                    } as VulnerabilityAlert,
                   },
                 ],
               },
