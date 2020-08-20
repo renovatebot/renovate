@@ -689,9 +689,21 @@ export async function touchBranch(branchName: string): Promise<void> {
     const lastMessage = (
       await git.raw(['log', '-1', '--pretty=%B', branchName])
     ).trim();
+    const lastAuthor = (
+      await git.raw([
+        'log',
+        '-1',
+        '--pretty=format:%ae',
+        `origin/${branchName}`,
+      ])
+    ).trim();
     await git.commit(lastMessage, null, {
       '--amend': true,
       '--reset-author': true,
+    });
+    await git.commit(lastMessage, null, {
+      '--amend': true,
+      '--author': lastAuthor,
     });
     await git.push('origin', `${branchName}:${branchName}`, {
       '--force': true,
