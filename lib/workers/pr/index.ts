@@ -5,7 +5,7 @@ import {
   REPOSITORY_CHANGED,
 } from '../../constants/error-messages';
 import { logger } from '../../logger';
-import { platform, PlatformPrOptions, Pr } from '../../platform';
+import { PlatformPrOptions, Pr, platform } from '../../platform';
 import { BranchStatus, PrState } from '../../types';
 import { ExternalHostError } from '../../types/errors/external-host-error';
 import { sampleSize } from '../../util';
@@ -100,9 +100,9 @@ async function getExistingPr(
 ): Promise<Pr | null> {
   let result: Pr = null;
 
-  let pr = await platform.getBranchPr(branchName);
-  if (pr) {
-    result = pr;
+  const existingOpenPr = await platform.getBranchPr(branchName);
+  if (existingOpenPr) {
+    result = existingOpenPr;
   } else if (platform.supportsPrReopen) {
     const closedPr = await platform.findPr({
       branchName,
