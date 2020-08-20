@@ -11,7 +11,6 @@ declare interface Error {
 
 declare namespace NodeJS {
   interface Global {
-    appMode?: boolean;
     gitAuthor?: { name: string; email: string };
 
     trustLevel?: string;
