@@ -61,6 +61,11 @@ describe('workers/branch/schedule', () => {
         schedule.hasValidSchedule(['on the first day of the month'])[0]
       ).toBe(true);
     });
+    it('returns true for schedules longer than 1 month', () => {
+      expect(schedule.hasValidSchedule(['every 3 months'])[0]).toBe(true);
+      expect(schedule.hasValidSchedule(['every 6 months'])[0]).toBe(true);
+      expect(schedule.hasValidSchedule(['every 12 months'])[0]).toBe(true);
+    });
     it('returns true if schedule has an end time', () => {
       expect(schedule.hasValidSchedule(['before 6:00am'])[0]).toBe(true);
     });
