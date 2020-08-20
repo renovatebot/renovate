@@ -56,6 +56,8 @@ import {
 } from './types';
 import { UserDetails, getUserDetails, getUserEmail } from './user';
 
+export const supportsPrReopen = true;
+
 const githubApi = new githubHttp.GithubHttp();
 
 const defaultConfigFile = configFileNames[0];
