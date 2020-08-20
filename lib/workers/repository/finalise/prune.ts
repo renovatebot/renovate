@@ -52,7 +52,6 @@ async function cleanUpBranches(
         }
       }
 
-      logger.debug({ branch: branchName }, `Deleting orphan branch`);
       if (branchIsModified) {
         if (pr) {
           logger.debug(
@@ -81,10 +80,21 @@ async function cleanUpBranches(
           const lastCommitTime = await getBranchLastCommitTime(branchName);
           const minutesFromLastCommit = moment().diff(lastCommitTime, 'm');
           if (minutesFromLastCommit >= 60) {
+            logger.debug(
+              { branch: branchName },
+              'Deleting orphan branch by timeout'
+            );
             await deleteBranch(branchName);
+          } else {
+            /* istanbul ignore next */
+            logger.debug(
+              { branch: branchName },
+              'Orphan branch deletion is delayed'
+            );
           }
         }
       } else {
+        logger.debug({ branch: branchName }, 'Deleting orphan branch');
         await deleteBranch(branchName);
       }
       if (pr && !branchIsModified) {
