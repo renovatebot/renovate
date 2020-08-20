@@ -6,6 +6,14 @@ import {
 
 export type VulnerabilityAlert = _VulnerabilityAlert;
 
+export interface VulnerabilityAlertShort {
+  datasource: string;
+  dep: string;
+  range: string;
+  patch: string;
+  severity?: 'HIGH' | 'MODERATE' | string;
+}
+
 export interface PlatformParams {
   endpoint?: string;
   token?: string;

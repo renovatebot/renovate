@@ -40,6 +40,7 @@ import {
   RepoResult,
   UpdatePrConfig,
   VulnerabilityAlert,
+  VulnerabilityAlertShort,
 } from '../common';
 import { smartTruncate } from '../utils/pr-body';
 import {
@@ -1629,28 +1630,28 @@ export async function getVulnerabilityAlerts(): Promise<VulnerabilityAlert[]> {
     });
     if (vulnerabilityAlerts?.length) {
       alerts = vulnerabilityAlerts.map((edge) => edge.node);
+      const shortAlerts: VulnerabilityAlertShort[] = [];
       if (alerts.length) {
-        const importantSeverities = ['HIGH', 'MODERATE'];
+        logger.trace({ alerts }, 'GitHub vulnerability details');
         for (const alert of alerts) {
-          if (importantSeverities.includes(alert.securityAdvisory.severity)) {
-            const {
-              package: { name, ecosystem },
-              vulnerableVersionRange,
-              firstPatchedVersion,
-            } = alert.securityVulnerability;
-            const result: Record<string, string> = {
+          const {
+            package: { name, ecosystem },
+            vulnerableVersionRange,
+            firstPatchedVersion,
+          } = alert.securityVulnerability;
+          const patch = firstPatchedVersion?.identifier;
+          const severity = alert.securityAdvisory.severity;
+          if (patch) {
+            shortAlerts.push({
               datasource: ecosystem.toLowerCase(),
               dep: name,
               range: vulnerableVersionRange,
-              patch: firstPatchedVersion?.identifier || 'N/A',
-            };
-            if (importantSeverities.length > 1) {
-              result.severety = alert.securityAdvisory.severity;
-            }
-            logger.debug('Important GitHub vulnerability');
+              patch,
+              ...(severity && { severity }),
+            });
           }
-          logger.trace(alert, 'GitHub vulnerability details');
         }
+        logger.debug({ alerts: shortAlerts }, 'GitHub vulnerability details');
       }
     } else {
       logger.debug('Cannot read vulnerability alerts');
