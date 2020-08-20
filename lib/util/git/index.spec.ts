@@ -85,11 +85,15 @@ describe('platform/git', () => {
 
   describe('touchBranch(branchName)', () => {
     it('updates branch timestamp', async () => {
+      const repo = Git(base.path).silent(true);
       const t1 = await getBranchLastCommitTime('master');
+      const a1 = repo.raw(['log', '-1', '--pretty=format:%an <%ae>', 'master']);
       await delay(1000);
       await touchBranch('master');
       const t2 = await getBranchLastCommitTime('master');
+      const a2 = repo.raw(['log', '-1', '--pretty=format:%an <%ae>', 'master']);
       expect(t1).not.toEqual(t2);
+      expect(a1).toEqual(a2);
     });
   });
   describe('setBaseBranch(branchName)', () => {
