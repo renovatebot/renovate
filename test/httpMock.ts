@@ -82,7 +82,12 @@ function simplifyGraphqlAST(tree: any): any {
   return tree;
 }
 
-function onMissing(req: any, opts: any): void /* istanbul ignore next */ {
+type TestRequest = {
+  method: string;
+  href: string;
+};
+
+function onMissing(req: TestRequest, opts?: TestRequest): void {
   if (!opts) {
     missingLog.push(`  ${req.method} ${req.href}`);
   } else {
