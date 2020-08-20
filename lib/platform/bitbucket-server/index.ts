@@ -249,6 +249,8 @@ export async function getPr(
   prNo: number,
   refreshCache?: boolean
 ): Promise<BbsPr | null> {
+  const useCache = typeof refreshCache === 'undefined' ? false : !refreshCache;
+
   logger.debug(`getPr(${prNo})`);
   if (!prNo) {
     return null;
@@ -256,7 +258,7 @@ export async function getPr(
 
   const res = await bitbucketServerHttp.getJson<BbbsRestPr>(
     `./rest/api/1.0/projects/${config.projectKey}/repos/${config.repositorySlug}/pull-requests/${prNo}`,
-    { useCache: !refreshCache }
+    { useCache }
   );
 
   const pr: BbsPr = {
@@ -273,7 +275,7 @@ export async function getPr(
       canMerge: string;
     }>(
       `./rest/api/1.0/projects/${config.projectKey}/repos/${config.repositorySlug}/pull-requests/${prNo}/merge`,
-      { useCache: !refreshCache }
+      { useCache }
     );
     pr.isConflicted = !!mergeRes.body.conflicted;
     pr.canMerge = !!mergeRes.body.canMerge;

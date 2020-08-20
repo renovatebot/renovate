@@ -445,7 +445,9 @@ const platform: Platform = {
       logger.debug('Returning from cached PRs');
     } else {
       logger.debug('PR not found in cached PRs - trying to fetch directly');
-      const gpr = await helper.getPR(config.repository, number);
+      const gpr = await helper.getPR(config.repository, number, {
+        useCache: false,
+      });
       pr = toRenovatePR(gpr);
 
       // Add pull request to cache for further lookups / queries

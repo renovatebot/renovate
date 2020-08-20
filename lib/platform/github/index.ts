@@ -507,6 +507,7 @@ async function getClosedPrs(): Promise<PrList> {
         'pullRequests',
         {
           paginate: false,
+          useCache: false,
         }
       );
       const prNumbers: number[] = [];
@@ -610,6 +611,7 @@ async function getOpenPrs(): Promise<PrList> {
         {
           paginate: false,
           acceptHeader: 'application/vnd.github.merge-info-preview+json',
+          useCache: false,
         }
       );
       const prNumbers: number[] = [];

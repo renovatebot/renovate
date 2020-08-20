@@ -420,7 +420,7 @@ export async function getPr(iid: number): Promise<Pr> {
         assignee?: { id?: number };
         assignees?: { id?: number }[];
       }
-    >(url)
+    >(url, { useCache: false })
   ).body;
   // Harmonize fields with GitHub
   pr.branchName = pr.source_branch;

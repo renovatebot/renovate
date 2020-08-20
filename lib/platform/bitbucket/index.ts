@@ -250,7 +250,8 @@ interface PrResponse {
 export async function getPr(prNo: number): Promise<Pr | null> {
   const pr = (
     await bitbucketHttp.getJson<PrResponse>(
-      `/2.0/repositories/${config.repository}/pullrequests/${prNo}`
+      `/2.0/repositories/${config.repository}/pullrequests/${prNo}`,
+      { useCache: false }
     )
   ).body;
 

@@ -126,6 +126,7 @@ interface GraphqlOptions {
   count?: number;
   acceptHeader?: string;
   fromEnd?: boolean;
+  useCache?: boolean;
 }
 
 function constructAcceptString(input?: any): string {
