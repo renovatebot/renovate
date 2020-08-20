@@ -232,5 +232,29 @@ describe('workers/branch/schedule', () => {
       const res = schedule.isScheduledNow(config);
       expect(res).toBe(false);
     });
+    it('approves schedule longer than 1 month', () => {
+      config.schedule = ['every 3 months'];
+      mockDate.set('2017-07-01T06:00:00.000'); // Locally Saturday, 1 July 2017 6am
+      const res = schedule.isScheduledNow(config);
+      expect(res).toBe(true);
+    });
+    it('rejects schedule longer than 1 month', () => {
+      config.schedule = ['every 6 months'];
+      mockDate.set('2017-02-01T06:00:00.000'); // Locally Thursday, 2 February 2017 6am
+      const res = schedule.isScheduledNow(config);
+      expect(res).toBe(false);
+    });
+    it('approves schedule longer than 1 month with day of month', () => {
+      config.schedule = ['every 3 months on the first day of the month'];
+      mockDate.set('2017-07-01T06:00:00.000'); // Locally Saturday, 1 July 2017 6am
+      const res = schedule.isScheduledNow(config);
+      expect(res).toBe(true);
+    });
+    it('rejects schedule longer than 1 month with day of month', () => {
+      config.schedule = ['every 3 months on the first day of the month'];
+      mockDate.set('2017-02-01T06:00:00.000'); // Locally Thursday, 2 February 2017 6am
+      const res = schedule.isScheduledNow(config);
+      expect(res).toBe(false);
+    });
   });
 });
