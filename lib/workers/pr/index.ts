@@ -5,7 +5,7 @@ import {
   REPOSITORY_CHANGED,
 } from '../../constants/error-messages';
 import { logger } from '../../logger';
-import { PlatformPrOptions, Pr, platform } from '../../platform';
+import { platform, PlatformPrOptions, Pr } from '../../platform';
 import { BranchStatus, PrState } from '../../types';
 import { ExternalHostError } from '../../types/errors/external-host-error';
 import { sampleSize } from '../../util';
@@ -18,7 +18,6 @@ import { BranchConfig, PrResult } from '../common';
 import { getPrBody } from './body';
 import { ChangeLogError } from './changelog';
 import { codeOwnersForPr } from './code-owners';
-import { findPr, getPr } from '../../platform/github';
 
 function noWhitespaceOrHeadings(input: string): string {
   return input.replace(/\r?\n|\r|\s|#/g, '');
@@ -95,6 +94,40 @@ export async function addAssigneesReviewers(
   }
 }
 
+async function getExistingPr(
+  branchName: string,
+  prTitle: string
+): Promise<Pr | null> {
+  let result: Pr = null;
+
+  let pr = await platform.getBranchPr(branchName);
+  if (pr) {
+    result = pr;
+  } else if (platform.supportsPrReopen) {
+    const closedPr = await platform.findPr({
+      branchName,
+      prTitle: `${prTitle} - autoclosed`,
+      state: PrState.Closed,
+    });
+    const number = closedPr?.number;
+    if (number) {
+      try {
+        logger.debug(`Trying to re-open autoclosed PR: ${prTitle}`);
+        await platform.updatePr({
+          number,
+          prTitle,
+          state: PrState.Open,
+        });
+        result = await platform.getPr(number);
+      } catch (err) {
+        logger.debug(`Unable to reopen PR: ${prTitle}`);
+      }
+    }
+  }
+
+  return result;
+}
+
 // Ensures that PR exists with matching title/body
 export async function ensurePr(
   prConfig: BranchConfig
@@ -111,15 +144,7 @@ export async function ensurePr(
     config.branchName
   ];
   // Check if existing PR exists
-  let existingPr = await platform.getBranchPr(branchName);
-  if (!existingPr) {
-    existingPr = await findPr({
-      branchName,
-      prTitle: `${prTitle} - autoclosed`,
-      state: PrState.Closed,
-    });
-    existingPr = existingPr ? await getPr(existingPr.number) : null;
-  }
+  const existingPr = await getExistingPr(branchName, prTitle);
   if (existingPr) {
     logger.debug('Found existing PR');
   }
@@ -341,24 +366,6 @@ export async function ensurePr(
         );
       }
 
-      let prResult = PrResult.Updated;
-      let state = null;
-
-      if (
-        existingPr.state === PrState.Closed &&
-        existingPr.title?.endsWith(' - autoclosed')
-      ) {
-        logger.debug('Reopening autoclosed PR');
-        prResult = PrResult.Reopened;
-        state = PrState.Open;
-        existingPr = {
-          ...existingPr,
-          title: prTitle,
-          body: prBody,
-          state,
-        };
-      }
-
       // istanbul ignore if
       if (config.dryRun) {
         logger.info('DRY-RUN: Would update PR #' + existingPr.number);
@@ -367,11 +374,10 @@ export async function ensurePr(
           number: existingPr.number,
           prTitle,
           prBody,
-          ...(state && { state }),
         });
         logger.info({ pr: existingPr.number, prTitle }, `PR updated`);
       }
-      return { prResult, pr: existingPr };
+      return { prResult: PrResult.Updated, pr: existingPr };
     }
     logger.debug({ branch: branchName, prTitle }, `Creating PR`);
     // istanbul ignore if

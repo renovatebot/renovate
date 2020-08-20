@@ -109,6 +109,7 @@ describe('workers/pr', () => {
     });
     afterEach(() => {
       jest.clearAllMocks();
+      delete platform.supportsPrReopen;
     });
     it('should not automerge if not configured', async () => {
       await prWorker.checkAutoMerge(pr, config);
@@ -509,31 +510,6 @@ describe('workers/pr', () => {
       expect(prResult).toEqual(PrResult.Updated);
       expect(pr).toMatchSnapshot();
     });
-    it('should reopen autoclosed PR', async () => {
-      config.newValue = '1.2.0';
-      config.automerge = true;
-      config.schedule = ['before 5am'];
-      config.logJSON = await getChangeLogJSON(config);
-      const prTitle = 'Update dependency dummy to v1.1.0';
-      const autoclosedPR = {
-        ...existingPr,
-        number: 42,
-        displayNumber: 'Autoclosed PR',
-        title: `${prTitle} - autoclosed`,
-        state: PrState.Closed,
-      } as never;
-      platform.getBranchPr.mockResolvedValueOnce(null);
-      platform.findPr.mockResolvedValueOnce(autoclosedPR);
-      platform.updatePr.mockResolvedValueOnce(null);
-      const { prResult, pr } = await prWorker.ensurePr({
-        ...config,
-        prTitle,
-      });
-      expect(prResult).toEqual(PrResult.Reopened);
-      expect(pr.title).toEqual(prTitle);
-      expect(pr.state).toEqual(PrState.Open);
-      expect(platform.updatePr).toHaveBeenCalledTimes(1);
-    });
     it('should create PR if branch tests failed', async () => {
       config.automerge = true;
       config.automergeType = 'branch';
@@ -608,6 +584,68 @@ describe('workers/pr', () => {
       expect(args[0].platformOptions).toMatchObject({
         gitLabAutomerge: true,
       });
+    });
+    it('should reopen autoclosed PR', async () => {
+      platform.supportsPrReopen = true;
+      config.newValue = '1.2.0';
+      config.automerge = true;
+      config.schedule = ['before 5am'];
+      config.logJSON = await getChangeLogJSON(config);
+      const prTitle = 'Update dependency dummy to v1.1.0';
+      const autoclosedPR = {
+        ...existingPr,
+        number: 42,
+        displayNumber: 'Autoclosed PR',
+        title: `${prTitle} - autoclosed`,
+        state: PrState.Closed,
+        body: 'old body',
+      } as any;
+      platform.getBranchPr.mockResolvedValueOnce(null);
+      platform.findPr.mockResolvedValueOnce(autoclosedPR);
+      platform.updatePr.mockResolvedValueOnce(null);
+      platform.getPr.mockResolvedValueOnce({
+        ...autoclosedPR,
+        title: prTitle,
+        state: PrState.Open,
+      });
+      platform.updatePr.mockResolvedValueOnce(null);
+      const { pr } = await prWorker.ensurePr({
+        ...config,
+        prTitle,
+      });
+      expect(pr.title).toEqual(prTitle);
+      expect(pr.state).toEqual(PrState.Open);
+      expect(platform.updatePr).toHaveBeenCalledTimes(2);
+    });
+    it('should handle PR re-open failure', async () => {
+      platform.supportsPrReopen = true;
+      config.newValue = '1.2.0';
+      config.automerge = true;
+      config.schedule = ['before 5am'];
+      config.logJSON = await getChangeLogJSON(config);
+      const prTitle = 'Update dependency dummy to v1.1.0';
+      const autoclosedPR = {
+        ...existingPr,
+        number: 42,
+        displayNumber: 'Autoclosed PR',
+        title: `${prTitle} - autoclosed`,
+        state: PrState.Closed,
+        body: 'old body',
+      } as any;
+      platform.getBranchPr.mockResolvedValueOnce(null);
+      platform.findPr.mockResolvedValueOnce(autoclosedPR);
+      platform.updatePr.mockRejectedValueOnce(null);
+      platform.getPr.mockResolvedValueOnce({
+        ...autoclosedPR,
+        title: prTitle,
+        state: PrState.Open,
+      });
+      platform.updatePr.mockResolvedValueOnce(null);
+      const { prResult } = await prWorker.ensurePr({
+        ...config,
+        prTitle,
+      });
+      expect(prResult).toEqual(PrResult.Created);
     });
   });
 });
