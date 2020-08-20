@@ -112,7 +112,10 @@ async function getExistingPr(
     const number = closedPr?.number;
     if (number) {
       try {
-        logger.debug(`Trying to re-open autoclosed PR: ${prTitle}`);
+        logger.debug(
+          { prNo: number },
+          `Trying to re-open autoclosed PR: ${prTitle}`
+        );
         await platform.updatePr({
           number,
           prTitle,
