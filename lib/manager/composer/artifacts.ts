@@ -20,7 +20,82 @@ import {
 } from '../../util/fs';
 import { getRepoStatus } from '../../util/git';
 import * as hostRules from '../../util/host-rules';
-import { UpdateArtifact, UpdateArtifactsResult } from '../common';
+import {
+  UpdateArtifact,
+  UpdateArtifactsConfig,
+  UpdateArtifactsResult,
+} from '../common';
+
+interface UserPass {
+  username: string;
+  password: string;
+}
+
+interface AuthJson {
+  'github-oauth'?: Record<string, string>;
+  'gitlab-token'?: Record<string, string>;
+  'http-basic'?: Record<string, UserPass>;
+}
+
+async function writeAuthJson(config: UpdateArtifactsConfig): Promise<void> {
+  const authJson: AuthJson = {};
+  let credentials = hostRules.find({
+    hostType: PLATFORM_TYPE_GITHUB,
+    url: 'https://api.github.com/',
+  });
+  // istanbul ignore if
+  if (credentials?.token) {
+    authJson['github-oauth'] = {
+      'github.com': credentials.token,
+    };
+  }
+  credentials = hostRules.find({
+    hostType: PLATFORM_TYPE_GITLAB,
+    url: 'https://gitlab.com/api/v4/',
+  });
+  // istanbul ignore if
+  if (credentials?.token) {
+    authJson['gitlab-token'] = {
+      'gitlab.com': credentials.token,
+    };
+  }
+  try {
+    // istanbul ignore else
+    if (is.array(config.registryUrls)) {
+      for (const regUrl of config.registryUrls) {
+        if (regUrl) {
+          const { host } = URL.parse(regUrl);
+          const hostRule = hostRules.find({
+            hostType: datasourcePackagist.id,
+            url: regUrl,
+          });
+          // istanbul ignore else
+          if (hostRule.username && hostRule.password) {
+            logger.debug('Setting packagist auth for host ' + host);
+            authJson['http-basic'] = authJson['http-basic'] || {};
+            authJson['http-basic'][host] = {
+              username: hostRule.username,
+              password: hostRule.password,
+            };
+          } else {
+            logger.debug('No packagist auth found for ' + regUrl);
+          }
+        }
+      }
+    } else if (config.registryUrls) {
+      logger.warn(
+        { registryUrls: config.registryUrls },
+        'Non-array composer registryUrls'
+      );
+    }
+  } catch (err) /* istanbul ignore next */ {
+    logger.warn({ err }, 'Error setting registryUrls auth for composer');
+  }
+
+  if (authJson) {
+    await writeLocalFile('auth.json', JSON.stringify(authJson));
+  }
+}
 
 export async function updateArtifacts({
   packageFileName,
@@ -48,62 +123,9 @@ export async function updateArtifacts({
     if (config.isLockFileMaintenance) {
       await deleteLocalFile(lockFileName);
     }
-    const authJson = {};
-    let credentials = hostRules.find({
-      hostType: PLATFORM_TYPE_GITHUB,
-      url: 'https://api.github.com/',
-    });
-    // istanbul ignore if
-    if (credentials?.token) {
-      authJson['github-oauth'] = {
-        'github.com': credentials.token,
-      };
-    }
-    credentials = hostRules.find({
-      hostType: PLATFORM_TYPE_GITLAB,
-      url: 'https://gitlab.com/api/v4/',
-    });
-    // istanbul ignore if
-    if (credentials?.token) {
-      authJson['gitlab-token'] = {
-        'gitlab.com': credentials.token,
-      };
-    }
-    try {
-      // istanbul ignore else
-      if (is.array(config.registryUrls)) {
-        for (const regUrl of config.registryUrls) {
-          if (regUrl) {
-            const { host } = URL.parse(regUrl);
-            const hostRule = hostRules.find({
-              hostType: datasourcePackagist.id,
-              url: regUrl,
-            });
-            // istanbul ignore else
-            if (hostRule.username && hostRule.password) {
-              logger.debug('Setting packagist auth for host ' + host);
-              authJson['http-basic'] = authJson['http-basic'] || {};
-              authJson['http-basic'][host] = {
-                username: hostRule.username,
-                password: hostRule.password,
-              };
-            } else {
-              logger.debug('No packagist auth found for ' + regUrl);
-            }
-          }
-        }
-      } else if (config.registryUrls) {
-        logger.warn(
-          { registryUrls: config.registryUrls },
-          'Non-array composer registryUrls'
-        );
-      }
-    } catch (err) /* istanbul ignore next */ {
-      logger.warn({ err }, 'Error setting registryUrls auth for composer');
-    }
-    if (authJson) {
-      await writeLocalFile('auth.json', JSON.stringify(authJson));
-    }
+
+    await writeAuthJson(config);
+
     const execOptions: ExecOptions = {
       cwdFile: packageFileName,
       extraEnv: {
