@@ -453,7 +453,7 @@ export async function updatePr({
   state,
 }: UpdatePrConfig): Promise<void> {
   const newState = {
-    [PrState.Closed]: 'closed',
+    [PrState.Closed]: 'close',
     [PrState.Open]: 'reopen',
   }[state];
   await gitlabApi.putJson(
