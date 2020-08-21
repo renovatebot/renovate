@@ -1,36 +1,33 @@
-import { structUtils } from '@yarnpkg/core';
-import { parseSyml } from '@yarnpkg/parsers';
+import { parse } from '@yarnpkg/lockfile';
 import { logger } from '../../../logger';
 import { readLocalFile } from '../../../util/fs';
+import { LockFileEntry } from './common';
 
-export async function getYarnLock(
-  filePath: string
-): Promise<{ isYarn1: boolean; lockedVersions: Record<string, string> }> {
+export type YarnLock = Record<string, string>;
+
+export async function getYarnLock(filePath: string): Promise<YarnLock> {
   const yarnLockRaw = await readLocalFile(filePath, 'utf8');
   try {
-    const parsed = parseSyml(yarnLockRaw);
-    const lockFile: Record<string, string> = {};
-
-    for (const [key, val] of Object.entries(parsed)) {
-      if (key === '__metadata') {
-        // yarn 2
-      } else {
-        for (const entry of key.split(', ')) {
-          const { scope, name, range } = structUtils.parseDescriptor(entry);
-          const packageName = scope ? `${scope}/${name}` : name;
-          const { selector } = structUtils.parseRange(range);
-
-          logger.trace({ entry, version: val.version });
-          lockFile[packageName + '@' + selector] = parsed[key].version;
-        }
-      }
+    const yarnLockParsed = parse(yarnLockRaw);
+    // istanbul ignore if
+    if (yarnLockParsed.type !== 'success') {
+      logger.debug(
+        { filePath, parseType: yarnLockParsed.type },
+        'Error parsing yarn.lock - not success'
+      );
+      return {};
     }
-    return {
-      isYarn1: !('__metadata' in parsed),
-      lockedVersions: lockFile,
-    };
+    const lockFile: YarnLock = {};
+
+    for (const [entry, val] of Object.entries(
+      yarnLockParsed.object as LockFileEntry
+    )) {
+      logger.trace({ entry, version: val.version });
+      lockFile[entry] = val.version;
+    }
+    return lockFile;
   } catch (err) {
     logger.debug({ filePath, err }, 'Warning: Exception parsing yarn.lock');
-    return { isYarn1: true, lockedVersions: {} };
+    return {};
   }
 }
