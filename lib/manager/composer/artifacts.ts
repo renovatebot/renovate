@@ -1,4 +1,3 @@
-import URL from 'url';
 import is from '@sindresorhus/is';
 import { quote } from 'shlex';
 import upath from 'upath';
@@ -66,7 +65,7 @@ function getAuthJson(): string | null {
       }
     });
 
-  return Object.keys(authJson).length ? JSON.stringify(authJson) : null;
+  return is.emptyObject(authJson) ? null : JSON.stringify(authJson);
 }
 
 export async function updateArtifacts({
