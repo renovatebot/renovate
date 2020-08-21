@@ -81,6 +81,12 @@ export async function generateLockFile(
         preCommands,
       },
     };
+    // istanbul ignore if
+    if (global.trustLevel === 'high') {
+      execOptions.extraEnv.NPM_AUTH = env.NPM_AUTH;
+      execOptions.extraEnv.NPM_EMAIL = env.NPM_EMAIL;
+      execOptions.extraEnv.NPM_TOKEN = env.NPM_TOKEN;
+    }
     if (config.dockerMapDotfiles) {
       const homeDir =
         process.env.HOME || process.env.HOMEPATH || process.env.USERPROFILE;
