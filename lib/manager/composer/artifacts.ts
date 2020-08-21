@@ -37,7 +37,7 @@ interface AuthJson {
   'http-basic'?: Record<string, UserPass>;
 }
 
-async function writeAuthJson(config: UpdateArtifactsConfig): Promise<void> {
+function getAuthJson(config: UpdateArtifactsConfig): string {
   const authJson: AuthJson = {};
   let credentials = hostRules.find({
     hostType: PLATFORM_TYPE_GITHUB,
@@ -92,9 +92,7 @@ async function writeAuthJson(config: UpdateArtifactsConfig): Promise<void> {
     logger.warn({ err }, 'Error setting registryUrls auth for composer');
   }
 
-  if (authJson) {
-    await writeLocalFile('auth.json', JSON.stringify(authJson));
-  }
+  return is.emptyObject(authJson) ? null : JSON.stringify(authJson);
 }
 
 export async function updateArtifacts({
@@ -124,12 +122,11 @@ export async function updateArtifacts({
       await deleteLocalFile(lockFileName);
     }
 
-    await writeAuthJson(config);
-
     const execOptions: ExecOptions = {
       cwdFile: packageFileName,
       extraEnv: {
         COMPOSER_CACHE_DIR: cacheDir,
+        COMPOSER_AUTH: getAuthJson(config),
       },
       docker: {
         image: 'renovate/composer',
