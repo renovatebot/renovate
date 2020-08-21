@@ -37,7 +37,7 @@ interface AuthJson {
   'http-basic'?: Record<string, UserPass>;
 }
 
-function getAuthJson(config: UpdateArtifactsConfig): string {
+function getAuthJson(config: UpdateArtifactsConfig): string | null {
   const authJson: AuthJson = {};
   let credentials = hostRules.find({
     hostType: PLATFORM_TYPE_GITHUB,
