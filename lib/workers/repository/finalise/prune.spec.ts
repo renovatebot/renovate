@@ -138,7 +138,9 @@ describe('workers/repository/finalise/prune', () => {
       git.isBranchModified.mockResolvedValueOnce(false);
       git.touchBranch.mockResolvedValueOnce(null);
       git.getBranchLastCommitTime.mockResolvedValueOnce(
-        moment().subtract(60, 'minutes').toDate()
+        moment()
+          .subtract(3 * 24 * 60, 'minutes')
+          .toDate()
       );
       await cleanup.pruneStaleBranches(config, config.branchList);
       expect(git.touchBranch).toHaveBeenCalledTimes(0);
