@@ -79,7 +79,7 @@ async function cleanUpBranches(
         if (!closedRightNow) {
           const lastCommitTime = await getBranchLastCommitTime(branchName);
           const minutesFromLastCommit = moment().diff(lastCommitTime, 'm');
-          if (minutesFromLastCommit >= 60) {
+          if (minutesFromLastCommit >= 3 * 24 * 60) {
             logger.debug(
               { branch: branchName },
               'Deleting orphan branch by timeout'
