@@ -6,13 +6,13 @@ import {
 
 export type VulnerabilityAlert = _VulnerabilityAlert;
 
-export interface VulnerabilityAlertShort {
-  datasource: string;
-  dep: string;
-  range: string;
-  patch: string;
-  severity?: 'HIGH' | 'MODERATE' | string;
-}
+type VulnerabilityKey = string;
+type VulnerabilityRangeKey = string;
+type VulnerabilityPatch = string;
+export type AggregatedVulnerabilities = Record<
+  VulnerabilityKey,
+  Record<VulnerabilityRangeKey, VulnerabilityPatch>
+>;
 
 export interface PlatformParams {
   endpoint?: string;

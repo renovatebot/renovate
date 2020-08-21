@@ -26,6 +26,7 @@ import * as githubHttp from '../../util/http/github';
 import { sanitize } from '../../util/sanitize';
 import { ensureTrailingSlash } from '../../util/url';
 import {
+  AggregatedVulnerabilities,
   BranchStatusConfig,
   CreatePRConfig,
   EnsureCommentConfig,
@@ -40,7 +41,6 @@ import {
   RepoResult,
   UpdatePrConfig,
   VulnerabilityAlert,
-  VulnerabilityAlertShort,
 } from '../common';
 import { smartTruncate } from '../utils/pr-body';
 import {
@@ -1630,7 +1630,7 @@ export async function getVulnerabilityAlerts(): Promise<VulnerabilityAlert[]> {
     });
     if (vulnerabilityAlerts?.length) {
       alerts = vulnerabilityAlerts.map((edge) => edge.node);
-      const shortAlerts: VulnerabilityAlertShort[] = [];
+      const shortAlerts: AggregatedVulnerabilities = {};
       if (alerts.length) {
         logger.trace({ alerts }, 'GitHub vulnerability details');
         for (const alert of alerts) {
@@ -1640,16 +1640,12 @@ export async function getVulnerabilityAlerts(): Promise<VulnerabilityAlert[]> {
             firstPatchedVersion,
           } = alert.securityVulnerability;
           const patch = firstPatchedVersion?.identifier;
-          const severity = alert.securityAdvisory.severity;
-          if (patch) {
-            shortAlerts.push({
-              datasource: ecosystem.toLowerCase(),
-              dep: name,
-              range: vulnerableVersionRange,
-              patch,
-              ...(severity && { severity }),
-            });
-          }
+
+          const key = `${ecosystem.toLowerCase()}/${name}`;
+          const range = vulnerableVersionRange;
+          const elem = shortAlerts[key] || {};
+          elem[range] = patch || null;
+          shortAlerts[key] = elem;
         }
         logger.debug({ alerts: shortAlerts }, 'GitHub vulnerability details');
       }
