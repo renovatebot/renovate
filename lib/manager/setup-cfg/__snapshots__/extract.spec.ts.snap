@@ -1,0 +1,154 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`lib/manager/pip_requirements/extract extractPackageFile() extracts dependencies 1`] = `
+Object {
+  "deps": Array [
+    Object {
+      "currentValue": "~=14.0",
+      "datasource": "pypi",
+      "depName": "coloredlogs",
+    },
+    Object {
+      "currentValue": "~=2.1",
+      "datasource": "pypi",
+      "depName": "python-dateutil",
+    },
+    Object {
+      "currentValue": "~=0.4",
+      "datasource": "pypi",
+      "depName": "docopt",
+    },
+    Object {
+      "currentValue": "~=2.1",
+      "datasource": "pypi",
+      "depName": "fs",
+    },
+    Object {
+      "currentValue": "~=2.18",
+      "datasource": "pypi",
+      "depName": "requests",
+    },
+    Object {
+      "currentValue": "~=1.4",
+      "datasource": "pypi",
+      "depName": "six",
+    },
+    Object {
+      "currentValue": "~=4.19",
+      "datasource": "pypi",
+      "depName": "tqdm",
+    },
+    Object {
+      "currentValue": "~=6.0",
+      "datasource": "pypi",
+      "depName": "tenacity",
+    },
+    Object {
+      "currentValue": "~=3.6",
+      "datasource": "pypi",
+      "depName": "typing",
+    },
+    Object {
+      "currentValue": "~=1.7",
+      "datasource": "pypi",
+      "depName": "verboselogs",
+    },
+    Object {
+      "currentValue": "~=0.1",
+      "datasource": "pypi",
+      "depName": "contexter",
+      "depType": "test",
+    },
+    Object {
+      "currentValue": "~=2.0",
+      "datasource": "pypi",
+      "depName": "mock",
+      "depType": "test",
+    },
+    Object {
+      "currentValue": "~=0.6",
+      "datasource": "pypi",
+      "depName": "parameterized",
+      "depType": "test",
+    },
+    Object {
+      "currentValue": "~=2.12",
+      "datasource": "pypi",
+      "depName": "green",
+      "depType": "test",
+    },
+    Object {
+      "currentValue": "coverage dependencies",
+      "datasource": "pypi",
+      "depName": "#",
+      "depType": "test",
+      "skipReason": "unsupported-value",
+    },
+    Object {
+      "currentValue": "~=1.7",
+      "datasource": "pypi",
+      "depName": "sphinx",
+      "depType": "doc",
+    },
+    Object {
+      "currentValue": "~=0.6",
+      "datasource": "pypi",
+      "depName": "sphinx-bootstrap-theme",
+      "depType": "doc",
+    },
+    Object {
+      "currentValue": "~=2.6",
+      "datasource": "pypi",
+      "depName": "semantic-version",
+      "depType": "doc",
+    },
+    Object {
+      "currentValue": "development dependencies",
+      "datasource": "pypi",
+      "depName": "#",
+      "depType": "doc",
+      "skipReason": "unsupported-value",
+    },
+    Object {
+      "currentValue": ">=0.9",
+      "datasource": "pypi",
+      "depName": "aiortc",
+    },
+    Object {
+      "currentValue": ">=8.1",
+      "datasource": "pypi",
+      "depName": "websockets",
+    },
+    Object {
+      "currentValue": ">=3.6",
+      "datasource": "pypi",
+      "depName": "aiohttp",
+    },
+    Object {
+      "currentValue": ">=6.0",
+      "datasource": "pypi",
+      "depName": "pyee",
+    },
+    Object {
+      "currentValue": ">=8.1",
+      "datasource": "pypi",
+      "depName": "websockets",
+    },
+    Object {
+      "currentValue": ">=0.3",
+      "datasource": "pypi",
+      "depName": "dataclasses_json",
+    },
+    Object {
+      "currentValue": ">=10.0",
+      "datasource": "pypi",
+      "depName": "coloredlogs",
+    },
+    Object {
+      "currentValue": "~=8.0.0",
+      "datasource": "pypi",
+      "depName": "av",
+    },
+  ],
+}
+`;
