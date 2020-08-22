@@ -112,7 +112,7 @@ Note that this setting is independent of `branchPrefix`. For example, if you con
 
 ## onboardingCommitMessage
 
-Note that the `commitMessagePrefix` or `semanticCommits` value will be prepended to the commit message.
+Note that if `commitMessagePrefix` or `semanticCommits` values are defined then they will be prepended to the commit message using the same logic that is used for adding them to non-onboarding commit messages.
 
 ## onboardingConfig
 
