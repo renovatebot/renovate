@@ -239,7 +239,7 @@
     "jest-circus": "26.4.0",
     "jest-extended": "0.11.5",
     "jest-junit": "11.1.0",
-    "jest-mock-extended": "1.0.9",
+    "jest-mock-extended": "1.0.10",
     "jest-silent-reporter": "0.2.1",
     "mockdate": "3.0.2",
     "nock": "13.0.4",
