@@ -9,10 +9,10 @@ const content = readFileSync(
 describe('lib/manager/pip_requirements/extract', () => {
   describe('extractPackageFile()', () => {
     it('returns null for empty', () => {
-      expect(extractPackageFile('nothing here', 'setup.cfg')).toBeNull();
+      expect(extractPackageFile('nothing here')).toBeNull();
     });
     it('extracts dependencies', () => {
-      const res = extractPackageFile(content, 'setup.cfg');
+      const res = extractPackageFile(content);
       expect(res).toMatchSnapshot();
     });
   });
