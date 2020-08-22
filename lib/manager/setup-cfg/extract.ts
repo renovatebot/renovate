@@ -1,6 +1,4 @@
 import { id as datasource } from '../../datasource/pypi';
-import { SkipReason } from '../../types';
-import pep440 from '../../versioning/pep440';
 import { PackageDependency, PackageFile, Result } from '../common';
 
 function getSectionName(str: string): string {
@@ -16,11 +14,7 @@ function getSectionRecord(str: string): string {
 function parseDep(line: string): PackageDependency | null {
   const [, depName, currentValue] = /\s*([^\s=~<>!]*)\s*(.*)/.exec(line) || [];
   if (depName && currentValue) {
-    const dep: PackageDependency = { datasource, depName, currentValue };
-    if (!pep440.isValid(currentValue)) {
-      dep.skipReason = SkipReason.UnsupportedValue;
-    }
-    return dep;
+    return { datasource, depName, currentValue };
   }
   return null;
 }
@@ -34,7 +28,7 @@ export function extractPackageFile(
   const deps: PackageDependency[] = [];
   content
     .split('\n')
-    .map((line) => line.replace(/;.*$/, '').trimRight())
+    .map((line) => line.replace(/[;#].*$/, '').trimRight())
     .forEach((rawLine) => {
       let line = rawLine;
       const newSectionName = getSectionName(line);

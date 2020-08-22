@@ -78,13 +78,6 @@ Object {
       "depType": "test",
     },
     Object {
-      "currentValue": "coverage dependencies",
-      "datasource": "pypi",
-      "depName": "#",
-      "depType": "test",
-      "skipReason": "unsupported-value",
-    },
-    Object {
       "currentValue": "~=1.7",
       "datasource": "pypi",
       "depName": "sphinx",
@@ -101,13 +94,6 @@ Object {
       "datasource": "pypi",
       "depName": "semantic-version",
       "depType": "doc",
-    },
-    Object {
-      "currentValue": "development dependencies",
-      "datasource": "pypi",
-      "depName": "#",
-      "depType": "doc",
-      "skipReason": "unsupported-value",
     },
     Object {
       "currentValue": ">=0.9",
