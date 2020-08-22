@@ -2,6 +2,7 @@ import { RenovateConfig } from '../../../../config';
 import { configFileNames } from '../../../../config/app-strings';
 import { logger } from '../../../../logger';
 import { commitFiles } from '../../../../util/git';
+import { formatCommitMessagePrefix } from '../../util/commit-message';
 import { getOnboardingConfig } from './config';
 
 const defaultConfigFile = configFileNames[0];
@@ -23,7 +24,7 @@ export function createOnboardingBranch(
     }
   }
   if (commitMessagePrefix) {
-    commitMessagePrefix += commitMessagePrefix.endsWith(':') ? ' ' : ':';
+    commitMessagePrefix = formatCommitMessagePrefix(commitMessagePrefix);
   }
 
   let onboardingCommitMessage: string;

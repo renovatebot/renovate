@@ -1,5 +1,6 @@
 import { RenovateConfig, getConfig } from '../../../../../test/util';
 import { commitFiles } from '../../../../util/git';
+import { COMMIT_MESSAGE_PREFIX_SEPARATOR } from '../../util/commit-message';
 import { createOnboardingBranch } from './create';
 
 jest.mock('../../../../util/git');
@@ -49,7 +50,9 @@ describe('workers/repository/onboarding/branch', () => {
         config.commitMessagePrefix = prefix;
         await createOnboardingBranch(config);
         expect(commitFiles).toHaveBeenCalledWith(
-          buildExpectedCommitFilesArgument(`${prefix}: add renovate.json`)
+          buildExpectedCommitFilesArgument(
+            `${prefix}${COMMIT_MESSAGE_PREFIX_SEPARATOR} add renovate.json`
+          )
         );
       });
       it('to the supplied commit message', async () => {
@@ -60,7 +63,9 @@ describe('workers/repository/onboarding/branch', () => {
         config.onboardingCommitMessage = message;
         await createOnboardingBranch(config);
         expect(commitFiles).toHaveBeenCalledWith(
-          buildExpectedCommitFilesArgument(`${prefix}: ${message}`)
+          buildExpectedCommitFilesArgument(
+            `${prefix}${COMMIT_MESSAGE_PREFIX_SEPARATOR} ${message}`
+          )
         );
       });
     });
@@ -70,7 +75,9 @@ describe('workers/repository/onboarding/branch', () => {
         config.semanticCommits = true;
         await createOnboardingBranch(config);
         expect(commitFiles).toHaveBeenCalledWith(
-          buildExpectedCommitFilesArgument(`${prefix}: add renovate.json`)
+          buildExpectedCommitFilesArgument(
+            `${prefix}${COMMIT_MESSAGE_PREFIX_SEPARATOR} add renovate.json`
+          )
         );
       });
       it('to the supplied commit message', async () => {
@@ -81,7 +88,9 @@ describe('workers/repository/onboarding/branch', () => {
         config.onboardingCommitMessage = message;
         await createOnboardingBranch(config);
         expect(commitFiles).toHaveBeenCalledWith(
-          buildExpectedCommitFilesArgument(`${prefix}: ${message}`)
+          buildExpectedCommitFilesArgument(
+            `${prefix}${COMMIT_MESSAGE_PREFIX_SEPARATOR} ${message}`
+          )
         );
       });
     });
