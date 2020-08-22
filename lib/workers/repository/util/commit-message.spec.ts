@@ -18,10 +18,10 @@ describe('workers/repository/util/commit-message', () => {
         `RENOV-123${COMMIT_MESSAGE_PREFIX_SEPARATOR}`,
       ],
       [
-        'adds a space',
+        'does nothing',
         'ends',
-        'RENOV-123:',
-        `RENOV-123${COMMIT_MESSAGE_PREFIX_SEPARATOR} `,
+        `RENOV-123${COMMIT_MESSAGE_PREFIX_SEPARATOR}`,
+        `RENOV-123${COMMIT_MESSAGE_PREFIX_SEPARATOR}`,
       ],
     ])(
       '%s when the prefix %s with a separator',
