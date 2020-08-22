@@ -1,6 +1,7 @@
 import { RangeStrategy } from '../../types';
 import { RangeConfig } from '../common';
 
-export function getRangeStrategy(config: RangeConfig): RangeStrategy {
+/* istanbul ignore next */
+export function getRangeStrategy(_config: RangeConfig): RangeStrategy {
   return 'bump';
 }
