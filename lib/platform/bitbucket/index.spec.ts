@@ -755,6 +755,8 @@ describe('platform/bitbucket', () => {
         .get('/2.0/repositories/some/repo/pullrequests/5')
         .reply(200, { values: [pr] })
         .put('/2.0/repositories/some/repo/pullrequests/5')
+        .reply(200)
+        .post('/2.0/repositories/some/repo/pullrequests/5/decline')
         .reply(200);
       await bitbucket.updatePr({
         number: pr.id,

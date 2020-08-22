@@ -40,7 +40,7 @@ const BITBUCKET_PROD_ENDPOINT = 'https://api.bitbucket.org/';
 
 let config: utils.Config = {} as any;
 
-let endpoint_ = BITBUCKET_PROD_ENDPOINT;
+const defaults = { endpoint: BITBUCKET_PROD_ENDPOINT };
 
 export function initPlatform({
   endpoint,
@@ -56,9 +56,9 @@ export function initPlatform({
     logger.warn(
       `Init: Bitbucket Cloud endpoint should generally be ${BITBUCKET_PROD_ENDPOINT} but is being configured to a different value. Did you mean to use Bitbucket Server?`
     );
-    endpoint_ = endpoint;
+    defaults.endpoint = endpoint;
   }
-  setBaseUrl(endpoint_);
+  setBaseUrl(defaults.endpoint);
   // TODO: Add a connection check that endpoint/username/password combination are valid
   const platformConfig: PlatformResult = {
     endpoint: endpoint || BITBUCKET_PROD_ENDPOINT,
@@ -90,7 +90,7 @@ export async function initRepo({
   logger.debug(`initRepo("${repository}")`);
   const opts = hostRules.find({
     hostType: PLATFORM_TYPE_BITBUCKET,
-    url: endpoint_,
+    url: defaults.endpoint,
   });
   config = {
     repository,
@@ -138,7 +138,7 @@ export async function initRepo({
     throw err;
   }
 
-  const { hostname } = URL.parse(endpoint_);
+  const { hostname } = URL.parse(defaults.endpoint);
 
   // Converts API hostnames to their respective HTTP git hosts:
   // `api.bitbucket.org`  to `bitbucket.org`
@@ -531,7 +531,9 @@ export async function ensureIssue({
   } catch (err) /* istanbul ignore next */ {
     if (err.message.startsWith('Repository has no issue tracker.')) {
       logger.debug(
-        `Issues are disabled, so could not create issue: ${err.message}`
+        `Issues are disabled, so could not create issue: ${
+          err.message as string
+        }`
       );
     } else {
       logger.warn({ err }, 'Could not ensure issue');
@@ -596,7 +598,7 @@ export async function addReviewers(
   prId: number,
   reviewers: string[]
 ): Promise<void> {
-  logger.debug(`Adding reviewers ${reviewers} to #${prId}`);
+  logger.debug(`Adding reviewers '${reviewers.join(', ')}' to #${prId}`);
 
   const { title } = await getPr(prId);
 
@@ -715,7 +717,7 @@ export async function updatePr({
   number: prNo,
   prTitle: title,
   prBody: description,
-  state: _state,
+  state,
 }: UpdatePrConfig): Promise<void> {
   logger.debug(`updatePr(${prNo}, ${title}, body)`);
   // Updating a PR in Bitbucket will clear the reviewers if reviewers is not present
@@ -725,11 +727,6 @@ export async function updatePr({
     )
   ).body;
 
-  const state = {
-    [PrState.Open]: 'OPEN',
-    [PrState.Closed]: 'DECLINED',
-  }[_state];
-
   await bitbucketHttp.putJson(
     `/2.0/repositories/${config.repository}/pullrequests/${prNo}`,
     {
@@ -737,10 +734,15 @@ export async function updatePr({
         title,
         description: sanitize(description),
         reviewers: pr.reviewers,
-        ...(state && { state }),
       },
     }
   );
+
+  if (state === PrState.Closed && pr) {
+    await bitbucketHttp.postJson(
+      `/2.0/repositories/${config.repository}/pullrequests/${prNo}/decline`
+    );
+  }
 }
 
 export async function mergePr(

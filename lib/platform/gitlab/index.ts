@@ -1,6 +1,5 @@
 import URL, { URLSearchParams } from 'url';
 import is from '@sindresorhus/is';
-
 import delay from 'delay';
 import { configFileNames } from '../../config/app-strings';
 import { RenovateConfig } from '../../config/common';
@@ -40,29 +39,17 @@ import {
   VulnerabilityAlert,
 } from '../common';
 import { smartTruncate } from '../utils/pr-body';
+import { GitlabComment, GitlabIssue, MergeMethod, RepoResponse } from './types';
 
 const gitlabApi = new GitlabHttp();
 
-type MergeMethod = 'merge' | 'rebase_merge' | 'ff';
-type RepoResponse = {
-  archived: boolean;
-  mirror: boolean;
-  default_branch: string;
-  empty_repo: boolean;
-  http_url_to_repo: string;
-  forked_from_project: boolean;
-  repository_access_level: 'disabled' | 'private' | 'enabled';
-  merge_requests_access_level: 'disabled' | 'private' | 'enabled';
-  merge_method: MergeMethod;
-  path_with_namespace: string;
-};
 const defaultConfigFile = configFileNames[0];
 let config: {
   repository: string;
   localDir: string;
   email: string;
   prList: any[];
-  issueList: any[];
+  issueList: GitlabIssue[];
   optimizeForDisabled: boolean;
   mergeMethod: MergeMethod;
 } = {} as any;
@@ -466,7 +453,7 @@ export async function updatePr({
   state,
 }: UpdatePrConfig): Promise<void> {
   const newState = {
-    [PrState.Closed]: 'closed',
+    [PrState.Closed]: 'close',
     [PrState.Open]: 'reopen',
   }[state];
   await gitlabApi.putJson(
@@ -513,7 +500,7 @@ export function getPrBody(input: string): string {
       .replace(/Pull Request/g, 'Merge Request')
       .replace(/PR/g, 'MR')
       .replace(/\]\(\.\.\/pull\//g, '](!'),
-    50000
+    25000 // TODO: increase it once https://gitlab.com/gitlab-org/gitlab/-/issues/217483 is closed
   );
 }
 
@@ -610,7 +597,7 @@ export async function setBranchStatus({
 
 // Issue
 
-export async function getIssueList(): Promise<any[]> {
+export async function getIssueList(): Promise<GitlabIssue[]> {
   if (!config.issueList) {
     const query = new URLSearchParams({
       per_page: '100',
@@ -641,7 +628,7 @@ export async function findIssue(title: string): Promise<Issue | null> {
   logger.debug(`findIssue(${title})`);
   try {
     const issueList = await getIssueList();
-    const issue = issueList.find((i: { title: string }) => i.title === title);
+    const issue = issueList.find((i) => i.title === title);
     if (!issue) {
       return null;
     }
@@ -669,9 +656,9 @@ export async function ensureIssue({
   const description = getPrBody(sanitize(body));
   try {
     const issueList = await getIssueList();
-    let issue = issueList.find((i: { title: string }) => i.title === title);
+    let issue = issueList.find((i) => i.title === title);
     if (!issue) {
-      issue = issueList.find((i: { title: string }) => i.title === reuseTitle);
+      issue = issueList.find((i) => i.title === reuseTitle);
     }
     if (issue) {
       const existingDescription = (
@@ -703,7 +690,7 @@ export async function ensureIssue({
     }
   } catch (err) /* istanbul ignore next */ {
     if (err.message.startsWith('Issues are disabled for this repo')) {
-      logger.debug(`Could not create issue: ${err.message}`);
+      logger.debug(`Could not create issue: ${(err as Error).message}`);
     } else {
       logger.warn({ err }, 'Could not ensure issue');
     }
@@ -731,7 +718,7 @@ export async function addAssignees(
   iid: number,
   assignees: string[]
 ): Promise<void> {
-  logger.debug(`Adding assignees ${assignees} to #${iid}`);
+  logger.debug(`Adding assignees '${assignees.join(', ')}' to #${iid}`);
   try {
     let assigneeId = (
       await gitlabApi.getJson<{ id: number }[]>(
@@ -763,7 +750,7 @@ export async function addAssignees(
 }
 
 export function addReviewers(iid: number, reviewers: string[]): Promise<void> {
-  logger.debug(`addReviewers('${iid}, '${reviewers})`);
+  logger.debug(`addReviewers('${iid}, [${reviewers.join(', ')}])`);
   logger.warn('Unimplemented in GitLab: approvals');
   return Promise.resolve();
 }
@@ -882,11 +869,6 @@ export async function ensureComment({
   }
   return true;
 }
-
-type GitlabComment = {
-  body: string;
-  id: number;
-};
 
 export async function ensureCommentRemoval({
   number: issueNo,

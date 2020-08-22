@@ -172,7 +172,7 @@ Array [
 ]
 `;
 
-exports[`.updateArtifacts() uses hostRules to write auth.json 1`] = `
+exports[`.updateArtifacts() uses hostRules to set COMPOSER_AUTH 1`] = `
 Array [
   Object {
     "cmd": "composer update --with-dependencies --ignore-platform-reqs --no-ansi --no-interaction --no-scripts --no-autoloader",
@@ -180,6 +180,7 @@ Array [
       "cwd": "/tmp/github/some/repo",
       "encoding": "utf-8",
       "env": Object {
+        "COMPOSER_AUTH": "{\\"github-oauth\\":{\\"github.com\\":\\"github-token\\"},\\"gitlab-token\\":{\\"gitlab.com\\":\\"gitlab-token\\"},\\"http-basic\\":{\\"packagist.renovatebot.com\\":{\\"username\\":\\"some-username\\",\\"password\\":\\"some-password\\"}}}",
         "COMPOSER_CACHE_DIR": "/tmp/renovate/cache/others/composer",
         "HOME": "/home/user",
         "HTTPS_PROXY": "https://example.com",

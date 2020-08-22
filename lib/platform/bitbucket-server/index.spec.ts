@@ -279,7 +279,7 @@ describe(getName(__filename), () => {
             )
             .reply(200, {
               isLastPage: false,
-              lines: ['{'],
+              lines: [{ text: '{' }],
               size: 50000,
             });
           const res = await bitbucket.initRepo({
@@ -299,7 +299,10 @@ describe(getName(__filename), () => {
             .get(
               `${urlPath}/rest/api/1.0/projects/SOME/repos/repo/browse/renovate.json?limit=20000`
             )
-            .reply(200, { isLastPage: true, lines: ['{ "enabled": false }'] });
+            .reply(200, {
+              isLastPage: true,
+              lines: [{ text: '{ "enabled": false' }, { text: '}' }],
+            });
           await expect(
             bitbucket.initRepo({
               endpoint: 'https://stash.renovatebot.com/vcs/',
