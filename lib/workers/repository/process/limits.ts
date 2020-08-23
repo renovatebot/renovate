@@ -2,7 +2,6 @@ import moment from 'moment';
 import { RenovateConfig } from '../../../config';
 import { logger } from '../../../logger';
 import { platform } from '../../../platform';
-import { branchExists } from '../../../util/git';
 import { BranchConfig } from '../../common';
 
 export async function getPrHourlyRemaining(
@@ -48,7 +47,7 @@ export async function getConcurrentPrsRemaining(
     logger.debug(`Enforcing prConcurrentLimit (${config.prConcurrentLimit})`);
     let currentlyOpen = 0;
     for (const branch of branches) {
-      if (await branchExists(branch.branchName)) {
+      if (await platform.getBranchPr(branch.branchName)) {
         currentlyOpen += 1;
       }
     }
