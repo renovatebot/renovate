@@ -57,13 +57,15 @@ function getAuthJson(): string | null {
 
   hostRules
     .findAll({ hostType: datasourcePackagist.id })
-    ?.forEach(({ username, password, hostName, domainName }) => {
-      const host = hostName || domainName;
-      if (host && username && password) {
-        authJson['http-basic'] = authJson['http-basic'] || {};
-        authJson['http-basic'][host] = { username, password };
+    ?.forEach(
+      ({ username, password, hostName, domainName, endpoint, baseUrl }) => {
+        const host = hostName || domainName || endpoint || baseUrl;
+        if (host && username && password) {
+          authJson['http-basic'] = authJson['http-basic'] || {};
+          authJson['http-basic'][host] = { username, password };
+        }
       }
-    });
+    );
 
   return is.emptyObject(authJson) ? null : JSON.stringify(authJson);
 }
