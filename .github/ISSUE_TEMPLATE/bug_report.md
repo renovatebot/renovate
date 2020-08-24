@@ -16,7 +16,7 @@ about: You've found a bug with Renovate
 <!--
 Try not to raise a bug report unless you've looked at the logs first.
 
-If you're running self-hosted, run with `--log-level=debug` or LOG_LEVEL=debug and search for whatever dependency/branch/PR that is causing the problem. If you are using the Renovate App, log into https://app.renovatebot.com/dashboard and locate the correct job log for when the problem occurred (e.g. when the PR was created). 
+If you're running self-hosted, run with `--log-level=debug` or LOG_LEVEL=debug and search for whatever dependency/branch/PR that is causing the problem. If you are using the Renovate App, log into https://app.renovatebot.com/dashboard and locate the correct job log for when the problem occurred (e.g. when the PR was created).
 
 Paste the *relevant* logs here, not the entire thing and not just a link to the dashboard (others do not have permissions to view them).
 -->
