@@ -1,3 +1,4 @@
+import url from 'url';
 import is from '@sindresorhus/is';
 import { quote } from 'shlex';
 import upath from 'upath';
@@ -8,6 +9,7 @@ import {
 } from '../../constants/platforms';
 import * as datasourcePackagist from '../../datasource/packagist';
 import { logger } from '../../logger';
+import { HostRule } from '../../types';
 import { ExecOptions, exec } from '../../util/exec';
 import {
   deleteLocalFile,
@@ -30,6 +32,25 @@ interface AuthJson {
   'github-oauth'?: Record<string, string>;
   'gitlab-token'?: Record<string, string>;
   'http-basic'?: Record<string, UserPass>;
+}
+
+function getHost({
+  hostName,
+  domainName,
+  endpoint,
+  baseUrl,
+}: HostRule): string | null {
+  let host = hostName || domainName;
+  if (!host) {
+    try {
+      host = endpoint || baseUrl;
+      host = url.parse(host).host;
+    } catch (err) {
+      logger.warn(`Composer: can't parse ${host}`);
+      host = null;
+    }
+  }
+  return host;
 }
 
 function getAuthJson(): string | null {
@@ -57,15 +78,14 @@ function getAuthJson(): string | null {
 
   hostRules
     .findAll({ hostType: datasourcePackagist.id })
-    ?.forEach(
-      ({ username, password, hostName, domainName, endpoint, baseUrl }) => {
-        const host = hostName || domainName || endpoint || baseUrl;
-        if (host && username && password) {
-          authJson['http-basic'] = authJson['http-basic'] || {};
-          authJson['http-basic'][host] = { username, password };
-        }
+    ?.forEach((hostRule) => {
+      const { username, password } = hostRule;
+      const host = getHost(hostRule);
+      if (host && username && password) {
+        authJson['http-basic'] = authJson['http-basic'] || {};
+        authJson['http-basic'][host] = { username, password };
       }
-    );
+    });
 
   return is.emptyObject(authJson) ? null : JSON.stringify(authJson);
 }

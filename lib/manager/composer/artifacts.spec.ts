@@ -82,6 +82,12 @@ describe('.updateArtifacts()', () => {
       username: 'some-username',
       password: 'some-password',
     });
+    hostRules.add({
+      hostType: datasourcePackagist.id,
+      endpoint: 'https://artifactory.yyyyyyy.com/artifactory/api/composer/',
+      username: 'some-other-username',
+      password: 'some-other-password',
+    });
     fs.readLocalFile.mockResolvedValueOnce('Current composer.lock' as any);
     const execSnapshots = mockExecAll(exec);
     fs.readLocalFile.mockReturnValueOnce('Current composer.lock' as any);
