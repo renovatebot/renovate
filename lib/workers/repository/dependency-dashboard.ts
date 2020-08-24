@@ -1,3 +1,4 @@
+import is from '@sindresorhus/is';
 import { RenovateConfig } from '../../config';
 import { logger } from '../../logger';
 import { Pr, platform } from '../../platform';
@@ -40,34 +41,18 @@ export async function ensureMasterIssue(
     return;
   }
   logger.debug('Ensuring Dependency Dashboard');
-  if (
-    !branches.length ||
-    branches.every((branch) => branch.res === 'automerged')
-  ) {
-    if (config.dependencyDashboardAutoclose) {
-      logger.debug('Closing Dependency Dashboard');
-      if (config.dryRun) {
-        logger.info(
-          'DRY-RUN: Would close Dependency Dashboard ' +
-            config.dependencyDashboardTitle
-        );
-      } else {
-        await platform.ensureIssueClosing(config.dependencyDashboardTitle);
-      }
-      return;
-    }
+  const hasBranches =
+    is.nonEmptyArray(branches) &&
+    branches.some((branch) => branch.res !== 'automerged');
+  if (config.dependencyDashboardAutoclose && !hasBranches) {
     if (config.dryRun) {
       logger.info(
-        'DRY-RUN: Would ensure Dependency Dashboard ' +
+        'DRY-RUN: Would close Dependency Dashboard ' +
           config.dependencyDashboardTitle
       );
     } else {
-      await platform.ensureIssue({
-        title: config.dependencyDashboardTitle,
-        reuseTitle,
-        body:
-          'This repository is up-to-date and has no outstanding updates open or pending.',
-      });
+      logger.debug('Closing Dependency Dashboard');
+      await platform.ensureIssueClosing(config.dependencyDashboardTitle);
     }
     return;
   }
@@ -204,8 +189,13 @@ export async function ensureMasterIssue(
     issueBody += '\n';
   }
 
-  // istanbul ignore if
+  if (!hasBranches) {
+    issueBody +=
+      'This repository currently has no open or pending branches.\n\n';
+  }
+
   if (config.dependencyDashboardFooter?.length) {
+    // istanbul ignore if
     issueBody += `---\n${config.dependencyDashboardFooter}\n`;
   }
 

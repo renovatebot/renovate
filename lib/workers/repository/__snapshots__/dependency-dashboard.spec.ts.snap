@@ -1,0 +1,11 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`workers/repository/master-issue ensureMasterIssue() open or update Dependency Dashboard when all branches are closed and dependencyDashboardAutoclose is false 1`] = `
+"This issue contains a list of Renovate updates and their statuses.
+
+This repository currently has no open or pending branches.
+
+---
+And this is a footer
+"
+`;
