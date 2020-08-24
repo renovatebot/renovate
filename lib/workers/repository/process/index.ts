@@ -2,6 +2,7 @@ import { RenovateConfig, mergeChildConfig } from '../../../config';
 import { logger } from '../../../logger';
 import { PackageFile } from '../../../manager/common';
 import { platform } from '../../../platform';
+import { branchExists } from '../../../util/git';
 import { addSplit } from '../../../util/split';
 import { BranchConfig } from '../../common';
 import { ExtractResult, extract, lookup, update } from './extract-update';
@@ -69,17 +70,23 @@ export async function extractDependencies(
     logger.debug({ baseBranches: config.baseBranches }, 'baseBranches');
     const extracted: Record<string, Record<string, PackageFile[]>> = {};
     for (const baseBranch of config.baseBranches) {
-      const baseBranchConfig = await setBaseBranch(baseBranch, config);
-      extracted[baseBranch] = await extract(baseBranchConfig);
+      if (await branchExists(baseBranch)) {
+        const baseBranchConfig = await setBaseBranch(baseBranch, config);
+        extracted[baseBranch] = await extract(baseBranchConfig);
+      } else {
+        logger.warn({ baseBranch }, 'Base branch does not exist - skipping');
+      }
     }
     addSplit('extract');
     for (const baseBranch of config.baseBranches) {
-      const baseBranchConfig = await setBaseBranch(baseBranch, config);
-      const packageFiles = extracted[baseBranch];
-      const baseBranchRes = await lookup(baseBranchConfig, packageFiles);
-      res.branches = res.branches.concat(baseBranchRes?.branches);
-      res.branchList = res.branchList.concat(baseBranchRes?.branchList);
-      res.packageFiles = res.packageFiles || baseBranchRes?.packageFiles; // Use the first branch
+      if (await branchExists(baseBranch)) {
+        const baseBranchConfig = await setBaseBranch(baseBranch, config);
+        const packageFiles = extracted[baseBranch];
+        const baseBranchRes = await lookup(baseBranchConfig, packageFiles);
+        res.branches = res.branches.concat(baseBranchRes?.branches);
+        res.branchList = res.branchList.concat(baseBranchRes?.branchList);
+        res.packageFiles = res.packageFiles || baseBranchRes?.packageFiles; // Use the first branch
+      }
     }
   } else {
     logger.debug('No baseBranches');

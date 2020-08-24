@@ -792,6 +792,8 @@ Here is an example where you might want to limit the "noisy" package `aws-sdk` t
 }
 ```
 
+For Maven dependencies, the package name is `<groupId:artefactId>`, eg `"packageNames": ["com.thoughtworks.xstream:xstream"]`
+
 Note how the above uses `packageNames` instead of `packagePatterns` because it is an exact match package name. This is the equivalent of defining `"packagePatterns": ["^aws\-sdk$"]` and hence much simpler. However you can mix together both `packageNames` and `packagePatterns` in the same package rule and the rule will be applied if _either_ match. Example:
 
 ```json
@@ -1409,6 +1411,7 @@ before 5:00am
 after 10pm and before 5:00am
 after 10pm and before 5am every weekday
 on friday and saturday
+every 3 months on the first day of the month
 ```
 
 One example might be that you don't want Renovate to run during your typical business hours, so that your build machines don't get clogged up testing `package.json` updates. You could then configure a schedule like this at the repository level:

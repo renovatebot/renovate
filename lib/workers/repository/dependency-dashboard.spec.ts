@@ -2,8 +2,8 @@ import fs from 'fs';
 import { mock } from 'jest-mock-extended';
 import { RenovateConfig, getConfig, platform } from '../../../test/util';
 import { PLATFORM_TYPE_GITHUB } from '../../constants/platforms';
-import { PR_STATE_NOT_OPEN } from '../../constants/pull-requests';
 import { Platform, Pr } from '../../platform';
+import { PrState } from '../../types';
 import { BranchConfig, BranchUpgradeConfig } from '../common';
 import * as dependencyDashboard from './dependency-dashboard';
 
@@ -354,10 +354,10 @@ describe('workers/repository/master-issue', () => {
       expect(platform.findPr).toHaveBeenCalledTimes(2);
       expect(platform.findPr.mock.calls[0][0].branchName).toBe('branchName1');
       expect(platform.findPr.mock.calls[0][0].prTitle).toBe('pr1');
-      expect(platform.findPr.mock.calls[0][0].state).toBe(PR_STATE_NOT_OPEN);
+      expect(platform.findPr.mock.calls[0][0].state).toBe(PrState.NotOpen);
       expect(platform.findPr.mock.calls[1][0].branchName).toBe('branchName2');
       expect(platform.findPr.mock.calls[1][0].prTitle).toBe('pr2');
-      expect(platform.findPr.mock.calls[1][0].state).toBe(PR_STATE_NOT_OPEN);
+      expect(platform.findPr.mock.calls[1][0].state).toBe(PrState.NotOpen);
 
       // same with dry run
       await dryRun(branches, platform, 0, 0, 0, 2);

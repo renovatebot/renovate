@@ -80,6 +80,45 @@ Array [
 ]
 `;
 
+exports[`datasource/pypi getReleases parses data-requires-python and respects compatibility from simple endpoint 1`] = `
+Object {
+  "releases": Array [
+    Object {
+      "version": "0.1.2",
+    },
+    Object {
+      "version": "0.1.3",
+    },
+    Object {
+      "version": "0.1.4",
+    },
+    Object {
+      "version": "0.2.0",
+    },
+    Object {
+      "version": "0.2.1",
+    },
+    Object {
+      "version": "0.2.2",
+    },
+  ],
+}
+`;
+
+exports[`datasource/pypi getReleases parses data-requires-python and respects compatibility from simple endpoint 2`] = `
+Array [
+  Object {
+    "headers": Object {
+      "accept-encoding": "gzip, deflate",
+      "host": "pypi.org",
+      "user-agent": "https://github.com/renovatebot/renovate",
+    },
+    "method": "GET",
+    "url": "https://pypi.org/simple/dj-database-url",
+  },
+]
+`;
+
 exports[`datasource/pypi getReleases process data from +simple endpoint 1`] = `
 Object {
   "releases": Array [

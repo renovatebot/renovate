@@ -9,11 +9,7 @@ import {
   REPOSITORY_EMPTY,
   REPOSITORY_MIRRORED,
 } from '../../constants/error-messages';
-import {
-  PR_STATE_NOT_OPEN,
-  PR_STATE_OPEN,
-} from '../../constants/pull-requests';
-import { BranchStatus } from '../../types';
+import { BranchStatus, PrState } from '../../types';
 import * as _git from '../../util/git';
 import * as _hostRules from '../../util/host-rules';
 
@@ -569,30 +565,6 @@ describe('platform/gitlab', () => {
     );
   });
 
-  describe('deleteBranch()', () => {
-    it('sends to gitFs', async () => {
-      const scope = await initRepo();
-      scope
-        .get(
-          '/api/v4/projects/some%2Frepo/merge_requests?per_page=100&state=opened&source_branch=branch'
-        )
-        .reply(200, [
-          {
-            number: 1,
-            source_branch: 'branch-a',
-            title: 'branch a pr',
-            state: 'opened',
-          },
-        ]);
-      await gitlab.deleteBranch('branch', true);
-      expect(httpMock.getTrace()).toMatchSnapshot();
-    });
-    it('defaults to not closing associated PR', async () => {
-      await initRepo();
-      await gitlab.deleteBranch('branch2');
-      expect(httpMock.getTrace()).toMatchSnapshot();
-    });
-  });
   describe('findIssue()', () => {
     it('returns null if no issue', async () => {
       httpMock
@@ -907,12 +879,12 @@ describe('platform/gitlab', () => {
             iid: 1,
             source_branch: 'branch-a',
             title: 'branch a pr',
-            state: 'merged',
+            state: PrState.Merged,
           },
         ]);
       const res = await gitlab.findPr({
         branchName: 'branch-a',
-        state: PR_STATE_NOT_OPEN,
+        state: PrState.NotOpen,
       });
       expect(res).toBeDefined();
       expect(httpMock.getTrace()).toMatchSnapshot();
@@ -935,7 +907,7 @@ describe('platform/gitlab', () => {
       const res = await gitlab.findPr({
         branchName: 'branch-a',
         prTitle: 'branch a pr',
-        state: PR_STATE_OPEN,
+        state: PrState.Open,
       });
       expect(res).toBeDefined();
       expect(httpMock.getTrace()).toMatchSnapshot();
@@ -1048,7 +1020,7 @@ describe('platform/gitlab', () => {
           id: 1,
           iid: 12345,
           description: 'a merge request',
-          state: 'merged',
+          state: PrState.Merged,
           merge_status: 'cannot_be_merged',
           diverged_commits_count: 5,
           source_branch: 'some-branch',
@@ -1070,7 +1042,7 @@ describe('platform/gitlab', () => {
           id: 1,
           iid: 12345,
           description: 'a merge request',
-          state: 'open',
+          state: PrState.Open,
           diverged_commits_count: 5,
           source_branch: 'some-branch',
           target_branch: 'master',
@@ -1097,7 +1069,7 @@ describe('platform/gitlab', () => {
           id: 1,
           iid: 12345,
           description: 'a merge request',
-          state: 'open',
+          state: PrState.Open,
           merge_status: 'cannot_be_merged',
           diverged_commits_count: 2,
           source_branch: 'some-branch',
@@ -1121,7 +1093,20 @@ describe('platform/gitlab', () => {
         .scope(gitlabApiHost)
         .put('/api/v4/projects/undefined/merge_requests/1')
         .reply(200);
-      await gitlab.updatePr(1, 'title', 'body');
+      await gitlab.updatePr({ number: 1, prTitle: 'title', prBody: 'body' });
+      expect(httpMock.getTrace()).toMatchSnapshot();
+    });
+    it('closes the PR', async () => {
+      httpMock
+        .scope(gitlabApiHost)
+        .put('/api/v4/projects/undefined/merge_requests/1')
+        .reply(200);
+      await gitlab.updatePr({
+        number: 1,
+        prTitle: 'title',
+        prBody: 'body',
+        state: PrState.Closed,
+      });
       expect(httpMock.getTrace()).toMatchSnapshot();
     });
   });
@@ -1168,7 +1153,7 @@ These updates have all been created already. Click a checkbox below to force a r
           id: 1,
           iid: 12345,
           description: 'a merge request',
-          state: 'merged',
+          state: PrState.Merged,
           merge_status: 'cannot_be_merged',
           diverged_commits_count: 5,
           source_branch: 'some-branch',

@@ -4,10 +4,10 @@ import { getName } from '../../../test/util';
 import {
   REPOSITORY_CHANGED,
   REPOSITORY_DISABLED,
+  REPOSITORY_EMPTY,
   REPOSITORY_NOT_FOUND,
 } from '../../constants/error-messages';
-import { PR_STATE_CLOSED, PR_STATE_OPEN } from '../../constants/pull-requests';
-import { BranchStatus } from '../../types';
+import { BranchStatus, PrState } from '../../types';
 import * as _git from '../../util/git';
 import { Platform } from '../common';
 
@@ -280,7 +280,7 @@ describe(getName(__filename), () => {
             )
             .reply(200, {
               isLastPage: false,
-              lines: ['{'],
+              lines: [{ text: '{' }],
               size: 50000,
             });
           const res = await bitbucket.initRepo({
@@ -293,6 +293,27 @@ describe(getName(__filename), () => {
           expect(httpMock.getTrace()).toMatchSnapshot();
         });
 
+        it('throws empty', async () => {
+          expect.assertions(2);
+          httpMock
+            .scope(urlHost)
+            .get(`${urlPath}/rest/api/1.0/projects/SOME/repos/repo`)
+            .reply(200, repoMock(url, 'SOME', 'repo'))
+            .get(
+              `${urlPath}/rest/api/1.0/projects/SOME/repos/repo/branches/default`
+            )
+            .reply(204);
+          await expect(
+            bitbucket.initRepo({
+              endpoint: 'https://stash.renovatebot.com/vcs/',
+              repository: 'SOME/repo',
+              localDir: '',
+              optimizeForDisabled: false,
+            })
+          ).rejects.toThrow(REPOSITORY_EMPTY);
+          expect(httpMock.getTrace()).toMatchSnapshot();
+        });
+
         it('throws disabled', async () => {
           expect.assertions(2);
           httpMock
@@ -300,7 +321,10 @@ describe(getName(__filename), () => {
             .get(
               `${urlPath}/rest/api/1.0/projects/SOME/repos/repo/browse/renovate.json?limit=20000`
             )
-            .reply(200, { isLastPage: true, lines: ['{ "enabled": false }'] });
+            .reply(200, {
+              isLastPage: true,
+              lines: [{ text: '{ "enabled": false' }, { text: '}' }],
+            });
           await expect(
             bitbucket.initRepo({
               endpoint: 'https://stash.renovatebot.com/vcs/',
@@ -396,14 +420,6 @@ describe(getName(__filename), () => {
           expect.assertions(1);
           await initRepo();
           await bitbucket.setBaseBranch('branch');
-          expect(httpMock.getTrace()).toMatchSnapshot();
-        });
-      });
-
-      describe('deleteBranch()', () => {
-        it('sends to gitFs', async () => {
-          await initRepo();
-          expect(await bitbucket.deleteBranch('branch')).toMatchSnapshot();
           expect(httpMock.getTrace()).toMatchSnapshot();
         });
       });
@@ -1075,7 +1091,7 @@ describe(getName(__filename), () => {
             await bitbucket.findPr({
               branchName: 'userName1/pullRequest5',
               prTitle: 'title',
-              state: PR_STATE_OPEN,
+              state: PrState.Open,
             })
           ).toMatchSnapshot();
           expect(httpMock.getTrace()).toMatchSnapshot();
@@ -1095,7 +1111,7 @@ describe(getName(__filename), () => {
             await bitbucket.findPr({
               branchName: 'userName1/pullRequest5',
               prTitle: 'title',
-              state: PR_STATE_CLOSED,
+              state: PrState.Closed,
             })
           ).toBeUndefined();
           expect(httpMock.getTrace()).toMatchSnapshot();
@@ -1248,14 +1264,80 @@ describe(getName(__filename), () => {
             )
             .reply(200);
 
-          await bitbucket.updatePr(5, 'title', 'body');
+          await bitbucket.updatePr({
+            number: 5,
+            prTitle: 'title',
+            prBody: 'body',
+          });
+          expect(httpMock.getTrace()).toMatchSnapshot();
+        });
+
+        it('closes PR', async () => {
+          const scope = await initRepo();
+          scope
+            .get(
+              `${urlPath}/rest/api/1.0/projects/SOME/repos/repo/pull-requests/5`
+            )
+            .reply(200, prMock(url, 'SOME', 'repo'))
+            .get(
+              `${urlPath}/rest/api/1.0/projects/SOME/repos/repo/pull-requests/5/merge`
+            )
+            .reply(200, { conflicted: false })
+            .put(
+              `${urlPath}/rest/api/1.0/projects/SOME/repos/repo/pull-requests/5`
+            )
+            .reply(200, { state: 'OPEN', version: 42 })
+            .post(
+              `${urlPath}/rest/api/1.0/projects/SOME/repos/repo/pull-requests/5/decline?version=42`
+            )
+            .reply(200, { status: 'DECLINED' });
+
+          await bitbucket.updatePr({
+            number: 5,
+            prTitle: 'title',
+            prBody: 'body',
+            state: PrState.Closed,
+          });
+          expect(httpMock.getTrace()).toMatchSnapshot();
+        });
+
+        it('re-opens PR', async () => {
+          const scope = await initRepo();
+          scope
+            .get(
+              `${urlPath}/rest/api/1.0/projects/SOME/repos/repo/pull-requests/5`
+            )
+            .reply(200, prMock(url, 'SOME', 'repo'))
+            .get(
+              `${urlPath}/rest/api/1.0/projects/SOME/repos/repo/pull-requests/5/merge`
+            )
+            .reply(200, { conflicted: false })
+            .put(
+              `${urlPath}/rest/api/1.0/projects/SOME/repos/repo/pull-requests/5`
+            )
+            .reply(200, { state: 'DECLINED', version: 42 })
+            .post(
+              `${urlPath}/rest/api/1.0/projects/SOME/repos/repo/pull-requests/5/reopen?version=42`
+            )
+            .reply(200, { status: 'OPEN' });
+
+          await bitbucket.updatePr({
+            number: 5,
+            prTitle: 'title',
+            prBody: 'body',
+            state: PrState.Open,
+          });
           expect(httpMock.getTrace()).toMatchSnapshot();
         });
 
         it('throws not-found 1', async () => {
           await initRepo();
           await expect(
-            bitbucket.updatePr(null as any, 'title', 'body')
+            bitbucket.updatePr({
+              number: null as any,
+              prTitle: 'title',
+              prBody: 'body',
+            })
           ).rejects.toThrow(REPOSITORY_NOT_FOUND);
 
           expect(httpMock.getTrace()).toMatchSnapshot();
@@ -1268,9 +1350,9 @@ describe(getName(__filename), () => {
               `${urlPath}/rest/api/1.0/projects/SOME/repos/repo/pull-requests/4`
             )
             .reply(404);
-          await expect(bitbucket.updatePr(4, 'title', 'body')).rejects.toThrow(
-            REPOSITORY_NOT_FOUND
-          );
+          await expect(
+            bitbucket.updatePr({ number: 4, prTitle: 'title', prBody: 'body' })
+          ).rejects.toThrow(REPOSITORY_NOT_FOUND);
 
           expect(httpMock.getTrace()).toMatchSnapshot();
         });
@@ -1291,9 +1373,9 @@ describe(getName(__filename), () => {
             )
             .reply(404);
 
-          await expect(bitbucket.updatePr(5, 'title', 'body')).rejects.toThrow(
-            REPOSITORY_NOT_FOUND
-          );
+          await expect(
+            bitbucket.updatePr({ number: 5, prTitle: 'title', prBody: 'body' })
+          ).rejects.toThrow(REPOSITORY_NOT_FOUND);
 
           expect(httpMock.getTrace()).toMatchSnapshot();
         });
@@ -1314,9 +1396,9 @@ describe(getName(__filename), () => {
             )
             .reply(409);
 
-          await expect(bitbucket.updatePr(5, 'title', 'body')).rejects.toThrow(
-            REPOSITORY_CHANGED
-          );
+          await expect(
+            bitbucket.updatePr({ number: 5, prTitle: 'title', prBody: 'body' })
+          ).rejects.toThrow(REPOSITORY_CHANGED);
           expect(httpMock.getTrace()).toMatchSnapshot();
         });
 
@@ -1337,7 +1419,7 @@ describe(getName(__filename), () => {
             .reply(405);
 
           await expect(
-            bitbucket.updatePr(5, 'title', 'body')
+            bitbucket.updatePr({ number: 5, prTitle: 'title', prBody: 'body' })
           ).rejects.toThrowErrorMatchingSnapshot();
           expect(httpMock.getTrace()).toMatchSnapshot();
         });
