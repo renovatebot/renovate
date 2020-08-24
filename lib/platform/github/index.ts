@@ -355,6 +355,9 @@ export async function initRepo({
       // This is a lovely "hack" by GitHub that lets us force update our fork's master
       // with the base commit from the parent repository
       try {
+        logger.debug(
+          'Updating forked repository default sha to match upstream'
+        );
         await githubApi.patchJson(
           `repos/${config.repository}/git/refs/heads/${config.defaultBranch}`,
           {
@@ -366,22 +369,10 @@ export async function initRepo({
           }
         );
       } catch (err) /* istanbul ignore next */ {
-        logger.debug(
-          'Error updating fork reference - will try deleting fork to try again next time'
+        logger.error(
+          { err: err.err || err },
+          'Error updating fork from upstream - cannot continue'
         );
-        try {
-          await githubApi.deleteJson(`repos/${config.repository}`, {
-            token: forkToken || opts.token,
-          });
-          logger.info('Fork deleted');
-          if (is.nonEmptyArray(existingRepos)) {
-            existingRepos = existingRepos.filter(
-              (existingRepo) => existingRepo !== config.repository
-            );
-          }
-        } catch (deleteErr) {
-          logger.warn({ err: deleteErr }, 'Could not delete fork');
-        }
         if (err instanceof ExternalHostError) {
           throw err;
         }
