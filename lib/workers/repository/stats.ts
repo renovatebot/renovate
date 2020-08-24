@@ -2,6 +2,11 @@ import URL from 'url';
 import { logger } from '../../logger';
 import * as memCache from '../../util/cache/memory';
 
+interface RequestStats {
+  duration: number;
+  queueDuration: number;
+}
+
 export function printRequestStats(): void {
   const httpRequests = memCache.get('http-requests');
   if (!httpRequests) {
@@ -17,10 +22,7 @@ export function printRequestStats(): void {
     return 1;
   });
   const allRequests: string[] = [];
-  const requestHosts: Record<
-    string,
-    { duration: number; queueDuration: number }[]
-  > = {};
+  const requestHosts: Record<string, RequestStats[]> = {};
   for (const { method, url, duration, queueDuration } of httpRequests) {
     allRequests.push(
       `${method.toUpperCase()} ${url} ${duration} ${queueDuration}`

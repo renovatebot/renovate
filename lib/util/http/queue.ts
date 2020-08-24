@@ -2,38 +2,35 @@ import URL from 'url';
 import PQueue from 'p-queue';
 import { getRequestLimit } from './host-rules';
 
-let hostQueues: Record<string, PQueue> = {};
+const hostQueues = new Map<string | null, PQueue | null>();
 
 function getUrlHost(url: string): string | null {
   try {
     return URL.parse(url).host;
-  } catch (e) /* istanbul ignore next */ {
+  } catch (e) {
     return null;
   }
 }
 
 export function getQueue(url: string): PQueue | null {
   const host = getUrlHost(url);
-
-  /* istanbul ignore if */
   if (!host) {
     return null;
   }
 
-  let queue = hostQueues[host];
-  if (!queue) {
+  let queue = hostQueues.get(host);
+  if (queue === undefined) {
+    queue = null;
     const concurrency = getRequestLimit(url);
     if (concurrency) {
       queue = new PQueue({ concurrency });
-      hostQueues[host] = queue;
-    } else {
-      queue = null;
     }
   }
+  hostQueues.set(host, queue);
 
   return queue;
 }
 
 export function clear(): void {
-  hostQueues = {};
+  hostQueues.clear();
 }

@@ -132,7 +132,8 @@ describe('datasource/nuget', () => {
   describe('getReleases', () => {
     beforeEach(() => {
       jest.resetAllMocks();
-      hostRules.hosts = jest.fn(() => []);
+      hostRules.hosts.mockReturnValue([]);
+      hostRules.find.mockReturnValue({});
       httpMock.setup();
     });
 

@@ -1,4 +1,3 @@
-import delay from 'delay';
 import nock from 'nock';
 import { getName } from '../../../test/util';
 import {
@@ -161,15 +160,13 @@ describe(getName(__filename), () => {
 
     nock(baseUrl)
       .get('/foo')
-      .reply(200, async () => {
-        await delay(100);
+      .reply(200, () => {
         foo = true;
         fooStart();
         return fooResp;
       })
       .get('/bar')
-      .reply(200, async () => {
-        await delay(100);
+      .reply(200, () => {
         bar = true;
         barStart();
         return barResp;

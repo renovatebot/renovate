@@ -10,7 +10,7 @@ const githubApiHost = 'https://api.github.com';
 
 describe('datasource/github-releases', () => {
   beforeEach(() => {
-    hostRules.hosts = jest.fn(() => []);
+    hostRules.hosts.mockReturnValue([]);
     hostRules.find.mockReturnValue({
       token: 'some-token',
     });
