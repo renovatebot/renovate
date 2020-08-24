@@ -195,7 +195,6 @@ export async function ensureMasterIssue(
   }
 
   if (config.dependencyDashboardFooter?.length) {
-    // istanbul ignore if
     issueBody += `---\n${config.dependencyDashboardFooter}\n`;
   }
 
