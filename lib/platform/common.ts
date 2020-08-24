@@ -6,6 +6,14 @@ import {
 
 export type VulnerabilityAlert = _VulnerabilityAlert;
 
+type VulnerabilityKey = string;
+type VulnerabilityRangeKey = string;
+type VulnerabilityPatch = string;
+export type AggregatedVulnerabilities = Record<
+  VulnerabilityKey,
+  Record<VulnerabilityRangeKey, VulnerabilityPatch>
+>;
+
 export interface PlatformParams {
   endpoint?: string;
   token?: string;
