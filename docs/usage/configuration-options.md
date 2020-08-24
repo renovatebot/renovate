@@ -1411,6 +1411,7 @@ before 5:00am
 after 10pm and before 5:00am
 after 10pm and before 5am every weekday
 on friday and saturday
+every 3 months on the first day of the month
 ```
 
 One example might be that you don't want Renovate to run during your typical business hours, so that your build machines don't get clogged up testing `package.json` updates. You could then configure a schedule like this at the repository level:

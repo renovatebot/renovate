@@ -26,6 +26,7 @@ import * as githubHttp from '../../util/http/github';
 import { sanitize } from '../../util/sanitize';
 import { ensureTrailingSlash } from '../../util/url';
 import {
+  AggregatedVulnerabilities,
   BranchStatusConfig,
   CreatePRConfig,
   EnsureCommentConfig,
@@ -1629,8 +1630,24 @@ export async function getVulnerabilityAlerts(): Promise<VulnerabilityAlert[]> {
     });
     if (vulnerabilityAlerts?.length) {
       alerts = vulnerabilityAlerts.map((edge) => edge.node);
+      const shortAlerts: AggregatedVulnerabilities = {};
       if (alerts.length) {
-        logger.debug({ alerts }, 'Found GitHub vulnerability alerts');
+        logger.trace({ alerts }, 'GitHub vulnerability details');
+        for (const alert of alerts) {
+          const {
+            package: { name, ecosystem },
+            vulnerableVersionRange,
+            firstPatchedVersion,
+          } = alert.securityVulnerability;
+          const patch = firstPatchedVersion?.identifier;
+
+          const key = `${ecosystem.toLowerCase()}/${name}`;
+          const range = vulnerableVersionRange;
+          const elem = shortAlerts[key] || {};
+          elem[range] = patch || null;
+          shortAlerts[key] = elem;
+        }
+        logger.debug({ alerts: shortAlerts }, 'GitHub vulnerability details');
       }
     } else {
       logger.debug('Cannot read vulnerability alerts');

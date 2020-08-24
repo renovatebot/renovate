@@ -188,6 +188,26 @@ Array [
 ]
 `;
 
+exports[`platform/azure updatePr(prNo, title, body) should reopen the PR 1`] = `
+Array [
+  Array [
+    Object {
+      "status": 1,
+    },
+    "1",
+    1234,
+  ],
+  Array [
+    Object {
+      "description": undefined,
+      "title": "The New Title",
+    },
+    "1",
+    1234,
+  ],
+]
+`;
+
 exports[`platform/azure updatePr(prNo, title, body) should update the PR 1`] = `
 Array [
   Array [

@@ -113,7 +113,7 @@
     "@sindresorhus/is": "3.1.1",
     "@yarnpkg/core": "2.1.1",
     "@yarnpkg/parsers": "2.1.0",
-    "aws-sdk": "2.725.0",
+    "aws-sdk": "2.738.0",
     "azure-devops-node-api": "10.1.1",
     "bunyan": "1.8.14",
     "cacache": "15.0.5",
@@ -177,7 +177,7 @@
   "devDependencies": {
     "@actions/core": "1.2.4",
     "@babel/cli": "7.10.5",
-    "@babel/core": "7.11.1",
+    "@babel/core": "7.11.4",
     "@babel/node": "7.10.5",
     "@babel/plugin-proposal-class-properties": "7.10.4",
     "@babel/plugin-proposal-object-rest-spread": "7.11.0",
