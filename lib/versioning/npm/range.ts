@@ -129,21 +129,12 @@ export function getNewValue({
         if (satisfies(toVersion, bumpedSubRange)) {
           return bumpedSubRange;
         }
-        let incremented;
-        if (x.patch !== '0') {
-          incremented = increment(toVersion, 'patch');
-        } else if (x.minor !== '0') {
-          incremented = increment(toVersion, 'minor');
-        } else {
-          incremented = increment(toVersion, 'major');
-        }
-        const replaced = getNewValue({
+        return getNewValue({
           currentValue: subRange,
           rangeStrategy: 'replace',
           fromVersion,
-          toVersion: incremented,
+          toVersion,
         });
-        return satisfies(toVersion, replaced) ? replaced : null;
       });
       return versions.filter((x) => x !== null && x !== '').join(' ');
     }
