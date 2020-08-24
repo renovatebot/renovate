@@ -88,6 +88,11 @@ describe('.updateArtifacts()', () => {
       username: 'some-other-username',
       password: 'some-other-password',
     });
+    hostRules.add({
+      hostType: datasourcePackagist.id,
+      username: 'some-other-username',
+      password: 'some-other-password',
+    });
     fs.readLocalFile.mockResolvedValueOnce('Current composer.lock' as any);
     const execSnapshots = mockExecAll(exec);
     fs.readLocalFile.mockReturnValueOnce('Current composer.lock' as any);
