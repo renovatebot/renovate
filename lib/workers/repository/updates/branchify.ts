@@ -1,12 +1,10 @@
-import slugify from 'slugify';
 import type { Merge } from 'type-fest';
 import { RenovateConfig, ValidationMessage } from '../../../config';
 import { addMeta, logger, removeMeta } from '../../../logger';
 import { clone } from '../../../util/clone';
-import * as template from '../../../util/template';
 import { BranchConfig, BranchUpgradeConfig } from '../../common';
 import { embedChangelogs } from '../changelog';
-import { cleanBranchName } from './branch-name';
+import { generateBranchName } from './branch-name';
 import { flattenUpdates } from './flatten';
 import { generateBranchConfig } from './generate';
 import { addUpdateMeta } from './meta';
@@ -37,47 +35,7 @@ export async function branchifyUpgrades(
   for (const u of updates) {
     const update: BranchUpgradeConfig = clone(u) as any;
     addUpdateMeta(update);
-    // Massage legacy vars just in case
-    update.currentVersion = update.currentValue;
-    update.newVersion = update.newVersion || update.newValue;
-    const upper = (str: string): string =>
-      str.charAt(0).toUpperCase() + str.substr(1);
-    if (update.updateType) {
-      update[`is${upper(update.updateType)}`] = true;
-    }
-    // Check whether to use a group name
-    if (update.groupName) {
-      logger.debug('Using group branchName template');
-      logger.debug(
-        `Dependency ${update.depName} is part of group ${update.groupName}`
-      );
-      update.groupSlug = slugify(update.groupSlug || update.groupName, {
-        lower: true,
-      });
-      if (update.updateType === 'major' && update.separateMajorMinor) {
-        if (update.separateMultipleMajor) {
-          update.groupSlug = `major-${update.newMajor}-${update.groupSlug}`;
-        } else {
-          update.groupSlug = `major-${update.groupSlug}`;
-        }
-      }
-      if (update.updateType === 'patch') {
-        update.groupSlug = `patch-${update.groupSlug}`;
-      }
-      update.branchTopic = update.group.branchTopic || update.branchTopic;
-      update.branchName = template.compile(
-        update.group.branchName || update.branchName,
-        update
-      );
-    } else {
-      update.branchName = template.compile(update.branchName, update);
-    }
-    // Compile extra times in case of nested templates
-    update.branchName = template.compile(update.branchName, update);
-    update.branchName = cleanBranchName(
-      template.compile(update.branchName, update)
-    );
-
+    generateBranchName(update);
     branchUpgrades[update.branchName] = branchUpgrades[update.branchName] || [];
     branchUpgrades[update.branchName] = [update].concat(
       branchUpgrades[update.branchName]
