@@ -98,14 +98,14 @@ async function getDependencyInfo(
   return result;
 }
 
-function isStable(x: string): boolean {
+function isStableVersion(x: string): boolean {
   return mavenVersion.isStable(x);
 }
 
 function getLatestStableVersion(releases: Release[]): string | null {
   const stableVersions = releases
     .map(({ version }) => version)
-    .filter(isStable);
+    .filter(isStableVersion);
   if (stableVersions.length) {
     return stableVersions.reduce((latestVersion, version) =>
       compare(version, latestVersion) === 1 ? version : latestVersion
@@ -267,6 +267,7 @@ export async function getReleases({
         metadataVersions
       );
     }
+
     /* istanbul ignore next */
     releases = releases || metadataVersions.map((version) => ({ version }));
 
@@ -275,8 +276,10 @@ export async function getReleases({
       repoForVersions[latestVersion] = repoUrl;
     }
 
-    logger.debug(`Found ${releases.length} new versions for ${dependency.display} in repository ${repoUrl}`); // prettier-ignore
-  } else {
+    logger.debug(`Found ${releases.length} new releases for ${dependency.display} in repository ${repoUrl}`); // prettier-ignore
+  }
+
+  if (!releases?.length) {
     return null;
   }
 

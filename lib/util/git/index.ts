@@ -290,7 +290,7 @@ export async function createBranch(
   await git.reset(ResetMode.HARD);
   await git.raw(['clean', '-fd']);
   await git.checkout(['-B', branchName, sha]);
-  await git.push('origin', branchName, { '--force': true });
+  await git.push('origin', branchName, { '--force': null });
   config.branchExists[branchName] = true;
   config.branchIsModified[branchName] = false;
 }
@@ -615,7 +615,7 @@ export async function commitFiles({
       }
     }
     const commitRes = await git.commit(message, [], {
-      '--no-verify': true,
+      '--no-verify': null,
     });
     const commit = commitRes?.commit || 'unknown';
     if (!force && !(await hasDiff(`origin/${branchName}`))) {
@@ -626,9 +626,9 @@ export async function commitFiles({
       return null;
     }
     await git.push('origin', `${branchName}:${branchName}`, {
-      '--force': true,
-      '-u': true,
-      '--no-verify': true,
+      '--force': null,
+      '-u': null,
+      '--no-verify': null,
     });
     // Fetch it after create
     const ref = `refs/heads/${branchName}:refs/remotes/origin/${branchName}`;
