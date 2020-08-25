@@ -196,25 +196,28 @@ export async function initRepo({
     ).body;
     config.owner = info.project.key;
     logger.debug(`${repository} owner = ${config.owner}`);
-    const defaultBranch = (
-      await bitbucketServerHttp.getJson<{ displayId: string }>(
-        `./rest/api/1.0/projects/${config.projectKey}/repos/${config.repositorySlug}/branches/default`
-      )
-    ).body.displayId;
+    const branchRes = await bitbucketServerHttp.getJson<{ displayId: string }>(
+      `./rest/api/1.0/projects/${config.projectKey}/repos/${config.repositorySlug}/branches/default`
+    );
+
+    if (branchRes.statusCode === 204) {
+      throw new Error(REPOSITORY_EMPTY);
+    }
+
     config.mergeMethod = 'merge';
     const repoConfig: RepoResult = {
-      defaultBranch,
+      defaultBranch: branchRes.body.displayId,
       isFork: !!info.parent,
     };
     return repoConfig;
   } catch (err) /* istanbul ignore next */ {
-    logger.debug(err);
     if (err.statusCode === 404) {
       throw new Error(REPOSITORY_NOT_FOUND);
     }
-    if (err.statusCode === 204) {
-      throw new Error(REPOSITORY_EMPTY);
+    if (err.message === REPOSITORY_EMPTY) {
+      throw err;
     }
+
     logger.debug({ err }, 'Unknown Bitbucket initRepo error');
     throw err;
   }
