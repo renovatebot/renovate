@@ -41,7 +41,12 @@ export function extractPackageFile(
           sectionRecord = newSectionRecord;
           line = rawLine.replace(/^[^=]*=\s*/, '');
         }
-        if (sectionName === 'options' && sectionRecord === 'install_requires') {
+        if (
+          sectionName === 'options' &&
+          ['setup_requires', 'install_requires', 'tests_require'].includes(
+            sectionRecord
+          )
+        ) {
           dep = parseDep(line);
         } else if (
           sectionName === 'options.extras_require' &&

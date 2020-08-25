@@ -11,12 +11,14 @@ install_requires =
     fs ~=2.1
 
     requests ~=2.18
+
+setup_requires =
     six ~=1.4
     tqdm ~=4.19
     tenacity ~=6.0
+tests_require =
     typing ~=3.6    ; python_version < '3.6'
     verboselogs ~=1.7
-tests_require =
     instalooter[test]
 
 
