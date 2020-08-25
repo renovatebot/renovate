@@ -1,4 +1,5 @@
 import { id as datasource } from '../../datasource/pypi';
+import pep440 from '../../versioning/pep440';
 import { PackageDependency, PackageFile, Result } from '../common';
 
 function getSectionName(str: string): string {
@@ -11,10 +12,38 @@ function getSectionRecord(str: string): string {
   return sectionRecord;
 }
 
-function parseDep(line: string): PackageDependency | null {
-  const [, depName, currentValue] = /\s*([^\s=~<>!]*)\s*(.*)/.exec(line) || [];
-  if (depName && currentValue) {
-    return { datasource, depName, currentValue };
+function getDepType(section: string, record: string): null | string {
+  if (!section || !record) {
+    return null;
+  }
+  if (section === 'options') {
+    if (record === 'install_requires') {
+      return 'install';
+    }
+    if (record === 'setup_requires') {
+      return 'setup';
+    }
+    if (record === 'tests_require') {
+      return 'test';
+    }
+  }
+  return 'extra';
+}
+
+function parseDep(
+  line: string,
+  section: string,
+  record: string
+): PackageDependency | null {
+  const [, depName, currentValue] =
+    /\s*([-_a-zA-Z0-9]*)\s*(.*)/.exec(line) || [];
+  if (depName && currentValue && pep440.isValid(currentValue)) {
+    const dep: PackageDependency = { datasource, depName, currentValue };
+    const depType = getDepType(section, record);
+    if (depType) {
+      dep.depType = depType;
+    }
+    return dep;
   }
   return null;
 }
@@ -36,27 +65,11 @@ export function extractPackageFile(
       if (newSectionName) {
         sectionName = newSectionName;
       } else {
-        let dep: PackageDependency;
         if (newSectionRecord) {
           sectionRecord = newSectionRecord;
           line = rawLine.replace(/^[^=]*=\s*/, '');
         }
-        if (
-          sectionName === 'options' &&
-          ['setup_requires', 'install_requires', 'tests_require'].includes(
-            sectionRecord
-          )
-        ) {
-          dep = parseDep(line);
-        } else if (
-          sectionName === 'options.extras_require' &&
-          ['test', 'doc', 'dev'].includes(sectionRecord)
-        ) {
-          const extraDep = parseDep(line);
-          if (extraDep) {
-            dep = { ...extraDep, depType: sectionRecord };
-          }
-        }
+        const dep = parseDep(line, sectionName, sectionRecord);
         if (dep) {
           deps.push(dep);
         }
