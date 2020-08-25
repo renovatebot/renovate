@@ -62,7 +62,7 @@ function getAuthJson(): string | null {
   });
   if (githubCredentials?.token) {
     authJson['github-oauth'] = {
-      'github.com': githubCredentials.token,
+      'github.com': githubCredentials.token.replace('x-access-token:', ''),
     };
   }
 
