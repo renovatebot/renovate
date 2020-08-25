@@ -1,4 +1,3 @@
-import { clean as cleanGitRef } from 'clean-git-ref';
 import slugify from 'slugify';
 import type { Merge } from 'type-fest';
 import { RenovateConfig, ValidationMessage } from '../../../config';
@@ -6,23 +5,9 @@ import { addMeta, logger, removeMeta } from '../../../logger';
 import * as template from '../../../util/template';
 import { BranchConfig, BranchUpgradeConfig } from '../../common';
 import { embedChangelogs } from '../changelog';
+import { cleanBranchName } from './branch-name';
 import { flattenUpdates } from './flatten';
 import { generateBranchConfig } from './generate';
-
-/**
- * Clean git branch name
- *
- * Remove what clean-git-ref fails to:
- * - leading dot/leading dot after slash
- * - trailing dot
- * - whitespace
- */
-function cleanBranchName(branchName: string): string {
-  return cleanGitRef(branchName)
-    .replace(/^\.|\.$/, '') // leading or trailing dot
-    .replace(/\/\./g, '/') // leading dot after slash
-    .replace(/\s/g, ''); // whitespace
-}
 
 export type BranchifiedConfig = Merge<
   RenovateConfig,
