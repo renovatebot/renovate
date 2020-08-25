@@ -2,6 +2,7 @@ import slugify from 'slugify';
 import type { Merge } from 'type-fest';
 import { RenovateConfig, ValidationMessage } from '../../../config';
 import { addMeta, logger, removeMeta } from '../../../logger';
+import { clone } from '../../../util/clone';
 import * as template from '../../../util/template';
 import { BranchConfig, BranchUpgradeConfig } from '../../common';
 import { embedChangelogs } from '../changelog';
@@ -47,7 +48,7 @@ export async function branchifyUpgrades(
         u.baseDir = '';
       }
     }
-    const update: BranchUpgradeConfig = { ...u } as any;
+    const update: BranchUpgradeConfig = clone(u) as any;
     // Massage legacy vars just in case
     update.currentVersion = update.currentValue;
     update.newVersion = update.newVersion || update.newValue;
