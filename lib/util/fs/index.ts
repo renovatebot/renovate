@@ -53,8 +53,10 @@ export async function writeLocalFile(
 }
 
 export async function deleteLocalFile(fileName: string): Promise<void> {
-  const localFileName = join(localDir, fileName);
-  await fs.remove(localFileName);
+  if (localDir) {
+    const localFileName = join(localDir, fileName);
+    await fs.remove(localFileName);
+  }
 }
 
 // istanbul ignore next

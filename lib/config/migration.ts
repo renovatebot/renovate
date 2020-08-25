@@ -22,6 +22,8 @@ const removedOptions = [
   'groupCommitMessage',
   'groupPrTitle',
   'groupPrBody',
+  'statusCheckVerify',
+  'lazyGrouping',
 ];
 
 export interface MigratedConfig {

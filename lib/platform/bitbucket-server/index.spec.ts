@@ -4,6 +4,7 @@ import { getName } from '../../../test/util';
 import {
   REPOSITORY_CHANGED,
   REPOSITORY_DISABLED,
+  REPOSITORY_EMPTY,
   REPOSITORY_NOT_FOUND,
 } from '../../constants/error-messages';
 import { BranchStatus, PrState } from '../../types';
@@ -289,6 +290,27 @@ describe(getName(__filename), () => {
             optimizeForDisabled: true,
           });
           expect(res).toMatchSnapshot();
+          expect(httpMock.getTrace()).toMatchSnapshot();
+        });
+
+        it('throws empty', async () => {
+          expect.assertions(2);
+          httpMock
+            .scope(urlHost)
+            .get(`${urlPath}/rest/api/1.0/projects/SOME/repos/repo`)
+            .reply(200, repoMock(url, 'SOME', 'repo'))
+            .get(
+              `${urlPath}/rest/api/1.0/projects/SOME/repos/repo/branches/default`
+            )
+            .reply(204);
+          await expect(
+            bitbucket.initRepo({
+              endpoint: 'https://stash.renovatebot.com/vcs/',
+              repository: 'SOME/repo',
+              localDir: '',
+              optimizeForDisabled: false,
+            })
+          ).rejects.toThrow(REPOSITORY_EMPTY);
           expect(httpMock.getTrace()).toMatchSnapshot();
         });
 

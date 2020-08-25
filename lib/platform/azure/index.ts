@@ -373,19 +373,23 @@ export async function updatePr({
 }: UpdatePrConfig): Promise<void> {
   logger.debug(`updatePr(${prNo}, ${title}, body)`);
 
-  const status = {
-    [PrState.Open]: PullRequestStatus.Active,
-    [PrState.Closed]: PullRequestStatus.Abandoned,
-  }[state];
-
   const azureApiGit = await azureApi.gitApi();
   const objToUpdate: GitPullRequest = {
     title,
-    ...(status && { status }),
   };
 
   if (body) {
     objToUpdate.description = azureHelper.max4000Chars(sanitize(body));
+  }
+
+  if (state === PrState.Open) {
+    await azureApiGit.updatePullRequest(
+      { status: PullRequestStatus.Active },
+      config.repoId,
+      prNo
+    );
+  } else if (state === PrState.Closed) {
+    objToUpdate.status = PullRequestStatus.Abandoned;
   }
 
   await azureApiGit.updatePullRequest(objToUpdate, config.repoId, prNo);
