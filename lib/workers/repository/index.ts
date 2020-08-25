@@ -55,7 +55,7 @@ export async function renovateRepository(
     try {
       await deleteLocalFile('.');
     } catch (err) /* istanbul ignore if */ {
-      logger.debug({ err }, 'localDir deletion error');
+      logger.warn({ err }, 'localDir deletion error');
     }
   }
   const splits = getSplits();
