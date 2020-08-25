@@ -9,6 +9,7 @@ import { embedChangelogs } from '../changelog';
 import { cleanBranchName } from './branch-name';
 import { flattenUpdates } from './flatten';
 import { generateBranchConfig } from './generate';
+import { addUpdateMeta } from './meta';
 
 export type BranchifiedConfig = Merge<
   RenovateConfig,
@@ -34,21 +35,8 @@ export async function branchifyUpgrades(
   const branchUpgrades: Record<string, BranchUpgradeConfig[]> = {};
   const branches: BranchConfig[] = [];
   for (const u of updates) {
-    // extract parentDir and baseDir from packageFile
-    if (u.packageFile) {
-      const packagePath = u.packageFile.split('/');
-      if (packagePath.length > 0) {
-        packagePath.splice(-1, 1);
-      }
-      if (packagePath.length > 0) {
-        u.parentDir = packagePath[packagePath.length - 1];
-        u.baseDir = packagePath.join('/');
-      } else {
-        u.parentDir = '';
-        u.baseDir = '';
-      }
-    }
     const update: BranchUpgradeConfig = clone(u) as any;
+    addUpdateMeta(update);
     // Massage legacy vars just in case
     update.currentVersion = update.currentValue;
     update.newVersion = update.newVersion || update.newValue;
