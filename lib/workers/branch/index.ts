@@ -562,6 +562,7 @@ export async function processBranch(
     );
     const { prResult: result, pr } = await ensurePr(config, prLimitReached);
     if (result === PrResult.LimitReached) {
+      logger.debug('Reached PR limit - skipping branch creation');
       return 'pr-limit-reached';
     }
     // TODO: ensurePr should check for automerge itself
