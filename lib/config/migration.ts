@@ -23,6 +23,7 @@ const removedOptions = [
   'groupPrTitle',
   'groupPrBody',
   'statusCheckVerify',
+  'lazyGrouping',
 ];
 
 export interface MigratedConfig {

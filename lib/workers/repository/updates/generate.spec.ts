@@ -17,7 +17,6 @@ describe('workers/repository/updates/generate', () => {
           groupName: 'some-group',
           branchName: 'some-branch',
           prTitle: 'some-title',
-          lazyGrouping: true,
           releaseTimestamp: '2017-02-07T20:01:41+00:00',
           foo: 1,
           group: {
@@ -30,24 +29,6 @@ describe('workers/repository/updates/generate', () => {
       expect(res.groupName).toBeUndefined();
       expect(res.releaseTimestamp).toBeDefined();
     });
-    it('groups single upgrade if not lazyGrouping', () => {
-      const branch = [
-        {
-          depName: 'some-dep',
-          groupName: 'some-group',
-          branchName: 'some-branch',
-          prTitle: 'some-title',
-          lazyGrouping: false,
-          foo: 1,
-          group: {
-            foo: 2,
-          },
-        },
-      ];
-      const res = generateBranchConfig(branch);
-      expect(res.foo).toBe(2);
-      expect(res.groupName).toBeDefined();
-    });
     it('does not group same upgrades', () => {
       const branch = [
         {
@@ -55,7 +36,6 @@ describe('workers/repository/updates/generate', () => {
           groupName: 'some-group',
           branchName: 'some-branch',
           prTitle: 'some-title',
-          lazyGrouping: true,
           foo: 1,
           group: {
             foo: 2,
@@ -66,7 +46,6 @@ describe('workers/repository/updates/generate', () => {
           groupName: 'some-group',
           branchName: 'some-branch',
           prTitle: 'some-title',
-          lazyGrouping: true,
           foo: 1,
           group: {
             foo: 2,
@@ -86,7 +65,6 @@ describe('workers/repository/updates/generate', () => {
           prTitle: 'some-title',
           commitMessageExtra:
             'to {{#if isMajor}}v{{newMajor}}{{else}}{{#unless isRange}}v{{/unless}}{{newValue}}{{/if}}',
-          lazyGrouping: true,
           foo: 1,
           newValue: '5.1.2',
           toVersion: '5.1.2',
@@ -104,7 +82,6 @@ describe('workers/repository/updates/generate', () => {
           prTitle: 'some-title',
           commitMessageExtra:
             'to {{#if isMajor}}v{{newMajor}}{{else}}{{#unless isRange}}v{{/unless}}{{newValue}}{{/if}}',
-          lazyGrouping: true,
           foo: 1,
           newValue: '5.1.2',
           toVersion: '5.1.2',
@@ -132,7 +109,6 @@ describe('workers/repository/updates/generate', () => {
           prTitle: 'some-title',
           commitMessageExtra:
             'to {{#if isMajor}}v{{newMajor}}{{else}}{{#unless isRange}}v{{/unless}}{{newValue}}{{/if}}',
-          lazyGrouping: true,
           foo: 1,
           newValue: '5.1.2',
           toVersion: '5.1.2',
@@ -148,7 +124,6 @@ describe('workers/repository/updates/generate', () => {
           prTitle: 'some-title',
           commitMessageExtra:
             'to {{#if isMajor}}v{{newMajor}}{{else}}{{#unless isRange}}v{{/unless}}{{newValue}}{{/if}}',
-          lazyGrouping: true,
           foo: 1,
           newValue: '1.1.0',
           toVersion: '1.1.0',
@@ -174,7 +149,6 @@ describe('workers/repository/updates/generate', () => {
           prTitle: 'some-title',
           commitMessageExtra:
             'to {{#if isMajor}}v{{newMajor}}{{else}}{{#unless isRange}}v{{/unless}}{{newValue}}{{/if}}',
-          lazyGrouping: true,
           isDigest: true,
           currentDigest: 'abcdefghijklmnopqrstuvwxyz',
           newDigest: '123abcdefghijklmnopqrstuvwxyz',
@@ -190,7 +164,6 @@ describe('workers/repository/updates/generate', () => {
           prTitle: 'some-title',
           commitMessageExtra:
             'to {{#if isMajor}}v{{newMajor}}{{else}}{{#unless isRange}}v{{/unless}}{{newValue}}{{/if}}',
-          lazyGrouping: true,
           foo: 1,
           newValue: 'zzzzzzzzzz',
           group: {
@@ -213,7 +186,6 @@ describe('workers/repository/updates/generate', () => {
           prTitle: 'some-title',
           commitMessageExtra:
             'to {{#if isMajor}}v{{newMajor}}{{else}}{{#unless isRange}}v{{/unless}}{{newValue}}{{/if}}',
-          lazyGrouping: true,
           foo: 1,
           newValue: '>= 5.1.2',
           toVersion: '5.1.2',
@@ -229,7 +201,6 @@ describe('workers/repository/updates/generate', () => {
           prTitle: 'some-title',
           commitMessageExtra:
             'to {{#if isMajor}}v{{newMajor}}{{else}}{{#unless isRange}}v{{/unless}}{{newValue}}{{/if}}',
-          lazyGrouping: true,
           foo: 1,
           newValue: '^5,1,2',
           toVersion: '5.1.2',
@@ -251,7 +222,6 @@ describe('workers/repository/updates/generate', () => {
           semanticCommits: true,
           semanticCommitType: 'chore',
           semanticCommitScope: 'package',
-          lazyGrouping: true,
           newValue: '1.2.0',
           isSingleVersion: true,
           toVersion: '1.2.0',
@@ -276,7 +246,6 @@ describe('workers/repository/updates/generate', () => {
           semanticCommits: true,
           semanticCommitType: 'chore',
           semanticCommitScope: '{{baseDir}}',
-          lazyGrouping: true,
           newValue: '1.2.0',
           isSingleVersion: true,
           toVersion: '1.2.0',
@@ -302,7 +271,6 @@ describe('workers/repository/updates/generate', () => {
           semanticCommits: true,
           semanticCommitType: 'chore',
           semanticCommitScope: '{{parentDir}}',
-          lazyGrouping: true,
           newValue: '1.2.0',
           isSingleVersion: true,
           toVersion: '1.2.0',
@@ -327,7 +295,6 @@ describe('workers/repository/updates/generate', () => {
           semanticCommits: true,
           semanticCommitType: 'chore',
           semanticCommitScope: '{{baseDir}}',
-          lazyGrouping: true,
           newValue: '1.2.0',
           isSingleVersion: true,
           toVersion: '1.2.0',
@@ -378,7 +345,6 @@ describe('workers/repository/updates/generate', () => {
           groupName: null,
           branchName: 'some-branch',
           prTitle: 'some-title',
-          lazyGrouping: true,
           currentValue: '0.5.7',
           fromVersion: '0.5.7',
           toVersion: '0.5.8',
@@ -391,7 +357,6 @@ describe('workers/repository/updates/generate', () => {
           groupName: null,
           branchName: 'some-branch',
           prTitle: 'some-title',
-          lazyGrouping: true,
           newValue: '0.6.0',
           group: {},
         },
@@ -402,7 +367,6 @@ describe('workers/repository/updates/generate', () => {
           groupName: null,
           branchName: 'some-branch',
           prTitle: 'some-other-title',
-          lazyGrouping: true,
           newValue: '1.0.0',
           group: {},
         },
@@ -419,7 +383,6 @@ describe('workers/repository/updates/generate', () => {
           groupName: null,
           branchName: 'some-branch',
           prTitle: 'some-title',
-          lazyGrouping: true,
           newValue: '0.6.0',
           group: {},
         },
@@ -430,7 +393,6 @@ describe('workers/repository/updates/generate', () => {
           groupName: null,
           branchName: 'some-branch',
           prTitle: 'some-other-title',
-          lazyGrouping: true,
           newValue: '1.0.0',
           group: {},
         },
@@ -439,7 +401,6 @@ describe('workers/repository/updates/generate', () => {
           groupName: null,
           branchName: 'some-branch',
           prTitle: 'some-title',
-          lazyGrouping: true,
           newValue: '0.5.7',
           group: {},
         },
