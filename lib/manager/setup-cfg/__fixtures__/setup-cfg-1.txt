@@ -1,6 +1,9 @@
-foo >=1.2.3
+foo >=1.1.1
+bar = bar >=2.2.2
 [options]
-bar = baz >=3.2.1
+baz >=3.3.3.
+qux = qux >=4.4.4
+
 zip_safe = true
 include_package_data = true
 python_requires = >= 2.7, != 3.0.*, != 3.1.*, != 3.2.*, != 3.5.1

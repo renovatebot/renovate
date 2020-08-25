@@ -13,9 +13,6 @@ function getSectionRecord(str: string): string {
 }
 
 function getDepType(section: string, record: string): null | string {
-  if (!section || !record) {
-    return null;
-  }
   if (section === 'options') {
     if (record === 'install_requires') {
       return 'install';

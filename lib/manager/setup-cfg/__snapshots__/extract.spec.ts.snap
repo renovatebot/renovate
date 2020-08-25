@@ -4,14 +4,10 @@ exports[`lib/manager/pip_requirements/extract extractPackageFile() extracts depe
 Object {
   "deps": Array [
     Object {
-      "currentValue": ">=1.2.3",
+      "currentValue": ">=4.4.4",
       "datasource": "pypi",
-      "depName": "foo",
-    },
-    Object {
-      "currentValue": ">=3.2.1",
-      "datasource": "pypi",
-      "depName": "bar",
+      "depName": "qux",
+      "depType": "extra",
     },
     Object {
       "currentValue": "~=14.0",
