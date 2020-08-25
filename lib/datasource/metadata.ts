@@ -16,6 +16,8 @@ const manualChangelogUrls = {
       'https://github.com/gatsbyjs/gatsby/blob/master/packages/gatsby/CHANGELOG.md',
     'react-native':
       'https://github.com/react-native-community/react-native-releases/blob/master/CHANGELOG.md',
+    'zone.js':
+      'https://github.com/angular/angular/blob/master/packages/zone.js/CHANGELOG.md',
   },
   pypi: {
     django: 'https://github.com/django/django/tree/master/docs/releases',
