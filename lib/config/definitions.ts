@@ -1104,12 +1104,6 @@ const options: RenovateOptions[] = [
     default: 'rebase',
   },
   {
-    name: 'statusCheckVerify',
-    description: 'Set a verify status check for all PRs',
-    type: 'boolean',
-    default: false,
-  },
-  {
     name: 'unpublishSafe',
     description: 'Set a status check for unpublish-safe upgrades',
     type: 'boolean',
