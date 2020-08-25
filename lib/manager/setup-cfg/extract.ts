@@ -33,7 +33,7 @@ function parseDep(
   record: string
 ): PackageDependency | null {
   const [, depName, currentValue] =
-    /\s*([-_a-zA-Z0-9]*)\s*(.*)/.exec(line) || [];
+    /\s+([-_a-zA-Z0-9]*)\s*(.*)/.exec(line) || [];
   if (
     section &&
     record &&
@@ -70,7 +70,7 @@ export function extractPackageFile(
       } else {
         if (newSectionRecord) {
           sectionRecord = newSectionRecord;
-          line = rawLine.replace(/^[^=]*=\s*/, '');
+          line = rawLine.replace(/^[^=]*=\s*/, '\t');
         }
         const dep = parseDep(line, sectionName, sectionRecord);
         if (dep) {

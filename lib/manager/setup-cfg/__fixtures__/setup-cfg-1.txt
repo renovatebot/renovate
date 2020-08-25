@@ -3,6 +3,7 @@ bar = bar >=2.2.2
 [options]
 baz >=3.3.3.
 qux = qux >=4.4.4
+quux >=5.5.5
 
 zip_safe = true
 include_package_data = true
