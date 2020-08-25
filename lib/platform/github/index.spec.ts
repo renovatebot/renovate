@@ -1580,22 +1580,6 @@ describe('platform/github', () => {
           number: 123,
         })
         .post('/repos/some/repo/issues/123/labels')
-        .reply(200, [])
-        .get(
-          '/repos/some/repo/commits/0d9c7726c3d628b7e28af234595cfd20febdbf8e/statuses'
-        )
-        .reply(200, [])
-        .get('/repos/some/repo/commits/some-branch/status')
-        .reply(200, {
-          object: { sha: 'some-sha' },
-        })
-        .post(
-          '/repos/some/repo/statuses/0d9c7726c3d628b7e28af234595cfd20febdbf8e'
-        )
-        .reply(200, [])
-        .get(
-          '/repos/some/repo/commits/0d9c7726c3d628b7e28af234595cfd20febdbf8e/statuses'
-        )
         .reply(200, []);
       await github.initRepo({ repository: 'some/repo', token: 'token' } as any);
       const pr = await github.createPr({
@@ -1604,7 +1588,6 @@ describe('platform/github', () => {
         prTitle: 'The Title',
         prBody: 'Hello world',
         labels: ['deps', 'renovate'],
-        platformOptions: { statusCheckVerify: true },
       });
       expect(pr).toMatchSnapshot();
       expect(httpMock.getTrace()).toMatchSnapshot();

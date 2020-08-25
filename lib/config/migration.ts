@@ -22,6 +22,7 @@ const removedOptions = [
   'groupCommitMessage',
   'groupPrTitle',
   'groupPrBody',
+  'statusCheckVerify',
 ];
 
 export interface MigratedConfig {

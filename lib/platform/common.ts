@@ -80,7 +80,6 @@ export interface Issue {
 }
 export type PlatformPrOptions = {
   azureAutoComplete?: boolean;
-  statusCheckVerify?: boolean;
   gitLabAutomerge?: boolean;
 };
 export interface CreatePRConfig {

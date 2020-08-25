@@ -1483,10 +1483,6 @@ If you combine `stabilityDays=3` and `prCreation="not-pending"` then Renovate wi
 
 If you have both `automerge` as well as `stabilityDays` enabled, it means that PRs will be created immediately but automerging will be delayed until X days have passed. This works because Renovate will add a "renovate/stability-days" pending status check to each branch/PR and that pending check will prevent the branch going green to automerge.
 
-## statusCheckVerify
-
-This feature is added for people migrating from alternative services who are used to seeing a "verify" status check on PRs. If you'd like to use this then go ahead, but otherwise it's more secure to look for Renovate's [GPG Verified Commits](https://github.com/blog/2144-gpg-signature-verification) instead, because those cannot be spoofed by any other person or service (unlike status checks).
-
 ## supportPolicy
 
 Language support is limited to those listed below:
