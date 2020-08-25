@@ -52,7 +52,11 @@ export async function renovateRepository(
     repoResult = processResult(config, errorRes);
   }
   if (config.localDir && !config.persistRepoData) {
-    await deleteLocalFile('.');
+    try {
+      await deleteLocalFile('.');
+    } catch (err) /* istanbul ignore if */ {
+      logger.debug({ err }, 'localDir deletion error');
+    }
   }
   const splits = getSplits();
   logger.debug(splits, 'Repository timing splits (milliseconds)');
