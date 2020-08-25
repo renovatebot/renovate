@@ -211,9 +211,11 @@ export async function initRepo({
     };
     return repoConfig;
   } catch (err) /* istanbul ignore next */ {
-    logger.debug(err);
     if (err.statusCode === 404) {
       throw new Error(REPOSITORY_NOT_FOUND);
+    }
+    if (err.message === REPOSITORY_EMPTY) {
+      throw err;
     }
 
     logger.debug({ err }, 'Unknown Bitbucket initRepo error');
