@@ -1,6 +1,6 @@
 foo >=1.2.3
 [options]
-bar >=3.2.1
+bar = baz >=3.2.1
 zip_safe = true
 include_package_data = true
 python_requires = >= 2.7, != 3.0.*, != 3.1.*, != 3.2.*, != 3.5.1

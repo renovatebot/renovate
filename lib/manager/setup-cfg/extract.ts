@@ -37,7 +37,13 @@ function parseDep(
 ): PackageDependency | null {
   const [, depName, currentValue] =
     /\s*([-_a-zA-Z0-9]*)\s*(.*)/.exec(line) || [];
-  if (depName && currentValue && pep440.isValid(currentValue)) {
+  if (
+    section &&
+    record &&
+    depName &&
+    currentValue &&
+    pep440.isValid(currentValue)
+  ) {
     const dep: PackageDependency = { datasource, depName, currentValue };
     const depType = getDepType(section, record);
     if (depType) {
