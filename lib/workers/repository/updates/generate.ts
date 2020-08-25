@@ -94,8 +94,7 @@ export function generateBranchConfig(
   const groupEligible =
     depNames.length > 1 ||
     toVersions.length > 1 ||
-    (!toVersions[0] && newValue.length > 1) ||
-    branchUpgrades[0].lazyGrouping === false;
+    (!toVersions[0] && newValue.length > 1);
   if (newValue.length > 1 && !groupEligible) {
     // eslint-disable-next-line no-param-reassign
     branchUpgrades[0].commitMessageExtra = `to v${toVersions[0]}`;
@@ -159,7 +158,6 @@ export function generateBranchConfig(
     }
     // Delete group config regardless of whether it was applied
     delete upgrade.group;
-    delete upgrade.lazyGrouping;
 
     // istanbul ignore else
     if (toVersions.length > 1 && !typesGroup) {

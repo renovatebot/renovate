@@ -1336,12 +1336,6 @@ const options: RenovateOptions[] = [
   },
   // Dependency Groups
   {
-    name: 'lazyGrouping',
-    description: 'Use group names only when multiple dependencies upgraded',
-    type: 'boolean',
-    default: true,
-  },
-  {
     name: 'groupName',
     description: 'Human understandable name for the dependency group',
     type: 'string',

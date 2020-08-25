@@ -716,10 +716,6 @@ Consider this example:
 
 With the above config, every PR raised by Renovate will have the label `dependencies` while PRs containing `eslint`-related packages will instead have the label `linting`.
 
-## lazyGrouping
-
-By default, Renovate will use group names in Pull Request titles only when the PR contains two or more dependencies. For example you may have defined a dependency group calls "All eslint packages" with a `packagePattern` of `^eslint`, but if the only upgrade available at the time is `eslint-config-airbnb` then it makes more sense for the PR to be named "Upgrade eslint-config-airbnb to v2.1.4" than to name it "Upgrade All eslint packages". If ever this behaviour is undesirable then you can override it by setting this option to `false`.
-
 ## lockFileMaintenance
 
 This feature can be used to refresh lock files and keep them up-to-date. "Maintaining" a lock file means recreating it so that every dependency version within it is updated to the latest. Supported lock files are `package-lock.json`, `yarn.lock`, `composer.lock`, `Gemfile.lock` and `poetry.lock`. Others may be added via feature request.
