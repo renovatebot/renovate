@@ -1,10 +1,5 @@
 import moment from 'moment';
-import {
-  RenovateConfig,
-  getConfig,
-  git,
-  platform,
-} from '../../../../test/util';
+import { RenovateConfig, getConfig, platform } from '../../../../test/util';
 import { BranchConfig } from '../../common';
 import * as limits from './limits';
 
@@ -41,7 +36,7 @@ describe('workers/repository/process/limits', () => {
   describe('getConcurrentPrsRemaining()', () => {
     it('calculates concurrent limit remaining', async () => {
       config.prConcurrentLimit = 20;
-      git.branchExists.mockResolvedValueOnce(true);
+      platform.getBranchPr.mockResolvedValueOnce({} as never);
       const branches: BranchConfig[] = [
         { branchName: 'test', upgrades: [] },
         { branchName: undefined, upgrades: [] },
