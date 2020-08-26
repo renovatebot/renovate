@@ -32,6 +32,7 @@ describe('workers/repository/updates/branch-name', () => {
         groupSlug: 'some group slug',
         updateType: 'major',
         separateMajorMinor: true,
+        separateMultipleMajor: true,
         newMajor: 2,
         group: {
           branchName: '{{groupSlug}}-{{branchTopic}}',
@@ -40,6 +41,22 @@ describe('workers/repository/updates/branch-name', () => {
       };
       generateBranchName(upgrade);
       expect(upgrade.branchName).toEqual('major-2-some-group-slug-grouptopic');
+    });
+    it('uses single major with groups', () => {
+      const upgrade: RenovateConfig = {
+        groupName: 'some group name',
+        groupSlug: 'some group slug',
+        updateType: 'major',
+        separateMajorMinor: true,
+        separateMultipleMajor: false,
+        newMajor: 2,
+        group: {
+          branchName: '{{groupSlug}}-{{branchTopic}}',
+          branchTopic: 'grouptopic',
+        },
+      };
+      generateBranchName(upgrade);
+      expect(upgrade.branchName).toEqual('major-some-group-slug-grouptopic');
     });
     it('separates patch groups and uses update topic', () => {
       const upgrade: RenovateConfig = {
