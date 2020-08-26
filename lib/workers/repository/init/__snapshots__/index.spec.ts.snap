@@ -1,3 +1,5 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
 exports[`workers/repository/init initRepo runs 1`] = `Object {}`;
+
+exports[`workers/repository/init initRepo uses cache 1`] = `Object {}`;

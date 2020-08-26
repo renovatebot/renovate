@@ -10,7 +10,7 @@ export async function initializeCaches(config: RenovateConfig): Promise<void> {
   cache.init = cache.init || {};
 }
 
-export function getCachedConfig(
+export function getResolvedConfig(
   defaultBranchSha: string
 ): RenovateConfig | null {
   if (!defaultBranchSha) {

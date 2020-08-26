@@ -6,7 +6,11 @@ import { setBranchPrefix } from '../../../util/git';
 import { checkIfConfigured } from '../configured';
 import { checkOnboardingBranch } from '../onboarding/branch';
 import { initApis } from './apis';
-import { getCachedConfig, initializeCaches, setResolvedConfig } from './cache';
+import {
+  getResolvedConfig,
+  initializeCaches,
+  setResolvedConfig,
+} from './cache';
 import { mergeRenovateConfig } from './config';
 import { detectSemanticCommits } from './semantic';
 import { detectVulnerabilityAlerts } from './vulnerability';
@@ -31,7 +35,7 @@ export async function initRepo(
   let config: RenovateConfig = initializeConfig(config_);
   await initializeCaches(config);
   config = await initApis(config);
-  const resolvedConfig = getCachedConfig(config.defaultBranchSha);
+  const resolvedConfig = getResolvedConfig(config.defaultBranchSha);
   if (resolvedConfig) {
     config = resolvedConfig;
   } else {
