@@ -21,9 +21,9 @@ export function check({
       )
     ) {
       managersErrMessage = `${currentPath}:
-        You have included an unsupported manager in a package rule. Your list: ${
+        You have included an unsupported manager in a package rule. Your list: ${String(
           resolvedRule.managers
-        }.
+        )}.
         Supported managers are: (${getManagerList().join(', ')}).`;
     }
   } else if (typeof resolvedRule.managers !== 'undefined') {
