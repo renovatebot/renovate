@@ -71,12 +71,13 @@ export async function getDependency(
   }
 
   const testendpoint = (await http.get(VERSIONS_PATH));
+  const releases = {};
 
   if (testendpoint.statusCode == 404 ) {
     // Let's try with the dependencies.json endpoint then
     const versions = (await fetch_deps(dependency, registry, DEPENDENCIES_PATH)) || [];
 
-    const releases = versions.map(
+    releases = versions.map(
       ({
         number: version,
         platform: rubyPlatform,
@@ -89,7 +90,7 @@ export async function getDependency(
   } else {
     const versions = (await fetch(dependency, registry, VERSIONS_PATH)) || [];
 
-    const releases = versions.map(
+    releases = versions.map(
       ({
         number: version,
         platform: rubyPlatform,
