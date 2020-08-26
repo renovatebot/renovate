@@ -33,6 +33,17 @@ export async function flattenUpdates(
     const managerConfig = getManagerConfig(config, manager);
     for (const packageFile of files) {
       const packageFileConfig = mergeChildConfig(managerConfig, packageFile);
+      const packagePath = packageFile.packageFile?.split('/');
+      if (packagePath.length > 0) {
+        packagePath.splice(-1, 1);
+      }
+      if (packagePath.length > 0) {
+        packageFileConfig.parentDir = packagePath[packagePath.length - 1];
+        packageFileConfig.baseDir = packagePath.join('/');
+      } else {
+        packageFileConfig.parentDir = '';
+        packageFileConfig.baseDir = '';
+      }
       for (const dep of packageFile.deps) {
         if (dep.updates.length) {
           const depConfig = mergeChildConfig(packageFileConfig, dep);
