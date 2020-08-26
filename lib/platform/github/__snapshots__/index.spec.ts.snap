@@ -243,53 +243,6 @@ Array [
     "method": "POST",
     "url": "https://api.github.com/repos/some/repo/issues/123/labels",
   },
-  Object {
-    "headers": Object {
-      "accept": "application/vnd.github.v3+json",
-      "accept-encoding": "gzip, deflate",
-      "authorization": "token abc123",
-      "host": "api.github.com",
-      "user-agent": "https://github.com/renovatebot/renovate",
-    },
-    "method": "GET",
-    "url": "https://api.github.com/repos/some/repo/commits/0d9c7726c3d628b7e28af234595cfd20febdbf8e/statuses",
-  },
-  Object {
-    "body": "{\\"state\\":\\"success\\",\\"description\\":\\"Renovate verified pull request\\",\\"context\\":\\"renovate/verify\\",\\"target_url\\":\\"https://github.com/renovatebot/renovate\\"}",
-    "headers": Object {
-      "accept": "application/vnd.github.v3+json",
-      "accept-encoding": "gzip, deflate",
-      "authorization": "token abc123",
-      "content-length": "149",
-      "content-type": "application/json",
-      "host": "api.github.com",
-      "user-agent": "https://github.com/renovatebot/renovate",
-    },
-    "method": "POST",
-    "url": "https://api.github.com/repos/some/repo/statuses/0d9c7726c3d628b7e28af234595cfd20febdbf8e",
-  },
-  Object {
-    "headers": Object {
-      "accept": "application/vnd.github.v3+json",
-      "accept-encoding": "gzip, deflate",
-      "authorization": "token abc123",
-      "host": "api.github.com",
-      "user-agent": "https://github.com/renovatebot/renovate",
-    },
-    "method": "GET",
-    "url": "https://api.github.com/repos/some/repo/commits/some-branch/status",
-  },
-  Object {
-    "headers": Object {
-      "accept": "application/vnd.github.v3+json",
-      "accept-encoding": "gzip, deflate",
-      "authorization": "token abc123",
-      "host": "api.github.com",
-      "user-agent": "https://github.com/renovatebot/renovate",
-    },
-    "method": "GET",
-    "url": "https://api.github.com/repos/some/repo/commits/0d9c7726c3d628b7e28af234595cfd20febdbf8e/statuses",
-  },
 ]
 `;
 

@@ -7,7 +7,7 @@ import { id as npmId } from '../../../datasource/npm';
 import { logger } from '../../../logger';
 import { ExternalHostError } from '../../../types/errors/external-host-error';
 import { ExecOptions, exec } from '../../../util/exec';
-import { readLocalFile, remove } from '../../../util/fs';
+import { readFile, remove } from '../../../util/fs';
 import { PostUpdateConfig, Upgrade } from '../../common';
 import { getNodeConstraint } from './node-version';
 
@@ -19,7 +19,7 @@ export interface GenerateLockFileResult {
 
 export async function hasYarnOfflineMirror(cwd: string): Promise<boolean> {
   try {
-    const yarnrc = await readLocalFile(`${cwd}/.yarnrc`, 'utf8');
+    const yarnrc = await readFile(`${cwd}/.yarnrc`, 'utf8');
     if (is.string(yarnrc)) {
       const mirrorLine = yarnrc
         .split('\n')
@@ -94,6 +94,12 @@ export async function generateLockFile(
         preCommands,
       },
     };
+    // istanbul ignore if
+    if (global.trustLevel === 'high') {
+      execOptions.extraEnv.NPM_AUTH = env.NPM_AUTH;
+      execOptions.extraEnv.NPM_EMAIL = env.NPM_EMAIL;
+      execOptions.extraEnv.NPM_TOKEN = env.NPM_TOKEN;
+    }
     if (config.dockerMapDotfiles) {
       const homeDir =
         process.env.HOME || process.env.HOMEPATH || process.env.USERPROFILE;
@@ -147,7 +153,7 @@ export async function generateLockFile(
     await exec(commands, execOptions);
 
     // Read the result
-    lockFile = await readLocalFile(lockFileName, 'utf8');
+    lockFile = await readFile(lockFileName, 'utf8');
   } catch (err) /* istanbul ignore next */ {
     logger.debug(
       {
