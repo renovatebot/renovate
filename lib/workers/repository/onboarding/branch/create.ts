@@ -2,6 +2,7 @@ import { RenovateConfig } from '../../../../config';
 import { configFileNames } from '../../../../config/app-strings';
 import { logger } from '../../../../logger';
 import { commitFiles } from '../../../../util/git';
+import { formatCommitMessagePrefix } from '../../util/commit-message';
 import { getOnboardingConfig } from './config';
 
 const defaultConfigFile = configFileNames[0];
@@ -12,18 +13,31 @@ export function createOnboardingBranch(
   logger.debug('createOnboardingBranch()');
   const contents = getOnboardingConfig(config);
   logger.debug('Creating onboarding branch');
-  let commitMessage;
-  // istanbul ignore if
-  if (config.semanticCommits) {
-    commitMessage = config.semanticCommitType;
+
+  let commitMessagePrefix = '';
+  if (config.commitMessagePrefix) {
+    commitMessagePrefix = config.commitMessagePrefix;
+  } else if (config.semanticCommits) {
+    commitMessagePrefix = config.semanticCommitType;
     if (config.semanticCommitScope) {
-      commitMessage += `(${config.semanticCommitScope})`;
+      commitMessagePrefix += `(${config.semanticCommitScope})`;
     }
-    commitMessage += ': ';
-    commitMessage += 'add ' + defaultConfigFile;
-  } else {
-    commitMessage = 'Add ' + defaultConfigFile;
   }
+  if (commitMessagePrefix) {
+    commitMessagePrefix = formatCommitMessagePrefix(commitMessagePrefix);
+  }
+
+  let onboardingCommitMessage: string;
+  if (config.onboardingCommitMessage) {
+    onboardingCommitMessage = config.onboardingCommitMessage;
+  } else {
+    onboardingCommitMessage = `${
+      commitMessagePrefix ? 'add' : 'Add'
+    } ${defaultConfigFile}`;
+  }
+
+  const commitMessage = `${commitMessagePrefix} ${onboardingCommitMessage}`.trim();
+
   // istanbul ignore if
   if (config.dryRun) {
     logger.info('DRY-RUN: Would commit files to onboarding branch');
