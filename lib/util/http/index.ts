@@ -146,14 +146,14 @@ export class Http<GetOptions = HttpOptions, PostOptions = HttpPostOptions> {
         return resolveResponse<T>(cachedRes, options);
       }
     }
-    let startTime: number;
+
+    const startTime = Date.now();
     const queueTask = (): Promise<Response<T>> => {
       const queueTime = Date.now();
       return gotTask(url, options, startTime, queueTime);
     };
 
     const queue = getQueue(url);
-    startTime = Date.now();
     const promisedRes = queue ? queue.add(queueTask) : queueTask();
 
     if (options.method === 'get') {
