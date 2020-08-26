@@ -214,11 +214,10 @@ async function fetchReleases(
 function getRawReleases(
   config: GetReleasesInternalConfig
 ): Promise<ReleaseResult | null> {
-  const cacheKey =
-    cacheNamespace +
-    config.datasource +
-    config.lookupName +
-    config.registryUrls;
+  const { datasource, lookupName, registryUrls } = config;
+  const cacheKey = `${cacheNamespace}${datasource}${lookupName}${String(
+    registryUrls
+  )}`;
   // By returning a Promise and reusing it, we should only fetch each package at most once
   const cachedResult = memCache.get(cacheKey);
   // istanbul ignore if
@@ -291,7 +290,9 @@ export function getDigest(
   );
 }
 
-export function getDefaultConfig(datasource: string): Promise<object> {
+export function getDefaultConfig(
+  datasource: string
+): Promise<Record<string, unknown>> {
   const loadedDatasource = load(datasource);
-  return Promise.resolve(loadedDatasource?.defaultConfig || {});
+  return Promise.resolve(loadedDatasource?.defaultConfig || Object.create({}));
 }

@@ -45,6 +45,29 @@ export interface NpmDependency extends ReleaseResult {
   sourceDirectory?: string;
 }
 
+interface NpmResponse {
+  _id: string;
+  name?: string;
+  versions?: Record<
+    string,
+    {
+      repository?: {
+        url: string;
+        directory: string;
+      };
+      homepage?: string;
+      deprecated?: boolean;
+      gitHead?: string;
+    }
+  >;
+  repository?: {
+    url?: string;
+    directory?: string;
+  };
+  homepage?: string;
+  time?: Record<string, string>;
+}
+
 export async function getDependency(
   packageName: string,
   retries = 3
@@ -135,8 +158,7 @@ export async function getDependency(
       headers,
       useCache,
     };
-    // TODO: fix type
-    const raw = await http.getJson<any>(pkgUrl, opts);
+    const raw = await http.getJson<NpmResponse>(pkgUrl, opts);
     if (retries < 3) {
       logger.debug({ pkgUrl, retries }, 'Recovered from npm error');
     }
