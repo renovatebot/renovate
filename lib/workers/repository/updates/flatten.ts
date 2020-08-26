@@ -16,6 +16,9 @@ function getUpdateTypeRules(packageRules: PackageRule[]): PackageRule[] {
   return packageRules.filter((rule) => is.nonEmptyArray(rule.updateTypes));
 }
 
+const upper = (str: string): string =>
+  str.charAt(0).toUpperCase() + str.substr(1);
+
 export async function flattenUpdates(
   config: RenovateConfig,
   packageFiles: Record<string, any[]>
@@ -51,6 +54,13 @@ export async function flattenUpdates(
           for (const update of dep.updates) {
             let updateConfig = mergeChildConfig(depConfig, update);
             delete updateConfig.updates;
+            // Massage legacy vars just in case
+            updateConfig.currentVersion = updateConfig.currentValue;
+            updateConfig.newVersion =
+              updateConfig.newVersion || updateConfig.newValue;
+            if (updateConfig.updateType) {
+              updateConfig[`is${upper(updateConfig.updateType)}`] = true;
+            }
             // apply config from datasource
             const datasourceConfig = await getDefaultConfig(
               depConfig.datasource

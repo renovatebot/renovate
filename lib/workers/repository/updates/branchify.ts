@@ -49,14 +49,6 @@ export async function branchifyUpgrades(
   const branches: BranchConfig[] = [];
   for (const u of updates) {
     const update: BranchUpgradeConfig = { ...u } as any;
-    // Massage legacy vars just in case
-    update.currentVersion = update.currentValue;
-    update.newVersion = update.newVersion || update.newValue;
-    const upper = (str: string): string =>
-      str.charAt(0).toUpperCase() + str.substr(1);
-    if (update.updateType) {
-      update[`is${upper(update.updateType)}`] = true;
-    }
     // Check whether to use a group name
     if (update.groupName) {
       logger.debug('Using group branchName template');
