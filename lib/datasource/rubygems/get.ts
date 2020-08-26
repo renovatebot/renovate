@@ -75,8 +75,6 @@ export async function getDependency(
 
   if (testendpoint.statusCode === 404) {
     logger.debug({ dependency }, '/api/v1/versions does not exist. Using /api/v1/dependencies.json');
-
-    // Let's try with the dependencies.json endpoint then
     const versions = (await fetch_deps(dependency, registry, DEPENDENCIES_PATH)) || [];
 
     releases = versions.map(
