@@ -33,6 +33,24 @@ export async function fetch(
   return response.body;
 }
 
+export async function fetch_deps(
+  dependency: string,
+  registry: string,
+  path: string
+): Promise<any> {
+  const headers = getHeaders();
+
+  const name = `${path}?gems=${dependency}`;
+  const baseUrl = ensureTrailingSlash(registry);
+
+  logger.trace({ dependency }, `RubyGems lookup request: ${baseUrl} ${name}`);
+  const response = (await http.getJson(name, { baseUrl, headers })) || {
+    body: undefined,
+  };
+
+  return response.body;
+}
+
 export async function getDependency(
   dependency: string,
   registry: string
@@ -52,23 +70,41 @@ export async function getDependency(
     return null;
   }
 
-  const versions = (await fetch(dependency, registry, VERSIONS_PATH)) || [];
+  const testendpoint = (await http.get(VERSIONS_PATH));
 
-  const releases = versions.map(
-    ({
-      number: version,
-      platform: rubyPlatform,
-      created_at: releaseTimestamp,
-      rubygems_version: rubygemsVersion,
-      ruby_version: rubyVersion,
-    }) => ({
-      version,
-      rubyPlatform,
-      releaseTimestamp,
-      rubygemsVersion,
-      rubyVersion,
-    })
-  );
+  if (testendpoint.statusCode == 404 ) {
+    // Let's try with the dependencies.json endpoint then
+    const versions = (await fetch_deps(dependency, registry, DEPENDENCIES_PATH)) || [];
+
+    const releases = versions.map(
+      ({
+        number: version,
+        platform: rubyPlatform,
+      }) => ({
+        version,
+        rubyPlatform,
+      })
+    );
+
+  } else {
+    const versions = (await fetch(dependency, registry, VERSIONS_PATH)) || [];
+
+    const releases = versions.map(
+      ({
+        number: version,
+        platform: rubyPlatform,
+        created_at: releaseTimestamp,
+        rubygems_version: rubygemsVersion,
+        ruby_version: rubyVersion,
+      }) => ({
+        version,
+        rubyPlatform,
+        releaseTimestamp,
+        rubygemsVersion,
+        rubyVersion,
+      })
+    );
+  }
 
   return {
     releases,
