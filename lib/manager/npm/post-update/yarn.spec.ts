@@ -26,7 +26,6 @@ describe(getName(__filename), () => {
   beforeEach(() => {
     jest.resetAllMocks();
     jest.resetModules();
-    fs.readLocalFile = jest.fn();
     env.getChildProcessEnv.mockReturnValue(envMock.basic);
   });
   it.each([
@@ -39,7 +38,7 @@ describe(getName(__filename), () => {
         stdout: yarnVersion,
         stderr: '',
       });
-      fs.readLocalFile.mockImplementation((filename, encoding) => {
+      fs.readFile.mockImplementation((filename, encoding) => {
         if (filename.endsWith('.yarnrc')) {
           return new Promise<string>((resolve) => resolve(null));
         }
@@ -55,7 +54,7 @@ describe(getName(__filename), () => {
         postUpdateOptions: ['yarnDedupeFewer', 'yarnDedupeHighest'],
       };
       const res = await yarnHelper.generateLockFile('some-dir', {}, config);
-      expect(fs.readLocalFile).toHaveBeenCalledTimes(expectedFsCalls);
+      expect(fs.readFile).toHaveBeenCalledTimes(expectedFsCalls);
       expect(fs.remove).toHaveBeenCalledTimes(0);
       expect(res.lockFile).toEqual('package-lock-contents');
       expect(fixSnapshots(execSnapshots)).toMatchSnapshot();
@@ -68,7 +67,7 @@ describe(getName(__filename), () => {
         stdout: yarnVersion,
         stderr: '',
       });
-      fs.readLocalFile
+      fs.readFile
         .mockResolvedValueOnce(null)
         .mockResolvedValueOnce('package-lock-contents');
       const res = await yarnHelper.generateLockFile('some-dir', {}, {}, [
@@ -88,7 +87,7 @@ describe(getName(__filename), () => {
         stdout: yarnVersion,
         stderr: '',
       });
-      fs.readLocalFile
+      fs.readFile
         .mockResolvedValueOnce(
           'yarn-offline-mirror ./npm-packages-offline-cache'
         )
@@ -113,7 +112,7 @@ describe(getName(__filename), () => {
         stdout: yarnVersion,
         stderr: '',
       });
-      fs.readLocalFile.mockImplementation((filename, encoding) => {
+      fs.readFile.mockImplementation((filename, encoding) => {
         if (filename.endsWith('.yarnrc')) {
           return new Promise<string>((resolve) => resolve(null));
         }
@@ -131,7 +130,7 @@ describe(getName(__filename), () => {
       const res = await yarnHelper.generateLockFile('some-dir', {}, config, [
         { isLockFileMaintenance: true },
       ]);
-      expect(fs.readLocalFile).toHaveBeenCalledTimes(expectedFsCalls);
+      expect(fs.readFile).toHaveBeenCalledTimes(expectedFsCalls);
       expect(fs.remove).toHaveBeenCalledTimes(1);
       expect(res.lockFile).toEqual('package-lock-contents');
       expect(fixSnapshots(execSnapshots)).toMatchSnapshot();
@@ -142,11 +141,11 @@ describe(getName(__filename), () => {
       stdout: '1.9.4',
       stderr: 'some-error',
     });
-    fs.readLocalFile.mockResolvedValueOnce(null).mockRejectedValueOnce(() => {
+    fs.readFile.mockResolvedValueOnce(null).mockRejectedValueOnce(() => {
       throw new Error('not-found');
     });
     const res = await yarnHelper.generateLockFile('some-dir', {});
-    expect(fs.readLocalFile).toHaveBeenCalledTimes(2);
+    expect(fs.readFile).toHaveBeenCalledTimes(2);
     expect(res.error).toBe(true);
     expect(res.lockFile).not.toBeDefined();
     expect(fixSnapshots(execSnapshots)).toMatchSnapshot();

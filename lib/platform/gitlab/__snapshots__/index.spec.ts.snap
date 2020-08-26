@@ -1702,11 +1702,11 @@ Array [
 exports[`platform/gitlab updatePr(prNo, title, body) closes the PR 1`] = `
 Array [
   Object {
-    "body": "{\\"title\\":\\"title\\",\\"description\\":\\"body\\",\\"state_event\\":\\"closed\\"}",
+    "body": "{\\"title\\":\\"title\\",\\"description\\":\\"body\\",\\"state_event\\":\\"close\\"}",
     "headers": Object {
       "accept": "application/json",
       "accept-encoding": "gzip, deflate",
-      "content-length": "61",
+      "content-length": "60",
       "content-type": "application/json",
       "host": "gitlab.com",
       "private-token": "abc123",

@@ -8,7 +8,7 @@ import {
 } from '../../constants/error-messages';
 import { BranchStatus, PrState } from '../../types';
 import * as _git from '../../util/git';
-import { Platform } from '../common';
+import { Platform, VulnerabilityAlert } from '../common';
 
 const githubApiHost = 'https://api.github.com';
 
@@ -1580,22 +1580,6 @@ describe('platform/github', () => {
           number: 123,
         })
         .post('/repos/some/repo/issues/123/labels')
-        .reply(200, [])
-        .get(
-          '/repos/some/repo/commits/0d9c7726c3d628b7e28af234595cfd20febdbf8e/statuses'
-        )
-        .reply(200, [])
-        .get('/repos/some/repo/commits/some-branch/status')
-        .reply(200, {
-          object: { sha: 'some-sha' },
-        })
-        .post(
-          '/repos/some/repo/statuses/0d9c7726c3d628b7e28af234595cfd20febdbf8e'
-        )
-        .reply(200, [])
-        .get(
-          '/repos/some/repo/commits/0d9c7726c3d628b7e28af234595cfd20febdbf8e/statuses'
-        )
         .reply(200, []);
       await github.initRepo({ repository: 'some/repo', token: 'token' } as any);
       const pr = await github.createPr({
@@ -1604,7 +1588,6 @@ describe('platform/github', () => {
         prTitle: 'The Title',
         prBody: 'Hello world',
         labels: ['deps', 'renovate'],
-        platformOptions: { statusCheckVerify: true },
       });
       expect(pr).toMatchSnapshot();
       expect(httpMock.getTrace()).toMatchSnapshot();
@@ -1939,23 +1922,35 @@ describe('platform/github', () => {
       expect(httpMock.getTrace()).toMatchSnapshot();
     });
     it('returns array if found', async () => {
-      // prettier-ignore
-      httpMock.scope(githubApiHost).post('/graphql').reply(200, {
-        "data": {
-          "repository": {
-            "vulnerabilityAlerts": {
-              "edges": [{
-                "node": {
-                  "externalIdentifier": "CVE-2018-1000136",
-                  "externalReference": "https://nvd.nist.gov/vuln/detail/CVE-2018-1000136",
-                  "affectedRange": ">= 1.8, < 1.8.3", "fixedIn": "1.8.3",
-                  "id": "MDI4OlJlcG9zaXRvcnlWdWxuZXJhYmlsaXR5QWxlcnQ1MzE3NDk4MQ==", "packageName": "electron"
-                }
-              }]
-            }
-          }
-        }
-      });
+      httpMock
+        .scope(githubApiHost)
+        .post('/graphql')
+        .reply(200, {
+          data: {
+            repository: {
+              vulnerabilityAlerts: {
+                edges: [
+                  {
+                    node: {
+                      securityAdvisory: { severity: 'HIGH', references: [] },
+                      securityVulnerability: {
+                        package: {
+                          ecosystem: 'NPM',
+                          name: 'left-pad',
+                          range: '0.0.2',
+                        },
+                        vulnerableVersionRange: '0.0.2',
+                        firstPatchedVersion: { identifier: '0.0.3' },
+                      },
+                      vulnerableManifestFilename: 'foo',
+                      vulnerableManifestPath: 'bar',
+                    } as VulnerabilityAlert,
+                  },
+                ],
+              },
+            },
+          },
+        });
       const res = await github.getVulnerabilityAlerts();
       expect(res).toHaveLength(1);
       expect(httpMock.getTrace()).toMatchSnapshot();
