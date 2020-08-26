@@ -86,7 +86,6 @@ export async function getDependency(
         rubyPlatform,
       })
     );
-
   } else {
     const versions = (await fetch(dependency, registry, VERSIONS_PATH)) || [];
 
