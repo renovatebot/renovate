@@ -136,6 +136,7 @@ export async function flattenUpdates(
         }
         delete lockFileConfig.packageRules;
         delete lockFileConfig.deps;
+        generateBranchName(lockFileConfig);
         updates.push(lockFileConfig);
       }
     }

@@ -22,7 +22,7 @@ describe(getName(__filename), () => {
     it('extracts multiple image lines', () => {
       const res = extractPackageFile(pluginsFile);
       expect(res.deps).toMatchSnapshot();
-      expect(res.deps).toHaveLength(4);
+      expect(res.deps).toHaveLength(6);
     });
   });
 });
