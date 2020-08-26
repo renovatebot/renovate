@@ -172,8 +172,6 @@ export function generateBranchConfig(
       upgrade.isRange = false;
     }
     // Use templates to generate strings
-    logger.trace('Compiling branchName: ' + upgrade.branchName);
-    upgrade.branchName = template.compile(upgrade.branchName, upgrade);
     if (upgrade.semanticCommits && !upgrade.commitMessagePrefix) {
       logger.trace('Upgrade has semantic commits enabled');
       let semanticPrefix = upgrade.semanticCommitType;
