@@ -1,5 +1,5 @@
 import { RenovateConfig } from '../../../config/common';
-import { getBranchName } from './branch-name';
+import { generateBranchName } from './branch-name';
 
 describe('workers/repository/updates/branch-name', () => {
   describe('getBranchName()', () => {
@@ -11,7 +11,8 @@ describe('workers/repository/updates/branch-name', () => {
           branchTopic: 'grouptopic',
         },
       };
-      expect(getBranchName(upgrade)).toEqual('some-group-name-grouptopic');
+      generateBranchName(upgrade);
+      expect(upgrade.branchName).toEqual('some-group-name-grouptopic');
     });
     it('uses groupSlug if defined', () => {
       const upgrade: RenovateConfig = {
@@ -22,7 +23,8 @@ describe('workers/repository/updates/branch-name', () => {
           branchTopic: 'grouptopic',
         },
       };
-      expect(getBranchName(upgrade)).toEqual('some-group-slug-grouptopic');
+      generateBranchName(upgrade);
+      expect(upgrade.branchName).toEqual('some-group-slug-grouptopic');
     });
     it('separates major with groups', () => {
       const upgrade: RenovateConfig = {
@@ -36,9 +38,8 @@ describe('workers/repository/updates/branch-name', () => {
           branchTopic: 'grouptopic',
         },
       };
-      expect(getBranchName(upgrade)).toEqual(
-        'major-2-some-group-slug-grouptopic'
-      );
+      generateBranchName(upgrade);
+      expect(upgrade.branchName).toEqual('major-2-some-group-slug-grouptopic');
     });
     it('separates patch groups and uses update topic', () => {
       const upgrade: RenovateConfig = {
@@ -51,7 +52,8 @@ describe('workers/repository/updates/branch-name', () => {
         newMajor: 2,
         group: {},
       };
-      expect(getBranchName(upgrade)).toEqual(
+      generateBranchName(upgrade);
+      expect(upgrade.branchName).toEqual(
         'update-branch-patch-some-group-slug-update-topic'
       );
     });
@@ -62,9 +64,10 @@ describe('workers/repository/updates/branch-name', () => {
         depName: 'dep',
         group: {},
       };
-      expect(getBranchName(upgrade)).toEqual('dep');
+      generateBranchName(upgrade);
+      expect(upgrade.branchName).toEqual('dep');
     });
-    it('enforces valid git branch name', async () => {
+    it('enforces valid git branch name', () => {
       const fixtures = [
         {
           upgrade: {
@@ -124,10 +127,9 @@ describe('workers/repository/updates/branch-name', () => {
           expectedBranchName: 'renovate/bad-branch-name9',
         },
       ];
-      fixtures.forEach((update) => {
-        expect(getBranchName(update.upgrade)).toEqual(
-          update.expectedBranchName
-        );
+      fixtures.forEach((fixture) => {
+        generateBranchName(fixture.upgrade);
+        expect(fixture.upgrade.branchName).toEqual(fixture.expectedBranchName);
       });
     });
   });

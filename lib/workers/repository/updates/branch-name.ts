@@ -2,7 +2,6 @@ import { clean as cleanGitRef } from 'clean-git-ref';
 import slugify from 'slugify';
 import { RenovateConfig } from '../../../config/common';
 import { logger } from '../../../logger';
-import { clone } from '../../../util/clone';
 import * as template from '../../../util/template';
 
 /**
@@ -20,8 +19,8 @@ function cleanBranchName(branchName: string): string {
     .replace(/\s/g, ''); // whitespace
 }
 
-export function getBranchName(update_: RenovateConfig): string {
-  const update = clone(update_);
+/* eslint-disable no-param-reassign */
+export function generateBranchName(update: RenovateConfig): void {
   // Check whether to use a group name
   if (update.groupName) {
     logger.debug('Using group branchName template');
@@ -50,5 +49,4 @@ export function getBranchName(update_: RenovateConfig): string {
   update.branchName = cleanBranchName(
     template.compile(update.branchName, update)
   );
-  return update.branchName;
 }
