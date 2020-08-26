@@ -39,7 +39,7 @@ export interface BitbucketStatus {
   state: BitbucketBranchState;
 }
 
-interface RepoInfoBody {
+export interface RepoInfoBody {
   parent?: any;
   owner: { username: string };
   mainbranch: { name: string };
@@ -105,7 +105,7 @@ function callApi<T>(
 export async function accumulateValues<T = any>(
   reqUrl: string,
   method = 'get',
-  options?: HttpOptions & HttpPostOptions,
+  options?: HttpOptions | HttpPostOptions,
   pagelen?: number
 ): Promise<T[]> {
   let accumulator: T[] = [];
@@ -147,8 +147,15 @@ export /* istanbul ignore next */ function isConflicted(
   return false;
 }
 
-export interface PrInfoInput {
+export interface PrResponse {
   id: number;
+  title: string;
+  state: string;
+  links: {
+    commits: {
+      href: string;
+    };
+  };
   summary?: { raw: string };
   source: {
     branch: {
@@ -160,12 +167,11 @@ export interface PrInfoInput {
       name: string;
     };
   };
-  title: string;
-  state: string;
+  reviewers: Array<any>;
   created_on: string;
 }
 
-export function prInfo(pr: PrInfoInput): Pr {
+export function prInfo(pr: PrResponse): Pr {
   return {
     number: pr.id,
     body: pr.summary ? pr.summary.raw : /* istanbul ignore next */ undefined,
