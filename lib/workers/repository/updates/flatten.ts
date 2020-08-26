@@ -61,6 +61,11 @@ export async function flattenUpdates(
             if (updateConfig.updateType) {
               updateConfig[`is${upper(updateConfig.updateType)}`] = true;
             }
+            if (updateConfig.updateTypes) {
+              updateConfig.updateTypes.forEach((updateType) => {
+                updateConfig[`is${upper(updateType)}`] = true;
+              });
+            }
             // apply config from datasource
             const datasourceConfig = await getDefaultConfig(
               depConfig.datasource

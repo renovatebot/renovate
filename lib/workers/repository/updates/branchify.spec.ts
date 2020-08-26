@@ -35,8 +35,6 @@ describe('workers/repository/updates/branchify', () => {
       config.repoIsOnboarded = true;
       const res = await branchifyUpgrades(config, {});
       expect(Object.keys(res.branches)).toHaveLength(1);
-      expect(res.branches[0].isMinor).toBe(true);
-      expect(res.branches[0].upgrades[0].isMinor).toBe(true);
     });
     it('deduplicates', async () => {
       flattenUpdates.mockResolvedValueOnce([
@@ -62,92 +60,6 @@ describe('workers/repository/updates/branchify', () => {
       config.repoIsOnboarded = true;
       const res = await branchifyUpgrades(config, {});
       expect(Object.keys(res.branches)).toHaveLength(1);
-      expect(res.branches[0].isMinor).toBe(true);
-      expect(res.branches[0].upgrades[0].isMinor).toBe(true);
-    });
-    it('uses major/minor/patch slugs', async () => {
-      flattenUpdates.mockResolvedValueOnce([
-        {
-          depName: 'foo',
-          branchName: 'foo-{{version}}',
-          version: '2.0.0',
-          prTitle: 'some-title',
-          updateType: 'major',
-          groupName: 'some packages',
-          group: {},
-          separateMajorMinor: true,
-          packageFile: 'package.json',
-        },
-        {
-          depName: 'foo',
-          branchName: 'foo-{{version}}',
-          version: '1.1.0',
-          prTitle: 'some-title',
-          updateType: 'minor',
-          groupName: 'some packages',
-          group: {},
-          separateMajorMinor: true,
-          separateMinorPatch: true,
-        },
-        {
-          depName: 'foo',
-          branchName: 'foo-{{version}}',
-          version: '1.0.1',
-          prTitle: 'some-title',
-          updateType: 'patch',
-          groupName: 'some packages',
-          group: {},
-          separateMajorMinor: true,
-          separateMinorPatch: true,
-        },
-        {
-          depName: 'bar',
-          branchName: 'bar-{{version}}',
-          version: '2.0.0',
-          prTitle: 'some-title',
-          updateType: 'major',
-          groupName: 'other packages',
-          group: {},
-          separateMultipleMajor: true,
-          separateMajorMinor: true,
-          newMajor: 2,
-        },
-      ]);
-      config.repoIsOnboarded = true;
-      const res = await branchifyUpgrades(config, {});
-      expect(Object.keys(res.branches)).toHaveLength(4);
-      expect(res.branches[0].isMajor).toBe(true);
-      expect(res.branches[0].groupSlug).toBe(`major-some-packages`);
-      expect(res.branches[1].isMinor).toBe(true);
-      expect(res.branches[1].groupSlug).toBe(`some-packages`);
-      expect(res.branches[2].isPatch).toBe(true);
-      expect(res.branches[2].groupSlug).toBe(`patch-some-packages`);
-      expect(res.branches[3].isMajor).toBe(true);
-      expect(res.branches[3].groupSlug).toBe(`major-2-other-packages`);
-    });
-    it('does not group if different compiled branch names', async () => {
-      flattenUpdates.mockResolvedValueOnce([
-        {
-          depName: 'foo',
-          branchName: 'foo-{{version}}',
-          version: '1.1.0',
-          prTitle: 'some-title',
-        },
-        {
-          depName: 'foo',
-          branchName: 'foo-{{version}}',
-          version: '2.0.0',
-          prTitle: 'some-title',
-        },
-        {
-          depName: 'bar',
-          branchName: 'bar-{{version}}',
-          version: '1.1.0',
-          prTitle: 'some-title',
-        },
-      ]);
-      const res = await branchifyUpgrades(config, {});
-      expect(Object.keys(res.branches)).toHaveLength(3);
     });
     it('groups if same compiled branch names', async () => {
       flattenUpdates.mockResolvedValueOnce([

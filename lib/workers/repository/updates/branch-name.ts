@@ -32,11 +32,7 @@ export function getBranchName(update_: RenovateConfig): string {
       lower: true,
     });
     if (update.updateType === 'major' && update.separateMajorMinor) {
-      if (update.separateMultipleMajor) {
-        update.groupSlug = `major-${update.newMajor}-${update.groupSlug}`;
-      } else {
-        update.groupSlug = `major-${update.groupSlug}`;
-      }
+      update.groupSlug = `major-${update.newMajor}-${update.groupSlug}`;
     }
     if (update.updateType === 'patch') {
       update.groupSlug = `patch-${update.groupSlug}`;
