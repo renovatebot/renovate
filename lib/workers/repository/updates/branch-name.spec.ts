@@ -55,14 +55,80 @@ describe('workers/repository/updates/branch-name', () => {
         'update-branch-patch-some-group-slug-update-topic'
       );
     });
-    it('compiles multiple times and cleans', () => {
+    it('compiles multiple times', () => {
       const upgrade: RenovateConfig = {
         branchName: '{{branchTopic}}',
         branchTopic: '{{depName}}',
-        depName: '.dep',
+        depName: 'dep',
         group: {},
       };
       expect(getBranchName(upgrade)).toEqual('dep');
+    });
+    it('enforces valid git branch name', async () => {
+      const fixtures = [
+        {
+          upgrade: {
+            groupName: '/My Group/',
+            group: { branchName: 'renovate/{{groupSlug}}' },
+          },
+          expectedBranchName: 'renovate/my-group',
+        },
+        {
+          upgrade: {
+            groupName: 'invalid branch name.lock',
+            group: { branchName: 'renovate/{{groupSlug}}' },
+          },
+          expectedBranchName: 'renovate/invalid-branch-name',
+        },
+        {
+          upgrade: {
+            groupName: '.a-bad-  name:@.lock',
+            group: { branchName: 'renovate/{{groupSlug}}' },
+          },
+          expectedBranchName: 'renovate/a-bad-name-@',
+        },
+        {
+          upgrade: { branchName: 'renovate/bad-branch-name1..' },
+          expectedBranchName: 'renovate/bad-branch-name1',
+        },
+        {
+          upgrade: { branchName: 'renovate/~bad-branch-name2' },
+          expectedBranchName: 'renovate/-bad-branch-name2',
+        },
+        {
+          upgrade: { branchName: 'renovate/bad-branch-^-name3' },
+          expectedBranchName: 'renovate/bad-branch---name3',
+        },
+        {
+          upgrade: { branchName: 'renovate/bad-branch-name : 4' },
+          expectedBranchName: 'renovate/bad-branch-name---4',
+        },
+        {
+          upgrade: { branchName: 'renovate/bad-branch-name5/' },
+          expectedBranchName: 'renovate/bad-branch-name5',
+        },
+        {
+          upgrade: { branchName: '.bad-branch-name6' },
+          expectedBranchName: 'bad-branch-name6',
+        },
+        {
+          upgrade: { branchName: 'renovate/.bad-branch-name7' },
+          expectedBranchName: 'renovate/bad-branch-name7',
+        },
+        {
+          upgrade: { branchName: 'renovate/.bad-branch-name8' },
+          expectedBranchName: 'renovate/bad-branch-name8',
+        },
+        {
+          upgrade: { branchName: 'renovate/bad-branch-name9.' },
+          expectedBranchName: 'renovate/bad-branch-name9',
+        },
+      ];
+      fixtures.forEach((update) => {
+        expect(getBranchName(update.upgrade)).toEqual(
+          update.expectedBranchName
+        );
+      });
     });
   });
 });
