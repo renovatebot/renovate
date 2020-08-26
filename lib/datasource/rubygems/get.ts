@@ -9,6 +9,7 @@ const http = new Http(id);
 
 const INFO_PATH = '/api/v1/gems';
 const VERSIONS_PATH = '/api/v1/versions';
+const DEPENDENCIES_PATH = 'api/v1/dependencies.json';
 
 const getHeaders = (): OutgoingHttpHeaders => {
   return { hostType: id };
