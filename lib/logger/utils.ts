@@ -1,4 +1,4 @@
-import { Stream, Writable } from 'stream';
+import { Stream } from 'stream';
 import bunyan from 'bunyan';
 import fs from 'fs-extra';
 import { redactedFields, sanitize } from '../util/sanitize';
@@ -92,13 +92,18 @@ function sanitizeValue(value: any, seen = new WeakMap()): any {
   return valueType === 'string' ? sanitize(value) : value;
 }
 
+type BunyanStream = (NodeJS.WritableStream | Stream) & {
+  writable?: boolean;
+  write: (chunk: BunyanRecord, enc, cb) => void;
+};
+
 export function withSanitizer(streamConfig: bunyan.Stream): bunyan.Stream {
   if (streamConfig.type === 'rotating-file') {
     throw new Error("Rotating files aren't supported");
   }
 
-  const stream = streamConfig.stream;
-  if (stream instanceof Writable && stream.writable) {
+  const stream = streamConfig.stream as BunyanStream;
+  if (stream?.writable) {
     const write = (chunk: BunyanRecord, enc, cb): void => {
       const raw = sanitizeValue(chunk);
       const result =
