@@ -2,6 +2,7 @@ import fs from 'fs-extra';
 import { RenovateConfig } from '../../config';
 import { logger, setMeta } from '../../logger';
 import { deleteLocalFile } from '../../util/fs';
+import * as queue from '../../util/http/queue';
 import { addSplit, getSplits, splitInit } from '../../util/split';
 import { ensureMasterIssue } from './dependency-dashboard';
 import handleError from './error';
@@ -30,6 +31,7 @@ export async function renovateRepository(
   logger.info({ renovateVersion }, 'Repository started');
   logger.trace({ config });
   let repoResult: ProcessResult;
+  queue.clear();
   try {
     await fs.ensureDir(config.localDir);
     logger.debug('Using localDir: ' + config.localDir);

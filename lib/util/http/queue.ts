@@ -20,7 +20,7 @@ export function getQueue(url: string): PQueue | null {
 
   let queue = hostQueues.get(host);
   if (queue === undefined) {
-    queue = null;
+    queue = null; // null represents "no queue", as opposed to undefined
     const concurrency = getRequestLimit(url);
     if (concurrency) {
       queue = new PQueue({ concurrency });

@@ -81,6 +81,25 @@ function applyDefaultHeaders(options: Options): void {
   };
 }
 
+async function gotTask<T>(
+  url: string,
+  options: GotOptions,
+  startTime: number,
+  queueTime: number
+): Promise<Response<T>> {
+  const resp = await got<T>(url, options);
+  const duration = Date.now() - queueTime;
+  const httpRequests = memCache.get('http-requests') || [];
+  httpRequests.push({
+    method: options.method,
+    url,
+    duration,
+    queueDuration: queueTime - startTime,
+  });
+  memCache.set('http-requests', httpRequests);
+  return resp;
+}
+
 export class Http<GetOptions = HttpOptions, PostOptions = HttpPostOptions> {
   constructor(private hostType: string, private options?: HttpOptions) {}
 
@@ -130,20 +149,7 @@ export class Http<GetOptions = HttpOptions, PostOptions = HttpPostOptions> {
     let startTime: number;
     const queueTask = (): Promise<Response<T>> => {
       const queueTime = Date.now();
-      const queueDuration = queueTime - startTime;
-      return got<T>(url, options).then((resp) => {
-        const respTime = Date.now();
-        const duration = respTime - queueTime;
-        const httpRequests = memCache.get('http-requests') || [];
-        httpRequests.push({
-          method: options.method,
-          url,
-          duration,
-          queueDuration,
-        });
-        memCache.set('http-requests', httpRequests);
-        return resp;
-      });
+      return gotTask(url, options, startTime, queueTime);
     };
 
     const queue = getQueue(url);
