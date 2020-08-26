@@ -677,12 +677,13 @@ describe('platform/gitea/gitea-helper', () => {
         { ...mockCommitStatus, status: 'unknown' },
       ];
 
-      for (const { status, created_at, expected } of statuses) {
+      for (const statusElem of statuses) {
+        const { status, expected } = statusElem;
         // Add current status ot list of commit statuses, then mock the API to return the whole list
         commitStatuses.push({
           ...mockCommitStatus,
           status,
-          created_at,
+          created_at: statusElem.created_at,
         });
         httpMock
           .scope(baseUrl)

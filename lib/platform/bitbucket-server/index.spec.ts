@@ -16,6 +16,7 @@ function repoMock(
   projectKey: string,
   repositorySlug: string
 ) {
+  const endpointStr = endpoint.toString();
   const projectKeyLower = projectKey.toLowerCase();
   return {
     slug: repositorySlug,
@@ -41,7 +42,7 @@ function repoMock(
     links: {
       clone: [
         {
-          href: `${endpoint}/scm/${projectKeyLower}/${repositorySlug}.git`,
+          href: `${endpointStr}/scm/${projectKeyLower}/${repositorySlug}.git`,
           name: 'http',
         },
         {
@@ -51,14 +52,19 @@ function repoMock(
       ],
       self: [
         {
-          href: `${endpoint}/projects/${projectKey}/repos/${repositorySlug}/browse`,
+          href: `${endpointStr}/projects/${projectKey}/repos/${repositorySlug}/browse`,
         },
       ],
     },
   };
 }
 
-function prMock(endpoint, projectKey, repositorySlug) {
+function prMock(
+  endpoint: URL | string,
+  projectKey: string,
+  repositorySlug: string
+) {
+  const endpointStr = endpoint.toString();
   return {
     id: 5,
     version: 1,
@@ -94,7 +100,7 @@ function prMock(endpoint, projectKey, repositorySlug) {
         slug: 'userName1',
         type: 'NORMAL',
         links: {
-          self: [{ href: `${endpoint}/users/userName1` }],
+          self: [{ href: `${endpointStr}/users/userName1` }],
         },
       },
       role: 'AUTHOR',
@@ -112,7 +118,7 @@ function prMock(endpoint, projectKey, repositorySlug) {
           slug: 'userName2',
           type: 'NORMAL',
           links: {
-            self: [{ href: `${endpoint}/users/userName2` }],
+            self: [{ href: `${endpointStr}/users/userName2` }],
           },
         },
         role: 'REVIEWER',
@@ -124,7 +130,7 @@ function prMock(endpoint, projectKey, repositorySlug) {
     links: {
       self: [
         {
-          href: `${endpoint}/projects/${projectKey}/repos/${repositorySlug}/pull-requests/5`,
+          href: `${endpointStr}/projects/${projectKey}/repos/${repositorySlug}/pull-requests/5`,
         },
       ],
     },
