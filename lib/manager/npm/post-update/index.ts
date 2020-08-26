@@ -89,7 +89,7 @@ export function determineLockFileDirs(
   }
 
   for (const p of config.updatedPackageFiles) {
-    logger.trace(`Checking ${p.name} for lock files`);
+    logger.trace(`Checking ${String(p.name)} for lock files`);
     const packageFile = getPackageFile(p.name);
     // lerna first
     if (packageFile.lernaDir && packageFile.npmLock) {
@@ -192,7 +192,9 @@ export async function writeExistingFiles(
           }
         }
         if (widens.length) {
-          logger.debug(`Removing ${widens} from ${npmLock} to force an update`);
+          logger.debug(
+            `Removing ${String(widens)} from ${npmLock} to force an update`
+          );
           try {
             const npmLockParsed = JSON.parse(existingNpmLock);
             if (npmLockParsed.dependencies) {
@@ -236,7 +238,7 @@ export async function writeUpdatedPackageFiles(
     if (!packageFile.name.endsWith('package.json')) {
       continue; // eslint-disable-line
     }
-    logger.debug(`Writing ${packageFile.name}`);
+    logger.debug(`Writing ${String(packageFile.name)}`);
     const massagedFile = JSON.parse(packageFile.contents);
     try {
       const { token } = hostRules.find({

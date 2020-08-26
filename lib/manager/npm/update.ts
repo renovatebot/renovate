@@ -62,7 +62,7 @@ export function updateDependency({
   upgrade,
 }: UpdateDependencyConfig): string | null {
   const { depType, managerData } = upgrade;
-  const depName = managerData?.key || upgrade.depName;
+  const depName: string = managerData?.key || upgrade.depName;
   let { newValue } = upgrade;
   if (upgrade.currentRawValue) {
     if (upgrade.currentDigest) {
@@ -86,7 +86,7 @@ export function updateDependency({
   try {
     const parsedContents = JSON.parse(fileContent);
     // Save the old version
-    const oldVersion = parsedContents[depType][depName];
+    const oldVersion: string = parsedContents[depType][depName];
     if (oldVersion === newValue) {
       logger.trace('Version is already updated');
       return bumpPackageVersion(
@@ -152,7 +152,7 @@ export function updateDependency({
           );
         }
         // Look for the old version number
-        const oldResolution = `"${parsedContents.resolutions[depKey]}"`;
+        const oldResolution = `"${String(parsedContents.resolutions[depKey])}"`;
         const newResolution = `"${newValue}"`;
         // Update the file = this is what we want
         parsedContents.resolutions[depKey] = newValue;
