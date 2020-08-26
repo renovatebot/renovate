@@ -3,7 +3,7 @@
   "type": "module",
   "dependencies": {
     "@actions/core": "1.2.4",
-    "@jest/reporters": "26.4.0",
+    "@jest/reporters": "26.4.1",
     "@jest/test-result": "26.3.0",
     "commander": "6.0.0",
     "eslint": "7.7.0",

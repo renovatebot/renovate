@@ -95,8 +95,7 @@ export function generateBranchConfig(
   const groupEligible =
     depNames.length > 1 ||
     toVersions.length > 1 ||
-    (!toVersions[0] && newValue.length > 1) ||
-    branchUpgrades[0].lazyGrouping === false;
+    (!toVersions[0] && newValue.length > 1);
   if (newValue.length > 1 && !groupEligible) {
     // eslint-disable-next-line no-param-reassign
     branchUpgrades[0].commitMessageExtra = `to v${toVersions[0]}`;
@@ -160,7 +159,6 @@ export function generateBranchConfig(
     }
     // Delete group config regardless of whether it was applied
     delete upgrade.group;
-    delete upgrade.lazyGrouping;
 
     // istanbul ignore else
     if (toVersions.length > 1 && !typesGroup) {
@@ -175,8 +173,6 @@ export function generateBranchConfig(
       upgrade.isRange = false;
     }
     // Use templates to generate strings
-    logger.trace('Compiling branchName: ' + upgrade.branchName);
-    upgrade.branchName = template.compile(upgrade.branchName, upgrade);
     if (upgrade.semanticCommits && !upgrade.commitMessagePrefix) {
       logger.trace('Upgrade has semantic commits enabled');
       let semanticPrefix = upgrade.semanticCommitType;

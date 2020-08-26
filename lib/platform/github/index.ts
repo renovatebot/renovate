@@ -26,6 +26,7 @@ import * as githubHttp from '../../util/http/github';
 import { sanitize } from '../../util/sanitize';
 import { ensureTrailingSlash } from '../../util/url';
 import {
+  AggregatedVulnerabilities,
   BranchStatusConfig,
   CreatePRConfig,
   EnsureCommentConfig,
@@ -354,6 +355,9 @@ export async function initRepo({
       // This is a lovely "hack" by GitHub that lets us force update our fork's master
       // with the base commit from the parent repository
       try {
+        logger.debug(
+          'Updating forked repository default sha to match upstream'
+        );
         await githubApi.patchJson(
           `repos/${config.repository}/git/refs/heads/${config.defaultBranch}`,
           {
@@ -365,22 +369,10 @@ export async function initRepo({
           }
         );
       } catch (err) /* istanbul ignore next */ {
-        logger.debug(
-          'Error updating fork reference - will try deleting fork to try again next time'
+        logger.error(
+          { err: err.err || err },
+          'Error updating fork from upstream - cannot continue'
         );
-        try {
-          await githubApi.deleteJson(`repos/${config.repository}`, {
-            token: forkToken || opts.token,
-          });
-          logger.info('Fork deleted');
-          if (is.nonEmptyArray(existingRepos)) {
-            existingRepos = existingRepos.filter(
-              (existingRepo) => existingRepo !== config.repository
-            );
-          }
-        } catch (deleteErr) {
-          logger.warn({ err: deleteErr }, 'Could not delete fork');
-        }
         if (err instanceof ExternalHostError) {
           throw err;
         }
@@ -1435,16 +1427,6 @@ export async function createPr({
   pr.displayNumber = `Pull Request #${pr.number}`;
   pr.branchName = branchName;
   await addLabels(pr.number, labels);
-  if (platformOptions.statusCheckVerify) {
-    logger.debug('Setting statusCheckVerify');
-    await setBranchStatus({
-      branchName,
-      context: `renovate/verify`,
-      description: `Renovate verified pull request`,
-      state: BranchStatus.green,
-      url: 'https://github.com/renovatebot/renovate',
-    });
-  }
   return pr;
 }
 
@@ -1629,8 +1611,24 @@ export async function getVulnerabilityAlerts(): Promise<VulnerabilityAlert[]> {
     });
     if (vulnerabilityAlerts?.length) {
       alerts = vulnerabilityAlerts.map((edge) => edge.node);
+      const shortAlerts: AggregatedVulnerabilities = {};
       if (alerts.length) {
-        logger.debug({ alerts }, 'Found GitHub vulnerability alerts');
+        logger.trace({ alerts }, 'GitHub vulnerability details');
+        for (const alert of alerts) {
+          const {
+            package: { name, ecosystem },
+            vulnerableVersionRange,
+            firstPatchedVersion,
+          } = alert.securityVulnerability;
+          const patch = firstPatchedVersion?.identifier;
+
+          const key = `${ecosystem.toLowerCase()}/${name}`;
+          const range = vulnerableVersionRange;
+          const elem = shortAlerts[key] || {};
+          elem[range] = patch || null;
+          shortAlerts[key] = elem;
+        }
+        logger.debug({ alerts: shortAlerts }, 'GitHub vulnerability details');
       }
     } else {
       logger.debug('Cannot read vulnerability alerts');

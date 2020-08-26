@@ -55,7 +55,6 @@ export interface RenovateSharedConfig {
   semanticCommits?: boolean;
   semanticCommitScope?: string;
   semanticCommitType?: string;
-  statusCheckVerify?: boolean;
   suppressNotifications?: string[];
   timezone?: string;
   unicodeEmoji?: boolean;

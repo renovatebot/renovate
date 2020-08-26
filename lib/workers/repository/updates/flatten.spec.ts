@@ -66,7 +66,7 @@ describe('workers/repository/updates/flatten', () => {
               {
                 depName: 'calico/node',
                 language: LANGUAGE_DOCKER,
-                updates: [{ newValue: '3.2.0' }],
+                updates: [{ newValue: '3.2.0', updateType: 'minor' }],
               },
             ],
           },

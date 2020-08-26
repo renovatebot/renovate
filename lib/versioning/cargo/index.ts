@@ -40,7 +40,7 @@ function npm2cargo(input: string): string {
   }
   // Note: this doesn't remove the ^
   const res = input
-    .split(' ')
+    .split(/\s+,?\s*|\s*,?\s+/)
     .map((str) => str.trim())
     .filter(notEmpty);
   const operators = ['^', '~', '=', '>', '<', '<=', '>='];

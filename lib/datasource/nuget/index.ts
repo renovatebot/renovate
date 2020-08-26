@@ -40,7 +40,7 @@ export async function getReleases({
     return v2.getReleases(feedUrl, lookupName);
   }
   if (protocolVersion === 3) {
-    const queryUrl = await v3.getQueryUrl(feedUrl);
+    const queryUrl = await v3.getResourceUrl(feedUrl);
     if (queryUrl !== null) {
       return v3.getReleases(feedUrl, queryUrl, lookupName);
     }
