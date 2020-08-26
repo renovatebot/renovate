@@ -10,6 +10,7 @@ import { LANGUAGE_DOCKER } from '../../../constants/languages';
 import { getDefaultConfig } from '../../../datasource';
 import { get } from '../../../manager';
 import { applyPackageRules } from '../../../util/package-rules';
+import { generateBranchName } from './branch-name';
 
 // Return only rules that contain an updateType
 function getUpdateTypeRules(packageRules: PackageRule[]): PackageRule[] {
@@ -103,6 +104,8 @@ export async function flattenUpdates(
               updateConfig.managerBranchPrefix = '';
               updateConfig.depNameSanitized = 'node';
             }
+            generateBranchName(updateConfig);
+            update.branchName = updateConfig.branchName; // for writing to cache
             delete updateConfig.repoIsOnboarded;
             delete updateConfig.renovateJsonPresent;
             updateConfig.baseDeps = packageFile.deps;

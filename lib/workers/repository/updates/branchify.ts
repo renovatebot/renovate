@@ -3,7 +3,6 @@ import { RenovateConfig, ValidationMessage } from '../../../config';
 import { addMeta, logger, removeMeta } from '../../../logger';
 import { BranchConfig, BranchUpgradeConfig } from '../../common';
 import { embedChangelogs } from '../changelog';
-import { generateBranchName } from './branch-name';
 import { flattenUpdates } from './flatten';
 import { generateBranchConfig } from './generate';
 
@@ -32,7 +31,6 @@ export async function branchifyUpgrades(
   const branches: BranchConfig[] = [];
   for (const u of updates) {
     const update: BranchUpgradeConfig = { ...u } as any;
-    generateBranchName(update);
     branchUpgrades[update.branchName] = branchUpgrades[update.branchName] || [];
     branchUpgrades[update.branchName] = [update].concat(
       branchUpgrades[update.branchName]
