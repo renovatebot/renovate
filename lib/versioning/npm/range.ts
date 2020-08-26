@@ -116,6 +116,27 @@ export function getNewValue({
       if (element.operator.startsWith('<')) {
         return currentValue;
       }
+    } else {
+      const newRange = parseRange(currentValue);
+      const versions = newRange.map((x) => {
+        const subRange = x.semver;
+        const bumpedSubRange = getNewValue({
+          currentValue: subRange,
+          rangeStrategy: 'bump',
+          fromVersion,
+          toVersion,
+        });
+        if (satisfies(toVersion, bumpedSubRange)) {
+          return bumpedSubRange;
+        }
+        return getNewValue({
+          currentValue: subRange,
+          rangeStrategy: 'replace',
+          fromVersion,
+          toVersion,
+        });
+      });
+      return versions.filter((x) => x !== null && x !== '').join(' ');
     }
     logger.debug(
       'Unsupported range type for rangeStrategy=bump: ' + currentValue

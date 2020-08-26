@@ -1427,16 +1427,6 @@ export async function createPr({
   pr.displayNumber = `Pull Request #${pr.number}`;
   pr.branchName = branchName;
   await addLabels(pr.number, labels);
-  if (platformOptions.statusCheckVerify) {
-    logger.debug('Setting statusCheckVerify');
-    await setBranchStatus({
-      branchName,
-      context: `renovate/verify`,
-      description: `Renovate verified pull request`,
-      state: BranchStatus.green,
-      url: 'https://github.com/renovatebot/renovate',
-    });
-  }
   return pr;
 }
 

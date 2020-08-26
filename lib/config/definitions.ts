@@ -141,6 +141,15 @@ const options: RenovateOptions[] = [
     cli: false,
   },
   {
+    name: 'onboardingCommitMessage',
+    description:
+      'Change this value in order to override the default onboarding commit message.',
+    type: 'string',
+    default: null,
+    admin: true,
+    cli: false,
+  },
+  {
     name: 'onboardingPrTitle',
     description:
       'Change this value in order to override the default onboarding PR title.',
@@ -1104,12 +1113,6 @@ const options: RenovateOptions[] = [
     default: 'rebase',
   },
   {
-    name: 'statusCheckVerify',
-    description: 'Set a verify status check for all PRs',
-    type: 'boolean',
-    default: false,
-  },
-  {
     name: 'unpublishSafe',
     description: 'Set a status check for unpublish-safe upgrades',
     type: 'boolean',
@@ -1335,12 +1338,6 @@ const options: RenovateOptions[] = [
     mergeable: true,
   },
   // Dependency Groups
-  {
-    name: 'lazyGrouping',
-    description: 'Use group names only when multiple dependencies upgraded',
-    type: 'boolean',
-    default: true,
-  },
   {
     name: 'groupName',
     description: 'Human understandable name for the dependency group',

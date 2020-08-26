@@ -28,16 +28,12 @@ export async function extractDependencies(
   logger.debug('processRepo()');
   /* eslint-disable no-param-reassign */
   config.dependencyDashboardChecks = {};
+  const stringifiedConfig = JSON.stringify(config);
   // istanbul ignore next
   if (
     config.dependencyDashboard ||
-    config.dependencyDashboardApproval ||
-    config.prCreation === 'approval' ||
-    (config.packageRules &&
-      config.packageRules.some(
-        (rule) =>
-          rule.dependencyDashboardApproval || rule.prCreation === 'approval'
-      ))
+    stringifiedConfig.includes('"dependencyDashboardApproval":true') ||
+    stringifiedConfig.includes('"prCreation":"approval"')
   ) {
     config.dependencyDashboardTitle =
       config.dependencyDashboardTitle || `Dependency Dashboard`;

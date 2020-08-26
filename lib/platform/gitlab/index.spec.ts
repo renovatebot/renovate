@@ -1002,7 +1002,6 @@ describe('platform/gitlab', () => {
         labels: [],
         platformOptions: {
           azureAutoComplete: false,
-          statusCheckVerify: false,
           gitLabAutomerge: true,
         },
       });
