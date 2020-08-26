@@ -437,7 +437,7 @@ export function migrateConfig(
         is.array(val) &&
         val.length === 1
       ) {
-        migratedConfig[key] = `${val[0]}`;
+        migratedConfig[key] = String(val[0]);
       } else if (key === 'node' && (val as RenovateConfig).enabled === true) {
         isMigrated = true;
         delete migratedConfig.node.enabled;
