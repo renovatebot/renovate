@@ -71,7 +71,7 @@ export async function getDependency(
   }
 
   const testendpoint = (await http.get(VERSIONS_PATH));
-  const releases = {};
+  let releases = {};
 
   if (testendpoint.statusCode == 404 ) {
     // Let's try with the dependencies.json endpoint then
