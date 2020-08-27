@@ -13,9 +13,7 @@ import { getPrUpdatesTable } from './updates-table';
 function massageUpdateMetadata(config: BranchConfig): void {
   config.upgrades.forEach((upgrade) => {
     /* eslint-disable no-param-reassign */
-    const { sourceUrl, sourceDirectory } = upgrade;
-    const homepage = upgrade.homepage;
-    const changelogUrl = upgrade.changelogUrl;
+    const { homepage, sourceUrl, sourceDirectory, changelogUrl } = upgrade;
     let depNameLinked = upgrade.depName;
     const primaryLink = homepage || sourceUrl;
     if (primaryLink) {
