@@ -128,7 +128,7 @@ export async function updateArtifacts({
       },
     };
     const cmd = 'composer';
-    let args;
+    let args: string;
     if (config.isLockFileMaintenance) {
       args = 'install';
     } else {

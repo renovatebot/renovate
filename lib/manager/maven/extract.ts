@@ -183,7 +183,7 @@ export function extractPackage(
   if (propsNode?.children) {
     for (const propNode of propsNode.children as XmlElement[]) {
       const key = propNode.name;
-      const val = propNode.val && propNode.val.trim();
+      const val = propNode?.val?.trim();
       if (key && val) {
         const fileReplacePosition = propNode.position;
         props[key] = { val, fileReplacePosition, packageFile };

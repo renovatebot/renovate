@@ -220,7 +220,7 @@ export interface UpdateDependencyConfig {
 }
 
 export interface ManagerApi {
-  defaultConfig: object;
+  defaultConfig: Record<string, unknown>;
   language?: string;
   supportsLockFileMaintenance?: boolean;
 

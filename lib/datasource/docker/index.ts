@@ -175,7 +175,7 @@ async function getAuthHeaders(
     }
 
     // prettier-ignore
-    const authUrl = `${authenticateHeader.parms.realm}?service=${authenticateHeader.parms.service}&scope=repository:${repository}:pull`;
+    const authUrl = `${String(authenticateHeader.parms.realm)}?service=${String(authenticateHeader.parms.service)}&scope=repository:${repository}:pull`;
     logger.trace(
       `Obtaining docker registry token for ${repository} using url ${authUrl}`
     );
@@ -497,7 +497,7 @@ async function getLabels(
       return {};
     }
     let labels: Record<string, string> = {};
-    const configDigest = manifest.config.digest;
+    const configDigest: string = manifest.config.digest;
     const headers = await getAuthHeaders(registry, repository);
     // istanbul ignore if: Should never be happen
     if (!headers) {

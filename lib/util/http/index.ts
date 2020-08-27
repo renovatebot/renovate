@@ -34,7 +34,7 @@ export interface HttpPostOptions extends HttpOptions {
 }
 
 export interface InternalHttpOptions extends HttpOptions {
-  json?: object;
+  json?: Record<string, unknown>;
   responseType?: 'json';
   method?: 'get' | 'post' | 'put' | 'patch' | 'delete' | 'head';
 }

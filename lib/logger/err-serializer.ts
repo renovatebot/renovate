@@ -2,8 +2,20 @@ import is from '@sindresorhus/is';
 
 Error.stackTraceLimit = 20;
 
-// eslint-disable-next-lint @typescript-eslint/explicit-module-boundary-types
-export default function errSerializer(err: any): any {
+interface Err {
+  body?: unknown;
+  response?: {
+    body?: unknown;
+  };
+  message?: unknown;
+  stack?: unknown;
+  gotOptions?: {
+    auth?: unknown;
+    headers?: unknown;
+  };
+}
+
+export default function errSerializer(err: Err): any {
   const response = {
     ...err,
   };

@@ -14,7 +14,7 @@ export const defaultRegistryUrls = [
 ];
 export const registryStrategy = 'merge';
 
-const github_repo_pattern = /^https?:\/\/github\.com\/[^\\/]+\/[^\\/]+$/;
+const githubRepoPattern = /^https?:\/\/github\.com\/[^\\/]+\/[^\\/]+$/;
 const http = new Http(id);
 
 type PypiJSONRelease = {
@@ -82,7 +82,7 @@ async function getDependency(
 
   if (dep.info?.home_page) {
     dependency.homepage = dep.info.home_page;
-    if (github_repo_pattern.exec(dep.info.home_page)) {
+    if (githubRepoPattern.exec(dep.info.home_page)) {
       dependency.sourceUrl = dep.info.home_page.replace('http://', 'https://');
     }
   }
@@ -96,7 +96,7 @@ async function getDependency(
         (lower.startsWith('repo') ||
           lower === 'code' ||
           lower === 'source' ||
-          github_repo_pattern.exec(projectUrl))
+          githubRepoPattern.exec(projectUrl))
       ) {
         dependency.sourceUrl = projectUrl;
       }

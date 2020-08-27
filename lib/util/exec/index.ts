@@ -158,9 +158,10 @@ export async function exec(
       logger.trace({ err }, 'rawExec err');
       clearTimeout(timer);
       if (useDocker) {
-        await removeDockerContainer(docker.image).catch((removeErr) => {
+        await removeDockerContainer(docker.image).catch((removeErr: Error) => {
+          const message: string = err.message;
           throw new Error(
-            `Error: "${removeErr.message}" - Original Error: "${err.message}"`
+            `Error: "${removeErr.message}" - Original Error: "${message}"`
           );
         });
       }
