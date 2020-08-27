@@ -60,7 +60,9 @@ export interface BranchUpgradeConfig
   updatedArtifacts?: File[];
 
   logJSON?: ChangeLogResult;
+
   homepage?: string;
+  changelogUrl?: string;
   sourceUrl?: string;
 }
 
