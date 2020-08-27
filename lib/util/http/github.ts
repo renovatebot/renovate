@@ -257,7 +257,7 @@ export class GithubHttp extends Http<GithubHttpOptions, GithubHttpOptions> {
 
     const { paginate = true } = options;
     let count = options.count || 100;
-    let cursor = null;
+    let cursor: string = null;
 
     let isIterating = true;
     while (isIterating) {

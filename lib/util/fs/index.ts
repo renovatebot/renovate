@@ -60,18 +60,18 @@ export async function deleteLocalFile(fileName: string): Promise<void> {
 }
 
 // istanbul ignore next
-export async function ensureDir(dirName): Promise<void> {
+export async function ensureDir(dirName: string): Promise<void> {
   await fs.ensureDir(dirName);
 }
 
 // istanbul ignore next
-export async function ensureLocalDir(dirName): Promise<void> {
+export async function ensureLocalDir(dirName: string): Promise<void> {
   const localDirName = join(localDir, dirName);
   await fs.ensureDir(localDirName);
 }
 
 export async function ensureCacheDir(
-  dirName,
+  dirName: string,
   envPathVar?: string
 ): Promise<string> {
   const envCacheDirName = envPathVar ? process.env[envPathVar] : null;
