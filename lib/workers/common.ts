@@ -60,6 +60,8 @@ export interface BranchUpgradeConfig
   updatedArtifacts?: File[];
 
   logJSON?: ChangeLogResult;
+  homepage?: string;
+  changelogUrl?: string;
 }
 
 export enum PrResult {
