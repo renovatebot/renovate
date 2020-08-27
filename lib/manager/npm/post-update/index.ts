@@ -307,6 +307,7 @@ async function updateNpmrcContent(
   try {
     const newContent = newNpmrc.join('\n');
     if (newContent !== originalContent) {
+      logger.debug(`Writing updated .npmrc file to ${npmrcFilePath}`);
       await writeFile(npmrcFilePath, newContent);
     }
   } catch {
