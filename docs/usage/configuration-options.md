@@ -1189,6 +1189,12 @@ e.g. if you wish to add an extra Warning to major updates:
 }
 ```
 
+## prBodyTemplate
+
+This setting controls which sections are rendered in the body of the pull request.
+
+The available sections are header, table, notes, changelogs, configDescription, controls, footer.
+
 ## prConcurrentLimit
 
 This setting - if enabled - limits Renovate to a maximum of x concurrent PRs open at any time.
