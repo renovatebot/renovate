@@ -14,7 +14,7 @@ export async function getPrHourlyRemaining(
     const currentHourStart = moment({
       hour: moment().hour(),
     });
-    logger.debug('currentHourStart=' + currentHourStart);
+    logger.debug(`currentHourStart=${String(currentHourStart)}`);
     try {
       const soFarThisHour = prList.filter(
         (pr) =>

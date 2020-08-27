@@ -102,7 +102,7 @@ export async function pruneStaleBranches(
   const remainingBranches = renovateBranches.filter(
     (branch) => !branchList.includes(branch)
   );
-  logger.debug(`remainingBranches=${remainingBranches}`);
+  logger.debug(`remainingBranches=${String(remainingBranches)}`);
   if (remainingBranches.length === 0) {
     logger.debug('No branches to clean up');
     return;
