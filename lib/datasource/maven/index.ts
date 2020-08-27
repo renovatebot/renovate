@@ -181,7 +181,7 @@ function isValidArtifactsInfo(
   return versions.every((v) => info[v] !== undefined);
 }
 
-type ArtifactInfoResult = [string, boolean | null];
+type ArtifactInfoResult = [string, boolean | string | null];
 
 async function getArtifactInfo(
   version: string,
@@ -239,7 +239,14 @@ async function filterMissingArtifacts(
 
   return versions
     .filter((v) => artifactsInfo[v])
-    .map((version) => ({ version }));
+    .map((version) => {
+      const release: Release = { version };
+      const releaseTimestamp = artifactsInfo[version];
+      if (releaseTimestamp && typeof releaseTimestamp === 'string') {
+        release.releaseTimestamp = releaseTimestamp;
+      }
+      return release;
+    });
 }
 
 export async function getReleases({

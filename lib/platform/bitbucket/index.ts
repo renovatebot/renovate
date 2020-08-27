@@ -33,6 +33,7 @@ import { smartTruncate } from '../utils/pr-body';
 import { readOnlyIssueBody } from '../utils/read-only-issue-body';
 import * as comments from './comments';
 import * as utils from './utils';
+import { PrResponse, RepoInfoBody } from './utils';
 
 const bitbucketHttp = new BitbucketHttp();
 
@@ -100,7 +101,11 @@ export async function initRepo({
   let info: utils.RepoInfo;
   try {
     info = utils.repoInfoTransformer(
-      (await bitbucketHttp.getJson(`/2.0/repositories/${repository}`)).body
+      (
+        await bitbucketHttp.getJson<RepoInfoBody>(
+          `/2.0/repositories/${repository}`
+        )
+      ).body
     );
 
     if (optimizeForDisabled) {
@@ -228,22 +233,6 @@ async function isPrConflicted(prNo: number): Promise<boolean> {
   ).body;
 
   return utils.isConflicted(parseDiff(diff));
-}
-
-interface PrResponse {
-  id: string;
-  state: string;
-  links: {
-    commits: {
-      href: string;
-    };
-  };
-  source: {
-    branch: {
-      name: string;
-    };
-  };
-  reviewers: Array<any>;
 }
 
 // Gets details for a PR

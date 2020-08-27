@@ -81,7 +81,7 @@ export async function extractPackageFile(
   config: ExtractConfig
 ): Promise<PackageFile | null> {
   logger.trace({ packageFile }, 'nuget.extractPackageFile()');
-  const { isVersion } = get(config.versioning || semverVersioning.id);
+  const versioning = get(config.versioning || semverVersioning.id);
   const deps: PackageDependency[] = [];
 
   const registryUrls = await determineRegistryUrls(
@@ -148,7 +148,7 @@ export async function extractPackageFile(
       if (registryUrls) {
         dep.registryUrls = registryUrls;
       }
-      if (!isVersion(currentValue)) {
+      if (!versioning.isVersion(currentValue)) {
         dep.skipReason = SkipReason.NotAVersion;
       }
       deps.push(dep);

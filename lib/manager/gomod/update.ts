@@ -75,7 +75,7 @@ export function updateDependency({
         !newLine.includes(`/v${upgrade.newMajor}`)
       ) {
         // If package has no version, pin to latest one.
-        newLine = newLine.replace(depName, depName + '/v' + upgrade.newMajor);
+        newLine = newLine.replace(depName, `${depName}/v${upgrade.newMajor}`);
         if (/^v(0|1)\./.test(upgrade.currentValue)) {
           // Add version
           newLine = newLine.replace(
