@@ -34,7 +34,7 @@ Array [
     },
   },
   Object {
-    "cmd": "docker run --rm --name=renovate_cocoapods --label=renovate_child --user=ubuntu -v \\"/tmp/github/some/repo\\":\\"/tmp/github/some/repo\\" -v \\"/tmp/cache\\":\\"/tmp/cache\\" -e CP_HOME_DIR -w \\"/tmp/github/some/repo\\" renovate/cocoapods:1.2.4 bash -l -c \\"pod install\\"",
+    "cmd": "docker run --rm --name=renovate_cocoapods --label=renovate_child --user=ubuntu -v \\"/tmp/github/some/repo\\":\\"/tmp/github/some/repo\\" -v \\"/tmp/cache\\":\\"/tmp/cache\\" -e CP_HOME_DIR -w \\"/tmp/github/some/repo\\" renovate/cocoapods:1.2.4 bash -l -c \\"pod install --repo-update\\"",
     "options": Object {
       "cwd": "/tmp/github/some/repo",
       "encoding": "utf-8",
@@ -75,7 +75,7 @@ Array [
     },
   },
   Object {
-    "cmd": "docker run --rm --name=renovate_cocoapods --label=renovate_child --user=ubuntu -v \\"/tmp/github/some/repo\\":\\"/tmp/github/some/repo\\" -v \\"/tmp/cache\\":\\"/tmp/cache\\" -e CP_HOME_DIR -w \\"/tmp/github/some/repo\\" renovate/cocoapods:latest bash -l -c \\"pod install\\"",
+    "cmd": "docker run --rm --name=renovate_cocoapods --label=renovate_child --user=ubuntu -v \\"/tmp/github/some/repo\\":\\"/tmp/github/some/repo\\" -v \\"/tmp/cache\\":\\"/tmp/cache\\" -e CP_HOME_DIR -w \\"/tmp/github/some/repo\\" renovate/cocoapods:latest bash -l -c \\"pod install --repo-update\\"",
     "options": Object {
       "cwd": "/tmp/github/some/repo",
       "encoding": "utf-8",
@@ -104,7 +104,7 @@ exports[`.updateArtifacts() returns null if no updatedDeps were provided 1`] = `
 exports[`.updateArtifacts() returns null if unchanged 1`] = `
 Array [
   Object {
-    "cmd": "pod install",
+    "cmd": "pod install --repo-update",
     "options": Object {
       "cwd": "/tmp/github/some/repo",
       "encoding": "utf-8",
@@ -140,7 +140,7 @@ Array [
 exports[`.updateArtifacts() returns pod exec error 2`] = `
 Array [
   Object {
-    "cmd": "pod install",
+    "cmd": "pod install --repo-update",
     "options": Object {
       "cwd": "/tmp/github/some/repo",
       "encoding": "utf-8",
@@ -192,7 +192,7 @@ Array [
     },
   },
   Object {
-    "cmd": "docker run --rm --name=renovate_cocoapods --label=renovate_child -v \\"/tmp/github/some/repo\\":\\"/tmp/github/some/repo\\" -v \\"/tmp/cache\\":\\"/tmp/cache\\" -e CP_HOME_DIR -w \\"/tmp/github/some/repo\\" renovate/cocoapods bash -l -c \\"gem install cocoapods-acknowledgements && pod install\\"",
+    "cmd": "docker run --rm --name=renovate_cocoapods --label=renovate_child -v \\"/tmp/github/some/repo\\":\\"/tmp/github/some/repo\\" -v \\"/tmp/cache\\":\\"/tmp/cache\\" -e CP_HOME_DIR -w \\"/tmp/github/some/repo\\" renovate/cocoapods bash -l -c \\"gem install cocoapods-acknowledgements && pod install --repo-update\\"",
     "options": Object {
       "cwd": "/tmp/github/some/repo",
       "encoding": "utf-8",
@@ -256,7 +256,7 @@ Array [
     },
   },
   Object {
-    "cmd": "docker run --rm --name=renovate_cocoapods --label=renovate_child -v \\"/tmp/github/some/repo\\":\\"/tmp/github/some/repo\\" -v \\"/tmp/cache\\":\\"/tmp/cache\\" -e CP_HOME_DIR -w \\"/tmp/github/some/repo\\" renovate/cocoapods bash -l -c \\"pod install\\"",
+    "cmd": "docker run --rm --name=renovate_cocoapods --label=renovate_child -v \\"/tmp/github/some/repo\\":\\"/tmp/github/some/repo\\" -v \\"/tmp/cache\\":\\"/tmp/cache\\" -e CP_HOME_DIR -w \\"/tmp/github/some/repo\\" renovate/cocoapods bash -l -c \\"pod install --repo-update\\"",
     "options": Object {
       "cwd": "/tmp/github/some/repo",
       "encoding": "utf-8",
