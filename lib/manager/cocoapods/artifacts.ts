@@ -66,7 +66,7 @@ export async function updateArtifacts({
   );
   const tagConstraint = match?.groups?.cocoapodsVersion ?? null;
 
-  const cmd = [...getPluginCommands(newPackageFileContent), 'pod install'];
+  const cmd = [...getPluginCommands(newPackageFileContent), 'pod install --repo-update'];
   const execOptions: ExecOptions = {
     cwdFile: packageFileName,
     extraEnv: {
