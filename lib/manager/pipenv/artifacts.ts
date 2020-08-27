@@ -27,10 +27,13 @@ function getPythonConstraint(
   try {
     const pipfileLock = JSON.parse(existingLockFileContent);
     if (pipfileLock?._meta?.requires?.python_version) {
-      return `== ${pipfileLock._meta.requires.python_version}.*`;
+      const pythonVersion: string = pipfileLock._meta.requires.python_version;
+      return `== ${pythonVersion}.*`;
     }
     if (pipfileLock?._meta?.requires?.python_full_version) {
-      return `== ${pipfileLock._meta.requires.python_full_version}`;
+      const pythonFullVersion: string =
+        pipfileLock._meta.requires.python_full_version;
+      return `== ${pythonFullVersion}`;
     }
   } catch (err) {
     // Do nothing

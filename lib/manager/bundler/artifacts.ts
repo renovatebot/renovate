@@ -154,7 +154,7 @@ export async function updateArtifacts(
       },
     ];
   } catch (err) /* istanbul ignore next */ {
-    const output = `${err.stdout}\n${err.stderr}`;
+    const output = `${String(err.stdout)}\n${String(err.stderr)}`;
     if (
       err.message.includes('fatal: Could not parse object') ||
       output.includes('but that version could not be found')
@@ -223,7 +223,7 @@ export async function updateArtifacts(
       {
         artifactError: {
           lockFile: lockFileName,
-          stderr: `${err.stdout}\n${err.stderr}`,
+          stderr: `${String(err.stdout)}\n${String(err.stderr)}`,
         },
       },
     ];
