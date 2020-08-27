@@ -64,7 +64,6 @@ export async function extract(
     packageFiles = cachedExtract.packageFiles;
   } else {
     packageFiles = await extractAllDependencies(config);
-    cache.scan = cache.scan || Object.create({});
     cache.scan[baseBranch] = {
       sha: baseBranchSha,
       configHash,

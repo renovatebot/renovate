@@ -6,8 +6,6 @@ import * as repositoryCache from '../../../util/cache/repository';
 export async function initializeCaches(config: RenovateConfig): Promise<void> {
   memCache.init();
   await repositoryCache.initialize(config);
-  const cache = repositoryCache.getCache();
-  cache.init = cache.init || {};
 }
 
 export function getResolvedConfig(
