@@ -61,7 +61,7 @@ export interface BranchUpgradeConfig
 
   logJSON?: ChangeLogResult;
   homepage?: string;
-  changelogUrl?: string;
+  sourceUrl?: string;
 }
 
 export enum PrResult {
