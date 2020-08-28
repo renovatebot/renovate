@@ -1,4 +1,7 @@
-import { CONFIG_SECRETS_INVALID } from '../constants/error-messages';
+import {
+  CONFIG_SECRETS_INVALID,
+  CONFIG_VALIDATION,
+} from '../constants/error-messages';
 import { applySecretsToConfig, validateConfigSecrets } from './secrets';
 
 describe('config/secrets', () => {
@@ -28,6 +31,12 @@ describe('config/secrets', () => {
         })
       ).toThrow(CONFIG_SECRETS_INVALID);
     });
+    it('throws if an unknown secret is used', () => {
+      const config = {
+        npmToken: '{{ secrets.ARTIFACTORY_TOKEN }}',
+      };
+      expect(() => applySecretsToConfig(config)).toThrow(CONFIG_VALIDATION);
+    });
     it('replaces secrets in the top level', () => {
       const config = {
         secrets: { ARTIFACTORY_TOKEN: 'abc123==' },
@@ -41,6 +50,26 @@ describe('config/secrets', () => {
       const config = {
         secrets: { ARTIFACTORY_TOKEN: 'abc123==' },
         npm: { npmToken: '{{ secrets.ARTIFACTORY_TOKEN }}' },
+      };
+      const res = applySecretsToConfig(config);
+      expect(res).toMatchSnapshot();
+      expect(Object.keys(res)).not.toContain('secrets');
+    });
+    it('replaces secrets in a array of objects', () => {
+      const config = {
+        secrets: { ARTIFACTORY_TOKEN: 'abc123==' },
+        hostRules: [
+          { hostType: 'npm', token: '{{ secrets.ARTIFACTORY_TOKEN }}' },
+        ],
+      };
+      const res = applySecretsToConfig(config);
+      expect(res).toMatchSnapshot();
+      expect(Object.keys(res)).not.toContain('secrets');
+    });
+    it('replaces secrets in a array of strings', () => {
+      const config = {
+        secrets: { SECRET_MANAGER: 'npm' },
+        allowedManagers: ['{{ secrets.SECRET_MANAGER }}'],
       };
       const res = applySecretsToConfig(config);
       expect(res).toMatchSnapshot();
