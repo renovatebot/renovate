@@ -169,12 +169,12 @@ Warning: this is an experimental feature and may be modified or removed in a fut
 
 ## secrets
 
-Secrets may be configured by a bot admin, which will then make them available for templating within repository configs. For example, to configure an `NPM_TOKEN` to be accessible by all repositories:
+Secrets may be configured by a bot admin, which will then make them available for templating within repository configs. For example, to configure a `GOOGLE_TOKEN` to be accessible by all repositories:
 
 ```js
 module.exports = {
   secrets: {
-    NPM_TOKEN: 'abc123',
+    GOOGLE_TOKEN: 'abc123',
   },
 };
 ```
@@ -183,9 +183,16 @@ It could then be used in a repository config or preset like so:
 
 ```json
 {
-  "npmToken": "{{ secrets.NPM_TOKEN }}"
+  "hostRules": [
+    {
+      "domainName": "google.com",
+      "token": "{{ secrets.GOOGLE_TOKEN }}"
+    }
+  ]
 }
 ```
+
+Secret names must start with a upper or lower case character and can contain only characters, digits, or underscores.
 
 ## skipInstalls
 

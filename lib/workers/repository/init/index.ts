@@ -1,5 +1,5 @@
 import { RenovateConfig } from '../../../config';
-import { replaceSecretsinObject } from '../../../config/secrets';
+import { applySecretsToConfig } from '../../../config/secrets';
 import { logger } from '../../../logger';
 import { platform } from '../../../platform';
 import * as memCache from '../../../util/cache/memory';
@@ -40,7 +40,7 @@ export async function initRepo(
   config = await initApis(config);
   config = await getRepoConfig(config);
   checkIfConfigured(config);
-  config = replaceSecretsinObject(config);
+  config = applySecretsToConfig(config);
   await setBranchPrefix(config.branchPrefix);
   config = await detectVulnerabilityAlerts(config);
   // istanbul ignore if

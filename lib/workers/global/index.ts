@@ -2,7 +2,7 @@ import path from 'path';
 import is from '@sindresorhus/is';
 import fs from 'fs-extra';
 import * as configParser from '../../config';
-import { validateSecrets } from '../../config/secrets';
+import { validateConfigSecrets } from '../../config/secrets';
 import { getErrors, logger, setMeta } from '../../logger';
 import { setUtilConfig } from '../../util';
 import * as hostRules from '../../util/host-rules';
@@ -51,7 +51,7 @@ export async function start(): Promise<0 | 1> {
     // initialize all submodules
     config = await globalInitialize(config);
     // validate secrets. Will throw and abort if invalid
-    validateSecrets(config.secrets);
+    validateConfigSecrets(config.secrets);
     // autodiscover repositories (needs to come after platform initialization)
     config = await autodiscoverRepositories(config);
     // Iterate through repositories sequentially

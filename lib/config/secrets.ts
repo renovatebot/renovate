@@ -13,7 +13,7 @@ const secretNamePattern = '[A-Za-z][A-Za-z0-9_]*';
 const secretNameRegex = regEx(`^${secretNamePattern}$`);
 const secretTemplateRegex = regEx(`{{ secrets\\.(${secretNamePattern}) }}`);
 
-export function validateSecrets(secrets_: unknown): void {
+function validateSecrets(secrets_: unknown): void {
   if (!secrets_) {
     return;
   }
@@ -50,7 +50,7 @@ export function validateConfigSecrets(config: RenovateAdminConfig): void {
   }
 }
 
-export function replaceSecretsInString(
+function replaceSecretsInString(
   value: string,
   secrets: Record<string, string>
 ): string {
@@ -68,7 +68,7 @@ export function replaceSecretsInString(
   });
 }
 
-export function replaceSecretsinObject(
+function replaceSecretsinObject(
   config_: RenovateConfig,
   secrets: Record<string, string> = {}
 ): RenovateConfig {
