@@ -149,7 +149,7 @@ describe('logger', () => {
       prBody: 'test',
       secrets: {
         foo: 'barsecret',
-      }
+      },
     });
 
     expect(logged.foo).not.toEqual('secret"password');
