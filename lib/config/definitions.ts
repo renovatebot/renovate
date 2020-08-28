@@ -176,7 +176,7 @@ const options: RenovateOptions[] = [
   },
   {
     name: 'secrets',
-    description: 'Object containing secret names values',
+    description: 'Object containing secret name/value pairs',
     type: 'object',
     admin: true,
     mergeable: true,

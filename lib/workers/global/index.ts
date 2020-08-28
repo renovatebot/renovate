@@ -51,7 +51,7 @@ export async function start(): Promise<0 | 1> {
     // initialize all submodules
     config = await globalInitialize(config);
     // validate secrets. Will throw and abort if invalid
-    validateConfigSecrets(config.secrets);
+    validateConfigSecrets(config);
     // autodiscover repositories (needs to come after platform initialization)
     config = await autodiscoverRepositories(config);
     // Iterate through repositories sequentially
