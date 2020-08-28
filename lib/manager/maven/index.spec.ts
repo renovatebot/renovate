@@ -2,9 +2,9 @@ import { readFileSync } from 'fs';
 import { fs } from '../../../test/util';
 import { PackageDependency, PackageFile } from '../common';
 import { extractPackage, resolveParents } from './extract';
-import { extractAllPackageFiles, updateDependency } from './index';
+import { extractAllPackageFiles, updateDependency } from '.';
 
-jest.mock('../../util/gitfs/fs');
+jest.mock('../../util/fs');
 
 const pomContent = readFileSync(
   'lib/manager/maven/__fixtures__/simple.pom.xml',
@@ -115,6 +115,7 @@ describe('manager/maven', () => {
           expect(depUrls).toEqual(urls);
         });
       });
+      expect(packages).toMatchSnapshot();
     });
 
     it('should not touch content if new and old versions are equal', () => {
@@ -217,9 +218,7 @@ describe('manager/maven', () => {
     it('should preserve ranges', () => {
       const newValue = '[1.0.0]';
       const select = (depSet: PackageFile) =>
-        depSet && depSet.deps
-          ? selectDep(depSet.deps, 'org.example:hard-range')
-          : null;
+        depSet?.deps ? selectDep(depSet.deps, 'org.example:hard-range') : null;
       const oldContent = extractPackage(pomContent);
       const dep = select(oldContent);
       expect(dep).not.toBeNull();

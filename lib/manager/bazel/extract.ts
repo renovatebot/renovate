@@ -79,6 +79,7 @@ function parseContent(content: string): string[] {
   return [
     'container_pull',
     'http_archive',
+    'http_file',
     'go_repository',
     'git_repository',
   ].reduce(
@@ -98,10 +99,13 @@ function parseContent(content: string): string[] {
   );
 }
 
-export function extractPackageFile(content: string): PackageFile | null {
+export function extractPackageFile(
+  content: string,
+  fileName?: string
+): PackageFile | null {
   const definitions = parseContent(content);
   if (!definitions.length) {
-    logger.debug('No matching WORKSPACE definitions found');
+    logger.debug({ fileName }, 'No matching bazel WORKSPACE definitions found');
     return null;
   }
   logger.debug({ definitions }, `Found ${definitions.length} definitions`);
@@ -215,7 +219,7 @@ export function extractPackageFile(content: string): PackageFile | null {
       }
       deps.push(dep);
     } else if (
-      depType === 'http_archive' &&
+      (depType === 'http_archive' || depType === 'http_file') &&
       depName &&
       parseUrl(url) &&
       sha256

@@ -1,14 +1,12 @@
 import { Stats } from 'fs';
-import * as os from 'os';
-import * as fs from 'fs-extra';
+import { stat } from 'fs-extra';
 import upath from 'upath';
 import { LANGUAGE_JAVA } from '../../constants/languages';
 import * as datasourceMaven from '../../datasource/maven';
 import { logger } from '../../logger';
 import { ExternalHostError } from '../../types/errors/external-host-error';
 import { ExecOptions, exec } from '../../util/exec';
-import { BinarySource } from '../../util/exec/common';
-import { readLocalFile } from '../../util/gitfs';
+import { readLocalFile } from '../../util/fs';
 import * as gradleVersioning from '../../versioning/gradle';
 import {
   ExtractConfig,
@@ -26,43 +24,11 @@ import {
   createRenovateGradlePlugin,
   extractDependenciesFromUpdatesReport,
 } from './gradle-updates-report';
+import { extraEnv, gradleWrapperFileName, prepareGradleCommand } from './utils';
 
 export const GRADLE_DEPENDENCY_REPORT_OPTIONS =
   '--init-script renovate-plugin.gradle renovate';
 const TIMEOUT_CODE = 143;
-
-export function gradleWrapperFileName(config: ExtractConfig): string {
-  if (
-    os.platform() === 'win32' &&
-    config?.binarySource !== BinarySource.Docker
-  ) {
-    return 'gradlew.bat';
-  }
-  return './gradlew';
-}
-
-export async function prepareGradleCommand(
-  gradlewName: string,
-  cwd: string,
-  gradlew: Stats | null,
-  args: string | null
-): Promise<string> {
-  /* eslint-disable no-bitwise */
-  // istanbul ignore if
-  if (gradlew?.isFile() === true) {
-    // if the file is not executable by others
-    if ((gradlew.mode & 0o1) === 0) {
-      // add the execution permission to the owner, group and others
-      await fs.chmod(upath.join(cwd, gradlewName), gradlew.mode | 0o111);
-    }
-    if (args === null) {
-      return gradlewName;
-    }
-    return `${gradlewName} ${args}`;
-  }
-  /* eslint-enable no-bitwise */
-  return null;
-}
 
 async function prepareGradleCommandFallback(
   gradlewName: string,
@@ -100,6 +66,7 @@ export async function executeGradle(
     docker: {
       image: 'renovate/gradle',
     },
+    extraEnv,
   };
   try {
     logger.debug({ cmd }, 'Start gradle command');
@@ -124,9 +91,9 @@ export async function extractAllPackageFiles(
   for (const packageFile of packageFiles) {
     const dirname = upath.dirname(packageFile);
     const gradlewPath = upath.join(dirname, gradleWrapperFileName(config));
-    gradlew = await fs
-      .stat(upath.join(config.localDir, gradlewPath))
-      .catch(() => null);
+    gradlew = await stat(upath.join(config.localDir, gradlewPath)).catch(
+      () => null
+    );
 
     if (['build.gradle', 'build.gradle.kts'].includes(packageFile)) {
       rootBuildGradle = packageFile;

@@ -12,6 +12,7 @@ import {
 } from './resources';
 import {
   TerraformDependencyTypes,
+  TerraformManagerData,
   checkFileContainsDependency,
   getTerraformDependencyType,
 } from './util';
@@ -22,6 +23,7 @@ const contentCheckList = [
   'provider "',
   'required_providers ',
   ' "helm_release" ',
+  ' "docker_image" ',
 ];
 
 export function extractPackageFile(content: string): PackageFile | null {
@@ -29,7 +31,7 @@ export function extractPackageFile(content: string): PackageFile | null {
   if (!checkFileContainsDependency(content, contentCheckList)) {
     return null;
   }
-  let deps: PackageDependency[] = [];
+  let deps: PackageDependency<TerraformManagerData>[] = [];
   try {
     const lines = content.split('\n');
     for (let lineNumber = 0; lineNumber < lines.length; lineNumber += 1) {
@@ -70,7 +72,7 @@ export function extractPackageFile(content: string): PackageFile | null {
           }
           /* istanbul ignore next */
           default:
-            logger.warn(
+            logger.trace(
               `Could not identify TerraformDependencyType ${terraformDependency.groups.type} on line ${lineNumber}.`
             );
             break;

@@ -1,6 +1,7 @@
 import {
   RenovateConfig,
   defaultConfig,
+  git,
   partial,
   platform,
 } from '../../../../../test/util';
@@ -8,6 +9,8 @@ import { PackageFile } from '../../../../manager/common';
 import { Pr } from '../../../../platform';
 import { BranchConfig } from '../../../common';
 import { ensureOnboardingPr } from '.';
+
+jest.mock('../../../../util/git');
 
 describe('workers/repository/onboarding/pr', () => {
   describe('ensureOnboardingPr()', () => {
@@ -44,7 +47,6 @@ describe('workers/repository/onboarding/pr', () => {
         partial<Pr>({
           title: 'Configure Renovate',
           body: createPrBody,
-          isModified: false,
         })
       );
       await ensureOnboardingPr(config, packageFiles, branches);
@@ -58,9 +60,9 @@ describe('workers/repository/onboarding/pr', () => {
           title: 'Configure Renovate',
           body: createPrBody,
           isConflicted: true,
-          isModified: true,
         })
       );
+      git.isBranchModified.mockResolvedValueOnce(true);
       await ensureOnboardingPr(config, {}, branches);
       expect(platform.createPr).toHaveBeenCalledTimes(0);
       expect(platform.updatePr).toHaveBeenCalledTimes(1);
@@ -71,9 +73,9 @@ describe('workers/repository/onboarding/pr', () => {
         partial<Pr>({
           title: 'Configure Renovate',
           body: createPrBody,
-          isModified: true,
         })
       );
+      git.isBranchModified.mockResolvedValueOnce(true);
       await ensureOnboardingPr(config, {}, branches);
       expect(platform.createPr).toHaveBeenCalledTimes(0);
       expect(platform.updatePr).toHaveBeenCalledTimes(1);

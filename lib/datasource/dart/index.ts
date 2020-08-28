@@ -14,6 +14,7 @@ export async function getReleases({
   interface DartResult {
     versions?: {
       version: string;
+      published?: string;
     }[];
     latest?: {
       pubspec?: { homepage?: string; repository?: string };
@@ -33,12 +34,15 @@ export async function getReleases({
     throw err;
   }
 
-  const body = raw && raw.body;
+  const body = raw?.body;
   if (body) {
     const { versions, latest } = body;
     if (versions && latest) {
       result = {
-        releases: body.versions.map(({ version }) => ({ version })),
+        releases: body.versions.map(({ version, published }) => ({
+          version,
+          releaseTimestamp: published,
+        })),
       };
 
       const pubspec = latest.pubspec;

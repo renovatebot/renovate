@@ -1,7 +1,7 @@
 import { readFileSync } from 'fs';
 import path from 'path';
 import { getConfig } from '../../../config/defaults';
-import * as _fs from '../../../util/gitfs/fs';
+import * as _fs from '../../../util/fs';
 import * as npmExtract from '.';
 
 const fs: any = _fs;

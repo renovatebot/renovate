@@ -55,7 +55,10 @@ export async function validateConfig(
     return ignoredNodes.includes(key);
   }
 
-  function validateAliasObject(key: string, val: object): boolean {
+  function validateAliasObject(
+    key: string,
+    val: Record<string, unknown>
+  ): boolean {
     if (key === 'aliases') {
       for (const value of Object.values(val)) {
         if (!is.urlString(value)) {
@@ -208,6 +211,7 @@ export async function validateConfig(
               'excludePackagePatterns',
               'sourceUrlPrefixes',
               'updateTypes',
+              'matchCurrentVersion',
             ];
             if (key === 'packageRules') {
               for (const packageRule of val) {
@@ -251,7 +255,8 @@ export async function validateConfig(
                 'datasourceTemplate',
                 'versioningTemplate',
               ];
-              for (const regexManager of val) {
+              // TODO: fix types
+              for (const regexManager of val as any[]) {
                 if (
                   Object.keys(regexManager).some(
                     (k) => !allowedKeys.includes(k)
@@ -283,7 +288,9 @@ export async function validateConfig(
                     } catch (e) {
                       errors.push({
                         depName: 'Configuration Error',
-                        message: `Invalid regExp for ${currentPath}: \`${matchString}\``,
+                        message: `Invalid regExp for ${currentPath}: \`${String(
+                          matchString
+                        )}\``,
                       });
                     }
                   }
@@ -311,7 +318,7 @@ export async function validateConfig(
               }
             }
             if (key === 'packagePatterns' || key === 'excludePackagePatterns') {
-              for (const pattern of val) {
+              for (const pattern of val as string[]) {
                 if (pattern !== '*') {
                   try {
                     regEx(pattern);
@@ -325,7 +332,7 @@ export async function validateConfig(
               }
             }
             if (key === 'fileMatch') {
-              for (const fileMatch of val) {
+              for (const fileMatch of val as string[]) {
                 try {
                   regEx(fileMatch);
                 } catch (e) {
@@ -355,7 +362,7 @@ export async function validateConfig(
             });
           }
         } else if (type === 'object' && currentPath !== 'compatibility') {
-          if (is.object(val)) {
+          if (is.plainObject(val)) {
             if (key === 'aliases') {
               if (!validateAliasObject(key, val)) {
                 errors.push({

@@ -10,7 +10,7 @@ import {
   deleteLocalFile,
   getSiblingFileName,
   readLocalFile,
-} from '../../../util/gitfs';
+} from '../../../util/fs';
 import * as nodeVersioning from '../../../versioning/node';
 import { isValid, isVersion } from '../../../versioning/npm';
 import {
@@ -102,7 +102,7 @@ export async function extractPackageFile(
     await deleteLocalFile(npmrcFileName);
   } else {
     npmrc = await readLocalFile(npmrcFileName, 'utf8');
-    if (npmrc && npmrc.includes('package-lock')) {
+    if (npmrc?.includes('package-lock')) {
       logger.debug('Stripping package-lock setting from npmrc');
       npmrc = npmrc.replace(/(^|\n)package-lock.*?(\n|$)/g, '\n');
     }
@@ -118,7 +118,10 @@ export async function extractPackageFile(
     }
   }
   const yarnrcFileName = getSiblingFileName(fileName, '.yarnrc');
-  const yarnrc = (await readLocalFile(yarnrcFileName, 'utf8')) || undefined;
+  let yarnrc;
+  if (!is.string(config.yarnrc)) {
+    yarnrc = (await readLocalFile(yarnrcFileName, 'utf8')) || undefined;
+  }
 
   let lernaDir: string;
   let lernaPackages: string[];

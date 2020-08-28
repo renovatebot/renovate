@@ -1,4 +1,5 @@
 import * as httpMock from '../../../../test/httpMock';
+import { getName } from '../../../../test/util';
 import { PLATFORM_TYPE_GITLAB } from '../../../constants/platforms';
 import * as hostRules from '../../../util/host-rules';
 import * as semverVersioning from '../../../versioning/semver';
@@ -30,7 +31,7 @@ const upgrade: BranchUpgradeConfig = {
 
 const baseUrl = 'https://gitlab.com/';
 
-describe('workers/pr/changelog', () => {
+describe(getName(__filename), () => {
   describe('getChangeLogJSON', () => {
     beforeEach(() => {
       httpMock.setup();
@@ -83,7 +84,7 @@ describe('workers/pr/changelog', () => {
     it('uses GitLab tags', async () => {
       httpMock
         .scope(baseUrl)
-        .get('/api/v4/projects/meno%2Fdropzone/repository/tags')
+        .get('/api/v4/projects/meno%2fdropzone/repository/tags?per_page=100')
         .reply(200, [
           { name: 'v5.2.0' },
           { name: 'v5.4.0' },
@@ -93,7 +94,7 @@ describe('workers/pr/changelog', () => {
           { name: 'v5.7.0' },
         ])
         .persist()
-        .get('/api/v4/projects/meno/dropzone/repository/tree/')
+        .get('/api/v4/projects/meno%2fdropzone/repository/tree?per_page=100')
         .reply(200, [])
         .persist()
         .get('/api/v4/projects/meno%2fdropzone/releases?per_page=100')
@@ -108,10 +109,10 @@ describe('workers/pr/changelog', () => {
     it('handles empty GitLab tags response', async () => {
       httpMock
         .scope(baseUrl)
-        .get('/api/v4/projects/meno%2Fdropzone/repository/tags')
+        .get('/api/v4/projects/meno%2fdropzone/repository/tags?per_page=100')
         .reply(200, [])
         .persist()
-        .get('/api/v4/projects/meno/dropzone/repository/tree/')
+        .get('/api/v4/projects/meno%2fdropzone/repository/tree?per_page=100')
         .reply(200, [])
         .persist()
         .get('/api/v4/projects/meno%2fdropzone/releases?per_page=100')
@@ -126,10 +127,10 @@ describe('workers/pr/changelog', () => {
     it('uses GitLab tags with error', async () => {
       httpMock
         .scope(baseUrl)
-        .get('/api/v4/projects/meno%2Fdropzone/repository/tags')
+        .get('/api/v4/projects/meno%2fdropzone/repository/tags?per_page=100')
         .replyWithError('Unknown GitLab Repo')
         .persist()
-        .get('/api/v4/projects/meno/dropzone/repository/tree/')
+        .get('/api/v4/projects/meno%2fdropzone/repository/tree?per_page=100')
         .reply(200, [])
         .persist()
         .get('/api/v4/projects/meno%2fdropzone/releases?per_page=100')

@@ -1,11 +1,11 @@
 import crypto from 'crypto';
-import { expect, jest } from '@jest/globals';
+import { expect } from '@jest/globals';
 import { RenovateConfig as _RenovateConfig } from '../lib/config';
 import { getConfig } from '../lib/config/defaults';
 import { platform as _platform } from '../lib/platform';
 import * as _env from '../lib/util/exec/env';
-import * as _fs from '../lib/util/gitfs/fs';
-import * as _git from '../lib/util/gitfs/git';
+import * as _fs from '../lib/util/fs';
+import * as _git from '../lib/util/git';
 import * as _hostRules from '../lib/util/host-rules';
 
 /**

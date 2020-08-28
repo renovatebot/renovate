@@ -1,7 +1,7 @@
 import { ReleaseType } from 'semver';
 import { GlobalConfig, UpdateType, ValidationMessage } from '../config/common';
-import { File } from '../platform/common';
 import { RangeStrategy, SkipReason } from '../types';
+import { File } from '../util/git';
 
 export type Result<T> = T | Promise<T>;
 
@@ -22,7 +22,7 @@ export interface ExtractConfig extends ManagerConfig {
   gradle?: { timeout?: number };
   aliases?: Record<string, string>;
   ignoreNpmrcFile?: boolean;
-
+  yarnrc?: string;
   skipInstalls?: boolean;
   versioning?: string;
 }
@@ -167,10 +167,11 @@ export interface PackageDependency<T = Record<string, any>> extends Package<T> {
   sourceLine?: number;
   toVersion?: string;
   updates?: LookupUpdate[];
-  versionLine?: number;
   replaceString?: string;
   autoReplaceStringTemplate?: string;
   depIndex?: number;
+  editFile?: string;
+  separateMinorPatch?: boolean;
 }
 
 export interface Upgrade<T = Record<string, any>>
@@ -219,7 +220,7 @@ export interface UpdateDependencyConfig {
 }
 
 export interface ManagerApi {
-  defaultConfig: object;
+  defaultConfig: Record<string, unknown>;
   language?: string;
   supportsLockFileMaintenance?: boolean;
 

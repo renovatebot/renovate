@@ -1,5 +1,70 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
+exports[`datasource/pypi getReleases fall back from json and process data from simple endpoint 1`] = `
+Object {
+  "releases": Array [
+    Object {
+      "version": "0.1.2",
+    },
+    Object {
+      "version": "0.1.3",
+    },
+    Object {
+      "version": "0.1.4",
+    },
+    Object {
+      "version": "0.2.0",
+    },
+    Object {
+      "version": "0.2.1",
+    },
+    Object {
+      "version": "0.2.2",
+    },
+    Object {
+      "version": "0.3.0",
+    },
+    Object {
+      "version": "0.4.0",
+    },
+    Object {
+      "version": "0.4.1",
+    },
+    Object {
+      "version": "0.4.2",
+    },
+    Object {
+      "isDeprecated": true,
+      "version": "0.5.0",
+    },
+  ],
+}
+`;
+
+exports[`datasource/pypi getReleases fall back from json and process data from simple endpoint 2`] = `
+Array [
+  Object {
+    "headers": Object {
+      "accept": "application/json",
+      "accept-encoding": "gzip, deflate",
+      "host": "custom.pypi.net",
+      "user-agent": "https://github.com/renovatebot/renovate",
+    },
+    "method": "GET",
+    "url": "https://custom.pypi.net/foo/dj-database-url/json",
+  },
+  Object {
+    "headers": Object {
+      "accept-encoding": "gzip, deflate",
+      "host": "custom.pypi.net",
+      "user-agent": "https://github.com/renovatebot/renovate",
+    },
+    "method": "GET",
+    "url": "https://custom.pypi.net/foo/dj-database-url",
+  },
+]
+`;
+
 exports[`datasource/pypi getReleases find url from project_urls 1`] = `
 Array [
   Object {
@@ -11,6 +76,45 @@ Array [
     },
     "method": "GET",
     "url": "https://pypi.org/pypi/flexget/json",
+  },
+]
+`;
+
+exports[`datasource/pypi getReleases parses data-requires-python and respects compatibility from simple endpoint 1`] = `
+Object {
+  "releases": Array [
+    Object {
+      "version": "0.1.2",
+    },
+    Object {
+      "version": "0.1.3",
+    },
+    Object {
+      "version": "0.1.4",
+    },
+    Object {
+      "version": "0.2.0",
+    },
+    Object {
+      "version": "0.2.1",
+    },
+    Object {
+      "version": "0.2.2",
+    },
+  ],
+}
+`;
+
+exports[`datasource/pypi getReleases parses data-requires-python and respects compatibility from simple endpoint 2`] = `
+Array [
+  Object {
+    "headers": Object {
+      "accept-encoding": "gzip, deflate",
+      "host": "pypi.org",
+      "user-agent": "https://github.com/renovatebot/renovate",
+    },
+    "method": "GET",
+    "url": "https://pypi.org/simple/dj-database-url",
   },
 ]
 `;
@@ -49,6 +153,7 @@ Object {
       "version": "0.4.2",
     },
     Object {
+      "isDeprecated": true,
       "version": "0.5.0",
     },
   ],
@@ -103,6 +208,7 @@ Object {
       "version": "0.4.2",
     },
     Object {
+      "isDeprecated": true,
       "version": "0.5.0",
     },
   ],
@@ -231,6 +337,7 @@ Object {
       "version": "0.1.5",
     },
     Object {
+      "isDeprecated": true,
       "releaseTimestamp": "2018-05-07T17:59:09",
       "version": "0.1.6",
     },
@@ -317,6 +424,15 @@ Array [
     },
     "method": "GET",
     "url": "https://pypi.org/pypi/something/json",
+  },
+  Object {
+    "headers": Object {
+      "accept-encoding": "gzip, deflate",
+      "host": "pypi.org",
+      "user-agent": "https://github.com/renovatebot/renovate",
+    },
+    "method": "GET",
+    "url": "https://pypi.org/pypi/something",
   },
 ]
 `;
@@ -415,6 +531,16 @@ Array [
     },
     "method": "GET",
     "url": "https://second-index/foo/azure-cli-monitor/json",
+  },
+  Object {
+    "headers": Object {
+      "accept": "application/json",
+      "accept-encoding": "gzip, deflate",
+      "host": "third-index",
+      "user-agent": "https://github.com/renovatebot/renovate",
+    },
+    "method": "GET",
+    "url": "https://third-index/foo/azure-cli-monitor/json",
   },
 ]
 `;

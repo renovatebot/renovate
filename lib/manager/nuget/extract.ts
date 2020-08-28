@@ -1,11 +1,11 @@
 import * as path from 'path';
 import findUp from 'find-up';
-import { readFile } from 'fs-extra';
 import { XmlDocument } from 'xmldoc';
 import * as datasourceNuget from '../../datasource/nuget';
 import { logger } from '../../logger';
 import { SkipReason } from '../../types';
 import { clone } from '../../util/clone';
+import { readFile } from '../../util/fs';
 import { get } from '../../versioning';
 import * as semverVersioning from '../../versioning/semver';
 import { ExtractConfig, PackageDependency, PackageFile } from '../common';
@@ -74,14 +74,14 @@ async function determineRegistryUrls(
   return registryUrls;
 }
 
-const packageRe = /<(?:PackageReference|DotNetCliToolReference).*Include\s*=\s*"([^"]+)".*Version\s*=\s*"(?:[[])?(?:([^"(,[\]]+)\s*(?:,\s*[)\]]|])?)"/;
+const packageRe = /<(?:PackageReference|DotNetCliToolReference|GlobalPackageReference).*(?:Include|Update)\s*=\s*"(?<depName>[^"]+)".*(?:Version|VersionOverride)\s*=\s*"(?:[[])?(?:(?<currentValue>[^"(,[\]]+)\s*(?:,\s*[)\]]|])?)"/;
 export async function extractPackageFile(
   content: string,
   packageFile: string,
   config: ExtractConfig
 ): Promise<PackageFile | null> {
   logger.trace({ packageFile }, 'nuget.extractPackageFile()');
-  const { isVersion } = get(config.versioning || semverVersioning.id);
+  const versioning = get(config.versioning || semverVersioning.id);
   const deps: PackageDependency[] = [];
 
   const registryUrls = await determineRegistryUrls(
@@ -138,8 +138,7 @@ export async function extractPackageFile(
 
     const match = packageRe.exec(line);
     if (match) {
-      const depName = match[1];
-      const currentValue = match[2];
+      const { currentValue, depName } = match.groups;
       const dep: PackageDependency = {
         depType: 'nuget',
         depName,
@@ -149,7 +148,7 @@ export async function extractPackageFile(
       if (registryUrls) {
         dep.registryUrls = registryUrls;
       }
-      if (!isVersion(currentValue)) {
+      if (!versioning.isVersion(currentValue)) {
         dep.skipReason = SkipReason.NotAVersion;
       }
       deps.push(dep);

@@ -16,10 +16,10 @@ const manualChangelogUrls = {
       'https://github.com/gatsbyjs/gatsby/blob/master/packages/gatsby/CHANGELOG.md',
     'react-native':
       'https://github.com/react-native-community/react-native-releases/blob/master/CHANGELOG.md',
+    'zone.js':
+      'https://github.com/angular/angular/blob/master/packages/zone.js/CHANGELOG.md',
   },
   pypi: {
-    'pytest-django':
-      'https://pytest-django.readthedocs.io/en/latest/changelog.html#changelog',
     django: 'https://github.com/django/django/tree/master/docs/releases',
     djangorestframework:
       'https://www.django-rest-framework.org/community/release-notes/',
@@ -33,9 +33,14 @@ const manualChangelogUrls = {
       'https://django-debug-toolbar.readthedocs.io/en/latest/changes.html',
     'firebase-admin':
       'https://firebase.google.com/support/release-notes/admin/python',
-    requests:
-      'http://docs.python-requests.org/en/master/community/updates/#release-and-version-history',
+    requests: 'https://github.com/psf/requests/blob/master/HISTORY.md',
     wagtail: 'https://github.com/wagtail/wagtail/tree/master/docs/releases',
+  },
+  docker: {
+    'gitlab/gitlab-ce':
+      'https://gitlab.com/gitlab-org/omnibus-gitlab/-/blob/master/CHANGELOG.md',
+    'gitlab/gitlab-runner':
+      'https://gitlab.com/gitlab-org/gitlab-runner/-/blob/master/CHANGELOG.md',
   },
 };
 
@@ -48,7 +53,13 @@ const manualSourceUrls = {
       'https://github.com/hyper-expanse/library-release-workflows',
   },
   docker: {
+    'gcr.io/kaniko-project/executor':
+      'https://github.com/GoogleContainerTools/kaniko',
+    'gitlab/gitlab-ce': 'https://gitlab.com/gitlab-org/omnibus-gitlab',
+    'gitlab/gitlab-runner': 'https://gitlab.com/gitlab-org/gitlab-runner',
+    'hashicorp/terraform': 'https://github.com/hashicorp/terraform',
     node: 'https://github.com/nodejs/node',
+    traefik: 'https://github.com/containous/traefik',
   },
   kubernetes: {
     node: 'https://github.com/nodejs/node',
@@ -75,16 +86,10 @@ export function addMetaData(
     return;
   }
   const lookupNameLowercase = lookupName ? lookupName.toLowerCase() : null;
-  if (
-    manualChangelogUrls[datasource] &&
-    manualChangelogUrls[datasource][lookupNameLowercase]
-  ) {
+  if (manualChangelogUrls[datasource]?.[lookupNameLowercase]) {
     dep.changelogUrl = manualChangelogUrls[datasource][lookupNameLowercase];
   }
-  if (
-    manualSourceUrls[datasource] &&
-    manualSourceUrls[datasource][lookupNameLowercase]
-  ) {
+  if (manualSourceUrls[datasource]?.[lookupNameLowercase]) {
     dep.sourceUrl = manualSourceUrls[datasource][lookupNameLowercase];
   }
 

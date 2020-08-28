@@ -4,6 +4,7 @@ import AWS from 'aws-sdk';
 import hasha from 'hasha';
 import parseLinkHeader from 'parse-link-header';
 import wwwAuthenticate from 'www-authenticate';
+import { HOST_DISABLED } from '../../constants/error-messages';
 import { logger } from '../../logger';
 import { HostRule } from '../../types';
 import { ExternalHostError } from '../../types/errors/external-host-error';
@@ -89,7 +90,7 @@ export function getRegistryRepository(
     registry = `https://${registry}`;
   }
   const opts = hostRules.find({ hostType: id, url: registry });
-  if (opts && opts.insecureRegistry) {
+  if (opts?.insecureRegistry) {
     registry = registry.replace('https', 'http');
   }
   if (registry.endsWith('.docker.io') && !repository.includes('/')) {
@@ -119,10 +120,7 @@ function getECRAuthToken(
         resolve(null);
       } else {
         const authorizationToken =
-          data &&
-          data.authorizationData &&
-          data.authorizationData[0] &&
-          data.authorizationData[0].authorizationToken;
+          data?.authorizationData?.[0]?.authorizationToken;
         if (authorizationToken) {
           resolve(authorizationToken);
         } else {
@@ -155,7 +153,6 @@ async function getAuthHeaders(
     const opts: HostRule & {
       headers?: Record<string, string>;
     } = hostRules.find({ hostType: id, url: apiCheckUrl });
-    opts.json = true;
     if (ecrRegex.test(registry)) {
       const [, region] = ecrRegex.exec(registry);
       const auth = await getECRAuthToken(region, opts);
@@ -178,7 +175,7 @@ async function getAuthHeaders(
     }
 
     // prettier-ignore
-    const authUrl = `${authenticateHeader.parms.realm}?service=${authenticateHeader.parms.service}&scope=repository:${repository}:pull`;
+    const authUrl = `${String(authenticateHeader.parms.realm)}?service=${String(authenticateHeader.parms.service)}&scope=repository:${repository}:pull`;
     logger.trace(
       `Obtaining docker registry token for ${repository} using url ${authUrl}`
     );
@@ -229,6 +226,13 @@ async function getAuthHeaders(
     }
     if (err.statusCode >= 500 && err.statusCode < 600) {
       throw new ExternalHostError(err);
+    }
+    if (err.message === HOST_DISABLED) {
+      logger.trace(
+        { registry, dockerRepository: repository, err },
+        'Host disabled'
+      );
+      return null;
     }
     logger.warn(
       { registry, dockerRepository: repository, err },
@@ -404,10 +408,7 @@ async function getTags(
       const res = await http.getJson<{ tags: string[] }>(url, { headers });
       tags = tags.concat(res.body.tags);
       const linkHeader = parseLinkHeader(res.headers.link as string);
-      url =
-        linkHeader && linkHeader.next
-          ? URL.resolve(url, linkHeader.next.url)
-          : null;
+      url = linkHeader?.next ? URL.resolve(url, linkHeader.next.url) : null;
       page += 1;
     } while (url && page < 20);
     const cacheMinutes = 15;
@@ -449,7 +450,6 @@ async function getTags(
  *  - Return the labels for the requested image
  */
 
-// istanbul ignore next
 async function getLabels(
   registry: string,
   repository: string,
@@ -475,6 +475,7 @@ async function getLabels(
     // If getting the manifest fails here, then abort
     // This means that the latest tag doesn't have a manifest, which shouldn't
     // be possible
+    // istanbul ignore if
     if (!manifestResponse) {
       logger.debug(
         {
@@ -496,8 +497,9 @@ async function getLabels(
       return {};
     }
     let labels: Record<string, string> = {};
-    const configDigest = manifest.config.digest;
+    const configDigest: string = manifest.config.digest;
     const headers = await getAuthHeaders(registry, repository);
+    // istanbul ignore if: Should never be happen
     if (!headers) {
       logger.debug('No docker auth found - returning');
       return {};
@@ -519,7 +521,7 @@ async function getLabels(
     const cacheMinutes = 60;
     await packageCache.set(cacheNamespace, cacheKey, labels, cacheMinutes);
     return labels;
-  } catch (err) {
+  } catch (err) /* istanbul ignore next: should be tested in future */ {
     if (err instanceof ExternalHostError) {
       throw err;
     }
@@ -605,7 +607,6 @@ export async function getReleases({
 
   const latestTag = tags.includes('latest') ? 'latest' : tags[tags.length - 1];
   const labels = await getLabels(registry, repository, latestTag);
-  // istanbul ignore if
   if (labels && 'org.opencontainers.image.source' in labels) {
     ret.sourceUrl = labels['org.opencontainers.image.source'];
   }

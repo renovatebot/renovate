@@ -3,32 +3,44 @@ import { logger } from '../../../logger';
 import { platform } from '../../../platform';
 import * as memCache from '../../../util/cache/memory';
 import * as repositoryCache from '../../../util/cache/repository';
+import { clone } from '../../../util/clone';
+import { setBranchPrefix } from '../../../util/git';
 import { checkIfConfigured } from '../configured';
 import { checkOnboardingBranch } from '../onboarding/branch';
 import { initApis } from './apis';
-import { checkBaseBranch } from './base';
 import { mergeRenovateConfig } from './config';
 import { applySecrets } from './secrets';
 import { detectSemanticCommits } from './semantic';
 import { detectVulnerabilityAlerts } from './vulnerability';
 
-export async function initRepo(input: RenovateConfig): Promise<RenovateConfig> {
+function initializeConfig(config: RenovateConfig): RenovateConfig {
+  return { ...clone(config), errors: [], warnings: [], branchList: [] };
+}
+
+async function initializeCaches(config: RenovateConfig): Promise<void> {
   memCache.init();
-  await repositoryCache.initialize(input);
-  let config: RenovateConfig = {
-    ...input,
-    errors: [],
-    warnings: [],
-    branchList: [],
-  };
-  config = await initApis(config);
-  config.semanticCommits = await detectSemanticCommits(config);
+  await repositoryCache.initialize(config);
+}
+
+async function getRepoConfig(config_: RenovateConfig): Promise<RenovateConfig> {
+  let config = { ...config_ };
+  config.baseBranch = config.defaultBranch;
   config.baseBranchSha = await platform.setBaseBranch(config.baseBranch);
+  config.semanticCommits = await detectSemanticCommits(config);
   config = await checkOnboardingBranch(config);
   config = await mergeRenovateConfig(config);
+  return config;
+}
+
+export async function initRepo(
+  config_: RenovateConfig
+): Promise<RenovateConfig> {
+  let config: RenovateConfig = initializeConfig(config_);
+  await initializeCaches(config);
+  config = await initApis(config);
+  config = await getRepoConfig(config);
   checkIfConfigured(config);
-  config = await checkBaseBranch(config);
-  await platform.setBranchPrefix(config.branchPrefix);
+  await setBranchPrefix(config.branchPrefix);
   config = await detectVulnerabilityAlerts(config);
   config = applySecrets(config);
   // istanbul ignore if

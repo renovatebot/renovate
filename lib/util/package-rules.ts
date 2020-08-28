@@ -93,7 +93,7 @@ function matchesRule(inputConfig: Config, packageRule: PackageRule): boolean {
   if (depTypeList.length) {
     const isMatch =
       depTypeList.includes(depType) ||
-      (depTypes && depTypes.some((dt) => depTypeList.includes(dt)));
+      depTypes?.some((dt) => depTypeList.includes(dt));
     if (!isMatch) {
       return false;
     }
@@ -147,7 +147,7 @@ function matchesRule(inputConfig: Config, packageRule: PackageRule): boolean {
             : packagePattern
         );
         if (packageRegex.test(depName)) {
-          logger.trace(`${depName} matches against ${packageRegex}`);
+          logger.trace(`${depName} matches against ${String(packageRegex)}`);
           isMatch = true;
         }
       }
@@ -171,7 +171,7 @@ function matchesRule(inputConfig: Config, packageRule: PackageRule): boolean {
         pattern === '^*$' || pattern === '*' ? '.*' : pattern
       );
       if (packageRegex.test(depName)) {
-        logger.trace(`${depName} matches against ${packageRegex}`);
+        logger.trace(`${depName} matches against ${String(packageRegex)}`);
         isMatch = true;
       }
     }
@@ -181,8 +181,8 @@ function matchesRule(inputConfig: Config, packageRule: PackageRule): boolean {
     positiveMatch = true;
   }
   if (sourceUrlPrefixes.length) {
-    const isMatch = sourceUrlPrefixes.some(
-      (prefix) => sourceUrl && sourceUrl.startsWith(prefix)
+    const isMatch = sourceUrlPrefixes.some((prefix) =>
+      sourceUrl?.startsWith(prefix)
     );
     if (!isMatch) {
       return false;

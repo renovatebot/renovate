@@ -10,11 +10,11 @@ import * as presets from '../../../config/presets';
 import { CONFIG_VALIDATION } from '../../../constants/error-messages';
 import * as npmApi from '../../../datasource/npm';
 import { logger } from '../../../logger';
-import { platform } from '../../../platform';
 import { ExternalHostError } from '../../../types/errors/external-host-error';
 import { getCache } from '../../../util/cache/repository';
 import { clone } from '../../../util/clone';
-import { readLocalFile } from '../../../util/gitfs';
+import { readLocalFile } from '../../../util/fs';
+import { getFileList } from '../../../util/git';
 import * as hostRules from '../../../util/host-rules';
 import { flattenPackageRules } from './flatten';
 
@@ -23,7 +23,7 @@ export async function mergeRenovateConfig(
   config: RenovateConfig
 ): Promise<RenovateConfig> {
   let returnConfig = { ...config };
-  const fileList = await platform.getFileList();
+  const fileList = await getFileList();
   async function detectConfigFile(): Promise<string | null> {
     for (const fileName of configFileNames) {
       if (fileName === 'package.json') {
@@ -82,7 +82,7 @@ export async function mergeRenovateConfig(
         const error = new Error(CONFIG_VALIDATION);
         error.configFile = configFile;
         error.validationError = 'Invalid JSON5 (parsing failed)';
-        error.validationMessage = 'JSON5.parse error: ' + err.message;
+        error.validationMessage = `JSON5.parse error:  ${err.message}`;
         throw error;
       }
     } else {
@@ -117,7 +117,7 @@ export async function mergeRenovateConfig(
         const error = new Error(CONFIG_VALIDATION);
         error.configFile = configFile;
         error.validationError = 'Invalid JSON (parsing failed)';
-        error.validationMessage = 'JSON.parse error: ' + err.message;
+        error.validationMessage = `JSON.parse error:  ${err.message}`;
         throw error;
       }
     }
@@ -126,7 +126,7 @@ export async function mergeRenovateConfig(
   const cache = getCache();
   cache.init = {
     configFile,
-    contents: clone(renovateJson),
+    configFileContents: clone(renovateJson),
   };
   const migratedConfig = await migrateAndValidate(config, renovateJson);
   if (migratedConfig.errors.length) {
@@ -188,7 +188,7 @@ export async function mergeRenovateConfig(
   returnConfig.renovateJsonPresent = true;
   returnConfig.packageRules = flattenPackageRules(returnConfig.packageRules);
   // istanbul ignore if
-  if (returnConfig.ignorePaths && returnConfig.ignorePaths.length) {
+  if (returnConfig.ignorePaths?.length) {
     logger.debug(
       { ignorePaths: returnConfig.ignorePaths },
       `Found repo ignorePaths`

@@ -93,7 +93,7 @@ export function decryptConfig(
             decryptConfig(item as RenovateConfig, privateKey)
           );
         } else {
-          (decryptedConfig[key] as RenovateConfig[]).push(item);
+          (decryptedConfig[key] as unknown[]).push(item);
         }
       });
     } else if (is.object(val) && key !== 'content') {

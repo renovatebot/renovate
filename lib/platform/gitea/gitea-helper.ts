@@ -1,11 +1,10 @@
 import { URLSearchParams } from 'url';
-import { PR_STATE_CLOSED } from '../../constants/pull-requests';
-import { BranchStatus } from '../../types';
+import { BranchStatus, PrState } from '../../types';
 import { GiteaHttp, GiteaHttpOptions } from '../../util/http/gitea';
 
 const giteaHttp = new GiteaHttp();
 
-export type PRState = 'open' | 'closed' | 'all';
+export type PRState = PrState.Open | PrState.Closed | PrState.All;
 export type IssueState = 'open' | 'closed' | 'all';
 export type CommitStatusType =
   | 'pending'
@@ -33,6 +32,10 @@ export interface PR {
     sha: string;
     repo?: Repo;
   };
+  assignee?: {
+    login?: string;
+  };
+  assignees?: any[];
 }
 
 export interface Issue {
@@ -129,7 +132,7 @@ export type RepoSearchParams = {
   uid?: number;
 };
 
-export type IssueCreateParams = {} & IssueUpdateParams;
+export type IssueCreateParams = IssueUpdateParams;
 
 export type IssueUpdateParams = {
   title?: string;
@@ -164,7 +167,7 @@ export type PRMergeParams = {
   Do: PRMergeMethod;
 };
 
-export type CommentCreateParams = {} & CommentUpdateParams;
+export type CommentCreateParams = CommentUpdateParams;
 
 export type CommentUpdateParams = {
   body: string;
@@ -291,7 +294,7 @@ export async function closePR(
 ): Promise<void> {
   await updatePR(repoPath, idx, {
     ...options,
-    state: PR_STATE_CLOSED,
+    state: PrState.Closed,
   });
 }
 
@@ -452,7 +455,7 @@ export async function updateComment(
 }
 
 export async function deleteComment(
-  repoPath,
+  repoPath: string,
   idx: number,
   options?: GiteaHttpOptions
 ): Promise<void> {
@@ -461,7 +464,7 @@ export async function deleteComment(
 }
 
 export async function getComments(
-  repoPath,
+  repoPath: string,
   issue: number,
   options?: GiteaHttpOptions
 ): Promise<Comment[]> {

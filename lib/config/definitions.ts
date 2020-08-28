@@ -39,7 +39,7 @@ export interface RenovateOptionBase {
 }
 
 export interface RenovateArrayOption<
-  T extends string | number | object = object
+  T extends string | number | Record<string, unknown> = Record<string, unknown>
 > extends RenovateOptionBase {
   default?: T[];
   mergeable?: boolean;
@@ -77,7 +77,7 @@ export interface RenovateStringOption extends RenovateOptionBase {
 
 export interface RenovateObjectOption extends RenovateOptionBase {
   default?: any;
-  additionalProperties?: {} | boolean;
+  additionalProperties?: Record<string, unknown> | boolean;
   mergeable?: boolean;
   type: 'object';
 }
@@ -137,6 +137,15 @@ const options: RenovateOptions[] = [
       'Change this value in order to override the default onboarding branch name.',
     type: 'string',
     default: 'renovate/configure',
+    admin: true,
+    cli: false,
+  },
+  {
+    name: 'onboardingCommitMessage',
+    description:
+      'Change this value in order to override the default onboarding commit message.',
+    type: 'string',
+    default: null,
     admin: true,
     cli: false,
   },
@@ -398,32 +407,47 @@ const options: RenovateOptions[] = [
     default: false,
     admin: true,
   },
-  // Master Issue
+  // Dependency Dashboard
   {
-    name: 'masterIssue',
-    description: 'Whether to create a "Master Issue" within the repository.',
-    type: 'boolean',
-    default: false,
-  },
-  {
-    name: 'masterIssueApproval',
+    name: 'dependencyDashboard',
     description:
-      'Whether updates should require manual approval from within the Master Issue before creation.',
+      'Whether to create a "Dependency Dashboard" issue within the repository.',
     type: 'boolean',
     default: false,
   },
   {
-    name: 'masterIssueAutoclose',
+    name: 'dependencyDashboardApproval',
     description:
-      'Set to `true` and Renovate will autoclose the Master Issue if there are no updates.',
+      'Whether updates should require manual approval from within the Dependency Dashboard issue before creation.',
     type: 'boolean',
     default: false,
   },
   {
-    name: 'masterIssueTitle',
-    description: 'Title to use for the Master Issue',
+    name: 'dependencyDashboardAutoclose',
+    description:
+      'Set to `true` and Renovate will autoclose the Dependency Dashboard issue if there are no updates.',
+    type: 'boolean',
+    default: false,
+  },
+  {
+    name: 'dependencyDashboardTitle',
+    description: 'Title to use for the Dependency Dashboard issue',
     type: 'string',
-    default: `Update Dependencies (Renovate Bot)`,
+    default: `Dependency Dashboard`,
+  },
+  {
+    name: 'dependencyDashboardHeader',
+    description:
+      'Any text added here will be placed first in the Dependency Dashboard issue body.',
+    type: 'string',
+    default:
+      'This issue contains a list of Renovate updates and their statuses.',
+  },
+  {
+    name: 'dependencyDashboardFooter',
+    description:
+      'Any text added here will be placed last in the Dependency Dashboard issue body, with a divider separator before it.',
+    type: 'string',
   },
   {
     name: 'configWarningReuseIssue',
@@ -608,7 +632,6 @@ const options: RenovateOptions[] = [
     type: 'array',
     stage: 'package',
     cli: false,
-    env: false,
   },
   {
     name: 'gitAuthor',
@@ -1100,12 +1123,6 @@ const options: RenovateOptions[] = [
     default: 'rebase',
   },
   {
-    name: 'statusCheckVerify',
-    description: 'Set a verify status check for all PRs',
-    type: 'boolean',
-    default: false,
-  },
-  {
     name: 'unpublishSafe',
     description: 'Set a status check for unpublish-safe upgrades',
     type: 'boolean',
@@ -1200,7 +1217,7 @@ const options: RenovateOptions[] = [
     default: {
       groupName: null,
       schedule: [],
-      masterIssueApproval: false,
+      dependencyDashboardApproval: false,
       rangeStrategy: 'update-lockfile',
       commitMessageSuffix: '[SECURITY]',
     },
@@ -1289,6 +1306,15 @@ const options: RenovateOptions[] = [
     cli: false,
   },
   {
+    name: 'prBodyTemplate',
+    description:
+      'Pull Request body template. Controls which sections are rendered in the body.',
+    type: 'string',
+    default:
+      '{{{header}}}{{{table}}}{{{notes}}}{{{changelogs}}}{{{configDescription}}}{{{controls}}}{{{footer}}}',
+    cli: false,
+  },
+  {
     name: 'prTitle',
     description:
       'Pull Request title template (deprecated). Now uses commitMessage.',
@@ -1331,12 +1357,6 @@ const options: RenovateOptions[] = [
     mergeable: true,
   },
   // Dependency Groups
-  {
-    name: 'lazyGrouping',
-    description: 'Use group names only when multiple dependencies upgraded',
-    type: 'boolean',
-    default: true,
-  },
   {
     name: 'groupName',
     description: 'Human understandable name for the dependency group',
@@ -1663,6 +1683,16 @@ const options: RenovateOptions[] = [
     env: false,
   },
   {
+    name: 'enableHttp2',
+    description: 'Enable got http2 support.',
+    type: 'boolean',
+    stage: 'repository',
+    parent: 'hostRules',
+    default: false,
+    cli: false,
+    env: false,
+  },
+  {
     name: 'prBodyDefinitions',
     description: 'Table column definitions for use in PR tables',
     type: 'object',
@@ -1705,7 +1735,6 @@ const options: RenovateOptions[] = [
     default: ['deprecationWarningIssues'],
     allowedValues: [
       'prIgnoreNotification',
-      'prEditNotification',
       'branchAutomergeFailure',
       'lockFileErrors',
       'artifactErrors',

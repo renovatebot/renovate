@@ -9,6 +9,9 @@ const consulData: any = fs.readFileSync(
 const hashicorpReleases: any = fs.readFileSync(
   'lib/datasource/terraform-provider/__fixtures__/releaseBackendIndex.json'
 );
+const serviceDiscoveryResult: any = fs.readFileSync(
+  'lib/datasource/terraform-module/__fixtures__/service-discovery.json'
+);
 
 const primaryUrl = defaultRegistryUrls[0];
 const secondaryUrl = defaultRegistryUrls[1];
@@ -28,7 +31,9 @@ describe('datasource/terraform', () => {
       httpMock
         .scope(primaryUrl)
         .get('/v1/providers/hashicorp/azurerm')
-        .reply(200, {});
+        .reply(200, {})
+        .get('/.well-known/terraform.json')
+        .reply(200, serviceDiscoveryResult);
       httpMock.scope(secondaryUrl).get('/index.json').reply(200, {});
       expect(
         await getPkgReleases({
@@ -42,7 +47,9 @@ describe('datasource/terraform', () => {
       httpMock
         .scope(primaryUrl)
         .get('/v1/providers/hashicorp/azurerm')
-        .reply(404);
+        .reply(404)
+        .get('/.well-known/terraform.json')
+        .reply(200, serviceDiscoveryResult);
       httpMock.scope(secondaryUrl).get('/index.json').reply(404);
       expect(
         await getPkgReleases({
@@ -56,7 +63,9 @@ describe('datasource/terraform', () => {
       httpMock
         .scope(primaryUrl)
         .get('/v1/providers/hashicorp/azurerm')
-        .replyWithError('');
+        .replyWithError('')
+        .get('/.well-known/terraform.json')
+        .reply(200, serviceDiscoveryResult);
       httpMock.scope(secondaryUrl).get('/index.json').replyWithError('');
       expect(
         await getPkgReleases({
@@ -70,10 +79,30 @@ describe('datasource/terraform', () => {
       httpMock
         .scope(primaryUrl)
         .get('/v1/providers/hashicorp/azurerm')
-        .reply(200, JSON.parse(consulData));
+        .reply(200, JSON.parse(consulData))
+        .get('/.well-known/terraform.json')
+        .reply(200, serviceDiscoveryResult);
       const res = await getPkgReleases({
         datasource,
         depName: 'azurerm',
+      });
+      expect(res).toMatchSnapshot();
+      expect(res).not.toBeNull();
+      expect(httpMock.getTrace()).toMatchSnapshot();
+    });
+
+    it('processes real data from lookupName', async () => {
+      httpMock
+        .scope('https://registry.company.com')
+        .get('/v1/providers/hashicorp/azurerm')
+        .reply(200, JSON.parse(consulData))
+        .get('/.well-known/terraform.json')
+        .reply(200, serviceDiscoveryResult);
+      const res = await getPkgReleases({
+        datasource,
+        depName: 'azure',
+        lookupName: 'hashicorp/azurerm',
+        registryUrls: ['https://registry.company.com'],
       });
       expect(res).toMatchSnapshot();
       expect(res).not.toBeNull();
@@ -85,7 +114,9 @@ describe('datasource/terraform', () => {
         .get('/v1/providers/hashicorp/google-beta')
         .reply(404, {
           errors: ['Not Found'],
-        });
+        })
+        .get('/.well-known/terraform.json')
+        .reply(200, serviceDiscoveryResult);
       httpMock
         .scope(secondaryUrl)
         .get('/index.json')
@@ -105,7 +136,9 @@ describe('datasource/terraform', () => {
         .get('/v1/providers/hashicorp/google-beta')
         .reply(404, {
           errors: ['Not Found'],
-        });
+        })
+        .get('/.well-known/terraform.json')
+        .reply(200, serviceDiscoveryResult);
       httpMock.scope(secondaryUrl).get('/index.json').reply(404);
 
       const res = await getPkgReleases({
@@ -114,6 +147,17 @@ describe('datasource/terraform', () => {
       });
       expect(res).toMatchSnapshot();
       expect(res).toBeNull();
+    });
+    it('returns null for error in service discovery', async () => {
+      httpMock.scope(primaryUrl).get('/.well-known/terraform.json').reply(404);
+      httpMock.scope(secondaryUrl).get('/index.json').replyWithError('');
+      expect(
+        await getPkgReleases({
+          datasource,
+          depName: 'azurerm',
+        })
+      ).toBeNull();
+      expect(httpMock.getTrace()).toMatchSnapshot();
     });
   });
 });

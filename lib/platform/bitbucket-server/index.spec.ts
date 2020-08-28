@@ -1,13 +1,14 @@
 import nock from 'nock';
 import * as httpMock from '../../../test/httpMock';
+import { getName } from '../../../test/util';
 import {
   REPOSITORY_CHANGED,
   REPOSITORY_DISABLED,
+  REPOSITORY_EMPTY,
   REPOSITORY_NOT_FOUND,
 } from '../../constants/error-messages';
-import { PR_STATE_CLOSED, PR_STATE_OPEN } from '../../constants/pull-requests';
-import { BranchStatus } from '../../types';
-import * as _git from '../../util/gitfs/git';
+import { BranchStatus, PrState } from '../../types';
+import * as _git from '../../util/git';
 import { Platform } from '../common';
 
 function repoMock(
@@ -15,6 +16,7 @@ function repoMock(
   projectKey: string,
   repositorySlug: string
 ) {
+  const endpointStr = endpoint.toString();
   const projectKeyLower = projectKey.toLowerCase();
   return {
     slug: repositorySlug,
@@ -40,7 +42,7 @@ function repoMock(
     links: {
       clone: [
         {
-          href: `${endpoint}/scm/${projectKeyLower}/${repositorySlug}.git`,
+          href: `${endpointStr}/scm/${projectKeyLower}/${repositorySlug}.git`,
           name: 'http',
         },
         {
@@ -50,14 +52,19 @@ function repoMock(
       ],
       self: [
         {
-          href: `${endpoint}/projects/${projectKey}/repos/${repositorySlug}/browse`,
+          href: `${endpointStr}/projects/${projectKey}/repos/${repositorySlug}/browse`,
         },
       ],
     },
   };
 }
 
-function prMock(endpoint, projectKey, repositorySlug) {
+function prMock(
+  endpoint: URL | string,
+  projectKey: string,
+  repositorySlug: string
+) {
+  const endpointStr = endpoint.toString();
   return {
     id: 5,
     version: 1,
@@ -93,7 +100,7 @@ function prMock(endpoint, projectKey, repositorySlug) {
         slug: 'userName1',
         type: 'NORMAL',
         links: {
-          self: [{ href: `${endpoint}/users/userName1` }],
+          self: [{ href: `${endpointStr}/users/userName1` }],
         },
       },
       role: 'AUTHOR',
@@ -111,7 +118,7 @@ function prMock(endpoint, projectKey, repositorySlug) {
           slug: 'userName2',
           type: 'NORMAL',
           links: {
-            self: [{ href: `${endpoint}/users/userName2` }],
+            self: [{ href: `${endpointStr}/users/userName2` }],
           },
         },
         role: 'REVIEWER',
@@ -123,7 +130,7 @@ function prMock(endpoint, projectKey, repositorySlug) {
     links: {
       self: [
         {
-          href: `${endpoint}/projects/${projectKey}/repos/${repositorySlug}/pull-requests/5`,
+          href: `${endpointStr}/projects/${projectKey}/repos/${repositorySlug}/pull-requests/5`,
         },
       ],
     },
@@ -135,7 +142,7 @@ const scenarios = {
   'endpoint with path': new URL('https://stash.renovatebot.com/vcs'),
 };
 
-describe('platform/bitbucket-server', () => {
+describe(getName(__filename), () => {
   Object.entries(scenarios).forEach(([scenarioName, url]) => {
     const urlHost = url.origin;
     const urlPath = url.pathname === '/' ? '' : url.pathname;
@@ -172,11 +179,11 @@ describe('platform/bitbucket-server', () => {
         httpMock.reset();
         httpMock.setup();
         jest.mock('delay');
-        jest.mock('../../util/gitfs/git');
+        jest.mock('../../util/git');
         jest.mock('../../util/host-rules');
         hostRules = require('../../util/host-rules');
         bitbucket = await import('.');
-        git = require('../../util/gitfs/git');
+        git = require('../../util/git');
         git.branchExists.mockResolvedValue(true);
         git.isBranchStale.mockResolvedValue(false);
         git.getBranchCommit.mockResolvedValue(
@@ -195,10 +202,6 @@ describe('platform/bitbucket-server', () => {
           username: 'abc',
           password: '123',
         });
-      });
-
-      afterEach(async () => {
-        await bitbucket.cleanRepo();
       });
 
       describe('initPlatform()', () => {
@@ -283,7 +286,7 @@ describe('platform/bitbucket-server', () => {
             )
             .reply(200, {
               isLastPage: false,
-              lines: ['{'],
+              lines: [{ text: '{' }],
               size: 50000,
             });
           const res = await bitbucket.initRepo({
@@ -296,6 +299,27 @@ describe('platform/bitbucket-server', () => {
           expect(httpMock.getTrace()).toMatchSnapshot();
         });
 
+        it('throws empty', async () => {
+          expect.assertions(2);
+          httpMock
+            .scope(urlHost)
+            .get(`${urlPath}/rest/api/1.0/projects/SOME/repos/repo`)
+            .reply(200, repoMock(url, 'SOME', 'repo'))
+            .get(
+              `${urlPath}/rest/api/1.0/projects/SOME/repos/repo/branches/default`
+            )
+            .reply(204);
+          await expect(
+            bitbucket.initRepo({
+              endpoint: 'https://stash.renovatebot.com/vcs/',
+              repository: 'SOME/repo',
+              localDir: '',
+              optimizeForDisabled: false,
+            })
+          ).rejects.toThrow(REPOSITORY_EMPTY);
+          expect(httpMock.getTrace()).toMatchSnapshot();
+        });
+
         it('throws disabled', async () => {
           expect.assertions(2);
           httpMock
@@ -303,7 +327,10 @@ describe('platform/bitbucket-server', () => {
             .get(
               `${urlPath}/rest/api/1.0/projects/SOME/repos/repo/browse/renovate.json?limit=20000`
             )
-            .reply(200, { isLastPage: true, lines: ['{ "enabled": false }'] });
+            .reply(200, {
+              isLastPage: true,
+              lines: [{ text: '{ "enabled": false' }, { text: '}' }],
+            });
           await expect(
             bitbucket.initRepo({
               endpoint: 'https://stash.renovatebot.com/vcs/',
@@ -399,98 +426,6 @@ describe('platform/bitbucket-server', () => {
           expect.assertions(1);
           await initRepo();
           await bitbucket.setBaseBranch('branch');
-          await bitbucket.setBaseBranch();
-          expect(httpMock.getTrace()).toMatchSnapshot();
-        });
-      });
-
-      describe('getFileList()', () => {
-        it('sends to gitFs', async () => {
-          await initRepo();
-          expect(await bitbucket.getFileList()).toMatchSnapshot();
-          expect(httpMock.getTrace()).toMatchSnapshot();
-        });
-      });
-
-      describe('branchExists()', () => {
-        describe('getFileList()', () => {
-          it('sends to gitFs', async () => {
-            await initRepo();
-            expect(
-              await bitbucket.branchExists(undefined as any)
-            ).toMatchSnapshot();
-            expect(httpMock.getTrace()).toMatchSnapshot();
-          });
-        });
-      });
-
-      describe('isBranchStale()', () => {
-        it('sends to gitFs', async () => {
-          await initRepo();
-          expect(
-            await bitbucket.isBranchStale(undefined as any)
-          ).toMatchSnapshot();
-          expect(httpMock.getTrace()).toMatchSnapshot();
-        });
-      });
-
-      describe('deleteBranch()', () => {
-        it('sends to gitFs', async () => {
-          await initRepo();
-          expect(await bitbucket.deleteBranch('branch')).toMatchSnapshot();
-          expect(httpMock.getTrace()).toMatchSnapshot();
-        });
-      });
-
-      describe('mergeBranch()', () => {
-        it('sends to gitFs', async () => {
-          await initRepo();
-          expect(await bitbucket.mergeBranch('branch')).toMatchSnapshot();
-          expect(httpMock.getTrace()).toMatchSnapshot();
-        });
-      });
-
-      describe('commitFiles()', () => {
-        it('sends to gitFs', async () => {
-          expect.assertions(1);
-          const scope = await initRepo();
-          scope
-            .get(
-              `${urlPath}/rest/api/1.0/projects/SOME/repos/repo/pull-requests?state=ALL&role.1=AUTHOR&username.1=abc&limit=100`
-            )
-            .reply(200, {
-              isLastPage: true,
-              values: [prMock(url, 'SOME', 'repo')],
-            });
-          await bitbucket.commitFiles({
-            branchName: 'some-branch',
-            files: [{ name: 'test', contents: 'dummy' }],
-            message: 'message',
-          });
-          expect(httpMock.getTrace()).toMatchSnapshot();
-        });
-      });
-
-      describe('getFile()', () => {
-        it('sends to gitFs', async () => {
-          await initRepo();
-          expect(await bitbucket.getFile('', '')).toMatchSnapshot();
-          expect(httpMock.getTrace()).toMatchSnapshot();
-        });
-      });
-
-      describe('getAllRenovateBranches()', () => {
-        it('sends to gitFs', async () => {
-          await initRepo();
-          expect(await bitbucket.getAllRenovateBranches('')).toMatchSnapshot();
-          expect(httpMock.getTrace()).toMatchSnapshot();
-        });
-      });
-
-      describe('getBranchLastCommitTime()', () => {
-        it('sends to gitFs', async () => {
-          await initRepo();
-          expect(await bitbucket.getBranchLastCommitTime('')).toMatchSnapshot();
           expect(httpMock.getTrace()).toMatchSnapshot();
         });
       });
@@ -510,14 +445,6 @@ describe('platform/bitbucket-server', () => {
             )
             .twice()
             .reply(200, { conflicted: false })
-            .get(
-              `${urlPath}/rest/api/1.0/projects/SOME/repos/repo/pull-requests/5/commits?withCounts=true`
-            )
-            .twice()
-            .reply(200, {
-              totalCount: 1,
-              values: [{ author: { emailAddress: 'bot@renovateapp.com' } }],
-            })
             .get(
               `${urlPath}/rest/api/1.0/projects/SOME/repos/repo/pull-requests/5`
             )
@@ -541,14 +468,6 @@ describe('platform/bitbucket-server', () => {
             )
             .twice()
             .reply(200, { conflicted: false })
-            .get(
-              `${urlPath}/rest/api/1.0/projects/SOME/repos/repo/pull-requests/5/commits?withCounts=true`
-            )
-            .twice()
-            .reply(200, {
-              totalCount: 1,
-              values: [{ author: { emailAddress: 'bot@renovateapp.com' } }],
-            })
             .get(
               `${urlPath}/rest/api/1.0/projects/SOME/repos/repo/pull-requests/5`
             )
@@ -598,13 +517,6 @@ describe('platform/bitbucket-server', () => {
               `${urlPath}/rest/api/1.0/projects/SOME/repos/repo/pull-requests/5/merge`
             )
             .reply(200, { conflicted: false })
-            .get(
-              `${urlPath}/rest/api/1.0/projects/SOME/repos/repo/pull-requests/5/commits?withCounts=true`
-            )
-            .reply(200, {
-              totalCount: 1,
-              values: [{ author: { emailAddress: 'bot@renovateapp.com' } }],
-            })
             .put(
               `${urlPath}/rest/api/1.0/projects/SOME/repos/repo/pull-requests/5`
             )
@@ -628,13 +540,6 @@ describe('platform/bitbucket-server', () => {
               `${urlPath}/rest/api/1.0/projects/SOME/repos/repo/pull-requests/5/merge`
             )
             .reply(200, { conflicted: false })
-            .get(
-              `${urlPath}/rest/api/1.0/projects/SOME/repos/repo/pull-requests/5/commits?withCounts=true`
-            )
-            .reply(200, {
-              totalCount: 1,
-              values: [{ author: { emailAddress: 'bot@renovateapp.com' } }],
-            })
             .put(
               `${urlPath}/rest/api/1.0/projects/SOME/repos/repo/pull-requests/5`
             )
@@ -656,22 +561,13 @@ describe('platform/bitbucket-server', () => {
               `${urlPath}/rest/api/1.0/projects/SOME/repos/repo/pull-requests/5/merge`
             )
             .reply(200, { conflicted: false })
-            .get(
-              `${urlPath}/rest/api/1.0/projects/SOME/repos/repo/pull-requests/5/commits?withCounts=true`
-            )
-            .reply(200, {
-              totalCount: 1,
-              values: [{ author: { emailAddress: 'bot@renovateapp.com' } }],
-            })
             .put(
               `${urlPath}/rest/api/1.0/projects/SOME/repos/repo/pull-requests/5`
             )
             .reply(405);
           await expect(
             bitbucket.addReviewers(5, ['name'])
-          ).rejects.toMatchObject({
-            statusCode: 405,
-          });
+          ).rejects.toThrowErrorMatchingSnapshot();
           expect(httpMock.getTrace()).toMatchSnapshot();
         });
       });
@@ -1158,14 +1054,7 @@ describe('platform/bitbucket-server', () => {
             .get(
               `${urlPath}/rest/api/1.0/projects/SOME/repos/repo/pull-requests/5/merge`
             )
-            .reply(200, { conflicted: false })
-            .get(
-              `${urlPath}/rest/api/1.0/projects/SOME/repos/repo/pull-requests/5/commits?withCounts=true`
-            )
-            .reply(200, {
-              totalCount: 1,
-              values: [{ author: { emailAddress: 'bot@renovateapp.com' } }],
-            });
+            .reply(200, { conflicted: false });
 
           expect(
             await bitbucket.getBranchPr('userName1/pullRequest5')
@@ -1208,7 +1097,7 @@ describe('platform/bitbucket-server', () => {
             await bitbucket.findPr({
               branchName: 'userName1/pullRequest5',
               prTitle: 'title',
-              state: PR_STATE_OPEN,
+              state: PrState.Open,
             })
           ).toMatchSnapshot();
           expect(httpMock.getTrace()).toMatchSnapshot();
@@ -1228,7 +1117,7 @@ describe('platform/bitbucket-server', () => {
             await bitbucket.findPr({
               branchName: 'userName1/pullRequest5',
               prTitle: 'title',
-              state: PR_STATE_CLOSED,
+              state: PrState.Closed,
             })
           ).toBeUndefined();
           expect(httpMock.getTrace()).toMatchSnapshot();
@@ -1252,6 +1141,7 @@ describe('platform/bitbucket-server', () => {
 
           const { number: id } = await bitbucket.createPr({
             branchName: 'branch',
+            targetBranch: 'master',
             prTitle: 'title',
             prBody: 'body',
           });
@@ -1275,10 +1165,10 @@ describe('platform/bitbucket-server', () => {
 
           const { number: id } = await bitbucket.createPr({
             branchName: 'branch',
+            targetBranch: 'master',
             prTitle: 'title',
             prBody: 'body',
             labels: null,
-            useDefaultBranch: true,
           });
           expect(id).toBe(5);
           expect(httpMock.getTrace()).toMatchSnapshot();
@@ -1301,14 +1191,7 @@ describe('platform/bitbucket-server', () => {
             .get(
               `${urlPath}/rest/api/1.0/projects/SOME/repos/repo/pull-requests/5/merge`
             )
-            .reply(200, { conflicted: false })
-            .get(
-              `${urlPath}/rest/api/1.0/projects/SOME/repos/repo/pull-requests/5/commits?withCounts=true`
-            )
-            .reply(200, {
-              totalCount: 1,
-              values: [{ author: { emailAddress: 'bot@renovateapp.com' } }],
-            });
+            .reply(200, { conflicted: false });
 
           expect(await bitbucket.getPr(5)).toMatchSnapshot();
           expect(httpMock.getTrace()).toMatchSnapshot();
@@ -1326,12 +1209,6 @@ describe('platform/bitbucket-server', () => {
             )
             .reply(200, { conflicted: false })
             .get(
-              `${urlPath}/rest/api/1.0/projects/SOME/repos/repo/pull-requests/3/commits?withCounts=true`
-            )
-            .reply(200, {
-              totalCount: 2,
-            })
-            .get(
               `${urlPath}/rest/api/1.0/projects/SOME/repos/repo/pull-requests/5`
             )
             .twice()
@@ -1340,24 +1217,14 @@ describe('platform/bitbucket-server', () => {
               `${urlPath}/rest/api/1.0/projects/SOME/repos/repo/pull-requests/5/merge`
             )
             .twice()
-            .reply(200, { conflicted: false })
-            .get(
-              `${urlPath}/rest/api/1.0/projects/SOME/repos/repo/pull-requests/5/commits?withCounts=true`
-            )
-            .twice()
-            .reply(200, {
-              totalCount: 1,
-              values: [{ author: { emailAddress: 'bot@renovateapp.com' } }],
-            });
+            .reply(200, { conflicted: false });
 
           const author = global.gitAuthor;
           try {
             expect(await bitbucket.getPr(3)).toMatchSnapshot();
 
-            global.gitAuthor = { email: 'bot@renovateapp.com', name: 'bot' };
             expect(await bitbucket.getPr(5)).toMatchSnapshot();
 
-            global.gitAuthor = { email: 'jane@example.com', name: 'jane' };
             expect(await bitbucket.getPr(5)).toMatchSnapshot();
 
             expect(httpMock.getTrace()).toMatchSnapshot();
@@ -1398,26 +1265,85 @@ describe('platform/bitbucket-server', () => {
               `${urlPath}/rest/api/1.0/projects/SOME/repos/repo/pull-requests/5/merge`
             )
             .reply(200, { conflicted: false })
-            .get(
-              `${urlPath}/rest/api/1.0/projects/SOME/repos/repo/pull-requests/5/commits?withCounts=true`
-            )
-            .reply(200, {
-              totalCount: 1,
-              values: [{ author: { emailAddress: 'bot@renovateapp.com' } }],
-            })
             .put(
               `${urlPath}/rest/api/1.0/projects/SOME/repos/repo/pull-requests/5`
             )
             .reply(200);
 
-          await bitbucket.updatePr(5, 'title', 'body');
+          await bitbucket.updatePr({
+            number: 5,
+            prTitle: 'title',
+            prBody: 'body',
+          });
+          expect(httpMock.getTrace()).toMatchSnapshot();
+        });
+
+        it('closes PR', async () => {
+          const scope = await initRepo();
+          scope
+            .get(
+              `${urlPath}/rest/api/1.0/projects/SOME/repos/repo/pull-requests/5`
+            )
+            .reply(200, prMock(url, 'SOME', 'repo'))
+            .get(
+              `${urlPath}/rest/api/1.0/projects/SOME/repos/repo/pull-requests/5/merge`
+            )
+            .reply(200, { conflicted: false })
+            .put(
+              `${urlPath}/rest/api/1.0/projects/SOME/repos/repo/pull-requests/5`
+            )
+            .reply(200, { state: 'OPEN', version: 42 })
+            .post(
+              `${urlPath}/rest/api/1.0/projects/SOME/repos/repo/pull-requests/5/decline?version=42`
+            )
+            .reply(200, { status: 'DECLINED' });
+
+          await bitbucket.updatePr({
+            number: 5,
+            prTitle: 'title',
+            prBody: 'body',
+            state: PrState.Closed,
+          });
+          expect(httpMock.getTrace()).toMatchSnapshot();
+        });
+
+        it('re-opens PR', async () => {
+          const scope = await initRepo();
+          scope
+            .get(
+              `${urlPath}/rest/api/1.0/projects/SOME/repos/repo/pull-requests/5`
+            )
+            .reply(200, prMock(url, 'SOME', 'repo'))
+            .get(
+              `${urlPath}/rest/api/1.0/projects/SOME/repos/repo/pull-requests/5/merge`
+            )
+            .reply(200, { conflicted: false })
+            .put(
+              `${urlPath}/rest/api/1.0/projects/SOME/repos/repo/pull-requests/5`
+            )
+            .reply(200, { state: 'DECLINED', version: 42 })
+            .post(
+              `${urlPath}/rest/api/1.0/projects/SOME/repos/repo/pull-requests/5/reopen?version=42`
+            )
+            .reply(200, { status: 'OPEN' });
+
+          await bitbucket.updatePr({
+            number: 5,
+            prTitle: 'title',
+            prBody: 'body',
+            state: PrState.Open,
+          });
           expect(httpMock.getTrace()).toMatchSnapshot();
         });
 
         it('throws not-found 1', async () => {
           await initRepo();
           await expect(
-            bitbucket.updatePr(null as any, 'title', 'body')
+            bitbucket.updatePr({
+              number: null as any,
+              prTitle: 'title',
+              prBody: 'body',
+            })
           ).rejects.toThrow(REPOSITORY_NOT_FOUND);
 
           expect(httpMock.getTrace()).toMatchSnapshot();
@@ -1430,9 +1356,9 @@ describe('platform/bitbucket-server', () => {
               `${urlPath}/rest/api/1.0/projects/SOME/repos/repo/pull-requests/4`
             )
             .reply(404);
-          await expect(bitbucket.updatePr(4, 'title', 'body')).rejects.toThrow(
-            REPOSITORY_NOT_FOUND
-          );
+          await expect(
+            bitbucket.updatePr({ number: 4, prTitle: 'title', prBody: 'body' })
+          ).rejects.toThrow(REPOSITORY_NOT_FOUND);
 
           expect(httpMock.getTrace()).toMatchSnapshot();
         });
@@ -1448,21 +1374,14 @@ describe('platform/bitbucket-server', () => {
               `${urlPath}/rest/api/1.0/projects/SOME/repos/repo/pull-requests/5/merge`
             )
             .reply(200, { conflicted: false })
-            .get(
-              `${urlPath}/rest/api/1.0/projects/SOME/repos/repo/pull-requests/5/commits?withCounts=true`
-            )
-            .reply(200, {
-              totalCount: 1,
-              values: [{ author: { emailAddress: 'bot@renovateapp.com' } }],
-            })
             .put(
               `${urlPath}/rest/api/1.0/projects/SOME/repos/repo/pull-requests/5`
             )
             .reply(404);
 
-          await expect(bitbucket.updatePr(5, 'title', 'body')).rejects.toThrow(
-            REPOSITORY_NOT_FOUND
-          );
+          await expect(
+            bitbucket.updatePr({ number: 5, prTitle: 'title', prBody: 'body' })
+          ).rejects.toThrow(REPOSITORY_NOT_FOUND);
 
           expect(httpMock.getTrace()).toMatchSnapshot();
         });
@@ -1478,21 +1397,14 @@ describe('platform/bitbucket-server', () => {
               `${urlPath}/rest/api/1.0/projects/SOME/repos/repo/pull-requests/5/merge`
             )
             .reply(200, { conflicted: false })
-            .get(
-              `${urlPath}/rest/api/1.0/projects/SOME/repos/repo/pull-requests/5/commits?withCounts=true`
-            )
-            .reply(200, {
-              totalCount: 1,
-              values: [{ author: { emailAddress: 'bot@renovateapp.com' } }],
-            })
             .put(
               `${urlPath}/rest/api/1.0/projects/SOME/repos/repo/pull-requests/5`
             )
             .reply(409);
 
-          await expect(bitbucket.updatePr(5, 'title', 'body')).rejects.toThrow(
-            REPOSITORY_CHANGED
-          );
+          await expect(
+            bitbucket.updatePr({ number: 5, prTitle: 'title', prBody: 'body' })
+          ).rejects.toThrow(REPOSITORY_CHANGED);
           expect(httpMock.getTrace()).toMatchSnapshot();
         });
 
@@ -1507,23 +1419,14 @@ describe('platform/bitbucket-server', () => {
               `${urlPath}/rest/api/1.0/projects/SOME/repos/repo/pull-requests/5/merge`
             )
             .reply(200, { conflicted: false })
-            .get(
-              `${urlPath}/rest/api/1.0/projects/SOME/repos/repo/pull-requests/5/commits?withCounts=true`
-            )
-            .reply(200, {
-              totalCount: 1,
-              values: [{ author: { emailAddress: 'bot@renovateapp.com' } }],
-            })
             .put(
               `${urlPath}/rest/api/1.0/projects/SOME/repos/repo/pull-requests/5`
             )
             .reply(405);
 
           await expect(
-            bitbucket.updatePr(5, 'title', 'body')
-          ).rejects.toMatchObject({
-            statusCode: 405,
-          });
+            bitbucket.updatePr({ number: 5, prTitle: 'title', prBody: 'body' })
+          ).rejects.toThrowErrorMatchingSnapshot();
           expect(httpMock.getTrace()).toMatchSnapshot();
         });
       });
@@ -1540,13 +1443,6 @@ describe('platform/bitbucket-server', () => {
               `${urlPath}/rest/api/1.0/projects/SOME/repos/repo/pull-requests/5/merge`
             )
             .reply(200, { conflicted: false })
-            .get(
-              `${urlPath}/rest/api/1.0/projects/SOME/repos/repo/pull-requests/5/commits?withCounts=true`
-            )
-            .reply(200, {
-              totalCount: 1,
-              values: [{ author: { emailAddress: 'bot@renovateapp.com' } }],
-            })
             .post(
               `${urlPath}/rest/api/1.0/projects/SOME/repos/repo/pull-requests/5/merge?version=1`
             )
@@ -1588,13 +1484,6 @@ describe('platform/bitbucket-server', () => {
               `${urlPath}/rest/api/1.0/projects/SOME/repos/repo/pull-requests/5/merge`
             )
             .reply(200, { conflicted: false })
-            .get(
-              `${urlPath}/rest/api/1.0/projects/SOME/repos/repo/pull-requests/5/commits?withCounts=true`
-            )
-            .reply(200, {
-              totalCount: 1,
-              values: [{ author: { emailAddress: 'bot@renovateapp.com' } }],
-            })
             .post(
               `${urlPath}/rest/api/1.0/projects/SOME/repos/repo/pull-requests/5/merge?version=1`
             )
@@ -1617,13 +1506,6 @@ describe('platform/bitbucket-server', () => {
               `${urlPath}/rest/api/1.0/projects/SOME/repos/repo/pull-requests/5/merge`
             )
             .reply(200, { conflicted: false })
-            .get(
-              `${urlPath}/rest/api/1.0/projects/SOME/repos/repo/pull-requests/5/commits?withCounts=true`
-            )
-            .reply(200, {
-              totalCount: 1,
-              values: [{ author: { emailAddress: 'bot@renovateapp.com' } }],
-            })
             .post(
               `${urlPath}/rest/api/1.0/projects/SOME/repos/repo/pull-requests/5/merge?version=1`
             )
@@ -1644,13 +1526,6 @@ describe('platform/bitbucket-server', () => {
               `${urlPath}/rest/api/1.0/projects/SOME/repos/repo/pull-requests/5/merge`
             )
             .reply(200, { conflicted: false })
-            .get(
-              `${urlPath}/rest/api/1.0/projects/SOME/repos/repo/pull-requests/5/commits?withCounts=true`
-            )
-            .reply(200, {
-              totalCount: 1,
-              values: [{ author: { emailAddress: 'bot@renovateapp.com' } }],
-            })
             .post(
               `${urlPath}/rest/api/1.0/projects/SOME/repos/repo/pull-requests/5/merge?version=1`
             )
@@ -1683,14 +1558,6 @@ Empty comment.
 Followed by some information.
 <!-- followed by some more comments -->`);
           expect(prBody).toMatchSnapshot();
-        });
-      });
-
-      describe('getCommitMessages()', () => {
-        it('sends to gitFs', async () => {
-          await initRepo();
-          expect(await bitbucket.getCommitMessages()).toMatchSnapshot();
-          expect(httpMock.getTrace()).toMatchSnapshot();
         });
       });
 

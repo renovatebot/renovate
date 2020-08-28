@@ -1,4 +1,4 @@
-import hash from 'object-hash';
+import hasha from 'hasha';
 import { mocked } from '../../../../test/util';
 import * as _repositoryCache from '../../../util/cache/repository';
 import * as _branchify from '../updates/branchify';
@@ -54,7 +54,7 @@ describe('workers/repository/process/extract-update', () => {
         scan: {
           master: {
             sha: config.baseBranchSha,
-            configHash: hash(config).toString(),
+            configHash: hasha(JSON.stringify(config)),
             packageFiles,
           },
         },

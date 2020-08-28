@@ -1,4 +1,5 @@
 import URL from 'url';
+import is from '@sindresorhus/is';
 import { configFileNames } from '../../config/app-strings';
 import { RenovateConfig } from '../../config/common';
 import {
@@ -11,17 +12,15 @@ import {
   REPOSITORY_MIRRORED,
 } from '../../constants/error-messages';
 import { PLATFORM_TYPE_GITEA } from '../../constants/platforms';
-import { PR_STATE_ALL, PR_STATE_OPEN } from '../../constants/pull-requests';
 import { logger } from '../../logger';
-import { BranchStatus } from '../../types';
-import * as gitfs from '../../util/gitfs';
+import { BranchStatus, PrState } from '../../types';
+import * as git from '../../util/git';
 import * as hostRules from '../../util/host-rules';
 import { setBaseUrl } from '../../util/http/gitea';
 import { sanitize } from '../../util/sanitize';
 import { ensureTrailingSlash } from '../../util/url';
 import {
   BranchStatusConfig,
-  CommitFilesConfig,
   CreatePRConfig,
   EnsureCommentConfig,
   EnsureCommentRemovalConfig,
@@ -29,25 +28,20 @@ import {
   FindPRConfig,
   Issue,
   Platform,
-  PlatformConfig,
+  PlatformParams,
+  PlatformResult,
   Pr,
-  RepoConfig,
   RepoParams,
+  RepoResult,
+  UpdatePrConfig,
   VulnerabilityAlert,
 } from '../common';
 import { smartTruncate } from '../utils/pr-body';
 import * as helper from './gitea-helper';
 
-type GiteaRenovateConfig = {
-  endpoint: string;
-  token: string;
-} & RenovateConfig;
-
 interface GiteaRepoConfig {
   repository: string;
   localDir: string;
-  defaultBranch: string;
-  baseBranch: string;
   mergeMethod: helper.PRMergeMethod;
 
   prList: Promise<Pr[]> | null;
@@ -55,7 +49,7 @@ interface GiteaRepoConfig {
   labelList: Promise<helper.Label[]> | null;
 }
 
-const defaults: any = {
+const defaults = {
   hostType: PLATFORM_TYPE_GITEA,
   endpoint: 'https://gitea.com/api/v1/',
 };
@@ -103,13 +97,12 @@ function toRenovatePR(data: helper.PR): Pr | null {
     createdAt: data.created_at,
     canMerge: data.mergeable,
     isConflicted: !data.mergeable,
-    isStale: undefined,
-    isModified: undefined,
+    hasAssignees: !!(data.assignee?.login || is.nonEmptyArray(data.assignees)),
   };
 }
 
 function matchesState(actual: string, expected: string): boolean {
-  if (expected === PR_STATE_ALL) {
+  if (expected === PrState.All) {
     return true;
   }
   if (expected.startsWith('!')) {
@@ -131,30 +124,6 @@ function findCommentByContent(
   content: string
 ): helper.Comment | null {
   return comments.find((c) => c.body.trim() === content);
-}
-
-async function isPRModified(
-  repoPath: string,
-  branchName: string
-): Promise<boolean> {
-  try {
-    const branch = await helper.getBranch(repoPath, branchName);
-    const branchCommitEmail = branch.commit.author.email;
-    const configEmail = global.gitAuthor.email;
-
-    if (branchCommitEmail === configEmail) {
-      return false;
-    }
-
-    logger.debug(
-      { branchCommitEmail, configEmail },
-      'Last committer to branch does not match bot, PR cannot be rebased'
-    );
-    return true;
-  } catch (err) {
-    logger.warn({ err }, 'Error getting PR branch, marking as modified');
-    return true;
-  }
 }
 
 async function retrieveDefaultConfig(
@@ -213,7 +182,7 @@ const platform: Platform = {
   async initPlatform({
     endpoint,
     token,
-  }: GiteaRenovateConfig): Promise<PlatformConfig> {
+  }: PlatformParams): Promise<PlatformResult> {
     if (!token) {
       throw new Error('Init: You must configure a Gitea personal access token');
     }
@@ -248,7 +217,7 @@ const platform: Platform = {
     repository,
     localDir,
     optimizeForDisabled,
-  }: RepoParams): Promise<RepoConfig> {
+  }: RepoParams): Promise<RepoResult> {
     let renovateConfig: RenovateConfig;
     let repo: helper.Repo;
 
@@ -304,16 +273,15 @@ const platform: Platform = {
     }
 
     // Determine author email and branches
-    config.defaultBranch = repo.default_branch;
-    config.baseBranch = config.defaultBranch;
-    logger.debug(`${repository} default branch = ${config.baseBranch}`);
+    const defaultBranch = repo.default_branch;
+    logger.debug(`${repository} default branch = ${defaultBranch}`);
 
     // Optionally check if Renovate is disabled by attempting to fetch default configuration file
     if (optimizeForDisabled) {
       try {
         renovateConfig = await retrieveDefaultConfig(
           config.repository,
-          config.defaultBranch
+          defaultBranch
         );
       } catch (err) {
         // Do nothing
@@ -333,7 +301,7 @@ const platform: Platform = {
     gitEndpoint.auth = opts.token;
 
     // Initialize Git storage
-    await gitfs.initRepo({
+    git.initRepo({
       ...config,
       url: URL.format(gitEndpoint),
       gitAuthorName: global.gitAuthor?.name,
@@ -346,7 +314,7 @@ const platform: Platform = {
     config.labelList = null;
 
     return {
-      baseBranch: config.baseBranch,
+      defaultBranch,
       isFork: !!repo.fork,
     };
   },
@@ -362,12 +330,6 @@ const platform: Platform = {
     }
   },
 
-  cleanRepo(): Promise<void> {
-    gitfs.cleanRepo();
-    config = {} as any;
-    return Promise.resolve();
-  },
-
   async setBranchStatus({
     branchName,
     context,
@@ -377,7 +339,7 @@ const platform: Platform = {
   }: BranchStatusConfig): Promise<void> {
     try {
       // Create new status for branch commit
-      const branchCommit = await gitfs.getBranchCommit(branchName);
+      const branchCommit = await git.getBranchCommit(branchName);
       await helper.createCommitStatus(config.repository, branchCommit, {
         state: helper.renovateToGiteaStatusMapping[state] || 'pending',
         context,
@@ -452,18 +414,19 @@ const platform: Platform = {
     return BranchStatus.yellow;
   },
 
-  async setBaseBranch(
-    baseBranch: string = config.defaultBranch
-  ): Promise<string> {
-    config.baseBranch = baseBranch;
-    const baseBranchSha = await gitfs.setBaseBranch(baseBranch);
+  async setBaseBranch(branchName: string): Promise<string> {
+    const baseBranchSha = await git.setBranch(branchName);
     return baseBranchSha;
   },
 
   getPrList(): Promise<Pr[]> {
     if (config.prList === null) {
       config.prList = helper
-        .searchPRs(config.repository, { state: 'all' }, { useCache: false })
+        .searchPRs(
+          config.repository,
+          { state: PrState.All },
+          { useCache: false }
+        )
         .then((prs) => {
           const prList = prs.map(toRenovatePR).filter(Boolean);
           logger.debug(`Retrieved ${prList.length} Pull Requests`);
@@ -472,11 +435,6 @@ const platform: Platform = {
     }
 
     return config.prList;
-  },
-
-  /* istanbul ignore next */
-  async getPrFiles(pr: Pr): Promise<string[]> {
-    return gitfs.getBranchFiles(pr.branchName, pr.targetBranch);
   },
 
   async getPr(number: number): Promise<Pr | null> {
@@ -501,23 +459,13 @@ const platform: Platform = {
       return null;
     }
 
-    // Enrich pull request with additional information which is more expensive to fetch
-    if (pr.state !== 'closed') {
-      if (pr.isStale === undefined) {
-        pr.isStale = await platform.isBranchStale(pr.branchName);
-      }
-      if (pr.isModified === undefined) {
-        pr.isModified = await isPRModified(config.repository, pr.branchName);
-      }
-    }
-
     return pr;
   },
 
   async findPr({
     branchName,
     prTitle: title,
-    state = PR_STATE_ALL,
+    state = PrState.All,
   }: FindPRConfig): Promise<Pr> {
     logger.debug(`findPr(${branchName}, ${title}, ${state})`);
     const prList = await platform.getPrList();
@@ -537,12 +485,12 @@ const platform: Platform = {
 
   async createPr({
     branchName,
+    targetBranch,
     prTitle: title,
     prBody: rawBody,
     labels: labelNames,
-    useDefaultBranch,
   }: CreatePRConfig): Promise<Pr> {
-    const base = useDefaultBranch ? config.defaultBranch : config.baseBranch;
+    const base = targetBranch;
     const head = branchName;
     const body = sanitize(rawBody);
 
@@ -582,7 +530,7 @@ const platform: Platform = {
         config.prList = null;
         const pr = await platform.findPr({
           branchName,
-          state: PR_STATE_OPEN,
+          state: PrState.Open,
         });
 
         // If a valid PR was found, return and gracefully recover from the error. Otherwise, abort and throw error.
@@ -591,7 +539,11 @@ const platform: Platform = {
             logger.debug(
               `Recovered from 409 Conflict, but PR for ${branchName} is outdated. Updating...`
             );
-            await platform.updatePr(pr.number, title, body);
+            await platform.updatePr({
+              number: pr.number,
+              prTitle: title,
+              prBody: body,
+            });
             pr.title = title;
             pr.body = body;
           } else {
@@ -608,10 +560,16 @@ const platform: Platform = {
     }
   },
 
-  async updatePr(number: number, title: string, body?: string): Promise<void> {
+  async updatePr({
+    number,
+    prTitle: title,
+    prBody: body,
+    state,
+  }: UpdatePrConfig): Promise<void> {
     await helper.updatePR(config.repository, number, {
       title,
       ...(body && { body }),
+      ...(state && { state }),
     });
   },
 
@@ -653,6 +611,7 @@ const platform: Platform = {
 
   async ensureIssue({
     title,
+    reuseTitle,
     body,
     shouldReOpen,
     once,
@@ -660,8 +619,10 @@ const platform: Platform = {
     logger.debug(`ensureIssue(${title})`);
     try {
       const issueList = await platform.getIssueList();
-      const issues = issueList.filter((i) => i.title === title);
-
+      let issues = issueList.filter((i) => i.title === title);
+      if (!issues.length) {
+        issues = issueList.filter((i) => i.title === reuseTitle);
+      }
       // Update any matching issues which currently exist
       if (issues.length) {
         let activeIssue = issues.find((i) => i.state === 'open');
@@ -689,7 +650,11 @@ const platform: Platform = {
         }
 
         // Check if issue has already correct state
-        if (activeIssue.body === body && activeIssue.state === 'open') {
+        if (
+          activeIssue.title === title &&
+          activeIssue.body === body &&
+          activeIssue.state === 'open'
+        ) {
           logger.debug(
             `Issue #${activeIssue.number} is open and up to date - nothing to do`
           );
@@ -700,6 +665,7 @@ const platform: Platform = {
         logger.debug(`Updating Issue #${activeIssue.number}`);
         await helper.updateIssue(config.repository, activeIssue.number, {
           body,
+          title,
           state: shouldReOpen
             ? 'open'
             : (activeIssue.state as helper.IssueState),
@@ -825,24 +791,14 @@ const platform: Platform = {
 
   async getBranchPr(branchName: string): Promise<Pr | null> {
     logger.debug(`getBranchPr(${branchName})`);
-    const pr = await platform.findPr({ branchName, state: PR_STATE_OPEN });
+    const pr = await platform.findPr({ branchName, state: PrState.Open });
     return pr ? platform.getPr(pr.number) : null;
   },
 
-  async deleteBranch(branchName: string, closePr?: boolean): Promise<void> {
-    logger.debug(`deleteBranch(${branchName})`);
-    if (closePr) {
-      const pr = await platform.getBranchPr(branchName);
-      if (pr) {
-        await helper.closePR(config.repository, pr.number);
-      }
-    }
-
-    return gitfs.deleteBranch(branchName);
-  },
-
   async addAssignees(number: number, assignees: string[]): Promise<void> {
-    logger.debug(`Updating assignees ${assignees} on Issue #${number}`);
+    logger.debug(
+      `Updating assignees '${assignees?.join(', ')}' on Issue #${number}`
+    );
     await helper.updateIssue(config.repository, number, {
       assignees,
     });
@@ -851,57 +807,15 @@ const platform: Platform = {
   addReviewers(number: number, reviewers: string[]): Promise<void> {
     // Adding reviewers to a PR through API is not supported by Gitea as of today
     // See tracking issue: https://github.com/go-gitea/gitea/issues/5733
-    logger.debug(`Updating reviewers ${reviewers} on Pull Request #${number}`);
+    logger.debug(
+      `Updating reviewers '${reviewers?.join(', ')}' on Pull Request #${number}`
+    );
     logger.warn('Unimplemented in Gitea: Reviewers');
     return Promise.resolve();
   },
 
-  commitFiles(commitFilesConfig: CommitFilesConfig): Promise<string | null> {
-    return gitfs.commitFiles(commitFilesConfig);
-  },
-
   getPrBody(prBody: string): string {
     return smartTruncate(prBody, 1000000);
-  },
-
-  isBranchStale(branchName: string): Promise<boolean> {
-    return gitfs.isBranchStale(branchName);
-  },
-
-  setBranchPrefix(branchPrefix: string): Promise<void> {
-    return gitfs.setBranchPrefix(branchPrefix);
-  },
-
-  branchExists(branchName: string): Promise<boolean> {
-    return gitfs.branchExists(branchName);
-  },
-
-  mergeBranch(branchName: string): Promise<void> {
-    return gitfs.mergeBranch(branchName);
-  },
-
-  getBranchLastCommitTime(branchName: string): Promise<Date> {
-    return gitfs.getBranchLastCommitTime(branchName);
-  },
-
-  getFile(lockFileName: string, branchName?: string): Promise<string> {
-    return gitfs.getFile(lockFileName, branchName);
-  },
-
-  getRepoStatus(): Promise<gitfs.StatusResult> {
-    return gitfs.getRepoStatus();
-  },
-
-  getFileList(): Promise<string[]> {
-    return gitfs.getFileList();
-  },
-
-  getAllRenovateBranches(branchPrefix: string): Promise<string[]> {
-    return gitfs.getAllRenovateBranches(branchPrefix);
-  },
-
-  getCommitMessages(): Promise<string[]> {
-    return gitfs.getCommitMessages();
   },
 
   getVulnerabilityAlerts(): Promise<VulnerabilityAlert[]> {
@@ -909,14 +823,11 @@ const platform: Platform = {
   },
 };
 
+// eslint-disable-next-line @typescript-eslint/unbound-method
 export const {
   addAssignees,
   addReviewers,
-  branchExists,
-  cleanRepo,
-  commitFiles,
   createPr,
-  deleteBranch,
   deleteLabel,
   ensureComment,
   ensureCommentRemoval,
@@ -924,30 +835,20 @@ export const {
   ensureIssueClosing,
   findIssue,
   findPr,
-  getAllRenovateBranches,
-  getBranchLastCommitTime,
   getBranchPr,
   getBranchStatus,
   getBranchStatusCheck,
-  getCommitMessages,
-  getFile,
-  getFileList,
   getIssueList,
   getPr,
   getPrBody,
   getPrList,
-  getPrFiles,
   getRepoForceRebase,
-  getRepoStatus,
   getRepos,
   getVulnerabilityAlerts,
   initPlatform,
   initRepo,
-  isBranchStale,
-  mergeBranch,
   mergePr,
   setBaseBranch,
-  setBranchPrefix,
   setBranchStatus,
   updatePr,
 } = platform;

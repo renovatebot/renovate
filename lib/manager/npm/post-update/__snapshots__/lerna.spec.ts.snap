@@ -1,6 +1,5 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
-
-exports[`generateLockFiles() allows scripts for trust level high 1`] = `
+exports[`manager/npm/post-update/lerna generateLockFiles() allows scripts for trust level high 1`] = `
 Array [
   Object {
     "cmd": "npm install  --no-audit --package-lock-only",
@@ -39,7 +38,7 @@ Array [
 ]
 `;
 
-exports[`generateLockFiles() defaults to latest 1`] = `
+exports[`manager/npm/post-update/lerna generateLockFiles() defaults to latest if lerna version unspecified 1`] = `
 Array [
   Object {
     "cmd": "npm install --ignore-scripts  --no-audit --package-lock-only",
@@ -78,7 +77,7 @@ Array [
 ]
 `;
 
-exports[`generateLockFiles() generates package-lock.json files 1`] = `
+exports[`manager/npm/post-update/lerna generateLockFiles() generates package-lock.json files 1`] = `
 Array [
   Object {
     "cmd": "npm install --ignore-scripts  --no-audit --package-lock-only",
@@ -117,7 +116,7 @@ Array [
 ]
 `;
 
-exports[`generateLockFiles() generates yarn.lock files 1`] = `
+exports[`manager/npm/post-update/lerna generateLockFiles() generates yarn.lock files 1`] = `
 Array [
   Object {
     "cmd": "yarn install --ignore-scripts --ignore-engines --ignore-platform",
@@ -156,7 +155,7 @@ Array [
 ]
 `;
 
-exports[`generateLockFiles() maps dot files 1`] = `
+exports[`manager/npm/post-update/lerna generateLockFiles() maps dot files 1`] = `
 Array [
   Object {
     "cmd": "npm install --ignore-scripts  --no-audit --package-lock-only",
@@ -195,7 +194,7 @@ Array [
 ]
 `;
 
-exports[`generateLockFiles() performs full npm install 1`] = `
+exports[`manager/npm/post-update/lerna generateLockFiles() performs full npm install 1`] = `
 Array [
   Object {
     "cmd": "npm install --ignore-scripts  --no-audit",
@@ -233,3 +232,4 @@ Array [
   },
 ]
 `;
+

@@ -1,6 +1,7 @@
 import { RenovateConfig } from '../../config';
 
 import {
+  CONFIG_SECRETS_EXPOSED,
   CONFIG_VALIDATION,
   EXTERNAL_HOST_ERROR,
   MANAGER_LOCKFILE_ERROR,
@@ -106,6 +107,14 @@ export default async function handleError(
     await raiseConfigWarningIssue(config, err);
     return err.message;
   }
+  if (err.message === CONFIG_SECRETS_EXPOSED) {
+    delete config.branchList; // eslint-disable-line no-param-reassign
+    logger.warn(
+      { error: err },
+      'Repository aborted due to potential secrets exposure'
+    );
+    return err.message;
+  }
   if (err instanceof ExternalHostError) {
     logger.warn(
       { hostType: err.hostType, lookupName: err.lookupName, err: err.err },
@@ -166,7 +175,7 @@ export default async function handleError(
     return EXTERNAL_HOST_ERROR;
   }
   if (
-    err.message.includes('The remote end hung up unexpectedly') ||
+    err.message.includes('remote end hung up unexpectedly') ||
     err.message.includes('access denied or repository not exported')
   ) {
     logger.warn({ err }, 'Git error - aborting');

@@ -28,7 +28,7 @@ export interface GetPkgReleasesConfig extends ReleasesConfigBase {
 }
 
 export function isGetPkgReleasesConfig(
-  input: any
+  input: unknown
 ): input is GetPkgReleasesConfig {
   return (
     (input as GetPkgReleasesConfig).datasource !== undefined &&
@@ -69,12 +69,15 @@ export interface ReleaseResult {
   registryUrl?: string;
 }
 
-export interface Datasource {
+export interface DatasourceApi {
   id: string;
   getDigest?(config: DigestConfig, newValue?: string): Promise<string | null>;
   getReleases(config: GetReleasesConfig): Promise<ReleaseResult | null>;
   defaultRegistryUrls?: string[];
   appendRegistryUrls?: string[];
-  defaultConfig?: object;
+  defaultConfig?: Record<string, unknown>;
   registryStrategy?: 'first' | 'hunt' | 'merge';
 }
+
+// TODO: remove, only for compatabillity
+export type Datasource = DatasourceApi;

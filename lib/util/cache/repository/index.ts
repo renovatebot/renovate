@@ -13,8 +13,8 @@ export interface BaseBranchCache {
 export interface Cache {
   repository?: string;
   init?: {
-    configFile: string;
-    contents: RenovateConfig;
+    configFile?: string;
+    configFileContents?: RenovateConfig;
   };
   scan?: Record<string, BaseBranchCache>;
 }
@@ -34,8 +34,10 @@ export function getCacheFileName(config: RenovateConfig): string {
 
 function validate(config: RenovateConfig, input: any): Cache | null {
   if (input?.repository === config.repository) {
+    logger.debug('Repository cache is valid');
     return input as Cache;
   }
+  logger.info('Repository cache invalidated');
   // reset
   return null;
 }
@@ -52,17 +54,21 @@ export async function initialize(config: RenovateConfig): Promise<void> {
       );
     }
   } catch (err) {
-    logger.debug({ cacheFileName }, 'No repository cache found');
+    logger.debug({ cacheFileName }, 'Repository cache not found');
   }
-  cache = cache || { repository: config.repository };
+  cache = cache || Object.create({});
+  cache.repository = config.repository;
 }
 
 export function getCache(): Cache {
+  cache = cache || Object.create({});
   return cache;
 }
 
 export async function finalize(): Promise<void> {
-  if (repositoryCache !== 'disabled') {
+  if (cacheFileName && cache && repositoryCache !== 'disabled') {
     await fs.outputFile(cacheFileName, JSON.stringify(cache));
   }
+  cacheFileName = null;
+  cache = Object.create({});
 }

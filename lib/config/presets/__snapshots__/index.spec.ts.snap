@@ -318,6 +318,7 @@ Object {
     "babel-eslint",
   ],
   "packagePatterns": Array [
+    "^@typescript-eslint/",
     "^eslint",
     "^stylelint",
   ],
@@ -406,6 +407,7 @@ Object {
     "babel-eslint",
   ],
   "packagePatterns": Array [
+    "^@typescript-eslint/",
     "^eslint",
   ],
 }
@@ -422,6 +424,7 @@ Object {
     "remark-lint",
   ],
   "packagePatterns": Array [
+    "^@typescript-eslint/",
     "^eslint",
     "^stylelint",
     "\\\\btslint\\\\b",
@@ -446,6 +449,7 @@ Object {
         "remark-lint",
       ],
       "packagePatterns": Array [
+        "^@typescript-eslint/",
         "^eslint",
         "^stylelint",
         "\\\\btslint\\\\b",
@@ -464,6 +468,7 @@ Object {
         "babel-eslint",
       ],
       "packagePatterns": Array [
+        "^@typescript-eslint/",
         "^eslint",
       ],
     },

@@ -1,5 +1,8 @@
 import is from '@sindresorhus/is';
-import { CONFIG_VALIDATION } from '../../constants/error-messages';
+import {
+  CONFIG_VALIDATION,
+  PLATFORM_RATE_LIMIT_EXCEEDED,
+} from '../../constants/error-messages';
 import { logger } from '../../logger';
 import { ExternalHostError } from '../../types/errors/external-host-error';
 import { regEx } from '../../util/regex';
@@ -23,7 +26,7 @@ const presetSources: Record<string, PresetApi> = {
 };
 
 export function replaceArgs(
-  obj: string | string[] | object | object[],
+  obj: string | string[] | Record<string, any> | Record<string, any>[],
   argMapping: Record<string, any>
 ): any {
   if (is.string(obj)) {
@@ -188,14 +191,18 @@ export async function resolveConfigPresets(
   );
   let config: RenovateConfig = {};
   // First, merge all the preset configs from left to right
-  if (inputConfig.extends && inputConfig.extends.length) {
+  if (inputConfig.extends?.length) {
     for (const preset of inputConfig.extends) {
       // istanbul ignore if
       if (existingPresets.includes(preset)) {
-        logger.debug(`Already seen preset ${preset} in ${existingPresets}`);
+        logger.debug(
+          `Already seen preset ${preset} in [${existingPresets.join(', ')}]`
+        );
       } else if (ignorePresets.includes(preset)) {
         // istanbul ignore next
-        logger.debug(`Ignoring preset ${preset} in ${existingPresets}`);
+        logger.debug(
+          `Ignoring preset ${preset} in [${existingPresets.join(', ')}]`
+        );
       } else {
         logger.trace(`Resolving preset "${preset}"`);
         let fetchedPreset: RenovateConfig;
@@ -205,6 +212,10 @@ export async function resolveConfigPresets(
           logger.debug({ preset, err }, 'Preset fetch error');
           // istanbul ignore if
           if (err instanceof ExternalHostError) {
+            throw err;
+          }
+          // istanbul ignore if
+          if (err.message === PLATFORM_RATE_LIMIT_EXCEEDED) {
             throw err;
           }
           const error = new Error(CONFIG_VALIDATION);
@@ -233,11 +244,7 @@ export async function resolveConfigPresets(
           existingPresets.concat([preset])
         );
         // istanbul ignore if
-        if (
-          inputConfig &&
-          inputConfig.ignoreDeps &&
-          inputConfig.ignoreDeps.length === 0
-        ) {
+        if (inputConfig?.ignoreDeps?.length === 0) {
           delete presetConfig.description;
         }
         config = mergeChildConfig(config, presetConfig);
@@ -266,7 +273,7 @@ export async function resolveConfigPresets(
             )
           );
         } else {
-          (config[key] as RenovateConfig[]).push(element);
+          (config[key] as unknown[]).push(element);
         }
       }
     } else if (is.object(val) && !ignoredKeys.includes(key)) {

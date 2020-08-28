@@ -94,15 +94,15 @@ function isDataStale(): boolean {
   return minutesElapsed >= 5;
 }
 
-let _updateRubyGemsVersions: Promise<void> | undefined;
+let updateRubyGemsVersionsPromise: Promise<void> | undefined;
 
 async function syncVersions(): Promise<void> {
   if (isDataStale()) {
-    _updateRubyGemsVersions =
+    updateRubyGemsVersionsPromise =
       // eslint-disable-next-line @typescript-eslint/no-misused-promises
-      _updateRubyGemsVersions || updateRubyGemsVersions();
-    await _updateRubyGemsVersions;
-    _updateRubyGemsVersions = null;
+      updateRubyGemsVersionsPromise || updateRubyGemsVersions();
+    await updateRubyGemsVersionsPromise;
+    updateRubyGemsVersionsPromise = null;
   }
 }
 

@@ -1,5 +1,6 @@
 import { RenovateConfig, getConfig } from '../../../test/util';
 import {
+  CONFIG_SECRETS_EXPOSED,
   CONFIG_VALIDATION,
   EXTERNAL_HOST_ERROR,
   MANAGER_LOCKFILE_ERROR,
@@ -46,6 +47,7 @@ describe('workers/repository/error', () => {
       REPOSITORY_CHANGED,
       REPOSITORY_FORKED,
       MANAGER_NO_PACKAGE_FILES,
+      CONFIG_SECRETS_EXPOSED,
       CONFIG_VALIDATION,
       REPOSITORY_ARCHIVED,
       REPOSITORY_MIRRORED,

@@ -1,7 +1,9 @@
 import URL from 'url';
 import { logger } from '../../logger';
+import * as packageCache from '../../util/cache/package';
 import { Http } from '../../util/http';
 import { GetReleasesConfig, ReleaseResult } from '../common';
+import { getTerraformServiceDiscoveryResult } from '../terraform-module';
 
 export const id = 'terraform-provider';
 export const defaultRegistryUrls = [
@@ -36,7 +38,10 @@ async function queryRegistry(
   registryURL: string,
   repository: string
 ): Promise<ReleaseResult> {
-  const backendURL = `${registryURL}/v1/providers/${repository}`;
+  const serviceDiscovery = await getTerraformServiceDiscoveryResult(
+    registryURL
+  );
+  const backendURL = `${registryURL}${serviceDiscovery['providers.v1']}${repository}`;
   const res = (await http.getJson<TerraformProvider>(backendURL)).body;
   const dep: ReleaseResult = {
     name: repository,
@@ -54,6 +59,7 @@ async function queryRegistry(
   return dep;
 }
 
+// TODO: add long term cache
 async function queryReleaseBackend(
   lookupName: string,
   registryURL: string,
@@ -67,6 +73,7 @@ async function queryReleaseBackend(
     name: repository,
     versions: {},
     releases: null,
+    sourceUrl: `https://github.com/terraform-providers/${backendLookUpName}`,
   };
   dep.releases = Object.keys(res[backendLookUpName].versions).map(
     (version) => ({
@@ -86,15 +93,30 @@ export async function getReleases({
   lookupName,
   registryUrl,
 }: GetReleasesConfig): Promise<ReleaseResult | null> {
-  const repository = `hashicorp/${lookupName}`;
+  const repository = lookupName.includes('/')
+    ? lookupName
+    : `hashicorp/${lookupName}`;
+
+  const cacheNamespace = 'terraform-provider';
+  const pkgUrl = `${registryUrl}/${repository}`;
+  const cachedResult = await packageCache.get<ReleaseResult>(
+    cacheNamespace,
+    pkgUrl
+  );
+  // istanbul ignore if
+  if (cachedResult) {
+    return cachedResult;
+  }
 
   logger.debug({ lookupName }, 'terraform-provider.getDependencies()');
   let dep: ReleaseResult = null;
   const registryHost = URL.parse(registryUrl).host;
-  if (registryHost === 'registry.terraform.io') {
-    dep = await queryRegistry(lookupName, registryUrl, repository);
-  } else if (registryHost === 'releases.hashicorp.com') {
+  if (registryHost === 'releases.hashicorp.com') {
     dep = await queryReleaseBackend(lookupName, registryUrl, repository);
+  } else {
+    dep = await queryRegistry(lookupName, registryUrl, repository);
   }
+  const cacheMinutes = 30;
+  await packageCache.set(cacheNamespace, pkgUrl, dep, cacheMinutes);
   return dep;
 }

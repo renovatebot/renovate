@@ -2,11 +2,14 @@ import { ReleaseResult, getPkgReleases } from '..';
 import * as httpMock from '../../../test/httpMock';
 import { mocked, partial } from '../../../test/util';
 import * as _github from '../github-tags';
+import * as _gitlab from '../gitlab-tags';
 import { id as datasource, getDigest } from '.';
 
 jest.mock('../github-tags');
+jest.mock('../gitlab-tags');
 
 const github = mocked(_github);
+const gitlab = mocked(_gitlab);
 
 const res1 = `<!DOCTYPE html>
 <html>
@@ -31,6 +34,16 @@ describe('datasource/go', () => {
   });
 
   describe('getDigest', () => {
+    it('returns null for no go-source tag', async () => {
+      httpMock
+        .scope('https://golang.org/')
+        .get('/y/text?go-get=1')
+        .reply(200, '');
+      github.getDigest.mockResolvedValueOnce('abcdefabcdefabcdefabcdef');
+      const res = await getDigest({ lookupName: 'golang.org/y/text' }, null);
+      expect(res).toBeNull();
+      expect(httpMock.getTrace()).toMatchSnapshot();
+    });
     it('returns null for wrong name', async () => {
       httpMock
         .scope('https://golang.org/')
@@ -98,6 +111,29 @@ describe('datasource/go', () => {
         .get('/x/text?go-get=1')
         .reply(200, res1);
       github.getReleases.mockResolvedValueOnce({
+        releases: [{ version: 'v1.0.0' }, { version: 'v2.0.0' }],
+      });
+      const res = await getPkgReleases({
+        datasource,
+        depName: 'golang.org/x/text',
+      });
+      expect(res).toMatchSnapshot();
+      expect(res).not.toBeNull();
+      expect(res).toBeDefined();
+      expect(httpMock.getTrace()).toMatchSnapshot();
+    });
+    it('support gitlab', async () => {
+      httpMock
+        .scope('https://golang.org/')
+        .get('/x/text?go-get=1')
+        .reply(
+          200,
+          res1.replace(
+            'https://github.com/golang/text/',
+            'https://gitlab.com/golang/text/'
+          )
+        );
+      gitlab.getReleases.mockResolvedValueOnce({
         releases: [{ version: 'v1.0.0' }, { version: 'v2.0.0' }],
       });
       const res = await getPkgReleases({

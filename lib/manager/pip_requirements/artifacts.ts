@@ -1,7 +1,7 @@
 import is from '@sindresorhus/is';
 import { logger } from '../../logger';
 import { ExecOptions, exec } from '../../util/exec';
-import { readLocalFile } from '../../util/gitfs';
+import { readLocalFile } from '../../util/fs';
 import { UpdateArtifact, UpdateArtifactsResult } from '../common';
 
 export async function updateArtifacts({
@@ -57,7 +57,7 @@ export async function updateArtifacts({
       {
         artifactError: {
           lockFile: packageFileName,
-          stderr: err.stdout + '\n' + err.stderr,
+          stderr: `${String(err.stdout)}\n${String(err.stderr)}`,
         },
       },
     ];

@@ -113,7 +113,10 @@ export async function updateDependency({
           `$1"${upgrade.newDigest}",  # ${upgrade.newValue}\n`
         );
       }
-    } else if (upgrade.depType === 'http_archive' && upgrade.newValue) {
+    } else if (
+      (upgrade.depType === 'http_archive' || upgrade.depType === 'http_file') &&
+      upgrade.newValue
+    ) {
       newDef = updateWithNewVersion(
         upgrade.managerData.def,
         upgrade.currentValue,
@@ -131,7 +134,7 @@ export async function updateDependency({
         newDef = newDef.replace(from, to);
       }
       const urls = extractUrls(newDef);
-      if (!(urls && urls.length)) {
+      if (!urls?.length) {
         logger.debug({ newDef }, 'urls is empty');
         return null;
       }
@@ -141,7 +144,10 @@ export async function updateDependency({
       }
       logger.debug({ hash }, 'Calculated hash');
       newDef = setNewHash(newDef, hash);
-    } else if (upgrade.depType === 'http_archive' && upgrade.newDigest) {
+    } else if (
+      (upgrade.depType === 'http_archive' || upgrade.depType === 'http_file') &&
+      upgrade.newDigest
+    ) {
       const [, shortRepo] = upgrade.repo.split('/');
       const url = `https://github.com/${upgrade.repo}/archive/${upgrade.newDigest}.tar.gz`;
       const hash = await getHashFromUrl(url);

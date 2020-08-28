@@ -1,8 +1,13 @@
 import { RenovateConfig } from '../../../config';
 import { REPOSITORY_CHANGED } from '../../../constants/error-messages';
-import { PR_STATE_OPEN } from '../../../constants/pull-requests';
 import { logger } from '../../../logger';
 import { platform } from '../../../platform';
+import { PrState } from '../../../types';
+import {
+  deleteBranch,
+  getAllRenovateBranches,
+  isBranchModified,
+} from '../../../util/git';
 
 async function cleanUpBranches(
   { dryRun, pruneStaleBranches: enabled }: RenovateConfig,
@@ -12,11 +17,10 @@ async function cleanUpBranches(
     try {
       const pr = await platform.findPr({
         branchName,
-        state: PR_STATE_OPEN,
+        state: PrState.Open,
       });
-      const branchPr = await platform.getBranchPr(branchName);
-      const skipAutoclose = branchPr && branchPr.isModified;
-      if (pr && !skipAutoclose) {
+      const branchIsModified = await isBranchModified(branchName);
+      if (pr && !branchIsModified) {
         if (!pr.title.endsWith('- autoclosed')) {
           if (dryRun) {
             logger.info(
@@ -27,13 +31,17 @@ async function cleanUpBranches(
               `PRUNING-DISABLED: Would update pr ${pr.number} to ${pr.title} - autoclosed`
             );
           } else {
-            await platform.updatePr(pr.number, `${pr.title} - autoclosed`);
+            await platform.updatePr({
+              number: pr.number,
+              prTitle: `${pr.title} - autoclosed`,
+              state: PrState.Closed,
+            });
           }
         }
       }
-      const closePr = true;
+
       logger.debug({ branch: branchName }, `Deleting orphan branch`);
-      if (skipAutoclose) {
+      if (branchIsModified) {
         if (pr) {
           logger.debug(
             { prNo: pr?.number, prTitle: pr?.title },
@@ -57,9 +65,9 @@ async function cleanUpBranches(
           `PRUNING-DISABLED: Would deleting orphan branch ${branchName}`
         );
       } else {
-        await platform.deleteBranch(branchName, closePr);
+        await deleteBranch(branchName);
       }
-      if (pr && !skipAutoclose) {
+      if (pr && !branchIsModified) {
         logger.info({ prNo: pr.number, prTitle: pr.title }, 'PR autoclosed');
       }
     } catch (err) /* istanbul ignore next */ {
@@ -81,10 +89,8 @@ export async function pruneStaleBranches(
     logger.debug('No branchList');
     return;
   }
-  let renovateBranches = await platform.getAllRenovateBranches(
-    config.branchPrefix
-  );
-  if (!(renovateBranches && renovateBranches.length)) {
+  let renovateBranches = await getAllRenovateBranches(config.branchPrefix);
+  if (!renovateBranches?.length) {
     logger.debug('No renovate branches found');
     return;
   }

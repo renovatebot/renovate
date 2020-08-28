@@ -1,4 +1,5 @@
 import url from 'url';
+import { HOST_DISABLED } from '../../constants/error-messages';
 import { logger } from '../../logger';
 import { ExternalHostError } from '../../types/errors/external-host-error';
 import { Http } from '../../util/http';
@@ -64,7 +65,10 @@ export async function downloadHttpProtocol(
     return raw.body;
   } catch (err) {
     const failedUrl = pkgUrl.toString();
-    if (isNotFoundError(err)) {
+    if (err.message === HOST_DISABLED) {
+      // istanbul ignore next
+      logger.trace({ failedUrl }, 'Host disabled');
+    } else if (isNotFoundError(err)) {
       logger.trace({ failedUrl }, `Url not found`);
     } else if (isHostError(err)) {
       // istanbul ignore next
@@ -95,10 +99,15 @@ export async function downloadHttpProtocol(
 export async function isHttpResourceExists(
   pkgUrl: url.URL | string,
   hostType = id
-): Promise<boolean | null> {
+): Promise<boolean | string | null> {
   try {
     const httpClient = httpByHostType(hostType);
-    await httpClient.head(pkgUrl.toString());
+    const res = await httpClient.head(pkgUrl.toString());
+    const pkgUrlHost = url.parse(pkgUrl.toString()).host;
+    if (pkgUrlHost === 'repo.maven.apache.org') {
+      const timestamp = res?.headers?.['last-modified'];
+      return timestamp || true;
+    }
     return true;
   } catch (err) {
     if (isNotFoundError(err)) {

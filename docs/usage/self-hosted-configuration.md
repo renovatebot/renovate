@@ -73,7 +73,9 @@ You probably have no need for this option - it is an experimental setting for th
 
 ## gitAuthor
 
-RFC5322-compliant string if you wish to customise the git author for commits.
+RFC5322-compliant string if you wish to customise the git author for commits. If you need to transition from one git author to another, put the old gitAuthor into `RENOVATE_LEGACY_GIT_AUTHOR_EMAIL` in environment. Renovate will then check against it as well as the current git author value before deciding if a branch has been modified.
+
+**Note** It is strongly recommended that the git author email you provide should be unique to Renovate. Otherwise, if another bot or human shares the same email and pushes to one of Renovate's branches then Renovate will mistake the branch as unmodified and potentially force push over the changes.
 
 ## gitPrivateKey
 
@@ -96,6 +98,10 @@ The `git` commands are run locally in the cloned repo instead of globally to red
 
 ## logLevel
 
+It's recommended to run at debug level if you can, and configure it using the environment variable `LOG_LEVEL=debug`. By configuring using the environment it means that debug logging starts from the beginning of the app, while if you configure it using file config then the debug logging can only start after the file config is parsed.
+
+Additionally, if you configure `LOG_FORMAT=json` in env then logging will be done in JSON format instead of "pretty" format, which is usually better if you're doing any ingestion or parsing of the logs.
+
 ## onboarding
 
 Set this to `false` if (a) you configure Renovate entirely on the bot side (i.e. empty `renovate.json` in repositories) and (b) you wish to run Renovate on every repository the bot has access to, and (c) you wish to skip the onboarding PRs.
@@ -103,6 +109,10 @@ Set this to `false` if (a) you configure Renovate entirely on the bot side (i.e.
 ## onboardingBranch
 
 Note that this setting is independent of `branchPrefix`. For example, if you configure `branchPrefix` to be `renovate-` then you'd still have the onboarding PR created with branch `renovate/configure` until you configure `onboardingBranch=renovate-configure` or similar. If you have an existing Renovate installation and you change `onboardingBranch` then it's possible that you'll get onboarding PRs for repositories that had previously closed the onboarding PR unmerged.
+
+## onboardingCommitMessage
+
+Note that if `commitMessagePrefix` or `semanticCommits` values are defined then they will be prepended to the commit message using the same logic that is used for adding them to non-onboarding commit messages.
 
 ## onboardingConfig
 

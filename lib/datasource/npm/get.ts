@@ -45,6 +45,29 @@ export interface NpmDependency extends ReleaseResult {
   sourceDirectory?: string;
 }
 
+interface NpmResponse {
+  _id: string;
+  name?: string;
+  versions?: Record<
+    string,
+    {
+      repository?: {
+        url: string;
+        directory: string;
+      };
+      homepage?: string;
+      deprecated?: boolean;
+      gitHead?: string;
+    }
+  >;
+  repository?: {
+    url?: string;
+    directory?: string;
+  };
+  homepage?: string;
+  time?: Record<string, string>;
+}
+
 export async function getDependency(
   packageName: string,
   retries = 3
@@ -91,7 +114,7 @@ export async function getDependency(
     authInfo = { type: 'Bearer', token: npmrc._authToken };
   }
 
-  if (authInfo && authInfo.type && authInfo.token) {
+  if (authInfo?.type && authInfo.token) {
     headers.authorization = `${authInfo.type} ${authInfo.token}`;
     logger.trace(
       { token: maskToken(authInfo.token), npmName: packageName },
@@ -135,8 +158,7 @@ export async function getDependency(
       headers,
       useCache,
     };
-    // TODO: fix type
-    const raw = await http.getJson<any>(pkgUrl, opts);
+    const raw = await http.getJson<NpmResponse>(pkgUrl, opts);
     if (retries < 3) {
       logger.debug({ pkgUrl, retries }, 'Recovered from npm error');
     }
@@ -181,7 +203,7 @@ export async function getDependency(
       'dist-tags': res['dist-tags'],
       'renovate-config': latestVersion['renovate-config'],
     };
-    if (res.repository && res.repository.directory) {
+    if (res.repository?.directory) {
       dep.sourceDirectory = res.repository.directory;
     }
     if (latestVersion.deprecated) {
@@ -193,7 +215,7 @@ export async function getDependency(
         version,
         gitRef: res.versions[version].gitHead,
       };
-      if (res.time && res.time[version]) {
+      if (res.time?.[version]) {
         release.releaseTimestamp = res.time[version];
         release.canBeUnpublished =
           moment().diff(moment(release.releaseTimestamp), 'days') === 0;
@@ -208,7 +230,7 @@ export async function getDependency(
     memcache[packageName] = JSON.stringify(dep);
     const cacheMinutes = process.env.RENOVATE_CACHE_NPM_MINUTES
       ? parseInt(process.env.RENOVATE_CACHE_NPM_MINUTES, 10)
-      : 5;
+      : 15;
     // TODO: use dynamic detection of public repos instead of a static list
     const whitelistedPublicScopes = [
       '@graphql-codegen',

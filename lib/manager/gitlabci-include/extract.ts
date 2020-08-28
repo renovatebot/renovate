@@ -3,7 +3,7 @@ import yaml from 'js-yaml';
 import * as datasourceGitlabTags from '../../datasource/gitlab-tags';
 import { logger } from '../../logger';
 import { SkipReason } from '../../types';
-import { readLocalFile } from '../../util/gitfs';
+import { readLocalFile } from '../../util/fs';
 import { ExtractConfig, PackageDependency, PackageFile } from '../common';
 import * as gitlabci from '../gitlabci/extract';
 
@@ -60,7 +60,7 @@ export async function extractPackageFile(
       }
     }
   } catch (err) /* istanbul ignore next */ {
-    if (err.stack && err.stack.startsWith('YAMLException:')) {
+    if (err.stack?.startsWith('YAMLException:')) {
       logger.debug({ err });
       logger.debug('YAML exception extracting GitLab CI includes');
     } else {

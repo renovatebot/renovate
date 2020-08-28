@@ -1,7 +1,7 @@
 import * as datasourceRubygems from '../../datasource/rubygems';
 import { logger } from '../../logger';
 import { SkipReason } from '../../types';
-import { readLocalFile } from '../../util/gitfs';
+import { readLocalFile } from '../../util/fs';
 import { regEx } from '../../util/regex';
 import { PackageDependency, PackageFile } from '../common';
 import { extractLockFileEntries } from './locked-version';
@@ -96,7 +96,8 @@ export async function extractPackageFile(
             ...dep,
             depTypes,
             managerData: {
-              lineNumber: dep.managerData.lineNumber + groupLineNumber + 1,
+              lineNumber:
+                Number(dep.managerData.lineNumber) + groupLineNumber + 1,
             },
           }))
         );
@@ -130,7 +131,8 @@ export async function extractPackageFile(
               ...dep,
               registryUrls: [repositoryUrl],
               managerData: {
-                lineNumber: dep.managerData.lineNumber + sourceLineNumber + 1,
+                lineNumber:
+                  Number(dep.managerData.lineNumber) + sourceLineNumber + 1,
               },
             }))
           );
@@ -156,7 +158,8 @@ export async function extractPackageFile(
           platformsRes.deps.map((dep) => ({
             ...dep,
             managerData: {
-              lineNumber: dep.managerData.lineNumber + platformsLineNumber + 1,
+              lineNumber:
+                Number(dep.managerData.lineNumber) + platformsLineNumber + 1,
             },
           }))
         );
@@ -181,7 +184,7 @@ export async function extractPackageFile(
           ifRes.deps.map((dep) => ({
             ...dep,
             managerData: {
-              lineNumber: dep.managerData.lineNumber + ifLineNumber + 1,
+              lineNumber: Number(dep.managerData.lineNumber) + ifLineNumber + 1,
             },
           }))
         );

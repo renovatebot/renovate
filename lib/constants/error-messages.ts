@@ -12,6 +12,7 @@ export const PLATFORM_RATE_LIMIT_EXCEEDED = 'rate-limit-exceeded';
 
 // Config Error
 export const CONFIG_VALIDATION = 'config-validation';
+export const CONFIG_SECRETS_EXPOSED = 'config-secrets-exposed';
 
 // Repository Error
 export const REPOSITORY_ACCESS_FORBIDDEN = 'forbidden';
@@ -36,6 +37,7 @@ export const MANAGER_NO_PACKAGE_FILES = 'no-package-files';
 // Host error
 export const EXTERNAL_HOST_ERROR = 'external-host-error';
 export const IGNORABLE_HOST_ERROR = 'ignorable-host-error';
+export const HOST_DISABLED = 'host-disabled';
 
 // Worker Error
 export const WORKER_FILE_UPDATE_FAILED = 'update-failure';

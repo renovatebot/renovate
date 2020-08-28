@@ -1,14 +1,15 @@
 import { RenovateConfig } from '../../../../config';
 import { configFileNames } from '../../../../config/app-strings';
 import { REPOSITORY_DISABLED } from '../../../../constants/error-messages';
-import { PR_STATE_NOT_OPEN } from '../../../../constants/pull-requests';
 import { logger } from '../../../../logger';
 import { platform } from '../../../../platform';
-import { readLocalFile } from '../../../../util/gitfs';
+import { PrState } from '../../../../types';
+import { readLocalFile } from '../../../../util/fs';
+import { getFileList } from '../../../../util/git';
 
 const findFile = async (fileName: string): Promise<boolean> => {
   logger.debug(`findFile(${fileName})`);
-  const fileList = await platform.getFileList();
+  const fileList = await getFileList();
   return fileList.includes(fileName);
 };
 
@@ -40,7 +41,7 @@ const closedPrExists = (config: RenovateConfig): Promise<Pr> =>
   platform.findPr({
     branchName: config.onboardingBranch,
     prTitle: config.onboardingPrTitle,
-    state: PR_STATE_NOT_OPEN,
+    state: PrState.NotOpen,
   });
 
 export const isOnboarded = async (config: RenovateConfig): Promise<boolean> => {

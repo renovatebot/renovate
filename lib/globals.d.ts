@@ -5,15 +5,12 @@
 declare interface Error {
   configFile?: string;
 
-  statusCode?: number;
-
   validationError?: string;
   validationMessage?: string;
 }
 
 declare namespace NodeJS {
   interface Global {
-    appMode?: boolean;
     gitAuthor?: { name: string; email: string };
 
     trustLevel?: string;

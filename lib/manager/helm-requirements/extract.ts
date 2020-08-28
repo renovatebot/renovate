@@ -3,7 +3,7 @@ import yaml from 'js-yaml';
 import * as datasourceHelm from '../../datasource/helm';
 import { logger } from '../../logger';
 import { SkipReason } from '../../types';
-import { getSiblingFileName, readLocalFile } from '../../util/gitfs';
+import { getSiblingFileName, readLocalFile } from '../../util/fs';
 import { ExtractConfig, PackageDependency, PackageFile } from '../common';
 
 export async function extractPackageFile(
@@ -19,7 +19,7 @@ export async function extractPackageFile(
       return null;
     }
     const chart = yaml.safeLoad(chartContents, { json: true });
-    if (!(chart && chart.apiVersion && chart.name && chart.version)) {
+    if (!(chart?.apiVersion && chart.name && chart.version)) {
       logger.debug(
         { fileName },
         'Failed to find required fields in Chart.yaml'

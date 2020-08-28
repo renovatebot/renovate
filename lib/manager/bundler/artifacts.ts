@@ -1,7 +1,6 @@
 import { quote } from 'shlex';
 import { BUNDLER_INVALID_CREDENTIALS } from '../../constants/error-messages';
 import { logger } from '../../logger';
-import { platform } from '../../platform';
 import { HostRule } from '../../types';
 import * as memCache from '../../util/cache/memory';
 import { ExecOptions, exec } from '../../util/exec';
@@ -10,7 +9,8 @@ import {
   getSiblingFileName,
   readLocalFile,
   writeLocalFile,
-} from '../../util/gitfs';
+} from '../../util/fs';
+import { getRepoStatus } from '../../util/git';
 import { isValid } from '../../versioning/ruby';
 import { UpdateArtifact, UpdateArtifactsResult } from '../common';
 import {
@@ -139,7 +139,7 @@ export async function updateArtifacts(
       },
     };
     await exec(cmd, execOptions);
-    const status = await platform.getRepoStatus();
+    const status = await getRepoStatus();
     if (!status.modified.includes(lockFileName)) {
       return null;
     }
@@ -154,7 +154,7 @@ export async function updateArtifacts(
       },
     ];
   } catch (err) /* istanbul ignore next */ {
-    const output = err.stdout + err.stderr;
+    const output = `${String(err.stdout)}\n${String(err.stderr)}`;
     if (
       err.message.includes('fatal: Could not parse object') ||
       output.includes('but that version could not be found')
@@ -169,13 +169,11 @@ export async function updateArtifacts(
       ];
     }
     if (
-      (err.stdout &&
-        err.stdout.includes('Please supply credentials for this source')) ||
-      (err.stderr && err.stderr.includes('Authentication is required')) ||
-      (err.stderr &&
-        err.stderr.includes(
-          'Please make sure you have the correct access rights'
-        ))
+      err.stdout?.includes('Please supply credentials for this source') ||
+      err.stderr?.includes('Authentication is required') ||
+      err.stderr?.includes(
+        'Please make sure you have the correct access rights'
+      )
     ) {
       logger.debug(
         { err },
@@ -225,7 +223,7 @@ export async function updateArtifacts(
       {
         artifactError: {
           lockFile: lockFileName,
-          stderr: err.stdout + '\n' + err.stderr,
+          stderr: `${String(err.stdout)}\n${String(err.stderr)}`,
         },
       },
     ];

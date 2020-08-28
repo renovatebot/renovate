@@ -23,6 +23,7 @@ export interface RenovateSharedConfig {
   branchName?: string;
   manager?: string;
   commitMessage?: string;
+  commitMessagePrefix?: string;
   draftPR?: boolean;
   enabled?: boolean;
   enabledManagers?: string[];
@@ -35,7 +36,7 @@ export interface RenovateSharedConfig {
   ignorePaths?: string[];
   labels?: string[];
   managers?: string | string[];
-  masterIssueApproval?: boolean;
+  dependencyDashboardApproval?: boolean;
   npmrc?: string;
   platform?: string;
   postUpgradeTasks?: PostUpgradeTasks;
@@ -54,7 +55,6 @@ export interface RenovateSharedConfig {
   semanticCommits?: boolean;
   semanticCommitScope?: string;
   semanticCommitType?: string;
-  statusCheckVerify?: boolean;
   suppressNotifications?: string[];
   timezone?: string;
   unicodeEmoji?: boolean;
@@ -87,6 +87,7 @@ export interface RenovateAdminConfig {
 
   onboarding?: boolean;
   onboardingBranch?: string;
+  onboardingCommitMessage?: string;
   onboardingPrTitle?: string;
   onboardingConfig?: RenovateSharedConfig;
 
@@ -135,6 +136,8 @@ export interface RenovateConfig
   baseBranches?: string[];
   baseBranch?: string;
   baseBranchSha?: string;
+  defaultBranch?: string;
+  defaultBranchSha?: string;
   branchList?: string[];
   description?: string | string[];
 
@@ -151,11 +154,13 @@ export interface RenovateConfig
 
   fileList?: string[];
 
-  masterIssue?: boolean;
-  masterIssueAutoclose?: boolean;
-  masterIssueChecks?: Record<string, string>;
-  masterIssueRebaseAllOpen?: boolean;
-  masterIssueTitle?: string;
+  dependencyDashboard?: boolean;
+  dependencyDashboardAutoclose?: boolean;
+  dependencyDashboardChecks?: Record<string, string>;
+  dependencyDashboardRebaseAllOpen?: boolean;
+  dependencyDashboardTitle?: string;
+  dependencyDashboardHeader?: string;
+  dependencyDashboardFooter?: string;
   packageFile?: string;
   packageRules?: PackageRule[];
   prConcurrentLimit?: number;

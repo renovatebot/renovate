@@ -22,6 +22,24 @@ export interface Comment {
 
 export interface GhPr extends Pr {
   comments: Comment[];
+  mergeable: boolean;
+}
+
+export interface GhRestPr extends GhPr {
+  head: { ref: string; sha: string };
+  mergeable_state: string;
+}
+
+export interface GhGraphQlPr extends GhPr {
+  commits: any;
+  reviewRequests: any;
+  assignees: any;
+  mergeStateStatus: string;
+  reviews: any;
+  baseRefName: string;
+  headRefName: string;
+  comments: Comment[] & { nodes?: { databaseId: number; body: string }[] };
+  labels: string[] & { nodes?: { name: string }[] };
 }
 
 export interface LocalRepoConfig {
@@ -30,7 +48,6 @@ export interface LocalRepoConfig {
   prReviewsRequired: boolean;
   repoForceRebase?: boolean;
   parentRepo: string;
-  baseCommitSHA: string | null;
   forkMode?: boolean;
   forkToken?: string;
   closedPrList: PrList | null;
@@ -38,9 +55,8 @@ export interface LocalRepoConfig {
   prList: GhPr[] | null;
   issueList: any[] | null;
   mergeMethod: string;
-  baseBranch: string;
   defaultBranch: string;
-  enterpriseVersion: string;
+  defaultBranchSha?: string;
   repositoryOwner: string;
   repository: string | null;
   localDir: string;
@@ -51,3 +67,18 @@ export interface LocalRepoConfig {
 
 export type BranchProtection = any;
 export type PrList = Record<number, GhPr>;
+
+export interface GhRepo {
+  isFork: boolean;
+  isArchived: boolean;
+  nameWithOwner: string;
+  mergeCommitAllowed: boolean;
+  rebaseMergeAllowed: boolean;
+  squashMergeAllowed: boolean;
+  defaultBranchRef: {
+    name: string;
+    target: {
+      oid: string;
+    };
+  };
+}
