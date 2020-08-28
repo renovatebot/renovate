@@ -27,7 +27,7 @@ describe('workers/repository/init', () => {
       apis.initApis.mockResolvedValue({} as never);
       onboarding.checkOnboardingBranch.mockResolvedValueOnce({});
       config.mergeRenovateConfig.mockResolvedValueOnce({});
-      secrets.applySecretsToConfig.mockResolvedValueOnce({} as never);
+      secrets.applySecretsToConfig.mockReturnValueOnce({} as never);
       const renovateConfig = await initRepo({});
       expect(renovateConfig).toMatchSnapshot();
     });
@@ -35,7 +35,7 @@ describe('workers/repository/init', () => {
       apis.initApis.mockResolvedValue({} as never);
       onboarding.checkOnboardingBranch.mockResolvedValueOnce({});
       cache.getResolvedConfig.mockResolvedValueOnce({} as never);
-      secrets.applySecretsToConfig.mockResolvedValueOnce({} as never);
+      secrets.applySecretsToConfig.mockReturnValueOnce({} as never);
       const renovateConfig = await initRepo({});
       expect(renovateConfig).toMatchSnapshot();
     });
