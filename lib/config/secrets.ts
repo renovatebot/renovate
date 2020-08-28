@@ -18,20 +18,21 @@ function validateSecrets(secrets_: unknown): void {
     return;
   }
   const validationErrors: string[] = [];
-  if (!is.plainObject(secrets_)) {
+  if (is.plainObject(secrets_)) {
+    for (const [secretName, secretValue] of Object.entries(secrets_)) {
+      if (!secretNameRegex.test(secretName)) {
+        validationErrors.push(`Invalid secret name "${secretName}"`);
+      }
+      if (!is.string(secretValue)) {
+        validationErrors.push(
+          `Secret values must be strings. Found type ${typeof secretValue} for secret ${secretName}`
+        );
+      }
+    }
+  } else {
     validationErrors.push(
       `Config secrets must be a plain object. Found: ${typeof secrets_}`
     );
-  }
-  for (const [secretName, secretValue] of Object.entries(secrets_)) {
-    if (!secretNameRegex.test(secretName)) {
-      validationErrors.push(`Invalid secret name "${secretName}"`);
-    }
-    if (!is.string(secretValue)) {
-      validationErrors.push(
-        `Secret values must be strings. Found type ${typeof secretValue} for secret ${secretName}`
-      );
-    }
   }
   if (validationErrors.length) {
     logger.error({ validationErrors }, 'Invalid secrets configured');
@@ -73,7 +74,8 @@ function replaceSecretsinObject(
   secrets: Record<string, string> = {}
 ): RenovateConfig {
   const config = { ...config_ };
-  for (const [key, value] of Object.entries(config_)) {
+  delete config.secrets;
+  for (const [key, value] of Object.entries(config)) {
     if (is.plainObject(value)) {
       config[key] = replaceSecretsinObject(value, secrets);
     }
@@ -90,7 +92,6 @@ function replaceSecretsinObject(
       }
     }
   }
-  delete config.secrets;
   return config;
 }
 
