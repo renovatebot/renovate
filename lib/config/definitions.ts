@@ -179,6 +179,7 @@ const options: RenovateOptions[] = [
     description:
       'Object containing secrets, may be encrypted if in repository config',
     type: 'object',
+    admin: true,
     mergeable: true,
     default: {},
     additionalProperties: {
