@@ -172,11 +172,11 @@ Warning: this is an experimental feature and may be modified or removed in a fut
 Secrets may be configured by a bot admin, which will then make them available for templating within repository configs. For example, to configure an `NPM_TOKEN` to be accessible by all repositories:
 
 ```js
-  module.exports = {
-    secrets: {
-      NPM_TOKEN: 'abc123',
-    }
-  }
+module.exports = {
+  secrets: {
+    NPM_TOKEN: 'abc123',
+  },
+};
 ```
 
 It could then be used in a repository config or preset like so:

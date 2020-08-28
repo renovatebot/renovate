@@ -1,4 +1,5 @@
 import { RenovateConfig } from '../../../config';
+import { replaceSecretsinObject } from '../../../config/secrets';
 import { logger } from '../../../logger';
 import { platform } from '../../../platform';
 import * as memCache from '../../../util/cache/memory';
@@ -9,7 +10,6 @@ import { checkIfConfigured } from '../configured';
 import { checkOnboardingBranch } from '../onboarding/branch';
 import { initApis } from './apis';
 import { mergeRenovateConfig } from './config';
-import { applySecrets } from './secrets';
 import { detectSemanticCommits } from './semantic';
 import { detectVulnerabilityAlerts } from './vulnerability';
 
@@ -40,9 +40,9 @@ export async function initRepo(
   config = await initApis(config);
   config = await getRepoConfig(config);
   checkIfConfigured(config);
+  config = replaceSecretsinObject(config);
   await setBranchPrefix(config.branchPrefix);
   config = await detectVulnerabilityAlerts(config);
-  config = applySecrets(config);
   // istanbul ignore if
   if (config.printConfig) {
     logger.debug({ config }, 'Full resolved config including presets');

@@ -74,7 +74,7 @@ export interface RenovateAdminConfig {
   cacheDir?: string;
   configWarningReuseIssue?: boolean;
   dryRun?: boolean;
-
+  secrets?: any;
   endpoint?: string;
 
   global?: GlobalConfig;
@@ -114,6 +114,7 @@ export type RenovateRepository =
   | string
   | {
       repository: string;
+      secrets?: any;
     };
 
 export interface CustomManager {
