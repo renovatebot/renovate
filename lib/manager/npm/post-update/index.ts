@@ -125,7 +125,7 @@ export async function writeExistingFiles(
   const npmrcFile = upath.join(config.localDir, '.npmrc');
   if (config.npmrc) {
     logger.debug(`Writing repo .npmrc (${config.localDir})`);
-    await outputFile(npmrcFile, config.npmrc);
+    await outputFile(npmrcFile, `${String(config.npmrc)}\n`);
   } else if (config.ignoreNpmrcFile) {
     logger.debug('Removing ignored .npmrc file before artifact generation');
     await remove(npmrcFile);
@@ -147,11 +147,11 @@ export async function writeExistingFiles(
       config.localDir,
       path.dirname(packageFile.packageFile)
     );
-    const npmrc = packageFile.npmrc || config.npmrc;
+    const npmrc: string = packageFile.npmrc || config.npmrc;
     const npmrcFilename = upath.join(basedir, '.npmrc');
     if (npmrc) {
       try {
-        await outputFile(npmrcFilename, npmrc);
+        await outputFile(npmrcFilename, `${npmrc}\n`);
       } catch (err) /* istanbul ignore next */ {
         logger.warn({ npmrcFilename, err }, 'Error writing .npmrc');
       }
@@ -307,7 +307,8 @@ async function updateNpmrcContent(
   try {
     const newContent = newNpmrc.join('\n');
     if (newContent !== originalContent) {
-      await writeFile(npmrcFilePath, newContent);
+      logger.debug(`Writing updated .npmrc file to ${npmrcFilePath}`);
+      await writeFile(npmrcFilePath, `${newContent}\n`);
     }
   } catch {
     logger.warn('Unable to write custom npmrc file');
