@@ -397,7 +397,11 @@ export async function getFileList(): Promise<string[]> {
 export async function getAllRenovateBranches(
   branchPrefix: string
 ): Promise<string[]> {
-  await syncGit();
+  // istanbul ignore if
+  if (!git) {
+    logger.debug('git is uninitialized so returning empty branch set');
+    return [];
+  }
   const branches = await git.branch(['--remotes', '--verbose']);
   return branches.all
     .map(localName)

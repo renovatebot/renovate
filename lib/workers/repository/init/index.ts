@@ -1,24 +1,22 @@
 import { RenovateConfig } from '../../../config';
 import { logger } from '../../../logger';
 import { platform } from '../../../platform';
-import * as memCache from '../../../util/cache/memory';
-import * as repositoryCache from '../../../util/cache/repository';
 import { clone } from '../../../util/clone';
 import { setBranchPrefix } from '../../../util/git';
 import { checkIfConfigured } from '../configured';
 import { checkOnboardingBranch } from '../onboarding/branch';
 import { initApis } from './apis';
+import {
+  getResolvedConfig,
+  initializeCaches,
+  setResolvedConfig,
+} from './cache';
 import { mergeRenovateConfig } from './config';
 import { detectSemanticCommits } from './semantic';
 import { detectVulnerabilityAlerts } from './vulnerability';
 
 function initializeConfig(config: RenovateConfig): RenovateConfig {
   return { ...clone(config), errors: [], warnings: [], branchList: [] };
-}
-
-async function initializeCaches(config: RenovateConfig): Promise<void> {
-  memCache.init();
-  await repositoryCache.initialize(config);
 }
 
 async function getRepoConfig(config_: RenovateConfig): Promise<RenovateConfig> {
@@ -37,7 +35,13 @@ export async function initRepo(
   let config: RenovateConfig = initializeConfig(config_);
   await initializeCaches(config);
   config = await initApis(config);
-  config = await getRepoConfig(config);
+  const resolvedConfig = getResolvedConfig(config.defaultBranchSha);
+  if (resolvedConfig) {
+    config = resolvedConfig;
+  } else {
+    config = await getRepoConfig(config);
+    setResolvedConfig(config);
+  }
   checkIfConfigured(config);
   await setBranchPrefix(config.branchPrefix);
   config = await detectVulnerabilityAlerts(config);
