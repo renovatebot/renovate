@@ -110,6 +110,10 @@ Set this to `false` if (a) you configure Renovate entirely on the bot side (i.e.
 
 Note that this setting is independent of `branchPrefix`. For example, if you configure `branchPrefix` to be `renovate-` then you'd still have the onboarding PR created with branch `renovate/configure` until you configure `onboardingBranch=renovate-configure` or similar. If you have an existing Renovate installation and you change `onboardingBranch` then it's possible that you'll get onboarding PRs for repositories that had previously closed the onboarding PR unmerged.
 
+## onboardingCommitMessage
+
+Note that if `commitMessagePrefix` or `semanticCommits` values are defined then they will be prepended to the commit message using the same logic that is used for adding them to non-onboarding commit messages.
+
 ## onboardingConfig
 
 ## onboardingPrTitle

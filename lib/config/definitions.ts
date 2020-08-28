@@ -141,6 +141,15 @@ const options: RenovateOptions[] = [
     cli: false,
   },
   {
+    name: 'onboardingCommitMessage',
+    description:
+      'Change this value in order to override the default onboarding commit message.',
+    type: 'string',
+    default: null,
+    admin: true,
+    cli: false,
+  },
+  {
     name: 'onboardingPrTitle',
     description:
       'Change this value in order to override the default onboarding PR title.',
@@ -612,7 +621,6 @@ const options: RenovateOptions[] = [
     type: 'array',
     stage: 'package',
     cli: false,
-    env: false,
   },
   {
     name: 'gitAuthor',
@@ -1284,6 +1292,15 @@ const options: RenovateOptions[] = [
     name: 'commitMessageSuffix',
     description: 'Suffix to add to end of commit messages and PR titles.',
     type: 'string',
+    cli: false,
+  },
+  {
+    name: 'prBodyTemplate',
+    description:
+      'Pull Request body template. Controls which sections are rendered in the body.',
+    type: 'string',
+    default:
+      '{{{header}}}{{{table}}}{{{notes}}}{{{changelogs}}}{{{configDescription}}}{{{controls}}}{{{footer}}}',
     cli: false,
   },
   {

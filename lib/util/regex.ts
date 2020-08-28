@@ -21,7 +21,7 @@ export function regEx(pattern: string, flags?: string): RegExp {
   } catch (err) {
     const error = new Error(CONFIG_VALIDATION);
     error.configFile = pattern;
-    error.validationError = 'Invalid regular expression: ' + err.toString();
+    error.validationError = `Invalid regular expression: ${pattern}`;
     throw error;
   }
 }

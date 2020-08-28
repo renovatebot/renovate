@@ -13,8 +13,11 @@ export interface BaseBranchCache {
 export interface Cache {
   repository?: string;
   init?: {
+    defaultBranch?: string;
+    defaultBranchSha?: string;
     configFile?: string;
     configFileContents?: RenovateConfig;
+    resolvedConfig?: RenovateConfig;
   };
   scan?: Record<string, BaseBranchCache>;
 }
@@ -62,6 +65,8 @@ export async function initialize(config: RenovateConfig): Promise<void> {
 
 export function getCache(): Cache {
   cache = cache || Object.create({});
+  cache.init = cache.init || Object.create({});
+  cache.scan = cache.scan || Object.create({});
   return cache;
 }
 

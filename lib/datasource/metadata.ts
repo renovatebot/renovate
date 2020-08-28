@@ -57,6 +57,7 @@ const manualSourceUrls = {
       'https://github.com/GoogleContainerTools/kaniko',
     'gitlab/gitlab-ce': 'https://gitlab.com/gitlab-org/omnibus-gitlab',
     'gitlab/gitlab-runner': 'https://gitlab.com/gitlab-org/gitlab-runner',
+    'hashicorp/terraform': 'https://github.com/hashicorp/terraform',
     node: 'https://github.com/nodejs/node',
     traefik: 'https://github.com/containous/traefik',
   },

@@ -133,7 +133,7 @@ export async function getReleases(
   ).flat();
 
   let homepage = null;
-  let latestStable = null;
+  let latestStable: string = null;
   const releases = catalogEntries.map(
     ({ version, published: releaseTimestamp, projectUrl }) => {
       const release: Release = { version };

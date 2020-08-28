@@ -75,9 +75,7 @@ export async function getPrBody(config: BranchConfig): Promise<string> {
     controls: getControls(),
     footer: getPrFooter(config),
   };
-  const defaultPrBodyTemplate =
-    '{{{header}}}{{{table}}}{{{notes}}}{{{changelogs}}}{{{configDescription}}}{{{controls}}}{{{footer}}}';
-  const prBodyTemplate = config.prBodyTemplate || defaultPrBodyTemplate;
+  const prBodyTemplate = config.prBodyTemplate;
   let prBody = template.compile(prBodyTemplate, content, false);
   prBody = prBody.trim();
   prBody = prBody.replace(/\n\n\n+/g, '\n\n');

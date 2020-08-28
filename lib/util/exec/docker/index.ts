@@ -117,7 +117,7 @@ function getContainerName(image: string): string {
   return image.replace(/\//g, '_');
 }
 
-export async function removeDockerContainer(image): Promise<void> {
+export async function removeDockerContainer(image: string): Promise<void> {
   const containerName = getContainerName(image);
   let cmd = `docker ps --filter name=${containerName} -aq`;
   try {
@@ -208,7 +208,7 @@ export async function generateDockerCommand(
     result.push(`-w "${cwd}"`);
   }
 
-  let tag;
+  let tag: string;
   if (options.tag) {
     tag = options.tag;
   } else if (tagConstraint) {
