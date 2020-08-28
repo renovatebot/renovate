@@ -1295,6 +1295,15 @@ const options: RenovateOptions[] = [
     cli: false,
   },
   {
+    name: 'prBodyTemplate',
+    description:
+      'Pull Request body template. Controls which sections are rendered in the body.',
+    type: 'string',
+    default:
+      '{{{header}}}{{{table}}}{{{notes}}}{{{changelogs}}}{{{configDescription}}}{{{controls}}}{{{footer}}}',
+    cli: false,
+  },
+  {
     name: 'prTitle',
     description:
       'Pull Request title template (deprecated). Now uses commitMessage.',
