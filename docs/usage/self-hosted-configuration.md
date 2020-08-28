@@ -169,13 +169,28 @@ Warning: this is an experimental feature and may be modified or removed in a fut
 
 ## secrets
 
-Secrets may be configured by a bot admin, which will then make them available for templating within repository configs. For example, to configure a `GOOGLE_TOKEN` to be accessible by all repositories:
+Secrets may be configured by a bot admin in `confi.js`, which will then make them available for templating within repository configs. For example, to configure a `GOOGLE_TOKEN` to be accessible by all repositories:
 
 ```js
 module.exports = {
   secrets: {
     GOOGLE_TOKEN: 'abc123',
   },
+};
+```
+
+They can also be configured per repository, e.g.
+
+```js
+module.exports = {
+  repositories: [
+    {
+      repository: 'abc/def',
+      secrets: {
+        GOOGLE_TOKEN: 'abc123',
+      },
+    },
+  ],
 };
 ```
 
