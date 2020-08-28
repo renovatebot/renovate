@@ -148,6 +148,10 @@ const ubuntuReleases: UbuntuRelease[] = [
     value: '20.04',
     stable: true,
   },
+  {
+    name: 'groovy',
+    value: '20.10',
+  },
 ];
 
 function find(input: string): UbuntuRelease | null {

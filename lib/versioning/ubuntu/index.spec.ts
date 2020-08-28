@@ -42,6 +42,7 @@ describe('versioning/ubuntu', () => {
     expect(ubuntu.isCompatible('disco')).toBe(true);
     expect(ubuntu.isCompatible('eoan')).toBe(true);
     expect(ubuntu.isCompatible('focal')).toBe(true);
+    expect(ubuntu.isCompatible('groovy')).toBe(true);
 
     expect(ubuntu.isCompatible('04.10')).toBe(true);
     expect(ubuntu.isCompatible('05.04')).toBe(true);
@@ -75,6 +76,7 @@ describe('versioning/ubuntu', () => {
     expect(ubuntu.isCompatible('19.04')).toBe(true);
     expect(ubuntu.isCompatible('19.10')).toBe(true);
     expect(ubuntu.isCompatible('20.04')).toBe(true);
+    expect(ubuntu.isCompatible('20.10')).toBe(true);
     expect(ubuntu.isCompatible('2020.04')).toBe(false);
 
     expect(ubuntu.isCompatible('20.04', '2020.04')).toBeNull();
@@ -130,6 +132,7 @@ describe('versioning/ubuntu', () => {
     expect(ubuntu.isStable('disco')).toBe(false);
     expect(ubuntu.isStable('eoan')).toBe(false);
     expect(ubuntu.isStable('focal')).toBe(true); // LTS
+    expect(ubuntu.isStable('groovy')).toBe(false);
 
     expect(ubuntu.isStable('04.10')).toBe(false);
     expect(ubuntu.isStable('05.04')).toBe(false);
@@ -163,6 +166,7 @@ describe('versioning/ubuntu', () => {
     expect(ubuntu.isStable('19.04')).toBe(false);
     expect(ubuntu.isStable('19.10')).toBe(false);
     expect(ubuntu.isStable('20.04')).toBe(true); // LTS
+    expect(ubuntu.isStable('20.10')).toBe(false);
     expect(ubuntu.isStable('2020.04')).toBe(false);
   });
 
@@ -205,6 +209,7 @@ describe('versioning/ubuntu', () => {
     expect(ubuntu.isValid('disco')).toBe(true);
     expect(ubuntu.isValid('eoan')).toBe(true);
     expect(ubuntu.isValid('focal')).toBe(true);
+    expect(ubuntu.isValid('groovy')).toBe(true);
 
     expect(ubuntu.isValid('04.10')).toBe(true);
     expect(ubuntu.isValid('05.04')).toBe(true);
@@ -238,6 +243,7 @@ describe('versioning/ubuntu', () => {
     expect(ubuntu.isValid('19.04')).toBe(true);
     expect(ubuntu.isValid('19.10')).toBe(true);
     expect(ubuntu.isValid('20.04')).toBe(true);
+    expect(ubuntu.isValid('20.10')).toBe(true);
     expect(ubuntu.isValid('2020.04')).toBe(false);
   });
 
@@ -280,6 +286,7 @@ describe('versioning/ubuntu', () => {
     expect(ubuntu.isVersion('disco')).toBe(true);
     expect(ubuntu.isVersion('eoan')).toBe(true);
     expect(ubuntu.isVersion('focal')).toBe(true);
+    expect(ubuntu.isVersion('groovy')).toBe(true);
 
     expect(ubuntu.isVersion('04.10')).toBe(true);
     expect(ubuntu.isVersion('05.04')).toBe(true);
@@ -313,6 +320,7 @@ describe('versioning/ubuntu', () => {
     expect(ubuntu.isVersion('19.04')).toBe(true);
     expect(ubuntu.isVersion('19.10')).toBe(true);
     expect(ubuntu.isVersion('20.04')).toBe(true);
+    expect(ubuntu.isVersion('20.10')).toBe(true);
     expect(ubuntu.isVersion('2020.04')).toBe(false);
   });
 
