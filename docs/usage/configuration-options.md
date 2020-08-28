@@ -341,9 +341,7 @@ To disable Renovate for npm `devDependencies` but keep it for `dependencies` you
 
 ## enabledManagers
 
-This is a way to "whitelist" certain package managers and disable all others.
-
-Possible managers are: `'ansible', 'ansible-galaxy', 'bazel', 'buildkite', 'bundler', 'cargo', 'cdnurl', 'circleci', 'cocoapods', 'composer', 'deps-edn','docker-compose', 'dockerfile', 'droneci', 'git-submodules', 'github-actions', 'gitlabci', 'gitlabci-include', 'gomod', 'gradle', 'gradle-wrapper', 'helm-requirements', 'helm-values', 'helmfile', 'homebrew', 'html', 'kubernetes', 'kustomize', 'leiningen', 'maven', 'meteor', 'mix', 'nodenv', 'npm', 'nuget', 'nvm', 'pip_requirements', 'pip_setup', 'pipenv', 'poetry', 'pub', 'ruby-version', 'regex', 'sbt', 'swift', 'terraform', 'travis'`
+This is a way to allow only certain package managers and implicitly disable all others.
 
 Example:
 
@@ -352,6 +350,8 @@ Example:
   "enabledManagers": ["dockerfile", "npm"]
 }
 ```
+
+For the full list of available managers, see the [Supported Managers](https://docs.renovatebot.com/modules/manager/#supported-managers) documentation.
 
 ## encrypted
 
