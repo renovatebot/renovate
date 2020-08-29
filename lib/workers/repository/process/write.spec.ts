@@ -1,6 +1,6 @@
 import { RenovateConfig, getConfig, mocked } from '../../../../test/util';
 import * as _branchWorker from '../../branch';
-import { BranchConfig } from '../../common';
+import { BranchConfig, ProcessBranchResult } from '../../common';
 import * as _limits from './limits';
 import { writeUpdates } from './write';
 
@@ -26,7 +26,7 @@ describe('workers/repository/write', () => {
         {},
       ] as never;
       const res = await writeUpdates(config, branches);
-      expect(res).toEqual('done');
+      expect(res).toEqual(ProcessBranchResult.Done);
       expect(branchWorker.processBranch).toHaveBeenCalledTimes(2);
     });
     it('stops after automerge', async () => {
@@ -37,12 +37,20 @@ describe('workers/repository/write', () => {
         {},
         {},
       ] as never;
-      branchWorker.processBranch.mockResolvedValueOnce('pr-created');
-      branchWorker.processBranch.mockResolvedValueOnce('already-existed');
-      branchWorker.processBranch.mockResolvedValueOnce('automerged');
-      branchWorker.processBranch.mockResolvedValueOnce('automerged');
+      branchWorker.processBranch.mockResolvedValueOnce(
+        ProcessBranchResult.PrCreated
+      );
+      branchWorker.processBranch.mockResolvedValueOnce(
+        ProcessBranchResult.AlreadyExisted
+      );
+      branchWorker.processBranch.mockResolvedValueOnce(
+        ProcessBranchResult.Automerged
+      );
+      branchWorker.processBranch.mockResolvedValueOnce(
+        ProcessBranchResult.Automerged
+      );
       const res = await writeUpdates(config, branches);
-      expect(res).toEqual('automerged');
+      expect(res).toEqual(ProcessBranchResult.Automerged);
       expect(branchWorker.processBranch).toHaveBeenCalledTimes(4);
     });
   });
