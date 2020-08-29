@@ -41,7 +41,7 @@ export async function renovateRepository(
     await ensureOnboardingPr(config, packageFiles, branches);
     const res = await updateRepo(config, branches, branchList);
     addSplit('update');
-    if (res !== ProcessBranchResult.Automerged) {
+    if (res !== 'automerged') {
       await ensureMasterIssue(config, branches);
     }
     await finaliseRepo(config, branchList);
