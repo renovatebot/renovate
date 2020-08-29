@@ -99,6 +99,7 @@ const repoGroups = {
   picasso: 'https://github.com/qlik-oss/picasso.js',
   pollyjs: 'https://github.com/Netflix/pollyjs',
   pouchdb: 'https://github.com/pouchdb/pouchdb',
+  prisma: 'https://github.com/prisma/prisma',
   react: 'https://github.com/facebook/react',
   reactrouter: 'https://github.com/ReactTraining/react-router',
   reakit: 'https://github.com/reakit/reakit',
