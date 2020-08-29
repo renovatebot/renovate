@@ -441,17 +441,17 @@ export async function processBranch(
       !!dependencyDashboardCheck ||
       config.rebaseRequested ||
       branchPr?.isConflicted;
-    const commitHash = await commitFilesToBranch(config);
+    const commitSha = await commitFilesToBranch(config);
     // istanbul ignore if
     if (branchPr && platform.refreshPr) {
       await platform.refreshPr(branchPr.number);
     }
-    if (!commitHash && !branchExists) {
+    if (!commitSha && !branchExists) {
       return 'no-work';
     }
-    if (commitHash) {
+    if (commitSha) {
       const action = branchExists ? 'updated' : 'created';
-      logger.info({ commitHash }, `Branch ${action}`);
+      logger.info({ commitSha }, `Branch ${action}`);
     }
     // Set branch statuses
     await setStability(config);
@@ -461,10 +461,10 @@ export async function processBranch(
     if (
       !dependencyDashboardCheck &&
       !config.rebaseRequested &&
-      commitHash &&
+      commitSha &&
       (config.requiredStatusChecks?.length || config.prCreation !== 'immediate')
     ) {
-      logger.debug({ commitHash }, `Branch status pending`);
+      logger.debug({ commitSha }, `Branch status pending`);
       return 'pending';
     }
 
@@ -554,7 +554,11 @@ export async function processBranch(
     logger.debug(
       `There are ${config.errors.length} errors and ${config.warnings.length} warnings`
     );
-    const { prResult: result, pr } = await ensurePr(config);
+    const { prResult: result, pr } = await ensurePr(config, prLimitReached);
+    if (result === PrResult.LimitReached) {
+      logger.debug('Reached PR limit - skipping PR creation');
+      return 'pr-limit-reached';
+    }
     // TODO: ensurePr should check for automerge itself
     if (result === PrResult.AwaitingApproval) {
       return 'needs-pr-approval';

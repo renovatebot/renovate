@@ -30,6 +30,8 @@ export type StatusResult = StatusResult_;
 
 export type DiffResult = DiffResult_;
 
+export type CommitSha = string;
+
 interface StorageConfig {
   localDir: string;
   currentBranch?: string;
@@ -322,7 +324,7 @@ export async function branchExists(branchName: string): Promise<boolean> {
 }
 
 // Return the commit SHA for a branch
-export async function getBranchCommit(branchName: string): Promise<string> {
+export async function getBranchCommit(branchName: string): Promise<CommitSha> {
   await syncGit();
   if (!(await branchExists(branchName))) {
     throw Error(
@@ -343,7 +345,7 @@ export async function getCommitMessages(): Promise<string[]> {
   return res.all.map((commit) => commit.message);
 }
 
-export async function setBranch(branchName: string): Promise<string> {
+export async function setBranch(branchName: string): Promise<CommitSha> {
   await syncGit();
   if (!(await branchExists(branchName))) {
     throwBranchValidationError(branchName);
@@ -397,7 +399,11 @@ export async function getFileList(): Promise<string[]> {
 export async function getAllRenovateBranches(
   branchPrefix: string
 ): Promise<string[]> {
-  await syncGit();
+  // istanbul ignore if
+  if (!git) {
+    logger.debug('git is uninitialized so returning empty branch set');
+    return [];
+  }
   const branches = await git.branch(['--remotes', '--verbose']);
   return branches.all
     .map(localName)
@@ -565,7 +571,7 @@ export async function commitFiles({
   files,
   message,
   force = false,
-}: CommitFilesConfig): Promise<string | null> {
+}: CommitFilesConfig): Promise<CommitSha | null> {
   await syncGit();
   logger.debug(`Committing files to branch ${branchName}`);
   if (!privateKeySet) {
