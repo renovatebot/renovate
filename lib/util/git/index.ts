@@ -332,9 +332,9 @@ export async function getBranchCommit(branchName: string): Promise<CommitSha> {
     (await git.listRemote(['--heads', 'origin']))
       .split('\n')
       .filter(Boolean)
-      .map((line) => line.split(/\s+/))
+      .map((line) => line.trim().split(/\s+/))
       .forEach(([sha, ref]) => {
-        config.branchCommits[ref.replace('refs/heads/', '').trim()] = sha;
+        config.branchCommits[ref.replace('refs/heads/', '')] = sha;
       });
   }
   return config.branchCommits[branchName];
