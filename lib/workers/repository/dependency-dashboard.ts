@@ -98,7 +98,7 @@ export async function ensureMasterIssue(
     issueBody += '\n';
   }
   const errorList = branches.filter(
-    (branch) => branch.res && branch.res.endsWith(ProcessBranchResult.Error)
+    (branch) => branch.res && branch.res === ProcessBranchResult.Error
   );
   if (errorList.length) {
     issueBody += '## Errored\n\n';
@@ -177,8 +177,7 @@ export async function ensureMasterIssue(
     issueBody += '\n';
   }
   const alreadyExisted = branches.filter(
-    (branch) =>
-      branch.res && branch.res.endsWith(ProcessBranchResult.AlreadyExisted)
+    (branch) => branch.res && branch.res === ProcessBranchResult.AlreadyExisted
   );
   if (alreadyExisted.length) {
     issueBody += '## Closed/Ignored\n\n';
