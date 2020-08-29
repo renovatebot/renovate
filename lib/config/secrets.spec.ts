@@ -31,6 +31,15 @@ describe('config/secrets', () => {
         })
       ).toThrow(CONFIG_SECRETS_INVALID);
     });
+    it('throws if disallowed field is used', () => {
+      const config = {
+        prTitle: '{{ secrets.ARTIFACTORY_TOKEN }}',
+        secrets: {
+          ARTIFACTORY_TOKEN: 'abc123==',
+        },
+      };
+      expect(() => applySecretsToConfig(config)).toThrow(CONFIG_VALIDATION);
+    });
     it('throws if an unknown secret is used', () => {
       const config = {
         npmToken: '{{ secrets.ARTIFACTORY_TOKEN }}',

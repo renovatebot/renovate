@@ -52,9 +52,18 @@ export function validateConfigSecrets(config: RenovateAdminConfig): void {
 }
 
 function replaceSecretsInString(
+  key: string,
   value: string,
   secrets: Record<string, string>
 ): string {
+  const disallowedPrefixes = ['branch', 'commit', 'group', 'pr', 'semantic'];
+  if (disallowedPrefixes.some((prefix) => key.startsWith(prefix))) {
+    const error = new Error(CONFIG_VALIDATION);
+    error.configFile = 'config';
+    error.validationError = 'Disallowed secret substitution';
+    error.validationMessage = `The field ${key} may not use secret substitution`;
+    throw error;
+  }
   return value.replace(secretTemplateRegex, (_, secretName) => {
     if (secrets[secretName]) {
       return secrets[secretName];
@@ -80,14 +89,18 @@ function replaceSecretsinObject(
       config[key] = replaceSecretsinObject(value, secrets);
     }
     if (is.string(value)) {
-      config[key] = replaceSecretsInString(value, secrets);
+      config[key] = replaceSecretsInString(key, value, secrets);
     }
     if (is.array(value)) {
       for (const [arrayIndex, arrayItem] of value.entries()) {
         if (is.plainObject(arrayItem)) {
           config[key][arrayIndex] = replaceSecretsinObject(arrayItem, secrets);
         } else if (is.string(arrayItem)) {
-          config[key][arrayIndex] = replaceSecretsInString(arrayItem, secrets);
+          config[key][arrayIndex] = replaceSecretsInString(
+            key,
+            arrayItem,
+            secrets
+          );
         }
       }
     }
