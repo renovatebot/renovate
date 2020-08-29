@@ -44,6 +44,7 @@ interface StorageConfig {
 interface LocalConfig extends StorageConfig {
   currentBranch: string;
   currentBranchSha: string;
+  branchCommits: Record<string, CommitSha>;
   branchExists: Record<string, boolean>;
   branchIsModified: Record<string, boolean>;
   branchPrefix: string;
@@ -118,6 +119,7 @@ let privateKeySet = false;
 
 export function initRepo(args: StorageConfig): void {
   config = { ...args } as any;
+  config.branchCommits = {};
   config.branchExists = {};
   config.branchIsModified = {};
   git = undefined;
@@ -293,6 +295,7 @@ export async function createBranch(
   await git.raw(['clean', '-fd']);
   await git.checkout(['-B', branchName, sha]);
   await git.push('origin', branchName, { '--force': null });
+  config.branchCommits[branchName] = sha;
   config.branchExists[branchName] = true;
   config.branchIsModified[branchName] = false;
 }
@@ -325,14 +328,16 @@ export async function branchExists(branchName: string): Promise<boolean> {
 
 // Return the commit SHA for a branch
 export async function getBranchCommit(branchName: string): Promise<CommitSha> {
-  await syncGit();
-  if (!(await branchExists(branchName))) {
-    throw Error(
-      'Cannot fetch commit for branch that does not exist: ' + branchName
-    );
+  if (!Object.keys(config.branchCommits).length) {
+    (await git.listRemote(['--heads', 'origin']))
+      .split('\n')
+      .filter(Boolean)
+      .map((line) => line.split(/\s+/))
+      .forEach(([sha, ref]) => {
+        config.branchCommits[ref.replace('refs/heads/', '').trim()] = sha;
+      });
   }
-  const res = await git.revparse(['origin/' + branchName]);
-  return res.trim();
+  return config.branchCommits[branchName];
 }
 
 export async function getCommitMessages(): Promise<string[]> {
@@ -475,6 +480,7 @@ export async function deleteBranch(branchName: string): Promise<void> {
     checkForPlatformFailure(err);
     logger.debug({ branchName }, 'No local branch to delete');
   }
+  delete config.branchCommits[branchName];
   config.branchExists[branchName] = false;
 }
 
@@ -639,6 +645,7 @@ export async function commitFiles({
     // Fetch it after create
     const ref = `refs/heads/${branchName}:refs/remotes/origin/${branchName}`;
     await git.fetch(['origin', ref, '--depth=2', '--force']);
+    config.branchCommits[branchName] = commit;
     config.branchExists[branchName] = true;
     config.branchIsModified[branchName] = false;
     limits.incrementLimit('prCommitsPerRunLimit');
