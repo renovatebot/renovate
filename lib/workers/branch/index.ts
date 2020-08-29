@@ -443,17 +443,17 @@ export async function processBranch(
       !!dependencyDashboardCheck ||
       config.rebaseRequested ||
       branchPr?.isConflicted;
-    const commitHash = await commitFilesToBranch(config);
+    const commitSha = await commitFilesToBranch(config);
     // istanbul ignore if
     if (branchPr && platform.refreshPr) {
       await platform.refreshPr(branchPr.number);
     }
-    if (!commitHash && !branchExists) {
+    if (!commitSha && !branchExists) {
       return 'no-work';
     }
-    if (commitHash) {
+    if (commitSha) {
       const action = branchExists ? 'updated' : 'created';
-      logger.info({ commitHash }, `Branch ${action}`);
+      logger.info({ commitSha }, `Branch ${action}`);
     }
     // Set branch statuses
     await setStability(config);
@@ -463,10 +463,10 @@ export async function processBranch(
     if (
       !dependencyDashboardCheck &&
       !config.rebaseRequested &&
-      commitHash &&
+      commitSha &&
       (config.requiredStatusChecks?.length || config.prCreation !== 'immediate')
     ) {
-      logger.debug({ commitHash }, `Branch status pending`);
+      logger.debug({ commitSha }, `Branch status pending`);
       return 'pending';
     }
 
