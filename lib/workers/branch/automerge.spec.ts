@@ -1,7 +1,6 @@
 import { defaultConfig, git, platform } from '../../../test/util';
 import { RenovateConfig } from '../../config';
 import { BranchStatus } from '../../types';
-import { ProcessBranchResult } from '../common';
 import { tryBranchAutomerge } from './automerge';
 
 jest.mock('../../util/git');
@@ -57,18 +56,14 @@ describe('workers/branch/automerge', () => {
       config.automerge = true;
       config.automergeType = 'branch';
       platform.getBranchStatus.mockResolvedValueOnce(BranchStatus.green);
-      expect(await tryBranchAutomerge(config)).toBe(
-        ProcessBranchResult.Automerged
-      );
+      expect(await tryBranchAutomerge(config)).toBe('automerged');
     });
     it('returns true if automerge succeeds (dry-run)', async () => {
       config.automerge = true;
       config.automergeType = 'branch';
       config.dryRun = true;
       platform.getBranchStatus.mockResolvedValueOnce(BranchStatus.green);
-      expect(await tryBranchAutomerge(config)).toBe(
-        ProcessBranchResult.Automerged
-      );
+      expect(await tryBranchAutomerge(config)).toBe('automerged');
     });
   });
 });
