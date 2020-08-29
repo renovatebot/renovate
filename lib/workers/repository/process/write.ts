@@ -40,7 +40,7 @@ export async function writeUpdates(
       branch.automergeType !== 'pr-comment'
     ) {
       // Stop procesing other branches because base branch has been changed
-      return res;
+      return 'automerged';
     }
     let deductPrRemainingCount = 0;
     if (res === ProcessBranchResult.PrCreated) {
@@ -57,5 +57,5 @@ export async function writeUpdates(
     prsRemaining -= deductPrRemainingCount;
   }
   removeMeta(['branch']);
-  return ProcessBranchResult.Done;
+  return 'done';
 }

@@ -26,7 +26,7 @@ describe('workers/repository/write', () => {
         {},
       ] as never;
       const res = await writeUpdates(config, branches);
-      expect(res).toEqual(ProcessBranchResult.Done);
+      expect(res).toEqual('done');
       expect(branchWorker.processBranch).toHaveBeenCalledTimes(2);
     });
     it('stops after automerge', async () => {
@@ -50,7 +50,7 @@ describe('workers/repository/write', () => {
         ProcessBranchResult.Automerged
       );
       const res = await writeUpdates(config, branches);
-      expect(res).toEqual(ProcessBranchResult.Automerged);
+      expect(res).toEqual('automerged');
       expect(branchWorker.processBranch).toHaveBeenCalledTimes(4);
     });
   });
