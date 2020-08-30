@@ -26,9 +26,9 @@ describe('platform/github', () => {
     hostRules = mocked(await import('../../util/host-rules'));
     jest.mock('../../util/git');
     git = mocked(await import('../../util/git'));
-    git.branchExists.mockResolvedValue(true);
+    git.branchExists.mockReturnValue(true);
     git.isBranchStale.mockResolvedValue(true);
-    git.getBranchCommit.mockResolvedValue(
+    git.getBranchCommit.mockReturnValue(
       '0d9c7726c3d628b7e28af234595cfd20febdbf8e'
     );
     delete global.gitAuthor;

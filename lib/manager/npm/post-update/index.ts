@@ -359,7 +359,7 @@ export async function getAdditionalFiles(
   if (
     config.updateType === 'lockFileMaintenance' &&
     config.reuseExistingBranch &&
-    (await branchExists(config.branchName))
+    branchExists(config.branchName)
   ) {
     logger.debug('Skipping lockFileMaintenance update');
     return { artifactErrors, updatedArtifacts };

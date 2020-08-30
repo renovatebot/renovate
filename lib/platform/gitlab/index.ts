@@ -211,7 +211,7 @@ export async function initRepo({
       repoUrl.auth = 'oauth2:' + opts.token;
       url = URL.format(repoUrl);
     }
-    git.initRepo({
+    await git.initRepo({
       ...config,
       url,
       gitAuthorName: global.gitAuthor?.name,
@@ -265,7 +265,7 @@ async function getStatus(
   branchName: string,
   useCache = true
 ): Promise<GitlabBranchStatus[]> {
-  const branchSha = await git.getBranchCommit(branchName);
+  const branchSha = git.getBranchCommit(branchName);
   const url = `projects/${config.repository}/repository/commits/${branchSha}/statuses`;
 
   return (
@@ -303,7 +303,7 @@ export async function getBranchStatus(
     return BranchStatus.red;
   }
 
-  if (!(await git.branchExists(branchName))) {
+  if (!git.branchExists(branchName)) {
     throw new Error(REPOSITORY_CHANGED);
   }
 
@@ -510,7 +510,7 @@ export function getPrBody(input: string): string {
 export async function getBranchPr(branchName: string): Promise<Pr> {
   logger.debug(`getBranchPr(${branchName})`);
   // istanbul ignore if
-  if (!(await git.branchExists(branchName))) {
+  if (!git.branchExists(branchName)) {
     return null;
   }
   const query = new URLSearchParams({
@@ -558,7 +558,7 @@ export async function setBranchStatus({
   url: targetUrl,
 }: BranchStatusConfig): Promise<void> {
   // First, get the branch commit SHA
-  const branchSha = await git.getBranchCommit(branchName);
+  const branchSha = git.getBranchCommit(branchName);
   // Now, check the statuses for that commit
   const url = `projects/${config.repository}/statuses/${branchSha}`;
   let state = 'success';

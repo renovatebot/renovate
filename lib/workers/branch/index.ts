@@ -66,7 +66,7 @@ export async function processBranch(
   );
   logger.trace({ config }, 'branch config');
   await platform.setBaseBranch(config.baseBranch);
-  const branchExists = await gitBranchExists(config.branchName);
+  const branchExists = gitBranchExists(config.branchName);
   const branchPr = await platform.getBranchPr(config.branchName);
   logger.debug(`branchExists=${branchExists}`);
   const dependencyDashboardCheck = (config.dependencyDashboardChecks || {})[

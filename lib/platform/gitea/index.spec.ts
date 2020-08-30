@@ -158,7 +158,7 @@ describe('platform/gitea', () => {
     logger = (await import('../../logger')).logger as any;
     gitvcs = require('../../util/git');
     gitvcs.isBranchStale.mockResolvedValue(false);
-    gitvcs.getBranchCommit.mockResolvedValue(mockCommitHash);
+    gitvcs.getBranchCommit.mockReturnValue(mockCommitHash);
 
     global.gitAuthor = { name: 'Renovate', email: 'renovate@example.com' };
 
