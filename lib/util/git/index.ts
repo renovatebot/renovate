@@ -113,6 +113,7 @@ async function getDefaultBranch(git: SimpleGit): Promise<string> {
 let config: LocalConfig = {} as any;
 
 let git: SimpleGit | undefined;
+let gitInitialized: boolean;
 
 let privateKeySet = false;
 
@@ -120,7 +121,8 @@ export function initRepo(args: StorageConfig): void {
   config = { ...args } as any;
   config.branchExists = {};
   config.branchIsModified = {};
-  git = undefined;
+  git = Git(config.localDir).silent(true);
+  gitInitialized = false;
 }
 
 async function resetToBranch(branchName: string): Promise<void> {
@@ -154,7 +156,7 @@ async function cleanLocalBranches(): Promise<void> {
 export async function setBranchPrefix(branchPrefix: string): Promise<void> {
   config.branchPrefix = branchPrefix;
   // If the repo is already cloned then set branchPrefix now, otherwise it will be called again during syncGit()
-  if (git) {
+  if (gitInitialized) {
     logger.debug('Setting branchPrefix: ' + branchPrefix);
     const ref = `refs/heads/${branchPrefix}*:refs/remotes/origin/${branchPrefix}*`;
     try {
@@ -182,16 +184,16 @@ export async function getSubmodules(): Promise<string[]> {
 }
 
 export async function syncGit(): Promise<void> {
-  if (git) {
+  if (gitInitialized) {
     return;
   }
+  gitInitialized = true;
   logger.debug('Initializing git repository into ' + config.localDir);
   const gitHead = join(config.localDir, '.git/HEAD');
   let clone = true;
 
   if (await fs.exists(gitHead)) {
     try {
-      git = Git(config.localDir).silent(true);
       await git.raw(['remote', 'set-url', 'origin', config.url]);
       const fetchStart = Date.now();
       await git.fetch(['--depth=10']);
@@ -212,7 +214,6 @@ export async function syncGit(): Promise<void> {
   }
   if (clone) {
     await fs.emptyDir(config.localDir);
-    git = Git(config.localDir).silent(true);
     const cloneStart = Date.now();
     try {
       // clone only the default branch
@@ -400,7 +401,7 @@ export async function getAllRenovateBranches(
   branchPrefix: string
 ): Promise<string[]> {
   // istanbul ignore if
-  if (!git) {
+  if (!gitInitialized) {
     logger.debug('git is uninitialized so returning empty branch set');
     return [];
   }
