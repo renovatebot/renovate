@@ -91,9 +91,6 @@ describe('platform/git', () => {
     it('sets non-master base branch', async () => {
       await expect(git.setBranch('develop')).resolves.not.toThrow();
     });
-    it('should throw if branch does not exist', async () => {
-      await expect(git.setBranch('not_found')).rejects.toMatchSnapshot();
-    });
   });
   describe('getFileList()', () => {
     it('should return the correct files', async () => {
@@ -137,14 +134,8 @@ describe('platform/git', () => {
     it('should return true if SHA different from master', async () => {
       expect(await git.isBranchStale('renovate/past_branch')).toBe(true);
     });
-    it('should throw if branch does not exist', async () => {
-      await expect(git.isBranchStale('not_found')).rejects.toMatchSnapshot();
-    });
   });
   describe('isBranchModified()', () => {
-    it('should throw if branch does not exist', async () => {
-      await expect(git.isBranchModified('not_found')).rejects.toMatchSnapshot();
-    });
     it('should return true when author matches', async () => {
       expect(await git.isBranchModified('renovate/future_branch')).toBe(false);
       expect(await git.isBranchModified('renovate/future_branch')).toBe(false);
@@ -224,9 +215,7 @@ describe('platform/git', () => {
       expect(res).toBeNull();
     });
     it('returns null for 404', async () => {
-      await expect(
-        git.getFile('some-path', 'some-branch')
-      ).rejects.toMatchSnapshot();
+      expect(await git.getFile('some-path', 'some-branch')).toBeNull();
     });
   });
   describe('commitFiles({branchName, files, message})', () => {

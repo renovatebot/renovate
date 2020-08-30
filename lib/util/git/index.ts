@@ -76,14 +76,6 @@ function localName(branchName: string): string {
   return branchName.replace(/^origin\//, '');
 }
 
-function throwBranchValidationError(branchName: string): never {
-  const error = new Error(CONFIG_VALIDATION);
-  error.validationError = 'branch not found';
-  error.validationMessage =
-    'The following branch could not be found: ' + branchName;
-  throw error;
-}
-
 async function isDirectory(dir: string): Promise<boolean> {
   try {
     return (await fs.stat(dir)).isDirectory();
@@ -328,9 +320,6 @@ export async function getCommitMessages(): Promise<string[]> {
 
 export async function setBranch(branchName: string): Promise<CommitSha> {
   await syncGit();
-  if (!branchExists(branchName)) {
-    throwBranchValidationError(branchName);
-  }
   logger.debug(`Setting current branch to ${branchName}`);
   await syncBranch(branchName);
   try {
@@ -394,11 +383,6 @@ export async function getAllRenovateBranches(
 
 export async function isBranchStale(branchName: string): Promise<boolean> {
   await syncGit();
-  if (!branchExists(branchName)) {
-    throw Error(
-      'Cannot check staleness for branch that does not exist: ' + branchName
-    );
-  }
   const branches = await git.branch([
     '--remotes',
     '--verbose',
@@ -413,11 +397,6 @@ export async function isBranchModified(branchName: string): Promise<boolean> {
   // First check cache
   if (config.branchIsModified[branchName] !== undefined) {
     return config.branchIsModified[branchName];
-  }
-  if (!branchExists(branchName)) {
-    throw Error(
-      'Cannot check modification for branch that does not exist: ' + branchName
-    );
   }
   // Retrieve the author of the most recent commit
   const lastAuthor = (
@@ -499,13 +478,6 @@ export async function getFile(
   branchName?: string
 ): Promise<string | null> {
   await syncGit();
-  if (branchName) {
-    const exists = branchExists(branchName);
-    if (!exists) {
-      logger.debug({ branchName }, 'branch no longer exists - aborting');
-      throw new Error(REPOSITORY_CHANGED);
-    }
-  }
   try {
     const content = await git.show([
       'origin/' + (branchName || config.currentBranch) + ':' + filePath,
