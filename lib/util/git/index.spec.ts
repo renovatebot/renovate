@@ -50,6 +50,8 @@ describe('platform/git', () => {
     await repo.addConfig('user.email', 'custom@example.com');
     await repo.commit('custom message');
 
+    await repo.checkoutBranch('renovate/equal_branch', 'master');
+
     await repo.checkout('master');
   });
 
@@ -158,8 +160,8 @@ describe('platform/git', () => {
 
   describe('getBranchCommit(branchName)', () => {
     it('should return same value for equal refs', async () => {
-      const hex = await git.getBranchCommit('renovate/past_branch');
-      expect(hex).toBe(await git.getBranchCommit('master~1'));
+      const hex = await git.getBranchCommit('renovate/equal_branch');
+      expect(hex).toBe(await git.getBranchCommit('master'));
       expect(hex).toHaveLength(40);
     });
     it('should throw if branch does not exist', async () => {
