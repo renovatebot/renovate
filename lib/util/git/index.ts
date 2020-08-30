@@ -367,18 +367,10 @@ export async function getFileList(): Promise<string[]> {
     );
 }
 
-export async function getAllRenovateBranches(
-  branchPrefix: string
-): Promise<string[]> {
-  // istanbul ignore if
-  if (!gitInitialized) {
-    logger.debug('git is uninitialized so returning empty branch set');
-    return [];
-  }
-  const branches = await git.branch(['--remotes', '--verbose']);
-  return branches.all
-    .map(localName)
-    .filter((branchName) => branchName.startsWith(branchPrefix));
+export function getAllRenovateBranches(branchPrefix: string): string[] {
+  return Object.keys(config.branchCommits).filter((branchName) =>
+    branchName.startsWith(branchPrefix)
+  );
 }
 
 export async function isBranchStale(branchName: string): Promise<boolean> {
