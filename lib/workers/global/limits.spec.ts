@@ -1,31 +1,43 @@
-import * as globalLimits from './limits';
-import { isLimitReached } from './limits';
+import {
+  Limit,
+  incLimitedValue,
+  isLimitReached,
+  reset,
+  setMaxLimit,
+} from './limits';
 
 describe('lib/workers/global/limits', () => {
   beforeEach(() => {
-    globalLimits.reset();
+    reset();
   });
 
-  it('incrementLimit', () => {
-    const config = { prCommitsPerRunLimit: 3 };
-    globalLimits.init(config);
+  beforeEach(() => {
+    reset();
+  });
 
-    expect(isLimitReached('prCommitsPerRunLimit')).toBe(false);
+  it('increments limited value', () => {
+    setMaxLimit(Limit.Commits, 3);
 
-    globalLimits.incrementLimit('prCommitsPerRunLimit');
-    expect(isLimitReached('prCommitsPerRunLimit')).toBe(false);
+    expect(isLimitReached(Limit.Commits)).toBe(false);
 
-    globalLimits.incrementLimit('prCommitsPerRunLimit');
-    expect(isLimitReached('prCommitsPerRunLimit')).toBe(false);
+    incLimitedValue(Limit.Commits, 2);
+    expect(isLimitReached(Limit.Commits)).toBe(false);
 
-    globalLimits.incrementLimit('prCommitsPerRunLimit');
-    expect(isLimitReached('prCommitsPerRunLimit')).toBe(true);
+    incLimitedValue(Limit.Commits);
+    expect(isLimitReached(Limit.Commits)).toBe(true);
 
-    globalLimits.incrementLimit('prCommitsPerRunLimit');
-    expect(isLimitReached('prCommitsPerRunLimit')).toBe(true);
+    incLimitedValue(Limit.Commits);
+    expect(isLimitReached(Limit.Commits)).toBe(true);
   });
 
   it('defaults to unlimited', () => {
-    expect(isLimitReached('foobar')).toBe(false);
+    expect(isLimitReached(Limit.Commits)).toBe(false);
+  });
+
+  it('increments undefined', () => {
+    incLimitedValue(Limit.Commits);
+    expect(isLimitReached(Limit.Commits)).toBe(false);
+    setMaxLimit(Limit.Commits, 1);
+    expect(isLimitReached(Limit.Commits)).toBe(true);
   });
 });

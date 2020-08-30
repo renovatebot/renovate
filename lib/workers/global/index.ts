@@ -9,6 +9,7 @@ import * as repositoryWorker from '../repository';
 import { autodiscoverRepositories } from './autodiscover';
 import { globalFinalize, globalInitialize } from './initialize';
 import * as limits from './limits';
+import { Limit } from './limits';
 
 type RenovateConfig = configParser.RenovateConfig;
 type RenovateRepository = configParser.RenovateRepository;
@@ -35,7 +36,7 @@ function getGlobalConfig(): Promise<RenovateConfig> {
 }
 
 function haveReachedLimits(): boolean {
-  if (limits.isLimitReached('prCommitsPerRunLimit')) {
+  if (limits.isLimitReached(Limit.Commits)) {
     logger.info('Max commits created for this run.');
     return true;
   }

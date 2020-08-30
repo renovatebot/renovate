@@ -9,7 +9,7 @@ import { PrState } from '../../types';
 import * as _exec from '../../util/exec';
 import { File, StatusResult } from '../../util/git';
 import { BranchConfig, PrResult } from '../common';
-import * as globalLimits from '../global/limits';
+import * as _limits from '../global/limits';
 import * as _prWorker from '../pr';
 import * as _automerge from './automerge';
 import * as _checkExisting from './check-existing';
@@ -32,6 +32,7 @@ jest.mock('../pr');
 jest.mock('../../util/exec');
 jest.mock('../../util/git');
 jest.mock('fs-extra');
+jest.mock('../global/limits');
 
 const getUpdated = mocked(_getUpdated);
 const schedule = mocked(_schedule);
@@ -44,6 +45,7 @@ const commit = mocked(_commit);
 const prWorker = mocked(_prWorker);
 const exec = mocked(_exec);
 const fs = mocked(_fs);
+const limits = mocked(_limits);
 
 describe('workers/branch', () => {
   describe('processBranch', () => {
@@ -54,7 +56,6 @@ describe('workers/branch', () => {
     };
     let config: BranchConfig;
     beforeEach(() => {
-      globalLimits.reset();
       prWorker.ensurePr = jest.fn();
       prWorker.checkAutoMerge = jest.fn();
       config = {
@@ -213,7 +214,8 @@ describe('workers/branch', () => {
         updatedArtifacts: [],
       });
       git.branchExists.mockResolvedValue(false);
-      globalLimits.setLimit('prsRemaining', 0);
+      limits.isLimitReached.mockReturnValueOnce(true);
+      limits.isLimitReached.mockReturnValueOnce(false);
       expect(await branchWorker.processBranch(config)).toEqual(
         'pr-limit-reached'
       );
@@ -230,7 +232,8 @@ describe('workers/branch', () => {
       prWorker.ensurePr.mockResolvedValueOnce({
         prResult: PrResult.LimitReached,
       });
-      globalLimits.setLimit('prsRemaining', 0);
+      limits.isLimitReached.mockReturnValue(true);
+      limits.isLimitReached.mockReturnValue(false);
       expect(await branchWorker.processBranch(config)).toEqual(
         'pr-limit-reached'
       );
@@ -244,7 +247,8 @@ describe('workers/branch', () => {
         updatedArtifacts: [],
       });
       git.branchExists.mockResolvedValue(false);
-      globalLimits.setLimit('prCommitsPerRunLimit', 0);
+      limits.isLimitReached.mockReturnValueOnce(false);
+      limits.isLimitReached.mockReturnValueOnce(true);
       expect(await branchWorker.processBranch(config)).toEqual(
         'commit-limit-reached'
       );

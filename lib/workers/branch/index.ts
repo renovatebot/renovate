@@ -28,7 +28,7 @@ import {
 } from '../../util/git';
 import { regEx } from '../../util/regex';
 import { BranchConfig, PrResult, ProcessBranchResult } from '../common';
-import { isLimitReached } from '../global/limits';
+import { Limit, isLimitReached } from '../global/limits';
 import { checkAutoMerge, ensurePr } from '../pr';
 import { tryBranchAutomerge } from './automerge';
 import { prAlreadyExisted } from './check-existing';
@@ -144,7 +144,7 @@ export async function processBranch(
     }
     if (
       !branchExists &&
-      isLimitReached('prsRemaining') &&
+      isLimitReached(Limit.PullRequests) &&
       !dependencyDashboardCheck &&
       !config.vulnerabilityAlert
     ) {
@@ -152,7 +152,7 @@ export async function processBranch(
       return 'pr-limit-reached';
     }
     if (
-      isLimitReached('prCommitsPerRunLimit') &&
+      isLimitReached(Limit.Commits) &&
       !dependencyDashboardCheck &&
       !config.vulnerabilityAlert
     ) {

@@ -2,7 +2,7 @@ import { RenovateConfig } from '../../../config';
 import { addMeta, logger, removeMeta } from '../../../logger';
 import { processBranch } from '../../branch';
 import { BranchConfig } from '../../common';
-import { incrementLimit, setLimit } from '../../global/limits';
+import { Limit, incLimitedValue, setMaxLimit } from '../../global/limits';
 import { getPrsRemaining } from './limits';
 
 export type WriteUpdateResult = 'done' | 'automerged';
@@ -29,7 +29,7 @@ export async function writeUpdates(
   });
   const prsRemaining = await getPrsRemaining(config, branches);
   logger.debug({ prsRemaining }, 'Calculated maximum PRs remaining this run');
-  setLimit('prsRemaining', prsRemaining);
+  setMaxLimit(Limit.PullRequests, prsRemaining);
   for (const branch of branches) {
     addMeta({ branch: branch.branchName });
     const res = await processBranch(branch);
@@ -39,15 +39,14 @@ export async function writeUpdates(
       return res;
     }
     if (res === 'pr-created') {
-      incrementLimit('prsRemaining');
+      incLimitedValue(Limit.PullRequests);
     }
-    // istanbul ignore if
     if (
       res === 'automerged' &&
       branch.automergeType === 'pr-comment' &&
       branch.requiredStatusChecks === null
     ) {
-      incrementLimit('prsRemaining');
+      incLimitedValue(Limit.PullRequests);
     }
   }
   removeMeta(['branch']);

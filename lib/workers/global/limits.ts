@@ -1,48 +1,45 @@
 import { logger } from '../../logger';
 
-const limitsToInit = ['prCommitsPerRunLimit'];
-let l: Record<string, number> = {};
-let v: Record<string, number> = {};
+export enum Limit {
+  Commits = 'Commits',
+  PullRequests = 'Pull requests',
+}
+
+interface LimitValue {
+  max: number | null;
+  current: number;
+}
+
+const limits = new Map<Limit, LimitValue>();
 
 export function reset(): void {
-  l = {};
-  v = {};
+  limits.clear();
 }
 
-export function setLimit(name: string, value: number): void {
-  logger.debug(`Limits.setLimit l[${name}] = ${value}`);
-  l[name] = value;
-  v[name] = 0;
+export function setMaxLimit(key: Limit, max: unknown): void {
+  const maxVal = typeof max === 'number' && max > 0 ? max : null;
+  logger.debug(`${key} limit = ${max}`);
+  const limit = limits.get(key);
+  limits.set(key, {
+    current: 0,
+    ...limit,
+    max: maxVal,
+  });
 }
 
-export function init(config: Record<string, any>): void {
-  logger.debug(`Limits.init enter method`);
-  for (const limit of limitsToInit) {
-    logger.debug(`Limits.init ${limit} processing`);
-    if (config[limit]) {
-      setLimit(limit, config[limit]);
-    } else {
-      logger.debug(
-        `Limits.init ${limit} variable is not set. Ignoring ${limit}`
-      );
-    }
+export function incLimitedValue(key: Limit, incBy = 1): void {
+  const limit = limits.get(key) || { max: null, current: 0 };
+  limits.set(key, {
+    ...limit,
+    current: limit.current + incBy,
+  });
+}
+
+export function isLimitReached(key: Limit): boolean {
+  const limit = limits.get(key);
+  if (!limit || limit.max === null) {
+    return false;
   }
-}
-
-function getLimitRemaining(name: string): number | null {
-  if (typeof l[name] !== 'undefined' && typeof v[name] !== 'undefined') {
-    return l[name] - v[name];
-  }
-  return null;
-}
-
-export function isLimitReached(name: string): boolean {
-  const remaining = getLimitRemaining(name);
-  return remaining === null ? false : remaining <= 0;
-}
-
-export function incrementLimit(name: string, value = 1): void {
-  if (typeof v[name] !== 'undefined') {
-    v[name] += value;
-  }
+  const { max, current } = limit;
+  return max - current <= 0;
 }
