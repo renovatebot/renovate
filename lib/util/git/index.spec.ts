@@ -50,6 +50,8 @@ describe('platform/git', () => {
     await repo.addConfig('user.email', 'custom@example.com');
     await repo.commit('custom message');
 
+    await repo.checkoutBranch('renovate/equal_branch', 'master');
+
     await repo.checkout('master');
   });
 
@@ -167,19 +169,9 @@ describe('platform/git', () => {
     });
   });
 
-  describe('createBranch(branchName, sha)', () => {
-    it('resets existing branch', async () => {
-      const hex = git.getBranchCommit('renovate/past_branch');
-      expect(git.getBranchCommit('renovate/future_branch')).not.toBe(hex);
-      await git.createBranch('renovate/future_branch', hex);
-      expect(git.getBranchCommit('renovate/future_branch')).toBe(hex);
-    });
-  });
 
   describe('getBranchFiles(branchName)', () => {
     it('detects changed files compared to current base branch', async () => {
-      const hex = git.getBranchCommit('master');
-      await git.createBranch('renovate/branch_with_changes', hex);
       const file = {
         name: 'some-new-file',
         contents: 'some new-contents',

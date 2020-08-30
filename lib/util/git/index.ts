@@ -295,20 +295,6 @@ export async function getRepoStatus(): Promise<StatusResult> {
   return git.status();
 }
 
-export async function createBranch(
-  branchName: string,
-  sha: string
-): Promise<void> {
-  await syncGit();
-  logger.debug(`createBranch(${branchName})`);
-  await git.reset(ResetMode.HARD);
-  await git.raw(['clean', '-fd']);
-  await git.checkout(['-B', branchName, sha]);
-  await git.push('origin', branchName, { '--force': null });
-  config.branchCommits[branchName] = sha;
-  config.branchIsModified[branchName] = false;
-}
-
 export function branchExists(branchName: string): boolean {
   return !!config.branchCommits[branchName];
 }
