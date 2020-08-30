@@ -133,7 +133,6 @@ describe('platform/git', () => {
   describe('isBranchStale()', () => {
     beforeEach(async () => {
       await git.setBranchPrefix('renovate/');
-      await git.syncGit();
       await git.setBranch('master');
     });
     it('should return false if same SHA as master', async () => {
@@ -148,7 +147,6 @@ describe('platform/git', () => {
   });
   describe('isBranchModified()', () => {
     beforeEach(async () => {
-      await git.syncGit();
       await git.setBranch('master');
       await git.setBranchPrefix('renovate/');
     });
@@ -166,7 +164,6 @@ describe('platform/git', () => {
 
   describe('getBranchCommit(branchName)', () => {
     beforeEach(async () => {
-      await git.syncGit();
       await git.setBranch('master');
       await git.setBranchPrefix('renovate/');
     });
