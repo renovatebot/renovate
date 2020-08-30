@@ -118,12 +118,12 @@ describe('platform/git', () => {
       expect(git.branchExists('not_found')).toBe(false);
     });
   });
-  describe('getAllRenovateBranches()', () => {
-    it('should return all renovate branches', async () => {
-      const res = await git.getAllRenovateBranches('renovate/');
+  describe('getBranchList()', () => {
+    it('should return all branches', () => {
+      const res = git.getBranchList();
       expect(res).toContain('renovate/past_branch');
       expect(res).toContain('renovate/future_branch');
-      expect(res).not.toContain('master');
+      expect(res).toContain('master');
     });
   });
   describe('isBranchStale()', () => {

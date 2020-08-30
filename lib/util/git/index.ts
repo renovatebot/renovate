@@ -358,10 +358,8 @@ export async function getFileList(): Promise<string[]> {
     );
 }
 
-export function getAllRenovateBranches(branchPrefix: string): string[] {
-  return Object.keys(config.branchCommits).filter((branchName) =>
-    branchName.startsWith(branchPrefix)
-  );
+export function getBranchList(): string[] {
+  return Object.keys(config.branchCommits);
 }
 
 export async function isBranchStale(branchName: string): Promise<boolean> {
