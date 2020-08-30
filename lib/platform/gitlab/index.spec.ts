@@ -29,9 +29,9 @@ describe('platform/gitlab', () => {
     hostRules = require('../../util/host-rules');
     jest.mock('../../util/git');
     git = require('../../util/git');
-    git.branchExists.mockResolvedValue(true);
+    git.branchExists.mockReturnValue(true);
     git.isBranchStale.mockResolvedValue(true);
-    git.getBranchCommit.mockResolvedValue(
+    git.getBranchCommit.mockReturnValue(
       '0d9c7726c3d628b7e28af234595cfd20febdbf8e'
     );
     hostRules.find.mockReturnValue({
@@ -464,7 +464,7 @@ describe('platform/gitlab', () => {
     });
     it('throws repository-changed', async () => {
       expect.assertions(2);
-      git.branchExists.mockResolvedValue(false);
+      git.branchExists.mockReturnValue(false);
       await initRepo();
       await expect(gitlab.getBranchStatus('somebranch', [])).rejects.toThrow(
         REPOSITORY_CHANGED

@@ -5,7 +5,7 @@ import { platform } from '../../../platform';
 import { PrState } from '../../../types';
 import {
   deleteBranch,
-  getAllRenovateBranches,
+  getBranchList,
   isBranchModified,
 } from '../../../util/git';
 
@@ -89,7 +89,9 @@ export async function pruneStaleBranches(
     logger.debug('No branchList');
     return;
   }
-  let renovateBranches = await getAllRenovateBranches(config.branchPrefix);
+  let renovateBranches = getBranchList().filter((branchName) =>
+    branchName.startsWith(config.branchPrefix)
+  );
   if (!renovateBranches?.length) {
     logger.debug('No renovate branches found');
     return;

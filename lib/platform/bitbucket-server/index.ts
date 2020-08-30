@@ -177,7 +177,7 @@ export async function initRepo({
     repository,
   });
 
-  git.initRepo({
+  await git.initRepo({
     ...config,
     localDir,
     url: gitUrl,
@@ -365,7 +365,7 @@ async function getStatus(
   branchName: string,
   useCache = true
 ): Promise<utils.BitbucketCommitStatus> {
-  const branchCommit = await git.getBranchCommit(branchName);
+  const branchCommit = git.getBranchCommit(branchName);
 
   return (
     await bitbucketServerHttp.getJson<utils.BitbucketCommitStatus>(
@@ -394,7 +394,7 @@ export async function getBranchStatus(
     return BranchStatus.green;
   }
 
-  if (!(await git.branchExists(branchName))) {
+  if (!git.branchExists(branchName)) {
     throw new Error(REPOSITORY_CHANGED);
   }
 
@@ -418,11 +418,11 @@ export async function getBranchStatus(
   }
 }
 
-async function getStatusCheck(
+function getStatusCheck(
   branchName: string,
   useCache = true
 ): Promise<utils.BitbucketStatus[]> {
-  const branchCommit = await git.getBranchCommit(branchName);
+  const branchCommit = git.getBranchCommit(branchName);
 
   return utils.accumulateValues(
     `./rest/build-status/1.0/commits/${branchCommit}`,
@@ -475,7 +475,7 @@ export async function setBranchStatus({
   }
   logger.debug({ branch: branchName, context, state }, 'Setting branch status');
 
-  const branchCommit = await git.getBranchCommit(branchName);
+  const branchCommit = git.getBranchCommit(branchName);
 
   try {
     const body: any = {

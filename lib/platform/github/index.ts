@@ -401,7 +401,7 @@ export async function initRepo({
   );
   parsedEndpoint.pathname = config.repository + '.git';
   const url = URL.format(parsedEndpoint);
-  git.initRepo({
+  await git.initRepo({
     ...config,
     url,
     gitAuthorName: global.gitAuthor?.name,
@@ -898,7 +898,7 @@ async function getStatusCheck(
   branchName: string,
   useCache = true
 ): Promise<GhBranchStatus[]> {
-  const branchCommit = await git.getBranchCommit(branchName);
+  const branchCommit = git.getBranchCommit(branchName);
 
   const url = `repos/${config.repository}/commits/${branchCommit}/statuses`;
 
@@ -953,7 +953,7 @@ export async function setBranchStatus({
   }
   logger.debug({ branch: branchName, context, state }, 'Setting branch status');
   try {
-    const branchCommit = await git.getBranchCommit(branchName);
+    const branchCommit = git.getBranchCommit(branchName);
     const url = `repos/${config.repository}/statuses/${branchCommit}`;
     const renovateToGitHubStateMapping = {
       green: 'success',

@@ -52,7 +52,7 @@ describe('platform/bitbucket', () => {
     bitbucket = await import('.');
     logger = (await import('../../logger')).logger as any;
     git = require('../../util/git');
-    git.branchExists.mockResolvedValue(true);
+    git.branchExists.mockReturnValue(true);
     git.isBranchStale.mockResolvedValue(false);
     // clean up hostRules
     hostRules.clear();

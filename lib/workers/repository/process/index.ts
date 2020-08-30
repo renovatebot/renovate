@@ -66,7 +66,7 @@ export async function extractDependencies(
     logger.debug({ baseBranches: config.baseBranches }, 'baseBranches');
     const extracted: Record<string, Record<string, PackageFile[]>> = {};
     for (const baseBranch of config.baseBranches) {
-      if (await branchExists(baseBranch)) {
+      if (branchExists(baseBranch)) {
         const baseBranchConfig = await getBaseBranchConfig(baseBranch, config);
         extracted[baseBranch] = await extract(baseBranchConfig);
       } else {
@@ -75,7 +75,7 @@ export async function extractDependencies(
     }
     addSplit('extract');
     for (const baseBranch of config.baseBranches) {
-      if (await branchExists(baseBranch)) {
+      if (branchExists(baseBranch)) {
         const baseBranchConfig = await getBaseBranchConfig(baseBranch, config);
         const packageFiles = extracted[baseBranch];
         const baseBranchRes = await lookup(baseBranchConfig, packageFiles);

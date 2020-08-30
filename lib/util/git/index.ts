@@ -8,7 +8,6 @@ import Git, {
   StatusResult as StatusResult_,
 } from 'simple-git';
 import {
-  CONFIG_VALIDATION,
   REPOSITORY_CHANGED,
   REPOSITORY_EMPTY,
   REPOSITORY_TEMPORARY_ERROR,
@@ -44,7 +43,7 @@ interface StorageConfig {
 interface LocalConfig extends StorageConfig {
   currentBranch: string;
   currentBranchSha: string;
-  branchExists: Record<string, boolean>;
+  branchCommits: Record<string, CommitSha>;
   branchIsModified: Record<string, boolean>;
   branchPrefix: string;
 }
@@ -74,14 +73,6 @@ function checkForPlatformFailure(err: Error): void {
 
 function localName(branchName: string): string {
   return branchName.replace(/^origin\//, '');
-}
-
-function throwBranchValidationError(branchName: string): never {
-  const error = new Error(CONFIG_VALIDATION);
-  error.validationError = 'branch not found';
-  error.validationMessage =
-    'The following branch could not be found: ' + branchName;
-  throw error;
 }
 
 async function isDirectory(dir: string): Promise<boolean> {
@@ -117,12 +108,23 @@ let gitInitialized: boolean;
 
 let privateKeySet = false;
 
-export function initRepo(args: StorageConfig): void {
+async function fetchBranchCommits(): Promise<void> {
+  config.branchCommits = {};
+  (await git.listRemote(['--heads', config.url]))
+    .split('\n')
+    .filter(Boolean)
+    .map((line) => line.trim().split(/\s+/))
+    .forEach(([sha, ref]) => {
+      config.branchCommits[ref.replace('refs/heads/', '')] = sha;
+    });
+}
+
+export async function initRepo(args: StorageConfig): Promise<void> {
   config = { ...args } as any;
-  config.branchExists = {};
   config.branchIsModified = {};
   git = Git(config.localDir).silent(true);
   gitInitialized = false;
+  await fetchBranchCommits();
 }
 
 async function resetToBranch(branchName: string): Promise<void> {
@@ -290,40 +292,19 @@ async function syncBranch(branchName: string): Promise<void> {
     try {
       await git.raw(['remote', 'set-branches', '--add', 'origin', branchName]);
       await git.fetch(['origin', branchName, '--depth=2']);
-    } catch (err) {
+    } catch (err) /* istanbul ignore next */ {
       checkForPlatformFailure(err);
     }
   }
 }
 
-export async function branchExists(branchName: string): Promise<boolean> {
-  await syncGit();
-  // First check cache
-  if (config.branchExists[branchName] !== undefined) {
-    return config.branchExists[branchName];
-  }
-  await syncBranch(branchName);
-  try {
-    await git.raw(['show-branch', 'origin/' + branchName]);
-    config.branchExists[branchName] = true;
-    return true;
-  } catch (err) {
-    checkForPlatformFailure(err);
-    config.branchExists[branchName] = false;
-    return false;
-  }
+export function branchExists(branchName: string): boolean {
+  return !!config.branchCommits[branchName];
 }
 
 // Return the commit SHA for a branch
-export async function getBranchCommit(branchName: string): Promise<CommitSha> {
-  await syncGit();
-  if (!(await branchExists(branchName))) {
-    throw Error(
-      'Cannot fetch commit for branch that does not exist: ' + branchName
-    );
-  }
-  const res = await git.revparse(['origin/' + branchName]);
-  return res.trim();
+export function getBranchCommit(branchName: string): CommitSha | null {
+  return config.branchCommits[branchName] || null;
 }
 
 export async function getCommitMessages(): Promise<string[]> {
@@ -338,10 +319,8 @@ export async function getCommitMessages(): Promise<string[]> {
 
 export async function checkoutBranch(branchName: string): Promise<CommitSha> {
   await syncGit();
-  if (!(await branchExists(branchName))) {
-    throwBranchValidationError(branchName);
-  }
   logger.debug(`Setting current branch to ${branchName}`);
+  await syncBranch(branchName);
   try {
     config.currentBranch = branchName;
     config.currentBranchSha = (
@@ -356,14 +335,6 @@ export async function checkoutBranch(branchName: string): Promise<CommitSha> {
     return config.currentBranchSha;
   } catch (err) /* istanbul ignore next */ {
     checkForPlatformFailure(err);
-    if (
-      err.message.includes(
-        'unknown revision or path not in the working tree'
-      ) ||
-      err.message.includes('did not match any file(s) known to git')
-    ) {
-      throwBranchValidationError(branchName);
-    }
     throw err;
   }
 }
@@ -387,27 +358,12 @@ export async function getFileList(): Promise<string[]> {
     );
 }
 
-export async function getAllRenovateBranches(
-  branchPrefix: string
-): Promise<string[]> {
-  // istanbul ignore if
-  if (!gitInitialized) {
-    logger.debug('git is uninitialized so returning empty branch set');
-    return [];
-  }
-  const branches = await git.branch(['--remotes', '--verbose']);
-  return branches.all
-    .map(localName)
-    .filter((branchName) => branchName.startsWith(branchPrefix));
+export function getBranchList(): string[] {
+  return Object.keys(config.branchCommits);
 }
 
 export async function isBranchStale(branchName: string): Promise<boolean> {
   await syncGit();
-  if (!(await branchExists(branchName))) {
-    throw Error(
-      'Cannot check staleness for branch that does not exist: ' + branchName
-    );
-  }
   const branches = await git.branch([
     '--remotes',
     '--verbose',
@@ -422,11 +378,6 @@ export async function isBranchModified(branchName: string): Promise<boolean> {
   // First check cache
   if (config.branchIsModified[branchName] !== undefined) {
     return config.branchIsModified[branchName];
-  }
-  if (!(await branchExists(branchName))) {
-    throw Error(
-      'Cannot check modification for branch that does not exist: ' + branchName
-    );
   }
   // Retrieve the author of the most recent commit
   const lastAuthor = (
@@ -466,7 +417,7 @@ export async function deleteBranch(branchName: string): Promise<void> {
     checkForPlatformFailure(err);
     logger.debug({ branchName }, 'No local branch to delete');
   }
-  config.branchExists[branchName] = false;
+  delete config.branchCommits[branchName];
 }
 
 export async function mergeBranch(branchName: string): Promise<void> {
@@ -508,13 +459,6 @@ export async function getFile(
   branchName?: string
 ): Promise<string | null> {
   await syncGit();
-  if (branchName) {
-    const exists = await branchExists(branchName);
-    if (!exists) {
-      logger.debug({ branchName }, 'branch no longer exists - aborting');
-      throw new Error(REPOSITORY_CHANGED);
-    }
-  }
   try {
     const content = await git.show([
       'origin/' + (branchName || config.currentBranch) + ':' + filePath,
@@ -630,7 +574,7 @@ export async function commitFiles({
     // Fetch it after create
     const ref = `refs/heads/${branchName}:refs/remotes/origin/${branchName}`;
     await git.fetch(['origin', ref, '--depth=2', '--force']);
-    config.branchExists[branchName] = true;
+    config.branchCommits[branchName] = commit;
     config.branchIsModified[branchName] = false;
     limits.incrementLimit('prCommitsPerRunLimit');
     return commit;

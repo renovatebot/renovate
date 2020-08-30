@@ -157,7 +157,7 @@ export async function initRepo({
     repository,
   });
 
-  git.initRepo({
+  await git.initRepo({
     ...config,
     localDir,
     url,
