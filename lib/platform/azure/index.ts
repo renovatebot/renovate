@@ -168,13 +168,6 @@ export function getRepoForceRebase(): Promise<boolean> {
   return Promise.resolve(config.repoForceRebase === true);
 }
 
-// istanbul ignore next
-export async function setBaseBranch(branchName: string): Promise<string> {
-  logger.debug(`Setting base branch to ${branchName}`);
-  const baseBranchSha = await git.setBranch(branchName);
-  return baseBranchSha;
-}
-
 export async function getPrList(): Promise<AzurePr[]> {
   logger.debug('getPrList()');
   if (!config.prList) {

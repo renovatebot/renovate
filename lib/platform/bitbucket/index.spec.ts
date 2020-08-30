@@ -175,14 +175,6 @@ describe('platform/bitbucket', () => {
     });
   });
 
-  describe('setBaseBranch()', () => {
-    it('updates file list', async () => {
-      await initRepoMock();
-      await bitbucket.setBaseBranch('branch');
-      expect(httpMock.getTrace()).toMatchSnapshot();
-    });
-  });
-
   describe('getBranchPr()', () => {
     it('bitbucket finds PR for branch', async () => {
       const scope = await initRepoMock();

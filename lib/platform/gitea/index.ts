@@ -414,11 +414,6 @@ const platform: Platform = {
     return BranchStatus.yellow;
   },
 
-  async setBaseBranch(branchName: string): Promise<string> {
-    const baseBranchSha = await git.setBranch(branchName);
-    return baseBranchSha;
-  },
-
   getPrList(): Promise<Pr[]> {
     if (config.prList === null) {
       config.prList = helper
@@ -848,7 +843,6 @@ export const {
   initPlatform,
   initRepo,
   mergePr,
-  setBaseBranch,
   setBranchStatus,
   updatePr,
 } = platform;

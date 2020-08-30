@@ -385,22 +385,6 @@ describe('platform/gitea', () => {
 
       expect(logger.warn).toHaveBeenCalledTimes(1);
     });
-
-    it('should set base branch', async () => {
-      await initFakeRepo();
-      await gitea.setBaseBranch('master');
-
-      expect(gitvcs.setBranch).toHaveBeenCalledTimes(1);
-      expect(gitvcs.setBranch).toHaveBeenCalledWith(mockRepo.default_branch);
-    });
-
-    it('should set custom base branch', async () => {
-      await initFakeRepo();
-      await gitea.setBaseBranch('devel');
-
-      expect(gitvcs.setBranch).toHaveBeenCalledTimes(1);
-      expect(gitvcs.setBranch).toHaveBeenCalledWith('devel');
-    });
   });
 
   describe('getBranchStatus', () => {
@@ -688,7 +672,6 @@ describe('platform/gitea', () => {
       });
 
       await initFakeRepo();
-      await gitea.setBaseBranch('devel');
       const res = await gitea.createPr({
         branchName: mockNewPR.head.label,
         targetBranch: 'devel',
@@ -713,7 +696,6 @@ describe('platform/gitea', () => {
       helper.createPR.mockResolvedValueOnce(mockNewPR);
 
       await initFakeRepo();
-      await gitea.setBaseBranch('devel');
       const res = await gitea.createPr({
         branchName: mockNewPR.head.label,
         targetBranch: 'master',

@@ -1090,22 +1090,6 @@ Array [
 ]
 `;
 
-exports[`platform/bitbucket setBaseBranch() updates file list 1`] = `
-Array [
-  Object {
-    "headers": Object {
-      "accept": "application/json",
-      "accept-encoding": "gzip, deflate",
-      "authorization": "Basic YWJjOjEyMw==",
-      "host": "api.bitbucket.org",
-      "user-agent": "https://github.com/renovatebot/renovate",
-    },
-    "method": "GET",
-    "url": "https://api.bitbucket.org/2.0/repositories/some/repo",
-  },
-]
-`;
-
 exports[`platform/bitbucket setBranchStatus() posts status 1`] = `
 Array [
   Object {
