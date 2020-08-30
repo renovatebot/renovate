@@ -298,12 +298,7 @@ export async function createBranch(
   config.branchIsModified[branchName] = false;
 }
 
-export async function branchExists(branchName: string): Promise<boolean> {
-  await syncGit();
-  // First check cache
-  if (config.branchExists[branchName] !== undefined) {
-    return config.branchExists[branchName];
-  }
+async function syncBranch(branchName: string): Promise<void> {
   if (!branchName.startsWith(config.branchPrefix)) {
     // fetch the branch only if it's not part of the existing branchPrefix
     try {
@@ -313,6 +308,15 @@ export async function branchExists(branchName: string): Promise<boolean> {
       checkForPlatformFailure(err);
     }
   }
+}
+
+export async function branchExists(branchName: string): Promise<boolean> {
+  await syncGit();
+  // First check cache
+  if (config.branchExists[branchName] !== undefined) {
+    return config.branchExists[branchName];
+  }
+  await syncBranch(branchName);
   try {
     await git.raw(['show-branch', 'origin/' + branchName]);
     config.branchExists[branchName] = true;
