@@ -295,6 +295,18 @@ export async function getRepoStatus(): Promise<StatusResult> {
   return git.status();
 }
 
+async function syncBranch(branchName: string): Promise<void> {
+  if (!branchName.startsWith(config.branchPrefix)) {
+    // fetch the branch only if it's not part of the existing branchPrefix
+    try {
+      await git.raw(['remote', 'set-branches', '--add', 'origin', branchName]);
+      await git.fetch(['origin', branchName, '--depth=2']);
+    } catch (err) {
+      checkForPlatformFailure(err);
+    }
+  }
+}
+
 export function branchExists(branchName: string): boolean {
   return !!config.branchCommits[branchName];
 }
@@ -320,15 +332,7 @@ export async function setBranch(branchName: string): Promise<CommitSha> {
     throwBranchValidationError(branchName);
   }
   logger.debug(`Setting current branch to ${branchName}`);
-  if (!branchName.startsWith(config.branchPrefix)) {
-    // fetch the branch only if it's not part of the existing branchPrefix
-    try {
-      await git.raw(['remote', 'set-branches', '--add', 'origin', branchName]);
-      await git.fetch(['origin', branchName, '--depth=2']);
-    } catch (err) {
-      checkForPlatformFailure(err);
-    }
-  }
+  await syncBranch();
   try {
     config.currentBranch = branchName;
     config.currentBranchSha = (
