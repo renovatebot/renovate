@@ -132,6 +132,7 @@ describe('platform/git', () => {
   });
   describe('isBranchStale()', () => {
     beforeEach(async () => {
+      await git.setBranchPrefix('renovate/');
       await git.syncGit();
       await git.setBranch('master');
     });
@@ -146,6 +147,11 @@ describe('platform/git', () => {
     });
   });
   describe('isBranchModified()', () => {
+    beforeEach(async () => {
+      await git.syncGit();
+      await git.setBranch('master');
+      await git.setBranchPrefix('renovate/');
+    });
     it('should throw if branch does not exist', async () => {
       await expect(git.isBranchModified('not_found')).rejects.toMatchSnapshot();
     });
@@ -159,16 +165,20 @@ describe('platform/git', () => {
   });
 
   describe('getBranchCommit(branchName)', () => {
+    beforeEach(async () => {
+      await git.syncGit();
+      await git.setBranch('master');
+      await git.setBranchPrefix('renovate/');
+    });
     it('should return same value for equal refs', () => {
       const hex = git.getBranchCommit('equal_branch');
       expect(hex).toBe(git.getBranchCommit('master'));
       expect(hex).toHaveLength(40);
     });
-    it('should return undefined', () => {
-      expect(git.getBranchCommit('not_found')).toBeUndefined();
+    it('should return null', () => {
+      expect(git.getBranchCommit('not_found')).toBeNull();
     });
   });
-
 
   describe('getBranchFiles(branchName)', () => {
     it('detects changed files compared to current base branch', async () => {
@@ -392,7 +402,6 @@ describe('platform/git', () => {
 
       await git.setBranchPrefix('renovate/');
       expect(git.branchExists('renovate/test')).toBe(true);
-      const cid = git.getBranchCommit('renovate/test');
 
       await git.initRepo({
         localDir: tmpDir.path,
@@ -404,7 +413,6 @@ describe('platform/git', () => {
 
       await git.setBranchPrefix('renovate/');
       expect(git.branchExists('renovate/test')).toBe(true);
-      expect(git.getBranchCommit('renovate/test')).not.toEqual(cid);
     });
 
     it('should fail clone ssh submodule', async () => {

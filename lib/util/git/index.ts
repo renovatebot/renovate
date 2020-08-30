@@ -301,7 +301,7 @@ async function syncBranch(branchName: string): Promise<void> {
     try {
       await git.raw(['remote', 'set-branches', '--add', 'origin', branchName]);
       await git.fetch(['origin', branchName, '--depth=2']);
-    } catch (err) {
+    } catch (err) /* istanbul ignore next */ {
       checkForPlatformFailure(err);
     }
   }
@@ -332,7 +332,7 @@ export async function setBranch(branchName: string): Promise<CommitSha> {
     throwBranchValidationError(branchName);
   }
   logger.debug(`Setting current branch to ${branchName}`);
-  await syncBranch();
+  await syncBranch(branchName);
   try {
     config.currentBranch = branchName;
     config.currentBranchSha = (
