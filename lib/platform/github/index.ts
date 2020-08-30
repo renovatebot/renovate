@@ -460,12 +460,6 @@ export async function getRepoForceRebase(): Promise<boolean> {
   return config.repoForceRebase;
 }
 
-// istanbul ignore next
-export async function setBaseBranch(branchName: string): Promise<string> {
-  const baseBranchSha = await git.setBranch(branchName);
-  return baseBranchSha;
-}
-
 async function getClosedPrs(): Promise<PrList> {
   if (!config.closedPrList) {
     config.closedPrList = {};

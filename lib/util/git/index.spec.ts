@@ -84,12 +84,12 @@ describe('platform/git', () => {
     await base.cleanup();
   });
 
-  describe('setBaseBranch(branchName)', () => {
+  describe('checkoutBranch(branchName)', () => {
     it('sets the base branch as master', async () => {
-      await expect(git.setBranch('master')).resolves.not.toThrow();
+      await expect(git.checkoutBranch('master')).resolves.not.toThrow();
     });
     it('sets non-master base branch', async () => {
-      await expect(git.setBranch('develop')).resolves.not.toThrow();
+      await expect(git.checkoutBranch('develop')).resolves.not.toThrow();
     });
   });
   describe('getFileList()', () => {
@@ -343,7 +343,7 @@ describe('platform/git', () => {
 
       expect(await git.getCommitMessages()).toMatchSnapshot();
 
-      await git.setBranch('develop');
+      await git.checkoutBranch('develop');
 
       await git.initRepo({
         localDir: tmpDir.path,
@@ -352,7 +352,7 @@ describe('platform/git', () => {
 
       expect(git.branchExists('test')).toBeTruthy();
 
-      await git.setBranch('test');
+      await git.checkoutBranch('test');
 
       const msg = await git.getCommitMessages();
       expect(msg).toMatchSnapshot();

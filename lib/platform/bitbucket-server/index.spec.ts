@@ -421,15 +421,6 @@ describe(getName(__filename), () => {
         );
       });
 
-      describe('setBaseBranch()', () => {
-        it('updates file list', async () => {
-          expect.assertions(1);
-          await initRepo();
-          await bitbucket.setBaseBranch('branch');
-          expect(httpMock.getTrace()).toMatchSnapshot();
-        });
-      });
-
       describe('addAssignees()', () => {
         it('does not throw', async () => {
           expect(await bitbucket.addAssignees(3, ['some'])).toMatchSnapshot();

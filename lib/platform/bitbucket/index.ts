@@ -177,11 +177,6 @@ export function getRepoForceRebase(): Promise<boolean> {
   return Promise.resolve(false);
 }
 
-export async function setBaseBranch(branchName: string): Promise<string> {
-  const baseBranchSha = await git.setBranch(branchName);
-  return baseBranchSha;
-}
-
 // istanbul ignore next
 function matchesState(state: string, desiredState: string): boolean {
   if (desiredState === PrState.All) {

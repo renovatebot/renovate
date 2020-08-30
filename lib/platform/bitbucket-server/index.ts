@@ -241,12 +241,6 @@ export async function getRepoForceRebase(): Promise<boolean> {
     res.body?.mergeConfig?.defaultStrategy?.id.includes('ff-only')
   );
 }
-
-export async function setBaseBranch(branchName: string): Promise<string> {
-  const baseBranchSha = await git.setBranch(branchName);
-  return baseBranchSha;
-}
-
 // Gets details for a PR
 export async function getPr(
   prNo: number,
