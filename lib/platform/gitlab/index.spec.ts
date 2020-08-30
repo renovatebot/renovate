@@ -329,24 +329,6 @@ describe('platform/gitlab', () => {
       expect(httpMock.getTrace()).toMatchSnapshot();
     });
   });
-  describe('setBaseBranch(branchName)', () => {
-    it('sets the base branch', async () => {
-      httpMock
-        .scope(gitlabApiHost)
-        .get(`/api/v4/projects/some%2Frepo`)
-        .reply(200, {
-          default_branch: 'master',
-          http_url_to_repo: `https://gitlab.com/some/repo.git`,
-        });
-      await gitlab.initRepo({
-        repository: 'some/repo',
-        localDir: '',
-        optimizeForDisabled: false,
-      });
-      await gitlab.setBaseBranch('master');
-      expect(httpMock.getTrace()).toMatchSnapshot();
-    });
-  });
 
   describe('getBranchPr(branchName)', () => {
     it('should return null if no PR exists', async () => {

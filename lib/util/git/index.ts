@@ -336,7 +336,7 @@ export async function getCommitMessages(): Promise<string[]> {
   return res.all.map((commit) => commit.message);
 }
 
-export async function setBranch(branchName: string): Promise<CommitSha> {
+export async function checkoutBranch(branchName: string): Promise<CommitSha> {
   await syncGit();
   if (!(await branchExists(branchName))) {
     throwBranchValidationError(branchName);

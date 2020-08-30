@@ -1,5 +1,7 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
+exports[`platform/git checkoutBranch(branchName) should throw if branch does not exist 1`] = `[Error: config-validation]`;
+
 exports[`platform/git getBranchCommit(branchName) should throw if branch does not exist 1`] = `[Error: Cannot fetch commit for branch that does not exist: not_found]`;
 
 exports[`platform/git getBranchFiles(branchName) detects changed files compared to current base branch 1`] = `
@@ -51,5 +53,3 @@ Array [
 exports[`platform/git isBranchModified() should throw if branch does not exist 1`] = `[Error: Cannot check modification for branch that does not exist: not_found]`;
 
 exports[`platform/git isBranchStale() should throw if branch does not exist 1`] = `[Error: Cannot check staleness for branch that does not exist: not_found]`;
-
-exports[`platform/git setBaseBranch(branchName) should throw if branch does not exist 1`] = `[Error: config-validation]`;

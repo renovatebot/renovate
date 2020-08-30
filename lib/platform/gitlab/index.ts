@@ -248,11 +248,6 @@ export function getRepoForceRebase(): Promise<boolean> {
   return Promise.resolve(config?.mergeMethod !== 'merge');
 }
 
-export async function setBaseBranch(branchName: string): Promise<string> {
-  const baseBranchSha = await git.setBranch(branchName);
-  return baseBranchSha;
-}
-
 type BranchState = 'pending' | 'running' | 'success' | 'failed' | 'canceled';
 
 interface GitlabBranchStatus {
