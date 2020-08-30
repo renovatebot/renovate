@@ -71,6 +71,7 @@ describe('platform/git', () => {
       gitAuthorName: 'Jest',
       gitAuthorEmail: 'Jest@example.com',
     });
+    await git.setBranchPrefix('renovate/');
     await git.syncGit();
   });
 
@@ -123,7 +124,6 @@ describe('platform/git', () => {
   });
   describe('getAllRenovateBranches()', () => {
     it('should return all renovate branches', async () => {
-      await git.setBranchPrefix('renovate/');
       const res = await git.getAllRenovateBranches('renovate/');
       expect(res).toContain('renovate/past_branch');
       expect(res).toContain('renovate/future_branch');
@@ -131,10 +131,6 @@ describe('platform/git', () => {
     });
   });
   describe('isBranchStale()', () => {
-    beforeEach(async () => {
-      await git.syncGit();
-      await git.setBranch('master');
-    });
     it('should return false if same SHA as master', async () => {
       expect(await git.isBranchStale('renovate/future_branch')).toBe(false);
     });
@@ -189,7 +185,6 @@ describe('platform/git', () => {
 
   describe('mergeBranch(branchName)', () => {
     it('should perform a branch merge', async () => {
-      await git.setBranchPrefix('renovate/');
       await git.mergeBranch('renovate/future_branch');
       const merged = await Git(origin.path).branch([
         '--verbose',
