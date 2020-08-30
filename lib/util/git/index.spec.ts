@@ -30,7 +30,7 @@ describe('platform/git', () => {
     await repo.commit('master message', [
       '--date=' + masterCommitDate.toISOString(),
     ]);
-    await repo.checkout(['-b', 'equal_branch', 'master']);
+
     await repo.checkout(['-b', 'renovate/future_branch', 'master']);
     await fs.writeFile(base.path + '/future_file', 'future');
     await repo.add(['future_file']);
@@ -156,7 +156,7 @@ describe('platform/git', () => {
 
   describe('getBranchCommit(branchName)', () => {
     it('should return same value for equal refs', () => {
-      const hex = git.getBranchCommit('equal_branch');
+      const hex = git.getBranchCommit('renovate/equal_branch');
       expect(hex).toBe(git.getBranchCommit('master'));
       expect(hex).toHaveLength(40);
     });
