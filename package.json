@@ -175,7 +175,7 @@
     "re2": "1.15.4"
   },
   "devDependencies": {
-    "@actions/core": "1.2.4",
+    "@actions/core": "1.2.5",
     "@babel/cli": "7.10.5",
     "@babel/core": "7.11.4",
     "@babel/node": "7.10.5",
@@ -204,7 +204,7 @@
     "@types/json5": "0.0.30",
     "@types/later": "1.2.6",
     "@types/linkify-markdown": "1.0.0",
-    "@types/luxon": "1.24.3",
+    "@types/luxon": "1.24.4",
     "@types/markdown-it": "10.0.2",
     "@types/markdown-table": "2.0.0",
     "@types/moment-timezone": "0.5.13",
