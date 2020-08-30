@@ -131,9 +131,6 @@ describe('platform/git', () => {
     });
   });
   describe('isBranchStale()', () => {
-    beforeEach(async () => {
-      await git.setBranch('master');
-    });
     it('should return false if same SHA as master', async () => {
       expect(await git.isBranchStale('renovate/future_branch')).toBe(false);
     });
@@ -145,9 +142,6 @@ describe('platform/git', () => {
     });
   });
   describe('isBranchModified()', () => {
-    beforeEach(async () => {
-      await git.setBranch('master');
-    });
     it('should throw if branch does not exist', async () => {
       await expect(git.isBranchModified('not_found')).rejects.toMatchSnapshot();
     });
@@ -161,9 +155,6 @@ describe('platform/git', () => {
   });
 
   describe('getBranchCommit(branchName)', () => {
-    beforeEach(async () => {
-      await git.setBranch('master');
-    });
     it('should return same value for equal refs', () => {
       const hex = git.getBranchCommit('equal_branch');
       expect(hex).toBe(git.getBranchCommit('master'));
