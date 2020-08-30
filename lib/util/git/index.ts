@@ -119,7 +119,7 @@ let privateKeySet = false;
 
 async function fetchBranchCommits(): Promise<void> {
   config.branchCommits = {};
-  (await Git(config.localDir).silent(true).listRemote(['--heads', config.url]))
+  (await git.listRemote(['--heads', config.url]))
     .split('\n')
     .filter(Boolean)
     .map((line) => line.trim().split(/\s+/))
