@@ -335,14 +335,6 @@ export async function setBranch(branchName: string): Promise<CommitSha> {
     return config.currentBranchSha;
   } catch (err) /* istanbul ignore next */ {
     checkForPlatformFailure(err);
-    if (
-      err.message.includes(
-        'unknown revision or path not in the working tree'
-      ) ||
-      err.message.includes('did not match any file(s) known to git')
-    ) {
-      throwBranchValidationError(branchName);
-    }
     throw err;
   }
 }
