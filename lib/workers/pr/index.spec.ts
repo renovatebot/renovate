@@ -4,6 +4,7 @@ import { PLATFORM_TYPE_GITLAB } from '../../constants/platforms';
 import { Pr, platform as _platform } from '../../platform';
 import { BranchStatus } from '../../types';
 import { BranchConfig, PrResult } from '../common';
+import * as globalLimits from '../global/limits';
 import * as _changelogHelper from './changelog';
 import { getChangeLogJSON } from './changelog';
 import * as codeOwners from './code-owners';
@@ -100,6 +101,7 @@ describe('workers/pr', () => {
     let config: BranchConfig;
     let pr: Pr;
     beforeEach(() => {
+      globalLimits.reset();
       config = partial<BranchConfig>({
         ...defaultConfig,
       });
@@ -176,6 +178,7 @@ describe('workers/pr', () => {
         'Some body<!-- Reviewable:start -->something<!-- Reviewable:end -->\n\n',
     } as never;
     beforeEach(() => {
+      globalLimits.reset();
       setupChangelogMock();
       config = partial<BranchConfig>({
         ...defaultConfig,
@@ -267,7 +270,8 @@ describe('workers/pr', () => {
       config.prCreation = 'status-success';
       config.automerge = true;
       config.schedule = ['before 5am'];
-      const { prResult } = await prWorker.ensurePr(config, true);
+      globalLimits.setLimit('prsRemaining', 0);
+      const { prResult } = await prWorker.ensurePr(config);
       expect(prResult).toEqual(PrResult.LimitReached);
       expect(platform.createPr.mock.calls).toBeEmpty();
     });

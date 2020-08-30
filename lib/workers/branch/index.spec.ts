@@ -9,6 +9,7 @@ import { PrState } from '../../types';
 import * as _exec from '../../util/exec';
 import { File, StatusResult } from '../../util/git';
 import { BranchConfig, PrResult } from '../common';
+import * as globalLimits from '../global/limits';
 import * as _prWorker from '../pr';
 import * as _automerge from './automerge';
 import * as _checkExisting from './check-existing';
@@ -53,6 +54,7 @@ describe('workers/branch', () => {
     };
     let config: BranchConfig;
     beforeEach(() => {
+      globalLimits.reset();
       prWorker.ensurePr = jest.fn();
       prWorker.checkAutoMerge = jest.fn();
       config = {
@@ -211,7 +213,8 @@ describe('workers/branch', () => {
         updatedArtifacts: [],
       });
       git.branchExists.mockResolvedValue(false);
-      expect(await branchWorker.processBranch(config, true)).toEqual(
+      globalLimits.setLimit('prsRemaining', 0);
+      expect(await branchWorker.processBranch(config)).toEqual(
         'pr-limit-reached'
       );
     });
@@ -227,7 +230,8 @@ describe('workers/branch', () => {
       prWorker.ensurePr.mockResolvedValueOnce({
         prResult: PrResult.LimitReached,
       });
-      expect(await branchWorker.processBranch(config, true)).toEqual(
+      globalLimits.setLimit('prsRemaining', 0);
+      expect(await branchWorker.processBranch(config)).toEqual(
         'pr-limit-reached'
       );
     });
@@ -240,7 +244,8 @@ describe('workers/branch', () => {
         updatedArtifacts: [],
       });
       git.branchExists.mockResolvedValue(false);
-      expect(await branchWorker.processBranch(config, false, true)).toEqual(
+      globalLimits.setLimit('prCommitsPerRunLimit', 0);
+      expect(await branchWorker.processBranch(config)).toEqual(
         'commit-limit-reached'
       );
     });

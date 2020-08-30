@@ -35,7 +35,7 @@ function getGlobalConfig(): Promise<RenovateConfig> {
 }
 
 function haveReachedLimits(): boolean {
-  if (limits.getLimitRemaining('prCommitsPerRunLimit') <= 0) {
+  if (limits.isLimitReached('prCommitsPerRunLimit')) {
     logger.info('Max commits created for this run.');
     return true;
   }

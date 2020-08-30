@@ -1,12 +1,18 @@
 import { logger } from '../../logger';
 
 const limitsToInit = ['prCommitsPerRunLimit'];
-const l: Record<string, number> = {};
-const v: Record<string, number> = {};
+let l: Record<string, number> = {};
+let v: Record<string, number> = {};
+
+export function reset(): void {
+  l = {};
+  v = {};
+}
 
 export function setLimit(name: string, value: number): void {
   logger.debug(`Limits.setLimit l[${name}] = ${value}`);
   l[name] = value;
+  v[name] = 0;
 }
 
 export function init(config: Record<string, any>): void {
@@ -15,7 +21,6 @@ export function init(config: Record<string, any>): void {
     logger.debug(`Limits.init ${limit} processing`);
     if (config[limit]) {
       setLimit(limit, config[limit]);
-      v[limit] = 0;
     } else {
       logger.debug(
         `Limits.init ${limit} variable is not set. Ignoring ${limit}`
@@ -24,14 +29,16 @@ export function init(config: Record<string, any>): void {
   }
 }
 
-export function getLimitRemaining(name: string): number {
-  let result;
-  if (typeof v[name] !== 'undefined') {
-    result = l[name] - v[name];
-  } else {
-    result = undefined;
+function getLimitRemaining(name: string): number | null {
+  if (typeof l[name] !== 'undefined' && typeof v[name] !== 'undefined') {
+    return l[name] - v[name];
   }
-  return result;
+  return null;
+}
+
+export function isLimitReached(name: string): boolean {
+  const remaining = getLimitRemaining(name);
+  return remaining === null ? false : remaining <= 0;
 }
 
 export function incrementLimit(name: string, value = 1): void {

@@ -28,6 +28,7 @@ import {
 } from '../../util/git';
 import { regEx } from '../../util/regex';
 import { BranchConfig, PrResult, ProcessBranchResult } from '../common';
+import { isLimitReached } from '../global/limits';
 import { checkAutoMerge, ensurePr } from '../pr';
 import { tryBranchAutomerge } from './automerge';
 import { prAlreadyExisted } from './check-existing';
@@ -51,9 +52,7 @@ function rebaseCheck(config: RenovateConfig, branchPr: any): boolean {
 const rebasingRegex = /\*\*Rebasing\*\*: .*/;
 
 export async function processBranch(
-  branchConfig: BranchConfig,
-  prLimitReached?: boolean,
-  commitLimitReached?: boolean
+  branchConfig: BranchConfig
 ): Promise<ProcessBranchResult> {
   const config: BranchConfig = { ...branchConfig };
   const dependencies = config.upgrades
@@ -145,7 +144,7 @@ export async function processBranch(
     }
     if (
       !branchExists &&
-      prLimitReached &&
+      isLimitReached('prsRemaining') &&
       !dependencyDashboardCheck &&
       !config.vulnerabilityAlert
     ) {
@@ -153,7 +152,7 @@ export async function processBranch(
       return 'pr-limit-reached';
     }
     if (
-      commitLimitReached &&
+      isLimitReached('prCommitsPerRunLimit') &&
       !dependencyDashboardCheck &&
       !config.vulnerabilityAlert
     ) {
@@ -560,7 +559,7 @@ export async function processBranch(
     logger.debug(
       `There are ${config.errors.length} errors and ${config.warnings.length} warnings`
     );
-    const { prResult: result, pr } = await ensurePr(config, prLimitReached);
+    const { prResult: result, pr } = await ensurePr(config);
     if (result === PrResult.LimitReached) {
       logger.debug('Reached PR limit - skipping PR creation');
       return 'pr-limit-reached';
