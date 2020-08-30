@@ -207,7 +207,7 @@ export async function syncGit(): Promise<void> {
       if (err.message === REPOSITORY_EMPTY) {
         throw err;
       }
-      logger.error({ err }, 'git fetch error');
+      logger.warn({ err }, 'git fetch error');
     }
   }
   if (clone) {
