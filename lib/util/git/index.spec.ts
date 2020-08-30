@@ -113,7 +113,6 @@ describe('platform/git', () => {
   describe('branchExists(branchName)', () => {
     it('should return true if found', () => {
       expect(git.branchExists('renovate/future_branch')).toBe(true);
-      expect(git.branchExists('renovate/future_branch')).toBe(true); // should come from cache
     });
     it('should return false if not found', () => {
       expect(git.branchExists('not_found')).toBe(false);
