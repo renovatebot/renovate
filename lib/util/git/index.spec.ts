@@ -71,6 +71,7 @@ describe('platform/git', () => {
       gitAuthorName: 'Jest',
       gitAuthorEmail: 'Jest@example.com',
     });
+    await git.setBranchPrefix('renovate/');
     await git.syncGit();
   });
 
@@ -123,7 +124,6 @@ describe('platform/git', () => {
   });
   describe('getAllRenovateBranches()', () => {
     it('should return all renovate branches', async () => {
-      await git.setBranchPrefix('renovate/');
       const res = await git.getAllRenovateBranches('renovate/');
       expect(res).toContain('renovate/past_branch');
       expect(res).toContain('renovate/future_branch');
@@ -132,7 +132,6 @@ describe('platform/git', () => {
   });
   describe('isBranchStale()', () => {
     beforeEach(async () => {
-      await git.setBranchPrefix('renovate/');
       await git.setBranch('master');
     });
     it('should return false if same SHA as master', async () => {
@@ -148,7 +147,6 @@ describe('platform/git', () => {
   describe('isBranchModified()', () => {
     beforeEach(async () => {
       await git.setBranch('master');
-      await git.setBranchPrefix('renovate/');
     });
     it('should throw if branch does not exist', async () => {
       await expect(git.isBranchModified('not_found')).rejects.toMatchSnapshot();
@@ -165,7 +163,6 @@ describe('platform/git', () => {
   describe('getBranchCommit(branchName)', () => {
     beforeEach(async () => {
       await git.setBranch('master');
-      await git.setBranchPrefix('renovate/');
     });
     it('should return same value for equal refs', () => {
       const hex = git.getBranchCommit('equal_branch');
@@ -197,7 +194,6 @@ describe('platform/git', () => {
 
   describe('mergeBranch(branchName)', () => {
     it('should perform a branch merge', async () => {
-      await git.setBranchPrefix('renovate/');
       await git.mergeBranch('renovate/future_branch');
       const merged = await Git(origin.path).branch([
         '--verbose',
