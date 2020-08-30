@@ -8,7 +8,6 @@ import Git, {
   StatusResult as StatusResult_,
 } from 'simple-git';
 import {
-  CONFIG_VALIDATION,
   REPOSITORY_CHANGED,
   REPOSITORY_EMPTY,
   REPOSITORY_TEMPORARY_ERROR,
