@@ -14,14 +14,10 @@ import { getCache } from '../../../util/cache/repository';
 import { readLocalFile } from '../../../util/fs';
 import { getFileList } from '../../../util/git';
 import * as hostRules from '../../../util/host-rules';
+import { RepoConfig } from './common';
 import { flattenPackageRules } from './flatten';
 
-export type RepoConfig = {
-  fileName: string;
-  config: any;
-};
-
-export async function getRepoConfig(): Promise<RepoConfig | null> {
+export async function detectRepoFileConfig(): Promise<RepoConfig> {
   const fileList = await getFileList();
   async function detectConfigFile(): Promise<string | null> {
     for (const configFileName of configFileNames) {
@@ -44,7 +40,7 @@ export async function getRepoConfig(): Promise<RepoConfig | null> {
   const fileName = await detectConfigFile();
   if (!fileName) {
     logger.debug('No renovate config file found');
-    return null;
+    return {};
   }
   logger.debug(`Found ${fileName} config file`);
   let config;
@@ -69,11 +65,9 @@ export async function getRepoConfig(): Promise<RepoConfig | null> {
           { renovateConfig: rawFileContents },
           'Error parsing renovate config renovate.json5'
         );
-        const error = new Error(CONFIG_VALIDATION);
-        error.configFile = fileName;
-        error.validationError = 'Invalid JSON5 (parsing failed)';
-        error.validationMessage = `JSON5.parse error:  ${err.message}`;
-        throw error;
+        const validationError = 'Invalid JSON5 (parsing failed)';
+        const validationMessage = `JSON5.parse error:  ${String(err.message)}`;
+        return { fileName, error: { validationError, validationMessage } };
       }
     } else {
       let allowDuplicateKeys = true;
@@ -82,11 +76,9 @@ export async function getRepoConfig(): Promise<RepoConfig | null> {
         allowDuplicateKeys
       );
       if (jsonValidationError) {
-        const error = new Error(CONFIG_VALIDATION);
-        error.configFile = fileName;
-        error.validationError = 'Invalid JSON (parsing failed)';
-        error.validationMessage = jsonValidationError;
-        throw error;
+        const validationError = 'Invalid JSON (parsing failed)';
+        const validationMessage = jsonValidationError;
+        return { fileName, error: { validationError, validationMessage } };
       }
       allowDuplicateKeys = false;
       jsonValidationError = jsonValidator.validate(
@@ -94,11 +86,9 @@ export async function getRepoConfig(): Promise<RepoConfig | null> {
         allowDuplicateKeys
       );
       if (jsonValidationError) {
-        const error = new Error(CONFIG_VALIDATION);
-        error.configFile = fileName;
-        error.validationError = 'Duplicate keys in JSON';
-        error.validationMessage = JSON.stringify(jsonValidationError);
-        throw error;
+        const validationError = 'Duplicate keys in JSON';
+        const validationMessage = JSON.stringify(jsonValidationError);
+        return { fileName, error: { validationError, validationMessage } };
       }
       try {
         config = JSON.parse(rawFileContents);
@@ -107,11 +97,9 @@ export async function getRepoConfig(): Promise<RepoConfig | null> {
           { renovateConfig: rawFileContents },
           'Error parsing renovate config'
         );
-        const error = new Error(CONFIG_VALIDATION);
-        error.configFile = fileName;
-        error.validationError = 'Invalid JSON (parsing failed)';
-        error.validationMessage = `JSON.parse error:  ${err.message}`;
-        throw error;
+        const validationError = 'Invalid JSON (parsing failed)';
+        const validationMessage = `JSON.parse error:  ${String(err.message)}`;
+        return { fileName, error: { validationError, validationMessage } };
       }
     }
     logger.debug({ fileName, config }, 'Repository config');
@@ -119,18 +107,26 @@ export async function getRepoConfig(): Promise<RepoConfig | null> {
   return { fileName, config };
 }
 
+function checkForRepoConfigError(repoConfig: RepoConfig): void {
+  if (!repoConfig.error) {
+    return;
+  }
+  const error = new Error(CONFIG_VALIDATION);
+  error.configFile = repoConfig.fileName;
+  error.validationError = repoConfig.error.validationError;
+  error.validationMessage = repoConfig.error.validationMessage;
+  throw error;
+}
+
 // Check for repository config
 export async function mergeRenovateConfig(
   config: RenovateConfig
 ): Promise<RenovateConfig> {
   let returnConfig = { ...config };
-  const repoConfig = await getRepoConfig();
+  const repoConfig = await detectRepoFileConfig();
   const cache = getCache();
-  cache.init = {};
-  if (repoConfig) {
-    cache.init.configFile = repoConfig.fileName;
-    cache.init.configFileContents = repoConfig.config;
-  }
+  cache.init.repoConfig = repoConfig;
+  checkForRepoConfigError(repoConfig);
   const migratedConfig = await migrateAndValidate(
     config,
     repoConfig?.config || {}

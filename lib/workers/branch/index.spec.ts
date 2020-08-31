@@ -133,7 +133,7 @@ describe('workers/branch', () => {
       checkExisting.prAlreadyExisted.mockResolvedValueOnce({
         number: 13,
         state: PrState.Closed,
-      });
+      } as never);
       await branchWorker.processBranch(config);
       expect(reuse.shouldReuseExistingBranch).toHaveBeenCalledTimes(0);
     });
@@ -143,7 +143,7 @@ describe('workers/branch', () => {
       checkExisting.prAlreadyExisted.mockResolvedValueOnce({
         number: 13,
         state: PrState.Closed,
-      });
+      } as never);
       await branchWorker.processBranch(config);
       expect(reuse.shouldReuseExistingBranch).toHaveBeenCalledTimes(0);
     });
@@ -153,7 +153,7 @@ describe('workers/branch', () => {
       checkExisting.prAlreadyExisted.mockResolvedValueOnce({
         number: 13,
         state: PrState.Merged,
-      });
+      } as never);
       await branchWorker.processBranch(config);
       expect(reuse.shouldReuseExistingBranch).toHaveBeenCalledTimes(0);
     });
@@ -530,7 +530,7 @@ describe('workers/branch', () => {
       git.branchExists.mockReturnValueOnce(true);
       checkExisting.prAlreadyExisted.mockResolvedValueOnce({
         state: PrState.Closed,
-      });
+      } as never);
       expect(
         await branchWorker.processBranch({ ...config, dryRun: true })
       ).toEqual('already-existed');

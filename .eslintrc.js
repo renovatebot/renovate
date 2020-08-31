@@ -81,7 +81,7 @@ module.exports = {
         ignoreRestSiblings: false,
       },
     ],
-    '@typescript-eslint/prefer-optional-chain': 1,
+    '@typescript-eslint/prefer-optional-chain': 2,
     '@typescript-eslint/prefer-nullish-coalescing': 2,
     curly: [2, 'all'],
     'require-await': 2,
@@ -97,12 +97,12 @@ module.exports = {
       1,
       { allowNumber: true, allowBoolean: true },
     ],
-    '@typescript-eslint/restrict-plus-operands': 1,
+    '@typescript-eslint/restrict-plus-operands': 2,
 
-    '@typescript-eslint/naming-convention': 1,
+    '@typescript-eslint/naming-convention': 2,
 
-    '@typescript-eslint/unbound-method': 1,
-    '@typescript-eslint/ban-types': 1,
+    '@typescript-eslint/unbound-method': 2,
+    '@typescript-eslint/ban-types': 2,
   },
   settings: {
     'import/parsers': {
