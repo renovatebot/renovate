@@ -10,7 +10,6 @@ import * as presets from '../../../config/presets';
 import { CONFIG_VALIDATION } from '../../../constants/error-messages';
 import * as npmApi from '../../../datasource/npm';
 import { logger } from '../../../logger';
-import { ExternalHostError } from '../../../types/errors/external-host-error';
 import { getCache } from '../../../util/cache/repository';
 import { clone } from '../../../util/clone';
 import { readLocalFile } from '../../../util/fs';
