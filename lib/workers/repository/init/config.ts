@@ -17,7 +17,7 @@ import * as hostRules from '../../../util/host-rules';
 import { RepoConfig } from './common';
 import { flattenPackageRules } from './flatten';
 
-export async function getRepoConfig(): Promise<RepoConfig> {
+export async function detectRepoFileConfig(): Promise<RepoConfig> {
   const fileList = await getFileList();
   async function detectConfigFile(): Promise<string | null> {
     for (const configFileName of configFileNames) {
@@ -123,7 +123,7 @@ export async function mergeRenovateConfig(
   config: RenovateConfig
 ): Promise<RenovateConfig> {
   let returnConfig = { ...config };
-  const repoConfig = await getRepoConfig();
+  const repoConfig = await detectRepoFileConfig();
   const cache = getCache();
   cache.init.repoConfig = repoConfig;
   checkForRepoConfigError(repoConfig);
