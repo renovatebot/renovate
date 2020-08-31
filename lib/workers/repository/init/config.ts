@@ -10,19 +10,18 @@ import * as presets from '../../../config/presets';
 import { CONFIG_VALIDATION } from '../../../constants/error-messages';
 import * as npmApi from '../../../datasource/npm';
 import { logger } from '../../../logger';
-import { ExternalHostError } from '../../../types/errors/external-host-error';
 import { getCache } from '../../../util/cache/repository';
-import { clone } from '../../../util/clone';
 import { readLocalFile } from '../../../util/fs';
 import { getFileList } from '../../../util/git';
 import * as hostRules from '../../../util/host-rules';
 import { flattenPackageRules } from './flatten';
 
-// Check for repository config
-export async function mergeRenovateConfig(
-  config: RenovateConfig
-): Promise<RenovateConfig> {
-  let returnConfig = { ...config };
+export type RepoConfig = {
+  configFile: string;
+  configFileContents: any;
+};
+
+export async function getRepoConfig(): Promise<RepoConfig | null> {
   const fileList = await getFileList();
   async function detectConfigFile(): Promise<string | null> {
     for (const fileName of configFileNames) {
@@ -45,30 +44,33 @@ export async function mergeRenovateConfig(
   const configFile = await detectConfigFile();
   if (!configFile) {
     logger.debug('No renovate config file found');
-    return returnConfig;
+    return null;
   }
   logger.debug(`Found ${configFile} config file`);
-  let renovateJson;
+  let configFileContents;
   if (configFile === 'package.json') {
     // We already know it parses
-    renovateJson = JSON.parse(await readLocalFile('package.json', 'utf8'))
+    configFileContents = JSON.parse(await readLocalFile('package.json', 'utf8'))
       .renovate;
-    logger.debug({ config: renovateJson }, 'package.json>renovate config');
+    logger.debug(
+      { config: configFileContents },
+      'package.json>renovate config'
+    );
   } else {
-    let renovateConfig = await readLocalFile(configFile, 'utf8');
+    let rawFileContents = await readLocalFile(configFile, 'utf8');
     // istanbul ignore if
-    if (!renovateConfig.length) {
-      renovateConfig = '{}';
+    if (!rawFileContents.length) {
+      rawFileContents = '{}';
     }
 
     const fileType = path.extname(configFile);
 
     if (fileType === '.json5') {
       try {
-        renovateJson = JSON5.parse(renovateConfig);
+        configFileContents = JSON5.parse(rawFileContents);
       } catch (err) /* istanbul ignore next */ {
         logger.debug(
-          { renovateConfig },
+          { renovateConfig: rawFileContents },
           'Error parsing renovate config renovate.json5'
         );
         const error = new Error(CONFIG_VALIDATION);
@@ -80,7 +82,7 @@ export async function mergeRenovateConfig(
     } else {
       let allowDuplicateKeys = true;
       let jsonValidationError = jsonValidator.validate(
-        renovateConfig,
+        rawFileContents,
         allowDuplicateKeys
       );
       if (jsonValidationError) {
@@ -92,7 +94,7 @@ export async function mergeRenovateConfig(
       }
       allowDuplicateKeys = false;
       jsonValidationError = jsonValidator.validate(
-        renovateConfig,
+        rawFileContents,
         allowDuplicateKeys
       );
       if (jsonValidationError) {
@@ -103,9 +105,12 @@ export async function mergeRenovateConfig(
         throw error;
       }
       try {
-        renovateJson = JSON.parse(renovateConfig);
+        configFileContents = JSON.parse(rawFileContents);
       } catch (err) /* istanbul ignore next */ {
-        logger.debug({ renovateConfig }, 'Error parsing renovate config');
+        logger.debug(
+          { renovateConfig: rawFileContents },
+          'Error parsing renovate config'
+        );
         const error = new Error(CONFIG_VALIDATION);
         error.configFile = configFile;
         error.validationError = 'Invalid JSON (parsing failed)';
@@ -113,17 +118,29 @@ export async function mergeRenovateConfig(
         throw error;
       }
     }
-    logger.debug({ configFile, config: renovateJson }, 'Repository config');
+    logger.debug(
+      { configFile, config: configFileContents },
+      'Repository config'
+    );
   }
+  return { configFile, configFileContents };
+}
+
+// Check for repository config
+export async function mergeRenovateConfig(
+  config: RenovateConfig
+): Promise<RenovateConfig> {
+  let returnConfig = { ...config };
+  const repoConfig = await getRepoConfig();
   const cache = getCache();
-  cache.init = {
-    configFile,
-    configFileContents: clone(renovateJson),
-  };
-  const migratedConfig = await migrateAndValidate(config, renovateJson);
+  cache.init = repoConfig;
+  const migratedConfig = await migrateAndValidate(
+    config,
+    repoConfig?.configFileContents || {}
+  );
   if (migratedConfig.errors.length) {
     const error = new Error(CONFIG_VALIDATION);
-    error.configFile = configFile;
+    error.configFile = repoConfig.configFile;
     error.validationError =
       'The renovate configuration file contains some invalid settings';
     error.validationMessage = migratedConfig.errors
