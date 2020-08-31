@@ -190,6 +190,10 @@ export function migrateConfig(
         } else if (val === false) {
           migratedConfig.trustLevel = 'low';
         }
+      } else if (key === 'managerBranchPrefix') {
+        isMigrated = true;
+        delete migratedConfig.managerBranchPrefix;
+        migratedConfig.additionalBranchPrefix = val;
       } else if (key === 'upgradeInRange') {
         isMigrated = true;
         delete migratedConfig.upgradeInRange;
