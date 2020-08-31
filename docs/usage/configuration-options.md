@@ -170,6 +170,8 @@ Warning: it's strongly recommended not to configure this field directly. Use at 
 
 You can modify this field if you want to change the prefix used. For example if you want branches to be like `deps/eslint-4.x` instead of `renovate/eslint-4.x` then you configure `branchPrefix` = `deps/`. Or if you wish to avoid forward slashes in branch names then you could use `renovate_` instead, for example.
 
+`branchPrefix` must be configured at the root of the configuration (e.g. not within any package rule) and is not allowed to use template values. e.g. instead of `renovate/{{parentDir}}-`, configure the template part in `additionalBranchPrefix`, like `"additionalBranchPrefix": "{{parentDir}}-"`.
+
 Note that this setting does not change the default _onboarding_ branch name, i.e. `renovate/configure`. If you wish to change that too, you need to also configure the field `onboardingBranch` in your admin bot config.
 
 ## branchTopic

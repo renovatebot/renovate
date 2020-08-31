@@ -44,6 +44,7 @@ describe('config/migration', () => {
         automergeType: 'branch-push',
         baseBranch: 'next',
         managerBranchPrefix: 'foo',
+        branchPrefix: 'renovate/{{parentDir}}-',
         renovateFork: true,
         ignoreNodeModules: true,
         node: {
