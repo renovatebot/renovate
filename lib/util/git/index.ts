@@ -9,6 +9,7 @@ import Git, {
 } from 'simple-git';
 import {
   REPOSITORY_CHANGED,
+  REPOSITORY_DISABLED,
   REPOSITORY_EMPTY,
   REPOSITORY_TEMPORARY_ERROR,
   SYSTEM_INSUFFICIENT_DISK_SPACE,
@@ -110,13 +111,21 @@ let privateKeySet = false;
 
 async function fetchBranchCommits(): Promise<void> {
   config.branchCommits = {};
-  (await git.listRemote(['--heads', config.url]))
-    .split('\n')
-    .filter(Boolean)
-    .map((line) => line.trim().split(/\s+/))
-    .forEach(([sha, ref]) => {
-      config.branchCommits[ref.replace('refs/heads/', '')] = sha;
-    });
+  try {
+    (await git.listRemote(['--heads', config.url]))
+      .split('\n')
+      .filter(Boolean)
+      .map((line) => line.trim().split(/\s+/))
+      .forEach(([sha, ref]) => {
+        config.branchCommits[ref.replace('refs/heads/', '')] = sha;
+      });
+  } catch (err) /* istanbul ignore next */ {
+    logger.debug({ err }, 'git error');
+    if (err.message?.includes('Please ask the owner to check their account')) {
+      throw new Error(REPOSITORY_DISABLED);
+    }
+    throw err;
+  }
 }
 
 export async function initRepo(args: StorageConfig): Promise<void> {
