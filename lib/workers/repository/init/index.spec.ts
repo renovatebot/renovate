@@ -23,6 +23,7 @@ describe('workers/repository/init', () => {
     it('runs', async () => {
       apis.initApis.mockResolvedValue({} as never);
       onboarding.checkOnboardingBranch.mockResolvedValueOnce({});
+      config.getRepoConfig.mockResolvedValueOnce({});
       config.mergeRenovateConfig.mockResolvedValueOnce({});
       const renovateConfig = await initRepo({});
       expect(renovateConfig).toMatchSnapshot();
