@@ -1,7 +1,11 @@
 import { RenovateConfig } from '../../../config';
 import { logger } from '../../../logger';
 import { clone } from '../../../util/clone';
-import { checkoutBranch, setBranchPrefix } from '../../../util/git';
+import {
+  checkoutBranch,
+  getBranchCommit,
+  setBranchPrefix,
+} from '../../../util/git';
 import { checkIfConfigured } from '../configured';
 import { checkOnboardingBranch } from '../onboarding/branch';
 import { initApis } from './apis';
@@ -34,6 +38,7 @@ export async function initRepo(
   let config: RenovateConfig = initializeConfig(config_);
   await initializeCaches(config);
   config = await initApis(config);
+  config.defaultBranchSha = getBranchCommit(config.defaultBranch);
   const resolvedConfig = getResolvedConfig(config.defaultBranchSha);
   if (resolvedConfig) {
     config = resolvedConfig;

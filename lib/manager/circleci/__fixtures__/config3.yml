@@ -1,0 +1,20 @@
+aliases:  
+  - &nodejs
+    image: cimg/node:14.8.0
+
+version: 2
+jobs:
+  checkout: 
+    <<: *defaults
+    docker:
+      - *nodejs
+    steps:
+      - run: yarn build:runtime
+
+  release_docker:
+    <<: *defaults
+    machine:
+      image: ubuntu-1604:201903-01
+      docker_layer_caching: true
+    steps:
+      - run: ./scripts.sh
