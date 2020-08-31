@@ -11,7 +11,7 @@ interface LimitValue {
 
 const limits = new Map<Limit, LimitValue>();
 
-export function reset(): void {
+export function resetAllLimits(): void {
   limits.clear();
 }
 

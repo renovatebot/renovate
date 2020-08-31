@@ -17,8 +17,7 @@ import {
 import { logger } from '../../logger';
 import { ExternalHostError } from '../../types/errors/external-host-error';
 import { GitOptions, GitProtocol } from '../../types/git';
-import * as limits from '../../workers/global/limits';
-import { Limit } from '../../workers/global/limits';
+import { Limit, incLimitedValue } from '../../workers/global/limits';
 import { writePrivateKey } from './private-key';
 
 export * from './private-key';
@@ -444,7 +443,7 @@ export async function mergeBranch(branchName: string): Promise<void> {
   await git.checkout(config.currentBranch);
   await git.merge(['--ff-only', branchName]);
   await git.push('origin', config.currentBranch);
-  limits.incLimitedValue(Limit.Commits);
+  incLimitedValue(Limit.Commits);
 }
 
 export async function getBranchLastCommitTime(
@@ -593,7 +592,7 @@ export async function commitFiles({
     await git.fetch(['origin', ref, '--depth=2', '--force']);
     config.branchCommits[branchName] = commit;
     config.branchIsModified[branchName] = false;
-    limits.incLimitedValue(Limit.Commits);
+    incLimitedValue(Limit.Commits);
     return commit;
   } catch (err) /* istanbul ignore next */ {
     checkForPlatformFailure(err);
