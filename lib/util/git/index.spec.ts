@@ -133,6 +133,10 @@ describe('platform/git', () => {
     it('should return true if SHA different from master', async () => {
       expect(await git.isBranchStale('renovate/past_branch')).toBe(true);
     });
+    it('should return result even if non-default and not under branchPrefix', async () => {
+      expect(await git.isBranchStale('develop')).toBe(true);
+      expect(await git.isBranchStale('develop')).toBe(true); // cache
+    });
   });
   describe('isBranchModified()', () => {
     it('should return true when author matches', async () => {

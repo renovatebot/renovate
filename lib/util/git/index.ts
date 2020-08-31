@@ -42,6 +42,7 @@ interface StorageConfig {
 }
 
 interface LocalConfig extends StorageConfig {
+  additionalBranches: string[];
   currentBranch: string;
   currentBranchSha: string;
   branchCommits: Record<string, CommitSha>;
@@ -130,6 +131,7 @@ async function fetchBranchCommits(): Promise<void> {
 
 export async function initRepo(args: StorageConfig): Promise<void> {
   config = { ...args } as any;
+  config.additionalBranches = [];
   config.branchIsModified = {};
   git = Git(config.localDir).silent(true);
   gitInitialized = false;
@@ -296,14 +298,20 @@ export async function getRepoStatus(): Promise<StatusResult> {
 }
 
 async function syncBranch(branchName: string): Promise<void> {
-  if (!branchName.startsWith(config.branchPrefix)) {
-    // fetch the branch only if it's not part of the existing branchPrefix
-    try {
-      await git.raw(['remote', 'set-branches', '--add', 'origin', branchName]);
-      await git.fetch(['origin', branchName, '--depth=2']);
-    } catch (err) /* istanbul ignore next */ {
-      checkForPlatformFailure(err);
-    }
+  await syncGit();
+  if (branchName.startsWith(config.branchPrefix)) {
+    return;
+  }
+  if (config.additionalBranches.includes(branchName)) {
+    return;
+  }
+  config.additionalBranches.push(branchName);
+  // fetch the branch only if it's not part of the existing branchPrefix
+  try {
+    await git.raw(['remote', 'set-branches', '--add', 'origin', branchName]);
+    await git.fetch(['origin', branchName, '--depth=2']);
+  } catch (err) /* istanbul ignore next */ {
+    checkForPlatformFailure(err);
   }
 }
 
@@ -327,7 +335,6 @@ export async function getCommitMessages(): Promise<string[]> {
 }
 
 export async function checkoutBranch(branchName: string): Promise<CommitSha> {
-  await syncGit();
   logger.debug(`Setting current branch to ${branchName}`);
   await syncBranch(branchName);
   try {
@@ -372,7 +379,7 @@ export function getBranchList(): string[] {
 }
 
 export async function isBranchStale(branchName: string): Promise<boolean> {
-  await syncGit();
+  await syncBranch(branchName);
   const branches = await git.branch([
     '--remotes',
     '--verbose',
@@ -383,7 +390,7 @@ export async function isBranchStale(branchName: string): Promise<boolean> {
 }
 
 export async function isBranchModified(branchName: string): Promise<boolean> {
-  await syncGit();
+  await syncBranch(branchName);
   // First check cache
   if (config.branchIsModified[branchName] !== undefined) {
     return config.branchIsModified[branchName];
@@ -410,7 +417,7 @@ export async function isBranchModified(branchName: string): Promise<boolean> {
 }
 
 export async function deleteBranch(branchName: string): Promise<void> {
-  await syncGit();
+  await syncBranch(branchName);
   try {
     await git.raw(['push', '--delete', 'origin', branchName]);
     logger.debug({ branchName }, 'Deleted remote branch');
@@ -430,7 +437,7 @@ export async function deleteBranch(branchName: string): Promise<void> {
 }
 
 export async function mergeBranch(branchName: string): Promise<void> {
-  await syncGit();
+  await syncBranch(branchName);
   await git.reset(ResetMode.HARD);
   await git.checkout(['-B', branchName, 'origin/' + branchName]);
   await git.checkout(config.currentBranch);
@@ -442,7 +449,7 @@ export async function mergeBranch(branchName: string): Promise<void> {
 export async function getBranchLastCommitTime(
   branchName: string
 ): Promise<Date> {
-  await syncGit();
+  await syncBranch(branchName);
   try {
     const time = await git.show(['-s', '--format=%ai', 'origin/' + branchName]);
     return new Date(Date.parse(time));
@@ -453,7 +460,7 @@ export async function getBranchLastCommitTime(
 }
 
 export async function getBranchFiles(branchName: string): Promise<string[]> {
-  await syncGit();
+  await syncBranch(branchName);
   try {
     const diff = await git.diffSummary([branchName, config.currentBranch]);
     return diff.files.map((file) => file.file);
@@ -480,7 +487,7 @@ export async function getFile(
 }
 
 export async function hasDiff(branchName: string): Promise<boolean> {
-  await syncGit();
+  await syncBranch(branchName);
   try {
     return (await git.diff(['HEAD', branchName])) !== '';
   } catch (err) {
