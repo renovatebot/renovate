@@ -57,14 +57,6 @@ export async function mergeRenovateConfig(
   } else {
     let renovateConfig = await readLocalFile(configFile, 'utf8');
     // istanbul ignore if
-    if (renovateConfig === null) {
-      logger.warn('Fetching renovate config returns null');
-      throw new ExternalHostError(
-        Error('Fetching renovate config returns null'),
-        config.platform
-      );
-    }
-    // istanbul ignore if
     if (!renovateConfig.length) {
       renovateConfig = '{}';
     }
