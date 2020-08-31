@@ -190,19 +190,6 @@ export function migrateConfig(
         } else if (val === false) {
           migratedConfig.trustLevel = 'low';
         }
-      } else if (key === 'managerBranchPrefix') {
-        isMigrated = true;
-        delete migratedConfig.managerBranchPrefix;
-        migratedConfig.additionalBranchPrefix = val;
-      } else if (
-        key === 'branchPrefix' &&
-        is.string(val) &&
-        val.includes('{{')
-      ) {
-        isMigrated = true;
-        const templateIndex = val.indexOf(`{{`);
-        migratedConfig.branchPrefix = val.substring(0, templateIndex);
-        migratedConfig.additionalBranchPrefix = val.substring(templateIndex);
       } else if (key === 'upgradeInRange') {
         isMigrated = true;
         delete migratedConfig.upgradeInRange;

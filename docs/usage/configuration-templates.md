@@ -11,13 +11,13 @@ This document describes how you can edit the branch names, commit messages, or P
 
 The branch name is very important for Renovate because it helps determine "grouping" of updates, and also makes it efficient when an existing PR needs to be updated with a newer version. Also, if you change branchPrefix and have some upgrades "ignored" (closed without merging) then you may see duplicate PRs opened with your new branch name.
 
-`branchName` has a default value of `{{{branchPrefix}}}{{{additionalBranchPrefix}}}{{{branchTopic}}}`.
+`branchName` has a default value of `{{{branchPrefix}}}{{{managerBranchPrefix}}}{{{branchTopic}}}`.
 
-The most common type of branch name you will see looks like this: `renovate/react-16.x`. In this example, the `branchPrefix` is the default `renovate/`, `additionalBranchPrefix` is empty, and `branchTopic` is `react-16.x`.
+The most common type of branch name you will see looks like this: `renovate/react-16.x`. In this example, the `branchPrefix` is the default `renovate/`, `managerBranchPrefix` is empty, and `branchTopic` is `react-16.x`.
 
 Most people can leave `branchPrefix` as `renovate/` however if you prefer to have no forward slashes then you might pick `renovate-` instead. Please note that the onboarding PR is fixed to use `renovate/configure` however.
 
-`additionalBranchPrefix` is optional and by default is empty for all JavaScript dependencies. We use `docker-` for all Docker updates, so you might see branches like `renovate/docker-ubuntu-16.x`.
+`managerBranchPrefix` is optional and by default is empty for all JavaScript dependencies. We use `docker-` for all Docker updates, so you might see branches like `renovate/docker-ubuntu-16.x`.
 
 `branchTopic` depends on the package manager and upgrade type, so you will see a lot of variety. It is also the one you might be most likely to want to change, but be careful and consider posting your config to https://github.com/renovateapp/config-help first.
 

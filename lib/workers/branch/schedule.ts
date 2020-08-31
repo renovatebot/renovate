@@ -68,7 +68,9 @@ export function hasValidSchedule(
 
 export function isScheduledNow(config: RenovateConfig): boolean {
   let configSchedule = config.schedule;
-  logger.debug(`Checking schedule(${configSchedule}, ${config.timezone})`);
+  logger.debug(
+    `Checking schedule(${String(configSchedule)}, ${config.timezone})`
+  );
   if (
     !configSchedule ||
     configSchedule.length === 0 ||
@@ -125,7 +127,9 @@ export function isScheduledNow(config: RenovateConfig): boolean {
         const currentMonth = parseInt(now.format('M'), 10);
         if (!schedule.M.includes(currentMonth)) {
           logger.debug(
-            `Does not match schedule because ${currentMonth} is not in ${schedule.M}`
+            `Does not match schedule because ${currentMonth} is not in ${String(
+              schedule.M
+            )}`
           );
           return false;
         }
@@ -149,7 +153,9 @@ export function isScheduledNow(config: RenovateConfig): boolean {
         logger.trace({ scheduledDays }, `scheduledDays`);
         if (!scheduledDays.includes(currentDay)) {
           logger.debug(
-            `Does not match schedule because ${currentDay} is not in ${scheduledDays}`
+            `Does not match schedule because ${currentDay} is not in ${String(
+              scheduledDays
+            )}`
           );
           return false;
         }

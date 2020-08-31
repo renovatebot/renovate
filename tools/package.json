@@ -5,7 +5,7 @@
     "@actions/core": "1.2.5",
     "@jest/reporters": "26.4.1",
     "@jest/test-result": "26.3.0",
-    "commander": "6.0.0",
+    "commander": "6.1.0",
     "eslint": "7.7.0",
     "fs-extra": "9.0.1",
     "got": "11.5.2",

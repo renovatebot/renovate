@@ -1,7 +1,7 @@
 import { RenovateConfig } from '../../../config';
 import { addMeta, logger, removeMeta } from '../../../logger';
 import { processBranch } from '../../branch';
-import { BranchConfig } from '../../common';
+import { BranchConfig, ProcessBranchResult } from '../../common';
 import { Limit, isLimitReached } from '../../global/limits';
 import { getPrsRemaining } from './limits';
 
@@ -35,17 +35,20 @@ export async function writeUpdates(
     const commitLimitReached = isLimitReached(Limit.Commits);
     const res = await processBranch(branch, prLimitReached, commitLimitReached);
     branch.res = res;
-    if (res === 'automerged' && branch.automergeType !== 'pr-comment') {
+    if (
+      res === ProcessBranchResult.Automerged &&
+      branch.automergeType !== 'pr-comment'
+    ) {
       // Stop procesing other branches because base branch has been changed
-      return res;
+      return 'automerged';
     }
     let deductPrRemainingCount = 0;
-    if (res === 'pr-created') {
+    if (res === ProcessBranchResult.PrCreated) {
       deductPrRemainingCount = 1;
     }
     // istanbul ignore if
     if (
-      res === 'automerged' &&
+      res === ProcessBranchResult.Automerged &&
       branch.automergeType === 'pr-comment' &&
       branch.requiredStatusChecks === null
     ) {

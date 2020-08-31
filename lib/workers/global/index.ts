@@ -70,7 +70,7 @@ export async function start(): Promise<0 | 1> {
     if (err.message.startsWith('Init: ')) {
       logger.fatal(err.message.substring(6));
     } else {
-      logger.fatal({ err }, `Fatal error: ${err.message}`);
+      logger.fatal({ err }, `Fatal error: ${String(err.message)}`);
     }
   } finally {
     globalFinalize(config);

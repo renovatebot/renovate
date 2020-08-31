@@ -23,7 +23,7 @@ export const exposedConfigOptions = [
   'group',
   'groupSlug',
   'groupName',
-  'additionalBranchPrefix',
+  'managerBranchPrefix',
   'prBodyColumns',
   'prBodyDefinitions',
   'prBodyNotes',
