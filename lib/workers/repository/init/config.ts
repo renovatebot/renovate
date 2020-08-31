@@ -12,10 +12,17 @@ import * as npmApi from '../../../datasource/npm';
 import { logger } from '../../../logger';
 import { getCache } from '../../../util/cache/repository';
 import { readLocalFile } from '../../../util/fs';
-import { getFileList } from '../../../util/git';
+import {
+  checkoutBranch,
+  getBranchCommit,
+  getFileList,
+} from '../../../util/git';
 import * as hostRules from '../../../util/host-rules';
+import { checkOnboardingBranch } from '../onboarding/branch';
+import { getResolvedConfig, setResolvedConfig } from './cache';
 import { RepoConfig } from './common';
 import { flattenPackageRules } from './flatten';
+import { detectSemanticCommits } from './semantic';
 
 export async function detectRepoFileConfig(): Promise<RepoConfig> {
   const fileList = await getFileList();
@@ -197,4 +204,23 @@ export async function mergeRenovateConfig(
     );
   }
   return returnConfig;
+}
+
+// istanbul ignore next
+export async function getRepoConfig(
+  config_: RenovateConfig
+): Promise<RenovateConfig> {
+  let config = { ...config_ };
+  config.defaultBranchSha = getBranchCommit(config.defaultBranch);
+  const resolvedConfig = getResolvedConfig(config.defaultBranchSha);
+  if (resolvedConfig) {
+    return resolvedConfig;
+  }
+  config.baseBranch = config.defaultBranch;
+  config.baseBranchSha = await checkoutBranch(config.baseBranch);
+  config.semanticCommits = await detectSemanticCommits(config);
+  config = await checkOnboardingBranch(config);
+  config = await mergeRenovateConfig(config);
+  setResolvedConfig(config);
+  return config;
 }
