@@ -169,7 +169,8 @@
     "upath": "1.2.0",
     "validate-npm-package-name": "3.0.0",
     "www-authenticate": "0.6.2",
-    "xmldoc": "1.1.2"
+    "xmldoc": "1.1.2",
+    "zod": "^1.11.1"
   },
   "optionalDependencies": {
     "re2": "1.15.4"

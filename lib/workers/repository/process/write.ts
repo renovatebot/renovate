@@ -1,7 +1,7 @@
 import { RenovateConfig } from '../../../config';
 import { addMeta, logger, removeMeta } from '../../../logger';
 import { processBranch } from '../../branch';
-import { BranchConfig, ProcessBranchResult } from '../../common';
+import { BranchConfigCoerced, ProcessBranchResult } from '../../common';
 import { getLimitRemaining } from '../../global/limits';
 import { getPrsRemaining } from './limits';
 
@@ -9,7 +9,7 @@ export type WriteUpdateResult = 'done' | 'automerged';
 
 export async function writeUpdates(
   config: RenovateConfig,
-  allBranches: BranchConfig[]
+  allBranches: BranchConfigCoerced[]
 ): Promise<WriteUpdateResult> {
   let branches = allBranches;
   logger.debug(

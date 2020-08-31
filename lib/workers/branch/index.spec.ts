@@ -8,7 +8,7 @@ import * as _npmPostExtract from '../../manager/npm/post-update';
 import { PrState } from '../../types';
 import * as _exec from '../../util/exec';
 import { File, StatusResult } from '../../util/git';
-import { BranchConfig, PrResult, ProcessBranchResult } from '../common';
+import { BranchConfigCoerced, PrResult, ProcessBranchResult } from '../common';
 import * as _prWorker from '../pr';
 import * as _automerge from './automerge';
 import * as _checkExisting from './check-existing';
@@ -51,7 +51,7 @@ describe('workers/branch', () => {
       artifactErrors: [],
       updatedArtifacts: [],
     };
-    let config: BranchConfig;
+    let config: BranchConfigCoerced;
     beforeEach(() => {
       prWorker.ensurePr = jest.fn();
       prWorker.checkAutoMerge = jest.fn();

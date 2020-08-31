@@ -1,6 +1,6 @@
 import { RenovateConfig, getConfig, mocked } from '../../../../test/util';
 import * as _branchWorker from '../../branch';
-import { BranchConfig, ProcessBranchResult } from '../../common';
+import { BranchConfigCoerced, ProcessBranchResult } from '../../common';
 import * as _limits from './limits';
 import { writeUpdates } from './write';
 
@@ -20,7 +20,7 @@ beforeEach(() => {
 describe('workers/repository/write', () => {
   describe('writeUpdates()', () => {
     it('skips branches blocked by pin', async () => {
-      const branches: BranchConfig[] = [
+      const branches: BranchConfigCoerced[] = [
         { updateType: 'pin' },
         { blockedByPin: true },
         {},
@@ -30,7 +30,7 @@ describe('workers/repository/write', () => {
       expect(branchWorker.processBranch).toHaveBeenCalledTimes(2);
     });
     it('stops after automerge', async () => {
-      const branches: BranchConfig[] = [
+      const branches: BranchConfigCoerced[] = [
         {},
         {},
         { automergeType: 'pr-comment', requiredStatusChecks: null },

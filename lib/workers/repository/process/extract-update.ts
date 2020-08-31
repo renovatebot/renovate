@@ -4,6 +4,7 @@ import { RenovateConfig } from '../../../config';
 import { logger } from '../../../logger';
 import { PackageFile } from '../../../manager/common';
 import { getCache } from '../../../util/cache/repository';
+import { coerceBranchConfig } from '../../coerce';
 import { BranchConfig } from '../../common';
 import { extractAllDependencies } from '../extract';
 import { branchifyUpgrades } from '../updates/branchify';
@@ -110,7 +111,7 @@ export async function update(
   let res: WriteUpdateResult | undefined;
   // istanbul ignore else
   if (config.repoIsOnboarded) {
-    res = await writeUpdates(config, branches);
+    res = await writeUpdates(config, branches.map(coerceBranchConfig));
   }
 
   return res;

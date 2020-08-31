@@ -1,16 +1,17 @@
 import { defaultConfig, partial, platform } from '../../../test/util';
 import { PrState } from '../../types';
-import { BranchConfig } from '../common';
+import { BranchConfigCoerced } from '../common';
 import { prAlreadyExisted } from './check-existing';
 
 describe('workers/branch/check-existing', () => {
   describe('prAlreadyExisted', () => {
-    let config: BranchConfig;
+    let config: BranchConfigCoerced;
     beforeEach(() => {
-      config = partial<BranchConfig>({
+      config = partial<BranchConfigCoerced>({
         ...defaultConfig,
         branchName: 'some-branch',
         prTitle: 'some-title',
+        recreateClosed: null,
       });
       jest.resetAllMocks();
     });

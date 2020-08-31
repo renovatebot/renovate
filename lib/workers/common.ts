@@ -115,3 +115,7 @@ export interface BranchConfig
   upgrades: BranchUpgradeConfig[];
   packageFiles?: Record<string, PackageFile[]>;
 }
+
+export interface BranchConfigCoerced extends BranchConfig {
+  recreateClosed: boolean | null;
+}

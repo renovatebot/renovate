@@ -10931,3 +10931,8 @@ yargs@^8.0.2:
     which-module "^2.0.0"
     y18n "^3.2.1"
     yargs-parser "^7.0.0"
+
+zod@^1.11.1:
+  version "1.11.1"
+  resolved "https://registry.yarnpkg.com/zod/-/zod-1.11.1.tgz#b093202a3c4e4dae2463006f81933b22ccc2a144"
+  integrity sha512-qJE3F34NzKahp4kFCEeBK4qiLaynwylSg5jOtX6dlQlcBiDEMt78BAtrjSx/qk3Q65SzNe/40LgZE/h1ACcyIg==

@@ -28,7 +28,7 @@ import {
   isBranchModified,
 } from '../../util/git';
 import { regEx } from '../../util/regex';
-import { BranchConfig, PrResult, ProcessBranchResult } from '../common';
+import { BranchConfigCoerced, PrResult, ProcessBranchResult } from '../common';
 import { checkAutoMerge, ensurePr } from '../pr';
 import { tryBranchAutomerge } from './automerge';
 import { prAlreadyExisted } from './check-existing';
@@ -51,11 +51,11 @@ function rebaseCheck(config: RenovateConfig, branchPr: Pr): boolean {
 const rebasingRegex = /\*\*Rebasing\*\*: .*/;
 
 export async function processBranch(
-  branchConfig: BranchConfig,
+  branchConfig: BranchConfigCoerced,
   prLimitReached?: boolean,
   commitLimitReached?: boolean
 ): Promise<ProcessBranchResult> {
-  const config: BranchConfig = { ...branchConfig };
+  const config: BranchConfigCoerced = { ...branchConfig };
   const dependencies = config.upgrades
     .map((upgrade) => upgrade.depName)
     .filter((v) => v) // remove nulls (happens for lock file maintenance)
