@@ -29,7 +29,7 @@ describe('lib/manager/circleci/extract', () => {
       expect(res.deps).toMatchSnapshot();
       // expect(res.deps).toHaveLength(4);
     });
-    it('extracts ', () => {
+    it('extracts image without leading dash', () => {
       const res = extractPackageFile(file3);
       expect(res.deps).toMatchSnapshot();
     });
