@@ -11,7 +11,7 @@ export { extractPackageFile, updateArtifacts, language };
 
 export const defaultConfig = {
   commitMessageTopic: 'Rust crate {{depName}}',
-  additionalBranchPrefix: 'rust-',
+  managerBranchPrefix: 'rust-',
   fileMatch: ['(^|/)Cargo.toml$'],
   versioning: cargoVersioning.id,
   rangeStrategy: 'bump',

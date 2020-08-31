@@ -101,7 +101,7 @@ export async function flattenUpdates(
               updateConfig.depName.match(/(^|\/)node$/) &&
               updateConfig.depName !== 'calico/node'
             ) {
-              updateConfig.additionalBranchPrefix = '';
+              updateConfig.managerBranchPrefix = '';
               updateConfig.depNameSanitized = 'node';
             }
             generateBranchName(updateConfig);
