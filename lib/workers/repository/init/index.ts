@@ -1,14 +1,10 @@
 import { RenovateConfig } from '../../../config';
 import { logger } from '../../../logger';
 import { clone } from '../../../util/clone';
-import { getBranchCommit, setBranchPrefix } from '../../../util/git';
+import { setBranchPrefix } from '../../../util/git';
 import { checkIfConfigured } from '../configured';
 import { initApis } from './apis';
-import {
-  getResolvedConfig,
-  initializeCaches,
-  setResolvedConfig,
-} from './cache';
+import { initializeCaches } from './cache';
 import { getRepoConfig } from './config';
 import { detectVulnerabilityAlerts } from './vulnerability';
 
@@ -22,14 +18,7 @@ export async function initRepo(
   let config: RenovateConfig = initializeConfig(config_);
   await initializeCaches(config);
   config = await initApis(config);
-  config.defaultBranchSha = getBranchCommit(config.defaultBranch);
-  const resolvedConfig = getResolvedConfig(config.defaultBranchSha);
-  if (resolvedConfig) {
-    config = resolvedConfig;
-  } else {
-    config = await getRepoConfig(config);
-    setResolvedConfig(config);
-  }
+  config = await getRepoConfig(config);
   checkIfConfigured(config);
   await setBranchPrefix(config.branchPrefix);
   config = await detectVulnerabilityAlerts(config);
