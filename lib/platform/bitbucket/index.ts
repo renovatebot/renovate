@@ -157,7 +157,7 @@ export async function initRepo({
     repository,
   });
 
-  git.initRepo({
+  await git.initRepo({
     ...config,
     localDir,
     url,
@@ -175,11 +175,6 @@ export async function initRepo({
 export function getRepoForceRebase(): Promise<boolean> {
   // BB doesnt have an option to flag staled branches
   return Promise.resolve(false);
-}
-
-export async function setBaseBranch(branchName: string): Promise<string> {
-  const baseBranchSha = await git.setBranch(branchName);
-  return baseBranchSha;
 }
 
 // istanbul ignore next

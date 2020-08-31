@@ -21,6 +21,7 @@ import { emojify } from '../../util/emoji';
 import { exec } from '../../util/exec';
 import { readLocalFile, writeLocalFile } from '../../util/fs';
 import {
+  checkoutBranch,
   deleteBranch,
   getRepoStatus,
   branchExists as gitBranchExists,
@@ -65,8 +66,8 @@ export async function processBranch(
     `processBranch with ${branchConfig.upgrades.length} upgrades`
   );
   logger.trace({ config }, 'branch config');
-  await platform.setBaseBranch(config.baseBranch);
-  const branchExists = await gitBranchExists(config.branchName);
+  await checkoutBranch(config.baseBranch);
+  const branchExists = gitBranchExists(config.branchName);
   const branchPr = await platform.getBranchPr(config.branchName);
   logger.debug(`branchExists=${branchExists}`);
   const dependencyDashboardCheck = (config.dependencyDashboardChecks || {})[

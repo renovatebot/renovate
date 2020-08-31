@@ -24,7 +24,7 @@ describe('platform/azure', () => {
     azureApi = require('./azure-got-wrapper');
     azureHelper = require('./azure-helper');
     git = require('../../util/git');
-    git.branchExists.mockResolvedValue(true);
+    git.branchExists.mockReturnValue(true);
     git.isBranchStale.mockResolvedValue(false);
     hostRules.find.mockReturnValue({
       token: 'token',
