@@ -397,7 +397,13 @@ export async function isBranchModified(branchName: string): Promise<boolean> {
   }
   // Retrieve the author of the most recent commit
   const lastAuthor = (
-    await git.raw(['log', '-1', '--pretty=format:%ae', `origin/${branchName}`])
+    await git.raw([
+      'log',
+      '-1',
+      '--pretty=format:%ae',
+      `origin/${branchName}`,
+      '--',
+    ])
   ).trim();
   const { gitAuthorEmail } = config;
   if (
