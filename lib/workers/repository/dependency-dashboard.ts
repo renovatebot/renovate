@@ -96,9 +96,7 @@ export async function ensureMasterIssue(
     }
     issueBody += '\n';
   }
-  const errorList = branches.filter(
-    (branch) => branch.res && branch.res.endsWith('error')
-  );
+  const errorList = branches.filter((branch) => branch.res?.endsWith('error'));
   if (errorList.length) {
     issueBody += '## Errored\n\n';
     issueBody +=
@@ -171,8 +169,8 @@ export async function ensureMasterIssue(
     }
     issueBody += '\n';
   }
-  const alreadyExisted = branches.filter(
-    (branch) => branch.res && branch.res.endsWith('already-existed')
+  const alreadyExisted = branches.filter((branch) =>
+    branch.res?.endsWith('already-existed')
   );
   if (alreadyExisted.length) {
     issueBody += '## Closed/Ignored\n\n';

@@ -14,7 +14,7 @@ import {
 } from '../../constants/error-messages';
 import { logger } from '../../logger';
 import { getAdditionalFiles } from '../../manager/npm/post-update';
-import { platform } from '../../platform';
+import { Pr, platform } from '../../platform';
 import { BranchStatus, PrState } from '../../types';
 import { ExternalHostError } from '../../types/errors/external-host-error';
 import { emojify } from '../../util/emoji';
@@ -38,13 +38,12 @@ import { shouldReuseExistingBranch } from './reuse';
 import { isScheduledNow } from './schedule';
 import { setStability, setUnpublishable } from './status-checks';
 
-// TODO: proper typings
-function rebaseCheck(config: RenovateConfig, branchPr: any): boolean {
-  const titleRebase = branchPr.title && branchPr.title.startsWith('rebase!');
-  const labelRebase =
-    branchPr.labels && branchPr.labels.includes(config.rebaseLabel);
-  const prRebaseChecked =
-    branchPr.body && branchPr.body.includes(`- [x] <!-- rebase-check -->`);
+function rebaseCheck(config: RenovateConfig, branchPr: Pr): boolean {
+  const titleRebase = branchPr.title?.startsWith('rebase!');
+  const labelRebase = branchPr.labels?.includes(config.rebaseLabel);
+  const prRebaseChecked = branchPr.body?.includes(
+    `- [x] <!-- rebase-check -->`
+  );
 
   return titleRebase || labelRebase || prRebaseChecked;
 }
@@ -109,8 +108,7 @@ export async function processBranch(
         if (!config.suppressNotifications.includes('prIgnoreNotification')) {
           if (config.dryRun) {
             logger.info(
-              'DRY-RUN: Would ensure closed PR comment in PR #' +
-                existingPr.number
+              `DRY-RUN: Would ensure closed PR comment in PR #${existingPr.number}`
             );
           } else {
             await platform.ensureComment({
@@ -318,7 +316,7 @@ export async function processBranch(
       logger.debug(
         {
           updatedArtifacts: config.updatedArtifacts.map((f) =>
-            f.name === '|delete|' ? `${f.contents} (delete)` : f.name
+            f.name === '|delete|' ? `${String(f.contents)} (delete)` : f.name
           ),
         },
         `Updated ${config.updatedArtifacts.length} lock files`
@@ -501,16 +499,12 @@ export async function processBranch(
       logger.debug('Passing repository-changed error up');
       throw err;
     }
-    if (
-      err.message &&
-      err.message.startsWith('remote: Invalid username or password')
-    ) {
+    if (err.message?.startsWith('remote: Invalid username or password')) {
       logger.debug('Throwing bad credentials');
       throw new Error(PLATFORM_BAD_CREDENTIALS);
     }
     if (
-      err.message &&
-      err.message.startsWith(
+      err.message?.startsWith(
         'ssh_exchange_identification: Connection closed by remote host'
       )
     ) {
@@ -529,7 +523,7 @@ export async function processBranch(
       logger.debug('Passing lockfile-error up');
       throw err;
     }
-    if (err.message && err.message.includes('space left on device')) {
+    if (err.message?.includes('space left on device')) {
       throw new Error(SYSTEM_INSUFFICIENT_DISK_SPACE);
     }
     if (err.message === SYSTEM_INSUFFICIENT_DISK_SPACE) {
@@ -551,7 +545,7 @@ export async function processBranch(
     ) {
       throw new Error(PLATFORM_AUTHENTICATION_ERROR);
     } else if (!(err instanceof ExternalHostError)) {
-      logger.error({ err }, `Error updating branch: ${err.message}`);
+      logger.error({ err }, `Error updating branch: ${String(err.message)}`);
     }
     // Don't throw here - we don't want to stop the other renovations
     return 'error';
@@ -611,8 +605,7 @@ export async function processBranch(
         ) {
           if (config.dryRun) {
             logger.info(
-              'DRY-RUN: Would ensure lock file error comment in PR #' +
-                pr.number
+              `DRY-RUN: Would ensure lock file error comment in PR #${pr.number}`
             );
           } else {
             await platform.ensureComment({
@@ -650,7 +643,7 @@ export async function processBranch(
           // istanbul ignore if
           if (config.dryRun) {
             logger.info(
-              'DRY-RUN: Would ensure comment removal in PR #' + pr.number
+              `DRY-RUN: Would ensure comment removal in PR #${pr.number}`
             );
           } else {
             // Remove artifacts error comment only if this run has successfully updated artifacts
@@ -672,7 +665,7 @@ export async function processBranch(
       throw err;
     }
     // Otherwise don't throw here - we don't want to stop the other renovations
-    logger.error({ err }, `Error ensuring PR: ${err.message}`);
+    logger.error({ err }, `Error ensuring PR: ${String(err.message)}`);
   }
   if (!branchExists) {
     return 'pr-created';
