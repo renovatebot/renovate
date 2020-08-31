@@ -14,14 +14,10 @@ import { getCache } from '../../../util/cache/repository';
 import { readLocalFile } from '../../../util/fs';
 import { getFileList } from '../../../util/git';
 import * as hostRules from '../../../util/host-rules';
+import { RepoConfig } from './common';
 import { flattenPackageRules } from './flatten';
 
-export type RepoConfig = {
-  fileName: string;
-  config: any;
-};
-
-export async function getRepoConfig(): Promise<RepoConfig | null> {
+export async function getRepoConfig(): Promise<RepoConfig> {
   const fileList = await getFileList();
   async function detectConfigFile(): Promise<string | null> {
     for (const configFileName of configFileNames) {
@@ -44,7 +40,7 @@ export async function getRepoConfig(): Promise<RepoConfig | null> {
   const fileName = await detectConfigFile();
   if (!fileName) {
     logger.debug('No renovate config file found');
-    return null;
+    return {};
   }
   logger.debug(`Found ${fileName} config file`);
   let config;
@@ -126,11 +122,7 @@ export async function mergeRenovateConfig(
   let returnConfig = { ...config };
   const repoConfig = await getRepoConfig();
   const cache = getCache();
-  cache.init = {};
-  if (repoConfig) {
-    cache.init.configFile = repoConfig.fileName;
-    cache.init.configFileContents = repoConfig.config;
-  }
+  cache.init.repoConfig = repoConfig;
   const migratedConfig = await migrateAndValidate(
     config,
     repoConfig?.config || {}
