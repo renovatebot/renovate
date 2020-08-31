@@ -98,7 +98,7 @@ export async function ensureMasterIssue(
     issueBody += '\n';
   }
   const errorList = branches.filter(
-    (branch) => branch.res === ProcessBranchResult.Error)
+    (branch) => branch.res === ProcessBranchResult.Error
   );
   if (errorList.length) {
     issueBody += '## Errored\n\n';
