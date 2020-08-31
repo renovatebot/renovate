@@ -112,7 +112,7 @@
     "@renovatebot/ruby-semver": "0.2.1",
     "@sindresorhus/is": "3.1.2",
     "@yarnpkg/core": "2.1.1",
-    "@yarnpkg/parsers": "2.1.0",
+    "@yarnpkg/parsers": "2.2.0",
     "aws-sdk": "2.738.0",
     "azure-devops-node-api": "10.1.1",
     "bunyan": "1.8.14",
