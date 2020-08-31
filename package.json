@@ -175,7 +175,7 @@
     "re2": "1.15.4"
   },
   "devDependencies": {
-    "@actions/core": "1.2.4",
+    "@actions/core": "1.2.5",
     "@babel/cli": "7.10.5",
     "@babel/core": "7.11.4",
     "@babel/node": "7.10.5",
@@ -193,7 +193,7 @@
     "@types/changelog-filename-regex": "2.0.0",
     "@types/clean-git-ref": "2.0.0",
     "@types/conventional-commits-detector": "1.0.0",
-    "@types/eslint": "7.2.1",
+    "@types/eslint": "7.2.2",
     "@types/fs-extra": "9.0.1",
     "@types/github-url-from-git": "1.5.0",
     "@types/global-agent": "2.1.0",
@@ -204,7 +204,7 @@
     "@types/json5": "0.0.30",
     "@types/later": "1.2.6",
     "@types/linkify-markdown": "1.0.0",
-    "@types/luxon": "1.24.3",
+    "@types/luxon": "1.24.4",
     "@types/markdown-it": "10.0.2",
     "@types/markdown-table": "2.0.0",
     "@types/moment-timezone": "0.5.13",

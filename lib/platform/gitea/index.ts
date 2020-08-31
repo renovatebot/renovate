@@ -301,7 +301,7 @@ const platform: Platform = {
     gitEndpoint.auth = opts.token;
 
     // Initialize Git storage
-    git.initRepo({
+    await git.initRepo({
       ...config,
       url: URL.format(gitEndpoint),
       gitAuthorName: global.gitAuthor?.name,
@@ -339,7 +339,7 @@ const platform: Platform = {
   }: BranchStatusConfig): Promise<void> {
     try {
       // Create new status for branch commit
-      const branchCommit = await git.getBranchCommit(branchName);
+      const branchCommit = git.getBranchCommit(branchName);
       await helper.createCommitStatus(config.repository, branchCommit, {
         state: helper.renovateToGiteaStatusMapping[state] || 'pending',
         context,
@@ -412,11 +412,6 @@ const platform: Platform = {
       'Could not map Gitea status value to Renovate status'
     );
     return BranchStatus.yellow;
-  },
-
-  async setBaseBranch(branchName: string): Promise<string> {
-    const baseBranchSha = await git.setBranch(branchName);
-    return baseBranchSha;
   },
 
   getPrList(): Promise<Pr[]> {
@@ -848,7 +843,6 @@ export const {
   initPlatform,
   initRepo,
   mergePr,
-  setBaseBranch,
   setBranchStatus,
   updatePr,
 } = platform;

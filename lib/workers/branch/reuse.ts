@@ -13,7 +13,7 @@ export async function shouldReuseExistingBranch(
 ): Promise<ParentBranch> {
   const { branchName } = config;
   // Check if branch exists
-  if (!(await branchExists(branchName))) {
+  if (!branchExists(branchName)) {
     logger.debug(`Branch needs creating`);
     return { reuseExistingBranch: false };
   }

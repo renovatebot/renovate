@@ -1,8 +1,7 @@
 import { RenovateConfig } from '../../../config';
 import { logger } from '../../../logger';
-import { platform } from '../../../platform';
 import { clone } from '../../../util/clone';
-import { setBranchPrefix } from '../../../util/git';
+import { checkoutBranch, setBranchPrefix } from '../../../util/git';
 import { checkIfConfigured } from '../configured';
 import { checkOnboardingBranch } from '../onboarding/branch';
 import { initApis } from './apis';
@@ -22,7 +21,7 @@ function initializeConfig(config: RenovateConfig): RenovateConfig {
 async function getRepoConfig(config_: RenovateConfig): Promise<RenovateConfig> {
   let config = { ...config_ };
   config.baseBranch = config.defaultBranch;
-  config.baseBranchSha = await platform.setBaseBranch(config.baseBranch);
+  config.baseBranchSha = await checkoutBranch(config.baseBranch);
   config.semanticCommits = await detectSemanticCommits(config);
   config = await checkOnboardingBranch(config);
   config = await mergeRenovateConfig(config);
