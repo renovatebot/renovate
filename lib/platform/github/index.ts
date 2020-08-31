@@ -409,7 +409,6 @@ export async function initRepo({
   });
   const repoConfig: RepoResult = {
     defaultBranch: config.defaultBranch,
-    defaultBranchSha: config.defaultBranchSha,
     isFork: repo.isFork === true,
   };
   return repoConfig;
