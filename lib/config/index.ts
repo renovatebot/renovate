@@ -1,6 +1,6 @@
 import { addStream, levels, logger, setContext } from '../logger';
 import { get, getLanguageList, getManagerList } from '../manager';
-import { readLocalFile } from '../util/fs';
+import { readFile } from '../util/fs';
 import { ensureTrailingSlash } from '../util/url';
 import * as cliParser from './cli';
 import { RenovateConfig, RenovateConfigStage } from './common';
@@ -69,7 +69,7 @@ export async function parseConfigs(
   }
 
   if (!config.privateKey && config.privateKeyPath) {
-    config.privateKey = await readLocalFile(config.privateKeyPath);
+    config.privateKey = await readFile(config.privateKeyPath);
   }
 
   // Set log level

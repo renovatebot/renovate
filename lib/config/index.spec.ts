@@ -1,4 +1,4 @@
-import { readLocalFile } from '../util/fs';
+import { readFile } from '../util/fs';
 import getArgv from './config/__fixtures__/argv';
 import { getConfig } from './defaults';
 
@@ -66,7 +66,7 @@ describe('config/index', () => {
         ...defaultEnv,
         RENOVATE_PRIVATE_KEY_PATH: privateKeyPath,
       };
-      const expected = await readLocalFile(privateKeyPath);
+      const expected = await readFile(privateKeyPath);
       const parsedConfig = await configParser.parseConfigs(env, defaultArgv);
 
       expect(parsedConfig).toContainEntries([
