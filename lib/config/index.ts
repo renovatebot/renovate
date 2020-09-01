@@ -1,3 +1,4 @@
+import fs from 'fs';
 import { addStream, levels, logger, setContext } from '../logger';
 import { get, getLanguageList, getManagerList } from '../manager';
 import { ensureTrailingSlash } from '../util/url';
@@ -65,6 +66,10 @@ export async function parseConfigs(
 
   if (config.forceCli) {
     config = mergeChildConfig(config, { force: { ...cliConfig } });
+  }
+
+  if (!config.privateKey && config.privateKeyPath) {
+    config.privateKey = fs.readFileSync(config.privateKeyPath);
   }
 
   // Set log level

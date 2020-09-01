@@ -1,4 +1,3 @@
-import fs from 'fs';
 import is from '@sindresorhus/is';
 import { logger } from '../logger';
 import { RenovateConfig, ValidationMessage } from './common';
@@ -41,9 +40,6 @@ export async function migrateAndValidate(
     if (!config.repoIsOnboarded) {
       // TODO #556 - enable warnings in real PRs
       massagedConfig.warnings = (config.warnings || []).concat(warnings);
-    }
-    if (!input.privateKey && input.privateKeyPath) {
-      massagedConfig.privateKey = fs.readFileSync(config.privateKeyPath);
     }
     return massagedConfig;
   } catch (err) /* istanbul ignore next */ {

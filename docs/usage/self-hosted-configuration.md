@@ -151,7 +151,7 @@ To create the key pair with openssl use the following commands:
 
 ## privateKeyPath
 
-Path to a Private Key File. This private key is used to decrypt config files.
+Used as an alternative to `privateKey`, if you wish for the key to be read from disk instead.
 
 ## productLinks
 
