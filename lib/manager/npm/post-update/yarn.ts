@@ -74,11 +74,10 @@ export async function generateLockFile(
       preCommands.push(optimizeCommand);
     }
     const commands = [];
-    let cmdOptions =
-      '--ignore-engines --ignore-platform --network-timeout 100000';
+    let cmdOptions = '--network-timeout 100000';
     if (global.trustLevel !== 'high' || config.ignoreScripts) {
       if (isYarn1) {
-        cmdOptions += ' --ignore-scripts';
+        cmdOptions += ' --ignore-scripts --ignore-engines --ignore-platform';
       } else {
         extraEnv.YARN_ENABLE_SCRIPTS = '0';
       }
