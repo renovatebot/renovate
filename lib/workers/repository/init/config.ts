@@ -218,9 +218,10 @@ export async function getRepoConfig(
   }
   config.baseBranch = config.defaultBranch;
   config.baseBranchSha = await checkoutBranch(config.baseBranch);
-  config.semanticCommits = await detectSemanticCommits(config);
   config = await checkOnboardingBranch(config);
   config = await mergeRenovateConfig(config);
+  config.semanticCommits =
+    config.semanticCommits ?? (await detectSemanticCommits());
   setResolvedConfig(config);
   return config;
 }
