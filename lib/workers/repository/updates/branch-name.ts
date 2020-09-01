@@ -32,7 +32,8 @@ export function generateBranchName(update: RenovateConfig): void {
     });
     if (update.updateType === 'major' && update.separateMajorMinor) {
       if (update.separateMultipleMajor) {
-        update.groupSlug = `major-${update.newMajor}-${update.groupSlug}`;
+        const newMajor = String(update.newMajor);
+        update.groupSlug = `major-${newMajor}-${update.groupSlug}`;
       } else {
         update.groupSlug = `major-${update.groupSlug}`;
       }

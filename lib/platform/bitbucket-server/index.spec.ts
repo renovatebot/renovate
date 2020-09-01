@@ -184,9 +184,9 @@ describe(getName(__filename), () => {
         hostRules = require('../../util/host-rules');
         bitbucket = await import('.');
         git = require('../../util/git');
-        git.branchExists.mockResolvedValue(true);
+        git.branchExists.mockReturnValue(true);
         git.isBranchStale.mockResolvedValue(false);
-        git.getBranchCommit.mockResolvedValue(
+        git.getBranchCommit.mockReturnValue(
           '0d9c7726c3d628b7e28af234595cfd20febdbf8e'
         );
         const endpoint =
@@ -419,15 +419,6 @@ describe(getName(__filename), () => {
             expect(httpMock.getTrace()).toMatchSnapshot();
           }
         );
-      });
-
-      describe('setBaseBranch()', () => {
-        it('updates file list', async () => {
-          expect.assertions(1);
-          await initRepo();
-          await bitbucket.setBaseBranch('branch');
-          expect(httpMock.getTrace()).toMatchSnapshot();
-        });
       });
 
       describe('addAssignees()', () => {
@@ -1655,7 +1646,7 @@ Followed by some information.
         });
 
         it('throws repository-changed', async () => {
-          git.branchExists.mockResolvedValue(false);
+          git.branchExists.mockReturnValue(false);
           await initRepo();
           await expect(
             bitbucket.getBranchStatus('somebranch', [])

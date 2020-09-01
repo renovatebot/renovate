@@ -9,7 +9,7 @@ import * as hostRules from '../../util/host-rules';
 import * as repositoryWorker from '../repository';
 import { autodiscoverRepositories } from './autodiscover';
 import { globalFinalize, globalInitialize } from './initialize';
-import * as limits from './limits';
+import { Limit, isLimitReached } from './limits';
 
 type RenovateConfig = configParser.RenovateConfig;
 type RenovateRepository = configParser.RenovateRepository;
@@ -36,7 +36,7 @@ function getGlobalConfig(): Promise<RenovateConfig> {
 }
 
 function haveReachedLimits(): boolean {
-  if (limits.getLimitRemaining('prCommitsPerRunLimit') <= 0) {
+  if (isLimitReached(Limit.Commits)) {
     logger.info('Max commits created for this run.');
     return true;
   }
@@ -73,7 +73,7 @@ export async function start(): Promise<0 | 1> {
     if (err.message.startsWith('Init: ')) {
       logger.fatal(err.message.substring(6));
     } else {
-      logger.fatal({ err }, `Fatal error: ${err.message}`);
+      logger.fatal({ err }, `Fatal error: ${String(err.message)}`);
     }
   } finally {
     globalFinalize(config);
