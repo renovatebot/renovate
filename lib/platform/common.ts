@@ -29,7 +29,6 @@ export interface PlatformResult {
 
 export interface RepoResult {
   defaultBranch: string;
-  defaultBranchSha?: string;
   isFork: boolean;
 }
 
@@ -169,7 +168,6 @@ export interface Platform {
       | EnsureCommentRemovalConfigByContent
   ): Promise<void>;
   ensureComment(ensureComment: EnsureCommentConfig): Promise<boolean>;
-  setBaseBranch(branchName: string): Promise<string>;
   getPr(number: number): Promise<Pr>;
   findPr(findPRConfig: FindPRConfig): Promise<Pr>;
   refreshPr?(number: number): Promise<void>;

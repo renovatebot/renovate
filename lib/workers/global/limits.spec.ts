@@ -2,17 +2,17 @@ import {
   Limit,
   incLimitedValue,
   isLimitReached,
-  reset,
+  resetAllLimits,
   setMaxLimit,
 } from './limits';
 
 describe('lib/workers/global/limits', () => {
   beforeEach(() => {
-    reset();
+    resetAllLimits();
   });
 
   beforeEach(() => {
-    reset();
+    resetAllLimits();
   });
 
   it('increments limited value', () => {

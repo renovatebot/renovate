@@ -10,23 +10,25 @@ import * as presets from '../../../config/presets';
 import { CONFIG_VALIDATION } from '../../../constants/error-messages';
 import * as npmApi from '../../../datasource/npm';
 import { logger } from '../../../logger';
-import { ExternalHostError } from '../../../types/errors/external-host-error';
 import { getCache } from '../../../util/cache/repository';
-import { clone } from '../../../util/clone';
 import { readLocalFile } from '../../../util/fs';
-import { getFileList } from '../../../util/git';
+import {
+  checkoutBranch,
+  getBranchCommit,
+  getFileList,
+} from '../../../util/git';
 import * as hostRules from '../../../util/host-rules';
+import { checkOnboardingBranch } from '../onboarding/branch';
+import { getResolvedConfig, setResolvedConfig } from './cache';
+import { RepoFileConfig } from './common';
 import { flattenPackageRules } from './flatten';
+import { detectSemanticCommits } from './semantic';
 
-// Check for repository config
-export async function mergeRenovateConfig(
-  config: RenovateConfig
-): Promise<RenovateConfig> {
-  let returnConfig = { ...config };
+export async function detectRepoFileConfig(): Promise<RepoFileConfig> {
   const fileList = await getFileList();
   async function detectConfigFile(): Promise<string | null> {
-    for (const fileName of configFileNames) {
-      if (fileName === 'package.json') {
+    for (const configFileName of configFileNames) {
+      if (configFileName === 'package.json') {
         try {
           const pJson = JSON.parse(await readLocalFile('package.json', 'utf8'));
           if (pJson.renovate) {
@@ -36,102 +38,109 @@ export async function mergeRenovateConfig(
         } catch (err) {
           // Do nothing
         }
-      } else if (fileList.includes(fileName)) {
-        return fileName;
+      } else if (fileList.includes(configFileName)) {
+        return configFileName;
       }
     }
     return null;
   }
-  const configFile = await detectConfigFile();
-  if (!configFile) {
+  const fileName = await detectConfigFile();
+  if (!fileName) {
     logger.debug('No renovate config file found');
-    return returnConfig;
+    return {};
   }
-  logger.debug(`Found ${configFile} config file`);
-  let renovateJson;
-  if (configFile === 'package.json') {
+  logger.debug(`Found ${fileName} config file`);
+  let config;
+  if (fileName === 'package.json') {
     // We already know it parses
-    renovateJson = JSON.parse(await readLocalFile('package.json', 'utf8'))
-      .renovate;
-    logger.debug({ config: renovateJson }, 'package.json>renovate config');
+    config = JSON.parse(await readLocalFile('package.json', 'utf8')).renovate;
+    logger.debug({ config }, 'package.json>renovate config');
   } else {
-    let renovateConfig = await readLocalFile(configFile, 'utf8');
+    let rawFileContents = await readLocalFile(fileName, 'utf8');
     // istanbul ignore if
-    if (renovateConfig === null) {
-      logger.warn('Fetching renovate config returns null');
-      throw new ExternalHostError(
-        Error('Fetching renovate config returns null'),
-        config.platform
-      );
-    }
-    // istanbul ignore if
-    if (!renovateConfig.length) {
-      renovateConfig = '{}';
+    if (!rawFileContents.length) {
+      rawFileContents = '{}';
     }
 
-    const fileType = path.extname(configFile);
+    const fileType = path.extname(fileName);
 
     if (fileType === '.json5') {
       try {
-        renovateJson = JSON5.parse(renovateConfig);
+        config = JSON5.parse(rawFileContents);
       } catch (err) /* istanbul ignore next */ {
         logger.debug(
-          { renovateConfig },
+          { renovateConfig: rawFileContents },
           'Error parsing renovate config renovate.json5'
         );
-        const error = new Error(CONFIG_VALIDATION);
-        error.configFile = configFile;
-        error.validationError = 'Invalid JSON5 (parsing failed)';
-        error.validationMessage = `JSON5.parse error:  ${err.message}`;
-        throw error;
+        const validationError = 'Invalid JSON5 (parsing failed)';
+        const validationMessage = `JSON5.parse error:  ${String(err.message)}`;
+        return { fileName, error: { validationError, validationMessage } };
       }
     } else {
       let allowDuplicateKeys = true;
       let jsonValidationError = jsonValidator.validate(
-        renovateConfig,
+        rawFileContents,
         allowDuplicateKeys
       );
       if (jsonValidationError) {
-        const error = new Error(CONFIG_VALIDATION);
-        error.configFile = configFile;
-        error.validationError = 'Invalid JSON (parsing failed)';
-        error.validationMessage = jsonValidationError;
-        throw error;
+        const validationError = 'Invalid JSON (parsing failed)';
+        const validationMessage = jsonValidationError;
+        return { fileName, error: { validationError, validationMessage } };
       }
       allowDuplicateKeys = false;
       jsonValidationError = jsonValidator.validate(
-        renovateConfig,
+        rawFileContents,
         allowDuplicateKeys
       );
       if (jsonValidationError) {
-        const error = new Error(CONFIG_VALIDATION);
-        error.configFile = configFile;
-        error.validationError = 'Duplicate keys in JSON';
-        error.validationMessage = JSON.stringify(jsonValidationError);
-        throw error;
+        const validationError = 'Duplicate keys in JSON';
+        const validationMessage = JSON.stringify(jsonValidationError);
+        return { fileName, error: { validationError, validationMessage } };
       }
       try {
-        renovateJson = JSON.parse(renovateConfig);
+        config = JSON.parse(rawFileContents);
       } catch (err) /* istanbul ignore next */ {
-        logger.debug({ renovateConfig }, 'Error parsing renovate config');
-        const error = new Error(CONFIG_VALIDATION);
-        error.configFile = configFile;
-        error.validationError = 'Invalid JSON (parsing failed)';
-        error.validationMessage = `JSON.parse error:  ${err.message}`;
-        throw error;
+        logger.debug(
+          { renovateConfig: rawFileContents },
+          'Error parsing renovate config'
+        );
+        const validationError = 'Invalid JSON (parsing failed)';
+        const validationMessage = `JSON.parse error:  ${String(err.message)}`;
+        return { fileName, error: { validationError, validationMessage } };
       }
     }
-    logger.debug({ configFile, config: renovateJson }, 'Repository config');
+    logger.debug({ fileName, config }, 'Repository config');
   }
+  return { fileName, config };
+}
+
+export function checkForRepoConfigError(repoConfig: RepoFileConfig): void {
+  if (!repoConfig.error) {
+    return;
+  }
+  const error = new Error(CONFIG_VALIDATION);
+  error.configFile = repoConfig.fileName;
+  error.validationError = repoConfig.error.validationError;
+  error.validationMessage = repoConfig.error.validationMessage;
+  throw error;
+}
+
+// Check for repository config
+export async function mergeRenovateConfig(
+  config: RenovateConfig
+): Promise<RenovateConfig> {
+  let returnConfig = { ...config };
+  const repoConfig = await detectRepoFileConfig();
   const cache = getCache();
-  cache.init = {
-    configFile,
-    configFileContents: clone(renovateJson),
-  };
-  const migratedConfig = await migrateAndValidate(config, renovateJson);
+  cache.init.repoConfig = repoConfig;
+  checkForRepoConfigError(repoConfig);
+  const migratedConfig = await migrateAndValidate(
+    config,
+    repoConfig?.config || {}
+  );
   if (migratedConfig.errors.length) {
     const error = new Error(CONFIG_VALIDATION);
-    error.configFile = configFile;
+    error.configFile = repoConfig.fileName;
     error.validationError =
       'The renovate configuration file contains some invalid settings';
     error.validationMessage = migratedConfig.errors
@@ -195,4 +204,24 @@ export async function mergeRenovateConfig(
     );
   }
   return returnConfig;
+}
+
+// istanbul ignore next
+export async function getRepoConfig(
+  config_: RenovateConfig
+): Promise<RenovateConfig> {
+  let config = { ...config_ };
+  config.defaultBranchSha = getBranchCommit(config.defaultBranch);
+  const resolvedConfig = getResolvedConfig(config.defaultBranchSha);
+  if (resolvedConfig) {
+    return resolvedConfig;
+  }
+  config.baseBranch = config.defaultBranch;
+  config.baseBranchSha = await checkoutBranch(config.baseBranch);
+  config = await checkOnboardingBranch(config);
+  config = await mergeRenovateConfig(config);
+  config.semanticCommits =
+    config.semanticCommits ?? (await detectSemanticCommits());
+  setResolvedConfig(config);
+  return config;
 }
