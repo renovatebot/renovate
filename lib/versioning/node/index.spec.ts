@@ -1,4 +1,4 @@
-import { api as nodever, isStable } from '.';
+import { isStable, api as nodever } from '.';
 
 describe('semver.getNewValue()', () => {
   it('returns normalized toVersion', () => {
