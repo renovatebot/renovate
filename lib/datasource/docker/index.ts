@@ -21,7 +21,7 @@ export const defaultRegistryUrls = ['https://index.docker.io'];
 export const registryStrategy = 'first';
 
 export const defaultConfig = {
-  managerBranchPrefix: 'docker-',
+  additionalBranchPrefix: 'docker-',
   commitMessageTopic: '{{{depName}}} Docker tag',
   major: { enabled: false },
   commitMessageExtra:

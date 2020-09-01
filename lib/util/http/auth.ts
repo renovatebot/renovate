@@ -3,6 +3,7 @@ import { NormalizedOptions } from 'got';
 import {
   PLATFORM_TYPE_GITEA,
   PLATFORM_TYPE_GITHUB,
+  PLATFORM_TYPE_GITLAB,
 } from '../../constants/platforms';
 import { GotOptions } from './types';
 
@@ -26,8 +27,15 @@ export function applyAuthorization(inOptions: GotOptions): GotOptions {
           );
         }
       }
+    } else if (options.hostType === PLATFORM_TYPE_GITLAB) {
+      // GitLab versions earlier than 12.2 only support authentication with
+      // a personal access token, which is 20 characters long.
+      if (options.token.length === 20) {
+        options.headers['Private-token'] = options.token;
+      } else {
+        options.headers.authorization = `Bearer ${options.token}`;
+      }
     } else {
-      // For GitLab the bearer token can be a Personal Access Token or an OAuth2 token.
       options.headers.authorization = `Bearer ${options.token}`;
     }
     delete options.token;

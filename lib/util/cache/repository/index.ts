@@ -60,7 +60,7 @@ export async function initialize(config: RenovateConfig): Promise<void> {
 
 export function getCache(): Cache {
   cache = cache || Object.create({});
-  cache.init = cache.init || Object.create({});
+  delete cache.init;
   cache.scan = cache.scan || Object.create({});
   return cache;
 }

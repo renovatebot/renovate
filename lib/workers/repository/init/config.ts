@@ -10,7 +10,6 @@ import * as presets from '../../../config/presets';
 import { CONFIG_VALIDATION } from '../../../constants/error-messages';
 import * as npmApi from '../../../datasource/npm';
 import { logger } from '../../../logger';
-import { getCache } from '../../../util/cache/repository';
 import { readLocalFile } from '../../../util/fs';
 import {
   checkoutBranch,
@@ -19,7 +18,6 @@ import {
 } from '../../../util/git';
 import * as hostRules from '../../../util/host-rules';
 import { checkOnboardingBranch } from '../onboarding/branch';
-import { getResolvedConfig, setResolvedConfig } from './cache';
 import { RepoFileConfig } from './common';
 import { flattenPackageRules } from './flatten';
 import { detectSemanticCommits } from './semantic';
@@ -131,8 +129,6 @@ export async function mergeRenovateConfig(
 ): Promise<RenovateConfig> {
   let returnConfig = { ...config };
   const repoConfig = await detectRepoFileConfig();
-  const cache = getCache();
-  cache.init.repoConfig = repoConfig;
   checkForRepoConfigError(repoConfig);
   const migratedConfig = await migrateAndValidate(
     config,
@@ -212,16 +208,11 @@ export async function getRepoConfig(
 ): Promise<RenovateConfig> {
   let config = { ...config_ };
   config.defaultBranchSha = getBranchCommit(config.defaultBranch);
-  const resolvedConfig = getResolvedConfig(config.defaultBranchSha);
-  if (resolvedConfig) {
-    return resolvedConfig;
-  }
   config.baseBranch = config.defaultBranch;
   config.baseBranchSha = await checkoutBranch(config.baseBranch);
   config = await checkOnboardingBranch(config);
   config = await mergeRenovateConfig(config);
   config.semanticCommits =
     config.semanticCommits ?? (await detectSemanticCommits());
-  setResolvedConfig(config);
   return config;
 }
