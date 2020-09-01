@@ -114,7 +114,7 @@ export async function detectRepoFileConfig(): Promise<RepoFileConfig> {
   return { fileName, config };
 }
 
-function checkForRepoConfigError(repoConfig: RepoFileConfig): void {
+export function checkForRepoConfigError(repoConfig: RepoFileConfig): void {
   if (!repoConfig.error) {
     return;
   }
