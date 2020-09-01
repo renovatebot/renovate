@@ -14,7 +14,6 @@ export interface BaseBranchCache {
 export interface Cache {
   repository?: string;
   init?: {
-    defaultBranch?: string;
     defaultBranchSha?: string;
     repoConfig?: RepoFileConfig;
     resolvedConfig?: RenovateConfig;
