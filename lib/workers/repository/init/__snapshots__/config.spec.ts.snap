@@ -524,6 +524,7 @@ Object {
   "schedule": Array [
     "at any time",
   ],
+  "secrets": Object {},
   "semanticCommitScope": "deps",
   "semanticCommitType": "chore",
   "semanticCommits": null,
