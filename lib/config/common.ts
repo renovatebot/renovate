@@ -94,6 +94,7 @@ export interface RenovateAdminConfig {
   platform?: string;
   postUpdateOptions?: string[];
   privateKey?: string | Buffer;
+  privateKeyPath?: string;
   repositories?: RenovateRepository[];
   requireConfig?: boolean;
   trustLevel?: 'low' | 'high';

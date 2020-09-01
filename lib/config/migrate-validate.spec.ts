@@ -1,3 +1,5 @@
+import fs from 'fs';
+import path from 'path';
 import { RenovateConfig, getConfig } from '../../test/util';
 import { migrateAndValidate } from './migrate-validate';
 
@@ -33,6 +35,22 @@ describe('config/migrate-validate', () => {
       );
       expect(res.warnings).toBeUndefined();
       expect(res).toMatchSnapshot();
+    });
+
+    it('reads private key from file', async () => {
+      const input: RenovateConfig = {
+        privateKeyPath: path.join(
+          __dirname,
+          '/config/__fixtures__/private.pem'
+        ),
+      };
+      const res = await migrateAndValidate(
+        { ...config, repoIsOnboarded: true, warnings: undefined },
+        input
+      );
+
+      const expected = fs.readFileSync(input.privateKeyPath);
+      expect(res.privateKey).toBe(expected);
     });
   });
 });

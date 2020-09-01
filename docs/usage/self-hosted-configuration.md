@@ -149,6 +149,10 @@ To create the key pair with openssl use the following commands:
 - `openssl genrsa -out rsa_priv.pem 4096` for generating the private key
 - `openssl rsa -pubout -in rsa_priv.pem -out rsa_pub.pem` for extracting the public key
 
+## privateKeyPath
+
+Path to a Private Key File. This private key is used to decrypt config files.
+
 ## productLinks
 
 Override this object if you wish to change the URLs that Renovate links to, e.g. if you have an internal forum for asking for help.
