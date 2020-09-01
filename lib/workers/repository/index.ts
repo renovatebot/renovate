@@ -39,7 +39,7 @@ export async function renovateRepository(
       config
     );
     await ensureOnboardingPr(config, packageFiles, branches);
-    const res = await updateRepo(config, branches, branchList);
+    const res = await updateRepo(config, branches);
     addSplit('update');
     if (res !== 'automerged') {
       await ensureMasterIssue(config, branches);

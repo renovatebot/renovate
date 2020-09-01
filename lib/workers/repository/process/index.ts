@@ -95,8 +95,7 @@ export async function extractDependencies(
 
 export function updateRepo(
   config: RenovateConfig,
-  branches: BranchConfig[],
-  branchList: string[]
+  branches: BranchConfig[]
 ): Promise<WriteUpdateResult | undefined> {
   logger.debug('processRepo()');
 
