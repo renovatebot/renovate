@@ -1,3 +1,4 @@
+import path from 'path';
 import { readFile } from '../util/fs';
 import getArgv from './config/__fixtures__/argv';
 import { getConfig } from './defaults';
@@ -61,7 +62,10 @@ describe('config/index', () => {
       expect(parsedConfig).not.toContainKey('configFile');
     });
     it('reads private key from file', async () => {
-      const privateKeyPath = 'keys/__fixtures__/private.pem';
+      const privateKeyPath = path.join(
+        __dirname,
+        'keys/__fixtures__/private.pem'
+      );
       const env: NodeJS.ProcessEnv = {
         ...defaultEnv,
         RENOVATE_PRIVATE_KEY_PATH: privateKeyPath,
@@ -69,10 +73,7 @@ describe('config/index', () => {
       const expected = await readFile(privateKeyPath);
       const parsedConfig = await configParser.parseConfigs(env, defaultArgv);
 
-      expect(parsedConfig).toContainEntries([
-        ['privateKey', expected],
-        ['privateKeyPath', privateKeyPath],
-      ]);
+      expect(parsedConfig).toContainEntries([['privateKey', expected]]);
     });
     it('supports Bitbucket username/passwod', async () => {
       defaultArgv = defaultArgv.concat([
