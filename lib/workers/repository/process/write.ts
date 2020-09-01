@@ -2,7 +2,7 @@ import { RenovateConfig } from '../../../config';
 import { addMeta, logger, removeMeta } from '../../../logger';
 import { processBranch } from '../../branch';
 import { BranchConfig, ProcessBranchResult } from '../../common';
-import { getLimitRemaining } from '../../global/limits';
+import { Limit, isLimitReached } from '../../global/limits';
 import { getPrsRemaining } from './limits';
 
 export type WriteUpdateResult = 'done' | 'automerged';
@@ -32,7 +32,7 @@ export async function writeUpdates(
   for (const branch of branches) {
     addMeta({ branch: branch.branchName });
     const prLimitReached = prsRemaining <= 0;
-    const commitLimitReached = getLimitRemaining('prCommitsPerRunLimit') <= 0;
+    const commitLimitReached = isLimitReached(Limit.Commits);
     const res = await processBranch(branch, prLimitReached, commitLimitReached);
     branch.res = res;
     if (
