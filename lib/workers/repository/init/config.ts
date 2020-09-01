@@ -11,7 +11,7 @@ import { CONFIG_VALIDATION } from '../../../constants/error-messages';
 import * as npmApi from '../../../datasource/npm';
 import { logger } from '../../../logger';
 import { readLocalFile } from '../../../util/fs';
-import { checkoutBranch, getFileList } from '../../../util/git';
+import { getFileList } from '../../../util/git';
 import * as hostRules from '../../../util/host-rules';
 import { checkOnboardingBranch } from '../onboarding/branch';
 import { RepoFileConfig } from './common';
@@ -220,7 +220,6 @@ export async function getRepoConfig(
 ): Promise<RenovateConfig> {
   let config = { ...config_ };
   config.baseBranch = config.defaultBranch;
-  config.baseBranchSha = await checkoutBranch(config.baseBranch);
   config = await checkOnboardingBranch(config);
   config = await mergeRenovateConfig(config);
   config.semanticCommits =
