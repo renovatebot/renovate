@@ -36,8 +36,8 @@ export function isStable(version: string, now = Date.now()): boolean {
     const data = nodeData as NodeJsData;
     const schedule = data[`v${major}`];
     if (schedule) {
-      const { lts, end } = schedule;
-      const ltsStart = moment(lts);
+      const { maintenance, end } = schedule;
+      const ltsStart = moment(maintenance);
       const ltsFinish = moment(end);
       return moment(now).isBetween(ltsStart, ltsFinish);
     }
