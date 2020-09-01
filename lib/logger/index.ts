@@ -39,6 +39,7 @@ const bunyanLogger = bunyan.createLogger({
     body: configSerializer,
     cmd: cmdSerializer,
     config: configSerializer,
+    configFileParsed: configSerializer,
     migratedConfig: configSerializer,
     originalConfig: configSerializer,
     presetConfig: configSerializer,

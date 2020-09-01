@@ -5,14 +5,10 @@ export type RepoConfigError = {
   validationMessage: string;
 };
 
-export interface RepoFileConfig {
-  fileName?: string;
-  config?: any;
-  error?: RepoConfigError;
-}
-
 export interface RepoInitConfig {
   defaultBranchSha?: string;
-  repoConfig?: RepoFileConfig;
+  configFileName?: string;
+  configFileParsed?: any;
+  configFileError?: RepoConfigError;
   resolvedConfig?: RenovateConfig;
 }

@@ -93,7 +93,7 @@ describe('workers/repository/init/config', () => {
     it('throws on error', () => {
       expect(() =>
         checkForRepoConfigError({
-          error: { validationError: '', validationMessage: '' },
+          configFileError: { validationError: '', validationMessage: '' },
         })
       ).toThrow();
     });

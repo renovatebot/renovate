@@ -20,11 +20,11 @@ import {
 import * as hostRules from '../../../util/host-rules';
 import { checkOnboardingBranch } from '../onboarding/branch';
 import { getResolvedConfig, setResolvedConfig } from './cache';
-import { RepoFileConfig } from './common';
+import { RepoInitConfig } from './common';
 import { flattenPackageRules } from './flatten';
 import { detectSemanticCommits } from './semantic';
 
-export async function detectRepoFileConfig(): Promise<RepoFileConfig> {
+export async function detectRepoFileConfig(): Promise<RepoInitConfig> {
   const fileList = await getFileList();
   async function detectConfigFile(): Promise<string | null> {
     for (const configFileName of configFileNames) {
@@ -44,29 +44,30 @@ export async function detectRepoFileConfig(): Promise<RepoFileConfig> {
     }
     return null;
   }
-  const fileName = await detectConfigFile();
-  if (!fileName) {
+  const configFileName = await detectConfigFile();
+  if (!configFileName) {
     logger.debug('No renovate config file found');
     return {};
   }
-  logger.debug(`Found ${fileName} config file`);
-  let config;
-  if (fileName === 'package.json') {
+  logger.debug(`Found ${configFileName} config file`);
+  let configFileParsed;
+  if (configFileName === 'package.json') {
     // We already know it parses
-    config = JSON.parse(await readLocalFile('package.json', 'utf8')).renovate;
-    logger.debug({ config }, 'package.json>renovate config');
+    configFileParsed = JSON.parse(await readLocalFile('package.json', 'utf8'))
+      .renovate;
+    logger.debug({ config: configFileParsed }, 'package.json>renovate config');
   } else {
-    let rawFileContents = await readLocalFile(fileName, 'utf8');
+    let rawFileContents = await readLocalFile(configFileName, 'utf8');
     // istanbul ignore if
     if (!rawFileContents.length) {
       rawFileContents = '{}';
     }
 
-    const fileType = path.extname(fileName);
+    const fileType = path.extname(configFileName);
 
     if (fileType === '.json5') {
       try {
-        config = JSON5.parse(rawFileContents);
+        configFileParsed = JSON5.parse(rawFileContents);
       } catch (err) /* istanbul ignore next */ {
         logger.debug(
           { renovateConfig: rawFileContents },
@@ -74,7 +75,10 @@ export async function detectRepoFileConfig(): Promise<RepoFileConfig> {
         );
         const validationError = 'Invalid JSON5 (parsing failed)';
         const validationMessage = `JSON5.parse error:  ${String(err.message)}`;
-        return { fileName, error: { validationError, validationMessage } };
+        return {
+          configFileName,
+          configFileError: { validationError, validationMessage },
+        };
       }
     } else {
       let allowDuplicateKeys = true;
@@ -85,7 +89,10 @@ export async function detectRepoFileConfig(): Promise<RepoFileConfig> {
       if (jsonValidationError) {
         const validationError = 'Invalid JSON (parsing failed)';
         const validationMessage = jsonValidationError;
-        return { fileName, error: { validationError, validationMessage } };
+        return {
+          configFileName,
+          configFileError: { validationError, validationMessage },
+        };
       }
       allowDuplicateKeys = false;
       jsonValidationError = jsonValidator.validate(
@@ -95,10 +102,13 @@ export async function detectRepoFileConfig(): Promise<RepoFileConfig> {
       if (jsonValidationError) {
         const validationError = 'Duplicate keys in JSON';
         const validationMessage = JSON.stringify(jsonValidationError);
-        return { fileName, error: { validationError, validationMessage } };
+        return {
+          configFileName,
+          configFileError: { validationError, validationMessage },
+        };
       }
       try {
-        config = JSON.parse(rawFileContents);
+        configFileParsed = JSON.parse(rawFileContents);
       } catch (err) /* istanbul ignore next */ {
         logger.debug(
           { renovateConfig: rawFileContents },
@@ -106,22 +116,25 @@ export async function detectRepoFileConfig(): Promise<RepoFileConfig> {
         );
         const validationError = 'Invalid JSON (parsing failed)';
         const validationMessage = `JSON.parse error:  ${String(err.message)}`;
-        return { fileName, error: { validationError, validationMessage } };
+        return {
+          configFileName,
+          configFileError: { validationError, validationMessage },
+        };
       }
     }
-    logger.debug({ fileName, config }, 'Repository config');
+    logger.debug({ configFileName, configFileParsed }, 'Repository config');
   }
-  return { fileName, config };
+  return { configFileName, configFileParsed };
 }
 
-export function checkForRepoConfigError(repoConfig: RepoFileConfig): void {
-  if (!repoConfig.error) {
+export function checkForRepoConfigError(initConfig: RepoInitConfig): void {
+  if (!initConfig.configFileError) {
     return;
   }
   const error = new Error(CONFIG_VALIDATION);
-  error.configFile = repoConfig.fileName;
-  error.validationError = repoConfig.error.validationError;
-  error.validationMessage = repoConfig.error.validationMessage;
+  error.configFile = initConfig.configFileName;
+  error.validationError = initConfig.configFileError.validationError;
+  error.validationMessage = initConfig.configFileError.validationMessage;
   throw error;
 }
 
@@ -132,15 +145,15 @@ export async function mergeRenovateConfig(
   let returnConfig = { ...config };
   const repoConfig = await detectRepoFileConfig();
   const cache = getCache();
-  cache.init.repoConfig = repoConfig;
+  cache.init = { ...cache.init, ...repoConfig };
   checkForRepoConfigError(repoConfig);
   const migratedConfig = await migrateAndValidate(
     config,
-    repoConfig?.config || {}
+    repoConfig?.configFileParsed || {}
   );
   if (migratedConfig.errors.length) {
     const error = new Error(CONFIG_VALIDATION);
-    error.configFile = repoConfig.fileName;
+    error.configFile = repoConfig.configFileName;
     error.validationError =
       'The renovate configuration file contains some invalid settings';
     error.validationMessage = migratedConfig.errors
