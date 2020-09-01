@@ -7,14 +7,12 @@ import {
 import { logger } from '../../../logger';
 import { getManagerList } from '../../../manager';
 import { PackageFile } from '../../../manager/common';
-import { checkoutBranch } from '../../../util/git';
 import { getMatchingFiles } from './file-match';
 import { getManagerPackageFiles } from './manager-files';
 
 export async function extractAllDependencies(
   config: RenovateConfig
 ): Promise<Record<string, PackageFile[]>> {
-  await checkoutBranch(config.baseBranch);
   let managerList = getManagerList();
   if (is.nonEmptyArray(config.enabledManagers)) {
     logger.debug('Applying enabledManagers filtering');

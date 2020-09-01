@@ -4,7 +4,7 @@ import { RenovateConfig } from '../../../config';
 import { logger } from '../../../logger';
 import { PackageFile } from '../../../manager/common';
 import { getCache } from '../../../util/cache/repository';
-import { getBranchCommit } from '../../../util/git';
+import { checkoutBranch, getBranchCommit } from '../../../util/git';
 import { BranchConfig } from '../../common';
 import { extractAllDependencies } from '../extract';
 import { branchifyUpgrades } from '../updates/branchify';
@@ -65,6 +65,7 @@ export async function extract(
     logger.debug({ baseBranch, baseBranchSha }, 'Found cached extract');
     packageFiles = cachedExtract.packageFiles;
   } else {
+    await checkoutBranch(baseBranch);
     packageFiles = await extractAllDependencies(config);
     cache.scan[baseBranch] = {
       sha: baseBranchSha,
