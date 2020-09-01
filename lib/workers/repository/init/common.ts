@@ -3,7 +3,7 @@ export type RepoConfigError = {
   validationMessage: string;
 };
 
-export type RepoConfig = {
+export type RepoFileConfig = {
   fileName?: string;
   config?: any;
   error?: RepoConfigError;

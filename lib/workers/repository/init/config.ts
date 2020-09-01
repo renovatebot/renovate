@@ -20,11 +20,11 @@ import {
 import * as hostRules from '../../../util/host-rules';
 import { checkOnboardingBranch } from '../onboarding/branch';
 import { getResolvedConfig, setResolvedConfig } from './cache';
-import { RepoConfig } from './common';
+import { RepoFileConfig } from './common';
 import { flattenPackageRules } from './flatten';
 import { detectSemanticCommits } from './semantic';
 
-export async function detectRepoFileConfig(): Promise<RepoConfig> {
+export async function detectRepoFileConfig(): Promise<RepoFileConfig> {
   const fileList = await getFileList();
   async function detectConfigFile(): Promise<string | null> {
     for (const configFileName of configFileNames) {
@@ -114,7 +114,7 @@ export async function detectRepoFileConfig(): Promise<RepoConfig> {
   return { fileName, config };
 }
 
-function checkForRepoConfigError(repoConfig: RepoConfig): void {
+function checkForRepoConfigError(repoConfig: RepoFileConfig): void {
   if (!repoConfig.error) {
     return;
   }
