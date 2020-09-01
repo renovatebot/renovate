@@ -42,7 +42,7 @@ export async function migrateAndValidate(
       // TODO #556 - enable warnings in real PRs
       massagedConfig.warnings = (config.warnings || []).concat(warnings);
     }
-    if (!config.privateKey && config.privateKeyPath) {
+    if (!input.privateKey && input.privateKeyPath) {
       massagedConfig.privateKey = fs.readFileSync(config.privateKeyPath);
     }
     return massagedConfig;
