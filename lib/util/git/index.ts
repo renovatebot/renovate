@@ -112,8 +112,15 @@ let privateKeySet = false;
 
 async function fetchBranchCommits(): Promise<void> {
   config.branchCommits = {};
+  const opts = ['--heads', config.url];
+  // istanbul ignore if
+  if (config.extraCloneOpts) {
+    opts.push(
+      ...Object.entries(config.extraCloneOpts).map((e) => `${e[0]}=${e[1]}`)
+    );
+  }
   try {
-    (await git.listRemote(['--heads', config.url]))
+    (await git.listRemote(opts))
       .split('\n')
       .filter(Boolean)
       .map((line) => line.trim().split(/\s+/))

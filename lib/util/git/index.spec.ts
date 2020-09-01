@@ -65,9 +65,6 @@ describe('platform/git', () => {
     await git.initRepo({
       localDir: tmpDir.path,
       url: origin.path,
-      extraCloneOpts: {
-        '--config': 'extra.clone.config=test-extra-config-value',
-      },
       gitAuthorName: 'Jest',
       gitAuthorEmail: 'Jest@example.com',
     });
@@ -417,6 +414,15 @@ describe('platform/git', () => {
     });
 
     it('should use extra clone configuration', async () => {
+      await fs.emptyDir(tmpDir.path);
+      await git.initRepo({
+        localDir: tmpDir.path,
+        url: origin.path,
+        extraCloneOpts: {
+          '--config': 'extra.clone.config=test-extra-config-value',
+        },
+      });
+      await git.syncGit();
       const repo = Git(tmpDir.path).silent(true);
       const res = (await repo.raw(['config', 'extra.clone.config'])).trim();
       expect(res).toBe('test-extra-config-value');
