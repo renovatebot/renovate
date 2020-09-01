@@ -15,7 +15,13 @@ export function getResolvedConfig(
     logger.trace('No defaultBranchSha, so no cached config possible');
     return null;
   }
-  const { resolvedConfig } = repositoryCache.getCache().init;
+  const cache = repositoryCache.getCache();
+  if (Object.keys(cache.init).includes('repoConfig')) {
+    logger.debug('Cached resolved config is outdated format');
+    cache.init = {};
+    return null;
+  }
+  const { resolvedConfig } = cache.init;
   if (!resolvedConfig) {
     logger.debug('No cache.init.resolvedConfig');
     return null;

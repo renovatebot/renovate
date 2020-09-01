@@ -4,6 +4,7 @@ import {
   initializeCaches,
   setResolvedConfig,
 } from './cache';
+import { getCache } from '../../../util/cache/repository';
 
 describe('workers/repository/init/cache', () => {
   describe('getCachedConfig()', () => {
@@ -17,6 +18,10 @@ describe('workers/repository/init/cache', () => {
     });
     it('returns null if no match', () => {
       expect(getResolvedConfig('abc123')).toBeNull();
+    });
+    it('returns null if old format found', () => {
+      getCache().init = { repoConfig: {} } as never;
+      expect(getResolvedConfig('def456')).toBeNull();
     });
     it('returns null if resolved config sha does not match', () => {
       config.defaultBranchSha = 'abc123';
