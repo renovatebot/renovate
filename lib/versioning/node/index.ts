@@ -30,9 +30,7 @@ function getNewValue({
 
 export { isValid };
 
-const currentTime = Date.now();
-
-export function isStable(version: string, now = currentTime): boolean {
+export function isStable(version: string, now = Date.now()): boolean {
   if (npm.isStable(version)) {
     const major = npm.getMajor(version);
     const data = nodeData as NodeJsData;
