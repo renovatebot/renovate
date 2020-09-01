@@ -27,8 +27,20 @@ function getNewValue({
 
 export { isValid };
 
+const currentRelease = 14;
+
+function isStable(version: string): boolean {
+  if (!npm.isStable(version)) {
+    return false;
+  }
+
+  const major = npm.getMajor(version);
+  return major && major < currentRelease && major % 2 === 0;
+}
+
 export const api: VersioningApi = {
   ...npm,
+  isStable,
   getNewValue,
 };
 export default api;
