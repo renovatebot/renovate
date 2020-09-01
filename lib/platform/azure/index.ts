@@ -5,7 +5,10 @@ import {
   GitPullRequestMergeStrategy,
   PullRequestStatus,
 } from 'azure-devops-node-api/interfaces/GitInterfaces';
-import { REPOSITORY_DISABLED } from '../../constants/error-messages';
+import {
+  REPOSITORY_DISABLED,
+  REPOSITORY_EMPTY,
+} from '../../constants/error-messages';
 import { PLATFORM_TYPE_AZURE } from '../../constants/platforms';
 import { logger } from '../../logger';
 import { BranchStatus, PrState } from '../../types';
@@ -110,11 +113,15 @@ export async function initRepo({
       c.project.name.toLowerCase() === names.project.toLowerCase()
   )[0];
   logger.debug({ repositoryDetails: repo }, 'Repository details');
+  // istanbul ignore if
+  if (!repo.defaultBranch) {
+    logger.debug('Repo is empty');
+    throw new Error(REPOSITORY_EMPTY);
+  }
   config.repoId = repo.id;
   config.project = repo.project.name;
   config.owner = '?owner?';
   logger.debug(`${repository} owner = ${config.owner}`);
-  // Use default branch as PR target unless later overridden
   const defaultBranch = repo.defaultBranch.replace('refs/heads/', '');
   logger.debug(`${repository} default branch = ${defaultBranch}`);
   config.mergeMethod = await azureHelper.getMergeMethod(repo.id, names.project);

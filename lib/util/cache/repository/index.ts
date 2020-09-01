@@ -3,7 +3,7 @@ import { join } from 'upath';
 import { RenovateConfig, RepositoryCacheConfig } from '../../../config/common';
 import { logger } from '../../../logger';
 import { PackageFile } from '../../../manager/common';
-import { RepoConfig } from '../../../workers/repository/init/common';
+import { RepoInitConfig } from '../../../workers/repository/init/common';
 
 export interface BaseBranchCache {
   sha: string; // branch commit sha
@@ -13,12 +13,7 @@ export interface BaseBranchCache {
 
 export interface Cache {
   repository?: string;
-  init?: {
-    defaultBranch?: string;
-    defaultBranchSha?: string;
-    repoConfig?: RepoConfig;
-    resolvedConfig?: RenovateConfig;
-  };
+  init?: RepoInitConfig;
   scan?: Record<string, BaseBranchCache>;
 }
 
