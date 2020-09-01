@@ -43,3 +43,15 @@ export function get(versioning: string): VersioningApi {
   }
   return theVersioning;
 }
+
+export async function initVersioningModules(): Promise<void> {
+  for (const [k, v] of getVersionings()) {
+    if (v.initModule) {
+      try {
+        await v.initModule();
+      } catch (err) {
+        logger.warn({ err }, `Failed to init ${k} versioning module`);
+      }
+    }
+  }
+}
