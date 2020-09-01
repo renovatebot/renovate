@@ -14,6 +14,20 @@ Array [
 ]
 `;
 
+exports[`datasource/go getDigest returns null for no go-source tag 1`] = `
+Array [
+  Object {
+    "headers": Object {
+      "accept-encoding": "gzip, deflate",
+      "host": "golang.org",
+      "user-agent": "https://github.com/renovatebot/renovate",
+    },
+    "method": "GET",
+    "url": "https://golang.org/y/text?go-get=1",
+  },
+]
+`;
+
 exports[`datasource/go getDigest returns null for wrong name 1`] = `
 Array [
   Object {

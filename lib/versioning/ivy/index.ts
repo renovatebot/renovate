@@ -13,6 +13,7 @@ export const urls = ['https://ant.apache.org/ivy/'];
 export const supportsRanges = true;
 export const supportedRangeStrategies = ['bump', 'extend', 'pin', 'replace'];
 
+// eslint-disable-next-line @typescript-eslint/unbound-method
 const {
   equals,
   getMajor,

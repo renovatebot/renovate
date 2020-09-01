@@ -13,6 +13,7 @@ export * from './common';
 export const getPlatformList = (): string[] => Array.from(platforms.keys());
 export const getPlatforms = (): Map<string, Platform> => platforms;
 
+// eslint-disable-next-line @typescript-eslint/naming-convention
 let _platform: Platform;
 
 const handler: ProxyHandler<Platform> = {
@@ -97,7 +98,7 @@ export async function initPlatform(
     );
     gitAuthor = 'Renovate Bot <renovate@whitesourcesoftware.com>';
   } /* istanbul ignore next */ else {
-    logger.debug('Using platform gitAuthor: ' + platformInfo.gitAuthor);
+    logger.debug(`Using platform gitAuthor: ${String(platformInfo.gitAuthor)}`);
     gitAuthor = platformInfo.gitAuthor;
   }
   const gitAuthorParsed = parseGitAuthor(gitAuthor);

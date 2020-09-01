@@ -168,10 +168,7 @@ export async function lookupUpdates(
       logger.debug({ dependency: depName }, 'Found deprecationMessage');
       res.deprecationMessage = dependency.deprecationMessage;
     }
-    res.sourceUrl =
-      dependency.sourceUrl && dependency.sourceUrl.length
-        ? dependency.sourceUrl
-        : /* istanbul ignore next */ null;
+    res.sourceUrl = dependency?.sourceUrl;
     if (dependency.sourceDirectory) {
       res.sourceDirectory = dependency.sourceDirectory;
     }
@@ -387,10 +384,12 @@ export async function lookupUpdates(
       }
     } else if (config.datasource === datasourceGitSubmodules.id) {
       const dependency = clone(await getPkgReleases(config));
-      res.updates.push({
-        updateType: 'digest',
-        newValue: dependency.releases[0].version,
-      });
+      if (dependency?.releases[0]?.version) {
+        res.updates.push({
+          updateType: 'digest',
+          newValue: dependency.releases[0].version,
+        });
+      }
     }
     if (version.valueToVersion) {
       for (const update of res.updates || []) {

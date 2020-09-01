@@ -154,7 +154,7 @@ export async function updateArtifacts(
       },
     ];
   } catch (err) /* istanbul ignore next */ {
-    const output = err.stdout + err.stderr;
+    const output = `${String(err.stdout)}\n${String(err.stderr)}`;
     if (
       err.message.includes('fatal: Could not parse object') ||
       output.includes('but that version could not be found')
@@ -169,13 +169,11 @@ export async function updateArtifacts(
       ];
     }
     if (
-      (err.stdout &&
-        err.stdout.includes('Please supply credentials for this source')) ||
-      (err.stderr && err.stderr.includes('Authentication is required')) ||
-      (err.stderr &&
-        err.stderr.includes(
-          'Please make sure you have the correct access rights'
-        ))
+      err.stdout?.includes('Please supply credentials for this source') ||
+      err.stderr?.includes('Authentication is required') ||
+      err.stderr?.includes(
+        'Please make sure you have the correct access rights'
+      )
     ) {
       logger.debug(
         { err },
@@ -225,7 +223,7 @@ export async function updateArtifacts(
       {
         artifactError: {
           lockFile: lockFileName,
-          stderr: err.stdout + '\n' + err.stderr,
+          stderr: `${String(err.stdout)}\n${String(err.stderr)}`,
         },
       },
     ];

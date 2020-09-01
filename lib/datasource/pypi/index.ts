@@ -6,7 +6,7 @@ import { Http } from '../../util/http';
 import { ensureTrailingSlash } from '../../util/url';
 import { matches } from '../../versioning/pep440';
 import * as pep440 from '../../versioning/pep440';
-import { GetReleasesConfig, ReleaseResult } from '../common';
+import { GetReleasesConfig, Release, ReleaseResult } from '../common';
 
 export const id = 'pypi';
 export const defaultRegistryUrls = [
@@ -14,13 +14,15 @@ export const defaultRegistryUrls = [
 ];
 export const registryStrategy = 'merge';
 
-const github_repo_pattern = /^https?:\/\/github\.com\/[^\\/]+\/[^\\/]+$/;
+const githubRepoPattern = /^https?:\/\/github\.com\/[^\\/]+\/[^\\/]+$/;
 const http = new Http(id);
 
-type Releases = Record<
-  string,
-  { requires_python?: boolean; upload_time?: string }[]
->;
+type PypiJSONRelease = {
+  requires_python?: string;
+  upload_time?: string;
+  yanked?: boolean;
+};
+type Releases = Record<string, PypiJSONRelease[]>;
 type PypiJSON = {
   info: {
     name: string;
@@ -80,7 +82,7 @@ async function getDependency(
 
   if (dep.info?.home_page) {
     dependency.homepage = dep.info.home_page;
-    if (github_repo_pattern.exec(dep.info.home_page)) {
+    if (githubRepoPattern.exec(dep.info.home_page)) {
       dependency.sourceUrl = dep.info.home_page.replace('http://', 'https://');
     }
   }
@@ -94,7 +96,7 @@ async function getDependency(
         (lower.startsWith('repo') ||
           lower === 'code' ||
           lower === 'source' ||
-          github_repo_pattern.exec(projectUrl))
+          githubRepoPattern.exec(projectUrl))
       ) {
         dependency.sourceUrl = projectUrl;
       }
@@ -120,10 +122,19 @@ async function getDependency(
   dependency.releases = [];
   if (dep.releases) {
     const versions = compatibleVersions(dep.releases, compatibility);
-    dependency.releases = versions.map((version) => ({
-      version,
-      releaseTimestamp: (dep.releases[version][0] || {}).upload_time,
-    }));
+    dependency.releases = versions.map((version) => {
+      const releases = dep.releases[version] || [];
+      const { upload_time: releaseTimestamp } = releases[0] || {};
+      const isDeprecated = releases.some(({ yanked }) => yanked);
+      const result: Release = {
+        version,
+        releaseTimestamp,
+      };
+      if (isDeprecated) {
+        result.isDeprecated = isDeprecated;
+      }
+      return result;
+    });
   }
   return dependency;
 }
@@ -155,9 +166,26 @@ function extractVersionFromLinkText(
   return null;
 }
 
+function cleanSimpleHtml(html: string): string {
+  return (
+    html
+      .replace(/<\/?pre>/, '')
+      // Certain simple repositories like artifactory don't escape > and <
+      .replace(
+        /data-requires-python="(.*?)>(.*?)"/g,
+        'data-requires-python="$1&gt;$2"'
+      )
+      .replace(
+        /data-requires-python="(.*?)<(.*?)"/g,
+        'data-requires-python="$1&lt;$2"'
+      )
+  );
+}
+
 async function getSimpleDependency(
   packageName: string,
-  hostUrl: string
+  hostUrl: string,
+  compatibility: Record<string, string>
 ): Promise<ReleaseResult | null> {
   const lookupUrl = url.resolve(hostUrl, `${packageName}`);
   const dependency: ReleaseResult = { releases: null };
@@ -167,21 +195,35 @@ async function getSimpleDependency(
     logger.trace({ dependency: packageName }, 'pip package not found');
     return null;
   }
-  const root: HTMLElement = parse(dep.replace(/<\/?pre>/, '')) as any;
+  const root: HTMLElement = parse(cleanSimpleHtml(dep)) as any;
   const links = root.querySelectorAll('a');
-  const versions = new Set<string>();
+  const releases: Releases = {};
   for (const link of Array.from(links)) {
-    const result = extractVersionFromLinkText(link.text, packageName);
-    if (result) {
-      versions.add(result);
+    const version = extractVersionFromLinkText(link.text, packageName);
+    if (version) {
+      const release: PypiJSONRelease = {
+        yanked: link.hasAttribute('data-yanked'),
+      };
+      const requiresPython = link.getAttribute('data-requires-python');
+      if (requiresPython) {
+        release.requires_python = requiresPython;
+      }
+      if (!releases[version]) {
+        releases[version] = [];
+      }
+      releases[version].push(release);
     }
   }
-  dependency.releases = [];
-  if (versions && versions.size > 0) {
-    dependency.releases = [...versions].map((version) => ({
-      version,
-    }));
-  }
+  const versions = compatibleVersions(releases, compatibility);
+  dependency.releases = versions.map((version) => {
+    const versionReleases = releases[version] || [];
+    const isDeprecated = versionReleases.some(({ yanked }) => yanked);
+    const result: Release = { version };
+    if (isDeprecated) {
+      result.isDeprecated = isDeprecated;
+    }
+    return result;
+  });
   return dependency;
 }
 
@@ -195,7 +237,7 @@ export async function getReleases({
   // not all simple indexes use this identifier, but most do
   if (hostUrl.endsWith('/simple/') || hostUrl.endsWith('/+simple/')) {
     logger.trace({ lookupName, hostUrl }, 'Looking up pypi simple dependency');
-    return getSimpleDependency(lookupName, hostUrl);
+    return getSimpleDependency(lookupName, hostUrl, compatibility);
   }
 
   logger.trace({ lookupName, hostUrl }, 'Looking up pypi api dependency');
@@ -214,7 +256,11 @@ export async function getReleases({
       { lookupName, hostUrl },
       'Looking up pypi simple dependency via fallback'
     );
-    const releases = await getSimpleDependency(lookupName, hostUrl);
+    const releases = await getSimpleDependency(
+      lookupName,
+      hostUrl,
+      compatibility
+    );
     return releases;
   }
 }

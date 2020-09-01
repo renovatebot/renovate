@@ -23,6 +23,7 @@ export interface RenovateSharedConfig {
   branchName?: string;
   manager?: string;
   commitMessage?: string;
+  commitMessagePrefix?: string;
   draftPR?: boolean;
   enabled?: boolean;
   enabledManagers?: string[];
@@ -54,7 +55,6 @@ export interface RenovateSharedConfig {
   semanticCommits?: boolean;
   semanticCommitScope?: string;
   semanticCommitType?: string;
-  statusCheckVerify?: boolean;
   suppressNotifications?: string[];
   timezone?: string;
   unicodeEmoji?: boolean;
@@ -87,6 +87,7 @@ export interface RenovateAdminConfig {
 
   onboarding?: boolean;
   onboardingBranch?: string;
+  onboardingCommitMessage?: string;
   onboardingPrTitle?: string;
   onboardingConfig?: RenovateSharedConfig;
 
@@ -136,6 +137,7 @@ export interface RenovateConfig
   baseBranch?: string;
   baseBranchSha?: string;
   defaultBranch?: string;
+  defaultBranchSha?: string;
   branchList?: string[];
   description?: string | string[];
 

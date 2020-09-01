@@ -261,6 +261,16 @@ describe('workers/pr', () => {
       expect(platform.createPr.mock.calls[0]).toMatchSnapshot();
       existingPr.body = platform.createPr.mock.calls[0][0].prBody;
     });
+    it('should not create PR if limit is reached', async () => {
+      platform.getBranchStatus.mockResolvedValueOnce(BranchStatus.green);
+      config.logJSON = await getChangeLogJSON(config);
+      config.prCreation = 'status-success';
+      config.automerge = true;
+      config.schedule = ['before 5am'];
+      const { prResult } = await prWorker.ensurePr(config, true);
+      expect(prResult).toEqual(PrResult.LimitReached);
+      expect(platform.createPr.mock.calls).toBeEmpty();
+    });
     it('should create group PR', async () => {
       config.upgrades = config.upgrades.concat([
         {

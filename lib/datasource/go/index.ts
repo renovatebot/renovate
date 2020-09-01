@@ -37,10 +37,14 @@ async function getDatasource(goModule: string): Promise<DataSource | null> {
   const pkgUrl = `https://${goModule}?go-get=1`;
   const res = (await http.get(pkgUrl)).body;
   const sourceMatch = regEx(
-    `<meta\\s+name="go-source"\\s+content="${goModule}\\s+([^\\s]+)`
+    `<meta\\s+name="go-source"\\s+content="([^\\s]+)\\s+([^\\s]+)`
   ).exec(res);
   if (sourceMatch) {
-    const [, goSourceUrl] = sourceMatch;
+    const [, prefix, goSourceUrl] = sourceMatch;
+    if (!goModule.startsWith(prefix)) {
+      logger.trace({ goModule }, 'go-source header prefix not match');
+      return null;
+    }
     logger.debug({ goModule, goSourceUrl }, 'Go lookup source url');
     if (goSourceUrl?.startsWith('https://github.com/')) {
       return {
@@ -103,9 +107,7 @@ export async function getReleases({
     const prefix = nameParts.slice(3, nameParts.length).join('/');
     logger.trace(`go.getReleases.prefix:${prefix}`);
     const submodReleases = res.releases
-      .filter(
-        (release) => release.version && release.version.startsWith(prefix)
-      )
+      .filter((release) => release.version?.startsWith(prefix))
       .map((release) => {
         const r2 = release;
         r2.version = r2.version.replace(`${prefix}/`, '');
@@ -113,13 +115,15 @@ export async function getReleases({
       });
     logger.trace({ submodReleases }, 'go.getReleases');
     if (submodReleases.length > 0) {
-      res.releases = submodReleases;
-      return res;
+      return {
+        sourceUrl: res.sourceUrl,
+        releases: submodReleases,
+      };
     }
   }
   if (res?.releases) {
-    res.releases = res.releases.filter(
-      (release) => release.version && release.version.startsWith('v')
+    res.releases = res.releases.filter((release) =>
+      release.version?.startsWith('v')
     );
   }
   return res;

@@ -2,7 +2,7 @@ import nock from 'nock';
 import * as httpMock from '../../../test/httpMock';
 import { REPOSITORY_DISABLED } from '../../constants/error-messages';
 import { logger as _logger } from '../../logger';
-import { BranchStatus } from '../../types';
+import { BranchStatus, PrState } from '../../types';
 import * as _git from '../../util/git';
 import { setBaseUrl } from '../../util/http/bitbucket';
 import { Platform, RepoParams } from '../common';
@@ -52,7 +52,7 @@ describe('platform/bitbucket', () => {
     bitbucket = await import('.');
     logger = (await import('../../logger')).logger as any;
     git = require('../../util/git');
-    git.branchExists.mockResolvedValue(true);
+    git.branchExists.mockReturnValue(true);
     git.isBranchStale.mockResolvedValue(false);
     // clean up hostRules
     hostRules.clear();
@@ -172,14 +172,6 @@ describe('platform/bitbucket', () => {
     it('always return false, since bitbucket does not support force rebase', async () => {
       const actual = await bitbucket.getRepoForceRebase();
       expect(actual).toBe(false);
-    });
-  });
-
-  describe('setBaseBranch()', () => {
-    it('updates file list', async () => {
-      await initRepoMock();
-      await bitbucket.setBaseBranch('branch');
-      expect(httpMock.getTrace()).toMatchSnapshot();
     });
   });
 
@@ -402,36 +394,6 @@ describe('platform/bitbucket', () => {
         state: BranchStatus.red,
         url: 'targetUrl',
       });
-      expect(httpMock.getTrace()).toMatchSnapshot();
-    });
-  });
-
-  describe('deleteBranch()', () => {
-    it('sends to gitFs', async () => {
-      await initRepoMock();
-      expect(await bitbucket.deleteBranch('test')).toMatchSnapshot();
-      expect(httpMock.getTrace()).toMatchSnapshot();
-    });
-    it('should handle closing PRs when none exist', async () => {
-      const scope = await initRepoMock();
-      scope
-        .get(
-          '/2.0/repositories/some/repo/pullrequests?state=OPEN&state=MERGED&state=DECLINED&state=SUPERSEDED&pagelen=50'
-        )
-        .reply(200, { values: [pr] });
-      await bitbucket.deleteBranch('some-branch', true);
-      expect(httpMock.getTrace()).toMatchSnapshot();
-    });
-    it('should handle closing PRs when some exist', async () => {
-      const scope = await initRepoMock();
-      scope
-        .get(
-          '/2.0/repositories/some/repo/pullrequests?state=OPEN&state=MERGED&state=DECLINED&state=SUPERSEDED&pagelen=50'
-        )
-        .reply(200, { values: [pr] })
-        .post('/2.0/repositories/some/repo/pullrequests/5/decline')
-        .reply(200);
-      await bitbucket.deleteBranch('branch', true);
       expect(httpMock.getTrace()).toMatchSnapshot();
     });
   });
@@ -766,7 +728,7 @@ describe('platform/bitbucket', () => {
         .reply(200, { reviewers: [reviewer] })
         .put('/2.0/repositories/some/repo/pullrequests/5')
         .reply(200);
-      await bitbucket.updatePr(5, 'title', 'body');
+      await bitbucket.updatePr({ number: 5, prTitle: 'title', prBody: 'body' });
       expect(httpMock.getTrace()).toMatchSnapshot();
     });
     it('throws an error on failure to get current list of reviewers', async () => {
@@ -775,8 +737,24 @@ describe('platform/bitbucket', () => {
         .get('/2.0/repositories/some/repo/pullrequests/5')
         .reply(500, undefined);
       await expect(() =>
-        bitbucket.updatePr(5, 'title', 'body')
+        bitbucket.updatePr({ number: 5, prTitle: 'title', prBody: 'body' })
       ).rejects.toThrowErrorMatchingSnapshot();
+      expect(httpMock.getTrace()).toMatchSnapshot();
+    });
+    it('closes PR', async () => {
+      const scope = await initRepoMock();
+      scope
+        .get('/2.0/repositories/some/repo/pullrequests/5')
+        .reply(200, { values: [pr] })
+        .put('/2.0/repositories/some/repo/pullrequests/5')
+        .reply(200)
+        .post('/2.0/repositories/some/repo/pullrequests/5/decline')
+        .reply(200);
+      await bitbucket.updatePr({
+        number: pr.id,
+        prTitle: pr.title,
+        state: PrState.Closed,
+      });
       expect(httpMock.getTrace()).toMatchSnapshot();
     });
   });

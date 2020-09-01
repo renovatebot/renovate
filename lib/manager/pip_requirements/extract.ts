@@ -1,5 +1,5 @@
 // based on https://www.python.org/dev/peps/pep-0508/#names
-import { RANGE_PATTERN as rangePattern } from '@renovate/pep440/lib/specifier';
+import { RANGE_PATTERN } from '@renovate/pep440/lib/specifier';
 import * as datasourcePypi from '../../datasource/pypi';
 import { logger } from '../../logger';
 import { SkipReason } from '../../types';
@@ -10,6 +10,7 @@ export const packagePattern =
   '[a-zA-Z0-9]|[a-zA-Z0-9][a-zA-Z0-9._-]*[a-zA-Z0-9]';
 const extrasPattern = '(?:\\s*\\[[^\\]]+\\])?';
 
+const rangePattern: string = RANGE_PATTERN;
 const specifierPartPattern = `\\s*${rangePattern.replace(/\?<\w+>/g, '?:')}`;
 const specifierPattern = `${specifierPartPattern}(?:\\s*,${specifierPartPattern})*`;
 export const dependencyPattern = `(${packagePattern})(${extrasPattern})(${specifierPattern})`;
@@ -38,7 +39,7 @@ export function extractPackageFile(
   if (indexUrl) {
     // index url in file takes precedence
     registryUrls.push(indexUrl);
-  } else if (config.registryUrls && config.registryUrls.length) {
+  } else if (config.registryUrls?.length) {
     // configured registryURls takes next precedence
     registryUrls = registryUrls.concat(config.registryUrls);
   } else if (extraUrls.length) {

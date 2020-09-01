@@ -1,8 +1,8 @@
+import is from '@sindresorhus/is';
 import { NormalizedOptions } from 'got';
 import {
   PLATFORM_TYPE_GITEA,
   PLATFORM_TYPE_GITHUB,
-  PLATFORM_TYPE_GITLAB,
 } from '../../constants/platforms';
 import { GotOptions } from './types';
 
@@ -12,14 +12,22 @@ export function applyAuthorization(inOptions: GotOptions): GotOptions {
     return options;
   }
   if (options.token) {
-    if (
-      options.hostType === PLATFORM_TYPE_GITHUB ||
-      options.hostType === PLATFORM_TYPE_GITEA
-    ) {
+    if (options.hostType === PLATFORM_TYPE_GITEA) {
       options.headers.authorization = `token ${options.token}`;
-    } else if (options.hostType === PLATFORM_TYPE_GITLAB) {
-      options.headers['Private-token'] = options.token;
+    } else if (options.hostType === PLATFORM_TYPE_GITHUB) {
+      options.headers.authorization = `token ${options.token}`;
+      if (options.token.startsWith('x-access-token:')) {
+        const appToken = options.token.replace('x-access-token:', '');
+        options.headers.authorization = `token ${appToken}`;
+        if (is.string(options.headers.accept)) {
+          options.headers.accept = options.headers.accept.replace(
+            'application/vnd.github.v3+json',
+            'application/vnd.github.machine-man-preview+json'
+          );
+        }
+      }
     } else {
+      // For GitLab the bearer token can be a Personal Access Token or an OAuth2 token.
       options.headers.authorization = `Bearer ${options.token}`;
     }
     delete options.token;

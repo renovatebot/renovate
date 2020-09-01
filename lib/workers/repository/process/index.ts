@@ -2,12 +2,13 @@ import { RenovateConfig, mergeChildConfig } from '../../../config';
 import { logger } from '../../../logger';
 import { PackageFile } from '../../../manager/common';
 import { platform } from '../../../platform';
+import { branchExists, checkoutBranch } from '../../../util/git';
 import { addSplit } from '../../../util/split';
 import { BranchConfig } from '../../common';
 import { ExtractResult, extract, lookup, update } from './extract-update';
 import { WriteUpdateResult } from './write';
 
-async function setBaseBranch(
+async function getBaseBranchConfig(
   baseBranch: string,
   config: RenovateConfig
 ): Promise<RenovateConfig> {
@@ -17,7 +18,7 @@ async function setBaseBranch(
     baseBranchConfig.branchPrefix += `${baseBranch}-`;
     baseBranchConfig.hasBaseBranches = true;
   }
-  baseBranchConfig.baseBranchSha = await platform.setBaseBranch(baseBranch);
+  baseBranchConfig.baseBranchSha = await checkoutBranch(baseBranch);
   return baseBranchConfig;
 }
 
@@ -27,16 +28,12 @@ export async function extractDependencies(
   logger.debug('processRepo()');
   /* eslint-disable no-param-reassign */
   config.dependencyDashboardChecks = {};
+  const stringifiedConfig = JSON.stringify(config);
   // istanbul ignore next
   if (
     config.dependencyDashboard ||
-    config.dependencyDashboardApproval ||
-    config.prCreation === 'approval' ||
-    (config.packageRules &&
-      config.packageRules.some(
-        (rule) =>
-          rule.dependencyDashboardApproval || rule.prCreation === 'approval'
-      ))
+    stringifiedConfig.includes('"dependencyDashboardApproval":true') ||
+    stringifiedConfig.includes('"prCreation":"approval"')
   ) {
     config.dependencyDashboardTitle =
       config.dependencyDashboardTitle || `Dependency Dashboard`;
@@ -65,21 +62,27 @@ export async function extractDependencies(
     branchList: [],
     packageFiles: null,
   };
-  if (config.baseBranches && config.baseBranches.length) {
+  if (config.baseBranches?.length) {
     logger.debug({ baseBranches: config.baseBranches }, 'baseBranches');
     const extracted: Record<string, Record<string, PackageFile[]>> = {};
     for (const baseBranch of config.baseBranches) {
-      const baseBranchConfig = await setBaseBranch(baseBranch, config);
-      extracted[baseBranch] = await extract(baseBranchConfig);
+      if (branchExists(baseBranch)) {
+        const baseBranchConfig = await getBaseBranchConfig(baseBranch, config);
+        extracted[baseBranch] = await extract(baseBranchConfig);
+      } else {
+        logger.warn({ baseBranch }, 'Base branch does not exist - skipping');
+      }
     }
     addSplit('extract');
     for (const baseBranch of config.baseBranches) {
-      const baseBranchConfig = await setBaseBranch(baseBranch, config);
-      const packageFiles = extracted[baseBranch];
-      const baseBranchRes = await lookup(baseBranchConfig, packageFiles);
-      res.branches = res.branches.concat(baseBranchRes?.branches);
-      res.branchList = res.branchList.concat(baseBranchRes?.branchList);
-      res.packageFiles = res.packageFiles || baseBranchRes?.packageFiles; // Use the first branch
+      if (branchExists(baseBranch)) {
+        const baseBranchConfig = await getBaseBranchConfig(baseBranch, config);
+        const packageFiles = extracted[baseBranch];
+        const baseBranchRes = await lookup(baseBranchConfig, packageFiles);
+        res.branches = res.branches.concat(baseBranchRes?.branches);
+        res.branchList = res.branchList.concat(baseBranchRes?.branchList);
+        res.packageFiles = res.packageFiles || baseBranchRes?.packageFiles; // Use the first branch
+      }
     }
   } else {
     logger.debug('No baseBranches');

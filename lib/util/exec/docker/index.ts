@@ -14,7 +14,9 @@ import {
 const prefetchedImages = new Set<string>();
 
 async function prefetchDockerImage(taggedImage: string): Promise<void> {
-  if (!prefetchedImages.has(taggedImage)) {
+  if (prefetchedImages.has(taggedImage)) {
+    logger.debug(`Docker image is already prefetched: ${taggedImage}`);
+  } else {
     logger.debug(`Fetching Docker image: ${taggedImage}`);
     prefetchedImages.add(taggedImage);
     await rawExec(`docker pull ${taggedImage}`, { encoding: 'utf-8' });
@@ -72,6 +74,8 @@ async function getDockerTag(
   constraint: string,
   scheme: string
 ): Promise<string> {
+  // TODO: fixme
+  // eslint-disable-next-line @typescript-eslint/unbound-method
   const { isValid, isVersion, matches, sortVersions } = versioning.get(scheme);
 
   if (!isValid(constraint)) {
@@ -113,7 +117,7 @@ function getContainerName(image: string): string {
   return image.replace(/\//g, '_');
 }
 
-export async function removeDockerContainer(image): Promise<void> {
+export async function removeDockerContainer(image: string): Promise<void> {
   const containerName = getContainerName(image);
   let cmd = `docker ps --filter name=${containerName} -aq`;
   try {
@@ -204,7 +208,7 @@ export async function generateDockerCommand(
     result.push(`-w "${cwd}"`);
   }
 
-  let tag;
+  let tag: string;
   if (options.tag) {
     tag = options.tag;
   } else if (tagConstraint) {

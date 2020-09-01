@@ -60,6 +60,7 @@ export const api: VersioningApi = {
   getNewValue,
 };
 
+// eslint-disable-next-line @typescript-eslint/unbound-method
 export const { isVersion } = api;
 
 export default api;

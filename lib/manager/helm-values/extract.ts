@@ -14,7 +14,7 @@ import {
  * @param parsedContent
  */
 function findDependencies(
-  parsedContent: object | HelmDockerImageDependency,
+  parsedContent: Record<string, unknown> | HelmDockerImageDependency,
   packageDependencies: Array<PackageDependency>
 ): Array<PackageDependency> {
   if (!parsedContent || typeof parsedContent !== 'object') {
@@ -25,10 +25,12 @@ function findDependencies(
     if (matchesHelmValuesDockerHeuristic(key, parsedContent[key])) {
       const currentItem = parsedContent[key];
 
-      const registry = currentItem.registry ? `${currentItem.registry}/` : '';
-      packageDependencies.push(
-        getDep(`${registry}${currentItem.repository}:${currentItem.tag}`, false)
-      );
+      let registry: string = currentItem.registry;
+      registry = registry ? `${registry}/` : '';
+      const repository = String(currentItem.repository);
+      const tag = String(currentItem.tag);
+      const currentFrom = `${registry}${repository}:${tag}`;
+      packageDependencies.push(getDep(currentFrom, false));
     } else {
       findDependencies(parsedContent[key], packageDependencies);
     }

@@ -1,5 +1,5 @@
 import is from '@sindresorhus/is';
-import { validRange } from 'semver';
+import { minVersion, validRange } from 'semver';
 import { quote } from 'shlex';
 import { join } from 'upath';
 import { SYSTEM_INSUFFICIENT_DISK_SPACE } from '../../../constants/error-messages';
@@ -47,13 +47,25 @@ export async function generateLockFile(
   logger.debug(`Spawning yarn install to create ${lockFileName}`);
   let lockFile = null;
   try {
-    let installYarn = 'npm i -g yarn';
     const yarnCompatibility = config.compatibility?.yarn;
-    if (validRange(yarnCompatibility)) {
+    const isValidYarnRange = validRange(yarnCompatibility);
+    const isYarn1 =
+      !isValidYarnRange || minVersion(yarnCompatibility).major === 1;
+
+    let installYarn = 'npm i -g yarn';
+    if (isValidYarnRange) {
       installYarn += `@${quote(yarnCompatibility)}`;
     }
+
     const preCommands = [installYarn];
+
+    const extraEnv: ExecOptions['extraEnv'] = {
+      NPM_CONFIG_CACHE: env.NPM_CONFIG_CACHE,
+      npm_config_store: env.npm_config_store,
+    };
+
     if (
+      isYarn1 &&
       config.skipInstalls !== false &&
       (await hasYarnOfflineMirror(cwd)) === false
     ) {
@@ -65,15 +77,16 @@ export async function generateLockFile(
     let cmdOptions =
       '--ignore-engines --ignore-platform --network-timeout 100000';
     if (global.trustLevel !== 'high' || config.ignoreScripts) {
-      cmdOptions += ' --ignore-scripts';
+      if (isYarn1) {
+        cmdOptions += ' --ignore-scripts';
+      } else {
+        extraEnv.YARN_ENABLE_SCRIPTS = '0';
+      }
     }
     const tagConstraint = await getNodeConstraint(config);
     const execOptions: ExecOptions = {
       cwd,
-      extraEnv: {
-        NPM_CONFIG_CACHE: env.NPM_CONFIG_CACHE,
-        npm_config_store: env.npm_config_store,
-      },
+      extraEnv,
       docker: {
         image: 'renovate/node',
         tagScheme: 'npm',
@@ -81,6 +94,12 @@ export async function generateLockFile(
         preCommands,
       },
     };
+    // istanbul ignore if
+    if (global.trustLevel === 'high') {
+      execOptions.extraEnv.NPM_AUTH = env.NPM_AUTH;
+      execOptions.extraEnv.NPM_EMAIL = env.NPM_EMAIL;
+      execOptions.extraEnv.NPM_TOKEN = env.NPM_TOKEN;
+    }
     if (config.dockerMapDotfiles) {
       const homeDir =
         process.env.HOME || process.env.HOMEPATH || process.env.USERPROFILE;
@@ -103,13 +122,13 @@ export async function generateLockFile(
     }
 
     // postUpdateOptions
-    if (config.postUpdateOptions?.includes('yarnDedupeFewer')) {
+    if (isYarn1 && config.postUpdateOptions?.includes('yarnDedupeFewer')) {
       logger.debug('Performing yarn dedupe fewer');
       commands.push('npx yarn-deduplicate --strategy fewer');
       // Run yarn again in case any changes are necessary
       commands.push(`yarn install ${cmdOptions}`.trim());
     }
-    if (config.postUpdateOptions?.includes('yarnDedupeHighest')) {
+    if (isYarn1 && config.postUpdateOptions?.includes('yarnDedupeHighest')) {
       logger.debug('Performing yarn dedupe highest');
       commands.push('npx yarn-deduplicate --strategy highest');
       // Run yarn again in case any changes are necessary

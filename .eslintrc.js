@@ -42,6 +42,7 @@ module.exports = {
     'prefer-destructuring': 0,
     'prefer-template': 0,
     'no-underscore-dangle': 0,
+    // 'no-unused-vars': 2,
 
     'sort-imports': [
       'error',
@@ -79,15 +80,34 @@ module.exports = {
         args: 'none',
         ignoreRestSiblings: false,
       },
-    ], // disable until proper interfaced api
+    ],
     '@typescript-eslint/prefer-optional-chain': 2,
     '@typescript-eslint/prefer-nullish-coalescing': 2,
     curly: [2, 'all'],
     'require-await': 2,
+    // next 2 rules disabled due to https://github.com/microsoft/TypeScript/issues/20024
+    '@typescript-eslint/no-unsafe-assignment': 0,
+    '@typescript-eslint/no-unsafe-member-access': 0,
+
+    // TODO: fix me
+    '@typescript-eslint/no-unsafe-return': 0,
+    '@typescript-eslint/no-unsafe-call': 0,
+
+    '@typescript-eslint/restrict-template-expressions': [
+      1,
+      { allowNumber: true, allowBoolean: true },
+    ],
+    '@typescript-eslint/restrict-plus-operands': 2,
+
+    '@typescript-eslint/naming-convention': 2,
+
+    '@typescript-eslint/unbound-method': 2,
+    '@typescript-eslint/ban-types': 2,
   },
   settings: {
-    // https://github.com/benmosher/eslint-plugin-import/issues/1618
-    'import/internal-regex': '^type\\-fest$',
+    'import/parsers': {
+      '@typescript-eslint/parser': ['.ts'],
+    },
   },
   overrides: [
     {
@@ -112,6 +132,8 @@ module.exports = {
 
       rules: {
         '@typescript-eslint/explicit-function-return-type': 0,
+        '@typescript-eslint/explicit-module-boundary-types': 0,
+        '@typescript-eslint/restrict-template-expressions': 0,
       },
     },
   ],

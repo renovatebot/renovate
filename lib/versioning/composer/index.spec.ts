@@ -203,6 +203,16 @@ describe('semver.getNewValue()', () => {
       })
     ).toEqual('^1.0');
   });
+  it('bumps less than to same', () => {
+    expect(
+      semver.getNewValue({
+        currentValue: '<2.7.14',
+        rangeStrategy: 'bump',
+        fromVersion: '2.0.3',
+        toVersion: '2.0.4',
+      })
+    ).toEqual('<2.7.14');
+  });
   it('bumps caret to same', () => {
     expect(
       semver.getNewValue({

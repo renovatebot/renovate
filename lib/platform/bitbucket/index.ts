@@ -1,15 +1,13 @@
 import URL from 'url';
 import is from '@sindresorhus/is';
 import parseDiff from 'parse-diff';
-import { RenovateConfig } from '../../config/common';
 import {
   REPOSITORY_DISABLED,
   REPOSITORY_NOT_FOUND,
 } from '../../constants/error-messages';
 import { PLATFORM_TYPE_BITBUCKET } from '../../constants/platforms';
-import { PR_STATE_ALL, PR_STATE_OPEN } from '../../constants/pull-requests';
 import { logger } from '../../logger';
-import { BranchStatus } from '../../types';
+import { BranchStatus, PrState } from '../../types';
 import * as git from '../../util/git';
 import * as hostRules from '../../util/host-rules';
 import { BitbucketHttp, setBaseUrl } from '../../util/http/bitbucket';
@@ -28,12 +26,14 @@ import {
   Pr,
   RepoParams,
   RepoResult,
+  UpdatePrConfig,
   VulnerabilityAlert,
 } from '../common';
 import { smartTruncate } from '../utils/pr-body';
 import { readOnlyIssueBody } from '../utils/read-only-issue-body';
 import * as comments from './comments';
 import * as utils from './utils';
+import { PrResponse, RepoInfoBody } from './utils';
 
 const bitbucketHttp = new BitbucketHttp();
 
@@ -41,7 +41,7 @@ const BITBUCKET_PROD_ENDPOINT = 'https://api.bitbucket.org/';
 
 let config: utils.Config = {} as any;
 
-let endpoint_ = BITBUCKET_PROD_ENDPOINT;
+const defaults = { endpoint: BITBUCKET_PROD_ENDPOINT };
 
 export function initPlatform({
   endpoint,
@@ -57,9 +57,9 @@ export function initPlatform({
     logger.warn(
       `Init: Bitbucket Cloud endpoint should generally be ${BITBUCKET_PROD_ENDPOINT} but is being configured to a different value. Did you mean to use Bitbucket Server?`
     );
-    endpoint_ = endpoint;
+    defaults.endpoint = endpoint;
   }
-  setBaseUrl(endpoint_);
+  setBaseUrl(defaults.endpoint);
   // TODO: Add a connection check that endpoint/username/password combination are valid
   const platformConfig: PlatformResult = {
     endpoint: endpoint || BITBUCKET_PROD_ENDPOINT,
@@ -91,7 +91,7 @@ export async function initRepo({
   logger.debug(`initRepo("${repository}")`);
   const opts = hostRules.find({
     hostType: PLATFORM_TYPE_BITBUCKET,
-    url: endpoint_,
+    url: defaults.endpoint,
   });
   config = {
     repository,
@@ -101,7 +101,11 @@ export async function initRepo({
   let info: utils.RepoInfo;
   try {
     info = utils.repoInfoTransformer(
-      (await bitbucketHttp.getJson(`/2.0/repositories/${repository}`)).body
+      (
+        await bitbucketHttp.getJson<RepoInfoBody>(
+          `/2.0/repositories/${repository}`
+        )
+      ).body
     );
 
     if (optimizeForDisabled) {
@@ -139,7 +143,7 @@ export async function initRepo({
     throw err;
   }
 
-  const { hostname } = URL.parse(endpoint_);
+  const { hostname } = URL.parse(defaults.endpoint);
 
   // Converts API hostnames to their respective HTTP git hosts:
   // `api.bitbucket.org`  to `bitbucket.org`
@@ -173,14 +177,9 @@ export function getRepoForceRebase(): Promise<boolean> {
   return Promise.resolve(false);
 }
 
-export async function setBaseBranch(branchName: string): Promise<string> {
-  const baseBranchSha = await git.setBranch(branchName);
-  return baseBranchSha;
-}
-
 // istanbul ignore next
 function matchesState(state: string, desiredState: string): boolean {
-  if (desiredState === PR_STATE_ALL) {
+  if (desiredState === PrState.All) {
     return true;
   }
   if (desiredState.startsWith('!')) {
@@ -205,7 +204,7 @@ export async function getPrList(): Promise<Pr[]> {
 export async function findPr({
   branchName,
   prTitle,
-  state = PR_STATE_ALL,
+  state = PrState.All,
 }: FindPRConfig): Promise<Pr | null> {
   logger.debug(`findPr(${branchName}, ${prTitle}, ${state})`);
   const prList = await getPrList();
@@ -221,21 +220,6 @@ export async function findPr({
   return pr;
 }
 
-export async function deleteBranch(
-  branchName: string,
-  closePr?: boolean
-): Promise<void> {
-  if (closePr) {
-    const pr = await findPr({ branchName, state: PR_STATE_OPEN });
-    if (pr) {
-      await bitbucketHttp.postJson(
-        `/2.0/repositories/${config.repository}/pullrequests/${pr.number}/decline`
-      );
-    }
-  }
-  return git.deleteBranch(branchName);
-}
-
 async function isPrConflicted(prNo: number): Promise<boolean> {
   const diff = (
     await bitbucketHttp.get(
@@ -244,22 +228,6 @@ async function isPrConflicted(prNo: number): Promise<boolean> {
   ).body;
 
   return utils.isConflicted(parseDiff(diff));
-}
-
-interface PrResponse {
-  id: string;
-  state: string;
-  links: {
-    commits: {
-      href: string;
-    };
-  };
-  source: {
-    branch: {
-      name: string;
-    };
-  };
-  reviewers: Array<any>;
 }
 
 // Gets details for a PR
@@ -322,7 +290,7 @@ export async function getBranchPr(branchName: string): Promise<Pr | null> {
   logger.debug(`getBranchPr(${branchName})`);
   const existingPr = await findPr({
     branchName,
-    state: PR_STATE_OPEN,
+    state: PrState.Open,
   });
   return existingPr ? getPr(existingPr.number) : null;
 }
@@ -459,7 +427,7 @@ export async function findIssue(title: string): Promise<Issue> {
   const [issue] = issues;
   return {
     number: issue.id,
-    body: issue.content && issue.content.raw,
+    body: issue.content?.raw,
   };
 }
 
@@ -547,7 +515,9 @@ export async function ensureIssue({
   } catch (err) /* istanbul ignore next */ {
     if (err.message.startsWith('Repository has no issue tracker.')) {
       logger.debug(
-        `Issues are disabled, so could not create issue: ${err.message}`
+        `Issues are disabled, so could not create issue: ${
+          err.message as string
+        }`
       );
     } else {
       logger.warn({ err }, 'Could not ensure issue');
@@ -612,7 +582,7 @@ export async function addReviewers(
   prId: number,
   reviewers: string[]
 ): Promise<void> {
-  logger.debug(`Adding reviewers ${reviewers} to #${prId}`);
+  logger.debug(`Adding reviewers '${reviewers.join(', ')}' to #${prId}`);
 
   const { title } = await getPr(prId);
 
@@ -727,15 +697,12 @@ interface Reviewer {
   uuid: { raw: string };
 }
 
-interface Commit {
-  author: { raw: string };
-}
-
-export async function updatePr(
-  prNo: number,
-  title: string,
-  description: string
-): Promise<void> {
+export async function updatePr({
+  number: prNo,
+  prTitle: title,
+  prBody: description,
+  state,
+}: UpdatePrConfig): Promise<void> {
   logger.debug(`updatePr(${prNo}, ${title}, body)`);
   // Updating a PR in Bitbucket will clear the reviewers if reviewers is not present
   const pr = (
@@ -754,6 +721,12 @@ export async function updatePr(
       },
     }
   );
+
+  if (state === PrState.Closed && pr) {
+    await bitbucketHttp.postJson(
+      `/2.0/repositories/${config.repository}/pullrequests/${prNo}/decline`
+    );
+  }
 }
 
 export async function mergePr(

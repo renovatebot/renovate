@@ -29,6 +29,24 @@ describe('loose.', () => {
         expect(loose.isValid(version)).toBeNull();
       });
     });
+    it('it should return null if the version string looks like a git commit hash', () => {
+      [
+        '0a1b2c3',
+        '0a1b2c3d',
+        '0a1b2c3d4e5f6a7b8c9d0a1b2c3d4e5f6a7b8c9d',
+      ].forEach((version) => {
+        expect(loose.isValid(version)).toBeNull();
+      });
+      [
+        '0a1b2c3d4e5f6a7b8c9d0a1b2c3d4e5f6a7b8c9d0',
+        '0a1b2C3',
+        '0z1b2c3',
+        '0A1b2c3d4e5f6a7b8c9d0a1b2c3d4e5f6a7b8c9d',
+        '123098140293',
+      ].forEach((version) => {
+        expect(loose.isValid(version)).toBe(version);
+      });
+    });
   });
   describe('isGreaterThan(version)', () => {
     it('it should compare using release number than suffix', () => {

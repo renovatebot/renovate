@@ -111,12 +111,12 @@ export function getContext(): any {
 }
 
 // setMeta overrides existing meta, may remove fields if no longer existing
-export function setMeta(obj: any): void {
+export function setMeta(obj: Record<string, unknown>): void {
   meta = { ...obj };
 }
 
 // addMeta overrides or adds fields but does not remove any
-export function addMeta(obj: any): void {
+export function addMeta(obj: Record<string, unknown>): void {
   meta = { ...meta, ...obj };
 }
 

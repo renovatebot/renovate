@@ -2,14 +2,26 @@ import is from '@sindresorhus/is';
 
 Error.stackTraceLimit = 20;
 
-// TODO: remove any type
-export default function errSerializer(err: any): any {
+interface Err {
+  body?: unknown;
+  response?: {
+    body?: unknown;
+  };
+  message?: unknown;
+  stack?: unknown;
+  gotOptions?: {
+    auth?: unknown;
+    headers?: unknown;
+  };
+}
+
+export default function errSerializer(err: Err): any {
   const response = {
     ...err,
   };
   if (err.body) {
     response.body = err.body;
-  } else if (err.response && err.response.body) {
+  } else if (err.response?.body) {
     response.body = err.response.body;
   }
   if (err.message) {

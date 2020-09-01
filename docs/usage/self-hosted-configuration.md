@@ -98,6 +98,10 @@ The `git` commands are run locally in the cloned repo instead of globally to red
 
 ## logLevel
 
+It's recommended to run at debug level if you can, and configure it using the environment variable `LOG_LEVEL=debug`. By configuring using the environment it means that debug logging starts from the beginning of the app, while if you configure it using file config then the debug logging can only start after the file config is parsed.
+
+Additionally, if you configure `LOG_FORMAT=json` in env then logging will be done in JSON format instead of "pretty" format, which is usually better if you're doing any ingestion or parsing of the logs.
+
 ## onboarding
 
 Set this to `false` if (a) you configure Renovate entirely on the bot side (i.e. empty `renovate.json` in repositories) and (b) you wish to run Renovate on every repository the bot has access to, and (c) you wish to skip the onboarding PRs.
@@ -105,6 +109,10 @@ Set this to `false` if (a) you configure Renovate entirely on the bot side (i.e.
 ## onboardingBranch
 
 Note that this setting is independent of `branchPrefix`. For example, if you configure `branchPrefix` to be `renovate-` then you'd still have the onboarding PR created with branch `renovate/configure` until you configure `onboardingBranch=renovate-configure` or similar. If you have an existing Renovate installation and you change `onboardingBranch` then it's possible that you'll get onboarding PRs for repositories that had previously closed the onboarding PR unmerged.
+
+## onboardingCommitMessage
+
+Note that if `commitMessagePrefix` or `semanticCommits` values are defined then they will be prepended to the commit message using the same logic that is used for adding them to non-onboarding commit messages.
 
 ## onboardingConfig
 

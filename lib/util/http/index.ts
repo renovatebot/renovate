@@ -33,12 +33,13 @@ export interface HttpPostOptions extends HttpOptions {
 }
 
 export interface InternalHttpOptions extends HttpOptions {
-  json?: object;
+  json?: Record<string, unknown>;
   responseType?: 'json';
   method?: 'get' | 'post' | 'put' | 'patch' | 'delete' | 'head';
 }
 
 export interface HttpResponse<T = string> {
+  statusCode: number;
   body: T;
   headers: any;
 }
@@ -46,6 +47,7 @@ export interface HttpResponse<T = string> {
 function cloneResponse<T>(response: any): HttpResponse<T> {
   // clone body and headers so that the cached result doesn't get accidentally mutated
   return {
+    statusCode: response.statusCode,
     body: clone<T>(response.body),
     headers: clone(response.headers),
   };

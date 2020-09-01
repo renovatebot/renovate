@@ -10,6 +10,7 @@ coverage
 **/__mocks__/**
 **/*.d.ts
 /config.js
+.clinic/
 
 # generated code
 **/*.generated.ts

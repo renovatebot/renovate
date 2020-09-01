@@ -39,7 +39,7 @@ export interface RenovateOptionBase {
 }
 
 export interface RenovateArrayOption<
-  T extends string | number | object = object
+  T extends string | number | Record<string, unknown> = Record<string, unknown>
 > extends RenovateOptionBase {
   default?: T[];
   mergeable?: boolean;
@@ -77,7 +77,7 @@ export interface RenovateStringOption extends RenovateOptionBase {
 
 export interface RenovateObjectOption extends RenovateOptionBase {
   default?: any;
-  additionalProperties?: {} | boolean;
+  additionalProperties?: Record<string, unknown> | boolean;
   mergeable?: boolean;
   type: 'object';
 }
@@ -137,6 +137,15 @@ const options: RenovateOptions[] = [
       'Change this value in order to override the default onboarding branch name.',
     type: 'string',
     default: 'renovate/configure',
+    admin: true,
+    cli: false,
+  },
+  {
+    name: 'onboardingCommitMessage',
+    description:
+      'Change this value in order to override the default onboarding commit message.',
+    type: 'string',
+    default: null,
     admin: true,
     cli: false,
   },
@@ -612,7 +621,6 @@ const options: RenovateOptions[] = [
     type: 'array',
     stage: 'package',
     cli: false,
-    env: false,
   },
   {
     name: 'gitAuthor',
@@ -1104,12 +1112,6 @@ const options: RenovateOptions[] = [
     default: 'rebase',
   },
   {
-    name: 'statusCheckVerify',
-    description: 'Set a verify status check for all PRs',
-    type: 'boolean',
-    default: false,
-  },
-  {
     name: 'unpublishSafe',
     description: 'Set a status check for unpublish-safe upgrades',
     type: 'boolean',
@@ -1293,6 +1295,15 @@ const options: RenovateOptions[] = [
     cli: false,
   },
   {
+    name: 'prBodyTemplate',
+    description:
+      'Pull Request body template. Controls which sections are rendered in the body.',
+    type: 'string',
+    default:
+      '{{{header}}}{{{table}}}{{{notes}}}{{{changelogs}}}{{{configDescription}}}{{{controls}}}{{{footer}}}',
+    cli: false,
+  },
+  {
     name: 'prTitle',
     description:
       'Pull Request title template (deprecated). Now uses commitMessage.',
@@ -1335,12 +1346,6 @@ const options: RenovateOptions[] = [
     mergeable: true,
   },
   // Dependency Groups
-  {
-    name: 'lazyGrouping',
-    description: 'Use group names only when multiple dependencies upgraded',
-    type: 'boolean',
-    default: true,
-  },
   {
     name: 'groupName',
     description: 'Human understandable name for the dependency group',
@@ -1663,6 +1668,16 @@ const options: RenovateOptions[] = [
     subType: 'number',
     stage: 'repository',
     parent: 'hostRules',
+    cli: false,
+    env: false,
+  },
+  {
+    name: 'enableHttp2',
+    description: 'Enable got http2 support.',
+    type: 'boolean',
+    stage: 'repository',
+    parent: 'hostRules',
+    default: false,
     cli: false,
     env: false,
   },

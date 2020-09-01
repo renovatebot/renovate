@@ -1,4 +1,4 @@
-import hash from 'object-hash';
+import hasha from 'hasha';
 import { mocked } from '../../../../test/util';
 import * as _repositoryCache from '../../../util/cache/repository';
 import * as _branchify from '../updates/branchify';
@@ -26,7 +26,7 @@ describe('workers/repository/process/extract-update', () => {
         repoIsOnboarded: true,
         suppressNotifications: ['deprecationWarningIssues'],
       };
-      repositoryCache.getCache.mockReturnValueOnce({});
+      repositoryCache.getCache.mockReturnValueOnce({ init: {}, scan: {} });
       const packageFiles = await extract(config);
       const res = await lookup(config, packageFiles);
       expect(res).toMatchSnapshot();
@@ -38,7 +38,7 @@ describe('workers/repository/process/extract-update', () => {
         repoIsOnboarded: true,
         suppressNotifications: ['deprecationWarningIssues'],
       };
-      repositoryCache.getCache.mockReturnValueOnce({});
+      repositoryCache.getCache.mockReturnValueOnce({ init: {}, scan: {} });
       const packageFiles = await extract(config);
       expect(packageFiles).toMatchSnapshot();
     });
@@ -54,7 +54,7 @@ describe('workers/repository/process/extract-update', () => {
         scan: {
           master: {
             sha: config.baseBranchSha,
-            configHash: hash(config).toString(),
+            configHash: hasha(JSON.stringify(config)),
             packageFiles,
           },
         },

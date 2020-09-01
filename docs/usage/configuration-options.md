@@ -341,9 +341,7 @@ To disable Renovate for npm `devDependencies` but keep it for `dependencies` you
 
 ## enabledManagers
 
-This is a way to "whitelist" certain package managers and disable all others.
-
-Possible managers are: `'ansible', 'ansible-galaxy', 'bazel', 'buildkite', 'bundler', 'cargo', 'cdnurl', 'circleci', 'cocoapods', 'composer', 'deps-edn','docker-compose', 'dockerfile', 'droneci', 'git-submodules', 'github-actions', 'gitlabci', 'gitlabci-include', 'gomod', 'gradle', 'gradle-wrapper', 'helm-requirements', 'helm-values', 'helmfile', 'homebrew', 'html', 'kubernetes', 'kustomize', 'leiningen', 'maven', 'meteor', 'mix', 'nodenv', 'npm', 'nuget', 'nvm', 'pip_requirements', 'pip_setup', 'pipenv', 'poetry', 'pub', 'ruby-version', 'regex', 'sbt', 'swift', 'terraform', 'travis'`
+This is a way to allow only certain package managers and implicitly disable all others.
 
 Example:
 
@@ -352,6 +350,8 @@ Example:
   "enabledManagers": ["dockerfile", "npm"]
 }
 ```
+
+For the full list of available managers, see the [Supported Managers](https://docs.renovatebot.com/modules/manager/#supported-managers) documentation.
 
 ## encrypted
 
@@ -572,6 +572,10 @@ Renovate does not do a "longest match" algorithm to pick between multiple matchi
 
 If you have any uncertainty about exactly which hosts a service uses, then it can be more reliable to use `domainName` instead of `hostName` or `baseUrl`. e.g. configure `"hostName": "docker.io"` to cover both `index.docker.io` and `auth.docker.io` and any other host that's in use.
 
+### enableHttp2
+
+Enable got [http2](https://github.com/sindresorhus/got/blob/v11.5.2/readme.md#http2) support.
+
 ### hostName
 
 ### hostType
@@ -712,10 +716,6 @@ Consider this example:
 
 With the above config, every PR raised by Renovate will have the label `dependencies` while PRs containing `eslint`-related packages will instead have the label `linting`.
 
-## lazyGrouping
-
-By default, Renovate will use group names in Pull Request titles only when the PR contains two or more dependencies. For example you may have defined a dependency group calls "All eslint packages" with a `packagePattern` of `^eslint`, but if the only upgrade available at the time is `eslint-config-airbnb` then it makes more sense for the PR to be named "Upgrade eslint-config-airbnb to v2.1.4" than to name it "Upgrade All eslint packages". If ever this behaviour is undesirable then you can override it by setting this option to `false`.
-
 ## lockFileMaintenance
 
 This feature can be used to refresh lock files and keep them up-to-date. "Maintaining" a lock file means recreating it so that every dependency version within it is updated to the latest. Supported lock files are `package-lock.json`, `yarn.lock`, `composer.lock`, `Gemfile.lock` and `poetry.lock`. Others may be added via feature request.
@@ -787,6 +787,8 @@ Here is an example where you might want to limit the "noisy" package `aws-sdk` t
   ]
 }
 ```
+
+For Maven dependencies, the package name is `<groupId:artefactId>`, eg `"packageNames": ["com.thoughtworks.xstream:xstream"]`
 
 Note how the above uses `packageNames` instead of `packagePatterns` because it is an exact match package name. This is the equivalent of defining `"packagePatterns": ["^aws\-sdk$"]` and hence much simpler. However you can mix together both `packageNames` and `packagePatterns` in the same package rule and the rule will be applied if _either_ match. Example:
 
@@ -1187,6 +1189,12 @@ e.g. if you wish to add an extra Warning to major updates:
 }
 ```
 
+## prBodyTemplate
+
+This setting controls which sections are rendered in the body of the pull request.
+
+The available sections are header, table, notes, changelogs, configDescription, controls, footer.
+
 ## prConcurrentLimit
 
 This setting - if enabled - limits Renovate to a maximum of x concurrent PRs open at any time.
@@ -1405,6 +1413,7 @@ before 5:00am
 after 10pm and before 5:00am
 after 10pm and before 5am every weekday
 on friday and saturday
+every 3 months on the first day of the month
 ```
 
 One example might be that you don't want Renovate to run during your typical business hours, so that your build machines don't get clogged up testing `package.json` updates. You could then configure a schedule like this at the repository level:
@@ -1475,10 +1484,6 @@ If you combine `stabilityDays=3` and `prCreation="not-pending"` then Renovate wi
 #### Await X days before Automerging
 
 If you have both `automerge` as well as `stabilityDays` enabled, it means that PRs will be created immediately but automerging will be delayed until X days have passed. This works because Renovate will add a "renovate/stability-days" pending status check to each branch/PR and that pending check will prevent the branch going green to automerge.
-
-## statusCheckVerify
-
-This feature is added for people migrating from alternative services who are used to seeing a "verify" status check on PRs. If you'd like to use this then go ahead, but otherwise it's more secure to look for Renovate's [GPG Verified Commits](https://github.com/blog/2144-gpg-signature-verification) instead, because those cannot be spoofed by any other person or service (unlike status checks).
 
 ## supportPolicy
 

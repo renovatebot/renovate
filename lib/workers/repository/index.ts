@@ -14,6 +14,7 @@ import { printRequestStats } from './stats';
 
 let renovateVersion = 'unknown';
 try {
+  // eslint-disable-next-line @typescript-eslint/no-var-requires
   renovateVersion = require('../../../package.json').version; // eslint-disable-line global-require
 } catch (err) /* istanbul ignore next */ {
   logger.debug({ err }, 'Error getting renovate version');
@@ -51,7 +52,11 @@ export async function renovateRepository(
     repoResult = processResult(config, errorRes);
   }
   if (config.localDir && !config.persistRepoData) {
-    await deleteLocalFile('.');
+    try {
+      await deleteLocalFile('.');
+    } catch (err) /* istanbul ignore if */ {
+      logger.warn({ err }, 'localDir deletion error');
+    }
   }
   const splits = getSplits();
   logger.debug(splits, 'Repository timing splits (milliseconds)');
