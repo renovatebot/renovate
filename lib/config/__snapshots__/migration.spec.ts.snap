@@ -8,6 +8,7 @@ Object {
 
 exports[`config/migration migrateConfig(config, parentConfig) it migrates config 1`] = `
 Object {
+  "additionalBranchPrefix": "foo",
   "autodiscover": true,
   "automerge": false,
   "automergeType": "branch",

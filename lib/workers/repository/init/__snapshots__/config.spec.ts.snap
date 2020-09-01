@@ -18,6 +18,7 @@ exports[`workers/repository/init/config detectRepoFileConfig() uses package.json
 
 exports[`workers/repository/init/config mergeRenovateConfig() continues if no errors 1`] = `
 Object {
+  "additionalBranchPrefix": "",
   "additionalReviewers": Array [],
   "aliases": Object {},
   "allowedPostUpgradeCommands": Array [],
@@ -52,17 +53,17 @@ Object {
   },
   "bbUseDefaultReviewers": true,
   "binarySource": "auto",
-  "branchName": "{{{branchPrefix}}}{{{managerBranchPrefix}}}{{{branchTopic}}}",
+  "branchName": "{{{branchPrefix}}}{{{additionalBranchPrefix}}}{{{branchTopic}}}",
   "branchPrefix": "renovate/",
   "branchTopic": "{{{depNameSanitized}}}-{{{newMajor}}}{{#if isPatch}}.{{{newMinor}}}{{/if}}.x{{#if isLockfileUpdate}}-lockfile{{/if}}",
   "buildkite": Object {
+    "additionalBranchPrefix": "buildkite-",
     "commitMessageExtra": "to {{#if isMajor}}v{{{newMajor}}}{{else}}{{{newValue}}}{{/if}}",
     "commitMessageTopic": "buildkite plugin {{depName}}",
     "fileMatch": Array [
       "buildkite\\\\.ya?ml",
       "\\\\.buildkite/.+\\\\.ya?ml$",
     ],
-    "managerBranchPrefix": "buildkite-",
   },
   "bumpVersion": null,
   "bundler": Object {
@@ -73,11 +74,11 @@ Object {
   },
   "cacheDir": null,
   "cargo": Object {
+    "additionalBranchPrefix": "rust-",
     "commitMessageTopic": "Rust crate {{depName}}",
     "fileMatch": Array [
       "(^|/)Cargo.toml$",
     ],
-    "managerBranchPrefix": "rust-",
     "rangeStrategy": "bump",
     "versioning": "cargo",
   },
@@ -257,11 +258,11 @@ Object {
     ],
   },
   "homebrew": Object {
+    "additionalBranchPrefix": "homebrew-",
     "commitMessageTopic": "Homebrew Formula {{depName}}",
     "fileMatch": Array [
       "^Formula/[^/]+[.]rb$",
     ],
-    "managerBranchPrefix": "homebrew-",
   },
   "hostRules": Array [
     Object {
@@ -333,7 +334,6 @@ Object {
   "logFileLevel": "debug",
   "logLevel": "info",
   "major": Object {},
-  "managerBranchPrefix": "",
   "maven": Object {
     "fileMatch": Array [
       "\\\\.pom\\\\.xml$",
