@@ -74,12 +74,14 @@ export async function generateLockFile(
       preCommands.push(optimizeCommand);
     }
     const commands = [];
-    let cmdOptions = '--network-timeout 100000';
+    let cmdOptions = '';
     if (global.trustLevel !== 'high' || config.ignoreScripts) {
       if (isYarn1) {
-        cmdOptions += ' --ignore-scripts --ignore-engines --ignore-platform';
+        cmdOptions +=
+          ' --ignore-scripts --ignore-engines --ignore-platform --network-timeout 100000';
       } else {
         extraEnv.YARN_ENABLE_SCRIPTS = '0';
+        extraEnv.YARN_HTTP_TIMEOUT = '0';
       }
     }
     const tagConstraint = await getNodeConstraint(config);
