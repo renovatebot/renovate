@@ -81,7 +81,7 @@ export async function generateLockFile(
           ' --ignore-scripts --ignore-engines --ignore-platform --network-timeout 100000';
       } else {
         extraEnv.YARN_ENABLE_SCRIPTS = '0';
-        extraEnv.YARN_HTTP_TIMEOUT = '0';
+        extraEnv.YARN_HTTP_TIMEOUT = '100000';
       }
     }
     const tagConstraint = await getNodeConstraint(config);
