@@ -39,10 +39,7 @@ describe('config/migrate-validate', () => {
 
     it('reads private key from file', async () => {
       const input: RenovateConfig = {
-        privateKeyPath: path.join(
-          __dirname,
-          '/config/__fixtures__/private.pem'
-        ),
+        privateKeyPath: path.join(__dirname, '/keys/__fixtures__/private.pem'),
       };
       const res = await migrateAndValidate(
         { ...config, repoIsOnboarded: true, warnings: undefined },
