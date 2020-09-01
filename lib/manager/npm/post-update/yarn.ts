@@ -77,7 +77,7 @@ export async function generateLockFile(
     let cmdOptions = '';
     if (isYarn1) {
       cmdOptions +=
-        ' --ignore-engines --ignore-platform --network-timeout 100000';
+        '--ignore-engines --ignore-platform --network-timeout 100000';
     } else {
       extraEnv.YARN_HTTP_TIMEOUT = '100000';
     }
