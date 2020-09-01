@@ -75,13 +75,17 @@ export async function generateLockFile(
     }
     const commands = [];
     let cmdOptions = '';
+    if (isYarn1) {
+      cmdOptions +=
+        ' --ignore-engines --ignore-platform --network-timeout 100000';
+    } else {
+      extraEnv.YARN_HTTP_TIMEOUT = '100000';
+    }
     if (global.trustLevel !== 'high' || config.ignoreScripts) {
       if (isYarn1) {
-        cmdOptions +=
-          ' --ignore-scripts --ignore-engines --ignore-platform --network-timeout 100000';
+        cmdOptions += ' --ignore-scripts';
       } else {
         extraEnv.YARN_ENABLE_SCRIPTS = '0';
-        extraEnv.YARN_HTTP_TIMEOUT = '100000';
       }
     }
     const tagConstraint = await getNodeConstraint(config);
