@@ -34,7 +34,7 @@ export async function getTags(
   } catch (err) {
     logger.info({ sourceRepo: repository }, 'Failed to fetch Gitlab tags');
     // istanbul ignore if
-    if (err.message && err.message.includes('Bad credentials')) {
+    if (err.message?.includes('Bad credentials')) {
       logger.warn('Bad credentials triggering tag fail lookup in changelog');
       throw err;
     }

@@ -26,7 +26,7 @@ describe('workers/repository/process/extract-update', () => {
         repoIsOnboarded: true,
         suppressNotifications: ['deprecationWarningIssues'],
       };
-      repositoryCache.getCache.mockReturnValueOnce({});
+      repositoryCache.getCache.mockReturnValueOnce({ scan: {} });
       const packageFiles = await extract(config);
       const res = await lookup(config, packageFiles);
       expect(res).toMatchSnapshot();
@@ -38,7 +38,7 @@ describe('workers/repository/process/extract-update', () => {
         repoIsOnboarded: true,
         suppressNotifications: ['deprecationWarningIssues'],
       };
-      repositoryCache.getCache.mockReturnValueOnce({});
+      repositoryCache.getCache.mockReturnValueOnce({ scan: {} });
       const packageFiles = await extract(config);
       expect(packageFiles).toMatchSnapshot();
     });

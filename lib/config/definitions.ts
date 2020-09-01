@@ -1218,12 +1218,12 @@ const options: RenovateOptions[] = [
     name: 'branchName',
     description: 'Branch name template',
     type: 'string',
-    default: '{{{branchPrefix}}}{{{managerBranchPrefix}}}{{{branchTopic}}}',
+    default: '{{{branchPrefix}}}{{{additionalBranchPrefix}}}{{{branchTopic}}}',
     cli: false,
   },
   {
-    name: 'managerBranchPrefix',
-    description: 'Branch manager prefix',
+    name: 'additionalBranchPrefix',
+    description: 'Additional string value to be appended to branchPrefix',
     type: 'string',
     default: '',
     cli: false,
@@ -1292,6 +1292,15 @@ const options: RenovateOptions[] = [
     name: 'commitMessageSuffix',
     description: 'Suffix to add to end of commit messages and PR titles.',
     type: 'string',
+    cli: false,
+  },
+  {
+    name: 'prBodyTemplate',
+    description:
+      'Pull Request body template. Controls which sections are rendered in the body.',
+    type: 'string',
+    default:
+      '{{{header}}}{{{table}}}{{{notes}}}{{{changelogs}}}{{{configDescription}}}{{{controls}}}{{{footer}}}',
     cli: false,
   },
   {

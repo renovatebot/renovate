@@ -25,6 +25,16 @@ Also, be sure to check out Renovate's [shareable config presets](/config-presets
 
 If you have any questions about the below config options, or would like to get help/feedback about a config, please post it as an issue in [renovatebot/config-help](https://github.com/renovatebot/config-help) where we will do our best to answer your question.
 
+## additionalBranchPrefix
+
+This value defaults to an empty string, and is typically not necessary. Some managers populate this field for historical reasons, for example we use `docker-` for Docker branches, so they may look like `renovate/docker-ubuntu-16.x`. You normally don't need to configure this, but one example where it can be useful is combining with `parentDir` in monorepos to split PRs based on where the package definition is located, e.g.
+
+```json
+{
+  "additionalBranchPrefix": "{{parentDir}}-"
+}
+```
+
 ## additionalReviewers
 
 In contrast to `reviewers`, this option adds to the existing reviewer list, rather than replacing it. This makes it suitable for augmenting a preset or base list without displacing the original, for example when adding focused reviewers for a specific package group.
@@ -160,11 +170,13 @@ Warning: it's strongly recommended not to configure this field directly. Use at 
 
 You can modify this field if you want to change the prefix used. For example if you want branches to be like `deps/eslint-4.x` instead of `renovate/eslint-4.x` then you configure `branchPrefix` = `deps/`. Or if you wish to avoid forward slashes in branch names then you could use `renovate_` instead, for example.
 
+`branchPrefix` must be configured at the root of the configuration (e.g. not within any package rule) and is not allowed to use template values. e.g. instead of `renovate/{{parentDir}}-`, configure the template part in `additionalBranchPrefix`, like `"additionalBranchPrefix": "{{parentDir}}-"`.
+
 Note that this setting does not change the default _onboarding_ branch name, i.e. `renovate/configure`. If you wish to change that too, you need to also configure the field `onboardingBranch` in your admin bot config.
 
 ## branchTopic
 
-This field is combined with `branchPrefix` and `managerBranchPrefix` to form the full `branchName`. `branchName` uniqueness is important for dependency update grouping or non-grouping so be cautious about ever editing this field manually. This is an advance field and it's recommend you seek a config review before applying it.
+This field is combined with `branchPrefix` and `additionalBranchPrefix` to form the full `branchName`. `branchName` uniqueness is important for dependency update grouping or non-grouping so be cautious about ever editing this field manually. This is an advance field and it's recommend you seek a config review before applying it.
 
 ## bumpVersion
 
@@ -341,9 +353,7 @@ To disable Renovate for npm `devDependencies` but keep it for `dependencies` you
 
 ## enabledManagers
 
-This is a way to "whitelist" certain package managers and disable all others.
-
-Possible managers are: `'ansible', 'ansible-galaxy', 'bazel', 'buildkite', 'bundler', 'cargo', 'cdnurl', 'circleci', 'cocoapods', 'composer', 'deps-edn','docker-compose', 'dockerfile', 'droneci', 'git-submodules', 'github-actions', 'gitlabci', 'gitlabci-include', 'gomod', 'gradle', 'gradle-wrapper', 'helm-requirements', 'helm-values', 'helmfile', 'homebrew', 'html', 'kubernetes', 'kustomize', 'leiningen', 'maven', 'meteor', 'mix', 'nodenv', 'npm', 'nuget', 'nvm', 'pip_requirements', 'pip_setup', 'pipenv', 'poetry', 'pub', 'ruby-version', 'regex', 'sbt', 'swift', 'terraform', 'travis'`
+This is a way to allow only certain package managers and implicitly disable all others.
 
 Example:
 
@@ -352,6 +362,8 @@ Example:
   "enabledManagers": ["dockerfile", "npm"]
 }
 ```
+
+For the full list of available managers, see the [Supported Managers](https://docs.renovatebot.com/modules/manager/#supported-managers) documentation.
 
 ## encrypted
 
@@ -733,10 +745,6 @@ To reduce "noise" in the repository, it defaults its schedule to `"before 5am on
 ## major
 
 Add to this object if you wish to define rules that apply only to major updates.
-
-## managerBranchPrefix
-
-This value defaults to an empty string, because historically no prefix was necessary for when Renovate was JS-only. Now - for example - we use `docker-` for Docker branches, so they may look like `renovate/docker-ubuntu-16.x`. You normally don't need to configure this.
 
 ## minor
 
@@ -1188,6 +1196,12 @@ e.g. if you wish to add an extra Warning to major updates:
   "prBodyNotes": ["{{#if isMajor}}:warning: MAJOR MAJOR MAJOR :warning:{{/if}}"]
 }
 ```
+
+## prBodyTemplate
+
+This setting controls which sections are rendered in the body of the pull request.
+
+The available sections are header, table, notes, changelogs, configDescription, controls, footer.
 
 ## prConcurrentLimit
 

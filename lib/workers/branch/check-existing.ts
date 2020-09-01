@@ -1,13 +1,12 @@
 import { REPOSITORY_CHANGED } from '../../constants/error-messages';
 import { logger } from '../../logger';
-import { platform } from '../../platform';
+import { Pr, platform } from '../../platform';
 import { PrState } from '../../types';
 import { BranchConfig } from '../common';
 
-/** TODO: Proper return type */
 export async function prAlreadyExisted(
   config: BranchConfig
-): Promise<any | null> {
+): Promise<Pr | null> {
   logger.trace({ config }, 'prAlreadyExisted');
   if (config.recreateClosed) {
     logger.debug('recreateClosed is true');
