@@ -1,5 +1,8 @@
+import moment from 'moment';
+import nodeData from '../../../data/node-js-schedule.json';
 import { NewValueConfig, VersioningApi } from '../common';
 import npm, { isValid, isVersion } from '../npm';
+import { NodeJsData } from './common';
 
 export const id = 'node';
 export const displayName = 'Node.js';
@@ -27,15 +30,21 @@ function getNewValue({
 
 export { isValid };
 
-const currentRelease = 14;
+const currentTime = Date.now();
 
-function isStable(version: string): boolean {
-  if (!npm.isStable(version)) {
-    return false;
+export function isStable(version: string, now = currentTime): boolean {
+  if (npm.isStable(version)) {
+    const major = npm.getMajor(version);
+    const data = nodeData as NodeJsData;
+    const schedule = data[`v${major}`];
+    if (schedule) {
+      const { lts, end } = schedule;
+      const ltsStart = moment(lts);
+      const ltsFinish = moment(end);
+      return moment(now).isBetween(ltsStart, ltsFinish);
+    }
   }
-
-  const major = npm.getMajor(version);
-  return major && major < currentRelease && major % 2 === 0;
+  return false;
 }
 
 export const api: VersioningApi = {

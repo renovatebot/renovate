@@ -1,4 +1,4 @@
-import { api as nodever } from '.';
+import { api as nodever, isStable } from '.';
 
 describe('semver.getNewValue()', () => {
   it('returns normalized toVersion', () => {
@@ -22,16 +22,17 @@ describe('semver.getNewValue()', () => {
     ).toEqual('~8.2.0');
   });
   it('isStable', () => {
-    expect(nodever.isStable('16.0.0')).toBeFalse();
-    expect(nodever.isStable('15.0.0')).toBeFalse();
-    expect(nodever.isStable('14.9.0')).toBeFalse();
+    const now = new Date('2020-09-01').getTime();
+    expect(isStable('16.0.0', now)).toBeFalse();
+    expect(isStable('15.0.0', now)).toBeFalse();
+    expect(isStable('14.9.0', now)).toBeFalse();
 
-    expect(nodever.isStable('12.0.3')).toBeTrue();
-    expect(nodever.isStable('v12.0.3')).toBeTrue();
-    expect(nodever.isStable('12.0.3a')).toBeFalse();
+    expect(isStable('12.0.3', now)).toBeTrue();
+    expect(isStable('v12.0.3', now)).toBeTrue();
+    expect(isStable('12.0.3a', now)).toBeFalse();
 
-    expect(nodever.isStable('11.0.0')).toBeFalse();
-    expect(nodever.isStable('10.0.0')).toBeTrue();
-    expect(nodever.isStable('9.0.0')).toBeFalse();
+    expect(isStable('11.0.0', now)).toBeFalse();
+    expect(isStable('10.0.0', now)).toBeTrue();
+    expect(isStable('9.0.0', now)).toBeFalse();
   });
 });

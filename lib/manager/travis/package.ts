@@ -4,6 +4,7 @@ import { getPkgReleases } from '../../datasource';
 import * as datasourceGithubTags from '../../datasource/github-tags';
 import { logger } from '../../logger';
 import { resolveFile } from '../../util';
+import { NodeJsData } from '../../versioning/node/common';
 import { isVersion, maxSatisfyingVersion } from '../../versioning/semver';
 import { LookupUpdate, PackageUpdateConfig } from '../common';
 
@@ -15,13 +16,6 @@ interface NodeJsPolicies {
   lts_latest: number[];
   current: number[];
 }
-interface NodeJsSchedule {
-  lts: string;
-  maintenance: string;
-  end: string;
-  start: string;
-}
-type NodeJsData = Record<string, NodeJsSchedule>;
 
 let policies: NodeJsPolicies;
 let refreshDate: Date;
