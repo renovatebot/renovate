@@ -113,7 +113,6 @@ let privateKeySet = false;
 async function fetchBranchCommits(): Promise<void> {
   config.branchCommits = {};
   const opts = ['--heads', config.url];
-  // istanbul ignore if
   if (config.extraCloneOpts) {
     opts.push(
       ...Object.entries(config.extraCloneOpts).map((e) => `${e[0]}=${e[1]}`)
