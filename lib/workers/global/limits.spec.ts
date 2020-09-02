@@ -40,4 +40,12 @@ describe('lib/workers/global/limits', () => {
     setMaxLimit(Limit.Commits, 1);
     expect(isLimitReached(Limit.Commits)).toBe(true);
   });
+
+  it('allow zero', () => {
+    setMaxLimit(Limit.PullRequests, 0, true);
+    expect(isLimitReached(Limit.PullRequests)).toBeTrue();
+
+    setMaxLimit(Limit.PullRequests, 0, false);
+    expect(isLimitReached(Limit.PullRequests)).toBeFalse();
+  });
 });
