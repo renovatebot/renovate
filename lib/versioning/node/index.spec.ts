@@ -1,9 +1,6 @@
 import { isStable, api as nodever } from '.';
 
 describe('semver.getNewValue()', () => {
-  beforeAll(async () => {
-    await nodever.initModule();
-  });
   it('returns normalized toVersion', () => {
     expect(
       nodever.getNewValue({

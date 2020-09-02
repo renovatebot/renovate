@@ -3,8 +3,10 @@ import equal from 'fast-deep-equal';
 import { getPkgReleases } from '../../datasource';
 import * as datasourceGithubTags from '../../datasource/github-tags';
 import { logger } from '../../logger';
-import { resolveFile } from '../../util';
-import { NodeJsData } from '../../versioning/node/common';
+import {
+  NodeJsData,
+  nodeSchedule,
+} from '../../versioning/node/node-js-schedule';
 import { isVersion, maxSatisfyingVersion } from '../../versioning/semver';
 import { LookupUpdate, PackageUpdateConfig } from '../common';
 
@@ -20,9 +22,7 @@ interface NodeJsPolicies {
 let policies: NodeJsPolicies;
 let refreshDate: Date;
 
-async function generatePolicies(): Promise<NodeJsData> {
-  const file = await resolveFile('data/node-js-schedule.json');
-  const nodeJsSchedule = (await import(file)) as NodeJsData;
+function generatePolicies(): NodeJsData {
   policies = {
     all: [],
     lts: [],
@@ -34,7 +34,7 @@ async function generatePolicies(): Promise<NodeJsData> {
 
   const now = new Date();
 
-  for (const [vRelease, data] of Object.entries(nodeJsSchedule)) {
+  for (const [vRelease, data] of Object.entries(nodeSchedule)) {
     const isAlive = new Date(data.start) < now && new Date(data.end) > now;
     if (isAlive) {
       const release = parseInt(vRelease.replace(/^v/, ''), 10);
@@ -56,14 +56,14 @@ async function generatePolicies(): Promise<NodeJsData> {
   policies.current.push(policies.active[policies.active.length - 1]);
   policies.lts_latest.push(policies.lts[policies.lts.length - 1]);
 
-  return nodeJsSchedule;
+  return nodeSchedule;
 }
 
-async function checkPolicies(): Promise<void> {
+function checkPolicies(): void {
   if (policies && refreshDate > new Date()) {
     return;
   }
-  const nodeJsSchedule = await generatePolicies();
+  const nodeJsSchedule = generatePolicies();
   refreshDate = new Date('3000-01-01'); // y3k
   const now = new Date();
   for (const data of Object.values(nodeJsSchedule)) {
@@ -86,7 +86,7 @@ export async function getPackageUpdates(
   if (!supportPolicy?.length) {
     return [];
   }
-  await checkPolicies();
+  checkPolicies();
   for (const policy of supportPolicy) {
     if (!Object.keys(policies).includes(policy)) {
       logger.warn({ policy }, `Unknown supportPolicy`);

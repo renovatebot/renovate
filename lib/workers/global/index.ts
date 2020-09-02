@@ -5,7 +5,6 @@ import * as configParser from '../../config';
 import { getErrors, logger, setMeta } from '../../logger';
 import { setUtilConfig } from '../../util';
 import * as hostRules from '../../util/host-rules';
-import { initVersioningModules } from '../../versioning';
 import * as repositoryWorker from '../repository';
 import { autodiscoverRepositories } from './autodiscover';
 import { globalFinalize, globalInitialize } from './initialize';
@@ -46,7 +45,6 @@ function haveReachedLimits(): boolean {
 export async function start(): Promise<0 | 1> {
   let config: RenovateConfig;
   try {
-    await initVersioningModules();
     // read global config from file, env and cli args
     config = await getGlobalConfig();
     // initialize all submodules

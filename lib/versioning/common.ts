@@ -13,8 +13,6 @@ export interface NewValueConfig {
   toVersion: string;
 }
 export interface VersioningApi {
-  initModule?(): Promise<void>;
-
   // validation
   isCompatible(version: string, range?: string): string | boolean | null;
   isSingleVersion(version: string): string | boolean | null;
@@ -42,7 +40,6 @@ export interface VersioningApi {
 }
 
 export interface VersioningApiConstructor {
-  initModule?(): Promise<void>;
   new (config?: string): VersioningApi;
 }
 
