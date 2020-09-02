@@ -44,6 +44,12 @@ Configure this directory if you want to change which directory Renovate uses for
 
 Set to `false` to prevent usage of `--ignore-platform-reqs` in the composer package manager.
 
+## dockerImagePrefix
+
+Override the default renovate sidecar docker containers image prefix from `docker.io/renovate` to a custom value, so renovate will can pull images from a custom docker registry.
+
+If this is set to `ghcr.io/renovatebot` the final image for `node` would become `ghcr.io/renovatebot/node` instead of currently used `docker.io/renovate/node`.
+
 ## dockerMapDotfiles
 
 This is used if you want to map "dotfiles" from your host computer home directory to containers that Renovate creates, e.g. for updating lock files. Currently applicable to `.npmrc` only.

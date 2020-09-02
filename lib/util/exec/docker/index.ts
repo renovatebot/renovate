@@ -180,7 +180,8 @@ export async function generateDockerCommand(
   options: DockerOptions,
   config: ExecConfig
 ): Promise<string> {
-  const { image, envVars, cwd, tagScheme, tagConstraint } = options;
+  const { envVars, cwd, tagScheme, tagConstraint } = options;
+  let image = options.image;
   const volumes = options.volumes || [];
   const preCommands = options.preCommands || [];
   const postCommands = options.postCommands || [];
@@ -206,6 +207,10 @@ export async function generateDockerCommand(
 
   if (cwd) {
     result.push(`-w "${cwd}"`);
+  }
+
+  if (config.dockerImagePrefix) {
+    image = image.replace(/^renovate/, config.dockerImagePrefix);
   }
 
   let tag: string;
