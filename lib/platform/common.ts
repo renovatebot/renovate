@@ -142,6 +142,7 @@ export interface Platform {
   findIssue(title: string): Promise<Issue | null>;
   getIssueList(): Promise<Issue[]>;
   getVulnerabilityAlerts(): Promise<VulnerabilityAlert[]>;
+  getJsonFile(fileName: string): Promise<any | null>;
   initRepo(config: RepoParams): Promise<RepoResult>;
   getPrList(): Promise<Pr[]>;
   ensureIssueClosing(title: string): Promise<void>;

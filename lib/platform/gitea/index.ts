@@ -47,6 +47,7 @@ interface GiteaRepoConfig {
   prList: Promise<Pr[]> | null;
   issueList: Promise<Issue[]> | null;
   labelList: Promise<helper.Label[]> | null;
+  defaultBranch: string;
 }
 
 const defaults = {
@@ -126,19 +127,6 @@ function findCommentByContent(
   return comments.find((c) => c.body.trim() === content);
 }
 
-async function retrieveDefaultConfig(
-  repoPath: string,
-  branchName: string
-): Promise<RenovateConfig> {
-  const contents = await helper.getRepoContents(
-    repoPath,
-    defaultConfigFile,
-    branchName
-  );
-
-  return JSON.parse(contents.contentString);
-}
-
 function getLabelList(): Promise<helper.Label[]> {
   if (config.labelList === null) {
     const repoLabels = helper
@@ -176,6 +164,19 @@ async function lookupLabelByName(name: string): Promise<number | null> {
   logger.debug(`lookupLabelByName(${name})`);
   const labelList = await getLabelList();
   return labelList.find((l) => l.name === name)?.id;
+}
+
+async function getJsonFile(fileName: string): Promise<any | null> {
+  try {
+    const contents = await helper.getRepoContents(
+      fileName,
+      defaultConfigFile,
+      config.defaultBranch
+    );
+    return JSON.parse(contents.contentString);
+  } catch (err) /* istanbul ignore next */ {
+    return null;
+  }
 }
 
 const platform: Platform = {
@@ -273,20 +274,12 @@ const platform: Platform = {
     }
 
     // Determine author email and branches
-    const defaultBranch = repo.default_branch;
-    logger.debug(`${repository} default branch = ${defaultBranch}`);
+    config.defaultBranch = repo.default_branch;
+    logger.debug(`${repository} default branch = ${config.defaultBranch}`);
 
     // Optionally check if Renovate is disabled by attempting to fetch default configuration file
     if (optimizeForDisabled) {
-      try {
-        renovateConfig = await retrieveDefaultConfig(
-          config.repository,
-          defaultBranch
-        );
-      } catch (err) {
-        // Do nothing
-      }
-
+      renovateConfig = await getJsonFile(config.repository);
       if (renovateConfig && renovateConfig.enabled === false) {
         throw new Error(REPOSITORY_DISABLED);
       }
@@ -314,7 +307,7 @@ const platform: Platform = {
     config.labelList = null;
 
     return {
-      defaultBranch,
+      defaultBranch: config.defaultBranch,
       isFork: !!repo.fork,
     };
   },
