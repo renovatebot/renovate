@@ -27,7 +27,7 @@ describe('workers/repository/process/index', () => {
       git.branchExists.mockReturnValueOnce(false);
       git.branchExists.mockReturnValueOnce(true);
       const res = await extractDependencies(config);
-      await updateRepo(config, res.branches, res.branchList);
+      await updateRepo(config, res.branches);
       expect(res).toMatchSnapshot();
     });
   });
