@@ -2,23 +2,22 @@ import { RenovateConfig, mergeChildConfig } from '../../../config';
 import { logger } from '../../../logger';
 import { PackageFile } from '../../../manager/common';
 import { platform } from '../../../platform';
-import { branchExists, checkoutBranch } from '../../../util/git';
+import { branchExists } from '../../../util/git';
 import { addSplit } from '../../../util/split';
 import { BranchConfig } from '../../common';
 import { ExtractResult, extract, lookup, update } from './extract-update';
 import { WriteUpdateResult } from './write';
 
-async function getBaseBranchConfig(
+function getBaseBranchConfig(
   baseBranch: string,
   config: RenovateConfig
-): Promise<RenovateConfig> {
+): RenovateConfig {
   logger.debug(`baseBranch: ${baseBranch}`);
   const baseBranchConfig = mergeChildConfig(config, { baseBranch });
   if (config.baseBranches.length > 1) {
     baseBranchConfig.branchPrefix += `${baseBranch}-`;
     baseBranchConfig.hasBaseBranches = true;
   }
-  baseBranchConfig.baseBranchSha = await checkoutBranch(baseBranch);
   return baseBranchConfig;
 }
 
@@ -67,7 +66,7 @@ export async function extractDependencies(
     const extracted: Record<string, Record<string, PackageFile[]>> = {};
     for (const baseBranch of config.baseBranches) {
       if (branchExists(baseBranch)) {
-        const baseBranchConfig = await getBaseBranchConfig(baseBranch, config);
+        const baseBranchConfig = getBaseBranchConfig(baseBranch, config);
         extracted[baseBranch] = await extract(baseBranchConfig);
       } else {
         logger.warn({ baseBranch }, 'Base branch does not exist - skipping');
@@ -76,7 +75,7 @@ export async function extractDependencies(
     addSplit('extract');
     for (const baseBranch of config.baseBranches) {
       if (branchExists(baseBranch)) {
-        const baseBranchConfig = await getBaseBranchConfig(baseBranch, config);
+        const baseBranchConfig = getBaseBranchConfig(baseBranch, config);
         const packageFiles = extracted[baseBranch];
         const baseBranchRes = await lookup(baseBranchConfig, packageFiles);
         res.branches = res.branches.concat(baseBranchRes?.branches);
@@ -96,8 +95,7 @@ export async function extractDependencies(
 
 export function updateRepo(
   config: RenovateConfig,
-  branches: BranchConfig[],
-  branchList: string[]
+  branches: BranchConfig[]
 ): Promise<WriteUpdateResult | undefined> {
   logger.debug('processRepo()');
 

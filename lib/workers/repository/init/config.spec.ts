@@ -93,7 +93,7 @@ describe('workers/repository/init/config', () => {
     it('throws on error', () => {
       expect(() =>
         checkForRepoConfigError({
-          error: { validationError: '', validationMessage: '' },
+          configFileParseError: { validationError: '', validationMessage: '' },
         })
       ).toThrow();
     });
@@ -121,7 +121,7 @@ describe('workers/repository/init/config', () => {
         warnings: [],
         errors: [],
       });
-      expect(await mergeRenovateConfig(config)).toMatchSnapshot();
+      expect(await mergeRenovateConfig(config)).not.toBeUndefined();
     });
   });
 });
