@@ -50,6 +50,8 @@ describe('platform/git', () => {
     await repo.addConfig('user.email', 'custom@example.com');
     await repo.commit('custom message');
 
+    await repo.checkoutBranch('renovate/equal_branch', 'master');
+
     await repo.checkout('master');
   });
 
@@ -60,15 +62,13 @@ describe('platform/git', () => {
     const repo = Git(origin.path);
     await repo.clone(base.path, '.', ['--bare']);
     tmpDir = await tmp.dir({ unsafeCleanup: true });
-    git.initRepo({
+    await git.initRepo({
       localDir: tmpDir.path,
       url: origin.path,
-      extraCloneOpts: {
-        '--config': 'extra.clone.config=test-extra-config-value',
-      },
       gitAuthorName: 'Jest',
       gitAuthorEmail: 'Jest@example.com',
     });
+    await git.setBranchPrefix('renovate/');
     await git.syncGit();
   });
 
@@ -81,15 +81,12 @@ describe('platform/git', () => {
     await base.cleanup();
   });
 
-  describe('setBaseBranch(branchName)', () => {
+  describe('checkoutBranch(branchName)', () => {
     it('sets the base branch as master', async () => {
-      await expect(git.setBranch('master')).resolves.not.toThrow();
+      await expect(git.checkoutBranch('master')).resolves.not.toThrow();
     });
     it('sets non-master base branch', async () => {
-      await expect(git.setBranch('develop')).resolves.not.toThrow();
-    });
-    it('should throw if branch does not exist', async () => {
-      await expect(git.setBranch('not_found')).rejects.toMatchSnapshot();
+      await expect(git.checkoutBranch('develop')).resolves.not.toThrow();
     });
   });
   describe('getFileList()', () => {
@@ -100,7 +97,7 @@ describe('platform/git', () => {
       const repo = Git(base.path).silent(true);
       await repo.submoduleAdd(base.path, 'submodule');
       await repo.commit('Add submodule');
-      git.initRepo({
+      await git.initRepo({
         localDir: tmpDir.path,
         url: base.path,
       });
@@ -111,42 +108,34 @@ describe('platform/git', () => {
     });
   });
   describe('branchExists(branchName)', () => {
-    it('should return true if found', async () => {
-      expect(await git.branchExists('renovate/future_branch')).toBe(true);
-      expect(await git.branchExists('renovate/future_branch')).toBe(true); // should come from cache
+    it('should return true if found', () => {
+      expect(git.branchExists('renovate/future_branch')).toBe(true);
     });
-    it('should return false if not found', async () => {
-      expect(await git.branchExists('not_found')).toBe(false);
+    it('should return false if not found', () => {
+      expect(git.branchExists('not_found')).toBe(false);
     });
   });
-  describe('getAllRenovateBranches()', () => {
-    it('should return all renovate branches', async () => {
-      await git.setBranchPrefix('renovate/');
-      const res = await git.getAllRenovateBranches('renovate/');
+  describe('getBranchList()', () => {
+    it('should return all branches', () => {
+      const res = git.getBranchList();
       expect(res).toContain('renovate/past_branch');
       expect(res).toContain('renovate/future_branch');
-      expect(res).not.toContain('master');
+      expect(res).toContain('master');
     });
   });
   describe('isBranchStale()', () => {
-    beforeEach(async () => {
-      await git.syncGit();
-      await git.setBranch('master');
-    });
     it('should return false if same SHA as master', async () => {
       expect(await git.isBranchStale('renovate/future_branch')).toBe(false);
     });
     it('should return true if SHA different from master', async () => {
       expect(await git.isBranchStale('renovate/past_branch')).toBe(true);
     });
-    it('should throw if branch does not exist', async () => {
-      await expect(git.isBranchStale('not_found')).rejects.toMatchSnapshot();
+    it('should return result even if non-default and not under branchPrefix', async () => {
+      expect(await git.isBranchStale('develop')).toBe(true);
+      expect(await git.isBranchStale('develop')).toBe(true); // cache
     });
   });
   describe('isBranchModified()', () => {
-    it('should throw if branch does not exist', async () => {
-      await expect(git.isBranchModified('not_found')).rejects.toMatchSnapshot();
-    });
     it('should return true when author matches', async () => {
       expect(await git.isBranchModified('renovate/future_branch')).toBe(false);
       expect(await git.isBranchModified('renovate/future_branch')).toBe(false);
@@ -157,29 +146,18 @@ describe('platform/git', () => {
   });
 
   describe('getBranchCommit(branchName)', () => {
-    it('should return same value for equal refs', async () => {
-      const hex = await git.getBranchCommit('renovate/past_branch');
-      expect(hex).toBe(await git.getBranchCommit('master~1'));
+    it('should return same value for equal refs', () => {
+      const hex = git.getBranchCommit('renovate/equal_branch');
+      expect(hex).toBe(git.getBranchCommit('master'));
       expect(hex).toHaveLength(40);
     });
-    it('should throw if branch does not exist', async () => {
-      await expect(git.getBranchCommit('not_found')).rejects.toMatchSnapshot();
-    });
-  });
-
-  describe('createBranch(branchName, sha)', () => {
-    it('resets existing branch', async () => {
-      const hex = await git.getBranchCommit('renovate/past_branch');
-      expect(await git.getBranchCommit('renovate/future_branch')).not.toBe(hex);
-      await git.createBranch('renovate/future_branch', hex);
-      expect(await git.getBranchCommit('renovate/future_branch')).toBe(hex);
+    it('should return null', () => {
+      expect(git.getBranchCommit('not_found')).toBeNull();
     });
   });
 
   describe('getBranchFiles(branchName)', () => {
     it('detects changed files compared to current base branch', async () => {
-      const hex = await git.getBranchCommit('master');
-      await git.createBranch('renovate/branch_with_changes', hex);
       const file = {
         name: 'some-new-file',
         contents: 'some new-contents',
@@ -198,7 +176,6 @@ describe('platform/git', () => {
 
   describe('mergeBranch(branchName)', () => {
     it('should perform a branch merge', async () => {
-      await git.setBranchPrefix('renovate/');
       await git.mergeBranch('renovate/future_branch');
       const merged = await Git(origin.path).branch([
         '--verbose',
@@ -238,9 +215,7 @@ describe('platform/git', () => {
       expect(res).toBeNull();
     });
     it('returns null for 404', async () => {
-      await expect(
-        git.getFile('some-path', 'some-branch')
-      ).rejects.toMatchSnapshot();
+      expect(await git.getFile('some-path', 'some-branch')).toBeNull();
     });
   });
   describe('commitFiles({branchName, files, message})', () => {
@@ -365,20 +340,20 @@ describe('platform/git', () => {
       await repo.commit('past message2');
       await repo.checkout('master');
 
-      expect(await git.branchExists('test')).toBeFalsy();
+      expect(git.branchExists('test')).toBeFalsy();
 
       expect(await git.getCommitMessages()).toMatchSnapshot();
 
-      await git.setBranch('develop');
+      await git.checkoutBranch('develop');
 
-      git.initRepo({
+      await git.initRepo({
         localDir: tmpDir.path,
         url: base.path,
       });
 
-      expect(await git.branchExists('test')).toBeTruthy();
+      expect(git.branchExists('test')).toBeTruthy();
 
-      await git.setBranch('test');
+      await git.checkoutBranch('test');
 
       const msg = await git.getCommitMessages();
       expect(msg).toMatchSnapshot();
@@ -393,16 +368,15 @@ describe('platform/git', () => {
       await repo.commit('past message2');
       await repo.checkout('master');
 
-      git.initRepo({
+      await git.initRepo({
         localDir: tmpDir.path,
         url: base.path,
       });
 
       await git.setBranchPrefix('renovate/');
-      expect(await git.branchExists('renovate/test')).toBe(true);
-      const cid = await git.getBranchCommit('renovate/test');
+      expect(git.branchExists('renovate/test')).toBe(true);
 
-      git.initRepo({
+      await git.initRepo({
         localDir: tmpDir.path,
         url: base.path,
       });
@@ -411,8 +385,7 @@ describe('platform/git', () => {
       await repo.commit('past message3', ['--amend']);
 
       await git.setBranchPrefix('renovate/');
-      expect(await git.branchExists('renovate/test')).toBe(true);
-      expect(await git.getBranchCommit('renovate/test')).not.toEqual(cid);
+      expect(git.branchExists('renovate/test')).toBe(true);
     });
 
     it('should fail clone ssh submodule', async () => {
@@ -431,7 +404,7 @@ describe('platform/git', () => {
         'test',
       ]);
       await repo.commit('Add submodule');
-      git.initRepo({
+      await git.initRepo({
         localDir: tmpDir.path,
         url: base.path,
       });
@@ -441,6 +414,16 @@ describe('platform/git', () => {
     });
 
     it('should use extra clone configuration', async () => {
+      await fs.emptyDir(tmpDir.path);
+      await git.initRepo({
+        localDir: tmpDir.path,
+        url: origin.path,
+        extraCloneOpts: {
+          '--config': 'extra.clone.config=test-extra-config-value',
+        },
+      });
+      git.getBranchCommit('master');
+      await git.syncGit();
       const repo = Git(tmpDir.path).silent(true);
       const res = (await repo.raw(['config', 'extra.clone.config'])).trim();
       expect(res).toBe('test-extra-config-value');

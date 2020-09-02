@@ -22,12 +22,12 @@ describe('workers/repository/process/index', () => {
     it('processes baseBranches', async () => {
       extract.mockResolvedValue({} as never);
       config.baseBranches = ['branch1', 'branch2'];
-      git.branchExists.mockResolvedValueOnce(false);
-      git.branchExists.mockResolvedValueOnce(true);
-      git.branchExists.mockResolvedValueOnce(false);
-      git.branchExists.mockResolvedValueOnce(true);
+      git.branchExists.mockReturnValueOnce(false);
+      git.branchExists.mockReturnValueOnce(true);
+      git.branchExists.mockReturnValueOnce(false);
+      git.branchExists.mockReturnValueOnce(true);
       const res = await extractDependencies(config);
-      await updateRepo(config, res.branches, res.branchList);
+      await updateRepo(config, res.branches);
       expect(res).toMatchSnapshot();
     });
   });

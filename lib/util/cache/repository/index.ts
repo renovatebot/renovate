@@ -3,6 +3,7 @@ import { join } from 'upath';
 import { RenovateConfig, RepositoryCacheConfig } from '../../../config/common';
 import { logger } from '../../../logger';
 import { PackageFile } from '../../../manager/common';
+import { RepoInitConfig } from '../../../workers/repository/init/common';
 
 export interface BaseBranchCache {
   sha: string; // branch commit sha
@@ -12,13 +13,7 @@ export interface BaseBranchCache {
 
 export interface Cache {
   repository?: string;
-  init?: {
-    defaultBranch?: string;
-    defaultBranchSha?: string;
-    configFile?: string;
-    configFileContents?: RenovateConfig;
-    resolvedConfig?: RenovateConfig;
-  };
+  init?: RepoInitConfig;
   scan?: Record<string, BaseBranchCache>;
 }
 
@@ -65,7 +60,7 @@ export async function initialize(config: RenovateConfig): Promise<void> {
 
 export function getCache(): Cache {
   cache = cache || Object.create({});
-  cache.init = cache.init || Object.create({});
+  delete cache.init;
   cache.scan = cache.scan || Object.create({});
   return cache;
 }

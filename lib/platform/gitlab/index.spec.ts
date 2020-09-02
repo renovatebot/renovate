@@ -29,9 +29,9 @@ describe('platform/gitlab', () => {
     hostRules = require('../../util/host-rules');
     jest.mock('../../util/git');
     git = require('../../util/git');
-    git.branchExists.mockResolvedValue(true);
+    git.branchExists.mockReturnValue(true);
     git.isBranchStale.mockResolvedValue(true);
-    git.getBranchCommit.mockResolvedValue(
+    git.getBranchCommit.mockReturnValue(
       '0d9c7726c3d628b7e28af234595cfd20febdbf8e'
     );
     hostRules.find.mockReturnValue({
@@ -329,24 +329,6 @@ describe('platform/gitlab', () => {
       expect(httpMock.getTrace()).toMatchSnapshot();
     });
   });
-  describe('setBaseBranch(branchName)', () => {
-    it('sets the base branch', async () => {
-      httpMock
-        .scope(gitlabApiHost)
-        .get(`/api/v4/projects/some%2Frepo`)
-        .reply(200, {
-          default_branch: 'master',
-          http_url_to_repo: `https://gitlab.com/some/repo.git`,
-        });
-      await gitlab.initRepo({
-        repository: 'some/repo',
-        localDir: '',
-        optimizeForDisabled: false,
-      });
-      await gitlab.setBaseBranch('master');
-      expect(httpMock.getTrace()).toMatchSnapshot();
-    });
-  });
 
   describe('getBranchPr(branchName)', () => {
     it('should return null if no PR exists', async () => {
@@ -482,7 +464,7 @@ describe('platform/gitlab', () => {
     });
     it('throws repository-changed', async () => {
       expect.assertions(2);
-      git.branchExists.mockResolvedValue(false);
+      git.branchExists.mockReturnValue(false);
       await initRepo();
       await expect(gitlab.getBranchStatus('somebranch', [])).rejects.toThrow(
         REPOSITORY_CHANGED

@@ -89,11 +89,13 @@ If you need any further assistance then you can also [request help here](${confi
   prBody = prBody.replace('{{PRLIST}}\n', getPrList(config, branches));
   // istanbul ignore if
   if (config.prHeader) {
-    prBody = (config.prHeader || '') + '\n\n' + prBody;
+    const prHeader = String(config.prHeader || '');
+    prBody = `${prHeader}\n\n${prBody}`;
   }
   // istanbul ignore if
   if (config.prFooter) {
-    prBody = prBody + '\n---\n\n' + config.prFooter + '\n';
+    const prFooter = String(config.prFooter);
+    prBody = `${prBody}\n---\n\n${prFooter}\n`;
   }
   logger.trace('prBody:\n' + prBody);
 

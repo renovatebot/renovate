@@ -14,7 +14,7 @@ export async function getPrHourlyRemaining(
     const currentHourStart = moment({
       hour: moment().hour(),
     });
-    logger.debug('currentHourStart=' + currentHourStart);
+    logger.debug(`currentHourStart=${String(currentHourStart)}`);
     try {
       const soFarThisHour = prList.filter(
         (pr) =>
@@ -40,15 +40,15 @@ export async function getPrHourlyRemaining(
   return 99;
 }
 
-export async function getConcurrentPrsRemaining(
+export function getConcurrentPrsRemaining(
   config: RenovateConfig,
   branches: BranchConfig[]
-): Promise<number> {
+): number {
   if (config.prConcurrentLimit) {
     logger.debug(`Enforcing prConcurrentLimit (${config.prConcurrentLimit})`);
     let currentlyOpen = 0;
     for (const branch of branches) {
-      if (await branchExists(branch.branchName)) {
+      if (branchExists(branch.branchName)) {
         currentlyOpen += 1;
       }
     }
@@ -65,7 +65,7 @@ export async function getPrsRemaining(
   branches: BranchConfig[]
 ): Promise<number> {
   const hourlyRemaining = await getPrHourlyRemaining(config);
-  const concurrentRemaining = await getConcurrentPrsRemaining(config, branches);
+  const concurrentRemaining = getConcurrentPrsRemaining(config, branches);
   return hourlyRemaining < concurrentRemaining
     ? hourlyRemaining
     : concurrentRemaining;

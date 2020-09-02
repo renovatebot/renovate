@@ -39,18 +39,18 @@ describe('workers/repository/process/limits', () => {
     });
   });
   describe('getConcurrentPrsRemaining()', () => {
-    it('calculates concurrent limit remaining', async () => {
+    it('calculates concurrent limit remaining', () => {
       config.prConcurrentLimit = 20;
-      git.branchExists.mockResolvedValueOnce(true);
+      git.branchExists.mockReturnValueOnce(true);
       const branches: BranchConfig[] = [
         { branchName: 'test', upgrades: [] },
         { branchName: undefined, upgrades: [] },
       ];
-      const res = await limits.getConcurrentPrsRemaining(config, branches);
+      const res = limits.getConcurrentPrsRemaining(config, branches);
       expect(res).toEqual(19);
     });
-    it('returns 99 if no concurrent limit', async () => {
-      const res = await limits.getConcurrentPrsRemaining(config, []);
+    it('returns 99 if no concurrent limit', () => {
+      const res = limits.getConcurrentPrsRemaining(config, []);
       expect(res).toEqual(99);
     });
   });
