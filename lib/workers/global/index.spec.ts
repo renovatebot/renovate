@@ -59,7 +59,7 @@ describe('lib/workers/global', () => {
   });
 
   it('processes repositories break', async () => {
-    limits.getLimitRemaining = jest.fn(() => 0);
+    limits.isLimitReached = jest.fn(() => true);
     configParser.parseConfigs.mockResolvedValueOnce({
       gitAuthor: 'a@b.com',
       enabled: true,

@@ -1,6 +1,9 @@
 import { NormalizedOptions } from 'got';
 import { getName, partial } from '../../../test/util';
-import { PLATFORM_TYPE_GITEA } from '../../constants/platforms';
+import {
+  PLATFORM_TYPE_GITEA,
+  PLATFORM_TYPE_GITLAB,
+} from '../../constants/platforms';
 import { applyAuthorization, removeAuthorization } from './auth';
 import { GotOptions } from './types';
 
@@ -62,6 +65,48 @@ describe(getName(__filename), () => {
           },
           "hostType": "gitea",
           "token": "XXXX",
+        }
+      `);
+    });
+
+    it(`gitlab personal access token`, () => {
+      const opts: GotOptions = {
+        headers: {},
+        // Personal Access Token is exactly 20 characters long
+        token: '01234567890123456789',
+        hostType: PLATFORM_TYPE_GITLAB,
+      };
+
+      applyAuthorization(opts);
+
+      expect(opts).toMatchInlineSnapshot(`
+        Object {
+          "headers": Object {
+            "Private-token": "01234567890123456789",
+          },
+          "hostType": "gitlab",
+          "token": "01234567890123456789",
+        }
+      `);
+    });
+
+    it(`gitlab oauth token`, () => {
+      const opts: GotOptions = {
+        headers: {},
+        token:
+          'a40bdd925a0c0b9c4cdd19d101c0df3b2bcd063ab7ad6706f03bcffcec01e863',
+        hostType: PLATFORM_TYPE_GITLAB,
+      };
+
+      applyAuthorization(opts);
+
+      expect(opts).toMatchInlineSnapshot(`
+        Object {
+          "headers": Object {
+            "authorization": "Bearer a40bdd925a0c0b9c4cdd19d101c0df3b2bcd063ab7ad6706f03bcffcec01e863",
+          },
+          "hostType": "gitlab",
+          "token": "a40bdd925a0c0b9c4cdd19d101c0df3b2bcd063ab7ad6706f03bcffcec01e863",
         }
       `);
     });
