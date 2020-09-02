@@ -20,10 +20,8 @@ export function setMaxLimit(key: Limit, max: unknown, allowZero = false): void {
   if (typeof max === 'number') {
     const maxVal = max > 0 || (allowZero && max <= 0) ? Math.max(max, 0) : null;
     logger.debug(`${key} limit = ${maxVal}`);
-    const limit = limits.get(key);
     limits.set(key, {
       current: 0,
-      ...limit,
       max: maxVal,
     });
   }
