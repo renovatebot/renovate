@@ -1069,8 +1069,9 @@ const options: RenovateOptions[] = [
   {
     name: 'semanticCommits',
     description: 'Enable semantic commit prefixes for commits and PR titles',
-    type: 'boolean',
-    default: null,
+    type: 'string',
+    allowedValues: ['auto', 'enabled', 'disabled'],
+    default: 'auto',
   },
   {
     name: 'semanticCommitType',

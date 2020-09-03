@@ -1,6 +1,7 @@
 import { PLATFORM_TYPE_GITHUB } from '../constants/platforms';
 import { getConfig } from './defaults';
 import * as configMigration from './migration';
+import { MigratedConfig } from './migration';
 import { RenovateSharedConfig, RenovateConfig as _RenovateConfig } from '.';
 
 const defaultConfig = getConfig();
@@ -129,7 +130,7 @@ describe('config/migration', () => {
         ],
         raiseDeprecationWarnings: false,
       };
-      const parentConfig = { ...defaultConfig, semanticCommits: false };
+      const parentConfig = { ...defaultConfig, semanticCommits: 'disabled' };
       const { isMigrated, migratedConfig } = configMigration.migrateConfig(
         config,
         parentConfig
@@ -269,7 +270,6 @@ describe('config/migration', () => {
     it('it does not migrate config', () => {
       const config: RenovateConfig = {
         enabled: true,
-        semanticCommits: true,
         separateMinorPatch: true,
       };
       const { isMigrated, migratedConfig } = configMigration.migrateConfig(
@@ -402,6 +402,25 @@ describe('config/migration', () => {
       );
       expect(migratedConfig).toMatchSnapshot();
       expect(isMigrated).toBe(true);
+    });
+    it('it migrates semanticCommits', () => {
+      let config: RenovateConfig;
+      let res: MigratedConfig;
+
+      config = { semanticCommits: true as never };
+      res = configMigration.migrateConfig(config);
+      expect(res.isMigrated).toBe(true);
+      expect(res.migratedConfig).toMatchObject({ semanticCommits: 'enabled' });
+
+      config = { semanticCommits: false as never };
+      res = configMigration.migrateConfig(config);
+      expect(res.isMigrated).toBe(true);
+      expect(res.migratedConfig).toMatchObject({ semanticCommits: 'disabled' });
+
+      config = { semanticCommits: null as never };
+      res = configMigration.migrateConfig(config);
+      expect(res.isMigrated).toBe(true);
+      expect(res.migratedConfig).toMatchObject({ semanticCommits: 'auto' });
     });
   });
 });
