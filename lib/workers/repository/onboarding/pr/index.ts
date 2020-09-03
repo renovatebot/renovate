@@ -65,7 +65,10 @@ If you need any further assistance then you can also [request help here](${confi
     prBody = prBody.replace('{{PACKAGE FILES}}\n', '');
   }
   let configDesc = '';
-  if (await isBranchModified(config.onboardingBranch)) {
+  // istanbul ignore if
+  if (config.dryRun) {
+    logger.info(`DRY-RUN: Would check branch ${config.onboardingBranch}`);
+  } else if (await isBranchModified(config.onboardingBranch)) {
     configDesc = emojify(
       `### Configuration\n\n:abcd: Renovate has detected a custom config for this PR. Feel free to ask for [help](${config.productLinks.help}) if you have any doubts and would like it reviewed.\n\n`
     );
