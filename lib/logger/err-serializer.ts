@@ -1,60 +1,47 @@
 import is from '@sindresorhus/is';
+import { RequestError } from 'got';
+import { clone } from '../util/clone';
 
 Error.stackTraceLimit = 20;
 
-interface Err {
-  body?: unknown;
-  response?: {
-    body?: unknown;
-    url?: unknown;
-  };
-  message?: unknown;
-  stack?: unknown;
-  gotOptions?: {
-    auth?: unknown;
-    headers?: unknown;
-  };
-}
-
-export default function errSerializer(err: Err): any {
+export default function errSerializer(err: Error): any {
   const response: Record<string, unknown> = {
     ...err,
   };
-  if (err.body) {
-    response.body = err.body;
-  } else if (err.response?.body) {
-    response.body = err.response.body;
-  }
-  if (err.message) {
+
+  // Can maybe removed?
+  if (!response.message && err.message) {
     response.message = err.message;
   }
-  if (err.stack) {
+
+  // Can maybe removed?
+  if (!response.stack && err.stack) {
     response.stack = err.stack;
   }
-  if (err.response?.url) {
-    response.url = err.response.url;
-  }
-  if (is.plainObject(response.gotOptions)) {
-    if (is.string(response.gotOptions.auth)) {
-      response.gotOptions.auth = response.gotOptions.auth.replace(
-        /:.*/,
-        ':***********'
-      );
+
+  // handle got error
+  if (err instanceof RequestError) {
+    const options: Record<string, unknown> = {
+      headers: clone(err.options.headers),
+      url: err.options.url?.toString(),
+    };
+    response.options = options;
+
+    for (const k of ['username', 'password', 'method', 'http2']) {
+      options[k] = err.options[k];
     }
-    if (is.plainObject(response.gotOptions.headers)) {
-      const headers = response.gotOptions.headers;
-      const redactedHeaders = [
-        'authorization',
-        'private-header',
-        'Private-header',
-      ];
-      redactedHeaders.forEach((header) => {
-        if (headers[header]) {
-          headers[header] = '** redacted **';
-        }
-      });
+
+    if (err.response) {
+      response.response = {
+        statusCode: err.response?.statusCode,
+        statusMessage: err.response?.statusMessage,
+        body: clone(err.response.body),
+        headers: clone(err.response.headers),
+      };
     }
   }
+
+  // already done by `sanitizeValue` ?
   const redactedFields = ['message', 'stack', 'stdout', 'stderr'];
   for (const field of redactedFields) {
     const val = response[field];
