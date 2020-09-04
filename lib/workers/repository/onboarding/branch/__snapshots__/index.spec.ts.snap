@@ -7,3 +7,10 @@ exports[`workers/repository/onboarding/branch checkOnboardingBranch has default 
 }
 "
 `;
+
+exports[`workers/repository/onboarding/branch checkOnboardingBranch uses semanticCommit from onboarding config when available 1`] = `
+"{
+  \\"semanticCommits\\": true
+}
+"
+`;

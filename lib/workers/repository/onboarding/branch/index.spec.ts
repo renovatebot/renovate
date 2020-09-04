@@ -40,6 +40,18 @@ describe('workers/repository/onboarding/branch', () => {
         git.commitFiles.mock.calls[0][0].files[0].contents
       ).toMatchSnapshot();
     });
+    it('uses semanticCommit from onboarding config when available', async () => {
+      git.getFileList.mockResolvedValue(['package.json']);
+      fs.readLocalFile.mockResolvedValue('{}');
+      await checkOnboardingBranch({
+        ...config,
+        semanticCommits: false,
+        onboardingConfig: { semanticCommits: true },
+      });
+      expect(
+        git.commitFiles.mock.calls[0][0].files[0].contents
+      ).toMatchSnapshot();
+    });
     it('handles skipped onboarding combined with requireConfig = false', async () => {
       config.requireConfig = false;
       config.onboarding = false;
