@@ -3,10 +3,10 @@ import is from '@sindresorhus/is';
 Error.stackTraceLimit = 20;
 
 interface Err {
-  url?: unknown;
   body?: unknown;
   response?: {
     body?: unknown;
+    url?: unknown;
   };
   message?: unknown;
   stack?: unknown;
@@ -31,8 +31,8 @@ export default function errSerializer(err: Err): any {
   if (err.stack) {
     response.stack = err.stack;
   }
-  if (err.url) {
-    response.url = err.url;
+  if (err.response?.url) {
+    response.url = err.response?.url;
   }
   if (response.gotOptions) {
     if (is.string(response.gotOptions.auth)) {
