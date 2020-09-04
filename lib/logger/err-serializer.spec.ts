@@ -6,9 +6,9 @@ describe('logger/err-serializer', () => {
       a: 1,
       b: 2,
       message: 'some message',
-      url: 'some/path',
       response: {
         body: 'some response body',
+        url: 'some/path',
       },
       gotOptions: {
         headers: {

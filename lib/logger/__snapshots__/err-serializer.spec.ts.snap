@@ -14,6 +14,7 @@ Object {
   "message": "some message",
   "response": Object {
     "body": "some response body",
+    "url": "some/path",
   },
   "url": "some/path",
 }
