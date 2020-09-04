@@ -35,7 +35,7 @@ describe('workers/repository/onboarding/branch', () => {
     it('has default onboarding config', async () => {
       git.getFileList.mockResolvedValue(['package.json']);
       fs.readLocalFile.mockResolvedValue('{}');
-      await checkOnboardingBranch(config);
+      await checkOnboardingBranch({ ...config, semanticCommits: false });
       expect(
         git.commitFiles.mock.calls[0][0].files[0].contents
       ).toMatchSnapshot();

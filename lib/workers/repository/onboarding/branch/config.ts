@@ -6,7 +6,7 @@ export function getOnboardingConfig(config: RenovateConfig): string {
   const onboardingConfig = clone(config.onboardingConfig);
   if (
     typeof onboardingConfig.semanticCommits === 'undefined' &&
-    typeof config.semanticCommits !== 'undefined'
+    typeof config.semanticCommits === 'boolean'
   ) {
     onboardingConfig.semanticCommits = config.semanticCommits;
   }

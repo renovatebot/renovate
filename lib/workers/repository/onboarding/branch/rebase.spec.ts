@@ -10,6 +10,7 @@ describe('workers/repository/onboarding/branch/rebase', () => {
       jest.resetAllMocks();
       config = {
         ...defaultConfig,
+        semanticCommits: true,
       };
     });
     it('does not rebase modified branch', async () => {
@@ -18,12 +19,14 @@ describe('workers/repository/onboarding/branch/rebase', () => {
       expect(git.commitFiles).toHaveBeenCalledTimes(0);
     });
     it('does nothing if branch is up to date', async () => {
-      const contents =
-        JSON.stringify(defaultConfig.onboardingConfig, null, 2) + '\n';
-      git.getFile
-        .mockResolvedValueOnce(contents) // package.json
-        .mockResolvedValueOnce(contents); // renovate.json
+      const onboardingConfig = {
+        ...defaultConfig.onboardingConfig,
+        semanticCommits: config.semanticCommits,
+      };
+      const contents = JSON.stringify(onboardingConfig, null, 2) + '\n';
+      git.getFile.mockResolvedValueOnce(contents); // renovate.json
       await rebaseOnboardingBranch(config);
+      expect(git.getFile).toHaveBeenCalledTimes(1);
       expect(git.commitFiles).toHaveBeenCalledTimes(0);
     });
     it('rebases onboarding branch', async () => {
