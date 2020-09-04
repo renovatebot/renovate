@@ -19,6 +19,7 @@ export interface BbsPr extends Pr {
   version?: number;
 }
 
+// eslint-disable-next-line no-shadow
 export enum BbsRestPrState {
   Declined = 'DECLINED',
   Open = 'OPEN',

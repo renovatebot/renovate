@@ -161,6 +161,7 @@ function commonOrder(token: Token): number {
   return 3;
 }
 
+// eslint-disable-next-line no-shadow
 export enum QualifierTypes {
   Alpha = 1,
   Beta,

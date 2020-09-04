@@ -1,3 +1,4 @@
+// eslint-disable-next-line no-shadow
 export enum TokenType {
   Number = 1,
   String,
@@ -79,6 +80,7 @@ export function tokenize(versionStr: string): Token[] | null {
   return result;
 }
 
+// eslint-disable-next-line no-shadow
 export enum QualifierRank {
   Dev = -1,
   Default = 0,
@@ -205,6 +207,7 @@ interface PrefixRange {
   tokens: Token[];
 }
 
+// eslint-disable-next-line no-shadow
 export enum RangeBound {
   Inclusive = 1,
   Exclusive,

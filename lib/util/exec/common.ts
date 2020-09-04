@@ -6,6 +6,7 @@ import { promisify } from 'util';
 
 export type Opt<T> = T | null | undefined;
 
+// eslint-disable-next-line no-shadow
 export enum BinarySource {
   Auto = 'auto',
   Docker = 'docker',

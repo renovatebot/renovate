@@ -54,6 +54,8 @@ async function getDatasource(goModule: string): Promise<DataSource | null> {
           .replace(/\/$/, ''),
       };
     }
+    // TODO: fix me
+    // eslint-disable-next-line @typescript-eslint/prefer-regexp-exec
     if (goSourceUrl?.match('^https://[^/]*gitlab.[^/]*/.+')) {
       const gitlabRegExp = /^(https:\/\/[^/]*gitlab.[^/]*)\/(.*)$/;
       const gitlabRes = gitlabRegExp.exec(goSourceUrl);

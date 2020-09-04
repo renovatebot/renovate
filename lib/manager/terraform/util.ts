@@ -8,6 +8,7 @@ export interface ExtractionResult {
   dependencies: PackageDependency[];
 }
 
+// eslint-disable-next-line no-shadow
 export enum TerraformDependencyTypes {
   unknown = 'unknown',
   module = 'module',
@@ -20,6 +21,7 @@ export interface TerraformManagerData {
   terraformDependencyType: TerraformDependencyTypes;
 }
 
+// eslint-disable-next-line no-shadow
 export enum TerraformResourceTypes {
   unknown = 'unknown',
   /**

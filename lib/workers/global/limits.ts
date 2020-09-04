@@ -1,5 +1,6 @@
 import { logger } from '../../logger';
 
+// eslint-disable-next-line no-shadow
 export enum Limit {
   Commits = 'Commits',
 }
