@@ -15,6 +15,7 @@ Object {
   "response": Object {
     "body": "some response body",
   },
+  "url": "some/path",
 }
 `;
 

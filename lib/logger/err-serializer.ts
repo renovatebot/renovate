@@ -3,6 +3,7 @@ import is from '@sindresorhus/is';
 Error.stackTraceLimit = 20;
 
 interface Err {
+  url?: unknown;
   body?: unknown;
   response?: {
     body?: unknown;
@@ -30,6 +31,9 @@ export default function errSerializer(err: Err): any {
   if (err.stack) {
     response.stack = err.stack;
   }
+  if (err.url) {
+    response.url = err.url;
+  }
   if (response.gotOptions) {
     if (is.string(response.gotOptions.auth)) {
       response.gotOptions.auth = response.gotOptions.auth.replace(
@@ -54,7 +58,7 @@ export default function errSerializer(err: Err): any {
   for (const field of redactedFields) {
     if (is.string(response[field])) {
       response[field] = response[field].replace(
-        /https:\/\/[^@]*@/g,
+        /https:\/\/[^@]*?@/g,
         'https://**redacted**@'
       );
     }
