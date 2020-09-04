@@ -10,7 +10,7 @@ describe('workers/repository/onboarding/branch/rebase', () => {
       jest.resetAllMocks();
       config = {
         ...defaultConfig,
-        semanticCommits: true,
+        semanticCommits: false,
       };
     });
     it('does not rebase modified branch', async () => {
