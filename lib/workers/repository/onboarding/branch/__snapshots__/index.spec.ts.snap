@@ -2,7 +2,8 @@
 
 exports[`workers/repository/onboarding/branch checkOnboardingBranch has default onboarding config 1`] = `
 "{
-  \\"$schema\\": \\"https://docs.renovatebot.com/renovate-schema.json\\"
+  \\"$schema\\": \\"https://docs.renovatebot.com/renovate-schema.json\\",
+  \\"semanticCommits\\": false
 }
 "
 `;
