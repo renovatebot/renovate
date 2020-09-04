@@ -128,6 +128,7 @@ const patternGroups = {
   wordpress: '^@wordpress/',
   angularmaterial: ['^@angular/material', '^@angular/cdk'],
   'aws-java-sdk': '^com.amazonaws:aws-java-sdk-',
+  fullcalendar: '^@fullcalendar/',
 };
 
 export const presets: Record<string, Preset> = {};
