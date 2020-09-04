@@ -62,9 +62,6 @@ Object {
     "statusCode": 412,
     "statusMessage": "Precondition Failed",
   },
-  "stack": "HTTPError: Response code 412 (Precondition Failed)
-    at onResponse (C:\\\\Users\\\\kriese\\\\projects\\\\gh\\\\renovatebot\\\\renovate\\\\node_modules\\\\got\\\\dist\\\\source\\\\as-promise\\\\index.js:142:28)
-    at processTicksAndRejections (internal/process/task_queues.js:97:5)",
 }
 `;
 

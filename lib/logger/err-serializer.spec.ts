@@ -63,9 +63,14 @@ describe('logger/err-serializer', () => {
 
       expect(httpMock.getTrace()).toMatchSnapshot();
       expect(err).toBeDefined();
-      delete err.timings;
+
       expect(err.response.body).toBeDefined();
       expect(err.options).toBeDefined();
+
+      // remove platform related props
+      delete err.timings;
+      delete err.stack;
+
       // sanitize like Bunyan
       expect(sanitizeValue(err)).toMatchSnapshot();
     });
