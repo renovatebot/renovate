@@ -17,7 +17,7 @@ interface Err {
 }
 
 export default function errSerializer(err: Err): any {
-  const response = {
+  const response: Record<string, unknown> = {
     ...err,
   };
   if (err.body) {
@@ -34,30 +34,32 @@ export default function errSerializer(err: Err): any {
   if (err.response?.url) {
     response.url = err.response.url;
   }
-  if (response.gotOptions) {
+  if (is.plainObject(response.gotOptions)) {
     if (is.string(response.gotOptions.auth)) {
       response.gotOptions.auth = response.gotOptions.auth.replace(
         /:.*/,
         ':***********'
       );
     }
-    if (err.gotOptions.headers) {
+    if (is.plainObject(response.gotOptions.headers)) {
+      const headers = response.gotOptions.headers;
       const redactedHeaders = [
         'authorization',
         'private-header',
         'Private-header',
       ];
       redactedHeaders.forEach((header) => {
-        if (response.gotOptions.headers[header]) {
-          response.gotOptions.headers[header] = '** redacted **';
+        if (headers[header]) {
+          headers[header] = '** redacted **';
         }
       });
     }
   }
   const redactedFields = ['message', 'stack', 'stdout', 'stderr'];
   for (const field of redactedFields) {
-    if (is.string(response[field])) {
-      response[field] = response[field].replace(
+    const val = response[field];
+    if (is.string(val)) {
+      response[field] = val.replace(
         /https:\/\/[^@]*?@/g,
         'https://**redacted**@'
       );
