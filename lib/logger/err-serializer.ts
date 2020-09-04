@@ -32,7 +32,7 @@ export default function errSerializer(err: Err): any {
     response.stack = err.stack;
   }
   if (err.response?.url) {
-    response.url = err.response?.url;
+    response.url = err.response.url;
   }
   if (response.gotOptions) {
     if (is.string(response.gotOptions.auth)) {
