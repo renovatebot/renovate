@@ -8,7 +8,7 @@
     "commander": "6.1.0",
     "eslint": "7.7.0",
     "fs-extra": "9.0.1",
-    "got": "11.5.2",
+    "got": "11.6.0",
     "lodash": "4.17.20",
     "shelljs": "0.8.4",
     "strip-ansi": "6.0.0"
