@@ -107,8 +107,9 @@ function extractDepsFromXml(
           child.valueWithPath('Version') ||
           attr?.VersionOverride ||
           child.valueWithPath('VersionOverride');
-        const match = version?.match(checkVersion);
-        const currentValue = match?.groups?.currentValue?.trim();
+        const currentValue = version
+          ?.match(checkVersion)
+          ?.groups?.currentValue?.trim();
         if (depName && currentValue) {
           results.push({
             datasource: datasourceNuget.id,
