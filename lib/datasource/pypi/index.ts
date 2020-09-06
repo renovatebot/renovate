@@ -1,6 +1,6 @@
 import url from 'url';
 import changelogFilenameRegex from 'changelog-filename-regex';
-import { parse } from 'node-html-parser';
+import { JSDOM } from 'jsdom';
 import { logger } from '../../logger';
 import { Http } from '../../util/http';
 import { ensureTrailingSlash } from '../../util/url';
@@ -195,7 +195,8 @@ async function getSimpleDependency(
     logger.trace({ dependency: packageName }, 'pip package not found');
     return null;
   }
-  const root: HTMLElement = parse(cleanSimpleHtml(dep)) as any;
+  const root: HTMLElement = new JSDOM(cleanSimpleHtml(dep)).window.document
+    .body;
   const links = root.querySelectorAll('a');
   const releases: Releases = {};
   for (const link of Array.from(links)) {
