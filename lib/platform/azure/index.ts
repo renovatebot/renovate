@@ -153,9 +153,10 @@ export async function initRepo({
     hostType: defaults.hostType,
     url: defaults.endpoint,
   });
-  const url =
+  const manualUrl =
     defaults.endpoint +
     `${encodeURIComponent(projectName)}/_git/${encodeURIComponent(repoName)}`;
+  const url = repo.remoteUrl || manualUrl;
   await git.initRepo({
     ...config,
     localDir,
