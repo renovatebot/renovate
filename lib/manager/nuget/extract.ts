@@ -1,6 +1,6 @@
 import * as path from 'path';
 import findUp from 'find-up';
-import { XmlDocument, XmlElement } from 'xmldoc';
+import { XmlDocument } from 'xmldoc';
 import * as datasourceNuget from '../../datasource/nuget';
 import { logger } from '../../logger';
 import { SkipReason } from '../../types';
@@ -87,39 +87,33 @@ async function determineRegistryUrls(
  */
 const checkVersion = /^\s*(?:[[])?(?:(?<currentValue>[^"(,[\]]+)\s*(?:,\s*[)\]]|])?)\s*$/;
 
-function extractDepsFromXml(
-  xmlNode: XmlElement,
-  results: PackageDependency[] = []
-): PackageDependency[] {
-  for (const child of xmlNode.children) {
-    if (child.type === 'element') {
-      const { name, attr } = child;
-      if (
-        [
-          'PackageReference',
-          'DotNetCliToolReference',
-          'GlobalPackageReference',
-        ].includes(name)
-      ) {
-        const depName = attr?.Include || attr?.Update;
-        const version =
-          attr?.Version ||
-          child.valueWithPath('Version') ||
-          attr?.VersionOverride ||
-          child.valueWithPath('VersionOverride');
-        const currentValue = version
-          ?.match(checkVersion)
-          ?.groups?.currentValue?.trim();
-        if (depName && currentValue) {
-          results.push({
-            datasource: datasourceNuget.id,
-            depType: 'nuget',
-            depName,
-            currentValue,
-          });
-        }
-      } else {
-        extractDepsFromXml(child, results);
+function extractDepsFromXml(xmlNode: XmlDocument): PackageDependency[] {
+  const results = [];
+  const itemGroups = xmlNode.childrenNamed('ItemGroup');
+  for (const itemGroup of itemGroups) {
+    const relevantChildren = [
+      ...itemGroup.childrenNamed('PackageReference'),
+      ...itemGroup.childrenNamed('DotNetCliToolReference'),
+      ...itemGroup.childrenNamed('GlobalPackageReference'),
+    ];
+    for (const child of relevantChildren) {
+      const { attr } = child;
+      const depName = attr?.Include || attr?.Update;
+      const version =
+        attr?.Version ||
+        child.valueWithPath('Version') ||
+        attr?.VersionOverride ||
+        child.valueWithPath('VersionOverride');
+      const currentValue = version
+        ?.match(checkVersion)
+        ?.groups?.currentValue?.trim();
+      if (depName && currentValue) {
+        results.push({
+          datasource: datasourceNuget.id,
+          depType: 'nuget',
+          depName,
+          currentValue,
+        });
       }
     }
   }
