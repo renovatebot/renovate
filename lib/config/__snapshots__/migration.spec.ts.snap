@@ -8,12 +8,14 @@ Object {
 
 exports[`config/migration migrateConfig(config, parentConfig) it migrates config 1`] = `
 Object {
+  "additionalBranchPrefix": "{{parentDir}}-",
   "autodiscover": true,
   "automerge": false,
   "automergeType": "branch",
   "baseBranches": Array [
     "next",
   ],
+  "branchPrefix": "renovate/",
   "commitMessage": "{{#if semanticCommitType}}{{semanticCommitType}}{{#if semanticCommitScope}}({{semanticCommitScope}}){{/if}}: {{/if}}some commit message",
   "commitMessageExtra": "{{currentValue}} something",
   "dependencyDashboard": true,

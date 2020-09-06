@@ -33,7 +33,6 @@ describe('lib/util/cache/repository', () => {
       repositoryCache: 'enabled',
     });
     expect(repositoryCache.getCache()).toEqual({
-      init: {},
       repository: 'abc/def',
       scan: {},
     });
@@ -49,6 +48,6 @@ describe('lib/util/cache/repository', () => {
     expect(fs.outputFile.mock.calls).toHaveLength(1);
   });
   it('gets', () => {
-    expect(repositoryCache.getCache()).toEqual({ init: {}, scan: {} });
+    expect(repositoryCache.getCache()).toEqual({ scan: {} });
   });
 });

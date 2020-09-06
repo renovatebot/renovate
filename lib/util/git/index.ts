@@ -17,7 +17,7 @@ import {
 import { logger } from '../../logger';
 import { ExternalHostError } from '../../types/errors/external-host-error';
 import { GitOptions, GitProtocol } from '../../types/git';
-import * as limits from '../../workers/global/limits';
+import { Limit, incLimitedValue } from '../../workers/global/limits';
 import { writePrivateKey } from './private-key';
 
 export * from './private-key';
@@ -112,14 +112,14 @@ let privateKeySet = false;
 
 async function fetchBranchCommits(): Promise<void> {
   config.branchCommits = {};
-  const opts = ['--heads', config.url];
+  const opts = ['ls-remote', '--heads', config.url];
   if (config.extraCloneOpts) {
-    opts.push(
-      ...Object.entries(config.extraCloneOpts).map((e) => `${e[0]}=${e[1]}`)
+    Object.entries(config.extraCloneOpts).forEach((e) =>
+      opts.unshift(e[0], `${e[1]}`)
     );
   }
   try {
-    (await git.listRemote(opts))
+    (await git.raw(opts))
       .split('\n')
       .filter(Boolean)
       .map((line) => line.trim().split(/\s+/))
@@ -238,8 +238,8 @@ export async function syncGit(): Promise<void> {
       // clone only the default branch
       const opts = ['--depth=2'];
       if (config.extraCloneOpts) {
-        opts.push(
-          ...Object.entries(config.extraCloneOpts).map((e) => `${e[0]}=${e[1]}`)
+        Object.entries(config.extraCloneOpts).forEach((e) =>
+          opts.push(e[0], `${e[1]}`)
         );
       }
       await git.clone(config.url, '.', opts);
@@ -455,7 +455,7 @@ export async function mergeBranch(branchName: string): Promise<void> {
   await git.checkout(config.currentBranch);
   await git.merge(['--ff-only', branchName]);
   await git.push('origin', config.currentBranch);
-  limits.incrementLimit('prCommitsPerRunLimit');
+  incLimitedValue(Limit.Commits);
 }
 
 export async function getBranchLastCommitTime(
@@ -604,7 +604,7 @@ export async function commitFiles({
     await git.fetch(['origin', ref, '--depth=2', '--force']);
     config.branchCommits[branchName] = commit;
     config.branchIsModified[branchName] = false;
-    limits.incrementLimit('prCommitsPerRunLimit');
+    incLimitedValue(Limit.Commits);
     return commit;
   } catch (err) /* istanbul ignore next */ {
     checkForPlatformFailure(err);
