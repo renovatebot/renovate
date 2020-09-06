@@ -65,7 +65,6 @@ If you need any further assistance then you can also [request help here](${confi
     prBody = prBody.replace('{{PACKAGE FILES}}\n', '');
   }
   let configDesc = '';
-  // istanbul ignore if
   if (config.dryRun) {
     logger.info(`DRY-RUN: Would check branch ${config.onboardingBranch}`);
   } else if (await isBranchModified(config.onboardingBranch)) {
@@ -114,7 +113,6 @@ If you need any further assistance then you can also [request help here](${confi
       return;
     }
     // PR must need updating
-    // istanbul ignore if
     if (config.dryRun) {
       logger.info('DRY-RUN: Would update onboarding PR');
     } else {
@@ -130,7 +128,6 @@ If you need any further assistance then you can also [request help here](${confi
   logger.debug('Creating onboarding PR');
   const labels: string[] = [];
   try {
-    // istanbul ignore if
     if (config.dryRun) {
       logger.info('DRY-RUN: Would create onboarding PR');
     } else {
