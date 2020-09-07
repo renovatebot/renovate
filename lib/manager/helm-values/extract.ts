@@ -8,6 +8,20 @@ import {
   matchesHelmValuesDockerHeuristic,
 } from './util';
 
+function getHelmDep({
+  registry,
+  repository,
+  tag,
+}: {
+  registry: string;
+  repository: string;
+  tag: string;
+}): PackageDependency {
+  const dep = getDep(`${registry}${repository}:${tag}`, false);
+  dep.replaceString = tag;
+  return dep;
+}
+
 /**
  * Recursively find all supported dependencies in the yaml object.
  *
@@ -29,8 +43,7 @@ function findDependencies(
       registry = registry ? `${registry}/` : '';
       const repository = String(currentItem.repository);
       const tag = String(currentItem.tag);
-      const currentFrom = `${registry}${repository}:${tag}`;
-      packageDependencies.push(getDep(currentFrom, false));
+      packageDependencies.push(getHelmDep({ repository, tag, registry }));
     } else {
       findDependencies(parsedContent[key], packageDependencies);
     }
@@ -39,7 +52,7 @@ function findDependencies(
 }
 
 export function extractPackageFile(content: string): PackageFile {
-  let parsedContent;
+  let parsedContent: Record<string, unknown> | HelmDockerImageDependency;
   try {
     // a parser that allows extracting line numbers would be preferable, with
     // the current approach we need to match anything we find again during the update
