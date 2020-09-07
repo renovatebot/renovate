@@ -43,7 +43,6 @@ interface Config {
   owner: string;
   repoId: string;
   project: string;
-  azureWorkItemId: string;
   prList: AzurePr[];
   fileList: null;
   repository: string;
@@ -99,11 +98,10 @@ export async function getRepos(): Promise<string[]> {
 export async function initRepo({
   repository,
   localDir,
-  azureWorkItemId,
   optimizeForDisabled,
 }: RepoParams): Promise<RepoResult> {
   logger.debug(`initRepo("${repository}")`);
-  config = { repository, azureWorkItemId } as any;
+  config = { repository } as Config;
   const azureApiGit = await azureApi.gitApi();
   const repos = await azureApiGit.getRepositories();
   const names = azureHelper.getProjectAndRepo(repository);
@@ -323,7 +321,7 @@ export async function createPr({
   const azureApiGit = await azureApi.gitApi();
   const workItemRefs = [
     {
-      id: config.azureWorkItemId,
+      id: platformOptions.azureWorkItemId?.toString(),
     },
   ];
   let pr: GitPullRequest = await azureApiGit.createPullRequest(
