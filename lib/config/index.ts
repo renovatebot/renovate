@@ -1,5 +1,6 @@
 import { addStream, levels, logger, setContext } from '../logger';
 import { get, getLanguageList, getManagerList } from '../manager';
+import { readFile } from '../util/fs';
 import { ensureTrailingSlash } from '../util/url';
 import * as cliParser from './cli';
 import { RenovateConfig, RenovateConfigStage } from './common';
@@ -65,6 +66,11 @@ export async function parseConfigs(
 
   if (config.forceCli) {
     config = mergeChildConfig(config, { force: { ...cliConfig } });
+  }
+
+  if (!config.privateKey && config.privateKeyPath) {
+    config.privateKey = await readFile(config.privateKeyPath);
+    delete config.privateKeyPath;
   }
 
   // Set log level
