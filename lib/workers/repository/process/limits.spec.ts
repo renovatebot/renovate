@@ -89,7 +89,7 @@ describe('workers/repository/process/limits', () => {
       expect(res).toEqual(19);
     });
     it('defaults to prConcurrentLimit', () => {
-      delete config.branchConcurrentLimit;
+      config.branchConcurrentLimit = null;
       config.prConcurrentLimit = 20;
       git.getBranchList.mockReturnValueOnce([
         'foo',
