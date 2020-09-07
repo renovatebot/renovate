@@ -15,15 +15,15 @@ export function resetAllLimits(): void {
   limits.clear();
 }
 
-export function setMaxLimit(key: Limit, max: unknown): void {
-  const maxVal = typeof max === 'number' && max > 0 ? max : null;
-  logger.debug(`${key} limit = ${maxVal}`);
-  const limit = limits.get(key);
-  limits.set(key, {
-    current: 0,
-    ...limit,
-    max: maxVal,
-  });
+export function setMaxLimit(key: Limit, max: unknown, allowZero = false): void {
+  if (typeof max === 'number') {
+    const maxVal = max > 0 || (allowZero && max <= 0) ? Math.max(max, 0) : null;
+    logger.debug(`${key} limit = ${maxVal}`);
+    limits.set(key, {
+      current: 0,
+      max: maxVal,
+    });
+  }
 }
 
 export function incLimitedValue(key: Limit, incBy = 1): void {
