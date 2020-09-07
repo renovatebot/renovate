@@ -1,6 +1,11 @@
 import moment from 'moment';
-import { RenovateConfig, getConfig, platform } from '../../../../test/util';
-import { PrState } from '../../../types';
+import {
+  RenovateConfig,
+  getConfig,
+  git,
+  platform,
+} from '../../../../test/util';
+import { BranchConfig } from '../../common';
 import * as limits from './limits';
 
 jest.mock('../../../util/git');
@@ -34,24 +39,23 @@ describe('workers/repository/process/limits', () => {
     });
   });
   describe('getConcurrentPrsRemaining()', () => {
-    it('calculates concurrent limit remaining', async () => {
+    it('calculates concurrent limit remaining', () => {
       config.prConcurrentLimit = 20;
-      platform.getPrList.mockResolvedValueOnce([
-        { branchName: 'test1', state: PrState.Open },
-        { branchName: 'test2', state: PrState.Closed },
+      git.branchExists.mockReturnValueOnce(true);
+      const branches: BranchConfig[] = [
+        { branchName: 'test', upgrades: [] },
         { branchName: undefined, upgrades: [] },
-      ] as never);
-      const res = await limits.getConcurrentPrsRemaining(config);
+      ];
+      const res = limits.getConcurrentPrsRemaining(config, branches);
       expect(res).toEqual(19);
     });
-    it('returns 99 if no concurrent limit', async () => {
-      const res = await limits.getConcurrentPrsRemaining(config);
+    it('returns 99 if no concurrent limit', () => {
+      const res = limits.getConcurrentPrsRemaining(config, []);
       expect(res).toEqual(99);
     });
-    it('returns prConcurrentLimit if errored', async () => {
+    it('returns prConcurrentLimit if errored', () => {
       config.prConcurrentLimit = 42;
-      platform.getPrList.mockResolvedValueOnce([null]);
-      const res = await limits.getConcurrentPrsRemaining(config);
+      const res = limits.getConcurrentPrsRemaining(config, null as any);
       expect(res).toEqual(42);
     });
   });
@@ -60,13 +64,13 @@ describe('workers/repository/process/limits', () => {
     it('returns hourly limit', async () => {
       config.prHourlyLimit = 5;
       platform.getPrList.mockResolvedValueOnce([]);
-      const res = await limits.getPrsRemaining(config);
+      const res = await limits.getPrsRemaining(config, []);
       expect(res).toEqual(5);
     });
     it('returns concurrent limit', async () => {
       config.prConcurrentLimit = 5;
       platform.getPrList.mockResolvedValueOnce([]);
-      const res = await limits.getPrsRemaining(config);
+      const res = await limits.getPrsRemaining(config, []);
       expect(res).toEqual(5);
     });
   });

@@ -2,7 +2,8 @@ import moment from 'moment';
 import { RenovateConfig } from '../../../config';
 import { logger } from '../../../logger';
 import { platform } from '../../../platform';
-import { PrState } from '../../../types';
+import { branchExists } from '../../../util/git';
+import { BranchConfig } from '../../common';
 
 export async function getPrHourlyRemaining(
   config: RenovateConfig
@@ -34,21 +35,23 @@ export async function getPrHourlyRemaining(
   return 99;
 }
 
-export async function getConcurrentPrsRemaining(
-  config: RenovateConfig
-): Promise<number> {
+export function getConcurrentPrsRemaining(
+  config: RenovateConfig,
+  branches: BranchConfig[]
+): number {
   if (config.prConcurrentLimit) {
     logger.debug(`Calculating prConcurrentLimit (${config.prConcurrentLimit})`);
     try {
-      const prList = await platform.getPrList();
-      const openPrs = prList.filter(
-        (pr) =>
-          pr.state === PrState.Open && pr.branchName !== config.onboardingBranch
-      );
-      logger.debug(`${openPrs.length} PRs are currently open`);
+      let currentlyOpen = 0;
+      for (const branch of branches) {
+        if (branchExists(branch.branchName)) {
+          currentlyOpen += 1;
+        }
+      }
+      logger.debug(`${currentlyOpen} PRs are currently open`);
       const concurrentRemaining = Math.max(
         0,
-        config.prConcurrentLimit - openPrs.length
+        config.prConcurrentLimit - currentlyOpen
       );
       logger.debug(`PR concurrent limit remaining: ${concurrentRemaining}`);
       return concurrentRemaining;
@@ -60,9 +63,12 @@ export async function getConcurrentPrsRemaining(
   return 99;
 }
 
-export async function getPrsRemaining(config: RenovateConfig): Promise<number> {
+export async function getPrsRemaining(
+  config: RenovateConfig,
+  branches: BranchConfig[]
+): Promise<number> {
   const hourlyRemaining = await getPrHourlyRemaining(config);
-  const concurrentRemaining = await getConcurrentPrsRemaining(config);
+  const concurrentRemaining = getConcurrentPrsRemaining(config, branches);
   return hourlyRemaining < concurrentRemaining
     ? hourlyRemaining
     : concurrentRemaining;
