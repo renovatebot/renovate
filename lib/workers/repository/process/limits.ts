@@ -88,12 +88,12 @@ export function getConcurrentBranchesRemaining(
           currentlyOpen += 1;
         }
       }
-      logger.debug(`${currentlyOpen} PRs are currently open`);
+      logger.debug(`${currentlyOpen} branches are currently open`);
       const concurrentRemaining = Math.max(0, limit - currentlyOpen);
-      logger.debug(`PR concurrent limit remaining: ${concurrentRemaining}`);
+      logger.debug(`Branch concurrent limit remaining: ${concurrentRemaining}`);
       return concurrentRemaining;
     } catch (err) {
-      logger.error('Error checking concurrent PRs');
+      logger.error('Error checking concurrent branches');
       return limit;
     }
   }
