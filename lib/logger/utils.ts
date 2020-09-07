@@ -45,7 +45,7 @@ const contentFields = [
   'yarnLockParsed',
 ];
 
-function sanitizeValue(value: any, seen = new WeakMap()): any {
+export function sanitizeValue(value: unknown, seen = new WeakMap()): any {
   if (Array.isArray(value)) {
     const length = value.length;
     const arrayResult = Array(length);
@@ -71,7 +71,7 @@ function sanitizeValue(value: any, seen = new WeakMap()): any {
     }
 
     const objectResult: Record<string, any> = {};
-    seen.set(value, objectResult);
+    seen.set(value as any, objectResult);
     for (const [key, val] of Object.entries<any>(value)) {
       let curValue: any;
       if (redactedFields.includes(key)) {
@@ -89,7 +89,7 @@ function sanitizeValue(value: any, seen = new WeakMap()): any {
     return objectResult;
   }
 
-  return valueType === 'string' ? sanitize(value) : value;
+  return valueType === 'string' ? sanitize(value as string) : value;
 }
 
 type BunyanStream = (NodeJS.WritableStream | Stream) & {
