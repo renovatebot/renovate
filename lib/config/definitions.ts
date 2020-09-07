@@ -456,6 +456,13 @@ const options: RenovateOptions[] = [
     admin: true,
   },
   {
+    name: 'privateKeyPath',
+    description: 'Path to the Server-side private key',
+    stage: 'repository',
+    type: 'string',
+    admin: true,
+  },
+  {
     name: 'encrypted',
     description:
       'A configuration object containing configuration encrypted with project key.',

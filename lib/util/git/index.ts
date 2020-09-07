@@ -112,14 +112,14 @@ let privateKeySet = false;
 
 async function fetchBranchCommits(): Promise<void> {
   config.branchCommits = {};
-  const opts = ['--heads', config.url];
+  const opts = ['ls-remote', '--heads', config.url];
   if (config.extraCloneOpts) {
-    opts.push(
-      ...Object.entries(config.extraCloneOpts).map((e) => `${e[0]}=${e[1]}`)
+    Object.entries(config.extraCloneOpts).forEach((e) =>
+      opts.unshift(e[0], `${e[1]}`)
     );
   }
   try {
-    (await git.listRemote(opts))
+    (await git.raw(opts))
       .split('\n')
       .filter(Boolean)
       .map((line) => line.trim().split(/\s+/))
@@ -238,8 +238,8 @@ export async function syncGit(): Promise<void> {
       // clone only the default branch
       const opts = ['--depth=2'];
       if (config.extraCloneOpts) {
-        opts.push(
-          ...Object.entries(config.extraCloneOpts).map((e) => `${e[0]}=${e[1]}`)
+        Object.entries(config.extraCloneOpts).forEach((e) =>
+          opts.push(e[0], `${e[1]}`)
         );
       }
       await git.clone(config.url, '.', opts);

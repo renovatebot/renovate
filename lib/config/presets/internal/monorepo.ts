@@ -79,6 +79,7 @@ const repoGroups = {
   lingui: 'https://github.com/lingui/js-lingui',
   lodash: 'https://github.com/lodash/',
   loopback: 'https://github.com/strongloop/loopback-next',
+  lrnwebcomponents: 'https://github.com/elmsln/lrnwebcomponents',
   material: 'https://github.com/material-components/material-components-web',
   mdx: 'https://github.com/mdx-js/mdx',
   mui: 'https://github.com/mui-org/material-ui',
@@ -127,6 +128,7 @@ const patternGroups = {
   wordpress: '^@wordpress/',
   angularmaterial: ['^@angular/material', '^@angular/cdk'],
   'aws-java-sdk': '^com.amazonaws:aws-java-sdk-',
+  fullcalendar: '^@fullcalendar/',
 };
 
 export const presets: Record<string, Preset> = {};

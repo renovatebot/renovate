@@ -59,7 +59,7 @@ describe('manager/kustomize/extract', () => {
     expect(file).toBeNull();
   });
   describe('extractBase', () => {
-    it('should return null for a local base ', () => {
+    it('should return null for a local base', () => {
       const res = extractBase('./service-1');
       expect(res).toBeNull();
     });
