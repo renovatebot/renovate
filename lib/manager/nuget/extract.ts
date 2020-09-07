@@ -74,7 +74,52 @@ async function determineRegistryUrls(
   return registryUrls;
 }
 
-const packageRe = /<(?:PackageReference|DotNetCliToolReference|GlobalPackageReference).*(?:Include|Update)\s*=\s*"(?<depName>[^"]+)".*(?:Version|VersionOverride)\s*=\s*"(?:[[])?(?:(?<currentValue>[^"(,[\]]+)\s*(?:,\s*[)\]]|])?)"/;
+/**
+ * https://docs.microsoft.com/en-us/nuget/concepts/package-versioning
+ * This article mentions that  Nuget 3.x and later tries to restore the lowest possible version
+ * regarding to given version range.
+ * 1.3.4 equals [1.3.4,)
+ * Due to guarantee that an update of package version will result in its usage by the next restore + build operation,
+ * only following constrained versions make sense
+ * 1.3.4, [1.3.4], [1.3.4, ], [1.3.4, )
+ * The update of the right boundary does not make sense regarding to the lowest version restore rule,
+ * so we don't include it in the extracting regexp
+ */
+const checkVersion = /^\s*(?:[[])?(?:(?<currentValue>[^"(,[\]]+)\s*(?:,\s*[)\]]|])?)\s*$/;
+
+function extractDepsFromXml(xmlNode: XmlDocument): PackageDependency[] {
+  const results = [];
+  const itemGroups = xmlNode.childrenNamed('ItemGroup');
+  for (const itemGroup of itemGroups) {
+    const relevantChildren = [
+      ...itemGroup.childrenNamed('PackageReference'),
+      ...itemGroup.childrenNamed('DotNetCliToolReference'),
+      ...itemGroup.childrenNamed('GlobalPackageReference'),
+    ];
+    for (const child of relevantChildren) {
+      const { attr } = child;
+      const depName = attr?.Include || attr?.Update;
+      const version =
+        attr?.Version ||
+        child.valueWithPath('Version') ||
+        attr?.VersionOverride ||
+        child.valueWithPath('VersionOverride');
+      const currentValue = checkVersion
+        ?.exec(version)
+        ?.groups?.currentValue?.trim();
+      if (depName && currentValue) {
+        results.push({
+          datasource: datasourceNuget.id,
+          depType: 'nuget',
+          depName,
+          currentValue,
+        });
+      }
+    }
+  }
+  return results;
+}
+
 export async function extractPackageFile(
   content: string,
   packageFile: string,
@@ -82,7 +127,6 @@ export async function extractPackageFile(
 ): Promise<PackageFile | null> {
   logger.trace({ packageFile }, 'nuget.extractPackageFile()');
   const versioning = get(config.versioning || semverVersioning.id);
-  const deps: PackageDependency[] = [];
 
   const registryUrls = await determineRegistryUrls(
     packageFile,
@@ -90,6 +134,7 @@ export async function extractPackageFile(
   );
 
   if (packageFile.endsWith('.config/dotnet-tools.json')) {
+    const deps: PackageDependency[] = [];
     let manifest: DotnetToolsManifest;
 
     try {
@@ -123,36 +168,19 @@ export async function extractPackageFile(
     return { deps };
   }
 
-  for (const line of content.split('\n')) {
-    /**
-     * https://docs.microsoft.com/en-us/nuget/concepts/package-versioning
-     * This article mentions that  Nuget 3.x and later tries to restore the lowest possible version
-     * regarding to given version range.
-     * 1.3.4 equals [1.3.4,)
-     * Due to guarantee that an update of package version will result in its usage by the next restore + build operation,
-     * only following constrained versions make sense
-     * 1.3.4, [1.3.4], [1.3.4, ], [1.3.4, )
-     * The update of the right boundary does not make sense regarding to the lowest version restore rule,
-     * so we don't include it in the extracting regexp
-     */
-
-    const match = packageRe.exec(line);
-    if (match) {
-      const { currentValue, depName } = match.groups;
-      const dep: PackageDependency = {
-        depType: 'nuget',
-        depName,
-        currentValue,
-        datasource: datasourceNuget.id,
-      };
-      if (registryUrls) {
-        dep.registryUrls = registryUrls;
-      }
-      if (!versioning.isVersion(currentValue)) {
-        dep.skipReason = SkipReason.NotAVersion;
-      }
-      deps.push(dep);
-    }
+  let deps: PackageDependency[] = [];
+  try {
+    const parsedXml = new XmlDocument(content);
+    deps = extractDepsFromXml(parsedXml).map((dep) => ({
+      ...dep,
+      ...(registryUrls && { registryUrls }),
+      ...(!versioning.isVersion(dep.currentValue) && {
+        skipReason: SkipReason.NotAVersion,
+      }),
+    }));
+    return { deps };
+  } catch (err) {
+    logger.debug({ err }, `Failed to parse ${packageFile}`);
   }
   return { deps };
 }

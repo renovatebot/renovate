@@ -51,7 +51,7 @@ export async function getResourceUrl(
       servicesIndexRaw = (await http.getJson<ServicesIndexRaw>(url)).body;
       await packageCache.set(
         cacheNamespace,
-        resultCacheKey,
+        responseCacheKey,
         servicesIndexRaw,
         3 * 24 * 60
       );
@@ -122,7 +122,8 @@ export async function getReleases(
   feedUrl: string,
   pkgName: string
 ): Promise<ReleaseResult | null> {
-  const url = `${feedUrl.replace(/\/*$/, '')}/${pkgName}/index.json`;
+  const baseUrl = feedUrl.replace(/\/*$/, '');
+  const url = `${baseUrl}/${pkgName.toLowerCase()}/index.json`;
   const packageRegistration = await http.getJson<PackageRegistration>(url);
   const catalogPages = packageRegistration.body.items || [];
   const catalogPagesQueue = catalogPages.map((page) => (): Promise<

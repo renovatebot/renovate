@@ -29,7 +29,7 @@ export function getStorageExtraCloneOpts(config: HostRule): GitOptions {
   } else {
     header = `${headerName}: basic ${toBase64(`:${config.token}`)}`;
   }
-  return { '--config': `http.extraheader=${header}` };
+  return { '-c': `http.extraheader=${header}` };
 }
 
 export function getNewBranchName(branchName?: string): string {
