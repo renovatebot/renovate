@@ -166,19 +166,6 @@ async function lookupLabelByName(name: string): Promise<number | null> {
   return labelList.find((l) => l.name === name)?.id;
 }
 
-async function getJsonFile(fileName: string): Promise<any | null> {
-  try {
-    const contents = await helper.getRepoContents(
-      fileName,
-      defaultConfigFile,
-      config.defaultBranch
-    );
-    return JSON.parse(contents.contentString);
-  } catch (err) /* istanbul ignore next */ {
-    return null;
-  }
-}
-
 const platform: Platform = {
   async initPlatform({
     endpoint,
@@ -212,6 +199,19 @@ const platform: Platform = {
       endpoint: defaults.endpoint,
       gitAuthor,
     };
+  },
+
+  async getJsonFile(fileName: string): Promise<any | null> {
+    try {
+      const contents = await helper.getRepoContents(
+        fileName,
+        defaultConfigFile,
+        config.defaultBranch
+      );
+      return JSON.parse(contents.contentString);
+    } catch (err) /* istanbul ignore next */ {
+      return null;
+    }
   },
 
   async initRepo({
@@ -279,7 +279,7 @@ const platform: Platform = {
 
     // Optionally check if Renovate is disabled by attempting to fetch default configuration file
     if (optimizeForDisabled) {
-      renovateConfig = await getJsonFile(config.repository);
+      renovateConfig = await platform.getJsonFile(config.repository);
       if (renovateConfig && renovateConfig.enabled === false) {
         throw new Error(REPOSITORY_DISABLED);
       }
@@ -826,6 +826,7 @@ export const {
   getBranchPr,
   getBranchStatus,
   getBranchStatusCheck,
+  getJsonFile,
   getIssueList,
   getPr,
   getPrBody,

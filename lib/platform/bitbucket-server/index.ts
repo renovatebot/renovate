@@ -113,7 +113,7 @@ export async function getRepos(): Promise<string[]> {
   }
 }
 
-async function getJsonFile(fileName: string): Promise<any | null> {
+export async function getJsonFile(fileName: string): Promise<any | null> {
   try {
     const { body } = await bitbucketServerHttp.getJson<FileData>(
       `./rest/api/1.0/projects/${config.projectKey}/repos/${config.repositorySlug}/browse/${fileName}?limit=20000`

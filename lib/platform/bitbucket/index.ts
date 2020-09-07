@@ -81,7 +81,7 @@ export async function getRepos(): Promise<string[]> {
   }
 }
 
-async function getJsonFile(fileName: string): Promise<any | null> {
+export async function getJsonFile(fileName: string): Promise<any | null> {
   try {
     return (
       await bitbucketHttp.getJson(

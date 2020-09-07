@@ -96,7 +96,7 @@ export async function getRepos(): Promise<string[]> {
   return repos.map((repo) => `${repo.project.name}/${repo.name}`);
 }
 
-async function getJsonFile(fileName): Promise<any | null> {
+export async function getJsonFile(fileName: string): Promise<any | null> {
   try {
     const json = await azureHelper.getFile(
       config.repoId,
