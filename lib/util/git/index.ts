@@ -322,7 +322,7 @@ async function syncBranch(branchName: string): Promise<void> {
 }
 
 export function branchExists(branchName: string): boolean {
-  return !!config.branchCommits?.[branchName];
+  return !!config.branchCommits[branchName];
 }
 
 // Return the commit SHA for a branch
