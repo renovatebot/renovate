@@ -2,6 +2,7 @@ import { SYSTEM_INSUFFICIENT_MEMORY } from '../../../constants/error-messages';
 import { getPkgReleases } from '../../../datasource';
 import { logger } from '../../../logger';
 import * as versioning from '../../../versioning';
+import { ensureTrailingSlash } from '../../url';
 import {
   DockerOptions,
   ExecConfig,
@@ -210,7 +211,10 @@ export async function generateDockerCommand(
   }
 
   if (config.dockerImagePrefix) {
-    image = image.replace(/^renovate/, config.dockerImagePrefix);
+    image = image.replace(
+      /^renovate/,
+      ensureTrailingSlash(config.dockerImagePrefix)
+    );
   }
 
   let tag: string;
