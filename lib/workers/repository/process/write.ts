@@ -27,7 +27,7 @@ export async function writeUpdates(
     }
     return true;
   });
-  let prsRemaining = await getPrsRemaining(config, branches);
+  let prsRemaining = await getPrsRemaining(config);
   logger.debug({ prsRemaining }, 'Calculated maximum PRs remaining this run');
   for (const branch of branches) {
     addMeta({ branch: branch.branchName });

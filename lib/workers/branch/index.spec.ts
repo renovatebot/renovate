@@ -215,22 +215,6 @@ describe('workers/branch', () => {
         ProcessBranchResult.PrLimitReached
       );
     });
-    it('returns if pr creation limit exceeded and branch exists', async () => {
-      getUpdated.getUpdatedPackageFiles.mockResolvedValueOnce({
-        ...updatedPackageFiles,
-      });
-      npmPostExtract.getAdditionalFiles.mockResolvedValueOnce({
-        artifactErrors: [],
-        updatedArtifacts: [],
-      });
-      git.branchExists.mockReturnValue(true);
-      prWorker.ensurePr.mockResolvedValueOnce({
-        prResult: PrResult.LimitReached,
-      });
-      expect(await branchWorker.processBranch(config, true)).toEqual(
-        ProcessBranchResult.PrLimitReached
-      );
-    });
     it('returns if commit limit exceeded', async () => {
       getUpdated.getUpdatedPackageFiles.mockResolvedValueOnce({
         ...updatedPackageFiles,

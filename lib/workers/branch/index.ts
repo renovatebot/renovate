@@ -555,11 +555,7 @@ export async function processBranch(
     logger.debug(
       `There are ${config.errors.length} errors and ${config.warnings.length} warnings`
     );
-    const { prResult: result, pr } = await ensurePr(config, prLimitReached);
-    if (result === PrResult.LimitReached) {
-      logger.debug('Reached PR limit - skipping PR creation');
-      return ProcessBranchResult.PrLimitReached;
-    }
+    const { prResult: result, pr } = await ensurePr(config);
     // TODO: ensurePr should check for automerge itself
     if (result === PrResult.AwaitingApproval) {
       return ProcessBranchResult.NeedsPrApproval;

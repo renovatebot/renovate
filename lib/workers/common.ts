@@ -76,7 +76,6 @@ export enum PrResult {
   ErrorAlreadyExists = 'ErrorAlreadyExists',
   NotUpdated = 'NotUpdated',
   Updated = 'Updated',
-  LimitReached = 'LimitReached',
 }
 
 export enum ProcessBranchResult {

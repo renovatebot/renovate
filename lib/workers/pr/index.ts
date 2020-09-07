@@ -96,8 +96,7 @@ export async function addAssigneesReviewers(
 
 // Ensures that PR exists with matching title/body
 export async function ensurePr(
-  prConfig: BranchConfig,
-  prLimitReached?: boolean
+  prConfig: BranchConfig
 ): Promise<{
   prResult: PrResult;
   pr?: Pr;
@@ -363,9 +362,6 @@ export async function ensurePr(
             config.automergeType === 'pr' &&
             config.gitLabAutomerge,
         };
-        if (prLimitReached) {
-          return { prResult: PrResult.LimitReached };
-        }
         pr = await platform.createPr({
           branchName,
           targetBranch: config.baseBranch,
