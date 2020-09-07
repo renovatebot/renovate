@@ -18,13 +18,17 @@
     <PackageReference Include="Microsoft.Extensions.Configuration.Json" Version="1.1.2" />
     <PackageReference Include="Microsoft.Extensions.Logging.Debug" Version="1.1.2" />
     <PackageReference Include="Newtonsoft.Json" VersionOverride="10.0.2" />
-    <PackageReference Include="Serilog" Version="2.4.0" />
+    <PackageReference Include="Serilog">
+      <VersionOverride>
+        2.4.0
+      </VersionOverride>
+    </PackageReference>
     <PackageReference Include="Serilog.Extensions.Logging" Version="1.4.0" />
     <PackageReference Include="Serilog.Sinks.Literate" Version="2.1.0" />
     <PackageReference Include="Stateless" Version="3.1.0.5" />
     <PackageReference Include="Range1" Version="[1.2.3]" />
     <PackageReference Include="Range2" Version="[1.2.3,]" />
-    <PackageReference Include="Range3" Version="[1.2.3,)" />
+    <PackageReference Include="Range3"><Version>[1.2.3,)</Version></PackageReference>
     <PackageReference Include="NotUpdatable1" Version="[,1.2.3)" />
     <PackageReference Include="NotUpdatable2" Version="(1.2.3,)" />
     <PackageReference Include="NotUpdatable3" Version="(1.2.3, 3.2.1)" />
