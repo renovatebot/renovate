@@ -106,8 +106,7 @@ describe('workers/repository/process/limits', () => {
     });
     it('returns prConcurrentLimit if errored', () => {
       config.branchConcurrentLimit = 2;
-      git.getBranchList.mockRejectedValueOnce('error' as never);
-      const res = limits.getBranchesRemaining(config, []);
+      const res = limits.getBranchesRemaining(config, null);
       expect(res).toEqual(2);
     });
   });
