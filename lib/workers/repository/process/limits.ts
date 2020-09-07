@@ -10,12 +10,12 @@ export async function getPrHourlyRemaining(
 ): Promise<number> {
   if (config.prHourlyLimit) {
     logger.debug('Calculating hourly PRs remaining');
-    const prList = await platform.getPrList();
-    const currentHourStart = moment({
-      hour: moment().hour(),
-    });
-    logger.debug(`currentHourStart=${String(currentHourStart)}`);
     try {
+      const prList = await platform.getPrList();
+      const currentHourStart = moment({
+        hour: moment().hour(),
+      });
+      logger.debug(`currentHourStart=${String(currentHourStart)}`);
       const soFarThisHour = prList.filter(
         (pr) =>
           pr.branchName !== config.onboardingBranch &&
