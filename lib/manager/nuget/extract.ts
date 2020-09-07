@@ -104,8 +104,8 @@ function extractDepsFromXml(xmlNode: XmlDocument): PackageDependency[] {
         child.valueWithPath('Version') ||
         attr?.VersionOverride ||
         child.valueWithPath('VersionOverride');
-      const currentValue = version
-        ?.match(checkVersion)
+      const currentValue = checkVersion
+        ?.exec(version)
         ?.groups?.currentValue?.trim();
       if (depName && currentValue) {
         results.push({

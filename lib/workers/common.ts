@@ -66,7 +66,6 @@ export interface BranchUpgradeConfig
   sourceUrl?: string;
 }
 
-// eslint-disable-next-line no-shadow
 export enum PrResult {
   AwaitingApproval = 'AwaitingApproval',
   AwaitingGreenBranch = 'AwaitingGreenBranch',
@@ -80,7 +79,6 @@ export enum PrResult {
   LimitReached = 'LimitReached',
 }
 
-// eslint-disable-next-line no-shadow
 export enum ProcessBranchResult {
   AlreadyExisted = 'already-existed',
   Automerged = 'automerged',

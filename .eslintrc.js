@@ -138,12 +138,5 @@ module.exports = {
         '@typescript-eslint/restrict-template-expressions': 0,
       },
     },
-    {
-      files: ['lib/types/**/*.ts'],
-      rules: {
-        // https://github.com/typescript-eslint/typescript-eslint/issues/325
-        'no-shadow': 0,
-      },
-    },
   ],
 };

@@ -8,6 +8,7 @@ import * as gitlab from '../gitlab-tags';
 export const id = 'go';
 
 const http = new Http(id);
+const gitlabRegExp = /^(https:\/\/[^/]*gitlab.[^/]*)\/(.*)$/;
 
 interface DataSource {
   datasource: string;
@@ -54,11 +55,8 @@ async function getDatasource(goModule: string): Promise<DataSource | null> {
           .replace(/\/$/, ''),
       };
     }
-    // TODO: fix me
-    // eslint-disable-next-line @typescript-eslint/prefer-regexp-exec
-    if (goSourceUrl?.match('^https://[^/]*gitlab.[^/]*/.+')) {
-      const gitlabRegExp = /^(https:\/\/[^/]*gitlab.[^/]*)\/(.*)$/;
-      const gitlabRes = gitlabRegExp.exec(goSourceUrl);
+    const gitlabRes = gitlabRegExp.exec(goSourceUrl);
+    if (gitlabRes) {
       return {
         datasource: gitlab.id,
         registryUrl: gitlabRes[1],

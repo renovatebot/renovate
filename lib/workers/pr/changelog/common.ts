@@ -29,7 +29,6 @@ export interface ChangeLogProject {
   repository: string;
 }
 
-// eslint-disable-next-line no-shadow
 export enum ChangeLogError {
   MissingGithubToken = 1,
   MissingGitlabToken = 2,
