@@ -212,7 +212,7 @@ export async function generateDockerCommand(
 
   if (config.dockerImagePrefix) {
     image = image.replace(
-      /^renovate/,
+      /^renovate\//,
       ensureTrailingSlash(config.dockerImagePrefix)
     );
   }
