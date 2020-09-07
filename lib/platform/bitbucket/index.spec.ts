@@ -646,6 +646,9 @@ describe('platform/bitbucket', () => {
         targetBranch: 'master',
         prTitle: 'title',
         prBody: 'body',
+        platformOptions: {
+          bbUseDefaultReviewers: true,
+        },
       });
       expect(number).toBe(5);
       expect(httpMock.getTrace()).toMatchSnapshot();
