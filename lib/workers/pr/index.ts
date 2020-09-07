@@ -356,6 +356,8 @@ export async function ensurePr(
       } else {
         const platformOptions: PlatformPrOptions = {
           azureAutoComplete: config.azureAutoComplete,
+          azureWorkItemId: config.azureWorkItemId,
+          bbUseDefaultReviewers: config.bbUseDefaultReviewers,
           gitLabAutomerge:
             config.automerge &&
             config.automergeType === 'pr' &&

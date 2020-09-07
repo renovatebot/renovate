@@ -11,7 +11,7 @@ interface RenovateConfig extends _RenovateConfig {
 
 describe('config/migration', () => {
   describe('migrateConfig(config, parentConfig)', () => {
-    it('it migrates config', () => {
+    it('migrates config', () => {
       const config: RenovateConfig = {
         endpoints: [{}] as never,
         enabled: true,
@@ -230,7 +230,7 @@ describe('config/migration', () => {
       expect(migratedConfig.schedule).toEqual(config.schedule);
       expect(isMigrated).toBe(false);
     });
-    it('it migrates packages', () => {
+    it('migrates packages', () => {
       const config = {
         packages: [
           {
@@ -247,7 +247,7 @@ describe('config/migration', () => {
       expect(isMigrated).toBe(true);
       expect(migratedConfig).toMatchSnapshot();
     });
-    it('it overrides existing automerge setting', () => {
+    it('overrides existing automerge setting', () => {
       const config: RenovateConfig = {
         automerge: 'minor' as never,
         packages: [
@@ -266,7 +266,7 @@ describe('config/migration', () => {
       expect(migratedConfig).toMatchSnapshot();
       expect(migratedConfig.packageRules[0].minor.automerge).toBe(false);
     });
-    it('it does not migrate config', () => {
+    it('does not migrate config', () => {
       const config: RenovateConfig = {
         enabled: true,
         semanticCommits: true,
@@ -278,7 +278,7 @@ describe('config/migration', () => {
       expect(isMigrated).toBe(false);
       expect(migratedConfig).toMatchObject(config);
     });
-    it('it migrates subconfig', () => {
+    it('migrates subconfig', () => {
       const config: RenovateConfig = {
         lockFileMaintenance: {
           depTypes: [
@@ -301,7 +301,7 @@ describe('config/migration', () => {
         migratedConfig.lockFileMaintenance.packageRules[0].respectLatest
       ).toBe(false);
     });
-    it('it migrates node to travis', () => {
+    it('migrates node to travis', () => {
       const config: RenovateConfig = {
         node: {
           enabled: true,
@@ -325,7 +325,7 @@ describe('config/migration', () => {
         (migratedConfig.node as RenovateConfig).supportPolicy
       ).toBeDefined();
     });
-    it('it migrates packageFiles', () => {
+    it('migrates packageFiles', () => {
       const config: RenovateConfig = {
         packageFiles: [
           'package.json',
@@ -350,7 +350,7 @@ describe('config/migration', () => {
       expect(migratedConfig.packageRules[0].rangeStrategy).toBe('replace');
       expect(migratedConfig.packageRules[1].rangeStrategy).toBe('pin');
     });
-    it('it migrates more packageFiles', () => {
+    it('migrates more packageFiles', () => {
       const config: RenovateConfig = {
         packageFiles: [
           {
@@ -379,7 +379,7 @@ describe('config/migration', () => {
       expect(migratedConfig.packageRules).toHaveLength(2);
     });
 
-    it('it removes invalid configs', () => {
+    it('removes invalid configs', () => {
       const config: RenovateConfig = {
         pathRules: {},
         packageFiles: [{ packageFile: 'test' }],

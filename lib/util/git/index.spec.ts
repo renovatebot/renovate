@@ -419,7 +419,7 @@ describe('platform/git', () => {
         localDir: tmpDir.path,
         url: origin.path,
         extraCloneOpts: {
-          '--config': 'extra.clone.config=test-extra-config-value',
+          '-c': 'extra.clone.config=test-extra-config-value',
         },
       });
       git.getBranchCommit('master');

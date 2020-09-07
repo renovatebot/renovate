@@ -53,7 +53,7 @@ export async function generateLockFile(
       !isValidYarnRange || minVersion(yarnCompatibility).major === 1;
 
     let installYarn = 'npm i -g yarn';
-    if (isValidYarnRange) {
+    if (isYarn1 && isValidYarnRange) {
       installYarn += `@${quote(yarnCompatibility)}`;
     }
 

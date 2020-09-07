@@ -13,8 +13,6 @@ export interface Config {
   owner: string;
   prList: Pr[];
   repository: string;
-  bbUseDefaultReviewers: boolean;
-
   username: string;
 }
 
