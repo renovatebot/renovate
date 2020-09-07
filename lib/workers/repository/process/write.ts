@@ -52,16 +52,6 @@ export async function writeUpdates(
       // Stop procesing other branches because base branch has been changed
       return 'automerged';
     }
-    if (res === ProcessBranchResult.PrCreated) {
-      incLimitedValue(Limit.PullRequests);
-    }
-    if (
-      res === ProcessBranchResult.Automerged &&
-      branch.automergeType === 'pr-comment' &&
-      branch.requiredStatusChecks === null
-    ) {
-      incLimitedValue(Limit.PullRequests);
-    }
     if (!branchExisted && branchExists(branch.branchName)) {
       incLimitedValue(Limit.Branches);
     }

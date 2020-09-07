@@ -39,18 +39,22 @@ export async function getConcurrentPrsRemaining(
 ): Promise<number> {
   if (config.prConcurrentLimit) {
     logger.debug(`Calculating prConcurrentLimit (${config.prConcurrentLimit})`);
-    const prList = await platform.getPrList();
-    const openPrs = prList.filter(
-      (pr) =>
-        pr.state === PrState.Open && pr.branchName !== config.onboardingBranch
-    );
-    logger.debug(`${openPrs.length} PRs are currently open`);
-    const concurrentRemaining = Math.max(
-      0,
-      config.prConcurrentLimit - openPrs.length
-    );
-    logger.debug(`PR concurrent limit remaining: ${concurrentRemaining}`);
-    return concurrentRemaining;
+    try {
+      const prList = await platform.getPrList();
+      const openPrs = prList.filter(
+        (pr) =>
+          pr.state === PrState.Open && pr.branchName !== config.onboardingBranch
+      );
+      logger.debug(`${openPrs.length} PRs are currently open`);
+      const concurrentRemaining = Math.max(
+        0,
+        config.prConcurrentLimit - openPrs.length
+      );
+      logger.debug(`PR concurrent limit remaining: ${concurrentRemaining}`);
+      return concurrentRemaining;
+    } catch (err) {
+      logger.error('Error checking concurrent PRs');
+    }
   }
   return 99;
 }
@@ -66,12 +70,17 @@ export async function getPrsRemaining(config: RenovateConfig): Promise<number> {
 export function getConcurrentBranchesRemaining(config: RenovateConfig): number {
   const { branchConcurrentLimit, prConcurrentLimit } = config;
   const limit =
-    branchConcurrentLimit === 0
+    typeof branchConcurrentLimit === 'number'
       ? branchConcurrentLimit
-      : branchConcurrentLimit || prConcurrentLimit;
+      : prConcurrentLimit;
   if (typeof limit === 'number' && limit) {
     logger.debug(`Calculating branchConcurrentLimit (${limit})`);
-    const currentlyCreated = getBranchList().length;
+    const renovateBranches = getBranchList()?.filter(
+      (branchName) =>
+        branchName.startsWith(config.branchPrefix) &&
+        branchName !== config.onboardingBranch
+    );
+    const currentlyCreated = renovateBranches.length;
     logger.debug(`${currentlyCreated} branches are currently created`);
     const concurrentRemaining = Math.max(0, limit - currentlyCreated);
     logger.debug(`Branch concurrent limit remaining: ${concurrentRemaining}`);

@@ -73,14 +73,24 @@ describe('workers/repository/process/limits', () => {
   describe('getBranchesRemaining()', () => {
     it('calculates concurrent limit remaining', () => {
       config.branchConcurrentLimit = 20;
-      git.getBranchList.mockReturnValueOnce([{}] as never);
+      git.getBranchList.mockReturnValueOnce([
+        'foo',
+        'bar',
+        'renovate/test',
+        'renovate/configure',
+      ] as never);
       const res = limits.getBranchesRemaining(config);
       expect(res).toEqual(19);
     });
     it('defaults to prConcurrentLimit', () => {
       delete config.branchConcurrentLimit;
       config.prConcurrentLimit = 20;
-      git.getBranchList.mockReturnValueOnce([{}] as never);
+      git.getBranchList.mockReturnValueOnce([
+        'foo',
+        'bar',
+        'renovate/test',
+        'renovate/configure',
+      ] as never);
       const res = limits.getBranchesRemaining(config);
       expect(res).toEqual(19);
     });
