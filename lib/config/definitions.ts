@@ -1148,7 +1148,14 @@ const options: RenovateOptions[] = [
   {
     name: 'prConcurrentLimit',
     description:
-      'Limit to a maximum of x concurrent branches/PRs. 0 (default) means no limit.',
+      'Limit to a maximum of x concurrent PRs. 0 (default) means no limit.',
+    type: 'integer',
+    default: 0, // no limit
+  },
+  {
+    name: 'branchConcurrentLimit',
+    description:
+      'Limit to a maximum of x concurrent branches. 0 (default) means no limit.',
     type: 'integer',
     default: 0, // no limit
   },

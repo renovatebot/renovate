@@ -1,9 +1,10 @@
 import { RenovateConfig } from '../../../config';
 import { addMeta, logger, removeMeta } from '../../../logger';
+import { branchExists } from '../../../util/git';
 import { processBranch } from '../../branch';
 import { BranchConfig, ProcessBranchResult } from '../../common';
 import { Limit, incLimitedValue, setMaxLimit } from '../../global/limits';
-import { getPrsRemaining } from './limits';
+import { getBranchesRemaining, getPrsRemaining } from './limits';
 
 export type WriteUpdateResult = 'done' | 'automerged';
 
@@ -27,11 +28,21 @@ export async function writeUpdates(
     }
     return true;
   });
-  const prsRemaining = await getPrsRemaining(config, branches);
+
+  const prsRemaining = await getPrsRemaining(config);
   logger.debug({ prsRemaining }, 'Calculated maximum PRs remaining this run');
   setMaxLimit(Limit.PullRequests, prsRemaining, true);
+
+  const branchesRemaining = getBranchesRemaining(config);
+  logger.debug(
+    { branchesRemaining },
+    'Calculated maximum branches remaining this run'
+  );
+  setMaxLimit(Limit.Branches, branchesRemaining, true);
+
   for (const branch of branches) {
     addMeta({ branch: branch.branchName });
+    const branchExisted = branchExists(branch.branchName);
     const res = await processBranch(branch);
     branch.res = res;
     if (
@@ -50,6 +61,9 @@ export async function writeUpdates(
       branch.requiredStatusChecks === null
     ) {
       incLimitedValue(Limit.PullRequests);
+    }
+    if (!branchExisted && branchExists(branch.branchName)) {
+      incLimitedValue(Limit.Branches);
     }
   }
   removeMeta(['branch']);

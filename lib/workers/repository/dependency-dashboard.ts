@@ -83,10 +83,12 @@ export async function ensureMasterIssue(
     }
     issueBody += '\n';
   }
-  const rateLimited = branches.filter(
-    (branch) =>
-      branch.res === ProcessBranchResult.PrLimitReached ||
-      branch.res === ProcessBranchResult.CommitLimitReached
+  const rateLimited = branches.filter((branch) =>
+    [
+      ProcessBranchResult.PrLimitReached,
+      ProcessBranchResult.BranchLimitReached,
+      ProcessBranchResult.CommitLimitReached,
+    ].includes(branch.res)
   );
   if (rateLimited.length) {
     issueBody += '## Rate Limited\n\n';
@@ -150,6 +152,7 @@ export async function ensureMasterIssue(
     ProcessBranchResult.NeedsPrApproval,
     ProcessBranchResult.NotScheduled,
     ProcessBranchResult.PrLimitReached,
+    ProcessBranchResult.BranchLimitReached,
     ProcessBranchResult.CommitLimitReached,
     ProcessBranchResult.AlreadyExisted,
     ProcessBranchResult.Error,

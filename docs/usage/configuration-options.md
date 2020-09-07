@@ -159,6 +159,12 @@ It's possible to add this setting into the `renovate.json` file as part of the "
 
 Configuring this to `true` means that Renovate will detect and apply the default reviewers rules to PRs (Bitbucket only).
 
+## branchConcurrentLimit
+
+This setting - if enabled - limits Renovate to a maximum of x concurrent branches.
+
+Note that this limit is enforced on a per-repository basis.
+
 ## branchName
 
 Warning: it's strongly recommended not to configure this field directly. Use at your own risk. If you truly need to configure this then it probably means either:
