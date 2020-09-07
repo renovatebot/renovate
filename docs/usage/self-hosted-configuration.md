@@ -46,7 +46,7 @@ Set to `false` to prevent usage of `--ignore-platform-reqs` in the composer pack
 
 ## dockerImagePrefix
 
-Override the default renovate sidecar docker containers image prefix from `docker.io/renovate` to a custom value, so renovate will can pull images from a custom docker registry.
+Override the default renovate sidecar docker containers image prefix from `docker.io/renovate` to a custom value, so renovate will pull images from a custom docker registry.
 
 If this is set to `ghcr.io/renovatebot` the final image for `node` would become `ghcr.io/renovatebot/node` instead of currently used `docker.io/renovate/node`.
 
