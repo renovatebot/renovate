@@ -3,7 +3,8 @@ import { RenovateConfig } from '../../../config';
 import { logger } from '../../../logger';
 import { platform } from '../../../platform';
 import { PrState } from '../../../types';
-import { getBranchList } from '../../../util/git';
+import { branchExists } from '../../../util/git';
+import { BranchConfig } from '../../common';
 
 export async function getPrHourlyRemaining(
   config: RenovateConfig
@@ -69,7 +70,10 @@ export async function getPrsRemaining(config: RenovateConfig): Promise<number> {
     : concurrentRemaining;
 }
 
-export function getConcurrentBranchesRemaining(config: RenovateConfig): number {
+export function getConcurrentBranchesRemaining(
+  config: RenovateConfig,
+  branches: BranchConfig[]
+): number {
   const { branchConcurrentLimit, prConcurrentLimit } = config;
   const limit =
     typeof branchConcurrentLimit === 'number'
@@ -78,24 +82,27 @@ export function getConcurrentBranchesRemaining(config: RenovateConfig): number {
   if (typeof limit === 'number' && limit) {
     logger.debug(`Calculating branchConcurrentLimit (${limit})`);
     try {
-      const renovateBranches = getBranchList().filter(
-        (branchName) =>
-          branchName.startsWith(config.branchPrefix) &&
-          branchName !== config.onboardingBranch
-      );
-      const currentlyCreated = renovateBranches.length;
-      logger.debug(`${currentlyCreated} branches are currently created`);
-      const concurrentRemaining = Math.max(0, limit - currentlyCreated);
-      logger.debug(`Branch concurrent limit remaining: ${concurrentRemaining}`);
+      let currentlyOpen = 0;
+      for (const branch of branches) {
+        if (branchExists(branch.branchName)) {
+          currentlyOpen += 1;
+        }
+      }
+      logger.debug(`${currentlyOpen} PRs are currently open`);
+      const concurrentRemaining = Math.max(0, limit - currentlyOpen);
+      logger.debug(`PR concurrent limit remaining: ${concurrentRemaining}`);
       return concurrentRemaining;
     } catch (err) {
-      logger.error('Error checking concurrent branches');
+      logger.error('Error checking concurrent PRs');
       return limit;
     }
   }
   return 99;
 }
 
-export function getBranchesRemaining(config: RenovateConfig): number {
-  return getConcurrentBranchesRemaining(config);
+export function getBranchesRemaining(
+  config: RenovateConfig,
+  branches: BranchConfig[]
+): number {
+  return getConcurrentBranchesRemaining(config, branches);
 }

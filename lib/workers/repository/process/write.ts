@@ -33,7 +33,7 @@ export async function writeUpdates(
   logger.debug({ prsRemaining }, 'Calculated maximum PRs remaining this run');
   setMaxLimit(Limit.PullRequests, prsRemaining, true);
 
-  const branchesRemaining = getBranchesRemaining(config);
+  const branchesRemaining = getBranchesRemaining(config, branches);
   logger.debug(
     { branchesRemaining },
     'Calculated maximum branches remaining this run'

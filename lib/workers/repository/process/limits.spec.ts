@@ -79,41 +79,35 @@ describe('workers/repository/process/limits', () => {
   describe('getBranchesRemaining()', () => {
     it('calculates concurrent limit remaining', () => {
       config.branchConcurrentLimit = 20;
-      git.getBranchList.mockReturnValueOnce([
-        'foo',
-        'bar',
-        'renovate/test',
-        'renovate/configure',
+      git.branchExists.mockReturnValueOnce(true);
+      const res = limits.getBranchesRemaining(config, [
+        { branchName: 'foo' },
       ] as never);
-      const res = limits.getBranchesRemaining(config);
       expect(res).toEqual(19);
     });
     it('defaults to prConcurrentLimit', () => {
       config.branchConcurrentLimit = null;
       config.prConcurrentLimit = 20;
-      git.getBranchList.mockReturnValueOnce([
-        'foo',
-        'bar',
-        'renovate/test',
-        'renovate/configure',
+      git.branchExists.mockReturnValueOnce(true);
+      const res = limits.getBranchesRemaining(config, [
+        { branchName: 'foo' },
       ] as never);
-      const res = limits.getBranchesRemaining(config);
       expect(res).toEqual(19);
     });
     it('does not use prConcurrentLimit for explicit branchConcurrentLimit=0', () => {
       config.branchConcurrentLimit = 0;
       config.prConcurrentLimit = 20;
-      const res = limits.getBranchesRemaining(config);
+      const res = limits.getBranchesRemaining(config, [] as never);
       expect(res).toEqual(99);
     });
-    it('returns 99 if no concurrent limit', () => {
-      const res = limits.getBranchesRemaining(config);
+    it('returns 99 if no limits are set', () => {
+      const res = limits.getBranchesRemaining(config, []);
       expect(res).toEqual(99);
     });
     it('returns prConcurrentLimit if errored', () => {
       config.branchConcurrentLimit = 2;
       git.getBranchList.mockRejectedValueOnce('error' as never);
-      const res = limits.getBranchesRemaining(config);
+      const res = limits.getBranchesRemaining(config, []);
       expect(res).toEqual(2);
     });
   });
