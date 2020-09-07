@@ -11,7 +11,7 @@ describe('docker.', () => {
       expect(docker.isValid('3')).toBe('3');
       expect(docker.isValid('foo')).toBeNull();
     });
-    it('it should return null if the version string looks like a git commit hash', () => {
+    it('should return null if the version string looks like a git commit hash', () => {
       [
         '0a1b2c3',
         '0a1b2c3d',

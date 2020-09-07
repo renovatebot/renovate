@@ -111,7 +111,7 @@ module.exports = {
   },
   overrides: [
     {
-      files: ['**/*.spec.ts'],
+      files: ['**/*.spec.ts', 'test/**'],
       env: {
         jest: true,
       },
@@ -125,6 +125,8 @@ module.exports = {
         '@typescript-eslint/no-object-literal-type-assertion': 0,
         '@typescript-eslint/explicit-function-return-type': 0,
         '@typescript-eslint/unbound-method': 0,
+
+        'jest/valid-title': [0, { ignoreTypeOfDescribeName: true }],
       },
     },
     {
