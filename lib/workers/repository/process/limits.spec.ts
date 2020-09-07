@@ -31,11 +31,11 @@ describe('workers/repository/process/limits', () => {
       const res = await limits.getPrHourlyRemaining(config);
       expect(res).toEqual(1);
     });
-    it('returns 99 if errored', async () => {
+    it('returns prHourlyLimit if errored', async () => {
       config.prHourlyLimit = 2;
       platform.getPrList.mockResolvedValueOnce([null]);
       const res = await limits.getPrHourlyRemaining(config);
-      expect(res).toEqual(99);
+      expect(res).toEqual(2);
     });
   });
   describe('getConcurrentPrsRemaining()', () => {
@@ -52,6 +52,12 @@ describe('workers/repository/process/limits', () => {
     it('returns 99 if no concurrent limit', async () => {
       const res = await limits.getConcurrentPrsRemaining(config);
       expect(res).toEqual(99);
+    });
+    it('returns prConcurrentLimit if errored', async () => {
+      config.prConcurrentLimit = 2;
+      platform.getPrList.mockResolvedValueOnce([null]);
+      const res = await limits.getConcurrentPrsRemaining(config);
+      expect(res).toEqual(2);
     });
   });
 
@@ -103,6 +109,12 @@ describe('workers/repository/process/limits', () => {
     it('returns 99 if no concurrent limit', () => {
       const res = limits.getBranchesRemaining(config);
       expect(res).toEqual(99);
+    });
+    it('returns prConcurrentLimit if errored', () => {
+      config.branchConcurrentLimit = 2;
+      git.getBranchList.mockRejectedValueOnce('error' as never);
+      const res = limits.getBranchesRemaining(config);
+      expect(res).toEqual(2);
     });
   });
 });

@@ -29,6 +29,7 @@ export async function getPrHourlyRemaining(
       return prsRemaining;
     } catch (err) {
       logger.error('Error checking PRs created per hour');
+      return config.prHourlyLimit;
     }
   }
   return 99;
@@ -54,6 +55,7 @@ export async function getConcurrentPrsRemaining(
       return concurrentRemaining;
     } catch (err) {
       logger.error('Error checking concurrent PRs');
+      return config.prConcurrentLimit;
     }
   }
   return 99;
@@ -75,16 +77,21 @@ export function getConcurrentBranchesRemaining(config: RenovateConfig): number {
       : prConcurrentLimit;
   if (typeof limit === 'number' && limit) {
     logger.debug(`Calculating branchConcurrentLimit (${limit})`);
-    const renovateBranches = getBranchList()?.filter(
-      (branchName) =>
-        branchName.startsWith(config.branchPrefix) &&
-        branchName !== config.onboardingBranch
-    );
-    const currentlyCreated = renovateBranches.length;
-    logger.debug(`${currentlyCreated} branches are currently created`);
-    const concurrentRemaining = Math.max(0, limit - currentlyCreated);
-    logger.debug(`Branch concurrent limit remaining: ${concurrentRemaining}`);
-    return concurrentRemaining;
+    try {
+      const renovateBranches = getBranchList().filter(
+        (branchName) =>
+          branchName.startsWith(config.branchPrefix) &&
+          branchName !== config.onboardingBranch
+      );
+      const currentlyCreated = renovateBranches.length;
+      logger.debug(`${currentlyCreated} branches are currently created`);
+      const concurrentRemaining = Math.max(0, limit - currentlyCreated);
+      logger.debug(`Branch concurrent limit remaining: ${concurrentRemaining}`);
+      return concurrentRemaining;
+    } catch (err) {
+      logger.error('Error checking concurrent branches');
+      return limit;
+    }
   }
   return 99;
 }
