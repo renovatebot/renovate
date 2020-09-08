@@ -127,6 +127,8 @@ describe('platform/gitlab', () => {
       repository: 'some/repo',
       localDir: '',
       optimizeForDisabled: false,
+      branchPrefix: 'renovate/',
+      onboardingBranch: 'renovate/configure',
     },
     repoResp = null,
     scope = httpMock.scope(gitlabApiHost)
@@ -164,6 +166,8 @@ describe('platform/gitlab', () => {
           repository: 'some/repo',
           localDir: '',
           optimizeForDisabled: true,
+          branchPrefix: 'renovate/',
+          onboardingBranch: 'renovate/configure',
         })
       ).rejects.toThrow(REPOSITORY_DISABLED);
       expect(httpMock.getTrace()).toMatchSnapshot();
@@ -177,6 +181,8 @@ describe('platform/gitlab', () => {
         repository: 'some/repo/project',
         localDir: '',
         optimizeForDisabled: false,
+        branchPrefix: 'renovate/',
+        onboardingBranch: 'renovate/configure',
       });
       expect(httpMock.getTrace()).toMatchSnapshot();
     });
@@ -190,6 +196,8 @@ describe('platform/gitlab', () => {
           repository: 'some/repo',
           localDir: '',
           optimizeForDisabled: false,
+          branchPrefix: 'renovate/',
+          onboardingBranch: 'renovate/configure',
         })
       ).rejects.toThrow('always error');
       expect(httpMock.getTrace()).toMatchSnapshot();
@@ -204,6 +212,8 @@ describe('platform/gitlab', () => {
           repository: 'some/repo',
           localDir: '',
           optimizeForDisabled: false,
+          branchPrefix: 'renovate/',
+          onboardingBranch: 'renovate/configure',
         })
       ).rejects.toThrow(REPOSITORY_ARCHIVED);
       expect(httpMock.getTrace()).toMatchSnapshot();
@@ -218,6 +228,8 @@ describe('platform/gitlab', () => {
           repository: 'some/repo',
           localDir: '',
           optimizeForDisabled: false,
+          branchPrefix: 'renovate/',
+          onboardingBranch: 'renovate/configure',
         })
       ).rejects.toThrow(REPOSITORY_MIRRORED);
       expect(httpMock.getTrace()).toMatchSnapshot();
@@ -232,6 +244,8 @@ describe('platform/gitlab', () => {
           repository: 'some/repo',
           localDir: '',
           optimizeForDisabled: false,
+          branchPrefix: 'renovate/',
+          onboardingBranch: 'renovate/configure',
         })
       ).rejects.toThrow(REPOSITORY_DISABLED);
       expect(httpMock.getTrace()).toMatchSnapshot();
@@ -246,6 +260,8 @@ describe('platform/gitlab', () => {
           repository: 'some/repo',
           localDir: '',
           optimizeForDisabled: false,
+          branchPrefix: 'renovate/',
+          onboardingBranch: 'renovate/configure',
         })
       ).rejects.toThrow(REPOSITORY_DISABLED);
       expect(httpMock.getTrace()).toMatchSnapshot();
@@ -260,6 +276,8 @@ describe('platform/gitlab', () => {
           repository: 'some/repo',
           localDir: '',
           optimizeForDisabled: false,
+          branchPrefix: 'renovate/',
+          onboardingBranch: 'renovate/configure',
         })
       ).rejects.toThrow(REPOSITORY_EMPTY);
       expect(httpMock.getTrace()).toMatchSnapshot();
@@ -274,6 +292,8 @@ describe('platform/gitlab', () => {
           repository: 'some/repo',
           localDir: '',
           optimizeForDisabled: false,
+          branchPrefix: 'renovate/',
+          onboardingBranch: 'renovate/configure',
         })
       ).rejects.toThrow(REPOSITORY_EMPTY);
       expect(httpMock.getTrace()).toMatchSnapshot();
@@ -290,6 +310,8 @@ describe('platform/gitlab', () => {
         repository: 'some/repo/project',
         localDir: '',
         optimizeForDisabled: false,
+        branchPrefix: 'renovate/',
+        onboardingBranch: 'renovate/configure',
       });
       expect(httpMock.getTrace()).toMatchSnapshot();
     });
@@ -301,6 +323,8 @@ describe('platform/gitlab', () => {
           repository: 'some/repo/project',
           localDir: '',
           optimizeForDisabled: false,
+          branchPrefix: 'renovate/',
+          onboardingBranch: 'renovate/configure',
         },
         {
           default_branch: 'master',
@@ -318,6 +342,8 @@ describe('platform/gitlab', () => {
           repository: 'some/repo/project',
           localDir: '',
           optimizeForDisabled: false,
+          branchPrefix: 'renovate/',
+          onboardingBranch: 'renovate/configure',
         },
         {
           default_branch: 'master',

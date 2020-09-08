@@ -168,6 +168,8 @@ describe(getName(__filename), () => {
           repository: 'SOME/repo',
           localDir: '',
           optimizeForDisabled: false,
+          branchPrefix: 'renovate/',
+          onboardingBranch: 'renovate/configure',
           ...config,
         });
         return scope;
@@ -265,6 +267,8 @@ describe(getName(__filename), () => {
               repository: 'SOME/repo',
               localDir: '',
               optimizeForDisabled: false,
+              branchPrefix: 'renovate/',
+              onboardingBranch: 'renovate/configure',
             })
           ).toMatchSnapshot();
           expect(httpMock.getTrace()).toMatchSnapshot();
@@ -294,6 +298,8 @@ describe(getName(__filename), () => {
             repository: 'SOME/repo',
             localDir: '',
             optimizeForDisabled: true,
+            branchPrefix: 'renovate/',
+            onboardingBranch: 'renovate/configure',
           });
           expect(res).toMatchSnapshot();
           expect(httpMock.getTrace()).toMatchSnapshot();
@@ -315,6 +321,8 @@ describe(getName(__filename), () => {
               repository: 'SOME/repo',
               localDir: '',
               optimizeForDisabled: false,
+              branchPrefix: null,
+              onboardingBranch: null,
             })
           ).rejects.toThrow(REPOSITORY_EMPTY);
           expect(httpMock.getTrace()).toMatchSnapshot();
@@ -337,6 +345,8 @@ describe(getName(__filename), () => {
               repository: 'SOME/repo',
               localDir: '',
               optimizeForDisabled: true,
+              branchPrefix: 'renovate/',
+              onboardingBranch: 'renovate/configure',
             })
           ).rejects.toThrow(REPOSITORY_DISABLED);
           expect(httpMock.getTrace()).toMatchSnapshot();
