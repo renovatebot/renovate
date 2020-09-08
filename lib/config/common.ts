@@ -73,6 +73,10 @@ export interface RenovateAdminConfig {
   baseDir?: string;
   cacheDir?: string;
   configWarningReuseIssue?: boolean;
+
+  dockerImagePrefix?: string;
+  dockerUser?: string;
+
   dryRun?: boolean;
 
   endpoint?: string;
