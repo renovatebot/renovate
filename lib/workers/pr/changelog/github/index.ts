@@ -70,7 +70,7 @@ export async function getReleaseNotesMd(
   }
   const { path: changelogFile, sha } = files.shift();
   /* istanbul ignore if */
-  if (files.length > 1) {
+  if (files.length !== 1) {
     logger.debug(
       `Multiple candidates for changelog file, using ${changelogFile}`
     );
