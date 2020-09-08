@@ -433,7 +433,13 @@ describe(`Child process execution wrapper`, () => {
         outOpts: [
           dockerPullOpts,
           dockerRemoveOpts,
-          { cwd, encoding, env: envMock.basic, timeout: 900000 },
+          {
+            cwd,
+            encoding,
+            env: envMock.basic,
+            timeout: 900000,
+            maxBuffer: 10485760,
+          },
         ],
       },
     ],
