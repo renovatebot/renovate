@@ -20,6 +20,7 @@ export async function getPrHourlyRemaining(
       const soFarThisHour = prList.filter(
         (pr) =>
           pr.branchName !== config.onboardingBranch &&
+          pr.branchName.startsWith(config.branchPrefix) &&
           moment(pr.createdAt).isAfter(currentHourStart)
       );
       const prsRemaining = Math.max(
@@ -45,7 +46,9 @@ export async function getConcurrentPrsRemaining(
       const prList = await platform.getPrList();
       const openPrs = prList.filter(
         (pr) =>
-          pr.state === PrState.Open && pr.branchName !== config.onboardingBranch
+          pr.state === PrState.Open &&
+          pr.branchName !== config.onboardingBranch &&
+          pr.branchName.startsWith(config.branchPrefix)
       );
       logger.debug(`${openPrs.length} PRs are currently open`);
       const concurrentRemaining = Math.max(
