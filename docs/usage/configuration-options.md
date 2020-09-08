@@ -161,9 +161,9 @@ Configuring this to `true` means that Renovate will detect and apply the default
 
 ## branchConcurrentLimit
 
-This setting - if enabled - limits Renovate to a maximum of x concurrent branches.
+By default, Renovate won't enforce any concurrent branch limits. If you want the same limit for both concurrent branches and concurrent PRs, then just set a value for `prConcurrentLimit` and it will be reused for branch calculations too. However, if you want to allow more concurrent branches than concurrent PRs, you can configure both values (e.g. `branchConcurrentLimit=5` and `prConcurrentLimit=3`).
 
-Note that this limit is enforced on a per-repository basis.
+This limit is enforced on a per-repository basis.
 
 ## branchName
 
