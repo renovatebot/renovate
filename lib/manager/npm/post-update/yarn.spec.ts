@@ -61,17 +61,27 @@ describe(getName(__filename), () => {
       expect(fixSnapshots(execSnapshots)).toMatchSnapshot();
     }
   );
-  it.each([['1.22.0']])(
+  it.each([['1.22.0'], ['2.1.0']])(
     'performs lock file updates using yarn v%s',
     async (yarnVersion) => {
       const execSnapshots = mockExecAll(exec, {
         stdout: yarnVersion,
         stderr: '',
       });
-      fs.readFile
-        .mockResolvedValueOnce(null)
-        .mockResolvedValueOnce('package-lock-contents');
-      const res = await yarnHelper.generateLockFile('some-dir', {}, {}, [
+      fs.readFile.mockImplementation((filename, encoding) => {
+        if (filename.endsWith('.yarnrc')) {
+          return new Promise<string>((resolve) => resolve(null));
+        }
+        return new Promise<string>((resolve) =>
+          resolve('package-lock-contents')
+        );
+      });
+      const config = {
+        compatibility: {
+          yarn: yarnVersion === '1.22.0' ? '^1.10.0' : '>= 2.0.0',
+        },
+      };
+      const res = await yarnHelper.generateLockFile('some-dir', {}, config, [
         {
           depName: 'some-dep',
           isLockfileUpdate: true,
