@@ -118,7 +118,6 @@ export async function initRepo({
   repository,
   localDir,
   optimizeForDisabled,
-  bbUseDefaultReviewers,
 }: RepoParams): Promise<RepoResult> {
   logger.debug(
     `initRepo("${JSON.stringify({ repository, localDir }, null, 2)}")`
@@ -160,12 +159,6 @@ export async function initRepo({
     prVersions: new Map<number, number>(),
     username: opts.username,
   } as any;
-
-  /* istanbul ignore else */
-  if (bbUseDefaultReviewers !== false) {
-    logger.debug('Enable bitbucket default reviewer');
-    config.bbUseDefaultReviewers = true;
-  }
 
   const { host, pathname } = url.parse(defaults.endpoint);
   const gitUrl = git.getUrl({
@@ -776,6 +769,7 @@ export async function createPr({
   targetBranch,
   prTitle: title,
   prBody: rawDescription,
+  platformOptions = {},
 }: CreatePRConfig): Promise<Pr> {
   const description = sanitize(rawDescription);
   logger.debug(`createPr(${branchName}, title=${title})`);
@@ -783,7 +777,7 @@ export async function createPr({
   let reviewers: BbsRestUserRef[] = [];
 
   /* istanbul ignore else */
-  if (config.bbUseDefaultReviewers) {
+  if (platformOptions.bbUseDefaultReviewers) {
     logger.debug(`fetching default reviewers`);
     const { id } = (
       await bitbucketServerHttp.getJson<{ id: number }>(
