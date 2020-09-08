@@ -21,8 +21,8 @@ export interface Comment {
 }
 
 export interface GhPr extends Pr {
-  comments: Comment[];
-  mergeable: boolean;
+  comments?: Comment[];
+  mergeable?: boolean;
 }
 
 export interface GhRestPr extends GhPr {
