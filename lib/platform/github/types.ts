@@ -62,6 +62,8 @@ export interface LocalRepoConfig {
   isGhe: boolean;
   renovateUsername: string;
   productLinks: any;
+  branchPrefix: string;
+  onboardingBranch: string;
 }
 
 export type BranchProtection = any;

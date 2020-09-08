@@ -507,6 +507,8 @@ describe('platform/github', () => {
 
       await github.initRepo({
         repository: 'some/repo',
+        branchPrefix: 'somebranch',
+        onboardingBranch: 'renovate/configure',
       } as any);
       const pr = await github.getBranchPr('somebranch');
       expect(pr).toMatchSnapshot();
@@ -549,6 +551,8 @@ describe('platform/github', () => {
       await github.initRepo({
         repository: 'some/repo',
         forkMode: true,
+        branchPrefix: 'somebranch',
+        onboardingBranch: 'renovate/configure',
       } as any);
       const pr = await github.getBranchPr('somebranch');
       expect(pr).toMatchSnapshot();
@@ -562,6 +566,8 @@ describe('platform/github', () => {
 
       await github.initRepo({
         repository: 'some/repo',
+        branchPrefix: 'somebranch',
+        onboardingBranch: 'renovate/configure',
       } as any);
       const res = await github.getBranchStatus('somebranch', null);
       expect(res).toEqual(BranchStatus.green);
@@ -1502,17 +1508,29 @@ describe('platform/github', () => {
   });
   describe('findPr(branchName, prTitle, state)', () => {
     it('returns true if no title and all state', async () => {
-      httpMock
-        .scope(githubApiHost)
-        .get('/repos/undefined/pulls?per_page=100&state=all')
-        .reply(200, [
-          {
-            number: 1,
-            head: { ref: 'branch-a' },
-            title: 'branch a pr',
-            state: PrState.Open,
-          },
-        ]);
+      const scope = httpMock.scope(githubApiHost);
+
+      initRepoMock(scope, 'some/repo');
+      await github.initRepo({
+        repository: 'some/repo',
+        token: 'token',
+        branchPrefix: 'branch',
+      } as any);
+
+      scope.get('/repos/some/repo/pulls?per_page=100&state=all').reply(200, [
+        {
+          number: 1,
+          head: { ref: 'branch-a', repo: { full_name: 'some/repo' } },
+          title: 'branch a pr',
+          state: PrState.Open,
+        },
+        {
+          number: 2,
+          head: { ref: 'third-party', repo: { full_name: 'some/repo' } },
+          title: 'branch a pr',
+          state: PrState.Open,
+        },
+      ]);
 
       const res = await github.findPr({
         branchName: 'branch-a',
@@ -1521,17 +1539,29 @@ describe('platform/github', () => {
       expect(httpMock.getTrace()).toMatchSnapshot();
     });
     it('returns true if not open', async () => {
-      httpMock
-        .scope(githubApiHost)
-        .get('/repos/undefined/pulls?per_page=100&state=all')
-        .reply(200, [
-          {
-            number: 1,
-            head: { ref: 'branch-a' },
-            title: 'branch a pr',
-            state: PrState.Closed,
-          },
-        ]);
+      const scope = httpMock.scope(githubApiHost);
+
+      initRepoMock(scope, 'some/repo');
+      await github.initRepo({
+        repository: 'some/repo',
+        token: 'token',
+        branchPrefix: 'branch',
+      } as any);
+
+      scope.get('/repos/some/repo/pulls?per_page=100&state=all').reply(200, [
+        {
+          number: 1,
+          head: { ref: 'branch-a', repo: { full_name: 'some/repo' } },
+          title: 'branch a pr',
+          state: PrState.Closed,
+        },
+        {
+          number: 2,
+          head: { ref: 'third-party', repo: { full_name: 'some/repo' } },
+          title: 'branch a pr',
+          state: PrState.Closed,
+        },
+      ]);
 
       const res = await github.findPr({
         branchName: 'branch-a',
@@ -1541,17 +1571,30 @@ describe('platform/github', () => {
       expect(httpMock.getTrace()).toMatchSnapshot();
     });
     it('caches pr list', async () => {
-      httpMock
-        .scope(githubApiHost)
-        .get('/repos/undefined/pulls?per_page=100&state=all')
-        .reply(200, [
-          {
-            number: 1,
-            head: { ref: 'branch-a' },
-            title: 'branch a pr',
-            state: PrState.Open,
-          },
-        ]);
+      const scope = httpMock.scope(githubApiHost);
+
+      initRepoMock(scope, 'some/repo');
+      await github.initRepo({
+        repository: 'some/repo',
+        token: 'token',
+        branchPrefix: 'branch',
+      } as any);
+
+      scope.get('/repos/some/repo/pulls?per_page=100&state=all').reply(200, [
+        {
+          number: 1,
+          head: { ref: 'branch-a', repo: { full_name: 'some/repo' } },
+          title: 'branch a pr',
+          state: PrState.Open,
+        },
+        {
+          number: 2,
+          head: { ref: 'third-party', repo: { full_name: 'some/repo' } },
+          title: 'branch a pr',
+          state: PrState.Open,
+        },
+      ]);
+
       let res = await github.findPr({ branchName: 'branch-a' });
       expect(res).toBeDefined();
       res = await github.findPr({

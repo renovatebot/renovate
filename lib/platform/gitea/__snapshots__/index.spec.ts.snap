@@ -3,7 +3,7 @@
 exports[`platform/gitea createPr should use base branch by default 1`] = `
 Object {
   "body": "pr-body",
-  "branchName": "pr-branch",
+  "branchName": "renovate/pr-branch",
   "canMerge": true,
   "createdAt": "2014-04-01T05:14:20Z",
   "displayNumber": "Pull Request #42",
@@ -21,7 +21,7 @@ Object {
 exports[`platform/gitea createPr should use default branch if requested 1`] = `
 Object {
   "body": "pr-body",
-  "branchName": "pr-branch",
+  "branchName": "renovate/pr-branch",
   "canMerge": true,
   "createdAt": "2014-04-01T05:14:20Z",
   "displayNumber": "Pull Request #42",
@@ -39,7 +39,7 @@ Object {
 exports[`platform/gitea getPr should fallback to direct fetching if cache fails 1`] = `
 Object {
   "body": "some random pull request",
-  "branchName": "some-head-branch",
+  "branchName": "renovate/some-head-branch",
   "canMerge": true,
   "createdAt": "2015-03-22T20:36:16Z",
   "displayNumber": "Pull Request #1",
@@ -57,7 +57,7 @@ Object {
 exports[`platform/gitea getPr should return enriched pull request which exists if open 1`] = `
 Object {
   "body": "some random pull request",
-  "branchName": "some-head-branch",
+  "branchName": "renovate/some-head-branch",
   "canMerge": true,
   "createdAt": "2015-03-22T20:36:16Z",
   "displayNumber": "Pull Request #1",
@@ -76,7 +76,7 @@ exports[`platform/gitea getPrList should return list of pull requests 1`] = `
 Array [
   Object {
     "body": "some random pull request",
-    "branchName": "some-head-branch",
+    "branchName": "renovate/some-head-branch",
     "canMerge": true,
     "createdAt": "2015-03-22T20:36:16Z",
     "displayNumber": "Pull Request #1",
@@ -91,7 +91,7 @@ Array [
   },
   Object {
     "body": "other random pull request",
-    "branchName": "other-head-branch",
+    "branchName": "renovate/other-head-branch",
     "canMerge": true,
     "createdAt": "2011-08-18T22:30:38Z",
     "displayNumber": "Pull Request #2",

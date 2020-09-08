@@ -14,6 +14,8 @@ export interface Config {
   prList: Pr[];
   repository: string;
   username: string;
+  branchPrefix: string;
+  onboardingBranch: string;
 }
 
 export interface PagedResult<T = any> {

@@ -19,6 +19,16 @@ const pr = {
   created_on: '2018-07-02T07:02:25.275030+00:00',
 };
 
+const prX = {
+  id: 6,
+  source: { branch: { name: 'other-branch' } },
+  destination: { branch: { name: 'master' } },
+  title: 'title',
+  summary: { raw: 'summary' },
+  state: 'OPEN',
+  created_on: '2018-07-02T07:02:25.275030+00:00',
+};
+
 const diff = `
 diff --git a/requirements.txt b/requirements.txt
 index 7e08d70..f5283ca 100644
@@ -83,6 +93,8 @@ describe('platform/bitbucket', () => {
       repository: 'some/repo',
       localDir: '',
       optimizeForDisabled: false,
+      branchPrefix: 'renovate/',
+      onboardingBranch: 'renovate/configure',
       ...config,
     });
 
@@ -139,6 +151,8 @@ describe('platform/bitbucket', () => {
           repository: 'some/repo',
           localDir: '',
           optimizeForDisabled: false,
+          branchPrefix: 'renovate/',
+          onboardingBranch: 'renovate/configure',
         })
       ).toMatchSnapshot();
       expect(httpMock.getTrace()).toMatchSnapshot();
@@ -162,6 +176,8 @@ describe('platform/bitbucket', () => {
           repository: 'some/empty',
           optimizeForDisabled: true,
           localDir: '',
+          branchPrefix: 'renovate/',
+          onboardingBranch: 'renovate/configure',
         })
       ).rejects.toThrow(REPOSITORY_DISABLED);
       expect(httpMock.getTrace()).toMatchSnapshot();
@@ -177,12 +193,12 @@ describe('platform/bitbucket', () => {
 
   describe('getBranchPr()', () => {
     it('bitbucket finds PR for branch', async () => {
-      const scope = await initRepoMock();
+      const scope = await initRepoMock({ branchPrefix: 'branch' });
       scope
         .get(
           '/2.0/repositories/some/repo/pullrequests?state=OPEN&state=MERGED&state=DECLINED&state=SUPERSEDED&pagelen=50'
         )
-        .reply(200, { values: [pr] })
+        .reply(200, { values: [prX, pr] })
         .get('/2.0/repositories/some/repo/pullrequests/5')
         .reply(200, pr)
         .get('/2.0/repositories/some/repo/pullrequests/5/diff')
@@ -197,7 +213,7 @@ describe('platform/bitbucket', () => {
         .get(
           '/2.0/repositories/some/repo/pullrequests?state=OPEN&state=MERGED&state=DECLINED&state=SUPERSEDED&pagelen=50'
         )
-        .reply(200, { values: [pr] });
+        .reply(200, { values: [prX, pr] });
 
       const res = await bitbucket.getBranchPr('branch_without_pr');
       expect(res).toBeNull();
@@ -615,12 +631,12 @@ describe('platform/bitbucket', () => {
     });
 
     it('finds pr', async () => {
-      const scope = await initRepoMock();
+      const scope = await initRepoMock({ branchPrefix: 'branch' });
       scope
         .get(
           '/2.0/repositories/some/repo/pullrequests?state=OPEN&state=MERGED&state=DECLINED&state=SUPERSEDED&pagelen=50'
         )
-        .reply(200, { values: [pr] });
+        .reply(200, { values: [prX, pr] });
       expect(
         await bitbucket.findPr({
           branchName: 'branch',

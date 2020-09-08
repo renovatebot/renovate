@@ -157,10 +157,12 @@ export async function initRepo({
   includeForks,
   renovateUsername,
   optimizeForDisabled,
+  branchPrefix,
+  onboardingBranch,
 }: RepoParams): Promise<RepoResult> {
   logger.debug(`initRepo("${repository}")`);
   // config is used by the platform api itself, not necessary for the app layer to know
-  config = { localDir, repository } as any;
+  config = { localDir, repository, branchPrefix, onboardingBranch } as any;
   // istanbul ignore if
   if (endpoint) {
     // Necessary for Renovate Pro - do not remove
@@ -723,19 +725,25 @@ export async function getPrList(): Promise<Pr[]> {
       logger.debug({ err }, 'getPrList err');
       throw new ExternalHostError(err, PLATFORM_TYPE_GITHUB);
     }
-    config.prList = res.body.map((pr) => ({
-      number: pr.number,
-      branchName: pr.head.ref,
-      sha: pr.head.sha,
-      title: pr.title,
-      state:
-        pr.state === PrState.Closed && pr.merged_at?.length
-          ? /* istanbul ignore next */ PrState.Merged
-          : pr.state,
-      createdAt: pr.created_at,
-      closed_at: pr.closed_at,
-      sourceRepo: pr.head?.repo?.full_name,
-    }));
+    config.prList = res.body
+      .map((pr) => ({
+        number: pr.number,
+        branchName: pr.head.ref,
+        sha: pr.head.sha,
+        title: pr.title,
+        state:
+          pr.state === PrState.Closed && pr.merged_at?.length
+            ? /* istanbul ignore next */ PrState.Merged
+            : pr.state,
+        createdAt: pr.created_at,
+        closed_at: pr.closed_at,
+        sourceRepo: pr.head?.repo?.full_name,
+      }))
+      .filter(
+        (pr) =>
+          pr.branchName.startsWith(config.branchPrefix) ||
+          pr.branchName === config.onboardingBranch
+      );
     logger.debug(`Retrieved ${config.prList.length} Pull Requests`);
   }
   return config.prList;

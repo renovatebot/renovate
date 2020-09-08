@@ -59,7 +59,7 @@ describe('platform/gitea', () => {
       mergeable: true,
       base: { ref: 'some-base-branch' },
       head: {
-        label: 'some-head-branch',
+        label: 'renovate/some-head-branch',
         sha: 'some-head-sha',
         repo: partial<ght.Repo>({ full_name: mockRepo.full_name }),
       },
@@ -75,7 +75,23 @@ describe('platform/gitea', () => {
       mergeable: true,
       base: { ref: 'other-base-branch' },
       head: {
-        label: 'other-head-branch',
+        label: 'renovate/other-head-branch',
+        sha: 'other-head-sha',
+        repo: partial<ght.Repo>({ full_name: mockRepo.full_name }),
+      },
+    }),
+    partial<ght.PR>({
+      number: 3,
+      title: 'Third-party PR',
+      body: 'pull request',
+      state: PrState.Open,
+      diff_url: 'https://gitea.renovatebot.com/some/repo/pulls/3.diff',
+      created_at: '2011-08-18T22:30:38Z',
+      closed_at: '2016-01-09T10:03:21Z',
+      mergeable: true,
+      base: { ref: 'other-base-branch' },
+      head: {
+        label: 'third-party-branch',
         sha: 'other-head-sha',
         repo: partial<ght.Repo>({ full_name: mockRepo.full_name }),
       },
@@ -175,6 +191,8 @@ describe('platform/gitea', () => {
       repository: mockRepo.full_name,
       localDir: '',
       optimizeForDisabled: false,
+      branchPrefix: 'renovate/',
+      onboardingBranch: 'renovate/configure',
       ...config,
     });
   }
@@ -243,6 +261,8 @@ describe('platform/gitea', () => {
       repository: mockRepo.full_name,
       localDir: '',
       optimizeForDisabled: false,
+      branchPrefix: 'renovate/',
+      onboardingBranch: 'renovate/configure',
     };
 
     it('should propagate API errors', async () => {
@@ -510,7 +530,7 @@ describe('platform/gitea', () => {
       await initFakeRepo();
 
       const res = await gitea.getPrList();
-      expect(res).toHaveLength(mockPRs.length);
+      expect(res).toHaveLength(2);
       expect(res).toMatchSnapshot();
     });
 
@@ -650,7 +670,7 @@ describe('platform/gitea', () => {
       number: 42,
       state: PrState.Open,
       head: {
-        label: 'pr-branch',
+        label: 'renovate/pr-branch',
         sha: mockCommitHash,
         repo: partial<ght.Repo>({ full_name: mockRepo.full_name }),
       },

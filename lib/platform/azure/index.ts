@@ -51,6 +51,8 @@ interface Config {
   prList: AzurePr[];
   fileList: null;
   repository: string;
+  branchPrefix: string;
+  onboardingBranch: string;
 }
 
 interface User {
@@ -104,6 +106,8 @@ export async function initRepo({
   repository,
   localDir,
   optimizeForDisabled,
+  branchPrefix,
+  onboardingBranch,
 }: RepoParams): Promise<RepoResult> {
   logger.debug(`initRepo("${repository}")`);
   config = { repository } as Config;
@@ -129,6 +133,8 @@ export async function initRepo({
   logger.debug(`${repository} default branch = ${defaultBranch}`);
   config.mergeMethod = await azureHelper.getMergeMethod(repo.id, names.project);
   config.repoForceRebase = false;
+  config.branchPrefix = branchPrefix;
+  config.onboardingBranch = onboardingBranch;
 
   if (optimizeForDisabled) {
     interface RenovateConfig {
@@ -199,7 +205,13 @@ export async function getPrList(): Promise<AzurePr[]> {
       skip += 100;
     } while (fetchedPrs.length > 0);
 
-    config.prList = prs.map(getRenovatePRFormat);
+    config.prList = prs
+      .map(getRenovatePRFormat)
+      .filter(
+        (pr) =>
+          pr.branchName.startsWith(config.branchPrefix) ||
+          pr.branchName === config.onboardingBranch
+      );
     logger.debug({ length: config.prList.length }, 'Retrieved Pull Requests');
   }
   return config.prList;

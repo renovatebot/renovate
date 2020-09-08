@@ -142,15 +142,14 @@ describe('platform/azure', () => {
       repo: 'some-repo',
     }));
 
-    if (is.string(args)) {
-      return azure.initRepo({
-        repository: args,
-      } as any);
-    }
+    const repoParams = is.string(args)
+      ? { repository: args }
+      : { repository: 'some/repo', ...args };
 
     return azure.initRepo({
-      repository: 'some/repo',
-      ...args,
+      ...repoParams,
+      branchPrefix: 'renovate/',
+      onboardingBranch: 'renovate/configure',
     } as any);
   }
 
@@ -180,6 +179,7 @@ describe('platform/azure', () => {
 
   describe('findPr(branchName, prTitle, state)', () => {
     it('returns pr if found it open', async () => {
+      await initRepo();
       azureApi.gitApi.mockImplementationOnce(
         () =>
           ({
@@ -188,8 +188,15 @@ describe('platform/azure', () => {
               .mockReturnValue([])
               .mockReturnValueOnce([
                 {
-                  pullRequestId: 1,
+                  pullRequestId: 2,
                   sourceRefName: 'refs/heads/branch-a',
+                  targetRefName: 'refs/heads/branch-b',
+                  title: 'branch a pr',
+                  status: PullRequestStatus.Active,
+                },
+                {
+                  pullRequestId: 1,
+                  sourceRefName: 'refs/heads/renovate/branch-a',
                   targetRefName: 'refs/heads/branch-b',
                   title: 'branch a pr',
                   status: PullRequestStatus.Active,
@@ -199,13 +206,14 @@ describe('platform/azure', () => {
           } as any)
       );
       const res = await azure.findPr({
-        branchName: 'branch-a',
+        branchName: 'renovate/branch-a',
         prTitle: 'branch a pr',
         state: PrState.Open,
       });
       expect(res).toMatchSnapshot();
     });
     it('returns pr if found not open', async () => {
+      await initRepo();
       azureApi.gitApi.mockImplementationOnce(
         () =>
           ({
@@ -214,8 +222,15 @@ describe('platform/azure', () => {
               .mockReturnValue([])
               .mockReturnValueOnce([
                 {
-                  pullRequestId: 1,
+                  pullRequestId: 2,
                   sourceRefName: 'refs/heads/branch-a',
+                  targetRefName: 'refs/heads/branch-b',
+                  title: 'branch a pr',
+                  status: PullRequestStatus.Completed,
+                },
+                {
+                  pullRequestId: 1,
+                  sourceRefName: 'refs/heads/renovate/branch-a',
                   targetRefName: 'refs/heads/branch-b',
                   title: 'branch a pr',
                   status: PullRequestStatus.Completed,
@@ -225,13 +240,14 @@ describe('platform/azure', () => {
           } as any)
       );
       const res = await azure.findPr({
-        branchName: 'branch-a',
+        branchName: 'renovate/branch-a',
         prTitle: 'branch a pr',
         state: PrState.NotOpen,
       });
       expect(res).toMatchSnapshot();
     });
     it('returns pr if found it close', async () => {
+      await initRepo();
       azureApi.gitApi.mockImplementationOnce(
         () =>
           ({
@@ -240,8 +256,15 @@ describe('platform/azure', () => {
               .mockReturnValue([])
               .mockReturnValueOnce([
                 {
-                  pullRequestId: 1,
+                  pullRequestId: 2,
                   sourceRefName: 'refs/heads/branch-a',
+                  targetRefName: 'refs/heads/branch-b',
+                  title: 'branch a pr',
+                  status: PullRequestStatus.Abandoned,
+                },
+                {
+                  pullRequestId: 1,
+                  sourceRefName: 'refs/heads/renovate/branch-a',
                   targetRefName: 'refs/heads/branch-b',
                   title: 'branch a pr',
                   status: PullRequestStatus.Abandoned,
@@ -251,13 +274,14 @@ describe('platform/azure', () => {
           } as any)
       );
       const res = await azure.findPr({
-        branchName: 'branch-a',
+        branchName: 'renovate/branch-a',
         prTitle: 'branch a pr',
         state: PrState.Closed,
       });
       expect(res).toMatchSnapshot();
     });
     it('returns pr if found it all state', async () => {
+      await initRepo();
       azureApi.gitApi.mockImplementationOnce(
         () =>
           ({
@@ -266,8 +290,15 @@ describe('platform/azure', () => {
               .mockReturnValue([])
               .mockReturnValueOnce([
                 {
-                  pullRequestId: 1,
+                  pullRequestId: 2,
                   sourceRefName: 'refs/heads/branch-a',
+                  targetRefName: 'refs/heads/branch-b',
+                  title: 'branch a pr',
+                  status: PullRequestStatus.Abandoned,
+                },
+                {
+                  pullRequestId: 1,
+                  sourceRefName: 'refs/heads/renovate/branch-a',
                   targetRefName: 'refs/heads/branch-b',
                   title: 'branch a pr',
                   status: PullRequestStatus.Abandoned,
@@ -277,7 +308,7 @@ describe('platform/azure', () => {
           } as any)
       );
       const res = await azure.findPr({
-        branchName: 'branch-a',
+        branchName: 'renovate/branch-a',
         prTitle: 'branch a pr',
       });
       expect(res).toMatchSnapshot();
@@ -396,6 +427,7 @@ describe('platform/azure', () => {
               .mockReturnValueOnce([
                 {
                   pullRequestId: 1234,
+                  sourceRefName: 'refs/heads/renovate/configure',
                 },
               ]),
             getPullRequestLabels: jest

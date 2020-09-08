@@ -86,6 +86,8 @@ export async function initRepo({
   repository,
   localDir,
   optimizeForDisabled,
+  branchPrefix,
+  onboardingBranch,
 }: RepoParams): Promise<RepoResult> {
   logger.debug(`initRepo("${repository}")`);
   const opts = hostRules.find({
@@ -95,6 +97,8 @@ export async function initRepo({
   config = {
     repository,
     username: opts.username,
+    branchPrefix,
+    onboardingBranch,
   } as utils.Config;
   let info: utils.RepoInfo;
   try {
@@ -193,7 +197,13 @@ export async function getPrList(): Promise<Pr[]> {
     let url = `/2.0/repositories/${config.repository}/pullrequests?`;
     url += utils.prStates.all.map((state) => 'state=' + state).join('&');
     const prs = await utils.accumulateValues(url, undefined, undefined, 50);
-    config.prList = prs.map(utils.prInfo);
+    config.prList = prs
+      .map(utils.prInfo)
+      .filter(
+        (pr) =>
+          pr.branchName.startsWith(config.branchPrefix) ||
+          pr.branchName === config.onboardingBranch
+      );
     logger.debug({ length: config.prList.length }, 'Retrieved Pull Requests');
   }
   return config.prList;

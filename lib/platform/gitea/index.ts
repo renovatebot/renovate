@@ -47,6 +47,9 @@ interface GiteaRepoConfig {
   prList: Promise<Pr[]> | null;
   issueList: Promise<Issue[]> | null;
   labelList: Promise<helper.Label[]> | null;
+
+  branchPrefix: string;
+  onboardingBranch: string;
 }
 
 const defaults = {
@@ -217,13 +220,18 @@ const platform: Platform = {
     repository,
     localDir,
     optimizeForDisabled,
+    branchPrefix,
+    onboardingBranch,
   }: RepoParams): Promise<RepoResult> {
     let renovateConfig: RenovateConfig;
     let repo: helper.Repo;
 
-    config = {} as any;
-    config.repository = repository;
-    config.localDir = localDir;
+    config = {
+      repository,
+      localDir,
+      branchPrefix,
+      onboardingBranch,
+    } as any;
 
     // Attempt to fetch information about repository
     try {
@@ -423,7 +431,14 @@ const platform: Platform = {
           { useCache: false }
         )
         .then((prs) => {
-          const prList = prs.map(toRenovatePR).filter(Boolean);
+          const prList = prs
+            .map(toRenovatePR)
+            .filter(Boolean)
+            .filter(
+              (pr) =>
+                pr.branchName.startsWith(config.branchPrefix) ||
+                pr.branchName === config.onboardingBranch
+            );
           logger.debug(`Retrieved ${prList.length} Pull Requests`);
           return prList;
         });
