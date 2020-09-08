@@ -1509,7 +1509,7 @@ describe('platform/github', () => {
           {
             number: 2,
             head: {
-              ref: 'branch-b',
+              ref: 'branch-a',
               user: { login: 'not-me' },
               repo: { full_name: 'some/repo' },
             },
