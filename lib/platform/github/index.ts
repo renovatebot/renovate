@@ -740,19 +740,22 @@ export async function getPrList(): Promise<Pr[]> {
           return true;
         }
       })
-      .map((pr) => ({
-        number: pr.number,
-        branchName: pr.head.ref,
-        sha: pr.head.sha,
-        title: pr.title,
-        state:
-          pr.state === PrState.Closed && pr.merged_at?.length
-            ? /* istanbul ignore next */ PrState.Merged
-            : pr.state,
-        createdAt: pr.created_at,
-        closed_at: pr.closed_at,
-        sourceRepo: pr.head?.repo?.full_name,
-      }));
+      .map(
+        (pr) =>
+          ({
+            number: pr.number,
+            branchName: pr.head.ref,
+            sha: pr.head.sha,
+            title: pr.title,
+            state:
+              pr.state === PrState.Closed && pr.merged_at?.length
+                ? /* istanbul ignore next */ PrState.Merged
+                : pr.state,
+            createdAt: pr.created_at,
+            closed_at: pr.closed_at,
+            sourceRepo: pr.head?.repo?.full_name,
+          } as never)
+      );
     logger.debug(`Retrieved ${config.prList.length} Pull Requests`);
   }
   return config.prList;
