@@ -336,6 +336,50 @@ async function resetNpmrcContent(
   }
 }
 
+// istanbul ignore next
+async function updateYarnOffline(
+  lockFileDir: string,
+  localDir: string,
+  updatedArtifacts: UpdatedArtifcats[]
+): Promise<void> {
+  try {
+    const yarnrc = await getFile(upath.join(lockFileDir, '.yarnrc'));
+    if (yarnrc) {
+      const mirrorLine = yarnrc
+        .split('\n')
+        .find((line) => line.startsWith('yarn-offline-mirror '));
+      if (mirrorLine) {
+        const mirrorPath = mirrorLine
+          .split(' ')[1]
+          .replace(/"/g, '')
+          .replace(/\/?$/, '/');
+        const resolvedPath = upath.join(lockFileDir, mirrorPath);
+        logger.debug('Found yarn offline mirror: ' + resolvedPath);
+        const status = await getRepoStatus();
+        for (const f of status.modified.concat(status.not_added)) {
+          if (f.startsWith(resolvedPath)) {
+            const localModified = upath.join(localDir, f);
+            updatedArtifacts.push({
+              name: f,
+              contents: await readFile(localModified),
+            });
+          }
+        }
+        for (const f of status.deleted || []) {
+          if (f.startsWith(resolvedPath)) {
+            updatedArtifacts.push({
+              name: '|delete|',
+              contents: f,
+            });
+          }
+        }
+      }
+    }
+  } catch (err) {
+    logger.error({ err }, 'Error updating yarn offline packages');
+  }
+}
+
 export interface WriteExistingFilesResult {
   artifactErrors: ArtifactError[];
   updatedArtifacts: UpdatedArtifcats[];
@@ -538,43 +582,7 @@ export async function getAdditionalFiles(
           name: lockFileName,
           contents: res.lockFile,
         });
-        // istanbul ignore next
-        try {
-          const yarnrc = await getFile(upath.join(lockFileDir, '.yarnrc'));
-          if (yarnrc) {
-            const mirrorLine = yarnrc
-              .split('\n')
-              .find((line) => line.startsWith('yarn-offline-mirror '));
-            if (mirrorLine) {
-              const mirrorPath = mirrorLine
-                .split(' ')[1]
-                .replace(/"/g, '')
-                .replace(/\/?$/, '/');
-              const resolvedPath = upath.join(lockFileDir, mirrorPath);
-              logger.debug('Found yarn offline  mirror: ' + resolvedPath);
-              const status = await getRepoStatus();
-              for (const f of status.modified.concat(status.not_added)) {
-                if (f.startsWith(resolvedPath)) {
-                  const localModified = upath.join(config.localDir, f);
-                  updatedArtifacts.push({
-                    name: f,
-                    contents: await readFile(localModified),
-                  });
-                }
-              }
-              for (const f of status.deleted || []) {
-                if (f.startsWith(resolvedPath)) {
-                  updatedArtifacts.push({
-                    name: '|delete|',
-                    contents: f,
-                  });
-                }
-              }
-            }
-          }
-        } catch (err) {
-          logger.error({ err }, 'Error updating yarn offline packages');
-        }
+        await updateYarnOffline(lockFileDir, config.localDir, updatedArtifacts);
       } else {
         logger.debug("yarn.lock hasn't changed");
       }
