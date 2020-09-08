@@ -1,7 +1,6 @@
-import { parse } from 'node-html-parser';
-
 import { ExternalHostError } from '../../types/errors/external-host-error';
 import * as packageCache from '../../util/cache/package';
+import { parse } from '../../util/html';
 import { Http } from '../../util/http';
 import { isVersion } from '../../versioning/ruby';
 import { GetReleasesConfig, ReleaseResult } from '../common';
@@ -32,12 +31,12 @@ export async function getReleases(
       releases: [],
     };
     const response = await http.get(rubyVersionsUrl);
-    const root: any = parse(response.body);
+    const root: HTMLElement = parse(response.body);
     const rows = root.querySelector('.release-list').querySelectorAll('tr');
-    for (const row of rows) {
-      const columns: string[] = Array.from(
-        row.querySelectorAll('td').map((td) => td.innerHTML)
-      );
+    rows.forEach((row) => {
+      const tds = row.querySelectorAll('td');
+      const columns: string[] = [];
+      tds.forEach((td) => columns.push(td.innerHTML));
       if (columns.length) {
         const version = columns[0].replace('Ruby ', '');
         if (isVersion(version)) {
@@ -48,7 +47,7 @@ export async function getReleases(
           res.releases.push({ version, releaseTimestamp, changelogUrl });
         }
       }
-    }
+    });
     await packageCache.set(cacheNamespace, 'all', res, 15);
     return res;
   } catch (err) {
