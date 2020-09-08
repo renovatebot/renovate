@@ -10,6 +10,7 @@
   "author": "",
   "license": "ISC",
   "dependencies": {
+    "@babel/runtime": "^7.11.2",
     "chalk": "^2.4.1"
   }
 }
