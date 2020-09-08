@@ -121,8 +121,8 @@ export function extractPackageFile(
     compatibility.poetry = pyprojectfile['build-system']?.requires.join(' ');
   }
 
-  if (is.nonEmptyString(pyprojectfile.tool?.poetry?.['dependencies']?.python)) {
-    compatibility.python = pyprojectfile.tool?.poetry?.['dependencies']?.python;
+  if (is.nonEmptyString(pyprojectfile.tool?.poetry?.dependencies?.python)) {
+    compatibility.python = pyprojectfile.tool?.poetry?.dependencies?.python;
   }
 
   return {

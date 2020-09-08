@@ -942,9 +942,10 @@ export async function setBranchStatus({
     return;
   }
   logger.debug({ branch: branchName, context, state }, 'Setting branch status');
+  let url: string;
   try {
     const branchCommit = git.getBranchCommit(branchName);
-    const url = `repos/${config.repository}/statuses/${branchCommit}`;
+    url = `repos/${config.repository}/statuses/${branchCommit}`;
     const renovateToGitHubStateMapping = {
       green: 'success',
       yellow: 'pending',
@@ -964,7 +965,7 @@ export async function setBranchStatus({
     await getStatus(branchName, false);
     await getStatusCheck(branchName, false);
   } catch (err) /* istanbul ignore next */ {
-    logger.debug({ err }, 'Caught error setting branch status - aborting');
+    logger.debug({ err, url }, 'Caught error setting branch status - aborting');
     throw new Error(REPOSITORY_CHANGED);
   }
 }

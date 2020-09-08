@@ -73,6 +73,10 @@ export interface RenovateAdminConfig {
   baseDir?: string;
   cacheDir?: string;
   configWarningReuseIssue?: boolean;
+
+  dockerImagePrefix?: string;
+  dockerUser?: string;
+
   dryRun?: boolean;
 
   endpoint?: string;
@@ -94,6 +98,7 @@ export interface RenovateAdminConfig {
   platform?: string;
   postUpdateOptions?: string[];
   privateKey?: string | Buffer;
+  privateKeyPath?: string;
   repositories?: RenovateRepository[];
   requireConfig?: boolean;
   trustLevel?: 'low' | 'high';

@@ -56,7 +56,7 @@ describe(`Child process execution wrapper`, () => {
     global.trustLevel = trustLevelOrig;
   });
 
-  const image = 'example/image';
+  const image = 'renovate/image';
   const name = image.replace(/\//g, '_');
   const tag = '1.2.3';
   const inCmd = 'echo hello';
@@ -410,6 +410,30 @@ describe(`Child process execution wrapper`, () => {
             timeout: 900000,
             maxBuffer: 10485760,
           },
+        ],
+      },
+    ],
+
+    [
+      'Docker image prefix',
+      {
+        execConfig: {
+          ...execConfig,
+          binarySource: BinarySource.Docker,
+          dockerImagePrefix: 'ghcr.io/renovatebot',
+        },
+        processEnv,
+        inCmd,
+        inOpts: { docker },
+        outCmd: [
+          `docker pull ghcr.io/renovatebot/image`,
+          dockerRemoveCmd,
+          `docker run --rm --name=${name} --label=renovate_child ${defaultVolumes} -w "${cwd}" ghcr.io/renovatebot/image bash -l -c "${inCmd}"`,
+        ],
+        outOpts: [
+          dockerPullOpts,
+          dockerRemoveOpts,
+          { cwd, encoding, env: envMock.basic, timeout: 900000 },
         ],
       },
     ],
