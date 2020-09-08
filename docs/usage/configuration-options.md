@@ -1102,7 +1102,7 @@ If enabled Renovate will pin docker images by means of their sha256 digest and n
 - `gomodTidy`: Run `go mod tidy` after Go module updates
 - `npmDedupe`: Run `npm dedupe` after `package-lock.json` updates
 - `yarnDedupeFewer`: Run `yarn-deduplicate --strategy fewer` after `yarn.lock` updates
-- `yarnDedupeHighest`: Run `yarn-deduplicate --strategy highest` after `yarn.lock` updates
+- `yarnDedupeHighest`: Run `yarn-deduplicate --strategy highest` (`yarn dedupe --strategy highest` for Yarn >=2.2.0) after `yarn.lock` updates
 
 ## postUpgradeTasks
 
