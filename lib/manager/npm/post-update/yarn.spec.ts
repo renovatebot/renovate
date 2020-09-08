@@ -29,11 +29,12 @@ describe(getName(__filename), () => {
     env.getChildProcessEnv.mockReturnValue(envMock.basic);
   });
   it.each([
-    ['1.22.0', 2],
-    ['2.1.0', 1],
+    ['1.22.0', '^1.10.0', 2],
+    ['2.1.0', '>= 2.0.0', 1],
+    ['2.2.0', '2.2.0', 1],
   ])(
     'generates lock files using yarn v%s',
-    async (yarnVersion, expectedFsCalls) => {
+    async (yarnVersion, yarnCompatibility, expectedFsCalls) => {
       const execSnapshots = mockExecAll(exec, {
         stdout: yarnVersion,
         stderr: '',
@@ -49,7 +50,7 @@ describe(getName(__filename), () => {
       const config = {
         dockerMapDotfiles: true,
         compatibility: {
-          yarn: yarnVersion === '1.22.0' ? '^1.10.0' : '>= 2.0.0',
+          yarn: yarnCompatibility,
         },
         postUpdateOptions: ['yarnDedupeFewer', 'yarnDedupeHighest'],
       };
@@ -103,11 +104,12 @@ describe(getName(__filename), () => {
     }
   );
   it.each([
-    ['1.22.0', 2],
-    ['2.1.0', 1],
+    ['1.22.0', '^1.10.0', 2],
+    ['2.1.0', '>= 2.0.0', 1],
+    ['2.2.0', '2.2.0', 1],
   ])(
     'performs lock file maintenance using yarn v%s',
-    async (yarnVersion, expectedFsCalls) => {
+    async (yarnVersion, yarnCompatibility, expectedFsCalls) => {
       const execSnapshots = mockExecAll(exec, {
         stdout: yarnVersion,
         stderr: '',
@@ -123,7 +125,7 @@ describe(getName(__filename), () => {
       const config = {
         dockerMapDotfiles: true,
         compatibility: {
-          yarn: yarnVersion === '1.22.0' ? '^1.10.0' : '>= 2.0.0',
+          yarn: yarnCompatibility,
         },
         postUpdateOptions: ['yarnDedupeFewer', 'yarnDedupeHighest'],
       };

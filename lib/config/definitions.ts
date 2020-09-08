@@ -301,6 +301,14 @@ const options: RenovateOptions[] = [
     default: false,
   },
   {
+    name: 'dockerImagePrefix',
+    description:
+      'Change this value in order to override the default renovate docker sidecar image name prefix.',
+    type: 'string',
+    default: 'docker.io/renovate',
+    admin: true,
+  },
+  {
     name: 'dockerUser',
     description:
       'Specify UID and GID for docker-based binaries when binarySource=docker is used.',
