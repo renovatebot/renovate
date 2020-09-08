@@ -522,7 +522,7 @@ This field can be used to configure status codes that Renovate ignores and passe
   "hostRules": [
     {
       "abortOnError": true,
-      "abortStatusCodes": [404]
+      "abortIgnoreStatusCodes": [404]
     }
   ]
 }

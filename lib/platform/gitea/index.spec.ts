@@ -1013,6 +1013,7 @@ describe('platform/gitea', () => {
       expect(helper.closeIssue).toHaveBeenCalledTimes(duplicates.length - 1);
       for (const issue of duplicates) {
         if (issue.number !== firstDuplicate.number) {
+          // eslint-disable-next-line jest/no-conditional-expect
           expect(helper.closeIssue).toHaveBeenCalledWith(
             mockRepo.full_name,
             issue.number

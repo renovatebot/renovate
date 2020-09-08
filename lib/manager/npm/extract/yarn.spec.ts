@@ -21,6 +21,7 @@ describe('manager/npm/extract/yarn', () => {
       fs.readLocalFile.mockResolvedValueOnce(plocktest1Lock);
       const res = await getYarnLock('package.json');
       expect(res.isYarn1).toBe(true);
+      expect(res.cacheVersion).toBe(NaN);
       expect(res.lockedVersions).toMatchSnapshot();
       expect(Object.keys(res.lockedVersions)).toHaveLength(7);
     });
@@ -33,6 +34,20 @@ describe('manager/npm/extract/yarn', () => {
       fs.readLocalFile.mockResolvedValueOnce(plocktest1Lock);
       const res = await getYarnLock('package.json');
       expect(res.isYarn1).toBe(false);
+      expect(res.cacheVersion).toBe(NaN);
+      expect(res.lockedVersions).toMatchSnapshot();
+      expect(Object.keys(res.lockedVersions)).toHaveLength(8);
+    });
+
+    it('extracts yarn 2 cache version', async () => {
+      const plocktest1Lock = readFileSync(
+        'lib/manager/npm/__fixtures__/yarn2.2/yarn.lock',
+        'utf8'
+      );
+      fs.readLocalFile.mockResolvedValueOnce(plocktest1Lock);
+      const res = await getYarnLock('package.json');
+      expect(res.isYarn1).toBe(false);
+      expect(res.cacheVersion).toBe(6);
       expect(res.lockedVersions).toMatchSnapshot();
       expect(Object.keys(res.lockedVersions)).toHaveLength(8);
     });
