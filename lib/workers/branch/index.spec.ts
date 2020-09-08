@@ -232,7 +232,6 @@ describe('workers/branch', () => {
       prWorker.ensurePr.mockResolvedValueOnce({
         prResult: PrResult.LimitReached,
       });
-      limits.isLimitReached.mockReturnValue(true);
       limits.isLimitReached.mockReturnValue(false);
       expect(await branchWorker.processBranch(config)).toEqual(
         ProcessBranchResult.PrLimitReached
