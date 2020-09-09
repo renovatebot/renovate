@@ -705,13 +705,13 @@ type GithubPullsResponse = {
     ref: string;
     sha: string;
     repo: { full_name: string };
-    user: { login: string };
   };
   title: string;
   state: string;
   merged_at: string;
   created_at: string;
   closed_at: string;
+  user?: { login?: string };
 }[];
 
 export async function getPrList(): Promise<Pr[]> {
@@ -734,11 +734,9 @@ export async function getPrList(): Promise<Pr[]> {
     }
     config.prList = prList
       .filter((pr) => {
-        try {
-          return pr.head.user.login === config.renovateUsername;
-        } catch (err) {
-          return true;
-        }
+        return pr?.user?.login && config?.renovateUsername
+          ? pr?.user?.login === config?.renovateUsername
+          : true;
       })
       .map(
         (pr) =>

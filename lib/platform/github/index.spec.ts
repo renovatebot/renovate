@@ -1510,21 +1510,21 @@ describe('platform/github', () => {
             number: 2,
             head: {
               ref: 'branch-a',
-              user: { login: 'not-me' },
               repo: { full_name: 'some/repo' },
             },
             title: 'branch a pr',
             state: PrState.Open,
+            user: { login: 'not-me' },
           },
           {
             number: 1,
             head: {
               ref: 'branch-a',
-              user: { login: 'me' },
               repo: { full_name: 'some/repo' },
             },
             title: 'branch a pr',
             state: PrState.Open,
+            user: { login: 'me' },
           },
         ]);
       initRepoMock(scope, 'some/repo');
