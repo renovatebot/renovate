@@ -23,7 +23,7 @@ export async function getYarnLock(
       } else {
         for (const entry of key.split(', ')) {
           const { scope, name, range } = structUtils.parseDescriptor(entry);
-          const packageName = scope ? `${scope}/${name}` : name;
+          const packageName = scope ? `@${scope}/${name}` : name;
           const { selector } = structUtils.parseRange(range);
 
           logger.trace({ entry, version: val.version });
