@@ -49,7 +49,7 @@ describe('manager/npm/extract/yarn', () => {
       expect(res.isYarn1).toBe(false);
       expect(res.cacheVersion).toBe(6);
       expect(res.lockedVersions).toMatchSnapshot();
-      expect(Object.keys(res.lockedVersions)).toHaveLength(8);
+      expect(Object.keys(res.lockedVersions)).toHaveLength(10);
     });
   });
 });
