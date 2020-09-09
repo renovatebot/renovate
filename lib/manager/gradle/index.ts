@@ -86,46 +86,47 @@ export async function extractAllPackageFiles(
   config: ExtractConfig,
   packageFiles: string[]
 ): Promise<PackageFile[] | null> {
-  let rootBuildGradle: string | undefined;
-  let gradlew: Stats | null;
-  for (const packageFile of packageFiles) {
-    const dirname = upath.dirname(packageFile);
-    const gradlewPath = upath.join(dirname, gradleWrapperFileName(config));
-    gradlew = await stat(upath.join(config.localDir, gradlewPath)).catch(
-      () => null
-    );
-
-    if (['build.gradle', 'build.gradle.kts'].includes(packageFile)) {
-      rootBuildGradle = packageFile;
-      break;
-    }
-
-    // If there is gradlew in the same directory, the directory should be a Gradle project root
-    if (gradlew?.isFile() === true) {
-      rootBuildGradle = packageFile;
-      break;
+  const rootDirs = new Set<string>(
+    packageFiles.map((x) => upath.join(config.localDir, upath.dirname(x)))
+  );
+  for (const x of packageFiles) {
+    const xdir = upath.dirname(x);
+    for (const y of packageFiles) {
+      const ydir = upath.dirname(y);
+      if (xdir !== ydir && xdir.startsWith(ydir)) {
+        rootDirs.delete(xdir);
+      }
     }
   }
-  if (!rootBuildGradle) {
+
+  if (!rootDirs.size) {
     logger.warn('No root build.gradle nor build.gradle.kts found - skipping');
     return null;
   }
   logger.debug('Extracting dependencies from all gradle files');
 
-  const cwd = upath.join(config.localDir, upath.dirname(rootBuildGradle));
+  for (const cwd of rootDirs) {
+    debugger;
+    const gradlewPath = upath.join(cwd, gradleWrapperFileName(config));
+    debugger;
+    const gradlew = await stat(upath.join(config.localDir, gradlewPath)).catch(
+      () => null
+    );
+    debugger;
+    await createRenovateGradlePlugin(cwd);
+    debugger;
+    await executeGradle(config, cwd, gradlew);
 
-  await createRenovateGradlePlugin(cwd);
-  await executeGradle(config, cwd, gradlew);
-
-  init();
-
-  const dependencies = await extractDependenciesFromUpdatesReport(cwd);
-  if (dependencies.length === 0) {
-    return [];
+    debugger;
+    init();
   }
+
+  debugger;
 
   const gradleFiles: PackageFile[] = [];
   for (const packageFile of packageFiles) {
+    const cwd = upath.join(config.localDir, upath.dirname(packageFile));
+    const dependencies = await extractDependenciesFromUpdatesReport(cwd);
     const content = await readLocalFile(packageFile, 'utf8');
     if (content) {
       gradleFiles.push({
@@ -140,7 +141,6 @@ export async function extractAllPackageFiles(
       logger.debug({ packageFile }, 'packageFile has no content');
     }
   }
-
   return gradleFiles;
 }
 
