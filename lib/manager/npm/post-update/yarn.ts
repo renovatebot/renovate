@@ -125,7 +125,9 @@ export async function generateLockFile(
     if (lockUpdates.length) {
       logger.debug('Performing lockfileUpdate (yarn)');
       commands.push(
-        `yarn upgrade ${lockUpdates.join(' ')} ${cmdOptions}`.trim()
+        `yarn ${isYarn1 ? 'upgrade' : 'up'} ${lockUpdates.join(
+          ' '
+        )} ${cmdOptions}`.trim()
       );
     }
 
