@@ -25,6 +25,8 @@ const emptyUpdatesReport = () =>
   fsExtra.readFile(`${fixtures}/updatesReportEmpty.json`, 'utf8');
 const multiProjectUpdatesReport = () =>
   fsExtra.readFile(`${fixtures}/MultiProjectUpdatesReport.json`, 'utf8');
+const updatesReportWithVersion = () =>
+  fsExtra.readFile(`${fixtures}/updatesReportWithVersion.json`, 'utf8');
 
 const baseConfig = {
   gradle: {
@@ -142,6 +144,18 @@ describe(getName(__filename), () => {
       ]);
 
       expect(dependencies).toEqual([]);
+      expect(execSnapshots).toMatchSnapshot();
+    });
+
+    it('should include version when in the project report', async () => {
+      const execSnapshots = mockExecAll(exec, gradleOutput);
+      await initializeWorkingDir(true, updatesReportWithVersion());
+
+      const dependencies = await manager.extractAllPackageFiles(config, [
+        'build.gradle',
+      ]);
+
+      expect(dependencies).toMatchSnapshot();
       expect(execSnapshots).toMatchSnapshot();
     });
 
@@ -432,6 +446,164 @@ describe(getName(__filename), () => {
       );
 
       expect(execSnapshots).toMatchSnapshot();
+    });
+  });
+
+  describe('bumpVersion', () => {
+    let manager: typeof _manager;
+    let exec: jest.Mock<typeof _exec>;
+
+    beforeAll(async () => {
+      [manager, exec] = await setupMocks();
+    });
+    afterAll(resetMocks);
+
+    it('should bump the patch version when set', async () => {
+      mockExecAll(exec, gradleOutput);
+
+      const buildGradleContent = await fsExtra.readFile(
+        `${fixtures}/build.gradle.example2`,
+        'utf8'
+      );
+
+      const upgrade = {
+        depGroup: 'org.apache.openjpa',
+        name: 'openjpa',
+        version: '3.1.1',
+        newValue: '3.1.2',
+        packageJsonVersion: '0.0.1',
+        bumpVersion: 'patch',
+      };
+
+      const buildGradleContentUpdated = manager.updateDependency({
+        fileContent: buildGradleContent,
+        upgrade,
+      });
+
+      expect(buildGradleContent).toContain("version = '0.0.1'");
+
+      expect(buildGradleContentUpdated).toContain("version = '0.0.2'");
+    });
+
+    it('should not bump when not configured', async () => {
+      mockExecAll(exec, gradleOutput);
+
+      const buildGradleContent = await fsExtra.readFile(
+        `${fixtures}/build.gradle.example2`,
+        'utf8'
+      );
+
+      const upgrade = {
+        depGroup: 'org.apache.openjpa',
+        name: 'openjpa',
+        version: '3.1.1',
+        newValue: '3.1.2',
+        packageJsonVersion: '0.0.1',
+      };
+
+      const buildGradleContentUpdated = manager.updateDependency({
+        fileContent: buildGradleContent,
+        upgrade,
+      });
+
+      expect(buildGradleContent).toContain("version = '0.0.1'");
+
+      expect(buildGradleContentUpdated).toContain("version = '0.0.1'");
+    });
+
+    it('should not bump when configured incorrectly', async () => {
+      mockExecAll(exec, gradleOutput);
+
+      const buildGradleContent = await fsExtra.readFile(
+        `${fixtures}/build.gradle.example2`,
+        'utf8'
+      );
+
+      const upgrade = {
+        depGroup: 'org.apache.openjpa',
+        name: 'openjpa',
+        version: '3.1.1',
+        newValue: '3.1.2',
+        packageJsonVersion: '0.0.1',
+        bumpVersion: 'invalid-value',
+      };
+
+      const buildGradleContentUpdated = manager.updateDependency({
+        fileContent: buildGradleContent,
+        upgrade,
+      });
+
+      expect(buildGradleContent).toContain("version = '0.0.1'");
+
+      expect(buildGradleContentUpdated).toContain("version = '0.0.1'");
+    });
+
+    it('should not bump when the version is a snapshot', async () => {
+      mockExecAll(exec, gradleOutput);
+
+      const buildGradleContent = await fsExtra.readFile(
+        `${fixtures}/build.gradle.example2`,
+        'utf8'
+      );
+
+      const buildGradleContentWithBaselineVersion = buildGradleContent.replace(
+        "version = '0.0.1'",
+        "version = '0.0.1-SNAPSHOT'"
+      );
+
+      const upgrade = {
+        depGroup: 'org.apache.openjpa',
+        name: 'openjpa',
+        version: '3.1.1',
+        newValue: '3.1.2',
+        packageJsonVersion: '0.0.1-SNAPSHOT',
+        bumpVersion: 'invalid-value',
+      };
+
+      const buildGradleContentUpdated = manager.updateDependency({
+        fileContent: buildGradleContentWithBaselineVersion,
+        upgrade,
+      });
+
+      expect(buildGradleContentWithBaselineVersion).toContain(
+        "version = '0.0.1-SNAPSHOT'"
+      );
+
+      expect(buildGradleContentUpdated).toContain("version = '0.0.1-SNAPSHOT'");
+    });
+
+    it('Version was already bumped', async () => {
+      mockExecAll(exec, gradleOutput);
+
+      const buildGradleContent = await fsExtra.readFile(
+        `${fixtures}/build.gradle.example2`,
+        'utf8'
+      );
+
+      const buildGradleContentWithBaselineVersion = buildGradleContent.replace(
+        "version = '0.0.1'",
+        "version = '0.0.2'"
+      );
+
+      const upgrade = {
+        depGroup: 'org.apache.openjpa',
+        name: 'openjpa',
+        version: '3.1.1',
+        newValue: '3.1.2',
+        packageJsonVersion: '0.0.1',
+        bumpVersion: 'patch',
+      };
+
+      const buildGradleContentUpdated = manager.updateDependency({
+        fileContent: buildGradleContentWithBaselineVersion,
+        upgrade,
+      });
+
+      expect(buildGradleContentWithBaselineVersion).toContain(
+        "version = '0.0.2'"
+      );
+
+      expect(buildGradleContentUpdated).toContain("version = '0.0.2'");
     });
   });
 });

@@ -1,5 +1,6 @@
 import { Stats } from 'fs';
 import { stat } from 'fs-extra';
+import { ReleaseType, inc } from 'semver';
 import upath from 'upath';
 import { LANGUAGE_JAVA } from '../../constants/languages';
 import * as datasourceMaven from '../../datasource/maven';
@@ -23,6 +24,7 @@ import {
 import {
   createRenovateGradlePlugin,
   extractDependenciesFromUpdatesReport,
+  readGradleReport,
 } from './gradle-updates-report';
 import { extraEnv, gradleWrapperFileName, prepareGradleCommand } from './utils';
 
@@ -119,20 +121,40 @@ export async function extractAllPackageFiles(
 
   init();
 
-  const dependencies = await extractDependenciesFromUpdatesReport(cwd);
+  const gradleProjectConfigurations = await readGradleReport(cwd);
+  const dependencies = extractDependenciesFromUpdatesReport(
+    gradleProjectConfigurations
+  );
   if (dependencies.length === 0) {
     return [];
+  }
+
+  let gradleProjectVersion = null;
+  try {
+    gradleProjectVersion = gradleProjectConfigurations.find((c) => c.version)
+      .version;
+  } catch (e) {
+    logger.debug(
+      'Was unable to locate a project version within any of the gradle project configurations.'
+    );
   }
 
   const gradleFiles: PackageFile[] = [];
   for (const packageFile of packageFiles) {
     const content = await readLocalFile(packageFile, 'utf8');
+
     if (content) {
-      gradleFiles.push({
+      const gradleFileObject: PackageFile = {
         packageFile,
         datasource: datasourceMaven.id,
         deps: dependencies,
-      });
+      };
+
+      if (gradleProjectVersion != null) {
+        gradleFileObject.packageJsonVersion = gradleProjectVersion;
+      }
+
+      gradleFiles.push(gradleFileObject);
 
       collectVersionVariables(dependencies, content);
     } else {
@@ -152,6 +174,49 @@ function buildGradleDependency(config: Upgrade): GradleDependency {
   };
 }
 
+function bumpPackageVersion(
+  content: string,
+  currentValue: string,
+  bumpVersion: ReleaseType | string
+): string {
+  if (!bumpVersion || currentValue == null) {
+    return content;
+  }
+
+  if (currentValue.endsWith('-SNAPSHOT')) {
+    return content;
+  }
+
+  /*
+   TODO:
+    This is currently missing the ability to mirror a package as described in the docs, more work may be required
+    here in order to both find and mirror the version. The npm version has access to the package.json, which makes it
+    easier to parse.
+   */
+
+  const newVersion = inc(currentValue, bumpVersion as ReleaseType);
+
+  if (!newVersion) {
+    logger.debug(
+      `Unable to increment the project version, likely because the version is not semver. Attempted to bump ${currentValue} by ${bumpVersion} but the new version was ${newVersion}`
+    );
+    return content;
+  }
+
+  const bumpedContent = content.replace(
+    /(version\s*=\s*['"])[^'"]*/,
+    `$1${newVersion}`
+  );
+
+  if (bumpedContent === content) {
+    logger.debug('Version was already bumped');
+  } else {
+    logger.debug('Bumped gradle project version');
+  }
+
+  return bumpedContent;
+}
+
 export function updateDependency({
   fileContent,
   upgrade,
@@ -159,10 +224,17 @@ export function updateDependency({
   // prettier-ignore
   logger.debug(`gradle.updateDependency(): packageFile:${upgrade.packageFile} depName:${upgrade.depName}, version:${upgrade.currentValue} ==> ${upgrade.newValue}`);
 
-  return updateGradleVersion(
+  const content = updateGradleVersion(
     fileContent,
     buildGradleDependency(upgrade),
     upgrade.newValue
+  );
+
+  return bumpPackageVersion(
+    content,
+    // This is a holdover from the npm bumpVersion implementation. This should either stay the same with a slightly weird name or be renamed to be more generic.
+    upgrade.packageJsonVersion,
+    upgrade.bumpVersion
   );
 }
 

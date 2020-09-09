@@ -7,6 +7,7 @@ export const GRADLE_DEPENDENCY_REPORT_FILENAME = 'gradle-renovate-report.json';
 
 interface GradleProject {
   project: string;
+  version: string;
   repositories: string[];
   dependencies: GradleDependency[];
 }
@@ -41,8 +42,13 @@ def output = new ConcurrentLinkedQueue<>();
 allprojects {
   tasks.register("renovate") {
     doLast {
+      def projectVersion = project.version
       def project = ['project': project.name]
       output << project
+
+      if (projectVersion != null) {
+        project.version = projectVersion
+      }
 
       def repos = (repositories + buildscript.repositories + settings.pluginManagement.repositories)
         .findAll { it instanceof MavenArtifactRepository && it.url.scheme ==~ /https?/ }
@@ -72,7 +78,9 @@ gradle.buildFinished {
   await writeFile(gradleInitFile, content);
 }
 
-async function readGradleReport(localDir: string): Promise<GradleProject[]> {
+export async function readGradleReport(
+  localDir: string
+): Promise<GradleProject[]> {
   const renovateReportFilename = join(
     localDir,
     GRADLE_DEPENDENCY_REPORT_FILENAME
@@ -140,11 +148,9 @@ function buildDependency(
   };
 }
 
-export async function extractDependenciesFromUpdatesReport(
-  localDir: string
-): Promise<BuildDependency[]> {
-  const gradleProjectConfigurations = await readGradleReport(localDir);
-
+export function extractDependenciesFromUpdatesReport(
+  gradleProjectConfigurations: GradleProject[]
+): BuildDependency[] {
   const dependencies = gradleProjectConfigurations
     .map(mergeDependenciesWithRepositories, [])
     .reduce(flattenDependencies, [])

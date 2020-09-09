@@ -14,36 +14,41 @@ import { GRADLE_DEPENDENCY_REPORT_OPTIONS } from '.';
 const fixtures = 'lib/manager/gradle/__fixtures__';
 
 describe(getName(__filename), () => {
-  for (const gradleVersion of [5, 6]) {
-    ifSystemSupportsGradle(gradleVersion).describe(
-      'createRenovateGradlePlugin',
-      () => {
-        let workingDir: DirectoryResult;
+  for (const projectName of [
+    'minimal-project',
+    'minimal-project-with-version',
+  ]) {
+    for (const gradleVersion of [5, 6]) {
+      ifSystemSupportsGradle(gradleVersion).describe(
+        'createRenovateGradlePlugin',
+        () => {
+          let workingDir: DirectoryResult;
 
-        beforeEach(async () => {
-          workingDir = await tmp.dir({ unsafeCleanup: true });
-        });
-
-        it(`generates a report for Gradle version ${gradleVersion}`, async () => {
-          await fs.copy(`${fixtures}/minimal-project`, workingDir.path);
-          await fs.copy(
-            `${fixtures}/gradle-wrappers/${gradleVersion}`,
-            workingDir.path
-          );
-          await createRenovateGradlePlugin(workingDir.path);
-
-          const gradlew = upath.join(workingDir.path, 'gradlew');
-          await exec(`${gradlew} ${GRADLE_DEPENDENCY_REPORT_OPTIONS}`, {
-            cwd: workingDir.path,
-            extraEnv,
+          beforeEach(async () => {
+            workingDir = await tmp.dir({unsafeCleanup: true});
           });
-          expect(
-            fs.readJSONSync(
-              `${workingDir.path}/${GRADLE_DEPENDENCY_REPORT_FILENAME}`
-            )
-          ).toMatchSnapshot();
-        }, 120000);
-      }
-    );
+
+          it(`generates a report for the project ${projectName}, with Gradle version ${gradleVersion}`, async () => {
+            await fs.copy(`${fixtures}/${projectName}`, workingDir.path);
+            await fs.copy(
+              `${fixtures}/gradle-wrappers/${gradleVersion}`,
+              workingDir.path
+            );
+            await createRenovateGradlePlugin(workingDir.path);
+
+            const gradlew = upath.join(workingDir.path, 'gradlew');
+            await exec(`${gradlew} ${GRADLE_DEPENDENCY_REPORT_OPTIONS}`, {
+              cwd: workingDir.path,
+              extraEnv,
+            });
+            expect(
+              fs.readJSONSync(
+                `${workingDir.path}/${GRADLE_DEPENDENCY_REPORT_FILENAME}`
+              )
+            ).toMatchSnapshot();
+          }, 120000);
+        }
+      );
+    }
   }
 });
