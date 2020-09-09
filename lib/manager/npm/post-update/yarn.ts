@@ -1,5 +1,5 @@
 import is from '@sindresorhus/is';
-import { minVersion, validRange } from 'semver';
+import { gte, minVersion, validRange } from 'semver';
 import { quote } from 'shlex';
 import { join } from 'upath';
 import { SYSTEM_INSUFFICIENT_DISK_SPACE } from '../../../constants/error-messages';
@@ -48,12 +48,14 @@ export async function generateLockFile(
   let lockFile = null;
   try {
     const yarnCompatibility = config.compatibility?.yarn;
-    const isValidYarnRange = validRange(yarnCompatibility);
-    const isYarn1 =
-      !isValidYarnRange || minVersion(yarnCompatibility).major === 1;
+    const minYarnVersion =
+      validRange(yarnCompatibility) && minVersion(yarnCompatibility);
+    const isYarn1 = !minYarnVersion || minYarnVersion.major === 1;
+    const isYarnDedupeAvailable =
+      minYarnVersion && gte(minYarnVersion, '2.2.0');
 
     let installYarn = 'npm i -g yarn';
-    if (isYarn1 && isValidYarnRange) {
+    if (isYarn1 && minYarnVersion) {
       installYarn += `@${quote(yarnCompatibility)}`;
     }
 
@@ -133,11 +135,18 @@ export async function generateLockFile(
       // Run yarn again in case any changes are necessary
       commands.push(`yarn install ${cmdOptions}`.trim());
     }
-    if (isYarn1 && config.postUpdateOptions?.includes('yarnDedupeHighest')) {
+    if (
+      (isYarn1 || isYarnDedupeAvailable) &&
+      config.postUpdateOptions?.includes('yarnDedupeHighest')
+    ) {
       logger.debug('Performing yarn dedupe highest');
-      commands.push('npx yarn-deduplicate --strategy highest');
-      // Run yarn again in case any changes are necessary
-      commands.push(`yarn install ${cmdOptions}`.trim());
+      if (isYarn1) {
+        commands.push('npx yarn-deduplicate --strategy highest');
+        // Run yarn again in case any changes are necessary
+        commands.push(`yarn install ${cmdOptions}`.trim());
+      } else {
+        commands.push('yarn dedupe --strategy highest');
+      }
     }
 
     if (upgrades.find((upgrade) => upgrade.isLockFileMaintenance)) {

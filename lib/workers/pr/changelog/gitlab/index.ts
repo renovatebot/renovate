@@ -68,7 +68,7 @@ export async function getReleaseNotesMd(
   }
   const { path: changelogFile, id } = files.shift();
   /* istanbul ignore if */
-  if (files.length > 1) {
+  if (files.length !== 0) {
     logger.debug(
       `Multiple candidates for changelog file, using ${changelogFile}`
     );
