@@ -81,6 +81,18 @@ export async function getRepos(): Promise<string[]> {
   }
 }
 
+export async function getJsonFile(fileName: string): Promise<any | null> {
+  try {
+    return (
+      await bitbucketHttp.getJson(
+        `/2.0/repositories/${config.repository}/src/${config.defaultBranch}/${fileName}`
+      )
+    ).body;
+  } catch (err) /* istanbul ignore next */ {
+    return null;
+  }
+}
+
 // Initialize bitbucket by getting base branch and SHA
 export async function initRepo({
   repository,
@@ -105,22 +117,14 @@ export async function initRepo({
         )
       ).body
     );
+    config.defaultBranch = info.mainbranch;
 
     if (optimizeForDisabled) {
       interface RenovateConfig {
         enabled: boolean;
       }
 
-      let renovateConfig: RenovateConfig;
-      try {
-        renovateConfig = (
-          await bitbucketHttp.getJson<RenovateConfig>(
-            `/2.0/repositories/${repository}/src/${info.mainbranch}/renovate.json`
-          )
-        ).body;
-      } catch {
-        // Do nothing
-      }
+      const renovateConfig: RenovateConfig = await getJsonFile('renovate.json');
       if (renovateConfig && renovateConfig.enabled === false) {
         throw new Error(REPOSITORY_DISABLED);
       }
