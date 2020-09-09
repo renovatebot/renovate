@@ -318,7 +318,7 @@ export async function createPr({
   prBody: body,
   labels,
   draftPR = false,
-  platformOptions = {},
+  platformOptions,
 }: CreatePRConfig): Promise<Pr> {
   const sourceRefName = getNewBranchName(branchName);
   const targetRefName = getNewBranchName(targetBranch);
@@ -326,7 +326,7 @@ export async function createPr({
   const azureApiGit = await azureApi.gitApi();
   const workItemRefs = [
     {
-      id: platformOptions.azureWorkItemId?.toString(),
+      id: platformOptions?.azureWorkItemId?.toString(),
     },
   ];
   let pr: GitPullRequest = await azureApiGit.createPullRequest(
@@ -340,7 +340,7 @@ export async function createPr({
     },
     config.repoId
   );
-  if (platformOptions.azureAutoComplete) {
+  if (platformOptions?.azureAutoComplete) {
     pr = await azureApiGit.updatePullRequest(
       {
         autoCompleteSetBy: {

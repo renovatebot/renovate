@@ -1373,7 +1373,6 @@ export async function createPr({
   prTitle: title,
   prBody: rawBody,
   labels,
-  platformOptions = {},
   draftPR = false,
 }: CreatePRConfig): Promise<Pr> {
   const body = sanitize(rawBody);
