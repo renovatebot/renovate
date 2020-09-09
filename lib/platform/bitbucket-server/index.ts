@@ -769,7 +769,7 @@ export async function createPr({
   targetBranch,
   prTitle: title,
   prBody: rawDescription,
-  platformOptions = {},
+  platformOptions,
 }: CreatePRConfig): Promise<Pr> {
   const description = sanitize(rawDescription);
   logger.debug(`createPr(${branchName}, title=${title})`);
@@ -777,7 +777,7 @@ export async function createPr({
   let reviewers: BbsRestUserRef[] = [];
 
   /* istanbul ignore else */
-  if (platformOptions.bbUseDefaultReviewers) {
+  if (platformOptions?.bbUseDefaultReviewers) {
     logger.debug(`fetching default reviewers`);
     const { id } = (
       await bitbucketServerHttp.getJson<{ id: number }>(

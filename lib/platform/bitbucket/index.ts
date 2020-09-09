@@ -629,7 +629,7 @@ export async function createPr({
   targetBranch,
   prTitle: title,
   prBody: description,
-  platformOptions = {},
+  platformOptions,
 }: CreatePRConfig): Promise<Pr> {
   // labels is not supported in Bitbucket: https://bitbucket.org/site/master/issues/11976/ability-to-add-labels-to-pull-requests-bb
 
@@ -639,7 +639,7 @@ export async function createPr({
 
   let reviewers: { uuid: { raw: string } }[] = [];
 
-  if (platformOptions.bbUseDefaultReviewers) {
+  if (platformOptions?.bbUseDefaultReviewers) {
     const reviewersResponse = (
       await bitbucketHttp.getJson<utils.PagedResult<Reviewer>>(
         `/2.0/repositories/${config.repository}/default-reviewers`
