@@ -141,7 +141,7 @@ export async function extractAllPackageFiles(
       logger.debug({ packageFile }, 'packageFile has no content');
     }
   }
-  return gradleFiles;
+  return gradleFiles.length ? gradleFiles : null;
 }
 
 function buildGradleDependency(config: Upgrade): GradleDependency {
