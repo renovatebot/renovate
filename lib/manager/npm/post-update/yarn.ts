@@ -64,6 +64,7 @@ export async function generateLockFile(
     const extraEnv: ExecOptions['extraEnv'] = {
       NPM_CONFIG_CACHE: env.NPM_CONFIG_CACHE,
       npm_config_store: env.npm_config_store,
+      CI: 'true',
     };
 
     if (
@@ -124,7 +125,9 @@ export async function generateLockFile(
     if (lockUpdates.length) {
       logger.debug('Performing lockfileUpdate (yarn)');
       commands.push(
-        `yarn upgrade ${lockUpdates.join(' ')} ${cmdOptions}`.trim()
+        `yarn ${isYarn1 ? 'upgrade' : 'up'} ${lockUpdates.join(
+          ' '
+        )} ${cmdOptions}`.trim()
       );
     }
 
