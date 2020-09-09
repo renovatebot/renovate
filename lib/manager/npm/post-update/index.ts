@@ -275,7 +275,7 @@ interface ArtifactError {
   stderr: string;
 }
 
-interface UpdatedArtifcats {
+interface UpdatedArtifacts {
   name: string;
   contents: string | Buffer;
 }
@@ -341,7 +341,7 @@ async function resetNpmrcContent(
 async function updateYarnOffline(
   lockFileDir: string,
   localDir: string,
-  updatedArtifacts: UpdatedArtifcats[]
+  updatedArtifacts: UpdatedArtifacts[]
 ): Promise<void> {
   try {
     const resolvedPaths: string[] = [];
@@ -401,7 +401,7 @@ async function updateYarnOffline(
 
 export interface WriteExistingFilesResult {
   artifactErrors: ArtifactError[];
-  updatedArtifacts: UpdatedArtifcats[];
+  updatedArtifacts: UpdatedArtifacts[];
 }
 // istanbul ignore next
 export async function getAdditionalFiles(
@@ -410,7 +410,7 @@ export async function getAdditionalFiles(
 ): Promise<WriteExistingFilesResult> {
   logger.trace({ config }, 'getAdditionalFiles');
   const artifactErrors: ArtifactError[] = [];
-  const updatedArtifacts: UpdatedArtifcats[] = [];
+  const updatedArtifacts: UpdatedArtifacts[] = [];
   if (!packageFiles.npm?.length) {
     return { artifactErrors, updatedArtifacts };
   }
