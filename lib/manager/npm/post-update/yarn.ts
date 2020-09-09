@@ -119,16 +119,25 @@ export async function generateLockFile(
     commands.push(`yarn install ${cmdOptions}`.trim());
 
     // rangeStrategy = update-lockfile
-    const lockUpdates = upgrades
-      .filter((upgrade) => upgrade.isLockfileUpdate)
-      .map((upgrade) => upgrade.depName); // note - this can hit a yarn bug, see https://github.com/yarnpkg/yarn/issues/8236
+    const lockUpdates = upgrades.filter((upgrade) => upgrade.isLockfileUpdate);
     if (lockUpdates.length) {
       logger.debug('Performing lockfileUpdate (yarn)');
-      commands.push(
-        `yarn ${isYarn1 ? 'upgrade' : 'up'} ${lockUpdates.join(
-          ' '
-        )} ${cmdOptions}`.trim()
-      );
+      if (isYarn1) {
+        // `yarn upgrade` updates based on the version range specified in the package file
+        // note - this can hit a yarn bug, see https://github.com/yarnpkg/yarn/issues/8236
+        commands.push(
+          `yarn upgrade ${lockUpdates
+            .map((update) => update.depName)
+            .join(' ')} ${cmdOptions}`.trim()
+        );
+      } else {
+        // `yarn up` updates to the latest release, so the range should be specified
+        commands.push(
+          `yarn up ${lockUpdates
+            .map((update) => `${update.depName}@${update.newValue}`)
+            .join(' ')}`
+        );
+      }
     }
 
     // postUpdateOptions
