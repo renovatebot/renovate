@@ -345,10 +345,23 @@ async function updateYarnOffline(
 ): Promise<void> {
   try {
     const resolvedPaths: string[] = [];
-    const yarnrc = await getFile(upath.join(lockFileDir, '.yarnrc'));
     const yarnrcYml = await getFile(upath.join(lockFileDir, '.yarnrc.yml'));
+    const yarnrc = await getFile(upath.join(lockFileDir, '.yarnrc'));
 
-    if (yarnrc) {
+    // As .yarnrc.yml overrides .yarnrc in Yarn 1 (https://git.io/JUcco)
+    // both files may exist, so check for .yarnrc.yml first
+    if (yarnrcYml) {
+      // Yarn 2 (offline cache and zero-installs)
+      const config = parseSyml(yarnrcYml);
+      resolvedPaths.push(
+        upath.join(lockFileDir, config.cacheFolder || './.yarn/cache')
+      );
+
+      resolvedPaths.push(upath.join(lockFileDir, '.pnp'));
+      if (config.pnpDataPath) {
+        resolvedPaths.push(upath.join(lockFileDir, config.pnpDataPath));
+      }
+    } else if (yarnrc) {
       // Yarn 1 (offline mirror)
       const mirrorLine = yarnrc
         .split('\n')
@@ -359,17 +372,6 @@ async function updateYarnOffline(
           .replace(/"/g, '')
           .replace(/\/?$/, '/');
         resolvedPaths.push(upath.join(lockFileDir, mirrorPath));
-      }
-    } else if (yarnrcYml) {
-      // Yarn 2 (offline cache and zero-installs)
-      const config = parseSyml(yarnrcYml);
-      resolvedPaths.push(
-        upath.join(lockFileDir, config.cacheFolder || './.yarn/cache')
-      );
-
-      resolvedPaths.push(upath.join(lockFileDir, '.pnp'));
-      if (config.pnpDataPath) {
-        resolvedPaths.push(upath.join(lockFileDir, config.pnpDataPath));
       }
     }
     logger.debug({ resolvedPaths }, 'updateYarnOffline resolvedPaths');
