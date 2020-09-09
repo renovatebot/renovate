@@ -93,7 +93,7 @@ export interface PackageFile<T = Record<string, any>>
   packageJsonVersion?: string;
   parent?: string;
   skipInstalls?: boolean;
-  yarnrc?: string;
+  yarnrc?: RcFile;
   yarnWorkspacesPackages?: string[] | string;
   matchStrings?: string[];
 }
@@ -261,4 +261,9 @@ export interface PostUpdateConfig extends ManagerConfig, Record<string, any> {
   yarnLock?: string;
   branchName?: string;
   reuseExistingBranch?: boolean;
+}
+
+export interface RcFile {
+  content: string;
+  fileName: string;
 }

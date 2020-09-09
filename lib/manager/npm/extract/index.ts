@@ -23,6 +23,7 @@ import { NpmPackage, NpmPackageDependeny } from './common';
 import { getLockedVersions } from './locked-versions';
 import { detectMonorepos } from './monorepo';
 import { mightBeABrowserLibrary } from './type';
+import { getYarnRc } from './yarn';
 
 function parseDepName(depType: string, key: string): string {
   if (depType !== 'resolutions') {
@@ -117,11 +118,8 @@ export async function extractPackageFile(
       npmrc = undefined;
     }
   }
-  const yarnrcFileName = getSiblingFileName(fileName, '.yarnrc');
-  let yarnrc;
-  if (!is.string(config.yarnrc)) {
-    yarnrc = (await readLocalFile(yarnrcFileName, 'utf8')) || undefined;
-  }
+
+  const yarnrc = await getYarnRc(fileName, config);
 
   let lernaDir: string;
   let lernaPackages: string[];

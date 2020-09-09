@@ -157,12 +157,15 @@ export async function writeExistingFiles(
       }
     }
     if (packageFile.yarnrc) {
-      logger.debug(`Writing .yarnrc to ${basedir}`);
-      const yarnrcFilename = upath.join(basedir, '.yarnrc');
+      const {
+        fileName: yarnrcFilename,
+        content: yarnrcContent,
+      } = packageFile.yarnrc;
+      logger.debug(`Writing ${yarnrcFilename} to ${basedir}`);
       try {
         await outputFile(
           yarnrcFilename,
-          packageFile.yarnrc
+          yarnrcContent
             .replace('--install.pure-lockfile true', '')
             .replace('--install.frozen-lockfile true', '')
         );

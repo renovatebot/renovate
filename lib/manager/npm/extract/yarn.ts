@@ -1,7 +1,12 @@
+import * as path from 'path';
+import is from '@sindresorhus/is';
 import { structUtils } from '@yarnpkg/core';
 import { parseSyml } from '@yarnpkg/parsers';
+import findUp from 'find-up';
+import { getEnv } from '../../../../tools/utils';
 import { logger } from '../../../logger';
-import { readLocalFile } from '../../../util/fs';
+import { readFile, readLocalFile } from '../../../util/fs';
+import { ExtractConfig, RcFile } from '../../common';
 
 export async function getYarnLock(
   filePath: string
@@ -40,4 +45,30 @@ export async function getYarnLock(
     logger.debug({ filePath, err }, 'Warning: Exception parsing yarn.lock');
     return { isYarn1: true, cacheVersion: NaN, lockedVersions: {} };
   }
+}
+
+export async function getYarnRc(
+  packageFilePath: string,
+  config: ExtractConfig
+): Promise<RcFile> {
+  if (is.string(config.yarnrc) || config.localDir === undefined) {
+    return undefined;
+  }
+  const yarnRcFileNames = [
+    '.yarnrc',
+    '.yarnrc.yml',
+    getEnv('YARN_RC_FILENAME'),
+  ];
+  const yarnRcPath = await findUp(yarnRcFileNames, {
+    cwd: path.dirname(path.join(config.localDir, packageFilePath)),
+    type: 'file',
+  });
+  if (yarnRcPath?.startsWith(config.localDir) !== true) {
+    return undefined;
+  }
+  logger.debug({ yarnRcPath }, 'found Yarn config file');
+  return {
+    content: await readFile(yarnRcPath, 'utf8'),
+    fileName: yarnRcPath,
+  };
 }
