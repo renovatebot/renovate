@@ -58,6 +58,7 @@ const defaultConfigFile = configFileNames[0];
 
 let config: GiteaRepoConfig = {} as any;
 let botUserID: number;
+let botUserName: string;
 
 function toRenovateIssue(data: helper.Issue): Issue {
   return {
@@ -82,6 +83,11 @@ function toRenovatePR(data: helper.PR): Pr | null {
     logger.trace(
       `Skipping Pull Request #${data.number} due to missing base and/or head branch`
     );
+    return null;
+  }
+
+  const createdBy = data.user?.username;
+  if (createdBy && botUserName && createdBy !== botUserName) {
     return null;
   }
 
@@ -187,6 +193,7 @@ const platform: Platform = {
       const user = await helper.getCurrentUser({ token });
       gitAuthor = `${user.full_name || user.username} <${user.email}>`;
       botUserID = user.id;
+      botUserName = user.username;
     } catch (err) {
       logger.debug(
         { err },
