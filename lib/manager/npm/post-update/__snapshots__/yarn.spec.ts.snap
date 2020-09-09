@@ -443,6 +443,7 @@ Array [
       "cwd": "some-dir",
       "encoding": "utf-8",
       "env": Object {
+        "CI": "true",
         "HOME": "/home/user",
         "HTTPS_PROXY": "https://example.com",
         "HTTP_PROXY": "http://example.com",
@@ -462,6 +463,7 @@ Array [
       "cwd": "some-dir",
       "encoding": "utf-8",
       "env": Object {
+        "CI": "true",
         "HOME": "/home/user",
         "HTTPS_PROXY": "https://example.com",
         "HTTP_PROXY": "http://example.com",
