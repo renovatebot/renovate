@@ -14,6 +14,7 @@ export interface Config {
   prList: Pr[];
   repository: string;
   username: string;
+  userUuid: string;
 }
 
 export interface PagedResult<T = any> {
@@ -77,7 +78,7 @@ const addMaxLength = (inputUrl: string, pagelen = 100): string => {
   return maxedUrl;
 };
 
-function callApi<T>(
+export function callApi<T>(
   apiUrl: string,
   method: string,
   options?: HttpOptions | HttpPostOptions
