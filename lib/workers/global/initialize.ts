@@ -6,7 +6,7 @@ import { logger } from '../../logger';
 import { initPlatform } from '../../platform';
 import * as packageCache from '../../util/cache/package';
 import { setEmojiConfig } from '../../util/emoji';
-import * as limits from './limits';
+import { Limit, setMaxLimit } from './limits';
 
 async function setDirectories(input: RenovateConfig): Promise<RenovateConfig> {
   const config: RenovateConfig = { ...input };
@@ -35,7 +35,7 @@ export async function globalInitialize(
   config = await initPlatform(config);
   config = await setDirectories(config);
   packageCache.init(config);
-  limits.init(config);
+  setMaxLimit(Limit.Commits, config.prCommitsPerRunLimit);
   setEmojiConfig(config);
   return config;
 }

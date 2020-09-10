@@ -71,12 +71,9 @@ export async function getReleases({
     };
 
     result.dependencyUrl = galaxyProjectUrl;
-    if (resultObject.github_user && resultObject.github_repo) {
-      result.sourceUrl =
-        'https://github.com/' +
-        resultObject.github_user +
-        '/' +
-        resultObject.github_repo;
+    const { github_user: user = null, github_repo: repo = null } = resultObject;
+    if (typeof user === 'string' && typeof repo === 'string') {
+      result.sourceUrl = `https://github.com/${user}/${repo}`;
     }
 
     result.releases = versions.map(

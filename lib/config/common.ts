@@ -23,6 +23,7 @@ export interface RenovateSharedConfig {
   branchName?: string;
   manager?: string;
   commitMessage?: string;
+  commitMessagePrefix?: string;
   draftPR?: boolean;
   enabled?: boolean;
   enabledManagers?: string[];
@@ -54,7 +55,6 @@ export interface RenovateSharedConfig {
   semanticCommits?: boolean;
   semanticCommitScope?: string;
   semanticCommitType?: string;
-  statusCheckVerify?: boolean;
   suppressNotifications?: string[];
   timezone?: string;
   unicodeEmoji?: boolean;
@@ -73,6 +73,10 @@ export interface RenovateAdminConfig {
   baseDir?: string;
   cacheDir?: string;
   configWarningReuseIssue?: boolean;
+
+  dockerImagePrefix?: string;
+  dockerUser?: string;
+
   dryRun?: boolean;
 
   endpoint?: string;
@@ -87,12 +91,14 @@ export interface RenovateAdminConfig {
 
   onboarding?: boolean;
   onboardingBranch?: string;
+  onboardingCommitMessage?: string;
   onboardingPrTitle?: string;
   onboardingConfig?: RenovateSharedConfig;
 
   platform?: string;
   postUpdateOptions?: string[];
   privateKey?: string | Buffer;
+  privateKeyPath?: string;
   repositories?: RenovateRepository[];
   requireConfig?: boolean;
   trustLevel?: 'low' | 'high';
@@ -134,7 +140,6 @@ export interface RenovateConfig
   depName?: string;
   baseBranches?: string[];
   baseBranch?: string;
-  baseBranchSha?: string;
   defaultBranch?: string;
   branchList?: string[];
   description?: string | string[];

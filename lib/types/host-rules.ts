@@ -16,4 +16,5 @@ export interface HostRule {
   abortOnError?: boolean;
   abortIgnoreStatusCodes?: number[];
   enabled?: boolean;
+  enableHttp2?: boolean;
 }

@@ -8,6 +8,7 @@ import * as gitlab from '../gitlab-tags';
 export const id = 'go';
 
 const http = new Http(id);
+const gitlabRegExp = /^(https:\/\/[^/]*gitlab.[^/]*)\/(.*)$/;
 
 interface DataSource {
   datasource: string;
@@ -54,9 +55,8 @@ async function getDatasource(goModule: string): Promise<DataSource | null> {
           .replace(/\/$/, ''),
       };
     }
-    if (goSourceUrl?.match('^https://[^/]*gitlab.[^/]*/.+')) {
-      const gitlabRegExp = /^(https:\/\/[^/]*gitlab.[^/]*)\/(.*)$/;
-      const gitlabRes = gitlabRegExp.exec(goSourceUrl);
+    const gitlabRes = gitlabRegExp.exec(goSourceUrl);
+    if (gitlabRes) {
       return {
         datasource: gitlab.id,
         registryUrl: gitlabRes[1],
@@ -115,8 +115,10 @@ export async function getReleases({
       });
     logger.trace({ submodReleases }, 'go.getReleases');
     if (submodReleases.length > 0) {
-      res.releases = submodReleases;
-      return res;
+      return {
+        sourceUrl: res.sourceUrl,
+        releases: submodReleases,
+      };
     }
   }
   if (res?.releases) {

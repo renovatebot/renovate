@@ -1,8 +1,11 @@
+import is from '@sindresorhus/is';
 import { RenovateConfig } from '../../config';
 import { PR_STATE_NOT_OPEN } from '../../constants/pull-requests';
 import { logger, getErrors } from '../../logger';
+import { logger } from '../../logger';
 import { Pr, platform } from '../../platform';
-import { BranchConfig } from '../common';
+import { PrState } from '../../types';
+import { BranchConfig, ProcessBranchResult } from '../common';
 
 function getListItem(branch: BranchConfig, type: string, pr?: Pr): string {
   let item = ' - [ ] ';
@@ -40,34 +43,18 @@ export async function ensureMasterIssue(
     return;
   }
   logger.debug('Ensuring Dependency Dashboard');
-  if (
-    !branches.length ||
-    branches.every((branch) => branch.res === 'automerged')
-  ) {
-    if (config.dependencyDashboardAutoclose) {
-      logger.debug('Closing Dependency Dashboard');
-      if (config.dryRun) {
-        logger.info(
-          'DRY-RUN: Would close Dependency Dashboard ' +
-            config.dependencyDashboardTitle
-        );
-      } else {
-        await platform.ensureIssueClosing(config.dependencyDashboardTitle);
-      }
-      return;
-    }
+  const hasBranches =
+    is.nonEmptyArray(branches) &&
+    branches.some((branch) => branch.res !== ProcessBranchResult.Automerged);
+  if (config.dependencyDashboardAutoclose && !hasBranches) {
     if (config.dryRun) {
       logger.info(
-        'DRY-RUN: Would ensure Dependency Dashboard ' +
+        'DRY-RUN: Would close Dependency Dashboard ' +
           config.dependencyDashboardTitle
       );
     } else {
-      await platform.ensureIssue({
-        title: config.dependencyDashboardTitle,
-        reuseTitle,
-        body:
-          'This repository is up-to-date and has no outstanding updates open or pending.',
-      });
+      logger.debug('Closing Dependency Dashboard');
+      await platform.ensureIssueClosing(config.dependencyDashboardTitle);
     }
     return;
   }
@@ -89,7 +76,7 @@ export async function ensureMasterIssue(
   }
 
   const pendingApprovals = branches.filter(
-    (branch) => branch.res === 'needs-approval'
+    (branch) => branch.res === ProcessBranchResult.NeedsApproval
   );
   if (pendingApprovals.length) {
     issueBody += '## Pending Approval\n\n';
@@ -100,7 +87,7 @@ export async function ensureMasterIssue(
     issueBody += '\n';
   }
   const awaitingSchedule = branches.filter(
-    (branch) => branch.res === 'not-scheduled'
+    (branch) => branch.res === ProcessBranchResult.NotScheduled
   );
   if (awaitingSchedule.length) {
     issueBody += '## Awaiting Schedule\n\n';
@@ -113,7 +100,8 @@ export async function ensureMasterIssue(
   }
   const rateLimited = branches.filter(
     (branch) =>
-      branch.res === 'pr-limit-reached' || branch.res === 'commit-limit-reached'
+      branch.res === ProcessBranchResult.PrLimitReached ||
+      branch.res === ProcessBranchResult.CommitLimitReached
   );
   if (rateLimited.length) {
     issueBody += '## Rate Limited\n\n';
@@ -125,7 +113,7 @@ export async function ensureMasterIssue(
     issueBody += '\n';
   }
   const errorList = branches.filter(
-    (branch) => branch.res && branch.res.endsWith('error')
+    (branch) => branch.res === ProcessBranchResult.Error
   );
   if (errorList.length) {
     issueBody += '## Errored\n\n';
@@ -137,7 +125,7 @@ export async function ensureMasterIssue(
     issueBody += '\n';
   }
   const awaitingPr = branches.filter(
-    (branch) => branch.res === 'needs-pr-approval'
+    (branch) => branch.res === ProcessBranchResult.NeedsPrApproval
   );
   if (awaitingPr.length) {
     issueBody += '## PR Creation Approval Required\n\n';
@@ -148,7 +136,9 @@ export async function ensureMasterIssue(
     }
     issueBody += '\n';
   }
-  const prEdited = branches.filter((branch) => branch.res === 'pr-edited');
+  const prEdited = branches.filter(
+    (branch) => branch.res === ProcessBranchResult.PrEdited
+  );
   if (prEdited.length) {
     issueBody += '## Edited/Blocked\n\n';
     issueBody += `These updates have been manually edited so Renovate will no longer make changes. To discard all commits and start over, check the box below.\n\n`;
@@ -158,7 +148,9 @@ export async function ensureMasterIssue(
     }
     issueBody += '\n';
   }
-  const prPending = branches.filter((branch) => branch.res === 'pending');
+  const prPending = branches.filter(
+    (branch) => branch.res === ProcessBranchResult.Pending
+  );
   if (prPending.length) {
     issueBody += '## Pending Status Checks\n\n';
     issueBody += `These updates await pending status checks. To force their creation now, check the box below.\n\n`;
@@ -168,16 +160,16 @@ export async function ensureMasterIssue(
     issueBody += '\n';
   }
   const otherRes = [
-    'pending',
-    'needs-approval',
-    'needs-pr-approval',
-    'not-scheduled',
-    'pr-limit-reached',
-    'commit-limit-reached',
-    'already-existed',
-    'error',
-    'automerged',
-    'pr-edited',
+    ProcessBranchResult.Pending,
+    ProcessBranchResult.NeedsApproval,
+    ProcessBranchResult.NeedsPrApproval,
+    ProcessBranchResult.NotScheduled,
+    ProcessBranchResult.PrLimitReached,
+    ProcessBranchResult.CommitLimitReached,
+    ProcessBranchResult.AlreadyExisted,
+    ProcessBranchResult.Error,
+    ProcessBranchResult.Automerged,
+    ProcessBranchResult.PrEdited,
   ];
   const inProgress = branches.filter(
     (branch) => !otherRes.includes(branch.res)
@@ -200,7 +192,7 @@ export async function ensureMasterIssue(
     issueBody += '\n';
   }
   const alreadyExisted = branches.filter(
-    (branch) => branch.res && branch.res.endsWith('already-existed')
+    (branch) => branch.res === ProcessBranchResult.AlreadyExisted
   );
   if (alreadyExisted.length) {
     issueBody += '## Closed/Ignored\n\n';
@@ -210,14 +202,18 @@ export async function ensureMasterIssue(
       const pr = await platform.findPr({
         branchName: branch.branchName,
         prTitle: branch.prTitle,
-        state: PR_STATE_NOT_OPEN,
+        state: PrState.NotOpen,
       });
       issueBody += getListItem(branch, 'recreate', pr);
     }
     issueBody += '\n';
   }
 
-  // istanbul ignore if
+  if (!hasBranches) {
+    issueBody +=
+      'This repository currently has no open or pending branches.\n\n';
+  }
+
   if (config.dependencyDashboardFooter?.length) {
     issueBody += `---\n${config.dependencyDashboardFooter}\n`;
   }

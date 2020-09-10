@@ -1,9 +1,18 @@
 import {
   BranchStatus,
+  PrState,
   VulnerabilityAlert as _VulnerabilityAlert,
 } from '../types';
 
 export type VulnerabilityAlert = _VulnerabilityAlert;
+
+type VulnerabilityKey = string;
+type VulnerabilityRangeKey = string;
+type VulnerabilityPatch = string;
+export type AggregatedVulnerabilities = Record<
+  VulnerabilityKey,
+  Record<VulnerabilityRangeKey, VulnerabilityPatch>
+>;
 
 export interface PlatformParams {
   endpoint?: string;
@@ -20,13 +29,10 @@ export interface PlatformResult {
 
 export interface RepoResult {
   defaultBranch: string;
-  defaultBranchSha?: string;
   isFork: boolean;
 }
 
 export interface RepoParams {
-  azureWorkItemId?: number; // shouldn't this be configurable within a renovate.json?
-  bbUseDefaultReviewers?: boolean; // shouldn't this be configurable within a renovate.json?
   localDir: string;
   optimizeForDisabled: boolean;
   repository: string;
@@ -71,7 +77,8 @@ export interface Issue {
 }
 export type PlatformPrOptions = {
   azureAutoComplete?: boolean;
-  statusCheckVerify?: boolean;
+  azureWorkItemId?: number;
+  bbUseDefaultReviewers?: boolean;
   gitLabAutomerge?: boolean;
 };
 export interface CreatePRConfig {
@@ -82,6 +89,12 @@ export interface CreatePRConfig {
   labels?: string[] | null;
   platformOptions?: PlatformPrOptions;
   draftPR?: boolean;
+}
+export interface UpdatePrConfig {
+  number: number;
+  prTitle: string;
+  prBody?: string;
+  state?: PrState.Open | PrState.Closed;
 }
 export interface EnsureIssueConfig {
   title: string;
@@ -100,7 +113,7 @@ export interface BranchStatusConfig {
 export interface FindPRConfig {
   branchName: string;
   prTitle?: string | null;
-  state?: 'open' | 'closed' | '!open' | 'all';
+  state?: PrState.Open | PrState.Closed | PrState.NotOpen | PrState.All;
   refreshCache?: boolean;
 }
 export interface EnsureCommentConfig {
@@ -129,6 +142,7 @@ export interface Platform {
   findIssue(title: string): Promise<Issue | null>;
   getIssueList(): Promise<Issue[]>;
   getVulnerabilityAlerts(): Promise<VulnerabilityAlert[]>;
+  getJsonFile(fileName: string): Promise<any | null>;
   initRepo(config: RepoParams): Promise<RepoResult>;
   getPrList(): Promise<Pr[]>;
   ensureIssueClosing(title: string): Promise<void>;
@@ -136,7 +150,7 @@ export interface Platform {
     issueConfig: EnsureIssueConfig
   ): Promise<EnsureIssueResult | null>;
   getPrBody(prBody: string): string;
-  updatePr(number: number, prTitle: string, prBody?: string): Promise<void>;
+  updatePr(prConfig: UpdatePrConfig): Promise<void>;
   mergePr(number: number, branchName: string): Promise<boolean>;
   addReviewers(number: number, reviewers: string[]): Promise<void>;
   addAssignees(number: number, assignees: string[]): Promise<void>;
@@ -154,9 +168,7 @@ export interface Platform {
       | EnsureCommentRemovalConfigByTopic
       | EnsureCommentRemovalConfigByContent
   ): Promise<void>;
-  deleteBranch(branchName: string, closePr?: boolean): Promise<void>;
   ensureComment(ensureComment: EnsureCommentConfig): Promise<boolean>;
-  setBaseBranch(branchName: string): Promise<string>;
   getPr(number: number): Promise<Pr>;
   findPr(findPRConfig: FindPRConfig): Promise<Pr>;
   refreshPr?(number: number): Promise<void>;

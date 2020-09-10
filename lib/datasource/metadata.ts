@@ -16,6 +16,8 @@ const manualChangelogUrls = {
       'https://github.com/gatsbyjs/gatsby/blob/master/packages/gatsby/CHANGELOG.md',
     'react-native':
       'https://github.com/react-native-community/react-native-releases/blob/master/CHANGELOG.md',
+    'zone.js':
+      'https://github.com/angular/angular/blob/master/packages/zone.js/CHANGELOG.md',
   },
   pypi: {
     django: 'https://github.com/django/django/tree/master/docs/releases',
@@ -55,6 +57,7 @@ const manualSourceUrls = {
       'https://github.com/GoogleContainerTools/kaniko',
     'gitlab/gitlab-ce': 'https://gitlab.com/gitlab-org/omnibus-gitlab',
     'gitlab/gitlab-runner': 'https://gitlab.com/gitlab-org/gitlab-runner',
+    'hashicorp/terraform': 'https://github.com/hashicorp/terraform',
     node: 'https://github.com/nodejs/node',
     traefik: 'https://github.com/containous/traefik',
   },

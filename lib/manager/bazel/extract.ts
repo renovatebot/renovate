@@ -99,10 +99,13 @@ function parseContent(content: string): string[] {
   );
 }
 
-export function extractPackageFile(content: string): PackageFile | null {
+export function extractPackageFile(
+  content: string,
+  fileName?: string
+): PackageFile | null {
   const definitions = parseContent(content);
   if (!definitions.length) {
-    logger.debug('No matching WORKSPACE definitions found');
+    logger.debug({ fileName }, 'No matching bazel WORKSPACE definitions found');
     return null;
   }
   logger.debug({ definitions }, `Found ${definitions.length} definitions`);

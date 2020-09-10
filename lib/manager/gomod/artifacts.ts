@@ -16,10 +16,7 @@ function getPreCommands(): string[] | null {
   });
   let preCommands = null;
   if (credentials?.token) {
-    let token = global.appMode
-      ? `x-access-token:${credentials.token}`
-      : credentials.token;
-    token = quote(token);
+    const token = quote(credentials.token);
     preCommands = [
       `git config --global url.\"https://${token}@github.com/\".insteadOf \"https://github.com/\"`, // eslint-disable-line no-useless-escape
     ];
@@ -65,6 +62,7 @@ export async function updateArtifacts({
       extraEnv: {
         GOPATH: goPath,
         GOPROXY: process.env.GOPROXY,
+        GOPRIVATE: process.env.GOPRIVATE,
         GONOSUMDB: process.env.GONOSUMDB,
         CGO_ENABLED: config.binarySource === BinarySource.Docker ? '0' : null,
       },
@@ -95,6 +93,13 @@ export async function updateArtifacts({
         logger.debug({ cmd, args }, 'go mod tidy command included');
         execCommands.push(`${cmd} ${args}`);
       }
+    }
+
+    // We tidy one more time as a solution for #6795
+    if (config.postUpdateOptions?.includes('gomodTidy')) {
+      args = 'mod tidy';
+      logger.debug({ cmd, args }, 'additional go mod tidy command included');
+      execCommands.push(`${cmd} ${args}`);
     }
 
     await exec(execCommands, execOptions);

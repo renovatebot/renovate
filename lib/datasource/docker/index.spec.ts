@@ -230,7 +230,7 @@ describe(getName(__filename), () => {
       AWSMock.mock(
         'ECR',
         'getAuthorizationToken',
-        (params: {}, callback: Function) => {
+        (params: unknown, callback: (...unknown) => void) => {
           callback(null, {
             authorizationData: [{ authorizationToken: 'abcdef' }],
           });
@@ -262,7 +262,7 @@ describe(getName(__filename), () => {
       AWSMock.mock(
         'ECR',
         'getAuthorizationToken',
-        (params: {}, callback: Function) => {
+        (params: unknown, callback: (...unknown) => void) => {
           callback(null, {});
         }
       );
@@ -291,7 +291,7 @@ describe(getName(__filename), () => {
       AWSMock.mock(
         'ECR',
         'getAuthorizationToken',
-        (params: {}, callback: Function) => {
+        (params: unknown, callback: (...unknown) => void) => {
           callback(Error('some error'), null);
         }
       );

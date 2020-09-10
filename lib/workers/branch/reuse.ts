@@ -13,7 +13,7 @@ export async function shouldReuseExistingBranch(
 ): Promise<ParentBranch> {
   const { branchName } = config;
   // Check if branch exists
-  if (!(await branchExists(branchName))) {
+  if (!branchExists(branchName)) {
     logger.debug(`Branch needs creating`);
     return { reuseExistingBranch: false };
   }
@@ -23,16 +23,16 @@ export async function shouldReuseExistingBranch(
   const pr = await platform.getBranchPr(branchName);
 
   if (pr) {
-    if (pr.title && pr.title.startsWith('rebase!')) {
-      logger.debug('Manual rebase requested via PR title for #' + pr.number);
+    if (pr.title?.startsWith('rebase!')) {
+      logger.debug(`Manual rebase requested via PR title for #${pr.number}`);
       return { reuseExistingBranch: false };
     }
-    if (pr.body && pr.body.includes(`- [x] <!-- rebase-check -->`)) {
-      logger.debug('Manual rebase requested via PR checkbox for #' + pr.number);
+    if (pr.body?.includes(`- [x] <!-- rebase-check -->`)) {
+      logger.debug(`Manual rebase requested via PR checkbox for #${pr.number}`);
       return { reuseExistingBranch: false };
     }
-    if (pr.labels && pr.labels.includes(config.rebaseLabel)) {
-      logger.debug('Manual rebase requested via PR labels for #' + pr.number);
+    if (pr.labels?.includes(config.rebaseLabel)) {
+      logger.debug(`Manual rebase requested via PR labels for #${pr.number}`);
       // istanbul ignore if
       if (config.dryRun) {
         logger.info(

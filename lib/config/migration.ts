@@ -22,6 +22,8 @@ const removedOptions = [
   'groupCommitMessage',
   'groupPrTitle',
   'groupPrBody',
+  'statusCheckVerify',
+  'lazyGrouping',
 ];
 
 export interface MigratedConfig {
@@ -188,6 +190,19 @@ export function migrateConfig(
         } else if (val === false) {
           migratedConfig.trustLevel = 'low';
         }
+      } else if (key === 'managerBranchPrefix') {
+        isMigrated = true;
+        delete migratedConfig.managerBranchPrefix;
+        migratedConfig.additionalBranchPrefix = val;
+      } else if (
+        key === 'branchPrefix' &&
+        is.string(val) &&
+        val.includes('{{')
+      ) {
+        isMigrated = true;
+        const templateIndex = val.indexOf(`{{`);
+        migratedConfig.branchPrefix = val.substring(0, templateIndex);
+        migratedConfig.additionalBranchPrefix = val.substring(templateIndex);
       } else if (key === 'upgradeInRange') {
         isMigrated = true;
         delete migratedConfig.upgradeInRange;
@@ -219,7 +234,7 @@ export function migrateConfig(
           } else if (val[i] === ':library' || val[i] === 'config:library') {
             isMigrated = true;
             migratedConfig.extends[i] = 'config:js-lib';
-          } else if (val[i].startsWith(':masterIssue')) {
+          } else if (is.string(val[i]) && val[i].startsWith(':masterIssue')) {
             isMigrated = true;
             migratedConfig.extends[i] = val[i].replace(
               'masterIssue',
@@ -435,7 +450,7 @@ export function migrateConfig(
         is.array(val) &&
         val.length === 1
       ) {
-        migratedConfig[key] = `${val[0]}`;
+        migratedConfig[key] = String(val[0]);
       } else if (key === 'node' && (val as RenovateConfig).enabled === true) {
         isMigrated = true;
         delete migratedConfig.node.enabled;

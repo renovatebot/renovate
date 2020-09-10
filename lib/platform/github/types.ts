@@ -22,6 +22,24 @@ export interface Comment {
 
 export interface GhPr extends Pr {
   comments: Comment[];
+  mergeable: boolean;
+}
+
+export interface GhRestPr extends GhPr {
+  head: { ref: string; sha: string };
+  mergeable_state: string;
+}
+
+export interface GhGraphQlPr extends GhPr {
+  commits: any;
+  reviewRequests: any;
+  assignees: any;
+  mergeStateStatus: string;
+  reviews: any;
+  baseRefName: string;
+  headRefName: string;
+  comments: Comment[] & { nodes?: { databaseId: number; body: string }[] };
+  labels: string[] & { nodes?: { name: string }[] };
 }
 
 export interface LocalRepoConfig {
@@ -38,7 +56,6 @@ export interface LocalRepoConfig {
   issueList: any[] | null;
   mergeMethod: string;
   defaultBranch: string;
-  defaultBranchSha?: string;
   repositoryOwner: string;
   repository: string | null;
   localDir: string;

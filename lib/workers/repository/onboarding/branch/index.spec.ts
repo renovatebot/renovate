@@ -6,8 +6,8 @@ import {
   git,
   platform,
 } from '../../../../../test/util';
-import { PR_STATE_OPEN } from '../../../../constants/pull-requests';
 import { Pr } from '../../../../platform';
+import { PrState } from '../../../../types';
 import * as _rebase from './rebase';
 import { checkOnboardingBranch } from '.';
 
@@ -85,7 +85,7 @@ describe('workers/repository/onboarding/branch', () => {
         {
           ...mock<Pr>(),
           branchName: 'renovate/something',
-          state: PR_STATE_OPEN,
+          state: PrState.Open,
         },
       ]);
       await expect(checkOnboardingBranch(config)).rejects.toThrow();
@@ -98,7 +98,7 @@ describe('workers/repository/onboarding/branch', () => {
       const res = await checkOnboardingBranch(config);
       expect(res.repoIsOnboarded).toBe(false);
       expect(res.branchList).toEqual(['renovate/configure']);
-      expect(platform.setBaseBranch).toHaveBeenCalledTimes(1);
+      expect(git.checkoutBranch).toHaveBeenCalledTimes(1);
       expect(git.commitFiles).toHaveBeenCalledTimes(0);
     });
   });

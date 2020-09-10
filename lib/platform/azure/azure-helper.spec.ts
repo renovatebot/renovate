@@ -33,36 +33,6 @@ describe('platform/azure/helpers', () => {
     });
   });
 
-  describe('getNewBranchName', () => {
-    it('should add refs/heads', () => {
-      const res = azureHelper.getNewBranchName('testBB');
-      expect(res).toBe(`refs/heads/testBB`);
-    });
-    it('should be the same', () => {
-      const res = azureHelper.getNewBranchName('refs/heads/testBB');
-      expect(res).toBe(`refs/heads/testBB`);
-    });
-  });
-
-  describe('getBranchNameWithoutRefsheadsPrefix', () => {
-    it('should be renamed', () => {
-      const res = azureHelper.getBranchNameWithoutRefsheadsPrefix(
-        'refs/heads/testBB'
-      );
-      expect(res).toBe(`testBB`);
-    });
-    it('should log error and return undefined', () => {
-      const res = azureHelper.getBranchNameWithoutRefsheadsPrefix(
-        undefined as any
-      );
-      expect(res).toBeUndefined();
-    });
-    it('should return the input', () => {
-      const res = azureHelper.getBranchNameWithoutRefsheadsPrefix('testBB');
-      expect(res).toBe('testBB');
-    });
-  });
-
   describe('getRef', () => {
     it('should get the ref with short ref name', async () => {
       azureApi.gitApi.mockImplementationOnce(
@@ -245,28 +215,6 @@ describe('platform/azure/helpers', () => {
       }
       const res = azureHelper.max4000Chars(str);
       expect(res).toHaveLength(3999);
-    });
-  });
-
-  describe('getRenovatePRFormat', () => {
-    it('should be formated (closed)', () => {
-      const res = azureHelper.getRenovatePRFormat({ status: 2 } as any);
-      expect(res).toMatchSnapshot();
-    });
-
-    it('should be formated (closed v2)', () => {
-      const res = azureHelper.getRenovatePRFormat({ status: 3 } as any);
-      expect(res).toMatchSnapshot();
-    });
-
-    it('should be formated (not closed)', () => {
-      const res = azureHelper.getRenovatePRFormat({ status: 1 } as any);
-      expect(res).toMatchSnapshot();
-    });
-
-    it('should be formated (isConflicted)', () => {
-      const res = azureHelper.getRenovatePRFormat({ mergeStatus: 2 } as any);
-      expect(res).toMatchSnapshot();
     });
   });
 
