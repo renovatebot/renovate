@@ -458,7 +458,7 @@ Array [
     },
   },
   Object {
-    "cmd": "yarn up some-dep",
+    "cmd": "yarn up some-dep@^1.0.0",
     "options": Object {
       "cwd": "some-dir",
       "encoding": "utf-8",
