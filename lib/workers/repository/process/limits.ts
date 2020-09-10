@@ -30,7 +30,7 @@ export async function getPrHourlyRemaining(
       logger.debug(`PR hourly limit remaining: ${prsRemaining}`);
       return prsRemaining;
     } catch (err) {
-      logger.error('Error checking PRs created per hour');
+      logger.error({ err }, 'Error checking PRs created per hour');
       return config.prHourlyLimit;
     }
   }
@@ -58,7 +58,7 @@ export async function getConcurrentPrsRemaining(
       logger.debug(`PR concurrent limit remaining: ${concurrentRemaining}`);
       return concurrentRemaining;
     } catch (err) {
-      logger.error('Error checking concurrent PRs');
+      logger.error({ err }, 'Error checking concurrent PRs');
       return config.prConcurrentLimit;
     }
   }
@@ -96,7 +96,7 @@ export function getConcurrentBranchesRemaining(
       logger.debug(`Branch concurrent limit remaining: ${concurrentRemaining}`);
       return concurrentRemaining;
     } catch (err) {
-      logger.error('Error checking concurrent branches');
+      logger.error({ err }, 'Error checking concurrent branches');
       return limit;
     }
   }
