@@ -602,7 +602,9 @@ export async function commitFiles({
     // Fetch it after create
     const ref = `refs/heads/${branchName}:refs/remotes/origin/${branchName}`;
     await git.fetch(['origin', ref, '--depth=2', '--force']);
-    config.branchCommits[branchName] = await git.revparse([branchName]);
+    config.branchCommits[branchName] = (
+      await git.revparse([branchName])
+    ).trim();
     config.branchIsModified[branchName] = false;
     incLimitedValue(Limit.Commits);
     return commit;
