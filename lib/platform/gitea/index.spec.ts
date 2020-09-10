@@ -514,6 +514,41 @@ describe('platform/gitea', () => {
       expect(res).toMatchSnapshot();
     });
 
+    it('should filter list by creator', async () => {
+      helper.getCurrentUser.mockResolvedValueOnce(mockUser);
+
+      expect(
+        await gitea.initPlatform({ token: 'some-token' })
+      ).toMatchSnapshot();
+
+      await initFakeRepo();
+
+      helper.searchPRs.mockResolvedValueOnce([
+        partial<ght.PR>({
+          number: 3,
+          title: 'Third-party PR',
+          body: 'other random pull request',
+          state: PrState.Open,
+          diff_url: 'https://gitea.renovatebot.com/some/repo/pulls/3.diff',
+          created_at: '2011-08-18T22:30:38Z',
+          closed_at: '2016-01-09T10:03:21Z',
+          mergeable: true,
+          base: { ref: 'third-party-base-branch' },
+          head: {
+            label: 'other-head-branch',
+            sha: 'other-head-sha',
+            repo: partial<ght.Repo>({ full_name: mockRepo.full_name }),
+          },
+          user: { username: 'not-renovate' },
+        }),
+        ...mockPRs.map((pr) => ({ ...pr, user: { username: 'renovate' } })),
+      ]);
+
+      const res = await gitea.getPrList();
+      expect(res).toHaveLength(mockPRs.length);
+      expect(res).toMatchSnapshot();
+    });
+
     it('should cache results after first query', async () => {
       helper.searchPRs.mockResolvedValueOnce(mockPRs);
       await initFakeRepo();
