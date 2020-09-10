@@ -1,8 +1,6 @@
 import is from '@sindresorhus/is';
 import { RenovateConfig } from '../../config';
-import { PR_STATE_NOT_OPEN } from '../../constants/pull-requests';
-import { logger, getErrors } from '../../logger';
-import { logger } from '../../logger';
+import { getErrors, logger } from '../../logger';
 import { Pr, platform } from '../../platform';
 import { PrState } from '../../types';
 import { BranchConfig, ProcessBranchResult } from '../common';
