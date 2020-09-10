@@ -36,6 +36,7 @@ export interface PR {
     login?: string;
   };
   assignees?: any[];
+  user?: { username?: string };
 }
 
 export interface Issue {

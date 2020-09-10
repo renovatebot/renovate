@@ -2,13 +2,6 @@
 
 exports[`manager/travis/update updateDependency falls back to 2 spaces 1`] = `"hello: world"`;
 
-exports[`manager/travis/update updateDependency it uses double quotes 1`] = `
-"node_js:
-  - \\"6\\"
-  - \\"8\\"
-"
-`;
-
 exports[`manager/travis/update updateDependency updates values 1`] = `
 "dist: trusty
 language: node_js
@@ -30,5 +23,12 @@ after_success: npm run coverage
 notifications:
   email:
     on_success: never
+"
+`;
+
+exports[`manager/travis/update updateDependency uses double quotes 1`] = `
+"node_js:
+  - \\"6\\"
+  - \\"8\\"
 "
 `;
