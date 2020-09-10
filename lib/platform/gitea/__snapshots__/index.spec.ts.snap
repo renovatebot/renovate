@@ -72,6 +72,48 @@ Object {
 }
 `;
 
+exports[`platform/gitea getPrList should filter list by creator 1`] = `
+Object {
+  "endpoint": "https://gitea.com/api/v1/",
+  "gitAuthor": "Renovate Bot <renovate@example.com>",
+}
+`;
+
+exports[`platform/gitea getPrList should filter list by creator 2`] = `
+Array [
+  Object {
+    "body": "some random pull request",
+    "branchName": "some-head-branch",
+    "canMerge": true,
+    "createdAt": "2015-03-22T20:36:16Z",
+    "displayNumber": "Pull Request #1",
+    "hasAssignees": false,
+    "isConflicted": false,
+    "number": 1,
+    "sha": "some-head-sha",
+    "sourceRepo": "some/repo",
+    "state": "open",
+    "targetBranch": "some-base-branch",
+    "title": "Some PR",
+  },
+  Object {
+    "body": "other random pull request",
+    "branchName": "other-head-branch",
+    "canMerge": true,
+    "createdAt": "2011-08-18T22:30:38Z",
+    "displayNumber": "Pull Request #2",
+    "hasAssignees": false,
+    "isConflicted": false,
+    "number": 2,
+    "sha": "other-head-sha",
+    "sourceRepo": "some/repo",
+    "state": "closed",
+    "targetBranch": "other-base-branch",
+    "title": "Other PR",
+  },
+]
+`;
+
 exports[`platform/gitea getPrList should return list of pull requests 1`] = `
 Array [
   Object {

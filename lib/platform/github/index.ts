@@ -146,6 +146,23 @@ async function getBranchProtection(
   return res.body;
 }
 
+export async function getJsonFile(fileName: string): Promise<any | null> {
+  try {
+    return JSON.parse(
+      Buffer.from(
+        (
+          await githubApi.getJson<{ content: string }>(
+            `repos/${config.repository}/contents/${fileName}`
+          )
+        ).body.content,
+        'base64'
+      ).toString()
+    );
+  } catch (err) /* istanbul ignore next */ {
+    return null;
+  }
+}
+
 let existingRepos;
 
 // Initialize GitHub by getting base branch and SHA
@@ -206,21 +223,8 @@ export async function initRepo({
     }
     // istanbul ignore if
     if (repo.isFork && !includeForks) {
-      try {
-        const renovateConfig = JSON.parse(
-          Buffer.from(
-            (
-              await githubApi.getJson<{ content: string }>(
-                `repos/${config.repository}/contents/${defaultConfigFile}`
-              )
-            ).body.content,
-            'base64'
-          ).toString()
-        );
-        if (!renovateConfig.includeForks) {
-          throw new Error();
-        }
-      } catch (err) {
+      const renovateConfig = await getJsonFile(defaultConfigFile);
+      if (!renovateConfig?.includeForks) {
         throw new Error(REPOSITORY_FORKED);
       }
     }
@@ -238,22 +242,8 @@ export async function initRepo({
       throw new Error(REPOSITORY_ARCHIVED);
     }
     if (optimizeForDisabled) {
-      let renovateConfig;
-      try {
-        renovateConfig = JSON.parse(
-          Buffer.from(
-            (
-              await githubApi.getJson<{ content: string }>(
-                `repos/${config.repository}/contents/${defaultConfigFile}`
-              )
-            ).body.content,
-            'base64'
-          ).toString()
-        );
-      } catch (err) {
-        // Do nothing
-      }
-      if (renovateConfig && renovateConfig.enabled === false) {
+      const renovateConfig = await getJsonFile(defaultConfigFile);
+      if (renovateConfig?.enabled === false) {
         throw new Error(REPOSITORY_DISABLED);
       }
     }
@@ -1377,7 +1367,6 @@ export async function createPr({
   prTitle: title,
   prBody: rawBody,
   labels,
-  platformOptions = {},
   draftPR = false,
 }: CreatePRConfig): Promise<Pr> {
   const body = sanitize(rawBody);

@@ -51,6 +51,7 @@ interface Config {
   prList: AzurePr[];
   fileList: null;
   repository: string;
+  defaultBranch: string;
 }
 
 interface User {
@@ -100,6 +101,19 @@ export async function getRepos(): Promise<string[]> {
   return repos.map((repo) => `${repo.project.name}/${repo.name}`);
 }
 
+export async function getJsonFile(fileName: string): Promise<any | null> {
+  try {
+    const json = await azureHelper.getFile(
+      config.repoId,
+      fileName,
+      config.defaultBranch
+    );
+    return JSON.parse(json);
+  } catch (err) /* istanbul ignore next */ {
+    return null;
+  }
+}
+
 export async function initRepo({
   repository,
   localDir,
@@ -126,6 +140,7 @@ export async function initRepo({
   config.owner = '?owner?';
   logger.debug(`${repository} owner = ${config.owner}`);
   const defaultBranch = repo.defaultBranch.replace('refs/heads/', '');
+  config.defaultBranch = defaultBranch;
   logger.debug(`${repository} default branch = ${defaultBranch}`);
   config.mergeMethod = await azureHelper.getMergeMethod(repo.id, names.project);
   config.repoForceRebase = false;
@@ -135,17 +150,7 @@ export async function initRepo({
       enabled: boolean;
     }
 
-    let renovateConfig: RenovateConfig;
-    try {
-      const json = await azureHelper.getFile(
-        repo.id,
-        'renovate.json',
-        defaultBranch
-      );
-      renovateConfig = JSON.parse(json);
-    } catch {
-      // Do nothing
-    }
+    const renovateConfig: RenovateConfig = await getJsonFile('renovate.json');
     if (renovateConfig && renovateConfig.enabled === false) {
       throw new Error(REPOSITORY_DISABLED);
     }
@@ -318,7 +323,7 @@ export async function createPr({
   prBody: body,
   labels,
   draftPR = false,
-  platformOptions = {},
+  platformOptions,
 }: CreatePRConfig): Promise<Pr> {
   const sourceRefName = getNewBranchName(branchName);
   const targetRefName = getNewBranchName(targetBranch);
@@ -326,7 +331,7 @@ export async function createPr({
   const azureApiGit = await azureApi.gitApi();
   const workItemRefs = [
     {
-      id: platformOptions.azureWorkItemId?.toString(),
+      id: platformOptions?.azureWorkItemId?.toString(),
     },
   ];
   let pr: GitPullRequest = await azureApiGit.createPullRequest(
@@ -340,7 +345,7 @@ export async function createPr({
     },
     config.repoId
   );
-  if (platformOptions.azureAutoComplete) {
+  if (platformOptions?.azureAutoComplete) {
     pr = await azureApiGit.updatePullRequest(
       {
         autoCompleteSetBy: {

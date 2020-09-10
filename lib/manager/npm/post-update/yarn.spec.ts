@@ -84,6 +84,7 @@ describe(getName(__filename), () => {
       const res = await yarnHelper.generateLockFile('some-dir', {}, config, [
         {
           depName: 'some-dep',
+          newValue: '^1.0.0',
           isLockfileUpdate: true,
         },
       ]);
