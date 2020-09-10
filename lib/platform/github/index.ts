@@ -50,6 +50,7 @@ import {
   GhBranchStatus,
   GhGraphQlPr,
   GhPr,
+  GhPulls,
   GhRepo,
   GhRestPr,
   LocalRepoConfig,
@@ -699,29 +700,14 @@ function matchesState(state: string, desiredState: string): boolean {
   return state === desiredState;
 }
 
-type GithubPullsResponse = {
-  number: number;
-  head: {
-    ref: string;
-    sha: string;
-    repo: { full_name: string };
-  };
-  title: string;
-  state: string;
-  merged_at: string;
-  created_at: string;
-  closed_at: string;
-  user?: { login?: string };
-}[];
-
 export async function getPrList(): Promise<Pr[]> {
   logger.trace('getPrList()');
   if (!config.prList) {
     logger.debug('Retrieving PR list');
-    let prList: GithubPullsResponse;
+    let prList: GhPulls;
     try {
       prList = (
-        await githubApi.getJson<GithubPullsResponse>(
+        await githubApi.getJson<GhPulls>(
           `repos/${
             config.parentRepo || config.repository
           }/pulls?per_page=100&state=all`,
