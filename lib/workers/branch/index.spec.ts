@@ -230,7 +230,6 @@ describe('workers/branch', () => {
       expect(await branchWorker.processBranch(config, true)).toEqual(
         ProcessBranchResult.PrLimitReached
       );
-      expect(prWorker.ensurePr.mock.calls[0][1]).toBeTrue();
     });
     it('returns if commit limit exceeded', async () => {
       getUpdated.getUpdatedPackageFiles.mockResolvedValueOnce({
