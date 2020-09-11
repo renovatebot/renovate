@@ -1,3 +1,4 @@
+import { ERROR, WARN } from 'bunyan';
 import { logger } from '../../../test/util';
 import * as _configParser from '../../config';
 import {
@@ -9,7 +10,6 @@ import * as _platform from '../../platform';
 import * as _repositoryWorker from '../repository';
 import * as _limits from './limits';
 import * as globalWorker from '.';
-import { ERROR, WARN } from 'bunyan';
 
 jest.mock('../repository');
 
