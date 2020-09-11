@@ -17,13 +17,13 @@ describe('workers/repository/init/semantic', () => {
       config.semanticCommits = null;
       git.getCommitMessages.mockResolvedValue(['foo', 'bar']);
       const res = await detectSemanticCommits();
-      expect(res).toBe('disabled');
+      expect(res).toBe(false);
     });
     it('detects true if known', async () => {
       config.semanticCommits = null;
       git.getCommitMessages.mockResolvedValue(['fix: foo', 'refactor: bar']);
       const res = await detectSemanticCommits();
-      expect(res).toBe('enabled');
+      expect(res).toBe(true);
     });
   });
 });

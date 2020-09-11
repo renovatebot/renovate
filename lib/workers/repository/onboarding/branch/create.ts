@@ -17,7 +17,7 @@ export function createOnboardingBranch(
   let commitMessagePrefix = '';
   if (config.commitMessagePrefix) {
     commitMessagePrefix = config.commitMessagePrefix;
-  } else if (config.semanticCommits === 'enabled') {
+  } else if (config.semanticCommits) {
     commitMessagePrefix = config.semanticCommitType;
     if (config.semanticCommitScope) {
       commitMessagePrefix += `(${config.semanticCommitScope})`;

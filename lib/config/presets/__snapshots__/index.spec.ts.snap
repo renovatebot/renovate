@@ -393,7 +393,7 @@ Object {
   "schedule": Array [
     "before 8am",
   ],
-  "semanticCommits": "enabled",
+  "semanticCommits": true,
   "separateMajorMinor": true,
   "separateMinorPatch": false,
   "timezone": "Asia/Taipei",
