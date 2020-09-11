@@ -78,7 +78,6 @@ export async function start(): Promise<0 | 1> {
     logger.debug(`Renovate exiting`);
   }
   const loggerErrors = getProblems().filter((p) => p.level >= ERROR);
-  /* istanbul ignore if */
   if (loggerErrors.length) {
     logger.info(
       { loggerErrors },
