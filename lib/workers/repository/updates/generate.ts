@@ -173,7 +173,7 @@ export function generateBranchConfig(
       upgrade.isRange = false;
     }
     // Use templates to generate strings
-    if (upgrade.semanticCommits && !upgrade.commitMessagePrefix) {
+    if (upgrade.semanticCommits === 'enabled' && !upgrade.commitMessagePrefix) {
       logger.trace('Upgrade has semantic commits enabled');
       let semanticPrefix = upgrade.semanticCommitType;
       if (upgrade.semanticCommitScope) {
