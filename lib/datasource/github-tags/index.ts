@@ -1,8 +1,8 @@
+import URL from 'url';
 import { logger } from '../../logger';
 import * as packageCache from '../../util/cache/package';
 import { GithubHttp } from '../../util/http/github';
 import { DigestConfig, GetReleasesConfig, ReleaseResult } from '../common';
-import URL from 'url';
 
 export const id = 'github-tags';
 
