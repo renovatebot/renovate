@@ -236,7 +236,7 @@ export async function syncGit(): Promise<void> {
     const cloneStart = Date.now();
     try {
       // clone only the default branch
-      const opts = ['--depth=2'];
+      const opts = ['--depth=10'];
       if (config.extraCloneOpts) {
         Object.entries(config.extraCloneOpts).forEach((e) =>
           opts.push(e[0], `${e[1]}`)
@@ -602,7 +602,9 @@ export async function commitFiles({
     // Fetch it after create
     const ref = `refs/heads/${branchName}:refs/remotes/origin/${branchName}`;
     await git.fetch(['origin', ref, '--depth=2', '--force']);
-    config.branchCommits[branchName] = commit;
+    config.branchCommits[branchName] = (
+      await git.revparse([branchName])
+    ).trim();
     config.branchIsModified[branchName] = false;
     incLimitedValue(Limit.Commits);
     return commit;

@@ -14,7 +14,7 @@ const defaultConfigFile = configFileNames[0];
 function getCommitMessage(config: RenovateConfig): string {
   let commitMessage: string;
   // istanbul ignore if
-  if (config.semanticCommits) {
+  if (config.semanticCommits === 'enabled') {
     commitMessage = config.semanticCommitType;
     if (config.semanticCommitScope) {
       commitMessage += `(${config.semanticCommitScope})`;
