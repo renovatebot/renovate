@@ -711,7 +711,7 @@ export async function getPrList(): Promise<Pr[]> {
     config.prList = prList
       .filter((pr) => {
         return pr?.user?.login && config?.renovateUsername
-          ? pr?.user?.login === config?.renovateUsername
+          ? pr.user.login === config.renovateUsername
           : true;
       })
       .map(
