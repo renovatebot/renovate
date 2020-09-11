@@ -555,10 +555,7 @@ export async function processBranch(
     logger.debug(
       `There are ${config.errors.length} errors and ${config.warnings.length} warnings`
     );
-    const { prResult: result, pr } = await ensurePr(
-      config,
-      dependencyDashboardCheck ? false : prLimitReached
-    );
+    const { prResult: result, pr } = await ensurePr(config, prLimitReached);
     if (result === PrResult.LimitReached) {
       logger.debug('Reached PR limit - skipping PR creation');
       return ProcessBranchResult.PrLimitReached;
