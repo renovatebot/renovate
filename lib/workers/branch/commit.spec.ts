@@ -12,7 +12,7 @@ describe('workers/branch/automerge', () => {
         ...defaultConfig,
         branchName: 'renovate/some-branch',
         commitMessage: 'some commit message',
-        semanticCommits: false,
+        semanticCommits: 'disabled',
         semanticCommitType: 'a',
         semanticCommitScope: 'b',
         updatedPackageFiles: [],
