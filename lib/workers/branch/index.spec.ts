@@ -230,6 +230,28 @@ describe('workers/branch', () => {
       expect(await branchWorker.processBranch(config, true)).toEqual(
         ProcessBranchResult.PrLimitReached
       );
+      expect(prWorker.ensurePr.mock.calls[0][1]).toBeTrue();
+    });
+    it('creates pr if dependency dashboard checked', async () => {
+      getUpdated.getUpdatedPackageFiles.mockResolvedValueOnce({
+        ...updatedPackageFiles,
+      });
+      npmPostExtract.getAdditionalFiles.mockResolvedValueOnce({
+        artifactErrors: [],
+        updatedArtifacts: [],
+      });
+      git.branchExists.mockReturnValue(true);
+      const branch = {
+        ...config,
+        dependencyDashboardChecks: { 'renovate/some-branch': 'true' },
+      };
+      prWorker.ensurePr.mockResolvedValueOnce({
+        prResult: PrResult.Created,
+      });
+      expect(await branchWorker.processBranch(branch, true)).toEqual(
+        ProcessBranchResult.Done
+      );
+      expect(prWorker.ensurePr.mock.calls[0][1]).toBeFalse();
     });
     it('returns if commit limit exceeded', async () => {
       getUpdated.getUpdatedPackageFiles.mockResolvedValueOnce({
