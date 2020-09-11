@@ -15,6 +15,7 @@ Array [
     "logContext": "abc123",
     "msg": "",
     "name": "renovate",
+    "password": "***********",
     "some": "meta",
   },
   Object {
@@ -29,7 +30,7 @@ Array [
     "any": "test",
     "level": 40,
     "logContext": "abc123",
-    "msg": "a warning",
+    "msg": "a warning with a **redacted**",
     "name": "renovate",
   },
 ]

@@ -1,5 +1,6 @@
 import _fs from 'fs-extra';
 import { add } from '../util/host-rules';
+import { add as addSecret } from '../util/sanitize';
 import {
   addMeta,
   addStream,
@@ -52,11 +53,12 @@ describe('logger', () => {
   });
 
   it('saves problems', () => {
+    addSecret('p4$$w0rd');
     levels('stdout', 'fatal');
     logger.error('some meta');
-    logger.error({ some: 'meta' });
+    logger.error({ some: 'meta', password: 'super secret' });
     logger.error({ some: 'meta' }, 'message');
-    logger.warn('a warning');
+    logger.warn('a warning with a p4$$w0rd');
     logger.info('ignored');
     expect(getProblems()).toMatchSnapshot();
   });
