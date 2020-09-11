@@ -1,8 +1,9 @@
 import path from 'path';
 import is from '@sindresorhus/is';
+import { ERROR } from 'bunyan';
 import fs from 'fs-extra';
 import * as configParser from '../../config';
-import { getErrors, logger, setMeta } from '../../logger';
+import { getProblems, logger, setMeta } from '../../logger';
 import { setUtilConfig } from '../../util';
 import * as hostRules from '../../util/host-rules';
 import * as repositoryWorker from '../repository';
@@ -76,7 +77,7 @@ export async function start(): Promise<0 | 1> {
     globalFinalize(config);
     logger.debug(`Renovate exiting`);
   }
-  const loggerErrors = getErrors();
+  const loggerErrors = getProblems().filter((p) => p.level >= ERROR);
   /* istanbul ignore if */
   if (loggerErrors.length) {
     logger.info(

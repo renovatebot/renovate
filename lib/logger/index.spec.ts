@@ -4,7 +4,7 @@ import {
   addMeta,
   addStream,
   getContext,
-  getErrors,
+  getProblems,
   levels,
   logger,
   removeMeta,
@@ -51,12 +51,14 @@ describe('logger', () => {
     expect(() => levels('stdout', 'debug')).not.toThrow();
   });
 
-  it('saves errors', () => {
+  it('saves problems', () => {
     levels('stdout', 'fatal');
     logger.error('some meta');
     logger.error({ some: 'meta' });
     logger.error({ some: 'meta' }, 'message');
-    expect(getErrors()).toMatchSnapshot();
+    logger.warn('a warning');
+    logger.info('ignored');
+    expect(getProblems()).toMatchSnapshot();
   });
 
   it('should contain path or stream parameters', () => {

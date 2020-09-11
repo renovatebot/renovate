@@ -1,6 +1,7 @@
 import is from '@sindresorhus/is';
+import { nameFromLevel } from 'bunyan';
 import { RenovateConfig } from '../../config';
-import { getErrors, logger } from '../../logger';
+import { getProblems, logger } from '../../logger';
 import { Pr, platform } from '../../platform';
 import { PrState } from '../../types';
 import { BranchConfig, ProcessBranchResult } from '../common';
@@ -61,15 +62,17 @@ export async function ensureMasterIssue(
     issueBody += `${config.dependencyDashboardHeader}\n\n`;
   }
 
-  const repoErrors = getErrors().filter(
+  const repoProblems = getProblems().filter(
     (err) => err.repository === config.repository
   );
-  if (repoErrors.length) {
+  if (repoProblems.length) {
     issueBody += '## Repository problems\n\n';
     issueBody +=
       'The problems below occurred while renovating this repository.\n\n';
-    for (const repoError of repoErrors) {
-      issueBody += `  - :warning: ${repoError.msg}\n`;
+    for (const repoProblem of repoProblems) {
+      issueBody += ` - ${nameFromLevel[repoProblem.level]}: ${
+        repoProblem.msg
+      }\n`;
     }
   }
 

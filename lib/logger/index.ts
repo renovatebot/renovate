@@ -6,7 +6,7 @@ import cmdSerializer from './cmd-serializer';
 import configSerializer from './config-serializer';
 import errSerializer from './err-serializer';
 import { RenovateStream } from './pretty-stdout';
-import { BunyanRecord, ErrorStream, withSanitizer } from './utils';
+import { BunyanRecord, ProblemStream, withSanitizer } from './utils';
 
 let logContext: string = process.env.LOG_CONTEXT || shortid.generate();
 let curMeta = {};
@@ -17,7 +17,7 @@ export interface LogError {
   msg?: string;
 }
 
-const errors = new ErrorStream();
+const problems = new ProblemStream();
 
 const stdout: bunyan.Stream = {
   name: 'stdout',
@@ -49,9 +49,9 @@ const bunyanLogger = bunyan.createLogger({
   streams: [
     stdout,
     {
-      name: 'error',
-      level: 'error' as bunyan.LogLevel,
-      stream: errors as any,
+      name: 'problems',
+      level: 'warn' as bunyan.LogLevel,
+      stream: problems as any,
       type: 'raw',
     },
   ].map(withSanitizer),
@@ -139,6 +139,6 @@ export function levels(name: string, level: bunyan.LogLevel): void {
   bunyanLogger.levels(name, level);
 }
 
-export function getErrors(): BunyanRecord[] {
-  return errors.getErrors();
+export function getProblems(): BunyanRecord[] {
+  return problems.getProblems();
 }
