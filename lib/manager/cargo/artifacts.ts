@@ -10,11 +10,13 @@ import { UpdateArtifact, UpdateArtifactsResult } from '../common';
 
 async function cargoUpdate(
   manifestPath: string,
-  packageName: string
+  packageName?: string
 ): Promise<void> {
-  let cmd = `cargo update --manifest-path ${quote(
-    manifestPath
-  )} --package ${quote(packageName)}`;
+  let cmd = `cargo update --manifest-path ${quote(manifestPath)}`;
+  if (packageName) {
+    cmd += ` --package ${quote(packageName)}`;
+  }
+
   const execOptions: ExecOptions = {
     docker: {
       image: 'renovate/rust',
