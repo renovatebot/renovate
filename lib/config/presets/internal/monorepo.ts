@@ -130,6 +130,7 @@ const patternGroups = {
   wordpress: '^@wordpress/',
   angularmaterial: ['^@angular/material', '^@angular/cdk'],
   'aws-java-sdk': '^com.amazonaws:aws-java-sdk-',
+  embroider: '^@embroider/',
   fullcalendar: '^@fullcalendar/',
 };
 
