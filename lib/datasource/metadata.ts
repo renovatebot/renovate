@@ -76,6 +76,25 @@ const manualSourceUrls = {
   },
 };
 
+function massageGithubUrl(url: string): string {
+  return url
+    .replace('http:', 'https:')
+    .replace(/^git:\/?\/?/, 'https://')
+    .replace('www.github.com', 'github.com')
+    .split('/')
+    .slice(0, 5)
+    .join('/');
+}
+
+function massageGitlabUrl(url: string): string {
+  return url
+    .replace('http:', 'https:')
+    .replace(/^git:\/?\/?/, 'https://')
+    .replace(/\/tree\/.*$/i, '')
+    .replace(/\/$/i, '')
+    .replace('.git', '');
+}
+
 /* eslint-disable no-param-reassign */
 export function addMetaData(
   dep?: ReleaseResult,
@@ -92,30 +111,6 @@ export function addMetaData(
   if (manualSourceUrls[datasource]?.[lookupNameLowercase]) {
     dep.sourceUrl = manualSourceUrls[datasource][lookupNameLowercase];
   }
-
-  /**
-   * @param {string} url
-   */
-  const massageGithubUrl = (url: string): string => {
-    return url
-      .replace('http:', 'https:')
-      .replace(/^git:\/?\/?/, 'https://')
-      .replace('www.github.com', 'github.com')
-      .split('/')
-      .slice(0, 5)
-      .join('/');
-  };
-  /**
-   * @param {string} url
-   */
-  const massageGitlabUrl = (url: string): string => {
-    return url
-      .replace('http:', 'https:')
-      .replace(/^git:\/?\/?/, 'https://')
-      .replace(/\/tree\/.*$/i, '')
-      .replace(/\/$/i, '')
-      .replace('.git', '');
-  };
 
   if (
     dep.changelogUrl?.includes('github.com') && // lgtm [js/incomplete-url-substring-sanitization]
