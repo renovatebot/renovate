@@ -25,6 +25,7 @@ export interface UpdateResult {
   dockerRepository?: string;
   dockerRegistry?: string;
   changelogUrl?: string;
+  dependencyUrl?: string;
   homepage?: string;
   deprecationMessage?: string;
   sourceUrl?: string;
@@ -174,6 +175,7 @@ export async function lookupUpdates(
     }
     res.homepage = dependency.homepage;
     res.changelogUrl = dependency.changelogUrl;
+    res.dependencyUrl = dependency?.dependencyUrl;
     // TODO: improve this
     // istanbul ignore if
     if (dependency.dockerRegistry) {

@@ -79,6 +79,7 @@ Array [
 exports[`workers/repository/process/lookup .lookupUpdates() handles digest pin 1`] = `
 Object {
   "changelogUrl": undefined,
+  "dependencyUrl": undefined,
   "homepage": undefined,
   "sourceUrl": "https://github.com/nodejs/node",
   "updates": Array [
@@ -122,6 +123,7 @@ Object {
 exports[`workers/repository/process/lookup .lookupUpdates() handles digest pin for up to date version 1`] = `
 Object {
   "changelogUrl": undefined,
+  "dependencyUrl": undefined,
   "homepage": undefined,
   "sourceUrl": "https://github.com/nodejs/node",
   "updates": Array [
@@ -139,6 +141,7 @@ Object {
 exports[`workers/repository/process/lookup .lookupUpdates() handles digest update 1`] = `
 Object {
   "changelogUrl": undefined,
+  "dependencyUrl": undefined,
   "homepage": undefined,
   "sourceUrl": "https://github.com/nodejs/node",
   "updates": Array [
@@ -204,6 +207,7 @@ exports[`workers/repository/process/lookup .lookupUpdates() handles unknown data
 exports[`workers/repository/process/lookup .lookupUpdates() ignores deprecated 1`] = `
 Object {
   "changelogUrl": undefined,
+  "dependencyUrl": undefined,
   "deprecationMessage": "On registry \`https://registry.npmjs.org/\`, the \\"latest\\" version (v1.4.1) of dependency \`q2\` has the following deprecation notice:
 
 \`true\`
@@ -254,6 +258,7 @@ Array [
 exports[`workers/repository/process/lookup .lookupUpdates() is deprecated 1`] = `
 Object {
   "changelogUrl": undefined,
+  "dependencyUrl": undefined,
   "homepage": undefined,
   "sourceDirectory": "test",
   "sourceUrl": "https://github.com/kriskowal/q",
@@ -419,6 +424,7 @@ Array [
 exports[`workers/repository/process/lookup .lookupUpdates() returns complex object 1`] = `
 Object {
   "changelogUrl": undefined,
+  "dependencyUrl": undefined,
   "homepage": undefined,
   "sourceUrl": "https://github.com/kriskowal/q",
   "updates": Array [
@@ -833,6 +839,7 @@ exports[`workers/repository/process/lookup .lookupUpdates() should warn if no ve
 exports[`workers/repository/process/lookup .lookupUpdates() skips uncompatible versions for 8 1`] = `
 Object {
   "changelogUrl": undefined,
+  "dependencyUrl": undefined,
   "homepage": undefined,
   "sourceUrl": "https://github.com/nodejs/node",
   "updates": Array [
@@ -854,6 +861,7 @@ Object {
 exports[`workers/repository/process/lookup .lookupUpdates() skips uncompatible versions for 8.1 1`] = `
 Object {
   "changelogUrl": undefined,
+  "dependencyUrl": undefined,
   "homepage": undefined,
   "sourceUrl": "https://github.com/nodejs/node",
   "updates": Array [
@@ -885,6 +893,7 @@ Object {
 exports[`workers/repository/process/lookup .lookupUpdates() skips uncompatible versions for 8.1.0 1`] = `
 Object {
   "changelogUrl": undefined,
+  "dependencyUrl": undefined,
   "homepage": undefined,
   "sourceUrl": "https://github.com/nodejs/node",
   "updates": Array [
