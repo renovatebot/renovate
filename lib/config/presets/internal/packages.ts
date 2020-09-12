@@ -18,6 +18,10 @@ export const presets: Record<string, Preset> = {
     description: 'All mapbox-related packages',
     packagePatterns: ['^(leaflet|mapbox)'],
   },
+  emberTemplateLint: {
+    description: 'All ember-template-lint packages',
+    packagePatterns: ['^ember-template-lint'],
+  },
   eslint: {
     description: 'All eslint packages',
     packageNames: ['babel-eslint'],
@@ -34,7 +38,12 @@ export const presets: Record<string, Preset> = {
   },
   linters: {
     description: 'All lint-related packages',
-    extends: ['packages:eslint', 'packages:stylelint', 'packages:tslint'],
+    extends: [
+      'packages:emberTemplateLint',
+      'packages:eslint',
+      'packages:stylelint',
+      'packages:tslint',
+    ],
     packageNames: ['remark-lint'],
   },
   postcss: {
