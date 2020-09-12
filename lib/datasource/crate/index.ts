@@ -43,6 +43,7 @@ export async function getReleases({
   }
 
   const crateUrl = BASE_URL + getIndexSuffix(lookupName);
+  const dependencyUrl = `https://crates.io/crates/${lookupName}`;
   try {
     const lines = (await http.get(crateUrl)).body
       .split('\n') // break into lines
@@ -50,6 +51,7 @@ export async function getReleases({
       .filter((line) => line.length !== 0) // remove empty lines
       .map((line) => JSON.parse(line)); // parse
     const result: ReleaseResult = {
+      dependencyUrl,
       releases: [],
     };
     result.releases = lines
