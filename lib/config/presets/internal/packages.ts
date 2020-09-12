@@ -46,6 +46,7 @@ export const presets: Record<string, Preset> = {
     description: 'Unit test packages for javascript',
     packageNames: [
       'coveralls',
+      'ember-exam',
       'ember-mocha',
       'ember-qunit',
       'istanbul',
