@@ -38,6 +38,7 @@ const staticGroups = {
       'group:fortawesome',
       'group:goOpenapi',
       'group:fusionjs',
+      'group:glimmer',
       'group:hibernateCore',
       'group:hibernateValidator',
       'group:hibernateOgm',
@@ -120,6 +121,10 @@ const staticGroups = {
       'fusion-tokens',
     ],
     packagePatterns: ['^fusion-plugin-*', '^fusion-react*', '^fusion-apollo*'],
+  },
+  glimmer: {
+    description: 'Glimmer.js packages',
+    packageNames: ['@glimmer/component', '@glimmer/tracking'],
   },
   illuminate: {
     description: 'Group PHP illuminate packages together',
