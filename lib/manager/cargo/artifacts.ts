@@ -53,10 +53,17 @@ export async function updateArtifacts({
   config,
 }: UpdateArtifact): Promise<UpdateArtifactsResult[] | null> {
   logger.debug(`cargo.updateArtifacts(${packageFileName})`);
-  if (updatedDeps === undefined || updatedDeps.length < 1) {
+
+  const isLockFileMaintenance = config.updateType === 'lockFileMaintenance';
+
+  if (
+    !isLockFileMaintenance &&
+    (updatedDeps === undefined || updatedDeps.length < 1)
+  ) {
     logger.debug('No updated cargo deps - returning null');
     return null;
   }
+
   const lockFileName = getSiblingFileName(packageFileName, 'Cargo.lock');
   const existingLockFileContent = await readLocalFile(lockFileName);
   if (!existingLockFileContent) {
@@ -71,6 +78,9 @@ export async function updateArtifacts({
       // Update dependency `${dep}` in Cargo.lock file corresponding to Cargo.toml file located
       // at ${localPackageFileName} path
       await cargoUpdate(packageFileName, dep);
+    }
+    if (isLockFileMaintenance) {
+      await cargoUpdate(packageFileName);
     }
     logger.debug('Returning updated Cargo.lock');
     const newCargoLockContent = await readLocalFile(lockFileName);
