@@ -78,7 +78,7 @@ const addMaxLength = (inputUrl: string, pagelen = 100): string => {
   return maxedUrl;
 };
 
-export function callApi<T>(
+function callApi<T>(
   apiUrl: string,
   method: string,
   options?: HttpOptions | HttpPostOptions

@@ -74,8 +74,8 @@ export async function initPlatform({
     renovateUserUuid = uuid;
   } catch (err) {
     if (
-      err?.statusCode === 403 &&
-      err?.body?.error?.detail?.required?.includes('account')
+      err.statusCode === 403 &&
+      err.body?.error?.detail?.required?.includes('account')
     ) {
       logger.warn(`Bitbucket: missing 'account' scope for password`);
     }
