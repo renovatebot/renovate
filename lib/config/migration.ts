@@ -107,7 +107,7 @@ export function migrateConfig(
           migratedConfig.semanticCommits = 'enabled';
         } else if (val === false) {
           migratedConfig.semanticCommits = 'disabled';
-        } else {
+        } else if (val !== 'enabled' && val !== 'disabled') {
           migratedConfig.semanticCommits = 'auto';
         }
       } else if (parentKey === 'hostRules' && key === 'platform') {

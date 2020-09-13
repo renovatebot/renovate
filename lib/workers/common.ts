@@ -63,6 +63,7 @@ export interface BranchUpgradeConfig
 
   homepage?: string;
   changelogUrl?: string;
+  dependencyUrl?: string;
   sourceUrl?: string;
 }
 

@@ -6,6 +6,7 @@ Object {
     "All lint-related packages",
   ],
   "extends": Array [
+    "packages:emberTemplateLint",
     "packages:eslint",
     "packages:stylelint",
     "packages:tslint",
@@ -424,6 +425,7 @@ Object {
     "remark-lint",
   ],
   "packagePatterns": Array [
+    "^ember-template-lint",
     "^@typescript-eslint/",
     "^eslint",
     "^stylelint",
@@ -449,6 +451,7 @@ Object {
         "remark-lint",
       ],
       "packagePatterns": Array [
+        "^ember-template-lint",
         "^@typescript-eslint/",
         "^eslint",
         "^stylelint",
