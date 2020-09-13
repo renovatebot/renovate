@@ -150,7 +150,7 @@ describe('config/presets', () => {
       const res = await presets.resolveConfigPresets(config);
       expect(res).toMatchSnapshot();
       expect(res.packageNames).toHaveLength(3);
-      expect(res.packagePatterns).toHaveLength(4);
+      expect(res.packagePatterns).toHaveLength(5);
     });
     it('resolves nested groups', async () => {
       config.extends = [':automergeLinters'];
@@ -159,7 +159,7 @@ describe('config/presets', () => {
       const rule = res.packageRules[0];
       expect(rule.automerge).toBe(true);
       expect(rule.packageNames).toHaveLength(3);
-      expect(rule.packagePatterns).toHaveLength(4);
+      expect(rule.packagePatterns).toHaveLength(5);
     });
     it('migrates automerge in presets', async () => {
       config.extends = ['ikatyang:library'];
@@ -324,7 +324,7 @@ describe('config/presets', () => {
       const res = await presets.getPreset('packages:linters', {});
       expect(res).toMatchSnapshot();
       expect(res.packageNames).toHaveLength(1);
-      expect(res.extends).toHaveLength(3);
+      expect(res.extends).toHaveLength(4);
     });
     it('gets parameterised configs', async () => {
       const res = await presets.getPreset(
