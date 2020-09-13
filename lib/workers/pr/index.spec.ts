@@ -179,6 +179,7 @@ describe('workers/pr', () => {
         'Some body<!-- Reviewable:start -->something<!-- Reviewable:end -->\n\n',
     } as never;
     beforeEach(() => {
+      jest.resetAllMocks();
       setupChangelogMock();
       config = partial<BranchConfig>({
         ...defaultConfig,
@@ -203,9 +204,6 @@ describe('workers/pr', () => {
       platform.getPrBody = jest.fn((input) => input);
       platform.getBranchPr = jest.fn();
       platform.getBranchStatus = jest.fn();
-    });
-    afterEach(() => {
-      jest.clearAllMocks();
     });
     it('should return null if check fails', async () => {
       platform.updatePr.mockImplementationOnce(() => {
@@ -281,13 +279,11 @@ describe('workers/pr', () => {
       config.prCreation = 'status-success';
       config.automerge = true;
       config.schedule = ['before 5am'];
-      const { prResult } = await prWorker.ensurePr(
-        {
-          ...config,
-          dependencyDashboardChecks: { 'renovate/dummy-1.x': 'true' },
-        },
-        true
-      );
+      limits.isLimitReached.mockReturnValueOnce(true);
+      const { prResult } = await prWorker.ensurePr({
+        ...config,
+        dependencyDashboardChecks: { 'renovate/dummy-1.x': 'true' },
+      });
       expect(prResult).toEqual(PrResult.Created);
       expect(platform.createPr).toHaveBeenCalled();
     });
