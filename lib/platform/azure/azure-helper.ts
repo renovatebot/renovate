@@ -4,9 +4,9 @@ import {
   GitRef,
 } from 'azure-devops-node-api/interfaces/GitInterfaces';
 import { logger } from '../../logger';
-
 import { HostRule } from '../../types';
 import { GitOptions } from '../../types/git';
+import { add } from '../../util/sanitize';
 import * as azureApi from './azure-got-wrapper';
 import {
   getBranchNameWithoutRefsPrefix,
@@ -21,18 +21,22 @@ function toBase64(from: string): string {
 }
 
 export function getStorageExtraCloneOpts(config: HostRule): GitOptions {
-  let header: string;
-  const headerName = 'AUTHORIZATION';
+  let authType: string;
+  let authValue: string;
   if (!config.token && config.username && config.password) {
-    header = `${headerName}: basic ${toBase64(
-      `${config.username}:${config.password}`
-    )}`;
+    authType = 'basic';
+    authValue = toBase64(`${config.username}:${config.password}`);
   } else if (config.token.length !== 52) {
-    header = `${headerName}: bearer ${config.token}`;
+    authType = 'bearer';
+    authValue = config.token;
   } else {
-    header = `${headerName}: basic ${toBase64(`:${config.token}`)}`;
+    authType = 'basic';
+    authValue = toBase64(`:${config.token}`);
   }
-  return { '-c': `http.extraheader=${header}` };
+  add(authValue);
+  return {
+    '-c': `http.extraheader=AUTHORIZATION: ${authType} ${authValue}`,
+  };
 }
 
 export async function getRefs(

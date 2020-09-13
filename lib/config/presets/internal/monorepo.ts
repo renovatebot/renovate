@@ -35,6 +35,7 @@ const repoGroups = {
   'react-dnd': 'https://github.com/react-dnd/react-dnd',
   'react-navigation': 'https://github.com/react-navigation/react-navigation',
   'reactivestack-cookies': 'https://github.com/reactivestack/cookies',
+  'reg-suit': 'https://github.com/reg-viz/reg-suit',
   'semantic-release': 'https://github.com/semantic-release/',
   'telus-tds': 'https://github.com/telusdigital/tds',
   'typescript-eslint': 'https://github.com/typescript-eslint/typescript-eslint',
@@ -129,6 +130,7 @@ const patternGroups = {
   wordpress: '^@wordpress/',
   angularmaterial: ['^@angular/material', '^@angular/cdk'],
   'aws-java-sdk': '^com.amazonaws:aws-java-sdk-',
+  embroider: '^@embroider/',
   fullcalendar: '^@fullcalendar/',
 };
 

@@ -363,7 +363,7 @@ export async function ensurePr(
             config.automergeType === 'pr' &&
             config.gitLabAutomerge,
         };
-        if (prLimitReached) {
+        if (!dependencyDashboardCheck && prLimitReached) {
           return { prResult: PrResult.LimitReached };
         }
         pr = await platform.createPr({
