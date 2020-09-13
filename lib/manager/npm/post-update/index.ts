@@ -501,7 +501,7 @@ export async function getAdditionalFiles(
       (upgrade) => upgrade.yarnLock === lockFile
     );
     const res = await yarn.generateLockFile(
-      upath.join(config.localDir, lockFileDir),
+      fullLockFileDir,
       env,
       config,
       upgrades,
@@ -607,7 +607,7 @@ export async function getAdditionalFiles(
       (upgrade) => upgrade.pnpmShrinkwrap === lockFile
     );
     const res = await pnpm.generateLockFile(
-      upath.join(config.localDir, lockFileDir),
+      fullLockFileDir,
       env,
       config,
       upgrades,
