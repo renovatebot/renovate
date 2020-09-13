@@ -4,7 +4,7 @@ import { join } from 'upath';
 import { logger } from '../../../logger';
 import { ExecOptions, exec } from '../../../util/exec';
 import { readFile, remove } from '../../../util/fs';
-import { PostUpdateConfig, Upgrade } from '../../common';
+import { PackageFile, PostUpdateConfig, Upgrade } from '../../common';
 import { getNodeConstraint } from './node-version';
 
 export interface GenerateLockFileResult {
@@ -18,7 +18,8 @@ export async function generateLockFile(
   cwd: string,
   env: NodeJS.ProcessEnv,
   config: PostUpdateConfig,
-  upgrades: Upgrade[] = []
+  upgrades: Upgrade[] = [],
+  packageFile?: Partial<PackageFile>
 ): Promise<GenerateLockFileResult> {
   const lockFileName = join(cwd, 'pnpm-lock.yaml');
   logger.debug(`Spawning pnpm install to create ${lockFileName}`);
@@ -28,12 +29,12 @@ export async function generateLockFile(
   let cmd = 'pnpm';
   try {
     let installPnpm = 'npm i -g pnpm';
-    const pnpmCompatibility = config.compatibility?.pnpm;
+    const pnpmCompatibility = (packageFile || config).compatibility?.pnpm;
     if (validRange(pnpmCompatibility)) {
       installPnpm += `@${quote(pnpmCompatibility)}`;
     }
     const preCommands = [installPnpm];
-    const tagConstraint = await getNodeConstraint(config);
+    const tagConstraint = await getNodeConstraint(packageFile || config);
     const execOptions: ExecOptions = {
       cwd,
       extraEnv: {

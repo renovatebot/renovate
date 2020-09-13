@@ -163,4 +163,29 @@ describe(getName(__filename), () => {
     expect(res.lockFile).not.toBeDefined();
     expect(fixSnapshots(execSnapshots)).toMatchSnapshot();
   });
+  it('uses compatibility from the packageFile', async () => {
+    const execSnapshots = mockExecAll(exec, {
+      stdout: '2.2.0',
+      stderr: '',
+    });
+    fs.readFile.mockImplementation((filename, encoding) => {
+      if (filename.endsWith('.yarnrc')) {
+        return new Promise<string>((resolve) => resolve(null));
+      }
+      return new Promise<string>((resolve) => resolve('package-lock-contents'));
+    });
+    const config = {
+      dockerMapDotfiles: true,
+      compatibility: {
+        yarn: '>= 2.2.0',
+      },
+      postUpdateOptions: ['yarnDedupeFewer', 'yarnDedupeHighest'],
+    };
+    const res = await yarnHelper.generateLockFile('some-dir', {}, config, [], {
+      ...config,
+    });
+    expect(fs.readFile).toHaveBeenCalledTimes(1);
+    expect(res.lockFile).toEqual('package-lock-contents');
+    expect(fixSnapshots(execSnapshots)).toMatchSnapshot();
+  });
 });

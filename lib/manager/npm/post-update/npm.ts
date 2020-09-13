@@ -5,7 +5,7 @@ import { SYSTEM_INSUFFICIENT_DISK_SPACE } from '../../../constants/error-message
 import { logger } from '../../../logger';
 import { ExecOptions, exec } from '../../../util/exec';
 import { move, pathExists, readFile, remove } from '../../../util/fs';
-import { PostUpdateConfig, Upgrade } from '../../common';
+import { PackageFile, PostUpdateConfig, Upgrade } from '../../common';
 import { getNodeConstraint } from './node-version';
 
 export interface GenerateLockFileResult {
@@ -19,7 +19,8 @@ export async function generateLockFile(
   env: NodeJS.ProcessEnv,
   filename: string,
   config: PostUpdateConfig = {},
-  upgrades: Upgrade[] = []
+  upgrades: Upgrade[] = [],
+  packageFile?: Partial<PackageFile>
 ): Promise<GenerateLockFileResult> {
   logger.debug(`Spawning npm install to create ${cwd}/${filename}`);
   const { skipInstalls, postUpdateOptions } = config;
@@ -27,7 +28,7 @@ export async function generateLockFile(
   let lockFile = null;
   try {
     let installNpm = 'npm i -g npm';
-    const npmCompatibility = config.compatibility?.npm;
+    const npmCompatibility = (packageFile || config).compatibility?.npm;
     if (validRange(npmCompatibility)) {
       installNpm += `@${quote(npmCompatibility)}`;
     }
@@ -41,7 +42,7 @@ export async function generateLockFile(
       logger.debug('Updating lock file only');
       cmdOptions += '--package-lock-only --ignore-scripts --no-audit';
     }
-    const tagConstraint = await getNodeConstraint(config);
+    const tagConstraint = await getNodeConstraint(packageFile || config);
     const execOptions: ExecOptions = {
       cwd,
       extraEnv: {

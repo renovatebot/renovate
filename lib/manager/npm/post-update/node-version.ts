@@ -1,7 +1,7 @@
 import { validRange } from 'semver';
 import { logger } from '../../../logger';
 import { getSiblingFileName, readLocalFile } from '../../../util/fs';
-import { PostUpdateConfig } from '../../common';
+import { PackageFile, PostUpdateConfig } from '../../common';
 
 async function getNodeFile(filename: string): Promise<string> | null {
   try {
@@ -18,7 +18,9 @@ async function getNodeFile(filename: string): Promise<string> | null {
   return null;
 }
 
-function getPackageJsonConstraint(config: PostUpdateConfig): string | null {
+function getPackageJsonConstraint(
+  config: PostUpdateConfig | Partial<PackageFile>
+): string | null {
   const constraint: string = config.compatibility?.node;
   if (constraint && validRange(constraint)) {
     logger.debug(`Using node constraint "${constraint}" from package.json`);
@@ -28,7 +30,7 @@ function getPackageJsonConstraint(config: PostUpdateConfig): string | null {
 }
 
 export async function getNodeConstraint(
-  config: PostUpdateConfig
+  config: PostUpdateConfig | Partial<PackageFile>
 ): Promise<string> | null {
   const { packageFile } = config;
   const constraint =

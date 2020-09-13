@@ -62,4 +62,14 @@ describe('generateLockFile', () => {
     expect(res.lockFile).toEqual('package-lock-contents');
     expect(execSnapshots).toMatchSnapshot();
   });
+  it('uses compatibility from the packageFile', async () => {
+    const execSnapshots = mockExecAll(exec);
+    fs.readFile = jest.fn(() => 'package-lock-contents') as never;
+    const res = await pnpmHelper.generateLockFile('some-dir', {}, config, [], {
+      ...config,
+    });
+    expect(fs.readFile).toHaveBeenCalledTimes(1);
+    expect(res.lockFile).toEqual('package-lock-contents');
+    expect(execSnapshots).toMatchSnapshot();
+  });
 });

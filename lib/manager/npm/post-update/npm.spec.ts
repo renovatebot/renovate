@@ -187,4 +187,28 @@ describe('generateLockFile', () => {
     expect(res.lockFile).toEqual('package-lock-contents');
     expect(execSnapshots).toMatchSnapshot();
   });
+  it('uses compatibility from the packageFile', async () => {
+    const execSnapshots = mockExecAll(exec);
+    fs.readFile = jest.fn(() => 'package-lock-contents') as never;
+    const config = {
+      dockerMapDotfiles: true,
+      skipInstalls: true,
+      compatibility: { npm: '^6.0.0' },
+    };
+    const updates = [
+      { depName: 'some-dep', toVersion: '1.0.1', isLockfileUpdate: false },
+    ];
+    const res = await npmHelper.generateLockFile(
+      'some-dir',
+      {},
+      'package-lock.json',
+      config,
+      updates,
+      { ...config }
+    );
+    expect(fs.readFile).toHaveBeenCalledTimes(1);
+    expect(res.error).toBeUndefined();
+    expect(res.lockFile).toEqual('package-lock-contents');
+    expect(execSnapshots).toMatchSnapshot();
+  });
 });

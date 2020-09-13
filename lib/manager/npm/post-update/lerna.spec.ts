@@ -12,10 +12,11 @@ const exec: jest.Mock<typeof _exec> = _exec as any;
 const env = mocked(_env);
 const lernaHelper = mocked(_lernaHelper);
 
-function lernaPkgFile(lernaClient: string) {
+function lernaPkgFile(lernaClient: string, config: Record<string, any> = {}) {
   return {
     lernaClient,
     deps: [{ depName: 'lerna', currentValue: '2.0.0' }],
+    ...config,
   };
 }
 
@@ -72,10 +73,11 @@ describe(getName(__filename), () => {
     });
     it('generates yarn.lock files', async () => {
       const execSnapshots = mockExecAll(exec);
+      const config = { compatibility: { yarn: '^1.10.0' } };
       const res = await lernaHelper.generateLockFiles(
-        lernaPkgFile('yarn'),
+        lernaPkgFile('yarn', config),
         'some-dir',
-        { compatibility: { yarn: '^1.10.0' } },
+        config,
         {}
       );
       expect(execSnapshots).toMatchSnapshot();
@@ -94,13 +96,14 @@ describe(getName(__filename), () => {
     });
     it('maps dot files', async () => {
       const execSnapshots = mockExecAll(exec);
+      const config = {
+        dockerMapDotfiles: true,
+        compatibility: { npm: '^6.0.0' },
+      };
       const res = await lernaHelper.generateLockFiles(
-        lernaPkgFile('npm'),
+        lernaPkgFile('npm', config),
         'some-dir',
-        {
-          dockerMapDotfiles: true,
-          compatibility: { npm: '^6.0.0' },
-        },
+        config,
         {}
       );
       expect(res.error).toBe(false);

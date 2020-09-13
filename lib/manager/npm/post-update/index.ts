@@ -419,6 +419,9 @@ export async function getAdditionalFiles(
   for (const lockFile of dirs.npmLockDirs) {
     const lockFileDir = path.dirname(lockFile);
     const fullLockFileDir = upath.join(config.localDir, lockFileDir);
+    const packageFile = packageFiles.npm.find(
+      (p) => path.dirname(p.packageFile) === lockFileDir
+    );
     const npmrcContent = await getNpmrcContent(fullLockFileDir);
     await updateNpmrcContent(
       fullLockFileDir,
@@ -435,7 +438,8 @@ export async function getAdditionalFiles(
       env,
       fileName,
       config,
-      upgrades
+      upgrades,
+      packageFile
     );
     if (res.error) {
       // istanbul ignore if
@@ -482,6 +486,9 @@ export async function getAdditionalFiles(
   for (const lockFile of dirs.yarnLockDirs) {
     const lockFileDir = path.dirname(lockFile);
     const fullLockFileDir = upath.join(config.localDir, lockFileDir);
+    const packageFile = packageFiles.npm.find(
+      (p) => path.dirname(p.packageFile) === lockFileDir
+    );
     const npmrcContent = await getNpmrcContent(fullLockFileDir);
     await updateNpmrcContent(
       fullLockFileDir,
@@ -497,7 +504,8 @@ export async function getAdditionalFiles(
       upath.join(config.localDir, lockFileDir),
       env,
       config,
-      upgrades
+      upgrades,
+      packageFile
     );
     if (res.error) {
       // istanbul ignore if
@@ -585,6 +593,9 @@ export async function getAdditionalFiles(
   for (const lockFile of dirs.pnpmShrinkwrapDirs) {
     const lockFileDir = path.dirname(lockFile);
     const fullLockFileDir = upath.join(config.localDir, lockFileDir);
+    const packageFile = packageFiles.npm.find(
+      (p) => path.dirname(p.packageFile) === lockFileDir
+    );
     const npmrcContent = await getNpmrcContent(fullLockFileDir);
     await updateNpmrcContent(
       fullLockFileDir,
@@ -599,7 +610,8 @@ export async function getAdditionalFiles(
       upath.join(config.localDir, lockFileDir),
       env,
       config,
-      upgrades
+      upgrades,
+      packageFile
     );
     if (res.error) {
       // istanbul ignore if
