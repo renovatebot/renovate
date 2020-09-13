@@ -80,6 +80,7 @@ exports[`workers/repository/process/lookup .lookupUpdates() handles digest pin 1
 Object {
   "changelogUrl": undefined,
   "dependencyUrl": undefined,
+  "fixedVersion": "8.0.0",
   "homepage": undefined,
   "sourceUrl": "https://github.com/nodejs/node",
   "updates": Array [
@@ -124,6 +125,7 @@ exports[`workers/repository/process/lookup .lookupUpdates() handles digest pin f
 Object {
   "changelogUrl": undefined,
   "dependencyUrl": undefined,
+  "fixedVersion": "8.1.0",
   "homepage": undefined,
   "sourceUrl": "https://github.com/nodejs/node",
   "updates": Array [
@@ -142,6 +144,7 @@ exports[`workers/repository/process/lookup .lookupUpdates() handles digest updat
 Object {
   "changelogUrl": undefined,
   "dependencyUrl": undefined,
+  "fixedVersion": "8.0.0",
   "homepage": undefined,
   "sourceUrl": "https://github.com/nodejs/node",
   "updates": Array [
@@ -213,6 +216,7 @@ Object {
 \`true\`
 
 Marking the latest version of an npm package as deprecated results in the entire package being considered deprecated, so contact the package author you think this is a mistake.",
+  "fixedVersion": "1.3.0",
   "homepage": undefined,
   "sourceUrl": "https://github.com/kriskowal/q",
   "updates": Array [
@@ -259,6 +263,7 @@ exports[`workers/repository/process/lookup .lookupUpdates() is deprecated 1`] = 
 Object {
   "changelogUrl": undefined,
   "dependencyUrl": undefined,
+  "fixedVersion": "1.3.0",
   "homepage": undefined,
   "sourceDirectory": "test",
   "sourceUrl": "https://github.com/kriskowal/q",
@@ -425,6 +430,7 @@ exports[`workers/repository/process/lookup .lookupUpdates() returns complex obje
 Object {
   "changelogUrl": undefined,
   "dependencyUrl": undefined,
+  "fixedVersion": "1.3.0",
   "homepage": undefined,
   "sourceUrl": "https://github.com/kriskowal/q",
   "updates": Array [
@@ -840,6 +846,7 @@ exports[`workers/repository/process/lookup .lookupUpdates() skips uncompatible v
 Object {
   "changelogUrl": undefined,
   "dependencyUrl": undefined,
+  "fixedVersion": "8",
   "homepage": undefined,
   "sourceUrl": "https://github.com/nodejs/node",
   "updates": Array [
@@ -862,6 +869,7 @@ exports[`workers/repository/process/lookup .lookupUpdates() skips uncompatible v
 Object {
   "changelogUrl": undefined,
   "dependencyUrl": undefined,
+  "fixedVersion": "8.1",
   "homepage": undefined,
   "sourceUrl": "https://github.com/nodejs/node",
   "updates": Array [
@@ -894,6 +902,7 @@ exports[`workers/repository/process/lookup .lookupUpdates() skips uncompatible v
 Object {
   "changelogUrl": undefined,
   "dependencyUrl": undefined,
+  "fixedVersion": "8.1.0",
   "homepage": undefined,
   "sourceUrl": "https://github.com/nodejs/node",
   "updates": Array [

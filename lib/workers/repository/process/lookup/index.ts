@@ -31,7 +31,7 @@ export interface UpdateResult {
   sourceUrl?: string;
   skipReason: SkipReason;
   releases: Release[];
-
+  fixedVersion?: string;
   updates: LookupUpdate[];
   warnings: ValidationMessage[];
 }
@@ -142,7 +142,12 @@ export async function lookupUpdates(
   if (!isValid) {
     res.skipReason = SkipReason.InvalidValue;
   }
-
+  // Record if the dep is fixed to a version
+  if (lockedVersion) {
+    res.fixedVersion = lockedVersion;
+  } else if (currentValue && version.isSingleVersion(currentValue)) {
+    res.fixedVersion = currentValue.replace(/^=+/, '');
+  }
   // istanbul ignore if
   if (!isGetPkgReleasesConfig(config)) {
     res.skipReason = SkipReason.Unknown;
