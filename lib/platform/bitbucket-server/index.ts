@@ -113,12 +113,27 @@ export async function getRepos(): Promise<string[]> {
   }
 }
 
+export async function getJsonFile(fileName: string): Promise<any | null> {
+  try {
+    const { body } = await bitbucketServerHttp.getJson<FileData>(
+      `./rest/api/1.0/projects/${config.projectKey}/repos/${config.repositorySlug}/browse/${fileName}?limit=20000`
+    );
+    if (!body.isLastPage) {
+      logger.warn({ size: body.size }, `The file is too big`);
+    } else {
+      return JSON.parse(body.lines.map((l) => l.text).join(''));
+    }
+  } catch (err) /* istanbul ignore next */ {
+    // no-op
+  }
+  return null;
+}
+
 // Initialize GitLab by getting base branch
 export async function initRepo({
   repository,
   localDir,
   optimizeForDisabled,
-  bbUseDefaultReviewers,
 }: RepoParams): Promise<RepoResult> {
   logger.debug(
     `initRepo("${JSON.stringify({ repository, localDir }, null, 2)}")`
@@ -130,29 +145,6 @@ export async function initRepo({
 
   const [projectKey, repositorySlug] = repository.split('/');
 
-  if (optimizeForDisabled) {
-    interface RenovateConfig {
-      enabled: boolean;
-    }
-
-    let renovateConfig: RenovateConfig;
-    try {
-      const { body } = await bitbucketServerHttp.getJson<FileData>(
-        `./rest/api/1.0/projects/${projectKey}/repos/${repositorySlug}/browse/renovate.json?limit=20000`
-      );
-      if (!body.isLastPage) {
-        logger.warn({ size: body.size }, `Renovate config to big`);
-      } else {
-        renovateConfig = JSON.parse(body.lines.map((l) => l.text).join(''));
-      }
-    } catch {
-      // Do nothing
-    }
-    if (renovateConfig && renovateConfig.enabled === false) {
-      throw new Error(REPOSITORY_DISABLED);
-    }
-  }
-
   config = {
     projectKey,
     repositorySlug,
@@ -161,10 +153,15 @@ export async function initRepo({
     username: opts.username,
   } as any;
 
-  /* istanbul ignore else */
-  if (bbUseDefaultReviewers !== false) {
-    logger.debug('Enable bitbucket default reviewer');
-    config.bbUseDefaultReviewers = true;
+  if (optimizeForDisabled) {
+    interface RenovateConfig {
+      enabled: boolean;
+    }
+
+    const renovateConfig: RenovateConfig = await getJsonFile('renovate.json');
+    if (renovateConfig && renovateConfig.enabled === false) {
+      throw new Error(REPOSITORY_DISABLED);
+    }
   }
 
   const { host, pathname } = url.parse(defaults.endpoint);
@@ -177,7 +174,7 @@ export async function initRepo({
     repository,
   });
 
-  git.initRepo({
+  await git.initRepo({
     ...config,
     localDir,
     url: gitUrl,
@@ -241,12 +238,6 @@ export async function getRepoForceRebase(): Promise<boolean> {
     res.body?.mergeConfig?.defaultStrategy?.id.includes('ff-only')
   );
 }
-
-export async function setBaseBranch(branchName: string): Promise<string> {
-  const baseBranchSha = await git.setBranch(branchName);
-  return baseBranchSha;
-}
-
 // Gets details for a PR
 export async function getPr(
   prNo: number,
@@ -371,7 +362,7 @@ async function getStatus(
   branchName: string,
   useCache = true
 ): Promise<utils.BitbucketCommitStatus> {
-  const branchCommit = await git.getBranchCommit(branchName);
+  const branchCommit = git.getBranchCommit(branchName);
 
   return (
     await bitbucketServerHttp.getJson<utils.BitbucketCommitStatus>(
@@ -400,7 +391,7 @@ export async function getBranchStatus(
     return BranchStatus.green;
   }
 
-  if (!(await git.branchExists(branchName))) {
+  if (!git.branchExists(branchName)) {
     throw new Error(REPOSITORY_CHANGED);
   }
 
@@ -424,11 +415,11 @@ export async function getBranchStatus(
   }
 }
 
-async function getStatusCheck(
+function getStatusCheck(
   branchName: string,
   useCache = true
 ): Promise<utils.BitbucketStatus[]> {
-  const branchCommit = await git.getBranchCommit(branchName);
+  const branchCommit = git.getBranchCommit(branchName);
 
   return utils.accumulateValues(
     `./rest/build-status/1.0/commits/${branchCommit}`,
@@ -481,7 +472,7 @@ export async function setBranchStatus({
   }
   logger.debug({ branch: branchName, context, state }, 'Setting branch status');
 
-  const branchCommit = await git.getBranchCommit(branchName);
+  const branchCommit = git.getBranchCommit(branchName);
 
   try {
     const body: any = {
@@ -782,6 +773,7 @@ export async function createPr({
   targetBranch,
   prTitle: title,
   prBody: rawDescription,
+  platformOptions,
 }: CreatePRConfig): Promise<Pr> {
   const description = sanitize(rawDescription);
   logger.debug(`createPr(${branchName}, title=${title})`);
@@ -789,7 +781,7 @@ export async function createPr({
   let reviewers: BbsRestUserRef[] = [];
 
   /* istanbul ignore else */
-  if (config.bbUseDefaultReviewers) {
+  if (platformOptions?.bbUseDefaultReviewers) {
     logger.debug(`fetching default reviewers`);
     const { id } = (
       await bitbucketServerHttp.getJson<{ id: number }>(

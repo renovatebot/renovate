@@ -28,7 +28,13 @@ export function applyAuthorization(inOptions: GotOptions): GotOptions {
         }
       }
     } else if (options.hostType === PLATFORM_TYPE_GITLAB) {
-      options.headers['Private-token'] = options.token;
+      // GitLab versions earlier than 12.2 only support authentication with
+      // a personal access token, which is 20 characters long.
+      if (options.token.length === 20) {
+        options.headers['Private-token'] = options.token;
+      } else {
+        options.headers.authorization = `Bearer ${options.token}`;
+      }
     } else {
       options.headers.authorization = `Bearer ${options.token}`;
     }

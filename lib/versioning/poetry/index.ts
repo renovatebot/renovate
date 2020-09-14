@@ -74,11 +74,11 @@ function handleShort(
   const split = currentValue.split('.');
   if (split.length === 1) {
     // [^,~]4
-    return operator + toVersionMajor;
+    return `${operator}${toVersionMajor}`;
   }
   if (split.length === 2) {
     // [^,~]4.1
-    return operator + toVersionMajor + '.' + toVersionMinor;
+    return `${operator}${toVersionMajor}.${toVersionMinor}`;
   }
   return null;
 }

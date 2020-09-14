@@ -3,6 +3,6 @@ export { updateDependency } from './update';
 
 export const defaultConfig = {
   commitMessageTopic: 'Homebrew Formula {{depName}}',
-  managerBranchPrefix: 'homebrew-',
+  additionalBranchPrefix: 'homebrew-',
   fileMatch: ['^Formula/[^/]+[.]rb$'],
 };

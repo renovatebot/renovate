@@ -301,6 +301,14 @@ const options: RenovateOptions[] = [
     default: false,
   },
   {
+    name: 'dockerImagePrefix',
+    description:
+      'Change this value in order to override the default renovate docker sidecar image name prefix.',
+    type: 'string',
+    default: 'docker.io/renovate',
+    admin: true,
+  },
+  {
     name: 'dockerUser',
     description:
       'Specify UID and GID for docker-based binaries when binarySource=docker is used.',
@@ -453,6 +461,13 @@ const options: RenovateOptions[] = [
     stage: 'repository',
     type: 'string',
     replaceLineReturns: true,
+    admin: true,
+  },
+  {
+    name: 'privateKeyPath',
+    description: 'Path to the Server-side private key',
+    stage: 'repository',
+    type: 'string',
     admin: true,
   },
   {
@@ -1069,8 +1084,9 @@ const options: RenovateOptions[] = [
   {
     name: 'semanticCommits',
     description: 'Enable semantic commit prefixes for commits and PR titles',
-    type: 'boolean',
-    default: null,
+    type: 'string',
+    allowedValues: ['auto', 'enabled', 'disabled'],
+    default: 'auto',
   },
   {
     name: 'semanticCommitType',
@@ -1218,12 +1234,12 @@ const options: RenovateOptions[] = [
     name: 'branchName',
     description: 'Branch name template',
     type: 'string',
-    default: '{{{branchPrefix}}}{{{managerBranchPrefix}}}{{{branchTopic}}}',
+    default: '{{{branchPrefix}}}{{{additionalBranchPrefix}}}{{{branchTopic}}}',
     cli: false,
   },
   {
-    name: 'managerBranchPrefix',
-    description: 'Branch manager prefix',
+    name: 'additionalBranchPrefix',
+    description: 'Additional string value to be appended to branchPrefix',
     type: 'string',
     default: '',
     cli: false,

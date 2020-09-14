@@ -81,12 +81,23 @@ export async function getRepos(): Promise<string[]> {
   }
 }
 
+export async function getJsonFile(fileName: string): Promise<any | null> {
+  try {
+    return (
+      await bitbucketHttp.getJson(
+        `/2.0/repositories/${config.repository}/src/${config.defaultBranch}/${fileName}`
+      )
+    ).body;
+  } catch (err) /* istanbul ignore next */ {
+    return null;
+  }
+}
+
 // Initialize bitbucket by getting base branch and SHA
 export async function initRepo({
   repository,
   localDir,
   optimizeForDisabled,
-  bbUseDefaultReviewers,
 }: RepoParams): Promise<RepoResult> {
   logger.debug(`initRepo("${repository}")`);
   const opts = hostRules.find({
@@ -96,8 +107,7 @@ export async function initRepo({
   config = {
     repository,
     username: opts.username,
-    bbUseDefaultReviewers: bbUseDefaultReviewers !== false,
-  } as any;
+  } as utils.Config;
   let info: utils.RepoInfo;
   try {
     info = utils.repoInfoTransformer(
@@ -107,22 +117,14 @@ export async function initRepo({
         )
       ).body
     );
+    config.defaultBranch = info.mainbranch;
 
     if (optimizeForDisabled) {
       interface RenovateConfig {
         enabled: boolean;
       }
 
-      let renovateConfig: RenovateConfig;
-      try {
-        renovateConfig = (
-          await bitbucketHttp.getJson<RenovateConfig>(
-            `/2.0/repositories/${repository}/src/${info.mainbranch}/renovate.json`
-          )
-        ).body;
-      } catch {
-        // Do nothing
-      }
+      const renovateConfig: RenovateConfig = await getJsonFile('renovate.json');
       if (renovateConfig && renovateConfig.enabled === false) {
         throw new Error(REPOSITORY_DISABLED);
       }
@@ -157,7 +159,7 @@ export async function initRepo({
     repository,
   });
 
-  git.initRepo({
+  await git.initRepo({
     ...config,
     localDir,
     url,
@@ -175,11 +177,6 @@ export async function initRepo({
 export function getRepoForceRebase(): Promise<boolean> {
   // BB doesnt have an option to flag staled branches
   return Promise.resolve(false);
-}
-
-export async function setBaseBranch(branchName: string): Promise<string> {
-  const baseBranchSha = await git.setBranch(branchName);
-  return baseBranchSha;
 }
 
 // istanbul ignore next
@@ -636,6 +633,7 @@ export async function createPr({
   targetBranch,
   prTitle: title,
   prBody: description,
+  platformOptions,
 }: CreatePRConfig): Promise<Pr> {
   // labels is not supported in Bitbucket: https://bitbucket.org/site/master/issues/11976/ability-to-add-labels-to-pull-requests-bb
 
@@ -645,7 +643,7 @@ export async function createPr({
 
   let reviewers: { uuid: { raw: string } }[] = [];
 
-  if (config.bbUseDefaultReviewers) {
+  if (platformOptions?.bbUseDefaultReviewers) {
     const reviewersResponse = (
       await bitbucketHttp.getJson<utils.PagedResult<Reviewer>>(
         `/2.0/repositories/${config.repository}/default-reviewers`

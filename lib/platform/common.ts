@@ -29,13 +29,10 @@ export interface PlatformResult {
 
 export interface RepoResult {
   defaultBranch: string;
-  defaultBranchSha?: string;
   isFork: boolean;
 }
 
 export interface RepoParams {
-  azureWorkItemId?: number; // shouldn't this be configurable within a renovate.json?
-  bbUseDefaultReviewers?: boolean; // shouldn't this be configurable within a renovate.json?
   localDir: string;
   optimizeForDisabled: boolean;
   repository: string;
@@ -80,6 +77,8 @@ export interface Issue {
 }
 export type PlatformPrOptions = {
   azureAutoComplete?: boolean;
+  azureWorkItemId?: number;
+  bbUseDefaultReviewers?: boolean;
   gitLabAutomerge?: boolean;
 };
 export interface CreatePRConfig {
@@ -143,6 +142,7 @@ export interface Platform {
   findIssue(title: string): Promise<Issue | null>;
   getIssueList(): Promise<Issue[]>;
   getVulnerabilityAlerts(): Promise<VulnerabilityAlert[]>;
+  getJsonFile(fileName: string): Promise<any | null>;
   initRepo(config: RepoParams): Promise<RepoResult>;
   getPrList(): Promise<Pr[]>;
   ensureIssueClosing(title: string): Promise<void>;
@@ -169,7 +169,6 @@ export interface Platform {
       | EnsureCommentRemovalConfigByContent
   ): Promise<void>;
   ensureComment(ensureComment: EnsureCommentConfig): Promise<boolean>;
-  setBaseBranch(branchName: string): Promise<string>;
   getPr(number: number): Promise<Pr>;
   findPr(findPRConfig: FindPRConfig): Promise<Pr>;
   refreshPr?(number: number): Promise<void>;

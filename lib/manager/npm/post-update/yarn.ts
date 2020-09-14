@@ -1,5 +1,5 @@
 import is from '@sindresorhus/is';
-import { minVersion, validRange } from 'semver';
+import { gte, minVersion, validRange } from 'semver';
 import { quote } from 'shlex';
 import { join } from 'upath';
 import { SYSTEM_INSUFFICIENT_DISK_SPACE } from '../../../constants/error-messages';
@@ -48,12 +48,14 @@ export async function generateLockFile(
   let lockFile = null;
   try {
     const yarnCompatibility = config.compatibility?.yarn;
-    const isValidYarnRange = validRange(yarnCompatibility);
-    const isYarn1 =
-      !isValidYarnRange || minVersion(yarnCompatibility).major === 1;
+    const minYarnVersion =
+      validRange(yarnCompatibility) && minVersion(yarnCompatibility);
+    const isYarn1 = !minYarnVersion || minYarnVersion.major === 1;
+    const isYarnDedupeAvailable =
+      minYarnVersion && gte(minYarnVersion, '2.2.0');
 
     let installYarn = 'npm i -g yarn';
-    if (isValidYarnRange) {
+    if (isYarn1 && minYarnVersion) {
       installYarn += `@${quote(yarnCompatibility)}`;
     }
 
@@ -62,6 +64,7 @@ export async function generateLockFile(
     const extraEnv: ExecOptions['extraEnv'] = {
       NPM_CONFIG_CACHE: env.NPM_CONFIG_CACHE,
       npm_config_store: env.npm_config_store,
+      CI: 'true',
     };
 
     if (
@@ -74,8 +77,13 @@ export async function generateLockFile(
       preCommands.push(optimizeCommand);
     }
     const commands = [];
-    let cmdOptions =
-      '--ignore-engines --ignore-platform --network-timeout 100000';
+    let cmdOptions = '';
+    if (isYarn1) {
+      cmdOptions +=
+        '--ignore-engines --ignore-platform --network-timeout 100000';
+    } else {
+      extraEnv.YARN_HTTP_TIMEOUT = '100000';
+    }
     if (global.trustLevel !== 'high' || config.ignoreScripts) {
       if (isYarn1) {
         cmdOptions += ' --ignore-scripts';
@@ -111,14 +119,25 @@ export async function generateLockFile(
     commands.push(`yarn install ${cmdOptions}`.trim());
 
     // rangeStrategy = update-lockfile
-    const lockUpdates = upgrades
-      .filter((upgrade) => upgrade.isLockfileUpdate)
-      .map((upgrade) => upgrade.depName); // note - this can hit a yarn bug, see https://github.com/yarnpkg/yarn/issues/8236
+    const lockUpdates = upgrades.filter((upgrade) => upgrade.isLockfileUpdate);
     if (lockUpdates.length) {
       logger.debug('Performing lockfileUpdate (yarn)');
-      commands.push(
-        `yarn upgrade ${lockUpdates.join(' ')} ${cmdOptions}`.trim()
-      );
+      if (isYarn1) {
+        // `yarn upgrade` updates based on the version range specified in the package file
+        // note - this can hit a yarn bug, see https://github.com/yarnpkg/yarn/issues/8236
+        commands.push(
+          `yarn upgrade ${lockUpdates
+            .map((update) => update.depName)
+            .join(' ')} ${cmdOptions}`.trim()
+        );
+      } else {
+        // `yarn up` updates to the latest release, so the range should be specified
+        commands.push(
+          `yarn up ${lockUpdates
+            .map((update) => `${update.depName}@${update.newValue}`)
+            .join(' ')}`
+        );
+      }
     }
 
     // postUpdateOptions
@@ -128,11 +147,18 @@ export async function generateLockFile(
       // Run yarn again in case any changes are necessary
       commands.push(`yarn install ${cmdOptions}`.trim());
     }
-    if (isYarn1 && config.postUpdateOptions?.includes('yarnDedupeHighest')) {
+    if (
+      (isYarn1 || isYarnDedupeAvailable) &&
+      config.postUpdateOptions?.includes('yarnDedupeHighest')
+    ) {
       logger.debug('Performing yarn dedupe highest');
-      commands.push('npx yarn-deduplicate --strategy highest');
-      // Run yarn again in case any changes are necessary
-      commands.push(`yarn install ${cmdOptions}`.trim());
+      if (isYarn1) {
+        commands.push('npx yarn-deduplicate --strategy highest');
+        // Run yarn again in case any changes are necessary
+        commands.push(`yarn install ${cmdOptions}`.trim());
+      } else {
+        commands.push('yarn dedupe --strategy highest');
+      }
     }
 
     if (upgrades.find((upgrade) => upgrade.isLockFileMaintenance)) {

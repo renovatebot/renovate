@@ -52,7 +52,7 @@ describe('platform/bitbucket', () => {
     bitbucket = await import('.');
     logger = (await import('../../logger')).logger as any;
     git = require('../../util/git');
-    git.branchExists.mockResolvedValue(true);
+    git.branchExists.mockReturnValue(true);
     git.isBranchStale.mockResolvedValue(false);
     // clean up hostRules
     hostRules.clear();
@@ -172,14 +172,6 @@ describe('platform/bitbucket', () => {
     it('always return false, since bitbucket does not support force rebase', async () => {
       const actual = await bitbucket.getRepoForceRebase();
       expect(actual).toBe(false);
-    });
-  });
-
-  describe('setBaseBranch()', () => {
-    it('updates file list', async () => {
-      await initRepoMock();
-      await bitbucket.setBaseBranch('branch');
-      expect(httpMock.getTrace()).toMatchSnapshot();
     });
   });
 
@@ -654,6 +646,9 @@ describe('platform/bitbucket', () => {
         targetBranch: 'master',
         prTitle: 'title',
         prBody: 'body',
+        platformOptions: {
+          bbUseDefaultReviewers: true,
+        },
       });
       expect(number).toBe(5);
       expect(httpMock.getTrace()).toMatchSnapshot();

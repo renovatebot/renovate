@@ -61,5 +61,5 @@ export async function getMatchingFiles(
     );
   }
   // filter out duplicates
-  return [...new Set(matchedFiles)];
+  return [...new Set(matchedFiles)].sort();
 }
