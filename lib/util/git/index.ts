@@ -1,3 +1,4 @@
+import { Dirent } from 'fs';
 import { join } from 'path';
 import URL from 'url';
 import fs from 'fs-extra';
@@ -363,18 +364,16 @@ export async function checkoutBranch(branchName: string): Promise<CommitSha> {
 
 export async function getFileList(): Promise<string[]> {
   await syncGit();
-  const branch = config.currentBranch;
-  const submodules = await getSubmodules();
-  const files: string = await git.raw(['ls-tree', '-r', branch]);
-  // istanbul ignore if
-  if (!files) {
-    return [];
-  }
+  const [submodules, files]: [string[], Dirent[]] = await Promise.all([
+    getSubmodules(),
+    fs.readdir(config.localDir, {
+      encoding: 'utf8',
+      withFileTypes: true,
+    }),
+  ]);
   return files
-    .split('\n')
-    .filter(Boolean)
-    .filter((line) => line.startsWith('100'))
-    .map((line) => line.split(/\t/).pop())
+    .filter((dirent) => dirent.isFile())
+    .map(({ name }) => name)
     .filter((file: string) =>
       submodules.every((submodule: string) => !file.startsWith(submodule))
     );
