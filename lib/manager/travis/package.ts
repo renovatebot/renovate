@@ -4,66 +4,20 @@ import { getPkgReleases } from '../../datasource';
 import * as datasourceGithubTags from '../../datasource/github-tags';
 import { logger } from '../../logger';
 import {
-  NodeJsData,
+  NodeJsPolicies,
+  nodePolicies,
   nodeSchedule,
 } from '../../versioning/node/node-js-schedule';
 import { isVersion, maxSatisfyingVersion } from '../../versioning/semver';
 import { LookupUpdate, PackageUpdateConfig } from '../common';
 
-interface NodeJsPolicies {
-  all: number[];
-  lts: number[];
-  active: number[];
-  lts_active: number[];
-  lts_latest: number[];
-  current: number[];
-}
-
-let policies: NodeJsPolicies;
 let refreshDate: Date;
 
-function generatePolicies(): NodeJsData {
-  policies = {
-    all: [],
-    lts: [],
-    active: [],
-    lts_active: [],
-    lts_latest: [],
-    current: [],
-  };
-
-  const now = new Date();
-
-  for (const [vRelease, data] of Object.entries(nodeSchedule)) {
-    const isAlive = new Date(data.start) < now && new Date(data.end) > now;
-    if (isAlive) {
-      const release = parseInt(vRelease.replace(/^v/, ''), 10);
-      policies.all.push(release);
-      const isMaintenance =
-        data.maintenance && new Date(data.maintenance) < now;
-      if (!isMaintenance) {
-        policies.active.push(release);
-      }
-      const isLts = data.lts && new Date(data.lts) < now;
-      if (isLts) {
-        policies.lts.push(release);
-        if (!isMaintenance) {
-          policies.lts_active.push(release);
-        }
-      }
-    }
-  }
-  policies.current.push(policies.active[policies.active.length - 1]);
-  policies.lts_latest.push(policies.lts[policies.lts.length - 1]);
-
-  return nodeSchedule;
-}
-
 function checkPolicies(): void {
-  if (policies && refreshDate > new Date()) {
+  if (nodePolicies && refreshDate > new Date()) {
     return;
   }
-  const nodeJsSchedule = generatePolicies();
+  const nodeJsSchedule = nodeSchedule;
   refreshDate = new Date('3000-01-01'); // y3k
   const now = new Date();
   for (const data of Object.values(nodeJsSchedule)) {
@@ -88,14 +42,14 @@ export async function getPackageUpdates(
   }
   checkPolicies();
   for (const policy of supportPolicy) {
-    if (!Object.keys(policies).includes(policy)) {
+    if (!Object.keys(nodePolicies).includes(policy)) {
       logger.warn({ policy }, `Unknown supportPolicy`);
       return [];
     }
   }
   logger.debug({ supportPolicy }, `supportPolicy`);
   let newValue: any[] = (supportPolicy as (keyof NodeJsPolicies)[])
-    .map((policy) => policies[policy])
+    .map((policy) => nodePolicies[policy])
     .reduce((result, policy) => result.concat(policy), [])
     .sort((a, b) => a - b);
   const newMajor: number = newValue[newValue.length - 1];
