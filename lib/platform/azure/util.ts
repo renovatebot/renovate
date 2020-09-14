@@ -50,7 +50,9 @@ export function getRenovatePRFormat(azurePr: GitPullRequest): AzurePr {
   const number = azurePr.pullRequestId;
   const displayNumber = `Pull Request #${number}`;
 
-  const branchName = getBranchNameWithoutRefsheadsPrefix(azurePr.sourceRefName);
+  const sourceBranch = getBranchNameWithoutRefsheadsPrefix(
+    azurePr.sourceRefName
+  );
   const targetBranch = getBranchNameWithoutRefsheadsPrefix(
     azurePr.targetRefName
   );
@@ -69,7 +71,7 @@ export function getRenovatePRFormat(azurePr: GitPullRequest): AzurePr {
 
   return {
     ...azurePr,
-    branchName,
+    sourceBranch,
     state,
     number,
     displayNumber,

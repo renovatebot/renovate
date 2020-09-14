@@ -48,7 +48,7 @@ export interface RepoParams {
  */
 export interface Pr {
   body?: string;
-  branchName: string;
+  sourceBranch: string;
   canMerge?: boolean;
   canMergeReason?: string;
   createdAt?: string;

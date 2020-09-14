@@ -615,7 +615,7 @@ describe('platform/gitea', () => {
       await initFakeRepo();
 
       const res = await gitea.findPr({ branchName: mockPR.head.label });
-      expect(res).toHaveProperty('branchName', mockPR.head.label);
+      expect(res).toHaveProperty('sourceBranch', mockPR.head.label);
     });
 
     it('should find pull request with title', async () => {
@@ -627,7 +627,7 @@ describe('platform/gitea', () => {
         branchName: mockPR.head.label,
         prTitle: mockPR.title,
       });
-      expect(res).toHaveProperty('branchName', mockPR.head.label);
+      expect(res).toHaveProperty('sourceBranch', mockPR.head.label);
       expect(res).toHaveProperty('title', mockPR.title);
     });
 
@@ -640,7 +640,7 @@ describe('platform/gitea', () => {
         branchName: mockPR.head.label,
         state: mockPR.state,
       });
-      expect(res).toHaveProperty('branchName', mockPR.head.label);
+      expect(res).toHaveProperty('sourceBranch', mockPR.head.label);
       expect(res).toHaveProperty('state', mockPR.state);
     });
 
@@ -667,7 +667,7 @@ describe('platform/gitea', () => {
         prTitle: mockPR.title,
         state: mockPR.state,
       });
-      expect(res).toHaveProperty('branchName', mockPR.head.label);
+      expect(res).toHaveProperty('sourceBranch', mockPR.head.label);
       expect(res).toHaveProperty('title', mockPR.title);
       expect(res).toHaveProperty('state', mockPR.state);
     });

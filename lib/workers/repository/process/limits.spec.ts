@@ -23,7 +23,7 @@ describe('workers/repository/process/limits', () => {
       platform.getPrList.mockResolvedValueOnce([
         {
           createdAt: moment().toISOString(),
-          branchName: null,
+          sourceBranch: null,
           title: null,
           state: null,
         },

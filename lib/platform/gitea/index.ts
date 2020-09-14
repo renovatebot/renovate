@@ -98,7 +98,7 @@ function toRenovatePR(data: helper.PR): Pr | null {
     title: data.title,
     body: data.body,
     sha: data.head.sha,
-    branchName: data.head.label,
+    sourceBranch: data.head.label,
     targetBranch: data.base.ref,
     sourceRepo: data.head.repo.full_name,
     createdAt: data.created_at,
@@ -467,7 +467,7 @@ const platform: Platform = {
     const pr = prList.find(
       (p) =>
         p.sourceRepo === config.repository &&
-        p.branchName === branchName &&
+        p.sourceBranch === branchName &&
         matchesState(p.state, state) &&
         (!title || p.title === title)
     );

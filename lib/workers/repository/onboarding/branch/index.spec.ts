@@ -84,7 +84,7 @@ describe('workers/repository/onboarding/branch', () => {
       platform.getPrList.mockResolvedValueOnce([
         {
           ...mock<Pr>(),
-          branchName: 'renovate/something',
+          sourceBranch: 'renovate/something',
           state: PrState.Open,
         },
       ]);

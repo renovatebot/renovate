@@ -295,7 +295,7 @@ const isRelevantPr = (
   prTitle: string | null | undefined,
   state: string
 ) => (p: Pr): boolean =>
-  p.branchName === branchName &&
+  p.sourceBranch === branchName &&
   (!prTitle || p.title === prTitle) &&
   matchesState(p.state, state);
 
