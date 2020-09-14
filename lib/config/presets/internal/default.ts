@@ -510,11 +510,11 @@ export const presets: Record<string, Preset> = {
   },
   semanticCommits: {
     description: 'Use semantic prefixes for commit messages and PR titles',
-    semanticCommits: true,
+    semanticCommits: 'enabled',
   },
   semanticCommitsDisabled: {
     description: 'Disable semantic prefixes for commit messages and PR titles',
-    semanticCommits: false,
+    semanticCommits: 'disabled',
   },
   disableLockFiles: {
     description: 'Disable lock file updates',

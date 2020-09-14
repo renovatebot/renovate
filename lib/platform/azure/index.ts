@@ -36,6 +36,11 @@ import { smartTruncate } from '../utils/pr-body';
 import * as azureApi from './azure-got-wrapper';
 import * as azureHelper from './azure-helper';
 import { AzurePr } from './types';
+import {
+  getBranchNameWithoutRefsheadsPrefix,
+  getNewBranchName,
+  getRenovatePRFormat,
+} from './util';
 
 interface Config {
   repoForceRebase: boolean;
@@ -43,10 +48,10 @@ interface Config {
   owner: string;
   repoId: string;
   project: string;
-  azureWorkItemId: string;
   prList: AzurePr[];
   fileList: null;
   repository: string;
+  defaultBranch: string;
 }
 
 interface User {
@@ -96,14 +101,26 @@ export async function getRepos(): Promise<string[]> {
   return repos.map((repo) => `${repo.project.name}/${repo.name}`);
 }
 
+export async function getJsonFile(fileName: string): Promise<any | null> {
+  try {
+    const json = await azureHelper.getFile(
+      config.repoId,
+      fileName,
+      config.defaultBranch
+    );
+    return JSON.parse(json);
+  } catch (err) /* istanbul ignore next */ {
+    return null;
+  }
+}
+
 export async function initRepo({
   repository,
   localDir,
-  azureWorkItemId,
   optimizeForDisabled,
 }: RepoParams): Promise<RepoResult> {
   logger.debug(`initRepo("${repository}")`);
-  config = { repository, azureWorkItemId } as any;
+  config = { repository } as Config;
   const azureApiGit = await azureApi.gitApi();
   const repos = await azureApiGit.getRepositories();
   const names = azureHelper.getProjectAndRepo(repository);
@@ -123,6 +140,7 @@ export async function initRepo({
   config.owner = '?owner?';
   logger.debug(`${repository} owner = ${config.owner}`);
   const defaultBranch = repo.defaultBranch.replace('refs/heads/', '');
+  config.defaultBranch = defaultBranch;
   logger.debug(`${repository} default branch = ${defaultBranch}`);
   config.mergeMethod = await azureHelper.getMergeMethod(repo.id, names.project);
   config.repoForceRebase = false;
@@ -132,17 +150,7 @@ export async function initRepo({
       enabled: boolean;
     }
 
-    let renovateConfig: RenovateConfig;
-    try {
-      const json = await azureHelper.getFile(
-        repo.id,
-        'renovate.json',
-        defaultBranch
-      );
-      renovateConfig = JSON.parse(json);
-    } catch {
-      // Do nothing
-    }
+    const renovateConfig: RenovateConfig = await getJsonFile('renovate.json');
     if (renovateConfig && renovateConfig.enabled === false) {
       throw new Error(REPOSITORY_DISABLED);
     }
@@ -153,9 +161,10 @@ export async function initRepo({
     hostType: defaults.hostType,
     url: defaults.endpoint,
   });
-  const url =
+  const manualUrl =
     defaults.endpoint +
     `${encodeURIComponent(projectName)}/_git/${encodeURIComponent(repoName)}`;
+  const url = repo.remoteUrl || manualUrl;
   await git.initRepo({
     ...config,
     localDir,
@@ -195,7 +204,7 @@ export async function getPrList(): Promise<AzurePr[]> {
       skip += 100;
     } while (fetchedPrs.length > 0);
 
-    config.prList = prs.map(azureHelper.getRenovatePRFormat);
+    config.prList = prs.map(getRenovatePRFormat);
     logger.debug({ length: config.prList.length }, 'Retrieved Pull Requests');
   }
   return config.prList;
@@ -237,7 +246,7 @@ export async function findPr({
     const prs = await getPrList();
 
     prsFiltered = prs.filter(
-      (item) => item.sourceRefName === azureHelper.getNewBranchName(branchName)
+      (item) => item.sourceRefName === getNewBranchName(branchName)
     );
 
     if (prTitle) {
@@ -281,7 +290,7 @@ export async function getBranchStatusCheck(
   const azureApiGit = await azureApi.gitApi();
   const branch = await azureApiGit.getBranch(
     config.repoId,
-    azureHelper.getBranchNameWithoutRefsheadsPrefix(branchName)!
+    getBranchNameWithoutRefsheadsPrefix(branchName)!
   );
   if (branch.aheadCount === 0) {
     return BranchStatus.green;
@@ -314,15 +323,15 @@ export async function createPr({
   prBody: body,
   labels,
   draftPR = false,
-  platformOptions = {},
+  platformOptions,
 }: CreatePRConfig): Promise<Pr> {
-  const sourceRefName = azureHelper.getNewBranchName(branchName);
-  const targetRefName = azureHelper.getNewBranchName(targetBranch);
+  const sourceRefName = getNewBranchName(branchName);
+  const targetRefName = getNewBranchName(targetBranch);
   const description = azureHelper.max4000Chars(sanitize(body));
   const azureApiGit = await azureApi.gitApi();
   const workItemRefs = [
     {
-      id: config.azureWorkItemId,
+      id: platformOptions?.azureWorkItemId?.toString(),
     },
   ];
   let pr: GitPullRequest = await azureApiGit.createPullRequest(
@@ -336,7 +345,7 @@ export async function createPr({
     },
     config.repoId
   );
-  if (platformOptions.azureAutoComplete) {
+  if (platformOptions?.azureAutoComplete) {
     pr = await azureApiGit.updatePullRequest(
       {
         autoCompleteSetBy: {
@@ -362,7 +371,7 @@ export async function createPr({
       )
     )
   );
-  return azureHelper.getRenovatePRFormat(pr);
+  return getRenovatePRFormat(pr);
 }
 
 export async function updatePr({

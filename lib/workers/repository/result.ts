@@ -1,5 +1,7 @@
 import { RenovateConfig } from '../../config';
 import {
+  CONFIG_SECRETS_EXPOSED,
+  CONFIG_VALIDATION,
   MANAGER_NO_PACKAGE_FILES,
   REPOSITORY_ACCESS_FORBIDDEN,
   REPOSITORY_ARCHIVED,
@@ -12,6 +14,7 @@ import {
   REPOSITORY_RENAMED,
   REPOSITORY_UNINITIATED,
 } from '../../constants/error-messages';
+import { logger } from '../../logger';
 
 type ProcessStatus = 'disabled' | 'enabled' | 'onboarding' | 'unknown';
 export interface ProcessResult {
@@ -36,15 +39,17 @@ export function processResult(
     REPOSITORY_UNINITIATED,
     REPOSITORY_EMPTY,
   ];
+  const enabledStatuses = [CONFIG_SECRETS_EXPOSED, CONFIG_VALIDATION];
   let status: ProcessStatus;
   // istanbul ignore next
   if (disabledStatuses.includes(res)) {
     status = 'disabled';
-  } else if (config.repoIsOnboarded) {
+  } else if (enabledStatuses.includes(res) || config.repoIsOnboarded) {
     status = 'enabled';
   } else if (config.repoIsOnboarded === false) {
     status = 'onboarding';
   } else {
+    logger.debug({ res }, 'Unknown res');
     status = 'unknown';
   }
   return { res, status };

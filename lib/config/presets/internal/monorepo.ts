@@ -35,6 +35,7 @@ const repoGroups = {
   'react-dnd': 'https://github.com/react-dnd/react-dnd',
   'react-navigation': 'https://github.com/react-navigation/react-navigation',
   'reactivestack-cookies': 'https://github.com/reactivestack/cookies',
+  'reg-suit': 'https://github.com/reg-viz/reg-suit',
   'semantic-release': 'https://github.com/semantic-release/',
   'telus-tds': 'https://github.com/telusdigital/tds',
   'typescript-eslint': 'https://github.com/typescript-eslint/typescript-eslint',
@@ -72,6 +73,7 @@ const repoGroups = {
   hamcrest: 'https://github.com/hamcrest/JavaHamcrest',
   hapijs: 'https://github.com/hapijs',
   infrastructure: 'https://github.com/instructure/instructure-ui',
+  istanbuljs: 'https://github.com/istanbuljs/istanbuljs',
   jasmine: 'https://github.com/jasmine/jasmine',
   jersey: 'https://github.com/eclipse-ee4j/jersey',
   jest: 'https://github.com/facebook/jest',
@@ -79,6 +81,7 @@ const repoGroups = {
   lingui: 'https://github.com/lingui/js-lingui',
   lodash: 'https://github.com/lodash/',
   loopback: 'https://github.com/strongloop/loopback-next',
+  lrnwebcomponents: 'https://github.com/elmsln/lrnwebcomponents',
   material: 'https://github.com/material-components/material-components-web',
   mdx: 'https://github.com/mdx-js/mdx',
   mui: 'https://github.com/mui-org/material-ui',
@@ -127,6 +130,8 @@ const patternGroups = {
   wordpress: '^@wordpress/',
   angularmaterial: ['^@angular/material', '^@angular/cdk'],
   'aws-java-sdk': '^com.amazonaws:aws-java-sdk-',
+  embroider: '^@embroider/',
+  fullcalendar: '^@fullcalendar/',
 };
 
 export const presets: Record<string, Preset> = {};

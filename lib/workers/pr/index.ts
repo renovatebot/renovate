@@ -356,12 +356,14 @@ export async function ensurePr(
       } else {
         const platformOptions: PlatformPrOptions = {
           azureAutoComplete: config.azureAutoComplete,
+          azureWorkItemId: config.azureWorkItemId,
+          bbUseDefaultReviewers: config.bbUseDefaultReviewers,
           gitLabAutomerge:
             config.automerge &&
             config.automergeType === 'pr' &&
             config.gitLabAutomerge,
         };
-        if (prLimitReached) {
+        if (!dependencyDashboardCheck && prLimitReached) {
           return { prResult: PrResult.LimitReached };
         }
         pr = await platform.createPr({
