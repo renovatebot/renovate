@@ -65,7 +65,7 @@ export async function parseConfigs(
   }
 
   if (config.forceCli) {
-    config = mergeChildConfig(config, { force: { ...cliConfig } });
+    config.force = Object.assign(config.force, { ...cliConfig });
   }
 
   if (!config.privateKey && config.privateKeyPath) {
