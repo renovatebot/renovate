@@ -132,7 +132,7 @@ If you need any further assistance then you can also [request help here](${confi
       logger.info('DRY-RUN: Would create onboarding PR');
     } else {
       const pr = await platform.createPr({
-        branchName: config.onboardingBranch,
+        sourceBranch: config.onboardingBranch,
         targetBranch: config.defaultBranch,
         prTitle: config.onboardingPrTitle,
         prBody,

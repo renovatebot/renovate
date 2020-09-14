@@ -708,7 +708,7 @@ describe('platform/gitea', () => {
 
       await initFakeRepo();
       const res = await gitea.createPr({
-        branchName: mockNewPR.head.label,
+        sourceBranch: mockNewPR.head.label,
         targetBranch: 'devel',
         prTitle: mockNewPR.title,
         prBody: mockNewPR.body,
@@ -732,7 +732,7 @@ describe('platform/gitea', () => {
 
       await initFakeRepo();
       const res = await gitea.createPr({
-        branchName: mockNewPR.head.label,
+        sourceBranch: mockNewPR.head.label,
         targetBranch: 'master',
         prTitle: mockNewPR.title,
         prBody: mockNewPR.body,
@@ -760,7 +760,7 @@ describe('platform/gitea', () => {
 
       await initFakeRepo();
       await gitea.createPr({
-        branchName: mockNewPR.head.label,
+        sourceBranch: mockNewPR.head.label,
         targetBranch: 'master',
         prTitle: mockNewPR.title,
         prBody: mockNewPR.body,
@@ -784,7 +784,7 @@ describe('platform/gitea', () => {
       await initFakeRepo();
       await gitea.getPrList();
       await gitea.createPr({
-        branchName: mockNewPR.head.label,
+        sourceBranch: mockNewPR.head.label,
         targetBranch: 'master',
         prTitle: mockNewPR.title,
         prBody: mockNewPR.body,
@@ -801,7 +801,7 @@ describe('platform/gitea', () => {
 
       await initFakeRepo();
       const res = await gitea.createPr({
-        branchName: mockNewPR.head.label,
+        sourceBranch: mockNewPR.head.label,
         targetBranch: 'master',
         prTitle: mockNewPR.title,
         prBody: mockNewPR.body,
@@ -816,7 +816,7 @@ describe('platform/gitea', () => {
 
       await initFakeRepo();
       const res = await gitea.createPr({
-        branchName: mockNewPR.head.label,
+        sourceBranch: mockNewPR.head.label,
         targetBranch: 'master',
         prTitle: 'new-title',
         prBody: 'new-body',
@@ -837,7 +837,7 @@ describe('platform/gitea', () => {
       await initFakeRepo();
       await expect(
         gitea.createPr({
-          branchName: mockNewPR.head.label,
+          sourceBranch: mockNewPR.head.label,
           targetBranch: 'master',
           prTitle: mockNewPR.title,
           prBody: mockNewPR.body,

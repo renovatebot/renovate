@@ -82,7 +82,7 @@ export type PlatformPrOptions = {
   gitLabAutomerge?: boolean;
 };
 export interface CreatePRConfig {
-  branchName: string;
+  sourceBranch: string;
   targetBranch: string;
   prTitle: string;
   prBody: string;

@@ -1583,7 +1583,7 @@ describe('platform/github', () => {
         .reply(200, []);
       await github.initRepo({ repository: 'some/repo', token: 'token' } as any);
       const pr = await github.createPr({
-        branchName: 'some-branch',
+        sourceBranch: 'some-branch',
         targetBranch: 'dev',
         prTitle: 'The Title',
         prBody: 'Hello world',
@@ -1600,7 +1600,7 @@ describe('platform/github', () => {
       });
       await github.initRepo({ repository: 'some/repo', token: 'token' } as any);
       const pr = await github.createPr({
-        branchName: 'some-branch',
+        sourceBranch: 'some-branch',
         targetBranch: 'master',
         prTitle: 'The Title',
         prBody: 'Hello world',
@@ -1617,7 +1617,7 @@ describe('platform/github', () => {
       });
       await github.initRepo({ repository: 'some/repo', token: 'token' } as any);
       const pr = await github.createPr({
-        branchName: 'some-branch',
+        sourceBranch: 'some-branch',
         targetBranch: 'master',
         prTitle: 'PR draft',
         prBody: 'This is a result of a draft',

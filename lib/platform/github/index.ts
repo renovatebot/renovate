@@ -1358,7 +1358,7 @@ export async function ensureCommentRemoval({
 
 // Creates PR and returns PR number
 export async function createPr({
-  branchName,
+  sourceBranch,
   targetBranch,
   prTitle: title,
   prBody: rawBody,
@@ -1368,7 +1368,7 @@ export async function createPr({
   const body = sanitize(rawBody);
   const base = targetBranch;
   // Include the repository owner to handle forkMode and regular mode
-  const head = `${config.repository.split('/')[0]}:${branchName}`;
+  const head = `${config.repository.split('/')[0]}:${sourceBranch}`;
   const options: any = {
     body: {
       title,
@@ -1391,7 +1391,7 @@ export async function createPr({
     )
   ).body;
   logger.debug(
-    { branch: branchName, pr: pr.number, draft: draftPR },
+    { branch: sourceBranch, pr: pr.number, draft: draftPR },
     'PR created'
   );
   // istanbul ignore if
@@ -1399,7 +1399,7 @@ export async function createPr({
     config.prList.push(pr);
   }
   pr.displayNumber = `Pull Request #${pr.number}`;
-  pr.sourceBranch = branchName;
+  pr.sourceBranch = sourceBranch;
   await addLabels(pr.number, labels);
   return pr;
 }

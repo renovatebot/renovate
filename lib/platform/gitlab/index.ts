@@ -337,7 +337,7 @@ export async function getBranchStatus(
 // Pull Request
 
 export async function createPr({
-  branchName,
+  sourceBranch,
   targetBranch,
   prTitle: title,
   prBody: rawDescription,
@@ -350,7 +350,7 @@ export async function createPr({
     `projects/${config.repository}/merge_requests`,
     {
       body: {
-        source_branch: branchName,
+        source_branch: sourceBranch,
         target_branch: targetBranch,
         remove_source_branch: true,
         title,
@@ -361,7 +361,7 @@ export async function createPr({
   );
   const pr = res.body;
   pr.number = pr.iid;
-  pr.sourceBranch = branchName;
+  pr.sourceBranch = sourceBranch;
   pr.displayNumber = `Merge Request #${pr.iid}`;
   // istanbul ignore if
   if (config.prList) {
