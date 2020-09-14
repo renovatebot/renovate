@@ -47,6 +47,7 @@ interface GiteaRepoConfig {
   prList: Promise<Pr[]> | null;
   issueList: Promise<Issue[]> | null;
   labelList: Promise<helper.Label[]> | null;
+  defaultBranch: string;
 }
 
 const defaults = {
@@ -57,6 +58,7 @@ const defaultConfigFile = configFileNames[0];
 
 let config: GiteaRepoConfig = {} as any;
 let botUserID: number;
+let botUserName: string;
 
 function toRenovateIssue(data: helper.Issue): Issue {
   return {
@@ -81,6 +83,11 @@ function toRenovatePR(data: helper.PR): Pr | null {
     logger.trace(
       `Skipping Pull Request #${data.number} due to missing base and/or head branch`
     );
+    return null;
+  }
+
+  const createdBy = data.user?.username;
+  if (createdBy && botUserName && createdBy !== botUserName) {
     return null;
   }
 
@@ -124,19 +131,6 @@ function findCommentByContent(
   content: string
 ): helper.Comment | null {
   return comments.find((c) => c.body.trim() === content);
-}
-
-async function retrieveDefaultConfig(
-  repoPath: string,
-  branchName: string
-): Promise<RenovateConfig> {
-  const contents = await helper.getRepoContents(
-    repoPath,
-    defaultConfigFile,
-    branchName
-  );
-
-  return JSON.parse(contents.contentString);
 }
 
 function getLabelList(): Promise<helper.Label[]> {
@@ -199,6 +193,7 @@ const platform: Platform = {
       const user = await helper.getCurrentUser({ token });
       gitAuthor = `${user.full_name || user.username} <${user.email}>`;
       botUserID = user.id;
+      botUserName = user.username;
     } catch (err) {
       logger.debug(
         { err },
@@ -211,6 +206,19 @@ const platform: Platform = {
       endpoint: defaults.endpoint,
       gitAuthor,
     };
+  },
+
+  async getJsonFile(fileName: string): Promise<any | null> {
+    try {
+      const contents = await helper.getRepoContents(
+        fileName,
+        defaultConfigFile,
+        config.defaultBranch
+      );
+      return JSON.parse(contents.contentString);
+    } catch (err) /* istanbul ignore next */ {
+      return null;
+    }
   },
 
   async initRepo({
@@ -273,20 +281,12 @@ const platform: Platform = {
     }
 
     // Determine author email and branches
-    const defaultBranch = repo.default_branch;
-    logger.debug(`${repository} default branch = ${defaultBranch}`);
+    config.defaultBranch = repo.default_branch;
+    logger.debug(`${repository} default branch = ${config.defaultBranch}`);
 
     // Optionally check if Renovate is disabled by attempting to fetch default configuration file
     if (optimizeForDisabled) {
-      try {
-        renovateConfig = await retrieveDefaultConfig(
-          config.repository,
-          defaultBranch
-        );
-      } catch (err) {
-        // Do nothing
-      }
-
+      renovateConfig = await platform.getJsonFile(config.repository);
       if (renovateConfig && renovateConfig.enabled === false) {
         throw new Error(REPOSITORY_DISABLED);
       }
@@ -314,7 +314,7 @@ const platform: Platform = {
     config.labelList = null;
 
     return {
-      defaultBranch,
+      defaultBranch: config.defaultBranch,
       isFork: !!repo.fork,
     };
   },
@@ -833,6 +833,7 @@ export const {
   getBranchPr,
   getBranchStatus,
   getBranchStatusCheck,
+  getJsonFile,
   getIssueList,
   getPr,
   getPrBody,

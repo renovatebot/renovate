@@ -30,7 +30,7 @@ describe('manager/travis/update', () => {
       });
       expect(res).toMatchSnapshot();
     });
-    it('it uses double quotes', () => {
+    it('uses double quotes', () => {
       // TODO: should be `Upgrade`
       const upgrade: any = {
         currentValue: ['6'],
