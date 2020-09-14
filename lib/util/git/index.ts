@@ -366,10 +366,10 @@ export async function getFileList(): Promise<string[]> {
   await syncGit();
   const [submodules, files]: [string[], Dirent[]] = await Promise.all([
     getSubmodules(),
-    fs.readdir(config.localDir, {
+    (fs.readdir(config.localDir, {
       encoding: 'utf8',
       withFileTypes: true,
-    }),
+    } as never) as unknown) as Promise<Dirent[]>,
   ]);
   return files
     .filter((dirent) => dirent.isFile())
