@@ -95,6 +95,9 @@ describe('platform/git', () => {
     });
     it('should exclude submodules', async () => {
       const repo = Git(base.path).silent(true);
+      await fs.mkdirs(base.path + '/deeply/nested');
+      await fs.writeFile(base.path + '/deeply/nested/file', 'foobar');
+      await repo.add('deeply/nested/file');
       await repo.submoduleAdd(base.path, 'submodule');
       await repo.commit('Add submodule');
       await git.initRepo({

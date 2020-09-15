@@ -362,21 +362,33 @@ export async function checkoutBranch(branchName: string): Promise<CommitSha> {
   }
 }
 
-export async function getFileList(): Promise<string[]> {
-  await syncGit();
-  const [submodules, files]: [string[], Dirent[]] = await Promise.all([
-    getSubmodules(),
-    (fs.readdir(config.localDir, {
+async function fileList(
+  root: string,
+  exclude: string[] = [],
+  path = [],
+  results: string[] = []
+): Promise<string[]> {
+  const files = await ((fs.readdir(
+    [root.replace(/\/*$/g, ''), ...path].join('/'),
+    {
       encoding: 'utf8',
       withFileTypes: true,
-    } as never) as unknown) as Promise<Dirent[]>,
-  ]);
-  return files
-    .filter((dirent) => dirent.isFile())
-    .map(({ name }) => name)
-    .filter((file: string) =>
-      submodules.every((submodule: string) => !file.startsWith(submodule))
-    );
+    } as never
+  ) as unknown) as Promise<Dirent[]>);
+  for (const file of files) {
+    if (file.isFile()) {
+      results.push([...path, file.name].join('/'));
+    } else if (file.isDirectory() && !exclude.includes(file.name)) {
+      await fileList(root, [], [...path, file.name], results);
+    }
+  }
+  return results;
+}
+
+export async function getFileList(): Promise<string[]> {
+  await syncGit();
+  const submodules = await getSubmodules();
+  return fileList(config.localDir, ['.git', ...submodules]);
 }
 
 export function getBranchList(): string[] {

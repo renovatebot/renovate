@@ -16,6 +16,7 @@ Array [
 exports[`platform/git getFileList() should exclude submodules 1`] = `
 Array [
   ".gitmodules",
+  "deeply/nested/file",
   "file_to_delete",
   "master_file",
   "past_file",
