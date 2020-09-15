@@ -21,7 +21,8 @@ const manualChangelogUrls = {
   },
   pypi: {
     alembic: 'https://alembic.sqlalchemy.org/en/latest/changelog.html',
-    beautifulsoup4: 'https://bazaar.launchpad.net/~leonardr/beautifulsoup/bs4/view/head:/CHANGELOG',
+    beautifulsoup4:
+      'https://bazaar.launchpad.net/~leonardr/beautifulsoup/bs4/view/head:/CHANGELOG',
     django: 'https://github.com/django/django/tree/master/docs/releases',
     djangorestframework:
       'https://www.django-rest-framework.org/community/release-notes/',
@@ -36,7 +37,8 @@ const manualChangelogUrls = {
       'https://github.com/daviddrysdale/python-phonenumbers/blob/dev/python/HISTORY.md',
     psycopg2: 'http://initd.org/psycopg/articles/tag/release/',
     'psycopg2-binary': 'http://initd.org/psycopg/articles/tag/release/',
-    pycountry: 'https://github.com/flyingcircusio/pycountry/blob/master/HISTORY.txt',
+    pycountry:
+      'https://github.com/flyingcircusio/pycountry/blob/master/HISTORY.txt',
     'django-debug-toolbar':
       'https://django-debug-toolbar.readthedocs.io/en/latest/changes.html',
     'firebase-admin':
