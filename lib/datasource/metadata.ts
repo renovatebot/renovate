@@ -43,7 +43,7 @@ const manualChangelogUrls = {
       'https://firebase.google.com/support/release-notes/admin/python',
     requests: 'https://github.com/psf/requests/blob/master/HISTORY.md',
     sqlalchemy: 'https://docs.sqlalchemy.org/en/latest/changelog/',
-    uwsgi: 'https://uwsgi-docs.readthedocs.io/en/latest/#release-notes'
+    uwsgi: 'https://uwsgi-docs.readthedocs.io/en/latest/#release-notes',
     wagtail: 'https://github.com/wagtail/wagtail/tree/master/docs/releases',
   },
   docker: {
