@@ -544,6 +544,9 @@ export async function processBranch(
       err.message.includes('fatal: Authentication failed')
     ) {
       throw new Error(PLATFORM_AUTHENTICATION_ERROR);
+    } else if (err.message?.includes('fatal: bad revision')) {
+      logger.debug({ err }, 'Aborting job due to bad revision error');
+      throw new Error(REPOSITORY_CHANGED);
     } else if (!(err instanceof ExternalHostError)) {
       logger.error({ err }, `Error updating branch: ${String(err.message)}`);
     }
