@@ -74,6 +74,9 @@ describe('workers/repository/updates/generate', () => {
           releaseTimestamp: '2017-02-07T20:01:41+00:00',
           canBeUnpublished: false,
           automerge: true,
+          compatibility: {
+            foo: 'bar',
+          },
         },
         {
           depName: 'some-other-dep',
@@ -99,6 +102,7 @@ describe('workers/repository/updates/generate', () => {
       expect(res.releaseTimestamp).toEqual('2017-02-07T20:01:41+00:00');
       expect(res.canBeUnpublished).toBe(true);
       expect(res.automerge).toBe(false);
+      expect(res.compatibility).toEqual({ foo: 'bar' });
     });
     it('groups multiple upgrades different version', () => {
       const branch = [
