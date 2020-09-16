@@ -65,10 +65,13 @@ export async function parseConfigs(
   }
 
   if (config.forceCli) {
+    const forcedCli = { ...cliConfig };
+    delete forcedCli.token;
+    delete forcedCli.hostRules;
     if (config.force) {
-      config.force = Object.assign(config.force, { ...cliConfig });
+      config.force = Object.assign(config.force, forcedCli);
     } else {
-      config.force = { ...cliConfig };
+      config.force = forcedCli;
     }
   }
 
