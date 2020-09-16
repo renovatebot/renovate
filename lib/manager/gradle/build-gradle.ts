@@ -212,7 +212,12 @@ export function collectVersionVariables(
     }
 
     if (!dep.currentValue && variables[depName]) {
-      dep.currentValue = variables[depName];
+      const isVersionLiteral = !/^[a-zA-Z_][a-zA-Z0-9_.]*$/.test(
+        variables[depName]
+      );
+      if (isVersionLiteral) {
+        dep.currentValue = variables[depName];
+      }
     }
   }
 }
