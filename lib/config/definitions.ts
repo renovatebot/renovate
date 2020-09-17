@@ -1581,7 +1581,7 @@ const options: RenovateOptions[] = [
   },
   {
     name: 'constraints',
-    description: 'Configuration object for constraints',
+    description: 'Configuration object for define language or manager version constraints',
     type: 'object',
     default: {},
     mergeable: true,
