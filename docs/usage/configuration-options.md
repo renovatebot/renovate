@@ -387,6 +387,51 @@ The above would mean Renovate would not include files matching the above glob pa
 
 See [shareable config presets](https://docs.renovatebot.com/config-presets) for details.
 
+## extractVersion
+
+Use this only when the raw version strings from the datasource do not match the expected format that you need in your package file. You must defined a "named capture group" called `version` as shown in the below examples.
+
+For example, to extract only the major.minor precision from a GitHub release, the following would work:
+
+```json
+{
+  "packageRules": [
+    {
+      "packageNames": ["foo"],
+      "extractVersion": "^(?<version>v\\d+\\.\\d+)"
+    }
+  ]
+}
+```
+
+The above will change a raw version of `v1.31.5` to `v1.31`, for example.
+
+Alternatively, to strip a `release-` prefix:
+
+```json
+{
+  "packageRules": [
+    {
+      "packageNames": ["bar"],
+      "extractVersion": "^release-(?<version>.*)$"
+    }
+  ]
+}
+```
+
+The above will change a raw version of `release-2.0.0` to `2.0.0`, for example. A similar one could strip leading `v` prefixes:
+
+```json
+{
+  "packageRules": [
+    {
+      "packageNames": ["baz"],
+      "extractVersion": "^v(?<version>.*)$"
+    }
+  ]
+}
+```
+
 ## fileMatch
 
 `fileMatch` is used by Renovate to know which files in a repository to parse and extract, and it is possible to override defaults values to customize for your project's needs.
