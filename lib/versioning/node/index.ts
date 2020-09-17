@@ -33,11 +33,9 @@ export function isStable(version: string, now = Date.now()): boolean {
   if (npm.isStable(version)) {
     const major = npm.getMajor(version);
     const schedule = nodeSchedule[`v${major}`];
-    if (schedule) {
-      const { maintenance, end } = schedule;
-      const ltsStart = moment(maintenance);
-      const ltsFinish = moment(end);
-      return moment(now).isBetween(ltsStart, ltsFinish);
+    if (schedule?.lts) {
+      // TODO: use the exact release that started LTS
+      return moment(now).isAfter(moment(schedule.lts));
     }
   }
   return false;

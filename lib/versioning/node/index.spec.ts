@@ -26,8 +26,9 @@ describe('semver.getNewValue()', () => {
     expect(isStable('16.0.0', now)).toBeFalse();
     expect(isStable('15.0.0', now)).toBeFalse();
     expect(isStable('14.9.0', now)).toBeFalse();
-    expect(isStable('12.0.3', now)).toBeFalse();
-    expect(isStable('v12.0.3', now)).toBeFalse();
+    expect(isStable('14.0.0', new Date('2021-06-01').getTime())).toBeTrue();
+    expect(isStable('12.0.3', now)).toBeTrue();
+    expect(isStable('v12.0.3', now)).toBeTrue();
     expect(isStable('12.0.3a', now)).toBeFalse();
     expect(isStable('11.0.0', now)).toBeFalse();
 
@@ -37,7 +38,5 @@ describe('semver.getNewValue()', () => {
 
     expect(isStable('10.0.0a', now)).toBeFalse();
     expect(isStable('9.0.0', now)).toBeFalse();
-    expect(isStable('15.0.0', now)).toBeFalse();
-    expect(isStable('16.0.0', now)).toBeFalse();
   });
 });
