@@ -102,13 +102,15 @@ export function migrateConfig(
         }
         delete migratedConfig.gomodTidy;
       } else if (key === 'semanticCommits') {
-        isMigrated = true;
         if (val === true) {
           migratedConfig.semanticCommits = 'enabled';
+          isMigrated = true;
         } else if (val === false) {
           migratedConfig.semanticCommits = 'disabled';
-        } else {
+          isMigrated = true;
+        } else if (val !== 'enabled' && val !== 'disabled') {
           migratedConfig.semanticCommits = 'auto';
+          isMigrated = true;
         }
       } else if (parentKey === 'hostRules' && key === 'platform') {
         isMigrated = true;

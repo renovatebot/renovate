@@ -61,6 +61,7 @@ const repoGroups = {
   expo: 'https://github.com/expo/expo',
   fimbullinter: 'https://github.com/fimbullinter/wotan',
   flopflip: 'https://github.com/tdeekens/flopflip',
+  formatjs: 'https://github.com/formatjs/formatjs',
   framework7: 'https://github.com/framework7io/framework7',
   gatsby: 'https://github.com/gatsbyjs/gatsby',
   graphqlcodegenerator: [
@@ -130,6 +131,7 @@ const patternGroups = {
   wordpress: '^@wordpress/',
   angularmaterial: ['^@angular/material', '^@angular/cdk'],
   'aws-java-sdk': '^com.amazonaws:aws-java-sdk-',
+  embroider: '^@embroider/',
   fullcalendar: '^@fullcalendar/',
 };
 

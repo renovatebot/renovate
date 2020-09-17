@@ -20,20 +20,32 @@ const manualChangelogUrls = {
       'https://github.com/angular/angular/blob/master/packages/zone.js/CHANGELOG.md',
   },
   pypi: {
+    alembic: 'https://alembic.sqlalchemy.org/en/latest/changelog.html',
+    beautifulsoup4:
+      'https://bazaar.launchpad.net/~leonardr/beautifulsoup/bs4/view/head:/CHANGELOG',
     django: 'https://github.com/django/django/tree/master/docs/releases',
     djangorestframework:
       'https://www.django-rest-framework.org/community/release-notes/',
     flake8: 'http://flake8.pycqa.org/en/latest/release-notes/index.html',
     'django-storages':
       'https://github.com/jschneier/django-storages/blob/master/CHANGELOG.rst',
+    hypothesis:
+      'https://github.com/HypothesisWorks/hypothesis/blob/master/hypothesis-python/docs/changes.rst',
+    lxml: 'https://git.launchpad.net/lxml/plain/CHANGES.txt',
+    mypy: 'https://mypy-lang.blogspot.com/',
     phonenumbers:
       'https://github.com/daviddrysdale/python-phonenumbers/blob/dev/python/HISTORY.md',
+    psycopg2: 'http://initd.org/psycopg/articles/tag/release/',
     'psycopg2-binary': 'http://initd.org/psycopg/articles/tag/release/',
+    pycountry:
+      'https://github.com/flyingcircusio/pycountry/blob/master/HISTORY.txt',
     'django-debug-toolbar':
       'https://django-debug-toolbar.readthedocs.io/en/latest/changes.html',
     'firebase-admin':
       'https://firebase.google.com/support/release-notes/admin/python',
     requests: 'https://github.com/psf/requests/blob/master/HISTORY.md',
+    sqlalchemy: 'https://docs.sqlalchemy.org/en/latest/changelog/',
+    uwsgi: 'https://uwsgi-docs.readthedocs.io/en/latest/#release-notes',
     wagtail: 'https://github.com/wagtail/wagtail/tree/master/docs/releases',
   },
   docker: {
@@ -76,6 +88,25 @@ const manualSourceUrls = {
   },
 };
 
+function massageGithubUrl(url: string): string {
+  return url
+    .replace('http:', 'https:')
+    .replace(/^git:\/?\/?/, 'https://')
+    .replace('www.github.com', 'github.com')
+    .split('/')
+    .slice(0, 5)
+    .join('/');
+}
+
+function massageGitlabUrl(url: string): string {
+  return url
+    .replace('http:', 'https:')
+    .replace(/^git:\/?\/?/, 'https://')
+    .replace(/\/tree\/.*$/i, '')
+    .replace(/\/$/i, '')
+    .replace('.git', '');
+}
+
 /* eslint-disable no-param-reassign */
 export function addMetaData(
   dep?: ReleaseResult,
@@ -92,30 +123,6 @@ export function addMetaData(
   if (manualSourceUrls[datasource]?.[lookupNameLowercase]) {
     dep.sourceUrl = manualSourceUrls[datasource][lookupNameLowercase];
   }
-
-  /**
-   * @param {string} url
-   */
-  const massageGithubUrl = (url: string): string => {
-    return url
-      .replace('http:', 'https:')
-      .replace(/^git:\/?\/?/, 'https://')
-      .replace('www.github.com', 'github.com')
-      .split('/')
-      .slice(0, 5)
-      .join('/');
-  };
-  /**
-   * @param {string} url
-   */
-  const massageGitlabUrl = (url: string): string => {
-    return url
-      .replace('http:', 'https:')
-      .replace(/^git:\/?\/?/, 'https://')
-      .replace(/\/tree\/.*$/i, '')
-      .replace(/\/$/i, '')
-      .replace('.git', '');
-  };
 
   if (
     dep.changelogUrl?.includes('github.com') && // lgtm [js/incomplete-url-substring-sanitization]
