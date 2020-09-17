@@ -25,6 +25,7 @@ export interface GetPkgReleasesConfig extends ReleasesConfigBase {
   depName: string;
   lookupName?: string;
   versioning?: string;
+  extractVersion?: string;
 }
 
 export function isGetPkgReleasesConfig(
