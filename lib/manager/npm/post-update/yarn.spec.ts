@@ -49,7 +49,7 @@ describe(getName(__filename), () => {
       });
       const config = {
         dockerMapDotfiles: true,
-        compatibility: {
+        constraints: {
           yarn: yarnCompatibility,
         },
         postUpdateOptions: ['yarnDedupeFewer', 'yarnDedupeHighest'],
@@ -77,7 +77,7 @@ describe(getName(__filename), () => {
         );
       });
       const config = {
-        compatibility: {
+        constraints: {
           yarn: yarnVersion === '1.22.0' ? '^1.10.0' : '>= 2.0.0',
         },
       };
@@ -135,7 +135,7 @@ describe(getName(__filename), () => {
       });
       const config = {
         dockerMapDotfiles: true,
-        compatibility: {
+        constraints: {
           yarn: yarnCompatibility,
         },
         postUpdateOptions: ['yarnDedupeFewer', 'yarnDedupeHighest'],

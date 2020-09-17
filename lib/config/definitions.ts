@@ -1580,8 +1580,8 @@ const options: RenovateOptions[] = [
     cli: false,
   },
   {
-    name: 'compatibility',
-    description: 'Configuration object for compatibility',
+    name: 'constraints',
+    description: 'Configuration object for constraints',
     type: 'object',
     default: {},
     mergeable: true,

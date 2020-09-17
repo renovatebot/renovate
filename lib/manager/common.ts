@@ -37,7 +37,7 @@ export interface CustomExtractConfig extends ExtractConfig {
 
 export interface UpdateArtifactsConfig extends ManagerConfig {
   isLockFileMaintenance?: boolean;
-  compatibility?: Record<string, string>;
+  constraints?: Record<string, string>;
   cacheDir?: string;
   composerIgnorePlatformReqs?: boolean;
   currentValue?: string;
@@ -77,7 +77,7 @@ export interface PackageFile<T = Record<string, any>>
     ManagerData<T> {
   hasYarnWorkspaces?: boolean;
   internalPackages?: string[]; // TODO: remove
-  compatibility?: Record<string, string>;
+  constraints?: Record<string, string>;
   datasource?: string;
   registryUrls?: string[];
   deps: PackageDependency[];
