@@ -236,7 +236,7 @@ Array [
         ],
       },
       Object {
-        "currentValue": "3.4.5",
+        "currentValue": "This.Is.Valid.Version.Good.Luck",
         "depGroup": "bar",
         "depName": "bar:bar",
         "name": "bar",
@@ -324,7 +324,7 @@ Array [
         ],
       },
       Object {
-        "currentValue": "3.4.5",
+        "currentValue": "This.Is.Valid.Version.Good.Luck",
         "depGroup": "bar",
         "depName": "bar:bar",
         "name": "bar",
@@ -441,7 +441,7 @@ Array [
         ],
       },
       Object {
-        "currentValue": "3.4.5",
+        "currentValue": "This.Is.Valid.Version.Good.Luck",
         "depGroup": "bar",
         "depName": "bar:bar",
         "name": "bar",
@@ -558,7 +558,7 @@ Array [
         ],
       },
       Object {
-        "currentValue": "3.4.5",
+        "currentValue": "This.Is.Valid.Version.Good.Luck",
         "depGroup": "bar",
         "depName": "bar:bar",
         "name": "bar",
@@ -646,7 +646,7 @@ Array [
         ],
       },
       Object {
-        "currentValue": "3.4.5",
+        "currentValue": "This.Is.Valid.Version.Good.Luck",
         "depGroup": "bar",
         "depName": "bar:bar",
         "name": "bar",

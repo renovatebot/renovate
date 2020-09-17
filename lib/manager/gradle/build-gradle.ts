@@ -1,4 +1,5 @@
 import { regEx } from '../../util/regex';
+import { api as gradleVersioning } from '../../versioning/gradle';
 import { BuildDependency } from './gradle-updates-report';
 
 /**
@@ -167,7 +168,15 @@ function dependencyStringVariableExpressionFormatMatch(
   dependency: GradleDependency
 ): RegExp {
   return regEx(
-    `\\s*dependency\\s+['"]${dependency.group}:${dependency.name}:([^'"]+)['"](?:\\s|;|})`
+    `\\s*dependency\\s+['"]${dependency.group}:${dependency.name}:$\{([^}]*)}['"](?:\\s|;|})`
+  );
+}
+
+function dependencyStringLiteralExpressionFormatMatch(
+  dependency: GradleDependency
+): RegExp {
+  return regEx(
+    `\\s*dependency\\s+['"]${dependency.group}:${dependency.name}:([^'"{}$]+)['"](?:\\s|;|})`
   );
 }
 
@@ -211,12 +220,13 @@ export function collectVersionVariables(
       }
     }
 
-    if (!dep.currentValue && variables[depName]) {
-      const isVersionLiteral = !/^[a-zA-Z_][a-zA-Z0-9_.]*$/.test(
-        variables[depName]
+    if (!dep.currentValue) {
+      const dependencyLiteralRegex = dependencyStringLiteralExpressionFormatMatch(
+        dependency
       );
-      if (isVersionLiteral) {
-        dep.currentValue = variables[depName];
+      const currentValue = dependencyLiteralRegex.exec(buildGradleContent)?.[1];
+      if (gradleVersioning.isValid(currentValue)) {
+        dep.currentValue = currentValue;
       }
     }
   }
