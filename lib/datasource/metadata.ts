@@ -65,6 +65,7 @@ const manualSourceUrls = {
       'https://github.com/hyper-expanse/library-release-workflows',
   },
   docker: {
+    'docker/compose': 'https://github.com/docker/compose',
     'gcr.io/kaniko-project/executor':
       'https://github.com/GoogleContainerTools/kaniko',
     'gitlab/gitlab-ce': 'https://gitlab.com/gitlab-org/omnibus-gitlab',
