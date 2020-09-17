@@ -37,5 +37,7 @@ describe('semver.getNewValue()', () => {
 
     expect(isStable('10.0.0a', now)).toBeFalse();
     expect(isStable('9.0.0', now)).toBeFalse();
+    expect(isStable('15.0.0', now)).toBeFalse();
+    expect(isStable('16.0.0', now)).toBeFalse();
   });
 });
