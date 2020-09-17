@@ -168,7 +168,7 @@ function dependencyStringVariableExpressionFormatMatch(
   dependency: GradleDependency
 ): RegExp {
   return regEx(
-    `\\s*dependency\\s+['"]${dependency.group}:${dependency.name}:$\{([^}]*)}['"](?:\\s|;|})`
+    `\\s*dependency\\s+['"]${dependency.group}:${dependency.name}:\${([^}]*)}['"](?:\\s|;|})`
   );
 }
 
