@@ -363,32 +363,33 @@ export async function checkoutBranch(branchName: string): Promise<CommitSha> {
 }
 
 async function fileList(
-  root: string,
-  exclude: string[] = [],
-  path = [],
-  results: string[] = []
+  directory: string,
+  excludes: string[] = []
 ): Promise<string[]> {
-  const files = await ((fs.readdir(
-    [root.replace(/\/*$/g, ''), ...path].join('/'),
-    {
-      encoding: 'utf8',
-      withFileTypes: true,
-    } as never
-  ) as unknown) as Promise<Dirent[]>);
+  let list: string[] = [];
+
+  const files = (await fs.readdir(directory)).filter((file) =>
+    excludes.every(
+      (exclude) => file !== exclude && !file.startsWith(`${exclude}/`)
+    )
+  );
   for (const file of files) {
-    if (file.isFile()) {
-      results.push([...path, file.name].join('/'));
-    } else if (file.isDirectory() && !exclude.includes(file.name)) {
-      await fileList(root, [], [...path, file.name], results);
+    const p = join(directory, file);
+    if ((await fs.stat(p)).isDirectory()) {
+      list = [...list, ...(await fileList(p))];
+    } else {
+      list.push(p);
     }
   }
-  return results;
+
+  return list;
 }
 
 export async function getFileList(): Promise<string[]> {
   await syncGit();
   const submodules = await getSubmodules();
-  return fileList(config.localDir, ['.git', ...submodules]);
+  const files = await fileList(config.localDir, ['.git', ...submodules]);
+  return files.map((file) => file.replace(`${config.localDir}/`, ''));
 }
 
 export function getBranchList(): string[] {
