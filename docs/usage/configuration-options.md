@@ -387,6 +387,51 @@ The above would mean Renovate would not include files matching the above glob pa
 
 See [shareable config presets](https://docs.renovatebot.com/config-presets) for details.
 
+## extractVersion
+
+Use this only when the raw version strings from the datasource do not match the expected format that you need in your package file. You must defined a "named capture group" called `version` as shown in the below examples.
+
+For example, to extract only the major.minor precision from a GitHub release, the following would work:
+
+```json
+{
+  "packageRules": [
+    {
+      "packageNames": ["foo"],
+      "extractVersion": "^(?<version>v\\d+\\.\\d+)"
+    }
+  ]
+}
+```
+
+The above will change a raw version of `v1.31.5` to `v1.31`, for example.
+
+Alternatively, to strip a `release-` prefix:
+
+```json
+{
+  "packageRules": [
+    {
+      "packageNames": ["bar"],
+      "extractVersion": "^release-(?<version>.*)$"
+    }
+  ]
+}
+```
+
+The above will change a raw version of `release-2.0.0` to `2.0.0`, for example. A similar one could strip leading `v` prefixes:
+
+```json
+{
+  "packageRules": [
+    {
+      "packageNames": ["baz"],
+      "extractVersion": "^v(?<version>.*)$"
+    }
+  ]
+}
+```
+
 ## fileMatch
 
 `fileMatch` is used by Renovate to know which files in a repository to parse and extract, and it is possible to override defaults values to customize for your project's needs.
@@ -730,7 +775,7 @@ With the above config, every PR raised by Renovate will have the label `dependen
 
 ## lockFileMaintenance
 
-This feature can be used to refresh lock files and keep them up-to-date. "Maintaining" a lock file means recreating it so that every dependency version within it is updated to the latest. Supported lock files are `package-lock.json`, `yarn.lock`, `composer.lock`, `Gemfile.lock` and `poetry.lock`. Others may be added via feature request.
+This feature can be used to refresh lock files and keep them up-to-date. "Maintaining" a lock file means recreating it so that every dependency version within it is updated to the latest. Supported lock files are `package-lock.json`, `yarn.lock`, `composer.lock`, `Gemfile.lock`, `poetry.lock` and `Cargo.lock`. Others may be added via feature request.
 
 This feature is disabled by default. If you wish to enable this feature then you could add this to your configuration:
 
@@ -1467,7 +1512,7 @@ However, please note that Renovate will autodetect if your repository is already
 
 ## separateMajorMinor
 
-Renovate's default behaviour is to create a separate branch/PR if both minor and major version updates exist. For example, if you were using Webpack 2.0.0 and versions 2.1.0 and 3.0.0 were both available, then Renovate would create two PRs so that you have the choice whether to apply the minor update to 2.x or the major update of 3.x. If you were to apply the minor update then Renovate would keep updating the 3.x branch for you as well, e.g. if Webpack 3.0.1 or 3.1.0 were released. If instead you applied the 3.0.0 update then Renovate would clean up the unneeded 2.x branch for you on the next run.
+Renovate's default behaviour is to create a separate branch/PR if both minor and major version updates exist (note that your choice of `rangeStrategy` value can influence which updates exist in the first place however). For example, if you were using Webpack 2.0.0 and versions 2.1.0 and 3.0.0 were both available, then Renovate would create two PRs so that you have the choice whether to apply the minor update to 2.x or the major update of 3.x. If you were to apply the minor update then Renovate would keep updating the 3.x branch for you as well, e.g. if Webpack 3.0.1 or 3.1.0 were released. If instead you applied the 3.0.0 update then Renovate would clean up the unneeded 2.x branch for you on the next run.
 
 It is recommended that you leave this setting to `true`, because of the polite way that Renovate handles this. For example, let's say in the above example that you decided you wouldn't update to Webpack 3 for a long time and don't want to build/test every time a new 3.x version arrives. In that case, simply close the "Update Webpack to version 3.x" PR and it _won't_ be recreated again even if subsequent Webpack 3.x versions are released. You can continue with Webpack 2.x for as long as you want and receive any updates/patches that are made for it. Then eventually when you do want to update to Webpack 3.x you can make that update to `package.json` yourself and commit it to master once it's tested. After that, Renovate will resume providing you updates to 3.x again! i.e. if you close a major upgrade PR then it won't come back again, but once you make the major upgrade yourself then Renovate will resume providing you with minor or patch updates.
 
