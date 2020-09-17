@@ -8,6 +8,7 @@ interface NodeJsSchedule {
 
 export type NodeJsData = Record<string, NodeJsSchedule>;
 
+// The following is kept in sync manually from https://github.com/nodejs/Release/blob/master/schedule.json
 export const nodeSchedule: NodeJsData = {
   'v0.10': {
     start: '2013-03-11',
@@ -79,15 +80,22 @@ export const nodeSchedule: NodeJsData = {
   },
   v14: {
     start: '2020-04-21',
-    lts: '2020-10-20',
+    lts: '2020-10-27',
     maintenance: '2021-10-19',
     end: '2023-04-30',
     codename: '',
   },
   v15: {
-    start: '2020-10-21',
+    start: '2020-10-20',
     maintenance: '2021-04-01',
     end: '2021-06-01',
+  },
+  v16: {
+    start: '2021-04-20',
+    lts: '2021-10-26',
+    maintenance: '2022-10-18',
+    end: '2024-04-30',
+    codename: '',
   },
 };
 
