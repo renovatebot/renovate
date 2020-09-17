@@ -1,4 +1,3 @@
-import { Dirent } from 'fs';
 import { join } from 'path';
 import URL from 'url';
 import fs from 'fs-extra';
@@ -363,22 +362,19 @@ export async function checkoutBranch(branchName: string): Promise<CommitSha> {
 }
 
 async function fileList(
-  directory: string,
-  excludes: string[] = []
+  root: string,
+  subdir: string,
+  excludedDirs: string[] = []
 ): Promise<string[]> {
   let list: string[] = [];
-
-  const files = (await fs.readdir(directory)).filter((file) =>
-    excludes.every(
-      (exclude) => file !== exclude && !file.startsWith(`${exclude}/`)
-    )
-  );
+  const files = (await fs.readdir(join(root, subdir)))
+    .map((file) => join(subdir, file))
+    .filter((file) => !excludedDirs.includes(file));
   for (const file of files) {
-    const p = join(directory, file);
-    if ((await fs.stat(p)).isDirectory()) {
-      list = [...list, ...(await fileList(p))];
+    if ((await fs.stat(join(root, file))).isDirectory()) {
+      list = [...list, ...(await fileList(root, file, excludedDirs))];
     } else {
-      list.push(p);
+      list.push(file);
     }
   }
 
@@ -388,7 +384,7 @@ async function fileList(
 export async function getFileList(): Promise<string[]> {
   await syncGit();
   const submodules = await getSubmodules();
-  const files = await fileList(config.localDir, ['.git', ...submodules]);
+  const files = await fileList(config.localDir, '.', ['.git', ...submodules]);
   return files.map((file) => file.replace(`${config.localDir}/`, ''));
 }
 
