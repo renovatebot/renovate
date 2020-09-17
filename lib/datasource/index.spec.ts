@@ -104,7 +104,11 @@ describe('datasource/index', () => {
   });
   it('applies extractVersion', async () => {
     npmDatasource.getReleases.mockResolvedValue({
-      releases: [{ version: 'v1.0.0' }, { version: 'v1.0.1' }],
+      releases: [
+        { version: 'v1.0.0' },
+        { version: 'v1.0.1' },
+        { version: 'v2' },
+      ],
     });
     const res = await datasource.getPkgReleases({
       datasource: datasourceNpm.id,
