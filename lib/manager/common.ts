@@ -43,7 +43,7 @@ export interface UpdateArtifactsConfig extends ManagerConfig {
   currentValue?: string;
   postUpdateOptions?: string[];
   ignoreScripts?: boolean;
-
+  updateType?: UpdateType;
   toVersion?: string;
 }
 
