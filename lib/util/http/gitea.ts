@@ -1,5 +1,6 @@
 import url from 'url';
 import { PLATFORM_TYPE_GITEA } from '../../constants/platforms';
+import { resolveBaseUrl } from '../url';
 import { Http, HttpOptions, HttpResponse, InternalHttpOptions } from '.';
 
 let baseUrl;
@@ -24,7 +25,7 @@ function getPaginationContainer(body: any): any[] {
 }
 
 function resolveUrl(path: string): URL {
-  const resolvedUrlString = url.resolve(baseUrl, path);
+  const resolvedUrlString = resolveBaseUrl(baseUrl, path);
   return new url.URL(resolvedUrlString);
 }
 

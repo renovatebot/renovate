@@ -1,10 +1,10 @@
 import crypto from 'crypto';
-import URL from 'url';
 import got, { Options } from 'got';
 import { HOST_DISABLED } from '../../constants/error-messages';
 import { ExternalHostError } from '../../types/errors/external-host-error';
 import * as memCache from '../cache/memory';
 import { clone } from '../clone';
+import { resolveBaseUrl } from '../url';
 import { applyAuthorization, removeAuthorization } from './auth';
 import { applyHostRules } from './host-rules';
 import { GotOptions } from './types';
@@ -89,7 +89,7 @@ export class Http<GetOptions = HttpOptions, PostOptions = HttpPostOptions> {
   ): Promise<HttpResponse<T> | null> {
     let url = requestUrl.toString();
     if (httpOptions?.baseUrl) {
-      url = URL.resolve(httpOptions.baseUrl, url);
+      url = resolveBaseUrl(httpOptions.baseUrl, url);
     }
     // TODO: deep merge in order to merge headers
     let options: GotOptions = {
@@ -218,7 +218,7 @@ export class Http<GetOptions = HttpOptions, PostOptions = HttpPostOptions> {
     // istanbul ignore else: needs test
     if (options?.baseUrl) {
       // eslint-disable-next-line no-param-reassign
-      url = URL.resolve(options.baseUrl, url);
+      url = resolveBaseUrl(options.baseUrl, url);
     }
 
     applyDefaultHeaders(combinedOptions);

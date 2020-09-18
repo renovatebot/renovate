@@ -161,7 +161,7 @@ export class GithubHttp extends Http<GithubHttpOptions, GithubHttpOptions> {
 
     const method = opts.method || 'get';
 
-    if (method.toLowerCase() === 'post' && url === 'graphql') {
+    if (method.toLowerCase() === 'post' && url === '/graphql') {
       // GitHub Enterprise uses unversioned graphql path
       opts.baseUrl = opts.baseUrl.replace('/v3/', '/');
     }
