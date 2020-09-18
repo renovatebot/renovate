@@ -142,3 +142,7 @@ export function levels(name: string, level: bunyan.LogLevel): void {
 export function getProblems(): BunyanRecord[] {
   return problems.getProblems();
 }
+
+export function clearProblems(): void {
+  return problems.clearProblems();
+}

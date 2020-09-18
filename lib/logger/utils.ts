@@ -36,6 +36,10 @@ export class ProblemStream extends Stream {
   getProblems(): BunyanRecord[] {
     return this._problems;
   }
+
+  clearProblems(): void {
+    this._problems = [];
+  }
 }
 const templateFields = ['prBody'];
 const contentFields = [

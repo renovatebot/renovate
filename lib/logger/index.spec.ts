@@ -4,6 +4,7 @@ import { add as addSecret } from '../util/sanitize';
 import {
   addMeta,
   addStream,
+  clearProblems,
   getContext,
   getProblems,
   levels,
@@ -61,6 +62,8 @@ describe('logger', () => {
     logger.warn('a warning with a p4$$w0rd');
     logger.info('ignored');
     expect(getProblems()).toMatchSnapshot();
+    clearProblems();
+    expect(getProblems()).toHaveLength(0);
   });
 
   it('should contain path or stream parameters', () => {
