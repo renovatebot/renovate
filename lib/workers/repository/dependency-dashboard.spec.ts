@@ -451,16 +451,27 @@ describe('workers/repository/master-issue', () => {
           level: WARN,
           msg: 'just a bit',
         },
+        {
+          level: ERROR,
+          msg: 'i am a duplicated problem',
+        },
+        {
+          level: ERROR,
+          msg: 'i am a duplicated problem',
+        },
+        {
+          level: ERROR,
+          msg: 'i am a non-duplicated problem',
+        },
+        {
+          level: WARN,
+          msg: 'i am a non-duplicated problem',
+        },
       ]);
       config.dependencyDashboard = true;
       await dependencyDashboard.ensureMasterIssue(config, branches);
       expect(platform.ensureIssue).toHaveBeenCalledTimes(1);
-      expect(platform.ensureIssue.mock.calls[0][0].body).toContain(
-        'error: everything is broken'
-      );
-      expect(platform.ensureIssue.mock.calls[0][0].body).toContain(
-        'warn: just a bit'
-      );
+      expect(platform.ensureIssue.mock.calls[0][0].body).toMatchSnapshot();
     });
   });
 });

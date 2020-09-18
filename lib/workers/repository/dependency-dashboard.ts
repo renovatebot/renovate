@@ -23,6 +23,28 @@ function getListItem(branch: BranchConfig, type: string, pr?: Pr): string {
   return item + ' (' + uniquePackages.join(', ') + ')\n';
 }
 
+function appendRepoProblems(config: RenovateConfig, issueBody: string): string {
+  let newIssueBody = issueBody;
+  const repoProblems = new Set(
+    getProblems()
+      .filter((problem) => problem.repository === config.repository)
+      .map(
+        (problem) =>
+          `${nameFromLevel[problem.level].toUpperCase()}: ${problem.msg}`
+      )
+  );
+  if (repoProblems.size) {
+    newIssueBody += '## Repository problems\n\n';
+    newIssueBody +=
+      'These problems occurred while renovating this repository.\n\n';
+    for (const repoProblem of repoProblems) {
+      newIssueBody += ` - ${repoProblem}\n`;
+    }
+    newIssueBody += '\n';
+  }
+  return newIssueBody;
+}
+
 export async function ensureMasterIssue(
   config: RenovateConfig,
   branches: BranchConfig[]
@@ -62,19 +84,7 @@ export async function ensureMasterIssue(
     issueBody += `${config.dependencyDashboardHeader}\n\n`;
   }
 
-  const repoProblems = getProblems().filter(
-    (err) => err.repository === config.repository
-  );
-  if (repoProblems.length) {
-    issueBody += '## Repository problems\n\n';
-    issueBody +=
-      'The problems below occurred while renovating this repository.\n\n';
-    for (const repoProblem of repoProblems) {
-      issueBody += ` - ${nameFromLevel[repoProblem.level].toUpperCase()}: ${
-        repoProblem.msg
-      }\n`;
-    }
-  }
+  issueBody = appendRepoProblems(config, issueBody);
 
   const pendingApprovals = branches.filter(
     (branch) => branch.res === ProcessBranchResult.NeedsApproval
