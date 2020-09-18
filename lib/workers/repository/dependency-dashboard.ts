@@ -70,7 +70,7 @@ export async function ensureMasterIssue(
     issueBody +=
       'The problems below occurred while renovating this repository.\n\n';
     for (const repoProblem of repoProblems) {
-      issueBody += ` - ${nameFromLevel[repoProblem.level]}: ${
+      issueBody += ` - ${nameFromLevel[repoProblem.level].toUpperCase()}: ${
         repoProblem.msg
       }\n`;
     }
