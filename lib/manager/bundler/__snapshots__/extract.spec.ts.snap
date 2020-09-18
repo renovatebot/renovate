@@ -2491,12 +2491,13 @@ Object {
       },
     },
     Object {
+      "currentValue": "~> 0.0.2",
+      "datasource": "rubygems",
       "depName": "omniauth-ultraauth",
       "lockedVersion": "0.0.2",
       "managerData": Object {
         "lineNumber": 46,
       },
-      "skipReason": "no-version",
     },
     Object {
       "currentValue": "~> 1.0.5",
