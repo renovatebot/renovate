@@ -33,7 +33,10 @@ describe('datasource/rubygems', () => {
       versioning: rubyVersioning.id,
       datasource: rubygems.id,
       depName: 'rails',
-      registryUrls: ['https://thirdparty.com', 'https://firstparty.com'],
+      registryUrls: [
+        'https://thirdparty.com',
+        'https://firstparty.com/basepath/',
+      ],
     };
 
     beforeEach(() => {
@@ -51,7 +54,7 @@ describe('datasource/rubygems', () => {
     it('returns null for missing pkg', async () => {
       httpMock
         .scope('https://firstparty.com')
-        .get('/api/v1/gems/rails.json')
+        .get('/basepath/api/v1/gems/rails.json')
         .reply(200, null);
       httpMock
         .scope('https://thirdparty.com')
@@ -141,9 +144,9 @@ describe('datasource/rubygems', () => {
         .reply(401);
       httpMock
         .scope('https://firstparty.com/')
-        .get('/api/v1/gems/rails.json')
+        .get('/basepath/api/v1/gems/rails.json')
         .reply(200, railsInfo)
-        .get('/api/v1/versions/rails.json')
+        .get('/basepath/api/v1/versions/rails.json')
         .reply(200, railsVersions);
 
       const res = await getPkgReleases(params);
@@ -159,7 +162,7 @@ describe('datasource/rubygems', () => {
         .reply(200, { ...railsInfo, name: 'oooops' });
       httpMock
         .scope('https://firstparty.com/')
-        .get('/api/v1/gems/rails.json')
+        .get('/basepath/api/v1/gems/rails.json')
         .reply(200, null);
       expect(await getPkgReleases(params)).toBeNull();
       expect(httpMock.getTrace()).toMatchSnapshot();
