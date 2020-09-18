@@ -1,7 +1,7 @@
 import { OutgoingHttpHeaders } from 'http';
+import urlJoin from 'url-join';
 import { logger } from '../../logger';
 import { Http } from '../../util/http';
-import { ensureTrailingSlash } from '../../util/url';
 import { ReleaseResult } from '../common';
 import { id } from './common';
 
@@ -21,11 +21,10 @@ export async function fetch(
 ): Promise<any> {
   const headers = getHeaders();
 
-  const name = `${path}/${dependency}.json`;
-  const baseUrl = ensureTrailingSlash(registry);
+  const url = urlJoin(registry, path, `${dependency}.json`);
 
-  logger.trace({ dependency }, `RubyGems lookup request: ${baseUrl} ${name}`);
-  const response = (await http.getJson(name, { baseUrl, headers })) || {
+  logger.trace({ dependency }, `RubyGems lookup request: ${url}`);
+  const response = (await http.getJson(url, { headers })) || {
     body: undefined,
   };
 
