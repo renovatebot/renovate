@@ -52,7 +52,7 @@ export async function getDependency(
 
   const versions = (await fetch(dependency, registry, VERSIONS_PATH)) || [];
 
-  const releases = versions.map(
+  let releases = versions.map(
     ({
       number: version,
       platform: rubyPlatform,
@@ -67,6 +67,19 @@ export async function getDependency(
       rubyVersion,
     })
   );
+
+  if (versions.length === 0 && info.version) {
+    logger.warn('falling back to using the info version');
+    releases = [
+      {
+        version: info.version,
+        rubyPlatform: info.platform,
+        releaseTimestamp: null,
+        rubyVersion: null,
+        rubygemsVersion: '\u003e= 0',
+      },
+    ];
+  }
 
   return {
     releases,
