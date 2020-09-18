@@ -4690,6 +4690,36 @@ Object {
 }
 `;
 
+exports[`lib/manager/bundler/extract parse source blocks in Gemfile 1`] = `
+Object {
+  "deps": Array [
+    Object {
+      "currentValue": "~> 1",
+      "datasource": "rubygems",
+      "depName": "sfn_my_dep1",
+      "managerData": Object {
+        "lineNumber": 1,
+      },
+      "registryUrls": Array [
+        "https://hub.tech.my.domain.de/artifactory/api/gems/my-gems-prod-local/",
+      ],
+    },
+    Object {
+      "currentValue": "~> 1",
+      "datasource": "rubygems",
+      "depName": "sfn_my_dep2",
+      "managerData": Object {
+        "lineNumber": 2,
+      },
+      "registryUrls": Array [
+        "https://hub.tech.my.domain.de/artifactory/api/gems/my-gems-prod-local/",
+      ],
+    },
+  ],
+  "registryUrls": Array [],
+}
+`;
+
 exports[`lib/manager/bundler/extract parse source blocks with spaces in Gemfile 1`] = `
 Object {
   "compatibility": Object {

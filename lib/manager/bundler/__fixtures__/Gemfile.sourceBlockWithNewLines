@@ -3,5 +3,5 @@
 source 'https://rubygems.org' do
   gem 'rubocop'
 
-             gem 'brakeman'
+  gem 'brakeman'
 end
