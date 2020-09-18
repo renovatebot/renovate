@@ -123,7 +123,6 @@ describe('platform/bitbucket', () => {
           values: [{ full_name: 'foo/bar' }, { full_name: 'some/repo' }],
         });
       const res = await bitbucket.getRepos();
-      httpMock.getTrace();
       expect(res).toEqual(['foo/bar', 'some/repo']);
       expect(httpMock.getTrace()).toMatchSnapshot();
     });
