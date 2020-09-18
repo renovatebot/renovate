@@ -467,6 +467,11 @@ describe('workers/repository/master-issue', () => {
           level: WARN,
           msg: 'i am a non-duplicated problem',
         },
+        {
+          level: WARN,
+          msg: 'i am an artifact error',
+          artifactErrors: {},
+        },
       ]);
       config.dependencyDashboard = true;
       await dependencyDashboard.ensureMasterIssue(config, branches);

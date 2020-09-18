@@ -27,7 +27,10 @@ function appendRepoProblems(config: RenovateConfig, issueBody: string): string {
   let newIssueBody = issueBody;
   const repoProblems = new Set(
     getProblems()
-      .filter((problem) => problem.repository === config.repository)
+      .filter(
+        (problem) =>
+          problem.repository === config.repository && !problem.artifactErrors
+      )
       .map(
         (problem) =>
           `${nameFromLevel[problem.level].toUpperCase()}: ${problem.msg}`
