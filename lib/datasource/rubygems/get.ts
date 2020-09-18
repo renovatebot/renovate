@@ -50,12 +50,7 @@ export async function getDependency(
     return null;
   }
 
-  let versions = [];
-  try {
-    versions = (await fetch(dependency, registry, VERSIONS_PATH)) || [];
-  } catch {
-    logger.warn('falling back to using the version from the info endpoint');
-  }
+  const versions = (await fetch(dependency, registry, VERSIONS_PATH)) || [];
 
   let releases = versions.map(
     ({
@@ -74,6 +69,7 @@ export async function getDependency(
   );
 
   if (versions.length === 0 && info.version) {
+    logger.warn('falling back to the version from the info endpoint');
     releases = [
       {
         version: info.version,
