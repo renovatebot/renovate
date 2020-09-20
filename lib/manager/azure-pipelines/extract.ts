@@ -9,7 +9,7 @@ interface Container {
 }
 
 interface Repository {
-  type: string;
+  type: 'git' | 'github' | 'bitbucket';
   name: string;
   ref: string;
 }
@@ -40,7 +40,7 @@ export function extractRepository(
     datasource: datasourceGitTags.id,
     depName: repository.name,
     depType: 'gitTags',
-    lookupName: `git@github.com:${repository.name}.git`,
+    lookupName: `https://github.com/${repository.name}.git`,
     replaceString: repository.ref,
   };
 }
@@ -70,7 +70,8 @@ export function parseAzurePipelines(content: string): AzurePipelines | null {
   let pkg = null;
   try {
     pkg = safeLoad(content);
-  } catch (e) /* istanbul ignore next */ {
+  } catch (err) /* istanbul ignore next */ {
+    logger.error({ err }, 'Error parsing azure-pipelines content');
     return null;
   }
 
