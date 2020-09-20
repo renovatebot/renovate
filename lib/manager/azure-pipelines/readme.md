@@ -1,5 +1,4 @@
-The `azure-pipelines` manager extracts container and repository resources from
-the `resources:` block. For example:
+The `azure-pipelines` manager extracts container and repository resources from the `resources:` block. For example:
 
 ```yaml
 resources:
@@ -17,12 +16,16 @@ resources:
       image: python:3.7@sha256:3870d35b962a943df72d948580fc66ceaaee1c4fbd205930f32e0f0760eb1077
 ```
 
-More about the resources block can be found on the [Azure pipelines
-documentation](https://docs.microsoft.com/en-us/azure/devops/pipelines/yaml-schema?view=azure-devops&tabs=schema%2Cparameter-schema#resources).
+More about the resources block can be found on the [Azure pipelines documentation](https://docs.microsoft.com/en-us/azure/devops/pipelines/yaml-schema?view=azure-devops&tabs=schema%2Cparameter-schema#resources).
 
-Files that are processed by the manager:
+Files that are processed by the manager includes:
 
+- `.azure-pipelines/**/*.yaml`
+- `.azure-pipelines.yaml`
+- `.azure-pipelines.yml`
+- `azure-pipelines/**/*.yaml`
 - `azure-pipelines.yaml`
 - `azure-pipelines.yml`
+- `azure-pipeline/**/*.yaml`
 - `azure-pipeline.yaml`
 - `azure-pipeline.yml`
