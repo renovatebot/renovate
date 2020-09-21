@@ -36,6 +36,10 @@ export class ErrorStream extends Stream {
   getErrors(): BunyanRecord[] {
     return this._errors;
   }
+
+  clearErrors(): void {
+    this._errors = [];
+  }
 }
 const templateFields = ['prBody'];
 const contentFields = [
