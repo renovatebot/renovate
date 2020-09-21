@@ -16,6 +16,11 @@ const azurePipelinesInvalid = readFileSync(
   'utf8'
 );
 
+const azurePipelinesNoDependency = readFileSync(
+  'lib/manager/azure-pipelines/__fixtures__/azure-pipelines-no-dependency.yaml',
+  'utf8'
+);
+
 describe('manager/azure-pipelines/extract', () => {
   it('should parse a valid azure-pipelines file', () => {
     const file = parseAzurePipelines(azurePipelines);
@@ -77,6 +82,9 @@ describe('manager/azure-pipelines/extract', () => {
         })
       ).toMatchSnapshot();
     });
+    it('should return null if image field is missing', () => {
+      expect(extractContainer({})).toBeNull();
+    });
   });
 
   describe('extractPackageFile()', () => {
@@ -87,6 +95,9 @@ describe('manager/azure-pipelines/extract', () => {
       const res = extractPackageFile(azurePipelines);
       expect(res.deps).toMatchSnapshot();
       expect(res.deps).toHaveLength(3);
+    });
+    it('should return null when there is no dependency found', () => {
+      expect(extractPackageFile(azurePipelinesNoDependency)).toBeNull();
     });
   });
 });
