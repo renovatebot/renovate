@@ -8,7 +8,7 @@ import { id } from './common';
 const http = new Http(id);
 
 const INFO_PATH = '/api/v1/gems';
-const VERSIONS_PATH = '/api/v1/versions';
+const VERSIONS_PATH = '/api/v1/versionsblabla';
 
 const getHeaders = (): OutgoingHttpHeaders => {
   return { hostType: id };
@@ -55,7 +55,17 @@ export async function getDependency(
   try {
     versions = await fetch(dependency, registry, VERSIONS_PATH);
   } catch (err) {
-    logger.debug('version endpoint not errors or is not available');
+    if (err.statusCode === 400) {
+      logger.debug({ registry }, 'version endpoint errors or is not available');
+      logger.debug({ err });
+      return null;
+    }
+    if (err.statusCode === 404) {
+      logger.debug({ registry }, 'version endpoint errors or is not available');
+      logger.debug({ err });
+      return null;
+    }
+    throw err;
   }
 
   if (versions.length === 0 && info.version) {
