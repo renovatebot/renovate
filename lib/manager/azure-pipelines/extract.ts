@@ -48,22 +48,22 @@ export function extractRepository(
 export function extractContainer(
   container: Container
 ): PackageDependency | null {
-  if (container?.image) {
-    const dep = getDep(container.image);
-    logger.debug(
-      {
-        depName: dep.depName,
-        currentValue: dep.currentValue,
-        currentDigest: dep.currentDigest,
-      },
-      'Azure pipelines docker image'
-    );
-    dep.depType = 'docker';
-
-    return dep;
+  if (!container.image) {
+    return null;
   }
 
-  return null;
+  const dep = getDep(container.image);
+  logger.debug(
+    {
+      depName: dep.depName,
+      currentValue: dep.currentValue,
+      currentDigest: dep.currentDigest,
+    },
+    'Azure pipelines docker image'
+  );
+  dep.depType = 'docker';
+
+  return dep;
 }
 
 export function parseAzurePipelines(content: string): AzurePipelines | null {

@@ -83,7 +83,7 @@ describe('manager/azure-pipelines/extract', () => {
       ).toMatchSnapshot();
     });
     it('should return null if image field is missing', () => {
-      expect(extractContainer({})).toBeNull();
+      expect(extractContainer({ image: null })).toBeNull();
     });
   });
 
