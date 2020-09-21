@@ -64,7 +64,7 @@ export async function extractPackageFile(
   logger.debug(
     `npm file ${fileName} has name ${JSON.stringify(packageJsonName)}`
   );
-  const packageJsonVersion = packageJson.version;
+  const packageFileVersion = packageJson.version;
   let yarnWorkspacesPackages: string[];
   if (is.array(packageJson.workspaces)) {
     yarnWorkspacesPackages = packageJson.workspaces;
@@ -325,7 +325,7 @@ export async function extractPackageFile(
     if (
       !(
         packageJsonName ||
-        packageJsonVersion ||
+        packageFileVersion ||
         npmrc ||
         lernaDir ||
         yarnWorkspacesPackages
@@ -352,7 +352,7 @@ export async function extractPackageFile(
   return {
     deps,
     packageJsonName,
-    packageJsonVersion,
+    packageFileVersion,
     packageJsonType,
     npmrc,
     ignoreNpmrcFile,
