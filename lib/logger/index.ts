@@ -142,3 +142,7 @@ export function levels(name: string, level: bunyan.LogLevel): void {
 export function getErrors(): any {
   return errors.getErrors();
 }
+
+export function clearErrors(): void {
+  return errors.clearErrors();
+}

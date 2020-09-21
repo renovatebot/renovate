@@ -424,12 +424,12 @@ describe('config/migration', () => {
 
       config = { semanticCommits: 'enabled' };
       res = configMigration.migrateConfig(config);
-      expect(res.isMigrated).toBe(true);
+      expect(res.isMigrated).toBe(false);
       expect(res.migratedConfig).toMatchObject({ semanticCommits: 'enabled' });
 
       config = { semanticCommits: 'disabled' };
       res = configMigration.migrateConfig(config);
-      expect(res.isMigrated).toBe(true);
+      expect(res.isMigrated).toBe(false);
       expect(res.migratedConfig).toMatchObject({ semanticCommits: 'disabled' });
     });
   });
