@@ -81,3 +81,18 @@ export interface GhRepo {
     };
   };
 }
+
+export type GhPulls = {
+  number: number;
+  head: {
+    ref: string;
+    sha: string;
+    repo: { full_name: string };
+  };
+  title: string;
+  state: string;
+  merged_at: string;
+  created_at: string;
+  closed_at: string;
+  user?: { login?: string };
+}[];
