@@ -61,6 +61,26 @@ describe('config/index', () => {
       ]);
       expect(parsedConfig).not.toContainKey('configFile');
     });
+    it('supports config.force', async () => {
+      const configPath = path.join(
+        __dirname,
+        'config/__fixtures__/withForce.js'
+      );
+      const env: NodeJS.ProcessEnv = {
+        ...defaultEnv,
+        RENOVATE_CONFIG_FILE: configPath,
+      };
+      const parsedConfig = await configParser.parseConfigs(env, defaultArgv);
+      expect(parsedConfig).toContainEntries([
+        ['token', 'abcdefg'],
+        [
+          'force',
+          {
+            schedule: null,
+          },
+        ],
+      ]);
+    });
     it('reads private key from file', async () => {
       const privateKeyPath = path.join(
         __dirname,

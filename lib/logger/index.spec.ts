@@ -3,6 +3,7 @@ import { add } from '../util/host-rules';
 import {
   addMeta,
   addStream,
+  clearErrors,
   getContext,
   getErrors,
   levels,
@@ -57,6 +58,8 @@ describe('logger', () => {
     logger.error({ some: 'meta' });
     logger.error({ some: 'meta' }, 'message');
     expect(getErrors()).toMatchSnapshot();
+    clearErrors();
+    expect(getErrors()).toHaveLength(0);
   });
 
   it('should contain path or stream parameters', () => {
