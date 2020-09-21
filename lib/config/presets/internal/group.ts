@@ -123,8 +123,14 @@ const staticGroups = {
     packagePatterns: ['^fusion-plugin-*', '^fusion-react*', '^fusion-apollo*'],
   },
   glimmer: {
-    description: 'Glimmer.js packages',
-    packageNames: ['@glimmer/component', '@glimmer/tracking'],
+    description: 'Group Glimmer.js packages together',
+    packageRules: [
+      {
+        groupName: 'Glimmer.js packages',
+        groupSlug: 'glimmer',
+        packageNames: ['@glimmer/component', '@glimmer/tracking'],
+      },
+    ],
   },
   illuminate: {
     description: 'Group PHP illuminate packages together',
