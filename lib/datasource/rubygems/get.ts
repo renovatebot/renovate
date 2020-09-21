@@ -50,23 +50,13 @@ export async function getDependency(
     return null;
   }
 
-  const versions = (await fetch(dependency, registry, VERSIONS_PATH)) || [];
-
-  let releases = versions.map(
-    ({
-      number: version,
-      platform: rubyPlatform,
-      created_at: releaseTimestamp,
-      rubygems_version: rubygemsVersion,
-      ruby_version: rubyVersion,
-    }) => ({
-      version,
-      rubyPlatform,
-      releaseTimestamp,
-      rubygemsVersion,
-      rubyVersion,
-    })
-  );
+  let versions = [];
+  let releases = [];
+  try {
+    versions = await fetch(dependency, registry, VERSIONS_PATH);
+  } catch (err) {
+    logger.debug('version endpoint not errors or is not available');
+  }
 
   if (versions.length === 0 && info.version) {
     logger.warn('falling back to the version from the info endpoint');
@@ -79,6 +69,22 @@ export async function getDependency(
         rubygemsVersion: '\u003e= 0',
       },
     ];
+  } else {
+    releases = versions.map(
+      ({
+        number: version,
+        platform: rubyPlatform,
+        created_at: releaseTimestamp,
+        rubygems_version: rubygemsVersion,
+        ruby_version: rubyVersion,
+      }) => ({
+        version,
+        rubyPlatform,
+        releaseTimestamp,
+        rubygemsVersion,
+        rubyVersion,
+      })
+    );
   }
 
   return {
