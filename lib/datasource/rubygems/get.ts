@@ -56,8 +56,7 @@ export async function getDependency(
     versions = await fetch(dependency, registry, VERSIONS_PATH);
   } catch (err) {
     if (err.statusCode === 400 || err.statusCode === 404) {
-      logger.debug({ registry }, 'version endpoint errors or is not available');
-      logger.debug({ err });
+      logger.debug({ registry }, 'versions endpoint returns error - falling back to info endpoint');
     } else {
       throw err;
     }
