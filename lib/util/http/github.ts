@@ -163,7 +163,8 @@ export class GithubHttp extends Http<GithubHttpOptions, GithubHttpOptions> {
 
     if (method.toLowerCase() === 'post' && url === '/graphql') {
       // GitHub Enterprise uses unversioned graphql path
-      opts.baseUrl = opts.baseUrl.replace('/v3/', '/');
+      // https://x.com/api/v3/ + /graphql -> https://x.com/graphql
+      opts.baseUrl = URL.resolve(opts.baseUrl, '/');
     }
 
     const accept = constructAcceptString(opts.headers?.accept);

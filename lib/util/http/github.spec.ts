@@ -43,7 +43,7 @@ describe(getName(__filename), () => {
     it('strips v3 for graphql', async () => {
       httpMock
         .scope('https://ghe.mycompany.com')
-        .post('/api/graphql')
+        .post('/graphql')
         .reply(200, {});
       setBaseUrl('https://ghe.mycompany.com/api/v3/');
       await githubApi.postJson('/graphql', {
@@ -51,7 +51,7 @@ describe(getName(__filename), () => {
       });
       const [req] = httpMock.getTrace();
       expect(req).toBeDefined();
-      expect(req.url).toEqual('https://ghe.mycompany.com/api/graphql');
+      expect(req.url).toEqual('https://ghe.mycompany.com/graphql');
     });
     it('paginates', async () => {
       const url = '/some-url';
