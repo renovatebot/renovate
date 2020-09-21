@@ -53,35 +53,15 @@ spec:
         spec:
           containers:
             - name: renovate
-              # Update this to the latest available and then enable Renovate on the manifest
-              image: renovate/renovate:19.181.2
+              # Update this to the latest available and then enable Renovate on
+              # the manifest
+              image: renovate/renovate:23.19.2
+              args:
+                - user/repo
               # Environment Variables
-              env:
-                - name: RENOVATE_PLATFORM
-                  valueFrom:
-                    secretKeyRef:
-                      key: renovate-platform
-                      name: renovate-env
-                - name: RENOVATE_ENDPOINT
-                  valueFrom:
-                    secretKeyRef:
-                      key: renovate-endpoint
-                      name: renovate-env
-                - name: RENOVATE_TOKEN
-                  valueFrom:
-                    secretKeyRef:
-                      key: renovate-token
-                      name: renovate-env
-                - name: GITHUB_COM_TOKEN
-                  valueFrom:
-                    secretKeyRef:
-                      key: github-token
-                      name: renovate-env
-                - name: RENOVATE_AUTODISCOVER
-                  valueFrom:
-                    secretKeyRef:
-                      key: renovate-autodiscover
-                      name: renovate-env
+              envFrom:
+                - secretRef:
+                    name: renovate-env
           restartPolicy: Never
 ```
 
@@ -94,11 +74,13 @@ metadata:
   name: renovate-env
 type: Opaque
 stringData:
-  renovate-platform: 'github'
-  renovate-endpoint: 'https://github.company.com/api/v3'
-  renovate-token: 'your-github-enterprise-renovate-user-token'
-  github-token: 'any-personal-user-token-for-github-com-for-fetching-changelogs'
-  renovate-autodiscover: 'true'
+  GITHUB_COM_TOKEN: 'any-personal-user-token-for-github-com-for-fetching-changelogs'
+  # set to true to run on all repos you have push access to
+  RENOVATE_AUTODISCOVER: 'false'
+  RENOVATE_ENDPOINT: 'https://github.company.com/api/v3'
+  RENOVATE_GIT_AUTHOR: 'Renovate Bot <bot@renovateapp.com>'
+  RENOVATE_PLATFORM: 'github'
+  RENOVATE_TOKEN: 'your-github-enterprise-renovate-user-token'
 ```
 
 ## Configuration
@@ -270,11 +252,12 @@ metadata:
   namespace: <namespace>
 type: Opaque
 stringData:
-  renovate-platform: 'gitlab'
-  renovate-endpoint: 'https://gitlab.com/api/v4'
-  renovate-token: <Gitlab Token>
-  github-token: <Github Token>
-  renovate-autodiscover: 'false'
+  GITHUB_COM_TOKEN: 'any-personal-user-token-for-github-com-for-fetching-changelogs'
+  RENOVATE_AUTODISCOVER: 'false'
+  RENOVATE_ENDPOINT: 'https://github.company.com/api/v3'
+  RENOVATE_GIT_AUTHOR: 'Renovate Bot <bot@renovateapp.com>'
+  RENOVATE_PLATFORM: 'github'
+  RENOVATE_TOKEN: 'your-github-enterprise-renovate-user-token'
 ---
 apiVersion: v1
 data:
@@ -305,7 +288,7 @@ spec:
           containers:
             - name: renovate
               # Update this to the latest available and then enable Renovate on the manifest
-              image: renovate/renovate:14.1.0
+              image: renovate/renovate:23.19.2
               volumeMounts:
                 - name: ssh-key-volume
                   readOnly: true
@@ -313,36 +296,9 @@ spec:
               args:
                 - <repository>
               # Environment Variables
-              env:
-                - name: RENOVATE_GIT_AUTHOR
-                  value: <Git Author, with format 'User <email@email.com>'>
-                - name: RENOVATE_GIT_FS
-                  value: ssh
-                - name: RENOVATE_PLATFORM
-                  valueFrom:
-                    secretKeyRef:
-                      key: renovate-platform
-                      name: renovate-env
-                - name: RENOVATE_ENDPOINT
-                  valueFrom:
-                    secretKeyRef:
-                      key: renovate-endpoint
-                      name: renovate-env
-                - name: RENOVATE_TOKEN
-                  valueFrom:
-                    secretKeyRef:
-                      key: renovate-token
-                      name: renovate-env
-                - name: GITHUB_COM_TOKEN
-                  valueFrom:
-                    secretKeyRef:
-                      key: github-token
-                      name: renovate-env
-                - name: RENOVATE_AUTODISCOVER
-                  valueFrom:
-                    secretKeyRef:
-                      key: renovate-autodiscover
-                      name: renovate-env
+              envFrom:
+                - secretRef:
+                    name: renovate-env
           restartPolicy: Never
 ```
 
