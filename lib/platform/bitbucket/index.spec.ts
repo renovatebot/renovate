@@ -66,18 +66,18 @@ describe('platform/bitbucket', () => {
 
   async function initRepoMock(
     config?: Partial<RepoParams>,
-    repoResp?: any
+    repoResp?: any,
+    existingScope?: nock.Scope
   ): Promise<nock.Scope> {
     const repository = config?.repository || 'some/repo';
 
-    const scope = httpMock
-      .scope(baseUrl)
-      .get(`/2.0/repositories/${repository}`)
-      .reply(200, {
-        owner: {},
-        mainbranch: { name: 'master' },
-        ...repoResp,
-      });
+    const scope = existingScope || httpMock.scope(baseUrl);
+
+    scope.get(`/2.0/repositories/${repository}`).reply(200, {
+      owner: {},
+      mainbranch: { name: 'master' },
+      ...repoResp,
+    });
 
     await bitbucket.initRepo({
       repository: 'some/repo',
@@ -90,9 +90,9 @@ describe('platform/bitbucket', () => {
   }
 
   describe('initPlatform()', () => {
-    it('should throw if no username/password', () => {
+    it('should throw if no username/password', async () => {
       expect.assertions(1);
-      expect(() => bitbucket.initPlatform({})).toThrow();
+      await expect(bitbucket.initPlatform({})).rejects.toThrow();
     });
     it('should show warning message if custom endpoint', async () => {
       await bitbucket.initPlatform({
@@ -111,6 +111,16 @@ describe('platform/bitbucket', () => {
           password: '123',
         })
       ).toMatchSnapshot();
+    });
+    it('should warn for missing "profile" scope', async () => {
+      const scope = httpMock.scope(baseUrl);
+      scope
+        .get('/2.0/user')
+        .reply(403, { error: { detail: { required: ['account'] } } });
+      await bitbucket.initPlatform({ username: 'renovate', password: 'pass' });
+      expect(logger.warn).toHaveBeenCalledWith(
+        `Bitbucket: missing 'account' scope for password`
+      );
     });
   });
 
@@ -607,6 +617,36 @@ describe('platform/bitbucket', () => {
     it('exists', () => {
       expect(bitbucket.getPrList).toBeDefined();
     });
+    it('filters PR list by author', async () => {
+      const scope = httpMock.scope(baseUrl);
+      scope.get('/2.0/user').reply(200, { uuid: '12345' });
+      await bitbucket.initPlatform({ username: 'renovate', password: 'pass' });
+      await initRepoMock(null, null, scope);
+      scope
+        .get(
+          '/2.0/repositories/some/repo/pullrequests?state=OPEN&state=MERGED&state=DECLINED&state=SUPERSEDED&pagelen=50'
+        )
+        .reply(200, {
+          values: [
+            {
+              id: 2,
+              author: { uuid: 'abcde' },
+              source: { branch: { name: 'branch-a' } },
+              destination: { branch: { name: 'branch-a' } },
+              state: 'OPEN',
+            },
+            {
+              id: 1,
+              author: { uuid: '12345' },
+              source: { branch: { name: 'branch-a' } },
+              destination: { branch: { name: 'branch-b' } },
+              state: 'OPEN',
+            },
+          ],
+        });
+      expect(await bitbucket.getPrList()).toMatchSnapshot();
+      expect(httpMock.getTrace()).toMatchSnapshot();
+    });
   });
 
   describe('findPr()', () => {
@@ -642,7 +682,7 @@ describe('platform/bitbucket', () => {
         .post('/2.0/repositories/some/repo/pullrequests')
         .reply(200, { id: 5 });
       const { number } = await bitbucket.createPr({
-        branchName: 'branch',
+        sourceBranch: 'branch',
         targetBranch: 'master',
         prTitle: 'title',
         prBody: 'body',

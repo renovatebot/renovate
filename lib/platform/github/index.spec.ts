@@ -1502,17 +1502,37 @@ describe('platform/github', () => {
   });
   describe('findPr(branchName, prTitle, state)', () => {
     it('returns true if no title and all state', async () => {
-      httpMock
+      const scope = httpMock
         .scope(githubApiHost)
-        .get('/repos/undefined/pulls?per_page=100&state=all')
+        .get('/repos/some/repo/pulls?per_page=100&state=all')
         .reply(200, [
           {
-            number: 1,
-            head: { ref: 'branch-a' },
+            number: 2,
+            head: {
+              ref: 'branch-a',
+              repo: { full_name: 'some/repo' },
+            },
             title: 'branch a pr',
             state: PrState.Open,
+            user: { login: 'not-me' },
+          },
+          {
+            number: 1,
+            head: {
+              ref: 'branch-a',
+              repo: { full_name: 'some/repo' },
+            },
+            title: 'branch a pr',
+            state: PrState.Open,
+            user: { login: 'me' },
           },
         ]);
+      initRepoMock(scope, 'some/repo');
+      await github.initRepo({
+        repository: 'some/repo',
+        token: 'token',
+        renovateUsername: 'me',
+      } as any);
 
       const res = await github.findPr({
         branchName: 'branch-a',
@@ -1583,7 +1603,7 @@ describe('platform/github', () => {
         .reply(200, []);
       await github.initRepo({ repository: 'some/repo', token: 'token' } as any);
       const pr = await github.createPr({
-        branchName: 'some-branch',
+        sourceBranch: 'some-branch',
         targetBranch: 'dev',
         prTitle: 'The Title',
         prBody: 'Hello world',
@@ -1600,7 +1620,7 @@ describe('platform/github', () => {
       });
       await github.initRepo({ repository: 'some/repo', token: 'token' } as any);
       const pr = await github.createPr({
-        branchName: 'some-branch',
+        sourceBranch: 'some-branch',
         targetBranch: 'master',
         prTitle: 'The Title',
         prBody: 'Hello world',
@@ -1617,7 +1637,7 @@ describe('platform/github', () => {
       });
       await github.initRepo({ repository: 'some/repo', token: 'token' } as any);
       const pr = await github.createPr({
-        branchName: 'some-branch',
+        sourceBranch: 'some-branch',
         targetBranch: 'master',
         prTitle: 'PR draft',
         prBody: 'This is a result of a draft',

@@ -11,8 +11,8 @@ export interface BunyanRecord extends Record<string, any> {
 
 const excludeProps = ['pid', 'time', 'v', 'hostname'];
 
-export class ErrorStream extends Stream {
-  private _errors: BunyanRecord[] = [];
+export class ProblemStream extends Stream {
+  private _problems: BunyanRecord[] = [];
 
   readable: boolean;
 
@@ -25,20 +25,20 @@ export class ErrorStream extends Stream {
   }
 
   write(data: BunyanRecord): boolean {
-    const err = { ...data };
+    const problem = { ...data };
     for (const prop of excludeProps) {
-      delete err[prop];
+      delete problem[prop];
     }
-    this._errors.push(err);
+    this._problems.push(problem);
     return true;
   }
 
-  getErrors(): BunyanRecord[] {
-    return this._errors;
+  getProblems(): BunyanRecord[] {
+    return this._problems;
   }
 
-  clearErrors(): void {
-    this._errors = [];
+  clearProblems(): void {
+    this._problems = [];
   }
 }
 const templateFields = ['prBody'];
