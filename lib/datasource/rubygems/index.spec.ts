@@ -1,10 +1,10 @@
-import * as rubygems from '.';
 import { getPkgReleases } from '..';
 import * as httpMock from '../../../test/httpMock';
 import * as rubyVersioning from '../../versioning/ruby';
-import { resetCache } from './get-rubygems-org';
 import railsInfo from './__fixtures__/rails/info.json';
 import railsVersions from './__fixtures__/rails/versions.json';
+import { resetCache } from './get-rubygems-org';
+import * as rubygems from '.';
 
 const rubygemsOrgVersions = `created_at: 2017-03-27T04:38:13+00:00
 ---

@@ -56,7 +56,10 @@ export async function getDependency(
     versions = await fetch(dependency, registry, VERSIONS_PATH);
   } catch (err) {
     if (err.statusCode === 400 || err.statusCode === 404) {
-      logger.debug({ registry }, 'versions endpoint returns error - falling back to info endpoint');
+      logger.debug(
+        { registry },
+        'versions endpoint returns error - falling back to info endpoint'
+      );
     } else {
       throw err;
     }
@@ -68,9 +71,6 @@ export async function getDependency(
       {
         version: info.version,
         rubyPlatform: info.platform,
-        releaseTimestamp: null,
-        rubyVersion: null,
-        rubygemsVersion: '\u003e= 0',
       },
     ];
   } else {
