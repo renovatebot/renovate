@@ -50,6 +50,7 @@ import {
   GhBranchStatus,
   GhGraphQlPr,
   GhPr,
+  GhPulls,
   GhRepo,
   GhRestPr,
   LocalRepoConfig,
@@ -693,39 +694,42 @@ export async function getPrList(): Promise<Pr[]> {
   logger.trace('getPrList()');
   if (!config.prList) {
     logger.debug('Retrieving PR list');
-    let res;
+    let prList: GhPulls;
     try {
-      res = await githubApi.getJson<{
-        number: number;
-        head: { ref: string; sha: string; repo: { full_name: string } };
-        title: string;
-        state: string;
-        merged_at: string;
-        created_at: string;
-        closed_at: string;
-      }>(
-        `repos/${
-          config.parentRepo || config.repository
-        }/pulls?per_page=100&state=all`,
-        { paginate: true }
-      );
+      prList = (
+        await githubApi.getJson<GhPulls>(
+          `repos/${
+            config.parentRepo || config.repository
+          }/pulls?per_page=100&state=all`,
+          { paginate: true }
+        )
+      ).body;
     } catch (err) /* istanbul ignore next */ {
       logger.debug({ err }, 'getPrList err');
       throw new ExternalHostError(err, PLATFORM_TYPE_GITHUB);
     }
-    config.prList = res.body.map((pr) => ({
-      number: pr.number,
-      sourceBranch: pr.head.ref,
-      sha: pr.head.sha,
-      title: pr.title,
-      state:
-        pr.state === PrState.Closed && pr.merged_at?.length
-          ? /* istanbul ignore next */ PrState.Merged
-          : pr.state,
-      createdAt: pr.created_at,
-      closed_at: pr.closed_at,
-      sourceRepo: pr.head?.repo?.full_name,
-    }));
+    config.prList = prList
+      .filter((pr) => {
+        return pr?.user?.login && config?.renovateUsername
+          ? pr.user.login === config.renovateUsername
+          : true;
+      })
+      .map(
+        (pr) =>
+          ({
+            number: pr.number,
+            sourceBranch: pr.head.ref,
+            sha: pr.head.sha,
+            title: pr.title,
+            state:
+              pr.state === PrState.Closed && pr.merged_at?.length
+                ? /* istanbul ignore next */ PrState.Merged
+                : pr.state,
+            createdAt: pr.created_at,
+            closed_at: pr.closed_at,
+            sourceRepo: pr.head?.repo?.full_name,
+          } as never)
+      );
     logger.debug(`Retrieved ${config.prList.length} Pull Requests`);
   }
   return config.prList;

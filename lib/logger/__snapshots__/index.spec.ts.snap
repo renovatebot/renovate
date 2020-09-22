@@ -1,6 +1,6 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
-exports[`logger saves errors 1`] = `
+exports[`logger saves problems 1`] = `
 Array [
   Object {
     "any": "test",
@@ -15,6 +15,7 @@ Array [
     "logContext": "abc123",
     "msg": "",
     "name": "renovate",
+    "password": "***********",
     "some": "meta",
   },
   Object {
@@ -24,6 +25,13 @@ Array [
     "msg": "message",
     "name": "renovate",
     "some": "meta",
+  },
+  Object {
+    "any": "test",
+    "level": 40,
+    "logContext": "abc123",
+    "msg": "a warning with a **redacted**",
+    "name": "renovate",
   },
 ]
 `;
