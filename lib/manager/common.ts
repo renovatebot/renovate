@@ -90,7 +90,7 @@ export interface PackageFile<T = Record<string, any>>
   packageFile?: string;
   packageJsonName?: string;
   packageJsonType?: 'app' | 'library';
-  packageJsonVersion?: string;
+  packageFileVersion?: string;
   parent?: string;
   skipInstalls?: boolean;
   yarnrc?: string;
@@ -115,7 +115,7 @@ export interface Package<T> extends ManagerData<T> {
   // npm manager
   bumpVersion?: ReleaseType | string;
   npmPackageAlias?: boolean;
-  packageJsonVersion?: string;
+  packageFileVersion?: string;
   gitRef?: boolean;
   sourceUrl?: string;
   githubRepo?: string;
