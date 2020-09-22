@@ -1598,12 +1598,13 @@ describe('platform/github', () => {
         .post('/repos/some/repo/pulls')
         .reply(200, {
           number: 123,
+          head: { repo: { full_name: 'some/repo' } },
         })
         .post('/repos/some/repo/issues/123/labels')
         .reply(200, []);
       await github.initRepo({ repository: 'some/repo', token: 'token' } as any);
       const pr = await github.createPr({
-        branchName: 'some-branch',
+        sourceBranch: 'some-branch',
         targetBranch: 'dev',
         prTitle: 'The Title',
         prBody: 'Hello world',
@@ -1617,10 +1618,11 @@ describe('platform/github', () => {
       initRepoMock(scope, 'some/repo');
       scope.post('/repos/some/repo/pulls').reply(200, {
         number: 123,
+        head: { repo: { full_name: 'some/repo' } },
       });
       await github.initRepo({ repository: 'some/repo', token: 'token' } as any);
       const pr = await github.createPr({
-        branchName: 'some-branch',
+        sourceBranch: 'some-branch',
         targetBranch: 'master',
         prTitle: 'The Title',
         prBody: 'Hello world',
@@ -1634,10 +1636,11 @@ describe('platform/github', () => {
       initRepoMock(scope, 'some/repo');
       scope.post('/repos/some/repo/pulls').reply(200, {
         number: 123,
+        head: { repo: { full_name: 'some/repo' } },
       });
       await github.initRepo({ repository: 'some/repo', token: 'token' } as any);
       const pr = await github.createPr({
-        branchName: 'some-branch',
+        sourceBranch: 'some-branch',
         targetBranch: 'master',
         prTitle: 'PR draft',
         prBody: 'This is a result of a draft',

@@ -16,7 +16,7 @@ export async function codeOwnersForPr(pr: Pr): Promise<string[]> {
       return [];
     }
 
-    const prFiles = await getBranchFiles(pr.branchName);
+    const prFiles = await getBranchFiles(pr.sourceBranch);
     const rules = codeOwnersFile
       .split('\n')
       .map((line) => line.trim())

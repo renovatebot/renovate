@@ -43,7 +43,9 @@ let config: utils.Config = {} as any;
 
 const defaults = { endpoint: BITBUCKET_PROD_ENDPOINT };
 
-export function initPlatform({
+let renovateUserUuid: string;
+
+export async function initPlatform({
   endpoint,
   username,
   password,
@@ -60,6 +62,26 @@ export function initPlatform({
     defaults.endpoint = endpoint;
   }
   setBaseUrl(defaults.endpoint);
+  renovateUserUuid = null;
+  try {
+    const { uuid } = (
+      await bitbucketHttp.getJson<{ uuid: string }>('/2.0/user', {
+        username,
+        password,
+        useCache: false,
+      })
+    ).body;
+    renovateUserUuid = uuid;
+  } catch (err) {
+    if (
+      err.statusCode === 403 &&
+      err.body?.error?.detail?.required?.includes('account')
+    ) {
+      logger.warn(`Bitbucket: missing 'account' scope for password`);
+    } else {
+      logger.debug({ err }, 'Unknown error fetching Bitbucket user identity');
+    }
+  }
   // TODO: Add a connection check that endpoint/username/password combination are valid
   const platformConfig: PlatformResult = {
     endpoint: endpoint || BITBUCKET_PROD_ENDPOINT,
@@ -197,7 +219,14 @@ export async function getPrList(): Promise<Pr[]> {
     let url = `/2.0/repositories/${config.repository}/pullrequests?`;
     url += utils.prStates.all.map((state) => 'state=' + state).join('&');
     const prs = await utils.accumulateValues(url, undefined, undefined, 50);
-    config.prList = prs.map(utils.prInfo);
+    config.prList = prs
+      .filter((pr) => {
+        const prAuthorId = pr?.author?.uuid;
+        return renovateUserUuid && prAuthorId
+          ? renovateUserUuid === prAuthorId
+          : true;
+      })
+      .map(utils.prInfo);
     logger.debug({ length: config.prList.length }, 'Retrieved Pull Requests');
   }
   return config.prList;
@@ -212,7 +241,7 @@ export async function findPr({
   const prList = await getPrList();
   const pr = prList.find(
     (p) =>
-      p.branchName === branchName &&
+      p.sourceBranch === branchName &&
       (!prTitle || p.title === prTitle) &&
       matchesState(p.state, state)
   );
@@ -629,7 +658,7 @@ export function ensureCommentRemoval({
 
 // Creates PR and returns PR number
 export async function createPr({
-  branchName,
+  sourceBranch,
   targetBranch,
   prTitle: title,
   prBody: description,
@@ -659,7 +688,7 @@ export async function createPr({
     description: sanitize(description),
     source: {
       branch: {
-        name: branchName,
+        name: sourceBranch,
       },
     },
     destination: {

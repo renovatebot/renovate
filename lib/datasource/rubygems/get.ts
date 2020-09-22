@@ -23,7 +23,7 @@ export async function fetch(
 
   const url = urlJoin(registry, path, `${dependency}.json`);
 
-  logger.trace({ dependency }, `RubyGems lookup request: ${url}`);
+  logger.trace({ dependency }, `RubyGems lookup request: ${String(url)}`);
   const response = (await http.getJson(url, { headers })) || {
     body: undefined,
   };

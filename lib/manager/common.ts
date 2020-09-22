@@ -158,6 +158,7 @@ export interface PackageDependency<T = Record<string, any>> extends Package<T> {
   digestOneAndOnly?: boolean;
   displayFrom?: string;
   displayTo?: string;
+  fixedVersion?: string;
   fromVersion?: string;
   lockedVersion?: string;
   propSource?: string;
