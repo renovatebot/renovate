@@ -78,6 +78,8 @@ export async function initPlatform({
       err.body?.error?.detail?.required?.includes('account')
     ) {
       logger.warn(`Bitbucket: missing 'account' scope for password`);
+    } else {
+      logger.debug({ err }, 'Unknown error fetching Bitbucket user identity');
     }
   }
   // TODO: Add a connection check that endpoint/username/password combination are valid
