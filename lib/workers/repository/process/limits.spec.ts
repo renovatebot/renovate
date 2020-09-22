@@ -23,15 +23,15 @@ describe('workers/repository/process/limits', () => {
       platform.getPrList.mockResolvedValueOnce([
         {
           createdAt: moment().toISOString(),
-          branchName: 'renovate/test',
+          sourceBranch: 'renovate/test',
         },
         {
           createdAt: moment().toISOString(),
-          branchName: 'renovate/configure',
+          sourceBranch: 'renovate/configure',
         },
         {
           createdAt: moment().toISOString(),
-          branchName: 'foobar',
+          sourceBranch: 'foobar',
         },
       ] as never);
       const res = await limits.getPrHourlyRemaining(config);
@@ -48,10 +48,10 @@ describe('workers/repository/process/limits', () => {
     it('calculates concurrent limit remaining', async () => {
       config.prConcurrentLimit = 20;
       platform.getPrList.mockResolvedValueOnce([
-        { branchName: 'renovate/test1', state: PrState.Open },
-        { branchName: 'renovate/test2', state: PrState.Closed },
-        { branchName: 'renovate/configure', state: PrState.Open },
-        { branchName: 'foobar', state: PrState.Open },
+        { sourceBranch: 'renovate/test1', state: PrState.Open },
+        { sourceBranch: 'renovate/test2', state: PrState.Closed },
+        { sourceBranch: 'renovate/configure', state: PrState.Open },
+        { sourceBranch: 'foobar', state: PrState.Open },
       ] as never);
       const res = await limits.getConcurrentPrsRemaining(config);
       expect(res).toEqual(19);

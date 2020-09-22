@@ -367,7 +367,7 @@ export async function ensurePr(
           return { prResult: PrResult.LimitReached };
         }
         pr = await platform.createPr({
-          branchName,
+          sourceBranch: branchName,
           targetBranch: config.baseBranch,
           prTitle,
           prBody,

@@ -1290,9 +1290,9 @@ exports[`platform/bitbucket-server/index endpoint with no path findPr() has pr 1
 Object {
   "body": "* Line 1
 * Line 2",
-  "branchName": "userName1/pullRequest5",
   "createdAt": 1547853840016,
   "number": 5,
+  "sourceBranch": "userName1/pullRequest5",
   "state": "open",
   "targetBranch": "master",
   "title": "title",
@@ -1386,7 +1386,6 @@ exports[`platform/bitbucket-server/index endpoint with no path getBranchPr() has
 Object {
   "body": "* Line 1
 * Line 2",
-  "branchName": "userName1/pullRequest5",
   "canMerge": false,
   "createdAt": 1547853840016,
   "displayNumber": "Pull Request #5",
@@ -1396,6 +1395,7 @@ Object {
   "reviewers": Array [
     "userName2",
   ],
+  "sourceBranch": "userName1/pullRequest5",
   "state": "open",
   "targetBranch": "master",
   "title": "title",
@@ -1824,7 +1824,6 @@ exports[`platform/bitbucket-server/index endpoint with no path getPr() canRebase
 Object {
   "body": "* Line 1
 * Line 2",
-  "branchName": "userName1/pullRequest5",
   "canMerge": false,
   "createdAt": 1547853840016,
   "displayNumber": "Pull Request #5",
@@ -1834,6 +1833,7 @@ Object {
   "reviewers": Array [
     "userName2",
   ],
+  "sourceBranch": "userName1/pullRequest5",
   "state": "open",
   "targetBranch": "master",
   "title": "title",
@@ -1845,7 +1845,6 @@ exports[`platform/bitbucket-server/index endpoint with no path getPr() canRebase
 Object {
   "body": "* Line 1
 * Line 2",
-  "branchName": "userName1/pullRequest5",
   "canMerge": false,
   "createdAt": 1547853840016,
   "displayNumber": "Pull Request #5",
@@ -1855,6 +1854,7 @@ Object {
   "reviewers": Array [
     "userName2",
   ],
+  "sourceBranch": "userName1/pullRequest5",
   "state": "open",
   "targetBranch": "master",
   "title": "title",
@@ -1866,7 +1866,6 @@ exports[`platform/bitbucket-server/index endpoint with no path getPr() canRebase
 Object {
   "body": "* Line 1
 * Line 2",
-  "branchName": "userName1/pullRequest5",
   "canMerge": false,
   "createdAt": 1547853840016,
   "displayNumber": "Pull Request #5",
@@ -1876,6 +1875,7 @@ Object {
   "reviewers": Array [
     "userName2",
   ],
+  "sourceBranch": "userName1/pullRequest5",
   "state": "open",
   "targetBranch": "master",
   "title": "title",
@@ -1988,7 +1988,6 @@ exports[`platform/bitbucket-server/index endpoint with no path getPr() gets a PR
 Object {
   "body": "* Line 1
 * Line 2",
-  "branchName": "userName1/pullRequest5",
   "canMerge": false,
   "createdAt": 1547853840016,
   "displayNumber": "Pull Request #5",
@@ -1998,6 +1997,7 @@ Object {
   "reviewers": Array [
     "userName2",
   ],
+  "sourceBranch": "userName1/pullRequest5",
   "state": "open",
   "targetBranch": "master",
   "title": "title",
@@ -2061,12 +2061,12 @@ Array [
 exports[`platform/bitbucket-server/index endpoint with no path getPr() gets a closed PR 1`] = `
 Object {
   "body": undefined,
-  "branchName": undefined,
   "createdAt": undefined,
   "displayNumber": "Pull Request #undefined",
   "hasReviewers": false,
   "number": undefined,
   "reviewers": Array [],
+  "sourceBranch": undefined,
   "state": "merged",
   "targetBranch": undefined,
   "title": undefined,
@@ -2138,9 +2138,9 @@ Array [
   Object {
     "body": "* Line 1
 * Line 2",
-    "branchName": "userName1/pullRequest5",
     "createdAt": 1547853840016,
     "number": 5,
+    "sourceBranch": "userName1/pullRequest5",
     "state": "open",
     "targetBranch": "master",
     "title": "title",
@@ -5037,9 +5037,9 @@ exports[`platform/bitbucket-server/index endpoint with path findPr() has pr 1`] 
 Object {
   "body": "* Line 1
 * Line 2",
-  "branchName": "userName1/pullRequest5",
   "createdAt": 1547853840016,
   "number": 5,
+  "sourceBranch": "userName1/pullRequest5",
   "state": "open",
   "targetBranch": "master",
   "title": "title",
@@ -5133,7 +5133,6 @@ exports[`platform/bitbucket-server/index endpoint with path getBranchPr() has pr
 Object {
   "body": "* Line 1
 * Line 2",
-  "branchName": "userName1/pullRequest5",
   "canMerge": false,
   "createdAt": 1547853840016,
   "displayNumber": "Pull Request #5",
@@ -5143,6 +5142,7 @@ Object {
   "reviewers": Array [
     "userName2",
   ],
+  "sourceBranch": "userName1/pullRequest5",
   "state": "open",
   "targetBranch": "master",
   "title": "title",
@@ -5571,7 +5571,6 @@ exports[`platform/bitbucket-server/index endpoint with path getPr() canRebase 1`
 Object {
   "body": "* Line 1
 * Line 2",
-  "branchName": "userName1/pullRequest5",
   "canMerge": false,
   "createdAt": 1547853840016,
   "displayNumber": "Pull Request #5",
@@ -5581,6 +5580,7 @@ Object {
   "reviewers": Array [
     "userName2",
   ],
+  "sourceBranch": "userName1/pullRequest5",
   "state": "open",
   "targetBranch": "master",
   "title": "title",
@@ -5592,7 +5592,6 @@ exports[`platform/bitbucket-server/index endpoint with path getPr() canRebase 2`
 Object {
   "body": "* Line 1
 * Line 2",
-  "branchName": "userName1/pullRequest5",
   "canMerge": false,
   "createdAt": 1547853840016,
   "displayNumber": "Pull Request #5",
@@ -5602,6 +5601,7 @@ Object {
   "reviewers": Array [
     "userName2",
   ],
+  "sourceBranch": "userName1/pullRequest5",
   "state": "open",
   "targetBranch": "master",
   "title": "title",
@@ -5613,7 +5613,6 @@ exports[`platform/bitbucket-server/index endpoint with path getPr() canRebase 3`
 Object {
   "body": "* Line 1
 * Line 2",
-  "branchName": "userName1/pullRequest5",
   "canMerge": false,
   "createdAt": 1547853840016,
   "displayNumber": "Pull Request #5",
@@ -5623,6 +5622,7 @@ Object {
   "reviewers": Array [
     "userName2",
   ],
+  "sourceBranch": "userName1/pullRequest5",
   "state": "open",
   "targetBranch": "master",
   "title": "title",
@@ -5735,7 +5735,6 @@ exports[`platform/bitbucket-server/index endpoint with path getPr() gets a PR 1`
 Object {
   "body": "* Line 1
 * Line 2",
-  "branchName": "userName1/pullRequest5",
   "canMerge": false,
   "createdAt": 1547853840016,
   "displayNumber": "Pull Request #5",
@@ -5745,6 +5744,7 @@ Object {
   "reviewers": Array [
     "userName2",
   ],
+  "sourceBranch": "userName1/pullRequest5",
   "state": "open",
   "targetBranch": "master",
   "title": "title",
@@ -5808,12 +5808,12 @@ Array [
 exports[`platform/bitbucket-server/index endpoint with path getPr() gets a closed PR 1`] = `
 Object {
   "body": undefined,
-  "branchName": undefined,
   "createdAt": undefined,
   "displayNumber": "Pull Request #undefined",
   "hasReviewers": false,
   "number": undefined,
   "reviewers": Array [],
+  "sourceBranch": undefined,
   "state": "merged",
   "targetBranch": undefined,
   "title": undefined,
@@ -5885,9 +5885,9 @@ Array [
   Object {
     "body": "* Line 1
 * Line 2",
-    "branchName": "userName1/pullRequest5",
     "createdAt": 1547853840016,
     "number": 5,
+    "sourceBranch": "userName1/pullRequest5",
     "state": "open",
     "targetBranch": "master",
     "title": "title",
