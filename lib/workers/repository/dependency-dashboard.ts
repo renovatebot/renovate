@@ -1,6 +1,7 @@
 import is from '@sindresorhus/is';
+import { nameFromLevel } from 'bunyan';
 import { RenovateConfig } from '../../config';
-import { logger } from '../../logger';
+import { getProblems, logger } from '../../logger';
 import { Pr, platform } from '../../platform';
 import { PrState } from '../../types';
 import { BranchConfig, ProcessBranchResult } from '../common';
@@ -20,6 +21,31 @@ function getListItem(branch: BranchConfig, type: string, pr?: Pr): string {
     return item + '\n';
   }
   return item + ' (' + uniquePackages.join(', ') + ')\n';
+}
+
+function appendRepoProblems(config: RenovateConfig, issueBody: string): string {
+  let newIssueBody = issueBody;
+  const repoProblems = new Set(
+    getProblems()
+      .filter(
+        (problem) =>
+          problem.repository === config.repository && !problem.artifactErrors
+      )
+      .map(
+        (problem) =>
+          `${nameFromLevel[problem.level].toUpperCase()}: ${problem.msg}`
+      )
+  );
+  if (repoProblems.size) {
+    newIssueBody += '## Repository problems\n\n';
+    newIssueBody +=
+      'These problems occurred while renovating this repository.\n\n';
+    for (const repoProblem of repoProblems) {
+      newIssueBody += ` - ${repoProblem}\n`;
+    }
+    newIssueBody += '\n';
+  }
+  return newIssueBody;
 }
 
 export async function ensureMasterIssue(
@@ -60,6 +86,9 @@ export async function ensureMasterIssue(
   if (config.dependencyDashboardHeader?.length) {
     issueBody += `${config.dependencyDashboardHeader}\n\n`;
   }
+
+  issueBody = appendRepoProblems(config, issueBody);
+
   const pendingApprovals = branches.filter(
     (branch) => branch.res === ProcessBranchResult.NeedsApproval
   );

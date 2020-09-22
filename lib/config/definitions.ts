@@ -705,6 +705,15 @@ const options: RenovateOptions[] = [
     env: false,
   },
   {
+    name: 'extractVersion',
+    description:
+      "A regex (re2) to extract a version from a datasource's raw version string",
+    type: 'string',
+    format: 'regex',
+    cli: false,
+    env: false,
+  },
+  {
     name: 'versioning',
     description: 'versioning to use for filtering and comparisons',
     type: 'string',
