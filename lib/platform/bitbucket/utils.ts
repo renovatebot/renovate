@@ -14,6 +14,7 @@ export interface Config {
   prList: Pr[];
   repository: string;
   username: string;
+  userUuid: string;
 }
 
 export interface PagedResult<T = any> {
