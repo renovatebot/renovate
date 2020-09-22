@@ -49,7 +49,6 @@ import {
   Comment,
   GhBranchStatus,
   GhGraphQlPr,
-  GhPr,
   GhRepo,
   GhRestPr,
   LocalRepoConfig,
@@ -483,7 +482,7 @@ async function getClosedPrs(): Promise<PrList> {
         // https://developer.github.com/v4/object/pullrequest/
         pr.displayNumber = `Pull Request #${pr.number}`;
         pr.state = pr.state.toLowerCase();
-        pr.branchName = pr.headRefName;
+        pr.sourceBranch = pr.headRefName;
         delete pr.headRefName;
         pr.comments = pr.comments.nodes.map((comment) => ({
           id: comment.databaseId,
@@ -586,7 +585,7 @@ async function getOpenPrs(): Promise<PrList> {
         // https://developer.github.com/v4/object/pullrequest/
         pr.displayNumber = `Pull Request #${pr.number}`;
         pr.state = PrState.Open;
-        pr.branchName = pr.headRefName;
+        pr.sourceBranch = pr.headRefName;
         delete pr.headRefName;
         pr.targetBranch = pr.baseRefName;
         delete pr.baseRefName;
@@ -663,7 +662,7 @@ export async function getPr(prNo: number): Promise<Pr | null> {
   // Harmonise PR values
   pr.displayNumber = `Pull Request #${pr.number}`;
   if (pr.state === PrState.Open) {
-    pr.branchName = pr.head ? pr.head.ref : undefined;
+    pr.sourceBranch = pr.head ? pr.head.ref : undefined;
     pr.sha = pr.head ? pr.head.sha : undefined;
     if (pr.mergeable === true) {
       pr.canMerge = true;
@@ -693,39 +692,42 @@ export async function getPrList(): Promise<Pr[]> {
   logger.trace('getPrList()');
   if (!config.prList) {
     logger.debug('Retrieving PR list');
-    let res;
+    let prList: GhRestPr[];
     try {
-      res = await githubApi.getJson<{
-        number: number;
-        head: { ref: string; sha: string; repo: { full_name: string } };
-        title: string;
-        state: string;
-        merged_at: string;
-        created_at: string;
-        closed_at: string;
-      }>(
-        `repos/${
-          config.parentRepo || config.repository
-        }/pulls?per_page=100&state=all`,
-        { paginate: true }
-      );
+      prList = (
+        await githubApi.getJson<GhRestPr[]>(
+          `repos/${
+            config.parentRepo || config.repository
+          }/pulls?per_page=100&state=all`,
+          { paginate: true }
+        )
+      ).body;
     } catch (err) /* istanbul ignore next */ {
       logger.debug({ err }, 'getPrList err');
       throw new ExternalHostError(err, PLATFORM_TYPE_GITHUB);
     }
-    config.prList = res.body.map((pr) => ({
-      number: pr.number,
-      branchName: pr.head.ref,
-      sha: pr.head.sha,
-      title: pr.title,
-      state:
-        pr.state === PrState.Closed && pr.merged_at?.length
-          ? /* istanbul ignore next */ PrState.Merged
-          : pr.state,
-      createdAt: pr.created_at,
-      closed_at: pr.closed_at,
-      sourceRepo: pr.head?.repo?.full_name,
-    }));
+    config.prList = prList
+      .filter((pr) => {
+        return pr?.user?.login && config?.renovateUsername
+          ? pr.user.login === config.renovateUsername
+          : true;
+      })
+      .map(
+        (pr) =>
+          ({
+            number: pr.number,
+            sourceBranch: pr.head.ref,
+            sha: pr.head.sha,
+            title: pr.title,
+            state:
+              pr.state === PrState.Closed && pr.merged_at?.length
+                ? /* istanbul ignore next */ PrState.Merged
+                : pr.state,
+            createdAt: pr.created_at,
+            closed_at: pr.closed_at,
+            sourceRepo: pr.head?.repo?.full_name,
+          } as never)
+      );
     logger.debug(`Retrieved ${config.prList.length} Pull Requests`);
   }
   return config.prList;
@@ -740,7 +742,7 @@ export async function findPr({
   const prList = await getPrList();
   const pr = prList.find(
     (p) =>
-      p.branchName === branchName &&
+      p.sourceBranch === branchName &&
       (!prTitle || p.title === prTitle) &&
       matchesState(p.state, state) &&
       (config.forkMode || config.repository === p.sourceRepo) // #5188
@@ -1358,7 +1360,7 @@ export async function ensureCommentRemoval({
 
 // Creates PR and returns PR number
 export async function createPr({
-  branchName,
+  sourceBranch,
   targetBranch,
   prTitle: title,
   prBody: rawBody,
@@ -1368,7 +1370,7 @@ export async function createPr({
   const body = sanitize(rawBody);
   const base = targetBranch;
   // Include the repository owner to handle forkMode and regular mode
-  const head = `${config.repository.split('/')[0]}:${branchName}`;
+  const head = `${config.repository.split('/')[0]}:${sourceBranch}`;
   const options: any = {
     body: {
       title,
@@ -1385,13 +1387,13 @@ export async function createPr({
   }
   logger.debug({ title, head, base, draft: draftPR }, 'Creating PR');
   const pr = (
-    await githubApi.postJson<GhPr>(
+    await githubApi.postJson<GhRestPr>(
       `repos/${config.parentRepo || config.repository}/pulls`,
       options
     )
   ).body;
   logger.debug(
-    { branch: branchName, pr: pr.number, draft: draftPR },
+    { branch: sourceBranch, pr: pr.number, draft: draftPR },
     'PR created'
   );
   // istanbul ignore if
@@ -1399,7 +1401,8 @@ export async function createPr({
     config.prList.push(pr);
   }
   pr.displayNumber = `Pull Request #${pr.number}`;
-  pr.branchName = branchName;
+  pr.sourceBranch = sourceBranch;
+  pr.sourceRepo = pr.head.repo.full_name;
   await addLabels(pr.number, labels);
   return pr;
 }

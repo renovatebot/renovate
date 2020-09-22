@@ -114,7 +114,7 @@
     "@sindresorhus/is": "3.1.2",
     "@yarnpkg/core": "2.2.2",
     "@yarnpkg/parsers": "2.2.0",
-    "aws-sdk": "2.754.0",
+    "aws-sdk": "2.757.0",
     "azure-devops-node-api": "10.1.1",
     "bunyan": "1.8.14",
     "cacache": "15.0.5",
@@ -133,7 +133,7 @@
     "fs-extra": "9.0.1",
     "github-url-from-git": "1.5.0",
     "global-agent": "2.1.12",
-    "got": "11.6.2",
+    "got": "11.7.0",
     "handlebars": "4.7.6",
     "handy-redis": "1.8.3",
     "hasha": "5.2.0",
@@ -207,7 +207,7 @@
     "@types/json5": "0.0.30",
     "@types/later": "1.2.6",
     "@types/linkify-markdown": "1.0.0",
-    "@types/luxon": "1.24.4",
+    "@types/luxon": "1.25.0",
     "@types/markdown-it": "10.0.2",
     "@types/markdown-table": "2.0.0",
     "@types/moment-timezone": "0.5.13",
@@ -255,7 +255,7 @@
     "strip-ansi": "6.0.0",
     "tmp-promise": "3.0.2",
     "type-fest": "0.16.0",
-    "typescript": "4.0.2"
+    "typescript": "4.0.3"
   },
   "resolutions": {
     "jest-silent-reporter/jest-util": ">=25.1.0",

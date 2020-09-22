@@ -18,7 +18,7 @@ export async function getPrHourlyRemaining(
     try {
       const soFarThisHour = prList.filter(
         (pr) =>
-          pr.branchName !== config.onboardingBranch &&
+          pr.sourceBranch !== config.onboardingBranch &&
           moment(pr.createdAt).isAfter(currentHourStart)
       );
       const prsRemaining = config.prHourlyLimit - soFarThisHour.length;

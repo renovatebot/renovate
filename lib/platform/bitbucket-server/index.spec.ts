@@ -1131,7 +1131,7 @@ describe(getName(__filename), () => {
             .reply(200, prMock(url, 'SOME', 'repo'));
 
           const { number: id } = await bitbucket.createPr({
-            branchName: 'branch',
+            sourceBranch: 'branch',
             targetBranch: 'master',
             prTitle: 'title',
             prBody: 'body',
@@ -1158,7 +1158,7 @@ describe(getName(__filename), () => {
             .reply(200, prMock(url, 'SOME', 'repo'));
 
           const { number: id } = await bitbucket.createPr({
-            branchName: 'branch',
+            sourceBranch: 'branch',
             targetBranch: 'master',
             prTitle: 'title',
             prBody: 'body',

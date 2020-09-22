@@ -26,8 +26,19 @@ export interface GhPr extends Pr {
 }
 
 export interface GhRestPr extends GhPr {
-  head: { ref: string; sha: string };
+  head: {
+    ref: string;
+    sha: string;
+    repo: { full_name: string };
+  };
   mergeable_state: string;
+  number: number;
+  title: string;
+  state: string;
+  merged_at: string;
+  created_at: string;
+  closed_at: string;
+  user?: { login?: string };
 }
 
 export interface GhGraphQlPr extends GhPr {
