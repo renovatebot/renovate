@@ -1,3 +1,4 @@
+import URL from 'url';
 import { logger } from '../../logger';
 import { Http } from '../../util/http';
 import { regEx } from '../../util/regex';
@@ -9,7 +10,6 @@ export const id = 'go';
 
 const http = new Http(id);
 const gitlabRegExp = /^(https:\/\/[^/]*gitlab.[^/]*)\/(.*)$/;
-const httpRegExp = /^(https:\/\/[^/]*)\/(.*)$/;
 
 interface DataSource {
   datasource: string;
@@ -79,14 +79,15 @@ async function getDatasource(goModule: string): Promise<DataSource | null> {
       logger.debug({ goModule, goImportURL }, 'Go lookup import url');
 
       // get server base url from import url
-      const httpMatch = httpRegExp.exec(goImportURL);
+      const parsedUrl = URL.parse(goImportURL);
 
+      // split the go module from the URL: host/go/module -> go/module
       const split = goModule.split('/');
       const lookupName = split[1] + '/' + split[2];
 
       return {
         datasource: github.id,
-        registryUrl: httpMatch[1],
+        registryUrl: `${parsedUrl.protocol}//${parsedUrl.host}`,
         lookupName,
       };
     }
