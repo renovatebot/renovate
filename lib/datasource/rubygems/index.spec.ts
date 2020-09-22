@@ -1,10 +1,10 @@
+import * as rubygems from '.';
 import { getPkgReleases } from '..';
 import * as httpMock from '../../../test/httpMock';
 import * as rubyVersioning from '../../versioning/ruby';
+import { resetCache } from './get-rubygems-org';
 import railsInfo from './__fixtures__/rails/info.json';
 import railsVersions from './__fixtures__/rails/versions.json';
-import { resetCache } from './get-rubygems-org';
-import * as rubygems from '.';
 
 const rubygemsOrgVersions = `created_at: 2017-03-27T04:38:13+00:00
 ---
@@ -166,6 +166,17 @@ describe('datasource/rubygems', () => {
         .reply(200, null);
       expect(await getPkgReleases(params)).toBeNull();
       expect(httpMock.getTrace()).toMatchSnapshot();
+    });
+    it('falls back to info when version request fails', async () => {
+      httpMock
+        .scope('https://thirdparty.com/')
+        .get('/api/v1/gems/rails.json')
+        .reply(200, railsInfo)
+        .get('/api/v1/versions/rails.json')
+        .reply(400, {});
+      const res = await getPkgReleases(params);
+      expect(res.releases).toHaveLength(1);
+      expect(res.releases[0].version).toBe(railsInfo.version);
     });
   });
 });
