@@ -992,9 +992,9 @@ exports[`platform/bitbucket getPrList() filters PR list by author 1`] = `
 Array [
   Object {
     "body": undefined,
-    "branchName": "branch-a",
     "createdAt": undefined,
     "number": 1,
+    "sourceBranch": "branch-a",
     "state": "open",
     "targetBranch": "branch-b",
     "title": undefined,
