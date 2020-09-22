@@ -16,6 +16,7 @@ describe('versioning metadata', () => {
         // ignore missing file
       }
       if (readme) {
+        // eslint-disable-next-line jest/no-conditional-expect
         expect(RegExp(/(^|\n)#+ /).exec(readme)).toBeNull();
       }
     }
@@ -32,6 +33,7 @@ describe('versioning metadata', () => {
       expect(versioningObj.urls).toBeDefined();
       expect(versioningObj.supportsRanges).toBeDefined();
       if (versioningObj.supportsRanges === true) {
+        // eslint-disable-next-line jest/no-conditional-expect
         expect(versioningObj.supportedRangeStrategies).toBeDefined();
       }
     }

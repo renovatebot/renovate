@@ -72,7 +72,7 @@ describe('workers/repository/onboarding/branch', () => {
     describe('applies semanticCommit prefix', () => {
       it('to the default commit message', async () => {
         const prefix = 'chore(deps)';
-        config.semanticCommits = true;
+        config.semanticCommits = 'enabled';
         await createOnboardingBranch(config);
         expect(commitFiles).toHaveBeenCalledWith(
           buildExpectedCommitFilesArgument(
@@ -84,7 +84,7 @@ describe('workers/repository/onboarding/branch', () => {
         const prefix = 'chore(deps)';
         const message =
           'I say, we can update when we want to, a commit they will never mind';
-        config.semanticCommits = true;
+        config.semanticCommits = 'enabled';
         config.onboardingCommitMessage = message;
         await createOnboardingBranch(config);
         expect(commitFiles).toHaveBeenCalledWith(

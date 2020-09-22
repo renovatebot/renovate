@@ -44,6 +44,12 @@ Configure this directory if you want to change which directory Renovate uses for
 
 Set to `false` to prevent usage of `--ignore-platform-reqs` in the composer package manager.
 
+## dockerImagePrefix
+
+Override the default renovate sidecar docker containers image prefix from `docker.io/renovate` to a custom value, so renovate will pull images from a custom docker registry.
+
+If this is set to `ghcr.io/renovatebot` the final image for `node` would become `ghcr.io/renovatebot/node` instead of currently used `docker.io/renovate/node`.
+
 ## dockerMapDotfiles
 
 This is used if you want to map "dotfiles" from your host computer home directory to containers that Renovate creates, e.g. for updating lock files. Currently applicable to `.npmrc` only.
@@ -148,6 +154,10 @@ To create the key pair with openssl use the following commands:
 
 - `openssl genrsa -out rsa_priv.pem 4096` for generating the private key
 - `openssl rsa -pubout -in rsa_priv.pem -out rsa_pub.pem` for extracting the public key
+
+## privateKeyPath
+
+Used as an alternative to `privateKey`, if you wish for the key to be read from disk instead.
 
 ## productLinks
 

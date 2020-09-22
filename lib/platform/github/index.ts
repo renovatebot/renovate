@@ -50,6 +50,7 @@ import {
   GhBranchStatus,
   GhGraphQlPr,
   GhPr,
+  GhPulls,
   GhRepo,
   GhRestPr,
   LocalRepoConfig,
@@ -145,6 +146,23 @@ async function getBranchProtection(
   return res.body;
 }
 
+export async function getJsonFile(fileName: string): Promise<any | null> {
+  try {
+    return JSON.parse(
+      Buffer.from(
+        (
+          await githubApi.getJson<{ content: string }>(
+            `repos/${config.repository}/contents/${fileName}`
+          )
+        ).body.content,
+        'base64'
+      ).toString()
+    );
+  } catch (err) /* istanbul ignore next */ {
+    return null;
+  }
+}
+
 let existingRepos;
 
 // Initialize GitHub by getting base branch and SHA
@@ -205,21 +223,8 @@ export async function initRepo({
     }
     // istanbul ignore if
     if (repo.isFork && !includeForks) {
-      try {
-        const renovateConfig = JSON.parse(
-          Buffer.from(
-            (
-              await githubApi.getJson<{ content: string }>(
-                `repos/${config.repository}/contents/${defaultConfigFile}`
-              )
-            ).body.content,
-            'base64'
-          ).toString()
-        );
-        if (!renovateConfig.includeForks) {
-          throw new Error();
-        }
-      } catch (err) {
+      const renovateConfig = await getJsonFile(defaultConfigFile);
+      if (!renovateConfig?.includeForks) {
         throw new Error(REPOSITORY_FORKED);
       }
     }
@@ -237,28 +242,13 @@ export async function initRepo({
       throw new Error(REPOSITORY_ARCHIVED);
     }
     if (optimizeForDisabled) {
-      let renovateConfig;
-      try {
-        renovateConfig = JSON.parse(
-          Buffer.from(
-            (
-              await githubApi.getJson<{ content: string }>(
-                `repos/${config.repository}/contents/${defaultConfigFile}`
-              )
-            ).body.content,
-            'base64'
-          ).toString()
-        );
-      } catch (err) {
-        // Do nothing
-      }
-      if (renovateConfig && renovateConfig.enabled === false) {
+      const renovateConfig = await getJsonFile(defaultConfigFile);
+      if (renovateConfig?.enabled === false) {
         throw new Error(REPOSITORY_DISABLED);
       }
     }
     // Use default branch as PR target unless later overridden.
     config.defaultBranch = repo.defaultBranchRef.name;
-    config.defaultBranchSha = repo.defaultBranchRef.target.oid;
     // Base branch may be configured but defaultBranch is always fixed
     logger.debug(`${repository} default branch = ${config.defaultBranch}`);
     // GitHub allows administrators to block certain types of merge, so we need to check it
@@ -344,14 +334,6 @@ export async function initRepo({
         { repository_fork: config.repository },
         'Found existing fork'
       );
-      // Need to update base branch
-      logger.debug(
-        {
-          defaultBranch: config.defaultBranch,
-          defaultBranchSha: config.defaultBranchSha,
-        },
-        'Setting defaultBranch ref in fork'
-      );
       // This is a lovely "hack" by GitHub that lets us force update our fork's master
       // with the base commit from the parent repository
       try {
@@ -362,7 +344,7 @@ export async function initRepo({
           `repos/${config.repository}/git/refs/heads/${config.defaultBranch}`,
           {
             body: {
-              sha: config.defaultBranchSha,
+              sha: repo.defaultBranchRef.target.oid,
               force: true,
             },
             token: forkToken || opts.token,
@@ -712,39 +694,42 @@ export async function getPrList(): Promise<Pr[]> {
   logger.trace('getPrList()');
   if (!config.prList) {
     logger.debug('Retrieving PR list');
-    let res;
+    let prList: GhPulls;
     try {
-      res = await githubApi.getJson<{
-        number: number;
-        head: { ref: string; sha: string; repo: { full_name: string } };
-        title: string;
-        state: string;
-        merged_at: string;
-        created_at: string;
-        closed_at: string;
-      }>(
-        `repos/${
-          config.parentRepo || config.repository
-        }/pulls?per_page=100&state=all`,
-        { paginate: true }
-      );
+      prList = (
+        await githubApi.getJson<GhPulls>(
+          `repos/${
+            config.parentRepo || config.repository
+          }/pulls?per_page=100&state=all`,
+          { paginate: true }
+        )
+      ).body;
     } catch (err) /* istanbul ignore next */ {
       logger.debug({ err }, 'getPrList err');
       throw new ExternalHostError(err, PLATFORM_TYPE_GITHUB);
     }
-    config.prList = res.body.map((pr) => ({
-      number: pr.number,
-      branchName: pr.head.ref,
-      sha: pr.head.sha,
-      title: pr.title,
-      state:
-        pr.state === PrState.Closed && pr.merged_at?.length
-          ? /* istanbul ignore next */ PrState.Merged
-          : pr.state,
-      createdAt: pr.created_at,
-      closed_at: pr.closed_at,
-      sourceRepo: pr.head?.repo?.full_name,
-    }));
+    config.prList = prList
+      .filter((pr) => {
+        return pr?.user?.login && config?.renovateUsername
+          ? pr.user.login === config.renovateUsername
+          : true;
+      })
+      .map(
+        (pr) =>
+          ({
+            number: pr.number,
+            branchName: pr.head.ref,
+            sha: pr.head.sha,
+            title: pr.title,
+            state:
+              pr.state === PrState.Closed && pr.merged_at?.length
+                ? /* istanbul ignore next */ PrState.Merged
+                : pr.state,
+            createdAt: pr.created_at,
+            closed_at: pr.closed_at,
+            sourceRepo: pr.head?.repo?.full_name,
+          } as never)
+      );
     logger.debug(`Retrieved ${config.prList.length} Pull Requests`);
   }
   return config.prList;
@@ -951,9 +936,10 @@ export async function setBranchStatus({
     return;
   }
   logger.debug({ branch: branchName, context, state }, 'Setting branch status');
+  let url: string;
   try {
     const branchCommit = git.getBranchCommit(branchName);
-    const url = `repos/${config.repository}/statuses/${branchCommit}`;
+    url = `repos/${config.repository}/statuses/${branchCommit}`;
     const renovateToGitHubStateMapping = {
       green: 'success',
       yellow: 'pending',
@@ -973,7 +959,7 @@ export async function setBranchStatus({
     await getStatus(branchName, false);
     await getStatusCheck(branchName, false);
   } catch (err) /* istanbul ignore next */ {
-    logger.debug({ err }, 'Caught error setting branch status - aborting');
+    logger.debug({ err, url }, 'Caught error setting branch status - aborting');
     throw new Error(REPOSITORY_CHANGED);
   }
 }
@@ -1381,7 +1367,6 @@ export async function createPr({
   prTitle: title,
   prBody: rawBody,
   labels,
-  platformOptions = {},
   draftPR = false,
 }: CreatePRConfig): Promise<Pr> {
   const body = sanitize(rawBody);

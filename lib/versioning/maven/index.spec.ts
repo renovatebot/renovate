@@ -235,8 +235,10 @@ describe('versioning/maven/compare', () => {
       const fullRange = parseRange(rangeStr);
       expect(presetValue).toEqual(fullRange);
       if (fullRange === null) {
+        // eslint-disable-next-line jest/no-conditional-expect
         expect(presetValue).toBeNull();
       } else {
+        // eslint-disable-next-line jest/no-conditional-expect
         expect(rangeToStr(fullRange)).toEqual(rangeStr);
       }
     });

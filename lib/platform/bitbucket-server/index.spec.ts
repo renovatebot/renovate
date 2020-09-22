@@ -1135,6 +1135,9 @@ describe(getName(__filename), () => {
             targetBranch: 'master',
             prTitle: 'title',
             prBody: 'body',
+            platformOptions: {
+              bbUseDefaultReviewers: true,
+            },
           });
           expect(id).toBe(5);
           expect(httpMock.getTrace()).toMatchSnapshot();
@@ -1160,6 +1163,9 @@ describe(getName(__filename), () => {
             prTitle: 'title',
             prBody: 'body',
             labels: null,
+            platformOptions: {
+              bbUseDefaultReviewers: true,
+            },
           });
           expect(id).toBe(5);
           expect(httpMock.getTrace()).toMatchSnapshot();

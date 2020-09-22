@@ -312,6 +312,14 @@ const options: RenovateOptions[] = [
     default: false,
   },
   {
+    name: 'dockerImagePrefix',
+    description:
+      'Change this value in order to override the default renovate docker sidecar image name prefix.',
+    type: 'string',
+    default: 'docker.io/renovate',
+    admin: true,
+  },
+  {
     name: 'dockerUser',
     description:
       'Specify UID and GID for docker-based binaries when binarySource=docker is used.',
@@ -464,6 +472,13 @@ const options: RenovateOptions[] = [
     stage: 'repository',
     type: 'string',
     replaceLineReturns: true,
+    admin: true,
+  },
+  {
+    name: 'privateKeyPath',
+    description: 'Path to the Server-side private key',
+    stage: 'repository',
+    type: 'string',
     admin: true,
   },
   {
@@ -697,6 +712,15 @@ const options: RenovateOptions[] = [
     subType: 'string',
     default: null,
     stage: 'branch',
+    cli: false,
+    env: false,
+  },
+  {
+    name: 'extractVersion',
+    description:
+      "A regex (re2) to extract a version from a datasource's raw version string",
+    type: 'string',
+    format: 'regex',
     cli: false,
     env: false,
   },
@@ -1080,8 +1104,9 @@ const options: RenovateOptions[] = [
   {
     name: 'semanticCommits',
     description: 'Enable semantic commit prefixes for commits and PR titles',
-    type: 'boolean',
-    default: null,
+    type: 'string',
+    allowedValues: ['auto', 'enabled', 'disabled'],
+    default: 'auto',
   },
   {
     name: 'semanticCommitType',
