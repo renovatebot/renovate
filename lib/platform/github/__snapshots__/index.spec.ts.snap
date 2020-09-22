@@ -110,9 +110,9 @@ Array [
 
 exports[`platform/github createPr() should create a draftPR if set in the settings 1`] = `
 Object {
-  "branchName": "some-branch",
   "displayNumber": "Pull Request #123",
   "number": 123,
+  "sourceBranch": "some-branch",
 }
 `;
 
@@ -172,9 +172,9 @@ Array [
 
 exports[`platform/github createPr() should create and return a PR object 1`] = `
 Object {
-  "branchName": "some-branch",
   "displayNumber": "Pull Request #123",
   "number": 123,
+  "sourceBranch": "some-branch",
 }
 `;
 
@@ -248,9 +248,9 @@ Array [
 
 exports[`platform/github createPr() should use defaultBranch 1`] = `
 Object {
-  "branchName": "some-branch",
   "displayNumber": "Pull Request #123",
   "number": 123,
+  "sourceBranch": "some-branch",
 }
 `;
 
@@ -1884,7 +1884,6 @@ Object {
   "base": Object {
     "sha": "1234",
   },
-  "branchName": "somebranch",
   "canMerge": false,
   "canMergeReason": "mergeable = undefined",
   "commits": 1,
@@ -1898,6 +1897,7 @@ Object {
   },
   "number": 91,
   "sha": undefined,
+  "sourceBranch": "somebranch",
   "state": "open",
 }
 `;
@@ -2098,7 +2098,6 @@ Object {
   "base": Object {
     "sha": "1234",
   },
-  "branchName": "somebranch",
   "canMerge": false,
   "canMergeReason": "mergeable = undefined",
   "commits": 1,
@@ -2112,6 +2111,7 @@ Object {
   },
   "number": 90,
   "sha": undefined,
+  "sourceBranch": "somebranch",
   "state": "open",
 }
 `;
@@ -2899,7 +2899,6 @@ Array [
 exports[`platform/github getPr(prNo) should return PR from closed graphql result 1`] = `
 Object {
   "body": "dummy body",
-  "branchName": "renovate/delay-4.x",
   "comments": Array [
     Object {
       "body": ":tada: This PR is included in version 13.63.5 :tada:
@@ -2914,6 +2913,7 @@ Your **[semantic-release](https://github.com/semantic-release/semantic-release)*
   ],
   "displayNumber": "Pull Request #2499",
   "number": 2499,
+  "sourceBranch": "renovate/delay-4.x",
   "state": "merged",
   "title": "build(deps): update dependency delay to v4.0.1",
 }
@@ -3089,7 +3089,6 @@ Array [
 
 exports[`platform/github getPr(prNo) should return PR from graphql result 1`] = `
 Object {
-  "branchName": "renovate/jest-monorepo",
   "canMerge": false,
   "canMergeReason": "mergeStateStatus = DIRTY",
   "displayNumber": "Pull Request #2500",
@@ -3097,6 +3096,7 @@ Object {
   "hasReviewers": false,
   "isConflicted": true,
   "number": 2500,
+  "sourceBranch": "renovate/jest-monorepo",
   "state": "open",
   "targetBranch": "master",
   "title": "chore(deps): update dependency jest to v23.6.0",
@@ -3425,7 +3425,6 @@ Object {
   "base": Object {
     "sha": "1234",
   },
-  "branchName": undefined,
   "canMerge": false,
   "canMergeReason": "mergeable = undefined",
   "commits": 1,
@@ -3434,6 +3433,7 @@ Object {
   "mergeable_state": "dirty",
   "number": 1,
   "sha": undefined,
+  "sourceBranch": undefined,
   "state": "open",
 }
 `;
@@ -3622,13 +3622,13 @@ Object {
   "base": Object {
     "sha": "5678",
   },
-  "branchName": undefined,
   "canMerge": true,
   "commits": 1,
   "displayNumber": "Pull Request #1",
   "mergeable": true,
   "number": 1,
   "sha": undefined,
+  "sourceBranch": undefined,
   "state": "open",
 }
 `;

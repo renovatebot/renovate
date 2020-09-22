@@ -642,7 +642,7 @@ describe('platform/bitbucket', () => {
         .post('/2.0/repositories/some/repo/pullrequests')
         .reply(200, { id: 5 });
       const { number } = await bitbucket.createPr({
-        branchName: 'branch',
+        sourceBranch: 'branch',
         targetBranch: 'master',
         prTitle: 'title',
         prBody: 'body',

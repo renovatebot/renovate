@@ -212,7 +212,7 @@ export async function findPr({
   const prList = await getPrList();
   const pr = prList.find(
     (p) =>
-      p.branchName === branchName &&
+      p.sourceBranch === branchName &&
       (!prTitle || p.title === prTitle) &&
       matchesState(p.state, state)
   );
@@ -629,7 +629,7 @@ export function ensureCommentRemoval({
 
 // Creates PR and returns PR number
 export async function createPr({
-  branchName,
+  sourceBranch,
   targetBranch,
   prTitle: title,
   prBody: description,
@@ -659,7 +659,7 @@ export async function createPr({
     description: sanitize(description),
     source: {
       branch: {
-        name: branchName,
+        name: sourceBranch,
       },
     },
     destination: {
