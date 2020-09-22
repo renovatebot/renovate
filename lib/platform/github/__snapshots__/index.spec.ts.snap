@@ -111,8 +111,14 @@ Array [
 exports[`platform/github createPr() should create a draftPR if set in the settings 1`] = `
 Object {
   "displayNumber": "Pull Request #123",
+  "head": Object {
+    "repo": Object {
+      "full_name": "some/repo",
+    },
+  },
   "number": 123,
   "sourceBranch": "some-branch",
+  "sourceRepo": "some/repo",
 }
 `;
 
@@ -173,8 +179,14 @@ Array [
 exports[`platform/github createPr() should create and return a PR object 1`] = `
 Object {
   "displayNumber": "Pull Request #123",
+  "head": Object {
+    "repo": Object {
+      "full_name": "some/repo",
+    },
+  },
   "number": 123,
   "sourceBranch": "some-branch",
+  "sourceRepo": "some/repo",
 }
 `;
 
@@ -249,8 +261,14 @@ Array [
 exports[`platform/github createPr() should use defaultBranch 1`] = `
 Object {
   "displayNumber": "Pull Request #123",
+  "head": Object {
+    "repo": Object {
+      "full_name": "some/repo",
+    },
+  },
   "number": 123,
   "sourceBranch": "some-branch",
+  "sourceRepo": "some/repo",
 }
 `;
 
