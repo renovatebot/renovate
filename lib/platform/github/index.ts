@@ -49,8 +49,6 @@ import {
   Comment,
   GhBranchStatus,
   GhGraphQlPr,
-  GhPr,
-  GhPulls,
   GhRepo,
   GhRestPr,
   LocalRepoConfig,
@@ -694,10 +692,10 @@ export async function getPrList(): Promise<Pr[]> {
   logger.trace('getPrList()');
   if (!config.prList) {
     logger.debug('Retrieving PR list');
-    let prList: GhPulls;
+    let prList: GhRestPr[];
     try {
       prList = (
-        await githubApi.getJson<GhPulls>(
+        await githubApi.getJson<GhRestPr[]>(
           `repos/${
             config.parentRepo || config.repository
           }/pulls?per_page=100&state=all`,
@@ -1389,7 +1387,7 @@ export async function createPr({
   }
   logger.debug({ title, head, base, draft: draftPR }, 'Creating PR');
   const pr = (
-    await githubApi.postJson<GhPr>(
+    await githubApi.postJson<GhRestPr>(
       `repos/${config.parentRepo || config.repository}/pulls`,
       options
     )
@@ -1404,6 +1402,7 @@ export async function createPr({
   }
   pr.displayNumber = `Pull Request #${pr.number}`;
   pr.sourceBranch = sourceBranch;
+  pr.sourceRepo = pr.head.repo.full_name;
   await addLabels(pr.number, labels);
   return pr;
 }
