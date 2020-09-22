@@ -9,6 +9,7 @@ const http = new Http(id);
 
 const INFO_PATH = '/api/v1/gems';
 const VERSIONS_PATH = '/api/v1/versions';
+const DEPENDENCIES_PATH = 'api/v1/dependencies.json';
 
 const getHeaders = (): OutgoingHttpHeaders => {
   return { hostType: id };
@@ -25,6 +26,24 @@ export async function fetch(
 
   logger.trace({ dependency }, `RubyGems lookup request: ${String(url)}`);
   const response = (await http.getJson(url, { headers })) || {
+    body: undefined,
+  };
+
+  return response.body;
+}
+
+export async function fetch_deps(
+  dependency: string,
+  registry: string,
+  path: string
+): Promise<any> {
+  const headers = getHeaders();
+
+  const name = `${path}?gems=${dependency}`;
+  const baseUrl = ensureTrailingSlash(registry);
+
+  logger.trace({ dependency }, `RubyGems lookup request: ${baseUrl} ${name}`);
+  const response = (await http.getJson(name, { baseUrl, headers })) || {
     body: undefined,
   };
 
@@ -50,23 +69,41 @@ export async function getDependency(
     return null;
   }
 
-  const versions = (await fetch(dependency, registry, VERSIONS_PATH)) || [];
+  const testendpoint = (await http.get(VERSIONS_PATH));
+  let releases;
 
-  const releases = versions.map(
-    ({
-      number: version,
-      platform: rubyPlatform,
-      created_at: releaseTimestamp,
-      rubygems_version: rubygemsVersion,
-      ruby_version: rubyVersion,
-    }) => ({
-      version,
-      rubyPlatform,
-      releaseTimestamp,
-      rubygemsVersion,
-      rubyVersion,
-    })
-  );
+  if (testendpoint.statusCode === 404) {
+    logger.debug({ dependency }, '/api/v1/versions does not exist. Using /api/v1/dependencies.json');
+    const versions = (await fetch_deps(dependency, registry, DEPENDENCIES_PATH)) || [];
+
+    releases = versions.map(
+      ({
+        number: version,
+        platform: rubyPlatform,
+      }) => ({
+        version,
+        rubyPlatform,
+      })
+    );
+  } else {
+    const versions = (await fetch(dependency, registry, VERSIONS_PATH)) || [];
+
+    releases = versions.map(
+      ({
+        number: version,
+        platform: rubyPlatform,
+        created_at: releaseTimestamp,
+        rubygems_version: rubygemsVersion,
+        ruby_version: rubyVersion,
+      }) => ({
+        version,
+        rubyPlatform,
+        releaseTimestamp,
+        rubygemsVersion,
+        rubyVersion,
+      })
+    );
+  }
 
   return {
     releases,
