@@ -206,7 +206,7 @@
     "@types/json5": "0.0.30",
     "@types/later": "1.2.6",
     "@types/linkify-markdown": "1.0.0",
-    "@types/luxon": "1.24.4",
+    "@types/luxon": "1.25.0",
     "@types/markdown-it": "10.0.2",
     "@types/markdown-table": "2.0.0",
     "@types/moment-timezone": "0.5.13",
