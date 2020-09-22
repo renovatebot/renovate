@@ -3,7 +3,6 @@ import { RenovateConfig } from '../../config';
 import { logger, setMeta } from '../../logger';
 import { deleteLocalFile } from '../../util/fs';
 import { addSplit, getSplits, splitInit } from '../../util/split';
-import { setBranchCache } from './cache';
 import { ensureMasterIssue } from './dependency-dashboard';
 import handleError from './error';
 import { finaliseRepo } from './finalise';
@@ -42,7 +41,6 @@ export async function renovateRepository(
     await ensureOnboardingPr(config, packageFiles, branches);
     const res = await updateRepo(config, branches);
     addSplit('update');
-    await setBranchCache(branches);
     if (res !== 'automerged') {
       await ensureMasterIssue(config, branches);
     }
