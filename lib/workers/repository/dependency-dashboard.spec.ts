@@ -1,6 +1,12 @@
 import fs from 'fs';
+import { ERROR, WARN } from 'bunyan';
 import { mock } from 'jest-mock-extended';
-import { RenovateConfig, getConfig, platform } from '../../../test/util';
+import {
+  RenovateConfig,
+  getConfig,
+  logger,
+  platform,
+} from '../../../test/util';
 import { PLATFORM_TYPE_GITHUB } from '../../constants/platforms';
 import { Platform, Pr } from '../../platform';
 import { PrState } from '../../types';
@@ -15,7 +21,7 @@ type PrUpgrade = BranchUpgradeConfig;
 
 let config: RenovateConfig;
 beforeEach(() => {
-  jest.resetAllMocks();
+  jest.clearAllMocks();
   config = getConfig();
   config.platform = PLATFORM_TYPE_GITHUB;
   config.errors = [];
@@ -31,7 +37,7 @@ async function dryRun(
   getBranchPrCalls = 0,
   findPrCalls = 0
 ) {
-  jest.resetAllMocks();
+  jest.clearAllMocks();
   config.dryRun = true;
   await dependencyDashboard.ensureMasterIssue(config, branches);
   expect(platform.ensureIssueClosing).toHaveBeenCalledTimes(
@@ -422,6 +428,55 @@ describe('workers/repository/master-issue', () => {
 
       // same with dry run
       await dryRun(branches, platform);
+    });
+
+    it('contains logged problems', async () => {
+      const branches: BranchConfig[] = [
+        {
+          ...mock<BranchConfig>(),
+          prTitle: 'pr1',
+          upgrades: [
+            { ...mock<PrUpgrade>(), depName: 'dep1', repository: 'repo1' },
+          ],
+          res: ProcessBranchResult.Pending,
+          branchName: 'branchName1',
+        },
+      ];
+      logger.getProblems.mockReturnValueOnce([
+        {
+          level: ERROR,
+          msg: 'everything is broken',
+        },
+        {
+          level: WARN,
+          msg: 'just a bit',
+        },
+        {
+          level: ERROR,
+          msg: 'i am a duplicated problem',
+        },
+        {
+          level: ERROR,
+          msg: 'i am a duplicated problem',
+        },
+        {
+          level: ERROR,
+          msg: 'i am a non-duplicated problem',
+        },
+        {
+          level: WARN,
+          msg: 'i am a non-duplicated problem',
+        },
+        {
+          level: WARN,
+          msg: 'i am an artifact error',
+          artifactErrors: {},
+        },
+      ]);
+      config.dependencyDashboard = true;
+      await dependencyDashboard.ensureMasterIssue(config, branches);
+      expect(platform.ensureIssue).toHaveBeenCalledTimes(1);
+      expect(platform.ensureIssue.mock.calls[0][0].body).toMatchSnapshot();
     });
   });
 });
