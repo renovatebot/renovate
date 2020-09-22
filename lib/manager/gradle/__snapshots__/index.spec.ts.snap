@@ -175,7 +175,7 @@ Array [
       },
     ],
     "packageFile": "build.gradle",
-    "packageJsonVersion": "1.2.3",
+    "packageFileVersion": "1.2.3",
   },
 ]
 `;

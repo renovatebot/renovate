@@ -471,7 +471,7 @@ describe(getName(__filename), () => {
         name: 'openjpa',
         version: '3.1.1',
         newValue: '3.1.2',
-        packageJsonVersion: '0.0.1',
+        packageFileVersion: '0.0.1',
         bumpVersion: 'patch',
       };
 
@@ -481,7 +481,6 @@ describe(getName(__filename), () => {
       });
 
       expect(buildGradleContent).toContain("version = '0.0.1'");
-
       expect(buildGradleContentUpdated).toContain("version = '0.0.2'");
     });
 
@@ -498,7 +497,7 @@ describe(getName(__filename), () => {
         name: 'openjpa',
         version: '3.1.1',
         newValue: '3.1.2',
-        packageJsonVersion: '0.0.1',
+        packageFileVersion: '0.0.1',
       };
 
       const buildGradleContentUpdated = manager.updateDependency({
@@ -524,7 +523,7 @@ describe(getName(__filename), () => {
         name: 'openjpa',
         version: '3.1.1',
         newValue: '3.1.2',
-        packageJsonVersion: '0.0.1',
+        packageFileVersion: '0.0.1',
         bumpVersion: 'invalid-value',
       };
 
@@ -556,7 +555,7 @@ describe(getName(__filename), () => {
         name: 'openjpa',
         version: '3.1.1',
         newValue: '3.1.2',
-        packageJsonVersion: '0.0.1-SNAPSHOT',
+        packageFileVersion: '0.0.1-SNAPSHOT',
         bumpVersion: 'invalid-value',
       };
 
@@ -590,7 +589,7 @@ describe(getName(__filename), () => {
         name: 'openjpa',
         version: '3.1.1',
         newValue: '3.1.2',
-        packageJsonVersion: '0.0.1',
+        packageFileVersion: '0.0.1',
         bumpVersion: 'patch',
       };
 

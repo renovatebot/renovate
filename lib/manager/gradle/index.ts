@@ -151,7 +151,7 @@ export async function extractAllPackageFiles(
       };
 
       if (gradleProjectVersion != null) {
-        gradleFileObject.packageJsonVersion = gradleProjectVersion;
+        gradleFileObject.packageFileVersion = gradleProjectVersion;
       }
 
       gradleFiles.push(gradleFileObject);
@@ -233,7 +233,7 @@ export function updateDependency({
   return bumpPackageVersion(
     content,
     // This is a holdover from the npm bumpVersion implementation. This should either stay the same with a slightly weird name or be renamed to be more generic.
-    upgrade.packageJsonVersion,
+    upgrade.packageFileVersion,
     upgrade.bumpVersion
   );
 }
