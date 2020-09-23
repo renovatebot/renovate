@@ -8,7 +8,7 @@ import { PackageDependency, PackageFile } from '../common';
 interface Image {
   name: string;
   newTag: string;
-  newName: string;
+  newName?: string;
 }
 
 interface Kustomize {
