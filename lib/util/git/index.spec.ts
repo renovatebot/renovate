@@ -136,6 +136,9 @@ describe('platform/git', () => {
     });
   });
   describe('isBranchModified()', () => {
+    it('should return false when branch is not found', async () => {
+      expect(await git.isBranchModified('renovate/not_found')).toBe(false);
+    });
     it('should return true when author matches', async () => {
       expect(await git.isBranchModified('renovate/future_branch')).toBe(false);
       expect(await git.isBranchModified('renovate/future_branch')).toBe(false);

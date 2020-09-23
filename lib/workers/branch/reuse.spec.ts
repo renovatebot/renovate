@@ -9,7 +9,7 @@ jest.mock('../../util/git');
 describe('workers/branch/parent', () => {
   describe('getParentBranch(config)', () => {
     const pr: Pr = {
-      branchName: 'master',
+      sourceBranch: 'master',
       state: PrState.Open,
       title: 'any',
     };

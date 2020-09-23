@@ -7,6 +7,7 @@ jest.mock('../../util/host-rules');
 const hostRules: any = _hostRules;
 
 const githubApiHost = 'https://api.github.com';
+const githubEnterpriseApiHost = 'https://git.enterprise.com';
 
 describe('datasource/github-tags', () => {
   beforeEach(() => {
@@ -100,6 +101,20 @@ describe('datasource/github-tags', () => {
       const res = await getPkgReleases({ datasource: github.id, depName });
       expect(res).toMatchSnapshot();
       expect(res.releases).toHaveLength(2);
+      expect(httpMock.getTrace()).toMatchSnapshot();
+    });
+
+    it('supports ghe', async () => {
+      const body = [{ name: 'v1.0.0' }, { name: 'v1.1.0' }];
+      httpMock
+        .scope(githubEnterpriseApiHost)
+        .get(`/api/v3/repos/${depName}/tags?per_page=100`)
+        .reply(200, body);
+      const res = await github.getReleases({
+        registryUrl: 'https://git.enterprise.com',
+        lookupName: depName,
+      });
+      expect(res).toMatchSnapshot();
       expect(httpMock.getTrace()).toMatchSnapshot();
     });
   });

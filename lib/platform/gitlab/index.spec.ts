@@ -927,7 +927,7 @@ describe('platform/gitlab', () => {
           iid: 12345,
         });
       const pr = await gitlab.createPr({
-        branchName: 'some-branch',
+        sourceBranch: 'some-branch',
         targetBranch: 'master',
         prTitle: 'some-title',
         prBody: 'the-body',
@@ -945,7 +945,7 @@ describe('platform/gitlab', () => {
           iid: 12345,
         });
       const pr = await gitlab.createPr({
-        branchName: 'some-branch',
+        sourceBranch: 'some-branch',
         targetBranch: 'master',
         prTitle: 'some-title',
         prBody: 'the-body',
@@ -977,7 +977,7 @@ describe('platform/gitlab', () => {
         .put('/api/v4/projects/undefined/merge_requests/12345/merge')
         .reply(200);
       await gitlab.createPr({
-        branchName: 'some-branch',
+        sourceBranch: 'some-branch',
         targetBranch: 'master',
         prTitle: 'some-title',
         prBody: 'the-body',

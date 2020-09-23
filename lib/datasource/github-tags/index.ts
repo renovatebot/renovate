@@ -1,3 +1,4 @@
+import URL from 'url';
 import { logger } from '../../logger';
 import * as packageCache from '../../util/cache/package';
 import { GithubHttp } from '../../util/http/github';
@@ -119,6 +120,7 @@ export async function getDigest(
  *  - Return a dependency object containing sourceUrl string and releases array
  */
 export async function getReleases({
+  registryUrl: depHost,
   lookupName: repo,
 }: GetReleasesConfig): Promise<ReleaseResult | null> {
   const cachedResult = await packageCache.get<ReleaseResult>(
@@ -129,8 +131,15 @@ export async function getReleases({
   if (cachedResult) {
     return cachedResult;
   }
+
+  // default to GitHub.com if no GHE host is specified.
+  const sourceUrlBase = depHost ?? `https://github.com/`;
+  const apiBaseUrl = depHost
+    ? URL.resolve(depHost, 'api/v3/')
+    : `https://api.github.com/`;
+
   // tag
-  const url = `https://api.github.com/repos/${repo}/tags?per_page=100`;
+  const url = URL.resolve(apiBaseUrl, `repos/${repo}/tags?per_page=100`);
   type GitHubTag = {
     name: string;
   }[];
@@ -141,7 +150,7 @@ export async function getReleases({
     })
   ).body.map((o) => o.name);
   const dependency: ReleaseResult = {
-    sourceUrl: 'https://github.com/' + repo,
+    sourceUrl: URL.resolve(sourceUrlBase, repo),
     releases: null,
   };
   dependency.releases = versions.map((version) => ({
