@@ -47,7 +47,7 @@ async function generateBranchCache(branch: BranchConfig): Promise<BranchCache> {
       }
     }
     const automerge = !!branch.automerge;
-    const isModified = await isBranchModified(branchName);
+    const isModified = sha ? await isBranchModified(branchName) : false;
     const upgrades: BranchUpgradeCache[] = branch.upgrades
       ? branch.upgrades.map(generateBranchUpgradeCache)
       : [];

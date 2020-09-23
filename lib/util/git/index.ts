@@ -401,6 +401,13 @@ export async function isBranchModified(branchName: string): Promise<boolean> {
   if (config.branchIsModified[branchName] !== undefined) {
     return config.branchIsModified[branchName];
   }
+  if (!branchExists(branchName)) {
+    logger.debug(
+      { branchName },
+      'Branch does not exist - cannot check isModified'
+    );
+    return false;
+  }
   // Retrieve the author of the most recent commit
   const lastAuthor = (
     await git.raw([
