@@ -114,7 +114,7 @@
     "@sindresorhus/is": "3.1.2",
     "@yarnpkg/core": "2.2.2",
     "@yarnpkg/parsers": "2.2.0",
-    "aws-sdk": "2.757.0",
+    "aws-sdk": "2.758.0",
     "azure-devops-node-api": "10.1.1",
     "bunyan": "1.8.14",
     "cacache": "15.0.5",
