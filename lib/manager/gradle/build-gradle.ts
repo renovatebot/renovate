@@ -1,5 +1,4 @@
 import { regEx } from '../../util/regex';
-import { api as gradleVersioning } from '../../versioning/gradle';
 import { BuildDependency } from './gradle-updates-report';
 
 /**
@@ -228,7 +227,7 @@ export function collectVersionVariables(
         dependency
       );
       const currentValue = dependencyLiteralRegex.exec(buildGradleContent)?.[1];
-      if (gradleVersioning.isValid(currentValue)) {
+      if (currentValue) {
         dep.currentValue = currentValue;
       }
     }
