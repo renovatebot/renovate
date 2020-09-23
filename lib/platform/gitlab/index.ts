@@ -1,6 +1,7 @@
 import URL, { URLSearchParams } from 'url';
 import is from '@sindresorhus/is';
 import delay from 'delay';
+import semver from 'semver';
 import {
   PLATFORM_AUTHENTICATION_ERROR,
   REPOSITORY_ACCESS_FORBIDDEN,
@@ -56,7 +57,11 @@ const defaults = {
   endpoint: 'https://gitlab.com/api/v4/',
 };
 
+const DRAFT_PREFIX = 'Draft: ';
+const DRAFT_PREFIX_DEPRECATED = 'WIP: ';
+
 let authorId: number;
+let draftPrefix: string;
 
 export async function initPlatform({
   endpoint,
@@ -72,6 +77,7 @@ export async function initPlatform({
     logger.debug('Using default GitLab endpoint: ' + defaults.endpoint);
   }
   let gitAuthor: string;
+  let gitlabVersion: string;
   try {
     const user = (
       await gitlabApi.getJson<{ email: string; name: string; id: number }>(
@@ -81,13 +87,21 @@ export async function initPlatform({
     ).body;
     gitAuthor = `${user.name} <${user.email}>`;
     authorId = user.id;
+    // version is 'x.y.z-edition', so not strictly semver; need to strip edition
+    gitlabVersion = (
+      await gitlabApi.getJson<{ version: string }>('version', { token })
+    ).body.version.split('-')[0];
+    logger.debug('GitLab version is: ' + gitlabVersion);
   } catch (err) {
     logger.debug(
       { err },
-      'Error authenticating with GitLab. Check that your token includes "user" permissions'
+      'Error authenticating with GitLab. Check that your token includes "api" permissions'
     );
     throw new Error('Init: Authentication failure');
   }
+  draftPrefix = semver.lt(gitlabVersion, '13.2.0')
+    ? DRAFT_PREFIX_DEPRECATED
+    : DRAFT_PREFIX;
   const platformConfig: PlatformResult = {
     endpoint: defaults.endpoint,
     gitAuthor,
@@ -337,11 +351,16 @@ export async function getBranchStatus(
 export async function createPr({
   sourceBranch,
   targetBranch,
-  prTitle: title,
+  prTitle,
   prBody: rawDescription,
+  draftPR,
   labels,
   platformOptions,
 }: CreatePRConfig): Promise<Pr> {
+  let title = prTitle;
+  if (draftPR) {
+    title = draftPrefix + title;
+  }
   const description = sanitize(rawDescription);
   logger.debug(`Creating Merge Request: ${title}`);
   const res = await gitlabApi.postJson<Pr & { iid: number }>(
@@ -443,24 +462,32 @@ export async function getPr(iid: number): Promise<Pr> {
 
 export async function updatePr({
   number: iid,
-  prTitle: title,
+  prTitle,
   prBody: description,
   state,
 }: UpdatePrConfig): Promise<void> {
+  const url = `projects/${config.repository}/merge_requests/${iid}`;
+  const currentTitle = (await gitlabApi.getJson<{ title: string }>(url)).body
+    .title;
+  let title = prTitle;
+  // detect either draft prefix in case GitLab was recently upgraded
+  if (
+    currentTitle.startsWith(DRAFT_PREFIX) ||
+    currentTitle.startsWith(DRAFT_PREFIX_DEPRECATED)
+  ) {
+    title = draftPrefix + title;
+  }
   const newState = {
     [PrState.Closed]: 'close',
     [PrState.Open]: 'reopen',
   }[state];
-  await gitlabApi.putJson(
-    `projects/${config.repository}/merge_requests/${iid}`,
-    {
-      body: {
-        title,
-        description: sanitize(description),
-        ...(newState && { state_event: newState }),
-      },
-    }
-  );
+  await gitlabApi.putJson(url, {
+    body: {
+      title,
+      description: sanitize(description),
+      ...(newState && { state_event: newState }),
+    },
+  });
 }
 
 export async function mergePr(iid: number): Promise<boolean> {

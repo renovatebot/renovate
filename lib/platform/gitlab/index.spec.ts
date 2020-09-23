@@ -60,6 +60,9 @@ describe('platform/gitlab', () => {
         email: 'a@b.com',
         name: 'Renovate Bot',
       });
+      httpMock.scope(gitlabApiHost).get('/api/v4/version').reply(200, {
+        version: '13.3.6-ee',
+      });
       expect(
         await gitlab.initPlatform({
           token: 'some-token',
@@ -69,13 +72,17 @@ describe('platform/gitlab', () => {
       expect(httpMock.getTrace()).toMatchSnapshot();
     });
     it(`should accept custom endpoint`, async () => {
-      httpMock.scope('https://gitlab.renovatebot.com').get('/user').reply(200, {
+      const endpoint = 'https://gitlab.renovatebot.com';
+      httpMock.scope(endpoint).get('/user').reply(200, {
         email: 'a@b.com',
         name: 'Renovate Bot',
       });
+      httpMock.scope(endpoint).get('/version').reply(200, {
+        version: '13.3.6-ee',
+      });
       expect(
         await gitlab.initPlatform({
-          endpoint: 'https://gitlab.renovatebot.com',
+          endpoint,
           token: 'some-token',
         })
       ).toMatchSnapshot();
@@ -882,8 +889,24 @@ describe('platform/gitlab', () => {
       expect(httpMock.getTrace()).toMatchSnapshot();
     });
   });
+
+  async function initPlatform(gitlabVersion: string) {
+    httpMock.scope(gitlabApiHost).get('/api/v4/user').reply(200, {
+      email: 'a@b.com',
+      name: 'Renovate Bot',
+    });
+    httpMock.scope(gitlabApiHost).get('/api/v4/version').reply(200, {
+      version: gitlabVersion,
+    });
+    await gitlab.initPlatform({
+      token: 'some-token',
+      endpoint: undefined,
+    });
+  }
+
   describe('createPr(branchName, title, body)', () => {
     it('returns the PR', async () => {
+      await initPlatform('13.3.6-ee');
       httpMock
         .scope(gitlabApiHost)
         .post('/api/v4/projects/undefined/merge_requests')
@@ -902,6 +925,7 @@ describe('platform/gitlab', () => {
       expect(httpMock.getTrace()).toMatchSnapshot();
     });
     it('uses default branch', async () => {
+      await initPlatform('13.3.6-ee');
       httpMock
         .scope(gitlabApiHost)
         .post('/api/v4/projects/undefined/merge_requests')
@@ -919,7 +943,46 @@ describe('platform/gitlab', () => {
       expect(pr).toMatchSnapshot();
       expect(httpMock.getTrace()).toMatchSnapshot();
     });
+    it('supports draftPR on < 13.2', async () => {
+      await initPlatform('13.1.0-ee');
+      httpMock
+        .scope(gitlabApiHost)
+        .post('/api/v4/projects/undefined/merge_requests')
+        .reply(200, {
+          id: 1,
+          iid: 12345,
+        });
+      const pr = await gitlab.createPr({
+        sourceBranch: 'some-branch',
+        targetBranch: 'master',
+        prTitle: 'some-title',
+        prBody: 'the-body',
+        draftPR: true,
+      });
+      expect(pr).toMatchSnapshot();
+      expect(httpMock.getTrace()).toMatchSnapshot();
+    });
+    it('supports draftPR on >= 13.2', async () => {
+      await initPlatform('13.2.0-ee');
+      httpMock
+        .scope(gitlabApiHost)
+        .post('/api/v4/projects/undefined/merge_requests')
+        .reply(200, {
+          id: 1,
+          iid: 12345,
+        });
+      const pr = await gitlab.createPr({
+        sourceBranch: 'some-branch',
+        targetBranch: 'master',
+        prTitle: 'some-title',
+        prBody: 'the-body',
+        draftPR: true,
+      });
+      expect(pr).toMatchSnapshot();
+      expect(httpMock.getTrace()).toMatchSnapshot();
+    });
     it('auto-accepts the MR when requested', async () => {
+      await initPlatform('13.3.6-ee');
       httpMock
         .scope(gitlabApiHost)
         .post('/api/v4/projects/undefined/merge_requests')
@@ -1035,18 +1098,37 @@ describe('platform/gitlab', () => {
   describe('updatePr(prNo, title, body)', () => {
     jest.resetAllMocks();
     it('updates the PR', async () => {
+      await initPlatform('13.3.6-ee');
+      const url = '/api/v4/projects/undefined/merge_requests/1';
+      httpMock.scope(gitlabApiHost).get(url).reply(200, { title: 'foo' });
+      httpMock.scope(gitlabApiHost).put(url).reply(200);
+      await gitlab.updatePr({ number: 1, prTitle: 'title', prBody: 'body' });
+      expect(httpMock.getTrace()).toMatchSnapshot();
+    });
+    it('retains draft status when draft uses current prefix', async () => {
+      await initPlatform('13.3.6-ee');
+      const url = '/api/v4/projects/undefined/merge_requests/1';
       httpMock
         .scope(gitlabApiHost)
-        .put('/api/v4/projects/undefined/merge_requests/1')
-        .reply(200);
+        .get(url)
+        .reply(200, { title: 'Draft: foo' });
+      httpMock.scope(gitlabApiHost).put(url).reply(200);
+      await gitlab.updatePr({ number: 1, prTitle: 'title', prBody: 'body' });
+      expect(httpMock.getTrace()).toMatchSnapshot();
+    });
+    it('retains draft status when draft uses deprecated prefix', async () => {
+      await initPlatform('13.3.6-ee');
+      const url = '/api/v4/projects/undefined/merge_requests/1';
+      httpMock.scope(gitlabApiHost).get(url).reply(200, { title: 'WIP: foo' });
+      httpMock.scope(gitlabApiHost).put(url).reply(200);
       await gitlab.updatePr({ number: 1, prTitle: 'title', prBody: 'body' });
       expect(httpMock.getTrace()).toMatchSnapshot();
     });
     it('closes the PR', async () => {
-      httpMock
-        .scope(gitlabApiHost)
-        .put('/api/v4/projects/undefined/merge_requests/1')
-        .reply(200);
+      await initPlatform('13.3.6-ee');
+      const url = '/api/v4/projects/undefined/merge_requests/1';
+      httpMock.scope(gitlabApiHost).get(url).reply(200, { title: 'foo' });
+      httpMock.scope(gitlabApiHost).put(url).reply(200);
       await gitlab.updatePr({
         number: 1,
         prTitle: 'title',
