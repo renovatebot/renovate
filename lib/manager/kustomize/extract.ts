@@ -67,7 +67,6 @@ export function extractImage(image: Image): PackageDependency | null {
     return {
       datasource: datasourceDocker.id,
       depName: image.newName ?? image.name,
-      lookupName: image.newName ?? image.name,
       currentValue: image.newTag,
     };
   }

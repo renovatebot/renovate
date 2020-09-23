@@ -130,10 +130,9 @@ describe('manager/kustomize/extract', () => {
         currentValue: 'v1.0.0',
         datasource: datasourceDocker.id,
         depName: 'node',
-        lookupName: 'node',
       };
       const pkg = extractImage({
-        name: sample.lookupName,
+        name: sample.depName,
         newTag: sample.currentValue,
       });
       expect(pkg).toEqual(sample);
@@ -143,10 +142,9 @@ describe('manager/kustomize/extract', () => {
         currentValue: 'v1.0.0',
         datasource: datasourceDocker.id,
         depName: 'test/node',
-        lookupName: 'test/node',
       };
       const pkg = extractImage({
-        name: sample.lookupName,
+        name: sample.depName,
         newTag: sample.currentValue,
       });
       expect(pkg).toEqual(sample);
@@ -156,10 +154,9 @@ describe('manager/kustomize/extract', () => {
         currentValue: 'v1.0.0',
         datasource: datasourceDocker.id,
         depName: 'quay.io/repo/image',
-        lookupName: 'quay.io/repo/image',
       };
       const pkg = extractImage({
-        name: sample.lookupName,
+        name: sample.depName,
         newTag: sample.currentValue,
       });
       expect(pkg).toEqual(sample);
@@ -169,10 +166,9 @@ describe('manager/kustomize/extract', () => {
         currentValue: 'v1.0.0',
         datasource: datasourceDocker.id,
         depName: 'localhost:5000/repo/image',
-        lookupName: 'localhost:5000/repo/image',
       };
       const pkg = extractImage({
-        name: sample.lookupName,
+        name: sample.depName,
         newTag: sample.currentValue,
       });
       expect(pkg).toEqual(sample);
@@ -182,10 +178,9 @@ describe('manager/kustomize/extract', () => {
         currentValue: 'v1.0.0',
         datasource: datasourceDocker.id,
         depName: 'localhost:5000/repo/image/service',
-        lookupName: 'localhost:5000/repo/image/service',
       };
       const pkg = extractImage({
-        name: sample.lookupName,
+        name: sample.depName,
         newTag: sample.currentValue,
       });
       expect(pkg).toEqual(sample);
