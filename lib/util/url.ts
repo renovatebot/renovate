@@ -1,12 +1,12 @@
-import { parse, resolve } from 'url';
-import urljoin from 'url-join';
+import { parse } from 'url';
+import urlJoin from 'url-join';
 
 export function ensureTrailingSlash(url: string): string {
   return url.replace(/\/?$/, '/');
 }
 
-export function resolveBaseUrl(baseUrl: string, urlOrPath: string): string {
-  return parse(urlOrPath).host
-    ? resolve(baseUrl, urlOrPath)
-    : urljoin(baseUrl, urlOrPath);
+export function resolveBaseUrl(baseUrl: string, pathOrUrl: string): string {
+  const { host, path } = parse(pathOrUrl);
+  const result = host ? path : urlJoin(baseUrl, path || '');
+  return result.replace(/\/+$/, '');
 }
