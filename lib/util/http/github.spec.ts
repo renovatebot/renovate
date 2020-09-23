@@ -40,19 +40,6 @@ describe(getName(__filename), () => {
         'some-accept, application/vnd.github.machine-man-preview+json'
       );
     });
-    it('strips v3 for graphql', async () => {
-      httpMock
-        .scope('https://ghe.mycompany.com')
-        .post('/graphql')
-        .reply(200, {});
-      setBaseUrl('https://ghe.mycompany.com/api/v3/');
-      await githubApi.postJson('/graphql', {
-        body: {},
-      });
-      const [req] = httpMock.getTrace();
-      expect(req).toBeDefined();
-      expect(req.url).toEqual('https://ghe.mycompany.com/graphql');
-    });
     it('paginates', async () => {
       const url = '/some-url';
       httpMock
@@ -297,6 +284,18 @@ describe(getName(__filename), () => {
       const result = await githubApi.queryRepo(query);
       expect(httpMock.getTrace()).toHaveLength(1);
       expect(result).toStrictEqual(repository);
+    });
+    it('strips path from baseUrl', async () => {
+      setBaseUrl('https://ghe.mycompany.com/api/v3/');
+      const repository = { foo: 'foo', bar: 'bar' };
+      httpMock
+        .scope('https://ghe.mycompany.com')
+        .post('/graphql')
+        .reply(200, { data: { repository } });
+      await githubApi.queryRepo(query);
+      const [req] = httpMock.getTrace();
+      expect(req).toBeDefined();
+      expect(req.url).toEqual('https://ghe.mycompany.com/graphql');
     });
     it('queryRepoField', async () => {
       httpMock

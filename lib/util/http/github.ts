@@ -159,14 +159,6 @@ export class GithubHttp extends Http<GithubHttpOptions, GithubHttpOptions> {
       throwHttpErrors: true,
     };
 
-    const method = opts.method || 'get';
-
-    if (method.toLowerCase() === 'post' && url === '/graphql') {
-      // GitHub Enterprise uses unversioned graphql path
-      // https://x.com/api/v3/ + /graphql -> https://x.com/graphql
-      opts.baseUrl = URL.resolve(opts.baseUrl, '/');
-    }
-
     const accept = constructAcceptString(opts.headers?.accept);
 
     opts.headers = {
@@ -230,6 +222,7 @@ export class GithubHttp extends Http<GithubHttpOptions, GithubHttpOptions> {
     const path = 'graphql';
 
     const opts: HttpPostOptions = {
+      baseUrl: URL.resolve(baseUrl, '/'), // GitHub Enterprise uses unversioned graphql path
       body: { query },
       headers: { accept: options?.acceptHeader },
     };
@@ -237,10 +230,7 @@ export class GithubHttp extends Http<GithubHttpOptions, GithubHttpOptions> {
     logger.trace(`Performing Github GraphQL request`);
 
     try {
-      const res = await this.postJson<GithubGraphqlResponse<T>>(
-        'graphql',
-        opts
-      );
+      const res = await this.postJson<GithubGraphqlResponse<T>>(path, opts);
       result = res?.body?.data?.repository;
     } catch (gotErr) {
       handleGotError(gotErr, path, opts);

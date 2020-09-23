@@ -5,8 +5,12 @@ export function ensureTrailingSlash(url: string): string {
   return url.replace(/\/?$/, '/');
 }
 
-export function resolveBaseUrl(baseUrl: string, pathOrUrl: string): string {
-  const { host, path } = parse(pathOrUrl);
-  const result = host ? path : urlJoin(baseUrl, path || '');
+export function resolveBaseUrl(
+  baseUrl: string,
+  pathOrUrl: string | URL
+): string {
+  const pathOrUrlString = pathOrUrl.toString();
+  const { host, path } = parse(pathOrUrlString);
+  const result = host ? pathOrUrlString : urlJoin(baseUrl, path || '');
   return result.replace(/\/+$/, '');
 }
