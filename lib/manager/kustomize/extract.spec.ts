@@ -222,7 +222,7 @@ describe('manager/kustomize/extract', () => {
     it('should extract out image versions', () => {
       const res = extractPackageFile(gitImages);
       expect(res.deps).toMatchSnapshot();
-      expect(res.deps).toHaveLength(4);
+      expect(res.deps).toHaveLength(5);
       expect(res.deps[0].currentValue).toEqual('v0.1.0');
       expect(res.deps[1].currentValue).toEqual('v0.0.1');
     });
