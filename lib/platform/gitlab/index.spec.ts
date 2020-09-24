@@ -333,6 +333,83 @@ describe('platform/gitlab', () => {
         )
         .reply(200, {
           iid: 91,
+          title: 'some change',
+          state: 'opened',
+          additions: 1,
+          deletions: 1,
+          commits: 1,
+          source_branch: 'some-branch',
+          target_branch: 'master',
+          base: {
+            sha: '1234',
+          },
+        })
+        .get(
+          '/api/v4/projects/some%2Frepo/repository/commits/0d9c7726c3d628b7e28af234595cfd20febdbf8e/statuses'
+        )
+        .reply(200, []);
+      const pr = await gitlab.getBranchPr('some-branch');
+      expect(pr).toMatchSnapshot();
+      expect(httpMock.getTrace()).toMatchSnapshot();
+    });
+    it('should strip draft prefix from title', async () => {
+      const scope = await initRepo();
+      scope
+        .get(
+          '/api/v4/projects/some%2Frepo/merge_requests?per_page=100&state=opened&source_branch=some-branch'
+        )
+        .reply(200, [
+          {
+            iid: 91,
+            source_branch: 'some-branch',
+            target_branch: 'master',
+            state: 'opened',
+          },
+        ])
+        .get(
+          '/api/v4/projects/some%2Frepo/merge_requests/91?include_diverged_commits_count=1'
+        )
+        .reply(200, {
+          iid: 91,
+          title: 'Draft: some change',
+          state: 'opened',
+          additions: 1,
+          deletions: 1,
+          commits: 1,
+          source_branch: 'some-branch',
+          target_branch: 'master',
+          base: {
+            sha: '1234',
+          },
+        })
+        .get(
+          '/api/v4/projects/some%2Frepo/repository/commits/0d9c7726c3d628b7e28af234595cfd20febdbf8e/statuses'
+        )
+        .reply(200, []);
+      const pr = await gitlab.getBranchPr('some-branch');
+      expect(pr).toMatchSnapshot();
+      expect(httpMock.getTrace()).toMatchSnapshot();
+    });
+    it('should strip deprecated draft prefix from title', async () => {
+      const scope = await initRepo();
+      scope
+        .get(
+          '/api/v4/projects/some%2Frepo/merge_requests?per_page=100&state=opened&source_branch=some-branch'
+        )
+        .reply(200, [
+          {
+            iid: 91,
+            source_branch: 'some-branch',
+            target_branch: 'master',
+            state: 'opened',
+          },
+        ])
+        .get(
+          '/api/v4/projects/some%2Frepo/merge_requests/91?include_diverged_commits_count=1'
+        )
+        .reply(200, {
+          iid: 91,
+          title: 'WIP: some change',
           state: 'opened',
           additions: 1,
           deletions: 1,
@@ -888,6 +965,48 @@ describe('platform/gitlab', () => {
       expect(res).toBeDefined();
       expect(httpMock.getTrace()).toMatchSnapshot();
     });
+    it('returns true with draft prefix title', async () => {
+      httpMock
+        .scope(gitlabApiHost)
+        .get(
+          '/api/v4/projects/undefined/merge_requests?per_page=100&author_id=undefined'
+        )
+        .reply(200, [
+          {
+            iid: 1,
+            source_branch: 'branch-a',
+            title: 'Draft: branch a pr',
+            state: 'opened',
+          },
+        ]);
+      const res = await gitlab.findPr({
+        branchName: 'branch-a',
+        prTitle: 'branch a pr',
+      });
+      expect(res).toBeDefined();
+      expect(httpMock.getTrace()).toMatchSnapshot();
+    });
+    it('returns true with deprecated draft prefix title', async () => {
+      httpMock
+        .scope(gitlabApiHost)
+        .get(
+          '/api/v4/projects/undefined/merge_requests?per_page=100&author_id=undefined'
+        )
+        .reply(200, [
+          {
+            iid: 1,
+            source_branch: 'branch-a',
+            title: 'WIP: branch a pr',
+            state: 'opened',
+          },
+        ]);
+      const res = await gitlab.findPr({
+        branchName: 'branch-a',
+        prTitle: 'branch a pr',
+      });
+      expect(res).toBeDefined();
+      expect(httpMock.getTrace()).toMatchSnapshot();
+    });
   });
 
   async function initPlatform(gitlabVersion: string) {
@@ -913,6 +1032,7 @@ describe('platform/gitlab', () => {
         .reply(200, {
           id: 1,
           iid: 12345,
+          title: 'some title',
         });
       const pr = await gitlab.createPr({
         sourceBranch: 'some-branch',
@@ -932,6 +1052,7 @@ describe('platform/gitlab', () => {
         .reply(200, {
           id: 1,
           iid: 12345,
+          title: 'some title',
         });
       const pr = await gitlab.createPr({
         sourceBranch: 'some-branch',
@@ -951,6 +1072,7 @@ describe('platform/gitlab', () => {
         .reply(200, {
           id: 1,
           iid: 12345,
+          title: 'WIP: some title',
         });
       const pr = await gitlab.createPr({
         sourceBranch: 'some-branch',
@@ -970,6 +1092,7 @@ describe('platform/gitlab', () => {
         .reply(200, {
           id: 1,
           iid: 12345,
+          title: 'Draft: some title',
         });
       const pr = await gitlab.createPr({
         sourceBranch: 'some-branch',
@@ -989,6 +1112,7 @@ describe('platform/gitlab', () => {
         .reply(200, {
           id: 1,
           iid: 12345,
+          title: 'some title',
         })
         .get('/api/v4/projects/undefined/merge_requests/12345')
         .reply(200)
@@ -1028,6 +1152,7 @@ describe('platform/gitlab', () => {
         .reply(200, {
           id: 1,
           iid: 12345,
+          title: 'do something',
           description: 'a merge request',
           state: PrState.Merged,
           merge_status: 'cannot_be_merged',
@@ -1041,6 +1166,52 @@ describe('platform/gitlab', () => {
       expect(pr.hasAssignees).toBe(false);
       expect(httpMock.getTrace()).toMatchSnapshot();
     });
+    it('removes draft prefix from returned title', async () => {
+      httpMock
+        .scope(gitlabApiHost)
+        .get(
+          '/api/v4/projects/undefined/merge_requests/12345?include_diverged_commits_count=1'
+        )
+        .reply(200, {
+          id: 1,
+          iid: 12345,
+          title: 'Draft: do something',
+          description: 'a merge request',
+          state: PrState.Merged,
+          merge_status: 'cannot_be_merged',
+          diverged_commits_count: 5,
+          source_branch: 'some-branch',
+          target_branch: 'master',
+          assignees: [],
+        });
+      const pr = await gitlab.getPr(12345);
+      expect(pr).toMatchSnapshot();
+      expect(pr.title).toBe('do something');
+      expect(httpMock.getTrace()).toMatchSnapshot();
+    });
+    it('removes deprecated draft prefix from returned title', async () => {
+      httpMock
+        .scope(gitlabApiHost)
+        .get(
+          '/api/v4/projects/undefined/merge_requests/12345?include_diverged_commits_count=1'
+        )
+        .reply(200, {
+          id: 1,
+          iid: 12345,
+          title: 'WIP: do something',
+          description: 'a merge request',
+          state: PrState.Merged,
+          merge_status: 'cannot_be_merged',
+          diverged_commits_count: 5,
+          source_branch: 'some-branch',
+          target_branch: 'master',
+          assignees: [],
+        });
+      const pr = await gitlab.getPr(12345);
+      expect(pr).toMatchSnapshot();
+      expect(pr.title).toBe('do something');
+      expect(httpMock.getTrace()).toMatchSnapshot();
+    });
     it('returns the mergeable PR', async () => {
       const scope = await initRepo();
       scope
@@ -1050,6 +1221,7 @@ describe('platform/gitlab', () => {
         .reply(200, {
           id: 1,
           iid: 12345,
+          title: 'do something',
           description: 'a merge request',
           state: PrState.Open,
           diverged_commits_count: 5,
@@ -1077,6 +1249,7 @@ describe('platform/gitlab', () => {
         .reply(200, {
           id: 1,
           iid: 12345,
+          title: 'do something',
           description: 'a merge request',
           state: PrState.Open,
           merge_status: 'cannot_be_merged',
@@ -1180,6 +1353,7 @@ These updates have all been created already. Click a checkbox below to force a r
         .reply(200, {
           id: 1,
           iid: 12345,
+          title: 'some change',
           description: 'a merge request',
           state: PrState.Merged,
           merge_status: 'cannot_be_merged',

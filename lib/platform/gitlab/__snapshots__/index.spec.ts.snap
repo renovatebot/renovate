@@ -146,28 +146,6 @@ exports[`platform/gitlab addReviewers(issueNo, reviewers) should add the given r
 exports[`platform/gitlab createPr(branchName, title, body) auto-accepts the MR when requested 1`] = `
 Array [
   Object {
-    "headers": Object {
-      "accept": "application/json",
-      "accept-encoding": "gzip, deflate",
-      "authorization": "Bearer some-token",
-      "host": "gitlab.com",
-      "user-agent": "https://github.com/renovatebot/renovate",
-    },
-    "method": "GET",
-    "url": "https://gitlab.com/api/v4/user",
-  },
-  Object {
-    "headers": Object {
-      "accept": "application/json",
-      "accept-encoding": "gzip, deflate",
-      "authorization": "Bearer some-token",
-      "host": "gitlab.com",
-      "user-agent": "https://github.com/renovatebot/renovate",
-    },
-    "method": "GET",
-    "url": "https://gitlab.com/api/v4/version",
-  },
-  Object {
     "body": "{\\"source_branch\\":\\"some-branch\\",\\"target_branch\\":\\"master\\",\\"remove_source_branch\\":true,\\"title\\":\\"some-title\\",\\"description\\":\\"the-body\\",\\"labels\\":\\"\\"}",
     "headers": Object {
       "accept": "application/json",
@@ -233,136 +211,12 @@ Object {
 exports[`platform/gitlab createPr(branchName, title, body) returns the PR 2`] = `
 Array [
   Object {
-    "headers": Object {
-      "accept": "application/json",
-      "accept-encoding": "gzip, deflate",
-      "authorization": "Bearer some-token",
-      "host": "gitlab.com",
-      "user-agent": "https://github.com/renovatebot/renovate",
-    },
-    "method": "GET",
-    "url": "https://gitlab.com/api/v4/user",
-  },
-  Object {
-    "headers": Object {
-      "accept": "application/json",
-      "accept-encoding": "gzip, deflate",
-      "authorization": "Bearer some-token",
-      "host": "gitlab.com",
-      "user-agent": "https://github.com/renovatebot/renovate",
-    },
-    "method": "GET",
-    "url": "https://gitlab.com/api/v4/version",
-  },
-  Object {
     "body": "{\\"source_branch\\":\\"some-branch\\",\\"target_branch\\":\\"master\\",\\"remove_source_branch\\":true,\\"title\\":\\"some-title\\",\\"description\\":\\"the-body\\",\\"labels\\":null}",
     "headers": Object {
       "accept": "application/json",
       "accept-encoding": "gzip, deflate",
       "authorization": "Bearer abc123",
       "content-length": "144",
-      "content-type": "application/json",
-      "host": "gitlab.com",
-      "user-agent": "https://github.com/renovatebot/renovate",
-    },
-    "method": "POST",
-    "url": "https://gitlab.com/api/v4/projects/undefined/merge_requests",
-  },
-]
-`;
-
-exports[`platform/gitlab createPr(branchName, title, body) supports draftPR on < 13.2 1`] = `
-Object {
-  "displayNumber": "Merge Request #12345",
-  "id": 1,
-  "iid": 12345,
-  "number": 12345,
-  "sourceBranch": "some-branch",
-}
-`;
-
-exports[`platform/gitlab createPr(branchName, title, body) supports draftPR on < 13.2 2`] = `
-Array [
-  Object {
-    "headers": Object {
-      "accept": "application/json",
-      "accept-encoding": "gzip, deflate",
-      "authorization": "Bearer some-token",
-      "host": "gitlab.com",
-      "user-agent": "https://github.com/renovatebot/renovate",
-    },
-    "method": "GET",
-    "url": "https://gitlab.com/api/v4/user",
-  },
-  Object {
-    "headers": Object {
-      "accept": "application/json",
-      "accept-encoding": "gzip, deflate",
-      "authorization": "Bearer some-token",
-      "host": "gitlab.com",
-      "user-agent": "https://github.com/renovatebot/renovate",
-    },
-    "method": "GET",
-    "url": "https://gitlab.com/api/v4/version",
-  },
-  Object {
-    "body": "{\\"source_branch\\":\\"some-branch\\",\\"target_branch\\":\\"master\\",\\"remove_source_branch\\":true,\\"title\\":\\"WIP: some-title\\",\\"description\\":\\"the-body\\",\\"labels\\":null}",
-    "headers": Object {
-      "accept": "application/json",
-      "accept-encoding": "gzip, deflate",
-      "authorization": "Bearer abc123",
-      "content-length": "149",
-      "content-type": "application/json",
-      "host": "gitlab.com",
-      "user-agent": "https://github.com/renovatebot/renovate",
-    },
-    "method": "POST",
-    "url": "https://gitlab.com/api/v4/projects/undefined/merge_requests",
-  },
-]
-`;
-
-exports[`platform/gitlab createPr(branchName, title, body) supports draftPR on >= 13.2 1`] = `
-Object {
-  "displayNumber": "Merge Request #12345",
-  "id": 1,
-  "iid": 12345,
-  "number": 12345,
-  "sourceBranch": "some-branch",
-}
-`;
-
-exports[`platform/gitlab createPr(branchName, title, body) supports draftPR on >= 13.2 2`] = `
-Array [
-  Object {
-    "headers": Object {
-      "accept": "application/json",
-      "accept-encoding": "gzip, deflate",
-      "authorization": "Bearer some-token",
-      "host": "gitlab.com",
-      "user-agent": "https://github.com/renovatebot/renovate",
-    },
-    "method": "GET",
-    "url": "https://gitlab.com/api/v4/user",
-  },
-  Object {
-    "headers": Object {
-      "accept": "application/json",
-      "accept-encoding": "gzip, deflate",
-      "authorization": "Bearer some-token",
-      "host": "gitlab.com",
-      "user-agent": "https://github.com/renovatebot/renovate",
-    },
-    "method": "GET",
-    "url": "https://gitlab.com/api/v4/version",
-  },
-  Object {
-    "body": "{\\"source_branch\\":\\"some-branch\\",\\"target_branch\\":\\"master\\",\\"remove_source_branch\\":true,\\"title\\":\\"Draft: some-title\\",\\"description\\":\\"the-body\\",\\"labels\\":null}",
-    "headers": Object {
-      "accept": "application/json",
-      "accept-encoding": "gzip, deflate",
-      "authorization": "Bearer abc123",
-      "content-length": "151",
       "content-type": "application/json",
       "host": "gitlab.com",
       "user-agent": "https://github.com/renovatebot/renovate",
@@ -385,28 +239,6 @@ Object {
 
 exports[`platform/gitlab createPr(branchName, title, body) uses default branch 2`] = `
 Array [
-  Object {
-    "headers": Object {
-      "accept": "application/json",
-      "accept-encoding": "gzip, deflate",
-      "authorization": "Bearer some-token",
-      "host": "gitlab.com",
-      "user-agent": "https://github.com/renovatebot/renovate",
-    },
-    "method": "GET",
-    "url": "https://gitlab.com/api/v4/user",
-  },
-  Object {
-    "headers": Object {
-      "accept": "application/json",
-      "accept-encoding": "gzip, deflate",
-      "authorization": "Bearer some-token",
-      "host": "gitlab.com",
-      "user-agent": "https://github.com/renovatebot/renovate",
-    },
-    "method": "GET",
-    "url": "https://gitlab.com/api/v4/version",
-  },
   Object {
     "body": "{\\"source_branch\\":\\"some-branch\\",\\"target_branch\\":\\"master\\",\\"remove_source_branch\\":true,\\"title\\":\\"some-title\\",\\"description\\":\\"the-body\\",\\"labels\\":\\"\\"}",
     "headers": Object {
@@ -1550,17 +1382,6 @@ Array [
     "method": "GET",
     "url": "https://gitlab.renovatebot.com/user",
   },
-  Object {
-    "headers": Object {
-      "accept": "application/json",
-      "accept-encoding": "gzip, deflate",
-      "authorization": "Bearer some-token",
-      "host": "gitlab.renovatebot.com",
-      "user-agent": "https://github.com/renovatebot/renovate",
-    },
-    "method": "GET",
-    "url": "https://gitlab.renovatebot.com/version",
-  },
 ]
 `;
 
@@ -1583,17 +1404,6 @@ Array [
     },
     "method": "GET",
     "url": "https://gitlab.com/api/v4/user",
-  },
-  Object {
-    "headers": Object {
-      "accept": "application/json",
-      "accept-encoding": "gzip, deflate",
-      "authorization": "Bearer some-token",
-      "host": "gitlab.com",
-      "user-agent": "https://github.com/renovatebot/renovate",
-    },
-    "method": "GET",
-    "url": "https://gitlab.com/api/v4/version",
   },
 ]
 `;
@@ -1903,39 +1713,6 @@ Array [
 exports[`platform/gitlab updatePr(prNo, title, body) closes the PR 1`] = `
 Array [
   Object {
-    "headers": Object {
-      "accept": "application/json",
-      "accept-encoding": "gzip, deflate",
-      "authorization": "Bearer some-token",
-      "host": "gitlab.com",
-      "user-agent": "https://github.com/renovatebot/renovate",
-    },
-    "method": "GET",
-    "url": "https://gitlab.com/api/v4/user",
-  },
-  Object {
-    "headers": Object {
-      "accept": "application/json",
-      "accept-encoding": "gzip, deflate",
-      "authorization": "Bearer some-token",
-      "host": "gitlab.com",
-      "user-agent": "https://github.com/renovatebot/renovate",
-    },
-    "method": "GET",
-    "url": "https://gitlab.com/api/v4/version",
-  },
-  Object {
-    "headers": Object {
-      "accept": "application/json",
-      "accept-encoding": "gzip, deflate",
-      "authorization": "Bearer abc123",
-      "host": "gitlab.com",
-      "user-agent": "https://github.com/renovatebot/renovate",
-    },
-    "method": "GET",
-    "url": "https://gitlab.com/api/v4/projects/undefined/merge_requests/1",
-  },
-  Object {
     "body": "{\\"title\\":\\"title\\",\\"description\\":\\"body\\",\\"state_event\\":\\"close\\"}",
     "headers": Object {
       "accept": "application/json",
@@ -1952,145 +1729,8 @@ Array [
 ]
 `;
 
-exports[`platform/gitlab updatePr(prNo, title, body) retains draft status when draft uses current prefix 1`] = `
-Array [
-  Object {
-    "headers": Object {
-      "accept": "application/json",
-      "accept-encoding": "gzip, deflate",
-      "authorization": "Bearer some-token",
-      "host": "gitlab.com",
-      "user-agent": "https://github.com/renovatebot/renovate",
-    },
-    "method": "GET",
-    "url": "https://gitlab.com/api/v4/user",
-  },
-  Object {
-    "headers": Object {
-      "accept": "application/json",
-      "accept-encoding": "gzip, deflate",
-      "authorization": "Bearer some-token",
-      "host": "gitlab.com",
-      "user-agent": "https://github.com/renovatebot/renovate",
-    },
-    "method": "GET",
-    "url": "https://gitlab.com/api/v4/version",
-  },
-  Object {
-    "headers": Object {
-      "accept": "application/json",
-      "accept-encoding": "gzip, deflate",
-      "authorization": "Bearer abc123",
-      "host": "gitlab.com",
-      "user-agent": "https://github.com/renovatebot/renovate",
-    },
-    "method": "GET",
-    "url": "https://gitlab.com/api/v4/projects/undefined/merge_requests/1",
-  },
-  Object {
-    "body": "{\\"title\\":\\"Draft: title\\",\\"description\\":\\"body\\"}",
-    "headers": Object {
-      "accept": "application/json",
-      "accept-encoding": "gzip, deflate",
-      "authorization": "Bearer abc123",
-      "content-length": "45",
-      "content-type": "application/json",
-      "host": "gitlab.com",
-      "user-agent": "https://github.com/renovatebot/renovate",
-    },
-    "method": "PUT",
-    "url": "https://gitlab.com/api/v4/projects/undefined/merge_requests/1",
-  },
-]
-`;
-
-exports[`platform/gitlab updatePr(prNo, title, body) retains draft status when draft uses deprecated prefix 1`] = `
-Array [
-  Object {
-    "headers": Object {
-      "accept": "application/json",
-      "accept-encoding": "gzip, deflate",
-      "authorization": "Bearer some-token",
-      "host": "gitlab.com",
-      "user-agent": "https://github.com/renovatebot/renovate",
-    },
-    "method": "GET",
-    "url": "https://gitlab.com/api/v4/user",
-  },
-  Object {
-    "headers": Object {
-      "accept": "application/json",
-      "accept-encoding": "gzip, deflate",
-      "authorization": "Bearer some-token",
-      "host": "gitlab.com",
-      "user-agent": "https://github.com/renovatebot/renovate",
-    },
-    "method": "GET",
-    "url": "https://gitlab.com/api/v4/version",
-  },
-  Object {
-    "headers": Object {
-      "accept": "application/json",
-      "accept-encoding": "gzip, deflate",
-      "authorization": "Bearer abc123",
-      "host": "gitlab.com",
-      "user-agent": "https://github.com/renovatebot/renovate",
-    },
-    "method": "GET",
-    "url": "https://gitlab.com/api/v4/projects/undefined/merge_requests/1",
-  },
-  Object {
-    "body": "{\\"title\\":\\"Draft: title\\",\\"description\\":\\"body\\"}",
-    "headers": Object {
-      "accept": "application/json",
-      "accept-encoding": "gzip, deflate",
-      "authorization": "Bearer abc123",
-      "content-length": "45",
-      "content-type": "application/json",
-      "host": "gitlab.com",
-      "user-agent": "https://github.com/renovatebot/renovate",
-    },
-    "method": "PUT",
-    "url": "https://gitlab.com/api/v4/projects/undefined/merge_requests/1",
-  },
-]
-`;
-
 exports[`platform/gitlab updatePr(prNo, title, body) updates the PR 1`] = `
 Array [
-  Object {
-    "headers": Object {
-      "accept": "application/json",
-      "accept-encoding": "gzip, deflate",
-      "authorization": "Bearer some-token",
-      "host": "gitlab.com",
-      "user-agent": "https://github.com/renovatebot/renovate",
-    },
-    "method": "GET",
-    "url": "https://gitlab.com/api/v4/user",
-  },
-  Object {
-    "headers": Object {
-      "accept": "application/json",
-      "accept-encoding": "gzip, deflate",
-      "authorization": "Bearer some-token",
-      "host": "gitlab.com",
-      "user-agent": "https://github.com/renovatebot/renovate",
-    },
-    "method": "GET",
-    "url": "https://gitlab.com/api/v4/version",
-  },
-  Object {
-    "headers": Object {
-      "accept": "application/json",
-      "accept-encoding": "gzip, deflate",
-      "authorization": "Bearer abc123",
-      "host": "gitlab.com",
-      "user-agent": "https://github.com/renovatebot/renovate",
-    },
-    "method": "GET",
-    "url": "https://gitlab.com/api/v4/projects/undefined/merge_requests/1",
-  },
   Object {
     "body": "{\\"title\\":\\"title\\",\\"description\\":\\"body\\"}",
     "headers": Object {

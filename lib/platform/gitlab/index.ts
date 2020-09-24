@@ -348,6 +348,16 @@ export async function getBranchStatus(
 
 // Pull Request
 
+function massagePr(prToModify: Pr): Pr {
+  const pr = prToModify;
+  if (pr.title.startsWith(DRAFT_PREFIX)) {
+    pr.title = pr.title.substring(DRAFT_PREFIX.length);
+  } else if (pr.title.startsWith(DRAFT_PREFIX_DEPRECATED)) {
+    pr.title = pr.title.substring(DRAFT_PREFIX_DEPRECATED.length);
+  }
+  return pr;
+}
+
 export async function createPr({
   sourceBranch,
   targetBranch,
@@ -416,7 +426,7 @@ export async function createPr({
     }
   }
 
-  return pr;
+  return massagePr(pr);
 }
 
 export async function getPr(iid: number): Promise<Pr> {
@@ -457,7 +467,7 @@ export async function getPr(iid: number): Promise<Pr> {
       pr.canMerge = true;
     }
   }
-  return pr;
+  return massagePr(pr);
 }
 
 export async function updatePr({
@@ -936,13 +946,15 @@ async function fetchPrList(): Promise<Pr[]> {
         created_at: string;
       }[]
     >(urlString, { paginate: true });
-    return res.body.map((pr) => ({
-      number: pr.iid,
-      sourceBranch: pr.source_branch,
-      title: pr.title,
-      state: pr.state === 'opened' ? PrState.Open : pr.state,
-      createdAt: pr.created_at,
-    }));
+    return res.body.map((pr) =>
+      massagePr({
+        number: pr.iid,
+        sourceBranch: pr.source_branch,
+        title: pr.title,
+        state: pr.state === 'opened' ? PrState.Open : pr.state,
+        createdAt: pr.created_at,
+      })
+    );
   } catch (err) /* istanbul ignore next */ {
     logger.debug({ err }, 'Error fetching PR list');
     if (err.statusCode === 403) {
