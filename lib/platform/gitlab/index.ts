@@ -61,7 +61,7 @@ const DRAFT_PREFIX = 'Draft: ';
 const DRAFT_PREFIX_DEPRECATED = 'WIP: ';
 
 let authorId: number;
-let draftPrefix = '';
+let draftPrefix = DRAFT_PREFIX;
 
 export async function initPlatform({
   endpoint,
