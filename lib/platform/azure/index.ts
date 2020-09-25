@@ -290,7 +290,7 @@ export async function getBranchStatusCheck(
   const azureApiGit = await azureApi.gitApi();
   const branch = await azureApiGit.getBranch(
     config.repoId,
-    getBranchNameWithoutRefsheadsPrefix(branchName)!
+    getBranchNameWithoutRefsheadsPrefix(branchName)
   );
   if (branch.aheadCount === 0) {
     return BranchStatus.green;
@@ -317,7 +317,7 @@ export async function getBranchStatus(
 }
 
 export async function createPr({
-  branchName,
+  sourceBranch,
   targetBranch,
   prTitle: title,
   prBody: body,
@@ -325,7 +325,7 @@ export async function createPr({
   draftPR = false,
   platformOptions,
 }: CreatePRConfig): Promise<Pr> {
-  const sourceRefName = getNewBranchName(branchName);
+  const sourceRefName = getNewBranchName(sourceBranch);
   const targetRefName = getNewBranchName(targetBranch);
   const description = azureHelper.max4000Chars(sanitize(body));
   const azureApiGit = await azureApi.gitApi();

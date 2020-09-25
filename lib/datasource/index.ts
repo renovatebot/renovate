@@ -48,7 +48,7 @@ function logError(datasource, lookupName, err): void {
 }
 
 async function getRegistryReleases(
-  datasource,
+  datasource: Datasource,
   config: GetReleasesConfig,
   registryUrl: string
 ): Promise<ReleaseResult> {
@@ -223,7 +223,7 @@ function getRawReleases(
   const cachedResult = memCache.get(cacheKey);
   // istanbul ignore if
   if (cachedResult) {
-    return cachedResult;
+    return cachedResult as Promise<ReleaseResult | null>;
   }
   const promisedRes = fetchReleases(config);
   memCache.set(cacheKey, promisedRes);
@@ -315,5 +315,7 @@ export function getDefaultConfig(
   datasource: string
 ): Promise<Record<string, unknown>> {
   const loadedDatasource = load(datasource);
-  return Promise.resolve(loadedDatasource?.defaultConfig || Object.create({}));
+  return Promise.resolve<Record<string, unknown>>(
+    loadedDatasource?.defaultConfig || Object.create({})
+  );
 }

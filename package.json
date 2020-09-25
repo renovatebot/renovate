@@ -96,7 +96,8 @@
     "Viral Ruparel <viralruparel@gmail.com>",
     "Vladimir Starkov <iamstarkov@gmail.com>",
     "Mikhail Yakushin <driver733@gmail.com>",
-    "Sebastian Poxhofer <sebastian@poxhofer.at>"
+    "Sebastian Poxhofer <sebastian@poxhofer.at>",
+    "Henry Sachs <henrysachs@gmail.com>"
   ],
   "license": "AGPL-3.0",
   "bugs": {
@@ -113,7 +114,7 @@
     "@sindresorhus/is": "3.1.2",
     "@yarnpkg/core": "2.2.2",
     "@yarnpkg/parsers": "2.2.0",
-    "aws-sdk": "2.754.0",
+    "aws-sdk": "2.759.0",
     "azure-devops-node-api": "10.1.1",
     "bunyan": "1.8.14",
     "cacache": "15.0.5",
@@ -132,7 +133,7 @@
     "fs-extra": "9.0.1",
     "github-url-from-git": "1.5.0",
     "global-agent": "2.1.12",
-    "got": "11.6.2",
+    "got": "11.7.0",
     "handlebars": "4.7.6",
     "handy-redis": "1.8.3",
     "hasha": "5.2.0",
@@ -149,7 +150,7 @@
     "markdown-it": "11.0.1",
     "markdown-table": "2.0.0",
     "minimatch": "3.0.4",
-    "moment": "2.28.0",
+    "moment": "2.29.0",
     "moment-timezone": "0.5.31",
     "node-emoji": "1.10.0",
     "p-all": "3.0.0",
@@ -176,7 +177,7 @@
     "re2": "1.15.4"
   },
   "devDependencies": {
-    "@actions/core": "1.2.5",
+    "@actions/core": "1.2.6",
     "@babel/cli": "7.11.6",
     "@babel/core": "7.11.6",
     "@babel/node": "7.10.5",
@@ -206,7 +207,7 @@
     "@types/json5": "0.0.30",
     "@types/later": "1.2.6",
     "@types/linkify-markdown": "1.0.0",
-    "@types/luxon": "1.24.4",
+    "@types/luxon": "1.25.0",
     "@types/markdown-it": "10.0.2",
     "@types/markdown-table": "2.0.0",
     "@types/moment-timezone": "0.5.13",

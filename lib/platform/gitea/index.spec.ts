@@ -615,7 +615,7 @@ describe('platform/gitea', () => {
       await initFakeRepo();
 
       const res = await gitea.findPr({ branchName: mockPR.head.label });
-      expect(res).toHaveProperty('branchName', mockPR.head.label);
+      expect(res).toHaveProperty('sourceBranch', mockPR.head.label);
     });
 
     it('should find pull request with title', async () => {
@@ -627,7 +627,7 @@ describe('platform/gitea', () => {
         branchName: mockPR.head.label,
         prTitle: mockPR.title,
       });
-      expect(res).toHaveProperty('branchName', mockPR.head.label);
+      expect(res).toHaveProperty('sourceBranch', mockPR.head.label);
       expect(res).toHaveProperty('title', mockPR.title);
     });
 
@@ -640,7 +640,7 @@ describe('platform/gitea', () => {
         branchName: mockPR.head.label,
         state: mockPR.state,
       });
-      expect(res).toHaveProperty('branchName', mockPR.head.label);
+      expect(res).toHaveProperty('sourceBranch', mockPR.head.label);
       expect(res).toHaveProperty('state', mockPR.state);
     });
 
@@ -667,7 +667,7 @@ describe('platform/gitea', () => {
         prTitle: mockPR.title,
         state: mockPR.state,
       });
-      expect(res).toHaveProperty('branchName', mockPR.head.label);
+      expect(res).toHaveProperty('sourceBranch', mockPR.head.label);
       expect(res).toHaveProperty('title', mockPR.title);
       expect(res).toHaveProperty('state', mockPR.state);
     });
@@ -708,7 +708,7 @@ describe('platform/gitea', () => {
 
       await initFakeRepo();
       const res = await gitea.createPr({
-        branchName: mockNewPR.head.label,
+        sourceBranch: mockNewPR.head.label,
         targetBranch: 'devel',
         prTitle: mockNewPR.title,
         prBody: mockNewPR.body,
@@ -732,7 +732,7 @@ describe('platform/gitea', () => {
 
       await initFakeRepo();
       const res = await gitea.createPr({
-        branchName: mockNewPR.head.label,
+        sourceBranch: mockNewPR.head.label,
         targetBranch: 'master',
         prTitle: mockNewPR.title,
         prBody: mockNewPR.body,
@@ -760,7 +760,7 @@ describe('platform/gitea', () => {
 
       await initFakeRepo();
       await gitea.createPr({
-        branchName: mockNewPR.head.label,
+        sourceBranch: mockNewPR.head.label,
         targetBranch: 'master',
         prTitle: mockNewPR.title,
         prBody: mockNewPR.body,
@@ -784,7 +784,7 @@ describe('platform/gitea', () => {
       await initFakeRepo();
       await gitea.getPrList();
       await gitea.createPr({
-        branchName: mockNewPR.head.label,
+        sourceBranch: mockNewPR.head.label,
         targetBranch: 'master',
         prTitle: mockNewPR.title,
         prBody: mockNewPR.body,
@@ -801,7 +801,7 @@ describe('platform/gitea', () => {
 
       await initFakeRepo();
       const res = await gitea.createPr({
-        branchName: mockNewPR.head.label,
+        sourceBranch: mockNewPR.head.label,
         targetBranch: 'master',
         prTitle: mockNewPR.title,
         prBody: mockNewPR.body,
@@ -816,7 +816,7 @@ describe('platform/gitea', () => {
 
       await initFakeRepo();
       const res = await gitea.createPr({
-        branchName: mockNewPR.head.label,
+        sourceBranch: mockNewPR.head.label,
         targetBranch: 'master',
         prTitle: 'new-title',
         prBody: 'new-body',
@@ -837,7 +837,7 @@ describe('platform/gitea', () => {
       await initFakeRepo();
       await expect(
         gitea.createPr({
-          branchName: mockNewPR.head.label,
+          sourceBranch: mockNewPR.head.label,
           targetBranch: 'master',
           prTitle: mockNewPR.title,
           prBody: mockNewPR.body,
