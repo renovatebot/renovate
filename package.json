@@ -195,7 +195,7 @@
     "@types/changelog-filename-regex": "2.0.0",
     "@types/clean-git-ref": "2.0.0",
     "@types/conventional-commits-detector": "1.0.0",
-    "@types/eslint": "7.2.2",
+    "@types/eslint": "7.2.3",
     "@types/fs-extra": "9.0.1",
     "@types/github-url-from-git": "1.5.0",
     "@types/global-agent": "2.1.0",
