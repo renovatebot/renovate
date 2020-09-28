@@ -21,7 +21,10 @@ export async function getRepositoryData(
 ): Promise<ReleaseResult[]> {
   const cacheNamespace = 'datasource-helm';
   const cacheKey = repository;
-  const cachedIndex = await packageCache.get(cacheNamespace, cacheKey);
+  const cachedIndex = await packageCache.get<ReleaseResult[]>(
+    cacheNamespace,
+    cacheKey
+  );
   // istanbul ignore if
   if (cachedIndex) {
     return cachedIndex;

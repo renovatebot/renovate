@@ -44,7 +44,7 @@ export function extractPackageFile(
           dep[field] = groups[field];
         }
       }
-      dep.replaceString = `${matchResult[0]}`;
+      dep.replaceString = String(matchResult[0]);
       deps.push(dep);
     }
   } while (matchResult);

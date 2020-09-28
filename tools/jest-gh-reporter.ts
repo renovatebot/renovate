@@ -67,7 +67,7 @@ class GitHubReporter extends BaseReporter {
         }
       }
     } catch (e) {
-      error(`Unexpected error: ${e}`);
+      error(`Unexpected error: ${(e as Error).toString()}`);
     }
   }
 }

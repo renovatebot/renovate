@@ -51,6 +51,10 @@ const gitlabFossGemfile = readFileSync(
   'lib/manager/bundler/__fixtures__/Gemfile.gitlab-foss',
   'utf8'
 );
+const sourceBlockGemfile = readFileSync(
+  'lib/manager/bundler/__fixtures__/Gemfile.sourceBlock',
+  'utf8'
+);
 const sourceBlockWithNewLinesGemfileLock = readFileSync(
   'lib/manager/bundler/__fixtures__/Gemfile.sourceBlockWithNewLines.lock',
   'utf8'
@@ -157,6 +161,11 @@ describe('lib/manager/bundler/extract', () => {
     validateGems(gitlabFossGemfile, res);
   });
 
+  it('parse source blocks in Gemfile', async () => {
+    fs.readLocalFile.mockResolvedValueOnce(sourceBlockGemfile);
+    const res = await extractPackageFile(sourceBlockGemfile, 'Gemfile');
+    expect(res).toMatchSnapshot();
+  });
   it('parse source blocks with spaces in Gemfile', async () => {
     fs.readLocalFile.mockResolvedValueOnce(sourceBlockWithNewLinesGemfileLock);
     const res = await extractPackageFile(

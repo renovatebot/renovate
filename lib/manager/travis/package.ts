@@ -81,7 +81,7 @@ async function checkPolicies(): Promise<void> {
       }
     }
   }
-  logger.debug('Node.js policies refresh date: ' + refreshDate);
+  logger.debug(`Node.js policies refresh date: ${refreshDate.toString()}`);
 }
 
 export async function getPackageUpdates(
@@ -95,7 +95,7 @@ export async function getPackageUpdates(
   await checkPolicies();
   for (const policy of supportPolicy) {
     if (!Object.keys(policies).includes(policy)) {
-      logger.warn(`Unknown supportPolicy: ${policy}`);
+      logger.warn({ policy }, `Unknown supportPolicy`);
       return [];
     }
   }
@@ -113,12 +113,12 @@ export async function getPackageUpdates(
         depName: 'nodejs/node',
       })
     ).releases.map((release) => release.version);
-    newValue = newValue.map((value) =>
-      maxSatisfyingVersion(versions, `${value}`)
-    );
+    newValue = newValue
+      .map(String)
+      .map((value) => maxSatisfyingVersion(versions, value));
   }
   if (is.string(config.currentValue[0])) {
-    newValue = newValue.map((val) => `${val}`);
+    newValue = newValue.map(String);
   }
   newValue.sort((a, b) => a - b);
 

@@ -8,13 +8,13 @@ import { RepologyPackage, id as datasource } from '.';
 
 const repologyApiHost = 'https://repology.org/';
 
-type mockResponse = { status: number; body?: string };
+type ResponseMock = { status: number; body?: string };
 
 const mockProjectBy = (
   repo: string,
   name: string,
-  binary: mockResponse,
-  source: mockResponse
+  binary: ResponseMock,
+  source: ResponseMock
 ) => {
   const endpoint = '/tools/project-by';
   const defaultParams = {

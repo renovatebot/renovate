@@ -166,8 +166,6 @@ To host your preset config on GitLab:
 - Add a renovate.json to this new repo containing the preset config. No other files are necessary.
 - In other repos, reference it in an extends array like "gitlab>owner/name", e.g. "gitlab>rarkins/renovate-config"
 
-Note: Unlike npmjs-hosted presets, GitLab-hosted ones can contain only one config.
-
 ## Local presets
 
 Renovate also supports local presets, i.e. presets that are hosted on the same platform as the target repository. This is especially helpful in self-hosted scenarios where public presets cannot be used. Local presets are only supported on GitHub and GitLab. Local presets are specified either by leaving out any prefix, e.g. `owner/name`, or explicitly by adding a `local>` prefix, e.g. `local>owner/name`. Renovate will determine the current platform and look up the preset from there.

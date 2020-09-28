@@ -44,6 +44,7 @@ interface RegistryMeta {
   files?: RegistryFile[];
   providerPackages: Record<string, string>;
   providersUrl?: string;
+  providersLazyUrl?: string;
   includesFiles?: RegistryFile[];
   packages?: Record<string, RegistryFile>;
 }
@@ -68,6 +69,9 @@ async function getRegistryMeta(regUrl: string): Promise<RegistryMeta | null> {
   }
   if (res['providers-url']) {
     meta.providersUrl = res['providers-url'];
+  }
+  if (res['providers-lazy-url']) {
+    meta.providersLazyUrl = res['providers-lazy-url'];
   }
   if (res['provider-includes']) {
     meta.files = [];
@@ -109,7 +113,7 @@ async function getPackagistFile(
   const cachedResult = await packageCache.get(cacheNamespace, cacheKey);
   // istanbul ignore if
   if (cachedResult && cachedResult.sha256 === sha256) {
-    return cachedResult.res;
+    return cachedResult.res as Promise<PackagistFile>;
   }
   const res = (await http.getJson<PackagistFile>(regUrl + '/' + fileName, opts))
     .body;
@@ -148,6 +152,7 @@ function extractDepReleases(versions: RegistryFile): ReleaseResult {
 interface AllPackages {
   packages: Record<string, RegistryFile>;
   providersUrl: string;
+  providersLazyUrl: string;
   providerPackages: Record<string, string>;
 
   includesPackages: Record<string, ReleaseResult>;
@@ -158,6 +163,7 @@ async function getAllPackages(regUrl: string): Promise<AllPackages | null> {
   const {
     packages,
     providersUrl,
+    providersLazyUrl,
     files,
     includesFiles,
     providerPackages,
@@ -189,6 +195,7 @@ async function getAllPackages(regUrl: string): Promise<AllPackages | null> {
   const allPackages: AllPackages = {
     packages,
     providersUrl,
+    providersLazyUrl,
     providerPackages,
     includesPackages,
   };
@@ -200,7 +207,7 @@ function getAllCachedPackages(regUrl: string): Promise<AllPackages | null> {
   const cachedResult = memCache.get(cacheKey);
   // istanbul ignore if
   if (cachedResult) {
-    return cachedResult;
+    return cachedResult as Promise<AllPackages | null>;
   }
   const promisedRes = getAllPackages(regUrl);
   memCache.set(cacheKey, promisedRes);
@@ -245,6 +252,7 @@ async function packageLookup(
     const {
       packages,
       providersUrl,
+      providersLazyUrl,
       providerPackages,
       includesPackages,
     } = allPackages;
@@ -256,15 +264,19 @@ async function packageLookup(
     if (includesPackages?.[name]) {
       return includesPackages[name];
     }
-    if (!providerPackages?.[name]) {
+    let pkgUrl;
+    if (providerPackages?.[name]) {
+      pkgUrl = URL.resolve(
+        regUrl,
+        providersUrl
+          .replace('%package%', name)
+          .replace('%hash%', providerPackages[name])
+      );
+    } else if (providersLazyUrl) {
+      pkgUrl = URL.resolve(regUrl, providersLazyUrl.replace('%package%', name));
+    } else {
       return null;
     }
-    const pkgUrl = URL.resolve(
-      regUrl,
-      providersUrl
-        .replace('%package%', name)
-        .replace('%hash%', providerPackages[name])
-    );
     const opts = getHostOpts(regUrl);
     // TODO: fix types
     const versions = (await http.getJson<any>(pkgUrl, opts)).body.packages[

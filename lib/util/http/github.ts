@@ -1,4 +1,5 @@
 import URL from 'url';
+import is from '@sindresorhus/is';
 import pAll from 'p-all';
 import parseLinkHeader from 'parse-link-header';
 import {
@@ -43,8 +44,8 @@ function handleGotError(
 ): never {
   const path = url.toString();
   let message = err.message || '';
-  if (err.body?.message) {
-    message = err.body.message;
+  if (is.plainObject(err.response?.body) && 'message' in err.response.body) {
+    message = String(err.response.body.message);
   }
   if (
     err.name === 'RequestError' &&
@@ -114,7 +115,7 @@ function handleGotError(
     throw new ExternalHostError(err, PLATFORM_TYPE_GITHUB);
   }
   if (err.statusCode === 404) {
-    logger.debug({ url: err.options?.url }, 'GitHub 404');
+    logger.debug({ url: path }, 'GitHub 404');
   } else {
     logger.debug({ err }, 'Unknown GitHub error');
   }
@@ -130,11 +131,7 @@ interface GraphqlOptions {
 
 function constructAcceptString(input?: any): string {
   const defaultAccept = 'application/vnd.github.v3+json';
-  const appModeAccept = 'application/vnd.github.machine-man-preview+json';
   const acceptStrings = typeof input === 'string' ? input.split(/\s*,\s*/) : [];
-  if (global.appMode && !acceptStrings.includes(appModeAccept)) {
-    acceptStrings.unshift(appModeAccept);
-  }
   if (
     !acceptStrings.some((x) => x.startsWith('application/vnd.github.')) ||
     acceptStrings.length < 2
@@ -261,7 +258,7 @@ export class GithubHttp extends Http<GithubHttpOptions, GithubHttpOptions> {
 
     const { paginate = true } = options;
     let count = options.count || 100;
-    let cursor = null;
+    let cursor: string = null;
 
     let isIterating = true;
     while (isIterating) {

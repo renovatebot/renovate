@@ -40,10 +40,7 @@ function getNewValue({
   toVersion,
 }: NewValueConfig): string {
   if (fromParam.test(currentValue)) {
-    if (currentValue.includes(fromVersion)) {
-      return currentValue.replace(fromVersion, toVersion.replace(/^v/, ''));
-    }
-    return toVersion.replace(/^v/, '');
+    return currentValue.replace(/".*?"/, `"${toVersion}"`);
   }
   if (fromRange.test(currentValue)) {
     const [, version] = fromRange.exec(currentValue);

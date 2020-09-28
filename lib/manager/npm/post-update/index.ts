@@ -89,7 +89,7 @@ export function determineLockFileDirs(
   }
 
   for (const p of config.updatedPackageFiles) {
-    logger.trace(`Checking ${p.name} for lock files`);
+    logger.trace(`Checking ${String(p.name)} for lock files`);
     const packageFile = getPackageFile(p.name);
     // lerna first
     if (packageFile.lernaDir && packageFile.npmLock) {
@@ -125,7 +125,7 @@ export async function writeExistingFiles(
   const npmrcFile = upath.join(config.localDir, '.npmrc');
   if (config.npmrc) {
     logger.debug(`Writing repo .npmrc (${config.localDir})`);
-    await outputFile(npmrcFile, config.npmrc);
+    await outputFile(npmrcFile, `${String(config.npmrc)}\n`);
   } else if (config.ignoreNpmrcFile) {
     logger.debug('Removing ignored .npmrc file before artifact generation');
     await remove(npmrcFile);
@@ -147,18 +147,28 @@ export async function writeExistingFiles(
       config.localDir,
       path.dirname(packageFile.packageFile)
     );
-    const npmrc = packageFile.npmrc || config.npmrc;
+    const npmrc: string = packageFile.npmrc || config.npmrc;
+    const npmrcFilename = upath.join(basedir, '.npmrc');
     if (npmrc) {
-      await outputFile(upath.join(basedir, '.npmrc'), npmrc);
+      try {
+        await outputFile(npmrcFilename, `${npmrc}\n`);
+      } catch (err) /* istanbul ignore next */ {
+        logger.warn({ npmrcFilename, err }, 'Error writing .npmrc');
+      }
     }
     if (packageFile.yarnrc) {
       logger.debug(`Writing .yarnrc to ${basedir}`);
-      await outputFile(
-        upath.join(basedir, '.yarnrc'),
-        packageFile.yarnrc
-          .replace('--install.pure-lockfile true', '')
-          .replace('--install.frozen-lockfile true', '')
-      );
+      const yarnrcFilename = upath.join(basedir, '.yarnrc');
+      try {
+        await outputFile(
+          yarnrcFilename,
+          packageFile.yarnrc
+            .replace('--install.pure-lockfile true', '')
+            .replace('--install.frozen-lockfile true', '')
+        );
+      } catch (err) /* istanbul ignore next */ {
+        logger.warn({ yarnrcFilename, err }, 'Error writing .yarnrc');
+      }
     }
     const { npmLock } = packageFile;
     if (npmLock) {
@@ -182,7 +192,9 @@ export async function writeExistingFiles(
           }
         }
         if (widens.length) {
-          logger.debug(`Removing ${widens} from ${npmLock} to force an update`);
+          logger.debug(
+            `Removing ${String(widens)} from ${npmLock} to force an update`
+          );
           try {
             const npmLockParsed = JSON.parse(existingNpmLock);
             if (npmLockParsed.dependencies) {
@@ -226,7 +238,7 @@ export async function writeUpdatedPackageFiles(
     if (!packageFile.name.endsWith('package.json')) {
       continue; // eslint-disable-line
     }
-    logger.debug(`Writing ${packageFile.name}`);
+    logger.debug(`Writing ${String(packageFile.name)}`);
     const massagedFile = JSON.parse(packageFile.contents);
     try {
       const { token } = hostRules.find({
@@ -295,7 +307,8 @@ async function updateNpmrcContent(
   try {
     const newContent = newNpmrc.join('\n');
     if (newContent !== originalContent) {
-      await writeFile(npmrcFilePath, newContent);
+      logger.debug(`Writing updated .npmrc file to ${npmrcFilePath}`);
+      await writeFile(npmrcFilePath, `${newContent}\n`);
     }
   } catch {
     logger.warn('Unable to write custom npmrc file');
@@ -346,7 +359,7 @@ export async function getAdditionalFiles(
   if (
     config.updateType === 'lockFileMaintenance' &&
     config.reuseExistingBranch &&
-    (await branchExists(config.branchName))
+    branchExists(config.branchName)
   ) {
     logger.debug('Skipping lockFileMaintenance update');
     return { artifactErrors, updatedArtifacts };

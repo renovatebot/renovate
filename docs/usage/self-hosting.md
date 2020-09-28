@@ -1,10 +1,6 @@
 # Self-Hosting Renovate
 
-## Open Source vs Commercial versions
-
-Although Renovate is now best known as a "service" via the GitHub App, that service is actually running this same open source project, so you can get the same functionality if running it yourself. The version you see here in this repository can be cloned or `npm` installed in seconds and give you the same core functionality as in the app. The main feature that's missing is the responsiveness that comes from the app's use of a webhook listener (something not possible in a CLI tool).
-
-## Installing Renovate OSS
+## Installing Renovate OSS CLI
 
 #### npmjs
 
@@ -17,6 +13,8 @@ Since renovate v20 `npm`, `pnpm` and `yarn` are no longer embedded, so you need 
 ```sh
 $ npm install -g yarn pnpm
 ```
+
+The same goes for any other third party binary tool that may be needed, such as `gradle` or `poetry` - you need to make sure they are installed and the appropriate version you need before running Renovate.
 
 #### Docker
 
@@ -55,35 +53,15 @@ spec:
         spec:
           containers:
             - name: renovate
-              # Update this to the latest available and then enable Renovate on the manifest
-              image: renovate/renovate:19.181.2
+              # Update this to the latest available and then enable Renovate on
+              # the manifest
+              image: renovate/renovate:23.19.2
+              args:
+                - user/repo
               # Environment Variables
-              env:
-                - name: RENOVATE_PLATFORM
-                  valueFrom:
-                    secretKeyRef:
-                      key: renovate-platform
-                      name: renovate-env
-                - name: RENOVATE_ENDPOINT
-                  valueFrom:
-                    secretKeyRef:
-                      key: renovate-endpoint
-                      name: renovate-env
-                - name: RENOVATE_TOKEN
-                  valueFrom:
-                    secretKeyRef:
-                      key: renovate-token
-                      name: renovate-env
-                - name: GITHUB_COM_TOKEN
-                  valueFrom:
-                    secretKeyRef:
-                      key: github-token
-                      name: renovate-env
-                - name: RENOVATE_AUTODISCOVER
-                  valueFrom:
-                    secretKeyRef:
-                      key: renovate-autodiscover
-                      name: renovate-env
+              envFrom:
+                - secretRef:
+                    name: renovate-env
           restartPolicy: Never
 ```
 
@@ -96,16 +74,28 @@ metadata:
   name: renovate-env
 type: Opaque
 stringData:
-  renovate-platform: 'github'
-  renovate-endpoint: 'https://github.company.com/api/v3'
-  renovate-token: 'your-github-enterprise-renovate-user-token'
-  github-token: 'any-personal-user-token-for-github-com-for-fetching-changelogs'
-  renovate-autodiscover: 'true'
+  GITHUB_COM_TOKEN: 'any-personal-user-token-for-github-com-for-fetching-changelogs'
+  # set to true to run on all repos you have push access to
+  RENOVATE_AUTODISCOVER: 'false'
+  RENOVATE_ENDPOINT: 'https://github.company.com/api/v3'
+  RENOVATE_GIT_AUTHOR: 'Renovate Bot <bot@renovateapp.com>'
+  RENOVATE_PLATFORM: 'github'
+  RENOVATE_TOKEN: 'your-github-enterprise-renovate-user-token'
 ```
+
+## Configuration
+
+Self-hosted Renovate can be configured using any of the following (or a combination):
+
+- A `config.js` file (can also be named `config.json`, but you can't have both at the same time)
+- CLI params
+- Environment params
+
+Note that some Renovate configuratino options are _only_ available for self-hosting, and so can only be configured using one of the above methods. These are described in the [Self-hosted Configuration](./self-hosted-configuration.md) doc.
 
 ## Authentication
 
-You need to select a user account for `renovate` to assume the identity of, and generate a Personal Access Token. It is recommended to be `@renovate-bot` if you are using a self-hosted server and can pick any username you want.
+Regardless of platform, you need to select a user account for `renovate` to assume the identity of, and generate a Personal Access Token. It is recommended to be `@renovate-bot` if you are using a self-hosted server with free choice of usernames.
 It is also recommended that you configure `config.gitAuthor` with the same identity as your Renovate user, e.g. like `"gitAuthor": "Renovate Bot <renovate@whitesourcesoftware.com>"`.
 
 #### GitHub Enterprise
@@ -147,9 +137,9 @@ Don't forget to configure `platform=gitea` somewhere in config.
 
 ## GitHub.com token for release notes
 
-If you are running on any platform except github.com, it's important to also configure `GITHUB_COM_TOKEN` containing a personal access token for github.com. This account can actually be _any_ account on GitHub, and needs only read-only access. It's used when fetching release notes for repositories in order to increase the hourly API limit.
+If you are running on any platform except github.com, it's important to also configure the environment variable `GITHUB_COM_TOKEN` containing a personal access token for github.com. This account can actually be _any_ account on GitHub, and needs only read-only access. It's used when fetching release notes for repositories in order to increase the hourly API limit. It's also OK to configure the same as a host rule instead, if you prefer that.
 
-**Note:** If you're using renovate in a project where dependencies are loaded from github (such as go modules hosted on github) it is highly reccomended to add a github token as you will run in the rate limit from the github api, which will lead to renovate closing and reopening PRs because it could not get reliable info on updated dependencies.
+**Note:** If you're using renovate in a project where dependencies are loaded from github.com (such as Go m=Modules hosted on github) it is highly recommended to add a token as you will run in the rate limit from the github.com api, which will lead to renovate closing and reopening PRs because it could not get reliable info on updated dependencies.
 
 ## File/directory usage
 
@@ -162,14 +152,6 @@ Cache data - such as Renovate's own cache as well as that for npm, yarn, compose
 If you wish to override the base directory to be used (e.g. instead of `/tmp/renovate/`) then configure a value for `baseDir` in `config.js`, or via env (`RENOVATE_BASE_DIR`) or via CLI (`--base-dir=`).
 
 If you wish to override the cache location specifically then configure a value for `cacheDir` instead.
-
-### Identification and Authorization
-
-It's possible to sign git commits, but for this you need to set up the GPG key and setting out of band. In short:
-
-- Make sure the private key is added via GPG
-- Tell git about the private key (e.g. `git config --global user.signingkey AABBCCDDEEFF`)
-- Configure git to sign all commits (`git config --global commit.gpgsign true`)
 
 ## Usage
 
@@ -184,10 +166,7 @@ module.exports = {
   endpoint: 'https://self-hosted.gitlab/api/v4/',
   token: '**gitlab_token**',
   platform: 'gitlab',
-  logFileLevel: 'warn',
-  logLevel: 'info',
-  logFile: '/home/user/renovate.log',
-  onboarding: true,
+  logLevel: 'debug',
   onboardingConfig: {
     extends: ['config:base'],
   },
@@ -273,11 +252,12 @@ metadata:
   namespace: <namespace>
 type: Opaque
 stringData:
-  renovate-platform: 'gitlab'
-  renovate-endpoint: 'https://gitlab.com/api/v4'
-  renovate-token: <Gitlab Token>
-  github-token: <Github Token>
-  renovate-autodiscover: 'false'
+  GITHUB_COM_TOKEN: 'any-personal-user-token-for-github-com-for-fetching-changelogs'
+  RENOVATE_AUTODISCOVER: 'false'
+  RENOVATE_ENDPOINT: 'https://github.company.com/api/v3'
+  RENOVATE_GIT_AUTHOR: 'Renovate Bot <bot@renovateapp.com>'
+  RENOVATE_PLATFORM: 'github'
+  RENOVATE_TOKEN: 'your-github-enterprise-renovate-user-token'
 ---
 apiVersion: v1
 data:
@@ -308,7 +288,7 @@ spec:
           containers:
             - name: renovate
               # Update this to the latest available and then enable Renovate on the manifest
-              image: renovate/renovate:14.1.0
+              image: renovate/renovate:23.19.2
               volumeMounts:
                 - name: ssh-key-volume
                   readOnly: true
@@ -316,36 +296,9 @@ spec:
               args:
                 - <repository>
               # Environment Variables
-              env:
-                - name: RENOVATE_GIT_AUTHOR
-                  value: <Git Author, with format 'User <email@email.com>'>
-                - name: RENOVATE_GIT_FS
-                  value: ssh
-                - name: RENOVATE_PLATFORM
-                  valueFrom:
-                    secretKeyRef:
-                      key: renovate-platform
-                      name: renovate-env
-                - name: RENOVATE_ENDPOINT
-                  valueFrom:
-                    secretKeyRef:
-                      key: renovate-endpoint
-                      name: renovate-env
-                - name: RENOVATE_TOKEN
-                  valueFrom:
-                    secretKeyRef:
-                      key: renovate-token
-                      name: renovate-env
-                - name: GITHUB_COM_TOKEN
-                  valueFrom:
-                    secretKeyRef:
-                      key: github-token
-                      name: renovate-env
-                - name: RENOVATE_AUTODISCOVER
-                  valueFrom:
-                    secretKeyRef:
-                      key: renovate-autodiscover
-                      name: renovate-env
+              envFrom:
+                - secretRef:
+                    name: renovate-env
           restartPolicy: Never
 ```
 
