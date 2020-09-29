@@ -167,5 +167,25 @@ describe('datasource/rubygems', () => {
       expect(await getPkgReleases(params)).toBeNull();
       expect(httpMock.getTrace()).toMatchSnapshot();
     });
+    it('falls back to info when version request fails', async () => {
+      httpMock
+        .scope('https://thirdparty.com/')
+        .get('/api/v1/gems/rails.json')
+        .reply(200, railsInfo)
+        .get('/api/v1/versions/rails.json')
+        .reply(400, {});
+      const res = await getPkgReleases(params);
+      expect(res.releases).toHaveLength(1);
+      expect(res.releases[0].version).toBe(railsInfo.version);
+    });
+    it('errors when version request fails with anything other than 400 or 404', async () => {
+      httpMock
+        .scope('https://thirdparty.com/')
+        .get('/api/v1/gems/rails.json')
+        .reply(200, railsInfo)
+        .get('/api/v1/versions/rails.json')
+        .reply(500, {});
+      expect(await getPkgReleases(params)).toBeNull();
+    });
   });
 });

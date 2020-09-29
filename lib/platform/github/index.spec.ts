@@ -1598,6 +1598,7 @@ describe('platform/github', () => {
         .post('/repos/some/repo/pulls')
         .reply(200, {
           number: 123,
+          head: { repo: { full_name: 'some/repo' } },
         })
         .post('/repos/some/repo/issues/123/labels')
         .reply(200, []);
@@ -1617,6 +1618,7 @@ describe('platform/github', () => {
       initRepoMock(scope, 'some/repo');
       scope.post('/repos/some/repo/pulls').reply(200, {
         number: 123,
+        head: { repo: { full_name: 'some/repo' } },
       });
       await github.initRepo({ repository: 'some/repo', token: 'token' } as any);
       const pr = await github.createPr({
@@ -1634,6 +1636,7 @@ describe('platform/github', () => {
       initRepoMock(scope, 'some/repo');
       scope.post('/repos/some/repo/pulls').reply(200, {
         number: 123,
+        head: { repo: { full_name: 'some/repo' } },
       });
       await github.initRepo({ repository: 'some/repo', token: 'token' } as any);
       const pr = await github.createPr({
