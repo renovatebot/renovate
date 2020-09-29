@@ -77,7 +77,7 @@ export async function getDigest(
   if (newValue?.length) {
     return getTagCommit(githubRepo, newValue);
   }
-  const cachedResult = await packageCache.get(
+  const cachedResult = await packageCache.get<string>(
     cacheNamespace,
     getCacheKey(githubRepo, 'commit')
   );

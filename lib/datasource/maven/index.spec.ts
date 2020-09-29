@@ -106,7 +106,7 @@ describe('datasource/maven', () => {
     nock.enableNetConnect();
   });
 
-  function generateReleases(versions): Release[] {
+  function generateReleases(versions: string[]): Release[] {
     return versions.map((v) => ({ version: v }));
   }
 

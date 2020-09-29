@@ -290,7 +290,7 @@ export async function getBranchStatusCheck(
   const azureApiGit = await azureApi.gitApi();
   const branch = await azureApiGit.getBranch(
     config.repoId,
-    getBranchNameWithoutRefsheadsPrefix(branchName)!
+    getBranchNameWithoutRefsheadsPrefix(branchName)
   );
   if (branch.aheadCount === 0) {
     return BranchStatus.green;
