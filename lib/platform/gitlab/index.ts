@@ -1,7 +1,6 @@
 import URL, { URLSearchParams } from 'url';
 import is from '@sindresorhus/is';
 import delay from 'delay';
-import { configFileNames } from '../../config/app-strings';
 import {
   PLATFORM_AUTHENTICATION_ERROR,
   REPOSITORY_ACCESS_FORBIDDEN,
@@ -42,14 +41,12 @@ import { GitlabComment, GitlabIssue, MergeMethod, RepoResponse } from './types';
 
 const gitlabApi = new GitlabHttp();
 
-const defaultConfigFile = configFileNames[0];
 let config: {
   repository: string;
   localDir: string;
   email: string;
   prList: any[];
   issueList: GitlabIssue[];
-  optimizeForDisabled: boolean;
   mergeMethod: MergeMethod;
   defaultBranch: string;
 } = {} as any;
@@ -141,7 +138,6 @@ export async function getJsonFile(fileName: string): Promise<any | null> {
 export async function initRepo({
   repository,
   localDir,
-  optimizeForDisabled,
 }: RepoParams): Promise<RepoResult> {
   config = {} as any;
   config.repository = urlEscape(repository);
@@ -180,12 +176,6 @@ export async function initRepo({
       throw new Error(REPOSITORY_EMPTY);
     }
     config.defaultBranch = res.body.default_branch;
-    if (optimizeForDisabled) {
-      const renovateConfig = await getJsonFile(defaultConfigFile);
-      if (renovateConfig && renovateConfig.enabled === false) {
-        throw new Error(REPOSITORY_DISABLED);
-      }
-    }
     config.mergeMethod = res.body.merge_method || 'merge';
     logger.debug(`${repository} default branch = ${config.defaultBranch}`);
     delete config.prList;
