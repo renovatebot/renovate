@@ -1166,7 +1166,7 @@ e.g.
 }
 ```
 
-The `postUpdateTasks` configuration consists of two fields:
+The `postUpgradeTasks` configuration consists of two fields:
 
 ### commands
 
