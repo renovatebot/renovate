@@ -3,7 +3,6 @@ import * as httpMock from '../../../test/httpMock';
 import { getName } from '../../../test/util';
 import {
   REPOSITORY_CHANGED,
-  REPOSITORY_DISABLED,
   REPOSITORY_EMPTY,
   REPOSITORY_NOT_FOUND,
 } from '../../constants/error-messages';
@@ -280,14 +279,6 @@ describe(getName(__filename), () => {
             )
             .reply(200, {
               displayId: 'master',
-            })
-            .get(
-              `${urlPath}/rest/api/1.0/projects/SOME/repos/repo/browse/renovate.json?limit=20000`
-            )
-            .reply(200, {
-              isLastPage: false,
-              lines: [{ text: '{' }],
-              size: 50000,
             });
           const res = await bitbucket.initRepo({
             endpoint: 'https://stash.renovatebot.com/vcs/',
@@ -317,28 +308,6 @@ describe(getName(__filename), () => {
               optimizeForDisabled: false,
             })
           ).rejects.toThrow(REPOSITORY_EMPTY);
-          expect(httpMock.getTrace()).toMatchSnapshot();
-        });
-
-        it('throws disabled', async () => {
-          expect.assertions(2);
-          httpMock
-            .scope(urlHost)
-            .get(
-              `${urlPath}/rest/api/1.0/projects/SOME/repos/repo/browse/renovate.json?limit=20000`
-            )
-            .reply(200, {
-              isLastPage: true,
-              lines: [{ text: '{ "enabled": false' }, { text: '}' }],
-            });
-          await expect(
-            bitbucket.initRepo({
-              endpoint: 'https://stash.renovatebot.com/vcs/',
-              repository: 'SOME/repo',
-              localDir: '',
-              optimizeForDisabled: true,
-            })
-          ).rejects.toThrow(REPOSITORY_DISABLED);
           expect(httpMock.getTrace()).toMatchSnapshot();
         });
       });

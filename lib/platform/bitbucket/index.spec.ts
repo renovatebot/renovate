@@ -1,6 +1,5 @@
 import nock from 'nock';
 import * as httpMock from '../../../test/httpMock';
-import { REPOSITORY_DISABLED } from '../../constants/error-messages';
 import { logger as _logger } from '../../logger';
 import { BranchStatus, PrState } from '../../types';
 import * as _git from '../../util/git';
@@ -151,29 +150,6 @@ describe('platform/bitbucket', () => {
           optimizeForDisabled: false,
         })
       ).toMatchSnapshot();
-      expect(httpMock.getTrace()).toMatchSnapshot();
-    });
-
-    it('throws disabled', async () => {
-      expect.assertions(2);
-      httpMock
-        .scope(baseUrl)
-        .get('/2.0/repositories/some/empty')
-        .reply(200, { owner: {}, mainbranch: { name: 'master' } })
-        .get('/2.0/repositories/some/empty/src/master/renovate.json')
-        .reply(
-          200,
-          JSON.stringify({
-            enabled: false,
-          })
-        );
-      await expect(
-        bitbucket.initRepo({
-          repository: 'some/empty',
-          optimizeForDisabled: true,
-          localDir: '',
-        })
-      ).rejects.toThrow(REPOSITORY_DISABLED);
       expect(httpMock.getTrace()).toMatchSnapshot();
     });
   });

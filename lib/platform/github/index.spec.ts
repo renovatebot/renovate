@@ -2,7 +2,6 @@ import fs from 'fs-extra';
 import * as httpMock from '../../../test/httpMock';
 import { mocked } from '../../../test/util';
 import {
-  REPOSITORY_DISABLED,
   REPOSITORY_NOT_FOUND,
   REPOSITORY_RENAMED,
 } from '../../constants/error-messages';
@@ -217,21 +216,6 @@ describe('platform/github', () => {
   }
 
   describe('initRepo', () => {
-    it('should throw err if disabled in renovate.json', async () => {
-      const scope = httpMock.scope(githubApiHost);
-      initRepoMock(scope, 'some/repo');
-      scope.get('/repos/some/repo/contents/renovate.json').reply(200, {
-        content: Buffer.from('{"enabled": false}').toString('base64'),
-      });
-
-      await expect(
-        github.initRepo({
-          repository: 'some/repo',
-          optimizeForDisabled: true,
-        } as any)
-      ).rejects.toThrow(REPOSITORY_DISABLED);
-      expect(httpMock.getTrace()).toMatchSnapshot();
-    });
     it('should rebase', async () => {
       const scope = httpMock.scope(githubApiHost);
       initRepoMock(scope, 'some/repo');

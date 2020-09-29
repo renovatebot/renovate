@@ -5,7 +5,6 @@ import {
   REPOSITORY_ARCHIVED,
   REPOSITORY_BLOCKED,
   REPOSITORY_CHANGED,
-  REPOSITORY_DISABLED,
   REPOSITORY_EMPTY,
   REPOSITORY_MIRRORED,
 } from '../../constants/error-messages';
@@ -249,18 +248,6 @@ describe('platform/gitea', () => {
       helper.getRepo.mockRejectedValueOnce(new Error('getRepo()'));
 
       await expect(gitea.initRepo(initRepoCfg)).rejects.toThrow('getRepo()');
-    });
-
-    it('should abort when disabled and optimizeForDisabled is enabled', async () => {
-      helper.getRepoContents.mockResolvedValueOnce(
-        partial<ght.RepoContents>({
-          contentString: JSON.stringify({ enabled: false }),
-        })
-      );
-
-      await expect(
-        initFakeRepo({}, { optimizeForDisabled: true })
-      ).rejects.toThrow(REPOSITORY_DISABLED);
     });
 
     it('should abort when repo is archived', async () => {

@@ -145,29 +145,6 @@ describe('platform/gitlab', () => {
   }
 
   describe('initRepo', () => {
-    it(`should throw error if disabled in renovate.json`, async () => {
-      httpMock
-        .scope(gitlabApiHost)
-        .get('/api/v4/projects/some%2Frepo')
-        .reply(200, {
-          default_branch: 'master',
-          http_url_to_repo: 'https://gitlab.com/some/repo.git',
-        })
-        .get(
-          '/api/v4/projects/some%2Frepo/repository/files/renovate.json?ref=master'
-        )
-        .reply(200, {
-          content: Buffer.from('{"enabled": false}').toString('base64'),
-        });
-      await expect(
-        gitlab.initRepo({
-          repository: 'some/repo',
-          localDir: '',
-          optimizeForDisabled: true,
-        })
-      ).rejects.toThrow(REPOSITORY_DISABLED);
-      expect(httpMock.getTrace()).toMatchSnapshot();
-    });
     it(`should escape all forward slashes in project names`, async () => {
       httpMock
         .scope(gitlabApiHost)
