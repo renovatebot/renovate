@@ -1166,7 +1166,7 @@ e.g.
 }
 ```
 
-The `postUpdateTasks` configuration consists of two fields:
+The `postUpgradeTasks` configuration consists of two fields:
 
 ### commands
 
@@ -1416,7 +1416,20 @@ If the `versioning` for a dependency is not captured with a named group then it 
 
 ## registryUrls
 
-This is only necessary in case you need to manually configure a registry URL to use for datasource lookups. Applies to PyPI (pip) only for now. Supports only one URL for now but is defined as a list for forward compatibility.
+Usually Renovate is able to either (a) use the default registries for a datasource, or (b) automatically detect during the manager extract phase which custom registries are in use. In case there is a need to configure them manually, it can be done using this `registryUrls` field, typically using `packageUrls` like so:
+
+```json
+{
+  "packageRules": [
+    {
+      "datasources": ["docker"],
+      "registryUrls": ["https://docker.mycompany.domain"]
+    }
+  ]
+}
+```
+
+The field supports multiple URLs however it is datasource-dependent on whether only the first is used or multiple.
 
 ## requiredStatusChecks
 
