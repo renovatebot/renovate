@@ -20,6 +20,8 @@ interface TerraformProvider {
   provider: string;
   source?: string;
   versions: string[];
+  version: string;
+  published_at: string;
 }
 
 interface TerraformProviderReleaseBackend {
@@ -54,6 +56,11 @@ async function queryRegistry(
   dep.releases = res.versions.map((version) => ({
     version,
   }));
+  // set published date for latest release
+  const currentVersionIndex = dep.releases.findIndex((release) => {
+    return res.version === release.version;
+  });
+  dep.releases[currentVersionIndex].releaseTimestamp = res.published_at;
   dep.homepage = `${registryURL}/providers/${repository}`;
   logger.trace({ dep }, 'dep');
   return dep;

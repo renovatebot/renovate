@@ -43,6 +43,8 @@ interface TerraformRelease {
   provider: string;
   source?: string;
   versions: string[];
+  version: string;
+  published_at: string;
 }
 
 export interface ServiceDiscoveryResult {
@@ -132,6 +134,11 @@ export async function getReleases({
     if (pkgUrl.startsWith('https://registry.terraform.io/')) {
       dep.homepage = `https://registry.terraform.io/modules/${repository}`;
     }
+    // set published date for latest release
+    const currentVersionIndex = dep.releases.findIndex((release) => {
+      return res.version === release.version;
+    });
+    dep.releases[currentVersionIndex].releaseTimestamp = res.published_at;
     logger.trace({ dep }, 'dep');
     const cacheMinutes = 30;
     await packageCache.set(cacheNamespace, pkgUrl, dep, cacheMinutes);
