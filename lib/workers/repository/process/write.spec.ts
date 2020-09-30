@@ -1,8 +1,10 @@
-import { RenovateConfig, getConfig, mocked } from '../../../../test/util';
+import { RenovateConfig, getConfig, git, mocked } from '../../../../test/util';
 import * as _branchWorker from '../../branch';
 import { BranchConfig, ProcessBranchResult } from '../../common';
 import * as _limits from './limits';
 import { writeUpdates } from './write';
+
+jest.mock('../../../util/git');
 
 const branchWorker = mocked(_branchWorker);
 const limits = mocked(_limits);
@@ -25,6 +27,7 @@ describe('workers/repository/write', () => {
         { blockedByPin: true },
         {},
       ] as never;
+      git.branchExists.mockReturnValueOnce(false);
       const res = await writeUpdates(config, branches);
       expect(res).toEqual('done');
       expect(branchWorker.processBranch).toHaveBeenCalledTimes(2);
@@ -37,6 +40,7 @@ describe('workers/repository/write', () => {
         {},
         {},
       ] as never;
+      git.branchExists.mockReturnValue(true);
       branchWorker.processBranch.mockResolvedValueOnce(
         ProcessBranchResult.PrCreated
       );
