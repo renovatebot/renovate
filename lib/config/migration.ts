@@ -487,6 +487,10 @@ export function migrateConfig(
           }
         }
         migratedConfig[key] = newArray;
+      } else if (key === 'compatibility' && is.object(val)) {
+        isMigrated = true;
+        migratedConfig.constraints = migratedConfig.compatibility;
+        delete migratedConfig.compatibility;
       } else if (is.object(val)) {
         const subMigrate = migrateConfig(
           migratedConfig[key] as RenovateConfig,
