@@ -6,7 +6,6 @@ import {
 } from '../../../constants/error-messages';
 import * as npmApi from '../../../datasource/npm';
 import { RepoParams, RepoResult, platform } from '../../../platform';
-import { getJsonFile } from '../../../platform/github';
 
 // TODO: fix types
 export type WorkerPlatformConfig = RepoResult &
@@ -31,7 +30,7 @@ async function validateIncludeForks(
   repoResult: RepoResult
 ): Promise<void> {
   if (!repoParams.includeForks && repoResult.isFork) {
-    const renovateConfig = await getJsonFile(defaultConfigFile);
+    const renovateConfig = await platform.getJsonFile(defaultConfigFile);
     if (!renovateConfig?.includeForks) {
       throw new Error(REPOSITORY_FORKED);
     }
