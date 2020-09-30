@@ -5,6 +5,7 @@ import MarkdownIt from 'markdown-it';
 import { logger } from '../../../logger';
 import * as memCache from '../../../util/cache/memory';
 import * as packageCache from '../../../util/cache/package';
+import { toPromise } from '../../../util/promises';
 import { ChangeLogFile, ChangeLogNotes, ChangeLogResult } from './common';
 import * as github from './github';
 import * as gitlab from './gitlab';
@@ -42,10 +43,10 @@ export function getCachedReleaseList(
   repository: string
 ): Promise<ChangeLogNotes[]> {
   const cacheKey = `getReleaseList-${apiBaseUrl}-${repository}`;
-  const cachedResult = memCache.get(cacheKey);
+  const cachedResult: ChangeLogNotes[] = memCache.get(cacheKey);
   // istanbul ignore if
   if (cachedResult) {
-    return cachedResult;
+    return toPromise(cachedResult);
   }
   const promisedRes = getReleaseList(apiBaseUrl, repository);
   memCache.set(cacheKey, promisedRes);
@@ -181,10 +182,10 @@ export function getReleaseNotesMdFile(
   apiBaseUrl: string
 ): Promise<ChangeLogFile> | null {
   const cacheKey = `getReleaseNotesMdFile-${repository}-${apiBaseUrl}`;
-  const cachedResult = memCache.get(cacheKey);
+  const cachedResult: ChangeLogFile = memCache.get(cacheKey);
   // istanbul ignore if
   if (cachedResult !== undefined) {
-    return cachedResult;
+    return toPromise(cachedResult);
   }
   const promisedRes = getReleaseNotesMdFileInner(repository, apiBaseUrl);
   memCache.set(cacheKey, promisedRes);

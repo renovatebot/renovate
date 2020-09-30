@@ -74,7 +74,7 @@ describe('workers/pr/code-owners', () => {
           if (path === codeOwnerFilePath) {
             return Promise.resolve(['* @mike'].join('\n'));
           }
-          return Promise.resolve(null);
+          return Promise.resolve<string>(null);
         });
         git.getBranchFiles.mockResolvedValueOnce(['README.md']);
         const codeOwners = await codeOwnersForPr(pr);
