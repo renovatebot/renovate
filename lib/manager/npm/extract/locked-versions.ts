@@ -21,9 +21,9 @@ export async function getLockedVersions(
       if (!isYarn1) {
         if (cacheVersion >= 6) {
           // https://github.com/yarnpkg/berry/commit/f753790380cbda5b55d028ea84b199445129f9ba
-          packageFile.compatibility.yarn = '>= 2.2.0';
+          packageFile.constraints.yarn = '>= 2.2.0';
         } else {
-          packageFile.compatibility.yarn = '>= 2.0.0';
+          packageFile.constraints.yarn = '>= 2.0.0';
         }
       }
       for (const dep of packageFile.deps) {

@@ -40,7 +40,7 @@ const config = {
   localDir: join('/tmp/github/some/repo'),
   cacheDir: join('/tmp/renovate/cache'),
   dockerUser: 'foobar',
-  compatibility: { go: '1.14' },
+  constraints: { go: '1.14' },
 };
 
 const goEnv = {

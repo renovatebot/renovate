@@ -10,7 +10,7 @@ export interface DigestConfig extends Config {
 }
 
 interface ReleasesConfigBase {
-  compatibility?: Record<string, string>;
+  constraints?: Record<string, string>;
   npmrc?: string;
   registryUrls?: string[];
 }

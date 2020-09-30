@@ -47,7 +47,7 @@ export async function generateLockFile(
   logger.debug(`Spawning yarn install to create ${lockFileName}`);
   let lockFile = null;
   try {
-    const yarnCompatibility = config.compatibility?.yarn;
+    const yarnCompatibility = config.constraints?.yarn;
     const minYarnVersion =
       validRange(yarnCompatibility) && minVersion(yarnCompatibility);
     const isYarn1 = !minYarnVersion || minYarnVersion.major === 1;
