@@ -1587,8 +1587,9 @@ const options: RenovateOptions[] = [
     cli: false,
   },
   {
-    name: 'compatibility',
-    description: 'Configuration object for compatibility',
+    name: 'constraints',
+    description:
+      'Configuration object for define language or manager version constraints',
     type: 'object',
     default: {},
     mergeable: true,

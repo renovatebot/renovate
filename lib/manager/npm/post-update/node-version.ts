@@ -19,7 +19,7 @@ async function getNodeFile(filename: string): Promise<string> | null {
 }
 
 function getPackageJsonConstraint(config: PostUpdateConfig): string | null {
-  const constraint: string = config.compatibility?.node;
+  const constraint: string = config.constraints?.node;
   if (constraint && validRange(constraint)) {
     logger.debug(`Using node constraint "${constraint}" from package.json`);
     return constraint;

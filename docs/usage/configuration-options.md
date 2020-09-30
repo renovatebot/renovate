@@ -232,21 +232,25 @@ This is used to add a suffix to commit messages. Usually left empty except for i
 
 This is used to alter `commitMessage` and `prTitle` without needing to copy/paste the whole string. The "topic" is usually refers to the dependency being updated, e.g. `"dependency react"`.
 
-## compatibility
+## configWarningReuseIssue
 
-This is used to manually restrict which versions are possible to upgrade to based on their language support. For now this only supports `python`, other compatibility restrictions will be added in the future.
+Renovate's default behaviour is to reuse/reopen a single Config Warning issue in each repository so as to keep the "noise" down. However for some people this has the downside that the config warning won't be sorted near the top if you view issues by creation date. Configure this option to `false` if you prefer Renovate to open a new issue whenever there is a config warning.
+
+## constraints
+
+Constraints are used in package managers which use third party tools to update "artifacts" like lock files or checksum files. Typically, the constraint is detected automatically by Renovate from files within the repository and there is no need to manually configure it.
+
+Constraints are also used to manually restrict which _datasource_ versions are possible to upgrade to based on their language support. For now this only supports `python`, other compatibility restrictions will be added in the future.
 
 ```json
 {
-  "compatibility": {
+  "constraints": {
     "python": "2.7"
   }
 }
 ```
 
-## configWarningReuseIssue
-
-Renovate's default behaviour is to reuse/reopen a single Config Warning issue in each repository so as to keep the "noise" down. However for some people this has the downside that the config warning won't be sorted near the top if you view issues by creation date. Configure this option to `false` if you prefer Renovate to open a new issue whenever there is a config warning.
+Note: make sure not to mix this up with the term `compatibility`, which Renovate uses in the context of version releases, e.g. if a Docker image is `node:12.16.0-alpine` then the `-alpine` suffix represents `compatibility`.
 
 ## dependencyDashboard
 

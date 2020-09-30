@@ -62,7 +62,7 @@ describe('lib/manager/poetry/extract', () => {
       const res = extractPackageFile(pyproject1toml, filename);
       expect(res.deps).toMatchSnapshot();
       expect(res.deps).toHaveLength(9);
-      expect(res.compatibility).toEqual({
+      expect(res.constraints).toEqual({
         poetry: 'poetry>=1.0 wheel',
         python: '~2.7 || ^3.4',
       });

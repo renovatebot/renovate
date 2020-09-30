@@ -92,7 +92,7 @@ const repoGroups = {
     'https://github.com/mozilla-neutrino/neutrino-dev',
   ],
   nextjs: [
-    'https://github.com/zeit/next.js', // for compatibility
+    'https://github.com/zeit/next.js', // old repo
     'https://github.com/vercel/next.js',
   ],
   ngrx: 'https://github.com/ngrx/',
