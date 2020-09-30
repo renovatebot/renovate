@@ -2,7 +2,6 @@ import { URL } from 'url';
 import Git from 'simple-git';
 
 import * as packageCache from '../../util/cache/package';
-import { toPromise } from '../../util/promises';
 import { DigestConfig, GetReleasesConfig, ReleaseResult } from '../common';
 
 export const id = 'git-submodules';
@@ -52,4 +51,4 @@ export async function getReleases({
 export const getDigest = (
   config: DigestConfig,
   newValue?: string
-): Promise<string> => toPromise(newValue);
+): Promise<string> => Promise.resolve(newValue);

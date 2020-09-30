@@ -5,7 +5,6 @@ import { logger } from '../../../logger';
 import * as memCache from '../../../util/cache/memory';
 import * as packageCache from '../../../util/cache/package';
 import * as hostRules from '../../../util/host-rules';
-import { toPromise } from '../../../util/promises';
 import * as allVersioning from '../../../versioning';
 import { BranchUpgradeConfig } from '../../common';
 import { ChangeLogError, ChangeLogRelease, ChangeLogResult } from './common';
@@ -17,10 +16,10 @@ function getCachedTags(
   repository: string
 ): Promise<string[]> {
   const cacheKey = `getTags-${endpoint}-${repository}`;
-  const cachedResult: string[] = memCache.get(cacheKey);
+  const cachedResult = memCache.get<string[]>(cacheKey);
   // istanbul ignore if
-  if (cachedResult !== undefined) {
-    return toPromise(cachedResult);
+  if (cachedResult) {
+    return Promise.resolve(cachedResult);
   }
   const promisedRes = getTags(endpoint, repository);
   memCache.set(cacheKey, promisedRes);
