@@ -162,7 +162,7 @@ describe('updateArtifacts', () => {
     ).toMatchSnapshot();
   });
 
-  // it('uses hostRules to write auth.json', async () => {
+  // _it('uses hostRules to write auth.json', async () => {
   //   fs.readLocalFile.mockResolvedValueOnce('Current composer.lock' as any);
   //   const execSnapshots = mockExecAll(exec);
   //   fs.readLocalFile.mockReturnValueOnce('Current composer.lock' as any);
