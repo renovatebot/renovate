@@ -175,7 +175,7 @@ terraform {
 terraform {
   required_providers {
     docker = {
-      source  = "terraform-providers/docker"
+      source  = "docker"
       version = "2.7.2"
     }
     invalid = {

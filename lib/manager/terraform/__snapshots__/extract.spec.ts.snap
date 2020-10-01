@@ -296,9 +296,7 @@ Object {
       "depName": "docker",
       "depNameShort": "docker",
       "depType": "terraform",
-      "registryUrls": Array [
-        "https://releases.hashicorp.com",
-      ],
+      "lookupName": "docker",
     },
     Object {
       "currentValue": "1.2.4",
@@ -315,9 +313,6 @@ Object {
       "depNameShort": "helm",
       "depType": "terraform",
       "lookupName": "hashicorp/helm",
-      "registryUrls": Array [
-        "https://registry.terraform.io",
-      ],
     },
     Object {
       "currentValue": ">= 1.0",
