@@ -37,6 +37,7 @@ export default function errSerializer(err: Error): any {
         statusMessage: err.response?.statusMessage,
         body: clone(err.response.body),
         headers: clone(err.response.headers),
+        httpVersion: err.response.httpVersion,
       };
     }
   }
