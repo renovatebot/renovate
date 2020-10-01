@@ -5,7 +5,6 @@ import {
 } from '../../../constants/error-messages';
 import { initApis } from './apis';
 
-
 describe('workers/repository/init/apis', () => {
   describe('initApis', () => {
     let config: RenovateConfig;
