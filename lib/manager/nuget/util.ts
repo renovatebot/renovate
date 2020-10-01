@@ -22,7 +22,7 @@ export interface Registry {
 export async function determineRegistries(
   packageFile: string,
   localDir: string
-): Promise<Registry[]> {
+): Promise<Registry[] | undefined> {
   // Valid file names taken from https://github.com/NuGet/NuGet.Client/blob/f64621487c0b454eda4b98af853bf4a528bef72a/src/NuGet.Core/NuGet.Configuration/Settings/Settings.cs#L34
   const nuGetConfigFileNames = ['nuget.config', 'NuGet.config', 'NuGet.Config'];
   const nuGetConfigPath = await findUp(nuGetConfigFileNames, {

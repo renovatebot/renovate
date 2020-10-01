@@ -63,6 +63,9 @@ export async function extractPackageFile(
   const versioning = get(config.versioning || semverVersioning.id);
 
   const registries = await determineRegistries(packageFile, config.localDir);
+  const registryUrls = registries
+    ? registries.map((registry) => registry.url)
+    : undefined;
 
   if (packageFile.endsWith('.config/dotnet-tools.json')) {
     const deps: PackageDependency[] = [];
@@ -89,8 +92,8 @@ export async function extractPackageFile(
         currentValue,
         datasource: datasourceNuget.id,
       };
-      if (registries) {
-        dep.registryUrls = registries.map((registry) => registry.url);
+      if (registryUrls) {
+        dep.registryUrls = registryUrls;
       }
 
       deps.push(dep);
