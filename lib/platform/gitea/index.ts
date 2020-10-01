@@ -211,8 +211,8 @@ const platform: Platform = {
   async getJsonFile(fileName: string): Promise<any | null> {
     try {
       const contents = await helper.getRepoContents(
+        config.repository,
         fileName,
-        defaultConfigFile,
         config.defaultBranch
       );
       return JSON.parse(contents.contentString);
@@ -286,7 +286,7 @@ const platform: Platform = {
 
     // Optionally check if Renovate is disabled by attempting to fetch default configuration file
     if (optimizeForDisabled) {
-      renovateConfig = await platform.getJsonFile(config.repository);
+      renovateConfig = await platform.getJsonFile(defaultConfigFile);
       if (renovateConfig && renovateConfig.enabled === false) {
         throw new Error(REPOSITORY_DISABLED);
       }
