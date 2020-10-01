@@ -3,6 +3,7 @@ import {
   GitPullRequest,
   GitPullRequestCommentThread,
   GitPullRequestMergeStrategy,
+  GitStatusState,
   PullRequestStatus,
 } from 'azure-devops-node-api/interfaces/GitInterfaces';
 import {
@@ -292,9 +293,43 @@ export async function getBranchStatusCheck(
     config.repoId,
     getBranchNameWithoutRefsheadsPrefix(branchName)
   );
-  if (branch.aheadCount === 0) {
+  // only grab the latest statuses, it will group any by context
+  const statuses = await azureApiGit.getStatuses(
+    branch.commit.commitId,
+    config.repoId,
+    undefined,
+    undefined,
+    undefined,
+    true
+  );
+  if (statuses.length === 0) {
+    logger.trace(
+      `No branch statuses found on ${branchName}, defaulting to success`
+    );
+    // no statuses so we'll assume its fine
     return BranchStatus.green;
   }
+  if (statuses.every((status) => status.state === GitStatusState.Succeeded)) {
+    logger.trace(`All branch statuses found on ${branchName} were successful`);
+    return BranchStatus.green;
+  }
+  if (
+    statuses.some(
+      (status) =>
+        status.state === GitStatusState.Error ||
+        status.state === GitStatusState.Failed
+    )
+  ) {
+    logger.trace(
+      `An error or failing branch status was found on ${branchName}`
+    );
+    return BranchStatus.red;
+  }
+
+  logger.trace(
+    `All branch statuses found on ${branchName} were either successful or pending`
+  );
+  // otherwise it's pending or in an unknown state
   return BranchStatus.yellow;
 }
 

@@ -1,5 +1,8 @@
 import is from '@sindresorhus/is';
-import { PullRequestStatus } from 'azure-devops-node-api/interfaces/GitInterfaces';
+import {
+  GitStatusState,
+  PullRequestStatus,
+} from 'azure-devops-node-api/interfaces/GitInterfaces';
 import { REPOSITORY_DISABLED } from '../../constants/error-messages';
 import { BranchStatus, PrState } from '../../types';
 import * as _git from '../../util/git';
@@ -333,7 +336,78 @@ describe('platform/azure', () => {
       expect(pr).toMatchSnapshot();
     });
   });
-
+  describe('getBranchStatusCheck(branchName, context)', () => {
+    it('should return success if no statuses on the branch', async () => {
+      await initRepo({ repository: 'some/repo' });
+      azureApi.gitApi.mockImplementationOnce(
+        () =>
+          ({
+            getBranch: jest.fn(() => ({ commit: { commitId: 'abcd1234' } })),
+            getStatuses: jest.fn(() => []),
+          } as any)
+      );
+      const res = await azure.getBranchStatusCheck('somebranch', 'context');
+      expect(res).toEqual(BranchStatus.green);
+    });
+    it('should return success if all statuses on the branch are succeeding', async () => {
+      await initRepo({ repository: 'some/repo' });
+      azureApi.gitApi.mockImplementationOnce(
+        () =>
+          ({
+            getBranch: jest.fn(() => ({ commit: { commitId: 'abcd1234' } })),
+            getStatuses: jest.fn(() => [{ state: GitStatusState.Succeeded }]),
+          } as any)
+      );
+      const res = await azure.getBranchStatusCheck('somebranch', 'context');
+      expect(res).toEqual(BranchStatus.green);
+    });
+    it('should return failed if any statuses on the branch are failing', async () => {
+      await initRepo({ repository: 'some/repo' });
+      azureApi.gitApi.mockImplementationOnce(
+        () =>
+          ({
+            getBranch: jest.fn(() => ({ commit: { commitId: 'abcd1234' } })),
+            getStatuses: jest.fn(() => [
+              { state: GitStatusState.Succeeded },
+              { state: GitStatusState.Failed },
+            ]),
+          } as any)
+      );
+      const res = await azure.getBranchStatusCheck('somebranch', 'context');
+      expect(res).toEqual(BranchStatus.red);
+    });
+    it('should return failed if any statuses on the branch are error', async () => {
+      await initRepo({ repository: 'some/repo' });
+      azureApi.gitApi.mockImplementationOnce(
+        () =>
+          ({
+            getBranch: jest.fn(() => ({ commit: { commitId: 'abcd1234' } })),
+            getStatuses: jest.fn(() => [
+              { state: GitStatusState.Succeeded },
+              { state: GitStatusState.Error },
+            ]),
+          } as any)
+      );
+      const res = await azure.getBranchStatusCheck('somebranch', 'context');
+      expect(res).toEqual(BranchStatus.red);
+    });
+    it('should return pending if not all statuses on the branch are succeeding but no error or failures', async () => {
+      await initRepo({ repository: 'some/repo' });
+      azureApi.gitApi.mockImplementationOnce(
+        () =>
+          ({
+            getBranch: jest.fn(() => ({ commit: { commitId: 'abcd1234' } })),
+            getStatuses: jest.fn(() => [
+              { state: GitStatusState.Succeeded },
+              { state: GitStatusState.Pending },
+              { state: GitStatusState.NotSet },
+            ]),
+          } as any)
+      );
+      const res = await azure.getBranchStatusCheck('somebranch', 'context');
+      expect(res).toEqual(BranchStatus.yellow);
+    });
+  });
   describe('getBranchStatus(branchName, requiredStatusChecks)', () => {
     it('return success if requiredStatusChecks null', async () => {
       await initRepo('some-repo');
@@ -350,7 +424,8 @@ describe('platform/azure', () => {
       azureApi.gitApi.mockImplementationOnce(
         () =>
           ({
-            getBranch: jest.fn(() => ({ aheadCount: 0 })),
+            getBranch: jest.fn(() => ({ commit: { commitId: 'abcd1234' } })),
+            getStatuses: jest.fn(() => [{ state: GitStatusState.Succeeded }]),
           } as any)
       );
       const res = await azure.getBranchStatus('somebranch', []);
@@ -361,7 +436,20 @@ describe('platform/azure', () => {
       azureApi.gitApi.mockImplementationOnce(
         () =>
           ({
-            getBranch: jest.fn(() => ({ aheadCount: 123 })),
+            getBranch: jest.fn(() => ({ commit: { commitId: 'abcd1234' } })),
+            getStatuses: jest.fn(() => [{ state: GitStatusState.Error }]),
+          } as any)
+      );
+      const res = await azure.getBranchStatus('somebranch', []);
+      expect(res).toEqual(BranchStatus.red);
+    });
+    it('should pass through pending', async () => {
+      await initRepo({ repository: 'some/repo' });
+      azureApi.gitApi.mockImplementationOnce(
+        () =>
+          ({
+            getBranch: jest.fn(() => ({ commit: { commitId: 'abcd1234' } })),
+            getStatuses: jest.fn(() => [{ state: GitStatusState.Pending }]),
           } as any)
       );
       const res = await azure.getBranchStatus('somebranch', []);
