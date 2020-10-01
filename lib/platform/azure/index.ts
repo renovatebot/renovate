@@ -567,6 +567,9 @@ export async function setBranchStatus({
   state,
   url: targetUrl,
 }: BranchStatusConfig): Promise<void> {
+  logger.debug(
+    `setBranchStatus(${branchName}, ${context}, ${description}, ${state}, ${targetUrl})`
+  );
   const azureApiGit = await azureApi.gitApi();
   const branch = await azureApiGit.getBranch(
     config.repoId,
@@ -583,9 +586,7 @@ export async function setBranchStatus({
     branch.commit.commitId,
     config.repoId
   );
-  logger.debug(
-    `setBranchStatus(${branchName}, ${context}, ${description}, ${state}, ${targetUrl}) - Not supported by Azure DevOps (yet!)`
-  );
+  logger.trace(`Created commit status of ${state} on branch ${branchName}`);
 }
 
 export function mergePr(pr: number, branchName: string): Promise<boolean> {
