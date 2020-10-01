@@ -526,6 +526,18 @@ describe('platform/azure', () => {
       const res = await azure.getBranchStatus('somebranch', []);
       expect(res).toEqual(BranchStatus.yellow);
     });
+    it('should fall back to yellow if no statuses returned', async () => {
+      await initRepo({ repository: 'some/repo' });
+      azureApi.gitApi.mockImplementationOnce(
+        () =>
+          ({
+            getBranch: jest.fn(() => ({ commit: { commitId: 'abcd1234' } })),
+            getStatuses: jest.fn(() => []),
+          } as any)
+      );
+      const res = await azure.getBranchStatus('somebranch', []);
+      expect(res).toEqual(BranchStatus.yellow);
+    });
   });
 
   describe('getPr(prNo)', () => {
