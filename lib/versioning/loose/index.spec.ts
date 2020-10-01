@@ -9,7 +9,7 @@ describe('loose.', () => {
     });
   });
   describe('isValid(version)', () => {
-    it('it must support varied precision, from 1 to 6 sections', () => {
+    it('must support varied precision, from 1 to 6 sections', () => {
       [
         'v1.4',
         '3.5.0',
@@ -29,7 +29,7 @@ describe('loose.', () => {
         expect(loose.isValid(version)).toBeNull();
       });
     });
-    it('it should return null if the version string looks like a git commit hash', () => {
+    it('should return null if the version string looks like a git commit hash', () => {
       [
         '0a1b2c3',
         '0a1b2c3d',
@@ -49,7 +49,7 @@ describe('loose.', () => {
     });
   });
   describe('isGreaterThan(version)', () => {
-    it('it should compare using release number than suffix', () => {
+    it('should compare using release number than suffix', () => {
       expect(loose.isGreaterThan('2.4.0', '2.4')).toBe(true);
       expect(loose.isGreaterThan('2.4.2', '2.4.1')).toBe(true);
       expect(loose.isGreaterThan('2.4.beta', '2.4.alpha')).toBe(true);

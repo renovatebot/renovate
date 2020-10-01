@@ -10,10 +10,7 @@ export async function raiseDeprecationWarnings(
   if (!config.repoIsOnboarded) {
     return;
   }
-  if (
-    config.suppressNotifications &&
-    config.suppressNotifications.includes('deprecationWarningIssues')
-  ) {
+  if (config.suppressNotifications?.includes('deprecationWarningIssues')) {
     return;
   }
   for (const [manager, files] of Object.entries(packageFiles)) {

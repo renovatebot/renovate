@@ -59,6 +59,7 @@ async function queryRegistry(
   return dep;
 }
 
+// TODO: add long term cache
 async function queryReleaseBackend(
   lookupName: string,
   registryURL: string,
@@ -72,6 +73,7 @@ async function queryReleaseBackend(
     name: repository,
     versions: {},
     releases: null,
+    sourceUrl: `https://github.com/terraform-providers/${backendLookUpName}`,
   };
   dep.releases = Object.keys(res[backendLookUpName].versions).map(
     (version) => ({
@@ -91,7 +93,9 @@ export async function getReleases({
   lookupName,
   registryUrl,
 }: GetReleasesConfig): Promise<ReleaseResult | null> {
-  const repository = `hashicorp/${lookupName}`;
+  const repository = lookupName.includes('/')
+    ? lookupName
+    : `hashicorp/${lookupName}`;
 
   const cacheNamespace = 'terraform-provider';
   const pkgUrl = `${registryUrl}/${repository}`;

@@ -3,6 +3,7 @@ import { RenovateConfig } from '../../config';
 import { logger, setMeta } from '../../logger';
 import { deleteLocalFile } from '../../util/fs';
 import { addSplit, getSplits, splitInit } from '../../util/split';
+import { setBranchCache } from './cache';
 import { ensureMasterIssue } from './dependency-dashboard';
 import handleError from './error';
 import { finaliseRepo } from './finalise';
@@ -39,8 +40,9 @@ export async function renovateRepository(
       config
     );
     await ensureOnboardingPr(config, packageFiles, branches);
-    const res = await updateRepo(config, branches, branchList);
+    const res = await updateRepo(config, branches);
     addSplit('update');
+    await setBranchCache(branches);
     if (res !== 'automerged') {
       await ensureMasterIssue(config, branches);
     }
@@ -52,7 +54,11 @@ export async function renovateRepository(
     repoResult = processResult(config, errorRes);
   }
   if (config.localDir && !config.persistRepoData) {
-    await deleteLocalFile('.');
+    try {
+      await deleteLocalFile('.');
+    } catch (err) /* istanbul ignore if */ {
+      logger.warn({ err }, 'localDir deletion error');
+    }
   }
   const splits = getSplits();
   logger.debug(splits, 'Repository timing splits (milliseconds)');

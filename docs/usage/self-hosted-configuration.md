@@ -44,6 +44,12 @@ Configure this directory if you want to change which directory Renovate uses for
 
 Set to `false` to prevent usage of `--ignore-platform-reqs` in the composer package manager.
 
+## dockerImagePrefix
+
+Override the default renovate sidecar docker containers image prefix from `docker.io/renovate` to a custom value, so renovate will pull images from a custom docker registry.
+
+If this is set to `ghcr.io/renovatebot` the final image for `node` would become `ghcr.io/renovatebot/node` instead of currently used `docker.io/renovate/node`.
+
 ## dockerMapDotfiles
 
 This is used if you want to map "dotfiles" from your host computer home directory to containers that Renovate creates, e.g. for updating lock files. Currently applicable to `.npmrc` only.
@@ -110,6 +116,10 @@ Set this to `false` if (a) you configure Renovate entirely on the bot side (i.e.
 
 Note that this setting is independent of `branchPrefix`. For example, if you configure `branchPrefix` to be `renovate-` then you'd still have the onboarding PR created with branch `renovate/configure` until you configure `onboardingBranch=renovate-configure` or similar. If you have an existing Renovate installation and you change `onboardingBranch` then it's possible that you'll get onboarding PRs for repositories that had previously closed the onboarding PR unmerged.
 
+## onboardingCommitMessage
+
+Note that if `commitMessagePrefix` or `semanticCommits` values are defined then they will be prepended to the commit message using the same logic that is used for adding them to non-onboarding commit messages.
+
 ## onboardingConfig
 
 ## onboardingPrTitle
@@ -144,6 +154,10 @@ To create the key pair with openssl use the following commands:
 
 - `openssl genrsa -out rsa_priv.pem 4096` for generating the private key
 - `openssl rsa -pubout -in rsa_priv.pem -out rsa_pub.pem` for extracting the public key
+
+## privateKeyPath
+
+Used as an alternative to `privateKey`, if you wish for the key to be read from disk instead.
 
 ## productLinks
 

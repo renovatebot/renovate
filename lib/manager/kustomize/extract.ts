@@ -8,6 +8,7 @@ import { PackageDependency, PackageFile } from '../common';
 interface Image {
   name: string;
   newTag: string;
+  newName?: string;
 }
 
 interface Kustomize {
@@ -65,8 +66,7 @@ export function extractImage(image: Image): PackageDependency | null {
   if (image?.name && image.newTag) {
     return {
       datasource: datasourceDocker.id,
-      depName: image.name,
-      lookupName: image.name,
+      depName: image.newName ?? image.name,
       currentValue: image.newTag,
     };
   }

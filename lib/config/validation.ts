@@ -32,7 +32,7 @@ export async function validateConfig(
 
   function getDeprecationMessage(option: string): string {
     const deprecatedOptions = {
-      branchName: `Direct editing of branchName is now deprecated. Please edit branchPrefix, managerBranchPrefix, or branchTopic instead`,
+      branchName: `Direct editing of branchName is now deprecated. Please edit branchPrefix, additionalBranchPrefix, or branchTopic instead`,
       commitMessage: `Direct editing of commitMessage is now deprecated. Please edit commitMessage's subcomponents instead.`,
       prTitle: `Direct editing of prTitle is now deprecated. Please edit commitMessage subcomponents instead as they will be passed through to prTitle.`,
     };
@@ -55,7 +55,10 @@ export async function validateConfig(
     return ignoredNodes.includes(key);
   }
 
-  function validateAliasObject(key: string, val: object): boolean {
+  function validateAliasObject(
+    key: string,
+    val: Record<string, unknown>
+  ): boolean {
     if (key === 'aliases') {
       for (const value of Object.values(val)) {
         if (!is.urlString(value)) {
@@ -285,7 +288,9 @@ export async function validateConfig(
                     } catch (e) {
                       errors.push({
                         depName: 'Configuration Error',
-                        message: `Invalid regExp for ${currentPath}: \`${matchString}\``,
+                        message: `Invalid regExp for ${currentPath}: \`${String(
+                          matchString
+                        )}\``,
                       });
                     }
                   }
@@ -357,7 +362,7 @@ export async function validateConfig(
             });
           }
         } else if (type === 'object' && currentPath !== 'compatibility') {
-          if (is.object(val)) {
+          if (is.plainObject(val)) {
             if (key === 'aliases') {
               if (!validateAliasObject(key, val)) {
                 errors.push({

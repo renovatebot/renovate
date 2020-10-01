@@ -166,6 +166,33 @@ Array [
 ]
 `;
 
+exports[`datasource/go getReleases support ghe 1`] = `
+Object {
+  "releases": Array [
+    Object {
+      "version": "v1.0.0",
+    },
+    Object {
+      "version": "v2.0.0",
+    },
+  ],
+}
+`;
+
+exports[`datasource/go getReleases support ghe 2`] = `
+Array [
+  Object {
+    "headers": Object {
+      "accept-encoding": "gzip, deflate",
+      "host": "git.enterprise.com",
+      "user-agent": "https://github.com/renovatebot/renovate",
+    },
+    "method": "GET",
+    "url": "https://git.enterprise.com/example/module?go-get=1",
+  },
+]
+`;
+
 exports[`datasource/go getReleases works for known servers 1`] = `
 Array [
   Array [

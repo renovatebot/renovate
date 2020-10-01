@@ -130,6 +130,7 @@ async function getJenkinsUpdateCenterResponse<T>(
 
 async function updateJenkinsPluginCache<T>(
   cache: JenkinsCache<JenkinsCacheTypes>,
+  // eslint-disable-next-line @typescript-eslint/no-shadow
   callback: (resp: T, cache: JenkinsCache<any>) => void
 ): Promise<void> {
   const response = await getJenkinsUpdateCenterResponse<T>(cache);

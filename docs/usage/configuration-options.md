@@ -25,6 +25,16 @@ Also, be sure to check out Renovate's [shareable config presets](/config-presets
 
 If you have any questions about the below config options, or would like to get help/feedback about a config, please post it as an issue in [renovatebot/config-help](https://github.com/renovatebot/config-help) where we will do our best to answer your question.
 
+## additionalBranchPrefix
+
+This value defaults to an empty string, and is typically not necessary. Some managers populate this field for historical reasons, for example we use `docker-` for Docker branches, so they may look like `renovate/docker-ubuntu-16.x`. You normally don't need to configure this, but one example where it can be useful is combining with `parentDir` in monorepos to split PRs based on where the package definition is located, e.g.
+
+```json
+{
+  "additionalBranchPrefix": "{{parentDir}}-"
+}
+```
+
 ## additionalReviewers
 
 In contrast to `reviewers`, this option adds to the existing reviewer list, rather than replacing it. This makes it suitable for augmenting a preset or base list without displacing the original, for example when adding focused reviewers for a specific package group.
@@ -160,11 +170,13 @@ Warning: it's strongly recommended not to configure this field directly. Use at 
 
 You can modify this field if you want to change the prefix used. For example if you want branches to be like `deps/eslint-4.x` instead of `renovate/eslint-4.x` then you configure `branchPrefix` = `deps/`. Or if you wish to avoid forward slashes in branch names then you could use `renovate_` instead, for example.
 
+`branchPrefix` must be configured at the root of the configuration (e.g. not within any package rule) and is not allowed to use template values. e.g. instead of `renovate/{{parentDir}}-`, configure the template part in `additionalBranchPrefix`, like `"additionalBranchPrefix": "{{parentDir}}-"`.
+
 Note that this setting does not change the default _onboarding_ branch name, i.e. `renovate/configure`. If you wish to change that too, you need to also configure the field `onboardingBranch` in your admin bot config.
 
 ## branchTopic
 
-This field is combined with `branchPrefix` and `managerBranchPrefix` to form the full `branchName`. `branchName` uniqueness is important for dependency update grouping or non-grouping so be cautious about ever editing this field manually. This is an advance field and it's recommend you seek a config review before applying it.
+This field is combined with `branchPrefix` and `additionalBranchPrefix` to form the full `branchName`. `branchName` uniqueness is important for dependency update grouping or non-grouping so be cautious about ever editing this field manually. This is an advance field and it's recommend you seek a config review before applying it.
 
 ## bumpVersion
 
@@ -341,9 +353,7 @@ To disable Renovate for npm `devDependencies` but keep it for `dependencies` you
 
 ## enabledManagers
 
-This is a way to "whitelist" certain package managers and disable all others.
-
-Possible managers are: `'ansible', 'ansible-galaxy', 'bazel', 'buildkite', 'bundler', 'cargo', 'cdnurl', 'circleci', 'cocoapods', 'composer', 'deps-edn','docker-compose', 'dockerfile', 'droneci', 'git-submodules', 'github-actions', 'gitlabci', 'gitlabci-include', 'gomod', 'gradle', 'gradle-wrapper', 'helm-requirements', 'helm-values', 'helmfile', 'homebrew', 'html', 'kubernetes', 'kustomize', 'leiningen', 'maven', 'meteor', 'mix', 'nodenv', 'npm', 'nuget', 'nvm', 'pip_requirements', 'pip_setup', 'pipenv', 'poetry', 'pub', 'ruby-version', 'regex', 'sbt', 'swift', 'terraform', 'travis'`
+This is a way to allow only certain package managers and implicitly disable all others.
 
 Example:
 
@@ -352,6 +362,8 @@ Example:
   "enabledManagers": ["dockerfile", "npm"]
 }
 ```
+
+For the full list of available managers, see the [Supported Managers](https://docs.renovatebot.com/modules/manager/#supported-managers) documentation.
 
 ## encrypted
 
@@ -374,6 +386,51 @@ The above would mean Renovate would not include files matching the above glob pa
 ## extends
 
 See [shareable config presets](https://docs.renovatebot.com/config-presets) for details.
+
+## extractVersion
+
+Use this only when the raw version strings from the datasource do not match the expected format that you need in your package file. You must defined a "named capture group" called `version` as shown in the below examples.
+
+For example, to extract only the major.minor precision from a GitHub release, the following would work:
+
+```json
+{
+  "packageRules": [
+    {
+      "packageNames": ["foo"],
+      "extractVersion": "^(?<version>v\\d+\\.\\d+)"
+    }
+  ]
+}
+```
+
+The above will change a raw version of `v1.31.5` to `v1.31`, for example.
+
+Alternatively, to strip a `release-` prefix:
+
+```json
+{
+  "packageRules": [
+    {
+      "packageNames": ["bar"],
+      "extractVersion": "^release-(?<version>.*)$"
+    }
+  ]
+}
+```
+
+The above will change a raw version of `release-2.0.0` to `2.0.0`, for example. A similar one could strip leading `v` prefixes:
+
+```json
+{
+  "packageRules": [
+    {
+      "packageNames": ["baz"],
+      "extractVersion": "^v(?<version>.*)$"
+    }
+  ]
+}
+```
 
 ## fileMatch
 
@@ -510,7 +567,7 @@ This field can be used to configure status codes that Renovate ignores and passe
   "hostRules": [
     {
       "abortOnError": true,
-      "abortStatusCodes": [404]
+      "abortIgnoreStatusCodes": [404]
     }
   ]
 }
@@ -571,6 +628,10 @@ Renovate does not do a "longest match" algorithm to pick between multiple matchi
 ### domainName
 
 If you have any uncertainty about exactly which hosts a service uses, then it can be more reliable to use `domainName` instead of `hostName` or `baseUrl`. e.g. configure `"hostName": "docker.io"` to cover both `index.docker.io` and `auth.docker.io` and any other host that's in use.
+
+### enableHttp2
+
+Enable got [http2](https://github.com/sindresorhus/got/blob/v11.5.2/readme.md#http2) support.
 
 ### hostName
 
@@ -712,13 +773,9 @@ Consider this example:
 
 With the above config, every PR raised by Renovate will have the label `dependencies` while PRs containing `eslint`-related packages will instead have the label `linting`.
 
-## lazyGrouping
-
-By default, Renovate will use group names in Pull Request titles only when the PR contains two or more dependencies. For example you may have defined a dependency group calls "All eslint packages" with a `packagePattern` of `^eslint`, but if the only upgrade available at the time is `eslint-config-airbnb` then it makes more sense for the PR to be named "Upgrade eslint-config-airbnb to v2.1.4" than to name it "Upgrade All eslint packages". If ever this behaviour is undesirable then you can override it by setting this option to `false`.
-
 ## lockFileMaintenance
 
-This feature can be used to refresh lock files and keep them up-to-date. "Maintaining" a lock file means recreating it so that every dependency version within it is updated to the latest. Supported lock files are `package-lock.json`, `yarn.lock`, `composer.lock`, `Gemfile.lock` and `poetry.lock`. Others may be added via feature request.
+This feature can be used to refresh lock files and keep them up-to-date. "Maintaining" a lock file means recreating it so that every dependency version within it is updated to the latest. Supported lock files are `package-lock.json`, `yarn.lock`, `composer.lock`, `Gemfile.lock`, `poetry.lock` and `Cargo.lock`. Others may be added via feature request.
 
 This feature is disabled by default. If you wish to enable this feature then you could add this to your configuration:
 
@@ -733,10 +790,6 @@ To reduce "noise" in the repository, it defaults its schedule to `"before 5am on
 ## major
 
 Add to this object if you wish to define rules that apply only to major updates.
-
-## managerBranchPrefix
-
-This value defaults to an empty string, because historically no prefix was necessary for when Renovate was JS-only. Now - for example - we use `docker-` for Docker branches, so they may look like `renovate/docker-ubuntu-16.x`. You normally don't need to configure this.
 
 ## minor
 
@@ -787,6 +840,8 @@ Here is an example where you might want to limit the "noisy" package `aws-sdk` t
   ]
 }
 ```
+
+For Maven dependencies, the package name is `<groupId:artefactId>`, eg `"packageNames": ["com.thoughtworks.xstream:xstream"]`
 
 Note how the above uses `packageNames` instead of `packagePatterns` because it is an exact match package name. This is the equivalent of defining `"packagePatterns": ["^aws\-sdk$"]` and hence much simpler. However you can mix together both `packageNames` and `packagePatterns` in the same package rule and the rule will be applied if _either_ match. Example:
 
@@ -1092,7 +1147,7 @@ If enabled Renovate will pin docker images by means of their sha256 digest and n
 - `gomodTidy`: Run `go mod tidy` after Go module updates
 - `npmDedupe`: Run `npm dedupe` after `package-lock.json` updates
 - `yarnDedupeFewer`: Run `yarn-deduplicate --strategy fewer` after `yarn.lock` updates
-- `yarnDedupeHighest`: Run `yarn-deduplicate --strategy highest` after `yarn.lock` updates
+- `yarnDedupeHighest`: Run `yarn-deduplicate --strategy highest` (`yarn dedupe --strategy highest` for Yarn >=2.2.0) after `yarn.lock` updates
 
 ## postUpgradeTasks
 
@@ -1111,7 +1166,7 @@ e.g.
 }
 ```
 
-The `postUpdateTasks` configuration consists of two fields:
+The `postUpgradeTasks` configuration consists of two fields:
 
 ### commands
 
@@ -1186,6 +1241,12 @@ e.g. if you wish to add an extra Warning to major updates:
   "prBodyNotes": ["{{#if isMajor}}:warning: MAJOR MAJOR MAJOR :warning:{{/if}}"]
 }
 ```
+
+## prBodyTemplate
+
+This setting controls which sections are rendered in the body of the pull request.
+
+The available sections are header, table, notes, changelogs, configDescription, controls, footer.
 
 ## prConcurrentLimit
 
@@ -1355,7 +1416,20 @@ If the `versioning` for a dependency is not captured with a named group then it 
 
 ## registryUrls
 
-This is only necessary in case you need to manually configure a registry URL to use for datasource lookups. Applies to PyPI (pip) only for now. Supports only one URL for now but is defined as a list for forward compatibility.
+Usually Renovate is able to either (a) use the default registries for a datasource, or (b) automatically detect during the manager extract phase which custom registries are in use. In case there is a need to configure them manually, it can be done using this `registryUrls` field, typically using `packageUrls` like so:
+
+```json
+{
+  "packageRules": [
+    {
+      "datasources": ["docker"],
+      "registryUrls": ["https://docker.mycompany.domain"]
+    }
+  ]
+}
+```
+
+The field supports multiple URLs however it is datasource-dependent on whether only the first is used or multiple.
 
 ## requiredStatusChecks
 
@@ -1405,6 +1479,7 @@ before 5:00am
 after 10pm and before 5:00am
 after 10pm and before 5am every weekday
 on friday and saturday
+every 3 months on the first day of the month
 ```
 
 One example might be that you don't want Renovate to run during your typical business hours, so that your build machines don't get clogged up testing `package.json` updates. You could then configure a schedule like this at the repository level:
@@ -1450,7 +1525,7 @@ However, please note that Renovate will autodetect if your repository is already
 
 ## separateMajorMinor
 
-Renovate's default behaviour is to create a separate branch/PR if both minor and major version updates exist. For example, if you were using Webpack 2.0.0 and versions 2.1.0 and 3.0.0 were both available, then Renovate would create two PRs so that you have the choice whether to apply the minor update to 2.x or the major update of 3.x. If you were to apply the minor update then Renovate would keep updating the 3.x branch for you as well, e.g. if Webpack 3.0.1 or 3.1.0 were released. If instead you applied the 3.0.0 update then Renovate would clean up the unneeded 2.x branch for you on the next run.
+Renovate's default behaviour is to create a separate branch/PR if both minor and major version updates exist (note that your choice of `rangeStrategy` value can influence which updates exist in the first place however). For example, if you were using Webpack 2.0.0 and versions 2.1.0 and 3.0.0 were both available, then Renovate would create two PRs so that you have the choice whether to apply the minor update to 2.x or the major update of 3.x. If you were to apply the minor update then Renovate would keep updating the 3.x branch for you as well, e.g. if Webpack 3.0.1 or 3.1.0 were released. If instead you applied the 3.0.0 update then Renovate would clean up the unneeded 2.x branch for you on the next run.
 
 It is recommended that you leave this setting to `true`, because of the polite way that Renovate handles this. For example, let's say in the above example that you decided you wouldn't update to Webpack 3 for a long time and don't want to build/test every time a new 3.x version arrives. In that case, simply close the "Update Webpack to version 3.x" PR and it _won't_ be recreated again even if subsequent Webpack 3.x versions are released. You can continue with Webpack 2.x for as long as you want and receive any updates/patches that are made for it. Then eventually when you do want to update to Webpack 3.x you can make that update to `package.json` yourself and commit it to master once it's tested. After that, Renovate will resume providing you updates to 3.x again! i.e. if you close a major upgrade PR then it won't come back again, but once you make the major upgrade yourself then Renovate will resume providing you with minor or patch updates.
 
@@ -1475,10 +1550,6 @@ If you combine `stabilityDays=3` and `prCreation="not-pending"` then Renovate wi
 #### Await X days before Automerging
 
 If you have both `automerge` as well as `stabilityDays` enabled, it means that PRs will be created immediately but automerging will be delayed until X days have passed. This works because Renovate will add a "renovate/stability-days" pending status check to each branch/PR and that pending check will prevent the branch going green to automerge.
-
-## statusCheckVerify
-
-This feature is added for people migrating from alternative services who are used to seeing a "verify" status check on PRs. If you'd like to use this then go ahead, but otherwise it's more secure to look for Renovate's [GPG Verified Commits](https://github.com/blog/2144-gpg-signature-verification) instead, because those cannot be spoofed by any other person or service (unlike status checks).
 
 ## supportPolicy
 

@@ -2,37 +2,37 @@
   "version": "3.0.0",
   "resources": [
     {
-      "@id": "https://api-v2v3search-0.nuget.org/query",
+      "@id": "https://azuresearch-usnc.nuget.org/query",
       "@type": "SearchQueryService",
       "comment": "Query endpoint of NuGet Search service (primary)"
     },
     {
-      "@id": "https://api-v2v3search-1.nuget.org/query",
+      "@id": "https://azuresearch-ussc.nuget.org/query",
       "@type": "SearchQueryService",
       "comment": "Query endpoint of NuGet Search service (secondary)"
     },
     {
-      "@id": "https://api-v2v3search-0.nuget.org/autocomplete",
+      "@id": "https://azuresearch-usnc.nuget.org/autocomplete",
       "@type": "SearchAutocompleteService",
       "comment": "Autocomplete endpoint of NuGet Search service (primary)"
     },
     {
-      "@id": "https://api-v2v3search-1.nuget.org/autocomplete",
+      "@id": "https://azuresearch-ussc.nuget.org/autocomplete",
       "@type": "SearchAutocompleteService",
       "comment": "Autocomplete endpoint of NuGet Search service (secondary)"
     },
     {
-      "@id": "https://api-v2v3search-0.nuget.org/",
+      "@id": "https://azuresearch-usnc.nuget.org/",
       "@type": "SearchGalleryQueryService/3.0.0-rc",
       "comment": "Azure Website based Search Service used by Gallery (primary)"
     },
     {
-      "@id": "https://api-v2v3search-1.nuget.org/",
+      "@id": "https://azuresearch-ussc.nuget.org/",
       "@type": "SearchGalleryQueryService/3.0.0-rc",
       "comment": "Azure Website based Search Service used by Gallery (secondary)"
     },
     {
-      "@id": "https://api.nuget.org/v3/registration3/",
+      "@id": "https://api.nuget.org/v3/registration5-semver1/",
       "@type": "RegistrationsBaseUrl",
       "comment": "Base URL of Azure storage where NuGet package registration info is stored"
     },
@@ -59,27 +59,47 @@
       "comment": "The gallery symbol publish endpoint."
     },
     {
-      "@id": "https://api-v2v3search-0.nuget.org/query",
+      "@id": "https://azuresearch-usnc.nuget.org/query",
       "@type": "SearchQueryService/3.0.0-rc",
       "comment": "Query endpoint of NuGet Search service (primary) used by RC clients"
     },
     {
-      "@id": "https://api-v2v3search-1.nuget.org/query",
+      "@id": "https://azuresearch-ussc.nuget.org/query",
       "@type": "SearchQueryService/3.0.0-rc",
       "comment": "Query endpoint of NuGet Search service (secondary) used by RC clients"
     },
     {
-      "@id": "https://api-v2v3search-0.nuget.org/autocomplete",
+      "@id": "https://azuresearch-usnc.nuget.org/query",
+      "@type": "SearchQueryService/3.5.0",
+      "comment": "Query endpoint of NuGet Search service (primary) that supports package type filtering"
+    },
+    {
+      "@id": "https://azuresearch-ussc.nuget.org/query",
+      "@type": "SearchQueryService/3.5.0",
+      "comment": "Query endpoint of NuGet Search service (secondary) that supports package type filtering"
+    },
+    {
+      "@id": "https://azuresearch-usnc.nuget.org/autocomplete",
       "@type": "SearchAutocompleteService/3.0.0-rc",
       "comment": "Autocomplete endpoint of NuGet Search service (primary) used by RC clients"
     },
     {
-      "@id": "https://api-v2v3search-1.nuget.org/autocomplete",
+      "@id": "https://azuresearch-ussc.nuget.org/autocomplete",
       "@type": "SearchAutocompleteService/3.0.0-rc",
       "comment": "Autocomplete endpoint of NuGet Search service (secondary) used by RC clients"
     },
     {
-      "@id": "https://api.nuget.org/v3/registration3/",
+      "@id": "https://azuresearch-usnc.nuget.org/autocomplete",
+      "@type": "SearchAutocompleteService/3.5.0",
+      "comment": "Autocomplete endpoint of NuGet Search service (primary) that supports package type filtering"
+    },
+    {
+      "@id": "https://azuresearch-ussc.nuget.org/autocomplete",
+      "@type": "SearchAutocompleteService/3.5.0",
+      "comment": "Autocomplete endpoint of NuGet Search service (secondary) that supports package type filtering"
+    },
+    {
+      "@id": "https://api.nuget.org/v3/registration5-semver1/",
       "@type": "RegistrationsBaseUrl/3.0.0-rc",
       "comment": "Base URL of Azure storage where NuGet package registration info is stored used by RC clients. This base URL does not include SemVer 2.0.0 packages."
     },
@@ -89,37 +109,37 @@
       "comment": "URI template used by NuGet Client to construct Report Abuse URL for packages used by RC clients"
     },
     {
-      "@id": "https://api.nuget.org/v3/registration3/{id-lower}/index.json",
+      "@id": "https://api.nuget.org/v3/registration5-semver1/{id-lower}/index.json",
       "@type": "PackageDisplayMetadataUriTemplate/3.0.0-rc",
       "comment": "URI template used by NuGet Client to construct display metadata for Packages using ID"
     },
     {
-      "@id": "https://api.nuget.org/v3/registration3/{id-lower}/{version-lower}.json",
+      "@id": "https://api.nuget.org/v3/registration5-semver1/{id-lower}/{version-lower}.json",
       "@type": "PackageVersionDisplayMetadataUriTemplate/3.0.0-rc",
       "comment": "URI template used by NuGet Client to construct display metadata for Packages using ID, Version"
     },
     {
-      "@id": "https://api-v2v3search-0.nuget.org/query",
+      "@id": "https://azuresearch-usnc.nuget.org/query",
       "@type": "SearchQueryService/3.0.0-beta",
       "comment": "Query endpoint of NuGet Search service (primary) used by beta clients"
     },
     {
-      "@id": "https://api-v2v3search-1.nuget.org/query",
+      "@id": "https://azuresearch-ussc.nuget.org/query",
       "@type": "SearchQueryService/3.0.0-beta",
       "comment": "Query endpoint of NuGet Search service (secondary) used by beta clients"
     },
     {
-      "@id": "https://api-v2v3search-0.nuget.org/autocomplete",
+      "@id": "https://azuresearch-usnc.nuget.org/autocomplete",
       "@type": "SearchAutocompleteService/3.0.0-beta",
       "comment": "Autocomplete endpoint of NuGet Search service (primary) used by beta clients"
     },
     {
-      "@id": "https://api-v2v3search-1.nuget.org/autocomplete",
+      "@id": "https://azuresearch-ussc.nuget.org/autocomplete",
       "@type": "SearchAutocompleteService/3.0.0-beta",
       "comment": "Autocomplete endpoint of NuGet Search service (secondary) used by beta clients"
     },
     {
-      "@id": "https://api.nuget.org/v3/registration3/",
+      "@id": "https://api.nuget.org/v3/registration5-semver1/",
       "@type": "RegistrationsBaseUrl/3.0.0-beta",
       "comment": "Base URL of Azure storage where NuGet package registration info is stored used by Beta clients. This base URL does not include SemVer 2.0.0 packages."
     },
@@ -129,17 +149,22 @@
       "comment": "URI template used by NuGet Client to construct Report Abuse URL for packages"
     },
     {
-      "@id": "https://api.nuget.org/v3/registration3-gz/",
+      "@id": "https://www.nuget.org/packages/{id}/{version}?_src=template",
+      "@type": "PackageDetailsUriTemplate/5.1.0",
+      "comment": "URI template used by NuGet Client to construct details URL for packages"
+    },
+    {
+      "@id": "https://api.nuget.org/v3/registration5-gz-semver1/",
       "@type": "RegistrationsBaseUrl/3.4.0",
       "comment": "Base URL of Azure storage where NuGet package registration info is stored in GZIP format. This base URL does not include SemVer 2.0.0 packages."
     },
     {
-      "@id": "https://api.nuget.org/v3/registration3-gz-semver2/",
+      "@id": "https://api.nuget.org/v3/registration5-gz-semver2/",
       "@type": "RegistrationsBaseUrl/3.6.0",
       "comment": "Base URL of Azure storage where NuGet package registration info is stored in GZIP format. This base URL includes SemVer 2.0.0 packages."
     },
     {
-      "@id": "https://api.nuget.org/v3/registration3-gz-semver2/",
+      "@id": "https://api.nuget.org/v3/registration5-gz-semver2/",
       "@type": "RegistrationsBaseUrl/Versioned",
       "clientVersion": "4.3.0-alpha",
       "comment": "Base URL of Azure storage where NuGet package registration info is stored in GZIP format. This base URL includes SemVer 2.0.0 packages."
@@ -150,8 +175,8 @@
       "comment": "The endpoint for discovering information about this package source's repository signatures."
     },
     {
-      "@id": "https://api.nuget.org/v3-index/repository-signatures/4.9.0/index.json",
-      "@type": "RepositorySignatures/4.9.0",
+      "@id": "https://api.nuget.org/v3-index/repository-signatures/5.0.0/index.json",
+      "@type": "RepositorySignatures/5.0.0",
       "comment": "The endpoint for discovering information about this package source's repository signatures."
     },
     {

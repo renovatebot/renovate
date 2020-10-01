@@ -6,3 +6,7 @@ blueocean:1.21.0 # another comment
 #blueocean:1.22.0
 
 # this line is completely ignored
+
+# these deps will be ignored:
+git:4.2.0         # renovate:ignore
+git-client:3.3.1  # renovate:ignore
