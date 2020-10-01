@@ -209,8 +209,8 @@ const platform: Platform = {
   async getJsonFile(fileName: string): Promise<any | null> {
     try {
       const contents = await helper.getRepoContents(
+        config.repository,
         fileName,
-        defaultConfigFile,
         config.defaultBranch
       );
       return JSON.parse(contents.contentString);
