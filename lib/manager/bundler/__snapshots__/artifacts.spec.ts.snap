@@ -47,7 +47,7 @@ Array [
 ]
 `;
 
-exports[`bundler.updateArtifacts() Docker compatibility options 1`] = `
+exports[`bundler.updateArtifacts() Docker constraints options 1`] = `
 Array [
   Object {
     "file": Object {
@@ -58,7 +58,7 @@ Array [
 ]
 `;
 
-exports[`bundler.updateArtifacts() Docker compatibility options 2`] = `
+exports[`bundler.updateArtifacts() Docker constraints options 2`] = `
 Array [
   Object {
     "cmd": "docker pull renovate/ruby:latest",
@@ -142,7 +142,7 @@ Array [
 ]
 `;
 
-exports[`bundler.updateArtifacts() Docker invalid compatibility options 1`] = `
+exports[`bundler.updateArtifacts() Docker invalid constraints options 1`] = `
 Array [
   Object {
     "file": Object {
@@ -153,7 +153,7 @@ Array [
 ]
 `;
 
-exports[`bundler.updateArtifacts() Docker invalid compatibility options 2`] = `
+exports[`bundler.updateArtifacts() Docker invalid constraints options 2`] = `
 Array [
   Object {
     "cmd": "docker pull renovate/ruby:latest",

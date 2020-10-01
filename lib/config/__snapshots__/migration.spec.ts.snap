@@ -42,6 +42,9 @@ Object {
   "branchPrefix": "renovate/",
   "commitMessage": "{{#if semanticCommitType}}{{semanticCommitType}}{{#if semanticCommitScope}}({{semanticCommitScope}}){{/if}}: {{/if}}some commit message",
   "commitMessageExtra": "{{currentValue}} something",
+  "constraints": Object {
+    "python": "3.7",
+  },
   "dependencyDashboard": true,
   "dependencyDashboardTitle": "foo",
   "enabled": true,

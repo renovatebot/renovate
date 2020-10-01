@@ -361,7 +361,11 @@ export async function validateConfig(
               message: `Configuration option \`${currentPath}\` should be a string`,
             });
           }
-        } else if (type === 'object' && currentPath !== 'compatibility') {
+        } else if (
+          type === 'object' &&
+          currentPath !== 'compatibility' &&
+          currentPath !== 'constraints'
+        ) {
           if (is.plainObject(val)) {
             if (key === 'aliases') {
               if (!validateAliasObject(key, val)) {

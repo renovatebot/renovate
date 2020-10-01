@@ -61,6 +61,7 @@ const repoGroups = {
   expo: 'https://github.com/expo/expo',
   fimbullinter: 'https://github.com/fimbullinter/wotan',
   flopflip: 'https://github.com/tdeekens/flopflip',
+  formatjs: 'https://github.com/formatjs/formatjs',
   framework7: 'https://github.com/framework7io/framework7',
   gatsby: 'https://github.com/gatsbyjs/gatsby',
   graphqlcodegenerator: [
@@ -91,7 +92,7 @@ const repoGroups = {
     'https://github.com/mozilla-neutrino/neutrino-dev',
   ],
   nextjs: [
-    'https://github.com/zeit/next.js', // for compatibility
+    'https://github.com/zeit/next.js', // old repo
     'https://github.com/vercel/next.js',
   ],
   ngrx: 'https://github.com/ngrx/',

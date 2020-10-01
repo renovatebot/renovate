@@ -26,6 +26,9 @@ describe('config/migration', () => {
             password: 'some-password',
           },
         ],
+        compatibility: {
+          python: '3.7',
+        },
         extends: [':js-app', 'config:library', ':masterIssue'],
         maintainYarnLock: true,
         onboarding: 'false' as never,
@@ -424,12 +427,12 @@ describe('config/migration', () => {
 
       config = { semanticCommits: 'enabled' };
       res = configMigration.migrateConfig(config);
-      expect(res.isMigrated).toBe(true);
+      expect(res.isMigrated).toBe(false);
       expect(res.migratedConfig).toMatchObject({ semanticCommits: 'enabled' });
 
       config = { semanticCommits: 'disabled' };
       res = configMigration.migrateConfig(config);
-      expect(res.isMigrated).toBe(true);
+      expect(res.isMigrated).toBe(false);
       expect(res.migratedConfig).toMatchObject({ semanticCommits: 'disabled' });
     });
   });

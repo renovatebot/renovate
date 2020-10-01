@@ -3,10 +3,10 @@
 exports[`platform/azure/helpers getRenovatePRFormat should be formated (closed v2) 1`] = `
 Object {
   "body": undefined,
-  "branchName": undefined,
   "createdAt": undefined,
   "displayNumber": "Pull Request #undefined",
   "number": undefined,
+  "sourceBranch": undefined,
   "sourceRefName": undefined,
   "state": "merged",
   "status": 3,
@@ -17,10 +17,10 @@ Object {
 exports[`platform/azure/helpers getRenovatePRFormat should be formated (closed) 1`] = `
 Object {
   "body": undefined,
-  "branchName": undefined,
   "createdAt": undefined,
   "displayNumber": "Pull Request #undefined",
   "number": undefined,
+  "sourceBranch": undefined,
   "sourceRefName": undefined,
   "state": "closed",
   "status": 2,
@@ -31,12 +31,12 @@ Object {
 exports[`platform/azure/helpers getRenovatePRFormat should be formated (isConflicted) 1`] = `
 Object {
   "body": undefined,
-  "branchName": undefined,
   "createdAt": undefined,
   "displayNumber": "Pull Request #undefined",
   "isConflicted": true,
   "mergeStatus": 2,
   "number": undefined,
+  "sourceBranch": undefined,
   "sourceRefName": undefined,
   "state": "open",
   "targetBranch": undefined,
@@ -46,10 +46,10 @@ Object {
 exports[`platform/azure/helpers getRenovatePRFormat should be formated (not closed) 1`] = `
 Object {
   "body": undefined,
-  "branchName": undefined,
   "createdAt": undefined,
   "displayNumber": "Pull Request #undefined",
   "number": undefined,
+  "sourceBranch": undefined,
   "sourceRefName": undefined,
   "state": "open",
   "status": 1,

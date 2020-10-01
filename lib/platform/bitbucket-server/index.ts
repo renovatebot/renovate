@@ -295,7 +295,7 @@ const isRelevantPr = (
   prTitle: string | null | undefined,
   state: string
 ) => (p: Pr): boolean =>
-  p.branchName === branchName &&
+  p.sourceBranch === branchName &&
   (!prTitle || p.title === prTitle) &&
   matchesState(p.state, state);
 
@@ -769,14 +769,14 @@ const escapeHash = (input: string): string =>
   input ? input.replace(/#/g, '%23') : input;
 
 export async function createPr({
-  branchName,
+  sourceBranch,
   targetBranch,
   prTitle: title,
   prBody: rawDescription,
   platformOptions,
 }: CreatePRConfig): Promise<Pr> {
   const description = sanitize(rawDescription);
-  logger.debug(`createPr(${branchName}, title=${title})`);
+  logger.debug(`createPr(${sourceBranch}, title=${title})`);
   const base = targetBranch;
   let reviewers: BbsRestUserRef[] = [];
 
@@ -794,7 +794,7 @@ export async function createPr({
         `./rest/default-reviewers/1.0/projects/${config.projectKey}/repos/${
           config.repositorySlug
         }/reviewers?sourceRefId=refs/heads/${escapeHash(
-          branchName
+          sourceBranch
         )}&targetRefId=refs/heads/${base}&sourceRepoId=${id}&targetRepoId=${id}`
       )
     ).body;
@@ -808,7 +808,7 @@ export async function createPr({
     title,
     description,
     fromRef: {
-      id: `refs/heads/${branchName}`,
+      id: `refs/heads/${sourceBranch}`,
     },
     toRef: {
       id: `refs/heads/${base}`,
@@ -829,7 +829,7 @@ export async function createPr({
       logger.debug(
         'Empty pull request - deleting branch so it can be recreated next run'
       );
-      await deleteBranch(branchName);
+      await deleteBranch(sourceBranch);
       throw new Error(REPOSITORY_CHANGED);
     }
     throw err;
