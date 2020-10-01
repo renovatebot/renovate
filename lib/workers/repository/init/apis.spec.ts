@@ -5,7 +5,6 @@ import {
 } from '../../../constants/error-messages';
 import { initApis } from './apis';
 
-jest.mock('../../../platform');
 
 describe('workers/repository/init/apis', () => {
   describe('initApis', () => {
