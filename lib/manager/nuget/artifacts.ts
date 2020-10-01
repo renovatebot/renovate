@@ -1,3 +1,4 @@
+import { id } from '../../datasource/nuget';
 import { logger } from '../../logger';
 import { ExecOptions, exec } from '../../util/exec';
 import {
@@ -5,68 +6,36 @@ import {
   readLocalFile,
   writeLocalFile,
 } from '../../util/fs';
-// import { regEx } from '../../util/regex';
-// import * as hostRules from '../../util/host-rules';
-import { UpdateArtifact, UpdateArtifactsResult } from '../common';
+import * as hostRules from '../../util/host-rules';
+import {
+  UpdateArtifact,
+  UpdateArtifactsConfig,
+  UpdateArtifactsResult,
+} from '../common';
+import { determineRegistries } from './util';
 
-async function auth(): Promise<void> {
-  // const authJson = {};
-  // let credentials = hostRules.find({
-  //   hostType: PLATFORM_TYPE_GITHUB,
-  //   url: 'https://api.github.com/',
-  // });
-  // // istanbul ignore if
-  // if (credentials?.token) {
-  //   authJson['github-oauth'] = {
-  //     'github.com': credentials.token,
-  //   };
-  // }
-  // credentials = hostRules.find({
-  //   hostType: PLATFORM_TYPE_GITLAB,
-  //   url: 'https://gitlab.com/api/v4/',
-  // });
-  // // istanbul ignore if
-  // if (credentials?.token) {
-  //   authJson['gitlab-token'] = {
-  //     'gitlab.com': credentials.token,
-  //   };
-  // }
-  // try {
-  //   // istanbul ignore else
-  //   if (is.array(config.registryUrls)) {
-  //     for (const regUrl of config.registryUrls) {
-  //       if (regUrl) {
-  //         const { host } = URL.parse(regUrl);
-  //         const hostRule = hostRules.find({
-  //           hostType: datasourcePackagist.id,
-  //           url: regUrl,
-  //         });
-  //         // istanbul ignore else
-  //         if (hostRule.username && hostRule.password) {
-  //           logger.debug('Setting packagist auth for host ' + host);
-  //           authJson['http-basic'] = authJson['http-basic'] || {};
-  //           authJson['http-basic'][host] = {
-  //             username: hostRule.username,
-  //             password: hostRule.password,
-  //           };
-  //         } else {
-  //           logger.debug('No packagist auth found for ' + regUrl);
-  //         }
-  //       }
-  //     }
-  //   } else if (config.registryUrls) {
-  //     logger.warn(
-  //       { registryUrls: config.registryUrls },
-  //       'Non-array composer registryUrls'
-  //     );
-  //   }
-  // } catch (err) /* istanbul ignore next */ {
-  //   logger.warn({ err }, 'Error setting registryUrls auth for composer');
-  // }
-  // if (authJson) {
-  //   await writeLocalFile('auth.json', JSON.stringify(authJson));
-  // }
-  // TODO: Find package sources, log in to them using information from host rules.
+async function authenticate(
+  packageFileName: string,
+  config: UpdateArtifactsConfig,
+  cmds: string[]
+): Promise<void> {
+  const registries = (
+    (await determineRegistries(packageFileName, config.localDir)) || []
+  ).filter((registry) => registry.name != null);
+  for (const registry of registries) {
+    const { username, password } = hostRules.find({
+      hostType: id,
+      url: registry.url,
+    });
+    if (username && password) {
+      cmds.unshift(
+        `dotnet nuget update source ${registry.name} --username ${username} --password ${password} --store-password-in-clear-text`
+      );
+      cmds.push(
+        `dotnet nuget update source ${registry.name} --username '' --password '' --store-password-in-clear-text`
+      );
+    }
+  }
 }
 
 export async function updateArtifacts({
@@ -97,8 +66,6 @@ export async function updateArtifacts({
   }
 
   try {
-    await auth();
-
     if (updatedDeps.length === 0 && config.isLockFileMaintenance !== true) {
       logger.debug(`Not updating lock file because no deps changed.`);
       return null;
@@ -106,15 +73,19 @@ export async function updateArtifacts({
 
     await writeLocalFile(packageFileName, newPackageFileContent);
 
-    const cmd = 'dotnet restore --force-evaluate';
-    logger.debug({ cmd }, 'dotnet command');
     const execOptions: ExecOptions = {
       cwdFile: packageFileName,
       docker: {
         image: 'renovate/dotnet',
       },
     };
-    await exec(cmd, execOptions);
+
+    const cmds = ['dotnet restore --force-evaluate'];
+
+    await authenticate(packageFileName, config, cmds);
+
+    logger.debug({ cmd: cmds }, 'dotnet command');
+    await exec(cmds, execOptions);
     const newLockFileContent = await readLocalFile(lockFileName, 'utf8');
     if (existingLockFileContent === newLockFileContent) {
       logger.debug(`Lock file is unchanged`);

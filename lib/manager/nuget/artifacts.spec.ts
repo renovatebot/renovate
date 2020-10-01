@@ -6,18 +6,20 @@ import { setUtilConfig } from '../../util';
 import { BinarySource } from '../../util/exec/common';
 import * as docker from '../../util/exec/docker';
 import * as _env from '../../util/exec/env';
+import * as _hostRules from '../../util/host-rules';
 import * as nuget from './artifacts';
+import { determineRegistries as _determineRegistries } from './util';
 
 jest.mock('child_process');
 jest.mock('../../util/exec/env');
 jest.mock('../../util/fs');
-jest.mock('../../util/git');
 jest.mock('../../util/host-rules');
-
-// const hostRules = require('../../util/host-rules');
+jest.mock('./util');
 
 const exec: jest.Mock<typeof _exec> = _exec as any;
 const env = mocked(_env);
+const determineRegistries: jest.Mock<typeof _determineRegistries> = _determineRegistries as any;
+const hostRules = mocked(_hostRules);
 
 const config = {
   // `join` fixes Windows CI
@@ -161,28 +163,37 @@ describe('updateArtifacts', () => {
       })
     ).toMatchSnapshot();
   });
-
-  // _it('uses hostRules to write auth.json', async () => {
-  //   fs.readLocalFile.mockResolvedValueOnce('Current composer.lock' as any);
-  //   const execSnapshots = mockExecAll(exec);
-  //   fs.readLocalFile.mockReturnValueOnce('Current composer.lock' as any);
-  //   const authConfig = {
-  //     ...config,
-  //     registryUrls: ['https://packagist.renovatebot.com'],
-  //   };
-  //   hostRules.find.mockReturnValue({
-  //     username: 'some-username',
-  //     password: 'some-password',
-  //   });
-  //   git.getRepoStatus.mockResolvedValue({ modified: [] } as StatusResult);
-  //   expect(
-  //     await composer.updateArtifacts({
-  //       packageFileName: 'composer.json',
-  //       updatedDeps: [],
-  //       newPackageFileContent: '{}',
-  //       config: authConfig,
-  //     })
-  //   ).toBeNull();
-  //   expect(execSnapshots).toMatchSnapshot();
-  // });
+  it('authenticates at registries', async () => {
+    const execSnapshots = mockExecAll(exec);
+    fs.getSiblingFileName.mockReturnValueOnce('packages.lock.json');
+    fs.readLocalFile.mockResolvedValueOnce('Current packages.lock.json' as any);
+    fs.readLocalFile.mockResolvedValueOnce('New packages.lock.json' as any);
+    determineRegistries.mockResolvedValueOnce([
+      {
+        name: 'myRegistry',
+        url: 'https://my-registry.example.org',
+      },
+    ] as never);
+    hostRules.find.mockImplementationOnce((search) => {
+      if (
+        search.hostType === 'nuget' &&
+        search.url === 'https://my-registry.example.org'
+      ) {
+        return {
+          username: 'some-username',
+          password: 'some-password',
+        };
+      }
+      return undefined;
+    });
+    expect(
+      await nuget.updateArtifacts({
+        packageFileName: 'project.csproj',
+        updatedDeps: ['dep'],
+        newPackageFileContent: '{}',
+        config,
+      })
+    ).not.toBeNull();
+    expect(execSnapshots).toMatchSnapshot();
+  });
 });
