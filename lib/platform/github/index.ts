@@ -154,6 +154,7 @@ export async function getJsonFile(fileName: string): Promise<any | null> {
       ).toString()
     );
   } catch (err) /* istanbul ignore next */ {
+    debugger;
     return null;
   }
 }

@@ -1317,4 +1317,22 @@ describe('platform/gitea', () => {
       expect(await gitea.getVulnerabilityAlerts()).toEqual([]);
     });
   });
+
+  describe('getJsonFile()', () => {
+    it('returns file content', async () => {
+      const data = { foo: 'bar' };
+      helper.getRepoContents.mockResolvedValueOnce({
+        contentString: JSON.stringify(data),
+      } as never);
+      await initFakeRepo({ full_name: 'some/repo' });
+      const res = await gitea.getJsonFile('file.json');
+      expect(res).toEqual(data);
+    });
+    it('returns null on errors', async () => {
+      helper.getRepoContents.mockRejectedValueOnce('some error');
+      await initFakeRepo({ full_name: 'some/repo' });
+      const res = await gitea.getJsonFile('file.json');
+      expect(res).toBeNull();
+    });
+  });
 });

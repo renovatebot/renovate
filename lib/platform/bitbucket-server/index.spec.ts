@@ -1894,6 +1894,49 @@ Followed by some information.
           expect(httpMock.getTrace()).toMatchSnapshot();
         });
       });
+
+      describe('getJsonFile()', () => {
+        it('returns file content', async () => {
+          const data = { foo: 'bar' };
+          const scope = await initRepo();
+          scope
+            .get(
+              `${urlPath}/rest/api/1.0/projects/SOME/repos/repo/browse/file.json?limit=20000`
+            )
+            .reply(200, {
+              isLastPage: true,
+              lines: [{ text: JSON.stringify(data) }],
+            });
+          const res = await bitbucket.getJsonFile('file.json');
+          expect(res).toEqual(data);
+          expect(httpMock.getTrace()).toMatchSnapshot();
+        });
+        it('returns null for long content', async () => {
+          const scope = await initRepo();
+          scope
+            .get(
+              `${urlPath}/rest/api/1.0/projects/SOME/repos/repo/browse/file.json?limit=20000`
+            )
+            .reply(200, {
+              isLastPage: false,
+              lines: [{ text: '{' }],
+            });
+          const res = await bitbucket.getJsonFile('file.json');
+          expect(res).toBeNull();
+          expect(httpMock.getTrace()).toMatchSnapshot();
+        });
+        it('returns null on errors', async () => {
+          const scope = await initRepo();
+          scope
+            .get(
+              `${urlPath}/rest/api/1.0/projects/SOME/repos/repo/browse/file.json?limit=20000`
+            )
+            .replyWithError('some error');
+          const res = await bitbucket.getJsonFile('file.json');
+          expect(res).toBeNull();
+          expect(httpMock.getTrace()).toMatchSnapshot();
+        });
+      });
     });
   });
 });

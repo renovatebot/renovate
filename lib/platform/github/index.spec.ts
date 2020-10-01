@@ -1977,4 +1977,31 @@ describe('platform/github', () => {
       expect(httpMock.getTrace()).toMatchSnapshot();
     });
   });
+
+  describe('getJsonFile()', () => {
+    it('returns file content', async () => {
+      const data = { foo: 'bar' };
+      const scope = httpMock.scope(githubApiHost);
+      initRepoMock(scope, 'some/repo');
+      await github.initRepo({ repository: 'some/repo', token: 'token' } as any);
+      scope.get('/repos/some/repo/contents/file.json').reply(200, {
+        content: Buffer.from(JSON.stringify(data)).toString('base64'),
+      });
+      const res = await github.getJsonFile('file.json');
+      expect(res).toEqual(data);
+      expect(httpMock.getTrace()).toMatchSnapshot();
+    });
+    it('returns null on errors', async () => {
+      const scope = httpMock.scope(githubApiHost);
+      initRepoMock(scope, 'some/repo');
+      await github.initRepo({ repository: 'some/repo', token: 'token' } as any);
+      scope
+        .get('/repos/some/repo/contents/file.json')
+        .replyWithError('some error');
+
+      const res = await github.getJsonFile('file.json');
+      expect(res).toBeNull();
+      expect(httpMock.getTrace()).toMatchSnapshot();
+    });
+  });
 });

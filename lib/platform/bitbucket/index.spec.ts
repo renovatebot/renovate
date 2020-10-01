@@ -792,4 +792,26 @@ describe('platform/bitbucket', () => {
       expect(await bitbucket.getVulnerabilityAlerts()).toEqual([]);
     });
   });
+
+  describe('getJsonFile()', () => {
+    it('returns file content', async () => {
+      const data = { foo: 'bar' };
+      const scope = await initRepoMock();
+      scope
+        .get('/2.0/repositories/some/repo/src/master/file.json')
+        .reply(200, JSON.stringify(data));
+      const res = await bitbucket.getJsonFile('file.json');
+      expect(res).toEqual(data);
+      expect(httpMock.getTrace()).toMatchSnapshot();
+    });
+    it('returns null on errors', async () => {
+      const scope = await initRepoMock();
+      scope
+        .get('/2.0/repositories/some/repo/src/master/file.json')
+        .replyWithError('some error');
+      const res = await bitbucket.getJsonFile('file.json');
+      expect(res).toBeNull();
+      expect(httpMock.getTrace()).toMatchSnapshot();
+    });
+  });
 });

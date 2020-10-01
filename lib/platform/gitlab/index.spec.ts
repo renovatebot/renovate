@@ -1123,4 +1123,31 @@ These updates have all been created already. Click a checkbox below to force a r
       expect(httpMock.getTrace()).toMatchSnapshot();
     });
   });
+  describe('getJsonFile()', () => {
+    it('returns file content', async () => {
+      const data = { foo: 'bar' };
+      const scope = await initRepo();
+      scope
+        .get(
+          '/api/v4/projects/some%2Frepo/repository/files/file.json?ref=master'
+        )
+        .reply(200, {
+          content: Buffer.from(JSON.stringify(data)).toString('base64'),
+        });
+      const res = await gitlab.getJsonFile('file.json');
+      expect(res).toEqual(data);
+      expect(httpMock.getTrace()).toMatchSnapshot();
+    });
+    it('returns null on errors', async () => {
+      const scope = await initRepo();
+      scope
+        .get(
+          '/api/v4/projects/some%2Frepo/repository/files/file.json?ref=master'
+        )
+        .replyWithError('some error');
+      const res = await gitlab.getJsonFile('file.json');
+      expect(res).toBeNull();
+      expect(httpMock.getTrace()).toMatchSnapshot();
+    });
+  });
 });
