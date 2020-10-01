@@ -1,6 +1,5 @@
 import URL from 'url';
 import is from '@sindresorhus/is';
-import { configFileNames } from '../../config/app-strings';
 import {
   REPOSITORY_ACCESS_FORBIDDEN,
   REPOSITORY_ARCHIVED,
@@ -52,7 +51,6 @@ const defaults = {
   hostType: PLATFORM_TYPE_GITEA,
   endpoint: 'https://gitea.com/api/v1/',
 };
-const defaultConfigFile = configFileNames[0];
 
 let config: GiteaRepoConfig = {} as any;
 let botUserID: number;
