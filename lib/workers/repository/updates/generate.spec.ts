@@ -74,9 +74,33 @@ describe('workers/repository/updates/generate', () => {
           releaseTimestamp: '2017-02-07T20:01:41+00:00',
           canBeUnpublished: false,
           automerge: true,
+          constraints: {
+            foo: '1.0.0',
+          },
         },
         {
           depName: 'some-other-dep',
+          groupName: 'some-group',
+          branchName: 'some-branch',
+          prTitle: 'some-title',
+          commitMessageExtra:
+            'to {{#if isMajor}}v{{newMajor}}{{else}}{{#unless isRange}}v{{/unless}}{{newValue}}{{/if}}',
+          foo: 1,
+          newValue: '5.1.2',
+          toVersion: '5.1.2',
+          group: {
+            foo: 2,
+          },
+          releaseTimestamp: '2017-02-06T20:01:41+00:00',
+          canBeUnpublished: true,
+          automerge: false,
+          constraints: {
+            foo: '1.0.0',
+            bar: '2.0.0',
+          },
+        },
+        {
+          depName: 'another-dep',
           groupName: 'some-group',
           branchName: 'some-branch',
           prTitle: 'some-title',
@@ -99,6 +123,10 @@ describe('workers/repository/updates/generate', () => {
       expect(res.releaseTimestamp).toEqual('2017-02-07T20:01:41+00:00');
       expect(res.canBeUnpublished).toBe(true);
       expect(res.automerge).toBe(false);
+      expect(res.constraints).toEqual({
+        foo: '1.0.0',
+        bar: '2.0.0',
+      });
     });
     it('groups multiple upgrades different version', () => {
       const branch = [
@@ -219,7 +247,7 @@ describe('workers/repository/updates/generate', () => {
         partial<BranchUpgradeConfig>({
           ...defaultConfig,
           depName: 'some-dep',
-          semanticCommits: true,
+          semanticCommits: 'enabled',
           semanticCommitType: 'chore',
           semanticCommitScope: 'package',
           newValue: '1.2.0',
@@ -243,7 +271,7 @@ describe('workers/repository/updates/generate', () => {
           depName: 'some-dep',
           packageFile: 'package.json',
           baseDir: '',
-          semanticCommits: true,
+          semanticCommits: 'enabled',
           semanticCommitType: 'chore',
           semanticCommitScope: '{{baseDir}}',
           newValue: '1.2.0',
@@ -268,7 +296,7 @@ describe('workers/repository/updates/generate', () => {
           depName: 'some-dep',
           packageFile: 'foo/bar/package.json',
           parentDir: 'bar',
-          semanticCommits: true,
+          semanticCommits: 'enabled',
           semanticCommitType: 'chore',
           semanticCommitScope: '{{parentDir}}',
           newValue: '1.2.0',
@@ -292,7 +320,7 @@ describe('workers/repository/updates/generate', () => {
           depName: 'some-dep',
           packageFile: 'foo/bar/package.json',
           baseDir: 'foo/bar',
-          semanticCommits: true,
+          semanticCommits: 'enabled',
           semanticCommitType: 'chore',
           semanticCommitScope: '{{baseDir}}',
           newValue: '1.2.0',

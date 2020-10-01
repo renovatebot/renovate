@@ -37,13 +37,13 @@ export interface CustomExtractConfig extends ExtractConfig {
 
 export interface UpdateArtifactsConfig extends ManagerConfig {
   isLockFileMaintenance?: boolean;
-  compatibility?: Record<string, string>;
+  constraints?: Record<string, string>;
   cacheDir?: string;
   composerIgnorePlatformReqs?: boolean;
   currentValue?: string;
   postUpdateOptions?: string[];
   ignoreScripts?: boolean;
-
+  updateType?: UpdateType;
   toVersion?: string;
 }
 
@@ -77,7 +77,7 @@ export interface PackageFile<T = Record<string, any>>
     ManagerData<T> {
   hasYarnWorkspaces?: boolean;
   internalPackages?: string[]; // TODO: remove
-  compatibility?: Record<string, string>;
+  constraints?: Record<string, string>;
   datasource?: string;
   registryUrls?: string[];
   deps: PackageDependency[];
@@ -90,7 +90,7 @@ export interface PackageFile<T = Record<string, any>>
   packageFile?: string;
   packageJsonName?: string;
   packageJsonType?: 'app' | 'library';
-  packageJsonVersion?: string;
+  packageFileVersion?: string;
   parent?: string;
   skipInstalls?: boolean;
   yarnrc?: string;
@@ -115,7 +115,7 @@ export interface Package<T> extends ManagerData<T> {
   // npm manager
   bumpVersion?: ReleaseType | string;
   npmPackageAlias?: boolean;
-  packageJsonVersion?: string;
+  packageFileVersion?: string;
   gitRef?: boolean;
   sourceUrl?: string;
   githubRepo?: string;
@@ -158,6 +158,7 @@ export interface PackageDependency<T = Record<string, any>> extends Package<T> {
   digestOneAndOnly?: boolean;
   displayFrom?: string;
   displayTo?: string;
+  fixedVersion?: string;
   fromVersion?: string;
   lockedVersion?: string;
   propSource?: string;

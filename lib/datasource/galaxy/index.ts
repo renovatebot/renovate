@@ -39,7 +39,7 @@ export async function getReleases({
     if (!res || !res.body) {
       logger.warn(
         { dependency: lookupName },
-        `Received invalid crate data from ${galaxyAPIUrl}`
+        `Received invalid data from ${galaxyAPIUrl}`
       );
       return null;
     }

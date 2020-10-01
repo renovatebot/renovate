@@ -85,6 +85,22 @@ describe('.updateArtifacts()', () => {
     ).not.toBeNull();
     expect(execSnapshots).toMatchSnapshot();
   });
+
+  it('returns updated Cargo.lock for lockfile maintenance', async () => {
+    git.getFile.mockResolvedValueOnce('Old Cargo.lock');
+    const execSnapshots = mockExecAll(exec);
+    fs.readFile.mockResolvedValueOnce('New Cargo.lock' as any);
+    expect(
+      await cargo.updateArtifacts({
+        packageFileName: 'Cargo.toml',
+        updatedDeps: [],
+        newPackageFileContent: '{}',
+        config: { ...config, updateType: 'lockFileMaintenance' },
+      })
+    ).not.toBeNull();
+    expect(execSnapshots).toMatchSnapshot();
+  });
+
   it('returns updated Cargo.lock with docker', async () => {
     jest.spyOn(docker, 'removeDanglingContainers').mockResolvedValueOnce();
     await setExecConfig({ ...config, binarySource: BinarySource.Docker });

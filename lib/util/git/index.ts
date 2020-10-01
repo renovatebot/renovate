@@ -236,7 +236,7 @@ export async function syncGit(): Promise<void> {
     const cloneStart = Date.now();
     try {
       // clone only the default branch
-      const opts = ['--depth=2'];
+      const opts = ['--depth=10'];
       if (config.extraCloneOpts) {
         Object.entries(config.extraCloneOpts).forEach((e) =>
           opts.push(e[0], `${e[1]}`)
@@ -400,6 +400,13 @@ export async function isBranchModified(branchName: string): Promise<boolean> {
   // First check cache
   if (config.branchIsModified[branchName] !== undefined) {
     return config.branchIsModified[branchName];
+  }
+  if (!branchExists(branchName)) {
+    logger.debug(
+      { branchName },
+      'Branch does not exist - cannot check isModified'
+    );
+    return false;
   }
   // Retrieve the author of the most recent commit
   const lastAuthor = (
@@ -602,7 +609,9 @@ export async function commitFiles({
     // Fetch it after create
     const ref = `refs/heads/${branchName}:refs/remotes/origin/${branchName}`;
     await git.fetch(['origin', ref, '--depth=2', '--force']);
-    config.branchCommits[branchName] = commit;
+    config.branchCommits[branchName] = (
+      await git.revparse([branchName])
+    ).trim();
     config.branchIsModified[branchName] = false;
     incLimitedValue(Limit.Commits);
     return commit;
