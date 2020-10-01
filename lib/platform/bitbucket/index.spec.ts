@@ -81,7 +81,6 @@ describe('platform/bitbucket', () => {
     await bitbucket.initRepo({
       repository: 'some/repo',
       localDir: '',
-      optimizeForDisabled: false,
       ...config,
     });
 
@@ -147,7 +146,6 @@ describe('platform/bitbucket', () => {
         await bitbucket.initRepo({
           repository: 'some/repo',
           localDir: '',
-          optimizeForDisabled: false,
         })
       ).toMatchSnapshot();
       expect(httpMock.getTrace()).toMatchSnapshot();

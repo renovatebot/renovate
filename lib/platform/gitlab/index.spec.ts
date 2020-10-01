@@ -126,7 +126,6 @@ describe('platform/gitlab', () => {
     repoParams: RepoParams = {
       repository: 'some/repo',
       localDir: '',
-      optimizeForDisabled: false,
     },
     repoResp = null,
     scope = httpMock.scope(gitlabApiHost)
@@ -153,7 +152,6 @@ describe('platform/gitlab', () => {
       await gitlab.initRepo({
         repository: 'some/repo/project',
         localDir: '',
-        optimizeForDisabled: false,
       });
       expect(httpMock.getTrace()).toMatchSnapshot();
     });
@@ -166,7 +164,6 @@ describe('platform/gitlab', () => {
         gitlab.initRepo({
           repository: 'some/repo',
           localDir: '',
-          optimizeForDisabled: false,
         })
       ).rejects.toThrow('always error');
       expect(httpMock.getTrace()).toMatchSnapshot();
@@ -180,7 +177,6 @@ describe('platform/gitlab', () => {
         gitlab.initRepo({
           repository: 'some/repo',
           localDir: '',
-          optimizeForDisabled: false,
         })
       ).rejects.toThrow(REPOSITORY_ARCHIVED);
       expect(httpMock.getTrace()).toMatchSnapshot();
@@ -194,7 +190,6 @@ describe('platform/gitlab', () => {
         gitlab.initRepo({
           repository: 'some/repo',
           localDir: '',
-          optimizeForDisabled: false,
         })
       ).rejects.toThrow(REPOSITORY_MIRRORED);
       expect(httpMock.getTrace()).toMatchSnapshot();
@@ -208,7 +203,6 @@ describe('platform/gitlab', () => {
         gitlab.initRepo({
           repository: 'some/repo',
           localDir: '',
-          optimizeForDisabled: false,
         })
       ).rejects.toThrow(REPOSITORY_DISABLED);
       expect(httpMock.getTrace()).toMatchSnapshot();
@@ -222,7 +216,6 @@ describe('platform/gitlab', () => {
         gitlab.initRepo({
           repository: 'some/repo',
           localDir: '',
-          optimizeForDisabled: false,
         })
       ).rejects.toThrow(REPOSITORY_DISABLED);
       expect(httpMock.getTrace()).toMatchSnapshot();
@@ -236,7 +229,6 @@ describe('platform/gitlab', () => {
         gitlab.initRepo({
           repository: 'some/repo',
           localDir: '',
-          optimizeForDisabled: false,
         })
       ).rejects.toThrow(REPOSITORY_EMPTY);
       expect(httpMock.getTrace()).toMatchSnapshot();
@@ -250,7 +242,6 @@ describe('platform/gitlab', () => {
         gitlab.initRepo({
           repository: 'some/repo',
           localDir: '',
-          optimizeForDisabled: false,
         })
       ).rejects.toThrow(REPOSITORY_EMPTY);
       expect(httpMock.getTrace()).toMatchSnapshot();
@@ -266,7 +257,6 @@ describe('platform/gitlab', () => {
       await gitlab.initRepo({
         repository: 'some/repo/project',
         localDir: '',
-        optimizeForDisabled: false,
       });
       expect(httpMock.getTrace()).toMatchSnapshot();
     });
@@ -277,7 +267,6 @@ describe('platform/gitlab', () => {
         {
           repository: 'some/repo/project',
           localDir: '',
-          optimizeForDisabled: false,
         },
         {
           default_branch: 'master',
@@ -294,7 +283,6 @@ describe('platform/gitlab', () => {
         {
           repository: 'some/repo/project',
           localDir: '',
-          optimizeForDisabled: false,
         },
         {
           default_branch: 'master',

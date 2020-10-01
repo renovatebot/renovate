@@ -129,7 +129,7 @@ export async function getJsonFile(fileName: string): Promise<any | null> {
         'base64'
       ).toString()
     );
-  } catch (err) /* istanbul ignore next */ {
+  } catch (err) {
     return null;
   }
 }

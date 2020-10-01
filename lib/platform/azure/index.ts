@@ -105,10 +105,8 @@ export async function getJsonFile(fileName: string): Promise<any | null> {
       fileName,
       config.defaultBranch
     );
-    debugger;
     return JSON.parse(json);
-  } catch (err) /* istanbul ignore next */ {
-    debugger;
+  } catch (err) {
     return null;
   }
 }

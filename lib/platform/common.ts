@@ -34,7 +34,7 @@ export interface RepoResult {
 
 export interface RepoParams {
   localDir: string;
-  optimizeForDisabled: boolean;
+  optimizeForDisabled?: boolean;
   repository: string;
   endpoint?: string;
   forkMode?: string;

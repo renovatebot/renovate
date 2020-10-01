@@ -166,7 +166,6 @@ describe(getName(__filename), () => {
           endpoint: 'https://stash.renovatebot.com/vcs/',
           repository: 'SOME/repo',
           localDir: '',
-          optimizeForDisabled: false,
           ...config,
         });
         return scope;
@@ -263,7 +262,6 @@ describe(getName(__filename), () => {
               endpoint: 'https://stash.renovatebot.com/vcs/',
               repository: 'SOME/repo',
               localDir: '',
-              optimizeForDisabled: false,
             })
           ).toMatchSnapshot();
           expect(httpMock.getTrace()).toMatchSnapshot();
@@ -284,7 +282,6 @@ describe(getName(__filename), () => {
             endpoint: 'https://stash.renovatebot.com/vcs/',
             repository: 'SOME/repo',
             localDir: '',
-            optimizeForDisabled: true,
           });
           expect(res).toMatchSnapshot();
           expect(httpMock.getTrace()).toMatchSnapshot();
@@ -305,7 +302,6 @@ describe(getName(__filename), () => {
               endpoint: 'https://stash.renovatebot.com/vcs/',
               repository: 'SOME/repo',
               localDir: '',
-              optimizeForDisabled: false,
             })
           ).rejects.toThrow(REPOSITORY_EMPTY);
           expect(httpMock.getTrace()).toMatchSnapshot();

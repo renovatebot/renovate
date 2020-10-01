@@ -107,7 +107,7 @@ export async function getJsonFile(fileName: string): Promise<any | null> {
         `/2.0/repositories/${config.repository}/src/${config.defaultBranch}/${fileName}`
       )
     ).body;
-  } catch (err) /* istanbul ignore next */ {
+  } catch (err) {
     return null;
   }
 }

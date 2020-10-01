@@ -173,7 +173,6 @@ describe('platform/gitea', () => {
     return gitea.initRepo({
       repository: mockRepo.full_name,
       localDir: '',
-      optimizeForDisabled: false,
       ...config,
     });
   }
@@ -241,7 +240,6 @@ describe('platform/gitea', () => {
     const initRepoCfg: RepoParams = {
       repository: mockRepo.full_name,
       localDir: '',
-      optimizeForDisabled: false,
     };
 
     it('should propagate API errors', async () => {

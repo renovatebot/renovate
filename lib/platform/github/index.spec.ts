@@ -377,7 +377,6 @@ describe('platform/github', () => {
         });
       await expect(
         github.initRepo({
-          includeForks: true,
           repository: 'some/repo',
         } as any)
       ).rejects.toThrow(REPOSITORY_RENAMED);

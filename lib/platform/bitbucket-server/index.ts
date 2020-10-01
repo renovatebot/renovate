@@ -122,7 +122,7 @@ export async function getJsonFile(fileName: string): Promise<any | null> {
     } else {
       return JSON.parse(body.lines.map((l) => l.text).join(''));
     }
-  } catch (err) /* istanbul ignore next */ {
+  } catch (err) {
     // no-op
   }
   return null;
