@@ -79,6 +79,21 @@ describe('updateArtifacts', () => {
     ).not.toBeNull();
     expect(execSnapshots).toMatchSnapshot();
   });
+  it('does not update lock file when non-proj file is changed', async () => {
+    const execSnapshots = mockExecAll(exec);
+    fs.getSiblingFileName.mockReturnValueOnce('packages.lock.json');
+    fs.readLocalFile.mockResolvedValueOnce('Current packages.lock.json' as any);
+    fs.readLocalFile.mockResolvedValueOnce('New packages.lock.json' as any);
+    expect(
+      await nuget.updateArtifacts({
+        packageFileName: 'otherfile.props',
+        updatedDeps: ['dep'],
+        newPackageFileContent: '{}',
+        config,
+      })
+    ).toBeNull();
+    expect(execSnapshots).toMatchSnapshot();
+  });
   it('does not update lock file when no deps changed', async () => {
     const execSnapshots = mockExecAll(exec);
     fs.getSiblingFileName.mockReturnValueOnce('packages.lock.json');
@@ -156,7 +171,7 @@ describe('updateArtifacts', () => {
     });
     expect(
       await nuget.updateArtifacts({
-        packageFileName: 'composer.json',
+        packageFileName: 'project.csproj',
         updatedDeps: ['dep'],
         newPackageFileContent: '{}',
         config,

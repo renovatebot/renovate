@@ -7,6 +7,7 @@ import {
   writeLocalFile,
 } from '../../util/fs';
 import * as hostRules from '../../util/host-rules';
+import { regEx } from '../../util/regex';
 import {
   UpdateArtifact,
   UpdateArtifactsConfig,
@@ -38,6 +39,22 @@ async function authenticate(
   }
 }
 
+async function runDotnetRestore(
+  packageFileName: string,
+  config: UpdateArtifactsConfig
+): Promise<void> {
+  const execOptions: ExecOptions = {
+    cwdFile: packageFileName,
+    docker: {
+      image: 'renovate/dotnet',
+    },
+  };
+  const cmds = ['dotnet restore --force-evaluate'];
+  await authenticate(packageFileName, config, cmds);
+  logger.debug({ cmd: cmds }, 'dotnet command');
+  await exec(cmds, execOptions);
+}
+
 export async function updateArtifacts({
   packageFileName,
   newPackageFileContent,
@@ -46,13 +63,12 @@ export async function updateArtifacts({
 }: UpdateArtifact): Promise<UpdateArtifactsResult[] | null> {
   logger.debug(`nuget.updateArtifacts(${packageFileName})`);
 
-  // TODO: Make this work when non-project files are changed (e.g. '.props')
-  // // eslint-disable-next-line no-useless-escape
-  // if (regEx('.*.[cs|vb|fs]proj$', 'i').test(packageFileName)) {
-  //   logger.debug('Not updating lock file');
-  //   return null;
-  // }
+  if (!/[cs|vb|fs]proj$/i.test(packageFileName)) {
+    logger.debug('Not updating lock file');
+    return null;
+  }
 
+  // TODO: Make this work when non-project files are changed (e.g. '.props')
   // TODO: Make this work with central package version handling where there is just a single lock file.
 
   const lockFileName = getSiblingFileName(
@@ -67,25 +83,16 @@ export async function updateArtifacts({
 
   try {
     if (updatedDeps.length === 0 && config.isLockFileMaintenance !== true) {
-      logger.debug(`Not updating lock file because no deps changed.`);
+      logger.debug(
+        `Not updating lock file because no deps changed and no lock file maintenance.`
+      );
       return null;
     }
 
     await writeLocalFile(packageFileName, newPackageFileContent);
 
-    const execOptions: ExecOptions = {
-      cwdFile: packageFileName,
-      docker: {
-        image: 'renovate/dotnet',
-      },
-    };
+    await runDotnetRestore(packageFileName, config);
 
-    const cmds = ['dotnet restore --force-evaluate'];
-
-    await authenticate(packageFileName, config, cmds);
-
-    logger.debug({ cmd: cmds }, 'dotnet command');
-    await exec(cmds, execOptions);
     const newLockFileContent = await readLocalFile(lockFileName, 'utf8');
     if (existingLockFileContent === newLockFileContent) {
       logger.debug(`Lock file is unchanged`);

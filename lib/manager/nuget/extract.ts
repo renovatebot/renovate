@@ -5,8 +5,8 @@ import { SkipReason } from '../../types';
 import { get } from '../../versioning';
 import * as semverVersioning from '../../versioning/semver';
 import { ExtractConfig, PackageDependency, PackageFile } from '../common';
-import { determineRegistries } from './util';
 import { DotnetToolsManifest } from './types';
+import { determineRegistries } from './util';
 
 /**
  * https://docs.microsoft.com/en-us/nuget/concepts/package-versioning

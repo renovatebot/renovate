@@ -97,6 +97,8 @@ Array [
 
 exports[`updateArtifacts does not update lock file when no deps changed 1`] = `Array []`;
 
+exports[`updateArtifacts does not update lock file when non-proj file is changed 1`] = `Array []`;
+
 exports[`updateArtifacts performs lock file maintenance 1`] = `
 Array [
   Object {
