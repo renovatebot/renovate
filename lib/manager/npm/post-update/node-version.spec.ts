@@ -6,7 +6,7 @@ jest.mock('../../../util/fs');
 describe('getNodeConstraint', () => {
   const config = {
     packageFile: 'package.json',
-    compatibility: { node: '^12.16.0' },
+    constraints: { node: '^12.16.0' },
   };
   it('returns package.json range', async () => {
     fs.readLocalFile = jest.fn();
@@ -39,7 +39,7 @@ describe('getNodeConstraint', () => {
     fs.readLocalFile = jest.fn();
     fs.readLocalFile.mockResolvedValueOnce(null);
     fs.readLocalFile.mockResolvedValueOnce(null);
-    const res = await getNodeConstraint({ ...config, compatibility: null });
+    const res = await getNodeConstraint({ ...config, constraints: null });
     expect(res).toBeNull();
   });
 });

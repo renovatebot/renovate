@@ -26,8 +26,8 @@ async function getRubyConstraint(
   updateArtifact: UpdateArtifact
 ): Promise<string> {
   const { packageFileName, config } = updateArtifact;
-  const { compatibility = {} } = config;
-  const { ruby } = compatibility;
+  const { constraints = {} } = config;
+  const { ruby } = constraints;
 
   let rubyConstraint: string;
   if (ruby) {
@@ -72,7 +72,7 @@ export async function updateArtifacts(
     newPackageFileContent,
     config,
   } = updateArtifact;
-  const { compatibility = {} } = config;
+  const { constraints = {} } = config;
   logger.debug(`bundler.updateArtifacts(${packageFileName})`);
   const existingError = memCache.get<string>('bundlerArtifactsError');
   // istanbul ignore if
@@ -103,7 +103,7 @@ export async function updateArtifacts(
     }
 
     let bundlerVersion = '';
-    const { bundler } = compatibility;
+    const { bundler } = constraints;
     if (bundler) {
       if (isValid(bundler)) {
         logger.debug({ bundlerVersion: bundler }, 'Found bundler version');

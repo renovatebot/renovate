@@ -158,7 +158,16 @@ describe('platform/git', () => {
       expect(git.getBranchCommit('not_found')).toBeNull();
     });
   });
-
+  describe('getBranchParentSha(branchName)', () => {
+    it('should return sha if found', async () => {
+      const parentSha = await git.getBranchParentSha('renovate/future_branch');
+      expect(parentSha).toHaveLength(40);
+      expect(parentSha).toEqual(git.getBranchCommit('master'));
+    });
+    it('should return false if not found', async () => {
+      expect(await git.getBranchParentSha('not_found')).toBeNull();
+    });
+  });
   describe('getBranchFiles(branchName)', () => {
     it('detects changed files compared to current base branch', async () => {
       const file = {
