@@ -222,7 +222,8 @@ export async function getRepoConfig(
   config.baseBranch = config.defaultBranch;
   config = await checkOnboardingBranch(config);
   config = await mergeRenovateConfig(config);
-  config.semanticCommits =
-    config.semanticCommits ?? (await detectSemanticCommits());
+  if (config.semanticCommits === 'auto') {
+    config.semanticCommits = await detectSemanticCommits();
+  }
   return config;
 }

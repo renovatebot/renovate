@@ -236,7 +236,7 @@ export async function syncGit(): Promise<void> {
     const cloneStart = Date.now();
     try {
       // clone only the default branch
-      const opts = ['--depth=2'];
+      const opts = ['--depth=10'];
       if (config.extraCloneOpts) {
         Object.entries(config.extraCloneOpts).forEach((e) =>
           opts.push(e[0], `${e[1]}`)
@@ -330,6 +330,20 @@ export function getBranchCommit(branchName: string): CommitSha | null {
   return config.branchCommits[branchName] || null;
 }
 
+// Return the parent commit SHA for a branch
+export async function getBranchParentSha(
+  branchName: string
+): Promise<CommitSha | null> {
+  try {
+    const branchSha = getBranchCommit(branchName);
+    const parentSha = await git.revparse([`${branchSha}^`]);
+    return parentSha;
+  } catch (err) {
+    logger.debug({ err }, 'Error getting branch parent sha');
+    return null;
+  }
+}
+
 export async function getCommitMessages(): Promise<string[]> {
   await syncGit();
   logger.debug('getCommitMessages');
@@ -400,6 +414,13 @@ export async function isBranchModified(branchName: string): Promise<boolean> {
   // First check cache
   if (config.branchIsModified[branchName] !== undefined) {
     return config.branchIsModified[branchName];
+  }
+  if (!branchExists(branchName)) {
+    logger.debug(
+      { branchName },
+      'Branch does not exist - cannot check isModified'
+    );
+    return false;
   }
   // Retrieve the author of the most recent commit
   const lastAuthor = (

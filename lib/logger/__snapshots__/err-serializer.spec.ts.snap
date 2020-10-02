@@ -59,6 +59,7 @@ Object {
     "headers": Object {
       "content-type": "application/json",
     },
+    "httpVersion": null,
     "statusCode": 412,
     "statusMessage": "Precondition Failed",
   },

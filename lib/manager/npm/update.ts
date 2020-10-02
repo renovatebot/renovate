@@ -91,7 +91,7 @@ export function updateDependency({
       logger.trace('Version is already updated');
       return bumpPackageVersion(
         fileContent,
-        upgrade.packageJsonVersion,
+        upgrade.packageFileVersion,
         upgrade.bumpVersion
       );
     }
@@ -182,7 +182,7 @@ export function updateDependency({
     }
     return bumpPackageVersion(
       newFileContent,
-      upgrade.packageJsonVersion,
+      upgrade.packageFileVersion,
       upgrade.bumpVersion
     );
   } catch (err) {

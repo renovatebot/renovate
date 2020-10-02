@@ -1,7 +1,6 @@
 import URL, { URLSearchParams } from 'url';
 import is from '@sindresorhus/is';
 import delay from 'delay';
-import { configFileNames } from '../../config/app-strings';
 import {
   PLATFORM_AUTHENTICATION_ERROR,
   REPOSITORY_ACCESS_FORBIDDEN,
@@ -42,14 +41,12 @@ import { GitlabComment, GitlabIssue, MergeMethod, RepoResponse } from './types';
 
 const gitlabApi = new GitlabHttp();
 
-const defaultConfigFile = configFileNames[0];
 let config: {
   repository: string;
   localDir: string;
   email: string;
   prList: any[];
   issueList: GitlabIssue[];
-  optimizeForDisabled: boolean;
   mergeMethod: MergeMethod;
   defaultBranch: string;
 } = {} as any;
@@ -132,7 +129,7 @@ export async function getJsonFile(fileName: string): Promise<any | null> {
         'base64'
       ).toString()
     );
-  } catch (err) /* istanbul ignore next */ {
+  } catch (err) {
     return null;
   }
 }
@@ -141,7 +138,6 @@ export async function getJsonFile(fileName: string): Promise<any | null> {
 export async function initRepo({
   repository,
   localDir,
-  optimizeForDisabled,
 }: RepoParams): Promise<RepoResult> {
   config = {} as any;
   config.repository = urlEscape(repository);
@@ -180,12 +176,6 @@ export async function initRepo({
       throw new Error(REPOSITORY_EMPTY);
     }
     config.defaultBranch = res.body.default_branch;
-    if (optimizeForDisabled) {
-      const renovateConfig = await getJsonFile(defaultConfigFile);
-      if (renovateConfig && renovateConfig.enabled === false) {
-        throw new Error(REPOSITORY_DISABLED);
-      }
-    }
     config.mergeMethod = res.body.merge_method || 'merge';
     logger.debug(`${repository} default branch = ${config.defaultBranch}`);
     delete config.prList;
@@ -337,7 +327,7 @@ export async function getBranchStatus(
 // Pull Request
 
 export async function createPr({
-  branchName,
+  sourceBranch,
   targetBranch,
   prTitle: title,
   prBody: rawDescription,
@@ -350,7 +340,7 @@ export async function createPr({
     `projects/${config.repository}/merge_requests`,
     {
       body: {
-        source_branch: branchName,
+        source_branch: sourceBranch,
         target_branch: targetBranch,
         remove_source_branch: true,
         title,
@@ -361,7 +351,7 @@ export async function createPr({
   );
   const pr = res.body;
   pr.number = pr.iid;
-  pr.branchName = branchName;
+  pr.sourceBranch = sourceBranch;
   pr.displayNumber = `Merge Request #${pr.iid}`;
   // istanbul ignore if
   if (config.prList) {
@@ -420,7 +410,7 @@ export async function getPr(iid: number): Promise<Pr> {
     >(url)
   ).body;
   // Harmonize fields with GitHub
-  pr.branchName = pr.source_branch;
+  pr.sourceBranch = pr.source_branch;
   pr.targetBranch = pr.target_branch;
   pr.number = pr.iid;
   pr.displayNumber = `Merge Request #${pr.iid}`;
@@ -435,7 +425,7 @@ export async function getPr(iid: number): Promise<Pr> {
     pr.canMerge = false;
     pr.isConflicted = true;
   } else if (pr.state === PrState.Open) {
-    const branchStatus = await getBranchStatus(pr.branchName, []);
+    const branchStatus = await getBranchStatus(pr.sourceBranch, []);
     if (branchStatus === BranchStatus.green) {
       pr.canMerge = true;
     }
@@ -913,7 +903,7 @@ async function fetchPrList(): Promise<Pr[]> {
     >(urlString, { paginate: true });
     return res.body.map((pr) => ({
       number: pr.iid,
-      branchName: pr.source_branch,
+      sourceBranch: pr.source_branch,
       title: pr.title,
       state: pr.state === 'opened' ? PrState.Open : pr.state,
       createdAt: pr.created_at,
@@ -952,8 +942,8 @@ export async function findPr({
   logger.debug(`findPr(${branchName}, ${prTitle}, ${state})`);
   const prList = await getPrList();
   return prList.find(
-    (p: { branchName: string; title: string; state: string }) =>
-      p.branchName === branchName &&
+    (p: { sourceBranch: string; title: string; state: string }) =>
+      p.sourceBranch === branchName &&
       (!prTitle || p.title === prTitle) &&
       matchesState(p.state, state)
   );

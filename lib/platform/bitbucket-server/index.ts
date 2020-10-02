@@ -4,7 +4,6 @@ import delay from 'delay';
 import type { PartialDeep } from 'type-fest';
 import {
   REPOSITORY_CHANGED,
-  REPOSITORY_DISABLED,
   REPOSITORY_EMPTY,
   REPOSITORY_NOT_FOUND,
 } from '../../constants/error-messages';
@@ -123,7 +122,7 @@ export async function getJsonFile(fileName: string): Promise<any | null> {
     } else {
       return JSON.parse(body.lines.map((l) => l.text).join(''));
     }
-  } catch (err) /* istanbul ignore next */ {
+  } catch (err) {
     // no-op
   }
   return null;
@@ -133,7 +132,6 @@ export async function getJsonFile(fileName: string): Promise<any | null> {
 export async function initRepo({
   repository,
   localDir,
-  optimizeForDisabled,
 }: RepoParams): Promise<RepoResult> {
   logger.debug(
     `initRepo("${JSON.stringify({ repository, localDir }, null, 2)}")`
@@ -152,17 +150,6 @@ export async function initRepo({
     prVersions: new Map<number, number>(),
     username: opts.username,
   } as any;
-
-  if (optimizeForDisabled) {
-    interface RenovateConfig {
-      enabled: boolean;
-    }
-
-    const renovateConfig: RenovateConfig = await getJsonFile('renovate.json');
-    if (renovateConfig && renovateConfig.enabled === false) {
-      throw new Error(REPOSITORY_DISABLED);
-    }
-  }
 
   const { host, pathname } = url.parse(defaults.endpoint);
   const gitUrl = git.getUrl({
@@ -295,7 +282,7 @@ const isRelevantPr = (
   prTitle: string | null | undefined,
   state: string
 ) => (p: Pr): boolean =>
-  p.branchName === branchName &&
+  p.sourceBranch === branchName &&
   (!prTitle || p.title === prTitle) &&
   matchesState(p.state, state);
 
@@ -769,14 +756,14 @@ const escapeHash = (input: string): string =>
   input ? input.replace(/#/g, '%23') : input;
 
 export async function createPr({
-  branchName,
+  sourceBranch,
   targetBranch,
   prTitle: title,
   prBody: rawDescription,
   platformOptions,
 }: CreatePRConfig): Promise<Pr> {
   const description = sanitize(rawDescription);
-  logger.debug(`createPr(${branchName}, title=${title})`);
+  logger.debug(`createPr(${sourceBranch}, title=${title})`);
   const base = targetBranch;
   let reviewers: BbsRestUserRef[] = [];
 
@@ -794,7 +781,7 @@ export async function createPr({
         `./rest/default-reviewers/1.0/projects/${config.projectKey}/repos/${
           config.repositorySlug
         }/reviewers?sourceRefId=refs/heads/${escapeHash(
-          branchName
+          sourceBranch
         )}&targetRefId=refs/heads/${base}&sourceRepoId=${id}&targetRepoId=${id}`
       )
     ).body;
@@ -808,7 +795,7 @@ export async function createPr({
     title,
     description,
     fromRef: {
-      id: `refs/heads/${branchName}`,
+      id: `refs/heads/${sourceBranch}`,
     },
     toRef: {
       id: `refs/heads/${base}`,
@@ -829,7 +816,7 @@ export async function createPr({
       logger.debug(
         'Empty pull request - deleting branch so it can be recreated next run'
       );
-      await deleteBranch(branchName);
+      await deleteBranch(sourceBranch);
       throw new Error(REPOSITORY_CHANGED);
     }
     throw err;

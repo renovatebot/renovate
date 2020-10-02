@@ -1,13 +1,10 @@
 import URL from 'url';
 import is from '@sindresorhus/is';
-import { configFileNames } from '../../config/app-strings';
-import { RenovateConfig } from '../../config/common';
 import {
   REPOSITORY_ACCESS_FORBIDDEN,
   REPOSITORY_ARCHIVED,
   REPOSITORY_BLOCKED,
   REPOSITORY_CHANGED,
-  REPOSITORY_DISABLED,
   REPOSITORY_EMPTY,
   REPOSITORY_MIRRORED,
 } from '../../constants/error-messages';
@@ -54,7 +51,6 @@ const defaults = {
   hostType: PLATFORM_TYPE_GITEA,
   endpoint: 'https://gitea.com/api/v1/',
 };
-const defaultConfigFile = configFileNames[0];
 
 let config: GiteaRepoConfig = {} as any;
 let botUserID: number;
@@ -98,7 +94,7 @@ function toRenovatePR(data: helper.PR): Pr | null {
     title: data.title,
     body: data.body,
     sha: data.head.sha,
-    branchName: data.head.label,
+    sourceBranch: data.head.label,
     targetBranch: data.base.ref,
     sourceRepo: data.head.repo.full_name,
     createdAt: data.created_at,
@@ -211,8 +207,8 @@ const platform: Platform = {
   async getJsonFile(fileName: string): Promise<any | null> {
     try {
       const contents = await helper.getRepoContents(
+        config.repository,
         fileName,
-        defaultConfigFile,
         config.defaultBranch
       );
       return JSON.parse(contents.contentString);
@@ -221,12 +217,7 @@ const platform: Platform = {
     }
   },
 
-  async initRepo({
-    repository,
-    localDir,
-    optimizeForDisabled,
-  }: RepoParams): Promise<RepoResult> {
-    let renovateConfig: RenovateConfig;
+  async initRepo({ repository, localDir }: RepoParams): Promise<RepoResult> {
     let repo: helper.Repo;
 
     config = {} as any;
@@ -283,14 +274,6 @@ const platform: Platform = {
     // Determine author email and branches
     config.defaultBranch = repo.default_branch;
     logger.debug(`${repository} default branch = ${config.defaultBranch}`);
-
-    // Optionally check if Renovate is disabled by attempting to fetch default configuration file
-    if (optimizeForDisabled) {
-      renovateConfig = await platform.getJsonFile(config.repository);
-      if (renovateConfig && renovateConfig.enabled === false) {
-        throw new Error(REPOSITORY_DISABLED);
-      }
-    }
 
     // Find options for current host and determine Git endpoint
     const opts = hostRules.find({
@@ -467,7 +450,7 @@ const platform: Platform = {
     const pr = prList.find(
       (p) =>
         p.sourceRepo === config.repository &&
-        p.branchName === branchName &&
+        p.sourceBranch === branchName &&
         matchesState(p.state, state) &&
         (!title || p.title === title)
     );
@@ -479,14 +462,14 @@ const platform: Platform = {
   },
 
   async createPr({
-    branchName,
+    sourceBranch,
     targetBranch,
     prTitle: title,
     prBody: rawBody,
     labels: labelNames,
   }: CreatePRConfig): Promise<Pr> {
     const base = targetBranch;
-    const head = branchName;
+    const head = sourceBranch;
     const body = sanitize(rawBody);
 
     logger.debug(`Creating pull request: ${title} (${head} => ${base})`);
@@ -518,13 +501,13 @@ const platform: Platform = {
       // would cause a HTTP 409 conflict error, which we hereby gracefully handle.
       if (err.statusCode === 409) {
         logger.warn(
-          `Attempting to gracefully recover from 409 Conflict response in createPr(${title}, ${branchName})`
+          `Attempting to gracefully recover from 409 Conflict response in createPr(${title}, ${sourceBranch})`
         );
 
         // Refresh cached PR list and search for pull request with matching information
         config.prList = null;
         const pr = await platform.findPr({
-          branchName,
+          branchName: sourceBranch,
           state: PrState.Open,
         });
 
@@ -532,7 +515,7 @@ const platform: Platform = {
         if (pr) {
           if (pr.title !== title || pr.body !== body) {
             logger.debug(
-              `Recovered from 409 Conflict, but PR for ${branchName} is outdated. Updating...`
+              `Recovered from 409 Conflict, but PR for ${sourceBranch} is outdated. Updating...`
             );
             await platform.updatePr({
               number: pr.number,
@@ -543,7 +526,7 @@ const platform: Platform = {
             pr.body = body;
           } else {
             logger.debug(
-              `Recovered from 409 Conflict and PR for ${branchName} is up-to-date`
+              `Recovered from 409 Conflict and PR for ${sourceBranch} is up-to-date`
             );
           }
 

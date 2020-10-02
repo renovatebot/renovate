@@ -705,6 +705,15 @@ const options: RenovateOptions[] = [
     env: false,
   },
   {
+    name: 'extractVersion',
+    description:
+      "A regex (re2) to extract a version from a datasource's raw version string",
+    type: 'string',
+    format: 'regex',
+    cli: false,
+    env: false,
+  },
+  {
     name: 'versioning',
     description: 'versioning to use for filtering and comparisons',
     type: 'string',
@@ -1084,8 +1093,9 @@ const options: RenovateOptions[] = [
   {
     name: 'semanticCommits',
     description: 'Enable semantic commit prefixes for commits and PR titles',
-    type: 'boolean',
-    default: null,
+    type: 'string',
+    allowedValues: ['auto', 'enabled', 'disabled'],
+    default: 'auto',
   },
   {
     name: 'semanticCommitType',
@@ -1570,8 +1580,9 @@ const options: RenovateOptions[] = [
     cli: false,
   },
   {
-    name: 'compatibility',
-    description: 'Configuration object for compatibility',
+    name: 'constraints',
+    description:
+      'Configuration object for define language or manager version constraints',
     type: 'object',
     default: {},
     mergeable: true,

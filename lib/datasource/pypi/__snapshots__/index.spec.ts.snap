@@ -80,7 +80,7 @@ Array [
 ]
 `;
 
-exports[`datasource/pypi getReleases parses data-requires-python and respects compatibility from simple endpoint 1`] = `
+exports[`datasource/pypi getReleases parses data-requires-python and respects constraints from simple endpoint 1`] = `
 Object {
   "releases": Array [
     Object {
@@ -105,7 +105,7 @@ Object {
 }
 `;
 
-exports[`datasource/pypi getReleases parses data-requires-python and respects compatibility from simple endpoint 2`] = `
+exports[`datasource/pypi getReleases parses data-requires-python and respects constraints from simple endpoint 2`] = `
 Array [
   Object {
     "headers": Object {
@@ -365,7 +365,7 @@ Array [
 ]
 `;
 
-exports[`datasource/pypi getReleases respects compatibility 1`] = `
+exports[`datasource/pypi getReleases respects constraints 1`] = `
 Object {
   "releases": Array [
     Object {
@@ -381,7 +381,7 @@ Object {
 }
 `;
 
-exports[`datasource/pypi getReleases respects compatibility 2`] = `
+exports[`datasource/pypi getReleases respects constraints 2`] = `
 Array [
   Object {
     "headers": Object {
