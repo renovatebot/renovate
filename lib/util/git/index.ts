@@ -50,6 +50,11 @@ interface LocalConfig extends StorageConfig {
   branchPrefix: string;
 }
 
+enum GitDate {
+  Author = '%ai',
+  Committer = '%ci',
+}
+
 // istanbul ignore next
 function checkForPlatformFailure(err: Error): void {
   if (process.env.NODE_ENV === 'test') {
@@ -267,7 +272,11 @@ export async function syncGit(): Promise<void> {
     }
   }
   try {
-    const latestCommitDate = (await git.log({ n: 1 })).latest.date;
+    const commitLog = await git.log({
+      n: 1,
+      format: { date: GitDate.Committer },
+    });
+    const latestCommitDate = commitLog.latest.date;
     logger.debug({ latestCommitDate }, 'latest commit');
   } catch (err) /* istanbul ignore next */ {
     checkForPlatformFailure(err);
@@ -363,7 +372,11 @@ export async function checkoutBranch(branchName: string): Promise<CommitSha> {
       await git.raw(['rev-parse', 'origin/' + branchName])
     ).trim();
     await git.checkout([branchName, '-f']);
-    const latestCommitDate = (await git.log({ n: 1 }))?.latest?.date;
+    const commitLog = await git.log({
+      n: 1,
+      format: { date: GitDate.Committer },
+    });
+    const latestCommitDate = commitLog?.latest?.date;
     if (latestCommitDate) {
       logger.debug({ branchName, latestCommitDate }, 'latest commit');
     }
@@ -480,11 +493,16 @@ export async function mergeBranch(branchName: string): Promise<void> {
 }
 
 export async function getBranchLastCommitTime(
-  branchName: string
+  branchName: string,
+  dateFormat = GitDate.Committer
 ): Promise<Date> {
   await syncBranch(branchName);
   try {
-    const time = await git.show(['-s', '--format=%ai', 'origin/' + branchName]);
+    const time = await git.show([
+      '-s',
+      `--format=${dateFormat}`,
+      'origin/' + branchName,
+    ]);
     return new Date(Date.parse(time));
   } catch (err) {
     checkForPlatformFailure(err);
@@ -604,9 +622,19 @@ export async function commitFiles({
         }
       }
     }
-    const commitRes = await git.commit(message, [], {
-      '--no-verify': null,
-    });
+    const authorDate = await getBranchLastCommitTime(
+      branchName,
+      GitDate.Author
+    );
+    const committerDate = new Date();
+    const commitRes = await git
+      .env({
+        GIT_COMMITTER_DATE: committerDate.toISOString(),
+      })
+      .commit(message, [], {
+        '--no-verify': null,
+        '--date': authorDate.toISOString(),
+      });
     const commit = commitRes?.commit || 'unknown';
     if (!force && !(await hasDiff(`origin/${branchName}`))) {
       logger.debug(

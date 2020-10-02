@@ -27,9 +27,9 @@ describe('platform/git', () => {
     await fs.writeFile(base.path + '/master_file', 'master');
     await fs.writeFile(base.path + '/file_to_delete', 'bye');
     await repo.add(['master_file', 'file_to_delete']);
-    await repo.commit('master message', [
-      '--date=' + masterCommitDate.toISOString(),
-    ]);
+    await repo
+      .env({ GIT_COMMITTER_DATE: masterCommitDate.toISOString() })
+      .commit('master message', ['--date=' + masterCommitDate.toISOString()]);
 
     await repo.checkout(['-b', 'renovate/future_branch', 'master']);
     await fs.writeFile(base.path + '/future_file', 'future');
