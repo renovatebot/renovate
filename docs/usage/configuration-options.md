@@ -637,6 +637,10 @@ If you have any uncertainty about exactly which hosts a service uses, then it ca
 
 Enable got [http2](https://github.com/sindresorhus/got/blob/v11.5.2/readme.md#http2) support.
 
+## fetchReleaseNotes
+
+Configure this to `false` if you want to disable release notes fetching
+
 ### hostName
 
 ### hostType
@@ -1623,9 +1627,5 @@ To disable vulnerability alerts completely, configure like this:
   }
 }
 ```
-
-## fetchReleaseNotes
-
-Configure this to `false` if you want to disable release notes fetching
 
 ## yarnrc
