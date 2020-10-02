@@ -2,8 +2,11 @@ import { RenovateConfig, mocked } from '../../../../test/util';
 import { getConfig } from '../../../config/defaults';
 import { branchifyUpgrades } from './branchify';
 import * as _flatten from './flatten';
+import * as _changelog from '../changelog';
 
 const flattenUpdates = mocked(_flatten).flattenUpdates;
+const embedChangelogs = mocked(_changelog).embedChangelogs;
+
 jest.mock('./flatten');
 
 let config: RenovateConfig;
@@ -111,6 +114,36 @@ describe('workers/repository/updates/branchify', () => {
         },
       ]);
       const res = await branchifyUpgrades(config, {});
+      expect(Object.keys(res.branches)).toHaveLength(2);
+    });
+    it('no fetch changelogs', async () => {
+      config.fetchReleaseNotes = false;
+      flattenUpdates.mockResolvedValueOnce([
+        {
+          depName: 'foo',
+          branchName: 'foo',
+          prTitle: 'some-title',
+          version: '1.1.0',
+          groupName: 'My Group',
+          group: { branchName: 'renovate/{{groupSlug}}' },
+        },
+        {
+          depName: 'foo',
+          branchName: 'foo',
+          prTitle: 'some-title',
+          version: '2.0.0',
+        },
+        {
+          depName: 'bar',
+          branchName: 'bar-{{version}}',
+          prTitle: 'some-title',
+          version: '1.1.0',
+          groupName: 'My Group',
+          group: { branchName: 'renovate/my-group' },
+        },
+      ]);
+      const res = await branchifyUpgrades(config, {});
+      expect(embedChangelogs).not.toHaveBeenCalled();
       expect(Object.keys(res.branches)).toHaveLength(2);
     });
   });
