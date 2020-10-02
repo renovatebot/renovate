@@ -1,9 +1,35 @@
 import { RenovateConfig } from '../../../../config';
+import { getPreset } from '../../../../config/presets';
+import { PRESET_DEP_NOT_FOUND } from '../../../../config/presets/util';
 import { logger } from '../../../../logger';
 import { clone } from '../../../../util/clone';
 
-export function getOnboardingConfig(config: RenovateConfig): string {
-  const onboardingConfig = clone(config.onboardingConfig);
+export async function getOnboardingConfig(
+  config: RenovateConfig
+): Promise<string> {
+  let onboardingConfig = clone(config.onboardingConfig);
+
+  let organizationConfigRepoExists = false;
+  const organizationConfigPresetName = `local>${config.owner}/renovate-config`;
+
+  try {
+    if (config.owner) {
+      await getPreset(organizationConfigPresetName, config);
+      organizationConfigRepoExists = true;
+    }
+  } catch (err) {
+    if (err.message !== PRESET_DEP_NOT_FOUND) {
+      // istanbul ignore next
+      throw err;
+    }
+    // Organization preset did not exist
+  }
+  if (organizationConfigRepoExists) {
+    onboardingConfig = {
+      extends: [organizationConfigPresetName],
+    };
+  }
+
   logger.debug({ config: onboardingConfig }, 'onboarding config');
   return JSON.stringify(onboardingConfig, null, 2) + '\n';
 }

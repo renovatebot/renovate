@@ -316,6 +316,7 @@ const platform: Platform = {
     return {
       defaultBranch: config.defaultBranch,
       isFork: !!repo.fork,
+      owner: repository.split('/')[0],
     };
   },
 

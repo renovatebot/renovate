@@ -176,6 +176,7 @@ export async function initRepo({
   const repoConfig: RepoResult = {
     defaultBranch,
     isFork: false,
+    owner: projectName,
   };
   return repoConfig;
 }

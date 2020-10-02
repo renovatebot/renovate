@@ -242,6 +242,7 @@ export async function initRepo({
   const repoConfig: RepoResult = {
     defaultBranch: config.defaultBranch,
     isFork: !!res.body.forked_from_project,
+    owner: repository.split('/')[0],
   };
   return repoConfig;
 }

@@ -390,6 +390,7 @@ export async function initRepo({
   const repoConfig: RepoResult = {
     defaultBranch: config.defaultBranch,
     isFork: repo.isFork === true,
+    owner: config.repositoryOwner,
   };
   return repoConfig;
 }

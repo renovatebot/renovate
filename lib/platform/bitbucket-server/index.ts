@@ -205,6 +205,7 @@ export async function initRepo({
     const repoConfig: RepoResult = {
       defaultBranch: branchRes.body.displayId,
       isFork: !!info.parent,
+      owner: config.projectKey,
     };
     return repoConfig;
   } catch (err) /* istanbul ignore next */ {

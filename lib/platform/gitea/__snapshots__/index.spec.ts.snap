@@ -181,6 +181,7 @@ exports[`platform/gitea initRepo should fall back to merge method "merge" 1`] = 
 Object {
   "defaultBranch": "master",
   "isFork": false,
+  "owner": "some",
 }
 `;
 
@@ -188,6 +189,7 @@ exports[`platform/gitea initRepo should fall back to merge method "rebase-merge"
 Object {
   "defaultBranch": "master",
   "isFork": false,
+  "owner": "some",
 }
 `;
 
@@ -195,5 +197,6 @@ exports[`platform/gitea initRepo should fall back to merge method "squash" 1`] =
 Object {
   "defaultBranch": "master",
   "isFork": false,
+  "owner": "some",
 }
 `;

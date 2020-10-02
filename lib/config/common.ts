@@ -27,6 +27,7 @@ export interface RenovateSharedConfig {
   draftPR?: boolean;
   enabled?: boolean;
   enabledManagers?: string[];
+  extends?: string[];
   fileMatch?: string[];
   group?: GroupConfig;
   groupName?: string;
@@ -145,7 +146,6 @@ export interface RenovateConfig
   description?: string | string[];
 
   errors?: ValidationMessage[];
-  extends?: string[];
 
   gitAuthor?: string;
 
@@ -164,6 +164,7 @@ export interface RenovateConfig
   dependencyDashboardTitle?: string;
   dependencyDashboardHeader?: string;
   dependencyDashboardFooter?: string;
+  owner?: string;
   packageFile?: string;
   packageRules?: PackageRule[];
   prConcurrentLimit?: number;
