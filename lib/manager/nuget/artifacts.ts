@@ -7,7 +7,6 @@ import {
   writeLocalFile,
 } from '../../util/fs';
 import * as hostRules from '../../util/host-rules';
-import { regEx } from '../../util/regex';
 import {
   UpdateArtifact,
   UpdateArtifactsConfig,
@@ -49,7 +48,7 @@ async function runDotnetRestore(
       image: 'renovate/dotnet',
     },
   };
-  const cmds = ['dotnet restore --force-evaluate'];
+  const cmds = [`dotnet restore --force-evaluate ${packageFileName}`];
   await authenticate(packageFileName, config, cmds);
   logger.debug({ cmd: cmds }, 'dotnet command');
   await exec(cmds, execOptions);
@@ -64,12 +63,16 @@ export async function updateArtifacts({
   logger.debug(`nuget.updateArtifacts(${packageFileName})`);
 
   if (!/[cs|vb|fs]proj$/i.test(packageFileName)) {
-    logger.debug('Not updating lock file');
+    // This could be implemented in the future if necessary.
+    // It's not that easy though because the questions which
+    // project file to restore how to detmermine which lock files
+    // have been changed in such cases.
+    logger.debug(
+      { packageFileName },
+      'Not updating lock file for non project files'
+    );
     return null;
   }
-
-  // TODO: Make this work when non-project files are changed (e.g. '.props')
-  // TODO: Make this work with central package version handling where there is just a single lock file.
 
   const lockFileName = getSiblingFileName(
     packageFileName,
@@ -77,7 +80,10 @@ export async function updateArtifacts({
   );
   const existingLockFileContent = await readLocalFile(lockFileName, 'utf8');
   if (!existingLockFileContent) {
-    logger.debug('No lock file found');
+    logger.debug(
+      { packageFileName },
+      'No lock file found beneath package file.'
+    );
     return null;
   }
 
