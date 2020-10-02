@@ -1624,4 +1624,8 @@ To disable vulnerability alerts completely, configure like this:
 }
 ```
 
+## fetchReleaseNotes
+
+Configure this to `false` if you want to disable release notes fetching
+
 ## yarnrc
