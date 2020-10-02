@@ -1,0 +1,15 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`initCluster rejects invalid cluster config 1`] = `
+Array [
+  Object {
+    "repository": "2",
+  },
+  Object {
+    "repository": "5",
+  },
+  Object {
+    "repository": "8",
+  },
+]
+`;
