@@ -1,8 +1,8 @@
 import { RenovateConfig, mocked } from '../../../../test/util';
 import { getConfig } from '../../../config/defaults';
+import * as _changelog from '../changelog';
 import { branchifyUpgrades } from './branchify';
 import * as _flatten from './flatten';
-import * as _changelog from '../changelog';
 
 const flattenUpdates = mocked(_flatten).flattenUpdates;
 const embedChangelogs = mocked(_changelog).embedChangelogs;
