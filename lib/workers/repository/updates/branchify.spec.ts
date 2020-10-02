@@ -8,6 +8,7 @@ const flattenUpdates = mocked(_flatten).flattenUpdates;
 const embedChangelogs = mocked(_changelog).embedChangelogs;
 
 jest.mock('./flatten');
+jest.mock('../changelog');
 
 let config: RenovateConfig;
 beforeEach(() => {

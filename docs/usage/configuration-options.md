@@ -436,6 +436,10 @@ The above will change a raw version of `release-2.0.0` to `2.0.0`, for example. 
 }
 ```
 
+## fetchReleaseNotes
+
+Configure this to `false` if you want to disable release notes fetching
+
 ## fileMatch
 
 `fileMatch` is used by Renovate to know which files in a repository to parse and extract, and it is possible to override defaults values to customize for your project's needs.
@@ -636,10 +640,6 @@ If you have any uncertainty about exactly which hosts a service uses, then it ca
 ### enableHttp2
 
 Enable got [http2](https://github.com/sindresorhus/got/blob/v11.5.2/readme.md#http2) support.
-
-## fetchReleaseNotes
-
-Configure this to `false` if you want to disable release notes fetching
 
 ### hostName
 
