@@ -7,11 +7,10 @@ import { setUtilConfig } from '../../util';
 import * as hostRules from '../../util/host-rules';
 import * as repositoryWorker from '../repository';
 import { autodiscoverRepositories } from './autodiscover';
+import { initCluster } from './cluster';
 import { globalFinalize, globalInitialize } from './initialize';
 import { Limit, isLimitReached } from './limits';
-
-type RenovateConfig = configParser.RenovateConfig;
-type RenovateRepository = configParser.RenovateRepository;
+import { RenovateConfig, RenovateRepository } from './types';
 
 export async function getRepositoryConfig(
   globalConfig: RenovateConfig,
@@ -51,6 +50,8 @@ export async function start(): Promise<0 | 1> {
     config = await globalInitialize(config);
     // autodiscover repositories (needs to come after platform initialization)
     config = await autodiscoverRepositories(config);
+    // initialize cluster mode if necessary
+    config = initCluster(config);
     // Iterate through repositories sequentially
     for (const repository of config.repositories) {
       if (haveReachedLimits()) {

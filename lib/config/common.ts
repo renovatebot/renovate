@@ -104,7 +104,13 @@ export interface RenovateAdminConfig {
   trustLevel?: 'low' | 'high';
   redisUrl?: string;
   gitPrivateKey?: string;
+
+  cluster?: ClusterConfig;
 }
+export type ClusterConfig = {
+  numberOfNodes: number;
+  nodeIndex: number;
+};
 
 export type PostUpgradeTasks = {
   commands?: string[];
