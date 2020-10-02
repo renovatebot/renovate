@@ -1,6 +1,5 @@
 import is from '@sindresorhus/is';
 import { PullRequestStatus } from 'azure-devops-node-api/interfaces/GitInterfaces';
-import { REPOSITORY_DISABLED } from '../../constants/error-messages';
 import { BranchStatus, PrState } from '../../types';
 import * as _git from '../../util/git';
 import * as _hostRules from '../../util/host-rules';
@@ -161,14 +160,6 @@ describe('platform/azure', () => {
       });
       expect(azureApi.gitApi.mock.calls).toMatchSnapshot();
       expect(config).toMatchSnapshot();
-    });
-
-    it('throws disabled', async () => {
-      expect.assertions(1);
-      azureHelper.getFile.mockResolvedValueOnce('{ "enabled": false }');
-      await expect(
-        initRepo({ repository: 'some-repo', optimizeForDisabled: true })
-      ).rejects.toThrow(REPOSITORY_DISABLED);
     });
   });
 
@@ -814,6 +805,25 @@ describe('platform/azure', () => {
       );
       await azure.deleteLabel(1234, 'rebase');
       expect(azureApi.gitApi.mock.calls).toMatchSnapshot();
+    });
+  });
+  describe('getJsonFile()', () => {
+    it('returns file content', async () => {
+      const data = { foo: 'bar' };
+      azureHelper.getFile.mockResolvedValueOnce(JSON.stringify(data));
+      await initRepo({
+        repository: 'some-repo',
+      });
+      const res = await azure.getJsonFile('file.json');
+      expect(res).toEqual(data);
+    });
+    it('returns null on errors', async () => {
+      azureHelper.getFile.mockRejectedValueOnce('some error');
+      await initRepo({
+        repository: 'some-repo',
+      });
+      const res = await azure.getJsonFile('file.json');
+      expect(res).toBeNull();
     });
   });
 });

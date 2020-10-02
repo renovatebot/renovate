@@ -1,6 +1,5 @@
 import nock from 'nock';
 import * as httpMock from '../../../test/httpMock';
-import { REPOSITORY_DISABLED } from '../../constants/error-messages';
 import { logger as _logger } from '../../logger';
 import { BranchStatus, PrState } from '../../types';
 import * as _git from '../../util/git';
@@ -82,7 +81,6 @@ describe('platform/bitbucket', () => {
     await bitbucket.initRepo({
       repository: 'some/repo',
       localDir: '',
-      optimizeForDisabled: false,
       ...config,
     });
 
@@ -148,32 +146,8 @@ describe('platform/bitbucket', () => {
         await bitbucket.initRepo({
           repository: 'some/repo',
           localDir: '',
-          optimizeForDisabled: false,
         })
       ).toMatchSnapshot();
-      expect(httpMock.getTrace()).toMatchSnapshot();
-    });
-
-    it('throws disabled', async () => {
-      expect.assertions(2);
-      httpMock
-        .scope(baseUrl)
-        .get('/2.0/repositories/some/empty')
-        .reply(200, { owner: {}, mainbranch: { name: 'master' } })
-        .get('/2.0/repositories/some/empty/src/master/renovate.json')
-        .reply(
-          200,
-          JSON.stringify({
-            enabled: false,
-          })
-        );
-      await expect(
-        bitbucket.initRepo({
-          repository: 'some/empty',
-          optimizeForDisabled: true,
-          localDir: '',
-        })
-      ).rejects.toThrow(REPOSITORY_DISABLED);
       expect(httpMock.getTrace()).toMatchSnapshot();
     });
   });
@@ -814,6 +788,28 @@ describe('platform/bitbucket', () => {
   describe('getVulnerabilityAlerts()', () => {
     it('returns empty array', async () => {
       expect(await bitbucket.getVulnerabilityAlerts()).toEqual([]);
+    });
+  });
+
+  describe('getJsonFile()', () => {
+    it('returns file content', async () => {
+      const data = { foo: 'bar' };
+      const scope = await initRepoMock();
+      scope
+        .get('/2.0/repositories/some/repo/src/master/file.json')
+        .reply(200, JSON.stringify(data));
+      const res = await bitbucket.getJsonFile('file.json');
+      expect(res).toEqual(data);
+      expect(httpMock.getTrace()).toMatchSnapshot();
+    });
+    it('returns null on errors', async () => {
+      const scope = await initRepoMock();
+      scope
+        .get('/2.0/repositories/some/repo/src/master/file.json')
+        .replyWithError('some error');
+      const res = await bitbucket.getJsonFile('file.json');
+      expect(res).toBeNull();
+      expect(httpMock.getTrace()).toMatchSnapshot();
     });
   });
 });
