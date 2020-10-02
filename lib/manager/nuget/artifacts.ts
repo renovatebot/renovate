@@ -28,9 +28,11 @@ async function authenticate(
       url: registry.url,
     });
     if (username && password) {
+      // Add registry credentials from host rules.
       cmds.unshift(
         `dotnet nuget update source ${registry.name} --username ${username} --password ${password} --store-password-in-clear-text`
       );
+      // Ensure that credentials are removed as soon as not necessary anymore.
       cmds.push(
         `dotnet nuget update source ${registry.name} --username '' --password '' --store-password-in-clear-text`
       );
