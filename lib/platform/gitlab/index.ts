@@ -99,7 +99,17 @@ export async function initPlatform({
 export async function getRepos(): Promise<string[]> {
   logger.debug('Autodiscovering GitLab repositories');
   try {
-    const url = `projects?membership=true&per_page=100&with_merge_requests_enabled=true&min_access_level=30`;
+    const query = new URLSearchParams({
+      membership: 'true',
+      per_page: '100',
+      with_merge_requests_enabled: 'true',
+      min_access_level: '30',
+    });
+    const lastActivityAfter = process.env.GITLAB_LAST_ACTIVITY_AFTER;
+    if (lastActivityAfter != null) {
+      query.set('last_activity_after', lastActivityAfter);
+    }
+    const url = `projects?${query.toString()}`;
     const res = await gitlabApi.getJson<RepoResponse[]>(url, {
       paginate: true,
     });

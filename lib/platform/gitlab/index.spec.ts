@@ -122,6 +122,28 @@ describe('platform/gitlab', () => {
     });
   });
 
+  describe('getRepos with last_activity_after', () => {
+    afterEach(() => {
+      delete process.env.GITLAB_LAST_ACTIVITY_AFTER;
+    });
+    it('should return an array of repos with last_activity_after set', async () => {
+      httpMock
+        .scope(gitlabApiHost)
+        .get(
+          '/api/v4/projects?membership=true&per_page=100&with_merge_requests_enabled=true&min_access_level=30&last_activity_after=2020-01-01T00:00:00Z'
+        )
+        .reply(200, [
+          {
+            path_with_namespace: 'a/b',
+          },
+        ]);
+      process.env.GITLAB_LAST_ACTIVITY_AFTER = '2020-01-01T00:00:00Z';
+      const repos = await gitlab.getRepos();
+      expect(repos).toMatchSnapshot();
+      expect(httpMock.getTrace()).toMatchSnapshot();
+    });
+  });
+
   async function initRepo(
     repoParams: RepoParams = {
       repository: 'some/repo',
