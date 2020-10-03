@@ -278,7 +278,7 @@ async function getStatusCheck(branchName: string): Promise<GitStatus[]> {
     getBranchNameWithoutRefsheadsPrefix(branchName)
   );
   // only grab the latest statuses, it will group any by context
-  return await azureApiGit.getStatuses(
+  return azureApiGit.getStatuses(
     branch.commit.commitId,
     config.repoId,
     undefined,
