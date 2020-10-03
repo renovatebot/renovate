@@ -204,10 +204,10 @@ async function getAllPackages(regUrl: string): Promise<AllPackages | null> {
 
 function getAllCachedPackages(regUrl: string): Promise<AllPackages | null> {
   const cacheKey = `packagist-${regUrl}`;
-  const cachedResult = memCache.get<AllPackages>(cacheKey);
+  const cachedResult = memCache.get<Promise<AllPackages | null>>(cacheKey);
   // istanbul ignore if
-  if (cachedResult) {
-    return Promise.resolve(cachedResult);
+  if (cachedResult !== undefined) {
+    return cachedResult;
   }
   const promisedRes = getAllPackages(regUrl);
   memCache.set(cacheKey, promisedRes);

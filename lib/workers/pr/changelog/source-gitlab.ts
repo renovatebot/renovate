@@ -18,10 +18,10 @@ function getCachedTags(
   repository: string
 ): Promise<string[]> {
   const cacheKey = `getTags-${endpoint}-${versionScheme}-${repository}`;
-  const cachedResult = memCache.get<string[]>(cacheKey);
+  const cachedResult = memCache.get<Promise<string[]>>(cacheKey);
   // istanbul ignore if
-  if (cachedResult) {
-    return Promise.resolve(cachedResult);
+  if (cachedResult !== undefined) {
+    return cachedResult;
   }
   const promisedRes = getTags(endpoint, repository);
   memCache.set(cacheKey, promisedRes);

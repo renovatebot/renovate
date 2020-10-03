@@ -220,10 +220,10 @@ function getRawReleases(
     registryUrls
   )}`;
   // By returning a Promise and reusing it, we should only fetch each package at most once
-  const cachedResult = memCache.get<ReleaseResult>(cacheKey);
+  const cachedResult = memCache.get<Promise<ReleaseResult | null>>(cacheKey);
   // istanbul ignore if
-  if (cachedResult) {
-    return Promise.resolve(cachedResult);
+  if (cachedResult !== undefined) {
+    return cachedResult;
   }
   const promisedRes = fetchReleases(config);
   memCache.set(cacheKey, promisedRes);

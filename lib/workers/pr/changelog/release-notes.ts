@@ -42,10 +42,10 @@ export function getCachedReleaseList(
   repository: string
 ): Promise<ChangeLogNotes[]> {
   const cacheKey = `getReleaseList-${apiBaseUrl}-${repository}`;
-  const cachedResult = memCache.get<ChangeLogNotes[]>(cacheKey);
+  const cachedResult = memCache.get<Promise<ChangeLogNotes[]>>(cacheKey);
   // istanbul ignore if
-  if (cachedResult) {
-    return Promise.resolve(cachedResult);
+  if (cachedResult !== undefined) {
+    return cachedResult;
   }
   const promisedRes = getReleaseList(apiBaseUrl, repository);
   memCache.set(cacheKey, promisedRes);
@@ -179,12 +179,12 @@ export async function getReleaseNotesMdFileInner(
 export function getReleaseNotesMdFile(
   repository: string,
   apiBaseUrl: string
-): Promise<ChangeLogFile> | null {
+): Promise<ChangeLogFile | null> {
   const cacheKey = `getReleaseNotesMdFile-${repository}-${apiBaseUrl}`;
-  const cachedResult = memCache.get<ChangeLogFile>(cacheKey);
+  const cachedResult = memCache.get<Promise<ChangeLogFile | null>>(cacheKey);
   // istanbul ignore if
-  if (cachedResult) {
-    return Promise.resolve(cachedResult);
+  if (cachedResult !== undefined) {
+    return cachedResult;
   }
   const promisedRes = getReleaseNotesMdFileInner(repository, apiBaseUrl);
   memCache.set(cacheKey, promisedRes);
