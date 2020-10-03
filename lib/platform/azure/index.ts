@@ -7,10 +7,7 @@ import {
   GitStatusState,
   PullRequestStatus,
 } from 'azure-devops-node-api/interfaces/GitInterfaces';
-import {
-  REPOSITORY_DISABLED,
-  REPOSITORY_EMPTY,
-} from '../../constants/error-messages';
+import { REPOSITORY_EMPTY } from '../../constants/error-messages';
 import { PLATFORM_TYPE_AZURE } from '../../constants/platforms';
 import { logger } from '../../logger';
 import { BranchStatus, PrState } from '../../types';
@@ -113,7 +110,7 @@ export async function getJsonFile(fileName: string): Promise<any | null> {
       config.defaultBranch
     );
     return JSON.parse(json);
-  } catch (err) /* istanbul ignore next */ {
+  } catch (err) {
     return null;
   }
 }
@@ -121,7 +118,6 @@ export async function getJsonFile(fileName: string): Promise<any | null> {
 export async function initRepo({
   repository,
   localDir,
-  optimizeForDisabled,
 }: RepoParams): Promise<RepoResult> {
   logger.debug(`initRepo("${repository}")`);
   config = { repository } as Config;
@@ -148,17 +144,6 @@ export async function initRepo({
   logger.debug(`${repository} default branch = ${defaultBranch}`);
   config.mergeMethod = await azureHelper.getMergeMethod(repo.id, names.project);
   config.repoForceRebase = false;
-
-  if (optimizeForDisabled) {
-    interface RenovateConfig {
-      enabled: boolean;
-    }
-
-    const renovateConfig: RenovateConfig = await getJsonFile('renovate.json');
-    if (renovateConfig && renovateConfig.enabled === false) {
-      throw new Error(REPOSITORY_DISABLED);
-    }
-  }
 
   const [projectName, repoName] = repository.split('/');
   const opts = hostRules.find({
