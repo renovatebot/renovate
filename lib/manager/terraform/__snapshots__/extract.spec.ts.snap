@@ -307,6 +307,13 @@ Object {
       "lookupName": "docker",
     },
     Object {
+      "currentValue": "=2.27.0",
+      "datasource": "terraform-provider",
+      "depName": "azurerm",
+      "depNameShort": "azurerm",
+      "depType": "terraform",
+    },
+    Object {
       "currentValue": "1.2.4",
       "datasource": "terraform-provider",
       "depName": "invalid",
