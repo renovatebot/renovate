@@ -26,7 +26,7 @@ Object {
       "currentValue": "1.2.3",
       "datasource": "sbt-package",
       "depName": "com.abc:abc",
-      "groupName": "abcVersion",
+      "groupName": "abcVersion for com.abc",
       "lookupName": "com.abc:abc",
       "registryUrls": Array [
         "https://repo.maven.apache.org/maven2",
@@ -62,7 +62,7 @@ Object {
       "currentValue": "1.2.3",
       "datasource": "sbt-package",
       "depName": "com.abc:abc",
-      "groupName": "abcVersion",
+      "groupName": "abcVersion for com.abc",
       "lookupName": "com.abc:abc",
       "registryUrls": Array [
         "https://repo.maven.apache.org/maven2",
@@ -210,7 +210,7 @@ Object {
       "datasource": "sbt-package",
       "depName": "org.example:grault",
       "depType": "Test",
-      "groupName": "versionExample",
+      "groupName": "versionExample for org.example",
       "lookupName": "org.example:grault",
       "registryUrls": Array [
         "https://repo.maven.apache.org/maven2",
@@ -348,7 +348,7 @@ Object {
       "datasource": "sbt-package",
       "depName": "org.example:grault",
       "depType": "Test",
-      "groupName": "versionExample",
+      "groupName": "versionExample for org.example",
       "lookupName": "org.example:grault",
       "registryUrls": Array [
         "https://repo.maven.apache.org/maven2",
@@ -437,7 +437,7 @@ Object {
       "datasource": "sbt-plugin",
       "depName": "com.github.gseitz:sbt-release",
       "depType": "plugin",
-      "groupName": "sbtReleaseVersion",
+      "groupName": "sbtReleaseVersion for com.github.gseitz",
       "lookupName": "com.github.gseitz:sbt-release",
       "registryUrls": Array [
         "https://repo.maven.apache.org/maven2",
