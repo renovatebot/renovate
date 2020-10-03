@@ -176,6 +176,10 @@ function parseDepExpr(
     currentValue,
   };
 
+  if (variables[rawVersion]) {
+    result.groupName = rawVersion;
+  }
+
   if (depType) {
     result.depType = depType;
   }
@@ -287,6 +291,7 @@ function parseSbtLine(
     };
   }
   if (deps.length) {
+    debugger;
     return { deps };
   }
   return null;
