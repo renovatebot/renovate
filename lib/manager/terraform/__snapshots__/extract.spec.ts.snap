@@ -328,7 +328,7 @@ Object {
       "depName": "kubernetes",
       "depNameShort": "kubernetes",
       "depType": "terraform",
-      "lookupName": "hashicorp/kuberneteskubernetes",
+      "lookupName": "hashicorp/kubernetes",
       "registryUrls": Array [
         "https://terraform.example.com",
       ],

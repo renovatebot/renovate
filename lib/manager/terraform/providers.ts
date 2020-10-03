@@ -58,7 +58,6 @@ export function analyzeTerraformProvider(dep: PackageDependency): void {
       if (source.groups.hostname) {
         dep.registryUrls = [`https://${source.groups.hostname}`];
         dep.lookupName = `${source.groups.namespace}/${source.groups.type}`;
-        dep.lookupName += source.groups.type;
       } else {
         dep.lookupName = dep.managerData.source;
       }
