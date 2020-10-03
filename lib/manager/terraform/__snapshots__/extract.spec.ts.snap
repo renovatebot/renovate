@@ -296,6 +296,14 @@ Object {
       "depName": "docker",
       "depNameShort": "docker",
       "depType": "terraform",
+      "lookupName": "terraform-providers/docker",
+    },
+    Object {
+      "currentValue": "2.7.2",
+      "datasource": "terraform-provider",
+      "depName": "docker2",
+      "depNameShort": "docker2",
+      "depType": "terraform",
       "lookupName": "docker",
     },
     Object {
@@ -320,7 +328,7 @@ Object {
       "depName": "kubernetes",
       "depNameShort": "kubernetes",
       "depType": "terraform",
-      "lookupName": "hashicorp/kubernetes",
+      "lookupName": "hashicorp/kuberneteskubernetes",
       "registryUrls": Array [
         "https://terraform.example.com",
       ],
