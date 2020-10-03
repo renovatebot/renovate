@@ -291,7 +291,6 @@ function parseSbtLine(
     };
   }
   if (deps.length) {
-    debugger;
     return { deps };
   }
   return null;
