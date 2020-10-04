@@ -72,10 +72,12 @@ async function gotRoutine<T>(
   options: GotOptions,
   queueDuration: number
 ): Promise<Response<T>> {
-  const requestTime = Date.now();
   logger.trace({ url, options }, 'got request');
+
+  const requestTime = Date.now();
   const resp = await got<T>(url, options);
   const responseTime = Date.now();
+
   const httpRequests = memCache.get('http-requests') || [];
   httpRequests.push({
     method: options.method,
@@ -83,7 +85,9 @@ async function gotRoutine<T>(
     duration: responseTime - requestTime,
     queueDuration,
   });
+
   memCache.set('http-requests', httpRequests);
+
   return resp;
 }
 
