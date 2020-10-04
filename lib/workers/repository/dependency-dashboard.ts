@@ -1,9 +1,10 @@
 import is from '@sindresorhus/is';
+import { nameFromLevel } from 'bunyan';
 import { RenovateConfig } from '../../config';
-import { logger } from '../../logger';
+import { getProblems, logger } from '../../logger';
 import { Pr, platform } from '../../platform';
 import { PrState } from '../../types';
-import { BranchConfig } from '../common';
+import { BranchConfig, ProcessBranchResult } from '../common';
 
 function getListItem(branch: BranchConfig, type: string, pr?: Pr): string {
   let item = ' - [ ] ';
@@ -20,6 +21,31 @@ function getListItem(branch: BranchConfig, type: string, pr?: Pr): string {
     return item + '\n';
   }
   return item + ' (' + uniquePackages.join(', ') + ')\n';
+}
+
+function appendRepoProblems(config: RenovateConfig, issueBody: string): string {
+  let newIssueBody = issueBody;
+  const repoProblems = new Set(
+    getProblems()
+      .filter(
+        (problem) =>
+          problem.repository === config.repository && !problem.artifactErrors
+      )
+      .map(
+        (problem) =>
+          `${nameFromLevel[problem.level].toUpperCase()}: ${problem.msg}`
+      )
+  );
+  if (repoProblems.size) {
+    newIssueBody += '## Repository problems\n\n';
+    newIssueBody +=
+      'These problems occurred while renovating this repository.\n\n';
+    for (const repoProblem of repoProblems) {
+      newIssueBody += ` - ${repoProblem}\n`;
+    }
+    newIssueBody += '\n';
+  }
+  return newIssueBody;
 }
 
 export async function ensureMasterIssue(
@@ -43,7 +69,7 @@ export async function ensureMasterIssue(
   logger.debug('Ensuring Dependency Dashboard');
   const hasBranches =
     is.nonEmptyArray(branches) &&
-    branches.some((branch) => branch.res !== 'automerged');
+    branches.some((branch) => branch.res !== ProcessBranchResult.Automerged);
   if (config.dependencyDashboardAutoclose && !hasBranches) {
     if (config.dryRun) {
       logger.info(
@@ -60,8 +86,11 @@ export async function ensureMasterIssue(
   if (config.dependencyDashboardHeader?.length) {
     issueBody += `${config.dependencyDashboardHeader}\n\n`;
   }
+
+  issueBody = appendRepoProblems(config, issueBody);
+
   const pendingApprovals = branches.filter(
-    (branch) => branch.res === 'needs-approval'
+    (branch) => branch.res === ProcessBranchResult.NeedsApproval
   );
   if (pendingApprovals.length) {
     issueBody += '## Pending Approval\n\n';
@@ -72,7 +101,7 @@ export async function ensureMasterIssue(
     issueBody += '\n';
   }
   const awaitingSchedule = branches.filter(
-    (branch) => branch.res === 'not-scheduled'
+    (branch) => branch.res === ProcessBranchResult.NotScheduled
   );
   if (awaitingSchedule.length) {
     issueBody += '## Awaiting Schedule\n\n';
@@ -85,7 +114,8 @@ export async function ensureMasterIssue(
   }
   const rateLimited = branches.filter(
     (branch) =>
-      branch.res === 'pr-limit-reached' || branch.res === 'commit-limit-reached'
+      branch.res === ProcessBranchResult.PrLimitReached ||
+      branch.res === ProcessBranchResult.CommitLimitReached
   );
   if (rateLimited.length) {
     issueBody += '## Rate Limited\n\n';
@@ -97,7 +127,7 @@ export async function ensureMasterIssue(
     issueBody += '\n';
   }
   const errorList = branches.filter(
-    (branch) => branch.res && branch.res.endsWith('error')
+    (branch) => branch.res === ProcessBranchResult.Error
   );
   if (errorList.length) {
     issueBody += '## Errored\n\n';
@@ -109,7 +139,7 @@ export async function ensureMasterIssue(
     issueBody += '\n';
   }
   const awaitingPr = branches.filter(
-    (branch) => branch.res === 'needs-pr-approval'
+    (branch) => branch.res === ProcessBranchResult.NeedsPrApproval
   );
   if (awaitingPr.length) {
     issueBody += '## PR Creation Approval Required\n\n';
@@ -120,7 +150,9 @@ export async function ensureMasterIssue(
     }
     issueBody += '\n';
   }
-  const prEdited = branches.filter((branch) => branch.res === 'pr-edited');
+  const prEdited = branches.filter(
+    (branch) => branch.res === ProcessBranchResult.PrEdited
+  );
   if (prEdited.length) {
     issueBody += '## Edited/Blocked\n\n';
     issueBody += `These updates have been manually edited so Renovate will no longer make changes. To discard all commits and start over, check the box below.\n\n`;
@@ -130,7 +162,9 @@ export async function ensureMasterIssue(
     }
     issueBody += '\n';
   }
-  const prPending = branches.filter((branch) => branch.res === 'pending');
+  const prPending = branches.filter(
+    (branch) => branch.res === ProcessBranchResult.Pending
+  );
   if (prPending.length) {
     issueBody += '## Pending Status Checks\n\n';
     issueBody += `These updates await pending status checks. To force their creation now, check the box below.\n\n`;
@@ -140,16 +174,16 @@ export async function ensureMasterIssue(
     issueBody += '\n';
   }
   const otherRes = [
-    'pending',
-    'needs-approval',
-    'needs-pr-approval',
-    'not-scheduled',
-    'pr-limit-reached',
-    'commit-limit-reached',
-    'already-existed',
-    'error',
-    'automerged',
-    'pr-edited',
+    ProcessBranchResult.Pending,
+    ProcessBranchResult.NeedsApproval,
+    ProcessBranchResult.NeedsPrApproval,
+    ProcessBranchResult.NotScheduled,
+    ProcessBranchResult.PrLimitReached,
+    ProcessBranchResult.CommitLimitReached,
+    ProcessBranchResult.AlreadyExisted,
+    ProcessBranchResult.Error,
+    ProcessBranchResult.Automerged,
+    ProcessBranchResult.PrEdited,
   ];
   const inProgress = branches.filter(
     (branch) => !otherRes.includes(branch.res)
@@ -172,7 +206,7 @@ export async function ensureMasterIssue(
     issueBody += '\n';
   }
   const alreadyExisted = branches.filter(
-    (branch) => branch.res && branch.res.endsWith('already-existed')
+    (branch) => branch.res === ProcessBranchResult.AlreadyExisted
   );
   if (alreadyExisted.length) {
     issueBody += '## Closed/Ignored\n\n';

@@ -1,3 +1,5 @@
+import path from 'path';
+import { readFile } from '../util/fs';
 import getArgv from './config/__fixtures__/argv';
 import { getConfig } from './defaults';
 
@@ -58,6 +60,40 @@ describe('config/index', () => {
         ['force', null],
       ]);
       expect(parsedConfig).not.toContainKey('configFile');
+    });
+    it('supports config.force', async () => {
+      const configPath = path.join(
+        __dirname,
+        'config/__fixtures__/withForce.js'
+      );
+      const env: NodeJS.ProcessEnv = {
+        ...defaultEnv,
+        RENOVATE_CONFIG_FILE: configPath,
+      };
+      const parsedConfig = await configParser.parseConfigs(env, defaultArgv);
+      expect(parsedConfig).toContainEntries([
+        ['token', 'abcdefg'],
+        [
+          'force',
+          {
+            schedule: null,
+          },
+        ],
+      ]);
+    });
+    it('reads private key from file', async () => {
+      const privateKeyPath = path.join(
+        __dirname,
+        'keys/__fixtures__/private.pem'
+      );
+      const env: NodeJS.ProcessEnv = {
+        ...defaultEnv,
+        RENOVATE_PRIVATE_KEY_PATH: privateKeyPath,
+      };
+      const expected = await readFile(privateKeyPath);
+      const parsedConfig = await configParser.parseConfigs(env, defaultArgv);
+
+      expect(parsedConfig).toContainEntries([['privateKey', expected]]);
     });
     it('supports Bitbucket username/passwod', async () => {
       defaultArgv = defaultArgv.concat([

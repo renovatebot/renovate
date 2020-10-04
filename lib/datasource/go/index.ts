@@ -1,3 +1,4 @@
+import URL from 'url';
 import { logger } from '../../logger';
 import { Http } from '../../util/http';
 import { regEx } from '../../util/regex';
@@ -8,6 +9,7 @@ import * as gitlab from '../gitlab-tags';
 export const id = 'go';
 
 const http = new Http(id);
+const gitlabRegExp = /^(https:\/\/[^/]*gitlab.[^/]*)\/(.*)$/;
 
 interface DataSource {
   datasource: string;
@@ -34,6 +36,7 @@ async function getDatasource(goModule: string): Promise<DataSource | null> {
       lookupName,
     };
   }
+
   const pkgUrl = `https://${goModule}?go-get=1`;
   const res = (await http.get(pkgUrl)).body;
   const sourceMatch = regEx(
@@ -54,9 +57,8 @@ async function getDatasource(goModule: string): Promise<DataSource | null> {
           .replace(/\/$/, ''),
       };
     }
-    if (goSourceUrl?.match('^https://[^/]*gitlab.[^/]*/.+')) {
-      const gitlabRegExp = /^(https:\/\/[^/]*gitlab.[^/]*)\/(.*)$/;
-      const gitlabRes = gitlabRegExp.exec(goSourceUrl);
+    const gitlabRes = gitlabRegExp.exec(goSourceUrl);
+    if (gitlabRes) {
       return {
         datasource: gitlab.id,
         registryUrl: gitlabRes[1],
@@ -64,7 +66,33 @@ async function getDatasource(goModule: string): Promise<DataSource | null> {
       };
     }
   } else {
-    logger.trace({ goModule }, 'No go-source header found');
+    // GitHub Enterprise only returns a go-import meta
+    const importMatch = regEx(
+      `<meta\\s+name="go-import"\\s+content="([^\\s]+)\\s+([^\\s]+)\\s+([^\\s]+)">`
+    ).exec(res);
+    if (importMatch) {
+      const [, prefix, , goImportURL] = importMatch;
+      if (!goModule.startsWith(prefix)) {
+        logger.trace({ goModule }, 'go-import header prefix not match');
+        return null;
+      }
+      logger.debug({ goModule, goImportURL }, 'Go lookup import url');
+
+      // get server base url from import url
+      const parsedUrl = URL.parse(goImportURL);
+
+      // split the go module from the URL: host/go/module -> go/module
+      const split = goModule.split('/');
+      const lookupName = split[1] + '/' + split[2];
+
+      return {
+        datasource: github.id,
+        registryUrl: `${parsedUrl.protocol}//${parsedUrl.host}`,
+        lookupName,
+      };
+    }
+
+    logger.trace({ goModule }, 'No go-source or go-import header found');
   }
   return null;
 }

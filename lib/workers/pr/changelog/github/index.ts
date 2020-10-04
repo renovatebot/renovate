@@ -32,7 +32,7 @@ export async function getTags(
     logger.debug({ sourceRepo: repository }, 'Failed to fetch Github tags');
     logger.debug({ err });
     // istanbul ignore if
-    if (err.message && err.message.includes('Bad credentials')) {
+    if (err.message?.includes('Bad credentials')) {
       logger.warn('Bad credentials triggering tag fail lookup in changelog');
       throw err;
     }
@@ -46,13 +46,13 @@ export async function getReleaseNotesMd(
 ): Promise<ChangeLogFile> | null {
   logger.trace('github.getReleaseNotesMd()');
   const apiPrefix = `${ensureTrailingSlash(apiBaseUrl)}repos/${repository}`;
-  const { default_branch = 'master' } = (
+  const { default_branch: defaultBranch = 'master' } = (
     await http.getJson<{ default_branch: string }>(apiPrefix)
   ).body;
 
   // https://docs.github.com/en/rest/reference/git#get-a-tree
   const res = await http.getJson<GithubGitTree>(
-    `${apiPrefix}/git/trees/${default_branch}`
+    `${apiPrefix}/git/trees/${defaultBranch}`
   );
 
   // istanbul ignore if
@@ -70,7 +70,7 @@ export async function getReleaseNotesMd(
   }
   const { path: changelogFile, sha } = files.shift();
   /* istanbul ignore if */
-  if (files.length > 1) {
+  if (files.length !== 0) {
     logger.debug(
       `Multiple candidates for changelog file, using ${changelogFile}`
     );

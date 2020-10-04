@@ -1,17 +1,27 @@
 import fs from 'fs';
+import { ERROR, WARN } from 'bunyan';
 import { mock } from 'jest-mock-extended';
-import { RenovateConfig, getConfig, platform } from '../../../test/util';
+import {
+  RenovateConfig,
+  getConfig,
+  logger,
+  platform,
+} from '../../../test/util';
 import { PLATFORM_TYPE_GITHUB } from '../../constants/platforms';
 import { Platform, Pr } from '../../platform';
 import { PrState } from '../../types';
-import { BranchConfig, BranchUpgradeConfig } from '../common';
+import {
+  BranchConfig,
+  BranchUpgradeConfig,
+  ProcessBranchResult,
+} from '../common';
 import * as dependencyDashboard from './dependency-dashboard';
 
 type PrUpgrade = BranchUpgradeConfig;
 
 let config: RenovateConfig;
 beforeEach(() => {
-  jest.resetAllMocks();
+  jest.clearAllMocks();
   config = getConfig();
   config.platform = PLATFORM_TYPE_GITHUB;
   config.errors = [];
@@ -20,14 +30,14 @@ beforeEach(() => {
 
 async function dryRun(
   branches: BranchConfig[],
-  // eslint-disable-next-line no-shadow
+  // eslint-disable-next-line @typescript-eslint/no-shadow
   platform: jest.Mocked<Platform>,
   ensureIssueClosingCalls = 0,
   ensureIssueCalls = 0,
   getBranchPrCalls = 0,
   findPrCalls = 0
 ) {
-  jest.resetAllMocks();
+  jest.clearAllMocks();
   config.dryRun = true;
   await dependencyDashboard.ensureMasterIssue(config, branches);
   expect(platform.ensureIssueClosing).toHaveBeenCalledTimes(
@@ -93,11 +103,15 @@ describe('workers/repository/master-issue', () => {
 
     it('closes Dependency Dashboard when all branches are automerged and dependencyDashboardAutoclose is true', async () => {
       const branches: BranchConfig[] = [
-        { ...mock<BranchConfig>(), prTitle: 'pr1', res: 'automerged' },
+        {
+          ...mock<BranchConfig>(),
+          prTitle: 'pr1',
+          res: ProcessBranchResult.Automerged,
+        },
         {
           ...mock<BranchConfig>(),
           prTitle: 'pr2',
-          res: 'automerged',
+          res: ProcessBranchResult.Automerged,
           dependencyDashboardApproval: false,
         },
       ];
@@ -140,56 +154,56 @@ describe('workers/repository/master-issue', () => {
           ...mock<BranchConfig>(),
           prTitle: 'pr1',
           upgrades: [{ ...mock<BranchUpgradeConfig>(), depName: 'dep1' }],
-          res: 'needs-approval',
+          res: ProcessBranchResult.NeedsApproval,
           branchName: 'branchName1',
         },
         {
           ...mock<BranchConfig>(),
           prTitle: 'pr2',
           upgrades: [{ ...mock<PrUpgrade>(), depName: 'dep2' }],
-          res: 'needs-approval',
+          res: ProcessBranchResult.NeedsApproval,
           branchName: 'branchName2',
         },
         {
           ...mock<BranchConfig>(),
           prTitle: 'pr3',
           upgrades: [{ ...mock<PrUpgrade>(), depName: 'dep3' }],
-          res: 'not-scheduled',
+          res: ProcessBranchResult.NotScheduled,
           branchName: 'branchName3',
         },
         {
           ...mock<BranchConfig>(),
           prTitle: 'pr4',
           upgrades: [{ ...mock<PrUpgrade>(), depName: 'dep4' }],
-          res: 'not-scheduled',
+          res: ProcessBranchResult.NotScheduled,
           branchName: 'branchName4',
         },
         {
           ...mock<BranchConfig>(),
           prTitle: 'pr5',
           upgrades: [{ ...mock<PrUpgrade>(), depName: 'dep5' }],
-          res: 'pr-limit-reached',
+          res: ProcessBranchResult.PrLimitReached,
           branchName: 'branchName5',
         },
         {
           ...mock<BranchConfig>(),
           prTitle: 'pr6',
           upgrades: [{ ...mock<PrUpgrade>(), depName: 'dep6' }],
-          res: 'pr-limit-reached',
+          res: ProcessBranchResult.PrLimitReached,
           branchName: 'branchName6',
         },
         {
           ...mock<BranchConfig>(),
           prTitle: 'pr7',
           upgrades: [{ ...mock<PrUpgrade>(), depName: 'dep7' }],
-          res: 'error',
+          res: ProcessBranchResult.Error,
           branchName: 'branchName7',
         },
         {
           ...mock<BranchConfig>(),
           prTitle: 'pr8',
           upgrades: [{ ...mock<PrUpgrade>(), depName: 'dep8' }],
-          res: 'error',
+          res: ProcessBranchResult.Error,
           branchName: 'branchName8',
         },
       ];
@@ -219,7 +233,7 @@ describe('workers/repository/master-issue', () => {
           ...mock<BranchConfig>(),
           prTitle: 'pr1',
           upgrades: [{ ...mock<PrUpgrade>(), depName: 'dep1' }],
-          res: 'pr-edited',
+          res: ProcessBranchResult.PrEdited,
           branchName: 'branchName1',
         },
         {
@@ -229,7 +243,7 @@ describe('workers/repository/master-issue', () => {
             { ...mock<PrUpgrade>(), depName: 'dep2' },
             { ...mock<PrUpgrade>(), depName: 'dep3' },
           ],
-          res: 'pr-edited',
+          res: ProcessBranchResult.PrEdited,
           branchName: 'branchName2',
         },
       ];
@@ -264,7 +278,7 @@ describe('workers/repository/master-issue', () => {
           ...mock<BranchConfig>(),
           prTitle: 'pr1',
           upgrades: [{ ...mock<PrUpgrade>(), depName: 'dep1' }],
-          res: 'rebase',
+          res: ProcessBranchResult.Rebase,
           branchName: 'branchName1',
         },
         {
@@ -274,14 +288,14 @@ describe('workers/repository/master-issue', () => {
             { ...mock<PrUpgrade>(), depName: 'dep2' },
             { ...mock<PrUpgrade>(), depName: 'dep3' },
           ],
-          res: 'rebase',
+          res: ProcessBranchResult.Rebase,
           branchName: 'branchName2',
         },
         {
           ...mock<BranchConfig>(),
           prTitle: 'pr3',
           upgrades: [{ ...mock<PrUpgrade>(), depName: 'dep3' }],
-          res: 'rebase',
+          res: ProcessBranchResult.Rebase,
           branchName: 'branchName3',
         },
       ];
@@ -318,7 +332,7 @@ describe('workers/repository/master-issue', () => {
           ...mock<BranchConfig>(),
           prTitle: 'pr1',
           upgrades: [{ ...mock<PrUpgrade>(), depName: 'dep1' }],
-          res: 'already-existed',
+          res: ProcessBranchResult.AlreadyExisted,
           branchName: 'branchName1',
         },
         {
@@ -328,7 +342,7 @@ describe('workers/repository/master-issue', () => {
             { ...mock<PrUpgrade>(), depName: 'dep2' },
             { ...mock<PrUpgrade>(), depName: 'dep3' },
           ],
-          res: 'already-existed',
+          res: ProcessBranchResult.AlreadyExisted,
           branchName: 'branchName2',
         },
       ];
@@ -368,7 +382,7 @@ describe('workers/repository/master-issue', () => {
           ...mock<BranchConfig>(),
           prTitle: 'pr1',
           upgrades: [{ ...mock<PrUpgrade>(), depName: 'dep1' }],
-          res: 'needs-pr-approval',
+          res: ProcessBranchResult.NeedsPrApproval,
           branchName: 'branchName1',
         },
         {
@@ -378,21 +392,21 @@ describe('workers/repository/master-issue', () => {
             { ...mock<PrUpgrade>(), depName: 'dep2' },
             { ...mock<PrUpgrade>(), depName: 'dep3' },
           ],
-          res: 'needs-pr-approval',
+          res: ProcessBranchResult.NeedsPrApproval,
           branchName: 'branchName2',
         },
         {
           ...mock<BranchConfig>(),
           prTitle: 'pr3',
           upgrades: [{ ...mock<PrUpgrade>(), depName: 'dep3' }],
-          res: 'needs-pr-approval',
+          res: ProcessBranchResult.NeedsPrApproval,
           branchName: 'branchName3',
         },
         {
           ...mock<BranchConfig>(),
           prTitle: 'pr4',
           upgrades: [{ ...mock<PrUpgrade>(), depName: 'dep4' }],
-          res: 'pending',
+          res: ProcessBranchResult.Pending,
           branchName: 'branchName4',
         },
       ];
@@ -414,6 +428,55 @@ describe('workers/repository/master-issue', () => {
 
       // same with dry run
       await dryRun(branches, platform);
+    });
+
+    it('contains logged problems', async () => {
+      const branches: BranchConfig[] = [
+        {
+          ...mock<BranchConfig>(),
+          prTitle: 'pr1',
+          upgrades: [
+            { ...mock<PrUpgrade>(), depName: 'dep1', repository: 'repo1' },
+          ],
+          res: ProcessBranchResult.Pending,
+          branchName: 'branchName1',
+        },
+      ];
+      logger.getProblems.mockReturnValueOnce([
+        {
+          level: ERROR,
+          msg: 'everything is broken',
+        },
+        {
+          level: WARN,
+          msg: 'just a bit',
+        },
+        {
+          level: ERROR,
+          msg: 'i am a duplicated problem',
+        },
+        {
+          level: ERROR,
+          msg: 'i am a duplicated problem',
+        },
+        {
+          level: ERROR,
+          msg: 'i am a non-duplicated problem',
+        },
+        {
+          level: WARN,
+          msg: 'i am a non-duplicated problem',
+        },
+        {
+          level: WARN,
+          msg: 'i am an artifact error',
+          artifactErrors: {},
+        },
+      ]);
+      config.dependencyDashboard = true;
+      await dependencyDashboard.ensureMasterIssue(config, branches);
+      expect(platform.ensureIssue).toHaveBeenCalledTimes(1);
+      expect(platform.ensureIssue.mock.calls[0][0].body).toMatchSnapshot();
     });
   });
 });

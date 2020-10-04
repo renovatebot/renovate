@@ -1290,9 +1290,9 @@ exports[`platform/bitbucket-server/index endpoint with no path findPr() has pr 1
 Object {
   "body": "* Line 1
 * Line 2",
-  "branchName": "userName1/pullRequest5",
   "createdAt": 1547853840016,
   "number": 5,
+  "sourceBranch": "userName1/pullRequest5",
   "state": "open",
   "targetBranch": "master",
   "title": "title",
@@ -1386,7 +1386,6 @@ exports[`platform/bitbucket-server/index endpoint with no path getBranchPr() has
 Object {
   "body": "* Line 1
 * Line 2",
-  "branchName": "userName1/pullRequest5",
   "canMerge": false,
   "createdAt": 1547853840016,
   "displayNumber": "Pull Request #5",
@@ -1396,6 +1395,7 @@ Object {
   "reviewers": Array [
     "userName2",
   ],
+  "sourceBranch": "userName1/pullRequest5",
   "state": "open",
   "targetBranch": "master",
   "title": "title",
@@ -1820,11 +1820,133 @@ Array [
 ]
 `;
 
+exports[`platform/bitbucket-server/index endpoint with no path getJsonFile() returns file content 1`] = `
+Array [
+  Object {
+    "headers": Object {
+      "accept": "application/json",
+      "accept-encoding": "gzip, deflate",
+      "authorization": "Basic YWJjOjEyMw==",
+      "host": "stash.renovatebot.com",
+      "user-agent": "https://github.com/renovatebot/renovate",
+      "x-atlassian-token": "no-check",
+    },
+    "method": "GET",
+    "url": "https://stash.renovatebot.com/rest/api/1.0/projects/SOME/repos/repo",
+  },
+  Object {
+    "headers": Object {
+      "accept": "application/json",
+      "accept-encoding": "gzip, deflate",
+      "authorization": "Basic YWJjOjEyMw==",
+      "host": "stash.renovatebot.com",
+      "user-agent": "https://github.com/renovatebot/renovate",
+      "x-atlassian-token": "no-check",
+    },
+    "method": "GET",
+    "url": "https://stash.renovatebot.com/rest/api/1.0/projects/SOME/repos/repo/branches/default",
+  },
+  Object {
+    "headers": Object {
+      "accept": "application/json",
+      "accept-encoding": "gzip, deflate",
+      "authorization": "Basic YWJjOjEyMw==",
+      "host": "stash.renovatebot.com",
+      "user-agent": "https://github.com/renovatebot/renovate",
+      "x-atlassian-token": "no-check",
+    },
+    "method": "GET",
+    "url": "https://stash.renovatebot.com/rest/api/1.0/projects/SOME/repos/repo/browse/file.json?limit=20000",
+  },
+]
+`;
+
+exports[`platform/bitbucket-server/index endpoint with no path getJsonFile() returns null for long content 1`] = `
+Array [
+  Object {
+    "headers": Object {
+      "accept": "application/json",
+      "accept-encoding": "gzip, deflate",
+      "authorization": "Basic YWJjOjEyMw==",
+      "host": "stash.renovatebot.com",
+      "user-agent": "https://github.com/renovatebot/renovate",
+      "x-atlassian-token": "no-check",
+    },
+    "method": "GET",
+    "url": "https://stash.renovatebot.com/rest/api/1.0/projects/SOME/repos/repo",
+  },
+  Object {
+    "headers": Object {
+      "accept": "application/json",
+      "accept-encoding": "gzip, deflate",
+      "authorization": "Basic YWJjOjEyMw==",
+      "host": "stash.renovatebot.com",
+      "user-agent": "https://github.com/renovatebot/renovate",
+      "x-atlassian-token": "no-check",
+    },
+    "method": "GET",
+    "url": "https://stash.renovatebot.com/rest/api/1.0/projects/SOME/repos/repo/branches/default",
+  },
+  Object {
+    "headers": Object {
+      "accept": "application/json",
+      "accept-encoding": "gzip, deflate",
+      "authorization": "Basic YWJjOjEyMw==",
+      "host": "stash.renovatebot.com",
+      "user-agent": "https://github.com/renovatebot/renovate",
+      "x-atlassian-token": "no-check",
+    },
+    "method": "GET",
+    "url": "https://stash.renovatebot.com/rest/api/1.0/projects/SOME/repos/repo/browse/file.json?limit=20000",
+  },
+]
+`;
+
+exports[`platform/bitbucket-server/index endpoint with no path getJsonFile() returns null on errors 1`] = `
+Array [
+  Object {
+    "headers": Object {
+      "accept": "application/json",
+      "accept-encoding": "gzip, deflate",
+      "authorization": "Basic YWJjOjEyMw==",
+      "host": "stash.renovatebot.com",
+      "user-agent": "https://github.com/renovatebot/renovate",
+      "x-atlassian-token": "no-check",
+    },
+    "method": "GET",
+    "url": "https://stash.renovatebot.com/rest/api/1.0/projects/SOME/repos/repo",
+  },
+  Object {
+    "headers": Object {
+      "accept": "application/json",
+      "accept-encoding": "gzip, deflate",
+      "authorization": "Basic YWJjOjEyMw==",
+      "host": "stash.renovatebot.com",
+      "user-agent": "https://github.com/renovatebot/renovate",
+      "x-atlassian-token": "no-check",
+    },
+    "method": "GET",
+    "url": "https://stash.renovatebot.com/rest/api/1.0/projects/SOME/repos/repo/branches/default",
+  },
+  Object {
+    "headers": Object {
+      "accept": "application/json",
+      "accept-encoding": "gzip, deflate",
+      "authorization": "Basic YWJjOjEyMw==",
+      "host": "stash.renovatebot.com",
+      "user-agent": "https://github.com/renovatebot/renovate",
+      "x-atlassian-token": "no-check",
+    },
+    "method": "GET",
+    "url": "https://stash.renovatebot.com/rest/api/1.0/projects/SOME/repos/repo/browse/file.json?limit=20000",
+  },
+]
+`;
+
 exports[`platform/bitbucket-server/index endpoint with no path getPr() canRebase 1`] = `
 Object {
   "body": "* Line 1
 * Line 2",
-  "branchName": "userName1/pullRequest5",
   "canMerge": false,
   "createdAt": 1547853840016,
   "displayNumber": "Pull Request #5",
@@ -1834,6 +1956,7 @@ Object {
   "reviewers": Array [
     "userName2",
   ],
+  "sourceBranch": "userName1/pullRequest5",
   "state": "open",
   "targetBranch": "master",
   "title": "title",
@@ -1845,7 +1968,6 @@ exports[`platform/bitbucket-server/index endpoint with no path getPr() canRebase
 Object {
   "body": "* Line 1
 * Line 2",
-  "branchName": "userName1/pullRequest5",
   "canMerge": false,
   "createdAt": 1547853840016,
   "displayNumber": "Pull Request #5",
@@ -1855,6 +1977,7 @@ Object {
   "reviewers": Array [
     "userName2",
   ],
+  "sourceBranch": "userName1/pullRequest5",
   "state": "open",
   "targetBranch": "master",
   "title": "title",
@@ -1866,7 +1989,6 @@ exports[`platform/bitbucket-server/index endpoint with no path getPr() canRebase
 Object {
   "body": "* Line 1
 * Line 2",
-  "branchName": "userName1/pullRequest5",
   "canMerge": false,
   "createdAt": 1547853840016,
   "displayNumber": "Pull Request #5",
@@ -1876,6 +1998,7 @@ Object {
   "reviewers": Array [
     "userName2",
   ],
+  "sourceBranch": "userName1/pullRequest5",
   "state": "open",
   "targetBranch": "master",
   "title": "title",
@@ -1988,7 +2111,6 @@ exports[`platform/bitbucket-server/index endpoint with no path getPr() gets a PR
 Object {
   "body": "* Line 1
 * Line 2",
-  "branchName": "userName1/pullRequest5",
   "canMerge": false,
   "createdAt": 1547853840016,
   "displayNumber": "Pull Request #5",
@@ -1998,6 +2120,7 @@ Object {
   "reviewers": Array [
     "userName2",
   ],
+  "sourceBranch": "userName1/pullRequest5",
   "state": "open",
   "targetBranch": "master",
   "title": "title",
@@ -2061,12 +2184,12 @@ Array [
 exports[`platform/bitbucket-server/index endpoint with no path getPr() gets a closed PR 1`] = `
 Object {
   "body": undefined,
-  "branchName": undefined,
   "createdAt": undefined,
   "displayNumber": "Pull Request #undefined",
   "hasReviewers": false,
   "number": undefined,
   "reviewers": Array [],
+  "sourceBranch": undefined,
   "state": "merged",
   "targetBranch": undefined,
   "title": undefined,
@@ -2138,9 +2261,9 @@ Array [
   Object {
     "body": "* Line 1
 * Line 2",
-    "branchName": "userName1/pullRequest5",
     "createdAt": 1547853840016,
     "number": 5,
+    "sourceBranch": "userName1/pullRequest5",
     "state": "open",
     "targetBranch": "master",
     "title": "title",
@@ -2232,18 +2355,6 @@ Array [
       "x-atlassian-token": "no-check",
     },
     "method": "GET",
-    "url": "https://stash.renovatebot.com/rest/api/1.0/projects/SOME/repos/repo/browse/renovate.json?limit=20000",
-  },
-  Object {
-    "headers": Object {
-      "accept": "application/json",
-      "accept-encoding": "gzip, deflate",
-      "authorization": "Basic YWJjOjEyMw==",
-      "host": "stash.renovatebot.com",
-      "user-agent": "https://github.com/renovatebot/renovate",
-      "x-atlassian-token": "no-check",
-    },
-    "method": "GET",
     "url": "https://stash.renovatebot.com/rest/api/1.0/projects/SOME/repos/repo",
   },
   Object {
@@ -2257,23 +2368,6 @@ Array [
     },
     "method": "GET",
     "url": "https://stash.renovatebot.com/rest/api/1.0/projects/SOME/repos/repo/branches/default",
-  },
-]
-`;
-
-exports[`platform/bitbucket-server/index endpoint with no path initRepo() throws disabled 1`] = `
-Array [
-  Object {
-    "headers": Object {
-      "accept": "application/json",
-      "accept-encoding": "gzip, deflate",
-      "authorization": "Basic YWJjOjEyMw==",
-      "host": "stash.renovatebot.com",
-      "user-agent": "https://github.com/renovatebot/renovate",
-      "x-atlassian-token": "no-check",
-    },
-    "method": "GET",
-    "url": "https://stash.renovatebot.com/rest/api/1.0/projects/SOME/repos/repo/browse/renovate.json?limit=20000",
   },
 ]
 `;
@@ -2822,35 +2916,6 @@ Array [
     },
     "method": "GET",
     "url": "https://stash.renovatebot.com/rest/api/1.0/projects/undefined/repos/undefined/settings/pull-requests",
-  },
-]
-`;
-
-exports[`platform/bitbucket-server/index endpoint with no path setBaseBranch() updates file list 1`] = `
-Array [
-  Object {
-    "headers": Object {
-      "accept": "application/json",
-      "accept-encoding": "gzip, deflate",
-      "authorization": "Basic YWJjOjEyMw==",
-      "host": "stash.renovatebot.com",
-      "user-agent": "https://github.com/renovatebot/renovate",
-      "x-atlassian-token": "no-check",
-    },
-    "method": "GET",
-    "url": "https://stash.renovatebot.com/rest/api/1.0/projects/SOME/repos/repo",
-  },
-  Object {
-    "headers": Object {
-      "accept": "application/json",
-      "accept-encoding": "gzip, deflate",
-      "authorization": "Basic YWJjOjEyMw==",
-      "host": "stash.renovatebot.com",
-      "user-agent": "https://github.com/renovatebot/renovate",
-      "x-atlassian-token": "no-check",
-    },
-    "method": "GET",
-    "url": "https://stash.renovatebot.com/rest/api/1.0/projects/SOME/repos/repo/branches/default",
   },
 ]
 `;
@@ -5066,9 +5131,9 @@ exports[`platform/bitbucket-server/index endpoint with path findPr() has pr 1`] 
 Object {
   "body": "* Line 1
 * Line 2",
-  "branchName": "userName1/pullRequest5",
   "createdAt": 1547853840016,
   "number": 5,
+  "sourceBranch": "userName1/pullRequest5",
   "state": "open",
   "targetBranch": "master",
   "title": "title",
@@ -5162,7 +5227,6 @@ exports[`platform/bitbucket-server/index endpoint with path getBranchPr() has pr
 Object {
   "body": "* Line 1
 * Line 2",
-  "branchName": "userName1/pullRequest5",
   "canMerge": false,
   "createdAt": 1547853840016,
   "displayNumber": "Pull Request #5",
@@ -5172,6 +5236,7 @@ Object {
   "reviewers": Array [
     "userName2",
   ],
+  "sourceBranch": "userName1/pullRequest5",
   "state": "open",
   "targetBranch": "master",
   "title": "title",
@@ -5596,11 +5661,133 @@ Array [
 ]
 `;
 
+exports[`platform/bitbucket-server/index endpoint with path getJsonFile() returns file content 1`] = `
+Array [
+  Object {
+    "headers": Object {
+      "accept": "application/json",
+      "accept-encoding": "gzip, deflate",
+      "authorization": "Basic YWJjOjEyMw==",
+      "host": "stash.renovatebot.com",
+      "user-agent": "https://github.com/renovatebot/renovate",
+      "x-atlassian-token": "no-check",
+    },
+    "method": "GET",
+    "url": "https://stash.renovatebot.com/vcs/rest/api/1.0/projects/SOME/repos/repo",
+  },
+  Object {
+    "headers": Object {
+      "accept": "application/json",
+      "accept-encoding": "gzip, deflate",
+      "authorization": "Basic YWJjOjEyMw==",
+      "host": "stash.renovatebot.com",
+      "user-agent": "https://github.com/renovatebot/renovate",
+      "x-atlassian-token": "no-check",
+    },
+    "method": "GET",
+    "url": "https://stash.renovatebot.com/vcs/rest/api/1.0/projects/SOME/repos/repo/branches/default",
+  },
+  Object {
+    "headers": Object {
+      "accept": "application/json",
+      "accept-encoding": "gzip, deflate",
+      "authorization": "Basic YWJjOjEyMw==",
+      "host": "stash.renovatebot.com",
+      "user-agent": "https://github.com/renovatebot/renovate",
+      "x-atlassian-token": "no-check",
+    },
+    "method": "GET",
+    "url": "https://stash.renovatebot.com/vcs/rest/api/1.0/projects/SOME/repos/repo/browse/file.json?limit=20000",
+  },
+]
+`;
+
+exports[`platform/bitbucket-server/index endpoint with path getJsonFile() returns null for long content 1`] = `
+Array [
+  Object {
+    "headers": Object {
+      "accept": "application/json",
+      "accept-encoding": "gzip, deflate",
+      "authorization": "Basic YWJjOjEyMw==",
+      "host": "stash.renovatebot.com",
+      "user-agent": "https://github.com/renovatebot/renovate",
+      "x-atlassian-token": "no-check",
+    },
+    "method": "GET",
+    "url": "https://stash.renovatebot.com/vcs/rest/api/1.0/projects/SOME/repos/repo",
+  },
+  Object {
+    "headers": Object {
+      "accept": "application/json",
+      "accept-encoding": "gzip, deflate",
+      "authorization": "Basic YWJjOjEyMw==",
+      "host": "stash.renovatebot.com",
+      "user-agent": "https://github.com/renovatebot/renovate",
+      "x-atlassian-token": "no-check",
+    },
+    "method": "GET",
+    "url": "https://stash.renovatebot.com/vcs/rest/api/1.0/projects/SOME/repos/repo/branches/default",
+  },
+  Object {
+    "headers": Object {
+      "accept": "application/json",
+      "accept-encoding": "gzip, deflate",
+      "authorization": "Basic YWJjOjEyMw==",
+      "host": "stash.renovatebot.com",
+      "user-agent": "https://github.com/renovatebot/renovate",
+      "x-atlassian-token": "no-check",
+    },
+    "method": "GET",
+    "url": "https://stash.renovatebot.com/vcs/rest/api/1.0/projects/SOME/repos/repo/browse/file.json?limit=20000",
+  },
+]
+`;
+
+exports[`platform/bitbucket-server/index endpoint with path getJsonFile() returns null on errors 1`] = `
+Array [
+  Object {
+    "headers": Object {
+      "accept": "application/json",
+      "accept-encoding": "gzip, deflate",
+      "authorization": "Basic YWJjOjEyMw==",
+      "host": "stash.renovatebot.com",
+      "user-agent": "https://github.com/renovatebot/renovate",
+      "x-atlassian-token": "no-check",
+    },
+    "method": "GET",
+    "url": "https://stash.renovatebot.com/vcs/rest/api/1.0/projects/SOME/repos/repo",
+  },
+  Object {
+    "headers": Object {
+      "accept": "application/json",
+      "accept-encoding": "gzip, deflate",
+      "authorization": "Basic YWJjOjEyMw==",
+      "host": "stash.renovatebot.com",
+      "user-agent": "https://github.com/renovatebot/renovate",
+      "x-atlassian-token": "no-check",
+    },
+    "method": "GET",
+    "url": "https://stash.renovatebot.com/vcs/rest/api/1.0/projects/SOME/repos/repo/branches/default",
+  },
+  Object {
+    "headers": Object {
+      "accept": "application/json",
+      "accept-encoding": "gzip, deflate",
+      "authorization": "Basic YWJjOjEyMw==",
+      "host": "stash.renovatebot.com",
+      "user-agent": "https://github.com/renovatebot/renovate",
+      "x-atlassian-token": "no-check",
+    },
+    "method": "GET",
+    "url": "https://stash.renovatebot.com/vcs/rest/api/1.0/projects/SOME/repos/repo/browse/file.json?limit=20000",
+  },
+]
+`;
+
 exports[`platform/bitbucket-server/index endpoint with path getPr() canRebase 1`] = `
 Object {
   "body": "* Line 1
 * Line 2",
-  "branchName": "userName1/pullRequest5",
   "canMerge": false,
   "createdAt": 1547853840016,
   "displayNumber": "Pull Request #5",
@@ -5610,6 +5797,7 @@ Object {
   "reviewers": Array [
     "userName2",
   ],
+  "sourceBranch": "userName1/pullRequest5",
   "state": "open",
   "targetBranch": "master",
   "title": "title",
@@ -5621,7 +5809,6 @@ exports[`platform/bitbucket-server/index endpoint with path getPr() canRebase 2`
 Object {
   "body": "* Line 1
 * Line 2",
-  "branchName": "userName1/pullRequest5",
   "canMerge": false,
   "createdAt": 1547853840016,
   "displayNumber": "Pull Request #5",
@@ -5631,6 +5818,7 @@ Object {
   "reviewers": Array [
     "userName2",
   ],
+  "sourceBranch": "userName1/pullRequest5",
   "state": "open",
   "targetBranch": "master",
   "title": "title",
@@ -5642,7 +5830,6 @@ exports[`platform/bitbucket-server/index endpoint with path getPr() canRebase 3`
 Object {
   "body": "* Line 1
 * Line 2",
-  "branchName": "userName1/pullRequest5",
   "canMerge": false,
   "createdAt": 1547853840016,
   "displayNumber": "Pull Request #5",
@@ -5652,6 +5839,7 @@ Object {
   "reviewers": Array [
     "userName2",
   ],
+  "sourceBranch": "userName1/pullRequest5",
   "state": "open",
   "targetBranch": "master",
   "title": "title",
@@ -5764,7 +5952,6 @@ exports[`platform/bitbucket-server/index endpoint with path getPr() gets a PR 1`
 Object {
   "body": "* Line 1
 * Line 2",
-  "branchName": "userName1/pullRequest5",
   "canMerge": false,
   "createdAt": 1547853840016,
   "displayNumber": "Pull Request #5",
@@ -5774,6 +5961,7 @@ Object {
   "reviewers": Array [
     "userName2",
   ],
+  "sourceBranch": "userName1/pullRequest5",
   "state": "open",
   "targetBranch": "master",
   "title": "title",
@@ -5837,12 +6025,12 @@ Array [
 exports[`platform/bitbucket-server/index endpoint with path getPr() gets a closed PR 1`] = `
 Object {
   "body": undefined,
-  "branchName": undefined,
   "createdAt": undefined,
   "displayNumber": "Pull Request #undefined",
   "hasReviewers": false,
   "number": undefined,
   "reviewers": Array [],
+  "sourceBranch": undefined,
   "state": "merged",
   "targetBranch": undefined,
   "title": undefined,
@@ -5914,9 +6102,9 @@ Array [
   Object {
     "body": "* Line 1
 * Line 2",
-    "branchName": "userName1/pullRequest5",
     "createdAt": 1547853840016,
     "number": 5,
+    "sourceBranch": "userName1/pullRequest5",
     "state": "open",
     "targetBranch": "master",
     "title": "title",
@@ -6008,18 +6196,6 @@ Array [
       "x-atlassian-token": "no-check",
     },
     "method": "GET",
-    "url": "https://stash.renovatebot.com/vcs/rest/api/1.0/projects/SOME/repos/repo/browse/renovate.json?limit=20000",
-  },
-  Object {
-    "headers": Object {
-      "accept": "application/json",
-      "accept-encoding": "gzip, deflate",
-      "authorization": "Basic YWJjOjEyMw==",
-      "host": "stash.renovatebot.com",
-      "user-agent": "https://github.com/renovatebot/renovate",
-      "x-atlassian-token": "no-check",
-    },
-    "method": "GET",
     "url": "https://stash.renovatebot.com/vcs/rest/api/1.0/projects/SOME/repos/repo",
   },
   Object {
@@ -6033,23 +6209,6 @@ Array [
     },
     "method": "GET",
     "url": "https://stash.renovatebot.com/vcs/rest/api/1.0/projects/SOME/repos/repo/branches/default",
-  },
-]
-`;
-
-exports[`platform/bitbucket-server/index endpoint with path initRepo() throws disabled 1`] = `
-Array [
-  Object {
-    "headers": Object {
-      "accept": "application/json",
-      "accept-encoding": "gzip, deflate",
-      "authorization": "Basic YWJjOjEyMw==",
-      "host": "stash.renovatebot.com",
-      "user-agent": "https://github.com/renovatebot/renovate",
-      "x-atlassian-token": "no-check",
-    },
-    "method": "GET",
-    "url": "https://stash.renovatebot.com/vcs/rest/api/1.0/projects/SOME/repos/repo/browse/renovate.json?limit=20000",
   },
 ]
 `;
@@ -6598,35 +6757,6 @@ Array [
     },
     "method": "GET",
     "url": "https://stash.renovatebot.com/vcs/rest/api/1.0/projects/undefined/repos/undefined/settings/pull-requests",
-  },
-]
-`;
-
-exports[`platform/bitbucket-server/index endpoint with path setBaseBranch() updates file list 1`] = `
-Array [
-  Object {
-    "headers": Object {
-      "accept": "application/json",
-      "accept-encoding": "gzip, deflate",
-      "authorization": "Basic YWJjOjEyMw==",
-      "host": "stash.renovatebot.com",
-      "user-agent": "https://github.com/renovatebot/renovate",
-      "x-atlassian-token": "no-check",
-    },
-    "method": "GET",
-    "url": "https://stash.renovatebot.com/vcs/rest/api/1.0/projects/SOME/repos/repo",
-  },
-  Object {
-    "headers": Object {
-      "accept": "application/json",
-      "accept-encoding": "gzip, deflate",
-      "authorization": "Basic YWJjOjEyMw==",
-      "host": "stash.renovatebot.com",
-      "user-agent": "https://github.com/renovatebot/renovate",
-      "x-atlassian-token": "no-check",
-    },
-    "method": "GET",
-    "url": "https://stash.renovatebot.com/vcs/rest/api/1.0/projects/SOME/repos/repo/branches/default",
   },
 ]
 `;

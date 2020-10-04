@@ -10,11 +10,12 @@ jest.mock('./yarn');
 
 describe('manager/npm/extract/locked-versions', () => {
   describe('.getLockedVersions()', () => {
-    it.each([['1.22.0'], ['2.1.0']])(
+    it.each([['1.22.0'], ['2.1.0'], ['2.2.0']])(
       'uses yarn.lock with yarn v%s',
       async (yarnVersion) => {
         yarn.getYarnLock.mockReturnValue({
           isYarn1: yarnVersion === '1.22.0',
+          cacheVersion: yarnVersion === '2.2.0' ? 6 : NaN,
           lockedVersions: {
             'a@1.0.0': '1.0.0',
             'b@2.0.0': '2.0.0',
@@ -25,7 +26,7 @@ describe('manager/npm/extract/locked-versions', () => {
           {
             npmLock: 'package-lock.json',
             yarnLock: 'yarn.lock',
-            compatibility: {},
+            constraints: {},
             deps: [
               {
                 depName: 'a',

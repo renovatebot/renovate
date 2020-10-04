@@ -2,6 +2,7 @@ import crypto from 'crypto';
 import URL from 'url';
 import got, { Options, Response } from 'got';
 import { HOST_DISABLED } from '../../constants/error-messages';
+import { logger } from '../../logger';
 import { ExternalHostError } from '../../types/errors/external-host-error';
 import * as memCache from '../cache/memory';
 import { clone } from '../clone';
@@ -54,21 +55,6 @@ function cloneResponse<T>(response: any): HttpResponse<T> {
   };
 }
 
-async function resolveResponse<T>(
-  promisedRes: Promise<HttpResponse<T>>,
-  { abortOnError, abortIgnoreStatusCodes }: GotOptions
-): Promise<HttpResponse<T>> {
-  try {
-    const res = await promisedRes;
-    return cloneResponse(res);
-  } catch (err) {
-    if (abortOnError && !abortIgnoreStatusCodes?.includes(err.statusCode)) {
-      throw new ExternalHostError(err);
-    }
-    throw err;
-  }
-}
-
 function applyDefaultHeaders(options: Options): void {
   // eslint-disable-next-line no-param-reassign
   options.headers = {
@@ -81,19 +67,21 @@ function applyDefaultHeaders(options: Options): void {
   };
 }
 
-async function gotTask<T>(
+async function gotRoutine<T>(
   url: string,
   options: GotOptions,
   startTime: number,
   queueTime: number
 ): Promise<Response<T>> {
+  const requestTime = Date.now();
+  logger.trace({ url, options }, 'got request');
   const resp = await got<T>(url, options);
-  const duration = Date.now() - queueTime;
+  const responseTime = Date.now();
   const httpRequests = memCache.get('http-requests') || [];
   httpRequests.push({
     method: options.method,
     url,
-    duration,
+    duration: responseTime - requestTime,
     queueDuration: queueTime - startTime,
   });
   memCache.set('http-requests', httpRequests);
@@ -133,34 +121,41 @@ export class Http<GetOptions = HttpOptions, PostOptions = HttpPostOptions> {
     }
     options = applyAuthorization(options);
 
-    // Cache GET requests unless useCache=false
     const cacheKey = crypto
       .createHash('md5')
       .update('got-' + JSON.stringify({ url, headers: options.headers }))
       .digest('hex');
+
+    let resPromise;
+
+    // Cache GET requests unless useCache=false
     if (options.method === 'get' && options.useCache !== false) {
-      // return from cache if present
-      const cachedRes = memCache.get(cacheKey);
-      // istanbul ignore if
-      if (cachedRes) {
-        return resolveResponse<T>(cachedRes, options);
+      resPromise = memCache.get(cacheKey);
+    }
+
+    if (!resPromise) {
+      const startTime = Date.now();
+      const queueTask = (): Promise<Response<T>> => {
+        const queueTime = Date.now();
+        return gotRoutine(url, options, startTime, queueTime);
+      };
+      const queue = getQueue(url);
+      resPromise = queue ? queue.add(queueTask) : queueTask();
+      if (options.method === 'get') {
+        memCache.set(cacheKey, resPromise); // always set if it's a get
       }
     }
 
-    const startTime = Date.now();
-    const queueTask = (): Promise<Response<T>> => {
-      const queueTime = Date.now();
-      return gotTask(url, options, startTime, queueTime);
-    };
-
-    const queue = getQueue(url);
-    const promisedRes = queue ? queue.add(queueTask) : queueTask();
-
-    if (options.method === 'get') {
-      memCache.set(cacheKey, promisedRes); // always set if it's a get
+    try {
+      const res = await resPromise;
+      return cloneResponse(res);
+    } catch (err) {
+      const { abortOnError, abortIgnoreStatusCodes } = options;
+      if (abortOnError && !abortIgnoreStatusCodes?.includes(err.statusCode)) {
+        throw new ExternalHostError(err);
+      }
+      throw err;
     }
-    const resp = await resolveResponse<T>(promisedRes, options);
-    return resp;
   }
 
   get(url: string, options: HttpOptions = {}): Promise<HttpResponse> {

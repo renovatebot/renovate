@@ -2,6 +2,7 @@ import { SYSTEM_INSUFFICIENT_MEMORY } from '../../../constants/error-messages';
 import { getPkgReleases } from '../../../datasource';
 import { logger } from '../../../logger';
 import * as versioning from '../../../versioning';
+import { ensureTrailingSlash } from '../../url';
 import {
   DockerOptions,
   ExecConfig,
@@ -180,7 +181,8 @@ export async function generateDockerCommand(
   options: DockerOptions,
   config: ExecConfig
 ): Promise<string> {
-  const { image, envVars, cwd, tagScheme, tagConstraint } = options;
+  const { envVars, cwd, tagScheme, tagConstraint } = options;
+  let image = options.image;
   const volumes = options.volumes || [];
   const preCommands = options.preCommands || [];
   const postCommands = options.postCommands || [];
@@ -206,6 +208,13 @@ export async function generateDockerCommand(
 
   if (cwd) {
     result.push(`-w "${cwd}"`);
+  }
+
+  if (config.dockerImagePrefix) {
+    image = image.replace(
+      /^renovate\//,
+      ensureTrailingSlash(config.dockerImagePrefix)
+    );
   }
 
   let tag: string;

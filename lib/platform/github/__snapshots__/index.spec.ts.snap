@@ -110,9 +110,15 @@ Array [
 
 exports[`platform/github createPr() should create a draftPR if set in the settings 1`] = `
 Object {
-  "branchName": "some-branch",
   "displayNumber": "Pull Request #123",
+  "head": Object {
+    "repo": Object {
+      "full_name": "some/repo",
+    },
+  },
   "number": 123,
+  "sourceBranch": "some-branch",
+  "sourceRepo": "some/repo",
 }
 `;
 
@@ -172,9 +178,15 @@ Array [
 
 exports[`platform/github createPr() should create and return a PR object 1`] = `
 Object {
-  "branchName": "some-branch",
   "displayNumber": "Pull Request #123",
+  "head": Object {
+    "repo": Object {
+      "full_name": "some/repo",
+    },
+  },
   "number": 123,
+  "sourceBranch": "some-branch",
+  "sourceRepo": "some/repo",
 }
 `;
 
@@ -248,9 +260,15 @@ Array [
 
 exports[`platform/github createPr() should use defaultBranch 1`] = `
 Object {
-  "branchName": "some-branch",
   "displayNumber": "Pull Request #123",
+  "head": Object {
+    "repo": Object {
+      "full_name": "some/repo",
+    },
+  },
   "number": 123,
+  "sourceBranch": "some-branch",
+  "sourceRepo": "some/repo",
 }
 `;
 
@@ -1763,6 +1781,41 @@ Array [
 exports[`platform/github findPr(branchName, prTitle, state) returns true if no title and all state 1`] = `
 Array [
   Object {
+    "graphql": Object {
+      "query": Object {
+        "repository": Object {
+          "__args": Object {
+            "name": "repo",
+            "owner": "some",
+          },
+          "defaultBranchRef": Object {
+            "name": null,
+            "target": Object {
+              "oid": null,
+            },
+          },
+          "isArchived": null,
+          "isFork": null,
+          "mergeCommitAllowed": null,
+          "nameWithOwner": null,
+          "rebaseMergeAllowed": null,
+          "squashMergeAllowed": null,
+        },
+      },
+    },
+    "headers": Object {
+      "accept": "application/vnd.github.v3+json",
+      "accept-encoding": "gzip, deflate",
+      "authorization": "token abc123",
+      "content-length": "330",
+      "content-type": "application/json",
+      "host": "api.github.com",
+      "user-agent": "https://github.com/renovatebot/renovate",
+    },
+    "method": "POST",
+    "url": "https://api.github.com/graphql",
+  },
+  Object {
     "headers": Object {
       "accept": "application/vnd.github.v3+json",
       "accept-encoding": "gzip, deflate",
@@ -1771,7 +1824,7 @@ Array [
       "user-agent": "https://github.com/renovatebot/renovate",
     },
     "method": "GET",
-    "url": "https://api.github.com/repos/undefined/pulls?per_page=100&state=all",
+    "url": "https://api.github.com/repos/some/repo/pulls?per_page=100&state=all",
   },
 ]
 `;
@@ -1849,7 +1902,6 @@ Object {
   "base": Object {
     "sha": "1234",
   },
-  "branchName": "somebranch",
   "canMerge": false,
   "canMergeReason": "mergeable = undefined",
   "commits": 1,
@@ -1863,6 +1915,7 @@ Object {
   },
   "number": 91,
   "sha": undefined,
+  "sourceBranch": "somebranch",
   "state": "open",
 }
 `;
@@ -2063,7 +2116,6 @@ Object {
   "base": Object {
     "sha": "1234",
   },
-  "branchName": "somebranch",
   "canMerge": false,
   "canMergeReason": "mergeable = undefined",
   "commits": 1,
@@ -2077,6 +2129,7 @@ Object {
   },
   "number": 90,
   "sha": undefined,
+  "sourceBranch": "somebranch",
   "state": "open",
 }
 `;
@@ -2861,10 +2914,111 @@ Array [
 ]
 `;
 
+exports[`platform/github getJsonFile() returns file content 1`] = `
+Array [
+  Object {
+    "graphql": Object {
+      "query": Object {
+        "repository": Object {
+          "__args": Object {
+            "name": "repo",
+            "owner": "some",
+          },
+          "defaultBranchRef": Object {
+            "name": null,
+            "target": Object {
+              "oid": null,
+            },
+          },
+          "isArchived": null,
+          "isFork": null,
+          "mergeCommitAllowed": null,
+          "nameWithOwner": null,
+          "rebaseMergeAllowed": null,
+          "squashMergeAllowed": null,
+        },
+      },
+    },
+    "headers": Object {
+      "accept": "application/vnd.github.v3+json",
+      "accept-encoding": "gzip, deflate",
+      "authorization": "token abc123",
+      "content-length": "330",
+      "content-type": "application/json",
+      "host": "api.github.com",
+      "user-agent": "https://github.com/renovatebot/renovate",
+    },
+    "method": "POST",
+    "url": "https://api.github.com/graphql",
+  },
+  Object {
+    "headers": Object {
+      "accept": "application/vnd.github.v3+json",
+      "accept-encoding": "gzip, deflate",
+      "authorization": "token abc123",
+      "host": "api.github.com",
+      "user-agent": "https://github.com/renovatebot/renovate",
+    },
+    "method": "GET",
+    "url": "https://api.github.com/repos/some/repo/contents/file.json",
+  },
+]
+`;
+
+exports[`platform/github getJsonFile() returns null on errors 1`] = `
+Array [
+  Object {
+    "graphql": Object {
+      "query": Object {
+        "repository": Object {
+          "__args": Object {
+            "name": "repo",
+            "owner": "some",
+          },
+          "defaultBranchRef": Object {
+            "name": null,
+            "target": Object {
+              "oid": null,
+            },
+          },
+          "isArchived": null,
+          "isFork": null,
+          "mergeCommitAllowed": null,
+          "nameWithOwner": null,
+          "rebaseMergeAllowed": null,
+          "squashMergeAllowed": null,
+        },
+      },
+    },
+    "headers": Object {
+      "accept": "application/vnd.github.v3+json",
+      "accept-encoding": "gzip, deflate",
+      "authorization": "token abc123",
+      "content-length": "330",
+      "content-type": "application/json",
+      "host": "api.github.com",
+      "user-agent": "https://github.com/renovatebot/renovate",
+    },
+    "method": "POST",
+    "url": "https://api.github.com/graphql",
+  },
+  Object {
+    "headers": Object {
+      "accept": "application/vnd.github.v3+json",
+      "accept-encoding": "gzip, deflate",
+      "authorization": "token abc123",
+      "host": "api.github.com",
+      "user-agent": "https://github.com/renovatebot/renovate",
+    },
+    "method": "GET",
+    "url": "https://api.github.com/repos/some/repo/contents/file.json",
+  },
+]
+`;
+
 exports[`platform/github getPr(prNo) should return PR from closed graphql result 1`] = `
 Object {
   "body": "dummy body",
-  "branchName": "renovate/delay-4.x",
   "comments": Array [
     Object {
       "body": ":tada: This PR is included in version 13.63.5 :tada:
@@ -2879,6 +3033,7 @@ Your **[semantic-release](https://github.com/semantic-release/semantic-release)*
   ],
   "displayNumber": "Pull Request #2499",
   "number": 2499,
+  "sourceBranch": "renovate/delay-4.x",
   "state": "merged",
   "title": "build(deps): update dependency delay to v4.0.1",
 }
@@ -3054,7 +3209,6 @@ Array [
 
 exports[`platform/github getPr(prNo) should return PR from graphql result 1`] = `
 Object {
-  "branchName": "renovate/jest-monorepo",
   "canMerge": false,
   "canMergeReason": "mergeStateStatus = DIRTY",
   "displayNumber": "Pull Request #2500",
@@ -3062,6 +3216,7 @@ Object {
   "hasReviewers": false,
   "isConflicted": true,
   "number": 2500,
+  "sourceBranch": "renovate/jest-monorepo",
   "state": "open",
   "targetBranch": "master",
   "title": "chore(deps): update dependency jest to v23.6.0",
@@ -3390,7 +3545,6 @@ Object {
   "base": Object {
     "sha": "1234",
   },
-  "branchName": undefined,
   "canMerge": false,
   "canMergeReason": "mergeable = undefined",
   "commits": 1,
@@ -3399,6 +3553,7 @@ Object {
   "mergeable_state": "dirty",
   "number": 1,
   "sha": undefined,
+  "sourceBranch": undefined,
   "state": "open",
 }
 `;
@@ -3587,13 +3742,13 @@ Object {
   "base": Object {
     "sha": "5678",
   },
-  "branchName": undefined,
   "canMerge": true,
   "commits": 1,
   "displayNumber": "Pull Request #1",
   "mergeable": true,
   "number": 1,
   "sha": undefined,
+  "sourceBranch": undefined,
   "state": "open",
 }
 `;
@@ -4524,7 +4679,6 @@ Array [
 exports[`platform/github initRepo should fork when forkMode 1`] = `
 Object {
   "defaultBranch": "master",
-  "defaultBranchSha": "1234",
   "isFork": false,
 }
 `;
@@ -4594,7 +4748,6 @@ Array [
 exports[`platform/github initRepo should merge 1`] = `
 Object {
   "defaultBranch": "master",
-  "defaultBranchSha": "1234",
   "isFork": false,
 }
 `;
@@ -4642,7 +4795,6 @@ Array [
 exports[`platform/github initRepo should not guess at merge 1`] = `
 Object {
   "defaultBranch": "master",
-  "defaultBranchSha": "1234",
   "isFork": false,
 }
 `;
@@ -4690,7 +4842,6 @@ Array [
 exports[`platform/github initRepo should rebase 1`] = `
 Object {
   "defaultBranch": "master",
-  "defaultBranchSha": "1234",
   "isFork": false,
 }
 `;
@@ -4738,7 +4889,6 @@ Array [
 exports[`platform/github initRepo should squash 1`] = `
 Object {
   "defaultBranch": "master",
-  "defaultBranchSha": "1234",
   "isFork": false,
 }
 `;
@@ -4779,57 +4929,6 @@ Array [
     },
     "method": "POST",
     "url": "https://api.github.com/graphql",
-  },
-]
-`;
-
-exports[`platform/github initRepo should throw err if disabled in renovate.json 1`] = `
-Array [
-  Object {
-    "graphql": Object {
-      "query": Object {
-        "repository": Object {
-          "__args": Object {
-            "name": "repo",
-            "owner": "some",
-          },
-          "defaultBranchRef": Object {
-            "name": null,
-            "target": Object {
-              "oid": null,
-            },
-          },
-          "isArchived": null,
-          "isFork": null,
-          "mergeCommitAllowed": null,
-          "nameWithOwner": null,
-          "rebaseMergeAllowed": null,
-          "squashMergeAllowed": null,
-        },
-      },
-    },
-    "headers": Object {
-      "accept": "application/vnd.github.v3+json",
-      "accept-encoding": "gzip, deflate",
-      "authorization": "token abc123",
-      "content-length": "330",
-      "content-type": "application/json",
-      "host": "api.github.com",
-      "user-agent": "https://github.com/renovatebot/renovate",
-    },
-    "method": "POST",
-    "url": "https://api.github.com/graphql",
-  },
-  Object {
-    "headers": Object {
-      "accept": "application/vnd.github.v3+json",
-      "accept-encoding": "gzip, deflate",
-      "authorization": "token abc123",
-      "host": "api.github.com",
-      "user-agent": "https://github.com/renovatebot/renovate",
-    },
-    "method": "GET",
-    "url": "https://api.github.com/repos/some/repo/contents/renovate.json",
   },
 ]
 `;
@@ -4917,7 +5016,6 @@ Array [
 exports[`platform/github initRepo should update fork when forkMode 1`] = `
 Object {
   "defaultBranch": "master",
-  "defaultBranchSha": "1234",
   "isFork": false,
 }
 `;

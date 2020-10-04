@@ -3,12 +3,14 @@ import { logger } from '../../logger';
 import * as memCache from '../../util/cache/memory';
 
 interface RequestStats {
+  method: string;
+  url: string;
   duration: number;
   queueDuration: number;
 }
 
 export function printRequestStats(): void {
-  const httpRequests = memCache.get('http-requests');
+  const httpRequests = memCache.get<RequestStats[]>('http-requests');
   if (!httpRequests) {
     return;
   }
@@ -23,13 +25,14 @@ export function printRequestStats(): void {
   });
   const allRequests: string[] = [];
   const requestHosts: Record<string, RequestStats[]> = {};
-  for (const { method, url, duration, queueDuration } of httpRequests) {
+  for (const httpRequest of httpRequests) {
+    const { method, url, duration, queueDuration } = httpRequest;
     allRequests.push(
       `${method.toUpperCase()} ${url} ${duration} ${queueDuration}`
     );
     const { hostname } = URL.parse(url);
     requestHosts[hostname] = requestHosts[hostname] || [];
-    requestHosts[hostname].push({ duration, queueDuration });
+    requestHosts[hostname].push(httpRequest);
   }
   logger.trace({ allRequests, requestHosts }, 'full stats');
   const hostStats: string[] = [];
@@ -46,7 +49,6 @@ export function printRequestStats(): void {
       .map(({ queueDuration }) => queueDuration)
       .reduce((a, b) => a + b, 0);
     const queueAvg = Math.round(queueSum / hostRequests);
-
     const requestCount =
       `${hostRequests} ` + (hostRequests > 1 ? 'requests' : 'request');
     hostStats.push(

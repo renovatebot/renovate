@@ -29,9 +29,9 @@ describe('platform/gitlab', () => {
     hostRules = require('../../util/host-rules');
     jest.mock('../../util/git');
     git = require('../../util/git');
-    git.branchExists.mockResolvedValue(true);
+    git.branchExists.mockReturnValue(true);
     git.isBranchStale.mockResolvedValue(true);
-    git.getBranchCommit.mockResolvedValue(
+    git.getBranchCommit.mockReturnValue(
       '0d9c7726c3d628b7e28af234595cfd20febdbf8e'
     );
     hostRules.find.mockReturnValue({
@@ -126,7 +126,6 @@ describe('platform/gitlab', () => {
     repoParams: RepoParams = {
       repository: 'some/repo',
       localDir: '',
-      optimizeForDisabled: false,
     },
     repoResp = null,
     scope = httpMock.scope(gitlabApiHost)
@@ -145,29 +144,6 @@ describe('platform/gitlab', () => {
   }
 
   describe('initRepo', () => {
-    it(`should throw error if disabled in renovate.json`, async () => {
-      httpMock
-        .scope(gitlabApiHost)
-        .get('/api/v4/projects/some%2Frepo')
-        .reply(200, {
-          default_branch: 'master',
-          http_url_to_repo: 'https://gitlab.com/some/repo.git',
-        })
-        .get(
-          '/api/v4/projects/some%2Frepo/repository/files/renovate.json?ref=master'
-        )
-        .reply(200, {
-          content: Buffer.from('{"enabled": false}').toString('base64'),
-        });
-      await expect(
-        gitlab.initRepo({
-          repository: 'some/repo',
-          localDir: '',
-          optimizeForDisabled: true,
-        })
-      ).rejects.toThrow(REPOSITORY_DISABLED);
-      expect(httpMock.getTrace()).toMatchSnapshot();
-    });
     it(`should escape all forward slashes in project names`, async () => {
       httpMock
         .scope(gitlabApiHost)
@@ -176,7 +152,6 @@ describe('platform/gitlab', () => {
       await gitlab.initRepo({
         repository: 'some/repo/project',
         localDir: '',
-        optimizeForDisabled: false,
       });
       expect(httpMock.getTrace()).toMatchSnapshot();
     });
@@ -189,7 +164,6 @@ describe('platform/gitlab', () => {
         gitlab.initRepo({
           repository: 'some/repo',
           localDir: '',
-          optimizeForDisabled: false,
         })
       ).rejects.toThrow('always error');
       expect(httpMock.getTrace()).toMatchSnapshot();
@@ -203,7 +177,6 @@ describe('platform/gitlab', () => {
         gitlab.initRepo({
           repository: 'some/repo',
           localDir: '',
-          optimizeForDisabled: false,
         })
       ).rejects.toThrow(REPOSITORY_ARCHIVED);
       expect(httpMock.getTrace()).toMatchSnapshot();
@@ -217,7 +190,6 @@ describe('platform/gitlab', () => {
         gitlab.initRepo({
           repository: 'some/repo',
           localDir: '',
-          optimizeForDisabled: false,
         })
       ).rejects.toThrow(REPOSITORY_MIRRORED);
       expect(httpMock.getTrace()).toMatchSnapshot();
@@ -231,7 +203,6 @@ describe('platform/gitlab', () => {
         gitlab.initRepo({
           repository: 'some/repo',
           localDir: '',
-          optimizeForDisabled: false,
         })
       ).rejects.toThrow(REPOSITORY_DISABLED);
       expect(httpMock.getTrace()).toMatchSnapshot();
@@ -245,7 +216,6 @@ describe('platform/gitlab', () => {
         gitlab.initRepo({
           repository: 'some/repo',
           localDir: '',
-          optimizeForDisabled: false,
         })
       ).rejects.toThrow(REPOSITORY_DISABLED);
       expect(httpMock.getTrace()).toMatchSnapshot();
@@ -259,7 +229,6 @@ describe('platform/gitlab', () => {
         gitlab.initRepo({
           repository: 'some/repo',
           localDir: '',
-          optimizeForDisabled: false,
         })
       ).rejects.toThrow(REPOSITORY_EMPTY);
       expect(httpMock.getTrace()).toMatchSnapshot();
@@ -273,7 +242,6 @@ describe('platform/gitlab', () => {
         gitlab.initRepo({
           repository: 'some/repo',
           localDir: '',
-          optimizeForDisabled: false,
         })
       ).rejects.toThrow(REPOSITORY_EMPTY);
       expect(httpMock.getTrace()).toMatchSnapshot();
@@ -289,7 +257,6 @@ describe('platform/gitlab', () => {
       await gitlab.initRepo({
         repository: 'some/repo/project',
         localDir: '',
-        optimizeForDisabled: false,
       });
       expect(httpMock.getTrace()).toMatchSnapshot();
     });
@@ -300,7 +267,6 @@ describe('platform/gitlab', () => {
         {
           repository: 'some/repo/project',
           localDir: '',
-          optimizeForDisabled: false,
         },
         {
           default_branch: 'master',
@@ -317,7 +283,6 @@ describe('platform/gitlab', () => {
         {
           repository: 'some/repo/project',
           localDir: '',
-          optimizeForDisabled: false,
         },
         {
           default_branch: 'master',
@@ -326,24 +291,6 @@ describe('platform/gitlab', () => {
         }
       );
       expect(await gitlab.getRepoForceRebase()).toBe(true);
-      expect(httpMock.getTrace()).toMatchSnapshot();
-    });
-  });
-  describe('setBaseBranch(branchName)', () => {
-    it('sets the base branch', async () => {
-      httpMock
-        .scope(gitlabApiHost)
-        .get(`/api/v4/projects/some%2Frepo`)
-        .reply(200, {
-          default_branch: 'master',
-          http_url_to_repo: `https://gitlab.com/some/repo.git`,
-        });
-      await gitlab.initRepo({
-        repository: 'some/repo',
-        localDir: '',
-        optimizeForDisabled: false,
-      });
-      await gitlab.setBaseBranch('master');
       expect(httpMock.getTrace()).toMatchSnapshot();
     });
   });
@@ -482,7 +429,7 @@ describe('platform/gitlab', () => {
     });
     it('throws repository-changed', async () => {
       expect.assertions(2);
-      git.branchExists.mockResolvedValue(false);
+      git.branchExists.mockReturnValue(false);
       await initRepo();
       await expect(gitlab.getBranchStatus('somebranch', [])).rejects.toThrow(
         REPOSITORY_CHANGED
@@ -945,7 +892,7 @@ describe('platform/gitlab', () => {
           iid: 12345,
         });
       const pr = await gitlab.createPr({
-        branchName: 'some-branch',
+        sourceBranch: 'some-branch',
         targetBranch: 'master',
         prTitle: 'some-title',
         prBody: 'the-body',
@@ -963,7 +910,7 @@ describe('platform/gitlab', () => {
           iid: 12345,
         });
       const pr = await gitlab.createPr({
-        branchName: 'some-branch',
+        sourceBranch: 'some-branch',
         targetBranch: 'master',
         prTitle: 'some-title',
         prBody: 'the-body',
@@ -995,7 +942,7 @@ describe('platform/gitlab', () => {
         .put('/api/v4/projects/undefined/merge_requests/12345/merge')
         .reply(200);
       await gitlab.createPr({
-        branchName: 'some-branch',
+        sourceBranch: 'some-branch',
         targetBranch: 'master',
         prTitle: 'some-title',
         prBody: 'the-body',
@@ -1161,6 +1108,33 @@ These updates have all been created already. Click a checkbox below to force a r
         .put('/api/v4/projects/undefined/merge_requests/42')
         .reply(200);
       await gitlab.deleteLabel(42, 'rebase');
+      expect(httpMock.getTrace()).toMatchSnapshot();
+    });
+  });
+  describe('getJsonFile()', () => {
+    it('returns file content', async () => {
+      const data = { foo: 'bar' };
+      const scope = await initRepo();
+      scope
+        .get(
+          '/api/v4/projects/some%2Frepo/repository/files/file.json?ref=master'
+        )
+        .reply(200, {
+          content: Buffer.from(JSON.stringify(data)).toString('base64'),
+        });
+      const res = await gitlab.getJsonFile('file.json');
+      expect(res).toEqual(data);
+      expect(httpMock.getTrace()).toMatchSnapshot();
+    });
+    it('returns null on errors', async () => {
+      const scope = await initRepo();
+      scope
+        .get(
+          '/api/v4/projects/some%2Frepo/repository/files/file.json?ref=master'
+        )
+        .replyWithError('some error');
+      const res = await gitlab.getJsonFile('file.json');
+      expect(res).toBeNull();
       expect(httpMock.getTrace()).toMatchSnapshot();
     });
   });

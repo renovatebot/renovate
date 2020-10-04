@@ -1,15 +1,18 @@
 import {
   GitCommit,
-  GitPullRequest,
   GitPullRequestMergeStrategy,
   GitRef,
 } from 'azure-devops-node-api/interfaces/GitInterfaces';
 import { logger } from '../../logger';
-
-import { HostRule, PrState } from '../../types';
+import { HostRule } from '../../types';
 import { GitOptions } from '../../types/git';
+import { add } from '../../util/sanitize';
 import * as azureApi from './azure-got-wrapper';
-import { AzurePr } from './types';
+import {
+  getBranchNameWithoutRefsPrefix,
+  getBranchNameWithoutRefsheadsPrefix,
+  getNewBranchName,
+} from './util';
 
 const mergePolicyGuid = 'fa4e907d-c16b-4a4c-9dfa-4916e5d171ab'; // Magic GUID for merge strategy policy configurations
 
@@ -18,57 +21,22 @@ function toBase64(from: string): string {
 }
 
 export function getStorageExtraCloneOpts(config: HostRule): GitOptions {
-  let header: string;
-  const headerName = 'AUTHORIZATION';
+  let authType: string;
+  let authValue: string;
   if (!config.token && config.username && config.password) {
-    header = `${headerName}: basic ${toBase64(
-      `${config.username}:${config.password}`
-    )}`;
+    authType = 'basic';
+    authValue = toBase64(`${config.username}:${config.password}`);
   } else if (config.token.length !== 52) {
-    header = `${headerName}: bearer ${config.token}`;
+    authType = 'bearer';
+    authValue = config.token;
   } else {
-    header = `${headerName}: basic ${toBase64(`:${config.token}`)}`;
+    authType = 'basic';
+    authValue = toBase64(`:${config.token}`);
   }
-  return { '--config': `http.extraheader=${header}` };
-}
-
-export function getNewBranchName(branchName?: string): string {
-  if (branchName && !branchName.startsWith('refs/heads/')) {
-    return `refs/heads/${branchName}`;
-  }
-  return branchName;
-}
-
-export function getBranchNameWithoutRefsheadsPrefix(
-  branchPath: string
-): string | undefined {
-  if (!branchPath) {
-    logger.error(`getBranchNameWithoutRefsheadsPrefix(${branchPath})`);
-    return undefined;
-  }
-  if (!branchPath.startsWith('refs/heads/')) {
-    logger.trace(
-      `The refs/heads/ name should have started with 'refs/heads/' but it didn't. (${branchPath})`
-    );
-    return branchPath;
-  }
-  return branchPath.substring(11, branchPath.length);
-}
-
-function getBranchNameWithoutRefsPrefix(
-  branchPath?: string
-): string | undefined {
-  if (!branchPath) {
-    logger.error(`getBranchNameWithoutRefsPrefix(${branchPath})`);
-    return undefined;
-  }
-  if (!branchPath.startsWith('refs/')) {
-    logger.trace(
-      `The ref name should have started with 'refs/' but it didn't. (${branchPath})`
-    );
-    return branchPath;
-  }
-  return branchPath.substring(5, branchPath.length);
+  add(authValue);
+  return {
+    '-c': `http.extraheader=AUTHORIZATION: ${authType} ${authValue}`,
+  };
 }
 
 export async function getRefs(
@@ -173,48 +141,6 @@ export function max4000Chars(str: string): string {
     return str.substring(0, 3999);
   }
   return str;
-}
-
-export function getRenovatePRFormat(azurePr: GitPullRequest): AzurePr {
-  const pr: AzurePr = azurePr as any;
-
-  pr.displayNumber = `Pull Request #${azurePr.pullRequestId}`;
-  pr.number = azurePr.pullRequestId;
-  pr.body = azurePr.description;
-  pr.targetBranch = getBranchNameWithoutRefsheadsPrefix(azurePr.targetRefName);
-  pr.branchName = pr.targetBranch;
-  pr.createdAt = azurePr.creationDate?.toISOString();
-
-  // status
-  // export declare enum PullRequestStatus {
-  //   NotSet = 0,
-  //   Active = 1,
-  //   Abandoned = 2,
-  //   Completed = 3,
-  //   All = 4,
-  // }
-  if (azurePr.status === 2) {
-    pr.state = PrState.Closed;
-  } else if (azurePr.status === 3) {
-    pr.state = PrState.Merged;
-  } else {
-    pr.state = PrState.Open;
-  }
-
-  // mergeStatus
-  // export declare enum PullRequestAsyncStatus {
-  //   NotSet = 0,
-  //   Queued = 1,
-  //   Conflicts = 2,
-  //   Succeeded = 3,
-  //   RejectedByPolicy = 4,
-  //   Failure = 5,
-  // }
-  if (azurePr.mergeStatus === 2) {
-    pr.isConflicted = true;
-  }
-
-  return pr;
 }
 
 export async function getCommitDetails(

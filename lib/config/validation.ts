@@ -32,7 +32,7 @@ export async function validateConfig(
 
   function getDeprecationMessage(option: string): string {
     const deprecatedOptions = {
-      branchName: `Direct editing of branchName is now deprecated. Please edit branchPrefix, managerBranchPrefix, or branchTopic instead`,
+      branchName: `Direct editing of branchName is now deprecated. Please edit branchPrefix, additionalBranchPrefix, or branchTopic instead`,
       commitMessage: `Direct editing of commitMessage is now deprecated. Please edit commitMessage's subcomponents instead.`,
       prTitle: `Direct editing of prTitle is now deprecated. Please edit commitMessage subcomponents instead as they will be passed through to prTitle.`,
     };
@@ -361,7 +361,11 @@ export async function validateConfig(
               message: `Configuration option \`${currentPath}\` should be a string`,
             });
           }
-        } else if (type === 'object' && currentPath !== 'compatibility') {
+        } else if (
+          type === 'object' &&
+          currentPath !== 'compatibility' &&
+          currentPath !== 'constraints'
+        ) {
           if (is.plainObject(val)) {
             if (key === 'aliases') {
               if (!validateAliasObject(key, val)) {

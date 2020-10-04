@@ -313,9 +313,9 @@ describe('config/validation', () => {
       expect(errors).toHaveLength(0);
     });
 
-    it('does not validate compatibility children', async () => {
+    it('does not validate constraints children', async () => {
       const config = {
-        compatibility: { packageRules: [{}] },
+        constraints: { packageRules: [{}] },
       };
       const { warnings, errors } = await configValidation.validateConfig(
         config,

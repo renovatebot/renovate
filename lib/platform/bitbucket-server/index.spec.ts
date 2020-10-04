@@ -3,7 +3,6 @@ import * as httpMock from '../../../test/httpMock';
 import { getName } from '../../../test/util';
 import {
   REPOSITORY_CHANGED,
-  REPOSITORY_DISABLED,
   REPOSITORY_EMPTY,
   REPOSITORY_NOT_FOUND,
 } from '../../constants/error-messages';
@@ -167,7 +166,6 @@ describe(getName(__filename), () => {
           endpoint: 'https://stash.renovatebot.com/vcs/',
           repository: 'SOME/repo',
           localDir: '',
-          optimizeForDisabled: false,
           ...config,
         });
         return scope;
@@ -184,9 +182,9 @@ describe(getName(__filename), () => {
         hostRules = require('../../util/host-rules');
         bitbucket = await import('.');
         git = require('../../util/git');
-        git.branchExists.mockResolvedValue(true);
+        git.branchExists.mockReturnValue(true);
         git.isBranchStale.mockResolvedValue(false);
-        git.getBranchCommit.mockResolvedValue(
+        git.getBranchCommit.mockReturnValue(
           '0d9c7726c3d628b7e28af234595cfd20febdbf8e'
         );
         const endpoint =
@@ -264,7 +262,6 @@ describe(getName(__filename), () => {
               endpoint: 'https://stash.renovatebot.com/vcs/',
               repository: 'SOME/repo',
               localDir: '',
-              optimizeForDisabled: false,
             })
           ).toMatchSnapshot();
           expect(httpMock.getTrace()).toMatchSnapshot();
@@ -280,20 +277,11 @@ describe(getName(__filename), () => {
             )
             .reply(200, {
               displayId: 'master',
-            })
-            .get(
-              `${urlPath}/rest/api/1.0/projects/SOME/repos/repo/browse/renovate.json?limit=20000`
-            )
-            .reply(200, {
-              isLastPage: false,
-              lines: [{ text: '{' }],
-              size: 50000,
             });
           const res = await bitbucket.initRepo({
             endpoint: 'https://stash.renovatebot.com/vcs/',
             repository: 'SOME/repo',
             localDir: '',
-            optimizeForDisabled: true,
           });
           expect(res).toMatchSnapshot();
           expect(httpMock.getTrace()).toMatchSnapshot();
@@ -314,31 +302,8 @@ describe(getName(__filename), () => {
               endpoint: 'https://stash.renovatebot.com/vcs/',
               repository: 'SOME/repo',
               localDir: '',
-              optimizeForDisabled: false,
             })
           ).rejects.toThrow(REPOSITORY_EMPTY);
-          expect(httpMock.getTrace()).toMatchSnapshot();
-        });
-
-        it('throws disabled', async () => {
-          expect.assertions(2);
-          httpMock
-            .scope(urlHost)
-            .get(
-              `${urlPath}/rest/api/1.0/projects/SOME/repos/repo/browse/renovate.json?limit=20000`
-            )
-            .reply(200, {
-              isLastPage: true,
-              lines: [{ text: '{ "enabled": false' }, { text: '}' }],
-            });
-          await expect(
-            bitbucket.initRepo({
-              endpoint: 'https://stash.renovatebot.com/vcs/',
-              repository: 'SOME/repo',
-              localDir: '',
-              optimizeForDisabled: true,
-            })
-          ).rejects.toThrow(REPOSITORY_DISABLED);
           expect(httpMock.getTrace()).toMatchSnapshot();
         });
       });
@@ -419,15 +384,6 @@ describe(getName(__filename), () => {
             expect(httpMock.getTrace()).toMatchSnapshot();
           }
         );
-      });
-
-      describe('setBaseBranch()', () => {
-        it('updates file list', async () => {
-          expect.assertions(1);
-          await initRepo();
-          await bitbucket.setBaseBranch('branch');
-          expect(httpMock.getTrace()).toMatchSnapshot();
-        });
       });
 
       describe('addAssignees()', () => {
@@ -1140,10 +1096,13 @@ describe(getName(__filename), () => {
             .reply(200, prMock(url, 'SOME', 'repo'));
 
           const { number: id } = await bitbucket.createPr({
-            branchName: 'branch',
+            sourceBranch: 'branch',
             targetBranch: 'master',
             prTitle: 'title',
             prBody: 'body',
+            platformOptions: {
+              bbUseDefaultReviewers: true,
+            },
           });
           expect(id).toBe(5);
           expect(httpMock.getTrace()).toMatchSnapshot();
@@ -1164,11 +1123,14 @@ describe(getName(__filename), () => {
             .reply(200, prMock(url, 'SOME', 'repo'));
 
           const { number: id } = await bitbucket.createPr({
-            branchName: 'branch',
+            sourceBranch: 'branch',
             targetBranch: 'master',
             prTitle: 'title',
             prBody: 'body',
             labels: null,
+            platformOptions: {
+              bbUseDefaultReviewers: true,
+            },
           });
           expect(id).toBe(5);
           expect(httpMock.getTrace()).toMatchSnapshot();
@@ -1655,7 +1617,7 @@ Followed by some information.
         });
 
         it('throws repository-changed', async () => {
-          git.branchExists.mockResolvedValue(false);
+          git.branchExists.mockReturnValue(false);
           await initRepo();
           await expect(
             bitbucket.getBranchStatus('somebranch', [])
@@ -1925,6 +1887,49 @@ Followed by some information.
             state: BranchStatus.green,
           });
 
+          expect(httpMock.getTrace()).toMatchSnapshot();
+        });
+      });
+
+      describe('getJsonFile()', () => {
+        it('returns file content', async () => {
+          const data = { foo: 'bar' };
+          const scope = await initRepo();
+          scope
+            .get(
+              `${urlPath}/rest/api/1.0/projects/SOME/repos/repo/browse/file.json?limit=20000`
+            )
+            .reply(200, {
+              isLastPage: true,
+              lines: [{ text: JSON.stringify(data) }],
+            });
+          const res = await bitbucket.getJsonFile('file.json');
+          expect(res).toEqual(data);
+          expect(httpMock.getTrace()).toMatchSnapshot();
+        });
+        it('returns null for long content', async () => {
+          const scope = await initRepo();
+          scope
+            .get(
+              `${urlPath}/rest/api/1.0/projects/SOME/repos/repo/browse/file.json?limit=20000`
+            )
+            .reply(200, {
+              isLastPage: false,
+              lines: [{ text: '{' }],
+            });
+          const res = await bitbucket.getJsonFile('file.json');
+          expect(res).toBeNull();
+          expect(httpMock.getTrace()).toMatchSnapshot();
+        });
+        it('returns null on errors', async () => {
+          const scope = await initRepo();
+          scope
+            .get(
+              `${urlPath}/rest/api/1.0/projects/SOME/repos/repo/browse/file.json?limit=20000`
+            )
+            .replyWithError('some error');
+          const res = await bitbucket.getJsonFile('file.json');
+          expect(res).toBeNull();
           expect(httpMock.getTrace()).toMatchSnapshot();
         });
       });

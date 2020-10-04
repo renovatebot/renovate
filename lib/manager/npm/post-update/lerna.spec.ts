@@ -75,7 +75,7 @@ describe(getName(__filename), () => {
       const res = await lernaHelper.generateLockFiles(
         lernaPkgFile('yarn'),
         'some-dir',
-        { compatibility: { yarn: '^1.10.0' } },
+        { constraints: { yarn: '^1.10.0' } },
         {}
       );
       expect(execSnapshots).toMatchSnapshot();
@@ -99,7 +99,7 @@ describe(getName(__filename), () => {
         'some-dir',
         {
           dockerMapDotfiles: true,
-          compatibility: { npm: '^6.0.0' },
+          constraints: { npm: '^6.0.0' },
         },
         {}
       );

@@ -5,6 +5,7 @@ import {
 } from '../../../../constants/error-messages';
 import { logger } from '../../../../logger';
 import { platform } from '../../../../platform';
+import { checkoutBranch } from '../../../../util/git';
 import { extractAllDependencies } from '../../extract';
 import { isOnboarded, onboardingPrExists } from './check';
 import { createOnboardingBranch } from './create';
@@ -54,7 +55,7 @@ export async function checkOnboardingBranch(
     }
   }
   if (!config.dryRun) {
-    await platform.setBaseBranch(config.onboardingBranch);
+    await checkoutBranch(config.onboardingBranch);
   }
   const branchList = [config.onboardingBranch];
   return { ...config, repoIsOnboarded, branchList };
