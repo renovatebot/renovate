@@ -28,7 +28,7 @@ export async function generateLockFile(
   let cmd = 'pnpm';
   try {
     let installPnpm = 'npm i -g pnpm';
-    const pnpmCompatibility = config.compatibility?.pnpm;
+    const pnpmCompatibility = config.constraints?.pnpm;
     if (validRange(pnpmCompatibility)) {
       installPnpm += `@${quote(pnpmCompatibility)}`;
     }

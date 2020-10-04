@@ -30,6 +30,7 @@ export interface BranchCache {
   isModified: boolean;
   prNo: number | null;
   sha: string | null;
+  parentSha: string | null;
   upgrades: BranchUpgradeCache[];
 }
 

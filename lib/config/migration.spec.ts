@@ -26,6 +26,9 @@ describe('config/migration', () => {
             password: 'some-password',
           },
         ],
+        compatibility: {
+          python: '3.7',
+        },
         extends: [':js-app', 'config:library', ':masterIssue'],
         maintainYarnLock: true,
         onboarding: 'false' as never,
