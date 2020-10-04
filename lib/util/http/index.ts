@@ -70,8 +70,7 @@ function applyDefaultHeaders(options: Options): void {
 async function gotRoutine<T>(
   url: string,
   options: GotOptions,
-  startTime: number,
-  queueTime: number
+  queueDuration: number
 ): Promise<Response<T>> {
   const requestTime = Date.now();
   logger.trace({ url, options }, 'got request');
@@ -82,7 +81,7 @@ async function gotRoutine<T>(
     method: options.method,
     url,
     duration: responseTime - requestTime,
-    queueDuration: queueTime - startTime,
+    queueDuration,
   });
   memCache.set('http-requests', httpRequests);
   return resp;
@@ -136,8 +135,8 @@ export class Http<GetOptions = HttpOptions, PostOptions = HttpPostOptions> {
     if (!resPromise) {
       const startTime = Date.now();
       const queueTask = (): Promise<Response<T>> => {
-        const queueTime = Date.now();
-        return gotRoutine(url, options, startTime, queueTime);
+        const queueDuration = Date.now() - startTime;
+        return gotRoutine(url, options, queueDuration);
       };
       const queue = getQueue(url);
       resPromise = queue ? queue.add(queueTask) : queueTask();
