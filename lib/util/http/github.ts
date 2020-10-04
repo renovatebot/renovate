@@ -219,8 +219,6 @@ export class GithubHttp extends Http<GithubHttpOptions, GithubHttpOptions> {
   ): Promise<T> {
     let result = null;
 
-    const path = 'graphql';
-
     const opts: HttpPostOptions = {
       baseUrl: URL.resolve(baseUrl, '/'), // GitHub Enterprise uses unversioned graphql path
       body: { query },
@@ -230,10 +228,13 @@ export class GithubHttp extends Http<GithubHttpOptions, GithubHttpOptions> {
     logger.trace(`Performing Github GraphQL request`);
 
     try {
-      const res = await this.postJson<GithubGraphqlResponse<T>>(path, opts);
+      const res = await this.postJson<GithubGraphqlResponse<T>>(
+        'graphql',
+        opts
+      );
       result = res?.body?.data?.repository;
     } catch (gotErr) {
-      handleGotError(gotErr, path, opts);
+      handleGotError(gotErr, 'graphql', opts);
     }
     return result;
   }
