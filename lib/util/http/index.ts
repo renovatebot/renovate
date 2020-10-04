@@ -85,7 +85,6 @@ async function gotRoutine<T>(
     duration: responseTime - requestTime,
     queueDuration,
   });
-
   memCache.set('http-requests', httpRequests);
 
   return resp;
