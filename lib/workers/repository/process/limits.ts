@@ -6,6 +6,10 @@ import { PrState } from '../../../types';
 import { branchExists } from '../../../util/git';
 import { BranchConfig } from '../../common';
 
+function isBaseBranch(config: RenovateConfig, branch: string): boolean {
+  return config.baseBranches?.some((baseBranch) => baseBranch === branch);
+}
+
 export async function getPrHourlyRemaining(
   config: RenovateConfig
 ): Promise<number> {
@@ -20,6 +24,7 @@ export async function getPrHourlyRemaining(
       const soFarThisHour = prList.filter(
         (pr) =>
           pr.sourceBranch !== config.onboardingBranch &&
+          !isBaseBranch(config, pr.sourceBranch) &&
           pr.sourceBranch.startsWith(config.branchPrefix) &&
           moment(pr.createdAt).isAfter(currentHourStart)
       );
@@ -48,6 +53,7 @@ export async function getConcurrentPrsRemaining(
         (pr) =>
           pr.state === PrState.Open &&
           pr.sourceBranch !== config.onboardingBranch &&
+          !isBaseBranch(config, pr.sourceBranch) &&
           pr.sourceBranch.startsWith(config.branchPrefix)
       );
       logger.debug(`${openPrs.length} PRs are currently open`);
