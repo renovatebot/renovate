@@ -4,7 +4,6 @@ import delay from 'delay';
 import type { PartialDeep } from 'type-fest';
 import {
   REPOSITORY_CHANGED,
-  REPOSITORY_DISABLED,
   REPOSITORY_EMPTY,
   REPOSITORY_NOT_FOUND,
 } from '../../constants/error-messages';
@@ -123,7 +122,7 @@ export async function getJsonFile(fileName: string): Promise<any | null> {
     } else {
       return JSON.parse(body.lines.map((l) => l.text).join(''));
     }
-  } catch (err) /* istanbul ignore next */ {
+  } catch (err) {
     // no-op
   }
   return null;
@@ -133,7 +132,6 @@ export async function getJsonFile(fileName: string): Promise<any | null> {
 export async function initRepo({
   repository,
   localDir,
-  optimizeForDisabled,
 }: RepoParams): Promise<RepoResult> {
   logger.debug(
     `initRepo("${JSON.stringify({ repository, localDir }, null, 2)}")`
@@ -152,17 +150,6 @@ export async function initRepo({
     prVersions: new Map<number, number>(),
     username: opts.username,
   } as any;
-
-  if (optimizeForDisabled) {
-    interface RenovateConfig {
-      enabled: boolean;
-    }
-
-    const renovateConfig: RenovateConfig = await getJsonFile('renovate.json');
-    if (renovateConfig && renovateConfig.enabled === false) {
-      throw new Error(REPOSITORY_DISABLED);
-    }
-  }
 
   const { host, pathname } = url.parse(defaults.endpoint);
   const gitUrl = git.getUrl({

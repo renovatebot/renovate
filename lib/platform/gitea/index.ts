@@ -1,13 +1,10 @@
 import URL from 'url';
 import is from '@sindresorhus/is';
-import { configFileNames } from '../../config/app-strings';
-import { RenovateConfig } from '../../config/common';
 import {
   REPOSITORY_ACCESS_FORBIDDEN,
   REPOSITORY_ARCHIVED,
   REPOSITORY_BLOCKED,
   REPOSITORY_CHANGED,
-  REPOSITORY_DISABLED,
   REPOSITORY_EMPTY,
   REPOSITORY_MIRRORED,
 } from '../../constants/error-messages';
@@ -54,7 +51,6 @@ const defaults = {
   hostType: PLATFORM_TYPE_GITEA,
   endpoint: 'https://gitea.com/api/v1/',
 };
-const defaultConfigFile = configFileNames[0];
 
 let config: GiteaRepoConfig = {} as any;
 let botUserID: number;
@@ -221,12 +217,7 @@ const platform: Platform = {
     }
   },
 
-  async initRepo({
-    repository,
-    localDir,
-    optimizeForDisabled,
-  }: RepoParams): Promise<RepoResult> {
-    let renovateConfig: RenovateConfig;
+  async initRepo({ repository, localDir }: RepoParams): Promise<RepoResult> {
     let repo: helper.Repo;
 
     config = {} as any;
@@ -283,14 +274,6 @@ const platform: Platform = {
     // Determine author email and branches
     config.defaultBranch = repo.default_branch;
     logger.debug(`${repository} default branch = ${config.defaultBranch}`);
-
-    // Optionally check if Renovate is disabled by attempting to fetch default configuration file
-    if (optimizeForDisabled) {
-      renovateConfig = await platform.getJsonFile(defaultConfigFile);
-      if (renovateConfig && renovateConfig.enabled === false) {
-        throw new Error(REPOSITORY_DISABLED);
-      }
-    }
 
     // Find options for current host and determine Git endpoint
     const opts = hostRules.find({

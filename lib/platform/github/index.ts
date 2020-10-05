@@ -1,7 +1,6 @@
 import URL from 'url';
 import is from '@sindresorhus/is';
 import delay from 'delay';
-import { configFileNames } from '../../config/app-strings';
 import {
   PLATFORM_INTEGRATION_UNAUTHORIZED,
   REPOSITORY_ACCESS_FORBIDDEN,
@@ -57,8 +56,6 @@ import {
 import { UserDetails, getUserDetails, getUserEmail } from './user';
 
 const githubApi = new githubHttp.GithubHttp();
-
-const defaultConfigFile = configFileNames[0];
 
 let config: LocalRepoConfig = {} as any;
 
@@ -156,7 +153,7 @@ export async function getJsonFile(fileName: string): Promise<any | null> {
         'base64'
       ).toString()
     );
-  } catch (err) /* istanbul ignore next */ {
+  } catch (err) {
     return null;
   }
 }
@@ -170,9 +167,7 @@ export async function initRepo({
   forkMode,
   forkToken,
   localDir,
-  includeForks,
   renovateUsername,
-  optimizeForDisabled,
 }: RepoParams): Promise<RepoResult> {
   logger.debug(`initRepo("${repository}")`);
   // config is used by the platform api itself, not necessary for the app layer to know
@@ -219,13 +214,6 @@ export async function initRepo({
     if (!repo.defaultBranchRef?.name) {
       throw new Error(REPOSITORY_EMPTY);
     }
-    // istanbul ignore if
-    if (repo.isFork && !includeForks) {
-      const renovateConfig = await getJsonFile(defaultConfigFile);
-      if (!renovateConfig?.includeForks) {
-        throw new Error(REPOSITORY_FORKED);
-      }
-    }
     if (repo.nameWithOwner && repo.nameWithOwner !== repository) {
       logger.debug(
         { repository, this_repository: repo.nameWithOwner },
@@ -238,12 +226,6 @@ export async function initRepo({
         'Repository is archived - throwing error to abort renovation'
       );
       throw new Error(REPOSITORY_ARCHIVED);
-    }
-    if (optimizeForDisabled) {
-      const renovateConfig = await getJsonFile(defaultConfigFile);
-      if (renovateConfig?.enabled === false) {
-        throw new Error(REPOSITORY_DISABLED);
-      }
     }
     // Use default branch as PR target unless later overridden.
     config.defaultBranch = repo.defaultBranchRef.name;

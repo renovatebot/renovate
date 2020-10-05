@@ -1,10 +1,7 @@
 import URL from 'url';
 import is from '@sindresorhus/is';
 import parseDiff from 'parse-diff';
-import {
-  REPOSITORY_DISABLED,
-  REPOSITORY_NOT_FOUND,
-} from '../../constants/error-messages';
+import { REPOSITORY_NOT_FOUND } from '../../constants/error-messages';
 import { PLATFORM_TYPE_BITBUCKET } from '../../constants/platforms';
 import { logger } from '../../logger';
 import { BranchStatus, PrState } from '../../types';
@@ -110,7 +107,7 @@ export async function getJsonFile(fileName: string): Promise<any | null> {
         `/2.0/repositories/${config.repository}/src/${config.defaultBranch}/${fileName}`
       )
     ).body;
-  } catch (err) /* istanbul ignore next */ {
+  } catch (err) {
     return null;
   }
 }
@@ -119,7 +116,6 @@ export async function getJsonFile(fileName: string): Promise<any | null> {
 export async function initRepo({
   repository,
   localDir,
-  optimizeForDisabled,
 }: RepoParams): Promise<RepoResult> {
   logger.debug(`initRepo("${repository}")`);
   const opts = hostRules.find({
@@ -140,17 +136,6 @@ export async function initRepo({
       ).body
     );
     config.defaultBranch = info.mainbranch;
-
-    if (optimizeForDisabled) {
-      interface RenovateConfig {
-        enabled: boolean;
-      }
-
-      const renovateConfig: RenovateConfig = await getJsonFile('renovate.json');
-      if (renovateConfig && renovateConfig.enabled === false) {
-        throw new Error(REPOSITORY_DISABLED);
-      }
-    }
 
     Object.assign(config, {
       owner: info.owner,

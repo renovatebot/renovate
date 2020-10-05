@@ -330,6 +330,20 @@ export function getBranchCommit(branchName: string): CommitSha | null {
   return config.branchCommits[branchName] || null;
 }
 
+// Return the parent commit SHA for a branch
+export async function getBranchParentSha(
+  branchName: string
+): Promise<CommitSha | null> {
+  try {
+    const branchSha = getBranchCommit(branchName);
+    const parentSha = await git.revparse([`${branchSha}^`]);
+    return parentSha;
+  } catch (err) {
+    logger.debug({ err }, 'Error getting branch parent sha');
+    return null;
+  }
+}
+
 export async function getCommitMessages(): Promise<string[]> {
   await syncGit();
   logger.debug('getCommitMessages');
