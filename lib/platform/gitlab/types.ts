@@ -21,7 +21,7 @@ export type RepoResponse = {
   empty_repo: boolean;
   http_url_to_repo: string;
   forked_from_project: boolean;
-  namespace: Namespace;
+  namespace?: Namespace;
   repository_access_level: 'disabled' | 'private' | 'enabled';
   merge_requests_access_level: 'disabled' | 'private' | 'enabled';
   merge_method: MergeMethod;
