@@ -9,7 +9,7 @@ import * as template from '../../../util/template';
 import { BranchConfig, BranchUpgradeConfig } from '../../common';
 import { formatCommitMessagePrefix } from '../util/commit-message';
 
-function isTypesGroup(branchUpgrades: any[]): boolean {
+function isTypesGroup(branchUpgrades: BranchUpgradeConfig[]): boolean {
   return (
     branchUpgrades.some(({ depName }) => depName?.startsWith('@types/')) &&
     new Set(
