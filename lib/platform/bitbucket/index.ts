@@ -176,7 +176,7 @@ export async function initRepo({
   const repoConfig: RepoResult = {
     defaultBranch: info.mainbranch,
     isFork: info.isFork,
-    owner: repository.split('/')[0],
+    owner: info.owner,
   };
   return repoConfig;
 }
