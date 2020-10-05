@@ -18,6 +18,7 @@ export interface GroupConfig extends Record<string, unknown> {
 
 // TODO: Proper typings
 export interface RenovateSharedConfig {
+  $schema?: string;
   automerge?: boolean;
   branchPrefix?: string;
   branchName?: string;
