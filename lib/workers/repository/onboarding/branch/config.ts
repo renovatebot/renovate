@@ -25,6 +25,7 @@ export async function getOnboardingConfig(
   }
   if (organizationConfigRepoExists) {
     onboardingConfig = {
+      $schema: 'https://docs.renovatebot.com/renovate-schema.json',
       extends: [organizationConfigPresetName],
     };
   }
