@@ -141,7 +141,10 @@ describe('platform/bitbucket', () => {
       httpMock
         .scope(baseUrl)
         .get('/2.0/repositories/some/repo')
-        .reply(200, { owner: { 'username': 'some' }, mainbranch: { name: 'master' } });
+        .reply(200, {
+          owner: { username: 'some' },
+          mainbranch: { name: 'master' },
+        });
       expect(
         await bitbucket.initRepo({
           repository: 'some/repo',
