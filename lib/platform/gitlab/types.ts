@@ -12,7 +12,7 @@ export type MergeMethod = 'merge' | 'rebase_merge' | 'ff';
 
 export type Namespace = {
   path: string;
-}
+};
 
 export type RepoResponse = {
   archived: boolean;

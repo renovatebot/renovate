@@ -34,5 +34,15 @@ describe('workers/repository/onboarding/branch', () => {
       expect(mockedPresets.getPreset).toHaveBeenCalledTimes(1);
       expect(JSON.parse(onboardingConfig)).toEqual(config.onboardingConfig);
     });
+    it('propagates an unknown error', async () => {
+      config.owner = 'own3';
+      mockedPresets.getPreset.mockRejectedValue(
+        new Error('unknown error for test')
+      );
+      await expect(async () => {
+        await getOnboardingConfig(config);
+      }).rejects.toThrow('unknown error for test');
+      expect(mockedPresets.getPreset).toHaveBeenCalledTimes(1);
+    });
   });
 });

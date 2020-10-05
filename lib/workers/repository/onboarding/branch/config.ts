@@ -19,7 +19,6 @@ export async function getOnboardingConfig(
     }
   } catch (err) {
     if (err.message !== PRESET_DEP_NOT_FOUND) {
-      // istanbul ignore next
       throw err;
     }
     // Organization preset did not exist
