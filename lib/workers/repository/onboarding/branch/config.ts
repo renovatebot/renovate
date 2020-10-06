@@ -19,7 +19,7 @@ export async function getOnboardingConfig(
     }
   } catch (err) {
     if (err.message !== PRESET_DEP_NOT_FOUND) {
-      throw err;
+      logger.warn({ err }, 'Unknown error fetching default owner preset');
     }
     // Organization preset did not exist
   }
