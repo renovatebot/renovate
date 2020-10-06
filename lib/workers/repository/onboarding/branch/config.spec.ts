@@ -19,7 +19,9 @@ describe('workers/repository/onboarding/branch', () => {
     it('handles finding an organization preset', async () => {
       onboardingConfig = await getOnboardingConfig(config);
       expect(mockedPresets.getPreset).toHaveBeenCalledTimes(1);
-      expect(JSON.parse(onboardingConfig).extends[0]).toEqual('local>some/renovate-config');
+      expect(JSON.parse(onboardingConfig).extends[0]).toEqual(
+        'local>some/renovate-config'
+      );
     });
     it('handles not finding an organization preset', async () => {
       mockedPresets.getPreset.mockRejectedValue(
