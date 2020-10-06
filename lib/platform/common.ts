@@ -30,7 +30,6 @@ export interface PlatformResult {
 export interface RepoResult {
   defaultBranch: string;
   isFork: boolean;
-  owner?: string;
 }
 
 export interface RepoParams {

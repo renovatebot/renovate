@@ -1120,7 +1120,6 @@ exports[`platform/bitbucket initRepo() works 1`] = `
 Object {
   "defaultBranch": "master",
   "isFork": false,
-  "owner": "some",
 }
 `;
 

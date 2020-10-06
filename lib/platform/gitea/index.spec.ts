@@ -34,12 +34,6 @@ describe('platform/gitea', () => {
     clone_url: 'https://gitea.renovatebot.com/some/repo.git',
     default_branch: 'master',
     full_name: 'some/repo',
-    owner: {
-      id: 1,
-      email: 'some@renovatebot.com',
-      full_name: 'Some Person',
-      username: 'some',
-    },
     permissions: {
       pull: true,
       push: true,

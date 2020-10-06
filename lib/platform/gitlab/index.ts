@@ -232,7 +232,6 @@ export async function initRepo({
   const repoConfig: RepoResult = {
     defaultBranch: config.defaultBranch,
     isFork: !!res.body.forked_from_project,
-    owner: res.body.namespace?.path,
   };
   return repoConfig;
 }

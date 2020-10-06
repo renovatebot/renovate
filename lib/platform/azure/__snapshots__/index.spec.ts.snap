@@ -230,7 +230,6 @@ exports[`platform/azure initRepo should initialise the config for a repo 2`] = `
 Object {
   "defaultBranch": "defBr",
   "isFork": false,
-  "owner": "some-repo",
 }
 `;
 

@@ -10,13 +10,13 @@ export async function getOnboardingConfig(
   let onboardingConfig = clone(config.onboardingConfig);
 
   let organizationConfigRepoExists = false;
-  const organizationConfigPresetName = `local>${config.owner}/renovate-config`;
+  const organizationConfigPresetName = `local>${
+    config.repository.split('/')[0]
+  }/renovate-config`;
 
   try {
-    if (config.owner) {
-      await getPreset(organizationConfigPresetName, config);
-      organizationConfigRepoExists = true;
-    }
+    await getPreset(organizationConfigPresetName, config);
+    organizationConfigRepoExists = true;
   } catch (err) {
     if (err.message !== PRESET_DEP_NOT_FOUND) {
       logger.warn({ err }, 'Unknown error fetching default owner preset');

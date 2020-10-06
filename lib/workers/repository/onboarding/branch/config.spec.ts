@@ -13,20 +13,15 @@ describe('workers/repository/onboarding/branch', () => {
   beforeEach(() => {
     jest.clearAllMocks();
     config = getConfig();
+    config.repository = 'some/repo';
   });
   describe('getOnboardingConfig', () => {
-    it('handles not being given an owner', async () => {
-      onboardingConfig = await getOnboardingConfig(config);
-      expect(mockedPresets.getPreset).toHaveBeenCalledTimes(0);
-      expect(JSON.parse(onboardingConfig)).toEqual(config.onboardingConfig);
-    });
     it('handles finding an organization preset', async () => {
-      config.owner = 'own1';
       onboardingConfig = await getOnboardingConfig(config);
       expect(mockedPresets.getPreset).toHaveBeenCalledTimes(1);
+      expect(JSON.parse(onboardingConfig).extends[0]).toEqual('local>some/renovate-config');
     });
     it('handles not finding an organization preset', async () => {
-      config.owner = 'own2';
       mockedPresets.getPreset.mockRejectedValue(
         new Error(PRESET_DEP_NOT_FOUND)
       );
@@ -34,15 +29,13 @@ describe('workers/repository/onboarding/branch', () => {
       expect(mockedPresets.getPreset).toHaveBeenCalledTimes(1);
       expect(JSON.parse(onboardingConfig)).toEqual(config.onboardingConfig);
     });
-    it('propagates an unknown error', async () => {
-      config.owner = 'own3';
+    it('ignores an unknown error', async () => {
       mockedPresets.getPreset.mockRejectedValue(
         new Error('unknown error for test')
       );
-      await expect(async () => {
-        await getOnboardingConfig(config);
-      }).rejects.toThrow('unknown error for test');
+      onboardingConfig = await getOnboardingConfig(config);
       expect(mockedPresets.getPreset).toHaveBeenCalledTimes(1);
+      expect(JSON.parse(onboardingConfig)).toEqual(config.onboardingConfig);
     });
   });
 });

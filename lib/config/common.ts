@@ -165,7 +165,6 @@ export interface RenovateConfig
   dependencyDashboardTitle?: string;
   dependencyDashboardHeader?: string;
   dependencyDashboardFooter?: string;
-  owner?: string;
   packageFile?: string;
   packageRules?: PackageRule[];
   prConcurrentLimit?: number;

@@ -299,7 +299,6 @@ const platform: Platform = {
     return {
       defaultBranch: config.defaultBranch,
       isFork: !!repo.fork,
-      owner: repo.owner.username,
     };
   },
 
