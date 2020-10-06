@@ -11,6 +11,7 @@ describe('workers/repository/onboarding/branch/rebase', () => {
       config = {
         ...defaultConfig,
       };
+      config.repository = 'some/repo';
     });
     it('does not rebase modified branch', async () => {
       git.isBranchModified.mockResolvedValueOnce(true);
