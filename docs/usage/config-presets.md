@@ -182,4 +182,4 @@ Have you configured a rule that you think others might benefit from? Please cons
 
 ## Organisation level presets
 
-When repository onboarding happens, if a repository called `renovate-config` exists under the same organization and contains a default Renovate preset, that repository will be suggested as the preset instead of `config:base`. This allows for a seamless onboarding workflow with your own organization settings.
+When repository onboarding happens, if a repository called `renovate-config` exists under the same organization and contains a default Renovate preset, that repository will be suggested as the the sole extended preset, and any existing `onboardingConfig` config will be ignored/overriden. This allows for a seamless onboarding workflow with your own organization settings.
