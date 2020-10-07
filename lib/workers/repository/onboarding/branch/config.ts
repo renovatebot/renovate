@@ -9,31 +9,35 @@ export async function getOnboardingConfig(
 ): Promise<string> {
   let onboardingConfig = clone(config.onboardingConfig);
 
-  let organizationConfigRepoExists = false;
-  const organizationConfigPresetName = `local>${
-    config.repository.split('/')[0]
-  }/renovate-config`;
+  let orgPreset: string;
 
   logger.debug(
     'Checking if this org/owner has a default Renovate preset which can be used.'
   );
+
+  const orgName = config.repository.split('/')[0];
+
+  // Check for org/renovate-config
   try {
-    await getPreset(organizationConfigPresetName, config);
-    organizationConfigRepoExists = true;
+    const orgRenovateConfig = `local>${orgName}/renovate-config`;
+    await getPreset(orgRenovateConfig, config);
+    orgPreset = orgRenovateConfig;
   } catch (err) {
     if (err.message !== PRESET_DEP_NOT_FOUND) {
       logger.warn({ err }, 'Unknown error fetching default owner preset');
     }
+  }
+
+  if (orgPreset) {
+    onboardingConfig = {
+      $schema: 'https://docs.renovatebot.com/renovate-schema.json',
+      extends: [orgPreset],
+    };
+  } else {
     // Organization preset did not exist
     logger.debug(
       'No default org/owner preset found, so the default onboarding config will be used instead. Note: do not be concerned with any 404 messages that preceded this.'
     );
-  }
-  if (organizationConfigRepoExists) {
-    onboardingConfig = {
-      $schema: 'https://docs.renovatebot.com/renovate-schema.json',
-      extends: [organizationConfigPresetName],
-    };
   }
 
   logger.debug({ config: onboardingConfig }, 'onboarding config');
