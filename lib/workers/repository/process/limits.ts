@@ -7,11 +7,13 @@ import { branchExists } from '../../../util/git';
 import { BranchConfig } from '../../common';
 
 export async function getPrHourlyRemaining(
-  config: RenovateConfig
+  config: RenovateConfig,
+  branches: BranchConfig[]
 ): Promise<number> {
   if (config.prHourlyLimit) {
     logger.debug('Calculating hourly PRs remaining');
     try {
+      const branchList = branches.map(({ branchName }) => branchName);
       const prList = await platform.getPrList();
       const currentHourStart = moment({
         hour: moment().hour(),
@@ -20,7 +22,7 @@ export async function getPrHourlyRemaining(
       const soFarThisHour = prList.filter(
         (pr) =>
           pr.sourceBranch !== config.onboardingBranch &&
-          pr.sourceBranch.startsWith(config.branchPrefix) &&
+          branchList.includes(pr.sourceBranch) &&
           moment(pr.createdAt).isAfter(currentHourStart)
       );
       const prsRemaining = Math.max(
@@ -38,17 +40,19 @@ export async function getPrHourlyRemaining(
 }
 
 export async function getConcurrentPrsRemaining(
-  config: RenovateConfig
+  config: RenovateConfig,
+  branches: BranchConfig[]
 ): Promise<number> {
   if (config.prConcurrentLimit) {
     logger.debug(`Calculating prConcurrentLimit (${config.prConcurrentLimit})`);
     try {
+      const branchList = branches.map(({ branchName }) => branchName);
       const prList = await platform.getPrList();
       const openPrs = prList.filter(
         (pr) =>
           pr.state === PrState.Open &&
           pr.sourceBranch !== config.onboardingBranch &&
-          pr.sourceBranch.startsWith(config.branchPrefix)
+          branchList.includes(pr.sourceBranch)
       );
       logger.debug(`${openPrs.length} PRs are currently open`);
       const concurrentRemaining = Math.max(
@@ -65,9 +69,12 @@ export async function getConcurrentPrsRemaining(
   return 99;
 }
 
-export async function getPrsRemaining(config: RenovateConfig): Promise<number> {
-  const hourlyRemaining = await getPrHourlyRemaining(config);
-  const concurrentRemaining = await getConcurrentPrsRemaining(config);
+export async function getPrsRemaining(
+  config: RenovateConfig,
+  branches: BranchConfig[]
+): Promise<number> {
+  const hourlyRemaining = await getPrHourlyRemaining(config, branches);
+  const concurrentRemaining = await getConcurrentPrsRemaining(config, branches);
   return hourlyRemaining < concurrentRemaining
     ? hourlyRemaining
     : concurrentRemaining;

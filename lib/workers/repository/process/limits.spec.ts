@@ -34,13 +34,16 @@ describe('workers/repository/process/limits', () => {
           sourceBranch: 'foobar',
         },
       ] as never);
-      const res = await limits.getPrHourlyRemaining(config);
+      const res = await limits.getPrHourlyRemaining(config, [
+        { branchName: 'renovate/configure' },
+        { branchName: 'renovate/test' },
+      ] as never);
       expect(res).toEqual(1);
     });
     it('returns prHourlyLimit if errored', async () => {
       config.prHourlyLimit = 2;
       platform.getPrList.mockResolvedValueOnce([null]);
-      const res = await limits.getPrHourlyRemaining(config);
+      const res = await limits.getPrHourlyRemaining(config, []);
       expect(res).toEqual(2);
     });
   });
@@ -53,17 +56,21 @@ describe('workers/repository/process/limits', () => {
         { sourceBranch: 'renovate/configure', state: PrState.Open },
         { sourceBranch: 'foobar', state: PrState.Open },
       ] as never);
-      const res = await limits.getConcurrentPrsRemaining(config);
+      const res = await limits.getConcurrentPrsRemaining(config, [
+        { branchName: 'renovate/configure' },
+        { branchName: 'renovate/test1' },
+        { branchName: 'renovate/test2' },
+      ] as never);
       expect(res).toEqual(19);
     });
     it('returns 99 if no concurrent limit', async () => {
-      const res = await limits.getConcurrentPrsRemaining(config);
+      const res = await limits.getConcurrentPrsRemaining(config, []);
       expect(res).toEqual(99);
     });
     it('returns prConcurrentLimit if errored', async () => {
       config.prConcurrentLimit = 2;
       platform.getPrList.mockResolvedValueOnce([null]);
-      const res = await limits.getConcurrentPrsRemaining(config);
+      const res = await limits.getConcurrentPrsRemaining(config, []);
       expect(res).toEqual(2);
     });
   });
@@ -72,13 +79,13 @@ describe('workers/repository/process/limits', () => {
     it('returns hourly limit', async () => {
       config.prHourlyLimit = 5;
       platform.getPrList.mockResolvedValueOnce([]);
-      const res = await limits.getPrsRemaining(config);
+      const res = await limits.getPrsRemaining(config, []);
       expect(res).toEqual(5);
     });
     it('returns concurrent limit', async () => {
       config.prConcurrentLimit = 5;
       platform.getPrList.mockResolvedValueOnce([]);
-      const res = await limits.getPrsRemaining(config);
+      const res = await limits.getPrsRemaining(config, []);
       expect(res).toEqual(5);
     });
   });

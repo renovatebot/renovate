@@ -29,7 +29,7 @@ export async function writeUpdates(
     return true;
   });
 
-  const prsRemaining = await getPrsRemaining(config);
+  const prsRemaining = await getPrsRemaining(config, branches);
   logger.debug({ prsRemaining }, 'Calculated maximum PRs remaining this run');
   setMaxLimit(Limit.PullRequests, prsRemaining, true);
 
