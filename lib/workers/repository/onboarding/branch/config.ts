@@ -31,7 +31,7 @@ export async function getOnboardingConfig(
   if (!orgPreset) {
     // Check for org/.{{platform}}
     try {
-      const orgDotPlatformConfig = `local>${orgName}/.${config.platform}:renovate`;
+      const orgDotPlatformConfig = `local>${orgName}/.${config.platform}:renovate-config`;
       await getPreset(orgDotPlatformConfig, config);
       orgPreset = orgDotPlatformConfig;
     } catch (err) {

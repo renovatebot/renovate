@@ -33,7 +33,7 @@ describe('workers/repository/onboarding/branch', () => {
       onboardingConfig = await getOnboardingConfig(config);
       expect(mockedPresets.getPreset).toHaveBeenCalledTimes(2);
       expect(JSON.parse(onboardingConfig).extends[0]).toEqual(
-        'local>some/.github:renovate'
+        'local>some/.github:renovate-config'
       );
     });
     it('handles not finding an organization preset', async () => {
