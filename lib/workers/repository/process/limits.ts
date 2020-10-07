@@ -1,7 +1,7 @@
 import moment from 'moment';
 import { RenovateConfig } from '../../../config';
 import { logger } from '../../../logger';
-import { platform } from '../../../platform';
+import { Pr, platform } from '../../../platform';
 import { PrState } from '../../../types';
 import { branchExists } from '../../../util/git';
 import { BranchConfig } from '../../common';
@@ -46,14 +46,21 @@ export async function getConcurrentPrsRemaining(
   if (config.prConcurrentLimit) {
     logger.debug(`Calculating prConcurrentLimit (${config.prConcurrentLimit})`);
     try {
-      const branchList = branches.map(({ branchName }) => branchName);
-      const prList = await platform.getPrList();
-      const openPrs = prList.filter(
-        (pr) =>
-          pr.state === PrState.Open &&
-          pr.sourceBranch !== config.onboardingBranch &&
-          branchList.includes(pr.sourceBranch)
-      );
+      const openPrs: Pr[] = [];
+      for (const { branchName } of branches) {
+        try {
+          const pr = await platform.getBranchPr(branchName);
+          if (
+            pr &&
+            pr.sourceBranch !== config.onboardingBranch &&
+            pr.state === PrState.Open
+          ) {
+            openPrs.push(pr);
+          }
+        } catch (err) {
+          // no-op
+        }
+      }
       logger.debug(`${openPrs.length} PRs are currently open`);
       const concurrentRemaining = Math.max(
         0,
@@ -61,7 +68,7 @@ export async function getConcurrentPrsRemaining(
       );
       logger.debug(`PR concurrent limit remaining: ${concurrentRemaining}`);
       return concurrentRemaining;
-    } catch (err) {
+    } catch (err) /* istanbul ignore next */ {
       logger.error({ err }, 'Error checking concurrent PRs');
       return config.prConcurrentLimit;
     }

@@ -6,6 +6,7 @@ import {
   platform,
 } from '../../../../test/util';
 import { PrState } from '../../../types';
+import { BranchConfig } from '../../common';
 import * as limits from './limits';
 
 jest.mock('../../../util/git');
@@ -50,17 +51,19 @@ describe('workers/repository/process/limits', () => {
   describe('getConcurrentPrsRemaining()', () => {
     it('calculates concurrent limit remaining', async () => {
       config.prConcurrentLimit = 20;
-      platform.getPrList.mockResolvedValueOnce([
-        { sourceBranch: 'renovate/test1', state: PrState.Open },
-        { sourceBranch: 'renovate/test2', state: PrState.Closed },
-        { sourceBranch: 'renovate/configure', state: PrState.Open },
-        { sourceBranch: 'foobar', state: PrState.Open },
-      ] as never);
-      const res = await limits.getConcurrentPrsRemaining(config, [
-        { branchName: 'renovate/configure' },
-        { branchName: 'renovate/test1' },
-        { branchName: 'renovate/test2' },
-      ] as never);
+      platform.getBranchPr.mockImplementation((branchName) =>
+        branchName
+          ? Promise.resolve({
+              sourceBranch: branchName,
+              state: PrState.Open,
+            } as never)
+          : Promise.reject('some error')
+      );
+      const branches: BranchConfig[] = [
+        { branchName: 'test' },
+        { branchName: null },
+      ] as never;
+      const res = await limits.getConcurrentPrsRemaining(config, branches);
       expect(res).toEqual(19);
     });
     it('returns 99 if no concurrent limit', async () => {

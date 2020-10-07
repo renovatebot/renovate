@@ -179,3 +179,7 @@ The answer is to host your preset using GitHub or GitLab - not npmjs - and make 
 ## Contributing to presets
 
 Have you configured a rule that you think others might benefit from? Please consider contributing it to the [Renovate](https://github.com/renovatebot/renovate) repository so that it gains higher visibility and saves others from reinventing the same thing.
+
+## Organisation level presets
+
+When repository onboarding happens, if a repository called `renovate-config` exists under the same organization and contains a default Renovate preset, that repository will be suggested as the the sole extended preset, and any existing `onboardingConfig` config will be ignored/overriden. This allows for a seamless onboarding workflow with your own organization settings.
