@@ -36,12 +36,17 @@ describe('workers/repository/process/limits', () => {
     it('calculates concurrent limit remaining', async () => {
       config.prConcurrentLimit = 20;
       platform.getBranchPr.mockImplementation((branchName) =>
-        Promise.resolve({
-          sourceBranch: branchName,
-          state: PrState.Open,
-        } as never)
+        branchName
+          ? Promise.resolve({
+              sourceBranch: branchName,
+              state: PrState.Open,
+            } as never)
+          : Promise.reject('some error')
       );
-      const branches: BranchConfig[] = [{ branchName: 'test' }] as never;
+      const branches: BranchConfig[] = [
+        { branchName: 'test' },
+        { branchName: null },
+      ] as never;
       const res = await limits.getConcurrentPrsRemaining(config, branches);
       expect(res).toEqual(19);
     });

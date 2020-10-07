@@ -1,7 +1,7 @@
 import moment from 'moment';
 import { RenovateConfig } from '../../../config';
 import { logger } from '../../../logger';
-import { platform } from '../../../platform';
+import { Pr, platform } from '../../../platform';
 import { PrState } from '../../../types';
 import { BranchConfig } from '../../common';
 
@@ -47,14 +47,21 @@ export async function getConcurrentPrsRemaining(
   if (config.prConcurrentLimit) {
     logger.debug(`Calculating prConcurrentLimit (${config.prConcurrentLimit})`);
     try {
-      const branchList = branches.map(({ branchName }) => branchName);
-      const prList = await Promise.all(
-        branchList.map((branchName) => platform.getBranchPr(branchName))
-      );
-      const openPrs = prList
-        .filter(Boolean)
-        .filter((pr) => pr.sourceBranch !== config.onboardingBranch)
-        .filter((pr) => pr.state === PrState.Open);
+      const openPrs: Pr[] = [];
+      for (const { branchName } of branches) {
+        try {
+          const pr = await platform.getBranchPr(branchName);
+          if (
+            pr &&
+            pr.sourceBranch !== config.onboardingBranch &&
+            pr.state === PrState.Open
+          ) {
+            openPrs.push(pr);
+          }
+        } catch (err) {
+          // no-op
+        }
+      }
       logger.debug(`${openPrs.length} PRs are currently open`);
       const concurrentRemaining = Math.max(
         0,
