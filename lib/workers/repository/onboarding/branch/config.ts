@@ -14,6 +14,9 @@ export async function getOnboardingConfig(
     config.repository.split('/')[0]
   }/renovate-config`;
 
+  logger.debug(
+    'Checking if this org/owner has a default Renovate preset which can be used.'
+  );
   try {
     await getPreset(organizationConfigPresetName, config);
     organizationConfigRepoExists = true;
@@ -22,6 +25,9 @@ export async function getOnboardingConfig(
       logger.warn({ err }, 'Unknown error fetching default owner preset');
     }
     // Organization preset did not exist
+    logger.debug(
+      'No default org/owner preset found, so the default onboarding config will be used instead. Note: do not be concerned with any 404 messages that preceded this.'
+    );
   }
   if (organizationConfigRepoExists) {
     onboardingConfig = {
