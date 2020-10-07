@@ -48,31 +48,25 @@ export async function getConcurrentPrsRemaining(
     logger.debug(`Calculating prConcurrentLimit (${config.prConcurrentLimit})`);
     try {
       const branchList = branches.map(({ branchName }) => branchName);
-      debugger;
       const prList = await Promise.all(
         branchList.map((branchName) => platform.getBranchPr(branchName))
       );
-      debugger;
       const openPrs = prList
         .filter(Boolean)
         .filter((pr) => pr.sourceBranch !== config.onboardingBranch)
         .filter((pr) => pr.state === PrState.Open);
-      debugger;
       logger.debug(`${openPrs.length} PRs are currently open`);
       const concurrentRemaining = Math.max(
         0,
         config.prConcurrentLimit - openPrs.length
       );
       logger.debug(`PR concurrent limit remaining: ${concurrentRemaining}`);
-      debugger;
       return concurrentRemaining;
-    } catch (err) {
-      debugger;
+    } catch (err) /* istanbul ignore next */ {
       logger.error({ err }, 'Error checking concurrent PRs');
       return config.prConcurrentLimit;
     }
   }
-  debugger;
   return 99;
 }
 
