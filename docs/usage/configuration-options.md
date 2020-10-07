@@ -912,6 +912,8 @@ Use this - usually within a packageRule - to limit how far to upgrade a dependen
 }
 ```
 
+The valid syntax for this will be calculated at runtime because it depends on the versioning scheme, which is itself dynamic.
+
 This field also supports Regular Expressions if they begin and end with `/`. For example, the following will enforce that only 3 or 4-section versions are supported, without any prefixes:
 
 ```json
