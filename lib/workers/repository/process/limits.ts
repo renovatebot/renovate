@@ -2,7 +2,7 @@ import moment from 'moment';
 import { RenovateConfig } from '../../../config';
 import { logger } from '../../../logger';
 import { platform } from '../../../platform';
-import { branchExists } from '../../../util/git';
+import { PrState } from '../../../types';
 import { BranchConfig } from '../../common';
 
 export async function getPrHourlyRemaining(
@@ -40,23 +40,39 @@ export async function getPrHourlyRemaining(
   return 99;
 }
 
-export function getConcurrentPrsRemaining(
+export async function getConcurrentPrsRemaining(
   config: RenovateConfig,
   branches: BranchConfig[]
-): number {
+): Promise<number> {
   if (config.prConcurrentLimit) {
-    logger.debug(`Enforcing prConcurrentLimit (${config.prConcurrentLimit})`);
-    let currentlyOpen = 0;
-    for (const branch of branches) {
-      if (branchExists(branch.branchName)) {
-        currentlyOpen += 1;
-      }
+    logger.debug(`Calculating prConcurrentLimit (${config.prConcurrentLimit})`);
+    try {
+      const branchList = branches.map(({ branchName }) => branchName);
+      debugger;
+      const prList = await Promise.all(
+        branchList.map((branchName) => platform.getBranchPr(branchName))
+      );
+      debugger;
+      const openPrs = prList
+        .filter(Boolean)
+        .filter((pr) => pr.sourceBranch !== config.onboardingBranch)
+        .filter((pr) => pr.state === PrState.Open);
+      debugger;
+      logger.debug(`${openPrs.length} PRs are currently open`);
+      const concurrentRemaining = Math.max(
+        0,
+        config.prConcurrentLimit - openPrs.length
+      );
+      logger.debug(`PR concurrent limit remaining: ${concurrentRemaining}`);
+      debugger;
+      return concurrentRemaining;
+    } catch (err) {
+      debugger;
+      logger.error({ err }, 'Error checking concurrent PRs');
+      return config.prConcurrentLimit;
     }
-    logger.debug(`${currentlyOpen} PRs are currently open`);
-    const concurrentRemaining = config.prConcurrentLimit - currentlyOpen;
-    logger.debug(`PR concurrent limit remaining: ${concurrentRemaining}`);
-    return concurrentRemaining;
   }
+  debugger;
   return 99;
 }
 
@@ -65,7 +81,7 @@ export async function getPrsRemaining(
   branches: BranchConfig[]
 ): Promise<number> {
   const hourlyRemaining = await getPrHourlyRemaining(config);
-  const concurrentRemaining = getConcurrentPrsRemaining(config, branches);
+  const concurrentRemaining = await getConcurrentPrsRemaining(config, branches);
   return hourlyRemaining < concurrentRemaining
     ? hourlyRemaining
     : concurrentRemaining;
