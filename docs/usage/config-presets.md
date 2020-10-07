@@ -192,6 +192,6 @@ If found, that repository's preset will be suggested as the the sole extended pr
 ```json
 {
   "$schema": "https://docs.renovatebot.com/renovate-schema.json",
-  "extends": ["local>renovate-tests/.github:renovate-config"]
+  "extends": ["local>myorgname/.github:renovate-config"]
 }
 ```
