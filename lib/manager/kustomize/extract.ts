@@ -3,6 +3,7 @@ import * as datasourceDocker from '../../datasource/docker';
 import * as datasourceGitTags from '../../datasource/git-tags';
 import * as datasourceGitHubTags from '../../datasource/github-tags';
 import { logger } from '../../logger';
+import * as dockerVersioning from '../../versioning/docker';
 import { PackageDependency, PackageFile } from '../common';
 
 interface Image {
@@ -66,6 +67,7 @@ export function extractImage(image: Image): PackageDependency | null {
   if (image?.name && image.newTag) {
     return {
       datasource: datasourceDocker.id,
+      versioning: dockerVersioning.id,
       depName: image.newName ?? image.name,
       currentValue: image.newTag,
     };
