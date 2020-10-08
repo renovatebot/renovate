@@ -498,6 +498,7 @@ export async function getBranchFiles(branchName: string): Promise<string[]> {
     const diff = await git.diffSummary([branchName, config.currentBranch]);
     return diff.files.map((file) => file.file);
   } catch (err) /* istanbul ignore next */ {
+    logger.warn({ err }, 'getBranchFiles error');
     checkForPlatformFailure(err);
     return null;
   }

@@ -1,14 +1,8 @@
 import moment from 'moment';
-import {
-  RenovateConfig,
-  getConfig,
-  git,
-  platform,
-} from '../../../../test/util';
+import { RenovateConfig, getConfig, platform } from '../../../../test/util';
+import { PrState } from '../../../types';
 import { BranchConfig } from '../../common';
 import * as limits from './limits';
-
-jest.mock('../../../util/git');
 
 let config: RenovateConfig;
 beforeEach(() => {
@@ -39,18 +33,25 @@ describe('workers/repository/process/limits', () => {
     });
   });
   describe('getConcurrentPrsRemaining()', () => {
-    it('calculates concurrent limit remaining', () => {
+    it('calculates concurrent limit remaining', async () => {
       config.prConcurrentLimit = 20;
-      git.branchExists.mockReturnValueOnce(true);
+      platform.getBranchPr.mockImplementation((branchName) =>
+        branchName
+          ? Promise.resolve({
+              sourceBranch: branchName,
+              state: PrState.Open,
+            } as never)
+          : Promise.reject('some error')
+      );
       const branches: BranchConfig[] = [
-        { branchName: 'test', upgrades: [] },
-        { branchName: undefined, upgrades: [] },
-      ];
-      const res = limits.getConcurrentPrsRemaining(config, branches);
+        { branchName: 'test' },
+        { branchName: null },
+      ] as never;
+      const res = await limits.getConcurrentPrsRemaining(config, branches);
       expect(res).toEqual(19);
     });
-    it('returns 99 if no concurrent limit', () => {
-      const res = limits.getConcurrentPrsRemaining(config, []);
+    it('returns 99 if no concurrent limit', async () => {
+      const res = await limits.getConcurrentPrsRemaining(config, []);
       expect(res).toEqual(99);
     });
   });

@@ -351,7 +351,7 @@ export const presets: Record<string, Preset> = {
     description: 'Run lock file maintenance (updates) early Monday mornings',
     lockFileMaintenance: {
       enabled: true,
-      extends: 'schedule:weekly',
+      extends: ['schedule:weekly'],
     },
   },
   maintainLockFilesMonthly: {
@@ -359,7 +359,7 @@ export const presets: Record<string, Preset> = {
       'Run lock file maintenance (updates) on the first day of each month',
     lockFileMaintenance: {
       enabled: true,
-      extends: 'schedule:monthly',
+      extends: ['schedule:monthly'],
     },
   },
   ignoreUnstable: {
