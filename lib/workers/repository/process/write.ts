@@ -1,5 +1,7 @@
 import { RenovateConfig } from '../../../config';
 import { addMeta, logger, removeMeta } from '../../../logger';
+import { platform } from '../../../platform';
+import { PrState } from '../../../types';
 import { branchExists } from '../../../util/git';
 import { processBranch } from '../../branch';
 import { BranchConfig, ProcessBranchResult } from '../../common';
@@ -7,6 +9,15 @@ import { Limit, isLimitReached } from '../../global/limits';
 import { getPrsRemaining } from './limits';
 
 export type WriteUpdateResult = 'done' | 'automerged';
+
+async function prExists(branchName: string): Promise<boolean> {
+  try {
+    const pr = await platform.getBranchPr(branchName);
+    return pr?.state === PrState.Open;
+  } catch (err) /* istanbul ignore next */ {
+    return false;
+  }
+}
 
 export async function writeUpdates(
   config: RenovateConfig,
@@ -35,6 +46,7 @@ export async function writeUpdates(
     const prLimitReached = prsRemaining <= 0;
     const commitLimitReached = isLimitReached(Limit.Commits);
     const branchExisted = branchExists(branch.branchName);
+    const prExisted = await prExists(branch.branchName);
     const res = await processBranch(branch, prLimitReached, commitLimitReached);
     branch.res = res;
     if (
@@ -61,6 +73,14 @@ export async function writeUpdates(
       res === ProcessBranchResult.Pending &&
       !branchExisted &&
       branchExists(branch.branchName)
+    ) {
+      deductPrRemainingCount = 1;
+    }
+    // istanbul ignore if
+    if (
+      deductPrRemainingCount === 0 &&
+      !prExisted &&
+      (await prExists(branch.branchName))
     ) {
       deductPrRemainingCount = 1;
     }
