@@ -7,11 +7,11 @@ import { getOnboardingConfig } from './config';
 
 const defaultConfigFile = configFileNames[0];
 
-export function createOnboardingBranch(
+export async function createOnboardingBranch(
   config: Partial<RenovateConfig>
 ): Promise<string | null> {
   logger.debug('createOnboardingBranch()');
-  const contents = getOnboardingConfig(config);
+  const contents = await getOnboardingConfig(config);
   logger.debug('Creating onboarding branch');
 
   let commitMessagePrefix = '';

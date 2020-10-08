@@ -53,7 +53,7 @@ export async function extract(
   logger.debug('extract()');
   const { baseBranch } = config;
   const baseBranchSha = getBranchCommit(baseBranch);
-  let packageFiles;
+  let packageFiles: Record<string, PackageFile[]>;
   const cache = getCache();
   const cachedExtract = cache?.scan?.[baseBranch];
   const configHash = hasha(JSON.stringify(config));
