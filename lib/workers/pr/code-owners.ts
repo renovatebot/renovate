@@ -36,7 +36,10 @@ export async function codeOwnersForPr(pr: Pr): Promise<string[]> {
         };
       })
       .reverse();
-
+    logger.debug(
+      { prFiles, rules },
+      'PR files and rules to match for CODEOWNERS'
+    );
     const matchingRule = rules.find((rule) => prFiles?.every(rule.match));
     if (!matchingRule) {
       logger.debug('No matching CODEOWNERS rule found');

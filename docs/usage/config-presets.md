@@ -168,7 +168,7 @@ To host your preset config on GitLab:
 
 ## Local presets
 
-Renovate also supports local presets, i.e. presets that are hosted on the same platform as the target repository. This is especially helpful in self-hosted scenarios where public presets cannot be used. Local presets are only supported on GitHub and GitLab. Local presets are specified either by leaving out any prefix, e.g. `owner/name`, or explicitly by adding a `local>` prefix, e.g. `local>owner/name`. Renovate will determine the current platform and look up the preset from there.
+Renovate also supports local presets, i.e. presets that are hosted on the same platform as the target repository. This is especially helpful in self-hosted scenarios where public presets cannot be used. Local presets are only supported on GitHub, GitLab and Bitbucket Server. Local presets are specified either by leaving out any prefix, e.g. `owner/name`, or explicitly by adding a `local>` prefix, e.g. `local>owner/name`. Renovate will determine the current platform and look up the preset from there.
 
 ## Presets and Private Modules
 
@@ -180,6 +180,18 @@ The answer is to host your preset using GitHub or GitLab - not npmjs - and make 
 
 Have you configured a rule that you think others might benefit from? Please consider contributing it to the [Renovate](https://github.com/renovatebot/renovate) repository so that it gains higher visibility and saves others from reinventing the same thing.
 
-## Organisation level presets
+## Organization level presets
 
-When repository onboarding happens, if a repository called `renovate-config` exists under the same organization and contains a default Renovate preset, that repository will be suggested as the the sole extended preset, and any existing `onboardingConfig` config will be ignored/overriden. This allows for a seamless onboarding workflow with your own organization settings.
+Whenever repository onboarding happens, Renovate checks if the current user/group/org contains a default config to extend. It looks for:
+
+- A repository called `renovate-config` under the same user/group/org with either `default.json` or `renovate.json`, or
+- A repository named like `.{{platform}}` (e.g. `.github`) under the same user/group/org with `renovate-config.json`
+
+If found, that repository's preset will be suggested as the the sole extended preset, and any existing `onboardingConfig` config will be ignored/overriden. For example the result may be:
+
+```json
+{
+  "$schema": "https://docs.renovatebot.com/renovate-schema.json",
+  "extends": ["local>myorgname/.github:renovate-config"]
+}
+```
