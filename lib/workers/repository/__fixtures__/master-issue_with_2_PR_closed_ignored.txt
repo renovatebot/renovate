@@ -1,8 +1,8 @@
 This issue contains a list of Renovate updates and their statuses.
 
-## Closed/Ignored
+## Ignored or Blocked
 
-These updates were closed unmerged and will not be recreated unless you click a checkbox below.
+These are blocked by an existing closed PR and will not be recreated unless you click a checkbox below.
 
  - [ ] <!-- recreate-branch=branchName1 -->pr1
  - [ ] <!-- recreate-branch=branchName2 -->pr2 (`dep2`, `dep3`)
