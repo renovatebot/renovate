@@ -34,15 +34,24 @@ export function extractPackageFile(content: string): PackageFile | null {
       line
     );
     if (tagMatch) {
-      const { lookupName, currentValue } = tagMatch.groups;
+      const { lookupName, path, currentValue } = tagMatch.groups;
       if (looseVersioning.api.isValid(currentValue)) {
-        const dep = {
+        const dep: PackageDependency = {
+          depName: `${lookupName}${path || ''}`,
           lookupName,
           currentValue,
+          commitMessageTopic: '{{depName}}} Action',
           datasource: githubTagsDatasource.id,
           versioning: looseVersioning.id,
+          rangeStrategy: 'pin',
         };
-        logger.debug(dep, 'GitHub Action inside GitHub Workflow');
+        logger.debug(
+          {
+            depName: dep.depName,
+            currentValue: dep.currentValue,
+          },
+          'GitHub Action inside GitHub Workflow'
+        );
         deps.push(dep);
       }
     }
