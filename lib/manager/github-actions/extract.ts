@@ -25,12 +25,13 @@ export function extractPackageFile(content: string): PackageFile | null {
         },
         'Docker image inside GitHub Workflow'
       );
+      dep.depType = 'docker';
       dep.versioning = dockerVersioning.id;
       deps.push(dep);
       continue; // eslint-disable-line no-continue
     }
 
-    const tagMatch = /^^\s+-?\s+?uses: (?<depName>[\w-]+\/[\w-]+)(?<path>.*)?@(?<currentValue>.+?)\s*?$/.exec(
+    const tagMatch = /^\s+-?\s+?uses: (?<depName>[\w-]+\/[\w-]+)(?<path>.*)?@(?<currentValue>.+?)\s*?$/.exec(
       line
     );
     if (tagMatch?.groups) {
