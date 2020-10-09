@@ -1,0 +1,20 @@
+name: Run linters
+
+on: [push]
+
+jobs:
+  shell_lint:
+    name: Shell lint
+    runs-on: ubuntu-latest
+    steps:
+      - name: Shell lint
+        uses: actions/bin/shellcheck@v1.0.0
+        run: ./entrypoint.sh
+  build:
+    name: Build
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@1.0.0
+      - name: Build
+        uses: actions/docker/cli@master
+        run: build -t conventional-commits .
