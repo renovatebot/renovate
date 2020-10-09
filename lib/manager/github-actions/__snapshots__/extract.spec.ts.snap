@@ -3,7 +3,7 @@
 exports[`lib/manager/github-actions/extract extractPackageFile() extracts multiple action tag lines from yaml configuration file 1`] = `
 Array [
   Object {
-    "commitMessageTopic": "{{depName}}} Action",
+    "commitMessageTopic": "{{depName}}} action",
     "currentValue": "1.0.0",
     "datasource": "github-tags",
     "depName": "actions/checkout",
@@ -12,7 +12,7 @@ Array [
     "versioning": "loose",
   },
   Object {
-    "commitMessageTopic": "{{depName}}} Action",
+    "commitMessageTopic": "{{depName}}} action",
     "currentValue": "v2",
     "datasource": "github-tags",
     "depName": "docker/build-push-action",

@@ -40,7 +40,7 @@ export function extractPackageFile(content: string): PackageFile | null {
           depName: `${lookupName}${path || ''}`,
           lookupName,
           currentValue,
-          commitMessageTopic: '{{depName}}} Action',
+          commitMessageTopic: '{{depName}}} action',
           datasource: githubTagsDatasource.id,
           versioning: looseVersioning.id,
           rangeStrategy: 'pin',
