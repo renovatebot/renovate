@@ -30,28 +30,21 @@ export function extractPackageFile(content: string): PackageFile | null {
       continue; // eslint-disable-line no-continue
     }
 
-    const tagMatch = /^^\s+-?\s+?uses: (?<lookupName>[a-zA-Z-_]+\/[a-zA-Z-_]+)(?<path>.*)?@(?<currentValue>.+?)\s*?$/.exec(
+    const tagMatch = /^^\s+-?\s+?uses: (?<depName>[\w-]+\/[\w-]+)(?<path>.*)?@(?<currentValue>.+?)\s*?$/.exec(
       line
     );
-    if (tagMatch) {
-      const { lookupName, path, currentValue } = tagMatch.groups;
+    if (tagMatch?.groups) {
+      const { depName, currentValue } = tagMatch.groups;
       if (looseVersioning.api.isValid(currentValue)) {
         const dep: PackageDependency = {
-          depName: `${lookupName}${path || ''}`,
-          lookupName,
+          depName,
           currentValue,
           commitMessageTopic: '{{depName}}} action',
           datasource: githubTagsDatasource.id,
           versioning: looseVersioning.id,
           rangeStrategy: 'pin',
         };
-        logger.debug(
-          {
-            depName: dep.depName,
-            currentValue: dep.currentValue,
-          },
-          'GitHub Action inside GitHub Workflow'
-        );
+        logger.debug(dep, 'GitHub Action inside GitHub Workflow');
         deps.push(dep);
       }
     }
