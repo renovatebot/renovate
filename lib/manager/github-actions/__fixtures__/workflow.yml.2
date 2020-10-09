@@ -8,13 +8,14 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Shell lint
-        uses: actions/bin/shellcheck@v1.0.0
+        # Isn't supported current
+        uses: actions/bin/shellcheck@master
         run: ./entrypoint.sh
   build:
     name: Build
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@1.0.0
+#      - user: docker/setup-qemu-action@v1
       - name: Build
-        uses: actions/docker/cli@master
-        run: build -t conventional-commits .
+        uses: docker/build-push-action@v2

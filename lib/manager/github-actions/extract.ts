@@ -1,7 +1,7 @@
 import * as githubTagsDatasource from '../../datasource/github-tags';
 import { logger } from '../../logger';
 import * as dockerVersioning from '../../versioning/docker';
-import * as semverVersioning from '../../versioning/semver';
+import * as looseVersioning from '../../versioning/loose';
 import { PackageDependency, PackageFile } from '../common';
 import { getDep } from '../dockerfile/extract';
 
@@ -35,12 +35,12 @@ export function extractPackageFile(content: string): PackageFile | null {
     );
     if (tagMatch) {
       const { depName, currentValue } = tagMatch.groups;
-      // Only allow tagged versions for now
-      if (semverVersioning.isVersion(currentValue)) {
+      if (looseVersioning.api.isValid(currentValue)) {
         const dep = {
           depName,
           currentValue,
           datasource: githubTagsDatasource.id,
+          versioning: looseVersioning.id,
         };
         logger.debug(dep, 'GitHub Action inside GitHub Workflow');
         deps.push(dep);
