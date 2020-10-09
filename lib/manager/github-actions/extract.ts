@@ -30,14 +30,14 @@ export function extractPackageFile(content: string): PackageFile | null {
       continue; // eslint-disable-line no-continue
     }
 
-    const tagMatch = /^\s+-?\s+?uses: (?<depName>[a-z-/]+?)@(?<currentValue>.+?)\s*?$/.exec(
+    const tagMatch = /^^\s+-?\s+?uses: (?<lookupName>[a-zA-Z-_]+\/[a-zA-Z-_]+)(?<path>.*)?@(?<currentValue>.+?)\s*?$/.exec(
       line
     );
     if (tagMatch) {
-      const { depName, currentValue } = tagMatch.groups;
+      const { lookupName, currentValue } = tagMatch.groups;
       if (looseVersioning.api.isValid(currentValue)) {
         const dep = {
-          depName,
+          lookupName,
           currentValue,
           datasource: githubTagsDatasource.id,
           versioning: looseVersioning.id,

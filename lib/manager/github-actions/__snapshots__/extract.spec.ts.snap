@@ -5,13 +5,13 @@ Array [
   Object {
     "currentValue": "1.0.0",
     "datasource": "github-tags",
-    "depName": "actions/checkout",
+    "lookupName": "actions/checkout",
     "versioning": "loose",
   },
   Object {
     "currentValue": "v2",
     "datasource": "github-tags",
-    "depName": "docker/build-push-action",
+    "lookupName": "docker/build-push-action",
     "versioning": "loose",
   },
 ]
