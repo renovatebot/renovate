@@ -163,7 +163,7 @@
     "semver-utils": "1.1.4",
     "shlex": "2.0.2",
     "shortid": "2.2.15",
-    "simple-git": "2.20.1",
+    "simple-git": "2.21.0",
     "slugify": "1.4.5",
     "toml": "3.0.0",
     "traverse": "0.6.6",
