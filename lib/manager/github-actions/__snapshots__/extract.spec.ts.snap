@@ -5,21 +5,22 @@ Array [
   Object {
     "commitMessageTopic": "{{depName}}} action",
     "currentValue": "master",
-    "datasource": "github-releases",
+    "datasource": "github-tags",
     "depName": "actions/bin",
+    "skipReason": "invalid-version",
     "versioning": "docker",
   },
   Object {
     "commitMessageTopic": "{{depName}}} action",
     "currentValue": "1.0.0",
-    "datasource": "github-releases",
+    "datasource": "github-tags",
     "depName": "actions/checkout",
     "versioning": "docker",
   },
   Object {
     "commitMessageTopic": "{{depName}}} action",
     "currentValue": "v2",
-    "datasource": "github-releases",
+    "datasource": "github-tags",
     "depName": "docker/build-push-action",
     "versioning": "docker",
   },
@@ -31,8 +32,9 @@ Array [
   Object {
     "commitMessageTopic": "{{depName}}} action",
     "currentValue": "master",
-    "datasource": "github-releases",
+    "datasource": "github-tags",
     "depName": "actions/bin",
+    "skipReason": "invalid-version",
     "versioning": "docker",
   },
   Object {
@@ -48,8 +50,9 @@ Array [
   Object {
     "commitMessageTopic": "{{depName}}} action",
     "currentValue": "master",
-    "datasource": "github-releases",
+    "datasource": "github-tags",
     "depName": "actions/docker",
+    "skipReason": "invalid-version",
     "versioning": "docker",
   },
   Object {

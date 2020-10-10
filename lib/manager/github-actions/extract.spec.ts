@@ -25,7 +25,7 @@ describe('lib/manager/github-actions/extract', () => {
       const res = extractPackageFile(workflow2);
       expect(res.deps).toMatchSnapshot();
       expect(
-        res.deps.filter((d) => d.datasource === 'github-releases')
+        res.deps.filter((d) => d.datasource === 'github-tags')
       ).toHaveLength(3);
     });
   });

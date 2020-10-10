@@ -1,5 +1,6 @@
-import * as githubReleasesDatasource from '../../datasource/github-releases';
+import * as githubTagsDatasource from '../../datasource/github-tags';
 import { logger } from '../../logger';
+import { SkipReason } from '../../types';
 import * as dockerVersioning from '../../versioning/docker';
 import { PackageDependency, PackageFile } from '../common';
 import { getDep } from '../dockerfile/extract';
@@ -39,9 +40,12 @@ export function extractPackageFile(content: string): PackageFile | null {
         depName,
         currentValue,
         commitMessageTopic: '{{depName}}} action',
-        datasource: githubReleasesDatasource.id,
+        datasource: githubTagsDatasource.id,
         versioning: dockerVersioning.id,
       };
+      if (!dockerVersioning.api.isValid(currentValue)) {
+        dep.skipReason = SkipReason.InvalidVersion;
+      }
       logger.trace(dep, 'GitHub Action inside GitHub Workflow');
       deps.push(dep);
     }
