@@ -112,7 +112,7 @@
     "@renovate/pep440": "0.4.1",
     "@renovatebot/ruby-semver": "0.2.1",
     "@sindresorhus/is": "3.1.2",
-    "@yarnpkg/core": "2.3.0",
+    "@yarnpkg/core": "2.3.1",
     "@yarnpkg/parsers": "2.2.1",
     "aws-sdk": "2.759.0",
     "azure-devops-node-api": "10.1.1",
