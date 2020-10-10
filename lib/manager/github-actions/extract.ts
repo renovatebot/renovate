@@ -42,7 +42,7 @@ export function extractPackageFile(content: string): PackageFile | null {
         datasource: githubReleasesDatasource.id,
         versioning: dockerVersioning.id,
       };
-      logger.debug(dep, 'GitHub Action inside GitHub Workflow');
+      logger.trace(dep, 'GitHub Action inside GitHub Workflow');
       deps.push(dep);
     }
   }
