@@ -59,6 +59,7 @@ const repoGroups = {
   dropwizard: 'https://github.com/dropwizard/dropwizard',
   emotion: 'https://github.com/emotion-js/emotion',
   expo: 'https://github.com/expo/expo',
+  feathers: 'https://github.com/feathersjs/feathers',
   fimbullinter: 'https://github.com/fimbullinter/wotan',
   flopflip: 'https://github.com/tdeekens/flopflip',
   formatjs: 'https://github.com/formatjs/formatjs',
