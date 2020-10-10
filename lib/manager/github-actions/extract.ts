@@ -1,7 +1,6 @@
-import * as githubTagsDatasource from '../../datasource/github-tags';
+import * as githubReleasesDatasource from '../../datasource/github-releases';
 import { logger } from '../../logger';
 import * as dockerVersioning from '../../versioning/docker';
-import * as looseVersioning from '../../versioning/loose';
 import { PackageDependency, PackageFile } from '../common';
 import { getDep } from '../dockerfile/extract';
 
@@ -36,18 +35,15 @@ export function extractPackageFile(content: string): PackageFile | null {
     );
     if (tagMatch?.groups) {
       const { depName, currentValue } = tagMatch.groups;
-      if (looseVersioning.api.isValid(currentValue)) {
-        const dep: PackageDependency = {
-          depName,
-          currentValue,
-          commitMessageTopic: '{{depName}}} action',
-          datasource: githubTagsDatasource.id,
-          versioning: looseVersioning.id,
-          rangeStrategy: 'pin',
-        };
-        logger.debug(dep, 'GitHub Action inside GitHub Workflow');
-        deps.push(dep);
-      }
+      const dep: PackageDependency = {
+        depName,
+        currentValue,
+        commitMessageTopic: '{{depName}}} action',
+        datasource: githubReleasesDatasource.id,
+        versioning: dockerVersioning.id,
+      };
+      logger.debug(dep, 'GitHub Action inside GitHub Workflow');
+      deps.push(dep);
     }
   }
   if (!deps.length) {

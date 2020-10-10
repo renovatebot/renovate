@@ -19,12 +19,14 @@ describe('lib/manager/github-actions/extract', () => {
     it('extracts multiple docker image lines from yaml configuration file', () => {
       const res = extractPackageFile(workflow1);
       expect(res.deps).toMatchSnapshot();
-      expect(res.deps).toHaveLength(2);
+      expect(res.deps.filter((d) => d.datasource === 'docker')).toHaveLength(2);
     });
     it('extracts multiple action tag lines from yaml configuration file', () => {
       const res = extractPackageFile(workflow2);
       expect(res.deps).toMatchSnapshot();
-      expect(res.deps).toHaveLength(2);
+      expect(
+        res.deps.filter((d) => d.datasource === 'github-releases')
+      ).toHaveLength(3);
     });
   });
 });

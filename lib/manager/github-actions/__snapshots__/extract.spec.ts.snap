@@ -4,19 +4,24 @@ exports[`lib/manager/github-actions/extract extractPackageFile() extracts multip
 Array [
   Object {
     "commitMessageTopic": "{{depName}}} action",
+    "currentValue": "master",
+    "datasource": "github-releases",
+    "depName": "actions/bin",
+    "versioning": "docker",
+  },
+  Object {
+    "commitMessageTopic": "{{depName}}} action",
     "currentValue": "1.0.0",
-    "datasource": "github-tags",
+    "datasource": "github-releases",
     "depName": "actions/checkout",
-    "rangeStrategy": "pin",
-    "versioning": "loose",
+    "versioning": "docker",
   },
   Object {
     "commitMessageTopic": "{{depName}}} action",
     "currentValue": "v2",
-    "datasource": "github-tags",
+    "datasource": "github-releases",
     "depName": "docker/build-push-action",
-    "rangeStrategy": "pin",
-    "versioning": "loose",
+    "versioning": "docker",
   },
 ]
 `;
@@ -24,12 +29,27 @@ Array [
 exports[`lib/manager/github-actions/extract extractPackageFile() extracts multiple docker image lines from yaml configuration file 1`] = `
 Array [
   Object {
+    "commitMessageTopic": "{{depName}}} action",
+    "currentValue": "master",
+    "datasource": "github-releases",
+    "depName": "actions/bin",
+    "versioning": "docker",
+  },
+  Object {
     "autoReplaceStringTemplate": "{{depName}}{{#if newValue}}:{{newValue}}{{/if}}{{#if newDigest}}@{{newDigest}}{{/if}}",
     "currentDigest": undefined,
     "currentValue": undefined,
     "datasource": "docker",
     "depName": "replicated/dockerfilelint",
+    "depType": "docker",
     "replaceString": "replicated/dockerfilelint",
+    "versioning": "docker",
+  },
+  Object {
+    "commitMessageTopic": "{{depName}}} action",
+    "currentValue": "master",
+    "datasource": "github-releases",
+    "depName": "actions/docker",
     "versioning": "docker",
   },
   Object {
@@ -39,6 +59,7 @@ Array [
     "currentValue": "6",
     "datasource": "docker",
     "depName": "node",
+    "depType": "docker",
     "replaceString": "node:6@sha256:7b65413af120ec5328077775022c78101f103258a1876ec2f83890bce416e896",
     "versioning": "docker",
   },
