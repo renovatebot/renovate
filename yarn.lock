@@ -1974,21 +1974,21 @@
     "@typescript-eslint/types" "4.4.0"
     eslint-visitor-keys "^2.0.0"
 
-"@yarnpkg/core@2.3.0":
-  version "2.3.0"
-  resolved "https://registry.yarnpkg.com/@yarnpkg/core/-/core-2.3.0.tgz#1ab6cf72f627592d84648795253b3bd54770e2e3"
-  integrity sha512-a2I7PW3NfCLb5PyTIQUkJm5jSBgose5oYhvh+M+hES36PbkAIOIB0Oal4aNSXhHNeUsIrc9AG7hSA4UbZt3pCw==
+"@yarnpkg/core@2.3.1":
+  version "2.3.1"
+  resolved "https://registry.yarnpkg.com/@yarnpkg/core/-/core-2.3.1.tgz#feded2154ffbdab23b9a34dac8260b70f7ddf82e"
+  integrity sha512-XIFgmIJRSQxeuJcuozTMIViIQSAVbYPc21yn+PCv7JGZ6t2K1t64m+OKv5XYv9zexYiOYqCqpUw+IT1ql9YaZw==
   dependencies:
     "@arcanis/slice-ansi" "^1.0.2"
     "@types/semver" "^7.1.0"
     "@types/treeify" "^1.0.0"
-    "@yarnpkg/fslib" "^2.2.2"
+    "@yarnpkg/fslib" "^2.3.0"
     "@yarnpkg/json-proxy" "^2.1.0"
     "@yarnpkg/libzip" "^2.2.1"
-    "@yarnpkg/parsers" "^2.2.1"
-    "@yarnpkg/pnp" "^2.3.0"
-    "@yarnpkg/shell" "^2.3.0"
-    binjumper "^0.1.0"
+    "@yarnpkg/parsers" "^2.3.0"
+    "@yarnpkg/pnp" "^2.3.1"
+    "@yarnpkg/shell" "^2.4.0"
+    binjumper "^0.1.2"
     camelcase "^5.3.1"
     chalk "^3.0.0"
     ci-info "^2.0.0"
@@ -2012,10 +2012,10 @@
     tslib "^1.13.0"
     tunnel "^0.0.6"
 
-"@yarnpkg/fslib@^2.1.0", "@yarnpkg/fslib@^2.2.2":
-  version "2.2.2"
-  resolved "https://registry.yarnpkg.com/@yarnpkg/fslib/-/fslib-2.2.2.tgz#d5566521a9b612fc345d8491b61c39a802ed207f"
-  integrity sha512-SRDuFP5u/AqxP6DZ0p8fVjVk5Ue8gOxRXb0w36vduMoGWCUKS8G4W14bPjlyzOWCMTRXSqL8F7qovtEpB9IgUQ==
+"@yarnpkg/fslib@^2.1.0", "@yarnpkg/fslib@^2.3.0":
+  version "2.3.0"
+  resolved "https://registry.yarnpkg.com/@yarnpkg/fslib/-/fslib-2.3.0.tgz#448445d43d52252eba757b8e25a78f0333f806d8"
+  integrity sha512-QaaymZ7syTT7S3xUeK2iH7YDRxxdjGT5166mebk/Y/egtNLIMX7oNbVlw2TszwbK2iizyUKSGSFpLgmF6ahVUg==
   dependencies:
     "@yarnpkg/libzip" "^2.2.1"
     tslib "^1.13.0"
@@ -2036,30 +2036,30 @@
     "@types/emscripten" "^1.38.0"
     tslib "^1.13.0"
 
-"@yarnpkg/parsers@2.2.1", "@yarnpkg/parsers@^2.2.1":
-  version "2.2.1"
-  resolved "https://registry.yarnpkg.com/@yarnpkg/parsers/-/parsers-2.2.1.tgz#414ffb70571a17206c1efa1cff5fbd01e44c4f59"
-  integrity sha512-1hZ6EQKuNFWNJ/FhYNZwW3TrAnFwb2j3lFqCZpnJJ9l0BGnF/2BHVXU3JMNaqrPcrwZAaBjjmgUNGosVLuVoqg==
+"@yarnpkg/parsers@2.3.0", "@yarnpkg/parsers@^2.3.0":
+  version "2.3.0"
+  resolved "https://registry.yarnpkg.com/@yarnpkg/parsers/-/parsers-2.3.0.tgz#7b9564c6df02f4921d5cfe8287c4b648e93ea84b"
+  integrity sha512-qgz0QUgOvnhtF92kaluIhIIKBUHlYlHUBQxqh5v9+sxEQvUeF6G6PKiFlzo3E6O99XwvNEGpVu1xZPoSGyGscQ==
   dependencies:
     js-yaml "^3.10.0"
     tslib "^1.13.0"
 
-"@yarnpkg/pnp@^2.3.0":
-  version "2.3.0"
-  resolved "https://registry.yarnpkg.com/@yarnpkg/pnp/-/pnp-2.3.0.tgz#92a4925621ff8df8f7edbe6caac02ae3103b11b1"
-  integrity sha512-aW6dvt/UGRpGAhSKoDRCUdIi2LVBqG/FN4iU9QGLvmVMPok8O1C5Js7+PbxQMz6/1aqyrkEzhYJs0GpCvpaTXg==
+"@yarnpkg/pnp@^2.3.1":
+  version "2.3.1"
+  resolved "https://registry.yarnpkg.com/@yarnpkg/pnp/-/pnp-2.3.1.tgz#385dbc96ca31086e2620f5f4f8966293d730fa97"
+  integrity sha512-eFcAwIXgFIaoLz8DbeMEEDqoEHk0E7y57xUAsk4R3xThbFZ/DUFyk8LrypXBXN1hwfAsznR208Yiuk6NwP0eWw==
   dependencies:
     "@types/node" "^13.7.0"
-    "@yarnpkg/fslib" "^2.2.2"
+    "@yarnpkg/fslib" "^2.3.0"
     tslib "^1.13.0"
 
-"@yarnpkg/shell@^2.3.0":
-  version "2.3.0"
-  resolved "https://registry.yarnpkg.com/@yarnpkg/shell/-/shell-2.3.0.tgz#ce128fb65516ffd64cc1217ba6176d8da5943997"
-  integrity sha512-k2K4i06E6sbu+A7wu3e4l4CDXjXxibr3ZiamWuFNhiXTnuuQzKBI0xz5MnLKZ+v/9XncB1FLfGU+SKMWypRXfg==
+"@yarnpkg/shell@^2.4.0":
+  version "2.4.0"
+  resolved "https://registry.yarnpkg.com/@yarnpkg/shell/-/shell-2.4.0.tgz#e325d7ecb413bd6932552932cb48e0ab2999eb63"
+  integrity sha512-6c7v9bfNrYrAq3Zxz05dEIpcCZzTNzGAio5HCjsxwPsEiW2D4W+yOEQYP7TQtZ00HRCaxnA1gSICw6mp1I2MLg==
   dependencies:
-    "@yarnpkg/fslib" "^2.2.2"
-    "@yarnpkg/parsers" "^2.2.1"
+    "@yarnpkg/fslib" "^2.3.0"
+    "@yarnpkg/parsers" "^2.3.0"
     clipanion "^2.6.2"
     cross-spawn "7.0.3"
     fast-glob "^3.2.2"
@@ -2567,7 +2567,7 @@ bindings@^1.5.0:
   dependencies:
     file-uri-to-path "1.0.0"
 
-binjumper@^0.1.0:
+binjumper@^0.1.2:
   version "0.1.2"
   resolved "https://registry.yarnpkg.com/binjumper/-/binjumper-0.1.2.tgz#a82beb255c51ee631330f69897bc191169905023"
   integrity sha512-zZrQaKsC0h5HflYWM9G9Jisx+XNPs9WU3yMizdcYL91Aw1NNaLze3tKjyNRZPorQLBNDvkavZjB/wxXUZe/8gA==
@@ -9389,10 +9389,10 @@ signale@^1.2.1:
     figures "^2.0.0"
     pkg-conf "^2.1.0"
 
-simple-git@2.20.1:
-  version "2.20.1"
-  resolved "https://registry.yarnpkg.com/simple-git/-/simple-git-2.20.1.tgz#bab3f4d083ed6e1655a7c62ab8e8920eecae86f6"
-  integrity sha512-aa9s2ZLjXlHCVGbDXQLInMLvLkxKEclqMU9X5HMXi3tLWLxbWObz1UgtyZha6ocHarQtFp0OjQW9KHVR1g6wbA==
+simple-git@2.21.0:
+  version "2.21.0"
+  resolved "https://registry.yarnpkg.com/simple-git/-/simple-git-2.21.0.tgz#d25d3fdc6a139cd7f80f197541a6f9f6e9d4cbc8"
+  integrity sha512-rohCHmEjD/ESXFLxF4bVeqgdb4Awc65ZyyuCKl3f7BvgMbZOBa/Ye3HN/GFnvruiUOAWWNupxhz3Rz5/3vJLTg==
   dependencies:
     "@kwsites/file-exists" "^1.1.1"
     "@kwsites/promise-deferred" "^1.1.1"
