@@ -208,7 +208,16 @@ Array [
 ]
 `;
 
-exports[`workers/pr/changelog/release-notes getReleaseNotes() gets release notes with body 9`] = `null`;
+exports[`workers/pr/changelog/release-notes getReleaseNotes() gets release notes with body 9`] = `
+Object {
+  "body": "some body [#123](https://github.com/some/other-repository/issues/123), [#124](https://github.com/some/yet-other-repository/issues/124)
+",
+  "id": undefined,
+  "name": undefined,
+  "tag": "other@1.0.1",
+  "url": "https://github.com/some/other-repository/releases/other@1.0.1",
+}
+`;
 
 exports[`workers/pr/changelog/release-notes getReleaseNotes() gets release notes with body 10`] = `
 Array [
