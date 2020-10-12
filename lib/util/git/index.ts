@@ -500,7 +500,10 @@ export async function getBranchLastCommitTime(
 export async function getBranchFiles(branchName: string): Promise<string[]> {
   await syncBranch(branchName);
   try {
-    const diff = await git.diffSummary([`${branchName}^`]);
+    const diff = await git.diffSummary([
+      `origin/${branchName}`,
+      `origin/${branchName}^`,
+    ]);
     return diff.files.map((file) => file.file);
   } catch (err) /* istanbul ignore next */ {
     logger.warn({ err }, 'getBranchFiles error');
