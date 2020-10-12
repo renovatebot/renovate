@@ -84,19 +84,20 @@ stringData:
 ```
 
 A `config.js` file can be added to the manifest using a `ConfigMap` as shown in the following example (using a "dry run" in github.com)
+
 ```yaml
 ---
-  apiVersion: v1
-  kind: ConfigMap
-  metadata:
-    name: renovate-config
-  data:
-    config.json: |-
-      {
-        "logLevel" : "debug",
-        "repositories": ["orgname/repo","username/repo"],
-        "dryRun" : "true"
-      }
+ apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: renovate-config
+data:
+  config.json: |-
+    {
+      "logLevel" : "debug",
+      "repositories": ["orgname/repo","username/repo"],
+      "dryRun" : "true"
+    }
 
 ---
 apiVersion: batch/v1beta1
@@ -111,24 +112,24 @@ spec:
       template:
         spec:
           containers:
-          - image: renovate/renovate:23.22.1
-            name: renovate-bot
-            env: # For illustration purposes, please user secrets.
-              - name: RENOVATE_PLATFORM
-                value: 'github'
-              - name: RENOVATE_TOKEN
-                value: 'some-token'
-              - name: RENOVATE_AUTODISCOVER
-                value: 'false'
-              - name: RENOVATE_BASE_DIR
-                value: '/tmp/renovate/'
-              - name: RENOVATE_CONFIG_FILE
-                value: '/opt/renovate/config.json'
-            volumeMounts:
-            - name: config-volume
-              mountPath: /opt/renovate/
-            - name: work-volume
-              mountPath: /tmp/renovate/
+            - image: renovate/renovate:23.22.1
+              name: renovate-bot
+              env: # For illustration purposes, please user secrets.
+                - name: RENOVATE_PLATFORM
+                  value: 'github'
+                - name: RENOVATE_TOKEN
+                  value: 'some-token'
+                - name: RENOVATE_AUTODISCOVER
+                  value: 'false'
+                - name: RENOVATE_BASE_DIR
+                  value: '/tmp/renovate/'
+                - name: RENOVATE_CONFIG_FILE
+                  value: '/opt/renovate/config.json'
+              volumeMounts:
+                - name: config-volume
+                  mountPath: /opt/renovate/
+                - name: work-volume
+                  mountPath: /tmp/renovate/
           restartPolicy: Never
           volumes:
             - name: config-volume
