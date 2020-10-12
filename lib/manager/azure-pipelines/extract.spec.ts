@@ -23,12 +23,12 @@ const azurePipelinesNoDependency = readFileSync(
 
 describe('manager/azure-pipelines/extract', () => {
   it('should parse a valid azure-pipelines file', () => {
-    const file = parseAzurePipelines(azurePipelines);
+    const file = parseAzurePipelines(azurePipelines, 'some-file');
     expect(file).not.toBeNull();
   });
 
   it('return null on an invalid file', () => {
-    const file = parseAzurePipelines(azurePipelinesInvalid);
+    const file = parseAzurePipelines(azurePipelinesInvalid, 'some-file');
     expect(file).toBeNull();
   });
 
@@ -89,15 +89,17 @@ describe('manager/azure-pipelines/extract', () => {
 
   describe('extractPackageFile()', () => {
     it('returns null for invalid azure pipelines files', () => {
-      expect(extractPackageFile('')).toBeNull();
+      expect(extractPackageFile('', 'some-file')).toBeNull();
     });
     it('extracts dependencies', () => {
-      const res = extractPackageFile(azurePipelines);
+      const res = extractPackageFile(azurePipelines, 'some-file');
       expect(res.deps).toMatchSnapshot();
       expect(res.deps).toHaveLength(3);
     });
     it('should return null when there is no dependency found', () => {
-      expect(extractPackageFile(azurePipelinesNoDependency)).toBeNull();
+      expect(
+        extractPackageFile(azurePipelinesNoDependency, 'some-file')
+      ).toBeNull();
     });
   });
 });
