@@ -79,26 +79,31 @@ Array [
     "currentValue": "v0.1.0",
     "datasource": "docker",
     "depName": "node",
+    "versioning": "docker",
   },
   Object {
     "currentValue": "v0.0.1",
     "datasource": "docker",
     "depName": "group/instance",
+    "versioning": "docker",
   },
   Object {
     "currentValue": "v0.0.2",
     "datasource": "docker",
     "depName": "quay.io/test/repo",
+    "versioning": "docker",
   },
   Object {
     "currentValue": "v0.0.3",
     "datasource": "docker",
     "depName": "gitlab.com/org/suborg/image",
+    "versioning": "docker",
   },
   Object {
     "currentValue": "v0.0.4",
     "datasource": "docker",
     "depName": "but.this.lives.on.local/private-registry",
+    "versioning": "docker",
   },
 ]
 `;

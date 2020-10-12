@@ -28,6 +28,19 @@ export async function getOnboardingConfig(
     }
   }
 
+  if (!orgPreset) {
+    // Check for org/.{{platform}}
+    try {
+      const orgDotPlatformConfig = `local>${orgName}/.${config.platform}:renovate-config`;
+      await getPreset(orgDotPlatformConfig, config);
+      orgPreset = orgDotPlatformConfig;
+    } catch (err) {
+      if (err.message !== PRESET_DEP_NOT_FOUND) {
+        logger.warn({ err }, 'Unknown error fetching default owner preset');
+      }
+    }
+  }
+
   if (orgPreset) {
     onboardingConfig = {
       $schema: 'https://docs.renovatebot.com/renovate-schema.json',
