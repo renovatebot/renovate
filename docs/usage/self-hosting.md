@@ -137,9 +137,6 @@ spec:
             - name: work-volume
               emptyDir: {}
 ```
-
-
-
 ## Configuration
 
 Self-hosted Renovate can be configured using any of the following (or a combination):
