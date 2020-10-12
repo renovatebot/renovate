@@ -299,12 +299,12 @@ Object {
       "lookupName": "terraform-providers/docker",
     },
     Object {
-      "currentValue": "2.7.2",
+      "currentValue": "2.7.0",
       "datasource": "terraform-provider",
-      "depName": "docker2",
-      "depNameShort": "docker2",
+      "depName": "aws",
+      "depNameShort": "aws",
       "depType": "terraform",
-      "lookupName": "docker",
+      "lookupName": "aws",
     },
     Object {
       "currentValue": "=2.27.0",

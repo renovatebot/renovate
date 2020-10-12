@@ -178,9 +178,9 @@ terraform {
       source  = "terraform-providers/docker"
       version = "2.7.2"
     }
-    docker2 = {
-      source  = "docker"
-      version = "2.7.2"
+    aws = {
+      source  = "aws"
+      version = "2.7.0"
     }
     // falls back block name for source
     azurerm = {
