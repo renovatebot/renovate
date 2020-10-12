@@ -140,8 +140,11 @@ export async function mergeRenovateConfig(
   config: RenovateConfig
 ): Promise<RenovateConfig> {
   let returnConfig = { ...config };
-  const repoConfig = await detectRepoFileConfig();
-  checkForRepoConfigError(repoConfig);
+  let repoConfig: RepoFileConfig = {};
+  if (!config.onboarding) {
+    repoConfig = await detectRepoFileConfig();
+    checkForRepoConfigError(repoConfig);
+  }
   const migratedConfig = await migrateAndValidate(
     config,
     repoConfig?.configFileParsed || {}
