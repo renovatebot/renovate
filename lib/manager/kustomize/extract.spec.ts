@@ -2,6 +2,7 @@ import { readFileSync } from 'fs';
 import * as datasourceDocker from '../../datasource/docker';
 import * as datasourceGitTags from '../../datasource/git-tags';
 import * as datasourceGitHubTags from '../../datasource/github-tags';
+import * as dockerVersioning from '../../versioning/docker';
 import {
   extractBase,
   extractImage,
@@ -129,6 +130,7 @@ describe('manager/kustomize/extract', () => {
       const sample = {
         currentValue: 'v1.0.0',
         datasource: datasourceDocker.id,
+        versioning: dockerVersioning.id,
         depName: 'node',
       };
       const pkg = extractImage({
@@ -141,6 +143,7 @@ describe('manager/kustomize/extract', () => {
       const sample = {
         currentValue: 'v1.0.0',
         datasource: datasourceDocker.id,
+        versioning: dockerVersioning.id,
         depName: 'test/node',
       };
       const pkg = extractImage({
@@ -153,6 +156,7 @@ describe('manager/kustomize/extract', () => {
       const sample = {
         currentValue: 'v1.0.0',
         datasource: datasourceDocker.id,
+        versioning: dockerVersioning.id,
         depName: 'quay.io/repo/image',
       };
       const pkg = extractImage({
@@ -165,6 +169,7 @@ describe('manager/kustomize/extract', () => {
       const sample = {
         currentValue: 'v1.0.0',
         datasource: datasourceDocker.id,
+        versioning: dockerVersioning.id,
         depName: 'localhost:5000/repo/image',
       };
       const pkg = extractImage({
@@ -177,6 +182,7 @@ describe('manager/kustomize/extract', () => {
       const sample = {
         currentValue: 'v1.0.0',
         datasource: datasourceDocker.id,
+        versioning: dockerVersioning.id,
         depName: 'localhost:5000/repo/image/service',
       };
       const pkg = extractImage({

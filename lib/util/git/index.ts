@@ -188,18 +188,23 @@ export async function setBranchPrefix(branchPrefix: string): Promise<void> {
 }
 
 export async function getSubmodules(): Promise<string[]> {
-  return (
-    (await git.raw([
-      'config',
-      '--file',
-      '.gitmodules',
-      '--get-regexp',
-      'path',
-    ])) || ''
-  )
-    .trim()
-    .split(/[\n\s]/)
-    .filter((_e: string, i: number) => i % 2);
+  try {
+    return (
+      (await git.raw([
+        'config',
+        '--file',
+        '.gitmodules',
+        '--get-regexp',
+        'path',
+      ])) || ''
+    )
+      .trim()
+      .split(/[\n\s]/)
+      .filter((_e: string, i: number) => i % 2);
+  } catch (err) /* istanbul ignore next */ {
+    logger.warn({ err }, 'Error getting submodules');
+    return [];
+  }
 }
 
 export async function syncGit(): Promise<void> {
@@ -498,6 +503,7 @@ export async function getBranchFiles(branchName: string): Promise<string[]> {
     const diff = await git.diffSummary([branchName, config.currentBranch]);
     return diff.files.map((file) => file.file);
   } catch (err) /* istanbul ignore next */ {
+    logger.warn({ err }, 'getBranchFiles error');
     checkForPlatformFailure(err);
     return null;
   }

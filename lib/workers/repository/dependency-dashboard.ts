@@ -209,9 +209,9 @@ export async function ensureMasterIssue(
     (branch) => branch.res === ProcessBranchResult.AlreadyExisted
   );
   if (alreadyExisted.length) {
-    issueBody += '## Closed/Ignored\n\n';
+    issueBody += '## Ignored or Blocked\n\n';
     issueBody +=
-      'These updates were closed unmerged and will not be recreated unless you click a checkbox below.\n\n';
+      'These are blocked by an existing closed PR and will not be recreated unless you click a checkbox below.\n\n';
     for (const branch of alreadyExisted) {
       const pr = await platform.findPr({
         branchName: branch.branchName,

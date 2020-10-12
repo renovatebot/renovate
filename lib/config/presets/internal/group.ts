@@ -46,6 +46,7 @@ const staticGroups = {
       'group:illuminate',
       'group:jekyllEcosystem',
       'group:polymer',
+      'group:resilience4j',
       'group:rubyOmniauth',
       'group:socketio',
       'group:springAmqp',
@@ -194,6 +195,15 @@ const staticGroups = {
       {
         packagePatterns: ['^org.hibernate.common:'],
         groupName: 'hibernate commons',
+      },
+    ],
+  },
+  resilience4j: {
+    description: 'Group Java Resilience4j packages',
+    packageRules: [
+      {
+        packagePatterns: ['^io.github.resilience4j:'],
+        groupName: 'resilience4j',
       },
     ],
   },
