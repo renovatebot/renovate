@@ -4,15 +4,15 @@ exports[`manager/kustomize/extract extractPackageFile() extracts http dependency
 Array [
   Object {
     "currentValue": "v0.0.1",
-    "datasource": "git-tags",
-    "depName": "github.com/user/repo//deploy",
-    "lookupName": "github.com/user/repo",
+    "datasource": "github-tags",
+    "depName": "user/repo",
+    "depType": "github",
   },
   Object {
     "currentValue": "1.19.0",
     "datasource": "github-tags",
-    "depName": "fluxcd/flux/deploy",
-    "lookupName": "fluxcd/flux",
+    "depName": "fluxcd/flux",
+    "depType": "github",
   },
 ]
 `;
@@ -23,12 +23,14 @@ Array [
     "currentValue": "v0.0.1",
     "datasource": "git-tags",
     "depName": "https://moredhel/remote-kustomize.git",
+    "depType": "gitTags",
     "lookupName": "https://moredhel/remote-kustomize.git",
   },
   Object {
     "currentValue": "v0.0.1",
     "datasource": "git-tags",
     "depName": "https://moredhel/remote-kustomize.git//deploy",
+    "depType": "gitTags",
     "lookupName": "https://moredhel/remote-kustomize.git//deploy",
   },
 ]
@@ -38,9 +40,9 @@ exports[`manager/kustomize/extract extractPackageFile() extracts ssh dependency 
 Array [
   Object {
     "currentValue": "v0.0.1",
-    "datasource": "git-tags",
-    "depName": "git@github.com:moredhel/remote-kustomize.git",
-    "lookupName": "git@github.com:moredhel/remote-kustomize.git",
+    "datasource": "github-tags",
+    "depName": "moredhel/remote-kustomize",
+    "depType": "github",
   },
 ]
 `;
@@ -49,9 +51,9 @@ exports[`manager/kustomize/extract extractPackageFile() extracts ssh dependency 
 Array [
   Object {
     "currentValue": "v2.0.0",
-    "datasource": "git-tags",
-    "depName": "git@github.com:kubernetes-sigs/kustomize.git//examples/helloWorld",
-    "lookupName": "git@github.com:kubernetes-sigs/kustomize.git",
+    "datasource": "github-tags",
+    "depName": "kubernetes-sigs/kustomize",
+    "depType": "github",
   },
 ]
 `;
@@ -60,15 +62,15 @@ exports[`manager/kustomize/extract extractPackageFile() should extract bases fro
 Array [
   Object {
     "currentValue": "v0.0.1",
-    "datasource": "git-tags",
-    "depName": "git@github.com:moredhel/remote-kustomize.git",
-    "lookupName": "git@github.com:moredhel/remote-kustomize.git",
+    "datasource": "github-tags",
+    "depName": "moredhel/remote-kustomize",
+    "depType": "github",
   },
   Object {
     "currentValue": "1.19.0",
     "datasource": "github-tags",
-    "depName": "fluxcd/flux/deploy",
-    "lookupName": "fluxcd/flux",
+    "depName": "fluxcd/flux",
+    "depType": "github",
   },
 ]
 `;

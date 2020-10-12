@@ -24,19 +24,20 @@ const versionMatch = /(?<basename>.*)\?ref=(?<version>.*)\s*$/;
 // extract the url from the base of a url with a subdir
 const extractUrl = /^(?<url>.*)(?:\/\/.*)$/;
 
-const githubUrl = /^github\.com\/(?<depName>(?<lookupName>[^/]+?\/[^/]+?)(?:\/[^/]+?)*)\?ref=(?<currentValue>.+)$/;
+// extract github repository information
+const githubUrl = /^.*github\.com[:/](?<project>[^/]+\/[^/]+)[^?]*\?ref=(?<currentValue>.+)$/;
 
 export function extractBase(base: string): PackageDependency | null {
   const githubMatch = githubUrl.exec(base);
 
   if (githubMatch?.groups) {
-    const { currentValue, depName, lookupName } = githubMatch.groups;
+    const project = githubMatch.groups.project.replace('.git', '').split('/');
 
     return {
+      currentValue: githubMatch.groups.currentValue,
       datasource: datasourceGitHubTags.id,
-      depName,
-      lookupName,
-      currentValue,
+      depName: `${project[0]}/${project[1]}`,
+      depType: 'github',
     };
   }
 
@@ -55,6 +56,7 @@ export function extractBase(base: string): PackageDependency | null {
     return {
       datasource: datasourceGitTags.id,
       depName: root,
+      depType: 'gitTags',
       lookupName: url,
       currentValue,
     };
