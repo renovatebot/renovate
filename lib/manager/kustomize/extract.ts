@@ -34,7 +34,6 @@ export function extractBase(base: string): PackageDependency | null {
       currentValue: match.groups.currentValue,
       datasource: datasourceGitHubTags.id,
       depName: match.groups.project.replace('.git', ''),
-      depType: 'github',
     };
   }
 
@@ -42,7 +41,6 @@ export function extractBase(base: string): PackageDependency | null {
     datasource: datasourceGitTags.id,
     depName: match.groups.path.replace('.git', ''),
     depNameShort: match.groups.project.replace('.git', ''),
-    depType: 'gitTags',
     lookupName: match.groups.url,
     currentValue: match.groups.currentValue,
   };

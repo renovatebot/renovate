@@ -71,7 +71,6 @@ describe('manager/kustomize/extract', () => {
         currentValue: version,
         datasource: datasourceGitHubTags.id,
         depName: 'user/test-repo',
-        depType: 'github',
       };
 
       const pkg = extractBase(`${base}?ref=${version}`);
@@ -86,7 +85,6 @@ describe('manager/kustomize/extract', () => {
         datasource: datasourceGitTags.id,
         depName: 'bitbucket.com/user/test-repo',
         depNameShort: 'user/test-repo',
-        depType: 'gitTags',
         lookupName: 'ssh://git@bitbucket.com/user/test-repo',
       });
     });
@@ -99,7 +97,6 @@ describe('manager/kustomize/extract', () => {
         datasource: datasourceGitTags.id,
         depName: 'bitbucket.com/user/test-repo',
         depNameShort: 'user/test-repo',
-        depType: 'gitTags',
         lookupName: 'ssh://git@bitbucket.com/user/test-repo',
       });
     });
@@ -110,7 +107,6 @@ describe('manager/kustomize/extract', () => {
         currentValue: version,
         datasource: datasourceGitHubTags.id,
         depName: 'fluxcd/flux',
-        depType: 'github',
       };
 
       const pkg = extractBase(`${base}?ref=${version}`);
@@ -123,7 +119,6 @@ describe('manager/kustomize/extract', () => {
         currentValue: version,
         datasource: datasourceGitHubTags.id,
         depName: 'user/repo',
-        depType: 'github',
       };
 
       const pkg = extractBase(`${base}?ref=${version}`);
@@ -136,7 +131,6 @@ describe('manager/kustomize/extract', () => {
         currentValue: version,
         datasource: datasourceGitHubTags.id,
         depName: 'user/repo',
-        depType: 'github',
       };
 
       const pkg = extractBase(`${base}?ref=${version}`);

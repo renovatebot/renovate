@@ -6,13 +6,11 @@ Array [
     "currentValue": "v0.0.1",
     "datasource": "github-tags",
     "depName": "user/repo",
-    "depType": "github",
   },
   Object {
     "currentValue": "1.19.0",
     "datasource": "github-tags",
     "depName": "fluxcd/flux",
-    "depType": "github",
   },
 ]
 `;
@@ -24,7 +22,6 @@ Array [
     "datasource": "git-tags",
     "depName": "moredhel/remote-kustomize",
     "depNameShort": "moredhel/remote-kustomize",
-    "depType": "gitTags",
     "lookupName": "https://moredhel/remote-kustomize.git",
   },
   Object {
@@ -32,7 +29,6 @@ Array [
     "datasource": "git-tags",
     "depName": "moredhel/remote-kustomize",
     "depNameShort": "moredhel/remote-kustomize",
-    "depType": "gitTags",
     "lookupName": "https://moredhel/remote-kustomize.git",
   },
 ]
@@ -44,7 +40,6 @@ Array [
     "currentValue": "v0.0.1",
     "datasource": "github-tags",
     "depName": "moredhel/remote-kustomize",
-    "depType": "github",
   },
 ]
 `;
@@ -55,7 +50,6 @@ Array [
     "currentValue": "v2.0.0",
     "datasource": "github-tags",
     "depName": "kubernetes-sigs/kustomize",
-    "depType": "github",
   },
 ]
 `;
@@ -66,13 +60,11 @@ Array [
     "currentValue": "v0.0.1",
     "datasource": "github-tags",
     "depName": "moredhel/remote-kustomize",
-    "depType": "github",
   },
   Object {
     "currentValue": "1.19.0",
     "datasource": "github-tags",
     "depName": "fluxcd/flux",
-    "depType": "github",
   },
 ]
 `;
