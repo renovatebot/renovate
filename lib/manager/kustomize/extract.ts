@@ -20,7 +20,7 @@ interface Kustomize {
 
 // URL specifications should follow the hashicorp URL format
 // https://github.com/hashicorp/go-getter#url-format
-const gitUrl = /^(?:git::)?(?<url>((?:http|https|ssh):\/\/(?:.*@)?)?(?<path>([^:/]+[:/])?(?<project>[^/]+\/[^/]+)))(?<subdir>[^?]*)\?ref=(?<currentValue>.+)$/;
+const gitUrl = /^(?:git::)?(?<url>(?:(?:(?:http|https|ssh):\/\/)?(?:.*@)?)?(?<path>(?:[^:/]+[:/])?(?<project>[^/]+\/[^/]+)))(?<subdir>[^?]*)\?ref=(?<currentValue>.+)$/;
 
 export function extractBase(base: string): PackageDependency | null {
   const match = gitUrl.exec(base);
@@ -29,7 +29,7 @@ export function extractBase(base: string): PackageDependency | null {
     return null;
   }
 
-  if (match?.groups.path.includes('github.com')) {
+  if (match?.groups.path.startsWith('github.com')) {
     return {
       currentValue: match.groups.currentValue,
       datasource: datasourceGitHubTags.id,
