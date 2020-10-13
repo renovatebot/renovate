@@ -24,8 +24,8 @@ function parseRegistryUrl(
       protocolVersion = 3;
     }
     return { feedUrl: urlApi.format(parsedUrl), protocolVersion };
-  } catch (e) {
-    logger.debug({ e }, `nuget registry failure: can't parse ${registryUrl}`);
+  } catch (err) {
+    logger.debug({ err }, `nuget registry failure: can't parse ${registryUrl}`);
     return { feedUrl: registryUrl, protocolVersion: null };
   }
 }
