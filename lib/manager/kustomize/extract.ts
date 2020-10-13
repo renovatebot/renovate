@@ -18,51 +18,34 @@ interface Kustomize {
   images: Image[];
 }
 
-// extract the version from the url
-const versionMatch = /(?<basename>.*)\?ref=(?<version>.*)\s*$/;
-
-// extract the url from the base of a url with a subdir
-const extractUrl = /^(?<url>.*)(?:\/\/.*)$/;
-
-// extract github repository information
-const githubUrl = /^.*github\.com[:/](?<project>[^/]+\/[^/]+)[^?]*\?ref=(?<currentValue>.+)$/;
+// URL specifications should follow the hashicorp URL format
+// https://github.com/hashicorp/go-getter#url-format
+const gitUrl = /^(?:git::)?(?<url>((?:http|https|ssh):\/\/(?:.*@)?)?(?<path>([^:/]+[:/])?(?<project>[^/]+\/[^/]+)))(?<subdir>[^?]*)\?ref=(?<currentValue>.+)$/;
 
 export function extractBase(base: string): PackageDependency | null {
-  const githubMatch = githubUrl.exec(base);
+  const match = gitUrl.exec(base);
 
-  if (githubMatch?.groups) {
-    const project = githubMatch.groups.project.replace('.git', '').split('/');
+  if (!match) {
+    return null;
+  }
 
+  if (match?.groups.path.includes('github.com')) {
     return {
-      currentValue: githubMatch.groups.currentValue,
+      currentValue: match.groups.currentValue,
       datasource: datasourceGitHubTags.id,
-      depName: `${project[0]}/${project[1]}`,
+      depName: match.groups.project.replace('.git', ''),
       depType: 'github',
     };
   }
 
-  const basenameVersion = versionMatch.exec(base);
-  if (basenameVersion) {
-    const currentValue = basenameVersion.groups.version;
-    const root = basenameVersion.groups.basename;
-
-    const urlResult = extractUrl.exec(root);
-    let url = root;
-    // if a match, then there was a subdir, update
-    if (urlResult && !url.startsWith('http')) {
-      url = urlResult.groups.url;
-    }
-
-    return {
-      datasource: datasourceGitTags.id,
-      depName: root,
-      depType: 'gitTags',
-      lookupName: url,
-      currentValue,
-    };
-  }
-
-  return null;
+  return {
+    datasource: datasourceGitTags.id,
+    depName: match.groups.path.replace('.git', ''),
+    depNameShort: match.groups.project.replace('.git', ''),
+    depType: 'gitTags',
+    lookupName: match.groups.url,
+    currentValue: match.groups.currentValue,
+  };
 }
 
 export function extractImage(image: Image): PackageDependency | null {

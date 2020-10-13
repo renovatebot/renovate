@@ -22,16 +22,18 @@ Array [
   Object {
     "currentValue": "v0.0.1",
     "datasource": "git-tags",
-    "depName": "https://moredhel/remote-kustomize.git",
+    "depName": "moredhel/remote-kustomize",
+    "depNameShort": "moredhel/remote-kustomize",
     "depType": "gitTags",
     "lookupName": "https://moredhel/remote-kustomize.git",
   },
   Object {
     "currentValue": "v0.0.1",
     "datasource": "git-tags",
-    "depName": "https://moredhel/remote-kustomize.git//deploy",
+    "depName": "moredhel/remote-kustomize",
+    "depNameShort": "moredhel/remote-kustomize",
     "depType": "gitTags",
-    "lookupName": "https://moredhel/remote-kustomize.git//deploy",
+    "lookupName": "https://moredhel/remote-kustomize.git",
   },
 ]
 `;

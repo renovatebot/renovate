@@ -1,5 +1,6 @@
 import { readFileSync } from 'fs';
 import * as datasourceDocker from '../../datasource/docker';
+import * as datasourceGitTags from '../../datasource/git-tags';
 import * as datasourceGitHubTags from '../../datasource/github-tags';
 import * as dockerVersioning from '../../versioning/docker';
 import {
@@ -76,7 +77,32 @@ describe('manager/kustomize/extract', () => {
       const pkg = extractBase(`${base}?ref=${version}`);
       expect(pkg).toEqual(sample);
     });
-
+    it('should extract the version of a non http base', () => {
+      const pkg = extractBase(
+        'ssh://git@bitbucket.com/user/test-repo?ref=v1.2.3'
+      );
+      expect(pkg).toEqual({
+        currentValue: 'v1.2.3',
+        datasource: datasourceGitTags.id,
+        depName: 'bitbucket.com/user/test-repo',
+        depNameShort: 'user/test-repo',
+        depType: 'gitTags',
+        lookupName: 'ssh://git@bitbucket.com/user/test-repo',
+      });
+    });
+    it('should extract the version of a non http base with subdir', () => {
+      const pkg = extractBase(
+        'ssh://git@bitbucket.com/user/test-repo/subdir?ref=v1.2.3'
+      );
+      expect(pkg).toEqual({
+        currentValue: 'v1.2.3',
+        datasource: datasourceGitTags.id,
+        depName: 'bitbucket.com/user/test-repo',
+        depNameShort: 'user/test-repo',
+        depType: 'gitTags',
+        lookupName: 'ssh://git@bitbucket.com/user/test-repo',
+      });
+    });
     it('should extract out the version of an github base', () => {
       const base = 'github.com/fluxcd/flux/deploy';
       const version = 'v1.0.0';
