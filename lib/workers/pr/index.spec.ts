@@ -176,6 +176,7 @@ describe('workers/pr', () => {
         'Some body<!-- Reviewable:start -->something<!-- Reviewable:end -->\n\n',
     } as never;
     beforeEach(() => {
+      jest.resetAllMocks();
       setupChangelogMock();
       config = partial<BranchConfig>({
         ...defaultConfig,
@@ -360,6 +361,17 @@ describe('workers/pr', () => {
       const { prResult, pr } = await prWorker.ensurePr(config);
       expect(prResult).toEqual(PrResult.AwaitingNotPending);
       expect(pr).toBeUndefined();
+    });
+    it('should create PR if waiting for not pending with stabilityDays set', async () => {
+      platform.getBranchStatus.mockResolvedValueOnce(BranchStatus.yellow);
+      git.getBranchLastCommitTime.mockImplementationOnce(() =>
+        Promise.resolve(new Date())
+      );
+      config.prCreation = 'not-pending';
+      config.stabilityDays = 42;
+      const { prResult, pr } = await prWorker.ensurePr(config);
+      expect(prResult).toEqual(PrResult.Created);
+      expect(pr).toBeDefined();
     });
     it('should create PR if pending timeout hit', async () => {
       platform.getBranchStatus.mockResolvedValueOnce(BranchStatus.yellow);
@@ -561,7 +573,7 @@ describe('workers/pr', () => {
       expect(prResult).toEqual(PrResult.BlockedByBranchAutomerge);
       expect(pr).toBeUndefined();
     });
-    it('should not return no PR if branch automerging taking too long', async () => {
+    it('should return PR if branch automerging taking too long', async () => {
       config.automerge = true;
       config.automergeType = 'branch';
       platform.getBranchStatus.mockResolvedValueOnce(BranchStatus.yellow);
@@ -569,6 +581,16 @@ describe('workers/pr', () => {
       const { prResult, pr } = await prWorker.ensurePr(config);
       expect(prResult).toEqual(PrResult.Created);
       expect(pr).toBeDefined();
+    });
+    it('should return no PR if stabilityDays set', async () => {
+      config.automerge = true;
+      config.automergeType = 'branch';
+      config.stabilityDays = 42;
+      platform.getBranchStatus.mockResolvedValueOnce(BranchStatus.yellow);
+      git.getBranchLastCommitTime.mockResolvedValueOnce(new Date('2018-01-01'));
+      const { prResult, pr } = await prWorker.ensurePr(config);
+      expect(prResult).toEqual(PrResult.BlockedByBranchAutomerge);
+      expect(pr).toBeUndefined();
     });
     it('handles duplicate upgrades', async () => {
       config.upgrades.push(config.upgrades[0]);
