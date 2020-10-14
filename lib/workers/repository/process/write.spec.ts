@@ -64,10 +64,10 @@ describe('workers/repository/write', () => {
       ] as never;
       limits.getPrsRemaining.mockResolvedValueOnce(1);
 
-      branches.forEach(({ res, expect: branchExists }) => {
+      branches.forEach(({ res, expect: limitReached }) => {
         branchWorker.processBranch.mockResolvedValueOnce(res);
         git.branchExists.mockReturnValueOnce(false);
-        git.branchExists.mockReturnValueOnce(!branchExists as never);
+        git.branchExists.mockReturnValueOnce(!limitReached as never);
       });
 
       await writeUpdates(config, branches);
