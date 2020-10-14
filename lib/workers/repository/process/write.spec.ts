@@ -57,5 +57,28 @@ describe('workers/repository/write', () => {
       expect(res).toEqual('automerged');
       expect(branchWorker.processBranch).toHaveBeenCalledTimes(4);
     });
+    it('counts created branches', async () => {
+      const branches: BranchConfig[] = [
+        { res: ProcessBranchResult.Pending, expect: false },
+        { res: ProcessBranchResult.PrLimitReached, expect: true },
+      ] as never;
+      limits.getPrsRemaining.mockResolvedValueOnce(1);
+
+      branches.forEach(({ res, expect: limitReached }) => {
+        branchWorker.processBranch.mockResolvedValueOnce(res);
+        git.branchExists.mockReturnValueOnce(false);
+        git.branchExists.mockReturnValueOnce(!limitReached as never);
+      });
+
+      await writeUpdates(config, branches);
+
+      branches.forEach((branch) =>
+        expect(branchWorker.processBranch).toHaveBeenCalledWith(
+          branch,
+          branch.expect,
+          false
+        )
+      );
+    });
   });
 });
