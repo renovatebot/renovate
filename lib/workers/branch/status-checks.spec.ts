@@ -49,23 +49,20 @@ describe('workers/branch/status-checks', () => {
     });
     it('returns if not configured', async () => {
       await setUnpublishable(config);
-      expect(platform.getBranchStatusCheck).toHaveBeenCalledTimes(0);
+      expect(platform.getBranchStatusCheck).toHaveBeenCalledTimes(1);
     });
     it('defaults to canBeUnpublished', async () => {
-      config.unpublishSafe = true;
       await setUnpublishable(config);
       expect(platform.getBranchStatusCheck).toHaveBeenCalledTimes(1);
       expect(platform.setBranchStatus).toHaveBeenCalledTimes(1);
     });
     it('finds canBeUnpublished false and sets status', async () => {
       config.canBeUnpublished = true;
-      config.unpublishSafe = true;
       await setUnpublishable(config);
       expect(platform.getBranchStatusCheck).toHaveBeenCalledTimes(1);
       expect(platform.setBranchStatus).toHaveBeenCalledTimes(1);
     });
     it('finds canBeUnpublished false and skips status', async () => {
-      config.unpublishSafe = true;
       config.canBeUnpublished = false;
       platform.getBranchStatusCheck.mockResolvedValueOnce(BranchStatus.green);
       await setUnpublishable(config);

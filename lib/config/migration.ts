@@ -251,6 +251,13 @@ export function migrateConfig(
               'masterIssue',
               'dependencyDashboard'
             );
+          } else if (
+            is.string(val[i]) &&
+            (val[i] === 'default:unpublishSafe' ||
+              val[i] === 'default:unpublishSafeDisabled')
+          ) {
+            isMigrated = true;
+            migratedConfig.extends[i] = val[i].replace('default:', 'npm:');
           }
         }
       } else if (key === 'versionScheme') {
@@ -526,6 +533,26 @@ export function migrateConfig(
       delete migratedConfig.endpoints;
       isMigrated = true;
     }
+
+    if (typeof migratedConfig.unpublishSafe === 'boolean') {
+      if (migratedConfig.unpublishSafe) {
+        const ext = migratedConfig.extends || [];
+        if (!ext.includes('npm:unpublishSafe')) {
+          ext.push('npm:unpublishSafe');
+        }
+        migratedConfig.extends = ext;
+      }
+      delete migratedConfig.unpublishSafe;
+      isMigrated = true;
+    }
+
+    if (migratedConfig.extends && is.array<string>(migratedConfig.extends)) {
+      migratedConfig.extends = migratedConfig.extends.filter(
+        (val) => val !== 'npm:unpublishSafeDisabled'
+      );
+      isMigrated = true;
+    }
+
     return { isMigrated, migratedConfig };
   } catch (err) /* istanbul ignore next */ {
     logger.debug({ config }, 'migrateConfig() error');

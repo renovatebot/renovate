@@ -92,6 +92,7 @@ export function parsePreset(input: string): ParsedPreset {
     'group',
     'helpers',
     'monorepo',
+    'npm',
     'packages',
     'preview',
     'schedule',

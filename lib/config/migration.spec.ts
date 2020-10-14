@@ -435,5 +435,65 @@ describe('config/migration', () => {
       expect(res.isMigrated).toBe(false);
       expect(res.migratedConfig).toMatchObject({ semanticCommits: 'disabled' });
     });
+
+    it('it migrates unpublishSafe', () => {
+      let config: RenovateConfig;
+      let res: MigratedConfig;
+
+      config = { unpublishSafe: true };
+      res = configMigration.migrateConfig(config);
+      expect(res.isMigrated).toBe(true);
+      expect(res.migratedConfig).toMatchObject({
+        extends: ['npm:unpublishSafe'],
+      });
+
+      config = { unpublishSafe: true, extends: [] };
+      res = configMigration.migrateConfig(config);
+      expect(res.isMigrated).toBe(true);
+      expect(res.migratedConfig).toMatchObject({
+        extends: ['npm:unpublishSafe'],
+      });
+
+      config = { unpublishSafe: true, extends: ['foo', 'bar'] };
+      res = configMigration.migrateConfig(config);
+      expect(res.isMigrated).toBe(true);
+      expect(res.migratedConfig).toMatchObject({
+        extends: ['foo', 'bar', 'npm:unpublishSafe'],
+      });
+
+      config = {
+        extends: [
+          'foo',
+          'npm:unpublishSafeDisabled',
+          'default:unpublishSafeDisabled',
+          'bar',
+        ],
+      };
+      res = configMigration.migrateConfig(config);
+      expect(res.isMigrated).toBe(true);
+      expect(res.migratedConfig).toMatchObject({
+        extends: ['foo', 'bar'],
+      });
+
+      config = {
+        unpublishSafe: false,
+        extends: ['foo', 'default:unpublishSafeDisabled', 'bar'],
+      };
+      res = configMigration.migrateConfig(config);
+      expect(res.isMigrated).toBe(true);
+      expect(res.migratedConfig).toMatchObject({
+        extends: ['foo', 'bar'],
+      });
+
+      config = {
+        unpublishSafe: true,
+        extends: ['foo', 'default:unpublishSafeDisabled', 'bar'],
+      };
+      res = configMigration.migrateConfig(config);
+      expect(res.isMigrated).toBe(true);
+      expect(res.migratedConfig).toMatchObject({
+        extends: ['foo', 'bar', 'npm:unpublishSafe'],
+      });
+    });
   });
 });

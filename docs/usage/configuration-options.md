@@ -1290,7 +1290,7 @@ Note that this limit is enforced on a per-repository basis.
 
 ## prNotPendingHours
 
-If you configure `prCreation=not-pending`, then Renovate will wait until tests are non-pending (all pass or at least one fails) before creating PRs. However there are cases where PRs may remain in pending state forever, e.g. absence of tests or status checks that are configure to pending indefinitely. Therefore we configure an upper limit - default 24 hours - for how long we wait until creating a PR. Note also this is the same length of time as for Renovate's own `unpublishSafe` status check for npm.
+If you configure `prCreation=not-pending`, then Renovate will wait until tests are non-pending (all pass or at least one fails) before creating PRs. However there are cases where PRs may remain in pending state forever, e.g. absence of tests or status checks that are configure to pending indefinitely. Therefore we configure an upper limit for how long we wait until creating a PR.
 
 ## prPriority
 
@@ -1582,12 +1582,6 @@ It is only recommended to configure this field if you wish to use the `schedules
 ## unicodeEmoji
 
 If enabled emoji shortcodes (`:warning:`) are replaced with their unicode equivalents (`⚠️`)
-
-## unpublishSafe
-
-It is not known by many that npm package authors and collaborators can _delete_ an npm version if it is less than 24 hours old. e.g. version 1.0.0 might exist, then version 1.1.0 is released, and then version 1.1.0 might get deleted hours later. This means that version 1.1.0 essentially "disappears" and 1.0.0 returns to being the "latest". If you have installed 1.1.0 during that time then your build is essentially broken.
-
-Enabling `unpublishSafe` will add a `renovate/unpublish-safe` status check with value pending to every branch to warn you about this possibility. It can be handy when used with the `prCreation` = `not-pending` configuration option - that way you won't get the PR raised until after a patch is 24 hours old or more.
 
 ## updateLockFiles
 

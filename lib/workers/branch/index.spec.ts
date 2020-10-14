@@ -83,12 +83,20 @@ describe('workers/branch', () => {
       const res = await branchWorker.processBranch(config);
       expect(res).toEqual(ProcessBranchResult.NotScheduled);
     });
-    it('skips branch if not unpublishSafe + pending', async () => {
+    it('skips branch for fresh release with stabilityDays', async () => {
       schedule.isScheduledNow.mockReturnValueOnce(true);
-      config.unpublishSafe = true;
-      config.canBeUnpublished = true;
       config.prCreation = 'not-pending';
-      git.branchExists.mockReturnValueOnce(true);
+      config.upgrades = [
+        {
+          releaseTimestamp: new Date('2019-01-01').getTime(),
+          stabilityDays: 1,
+        },
+        {
+          releaseTimestamp: new Date().getTime(),
+          stabilityDays: 1,
+        },
+      ] as never;
+      git.branchExists.mockReturnValueOnce(false);
       const res = await branchWorker.processBranch(config);
       expect(res).toEqual(ProcessBranchResult.Pending);
     });

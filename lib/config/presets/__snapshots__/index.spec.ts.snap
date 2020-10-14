@@ -398,7 +398,6 @@ Object {
   "separateMajorMinor": true,
   "separateMinorPatch": false,
   "timezone": "Asia/Taipei",
-  "unpublishSafe": false,
 }
 `;
 

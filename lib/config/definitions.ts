@@ -1062,7 +1062,7 @@ const options: RenovateOptions[] = [
     stage: 'package',
     type: 'object',
     default: {
-      unpublishSafe: false,
+      prNotPendingHours: 0,
       recreateClosed: true,
       rebaseWhen: 'behind-base-branch',
       groupName: 'Pin Dependencies',
@@ -1138,12 +1138,6 @@ const options: RenovateOptions[] = [
     default: 'rebase',
   },
   {
-    name: 'unpublishSafe',
-    description: 'Set a status check for unpublish-safe upgrades',
-    type: 'boolean',
-    default: false,
-  },
-  {
     name: 'stabilityDays',
     description:
       'Number of days required before a new release is considered to be stabilized.',
@@ -1161,7 +1155,6 @@ const options: RenovateOptions[] = [
     name: 'prNotPendingHours',
     description: 'Timeout in hours for when prCreation=not-pending',
     type: 'integer',
-    // Must be at least 24 hours to give time for the unpublishSafe check to "complete".
     default: 25,
   },
   {

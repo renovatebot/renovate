@@ -221,19 +221,6 @@ export async function processBranch(
     }
 
     if (
-      config.updateType !== 'lockFileMaintenance' &&
-      config.unpublishSafe &&
-      config.canBeUnpublished &&
-      (config.prCreation === 'not-pending' ||
-        /* istanbul ignore next */ config.prCreation === 'status-success')
-    ) {
-      logger.debug(
-        'Skipping branch creation due to unpublishSafe + status checks'
-      );
-      return ProcessBranchResult.Pending;
-    }
-
-    if (
       config.upgrades.some(
         (upgrade) => upgrade.stabilityDays && upgrade.releaseTimestamp
       )
@@ -250,6 +237,7 @@ export async function processBranch(
               new Date(upgrade.releaseTimestamp).getTime()) /
               oneDay
           );
+          debugger;
           if (
             !dependencyDashboardCheck &&
             daysElapsed < upgrade.stabilityDays
@@ -488,6 +476,7 @@ export async function processBranch(
       }
     }
   } catch (err) /* istanbul ignore next */ {
+    debugger;
     if (err.statusCode === 404) {
       throw new Error(REPOSITORY_CHANGED);
     }

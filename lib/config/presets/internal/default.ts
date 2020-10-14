@@ -210,16 +210,6 @@ export const presets: Record<string, Preset> = {
       'Rebase existing PRs any time the base branch has been updated',
     rebaseWhen: 'behind-base-branch',
   },
-  unpublishSafe: {
-    description:
-      'Set a status check to warn when upgrades <  24 hours old might get unpublished',
-    unpublishSafe: true,
-  },
-  unpublishSafeDisabled: {
-    description:
-      "Create branches/PRs for dependency upgrades as soon as they're available",
-    unpublishSafe: false,
-  },
   prImmediately: {
     description: 'Raise PRs immediately (after branch is created)',
     prCreation: 'immediate',
