@@ -251,17 +251,24 @@ export function migrateConfig(
               'masterIssue',
               'dependencyDashboard'
             );
-          } else if (
-            is.string(val[i]) &&
-            (val[i] === 'default:unpublishSafe' ||
-              val[i] === ':unpublishSafe' ||
-              val[i] === 'default:unpublishSafeDisabled' ||
-              val[i] === ':unpublishSafeDisabled')
-          ) {
-            isMigrated = true;
-            migratedConfig.extends[i] = val[i].replace(/^.*?:/, 'npm:');
           }
         }
+      } else if (key === 'unpublishSafe') {
+        isMigrated = true;
+        if (val === true) {
+          const presets = is.array<string>(migratedConfig.extends)
+            ? migratedConfig.extends.map((preset) =>
+                is.string(preset) && /^(default)?:unpublishSafe$/.test(preset)
+                  ? preset.replace(/^.*?:/, 'npm:')
+                  : preset
+              )
+            : [];
+          if (!presets.includes('npm:unpublishSafe')) {
+            presets.push('npm:unpublishSafe');
+          }
+          migratedConfig.extends = presets;
+        }
+        delete migratedConfig.unpublishSafe;
       } else if (key === 'versionScheme') {
         isMigrated = true;
         migratedConfig.versioning = val;
@@ -533,25 +540,6 @@ export function migrateConfig(
     if (migratedConfig.endpoints) {
       migratedConfig.hostRules = migratedConfig.endpoints;
       delete migratedConfig.endpoints;
-      isMigrated = true;
-    }
-
-    if (typeof migratedConfig.unpublishSafe === 'boolean') {
-      if (migratedConfig.unpublishSafe) {
-        const ext = migratedConfig.extends || [];
-        if (!ext.includes('npm:unpublishSafe')) {
-          ext.push('npm:unpublishSafe');
-        }
-        migratedConfig.extends = ext;
-      }
-      delete migratedConfig.unpublishSafe;
-      isMigrated = true;
-    }
-
-    if (migratedConfig.extends && is.array<string>(migratedConfig.extends)) {
-      migratedConfig.extends = migratedConfig.extends.filter(
-        (val) => val !== 'npm:unpublishSafeDisabled'
-      );
       isMigrated = true;
     }
 
