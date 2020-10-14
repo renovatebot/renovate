@@ -36,7 +36,7 @@ import { commitFilesToBranch } from './commit';
 import { getUpdatedPackageFiles } from './get-updated';
 import { shouldReuseExistingBranch } from './reuse';
 import { isScheduledNow } from './schedule';
-import { setStability, setUnpublishable } from './status-checks';
+import { setStability } from './status-checks';
 
 function rebaseCheck(config: RenovateConfig, branchPr: Pr): boolean {
   const titleRebase = branchPr.title?.startsWith('rebase!');
@@ -443,7 +443,6 @@ export async function processBranch(
     }
     // Set branch statuses
     await setStability(config);
-    await setUnpublishable(config);
 
     // break if we pushed a new commit because status check are pretty sure pending but maybe not reported yet
     if (

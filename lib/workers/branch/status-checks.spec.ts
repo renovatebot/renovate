@@ -1,11 +1,6 @@
 import { defaultConfig, platform } from '../../../test/util';
 import { BranchStatus } from '../../types';
-import {
-  StabilityConfig,
-  UnpublishableConfig,
-  setStability,
-  setUnpublishable,
-} from './status-checks';
+import { StabilityConfig, setStability } from './status-checks';
 
 describe('workers/branch/status-checks', () => {
   describe('setStability', () => {
@@ -34,40 +29,6 @@ describe('workers/branch/status-checks', () => {
       await setStability(config);
       expect(platform.getBranchStatusCheck).toHaveBeenCalledTimes(1);
       expect(platform.setBranchStatus).toHaveBeenCalledTimes(1);
-    });
-  });
-  describe('setUnpublishable', () => {
-    let config: UnpublishableConfig;
-    beforeEach(() => {
-      config = {
-        ...defaultConfig,
-        branchName: 'renovate/some-branch',
-      };
-    });
-    afterEach(() => {
-      jest.resetAllMocks();
-    });
-    it('returns if not configured', async () => {
-      await setUnpublishable(config);
-      expect(platform.getBranchStatusCheck).toHaveBeenCalledTimes(1);
-    });
-    it('defaults to canBeUnpublished', async () => {
-      await setUnpublishable(config);
-      expect(platform.getBranchStatusCheck).toHaveBeenCalledTimes(1);
-      expect(platform.setBranchStatus).toHaveBeenCalledTimes(1);
-    });
-    it('finds canBeUnpublished false and sets status', async () => {
-      config.canBeUnpublished = true;
-      await setUnpublishable(config);
-      expect(platform.getBranchStatusCheck).toHaveBeenCalledTimes(1);
-      expect(platform.setBranchStatus).toHaveBeenCalledTimes(1);
-    });
-    it('finds canBeUnpublished false and skips status', async () => {
-      config.canBeUnpublished = false;
-      platform.getBranchStatusCheck.mockResolvedValueOnce(BranchStatus.green);
-      await setUnpublishable(config);
-      expect(platform.getBranchStatusCheck).toHaveBeenCalledTimes(1);
-      expect(platform.setBranchStatus).toHaveBeenCalledTimes(0);
     });
   });
 });
