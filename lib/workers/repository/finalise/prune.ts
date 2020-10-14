@@ -31,6 +31,10 @@ async function cleanUpBranches(
               `PRUNING-DISABLED: Would update pr ${pr.number} to ${pr.title} - autoclosed`
             );
           } else {
+            logger.info(
+              { branchName, prNo: pr.number, prTitle: pr.title },
+              'Autoclosing PR'
+            );
             await platform.updatePr({
               number: pr.number,
               prTitle: `${pr.title} - autoclosed`,
@@ -40,8 +44,11 @@ async function cleanUpBranches(
         }
       }
 
-      logger.debug({ branch: branchName }, `Deleting orphan branch`);
       if (branchIsModified) {
+        logger.debug(
+          { branch: branchName },
+          `Skipping orphan branch deletion as branch has been modified`
+        );
         if (pr) {
           logger.debug(
             { prNo: pr?.number, prTitle: pr?.title },
@@ -65,10 +72,8 @@ async function cleanUpBranches(
           `PRUNING-DISABLED: Would deleting orphan branch ${branchName}`
         );
       } else {
+        logger.debug({ branch: branchName }, `Deleting orphan branch`);
         await deleteBranch(branchName);
-      }
-      if (pr && !branchIsModified) {
-        logger.info({ prNo: pr.number, prTitle: pr.title }, 'PR autoclosed');
       }
     } catch (err) /* istanbul ignore next */ {
       if (err.message !== REPOSITORY_CHANGED) {
