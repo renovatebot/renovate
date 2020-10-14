@@ -38,7 +38,6 @@ export function isGetPkgReleasesConfig(
 }
 
 export interface Release {
-  canBeUnpublished?: boolean;
   changelogUrl?: string;
   checksumUrl?: string;
   downloadUrl?: string;
