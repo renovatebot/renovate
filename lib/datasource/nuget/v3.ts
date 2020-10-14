@@ -79,9 +79,9 @@ export async function getResourceUrl(
 
     await packageCache.set(cacheNamespace, resultCacheKey, serviceId, 60);
     return serviceId;
-  } catch (e) {
+  } catch (err) {
     logger.debug(
-      { e },
+      { err },
       `nuget registry failure: can't get ${resourceType} form ${url}`
     );
     return null;

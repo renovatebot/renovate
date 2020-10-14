@@ -114,7 +114,7 @@
     "@sindresorhus/is": "3.1.2",
     "@yarnpkg/core": "2.3.1",
     "@yarnpkg/parsers": "2.3.0",
-    "aws-sdk": "2.759.0",
+    "aws-sdk": "2.771.0",
     "azure-devops-node-api": "10.1.1",
     "bunyan": "1.8.14",
     "cacache": "15.0.5",
@@ -174,7 +174,7 @@
     "xmldoc": "1.1.2"
   },
   "optionalDependencies": {
-    "re2": "1.15.5"
+    "re2": "1.15.6"
   },
   "devDependencies": {
     "@actions/core": "1.2.6",

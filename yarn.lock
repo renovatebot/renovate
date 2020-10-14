@@ -2397,10 +2397,10 @@ aws-sdk-mock@5.1.0:
     sinon "^9.0.1"
     traverse "^0.6.6"
 
-aws-sdk@2.759.0, aws-sdk@^2.637.0:
-  version "2.759.0"
-  resolved "https://registry.yarnpkg.com/aws-sdk/-/aws-sdk-2.759.0.tgz#de4029dd6c804dd9e5570728e9206a103ddf9935"
-  integrity sha512-XTmt6b8NfluqmixO18Bu9ZttZMW9rwEDVO+XITsIQ5dZvLectwrjlbEn2refudJI1Y2pxLguw+tABvXi1wtbbQ==
+aws-sdk@2.771.0, aws-sdk@^2.637.0:
+  version "2.771.0"
+  resolved "https://registry.yarnpkg.com/aws-sdk/-/aws-sdk-2.771.0.tgz#ff4beb0a04d6ab1ae962c85dfb42e3e9bfe2b93b"
+  integrity sha512-fqNGusCwkdemx3yFqvQbU1+xq/PB2wGq7EQIrrTZx/zxfXUp+7+PnrHzXtViCRghN0tylLghBfWYD4VcVcqi7g==
   dependencies:
     buffer "4.9.2"
     events "1.1.1"
@@ -5179,10 +5179,10 @@ init-package-json@^1.10.3:
     validate-npm-package-license "^3.0.1"
     validate-npm-package-name "^3.0.0"
 
-install-artifact-from-github@^1.0.2:
-  version "1.0.2"
-  resolved "https://registry.yarnpkg.com/install-artifact-from-github/-/install-artifact-from-github-1.0.2.tgz#e1e478dd29880b9112ecd684a84029603e234a9d"
-  integrity sha512-yuMFBSVIP3vD0SDBGUqeIpgOAIlFx8eQFknQObpkYEM5gsl9hy6R9Ms3aV+Vw9MMyYsoPMeex0XDnfgY7uzc+Q==
+install-artifact-from-github@^1.1.1:
+  version "1.1.1"
+  resolved "https://registry.yarnpkg.com/install-artifact-from-github/-/install-artifact-from-github-1.1.1.tgz#587cd8b1a8ed97f4d4230cd7f76bec7a0c4ff292"
+  integrity sha512-ZA4d8ABVKdGoWjYK+EyHrOfMRpOLyrBX/9dVts2ULDBRuFWObQ/I3o4f80Ca8klbYQAa5oIRG7XbU22r74A+Ew==
 
 interpret@^1.0.0:
   version "1.4.0"
@@ -8573,12 +8573,12 @@ rc@^1.0.1, rc@^1.1.6, rc@^1.2.8:
     minimist "^1.2.0"
     strip-json-comments "~2.0.1"
 
-re2@1.15.5:
-  version "1.15.5"
-  resolved "https://registry.yarnpkg.com/re2/-/re2-1.15.5.tgz#070b728933433ab605134b827a58919038cc8048"
-  integrity sha512-DwlSUKqhBbECQYbJOudEC20d4Y4KnE7H6gFh1n7zRe10nFP7X2UKZ0ko2rz2islKyjl5KrPyCrxh9hJfiVx0VQ==
+re2@1.15.6:
+  version "1.15.6"
+  resolved "https://registry.yarnpkg.com/re2/-/re2-1.15.6.tgz#838f86ea4205ffec47c7f5802b12a8fee33472b3"
+  integrity sha512-SsxGuKiizqOPBwm2YkMfh+Wsj+02sqP9y8xydC9KbZqHuY2qdjEyoJAfBapKSTK130gZMXVE6Qm+GTlOfjwqJw==
   dependencies:
-    install-artifact-from-github "^1.0.2"
+    install-artifact-from-github "^1.1.1"
     nan "^2.14.1"
     node-gyp "^7.1.0"
 
