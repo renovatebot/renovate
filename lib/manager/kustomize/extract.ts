@@ -79,7 +79,7 @@ export function extractImage(image: Image): PackageDependency | null {
 export function parseKustomize(content: string): Kustomize | null {
   let pkg = null;
   try {
-    pkg = safeLoad(content);
+    pkg = safeLoad(content, { json: true });
   } catch (e) /* istanbul ignore next */ {
     return null;
   }
