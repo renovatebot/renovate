@@ -1111,7 +1111,7 @@ export async function ensureIssue({
 }
 
 export async function ensureIssueClosing(title: string): Promise<void> {
-  logger.debug(`ensureIssueClosing(${title})`);
+  logger.trace(`ensureIssueClosing(${title})`);
   const issueList = await getIssueList();
   for (const issue of issueList) {
     if (issue.state === 'open' && issue.title === title) {
