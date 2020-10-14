@@ -237,7 +237,6 @@ export async function processBranch(
               new Date(upgrade.releaseTimestamp).getTime()) /
               oneDay
           );
-          debugger;
           if (
             !dependencyDashboardCheck &&
             daysElapsed < upgrade.stabilityDays
@@ -476,7 +475,6 @@ export async function processBranch(
       }
     }
   } catch (err) /* istanbul ignore next */ {
-    debugger;
     if (err.statusCode === 404) {
       throw new Error(REPOSITORY_CHANGED);
     }
