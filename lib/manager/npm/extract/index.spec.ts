@@ -215,6 +215,7 @@ describe('manager/npm/extract', () => {
           npm: '^8.0.0',
           pnpm: '^1.2.0',
           yarn: 'disabled',
+          vscode: '>=1.49.3',
         },
         main: 'index.js',
       };
