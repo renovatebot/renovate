@@ -466,6 +466,7 @@ describe('config/migration', () => {
           'foo',
           'npm:unpublishSafeDisabled',
           'default:unpublishSafeDisabled',
+          ':unpublishSafeDisabled',
           'bar',
         ],
       };
@@ -477,7 +478,12 @@ describe('config/migration', () => {
 
       config = {
         unpublishSafe: false,
-        extends: ['foo', 'default:unpublishSafeDisabled', 'bar'],
+        extends: [
+          'foo',
+          'default:unpublishSafeDisabled',
+          ':unpublishSafeDisabled',
+          'bar',
+        ],
       };
       res = configMigration.migrateConfig(config);
       expect(res.isMigrated).toBe(true);
@@ -487,7 +493,12 @@ describe('config/migration', () => {
 
       config = {
         unpublishSafe: true,
-        extends: ['foo', 'default:unpublishSafeDisabled', 'bar'],
+        extends: [
+          'foo',
+          'default:unpublishSafeDisabled',
+          ':unpublishSafeDisabled',
+          'bar',
+        ],
       };
       res = configMigration.migrateConfig(config);
       expect(res.isMigrated).toBe(true);

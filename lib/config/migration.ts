@@ -254,10 +254,12 @@ export function migrateConfig(
           } else if (
             is.string(val[i]) &&
             (val[i] === 'default:unpublishSafe' ||
-              val[i] === 'default:unpublishSafeDisabled')
+              val[i] === ':unpublishSafe' ||
+              val[i] === 'default:unpublishSafeDisabled' ||
+              val[i] === ':unpublishSafeDisabled')
           ) {
             isMigrated = true;
-            migratedConfig.extends[i] = val[i].replace('default:', 'npm:');
+            migratedConfig.extends[i] = val[i].replace(/^.*?:/, 'npm:');
           }
         }
       } else if (key === 'versionScheme') {
