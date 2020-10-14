@@ -11,6 +11,15 @@ export const presets: Record<string, Preset> = {
       },
     ],
   },
+  disableTypesVSCode: {
+    description: 'Disable Renovate for <code>@types/vscode</code>.',
+    packageRules: [
+      {
+        packageNames: ['@types/vscode'],
+        enabled: false,
+      },
+    ],
+  },
   oddIsUnstable: {
     description: 'DEPRECATED: Odd version numbers are classified as unstable',
   },
