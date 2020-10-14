@@ -16,7 +16,6 @@ import * as _commit from './commit';
 import * as _getUpdated from './get-updated';
 import * as _reuse from './reuse';
 import * as _schedule from './schedule';
-import * as _statusChecks from './status-checks';
 import * as branchWorker from '.';
 
 jest.mock('./get-updated');
@@ -24,7 +23,6 @@ jest.mock('./schedule');
 jest.mock('./check-existing');
 jest.mock('./reuse');
 jest.mock('../../manager/npm/post-update');
-jest.mock('./status-checks');
 jest.mock('./automerge');
 jest.mock('./commit');
 jest.mock('../pr');
