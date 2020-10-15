@@ -186,6 +186,10 @@ export async function extractPackageFile(
         dep.datasource = datasourceNpm.id;
         dep.commitMessageTopic = 'pnpm';
         constraints.pnpm = dep.currentValue;
+      } else if (depName === 'vscode') {
+        dep.datasource = datasourceGithubTags.id;
+        dep.lookupName = 'microsoft/vscode';
+        constraints.vscode = dep.currentValue;
       } else {
         dep.skipReason = SkipReason.UnknownEngines;
       }

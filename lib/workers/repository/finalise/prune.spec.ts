@@ -50,6 +50,19 @@ describe('workers/repository/finalise/prune', () => {
       expect(git.deleteBranch).toHaveBeenCalledTimes(1);
       expect(platform.updatePr).toHaveBeenCalledTimes(1);
     });
+    it('skips rename but still deletes branch', async () => {
+      config.branchList = ['renovate/a', 'renovate/b'];
+      git.getBranchList.mockReturnValueOnce(
+        config.branchList.concat(['renovate/c'])
+      );
+      platform.findPr.mockResolvedValueOnce({
+        title: 'foo - autoclosed',
+      } as never);
+      await cleanup.pruneStaleBranches(config, config.branchList);
+      expect(git.getBranchList).toHaveBeenCalledTimes(1);
+      expect(git.deleteBranch).toHaveBeenCalledTimes(1);
+      expect(platform.updatePr).toHaveBeenCalledTimes(1);
+    });
     it('does nothing on dryRun', async () => {
       config.branchList = ['renovate/a', 'renovate/b'];
       config.dryRun = true;
@@ -104,6 +117,30 @@ describe('workers/repository/finalise/prune', () => {
       expect(git.deleteBranch).toHaveBeenCalledTimes(0);
       expect(platform.updatePr).toHaveBeenCalledTimes(0);
       expect(platform.ensureComment).toHaveBeenCalledTimes(0);
+    });
+    it('dry run delete branch no PR', async () => {
+      config.branchList = ['renovate/a', 'renovate/b'];
+      config.dryRun = true;
+      git.getBranchList.mockReturnValueOnce(
+        config.branchList.concat(['renovate/c'])
+      );
+      platform.findPr.mockResolvedValueOnce(null as never);
+      await cleanup.pruneStaleBranches(config, config.branchList);
+      expect(git.getBranchList).toHaveBeenCalledTimes(1);
+      expect(git.deleteBranch).toHaveBeenCalledTimes(0);
+      expect(platform.updatePr).toHaveBeenCalledTimes(0);
+    });
+    it('delete branch no PR', async () => {
+      config.branchList = ['renovate/a', 'renovate/b'];
+      config.dryRun = false;
+      git.getBranchList.mockReturnValueOnce(
+        config.branchList.concat(['renovate/c'])
+      );
+      platform.findPr.mockResolvedValueOnce(null as never);
+      await cleanup.pruneStaleBranches(config, config.branchList);
+      expect(git.getBranchList).toHaveBeenCalledTimes(1);
+      expect(git.deleteBranch).toHaveBeenCalledTimes(1);
+      expect(platform.updatePr).toHaveBeenCalledTimes(0);
     });
   });
 });

@@ -68,7 +68,6 @@ export async function writeUpdates(
     ) {
       deductPrRemainingCount = 1;
     }
-    // istanbul ignore if
     if (
       res === ProcessBranchResult.Pending &&
       !branchExisted &&
