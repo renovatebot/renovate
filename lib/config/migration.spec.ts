@@ -468,7 +468,7 @@ describe('config/migration', () => {
       res = configMigration.migrateConfig(config);
       expect(res.isMigrated).toBe(true);
       expect(res.migratedConfig).toMatchObject({
-        extends: ['foo', 'npm:unpublishSafe', 'bar'],
+        extends: ['foo', ':unpublishSafe', 'bar', 'npm:unpublishSafe'],
       });
 
       config = {
@@ -478,7 +478,7 @@ describe('config/migration', () => {
       res = configMigration.migrateConfig(config);
       expect(res.isMigrated).toBe(true);
       expect(res.migratedConfig).toMatchObject({
-        extends: ['foo', 'npm:unpublishSafe', 'bar'],
+        extends: ['foo', 'default:unpublishSafe', 'bar', 'npm:unpublishSafe'],
       });
 
       config = {

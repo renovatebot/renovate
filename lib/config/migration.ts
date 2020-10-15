@@ -256,17 +256,13 @@ export function migrateConfig(
       } else if (key === 'unpublishSafe') {
         isMigrated = true;
         if (val === true) {
-          const presets = is.array<string>(migratedConfig.extends)
-            ? migratedConfig.extends.map((preset) =>
-                is.string(preset) && /^(default)?:unpublishSafe$/.test(preset)
-                  ? preset.replace(/^.*?:/, 'npm:')
-                  : preset
-              )
-            : [];
-          if (!presets.includes('npm:unpublishSafe')) {
-            presets.push('npm:unpublishSafe');
+          migratedConfig.extends = migratedConfig.extends || [];
+          if (is.string(migratedConfig.extends)) {
+            migratedConfig.extends = [migratedConfig.extends];
           }
-          migratedConfig.extends = presets;
+          if (!migratedConfig.extends.includes('npm:unpublishSafe')) {
+            migratedConfig.extends.push('npm:unpublishSafe');
+          }
         }
         delete migratedConfig.unpublishSafe;
       } else if (key === 'versionScheme') {
