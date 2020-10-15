@@ -14,7 +14,9 @@ async function setStatusCheck(
     branchName,
     context
   );
-  if (existingState !== state) {
+  if (existingState === state) {
+    logger.debug(`Status check ${context} is already up-to-date`);
+  } else {
     logger.debug(`Updating ${context} status check state to ${state}`);
     await platform.setBranchStatus({
       branchName,

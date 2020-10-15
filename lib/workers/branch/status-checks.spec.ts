@@ -30,5 +30,12 @@ describe('workers/branch/status-checks', () => {
       expect(platform.getBranchStatusCheck).toHaveBeenCalledTimes(1);
       expect(platform.setBranchStatus).toHaveBeenCalledTimes(1);
     });
+    it('skips status if already set', async () => {
+      config.stabilityStatus = BranchStatus.green;
+      platform.getBranchStatusCheck.mockResolvedValueOnce(BranchStatus.green);
+      await setStability(config);
+      expect(platform.getBranchStatusCheck).toHaveBeenCalledTimes(1);
+      expect(platform.setBranchStatus).toHaveBeenCalledTimes(0);
+    });
   });
 });
