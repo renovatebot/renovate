@@ -237,7 +237,13 @@ export function migrateConfig(
         } else {
           migratedConfig.semanticCommitScope = null;
         }
-      } else if (key === 'extends' && is.array<string>(val)) {
+      } else if (
+        key === 'extends' &&
+        (is.array<string>(val) || is.string(val))
+      ) {
+        if (is.string(migratedConfig.extends)) {
+          migratedConfig.extends = [migratedConfig.extends];
+        }
         for (let i = 0; i < val.length; i += 1) {
           if (val[i] === 'config:application' || val[i] === ':js-app') {
             isMigrated = true;

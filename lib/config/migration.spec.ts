@@ -118,7 +118,7 @@ describe('config/migration', () => {
           pathRules: [
             {
               paths: ['node/**'],
-              extends: ['node'],
+              extends: 'node',
             },
           ],
         },
@@ -445,6 +445,13 @@ describe('config/migration', () => {
       expect(res.isMigrated).toBe(true);
       expect(res.migratedConfig).toMatchObject({
         extends: ['npm:unpublishSafe'],
+      });
+
+      config = { unpublishSafe: true, extends: 'foo' } as never;
+      res = configMigration.migrateConfig(config);
+      expect(res.isMigrated).toBe(true);
+      expect(res.migratedConfig).toMatchObject({
+        extends: ['foo', 'npm:unpublishSafe'],
       });
 
       config = { unpublishSafe: true, extends: [] };
