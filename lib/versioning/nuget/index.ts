@@ -1,5 +1,6 @@
 import { VersioningApi } from '../common';
 import * as generic from '../loose/generic';
+import { parseVersion } from './parse';
 
 export const id = 'nuget';
 export const displayName = 'NuGet';
@@ -8,21 +9,9 @@ export const urls = [
 ];
 export const supportsRanges = false;
 
-const pattern = /^(\d+(?:\.\d+)*)(-[^+]+)?(\+.*)?$/;
-
-function parse(version: string): any {
-  const matches = pattern.exec(version);
-  if (!matches) {
-    return null;
-  }
-  const [, prefix, prereleasesuffix] = matches;
-  const release = prefix.split('.').map(Number);
-  return { release, suffix: prereleasesuffix || '' };
-}
-
 function compare(version1: string, vervion2: string): number {
-  const parsed1 = parse(version1);
-  const parsed2 = parse(vervion2);
+  const parsed1 = parseVersion(version1);
+  const parsed2 = parseVersion(vervion2);
   // istanbul ignore if
   if (!(parsed1 && parsed2)) {
     return 1;
@@ -51,13 +40,13 @@ function compare(version1: string, vervion2: string): number {
 }
 
 function isStable(version: string): boolean {
-  const parsed = parse(version);
+  const parsed = parseVersion(version);
   return parsed && parsed.suffix === '';
 }
 
 export const api: VersioningApi = {
   ...generic.create({
-    parse,
+    parse: parseVersion,
     compare,
   }),
   isStable,
