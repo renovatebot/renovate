@@ -109,6 +109,23 @@ describe('applyPackageRules()', () => {
     expect(res.x).toBeUndefined();
     expect(res.y).toBeUndefined();
   });
+  it('ignores patterns if lock file maintenance', () => {
+    const dep = {
+      enabled: true,
+      packagePatterns: ['.*'],
+      updateType: 'lockFileMaintenance' as UpdateType,
+      packageRules: [
+        {
+          excludePackagePatterns: ['^foo'],
+          enabled: false,
+        },
+      ],
+    };
+    const res = applyPackageRules(dep);
+    expect(res.enabled).toBe(true);
+    const res2 = applyPackageRules({ ...dep, depName: 'anything' });
+    expect(res2.enabled).toBe(false);
+  });
   it('matches anything if missing inclusive rules', () => {
     const config: TestConfig = {
       packageRules: [
