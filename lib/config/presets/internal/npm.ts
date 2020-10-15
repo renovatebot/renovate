@@ -6,7 +6,6 @@ export const presets: Record<string, Preset> = {
       'Set a status check pending for 3 days from release timestamp to guard against npm unpublishing',
     npm: {
       stabilityDays: 3,
-      prNotPendingHours: 73,
     },
   },
 };
