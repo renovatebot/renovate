@@ -1292,6 +1292,8 @@ Note that this limit is enforced on a per-repository basis.
 
 If you configure `prCreation=not-pending`, then Renovate will wait until tests are non-pending (all pass or at least one fails) before creating PRs. However there are cases where PRs may remain in pending state forever, e.g. absence of tests or status checks that are configure to pending indefinitely. Therefore we configure an upper limit for how long we wait until creating a PR.
 
+Note: if the option `stabilityDays` is non-zero then Renovate will disable `prNotPendingHours` functionality.
+
 ## prPriority
 
 Sometimes Renovate needs to rate limit its creation of PRs, e.g. hourly or concurrent PR limits. In such cases it sorts/prioritizes by default based on the update type (e.g. patches raised before minor, minor before major). If you have dependencies that are more or less important than others then you can use the `prPriority` field for PR sorting. The default value is 0, so therefore setting a negative value will make dependencies sort last, while higher values sort first.
