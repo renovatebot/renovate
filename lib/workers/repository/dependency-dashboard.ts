@@ -55,6 +55,7 @@ export async function ensureMasterIssue(
   // legacy/migrated issue
   const reuseTitle = 'Update Dependencies (Renovate Bot)';
   if (
+    config.onboarding ||
     !(
       config.dependencyDashboard ||
       branches.some(
