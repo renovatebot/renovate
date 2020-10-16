@@ -67,7 +67,7 @@ export async function ensureMasterIssue(
     return;
   }
   // istanbul ignore if
-  if (config.onboarding === true) {
+  if (config.repoIsOnboarded === false) {
     logger.debug('Repo is onboarding - skipping dependency dashboard');
     return;
   }
