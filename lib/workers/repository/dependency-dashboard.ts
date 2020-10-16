@@ -55,7 +55,6 @@ export async function ensureMasterIssue(
   // legacy/migrated issue
   const reuseTitle = 'Update Dependencies (Renovate Bot)';
   if (
-    config.onboarding ||
     !(
       config.dependencyDashboard ||
       branches.some(
@@ -65,6 +64,11 @@ export async function ensureMasterIssue(
       )
     )
   ) {
+    return;
+  }
+  // istanbul ignore if
+  if (config.repoIsOnboarded === false) {
+    logger.debug('Repo is onboarding - skipping dependency dashboard');
     return;
   }
   logger.debug('Ensuring Dependency Dashboard');

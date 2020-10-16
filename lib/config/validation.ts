@@ -71,6 +71,14 @@ export async function validateConfig(
 
   for (const [key, val] of Object.entries(config)) {
     const currentPath = parentPath ? `${parentPath}.${key}` : key;
+    // istanbul ignore if
+    if (key === '__proto__') {
+      errors.push({
+        depName: 'Config security error',
+        message: '__proto__',
+      });
+      continue; // eslint-disable-line
+    }
     if (
       !isIgnored(key) && // We need to ignore some reserved keys
       !(is as any).function(val) // Ignore all functions
