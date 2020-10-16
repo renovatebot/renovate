@@ -167,7 +167,7 @@
     "slugify": "1.4.5",
     "toml": "3.0.0",
     "traverse": "0.6.6",
-    "upath": "1.2.0",
+    "upath": "2.0.0",
     "url-join": "4.0.1",
     "validate-npm-package-name": "3.0.0",
     "www-authenticate": "0.6.2",
