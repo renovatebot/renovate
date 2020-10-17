@@ -1,4 +1,5 @@
 import is from '@sindresorhus/is';
+import { getManagerList } from '../manager';
 import { regEx } from '../util/regex';
 import * as template from '../util/template';
 import { hasValidSchedule, hasValidTimezone } from '../workers/branch/schedule';
@@ -14,6 +15,15 @@ let optionTypes: Record<string, RenovateOptions['type']>;
 export interface ValidationResult {
   errors: ValidationMessage[];
   warnings: ValidationMessage[];
+}
+
+const managerList = getManagerList();
+
+function isManagerPath(parentPath: string): boolean {
+  return (
+    /^regexManagers\[[0-9]+]$/.test(parentPath) ||
+    managerList.includes(parentPath)
+  );
 }
 
 export async function validateConfig(
@@ -78,6 +88,14 @@ export async function validateConfig(
         message: '__proto__',
       });
       continue; // eslint-disable-line
+    }
+    if (key === 'fileMatch' && !isManagerPath(parentPath)) {
+      errors.push({
+        depName: 'Config error',
+        message: `Wrong parent for "fileMatch" field: ${
+          parentPath || '(toplevel)'
+        }`,
+      });
     }
     if (
       !isIgnored(key) && // We need to ignore some reserved keys

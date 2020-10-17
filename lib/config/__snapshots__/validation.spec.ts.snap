@@ -79,7 +79,7 @@ exports[`config/validation validateConfig(config) errors for unsafe fileMatches 
 Array [
   Object {
     "depName": "Configuration Error",
-    "message": "Invalid regExp for docker.fileMatch: \`x?+\`",
+    "message": "Invalid regExp for dockerfile.fileMatch: \`x?+\`",
   },
   Object {
     "depName": "Configuration Error",
@@ -102,6 +102,19 @@ Array [
   Object {
     "depName": "Configuration Error",
     "message": "Invalid alias object configuration",
+  },
+]
+`;
+
+exports[`config/validation validateConfig(config) errors if fileMatch has wrong parent 1`] = `
+Array [
+  Object {
+    "depName": "Config error",
+    "message": "Wrong parent for \\"fileMatch\\" field: (toplevel)",
+  },
+  Object {
+    "depName": "Config error",
+    "message": "Wrong parent for \\"fileMatch\\" field: npm.gradle",
   },
 ]
 `;
@@ -165,6 +178,15 @@ Array [
   Object {
     "depName": "Configuration Error",
     "message": "packageNames: packageNames should be inside a \`packageRule\` only",
+  },
+]
+`;
+
+exports[`config/validation validateConfig(config) validates regEx for each fileMatch 1`] = `
+Array [
+  Object {
+    "depName": "Configuration Error",
+    "message": "Invalid regExp for regexManagers[0].fileMatch: \`***$}{]][\`",
   },
 ]
 `;
