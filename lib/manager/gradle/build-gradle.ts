@@ -1,7 +1,5 @@
 import { regEx } from '../../util/regex';
 import { BuildDependency } from './gradle-updates-report';
-import { readLocalFile } from '../../util/fs';
-import { logger } from '../../logger';
 
 /**
  * Functions adapted/ported from https://github.com/patrikerdes/gradle-use-latest-versions-plugin
