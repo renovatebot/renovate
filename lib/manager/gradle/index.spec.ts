@@ -60,6 +60,7 @@ async function setupMocks() {
   fs.readLocalFile.mockResolvedValue(`
     dependency 'foo:foo:1.2.3'
     dependency "bar:bar:3.4.5"
+    mavenBom 'baz:baz:0.0.1'
   `);
   env.getChildProcessEnv.mockReturnValue(envMock.basic);
   await util.setUtilConfig(baseConfig);

@@ -7,7 +7,6 @@ import { logger } from '../../logger';
 import { ExternalHostError } from '../../types/errors/external-host-error';
 import { ExecOptions, exec } from '../../util/exec';
 import { readLocalFile } from '../../util/fs';
-import { regEx } from '../../util/regex';
 import * as gradleVersioning from '../../versioning/gradle';
 import {
   ExtractConfig,
@@ -18,11 +17,11 @@ import {
 import {
   GradleDependency,
   collectVersionVariables,
+  extractAdditionalDeps,
   init,
   updateGradleVersion,
 } from './build-gradle';
 import {
-  BuildDependency,
   createRenovateGradlePlugin,
   extractDependenciesFromUpdatesReport,
 } from './gradle-updates-report';
@@ -84,40 +83,6 @@ export async function executeGradle(
   logger.debug('Gradle report complete');
 }
 
-const additionalKeywords = ['mavenBom'].join('|');
-const additionalKeywordsRegex = regEx(
-  `[\\s\\n{](${additionalKeywords})\\s*['"](?<depName>[a-zA-Z][-_a-zA-Z0-9.]*?:[a-zA-Z][-_a-zA-Z0-9.]*?):(?<currentValue>[a-zA-Z0-9][-.a-zA-Z0-9]*?)['"]`
-);
-
-async function extractAdditionalDependencies(
-  packageFiles: string[],
-  deps: BuildDependency[]
-): Promise<void> {
-  const registryUrls = deps[0]?.registryUrls;
-  for (const packageFile of packageFiles) {
-    const content = await readLocalFile(packageFile, 'utf8');
-    if (content) {
-      for (const line of content.split(/\s*\n+/)) {
-        const match = additionalKeywordsRegex.exec(line);
-        if (match) {
-          const { depName, currentValue } = match.groups;
-          const [name, depGroup] = depName.split(':');
-          deps.push({
-            name,
-            depGroup,
-            depName,
-            currentValue,
-            ...(registryUrls && { registryUrls }),
-          });
-        }
-      }
-    } else {
-      // istanbul ignore next
-      logger.debug({ packageFile }, 'packageFile has no content');
-    }
-  }
-}
-
 export async function extractAllPackageFiles(
   config: ExtractConfig,
   packageFiles: string[]
@@ -156,7 +121,6 @@ export async function extractAllPackageFiles(
   init();
 
   const dependencies = await extractDependenciesFromUpdatesReport(cwd);
-  await extractAdditionalDependencies(packageFiles, dependencies);
 
   if (dependencies.length === 0) {
     return [];
@@ -166,6 +130,7 @@ export async function extractAllPackageFiles(
   for (const packageFile of packageFiles) {
     const content = await readLocalFile(packageFile, 'utf8');
     if (content) {
+      extractAdditionalDeps(content, dependencies);
       gradleFiles.push({
         packageFile,
         datasource: datasourceMaven.id,

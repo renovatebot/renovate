@@ -1,5 +1,7 @@
 import { regEx } from '../../util/regex';
 import { BuildDependency } from './gradle-updates-report';
+import { readLocalFile } from '../../util/fs';
+import { logger } from '../../logger';
 
 /**
  * Functions adapted/ported from https://github.com/patrikerdes/gradle-use-latest-versions-plugin
@@ -386,4 +388,37 @@ export function updateGradleVersion(
     }
   }
   return buildGradleContent;
+}
+
+const additionalKeywords = ['mavenBom'].join('|');
+
+const additionalKeywordsRegex = regEx(
+  `[\\s\\n{](${additionalKeywords})\\s*['"](?<depName>[a-zA-Z][-_a-zA-Z0-9.]*?:[a-zA-Z][-_a-zA-Z0-9.]*?):(?<currentValue>[a-zA-Z0-9][-.a-zA-Z0-9]*?)['"]`
+);
+
+export function extractAdditionalDeps(
+  content: string,
+  deps: BuildDependency[]
+): void {
+  const registryUrls = deps[0]?.registryUrls;
+  for (const line of content.split(/\s*\n+/)) {
+    const match = additionalKeywordsRegex.exec(line);
+    if (match) {
+      const { depName, currentValue } = match.groups;
+      const [name, depGroup] = depName.split(':');
+      if (
+        !deps.some(
+          (dep) => dep.depName === depName && dep.currentValue === currentValue
+        )
+      ) {
+        deps.push({
+          name,
+          depGroup,
+          depName,
+          currentValue,
+          ...(registryUrls && { registryUrls }),
+        });
+      }
+    }
+  }
 }

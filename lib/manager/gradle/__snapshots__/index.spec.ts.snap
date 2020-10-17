@@ -245,6 +245,16 @@ Array [
           "https://jitpack.io",
         ],
       },
+      Object {
+        "currentValue": "0.0.1",
+        "depGroup": "baz",
+        "depName": "baz:baz",
+        "name": "baz",
+        "registryUrls": Array [
+          "https://repo.maven.apache.org/maven2/",
+          "https://jitpack.io",
+        ],
+      },
     ],
     "packageFile": "build.gradle",
   },
@@ -318,6 +328,16 @@ Array [
         "depGroup": "bar",
         "depName": "bar:bar",
         "name": "bar",
+        "registryUrls": Array [
+          "https://repo.maven.apache.org/maven2/",
+          "https://jitpack.io",
+        ],
+      },
+      Object {
+        "currentValue": "0.0.1",
+        "depGroup": "baz",
+        "depName": "baz:baz",
+        "name": "baz",
         "registryUrls": Array [
           "https://repo.maven.apache.org/maven2/",
           "https://jitpack.io",
@@ -430,6 +450,16 @@ Array [
           "https://jitpack.io",
         ],
       },
+      Object {
+        "currentValue": "0.0.1",
+        "depGroup": "baz",
+        "depName": "baz:baz",
+        "name": "baz",
+        "registryUrls": Array [
+          "https://repo.maven.apache.org/maven2/",
+          "https://jitpack.io",
+        ],
+      },
     ],
     "packageFile": "foo/build.gradle",
   },
@@ -537,6 +567,16 @@ Array [
           "https://jitpack.io",
         ],
       },
+      Object {
+        "currentValue": "0.0.1",
+        "depGroup": "baz",
+        "depName": "baz:baz",
+        "name": "baz",
+        "registryUrls": Array [
+          "https://repo.maven.apache.org/maven2/",
+          "https://jitpack.io",
+        ],
+      },
     ],
     "packageFile": "build.gradle.kts",
   },
@@ -610,6 +650,16 @@ Array [
         "depGroup": "bar",
         "depName": "bar:bar",
         "name": "bar",
+        "registryUrls": Array [
+          "https://repo.maven.apache.org/maven2/",
+          "https://jitpack.io",
+        ],
+      },
+      Object {
+        "currentValue": "0.0.1",
+        "depGroup": "baz",
+        "depName": "baz:baz",
+        "name": "baz",
         "registryUrls": Array [
           "https://repo.maven.apache.org/maven2/",
           "https://jitpack.io",
@@ -802,6 +852,16 @@ Array [
         "depGroup": "org.spockframework",
         "depName": "org.spockframework:spock-core",
         "name": "spock-core",
+        "registryUrls": Array [
+          "https://repo.maven.apache.org/maven2/",
+          "https://jitpack.io",
+        ],
+      },
+      Object {
+        "currentValue": "0.0.1",
+        "depGroup": "baz",
+        "depName": "baz:baz",
+        "name": "baz",
         "registryUrls": Array [
           "https://repo.maven.apache.org/maven2/",
           "https://jitpack.io",
