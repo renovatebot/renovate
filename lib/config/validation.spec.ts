@@ -412,9 +412,10 @@ describe('config/validation', () => {
       const { warnings, errors } = await configValidation.validateConfig(
         config
       );
-      expect(warnings).toHaveLength(0);
-      expect(errors).toHaveLength(2);
+      expect(errors).toHaveLength(1);
+      expect(warnings).toHaveLength(1);
       expect(errors).toMatchSnapshot();
+      expect(warnings).toMatchSnapshot();
     });
   });
 });

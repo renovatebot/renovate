@@ -89,13 +89,18 @@ export async function validateConfig(
       });
       continue; // eslint-disable-line
     }
-    if (key === 'fileMatch' && !isManagerPath(parentPath)) {
-      errors.push({
-        depName: 'Config error',
-        message: `Wrong parent for "fileMatch" field: ${
-          parentPath || '(toplevel)'
-        }`,
-      });
+    if (key === 'fileMatch') {
+      if (parentPath === undefined) {
+        errors.push({
+          depName: 'Config error',
+          message: `"fileMatch" is the manager-level field`,
+        });
+      } else if (!isManagerPath(parentPath)) {
+        warnings.push({
+          depName: 'Config warning',
+          message: `Wrong parent for "fileMatch" field: ${parentPath}`,
+        });
+      }
     }
     if (
       !isIgnored(key) && // We need to ignore some reserved keys

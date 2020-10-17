@@ -110,10 +110,15 @@ exports[`config/validation validateConfig(config) errors if fileMatch has wrong 
 Array [
   Object {
     "depName": "Config error",
-    "message": "Wrong parent for \\"fileMatch\\" field: (toplevel)",
+    "message": "\\"fileMatch\\" is the manager-level field",
   },
+]
+`;
+
+exports[`config/validation validateConfig(config) errors if fileMatch has wrong parent 2`] = `
+Array [
   Object {
-    "depName": "Config error",
+    "depName": "Config warning",
     "message": "Wrong parent for \\"fileMatch\\" field: npm.gradle",
   },
 ]
