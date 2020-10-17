@@ -93,12 +93,12 @@ export async function validateConfig(
       if (parentPath === undefined) {
         errors.push({
           depName: 'Config error',
-          message: `"fileMatch" is the manager-level field`,
+          message: `"fileMatch" may not be defined at the top level of a config and must instead be within a manager block`,
         });
       } else if (!isManagerPath(parentPath)) {
         warnings.push({
           depName: 'Config warning',
-          message: `Wrong parent for "fileMatch" field: ${parentPath}`,
+          message: `"fileMatch" must be configured in a manager block and not here: ${parentPath}`,
         });
       }
     }
