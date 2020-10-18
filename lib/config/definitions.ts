@@ -1836,6 +1836,13 @@ const options: RenovateOptions[] = [
     cli: false,
     env: false,
   },
+  {
+    name: 'cloneSubmodules',
+    description:
+      'When cloning a repository, allow Renovate to clone git submodules as well.',
+    type: 'boolean',
+    default: true,
+  },
 ];
 
 export function getOptions(): RenovateOptions[] {

@@ -12,7 +12,7 @@ describe('platform/git', () => {
   let origin: tmp.DirectoryResult;
   beforeAll(async () => {
     base = await tmp.dir({ unsafeCleanup: true });
-    const repo = Git(base.path).silent(true);
+    const repo = Git(base.path);
     await repo.init();
     await repo.addConfig('user.email', 'Jest@example.com');
     await repo.addConfig('user.name', 'Jest');
@@ -94,10 +94,11 @@ describe('platform/git', () => {
       expect(await git.getFileList()).toMatchSnapshot();
     });
     it('should exclude submodules', async () => {
-      const repo = Git(base.path).silent(true);
+      const repo = Git(base.path);
       await repo.submoduleAdd(base.path, 'submodule');
       await repo.commit('Add submodule');
       await git.initRepo({
+        cloneSubmodules: true,
         localDir: tmpDir.path,
         url: base.path,
       });
@@ -345,7 +346,7 @@ describe('platform/git', () => {
 
   describe('initRepo())', () => {
     it('should fetch latest', async () => {
-      const repo = Git(base.path).silent(true);
+      const repo = Git(base.path);
       await repo.checkout(['-b', 'test', 'master']);
       await fs.writeFile(base.path + '/test', 'lorem ipsum');
       await repo.add(['test']);
@@ -373,7 +374,7 @@ describe('platform/git', () => {
     });
 
     it('should set branch prefix', async () => {
-      const repo = Git(base.path).silent(true);
+      const repo = Git(base.path);
       await repo.checkout(['-b', 'renovate/test', 'master']);
       await fs.writeFile(base.path + '/test', 'lorem ipsum');
       await repo.add(['test']);
@@ -401,7 +402,7 @@ describe('platform/git', () => {
     });
 
     it('should fail clone ssh submodule', async () => {
-      const repo = Git(base.path).silent(true);
+      const repo = Git(base.path);
       await fs.writeFile(
         base.path + '/.gitmodules',
         '[submodule "test"]\npath=test\nurl=ssh://0.0.0.0'
@@ -417,6 +418,7 @@ describe('platform/git', () => {
       ]);
       await repo.commit('Add submodule');
       await git.initRepo({
+        cloneSubmodules: true,
         localDir: tmpDir.path,
         url: base.path,
       });
@@ -436,7 +438,7 @@ describe('platform/git', () => {
       });
       git.getBranchCommit('master');
       await git.syncGit();
-      const repo = Git(tmpDir.path).silent(true);
+      const repo = Git(tmpDir.path);
       const res = (await repo.raw(['config', 'extra.clone.config'])).trim();
       expect(res).toBe('test-extra-config-value');
     });
