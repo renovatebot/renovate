@@ -1,7 +1,7 @@
 // istanbul ignore file
 import { HttpError } from './types';
 
-// TODO: remove when code is refactord
+// TODO: remove when code is refactored
 
 Object.defineProperty(HttpError.prototype, 'statusCode', {
   get: function statusCode(this: HttpError) {
