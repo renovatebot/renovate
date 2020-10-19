@@ -436,6 +436,10 @@ The above will change a raw version of `release-2.0.0` to `2.0.0`, for example. 
 }
 ```
 
+## fetchReleaseNotes
+
+Configure this to `false` if you want to disable release notes fetching
+
 ## fileMatch
 
 `fileMatch` is used by Renovate to know which files in a repository to parse and extract, and it is possible to override defaults values to customize for your project's needs.
