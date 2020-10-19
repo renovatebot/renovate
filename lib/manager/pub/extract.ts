@@ -44,7 +44,7 @@ export function extractPackageFile(
   packageFile: string
 ): PackageFile | null {
   try {
-    const doc = safeLoad(content);
+    const doc = safeLoad(content, { json: true });
     const deps = [
       ...getDeps(doc.dependencies, {
         depType: 'dependencies',

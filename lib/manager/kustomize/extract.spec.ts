@@ -2,6 +2,7 @@ import { readFileSync } from 'fs';
 import * as datasourceDocker from '../../datasource/docker';
 import * as datasourceGitTags from '../../datasource/git-tags';
 import * as datasourceGitHubTags from '../../datasource/github-tags';
+import * as dockerVersioning from '../../versioning/docker';
 import {
   extractBase,
   extractImage,
@@ -68,26 +69,47 @@ describe('manager/kustomize/extract', () => {
       const version = 'v1.0.0';
       const sample = {
         currentValue: version,
-        datasource: datasourceGitTags.id,
-        depName: base,
-        lookupName: base,
+        datasource: datasourceGitHubTags.id,
+        depName: 'user/test-repo',
       };
 
       const pkg = extractBase(`${base}?ref=${version}`);
       expect(pkg).toEqual(sample);
     });
-
+    it('should extract the version of a non http base', () => {
+      const pkg = extractBase(
+        'ssh://git@bitbucket.com/user/test-repo?ref=v1.2.3'
+      );
+      expect(pkg).toEqual({
+        currentValue: 'v1.2.3',
+        datasource: datasourceGitTags.id,
+        depName: 'bitbucket.com/user/test-repo',
+        depNameShort: 'user/test-repo',
+        lookupName: 'ssh://git@bitbucket.com/user/test-repo',
+      });
+    });
+    it('should extract the version of a non http base with subdir', () => {
+      const pkg = extractBase(
+        'ssh://git@bitbucket.com/user/test-repo/subdir?ref=v1.2.3'
+      );
+      expect(pkg).toEqual({
+        currentValue: 'v1.2.3',
+        datasource: datasourceGitTags.id,
+        depName: 'bitbucket.com/user/test-repo',
+        depNameShort: 'user/test-repo',
+        lookupName: 'ssh://git@bitbucket.com/user/test-repo',
+      });
+    });
     it('should extract out the version of an github base', () => {
-      const base = 'fluxcd/flux/deploy';
+      const base = 'github.com/fluxcd/flux/deploy';
       const version = 'v1.0.0';
       const sample = {
         currentValue: version,
         datasource: datasourceGitHubTags.id,
-        depName: base,
-        lookupName: 'fluxcd/flux',
+        depName: 'fluxcd/flux',
       };
 
-      const pkg = extractBase(`github.com/${base}?ref=${version}`);
+      const pkg = extractBase(`${base}?ref=${version}`);
       expect(pkg).toEqual(sample);
     });
     it('should extract out the version of a git base', () => {
@@ -95,25 +117,23 @@ describe('manager/kustomize/extract', () => {
       const version = 'v1.0.0';
       const sample = {
         currentValue: version,
-        datasource: datasourceGitTags.id,
-        depName: base,
-        lookupName: base,
+        datasource: datasourceGitHubTags.id,
+        depName: 'user/repo',
       };
 
       const pkg = extractBase(`${base}?ref=${version}`);
       expect(pkg).toEqual(sample);
     });
     it('should extract out the version of a git base with subdir', () => {
-      const base = 'git@github.com:user/repo.git';
+      const base = 'git@github.com:user/repo.git/subdir';
       const version = 'v1.0.0';
       const sample = {
         currentValue: version,
-        datasource: datasourceGitTags.id,
-        depName: `${base}//subdir`,
-        lookupName: base,
+        datasource: datasourceGitHubTags.id,
+        depName: 'user/repo',
       };
 
-      const pkg = extractBase(`${sample.depName}?ref=${version}`);
+      const pkg = extractBase(`${base}?ref=${version}`);
       expect(pkg).toEqual(sample);
     });
   });
@@ -129,6 +149,7 @@ describe('manager/kustomize/extract', () => {
       const sample = {
         currentValue: 'v1.0.0',
         datasource: datasourceDocker.id,
+        versioning: dockerVersioning.id,
         depName: 'node',
       };
       const pkg = extractImage({
@@ -141,6 +162,7 @@ describe('manager/kustomize/extract', () => {
       const sample = {
         currentValue: 'v1.0.0',
         datasource: datasourceDocker.id,
+        versioning: dockerVersioning.id,
         depName: 'test/node',
       };
       const pkg = extractImage({
@@ -153,6 +175,7 @@ describe('manager/kustomize/extract', () => {
       const sample = {
         currentValue: 'v1.0.0',
         datasource: datasourceDocker.id,
+        versioning: dockerVersioning.id,
         depName: 'quay.io/repo/image',
       };
       const pkg = extractImage({
@@ -165,6 +188,7 @@ describe('manager/kustomize/extract', () => {
       const sample = {
         currentValue: 'v1.0.0',
         datasource: datasourceDocker.id,
+        versioning: dockerVersioning.id,
         depName: 'localhost:5000/repo/image',
       };
       const pkg = extractImage({
@@ -177,6 +201,7 @@ describe('manager/kustomize/extract', () => {
       const sample = {
         currentValue: 'v1.0.0',
         datasource: datasourceDocker.id,
+        versioning: dockerVersioning.id,
         depName: 'localhost:5000/repo/image/service',
       };
       const pkg = extractImage({
@@ -211,8 +236,7 @@ describe('manager/kustomize/extract', () => {
       expect(res.deps).toHaveLength(2);
       expect(res.deps[0].currentValue).toEqual('v0.0.1');
       expect(res.deps[1].currentValue).toEqual('1.19.0');
-      expect(res.deps[1].depName).toEqual('fluxcd/flux/deploy');
-      expect(res.deps[1].lookupName).toEqual('fluxcd/flux');
+      expect(res.deps[1].depName).toEqual('fluxcd/flux');
     });
     it('should extract out image versions', () => {
       const res = extractPackageFile(gitImages);
@@ -234,8 +258,7 @@ describe('manager/kustomize/extract', () => {
       expect(res.deps).toHaveLength(2);
       expect(res.deps[0].currentValue).toEqual('v0.0.1');
       expect(res.deps[1].currentValue).toEqual('1.19.0');
-      expect(res.deps[1].depName).toEqual('fluxcd/flux/deploy');
-      expect(res.deps[1].lookupName).toEqual('fluxcd/flux');
+      expect(res.deps[1].depName).toEqual('fluxcd/flux');
     });
   });
 });

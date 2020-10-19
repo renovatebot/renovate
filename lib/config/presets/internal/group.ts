@@ -36,9 +36,9 @@ const staticGroups = {
     extends: [
       'group:allApollographql',
       'group:fortawesome',
-      'group:goOpenapi',
       'group:fusionjs',
       'group:glimmer',
+      'group:goOpenapi',
       'group:hibernateCore',
       'group:hibernateValidator',
       'group:hibernateOgm',
@@ -462,6 +462,15 @@ const staticGroups = {
         groupName: 'go-openapi packages',
         groupSlug: 'go-openapi',
         packagePatterns: ['^github.com/go-openapi/'],
+      },
+    ],
+  },
+  googleapis: {
+    description: 'Group googleapis packages together',
+    packageRules: [
+      {
+        extends: 'packages:googleapis',
+        groupName: 'googleapis packages',
       },
     ],
   },
