@@ -68,7 +68,12 @@ async function cleanUpBranches(
         await deleteBranch(branchName);
       }
     } catch (err) /* istanbul ignore next */ {
-      if (err.message !== REPOSITORY_CHANGED) {
+      if (err.message?.includes("bad revision 'origin/")) {
+        logger.debug(
+          { branchName },
+          'Branch not found on origin when attempting to prune'
+        );
+      } else if (err.message !== REPOSITORY_CHANGED) {
         logger.warn({ err, branch: branchName }, 'Error pruning branch');
       }
     }
