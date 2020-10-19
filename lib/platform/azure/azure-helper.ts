@@ -92,7 +92,7 @@ async function streamToString(stream: NodeJS.ReadableStream): Promise<string> {
   return p;
 }
 
-// if no branchName, look globaly
+// if no branchName, look globally
 export async function getFile(
   repoId: string,
   filePath: string,
