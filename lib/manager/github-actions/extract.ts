@@ -6,7 +6,7 @@ import { PackageDependency, PackageFile } from '../common';
 import { getDep } from '../dockerfile/extract';
 
 export function extractPackageFile(content: string): PackageFile | null {
-  logger.debug('github-actions.extractPackageFile()');
+  logger.trace('github-actions.extractPackageFile()');
   const deps: PackageDependency[] = [];
   for (const line of content.split('\n')) {
     if (line.trim().startsWith('#')) {
@@ -17,14 +17,6 @@ export function extractPackageFile(content: string): PackageFile | null {
     if (dockerMatch) {
       const [, currentFrom] = dockerMatch;
       const dep = getDep(currentFrom);
-      logger.debug(
-        {
-          depName: dep.depName,
-          currentValue: dep.currentValue,
-          currentDigest: dep.currentDigest,
-        },
-        'Docker image inside GitHub Workflow'
-      );
       dep.depType = 'docker';
       dep.versioning = dockerVersioning.id;
       deps.push(dep);
@@ -46,7 +38,6 @@ export function extractPackageFile(content: string): PackageFile | null {
       if (!dockerVersioning.api.isValid(currentValue)) {
         dep.skipReason = SkipReason.InvalidVersion;
       }
-      logger.trace(dep, 'GitHub Action inside GitHub Workflow');
       deps.push(dep);
     }
   }
