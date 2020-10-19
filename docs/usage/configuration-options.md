@@ -41,7 +41,7 @@ In contrast to `reviewers`, this option adds to the existing reviewer list, rath
 
 ## aliases
 
-The `aliases` object is used for configuring registry aliases. Currently it is needed/supported for the `helm-requiremenets` manager only.
+The `aliases` object is used for configuring registry aliases. Currently it is needed/supported for the `helm-requirements` manager only.
 
 `helm-requirements` includes this default alias:
 
@@ -1329,7 +1329,7 @@ Configure to `false` to disable deleting orphan branches and autoclosing PRs. De
 
 ## python
 
-Currently the only Python package manager is `pip` - specifically for `requirements.txt` and `requirequirements.pip` files - so adding any config to this `python` object is essentially the same as adding it to the `pip_requirements` object instead.
+Currently the only Python package manager is `pip` - specifically for `requirements.txt` and `requirements.pip` files - so adding any config to this `python` object is essentially the same as adding it to the `pip_requirements` object instead.
 
 ## rangeStrategy
 
