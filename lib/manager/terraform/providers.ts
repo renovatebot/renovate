@@ -9,7 +9,7 @@ import {
   keyValueExtractionRegex,
 } from './util';
 
-export const sourceExtractionRegex = /^(?:(?<hostname>[^/]+)\/)?(?<namespace>[^/]+)\/(?<type>[^/]+)/;
+export const sourceExtractionRegex = /^(?:(?<hostname>(?:[a-zA-Z0-9]+\.+)+[a-zA-Z0-9]+)\/)?(?:(?<namespace>[^/]+)\/)?(?<type>[^/]+)/;
 
 export function extractTerraformProvider(
   startingLine: number,
@@ -55,16 +55,11 @@ export function analyzeTerraformProvider(dep: PackageDependency): void {
   if (is.nonEmptyString(dep.managerData.source)) {
     const source = sourceExtractionRegex.exec(dep.managerData.source);
     if (source) {
-      // buildin providers https://github.com/terraform-providers
-      if (source.groups.namespace === 'terraform-providers') {
-        dep.registryUrls = [`https://releases.hashicorp.com`];
-      } else {
+      if (source.groups.hostname) {
+        dep.registryUrls = [`https://${source.groups.hostname}`];
         dep.lookupName = `${source.groups.namespace}/${source.groups.type}`;
-        if (source.groups.hostname) {
-          dep.registryUrls = [`https://${source.groups.hostname}`];
-        } else {
-          dep.registryUrls = [`https://registry.terraform.io`];
-        }
+      } else {
+        dep.lookupName = dep.managerData.source;
       }
     } else {
       dep.skipReason = SkipReason.UnsupportedUrl;
