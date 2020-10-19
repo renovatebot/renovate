@@ -26,7 +26,6 @@ beforeEach(() => {
   config.platform = PLATFORM_TYPE_GITHUB;
   config.errors = [];
   config.warnings = [];
-  delete config.onboarding;
 });
 
 async function dryRun(
