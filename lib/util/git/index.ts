@@ -656,7 +656,7 @@ export async function commitFiles({
       );
       return null;
     }
-    logger.debug({ err }, 'Error commiting files');
+    logger.debug({ err }, 'Error committing files');
     throw new Error(REPOSITORY_CHANGED);
   }
 }
