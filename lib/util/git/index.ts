@@ -188,18 +188,23 @@ export async function setBranchPrefix(branchPrefix: string): Promise<void> {
 }
 
 export async function getSubmodules(): Promise<string[]> {
-  return (
-    (await git.raw([
-      'config',
-      '--file',
-      '.gitmodules',
-      '--get-regexp',
-      'path',
-    ])) || ''
-  )
-    .trim()
-    .split(/[\n\s]/)
-    .filter((_e: string, i: number) => i % 2);
+  try {
+    return (
+      (await git.raw([
+        'config',
+        '--file',
+        '.gitmodules',
+        '--get-regexp',
+        'path',
+      ])) || ''
+    )
+      .trim()
+      .split(/[\n\s]/)
+      .filter((_e: string, i: number) => i % 2);
+  } catch (err) /* istanbul ignore next */ {
+    logger.warn({ err }, 'Error getting submodules');
+    return [];
+  }
 }
 
 export async function syncGit(): Promise<void> {
@@ -330,6 +335,20 @@ export function getBranchCommit(branchName: string): CommitSha | null {
   return config.branchCommits[branchName] || null;
 }
 
+// Return the parent commit SHA for a branch
+export async function getBranchParentSha(
+  branchName: string
+): Promise<CommitSha | null> {
+  try {
+    const branchSha = getBranchCommit(branchName);
+    const parentSha = await git.revparse([`${branchSha}^`]);
+    return parentSha;
+  } catch (err) {
+    logger.debug({ err }, 'Error getting branch parent sha');
+    return null;
+  }
+}
+
 export async function getCommitMessages(): Promise<string[]> {
   await syncGit();
   logger.debug('getCommitMessages');
@@ -400,6 +419,13 @@ export async function isBranchModified(branchName: string): Promise<boolean> {
   // First check cache
   if (config.branchIsModified[branchName] !== undefined) {
     return config.branchIsModified[branchName];
+  }
+  if (!branchExists(branchName)) {
+    logger.debug(
+      { branchName },
+      'Branch does not exist - cannot check isModified'
+    );
+    return false;
   }
   // Retrieve the author of the most recent commit
   const lastAuthor = (
@@ -474,9 +500,13 @@ export async function getBranchLastCommitTime(
 export async function getBranchFiles(branchName: string): Promise<string[]> {
   await syncBranch(branchName);
   try {
-    const diff = await git.diffSummary([branchName, config.currentBranch]);
+    const diff = await git.diffSummary([
+      `origin/${branchName}`,
+      `origin/${branchName}^`,
+    ]);
     return diff.files.map((file) => file.file);
   } catch (err) /* istanbul ignore next */ {
+    logger.warn({ err }, 'getBranchFiles error');
     checkForPlatformFailure(err);
     return null;
   }

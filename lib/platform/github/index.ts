@@ -1,7 +1,6 @@
 import URL from 'url';
 import is from '@sindresorhus/is';
 import delay from 'delay';
-import { configFileNames } from '../../config/app-strings';
 import {
   PLATFORM_INTEGRATION_UNAUTHORIZED,
   REPOSITORY_ACCESS_FORBIDDEN,
@@ -57,8 +56,6 @@ import {
 import { UserDetails, getUserDetails, getUserEmail } from './user';
 
 const githubApi = new githubHttp.GithubHttp();
-
-const defaultConfigFile = configFileNames[0];
 
 let config: LocalRepoConfig = {} as any;
 
@@ -122,7 +119,7 @@ export async function getRepos(): Promise<string[]> {
   try {
     const res = await githubApi.getJson<{ full_name: string }[]>(
       'user/repos?per_page=100',
-      { paginate: true }
+      { paginate: 'all' }
     );
     return res.body.map((repo) => repo.full_name);
   } catch (err) /* istanbul ignore next */ {
@@ -156,7 +153,7 @@ export async function getJsonFile(fileName: string): Promise<any | null> {
         'base64'
       ).toString()
     );
-  } catch (err) /* istanbul ignore next */ {
+  } catch (err) {
     return null;
   }
 }
@@ -170,9 +167,7 @@ export async function initRepo({
   forkMode,
   forkToken,
   localDir,
-  includeForks,
   renovateUsername,
-  optimizeForDisabled,
 }: RepoParams): Promise<RepoResult> {
   logger.debug(`initRepo("${repository}")`);
   // config is used by the platform api itself, not necessary for the app layer to know
@@ -219,13 +214,6 @@ export async function initRepo({
     if (!repo.defaultBranchRef?.name) {
       throw new Error(REPOSITORY_EMPTY);
     }
-    // istanbul ignore if
-    if (repo.isFork && !includeForks) {
-      const renovateConfig = await getJsonFile(defaultConfigFile);
-      if (!renovateConfig?.includeForks) {
-        throw new Error(REPOSITORY_FORKED);
-      }
-    }
     if (repo.nameWithOwner && repo.nameWithOwner !== repository) {
       logger.debug(
         { repository, this_repository: repo.nameWithOwner },
@@ -238,12 +226,6 @@ export async function initRepo({
         'Repository is archived - throwing error to abort renovation'
       );
       throw new Error(REPOSITORY_ARCHIVED);
-    }
-    if (optimizeForDisabled) {
-      const renovateConfig = await getJsonFile(defaultConfigFile);
-      if (renovateConfig?.enabled === false) {
-        throw new Error(REPOSITORY_DISABLED);
-      }
     }
     // Use default branch as PR target unless later overridden.
     config.defaultBranch = repo.defaultBranchRef.name;
@@ -708,9 +690,12 @@ export async function getPrList(): Promise<Pr[]> {
     }
     config.prList = prList
       .filter((pr) => {
-        return pr?.user?.login && config?.renovateUsername
-          ? pr.user.login === config.renovateUsername
-          : true;
+        return (
+          config.forkMode ||
+          (pr?.user?.login && config?.renovateUsername
+            ? pr.user.login === config.renovateUsername
+            : true)
+        );
       })
       .map(
         (pr) =>
@@ -1126,7 +1111,7 @@ export async function ensureIssue({
 }
 
 export async function ensureIssueClosing(title: string): Promise<void> {
-  logger.debug(`ensureIssueClosing(${title})`);
+  logger.trace(`ensureIssueClosing(${title})`);
   const issueList = await getIssueList();
   for (const issue of issueList) {
     if (issue.state === 'open' && issue.title === title) {

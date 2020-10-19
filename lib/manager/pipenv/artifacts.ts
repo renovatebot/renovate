@@ -17,8 +17,8 @@ function getPythonConstraint(
   existingLockFileContent: string,
   config: UpdateArtifactsConfig
 ): string | undefined | null {
-  const { compatibility = {} } = config;
-  const { python } = compatibility;
+  const { constraints = {} } = config;
+  const { python } = constraints;
 
   if (python) {
     logger.debug('Using python constraint from config');

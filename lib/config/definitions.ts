@@ -946,7 +946,8 @@ const options: RenovateOptions[] = [
   // Version behaviour
   {
     name: 'allowedVersions',
-    description: 'A semver range defining allowed versions for dependencies',
+    description:
+      'A version range or regex pattern capturing allowed versions for dependencies',
     type: 'string',
     parent: 'packageRules',
     stage: 'package',
@@ -1591,8 +1592,9 @@ const options: RenovateOptions[] = [
     cli: false,
   },
   {
-    name: 'compatibility',
-    description: 'Configuration object for compatibility',
+    name: 'constraints',
+    description:
+      'Configuration object for define language or manager version constraints',
     type: 'object',
     default: {},
     mergeable: true,

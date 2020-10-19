@@ -151,7 +151,7 @@ export async function extractPackageFile(
     resolutions: 'resolutions',
   };
 
-  const compatibility: Record<string, any> = {};
+  const constraints: Record<string, any> = {};
 
   function extractDependency(
     depType: string,
@@ -173,19 +173,23 @@ export async function extractPackageFile(
         dep.datasource = datasourceGithubTags.id;
         dep.lookupName = 'nodejs/node';
         dep.versioning = nodeVersioning.id;
-        compatibility.node = dep.currentValue;
+        constraints.node = dep.currentValue;
       } else if (depName === 'yarn') {
         dep.datasource = datasourceNpm.id;
         dep.commitMessageTopic = 'Yarn';
-        compatibility.yarn = dep.currentValue;
+        constraints.yarn = dep.currentValue;
       } else if (depName === 'npm') {
         dep.datasource = datasourceNpm.id;
         dep.commitMessageTopic = 'npm';
-        compatibility.npm = dep.currentValue;
+        constraints.npm = dep.currentValue;
       } else if (depName === 'pnpm') {
         dep.datasource = datasourceNpm.id;
         dep.commitMessageTopic = 'pnpm';
-        compatibility.pnpm = dep.currentValue;
+        constraints.pnpm = dep.currentValue;
+      } else if (depName === 'vscode') {
+        dep.datasource = datasourceGithubTags.id;
+        dep.lookupName = 'microsoft/vscode';
+        constraints.vscode = dep.currentValue;
       } else {
         dep.skipReason = SkipReason.UnknownEngines;
       }
@@ -363,7 +367,7 @@ export async function extractPackageFile(
     lernaPackages,
     skipInstalls,
     yarnWorkspacesPackages,
-    compatibility,
+    constraints,
   };
 }
 

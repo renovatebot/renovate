@@ -9,7 +9,7 @@ import * as template from '../../../util/template';
 import { BranchConfig, BranchUpgradeConfig } from '../../common';
 import { formatCommitMessagePrefix } from '../util/commit-message';
 
-function isTypesGroup(branchUpgrades: any[]): boolean {
+function isTypesGroup(branchUpgrades: BranchUpgradeConfig[]): boolean {
   return (
     branchUpgrades.some(({ depName }) => depName?.startsWith('@types/')) &&
     new Set(
@@ -304,9 +304,9 @@ export function generateBranchConfig(
   config.blockedByPin = config.upgrades.every(
     (upgrade) => upgrade.blockedByPin
   );
-  config.compatibility = Object.assign(
+  config.constraints = Object.assign(
     {},
-    ...config.upgrades.map((upgrade) => upgrade.compatibility)
+    ...config.upgrades.map((upgrade) => upgrade.constraints)
   );
   const tableRows = config.upgrades
     .map((upgrade) => getTableValues(upgrade))

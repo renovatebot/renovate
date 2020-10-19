@@ -226,21 +226,25 @@ This is used to add a suffix to commit messages. Usually left empty except for i
 
 This is used to alter `commitMessage` and `prTitle` without needing to copy/paste the whole string. The "topic" is usually refers to the dependency being updated, e.g. `"dependency react"`.
 
-## compatibility
+## configWarningReuseIssue
 
-This is used to manually restrict which versions are possible to upgrade to based on their language support. For now this only supports `python`, other compatibility restrictions will be added in the future.
+Renovate's default behaviour is to reuse/reopen a single Config Warning issue in each repository so as to keep the "noise" down. However for some people this has the downside that the config warning won't be sorted near the top if you view issues by creation date. Configure this option to `false` if you prefer Renovate to open a new issue whenever there is a config warning.
+
+## constraints
+
+Constraints are used in package managers which use third party tools to update "artifacts" like lock files or checksum files. Typically, the constraint is detected automatically by Renovate from files within the repository and there is no need to manually configure it.
+
+Constraints are also used to manually restrict which _datasource_ versions are possible to upgrade to based on their language support. For now this only supports `python`, other compatibility restrictions will be added in the future.
 
 ```json
 {
-  "compatibility": {
+  "constraints": {
     "python": "2.7"
   }
 }
 ```
 
-## configWarningReuseIssue
-
-Renovate's default behaviour is to reuse/reopen a single Config Warning issue in each repository so as to keep the "noise" down. However for some people this has the downside that the config warning won't be sorted near the top if you view issues by creation date. Configure this option to `false` if you prefer Renovate to open a new issue whenever there is a config warning.
+Note: make sure not to mix this up with the term `compatibility`, which Renovate uses in the context of version releases, e.g. if a Docker image is `node:12.16.0-alpine` then the `-alpine` suffix represents `compatibility`.
 
 ## dependencyDashboard
 
@@ -440,7 +444,7 @@ Sometimes file matches are really simple - for example with Go Modules Renovate 
 
 At other times, the possible files is too vague for Renovate to have any default. For default, Kubernetes manifests can exist in any `*.yaml` file and we don't want Renovate to parse every single YAML file in every repository just in case some of them contain a Kubernetes manifest, so Renovate's default `fileMatch` for manager `kubernetes` is actually empty (`[]`) and needs the user to tell Renovate what directories/files to look in.
 
-Finally, there are cases where Renovate's default `fileMatch` is good, but you may be using file patterns that a bot couldn't posibly guess about. For example, Renovate's default `fileMatch` for `Dockerfile` is `['(^|/|\\.)Dockerfile$', '(^|/)Dockerfile\\.[^/]*$']`. This will catch files like `backend/Dockerfile`, `prefix.Dockerfile` or `Dockerfile.suffix`, but it will miss files like `ACTUALLY_A_DOCKERFILE.template`. Because `fileMatch` is mergeable, you don't need to duplicate the defaults and could just add the missing file like this:
+Finally, there are cases where Renovate's default `fileMatch` is good, but you may be using file patterns that a bot couldn't possibly guess about. For example, Renovate's default `fileMatch` for `Dockerfile` is `['(^|/|\\.)Dockerfile$', '(^|/)Dockerfile\\.[^/]*$']`. This will catch files like `backend/Dockerfile`, `prefix.Dockerfile` or `Dockerfile.suffix`, but it will miss files like `ACTUALLY_A_DOCKERFILE.template`. Because `fileMatch` is mergeable, you don't need to duplicate the defaults and could just add the missing file like this:
 
 ```json
 {
@@ -449,6 +453,8 @@ Finally, there are cases where Renovate's default `fileMatch` is good, but you m
   }
 }
 ```
+
+If you configure `fileMatch` then it must be within a manager object (e.g. `dockerfile` in the above example). The full list of supported managers can be found [here](https://docs.renovatebot.com/modules/manager/).
 
 ## followTag
 
@@ -902,6 +908,8 @@ Use this - usually within a packageRule - to limit how far to upgrade a dependen
 }
 ```
 
+The valid syntax for this will be calculated at runtime because it depends on the versioning scheme, which is itself dynamic.
+
 This field also supports Regular Expressions if they begin and end with `/`. For example, the following will enforce that only 3 or 4-section versions are supported, without any prefixes:
 
 ```json
@@ -1166,7 +1174,7 @@ e.g.
 }
 ```
 
-The `postUpdateTasks` configuration consists of two fields:
+The `postUpgradeTasks` configuration consists of two fields:
 
 ### commands
 
@@ -1416,7 +1424,20 @@ If the `versioning` for a dependency is not captured with a named group then it 
 
 ## registryUrls
 
-This is only necessary in case you need to manually configure a registry URL to use for datasource lookups. Applies to PyPI (pip) only for now. Supports only one URL for now but is defined as a list for forward compatibility.
+Usually Renovate is able to either (a) use the default registries for a datasource, or (b) automatically detect during the manager extract phase which custom registries are in use. In case there is a need to configure them manually, it can be done using this `registryUrls` field, typically using `packageUrls` like so:
+
+```json
+{
+  "packageRules": [
+    {
+      "datasources": ["docker"],
+      "registryUrls": ["https://docker.mycompany.domain"]
+    }
+  ]
+}
+```
+
+The field supports multiple URLs however it is datasource-dependent on whether only the first is used or multiple.
 
 ## requiredStatusChecks
 
