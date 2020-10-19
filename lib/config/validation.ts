@@ -308,7 +308,12 @@ export async function validateConfig(
                 ) {
                   errors.push({
                     depName: 'Configuration Error',
-                    message: `Regex Manager ${currentPath} must contain a matchStrings array of length one`,
+                    message: `Each Regex Manager must contain a matchStrings array of length one`,
+                  });
+                } else if (!is.nonEmptyArray(regexManager.fileMatch)) {
+                  errors.push({
+                    depName: 'Configuration Error',
+                    message: `Each Regex Manager must contain a fileMatch array`,
                   });
                 } else {
                   let validRegex = false;
