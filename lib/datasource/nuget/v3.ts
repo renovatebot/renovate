@@ -79,9 +79,9 @@ export async function getResourceUrl(
 
     await packageCache.set(cacheNamespace, resultCacheKey, serviceId, 60);
     return serviceId;
-  } catch (e) {
+  } catch (err) {
     logger.debug(
-      { e },
+      { err },
       `nuget registry failure: can't get ${resourceType} form ${url}`
     );
     return null;
@@ -92,6 +92,7 @@ interface CatalogEntry {
   version: string;
   published?: string;
   projectUrl?: string;
+  listed?: boolean;
 }
 
 interface CatalogPage {
@@ -136,7 +137,7 @@ export async function getReleases(
   let homepage = null;
   let latestStable: string = null;
   const releases = catalogEntries.map(
-    ({ version, published: releaseTimestamp, projectUrl }) => {
+    ({ version, published: releaseTimestamp, projectUrl, listed }) => {
       const release: Release = { version };
       if (releaseTimestamp) {
         release.releaseTimestamp = releaseTimestamp;
@@ -144,6 +145,9 @@ export async function getReleases(
       if (semver.valid(version) && !semver.prerelease(version)) {
         latestStable = version;
         homepage = projectUrl || homepage;
+      }
+      if (listed === false) {
+        release.isDeprecated = true;
       }
       return release;
     }

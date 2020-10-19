@@ -146,7 +146,7 @@ describe(getName(__filename), () => {
       expect(res).toBeNull();
       expect(httpMock.getTrace()).toMatchSnapshot();
     });
-    it.each([[''], ['v'], ['other-']])(
+    it.each([[''], ['v'], ['other-'], ['other_v'], ['other@']])(
       'gets release notes with body',
       async (prefix) => {
         httpMock

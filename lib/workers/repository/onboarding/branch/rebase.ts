@@ -14,7 +14,7 @@ const defaultConfigFile = configFileNames[0];
 function getCommitMessage(config: RenovateConfig): string {
   let commitMessage: string;
   // istanbul ignore if
-  if (config.semanticCommits) {
+  if (config.semanticCommits === 'enabled') {
     commitMessage = config.semanticCommitType;
     if (config.semanticCommitScope) {
       commitMessage += `(${config.semanticCommitScope})`;
@@ -39,7 +39,7 @@ export async function rebaseOnboardingBranch(
     defaultConfigFile,
     config.onboardingBranch
   );
-  const contents = getOnboardingConfig(config);
+  const contents = await getOnboardingConfig(config);
   if (
     contents === existingContents &&
     !(await isBranchStale(config.onboardingBranch))

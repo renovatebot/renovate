@@ -2,7 +2,6 @@ import fs from 'fs-extra';
 import * as httpMock from '../../../test/httpMock';
 import { mocked } from '../../../test/util';
 import {
-  REPOSITORY_DISABLED,
   REPOSITORY_NOT_FOUND,
   REPOSITORY_RENAMED,
 } from '../../constants/error-messages';
@@ -217,21 +216,6 @@ describe('platform/github', () => {
   }
 
   describe('initRepo', () => {
-    it('should throw err if disabled in renovate.json', async () => {
-      const scope = httpMock.scope(githubApiHost);
-      initRepoMock(scope, 'some/repo');
-      scope.get('/repos/some/repo/contents/renovate.json').reply(200, {
-        content: Buffer.from('{"enabled": false}').toString('base64'),
-      });
-
-      await expect(
-        github.initRepo({
-          repository: 'some/repo',
-          optimizeForDisabled: true,
-        } as any)
-      ).rejects.toThrow(REPOSITORY_DISABLED);
-      expect(httpMock.getTrace()).toMatchSnapshot();
-    });
     it('should rebase', async () => {
       const scope = httpMock.scope(githubApiHost);
       initRepoMock(scope, 'some/repo');
@@ -393,7 +377,6 @@ describe('platform/github', () => {
         });
       await expect(
         github.initRepo({
-          includeForks: true,
           repository: 'some/repo',
         } as any)
       ).rejects.toThrow(REPOSITORY_RENAMED);
@@ -1502,17 +1485,37 @@ describe('platform/github', () => {
   });
   describe('findPr(branchName, prTitle, state)', () => {
     it('returns true if no title and all state', async () => {
-      httpMock
+      const scope = httpMock
         .scope(githubApiHost)
-        .get('/repos/undefined/pulls?per_page=100&state=all')
+        .get('/repos/some/repo/pulls?per_page=100&state=all')
         .reply(200, [
           {
-            number: 1,
-            head: { ref: 'branch-a' },
+            number: 2,
+            head: {
+              ref: 'branch-a',
+              repo: { full_name: 'some/repo' },
+            },
             title: 'branch a pr',
             state: PrState.Open,
+            user: { login: 'not-me' },
+          },
+          {
+            number: 1,
+            head: {
+              ref: 'branch-a',
+              repo: { full_name: 'some/repo' },
+            },
+            title: 'branch a pr',
+            state: PrState.Open,
+            user: { login: 'me' },
           },
         ]);
+      initRepoMock(scope, 'some/repo');
+      await github.initRepo({
+        repository: 'some/repo',
+        token: 'token',
+        renovateUsername: 'me',
+      } as any);
 
       const res = await github.findPr({
         branchName: 'branch-a',
@@ -1578,12 +1581,13 @@ describe('platform/github', () => {
         .post('/repos/some/repo/pulls')
         .reply(200, {
           number: 123,
+          head: { repo: { full_name: 'some/repo' } },
         })
         .post('/repos/some/repo/issues/123/labels')
         .reply(200, []);
       await github.initRepo({ repository: 'some/repo', token: 'token' } as any);
       const pr = await github.createPr({
-        branchName: 'some-branch',
+        sourceBranch: 'some-branch',
         targetBranch: 'dev',
         prTitle: 'The Title',
         prBody: 'Hello world',
@@ -1597,10 +1601,11 @@ describe('platform/github', () => {
       initRepoMock(scope, 'some/repo');
       scope.post('/repos/some/repo/pulls').reply(200, {
         number: 123,
+        head: { repo: { full_name: 'some/repo' } },
       });
       await github.initRepo({ repository: 'some/repo', token: 'token' } as any);
       const pr = await github.createPr({
-        branchName: 'some-branch',
+        sourceBranch: 'some-branch',
         targetBranch: 'master',
         prTitle: 'The Title',
         prBody: 'Hello world',
@@ -1614,10 +1619,11 @@ describe('platform/github', () => {
       initRepoMock(scope, 'some/repo');
       scope.post('/repos/some/repo/pulls').reply(200, {
         number: 123,
+        head: { repo: { full_name: 'some/repo' } },
       });
       await github.initRepo({ repository: 'some/repo', token: 'token' } as any);
       const pr = await github.createPr({
-        branchName: 'some-branch',
+        sourceBranch: 'some-branch',
         targetBranch: 'master',
         prTitle: 'PR draft',
         prBody: 'This is a result of a draft',
@@ -1967,6 +1973,33 @@ describe('platform/github', () => {
       httpMock.scope(githubApiHost).post('/graphql').replyWithError('unknown error');
       const res = await github.getVulnerabilityAlerts();
       expect(res).toHaveLength(0);
+      expect(httpMock.getTrace()).toMatchSnapshot();
+    });
+  });
+
+  describe('getJsonFile()', () => {
+    it('returns file content', async () => {
+      const data = { foo: 'bar' };
+      const scope = httpMock.scope(githubApiHost);
+      initRepoMock(scope, 'some/repo');
+      await github.initRepo({ repository: 'some/repo', token: 'token' } as any);
+      scope.get('/repos/some/repo/contents/file.json').reply(200, {
+        content: Buffer.from(JSON.stringify(data)).toString('base64'),
+      });
+      const res = await github.getJsonFile('file.json');
+      expect(res).toEqual(data);
+      expect(httpMock.getTrace()).toMatchSnapshot();
+    });
+    it('returns null on errors', async () => {
+      const scope = httpMock.scope(githubApiHost);
+      initRepoMock(scope, 'some/repo');
+      await github.initRepo({ repository: 'some/repo', token: 'token' } as any);
+      scope
+        .get('/repos/some/repo/contents/file.json')
+        .replyWithError('some error');
+
+      const res = await github.getJsonFile('file.json');
+      expect(res).toBeNull();
       expect(httpMock.getTrace()).toMatchSnapshot();
     });
   });

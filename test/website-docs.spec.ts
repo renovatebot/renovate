@@ -5,6 +5,7 @@ declare global {
   // eslint-disable-next-line @typescript-eslint/no-namespace
   namespace jest {
     type ContainsOption<T> = T extends ArrayLike<unknown> ? T[number] : unknown;
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
     interface Matchers<R, T> {
       /**
        * only available in `test/website-docs.spec.js`

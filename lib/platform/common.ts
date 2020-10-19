@@ -34,7 +34,6 @@ export interface RepoResult {
 
 export interface RepoParams {
   localDir: string;
-  optimizeForDisabled: boolean;
   repository: string;
   endpoint?: string;
   forkMode?: string;
@@ -48,7 +47,7 @@ export interface RepoParams {
  */
 export interface Pr {
   body?: string;
-  branchName: string;
+  sourceBranch: string;
   canMerge?: boolean;
   canMergeReason?: string;
   createdAt?: string;
@@ -82,7 +81,7 @@ export type PlatformPrOptions = {
   gitLabAutomerge?: boolean;
 };
 export interface CreatePRConfig {
-  branchName: string;
+  sourceBranch: string;
   targetBranch: string;
   prTitle: string;
   prBody: string;

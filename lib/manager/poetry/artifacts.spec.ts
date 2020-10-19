@@ -151,7 +151,7 @@ describe('.updateArtifacts()', () => {
         newPackageFileContent: '{}',
         config: {
           ...config,
-          compatibility: { python: '~2.7 || ^3.4' },
+          constraints: { python: '~2.7 || ^3.4' },
         },
       })
     ).not.toBeNull();
@@ -180,7 +180,7 @@ describe('.updateArtifacts()', () => {
         newPackageFileContent: '{}',
         config: {
           ...config,
-          compatibility: { poetry: 'poetry>=1.0' },
+          constraints: { poetry: 'poetry>=1.0' },
         },
       })
     ).not.toBeNull();

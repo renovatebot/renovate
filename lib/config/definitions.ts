@@ -705,6 +705,15 @@ const options: RenovateOptions[] = [
     env: false,
   },
   {
+    name: 'extractVersion',
+    description:
+      "A regex (re2) to extract a version from a datasource's raw version string",
+    type: 'string',
+    format: 'regex',
+    cli: false,
+    env: false,
+  },
+  {
     name: 'versioning',
     description: 'versioning to use for filtering and comparisons',
     type: 'string',
@@ -926,7 +935,8 @@ const options: RenovateOptions[] = [
   // Version behaviour
   {
     name: 'allowedVersions',
-    description: 'A semver range defining allowed versions for dependencies',
+    description:
+      'A version range or regex pattern capturing allowed versions for dependencies',
     type: 'string',
     parent: 'packageRules',
     stage: 'package',
@@ -1084,8 +1094,9 @@ const options: RenovateOptions[] = [
   {
     name: 'semanticCommits',
     description: 'Enable semantic commit prefixes for commits and PR titles',
-    type: 'boolean',
-    default: null,
+    type: 'string',
+    allowedValues: ['auto', 'enabled', 'disabled'],
+    default: 'auto',
   },
   {
     name: 'semanticCommitType',
@@ -1570,8 +1581,9 @@ const options: RenovateOptions[] = [
     cli: false,
   },
   {
-    name: 'compatibility',
-    description: 'Configuration object for compatibility',
+    name: 'constraints',
+    description:
+      'Configuration object for define language or manager version constraints',
     type: 'object',
     default: {},
     mergeable: true,
@@ -1821,6 +1833,14 @@ const options: RenovateOptions[] = [
       'Optional versioning for extracted dependencies. Valid only within `regexManagers` object.',
     type: 'string',
     parent: 'regexManagers',
+    cli: false,
+    env: false,
+  },
+  {
+    name: 'fetchReleaseNotes',
+    description: 'Allow to disable release notes fetching',
+    type: 'boolean',
+    default: true,
     cli: false,
     env: false,
   },

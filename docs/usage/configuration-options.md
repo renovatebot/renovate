@@ -226,21 +226,25 @@ This is used to add a suffix to commit messages. Usually left empty except for i
 
 This is used to alter `commitMessage` and `prTitle` without needing to copy/paste the whole string. The "topic" is usually refers to the dependency being updated, e.g. `"dependency react"`.
 
-## compatibility
+## configWarningReuseIssue
 
-This is used to manually restrict which versions are possible to upgrade to based on their language support. For now this only supports `python`, other compatibility restrictions will be added in the future.
+Renovate's default behaviour is to reuse/reopen a single Config Warning issue in each repository so as to keep the "noise" down. However for some people this has the downside that the config warning won't be sorted near the top if you view issues by creation date. Configure this option to `false` if you prefer Renovate to open a new issue whenever there is a config warning.
+
+## constraints
+
+Constraints are used in package managers which use third party tools to update "artifacts" like lock files or checksum files. Typically, the constraint is detected automatically by Renovate from files within the repository and there is no need to manually configure it.
+
+Constraints are also used to manually restrict which _datasource_ versions are possible to upgrade to based on their language support. For now this only supports `python`, other compatibility restrictions will be added in the future.
 
 ```json
 {
-  "compatibility": {
+  "constraints": {
     "python": "2.7"
   }
 }
 ```
 
-## configWarningReuseIssue
-
-Renovate's default behaviour is to reuse/reopen a single Config Warning issue in each repository so as to keep the "noise" down. However for some people this has the downside that the config warning won't be sorted near the top if you view issues by creation date. Configure this option to `false` if you prefer Renovate to open a new issue whenever there is a config warning.
+Note: make sure not to mix this up with the term `compatibility`, which Renovate uses in the context of version releases, e.g. if a Docker image is `node:12.16.0-alpine` then the `-alpine` suffix represents `compatibility`.
 
 ## dependencyDashboard
 
@@ -387,6 +391,55 @@ The above would mean Renovate would not include files matching the above glob pa
 
 See [shareable config presets](https://docs.renovatebot.com/config-presets) for details.
 
+## extractVersion
+
+Use this only when the raw version strings from the datasource do not match the expected format that you need in your package file. You must defined a "named capture group" called `version` as shown in the below examples.
+
+For example, to extract only the major.minor precision from a GitHub release, the following would work:
+
+```json
+{
+  "packageRules": [
+    {
+      "packageNames": ["foo"],
+      "extractVersion": "^(?<version>v\\d+\\.\\d+)"
+    }
+  ]
+}
+```
+
+The above will change a raw version of `v1.31.5` to `v1.31`, for example.
+
+Alternatively, to strip a `release-` prefix:
+
+```json
+{
+  "packageRules": [
+    {
+      "packageNames": ["bar"],
+      "extractVersion": "^release-(?<version>.*)$"
+    }
+  ]
+}
+```
+
+The above will change a raw version of `release-2.0.0` to `2.0.0`, for example. A similar one could strip leading `v` prefixes:
+
+```json
+{
+  "packageRules": [
+    {
+      "packageNames": ["baz"],
+      "extractVersion": "^v(?<version>.*)$"
+    }
+  ]
+}
+```
+
+## fetchReleaseNotes
+
+Configure this to `false` if you want to disable release notes fetching
+
 ## fileMatch
 
 `fileMatch` is used by Renovate to know which files in a repository to parse and extract, and it is possible to override defaults values to customize for your project's needs.
@@ -395,7 +448,7 @@ Sometimes file matches are really simple - for example with Go Modules Renovate 
 
 At other times, the possible files is too vague for Renovate to have any default. For default, Kubernetes manifests can exist in any `*.yaml` file and we don't want Renovate to parse every single YAML file in every repository just in case some of them contain a Kubernetes manifest, so Renovate's default `fileMatch` for manager `kubernetes` is actually empty (`[]`) and needs the user to tell Renovate what directories/files to look in.
 
-Finally, there are cases where Renovate's default `fileMatch` is good, but you may be using file patterns that a bot couldn't posibly guess about. For example, Renovate's default `fileMatch` for `Dockerfile` is `['(^|/|\\.)Dockerfile$', '(^|/)Dockerfile\\.[^/]*$']`. This will catch files like `backend/Dockerfile`, `prefix.Dockerfile` or `Dockerfile.suffix`, but it will miss files like `ACTUALLY_A_DOCKERFILE.template`. Because `fileMatch` is mergeable, you don't need to duplicate the defaults and could just add the missing file like this:
+Finally, there are cases where Renovate's default `fileMatch` is good, but you may be using file patterns that a bot couldn't possibly guess about. For example, Renovate's default `fileMatch` for `Dockerfile` is `['(^|/|\\.)Dockerfile$', '(^|/)Dockerfile\\.[^/]*$']`. This will catch files like `backend/Dockerfile`, `prefix.Dockerfile` or `Dockerfile.suffix`, but it will miss files like `ACTUALLY_A_DOCKERFILE.template`. Because `fileMatch` is mergeable, you don't need to duplicate the defaults and could just add the missing file like this:
 
 ```json
 {
@@ -404,6 +457,8 @@ Finally, there are cases where Renovate's default `fileMatch` is good, but you m
   }
 }
 ```
+
+If you configure `fileMatch` then it must be within a manager object (e.g. `dockerfile` in the above example). The full list of supported managers can be found [here](https://docs.renovatebot.com/modules/manager/).
 
 ## followTag
 
@@ -730,7 +785,7 @@ With the above config, every PR raised by Renovate will have the label `dependen
 
 ## lockFileMaintenance
 
-This feature can be used to refresh lock files and keep them up-to-date. "Maintaining" a lock file means recreating it so that every dependency version within it is updated to the latest. Supported lock files are `package-lock.json`, `yarn.lock`, `composer.lock`, `Gemfile.lock` and `poetry.lock`. Others may be added via feature request.
+This feature can be used to refresh lock files and keep them up-to-date. "Maintaining" a lock file means recreating it so that every dependency version within it is updated to the latest. Supported lock files are `package-lock.json`, `yarn.lock`, `composer.lock`, `Gemfile.lock`, `poetry.lock` and `Cargo.lock`. Others may be added via feature request.
 
 This feature is disabled by default. If you wish to enable this feature then you could add this to your configuration:
 
@@ -856,6 +911,8 @@ Use this - usually within a packageRule - to limit how far to upgrade a dependen
   ]
 }
 ```
+
+The valid syntax for this will be calculated at runtime because it depends on the versioning scheme, which is itself dynamic.
 
 This field also supports Regular Expressions if they begin and end with `/`. For example, the following will enforce that only 3 or 4-section versions are supported, without any prefixes:
 
@@ -1121,7 +1178,7 @@ e.g.
 }
 ```
 
-The `postUpdateTasks` configuration consists of two fields:
+The `postUpgradeTasks` configuration consists of two fields:
 
 ### commands
 
@@ -1371,7 +1428,20 @@ If the `versioning` for a dependency is not captured with a named group then it 
 
 ## registryUrls
 
-This is only necessary in case you need to manually configure a registry URL to use for datasource lookups. Applies to PyPI (pip) only for now. Supports only one URL for now but is defined as a list for forward compatibility.
+Usually Renovate is able to either (a) use the default registries for a datasource, or (b) automatically detect during the manager extract phase which custom registries are in use. In case there is a need to configure them manually, it can be done using this `registryUrls` field, typically using `packageUrls` like so:
+
+```json
+{
+  "packageRules": [
+    {
+      "datasources": ["docker"],
+      "registryUrls": ["https://docker.mycompany.domain"]
+    }
+  ]
+}
+```
+
+The field supports multiple URLs however it is datasource-dependent on whether only the first is used or multiple.
 
 ## requiredStatusChecks
 
@@ -1467,7 +1537,7 @@ However, please note that Renovate will autodetect if your repository is already
 
 ## separateMajorMinor
 
-Renovate's default behaviour is to create a separate branch/PR if both minor and major version updates exist. For example, if you were using Webpack 2.0.0 and versions 2.1.0 and 3.0.0 were both available, then Renovate would create two PRs so that you have the choice whether to apply the minor update to 2.x or the major update of 3.x. If you were to apply the minor update then Renovate would keep updating the 3.x branch for you as well, e.g. if Webpack 3.0.1 or 3.1.0 were released. If instead you applied the 3.0.0 update then Renovate would clean up the unneeded 2.x branch for you on the next run.
+Renovate's default behaviour is to create a separate branch/PR if both minor and major version updates exist (note that your choice of `rangeStrategy` value can influence which updates exist in the first place however). For example, if you were using Webpack 2.0.0 and versions 2.1.0 and 3.0.0 were both available, then Renovate would create two PRs so that you have the choice whether to apply the minor update to 2.x or the major update of 3.x. If you were to apply the minor update then Renovate would keep updating the 3.x branch for you as well, e.g. if Webpack 3.0.1 or 3.1.0 were released. If instead you applied the 3.0.0 update then Renovate would clean up the unneeded 2.x branch for you on the next run.
 
 It is recommended that you leave this setting to `true`, because of the polite way that Renovate handles this. For example, let's say in the above example that you decided you wouldn't update to Webpack 3 for a long time and don't want to build/test every time a new 3.x version arrives. In that case, simply close the "Update Webpack to version 3.x" PR and it _won't_ be recreated again even if subsequent Webpack 3.x versions are released. You can continue with Webpack 2.x for as long as you want and receive any updates/patches that are made for it. Then eventually when you do want to update to Webpack 3.x you can make that update to `package.json` yourself and commit it to master once it's tested. After that, Renovate will resume providing you updates to 3.x again! i.e. if you close a major upgrade PR then it won't come back again, but once you make the major upgrade yourself then Renovate will resume providing you with minor or patch updates.
 
