@@ -94,7 +94,7 @@ describe('lib/manager/dockerfile/extract', () => {
       expect(res).toMatchSnapshot();
       expect(res).toHaveLength(2);
     });
-    it('skips scratchs', () => {
+    it('skips scratches', () => {
       const res = extractPackageFile('FROM scratch\nADD foo\n');
       expect(res).toBeNull();
     });
