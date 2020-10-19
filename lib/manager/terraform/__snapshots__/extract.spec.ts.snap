@@ -296,9 +296,22 @@ Object {
       "depName": "docker",
       "depNameShort": "docker",
       "depType": "terraform",
-      "registryUrls": Array [
-        "https://releases.hashicorp.com",
-      ],
+      "lookupName": "terraform-providers/docker",
+    },
+    Object {
+      "currentValue": "2.7.0",
+      "datasource": "terraform-provider",
+      "depName": "aws",
+      "depNameShort": "aws",
+      "depType": "terraform",
+      "lookupName": "aws",
+    },
+    Object {
+      "currentValue": "=2.27.0",
+      "datasource": "terraform-provider",
+      "depName": "azurerm",
+      "depNameShort": "azurerm",
+      "depType": "terraform",
     },
     Object {
       "currentValue": "1.2.4",
@@ -315,9 +328,6 @@ Object {
       "depNameShort": "helm",
       "depType": "terraform",
       "lookupName": "hashicorp/helm",
-      "registryUrls": Array [
-        "https://registry.terraform.io",
-      ],
     },
     Object {
       "currentValue": ">= 1.0",
