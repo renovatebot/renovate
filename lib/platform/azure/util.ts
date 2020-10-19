@@ -1,5 +1,6 @@
 import {
   GitPullRequest,
+  GitStatusContext,
   PullRequestAsyncStatus,
   PullRequestStatus,
 } from 'azure-devops-node-api/interfaces/GitInterfaces';
@@ -12,6 +13,38 @@ export function getNewBranchName(branchName?: string): string {
     return `refs/heads/${branchName}`;
   }
   return branchName;
+}
+
+export function getGitStatusContextCombinedName(
+  context: GitStatusContext
+): string | undefined {
+  if (!context) {
+    return undefined;
+  }
+  const combinedName = `${context.genre ? `${context.genre}/` : ''}${
+    context.name
+  }`;
+  logger.trace(`Got combined context name of ${combinedName}`);
+  return combinedName;
+}
+
+export function getGitStatusContextFromCombinedName(
+  context: string
+): GitStatusContext | undefined {
+  if (!context) {
+    return undefined;
+  }
+  let name = context;
+  let genre;
+  const lastSlash = context.lastIndexOf('/');
+  if (lastSlash > 0) {
+    name = context.substr(lastSlash + 1);
+    genre = context.substr(0, lastSlash);
+  }
+  return {
+    genre,
+    name,
+  };
 }
 
 export function getBranchNameWithoutRefsheadsPrefix(
@@ -50,7 +83,9 @@ export function getRenovatePRFormat(azurePr: GitPullRequest): AzurePr {
   const number = azurePr.pullRequestId;
   const displayNumber = `Pull Request #${number}`;
 
-  const branchName = getBranchNameWithoutRefsheadsPrefix(azurePr.sourceRefName);
+  const sourceBranch = getBranchNameWithoutRefsheadsPrefix(
+    azurePr.sourceRefName
+  );
   const targetBranch = getBranchNameWithoutRefsheadsPrefix(
     azurePr.targetRefName
   );
@@ -69,7 +104,7 @@ export function getRenovatePRFormat(azurePr: GitPullRequest): AzurePr {
 
   return {
     ...azurePr,
-    branchName,
+    sourceBranch,
     state,
     number,
     displayNumber,

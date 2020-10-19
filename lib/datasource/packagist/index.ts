@@ -113,7 +113,7 @@ async function getPackagistFile(
   const cachedResult = await packageCache.get(cacheNamespace, cacheKey);
   // istanbul ignore if
   if (cachedResult && cachedResult.sha256 === sha256) {
-    return cachedResult.res;
+    return cachedResult.res as Promise<PackagistFile>;
   }
   const res = (await http.getJson<PackagistFile>(regUrl + '/' + fileName, opts))
     .body;
@@ -204,9 +204,9 @@ async function getAllPackages(regUrl: string): Promise<AllPackages | null> {
 
 function getAllCachedPackages(regUrl: string): Promise<AllPackages | null> {
   const cacheKey = `packagist-${regUrl}`;
-  const cachedResult = memCache.get(cacheKey);
+  const cachedResult = memCache.get<Promise<AllPackages | null>>(cacheKey);
   // istanbul ignore if
-  if (cachedResult) {
+  if (cachedResult !== undefined) {
     return cachedResult;
   }
   const promisedRes = getAllPackages(regUrl);

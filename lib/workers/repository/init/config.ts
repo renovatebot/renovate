@@ -7,7 +7,10 @@ import { configFileNames } from '../../../config/app-strings';
 import { decryptConfig } from '../../../config/decrypt';
 import { migrateAndValidate } from '../../../config/migrate-validate';
 import * as presets from '../../../config/presets';
-import { CONFIG_VALIDATION } from '../../../constants/error-messages';
+import {
+  CONFIG_VALIDATION,
+  REPOSITORY_CHANGED,
+} from '../../../constants/error-messages';
 import * as npmApi from '../../../datasource/npm';
 import { logger } from '../../../logger';
 import { readLocalFile } from '../../../util/fs';
@@ -52,6 +55,11 @@ export async function detectRepoFileConfig(): Promise<RepoFileConfig> {
     logger.debug({ config: configFileParsed }, 'package.json>renovate config');
   } else {
     let rawFileContents = await readLocalFile(configFileName, 'utf8');
+    // istanbul ignore if
+    if (!rawFileContents) {
+      logger.warn({ configFileName }, 'Null contents when reading config file');
+      throw new Error(REPOSITORY_CHANGED);
+    }
     // istanbul ignore if
     if (!rawFileContents.length) {
       rawFileContents = '{}';
@@ -222,7 +230,8 @@ export async function getRepoConfig(
   config.baseBranch = config.defaultBranch;
   config = await checkOnboardingBranch(config);
   config = await mergeRenovateConfig(config);
-  config.semanticCommits =
-    config.semanticCommits ?? (await detectSemanticCommits());
+  if (config.semanticCommits === 'auto') {
+    config.semanticCommits = await detectSemanticCommits();
+  }
   return config;
 }

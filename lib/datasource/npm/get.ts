@@ -77,7 +77,7 @@ export async function getDependency(
   // This is our datastore cache and is cleared at the end of each repo, i.e. we never requery/revalidate during a "run"
   if (memcache[packageName]) {
     logger.trace('Returning cached result');
-    return JSON.parse(memcache[packageName]);
+    return JSON.parse(memcache[packageName]) as NpmDependency;
   }
 
   const scope = packageName.split('/')[0];

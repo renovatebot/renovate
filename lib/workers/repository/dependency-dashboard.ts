@@ -1,6 +1,7 @@
 import is from '@sindresorhus/is';
+import { nameFromLevel } from 'bunyan';
 import { RenovateConfig } from '../../config';
-import { logger } from '../../logger';
+import { getProblems, logger } from '../../logger';
 import { Pr, platform } from '../../platform';
 import { PrState } from '../../types';
 import { BranchConfig, ProcessBranchResult } from '../common';
@@ -22,6 +23,31 @@ function getListItem(branch: BranchConfig, type: string, pr?: Pr): string {
   return item + ' (' + uniquePackages.join(', ') + ')\n';
 }
 
+function appendRepoProblems(config: RenovateConfig, issueBody: string): string {
+  let newIssueBody = issueBody;
+  const repoProblems = new Set(
+    getProblems()
+      .filter(
+        (problem) =>
+          problem.repository === config.repository && !problem.artifactErrors
+      )
+      .map(
+        (problem) =>
+          `${nameFromLevel[problem.level].toUpperCase()}: ${problem.msg}`
+      )
+  );
+  if (repoProblems.size) {
+    newIssueBody += '## Repository problems\n\n';
+    newIssueBody +=
+      'These problems occurred while renovating this repository.\n\n';
+    for (const repoProblem of repoProblems) {
+      newIssueBody += ` - ${repoProblem}\n`;
+    }
+    newIssueBody += '\n';
+  }
+  return newIssueBody;
+}
+
 export async function ensureMasterIssue(
   config: RenovateConfig,
   branches: BranchConfig[]
@@ -38,6 +64,11 @@ export async function ensureMasterIssue(
       )
     )
   ) {
+    return;
+  }
+  // istanbul ignore if
+  if (config.repoIsOnboarded === false) {
+    logger.debug('Repo is onboarding - skipping dependency dashboard');
     return;
   }
   logger.debug('Ensuring Dependency Dashboard');
@@ -60,6 +91,9 @@ export async function ensureMasterIssue(
   if (config.dependencyDashboardHeader?.length) {
     issueBody += `${config.dependencyDashboardHeader}\n\n`;
   }
+
+  issueBody = appendRepoProblems(config, issueBody);
+
   const pendingApprovals = branches.filter(
     (branch) => branch.res === ProcessBranchResult.NeedsApproval
   );
@@ -180,9 +214,9 @@ export async function ensureMasterIssue(
     (branch) => branch.res === ProcessBranchResult.AlreadyExisted
   );
   if (alreadyExisted.length) {
-    issueBody += '## Closed/Ignored\n\n';
+    issueBody += '## Ignored or Blocked\n\n';
     issueBody +=
-      'These updates were closed unmerged and will not be recreated unless you click a checkbox below.\n\n';
+      'These are blocked by an existing closed PR and will not be recreated unless you click a checkbox below.\n\n';
     for (const branch of alreadyExisted) {
       const pr = await platform.findPr({
         branchName: branch.branchName,

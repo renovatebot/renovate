@@ -9,7 +9,7 @@ import * as template from '../../../util/template';
 import { BranchConfig, BranchUpgradeConfig } from '../../common';
 import { formatCommitMessagePrefix } from '../util/commit-message';
 
-function isTypesGroup(branchUpgrades: any[]): boolean {
+function isTypesGroup(branchUpgrades: BranchUpgradeConfig[]): boolean {
   return (
     branchUpgrades.some(({ depName }) => depName?.startsWith('@types/')) &&
     new Set(
@@ -173,7 +173,7 @@ export function generateBranchConfig(
       upgrade.isRange = false;
     }
     // Use templates to generate strings
-    if (upgrade.semanticCommits && !upgrade.commitMessagePrefix) {
+    if (upgrade.semanticCommits === 'enabled' && !upgrade.commitMessagePrefix) {
       logger.trace('Upgrade has semantic commits enabled');
       let semanticPrefix = upgrade.semanticCommitType;
       if (upgrade.semanticCommitScope) {
@@ -303,6 +303,10 @@ export function generateBranchConfig(
   config.automerge = config.upgrades.every((upgrade) => upgrade.automerge);
   config.blockedByPin = config.upgrades.every(
     (upgrade) => upgrade.blockedByPin
+  );
+  config.constraints = Object.assign(
+    {},
+    ...config.upgrades.map((upgrade) => upgrade.constraints)
   );
   const tableRows = config.upgrades
     .map((upgrade) => getTableValues(upgrade))

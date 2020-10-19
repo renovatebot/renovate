@@ -27,6 +27,13 @@ describe('lib/manager/gitsubmodules/extract', () => {
           }
           return git.raw(options);
         },
+        listRemote(): Response<string> {
+          return partial<Response<string>>(
+            Promise.resolve(
+              'ref: refs/heads/main  HEAD\n5701164b9f5edba1f6ca114c491a564ffb55a964        HEAD'
+            )
+          );
+        },
       };
     });
   });
@@ -38,6 +45,7 @@ describe('lib/manager/gitsubmodules/extract', () => {
       ).toBeNull();
       res = await extractPackageFile('', '.gitmodules.2', { localDir });
       expect(res.deps).toHaveLength(1);
+      expect(res.deps[0].registryUrls[1]).toEqual('main');
       res = await extractPackageFile('', '.gitmodules.3', { localDir });
       expect(res.deps).toHaveLength(1);
       res = await extractPackageFile('', '.gitmodules.4', { localDir });

@@ -200,11 +200,11 @@ Array [
 
 exports[`platform/gitlab createPr(branchName, title, body) returns the PR 1`] = `
 Object {
-  "branchName": "some-branch",
   "displayNumber": "Merge Request #12345",
   "id": 1,
   "iid": 12345,
   "number": 12345,
+  "sourceBranch": "some-branch",
 }
 `;
 
@@ -229,11 +229,11 @@ Array [
 
 exports[`platform/gitlab createPr(branchName, title, body) uses default branch 1`] = `
 Object {
-  "branchName": "some-branch",
   "displayNumber": "Merge Request #12345",
   "id": 1,
   "iid": 12345,
   "number": 12345,
+  "sourceBranch": "some-branch",
 }
 `;
 
@@ -767,7 +767,6 @@ Object {
     "sha": "1234",
   },
   "body": undefined,
-  "branchName": "some-branch",
   "commits": 1,
   "deletions": 1,
   "displayNumber": "Merge Request #91",
@@ -775,6 +774,7 @@ Object {
   "hasReviewers": false,
   "iid": 91,
   "number": 91,
+  "sourceBranch": "some-branch",
   "source_branch": "some-branch",
   "state": "open",
   "targetBranch": "master",
@@ -1090,10 +1090,63 @@ Array [
 ]
 `;
 
+exports[`platform/gitlab getJsonFile() returns file content 1`] = `
+Array [
+  Object {
+    "headers": Object {
+      "accept": "application/json",
+      "accept-encoding": "gzip, deflate",
+      "authorization": "Bearer abc123",
+      "host": "gitlab.com",
+      "user-agent": "https://github.com/renovatebot/renovate",
+    },
+    "method": "GET",
+    "url": "https://gitlab.com/api/v4/projects/some%2Frepo",
+  },
+  Object {
+    "headers": Object {
+      "accept": "application/json",
+      "accept-encoding": "gzip, deflate",
+      "authorization": "Bearer abc123",
+      "host": "gitlab.com",
+      "user-agent": "https://github.com/renovatebot/renovate",
+    },
+    "method": "GET",
+    "url": "https://gitlab.com/api/v4/projects/some%2Frepo/repository/files/file.json?ref=master",
+  },
+]
+`;
+
+exports[`platform/gitlab getJsonFile() returns null on errors 1`] = `
+Array [
+  Object {
+    "headers": Object {
+      "accept": "application/json",
+      "accept-encoding": "gzip, deflate",
+      "authorization": "Bearer abc123",
+      "host": "gitlab.com",
+      "user-agent": "https://github.com/renovatebot/renovate",
+    },
+    "method": "GET",
+    "url": "https://gitlab.com/api/v4/projects/some%2Frepo",
+  },
+  Object {
+    "headers": Object {
+      "accept": "application/json",
+      "accept-encoding": "gzip, deflate",
+      "authorization": "Bearer abc123",
+      "host": "gitlab.com",
+      "user-agent": "https://github.com/renovatebot/renovate",
+    },
+    "method": "GET",
+    "url": "https://gitlab.com/api/v4/projects/some%2Frepo/repository/files/file.json?ref=master",
+  },
+]
+`;
+
 exports[`platform/gitlab getPr(prNo) returns the PR 1`] = `
 Object {
   "body": "a merge request",
-  "branchName": "some-branch",
   "canMerge": false,
   "description": "a merge request",
   "displayNumber": "Merge Request #12345",
@@ -1105,6 +1158,7 @@ Object {
   "isConflicted": true,
   "merge_status": "cannot_be_merged",
   "number": 12345,
+  "sourceBranch": "some-branch",
   "source_branch": "some-branch",
   "state": "merged",
   "targetBranch": "master",
@@ -1131,7 +1185,6 @@ Array [
 exports[`platform/gitlab getPr(prNo) returns the PR with nonexisting branch 1`] = `
 Object {
   "body": "a merge request",
-  "branchName": "some-branch",
   "canMerge": false,
   "description": "a merge request",
   "displayNumber": "Merge Request #12345",
@@ -1143,6 +1196,7 @@ Object {
   "isConflicted": true,
   "merge_status": "cannot_be_merged",
   "number": 12345,
+  "sourceBranch": "some-branch",
   "source_branch": "some-branch",
   "state": "open",
   "targetBranch": "master",
@@ -1169,7 +1223,6 @@ Array [
 exports[`platform/gitlab getPr(prNo) returns the mergeable PR 1`] = `
 Object {
   "body": "a merge request",
-  "branchName": "some-branch",
   "canMerge": true,
   "description": "a merge request",
   "displayNumber": "Merge Request #12345",
@@ -1179,6 +1232,7 @@ Object {
   "id": 1,
   "iid": 12345,
   "number": 12345,
+  "sourceBranch": "some-branch",
   "source_branch": "some-branch",
   "state": "open",
   "targetBranch": "master",
@@ -1510,33 +1564,6 @@ Array [
     },
     "method": "GET",
     "url": "https://gitlab.com/api/v4/projects/some%2Frepo",
-  },
-]
-`;
-
-exports[`platform/gitlab initRepo should throw error if disabled in renovate.json 1`] = `
-Array [
-  Object {
-    "headers": Object {
-      "accept": "application/json",
-      "accept-encoding": "gzip, deflate",
-      "authorization": "Bearer abc123",
-      "host": "gitlab.com",
-      "user-agent": "https://github.com/renovatebot/renovate",
-    },
-    "method": "GET",
-    "url": "https://gitlab.com/api/v4/projects/some%2Frepo",
-  },
-  Object {
-    "headers": Object {
-      "accept": "application/json",
-      "accept-encoding": "gzip, deflate",
-      "authorization": "Bearer abc123",
-      "host": "gitlab.com",
-      "user-agent": "https://github.com/renovatebot/renovate",
-    },
-    "method": "GET",
-    "url": "https://gitlab.com/api/v4/projects/some%2Frepo/repository/files/renovate.json?ref=master",
   },
 ]
 `;

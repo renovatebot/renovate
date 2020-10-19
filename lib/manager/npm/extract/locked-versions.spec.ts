@@ -26,7 +26,7 @@ describe('manager/npm/extract/locked-versions', () => {
           {
             npmLock: 'package-lock.json',
             yarnLock: 'yarn.lock',
-            compatibility: {},
+            constraints: {},
             deps: [
               {
                 depName: 'a',

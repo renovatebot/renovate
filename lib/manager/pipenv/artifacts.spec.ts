@@ -97,7 +97,7 @@ describe('.updateArtifacts()', () => {
         packageFileName: 'Pipfile',
         updatedDeps: [],
         newPackageFileContent: 'some new content',
-        config: { ...config, compatibility: { python: '3.7' } },
+        config: { ...config, constraints: { python: '3.7' } },
       })
     ).not.toBeNull();
     expect(execSnapshots).toMatchSnapshot();

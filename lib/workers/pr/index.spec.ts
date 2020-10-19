@@ -271,6 +271,22 @@ describe('workers/pr', () => {
       expect(prResult).toEqual(PrResult.LimitReached);
       expect(platform.createPr.mock.calls).toBeEmpty();
     });
+    it('should create PR if limit is reached but dashboard checked', async () => {
+      platform.getBranchStatus.mockResolvedValueOnce(BranchStatus.green);
+      config.logJSON = await getChangeLogJSON(config);
+      config.prCreation = 'status-success';
+      config.automerge = true;
+      config.schedule = ['before 5am'];
+      const { prResult } = await prWorker.ensurePr(
+        {
+          ...config,
+          dependencyDashboardChecks: { 'renovate/dummy-1.x': 'true' },
+        },
+        true
+      );
+      expect(prResult).toEqual(PrResult.Created);
+      expect(platform.createPr).toHaveBeenCalled();
+    });
     it('should create group PR', async () => {
       config.upgrades = config.upgrades.concat([
         {

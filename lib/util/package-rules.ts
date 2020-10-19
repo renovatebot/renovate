@@ -136,7 +136,7 @@ function matchesRule(inputConfig: Config, packageRule: PackageRule): boolean {
     }
     positiveMatch = true;
   }
-  if (packageNames.length || packagePatterns.length) {
+  if (depName && (packageNames.length || packagePatterns.length)) {
     let isMatch = packageNames.includes(depName);
     // name match is "or" so we check patterns if we didn't match names
     if (!isMatch) {
@@ -164,7 +164,7 @@ function matchesRule(inputConfig: Config, packageRule: PackageRule): boolean {
     }
     positiveMatch = true;
   }
-  if (excludePackagePatterns.length) {
+  if (depName && excludePackagePatterns.length) {
     let isMatch = false;
     for (const pattern of excludePackagePatterns) {
       const packageRegex = regEx(

@@ -344,9 +344,12 @@ export async function getDigest(
   const newTag = newValue || 'latest';
   const cacheNamespace = 'datasource-docker-digest';
   const cacheKey = `${registry}:${repository}:${newTag}`;
-  let digest = null;
+  let digest: string = null;
   try {
-    const cachedResult = await packageCache.get(cacheNamespace, cacheKey);
+    const cachedResult = await packageCache.get<string>(
+      cacheNamespace,
+      cacheKey
+    );
     // istanbul ignore if
     if (cachedResult !== undefined) {
       return cachedResult;

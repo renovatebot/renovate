@@ -101,6 +101,17 @@ export function migrateConfig(
           migratedConfig.postUpdateOptions.push('gomodTidy');
         }
         delete migratedConfig.gomodTidy;
+      } else if (key === 'semanticCommits') {
+        if (val === true) {
+          migratedConfig.semanticCommits = 'enabled';
+          isMigrated = true;
+        } else if (val === false) {
+          migratedConfig.semanticCommits = 'disabled';
+          isMigrated = true;
+        } else if (val !== 'enabled' && val !== 'disabled') {
+          migratedConfig.semanticCommits = 'auto';
+          isMigrated = true;
+        }
       } else if (parentKey === 'hostRules' && key === 'platform') {
         isMigrated = true;
         migratedConfig.hostType = val;
@@ -476,6 +487,10 @@ export function migrateConfig(
           }
         }
         migratedConfig[key] = newArray;
+      } else if (key === 'compatibility' && is.object(val)) {
+        isMigrated = true;
+        migratedConfig.constraints = migratedConfig.compatibility;
+        delete migratedConfig.compatibility;
       } else if (is.object(val)) {
         const subMigrate = migrateConfig(
           migratedConfig[key] as RenovateConfig,

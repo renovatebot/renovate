@@ -18,6 +18,7 @@ export interface GroupConfig extends Record<string, unknown> {
 
 // TODO: Proper typings
 export interface RenovateSharedConfig {
+  $schema?: string;
   automerge?: boolean;
   branchPrefix?: string;
   branchName?: string;
@@ -27,6 +28,7 @@ export interface RenovateSharedConfig {
   draftPR?: boolean;
   enabled?: boolean;
   enabledManagers?: string[];
+  extends?: string[];
   fileMatch?: string[];
   group?: GroupConfig;
   groupName?: string;
@@ -52,7 +54,7 @@ export interface RenovateSharedConfig {
   repositoryCache?: RepositoryCacheConfig;
   requiredStatusChecks?: string[];
   schedule?: string[];
-  semanticCommits?: boolean;
+  semanticCommits?: 'auto' | 'enabled' | 'disabled';
   semanticCommitScope?: string;
   semanticCommitType?: string;
   suppressNotifications?: string[];
@@ -145,7 +147,6 @@ export interface RenovateConfig
   description?: string | string[];
 
   errors?: ValidationMessage[];
-  extends?: string[];
 
   gitAuthor?: string;
 
@@ -175,6 +176,8 @@ export interface RenovateConfig
   warnings?: ValidationMessage[];
   vulnerabilityAlerts?: RenovateSharedConfig;
   regexManagers?: CustomManager[];
+
+  fetchReleaseNotes?: boolean;
 }
 
 export interface AssigneesAndReviewersConfig {

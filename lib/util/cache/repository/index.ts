@@ -8,10 +8,34 @@ import { RepoInitConfig } from '../../../workers/repository/init/common';
 export interface BaseBranchCache {
   sha: string; // branch commit sha
   configHash: string; // object hash of config
-  packageFiles: PackageFile[]; // extract result
+  packageFiles: Record<string, PackageFile[]>; // extract result
+}
+
+export interface BranchUpgradeCache {
+  currentDigest?: string;
+  currentValue?: string;
+  datasource?: string;
+  depName?: string;
+  fixedVersion?: string;
+  fromVersion?: string;
+  lookupName?: string;
+  newDigest?: string;
+  newValue?: string;
+  toVersion?: string;
+}
+
+export interface BranchCache {
+  automerge: boolean;
+  branchName: string;
+  isModified: boolean;
+  prNo: number | null;
+  sha: string | null;
+  parentSha: string | null;
+  upgrades: BranchUpgradeCache[];
 }
 
 export interface Cache {
+  branches?: BranchCache[];
   repository?: string;
   init?: RepoInitConfig;
   scan?: Record<string, BaseBranchCache>;
