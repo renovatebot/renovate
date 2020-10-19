@@ -721,7 +721,7 @@ Using this setting, you can selectively ignore package files that you don't want
 
 ## ignorePresets
 
-Use this if you are extending a complex preset but don't want to use every "sub preset" that it includes. For example, consinder this config:
+Use this if you are extending a complex preset but don't want to use every "sub preset" that it includes. For example, consider this config:
 
 ```json
 {
