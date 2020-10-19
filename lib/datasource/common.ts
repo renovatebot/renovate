@@ -80,5 +80,5 @@ export interface DatasourceApi {
   registryStrategy?: 'first' | 'hunt' | 'merge';
 }
 
-// TODO: remove, only for compatabillity
+// TODO: remove, only for compatibility
 export type Datasource = DatasourceApi;
