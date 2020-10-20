@@ -1,78 +1,12 @@
-import * as path from 'path';
-import findUp from 'find-up';
 import { XmlDocument } from 'xmldoc';
 import * as datasourceNuget from '../../datasource/nuget';
 import { logger } from '../../logger';
 import { SkipReason } from '../../types';
-import { clone } from '../../util/clone';
-import { readFile } from '../../util/fs';
 import { get } from '../../versioning';
 import * as semverVersioning from '../../versioning/semver';
 import { ExtractConfig, PackageDependency, PackageFile } from '../common';
 import { DotnetToolsManifest } from './types';
-
-async function readFileAsXmlDocument(file: string): Promise<XmlDocument> {
-  try {
-    return new XmlDocument(await readFile(file, 'utf8'));
-  } catch (err) {
-    logger.debug({ err }, `failed to parse '${file}' as XML document`);
-    return undefined;
-  }
-}
-
-async function determineRegistryUrls(
-  packageFile: string,
-  localDir: string
-): Promise<string[]> {
-  // Valid file names taken from https://github.com/NuGet/NuGet.Client/blob/f64621487c0b454eda4b98af853bf4a528bef72a/src/NuGet.Core/NuGet.Configuration/Settings/Settings.cs#L34
-  const nuGetConfigFileNames = ['nuget.config', 'NuGet.config', 'NuGet.Config'];
-  const nuGetConfigPath = await findUp(nuGetConfigFileNames, {
-    cwd: path.dirname(path.join(localDir, packageFile)),
-    type: 'file',
-  });
-
-  if (nuGetConfigPath?.startsWith(localDir) !== true) {
-    return undefined;
-  }
-
-  logger.debug({ nuGetConfigPath }, 'found NuGet.config');
-  const nuGetConfig = await readFileAsXmlDocument(nuGetConfigPath);
-  if (!nuGetConfig) {
-    return undefined;
-  }
-
-  const packageSources = nuGetConfig.childNamed('packageSources');
-  if (!packageSources) {
-    return undefined;
-  }
-
-  const registryUrls = clone(datasourceNuget.defaultRegistryUrls);
-  for (const child of packageSources.children) {
-    if (child.type === 'element') {
-      if (child.name === 'clear') {
-        logger.debug(`clearing registry URLs`);
-        registryUrls.length = 0;
-      } else if (child.name === 'add') {
-        const isHttpUrl = /^https?:\/\//i.test(child.attr.value);
-        if (isHttpUrl) {
-          let registryUrl = child.attr.value;
-          if (child.attr.protocolVersion) {
-            registryUrl += `#protocolVersion=${child.attr.protocolVersion}`;
-          }
-          logger.debug({ registryUrl }, 'adding registry URL');
-          registryUrls.push(registryUrl);
-        } else {
-          logger.debug(
-            { registryUrl: child.attr.value },
-            'ignoring local registry URL'
-          );
-        }
-      }
-      // child.name === 'remove' not supported
-    }
-  }
-  return registryUrls;
-}
+import { determineRegistries } from './util';
 
 /**
  * https://docs.microsoft.com/en-us/nuget/concepts/package-versioning
@@ -128,10 +62,10 @@ export async function extractPackageFile(
   logger.trace({ packageFile }, 'nuget.extractPackageFile()');
   const versioning = get(config.versioning || semverVersioning.id);
 
-  const registryUrls = await determineRegistryUrls(
-    packageFile,
-    config.localDir
-  );
+  const registries = await determineRegistries(packageFile, config.localDir);
+  const registryUrls = registries
+    ? registries.map((registry) => registry.url)
+    : undefined;
 
   if (packageFile.endsWith('.config/dotnet-tools.json')) {
     const deps: PackageDependency[] = [];
