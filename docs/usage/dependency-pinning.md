@@ -27,7 +27,7 @@ If you're familiar with the theory of semver, you might think that you only need
 
 #### Ranges for Libraries
 
-A second reason for using ranges applies to "libaries" that are published as npm packages with the intention that they are used/`require()`'d by other packages. In this case, it is usually a bad idea to pin all your dependencies because it will introduce an unnecessarily narrow range (one release!) and cause most users of your package to bloat their `node_modules` with duplicates.
+A second reason for using ranges applies to "libraries" that are published as npm packages with the intention that they are used/`require()`'d by other packages. In this case, it is usually a bad idea to pin all your dependencies because it will introduce an unnecessarily narrow range (one release!) and cause most users of your package to bloat their `node_modules` with duplicates.
 
 For example, you might have pinned `foobar` to version `1.1.0` and another author pinned his/her `foobar` to dependency to `1.2.2`. Any user of both your packages will end up with npm attempting to install two separate versions of `foobar`, which might not even work. Even if both projects use a service like Renovate to keep their pinned dependencies up to date with the very latest versions, it's still not a good idea - there will always be times when one package has updated/released before the other one and they will be out of sync. e.g. there might be a space of 30 minutes where your package specifies foobar `1.1.0` and the other one specifies `1.1.1` and your joint downstream users end up with a duplicate.
 
@@ -145,7 +145,7 @@ Does pinning give you "increased" security? Undeniably. The question is not whet
 
 Don't forget that there is some form of transitive trust too. You need to pick your direct dependencies carefully, and which versions of them you use. Hopefully in doing that you pick dependencies partly for how well _they_ look after their own dependencies and versions (e.g. do they have good enough test coverage, do they use something like Renovate to keep updated, etc?). So the reality is that even if 90% of the entries in your lock file are indirect dependencies, those are ones you have somewhat "delegated" responsibility for to your dependencies. e.g. I'd hope that Express are even better at watching their deps for breaks than I am, to use the example above.
 
-But certainly "does it give a false sense of securty" is not a question we can really answer quantifiably.
+But certainly "does it give a false sense of security" is not a question we can really answer quantifiably.
 
 ## So what's best?
 
