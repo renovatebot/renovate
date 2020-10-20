@@ -96,7 +96,9 @@ export async function getReleaseNotes(
     if (
       release.tag === version ||
       release.tag === `v${version}` ||
-      release.tag === `${depName}-${version}`
+      release.tag === `${depName}-${version}` ||
+      release.tag === `${depName}_v${version}` ||
+      release.tag === `${depName}@${version}`
     ) {
       releaseNotes = release;
       releaseNotes.url = baseUrl.includes('gitlab')

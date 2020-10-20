@@ -1676,7 +1676,7 @@ const options: RenovateOptions[] = [
   },
   {
     name: 'insecureRegistry',
-    description: 'explicity turn on insecure docker registry access (http)',
+    description: 'explicitly turn on insecure docker registry access (http)',
     type: 'boolean',
     stage: 'repository',
     parent: 'hostRules',
@@ -1840,6 +1840,14 @@ const options: RenovateOptions[] = [
       'Optional versioning for extracted dependencies. Valid only within `regexManagers` object.',
     type: 'string',
     parent: 'regexManagers',
+    cli: false,
+    env: false,
+  },
+  {
+    name: 'fetchReleaseNotes',
+    description: 'Allow to disable release notes fetching',
+    type: 'boolean',
+    default: true,
     cli: false,
     env: false,
   },

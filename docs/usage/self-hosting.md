@@ -83,6 +83,62 @@ stringData:
   RENOVATE_TOKEN: 'your-github-enterprise-renovate-user-token'
 ```
 
+A `config.js` file can be added to the manifest using a `ConfigMap` as shown in the following example (using a "dry run" in github.com)
+
+```yaml
+---
+ apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: renovate-config
+data:
+  config.json: |-
+    {
+      "logLevel" : "debug",
+      "repositories": ["orgname/repo","username/repo"],
+      "dryRun" : "true"
+    }
+
+---
+apiVersion: batch/v1beta1
+kind: CronJob
+metadata:
+  name: renovate-bot
+spec:
+  schedule: '@hourly'
+  concurrencyPolicy: Forbid
+  jobTemplate:
+    spec:
+      template:
+        spec:
+          containers:
+            - image: renovate/renovate:23.22.1
+              name: renovate-bot
+              env: # For illustration purposes, please user secrets.
+                - name: RENOVATE_PLATFORM
+                  value: 'github'
+                - name: RENOVATE_TOKEN
+                  value: 'some-token'
+                - name: RENOVATE_AUTODISCOVER
+                  value: 'false'
+                - name: RENOVATE_BASE_DIR
+                  value: '/tmp/renovate/'
+                - name: RENOVATE_CONFIG_FILE
+                  value: '/opt/renovate/config.json'
+              volumeMounts:
+                - name: config-volume
+                  mountPath: /opt/renovate/
+                - name: work-volume
+                  mountPath: /tmp/renovate/
+          restartPolicy: Never
+          volumes:
+            - name: config-volume
+              configMap:
+                name: renovate-config
+            - name: work-volume
+              emptyDir: {}
+```
+
 ## Configuration
 
 Self-hosted Renovate can be configured using any of the following (or a combination):
@@ -91,7 +147,7 @@ Self-hosted Renovate can be configured using any of the following (or a combinat
 - CLI params
 - Environment params
 
-Note that some Renovate configuratino options are _only_ available for self-hosting, and so can only be configured using one of the above methods. These are described in the [Self-hosted Configuration](./self-hosted-configuration.md) doc.
+Note that some Renovate configuration options are _only_ available for self-hosting, and so can only be configured using one of the above methods. These are described in the [Self-hosted Configuration](./self-hosted-configuration.md) doc.
 
 ## Authentication
 

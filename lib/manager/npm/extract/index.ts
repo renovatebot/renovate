@@ -19,7 +19,7 @@ import {
   PackageDependency,
   PackageFile,
 } from '../../common';
-import { NpmPackage, NpmPackageDependeny } from './common';
+import { NpmPackage, NpmPackageDependency } from './common';
 import { getLockedVersions } from './locked-versions';
 import { detectMonorepos } from './monorepo';
 import { mightBeABrowserLibrary } from './type';
@@ -186,6 +186,10 @@ export async function extractPackageFile(
         dep.datasource = datasourceNpm.id;
         dep.commitMessageTopic = 'pnpm';
         constraints.pnpm = dep.currentValue;
+      } else if (depName === 'vscode') {
+        dep.datasource = datasourceGithubTags.id;
+        dep.lookupName = 'microsoft/vscode';
+        constraints.vscode = dep.currentValue;
       } else {
         dep.skipReason = SkipReason.UnknownEngines;
       }
@@ -295,7 +299,7 @@ export async function extractPackageFile(
     if (packageJson[depType]) {
       try {
         for (const [key, val] of Object.entries(
-          packageJson[depType] as NpmPackageDependeny
+          packageJson[depType] as NpmPackageDependency
         )) {
           const depName = parseDepName(depType, key);
           const dep: PackageDependency = {

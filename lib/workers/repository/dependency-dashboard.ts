@@ -66,6 +66,11 @@ export async function ensureMasterIssue(
   ) {
     return;
   }
+  // istanbul ignore if
+  if (config.repoIsOnboarded === false) {
+    logger.debug('Repo is onboarding - skipping dependency dashboard');
+    return;
+  }
   logger.debug('Ensuring Dependency Dashboard');
   const hasBranches =
     is.nonEmptyArray(branches) &&

@@ -56,7 +56,7 @@ export async function getReleases({
       return null;
     }
     if (response.results.length === 0) {
-      logger.warn(
+      logger.info(
         { dependency: lookupName },
         `Received no results from ${galaxyAPIUrl}`
       );

@@ -1,4 +1,4 @@
-The Jenkins manager suppports the following format of the plugin list:
+The Jenkins manager supports the following format of the plugin list:
 
 ```text
 plugin1:1.2.3

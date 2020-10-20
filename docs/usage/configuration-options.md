@@ -41,7 +41,7 @@ In contrast to `reviewers`, this option adds to the existing reviewer list, rath
 
 ## aliases
 
-The `aliases` object is used for configuring registry aliases. Currently it is needed/supported for the `helm-requiremenets` manager only.
+The `aliases` object is used for configuring registry aliases. Currently it is needed/supported for the `helm-requirements` manager only.
 
 `helm-requirements` includes this default alias:
 
@@ -442,6 +442,10 @@ The above will change a raw version of `release-2.0.0` to `2.0.0`, for example. 
 }
 ```
 
+## fetchReleaseNotes
+
+Configure this to `false` if you want to disable release notes fetching
+
 ## fileMatch
 
 `fileMatch` is used by Renovate to know which files in a repository to parse and extract, and it is possible to override defaults values to customize for your project's needs.
@@ -450,7 +454,7 @@ Sometimes file matches are really simple - for example with Go Modules Renovate 
 
 At other times, the possible files is too vague for Renovate to have any default. For default, Kubernetes manifests can exist in any `*.yaml` file and we don't want Renovate to parse every single YAML file in every repository just in case some of them contain a Kubernetes manifest, so Renovate's default `fileMatch` for manager `kubernetes` is actually empty (`[]`) and needs the user to tell Renovate what directories/files to look in.
 
-Finally, there are cases where Renovate's default `fileMatch` is good, but you may be using file patterns that a bot couldn't posibly guess about. For example, Renovate's default `fileMatch` for `Dockerfile` is `['(^|/|\\.)Dockerfile$', '(^|/)Dockerfile\\.[^/]*$']`. This will catch files like `backend/Dockerfile`, `prefix.Dockerfile` or `Dockerfile.suffix`, but it will miss files like `ACTUALLY_A_DOCKERFILE.template`. Because `fileMatch` is mergeable, you don't need to duplicate the defaults and could just add the missing file like this:
+Finally, there are cases where Renovate's default `fileMatch` is good, but you may be using file patterns that a bot couldn't possibly guess about. For example, Renovate's default `fileMatch` for `Dockerfile` is `['(^|/|\\.)Dockerfile$', '(^|/)Dockerfile\\.[^/]*$']`. This will catch files like `backend/Dockerfile`, `prefix.Dockerfile` or `Dockerfile.suffix`, but it will miss files like `ACTUALLY_A_DOCKERFILE.template`. Because `fileMatch` is mergeable, you don't need to duplicate the defaults and could just add the missing file like this:
 
 ```json
 {
@@ -459,6 +463,8 @@ Finally, there are cases where Renovate's default `fileMatch` is good, but you m
   }
 }
 ```
+
+If you configure `fileMatch` then it must be within a manager object (e.g. `dockerfile` in the above example). The full list of supported managers can be found [here](https://docs.renovatebot.com/modules/manager/).
 
 ## followTag
 
@@ -721,7 +727,7 @@ Using this setting, you can selectively ignore package files that you don't want
 
 ## ignorePresets
 
-Use this if you are extending a complex preset but don't want to use every "sub preset" that it includes. For example, consinder this config:
+Use this if you are extending a complex preset but don't want to use every "sub preset" that it includes. For example, consider this config:
 
 ```json
 {
@@ -1329,7 +1335,7 @@ Configure to `false` to disable deleting orphan branches and autoclosing PRs. De
 
 ## python
 
-Currently the only Python package manager is `pip` - specifically for `requirements.txt` and `requirequirements.pip` files - so adding any config to this `python` object is essentially the same as adding it to the `pip_requirements` object instead.
+Currently the only Python package manager is `pip` - specifically for `requirements.txt` and `requirements.pip` files - so adding any config to this `python` object is essentially the same as adding it to the `pip_requirements` object instead.
 
 ## rangeStrategy
 
@@ -1337,7 +1343,7 @@ Behaviour:
 
 - `auto` = Renovate decides (this will be done on a manager-by-manager basis)
 - `pin` = convert ranges to exact versions, e.g. `^1.0.0` -> `1.1.0`
-- `bump` = e.g. bump the range even if the new version satisifies the existing range, e.g. `^1.0.0` -> `^1.1.0`
+- `bump` = e.g. bump the range even if the new version satisfies the existing range, e.g. `^1.0.0` -> `^1.1.0`
 - `replace` = Replace the range with a newer one if the new version falls outside it, e.g. `^1.0.0` -> `^2.0.0`
 - `widen` = Widen the range with newer one, e.g. `^1.0.0` -> `^1.0.0 || ^2.0.0`
 - `update-lockfile` = Update the lock file when in-range updates are available, otherwise `replace` for updates out of range. Works only for `npm` and `yarn` so far.

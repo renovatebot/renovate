@@ -253,14 +253,22 @@ async function getStatus(
   useCache = true
 ): Promise<GitlabBranchStatus[]> {
   const branchSha = git.getBranchCommit(branchName);
-  const url = `projects/${config.repository}/repository/commits/${branchSha}/statuses`;
+  try {
+    const url = `projects/${config.repository}/repository/commits/${branchSha}/statuses`;
 
-  return (
-    await gitlabApi.getJson<GitlabBranchStatus[]>(url, {
-      paginate: true,
-      useCache,
-    })
-  ).body;
+    return (
+      await gitlabApi.getJson<GitlabBranchStatus[]>(url, {
+        paginate: true,
+        useCache,
+      })
+    ).body;
+  } catch (err) /* istanbul ignore next */ {
+    logger.debug({ err }, 'Error getting commit status');
+    if (err.response?.statusCode === 404) {
+      throw new Error(REPOSITORY_CHANGED);
+    }
+    throw err;
+  }
 }
 
 const gitlabToRenovateStatusMapping: Record<string, BranchStatus> = {
