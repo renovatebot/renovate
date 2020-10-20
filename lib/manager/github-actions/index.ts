@@ -7,5 +7,4 @@ export { extractPackageFile, language };
 
 export const defaultConfig = {
   fileMatch: ['^\\.github/workflows/[^/]+\\.ya?ml$'],
-  pinDigests: true,
 };
