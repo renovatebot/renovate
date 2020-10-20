@@ -64,6 +64,7 @@ function checkForPlatformFailure(err: Error): void {
     'Could not write new index file',
     'Failed to connect to',
     'Connection timed out',
+    'malformed object name',
   ];
   for (const errorStr of platformFailureStrings) {
     if (err.message.includes(errorStr)) {
@@ -405,13 +406,18 @@ export function getBranchList(): string[] {
 
 export async function isBranchStale(branchName: string): Promise<boolean> {
   await syncBranch(branchName);
-  const branches = await git.branch([
-    '--remotes',
-    '--verbose',
-    '--contains',
-    config.currentBranchSha,
-  ]);
-  return !branches.all.map(localName).includes(branchName);
+  try {
+    const branches = await git.branch([
+      '--remotes',
+      '--verbose',
+      '--contains',
+      config.currentBranchSha,
+    ]);
+    return !branches.all.map(localName).includes(branchName);
+  } catch (err) /* istanbul ignore next */ {
+    checkForPlatformFailure(err);
+    throw err;
+  }
 }
 
 export async function isBranchModified(branchName: string): Promise<boolean> {

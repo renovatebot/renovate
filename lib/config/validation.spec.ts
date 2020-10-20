@@ -225,6 +225,23 @@ describe('config/validation', () => {
       expect(warnings).toHaveLength(0);
       expect(errors).toHaveLength(1);
     });
+    it('errors if no regexManager fileMatch', async () => {
+      const config = {
+        regexManagers: [
+          {
+            matchStrings: ['^(?<depName>foo)(?<currentValue>bar)$'],
+            datasourceTemplate: 'maven',
+            versioningTemplate: 'gradle',
+          },
+        ],
+      };
+      const { warnings, errors } = await configValidation.validateConfig(
+        config as any,
+        true
+      );
+      expect(warnings).toHaveLength(0);
+      expect(errors).toHaveLength(1);
+    });
     it('validates regEx for each matchStrings', async () => {
       const config = {
         regexManagers: [
