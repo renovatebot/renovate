@@ -248,17 +248,19 @@ export function migrateConfig(
         const presets = migratedConfig.extends;
         for (let i = 0; i < presets.length; i += 1) {
           let preset = presets[i];
-          if (preset === 'config:application' || preset === ':js-app') {
-            isMigrated = true;
-            preset = 'config:js-app';
-          } else if (preset === ':library' || preset === 'config:library') {
-            isMigrated = true;
-            preset = 'config:js-lib';
-          } else if (is.string(preset) && preset.startsWith(':masterIssue')) {
-            isMigrated = true;
-            preset = preset.replace('masterIssue', 'dependencyDashboard');
+          if (is.string(preset)) {
+            if (preset === 'config:application' || preset === ':js-app') {
+              isMigrated = true;
+              preset = 'config:js-app';
+            } else if (preset === ':library' || preset === 'config:library') {
+              isMigrated = true;
+              preset = 'config:js-lib';
+            } else if (preset.startsWith(':masterIssue')) {
+              isMigrated = true;
+              preset = preset.replace('masterIssue', 'dependencyDashboard');
+            }
+            presets[i] = preset;
           }
-          presets[i] = preset;
         }
       } else if (key === 'versionScheme') {
         isMigrated = true;
