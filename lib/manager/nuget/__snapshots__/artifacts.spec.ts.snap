@@ -3,7 +3,7 @@
 exports[`updateArtifacts aborts if lock file is unchanged 1`] = `
 Array [
   Object {
-    "cmd": "dotnet restore --force-evaluate project.csproj",
+    "cmd": "dotnet restore project.csproj --force-evaluate",
     "options": Object {
       "cwd": "/tmp/github/some/repo",
       "encoding": "utf-8",
@@ -46,7 +46,7 @@ Array [
     },
   },
   Object {
-    "cmd": "dotnet restore --force-evaluate project.csproj",
+    "cmd": "dotnet restore project.csproj --force-evaluate",
     "options": Object {
       "cwd": "/tmp/github/some/repo",
       "encoding": "utf-8",
@@ -102,7 +102,7 @@ exports[`updateArtifacts does not update lock file when non-proj file is changed
 exports[`updateArtifacts performs lock file maintenance 1`] = `
 Array [
   Object {
-    "cmd": "dotnet restore --force-evaluate project.csproj",
+    "cmd": "dotnet restore project.csproj --force-evaluate",
     "options": Object {
       "cwd": "/tmp/github/some/repo",
       "encoding": "utf-8",
@@ -137,7 +137,7 @@ Array [
     },
   },
   Object {
-    "cmd": "docker run --rm --name=renovate_dotnet --label=renovate_child --user=foobar -v \\"/tmp/github/some/repo\\":\\"/tmp/github/some/repo\\" -v \\"/tmp/renovate/cache\\":\\"/tmp/renovate/cache\\" -w \\"/tmp/github/some/repo\\" renovate/dotnet bash -l -c \\"dotnet restore --force-evaluate project.csproj\\"",
+    "cmd": "docker run --rm --name=renovate_dotnet --label=renovate_child --user=foobar -v \\"/tmp/github/some/repo\\":\\"/tmp/github/some/repo\\" -v \\"/tmp/renovate/cache\\":\\"/tmp/renovate/cache\\" -w \\"/tmp/github/some/repo\\" renovate/dotnet bash -l -c \\"dotnet restore project.csproj --force-evaluate\\"",
     "options": Object {
       "cwd": "/tmp/github/some/repo",
       "encoding": "utf-8",
@@ -160,7 +160,7 @@ Array [
 exports[`updateArtifacts supports global mode 1`] = `
 Array [
   Object {
-    "cmd": "dotnet restore --force-evaluate project.csproj",
+    "cmd": "dotnet restore project.csproj --force-evaluate",
     "options": Object {
       "cwd": "/tmp/github/some/repo",
       "encoding": "utf-8",
@@ -183,7 +183,7 @@ Array [
 exports[`updateArtifacts updates lock file 1`] = `
 Array [
   Object {
-    "cmd": "dotnet restore --force-evaluate project.csproj",
+    "cmd": "dotnet restore project.csproj --force-evaluate",
     "options": Object {
       "cwd": "/tmp/github/some/repo",
       "encoding": "utf-8",

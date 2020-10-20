@@ -45,12 +45,11 @@ async function runDotnetRestore(
   config: UpdateArtifactsConfig
 ): Promise<void> {
   const execOptions: ExecOptions = {
-    cwdFile: packageFileName,
     docker: {
       image: 'renovate/dotnet',
     },
   };
-  const cmds = [`dotnet restore --force-evaluate ${packageFileName}`];
+  const cmds = [`dotnet restore ${packageFileName} --force-evaluate`];
   await authenticate(packageFileName, config, cmds);
   logger.debug({ cmd: cmds }, 'dotnet command');
   await exec(cmds, execOptions);
