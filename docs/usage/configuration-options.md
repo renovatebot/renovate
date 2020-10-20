@@ -41,7 +41,7 @@ In contrast to `reviewers`, this option adds to the existing reviewer list, rath
 
 ## aliases
 
-The `aliases` object is used for configuring registry aliases. Currently it is needed/supported for the `helm-requiremenets` manager only.
+The `aliases` object is used for configuring registry aliases. Currently it is needed/supported for the `helm-requirements` manager only.
 
 `helm-requirements` includes this default alias:
 
@@ -436,6 +436,10 @@ The above will change a raw version of `release-2.0.0` to `2.0.0`, for example. 
 }
 ```
 
+## fetchReleaseNotes
+
+Configure this to `false` if you want to disable release notes fetching
+
 ## fileMatch
 
 `fileMatch` is used by Renovate to know which files in a repository to parse and extract, and it is possible to override defaults values to customize for your project's needs.
@@ -717,7 +721,7 @@ Using this setting, you can selectively ignore package files that you don't want
 
 ## ignorePresets
 
-Use this if you are extending a complex preset but don't want to use every "sub preset" that it includes. For example, consinder this config:
+Use this if you are extending a complex preset but don't want to use every "sub preset" that it includes. For example, consider this config:
 
 ```json
 {
@@ -1325,7 +1329,7 @@ Configure to `false` to disable deleting orphan branches and autoclosing PRs. De
 
 ## python
 
-Currently the only Python package manager is `pip` - specifically for `requirements.txt` and `requirequirements.pip` files - so adding any config to this `python` object is essentially the same as adding it to the `pip_requirements` object instead.
+Currently the only Python package manager is `pip` - specifically for `requirements.txt` and `requirements.pip` files - so adding any config to this `python` object is essentially the same as adding it to the `pip_requirements` object instead.
 
 ## rangeStrategy
 
@@ -1333,7 +1337,7 @@ Behaviour:
 
 - `auto` = Renovate decides (this will be done on a manager-by-manager basis)
 - `pin` = convert ranges to exact versions, e.g. `^1.0.0` -> `1.1.0`
-- `bump` = e.g. bump the range even if the new version satisifies the existing range, e.g. `^1.0.0` -> `^1.1.0`
+- `bump` = e.g. bump the range even if the new version satisfies the existing range, e.g. `^1.0.0` -> `^1.1.0`
 - `replace` = Replace the range with a newer one if the new version falls outside it, e.g. `^1.0.0` -> `^2.0.0`
 - `widen` = Widen the range with newer one, e.g. `^1.0.0` -> `^1.0.0 || ^2.0.0`
 - `update-lockfile` = Update the lock file when in-range updates are available, otherwise `replace` for updates out of range. Works only for `npm` and `yarn` so far.

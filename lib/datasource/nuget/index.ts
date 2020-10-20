@@ -15,8 +15,8 @@ function parseRegistryUrl(
   try {
     const parsedUrl = urlApi.parse(registryUrl);
     let protocolVersion = 2;
-    const protolVersionRegExp = /#protocolVersion=(2|3)/;
-    const protocolVersionMatch = protolVersionRegExp.exec(parsedUrl.hash);
+    const protocolVersionRegExp = /#protocolVersion=(2|3)/;
+    const protocolVersionMatch = protocolVersionRegExp.exec(parsedUrl.hash);
     if (protocolVersionMatch) {
       parsedUrl.hash = '';
       protocolVersion = Number.parseInt(protocolVersionMatch[1], 10);

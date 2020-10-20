@@ -147,7 +147,7 @@ Self-hosted Renovate can be configured using any of the following (or a combinat
 - CLI params
 - Environment params
 
-Note that some Renovate configuratino options are _only_ available for self-hosting, and so can only be configured using one of the above methods. These are described in the [Self-hosted Configuration](./self-hosted-configuration.md) doc.
+Note that some Renovate configuration options are _only_ available for self-hosting, and so can only be configured using one of the above methods. These are described in the [Self-hosted Configuration](./self-hosted-configuration.md) doc.
 
 ## Authentication
 
