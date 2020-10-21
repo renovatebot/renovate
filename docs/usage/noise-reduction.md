@@ -127,12 +127,12 @@ Have you come up with a rule that you think others would benefit from? How about
 
 ## Lock file considerations
 
-As mentioned earlier, using lock files greatly increases the chance that merging one PR will result in a second PR becoming conflicted with `master`. Therefore:
+Using lock files greatly increases the chance that merging one PR will result in a second PR becoming conflicted with `master`. The table below highlights different noise reduction strategies and their affect on pull request and potential lock file conflicts:
 
 | Action                               | Effect on pull requests          | Chance of lock file conflicts |
 | ------------------------------------ | -------------------------------- | ----------------------------- |
-| Group dependencies together          | Reduces number of separate PRs   | Decreases                     |
-| Automerge dependencies               | Reduces number of concurrent PRs | Decreases                     |
+| Group dependencies together          | Decreases separate PRs           | Decreases                     |
+| Automerge dependencies               | Decreases concurrent PRs         | Decreases                     |
 | Decrease scheduled time for Renovate | Increases concurrent PRs         | Increases                     |
 
 ## The Future of Noise Reduction
