@@ -34,6 +34,8 @@ export function extractPackageFile(content: string): PackageFile | null {
         commitMessageTopic: '{{{depName}}} action',
         datasource: githubTagsDatasource.id,
         versioning: dockerVersioning.id,
+        depType: 'action',
+        pinDigests: false,
       };
       if (!dockerVersioning.api.isValid(currentValue)) {
         dep.skipReason = SkipReason.InvalidVersion;
