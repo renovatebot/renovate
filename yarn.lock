@@ -5217,7 +5217,7 @@ init-package-json@^1.10.3:
     validate-npm-package-license "^3.0.1"
     validate-npm-package-name "^3.0.0"
 
-install-artifact-from-github@^1.1.1:
+install-artifact-from-github@^1.1.3:
   version "1.1.3"
   resolved "https://registry.yarnpkg.com/install-artifact-from-github/-/install-artifact-from-github-1.1.3.tgz#552f1ec3e693f970726e3f68018ff5885665ec9e"
   integrity sha512-iNuncO/pI1w0UOrebs9dwwVpXqERkszPcb7AYq2hbsJDS3X+XdZ+E5kE91EBSc98mjvCMWOoBa1Zk3hVeP1ddA==
@@ -7314,7 +7314,7 @@ mv@~2:
     ncp "~2.0.0"
     rimraf "~2.4.0"
 
-nan@^2.12.1, nan@^2.14.0, nan@^2.14.1:
+nan@^2.12.1, nan@^2.14.0, nan@^2.14.2:
   version "2.14.2"
   resolved "https://registry.yarnpkg.com/nan/-/nan-2.14.2.tgz#f5376400695168f4cc694ac9393d0c9585eeea19"
   integrity sha512-M2ufzIiINKCuDfBSAUr1vWQ+vuVcA9kqx8JJUsbQi6yf1uGRyb7HfpdfUr5qLXf3B/t8dPvcjhKMmlfnP47EzQ==
@@ -7433,7 +7433,7 @@ node-gyp@^5.0.2, node-gyp@^5.1.0:
     tar "^4.4.12"
     which "^1.3.1"
 
-node-gyp@^7.1.0:
+node-gyp@^7.1.2:
   version "7.1.2"
   resolved "https://registry.yarnpkg.com/node-gyp/-/node-gyp-7.1.2.tgz#21a810aebb187120251c3bcec979af1587b188ae"
   integrity sha512-CbpcIo7C3eMu3dL1c3d0xw449fHIGALIJsRP4DDPHpyiW8vcriNY7ubh9TE4zEKfSxscY7PjeFnshE7h75ynjQ==
@@ -8644,14 +8644,14 @@ rc@^1.0.1, rc@^1.1.6, rc@^1.2.8:
     minimist "^1.2.0"
     strip-json-comments "~2.0.1"
 
-re2@1.15.6:
-  version "1.15.6"
-  resolved "https://registry.yarnpkg.com/re2/-/re2-1.15.6.tgz#838f86ea4205ffec47c7f5802b12a8fee33472b3"
-  integrity sha512-SsxGuKiizqOPBwm2YkMfh+Wsj+02sqP9y8xydC9KbZqHuY2qdjEyoJAfBapKSTK130gZMXVE6Qm+GTlOfjwqJw==
+re2@1.15.8:
+  version "1.15.8"
+  resolved "https://registry.yarnpkg.com/re2/-/re2-1.15.8.tgz#654dfbd889acc2649773a2b32dfb9feb357ca9bc"
+  integrity sha512-CZm4HMuNbY+LP5LjFQvBxbQmvS7iJiVR3w23Bk3jYxZFUj6wPiYRvDikyVpqHYLioVAWcgjG6F90Pk4z7ehUSg==
   dependencies:
-    install-artifact-from-github "^1.1.1"
-    nan "^2.14.1"
-    node-gyp "^7.1.0"
+    install-artifact-from-github "^1.1.3"
+    nan "^2.14.2"
+    node-gyp "^7.1.2"
 
 react-is@^16.12.0, react-is@^16.8.4:
   version "16.13.1"
