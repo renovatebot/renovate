@@ -296,7 +296,9 @@ Object {
       "depName": "docker",
       "depNameShort": "docker",
       "depType": "terraform",
-      "lookupName": "terraform-providers/docker",
+      "registryUrls": Array [
+        "https://releases.hashicorp.com",
+      ],
     },
     Object {
       "currentValue": "2.7.0",
