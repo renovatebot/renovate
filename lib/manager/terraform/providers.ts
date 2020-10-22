@@ -55,7 +55,10 @@ export function analyzeTerraformProvider(dep: PackageDependency): void {
   if (is.nonEmptyString(dep.managerData.source)) {
     const source = sourceExtractionRegex.exec(dep.managerData.source);
     if (source) {
-      if (source.groups.hostname) {
+      // buildin providers https://github.com/terraform-providers
+      if (source.groups.namespace === 'terraform-providers') {
+        dep.registryUrls = [`https://releases.hashicorp.com`];
+      } else if (source.groups.hostname) {
         dep.registryUrls = [`https://${source.groups.hostname}`];
         dep.lookupName = `${source.groups.namespace}/${source.groups.type}`;
       } else {
