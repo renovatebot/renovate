@@ -1,0 +1,666 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`manager/gradle-lite/parser build.gradle 1`] = `
+Array [
+  Object {
+    "currentValue": "1.5.2.RELEASE",
+    "depName": "org.springframework.boot:spring-boot-gradle-plugin",
+    "groupName": "springBootVersion",
+    "managerData": Object {
+      "fileReplacePosition": 53,
+    },
+  },
+  Object {
+    "currentValue": "1.2.3",
+    "depName": "com.github.jengelman.gradle.plugins:shadow",
+    "managerData": Object {
+      "fileReplacePosition": 388,
+    },
+  },
+  Object {
+    "currentValue": "0.1",
+    "depName": "com.fkorotkov:gradle-libraries-plugin",
+    "managerData": Object {
+      "fileReplacePosition": 452,
+    },
+  },
+  Object {
+    "currentValue": "0.2.3",
+    "depName": "gradle.plugin.se.patrikerdes:gradle-use-latest-versions-plugin",
+    "managerData": Object {
+      "fileReplacePosition": 539,
+    },
+  },
+  Object {
+    "currentValue": "3.1.1",
+    "depName": "org.apache.openjpa:openjpa",
+    "managerData": Object {
+      "fileReplacePosition": 592,
+    },
+  },
+  Object {
+    "currentValue": "6.0.9.RELEASE",
+    "depName": "org.grails:gorm-hibernate5-spring-boot",
+    "managerData": Object {
+      "fileReplacePosition": 1785,
+    },
+  },
+  Object {
+    "currentValue": "6.0.5",
+    "depName": "mysql:mysql-connector-java",
+    "managerData": Object {
+      "fileReplacePosition": 1841,
+    },
+  },
+  Object {
+    "currentValue": "1.0-groovy-2.4",
+    "depName": "org.spockframework:spock-spring",
+    "managerData": Object {
+      "fileReplacePosition": 1899,
+    },
+  },
+  Object {
+    "currentValue": "1.3",
+    "depName": "org.hamcrest:hamcrest-core",
+    "managerData": Object {
+      "fileReplacePosition": 2004,
+    },
+  },
+  Object {
+    "currentValue": "3.1",
+    "depName": "cglib:cglib-nodep",
+    "managerData": Object {
+      "fileReplacePosition": 2092,
+    },
+  },
+  Object {
+    "currentValue": "3.1.1",
+    "depName": "org.apache.openjpa:openjpa",
+    "managerData": Object {
+      "fileReplacePosition": 2198,
+    },
+  },
+]
+`;
+
+exports[`manager/gradle-lite/parser build.gradle 2`] = `
+Array [
+  Object {
+    "currentValue": "2.7.1",
+    "depName": "com.bmuschko:gradle-cargo-plugin",
+    "managerData": Object {
+      "fileReplacePosition": 1374,
+    },
+  },
+  Object {
+    "currentValue": "1.1.10",
+    "depName": "org.zeroturnaround:gradle-jrebel-plugin",
+    "managerData": Object {
+      "fileReplacePosition": 1440,
+    },
+  },
+  Object {
+    "currentValue": "2.3.4.RELEASE",
+    "depName": "org.springframework.boot:spring-boot-gradle-plugin",
+    "managerData": Object {
+      "fileReplacePosition": 1518,
+    },
+  },
+  Object {
+    "currentValue": "3.1.2",
+    "depName": "org.apache.openjpa:openjpa",
+    "managerData": Object {
+      "fileReplacePosition": 1579,
+    },
+  },
+  Object {
+    "currentValue": "3.1.0",
+    "depName": "com.radcortez.gradle:openjpa-gradle-plugin",
+    "managerData": Object {
+      "fileReplacePosition": 1739,
+    },
+  },
+  Object {
+    "currentValue": "4.5.1",
+    "depName": "gradle.plugin.com.github.spotbugs.snom:spotbugs-gradle-plugin",
+    "managerData": Object {
+      "fileReplacePosition": 1827,
+    },
+  },
+  Object {
+    "currentValue": "1.3.0",
+    "depName": "gradle.plugin.com.github.andygoossens:gradle-modernizer-plugin",
+    "managerData": Object {
+      "fileReplacePosition": 1916,
+    },
+  },
+  Object {
+    "currentValue": "2.2.3",
+    "depName": "gradle.plugin.com.gorylenko.gradle-git-properties:gradle-git-properties",
+    "managerData": Object {
+      "fileReplacePosition": 2014,
+    },
+  },
+  Object {
+    "currentValue": "1.2.1",
+    "depName": "net.ltgt.gradle:gradle-errorprone-plugin",
+    "managerData": Object {
+      "fileReplacePosition": 2081,
+    },
+  },
+  Object {
+    "currentValue": "2.1.5",
+    "depName": "io.swagger.core.v3:swagger-gradle-plugin",
+    "managerData": Object {
+      "fileReplacePosition": 2148,
+    },
+  },
+  Object {
+    "currentValue": "5.2.6.RELEASE",
+    "depName": "org.springframework:spring-framework-bom",
+    "managerData": Object {
+      "fileReplacePosition": 3138,
+    },
+  },
+  Object {
+    "currentValue": "2.5.0.RELEASE",
+    "depName": "org.springframework.security.oauth:spring-security-oauth2",
+    "managerData": Object {
+      "fileReplacePosition": 3666,
+    },
+  },
+  Object {
+    "currentValue": "3.1.2",
+    "depName": "org.apache.openjpa:openjpa",
+    "managerData": Object {
+      "fileReplacePosition": 3732,
+    },
+  },
+  Object {
+    "currentValue": "1.9.0",
+    "depName": "com.squareup.retrofit:retrofit",
+    "managerData": Object {
+      "fileReplacePosition": 3872,
+    },
+  },
+  Object {
+    "currentValue": "2.7.5",
+    "depName": "com.squareup.okhttp:okhttp",
+    "managerData": Object {
+      "fileReplacePosition": 3930,
+    },
+  },
+  Object {
+    "currentValue": "2.7.5",
+    "depName": "com.squareup.okhttp:okhttp-urlconnection",
+    "managerData": Object {
+      "fileReplacePosition": 4002,
+    },
+  },
+  Object {
+    "currentValue": "30.0-jre",
+    "depName": "com.google.guava:guava",
+    "managerData": Object {
+      "fileReplacePosition": 4056,
+    },
+  },
+  Object {
+    "currentValue": "2.8.6",
+    "depName": "com.google.code.gson:gson",
+    "managerData": Object {
+      "fileReplacePosition": 4116,
+    },
+  },
+  Object {
+    "currentValue": "1.5",
+    "depName": "org.apache.commons:commons-email",
+    "managerData": Object {
+      "fileReplacePosition": 4180,
+    },
+  },
+  Object {
+    "currentValue": "2.8.0",
+    "depName": "commons-io:commons-io",
+    "managerData": Object {
+      "fileReplacePosition": 4231,
+    },
+  },
+  Object {
+    "currentValue": "1.4",
+    "depName": "org.drizzle.jdbc:drizzle-jdbc",
+    "managerData": Object {
+      "fileReplacePosition": 4292,
+    },
+  },
+  Object {
+    "currentValue": "1.3.22",
+    "depName": "com.github.librepdf:openpdf",
+    "managerData": Object {
+      "fileReplacePosition": 4349,
+    },
+  },
+  Object {
+    "currentValue": "3.0.20",
+    "depName": "org.mnode.ical4j:ical4j",
+    "managerData": Object {
+      "fileReplacePosition": 4405,
+    },
+  },
+  Object {
+    "currentValue": "2.3.2",
+    "depName": "org.quartz-scheduler:quartz",
+    "managerData": Object {
+      "fileReplacePosition": 4465,
+    },
+  },
+  Object {
+    "currentValue": "1.11.874",
+    "depName": "com.amazonaws:aws-java-sdk-s3",
+    "managerData": Object {
+      "fileReplacePosition": 4526,
+    },
+  },
+  Object {
+    "currentValue": "3.9.0",
+    "depName": "org.ehcache:ehcache",
+    "managerData": Object {
+      "fileReplacePosition": 4580,
+    },
+  },
+  Object {
+    "currentValue": "0.9.7",
+    "depName": "com.github.spullara.mustache.java:compiler",
+    "managerData": Object {
+      "fileReplacePosition": 4654,
+    },
+  },
+  Object {
+    "currentValue": "2.4.0",
+    "depName": "com.jayway.jsonpath:json-path",
+    "managerData": Object {
+      "fileReplacePosition": 4715,
+    },
+  },
+  Object {
+    "currentValue": "1.24.1",
+    "depName": "org.apache.tika:tika-core",
+    "managerData": Object {
+      "fileReplacePosition": 4772,
+    },
+  },
+  Object {
+    "currentValue": "4.5.13",
+    "depName": "org.apache.httpcomponents:httpclient",
+    "managerData": Object {
+      "fileReplacePosition": 4841,
+    },
+  },
+  Object {
+    "currentValue": "2.1.5",
+    "depName": "io.swagger.core.v3:swagger-annotations",
+    "managerData": Object {
+      "fileReplacePosition": 4912,
+    },
+  },
+  Object {
+    "currentValue": "1.1.4",
+    "depName": "jakarta.management.j2ee:jakarta.management.j2ee-api",
+    "managerData": Object {
+      "fileReplacePosition": 4995,
+    },
+  },
+  Object {
+    "currentValue": "2.0.3",
+    "depName": "jakarta.jms:jakarta.jms-api",
+    "managerData": Object {
+      "fileReplacePosition": 5054,
+    },
+  },
+  Object {
+    "currentValue": "2.3.3",
+    "depName": "jakarta.xml.bind:jakarta.xml.bind-api",
+    "managerData": Object {
+      "fileReplacePosition": 5123,
+    },
+  },
+  Object {
+    "currentValue": "3.0.0",
+    "depName": "jakarta.validation:jakarta.validation-api",
+    "managerData": Object {
+      "fileReplacePosition": 5196,
+    },
+  },
+  Object {
+    "currentValue": "5.16.0",
+    "depName": "org.apache.activemq:activemq-broker",
+    "managerData": Object {
+      "fileReplacePosition": 5263,
+    },
+  },
+  Object {
+    "currentValue": "2.0.4",
+    "depName": "org.apache.bval:org.apache.bval.bundle",
+    "managerData": Object {
+      "fileReplacePosition": 5334,
+    },
+  },
+  Object {
+    "currentValue": "3.5.13",
+    "depName": "org.mockito:mockito-core",
+    "managerData": Object {
+      "fileReplacePosition": 5390,
+    },
+  },
+  Object {
+    "currentValue": "3.5.13",
+    "depName": "org.mockito:mockito-junit-jupiter",
+    "managerData": Object {
+      "fileReplacePosition": 5456,
+    },
+  },
+  Object {
+    "currentValue": "4.8.90",
+    "depName": "io.github.classgraph:classgraph",
+    "managerData": Object {
+      "fileReplacePosition": 5520,
+    },
+  },
+  Object {
+    "currentValue": "4.0.3",
+    "depName": "org.awaitility:awaitility",
+    "managerData": Object {
+      "fileReplacePosition": 5578,
+    },
+  },
+  Object {
+    "currentValue": "4.1.4",
+    "depName": "com.github.spotbugs:spotbugs-annotations",
+    "managerData": Object {
+      "fileReplacePosition": 5650,
+    },
+  },
+  Object {
+    "currentValue": "1.1.1",
+    "depName": "javax.cache:cache-api",
+    "managerData": Object {
+      "fileReplacePosition": 5703,
+    },
+  },
+  Object {
+    "currentValue": "5.11.1",
+    "depName": "org.mock-server:mockserver-junit-jupiter",
+    "managerData": Object {
+      "fileReplacePosition": 5775,
+    },
+  },
+  Object {
+    "currentValue": "3.35.2",
+    "depName": "org.webjars.npm:swagger-ui-dist",
+    "managerData": Object {
+      "fileReplacePosition": 5839,
+    },
+  },
+  Object {
+    "currentValue": "0.46",
+    "depName": "org.webjars:webjars-locator-core",
+    "managerData": Object {
+      "fileReplacePosition": 5904,
+    },
+  },
+  Object {
+    "currentValue": "2.9.0",
+    "depName": "com.squareup.retrofit2:retrofit",
+    "groupName": "retrofitVersion",
+    "managerData": Object {
+      "fileReplacePosition": 949,
+    },
+  },
+  Object {
+    "currentValue": "2.9.0",
+    "depName": "com.squareup.retrofit2:retrofit-mock",
+    "groupName": "retrofitVersion",
+    "managerData": Object {
+      "fileReplacePosition": 949,
+    },
+  },
+  Object {
+    "currentValue": "2.9.0",
+    "depName": "com.squareup.retrofit2:adapter-java8",
+    "groupName": "retrofitVersion",
+    "managerData": Object {
+      "fileReplacePosition": 949,
+    },
+  },
+  Object {
+    "currentValue": "2.9.0",
+    "depName": "com.squareup.retrofit2:adapter-rxjava2",
+    "groupName": "retrofitVersion",
+    "managerData": Object {
+      "fileReplacePosition": 949,
+    },
+  },
+  Object {
+    "currentValue": "2.9.0",
+    "depName": "com.squareup.retrofit2:adapter-rxjava3",
+    "groupName": "retrofitVersion",
+    "managerData": Object {
+      "fileReplacePosition": 949,
+    },
+  },
+  Object {
+    "currentValue": "2.9.0",
+    "depName": "com.squareup.retrofit2:adapter-guava",
+    "groupName": "retrofitVersion",
+    "managerData": Object {
+      "fileReplacePosition": 949,
+    },
+  },
+  Object {
+    "currentValue": "2.9.0",
+    "depName": "com.squareup.retrofit2:converter-wire",
+    "groupName": "retrofitVersion",
+    "managerData": Object {
+      "fileReplacePosition": 949,
+    },
+  },
+  Object {
+    "currentValue": "2.9.0",
+    "depName": "com.squareup.retrofit2:converter-jackson",
+    "groupName": "retrofitVersion",
+    "managerData": Object {
+      "fileReplacePosition": 949,
+    },
+  },
+  Object {
+    "currentValue": "2.9.0",
+    "depName": "com.squareup.retrofit2:converter-simplexml",
+    "groupName": "retrofitVersion",
+    "managerData": Object {
+      "fileReplacePosition": 949,
+    },
+  },
+  Object {
+    "currentValue": "2.9.0",
+    "depName": "com.squareup.retrofit2:converter-jaxb",
+    "groupName": "retrofitVersion",
+    "managerData": Object {
+      "fileReplacePosition": 949,
+    },
+  },
+  Object {
+    "currentValue": "2.9.0",
+    "depName": "com.squareup.retrofit2:converter-java8",
+    "groupName": "retrofitVersion",
+    "managerData": Object {
+      "fileReplacePosition": 949,
+    },
+  },
+  Object {
+    "currentValue": "2.9.0",
+    "depName": "com.squareup.retrofit2:converter-scalars",
+    "groupName": "retrofitVersion",
+    "managerData": Object {
+      "fileReplacePosition": 949,
+    },
+  },
+  Object {
+    "currentValue": "2.9.0",
+    "depName": "com.squareup.retrofit2:converter-gson",
+    "groupName": "retrofitVersion",
+    "managerData": Object {
+      "fileReplacePosition": 949,
+    },
+  },
+  Object {
+    "currentValue": "2.9.0",
+    "depName": "com.squareup.retrofit2:converter-protobuf",
+    "groupName": "retrofitVersion",
+    "managerData": Object {
+      "fileReplacePosition": 949,
+    },
+  },
+  Object {
+    "currentValue": "1.0.1",
+    "depName": "org.apache.oltu.oauth2:org.apache.oltu.oauth2.common",
+    "groupName": "oltuVersion",
+    "managerData": Object {
+      "fileReplacePosition": 1011,
+    },
+  },
+  Object {
+    "currentValue": "1.0.1",
+    "depName": "org.apache.oltu.oauth2:org.apache.oltu.oauth2.client",
+    "groupName": "oltuVersion",
+    "managerData": Object {
+      "fileReplacePosition": 1011,
+    },
+  },
+  Object {
+    "currentValue": "1.0.1",
+    "depName": "org.apache.oltu.oauth2:org.apache.oltu.oauth2.httpclient4",
+    "groupName": "oltuVersion",
+    "managerData": Object {
+      "fileReplacePosition": 1011,
+    },
+  },
+  Object {
+    "currentValue": "4.7.2",
+    "depName": "com.squareup.okhttp3:okhttp",
+    "groupName": "okhttpVersion",
+    "managerData": Object {
+      "fileReplacePosition": 981,
+    },
+  },
+  Object {
+    "currentValue": "4.7.2",
+    "depName": "com.squareup.okhttp3:okcurl",
+    "groupName": "okhttpVersion",
+    "managerData": Object {
+      "fileReplacePosition": 981,
+    },
+  },
+  Object {
+    "currentValue": "4.7.2",
+    "depName": "com.squareup.okhttp3:logging-interceptor",
+    "groupName": "okhttpVersion",
+    "managerData": Object {
+      "fileReplacePosition": 981,
+    },
+  },
+  Object {
+    "currentValue": "4.7.2",
+    "depName": "com.squareup.okhttp3:okhttp-apache",
+    "groupName": "okhttpVersion",
+    "managerData": Object {
+      "fileReplacePosition": 981,
+    },
+  },
+  Object {
+    "currentValue": "4.7.2",
+    "depName": "com.squareup.okhttp3:okhttp-android-support",
+    "groupName": "okhttpVersion",
+    "managerData": Object {
+      "fileReplacePosition": 981,
+    },
+  },
+  Object {
+    "currentValue": "4.7.2",
+    "depName": "com.squareup.okhttp3:okhttp-urlconnection",
+    "groupName": "okhttpVersion",
+    "managerData": Object {
+      "fileReplacePosition": 981,
+    },
+  },
+  Object {
+    "currentValue": "4.7.2",
+    "depName": "com.squareup.okhttp3:okhttp-sse",
+    "groupName": "okhttpVersion",
+    "managerData": Object {
+      "fileReplacePosition": 981,
+    },
+  },
+  Object {
+    "currentValue": "1.8.4",
+    "depName": "io.gsonfire:gson-fire",
+    "managerData": Object {
+      "fileReplacePosition": 7938,
+    },
+  },
+  Object {
+    "currentValue": "1.4.1",
+    "depName": "org.threeten:threetenbp",
+    "managerData": Object {
+      "fileReplacePosition": 7993,
+    },
+  },
+  Object {
+    "currentValue": "1.6.2",
+    "depName": "io.swagger:swagger-core",
+    "managerData": Object {
+      "fileReplacePosition": 8048,
+    },
+  },
+  Object {
+    "currentValue": "1.6.2",
+    "depName": "io.swagger:swagger-annotations",
+    "managerData": Object {
+      "fileReplacePosition": 8110,
+    },
+  },
+  Object {
+    "currentValue": "1.3.2",
+    "depName": "javax.annotation:javax.annotation-api",
+    "managerData": Object {
+      "fileReplacePosition": 8179,
+    },
+  },
+  Object {
+    "currentValue": "3.0.2",
+    "depName": "com.google.code.findbugs:jsr305",
+    "managerData": Object {
+      "fileReplacePosition": 8242,
+    },
+  },
+  Object {
+    "currentValue": "1.15",
+    "depName": "commons-codec:commons-codec",
+    "managerData": Object {
+      "fileReplacePosition": 8301,
+    },
+  },
+  Object {
+    "currentValue": "7.0.0",
+    "depName": "org.flywaydb:flyway-core",
+    "managerData": Object {
+      "fileReplacePosition": 8358,
+    },
+  },
+  Object {
+    "currentValue": "2.1.3",
+    "depName": "org.dom4j:dom4j",
+    "managerData": Object {
+      "fileReplacePosition": 8812,
+    },
+  },
+]
+`;

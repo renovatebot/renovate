@@ -1,0 +1,456 @@
+/**
+ * Licensed to the Apache Software Foundation (ASF) under one
+ * or more contributor license agreements. See the NOTICE file
+ * distributed with this work for additional information
+ * regarding copyright ownership. The ASF licenses this file
+ * to you under the Apache License, Version 2.0 (the
+ * "License"); you may not use this file except in compliance
+ * with the License. You may obtain a copy of the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an
+ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ * KIND, either express or implied. See the License for the
+ * specific language governing permissions and limitations
+ * under the License.
+ */
+// TODO: this is work in progress, please follow FINERACT-1171
+buildscript {
+    ext {
+        jacocoVersion = '0.8.5'
+        retrofitVersion = '2.9.0'
+        okhttpVersion = '4.7.2'
+        oltuVersion = '1.0.1'
+        fineractJavaProjects = subprojects.findAll{
+            [
+                'fineract-provider',
+                'fineract-client'
+            ].contains(it.name)
+        }
+
+    }
+    repositories {
+        jcenter()
+        maven { url "https://plugins.gradle.org/m2/" }
+    }
+
+    dependencies {
+        classpath 'com.bmuschko:gradle-cargo-plugin:2.7.1'
+        classpath 'org.zeroturnaround:gradle-jrebel-plugin:1.1.10'
+        classpath 'org.springframework.boot:spring-boot-gradle-plugin:2.3.4.RELEASE'
+        classpath 'org.apache.openjpa:openjpa:3.1.2' // when upgrading, also change OpenJPA version repeated in fineract-provider/build.gradle!
+        classpath 'com.radcortez.gradle:openjpa-gradle-plugin:3.1.0'
+        classpath "gradle.plugin.com.github.spotbugs.snom:spotbugs-gradle-plugin:4.5.1"
+        classpath "gradle.plugin.com.github.andygoossens:gradle-modernizer-plugin:1.3.0"
+        classpath "gradle.plugin.com.gorylenko.gradle-git-properties:gradle-git-properties:2.2.3"
+        classpath "net.ltgt.gradle:gradle-errorprone-plugin:1.2.1"
+        classpath "io.swagger.core.v3:swagger-gradle-plugin:2.1.5"
+    }
+}
+
+plugins {
+    id 'io.spring.dependency-management' version '1.0.10.RELEASE'
+    id 'com.diffplug.spotless' version '5.6.1' apply false
+    id 'org.nosphere.apache.rat' version '0.7.0' apply false
+    id 'com.github.hierynomus.license' version '0.15.0' apply false
+    id 'org.openapi.generator' version '4.3.1' apply false
+}
+
+description = '''\
+Run as:
+gradle clean bootRun'''
+
+project.ext.jerseyVersion = '1.19.4'
+ext['groovy.version'] = '3.0.6'
+
+allprojects  {
+    group = 'org.apache.fineract'
+
+    repositories {
+        jcenter()
+    }
+
+    apply plugin: 'io.spring.dependency-management'
+    apply plugin: 'com.diffplug.spotless'
+    apply plugin: 'com.github.hierynomus.license'
+    apply plugin: 'org.nosphere.apache.rat'
+
+    // Configuration for the dependency management plugin
+    // https://github.com/spring-gradle-plugins/dependency-management-plugin
+    dependencyManagement {
+        imports {
+            mavenBom 'org.springframework:spring-framework-bom:5.2.6.RELEASE'
+        }
+
+        dependencies {
+            // We use fixed versions, instead of inheriting them from the Spring BOM, to be able to be on more recent ones.
+            // We do not use :+ to get the latest available version available on Maven Central, as that could suddenly break things.
+            // We use the Renovate Bot to automatically propose Pull Requests (PRs) when upgrades for all of these versions are available.
+
+            dependency 'org.springframework.security.oauth:spring-security-oauth2:2.5.0.RELEASE'
+            dependency 'org.apache.openjpa:openjpa:3.1.2' // when upgrading, also change OpenJPA version repeated above in buildscript!
+            dependency 'com.squareup.retrofit:retrofit:1.9.0'
+            dependency 'com.squareup.okhttp:okhttp:2.7.5'
+            dependency 'com.squareup.okhttp:okhttp-urlconnection:2.7.5'
+            dependency 'com.google.guava:guava:30.0-jre'
+            dependency 'com.google.code.gson:gson:2.8.6'
+            dependency 'org.apache.commons:commons-email:1.5'
+            dependency 'commons-io:commons-io:2.8.0'
+            dependency 'org.drizzle.jdbc:drizzle-jdbc:1.4'
+            dependency 'com.github.librepdf:openpdf:1.3.22'
+            dependency 'org.mnode.ical4j:ical4j:3.0.20'
+            dependency 'org.quartz-scheduler:quartz:2.3.2'
+            dependency 'com.amazonaws:aws-java-sdk-s3:1.11.874'
+            dependency 'org.ehcache:ehcache:3.9.0'
+            dependency 'com.github.spullara.mustache.java:compiler:0.9.7'
+            dependency 'com.jayway.jsonpath:json-path:2.4.0'
+            dependency 'org.apache.tika:tika-core:1.24.1'
+            dependency 'org.apache.httpcomponents:httpclient:4.5.13'
+            dependency 'io.swagger.core.v3:swagger-annotations:2.1.5'
+            dependency 'jakarta.management.j2ee:jakarta.management.j2ee-api:1.1.4'
+            dependency 'jakarta.jms:jakarta.jms-api:2.0.3'
+            dependency 'jakarta.xml.bind:jakarta.xml.bind-api:2.3.3'
+            dependency 'jakarta.validation:jakarta.validation-api:3.0.0'
+            dependency 'org.apache.activemq:activemq-broker:5.16.0'
+            dependency 'org.apache.bval:org.apache.bval.bundle:2.0.4'
+            dependency 'org.mockito:mockito-core:3.5.13'
+            dependency 'org.mockito:mockito-junit-jupiter:3.5.13'
+            dependency 'io.github.classgraph:classgraph:4.8.90'
+            dependency 'org.awaitility:awaitility:4.0.3'
+            dependency 'com.github.spotbugs:spotbugs-annotations:4.1.4'
+            dependency 'javax.cache:cache-api:1.1.1'
+            dependency 'org.mock-server:mockserver-junit-jupiter:5.11.1'
+            dependency 'org.webjars.npm:swagger-ui-dist:3.35.2'
+            dependency 'org.webjars:webjars-locator-core:0.46'
+
+            // fineract client dependencies
+            dependency "com.squareup.retrofit2:retrofit:$retrofitVersion"
+            dependency "com.squareup.retrofit2:retrofit-mock:$retrofitVersion"
+            dependency "com.squareup.retrofit2:adapter-java8:$retrofitVersion"
+            dependency "com.squareup.retrofit2:adapter-rxjava2:$retrofitVersion"
+            dependency "com.squareup.retrofit2:adapter-rxjava3:$retrofitVersion"
+            dependency "com.squareup.retrofit2:adapter-guava:$retrofitVersion"
+            dependency "com.squareup.retrofit2:converter-wire:$retrofitVersion"
+            dependency "com.squareup.retrofit2:converter-jackson:$retrofitVersion"
+            dependency "com.squareup.retrofit2:converter-simplexml:$retrofitVersion"
+            dependency "com.squareup.retrofit2:converter-jaxb:$retrofitVersion"
+            dependency "com.squareup.retrofit2:converter-java8:$retrofitVersion"
+            dependency "com.squareup.retrofit2:converter-scalars:$retrofitVersion"
+            dependency "com.squareup.retrofit2:converter-gson:$retrofitVersion"
+            dependency "com.squareup.retrofit2:converter-protobuf:$retrofitVersion"
+            dependency "org.apache.oltu.oauth2:org.apache.oltu.oauth2.common:$oltuVersion"
+            dependency "org.apache.oltu.oauth2:org.apache.oltu.oauth2.client:$oltuVersion"
+            dependency "org.apache.oltu.oauth2:org.apache.oltu.oauth2.httpclient4:$oltuVersion"
+            dependency "com.squareup.okhttp3:okhttp:$okhttpVersion"
+            dependency "com.squareup.okhttp3:okcurl:$okhttpVersion"
+            dependency "com.squareup.okhttp3:logging-interceptor:$okhttpVersion"
+            dependency "com.squareup.okhttp3:okhttp-apache:$okhttpVersion"
+            dependency "com.squareup.okhttp3:okhttp-android-support:$okhttpVersion"
+            dependency "com.squareup.okhttp3:okhttp-urlconnection:$okhttpVersion"
+            dependency "com.squareup.okhttp3:okhttp-sse:$okhttpVersion"
+            dependency "io.gsonfire:gson-fire:1.8.4"
+            dependency "org.threeten:threetenbp:1.4.1"
+            dependency "io.swagger:swagger-core:1.6.2"
+            dependency "io.swagger:swagger-annotations:1.6.2"
+            dependency "javax.annotation:javax.annotation-api:1.3.2"
+            dependency "com.google.code.findbugs:jsr305:3.0.2"
+            dependency "commons-codec:commons-codec:1.15"
+
+            dependency ('org.flywaydb:flyway-core:7.0.0') {
+                // https://issues.apache.org/jira/browse/FINERACT-1172
+                // https://github.com/apache/fineract/pull/1355
+                // https://github.com/flyway/flyway/issues/2957
+                // exclude conflicting non-<optional> dependencies from https://github.com/flyway/flyway/blob/master/flyway-core/pom.xml
+                exclude 'software.amazon.awssdk:s3'
+            }
+
+            dependency ('org.dom4j:dom4j:2.1.3') {
+                exclude 'relaxngDatatype:relaxngDatatype' // already in com.sun.xml.bind:jaxb-osgi:2.3.0.1
+                // FINERACT-940 && FINERACT-966 https://github.com/spotbugs/spotbugs/issues/1128
+                exclude 'xpp3:xpp3'
+                exclude 'pull-parser:pull-parser'
+            }
+
+            dependencySet(group: 'com.sun.jersey', version: jerseyVersion) {
+                entry 'jersey-core'
+                entry 'jersey-servlet'
+                entry 'jersey-server'
+                entry 'jersey-json'
+            }
+            dependencySet(group: 'com.sun.jersey.contribs', version: jerseyVersion) {
+                entry 'jersey-spring'
+                entry 'jersey-multipart'
+            }
+            dependencySet(group: 'org.apache.poi', version: '4.1.2') {
+                entry 'poi'
+                entry 'poi-ooxml'
+                entry 'poi-ooxml-schemas'
+            }
+            dependencySet(group: 'io.rest-assured', version: '4.3.0')
+            {
+                entry 'rest-assured'
+                entry 'json-path'
+                entry 'xml-path'
+            }
+        }
+    }
+
+    // Configuration for the spotless plugin
+    // https://github.com/diffplug/spotless/tree/main/plugin-gradle
+    spotless {
+        format 'misc', {
+            target '**/*.md', '**/*.properties', '**/.gitignore', '**/*.yml', '**/*.xml', '**/**.json', '**/*.sql'
+            targetExclude '**/build/**', '**/bin/**', '**/.settings/**', '**/.idea/**', '**/.gradle/**', '**/gradlew.bat'
+            indentWithSpaces(4)
+            endWithNewline()
+            trimTrailingWhitespace()
+        }
+
+        groovyGradle {
+            target '*.gradle', '**/*.gradle'
+            targetExclude '**/build/**'
+            greclipse()
+            indentWithSpaces(4)
+            endWithNewline()
+            trimTrailingWhitespace()
+        }
+
+        lineEndings 'UNIX'
+    }
+
+    // Configuration for Gradle license plug-in
+    // https://github.com/hierynomus/license-gradle-plugin
+    license {
+        header rootProject.file("$rootDir/APACHE_LICENSETEXT.md")
+        excludes([
+            "**/gradlew*",
+            "**/git.properties",
+            "**/*.html",
+            "**/*.mustache",
+            "**/package-info.java",
+            "**/keystore.jks",
+            "**/static/swagger-ui/**",
+            "**/api-docs/**",
+        ])
+        strictCheck true
+    }
+
+    task licenseFormatBuildScripts (type:nl.javadude.gradle.plugins.license.License) {
+        source = fileTree(dir: "$rootDir/", includes: [
+            '**/*.bat',
+            '**/*.sh',
+            '**/*.sql'
+        ], excludes: [
+            '**/gradlew*'
+        ])
+    }
+    licenseFormat.dependsOn licenseFormatBuildScripts
+
+    // Configuration for Apache Release Audit Tool task
+    // https://github.com/eskatos/creadur-rat-gradle
+    rat {
+        verbose = false
+        reportDir = file("$buildDir/reports/rat")
+        excludes = [
+            '**/src/main/templates/**/*.mustache',
+            '**/.dockerignore',
+            '**/*.launch',
+            '**/licenses/**',
+            '**/*.md',
+            '**/*.github/**',
+            '**/MANIFEST.MF',
+            '**/*.json',
+            '**/*.json.template',
+            '**/*.txt',
+            '**/*.log',
+            '**/fineractdev-eclipse-preferences.epf',
+            '**/template-expected.html',
+            '**/template.mustache',
+            '**/.classpath',
+            '**/.project',
+            '**/.idea/**',
+            '**/*.ipr',
+            '**/*.iws',
+            '**/.settings/**',
+            '**/bin/**',
+            '**/.git/**',
+            '**/.gitignore',
+            '**/.gitkeep',
+            '**/*.iml',
+            '**/config/swagger/templates/**',
+            // Notice files
+            '**/NOTICE_RELEASE',
+            '**/NOTICE_SOURCE',
+            // Swagger License
+            '**/src/main/resources/static/swagger-ui/**',
+            // gradle
+            '**/.gradle/**',
+            '**/gradlew',
+            '**/gradlew.bat',
+            '**/gradle/wrapper/gradle-wrapper.properties',
+            '**/caches/**',
+            '**/daemon/**',
+            '**/native/**',
+            '**/wrapper/**',
+            '**/build/**',
+            // Api Docs
+            '**/api-docs/*.*',
+            '**/docs/system-architecture/.htaccess',
+            '**/docs/system-architecture/404.html',
+            '**/docs/system-architecture/index.html',
+            '**/docs/system-architecture/**/*.xml',
+            '**/bootstrap-3.0.0/assets/application.js',
+            '**/system-architecture/js/plugins.js',
+            // Apache License
+            '**/bootstrap-3.0.0/assets/less.js',
+            '**/css/bootstrap-3.0.0/**/*.*',
+            // Public Domain See http://www.JSON.org/js.html
+            '**/bootstrap-3.0.0/assets/json2.js.htm',
+            // MIT License
+            '**/modernizr-2.6.2.min.js',
+            '**/css/normalize.css',
+            '**/assets/filesaver.js',
+            '**/css/fonts/glyphicons-halflings-regular.svg',
+            '**/assets/jszip.js',
+            '**/assets/jquery.js',
+            '**/api-docs/jquery-1.7.min.js',
+            '**/css/toc-0.1.2/**/*.*',
+            '**/docs/system-architecture/css/main.css',
+            '**/system-architecture/js/vendor/jquery-1.9.1.min.js',
+            '**/system-architecture/js/vendor/toc-0.1.2/jquery.toc.min.js',
+            '**/assets/respond.min.js',
+            '**/assets/html5shiv.js',
+            // BSD License
+            '**/assets/uglify.js',
+            // Ignore out folder
+            '**/out/**',
+            // Git build info
+            "**/git.properties",
+            ".mailmap",
+        ]
+    }
+}
+
+configure(project.fineractJavaProjects) {
+    // NOTE: order matters!
+
+    apply plugin: 'java-library'
+    apply plugin: 'idea'
+
+    /* define the valid syntax level for source files */
+    sourceCompatibility = JavaVersion.VERSION_11
+    /* define binary compatibility version */
+    targetCompatibility = JavaVersion.VERSION_11
+
+    /* http://stackoverflow.com/questions/19653311/jpa-repository-works-in-idea-and-production-but-not-in-gradle */
+    sourceSets.main.output.resourcesDir = sourceSets.main.java.outputDir
+    sourceSets.test.output.resourcesDir = sourceSets.test.java.outputDir
+
+    sourceSets {
+        integrationTest {
+            compileClasspath += main.output + test.output
+            runtimeClasspath += main.output + test.output
+        }
+    }
+
+    configurations {
+        implementation.setCanBeResolved(true)
+        api.setCanBeResolved(true)
+
+        integrationTestCompile.extendsFrom testImplementation
+        integrationTestRuntime.extendsFrom testRuntime
+    }
+
+    tasks.withType(JavaCompile) {
+        options.compilerArgs += [
+            "-Xlint:unchecked",
+            "-Xlint:cast",
+            "-Xlint:auxiliaryclass",
+            "-Xlint:deprecation",
+            "-Xlint:dep-ann",
+            "-Xlint:divzero",
+            "-Xlint:empty",
+            "-Xlint:exports",
+            "-Xlint:fallthrough",
+            "-Xlint:finally",
+            "-Xlint:module",
+            "-Xlint:opens",
+            "-Xlint:options",
+            "-Xlint:overloads",
+            "-Xlint:overrides",
+            "-Xlint:path",
+            "-Xlint:processing",
+            "-Xlint:removal",
+            "-Xlint:requires-automatic",
+            "-Xlint:requires-transitive-automatic",
+            "-Xlint:try",
+            "-Xlint:varargs",
+            "-Xlint:preview",
+            "-Xlint:static",
+            "-Werror"
+        ]
+        // TODO FINERACT-959 (gradually) enable -Xlint:all (see "javac -help -X")
+
+        options.deprecation = true
+
+        options.compilerArgs +=[
+            "-Xmaxwarns",
+            1500,
+            "-Xmaxerrs",
+            1500
+        ]
+    }
+
+    // Configuration for the spotless plugin
+    // https://github.com/diffplug/spotless/tree/main/plugin-gradle
+    spotless {
+        java {
+            targetExclude '**/build/**', '**/bin/**', '**/out/**'
+            importOrder() //sort imports alphabetically
+            removeUnusedImports()
+            eclipse().configFile "$rootDir/config/fineractdev-formatter.xml"
+            endWithNewline()
+            trimTrailingWhitespace()
+
+            // Enforce style modifier order
+            custom 'Modifier ordering', {
+                def modifierRanking = [
+                    public      : 1,
+                    protected   : 2,
+                    private     : 3,
+                    abstract    : 4,
+                    default     : 5,
+                    static      : 6,
+                    final       : 7,
+                    transient   : 8,
+                    volatile    : 9,
+                    synchronized: 10,
+                    native      : 11,
+                    strictfp    : 12]
+                // Find any instance of multiple modifiers. Lead with a non-word character to avoid
+                // accidental matching against for instance, "an alternative default value"
+                it.replaceAll(/\W(?:public |protected |private |abstract |default |static |final |transient |volatile |synchronized |native |strictfp ){2,}/, {
+                    // Do not replace the leading non-word character.  Identify the modifiers
+                    it.replaceAll(/(?:public |protected |private |abstract |default |static |final |transient |volatile |synchronized |native |strictfp ){2,}/, {
+                        // Sort the modifiers according to the ranking above
+                        it.split().sort({ modifierRanking[it] }).join(' ') + ' '
+                    }
+                    )
+                }
+                )
+            }
+        }
+
+        lineEndings 'UNIX'
+    }
+
+    compileJava {
+        if (project.hasProperty('automatedBuild')) {
+            dependsOn(spotlessCheck)
+        } else {
+            dependsOn(spotlessApply)
+        }
+    }
+}
