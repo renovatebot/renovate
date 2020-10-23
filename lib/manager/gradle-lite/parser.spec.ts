@@ -78,7 +78,7 @@ describe('manager/gradle-lite/parser', () => {
           currentValue: 'baz',
           depName: 'foo:bar',
           managerData: {
-            fileOffsetPosition: 10,
+            fileReplacePosition: 10,
             packageFile: 'x/gradle.properties',
           },
         },
