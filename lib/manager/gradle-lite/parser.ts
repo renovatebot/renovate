@@ -193,6 +193,7 @@ export function parseDependencyString(
 interface Matcher {
   type: string | string[];
   key?: string;
+  value?: string;
   lookahead?: boolean;
   testFn?: (string) => boolean;
 }
@@ -220,6 +221,10 @@ function matchSeq(tokens: Token[], matcherSeq: MatcherSeq): Match | null {
       ? matcher.type === token.type
       : matcher.type.includes(token.type);
     if (!typeMatches) {
+      return null;
+    }
+
+    if (is.string(matcher.value) && token.value !== matcher.value) {
       return null;
     }
 
@@ -266,6 +271,12 @@ const matcherMap: MatcherSeqMap = {
   ],
   depString: [{ type: 'string', testFn: isDependencyString }],
   depInterpolation: [{ type: 'interpolation' }],
+  plugin: [
+    { type: 'word', value: 'id' },
+    { type: 'string', key: 'pluginName' },
+    { type: 'word', value: 'version' },
+    { type: 'string', key: 'pluginVersion' },
+  ],
 };
 
 function interpolateString(
@@ -349,6 +360,21 @@ export function parseGradle(
           deps.push(dep);
         }
       }
+    } else if (matchKey === 'plugin') {
+      const { pluginName, pluginVersion } = match;
+      const dep = {
+        depType: 'plugin',
+        depName: pluginName.value,
+        lookupName: `${pluginName.value}:${pluginName.value}.gradle.plugin`,
+        registryUrls: ['https://plugins.gradle.org/m2/'],
+        currentValue: pluginVersion.value,
+        commitMessageTopic: `plugin ${pluginName.value}`,
+        managerData: {
+          fileReplacePosition: pluginVersion.offset,
+          packageFile,
+        },
+      };
+      deps.push(dep);
     }
 
     if (!match) {
