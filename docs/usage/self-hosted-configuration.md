@@ -34,7 +34,7 @@ Configure this directory if you want to change which directory Renovate uses for
 ## binarySource
 
 Set this to `global` if you wish Renovate to use globally-installed binaries (`npm`, `yarn`, etc) instead of using its bundled versions.
-Set this to `docker` instead to use docker-based binaries.
+Set this to `docker` instead to use Docker-based binaries.
 
 ## cacheDir
 
@@ -42,11 +42,11 @@ Configure this directory if you want to change which directory Renovate uses for
 
 ## composerIgnorePlatformReqs
 
-Set to `false` to prevent usage of `--ignore-platform-reqs` in the composer package manager.
+Set to `false` to prevent usage of `--ignore-platform-reqs` in the Composer package manager.
 
 ## dockerImagePrefix
 
-Override the default renovate sidecar docker containers image prefix from `docker.io/renovate` to a custom value, so renovate will pull images from a custom docker registry.
+Override the default renovate sidecar Docker containers image prefix from `docker.io/renovate` to a custom value, so renovate will pull images from a custom Docker registry.
 
 If this is set to `ghcr.io/renovatebot` the final image for `node` would become `ghcr.io/renovatebot/node` instead of currently used `docker.io/renovate/node`.
 
@@ -56,7 +56,7 @@ This is used if you want to map "dotfiles" from your host computer home director
 
 ## dockerUser
 
-Override default user and group used by docker-based binaries. UID and GID should match the user that executes renovate. See [Docker run reference](https://docs.docker.com/engine/reference/run/#user) for more information on user and group syntax.
+Override default user and group used by Docker-based binaries. UID and GID should match the user that executes renovate. See [Docker run reference](https://docs.docker.com/engine/reference/run/#user) for more information on user and group syntax.
 Set this to `1001:1002` to use UID 1001 and GID 1002.
 
 ## dryRun
@@ -79,9 +79,9 @@ You probably have no need for this option - it is an experimental setting for th
 
 ## gitAuthor
 
-RFC5322-compliant string if you wish to customise the git author for commits. If you need to transition from one git author to another, put the old gitAuthor into `RENOVATE_LEGACY_GIT_AUTHOR_EMAIL` in environment. Renovate will then check against it as well as the current git author value before deciding if a branch has been modified.
+RFC5322-compliant string if you wish to customise the Git author for commits. If you need to transition from one Git author to another, put the old gitAuthor into `RENOVATE_LEGACY_GIT_AUTHOR_EMAIL` in environment. Renovate will then check against it as well as the current Git author value before deciding if a branch has been modified.
 
-**Note** It is strongly recommended that the git author email you provide should be unique to Renovate. Otherwise, if another bot or human shares the same email and pushes to one of Renovate's branches then Renovate will mistake the branch as unmodified and potentially force push over the changes.
+**Note** It is strongly recommended that the Git author email you provide should be unique to Renovate. Otherwise, if another bot or human shares the same email and pushes to one of Renovate's branches then Renovate will mistake the branch as unmodified and potentially force push over the changes.
 
 ## gitPrivateKey
 
@@ -92,7 +92,7 @@ It will be loaded _lazily_. Before the first commit in a repository, Renovate wi
 - First, run `gpg import` if it hasn't been run before
 - Then, run `git config user.signingkey` and `git config commit.gpgsign true`
 
-The `git` commands are run locally in the cloned repo instead of globally to reduce the chance of causing unintended consequences with global git configs on shared systems.
+The `git` commands are run locally in the cloned repo instead of globally to reduce the chance of causing unintended consequences with global Git configs on shared systems.
 
 ## logContext
 
