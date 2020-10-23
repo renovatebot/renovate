@@ -3298,14 +3298,14 @@ conventional-changelog-writer@^4.0.0:
     split "^1.0.0"
     through2 "^3.0.0"
 
-conventional-commits-detector@1.0.2:
-  version "1.0.2"
-  resolved "https://registry.yarnpkg.com/conventional-commits-detector/-/conventional-commits-detector-1.0.2.tgz#de5dacafa7b9ba45dbe7eccfec46a32e742964f4"
-  integrity sha512-7DwYW+4i2Ne2HKxsSpOkc6jne28vnPB7Y8bS3li7DJcUj7V5IoYQPobvN+Xsg71NGLBuFuHndnCfdtisGA0EQw==
+conventional-commits-detector@1.0.3:
+  version "1.0.3"
+  resolved "https://registry.yarnpkg.com/conventional-commits-detector/-/conventional-commits-detector-1.0.3.tgz#e31b72db0e6fde66b3d7fc39b76c14ef7e5e443c"
+  integrity sha512-VlBCTEg34Bbvyh7MPYtmgoYPsP69Z1BusmthbiUbzTiwfhLZWRDEWsJHqWyiekSC9vFCHGT/jKOzs8r21MUZ5g==
   dependencies:
     arrify "^1.0.0"
     git-raw-commits "^2.0.0"
-    meow "^5.0.0"
+    meow "^7.0.0"
     through2-concurrent "^2.0.0"
 
 conventional-commits-filter@^2.0.0, conventional-commits-filter@^2.0.6:
@@ -7012,21 +7012,6 @@ meow@^4.0.0:
     read-pkg-up "^3.0.0"
     redent "^2.0.0"
     trim-newlines "^2.0.0"
-
-meow@^5.0.0:
-  version "5.0.0"
-  resolved "https://registry.yarnpkg.com/meow/-/meow-5.0.0.tgz#dfc73d63a9afc714a5e371760eb5c88b91078aa4"
-  integrity sha512-CbTqYU17ABaLefO8vCU153ZZlprKYWDljcndKKDCFcYQITzWCXZAVk4QMFZPgvzrnUQ3uItnIE/LoUOwrT15Ig==
-  dependencies:
-    camelcase-keys "^4.0.0"
-    decamelize-keys "^1.0.0"
-    loud-rejection "^1.0.0"
-    minimist-options "^3.0.1"
-    normalize-package-data "^2.3.4"
-    read-pkg-up "^3.0.0"
-    redent "^2.0.0"
-    trim-newlines "^2.0.0"
-    yargs-parser "^10.0.0"
 
 meow@^7.0.0:
   version "7.1.1"
@@ -11024,13 +11009,6 @@ yaml@^1.10.0, yaml@^1.7.2:
   version "1.10.0"
   resolved "https://registry.yarnpkg.com/yaml/-/yaml-1.10.0.tgz#3b593add944876077d4d683fee01081bd9fff31e"
   integrity sha512-yr2icI4glYaNG+KWONODapy2/jDdMSDnrONSjblABjD9B4Z5LgiircSt8m8sRZFNi08kG9Sm0uSHtEmP3zaEGg==
-
-yargs-parser@^10.0.0:
-  version "10.1.0"
-  resolved "https://registry.yarnpkg.com/yargs-parser/-/yargs-parser-10.1.0.tgz#7202265b89f7e9e9f2e5765e0fe735a905edbaa8"
-  integrity sha512-VCIyR1wJoEBZUqk5PA+oOBF6ypbwh5aNB3I50guxAL/quggdfs4TtNHQrSazFA3fYZ+tEqfs0zIGlv0c/rgjbQ==
-  dependencies:
-    camelcase "^4.1.0"
 
 yargs-parser@^15.0.1:
   version "15.0.1"
