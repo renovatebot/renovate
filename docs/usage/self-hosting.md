@@ -195,7 +195,7 @@ Don't forget to configure `platform=gitea` somewhere in config.
 
 If you are running on any platform except github.com, it's important to also configure the environment variable `GITHUB_COM_TOKEN` containing a personal access token for github.com. This account can actually be _any_ account on GitHub, and needs only read-only access. It's used when fetching release notes for repositories in order to increase the hourly API limit. It's also OK to configure the same as a host rule instead, if you prefer that.
 
-**Note:** If you're using renovate in a project where dependencies are loaded from github.com (such as Go m=Modules hosted on GitHub) it is highly recommended to add a token as you will run in the rate limit from the github.com api, which will lead to renovate closing and reopening PRs because it could not get reliable info on updated dependencies.
+**Note:** If you're using renovate in a project where dependencies are loaded from github.com (such as Go m=Modules hosted on GitHub) it is highly recommended to add a token as you will run in the rate limit from the github.com API, which will lead to renovate closing and reopening PRs because it could not get reliable info on updated dependencies.
 
 ## File/directory usage
 
