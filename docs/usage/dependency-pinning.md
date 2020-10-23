@@ -1,9 +1,9 @@
 ---
-title: Should you Pin your Javascript Dependencies?
-description: The pros and cons of dependency pinning for Javascript/npm
+title: Should you Pin your JavaScript Dependencies?
+description: The pros and cons of dependency pinning for JavaScript/npm
 ---
 
-# Should you Pin your Javascript Dependencies?
+# Should you Pin your JavaScript Dependencies?
 
 Once you start using a tool/service like Renovate, probably the biggest decision you need to make is whether to "pin" your dependencies instead of using semver ranges. The answer is "It's your choice", however we can certainly make some generalisations/recommendations to help you. Jump to the bottom conclusions if you get impatient.
 
