@@ -122,7 +122,7 @@
     "changelog-filename-regex": "2.0.1",
     "clean-git-ref": "2.0.1",
     "commander": "6.1.0",
-    "conventional-commits-detector": "1.0.2",
+    "conventional-commits-detector": "1.0.3",
     "deepmerge": "4.2.2",
     "delay": "4.4.0",
     "detect-indent": "6.0.0",
