@@ -899,7 +899,7 @@ Important to know: Renovate will evaluate all `packageRules` and not stop once i
 
 ### allowedVersions
 
-Use this - usually within a packageRule - to limit how far to upgrade a dependency. For example, if you wish to upgrade to angular v1.5 but not to `angular` v1.6 or higher, you could define this to be `<= 1.5` or `< 1.6.0`:
+Use this - usually within a packageRule - to limit how far to upgrade a dependency. For example, if you wish to upgrade to Angular v1.5 but not to `angular` v1.6 or higher, you could define this to be `<= 1.5` or `< 1.6.0`:
 
 ```json
 {
@@ -1523,11 +1523,11 @@ Technical details: We mostly rely on the text parsing of the library [later](htt
 
 ## semanticCommitScope
 
-By default you will see angular-style commit prefixes like `"chore(deps):"`. If you wish to change it to something else like `"package"` then it will look like `"chore(package):"`. You can also use `parentDir` or `baseDir` to namespace your commits for monorepos e.g. `"{{parentDir}}"`.
+By default you will see Angular-style commit prefixes like `"chore(deps):"`. If you wish to change it to something else like `"package"` then it will look like `"chore(package):"`. You can also use `parentDir` or `baseDir` to namespace your commits for monorepos e.g. `"{{parentDir}}"`.
 
 ## semanticCommitType
 
-By default you will see angular-style commit prefixes like `"chore(deps):"`. If you wish to change it to something else like "ci" then it will look like `"ci(deps):"`.
+By default you will see Angular-style commit prefixes like `"chore(deps):"`. If you wish to change it to something else like "ci" then it will look like `"ci(deps):"`.
 
 ## semanticCommits
 

@@ -29,7 +29,7 @@ Alternatively, if you prefer to use "dot files" then you can add the same JSON c
 
 Most of the settings in the `renovate.json` onboarding configuration are defaults, however usually this configuration file will have some default overrides in it, such as:
 
-- Automatically enabling angular-style semantic commits if your repository uses them
+- Automatically enabling Angular-style semantic commits if your repository uses them
 - Determining whether to use dependency range pinning depending on the detected project type
 
 ## Common Overrides

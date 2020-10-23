@@ -9,7 +9,7 @@ Renovate attempts to autodetect if your repository uses "semantic" commit messag
 
 Currently, Renovate ignores commit conventions apart from "angular".
 
-If angular-style commits are found then Renovate will structure its commit messages and PR titles to be like so:
+If Angular-style commits are found then Renovate will structure its commit messages and PR titles to be like so:
 
 - chore(deps): update eslint to v4.2.0
 - fix(deps): update express to v4.16.2
