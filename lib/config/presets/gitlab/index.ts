@@ -32,6 +32,7 @@ export async function fetchJSONFile(
   fileName: string,
   endpoint: string
 ): Promise<Preset> {
+  let url = endpoint;
   try {
     const urlEncodedRepo = encodeURIComponent(repo);
     const urlEncodedPkgName = encodeURIComponent(fileName);
@@ -39,14 +40,14 @@ export async function fetchJSONFile(
       urlEncodedRepo,
       endpoint
     );
-    const url = `${endpoint}projects/${urlEncodedRepo}/repository/files/${urlEncodedPkgName}/raw?ref=${defaultBranchName}`;
+    url += `projects/${urlEncodedRepo}/repository/files/${urlEncodedPkgName}/raw?ref=${defaultBranchName}`;
     return (await gitlabApi.getJson<Preset>(url)).body;
   } catch (err) {
     if (err instanceof ExternalHostError) {
       throw err;
     }
     logger.debug(
-      { statusCode: err.statusCode },
+      { statusCode: err.statusCode, url },
       `Failed to retrieve ${fileName} from repo`
     );
     throw new Error(PRESET_DEP_NOT_FOUND);
