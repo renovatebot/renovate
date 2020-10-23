@@ -2,14 +2,16 @@ import { readFileSync } from 'fs';
 import path from 'path';
 import { parseGradle, parseProps } from './parser';
 
-const file01 = readFileSync(
-  path.resolve(__dirname, './__fixtures__/01.build.gradle'),
-  'utf8'
-);
-const file02 = readFileSync(
-  path.resolve(__dirname, './__fixtures__/02.build.gradle'),
-  'utf8'
-);
+function getGradleFile(fileName: string): [string, string] {
+  const content = readFileSync(
+    path.resolve(__dirname, `./__fixtures__/${fileName}`),
+    'utf8'
+  );
+  return [fileName, content];
+}
+
+const file01 = getGradleFile('01.build.gradle');
+const file02 = getGradleFile('02.build.gradle');
 
 describe('manager/gradle-lite/parser', () => {
   it('calculates offset', () => {
@@ -20,8 +22,8 @@ describe('manager/gradle-lite/parser', () => {
     ).toEqual(0);
   });
   it('build.gradle', () => {
-    [file01, file02].forEach((content) => {
-      const deps = parseGradle(content);
+    [file01, file02].forEach(([packageFile, content]) => {
+      const deps = parseGradle(content, {}, packageFile);
       deps.forEach((dep) => {
         expect(
           content
