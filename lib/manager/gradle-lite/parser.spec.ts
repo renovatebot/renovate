@@ -43,21 +43,46 @@ describe('manager/gradle-lite/parser', () => {
   });
   it('gradle.properties', () => {
     expect(parseProps('foo=bar')).toStrictEqual({
-      foo: {
-        fileReplacePosition: 4,
-        key: 'foo',
-        value: 'bar',
+      vars: {
+        foo: {
+          fileReplacePosition: 4,
+          key: 'foo',
+          value: 'bar',
+        },
       },
+      deps: [],
     });
     expect(parseProps(' foo = bar ')).toStrictEqual({
-      foo: { key: 'foo', value: 'bar', fileReplacePosition: 7 },
+      vars: {
+        foo: { key: 'foo', value: 'bar', fileReplacePosition: 7 },
+      },
+      deps: [],
     });
     expect(parseProps('foo.bar=baz')).toStrictEqual({
-      'foo.bar': { key: 'foo.bar', value: 'baz', fileReplacePosition: 8 },
+      vars: {
+        'foo.bar': { key: 'foo.bar', value: 'baz', fileReplacePosition: 8 },
+      },
+      deps: [],
     });
     expect(parseProps('foo=foo\nbar=bar')).toStrictEqual({
-      foo: { key: 'foo', value: 'foo', fileReplacePosition: 4 },
-      bar: { key: 'bar', value: 'bar', fileReplacePosition: 12 },
+      vars: {
+        foo: { key: 'foo', value: 'foo', fileReplacePosition: 4 },
+        bar: { key: 'bar', value: 'bar', fileReplacePosition: 12 },
+      },
+      deps: [],
+    });
+    expect(parseProps('x=foo:bar:baz', 'x/gradle.properties')).toStrictEqual({
+      vars: {},
+      deps: [
+        {
+          currentValue: 'baz',
+          depName: 'foo:bar',
+          managerData: {
+            fileOffsetPosition: 10,
+            packageFile: 'x/gradle.properties',
+          },
+        },
+      ],
     });
   });
 });

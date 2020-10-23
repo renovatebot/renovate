@@ -177,6 +177,76 @@ Array [
     },
   },
   Object {
+    "commitMessageTopic": "plugin io.spring.dependency-management",
+    "currentValue": "1.0.10.RELEASE",
+    "depName": "io.spring.dependency-management",
+    "depType": "plugin",
+    "lookupName": "io.spring.dependency-management:io.spring.dependency-management.gradle.plugin",
+    "managerData": Object {
+      "fileReplacePosition": 2224,
+      "packageFile": "02.build.gradle",
+    },
+    "registryUrls": Array [
+      "https://plugins.gradle.org/m2/",
+    ],
+  },
+  Object {
+    "commitMessageTopic": "plugin com.diffplug.spotless",
+    "currentValue": "5.6.1",
+    "depName": "com.diffplug.spotless",
+    "depType": "plugin",
+    "lookupName": "com.diffplug.spotless:com.diffplug.spotless.gradle.plugin",
+    "managerData": Object {
+      "fileReplacePosition": 2280,
+      "packageFile": "02.build.gradle",
+    },
+    "registryUrls": Array [
+      "https://plugins.gradle.org/m2/",
+    ],
+  },
+  Object {
+    "commitMessageTopic": "plugin org.nosphere.apache.rat",
+    "currentValue": "0.7.0",
+    "depName": "org.nosphere.apache.rat",
+    "depType": "plugin",
+    "lookupName": "org.nosphere.apache.rat:org.nosphere.apache.rat.gradle.plugin",
+    "managerData": Object {
+      "fileReplacePosition": 2341,
+      "packageFile": "02.build.gradle",
+    },
+    "registryUrls": Array [
+      "https://plugins.gradle.org/m2/",
+    ],
+  },
+  Object {
+    "commitMessageTopic": "plugin com.github.hierynomus.license",
+    "currentValue": "0.15.0",
+    "depName": "com.github.hierynomus.license",
+    "depType": "plugin",
+    "lookupName": "com.github.hierynomus.license:com.github.hierynomus.license.gradle.plugin",
+    "managerData": Object {
+      "fileReplacePosition": 2408,
+      "packageFile": "02.build.gradle",
+    },
+    "registryUrls": Array [
+      "https://plugins.gradle.org/m2/",
+    ],
+  },
+  Object {
+    "commitMessageTopic": "plugin org.openapi.generator",
+    "currentValue": "4.3.1",
+    "depName": "org.openapi.generator",
+    "depType": "plugin",
+    "lookupName": "org.openapi.generator:org.openapi.generator.gradle.plugin",
+    "managerData": Object {
+      "fileReplacePosition": 2468,
+      "packageFile": "02.build.gradle",
+    },
+    "registryUrls": Array [
+      "https://plugins.gradle.org/m2/",
+    ],
+  },
+  Object {
     "currentValue": "5.2.6.RELEASE",
     "depName": "org.springframework:spring-framework-bom",
     "managerData": Object {
@@ -758,6 +828,90 @@ Array [
 exports[`manager/gradle-lite/parser build.gradle 3`] = `
 Array [
   Object {
+    "commitMessageTopic": "plugin com.github.kt3k.coveralls",
+    "currentValue": "2.10.2",
+    "depName": "com.github.kt3k.coveralls",
+    "depType": "plugin",
+    "lookupName": "com.github.kt3k.coveralls:com.github.kt3k.coveralls.gradle.plugin",
+    "managerData": Object {
+      "fileReplacePosition": 79,
+      "packageFile": "03.build.gradle",
+    },
+    "registryUrls": Array [
+      "https://plugins.gradle.org/m2/",
+    ],
+  },
+  Object {
+    "commitMessageTopic": "plugin com.github.node-gradle.node",
+    "currentValue": "2.2.4",
+    "depName": "com.github.node-gradle.node",
+    "depType": "plugin",
+    "lookupName": "com.github.node-gradle.node:com.github.node-gradle.node.gradle.plugin",
+    "managerData": Object {
+      "fileReplacePosition": 133,
+      "packageFile": "03.build.gradle",
+    },
+    "registryUrls": Array [
+      "https://plugins.gradle.org/m2/",
+    ],
+  },
+  Object {
+    "commitMessageTopic": "plugin net.researchgate.release",
+    "currentValue": "2.8.1",
+    "depName": "net.researchgate.release",
+    "depType": "plugin",
+    "lookupName": "net.researchgate.release:net.researchgate.release.gradle.plugin",
+    "managerData": Object {
+      "fileReplacePosition": 183,
+      "packageFile": "03.build.gradle",
+    },
+    "registryUrls": Array [
+      "https://plugins.gradle.org/m2/",
+    ],
+  },
+  Object {
+    "commitMessageTopic": "plugin com.github.sherter.google-java-format",
+    "currentValue": "0.9",
+    "depName": "com.github.sherter.google-java-format",
+    "depType": "plugin",
+    "lookupName": "com.github.sherter.google-java-format:com.github.sherter.google-java-format.gradle.plugin",
+    "managerData": Object {
+      "fileReplacePosition": 489,
+      "packageFile": "03.build.gradle",
+    },
+    "registryUrls": Array [
+      "https://plugins.gradle.org/m2/",
+    ],
+  },
+  Object {
+    "commitMessageTopic": "plugin nebula.lint",
+    "currentValue": "16.9.1",
+    "depName": "nebula.lint",
+    "depType": "plugin",
+    "lookupName": "nebula.lint:nebula.lint.gradle.plugin",
+    "managerData": Object {
+      "fileReplacePosition": 536,
+      "packageFile": "03.build.gradle",
+    },
+    "registryUrls": Array [
+      "https://plugins.gradle.org/m2/",
+    ],
+  },
+  Object {
+    "commitMessageTopic": "plugin net.ltgt.errorprone",
+    "currentValue": "0.8.1",
+    "depName": "net.ltgt.errorprone",
+    "depType": "plugin",
+    "lookupName": "net.ltgt.errorprone:net.ltgt.errorprone.gradle.plugin",
+    "managerData": Object {
+      "fileReplacePosition": 594,
+      "packageFile": "03.build.gradle",
+    },
+    "registryUrls": Array [
+      "https://plugins.gradle.org/m2/",
+    ],
+  },
+  Object {
     "currentValue": "2.3.3",
     "depName": "com.google.errorprone:error_prone_core",
     "managerData": Object {
@@ -787,6 +941,20 @@ Array [
 exports[`manager/gradle-lite/parser build.gradle 4`] = `
 Array [
   Object {
+    "commitMessageTopic": "plugin net.researchgate.release",
+    "currentValue": "2.8.1",
+    "depName": "net.researchgate.release",
+    "depType": "plugin",
+    "lookupName": "net.researchgate.release:net.researchgate.release.gradle.plugin",
+    "managerData": Object {
+      "fileReplacePosition": 53,
+      "packageFile": "04.build.gradle",
+    },
+    "registryUrls": Array [
+      "https://plugins.gradle.org/m2/",
+    ],
+  },
+  Object {
     "currentValue": "4.13.1",
     "depName": "junit:junit",
     "managerData": Object {
@@ -807,6 +975,34 @@ Array [
 
 exports[`manager/gradle-lite/parser build.gradle 5`] = `
 Array [
+  Object {
+    "commitMessageTopic": "plugin org.jetbrains.kotlin.jvm",
+    "currentValue": "1.3.20",
+    "depName": "org.jetbrains.kotlin.jvm",
+    "depType": "plugin",
+    "lookupName": "org.jetbrains.kotlin.jvm:org.jetbrains.kotlin.jvm.gradle.plugin",
+    "managerData": Object {
+      "fileReplacePosition": 53,
+      "packageFile": "05.build.gradle",
+    },
+    "registryUrls": Array [
+      "https://plugins.gradle.org/m2/",
+    ],
+  },
+  Object {
+    "commitMessageTopic": "plugin io.gitlab.arturbosch.detekt",
+    "currentValue": "1.0.0-RC14",
+    "depName": "io.gitlab.arturbosch.detekt",
+    "depType": "plugin",
+    "lookupName": "io.gitlab.arturbosch.detekt:io.gitlab.arturbosch.detekt.gradle.plugin",
+    "managerData": Object {
+      "fileReplacePosition": 104,
+      "packageFile": "05.build.gradle",
+    },
+    "registryUrls": Array [
+      "https://plugins.gradle.org/m2/",
+    ],
+  },
   Object {
     "currentValue": "1.2.0",
     "depName": "ch.qos.logback:logback-classic",

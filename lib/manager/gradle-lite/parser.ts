@@ -384,7 +384,7 @@ export function parseGradle(
   return deps;
 }
 
-const propWord = '[a-zA-Z_][a-zA-Z0-9_]+(?:\\.[a-zA-Z_][a-zA-Z0-9_]+)*';
+const propWord = '[a-zA-Z_][a-zA-Z0-9_]*(?:\\.[a-zA-Z_][a-zA-Z0-9_]*)*';
 const propRegex = regEx(
   `^(?<leftPart>\\s*(?<key>${propWord})\\s*=\\s*['"]?)(?<value>[^\\s'"]+)['"]?\\s*$`
 );
@@ -400,25 +400,26 @@ export function parseProps(
     const match = propRegex.exec(line);
     if (match) {
       const { key, value, leftPart } = match.groups;
-      const variableData: VariableData = {
-        key,
-        value,
-        fileReplacePosition: offset + leftPart.length,
-      };
-      if (packageFile) {
-        variableData.packageFile = packageFile;
-      }
-      vars[key] = variableData;
-
       if (isDependencyString(value)) {
         const dep = parseDependencyString(value);
         deps.push({
           ...dep,
           managerData: {
-            fileOffsetPosition: variableData.fileReplacePosition,
-            packageFile: variableData.packageFile,
+            fileReplacePosition:
+              offset + leftPart.length + dep.depName.length + 1,
+            packageFile,
           },
         });
+      } else {
+        const variableData: VariableData = {
+          key,
+          value,
+          fileReplacePosition: offset + leftPart.length,
+        };
+        if (packageFile) {
+          variableData.packageFile = packageFile;
+        }
+        vars[key] = variableData;
       }
     }
     offset += line.length + 1;
