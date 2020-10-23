@@ -653,7 +653,7 @@ Enable got [http2](https://github.com/sindresorhus/got/blob/v11.5.2/readme.md#ht
 
 Warning: Advanced config, use at own risk.
 
-Enable this option to allow Renovate to connect to an [insecure docker registry](https://docs.docker.com/registry/insecure/) that is http only. This is insecure and is not recommended.
+Enable this option to allow Renovate to connect to an [insecure Docker registry](https://docs.docker.com/registry/insecure/) that is http only. This is insecure and is not recommended.
 
 Example:
 
@@ -1152,7 +1152,7 @@ Add to this object if you wish to define rules that apply only to PRs that pin d
 
 ## pinDigests
 
-If enabled Renovate will pin docker images by means of their sha256 digest and not only by tag so that they are immutable.
+If enabled Renovate will pin Docker images by means of their SHA256 digest and not only by tag so that they are immutable.
 
 ## postUpdateOptions
 

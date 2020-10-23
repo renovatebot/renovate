@@ -34,7 +34,7 @@ Configure this directory if you want to change which directory Renovate uses for
 ## binarySource
 
 Set this to `global` if you wish Renovate to use globally-installed binaries (`npm`, `yarn`, etc) instead of using its bundled versions.
-Set this to `docker` instead to use docker-based binaries.
+Set this to `docker` instead to use Docker-based binaries.
 
 ## cacheDir
 
@@ -46,7 +46,7 @@ Set to `false` to prevent usage of `--ignore-platform-reqs` in the composer pack
 
 ## dockerImagePrefix
 
-Override the default renovate sidecar docker containers image prefix from `docker.io/renovate` to a custom value, so renovate will pull images from a custom docker registry.
+Override the default renovate sidecar Docker containers image prefix from `docker.io/renovate` to a custom value, so renovate will pull images from a custom Docker registry.
 
 If this is set to `ghcr.io/renovatebot` the final image for `node` would become `ghcr.io/renovatebot/node` instead of currently used `docker.io/renovate/node`.
 
@@ -56,7 +56,7 @@ This is used if you want to map "dotfiles" from your host computer home director
 
 ## dockerUser
 
-Override default user and group used by docker-based binaries. UID and GID should match the user that executes renovate. See [Docker run reference](https://docs.docker.com/engine/reference/run/#user) for more information on user and group syntax.
+Override default user and group used by Docker-based binaries. UID and GID should match the user that executes renovate. See [Docker run reference](https://docs.docker.com/engine/reference/run/#user) for more information on user and group syntax.
 Set this to `1001:1002` to use UID 1001 and GID 1002.
 
 ## dryRun
