@@ -53,21 +53,38 @@ export function reorderFiles(packageFiles: string[]): string[] {
   });
 }
 
+type VariableRegistry = Record<string, PackageVariables>;
+
+function getVars(
+  registry: VariableRegistry,
+  dir: string,
+  vars: PackageVariables = registry[dir] || {}
+): PackageVariables {
+  const parentDir = upath.dirname(dir);
+  if (parentDir === dir) {
+    return vars;
+  }
+  const parentVars = registry[parentDir] || {};
+  return getVars(registry, parentDir, { ...parentVars, ...vars });
+}
+
 export async function extractAllPackageFiles(
   config: ExtractConfig,
   packageFiles: string[]
 ): Promise<PackageFile[] | null> {
   const extractedDeps: PackageDependency<ManagerData>[] = [];
-  const variables: Record<string, PackageVariables> = {};
+  const registry: VariableRegistry = {};
   for (const packageFile of reorderFiles(packageFiles)) {
     const content = await readLocalFile(packageFile, 'utf8');
     const dir = upath.dirname(toAbsolute(packageFile));
     if (isProps(packageFile)) {
-      variables[dir] = parseProps(content, packageFile);
+      const { vars, deps } = parseProps(content, packageFile);
+      registry[dir] = vars;
+      extractedDeps.push(...deps);
     } else if (isGradle(packageFile)) {
-      const vars = variables[dir];
-      const parsedDeps = parseGradle(content, vars, packageFile);
-      extractedDeps.push(...parsedDeps);
+      const vars = getVars(registry, dir);
+      const deps = parseGradle(content, vars, packageFile);
+      extractedDeps.push(...deps);
     }
   }
 
@@ -87,8 +104,6 @@ export async function extractAllPackageFiles(
     deps.push(dep);
     packageFilesByName[key] = pkgFile;
   });
-
-  debugger;
 
   return Object.values(packageFilesByName);
 }

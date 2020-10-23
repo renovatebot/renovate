@@ -356,8 +356,8 @@ export function parseGradle(
             }
             dep.managerData = managerData;
             dep.groupName = variableData.key;
+            deps.push(dep);
           }
-          deps.push(dep);
         }
       }
     } else if (matchKey === 'plugin') {
@@ -392,9 +392,10 @@ const propRegex = regEx(
 export function parseProps(
   input: string,
   packageFile?: string
-): PackageVariables {
+): { vars: PackageVariables; deps: PackageDependency<ManagerData>[] } {
   let offset = 0;
-  const result = {};
+  const vars = {};
+  const deps = [];
   for (const line of input.split('\n')) {
     const match = propRegex.exec(line);
     if (match) {
@@ -407,9 +408,20 @@ export function parseProps(
       if (packageFile) {
         variableData.packageFile = packageFile;
       }
-      result[key] = variableData;
+      vars[key] = variableData;
+
+      if (isDependencyString(value)) {
+        const dep = parseDependencyString(value);
+        deps.push({
+          ...dep,
+          managerData: {
+            fileOffsetPosition: variableData.fileReplacePosition,
+            packageFile: variableData.packageFile,
+          },
+        });
+      }
     }
     offset += line.length + 1;
   }
-  return result;
+  return { vars, deps };
 }
