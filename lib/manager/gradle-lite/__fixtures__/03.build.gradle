@@ -1,0 +1,235 @@
+plugins {
+    // Top level plugins
+    id 'com.github.kt3k.coveralls' version '2.10.2'
+    id 'com.github.node-gradle.node' version '2.2.4'
+    id 'net.researchgate.release' version '2.8.1'
+    // Records all tasks in task graph, generates `build/reports/visteg.dot`
+    // dot file can be converted to an image using graphviz. `dot -Tsvg -O -v visteg.dot`
+    // id 'cz.malohlava.visteg' version '1.0.5'
+
+    // Sub project plugins
+    id 'com.github.sherter.google-java-format' version '0.9' apply false
+    id 'nebula.lint' version '16.9.1' apply false
+    id 'net.ltgt.errorprone' version '0.8.1' apply false
+}
+
+description = "Apereo uPortal $version"
+
+/*======== Dependency Management ========**/
+repositories {
+    jcenter()
+    mavenCentral()
+    mavenLocal()
+}
+
+node {
+    version = nodejsVersion
+    download = true
+}
+
+allprojects {
+    apply plugin: 'java'
+    apply plugin: 'jacoco'
+    apply plugin: 'eclipse'
+    apply plugin: 'idea'
+    apply plugin: 'nebula.lint'
+    apply plugin: 'groovy'
+    apply plugin: 'codenarc'
+    apply plugin: 'com.github.sherter.google-java-format'
+    apply plugin: 'net.ltgt.errorprone'
+
+    configurations {
+        // Banned dependencies
+        all*.exclude group: 'commons-logging', module: 'commons-logging'
+        all*.exclude group: 'commons-logging', module: 'commons-logging-api'
+        all*.exclude group: 'log4j', module: 'log4j'
+        all*.exclude group: 'org.hamcrest', module: 'hamcrest-core'
+    }
+
+    dependencies {
+        errorprone 'com.google.errorprone:error_prone_core:2.3.3'
+        errorproneJavac "com.google.errorprone:javac:9+181-r4173-1"
+    }
+
+    codenarc {
+        toolVersion = '1.5'
+        reportFormat = 'console'
+    }
+
+    // Version has to be set directly here, using a variable does not set Java compatability version
+    sourceCompatibility = 1.8
+
+    gradleLint.criticalRules = [
+      'overridden-dependency-version',
+      'dependency-parentheses',
+      'dependency-tuple',
+      'empty-closure',
+      'duplicate-dependency-class'
+    ]
+
+    /*======== Static Analysis ========*/
+    googleJavaFormat {
+        toolVersion '1.7'
+        options style: 'AOSP'
+        exclude '**/generated-sources'
+    }
+
+    /*======== Aggregate Dependencies Report ========*/
+    task dependenciesRecursive(type: DependencyReportTask) {
+        group = 'Help'
+        description = 'Provides a complete report on project dependencies;  use option (e.g.) --configuration compile to narrow'
+    }
+
+}
+
+/*======== Child Projects ========*/
+subprojects {
+
+    /*======== Plugins ========*/
+    apply plugin: 'maven-publish'
+    apply plugin: 'maven'
+    apply plugin: 'signing'
+
+    /*======== Dependency Management ========**/
+    repositories {
+        mavenLocal()
+        mavenCentral()
+    }
+
+    dependencies {
+        testCompile "junit:junit:${junitVersion}"
+        testCompile "org.easymock:easymock:${easymockVersion}"
+        testCompile "org.hamcrest:hamcrest-all:${hamcrestVersion}"
+        testCompile "org.mockito:mockito-core:${mockitoVersion}"
+        testCompile "org.springframework:spring-test:${springVersion}"
+        testCompile "org.xmlunit:xmlunit-legacy:${xmlunitVersion}"
+    }
+
+    /* Release Management
+     *
+     * Based on Sonatype's guide for publishing w/ Gradle:  http://central.sonatype.org/pages/gradle.html
+     */
+    ext {
+        publishingUsername = project.hasProperty('ossrhUsername') ? project.getProperty('ossrhUsername') : ""
+        publishingPassword = project.hasProperty('ossrhPassword') ? project.getProperty('ossrhPassword') : ""
+        publishingRepositoryUrl = project.hasProperty('ossrhUrl') ? project.getProperty('ossrhUrl') : "https://oss.sonatype.org/service/local/staging/deploy/maven2/"
+        publishingRepositoryUrlSnapshot = project.hasProperty('ossrhUrlSnapshot') ? project.getProperty('ossrhUrlSnapshot') : "https://oss.sonatype.org/content/repositories/snapshots/"
+    }
+    signing {
+        required { gradle.taskGraph.hasTask('uploadArchives') }
+        sign configurations.archives
+    }
+    tasks.withType(Javadoc) {
+        // FIXME: Fix errors rather than supressing them
+        failOnError = false
+    }
+    tasks.withType(Jar) {
+        from(project.projectDir) {
+            include "${rootDir}/LICENSE"
+            into 'META-INF'
+        }
+    }
+    task sourcesJar(type: Jar, dependsOn: classes) {
+        classifier 'sources'
+        from sourceSets.main.allSource
+    }
+    task javadocJar(type: Jar, dependsOn: javadoc) {
+        classifier = 'javadoc'
+        from javadoc.destinationDir
+    }
+    artifacts {
+        archives javadocJar, sourcesJar
+    }
+    publishing {
+        publications {
+            maven(MavenPublication) {
+                from components.java
+            }
+        }
+    }
+    uploadArchives {
+        repositories {
+            mavenDeployer {
+                beforeDeployment { MavenDeployment deployment -> signing.signPom(deployment) }
+
+                repository(url: publishingRepositoryUrl) {
+                    authentication(userName: publishingUsername, password: publishingPassword)
+                }
+
+                snapshotRepository(url: publishingRepositoryUrlSnapshot) {
+                    authentication(userName: publishingUsername, password: publishingPassword)
+                }
+
+                pom.project {
+                    name 'uPortal'
+                    packaging 'jar'
+                    // optionally artifactId can be defined here
+                    description 'Enterprise open source portal built by and for the higher education community.'
+                    url 'https://github.com/Jasig/uPortal'
+
+                    scm {
+                        connection 'scm:git@github.com:Jasig/uPortal.git'
+                        url 'https://github.com/Jasig/uPortal'
+                    }
+
+                    licenses {
+                        license {
+                            name 'The Apache License, Version 2.0'
+                            url 'http://www.apache.org/licenses/LICENSE-2.0.txt'
+                        }
+                    }
+
+                    developers {
+                        developer {
+                            organization 'uPortal Developers'
+                            organizationUrl 'https://github.com/Jasig/uPortal/graphs/contributors'
+                        }
+                    }
+                }
+            }
+        }
+    }
+    afterReleaseBuild.dependsOn uploadArchives
+
+    def jacocoExecutionDataFiles = fileTree(buildDir).include("/jacoco/*.exec")
+    jacocoTestReport {
+        getExecutionData().setFrom(jacocoExecutionDataFiles)
+    }
+}
+
+/*
+ * Configuration for the 'gradle-release' plugin (https://github.com/researchgate/gradle-release)
+ */
+release {
+    tagTemplate = 'v${version}' // Looks like it should be a GString, but not necessary
+    git {
+        requireBranch = ''
+    }
+}
+
+
+task jacocoAggregateReport(type: org.gradle.testing.jacoco.tasks.JacocoReport) {
+    dependsOn = subprojects.test
+    getAdditionalSourceDirs().setFrom(files(subprojects.sourceSets.main.allSource.srcDirs))
+    getSourceDirectories().setFrom(files(subprojects.sourceSets.main.allSource.srcDirs))
+    getClassDirectories().setFrom(files(subprojects.sourceSets.main.output))
+    getExecutionData().setFrom(files(subprojects.jacocoTestReport.executionData))
+
+    reports {
+        xml.enabled = true
+        html.enabled = true
+    }
+    onlyIf = {
+        true
+    }
+    doFirst {
+        getExecutionData().setFrom(files(getExecutionData().findAll {
+            it.exists()
+        }))
+    }
+}
+
+coveralls {
+    jacocoReportPath = "${buildDir}/reports/jacoco/jacocoAggregateReport/jacocoAggregateReport.xml"
+    sourceDirs = files(allprojects.sourceSets.main.allSource.srcDirs).files.absolutePath
+}

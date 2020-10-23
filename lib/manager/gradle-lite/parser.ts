@@ -157,7 +157,7 @@ export function extractTokens(input: string): Token[] {
 }
 
 const depArtifactRegex = regEx(
-  '[a-zA-Z][-_a-zA-Z0-9]*(?:.[a-zA-Z][-_a-zA-Z0-9]*)*'
+  '^[a-zA-Z][-_a-zA-Z0-9]*(?:.[a-zA-Z][-_a-zA-Z0-9]*)*$'
 );
 export const depVersionRegex = regEx('^(?<version>[-.\\[\\](),a-zA-Z0-9+]+)');
 

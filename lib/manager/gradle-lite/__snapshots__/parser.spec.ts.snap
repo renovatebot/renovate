@@ -754,3 +754,164 @@ Array [
   },
 ]
 `;
+
+exports[`manager/gradle-lite/parser build.gradle 3`] = `
+Array [
+  Object {
+    "currentValue": "2.3.3",
+    "depName": "com.google.errorprone:error_prone_core",
+    "managerData": Object {
+      "fileReplacePosition": 1542,
+      "packageFile": "03.build.gradle",
+    },
+  },
+  Object {
+    "currentValue": "9+181-r4173-1",
+    "depName": "com.google.errorprone:javac",
+    "managerData": Object {
+      "fileReplacePosition": 1602,
+      "packageFile": "03.build.gradle",
+    },
+  },
+  Object {
+    "currentValue": "Jasig/uPortal.git",
+    "depName": "scm:git@github.com",
+    "managerData": Object {
+      "fileReplacePosition": 5715,
+      "packageFile": "03.build.gradle",
+    },
+  },
+]
+`;
+
+exports[`manager/gradle-lite/parser build.gradle 4`] = `
+Array [
+  Object {
+    "currentValue": "4.13.1",
+    "depName": "junit:junit",
+    "managerData": Object {
+      "fileReplacePosition": 686,
+      "packageFile": "04.build.gradle",
+    },
+  },
+  Object {
+    "currentValue": "5.7.0",
+    "depName": "org.junit.vintage:junit-vintage-engine",
+    "managerData": Object {
+      "fileReplacePosition": 758,
+      "packageFile": "04.build.gradle",
+    },
+  },
+]
+`;
+
+exports[`manager/gradle-lite/parser build.gradle 5`] = `
+Array [
+  Object {
+    "currentValue": "1.2.0",
+    "depName": "ch.qos.logback:logback-classic",
+    "managerData": Object {
+      "fileReplacePosition": 421,
+      "packageFile": "05.build.gradle",
+    },
+  },
+  Object {
+    "currentValue": "1.0.0-RC13",
+    "depName": "io.gitlab.arturbosch.detekt:detekt-formatting",
+    "managerData": Object {
+      "fileReplacePosition": 490,
+      "packageFile": "05.build.gradle",
+    },
+  },
+  Object {
+    "currentValue": "2.20.1",
+    "depName": "org.mockito:mockito-core",
+    "managerData": Object {
+      "fileReplacePosition": 773,
+      "packageFile": "05.build.gradle",
+    },
+  },
+]
+`;
+
+exports[`manager/gradle-lite/parser build.gradle 6`] = `
+Array [
+  Object {
+    "currentValue": "2.1.3.RELEASE",
+    "depName": "org.springframework.boot:spring-boot-gradle-plugin",
+    "managerData": Object {
+      "fileReplacePosition": 265,
+      "packageFile": "06.build.gradle",
+    },
+  },
+  Object {
+    "currentValue": "5.1.5.RELEASE",
+    "depName": "org.springframework:spring-context-support",
+    "managerData": Object {
+      "fileReplacePosition": 451,
+      "packageFile": "06.build.gradle",
+    },
+  },
+  Object {
+    "currentValue": "2.1.3.RELEASE",
+    "depName": "org.springframework.boot:spring-boot-starter-actuator",
+    "managerData": Object {
+      "fileReplacePosition": 534,
+      "packageFile": "06.build.gradle",
+    },
+  },
+  Object {
+    "currentValue": "2.1.3.RELEASE",
+    "depName": "org.springframework.boot:spring-boot-starter-data-jpa",
+    "managerData": Object {
+      "fileReplacePosition": 617,
+      "packageFile": "06.build.gradle",
+    },
+  },
+  Object {
+    "currentValue": "2.1.3.RELEASE",
+    "depName": "org.springframework.boot:spring-boot-starter-security",
+    "managerData": Object {
+      "fileReplacePosition": 700,
+      "packageFile": "06.build.gradle",
+    },
+  },
+  Object {
+    "currentValue": "2.1.3.RELEASE",
+    "depName": "org.springframework.boot:spring-boot-starter-web",
+    "managerData": Object {
+      "fileReplacePosition": 778,
+      "packageFile": "06.build.gradle",
+    },
+  },
+  Object {
+    "currentValue": "2.1.3.RELEASE",
+    "depName": "org.springframework.boot:spring-boot-starter-aop",
+    "managerData": Object {
+      "fileReplacePosition": 856,
+      "packageFile": "06.build.gradle",
+    },
+  },
+  Object {
+    "currentValue": "1.1.3",
+    "depName": "io.micrometer:micrometer-registry-prometheus",
+    "managerData": Object {
+      "fileReplacePosition": 930,
+      "packageFile": "06.build.gradle",
+    },
+  },
+]
+`;
+
+exports[`manager/gradle-lite/parser build.gradle 7`] = `
+Array [
+  Object {
+    "currentValue": "1.0.10",
+    "depName": "gradle.plugin.com.ewerk.gradle.plugins:jaxb2-plugin",
+    "managerData": Object {
+      "fileReplacePosition": 923,
+      "packageFile": "07.build.gradle",
+    },
+  },
+]
+`;

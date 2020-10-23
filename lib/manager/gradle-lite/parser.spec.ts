@@ -12,6 +12,11 @@ function getGradleFile(fileName: string): [string, string] {
 
 const file01 = getGradleFile('01.build.gradle');
 const file02 = getGradleFile('02.build.gradle');
+const file03 = getGradleFile('03.build.gradle');
+const file04 = getGradleFile('04.build.gradle');
+const file05 = getGradleFile('05.build.gradle');
+const file06 = getGradleFile('06.build.gradle');
+const file07 = getGradleFile('07.build.gradle');
 
 describe('manager/gradle-lite/parser', () => {
   it('calculates offset', () => {
@@ -22,17 +27,19 @@ describe('manager/gradle-lite/parser', () => {
     ).toEqual(0);
   });
   it('build.gradle', () => {
-    [file01, file02].forEach(([packageFile, content]) => {
-      const deps = parseGradle(content, {}, packageFile);
-      deps.forEach((dep) => {
-        expect(
-          content
-            .slice(dep.managerData.fileReplacePosition)
-            .indexOf(dep.currentValue)
-        ).toEqual(0);
-      });
-      expect(deps).toMatchSnapshot();
-    });
+    [file01, file02, file03, file04, file05, file06, file07].forEach(
+      ([packageFile, content]) => {
+        const deps = parseGradle(content, {}, packageFile);
+        deps.forEach((dep) => {
+          expect(
+            content
+              .slice(dep.managerData.fileReplacePosition)
+              .indexOf(dep.currentValue)
+          ).toEqual(0);
+        });
+        expect(deps).toMatchSnapshot();
+      }
+    );
   });
   it('gradle.properties', () => {
     expect(parseProps('foo=bar')).toStrictEqual({

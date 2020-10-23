@@ -1,0 +1,695 @@
+import java.util.concurrent.ConcurrentHashMap
+
+description = "Apereo Central Authentication Service $version"
+defaultTasks "clean", "build"
+
+buildscript {
+    repositories {
+        jcenter()
+        maven {
+            url "https://maven.eveoh.nl/content/repositories/releases"
+            mavenContent { releasesOnly() }
+        }
+        maven {
+            url "https://plugins.gradle.org/m2/"
+            mavenContent { releasesOnly() }
+        }
+        maven {
+            url "https://repo.spring.io/plugins-release"
+            mavenContent { releasesOnly() }
+        }
+        maven {
+            url "https://repo.spring.io/libs-milestone"
+            mavenContent { releasesOnly() }
+        }
+        maven {
+            url "https://repo.spring.io/snapshot"
+            mavenContent { snapshotsOnly() }
+        }
+    }
+
+    dependencies {
+        classpath "gradle.plugin.com.ewerk.gradle.plugins:jaxb2-plugin:1.0.10"
+        classpath "org.gradle:test-retry-gradle-plugin:$gradleRetryVersion"
+        classpath "com.github.jk1:gradle-license-report:$gradleLicenseVersion"
+        classpath "org.springframework.boot:spring-boot-gradle-plugin:$springBootVersion"
+        classpath "gradle.plugin.com.gorylenko.gradle-git-properties:gradle-git-properties:$gradleGitVersion"
+        classpath "io.franzbecker:gradle-lombok:$gradleLombokVersion"
+        classpath "com.github.ben-manes:gradle-versions-plugin:$gradleDependencyVersionsVersion"
+        classpath "io.spring.gradle:propdeps-plugin:$gradlePropDepsVersion"
+        classpath "net.ltgt.gradle:gradle-errorprone-javacplugin-plugin:$gradleErrorProneVersion"
+        classpath "org.owasp:dependency-check-gradle:$gradleDependencyCheckVersion"
+        classpath "gradle.plugin.com.github.spotbugs.snom:spotbugs-gradle-plugin:$gradleSpotbugsVersion"
+        classpath "org.sonarsource.scanner.gradle:sonarqube-gradle-plugin:$gradleSonarqubeVersion"
+        classpath "com.github.jengelman.gradle.plugins:shadow:$gradleShadowVersion"
+        classpath "io.codearte.gradle.nexus:gradle-nexus-staging-plugin:$gradleNexusStagingVersion"
+    }
+}
+
+ext {
+    srcTagMap = new ConcurrentHashMap<File, Set<String>>()
+
+    sonatypeUsername = System.getProperty("sonatypeUsername")
+    sonatypePassword = System.getProperty("sonatypePassword")
+
+    publishSnapshots = Boolean.getBoolean("publishSnapshots")
+    publishReleases = Boolean.getBoolean("publishReleases")
+
+    skipBootifulArtifact = providers.systemProperty("skipBootifulArtifact").forUseAtConfigurationTime().present
+    skipErrorProneCompiler = providers.systemProperty("skipErrorProneCompiler").forUseAtConfigurationTime().present
+
+    enableRemoteDebugging = Boolean.getBoolean("enableRemoteDebugging")
+    remoteDebuggingSuspend = Boolean.getBoolean("remoteDebuggingSuspend") ? "y" : "n"
+    generateGitProperties = Boolean.getBoolean("generateGitProperties")
+
+    ci = System.getenv("CI") || Boolean.getBoolean("CI")
+
+    excludedFilesFromTestCoverage = [
+        '**/**ConfigurationMetadata**',
+        '**/**NtlmAuthenticationHandler**',
+        '**/**CosmosDbServiceRegistry**',
+        '**/**NimbusOAuthJacksonModule**',
+        '**/**DelegatedClientJacksonModuleTests**',
+        '**/**Application**',
+        '**/**Application$**',
+        '**/**Exception$**',
+        '**/**Properties**',
+        '**/**Properties$**'
+    ]
+}
+
+def isArtifactSigningRequired = {
+    return publishReleases
+}
+
+apply plugin: "io.codearte.nexus-staging"
+nexusStaging {
+    username = "${sonatypeUsername}"
+    password = "${sonatypePassword}"
+    packageGroup = "org.apereo"
+    stagingProfileId = "11d1ddbbdeae9d"
+}
+
+apply from: rootProject.file("gradle/dependencies.gradle")
+apply from: rootProject.file("gradle/dependencyUpdates.gradle")
+
+if (!Boolean.getBoolean("skipSonarqube")) {
+    apply plugin: "org.sonarqube"
+
+    sonarqube {
+        def token = providers.systemProperty("SONARCLOUD_TOKEN").forUseAtConfigurationTime().getOrElse(System.getenv("SONARCLOUD_TOKEN"))
+        properties {
+            property "sonar.host.url", "https://sonarcloud.io"
+            property "sonar.projectName", "cas"
+            property "sonar.sourceEncoding", "UTF-8"
+            property "sonar.java.source", project.targetCompatibility
+            property "sonar.organization", "apereo"
+            property "sonar.login", token
+            property "sonar.java.coveragePlugin", "jacoco"
+            property "sonar.coverage.jacoco.xmlReportPaths", "${rootProject.buildDir}/reports/jacoco/jacocoRootReport/jacocoRootReport.xml"
+        }
+    }
+}
+
+apply plugin: "org.owasp.dependencycheck"
+dependencyCheck {
+    /*
+     * Specifies if the build should be failed if a CVSS score equal
+     * to or above a specified level is identified.
+     */
+    failBuildOnCVSS = 8
+    skipTestGroups = true
+    skipConfigurations = ['jacocoAgent', 'jacocoAnt', 'optional', 'provided', 'providedCompile', 'providedRuntime',
+                          'signatures', 'spotbugs', 'spotbugsPlugins', 'checkstyle', 'errorprone', 'errorproneJavac',
+                          'annotationProcessor', 'archives', 'compileOnlyApi ',
+                          'tests', 'testRuntimeOnly', 'testRuntimeClasspath', 'testRuntime', 'testImplementation',
+                          'testCompileOnly', 'testCompileClasspath', 'testCompile', 'testAnnotationProcessor',
+                          'bootArchives', 'bootRunAnnotationProcessor']
+    cveValidForHours = 24
+    suppressionFile = file("$rootProject.projectDir/style/dependency-check-suppressions.xml")
+    analyzers {
+        assemblyEnabled = false
+        swiftEnabled = false
+        cocoapodsEnabled = false
+        nodeEnabled = false
+        nodeAuditEnabled = false
+        autoconfEnabled = false
+        cmakeEnabled = false
+        pathToDotnet = false
+        nuspecEnabled = false
+        rubygemsEnabled = false
+        pyPackageEnabled = false
+        pyDistributionEnabled = false
+        nexusEnabled = false
+        centralEnabled = false
+        bundleAuditEnabled = false
+        composerEnabled = false
+        opensslEnabled = false
+        archiveEnabled = false
+    }
+}
+
+allprojects {
+    apply plugin: "idea"
+    apply plugin: "eclipse"
+    apply plugin: "java-library"
+    apply plugin: "jacoco"
+
+    if (!Boolean.getBoolean("skipTestRetry")) {
+        apply plugin: "org.gradle.test-retry"
+    }
+
+    apply from: rootProject.file("gradle/tasks.gradle")
+
+    if (rootProject.publishReleases || rootProject.publishSnapshots || rootProject.generateGitProperties) {
+        apply plugin: "com.gorylenko.gradle-git-properties"
+        gitProperties {
+            extProperty = "gitProps"
+            keys = ["git.branch", "git.build.time", "git.build.user.name",
+                    "git.build.version", "git.commit.id", "git.remote.origin.url"]
+        }
+    }
+
+    project.ext["forceBootifulArtifact"] = null
+
+    afterEvaluate { project ->
+        jacoco {
+            toolVersion = "$gradleJacocoVersion"
+        }
+    }
+
+    java {
+        toolchain {
+            languageVersion = JavaLanguageVersion.of(project.targetCompatibility)
+        }
+    }
+
+    idea {
+        module {
+            downloadSources = false
+            downloadJavadoc = false
+            jdkName = project.targetCompatibility
+            excludeDirs += file(".gradle")
+            [".settings", "classes", "bin", "out", "docs", "dependency-cache", "libs", "reports", "resources", "test-results", "tmp"].each {
+                excludeDirs += file("$buildDir/$it")
+            }
+        }
+    }
+
+    repositories {
+        mavenLocal()
+        mavenCentral()
+        jcenter()
+        maven {
+            url "https://repo.spring.io/libs-milestone"
+            mavenContent { releasesOnly() }
+        }
+        maven {
+            url "$sonatypeReleasesRepositoryUrl"
+            mavenContent { releasesOnly() }
+        }
+    }
+
+    javadoc {
+        options.addBooleanOption('html5', true)
+        failOnError = Boolean.getBoolean("ignoreJavadocFailures")
+        excludes = ['**/generated/**']
+    }
+
+
+}
+
+subprojects {
+    task dependencyCheckAnalyze(type: org.owasp.dependencycheck.gradle.tasks.Analyze) {
+        /*
+         Disable analyze in cas-server-core-api and cas-server-core because
+         support and webapp sub-projects will include their dependencies transitively.
+        */
+        enabled = !"${project.name}".contains("cas-server-core")
+    }
+
+    task allDependenciesInsight(type: DependencyInsightReportTask,
+            description: "Produce insight information for all dependencies") {
+        doLast {}
+    }
+    task allDependencies(type: DependencyReportTask,
+            description: "Display a graph of all project dependencies") {
+        doLast {}
+    }
+
+    if (projectShouldBePublished(project)) {
+        apply plugin: "maven-publish"
+        apply plugin: "signing"
+    }
+
+    if (!rootProject.skipErrorProneCompiler) {
+        apply plugin: "net.ltgt.errorprone-javacplugin"
+    }
+
+    apply plugin: "propdeps"
+    apply plugin: "propdeps-maven"
+    apply plugin: "propdeps-idea"
+    apply plugin: "propdeps-eclipse"
+
+    apply from: rootProject.file("gradle/tests.gradle")
+
+    ext.libraries = rootProject.ext.libraries
+
+    repositories {
+        mavenLocal {
+            content {
+                includeGroup "org.apereo.service.persondir"
+            }
+        }
+        mavenCentral()
+        maven {
+            url "https://build.shibboleth.net/nexus/content/repositories/releases"
+            content {
+                includeGroupByRegex "org\\.opensaml.*"
+                includeGroupByRegex "net\\.shibboleth.*"
+            }
+        }
+        maven {
+            url "https://dl.bintray.com/apereocas/webauthn-cas/"
+            mavenContent { releasesOnly() }
+        }
+        maven {
+            url "https://oss.sonatype.org/content/repositories/snapshots"
+            mavenContent { snapshotsOnly() }
+        }
+        maven {
+            url "https://oss.sonatype.org/content/repositories/releases"
+            mavenContent { releasesOnly() }
+        }
+        maven {
+            url "https://repo.spring.io/plugins-release/"
+            mavenContent { releasesOnly() }
+        }
+        maven {
+            url "https://repo.spring.io/milestone/"
+            mavenContent { releasesOnly() }
+        }
+        maven {
+            url "https://repo.spring.io/snapshot/"
+            mavenContent { snapshotsOnly() }
+        }
+        maven {
+            url "https://repo.spring.io/libs-milestone"
+            mavenContent { releasesOnly() }
+        }
+        maven {
+            url "https://splunk.jfrog.io/splunk/ext-releases-local"
+            content {
+                includeGroupByRegex ".*splunk.*"
+            }
+            mavenContent { releasesOnly() }
+        }
+        maven {
+            url "https://dl.bintray.com/uniconiam/maven"
+            mavenContent { releasesOnly() }
+        }
+        maven {
+            url "https://repo.terracotta.org/maven2"
+            mavenContent { releasesOnly() }
+            content {
+                includeGroup "org.terracotta"
+            }
+        }
+        maven {
+            url "https://oss.jfrog.org/artifactory/oss-snapshot-local"
+            mavenContent { snapshotsOnly() }
+        }
+        jcenter()
+    }
+
+    configurations {
+        tests
+    }
+
+    jacocoTestReport {
+        reports {
+            xml.enabled(true)
+            html.enabled(true)
+        }
+        afterEvaluate {
+            classDirectories.setFrom(files(classDirectories.files.collect {
+                fileTree(dir: it, include: ['**/*.*'], exclude: rootProject.excludedFilesFromTestCoverage)
+            }))
+        }
+        sourceSets sourceSets.main
+        getExecutionData().setFrom(fileTree(buildDir).include("/jacoco/*.exec"))
+    }
+
+
+    jacocoTestCoverageVerification {
+        getExecutionData().setFrom(fileTree(buildDir).include("/jacoco/*.exec"))
+        afterEvaluate {
+            classDirectories.setFrom(files(classDirectories.files.collect {
+                fileTree(dir: it, include: ['**/*.*'], exclude: rootProject.excludedFilesFromTestCoverage)
+            }))
+        }
+        violationRules {
+            rule {
+                element = 'CLASS'
+                limit {
+                    minimum = 0.80
+                }
+            }
+        }
+    }
+
+    apply from: rootProject.file("gradle/overrides.gradle")
+
+    /**
+     * Apply publishing rules after the build has had a chance to
+     * evaluate sub-projects to apply plugins, etc.
+     */
+    afterEvaluate { project ->
+        if ((rootProject.publishReleases || rootProject.publishSnapshots) && projectShouldBePublished(project)) {
+            //logger.info "Project ${project.name} should be published"
+            apply from: rootProject.file("gradle/maven.gradle")
+
+            publishing {
+                publications {
+                    def isWarPluginApplied = project.plugins.hasPlugin("war")
+                    if (isWarPluginApplied) {
+                        //logger.info "Project ${project.name} should be published as a WAR"
+                        mavenWeb(MavenPublication) {
+                            from components.web
+                            pom {
+                                createPom(it, project)
+                            }
+                            pom.withXml {
+                                createPomRepositories(asNode())
+                            }
+                        }
+                    } else {
+                        //logger.info "Project ${project.name} should be published as a JAR"
+                        mavenJava(MavenPublication) {
+                            from components.java
+                            artifact tasks['sourcesJar']
+                            artifact tasks['resourcesJar']
+                            artifact tasks['javadocJar']
+                            artifact tasks['testJar']
+
+                            pom {
+                                createPom(it, project)
+                            }
+                            pom.withXml {
+                                createPomRepositories(asNode())
+                            }
+                        }
+                    }
+                }
+
+                repositories {
+                    if (rootProject.publishReleases) {
+                        maven {
+                            name "Sonatype-Releases"
+                            url "${sonatypeRepositoryUrl}"
+                            mavenContent {
+                                releasesOnly()
+                            }
+                            credentials {
+                                username "${sonatypeUsername}"
+                                password "${sonatypePassword}"
+                            }
+                        }
+                    }
+                    if (rootProject.publishSnapshots) {
+                        maven {
+                            name "Sonatype-Snapshots"
+                            url "${sonatypeSnapshotsRepositoryUrl}"
+                            mavenContent {
+                                snapshotsOnly()
+                            }
+                            credentials {
+                                username "${sonatypeUsername}"
+                                password "${sonatypePassword}"
+                            }
+                        }
+                    }
+                }
+            }
+
+            signing {
+                required = isArtifactSigningRequired
+                sign publishing.publications
+            }
+        }
+    }
+
+    artifacts {
+        tests testJar
+        if (rootProject.publishReleases || rootProject.publishSnapshots) {
+            archives sourcesJar
+            archives javadocJar
+            archives resourcesJar
+        }
+        archives testJar
+    }
+
+    sourceSets {
+        main {
+            java {
+                srcDirs = ["${projectDir}/src/main/java"]
+            }
+            resources {
+                srcDirs = ["${projectDir}/src/main/resources"]
+            }
+        }
+        test {
+            java {
+                srcDirs = ["${projectDir}/src/test/java"]
+
+            }
+            resources {
+                srcDirs = ["${projectDir}/src/test/resources"]
+            }
+        }
+    }
+
+    ext.buildDate = null
+    ext.buildJarFile = new File(project.buildDir, "libs/${project.name}-${project.version}.jar")
+
+    [compileTestJava, compileJava].each {
+        it.doFirst {
+            it.options.fork = true
+            it.options.incremental = true
+
+            def casCompilerArgs = ["-parameters"]
+
+            def terminateCompilerOnWarning = project.ext.properties.get("terminateCompilerOnWarning", true)
+            if (terminateCompilerOnWarning) {
+                casCompilerArgs.add("-Werror")
+            }
+
+            if (!rootProject.skipErrorProneCompiler) {
+                it.options.errorprone.allErrorsAsWarnings = false
+                it.options.errorprone.disableWarningsInGeneratedCode = true
+                it.options.errorprone.errorproneArgs += ['-Xep:ParameterName:OFF', '-Xep:MissingOverride:OFF', '-Xep:MissingSummary:OFF']
+
+                casCompilerArgs.add("-XDcompilePolicy=byfile")
+            }
+            it.options.compilerArgs += casCompilerArgs
+        }
+    }
+
+    tasks.jar.onlyIf {
+        project.buildDate != null || !project.buildJarFile.exists()
+    }
+
+    if (projectShouldBePublished(project)) {
+        apply plugin: "io.franzbecker.gradle-lombok"
+        lombok {
+            version = "$lombokVersion"
+        }
+    }
+
+    jar {
+        manifest {
+            attributes(
+                    "Automatic-Module-Name": project.name,
+                    "Implementation-Title": project.name,
+                    "Implementation-Vendor": project.group,
+                    "Created-By": project.group,
+                    "Implementation-Date": java.time.ZonedDateTime.now(ZoneId.systemDefault()),
+                    "Specification-Version": "${-> project.ext.has("gitProps") ? project.ext.gitProps['git.commit.id'] : 'N/A'}",
+                    "Implementation-Version": project.version)
+        }
+    }
+
+
+    if (!Boolean.getBoolean("skipCheckstyle") && projectShouldBePublished(project)) {
+        apply plugin: "checkstyle"
+        checkstyle {
+            configProperties = [
+                "checkstyle.suppressions.file" : new File(rootDir, "style/checkstyle-suppressions.xml"),
+                "checkstyle.importcontrol.file": new File(rootDir, "style/import-control.xml")
+            ]
+            configFile = new File(rootDir, "style/checkstyle-rules.xml")
+            ignoreFailures false
+            showViolations true
+            toolVersion "${checkstyleVersion}"
+        }
+    }
+
+    if (!Boolean.getBoolean("skipSpotbugs") && projectShouldBePublished(project)) {
+        apply from: rootProject.file("gradle/spotbugs.gradle")
+    }
+
+    apply plugin: "com.github.jk1.dependency-license-report"
+    licenseReport {
+        outputDir = "$projectDir/build/licenses"
+        projects = project
+        excludeOwnGroup = true
+        configurations = ['runtimeClasspath']
+        filters = [new com.github.jk1.license.filter.ExcludeTransitiveDependenciesFilter()]
+        allowedLicensesFile = new File("$rootProject.projectDir/etc/allowed-licenses.json")
+    }
+    checkLicense.finalizedBy outputDependenciesWithoutLicense
+
+    dependencies {
+
+        implementation libraries.aspectj
+        implementation libraries.validationapi
+
+        api libraries.jaxb
+        api libraries.slf4j
+        api libraries.guava
+        api libraries.commons
+        api libraries.jodatime
+        api libraries.inspektr
+        api libraries.persondirectory
+        api libraries.spring
+        api libraries.bytebuddy
+        api libraries.jackson
+        api libraries.httpclient
+        api libraries.quartz
+        api libraries.hibernatevalidator
+        api libraries.groovy
+        api libraries.caffein
+        api libraries.springcloud
+        api libraries.springboot
+        api libraries.springsecurity
+        api libraries.springwebflow
+        api libraries.javaxel
+        api libraries.javax
+
+        if (!Boolean.getBoolean("skipSpotbugs") && projectShouldBePublished(project)) {
+            spotbugsPlugins libraries.findbugscontrib
+            spotbugsPlugins libraries.findbugssec
+        }
+
+        if (!Boolean.getBoolean("skipErrorProneCompiler")) {
+            errorprone "com.google.errorprone:error_prone_core:$errorProneVersion"
+            errorproneJavac "com.google.errorprone:javac:$errorproneJavacVersion"
+        }
+        testImplementation libraries.tests
+        testImplementation libraries.log4j
+        compileOnlyApi  libraries.spotbugsannotations
+    }
+}
+
+tasks.withType(Javadoc) {
+    source subprojects.collect { project -> project.sourceSets.main.allJava }
+    destinationDir = new File(buildDir, "javadoc")
+    classpath = files(subprojects.collect { project -> project.sourceSets.main.compileClasspath })
+    options.addBooleanOption('html5', true)
+    failOnError = Boolean.getBoolean("ignoreJavadocFailures")
+}
+
+task aggregateJavadocsIntoJar(type: Jar, dependsOn: javadoc, description: "Aggregate all Javadocs into a single directory") {
+    classifier = "javadoc"
+    from javadoc
+}
+
+task rootSourcesJar(type: Jar, description: "Build JAR for the root CAS module") {
+    archiveBaseName = "${project.archivesBaseName}"
+    from rootProject.file("src")
+}
+
+task gradleHome(description: "Display GRADLE_HOME environment variable") {
+    doFirst {
+        println "\nexport GRADLE_HOME=" + gradle.gradleHomeDir
+    }
+}
+
+if (rootProject.publishReleases || rootProject.publishSnapshots) {
+    artifacts {
+        archives aggregateJavadocsIntoJar
+        archives rootSourcesJar
+    }
+}
+
+
+task jacocoMerge(type: JacocoMerge) {
+    subprojects.each { subproject ->
+        executionData subproject.tasks.withType(Test)
+        dependsOn tasks.withType(Test)
+    }
+    doFirst {
+        executionData = files(executionData.findAll { it.exists() })
+    }
+}
+
+task jacocoRootReport(type: JacocoReport) {
+    description = 'Generates an aggregate report from all projects'
+
+    subprojects.each {
+        if (!it.path.contains(":docs")) {
+            it.tasks.withType(Test).each { task -> dependsOn(task) }
+        }
+    }
+
+    dependsOn jacocoMerge
+
+    additionalSourceDirs.setFrom(files(subprojects.sourceSets.main.allSource.srcDirs))
+    sourceDirectories.setFrom(files(subprojects.sourceSets.main.allSource.srcDirs))
+    classDirectories.setFrom(
+            files(subprojects.sourceSets.main.output).collect {
+                fileTree(dir: it,
+                        include: ['**/*.*'],
+                        exclude: rootProject.excludedFilesFromTestCoverage
+                        )
+            })
+    //executionData.setFrom(files(subprojects.jacocoTestReport.executionData))
+    executionData jacocoMerge.destinationFile
+
+    reports {
+        html.enabled = true
+        xml.enabled = true
+    }
+    onlyIf = {
+        true
+    }
+    doFirst {
+        executionData files(executionData.findAll {
+            it.exists()
+        })
+    }
+}
+
+task casVersion(description: "Display current CAS version") {
+    doLast {
+        println rootProject.version
+    }
+}
+
+task signingKey(description: "Display CAS signing key id") {
+    doLast {
+        println "Signing key: " + project.findProperty("signing.keyId")
+    }
+}
+
+task verifyRequiredJavaVersion {
+    def requiredVersion = JavaVersion.toVersion(project.targetCompatibility)
+    if (!JavaVersion.current().isCompatibleWith(requiredVersion)) {
+        throw new GradleException("Current Java version ${JavaVersion.current()} does not match required Java version ${requiredVersion}")
+    }
+}
+
+boolean projectShouldBePublished(Project project) {
+    return !["api", "core", "docs", "support", "webapp", "cas-server-documentation"].contains(project.name)
+}
+
