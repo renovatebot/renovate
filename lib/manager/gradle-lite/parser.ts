@@ -1,3 +1,4 @@
+import is from '@sindresorhus/is';
 import moo from 'moo';
 import { regEx } from '../../util/regex';
 import { PackageDependency } from '../common';
@@ -112,7 +113,7 @@ function foldInterpolations(acc: Token[], token: Token): Token[] {
     } else if (tokenType === 'variable') {
       prevToken.interpolation.push({ key: token.value });
     } else if (tokenType === 'doubleQuotedFinish') {
-      if (prevToken.interpolation.every((elem) => typeof elem === 'string')) {
+      if (prevToken.interpolation.every((elem) => is.string(elem))) {
         prevToken.type = 'string';
         prevToken.value = prevToken.interpolation.join('');
         delete prevToken.interpolation;
@@ -189,38 +190,83 @@ export function parseDependencyString(
   return null;
 }
 
-function isEndToken(token: Token): boolean {
-  return !token || ['rightBrace', 'word'].includes(token.type);
+interface Matcher {
+  type: string | string[];
+  key?: string;
+  lookahead?: boolean;
+  testFn?: (string) => boolean;
 }
 
-function getAssignments(
-  tokens: Token[],
-  variables: PackageVariables,
-  packageFile?: string
-): PackageVariables | null {
-  const [wordToken, opToken, valToken, endToken] = tokens;
-  if (
-    wordToken?.type === 'word' &&
-    opToken?.type === 'assignment' &&
-    valToken?.type === 'string' &&
-    isEndToken(endToken)
-  ) {
-    tokens.splice(0, 3);
-    const variableData: VariableData = {
-      key: wordToken.value,
-      value: valToken.value,
-      fileReplacePosition: valToken.offset,
-    };
-    if (packageFile) {
-      variableData.packageFile = packageFile;
+type MatcherSeq = Matcher[];
+
+type MatcherSeqMap = Record<string, MatcherSeq>;
+
+type Match = Record<string, Token>;
+
+type MatchOneOf = [string, Match] | [null, null];
+
+function matchSeq(tokens: Token[], matcherSeq: MatcherSeq): Match | null {
+  let lookaheadCount = 0;
+  const result: Match = {};
+  for (let idx = 0; idx < matcherSeq.length; idx += 1) {
+    const token = tokens[idx];
+    const matcher = matcherSeq[idx];
+
+    if (!token) {
+      return matcher.lookahead ? result : null;
     }
-    return {
-      ...variables,
-      [variableData.key]: variableData,
-    };
+
+    const typeMatches = is.string(matcher.type)
+      ? matcher.type === token.type
+      : matcher.type.includes(token.type);
+    if (!typeMatches) {
+      return null;
+    }
+
+    if (matcher.testFn && !matcher.testFn(token.value)) {
+      return null;
+    }
+
+    lookaheadCount = matcher.lookahead ? lookaheadCount + 1 : 0;
+
+    if (matcher.key) {
+      result[matcher.key] = token;
+    }
   }
-  return null;
+
+  tokens.splice(0, matcherSeq.length - lookaheadCount);
+  return result;
 }
+
+function matchOneOfSeq(
+  tokens: Token[],
+  matcherSeqMap: MatcherSeqMap
+): MatchOneOf {
+  let match: Match = null;
+  for (const [matcherKey, matcherSeq] of Object.entries(matcherSeqMap)) {
+    match = matchSeq(
+      tokens,
+      matcherSeq.length === 1
+        ? [{ key: matcherKey, ...matcherSeq[0] }]
+        : matcherSeq
+    );
+    if (match) {
+      return [matcherKey, match];
+    }
+  }
+  return [null, null];
+}
+
+const matcherMap: MatcherSeqMap = {
+  assignment: [
+    { type: 'word', key: 'key' },
+    { type: 'assignment' },
+    { type: 'string', key: 'value' },
+    { type: ['rightBrace', 'word', null], lookahead: true },
+  ],
+  depString: [{ type: 'string', testFn: isDependencyString }],
+  depInterpolation: [{ type: 'interpolation' }],
+};
 
 function interpolateString(
   input: Interpolation,
@@ -228,7 +274,7 @@ function interpolateString(
 ): string | null {
   const results = [];
   for (const val of input) {
-    if (typeof val === 'string') {
+    if (is.string(val)) {
       results.push(val);
     } else {
       const varName = val.key;
@@ -250,23 +296,23 @@ export function parseGradle(
 ): PackageDependency<ManagerData>[] {
   const deps: PackageDependency<ManagerData>[] = [];
   const tokens = extractTokens(input);
-  let variables = { ...vars };
+  const variables = { ...vars };
   while (tokens.length) {
-    let newVariables = getAssignments(tokens, variables, packageFile);
-    while (newVariables) {
-      variables = newVariables;
-      newVariables = getAssignments(tokens, variables, packageFile);
-    }
-
-    const token = tokens.shift();
-    if (!token) {
-      break;
-    }
-
-    const tokenValue = token.value;
-    const tokenType = token.type;
-    if (tokenType === 'string' && isDependencyString(tokenValue)) {
-      const dep = parseDependencyString(tokenValue);
+    const [matchKey, match] = matchOneOfSeq(tokens, matcherMap);
+    if (matchKey === 'assignment') {
+      const { key: keyToken, value: valToken } = match;
+      const variableData: VariableData = {
+        key: keyToken.value,
+        value: valToken.value,
+        fileReplacePosition: valToken.offset,
+      };
+      if (packageFile) {
+        variableData.packageFile = packageFile;
+      }
+      variables[variableData.key] = variableData;
+    } else if (matchKey === 'depString') {
+      const token = match.depString;
+      const dep = parseDependencyString(token.value);
       if (dep) {
         const managerData: ManagerData = {
           fileReplacePosition: token.offset + dep.depName.length + 1,
@@ -277,7 +323,8 @@ export function parseGradle(
         dep.managerData = managerData;
         deps.push(dep);
       }
-    } else if (tokenType === 'interpolation' && token.isComplete) {
+    } else if (matchKey === 'depInterpolation') {
+      const token = match.depInterpolation;
       const interpolationResult = interpolateString(
         token.interpolation,
         variables
@@ -287,7 +334,7 @@ export function parseGradle(
         if (dep) {
           const variablePlaceholder = [...token.interpolation]
             .reverse()
-            .find((x) => typeof x !== 'string') as VariablePlaceholder;
+            .find((x) => !is.string(x)) as VariablePlaceholder;
           const variableData = variables[variablePlaceholder?.key];
           if (variableData?.value === dep.currentValue) {
             const managerData: ManagerData = {
@@ -302,6 +349,10 @@ export function parseGradle(
           deps.push(dep);
         }
       }
+    }
+
+    if (!match) {
+      tokens.shift();
     }
   }
   return deps;
