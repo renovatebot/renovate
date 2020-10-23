@@ -91,4 +91,4 @@ If you want to limit Renovate to only one or a small number of managers, you can
 }
 ```
 
-The above would then result in all other managers being disabled, including Bundler, Composer, Docker Composer, etc.
+The above would then result in all other managers being disabled, including Bundler, Composer, Docker Compose, etc.
