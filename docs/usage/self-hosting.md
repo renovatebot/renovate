@@ -230,9 +230,9 @@ module.exports = {
 };
 ```
 
-Here change the `logFile` and `repositories` to something appropriate. Also replace gitlab-token value with the one created during the previous step.
+Here change the `logFile` and `repositories` to something appropriate. Also replace `gitlab-token` value with the one created during the previous step.
 
-If running against GitHub Enterprise, change the above gitlab values to the equivalent GitHub ones.
+If running against GitHub Enterprise, change the above `gitlab` values to the equivalent GitHub ones.
 
 You can save this file as anything you want and then use `RENOVATE_CONFIG_FILE` env variable to tell Renovate where to find it.
 
