@@ -146,7 +146,7 @@ module.exports = {
 };
 ```
 
-It is possible to add additional host rules following the [documentation](https://docs.renovatebot.com/configuration-options/#hostrules). For example if you have some images you host yourself that are password protected and also some images you pull from Docker hub without authentication then you can configure for a specific Docker host like this:
+It is possible to add additional host rules following the [documentation](https://docs.renovatebot.com/configuration-options/#hostrules). For example if you have some images you host yourself that are password protected and also some images you pull from Docker Hub without authentication then you can configure for a specific Docker host like this:
 
 ```js
 module.exports = {
