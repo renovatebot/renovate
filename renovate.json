@@ -1,23 +1,8 @@
 {
-  "extends": [
-    "config:base",
-    ":rebaseStalePrs",
-    ":automergeMinor",
-    ":label(ready)",
-    "group:linters",
-    ":masterIssue",
-    ":assignee(rarkins)"
-  ],
-  "lockFileMaintenance": {
-    "enabled": true,
-    "schedule": ["at any time"],
-    "stabilityDays": 0,
-    "masterIssueApproval": true
-  },
-  "postUpdateOptions": ["yarnDedupeHighest"],
+  "extends": ["github>renovatebot/presets-internal:node", ":label(ready)"],
+  "assignees": ["rarkins", "viceice"],
   "semanticCommitScope": "deps",
   "dockerfile": {
-    "pinDigests": true,
     "semanticCommitType": "build"
   },
   "prBodyDefinitions": {
@@ -25,15 +10,10 @@
   },
   "prBodyColumns": ["Package", "Update", "Type", "Change", "Sourcegraph"],
   "stabilityDays": 3,
-  "prCreation": "not-pending",
   "packageRules": [
     {
       "datasources": ["docker"],
       "automerge": false
-    },
-    {
-      "updateTypes": ["major"],
-      "masterIssueApproval": true
     },
     {
       "packageNames": ["npm", "yarn"],
@@ -54,21 +34,6 @@
     {
       "paths": ["**/__fixtures__/**"],
       "enabled": false
-    }
-  ],
-  "regexManagers": [
-    {
-      "fileMatch": ["^Dockerfile$"],
-      "matchStrings": [
-        "datasource=(?<datasource>.*?) depName=(?<depName>.*?)( versioning=(?<versioning>.*?))?\\sENV .*?_VERSION=(?<currentValue>.*)\\s"
-      ],
-      "versioningTemplate": "{{#if versioning}}{{versioning}}{{else}}semver{{/if}}"
-    },
-    {
-      "fileMatch": ["^\\.github/workflows/[^/]+\\.ya?ml$"],
-      "matchStrings": ["uses: (?<depName>[a-z-/]+?)@(?<currentValue>.+?)\\s"],
-      "datasourceTemplate": "github-tags",
-      "versioningTemplate": "docker"
     }
   ]
 }
