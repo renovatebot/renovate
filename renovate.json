@@ -2,6 +2,7 @@
   "extends": ["github>renovatebot/presets-internal:node", ":label(ready)"],
   "assignees": ["rarkins", "viceice"],
   "semanticCommitScope": "deps",
+  "automergeType": "pr",
   "dockerfile": {
     "semanticCommitType": "build"
   },
