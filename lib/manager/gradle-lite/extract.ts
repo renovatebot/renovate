@@ -74,7 +74,14 @@ export async function extractAllPackageFiles(
 ): Promise<PackageFile[] | null> {
   const extractedDeps: PackageDependency<ManagerData>[] = [];
   const registry: VariableRegistry = {};
+  const packageFilesByName: Record<string, PackageFile> = {};
   for (const packageFile of reorderFiles(packageFiles)) {
+    packageFilesByName[packageFile] = {
+      packageFile,
+      datasource: datasourceMaven.id,
+      deps: [],
+    };
+
     const content = await readLocalFile(packageFile, 'utf8');
     const dir = upath.dirname(toAbsolute(packageFile));
     if (isProps(packageFile)) {
@@ -92,14 +99,9 @@ export async function extractAllPackageFiles(
     return null;
   }
 
-  const packageFilesByName: Record<string, PackageFile> = {};
   extractedDeps.forEach((dep) => {
     const key = dep.managerData.packageFile;
-    const pkgFile: PackageFile = packageFilesByName[key] || {
-      packageFile: key,
-      datasource: datasourceMaven.id,
-      deps: [],
-    };
+    const pkgFile: PackageFile = packageFilesByName[key];
     const { deps } = pkgFile;
     deps.push(dep);
     packageFilesByName[key] = pkgFile;
