@@ -42,7 +42,7 @@ Configure this directory if you want to change which directory Renovate uses for
 
 ## composerIgnorePlatformReqs
 
-Set to `false` to prevent usage of `--ignore-platform-reqs` in the composer package manager.
+Set to `false` to prevent usage of `--ignore-platform-reqs` in the Composer package manager.
 
 ## dockerImagePrefix
 

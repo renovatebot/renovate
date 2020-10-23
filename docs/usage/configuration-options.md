@@ -734,7 +734,7 @@ It would take the entire `"config:base"` preset - which contains a lot of sub-pr
 
 ## ignoreScripts
 
-Applicable for npm and composer only for now. Set this to `true` if running scripts causes problems.
+Applicable for npm and Composer only for now. Set this to `true` if running scripts causes problems.
 
 ## ignoreUnstable
 
