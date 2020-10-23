@@ -1,5 +1,6 @@
 import is from '@sindresorhus/is';
 import moo from 'moo';
+import { logger } from '../../logger';
 import { regEx } from '../../util/regex';
 import { PackageDependency } from '../common';
 import { ManagerData, PackageVariables, VariableData } from './common';
@@ -214,7 +215,10 @@ function matchSeq(tokens: Token[], matcherSeq: MatcherSeq): Match | null {
     const matcher = matcherSeq[idx];
 
     if (!token) {
-      return matcher.lookahead ? result : null;
+      if (matcher.lookahead) {
+        break;
+      }
+      return null;
     }
 
     const typeMatches = is.string(matcher.type)
@@ -305,9 +309,12 @@ export function parseGradle(
   vars: PackageVariables = {},
   packageFile?: string
 ): PackageDependency<ManagerData>[] {
+  logger.trace({ packageFile }, `Gradle parsing ${packageFile} start`);
+  const startTime = Date.now();
   const deps: PackageDependency<ManagerData>[] = [];
   const tokens = extractTokens(input);
   const variables = { ...vars };
+  let tokenLimit = 10000000;
   while (tokens.length) {
     const [matchKey, match] = matchOneOfSeq(tokens, matcherMap);
     if (matchKey === 'assignment') {
@@ -380,7 +387,18 @@ export function parseGradle(
     if (!match) {
       tokens.shift();
     }
+
+    tokenLimit -= 1;
+    if (tokenLimit < 1) {
+      logger.trace({ packageFile }, `${packageFile} parsing took too long`);
+      break;
+    }
   }
+  const durationMs = Math.round(Date.now() - startTime);
+  logger.trace(
+    { packageFile, durationMs },
+    `Gradle parsing ${packageFile} finish`
+  );
   return deps;
 }
 
