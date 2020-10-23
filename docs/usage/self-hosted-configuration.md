@@ -79,9 +79,9 @@ You probably have no need for this option - it is an experimental setting for th
 
 ## gitAuthor
 
-RFC5322-compliant string if you wish to customise the git author for commits. If you need to transition from one git author to another, put the old gitAuthor into `RENOVATE_LEGACY_GIT_AUTHOR_EMAIL` in environment. Renovate will then check against it as well as the current git author value before deciding if a branch has been modified.
+RFC5322-compliant string if you wish to customise the Git author for commits. If you need to transition from one Git author to another, put the old gitAuthor into `RENOVATE_LEGACY_GIT_AUTHOR_EMAIL` in environment. Renovate will then check against it as well as the current Git author value before deciding if a branch has been modified.
 
-**Note** It is strongly recommended that the git author email you provide should be unique to Renovate. Otherwise, if another bot or human shares the same email and pushes to one of Renovate's branches then Renovate will mistake the branch as unmodified and potentially force push over the changes.
+**Note** It is strongly recommended that the Git author email you provide should be unique to Renovate. Otherwise, if another bot or human shares the same email and pushes to one of Renovate's branches then Renovate will mistake the branch as unmodified and potentially force push over the changes.
 
 ## gitPrivateKey
 
@@ -92,7 +92,7 @@ It will be loaded _lazily_. Before the first commit in a repository, Renovate wi
 - First, run `gpg import` if it hasn't been run before
 - Then, run `git config user.signingkey` and `git config commit.gpgsign true`
 
-The `git` commands are run locally in the cloned repo instead of globally to reduce the chance of causing unintended consequences with global git configs on shared systems.
+The `git` commands are run locally in the cloned repo instead of globally to reduce the chance of causing unintended consequences with global Git configs on shared systems.
 
 ## logContext
 
