@@ -761,7 +761,7 @@ Use this configuration option for shared config across all java projects (Gradle
 
 ## js
 
-Use this configuration option for shared config across npm/yarn/pnpm and meteor package managers.
+Use this configuration option for shared config across npm/Yarn/pnpm and meteor package managers.
 
 ## labels
 
