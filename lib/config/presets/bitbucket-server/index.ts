@@ -17,7 +17,7 @@ export async function fetchJSONFile(
 ): Promise<Preset> {
   const [projectKey, repositorySlug] = repo.split('/');
   setBaseUrl(endpoint);
-  const url = `/rest/api/1.0/projects/${projectKey}/repos/${repositorySlug}/browse/${fileName}?limit=20000`;
+  const url = `rest/api/1.0/projects/${projectKey}/repos/${repositorySlug}/browse/${fileName}?limit=20000`;
   let res: { body: FileData };
   try {
     res = await http.getJson(url);
