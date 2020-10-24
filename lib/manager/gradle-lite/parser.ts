@@ -1,161 +1,16 @@
 import is from '@sindresorhus/is';
-import moo from 'moo';
 import { logger } from '../../logger';
 import { regEx } from '../../util/regex';
 import { PackageDependency } from '../common';
-import { ManagerData, PackageVariables, VariableData } from './common';
-
-type VariablePlaceholder = Pick<VariableData, 'key'>;
-type Interpolation = (string | VariablePlaceholder)[];
-
-type Token = moo.Token & {
-  interpolation?: Interpolation;
-  isComplete?: boolean;
-  isValid?: boolean;
-};
-
-const wordRegex = /[a-zA-Z$_][a-zA-Z0-9$_]+/;
-
-const states = {
-  main: {
-    space: { match: /[ \t\r]+/ },
-    lineComment: { match: /\/\/.*?$/ },
-    multiComment: { match: /\/\*(?:.|[^])*?\*\// },
-    newline: { match: /\n/, lineBreaks: true },
-    colon: { match: ';' },
-    dot: '.',
-    operator: /(?:==|\+=?|-=?|\/=?|\*\*?|\.+|:)/,
-    assignment: '=',
-    word: { match: wordRegex },
-    leftParen: { match: '(' },
-    rightParen: { match: ')' },
-    leftBracket: { match: '[' },
-    rightBracket: { match: ']' },
-    leftBrace: { match: '{', push: 'main' },
-    rightBrace: { match: '}', pop: 1 },
-    singleQuotedStart: { match: "'", push: 'singleQuotedString' },
-    doubleQuotedStart: { match: '"', push: 'doubleQuotedString' },
-    tripleQuotedStart: { match: "'''", push: 'tripleQuotedString' },
-    unknown: { match: /./, value: () => null },
-  },
-  singleQuotedString: {
-    singleQuotedFinish: { match: "'", pop: 1 },
-    char: { match: /\\['"bfnrst\\]|.|[^]/, lineBreaks: true },
-  },
-  doubleQuotedString: {
-    doubleQuotedFinish: { match: '"', pop: 1 },
-    variable: {
-      match: /\${\s*[a-zA-Z_][a-zA-Z0-9_]+(?:\s*\.\s*[a-zA-Z_][a-zA-Z0-9_]+)*\s*}|\$[a-zA-Z_][a-zA-Z0-9_]+(?:\.[a-zA-Z_][a-zA-Z0-9_]+)*/,
-      value: (x) => x.replace(/^\${?\s*/, '').replace(/\s*}$/, ''),
-    },
-    ignoredInterpolation: {
-      match: /\${/,
-      push: 'ignoredInterpolation',
-      value: () => null,
-    },
-    char: { match: /\\[$'"bfnrst\\]|.|[^]/, lineBreaks: true },
-  },
-  ignoredInterpolation: {
-    leftBrace: { match: '{', push: 'ignoredInterpolation' },
-    rightBrace: { match: '}', pop: 1 },
-    unknown: { match: /.|[^]/, lineBreaks: true },
-  },
-  tripleQuotedString: {
-    tripleQuotedFinish: { match: "'''", pop: 1 },
-    char: { match: /\\['"bfnrst\\]|.|[^]/, lineBreaks: true },
-  },
-};
-
-function foldNullValues(acc: Token[], token: Token): Token[] {
-  if (token.value === null) {
-    const prevToken: Token = acc[acc.length - 1];
-    if (prevToken?.value !== null) {
-      // TODO: preserve ignored text for debugging?
-      acc.push({ ...token, type: 'null', value: null });
-    }
-  } else {
-    acc.push(token);
-  }
-  return acc;
-}
-
-function foldCharValues(acc: Token[], token: Token): Token[] {
-  const tokenType = token.type;
-  const prevToken: Token = acc[acc.length - 1];
-  const prevTokenType = prevToken?.type;
-  if (tokenType === 'char') {
-    if (prevTokenType === 'string') {
-      prevToken.value += token.value;
-      prevToken.text += token.text;
-    } else {
-      acc.push({ ...token, type: 'string' });
-    }
-  } else {
-    acc.push(token);
-  }
-  return acc;
-}
-
-function foldInterpolations(acc: Token[], token: Token): Token[] {
-  const tokenType = token.type;
-  const prevToken: Token = acc[acc.length - 1];
-  const prevTokenType = prevToken?.type;
-  if (tokenType === 'doubleQuotedStart') {
-    acc.push({
-      ...token,
-      type: 'interpolation',
-      interpolation: [],
-      isValid: true,
-      offset: token.offset + 1,
-    });
-  } else if (prevTokenType === 'interpolation' && !prevToken.isComplete) {
-    if (tokenType === 'string') {
-      prevToken.interpolation.push(token.value);
-    } else if (tokenType === 'variable') {
-      prevToken.interpolation.push({ key: token.value });
-    } else if (tokenType === 'doubleQuotedFinish') {
-      if (prevToken.interpolation.every((elem) => is.string(elem))) {
-        prevToken.type = 'string';
-        prevToken.value = prevToken.interpolation.join('');
-        delete prevToken.interpolation;
-        delete prevToken.isComplete;
-        return acc;
-      }
-      prevToken.isComplete = true;
-    } else {
-      // TODO: save ignored fragments for debug or something
-      prevToken.isValid = false;
-    }
-  } else {
-    acc.push(token);
-  }
-  return acc;
-}
-
-const filteredTokens = [
-  'space',
-  'lineComment',
-  'multiComment',
-  'newline',
-  'colon',
-  'singleQuotedStart',
-  'singleQuotedFinish',
-  'doubleQuotedFinish',
-  'tripleQuotedStart',
-  'tripleQuotedFinish',
-];
-const filterTokens = ({ type }: Token): boolean =>
-  !filteredTokens.includes(type);
-
-export function extractTokens(input: string): Token[] {
-  const lexer = moo.states(states);
-  lexer.reset(input);
-  return Array.from(lexer)
-    .reduce(foldNullValues, [])
-    .reduce(foldCharValues, [])
-    .reduce(foldInterpolations, [])
-    .filter(filterTokens);
-}
+import {
+  ManagerData,
+  PackageVariables,
+  StringInterpolation,
+  Token,
+  TokenType,
+  VariableData,
+} from './common';
+import { tokenize } from './tokenizer';
 
 const depArtifactRegex = regEx(
   '^[a-zA-Z][-_a-zA-Z0-9]*(?:.[a-zA-Z][-_a-zA-Z0-9]*)*$'
@@ -192,7 +47,7 @@ export function parseDependencyString(
 }
 
 interface Matcher {
-  type: string | string[];
+  type: TokenType | TokenType[];
   key?: string;
   value?: string;
   lookahead?: boolean;
@@ -268,40 +123,43 @@ function matchOneOfSeq(
 
 const matcherMap: MatcherSeqMap = {
   assignment: [
-    { type: 'word', key: 'key' },
-    { type: 'assignment' },
-    { type: 'string', key: 'value' },
-    { type: ['rightBrace', 'word', null], lookahead: true },
+    { type: TokenType.Word, key: 'key' },
+    { type: TokenType.Assignment },
+    { type: TokenType.String, key: 'value' },
+    { type: [TokenType.RightBrace, TokenType.Word, null], lookahead: true },
   ],
-  depString: [{ type: 'string', testFn: isDependencyString }],
-  depInterpolation: [{ type: 'interpolation' }],
+  depString: [{ type: TokenType.String, testFn: isDependencyString }],
+  depInterpolation: [{ type: TokenType.StringInterpolation }],
   plugin: [
-    { type: 'word', value: 'id' },
-    { type: 'string', key: 'pluginName' },
-    { type: 'word', value: 'version' },
-    { type: 'string', key: 'pluginVersion' },
+    { type: TokenType.Word, value: 'id' },
+    { type: TokenType.String, key: 'pluginName' },
+    { type: TokenType.Word, value: 'version' },
+    { type: TokenType.String, key: 'pluginVersion' },
   ],
 };
 
 function interpolateString(
-  input: Interpolation,
+  childTokens: Token[],
   variables: PackageVariables
 ): string | null {
-  const results = [];
-  for (const val of input) {
-    if (is.string(val)) {
-      results.push(val);
-    } else {
-      const varName = val.key;
-      const varValue = variables[varName];
-      if (varValue) {
-        results.push(varValue.value);
+  const resolvedSubstrings = [];
+  for (const childToken of childTokens) {
+    const type = childToken.type;
+    if (type === TokenType.String) {
+      resolvedSubstrings.push(childToken.value);
+    } else if (type === TokenType.Variable) {
+      const varName = childToken.value;
+      const varData = variables[varName];
+      if (varData) {
+        resolvedSubstrings.push(varData.value);
       } else {
         return null;
       }
+    } else {
+      return null;
     }
   }
-  return results.join('');
+  return resolvedSubstrings.join('');
 }
 
 export function parseGradle(
@@ -312,7 +170,7 @@ export function parseGradle(
   logger.trace({ packageFile }, `Gradle parsing ${packageFile} start`);
   const startTime = Date.now();
   const deps: PackageDependency<ManagerData>[] = [];
-  const tokens = extractTokens(input);
+  const tokens = tokenize(input);
   const variables = { ...vars };
   let tokenLimit = 10000000;
   while (tokens.length) {
@@ -342,27 +200,24 @@ export function parseGradle(
         deps.push(dep);
       }
     } else if (matchKey === 'depInterpolation') {
-      const token = match.depInterpolation;
-      const interpolationResult = interpolateString(
-        token.interpolation,
-        variables
-      );
+      const token = match.depInterpolation as StringInterpolation;
+      const interpolationResult = interpolateString(token.children, variables);
       if (interpolationResult && isDependencyString(interpolationResult)) {
         const dep = parseDependencyString(interpolationResult);
         if (dep) {
-          const variablePlaceholder = [...token.interpolation]
+          const versionPlaceholder = [...token.children]
             .reverse()
-            .find((x) => !is.string(x)) as VariablePlaceholder;
-          const variableData = variables[variablePlaceholder?.key];
-          if (variableData?.value === dep.currentValue) {
+            .find(({ type }) => type === TokenType.Variable);
+          const variable = variables[versionPlaceholder?.value];
+          if (variable?.value === dep.currentValue) {
             const managerData: ManagerData = {
-              fileReplacePosition: variableData.fileReplacePosition,
+              fileReplacePosition: variable.fileReplacePosition,
             };
-            if (variableData.packageFile) {
-              managerData.packageFile = variableData.packageFile;
+            if (variable.packageFile) {
+              managerData.packageFile = variable.packageFile;
             }
             dep.managerData = managerData;
-            dep.groupName = variableData.key;
+            dep.groupName = variable.key;
             deps.push(dep);
           }
         }
