@@ -233,7 +233,7 @@ export async function lookupUpdates(
       res.updates.push(rollback);
     }
     let rangeStrategy = getRangeStrategy(config);
-    // istanbul ignore if
+    // istanbul ignore next
     if (
       vulnerabilityAlert &&
       rangeStrategy === 'update-lockfile' &&
