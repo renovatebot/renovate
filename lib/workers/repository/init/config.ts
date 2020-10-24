@@ -20,6 +20,7 @@ import { checkOnboardingBranch } from '../onboarding/branch';
 import { RepoFileConfig } from './common';
 import { flattenPackageRules } from './flatten';
 import { detectSemanticCommits } from './semantic';
+import is from '@sindresorhus/is';
 
 export async function detectRepoFileConfig(): Promise<RepoFileConfig> {
   const fileList = await getFileList();
@@ -149,11 +150,16 @@ export async function mergeRenovateConfig(
 ): Promise<RenovateConfig> {
   let returnConfig = { ...config };
   const repoConfig = await detectRepoFileConfig();
+  const configFileParsed = repoConfig?.configFileParsed || {};
+  if (is.nonEmptyArray(returnConfig.extends)) {
+    configFileParsed.extends = [
+      ...returnConfig.extends,
+      ...(configFileParsed.extends || []),
+    ];
+    delete returnConfig.extends;
+  }
   checkForRepoConfigError(repoConfig);
-  const migratedConfig = await migrateAndValidate(
-    config,
-    repoConfig?.configFileParsed || {}
-  );
+  const migratedConfig = await migrateAndValidate(config, configFileParsed);
   if (migratedConfig.errors.length) {
     const error = new Error(CONFIG_VALIDATION);
     error.configFile = repoConfig.configFileName;
