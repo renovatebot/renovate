@@ -234,7 +234,11 @@ export async function lookupUpdates(
     }
     let rangeStrategy = getRangeStrategy(config);
     // istanbul ignore if
-    if (rangeStrategy === 'update-lockfile' && !lockedVersion) {
+    if (
+      vulnerabilityAlert &&
+      rangeStrategy === 'update-lockfile' &&
+      !lockedVersion
+    ) {
       rangeStrategy = 'bump';
     }
     const nonDeprecatedVersions = releases
