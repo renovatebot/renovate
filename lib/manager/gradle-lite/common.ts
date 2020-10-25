@@ -1,3 +1,5 @@
+import { PackageDependency } from '../common';
+
 export interface ManagerData {
   fileReplacePosition: number;
   packageFile?: string;
@@ -69,4 +71,31 @@ export interface StringInterpolation extends Token {
   children: Token[]; // Tokens inside double-quoted string that are subject of interpolation
   isComplete: boolean; // True if token has parsed completely
   isValid: boolean; // False if string contains something unprocessable
+}
+
+// Matcher on single token
+export interface SyntaxMatcher {
+  matchType: TokenType | TokenType[];
+  matchValue?: string;
+  testValue?: (tokenValue: string) => boolean;
+  lookahead?: boolean;
+  tokenMapKey?: string;
+}
+
+export type TokenMap = Record<string, Token>;
+
+export interface SyntaxHandlerInput {
+  packageFile: string;
+  variables: PackageVariables;
+  tokenMap: TokenMap;
+}
+
+export type SyntaxHandlerOutput = {
+  deps?: PackageDependency<ManagerData>[];
+  vars?: PackageVariables;
+} | null;
+
+export interface SyntaxMatchConfig {
+  matchers: SyntaxMatcher[];
+  handler: (MatcherHandlerInput) => SyntaxHandlerOutput;
 }

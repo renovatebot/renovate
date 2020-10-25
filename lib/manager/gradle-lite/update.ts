@@ -1,7 +1,7 @@
 import { logger } from '../../logger';
 import { UpdateDependencyConfig } from '../common';
 import { ManagerData } from './common';
-import { versionRegex } from './parser';
+import { versionLikeSubstring } from './utils';
 
 export function updateDependency({
   fileContent,
@@ -11,9 +11,8 @@ export function updateDependency({
   const offset = managerData.fileReplacePosition;
   const leftPart = fileContent.slice(0, offset);
   const rightPart = fileContent.slice(offset);
-  const match = versionRegex.exec(rightPart);
-  if (match) {
-    const { version } = match.groups;
+  const version = versionLikeSubstring(rightPart);
+  if (version) {
     const versionClosePosition = version.length;
     const restPart = rightPart.slice(versionClosePosition);
     if (version === newValue) {

@@ -6,74 +6,31 @@ import {
   ManagerData,
   PackageVariables,
   StringInterpolation,
+  SyntaxHandlerInput,
+  SyntaxHandlerOutput,
+  SyntaxMatchConfig,
+  SyntaxMatcher,
   Token,
+  TokenMap,
   TokenType,
   VariableData,
 } from './common';
 import { tokenize } from './tokenizer';
+import {
+  interpolateString,
+  isDependencyString,
+  parseDependencyString,
+} from './utils';
 
-const groupIdRegex = regEx(
-  '^[a-zA-Z][-_a-zA-Z0-9]*(?:.[a-zA-Z][-_a-zA-Z0-9]*)+$'
-);
-
-const artifactIdRegex = regEx(
-  '^[a-zA-Z][-_a-zA-Z0-9]*(?:.[a-zA-Z][-_a-zA-Z0-9]*)*$'
-);
-
-// Extracts version-like and range-like strings
-export const versionRegex = regEx('^(?<version>[-.\\[\\](),a-zA-Z0-9+]+)');
-
-export function isDependencyString(input: string): boolean {
-  const split = input?.split(':');
-  if (split?.length !== 3) {
-    return false;
-  }
-  const [groupId, artifactId, version] = split;
-  return (
-    groupId &&
-    artifactId &&
-    version &&
-    groupIdRegex.test(groupId) &&
-    artifactIdRegex.test(artifactId) &&
-    versionRegex.test(version)
-  );
-}
-
-export function parseDependencyString(
-  input: string
-): PackageDependency<ManagerData> | null {
-  const [groupId, artifactId, currentValue] = input?.split(':');
-  if (groupId && artifactId) {
-    return {
-      depName: `${groupId}:${artifactId}`,
-      currentValue,
-    };
-  }
-  return null;
-}
-
-interface Matcher {
-  type: TokenType | TokenType[];
-  key?: string;
-  value?: string;
-  lookahead?: boolean;
-  testFn?: (string) => boolean;
-}
-
-type MatcherSeq = Matcher[];
-
-type MatcherSeqMap = Record<string, MatcherSeq>;
-
-type Match = Record<string, Token>;
-
-type MatchOneOf = [string, Match] | [null, null];
-
-function matchSeq(tokens: Token[], matcherSeq: MatcherSeq): Match | null {
+function matchTokens(
+  tokens: Token[],
+  matchers: SyntaxMatcher[]
+): TokenMap | null {
   let lookaheadCount = 0;
-  const result: Match = {};
-  for (let idx = 0; idx < matcherSeq.length; idx += 1) {
+  const result: TokenMap = {};
+  for (let idx = 0; idx < matchers.length; idx += 1) {
     const token = tokens[idx];
-    const matcher = matcherSeq[idx];
+    const matcher = matchers[idx];
 
     if (!token) {
       if (matcher.lookahead) {
@@ -82,131 +39,101 @@ function matchSeq(tokens: Token[], matcherSeq: MatcherSeq): Match | null {
       return null;
     }
 
-    const typeMatches = is.string(matcher.type)
-      ? matcher.type === token.type
-      : matcher.type.includes(token.type);
+    const typeMatches = is.string(matcher.matchType)
+      ? matcher.matchType === token.type
+      : matcher.matchType.includes(token.type);
     if (!typeMatches) {
       return null;
     }
 
-    if (is.string(matcher.value) && token.value !== matcher.value) {
+    if (is.string(matcher.matchValue) && token.value !== matcher.matchValue) {
       return null;
     }
 
-    if (matcher.testFn && !matcher.testFn(token.value)) {
+    if (matcher.testValue && !matcher.testValue(token.value)) {
       return null;
     }
 
     lookaheadCount = matcher.lookahead ? lookaheadCount + 1 : 0;
 
-    if (matcher.key) {
-      result[matcher.key] = token;
+    if (matcher.tokenMapKey) {
+      result[matcher.tokenMapKey] = token;
     }
   }
 
-  tokens.splice(0, matcherSeq.length - lookaheadCount);
+  tokens.splice(0, matchers.length - lookaheadCount);
   return result;
 }
 
-function matchOneOfSeq(
-  tokens: Token[],
-  matcherSeqMap: MatcherSeqMap
-): MatchOneOf {
-  let match: Match = null;
-  for (const [matcherKey, matcherSeq] of Object.entries(matcherSeqMap)) {
-    match = matchSeq(
-      tokens,
-      matcherSeq.length === 1
-        ? [{ key: matcherKey, ...matcherSeq[0] }]
-        : matcherSeq
-    );
-    if (match) {
-      return [matcherKey, match];
-    }
-  }
-  return [null, null];
-}
-
-const matcherMap: MatcherSeqMap = {
-  assignment: [
-    { type: TokenType.Word, key: 'key' },
-    { type: TokenType.Assignment },
-    { type: TokenType.String, key: 'value' },
-    { type: [TokenType.RightBrace, TokenType.Word, null], lookahead: true },
-  ],
-  depString: [{ type: TokenType.String, testFn: isDependencyString }],
-  depInterpolation: [{ type: TokenType.StringInterpolation }],
-  plugin: [
-    { type: TokenType.Word, value: 'id' },
-    { type: TokenType.String, key: 'pluginName' },
-    { type: TokenType.Word, value: 'version' },
-    { type: TokenType.String, key: 'pluginVersion' },
-  ],
-};
-
-function interpolateString(
-  childTokens: Token[],
-  variables: PackageVariables
-): string | null {
-  const resolvedSubstrings = [];
-  for (const childToken of childTokens) {
-    const type = childToken.type;
-    if (type === TokenType.String) {
-      resolvedSubstrings.push(childToken.value);
-    } else if (type === TokenType.Variable) {
-      const varName = childToken.value;
-      const varData = variables[varName];
-      if (varData) {
-        resolvedSubstrings.push(varData.value);
-      } else {
-        return null;
-      }
-    } else {
-      return null;
-    }
-  }
-  return resolvedSubstrings.join('');
-}
-
-export function parseGradle(
-  input: string,
-  vars: PackageVariables = {},
-  packageFile?: string
-): PackageDependency<ManagerData>[] {
-  logger.trace({ packageFile }, `Gradle parsing ${packageFile} start`);
-  const startTime = Date.now();
-  const deps: PackageDependency<ManagerData>[] = [];
-  const tokens = tokenize(input);
-  const variables = { ...vars };
-  let tokenLimit = 10000000;
-  while (tokens.length) {
-    const [matchKey, match] = matchOneOfSeq(tokens, matcherMap);
-    if (matchKey === 'assignment') {
-      const { key: keyToken, value: valToken } = match;
+const matcherConfigs: SyntaxMatchConfig[] = [
+  {
+    // foo = 'bar'
+    matchers: [
+      { matchType: TokenType.Word, tokenMapKey: 'keyToken' },
+      { matchType: TokenType.Assignment },
+      { matchType: TokenType.String, tokenMapKey: 'valToken' },
+      {
+        matchType: [TokenType.RightBrace, TokenType.Word],
+        lookahead: true,
+      },
+    ],
+    handler: function handleAssignment({
+      packageFile,
+      tokenMap,
+    }: SyntaxHandlerInput): SyntaxHandlerOutput {
+      const { keyToken, valToken } = tokenMap;
       const variableData: VariableData = {
         key: keyToken.value,
         value: valToken.value,
         fileReplacePosition: valToken.offset,
+        packageFile,
       };
-      if (packageFile) {
-        variableData.packageFile = packageFile;
-      }
-      variables[variableData.key] = variableData;
-    } else if (matchKey === 'depString') {
-      const token = match.depString;
+      return { vars: { [variableData.key]: variableData } };
+    },
+  },
+  {
+    // 'foo.bar:baz:1.2.3'
+    matchers: [
+      {
+        matchType: TokenType.String,
+        testValue: isDependencyString,
+        tokenMapKey: 'token',
+      },
+    ],
+    handler: function processDepString({
+      packageFile,
+      tokenMap,
+    }: SyntaxHandlerInput): SyntaxHandlerOutput {
+      const { token } = tokenMap;
       const dep = parseDependencyString(token.value);
-      if (dep) {
-        const managerData: ManagerData = {
-          fileReplacePosition: token.offset + dep.depName.length + 1,
-        };
-        if (packageFile) {
-          managerData.packageFile = packageFile;
-        }
-        dep.managerData = managerData;
-        deps.push(dep);
-      }
-    } else if (matchKey === 'depInterpolation') {
-      const token = match.depInterpolation as StringInterpolation;
+      return dep
+        ? {
+            deps: [
+              {
+                ...dep,
+                managerData: {
+                  fileReplacePosition: token.offset + dep.depName.length + 1,
+                  packageFile,
+                },
+              },
+            ],
+          }
+        : null;
+    },
+  },
+  {
+    // "foo.bar:baz:${bazVersion}"
+    matchers: [
+      {
+        matchType: TokenType.StringInterpolation,
+        tokenMapKey: 'depInterpolation',
+      },
+    ],
+    handler: function processDepInterpolation({
+      tokenMap,
+      variables,
+    }: SyntaxHandlerInput): SyntaxHandlerOutput {
+      const token = tokenMap.depInterpolation as StringInterpolation;
       const interpolationResult = interpolateString(token.children, variables);
       if (interpolationResult && isDependencyString(interpolationResult)) {
         const dep = parseDependencyString(interpolationResult);
@@ -216,20 +143,31 @@ export function parseGradle(
             .find(({ type }) => type === TokenType.Variable);
           const variable = variables[versionPlaceholder?.value];
           if (variable?.value === dep.currentValue) {
-            const managerData: ManagerData = {
+            dep.managerData = {
               fileReplacePosition: variable.fileReplacePosition,
+              packageFile: variable.packageFile,
             };
-            if (variable.packageFile) {
-              managerData.packageFile = variable.packageFile;
-            }
-            dep.managerData = managerData;
             dep.groupName = variable.key;
-            deps.push(dep);
+            return { deps: [dep] };
           }
         }
       }
-    } else if (matchKey === 'plugin') {
-      const { pluginName, pluginVersion } = match;
+      return null;
+    },
+  },
+  {
+    // id 'foo.bar' version '1.2.3'
+    matchers: [
+      { matchType: TokenType.Word, matchValue: 'id' },
+      { matchType: TokenType.String, tokenMapKey: 'pluginName' },
+      { matchType: TokenType.Word, matchValue: 'version' },
+      { matchType: TokenType.String, tokenMapKey: 'pluginVersion' },
+    ],
+    handler: function processPlugin({
+      tokenMap,
+      packageFile,
+    }: SyntaxHandlerInput): SyntaxHandlerOutput {
+      const { pluginName, pluginVersion } = tokenMap;
       const dep = {
         depType: 'plugin',
         depName: pluginName.value,
@@ -242,16 +180,60 @@ export function parseGradle(
           packageFile,
         },
       };
-      deps.push(dep);
+      return { deps: [dep] };
+    },
+  },
+];
+
+interface MatchConfig {
+  tokens: Token[];
+  variables: PackageVariables;
+  packageFile: string;
+}
+
+function tryMatch({
+  tokens,
+  variables,
+  packageFile,
+}: MatchConfig): SyntaxHandlerOutput {
+  for (const { matchers, handler } of matcherConfigs) {
+    const tokenMap = matchTokens(tokens, matchers);
+    if (tokenMap) {
+      return handler({
+        packageFile,
+        variables,
+        tokenMap,
+      });
+    }
+  }
+  tokens.shift();
+  return null;
+}
+
+export function parseGradle(
+  input: string,
+  initVars: PackageVariables = {},
+  packageFile?: string
+): PackageDependency<ManagerData>[] {
+  logger.trace({ packageFile }, `Gradle parsing ${packageFile} start`);
+  const variables = { ...initVars };
+  const dependencies: PackageDependency<ManagerData>[] = [];
+
+  const startTime = Date.now();
+  const tokens = tokenize(input);
+  let remainingIterations = 1024 * 1024;
+  while (tokens.length) {
+    const matchResult = tryMatch({ tokens, variables, packageFile });
+    if (matchResult?.deps?.length) {
+      dependencies.push(...matchResult.deps);
+    }
+    if (matchResult?.vars) {
+      Object.assign(variables, matchResult?.vars);
     }
 
-    if (!match) {
-      tokens.shift();
-    }
-
-    tokenLimit -= 1;
-    if (tokenLimit < 1) {
-      logger.trace({ packageFile }, `${packageFile} parsing took too long`);
+    remainingIterations -= 1;
+    if (remainingIterations < 1) {
+      logger.warn({ packageFile }, `${packageFile} parsing took too long`);
       break;
     }
   }
@@ -260,7 +242,7 @@ export function parseGradle(
     { packageFile, durationMs },
     `Gradle parsing ${packageFile} finish`
   );
-  return deps;
+  return dependencies;
 }
 
 const propWord = '[a-zA-Z_][a-zA-Z0-9_]*(?:\\.[a-zA-Z_][a-zA-Z0-9_]*)*';
@@ -276,9 +258,9 @@ export function parseProps(
   const vars = {};
   const deps = [];
   for (const line of input.split('\n')) {
-    const match = propRegex.exec(line);
-    if (match) {
-      const { key, value, leftPart } = match.groups;
+    const lineMatch = propRegex.exec(line);
+    if (lineMatch) {
+      const { key, value, leftPart } = lineMatch.groups;
       if (isDependencyString(value)) {
         const dep = parseDependencyString(value);
         deps.push({

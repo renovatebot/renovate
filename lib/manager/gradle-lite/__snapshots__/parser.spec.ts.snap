@@ -927,14 +927,6 @@ Array [
       "packageFile": "03.build.gradle",
     },
   },
-  Object {
-    "currentValue": "Jasig/uPortal.git",
-    "depName": "scm:git@github.com",
-    "managerData": Object {
-      "fileReplacePosition": 5715,
-      "packageFile": "03.build.gradle",
-    },
-  },
 ]
 `;
 
