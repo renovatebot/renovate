@@ -1,4 +1,5 @@
 import path from 'path';
+import is from '@sindresorhus/is';
 import jsonValidator from 'json-dup-key-validator';
 import JSON5 from 'json5';
 
@@ -20,7 +21,6 @@ import { checkOnboardingBranch } from '../onboarding/branch';
 import { RepoFileConfig } from './common';
 import { flattenPackageRules } from './flatten';
 import { detectSemanticCommits } from './semantic';
-import is from '@sindresorhus/is';
 
 export async function detectRepoFileConfig(): Promise<RepoFileConfig> {
   const fileList = await getFileList();
