@@ -1839,7 +1839,7 @@ const options: RenovateOptions[] = [
   {
     name: 'cloneSubmodules',
     description:
-      'When cloning a repository, allow Renovate to clone git submodules as well.',
+      'Set to false to disable initialization of submodules during repository clone',
     type: 'boolean',
     default: true,
   },
