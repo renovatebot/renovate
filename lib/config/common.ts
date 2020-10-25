@@ -176,6 +176,8 @@ export interface RenovateConfig
   warnings?: ValidationMessage[];
   vulnerabilityAlerts?: RenovateSharedConfig;
   regexManagers?: CustomManager[];
+
+  fetchReleaseNotes?: boolean;
 }
 
 export interface AssigneesAndReviewersConfig {

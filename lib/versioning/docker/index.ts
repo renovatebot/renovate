@@ -34,9 +34,9 @@ function valueToVersion(value: string): string {
   return value ? value.split('-')[0] : value;
 }
 
-function compare(version1: string, vervion2: string): number {
+function compare(version1: string, version2: string): number {
   const parsed1 = parse(version1);
-  const parsed2 = parse(vervion2);
+  const parsed2 = parse(version2);
   // istanbul ignore if
   if (!(parsed1 && parsed2)) {
     return 1;

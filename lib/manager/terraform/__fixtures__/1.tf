@@ -178,6 +178,14 @@ terraform {
       source  = "terraform-providers/docker"
       version = "2.7.2"
     }
+    aws = {
+      source  = "aws"
+      version = "2.7.0"
+    }
+    // falls back block name for source
+    azurerm = {
+      version = "=2.27.0"
+    }
     invalid = {
       source  = "//hashicorp/helm"
       version = "1.2.4"
