@@ -24,8 +24,8 @@ const artifactIdRegex = regEx(
 export const versionRegex = regEx('^(?<version>[-.\\[\\](),a-zA-Z0-9+]+)');
 
 export function isDependencyString(input: string): boolean {
-  const split = input.split(':');
-  if (split.length !== 3) {
+  const split = input?.split(':');
+  if (split?.length !== 3) {
     return false;
   }
   const [groupId, artifactId, version] = split;
