@@ -50,10 +50,6 @@ function matchTokens(
       return null;
     }
 
-    if (matcher.testValue && !matcher.testValue(token.value)) {
-      return null;
-    }
-
     lookaheadCount = matcher.lookahead ? lookaheadCount + 1 : 0;
 
     if (matcher.tokenMapKey) {
@@ -73,7 +69,14 @@ const matcherConfigs: SyntaxMatchConfig[] = [
       { matchType: TokenType.Assignment },
       { matchType: TokenType.String, tokenMapKey: 'valToken' },
       {
-        matchType: [TokenType.RightBrace, TokenType.Word],
+        // Ensure we skip assignments of complex expressions (not strings)
+        matchType: [
+          TokenType.Colon,
+          TokenType.RightBrace,
+          TokenType.Word,
+          TokenType.String,
+          TokenType.StringInterpolation,
+        ],
         lookahead: true,
       },
     ],
@@ -96,7 +99,6 @@ const matcherConfigs: SyntaxMatchConfig[] = [
     matchers: [
       {
         matchType: TokenType.String,
-        testValue: isDependencyString,
         tokenMapKey: 'token',
       },
     ],
@@ -106,19 +108,14 @@ const matcherConfigs: SyntaxMatchConfig[] = [
     }: SyntaxHandlerInput): SyntaxHandlerOutput {
       const { token } = tokenMap;
       const dep = parseDependencyString(token.value);
-      return dep
-        ? {
-            deps: [
-              {
-                ...dep,
-                managerData: {
-                  fileReplacePosition: token.offset + dep.depName.length + 1,
-                  packageFile,
-                },
-              },
-            ],
-          }
-        : null;
+      if (dep) {
+        dep.managerData = {
+          fileReplacePosition: token.offset + dep.depName.length + 1,
+          packageFile,
+        };
+        return { deps: [dep] };
+      }
+      return null;
     },
   },
   {
@@ -138,11 +135,14 @@ const matcherConfigs: SyntaxMatchConfig[] = [
       if (interpolationResult && isDependencyString(interpolationResult)) {
         const dep = parseDependencyString(interpolationResult);
         if (dep) {
-          const versionPlaceholder = [...token.children]
-            .reverse()
-            .find(({ type }) => type === TokenType.Variable);
-          const variable = variables[versionPlaceholder?.value];
-          if (variable?.value === dep.currentValue) {
+          const lastChild = token.children[token.children.length - 1];
+          const lastChildValue = lastChild?.value;
+          const variable = variables[lastChildValue];
+          if (
+            lastChild?.type === TokenType.Variable &&
+            variable &&
+            variable?.value === dep.currentValue
+          ) {
             dep.managerData = {
               fileReplacePosition: variable.fileReplacePosition,
               packageFile: variable.packageFile,
@@ -199,11 +199,14 @@ function tryMatch({
   for (const { matchers, handler } of matcherConfigs) {
     const tokenMap = matchTokens(tokens, matchers);
     if (tokenMap) {
-      return handler({
+      const result = handler({
         packageFile,
         variables,
         tokenMap,
       });
+      if (result !== null) {
+        return result;
+      }
     }
   }
   tokens.shift();
@@ -221,7 +224,7 @@ export function parseGradle(
 
   const startTime = Date.now();
   const tokens = tokenize(input);
-  let remainingIterations = 1024 * 1024;
+  let prevTokensLength = tokens.length;
   while (tokens.length) {
     const matchResult = tryMatch({ tokens, variables, packageFile });
     if (matchResult?.deps?.length) {
@@ -231,11 +234,16 @@ export function parseGradle(
       Object.assign(variables, matchResult?.vars);
     }
 
-    remainingIterations -= 1;
-    if (remainingIterations < 1) {
-      logger.warn({ packageFile }, `${packageFile} parsing took too long`);
+    // istanbul ignore if
+    if (tokens.length >= prevTokensLength) {
+      // Should not happen, but it's better to be prepared
+      logger.warn(
+        { packageFile },
+        `${packageFile} parsing error, results can be incomplete`
+      );
       break;
     }
+    prevTokensLength = tokens.length;
   }
   const durationMs = Math.round(Date.now() - startTime);
   logger.trace(
@@ -272,15 +280,12 @@ export function parseProps(
           },
         });
       } else {
-        const variableData: VariableData = {
+        vars[key] = {
           key,
           value,
           fileReplacePosition: offset + leftPart.length,
+          packageFile,
         };
-        if (packageFile) {
-          variableData.packageFile = packageFile;
-        }
-        vars[key] = variableData;
       }
     }
     offset += line.length + 1;

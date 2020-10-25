@@ -77,7 +77,6 @@ export interface StringInterpolation extends Token {
 export interface SyntaxMatcher {
   matchType: TokenType | TokenType[];
   matchValue?: string;
-  testValue?: (tokenValue: string) => boolean;
   lookahead?: boolean;
   tokenMapKey?: string;
 }
