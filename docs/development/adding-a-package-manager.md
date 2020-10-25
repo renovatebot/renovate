@@ -39,9 +39,9 @@ Also, if a file is passed to `extractPackageFile` which is a "false match" (e.g.
 
 You can use this function instead of `extractPackageFile` if the package manager cannot parse/extract all package files in parallel.
 
-For example, npm/yarn needs to correlate package files together for features such as Lerna and Workspaces, so it's necessary to iterate through them all together after initial parsing.
+For example, npm/Yarn needs to correlate package files together for features such as Lerna and Workspaces, so it's necessary to iterate through them all together after initial parsing.
 
-As another example, gradle needs to call a command via child process in order to extract dependencies, so that must be done first.
+As another example, Gradle needs to call a command via child process in order to extract dependencies, so that must be done first.
 
 This function takes an array of filenames as input and returns an array of filenames and dependencies as a result.
 

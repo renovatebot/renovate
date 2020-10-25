@@ -9,12 +9,12 @@ Please submit PRs to improve it if you think anything is unclear or you can thin
 
 For local development some dependencies are required:
 
-- git
-- nodejs `>=12`
-- yarn `^1.17.0`
-- c++ compiler
-- python `^3.7`
-- java between `8` and `12`
+- Git
+- Node.js `>=12`
+- Yarn `^1.17.0`
+- C++ compiler
+- Python `^3.7`
+- Java between `8` and `12`
 
 We support Node.js versions according to the [Node.js release schedule](https://github.com/nodejs/Release#release-schedule)
 
@@ -39,7 +39,7 @@ _Windows_
 
 The following steps work to set up a brand new Windows 10 installation for developing Renovate. If you already have some components installed, you can naturally skip them.
 
-- Install [git](https://git-scm.com/downloads). Make sure you've [configured your username and email](https://git-scm.com/book/en/v2/Getting-Started-First-Time-Git-Setup).
+- Install [Git](https://git-scm.com/downloads). Make sure you've [configured your username and email](https://git-scm.com/book/en/v2/Getting-Started-First-Time-Git-Setup).
 - Install [Node.js LTS](https://nodejs.org/en/download/)
 - In an Administrator PowerShell prompt, run `npm install -global npm` and then `npm --add-python-to-path='true' --debug install --global windows-build-tools`
 - Install [Yarn](https://yarnpkg.com/lang/en/docs/install/#windows-stable)
@@ -80,7 +80,7 @@ If you will contribute to the project, you should first "fork" the main project 
 
 #### Install dependencies
 
-We use [yarn](https://github.com/yarnpkg/yarn) so run `yarn install` to install dependencies instead of `npm install`.
+We use [Yarn](https://github.com/yarnpkg/yarn) so run `yarn install` to install dependencies instead of `npm install`.
 
 #### Build Renovate
 
@@ -129,7 +129,7 @@ You can run `yarn test` locally to test your code. We test all PRs using the sam
 
 ## Jest
 
-You can run just the Jest unit tests by running `yarn jest`. You can also run just a subset of the Jest tests using file matching, e.g. `yarn jest composer` or `yarn jest workers/branch`. If you get a test failure due to a "snapshot" mismatch, and you are sure that you need to update the snapshot, then you can append `-u` to the end. e.g. `yarn jest composer -u` would update the saved Snapshots for _all_ tests in `test/manager/composer/*`.
+You can run just the Jest unit tests by running `yarn jest`. You can also run just a subset of the Jest tests using file matching, e.g. `yarn jest composer` or `yarn jest workers/branch`. If you get a test failure due to a "snapshot" mismatch, and you are sure that you need to update the snapshot, then you can append `-u` to the end. e.g. `yarn jest composer -u` would update the saved snapshots for _all_ tests in `test/manager/composer/*`.
 
 #### Prerequisites
 
@@ -149,7 +149,7 @@ Also, it can be good to submit your PR as a work in progress (WIP) without tests
 
 #### Linting and formatting
 
-We use [Prettier](https://github.com/prettier/prettier) for code formatting. If your code fails `yarn test` due to a `prettier` rule then run `yarn lint-fix` to fix it or most `eslint` errors automatically before running `yarn test` again. You usually shouldn't need to fix any prettier errors manually.
+We use [Prettier](https://github.com/prettier/prettier) for code formatting. If your code fails `yarn test` due to a `prettier` rule then run `yarn lint-fix` to fix it or most `eslint` errors automatically before running `yarn test` again. You usually shouldn't need to fix any Prettier errors manually.
 
 ## Keeping your Renovate fork up to date
 

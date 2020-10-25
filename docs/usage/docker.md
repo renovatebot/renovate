@@ -61,11 +61,11 @@ Finally, if you use a Docker image that follows a versioning approach not captur
 
 ## Digest Pinning
 
-Pinning your docker images to an exact digest is recommended for reasons of **immutability**. In short: pin to digests so every time you `pull`, you get the same content.
+Pinning your Docker images to an exact digest is recommended for reasons of **immutability**. In short: pin to digests so every time you `pull`, you get the same content.
 
-If your experience with dependency versioning comes from a place like javascript/npm, you might be used to exact versions being immutable, e.g. if you specify a version like `2.0.1` then you and your colleagues will always get the exact same "code". What you may not expect is that Docker's tags are not immutable versions even if they look like a version. e.g. you probably expect that `node:8` and `node:8.9` will change over time, but you might incorrectly assume that `node:8.9.0` would never change. Although it probably _shouldn't_, the reality is that any Docker image tag _can_ change content, and potentially break.
+If your experience with dependency versioning comes from a place like JavaScript/npm, you might be used to exact versions being immutable, e.g. if you specify a version like `2.0.1` then you and your colleagues will always get the exact same "code". What you may not expect is that Docker's tags are not immutable versions even if they look like a version. e.g. you probably expect that `node:8` and `node:8.9` will change over time, but you might incorrectly assume that `node:8.9.0` would never change. Although it probably _shouldn't_, the reality is that any Docker image tag _can_ change content, and potentially break.
 
-Using a docker digest as the image's primary identifier instead of docker tag will achieve immutability but as a human it's quite inconvenient to deal with strings like `FROM node@sha256:552348163f074034ae75643c01e0ba301af936a898d778bb4fc16062917d0430`. The good news is that, as a human you no longer need to manually update such digests once you have Renovate on the job.
+Using a Docker digest as the image's primary identifier instead of Docker tag will achieve immutability but as a human it's quite inconvenient to deal with strings like `FROM node@sha256:552348163f074034ae75643c01e0ba301af936a898d778bb4fc16062917d0430`. The good news is that, as a human you no longer need to manually update such digests once you have Renovate on the job.
 
 Also, to retain some human-friendliness, Renovate will actually retain the tag in the `FROM` line too, e.g. `FROM node:8@sha256:552348163f074034ae75643c01e0ba301af936a898d778bb4fc16062917d0430`. Read on to see how Renovate keeps it up-to-date.
 
@@ -85,7 +85,7 @@ Thanks to this, you may wish to change the way you tag your image dependencies t
 
 Currently, Renovate will upgrade minor/patch versions (e.g. from `8.9.0` to `8.9.1`) by default, but not upgrade major versions. If you wish to enable major versions then add the preset `docker:enableMajor` to your `extends` array in your `renovate.json`.
 
-Renovate has a some docker-specific intelligence when it comes to versions. For example:
+Renovate has a some Docker-specific intelligence when it comes to versions. For example:
 
 ## Configuring/Disabling
 
@@ -146,7 +146,7 @@ module.exports = {
 };
 ```
 
-It is possible to add additional host rules following the [documentation](https://docs.renovatebot.com/configuration-options/#hostrules). For example if you have some images you host yourself that are password protected and also some images you pull from docker hub without authentication then you can configure for a specific Docker host like this:
+It is possible to add additional host rules following the [documentation](https://docs.renovatebot.com/configuration-options/#hostrules). For example if you have some images you host yourself that are password protected and also some images you pull from Docker Hub without authentication then you can configure for a specific Docker host like this:
 
 ```js
 module.exports = {
