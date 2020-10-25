@@ -12,10 +12,16 @@ import {
 } from './common';
 import { tokenize } from './tokenizer';
 
-const depArtifactRegex = regEx(
+const groupIdRegex = regEx(
+  '^[a-zA-Z][-_a-zA-Z0-9]*(?:.[a-zA-Z][-_a-zA-Z0-9]*)+$'
+);
+
+const artifactIdRegex = regEx(
   '^[a-zA-Z][-_a-zA-Z0-9]*(?:.[a-zA-Z][-_a-zA-Z0-9]*)*$'
 );
-export const depVersionRegex = regEx('^(?<version>[-.\\[\\](),a-zA-Z0-9+]+)');
+
+// Extracts version-like and range-like strings
+export const versionRegex = regEx('^(?<version>[-.\\[\\](),a-zA-Z0-9+]+)');
 
 export function isDependencyString(input: string): boolean {
   const split = input.split(':');
@@ -27,9 +33,9 @@ export function isDependencyString(input: string): boolean {
     groupId &&
     artifactId &&
     version &&
-    depArtifactRegex.test(groupId) &&
-    depArtifactRegex.test(artifactId) &&
-    depVersionRegex.test(version)
+    groupIdRegex.test(groupId) &&
+    artifactIdRegex.test(artifactId) &&
+    versionRegex.test(version)
   );
 }
 
