@@ -38,6 +38,7 @@ describe('manager/gradle-lite/tokenizer', () => {
         'singleQuotedFinish',
       ],
       "'x'": ['singleQuotedStart', 'char', 'singleQuotedFinish'],
+      "'\n'": ['singleQuotedStart', 'char', 'singleQuotedFinish'],
       "'$x'": ['singleQuotedStart', 'char', 'char', 'singleQuotedFinish'],
       "''''''": ['tripleQuotedStart', 'tripleQuotedFinish'],
       "'''x'''": ['tripleQuotedStart', 'char', 'tripleQuotedFinish'],
@@ -60,6 +61,7 @@ describe('manager/gradle-lite/tokenizer', () => {
         'doubleQuotedFinish',
       ],
       '"x"': ['doubleQuotedStart', 'char', 'doubleQuotedFinish'],
+      '"\n"': ['doubleQuotedStart', 'char', 'doubleQuotedFinish'],
       // eslint-disable-next-line no-template-curly-in-string
       '"${x}"': ['doubleQuotedStart', 'variable', 'doubleQuotedFinish'],
       // eslint-disable-next-line no-template-curly-in-string

@@ -72,7 +72,7 @@ export const rawLexer = {
   [TokenType.SingleQuotedStart]: {
     ...escapedChars,
     [TokenType.SingleQuotedFinish]: { match: "'", pop: 1 },
-    [TokenType.Char]: /./,
+    [TokenType.Char]: { match: /[^]/, lineBreaks: true },
   },
 
   // Tokenize double-quoted string literal chars and interpolations
@@ -89,7 +89,7 @@ export const rawLexer = {
       match: /\${/,
       push: TokenType.IgnoredInterpolationStart,
     },
-    [TokenType.Char]: /./,
+    [TokenType.Char]: { match: /[^]/, lineBreaks: true },
   },
 
   // Ignore interpolation of complex expressions˙,

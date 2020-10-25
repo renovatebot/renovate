@@ -11,10 +11,7 @@ export interface VariableData extends ManagerData {
 }
 
 export type PackageVariables = Record<string, VariableData>;
-
-export type VariablePlaceholder = Pick<VariableData, 'key'>;
-
-export type Interpolation = (string | VariablePlaceholder)[];
+export type VariableRegistry = Record<string, PackageVariables>;
 
 export enum TokenType {
   Space = 'space',

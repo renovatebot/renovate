@@ -1,57 +1,63 @@
-import { reorderFiles } from './extract';
+import { fs } from '../../../test/util';
+import { extractAllPackageFiles } from '.';
+
+jest.mock('../../util/fs');
+
+function mockFs(files: Record<string, string>): void {
+  fs.readLocalFile.mockImplementation(
+    (fileName: string): Promise<string> => {
+      const content = files?.[fileName];
+      return typeof content === 'string'
+        ? Promise.resolve(content)
+        : Promise.reject(`File not found: ${fileName}`);
+    }
+  );
+}
 
 describe('manager/gradle-lite/extract', () => {
-  it('reorderFiles', () => {
-    expect(
-      reorderFiles([
-        'a/b/c/build.gradle',
-        'a/build.gradle',
-        'a/b/build.gradle',
-        'build.gradle',
-      ])
-    ).toStrictEqual([
+  beforeAll(() => {});
+  afterAll(() => {
+    jest.resetAllMocks();
+  });
+
+  it('returns null', async () => {
+    mockFs({
+      'gradle.properties': '',
+      'build.gradle': '',
+    });
+
+    const res = await extractAllPackageFiles({} as never, [
       'build.gradle',
-      'a/build.gradle',
-      'a/b/build.gradle',
-      'a/b/c/build.gradle',
-    ]);
-
-    expect(reorderFiles(['b.gradle', 'c.gradle', 'a.gradle'])).toStrictEqual([
-      'a.gradle',
-      'b.gradle',
-      'c.gradle',
-    ]);
-
-    expect(
-      reorderFiles(['b.gradle', 'c.gradle', 'a.gradle', 'gradle.properties'])
-    ).toStrictEqual(['gradle.properties', 'a.gradle', 'b.gradle', 'c.gradle']);
-
-    expect(
-      reorderFiles([
-        'a/b/c/gradle.properties',
-        'a/b/c/build.gradle',
-        'a/build.gradle',
-        'a/gradle.properties',
-        'a/b/build.gradle',
-        'a/b/gradle.properties',
-        'build.gradle',
-        'gradle.properties',
-        'b.gradle',
-        'c.gradle',
-        'a.gradle',
-      ])
-    ).toStrictEqual([
       'gradle.properties',
-      'a.gradle',
-      'b.gradle',
+    ]);
+
+    expect(res).toBeNull();
+  });
+
+  it('works', async () => {
+    mockFs({
+      'gradle.properties': 'baz=1.2.3',
+      'build.gradle': '"foo:bar:$baz"',
+      'settings.gradle': null,
+    });
+
+    const res = await extractAllPackageFiles({} as never, [
       'build.gradle',
-      'c.gradle',
-      'a/gradle.properties',
-      'a/build.gradle',
-      'a/b/gradle.properties',
-      'a/b/build.gradle',
-      'a/b/c/gradle.properties',
-      'a/b/c/build.gradle',
+      'gradle.properties',
+      'settings.gradle',
+    ]);
+
+    expect(res).toMatchObject([
+      {
+        packageFile: 'gradle.properties',
+        deps: [{ depName: 'foo:bar', currentValue: '1.2.3' }],
+      },
+      { packageFile: 'build.gradle', deps: [] },
+      {
+        datasource: 'maven',
+        deps: [],
+        packageFile: 'settings.gradle',
+      },
     ]);
   });
 });
