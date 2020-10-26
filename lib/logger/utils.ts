@@ -56,6 +56,16 @@ export default function prepareError(err: Error): Record<string, unknown> {
     ...err,
   };
 
+  // Can maybe removed?
+  if (!response.message && err.message) {
+    response.message = err.message;
+  }
+
+  // Can maybe removed?
+  if (!response.stack && err.stack) {
+    response.stack = err.stack;
+  }
+
   // handle got error
   if (err instanceof RequestError) {
     const options: Record<string, unknown> = {
