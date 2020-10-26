@@ -56,12 +56,12 @@ export default function prepareError(err: Error): Record<string, unknown> {
     ...err,
   };
 
-  // Can maybe removed?
+  // Required as message is non-enumerable
   if (!response.message && err.message) {
     response.message = err.message;
   }
 
-  // Can maybe removed?
+  // Required as stack is non-enumerable
   if (!response.stack && err.stack) {
     response.stack = err.stack;
   }
