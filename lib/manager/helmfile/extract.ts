@@ -68,7 +68,7 @@ export function extractPackageFile(
       res.skipReason = SkipReason.LocalChart;
     }
 
-    // By definition on helm the chart name should be lowecase letter + number + -
+    // By definition on helm the chart name should be lowercase letter + number + -
     // However helmfile support templating of that field
     if (!isValidChartName(res.depName)) {
       res.skipReason = SkipReason.UnsupportedChartType;

@@ -1,4 +1,5 @@
 import is from '@sindresorhus/is';
+import { getManagerList } from '../manager';
 import { regEx } from '../util/regex';
 import * as template from '../util/template';
 import { hasValidSchedule, hasValidTimezone } from '../workers/branch/schedule';
@@ -14,6 +15,15 @@ let optionTypes: Record<string, RenovateOptions['type']>;
 export interface ValidationResult {
   errors: ValidationMessage[];
   warnings: ValidationMessage[];
+}
+
+const managerList = getManagerList();
+
+function isManagerPath(parentPath: string): boolean {
+  return (
+    /^regexManagers\[[0-9]+]$/.test(parentPath) ||
+    managerList.includes(parentPath)
+  );
 }
 
 export async function validateConfig(
@@ -78,6 +88,19 @@ export async function validateConfig(
         message: '__proto__',
       });
       continue; // eslint-disable-line
+    }
+    if (key === 'fileMatch') {
+      if (parentPath === undefined) {
+        errors.push({
+          depName: 'Config error',
+          message: `"fileMatch" may not be defined at the top level of a config and must instead be within a manager block`,
+        });
+      } else if (!isManagerPath(parentPath)) {
+        warnings.push({
+          depName: 'Config warning',
+          message: `"fileMatch" must be configured in a manager block and not here: ${parentPath}`,
+        });
+      }
     }
     if (
       !isIgnored(key) && // We need to ignore some reserved keys
@@ -285,7 +308,12 @@ export async function validateConfig(
                 ) {
                   errors.push({
                     depName: 'Configuration Error',
-                    message: `Regex Manager ${currentPath} must contain a matchStrings array of length one`,
+                    message: `Each Regex Manager must contain a matchStrings array of length one`,
+                  });
+                } else if (!is.nonEmptyArray(regexManager.fileMatch)) {
+                  errors.push({
+                    depName: 'Configuration Error',
+                    message: `Each Regex Manager must contain a fileMatch array`,
                   });
                 } else {
                   let validRegex = false;
@@ -372,7 +400,8 @@ export async function validateConfig(
         } else if (
           type === 'object' &&
           currentPath !== 'compatibility' &&
-          currentPath !== 'constraints'
+          currentPath !== 'constraints' &&
+          currentPath !== 'force.constraints'
         ) {
           if (is.plainObject(val)) {
             if (key === 'aliases') {

@@ -7,7 +7,7 @@ description: How Renovate Updates and Rebases Branches
 
 There are many cases where Renovate will need to update a branch/PR after its initial creation, and this document will attempt to describe them.
 
-Note: Renovate doesn't technically do "rebasing" in the git sense. Instead, it manually recreates the same commit based off of the latest commit in base branch.
+Note: Renovate doesn't technically do "rebasing" in the Git sense. Instead, it manually recreates the same commit based off of the latest commit in base branch.
 
 ## If you have made edits
 

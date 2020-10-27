@@ -10,7 +10,7 @@ export * from './common';
 
 export const getVersioningList = (): string[] => Array.from(versionings.keys());
 /**
- * Get versioning map. Can be used to dynamically add new versionig type
+ * Get versioning map. Can be used to dynamically add new versioning type
  */
 export const getVersionings = (): Map<
   string,

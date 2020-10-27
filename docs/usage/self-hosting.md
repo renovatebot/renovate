@@ -147,7 +147,7 @@ Self-hosted Renovate can be configured using any of the following (or a combinat
 - CLI params
 - Environment params
 
-Note that some Renovate configuratino options are _only_ available for self-hosting, and so can only be configured using one of the above methods. These are described in the [Self-hosted Configuration](./self-hosted-configuration.md) doc.
+Note that some Renovate configuration options are _only_ available for self-hosting, and so can only be configured using one of the above methods. These are described in the [Self-hosted Configuration](./self-hosted-configuration.md) doc.
 
 ## Authentication
 
@@ -195,7 +195,7 @@ Don't forget to configure `platform=gitea` somewhere in config.
 
 If you are running on any platform except github.com, it's important to also configure the environment variable `GITHUB_COM_TOKEN` containing a personal access token for github.com. This account can actually be _any_ account on GitHub, and needs only read-only access. It's used when fetching release notes for repositories in order to increase the hourly API limit. It's also OK to configure the same as a host rule instead, if you prefer that.
 
-**Note:** If you're using renovate in a project where dependencies are loaded from github.com (such as Go m=Modules hosted on github) it is highly recommended to add a token as you will run in the rate limit from the github.com api, which will lead to renovate closing and reopening PRs because it could not get reliable info on updated dependencies.
+**Note:** If you're using renovate in a project where dependencies are loaded from github.com (such as Go m=Modules hosted on GitHub) it is highly recommended to add a token as you will run in the rate limit from the github.com API, which will lead to renovate closing and reopening PRs because it could not get reliable info on updated dependencies.
 
 ## File/directory usage
 
@@ -203,7 +203,7 @@ By default, Renovate will store all files within a `renovate/` subdirectory of t
 
 Repository data will be copied or cloned into unique subdirectories under `repos/`, e.g. `/tmp/renovate/repos/github/owner1/repo-a/`.
 
-Cache data - such as Renovate's own cache as well as that for npm, yarn, composer, etc - will be stored in `/tmp/renovate/cache`.
+Cache data - such as Renovate's own cache as well as that for npm, Yarn, Composer, etc - will be stored in `/tmp/renovate/cache`.
 
 If you wish to override the base directory to be used (e.g. instead of `/tmp/renovate/`) then configure a value for `baseDir` in `config.js`, or via env (`RENOVATE_BASE_DIR`) or via CLI (`--base-dir=`).
 
@@ -230,9 +230,9 @@ module.exports = {
 };
 ```
 
-Here change the `logFile` and `repositories` to something appropriate. Also replace gitlab-token value with the one created during the previous step.
+Here change the `logFile` and `repositories` to something appropriate. Also replace `gitlab-token` value with the one created during the previous step.
 
-If running against GitHub Enterprise, change the above gitlab values to the equivalent github ones.
+If running against GitHub Enterprise, change the above `gitlab` values to the equivalent GitHub ones.
 
 You can save this file as anything you want and then use `RENOVATE_CONFIG_FILE` env variable to tell Renovate where to find it.
 
@@ -254,13 +254,13 @@ Note: the GitHub.com token in env is necessary in order to retrieve Release Note
 
 You should save and test out this script manually first, and add it to cron once you've verified it.
 
-## Kubernetes for Gitlab, using Git over SSH
+## Kubernetes for GitLab, using Git over SSH
 
-This section describes how to use git binary with ssh for Gitlab, to avoid API shortcomings.
+This section describes how to use Git binary with SSH for Gitlab, to avoid API shortcomings.
 
-You need to first create a ssh key, then add the public part to Gitlab (see this [guide](https://docs.gitlab.com/ee/ssh/))
+You need to first create a SSH key, then add the public part to Gitlab (see this [guide](https://docs.gitlab.com/ee/ssh/))
 
-Then, you need to create the secret to add the ssh key, and the following config to your container
+Then, you need to create the secret to add the SSH key, and the following config to your container
 
 ```
 host gitlab.com

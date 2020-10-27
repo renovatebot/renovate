@@ -1,4 +1,5 @@
 import path from 'path';
+import is from '@sindresorhus/is';
 import jsonValidator from 'json-dup-key-validator';
 import JSON5 from 'json5';
 
@@ -7,7 +8,10 @@ import { configFileNames } from '../../../config/app-strings';
 import { decryptConfig } from '../../../config/decrypt';
 import { migrateAndValidate } from '../../../config/migrate-validate';
 import * as presets from '../../../config/presets';
-import { CONFIG_VALIDATION } from '../../../constants/error-messages';
+import {
+  CONFIG_VALIDATION,
+  REPOSITORY_CHANGED,
+} from '../../../constants/error-messages';
 import * as npmApi from '../../../datasource/npm';
 import { logger } from '../../../logger';
 import { readLocalFile } from '../../../util/fs';
@@ -52,6 +56,11 @@ export async function detectRepoFileConfig(): Promise<RepoFileConfig> {
     logger.debug({ config: configFileParsed }, 'package.json>renovate config');
   } else {
     let rawFileContents = await readLocalFile(configFileName, 'utf8');
+    // istanbul ignore if
+    if (!rawFileContents) {
+      logger.warn({ configFileName }, 'Null contents when reading config file');
+      throw new Error(REPOSITORY_CHANGED);
+    }
     // istanbul ignore if
     if (!rawFileContents.length) {
       rawFileContents = '{}';
@@ -141,11 +150,16 @@ export async function mergeRenovateConfig(
 ): Promise<RenovateConfig> {
   let returnConfig = { ...config };
   const repoConfig = await detectRepoFileConfig();
+  const configFileParsed = repoConfig?.configFileParsed || {};
+  if (is.nonEmptyArray(returnConfig.extends)) {
+    configFileParsed.extends = [
+      ...returnConfig.extends,
+      ...(configFileParsed.extends || []),
+    ];
+    delete returnConfig.extends;
+  }
   checkForRepoConfigError(repoConfig);
-  const migratedConfig = await migrateAndValidate(
-    config,
-    repoConfig?.configFileParsed || {}
-  );
+  const migratedConfig = await migrateAndValidate(config, configFileParsed);
   if (migratedConfig.errors.length) {
     const error = new Error(CONFIG_VALIDATION);
     error.configFile = repoConfig.configFileName;

@@ -1,6 +1,6 @@
 ---
 title: Shareable Config Presets
-description: Renovate's support for eslint-like shareable configs
+description: Renovate's support for ESLint-like shareable configs
 ---
 
 # Shareable Config Presets
@@ -187,7 +187,7 @@ Whenever repository onboarding happens, Renovate checks if the current user/grou
 - A repository called `renovate-config` under the same user/group/org with either `default.json` or `renovate.json`, or
 - A repository named like `.{{platform}}` (e.g. `.github`) under the same user/group/org with `renovate-config.json`
 
-If found, that repository's preset will be suggested as the the sole extended preset, and any existing `onboardingConfig` config will be ignored/overriden. For example the result may be:
+If found, that repository's preset will be suggested as the the sole extended preset, and any existing `onboardingConfig` config will be ignored/overridden. For example the result may be:
 
 ```json
 {
