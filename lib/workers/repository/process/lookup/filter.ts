@@ -37,6 +37,11 @@ export function filterVersions(
     if (!versioning.isStable(version)) {
       return false;
     }
+    // Check if the datasource returned isStable = false
+    const release = releases.find((r) => r.version === version);
+    if (release?.isStable === false) {
+      return false;
+    }
     return true;
   }
   versioning = allVersioning.get(config.versioning);
