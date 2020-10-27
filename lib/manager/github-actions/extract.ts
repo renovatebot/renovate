@@ -1,4 +1,4 @@
-import * as githubTagsDatasource from '../../datasource/github-releases';
+import * as githubTagsDatasource from '../../datasource/github-tags';
 import { logger } from '../../logger';
 import { SkipReason } from '../../types';
 import * as dockerVersioning from '../../versioning/docker';
