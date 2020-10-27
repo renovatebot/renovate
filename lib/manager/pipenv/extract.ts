@@ -1,6 +1,6 @@
+import toml from '@iarna/toml';
 import { RANGE_PATTERN } from '@renovate/pep440/lib/specifier';
 import is from '@sindresorhus/is';
-import toml from 'toml';
 import * as datasourcePypi from '../../datasource/pypi';
 import { logger } from '../../logger';
 import { SkipReason } from '../../types';
@@ -121,7 +121,8 @@ export function extractPackageFile(content: string): PackageFile | null {
 
   let pipfile: PipFile;
   try {
-    pipfile = toml.parse(content);
+    // TODO: fix type
+    pipfile = toml.parse(content) as any;
   } catch (err) {
     logger.debug({ err }, 'Error parsing Pipfile');
     return null;

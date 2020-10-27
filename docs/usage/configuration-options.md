@@ -1156,8 +1156,6 @@ Add to this object if you wish to define rules that apply only to patch updates.
 
 ## php
 
-Warning: PHP Composer support is in alpha stage so you probably only want to run this if you are helping get it feature-ready.
-
 ## pin
 
 Add to this object if you wish to define rules that apply only to PRs that pin dependencies.
