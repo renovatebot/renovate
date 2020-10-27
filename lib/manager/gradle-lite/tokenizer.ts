@@ -22,10 +22,10 @@ const escapedChars = {
 export const rawLexer = {
   // Top-level Groovy lexemes
   main: {
-    [TokenType.Space]: { match: /[ \t\r]+/ },
     [TokenType.LineComment]: { match: /\/\/.*?$/ },
-    [TokenType.MultiComment]: { match: /\/\*[^]*?\*\// },
-    [TokenType.Newline]: { match: '\n', lineBreaks: true },
+    [TokenType.MultiComment]: { match: /\/\*[^]*?\*\//, lineBreaks: true },
+    [TokenType.Newline]: { match: /\r?\n/, lineBreaks: true },
+    [TokenType.Space]: { match: /[ \t\r]+/ },
     [TokenType.Colon]: ';',
     [TokenType.Dot]: '.',
     [TokenType.Operator]: /(?:==|\+=?|-=?|\/=?|\*\*?|\.+|:)/,
