@@ -110,6 +110,7 @@
     "yarn": "^1.17.0"
   },
   "dependencies": {
+    "@iarna/toml": "2.2.5",
     "@renovate/pep440": "0.4.1",
     "@renovatebot/ruby-semver": "0.2.1",
     "@sindresorhus/is": "4.0.0",
@@ -166,7 +167,6 @@
     "shortid": "2.2.16",
     "simple-git": "2.21.0",
     "slugify": "1.4.5",
-    "toml": "3.0.0",
     "traverse": "0.6.6",
     "upath": "2.0.0",
     "url-join": "4.0.1",
