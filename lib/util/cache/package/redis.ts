@@ -1,5 +1,5 @@
 /* istanbul ignore file */
-import { IHandyRedis, createHandyClient } from 'handy-redis';
+import { IHandyRedis, createNodeRedisClient } from 'handy-redis';
 import { DateTime } from 'luxon';
 import { logger } from '../../../logger';
 
@@ -11,7 +11,7 @@ function getKey(namespace: string, key: string): string {
 
 export function end(): void {
   try {
-    client?.redis?.end(true); // TODO: Why is this not supported by client directly?
+    client?.nodeRedis?.end(true); // TODO: Why is this not supported by client directly?
   } catch (err) {
     logger.warn({ err }, 'Redis cache end failed');
   }
@@ -69,7 +69,7 @@ export function init(url: string): void {
     return;
   }
   logger.debug('Redis cache init');
-  client = createHandyClient({
+  client = createNodeRedisClient({
     url,
     retry_strategy: (options) => {
       if (options.error) {
