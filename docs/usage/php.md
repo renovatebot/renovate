@@ -25,12 +25,14 @@ If you are using a [privately hosted Composer package](https://getcomposer.org/d
 
 ```json
 {
-    "hostRules": [{
-        "hostName": "some.vendor.com",
-        "hostType": "packagist",
-        "username": "<your-username>",
-        "password": "<your-password>"
-    }]
+  "hostRules": [
+    {
+      "hostName": "some.vendor.com",
+      "hostType": "packagist",
+      "username": "<your-username>",
+      "password": "<your-password>"
+    }
+  ]
 }
 ```
 
@@ -40,13 +42,15 @@ Go to [https://renovatebot.com/encrypt](https://renovatebot.com/encrypt), paste 
 
 ```json
 {
-    "hostRules": [{
-        "hostName": "some.vendor.com",
-        "hostType": "packagist",
-        "encrypted": {
-            "username": "<your-encrypted-password",
-            "password": "<your-encrypted-password"
-        }
-    }]
+  "hostRules": [
+    {
+      "hostName": "some.vendor.com",
+      "hostType": "packagist",
+      "encrypted": {
+        "username": "<your-encrypted-password",
+        "password": "<your-encrypted-password"
+      }
+    }
+  ]
 }
 ```
