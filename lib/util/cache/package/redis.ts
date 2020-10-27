@@ -1,9 +1,9 @@
 /* istanbul ignore file */
-import { IHandyRedis, createNodeRedisClient } from 'handy-redis';
+import { WrappedNodeRedisClient, createNodeRedisClient } from 'handy-redis';
 import { DateTime } from 'luxon';
 import { logger } from '../../../logger';
 
-let client: IHandyRedis | undefined;
+let client: WrappedNodeRedisClient | undefined;
 
 function getKey(namespace: string, key: string): string {
   return `${namespace}-${key}`;
