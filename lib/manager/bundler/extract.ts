@@ -36,7 +36,7 @@ export async function extractPackageFile(
         regEx(`^ruby ${delimiter}([^${delimiter}]+)${delimiter}`).exec(line);
     }
     if (rubyMatch) {
-      res.compatibility = { ruby: rubyMatch[1] };
+      res.constraints = { ruby: rubyMatch[1] };
     }
     const gemMatchRegex = /^\s*gem\s+(['"])(?<depName>[^'"]+)\1(\s*,\s*(?<currentValue>(['"])[^'"]+\5(\s*,\s*\5[^'"]+\5)?))?/;
     const gemMatch = gemMatchRegex.exec(line);
@@ -194,8 +194,8 @@ export async function extractPackageFile(
       }
       const bundledWith = /\nBUNDLED WITH\n\s+(.*?)(\n|$)/.exec(lockContent);
       if (bundledWith) {
-        res.compatibility = res.compatibility || {};
-        res.compatibility.bundler = bundledWith[1];
+        res.constraints = res.constraints || {};
+        res.constraints.bundler = bundledWith[1];
       }
     }
   }

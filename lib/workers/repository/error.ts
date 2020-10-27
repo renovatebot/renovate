@@ -183,6 +183,10 @@ export default async function handleError(
     // rewrite this error
     return EXTERNAL_HOST_ERROR;
   }
+  if (err.message.includes('fatal: not a git repository')) {
+    delete config.branchList; // eslint-disable-line no-param-reassign
+    return REPOSITORY_TEMPORARY_ERROR;
+  }
   // Swallow this error so that other repositories can be processed
   logger.error({ err }, `Repository has unknown error`);
   // delete branchList to avoid cleaning up branches

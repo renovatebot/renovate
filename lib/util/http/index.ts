@@ -1,6 +1,7 @@
 import crypto from 'crypto';
 import got, { Options, Response } from 'got';
 import { HOST_DISABLED } from '../../constants/error-messages';
+import { logger } from '../../logger';
 import { ExternalHostError } from '../../types/errors/external-host-error';
 import * as memCache from '../cache/memory';
 import { clone } from '../clone';
@@ -71,6 +72,7 @@ async function gotRoutine<T>(
   startTime: number
 ): Promise<Response<T>> {
   const requestTime = Date.now();
+  logger.trace({ url, options }, 'got request');
   const resp = await got<T>(url, options);
   const responseTime = Date.now();
   const httpRequests = memCache.get('http-requests') || [];

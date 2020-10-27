@@ -8,7 +8,7 @@ import { RepoInitConfig } from '../../../workers/repository/init/common';
 export interface BaseBranchCache {
   sha: string; // branch commit sha
   configHash: string; // object hash of config
-  packageFiles: PackageFile[]; // extract result
+  packageFiles: Record<string, PackageFile[]>; // extract result
 }
 
 export interface BranchUpgradeCache {
@@ -30,6 +30,7 @@ export interface BranchCache {
   isModified: boolean;
   prNo: number | null;
   sha: string | null;
+  parentSha: string | null;
   upgrades: BranchUpgradeCache[];
 }
 

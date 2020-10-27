@@ -36,9 +36,9 @@ const staticGroups = {
     extends: [
       'group:allApollographql',
       'group:fortawesome',
-      'group:goOpenapi',
       'group:fusionjs',
       'group:glimmer',
+      'group:goOpenapi',
       'group:hibernateCore',
       'group:hibernateValidator',
       'group:hibernateOgm',
@@ -46,6 +46,7 @@ const staticGroups = {
       'group:illuminate',
       'group:jekyllEcosystem',
       'group:polymer',
+      'group:resilience4j',
       'group:rubyOmniauth',
       'group:socketio',
       'group:springAmqp',
@@ -194,6 +195,15 @@ const staticGroups = {
       {
         packagePatterns: ['^org.hibernate.common:'],
         groupName: 'hibernate commons',
+      },
+    ],
+  },
+  resilience4j: {
+    description: 'Group Java Resilience4j packages',
+    packageRules: [
+      {
+        packagePatterns: ['^io.github.resilience4j:'],
+        groupName: 'resilience4j',
       },
     ],
   },
@@ -452,6 +462,15 @@ const staticGroups = {
         groupName: 'go-openapi packages',
         groupSlug: 'go-openapi',
         packagePatterns: ['^github.com/go-openapi/'],
+      },
+    ],
+  },
+  googleapis: {
+    description: 'Group googleapis packages together',
+    packageRules: [
+      {
+        extends: 'packages:googleapis',
+        groupName: 'googleapis packages',
       },
     ],
   },

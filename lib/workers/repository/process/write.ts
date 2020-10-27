@@ -1,11 +1,23 @@
 import { RenovateConfig } from '../../../config';
 import { addMeta, logger, removeMeta } from '../../../logger';
+import { platform } from '../../../platform';
+import { PrState } from '../../../types';
+import { branchExists } from '../../../util/git';
 import { processBranch } from '../../branch';
 import { BranchConfig, ProcessBranchResult } from '../../common';
 import { Limit, isLimitReached } from '../../global/limits';
 import { getPrsRemaining } from './limits';
 
 export type WriteUpdateResult = 'done' | 'automerged';
+
+async function prExists(branchName: string): Promise<boolean> {
+  try {
+    const pr = await platform.getBranchPr(branchName);
+    return pr?.state === PrState.Open;
+  } catch (err) /* istanbul ignore next */ {
+    return false;
+  }
+}
 
 export async function writeUpdates(
   config: RenovateConfig,
@@ -33,13 +45,15 @@ export async function writeUpdates(
     addMeta({ branch: branch.branchName });
     const prLimitReached = prsRemaining <= 0;
     const commitLimitReached = isLimitReached(Limit.Commits);
+    const branchExisted = branchExists(branch.branchName);
+    const prExisted = await prExists(branch.branchName);
     const res = await processBranch(branch, prLimitReached, commitLimitReached);
     branch.res = res;
     if (
       res === ProcessBranchResult.Automerged &&
       branch.automergeType !== 'pr-comment'
     ) {
-      // Stop procesing other branches because base branch has been changed
+      // Stop processing other branches because base branch has been changed
       return 'automerged';
     }
     let deductPrRemainingCount = 0;
@@ -51,6 +65,21 @@ export async function writeUpdates(
       res === ProcessBranchResult.Automerged &&
       branch.automergeType === 'pr-comment' &&
       branch.requiredStatusChecks === null
+    ) {
+      deductPrRemainingCount = 1;
+    }
+    if (
+      res === ProcessBranchResult.Pending &&
+      !branchExisted &&
+      branchExists(branch.branchName)
+    ) {
+      deductPrRemainingCount = 1;
+    }
+    // istanbul ignore if
+    if (
+      deductPrRemainingCount === 0 &&
+      !prExisted &&
+      (await prExists(branch.branchName))
     ) {
       deductPrRemainingCount = 1;
     }

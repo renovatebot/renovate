@@ -1,6 +1,6 @@
+import { parse } from '@iarna/toml';
 import is from '@sindresorhus/is';
 import { quote } from 'shlex';
-import { parse } from 'toml';
 import { logger } from '../../logger';
 import { ExecOptions, exec } from '../../util/exec';
 import {
@@ -21,8 +21,8 @@ function getPythonConstraint(
   existingLockFileContent: string,
   config: UpdateArtifactsConfig
 ): string | undefined | null {
-  const { compatibility = {} } = config;
-  const { python } = compatibility;
+  const { constraints = {} } = config;
+  const { python } = constraints;
 
   if (python) {
     logger.debug('Using python constraint from config');
@@ -120,7 +120,7 @@ export async function updateArtifacts({
       }
     }
     const tagConstraint = getPythonConstraint(existingLockFileContent, config);
-    const poetryRequirement = config.compatibility?.poetry || 'poetry';
+    const poetryRequirement = config.constraints?.poetry || 'poetry';
     const poetryInstall = 'pip install ' + quote(poetryRequirement);
     const extraEnv = getSourceCredentialVars(
       newPackageFileContent,

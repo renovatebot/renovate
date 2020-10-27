@@ -10,7 +10,7 @@ export interface DigestConfig extends Config {
 }
 
 interface ReleasesConfigBase {
-  compatibility?: Record<string, string>;
+  constraints?: Record<string, string>;
   npmrc?: string;
   registryUrls?: string[];
 }
@@ -44,7 +44,7 @@ export interface Release {
   downloadUrl?: string;
   gitRef?: string;
   isDeprecated?: boolean;
-
+  isStable?: boolean;
   releaseTimestamp?: any;
   version: string;
   newDigest?: string;
@@ -80,5 +80,5 @@ export interface DatasourceApi {
   registryStrategy?: 'first' | 'hunt' | 'merge';
 }
 
-// TODO: remove, only for compatabillity
+// TODO: remove, only for compatibility
 export type Datasource = DatasourceApi;

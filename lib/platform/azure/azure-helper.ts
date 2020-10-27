@@ -92,7 +92,7 @@ async function streamToString(stream: NodeJS.ReadableStream): Promise<string> {
   return p;
 }
 
-// if no branchName, look globaly
+// if no branchName, look globally
 export async function getFile(
   repoId: string,
   filePath: string,
@@ -157,17 +157,17 @@ export function getProjectAndRepo(
   str: string
 ): { project: string; repo: string } {
   logger.trace(`getProjectAndRepo(${str})`);
-  const strSplited = str.split(`/`);
-  if (strSplited.length === 1) {
+  const strSplit = str.split(`/`);
+  if (strSplit.length === 1) {
     return {
       project: str,
       repo: str,
     };
   }
-  if (strSplited.length === 2) {
+  if (strSplit.length === 2) {
     return {
-      project: strSplited[0],
-      repo: strSplited[1],
+      project: strSplit[0],
+      repo: strSplit[1],
     };
   }
   const msg = `${str} can be only structured this way : 'repository' or 'projectName/repository'!`;

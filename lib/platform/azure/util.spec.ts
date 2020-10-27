@@ -1,5 +1,7 @@
 import {
   getBranchNameWithoutRefsheadsPrefix,
+  getGitStatusContextCombinedName,
+  getGitStatusContextFromCombinedName,
   getNewBranchName,
   getRenovatePRFormat,
 } from './util';
@@ -13,6 +15,59 @@ describe('platform/azure/helpers', () => {
     it('should be the same', () => {
       const res = getNewBranchName('refs/heads/testBB');
       expect(res).toBe(`refs/heads/testBB`);
+    });
+  });
+
+  describe('getGitStatusContextCombinedName', () => {
+    it('should return undefined if null context passed', () => {
+      const contextName = getGitStatusContextCombinedName(null);
+      expect(contextName).toBeUndefined();
+    });
+    it('should combine valid genre and name with slash', () => {
+      const contextName = getGitStatusContextCombinedName({
+        genre: 'my-genre',
+        name: 'status-name',
+      });
+      expect(contextName).toMatch('my-genre/status-name');
+    });
+    it('should combine valid empty genre and name without a slash', () => {
+      const contextName = getGitStatusContextCombinedName({
+        genre: undefined,
+        name: 'status-name',
+      });
+      expect(contextName).toMatch('status-name');
+    });
+  });
+
+  describe('getGitStatusContextFromCombinedName', () => {
+    it('should return undefined if null context passed', () => {
+      const context = getGitStatusContextFromCombinedName(null);
+      expect(context).toBeUndefined();
+    });
+    it('should parse valid genre and name with slash', () => {
+      const context = getGitStatusContextFromCombinedName(
+        'my-genre/status-name'
+      );
+      expect(context).toEqual({
+        genre: 'my-genre',
+        name: 'status-name',
+      });
+    });
+    it('should parse valid genre and name with multiple slashes', () => {
+      const context = getGitStatusContextFromCombinedName(
+        'my-genre/sub-genre/status-name'
+      );
+      expect(context).toEqual({
+        genre: 'my-genre/sub-genre',
+        name: 'status-name',
+      });
+    });
+    it('should parse valid empty genre and name without a slash', () => {
+      const context = getGitStatusContextFromCombinedName('status-name');
+      expect(context).toEqual({
+        genre: undefined,
+        name: 'status-name',
+      });
     });
   });
 

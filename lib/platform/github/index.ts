@@ -1,7 +1,6 @@
 import URL from 'url';
 import is from '@sindresorhus/is';
 import delay from 'delay';
-import { configFileNames } from '../../config/app-strings';
 import {
   PLATFORM_INTEGRATION_UNAUTHORIZED,
   REPOSITORY_ACCESS_FORBIDDEN,
@@ -57,8 +56,6 @@ import {
 import { UserDetails, getUserDetails, getUserEmail } from './user';
 
 const githubApi = new githubHttp.GithubHttp();
-
-const defaultConfigFile = configFileNames[0];
 
 let config: LocalRepoConfig = {} as any;
 
@@ -122,7 +119,7 @@ export async function getRepos(): Promise<string[]> {
   try {
     const res = await githubApi.getJson<{ full_name: string }[]>(
       'user/repos?per_page=100',
-      { paginate: true }
+      { paginate: 'all' }
     );
     return res.body.map((repo) => repo.full_name);
   } catch (err) /* istanbul ignore next */ {
@@ -156,7 +153,7 @@ export async function getJsonFile(fileName: string): Promise<any | null> {
         'base64'
       ).toString()
     );
-  } catch (err) /* istanbul ignore next */ {
+  } catch (err) {
     return null;
   }
 }
@@ -170,9 +167,7 @@ export async function initRepo({
   forkMode,
   forkToken,
   localDir,
-  includeForks,
   renovateUsername,
-  optimizeForDisabled,
 }: RepoParams): Promise<RepoResult> {
   logger.debug(`initRepo("${repository}")`);
   // config is used by the platform api itself, not necessary for the app layer to know
@@ -219,13 +214,6 @@ export async function initRepo({
     if (!repo.defaultBranchRef?.name) {
       throw new Error(REPOSITORY_EMPTY);
     }
-    // istanbul ignore if
-    if (repo.isFork && !includeForks) {
-      const renovateConfig = await getJsonFile(defaultConfigFile);
-      if (!renovateConfig?.includeForks) {
-        throw new Error(REPOSITORY_FORKED);
-      }
-    }
     if (repo.nameWithOwner && repo.nameWithOwner !== repository) {
       logger.debug(
         { repository, this_repository: repo.nameWithOwner },
@@ -238,12 +226,6 @@ export async function initRepo({
         'Repository is archived - throwing error to abort renovation'
       );
       throw new Error(REPOSITORY_ARCHIVED);
-    }
-    if (optimizeForDisabled) {
-      const renovateConfig = await getJsonFile(defaultConfigFile);
-      if (renovateConfig?.enabled === false) {
-        throw new Error(REPOSITORY_DISABLED);
-      }
     }
     // Use default branch as PR target unless later overridden.
     config.defaultBranch = repo.defaultBranchRef.name;
@@ -502,13 +484,7 @@ async function getClosedPrs(): Promise<PrList> {
 }
 
 async function getOpenPrs(): Promise<PrList> {
-  // istanbul ignore if
-  if (config.isGhe) {
-    logger.debug(
-      'Skipping unsupported graphql PullRequests.mergeStateStatus query on GHE'
-    );
-    return {};
-  }
+  // The graphql query is supported in the current oldest GHE version 2.19
   if (!config.openPrList) {
     config.openPrList = {};
     let query;
@@ -813,44 +789,43 @@ export async function getBranchStatus(
     'branch status check result'
   );
   let checkRuns: { name: string; status: string; conclusion: string }[] = [];
-  if (!config.isGhe) {
-    try {
-      const checkRunsUrl = `repos/${config.repository}/commits/${escapeHash(
-        branchName
-      )}/check-runs`;
-      const opts = {
-        headers: {
-          accept: 'application/vnd.github.antiope-preview+json',
-        },
-      };
-      const checkRunsRaw = (
-        await githubApi.getJson<{
-          check_runs: { name: string; status: string; conclusion: string }[];
-        }>(checkRunsUrl, opts)
-      ).body;
-      if (checkRunsRaw.check_runs?.length) {
-        checkRuns = checkRunsRaw.check_runs.map((run) => ({
-          name: run.name,
-          status: run.status,
-          conclusion: run.conclusion,
-        }));
-        logger.debug({ checkRuns }, 'check runs result');
-      } else {
-        // istanbul ignore next
-        logger.debug({ result: checkRunsRaw }, 'No check runs found');
-      }
-    } catch (err) /* istanbul ignore next */ {
-      if (err instanceof ExternalHostError) {
-        throw err;
-      }
-      if (
-        err.statusCode === 403 ||
-        err.message === PLATFORM_INTEGRATION_UNAUTHORIZED
-      ) {
-        logger.debug('No permission to view check runs');
-      } else {
-        logger.warn({ err }, 'Error retrieving check runs');
-      }
+  // API is supported in oldest available GHE version 2.19
+  try {
+    const checkRunsUrl = `repos/${config.repository}/commits/${escapeHash(
+      branchName
+    )}/check-runs`;
+    const opts = {
+      headers: {
+        accept: 'application/vnd.github.antiope-preview+json',
+      },
+    };
+    const checkRunsRaw = (
+      await githubApi.getJson<{
+        check_runs: { name: string; status: string; conclusion: string }[];
+      }>(checkRunsUrl, opts)
+    ).body;
+    if (checkRunsRaw.check_runs?.length) {
+      checkRuns = checkRunsRaw.check_runs.map((run) => ({
+        name: run.name,
+        status: run.status,
+        conclusion: run.conclusion,
+      }));
+      logger.debug({ checkRuns }, 'check runs result');
+    } else {
+      // istanbul ignore next
+      logger.debug({ result: checkRunsRaw }, 'No check runs found');
+    }
+  } catch (err) /* istanbul ignore next */ {
+    if (err instanceof ExternalHostError) {
+      throw err;
+    }
+    if (
+      err.statusCode === 403 ||
+      err.message === PLATFORM_INTEGRATION_UNAUTHORIZED
+    ) {
+      logger.debug('No permission to view check runs');
+    } else {
+      logger.warn({ err }, 'Error retrieving check runs');
     }
   }
   if (checkRuns.length === 0) {
@@ -1129,7 +1104,7 @@ export async function ensureIssue({
 }
 
 export async function ensureIssueClosing(title: string): Promise<void> {
-  logger.debug(`ensureIssueClosing(${title})`);
+  logger.trace(`ensureIssueClosing(${title})`);
   const issueList = await getIssueList();
   for (const issue of issueList) {
     if (issue.state === 'open' && issue.title === title) {
@@ -1261,7 +1236,7 @@ async function getComments(issueNo: number): Promise<Comment[]> {
     return comments;
   } catch (err) /* istanbul ignore next */ {
     if (err.statusCode === 404) {
-      logger.debug('404 respose when retrieving comments');
+      logger.debug('404 response when retrieving comments');
       throw new ExternalHostError(err, PLATFORM_TYPE_GITHUB);
     }
     throw err;

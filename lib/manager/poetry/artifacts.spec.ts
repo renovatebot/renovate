@@ -151,13 +151,13 @@ describe('.updateArtifacts()', () => {
         newPackageFileContent: '{}',
         config: {
           ...config,
-          compatibility: { python: '~2.7 || ^3.4' },
+          constraints: { python: '~2.7 || ^3.4' },
         },
       })
     ).not.toBeNull();
     expect(execSnapshots).toMatchSnapshot();
   });
-  it('returns updated poetry.lock using docker (constaints)', async () => {
+  it('returns updated poetry.lock using docker (constraints)', async () => {
     jest.spyOn(docker, 'removeDanglingContainers').mockResolvedValueOnce();
     await setExecConfig({
       ...config,
@@ -180,7 +180,7 @@ describe('.updateArtifacts()', () => {
         newPackageFileContent: '{}',
         config: {
           ...config,
-          compatibility: { poetry: 'poetry>=1.0' },
+          constraints: { poetry: 'poetry>=1.0' },
         },
       })
     ).not.toBeNull();
