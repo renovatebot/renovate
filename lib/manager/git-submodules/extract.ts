@@ -106,7 +106,7 @@ export default async function extractPackageFile(
         try {
           const [currentValue] = (await git.subModule(['status', path]))
             .trim()
-            .replace(/[-+]/, '')
+            .replace(/^[-+]/, '')
             .split(/\s/);
           const subModuleUrl = await getUrl(git, gitModulesPath, name);
           const submoduleBranch = await getBranch(
