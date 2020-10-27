@@ -2,7 +2,7 @@ import { OutgoingHttpHeaders } from 'http';
 import url from 'url';
 import is from '@sindresorhus/is';
 import delay from 'delay';
-import moment from 'moment';
+import { DateTime } from 'luxon';
 import registryAuthToken from 'registry-auth-token';
 import getRegistryUrl from 'registry-auth-token/registry-url';
 import { logger } from '../../logger';
@@ -218,7 +218,12 @@ export async function getDependency(
       if (res.time?.[version]) {
         release.releaseTimestamp = res.time[version];
         release.canBeUnpublished =
-          moment().diff(moment(release.releaseTimestamp), 'days') === 0;
+          DateTime.local()
+            .startOf('day')
+            .diff(
+              DateTime.fromISO(release.releaseTimestamp).startOf('day'),
+              'days'
+            ).days === 0;
       }
       if (res.versions[version].deprecated) {
         release.isDeprecated = true;
