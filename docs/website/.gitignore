@@ -4,9 +4,15 @@
 # Production
 /build
 
+/tmp
+
 # Generated files
 .docusaurus
 .cache-loader
+
+/docs/*
+!/docs/index.md
+/static/assets
 
 # Misc
 .DS_Store

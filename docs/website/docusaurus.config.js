@@ -42,7 +42,7 @@ module.exports = {
       {
         debug: true,
         docs: {
-          path: 'usage',
+          path: 'docs',
           routeBasePath: '/',
           sidebarPath: require.resolve('./sidebars.js'),
           // editUrl: 'https://github.com/renovatebot/renovate/edit/master/docs/',
