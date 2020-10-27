@@ -71,7 +71,7 @@ export async function updateArtifacts({
     if (distributionUrl) {
       cmd += ` --gradle-distribution-url ${distributionUrl}`;
       if (newPackageFileContent.includes('distributionSha256Sum=')) {
-        // need to reset version, otherwise we have a checksum missmatch
+        // need to reset version, otherwise we have a checksum mismatch
         await writeLocalFile(
           packageFileName,
           newPackageFileContent.replace(config.toVersion, config.currentValue)

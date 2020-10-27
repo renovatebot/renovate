@@ -1,48 +1,108 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
-exports[`.updateArtifacts() catches errors 1`] = `
+exports[`updateArtifacts aborts if lock file is unchanged 1`] = `
+Array [
+  Object {
+    "cmd": "dotnet restore project.csproj --force-evaluate",
+    "options": Object {
+      "cwd": "/tmp/github/some/repo",
+      "encoding": "utf-8",
+      "env": Object {
+        "HOME": "/home/user",
+        "HTTPS_PROXY": "https://example.com",
+        "HTTP_PROXY": "http://example.com",
+        "LANG": "en_US.UTF-8",
+        "LC_ALL": "en_US",
+        "NO_PROXY": "localhost",
+        "PATH": "/tmp/path",
+      },
+      "maxBuffer": 10485760,
+      "timeout": 900000,
+    },
+  },
+]
+`;
+
+exports[`updateArtifacts aborts if no lock file found 1`] = `Array []`;
+
+exports[`updateArtifacts authenticates at registries 1`] = `
+Array [
+  Object {
+    "cmd": "dotnet nuget update source myRegistry --username some-username --password some-password --store-password-in-clear-text",
+    "options": Object {
+      "cwd": "/tmp/github/some/repo",
+      "encoding": "utf-8",
+      "env": Object {
+        "HOME": "/home/user",
+        "HTTPS_PROXY": "https://example.com",
+        "HTTP_PROXY": "http://example.com",
+        "LANG": "en_US.UTF-8",
+        "LC_ALL": "en_US",
+        "NO_PROXY": "localhost",
+        "PATH": "/tmp/path",
+      },
+      "maxBuffer": 10485760,
+      "timeout": 900000,
+    },
+  },
+  Object {
+    "cmd": "dotnet restore project.csproj --force-evaluate",
+    "options": Object {
+      "cwd": "/tmp/github/some/repo",
+      "encoding": "utf-8",
+      "env": Object {
+        "HOME": "/home/user",
+        "HTTPS_PROXY": "https://example.com",
+        "HTTP_PROXY": "http://example.com",
+        "LANG": "en_US.UTF-8",
+        "LC_ALL": "en_US",
+        "NO_PROXY": "localhost",
+        "PATH": "/tmp/path",
+      },
+      "maxBuffer": 10485760,
+      "timeout": 900000,
+    },
+  },
+  Object {
+    "cmd": "dotnet nuget update source myRegistry --username '' --password '' --store-password-in-clear-text",
+    "options": Object {
+      "cwd": "/tmp/github/some/repo",
+      "encoding": "utf-8",
+      "env": Object {
+        "HOME": "/home/user",
+        "HTTPS_PROXY": "https://example.com",
+        "HTTP_PROXY": "http://example.com",
+        "LANG": "en_US.UTF-8",
+        "LC_ALL": "en_US",
+        "NO_PROXY": "localhost",
+        "PATH": "/tmp/path",
+      },
+      "maxBuffer": 10485760,
+      "timeout": 900000,
+    },
+  },
+]
+`;
+
+exports[`updateArtifacts catches errors 1`] = `
 Array [
   Object {
     "artifactError": Object {
-      "lockFile": "poetry.lock",
-      "stderr": "undefined
-undefined",
+      "lockFile": "packages.lock.json",
+      "stderr": "not found",
     },
   },
 ]
 `;
 
-exports[`.updateArtifacts() passes private credential environment vars 1`] = `
-Array [
-  Object {
-    "cmd": "poetry update --lock --no-interaction dep1",
-    "options": Object {
-      "cwd": "/tmp/github/some/repo",
-      "encoding": "utf-8",
-      "env": Object {
-        "HOME": "/home/user",
-        "HTTPS_PROXY": "https://example.com",
-        "HTTP_PROXY": "http://example.com",
-        "LANG": "en_US.UTF-8",
-        "LC_ALL": "en_US",
-        "NO_PROXY": "localhost",
-        "PATH": "/tmp/path",
-        "POETRY_HTTP_BASIC_FOUR_PASSWORD": "passwordFour",
-        "POETRY_HTTP_BASIC_ONE_PASSWORD": "passwordOne",
-        "POETRY_HTTP_BASIC_ONE_USERNAME": "usernameOne",
-        "POETRY_HTTP_BASIC_TWO_USERNAME": "usernameTwo",
-      },
-      "maxBuffer": 10485760,
-      "timeout": 900000,
-    },
-  },
-]
-`;
+exports[`updateArtifacts does not update lock file when no deps changed 1`] = `Array []`;
 
-exports[`.updateArtifacts() returns null if unchanged 1`] = `
+exports[`updateArtifacts does not update lock file when non-proj file is changed 1`] = `Array []`;
+
+exports[`updateArtifacts performs lock file maintenance 1`] = `
 Array [
   Object {
-    "cmd": "poetry update --lock --no-interaction dep1",
+    "cmd": "dotnet restore project.csproj --force-evaluate",
     "options": Object {
       "cwd": "/tmp/github/some/repo",
       "encoding": "utf-8",
@@ -62,10 +122,22 @@ Array [
 ]
 `;
 
-exports[`.updateArtifacts() returns updated poetry.lock 1`] = `
+exports[`updateArtifacts supports docker mode 1`] = `
 Array [
   Object {
-    "cmd": "poetry update --lock --no-interaction dep1",
+    "cmd": "docker pull renovate/dotnet",
+    "options": Object {
+      "encoding": "utf-8",
+    },
+  },
+  Object {
+    "cmd": "docker ps --filter name=renovate_dotnet -aq",
+    "options": Object {
+      "encoding": "utf-8",
+    },
+  },
+  Object {
+    "cmd": "docker run --rm --name=renovate_dotnet --label=renovate_child --user=foobar -v \\"/tmp/github/some/repo\\":\\"/tmp/github/some/repo\\" -v \\"/tmp/renovate/cache\\":\\"/tmp/renovate/cache\\" -w \\"/tmp/github/some/repo\\" renovate/dotnet bash -l -c \\"dotnet restore project.csproj --force-evaluate\\"",
     "options": Object {
       "cwd": "/tmp/github/some/repo",
       "encoding": "utf-8",
@@ -85,22 +157,10 @@ Array [
 ]
 `;
 
-exports[`.updateArtifacts() returns updated poetry.lock using docker (constraints) 1`] = `
+exports[`updateArtifacts supports global mode 1`] = `
 Array [
   Object {
-    "cmd": "docker pull renovate/python:2.7.5",
-    "options": Object {
-      "encoding": "utf-8",
-    },
-  },
-  Object {
-    "cmd": "docker ps --filter name=renovate_python -aq",
-    "options": Object {
-      "encoding": "utf-8",
-    },
-  },
-  Object {
-    "cmd": "docker run --rm --name=renovate_python --label=renovate_child --user=foobar -v \\"/tmp/github/some/repo\\":\\"/tmp/github/some/repo\\" -w \\"/tmp/github/some/repo\\" renovate/python:2.7.5 bash -l -c \\"pip install 'poetry>=1.0' && poetry update --lock --no-interaction dep1\\"",
+    "cmd": "dotnet restore project.csproj --force-evaluate",
     "options": Object {
       "cwd": "/tmp/github/some/repo",
       "encoding": "utf-8",
@@ -120,68 +180,10 @@ Array [
 ]
 `;
 
-exports[`.updateArtifacts() returns updated poetry.lock using docker 1`] = `
+exports[`updateArtifacts updates lock file 1`] = `
 Array [
   Object {
-    "cmd": "docker pull renovate/python:3.4.2",
-    "options": Object {
-      "encoding": "utf-8",
-    },
-  },
-  Object {
-    "cmd": "docker ps --filter name=renovate_python -aq",
-    "options": Object {
-      "encoding": "utf-8",
-    },
-  },
-  Object {
-    "cmd": "docker run --rm --name=renovate_python --label=renovate_child --user=foobar -v \\"/tmp/github/some/repo\\":\\"/tmp/github/some/repo\\" -w \\"/tmp/github/some/repo\\" renovate/python:3.4.2 bash -l -c \\"pip install poetry && poetry update --lock --no-interaction dep1\\"",
-    "options": Object {
-      "cwd": "/tmp/github/some/repo",
-      "encoding": "utf-8",
-      "env": Object {
-        "HOME": "/home/user",
-        "HTTPS_PROXY": "https://example.com",
-        "HTTP_PROXY": "http://example.com",
-        "LANG": "en_US.UTF-8",
-        "LC_ALL": "en_US",
-        "NO_PROXY": "localhost",
-        "PATH": "/tmp/path",
-      },
-      "maxBuffer": 10485760,
-      "timeout": 900000,
-    },
-  },
-]
-`;
-
-exports[`.updateArtifacts() returns updated poetry.lock when doing lockfile maintenance 1`] = `
-Array [
-  Object {
-    "cmd": "poetry update --lock --no-interaction",
-    "options": Object {
-      "cwd": "/tmp/github/some/repo",
-      "encoding": "utf-8",
-      "env": Object {
-        "HOME": "/home/user",
-        "HTTPS_PROXY": "https://example.com",
-        "HTTP_PROXY": "http://example.com",
-        "LANG": "en_US.UTF-8",
-        "LC_ALL": "en_US",
-        "NO_PROXY": "localhost",
-        "PATH": "/tmp/path",
-      },
-      "maxBuffer": 10485760,
-      "timeout": 900000,
-    },
-  },
-]
-`;
-
-exports[`.updateArtifacts() returns updated pyproject.lock 1`] = `
-Array [
-  Object {
-    "cmd": "poetry update --lock --no-interaction dep1",
+    "cmd": "dotnet restore project.csproj --force-evaluate",
     "options": Object {
       "cwd": "/tmp/github/some/repo",
       "encoding": "utf-8",

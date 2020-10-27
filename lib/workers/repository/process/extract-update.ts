@@ -64,6 +64,18 @@ export async function extract(
   ) {
     logger.debug({ baseBranch, baseBranchSha }, 'Found cached extract');
     packageFiles = cachedExtract.packageFiles;
+    try {
+      for (const files of Object.values(packageFiles)) {
+        for (const file of files) {
+          for (const dep of file.deps) {
+            delete dep.updates;
+          }
+        }
+      }
+      logger.debug('Deleted cached dep updates');
+    } catch (err) {
+      logger.info({ err }, 'Error deleting cached dep updates');
+    }
   } else {
     await checkoutBranch(baseBranch);
     packageFiles = await extractAllDependencies(config);

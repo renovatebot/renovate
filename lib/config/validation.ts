@@ -214,17 +214,24 @@ export async function validateConfig(
             if (key === 'extends') {
               const tzRe = /^:timezone\((.+)\)$/;
               for (const subval of val) {
-                if (is.string(subval) && tzRe.test(subval)) {
-                  const [, timezone] = tzRe.exec(subval);
-                  const [validTimezone, errorMessage] = hasValidTimezone(
-                    timezone
-                  );
-                  if (!validTimezone) {
-                    errors.push({
-                      depName: 'Configuration Error',
-                      message: `${currentPath}: ${errorMessage}`,
-                    });
+                if (is.string(subval)) {
+                  if (tzRe.test(subval)) {
+                    const [, timezone] = tzRe.exec(subval);
+                    const [validTimezone, errorMessage] = hasValidTimezone(
+                      timezone
+                    );
+                    if (!validTimezone) {
+                      errors.push({
+                        depName: 'Configuration Error',
+                        message: `${currentPath}: ${errorMessage}`,
+                      });
+                    }
                   }
+                } else {
+                  errors.push({
+                    depName: 'Configuration Warning',
+                    message: `${currentPath}: preset value is not a string`,
+                  });
                 }
               }
             }
@@ -308,7 +315,12 @@ export async function validateConfig(
                 ) {
                   errors.push({
                     depName: 'Configuration Error',
-                    message: `Regex Manager ${currentPath} must contain a matchStrings array of length one`,
+                    message: `Each Regex Manager must contain a matchStrings array of length one`,
+                  });
+                } else if (!is.nonEmptyArray(regexManager.fileMatch)) {
+                  errors.push({
+                    depName: 'Configuration Error',
+                    message: `Each Regex Manager must contain a fileMatch array`,
                   });
                 } else {
                   let validRegex = false;
@@ -395,7 +407,8 @@ export async function validateConfig(
         } else if (
           type === 'object' &&
           currentPath !== 'compatibility' &&
-          currentPath !== 'constraints'
+          currentPath !== 'constraints' &&
+          currentPath !== 'force.constraints'
         ) {
           if (is.plainObject(val)) {
             if (key === 'aliases') {
