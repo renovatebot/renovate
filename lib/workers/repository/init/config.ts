@@ -1,4 +1,5 @@
 import path from 'path';
+import is from '@sindresorhus/is';
 import jsonValidator from 'json-dup-key-validator';
 import JSON5 from 'json5';
 
@@ -149,11 +150,16 @@ export async function mergeRenovateConfig(
 ): Promise<RenovateConfig> {
   let returnConfig = { ...config };
   const repoConfig = await detectRepoFileConfig();
+  const configFileParsed = repoConfig?.configFileParsed || {};
+  if (is.nonEmptyArray(returnConfig.extends)) {
+    configFileParsed.extends = [
+      ...returnConfig.extends,
+      ...(configFileParsed.extends || []),
+    ];
+    delete returnConfig.extends;
+  }
   checkForRepoConfigError(repoConfig);
-  const migratedConfig = await migrateAndValidate(
-    config,
-    repoConfig?.configFileParsed || {}
-  );
+  const migratedConfig = await migrateAndValidate(config, configFileParsed);
   if (migratedConfig.errors.length) {
     const error = new Error(CONFIG_VALIDATION);
     error.configFile = repoConfig.configFileName;

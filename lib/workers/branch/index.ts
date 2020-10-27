@@ -422,16 +422,18 @@ export async function processBranch(
       if (config.releaseTimestamp) {
         logger.debug(`Branch timestamp: ` + config.releaseTimestamp);
         const releaseTimestamp = DateTime.fromISO(config.releaseTimestamp);
-        if (releaseTimestamp.plus({ days: 1 }) < DateTime.local()) {
+        if (releaseTimestamp.plus({ hours: 2 }) < DateTime.local()) {
           logger.debug(
-            'PR is older than a day, raise PR with lock file errors'
+            'PR is older than 2 hours, raise PR with lock file errors'
           );
         } else if (branchExists) {
           logger.debug(
-            'PR is less than a day old but branchExists so updating anyway'
+            'PR is less than 2 hours old but branchExists so updating anyway'
           );
         } else {
-          logger.debug('PR is less than a day old - raise error instead of PR');
+          logger.debug(
+            'PR is less than 2 hours old - raise error instead of PR'
+          );
           throw new Error(MANAGER_LOCKFILE_ERROR);
         }
       } else {

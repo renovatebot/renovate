@@ -1,9 +1,9 @@
 ---
-title: Should you Pin your Javascript Dependencies?
-description: The pros and cons of dependency pinning for Javascript/npm
+title: Should you Pin your JavaScript Dependencies?
+description: The pros and cons of dependency pinning for JavaScript/npm
 ---
 
-# Should you Pin your Javascript Dependencies?
+# Should you Pin your JavaScript Dependencies?
 
 Once you start using a tool/service like Renovate, probably the biggest decision you need to make is whether to "pin" your dependencies instead of using semver ranges. The answer is "It's your choice", however we can certainly make some generalisations/recommendations to help you. Jump to the bottom conclusions if you get impatient.
 
@@ -151,9 +151,9 @@ But certainly "does it give a false sense of security" is not a question we can 
 
 We recommend:
 
-1.  Any apps (web or node.js) that aren't `require()`'d by other packages should pin all types of dependencies for greatest reliability/predictability.
+1.  Any apps (web or Node.js) that aren't `require()`'d by other packages should pin all types of dependencies for greatest reliability/predictability.
 2.  Browser or dual browser/node.js libraries that are consumed/`required()`'d by others should keep using semver ranges for `dependencies` but can use pinned dependencies for `devDependencies`.
-3.  Node.js-only libraries can consider pinning all dependencies, because application size/duplicate dependencies are not as much a concern in node.js compared to the browser. Of course, don't do that if your library is a micro one likely to be consumed in disk-sensitive environments.
+3.  Node.js-only libraries can consider pinning all dependencies, because application size/duplicate dependencies are not as much a concern in Node.js compared to the browser. Of course, don't do that if your library is a micro one likely to be consumed in disk-sensitive environments.
 4.  Use a lock file.
 
 As noted earlier, when you pin dependencies then you will see an increase in the raw volume of dependency updates, compared to if you use ranges. If/when this starts bothering you, add Renovate rules to reduce the volume, such as scheduling updates, grouping them, or automerging "safe" ones.

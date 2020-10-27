@@ -1,6 +1,6 @@
 ---
 title: Node.js Versions
-description: Node versions support in Renovate
+description: Node.js versions support in Renovate
 ---
 
 # Node.js Versions

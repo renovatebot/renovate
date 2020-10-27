@@ -5,7 +5,7 @@ description: Bazel dependencies support in Renovate
 
 # Bazel
 
-Renovate supports upgrading dependencies in bazel `WORKSPACE` files.
+Renovate supports upgrading dependencies in Bazel `WORKSPACE` files.
 
 ## How It Works
 

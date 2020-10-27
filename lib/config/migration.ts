@@ -1,5 +1,5 @@
+import later from '@breejs/later';
 import is from '@sindresorhus/is';
-import later from 'later';
 import { logger } from '../logger';
 import { HostRule } from '../types';
 import { clone } from '../util/clone';

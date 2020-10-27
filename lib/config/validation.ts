@@ -407,7 +407,8 @@ export async function validateConfig(
         } else if (
           type === 'object' &&
           currentPath !== 'compatibility' &&
-          currentPath !== 'constraints'
+          currentPath !== 'constraints' &&
+          currentPath !== 'force.constraints'
         ) {
           if (is.plainObject(val)) {
             if (key === 'aliases') {
