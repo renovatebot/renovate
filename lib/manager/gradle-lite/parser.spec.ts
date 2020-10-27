@@ -8,22 +8,67 @@ function getGradleFile(fileName: string): string {
 
 describe('manager/gradle-lite/parser', () => {
   it('handles end of input', () => {
-    expect(parseGradle('version = ')).toBeEmpty();
-    expect(parseGradle('id "foo.bar" version')).toBeEmpty();
+    expect(parseGradle('version = ').deps).toBeEmpty();
+    expect(parseGradle('id "foo.bar" version').deps).toBeEmpty();
   });
   it('parses variables', () => {
-    expect(
-      parseGradle('version = "1.2.3"\n"foo:bar:$version"\nversion = "3.2.1"')
-    ).toMatchObject([
+    let deps;
+
+    ({ deps } = parseGradle(
+      '\nversion = "1.2.3"\n"foo:bar:$version"\nversion = "3.2.1"'
+    ));
+    expect(deps).toMatchObject([
       {
         depName: 'foo:bar',
         currentValue: '1.2.3',
       },
     ]);
-    expect(parseGradle('version = "1.2.3"\n"foo:bar:$version@@@"')).toBeEmpty();
+
+    ({ deps } = parseGradle('version = "1.2.3"\n"foo:bar:$version@@@"'));
+    expect(deps).toBeEmpty();
+  });
+  it('parses registryUrls', () => {
+    let urls;
+
+    ({ urls } = parseGradle('url ""'));
+    expect(urls).toBeEmpty();
+
+    ({ urls } = parseGradle('url "#!@"'));
+    expect(urls).toBeEmpty();
+
+    ({ urls } = parseGradle('url "https://example.com"'));
+    expect(urls).toStrictEqual(['https://example.com']);
+  });
+  it('parses long form deps', () => {
+    let deps;
+    ({ deps } = parseGradle(
+      'group: "com.example", name: "my.dependency", version: "1.2.3"'
+    ));
+    expect(deps).toMatchObject([
+      {
+        depName: 'com.example:my.dependency',
+        currentValue: '1.2.3',
+      },
+    ]);
+
+    ({ deps } = parseGradle(
+      'group: "com.example", name: "my.dependency", version: depVersion'
+    ));
+    expect(deps).toBeEmpty();
+
+    ({ deps } = parseGradle(
+      'depVersion = "1.2.3"\ngroup: "com.example", name: "my.dependency", version: depVersion'
+    ));
+    expect(deps).toMatchObject([
+      {
+        depName: 'com.example:my.dependency',
+        currentValue: '1.2.3',
+      },
+    ]);
   });
   it('parses plugin', () => {
-    expect(parseGradle('id "foo.bar" version "1.2.3"')).toMatchObject([
+    const { deps } = parseGradle('id "foo.bar" version "1.2.3"');
+    expect(deps).toMatchObject([
       {
         depName: 'foo.bar',
         lookupName: 'foo.bar:foo.bar.gradle.plugin',
@@ -35,7 +80,7 @@ describe('manager/gradle-lite/parser', () => {
     const content = getGradleFile(
       `../gradle/__fixtures__/build.gradle.example1`
     );
-    const deps = parseGradle(content, {}, 'build.gradle');
+    const { deps } = parseGradle(content, {}, 'build.gradle');
     deps.forEach((dep) => {
       expect(
         content
@@ -47,7 +92,8 @@ describe('manager/gradle-lite/parser', () => {
   });
   it('calculates offset', () => {
     const content = "'foo:bar:1.2.3'";
-    const res = parseGradle(content)?.[0];
+    const { deps } = parseGradle(content);
+    const res = deps[0];
     expect(
       content.slice(res.managerData.fileReplacePosition).indexOf('1.2.3')
     ).toEqual(0);

@@ -20,6 +20,7 @@ export async function extractAllPackageFiles(
   const extractedDeps: PackageDependency<ManagerData>[] = [];
   const registry: VariableRegistry = {};
   const packageFilesByName: Record<string, PackageFile> = {};
+  const registryUrls = [];
   for (const packageFile of reorderFiles(packageFiles)) {
     packageFilesByName[packageFile] = {
       packageFile,
@@ -36,7 +37,12 @@ export async function extractAllPackageFiles(
         extractedDeps.push(...deps);
       } else if (isGradleFile(packageFile)) {
         const vars = getVars(registry, dir);
-        const deps = parseGradle(content, vars, packageFile);
+        const { deps, urls } = parseGradle(content, vars, packageFile);
+        urls.forEach((url) => {
+          if (!registryUrls.includes(url)) {
+            registryUrls.push(url);
+          }
+        });
         extractedDeps.push(...deps);
       }
     } catch (e) {
@@ -55,7 +61,10 @@ export async function extractAllPackageFiles(
     const key = dep.managerData.packageFile;
     const pkgFile: PackageFile = packageFilesByName[key];
     const { deps } = pkgFile;
-    deps.push(dep);
+    deps.push({
+      ...dep,
+      registryUrls: [...(dep.registryUrls || []), ...registryUrls],
+    });
     packageFilesByName[key] = pkgFile;
   });
 

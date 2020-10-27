@@ -1,3 +1,4 @@
+import * as url from 'url';
 import is from '@sindresorhus/is';
 import { logger } from '../../logger';
 import { regEx } from '../../util/regex';
@@ -61,6 +62,161 @@ function matchTokens(
   return result;
 }
 
+const endOfInstruction: SyntaxMatcher = {
+  // Ensure we skip assignments of complex expressions (not strings)
+  matchType: [
+    TokenType.Semicolon,
+    TokenType.RightBrace,
+    TokenType.Word,
+    TokenType.String,
+    TokenType.StringInterpolation,
+  ],
+  lookahead: true,
+};
+
+const potentialStringTypes = [TokenType.String, TokenType.Word];
+
+function coercePotentialString(
+  token: Token,
+  variables: PackageVariables
+): string | null {
+  const tokenType = token?.type;
+  if (tokenType === TokenType.String) {
+    return token?.value;
+  }
+  if (
+    tokenType === TokenType.Word &&
+    typeof variables[token?.value] !== 'undefined'
+  ) {
+    return variables[token.value].value;
+  }
+  return null;
+}
+
+function handleAssignment({
+  packageFile,
+  tokenMap,
+}: SyntaxHandlerInput): SyntaxHandlerOutput {
+  const { keyToken, valToken } = tokenMap;
+  const variableData: VariableData = {
+    key: keyToken.value,
+    value: valToken.value,
+    fileReplacePosition: valToken.offset,
+    packageFile,
+  };
+  return { vars: { [variableData.key]: variableData } };
+}
+
+function processDepString({
+  packageFile,
+  tokenMap,
+}: SyntaxHandlerInput): SyntaxHandlerOutput {
+  const { token } = tokenMap;
+  const dep = parseDependencyString(token.value);
+  if (dep) {
+    dep.managerData = {
+      fileReplacePosition: token.offset + dep.depName.length + 1,
+      packageFile,
+    };
+    return { deps: [dep] };
+  }
+  return null;
+}
+
+function processDepInterpolation({
+  tokenMap,
+  variables,
+}: SyntaxHandlerInput): SyntaxHandlerOutput {
+  const token = tokenMap.depInterpolation as StringInterpolation;
+  const interpolationResult = interpolateString(token.children, variables);
+  if (interpolationResult && isDependencyString(interpolationResult)) {
+    const dep = parseDependencyString(interpolationResult);
+    if (dep) {
+      const lastChild = token.children[token.children.length - 1];
+      const lastChildValue = lastChild?.value;
+      const variable = variables[lastChildValue];
+      if (
+        lastChild?.type === TokenType.Variable &&
+        variable &&
+        variable?.value === dep.currentValue
+      ) {
+        dep.managerData = {
+          fileReplacePosition: variable.fileReplacePosition,
+          packageFile: variable.packageFile,
+        };
+        dep.groupName = variable.key;
+        return { deps: [dep] };
+      }
+    }
+  }
+  return null;
+}
+
+function processPlugin({
+  tokenMap,
+  packageFile,
+}: SyntaxHandlerInput): SyntaxHandlerOutput {
+  const { pluginName, pluginVersion } = tokenMap;
+  const dep = {
+    depType: 'plugin',
+    depName: pluginName.value,
+    lookupName: `${pluginName.value}:${pluginName.value}.gradle.plugin`,
+    registryUrls: ['https://plugins.gradle.org/m2/'],
+    currentValue: pluginVersion.value,
+    commitMessageTopic: `plugin ${pluginName.value}`,
+    managerData: {
+      fileReplacePosition: pluginVersion.offset,
+      packageFile,
+    },
+  };
+  return { deps: [dep] };
+}
+
+function processRegistryUrl({
+  tokenMap,
+}: SyntaxHandlerInput): SyntaxHandlerOutput {
+  const registryUrl = tokenMap.registryUrl?.value;
+  try {
+    if (registryUrl) {
+      const { host, protocol } = url.parse(registryUrl);
+      if (host && protocol) {
+        return { urls: [registryUrl] };
+      }
+    }
+  } catch (e) {
+    // no-op
+  }
+  return null;
+}
+
+function processLongFormDep({
+  tokenMap,
+  variables,
+  packageFile,
+}: SyntaxHandlerInput): SyntaxHandlerOutput {
+  const groupId = coercePotentialString(tokenMap.groupId, variables);
+  const artifactId = coercePotentialString(tokenMap.artifactId, variables);
+  const version = coercePotentialString(tokenMap.version, variables);
+  const dep = parseDependencyString([groupId, artifactId, version].join(':'));
+  if (dep) {
+    const versionToken: Token = tokenMap.version;
+    if (versionToken.type === TokenType.Word) {
+      const variable = variables[versionToken.value];
+      dep.managerData = {
+        fileReplacePosition: variable.fileReplacePosition,
+        packageFile: variable.packageFile,
+      };
+    } else {
+      dep.managerData = {
+        fileReplacePosition: versionToken.offset,
+        packageFile,
+      };
+    }
+    return { deps: [dep] };
+  }
+  return null;
+}
+
 const matcherConfigs: SyntaxMatchConfig[] = [
   {
     // foo = 'bar'
@@ -68,31 +224,9 @@ const matcherConfigs: SyntaxMatchConfig[] = [
       { matchType: TokenType.Word, tokenMapKey: 'keyToken' },
       { matchType: TokenType.Assignment },
       { matchType: TokenType.String, tokenMapKey: 'valToken' },
-      {
-        // Ensure we skip assignments of complex expressions (not strings)
-        matchType: [
-          TokenType.Colon,
-          TokenType.RightBrace,
-          TokenType.Word,
-          TokenType.String,
-          TokenType.StringInterpolation,
-        ],
-        lookahead: true,
-      },
+      endOfInstruction,
     ],
-    handler: function handleAssignment({
-      packageFile,
-      tokenMap,
-    }: SyntaxHandlerInput): SyntaxHandlerOutput {
-      const { keyToken, valToken } = tokenMap;
-      const variableData: VariableData = {
-        key: keyToken.value,
-        value: valToken.value,
-        fileReplacePosition: valToken.offset,
-        packageFile,
-      };
-      return { vars: { [variableData.key]: variableData } };
-    },
+    handler: handleAssignment,
   },
   {
     // 'foo.bar:baz:1.2.3'
@@ -102,21 +236,7 @@ const matcherConfigs: SyntaxMatchConfig[] = [
         tokenMapKey: 'token',
       },
     ],
-    handler: function processDepString({
-      packageFile,
-      tokenMap,
-    }: SyntaxHandlerInput): SyntaxHandlerOutput {
-      const { token } = tokenMap;
-      const dep = parseDependencyString(token.value);
-      if (dep) {
-        dep.managerData = {
-          fileReplacePosition: token.offset + dep.depName.length + 1,
-          packageFile,
-        };
-        return { deps: [dep] };
-      }
-      return null;
-    },
+    handler: processDepString,
   },
   {
     // "foo.bar:baz:${bazVersion}"
@@ -126,34 +246,7 @@ const matcherConfigs: SyntaxMatchConfig[] = [
         tokenMapKey: 'depInterpolation',
       },
     ],
-    handler: function processDepInterpolation({
-      tokenMap,
-      variables,
-    }: SyntaxHandlerInput): SyntaxHandlerOutput {
-      const token = tokenMap.depInterpolation as StringInterpolation;
-      const interpolationResult = interpolateString(token.children, variables);
-      if (interpolationResult && isDependencyString(interpolationResult)) {
-        const dep = parseDependencyString(interpolationResult);
-        if (dep) {
-          const lastChild = token.children[token.children.length - 1];
-          const lastChildValue = lastChild?.value;
-          const variable = variables[lastChildValue];
-          if (
-            lastChild?.type === TokenType.Variable &&
-            variable &&
-            variable?.value === dep.currentValue
-          ) {
-            dep.managerData = {
-              fileReplacePosition: variable.fileReplacePosition,
-              packageFile: variable.packageFile,
-            };
-            dep.groupName = variable.key;
-            return { deps: [dep] };
-          }
-        }
-      }
-      return null;
-    },
+    handler: processDepInterpolation,
   },
   {
     // id 'foo.bar' version '1.2.3'
@@ -163,25 +256,45 @@ const matcherConfigs: SyntaxMatchConfig[] = [
       { matchType: TokenType.Word, matchValue: 'version' },
       { matchType: TokenType.String, tokenMapKey: 'pluginVersion' },
     ],
-    handler: function processPlugin({
-      tokenMap,
-      packageFile,
-    }: SyntaxHandlerInput): SyntaxHandlerOutput {
-      const { pluginName, pluginVersion } = tokenMap;
-      const dep = {
-        depType: 'plugin',
-        depName: pluginName.value,
-        lookupName: `${pluginName.value}:${pluginName.value}.gradle.plugin`,
-        registryUrls: ['https://plugins.gradle.org/m2/'],
-        currentValue: pluginVersion.value,
-        commitMessageTopic: `plugin ${pluginName.value}`,
-        managerData: {
-          fileReplacePosition: pluginVersion.offset,
-          packageFile,
-        },
-      };
-      return { deps: [dep] };
-    },
+    handler: processPlugin,
+  },
+  {
+    // url 'https://repo.spring.io/snapshot/'
+    matchers: [
+      { matchType: TokenType.Word, matchValue: 'url' },
+      { matchType: TokenType.String, tokenMapKey: 'registryUrl' },
+      endOfInstruction,
+    ],
+    handler: processRegistryUrl,
+  },
+  {
+    // url('https://repo.spring.io/snapshot/')
+    matchers: [
+      { matchType: TokenType.Word, matchValue: 'url' },
+      { matchType: TokenType.LeftBrace },
+      { matchType: TokenType.String, tokenMapKey: 'registryUrl' },
+      { matchType: TokenType.LeftBrace },
+      endOfInstruction,
+    ],
+    handler: processRegistryUrl,
+  },
+  {
+    // group: "com.example", name: "my.dependency", version: "1.2.3"
+    matchers: [
+      { matchType: TokenType.Word, matchValue: 'group' },
+      { matchType: TokenType.Colon },
+      { matchType: potentialStringTypes, tokenMapKey: 'groupId' },
+      { matchType: TokenType.Comma },
+      { matchType: TokenType.Word, matchValue: 'name' },
+      { matchType: TokenType.Colon },
+      { matchType: potentialStringTypes, tokenMapKey: 'artifactId' },
+      { matchType: TokenType.Comma },
+      { matchType: TokenType.Word, matchValue: 'version' },
+      { matchType: TokenType.Colon },
+      { matchType: potentialStringTypes, tokenMapKey: 'version' },
+      endOfInstruction,
+    ],
+    handler: processLongFormDep,
   },
 ];
 
@@ -217,21 +330,23 @@ export function parseGradle(
   input: string,
   initVars: PackageVariables = {},
   packageFile?: string
-): PackageDependency<ManagerData>[] {
-  logger.trace({ packageFile }, `Gradle parsing ${packageFile} start`);
-  const variables = { ...initVars };
-  const dependencies: PackageDependency<ManagerData>[] = [];
+): { deps: PackageDependency<ManagerData>[]; urls: string[] } {
+  const vars = { ...initVars };
+  const deps: PackageDependency<ManagerData>[] = [];
+  const urls = [];
 
-  const startTime = Date.now();
   const tokens = tokenize(input);
   let prevTokensLength = tokens.length;
   while (tokens.length) {
-    const matchResult = tryMatch({ tokens, variables, packageFile });
+    const matchResult = tryMatch({ tokens, variables: vars, packageFile });
     if (matchResult?.deps?.length) {
-      dependencies.push(...matchResult.deps);
+      deps.push(...matchResult.deps);
     }
     if (matchResult?.vars) {
-      Object.assign(variables, matchResult?.vars);
+      Object.assign(vars, matchResult.vars);
+    }
+    if (matchResult?.urls) {
+      urls.push(...matchResult.urls);
     }
 
     // istanbul ignore if
@@ -245,12 +360,8 @@ export function parseGradle(
     }
     prevTokensLength = tokens.length;
   }
-  const durationMs = Math.round(Date.now() - startTime);
-  logger.trace(
-    { packageFile, durationMs },
-    `Gradle parsing ${packageFile} finish`
-  );
-  return dependencies;
+
+  return { deps, urls };
 }
 
 const propWord = '[a-zA-Z_][a-zA-Z0-9_]*(?:\\.[a-zA-Z_][a-zA-Z0-9_]*)*';

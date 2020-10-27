@@ -37,7 +37,7 @@ describe('manager/gradle-lite/extract', () => {
   it('works', async () => {
     mockFs({
       'gradle.properties': 'baz=1.2.3',
-      'build.gradle': '"foo:bar:$baz"',
+      'build.gradle': 'url "https://example.com"; "foo:bar:$baz"',
       'settings.gradle': null,
     });
 
@@ -50,7 +50,13 @@ describe('manager/gradle-lite/extract', () => {
     expect(res).toMatchObject([
       {
         packageFile: 'gradle.properties',
-        deps: [{ depName: 'foo:bar', currentValue: '1.2.3' }],
+        deps: [
+          {
+            depName: 'foo:bar',
+            currentValue: '1.2.3',
+            registryUrls: ['https://example.com'],
+          },
+        ],
       },
       { packageFile: 'build.gradle', deps: [] },
       {

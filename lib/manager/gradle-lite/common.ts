@@ -19,8 +19,10 @@ export enum TokenType {
   MultiComment = 'multiComment',
   Newline = 'newline',
 
+  Semicolon = 'semicolon',
   Colon = 'colon',
   Dot = 'dot',
+  Comma = 'comma',
   Operator = 'operator',
 
   Assignment = 'assignment',
@@ -89,6 +91,7 @@ export interface SyntaxHandlerInput {
 export type SyntaxHandlerOutput = {
   deps?: PackageDependency<ManagerData>[];
   vars?: PackageVariables;
+  urls?: string[];
 } | null;
 
 export interface SyntaxMatchConfig {
