@@ -24,9 +24,8 @@ export function filterVersions(
   config: FilterConfig,
   fromVersion: string,
   latestVersion: string,
-  versions: string[],
-  releases: Release[]
-): string[] {
+  versions: Release[]
+): Release[] {
   const {
     versioning,
     ignoreUnstable,
@@ -41,19 +40,21 @@ export function filterVersions(
 
   // Leave only versions greater than current
   let filteredVersions = versions.filter((v) =>
-    version.isGreaterThan(v, fromVersion)
+    version.isGreaterThan(v.version, fromVersion)
   );
 
   // Don't upgrade from non-deprecated to deprecated
-  const fromRelease = releases.find(
+  const fromRelease = versions.find(
     (release) => release.version === fromVersion
   );
   if (ignoreDeprecated && fromRelease && !fromRelease.isDeprecated) {
     filteredVersions = filteredVersions.filter((v) => {
-      const versionRelease = releases.find((release) => release.version === v);
+      const versionRelease = versions.find(
+        (release) => release.version === v.version
+      );
       if (versionRelease.isDeprecated) {
         logger.debug(
-          `Skipping ${config.depName}@${v} because it is deprecated`
+          `Skipping ${config.depName}@${v.version} because it is deprecated`
         );
         return false;
       }
@@ -70,7 +71,7 @@ export function filterVersions(
       regexes[allowedVersions] =
         regexes[allowedVersions] || regEx(allowedVersions.slice(1, -1));
       filteredVersions = filteredVersions.filter((v) =>
-        regexes[allowedVersions].test(v)
+        regexes[allowedVersions].test(v.version)
       );
     } else if (
       allowedVersions.length > 2 &&
@@ -80,11 +81,11 @@ export function filterVersions(
       regexes[allowedVersions] =
         regexes[allowedVersions] || regEx(allowedVersions.slice(2, -1));
       filteredVersions = filteredVersions.filter(
-        (v) => !regexes[allowedVersions].test(v)
+        (v) => !regexes[allowedVersions].test(v.version)
       );
     } else if (version.isValid(allowedVersions)) {
       filteredVersions = filteredVersions.filter((v) =>
-        version.matches(v, allowedVersions)
+        version.matches(v.version, allowedVersions)
       );
     } else if (
       versioning !== npmVersioning.id &&
@@ -95,7 +96,7 @@ export function filterVersions(
         'Falling back to npm semver syntax for allowedVersions'
       );
       filteredVersions = filteredVersions.filter((v) =>
-        semver.satisfies(semver.coerce(v), allowedVersions)
+        semver.satisfies(semver.coerce(v.version), allowedVersions)
       );
     } else if (
       versioning === poetryVersioning.id &&
@@ -106,7 +107,7 @@ export function filterVersions(
         'Falling back to pypi syntax for allowedVersions'
       );
       filteredVersions = filteredVersions.filter((v) =>
-        pep440.matches(v, allowedVersions)
+        pep440.matches(v.version, allowedVersions)
       );
     } else {
       const error = new Error(CONFIG_VALIDATION);
@@ -129,15 +130,17 @@ export function filterVersions(
     // Allow unstable only in current major
     return filteredVersions.filter(
       (v) =>
-        version.isStable(v) ||
-        (version.getMajor(v) === version.getMajor(fromVersion) &&
-          version.getMinor(v) === version.getMinor(fromVersion) &&
-          version.getPatch(v) === version.getPatch(fromVersion))
+        version.isStable(v.version) ||
+        (version.getMajor(v.version) === version.getMajor(fromVersion) &&
+          version.getMinor(v.version) === version.getMinor(fromVersion) &&
+          version.getPatch(v.version) === version.getPatch(fromVersion))
     );
   }
 
   // Normal case: remove all unstable
-  filteredVersions = filteredVersions.filter((v) => version.isStable(v));
+  filteredVersions = filteredVersions.filter((v) =>
+    version.isStable(v.version)
+  );
 
   // Filter the latest
 
@@ -155,6 +158,6 @@ export function filterVersions(
     return filteredVersions;
   }
   return filteredVersions.filter(
-    (v) => !version.isGreaterThan(v, latestVersion)
+    (v) => !version.isGreaterThan(v.version, latestVersion)
   );
 }
