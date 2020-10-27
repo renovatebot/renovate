@@ -11,6 +11,18 @@ describe('lib/manager/travis/package', () => {
   describe('getPackageUpdates', () => {
     // TODO: should be `PackageUpdateConfig`
     let config: any;
+    const RealDate = Date;
+
+    beforeAll(() => {
+      global.Date = class FakeDate extends RealDate {
+        constructor(arg?: number | string | Date) {
+          super(arg ?? '2020-10-15');
+        }
+      } as any;
+    });
+    afterAll(() => {
+      global.Date = RealDate;
+    });
     beforeEach(() => {
       config = {
         ...defaultConfig,
