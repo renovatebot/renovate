@@ -34,9 +34,9 @@ If you are using a [privately hosted Composer package](https://getcomposer.org/d
 }
 ```
 
-If you don't wish for all users of the repository to be able to see the unencrypted token, you can encrypt it with Renovate's public key instead, so that only Renovate can decrypt it.
+This host rule is best added to the bot's `config.js` config so that it is not visible to users of the repository. If you are using the hosted WhiteSource Renovate App then you can encrypt it with Renovate's public key instead, so that only Renovate can decrypt it.
 
-Go to [https://renovatebot.com/encrypt](https://renovatebot.com/encrypt), paste in your credentials, click _Encrypt_, then copy the encrypted result. You may encrypt your `password` only or even pass your `username` encrypted.
+Go to [https://renovatebot.com/encrypt](https://renovatebot.com/encrypt), paste in the secret string you wish to encrypt, click _Encrypt_, then copy the encrypted result. You may encrypt your `password` only or even pass your `username` encrypted.
 
 ```json
 {
