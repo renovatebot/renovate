@@ -11,6 +11,7 @@ const http = new GithubHttp();
 type GithubRelease = {
   tag_name: string;
   published_at: string;
+  prerelease: boolean;
 };
 
 /**
@@ -43,11 +44,14 @@ export async function getReleases({
     sourceUrl: 'https://github.com/' + repo,
     releases: null,
   };
-  dependency.releases = githubReleases.map(({ tag_name, published_at }) => ({
-    version: tag_name,
-    gitRef: tag_name,
-    releaseTimestamp: published_at,
-  }));
+  dependency.releases = githubReleases.map(
+    ({ tag_name, published_at, prerelease }) => ({
+      version: tag_name,
+      gitRef: tag_name,
+      releaseTimestamp: published_at,
+      isStable: prerelease ? false : undefined,
+    })
+  );
   const cacheMinutes = 10;
   await packageCache.set(cacheNamespace, repo, dependency, cacheMinutes);
   return dependency;

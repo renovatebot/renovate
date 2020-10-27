@@ -1,4 +1,4 @@
-import moment from 'moment';
+import { DateTime } from 'luxon';
 import nock from 'nock';
 import _registryAuthToken from 'registry-auth-token';
 import { getPkgReleases } from '..';
@@ -171,7 +171,7 @@ describe(getName(__filename), () => {
     expect(getRelease(res, '0.0.2').canBeUnpublished).toBeUndefined();
   });
   it('should return canBeUnpublished=true', async () => {
-    npmResponse.time['0.0.2'] = moment().subtract(6, 'hours').format();
+    npmResponse.time['0.0.2'] = DateTime.local().minus({ hours: 6 }).toISO();
     nock('https://registry.npmjs.org').get('/foobar').reply(200, npmResponse);
     const res = await getPkgReleases({ datasource, depName: 'foobar' });
     expect(getRelease(res, '0.0.1').canBeUnpublished).toBe(false);

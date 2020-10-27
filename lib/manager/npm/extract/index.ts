@@ -19,7 +19,7 @@ import {
   PackageDependency,
   PackageFile,
 } from '../../common';
-import { NpmPackage, NpmPackageDependeny } from './common';
+import { NpmPackage, NpmPackageDependency } from './common';
 import { getLockedVersions } from './locked-versions';
 import { detectMonorepos } from './monorepo';
 import { mightBeABrowserLibrary } from './type';
@@ -299,7 +299,7 @@ export async function extractPackageFile(
     if (packageJson[depType]) {
       try {
         for (const [key, val] of Object.entries(
-          packageJson[depType] as NpmPackageDependeny
+          packageJson[depType] as NpmPackageDependency
         )) {
           const depName = parseDepName(depType, key);
           const dep: PackageDependency = {
