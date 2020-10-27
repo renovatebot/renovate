@@ -435,5 +435,26 @@ describe('config/migration', () => {
       expect(res.isMigrated).toBe(false);
       expect(res.migratedConfig).toMatchObject({ semanticCommits: 'disabled' });
     });
+    it('it migrates preset strings to array', () => {
+      let config: RenovateConfig;
+      let res: MigratedConfig;
+
+      config = { extends: ':js-app' } as never;
+      res = configMigration.migrateConfig(config);
+      expect(res.isMigrated).toBe(true);
+      expect(res.migratedConfig).toMatchObject({ extends: ['config:js-app'] });
+
+      config = { extends: 'foo' } as never;
+      res = configMigration.migrateConfig(config);
+      expect(res.isMigrated).toBe(true);
+      expect(res.migratedConfig).toMatchObject({ extends: ['foo'] });
+
+      config = { extends: ['foo', ':js-app', 'bar'] } as never;
+      res = configMigration.migrateConfig(config);
+      expect(res.isMigrated).toBe(true);
+      expect(res.migratedConfig).toMatchObject({
+        extends: ['foo', 'config:js-app', 'bar'],
+      });
+    });
   });
 });
