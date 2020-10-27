@@ -9,10 +9,10 @@
 
 ## Context:
 
-<!-- Describe why you're making these changes. -->
-<!-- If you're closing an existing issue with this pull request, use the keyboard Closes #issue_number -->
+<!-- Describe why you're making these changes if it's not already explained in a corresponding issue. -->
+<!-- If you're closing an existing issue with this pull request, use the keyword Closes #issue_number -->
 
-## Documentation (please tick one)
+## Documentation (please check one with an [x])
 
 - [ ] I have updated the documentation, or
 - [ ] No documentation update is required
