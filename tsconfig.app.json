@@ -18,6 +18,7 @@
     "**/__testutil__/**",
     "**/*.spec.ts",
     "./test",
-    "./tools"
+    "./tools",
+    "./docs"
   ]
 }
