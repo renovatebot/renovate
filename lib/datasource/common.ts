@@ -44,7 +44,7 @@ export interface Release {
   downloadUrl?: string;
   gitRef?: string;
   isDeprecated?: boolean;
-
+  isStable?: boolean;
   releaseTimestamp?: any;
   version: string;
   newDigest?: string;

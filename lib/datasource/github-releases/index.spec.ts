@@ -31,6 +31,11 @@ describe('datasource/github-releases', () => {
           { tag_name: 'v', published_at: '2020-03-09T12:00:00Z' },
           { tag_name: '1.0.0', published_at: '2020-03-09T11:00:00Z' },
           { tag_name: 'v1.1.0', published_at: '2020-03-09T10:00:00Z' },
+          {
+            tag_name: '2.0.0',
+            published_at: '2020-04-09T10:00:00Z',
+            prerelease: true,
+          },
         ]);
 
       const res = await getPkgReleases({
@@ -38,10 +43,13 @@ describe('datasource/github-releases', () => {
         depName: 'some/dep',
       });
       expect(res).toMatchSnapshot();
-      expect(res.releases).toHaveLength(2);
+      expect(res.releases).toHaveLength(3);
       expect(
         res.releases.find((release) => release.version === 'v1.1.0')
       ).toBeDefined();
+      expect(
+        res.releases.find((release) => release.version === '2.0.0').isStable
+      ).toBe(false);
       expect(httpMock.getTrace()).toMatchSnapshot();
     });
   });

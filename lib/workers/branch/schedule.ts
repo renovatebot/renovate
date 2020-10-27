@@ -1,5 +1,5 @@
+import later from '@breejs/later';
 import is from '@sindresorhus/is';
-import later from 'later';
 import { DateTime } from 'luxon';
 import { RenovateConfig } from '../../config';
 import { logger } from '../../logger';
