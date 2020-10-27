@@ -24,7 +24,7 @@ export function filterVersions(
   config: FilterConfig,
   fromVersion: string,
   latestVersion: string,
-  versions: Release[]
+  releases: Release[]
 ): Release[] {
   const {
     ignoreUnstable,
@@ -45,17 +45,17 @@ export function filterVersions(
   }
 
   // Leave only versions greater than current
-  let filteredVersions = versions.filter((v) =>
+  let filteredVersions = releases.filter((v) =>
     versioning.isGreaterThan(v.version, fromVersion)
   );
 
   // Don't upgrade from non-deprecated to deprecated
-  const fromRelease = versions.find(
+  const fromRelease = releases.find(
     (release) => release.version === fromVersion
   );
   if (ignoreDeprecated && fromRelease && !fromRelease.isDeprecated) {
     filteredVersions = filteredVersions.filter((v) => {
-      const versionRelease = versions.find(
+      const versionRelease = releases.find(
         (release) => release.version === v.version
       );
       if (versionRelease.isDeprecated) {
