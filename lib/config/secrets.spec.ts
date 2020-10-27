@@ -10,7 +10,7 @@ describe('config/secrets', () => {
       expect(validateConfigSecrets({})).toBeUndefined();
     });
     it('throws if secrets is not an object', () => {
-      expect(() => validateConfigSecrets({ secrets: 'hello' })).toThrow(
+      expect(() => validateConfigSecrets({ secrets: 'hello' } as any)).toThrow(
         CONFIG_SECRETS_INVALID
       );
     });
@@ -20,14 +20,16 @@ describe('config/secrets', () => {
       ).toThrow(CONFIG_SECRETS_INVALID);
     });
     it('throws for non-string secret', () => {
-      expect(() => validateConfigSecrets({ secrets: { abc: 123 } })).toThrow(
-        CONFIG_SECRETS_INVALID
-      );
+      expect(() =>
+        validateConfigSecrets({ secrets: { abc: 123 } } as any)
+      ).toThrow(CONFIG_SECRETS_INVALID);
     });
     it('throws for secrets inside repositories', () => {
       expect(() =>
         validateConfigSecrets({
-          repositories: [{ repository: 'abc/def', secrets: { abc: 123 } }],
+          repositories: [
+            { repository: 'abc/def', secrets: { abc: 123 } },
+          ] as any,
         })
       ).toThrow(CONFIG_SECRETS_INVALID);
     });

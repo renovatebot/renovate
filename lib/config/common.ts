@@ -80,7 +80,7 @@ export interface RenovateAdminConfig {
   dockerUser?: string;
 
   dryRun?: boolean;
-  secrets?: any;
+  secrets?: Record<string, string>;
   endpoint?: string;
 
   global?: GlobalConfig;
@@ -121,7 +121,7 @@ export type RenovateRepository =
   | string
   | {
       repository: string;
-      secrets?: any;
+      secrets?: Record<string, string>;
     };
 
 export interface CustomManager {
