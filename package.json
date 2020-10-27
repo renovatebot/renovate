@@ -29,7 +29,7 @@
     "prepare": "run-s prepare:*",
     "prepare:tools": "tsc -p tools",
     "prepare:re2": "node --experimental-modules tools/check-re2.mjs",
-    "prepare:generate": "run-s docs:install:ci generate:*",
+    "prepare:generate": "run-s generate:*",
     "prestart": "run-s generate:* ",
     "pretest": "run-s generate:* ",
     "prettier": "prettier --list-different \"**/*.{ts,js,mjs,json,md}\"",
