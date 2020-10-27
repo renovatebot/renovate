@@ -1,4 +1,4 @@
-import moment from 'moment';
+import { DateTime } from 'luxon';
 import { RenovateConfig, getConfig, platform } from '../../../../test/util';
 import { PrState } from '../../../types';
 import { BranchConfig } from '../../common';
@@ -16,7 +16,7 @@ describe('workers/repository/process/limits', () => {
       config.prHourlyLimit = 2;
       platform.getPrList.mockResolvedValueOnce([
         {
-          createdAt: moment().toISOString(),
+          createdAt: DateTime.local().toISO(),
           sourceBranch: null,
           title: null,
           state: null,

@@ -153,6 +153,24 @@ describe('config/index', () => {
         4,
       ]);
     });
+    it('merges constraints', async () => {
+      const parentConfig = { ...defaultConfig };
+      Object.assign(parentConfig, {
+        constraints: {
+          node: '>=12',
+          npm: '^6.0.0',
+        },
+      });
+      const childConfig = {
+        constraints: {
+          node: '<15',
+        },
+      };
+      const configParser = await import('./index');
+      const config = configParser.mergeChildConfig(parentConfig, childConfig);
+      expect(config.constraints).toMatchSnapshot();
+      expect(config.constraints.node).toEqual('<15');
+    });
     it('handles null parent packageRules', async () => {
       const parentConfig = { ...defaultConfig };
       Object.assign(parentConfig, {
