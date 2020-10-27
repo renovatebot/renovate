@@ -32,7 +32,14 @@ export function filterVersions(
     respectLatest,
     allowedVersions,
   } = config;
-  const versioning = allVersioning.get(config.versioning);
+  let versioning;
+  function isVersionStable(version: string): boolean {
+    if (!versioning.isStable(version)) {
+      return false;
+    }
+    return true;
+  }
+  versioning = allVersioning.get(config.versioning);
   if (!fromVersion) {
     return [];
   }
@@ -125,11 +132,11 @@ export function filterVersions(
   }
 
   // if current is unstable then allow unstable in the current major only
-  if (!versioning.isStable(fromVersion)) {
+  if (!isVersionStable(fromVersion)) {
     // Allow unstable only in current major
     return filteredVersions.filter(
       (v) =>
-        versioning.isStable(v.version) ||
+        isVersionStable(v.version) ||
         (versioning.getMajor(v.version) === versioning.getMajor(fromVersion) &&
           versioning.getMinor(v.version) === versioning.getMinor(fromVersion) &&
           versioning.getPatch(v.version) === versioning.getPatch(fromVersion))
@@ -137,9 +144,7 @@ export function filterVersions(
   }
 
   // Normal case: remove all unstable
-  filteredVersions = filteredVersions.filter((v) =>
-    versioning.isStable(v.version)
-  );
+  filteredVersions = filteredVersions.filter((v) => isVersionStable(v.version));
 
   // Filter the latest
 
