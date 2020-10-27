@@ -18,3 +18,35 @@ Renovate supports upgrading dependencies in PHP's `composer.json` files and thei
 ## Enabling
 
 Either install the [Renovate App](https://github.com/apps/renovate) on GitHub, or check out [Renovate OSS](https://github.com/renovatebot/renovate) for self-hosted.
+
+## Private packages
+
+If you are using a [privately hosted Composer package](https://getcomposer.org/doc/articles/authentication-for-private-packages.md) you can pass the credentials via the [`hostRules`](https://docs.renovatebot.com/configuration-options/#hostrules) configuration.
+
+```json
+{
+    "hostRules": [{
+        "hostName": "some.vendor.com",
+        "hostType": "packagist",
+        "username": "<your-username>",
+        "password": "<your-password>"
+    }]
+}
+```
+
+If you don't wish for all users of the repository to be able to see the unencrypted token, you can encrypt it with Renovate's public key instead, so that only Renovate can decrypt it.
+
+Go to [https://renovatebot.com/encrypt](https://renovatebot.com/encrypt), paste in your credentials, click _Encrypt_, then copy the encrypted result. You may encrypt your `password` only or even pass your `username` encrypted.
+
+```json
+{
+    "hostRules": [{
+        "hostName": "some.vendor.com",
+        "hostType": "packagist",
+        "encrypted": {
+            "username": "<your-encrypted-password",
+            "password": "<your-encrypted-password"
+        }
+    }]
+}
+```
