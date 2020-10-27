@@ -244,6 +244,18 @@ Constraints are also used to manually restrict which _datasource_ versions are p
 }
 ```
 
+If you need to _override_ constraints that Renovate detects from the repository, wrap it in the `force` object like so:
+
+```json
+{
+  "force": {
+    "constraints": {
+      "node": "< 15.0.0"
+    }
+  }
+}
+```
+
 Note: make sure not to mix this up with the term `compatibility`, which Renovate uses in the context of version releases, e.g. if a Docker image is `node:12.16.0-alpine` then the `-alpine` suffix represents `compatibility`.
 
 ## dependencyDashboard
