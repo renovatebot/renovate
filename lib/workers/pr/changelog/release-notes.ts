@@ -111,6 +111,7 @@ export async function getReleaseNotes(
         releaseNotes = null;
       } else {
         try {
+          // istanbul ignore else: not tested
           if (baseUrl !== 'https://gitlab.com/') {
             releaseNotes.body = linkify(releaseNotes.body, {
               repository: `${baseUrl}${repository}`,
@@ -236,6 +237,7 @@ export async function getReleaseNotesMd(
               let url = `${baseUrl}${repository}/blob/master/${changelogFile}#`;
               url += title.join('-').replace(/[^A-Za-z0-9-]/g, '');
               body = massageBody(body, baseUrl);
+              // istanbul ignore else: not tested
               if (body?.length) {
                 try {
                   body = linkify(body, {
@@ -270,16 +272,17 @@ export async function getReleaseNotesMd(
  * cache for days.
  */
 export function releaseNotesCacheMinutes(releaseDate?: string | Date): number {
-  // for an invalid or missing release date, default to "now"
   const dt = is.date(releaseDate)
     ? DateTime.fromJSDate(releaseDate)
     : DateTime.fromISO(releaseDate);
 
-  if (!dt.isValid || dt.diffNow('days').days < -7) {
+  const now = DateTime.local();
+
+  if (!dt.isValid || now.diff(dt, 'days').days < 7) {
     return 55;
   }
 
-  if (dt.diffNow('months').months < -6) {
+  if (now.diff(dt, 'months').months < 6) {
     return 1435; // 5 minutes shy of one day
   }
 
@@ -311,6 +314,7 @@ export async function addReleaseNotes(
     let releaseNotes: ChangeLogNotes;
     const cacheKey = getCacheKey(v.version);
     releaseNotes = await packageCache.get(cacheNamespace, cacheKey);
+    // istanbul ignore else: no cache tests
     if (!releaseNotes) {
       releaseNotes = await getReleaseNotesMd(
         repository,
@@ -318,6 +322,7 @@ export async function addReleaseNotes(
         input.project.baseUrl,
         input.project.apiBaseUrl
       );
+      // istanbul ignore else: should be tested
       if (!releaseNotes) {
         releaseNotes = await getReleaseNotes(
           repository,
