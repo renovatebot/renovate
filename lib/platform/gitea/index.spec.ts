@@ -1,4 +1,4 @@
-import { BranchStatusConfig, Platform, Pr, RepoParams, RepoResult } from '..';
+import { BranchStatusConfig, Platform, RepoParams, RepoResult } from '..';
 import { partial } from '../../../test/util';
 import {
   REPOSITORY_ACCESS_FORBIDDEN,
@@ -833,14 +833,8 @@ describe('platform/gitea', () => {
 
   describe('updatePr', () => {
     it('should update pull request with title', async () => {
-      const existingPr: Pr = {
-        number: 1,
-        sourceBranch: '',
-        state: '',
-        title: '',
-      };
       await initFakeRepo();
-      await gitea.updatePr({ existingPr, prTitle: 'New Title' });
+      await gitea.updatePr({ number: 1, prTitle: 'New Title' });
 
       expect(helper.updatePR).toHaveBeenCalledTimes(1);
       expect(helper.updatePR).toHaveBeenCalledWith(mockRepo.full_name, 1, {
@@ -849,15 +843,9 @@ describe('platform/gitea', () => {
     });
 
     it('should update pull request with title and body', async () => {
-      const existingPr: Pr = {
-        number: 1,
-        sourceBranch: '',
-        state: '',
-        title: '',
-      };
       await initFakeRepo();
       await gitea.updatePr({
-        existingPr,
+        number: 1,
         prTitle: 'New Title',
         prBody: 'New Body',
       });
@@ -870,15 +858,9 @@ describe('platform/gitea', () => {
     });
 
     it('should close pull request', async () => {
-      const existingPr: Pr = {
-        number: 1,
-        sourceBranch: '',
-        state: '',
-        title: '',
-      };
       await initFakeRepo();
       await gitea.updatePr({
-        existingPr,
+        number: 1,
         prTitle: 'New Title',
         prBody: 'New Body',
         state: PrState.Closed,

@@ -6,7 +6,7 @@ import {
 import { BranchStatus, PrState } from '../../types';
 import * as _git from '../../util/git';
 import * as _hostRules from '../../util/host-rules';
-import { Platform, Pr, RepoParams } from '../common';
+import { Platform, RepoParams } from '../common';
 
 describe('platform/azure', () => {
   let hostRules: jest.Mocked<typeof _hostRules>;
@@ -673,14 +673,8 @@ describe('platform/azure', () => {
             updatePullRequest,
           } as any)
       );
-      const existingPr: Pr = {
-        number: 1234,
-        sourceBranch: '',
-        state: '',
-        title: '',
-      };
       await azure.updatePr({
-        existingPr,
+        number: 1234,
         prTitle: 'The New Title',
         prBody: 'Hello world again',
       });
@@ -696,14 +690,8 @@ describe('platform/azure', () => {
             updatePullRequest,
           } as any)
       );
-      const existingPr: Pr = {
-        number: 1234,
-        sourceBranch: '',
-        state: '',
-        title: '',
-      };
       await azure.updatePr({
-        existingPr,
+        number: 1234,
         prTitle: 'The New Title - autoclose',
       });
       expect(updatePullRequest.mock.calls).toMatchSnapshot();
@@ -718,14 +706,8 @@ describe('platform/azure', () => {
             updatePullRequest,
           } as any)
       );
-      const existingPr: Pr = {
-        number: 1234,
-        sourceBranch: '',
-        state: '',
-        title: '',
-      };
       await azure.updatePr({
-        existingPr,
+        number: 1234,
         prTitle: 'The New Title',
         prBody: 'Hello world again',
         state: PrState.Closed,
@@ -742,14 +724,8 @@ describe('platform/azure', () => {
             updatePullRequest,
           } as any)
       );
-      const existingPr: Pr = {
-        number: 1234,
-        sourceBranch: '',
-        state: '',
-        title: '',
-      };
       await azure.updatePr({
-        existingPr,
+        number: 1234,
         prTitle: 'The New Title',
         prBody: 'Hello world again',
         state: PrState.Open,

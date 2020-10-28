@@ -715,12 +715,11 @@ interface Reviewer {
 }
 
 export async function updatePr({
-  existingPr,
+  number: prNo,
   prTitle: title,
   prBody: description,
   state,
 }: UpdatePrConfig): Promise<void> {
-  const prNo = existingPr.number;
   logger.debug(`updatePr(${prNo}, ${title}, body)`);
   // Updating a PR in Bitbucket will clear the reviewers if reviewers is not present
   const pr = (

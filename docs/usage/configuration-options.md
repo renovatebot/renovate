@@ -328,7 +328,7 @@ If you want the PRs created by Renovate to be considered as drafts rather than n
 
 This option is only supported on the following platforms: GitHub, GitLab, Azure
 
-Note that GitLab implements draft status by checking whether the PR's title starts with certain strings. Therefore, draftPR on GitLab is incompatible with the legacy method of triggering Renovate to rebase a PR by renaming the PR to start with `rebase!`.
+Note that GitLab implements draft status by checking whether the PR's title starts with certain strings. Therefore, draftPR on GitLab is incompatible with the legacy method of triggering Renovate to rebase a PR by renaming the PR to start with `!rebase`.
 
 ## enabled
 

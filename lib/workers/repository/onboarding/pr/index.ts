@@ -117,7 +117,7 @@ If you need any further assistance then you can also [request help here](${confi
       logger.info('DRY-RUN: Would update onboarding PR');
     } else {
       await platform.updatePr({
-        existingPr,
+        number: existingPr.number,
         prTitle: existingPr.title,
         prBody,
       });

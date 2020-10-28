@@ -838,12 +838,11 @@ export async function createPr({
 }
 
 export async function updatePr({
-  existingPr,
+  number: prNo,
   prTitle: title,
   prBody: rawDescription,
   state,
 }: UpdatePrConfig): Promise<void> {
-  const prNo = existingPr.number;
   const description = sanitize(rawDescription);
   logger.debug(`updatePr(${prNo}, title=${title})`);
 

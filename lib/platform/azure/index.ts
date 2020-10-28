@@ -408,12 +408,11 @@ export async function createPr({
 }
 
 export async function updatePr({
-  existingPr,
+  number: prNo,
   prTitle: title,
   prBody: body,
   state,
 }: UpdatePrConfig): Promise<void> {
-  const prNo = existingPr.number;
   logger.debug(`updatePr(${prNo}, ${title}, body)`);
 
   const azureApiGit = await azureApi.gitApi();

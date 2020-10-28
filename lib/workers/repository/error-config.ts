@@ -25,7 +25,7 @@ export async function raiseConfigWarningIssue(
       logger.info(`DRY-RUN: Would update PR #${pr.number}`);
     } else {
       await platform.updatePr({
-        existingPr: pr,
+        number: pr.number,
         prTitle: config.onboardingPrTitle,
         prBody: body,
       });

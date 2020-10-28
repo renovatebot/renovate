@@ -8,7 +8,7 @@ import {
 } from '../../constants/error-messages';
 import { BranchStatus, PrState } from '../../types';
 import * as _git from '../../util/git';
-import { Platform, Pr } from '../common';
+import { Platform } from '../common';
 
 function repoMock(
   endpoint: URL | string,
@@ -1232,14 +1232,8 @@ describe(getName(__filename), () => {
             )
             .reply(200);
 
-          const existingPr: Pr = {
-            number: 5,
-            sourceBranch: '',
-            state: '',
-            title: '',
-          };
           await bitbucket.updatePr({
-            existingPr,
+            number: 5,
             prTitle: 'title',
             prBody: 'body',
           });
@@ -1266,14 +1260,8 @@ describe(getName(__filename), () => {
             )
             .reply(200, { status: 'DECLINED' });
 
-          const existingPr: Pr = {
-            number: 5,
-            sourceBranch: '',
-            state: '',
-            title: '',
-          };
           await bitbucket.updatePr({
-            existingPr,
+            number: 5,
             prTitle: 'title',
             prBody: 'body',
             state: PrState.Closed,
@@ -1301,14 +1289,8 @@ describe(getName(__filename), () => {
             )
             .reply(200, { status: 'OPEN' });
 
-          const existingPr: Pr = {
-            number: 5,
-            sourceBranch: '',
-            state: '',
-            title: '',
-          };
           await bitbucket.updatePr({
-            existingPr,
+            number: 5,
             prTitle: 'title',
             prBody: 'body',
             state: PrState.Open,
@@ -1317,16 +1299,10 @@ describe(getName(__filename), () => {
         });
 
         it('throws not-found 1', async () => {
-          const existingPr: Pr = {
-            number: null,
-            sourceBranch: '',
-            state: '',
-            title: '',
-          };
           await initRepo();
           await expect(
             bitbucket.updatePr({
-              existingPr,
+              number: null as any,
               prTitle: 'title',
               prBody: 'body',
             })
@@ -1342,14 +1318,8 @@ describe(getName(__filename), () => {
               `${urlPath}/rest/api/1.0/projects/SOME/repos/repo/pull-requests/4`
             )
             .reply(404);
-          const existingPr: Pr = {
-            number: 4,
-            sourceBranch: '',
-            state: '',
-            title: '',
-          };
           await expect(
-            bitbucket.updatePr({ existingPr, prTitle: 'title', prBody: 'body' })
+            bitbucket.updatePr({ number: 4, prTitle: 'title', prBody: 'body' })
           ).rejects.toThrow(REPOSITORY_NOT_FOUND);
 
           expect(httpMock.getTrace()).toMatchSnapshot();
@@ -1371,14 +1341,8 @@ describe(getName(__filename), () => {
             )
             .reply(404);
 
-          const existingPr: Pr = {
-            number: 5,
-            sourceBranch: '',
-            state: '',
-            title: '',
-          };
           await expect(
-            bitbucket.updatePr({ existingPr, prTitle: 'title', prBody: 'body' })
+            bitbucket.updatePr({ number: 5, prTitle: 'title', prBody: 'body' })
           ).rejects.toThrow(REPOSITORY_NOT_FOUND);
 
           expect(httpMock.getTrace()).toMatchSnapshot();
@@ -1400,14 +1364,8 @@ describe(getName(__filename), () => {
             )
             .reply(409);
 
-          const existingPr: Pr = {
-            number: 5,
-            sourceBranch: '',
-            state: '',
-            title: '',
-          };
           await expect(
-            bitbucket.updatePr({ existingPr, prTitle: 'title', prBody: 'body' })
+            bitbucket.updatePr({ number: 5, prTitle: 'title', prBody: 'body' })
           ).rejects.toThrow(REPOSITORY_CHANGED);
           expect(httpMock.getTrace()).toMatchSnapshot();
         });
@@ -1428,14 +1386,8 @@ describe(getName(__filename), () => {
             )
             .reply(405);
 
-          const existingPr: Pr = {
-            number: 5,
-            sourceBranch: '',
-            state: '',
-            title: '',
-          };
           await expect(
-            bitbucket.updatePr({ existingPr, prTitle: 'title', prBody: 'body' })
+            bitbucket.updatePr({ number: 5, prTitle: 'title', prBody: 'body' })
           ).rejects.toThrowErrorMatchingSnapshot();
           expect(httpMock.getTrace()).toMatchSnapshot();
         });
