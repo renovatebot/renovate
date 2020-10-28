@@ -188,7 +188,6 @@ export async function ensurePr(
   ) {
     logger.debug('Checking branch combined status');
     if (
-      !dependencyDashboardCheck &&
       config.stabilityStatus !== BranchStatus.yellow &&
       (await getBranchStatus()) === BranchStatus.yellow
     ) {
@@ -201,7 +200,10 @@ export async function ensurePr(
       const elapsedHours = Math.round(
         (currentTime.getTime() - lastCommitTime.getTime()) / millisecondsPerHour
       );
-      if (elapsedHours < config.prNotPendingHours) {
+      if (
+        !dependencyDashboardCheck &&
+        elapsedHours < config.prNotPendingHours
+      ) {
         logger.debug(
           `Branch is ${elapsedHours} hours old - skipping PR creation`
         );
