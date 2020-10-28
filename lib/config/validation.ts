@@ -214,17 +214,24 @@ export async function validateConfig(
             if (key === 'extends') {
               const tzRe = /^:timezone\((.+)\)$/;
               for (const subval of val) {
-                if (is.string(subval) && tzRe.test(subval)) {
-                  const [, timezone] = tzRe.exec(subval);
-                  const [validTimezone, errorMessage] = hasValidTimezone(
-                    timezone
-                  );
-                  if (!validTimezone) {
-                    errors.push({
-                      depName: 'Configuration Error',
-                      message: `${currentPath}: ${errorMessage}`,
-                    });
+                if (is.string(subval)) {
+                  if (tzRe.test(subval)) {
+                    const [, timezone] = tzRe.exec(subval);
+                    const [validTimezone, errorMessage] = hasValidTimezone(
+                      timezone
+                    );
+                    if (!validTimezone) {
+                      errors.push({
+                        depName: 'Configuration Error',
+                        message: `${currentPath}: ${errorMessage}`,
+                      });
+                    }
                   }
+                } else {
+                  errors.push({
+                    depName: 'Configuration Warning',
+                    message: `${currentPath}: preset value is not a string`,
+                  });
                 }
               }
             }

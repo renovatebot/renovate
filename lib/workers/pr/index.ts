@@ -48,12 +48,14 @@ export async function addAssigneesReviewers(
       if (config.assigneesSampleSize !== null) {
         assignees = sampleSize(assignees, config.assigneesSampleSize);
       }
-      // istanbul ignore if
-      if (config.dryRun) {
-        logger.info(`DRY-RUN: Would add assignees to PR #${pr.number}`);
-      } else {
-        await platform.addAssignees(pr.number, assignees);
-        logger.debug({ assignees }, 'Added assignees');
+      if (assignees.length > 0) {
+        // istanbul ignore if
+        if (config.dryRun) {
+          logger.info(`DRY-RUN: Would add assignees to PR #${pr.number}`);
+        } else {
+          await platform.addAssignees(pr.number, assignees);
+          logger.debug({ assignees }, 'Added assignees');
+        }
       }
     } catch (err) {
       logger.debug(
@@ -78,12 +80,14 @@ export async function addAssigneesReviewers(
       if (config.reviewersSampleSize !== null) {
         reviewers = sampleSize(reviewers, config.reviewersSampleSize);
       }
-      // istanbul ignore if
-      if (config.dryRun) {
-        logger.info(`DRY-RUN: Would add reviewers to PR #${pr.number}`);
-      } else {
-        await platform.addReviewers(pr.number, reviewers);
-        logger.debug({ reviewers }, 'Added reviewers');
+      if (reviewers.length > 0) {
+        // istanbul ignore if
+        if (config.dryRun) {
+          logger.info(`DRY-RUN: Would add reviewers to PR #${pr.number}`);
+        } else {
+          await platform.addReviewers(pr.number, reviewers);
+          logger.debug({ reviewers }, 'Added reviewers');
+        }
       }
     } catch (err) {
       logger.debug(
