@@ -1,5 +1,6 @@
 import * as URL from 'url';
 import { linkify } from 'linkify-markdown';
+import { DateTime } from 'luxon';
 import MarkdownIt from 'markdown-it';
 
 import { logger } from '../../../logger';
@@ -268,15 +269,13 @@ export async function getReleaseNotesMd(
  * cache for days.
  */
 function releaseNotesCacheMinutes(releaseDate?: string | Date): number {
-  // for an invalid or missing release date, default to "now"
-  const releaseTS = new Date(releaseDate || '').valueOf() || Date.now();
-  const ageInDays = (Date.now() - releaseTS) / 86400000;
+  const dt = DateTime.fromJSDate(new Date(releaseDate));
 
-  if (ageInDays < 7) {
+  if (!dt.isValid || dt.diffNow('days').days < 7) {
     return 55;
   }
 
-  if (ageInDays < 180) {
+  if (dt.diffNow('months').months < 6) {
     return 1435; // 5 minutes shy of one day
   }
 
