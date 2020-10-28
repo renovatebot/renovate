@@ -1,4 +1,5 @@
 import * as URL from 'url';
+import is from '@sindresorhus/is';
 import { linkify } from 'linkify-markdown';
 import { DateTime } from 'luxon';
 import MarkdownIt from 'markdown-it';
@@ -268,14 +269,17 @@ export async function getReleaseNotesMd(
  * so only cache for about an hour when the release is less than a week old. Otherwise,
  * cache for days.
  */
-function releaseNotesCacheMinutes(releaseDate?: string | Date): number {
-  const dt = DateTime.fromJSDate(new Date(releaseDate));
+export function releaseNotesCacheMinutes(releaseDate?: string | Date): number {
+  // for an invalid or missing release date, default to "now"
+  const dt = is.date(releaseDate)
+    ? DateTime.fromJSDate(releaseDate)
+    : DateTime.fromISO(releaseDate);
 
-  if (!dt.isValid || dt.diffNow('days').days < 7) {
+  if (!dt.isValid || dt.diffNow('days').days < -7) {
     return 55;
   }
 
-  if (dt.diffNow('months').months < 6) {
+  if (dt.diffNow('months').months < -6) {
     return 1435; // 5 minutes shy of one day
   }
 
