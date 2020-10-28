@@ -23,5 +23,4 @@ I have verified these changes via:
 - [ ] Newly added unit tests, or
 - [ ] Unit tests + ran on a real repository
 
-
 <!-- Do you have any suggestions about this PR template? Edit it here: https://github.com/renovatebot/renovate/edit/master/.github/pull_request_template.md -->
