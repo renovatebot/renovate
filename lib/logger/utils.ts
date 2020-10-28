@@ -127,11 +127,13 @@ export function sanitizeValue(value: unknown, seen = new WeakMap()): any {
     seen.set(value as any, objectResult);
     for (const [key, val] of Object.entries<any>(value)) {
       let curValue: any;
-      if (redactedFields.includes(key) && val) {
+      if (!val) {
+        curValue = val;
+      } else if (redactedFields.includes(key)) {
         curValue = '***********';
-      } else if (contentFields.includes(key) && val) {
+      } else if (contentFields.includes(key)) {
         curValue = '[content]';
-      } else if (templateFields.includes(key) && val) {
+      } else if (templateFields.includes(key)) {
         curValue = '[Template]';
       } else {
         curValue = seen.has(val) ? seen.get(val) : sanitizeValue(val, seen);
