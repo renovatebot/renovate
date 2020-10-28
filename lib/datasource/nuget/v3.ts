@@ -206,7 +206,7 @@ export async function getReleases(
   if (homepage) {
     // only assign if not assigned
     dep.sourceUrl ??= homepage;
-    dep.homepage = homepage;
+    dep.homepage ??= homepage;
   }
 
   return dep;
