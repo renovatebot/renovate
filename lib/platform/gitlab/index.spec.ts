@@ -1272,36 +1272,69 @@ describe('platform/gitlab', () => {
     jest.resetAllMocks();
     it('updates the PR', async () => {
       await initPlatform('13.3.6-ee');
-      const url = '/api/v4/projects/undefined/merge_requests/1';
-      httpMock.scope(gitlabApiHost).get(url).reply(200, { title: 'foo' });
-      httpMock.scope(gitlabApiHost).put(url).reply(200);
+      httpMock.scope(gitlabApiHost).get(
+          '/api/v4/projects/undefined/merge_requests?per_page=100&author_id=undefined'
+        )
+        .reply(200, [
+          {
+            iid: 1,
+            source_branch: 'branch-a',
+            title: 'branch a pr',
+            state: PrState.Open,
+          },
+        ]);
+      httpMock.scope(gitlabApiHost).put('/api/v4/projects/undefined/merge_requests/1').reply(200);
       await gitlab.updatePr({ number: 1, prTitle: 'title', prBody: 'body' });
       expect(httpMock.getTrace()).toMatchSnapshot();
     });
     it('retains draft status when draft uses current prefix', async () => {
       await initPlatform('13.3.6-ee');
-      const url = '/api/v4/projects/undefined/merge_requests/1';
-      httpMock
-        .scope(gitlabApiHost)
-        .get(url)
-        .reply(200, { title: 'Draft: foo' });
-      httpMock.scope(gitlabApiHost).put(url).reply(200);
+      httpMock.scope(gitlabApiHost).get(
+          '/api/v4/projects/undefined/merge_requests?per_page=100&author_id=undefined'
+        )
+        .reply(200, [
+          {
+            iid: 1,
+            source_branch: 'branch-a',
+            title: 'Draft: foo',
+            state: PrState.Open,
+          },
+        ]);
+      httpMock.scope(gitlabApiHost).put('/api/v4/projects/undefined/merge_requests/1').reply(200);
       await gitlab.updatePr({ number: 1, prTitle: 'title', prBody: 'body' });
       expect(httpMock.getTrace()).toMatchSnapshot();
     });
     it('retains draft status when draft uses deprecated prefix', async () => {
       await initPlatform('13.3.6-ee');
-      const url = '/api/v4/projects/undefined/merge_requests/1';
-      httpMock.scope(gitlabApiHost).get(url).reply(200, { title: 'WIP: foo' });
-      httpMock.scope(gitlabApiHost).put(url).reply(200);
+      httpMock.scope(gitlabApiHost).get(
+          '/api/v4/projects/undefined/merge_requests?per_page=100&author_id=undefined'
+        )
+        .reply(200, [
+          {
+            iid: 1,
+            source_branch: 'branch-a',
+            title: 'WIP: foo',
+            state: PrState.Open,
+          },
+        ]);
+      httpMock.scope(gitlabApiHost).put('/api/v4/projects/undefined/merge_requests/1').reply(200);
       await gitlab.updatePr({ number: 1, prTitle: 'title', prBody: 'body' });
       expect(httpMock.getTrace()).toMatchSnapshot();
     });
     it('closes the PR', async () => {
       await initPlatform('13.3.6-ee');
-      const url = '/api/v4/projects/undefined/merge_requests/1';
-      httpMock.scope(gitlabApiHost).get(url).reply(200, { title: 'foo' });
-      httpMock.scope(gitlabApiHost).put(url).reply(200);
+      httpMock.scope(gitlabApiHost).get(
+          '/api/v4/projects/undefined/merge_requests?per_page=100&author_id=undefined'
+        )
+        .reply(200, [
+          {
+            iid: 1,
+            source_branch: 'branch-a',
+            title: 'branch a pr',
+            state: PrState.Open,
+          },
+        ]);
+      httpMock.scope(gitlabApiHost).put('/api/v4/projects/undefined/merge_requests/1').reply(200);
       await gitlab.updatePr({
         number: 1,
         prTitle: 'title',
