@@ -10,7 +10,7 @@ Please submit PRs to improve it if you think anything is unclear or you can thin
 For local development some dependencies are required:
 
 - Git
-- Node.js `>=12`
+- Node.js `^12.13.0 || >=14.0.0`
 - Yarn `^1.17.0`
 - C++ compiler
 - Python `^3.7`

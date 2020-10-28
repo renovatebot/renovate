@@ -26,7 +26,7 @@ jobs:
     strategy:
       matrix:
         os: [ubuntu-latest, macos-latest, windows-latest]
-        node-version: [12]
+        node-version: [12, 14]
         python-version: [3.8]
         java-version: [8]
         exclude:
@@ -58,7 +58,7 @@ jobs:
 
       - name: Skip Java tests
         if: env.NODE_VERSION != '12'
-        run: echo "::set-env name=SKIP_JAVA_TESTS::true"
+        run: echo "SKIP_JAVA_TESTS=true" >> $GITHUB_ENV
 
       - name: Init platform
         shell: bash
