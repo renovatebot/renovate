@@ -63,6 +63,7 @@ export interface Pr {
   state: string;
   targetBranch?: string;
   title: string;
+  isDraft?: boolean;
 }
 
 /**
@@ -90,7 +91,7 @@ export interface CreatePRConfig {
   draftPR?: boolean;
 }
 export interface UpdatePrConfig {
-  number: number;
+  existingPr: Pr;
   prTitle: string;
   prBody?: string;
   state?: PrState.Open | PrState.Closed;

@@ -55,7 +55,7 @@ async function cleanUpBranches(
             newPrTitle += '- autoclosed';
           }
           await platform.updatePr({
-            number: pr.number,
+            existingPr: pr,
             prTitle: newPrTitle,
             state: PrState.Closed,
           });

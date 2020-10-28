@@ -352,8 +352,10 @@ function massagePr(prToModify: Pr): Pr {
   const pr = prToModify;
   if (pr.title.startsWith(DRAFT_PREFIX)) {
     pr.title = pr.title.substring(DRAFT_PREFIX.length);
+    pr.isDraft = true;
   } else if (pr.title.startsWith(DRAFT_PREFIX_DEPRECATED)) {
     pr.title = pr.title.substring(DRAFT_PREFIX_DEPRECATED.length);
+    pr.isDraft = true;
   }
   return pr;
 }
@@ -471,20 +473,14 @@ export async function getPr(iid: number): Promise<Pr> {
 }
 
 export async function updatePr({
-  number: iid,
+  existingPr,
   prTitle,
   prBody: description,
   state,
 }: UpdatePrConfig): Promise<void> {
-  const url = `projects/${config.repository}/merge_requests/${iid}`;
-  const currentTitle = (await gitlabApi.getJson<{ title: string }>(url)).body
-    .title;
+  const url = `projects/${config.repository}/merge_requests/${existingPr.number}`;
   let title = prTitle;
-  // detect either draft prefix in case GitLab was recently upgraded
-  if (
-    currentTitle.startsWith(DRAFT_PREFIX) ||
-    currentTitle.startsWith(DRAFT_PREFIX_DEPRECATED)
-  ) {
+  if (existingPr.isDraft) {
     title = draftPrefix + title;
   }
   const newState = {

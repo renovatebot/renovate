@@ -6,7 +6,7 @@ import {
 import { BranchStatus, PrState } from '../../types';
 import * as _git from '../../util/git';
 import * as _hostRules from '../../util/host-rules';
-import { Platform, RepoParams } from '../common';
+import { Platform, Pr, RepoParams } from '../common';
 
 describe('platform/azure', () => {
   let hostRules: jest.Mocked<typeof _hostRules>;
@@ -673,8 +673,14 @@ describe('platform/azure', () => {
             updatePullRequest,
           } as any)
       );
-      await azure.updatePr({
+      const existingPr: Pr = {
         number: 1234,
+        sourceBranch: '',
+        state: '',
+        title: '',
+      };
+      await azure.updatePr({
+        existingPr,
         prTitle: 'The New Title',
         prBody: 'Hello world again',
       });
@@ -690,8 +696,14 @@ describe('platform/azure', () => {
             updatePullRequest,
           } as any)
       );
-      await azure.updatePr({
+      const existingPr: Pr = {
         number: 1234,
+        sourceBranch: '',
+        state: '',
+        title: '',
+      };
+      await azure.updatePr({
+        existingPr,
         prTitle: 'The New Title - autoclose',
       });
       expect(updatePullRequest.mock.calls).toMatchSnapshot();
@@ -706,8 +718,14 @@ describe('platform/azure', () => {
             updatePullRequest,
           } as any)
       );
-      await azure.updatePr({
+      const existingPr: Pr = {
         number: 1234,
+        sourceBranch: '',
+        state: '',
+        title: '',
+      };
+      await azure.updatePr({
+        existingPr,
         prTitle: 'The New Title',
         prBody: 'Hello world again',
         state: PrState.Closed,
@@ -724,8 +742,14 @@ describe('platform/azure', () => {
             updatePullRequest,
           } as any)
       );
-      await azure.updatePr({
+      const existingPr: Pr = {
         number: 1234,
+        sourceBranch: '',
+        state: '',
+        title: '',
+      };
+      await azure.updatePr({
+        existingPr,
         prTitle: 'The New Title',
         prBody: 'Hello world again',
         state: PrState.Open,

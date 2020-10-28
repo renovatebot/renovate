@@ -1,6 +1,6 @@
 // TODO fix mocks
 import nock from 'nock';
-import { Platform, RepoParams } from '..';
+import { Platform, Pr, RepoParams } from '..';
 import * as httpMock from '../../../test/httpMock';
 import {
   REPOSITORY_ARCHIVED,
@@ -1187,6 +1187,7 @@ describe('platform/gitlab', () => {
       const pr = await gitlab.getPr(12345);
       expect(pr).toMatchSnapshot();
       expect(pr.title).toBe('do something');
+      expect(pr.isDraft).toBe(true);
       expect(httpMock.getTrace()).toMatchSnapshot();
     });
     it('removes deprecated draft prefix from returned title', async () => {
@@ -1210,6 +1211,7 @@ describe('platform/gitlab', () => {
       const pr = await gitlab.getPr(12345);
       expect(pr).toMatchSnapshot();
       expect(pr.title).toBe('do something');
+      expect(pr.isDraft).toBe(true);
       expect(httpMock.getTrace()).toMatchSnapshot();
     });
     it('returns the mergeable PR', async () => {
@@ -1272,38 +1274,49 @@ describe('platform/gitlab', () => {
     jest.resetAllMocks();
     it('updates the PR', async () => {
       await initPlatform('13.3.6-ee');
-      const url = '/api/v4/projects/undefined/merge_requests/1';
-      httpMock.scope(gitlabApiHost).get(url).reply(200, { title: 'foo' });
-      httpMock.scope(gitlabApiHost).put(url).reply(200);
-      await gitlab.updatePr({ number: 1, prTitle: 'title', prBody: 'body' });
-      expect(httpMock.getTrace()).toMatchSnapshot();
-    });
-    it('retains draft status when draft uses current prefix', async () => {
-      await initPlatform('13.3.6-ee');
-      const url = '/api/v4/projects/undefined/merge_requests/1';
       httpMock
         .scope(gitlabApiHost)
-        .get(url)
-        .reply(200, { title: 'Draft: foo' });
-      httpMock.scope(gitlabApiHost).put(url).reply(200);
-      await gitlab.updatePr({ number: 1, prTitle: 'title', prBody: 'body' });
+        .put('/api/v4/projects/undefined/merge_requests/1')
+        .reply(200);
+      const existingPr: Pr = {
+        number: 1,
+        sourceBranch: '',
+        state: '',
+        title: '',
+      };
+      await gitlab.updatePr({ existingPr, prTitle: 'title', prBody: 'body' });
       expect(httpMock.getTrace()).toMatchSnapshot();
     });
-    it('retains draft status when draft uses deprecated prefix', async () => {
+    it('retains draft status', async () => {
       await initPlatform('13.3.6-ee');
-      const url = '/api/v4/projects/undefined/merge_requests/1';
-      httpMock.scope(gitlabApiHost).get(url).reply(200, { title: 'WIP: foo' });
-      httpMock.scope(gitlabApiHost).put(url).reply(200);
-      await gitlab.updatePr({ number: 1, prTitle: 'title', prBody: 'body' });
+      httpMock
+        .scope(gitlabApiHost)
+        .put('/api/v4/projects/undefined/merge_requests/1')
+        .reply(200);
+      const existingPr: Pr = {
+        number: 1,
+        sourceBranch: '',
+        state: '',
+        title: '',
+        isDraft: true,
+      };
+      await gitlab.updatePr({ existingPr, prTitle: 'title', prBody: 'body' });
       expect(httpMock.getTrace()).toMatchSnapshot();
     });
     it('closes the PR', async () => {
       await initPlatform('13.3.6-ee');
-      const url = '/api/v4/projects/undefined/merge_requests/1';
-      httpMock.scope(gitlabApiHost).get(url).reply(200, { title: 'foo' });
-      httpMock.scope(gitlabApiHost).put(url).reply(200);
-      await gitlab.updatePr({
+      httpMock
+        .scope(gitlabApiHost)
+        .put('/api/v4/projects/undefined/merge_requests/1')
+        .reply(200);
+      const existingPr: Pr = {
         number: 1,
+        sourceBranch: '',
+        state: '',
+        title: '',
+      };
+      await gitlab.updatePr({
+        existingPr,
         prTitle: 'title',
         prBody: 'body',
         state: PrState.Closed,

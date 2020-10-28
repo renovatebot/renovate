@@ -518,7 +518,7 @@ const platform: Platform = {
               `Recovered from 409 Conflict, but PR for ${sourceBranch} is outdated. Updating...`
             );
             await platform.updatePr({
-              number: pr.number,
+              existingPr: pr,
               prTitle: title,
               prBody: body,
             });
@@ -539,12 +539,12 @@ const platform: Platform = {
   },
 
   async updatePr({
-    number,
+    existingPr,
     prTitle: title,
     prBody: body,
     state,
   }: UpdatePrConfig): Promise<void> {
-    await helper.updatePR(config.repository, number, {
+    await helper.updatePR(config.repository, existingPr.number, {
       title,
       ...(body && { body }),
       ...(state && { state }),

@@ -7,7 +7,7 @@ import {
 } from '../../constants/error-messages';
 import { BranchStatus, PrState } from '../../types';
 import * as _git from '../../util/git';
-import { Platform, VulnerabilityAlert } from '../common';
+import { Platform, Pr, VulnerabilityAlert } from '../common';
 
 const githubApiHost = 'https://api.github.com';
 
@@ -1758,11 +1758,17 @@ describe('platform/github', () => {
   describe('updatePr(prNo, title, body)', () => {
     it('should update the PR', async () => {
       const scope = httpMock.scope(githubApiHost);
+      const existingPr: Pr = {
+        number: 1234,
+        sourceBranch: '',
+        state: '',
+        title: '',
+      };
       initRepoMock(scope, 'some/repo');
       scope.patch('/repos/some/repo/pulls/1234').reply(200);
       await github.initRepo({ repository: 'some/repo', token: 'token' } as any);
       await github.updatePr({
-        number: 1234,
+        existingPr,
         prTitle: 'The New Title',
         prBody: 'Hello world again',
       });
@@ -1770,11 +1776,17 @@ describe('platform/github', () => {
     });
     it('should update and close the PR', async () => {
       const scope = httpMock.scope(githubApiHost);
+      const existingPr: Pr = {
+        number: 1234,
+        sourceBranch: '',
+        state: '',
+        title: '',
+      };
       initRepoMock(scope, 'some/repo');
       scope.patch('/repos/some/repo/pulls/1234').reply(200);
       await github.initRepo({ repository: 'some/repo', token: 'token' } as any);
       await github.updatePr({
-        number: 1234,
+        existingPr,
         prTitle: 'The New Title',
         prBody: 'Hello world again',
         state: PrState.Closed,
