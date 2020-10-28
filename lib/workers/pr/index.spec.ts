@@ -362,13 +362,13 @@ describe('workers/pr', () => {
       expect(prResult).toEqual(PrResult.AwaitingNotPending);
       expect(pr).toBeUndefined();
     });
-    it('should create PR if waiting for not pending with stabilityDays set', async () => {
+    it('should not create PR if waiting for not pending with stabilityStatus yellow', async () => {
       platform.getBranchStatus.mockResolvedValueOnce(BranchStatus.yellow);
       git.getBranchLastCommitTime.mockImplementationOnce(() =>
         Promise.resolve(new Date())
       );
       config.prCreation = 'not-pending';
-      config.stabilityDays = 42;
+      config.stabilityStatus = BranchStatus.yellow;
       const { prResult, pr } = await prWorker.ensurePr(config);
       expect(prResult).toEqual(PrResult.Created);
       expect(pr).toBeDefined();
@@ -582,10 +582,10 @@ describe('workers/pr', () => {
       expect(prResult).toEqual(PrResult.Created);
       expect(pr).toBeDefined();
     });
-    it('should return no PR if stabilityDays set', async () => {
+    it('should return no PR if stabilityStatus yellow', async () => {
       config.automerge = true;
       config.automergeType = 'branch';
-      config.stabilityDays = 42;
+      config.stabilityStatus = BranchStatus.yellow;
       platform.getBranchStatus.mockResolvedValueOnce(BranchStatus.yellow);
       git.getBranchLastCommitTime.mockResolvedValueOnce(new Date('2018-01-01'));
       const { prResult, pr } = await prWorker.ensurePr(config);

@@ -144,7 +144,7 @@ export async function ensurePr(
       `Branch is configured for branch automerge, branch status) is: ${await getBranchStatus()}`
     );
     if (
-      !config.stabilityDays &&
+      config.stabilityStatus !== BranchStatus.yellow &&
       (await getBranchStatus()) === BranchStatus.yellow
     ) {
       logger.debug('Checking how long this branch has been pending');
@@ -189,7 +189,7 @@ export async function ensurePr(
     logger.debug('Checking branch combined status');
     if (
       !dependencyDashboardCheck &&
-      !config.stabilityDays &&
+      config.stabilityStatus !== BranchStatus.yellow &&
       (await getBranchStatus()) === BranchStatus.yellow
     ) {
       logger.debug(
