@@ -73,13 +73,17 @@ describe('platform/gitlab', () => {
     });
     it(`should accept custom endpoint`, async () => {
       const endpoint = 'https://gitlab.renovatebot.com';
-      httpMock.scope(endpoint).get('/user').reply(200, {
-        email: 'a@b.com',
-        name: 'Renovate Bot',
-      });
-      httpMock.scope(endpoint).get('/version').reply(200, {
-        version: '13.3.6-ee',
-      });
+      httpMock
+        .scope(endpoint)
+        .get('/user')
+        .reply(200, {
+          email: 'a@b.com',
+          name: 'Renovate Bot',
+        })
+        .get('/version')
+        .reply(200, {
+          version: '13.3.6-ee',
+        });
       expect(
         await gitlab.initPlatform({
           endpoint,
@@ -1010,13 +1014,17 @@ describe('platform/gitlab', () => {
   });
 
   async function initPlatform(gitlabVersion: string) {
-    httpMock.scope(gitlabApiHost).get('/api/v4/user').reply(200, {
-      email: 'a@b.com',
-      name: 'Renovate Bot',
-    });
-    httpMock.scope(gitlabApiHost).get('/api/v4/version').reply(200, {
-      version: gitlabVersion,
-    });
+    httpMock
+      .scope(gitlabApiHost)
+      .get('/api/v4/user')
+      .reply(200, {
+        email: 'a@b.com',
+        name: 'Renovate Bot',
+      })
+      .get('/api/v4/version')
+      .reply(200, {
+        version: gitlabVersion,
+      });
     await gitlab.initPlatform({
       token: 'some-token',
       endpoint: undefined,
@@ -1284,9 +1292,7 @@ describe('platform/gitlab', () => {
             title: 'branch a pr',
             state: PrState.Open,
           },
-        ]);
-      httpMock
-        .scope(gitlabApiHost)
+        ])
         .put('/api/v4/projects/undefined/merge_requests/1')
         .reply(200);
       await gitlab.updatePr({ number: 1, prTitle: 'title', prBody: 'body' });
@@ -1306,9 +1312,7 @@ describe('platform/gitlab', () => {
             title: 'Draft: foo',
             state: PrState.Open,
           },
-        ]);
-      httpMock
-        .scope(gitlabApiHost)
+        ])
         .put('/api/v4/projects/undefined/merge_requests/1')
         .reply(200);
       await gitlab.updatePr({ number: 1, prTitle: 'title', prBody: 'body' });
@@ -1328,9 +1332,7 @@ describe('platform/gitlab', () => {
             title: 'WIP: foo',
             state: PrState.Open,
           },
-        ]);
-      httpMock
-        .scope(gitlabApiHost)
+        ])
         .put('/api/v4/projects/undefined/merge_requests/1')
         .reply(200);
       await gitlab.updatePr({ number: 1, prTitle: 'title', prBody: 'body' });
@@ -1350,9 +1352,7 @@ describe('platform/gitlab', () => {
             title: 'branch a pr',
             state: PrState.Open,
           },
-        ]);
-      httpMock
-        .scope(gitlabApiHost)
+        ])
         .put('/api/v4/projects/undefined/merge_requests/1')
         .reply(200);
       await gitlab.updatePr({
