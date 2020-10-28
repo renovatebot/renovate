@@ -237,20 +237,29 @@ export function migrateConfig(
         } else {
           migratedConfig.semanticCommitScope = null;
         }
-      } else if (key === 'extends' && is.array<string>(val)) {
-        for (let i = 0; i < val.length; i += 1) {
-          if (val[i] === 'config:application' || val[i] === ':js-app') {
-            isMigrated = true;
-            migratedConfig.extends[i] = 'config:js-app';
-          } else if (val[i] === ':library' || val[i] === 'config:library') {
-            isMigrated = true;
-            migratedConfig.extends[i] = 'config:js-lib';
-          } else if (is.string(val[i]) && val[i].startsWith(':masterIssue')) {
-            isMigrated = true;
-            migratedConfig.extends[i] = val[i].replace(
-              'masterIssue',
-              'dependencyDashboard'
-            );
+      } else if (
+        key === 'extends' &&
+        (is.array<string>(val) || is.string(val))
+      ) {
+        if (is.string(migratedConfig.extends)) {
+          migratedConfig.extends = [migratedConfig.extends];
+          isMigrated = true;
+        }
+        const presets = migratedConfig.extends;
+        for (let i = 0; i < presets.length; i += 1) {
+          let preset = presets[i];
+          if (is.string(preset)) {
+            if (preset === 'config:application' || preset === ':js-app') {
+              isMigrated = true;
+              preset = 'config:js-app';
+            } else if (preset === ':library' || preset === 'config:library') {
+              isMigrated = true;
+              preset = 'config:js-lib';
+            } else if (preset.startsWith(':masterIssue')) {
+              isMigrated = true;
+              preset = preset.replace('masterIssue', 'dependencyDashboard');
+            }
+            presets[i] = preset;
           }
         }
       } else if (key === 'versionScheme') {
