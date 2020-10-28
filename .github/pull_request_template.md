@@ -1,6 +1,5 @@
 <!-- If this is your first pull request: sign the CLA with this GitHub app: https://cla-assistant.io/renovatebot/renovate -->
 <!-- Make sure the `Allow edits and access to secrets by maintainers` checkbox is checked on this pull request. -->
-<!-- If your pull request is going to change a lot of things, open an issue for discussion before starting your work. -->
 
 ## Changes:
 
