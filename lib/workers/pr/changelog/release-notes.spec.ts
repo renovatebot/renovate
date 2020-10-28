@@ -69,8 +69,8 @@ describe(getName(__filename), () => {
       [now, 55],
       [now.minus({ week: 2 }), 1435],
       [now.minus({ year: 1 }), 14495],
-    ])('works with string date (%s, %i)', (date, days) => {
-      expect(releaseNotesCacheMinutes(date?.toISO())).toEqual(days);
+    ])('works with string date (%s, %i)', (date, minutes) => {
+      expect(releaseNotesCacheMinutes(date?.toISO())).toEqual(minutes);
     });
 
     it('handles date object', () => {
