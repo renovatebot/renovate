@@ -1,4 +1,5 @@
 import is from '@sindresorhus/is';
+import { RequestError } from 'got';
 import pAll from 'p-all';
 import * as semver from 'semver';
 import { XmlDocument } from 'xmldoc';
@@ -186,6 +187,14 @@ export async function getReleases(
       }
     }
   } catch (err) /* istanbul ignore next */ {
+    // ignore / silence 404. Seen on proget, if remote connector is used and package is not yet cached
+    if (err instanceof RequestError && err.response?.statusCode === 404) {
+      logger.debug(
+        { registryUrl, pkgName, pkgVersion: latestStable },
+        `package manifest (.nuspec) not found`
+      );
+      return dep;
+    }
     logger.debug(
       { err, registryUrl, pkgName, pkgVersion: latestStable },
       `Cannot obtain sourceUrl`
