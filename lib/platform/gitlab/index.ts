@@ -360,6 +360,47 @@ function massagePr(prToModify: Pr): Pr {
   return pr;
 }
 
+async function fetchPrList(): Promise<Pr[]> {
+  const query = new URLSearchParams({
+    per_page: '100',
+    author_id: `${authorId}`,
+  }).toString();
+  const urlString = `projects/${config.repository}/merge_requests?${query}`;
+  try {
+    const res = await gitlabApi.getJson<
+      {
+        iid: number;
+        source_branch: string;
+        title: string;
+        state: string;
+        created_at: string;
+      }[]
+    >(urlString, { paginate: true });
+    return res.body.map((pr) =>
+      massagePr({
+        number: pr.iid,
+        sourceBranch: pr.source_branch,
+        title: pr.title,
+        state: pr.state === 'opened' ? PrState.Open : pr.state,
+        createdAt: pr.created_at,
+      })
+    );
+  } catch (err) /* istanbul ignore next */ {
+    logger.debug({ err }, 'Error fetching PR list');
+    if (err.statusCode === 403) {
+      throw new Error(PLATFORM_AUTHENTICATION_ERROR);
+    }
+    throw err;
+  }
+}
+
+export async function getPrList(): Promise<Pr[]> {
+  if (!config.prList) {
+    config.prList = await fetchPrList();
+  }
+  return config.prList;
+}
+
 export async function createPr({
   sourceBranch,
   targetBranch,
@@ -479,20 +520,23 @@ export async function updatePr({
   state,
 }: UpdatePrConfig): Promise<void> {
   let title = prTitle;
-  if ((await getPrList()).find(pr => pr.number === iid).isDraft) {
+  if ((await getPrList()).find((pr) => pr.number === iid).isDraft) {
     title = draftPrefix + title;
   }
   const newState = {
     [PrState.Closed]: 'close',
     [PrState.Open]: 'reopen',
   }[state];
-  await gitlabApi.putJson(`projects/${config.repository}/merge_requests/${iid}`, {
-    body: {
-      title,
-      description: sanitize(description),
-      ...(newState && { state_event: newState }),
-    },
-  });
+  await gitlabApi.putJson(
+    `projects/${config.repository}/merge_requests/${iid}`,
+    {
+      body: {
+        title,
+        description: sanitize(description),
+        ...(newState && { state_event: newState }),
+      },
+    }
+  );
 }
 
 export async function mergePr(iid: number): Promise<boolean> {
@@ -923,47 +967,6 @@ export async function ensureCommentRemoval({
   if (commentId) {
     await deleteComment(issueNo, commentId);
   }
-}
-
-async function fetchPrList(): Promise<Pr[]> {
-  const query = new URLSearchParams({
-    per_page: '100',
-    author_id: `${authorId}`,
-  }).toString();
-  const urlString = `projects/${config.repository}/merge_requests?${query}`;
-  try {
-    const res = await gitlabApi.getJson<
-      {
-        iid: number;
-        source_branch: string;
-        title: string;
-        state: string;
-        created_at: string;
-      }[]
-    >(urlString, { paginate: true });
-    return res.body.map((pr) =>
-      massagePr({
-        number: pr.iid,
-        sourceBranch: pr.source_branch,
-        title: pr.title,
-        state: pr.state === 'opened' ? PrState.Open : pr.state,
-        createdAt: pr.created_at,
-      })
-    );
-  } catch (err) /* istanbul ignore next */ {
-    logger.debug({ err }, 'Error fetching PR list');
-    if (err.statusCode === 403) {
-      throw new Error(PLATFORM_AUTHENTICATION_ERROR);
-    }
-    throw err;
-  }
-}
-
-export async function getPrList(): Promise<Pr[]> {
-  if (!config.prList) {
-    config.prList = await fetchPrList();
-  }
-  return config.prList;
 }
 
 function matchesState(state: string, desiredState: string): boolean {
