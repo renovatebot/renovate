@@ -191,10 +191,7 @@ export async function ensurePr(
     !config.forcePr
   ) {
     logger.debug('Checking branch combined status');
-    if (
-      config.stabilityStatus !== BranchStatus.yellow &&
-      (await getBranchStatus()) === BranchStatus.yellow
-    ) {
+    if ((await getBranchStatus()) === BranchStatus.yellow) {
       logger.debug(
         `Branch status is "${await getBranchStatus()}" - checking timeout`
       );
@@ -206,7 +203,8 @@ export async function ensurePr(
       );
       if (
         !dependencyDashboardCheck &&
-        elapsedHours < config.prNotPendingHours
+        (config.stabilityStatus !== BranchStatus.yellow ||
+          elapsedHours < config.prNotPendingHours)
       ) {
         logger.debug(
           `Branch is ${elapsedHours} hours old - skipping PR creation`
