@@ -10,7 +10,7 @@ Please submit PRs to improve it if you think anything is unclear or you can thin
 For local development some dependencies are required:
 
 - Git
-- Node.js `>=12`
+- Node.js `^12.13.0 || >=14.15.0`
 - Yarn `^1.17.0`
 - C++ compiler
 - Python `^3.7`
@@ -26,7 +26,7 @@ _Linux_
 You can use the following commands for `Ubuntu`.
 
 ```sh
-curl -sL https://deb.nodesource.com/setup_12.x | sudo -E bash -
+curl -sL https://deb.nodesource.com/setup_14.x | sudo -E bash -
 curl -sS https://dl.yarnpkg.com/debian/pubkey.gpg | sudo apt-key add -
 echo "deb https://dl.yarnpkg.com/debian/ stable main" | sudo tee /etc/apt/sources.list.d/yarn.list
 sudo apt-get update
@@ -49,9 +49,9 @@ The following steps work to set up a brand new Windows 10 installation for devel
 
   ```
   PS C:\Windows\system32> git --version
-  git version 2.26.2.windows.1
+  git version 2.29.0.windows.1
   PS C:\Windows\system32> node --version
-  v12.16.3
+  v14.15.0
   PS C:\Windows\system32> yarn --version
   1.22.4
   PS C:\Windows\system32> python --version
