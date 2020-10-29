@@ -1,4 +1,4 @@
-commitMessage: "Apply prettier formatting fix"
+commitMessage: 'Apply prettier formatting fix'
 excludeBranches:
   - master
 pullsOnly: true
