@@ -151,5 +151,23 @@ describe('workers/branch/get-updated', () => {
       const res = await getUpdatedPackageFiles(config);
       expect(res).toMatchSnapshot();
     });
+    it('update artifacts on update-lockfile strategy', async () => {
+      config.upgrades.push({
+        manager: 'composer',
+        branchName: undefined,
+        rangeStrategy: 'update-lockfile',
+      });
+      autoReplace.doAutoReplace.mockResolvedValueOnce('existing content');
+      composer.updateArtifacts.mockResolvedValueOnce([
+        {
+          file: {
+            name: 'composer.lock',
+            contents: 'some contents',
+          },
+        },
+      ]);
+      const res = await getUpdatedPackageFiles(config);
+      expect(res).toMatchSnapshot();
+    });
   });
 });
