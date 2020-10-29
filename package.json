@@ -106,7 +106,7 @@
   },
   "homepage": "https://renovatebot.com",
   "engines": {
-    "node": ">=12",
+    "node": "^12.13.0 || >=14.15.0",
     "yarn": "^1.17.0"
   },
   "dependencies": {
