@@ -38,9 +38,58 @@ Array [
 ]
 `;
 
-exports[`manager/npm/extract/locked-versions .getLockedVersions() uses yarn.lock 1`] = `
+exports[`manager/npm/extract/locked-versions .getLockedVersions() uses yarn.lock with yarn v1.22.0 1`] = `
 Array [
   Object {
+    "constraints": Object {},
+    "deps": Array [
+      Object {
+        "currentValue": "1.0.0",
+        "depName": "a",
+        "lockedVersion": "1.0.0",
+      },
+      Object {
+        "currentValue": "2.0.0",
+        "depName": "b",
+        "lockedVersion": "2.0.0",
+      },
+    ],
+    "npmLock": "package-lock.json",
+    "yarnLock": "yarn.lock",
+  },
+]
+`;
+
+exports[`manager/npm/extract/locked-versions .getLockedVersions() uses yarn.lock with yarn v2.1.0 1`] = `
+Array [
+  Object {
+    "constraints": Object {
+      "yarn": ">= 2.0.0",
+    },
+    "deps": Array [
+      Object {
+        "currentValue": "1.0.0",
+        "depName": "a",
+        "lockedVersion": "1.0.0",
+      },
+      Object {
+        "currentValue": "2.0.0",
+        "depName": "b",
+        "lockedVersion": "2.0.0",
+      },
+    ],
+    "npmLock": "package-lock.json",
+    "yarnLock": "yarn.lock",
+  },
+]
+`;
+
+exports[`manager/npm/extract/locked-versions .getLockedVersions() uses yarn.lock with yarn v2.2.0 1`] = `
+Array [
+  Object {
+    "constraints": Object {
+      "yarn": ">= 2.2.0",
+    },
     "deps": Array [
       Object {
         "currentValue": "1.0.0",

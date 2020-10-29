@@ -1,7 +1,8 @@
 import crypto from 'crypto';
-import { expect, jest } from '@jest/globals';
+import { expect } from '@jest/globals';
 import { RenovateConfig as _RenovateConfig } from '../lib/config';
 import { getConfig } from '../lib/config/defaults';
+import * as _logger from '../lib/logger';
 import { platform as _platform } from '../lib/platform';
 import * as _env from '../lib/util/exec/env';
 import * as _fs from '../lib/util/fs';
@@ -29,6 +30,7 @@ export const git = mocked(_git);
 export const platform = mocked(_platform);
 export const env = mocked(_env);
 export const hostRules = mocked(_hostRules);
+export const logger = mocked(_logger);
 
 // Required because of isolatedModules
 export type RenovateConfig = _RenovateConfig;

@@ -25,12 +25,13 @@ export interface UpdateResult {
   dockerRepository?: string;
   dockerRegistry?: string;
   changelogUrl?: string;
+  dependencyUrl?: string;
   homepage?: string;
   deprecationMessage?: string;
   sourceUrl?: string;
   skipReason: SkipReason;
   releases: Release[];
-
+  fixedVersion?: string;
   updates: LookupUpdate[];
   warnings: ValidationMessage[];
 }
@@ -141,7 +142,12 @@ export async function lookupUpdates(
   if (!isValid) {
     res.skipReason = SkipReason.InvalidValue;
   }
-
+  // Record if the dep is fixed to a version
+  if (lockedVersion) {
+    res.fixedVersion = lockedVersion;
+  } else if (currentValue && version.isSingleVersion(currentValue)) {
+    res.fixedVersion = currentValue.replace(/^=+/, '');
+  }
   // istanbul ignore if
   if (!isGetPkgReleasesConfig(config)) {
     res.skipReason = SkipReason.Unknown;
@@ -168,15 +174,13 @@ export async function lookupUpdates(
       logger.debug({ dependency: depName }, 'Found deprecationMessage');
       res.deprecationMessage = dependency.deprecationMessage;
     }
-    res.sourceUrl =
-      dependency.sourceUrl && dependency.sourceUrl.length
-        ? dependency.sourceUrl
-        : /* istanbul ignore next */ null;
+    res.sourceUrl = dependency?.sourceUrl;
     if (dependency.sourceDirectory) {
       res.sourceDirectory = dependency.sourceDirectory;
     }
     res.homepage = dependency.homepage;
     res.changelogUrl = dependency.changelogUrl;
+    res.dependencyUrl = dependency?.dependencyUrl;
     // TODO: improve this
     // istanbul ignore if
     if (dependency.dockerRegistry) {
@@ -185,9 +189,9 @@ export async function lookupUpdates(
     }
     const { latestVersion, releases } = dependency;
     // Filter out any results from datasource that don't comply with our versioning
-    let allVersions = releases
-      .map((release) => release.version)
-      .filter((v) => version.isVersion(v));
+    let allVersions = releases.filter((release) =>
+      version.isVersion(release.version)
+    );
     // istanbul ignore if
     if (allVersions.length === 0) {
       const message = `Found no results from datasource that look like a version`;
@@ -207,14 +211,14 @@ export async function lookupUpdates(
       }
       allVersions = allVersions.filter(
         (v) =>
-          v === taggedVersion ||
-          (v === currentValue &&
+          v.version === taggedVersion ||
+          (v.version === currentValue &&
             version.isGreaterThan(taggedVersion, currentValue))
       );
     }
     // Check that existing constraint can be satisfied
     const allSatisfyingVersions = allVersions.filter((v) =>
-      version.matches(v, currentValue)
+      version.matches(v.version, currentValue)
     );
     if (config.rollbackPrs && !allSatisfyingVersions.length) {
       const rollback = getRollbackUpdate(config, allVersions);
@@ -229,8 +233,12 @@ export async function lookupUpdates(
       res.updates.push(rollback);
     }
     let rangeStrategy = getRangeStrategy(config);
-    // istanbul ignore if
-    if (rangeStrategy === 'update-lockfile' && !lockedVersion) {
+    // istanbul ignore next
+    if (
+      vulnerabilityAlert &&
+      rangeStrategy === 'update-lockfile' &&
+      !lockedVersion
+    ) {
       rangeStrategy = 'bump';
     }
     const nonDeprecatedVersions = releases
@@ -242,7 +250,13 @@ export async function lookupUpdates(
         rangeStrategy,
         latestVersion,
         nonDeprecatedVersions
-      ) || getFromVersion(config, rangeStrategy, latestVersion, allVersions);
+      ) ||
+      getFromVersion(
+        config,
+        rangeStrategy,
+        latestVersion,
+        allVersions.map((v) => v.version)
+      );
     if (
       fromVersion &&
       rangeStrategy === 'pin' &&
@@ -270,17 +284,16 @@ export async function lookupUpdates(
       config,
       filterStart,
       dependency.latestVersion,
-      allVersions,
-      releases
+      allVersions
     ).filter((v) =>
       // Leave only compatible versions
-      version.isCompatible(v, currentValue)
+      version.isCompatible(v.version, currentValue)
     );
     if (vulnerabilityAlert) {
       filteredVersions = filteredVersions.slice(0, 1);
     }
     const buckets: Record<string, LookupUpdate> = {};
-    for (const toVersion of filteredVersions) {
+    for (const toVersion of filteredVersions.map((v) => v.version)) {
       const update: LookupUpdate = { fromVersion, toVersion } as any;
       try {
         update.newValue = version.getNewValue({
@@ -387,10 +400,12 @@ export async function lookupUpdates(
       }
     } else if (config.datasource === datasourceGitSubmodules.id) {
       const dependency = clone(await getPkgReleases(config));
-      res.updates.push({
-        updateType: 'digest',
-        newValue: dependency.releases[0].version,
-      });
+      if (dependency?.releases[0]?.version) {
+        res.updates.push({
+          updateType: 'digest',
+          newValue: dependency.releases[0].version,
+        });
+      }
     }
     if (version.valueToVersion) {
       for (const update of res.updates || []) {

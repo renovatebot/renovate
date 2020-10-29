@@ -33,7 +33,7 @@ function padZeroes(input: string): string {
   return sections.join('.') + stability;
 }
 
-function convertStabilitiyModifier(input: string): string {
+function convertStabilityModifier(input: string): string {
   // Handle stability modifiers.
   const versionParts = input.split('@');
   if (versionParts.length === 1) {
@@ -54,7 +54,7 @@ function convertStabilitiyModifier(input: string): string {
 function normalizeVersion(input: string): string {
   let output = input;
   output = output.replace(/(^|>|>=|\^|~)v/i, '$1');
-  return convertStabilitiyModifier(output);
+  return convertStabilityModifier(output);
 }
 
 function composer2npm(input: string): string {

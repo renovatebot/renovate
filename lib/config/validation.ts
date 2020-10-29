@@ -1,4 +1,5 @@
 import is from '@sindresorhus/is';
+import { getManagerList } from '../manager';
 import { regEx } from '../util/regex';
 import * as template from '../util/template';
 import { hasValidSchedule, hasValidTimezone } from '../workers/branch/schedule';
@@ -14,6 +15,15 @@ let optionTypes: Record<string, RenovateOptions['type']>;
 export interface ValidationResult {
   errors: ValidationMessage[];
   warnings: ValidationMessage[];
+}
+
+const managerList = getManagerList();
+
+function isManagerPath(parentPath: string): boolean {
+  return (
+    /^regexManagers\[[0-9]+]$/.test(parentPath) ||
+    managerList.includes(parentPath)
+  );
 }
 
 export async function validateConfig(
@@ -32,7 +42,7 @@ export async function validateConfig(
 
   function getDeprecationMessage(option: string): string {
     const deprecatedOptions = {
-      branchName: `Direct editing of branchName is now deprecated. Please edit branchPrefix, managerBranchPrefix, or branchTopic instead`,
+      branchName: `Direct editing of branchName is now deprecated. Please edit branchPrefix, additionalBranchPrefix, or branchTopic instead`,
       commitMessage: `Direct editing of commitMessage is now deprecated. Please edit commitMessage's subcomponents instead.`,
       prTitle: `Direct editing of prTitle is now deprecated. Please edit commitMessage subcomponents instead as they will be passed through to prTitle.`,
     };
@@ -55,7 +65,10 @@ export async function validateConfig(
     return ignoredNodes.includes(key);
   }
 
-  function validateAliasObject(key: string, val: object): boolean {
+  function validateAliasObject(
+    key: string,
+    val: Record<string, unknown>
+  ): boolean {
     if (key === 'aliases') {
       for (const value of Object.values(val)) {
         if (!is.urlString(value)) {
@@ -68,6 +81,27 @@ export async function validateConfig(
 
   for (const [key, val] of Object.entries(config)) {
     const currentPath = parentPath ? `${parentPath}.${key}` : key;
+    // istanbul ignore if
+    if (key === '__proto__') {
+      errors.push({
+        depName: 'Config security error',
+        message: '__proto__',
+      });
+      continue; // eslint-disable-line
+    }
+    if (key === 'fileMatch') {
+      if (parentPath === undefined) {
+        errors.push({
+          depName: 'Config error',
+          message: `"fileMatch" may not be defined at the top level of a config and must instead be within a manager block`,
+        });
+      } else if (!isManagerPath(parentPath)) {
+        warnings.push({
+          depName: 'Config warning',
+          message: `"fileMatch" must be configured in a manager block and not here: ${parentPath}`,
+        });
+      }
+    }
     if (
       !isIgnored(key) && // We need to ignore some reserved keys
       !(is as any).function(val) // Ignore all functions
@@ -180,17 +214,24 @@ export async function validateConfig(
             if (key === 'extends') {
               const tzRe = /^:timezone\((.+)\)$/;
               for (const subval of val) {
-                if (is.string(subval) && tzRe.test(subval)) {
-                  const [, timezone] = tzRe.exec(subval);
-                  const [validTimezone, errorMessage] = hasValidTimezone(
-                    timezone
-                  );
-                  if (!validTimezone) {
-                    errors.push({
-                      depName: 'Configuration Error',
-                      message: `${currentPath}: ${errorMessage}`,
-                    });
+                if (is.string(subval)) {
+                  if (tzRe.test(subval)) {
+                    const [, timezone] = tzRe.exec(subval);
+                    const [validTimezone, errorMessage] = hasValidTimezone(
+                      timezone
+                    );
+                    if (!validTimezone) {
+                      errors.push({
+                        depName: 'Configuration Error',
+                        message: `${currentPath}: ${errorMessage}`,
+                      });
+                    }
                   }
+                } else {
+                  errors.push({
+                    depName: 'Configuration Warning',
+                    message: `${currentPath}: preset value is not a string`,
+                  });
                 }
               }
             }
@@ -274,7 +315,12 @@ export async function validateConfig(
                 ) {
                   errors.push({
                     depName: 'Configuration Error',
-                    message: `Regex Manager ${currentPath} must contain a matchStrings array of length one`,
+                    message: `Each Regex Manager must contain a matchStrings array of length one`,
+                  });
+                } else if (!is.nonEmptyArray(regexManager.fileMatch)) {
+                  errors.push({
+                    depName: 'Configuration Error',
+                    message: `Each Regex Manager must contain a fileMatch array`,
                   });
                 } else {
                   let validRegex = false;
@@ -285,7 +331,9 @@ export async function validateConfig(
                     } catch (e) {
                       errors.push({
                         depName: 'Configuration Error',
-                        message: `Invalid regExp for ${currentPath}: \`${matchString}\``,
+                        message: `Invalid regExp for ${currentPath}: \`${String(
+                          matchString
+                        )}\``,
                       });
                     }
                   }
@@ -356,8 +404,13 @@ export async function validateConfig(
               message: `Configuration option \`${currentPath}\` should be a string`,
             });
           }
-        } else if (type === 'object' && currentPath !== 'compatibility') {
-          if (is.object(val)) {
+        } else if (
+          type === 'object' &&
+          currentPath !== 'compatibility' &&
+          currentPath !== 'constraints' &&
+          currentPath !== 'force.constraints'
+        ) {
+          if (is.plainObject(val)) {
             if (key === 'aliases') {
               if (!validateAliasObject(key, val)) {
                 errors.push({

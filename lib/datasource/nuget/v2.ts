@@ -19,7 +19,10 @@ export async function getReleases(
     pkgName,
     releases: [],
   };
-  let pkgUrlList = `${feedUrl}/FindPackagesById()?id=%27${pkgName}%27&$select=Version,IsLatestVersion,ProjectUrl`;
+  let pkgUrlList = `${feedUrl.replace(
+    /\/+$/,
+    ''
+  )}/FindPackagesById()?id=%27${pkgName}%27&$select=Version,IsLatestVersion,ProjectUrl,Published`;
   do {
     const pkgVersionsListRaw = await http.get(pkgUrlList);
     const pkgVersionsListDoc = new XmlDocument(pkgVersionsListRaw.body);
@@ -27,10 +30,9 @@ export async function getReleases(
     const pkgInfoList = pkgVersionsListDoc.childrenNamed('entry');
 
     for (const pkgInfo of pkgInfoList) {
-      const pkgVersion = getPkgProp(pkgInfo, 'Version');
-      dep.releases.push({
-        version: pkgVersion,
-      });
+      const version = getPkgProp(pkgInfo, 'Version');
+      const releaseTimestamp = getPkgProp(pkgInfo, 'Published');
+      dep.releases.push({ version, releaseTimestamp });
       try {
         const pkgIsLatestVersion = getPkgProp(pkgInfo, 'IsLatestVersion');
         if (pkgIsLatestVersion === 'true') {

@@ -42,9 +42,9 @@ export function getCachedReleaseList(
   repository: string
 ): Promise<ChangeLogNotes[]> {
   const cacheKey = `getReleaseList-${apiBaseUrl}-${repository}`;
-  const cachedResult = memCache.get(cacheKey);
+  const cachedResult = memCache.get<Promise<ChangeLogNotes[]>>(cacheKey);
   // istanbul ignore if
-  if (cachedResult) {
+  if (cachedResult !== undefined) {
     return cachedResult;
   }
   const promisedRes = getReleaseList(apiBaseUrl, repository);
@@ -96,7 +96,9 @@ export async function getReleaseNotes(
     if (
       release.tag === version ||
       release.tag === `v${version}` ||
-      release.tag === `${depName}-${version}`
+      release.tag === `${depName}-${version}` ||
+      release.tag === `${depName}_v${version}` ||
+      release.tag === `${depName}@${version}`
     ) {
       releaseNotes = release;
       releaseNotes.url = baseUrl.includes('gitlab')
@@ -106,9 +108,15 @@ export async function getReleaseNotes(
       if (!releaseNotes.body.length) {
         releaseNotes = null;
       } else {
-        releaseNotes.body = linkify(releaseNotes.body, {
-          repository: `${baseUrl}${repository}`,
-        });
+        try {
+          if (baseUrl !== 'https://gitlab.com/') {
+            releaseNotes.body = linkify(releaseNotes.body, {
+              repository: `${baseUrl}${repository}`,
+            });
+          }
+        } catch (err) /* istanbul ignore next */ {
+          logger.warn({ err, baseUrl, repository }, 'Error linkifying');
+        }
       }
     }
   });
@@ -173,9 +181,9 @@ export async function getReleaseNotesMdFileInner(
 export function getReleaseNotesMdFile(
   repository: string,
   apiBaseUrl: string
-): Promise<ChangeLogFile> | null {
+): Promise<ChangeLogFile | null> {
   const cacheKey = `getReleaseNotesMdFile-${repository}-${apiBaseUrl}`;
-  const cachedResult = memCache.get(cacheKey);
+  const cachedResult = memCache.get<Promise<ChangeLogFile | null>>(cacheKey);
   // istanbul ignore if
   if (cachedResult !== undefined) {
     return cachedResult;

@@ -28,7 +28,7 @@ export async function generateLockFile(
   let cmd = 'pnpm';
   try {
     let installPnpm = 'npm i -g pnpm';
-    const pnpmCompatibility = config.compatibility?.pnpm;
+    const pnpmCompatibility = config.constraints?.pnpm;
     if (validRange(pnpmCompatibility)) {
       installPnpm += `@${quote(pnpmCompatibility)}`;
     }
@@ -47,6 +47,12 @@ export async function generateLockFile(
         preCommands,
       },
     };
+    // istanbul ignore if
+    if (global.trustLevel === 'high') {
+      execOptions.extraEnv.NPM_AUTH = env.NPM_AUTH;
+      execOptions.extraEnv.NPM_EMAIL = env.NPM_EMAIL;
+      execOptions.extraEnv.NPM_TOKEN = env.NPM_TOKEN;
+    }
     if (config.dockerMapDotfiles) {
       const homeDir =
         process.env.HOME || process.env.HOMEPATH || process.env.USERPROFILE;

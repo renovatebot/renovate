@@ -1,7 +1,5 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
-exports[`platform/git getBranchCommit(branchName) should throw if branch does not exist 1`] = `[Error: Cannot fetch commit for branch that does not exist: not_found]`;
-
 exports[`platform/git getBranchFiles(branchName) detects changed files compared to current base branch 1`] = `
 Array [
   "some-new-file",
@@ -14,8 +12,6 @@ Array [
   "past message",
 ]
 `;
-
-exports[`platform/git getFile(filePath, branchName) returns null for 404 1`] = `[Error: repository-changed]`;
 
 exports[`platform/git getFileList() should exclude submodules 1`] = `
 Array [
@@ -47,9 +43,3 @@ Array [
   "master message",
 ]
 `;
-
-exports[`platform/git isBranchModified() should throw if branch does not exist 1`] = `[Error: Cannot check modification for branch that does not exist: not_found]`;
-
-exports[`platform/git isBranchStale() should throw if branch does not exist 1`] = `[Error: Cannot check staleness for branch that does not exist: not_found]`;
-
-exports[`platform/git setBaseBranch(branchName) should throw if branch does not exist 1`] = `[Error: config-validation]`;

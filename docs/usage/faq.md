@@ -49,8 +49,8 @@ or even specific packages at a different schedule.
 If you want to control the days of the week or times of day that renovate
 updates packages, use the `timezone` and `schedule` configuration options.
 
-By default, Renovate schedules will use the timezone of the machine that it's
-running on. This can be overridden in global config. Finally, it can be
+By default, Renovate schedules will use the UTC timezone.
+This can be overridden in global config. Finally, it can be
 overridden on a per-repository basis too, e.g.:
 
 ```

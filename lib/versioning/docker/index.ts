@@ -8,13 +8,18 @@ export const urls = [
 ];
 export const supportsRanges = false;
 
-const versionRe = /^(?<version>\d+(?:\.\d+)*)(?<prerelease>.*)$/;
+const versionPattern = /^(?<version>\d+(?:\.\d+)*)(?<prerelease>.*)$/;
+const commitHashPattern = /^[a-f0-9]{7,40}$/;
+const numericPattern = /^[0-9]+$/;
 
 function parse(version: string): generic.GenericVersion {
+  if (commitHashPattern.test(version) && !numericPattern.test(version)) {
+    return null;
+  }
   const versionPieces = version.replace(/^v/, '').split('-');
   const prefix = versionPieces.shift();
   const suffix = versionPieces.join('-');
-  const m = versionRe.exec(prefix);
+  const m = versionPattern.exec(prefix);
   if (!m?.groups) {
     return null;
   }
@@ -29,9 +34,9 @@ function valueToVersion(value: string): string {
   return value ? value.split('-')[0] : value;
 }
 
-function compare(version1: string, vervion2: string): number {
+function compare(version1: string, version2: string): number {
   const parsed1 = parse(version1);
-  const parsed2 = parse(vervion2);
+  const parsed2 = parse(version2);
   // istanbul ignore if
   if (!(parsed1 && parsed2)) {
     return 1;

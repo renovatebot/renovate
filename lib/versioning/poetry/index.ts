@@ -24,7 +24,7 @@ function poetry2npm(input: string): string {
   return versions.join(' ');
 }
 
-// NOTE: This function is copied from cargo versionsing code.
+// NOTE: This function is copied from cargo versioning code.
 // Poetry uses commas (like in cargo) instead of spaces (like in npm)
 // for AND operation.
 function npm2poetry(input: string): string {
@@ -74,11 +74,11 @@ function handleShort(
   const split = currentValue.split('.');
   if (split.length === 1) {
     // [^,~]4
-    return operator + toVersionMajor;
+    return `${operator}${toVersionMajor}`;
   }
   if (split.length === 2) {
     // [^,~]4.1
-    return operator + toVersionMajor + '.' + toVersionMinor;
+    return `${operator}${toVersionMajor}.${toVersionMinor}`;
   }
   return null;
 }

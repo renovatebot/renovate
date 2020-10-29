@@ -102,7 +102,7 @@ function mergeDependenciesWithRepositories(
   }));
 }
 
-function flatternDependencies(
+function flattenDependencies(
   accumulator: GradleDependencyWithRepos[],
   currentValue: GradleDependencyWithRepos[]
 ): GradleDependencyWithRepos[] {
@@ -147,7 +147,7 @@ export async function extractDependenciesFromUpdatesReport(
 
   const dependencies = gradleProjectConfigurations
     .map(mergeDependenciesWithRepositories, [])
-    .reduce(flatternDependencies, [])
+    .reduce(flattenDependencies, [])
     .reduce(combineReposOnDuplicatedDependencies, []);
 
   return dependencies

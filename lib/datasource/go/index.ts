@@ -1,3 +1,4 @@
+import URL from 'url';
 import { logger } from '../../logger';
 import { Http } from '../../util/http';
 import { regEx } from '../../util/regex';
@@ -8,6 +9,7 @@ import * as gitlab from '../gitlab-tags';
 export const id = 'go';
 
 const http = new Http(id);
+const gitlabRegExp = /^(https:\/\/[^/]*gitlab.[^/]*)\/(.*)$/;
 
 interface DataSource {
   datasource: string;
@@ -34,13 +36,18 @@ async function getDatasource(goModule: string): Promise<DataSource | null> {
       lookupName,
     };
   }
+
   const pkgUrl = `https://${goModule}?go-get=1`;
   const res = (await http.get(pkgUrl)).body;
   const sourceMatch = regEx(
-    `<meta\\s+name="go-source"\\s+content="${goModule}\\s+([^\\s]+)`
+    `<meta\\s+name="go-source"\\s+content="([^\\s]+)\\s+([^\\s]+)`
   ).exec(res);
   if (sourceMatch) {
-    const [, goSourceUrl] = sourceMatch;
+    const [, prefix, goSourceUrl] = sourceMatch;
+    if (!goModule.startsWith(prefix)) {
+      logger.trace({ goModule }, 'go-source header prefix not match');
+      return null;
+    }
     logger.debug({ goModule, goSourceUrl }, 'Go lookup source url');
     if (goSourceUrl?.startsWith('https://github.com/')) {
       return {
@@ -50,9 +57,8 @@ async function getDatasource(goModule: string): Promise<DataSource | null> {
           .replace(/\/$/, ''),
       };
     }
-    if (goSourceUrl?.match('^https://[^/]*gitlab.[^/]*/.+')) {
-      const gitlabRegExp = /^(https:\/\/[^/]*gitlab.[^/]*)\/(.*)$/;
-      const gitlabRes = gitlabRegExp.exec(goSourceUrl);
+    const gitlabRes = gitlabRegExp.exec(goSourceUrl);
+    if (gitlabRes) {
       return {
         datasource: gitlab.id,
         registryUrl: gitlabRes[1],
@@ -60,7 +66,33 @@ async function getDatasource(goModule: string): Promise<DataSource | null> {
       };
     }
   } else {
-    logger.trace({ goModule }, 'No go-source header found');
+    // GitHub Enterprise only returns a go-import meta
+    const importMatch = regEx(
+      `<meta\\s+name="go-import"\\s+content="([^\\s]+)\\s+([^\\s]+)\\s+([^\\s]+)">`
+    ).exec(res);
+    if (importMatch) {
+      const [, prefix, , goImportURL] = importMatch;
+      if (!goModule.startsWith(prefix)) {
+        logger.trace({ goModule }, 'go-import header prefix not match');
+        return null;
+      }
+      logger.debug({ goModule, goImportURL }, 'Go lookup import url');
+
+      // get server base url from import url
+      const parsedUrl = URL.parse(goImportURL);
+
+      // split the go module from the URL: host/go/module -> go/module
+      const split = goModule.split('/');
+      const lookupName = split[1] + '/' + split[2];
+
+      return {
+        datasource: github.id,
+        registryUrl: `${parsedUrl.protocol}//${parsedUrl.host}`,
+        lookupName,
+      };
+    }
+
+    logger.trace({ goModule }, 'No go-source or go-import header found');
   }
   return null;
 }
@@ -103,9 +135,7 @@ export async function getReleases({
     const prefix = nameParts.slice(3, nameParts.length).join('/');
     logger.trace(`go.getReleases.prefix:${prefix}`);
     const submodReleases = res.releases
-      .filter(
-        (release) => release.version && release.version.startsWith(prefix)
-      )
+      .filter((release) => release.version?.startsWith(prefix))
       .map((release) => {
         const r2 = release;
         r2.version = r2.version.replace(`${prefix}/`, '');
@@ -113,13 +143,15 @@ export async function getReleases({
       });
     logger.trace({ submodReleases }, 'go.getReleases');
     if (submodReleases.length > 0) {
-      res.releases = submodReleases;
-      return res;
+      return {
+        sourceUrl: res.sourceUrl,
+        releases: submodReleases,
+      };
     }
   }
   if (res?.releases) {
-    res.releases = res.releases.filter(
-      (release) => release.version && release.version.startsWith('v')
+    res.releases = res.releases.filter((release) =>
+      release.version?.startsWith('v')
     );
   }
   return res;

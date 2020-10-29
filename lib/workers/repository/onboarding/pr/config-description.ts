@@ -18,7 +18,7 @@ export function getScheduleDesc(config: RenovateConfig): string[] {
     logger.debug('No schedule');
     return [];
   }
-  const desc = `Run Renovate on following schedule: ${config.schedule}`;
+  const desc = `Run Renovate on following schedule: ${String(config.schedule)}`;
   return [desc];
 }
 

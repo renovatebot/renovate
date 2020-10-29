@@ -105,7 +105,7 @@ describe('manager/npm/post-update', () => {
     it('returns no error and empty lockfiles if lock file maintenance exists', async () => {
       config.updateType = 'lockFileMaintenance';
       config.reuseExistingBranch = true;
-      git.branchExists.mockResolvedValueOnce(true);
+      git.branchExists.mockReturnValueOnce(true);
       const res = await getAdditionalFiles(config, { npm: [{}] });
       expect(res).toMatchSnapshot();
       expect(res.artifactErrors).toHaveLength(0);

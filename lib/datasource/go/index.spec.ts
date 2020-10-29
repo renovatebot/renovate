@@ -24,6 +24,20 @@ Nothing to see here; <a href="https://godoc.org/golang.org/x/text">move along</a
 </body>
 </html>`;
 
+const resGitHubEnterprise = `<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+
+<title>Go remote import path metadata</title>
+<meta name="go-import" content="git.enterprise.com/example/module git https://git.enterprise.com/example/module.git">
+</head>
+
+<body>
+<!-- Metadata for Go remote import path -->
+</body>
+</html>`;
+
 describe('datasource/go', () => {
   beforeEach(() => {
     httpMock.setup();
@@ -34,6 +48,16 @@ describe('datasource/go', () => {
   });
 
   describe('getDigest', () => {
+    it('returns null for no go-source tag', async () => {
+      httpMock
+        .scope('https://golang.org/')
+        .get('/y/text?go-get=1')
+        .reply(200, '');
+      github.getDigest.mockResolvedValueOnce('abcdefabcdefabcdefabcdef');
+      const res = await getDigest({ lookupName: 'golang.org/y/text' }, null);
+      expect(res).toBeNull();
+      expect(httpMock.getTrace()).toMatchSnapshot();
+    });
     it('returns null for wrong name', async () => {
       httpMock
         .scope('https://golang.org/')
@@ -134,6 +158,40 @@ describe('datasource/go', () => {
       expect(res).not.toBeNull();
       expect(res).toBeDefined();
       expect(httpMock.getTrace()).toMatchSnapshot();
+    });
+    it('support ghe', async () => {
+      httpMock
+        .scope('https://git.enterprise.com/')
+        .get('/example/module?go-get=1')
+        .reply(200, resGitHubEnterprise);
+      github.getReleases.mockResolvedValueOnce({
+        releases: [{ version: 'v1.0.0' }, { version: 'v2.0.0' }],
+      });
+      const res = await getPkgReleases({
+        datasource,
+        depName: 'git.enterprise.com/example/module',
+      });
+      expect(res).toMatchSnapshot();
+      expect(res).not.toBeNull();
+      expect(res).toBeDefined();
+      expect(httpMock.getTrace()).toMatchSnapshot();
+    });
+    it('returns null for go-import prefix mismatch', async () => {
+      httpMock
+        .scope('https://git.enterprise.com/')
+        .get('/example/module?go-get=1')
+        .reply(
+          200,
+          resGitHubEnterprise.replace(
+            'git.enterprise.com/example/module',
+            'git.enterprise.com/badexample/badmodule'
+          )
+        );
+      const res = await getPkgReleases({
+        datasource,
+        depName: 'git.enterprise.com/example/module',
+      });
+      expect(res).toBeNull();
     });
     it('skips wrong package', async () => {
       httpMock

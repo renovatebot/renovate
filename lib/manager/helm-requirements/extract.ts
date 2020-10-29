@@ -18,7 +18,8 @@ export async function extractPackageFile(
       logger.debug({ fileName }, 'Failed to find helm Chart.yaml');
       return null;
     }
-    const chart = yaml.safeLoad(chartContents, { json: true });
+    // TODO: fix me
+    const chart = yaml.safeLoad(chartContents, { json: true }) as any;
     if (!(chart?.apiVersion && chart.name && chart.version)) {
       logger.debug(
         { fileName },

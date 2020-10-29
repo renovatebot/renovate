@@ -1,3 +1,4 @@
+import is from '@sindresorhus/is';
 import yaml from 'js-yaml';
 
 import { logger } from '../../logger';
@@ -21,7 +22,10 @@ export async function getRepositoryData(
 ): Promise<ReleaseResult[]> {
   const cacheNamespace = 'datasource-helm';
   const cacheKey = repository;
-  const cachedIndex = await packageCache.get(cacheNamespace, cacheKey);
+  const cachedIndex = await packageCache.get<ReleaseResult[]>(
+    cacheNamespace,
+    cacheKey
+  );
   // istanbul ignore if
   if (cachedIndex) {
     return cachedIndex;
@@ -46,7 +50,7 @@ export async function getRepositoryData(
   }
   try {
     const doc = yaml.safeLoad(res.body, { json: true });
-    if (!doc) {
+    if (!is.plainObject<Record<string, unknown>>(doc)) {
       logger.warn(`Failed to parse index.yaml from ${repository}`);
       return null;
     }

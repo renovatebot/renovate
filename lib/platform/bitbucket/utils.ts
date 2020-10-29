@@ -1,7 +1,6 @@
 import url from 'url';
-import { PR_STATE_CLOSED } from '../../constants/pull-requests';
-import { BranchStatus } from '../../types';
-import { HttpResponse } from '../../util/http';
+import { BranchStatus, PrState } from '../../types';
+import { HttpOptions, HttpPostOptions, HttpResponse } from '../../util/http';
 import { BitbucketHttp } from '../../util/http/bitbucket';
 import { Pr } from '../common';
 
@@ -14,9 +13,8 @@ export interface Config {
   owner: string;
   prList: Pr[];
   repository: string;
-  bbUseDefaultReviewers: boolean;
-
   username: string;
+  userUuid: string;
 }
 
 export interface PagedResult<T = any> {
@@ -40,7 +38,14 @@ export interface BitbucketStatus {
   state: BitbucketBranchState;
 }
 
-export function repoInfoTransformer(repoInfoBody: any): RepoInfo {
+export interface RepoInfoBody {
+  parent?: any;
+  owner: { username: string };
+  mainbranch: { name: string };
+  has_issues: boolean;
+}
+
+export function repoInfoTransformer(repoInfoBody: RepoInfoBody): RepoInfo {
   return {
     isFork: !!repoInfoBody.parent,
     owner: repoInfoBody.owner.username,
@@ -76,20 +81,20 @@ const addMaxLength = (inputUrl: string, pagelen = 100): string => {
 function callApi<T>(
   apiUrl: string,
   method: string,
-  options?: any
+  options?: HttpOptions | HttpPostOptions
 ): Promise<HttpResponse<T>> {
   /* istanbul ignore next */
   switch (method.toLowerCase()) {
     case 'post':
-      return bitbucketHttp.postJson<T>(apiUrl, options);
+      return bitbucketHttp.postJson<T>(apiUrl, options as HttpPostOptions);
     case 'put':
-      return bitbucketHttp.putJson<T>(apiUrl, options);
+      return bitbucketHttp.putJson<T>(apiUrl, options as HttpPostOptions);
     case 'patch':
-      return bitbucketHttp.patchJson<T>(apiUrl, options);
+      return bitbucketHttp.patchJson<T>(apiUrl, options as HttpPostOptions);
     case 'head':
       return bitbucketHttp.headJson<T>(apiUrl, options);
     case 'delete':
-      return bitbucketHttp.deleteJson<T>(apiUrl, options);
+      return bitbucketHttp.deleteJson<T>(apiUrl, options as HttpPostOptions);
     case 'get':
     default:
       return bitbucketHttp.getJson<T>(apiUrl, options);
@@ -99,7 +104,7 @@ function callApi<T>(
 export async function accumulateValues<T = any>(
   reqUrl: string,
   method = 'get',
-  options?: any,
+  options?: HttpOptions | HttpPostOptions,
   pagelen?: number
 ): Promise<T[]> {
   let accumulator: T[] = [];
@@ -118,7 +123,17 @@ export async function accumulateValues<T = any>(
   return accumulator;
 }
 
-export /* istanbul ignore next */ function isConflicted(files: any): boolean {
+interface Files {
+  chunks: {
+    changes: {
+      content: string;
+    }[];
+  }[];
+}
+
+export /* istanbul ignore next */ function isConflicted(
+  files: Files[]
+): boolean {
   for (const file of files) {
     for (const chunk of file.chunks) {
       for (const change of chunk.changes) {
@@ -131,15 +146,39 @@ export /* istanbul ignore next */ function isConflicted(files: any): boolean {
   return false;
 }
 
-export function prInfo(pr: any): Pr {
+export interface PrResponse {
+  id: number;
+  title: string;
+  state: string;
+  links: {
+    commits: {
+      href: string;
+    };
+  };
+  summary?: { raw: string };
+  source: {
+    branch: {
+      name: string;
+    };
+  };
+  destination: {
+    branch: {
+      name: string;
+    };
+  };
+  reviewers: Array<any>;
+  created_on: string;
+}
+
+export function prInfo(pr: PrResponse): Pr {
   return {
     number: pr.id,
     body: pr.summary ? pr.summary.raw : /* istanbul ignore next */ undefined,
-    branchName: pr.source.branch.name,
+    sourceBranch: pr.source.branch.name,
     targetBranch: pr.destination.branch.name,
     title: pr.title,
     state: prStates.closed.includes(pr.state)
-      ? /* istanbul ignore next */ PR_STATE_CLOSED
+      ? /* istanbul ignore next */ PrState.Closed
       : pr.state.toLowerCase(),
     createdAt: pr.created_on,
   };

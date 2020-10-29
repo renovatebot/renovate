@@ -8,7 +8,7 @@ type TableDefinition = {
 };
 
 function getTableDefinition(config: BranchConfig): TableDefinition[] {
-  const res = [];
+  const res: TableDefinition[] = [];
   for (const header of config.prBodyColumns) {
     const value = config.prBodyDefinitions[header];
     res.push({ header, value });
@@ -24,7 +24,7 @@ function getNonEmptyColumns(
   for (const column of definitions) {
     const { header } = column;
     for (const row of rows) {
-      if (row[header] && row[header].length) {
+      if (row[header]?.length) {
         if (!res.includes(header)) {
           res.push(header);
         }

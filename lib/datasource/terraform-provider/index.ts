@@ -20,6 +20,8 @@ interface TerraformProvider {
   provider: string;
   source?: string;
   versions: string[];
+  version: string;
+  published_at: string;
 }
 
 interface TerraformProviderReleaseBackend {
@@ -54,11 +56,20 @@ async function queryRegistry(
   dep.releases = res.versions.map((version) => ({
     version,
   }));
+  // set published date for latest release
+  const currentVersion = dep.releases.find((release) => {
+    return res.version === release.version;
+  });
+  // istanbul ignore else
+  if (currentVersion) {
+    currentVersion.releaseTimestamp = res.published_at;
+  }
   dep.homepage = `${registryURL}/providers/${repository}`;
   logger.trace({ dep }, 'dep');
   return dep;
 }
 
+// TODO: add long term cache
 async function queryReleaseBackend(
   lookupName: string,
   registryURL: string,
@@ -68,10 +79,16 @@ async function queryReleaseBackend(
   const backendURL = registryURL + `/index.json`;
   const res = (await http.getJson<TerraformProviderReleaseBackend>(backendURL))
     .body;
+
+  if (!res[backendLookUpName]) {
+    return null;
+  }
+
   const dep: ReleaseResult = {
     name: repository,
     versions: {},
     releases: null,
+    sourceUrl: `https://github.com/terraform-providers/${backendLookUpName}`,
   };
   dep.releases = Object.keys(res[backendLookUpName].versions).map(
     (version) => ({
@@ -91,7 +108,9 @@ export async function getReleases({
   lookupName,
   registryUrl,
 }: GetReleasesConfig): Promise<ReleaseResult | null> {
-  const repository = `hashicorp/${lookupName}`;
+  const repository = lookupName.includes('/')
+    ? lookupName
+    : `hashicorp/${lookupName}`;
 
   const cacheNamespace = 'terraform-provider';
   const pkgUrl = `${registryUrl}/${repository}`;

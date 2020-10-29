@@ -5,6 +5,7 @@ declare global {
   // eslint-disable-next-line @typescript-eslint/no-namespace
   namespace jest {
     type ContainsOption<T> = T extends ArrayLike<unknown> ? T[number] : unknown;
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
     interface Matchers<R, T> {
       /**
        * only available in `test/website-docs.spec.js`
@@ -84,7 +85,7 @@ describe('docs', () => {
     on an error, it throws a custom message.
   */
   expect.extend({
-    toContainOption<T>(received: T[], argument: T) {
+    toContainOption<T extends string>(received: T[], argument: T) {
       if (received.includes(argument)) {
         return {
           message: (): string =>

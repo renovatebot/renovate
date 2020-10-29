@@ -145,6 +145,24 @@ function kotlinPluginVariableVersionFormatMatch(
   );
 }
 
+function kotlinImplementationVariableVersionFormatMatch(
+  dependency: GradleDependency
+): RegExp {
+  // implementation("com.graphql-java", "graphql-java", graphqlVersion)
+  return regEx(
+    `(?:implementation|testImplementation)\\s*\\(\\s*['"]${dependency.group}['"]\\s*,\\s*['"]${dependency.name}['"]\\s*,\\s*([a-zA-Z_][a-zA-Z_0-9]*)\\s*\\)\\s*(?:\\s|;|})`
+  );
+}
+
+function kotlinPluginVariableDotVersionFormatMatch(
+  dependency: GradleDependency
+): RegExp {
+  // id("org.jetbrains.kotlin.jvm").version(kotlinVersion)
+  return regEx(
+    `id\\s*\\(\\s*"${dependency.group}"\\s*\\)\\s*\\.\\s*version\\s*\\(\\s*([a-zA-Z_][a-zA-Z_0-9]*)\\s*\\)\\s*(?:\\s|;|})`
+  );
+}
+
 function dependencyStringVariableExpressionFormatMatch(
   dependency: GradleDependency
 ): RegExp {
@@ -181,6 +199,8 @@ export function collectVersionVariables(
       dependencyStringVariableExpressionFormatMatch(dependency),
       ...moduleMapVariableVersionFormatMatch(dependency),
       ...moduleKotlinNamedArgumentVariableVersionFormatMatch(dependency),
+      kotlinImplementationVariableVersionFormatMatch(dependency),
+      kotlinPluginVariableDotVersionFormatMatch(dependency),
     ];
 
     const depName = `${dependency.group}:${dependency.name}`;
@@ -235,6 +255,7 @@ function updateLocalVariables(
     moduleStringVariableExpressionVersionFormatMatch(dependency),
     groovyPluginVariableVersionFormatMatch(dependency),
     kotlinPluginVariableVersionFormatMatch(dependency),
+    kotlinImplementationVariableVersionFormatMatch(dependency),
     ...moduleKotlinNamedArgumentVariableVersionFormatMatch(dependency),
   ];
   for (const regex of regexes) {

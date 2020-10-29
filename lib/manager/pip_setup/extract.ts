@@ -55,7 +55,7 @@ export async function extractSetupFile(
   logger.debug({ cmd, args }, 'python command');
   const res = await exec(`${cmd} ${args.join(' ')}`, {
     cwd,
-    timeout: 5000,
+    timeout: 30000,
     docker: {
       image: 'renovate/pip',
     },
@@ -83,6 +83,8 @@ export async function extractPackageFile(
     setup = await extractSetupFile(content, packageFile, config);
   } catch (err) {
     logger.warn({ err, content, packageFile }, 'Failed to read setup.py file');
+  }
+  if (!setup) {
     return null;
   }
   const requires: string[] = [];

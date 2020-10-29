@@ -8,13 +8,27 @@ import {
   matchesHelmValuesDockerHeuristic,
 } from './util';
 
+function getHelmDep({
+  registry,
+  repository,
+  tag,
+}: {
+  registry: string;
+  repository: string;
+  tag: string;
+}): PackageDependency {
+  const dep = getDep(`${registry}${repository}:${tag}`, false);
+  dep.replaceString = tag;
+  return dep;
+}
+
 /**
  * Recursively find all supported dependencies in the yaml object.
  *
  * @param parsedContent
  */
 function findDependencies(
-  parsedContent: object | HelmDockerImageDependency,
+  parsedContent: Record<string, unknown> | HelmDockerImageDependency,
   packageDependencies: Array<PackageDependency>
 ): Array<PackageDependency> {
   if (!parsedContent || typeof parsedContent !== 'object') {
@@ -25,10 +39,11 @@ function findDependencies(
     if (matchesHelmValuesDockerHeuristic(key, parsedContent[key])) {
       const currentItem = parsedContent[key];
 
-      const registry = currentItem.registry ? `${currentItem.registry}/` : '';
-      packageDependencies.push(
-        getDep(`${registry}${currentItem.repository}:${currentItem.tag}`, false)
-      );
+      let registry: string = currentItem.registry;
+      registry = registry ? `${registry}/` : '';
+      const repository = String(currentItem.repository);
+      const tag = String(currentItem.tag);
+      packageDependencies.push(getHelmDep({ repository, tag, registry }));
     } else {
       findDependencies(parsedContent[key], packageDependencies);
     }
@@ -37,11 +52,12 @@ function findDependencies(
 }
 
 export function extractPackageFile(content: string): PackageFile {
-  let parsedContent;
+  let parsedContent: Record<string, unknown> | HelmDockerImageDependency;
   try {
     // a parser that allows extracting line numbers would be preferable, with
     // the current approach we need to match anything we find again during the update
-    parsedContent = yaml.safeLoad(content, { json: true });
+    // TODO: fix me
+    parsedContent = yaml.safeLoad(content, { json: true }) as any;
   } catch (err) {
     logger.debug({ err }, 'Failed to parse helm-values YAML');
     return null;

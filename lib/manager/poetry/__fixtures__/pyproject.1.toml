@@ -23,3 +23,7 @@ dev_dep2 = "Invalid version."
 [build-system]
 requires = ["poetry>=1.0", "wheel"]
 build-backend = "poetry.masonry.api"
+
+[tool.coverage]
+run.omit = ["*/tests_*.py"]
+report.precision = 2

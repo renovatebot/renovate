@@ -261,6 +261,32 @@ describe('workers/pr', () => {
       expect(platform.createPr.mock.calls[0]).toMatchSnapshot();
       existingPr.body = platform.createPr.mock.calls[0][0].prBody;
     });
+    it('should not create PR if limit is reached', async () => {
+      platform.getBranchStatus.mockResolvedValueOnce(BranchStatus.green);
+      config.logJSON = await getChangeLogJSON(config);
+      config.prCreation = 'status-success';
+      config.automerge = true;
+      config.schedule = ['before 5am'];
+      const { prResult } = await prWorker.ensurePr(config, true);
+      expect(prResult).toEqual(PrResult.LimitReached);
+      expect(platform.createPr.mock.calls).toBeEmpty();
+    });
+    it('should create PR if limit is reached but dashboard checked', async () => {
+      platform.getBranchStatus.mockResolvedValueOnce(BranchStatus.green);
+      config.logJSON = await getChangeLogJSON(config);
+      config.prCreation = 'status-success';
+      config.automerge = true;
+      config.schedule = ['before 5am'];
+      const { prResult } = await prWorker.ensurePr(
+        {
+          ...config,
+          dependencyDashboardChecks: { 'renovate/dummy-1.x': 'true' },
+        },
+        true
+      );
+      expect(prResult).toEqual(PrResult.Created);
+      expect(platform.createPr).toHaveBeenCalled();
+    });
     it('should create group PR', async () => {
       config.upgrades = config.upgrades.concat([
         {
@@ -452,6 +478,17 @@ describe('workers/pr', () => {
       const reviewers = platform.addReviewers.mock.calls[0][1];
       expect(reviewers).toHaveLength(2);
       expect(config.reviewers).toEqual(expect.arrayContaining(reviewers));
+    });
+    it('should not add any assignees or reviewers to new PR', async () => {
+      config.assignees = ['foo', 'bar', 'baz'];
+      config.assigneesSampleSize = 0;
+      config.reviewers = ['baz', 'boo', 'bor'];
+      config.reviewersSampleSize = 0;
+      const { prResult, pr } = await prWorker.ensurePr(config);
+      expect(prResult).toEqual(PrResult.Created);
+      expect(pr).toMatchObject({ displayNumber: 'New Pull Request' });
+      expect(platform.addAssignees).toHaveBeenCalledTimes(0);
+      expect(platform.addReviewers).toHaveBeenCalledTimes(0);
     });
     it('should add and deduplicate additionalReviewers on new PR', async () => {
       config.reviewers = ['@foo', 'bar'];

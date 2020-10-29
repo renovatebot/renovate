@@ -150,7 +150,7 @@ describe('bundler.updateArtifacts()', () => {
       ).toMatchSnapshot();
       expect(execSnapshots).toMatchSnapshot();
     });
-    it('compatibility options', async () => {
+    it('constraints options', async () => {
       fs.readLocalFile.mockResolvedValueOnce('Current Gemfile.lock');
       fs.writeLocalFile.mockResolvedValueOnce(null as never);
       datasource.getPkgReleases.mockResolvedValueOnce({
@@ -174,7 +174,7 @@ describe('bundler.updateArtifacts()', () => {
             ...config,
             binarySource: BinarySource.Docker,
             dockerUser: 'foobar',
-            compatibility: {
+            constraints: {
               ruby: '1.2.5',
               bundler: '3.2.1',
             },
@@ -183,7 +183,7 @@ describe('bundler.updateArtifacts()', () => {
       ).toMatchSnapshot();
       expect(execSnapshots).toMatchSnapshot();
     });
-    it('invalid compatibility options', async () => {
+    it('invalid constraints options', async () => {
       fs.readLocalFile.mockResolvedValueOnce('Current Gemfile.lock');
       fs.writeLocalFile.mockResolvedValueOnce(null as never);
       datasource.getPkgReleases.mockResolvedValueOnce({
@@ -207,7 +207,7 @@ describe('bundler.updateArtifacts()', () => {
             ...config,
             binarySource: BinarySource.Docker,
             dockerUser: 'foobar',
-            compatibility: {
+            constraints: {
               ruby: 'foo',
               bundler: 'bar',
             },

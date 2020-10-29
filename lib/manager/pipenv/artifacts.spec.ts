@@ -29,7 +29,7 @@ const config = {
 };
 
 const dockerConfig = { ...config, binarySource: BinarySource.Docker };
-const lockMaintenceConfig = { ...config, isLockFileMaintenance: true };
+const lockMaintenanceConfig = { ...config, isLockFileMaintenance: true };
 
 describe('.updateArtifacts()', () => {
   let pipFileLock;
@@ -97,7 +97,7 @@ describe('.updateArtifacts()', () => {
         packageFileName: 'Pipfile',
         updatedDeps: [],
         newPackageFileContent: 'some new content',
-        config: { ...config, compatibility: { python: '3.7' } },
+        config: { ...config, constraints: { python: '3.7' } },
       })
     ).not.toBeNull();
     expect(execSnapshots).toMatchSnapshot();
@@ -148,7 +148,7 @@ describe('.updateArtifacts()', () => {
         packageFileName: 'Pipfile',
         updatedDeps: [],
         newPackageFileContent: '{}',
-        config: lockMaintenceConfig,
+        config: lockMaintenanceConfig,
       })
     ).not.toBeNull();
     expect(execSnapshots).toMatchSnapshot();

@@ -9,7 +9,11 @@ import { PlatformPrOptions, Pr, platform } from '../../platform';
 import { BranchStatus } from '../../types';
 import { ExternalHostError } from '../../types/errors/external-host-error';
 import { sampleSize } from '../../util';
-import { getBranchLastCommitTime, isBranchModified } from '../../util/git';
+import {
+  deleteBranch,
+  getBranchLastCommitTime,
+  isBranchModified,
+} from '../../util/git';
 import { BranchConfig, PrResult } from '../common';
 import { getPrBody } from './body';
 import { ChangeLogError } from './changelog';
@@ -44,12 +48,14 @@ export async function addAssigneesReviewers(
       if (config.assigneesSampleSize !== null) {
         assignees = sampleSize(assignees, config.assigneesSampleSize);
       }
-      // istanbul ignore if
-      if (config.dryRun) {
-        logger.info('DRY-RUN: Would add assignees to PR #' + pr.number);
-      } else {
-        await platform.addAssignees(pr.number, assignees);
-        logger.debug({ assignees }, 'Added assignees');
+      if (assignees.length > 0) {
+        // istanbul ignore if
+        if (config.dryRun) {
+          logger.info(`DRY-RUN: Would add assignees to PR #${pr.number}`);
+        } else {
+          await platform.addAssignees(pr.number, assignees);
+          logger.debug({ assignees }, 'Added assignees');
+        }
       }
     } catch (err) {
       logger.debug(
@@ -74,12 +80,14 @@ export async function addAssigneesReviewers(
       if (config.reviewersSampleSize !== null) {
         reviewers = sampleSize(reviewers, config.reviewersSampleSize);
       }
-      // istanbul ignore if
-      if (config.dryRun) {
-        logger.info('DRY-RUN: Would add reviewers to PR #' + pr.number);
-      } else {
-        await platform.addReviewers(pr.number, reviewers);
-        logger.debug({ reviewers }, 'Added reviewers');
+      if (reviewers.length > 0) {
+        // istanbul ignore if
+        if (config.dryRun) {
+          logger.info(`DRY-RUN: Would add reviewers to PR #${pr.number}`);
+        } else {
+          await platform.addReviewers(pr.number, reviewers);
+          logger.debug({ reviewers }, 'Added reviewers');
+        }
       }
     } catch (err) {
       logger.debug(
@@ -92,7 +100,8 @@ export async function addAssigneesReviewers(
 
 // Ensures that PR exists with matching title/body
 export async function ensurePr(
-  prConfig: BranchConfig
+  prConfig: BranchConfig,
+  prLimitReached?: boolean
 ): Promise<{
   prResult: PrResult;
   pr?: Pr;
@@ -112,7 +121,7 @@ export async function ensurePr(
   }
   config.upgrades = [];
 
-  if (config.artifactErrors && config.artifactErrors.length) {
+  if (config.artifactErrors?.length) {
     logger.debug('Forcing PR because of artifact errors');
     config.forcePr = true;
   }
@@ -198,8 +207,9 @@ export async function ensurePr(
         );
         return { prResult: PrResult.AwaitingNotPending };
       }
+      const prNotPendingHours = String(config.prNotPendingHours);
       logger.debug(
-        `prNotPendingHours=${config.prNotPendingHours} threshold hit - creating PR`
+        `prNotPendingHours=${prNotPendingHours} threshold hit - creating PR`
       );
     }
     logger.debug('Branch status success');
@@ -248,7 +258,7 @@ export async function ensurePr(
           [
             '\n',
             ':warning: Release Notes retrieval for this PR were skipped because no github.com credentials were available.',
-            'If you are using the hosted GitLab app, please follow [this guide](https://docs.renovatebot.com/install-gitlab-app/#configuring-a-token-for-githubcom-hosted-release-notes). If you are self-hosted, please see [this instruction](https://github.com/renovatebot/renovate/blob/master/docs/development/self-hosting.md#githubcom-token-for-release-notes) instead.',
+            'If you are using the hosted GitLab app, please follow [this guide](https://docs.renovatebot.com/install-gitlab-app/#configuring-a-token-for-githubcom-hosted-release-notes). If you are self-hosted, please see [this instruction](https://github.com/renovatebot/renovate/blob/master/docs/usage/self-hosting.md#githubcom-token-for-release-notes) instead.',
             '\n',
           ].join('\n'),
         ];
@@ -329,9 +339,9 @@ export async function ensurePr(
       }
       // istanbul ignore if
       if (config.dryRun) {
-        logger.info('DRY-RUN: Would update PR #' + existingPr.number);
+        logger.info(`DRY-RUN: Would update PR #${existingPr.number}`);
       } else {
-        await platform.updatePr(existingPr.number, prTitle, prBody);
+        await platform.updatePr({ number: existingPr.number, prTitle, prBody });
         logger.info({ pr: existingPr.number, prTitle }, `PR updated`);
       }
       return { prResult: PrResult.Updated, pr: existingPr };
@@ -350,14 +360,18 @@ export async function ensurePr(
       } else {
         const platformOptions: PlatformPrOptions = {
           azureAutoComplete: config.azureAutoComplete,
-          statusCheckVerify: config.statusCheckVerify,
+          azureWorkItemId: config.azureWorkItemId,
+          bbUseDefaultReviewers: config.bbUseDefaultReviewers,
           gitLabAutomerge:
             config.automerge &&
             config.automergeType === 'pr' &&
             config.gitLabAutomerge,
         };
+        if (!dependencyDashboardCheck && prLimitReached) {
+          return { prResult: PrResult.LimitReached };
+        }
         pr = await platform.createPr({
-          branchName,
+          sourceBranch: branchName,
           targetBranch: config.baseBranch,
           prTitle,
           prBody,
@@ -369,19 +383,15 @@ export async function ensurePr(
       }
     } catch (err) /* istanbul ignore next */ {
       logger.debug({ err }, 'Pull request creation error');
-      if (err.body && err.body.message === 'Validation failed') {
-        if (err.body.errors && err.body.errors.length) {
-          if (
-            err.body.errors.some(
-              (error: { message?: string }) =>
-                error.message &&
-                error.message.startsWith('A pull request already exists')
-            )
-          ) {
-            logger.warn('A pull requests already exists');
-            return { prResult: PrResult.ErrorAlreadyExists };
-          }
-        }
+      if (
+        err.body?.message === 'Validation failed' &&
+        err.body.errors?.length &&
+        err.body.errors.some((error: { message?: string }) =>
+          error.message?.startsWith('A pull request already exists')
+        )
+      ) {
+        logger.warn('A pull requests already exists');
+        return { prResult: PrResult.ErrorAlreadyExists };
       }
       if (err.statusCode === 502) {
         logger.warn(
@@ -391,7 +401,7 @@ export async function ensurePr(
         if (config.dryRun) {
           logger.info('DRY-RUN: Would delete branch: ' + config.branchName);
         } else {
-          await platform.deleteBranch(branchName);
+          await deleteBranch(branchName);
         }
       }
       return { prResult: PrResult.Error };
@@ -409,7 +419,7 @@ export async function ensurePr(
       logger.debug('Adding branch automerge failure message to PR');
       // istanbul ignore if
       if (config.dryRun) {
-        logger.info('DRY-RUN: Would add comment to PR #' + pr.number);
+        logger.info(`DRY-RUN: Would add comment to PR #${pr.number}`);
       } else {
         await platform.ensureComment({
           number: pr.number,
@@ -500,7 +510,7 @@ export async function checkAutoMerge(
       // istanbul ignore if
       if (config.dryRun) {
         logger.info(
-          'DRY-RUN: Would add PR automerge comment to PR #' + pr.number
+          `DRY-RUN: Would add PR automerge comment to PR #${pr.number}`
         );
         return false;
       }
@@ -520,7 +530,7 @@ export async function checkAutoMerge(
     logger.debug(`Automerging #${pr.number}`);
     // istanbul ignore if
     if (config.dryRun) {
-      logger.info('DRY-RUN: Would merge PR #' + pr.number);
+      logger.info(`DRY-RUN: Would merge PR #${pr.number}`);
       return false;
     }
     const res = await platform.mergePr(pr.number, branchName);

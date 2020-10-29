@@ -1,6 +1,6 @@
+import toml from '@iarna/toml';
 import { RANGE_PATTERN } from '@renovate/pep440/lib/specifier';
 import is from '@sindresorhus/is';
-import toml from 'toml';
 import * as datasourcePypi from '../../datasource/pypi';
 import { logger } from '../../logger';
 import { SkipReason } from '../../types';
@@ -8,7 +8,7 @@ import { PackageDependency, PackageFile } from '../common';
 
 // based on https://www.python.org/dev/peps/pep-0508/#names
 const packageRegex = /^([A-Z0-9]|[A-Z0-9][A-Z0-9._-]*[A-Z0-9])$/i;
-const rangePattern = RANGE_PATTERN;
+const rangePattern: string = RANGE_PATTERN;
 
 const specifierPartPattern = `\\s*${rangePattern.replace(
   /\?<\w+>/g,
@@ -121,7 +121,8 @@ export function extractPackageFile(content: string): PackageFile | null {
 
   let pipfile: PipFile;
   try {
-    pipfile = toml.parse(content);
+    // TODO: fix type
+    pipfile = toml.parse(content) as any;
   } catch (err) {
     logger.debug({ err }, 'Error parsing Pipfile');
     return null;

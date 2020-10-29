@@ -26,8 +26,8 @@ async function getRubyConstraint(
   updateArtifact: UpdateArtifact
 ): Promise<string> {
   const { packageFileName, config } = updateArtifact;
-  const { compatibility = {} } = config;
-  const { ruby } = compatibility;
+  const { constraints = {} } = config;
+  const { ruby } = constraints;
 
   let rubyConstraint: string;
   if (ruby) {
@@ -72,7 +72,7 @@ export async function updateArtifacts(
     newPackageFileContent,
     config,
   } = updateArtifact;
-  const { compatibility = {} } = config;
+  const { constraints = {} } = config;
   logger.debug(`bundler.updateArtifacts(${packageFileName})`);
   const existingError = memCache.get<string>('bundlerArtifactsError');
   // istanbul ignore if
@@ -103,7 +103,7 @@ export async function updateArtifacts(
     }
 
     let bundlerVersion = '';
-    const { bundler } = compatibility;
+    const { bundler } = constraints;
     if (bundler) {
       if (isValid(bundler)) {
         logger.debug({ bundlerVersion: bundler }, 'Found bundler version');
@@ -154,7 +154,7 @@ export async function updateArtifacts(
       },
     ];
   } catch (err) /* istanbul ignore next */ {
-    const output = err.stdout + err.stderr;
+    const output = `${String(err.stdout)}\n${String(err.stderr)}`;
     if (
       err.message.includes('fatal: Could not parse object') ||
       output.includes('but that version could not be found')
@@ -169,13 +169,11 @@ export async function updateArtifacts(
       ];
     }
     if (
-      (err.stdout &&
-        err.stdout.includes('Please supply credentials for this source')) ||
-      (err.stderr && err.stderr.includes('Authentication is required')) ||
-      (err.stderr &&
-        err.stderr.includes(
-          'Please make sure you have the correct access rights'
-        ))
+      err.stdout?.includes('Please supply credentials for this source') ||
+      err.stderr?.includes('Authentication is required') ||
+      err.stderr?.includes(
+        'Please make sure you have the correct access rights'
+      )
     ) {
       logger.debug(
         { err },
@@ -225,7 +223,7 @@ export async function updateArtifacts(
       {
         artifactError: {
           lockFile: lockFileName,
-          stderr: err.stdout + '\n' + err.stderr,
+          stderr: `${String(err.stdout)}\n${String(err.stderr)}`,
         },
       },
     ];

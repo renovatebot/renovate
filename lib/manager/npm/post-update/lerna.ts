@@ -45,7 +45,7 @@ export async function generateLockFiles(
   try {
     if (lernaClient === 'yarn') {
       let installYarn = 'npm i -g yarn';
-      const yarnCompatibility = config.compatibility?.yarn;
+      const yarnCompatibility = config.constraints?.yarn;
       if (validRange(yarnCompatibility)) {
         installYarn += `@${quote(yarnCompatibility)}`;
       }
@@ -56,7 +56,7 @@ export async function generateLockFiles(
       cmdOptions = '--ignore-scripts --ignore-engines --ignore-platform';
     } else if (lernaClient === 'npm') {
       let installNpm = 'npm i -g npm';
-      const npmCompatibility = config.compatibility?.npm;
+      const npmCompatibility = config.constraints?.npm;
       if (validRange(npmCompatibility)) {
         installNpm += `@${quote(npmCompatibility)}`;
         preCommands.push(installNpm);
@@ -89,6 +89,12 @@ export async function generateLockFiles(
         preCommands,
       },
     };
+    // istanbul ignore if
+    if (global.trustLevel === 'high') {
+      execOptions.extraEnv.NPM_AUTH = env.NPM_AUTH;
+      execOptions.extraEnv.NPM_EMAIL = env.NPM_EMAIL;
+      execOptions.extraEnv.NPM_TOKEN = env.NPM_TOKEN;
+    }
     if (config.dockerMapDotfiles) {
       const homeDir =
         process.env.HOME || process.env.HOMEPATH || process.env.USERPROFILE;

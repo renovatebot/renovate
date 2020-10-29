@@ -1,3 +1,4 @@
+import type { Merge } from 'type-fest';
 import {
   GroupConfig,
   RenovateAdminConfig,
@@ -15,7 +16,6 @@ import {
 import { PlatformPrOptions } from '../platform';
 import { File } from '../util/git';
 import { ChangeLogResult } from './pr/changelog/common';
-import { Merge } from 'type-fest';
 
 export interface BranchUpgradeConfig
   extends Merge<RenovateConfig, PackageDependency>,
@@ -60,6 +60,11 @@ export interface BranchUpgradeConfig
   updatedArtifacts?: File[];
 
   logJSON?: ChangeLogResult;
+
+  homepage?: string;
+  changelogUrl?: string;
+  dependencyUrl?: string;
+  sourceUrl?: string;
 }
 
 export enum PrResult {
@@ -72,23 +77,25 @@ export enum PrResult {
   ErrorAlreadyExists = 'ErrorAlreadyExists',
   NotUpdated = 'NotUpdated',
   Updated = 'Updated',
+  LimitReached = 'LimitReached',
 }
 
-export type ProcessBranchResult =
-  | 'already-existed'
-  | 'automerged'
-  | 'done'
-  | 'error'
-  | 'needs-approval'
-  | 'needs-pr-approval'
-  | 'not-scheduled'
-  | 'no-work'
-  | 'pending'
-  | 'pr-created'
-  | 'pr-edited'
-  | 'pr-limit-reached'
-  | 'commit-limit-reached'
-  | 'rebase';
+export enum ProcessBranchResult {
+  AlreadyExisted = 'already-existed',
+  Automerged = 'automerged',
+  Done = 'done',
+  Error = 'error',
+  NeedsApproval = 'needs-approval',
+  NeedsPrApproval = 'needs-pr-approval',
+  NotScheduled = 'not-scheduled',
+  NoWork = 'no-work',
+  Pending = 'pending',
+  PrCreated = 'pr-created',
+  PrEdited = 'pr-edited',
+  PrLimitReached = 'pr-limit-reached',
+  CommitLimitReached = 'commit-limit-reached',
+  Rebase = 'rebase',
+}
 
 export interface BranchConfig
   extends BranchUpgradeConfig,

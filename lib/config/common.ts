@@ -18,14 +18,17 @@ export interface GroupConfig extends Record<string, unknown> {
 
 // TODO: Proper typings
 export interface RenovateSharedConfig {
+  $schema?: string;
   automerge?: boolean;
   branchPrefix?: string;
   branchName?: string;
   manager?: string;
   commitMessage?: string;
+  commitMessagePrefix?: string;
   draftPR?: boolean;
   enabled?: boolean;
   enabledManagers?: string[];
+  extends?: string[];
   fileMatch?: string[];
   group?: GroupConfig;
   groupName?: string;
@@ -51,10 +54,9 @@ export interface RenovateSharedConfig {
   repositoryCache?: RepositoryCacheConfig;
   requiredStatusChecks?: string[];
   schedule?: string[];
-  semanticCommits?: boolean;
+  semanticCommits?: 'auto' | 'enabled' | 'disabled';
   semanticCommitScope?: string;
   semanticCommitType?: string;
-  statusCheckVerify?: boolean;
   suppressNotifications?: string[];
   timezone?: string;
   unicodeEmoji?: boolean;
@@ -73,6 +75,10 @@ export interface RenovateAdminConfig {
   baseDir?: string;
   cacheDir?: string;
   configWarningReuseIssue?: boolean;
+
+  dockerImagePrefix?: string;
+  dockerUser?: string;
+
   dryRun?: boolean;
 
   endpoint?: string;
@@ -87,12 +93,14 @@ export interface RenovateAdminConfig {
 
   onboarding?: boolean;
   onboardingBranch?: string;
+  onboardingCommitMessage?: string;
   onboardingPrTitle?: string;
   onboardingConfig?: RenovateSharedConfig;
 
   platform?: string;
   postUpdateOptions?: string[];
   privateKey?: string | Buffer;
+  privateKeyPath?: string;
   repositories?: RenovateRepository[];
   requireConfig?: boolean;
   trustLevel?: 'low' | 'high';
@@ -134,13 +142,11 @@ export interface RenovateConfig
   depName?: string;
   baseBranches?: string[];
   baseBranch?: string;
-  baseBranchSha?: string;
   defaultBranch?: string;
   branchList?: string[];
   description?: string | string[];
 
   errors?: ValidationMessage[];
-  extends?: string[];
 
   gitAuthor?: string;
 
@@ -170,6 +176,8 @@ export interface RenovateConfig
   warnings?: ValidationMessage[];
   vulnerabilityAlerts?: RenovateSharedConfig;
   regexManagers?: CustomManager[];
+
+  fetchReleaseNotes?: boolean;
 }
 
 export interface AssigneesAndReviewersConfig {

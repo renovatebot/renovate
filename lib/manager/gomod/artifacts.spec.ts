@@ -40,7 +40,7 @@ const config = {
   localDir: join('/tmp/github/some/repo'),
   cacheDir: join('/tmp/renovate/cache'),
   dockerUser: 'foobar',
-  compatibility: { go: '1.14' },
+  constraints: { go: '1.14' },
 };
 
 const goEnv = {
@@ -212,12 +212,10 @@ describe('.updateArtifacts()', () => {
     ).not.toBeNull();
     expect(execSnapshots).toMatchSnapshot();
   });
-  it('supports docker mode with credentials and appMode enabled', async () => {
+  it('supports docker mode with goModTidy', async () => {
     jest.spyOn(docker, 'removeDanglingContainers').mockResolvedValueOnce();
     await setUtilConfig({ ...config, binarySource: BinarySource.Docker });
-    hostRules.find.mockReturnValueOnce({
-      token: 'some-token',
-    });
+    hostRules.find.mockReturnValueOnce({});
     fs.readFile.mockResolvedValueOnce('Current go.sum' as any);
     fs.readFile.mockResolvedValueOnce(null as any); // vendor modules filename
     const execSnapshots = mockExecAll(exec);
@@ -228,24 +226,19 @@ describe('.updateArtifacts()', () => {
     fs.readFile.mockResolvedValueOnce('New go.sum 2' as any);
     fs.readFile.mockResolvedValueOnce('New go.sum 3' as any);
     fs.readFile.mockResolvedValueOnce('New go.mod' as any);
-    try {
-      global.appMode = true;
-      expect(
-        await gomod.updateArtifacts({
-          packageFileName: 'go.mod',
-          updatedDeps: [],
-          newPackageFileContent: gomod1,
-          config: {
-            ...config,
-            binarySource: BinarySource.Docker,
-            postUpdateOptions: ['gomodTidy'],
-          },
-        })
-      ).not.toBeNull();
-      expect(execSnapshots).toMatchSnapshot();
-    } finally {
-      delete global.appMode;
-    }
+    expect(
+      await gomod.updateArtifacts({
+        packageFileName: 'go.mod',
+        updatedDeps: [],
+        newPackageFileContent: gomod1,
+        config: {
+          ...config,
+          binarySource: BinarySource.Docker,
+          postUpdateOptions: ['gomodTidy'],
+        },
+      })
+    ).not.toBeNull();
+    expect(execSnapshots).toMatchSnapshot();
   });
   it('catches errors', async () => {
     const execSnapshots = mockExecAll(exec);

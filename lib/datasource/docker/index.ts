@@ -4,6 +4,7 @@ import AWS from 'aws-sdk';
 import hasha from 'hasha';
 import parseLinkHeader from 'parse-link-header';
 import wwwAuthenticate from 'www-authenticate';
+import { HOST_DISABLED } from '../../constants/error-messages';
 import { logger } from '../../logger';
 import { HostRule } from '../../types';
 import { ExternalHostError } from '../../types/errors/external-host-error';
@@ -20,7 +21,7 @@ export const defaultRegistryUrls = ['https://index.docker.io'];
 export const registryStrategy = 'first';
 
 export const defaultConfig = {
-  managerBranchPrefix: 'docker-',
+  additionalBranchPrefix: 'docker-',
   commitMessageTopic: '{{{depName}}} Docker tag',
   major: { enabled: false },
   commitMessageExtra:
@@ -174,7 +175,7 @@ async function getAuthHeaders(
     }
 
     // prettier-ignore
-    const authUrl = `${authenticateHeader.parms.realm}?service=${authenticateHeader.parms.service}&scope=repository:${repository}:pull`;
+    const authUrl = `${String(authenticateHeader.parms.realm)}?service=${String(authenticateHeader.parms.service)}&scope=repository:${repository}:pull`;
     logger.trace(
       `Obtaining docker registry token for ${repository} using url ${authUrl}`
     );
@@ -225,6 +226,13 @@ async function getAuthHeaders(
     }
     if (err.statusCode >= 500 && err.statusCode < 600) {
       throw new ExternalHostError(err);
+    }
+    if (err.message === HOST_DISABLED) {
+      logger.trace(
+        { registry, dockerRepository: repository, err },
+        'Host disabled'
+      );
+      return null;
     }
     logger.warn(
       { registry, dockerRepository: repository, err },
@@ -336,9 +344,12 @@ export async function getDigest(
   const newTag = newValue || 'latest';
   const cacheNamespace = 'datasource-docker-digest';
   const cacheKey = `${registry}:${repository}:${newTag}`;
-  let digest = null;
+  let digest: string = null;
   try {
-    const cachedResult = await packageCache.get(cacheNamespace, cacheKey);
+    const cachedResult = await packageCache.get<string>(
+      cacheNamespace,
+      cacheKey
+    );
     // istanbul ignore if
     if (cachedResult !== undefined) {
       return cachedResult;
@@ -489,7 +500,7 @@ async function getLabels(
       return {};
     }
     let labels: Record<string, string> = {};
-    const configDigest = manifest.config.digest;
+    const configDigest: string = manifest.config.digest;
     const headers = await getAuthHeaders(registry, repository);
     // istanbul ignore if: Should never be happen
     if (!headers) {

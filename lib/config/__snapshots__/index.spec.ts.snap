@@ -18,3 +18,10 @@ Object {
   ],
 }
 `;
+
+exports[`config/index mergeChildConfig(parentConfig, childConfig) merges constraints 1`] = `
+Object {
+  "node": "<15",
+  "npm": "^6.0.0",
+}
+`;

@@ -36,35 +36,20 @@ export async function extractPackageFile(
         regEx(`^ruby ${delimiter}([^${delimiter}]+)${delimiter}`).exec(line);
     }
     if (rubyMatch) {
-      res.compatibility = { ruby: rubyMatch[1] };
+      res.constraints = { ruby: rubyMatch[1] };
     }
-    let gemMatch: RegExpMatchArray;
-    let gemDelimiter: string;
-    for (const delimiter of delimiters) {
-      const gemMatchRegex = `^gem ${delimiter}([^${delimiter}]+)${delimiter}(,\\s+${delimiter}([^${delimiter}]+)${delimiter}){0,2}`;
-      if (regEx(gemMatchRegex).test(line)) {
-        gemDelimiter = delimiter;
-        gemMatch = gemMatch || regEx(gemMatchRegex).exec(line);
-      }
-    }
+    const gemMatchRegex = /^\s*gem\s+(['"])(?<depName>[^'"]+)\1(\s*,\s*(?<currentValue>(['"])[^'"]+\5(\s*,\s*\5[^'"]+\5)?))?/;
+    const gemMatch = gemMatchRegex.exec(line);
     if (gemMatch) {
       const dep: PackageDependency = {
-        depName: gemMatch[1],
+        depName: gemMatch.groups.depName,
         managerData: { lineNumber },
       };
-      if (gemMatch[3]) {
-        let currentValue = gemMatch[0]
-          .substring(`gem ${gemDelimiter}${dep.depName}${gemDelimiter},`.length)
-          .trim();
-        // strip quotes unless it's a complex constraint
-        if (
-          currentValue.startsWith(gemDelimiter) &&
-          currentValue.endsWith(gemDelimiter) &&
-          currentValue.split(gemDelimiter).length === 3
-        ) {
-          currentValue = currentValue.slice(1, -1);
-        }
-        dep.currentValue = currentValue;
+      if (gemMatch.groups.currentValue) {
+        const currentValue = gemMatch.groups.currentValue;
+        dep.currentValue = /\s*,\s*/.test(currentValue)
+          ? currentValue
+          : currentValue.slice(1, -1);
       } else {
         dep.skipReason = SkipReason.NoVersion;
       }
@@ -96,7 +81,8 @@ export async function extractPackageFile(
             ...dep,
             depTypes,
             managerData: {
-              lineNumber: dep.managerData.lineNumber + groupLineNumber + 1,
+              lineNumber:
+                Number(dep.managerData.lineNumber) + groupLineNumber + 1,
             },
           }))
         );
@@ -130,7 +116,8 @@ export async function extractPackageFile(
               ...dep,
               registryUrls: [repositoryUrl],
               managerData: {
-                lineNumber: dep.managerData.lineNumber + sourceLineNumber + 1,
+                lineNumber:
+                  Number(dep.managerData.lineNumber) + sourceLineNumber + 1,
               },
             }))
           );
@@ -156,7 +143,8 @@ export async function extractPackageFile(
           platformsRes.deps.map((dep) => ({
             ...dep,
             managerData: {
-              lineNumber: dep.managerData.lineNumber + platformsLineNumber + 1,
+              lineNumber:
+                Number(dep.managerData.lineNumber) + platformsLineNumber + 1,
             },
           }))
         );
@@ -181,7 +169,7 @@ export async function extractPackageFile(
           ifRes.deps.map((dep) => ({
             ...dep,
             managerData: {
-              lineNumber: dep.managerData.lineNumber + ifLineNumber + 1,
+              lineNumber: Number(dep.managerData.lineNumber) + ifLineNumber + 1,
             },
           }))
         );
@@ -206,8 +194,8 @@ export async function extractPackageFile(
       }
       const bundledWith = /\nBUNDLED WITH\n\s+(.*?)(\n|$)/.exec(lockContent);
       if (bundledWith) {
-        res.compatibility = res.compatibility || {};
-        res.compatibility.bundler = bundledWith[1];
+        res.constraints = res.constraints || {};
+        res.constraints.bundler = bundledWith[1];
       }
     }
   }

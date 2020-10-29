@@ -1,14 +1,8 @@
-import moment from 'moment';
-import {
-  RenovateConfig,
-  getConfig,
-  git,
-  platform,
-} from '../../../../test/util';
+import { DateTime } from 'luxon';
+import { RenovateConfig, getConfig, platform } from '../../../../test/util';
+import { PrState } from '../../../types';
 import { BranchConfig } from '../../common';
 import * as limits from './limits';
-
-jest.mock('../../../util/git');
 
 let config: RenovateConfig;
 beforeEach(() => {
@@ -22,8 +16,8 @@ describe('workers/repository/process/limits', () => {
       config.prHourlyLimit = 2;
       platform.getPrList.mockResolvedValueOnce([
         {
-          createdAt: moment().toISOString(),
-          branchName: null,
+          createdAt: DateTime.local().toISO(),
+          sourceBranch: null,
           title: null,
           state: null,
         },
@@ -41,11 +35,18 @@ describe('workers/repository/process/limits', () => {
   describe('getConcurrentPrsRemaining()', () => {
     it('calculates concurrent limit remaining', async () => {
       config.prConcurrentLimit = 20;
-      git.branchExists.mockResolvedValueOnce(true);
+      platform.getBranchPr.mockImplementation((branchName) =>
+        branchName
+          ? Promise.resolve({
+              sourceBranch: branchName,
+              state: PrState.Open,
+            } as never)
+          : Promise.reject('some error')
+      );
       const branches: BranchConfig[] = [
-        { branchName: 'test', upgrades: [] },
-        { branchName: undefined, upgrades: [] },
-      ];
+        { branchName: 'test' },
+        { branchName: null },
+      ] as never;
       const res = await limits.getConcurrentPrsRemaining(config, branches);
       expect(res).toEqual(19);
     });

@@ -1,34 +1,25 @@
 import { RenovateConfig } from '../../../config';
 import { logger } from '../../../logger';
-import { platform } from '../../../platform';
-import * as memCache from '../../../util/cache/memory';
-import * as repositoryCache from '../../../util/cache/repository';
+import { clone } from '../../../util/clone';
 import { setBranchPrefix } from '../../../util/git';
 import { checkIfConfigured } from '../configured';
-import { checkOnboardingBranch } from '../onboarding/branch';
 import { initApis } from './apis';
-import { checkBaseBranch } from './base';
-import { mergeRenovateConfig } from './config';
-import { detectSemanticCommits } from './semantic';
+import { initializeCaches } from './cache';
+import { getRepoConfig } from './config';
 import { detectVulnerabilityAlerts } from './vulnerability';
 
-export async function initRepo(input: RenovateConfig): Promise<RenovateConfig> {
-  memCache.init();
-  await repositoryCache.initialize(input);
-  let config: RenovateConfig = {
-    ...input,
-    errors: [],
-    warnings: [],
-    branchList: [],
-  };
+function initializeConfig(config: RenovateConfig): RenovateConfig {
+  return { ...clone(config), errors: [], warnings: [], branchList: [] };
+}
+
+export async function initRepo(
+  config_: RenovateConfig
+): Promise<RenovateConfig> {
+  let config: RenovateConfig = initializeConfig(config_);
+  await initializeCaches(config);
   config = await initApis(config);
-  config.semanticCommits = await detectSemanticCommits(config);
-  config.baseBranch = config.defaultBranch;
-  config.baseBranchSha = await platform.setBaseBranch(config.baseBranch);
-  config = await checkOnboardingBranch(config);
-  config = await mergeRenovateConfig(config);
+  config = await getRepoConfig(config);
   checkIfConfigured(config);
-  config = await checkBaseBranch(config);
   await setBranchPrefix(config.branchPrefix);
   config = await detectVulnerabilityAlerts(config);
   // istanbul ignore if

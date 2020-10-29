@@ -39,7 +39,7 @@ export interface RenovateOptionBase {
 }
 
 export interface RenovateArrayOption<
-  T extends string | number | object = object
+  T extends string | number | Record<string, unknown> = Record<string, unknown>
 > extends RenovateOptionBase {
   default?: T[];
   mergeable?: boolean;
@@ -77,7 +77,7 @@ export interface RenovateStringOption extends RenovateOptionBase {
 
 export interface RenovateObjectOption extends RenovateOptionBase {
   default?: any;
-  additionalProperties?: {} | boolean;
+  additionalProperties?: Record<string, unknown> | boolean;
   mergeable?: boolean;
   type: 'object';
 }
@@ -137,6 +137,15 @@ const options: RenovateOptions[] = [
       'Change this value in order to override the default onboarding branch name.',
     type: 'string',
     default: 'renovate/configure',
+    admin: true,
+    cli: false,
+  },
+  {
+    name: 'onboardingCommitMessage',
+    description:
+      'Change this value in order to override the default onboarding commit message.',
+    type: 'string',
+    default: null,
     admin: true,
     cli: false,
   },
@@ -292,6 +301,14 @@ const options: RenovateOptions[] = [
     default: false,
   },
   {
+    name: 'dockerImagePrefix',
+    description:
+      'Change this value in order to override the default renovate docker sidecar image name prefix.',
+    type: 'string',
+    default: 'docker.io/renovate',
+    admin: true,
+  },
+  {
     name: 'dockerUser',
     description:
       'Specify UID and GID for docker-based binaries when binarySource=docker is used.',
@@ -444,6 +461,13 @@ const options: RenovateOptions[] = [
     stage: 'repository',
     type: 'string',
     replaceLineReturns: true,
+    admin: true,
+  },
+  {
+    name: 'privateKeyPath',
+    description: 'Path to the Server-side private key',
+    stage: 'repository',
+    type: 'string',
     admin: true,
   },
   {
@@ -612,7 +636,6 @@ const options: RenovateOptions[] = [
     type: 'array',
     stage: 'package',
     cli: false,
-    env: false,
   },
   {
     name: 'gitAuthor',
@@ -678,6 +701,15 @@ const options: RenovateOptions[] = [
     subType: 'string',
     default: null,
     stage: 'branch',
+    cli: false,
+    env: false,
+  },
+  {
+    name: 'extractVersion',
+    description:
+      "A regex (re2) to extract a version from a datasource's raw version string",
+    type: 'string',
+    format: 'regex',
     cli: false,
     env: false,
   },
@@ -903,7 +935,8 @@ const options: RenovateOptions[] = [
   // Version behaviour
   {
     name: 'allowedVersions',
-    description: 'A semver range defining allowed versions for dependencies',
+    description:
+      'A version range or regex pattern capturing allowed versions for dependencies',
     type: 'string',
     parent: 'packageRules',
     stage: 'package',
@@ -1061,8 +1094,9 @@ const options: RenovateOptions[] = [
   {
     name: 'semanticCommits',
     description: 'Enable semantic commit prefixes for commits and PR titles',
-    type: 'boolean',
-    default: null,
+    type: 'string',
+    allowedValues: ['auto', 'enabled', 'disabled'],
+    default: 'auto',
   },
   {
     name: 'semanticCommitType',
@@ -1102,12 +1136,6 @@ const options: RenovateOptions[] = [
     description: 'Label to use to request the bot to rebase a PR manually',
     type: 'string',
     default: 'rebase',
-  },
-  {
-    name: 'statusCheckVerify',
-    description: 'Set a verify status check for all PRs',
-    type: 'boolean',
-    default: false,
   },
   {
     name: 'unpublishSafe',
@@ -1216,12 +1244,12 @@ const options: RenovateOptions[] = [
     name: 'branchName',
     description: 'Branch name template',
     type: 'string',
-    default: '{{{branchPrefix}}}{{{managerBranchPrefix}}}{{{branchTopic}}}',
+    default: '{{{branchPrefix}}}{{{additionalBranchPrefix}}}{{{branchTopic}}}',
     cli: false,
   },
   {
-    name: 'managerBranchPrefix',
-    description: 'Branch manager prefix',
+    name: 'additionalBranchPrefix',
+    description: 'Additional string value to be appended to branchPrefix',
     type: 'string',
     default: '',
     cli: false,
@@ -1293,6 +1321,15 @@ const options: RenovateOptions[] = [
     cli: false,
   },
   {
+    name: 'prBodyTemplate',
+    description:
+      'Pull Request body template. Controls which sections are rendered in the body.',
+    type: 'string',
+    default:
+      '{{{header}}}{{{table}}}{{{notes}}}{{{changelogs}}}{{{configDescription}}}{{{controls}}}{{{footer}}}',
+    cli: false,
+  },
+  {
     name: 'prTitle',
     description:
       'Pull Request title template (deprecated). Now uses commitMessage.',
@@ -1335,12 +1372,6 @@ const options: RenovateOptions[] = [
     mergeable: true,
   },
   // Dependency Groups
-  {
-    name: 'lazyGrouping',
-    description: 'Use group names only when multiple dependencies upgraded',
-    type: 'boolean',
-    default: true,
-  },
   {
     name: 'groupName',
     description: 'Human understandable name for the dependency group',
@@ -1550,8 +1581,9 @@ const options: RenovateOptions[] = [
     cli: false,
   },
   {
-    name: 'compatibility',
-    description: 'Configuration object for compatibility',
+    name: 'constraints',
+    description:
+      'Configuration object for define language or manager version constraints',
     type: 'object',
     default: {},
     mergeable: true,
@@ -1637,7 +1669,7 @@ const options: RenovateOptions[] = [
   },
   {
     name: 'insecureRegistry',
-    description: 'explicity turn on insecure docker registry access (http)',
+    description: 'explicitly turn on insecure docker registry access (http)',
     type: 'boolean',
     stage: 'repository',
     parent: 'hostRules',
@@ -1663,6 +1695,16 @@ const options: RenovateOptions[] = [
     subType: 'number',
     stage: 'repository',
     parent: 'hostRules',
+    cli: false,
+    env: false,
+  },
+  {
+    name: 'enableHttp2',
+    description: 'Enable got http2 support.',
+    type: 'boolean',
+    stage: 'repository',
+    parent: 'hostRules',
+    default: false,
     cli: false,
     env: false,
   },
@@ -1791,6 +1833,14 @@ const options: RenovateOptions[] = [
       'Optional versioning for extracted dependencies. Valid only within `regexManagers` object.',
     type: 'string',
     parent: 'regexManagers',
+    cli: false,
+    env: false,
+  },
+  {
+    name: 'fetchReleaseNotes',
+    description: 'Allow to disable release notes fetching',
+    type: 'boolean',
+    default: true,
     cli: false,
     env: false,
   },
