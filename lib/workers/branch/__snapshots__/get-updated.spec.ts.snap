@@ -143,7 +143,7 @@ Object {
 exports[`workers/branch/get-updated getUpdatedPackageFiles() update artifacts on update-lockfile strategy 1`] = `
 Object {
   "artifactErrors": Array [],
-  "parentBranch": undefined,
+  "reuseExistingBranch": undefined,
   "updatedArtifacts": Array [
     Object {
       "contents": "some contents",
