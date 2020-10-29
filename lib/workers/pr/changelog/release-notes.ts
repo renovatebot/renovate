@@ -111,7 +111,6 @@ export async function getReleaseNotes(
         releaseNotes = null;
       } else {
         try {
-          // istanbul ignore else: not tested
           if (baseUrl !== 'https://gitlab.com/') {
             releaseNotes.body = linkify(releaseNotes.body, {
               repository: `${baseUrl}${repository}`,
@@ -237,7 +236,6 @@ export async function getReleaseNotesMd(
               let url = `${baseUrl}${repository}/blob/master/${changelogFile}#`;
               url += title.join('-').replace(/[^A-Za-z0-9-]/g, '');
               body = massageBody(body, baseUrl);
-              // istanbul ignore else: not tested
               if (body?.length) {
                 try {
                   body = linkify(body, {
