@@ -74,15 +74,18 @@ export async function getResourceUrl(
       resourceType === 'RegistrationsBaseUrl' &&
       !semver.satisfies(version, '^3.0.0')
     ) {
-      logger.warn(`Nuget: RegistrationsBaseUrl/${version} is the major update`);
+      logger.warn(
+        { url },
+        `Nuget: RegistrationsBaseUrl/${version} is the major update`
+      );
     }
 
     await packageCache.set(cacheNamespace, resultCacheKey, serviceId, 60);
     return serviceId;
   } catch (err) {
     logger.debug(
-      { err },
-      `nuget registry failure: can't get ${resourceType} form ${url}`
+      { err, url },
+      `nuget registry failure: can't get ${resourceType}`
     );
     return null;
   }

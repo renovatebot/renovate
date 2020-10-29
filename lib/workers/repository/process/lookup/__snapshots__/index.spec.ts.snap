@@ -777,6 +777,20 @@ Array [
 ]
 `;
 
+exports[`workers/repository/process/lookup .lookupUpdates() should ignore unstable versions from datasource 1`] = `
+Array [
+  Object {
+    "fromVersion": "1.4.4",
+    "isSingleVersion": true,
+    "newMajor": 2,
+    "newMinor": 0,
+    "newValue": "2.0.0",
+    "toVersion": "2.0.0",
+    "updateType": "major",
+  },
+]
+`;
+
 exports[`workers/repository/process/lookup .lookupUpdates() should jump unstable versions if followTag 1`] = `
 Array [
   Object {

@@ -189,9 +189,9 @@ export async function lookupUpdates(
     }
     const { latestVersion, releases } = dependency;
     // Filter out any results from datasource that don't comply with our versioning
-    let allVersions = releases
-      .map((release) => release.version)
-      .filter((v) => version.isVersion(v));
+    let allVersions = releases.filter((release) =>
+      version.isVersion(release.version)
+    );
     // istanbul ignore if
     if (allVersions.length === 0) {
       const message = `Found no results from datasource that look like a version`;
@@ -211,14 +211,14 @@ export async function lookupUpdates(
       }
       allVersions = allVersions.filter(
         (v) =>
-          v === taggedVersion ||
-          (v === currentValue &&
+          v.version === taggedVersion ||
+          (v.version === currentValue &&
             version.isGreaterThan(taggedVersion, currentValue))
       );
     }
     // Check that existing constraint can be satisfied
     const allSatisfyingVersions = allVersions.filter((v) =>
-      version.matches(v, currentValue)
+      version.matches(v.version, currentValue)
     );
     if (config.rollbackPrs && !allSatisfyingVersions.length) {
       const rollback = getRollbackUpdate(config, allVersions);
@@ -250,7 +250,13 @@ export async function lookupUpdates(
         rangeStrategy,
         latestVersion,
         nonDeprecatedVersions
-      ) || getFromVersion(config, rangeStrategy, latestVersion, allVersions);
+      ) ||
+      getFromVersion(
+        config,
+        rangeStrategy,
+        latestVersion,
+        allVersions.map((v) => v.version)
+      );
     if (
       fromVersion &&
       rangeStrategy === 'pin' &&
@@ -278,17 +284,16 @@ export async function lookupUpdates(
       config,
       filterStart,
       dependency.latestVersion,
-      allVersions,
-      releases
+      allVersions
     ).filter((v) =>
       // Leave only compatible versions
-      version.isCompatible(v, currentValue)
+      version.isCompatible(v.version, currentValue)
     );
     if (vulnerabilityAlert) {
       filteredVersions = filteredVersions.slice(0, 1);
     }
     const buckets: Record<string, LookupUpdate> = {};
-    for (const toVersion of filteredVersions) {
+    for (const toVersion of filteredVersions.map((v) => v.version)) {
       const update: LookupUpdate = { fromVersion, toVersion } as any;
       try {
         update.newValue = version.getNewValue({
