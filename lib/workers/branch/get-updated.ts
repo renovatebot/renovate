@@ -66,6 +66,7 @@ export async function getUpdatedPackageFiles(
           if (res === existingContent) {
             logger.debug({ packageFile, depName }, 'No content changed');
             if (upgrade.rangeStrategy === 'update-lockfile') {
+              logger.debug({ packageFile, depName }, 'update-lockfile add');
               updatedFileContents[packageFile] = res;
             }
           } else {
