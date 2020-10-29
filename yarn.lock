@@ -4895,10 +4895,10 @@ handlebars@4.7.6, handlebars@^4.7.6:
   optionalDependencies:
     uglify-js "^3.1.4"
 
-handy-redis@2.0.1:
-  version "2.0.1"
-  resolved "https://registry.yarnpkg.com/handy-redis/-/handy-redis-2.0.1.tgz#d6ee2c655e06b667fec138b8c5bff94d77e8bad4"
-  integrity sha512-KEf4AQ+QaYMuRI8GwUfopbcRN6q8V8NEOt09nXN7dv13SEj4NDtzTq1fB7BTpuu8yu2MhC4S0P2u8EzAkt6qdg==
+handy-redis@2.0.2:
+  version "2.0.2"
+  resolved "https://registry.yarnpkg.com/handy-redis/-/handy-redis-2.0.2.tgz#233e33cb428f9b3a5898e338e7d0a6de257cb4d7"
+  integrity sha512-EYug7OQBwvgXFxWam2rNt0Naep2YpRicWzHdXfVCXWBHsW39x86fdSWbeY9Q474J15OVXQfAU48C9YYedsWSdw==
   dependencies:
     "@types/redis" "^2.8.27"
 
