@@ -1,0 +1,4 @@
+commitMessage: 'Apply prettier formatting fix'
+excludeBranches:
+  - master
+pullsOnly: true
