@@ -171,7 +171,9 @@ export async function extractPackageFile(
             dep.skipReason = SkipReason.AnyVersion;
           }
           if (lockParsed) {
-            const lockedDep = lockParsed.packages.find(
+            const lockField =
+              depType === 'require' ? 'packages' : 'packages-dev';
+            const lockedDep = lockParsed?.[lockField]?.find(
               (item) => item.name === dep.depName
             );
             if (lockedDep && semverComposer.isVersion(lockedDep.version)) {

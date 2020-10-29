@@ -83,6 +83,8 @@ export async function extractPackageFile(
     setup = await extractSetupFile(content, packageFile, config);
   } catch (err) {
     logger.warn({ err, content, packageFile }, 'Failed to read setup.py file');
+  }
+  if (!setup) {
     return null;
   }
   const requires: string[] = [];

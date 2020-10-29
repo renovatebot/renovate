@@ -24,24 +24,34 @@ export function filterVersions(
   config: FilterConfig,
   fromVersion: string,
   latestVersion: string,
-  versions: string[],
   releases: Release[]
-): string[] {
+): Release[] {
   const {
-    versioning,
     ignoreUnstable,
     ignoreDeprecated,
     respectLatest,
     allowedVersions,
   } = config;
-  const version = allVersioning.get(versioning);
+  let versioning;
+  function isVersionStable(version: string): boolean {
+    if (!versioning.isStable(version)) {
+      return false;
+    }
+    // Check if the datasource returned isStable = false
+    const release = releases.find((r) => r.version === version);
+    if (release?.isStable === false) {
+      return false;
+    }
+    return true;
+  }
+  versioning = allVersioning.get(config.versioning);
   if (!fromVersion) {
     return [];
   }
 
   // Leave only versions greater than current
-  let filteredVersions = versions.filter((v) =>
-    version.isGreaterThan(v, fromVersion)
+  let filteredVersions = releases.filter((v) =>
+    versioning.isGreaterThan(v.version, fromVersion)
   );
 
   // Don't upgrade from non-deprecated to deprecated
@@ -50,10 +60,12 @@ export function filterVersions(
   );
   if (ignoreDeprecated && fromRelease && !fromRelease.isDeprecated) {
     filteredVersions = filteredVersions.filter((v) => {
-      const versionRelease = releases.find((release) => release.version === v);
+      const versionRelease = releases.find(
+        (release) => release.version === v.version
+      );
       if (versionRelease.isDeprecated) {
         logger.debug(
-          `Skipping ${config.depName}@${v} because it is deprecated`
+          `Skipping ${config.depName}@${v.version} because it is deprecated`
         );
         return false;
       }
@@ -70,7 +82,7 @@ export function filterVersions(
       regexes[allowedVersions] =
         regexes[allowedVersions] || regEx(allowedVersions.slice(1, -1));
       filteredVersions = filteredVersions.filter((v) =>
-        regexes[allowedVersions].test(v)
+        regexes[allowedVersions].test(v.version)
       );
     } else if (
       allowedVersions.length > 2 &&
@@ -80,14 +92,14 @@ export function filterVersions(
       regexes[allowedVersions] =
         regexes[allowedVersions] || regEx(allowedVersions.slice(2, -1));
       filteredVersions = filteredVersions.filter(
-        (v) => !regexes[allowedVersions].test(v)
+        (v) => !regexes[allowedVersions].test(v.version)
       );
-    } else if (version.isValid(allowedVersions)) {
+    } else if (versioning.isValid(allowedVersions)) {
       filteredVersions = filteredVersions.filter((v) =>
-        version.matches(v, allowedVersions)
+        versioning.matches(v.version, allowedVersions)
       );
     } else if (
-      versioning !== npmVersioning.id &&
+      config.versioning !== npmVersioning.id &&
       semver.validRange(allowedVersions)
     ) {
       logger.debug(
@@ -95,10 +107,10 @@ export function filterVersions(
         'Falling back to npm semver syntax for allowedVersions'
       );
       filteredVersions = filteredVersions.filter((v) =>
-        semver.satisfies(semver.coerce(v), allowedVersions)
+        semver.satisfies(semver.coerce(v.version), allowedVersions)
       );
     } else if (
-      versioning === poetryVersioning.id &&
+      config.versioning === poetryVersioning.id &&
       pep440.isValid(allowedVersions)
     ) {
       logger.debug(
@@ -106,7 +118,7 @@ export function filterVersions(
         'Falling back to pypi syntax for allowedVersions'
       );
       filteredVersions = filteredVersions.filter((v) =>
-        pep440.matches(v, allowedVersions)
+        pep440.matches(v.version, allowedVersions)
       );
     } else {
       const error = new Error(CONFIG_VALIDATION);
@@ -125,19 +137,19 @@ export function filterVersions(
   }
 
   // if current is unstable then allow unstable in the current major only
-  if (!version.isStable(fromVersion)) {
+  if (!isVersionStable(fromVersion)) {
     // Allow unstable only in current major
     return filteredVersions.filter(
       (v) =>
-        version.isStable(v) ||
-        (version.getMajor(v) === version.getMajor(fromVersion) &&
-          version.getMinor(v) === version.getMinor(fromVersion) &&
-          version.getPatch(v) === version.getPatch(fromVersion))
+        isVersionStable(v.version) ||
+        (versioning.getMajor(v.version) === versioning.getMajor(fromVersion) &&
+          versioning.getMinor(v.version) === versioning.getMinor(fromVersion) &&
+          versioning.getPatch(v.version) === versioning.getPatch(fromVersion))
     );
   }
 
   // Normal case: remove all unstable
-  filteredVersions = filteredVersions.filter((v) => version.isStable(v));
+  filteredVersions = filteredVersions.filter((v) => isVersionStable(v.version));
 
   // Filter the latest
 
@@ -151,10 +163,10 @@ export function filterVersions(
     return filteredVersions;
   }
   // No filtering if fromVersion is already past latest
-  if (version.isGreaterThan(fromVersion, latestVersion)) {
+  if (versioning.isGreaterThan(fromVersion, latestVersion)) {
     return filteredVersions;
   }
   return filteredVersions.filter(
-    (v) => !version.isGreaterThan(v, latestVersion)
+    (v) => !versioning.isGreaterThan(v.version, latestVersion)
   );
 }

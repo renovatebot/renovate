@@ -157,7 +157,7 @@ describe('.updateArtifacts()', () => {
     ).not.toBeNull();
     expect(execSnapshots).toMatchSnapshot();
   });
-  it('returns updated poetry.lock using docker (constaints)', async () => {
+  it('returns updated poetry.lock using docker (constraints)', async () => {
     jest.spyOn(docker, 'removeDanglingContainers').mockResolvedValueOnce();
     await setExecConfig({
       ...config,

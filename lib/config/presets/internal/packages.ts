@@ -90,4 +90,9 @@ export const presets: Record<string, Preset> = {
     description: 'All packages published by Gatsby',
     extends: ['monorepo:gatsby'],
   },
+  googleapis: {
+    datasources: ['npm'],
+    description: 'All googleapis packages',
+    packagePatterns: ['^@google-cloud/'],
+  },
 };

@@ -121,6 +121,7 @@ describe('workers/repository/init/config', () => {
         warnings: [],
         errors: [],
       });
+      config.extends = [':automergeDisabled'];
       expect(await mergeRenovateConfig(config)).not.toBeUndefined();
     });
   });

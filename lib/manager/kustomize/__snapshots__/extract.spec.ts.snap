@@ -4,15 +4,13 @@ exports[`manager/kustomize/extract extractPackageFile() extracts http dependency
 Array [
   Object {
     "currentValue": "v0.0.1",
-    "datasource": "git-tags",
-    "depName": "github.com/user/repo//deploy",
-    "lookupName": "github.com/user/repo",
+    "datasource": "github-tags",
+    "depName": "user/repo",
   },
   Object {
     "currentValue": "1.19.0",
     "datasource": "github-tags",
-    "depName": "fluxcd/flux/deploy",
-    "lookupName": "fluxcd/flux",
+    "depName": "fluxcd/flux",
   },
 ]
 `;
@@ -22,14 +20,16 @@ Array [
   Object {
     "currentValue": "v0.0.1",
     "datasource": "git-tags",
-    "depName": "https://moredhel/remote-kustomize.git",
+    "depName": "moredhel/remote-kustomize",
+    "depNameShort": "moredhel/remote-kustomize",
     "lookupName": "https://moredhel/remote-kustomize.git",
   },
   Object {
     "currentValue": "v0.0.1",
     "datasource": "git-tags",
-    "depName": "https://moredhel/remote-kustomize.git//deploy",
-    "lookupName": "https://moredhel/remote-kustomize.git//deploy",
+    "depName": "moredhel/remote-kustomize",
+    "depNameShort": "moredhel/remote-kustomize",
+    "lookupName": "https://moredhel/remote-kustomize.git",
   },
 ]
 `;
@@ -38,9 +38,8 @@ exports[`manager/kustomize/extract extractPackageFile() extracts ssh dependency 
 Array [
   Object {
     "currentValue": "v0.0.1",
-    "datasource": "git-tags",
-    "depName": "git@github.com:moredhel/remote-kustomize.git",
-    "lookupName": "git@github.com:moredhel/remote-kustomize.git",
+    "datasource": "github-tags",
+    "depName": "moredhel/remote-kustomize",
   },
 ]
 `;
@@ -49,9 +48,8 @@ exports[`manager/kustomize/extract extractPackageFile() extracts ssh dependency 
 Array [
   Object {
     "currentValue": "v2.0.0",
-    "datasource": "git-tags",
-    "depName": "git@github.com:kubernetes-sigs/kustomize.git//examples/helloWorld",
-    "lookupName": "git@github.com:kubernetes-sigs/kustomize.git",
+    "datasource": "github-tags",
+    "depName": "kubernetes-sigs/kustomize",
   },
 ]
 `;
@@ -60,15 +58,13 @@ exports[`manager/kustomize/extract extractPackageFile() should extract bases fro
 Array [
   Object {
     "currentValue": "v0.0.1",
-    "datasource": "git-tags",
-    "depName": "git@github.com:moredhel/remote-kustomize.git",
-    "lookupName": "git@github.com:moredhel/remote-kustomize.git",
+    "datasource": "github-tags",
+    "depName": "moredhel/remote-kustomize",
   },
   Object {
     "currentValue": "1.19.0",
     "datasource": "github-tags",
-    "depName": "fluxcd/flux/deploy",
-    "lookupName": "fluxcd/flux",
+    "depName": "fluxcd/flux",
   },
 ]
 `;
@@ -79,26 +75,31 @@ Array [
     "currentValue": "v0.1.0",
     "datasource": "docker",
     "depName": "node",
+    "versioning": "docker",
   },
   Object {
     "currentValue": "v0.0.1",
     "datasource": "docker",
     "depName": "group/instance",
+    "versioning": "docker",
   },
   Object {
     "currentValue": "v0.0.2",
     "datasource": "docker",
     "depName": "quay.io/test/repo",
+    "versioning": "docker",
   },
   Object {
     "currentValue": "v0.0.3",
     "datasource": "docker",
     "depName": "gitlab.com/org/suborg/image",
+    "versioning": "docker",
   },
   Object {
     "currentValue": "v0.0.4",
     "datasource": "docker",
     "depName": "but.this.lives.on.local/private-registry",
+    "versioning": "docker",
   },
 ]
 `;

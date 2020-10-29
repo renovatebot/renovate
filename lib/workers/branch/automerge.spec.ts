@@ -17,7 +17,7 @@ describe('workers/branch/automerge', () => {
       config.automerge = false;
       expect(await tryBranchAutomerge(config)).toBe('no automerge');
     });
-    it('returns false if automergType is pr', async () => {
+    it('returns false if automergeType is pr', async () => {
       config.automerge = true;
       config.automergeType = 'pr';
       expect(await tryBranchAutomerge(config)).toBe('no automerge');

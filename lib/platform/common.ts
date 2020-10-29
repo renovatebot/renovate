@@ -34,7 +34,6 @@ export interface RepoResult {
 
 export interface RepoParams {
   localDir: string;
-  optimizeForDisabled: boolean;
   repository: string;
   endpoint?: string;
   forkMode?: string;
@@ -64,6 +63,7 @@ export interface Pr {
   state: string;
   targetBranch?: string;
   title: string;
+  isDraft?: boolean;
 }
 
 /**

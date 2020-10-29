@@ -479,6 +479,17 @@ describe('workers/pr', () => {
       expect(reviewers).toHaveLength(2);
       expect(config.reviewers).toEqual(expect.arrayContaining(reviewers));
     });
+    it('should not add any assignees or reviewers to new PR', async () => {
+      config.assignees = ['foo', 'bar', 'baz'];
+      config.assigneesSampleSize = 0;
+      config.reviewers = ['baz', 'boo', 'bor'];
+      config.reviewersSampleSize = 0;
+      const { prResult, pr } = await prWorker.ensurePr(config);
+      expect(prResult).toEqual(PrResult.Created);
+      expect(pr).toMatchObject({ displayNumber: 'New Pull Request' });
+      expect(platform.addAssignees).toHaveBeenCalledTimes(0);
+      expect(platform.addReviewers).toHaveBeenCalledTimes(0);
+    });
     it('should add and deduplicate additionalReviewers on new PR', async () => {
       config.reviewers = ['@foo', 'bar'];
       config.additionalReviewers = ['bar', 'baz', '@boo'];

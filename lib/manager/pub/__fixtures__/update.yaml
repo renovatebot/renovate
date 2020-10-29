@@ -4,7 +4,7 @@ dev_dependencies:
     version: 0.1
 
 dependencies:
-  bar:
+  - bar:
     sdk: flatter
   foo: 1
   bar:

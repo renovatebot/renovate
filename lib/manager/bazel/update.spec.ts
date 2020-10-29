@@ -56,7 +56,7 @@ describe('manager/bazel/update', () => {
       expect(res).not.toEqual(content);
     });
 
-    it('updates container_pull deptype and prserves comment', async () => {
+    it('updates container_pull deptype and preserves comment', async () => {
       const upgrade = {
         depName: 'hasura',
         depType: 'container_pull',
