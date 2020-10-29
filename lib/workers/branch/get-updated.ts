@@ -121,7 +121,8 @@ export async function getUpdatedPackageFiles(
       }
       if (
         newContent === existingContent &&
-        (upgrade.datasource === datasourceGitSubmodules.id ||
+        (upgrade.datasource ===
+          datasourceGitSubmodules.id /* istanbul ignore next: no manager to test this exists */ ||
           upgrade.rangeStrategy === 'update-lockfile')
       ) {
         updatedFileContents[packageFile] = newContent;
