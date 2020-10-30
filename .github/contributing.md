@@ -23,6 +23,12 @@ afterwards. Also, let the maintainers know that you plan to work on a particular
 
 Pull Requests can only be merged once all status checks are green, which means `yarn test` passes, and coverage is 100%.
 
+## Do not force push to your pull request branch
+
+Please do not force push to your PR's branch after you have created your PR, as doing so makes it harder for us to review your work.
+PRs will always be squashed by us when we merge your work.
+Commit as many times as you need in your pull request branch.
+
 ## Slack collaboration with maintainers
 
 Sometimes the codebase can be a challenge to navigate, especially for a first-time contributor. We don't want you spending an hour trying to work out something that would take us only a minute to explain.

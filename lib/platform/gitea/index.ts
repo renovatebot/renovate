@@ -793,7 +793,10 @@ const platform: Platform = {
   },
 
   getPrBody(prBody: string): string {
-    return smartTruncate(prBody, 1000000);
+    return smartTruncate(
+      prBody.replace(/\]\(\.\.\/pull\//g, '](pulls/'),
+      1000000
+    );
   },
 
   getVulnerabilityAlerts(): Promise<VulnerabilityAlert[]> {

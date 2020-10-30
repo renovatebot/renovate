@@ -250,6 +250,18 @@ Constraints are also used to manually restrict which _datasource_ versions are p
 }
 ```
 
+If you need to _override_ constraints that Renovate detects from the repository, wrap it in the `force` object like so:
+
+```json
+{
+  "force": {
+    "constraints": {
+      "node": "< 15.0.0"
+    }
+  }
+}
+```
+
 Note: make sure not to mix this up with the term `compatibility`, which Renovate uses in the context of version releases, e.g. if a Docker image is `node:12.16.0-alpine` then the `-alpine` suffix represents `compatibility`.
 
 ## dependencyDashboard
@@ -312,7 +324,7 @@ Add config here if you wish it to apply to Docker package managers Dockerfile an
 
 ## draftPR
 
-If you want the PRs created by Renovate to be considered as drafts rather than normal PRs in Github you could add this property to your `renovate.json`:
+If you want the PRs created by Renovate to be considered as drafts rather than normal PRs, you could add this property to your `renovate.json`:
 
 ```json
 {
@@ -320,7 +332,9 @@ If you want the PRs created by Renovate to be considered as drafts rather than n
 }
 ```
 
-Please see [draft pull requests on Github](https://github.blog/2019-02-14-introducing-draft-pull-requests/) for more information about draft PRs.
+This option is evaluated at PR/MR creation time and is only supported on the following platforms: GitHub, GitLab, Azure.
+
+Note that GitLab implements draft status by checking whether the PR's title starts with certain strings. Therefore, draftPR on GitLab is incompatible with the legacy method of triggering Renovate to rebase a PR by renaming the PR to start with `rebase!`.
 
 ## enabled
 
@@ -659,7 +673,7 @@ Enable got [http2](https://github.com/sindresorhus/got/blob/v11.5.2/readme.md#ht
 
 Warning: Advanced config, use at own risk.
 
-Enable this option to allow Renovate to connect to an [insecure docker registry](https://docs.docker.com/registry/insecure/) that is http only. This is insecure and is not recommended.
+Enable this option to allow Renovate to connect to an [insecure Docker registry](https://docs.docker.com/registry/insecure/) that is http only. This is insecure and is not recommended.
 
 Example:
 
@@ -740,7 +754,7 @@ It would take the entire `"config:base"` preset - which contains a lot of sub-pr
 
 ## ignoreScripts
 
-Applicable for npm and composer only for now. Set this to `true` if running scripts causes problems.
+Applicable for npm and Composer only for now. Set this to `true` if running scripts causes problems.
 
 ## ignoreUnstable
 
@@ -767,7 +781,7 @@ Use this configuration option for shared config across all java projects (Gradle
 
 ## js
 
-Use this configuration option for shared config across npm/yarn/pnpm and meteor package managers.
+Use this configuration option for shared config across npm/Yarn/pnpm and meteor package managers.
 
 ## labels
 
@@ -905,7 +919,7 @@ Important to know: Renovate will evaluate all `packageRules` and not stop once i
 
 ### allowedVersions
 
-Use this - usually within a packageRule - to limit how far to upgrade a dependency. For example, if you wish to upgrade to angular v1.5 but not to `angular` v1.6 or higher, you could define this to be `<= 1.5` or `< 1.6.0`:
+Use this - usually within a packageRule - to limit how far to upgrade a dependency. For example, if you wish to upgrade to Angular v1.5 but not to `angular` v1.6 or higher, you could define this to be `<= 1.5` or `< 1.6.0`:
 
 ```json
 {
@@ -1150,15 +1164,13 @@ Add to this object if you wish to define rules that apply only to patch updates.
 
 ## php
 
-Warning: PHP Composer support is in alpha stage so you probably only want to run this if you are helping get it feature-ready.
-
 ## pin
 
 Add to this object if you wish to define rules that apply only to PRs that pin dependencies.
 
 ## pinDigests
 
-If enabled Renovate will pin docker images by means of their sha256 digest and not only by tag so that they are immutable.
+If enabled Renovate will pin Docker images by means of their SHA256 digest and not only by tag so that they are immutable.
 
 ## postUpdateOptions
 
@@ -1346,7 +1358,7 @@ Behaviour:
 - `bump` = e.g. bump the range even if the new version satisfies the existing range, e.g. `^1.0.0` -> `^1.1.0`
 - `replace` = Replace the range with a newer one if the new version falls outside it, e.g. `^1.0.0` -> `^2.0.0`
 - `widen` = Widen the range with newer one, e.g. `^1.0.0` -> `^1.0.0 || ^2.0.0`
-- `update-lockfile` = Update the lock file when in-range updates are available, otherwise `replace` for updates out of range. Works only for `npm` and `yarn` so far.
+- `update-lockfile` = Update the lock file when in-range updates are available, otherwise `replace` for updates out of range. Works for `composer`, `npm` and `yarn` so far.
 
 Renovate's `"auto"` strategy works like this for npm:
 
@@ -1529,11 +1541,11 @@ Technical details: We mostly rely on the text parsing of the library [later](htt
 
 ## semanticCommitScope
 
-By default you will see angular-style commit prefixes like `"chore(deps):"`. If you wish to change it to something else like `"package"` then it will look like `"chore(package):"`. You can also use `parentDir` or `baseDir` to namespace your commits for monorepos e.g. `"{{parentDir}}"`.
+By default you will see Angular-style commit prefixes like `"chore(deps):"`. If you wish to change it to something else like `"package"` then it will look like `"chore(package):"`. You can also use `parentDir` or `baseDir` to namespace your commits for monorepos e.g. `"{{parentDir}}"`.
 
 ## semanticCommitType
 
-By default you will see angular-style commit prefixes like `"chore(deps):"`. If you wish to change it to something else like "ci" then it will look like `"ci(deps):"`.
+By default you will see Angular-style commit prefixes like `"chore(deps):"`. If you wish to change it to something else like "ci" then it will look like `"ci(deps):"`.
 
 ## semanticCommits
 

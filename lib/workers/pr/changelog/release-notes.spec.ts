@@ -1,4 +1,5 @@
 import fs from 'fs-extra';
+import { DateTime } from 'luxon';
 import * as httpMock from '../../../../test/httpMock';
 import { getName } from '../../../../test/util';
 import { ChangeLogNotes } from './common';
@@ -7,6 +8,7 @@ import {
   getReleaseList,
   getReleaseNotes,
   getReleaseNotesMd,
+  releaseNotesCacheMinutes,
 } from './release-notes';
 
 const angularJsChangelogMd = fs.readFileSync(
@@ -59,6 +61,24 @@ describe(getName(__filename), () => {
 
   afterEach(() => {
     httpMock.reset();
+  });
+
+  describe('releaseNotesCacheMinutes', () => {
+    const now = DateTime.local();
+    it.each([
+      [now, 55],
+      [now.minus({ week: 2 }), 1435],
+      [now.minus({ year: 1 }), 14495],
+    ])('works with string date (%s, %i)', (date, minutes) => {
+      expect(releaseNotesCacheMinutes(date?.toISO())).toEqual(minutes);
+    });
+
+    it('handles date object', () => {
+      expect(releaseNotesCacheMinutes(new Date())).toEqual(55);
+    });
+    it.each([null, undefined, 'fake', 123])('handles invalid: %s', (date) => {
+      expect(releaseNotesCacheMinutes(date as never)).toEqual(55);
+    });
   });
 
   describe('addReleaseNotes()', () => {

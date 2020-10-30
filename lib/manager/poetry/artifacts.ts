@@ -1,6 +1,6 @@
+import { parse } from '@iarna/toml';
 import is from '@sindresorhus/is';
 import { quote } from 'shlex';
-import { parse } from 'toml';
 import { logger } from '../../logger';
 import { ExecOptions, exec } from '../../util/exec';
 import {

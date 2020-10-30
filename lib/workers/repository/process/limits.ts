@@ -1,4 +1,4 @@
-import moment from 'moment';
+import { DateTime } from 'luxon';
 import { RenovateConfig } from '../../../config';
 import { logger } from '../../../logger';
 import { Pr, platform } from '../../../platform';
@@ -15,15 +15,13 @@ export async function getPrHourlyRemaining(
     try {
       const branchList = branches.map(({ branchName }) => branchName);
       const prList = await platform.getPrList();
-      const currentHourStart = moment({
-        hour: moment().hour(),
-      });
+      const currentHourStart = DateTime.local().startOf('hour');
       logger.debug(`currentHourStart=${String(currentHourStart)}`);
       const soFarThisHour = prList.filter(
         (pr) =>
           pr.sourceBranch !== config.onboardingBranch &&
           branchList.includes(pr.sourceBranch) &&
-          moment(pr.createdAt).isAfter(currentHourStart)
+          DateTime.fromISO(pr.createdAt) > currentHourStart
       );
       const prsRemaining = Math.max(
         0,

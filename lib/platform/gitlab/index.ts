@@ -1,6 +1,7 @@
 import URL, { URLSearchParams } from 'url';
 import is from '@sindresorhus/is';
 import delay from 'delay';
+import semver from 'semver';
 import {
   PLATFORM_AUTHENTICATION_ERROR,
   REPOSITORY_ACCESS_FORBIDDEN,
@@ -56,7 +57,11 @@ const defaults = {
   endpoint: 'https://gitlab.com/api/v4/',
 };
 
+const DRAFT_PREFIX = 'Draft: ';
+const DRAFT_PREFIX_DEPRECATED = 'WIP: ';
+
 let authorId: number;
+let draftPrefix = DRAFT_PREFIX;
 
 export async function initPlatform({
   endpoint,
@@ -72,6 +77,7 @@ export async function initPlatform({
     logger.debug('Using default GitLab endpoint: ' + defaults.endpoint);
   }
   let gitAuthor: string;
+  let gitlabVersion: string;
   try {
     const user = (
       await gitlabApi.getJson<{ email: string; name: string; id: number }>(
@@ -81,13 +87,21 @@ export async function initPlatform({
     ).body;
     gitAuthor = `${user.name} <${user.email}>`;
     authorId = user.id;
+    // version is 'x.y.z-edition', so not strictly semver; need to strip edition
+    gitlabVersion = (
+      await gitlabApi.getJson<{ version: string }>('version', { token })
+    ).body.version.split('-')[0];
+    logger.debug('GitLab version is: ' + gitlabVersion);
   } catch (err) {
     logger.debug(
       { err },
-      'Error authenticating with GitLab. Check that your token includes "user" permissions'
+      'Error authenticating with GitLab. Check that your token includes "api" permissions'
     );
     throw new Error('Init: Authentication failure');
   }
+  draftPrefix = semver.lt(gitlabVersion, '13.2.0')
+    ? DRAFT_PREFIX_DEPRECATED
+    : DRAFT_PREFIX;
   const platformConfig: PlatformResult = {
     endpoint: defaults.endpoint,
     gitAuthor,
@@ -334,14 +348,72 @@ export async function getBranchStatus(
 
 // Pull Request
 
+function massagePr(prToModify: Pr): Pr {
+  const pr = prToModify;
+  if (pr.title.startsWith(DRAFT_PREFIX)) {
+    pr.title = pr.title.substring(DRAFT_PREFIX.length);
+    pr.isDraft = true;
+  } else if (pr.title.startsWith(DRAFT_PREFIX_DEPRECATED)) {
+    pr.title = pr.title.substring(DRAFT_PREFIX_DEPRECATED.length);
+    pr.isDraft = true;
+  }
+  return pr;
+}
+
+async function fetchPrList(): Promise<Pr[]> {
+  const query = new URLSearchParams({
+    per_page: '100',
+    author_id: `${authorId}`,
+  }).toString();
+  const urlString = `projects/${config.repository}/merge_requests?${query}`;
+  try {
+    const res = await gitlabApi.getJson<
+      {
+        iid: number;
+        source_branch: string;
+        title: string;
+        state: string;
+        created_at: string;
+      }[]
+    >(urlString, { paginate: true });
+    return res.body.map((pr) =>
+      massagePr({
+        number: pr.iid,
+        sourceBranch: pr.source_branch,
+        title: pr.title,
+        state: pr.state === 'opened' ? PrState.Open : pr.state,
+        createdAt: pr.created_at,
+      })
+    );
+  } catch (err) /* istanbul ignore next */ {
+    logger.debug({ err }, 'Error fetching PR list');
+    if (err.statusCode === 403) {
+      throw new Error(PLATFORM_AUTHENTICATION_ERROR);
+    }
+    throw err;
+  }
+}
+
+export async function getPrList(): Promise<Pr[]> {
+  if (!config.prList) {
+    config.prList = await fetchPrList();
+  }
+  return config.prList;
+}
+
 export async function createPr({
   sourceBranch,
   targetBranch,
-  prTitle: title,
+  prTitle,
   prBody: rawDescription,
+  draftPR,
   labels,
   platformOptions,
 }: CreatePRConfig): Promise<Pr> {
+  let title = prTitle;
+  if (draftPR) {
+    title = draftPrefix + title;
+  }
   const description = sanitize(rawDescription);
   logger.debug(`Creating Merge Request: ${title}`);
   const res = await gitlabApi.postJson<Pr & { iid: number }>(
@@ -397,7 +469,7 @@ export async function createPr({
     }
   }
 
-  return pr;
+  return massagePr(pr);
 }
 
 export async function getPr(iid: number): Promise<Pr> {
@@ -438,15 +510,19 @@ export async function getPr(iid: number): Promise<Pr> {
       pr.canMerge = true;
     }
   }
-  return pr;
+  return massagePr(pr);
 }
 
 export async function updatePr({
   number: iid,
-  prTitle: title,
+  prTitle,
   prBody: description,
   state,
 }: UpdatePrConfig): Promise<void> {
+  let title = prTitle;
+  if ((await getPrList()).find((pr) => pr.number === iid)?.isDraft) {
+    title = draftPrefix + title;
+  }
   const newState = {
     [PrState.Closed]: 'close',
     [PrState.Open]: 'reopen',
@@ -891,45 +967,6 @@ export async function ensureCommentRemoval({
   if (commentId) {
     await deleteComment(issueNo, commentId);
   }
-}
-
-async function fetchPrList(): Promise<Pr[]> {
-  const query = new URLSearchParams({
-    per_page: '100',
-    author_id: `${authorId}`,
-  }).toString();
-  const urlString = `projects/${config.repository}/merge_requests?${query}`;
-  try {
-    const res = await gitlabApi.getJson<
-      {
-        iid: number;
-        source_branch: string;
-        title: string;
-        state: string;
-        created_at: string;
-      }[]
-    >(urlString, { paginate: true });
-    return res.body.map((pr) => ({
-      number: pr.iid,
-      sourceBranch: pr.source_branch,
-      title: pr.title,
-      state: pr.state === 'opened' ? PrState.Open : pr.state,
-      createdAt: pr.created_at,
-    }));
-  } catch (err) /* istanbul ignore next */ {
-    logger.debug({ err }, 'Error fetching PR list');
-    if (err.statusCode === 403) {
-      throw new Error(PLATFORM_AUTHENTICATION_ERROR);
-    }
-    throw err;
-  }
-}
-
-export async function getPrList(): Promise<Pr[]> {
-  if (!config.prList) {
-    config.prList = await fetchPrList();
-  }
-  return config.prList;
 }
 
 function matchesState(state: string, desiredState: string): boolean {

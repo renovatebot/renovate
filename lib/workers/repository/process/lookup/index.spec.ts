@@ -12,6 +12,7 @@ import * as datasourceDocker from '../../../../datasource/docker';
 import { id as datasourceDockerId } from '../../../../datasource/docker';
 import * as datasourceGitSubmodules from '../../../../datasource/git-submodules';
 import { id as datasourceGitSubmodulesId } from '../../../../datasource/git-submodules';
+import * as datasourceGithubReleases from '../../../../datasource/github-releases';
 import { id as datasourceGithubTagsId } from '../../../../datasource/github-tags';
 import { id as datasourceNpmId } from '../../../../datasource/npm';
 import { id as datasourcePackagistId } from '../../../../datasource/packagist';
@@ -25,12 +26,14 @@ import * as lookup from '.';
 
 jest.mock('../../../../datasource/docker');
 jest.mock('../../../../datasource/git-submodules');
+jest.mock('../../../../datasource/github-releases');
 
 qJson.latestVersion = '1.4.1';
 
 const docker = mocked(datasourceDocker) as any;
 docker.defaultRegistryUrls = ['https://index.docker.io'];
 const gitSubmodules = mocked(datasourceGitSubmodules);
+const githubReleases = mocked(datasourceGithubReleases);
 
 let config: lookup.LookupUpdateConfig;
 
@@ -638,6 +641,26 @@ describe('workers/repository/process/lookup', () => {
       config.datasource = datasourceNpmId;
       nock('https://registry.npmjs.org').get('/vue').reply(200, vueJson);
       expect((await lookup.lookupUpdates(config)).updates).toHaveLength(0);
+    });
+    it('should ignore unstable versions from datasource', async () => {
+      config.currentValue = '1.4.4';
+      config.depName = 'some/action';
+      config.datasource = datasourceGithubReleases.id;
+      githubReleases.getReleases.mockResolvedValueOnce({
+        releases: [
+          {
+            version: '1.4.4',
+          },
+          {
+            version: '2.0.0',
+          },
+          {
+            version: '2.1.0',
+            isStable: false,
+          },
+        ],
+      });
+      expect((await lookup.lookupUpdates(config)).updates).toMatchSnapshot();
     });
     it('should allow unstable versions if the ignoreUnstable=false', async () => {
       config.currentValue = '2.5.16';
