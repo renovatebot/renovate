@@ -6100,13 +6100,13 @@ jest-serializer@^26.5.0:
     "@types/node" "*"
     graceful-fs "^4.2.4"
 
-jest-silent-reporter@0.2.1:
-  version "0.2.1"
-  resolved "https://registry.yarnpkg.com/jest-silent-reporter/-/jest-silent-reporter-0.2.1.tgz#554dd62b800989cdbcfba22bf30a1c0db6ad289c"
-  integrity sha512-nEO3oOFHtEXFjlRCbJOlvEWA7ZHyyyvMsU4WHuAhinYBOI4PiX1EIbsZfQZ/cxHcYliHBU9zY8bPxMPdBGksYw==
+jest-silent-reporter@0.3.0:
+  version "0.3.0"
+  resolved "https://registry.yarnpkg.com/jest-silent-reporter/-/jest-silent-reporter-0.3.0.tgz#850b57da29e3929ee617fd40af64df5976afe2e8"
+  integrity sha512-Mq3STjj4vO+HdzocaXV8dcMa5yRxsmJ/jZy5LCzw5GBY40JAvnH85SaMRRwRlmAMydqJ3GUyEtnyQui8flUnxw==
   dependencies:
-    chalk "^2.3.1"
-    jest-util "^24.0.0"
+    chalk "^4.0.0"
+    jest-util "^26.0.0"
 
 jest-snapshot@^26.6.1:
   version "26.6.1"
@@ -6130,7 +6130,7 @@ jest-snapshot@^26.6.1:
     pretty-format "^26.6.1"
     semver "^7.3.2"
 
-jest-util@>=25.1.0, jest-util@^24.0.0, jest-util@^26.6.1:
+jest-util@>=25.1.0, jest-util@^26.0.0, jest-util@^26.6.1:
   version "26.6.1"
   resolved "https://registry.yarnpkg.com/jest-util/-/jest-util-26.6.1.tgz#4cc0d09ec57f28d12d053887eec5dc976a352e9b"
   integrity sha512-xCLZUqVoqhquyPLuDXmH7ogceGctbW8SMyQVjD9o+1+NPWI7t0vO08udcFLVPLgKWcvc+zotaUv/RuaR6l8HIA==
