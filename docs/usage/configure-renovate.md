@@ -21,7 +21,7 @@ If you have any Warnings or Errors listed, see if you need or want to make any c
 
 The Configure Renovate PR will include a `renovate.json` file in the root directory, with suggested default settings.
 
-If you don't want to have an additional file (`renovate.json`) in your repository then you can instead add the same settings to a `"renovate"` section in your `package.json`, if you are already using this (e.g. javascript project). Any settings made in `package.json` will apply to the whole project (including other, nested `package.json` files).
+If you don't want to have an additional file (`renovate.json`) in your repository then you can instead add the same settings to a `"renovate"` section in your `package.json`, if you are already using this (e.g. JavaScript project). Any settings made in `package.json` will apply to the whole project (including other, nested `package.json` files).
 
 Alternatively, if you prefer to use "dot files" then you can add the same JSON configuration to either a `.renovaterc` file or `.renovaterc.json` file instead of `renovate.json`.
 
@@ -29,7 +29,7 @@ Alternatively, if you prefer to use "dot files" then you can add the same JSON c
 
 Most of the settings in the `renovate.json` onboarding configuration are defaults, however usually this configuration file will have some default overrides in it, such as:
 
-- Automatically enabling angular-style semantic commits if your repository uses them
+- Automatically enabling Angular-style semantic commits if your repository uses them
 - Determining whether to use dependency range pinning depending on the detected project type
 
 ## Common Overrides

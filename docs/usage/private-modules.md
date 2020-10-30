@@ -17,9 +17,9 @@ Assuming the private module lookup succeeds (solutions for that are described la
 
 #### 2. Lock file generation
 
-If you are using a lock file (e.g. yarn's `yarn.lock` or npm's `package-lock.json`) then Renovate needs to update that lock file whenever _any_ package listed in your package file is updated to a new version.
+If you are using a lock file (e.g. Yarn's `yarn.lock` or npm's `package-lock.json`) then Renovate needs to update that lock file whenever _any_ package listed in your package file is updated to a new version.
 
-To do this, Renovate will run `npm install` or equivalent and save the resulting lock file. If a private module hasn't been updated, it _usually_ won't matter to npm/yarn because they won't attempt to udpate its lock file entry anyway. However it's possible that the install will fail if it attempts to look up that private module for some reason, even when that private module is not the main one being updated. It's therefore better to provide Renovate with all the credentials it needs to look up private packages.
+To do this, Renovate will run `npm install` or equivalent and save the resulting lock file. If a private module hasn't been updated, it _usually_ won't matter to npm/Yarn because they won't attempt to update its lock file entry anyway. However it's possible that the install will fail if it attempts to look up that private module for some reason, even when that private module is not the main one being updated. It's therefore better to provide Renovate with all the credentials it needs to look up private packages.
 
 ## Supported npm authentication approaches
 
