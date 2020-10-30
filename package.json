@@ -234,14 +234,14 @@
     "eslint-plugin-jest": "24.1.0",
     "eslint-plugin-promise": "4.2.1",
     "glob": "7.1.6",
-    "graphql": "15.3.0",
+    "graphql": "15.4.0",
     "husky": "4.3.0",
     "jest": "26.6.1",
     "jest-circus": "26.6.1",
     "jest-extended": "0.11.5",
     "jest-junit": "12.0.0",
     "jest-mock-extended": "1.0.10",
-    "jest-silent-reporter": "0.2.1",
+    "jest-silent-reporter": "0.3.0",
     "mockdate": "3.0.2",
     "nock": "13.0.4",
     "npm-run-all": "4.1.5",
@@ -253,7 +253,7 @@
     "strip-ansi": "6.0.0",
     "tmp-promise": "3.0.2",
     "type-fest": "0.18.0",
-    "typescript": "4.0.3"
+    "typescript": "4.0.5"
   },
   "resolutions": {
     "jest-silent-reporter/jest-util": ">=25.1.0",

@@ -520,7 +520,7 @@ export async function updatePr({
   state,
 }: UpdatePrConfig): Promise<void> {
   let title = prTitle;
-  if ((await getPrList()).find((pr) => pr.number === iid).isDraft) {
+  if ((await getPrList()).find((pr) => pr.number === iid)?.isDraft) {
     title = draftPrefix + title;
   }
   const newState = {
