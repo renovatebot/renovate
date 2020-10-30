@@ -1,4 +1,4 @@
-import { RenovateConfig } from '../../config/common';
+import { RenovateConfig } from '../../config';
 import {
   PLATFORM_INTEGRATION_UNAUTHORIZED,
   PLATFORM_RATE_LIMIT_EXCEEDED,
@@ -96,6 +96,20 @@ export async function addAssigneesReviewers(
       );
     }
   }
+}
+
+export function getPlafromPrOptions(
+  config: RenovateConfig & PlatformPrOptions
+): PlatformPrOptions {
+  return {
+    azureAutoComplete: config.azureAutoComplete,
+    azureWorkItemId: config.azureWorkItemId,
+    bbUseDefaultReviewers: config.bbUseDefaultReviewers,
+    gitLabAutomerge:
+      config.automerge &&
+      config.automergeType === 'pr' &&
+      config.gitLabAutomerge,
+  };
 }
 
 // Ensures that PR exists with matching title/body
@@ -358,15 +372,6 @@ export async function ensurePr(
         logger.info('DRY-RUN: Would create PR: ' + prTitle);
         pr = { number: 0, displayNumber: 'Dry run PR' } as never;
       } else {
-        const platformOptions: PlatformPrOptions = {
-          azureAutoComplete: config.azureAutoComplete,
-          azureWorkItemId: config.azureWorkItemId,
-          bbUseDefaultReviewers: config.bbUseDefaultReviewers,
-          gitLabAutomerge:
-            config.automerge &&
-            config.automergeType === 'pr' &&
-            config.gitLabAutomerge,
-        };
         if (!dependencyDashboardCheck && prLimitReached) {
           return { prResult: PrResult.LimitReached };
         }
@@ -376,7 +381,7 @@ export async function ensurePr(
           prTitle,
           prBody,
           labels: config.labels,
-          platformOptions,
+          platformOptions: getPlafromPrOptions(config),
           draftPR: config.draftPR,
         });
         logger.info({ pr: pr.number, prTitle }, 'PR created');
