@@ -20,7 +20,7 @@ To convert your .NET Framework `.csproj`/`.fsproj`/`.vbproj` into an SDK-style p
 ## How It Works
 
 1.  Renovate will search each repository for any files with a `.csproj`, `.fsproj`, or `.vbproj` extension.
-2.  Existing dependencies will be extracted from `<PackageReference>` tags
+2.  Existing dependencies will be extracted from `<PackageReference>` adn `<PackageVersion>` tags
 3.  Renovate will look up the latest version on [nuget.org](https://nuget.org) (or on [alternate feeds](#Alternate%20feeds)) to determine if any upgrades are available
 4.  If the source package includes a GitHub URL as its source, and has either a "changelog" file or uses GitHub releases, then Release Notes for each version will be embedded in the generated PR.
 
