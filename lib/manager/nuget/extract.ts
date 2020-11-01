@@ -21,6 +21,8 @@ import { determineRegistries } from './util';
  */
 const checkVersion = /^\s*(?:[[])?(?:(?<currentValue>[^"(,[\]]+)\s*(?:,\s*[)\]]|])?)\s*$/;
 
+console.log(111111111);
+
 function extractDepsFromXml(xmlNode: XmlDocument): PackageDependency[] {
   const results = [];
   const itemGroups = xmlNode.childrenNamed('ItemGroup');
