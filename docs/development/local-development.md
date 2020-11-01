@@ -37,7 +37,8 @@ You can also use [SDKMAN](https://sdkman.io/) to manage Java versions.
 
 _Windows_
 
-The following steps work to set up a brand new Windows 10 installation for developing Renovate. If you already have some components installed, you can naturally skip them.
+The following steps work to set up a brand new Windows 10 installation for developing Renovate.
+If you already have some components installed, you can naturally skip them.
 
 - Install [Git](https://git-scm.com/downloads). Make sure you've [configured your username and email](https://git-scm.com/book/en/v2/Getting-Started-First-Time-Git-Setup).
 - Install [Node.js LTS](https://nodejs.org/en/download/)
@@ -84,15 +85,19 @@ We use [Yarn](https://github.com/yarnpkg/yarn) so run `yarn install` to install 
 
 #### Build Renovate
 
-Run `yarn build`. You should get no errors.
+Run `yarn build`.
+You should get no errors.
 
 #### Verify tests
 
-Run `yarn test`. You should see it pass with 100% test coverage. Make sure you've run `yarn build` first.
+Run `yarn test`.
+You should see it pass with 100% test coverage.
+Make sure you've run `yarn build` first.
 
 #### Verify installation
 
-Run `yarn start`. You should see this error:
+Run `yarn start`.
+You should see this error:
 
 ```
 Fatal error: No authentication found for platform https://api.github.com/ (github)
@@ -100,7 +105,8 @@ Fatal error: No authentication found for platform https://api.github.com/ (githu
 
 ## Platform Account Setup
 
-Although it's possible to make small source code improvements without testing against a real repository, in most cases it's important that you run a "real" test on a repository before you submit a feature or fix. It's possible to do this against GitHub, GitLab or Bitbucket public servers.
+Although it's possible to make small source code improvements without testing against a real repository, in most cases it's important that you run a "real" test on a repository before you submit a feature or fix.
+It's possible to do this against GitHub, GitLab or Bitbucket public servers.
 
 #### Register new account (optional)
 
@@ -110,7 +116,8 @@ e.g. if your GitHub username is "alex88" then maybe you register "alex88-testing
 
 #### Generate platform token
 
-Once you have decided on your platform and account, log in and [generate a "Personal Access Token"](https://help.github.com/articles/creating-a-personal-access-token-for-the-command-line/) that can be used to authenticate Renovate. Select **repo** scope when generating the token.
+Once you have decided on your platform and account, log in and [generate a "Personal Access Token"](https://help.github.com/articles/creating-a-personal-access-token-for-the-command-line/) that can be used to authenticate Renovate.
+Select **repo** scope when generating the token.
 
 #### Export platform token
 
@@ -119,21 +126,29 @@ You are better off to instead export the Environment Variable `RENOVATE_TOKEN` f
 
 #### Run against a real repo
 
-To make sure everything is working, create a test repo in your account, e.g. like `https://github.com/r4harry/testrepo1`. Now, add a file called `.nvmrc` with the content `8.13.0`. Now run against the test repo you created, e.g. `yarn start r4harry/testrepo1`. If your token is set up correctly, you should find that it added a "Configure Renovate" PR inside the repo.
+To make sure everything is working, create a test repo in your account, e.g. like `https://github.com/r4harry/testrepo1`.
+Now, add a file called `.nvmrc` with the content `8.13.0`.
+Now run against the test repo you created, e.g. `yarn start r4harry/testrepo1`.
+If your token is set up correctly, you should find that it added a "Configure Renovate" PR inside the repo.
 
 If this is working then in future you can create other test repos to verify your code changes against.
 
 ## Tests
 
-You can run `yarn test` locally to test your code. We test all PRs using the same tests, run on CircleCI and Azure Pipelines. `yarn test` runs an `eslint` check, a `prettier` check, a `type` check and then all the unit tests using `jest`.
+You can run `yarn test` locally to test your code.
+We test all PRs using the same tests, run on CircleCI and Azure Pipelines. `yarn test` runs an `eslint` check, a `prettier` check, a `type` check and then all the unit tests using `jest`.
 
 ## Jest
 
-You can run just the Jest unit tests by running `yarn jest`. You can also run just a subset of the Jest tests using file matching, e.g. `yarn jest composer` or `yarn jest workers/branch`. If you get a test failure due to a "snapshot" mismatch, and you are sure that you need to update the snapshot, then you can append `-u` to the end. e.g. `yarn jest composer -u` would update the saved snapshots for _all_ tests in `test/manager/composer/*`.
+You can run just the Jest unit tests by running `yarn jest`.
+You can also run just a subset of the Jest tests using file matching, e.g. `yarn jest composer` or `yarn jest workers/branch`.
+If you get a test failure due to a "snapshot" mismatch, and you are sure that you need to update the snapshot, then you can append `-u` to the end.
+e.g. `yarn jest composer -u` would update the saved snapshots for _all_ tests in `test/manager/composer/*`.
 
 #### Prerequisites
 
-You need to have Python with `mock` installed for all tests to pass. Python 3 includes `mock` so that approach is recommended.
+You need to have Python with `mock` installed for all tests to pass.
+Python 3 includes `mock` so that approach is recommended.
 
 You also need to make sure that you don't have a local `.npmrc` file that overrides npm's default registry.
 
@@ -144,12 +159,15 @@ Using `// istanbul ignore` is not ideal but sometimes is a pragmatic solution if
 
 To view the current test coverage locally, open up `coverage/index.html` in your browser.
 
-Do not let coverage put you off submitting a PR! Maybe we can help, or at least guide.
+Do not let coverage put you off submitting a PR!
+Maybe we can help, or at least guide.
 Also, it can be good to submit your PR as a work in progress (WIP) without tests first so that you can get a thumbs up from others about the changes, and write tests after.
 
 #### Linting and formatting
 
-We use [Prettier](https://github.com/prettier/prettier) for code formatting. If your code fails `yarn test` due to a `prettier` rule then run `yarn lint-fix` to fix it or most `eslint` errors automatically before running `yarn test` again. You usually shouldn't need to fix any Prettier errors manually.
+We use [Prettier](https://github.com/prettier/prettier) for code formatting.
+If your code fails `yarn test` due to a `prettier` rule then run `yarn lint-fix` to fix it or most `eslint` errors automatically before running `yarn test` again.
+You usually shouldn't need to fix any Prettier errors manually.
 
 ## Keeping your Renovate fork up to date
 
@@ -186,15 +204,14 @@ The above will delete any existing `debug.log` and then save Renovate's output t
 
 #### Adding configuration options
 
-We wish to keep backwards-compatibility as often as possible, as well as make
-the code configurable, so most new functionality should be controllable via
-configuration options.
+We wish to keep backwards-compatibility as often as possible, as well as make the code configurable, so most new functionality should be controllable via configuration options.
 
 If you wish to add one, add it to `lib/config/definitions.ts` and then add documentation to `website/docs/configuration-options.md`.
 
 ## Debugging
 
-It's really easy to debug Renovate using Chrome's inspect tool. Try like this:
+It's really easy to debug Renovate using Chrome's inspect tool.
+Try like this:
 
 1. Open `chrome://inspect` in Chrome, then click on "Open dedicated DevTools for Node"
 2. Add a `debugger;` statement somewhere in the source code where you want to start debugging

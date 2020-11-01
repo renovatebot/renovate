@@ -7,7 +7,8 @@ description: How to install the Renovate GitLab App
 
 ### Overview
 
-WhiteSource Renovate runs as the user [@renovate-bot](https://gitlab.com/renovate-bot) on [gitlab.com](https://gitlab.com). To enable the hosted WhiteSource Renovate App on your GitLab.com project, you can do any of the following:
+WhiteSource Renovate runs as the user [@renovate-bot](https://gitlab.com/renovate-bot) on [gitlab.com](https://gitlab.com).
+To enable the hosted WhiteSource Renovate App on your GitLab.com project, you can do any of the following:
 
 - Add [@renovate-bot](https://gitlab.com/renovate-bot) as a Developer directly to each project, or
 - Add [@renovate-bot](https://gitlab.com/renovate-bot) to a team that has Developer access to the project
@@ -51,17 +52,20 @@ WhiteSource Renovate is free for both public and private repositories, so no pay
 
 Renovate needs a Personal Access Token configured in order to be able to fetch release notes from github.com repositories.
 
-Although open source repositories are public, GitHub's API applies strict rate limiting to unauthenticated requests, so Renovate will not attempt to fetch unless it can detect a token. To fetch without a token would risk getting requests denied, which could in turn result in confusing inconsistencies in Pull or Merge Requests, including bodies which flip flop between release notes and none.
+Although open source repositories are public, GitHub's API applies strict rate limiting to unauthenticated requests, so Renovate will not attempt to fetch unless it can detect a token.
+To fetch without a token would risk getting requests denied, which could in turn result in confusing inconsistencies in Pull or Merge Requests, including bodies which flip flop between release notes and none.
 
 #### Generate a Personal Access Token
 
 Any read-only, public-only Personal Access Token for github.com will work.
 
-While logged in, go to [https://github.com/settings/tokens/new](https://github.com/settings/tokens/new). Add a note like "renovate release notes" and then generate the token - no further permissions are required.
+While logged in, go to [https://github.com/settings/tokens/new](https://github.com/settings/tokens/new).
+Add a note like "renovate release notes" and then generate the token - no further permissions are required.
 
 #### Configuring the Token
 
-Visit [https://renovatebot.com/encrypt](https://renovatebot.com/encrypt), paste your token into "Raw value", and then click "Encrypt". Configure the resulting value into your renovate config or preset like this:
+Visit [https://renovatebot.com/encrypt](https://renovatebot.com/encrypt), paste your token into "Raw value", and then click "Encrypt".
+Configure the resulting value into your renovate config or preset like this:
 
 ```json
 {
@@ -95,11 +99,13 @@ User tokens are passed with API calls to Renovate's backend to verify identity b
 
 ##### Installing for all projects
 
-Unlike on GitHub, it is not possible to have the option to install Renovate on "all repositories now and in the future". To do this would require Renovate to store the user's token and this is not something we want to do.
+Unlike on GitHub, it is not possible to have the option to install Renovate on "all repositories now and in the future".
+To do this would require Renovate to store the user's token and this is not something we want to do.
 
 ##### Detecting new projects
 
-Currently there is no detection mechanism in the backend scheduler to determine when Renovate has been added to a new project, so the onboarding MR won't appear instantly. Instead, the new project should be picked up during hourly scheduled runs.
+Currently there is no detection mechanism in the backend scheduler to determine when Renovate has been added to a new project, so the onboarding MR won't appear instantly.
+Instead, the new project should be picked up during hourly scheduled runs.
 
 ##### Auto merging pull requests
 
