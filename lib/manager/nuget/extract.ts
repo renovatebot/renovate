@@ -27,6 +27,7 @@ function extractDepsFromXml(xmlNode: XmlDocument): PackageDependency[] {
   for (const itemGroup of itemGroups) {
     const relevantChildren = [
       ...itemGroup.childrenNamed('PackageReference'),
+      ...itemGroup.childrenNamed('PackageVersion'),
       ...itemGroup.childrenNamed('DotNetCliToolReference'),
       ...itemGroup.childrenNamed('GlobalPackageReference'),
     ];
