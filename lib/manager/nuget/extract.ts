@@ -8,12 +8,6 @@ import { ExtractConfig, PackageDependency, PackageFile } from '../common';
 import { DotnetToolsManifest } from './types';
 import { determineRegistries } from './util';
 
-
-
-
-
-
-
 /**
  * https://docs.microsoft.com/en-us/nuget/concepts/package-versioning
  * This article mentions that  Nuget 3.x and later tries to restore the lowest possible version
