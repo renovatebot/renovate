@@ -77,7 +77,7 @@ VS Code [integrated terminal](https://code.visualstudio.com/docs/editor/integrat
 
 #### Fork and Clone
 
-If you will contribute to the project, you should first "fork" the main project using the GitHub Website and then clone your fork locally.
+If you want to contribute to the project, you should first "fork" the main project using the GitHub Website and then clone your fork locally.
 
 #### Install dependencies
 
