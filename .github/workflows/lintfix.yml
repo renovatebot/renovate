@@ -65,7 +65,7 @@ jobs:
           repository: ${{github.event.pull_request.head.repo.full_name}}
 
       - name: Lint
-        run: docker run --rm -t -u $UID -v $PWD:/code -v $(mktemp -d -t ci-XXXXXXXXXX):/code/.git:ro -w /code node:$NODE_VERSION yarn lint-fix
+        run: docker run --rm -t -u $UID -v "${PWD}:/code" -v "$(mktemp -d -t ci-XXXXXXXXXX):/code/.git:ro" -e YARN_CACHE_FOLDER=/code/${{ env.YARN_CACHE_FOLDER }} -w /code node:$NODE_VERSION yarn lint-fix
 
       - name: Push changes
         env:
