@@ -6,7 +6,7 @@ For example, if you think anything is unclear, or you think something needs to b
 
 ## Installation
 
-#### Prerequisites
+### Prerequisites
 
 You need the following dependencies for local development:
 
