@@ -27,14 +27,11 @@ Default configuration values can be found in
 
 ### Configuration File
 
-You can override default configuration using a configuration file, with default
-name `config.js` in the working directory. If you need an alternate location or
-name, set it in the environment variable `RENOVATE_CONFIG_FILE`.
+You can override default configuration using a configuration file, with default name `config.js` in the working directory.
+If you need an alternate location or name, set it in the environment variable `RENOVATE_CONFIG_FILE`.
 
-Using a configuration file gives you very granular configuration options. For
-instance, you can override most settings at the global (file), repository, or
-package level. e.g. apply one set of labels for `backend/package.json` and a
-different set for `frontend/package.json` in the same repository.
+Using a configuration file gives you very granular configuration options.
+For instance, you can override most settings at the global (file), repository, or package level. e.g. apply one set of labels for `backend/package.json` and a different set for `frontend/package.json` in the same repository.
 
 ```javascript
 module.exports = {
@@ -52,7 +49,8 @@ module.exports = {
 $ node renovate --help
 ```
 
-To configure any `<list>` items, separate with commas. E.g. `renovate --labels=renovate,dependency`.
+To configure any `<list>` items, separate with commas.
+E.g. `renovate --labels=renovate,dependency`.
 
 ### renovate.json
 
@@ -60,8 +58,7 @@ If you add a `renovate.json` file to the root of your repository, you can use th
 
 ### package.json
 
-If you add configuration options to your `package.json` then these will override
-any other settings above.
+If you add configuration options to your `package.json` then these will override any other settings above.
 
 ```json
 "renovate": {

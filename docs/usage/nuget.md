@@ -26,7 +26,8 @@ To convert your .NET Framework `.csproj`/`.fsproj`/`.vbproj` into an SDK-style p
 
 ## Alternate feeds
 
-Renovate by default performs all lookups on `https://api.nuget.org/v3/index.json`, but it also supports alternative NuGet feeds. Alternative feeds can be specified either [in a `NuGet.config` file](https://docs.microsoft.com/en-us/nuget/reference/nuget-config-file#package-source-sections) within your repository (Renovate will not search outside the repository) or in Renovate configuration options:
+Renovate by default performs all lookups on `https://api.nuget.org/v3/index.json`, but it also supports alternative NuGet feeds.
+Alternative feeds can be specified either [in a `NuGet.config` file](https://docs.microsoft.com/en-us/nuget/reference/nuget-config-file#package-source-sections) within your repository (Renovate will not search outside the repository) or in Renovate configuration options:
 
 ```json
 "nuget": {
@@ -38,11 +39,15 @@ Renovate by default performs all lookups on `https://api.nuget.org/v3/index.json
 }
 ```
 
-If this example we defined 3 NuGet feeds. Packages resolving will process feeds consequentially. It means that if package will be resolved in second feed renovate won't look in last one.
+If this example we defined 3 NuGet feeds.
+Packages resolving will process feeds consequentially.
+It means that if package will be resolved in second feed renovate won't look in last one.
 
 ### Protocol versions
 
-NuGet supports two protocol versions, `v2` and `v3`, which NuGet client and server need to agree on. Renovate as a NuGet client supports both versions and will use `v2` unless the configured feed URL ends with `index.json` (which mirrors the behavior of the official NuGet client). If you have `v3` feed that does not match this pattern (e.g. JFrog Artifactory) you need to help Renovate by appending `#protocolVersion=3` to the registry URL:
+NuGet supports two protocol versions, `v2` and `v3`, which NuGet client and server need to agree on.
+Renovate as a NuGet client supports both versions and will use `v2` unless the configured feed URL ends with `index.json` (which mirrors the behavior of the official NuGet client).
+If you have `v3` feed that does not match this pattern (e.g. JFrog Artifactory) you need to help Renovate by appending `#protocolVersion=3` to the registry URL:
 
 ```json
 "nuget": {

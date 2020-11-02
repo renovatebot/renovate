@@ -5,7 +5,8 @@ description: Ruby Bundler support in Renovate
 
 # Automated Dependency Updates for Ruby Bundler Dependencies
 
-Renovate supports upgrading dependencies in Bundler's `Gemfile`s and their accompanying `Gemfile.lock` files. Support is considered "alpha" stage until there have been some more real-world tests.
+Renovate supports upgrading dependencies in Bundler's `Gemfile`s and their accompanying `Gemfile.lock` files.
+Support is considered "alpha" stage until there have been some more real-world tests.
 
 ## How It Works
 
@@ -17,7 +18,8 @@ Renovate supports upgrading dependencies in Bundler's `Gemfile`s and their accom
 
 ## Enabling
 
-Either install the [Renovate App](https://github.com/apps/renovate) on GitHub, or check out [Renovate OSS](https://github.com/renovatebot/renovate) for self-hosted. Bundler support is now enabled by default in both.
+Either install the [Renovate App](https://github.com/apps/renovate) on GitHub, or check out [Renovate OSS](https://github.com/renovatebot/renovate) for self-hosted.
+Bundler support is now enabled by default in both.
 
 ## Future work
 
