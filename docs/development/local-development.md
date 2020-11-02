@@ -83,12 +83,13 @@ The Renovate project uses the [Yarn](https://github.com/yarnpkg/yarn) package ma
 
 To ensure everything is working properly on your end, you must:
 
+1. Make sure you don't have a local `.npmrc` file that overrides npm's default registry.
 1. Install all dependencies with `yarn install`.
 1. Make a build with `yarn build`, which should pass with no errors.
 1. Verify all tests pass and have 100% test coverage, by running `yarn test`.
 1. Verify the installation by running `yarn start`. You must see this error: `Fatal error: No authentication found for platform https://api.github.com/ (github)`
 
-You only need to do these 4 steps this one time.
+You only need to do these 5 steps this one time.
 
 Before you submit a pull request you should:
 
@@ -135,8 +136,6 @@ We test all PRs using the same tests, run on GitHub Actions.
 
 You need to have Python with `mock` installed for all tests to pass.
 Python 3 includes `mock` so that approach is recommended.
-
-You also need to make sure that you don't have a local `.npmrc` file that overrides npm's default registry.
 
 ### Jest
 
