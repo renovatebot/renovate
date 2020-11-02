@@ -37,7 +37,7 @@ You can also use [SDKMAN](https://sdkman.io/) to manage Java versions.
 
 _Windows_
 
-The following steps work to set up a brand new Windows 10 installation for developing Renovate.
+The following steps work to set up a brand-new Windows 10 installation for developing Renovate.
 If you already have some components installed, you can naturally skip them.
 
 - Install [Git](https://git-scm.com/downloads). Make sure you've [configured your username and email](https://git-scm.com/book/en/v2/Getting-Started-First-Time-Git-Setup).
