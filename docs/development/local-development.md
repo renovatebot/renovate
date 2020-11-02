@@ -88,6 +88,13 @@ To ensure everything is working properly on your end, you must:
 1. Verify all tests pass and have 100% test coverage, by running `yarn test`.
 1. Verify the installation by running `yarn start`. You must see this error: `Fatal error: No authentication found for platform https://api.github.com/ (github)`
 
+You only need to do these 4 steps this one time.
+
+Before you submit a pull request you should:
+
+1. Install newer dependencies with `yarn install`.
+1. Run the tests with `yarn test`.
+
 ## Platform Account Setup
 
 Although it's possible to make small source code improvements without testing against a real repository, in most cases you should run a "real" test on a repository before you submit a feature or fix.
