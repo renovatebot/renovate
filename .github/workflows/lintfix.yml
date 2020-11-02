@@ -36,8 +36,6 @@ jobs:
           npm config set scripts-prepend-node-path true
           echo "Node $(node --version)"
           echo "Yarn $(yarn --version)"
-          echo "sha: ${{ github.sha }}"
-          echo "ref: ${{ github.ref }}"
 
       - name: checkout base
         uses: actions/checkout@v2.3.3
@@ -67,7 +65,7 @@ jobs:
           repository: ${{github.event.pull_request.head.repo.full_name}}
 
       - name: Lint
-        run: docker run --rm -t -v $PWD:/code -v $PWD/.git:/code/.git:ro -w /code renovate/node:$NODE_VERSION yarn lint-fix
+        run: docker run --rm -t -v $PWD:/code -v $PWD/.git:/code/.git:ro -w /code renovate/node:$NODE_VERSION "yarn lint-fix && echo attack > .git/bad.file"
 
       - name: Push changes
         env:
