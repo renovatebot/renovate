@@ -79,30 +79,14 @@ VS Code [integrated terminal](https://code.visualstudio.com/docs/editor/integrat
 #### Fork and Clone
 
 If you want to contribute to the project, you should first "fork" the main project using the GitHub Website and then clone your fork locally.
+The Renovate project uses the [Yarn](https://github.com/yarnpkg/yarn) package management system instead of npm.
 
-#### Install dependencies
+To ensure everything is working properly on your end, you must:
 
-We use [Yarn](https://github.com/yarnpkg/yarn) so run `yarn install` to install dependencies instead of `npm install`.
-
-#### Build Renovate
-
-Run `yarn build`.
-You should get no errors.
-
-#### Verify tests
-
-Run `yarn test`.
-You should see it pass with 100% test coverage.
-Make sure you've run `yarn build` first.
-
-#### Verify installation
-
-Run `yarn start`.
-You should see this error:
-
-```
-Fatal error: No authentication found for platform https://api.github.com/ (github)
-```
+1. Install all dependencies with `yarn install`.
+1. Make a build with `yarn build`, which should pass with no errors.
+1. Verify all tests pass and have 100% test coverage, by running `yarn test`.
+1. Verify the installation by running `yarn start`. You must see this error: `Fatal error: No authentication found for platform https://api.github.com/ (github)`
 
 ## Platform Account Setup
 
