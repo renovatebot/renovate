@@ -1,0 +1,80 @@
+name: lintfix
+
+on:
+  pull_request_target:
+
+env:
+  YARN_MODULES_CACHE_KEY: v1
+  YARN_PACKAGE_CACHE_KEY: v1
+  YARN_CACHE_FOLDER: .cache/yarn
+  NODE_VERSION: 12
+  # https://github.com/chalk/supports-color/issues/106
+  FORCE_COLOR: true
+  FIX_AUTHOR_EMAIL: renovate@whitesourcesoftware.com
+
+jobs:
+  lint-fix:
+    runs-on: ubuntu-latest
+
+    # lint shouldn't need more than 10 min
+    timeout-minutes: 15
+
+    steps:
+      - name: Set up Node.js ${{ env.NODE_VERSION }}
+        uses: actions/setup-node@v1.4.4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+
+      - name: Init platform
+        run: |
+          git config --global core.autocrlf false
+          git config --global core.symlinks true
+          git config --global user.email $FIX_AUTHOR_EMAIL
+          git config --global user.name 'Renovate Bot'
+          npm config set scripts-prepend-node-path true
+          echo "Node $(node --version)"
+          echo "Yarn $(yarn --version)"
+          echo "sha: ${{ github.sha }}"
+          echo "ref: ${{ github.ref }}"
+
+      - name: checkout base
+        uses: actions/checkout@v2.3.3
+        with:
+          persist-credentials: false # do not persist credentials
+
+      - name: Cache Yarn packages
+        id: yarn_cache_packages
+        uses: actions/cache@v2.1.2
+        with:
+          path: ${{ env.YARN_CACHE_FOLDER }}
+          key: ${{ env.YARN_PACKAGE_CACHE_KEY }}-${{ runner.os }}-yarn_cache-${{ hashFiles('**/yarn.lock') }}
+          restore-keys: |
+            ${{ env.YARN_PACKAGE_CACHE_KEY }}-${{ runner.os }}-yarn_cache-
+
+      - name: Installing dependencies
+        run: yarn install --frozen-lockfile
+
+      # - name: fetch pr head
+      #   run: git fetch
+
+      - name: checkout pr head
+        uses: actions/checkout@v2.3.3
+        with:
+          persist-credentials: false # do not persist credentials
+          ref: ${{github.event.pull_request.head.ref}}
+          repository: ${{github.event.pull_request.head.repo.full_name}}
+
+      - name: Lint
+        run: yarn lint-fix
+
+      - name: Push changes
+        env:
+          GH_TOKEN: ${{ github.token }} #needs maintainer pat here to push to forks
+        run: |
+          if [[ "$(git diff --stat)" != '' && "$(git log -1 --pretty=format:'%ae')" != "${FIX_AUTHOR_EMAIL}" ]]; then
+            # configure pat
+            git commit -a -m "chore: lint fix"
+            git push https://${GH_TOKEN}:github.com/${{github.event.pull_request.head.repo.full_name}} ${{github.event.pull_request.head.ref}}
+          else
+            echo 'nothing todo'
+          fi
