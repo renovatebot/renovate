@@ -24,7 +24,7 @@ If you don’t have Java installed, the Gradle tests will be skipped.
 
 _Linux_
 
-You can use the following commands for `Ubuntu`.
+You can use the following commands on Ubuntu.
 
 ```sh
 curl -sL https://deb.nodesource.com/setup_14.x | sudo -E bash -
