@@ -76,7 +76,7 @@ If you are using [VS Code](https://code.visualstudio.com/) you can skip installi
 
 VS Code [integrated terminal](https://code.visualstudio.com/docs/editor/integrated-terminal) is now running in the container and can be used to run additional commands.
 
-#### Fork and Clone
+## Fork and Clone
 
 If you want to contribute to the project, you should first "fork" the main project using the GitHub Website and then clone your fork locally.
 The Renovate project uses the [Yarn](https://github.com/yarnpkg/yarn) package management system instead of npm.
@@ -100,23 +100,23 @@ Before you submit a pull request you should:
 Although it's possible to make small source code improvements without testing against a real repository, in most cases you should run a "real" test on a repository before you submit a feature or fix.
 It's possible to do this against GitHub, GitLab or Bitbucket public servers.
 
-#### Register new account (optional)
+### Register new account (optional)
 
 If you're going to be doing a lot of Renovate development then it's recommended that you set up a dedicated test account on GitHub or GitLab, so that you reduce the risk that you accidentally cause problems when testing out Renovate.
 
 e.g. if your GitHub username is "alex88" then maybe you register "alex88-testing" for use with Renovate.
 
-#### Generate platform token
+### Generate platform token
 
 Once you have decided on your platform and account, log in and [generate a "Personal Access Token"](https://help.github.com/articles/creating-a-personal-access-token-for-the-command-line/) that can be used to authenticate Renovate.
 Select **repo** scope when generating the token.
 
-#### Export platform token
+### Export platform token
 
 Although you can specify a token to Renovate using `--token=`, it can be inconvenient if you need to include this every time.
 You are better off to instead export the Environment Variable `RENOVATE_TOKEN` for this.
 
-#### Run against a real repo
+### Run against a real repo
 
 To make sure everything is working, create a test repo in your account, e.g. like `https://github.com/r4harry/testrepo1`.
 Now, add a file called `.nvmrc` with the content `8.13.0`.
@@ -131,21 +131,21 @@ You can run `yarn test` locally to test your code.
 We test all PRs using the same tests, run on GitHub Actions.
 `yarn test` runs an `eslint` check, a `prettier` check, a `type` check and then all the unit tests using `jest`.
 
-## Jest
+### Jest
 
 You can run just the Jest unit tests by running `yarn jest`.
 You can also run just a subset of the Jest tests using file matching, e.g. `yarn jest composer` or `yarn jest workers/branch`.
 If you get a test failure due to a "snapshot" mismatch, and you are sure that you need to update the snapshot, then you can append `-u` to the end.
 e.g. `yarn jest composer -u` would update the saved snapshots for _all_ tests in `test/manager/composer/*`.
 
-#### Prerequisites
+### Prerequisites
 
 You need to have Python with `mock` installed for all tests to pass.
 Python 3 includes `mock` so that approach is recommended.
 
 You also need to make sure that you don't have a local `.npmrc` file that overrides npm's default registry.
 
-#### Coverage
+### Coverage
 
 The Renovate project maintains 100% test coverage, so any Pull Request will fail if it does not contain full coverage for code.
 Using `// istanbul ignore` is not ideal but sometimes is a pragmatic solution if an additional test wouldn't really prove anything.
@@ -156,7 +156,7 @@ Do not let coverage put you off submitting a PR!
 Maybe we can help, or at least guide.
 Also, it can be good to submit your PR as a work in progress (WIP) without tests first so that you can get a thumbs up from others about the changes, and write tests after.
 
-#### Linting and formatting
+## Linting and formatting
 
 We use [Prettier](https://github.com/prettier/prettier) for code formatting.
 If your code fails `yarn test` due to a `prettier` rule then run `yarn lint-fix` to fix it or most `eslint` errors automatically before running `yarn test` again.
@@ -174,7 +174,7 @@ Then, make sure your fork is up to date with `master` each time before creating 
 
 ## Tips and tricks
 
-#### Running Renovate against forked repositories
+### Running Renovate against forked repositories
 
 Quite often, the quickest way for you to test or fix something is to fork an existing repository.
 However, by default Renovate skips over repositories that are forked.
@@ -183,7 +183,7 @@ To override this default, you need to specify the setting `includeForks` as `tru
 Option 1: Add `"includeForks": true` to the `renovate.json` of the repository
 Option 2: Run Renovate with the CLI flag `--renovate-fork=true`
 
-#### Log files
+### Log files
 
 Usually, `debug` is good enough to troubleshoot most problems or verify functionality.
 
@@ -195,7 +195,7 @@ $ rm -f debug.log && yarn start myaccount/therepo --log-level=debug > debug.log
 
 The above will delete any existing `debug.log` and then save Renovate's output to that file.
 
-#### Adding configuration options
+### Adding configuration options
 
 We wish to keep backwards-compatibility as often as possible, as well as make the code configurable, so most new functionality should be controllable via configuration options.
 
