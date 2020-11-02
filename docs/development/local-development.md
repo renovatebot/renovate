@@ -47,7 +47,7 @@ If you already installed a component, skip the corresponding step.
 - Install [Yarn](https://yarnpkg.com/lang/en/docs/install/#windows-stable).
 - Install Java, e.g. from [AdoptOpenJDK](https://adoptopenjdk.net/?variant=openjdk11) or any other distribution.
 
-  Verify you have everything installed with appropriate versions, e.g.:
+  Verify you're using the appropriate versions:
 
   ```
   PS C:\Windows\system32> git --version
