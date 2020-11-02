@@ -1152,9 +1152,12 @@ Use this field to match rules against types of updates. For example to apply a s
 }
 ```
 
+Update type `patch` only matches if `separateMinorPatch` is set to true.
+
 ## patch
 
 Add to this object if you wish to define rules that apply only to patch updates. See also `major` and `minor` configuration options.
+Only applies if `separateMinorPatch` is set to true.
 
 ## php
 
