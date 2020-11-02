@@ -18,8 +18,8 @@ You need the following dependencies for local development:
 
 We support Node.js versions according to the [Node.js release schedule](https://github.com/nodejs/Release#release-schedule)
 
-Java is required to execute Gradle in tests.
-If you don’t have Java installed, the respective tests will be skipped.
+You need Java to execute Gradle tests.
+If you don’t have Java installed, the Gradle tests will be skipped.
 
 _Linux_
 
