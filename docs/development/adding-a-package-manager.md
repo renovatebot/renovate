@@ -22,7 +22,8 @@ The manager's `index.ts` file supports the following values/functions:
 
 ##### `extractPackageFile(content, packageFile, config)` (async, semi-mandatory)
 
-This function is mandatory unless you use `extractAllPackageFiles` instead. It takes as arguments the file's content and optionally the file's full file pathname and config, and returns an array of detected/extracted dependencies, including:
+This function is mandatory unless you use `extractAllPackageFiles` instead.
+It takes as arguments the file's content and optionally the file's full file pathname and config, and returns an array of detected/extracted dependencies, including:
 
 - dependency name
 - dependency type (e.g. dependencies, devDependencies, etc)
@@ -31,7 +32,8 @@ This function is mandatory unless you use `extractAllPackageFiles` instead. It t
 
 This function doesn't necessarily need to _understand_ the file or even syntax that it is passed, instead it just needs to understand enough to extract an accurate list of dependencies.
 
-As a general approach, we want to extract _all_ dependencies from each dependency file, even if they contain values we don't support. For any that have unsupported values that we cannot renovate, this `extractPackageFile` function should set a `skipReason` to a value that would be helpful to someone reading the logs.
+As a general approach, we want to extract _all_ dependencies from each dependency file, even if they contain values we don't support.
+For any that have unsupported values that we cannot renovate, this `extractPackageFile` function should set a `skipReason` to a value that would be helpful to someone reading the logs.
 
 Also, if a file is passed to `extractPackageFile` which is a "false match" (e.g. not an actual package file, or contains no dependencies) then this function can return `null` to have it ignored and removed from the list of package files.
 
@@ -47,7 +49,8 @@ This function takes an array of filenames as input and returns an array of filen
 
 #### `getRangeStrategy(config)` (optional)
 
-This optional function should be written if you wish the manager to support "auto" range strategies, e.g. pinning or not pinning depending on other values in the package file. `npm` uses this to pin `devDependencies` but not `dependencies` unless the package file is detected as an app.
+This optional function should be written if you wish the manager to support "auto" range strategies, e.g. pinning or not pinning depending on other values in the package file.
+`npm` uses this to pin `devDependencies` but not `dependencies` unless the package file is detected as an app.
 
 If left undefined, then a default `getRangeStrategy` will be used that always returns "replace".
 

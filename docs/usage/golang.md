@@ -21,18 +21,22 @@ Renovate supports upgrading dependencies in `go.mod` files and their accompanyin
 
 ## Enabling Go Modules Updating
 
-Go Modules updating is on by default in Renovate Bot. To install Renovate Bot itself, either enable the [Renovate App](https://github.com/apps/renovate) on GitHub, or check out [Renovate OSS](https://github.com/renovatebot/renovate) for self-hosted.
+Go Modules updating is on by default in Renovate Bot.
+To install Renovate Bot itself, either enable the [Renovate App](https://github.com/apps/renovate) on GitHub, or check out [Renovate OSS](https://github.com/renovatebot/renovate) for self-hosted.
 
 ## Technical Details
 
 #### Module Tidying
 
-Go Modules tidying is not enabled by default, and so is opt-in via the [`postUpdateOptions`](https://docs.renovatebot.com/configuration-options/#postupdateoptions) config option. The reason for this is that a `go mod tidy` command may make changes to `go.mod` and `go.sum` that are completely unrelated to the updated module(s) in the PR, and so may be confusing to some users.
+Go Modules tidying is not enabled by default, and so is opt-in via the [`postUpdateOptions`](https://docs.renovatebot.com/configuration-options/#postupdateoptions) config option.
+The reason for this is that a `go mod tidy` command may make changes to `go.mod` and `go.sum` that are completely unrelated to the updated module(s) in the PR, and so may be confusing to some users.
 
 #### Module Vendoring
 
-Vendoring of Go Modules is done automatically if `vendor/modules.txt` is present. Renovate will commit all files changed within the `vendor/` folder.
+Vendoring of Go Modules is done automatically if `vendor/modules.txt` is present.
+Renovate will commit all files changed within the `vendor/` folder.
 
 #### Go binary version
 
-Currently, Renovate will try to keep up with the very latest version of `go`, and it is not configurable. It is planned though to support a configurable version of `go` per-repository soon.
+Currently, Renovate will try to keep up with the very latest version of `go`, and it is not configurable.
+It is planned though to support a configurable version of `go` per-repository soon.
