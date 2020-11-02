@@ -9,7 +9,7 @@ env:
   YARN_MODULES_CACHE_KEY: v1
   YARN_PACKAGE_CACHE_KEY: v1
   YARN_CACHE_FOLDER: .cache/yarn
-  NODE_VERSION: 14
+  NODE_VERSION: 12
   # https://github.com/chalk/supports-color/issues/106
   FORCE_COLOR: true
   FIX_AUTHOR_EMAIL: renovate@whitesourcesoftware.com
@@ -22,10 +22,10 @@ jobs:
     timeout-minutes: 15
 
     steps:
-      # - name: Set up Node.js ${{ env.NODE_VERSION }}
-      #   uses: actions/setup-node@v1.4.4
-      #   with:
-      #     node-version: ${{ env.NODE_VERSION }}
+      - name: Set up Node.js ${{ env.NODE_VERSION }}
+        uses: actions/setup-node@v1.4.4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
 
       - name: Init platform
         run: |
@@ -52,7 +52,7 @@ jobs:
             ${{ env.YARN_PACKAGE_CACHE_KEY }}-${{ runner.os }}-yarn_cache-
 
       - name: Installing dependencies
-        run: docker run --rm -t -u $UID -v $PWD:/code -w /code node:$NODE_VERSION -e YARN_CACHE_FOLDER=/code/$YARN_CACHE_FOLDER yarn install --frozen-lockfile
+        run: yarn install --frozen-lockfile
 
       # - name: fetch pr head
       #   run: git fetch
