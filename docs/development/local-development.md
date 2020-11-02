@@ -136,7 +136,8 @@ If this is working then in future you can create other test repos to verify your
 ## Tests
 
 You can run `yarn test` locally to test your code.
-We test all PRs using the same tests, run on CircleCI and Azure Pipelines. `yarn test` runs an `eslint` check, a `prettier` check, a `type` check and then all the unit tests using `jest`.
+We test all PRs using the same tests, run on CircleCI and Azure Pipelines.
+`yarn test` runs an `eslint` check, a `prettier` check, a `type` check and then all the unit tests using `jest`.
 
 ## Jest
 
