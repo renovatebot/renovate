@@ -131,19 +131,19 @@ You can run `yarn test` locally to test your code.
 We test all PRs using the same tests, run on GitHub Actions.
 `yarn test` runs an `eslint` check, a `prettier` check, a `type` check and then all the unit tests using `jest`.
 
-### Jest
-
-You can run just the Jest unit tests by running `yarn jest`.
-You can also run just a subset of the Jest tests using file matching, e.g. `yarn jest composer` or `yarn jest workers/branch`.
-If you get a test failure due to a "snapshot" mismatch, and you are sure that you need to update the snapshot, then you can append `-u` to the end.
-e.g. `yarn jest composer -u` would update the saved snapshots for _all_ tests in `test/manager/composer/*`.
-
 ### Prerequisites
 
 You need to have Python with `mock` installed for all tests to pass.
 Python 3 includes `mock` so that approach is recommended.
 
 You also need to make sure that you don't have a local `.npmrc` file that overrides npm's default registry.
+
+### Jest
+
+You can run just the Jest unit tests by running `yarn jest`.
+You can also run just a subset of the Jest tests using file matching, e.g. `yarn jest composer` or `yarn jest workers/branch`.
+If you get a test failure due to a "snapshot" mismatch, and you are sure that you need to update the snapshot, then you can append `-u` to the end.
+e.g. `yarn jest composer -u` would update the saved snapshots for _all_ tests in `test/manager/composer/*`.
 
 ### Coverage
 
