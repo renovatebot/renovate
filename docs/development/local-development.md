@@ -7,7 +7,7 @@ Please submit PRs to improve it if you think anything is unclear or you can thin
 
 #### Prerequisites
 
-For local development some dependencies are required:
+You need the following dependencies for local development:
 
 - Git
 - Node.js `^12.13.0 || >=14.15.0`
