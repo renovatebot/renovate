@@ -4,7 +4,7 @@ This document gives tips and tricks on how to run Renovate locally to add featur
 You can improve this documentation by opening a pull request.
 For example, if you think anything is unclear, or you think something needs to be added, open a pull request!
 
-## Install
+## Installation
 
 #### Prerequisites
 
