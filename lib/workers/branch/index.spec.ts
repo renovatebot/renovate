@@ -681,15 +681,17 @@ describe('workers/branch', () => {
       const result = await branchWorker.processBranch({
         ...config,
         postUpgradeTasks: {
-          commands: ['echo 1', 'disallowed task'],
+          commands: ['echo {{{versioning}}}', 'disallowed task'],
           fileFilters: ['modified_file', 'deleted_file'],
         },
         localDir: '/localDir',
-        allowedPostUpgradeCommands: ['^echo 1$'],
+        allowedPostUpgradeCommands: ['^echo {{{versioning}}}$'],
       });
 
       expect(result).toEqual(ProcessBranchResult.Done);
-      expect(exec.exec).toHaveBeenCalledWith('echo 1', { cwd: '/localDir' });
+      expect(exec.exec).toHaveBeenCalledWith('echo semver', {
+        cwd: '/localDir',
+      });
     });
   });
 });

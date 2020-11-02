@@ -28,6 +28,7 @@ import {
   isBranchModified,
 } from '../../util/git';
 import { regEx } from '../../util/regex';
+import * as template from '../../util/template';
 import { BranchConfig, PrResult, ProcessBranchResult } from '../common';
 import { checkAutoMerge, ensurePr } from '../pr';
 import { tryBranchAutomerge } from './automerge';
@@ -373,13 +374,18 @@ export async function processBranch(
               'Post-upgrade task did not match any on allowed list'
             );
           } else {
-            logger.debug({ cmd }, 'Executing post-upgrade task');
+            const compiledCmd = template.compile(cmd, config);
 
-            const execResult = await exec(cmd, {
+            logger.debug({ cmd: compiledCmd }, 'Executing post-upgrade task');
+
+            const execResult = await exec(compiledCmd, {
               cwd: config.localDir,
             });
 
-            logger.debug({ cmd, ...execResult }, 'Executed post-upgrade task');
+            logger.debug(
+              { cmd: compiledCmd, ...execResult },
+              'Executed post-upgrade task'
+            );
           }
         }
 
