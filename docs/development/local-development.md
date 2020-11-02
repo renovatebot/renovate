@@ -143,7 +143,7 @@ You also need to make sure that you don't have a local `.npmrc` file that overri
 You can run just the Jest unit tests by running `yarn jest`.
 You can also run just a subset of the Jest tests using file matching, e.g. `yarn jest composer` or `yarn jest workers/branch`.
 If you get a test failure due to a "snapshot" mismatch, and you are sure that you need to update the snapshot, then you can append `-u` to the end.
-e.g. `yarn jest composer -u` would update the saved snapshots for _all_ tests in `test/manager/composer/*`.
+e.g. `yarn jest composer -u` would update the saved snapshots for _all_ tests in `**/composer/**`.
 
 ### Coverage
 
