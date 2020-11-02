@@ -90,7 +90,7 @@ To ensure everything is working properly on your end, you must:
 
 ## Platform Account Setup
 
-Although it's possible to make small source code improvements without testing against a real repository, in most cases it's important that you run a "real" test on a repository before you submit a feature or fix.
+Although it's possible to make small source code improvements without testing against a real repository, in most cases you should run a "real" test on a repository before you submit a feature or fix.
 It's possible to do this against GitHub, GitLab or Bitbucket public servers.
 
 #### Register new account (optional)
