@@ -38,8 +38,8 @@ You can also use [SDKMAN](https://sdkman.io/) to manage Java versions.
 
 _Windows_
 
-The following steps work to set up a brand-new Windows 10 installation for developing Renovate.
-If you already have some components installed, you can naturally skip them.
+Follow these steps to set up your development environment on Windows 10.
+If you already installed a component, skip the corresponding step.
 
 - Install [Git](https://git-scm.com/downloads). Make sure you've [configured your username and email](https://git-scm.com/book/en/v2/Getting-Started-First-Time-Git-Setup).
 - Install [Node.js LTS](https://nodejs.org/en/download/)
