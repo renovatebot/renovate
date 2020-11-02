@@ -900,7 +900,7 @@ const options: RenovateOptions[] = [
   {
     name: 'updateTypes',
     description:
-      'Update types to match against (major, minor, pin, etc). Valid only within `packageRules` object.',
+      'Update types to match against (major, minor, pin, etc). Valid only within `packageRules` object. `patch` only matches if `separateMinorPatch` is set to true',
     type: 'array',
     // TODO: add allowedValues
     subType: 'string',
