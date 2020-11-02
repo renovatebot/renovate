@@ -17,7 +17,7 @@ You need the following dependencies for local development:
 - Python `^3.7`
 - Java between `8` and `12`
 
-We support Node.js versions according to the [Node.js release schedule](https://github.com/nodejs/Release#release-schedule)
+We support Node.js versions according to the [Node.js release schedule](https://github.com/nodejs/Release#release-schedule).
 
 You need Java to execute Gradle tests.
 If you don’t have Java installed, the Gradle tests will be skipped.
