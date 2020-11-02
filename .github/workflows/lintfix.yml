@@ -67,7 +67,7 @@ jobs:
           repository: ${{github.event.pull_request.head.repo.full_name}}
 
       - name: Lint
-        run: docker run --rm -t -v $PWD:/code -w /code renovate/node:$NODE_VERSION yarn lint-fix
+        run: docker run --rm -t -v $PWD:/code -v $PWD/.git:/code/.git:ro -w /code renovate/node:$NODE_VERSION yarn lint-fix
 
       - name: Push changes
         env:
