@@ -52,7 +52,7 @@ jobs:
             ${{ env.YARN_PACKAGE_CACHE_KEY }}-${{ runner.os }}-yarn_cache-
 
       - name: Installing dependencies
-        run: docker run --rm -t -u $UID -v $PWD:/code -w /code node:$NODE_VERSION yarn install --frozen-lockfile
+        run: docker run --rm -t -u $UID -v $PWD:/code -w /code node:$NODE_VERSION -e YARN_CACHE_FOLDER yarn install --frozen-lockfile
 
       # - name: fetch pr head
       #   run: git fetch
