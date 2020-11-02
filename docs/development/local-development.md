@@ -1,7 +1,8 @@
 # Local Development
 
-This document serves to give tips and tricks on how to run Renovate locally to add features or fix bugs.
-Please submit PRs to improve it if you think anything is unclear or you can think of something that should be added.
+This document gives tips and tricks on how to run Renovate locally to add features or fix bugs.
+You can improve this documentation by opening a pull request.
+For example, if you think anything is unclear, or you think something needs to be added, open a pull request!
 
 ## Install
 
