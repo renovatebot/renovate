@@ -7,7 +7,7 @@ env:
   YARN_MODULES_CACHE_KEY: v1
   YARN_PACKAGE_CACHE_KEY: v1
   YARN_CACHE_FOLDER: .cache/yarn
-  NODE_VERSION: 12
+  NODE_VERSION: 14
   # https://github.com/chalk/supports-color/issues/106
   FORCE_COLOR: true
   FIX_AUTHOR_EMAIL: renovate@whitesourcesoftware.com
@@ -65,16 +65,17 @@ jobs:
           repository: ${{github.event.pull_request.head.repo.full_name}}
 
       - name: Lint
-        run: yarn lint-fix
+        run: docker run --rm -t -v $PWD:/code -w /code renovate/node:$NODE_VERSION yarn lint-fix
 
       - name: Push changes
         env:
           GH_TOKEN: ${{ github.token }} #needs maintainer pat here to push to forks
+          GIT_REPO: ${{github.event.pull_request.head.repo.full_name}}
+          GIT_REF: ${{github.event.pull_request.head.ref}}
         run: |
           if [[ "$(git diff --stat)" != '' && "$(git log -1 --pretty=format:'%ae')" != "${FIX_AUTHOR_EMAIL}" ]]; then
-            # configure pat
-            git commit -a -m "chore: lint fix"
-            git push https://${GH_TOKEN}:github.com/${{github.event.pull_request.head.repo.full_name}} ${{github.event.pull_request.head.ref}}
+            git commit -a -m "chore: lint fix" --no-verify
+            git push --no-verify https://${GH_TOKEN}:github.com/${GIT_REPO} ${GIT_REF}
           else
             echo 'nothing todo'
           fi
