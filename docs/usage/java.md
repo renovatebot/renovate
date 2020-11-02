@@ -5,7 +5,8 @@ description: Java versions support in Renovate
 
 # Java Dependency Updates
 
-Renovate can update the version used in Gradle and Maven projects. This includes libraries and plugins.
+Renovate can update the version used in Gradle and Maven projects.
+This includes libraries and plugins.
 
 ## Gradle
 
@@ -23,7 +24,8 @@ Renovate does not support:
 
 ### How It Works
 
-Renovate uses a plugin to search and extract versions from projects. They are then looked up using Maven datasources and patched into PRs the usual way.
+Renovate uses a plugin to search and extract versions from projects.
+They are then looked up using Maven datasources and patched into PRs the usual way.
 
 ## Maven
 
