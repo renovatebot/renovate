@@ -42,10 +42,10 @@ Follow these steps to set up your development environment on Windows 10.
 If you already installed a component, skip the corresponding step.
 
 - Install [Git](https://git-scm.com/downloads). Make sure you've [configured your username and email](https://git-scm.com/book/en/v2/Getting-Started-First-Time-Git-Setup).
-- Install [Node.js LTS](https://nodejs.org/en/download/)
-- In an Administrator PowerShell prompt, run `npm install -global npm` and then `npm --add-python-to-path='true' --debug install --global windows-build-tools`
-- Install [Yarn](https://yarnpkg.com/lang/en/docs/install/#windows-stable)
-- Install Java, e.g. from [AdoptOpenJDK](https://adoptopenjdk.net/?variant=openjdk11) or any other distribution
+- Install [Node.js LTS](https://nodejs.org/en/download/).
+- In an Administrator PowerShell prompt, run `npm install -global npm` and then `npm --add-python-to-path='true' --debug install --global windows-build-tools`.
+- Install [Yarn](https://yarnpkg.com/lang/en/docs/install/#windows-stable).
+- Install Java, e.g. from [AdoptOpenJDK](https://adoptopenjdk.net/?variant=openjdk11) or any other distribution.
 
   Verify you have everything installed with appropriate versions, e.g.:
 
