@@ -70,7 +70,6 @@ jobs:
            -v "${PWD}:/code" \
            -v "$(mktemp -d -t ci-XXXXXXXXXX):/code/.git:ro" \
            -w /code \
-           -e YARN_CACHE_FOLDER=/code/${{ env.YARN_CACHE_FOLDER }} \
            -e HOME=/home/ubuntu \
            "renovate/node:${{ env.NODE_VERSION}}" \
            npx yarn lint-fix
