@@ -82,8 +82,8 @@ jobs:
           GIT_REPO: ${{github.event.pull_request.head.repo.full_name}}
           GIT_REF: ${{github.event.pull_request.head.ref}}
         run: |
+          git config core.hooksPath $(mktemp -d -t ci-XXXXXXXXXX)
           if [[ "$(git diff --stat)" != '' && "$(git log -1 --pretty=format:'%ae')" != "${FIX_AUTHOR_EMAIL}" ]]; then
-            git config core.hooksPath $(mktemp -d -t ci-XXXXXXXXXX)
             git commit -a -m "chore: lint fix"
             git push https://${GH_TOKEN}:github.com/${GIT_REPO} ${GIT_REF}
           else
