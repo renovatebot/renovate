@@ -29,7 +29,7 @@ jobs:
           yarn config set version-git-tag false
           npm config set scripts-prepend-node-path true
 
-      - uses: actions/checkout@v2.3.3
+      - uses: actions/checkout@v2.3.4
         with:
           ref: ${{ github.event.client_payload.sha }}
 
