@@ -63,10 +63,10 @@ jobs:
           persist-credentials: false # do not persist credentials
           ref: ${{github.event.pull_request.head.ref}}
           repository: ${{github.event.pull_request.head.repo.full_name}}
+          clean: false
 
       - name: Lint
         run: |
-          ls -la node_modules/.bin
           docker run --rm -t -u "$UID:0" \
            -v "${PWD}:/code" \
            -v "$(mktemp -d -t ci-XXXXXXXXXX):/code/.git:ro" \
