@@ -14,7 +14,7 @@ async function helmUpdate(manifestPath: string): Promise<void> {
 
   const execOptions: ExecOptions = {
     docker: {
-      image: 'renovate/helmv3',
+      image: 'renovate/helm',
     },
   };
   await exec(cmd, execOptions);
