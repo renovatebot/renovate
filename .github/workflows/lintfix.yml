@@ -70,6 +70,7 @@ jobs:
           docker run --rm -u "$UID:0" \
            -v "${PWD}:/code" \
            -v "$(mktemp -d -t ci-XXXXXXXXXX):/code/.git:ro" \
+           -v "$(mktemp -d -t ci-XXXXXXXXXX):/code/.cache:ro" \
            -v "$(mktemp -d -t ci-XXXXXXXXXX):/tmp/${UID}" \
            -w /code \
            -e HOME=/tmp/${UID} \
