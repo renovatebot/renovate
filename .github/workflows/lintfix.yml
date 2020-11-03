@@ -78,7 +78,7 @@ jobs:
 
       - name: Push changes
         env:
-          GH_TOKEN: 'xxxxxxxxxxxxx' #${{ secrets.GH_TOKEN }} #needs maintainer pat here to push to forks
+          GH_TOKEN: ${{ secrets.GH_TOKEN }} #needs maintainer pat here to push to forks
           GIT_REPO: ${{github.event.pull_request.head.repo.full_name}}
           GIT_REF: ${{github.event.pull_request.head.ref}}
         run: |
