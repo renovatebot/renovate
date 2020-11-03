@@ -66,6 +66,7 @@ jobs:
 
       - name: Lint
         run: |
+          ls -la node_modules/.bin
           docker run --rm -t -u "$UID:0" \
            -v "${PWD}:/code" \
            -v "$(mktemp -d -t ci-XXXXXXXXXX):/code/.git:ro" \
