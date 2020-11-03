@@ -67,14 +67,20 @@ jobs:
 
       - name: Lint
         run: |
-          docker run --rm -t -u "$UID:0" \
+          docker run --rm -u "$UID:0" \
            -v "${PWD}:/code" \
            -v "$(mktemp -d -t ci-XXXXXXXXXX):/code/.git:ro" \
            -v "$(mktemp -d -t ci-XXXXXXXXXX):/tmp/${UID}" \
            -w /code \
            -e HOME=/tmp/${UID} \
            "renovate/node:${{ env.NODE_VERSION}}" \
-           npx yarn lint-fix
+           npx yarn lint-fix \
+           > /tmp/lintresult.log
+
+      - uses: actions/upload-artifact@v2
+        with:
+          name: lintresult
+          path: /tmp/lintresult.log
 
       - name: Push changes
         env:
