@@ -16,23 +16,6 @@ You should know about platforms, package managers, datasources and versioning to
 
 ## Label categories
 
-### Priority
-
-<details>
-    <summary>Priority</summary>
-
-    pri1-critical
-    pri2-important
-    pri3-normal
-    pri4-low
-    wontfix
-
-</details>
-
-Use these to assign a priority level to an issue.
-Make a best-effort attempt to select a proper priority.
-Nothing bad will happen if you select a "wrong" priority.
-
 ### Type of issue
 
 <details>
@@ -52,57 +35,38 @@ Only use `refactor` for code changes, don't use `refactor` for documentation typ
 
 Use the `breaking` label for Issues or PRs which contain changes that are not backwards compatible and require a major release bump.
 
-### Housekeeping
+### Priority
 
 <details>
-    <summary>Housekeeping</summary>
+    <summary>Priority</summary>
 
-    good first issue
-    help wanted
-    needs reproduction
-    reproduced
+    pri1-critical
+    pri2-important
+    pri3-normal
+    pri4-low
+    wontfix
 
 </details>
 
-Add a label `good first issue` to issues that are small, easy to fix, and do-able for a newcomer.
-This label is sometimes picked up by tools or websites that try to encourage people to contribute to open source.
+Use these to assign a priority level to an issue.
+Make a best-effort attempt to select a proper priority.
+Nothing bad will happen if you select a "wrong" priority.
 
-Add a label `needs reproduction` if nobody's reproduced it in a public repo yet and such a reproduction is necessary before further work can be done.
-Add the label `reproduced` once there is a public reproduction.
-
-Add the label `help wanted` to indicate that we need the original poster or someone else do some work or it is unlikely to get done.
-
-### Miscellaneous
+### Platform
 
 <details>
-    <summary>Miscellaneous</summary>
+    <summary>Platform labels</summary>
 
-    self hosted
+    platform:azure
+    platform:bitbucket
+    platform:gitea
+    platform:github
+    platform:gitlab
 
 </details>
 
-Use the `self hosted` label to identify when an issue is applicable only to users who self-administer their own bot.
-
-### Datasource
-
-<details>
-    <summary>Datasource</summary>
-
-    datasource:docker
-    datasource:git-submodule
-    datasource:git-labels
-    datasource:jenkins
-    datasource:maven
-    datasource:nuget
-    datasource:packagist
-    datasource:pypi
-    datasource:rubygems
-    datasource:terraform-module
-    datasource:terraform-provider
-
-</details>
-
-Use a `datasource:` label when it is applicable specifically to particular datasources (for example, as defined in the docs list of datasources).
+Use these to mark the platform that is affected by this issue.
+Keep in mind that a issue can be both affecting a platform and a self hosted instance.
 
 ### Manager
 
@@ -147,35 +111,26 @@ Use a `datasource:` label when it is applicable specifically to particular datas
 Add the relevant manager labels to the issue.
 If there are multiple managers affected, add labels for all of them.
 
-### New stuff
+### Datasource
 
 <details>
-    <summary>New stuff</summary>
+    <summary>Datasource</summary>
 
-    new datasource
-    new package manager
-    new platform
-    new versioning
+    datasource:docker
+    datasource:git-submodule
+    datasource:git-labels
+    datasource:jenkins
+    datasource:maven
+    datasource:nuget
+    datasource:packagist
+    datasource:pypi
+    datasource:rubygems
+    datasource:terraform-module
+    datasource:terraform-provider
 
 </details>
 
-Apply these labels when somebody opens a `feature` type issue requesting a new datasource, package manager, platform, or new versioning scheme.
-
-### Platform
-
-<details>
-    <summary>Platform labels</summary>
-
-    platform:azure
-    platform:bitbucket
-    platform:gitea
-    platform:github
-    platform:gitlab
-
-</details>
-
-Use these to mark the platform that is affected by this issue.
-Keep in mind that a issue can be both affecting a platform and a self hosted instance.
+Use a `datasource:` label when it is applicable specifically to particular datasources (for example, as defined in the docs list of datasources).
 
 ### Worker
 
@@ -190,3 +145,48 @@ Keep in mind that a issue can be both affecting a platform and a self hosted ins
 </details>
 
 A worker is the "core" logic of Renovate.
+
+### New stuff
+
+<details>
+    <summary>New stuff</summary>
+
+    new datasource
+    new package manager
+    new platform
+    new versioning
+
+</details>
+
+Apply these labels when somebody opens a `feature` type issue requesting a new datasource, package manager, platform, or new versioning scheme.
+
+### Housekeeping
+
+<details>
+    <summary>Housekeeping</summary>
+
+    good first issue
+    help wanted
+    needs reproduction
+    reproduced
+
+</details>
+
+Add a label `good first issue` to issues that are small, easy to fix, and do-able for a newcomer.
+This label is sometimes picked up by tools or websites that try to encourage people to contribute to open source.
+
+Add a label `needs reproduction` if nobody's reproduced it in a public repo yet and such a reproduction is necessary before further work can be done.
+Add the label `reproduced` once there is a public reproduction.
+
+Add the label `help wanted` to indicate that we need the original poster or someone else do some work or it is unlikely to get done.
+
+### Miscellaneous
+
+<details>
+    <summary>Miscellaneous</summary>
+
+    self hosted
+
+</details>
+
+Use the `self hosted` label to identify when an issue is applicable only to users who self-administer their own bot.
