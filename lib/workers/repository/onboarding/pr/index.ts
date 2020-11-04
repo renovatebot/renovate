@@ -5,7 +5,7 @@ import { platform } from '../../../../platform';
 import { emojify } from '../../../../util/emoji';
 import { deleteBranch, isBranchModified } from '../../../../util/git';
 import { BranchConfig } from '../../../common';
-import { addAssigneesReviewers, getPlafromPrOptions } from '../../../pr';
+import { addAssigneesReviewers, getPlatformPrOptions } from '../../../pr';
 import { getBaseBranchDesc } from './base-branch';
 import { getConfigDesc } from './config-description';
 import { getDepWarnings, getErrors, getWarnings } from './errors-warnings';
@@ -137,7 +137,7 @@ If you need any further assistance then you can also [request help here](${confi
         prTitle: config.onboardingPrTitle,
         prBody,
         labels,
-        platformOptions: getPlafromPrOptions(config),
+        platformOptions: getPlatformPrOptions({ ...config, automerge: false }),
       });
       logger.info({ pr: pr.displayNumber }, 'Onboarding PR created');
       await addAssigneesReviewers(config, pr);

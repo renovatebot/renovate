@@ -98,7 +98,7 @@ export async function addAssigneesReviewers(
   }
 }
 
-export function getPlatfromPrOptions(
+export function getPlatformPrOptions(
   config: RenovateConfig & PlatformPrOptions
 ): PlatformPrOptions {
   return {
@@ -381,7 +381,7 @@ export async function ensurePr(
           prTitle,
           prBody,
           labels: config.labels,
-          platformOptions: getPlafromPrOptions(config),
+          platformOptions: getPlatformPrOptions(config),
           draftPR: config.draftPR,
         });
         logger.info({ pr: pr.number, prTitle }, 'PR created');
