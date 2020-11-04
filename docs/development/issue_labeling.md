@@ -3,10 +3,21 @@
 We try to keep issues well-classified by labeling them appropriately.
 Only members/collaborators with the required rights can apply labels.
 
-## Severity labels
+## Basic knowledge about Renovate
+
+You should know about platforms, package managers, datasources and versioning to label issues effectively.
+
+- To learn about platforms, read the [Renovate docs on Platforms](https://docs.renovatebot.com/modules/platform/).
+- To learn about managers, read the [Renovate docs on Managers](https://docs.renovatebot.com/modules/manager/).
+- To learn about datasources, read the [Renovate docs on Datasources](https://docs.renovatebot.com/modules/datasource/).
+- To learn more about versioning, read the [Renovate docs on Versioning](https://docs.renovatebot.com/modules/versioning/).
+
+## Label categories
+
+### Severity
 
 <details>
-    <summary>Severity labels</summary>
+    <summary>Severity</summary>
 
     breaking
     major
@@ -15,10 +26,10 @@ Only members/collaborators with the required rights can apply labels.
 
 QUESTION: When/who should use these severity labels?
 
-## Priority labels
+### Priority
 
 <details>
-    <summary>Priority labels</summary>
+    <summary>Priority</summary>
 
     pri0-blocker
     pri1-critical
@@ -35,10 +46,10 @@ QUESTION: Who gets to decide the priority level? @rarkins and maintainers, or ca
 
 QUESTION: Maybe we should copy paste the priority descriptions from the labels into this doc?
 
-## Type of issue labels
+### Type of issue
 
 <details>
-    <summary>Type of issue labels</summary>
+    <summary>Type of issue</summary>
 
     bug
     docs
@@ -54,10 +65,10 @@ Only use `refactor` for code changes, don't use `refactor` for documentation typ
 
 QUESTION: Do we even need a `duplicate` label, there's **mark as duplicate** functionality in GitHub nowadays...
 
-## Housekeeping labels
+### Housekeeping
 
 <details>
-    <summary>Housekeeping labels</summary>
+    <summary>Housekeeping</summary>
 
     good first issue
     help wanted
@@ -73,10 +84,10 @@ Add the label `reproduced` once there is a public reproduction.
 
 QUESTION: When/who should use the `help wanted` label?
 
-## Miscellaneous labels
+### Miscellaneous
 
 <details>
-    <summary>Miscellaneous labels</summary>
+    <summary>Miscellaneous</summary>
 
     gitfs
     hacktoberfest
@@ -93,10 +104,10 @@ QUESTION: What is the `internal` label about?
 QUESTION: Do we even use the `ready` label now Renovate has a project board?
 QUESTION: I think `self hosted` belongs in the `platform:` type label section instead???
 
-### Datasource labels
+### Datasource
 
 <details>
-    <summary>Datasource labels</summary>
+    <summary>Datasource</summary>
 
     datasource:docker
     datasource:git-submodule
@@ -112,12 +123,12 @@ QUESTION: I think `self hosted` belongs in the `platform:` type label section in
 
 </details>
 
-QUESTION: What is a datasource? Where can I see if an issue is about a certain datasource? I have no idea what the backend files are that I can check....
+QUESTION: When should somebody use a datasource label?
 
-## Manager labels
+### Manager
 
 <details>
-    <summary>Manager labels</summary>
+    <summary>Manager</summary>
 
     manager:bazel
     manager:buildkite
@@ -153,12 +164,14 @@ QUESTION: What is a datasource? Where can I see if an issue is about a certain d
 
 </details>
 
-QUESTION: What is a manager? What does it do? How can I see what manager is used in an issue?
+"manager" is short for "package manager".
+Add the relevant manager labels to the issue.
+If there are multiple managers affected, add labels for all of them.
 
-## New labels
+### New stuff
 
 <details>
-    <summary>New stuff labels</summary>
+    <summary>New stuff</summary>
 
     new datasource
     new package manager
@@ -167,11 +180,9 @@ QUESTION: What is a manager? What does it do? How can I see what manager is used
 
 </details>
 
-Apply these labels when somebody opens a `feature` type issue requesting a new datasource, package manager, platform.
+Apply these labels when somebody opens a `feature` type issue requesting a new datasource, package manager, platform, or new versioning scheme.
 
-QUESTION: What is `new versioning` about??? I've no clue what this is...
-
-## Platform labels
+### Platform
 
 <details>
     <summary>Platform labels</summary>
@@ -188,10 +199,10 @@ Use these to mark the platform that is affected by this issue.
 
 QUESTION: Should the `self hosted` label be in this category as well? Or are we missing a `platform:self-hosted` label?
 
-## Worker labels
+### Worker
 
 <details>
-    <summary>Worker labels</summary>
+    <summary>Worker</summary>
 
     worker:branch
     worker:global
@@ -202,10 +213,10 @@ QUESTION: Should the `self hosted` label be in this category as well? Or are we 
 
 QUESTION: I have no clue what a worker even is....
 
-## Semantic release bot labels
+### Semantic release bot
 
 <details>
-    <summary>Semantic release bot labels</summary>
+    <summary>Semantic release bot</summary>
 
     released
     semantic-release
