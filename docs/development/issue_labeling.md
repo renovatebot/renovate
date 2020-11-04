@@ -66,7 +66,7 @@ Nothing bad will happen if you select a "wrong" priority.
 </details>
 
 Use these to mark the platform that is affected by this issue.
-Keep in mind that a issue can be both affecting a platform and a self hosted instance.
+Keep in mind that an issue can be both affecting a platform and a self hosted instance.
 
 ### Manager
 
