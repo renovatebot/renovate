@@ -98,7 +98,7 @@ export async function addAssigneesReviewers(
   }
 }
 
-export function getPlafromPrOptions(
+export function getPlatfromPrOptions(
   config: RenovateConfig & PlatformPrOptions
 ): PlatformPrOptions {
   return {
