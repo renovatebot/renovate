@@ -14,18 +14,6 @@ You should know about platforms, package managers, datasources and versioning to
 
 ## Label categories
 
-### Severity
-
-<details>
-    <summary>Severity</summary>
-
-    breaking
-    major
-
-</details>
-
-QUESTION: When/who should use these severity labels?
-
 ### Priority
 
 <details>
@@ -56,12 +44,17 @@ QUESTION: Maybe we should copy paste the priority descriptions from the labels i
     duplicate
     feature
     refactor
+    breaking
 
 </details>
 
 Use these to label the type of issue.
 For example, use `bug` to label a bug type issue, and use `feature` for feature requests.
 Only use `refactor` for code changes, don't use `refactor` for documentation type changes.
+
+QUESTION: Do we use breaking for "breaking" changes in a PR, or as a "the house is on fire" marker for issues, or both?
+Use the `breaking` label for pull requests that have breaking changes.
+Use the `breaking` label for when a bug is realy major.
 
 QUESTION: Do we even need a `duplicate` label, there's **mark as duplicate** functionality in GitHub nowadays...
 
