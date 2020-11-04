@@ -190,17 +190,3 @@ Keep in mind that a issue can be both affecting a platform and a self hosted ins
 </details>
 
 A worker is the "core" logic of Renovate.
-
-### Semantic release bot
-
-<details>
-    <summary>Semantic release bot</summary>
-
-    released
-    semantic-release
-
-</details>
-
-The semantic release bot applies the `released` label whenever the fix for an issue is packaged into a new release.
-
-QUESTION: I don't know what the `semantic-release` label is about.
