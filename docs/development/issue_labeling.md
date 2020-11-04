@@ -180,10 +180,10 @@ Add the label `reproduced` once there is a public reproduction.
 
 Add the label `help wanted` to indicate that we need the original poster or someone else do some work or it is unlikely to get done.
 
-### Miscellaneous
+### Self hosted
 
 <details>
-    <summary>Miscellaneous</summary>
+    <summary>Self hosted</summary>
 
     self hosted
 
