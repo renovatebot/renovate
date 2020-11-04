@@ -3,7 +3,6 @@ import * as datasourceGithubTags from '../../datasource/github-tags';
 import * as datasourceTerraformModule from '../../datasource/terraform-module';
 import { logger } from '../../logger';
 import { SkipReason } from '../../types';
-import { isVersion } from '../../versioning/hashicorp';
 import { PackageDependency } from '../common';
 import { extractTerraformProvider } from './providers';
 import { ExtractionResult, TerraformDependencyTypes } from './util';
@@ -37,9 +36,6 @@ export function analyseTerraformModule(dep: PackageDependency): void {
     dep.currentValue = githubRefMatch.groups.tag;
     dep.datasource = datasourceGithubTags.id;
     dep.lookupName = depNameShort;
-    if (!isVersion(dep.currentValue)) {
-      dep.skipReason = SkipReason.UnsupportedVersion;
-    }
   } else if (gitTagsRefMatch) {
     dep.depType = 'gitTags';
     if (gitTagsRefMatch.groups.path.includes('//')) {
@@ -55,9 +51,6 @@ export function analyseTerraformModule(dep: PackageDependency): void {
     }
     dep.currentValue = gitTagsRefMatch.groups.tag;
     dep.datasource = datasourceGitTags.id;
-    if (!isVersion(dep.currentValue)) {
-      dep.skipReason = SkipReason.UnsupportedVersion;
-    }
   } else if (dep.managerData.source) {
     const moduleParts = dep.managerData.source.split('//')[0].split('/');
     if (moduleParts[0] === '..') {
