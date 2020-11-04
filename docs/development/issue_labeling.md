@@ -21,7 +21,6 @@ You should know about platforms, package managers, datasources and versioning to
 <details>
     <summary>Priority</summary>
 
-    pri0-blocker
     pri1-critical
     pri2-important
     pri3-normal
