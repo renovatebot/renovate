@@ -110,14 +110,6 @@ export async function getDigest(
   return digest;
 }
 
-/**
- * github.getTags
- *
- * This function will:
- *  - Fetch all tags
- *  - Sanitize the versions if desired (e.g. strip out leading 'v')
- *  - Return a dependency object containing sourceUrl string and releases array
- */
 async function getTags({
   registryUrl: depHost,
   lookupName: repo,
@@ -170,18 +162,13 @@ function normalizeVersion(version: string): string {
   return version?.replace(/^v/, '');
 }
 
-/**
- * github.getReleases
- *
- * This function can be used to fetch releases with a customisable versioning (e.g. semver)
- * and with both tags or releases data.
- */
 export async function getReleases(
   config: GetReleasesConfig
 ): Promise<ReleaseResult | null> {
   const tagsResult = await getTags(config);
 
   try {
+    // Fetch additional data from releases endpoint when possible
     const releasesResult = await githubReleases.getReleases(config);
     const releaseByVersion = {};
     releasesResult?.releases?.forEach((release) => {
