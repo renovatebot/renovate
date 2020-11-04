@@ -60,6 +60,7 @@ async function queryRegistry(
   const currentVersion = dep.releases.find((release) => {
     return res.version === release.version;
   });
+  // istanbul ignore else
   if (currentVersion) {
     currentVersion.releaseTimestamp = res.published_at;
   }
@@ -78,6 +79,11 @@ async function queryReleaseBackend(
   const backendURL = registryURL + `/index.json`;
   const res = (await http.getJson<TerraformProviderReleaseBackend>(backendURL))
     .body;
+
+  if (!res[backendLookUpName]) {
+    return null;
+  }
+
   const dep: ReleaseResult = {
     name: repository,
     versions: {},

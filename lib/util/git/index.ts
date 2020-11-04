@@ -140,7 +140,7 @@ export async function initRepo(args: StorageConfig): Promise<void> {
   config = { ...args } as any;
   config.additionalBranches = [];
   config.branchIsModified = {};
-  git = Git(config.localDir).silent(true);
+  git = Git(config.localDir);
   gitInitialized = false;
   await fetchBranchCommits();
 }
@@ -652,11 +652,11 @@ export async function commitFiles({
       )
     ) {
       logger.warn(
-        'App has not been granted permissios to update Workflows - aborting branch.'
+        'App has not been granted permissions to update Workflows - aborting branch.'
       );
       return null;
     }
-    logger.debug({ err }, 'Error commiting files');
+    logger.debug({ err }, 'Error committing files');
     throw new Error(REPOSITORY_CHANGED);
   }
 }

@@ -1,4 +1,4 @@
-import { parse } from 'toml';
+import { parse } from '@iarna/toml';
 import * as datasourceCrate from '../../datasource/crate';
 import { logger } from '../../logger';
 import { SkipReason } from '../../types';
@@ -68,7 +68,8 @@ export function extractPackageFile(
   logger.trace(`cargo.extractPackageFile(${fileName})`);
   let parsedContent: CargoConfig;
   try {
-    parsedContent = parse(content);
+    // TODO: fix type
+    parsedContent = parse(content) as any;
   } catch (err) {
     logger.debug({ err }, 'Error parsing Cargo.toml file');
     return null;

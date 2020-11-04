@@ -53,7 +53,7 @@ export async function writeUpdates(
       res === ProcessBranchResult.Automerged &&
       branch.automergeType !== 'pr-comment'
     ) {
-      // Stop procesing other branches because base branch has been changed
+      // Stop processing other branches because base branch has been changed
       return 'automerged';
     }
     let deductPrRemainingCount = 0;

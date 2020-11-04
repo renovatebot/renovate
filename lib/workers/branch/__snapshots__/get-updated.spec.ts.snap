@@ -139,3 +139,22 @@ Object {
   "updatedPackageFiles": Array [],
 }
 `;
+
+exports[`workers/branch/get-updated getUpdatedPackageFiles() update artifacts on update-lockfile strategy 1`] = `
+Object {
+  "artifactErrors": Array [],
+  "reuseExistingBranch": undefined,
+  "updatedArtifacts": Array [
+    Object {
+      "contents": "some contents",
+      "name": "composer.lock",
+    },
+  ],
+  "updatedPackageFiles": Array [
+    Object {
+      "contents": "existing content",
+      "name": "undefined",
+    },
+  ],
+}
+`;

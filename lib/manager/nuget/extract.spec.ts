@@ -16,6 +16,16 @@ describe('lib/manager/nuget/extract', () => {
         await extractPackageFile('nothing here', 'bogus', config)
       ).toMatchSnapshot();
     });
+    it('extracts package version dependency', async () => {
+      const packageFile =
+        'with-centralized-package-versions/Directory.Packages.props';
+      const sample = readFileSync(
+        path.join(config.localDir, packageFile),
+        'utf8'
+      );
+      const res = await extractPackageFile(sample, packageFile, config);
+      expect(res.deps).toMatchSnapshot();
+    });
     it('extracts all dependencies', async () => {
       const packageFile = 'sample.csproj';
       const sample = readFileSync(

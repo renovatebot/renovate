@@ -1,6 +1,6 @@
 ---
 title: Node.js Versions
-description: Node versions support in Renovate
+description: Node.js versions support in Renovate
 ---
 
 # Node.js Versions
@@ -29,18 +29,18 @@ When Renovate processes your project's repository it will look for the files lis
 
 ## Configuring Support Policy
 
-Renovate supports a [`supportPolicy`](/configuration-options/#supportpolicy) option that can be passed the following values and associated versions (current as of May 2019):
+Renovate supports a [`supportPolicy`](/configuration-options/#supportpolicy) option that can be passed the following values and associated versions (current as of Oct 2020):
 
 **Default:** `lts`
 
 | supportPolicy | versions   | description                                              |
 | ------------- | ---------- | -------------------------------------------------------- |
-| all           | 8,10,11,12 | All releases that have not passed their end date         |
-| lts           | 8,10       | All releases classified as LTS, including in maintenance |
-| active        | 10,12      | All releases not in maintenance                          |
-| lts_active    | 10         | All releases both LTS and active                         |
-| lts_latest    | 10         | The latest LTS release                                   |
-| current       | 12         | The latest release from "all"                            |
+| all           | 10, 12, 14 | All releases that have not passed their end date         |
+| lts           | 10, 12     | All releases classified as LTS, including in maintenance |
+| active        | 12, 14     | All releases not in maintenance                          |
+| lts_active    | 12         | All releases both LTS and active                         |
+| lts_latest    | 12         | The latest LTS release                                   |
+| current       | 14         | The latest release from "all"                            |
 
 The version numbers associated with each support policy will be updated as new versions of Node.js are released, moved to LTS or maintenance, etc.
 

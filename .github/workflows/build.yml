@@ -26,7 +26,7 @@ jobs:
     strategy:
       matrix:
         os: [ubuntu-latest, macos-latest, windows-latest]
-        node-version: [12]
+        node-version: [12, ^14.15.0]
         python-version: [3.8]
         java-version: [8]
         exclude:
@@ -58,7 +58,7 @@ jobs:
 
       - name: Skip Java tests
         if: env.NODE_VERSION != '12'
-        run: echo "::set-env name=SKIP_JAVA_TESTS::true"
+        run: echo "SKIP_JAVA_TESTS=true" >> $GITHUB_ENV
 
       - name: Init platform
         shell: bash
@@ -72,7 +72,7 @@ jobs:
           python --version
           echo "Yarn $(yarn --version)"
 
-      - uses: actions/checkout@v2.3.3
+      - uses: actions/checkout@v2.3.4
 
       - name: Cache Yarn packages
         id: yarn_cache_packages
@@ -89,7 +89,7 @@ jobs:
         run: yarn cache clean
 
       - name: Installing dependencies
-        run: yarn install --frozen-lockfile --link-duplicates
+        run: yarn install --frozen-lockfile
 
       - name: Build
         run: yarn build
@@ -137,7 +137,7 @@ jobs:
           echo "Node $(node --version)"
           echo "Yarn $(yarn --version)"
 
-      - uses: actions/checkout@v2.3.3
+      - uses: actions/checkout@v2.3.4
 
       - name: Cache Yarn packages
         id: yarn_cache_packages
@@ -154,7 +154,7 @@ jobs:
         run: yarn cache clean
 
       - name: Installing dependencies
-        run: yarn install --frozen-lockfile --link-duplicates
+        run: yarn install --frozen-lockfile
 
       - name: Lint
         run: |
@@ -189,7 +189,7 @@ jobs:
           npm config set scripts-prepend-node-path true
 
       # full checkout for semantic-release
-      - uses: actions/checkout@v2.3.3
+      - uses: actions/checkout@v2.3.4
         with:
           fetch-depth: 0
 
@@ -200,7 +200,7 @@ jobs:
           key: ${{ env.YARN_PACKAGE_CACHE_KEY }}-${{ runner.os }}-yarn_cache-${{ hashFiles('**/yarn.lock') }}
 
       - name: Installing dependencies
-        run: yarn install --frozen-lockfile --link-duplicates
+        run: yarn install --frozen-lockfile
 
       - name: semantic-release
         if: github.ref == 'refs/heads/master'

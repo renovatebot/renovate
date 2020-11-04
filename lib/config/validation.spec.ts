@@ -434,5 +434,17 @@ describe('config/validation', () => {
       expect(errors).toMatchSnapshot();
       expect(warnings).toMatchSnapshot();
     });
+
+    it('validates preset values', async () => {
+      const config = {
+        extends: ['foo', 'bar', 42] as never,
+      };
+      const { warnings, errors } = await configValidation.validateConfig(
+        config,
+        true
+      );
+      expect(warnings).toHaveLength(0);
+      expect(errors).toHaveLength(1);
+    });
   });
 });
