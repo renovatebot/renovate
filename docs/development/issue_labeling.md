@@ -30,10 +30,8 @@ You should know about platforms, package managers, datasources and versioning to
 </details>
 
 Use these to assign a priority level to an issue.
-
-QUESTION: Who gets to decide the priority level? @rarkins and maintainers, or can a triaging member select a priority level?
-
-QUESTION: Maybe we should copy paste the priority descriptions from the labels into this doc?
+Make a best-effort attempt to select a proper priority.
+Nothing bad will happen if you select a "wrong" priority.
 
 ### Type of issue
 
