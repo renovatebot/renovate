@@ -3,6 +3,8 @@
 We try to keep issues well-classified by labeling them appropriately.
 Only members/collaborators with the required rights can apply labels.
 
+In theory any feature or bug should apply to either a platform, manager, datasource, versioning or a worker part.
+
 ## Basic knowledge about Renovate
 
 You should know about platforms, package managers, datasources and versioning to label issues effectively.
@@ -41,7 +43,6 @@ QUESTION: Maybe we should copy paste the priority descriptions from the labels i
 
     bug
     docs
-    duplicate
     feature
     refactor
     breaking
@@ -53,8 +54,6 @@ For example, use `bug` to label a bug type issue, and use `feature` for feature 
 Only use `refactor` for code changes, don't use `refactor` for documentation type changes.
 
 Use the `breaking` label for Issues or PRs which contain changes that are not backwards compatible and require a major release bump.
-
-QUESTION: Do we even need a `duplicate` label, there's **mark as duplicate** functionality in GitHub nowadays...
 
 ### Housekeeping
 
@@ -74,7 +73,7 @@ This label is sometimes picked up by tools or websites that try to encourage peo
 Add a label `needs reproduction` if nobody's reproduced it in a public repo yet and such a reproduction is necessary before further work can be done.
 Add the label `reproduced` once there is a public reproduction.
 
-QUESTION: When/who should use the `help wanted` label?
+Add the label `help wanted` to indicate that we need the original poster or someone else do some work or it is unlikely to get done.
 
 ### Miscellaneous
 
@@ -85,11 +84,7 @@ QUESTION: When/who should use the `help wanted` label?
 
 </details>
 
-QUESTION: What is the `gitfs` label about?
-QUESTION: Should we document the `hacktoberfest` labels?
-QUESTION: What is the `internal` label about?
-QUESTION: Do we even use the `ready` label now Renovate has a project board?
-QUESTION: I think `self hosted` belongs in the `platform:` type label section instead???
+Use the `self hosted` label to identify when an issue is applicable only to users who self-administer their own bot.
 
 ### Datasource
 
@@ -110,7 +105,7 @@ QUESTION: I think `self hosted` belongs in the `platform:` type label section in
 
 </details>
 
-QUESTION: When should somebody use a datasource label?
+Use a `datasource:` label when it is applicable specifically to particular datasources (for example, as defined in the docs list of datasources).
 
 ### Manager
 
@@ -183,8 +178,7 @@ Apply these labels when somebody opens a `feature` type issue requesting a new d
 </details>
 
 Use these to mark the platform that is affected by this issue.
-
-QUESTION: Should the `self hosted` label be in this category as well? Or are we missing a `platform:self-hosted` label?
+Keep in mind that a issue can be both affecting a platform and a self hosted instance.
 
 ### Worker
 
@@ -198,7 +192,7 @@ QUESTION: Should the `self hosted` label be in this category as well? Or are we 
 
 </details>
 
-QUESTION: I have no clue what a worker even is....
+A worker is the "core" logic of Renovate.
 
 ### Semantic release bot
 
