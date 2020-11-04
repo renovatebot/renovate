@@ -3,6 +3,7 @@ import { logger } from '../../logger';
 import * as packageCache from '../../util/cache/package';
 import { GithubHttp } from '../../util/http/github';
 import { DigestConfig, GetReleasesConfig, ReleaseResult } from '../common';
+import * as githubReleases from '../github-releases';
 
 export const id = 'github-tags';
 
@@ -110,16 +111,14 @@ export async function getDigest(
 }
 
 /**
- * github.getReleases
- *
- * This function can be used to fetch releases with a customisable versioning (e.g. semver) and with either tags or releases.
+ * github.getTags
  *
  * This function will:
- *  - Fetch all tags or releases (depending on configuration)
+ *  - Fetch all tags
  *  - Sanitize the versions if desired (e.g. strip out leading 'v')
  *  - Return a dependency object containing sourceUrl string and releases array
  */
-export async function getReleases({
+async function getTags({
   registryUrl: depHost,
   lookupName: repo,
 }: GetReleasesConfig): Promise<ReleaseResult | null> {
@@ -165,4 +164,40 @@ export async function getReleases({
     cacheMinutes
   );
   return dependency;
+}
+
+function normalizeVersion(version: string): string {
+  return version?.replace(/^v/, '');
+}
+
+/**
+ * github.getReleases
+ *
+ * This function can be used to fetch releases with a customisable versioning (e.g. semver)
+ * and with both tags or releases data.
+ */
+export async function getReleases(
+  config: GetReleasesConfig
+): Promise<ReleaseResult | null> {
+  const tagsResult = await getTags(config);
+
+  try {
+    const releasesResult = await githubReleases.getReleases(config);
+    const releaseByVersion = {};
+    releasesResult?.releases?.forEach((release) => {
+      const key = normalizeVersion(release.version);
+      const value = { ...release };
+      delete value.version;
+      releaseByVersion[key] = value;
+    });
+
+    tagsResult?.releases?.forEach((tag) => {
+      const release = releaseByVersion[normalizeVersion(tag?.version)];
+      Object.assign(tag, release);
+    });
+  } catch (e) {
+    // no-op
+  }
+
+  return tagsResult;
 }
