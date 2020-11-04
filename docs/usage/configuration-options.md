@@ -1268,8 +1268,6 @@ For example to apply a special label for Major updates:
 }
 ```
 
-Update type `patch` only matches if `separateMinorPatch` is set to true.
-
 ## patch
 
 Add to this object if you wish to define rules that apply only to patch updates.
