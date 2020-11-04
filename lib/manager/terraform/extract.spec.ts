@@ -26,7 +26,7 @@ describe('lib/manager/terraform/extract', () => {
       const res = extractPackageFile(helm);
       expect(res).toMatchSnapshot();
       expect(res.deps).toHaveLength(6);
-      expect(res.deps.filter((dep) => dep.skipReason)).toHaveLength(3);
+      expect(res.deps.filter((dep) => dep.skipReason)).toHaveLength(2);
     });
   });
 });

@@ -21,7 +21,6 @@ Object {
       "registryUrls": Array [
         "https://kubernetes-charts.storage.googleapis.com",
       ],
-      "skipReason": "unsupported-version",
     },
     Object {
       "datasource": "helm",
