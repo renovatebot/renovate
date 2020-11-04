@@ -19,6 +19,7 @@ import {
 
 const dependencyBlockExtractionRegex = /^\s*(?<type>[a-z_]+)\s+("(?<lookupName>[^"]+)"\s+)?("(?<terraformName>[^"]+)"\s+)?{\s*$/;
 const contentCheckList = [
+  'terraform {',
   'module "',
   'provider "',
   'required_providers ',

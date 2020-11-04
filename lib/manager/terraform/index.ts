@@ -5,6 +5,6 @@ export { extractPackageFile } from './extract';
 export const defaultConfig = {
   commitMessageTopic:
     'Terraform {{managerData.terraformDependencyType}} {{depNameShort}}',
-  fileMatch: ['\\.tf$'],
+  fileMatch: ['\\.tf$', '\\.hcl'],
   versioning: hashicorpVersioning.id,
 };
