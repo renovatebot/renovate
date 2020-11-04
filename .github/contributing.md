@@ -30,6 +30,12 @@ Please do not force push to your PR's branch after you have created your PR, as 
 PRs will always be squashed by us when we merge your work.
 Commit as many times as you need in your pull request branch.
 
+## Re-requesting a review
+
+Please do not ping your reviewer(s) by mentioning them in a new comment.
+Instead, use the re-request review functionality.
+Read more about this in the [GitHub docs, Re-requesting a review](https://docs.github.com/en/free-pro-team@latest/github/collaborating-with-issues-and-pull-requests/incorporating-feedback-in-your-pull-request#re-requesting-a-review).
+
 ## Slack collaboration with maintainers
 
 Sometimes the codebase can be a challenge to navigate, especially for a first-time contributor.
