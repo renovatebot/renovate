@@ -72,7 +72,7 @@ jobs:
           python --version
           echo "Yarn $(yarn --version)"
 
-      - uses: actions/checkout@v2.3.3
+      - uses: actions/checkout@v2.3.4
 
       - name: Cache Yarn packages
         id: yarn_cache_packages
@@ -137,7 +137,7 @@ jobs:
           echo "Node $(node --version)"
           echo "Yarn $(yarn --version)"
 
-      - uses: actions/checkout@v2.3.3
+      - uses: actions/checkout@v2.3.4
 
       - name: Cache Yarn packages
         id: yarn_cache_packages
@@ -189,7 +189,7 @@ jobs:
           npm config set scripts-prepend-node-path true
 
       # full checkout for semantic-release
-      - uses: actions/checkout@v2.3.3
+      - uses: actions/checkout@v2.3.4
         with:
           fetch-depth: 0
 
