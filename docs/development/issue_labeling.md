@@ -52,9 +52,7 @@ Use these to label the type of issue.
 For example, use `bug` to label a bug type issue, and use `feature` for feature requests.
 Only use `refactor` for code changes, don't use `refactor` for documentation type changes.
 
-QUESTION: Do we use breaking for "breaking" changes in a PR, or as a "the house is on fire" marker for issues, or both?
-Use the `breaking` label for pull requests that have breaking changes.
-Use the `breaking` label for when a bug is realy major.
+Use the `breaking` label for Issues or PRs which contain changes that are not backwards compatible and require a major release bump.
 
 QUESTION: Do we even need a `duplicate` label, there's **mark as duplicate** functionality in GitHub nowadays...
 
@@ -71,8 +69,9 @@ QUESTION: Do we even need a `duplicate` label, there's **mark as duplicate** fun
 </details>
 
 Add a label `good first issue` to issues that are small, easy to fix, and do-able for a newcomer.
+This label is sometimes picked up by tools or websites that try to encourage people to contribute to open source.
 
-Add a label `needs reproduction` if the issue can only be fixed once there's a reproduction.
+Add a label `needs reproduction` if nobody's reproduced it in a public repo yet and such a reproduction is necessary before further work can be done.
 Add the label `reproduced` once there is a public reproduction.
 
 QUESTION: When/who should use the `help wanted` label?
@@ -82,11 +81,6 @@ QUESTION: When/who should use the `help wanted` label?
 <details>
     <summary>Miscellaneous</summary>
 
-    gitfs
-    hacktoberfest
-    hacktoberfest-accepted
-    internal
-    ready
     self hosted
 
 </details>
