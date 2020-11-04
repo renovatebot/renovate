@@ -214,6 +214,8 @@ You can also configure this field to `"mirror:x"` where `x` is the name of a pac
 Doing so means that the `package.json` `version` field will mirror whatever the version is that `x` depended on.
 Make sure that version is a pinned version of course, as otherwise it won't be valid.
 
+## cloneSubmodules
+
 ## commitBody
 
 Configure this if you wish Renovate to add a commit body, otherwise Renovate just uses a regular single-line commit.
