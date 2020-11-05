@@ -21,11 +21,11 @@ Most issues should have a label relating to either a platform, manager, datasour
 <details>
     <summary>Type of issue</summary>
 
+    breaking
     type:bug
     type:docs
     type:feature
     type:refactor
-    breaking
 
 </details>
 
@@ -169,18 +169,18 @@ Apply these labels when somebody opens a `feature` type issue requesting a new d
 
     good first issue
     help wanted
-    reproduction needed
     reproduced
+    reproduction needed
 
 </details>
 
 Add a label `good first issue` to issues that are small, easy to fix, and do-able for a newcomer.
 This label is sometimes picked up by tools or websites that try to encourage people to contribute to open source.
 
+Add the label `help wanted` to indicate that we need the original poster or someone else do some work or it is unlikely to get done.
+
 Add a label `reproduction needed` if nobody's reproduced it in a public repo yet and such a reproduction is necessary before further work can be done.
 Add the label `reproduced` once there is a public reproduction.
-
-Add the label `help wanted` to indicate that we need the original poster or someone else do some work or it is unlikely to get done.
 
 ### Self hosted
 
