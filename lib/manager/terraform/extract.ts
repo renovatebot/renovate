@@ -60,11 +60,15 @@ export function extractPackageFile(content: string): PackageFile | null {
             break;
           }
           case TerraformDependencyTypes.module: {
-            result = extractTerraformModule(
-              lineNumber,
-              lines,
-              terraformDependency.groups.lookupName
-            );
+            if (terraformDependency.groups.type === 'terraform') {
+              result = extractTerraformModule(lineNumber, lines, 'hclmodule');
+            } else {
+              result = extractTerraformModule(
+                lineNumber,
+                lines,
+                terraformDependency.groups.lookupName
+              );
+            }
             break;
           }
           case TerraformDependencyTypes.resource: {
