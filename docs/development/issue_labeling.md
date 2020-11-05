@@ -3,7 +3,6 @@
 We try to keep issues well-classified through use of labels.
 Any repository collaborator can apply labels according to the below guidelines.
 
-
 ## Basic knowledge about Renovate
 
 You should know about platforms, package managers, datasources and versioning to label issues effectively.
@@ -14,6 +13,7 @@ You should know about platforms, package managers, datasources and versioning to
 - To learn more about versioning, read the [Renovate docs on Versioning](https://docs.renovatebot.com/modules/versioning/).
 
 Most issues should have a label relating to either a platform, manager, datasource, versioning or worker topic.
+
 ## Label categories
 
 ### Type of issue
@@ -21,30 +21,29 @@ Most issues should have a label relating to either a platform, manager, datasour
 <details>
     <summary>Type of issue</summary>
 
-    bug
-    docs
-    feature
-    refactor
+    type:bug
+    type:docs
+    type:feature
+    type:refactor
     breaking
 
 </details>
 
 Use these to label the type of issue.
-For example, use `bug` to label a bug type issue, and use `feature` for feature requests.
-Only use `refactor` for code changes, don't use `refactor` for documentation type changes.
+For example, use `type:bug` to label a bug type issue, and use `type:feature` for feature requests.
+Only use `type:refactor` for code changes, don't use `type:refactor` for documentation type changes.
 
-Use the `breaking` label for Issues or PRs which contain changes that are not backwards compatible and require a major release bump.
+Use the `breaking` label for Issues or PRs which contain changes that are not backwards compatible and require a major version bump.
 
 ### Priority
 
 <details>
     <summary>Priority</summary>
 
-    pri1-critical
-    pri2-important
-    pri3-normal
-    pri4-low
-    wontfix
+    priority-1-critical
+    priority-2-important
+    priority-3-normal
+    priority-4-low
 
 </details>
 
@@ -59,6 +58,7 @@ Nothing bad will happen if you select a "wrong" priority.
 
     platform:azure
     platform:bitbucket
+    platform:bitbucket-server
     platform:gitea
     platform:github
     platform:gitlab
@@ -117,8 +117,10 @@ If there are multiple managers affected, add labels for all of them.
     <summary>Datasource</summary>
 
     datasource:docker
-    datasource:git-submodule
     datasource:git-labels
+    datasource:git-submodule
+    datasource:git-tags
+    datasource:github-tags
     datasource:jenkins
     datasource:maven
     datasource:nuget
@@ -167,7 +169,7 @@ Apply these labels when somebody opens a `feature` type issue requesting a new d
 
     good first issue
     help wanted
-    needs reproduction
+    reproduction needed
     reproduced
 
 </details>
@@ -175,7 +177,7 @@ Apply these labels when somebody opens a `feature` type issue requesting a new d
 Add a label `good first issue` to issues that are small, easy to fix, and do-able for a newcomer.
 This label is sometimes picked up by tools or websites that try to encourage people to contribute to open source.
 
-Add a label `needs reproduction` if nobody's reproduced it in a public repo yet and such a reproduction is necessary before further work can be done.
+Add a label `reproduction needed` if nobody's reproduced it in a public repo yet and such a reproduction is necessary before further work can be done.
 Add the label `reproduced` once there is a public reproduction.
 
 Add the label `help wanted` to indicate that we need the original poster or someone else do some work or it is unlikely to get done.
@@ -185,8 +187,8 @@ Add the label `help wanted` to indicate that we need the original poster or some
 <details>
     <summary>Self hosted</summary>
 
-    self hosted
+    self-hosted
 
 </details>
 
-Use the `self hosted` label to identify when an issue is applicable only to users who self-administer their own bot.
+Use the `self-hosted` label to identify when an issue is applicable only to users who self-administer their own bot.
