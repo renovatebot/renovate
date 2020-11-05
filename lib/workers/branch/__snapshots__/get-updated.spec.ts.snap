@@ -1,14 +1,5 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
-exports[`workers/branch/get-updated getUpdatedPackageFiles()  does not update artifacts on update-lockfile if packageFile already updated 1`] = `
-Object {
-  "artifactErrors": Array [],
-  "reuseExistingBranch": undefined,
-  "updatedArtifacts": Array [],
-  "updatedPackageFiles": Array [],
-}
-`;
-
 exports[`workers/branch/get-updated getUpdatedPackageFiles() handles autoreplace base updated 1`] = `
 Object {
   "artifactErrors": Array [],
