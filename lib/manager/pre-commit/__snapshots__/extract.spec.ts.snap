@@ -1,0 +1,87 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`lib/manager/precommit/extract extractPackageFile() extracts from complex config file correctly" 1`] = `
+Object {
+  "deps": Array [
+    Object {
+      "currentValue": "v3.3.0",
+      "datasource": "github-tags",
+      "depName": "pre-commit/pre-commit-hooks",
+      "depType": "repository",
+      "lookupName": "pre-commit/pre-commit-hooks",
+      "skipReason": undefined,
+    },
+    Object {
+      "currentValue": "19.3b0",
+      "datasource": "github-tags",
+      "depName": "psf/black",
+      "depType": "repository",
+      "lookupName": "psf/black",
+      "skipReason": undefined,
+    },
+    Object {
+      "currentValue": "19.3b0",
+      "datasource": "gitlab-tags",
+      "depName": "psf/black",
+      "depType": "repository",
+      "lookupName": "psf/black",
+      "skipReason": undefined,
+    },
+    Object {
+      "currentValue": "19.3b0",
+      "datasource": "gitlab-tags",
+      "depName": "psf/black",
+      "depType": "repository",
+      "lookupName": "psf/black",
+      "skipReason": undefined,
+    },
+    Object {
+      "currentValue": "v2.1.2",
+      "datasource": "github-tags",
+      "depName": "prettier/pre-commit",
+      "depType": "repository",
+      "lookupName": "prettier/pre-commit",
+      "skipReason": undefined,
+    },
+    Object {
+      "currentValue": "v1.0.0",
+      "datasource": undefined,
+      "depName": "pre-commit/pre-commit-hooks",
+      "depType": "repository",
+      "lookupName": "pre-commit/pre-commit-hooks",
+      "skipReason": "unsupported-url",
+    },
+    Object {
+      "currentValue": "v2.1.2",
+      "datasource": "github-tags",
+      "depName": "prettier/pre-commit",
+      "depType": "repository",
+      "lookupName": "prettier/pre-commit",
+      "skipReason": undefined,
+    },
+    Object {
+      "currentValue": "v1.0.0",
+      "datasource": undefined,
+      "depName": undefined,
+      "depType": "repository",
+      "lookupName": undefined,
+      "skipReason": "invalid-url",
+    },
+  ],
+}
+`;
+
+exports[`lib/manager/precommit/extract extractPackageFile() extracts from values.yaml correctly with same structure as "pre-commit sample-config" 1`] = `
+Object {
+  "deps": Array [
+    Object {
+      "currentValue": "v2.4.0",
+      "datasource": "github-tags",
+      "depName": "pre-commit/pre-commit-hooks",
+      "depType": "repository",
+      "lookupName": "pre-commit/pre-commit-hooks",
+      "skipReason": undefined,
+    },
+  ],
+}
+`;
