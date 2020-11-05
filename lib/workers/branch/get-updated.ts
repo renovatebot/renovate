@@ -25,6 +25,7 @@ export async function getUpdatedPackageFiles(
     'manager.getUpdatedPackageFiles()'
   );
   const updatedFileContents: Record<string, string> = {};
+  const nonUpdatedFileContents: Record<string, string> = {};
   const packageFileManagers: Record<string, string> = {};
   const packageFileUpdatedDeps: Record<string, string[]> = {};
   const lockFileMaintenanceFiles = [];
@@ -67,7 +68,7 @@ export async function getUpdatedPackageFiles(
             logger.debug({ packageFile, depName }, 'No content changed');
             if (upgrade.rangeStrategy === 'update-lockfile') {
               logger.debug({ packageFile, depName }, 'update-lockfile add');
-              updatedFileContents[packageFile] = res;
+              nonUpdatedFileContents[packageFile] = res;
             }
           } else {
             logger.debug({ packageFile, depName }, 'Contents updated');
@@ -119,13 +120,13 @@ export async function getUpdatedPackageFiles(
         logger.debug({ packageFile, depName }, 'Updating packageFile content');
         updatedFileContents[packageFile] = newContent;
       }
-      if (
-        newContent === existingContent &&
-        (upgrade.datasource ===
-          datasourceGitSubmodules.id /* istanbul ignore next: no manager to test this exists */ ||
-          upgrade.rangeStrategy === 'update-lockfile')
-      ) {
-        updatedFileContents[packageFile] = newContent;
+      if (newContent === existingContent) {
+        // istanbul ignore else
+        if (upgrade.datasource === datasourceGitSubmodules.id) {
+          updatedFileContents[packageFile] = newContent;
+        } else if (upgrade.rangeStrategy === 'update-lockfile') {
+          nonUpdatedFileContents[packageFile] = newContent;
+        }
       }
     }
   }
@@ -149,6 +150,37 @@ export async function getUpdatedPackageFiles(
       if (is.nonEmptyArray(results)) {
         for (const res of results) {
           const { file, artifactError } = res;
+          if (file) {
+            updatedArtifacts.push(file);
+          } else if (artifactError) {
+            artifactErrors.push(artifactError);
+          }
+        }
+      }
+    }
+  }
+  const nonUpdatedPackageFiles = Object.keys(nonUpdatedFileContents).map(
+    (name) => ({
+      name,
+      contents: nonUpdatedFileContents[name],
+    })
+  );
+  for (const packageFile of nonUpdatedPackageFiles) {
+    const manager = packageFileManagers[packageFile.name];
+    const updatedDeps = packageFileUpdatedDeps[packageFile.name];
+    const updateArtifacts = get(manager, 'updateArtifacts');
+    if (updateArtifacts) {
+      const results = await updateArtifacts({
+        packageFileName: packageFile.name,
+        updatedDeps,
+        newPackageFileContent: packageFile.contents,
+        config,
+      });
+      if (is.nonEmptyArray(results)) {
+        updatedPackageFiles.push(packageFile);
+        for (const res of results) {
+          const { file, artifactError } = res;
+          // istanbul ignore else
           if (file) {
             updatedArtifacts.push(file);
           } else if (artifactError) {
