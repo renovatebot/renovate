@@ -374,7 +374,9 @@ export async function processBranch(
               'Post-upgrade task did not match any on allowed list'
             );
           } else {
-            const compiledCmd = template.compile(cmd, config);
+            const compiledCmd = config.allowPostUpgradeCommandTemplating
+              ? template.compile(cmd, config)
+              : cmd;
 
             logger.debug({ cmd: compiledCmd }, 'Executing post-upgrade task');
 

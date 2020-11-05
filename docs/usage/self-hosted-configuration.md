@@ -7,6 +7,25 @@ description: Self-Hosted Configuration usable in renovate.json or package.json
 
 The below configuration options are applicable only if you are running your own instance ("bot") of Renovate.
 
+## allowPostUpgradeCommandTemplating
+
+If true allow templating for post-upgrade commands.
+
+e.g.
+
+```json
+{
+  "allowPostUpgradeCommandTemplating": true,
+  "postUpgradeTasks": {
+    "commands": [
+      "npm ci --ignore-scripts",
+      "npx ng update {{{depName}}} --from={{{fromVersion}}} --to={{{toVersion}}} --migrateOnly --allowDirty --force"
+    ],
+    "fileFilters": ["**/**"]
+  }
+}
+```
+
 ## allowedPostUpgradeCommands
 
 A list of regular expressions that determine which commands in `postUpgradeTasks` are allowed to be executed.
