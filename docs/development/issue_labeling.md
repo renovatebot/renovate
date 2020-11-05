@@ -1,9 +1,8 @@
 # Issue labeling
 
-We try to keep issues well-classified by labeling them appropriately.
-Only members/collaborators with the required rights can apply labels.
+We try to keep issues well-classified through use of labels.
+Any repository collaborator can apply labels according to the below guidelines.
 
-In theory any feature or bug should apply to either a platform, manager, datasource, versioning or a worker part.
 
 ## Basic knowledge about Renovate
 
@@ -14,6 +13,7 @@ You should know about platforms, package managers, datasources and versioning to
 - To learn about datasources, read the [Renovate docs on Datasources](https://docs.renovatebot.com/modules/datasource/).
 - To learn more about versioning, read the [Renovate docs on Versioning](https://docs.renovatebot.com/modules/versioning/).
 
+Most issues should have a label relating to either a platform, manager, datasource, versioning or worker topic.
 ## Label categories
 
 ### Type of issue
