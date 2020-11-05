@@ -1844,6 +1844,13 @@ const options: RenovateOptions[] = [
     cli: false,
     env: false,
   },
+  {
+    name: 'cloneSubmodules',
+    description:
+      'Set to false to disable initialization of submodules during repository clone',
+    type: 'boolean',
+    default: true,
+  },
 ];
 
 export function getOptions(): RenovateOptions[] {
