@@ -65,10 +65,7 @@ export async function getUpdatedPackageFiles(
         if (res) {
           if (res === existingContent) {
             logger.debug({ packageFile, depName }, 'No content changed');
-            if (
-              upgrade.currentValue === upgrade.newValue &&
-              upgrade.rangeStrategy === 'update-lockfile'
-            ) {
+            if (upgrade.rangeStrategy === 'update-lockfile') {
               logger.debug({ packageFile, depName }, 'update-lockfile add');
               updatedFileContents[packageFile] = res;
             }
@@ -122,18 +119,13 @@ export async function getUpdatedPackageFiles(
         logger.debug({ packageFile, depName }, 'Updating packageFile content');
         updatedFileContents[packageFile] = newContent;
       }
-      if (newContent === existingContent) {
-        if (upgrade.datasource === datasourceGitSubmodules.id) {
-          updatedFileContents[packageFile] = newContent;
-        }
-        // istanbul ignore next
-        if (
-          upgrade.rangeStrategy === 'update-lockfile' &&
-          upgrade.currentValue === upgrade.newValue
-        ) {
-          // Treat the file as modified because we need to update artifacts
-          updatedFileContents[packageFile] = newContent;
-        }
+      if (
+        newContent === existingContent &&
+        (upgrade.datasource ===
+          datasourceGitSubmodules.id /* istanbul ignore next: no manager to test this exists */ ||
+          upgrade.rangeStrategy === 'update-lockfile')
+      ) {
+        updatedFileContents[packageFile] = newContent;
       }
     }
   }
