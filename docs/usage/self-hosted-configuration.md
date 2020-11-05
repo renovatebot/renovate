@@ -11,11 +11,21 @@ The below configuration options are applicable only if you are running your own 
 
 If true allow templating for post-upgrade commands.
 
-e.g.
+Let's look at an example of configuring packages with existing Angular migrations.
+
+Add two properties to `config.js`: `allowPostUpgradeCommandTemplating` and `allowedPostUpgradeCommands`
+
+```javascript
+module.export = {
+  allowPostUpgradeCommandTemplating: true,
+  allowedPostUpgradeCommands: ['^npm ci --ignore-scripts$', '^npx ng update'],
+};
+```
+
+In the `renovate.json` file, define the commands and files to be included in the final commit.
 
 ```json
 {
-  "allowPostUpgradeCommandTemplating": true,
   "postUpgradeTasks": {
     "commands": [
       "npm ci --ignore-scripts",
@@ -24,6 +34,12 @@ e.g.
     "fileFilters": ["**/**"]
   }
 }
+```
+
+With this configuration, the executable command for `@angular/core` will look like this
+
+```bash
+npx ng update @angular/core --from=9.0.0 --to=10.0.0 --migrateOnly --allowDirty --force
 ```
 
 ## allowedPostUpgradeCommands
