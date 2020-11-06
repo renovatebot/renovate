@@ -56,9 +56,10 @@ export async function getUpdatedPackageFiles(
           reuseExistingBranch: false,
         });
       }
+      const bumpVersion = get(manager, 'bumpVersion');
       const updateDependency = get(manager, 'updateDependency');
       if (!updateDependency) {
-        const res = await doAutoReplace(
+        let res = await doAutoReplace(
           upgrade,
           existingContent,
           reuseExistingBranch
@@ -68,10 +69,24 @@ export async function getUpdatedPackageFiles(
             logger.debug({ packageFile, depName }, 'No content changed');
             if (upgrade.rangeStrategy === 'update-lockfile') {
               logger.debug({ packageFile, depName }, 'update-lockfile add');
+              if (bumpVersion && upgrade.bumpVersion) {
+                res = await bumpVersion({
+                  bumpVersionType: upgrade.bumpVersion,
+                  content: res,
+                  upgrade,
+                });
+              }
               nonUpdatedFileContents[packageFile] = res;
             }
           } else {
             logger.debug({ packageFile, depName }, 'Contents updated');
+            if (bumpVersion && upgrade.bumpVersion) {
+              res = await bumpVersion({
+                bumpVersionType: upgrade.bumpVersion,
+                content: res,
+                upgrade,
+              });
+            }
             updatedFileContents[packageFile] = res;
           }
           continue; // eslint-disable-line no-continue
@@ -84,10 +99,17 @@ export async function getUpdatedPackageFiles(
         logger.error({ packageFile, depName }, 'Could not autoReplace');
         throw new Error(WORKER_FILE_UPDATE_FAILED);
       }
-      const newContent = await updateDependency({
+      let newContent = await updateDependency({
         fileContent: existingContent,
         upgrade,
       });
+      if (bumpVersion && upgrade.bumpVersion) {
+        newContent = await bumpVersion({
+          bumpVersionType: upgrade.bumpVersion,
+          content: newContent,
+          upgrade,
+        });
+      }
       if (!newContent) {
         if (config.reuseExistingBranch) {
           logger.debug(

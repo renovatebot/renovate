@@ -220,10 +220,20 @@ export interface UpdateDependencyConfig {
   upgrade: Upgrade;
 }
 
+export interface BumpVersionConfig {
+  content: string,
+  bumpVersionType: ReleaseType | string,
+  upgrade: Upgrade,
+}
+
 export interface ManagerApi {
   defaultConfig: Record<string, unknown>;
   language?: string;
   supportsLockFileMaintenance?: boolean;
+
+  bumpVersion?(
+    config: BumpVersionConfig,
+  ): Result<string | null>;
 
   extractAllPackageFiles?(
     config: ExtractConfig,

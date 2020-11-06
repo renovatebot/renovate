@@ -199,14 +199,14 @@ describe('workers/branch/package-json', () => {
       expect(testContent).toBeNull();
     });
   });
-  describe('.bumpPackageVersion()', () => {
+  describe('.bumpVersion()', () => {
     const content = JSON.stringify({
       name: 'some-package',
       version: '0.0.2',
       dependencies: { chalk: '2.4.2' },
     });
     it('mirrors', () => {
-      const res = npmUpdater.bumpPackageVersion(
+      const res = npmUpdater.bumpVersion(
         content,
         '0.0.2',
         'mirror:chalk'
@@ -215,20 +215,20 @@ describe('workers/branch/package-json', () => {
       expect(res).not.toEqual(content);
     });
     it('aborts mirror', () => {
-      const res = npmUpdater.bumpPackageVersion(content, '0.0.2', 'mirror:a');
+      const res = npmUpdater.bumpVersion(content, '0.0.2', 'mirror:a');
       expect(res).toEqual(content);
     });
     it('increments', () => {
-      const res = npmUpdater.bumpPackageVersion(content, '0.0.2', 'patch');
+      const res = npmUpdater.bumpVersion(content, '0.0.2', 'patch');
       expect(res).toMatchSnapshot();
       expect(res).not.toEqual(content);
     });
     it('no ops', () => {
-      const res = npmUpdater.bumpPackageVersion(content, '0.0.1', 'patch');
+      const res = npmUpdater.bumpVersion(content, '0.0.1', 'patch');
       expect(res).toEqual(content);
     });
     it('updates', () => {
-      const res = npmUpdater.bumpPackageVersion(content, '0.0.1', 'minor');
+      const res = npmUpdater.bumpVersion(content, '0.0.1', 'minor');
       expect(res).toMatchSnapshot();
       expect(res).not.toEqual(content);
     });
@@ -239,7 +239,7 @@ describe('workers/branch/package-json', () => {
         },
       }));
       const npmUpdater1 = await import('./update');
-      const res = npmUpdater1.bumpPackageVersion(content, '0.0.2', true as any);
+      const res = npmUpdater1.bumpVersion(content, '0.0.2', true as any);
       expect(res).toEqual(content);
     });
   });

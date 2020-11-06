@@ -2,24 +2,22 @@ import equal from 'fast-deep-equal';
 import { ReleaseType, inc } from 'semver';
 import { logger } from '../../logger';
 import { matchAt, replaceAt } from '../../util/string';
-import { UpdateDependencyConfig } from '../common';
+import { UpdateDependencyConfig, Upgrade } from '../common';
 
-export function bumpPackageVersion(
+export function bumpVersion(
+  bumpVersionType: ReleaseType | string,
   content: string,
-  currentValue: string,
-  bumpVersion: ReleaseType | string
+  upgrade: Upgrade,
 ): string {
-  if (!bumpVersion) {
-    return content;
-  }
+  const currentValue = upgrade.packageFileVersion;
   logger.debug(
-    { bumpVersion, currentValue },
+    { bumpVersionType, currentValue },
     'Checking if we should bump package.json version'
   );
   let newPjVersion: string;
   try {
-    if (bumpVersion.startsWith('mirror:')) {
-      const mirrorPackage = bumpVersion.replace('mirror:', '');
+    if (bumpVersionType.startsWith('mirror:')) {
+      const mirrorPackage = bumpVersionType.replace('mirror:', '');
       const parsedContent = JSON.parse(content);
       newPjVersion =
         (parsedContent.dependencies || {})[mirrorPackage] ||
@@ -31,7 +29,7 @@ export function bumpPackageVersion(
         return content;
       }
     } else {
-      newPjVersion = inc(currentValue, bumpVersion as ReleaseType);
+      newPjVersion = inc(currentValue, bumpVersionType as ReleaseType);
     }
     logger.debug({ newPjVersion });
     const bumpedContent = content.replace(
@@ -49,7 +47,7 @@ export function bumpPackageVersion(
       {
         content,
         currentValue,
-        bumpVersion,
+        bumpVersionType,
       },
       'Failed to bumpVersion'
     );
@@ -89,11 +87,7 @@ export function updateDependency({
     const oldVersion: string = parsedContents[depType][depName];
     if (oldVersion === newValue) {
       logger.trace('Version is already updated');
-      return bumpPackageVersion(
-        fileContent,
-        upgrade.packageFileVersion,
-        upgrade.bumpVersion
-      );
+      return fileContent;
     }
     // Update the file = this is what we want
     parsedContents[depType][depName] = newValue;
@@ -180,11 +174,7 @@ export function updateDependency({
         }
       }
     }
-    return bumpPackageVersion(
-      newFileContent,
-      upgrade.packageFileVersion,
-      upgrade.bumpVersion
-    );
+    return newFileContent;
   } catch (err) {
     logger.debug({ err }, 'updateDependency error');
     return null;
