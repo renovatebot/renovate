@@ -228,7 +228,7 @@ export interface ManagerApi {
   bumpPackageVersion?(
     content: string,
     currentValue: string,
-    bumpVersion: ReleaseType | string,
+    bumpVersion: ReleaseType | string
   ): Result<string | null>;
 
   extractAllPackageFiles?(

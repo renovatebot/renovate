@@ -70,14 +70,22 @@ export async function getUpdatedPackageFiles(
             if (upgrade.rangeStrategy === 'update-lockfile') {
               logger.debug({ packageFile, depName }, 'update-lockfile add');
               if (bumpPackageVersion && upgrade.bumpVersion) {
-                res = await bumpPackageVersion(res, upgrade.packageFileVersion, upgrade.bumpVersion);
+                res = await bumpPackageVersion(
+                  res,
+                  upgrade.packageFileVersion,
+                  upgrade.bumpVersion
+                );
               }
               nonUpdatedFileContents[packageFile] = res;
             }
           } else {
             logger.debug({ packageFile, depName }, 'Contents updated');
             if (bumpPackageVersion && upgrade.bumpVersion) {
-              res = await bumpPackageVersion(res, upgrade.packageFileVersion, upgrade.bumpVersion);
+              res = await bumpPackageVersion(
+                res,
+                upgrade.packageFileVersion,
+                upgrade.bumpVersion
+              );
             }
             updatedFileContents[packageFile] = res;
           }
@@ -96,7 +104,11 @@ export async function getUpdatedPackageFiles(
         upgrade,
       });
       if (bumpPackageVersion && upgrade.bumpVersion) {
-        newContent = await bumpPackageVersion(newContent, upgrade.packageFileVersion, upgrade.bumpVersion);
+        newContent = await bumpPackageVersion(
+          newContent,
+          upgrade.packageFileVersion,
+          upgrade.bumpVersion
+        );
       }
       if (!newContent) {
         if (config.reuseExistingBranch) {

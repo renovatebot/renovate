@@ -23,7 +23,11 @@ describe('lib/manager/helmv3/update', () => {
       expect(res).not.toEqual(content);
     });
     it('returns content if bumping errors', () => {
-      const res = helmv3Updater.bumpPackageVersion(content, '0.0.2', true as any);
+      const res = helmv3Updater.bumpPackageVersion(
+        content,
+        '0.0.2',
+        true as any
+      );
       expect(res).toEqual(content);
     });
   });
