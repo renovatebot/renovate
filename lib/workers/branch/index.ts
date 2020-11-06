@@ -476,6 +476,7 @@ export async function processBranch(
       const mergeStatus = await tryBranchAutomerge(config);
       logger.debug(`mergeStatus=${mergeStatus}`);
       if (mergeStatus === 'automerged') {
+        await deleteBranch(config.branchName);
         logger.debug('Branch is automerged - returning');
         return ProcessBranchResult.Automerged;
       }
@@ -657,6 +658,7 @@ export async function processBranch(
         }
         const prAutomerged = await checkAutoMerge(pr, config);
         if (prAutomerged) {
+          await deleteBranch(config.branchName);
           return ProcessBranchResult.Automerged;
         }
       }
