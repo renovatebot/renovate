@@ -2,22 +2,21 @@ import equal from 'fast-deep-equal';
 import { ReleaseType, inc } from 'semver';
 import { logger } from '../../logger';
 import { matchAt, replaceAt } from '../../util/string';
-import { UpdateDependencyConfig, BumpVersionConfig } from '../common';
+import { UpdateDependencyConfig } from '../common';
 
-export function bumpVersion(
-  config: BumpVersionConfig,
+export function bumpPackageVersion(
+  content: string,
+  currentValue: string,
+  bumpVersion: ReleaseType | string
 ): string {
-  const bumpVersionType = config.bumpVersionType;
-  const content = config.content;
-  const currentValue = upgrade.packageFileVersion;
   logger.debug(
-    { bumpVersionType, currentValue },
+    { bumpVersion, currentValue },
     'Checking if we should bump package.json version'
   );
   let newPjVersion: string;
   try {
-    if (bumpVersionType.startsWith('mirror:')) {
-      const mirrorPackage = bumpVersionType.replace('mirror:', '');
+    if (bumpVersion.startsWith('mirror:')) {
+      const mirrorPackage = bumpVersion.replace('mirror:', '');
       const parsedContent = JSON.parse(content);
       newPjVersion =
         (parsedContent.dependencies || {})[mirrorPackage] ||
@@ -29,7 +28,7 @@ export function bumpVersion(
         return content;
       }
     } else {
-      newPjVersion = inc(currentValue, bumpVersionType as ReleaseType);
+      newPjVersion = inc(currentValue, bumpVersion as ReleaseType);
     }
     logger.debug({ newPjVersion });
     const bumpedContent = content.replace(
@@ -47,7 +46,7 @@ export function bumpVersion(
       {
         content,
         currentValue,
-        bumpVersionType,
+        bumpVersion,
       },
       'Failed to bumpVersion'
     );

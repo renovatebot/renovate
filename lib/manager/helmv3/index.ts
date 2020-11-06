@@ -1,6 +1,6 @@
 export { updateArtifacts } from './artifacts';
 export { extractPackageFile } from './extract';
-export { bumpVersion } from './update';
+export { bumpPackageVersion } from './update';
 
 export const supportsLockFileMaintenance = true;
 
