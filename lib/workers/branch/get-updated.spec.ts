@@ -168,28 +168,6 @@ describe('workers/branch/get-updated', () => {
       ]);
       const res = await getUpdatedPackageFiles(config);
       expect(res).toMatchSnapshot();
-      expect(res.updatedPackageFiles).toHaveLength(1);
-    });
-    it(' does not update artifacts on update-lockfile if packageFile already updated', async () => {
-      config.upgrades.push({
-        manager: 'composer',
-        branchName: undefined,
-        rangeStrategy: 'update-lockfile',
-        currentValue: '^1.0.0',
-        newValue: '^2.0.0',
-      });
-      autoReplace.doAutoReplace.mockResolvedValueOnce('existing content');
-      composer.updateArtifacts.mockResolvedValueOnce([
-        {
-          file: {
-            name: 'composer.lock',
-            contents: 'some contents',
-          },
-        },
-      ]);
-      const res = await getUpdatedPackageFiles(config);
-      expect(res).toMatchSnapshot();
-      expect(res.updatedPackageFiles).toHaveLength(0);
     });
   });
 });
