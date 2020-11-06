@@ -4,6 +4,7 @@ import { id as githubTagsId } from '../../datasource/github-tags';
 import { id as gitlabTagsId } from '../../datasource/gitlab-tags';
 import { logger } from '../../logger';
 import { SkipReason } from '../../types';
+import { regEx } from '../../util/regex';
 import { PackageDependency, PackageFile } from '../common';
 
 import {
@@ -50,9 +51,9 @@ function extractDependency(
 
   const urlMatchers = [
     // This splits "http://github.com/user/repo" -> "http://github" ".com" "user/repo
-    /^(?<hostNamePrefix>.*)(?<domain>\.\w+)\/(?<depName>\S*)*/,
+    regEx('^(?<hostNamePrefix>.*)(?<domain>\\.\\w+)\\/(?<depName>\\S*)*'),
     // This splits "git@hostNamePrefix.com:user/repo" -> "hostNamePrefix" ".com" "user/repo
-    /^git@(?<hostNamePrefix>.*)(?<domain>\.\w+):(?<depName>\S*)*/,
+    regEx('^git@(?<hostNamePrefix>.*)(?<domain>\\.\\w+):(?<depName>\\S*)*'),
   ];
   let matched = false;
   for (const urlMatcher of urlMatchers) {
