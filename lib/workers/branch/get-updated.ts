@@ -56,7 +56,7 @@ export async function getUpdatedPackageFiles(
           reuseExistingBranch: false,
         });
       }
-      const bumpVersion = get(manager, 'bumpVersion');
+      const bumpPackageVersion = get(manager, 'bumpPackageVersion');
       const updateDependency = get(manager, 'updateDependency');
       if (!updateDependency) {
         let res = await doAutoReplace(
@@ -69,23 +69,15 @@ export async function getUpdatedPackageFiles(
             logger.debug({ packageFile, depName }, 'No content changed');
             if (upgrade.rangeStrategy === 'update-lockfile') {
               logger.debug({ packageFile, depName }, 'update-lockfile add');
-              if (bumpVersion && upgrade.bumpVersion) {
-                res = await bumpVersion({
-                  bumpVersionType: upgrade.bumpVersion,
-                  content: res,
-                  upgrade,
-                });
+              if (bumpPackageVersion && upgrade.bumpVersion) {
+                res = await bumpPackageVersion(res, upgrade.packageFileVersion, upgrade.bumpVersion);
               }
               nonUpdatedFileContents[packageFile] = res;
             }
           } else {
             logger.debug({ packageFile, depName }, 'Contents updated');
-            if (bumpVersion && upgrade.bumpVersion) {
-              res = await bumpVersion({
-                bumpVersionType: upgrade.bumpVersion,
-                content: res,
-                currentValue: upgrade.packageFileVersion,
-              });
+            if (bumpPackageVersion && upgrade.bumpVersion) {
+              res = await bumpPackageVersion(res, upgrade.packageFileVersion, upgrade.bumpVersion);
             }
             updatedFileContents[packageFile] = res;
           }
@@ -103,12 +95,8 @@ export async function getUpdatedPackageFiles(
         fileContent: existingContent,
         upgrade,
       });
-      if (bumpVersion && upgrade.bumpVersion) {
-        newContent = await bumpVersion({
-          bumpVersionType: upgrade.bumpVersion,
-          content: newContent,
-          upgrade,
-        });
+      if (bumpPackageVersion && upgrade.bumpVersion) {
+        newContent = await bumpPackageVersion(newContent, upgrade.packageFileVersion, upgrade.bumpVersion);
       }
       if (!newContent) {
         if (config.reuseExistingBranch) {
