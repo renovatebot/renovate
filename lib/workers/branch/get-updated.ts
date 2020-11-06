@@ -84,7 +84,7 @@ export async function getUpdatedPackageFiles(
               res = await bumpVersion({
                 bumpVersionType: upgrade.bumpVersion,
                 content: res,
-                upgrade,
+                currentValue: upgrade.packageFileVersion,
               });
             }
             updatedFileContents[packageFile] = res;

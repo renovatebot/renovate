@@ -221,9 +221,9 @@ export interface UpdateDependencyConfig {
 }
 
 export interface BumpVersionConfig {
-  content: string,
   bumpVersionType: ReleaseType | string,
-  upgrade: Upgrade,
+  content: string,
+  currentValue: string,
 }
 
 export interface ManagerApi {

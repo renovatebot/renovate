@@ -2,13 +2,13 @@ import equal from 'fast-deep-equal';
 import { ReleaseType, inc } from 'semver';
 import { logger } from '../../logger';
 import { matchAt, replaceAt } from '../../util/string';
-import { UpdateDependencyConfig, Upgrade } from '../common';
+import { UpdateDependencyConfig, BumpVersionConfig } from '../common';
 
 export function bumpVersion(
-  bumpVersionType: ReleaseType | string,
-  content: string,
-  upgrade: Upgrade,
+  config: BumpVersionConfig,
 ): string {
+  const bumpVersionType = config.bumpVersionType;
+  const content = config.content;
   const currentValue = upgrade.packageFileVersion;
   logger.debug(
     { bumpVersionType, currentValue },

@@ -1,15 +1,15 @@
 import { ReleaseType, inc } from 'semver';
 import { logger } from '../../logger';
-import { Upgrade } from '../common';
+import { BumpVersionConfig } from '../common';
 
 export function bumpVersion(
-  content: string,
-  bumpVersionType: ReleaseType | string,
-  upgrade: Upgrade,
+  config: BumpVersionConfig,
 ): string {
-  const currentValue = upgrade.packageFileVersion;
+  const bumpVersionType = config.bumpVersionType;
+  const content = config.content;
+  const currentValue = config.currentValue;
   logger.debug(
-    { bumpVersion, currentValue },
+    { bumpVersionType, currentValue },
     'Checking if we should bump Chart.yaml version'
   );
   let newChartVersion: string;
@@ -17,7 +17,7 @@ export function bumpVersion(
     newChartVersion = inc(currentValue, bumpVersionType as ReleaseType);
     logger.debug({ newChartVersion });
     const bumpedContent = content.replace(
-      /^(version:\s*")[^"]*$/,
+      /^(version:\s*).*$/m,
       `$1${newChartVersion}`
     );
     if (bumpedContent === content) {
