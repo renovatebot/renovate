@@ -158,30 +158,31 @@ async function getTags({
   return dependency;
 }
 
-function normalizeVersion(version: string): string {
-  return version?.replace(/^v/, '');
-}
-
 export async function getReleases(
   config: GetReleasesConfig
 ): Promise<ReleaseResult | null> {
   const tagsResult = await getTags(config);
 
   try {
-    // Fetch additional data from releases endpoint when possible
-    const releasesResult = await githubReleases.getReleases(config);
-    const releaseByVersion = {};
-    releasesResult?.releases?.forEach((release) => {
-      const key = normalizeVersion(release.version);
-      const value = { ...release };
-      delete value.version;
-      releaseByVersion[key] = value;
-    });
+    if (tagsResult?.releases) {
+      // Fetch additional data from releases endpoint when possible
+      const releasesResult = await githubReleases.getReleases(config);
+      const releaseByVersion = {};
+      releasesResult?.releases?.forEach((release) => {
+        const key = release.version;
+        const value = { ...release };
+        delete value.version;
+        releaseByVersion[key] = value;
+      });
 
-    tagsResult?.releases?.forEach((tag) => {
-      const release = releaseByVersion[normalizeVersion(tag?.version)];
-      Object.assign(tag, release);
-    });
+      const mergedReleases = [];
+      tagsResult.releases.forEach((tag) => {
+        const release = releaseByVersion[tag.version];
+        mergedReleases.push({ ...release, ...tag });
+      });
+
+      tagsResult.releases = mergedReleases;
+    }
   } catch (e) {
     // no-op
   }
