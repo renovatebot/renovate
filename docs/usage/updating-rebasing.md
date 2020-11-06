@@ -27,8 +27,8 @@ You can disable this functionality by configuring `"rebaseWhen": "never"` (not r
 
 There are two cases where Renovate will rebase its branches off the base branch every time they are out of date:
 
-1.  If you manually configure `"rebaseWhen": "behind-base-branch"`.
-2.  If you have enabled "Require branches to be up to date before merging" on GitHub protected branches settings, and `rebaseWhen` has default value `"auto"`.
+1.  If you manually configure `"rebaseWhen": "behind-base-branch"`
+2.  If you have enabled "Require branches to be up to date before merging" on GitHub protected branches settings, and `rebaseWhen` has default value `"auto"`
 
 In that case Renovate PRs will be continuously rebased off the repository's base branch whenever necessary, even if the PRs are not conflicted.
 
@@ -50,4 +50,4 @@ Therefore it is useful in situations such as:
 
 - If a branch is stale but you don't have `rebaseWhen=behind-base-branch` enabled
 - If a branch has been edited and you wish to discard the edits and have Renovate create it again
-- If a branch was created with an error (e.g. lockfile generation) and you wish to have it retried.
+- If a branch was created with an error (e.g. lockfile generation) and you wish to have it retried

@@ -18,10 +18,10 @@ It supports both pinned versions as well as ranges. Legacy versions (`===` prefi
 
 ## How It Works
 
-1.  Renovate will search each repository for any package files it finds.
+1.  Renovate will search each repository for any package files it finds
 2.  Existing dependencies will be extracted from the file(s)
 3.  Renovate will look up the latest version on [PyPI](https://pypi.org/) to determine if any upgrades are available
-4.  If the source package includes a GitHub URL as its source, and has either a "changelog" file or uses GitHub releases, then Release Notes for each version will be embedded in the generated PR.
+4.  If the source package includes a GitHub URL as its source, and has either a "changelog" file or uses GitHub releases, then Release Notes for each version will be embedded in the generated PR
 
 ## Enabling Beta
 
