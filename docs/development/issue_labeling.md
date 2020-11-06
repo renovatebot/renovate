@@ -121,6 +121,7 @@ If there are multiple managers affected, add labels for all of them.
     datasource:git-submodule
     datasource:git-tags
     datasource:github-tags
+    datasource:go
     datasource:jenkins
     datasource:maven
     datasource:nuget
