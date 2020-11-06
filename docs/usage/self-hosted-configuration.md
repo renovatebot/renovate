@@ -24,21 +24,29 @@ module.export = {
 
 In the `renovate.json` file, define the commands and files to be included in the final commit.
 
+The command to install dependencies is necessary because, by default, the installation of dependencies is skipped (see the `skipInstalls` admin option)
+
 ```json
 {
-  "postUpgradeTasks": {
-    "commands": [
-      "npm ci --ignore-scripts",
-      "npx ng update {{{depName}}} --from={{{fromVersion}}} --to={{{toVersion}}} --migrateOnly --allowDirty --force"
-    ],
-    "fileFilters": ["**/**"]
-  }
+  "packageRules": [
+    {
+      "packageNames": ["@angular/core"],
+      "postUpgradeTasks": {
+        "commands": [
+          "npm ci --ignore-scripts",
+          "npx ng update {{{depName}}} --from={{{fromVersion}}} --to={{{toVersion}}} --migrateOnly --allowDirty --force"
+        ],
+        "fileFilters": ["**/**"]
+      }
+    }
+  ]
 }
 ```
 
 With this configuration, the executable command for `@angular/core` will look like this
 
 ```bash
+npm ci --ignore-scripts
 npx ng update @angular/core --from=9.0.0 --to=10.0.0 --migrateOnly --allowDirty --force
 ```
 
