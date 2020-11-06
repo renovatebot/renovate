@@ -18,8 +18,8 @@ Renovate can update `build.gradle`/`build.gradle.kts` files in the root of the r
 
 Renovate does not support:
 
-- Projects with neither `build.gradle` nor `build.gradle.kts` in the root of the repository.
-- Android projects that require extra configuration to run (e.g. setting the Android SDK).
+- Projects with neither `build.gradle` nor `build.gradle.kts` in the root of the repository
+- Android projects that require extra configuration to run (e.g. setting the Android SDK)
 - Gradle versions prior to version 5.0.
 
 ### How It Works

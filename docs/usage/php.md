@@ -9,11 +9,11 @@ Renovate supports upgrading dependencies in PHP's `composer.json` files and thei
 
 ## How It Works
 
-1.  Renovate will search each repository for any `composer.json` files.
+1.  Renovate will search each repository for any `composer.json` files
 2.  Existing dependencies will be extracted from the relevant sections of the JSON
 3.  Renovate will resolve the dependency on Packagist or elsewhere if configured, and filter for semver versions
 4.  A PR will be created with `composer.json` and `composer.lock` updated in the same commit
-5.  If the source repository has either a "changelog" file or uses GitHub releases, then Release Notes for each version will be embedded in the generated PR.
+5.  If the source repository has either a "changelog" file or uses GitHub releases, then Release Notes for each version will be embedded in the generated PR
 
 ## Enabling
 
