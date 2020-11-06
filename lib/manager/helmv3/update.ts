@@ -13,6 +13,9 @@ export function bumpPackageVersion(
   let newChartVersion: string;
   try {
     newChartVersion = inc(currentValue, bumpVersion as ReleaseType);
+    if (!newChartVersion) {
+      throw new Error('semver inc failed');
+    }
     logger.debug({ newChartVersion });
     const bumpedContent = content.replace(
       /^(version:\s*).*$/m,
