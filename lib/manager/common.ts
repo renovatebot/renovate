@@ -1,5 +1,10 @@
 import { ReleaseType } from 'semver';
-import { GlobalConfig, UpdateType, ValidationMessage } from '../config/common';
+import {
+  GlobalConfig,
+  MatchStringsStrategy,
+  UpdateType,
+  ValidationMessage,
+} from '../config/common';
 import { RangeStrategy, SkipReason } from '../types';
 import { File } from '../util/git';
 
@@ -29,6 +34,7 @@ export interface ExtractConfig extends ManagerConfig {
 
 export interface CustomExtractConfig extends ExtractConfig {
   matchStrings: string[];
+  matchStringsStrategy?: MatchStringsStrategy;
   depNameTemplate?: string;
   lookupNameTemplate?: string;
   datasourceTemplate?: string;

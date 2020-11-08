@@ -205,6 +205,8 @@ export type UpdateType =
   | 'rollback'
   | 'bump';
 
+export type MatchStringsStrategy = 'flat' | 'recursive' | 'combination';
+
 // TODO: Proper typings
 export interface PackageRule
   extends RenovateSharedConfig,
