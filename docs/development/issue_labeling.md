@@ -148,6 +148,7 @@ Use a `datasource:` label when it is applicable specifically to particular datas
 </details>
 
 A worker is the "core" logic of Renovate.
+Use these labels to differentiate between the different internal Renovate working stages.
 
 ### New stuff
 
