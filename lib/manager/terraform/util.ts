@@ -55,9 +55,6 @@ export function getTerraformDependencyType(
     case 'module': {
       return TerraformDependencyTypes.module;
     }
-    case 'terraform': {
-      return TerraformDependencyTypes.module;
-    }
     case 'provider': {
       return TerraformDependencyTypes.provider;
     }

@@ -7,11 +7,6 @@ describe('lib/manager/terraform/extract', () => {
         TerraformDependencyTypes.module
       );
     });
-    it('returns TerraformDependencyTypes.terraform', () => {
-      expect(getTerraformDependencyType('terraform')).toBe(
-        TerraformDependencyTypes.module
-      );
-    });
     it('returns TerraformDependencyTypes.provider', () => {
       expect(getTerraformDependencyType('provider')).toBe(
         TerraformDependencyTypes.provider

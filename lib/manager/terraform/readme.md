@@ -1,20 +1,12 @@
 Currently Terraform support is limited to Terraform registry sources and github sources that include semver refs, e.g. like `github.com/hashicorp/example?ref=v1.0.0`.
 
-Terraform manager also supports updating [Terragrunt](https://terragrunt.gruntwork.io/) config files.
-
-Fixed Terraform or Terragrunt versions like the following will receive a PR whenever there is a newer version available:
+Fixed versions like the following will receive a PR whenever there is a newer version available:
 
 ```
 module "consul" {
   source  = "hashicorp/consul/aws"
   version = "0.0.5"
   servers = 3
-}
-```
-
-```hcl
-terraform {
-  source = "github.com/hashicorp/example?ref=v1.0.0"
 }
 ```
 
