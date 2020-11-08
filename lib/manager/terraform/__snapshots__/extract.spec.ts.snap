@@ -391,7 +391,7 @@ Object {
 }
 `;
 
-exports[`lib/manager/terraform/extract extractPackageFile() extracts terragrunt sources 1`] = `
+exports[`lib/manager/terraform/extract extractPackageFile() parses terragrunt sources 1`] = `
 Object {
   "deps": Array [
     Object {

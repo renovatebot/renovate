@@ -33,7 +33,7 @@ describe('lib/manager/terraform/extract', () => {
       expect(res.deps).toHaveLength(6);
       expect(res.deps.filter((dep) => dep.skipReason)).toHaveLength(2);
     });
-    it('extracts terragrunt sources', () => {
+    it('parses terragrunt sources', () => {
       const res = extractPackageFile(tg1);
       expect(res).toMatchSnapshot();
       expect(res.deps).toHaveLength(21);
