@@ -117,7 +117,6 @@ If there are multiple managers affected, add labels for all of them.
     <summary>Datasource</summary>
 
     datasource:docker
-    datasource:git-labels
     datasource:git-submodule
     datasource:git-tags
     datasource:github-tags
