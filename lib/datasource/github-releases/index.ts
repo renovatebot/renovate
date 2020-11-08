@@ -1,3 +1,4 @@
+import URL from 'url';
 import * as packageCache from '../../util/cache/package';
 import { GithubHttp } from '../../util/http/github';
 import { GetReleasesConfig, ReleaseResult } from '../common';
@@ -26,6 +27,7 @@ type GithubRelease = {
  */
 export async function getReleases({
   lookupName: repo,
+  registryUrl: depHost,
 }: GetReleasesConfig): Promise<ReleaseResult | null> {
   const cachedResult = await packageCache.get<ReleaseResult>(
     cacheNamespace,
@@ -35,13 +37,17 @@ export async function getReleases({
   if (cachedResult) {
     return cachedResult;
   }
-  const url = `https://api.github.com/repos/${repo}/releases?per_page=100`;
+  const sourceUrlBase = depHost ?? `https://github.com/`;
+  const apiBaseUrl = depHost
+    ? URL.resolve(depHost, 'api/v3/')
+    : `https://api.github.com/`;
+  const url = URL.resolve(apiBaseUrl, `repos/${repo}/releases?per_page=100`);
   const res = await http.getJson<GithubRelease[]>(url, {
     paginate: true,
   });
   const githubReleases = res.body;
   const dependency: ReleaseResult = {
-    sourceUrl: 'https://github.com/' + repo,
+    sourceUrl: URL.resolve(sourceUrlBase, repo),
     releases: null,
   };
   dependency.releases = githubReleases.map(
