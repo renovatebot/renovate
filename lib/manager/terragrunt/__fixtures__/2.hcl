@@ -1,3 +1,28 @@
+#real
+terraform {
+  extra_arguments "common_vars" {
+    commands = ["plan", "apply"]
+
+    arguments = [
+      "-var-file=../../common.tfvars",
+      "-var-file=../region.tfvars"
+    ]
+  }
+
+  before_hook "before_hook" {
+    commands     = ["apply", "plan"]
+    execute      = ["echo", "Running Terraform"]
+  }
+
+  source = "github.com/myuser/myrepo//folder/modules/moduleone?ref=v0.0.9"
+
+  after_hook "after_hook" {
+    commands     = ["apply", "plan"]
+    execute      = ["echo", "Finished running Terraform"]
+    run_on_error = true
+  }
+}
+
 #foo
 terraform {
   source = "github.com/hashicorp/example?ref=v1.0.0"

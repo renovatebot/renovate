@@ -1,6 +1,6 @@
 import { PackageDependency } from '../common';
 
-export const keyValueExtractionRegex = /^\s*(?<key>[^\s]+)\s+=\s+"(?<value>[^"]+)"\s*$/;
+export const keyValueExtractionRegex = /^\s*source\s+=\s+"(?<value>[^"]+)"\s*$/;
 
 export interface ExtractionResult {
   lineNumber: number;

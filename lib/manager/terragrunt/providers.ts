@@ -7,12 +7,28 @@ import {
 
 export const sourceExtractionRegex = /^(?:(?<hostname>(?:[a-zA-Z0-9]+\.+)+[a-zA-Z0-9]+)\/)?(?:(?<namespace>[^/]+)\/)?(?<type>[^/]+)/;
 
+function extractBracesContent(content): number {
+  const stack = [];
+  let i = 0;
+  for (i; i < content.length; i += 1) {
+    if (content[i] === '{') {
+      stack.push(content[i]);
+    } else if (content[i] === '}') {
+      stack.pop();
+      if (stack.length === 0) {
+        break;
+      }
+    }
+  }
+  return i;
+}
+
 export function extractTerragruntProvider(
   startingLine: number,
   lines: string[],
   moduleName: string
 ): ExtractionResult {
-  let lineNumber = startingLine;
+  const lineNumber = startingLine;
   let line: string;
   const deps: PackageDependency[] = [];
   const dep: PackageDependency = {
@@ -21,17 +37,20 @@ export function extractTerragruntProvider(
       terragruntDependencyType: TerragruntDependencyTypes.terragrunt,
     },
   };
-  do {
-    lineNumber += 1;
-    line = lines[lineNumber];
+  const teraformContent = lines
+    .slice(lineNumber)
+    .join('\n')
+    .substring(0, extractBracesContent(lines.slice(lineNumber).join('\n')))
+    .split('\n');
+
+  for (let lineNo = 0; lineNo < teraformContent.length; lineNo += 1) {
+    line = teraformContent[lineNo];
     const kvMatch = keyValueExtractionRegex.exec(line);
     if (kvMatch) {
-      if (kvMatch.groups.key === 'source') {
-        dep.managerData.source = kvMatch.groups.value;
-        dep.managerData.sourceLine = lineNumber;
-      }
+      dep.managerData.source = kvMatch.groups.value;
+      dep.managerData.sourceLine = lineNumber + lineNo;
     }
-  } while (line.trim() !== '}');
+  }
   deps.push(dep);
   return { lineNumber, dependencies: deps };
 }

@@ -15,7 +15,7 @@ describe('lib/manager/terragrunt/extract', () => {
     it('extracts terragrunt sources', () => {
       const res = extractPackageFile(tg1);
       expect(res).toMatchSnapshot();
-      expect(res.deps).toHaveLength(29);
+      expect(res.deps).toHaveLength(30);
       expect(res.deps.filter((dep) => dep.skipReason)).toHaveLength(5);
     });
     it('returns null if only local terragrunt deps', () => {

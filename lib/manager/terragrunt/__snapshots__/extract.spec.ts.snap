@@ -4,6 +4,14 @@ exports[`lib/manager/terragrunt/extract extractPackageFile() extracts terragrunt
 Object {
   "deps": Array [
     Object {
+      "currentValue": "v0.0.9",
+      "datasource": "github-tags",
+      "depName": "github.com/myuser/myrepo",
+      "depNameShort": "myuser/myrepo",
+      "depType": "github",
+      "lookupName": "myuser/myrepo",
+    },
+    Object {
       "currentValue": "v1.0.0",
       "datasource": "github-tags",
       "depName": "github.com/hashicorp/example",
