@@ -57,7 +57,7 @@ type ConfigRegexPredicate = (string) => boolean;
 export function configRegexPredicate(input: string): ConfigRegexPredicate {
   const configRegex = parseConfigRegex(input);
   if (configRegex) {
-    const isPositive = input.startsWith('!');
+    const isPositive = !input.startsWith('!');
     return (x: string): boolean => {
       const res = configRegex.test(x);
       return isPositive ? res : !res;
