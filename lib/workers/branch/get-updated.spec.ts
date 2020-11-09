@@ -179,8 +179,7 @@ describe('workers/branch/get-updated', () => {
         manager: 'npm',
       });
       npm.updateDependency.mockReturnValue('old version');
-      npm.bumpPackageVersion = jest.fn();
-      npm.bumpPackageVersion.mockResolvedValueOnce('new version');
+      npm.bumpPackageVersion.mockReturnValue('new version');
       const res = await getUpdatedPackageFiles(config);
       expect(res).toMatchSnapshot();
     });
@@ -191,8 +190,7 @@ describe('workers/branch/get-updated', () => {
         manager: 'helmv3',
       });
       autoReplace.doAutoReplace.mockResolvedValueOnce('version: 0.0.1');
-      helmv3.bumpPackageVersion = jest.fn();
-      helmv3.bumpPackageVersion.mockResolvedValueOnce('version: 0.0.2');
+      helmv3.bumpPackageVersion.mockReturnValue('version: 0.0.2');
       const res = await getUpdatedPackageFiles(config);
       expect(res).toMatchSnapshot();
     });
