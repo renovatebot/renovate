@@ -31,9 +31,9 @@ export function escapeRegExp(input: string): string {
   return input.replace(/[.*+\-?^${}()|[\]\\]/g, '\\$&'); // $& means the whole matched string
 }
 
-const posConfigValStart = /^\s*\//;
-const negConfigValStart = /^\s*!\s*\//;
-const configValEnd = /\/\s*$/;
+const posConfigValStart = /^\//;
+const negConfigValStart = /^!\//;
+const configValEnd = /\/$/;
 
 export function isConfigRegex(input: unknown): input is string {
   return (
