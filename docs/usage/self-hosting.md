@@ -119,7 +119,7 @@ spec:
           containers:
             - image: renovate/renovate:23.22.1
               name: renovate-bot
-              env: # For illustration purposes, please user secrets.
+              env: # For illustration purposes, please use secrets.
                 - name: RENOVATE_PLATFORM
                   value: 'github'
                 - name: RENOVATE_TOKEN
