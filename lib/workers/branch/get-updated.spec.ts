@@ -172,13 +172,26 @@ describe('workers/branch/get-updated', () => {
       const res = await getUpdatedPackageFiles(config);
       expect(res).toMatchSnapshot();
     });
+    it('bumps versions in updateDependency managers', async () => {
+      config.upgrades.push({
+        branchName: undefined,
+        bumpVersion: 'true',
+        manager: 'npm',
+      });
+      npm.updateDependency.mockReturnValue('old version');
+      npm.bumpPackageVersion = jest.fn();
+      npm.bumpPackageVersion.mockResolvedValueOnce('new version');
+      const res = await getUpdatedPackageFiles(config);
+      expect(res).toMatchSnapshot();
+    });
     it('bumps versions in autoReplace managers', async () => {
       config.upgrades.push({
         branchName: undefined,
-        bumpVersion: true,
+        bumpVersion: 'true',
         manager: 'helmv3',
       });
       autoReplace.doAutoReplace.mockResolvedValueOnce('version: 0.0.1');
+      helmv3.bumpPackageVersion = jest.fn();
       helmv3.bumpPackageVersion.mockResolvedValueOnce('version: 0.0.2');
       const res = await getUpdatedPackageFiles(config);
       expect(res).toMatchSnapshot();

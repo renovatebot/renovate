@@ -14,6 +14,20 @@ Object {
 }
 `;
 
+exports[`workers/branch/get-updated getUpdatedPackageFiles() bumps versions in updateDependency managers 1`] = `
+Object {
+  "artifactErrors": Array [],
+  "reuseExistingBranch": undefined,
+  "updatedArtifacts": Array [],
+  "updatedPackageFiles": Array [
+    Object {
+      "contents": "new version",
+      "name": "undefined",
+    },
+  ],
+}
+`;
+
 exports[`workers/branch/get-updated getUpdatedPackageFiles() handles autoreplace base updated 1`] = `
 Object {
   "artifactErrors": Array [],
