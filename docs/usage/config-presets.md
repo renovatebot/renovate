@@ -180,7 +180,7 @@ In such cases Renovate will simply look for a renovate.json file in the default 
 To host your preset config on GitLab:
 
 - Create a new repository on GitLab. Normally you'd call it renovate-config but it can be named anything
-- Add a renovate.json to this new repo containing the preset config. No other files are necessary.
+- Add a renovate.json to this new repo containing the preset config. No other files are necessary
 - In other repos, reference it in an extends array like "gitlab>owner/name", e.g. "gitlab>rarkins/renovate-config"
 
 ## Local presets

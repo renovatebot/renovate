@@ -16,7 +16,7 @@ Configuration is supported via any or all of the below:
   - `.gitlab/renovate.json5`
   - `.renovaterc.json`
   - `.renovaterc`
-- `renovate` field of `package.json` in target repository
+  - `renovate` field of `package.json` in target repository
 
 The above are listed in **_reverse order_** of preference. e.g. CLI values will override environment values if they conflict.
 

@@ -119,7 +119,7 @@ There's four ways to make it work:
 - Change renovate-bot member permission from developer to **maintainer**
   ![Allow renovate-bot merge permission](assets/images/change-renovate-bot-to-maintainer.png)
 
-- Allow **renovate-bot** to merge into master.
+- Allow **renovate-bot** to merge into master
   ![Allow renovate-bot merge permission](assets/images/allow-renovate-bot-to-merge.png)
 
 - Change master branch from protected branch to **unprotected** branch

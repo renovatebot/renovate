@@ -97,6 +97,7 @@ const repoGroups = {
     'https://github.com/zeit/next.js', // old repo
     'https://github.com/vercel/next.js',
   ],
+  nivo: 'https://github.com/plouc/nivo',
   ngrx: 'https://github.com/ngrx/',
   nrwl: 'https://github.com/nrwl/',
   nuxtjs: 'https://github.com/nuxt/nuxt.js',

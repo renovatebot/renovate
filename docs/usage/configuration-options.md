@@ -1487,14 +1487,14 @@ Behaviour:
 - `bump` = e.g. bump the range even if the new version satisfies the existing range, e.g. `^1.0.0` -> `^1.1.0`
 - `replace` = Replace the range with a newer one if the new version falls outside it, e.g. `^1.0.0` -> `^2.0.0`
 - `widen` = Widen the range with newer one, e.g. `^1.0.0` -> `^1.0.0 || ^2.0.0`
-- `update-lockfile` = Update the lock file when in-range updates are available, otherwise `replace` for updates out of range. Works for `composer`, `npm` and `yarn` so far.
+- `update-lockfile` = Update the lock file when in-range updates are available, otherwise `replace` for updates out of range. Works for `composer`, `npm` and `yarn` so far
 
 Renovate's `"auto"` strategy works like this for npm:
 
 1.  Always pin `devDependencies`
 2.  Pin `dependencies` if we detect that it's an app and not a library
 3.  Widen `peerDependencies`
-4.  If an existing range already ends with an "or" operator - e.g. `"^1.0.0 || ^2.0.0"` - then Renovate will widen it, e.g. making it into `"^1.0.0 || ^2.0.0 || ^3.0.0"`.
+4.  If an existing range already ends with an "or" operator - e.g. `"^1.0.0 || ^2.0.0"` - then Renovate will widen it, e.g. making it into `"^1.0.0 || ^2.0.0 || ^3.0.0"`
 5.  Otherwise, replace the range. e.g. `"^2.0.0"` would be replaced by `"^3.0.0"`
 
 **bump**
@@ -1516,10 +1516,10 @@ By default this label is `"rebase"` however you can configure it to anything you
 
 Possible values and meanings:
 
-- `auto`: Renovate will autodetect the best setting. Defaults to `conflicted` unless the repository has a setting requiring PRs to be up to date with the base branch.
-- `never`: Renovate will never rebase the branch.
-- `conflicted`: Renovate will rebase only if the branch is conflicted.
-- `behind-base-branch`: Renovate will rebase whenever the branch falls 1 or more commit behind its base branch.
+- `auto`: Renovate will autodetect the best setting. Defaults to `conflicted` unless the repository has a setting requiring PRs to be up to date with the base branch
+- `never`: Renovate will never rebase the branch
+- `conflicted`: Renovate will rebase only if the branch is conflicted
+- `behind-base-branch`: Renovate will rebase whenever the branch falls 1 or more commit behind its base branch
 
 Note: this field replaces the previous fields of `rebaseConflictedPrs` and `rebaseStalePrs`.
 
