@@ -1175,6 +1175,34 @@ Use this field to restrict rules to a particular datasource. e.g.
 
 `matchCurrentVersion` can be an exact semver version or a semver range.
 
+This field also supports Regular Expressions which should begin and end with `/`.
+For example, the following will enforce that only `1.*` versions:
+
+```json
+{
+  "packageRules": [
+    {
+      "packagePatterns": ["io.github.resilience4j"],
+      "matchCurrentVersion": "/^1\\./"
+    }
+  ]
+}
+```
+
+This field also supports a special negated regex syntax for ignoring certain versions.
+Use the syntax `!/ /` like the following:
+
+```json
+{
+  "packageRules": [
+    {
+      "packagePatterns": ["io.github.resilience4j"],
+      "allowedVersions": "!/^0\\./"
+    }
+  ]
+}
+```
+
 ### packageNames
 
 Use this field if you want to have one or more exact name matches in your package rule.
