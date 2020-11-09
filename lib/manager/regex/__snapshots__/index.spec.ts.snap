@@ -142,6 +142,7 @@ Object {
     "prometheus_image:\\\\s*\\"(?<depName>.*)\\"\\\\s*\\\\/\\\\/",
     "prometheus_version:\\\\s*\\"(?<currentValue>.*)\\"\\\\s*\\\\/\\\\/",
   ],
+  "matchStringsStrategy": "combination",
 }
 `;
 
@@ -159,5 +160,79 @@ Object {
     ".*_image:\\\\s*\\"(?<depName>.*)\\"\\\\s*\\\\/\\\\/",
     ".*_version:\\\\s*\\"(?<currentValue>.*)\\"\\\\s*\\\\/\\\\/",
   ],
+  "matchStringsStrategy": "combination",
+}
+`;
+
+exports[`manager/regex/index extracts with recursive strategy and fail because of not sufficient regexes 1`] = `null`;
+
+exports[`manager/regex/index extracts with recursive strategy and fail because there is no match 1`] = `null`;
+
+exports[`manager/regex/index extracts with recursive strategy and multiple layers  1`] = `
+Object {
+  "deps": Array [
+    Object {
+      "currentValue": "1.6.1",
+      "datasource": "docker",
+      "depName": "grafana/loki",
+      "replaceString": "\\"name\\": \\"grafana/loki\\",
+      \\"type\\": \\"docker\\",
+      \\"value\\": \\"1.6.1\\"",
+    },
+  ],
+  "matchStrings": Array [
+    "\\"backup\\":\\\\s*{[^}]*}",
+    "\\"test\\":\\\\s*\\\\{[^}]*}",
+    "\\"name\\":\\\\s*\\"(?<depName>.*)\\"[^\\"]*\\"type\\":\\\\s*\\"(?<datasource>.*)\\"[^\\"]*\\"value\\":\\\\s*\\"(?<currentValue>.*)\\"",
+  ],
+  "matchStringsStrategy": "recursive",
+}
+`;
+
+exports[`manager/regex/index extracts with recursive strategy and multiple matches 1`] = `
+Object {
+  "deps": Array [
+    Object {
+      "currentValue": "v2.19.0",
+      "datasource": "docker",
+      "depName": "prom/prometheus",
+      "replaceString": "\\"name\\": \\"prom/prometheus\\",
+    \\"type\\": \\"docker\\",
+    \\"value\\": \\"v2.19.0\\"",
+    },
+    Object {
+      "currentValue": "7.2.2",
+      "datasource": "docker",
+      "depName": "grafana/grafana",
+      "replaceString": "\\"name\\": \\"grafana/grafana\\",
+    \\"type\\": \\"docker\\",
+    \\"value\\": \\"7.2.2\\"",
+    },
+  ],
+  "matchStrings": Array [
+    "\\"group.{1}\\":\\\\s*\\\\{[^}]*}",
+    "\\"name\\":\\\\s*\\"(?<depName>.*)\\"[^\\"]*\\"type\\":\\\\s*\\"(?<datasource>.*)\\"[^\\"]*\\"value\\":\\\\s*\\"(?<currentValue>.*)\\"",
+  ],
+  "matchStringsStrategy": "recursive",
+}
+`;
+
+exports[`manager/regex/index extracts with recursive strategy and single match 1`] = `
+Object {
+  "deps": Array [
+    Object {
+      "currentValue": "v2.19.0",
+      "datasource": "docker",
+      "depName": "prom/prometheus",
+      "replaceString": "\\"name\\": \\"prom/prometheus\\",
+    \\"type\\": \\"docker\\",
+    \\"value\\": \\"v2.19.0\\"",
+    },
+  ],
+  "matchStrings": Array [
+    "\\"group1\\":\\\\s*\\\\{[^}]*}",
+    "\\"name\\":\\\\s*\\"(?<depName>.*)\\"[^\\"]*\\"type\\":\\\\s*\\"(?<datasource>.*)\\"[^\\"]*\\"value\\":\\\\s*\\"(?<currentValue>.*)\\"",
+  ],
+  "matchStringsStrategy": "recursive",
 }
 `;

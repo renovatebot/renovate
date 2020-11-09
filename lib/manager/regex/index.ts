@@ -107,13 +107,26 @@ function handleCombination(
   return [dep];
 }
 
-// TODO implement
 function handleRecursive(
   content: string,
   packageFile: string,
-  config: CustomExtractConfig
+  config: CustomExtractConfig,
+  index = 0
 ): PackageDependency[] {
-  return [];
+  const regexes = config.matchStrings.map((matchString) =>
+    regEx(matchString, 'g')
+  );
+  // abort if we have no matchString anymore
+  if (regexes[index] == null) {
+    return [];
+  }
+  return regexMatchAll(regexes[index], content).flatMap((match) => {
+    // if we have a depName and a currentValue with have the minimal viable definition
+    if (match?.groups?.depName && match?.groups?.currentValue) {
+      return createDependency(match, config);
+    }
+    return handleRecursive(match[0], packageFile, config, index + 1);
+  });
 }
 
 export function extractPackageFile(
@@ -139,11 +152,18 @@ export function extractPackageFile(
     return dep != null;
   });
   if (deps?.length) {
+    if (config.matchStringsStrategy) {
+      return {
+        deps,
+        matchStrings: config.matchStrings,
+        matchStringsStrategy: config.matchStringsStrategy,
+      };
+    }
     return {
       deps,
       matchStrings: config.matchStrings,
-      matchStringsStrategy: config.matchStringsStrategy,
     };
   }
+
   return null;
 }

@@ -12,6 +12,10 @@ const ansibleYamlContent = readFileSync(
   resolve(__dirname, `./__fixtures__/ansible.yml`),
   'utf8'
 );
+const exampleJsonContent = readFileSync(
+  resolve(__dirname, `./__fixtures__/example.json`),
+  'utf8'
+);
 
 describe(getName(__filename), () => {
   it('has default config', () => {
@@ -148,5 +152,80 @@ describe(getName(__filename), () => {
     );
     expect(res).toMatchSnapshot();
     expect(res.deps).toHaveLength(1);
+  });
+  it('extracts with recursive strategy and single match', async () => {
+    const config: CustomExtractConfig = {
+      matchStrings: [
+        '"group1":\\s*\\{[^}]*}',
+        '"name":\\s*"(?<depName>.*)"[^"]*"type":\\s*"(?<datasource>.*)"[^"]*"value":\\s*"(?<currentValue>.*)"',
+      ],
+      matchStringsStrategy: 'recursive',
+    };
+    const res = await extractPackageFile(
+      exampleJsonContent,
+      'example.json',
+      config
+    );
+    expect(res).toMatchSnapshot();
+    expect(res.deps).toHaveLength(1);
+  });
+  it('extracts with recursive strategy and multiple matches', async () => {
+    const config: CustomExtractConfig = {
+      matchStrings: [
+        '"group.{1}":\\s*\\{[^}]*}',
+        '"name":\\s*"(?<depName>.*)"[^"]*"type":\\s*"(?<datasource>.*)"[^"]*"value":\\s*"(?<currentValue>.*)"',
+      ],
+      matchStringsStrategy: 'recursive',
+    };
+    const res = await extractPackageFile(
+      exampleJsonContent,
+      'example.json',
+      config
+    );
+    expect(res).toMatchSnapshot();
+    expect(res.deps).toHaveLength(2);
+  });
+  it('extracts with recursive strategy and multiple layers ', async () => {
+    const config: CustomExtractConfig = {
+      matchStrings: [
+        '"backup":\\s*{[^}]*}',
+        '"test":\\s*\\{[^}]*}',
+        '"name":\\s*"(?<depName>.*)"[^"]*"type":\\s*"(?<datasource>.*)"[^"]*"value":\\s*"(?<currentValue>.*)"',
+      ],
+      matchStringsStrategy: 'recursive',
+    };
+    const res = await extractPackageFile(
+      exampleJsonContent,
+      'example.json',
+      config
+    );
+    expect(res).toMatchSnapshot();
+    expect(res.deps).toHaveLength(1);
+  });
+  it('extracts with recursive strategy and fail because of not sufficient regexes', async () => {
+    const config: CustomExtractConfig = {
+      matchStrings: ['"group.{1}":\\s*\\{[^}]*}'],
+      matchStringsStrategy: 'recursive',
+    };
+    const res = await extractPackageFile(
+      exampleJsonContent,
+      'example.json',
+      config
+    );
+    expect(res).toMatchSnapshot();
+    expect(res).toBeNull();
+  });
+  it('extracts with recursive strategy and fail because there is no match', async () => {
+    const config: CustomExtractConfig = {
+      matchStrings: ['"trunk.{1}":\\s*\\{[^}]*}'],
+      matchStringsStrategy: 'recursive',
+    };
+    const res = await extractPackageFile(
+      exampleJsonContent,
+      'example.json',
+      config
+    );
+    expect(res).toMatchSnapshot();
+    expect(res).toBeNull();
   });
 });
