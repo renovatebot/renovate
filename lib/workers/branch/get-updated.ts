@@ -65,28 +65,21 @@ export async function getUpdatedPackageFiles(
           reuseExistingBranch
         );
         if (res) {
+          if (bumpPackageVersion && upgrade.bumpVersion) {
+            res = await bumpPackageVersion(
+              res,
+              upgrade.packageFileVersion,
+              upgrade.bumpVersion
+            );
+          }
           if (res === existingContent) {
             logger.debug({ packageFile, depName }, 'No content changed');
             if (upgrade.rangeStrategy === 'update-lockfile') {
               logger.debug({ packageFile, depName }, 'update-lockfile add');
-              if (bumpPackageVersion && upgrade.bumpVersion) {
-                res = await bumpPackageVersion(
-                  res,
-                  upgrade.packageFileVersion,
-                  upgrade.bumpVersion
-                );
-              }
               nonUpdatedFileContents[packageFile] = res;
             }
           } else {
             logger.debug({ packageFile, depName }, 'Contents updated');
-            if (bumpPackageVersion && upgrade.bumpVersion) {
-              res = await bumpPackageVersion(
-                res,
-                upgrade.packageFileVersion,
-                upgrade.bumpVersion
-              );
-            }
             updatedFileContents[packageFile] = res;
           }
           continue; // eslint-disable-line no-continue
