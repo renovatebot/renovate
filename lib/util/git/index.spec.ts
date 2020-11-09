@@ -101,6 +101,7 @@ describe('platform/git', () => {
       await repo.submoduleAdd(base.path, 'submodule');
       await repo.commit('Add submodule');
       await git.initRepo({
+        cloneSubmodules: true,
         localDir: tmpDir.path,
         url: base.path,
       });
@@ -420,6 +421,7 @@ describe('platform/git', () => {
       ]);
       await repo.commit('Add submodule');
       await git.initRepo({
+        cloneSubmodules: true,
         localDir: tmpDir.path,
         url: base.path,
       });

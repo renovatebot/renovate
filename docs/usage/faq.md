@@ -124,10 +124,10 @@ Set the configuration option `labels` to an array of labels to use
 
 ### Apply a rule, but only to package `abc`?
 
-1.  Add a `packageRules` array to your configuration.
+1.  Add a `packageRules` array to your configuration
 2.  Create one object inside this array
 3.  Set field `packageNames` to value `["abc"]`
-4.  Add the configuration option to the same object.
+4.  Add the configuration option to the same object
 
 e.g.
 

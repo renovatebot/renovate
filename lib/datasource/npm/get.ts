@@ -217,13 +217,9 @@ export async function getDependency(
       };
       if (res.time?.[version]) {
         release.releaseTimestamp = res.time[version];
+        const relDate = DateTime.fromISO(release.releaseTimestamp);
         release.canBeUnpublished =
-          DateTime.local()
-            .startOf('day')
-            .diff(
-              DateTime.fromISO(release.releaseTimestamp).startOf('day'),
-              'days'
-            ).days === 0;
+          relDate.isValid && DateTime.local().diff(relDate, 'days').days < 1;
       }
       if (res.versions[version].deprecated) {
         release.isDeprecated = true;
