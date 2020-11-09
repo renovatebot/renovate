@@ -205,7 +205,7 @@ export type UpdateType =
   | 'rollback'
   | 'bump';
 
-export type MatchStringsStrategy = 'flat' | 'recursive' | 'combination';
+export type MatchStringsStrategy = 'any' | 'recursive' | 'combination';
 
 // TODO: Proper typings
 export interface PackageRule

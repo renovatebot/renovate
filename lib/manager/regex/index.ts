@@ -80,7 +80,7 @@ function mergeDependency(deps: PackageDependency[]): PackageDependency {
   return result;
 }
 
-function handleFlat(
+function handleAny(
   content: string,
   packageFile: string,
   config: CustomExtractConfig
@@ -97,7 +97,7 @@ function handleCombination(
   packageFile: string,
   config: CustomExtractConfig
 ): PackageDependency[] {
-  const dep = handleFlat(
+  const dep = handleAny(
     content,
     packageFile,
     config
@@ -121,12 +121,12 @@ export function extractPackageFile(
 ): Result<PackageFile | null> {
   let deps;
   switch (config.matchStringsStrategy) {
+    default:
+    case 'any':
+      deps = handleAny(content, packageFile, config);
+      break;
     case 'combination':
       deps = handleCombination(content, packageFile, config);
-      break;
-    default:
-    case 'flat':
-      deps = handleFlat(content, packageFile, config);
       break;
     case 'recursive':
       deps = handleRecursive(content, packageFile, config);
