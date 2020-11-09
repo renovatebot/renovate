@@ -40,7 +40,7 @@ Most of the settings in the `renovate.json` onboarding configuration are default
 
 Please check the docs on this website for an exhaustive Configuration Reference, however here are some of the most commonly changed (overridden) configuration settings:
 
-- **rangeStrategy**: By default (with zero config) it's `"replace"` however the `"config:base"` preset overrides it to `"auto"`. If you don't want to pin dependency versions and retain ranges, add the `":preserveSemverRanges"` preset to the `extends` array.
+- **rangeStrategy**: By default (with zero config) it's `"replace"` however the `"config:base"` preset overrides it to `"auto"`. If you don't want to pin dependency versions and retain ranges, add the `":preserveSemverRanges"` preset to the `extends` array
 - **labels**: Labels to assign to Pull Requests
 - **assignees**: GitHub users to assign the Pull Requests to
 

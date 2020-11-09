@@ -214,6 +214,8 @@ You can also configure this field to `"mirror:x"` where `x` is the name of a pac
 Doing so means that the `package.json` `version` field will mirror whatever the version is that `x` depended on.
 Make sure that version is a pinned version of course, as otherwise it won't be valid.
 
+## cloneSubmodules
+
 ## commitBody
 
 Configure this if you wish Renovate to add a commit body, otherwise Renovate just uses a regular single-line commit.
@@ -1271,7 +1273,7 @@ For example to apply a special label for Major updates:
 ## patch
 
 Add to this object if you wish to define rules that apply only to patch updates.
-See also `major` and `minor` configuration options.
+Only applies if `separateMinorPatch` is set to true.
 
 ## php
 
@@ -1485,14 +1487,14 @@ Behaviour:
 - `bump` = e.g. bump the range even if the new version satisfies the existing range, e.g. `^1.0.0` -> `^1.1.0`
 - `replace` = Replace the range with a newer one if the new version falls outside it, e.g. `^1.0.0` -> `^2.0.0`
 - `widen` = Widen the range with newer one, e.g. `^1.0.0` -> `^1.0.0 || ^2.0.0`
-- `update-lockfile` = Update the lock file when in-range updates are available, otherwise `replace` for updates out of range. Works for `composer`, `npm` and `yarn` so far.
+- `update-lockfile` = Update the lock file when in-range updates are available, otherwise `replace` for updates out of range. Works for `composer`, `npm` and `yarn` so far
 
 Renovate's `"auto"` strategy works like this for npm:
 
 1.  Always pin `devDependencies`
 2.  Pin `dependencies` if we detect that it's an app and not a library
 3.  Widen `peerDependencies`
-4.  If an existing range already ends with an "or" operator - e.g. `"^1.0.0 || ^2.0.0"` - then Renovate will widen it, e.g. making it into `"^1.0.0 || ^2.0.0 || ^3.0.0"`.
+4.  If an existing range already ends with an "or" operator - e.g. `"^1.0.0 || ^2.0.0"` - then Renovate will widen it, e.g. making it into `"^1.0.0 || ^2.0.0 || ^3.0.0"`
 5.  Otherwise, replace the range. e.g. `"^2.0.0"` would be replaced by `"^3.0.0"`
 
 **bump**
@@ -1514,10 +1516,10 @@ By default this label is `"rebase"` however you can configure it to anything you
 
 Possible values and meanings:
 
-- `auto`: Renovate will autodetect the best setting. Defaults to `conflicted` unless the repository has a setting requiring PRs to be up to date with the base branch.
-- `never`: Renovate will never rebase the branch.
-- `conflicted`: Renovate will rebase only if the branch is conflicted.
-- `behind-base-branch`: Renovate will rebase whenever the branch falls 1 or more commit behind its base branch.
+- `auto`: Renovate will autodetect the best setting. Defaults to `conflicted` unless the repository has a setting requiring PRs to be up to date with the base branch
+- `never`: Renovate will never rebase the branch
+- `conflicted`: Renovate will rebase only if the branch is conflicted
+- `behind-base-branch`: Renovate will rebase whenever the branch falls 1 or more commit behind its base branch
 
 Note: this field replaces the previous fields of `rebaseConflictedPrs` and `rebaseStalePrs`.
 
