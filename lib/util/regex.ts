@@ -31,23 +31,19 @@ export function escapeRegExp(input: string): string {
   return input.replace(/[.*+\-?^${}()|[\]\\]/g, '\\$&'); // $& means the whole matched string
 }
 
-const posConfigValStart = /^\//;
-const negConfigValStart = /^!\//;
+const configValStart = /^!?\//;
 const configValEnd = /\/$/;
 
 export function isConfigRegex(input: unknown): input is string {
   return (
-    is.string(input) &&
-    (posConfigValStart.test(input) || negConfigValStart.test(input)) &&
-    configValEnd.test(input)
+    is.string(input) && configValStart.test(input) && configValEnd.test(input)
   );
 }
 
 function parseConfigRegex(input: string): RegExp | null {
   try {
     const regexString = input
-      .replace(posConfigValStart, '')
-      .replace(negConfigValStart, '')
+      .replace(configValStart, '')
       .replace(configValEnd, '');
     return regEx(regexString);
   } catch (err) {
@@ -61,7 +57,7 @@ type ConfigRegexPredicate = (string) => boolean;
 export function configRegexPredicate(input: string): ConfigRegexPredicate {
   const configRegex = parseConfigRegex(input);
   if (configRegex) {
-    const isPositive = posConfigValStart.test(input);
+    const isPositive = input.startsWith('!');
     return (x: string): boolean => {
       const res = configRegex.test(x);
       return isPositive ? res : !res;
