@@ -100,3 +100,30 @@ Object {
   ],
 }
 `;
+
+exports[`manager/regex/index extracts multiple dependencies with multiple matchStrings 1`] = `
+Object {
+  "deps": Array [
+    Object {
+      "currentValue": "6.2",
+      "datasource": "gradle-version",
+      "depName": "gradle",
+      "replaceString": "ENV GRADLE_VERSION=6.2 # gradle-version/gradle&versioning=maven
+",
+      "versioning": "maven",
+    },
+    Object {
+      "currentValue": "10.19.0",
+      "datasource": "github-tags",
+      "depName": "nodejs/node",
+      "replaceString": "ENV NODE_VERSION=10.19.0 # github-tags/nodejs/node&versioning=node
+",
+      "versioning": "node",
+    },
+  ],
+  "matchStrings": Array [
+    "ENV GRADLE_VERSION=(?<currentValue>.*) # (?<datasource>.*?)/(?<depName>.*?)(\\\\&versioning=(?<versioning>.*?))?\\\\s",
+    "ENV NODE_VERSION=(?<currentValue>.*) # (?<datasource>.*?)/(?<depName>.*?)(\\\\&versioning=(?<versioning>.*?))?\\\\s",
+  ],
+}
+`;

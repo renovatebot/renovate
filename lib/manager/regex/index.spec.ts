@@ -86,4 +86,27 @@ describe(getName(__filename), () => {
     );
     expect(res).toMatchSnapshot();
   });
+  it('extracts multiple dependencies with multiple matchStrings', async () => {
+    const config = {
+      matchStrings: [
+        'ENV GRADLE_VERSION=(?<currentValue>.*) # (?<datasource>.*?)/(?<depName>.*?)(\\&versioning=(?<versioning>.*?))?\\s',
+        'ENV NODE_VERSION=(?<currentValue>.*) # (?<datasource>.*?)/(?<depName>.*?)(\\&versioning=(?<versioning>.*?))?\\s',
+      ],
+      versioningTemplate:
+        '{{#if versioning}}{{versioning}}{{else}}semver{{/if}}',
+    };
+    const res = await extractPackageFile(
+      dockerfileContent,
+      'Dockerfile',
+      config
+    );
+    expect(res).toMatchSnapshot();
+    expect(res.deps).toHaveLength(2);
+    expect(
+      res.deps.find((dep) => dep.depName === 'nodejs/node').versioning
+    ).toEqual('node');
+    expect(res.deps.find((dep) => dep.depName === 'gradle').versioning).toEqual(
+      'maven'
+    );
+  });
 });
