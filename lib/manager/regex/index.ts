@@ -74,6 +74,10 @@ function mergeDependency(deps: PackageDependency[]): PackageDependency {
     fields.forEach((field) => {
       if (dep[field]) {
         result[field] = dep[field];
+        // save the line replaceString of the section which contains the current Value for a speed up lookup during the replace phase
+        if (field === 'currentValue') {
+          result.replaceString = dep.replaceString;
+        }
       }
     });
   });
@@ -91,17 +95,15 @@ function handleAny(
     .map((matchResult) => createDependency(matchResult, config));
 }
 
-// TODO add tests
 function handleCombination(
   content: string,
   packageFile: string,
   config: CustomExtractConfig
 ): PackageDependency[] {
-  const dep = handleAny(
-    content,
-    packageFile,
-    config
-  ).reduce((mergedDep, currentDep) => mergeDependency([mergedDep, currentDep])); // merge fields of dependencies
+  const dep = handleAny(content, packageFile, config).reduce(
+    (mergedDep, currentDep) => mergeDependency([mergedDep, currentDep]),
+    {}
+  ); // merge fields of dependencies
   return [dep];
 }
 

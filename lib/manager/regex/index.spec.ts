@@ -1,12 +1,18 @@
 import { readFileSync } from 'fs';
 import { resolve } from 'upath';
 import { getName } from '../../../test/util';
+import { CustomExtractConfig } from '../common';
 import { defaultConfig, extractPackageFile } from '.';
 
 const dockerfileContent = readFileSync(
   resolve(__dirname, `./__fixtures__/Dockerfile`),
   'utf8'
 );
+const ansibleYamlContent = readFileSync(
+  resolve(__dirname, `./__fixtures__/ansible.yml`),
+  'utf8'
+);
+
 describe(getName(__filename), () => {
   it('has default config', () => {
     expect(defaultConfig).toEqual({
@@ -108,5 +114,39 @@ describe(getName(__filename), () => {
     expect(res.deps.find((dep) => dep.depName === 'gradle').versioning).toEqual(
       'maven'
     );
+  });
+  it('extracts with combination strategy', async () => {
+    const config: CustomExtractConfig = {
+      matchStrings: [
+        'prometheus_image:\\s*"(?<depName>.*)"\\s*\\/\\/',
+        'prometheus_version:\\s*"(?<currentValue>.*)"\\s*\\/\\/',
+      ],
+      matchStringsStrategy: 'combination',
+      datasourceTemplate: 'docker',
+    };
+    const res = await extractPackageFile(
+      ansibleYamlContent,
+      'ansible.yml',
+      config
+    );
+    expect(res).toMatchSnapshot();
+    expect(res.deps).toHaveLength(1);
+  });
+  it('extracts with combination strategy and multiple matches', async () => {
+    const config: CustomExtractConfig = {
+      matchStrings: [
+        '.*_image:\\s*"(?<depName>.*)"\\s*\\/\\/',
+        '.*_version:\\s*"(?<currentValue>.*)"\\s*\\/\\/',
+      ],
+      matchStringsStrategy: 'combination',
+      datasourceTemplate: 'docker',
+    };
+    const res = await extractPackageFile(
+      ansibleYamlContent,
+      'ansible.yml',
+      config
+    );
+    expect(res).toMatchSnapshot();
+    expect(res.deps).toHaveLength(1);
   });
 });

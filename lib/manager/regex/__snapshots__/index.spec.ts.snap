@@ -127,3 +127,37 @@ Object {
   ],
 }
 `;
+
+exports[`manager/regex/index extracts with combination strategy 1`] = `
+Object {
+  "deps": Array [
+    Object {
+      "currentValue": "v2.21.0",
+      "datasource": "docker",
+      "depName": "prom/prometheus",
+      "replaceString": "prometheus_version: \\"v2.21.0\\" //",
+    },
+  ],
+  "matchStrings": Array [
+    "prometheus_image:\\\\s*\\"(?<depName>.*)\\"\\\\s*\\\\/\\\\/",
+    "prometheus_version:\\\\s*\\"(?<currentValue>.*)\\"\\\\s*\\\\/\\\\/",
+  ],
+}
+`;
+
+exports[`manager/regex/index extracts with combination strategy and multiple matches 1`] = `
+Object {
+  "deps": Array [
+    Object {
+      "currentValue": "0.12.0",
+      "datasource": "docker",
+      "depName": "prom/prometheus",
+      "replaceString": "someother_version: \\"0.12.0\\" //",
+    },
+  ],
+  "matchStrings": Array [
+    ".*_image:\\\\s*\\"(?<depName>.*)\\"\\\\s*\\\\/\\\\/",
+    ".*_version:\\\\s*\\"(?<currentValue>.*)\\"\\\\s*\\\\/\\\\/",
+  ],
+}
+`;
