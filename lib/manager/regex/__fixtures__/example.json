@@ -15,5 +15,12 @@
       "type": "docker",
       "value": "1.6.1"
     }
+  },
+  "setup": {
+    "test": {
+      "name": "python",
+      "type": "docker",
+      "value": "3.9.0"
+    }
   }
 }
