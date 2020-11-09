@@ -53,7 +53,7 @@ const rebasingRegex = /\*\*Rebasing\*\*: .*/;
 async function deleteBranchSilently(branchName: string): Promise<void> {
   try {
     await deleteBranch(branchName);
-  } catch (err) {
+  } catch (err) /* istanbul ignore next */ {
     logger.debug({ branchName, err }, 'Branch auto-remove failed');
   }
 }
