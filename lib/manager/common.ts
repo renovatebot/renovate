@@ -102,6 +102,7 @@ export interface PackageFile<T = Record<string, any>>
   yarnrc?: string;
   yarnWorkspacesPackages?: string[] | string;
   matchStrings?: string[];
+  matchStringsStrategy?: MatchStringsStrategy;
 }
 
 export interface Package<T> extends ManagerData<T> {

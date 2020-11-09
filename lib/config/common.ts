@@ -127,6 +127,7 @@ export type RenovateRepository =
 export interface CustomManager {
   fileMatch: string[];
   matchStrings: string[];
+  matchStringsStrategy?: string;
   depNameTemplate?: string;
   datasourceTemplate?: string;
   lookupNameTemplate?: string;

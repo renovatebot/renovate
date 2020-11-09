@@ -139,7 +139,11 @@ export function extractPackageFile(
     return dep != null;
   });
   if (deps?.length) {
-    return { deps, matchStrings: config.matchStrings };
+    return {
+      deps,
+      matchStrings: config.matchStrings,
+      matchStringsStrategy: config.matchStringsStrategy,
+    };
   }
   return null;
 }
