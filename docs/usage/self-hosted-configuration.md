@@ -7,6 +7,49 @@ description: Self-Hosted Configuration usable in renovate.json or package.json
 
 The below configuration options are applicable only if you are running your own instance ("bot") of Renovate.
 
+## allowPostUpgradeCommandTemplating
+
+If true allow templating for post-upgrade commands.
+
+Let's look at an example of configuring packages with existing Angular migrations.
+
+Add two properties to `config.js`: `allowPostUpgradeCommandTemplating` and `allowedPostUpgradeCommands`
+
+```javascript
+module.export = {
+  allowPostUpgradeCommandTemplating: true,
+  allowedPostUpgradeCommands: ['^npm ci --ignore-scripts$', '^npx ng update'],
+};
+```
+
+In the `renovate.json` file, define the commands and files to be included in the final commit.
+
+The command to install dependencies is necessary because, by default, the installation of dependencies is skipped (see the `skipInstalls` admin option)
+
+```json
+{
+  "packageRules": [
+    {
+      "packageNames": ["@angular/core"],
+      "postUpgradeTasks": {
+        "commands": [
+          "npm ci --ignore-scripts",
+          "npx ng update {{{depName}}} --from={{{fromVersion}}} --to={{{toVersion}}} --migrateOnly --allowDirty --force"
+        ],
+        "fileFilters": ["**/**"]
+      }
+    }
+  ]
+}
+```
+
+With this configuration, the executable command for `@angular/core` will look like this
+
+```bash
+npm ci --ignore-scripts
+npx ng update @angular/core --from=9.0.0 --to=10.0.0 --migrateOnly --allowDirty --force
+```
+
 ## allowedPostUpgradeCommands
 
 A list of regular expressions that determine which commands in `postUpgradeTasks` are allowed to be executed.
