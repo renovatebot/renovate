@@ -156,7 +156,7 @@ describe('.updateArtifacts()', () => {
   it('uses pipenv version from Pipfile', async () => {
     jest.spyOn(docker, 'removeDanglingContainers').mockResolvedValueOnce();
     await setUtilConfig(dockerConfig);
-    pipFileLock.default.pipenv.version = '==2020.8.13'
+    pipFileLock.default.pipenv.version = '==2020.8.13';
     fs.readFile.mockResolvedValueOnce(JSON.stringify(pipFileLock) as any);
     const execSnapshots = mockExecAll(exec);
     fs.readFile.mockReturnValueOnce(JSON.stringify(pipFileLock) as any);
@@ -176,7 +176,7 @@ describe('.updateArtifacts()', () => {
   it('uses pipenv version from config', async () => {
     jest.spyOn(docker, 'removeDanglingContainers').mockResolvedValueOnce();
     await setUtilConfig(dockerConfig);
-    pipFileLock.default.pipenv.version = '==2020.8.13'
+    pipFileLock.default.pipenv.version = '==2020.8.13';
     fs.readFile.mockResolvedValueOnce(JSON.stringify(pipFileLock) as any);
     const execSnapshots = mockExecAll(exec);
     fs.readFile.mockReturnValueOnce(JSON.stringify(pipFileLock) as any);
