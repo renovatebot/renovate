@@ -43,7 +43,11 @@ describe('.updateArtifacts()', () => {
 
     await setUtilConfig(config);
     docker.resetPrefetchedImages();
-    pipFileLock = { _meta: { requires: {} }, default: { pipenv: {} }, develop: { pipenv: {} } };
+    pipFileLock = {
+      _meta: { requires: {} },
+      default: { pipenv: {} },
+      develop: { pipenv: {} },
+    };
   });
 
   it('returns if no Pipfile.lock found', async () => {
@@ -163,9 +167,6 @@ describe('.updateArtifacts()', () => {
       modified: ['Pipfile.lock'],
     } as StatusResult);
     fs.readFile.mockReturnValueOnce('new lock' as any);
-    git.getRepoStatus.mockResolvedValue({
-      modified: ['Pipfile.lock'],
-    } as StatusResult);
     expect(
       await pipenv.updateArtifacts({
         packageFileName: 'Pipfile',
@@ -186,9 +187,6 @@ describe('.updateArtifacts()', () => {
       modified: ['Pipfile.lock'],
     } as StatusResult);
     fs.readFile.mockReturnValueOnce('new lock' as any);
-    git.getRepoStatus.mockResolvedValue({
-      modified: ['Pipfile.lock'],
-    } as StatusResult);
     expect(
       await pipenv.updateArtifacts({
         packageFileName: 'Pipfile',
