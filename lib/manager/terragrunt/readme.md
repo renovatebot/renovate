@@ -1,6 +1,6 @@
 Currently by default, Terragrunt support is limited to Terraform registry sources and GitHub sources that include semver refs, e.g. like `github.com/hashicorp/example?ref=v1.0.0`.
 
-It is however possible to also use custom [versioning config](../../../docs/usage/configuration-options.md#versioning) in order to support non-semver references.
+You can create a custom [versioning config](../../../docs/usage/configuration-options.md#versioning) to support non-semver references.
 For example, if you want to reference a tag like `module-v1.2.5`, a block like this would work:
 
 ```json
