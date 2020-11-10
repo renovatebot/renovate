@@ -43,7 +43,7 @@ describe('.updateArtifacts()', () => {
 
     await setUtilConfig(config);
     docker.resetPrefetchedImages();
-    pipFileLock = { _meta: { requires: {} }, default: { pipenv: {} } };
+    pipFileLock = { _meta: { requires: {} }, default: { pipenv: {} }, develop: { pipenv: {} } };
   });
 
   it('returns if no Pipfile.lock found', async () => {
@@ -157,6 +157,29 @@ describe('.updateArtifacts()', () => {
     jest.spyOn(docker, 'removeDanglingContainers').mockResolvedValueOnce();
     await setUtilConfig(dockerConfig);
     pipFileLock.default.pipenv.version = '==2020.8.13';
+    fs.readFile.mockResolvedValueOnce(JSON.stringify(pipFileLock) as any);
+    const execSnapshots = mockExecAll(exec);
+    git.getRepoStatus.mockResolvedValue({
+      modified: ['Pipfile.lock'],
+    } as StatusResult);
+    fs.readFile.mockReturnValueOnce('new lock' as any);
+    git.getRepoStatus.mockResolvedValue({
+      modified: ['Pipfile.lock'],
+    } as StatusResult);
+    expect(
+      await pipenv.updateArtifacts({
+        packageFileName: 'Pipfile',
+        updatedDeps: [],
+        newPackageFileContent: 'some new content',
+        config: dockerConfig,
+      })
+    ).not.toBeNull();
+    expect(execSnapshots).toMatchSnapshot();
+  });
+  it('uses pipenv version from Pipfile dev packages', async () => {
+    jest.spyOn(docker, 'removeDanglingContainers').mockResolvedValueOnce();
+    await setUtilConfig(dockerConfig);
+    pipFileLock.develop.pipenv.version = '==2020.8.13';
     fs.readFile.mockResolvedValueOnce(JSON.stringify(pipFileLock) as any);
     const execSnapshots = mockExecAll(exec);
     git.getRepoStatus.mockResolvedValue({
