@@ -4,14 +4,11 @@ import { id as githubTagsId } from '../../datasource/github-tags';
 import { id as gitlabTagsId } from '../../datasource/gitlab-tags';
 import { logger } from '../../logger';
 import { SkipReason } from '../../types';
+import { hasKey } from '../../util/object';
 import { regEx } from '../../util/regex';
 import { PackageDependency, PackageFile } from '../common';
 
-import {
-  PrecommitGitDependency,
-  hasKey,
-  matchesPrecommitGitHeuristic,
-} from './util';
+import { PrecommitGitDependency, matchesPrecommitGitHeuristic } from './util';
 
 function determineDatasource(
   repository: string,
