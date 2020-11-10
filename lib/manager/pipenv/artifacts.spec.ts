@@ -172,9 +172,10 @@ describe('.updateArtifacts()', () => {
     expect(execSnapshots).toMatchSnapshot();
   });
   it('uses pipenv version from config', async () => {
-    fs.readFile.mockResolvedValueOnce('Current Pipfile.lock' as any);
+    pipFileLock.default.pipenv.version = '2020.8.13'
+    fs.readFile.mockResolvedValueOnce(JSON.stringify(pipFileLock) as any);
     const execSnapshots = mockExecAll(exec);
-    fs.readFile.mockReturnValueOnce('New Pipfile.lock' as any);
+    fs.readFile.mockReturnValueOnce(JSON.stringify(pipFileLock) as any);
     git.getRepoStatus.mockResolvedValue({
       modified: ['Pipfile.lock'],
     } as StatusResult);
@@ -183,7 +184,7 @@ describe('.updateArtifacts()', () => {
         packageFileName: 'Pipfile',
         updatedDeps: [],
         newPackageFileContent: '{}',
-        config: { ...config, constraints: { pipenv: '==2020.8.13' } },
+        config: { ...config, constraints: { pipenv: '==2020.1.1' } },
       })
     ).not.toBeNull();
     expect(execSnapshots).toMatchSnapshot();
