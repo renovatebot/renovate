@@ -1030,7 +1030,7 @@ const options: RenovateOptions[] = [
   },
   {
     name: 'bumpVersion',
-    description: 'Bump the version in the package.json being updated',
+    description: 'Bump the version in the package file being updated',
     type: 'string',
     allowedValues: ['major', 'minor', 'patch'],
   },
