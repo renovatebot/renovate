@@ -72,7 +72,7 @@ export async function updateArtifacts({
         image: 'renovate/python',
         tagConstraint,
         tagScheme: 'pep440',
-        preCommands: ['pip install --user pipenv'],
+        preCommands: ['pip install --user pipenv==2020.8.13'],
         volumes: [cacheDir],
       },
     };
