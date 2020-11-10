@@ -91,7 +91,10 @@ export async function updateArtifacts({
     }
     const cmd = 'pipenv lock';
     const tagConstraint = getPythonConstraint(existingLockFileContent, config);
-    const pipenvConstraint = getPipenvConstraint(existingLockFileContent, config);
+    const pipenvConstraint = getPipenvConstraint(
+      existingLockFileContent,
+      config
+    );
     const execOptions: ExecOptions = {
       extraEnv: {
         PIPENV_CACHE_DIR: cacheDir,
