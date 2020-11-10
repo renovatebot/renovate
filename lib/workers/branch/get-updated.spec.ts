@@ -175,7 +175,7 @@ describe('workers/branch/get-updated', () => {
     it('bumps versions in updateDependency managers', async () => {
       config.upgrades.push({
         branchName: undefined,
-        bumpVersion: 'true',
+        bumpVersion: 'patch',
         manager: 'npm',
       });
       npm.updateDependency.mockReturnValue('old version');
@@ -186,7 +186,7 @@ describe('workers/branch/get-updated', () => {
     it('bumps versions in autoReplace managers', async () => {
       config.upgrades.push({
         branchName: undefined,
-        bumpVersion: 'true',
+        bumpVersion: 'patch',
         manager: 'helmv3',
       });
       autoReplace.doAutoReplace.mockResolvedValueOnce('version: 0.0.1');
