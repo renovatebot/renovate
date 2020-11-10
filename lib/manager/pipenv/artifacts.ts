@@ -44,7 +44,7 @@ function getPythonConstraint(
 function getPipenvConstraint(
   existingLockFileContent: string,
   config: UpdateArtifactsConfig
-): string | undefined | null {
+): string | null {
   const { constraints = {} } = config;
   const { pipenv } = constraints;
 
@@ -65,7 +65,7 @@ function getPipenvConstraint(
   } catch (err) {
     // Do nothing
   }
-  return undefined;
+  return '';
 }
 
 export async function updateArtifacts({
