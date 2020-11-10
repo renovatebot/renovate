@@ -165,8 +165,8 @@ describe('.updateArtifacts()', () => {
       await pipenv.updateArtifacts({
         packageFileName: 'Pipfile',
         updatedDeps: [],
-        newPackageFileContent: '{}',
-        config: config,
+        newPackageFileContent: 'some new content',
+        config: dockerConfig,
       })
     ).not.toBeNull();
     expect(execSnapshots).toMatchSnapshot();
@@ -183,8 +183,8 @@ describe('.updateArtifacts()', () => {
       await pipenv.updateArtifacts({
         packageFileName: 'Pipfile',
         updatedDeps: [],
-        newPackageFileContent: '{}',
-        config: { ...config, constraints: { pipenv: '==2020.1.1' } },
+        newPackageFileContent: 'some new content',
+        config: { ...dockerConfig, constraints: { pipenv: '==2020.1.1' } },
       })
     ).not.toBeNull();
     expect(execSnapshots).toMatchSnapshot();
