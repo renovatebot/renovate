@@ -50,6 +50,14 @@ function rebaseCheck(config: RenovateConfig, branchPr: Pr): boolean {
 
 const rebasingRegex = /\*\*Rebasing\*\*: .*/;
 
+async function deleteBranchSilently(branchName: string): Promise<void> {
+  try {
+    await deleteBranch(branchName);
+  } catch (err) /* istanbul ignore next */ {
+    logger.debug({ branchName, err }, 'Branch auto-remove failed');
+  }
+}
+
 export async function processBranch(
   branchConfig: BranchConfig,
   prLimitReached?: boolean,
@@ -476,6 +484,7 @@ export async function processBranch(
       const mergeStatus = await tryBranchAutomerge(config);
       logger.debug(`mergeStatus=${mergeStatus}`);
       if (mergeStatus === 'automerged') {
+        await deleteBranchSilently(config.branchName);
         logger.debug('Branch is automerged - returning');
         return ProcessBranchResult.Automerged;
       }
@@ -657,6 +666,7 @@ export async function processBranch(
         }
         const prAutomerged = await checkAutoMerge(pr, config);
         if (prAutomerged) {
+          await deleteBranchSilently(config.branchName);
           return ProcessBranchResult.Automerged;
         }
       }
