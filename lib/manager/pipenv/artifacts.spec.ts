@@ -43,7 +43,7 @@ describe('.updateArtifacts()', () => {
 
     await setUtilConfig(config);
     docker.resetPrefetchedImages();
-    pipFileLock = { _meta: { requires: {} } };
+    pipFileLock = { _meta: { requires: {} }, default: { pipenv: {} } };
   });
 
   it('returns if no Pipfile.lock found', async () => {
@@ -149,6 +149,43 @@ describe('.updateArtifacts()', () => {
         updatedDeps: [],
         newPackageFileContent: '{}',
         config: lockMaintenanceConfig,
+      })
+    ).not.toBeNull();
+    expect(execSnapshots).toMatchSnapshot();
+  });
+});
+  it('uses pipenv version from Pipfile', async () => {
+    pipFileLock.default.pipenv.version = '2020.8.13'
+    fs.readFile.mockResolvedValueOnce(JSON.stringify(pipFileLock) as any);
+    const execSnapshots = mockExecAll(exec);
+    fs.readFile.mockReturnValueOnce(JSON.stringify(pipFileLock) as any);
+    git.getRepoStatus.mockResolvedValue({
+      modified: ['Pipfile.lock'],
+    } as StatusResult);
+    expect(
+      await pipenv.updateArtifacts({
+        packageFileName: 'Pipfile',
+        updatedDeps: [],
+        newPackageFileContent: '{}',
+        config: config,
+      })
+    ).not.toBeNull();
+    expect(execSnapshots).toMatchSnapshot();
+  });
+});
+  it('uses pipenv version from config', async () => {
+    fs.readFile.mockResolvedValueOnce('Current Pipfile.lock' as any);
+    const execSnapshots = mockExecAll(exec);
+    fs.readFile.mockReturnValueOnce('New Pipfile.lock' as any);
+    git.getRepoStatus.mockResolvedValue({
+      modified: ['Pipfile.lock'],
+    } as StatusResult);
+    expect(
+      await pipenv.updateArtifacts({
+        packageFileName: 'Pipfile',
+        updatedDeps: [],
+        newPackageFileContent: '{}',
+        config: { ...config, constraints: { pipenv: '==2020.8.13' } },
       })
     ).not.toBeNull();
     expect(execSnapshots).toMatchSnapshot();
