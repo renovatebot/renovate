@@ -1,6 +1,5 @@
-Renovate supports updating of Git dependencies within pre-commit configuration `.pre-commit-config.yaml` files or other YAML
-files that use the same format (via `fileMatch` configuration). Updates are performed if the files
-follow the conventional format used in typical pre-commit files:
+Renovate supports updating of Git dependencies within pre-commit configuration `.pre-commit-config.yaml` files or other YAML files that use the same format (via `fileMatch` configuration).
+Updates are performed if the files follow the conventional format used in typical pre-commit files:
 
 ```yaml
 repos:
