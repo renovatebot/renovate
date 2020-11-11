@@ -104,7 +104,9 @@ export async function updateArtifacts({
         image: 'renovate/python',
         tagConstraint,
         tagScheme: 'pep440',
-        preCommands: [`pip install --user ${quote(`pipenv${pipenvConstraint}`)}`],
+        preCommands: [
+          `pip install --user ${quote(`pipenv${pipenvConstraint}`)}`,
+        ],
         volumes: [cacheDir],
       },
     };
