@@ -49,6 +49,7 @@ Add the `breaking` label for Issues or PRs which contain changes that are not ba
 Use these to assign a priority level to an issue.
 Make a best-effort attempt to select a proper priority.
 Nothing bad will happen if you select a "wrong" priority.
+At a high level: critical = needs immediate fix, important = to be prioritized ahead of others, normal = default priority, low = trivial issue, or impacts a very small % of the user base.
 
 ### Platform
 
