@@ -56,14 +56,22 @@ export async function getUpdatedPackageFiles(
           reuseExistingBranch: false,
         });
       }
+      const bumpPackageVersion = get(manager, 'bumpPackageVersion');
       const updateDependency = get(manager, 'updateDependency');
       if (!updateDependency) {
-        const res = await doAutoReplace(
+        let res = await doAutoReplace(
           upgrade,
           existingContent,
           reuseExistingBranch
         );
         if (res) {
+          if (bumpPackageVersion && upgrade.bumpVersion) {
+            res = await bumpPackageVersion(
+              res,
+              upgrade.packageFileVersion,
+              upgrade.bumpVersion
+            );
+          }
           if (res === existingContent) {
             logger.debug({ packageFile, depName }, 'No content changed');
             if (upgrade.rangeStrategy === 'update-lockfile') {
@@ -84,10 +92,17 @@ export async function getUpdatedPackageFiles(
         logger.error({ packageFile, depName }, 'Could not autoReplace');
         throw new Error(WORKER_FILE_UPDATE_FAILED);
       }
-      const newContent = await updateDependency({
+      let newContent = await updateDependency({
         fileContent: existingContent,
         upgrade,
       });
+      if (bumpPackageVersion && upgrade.bumpVersion) {
+        newContent = await bumpPackageVersion(
+          newContent,
+          upgrade.packageFileVersion,
+          upgrade.bumpVersion
+        );
+      }
       if (!newContent) {
         if (config.reuseExistingBranch) {
           logger.debug(
