@@ -32,7 +32,7 @@ Use these to label the type of issue.
 For example, use `type:bug` to label a bug type issue, and use `type:feature` for feature requests.
 Only use `type:refactor` for code changes, don't use `type:refactor` for documentation type changes.
 
-Use the `breaking` label for Issues or PRs which contain changes that are not backwards compatible and require a major version bump.
+Add the `breaking` label for Issues or PRs which contain changes that are not backwards compatible and require a major version bump.
 
 ### Priority
 
