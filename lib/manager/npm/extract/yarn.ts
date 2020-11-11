@@ -8,13 +8,13 @@ export async function getYarnLock(filePath: string): Promise<LockFile> {
   const yarnLockRaw = await readLocalFile(filePath, 'utf8');
   try {
     const parsed = parseSyml(yarnLockRaw);
-    const lockFile: Record<string, string> = {};
-    let cacheVersion = NaN;
+    const lockedVersions: Record<string, string> = {};
+    let lockfileVersion = NaN;
 
     for (const [key, val] of Object.entries(parsed)) {
       if (key === '__metadata') {
         // yarn 2
-        cacheVersion = parseInt(val.cacheKey, 10);
+        lockfileVersion = parseInt(val.cacheKey, 10);
       } else {
         for (const entry of key.split(', ')) {
           const { scope, name, range } = structUtils.parseDescriptor(entry);
@@ -22,14 +22,14 @@ export async function getYarnLock(filePath: string): Promise<LockFile> {
           const { selector } = structUtils.parseRange(range);
 
           logger.trace({ entry, version: val.version });
-          lockFile[packageName + '@' + selector] = parsed[key].version;
+          lockedVersions[packageName + '@' + selector] = parsed[key].version;
         }
       }
     }
     return {
       isYarn1: !('__metadata' in parsed),
-      lockfileVersion: cacheVersion,
-      lockedVersions: lockFile,
+      lockfileVersion,
+      lockedVersions,
     };
   } catch (err) {
     logger.debug({ filePath, err }, 'Warning: Exception parsing yarn.lock');
