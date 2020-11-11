@@ -68,6 +68,7 @@ export interface GlobalConfig {
 }
 
 export interface RenovateAdminConfig {
+  allowPostUpgradeCommandTemplating?: boolean;
   allowedPostUpgradeCommands?: string[];
   autodiscover?: boolean;
   autodiscoverFilter?: string;

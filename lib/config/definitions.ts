@@ -93,6 +93,13 @@ export type RenovateOptions =
 
 const options: RenovateOptions[] = [
   {
+    name: 'allowPostUpgradeCommandTemplating',
+    description: 'If true allow templating for post-upgrade commands.',
+    type: 'boolean',
+    default: false,
+    admin: true,
+  },
+  {
     name: 'allowedPostUpgradeCommands',
     description:
       'A list of regular expressions that determine which post-upgrade tasks are allowed. A task has to match at least one of the patterns to be allowed to run',
@@ -1023,7 +1030,7 @@ const options: RenovateOptions[] = [
   },
   {
     name: 'bumpVersion',
-    description: 'Bump the version in the package.json being updated',
+    description: 'Bump the version in the package file being updated',
     type: 'string',
     allowedValues: ['major', 'minor', 'patch'],
   },
