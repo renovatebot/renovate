@@ -53,6 +53,9 @@ import * as utils from './utils';
  * https://confluence.atlassian.com/support/atlassian-support-end-of-life-policy-201851003.html#AtlassianSupportEndofLifePolicy-BitbucketServer
  */
 
+const BITBUCKET_INVALID_REVIEWERS =
+  'com.atlassian.bitbucket.pull.InvalidPullRequestReviewersException';
+
 let config: BbsConfig = {} as any;
 
 const bitbucketServerHttp = new BitbucketServerHttp();
@@ -128,7 +131,7 @@ export async function getJsonFile(fileName: string): Promise<any | null> {
   return null;
 }
 
-// Initialize GitLab by getting base branch
+// Initialize BitBucket Server by getting base branch
 export async function initRepo({
   repository,
   localDir,
@@ -577,15 +580,24 @@ export async function addReviewers(
     );
     await getPr(prNo, true);
   } catch (err) {
+    logger.fatal(
+      { err },
+      `Failed to add reviewers '${reviewers.join(', ')}' to #${prNo}`
+    );
     if (err.statusCode === 404) {
       throw new Error(REPOSITORY_NOT_FOUND);
     } else if (err.statusCode === 409) {
+      const errors = err?.response?.body?.errors || [];
+      if (
+        errors.every(
+          (error) => error?.exceptionName === BITBUCKET_INVALID_REVIEWERS
+        )
+      ) {
+        // If the errors are only about invalid reviewers do not throw REPOSITORY_CHANGED
+        throw err;
+      }
       throw new Error(REPOSITORY_CHANGED);
     } else {
-      logger.fatal(
-        { err },
-        `Failed to add reviewers '${reviewers.join(', ')}' to #${prNo}`
-      );
       throw err;
     }
   }
@@ -891,12 +903,21 @@ export async function updatePr({
       updatePrVersion(pr.number, updatedStatePr.version);
     }
   } catch (err) {
+    logger.fatal({ err }, `Failed to update PR`);
     if (err.statusCode === 404) {
       throw new Error(REPOSITORY_NOT_FOUND);
     } else if (err.statusCode === 409) {
+      const errors = err?.response?.body?.errors || [];
+      if (
+        errors.every(
+          (error) => error?.exceptionName === BITBUCKET_INVALID_REVIEWERS
+        )
+      ) {
+        // If the errors are only about invalid reviewers do not throw REPOSITORY_CHANGED
+        throw err;
+      }
       throw new Error(REPOSITORY_CHANGED);
     } else {
-      logger.fatal({ err }, `Failed to update PR`);
       throw err;
     }
   }

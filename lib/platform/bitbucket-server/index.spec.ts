@@ -506,6 +506,46 @@ describe(getName(__filename), () => {
           expect(httpMock.getTrace()).toMatchSnapshot();
         });
 
+        it('handles invalid users gracefully', async () => {
+          const scope = await initRepo();
+          scope
+            .get(
+              `${urlPath}/rest/api/1.0/projects/SOME/repos/repo/pull-requests/5`
+            )
+            .reply(200, prMock(url, 'SOME', 'repo'))
+            .get(
+              `${urlPath}/rest/api/1.0/projects/SOME/repos/repo/pull-requests/5/merge`
+            )
+            .reply(200, { conflicted: false })
+            .put(
+              `${urlPath}/rest/api/1.0/projects/SOME/repos/repo/pull-requests/5`
+            )
+            .reply(409, {
+              errors: [
+                {
+                  context: 'reviewers',
+                  message:
+                    'Errors encountered while adding some reviewers to this pull request.',
+                  exceptionName:
+                    'com.atlassian.bitbucket.pull.InvalidPullRequestReviewersException',
+                  reviewerErrors: [
+                    {
+                      context: 'username',
+                      message: 'username is not a user.',
+                      exceptionName: null,
+                    },
+                  ],
+                  validReviewers: [],
+                },
+              ],
+            });
+
+          await expect(
+            bitbucket.addReviewers(5, ['name'])
+          ).rejects.toThrowErrorMatchingSnapshot();
+          expect(httpMock.getTrace()).toMatchSnapshot();
+        });
+
         it('throws', async () => {
           const scope = await initRepo();
           scope
@@ -1345,6 +1385,46 @@ describe(getName(__filename), () => {
             bitbucket.updatePr({ number: 5, prTitle: 'title', prBody: 'body' })
           ).rejects.toThrow(REPOSITORY_NOT_FOUND);
 
+          expect(httpMock.getTrace()).toMatchSnapshot();
+        });
+
+        it('handles invalid users gracefully', async () => {
+          const scope = await initRepo();
+          scope
+            .get(
+              `${urlPath}/rest/api/1.0/projects/SOME/repos/repo/pull-requests/5`
+            )
+            .reply(200, prMock(url, 'SOME', 'repo'))
+            .get(
+              `${urlPath}/rest/api/1.0/projects/SOME/repos/repo/pull-requests/5/merge`
+            )
+            .reply(200, { conflicted: false })
+            .put(
+              `${urlPath}/rest/api/1.0/projects/SOME/repos/repo/pull-requests/5`
+            )
+            .reply(409, {
+              errors: [
+                {
+                  context: 'reviewers',
+                  message:
+                    'Errors encountered while adding some reviewers to this pull request.',
+                  exceptionName:
+                    'com.atlassian.bitbucket.pull.InvalidPullRequestReviewersException',
+                  reviewerErrors: [
+                    {
+                      context: 'username',
+                      message: 'username is not a user.',
+                      exceptionName: null,
+                    },
+                  ],
+                  validReviewers: [],
+                },
+              ],
+            });
+
+          await expect(
+            bitbucket.updatePr({ number: 5, prTitle: 'title', prBody: 'body' })
+          ).rejects.toThrowErrorMatchingSnapshot();
           expect(httpMock.getTrace()).toMatchSnapshot();
         });
 
