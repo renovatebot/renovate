@@ -161,7 +161,7 @@ describe('workers/repository/process/lookup', () => {
       nock('https://registry.npmjs.org').get('/q').reply(200, qJson);
       expect((await lookup.lookupUpdates(config)).updates).toHaveLength(1);
     });
-    it('enforces allowedVersions with negativee regex', async () => {
+    it('enforces allowedVersions with negative regex', async () => {
       config.currentValue = '0.4.0';
       config.allowedVersions = '!/^1/';
       config.depName = 'q';

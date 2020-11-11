@@ -203,14 +203,14 @@ This is an advance field and it's recommend you seek a config review before appl
 
 ## bumpVersion
 
-Currently this setting supports `npm` only, so raise a feature request if you have a use for it with other package managers.
+Currently this setting supports `helmv3` and `npm` only, so raise a feature request if you have a use for it with other package managers.
 It's purpose is if you want Renovate to update the `version` field within your file's `package.json` any time it updates dependencies within.
 Usually this is for automatic release purposes, so that you don't need to add another step after Renovate before you can release a new version.
 
 Configure this value to `"patch"`, `"minor"` or `"major"` to have Renovate update the version in your edited `package.json`.
 e.g. if you wish Renovate to always increase the target `package.json` version with a patch update, configure this to `"patch"`.
 
-You can also configure this field to `"mirror:x"` where `x` is the name of a package in the `package.json`.
+For `npm` only you can also configure this field to `"mirror:x"` where `x` is the name of a package in the `package.json`.
 Doing so means that the `package.json` `version` field will mirror whatever the version is that `x` depended on.
 Make sure that version is a pinned version of course, as otherwise it won't be valid.
 
