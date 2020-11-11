@@ -9,7 +9,6 @@ Object {
       "depName": "pre-commit/pre-commit-hooks",
       "depType": "repository",
       "lookupName": "pre-commit/pre-commit-hooks",
-      "skipReason": undefined,
     },
     Object {
       "currentValue": "19.3b0",
@@ -17,7 +16,6 @@ Object {
       "depName": "psf/black",
       "depType": "repository",
       "lookupName": "psf/black",
-      "skipReason": undefined,
     },
     Object {
       "currentValue": "19.3b0",
@@ -25,7 +23,6 @@ Object {
       "depName": "psf/black",
       "depType": "repository",
       "lookupName": "psf/black",
-      "skipReason": undefined,
     },
     Object {
       "currentValue": "19.3b0",
@@ -33,7 +30,6 @@ Object {
       "depName": "psf/black",
       "depType": "repository",
       "lookupName": "psf/black",
-      "skipReason": undefined,
     },
     Object {
       "currentValue": "v2.1.2",
@@ -41,15 +37,16 @@ Object {
       "depName": "prettier/pre-commit",
       "depType": "repository",
       "lookupName": "prettier/pre-commit",
-      "skipReason": undefined,
     },
     Object {
       "currentValue": "v1.0.0",
-      "datasource": undefined,
+      "datasource": "gitlab-tags",
       "depName": "pre-commit/pre-commit-hooks",
       "depType": "repository",
       "lookupName": "pre-commit/pre-commit-hooks",
-      "skipReason": "unsupported-url",
+      "registryUrls": Array [
+        "gitlab.enterprise.com",
+      ],
     },
     Object {
       "currentValue": "v2.1.2",
@@ -57,7 +54,6 @@ Object {
       "depName": "prettier/pre-commit",
       "depType": "repository",
       "lookupName": "prettier/pre-commit",
-      "skipReason": undefined,
     },
     Object {
       "currentValue": "v1.0.0",
@@ -80,7 +76,6 @@ Object {
       "depName": "pre-commit/pre-commit-hooks",
       "depType": "repository",
       "lookupName": "pre-commit/pre-commit-hooks",
-      "skipReason": undefined,
     },
   ],
 }

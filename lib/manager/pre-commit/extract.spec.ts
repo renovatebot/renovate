@@ -11,6 +11,21 @@ const examplePrecommitConfig = readFileSync(
   'utf8'
 );
 
+const emptyReposPrecommitConfig = readFileSync(
+  'lib/manager/pre-commit/__fixtures__/empty_repos.pre-commit-config.yaml',
+  'utf8'
+);
+
+const noReposPrecommitConfig = readFileSync(
+  'lib/manager/pre-commit/__fixtures__/no_repos.pre-commit-config.yaml',
+  'utf8'
+);
+
+const invalidRepoPrecommitConfig = readFileSync(
+  'lib/manager/pre-commit/__fixtures__/invalid_repo.pre-commit-config.yaml',
+  'utf8'
+);
+
 describe('lib/manager/precommit/extract', () => {
   describe('extractPackageFile()', () => {
     beforeEach(() => {
@@ -26,6 +41,18 @@ describe('lib/manager/precommit/extract', () => {
     });
     it('returns null for no file content', () => {
       const result = extractPackageFile(null);
+      expect(result).toBeNull();
+    });
+    it('returns null for no repos', () => {
+      const result = extractPackageFile(noReposPrecommitConfig);
+      expect(result).toBeNull();
+    });
+    it('returns null for empty repos', () => {
+      const result = extractPackageFile(emptyReposPrecommitConfig);
+      expect(result).toBeNull();
+    });
+    it('returns null for invalid repo', () => {
+      const result = extractPackageFile(invalidRepoPrecommitConfig);
       expect(result).toBeNull();
     });
     it('extracts from values.yaml correctly with same structure as "pre-commit sample-config"', () => {

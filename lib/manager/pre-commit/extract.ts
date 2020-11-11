@@ -1,132 +1,130 @@
+import is from '@sindresorhus/is';
 import yaml from 'js-yaml';
-import { forEach } from 'traverse';
 import { id as githubTagsId } from '../../datasource/github-tags';
 import { id as gitlabTagsId } from '../../datasource/gitlab-tags';
 import { logger } from '../../logger';
 import { SkipReason } from '../../types';
-import { hasKey } from '../../util/object';
 import { regEx } from '../../util/regex';
 import { PackageDependency, PackageFile } from '../common';
 
-import { PrecommitGitDependency, matchesPrecommitGitHeuristic } from './util';
+import {
+  matchesPrecommitConfigHeuristic,
+  matchesPrecommitDependencyHeuristic,
+} from './parsing';
+import { PreCommitConfig } from './types';
 
 function determineDatasource(
   repository: string,
-  hostName: string
-): { [key: string]: string } {
-  let datasource;
-  let skipReason;
-  if (hostName.endsWith('github.com')) {
-    datasource = githubTagsId;
-    logger.debug({ repository }, 'Found github dependency');
-  } else if (hostName.endsWith('gitlab.com')) {
-    datasource = gitlabTagsId;
-    logger.debug({ repository }, 'Found gitlab dependency');
-  } else {
-    logger.debug({ repository }, 'No datasource specified for hostname');
-    skipReason = SkipReason.UnsupportedUrl;
+  domain: string
+): { datasource?: string; registryUrls?: string[] } {
+  if (domain === 'github.com') {
+    logger.debug({ repository, domain }, 'Found github dependency');
+    return { datasource: githubTagsId };
   }
-  return { datasource, skipReason };
+  if (domain === 'gitlab.com') {
+    logger.debug({ repository, domain }, 'Found gitlab dependency');
+    return { datasource: gitlabTagsId };
+  }
+  logger.debug(
+    { repository, domain },
+    'Not github.com or gitlab.com, assuming private gitlab-ee.'
+  );
+  return { datasource: gitlabTagsId, registryUrls: [domain] };
 }
 
 function extractDependency(
   tag: string,
   repository: string
 ): {
-  depName: any;
-  depType: string;
-  datasource: any;
-  lookupName: any;
-  skipReason: any;
-  currentValue: string;
+  depName?: string;
+  depType?: string;
+  datasource?: string;
+  lookupName?: string;
+  skipReason?: SkipReason;
+  currentValue?: string;
 } {
-  let skipReason;
-  let datasource;
   let lookupName;
   const currentValue = tag;
   logger.debug({ tag }, 'Found version');
 
   const urlMatchers = [
-    // This splits "http://github.com/user/repo" -> "http://github" ".com" "user/repo
-    regEx('^(?<hostNamePrefix>.*)(?<domain>\\.\\w+)\\/(?<depName>\\S*)*'),
-    // This splits "git@hostNamePrefix.com:user/repo" -> "hostNamePrefix" ".com" "user/repo
-    regEx('^git@(?<hostNamePrefix>.*)(?<domain>\\.\\w+):(?<depName>\\S*)*'),
+    // This splits "http://github.com/user/repo" -> "github.com" "user/repo
+    regEx('^https?:\\/\\/(?<domain>[^\\/]+)\\/(?<depName>\\S*)'),
+    // This splits "git@domain.com:user/repo" -> "domain.com" "user/repo
+    regEx('^git@(?<domain>[^:]+):(?<depName>\\S*)'),
   ];
-  let matched = false;
   for (const urlMatcher of urlMatchers) {
     const match = urlMatcher.exec(repository);
     if (match) {
-      const { hostNamePrefix, domain, depName } = match.groups;
-      const hostName = hostNamePrefix.concat(domain);
+      const { domain, depName } = match.groups;
       lookupName = depName;
-      const sourceDef = determineDatasource(repository, hostName);
-      datasource = sourceDef.datasource;
-      skipReason = sourceDef.skipReason;
-      matched = true;
-      break;
+      const sourceDef = determineDatasource(repository, domain);
+      return {
+        ...sourceDef,
+        depName: lookupName,
+        depType: 'repository',
+        lookupName,
+        currentValue,
+      };
     }
   }
-  if (!matched) {
-    logger.info({ repository }, 'Could not separate host from lookup name.');
-    skipReason = SkipReason.InvalidUrl;
-  }
-
-  const dep = {
-    depName: lookupName,
+  logger.info({ repository }, 'Could not separate host from lookup name.');
+  return {
+    depName: undefined,
     depType: 'repository',
-    datasource,
-    lookupName,
-    skipReason,
+    datasource: undefined,
+    lookupName: undefined,
+    skipReason: SkipReason.InvalidUrl,
     currentValue,
   };
-  return dep;
 }
 
 /**
  * Find all supported dependencies in the pre-commit yaml object.
  *
- * @param parsedContent the yaml loaded contents of the full pre-commit configuration yaml
- * @param packageDependencies the array to add found dependenciees to
+ * @param precommitFile the parsed yaml config file
  */
 function findDependencies(
-  parsedContent: Record<string, unknown> | PrecommitGitDependency,
-  packageDependencies: Array<PackageDependency>
+  precommitFile: PreCommitConfig
 ): Array<PackageDependency> {
-  if (!parsedContent || typeof parsedContent !== 'object') {
-    return packageDependencies;
+  if (!precommitFile.repos) {
+    logger.debug(`No repos section found, skipping file`);
+    return [];
   }
+  const packageDependencies = [];
+  precommitFile.repos.forEach((item) => {
+    if (matchesPrecommitDependencyHeuristic(item)) {
+      logger.trace(item, 'Matched pre-commit dependency spec');
+      const repository = String(item.repo);
+      const tag = String(item.rev);
+      const dep = extractDependency(tag, repository);
 
-  if (hasKey('repos', parsedContent)) {
-    const repos = parsedContent.repos;
-    forEach(repos, (item) => {
-      if (matchesPrecommitGitHeuristic(item)) {
-        logger.trace(item, 'Matched pre-commit repo spec');
-        const repository = String(item.repo);
-        const tag = String(item.rev);
-        const dep = extractDependency(tag, repository);
-
-        packageDependencies.push(dep);
-      } else {
-        logger.trace(item, 'Did not find pre-commit repo spec');
-      }
-    });
-  }
+      packageDependencies.push(dep);
+    } else {
+      logger.trace(item, 'Did not find pre-commit repo spec');
+    }
+  });
   return packageDependencies;
 }
 
-export function extractPackageFile(content: string): PackageFile {
-  let parsedContent: Record<string, unknown> | PrecommitGitDependency;
+export function extractPackageFile(content: string): PackageFile | null {
+  let parsedContent: Record<string, unknown> | PreCommitConfig;
   try {
-    // a parser that allows extracting line numbers would be preferable, with
-    // the current approach we need to match anything we find again during the update
-    // TODO: fix me
     parsedContent = yaml.safeLoad(content, { json: true }) as any;
   } catch (err) {
     logger.debug({ err }, 'Failed to parse pre-commit config YAML');
     return null;
   }
+  if (!is.plainObject<Record<string, unknown>>(parsedContent)) {
+    logger.warn(`Parsing of pre-commit config YAML returned invalid result`);
+    return null;
+  }
+  if (!matchesPrecommitConfigHeuristic(parsedContent)) {
+    logger.info(`File does not look like a pre-commit config file`);
+    return null;
+  }
   try {
-    const deps = findDependencies(parsedContent, []);
+    const deps = findDependencies(parsedContent);
     if (deps.length) {
       logger.debug({ deps }, 'Found dependencies in pre-commit config');
       return { deps };
