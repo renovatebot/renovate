@@ -67,6 +67,10 @@ jobs:
 
       - name: Lint
         run: |
+          # disable command workflow processing
+          echo "::stop-commands::`echo -n ${{ github.token }} | sha256sum | head -c 64`"
+
+          # lint-fix
           docker run --rm -u "$UID:0" \
            -v "${PWD}:/code" \
            -v "$(mktemp -d -t ci-XXXXXXXXXX):/code/.git:ro" \
@@ -75,13 +79,10 @@ jobs:
            -w /code \
            -e HOME=/tmp/${UID} \
            "renovate/node:${{ env.NODE_VERSION}}" \
-           npx yarn lint-fix \
-           > /tmp/lintresult.log
+           npx yarn lint-fix
 
-      - uses: actions/upload-artifact@v2
-        with:
-          name: lintresult
-          path: /tmp/lintresult.log
+          # enable workflow command processing
+          echo "::`echo -n ${{ github.token }} | sha256sum | head -c 64`::"
 
       - name: Push changes
         env:
