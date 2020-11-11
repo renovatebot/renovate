@@ -11,6 +11,7 @@ import {
   REPOSITORY_EMPTY,
   REPOSITORY_MIRRORED,
   REPOSITORY_NOT_FOUND,
+  REPOSITORY_TEMPORARY_ERROR,
 } from '../../constants/error-messages';
 import { PLATFORM_TYPE_GITLAB } from '../../constants/platforms';
 import { logger } from '../../logger';
@@ -190,6 +191,11 @@ export async function initRepo({
       throw new Error(REPOSITORY_EMPTY);
     }
     config.defaultBranch = res.body.default_branch;
+    // istanbul ignore if
+    if (!config.defaultBranch) {
+      logger.warn({ resBody: res.body }, 'Error fetching GitLab project');
+      throw new Error(REPOSITORY_TEMPORARY_ERROR);
+    }
     config.mergeMethod = res.body.merge_method || 'merge';
     logger.debug(`${repository} default branch = ${config.defaultBranch}`);
     delete config.prList;
