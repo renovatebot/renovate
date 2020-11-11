@@ -1,3 +1,4 @@
+import { quote } from 'shlex';
 import { logger } from '../../logger';
 import { ExecOptions, exec } from '../../util/exec';
 import {
@@ -56,11 +57,11 @@ function getPipenvConstraint(
     const pipfileLock = JSON.parse(existingLockFileContent);
     if (pipfileLock?.default?.pipenv?.version) {
       const pipenvVersion: string = pipfileLock.default.pipenv.version;
-      return `${pipenvVersion}`;
+      return pipenvVersion;
     }
     if (pipfileLock?.develop?.pipenv?.version) {
       const pipenvVersion: string = pipfileLock.develop.pipenv.version;
-      return `${pipenvVersion}`;
+      return pipenvVersion;
     }
   } catch (err) {
     // Do nothing
@@ -103,7 +104,7 @@ export async function updateArtifacts({
         image: 'renovate/python',
         tagConstraint,
         tagScheme: 'pep440',
-        preCommands: ['pip install --user pipenv' + pipenvConstraint],
+        preCommands: [`pip install --user ${quote(`pipenv${pipenvConstraint}`)}`],
         volumes: [cacheDir],
       },
     };
