@@ -46,9 +46,11 @@ describe('manager/npm/extract/locked-versions', () => {
 
     it('uses package-lock.json', async () => {
       npm.getNpmLock.mockReturnValue({
-        a: '1.0.0',
-        b: '2.0.0',
-        c: '3.0.0',
+        lockedVersions: {
+          a: '1.0.0',
+          b: '2.0.0',
+          c: '3.0.0',
+        },
       });
       const packageFiles = [
         {

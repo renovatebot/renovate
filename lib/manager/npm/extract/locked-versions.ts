@@ -37,7 +37,7 @@ export async function getLockedVersions(
       logger.debug('Found ' + npmLock + ' for ' + packageFile.packageFile);
       if (!lockFileCache[npmLock]) {
         logger.trace('Retrieving/parsing ' + npmLock);
-        lockFileCache[npmLock] = { lockedVersions: await getNpmLock(npmLock) };
+        lockFileCache[npmLock] = await getNpmLock(npmLock);
       }
       for (const dep of packageFile.deps) {
         dep.lockedVersion = valid(
