@@ -21,7 +21,6 @@ Most issues should have a label relating to either a platform, manager, datasour
 <details>
     <summary>Type of issue</summary>
 
-    breaking
     type:bug
     type:docs
     type:feature
