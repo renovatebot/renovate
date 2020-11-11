@@ -4,6 +4,6 @@ export { extractPackageFile } from './extract';
 
 export const defaultConfig = {
   commitMessageTopic: 'Terragrunt dependency {{depNameShort}}',
-  fileMatch: ['\\.hcl$'],
+  fileMatch: ['(^|/)terragrunt\\.hcl$'],
   versioning: hashicorpVersioning.id,
 };
