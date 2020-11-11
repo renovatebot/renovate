@@ -17,9 +17,9 @@ export async function getLockedVersions(
         logger.trace('Retrieving/parsing ' + yarnLock);
         lockFileCache[yarnLock] = await getYarnLock(yarnLock);
       }
-      const { cacheVersion, isYarn1 } = lockFileCache[yarnLock];
+      const { lockfileVersion, isYarn1 } = lockFileCache[yarnLock];
       if (!isYarn1) {
-        if (cacheVersion >= 6) {
+        if (lockfileVersion >= 6) {
           // https://github.com/yarnpkg/berry/commit/f753790380cbda5b55d028ea84b199445129f9ba
           packageFile.constraints.yarn = '>= 2.2.0';
         } else {
@@ -51,6 +51,6 @@ export async function getLockedVersions(
 
 interface YarnLockCache {
   lockedVersions: Record<string, string>;
-  cacheVersion?: number;
+  lockfileVersion?: number; // cache version for Yarn
   isYarn1?: boolean;
 }

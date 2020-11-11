@@ -7,7 +7,7 @@ export async function getYarnLock(
   filePath: string
 ): Promise<{
   isYarn1: boolean;
-  cacheVersion: number;
+  lockfileVersion: number;
   lockedVersions: Record<string, string>;
 }> {
   const yarnLockRaw = await readLocalFile(filePath, 'utf8');
@@ -33,11 +33,11 @@ export async function getYarnLock(
     }
     return {
       isYarn1: !('__metadata' in parsed),
-      cacheVersion,
+      lockfileVersion: cacheVersion,
       lockedVersions: lockFile,
     };
   } catch (err) {
     logger.debug({ filePath, err }, 'Warning: Exception parsing yarn.lock');
-    return { isYarn1: true, cacheVersion: NaN, lockedVersions: {} };
+    return { isYarn1: true, lockfileVersion: NaN, lockedVersions: {} };
   }
 }
