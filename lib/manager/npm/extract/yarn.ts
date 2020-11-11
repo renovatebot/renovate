@@ -2,14 +2,9 @@ import { structUtils } from '@yarnpkg/core';
 import { parseSyml } from '@yarnpkg/parsers';
 import { logger } from '../../../logger';
 import { readLocalFile } from '../../../util/fs';
+import { LockFile } from './common';
 
-export async function getYarnLock(
-  filePath: string
-): Promise<{
-  isYarn1: boolean;
-  lockfileVersion: number;
-  lockedVersions: Record<string, string>;
-}> {
+export async function getYarnLock(filePath: string): Promise<LockFile> {
   const yarnLockRaw = await readLocalFile(filePath, 'utf8');
   try {
     const parsed = parseSyml(yarnLockRaw);

@@ -1,13 +1,14 @@
 import { valid } from 'semver';
 import { logger } from '../../../logger';
 import { PackageFile } from '../../common';
+import { LockFile } from './common';
 import { getNpmLock } from './npm';
 import { getYarnLock } from './yarn';
 
 export async function getLockedVersions(
   packageFiles: PackageFile[]
 ): Promise<void> {
-  const lockFileCache: Record<string, YarnLockCache> = {};
+  const lockFileCache: Record<string, LockFile> = {};
   logger.debug('Finding locked versions');
   for (const packageFile of packageFiles) {
     const { yarnLock, npmLock, pnpmShrinkwrap } = packageFile;
@@ -47,10 +48,4 @@ export async function getLockedVersions(
       logger.debug('TODO: implement pnpm-lock.yaml parsing of lockVersion');
     }
   }
-}
-
-interface YarnLockCache {
-  lockedVersions: Record<string, string>;
-  lockfileVersion?: number; // cache version for Yarn
-  isYarn1?: boolean;
 }
