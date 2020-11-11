@@ -180,7 +180,7 @@
     "@actions/core": "1.2.6",
     "@babel/cli": "7.12.1",
     "@babel/core": "7.12.3",
-    "@babel/node": "7.12.1",
+    "@babel/node": "7.12.6",
     "@babel/plugin-proposal-class-properties": "7.12.1",
     "@babel/plugin-proposal-object-rest-spread": "7.12.1",
     "@babel/plugin-syntax-dynamic-import": "7.8.3",
