@@ -506,7 +506,7 @@ describe(getName(__filename), () => {
           expect(httpMock.getTrace()).toMatchSnapshot();
         });
 
-        it('handles invalid users gracefully', async () => {
+        it('throws on invalid reviewers', async () => {
           const scope = await initRepo();
           scope
             .get(
@@ -530,8 +530,8 @@ describe(getName(__filename), () => {
                     'com.atlassian.bitbucket.pull.InvalidPullRequestReviewersException',
                   reviewerErrors: [
                     {
-                      context: 'username',
-                      message: 'username is not a user.',
+                      context: 'name',
+                      message: 'name is not a user.',
                       exceptionName: null,
                     },
                   ],
@@ -1388,7 +1388,7 @@ describe(getName(__filename), () => {
           expect(httpMock.getTrace()).toMatchSnapshot();
         });
 
-        it('handles invalid users gracefully', async () => {
+        it('handles invalid users gracefully by retrying without invalid reviewers', async () => {
           const scope = await initRepo();
           scope
             .get(
@@ -1412,19 +1412,36 @@ describe(getName(__filename), () => {
                     'com.atlassian.bitbucket.pull.InvalidPullRequestReviewersException',
                   reviewerErrors: [
                     {
-                      context: 'username',
-                      message: 'username is not a user.',
+                      context: 'userName2',
+                      message: 'userName2 is not a user.',
                       exceptionName: null,
                     },
                   ],
                   validReviewers: [],
                 },
               ],
-            });
+            })
+            .get(
+              `${urlPath}/rest/api/1.0/projects/SOME/repos/repo/pull-requests/5`
+            )
+            .reply(200, prMock(url, 'SOME', 'repo'))
+            .get(
+              `${urlPath}/rest/api/1.0/projects/SOME/repos/repo/pull-requests/5/merge`
+            )
+            .reply(200, { conflicted: false })
+            .put(
+              `${urlPath}/rest/api/1.0/projects/SOME/repos/repo/pull-requests/5`,
+              (body) => body.reviewers.length === 0
+            )
+            .reply(200, prMock(url, 'SOME', 'repo'));
 
-          await expect(
-            bitbucket.updatePr({ number: 5, prTitle: 'title', prBody: 'body' })
-          ).rejects.toThrowErrorMatchingSnapshot();
+          await bitbucket.updatePr({
+            number: 5,
+            prTitle: 'title',
+            prBody: 'body',
+            state: PrState.Open,
+          });
+
           expect(httpMock.getTrace()).toMatchSnapshot();
         });
 
