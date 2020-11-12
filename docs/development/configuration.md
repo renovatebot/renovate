@@ -22,8 +22,7 @@ The above are listed in **_reverse order_** of preference. e.g. CLI values will 
 
 ### Default Configuration
 
-Default configuration values can be found in
-[lib/config/definitions.ts](../../lib/config/definitions.ts)
+The default configuration values can be found in [lib/config/definitions.ts](../../lib/config/definitions.ts).
 
 ### Configuration File
 
