@@ -2,11 +2,11 @@
 
 ## Configuration Methods
 
-The Renovate bot can be configured via any of these methods:
+Renovate's bot admin settings can be configured via any of these methods:
 
 - Configuration file
-- Environment (variable? file? what is this about?)
-- CLI
+- Environment variables
+- CLI parameters
 - Configuration file in target repository at one of the following paths:
   - `renovate.json`
   - `renovate.json5`
@@ -23,6 +23,7 @@ The above are listed in **_reverse order_** of preference. e.g. CLI values will 
 ### Default Configuration
 
 The default configuration values can be found in [lib/config/definitions.ts](../../lib/config/definitions.ts).
+Options which have `"admin": true` are reserved only for bot admin configuration and cannot be configured within repository config files.
 
 ### Configuration File
 
