@@ -151,8 +151,8 @@ export function extractPackageFile(content: string): PackageFile | null {
 
   if (is.nonEmptyString(pipfile.packages?.pipenv)) {
     constraints.pipenv = pipfile.packages.pipenv;
-  } else if (is.nonEmptyString(pipfile['dev-packages']?.pipenv)) {
-    constraints.pipenv = pipfile['dev-packages'].pipenv;
+  } else if (is.nonEmptyString(pipfile["dev-packages"]?.pipenv)) {
+    constraints.pipenv = pipfile["dev-packages"].pipenv;
   }
   
   res.constraints = constraints;
