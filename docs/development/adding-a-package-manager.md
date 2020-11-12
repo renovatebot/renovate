@@ -46,7 +46,7 @@ Use this function instead of `extractPackageFile` if the package manager cannot 
 
 For example, npm/Yarn needs to correlate package files together for features such as Lerna and Workspaces, so it's necessary to iterate through them all together after initial parsing.
 
-As another example, Gradle needs to call a command via child process in order to extract dependencies, so that must be done first.
+As another example, Gradle needs to call a command via a child process in order to extract dependencies, so that must be done first.
 
 This function takes an array of filenames as input and returns an array of filenames and dependencies as a result.
 
