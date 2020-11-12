@@ -1,4 +1,3 @@
-import { join } from 'path';
 import URL from 'url';
 import fs from 'fs-extra';
 import Git, {
@@ -7,6 +6,7 @@ import Git, {
   SimpleGit,
   StatusResult as StatusResult_,
 } from 'simple-git';
+import { join } from 'upath';
 import {
   REPOSITORY_CHANGED,
   REPOSITORY_DISABLED,
