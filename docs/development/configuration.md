@@ -2,7 +2,7 @@
 
 ## Configuration Methods
 
-Configuration is supported via any or all of the below:
+The Renovate bot can be configured via any of these methods:
 
 - Configuration file
 - Environment
