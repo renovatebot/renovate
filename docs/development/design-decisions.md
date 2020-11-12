@@ -4,9 +4,9 @@ This file documents the design choices as well as configuration options.
 
 ## Stateless
 
-No state storage is needed on `renovate` or the source code repository apart from what you see publicly (branches, Pull Requests).
-It, therefore, doesn't matter if you stop/restart the script.
-The script would even still work if you had it running from two different locations, as long as their configuration was the same.
+A key feature of Renovate is that it does not require any state storage (e.g. on disk or in a database.
+Instead, Renovate's source of truth is the repository itself, e.g. branches, Issues and Pull Requests.
+Due to this design, it is possible to stop the script at any time without risking Renovate state being out of sync with repository state.
 
 ## Synchronous Operation
 
@@ -23,9 +23,10 @@ This means that specific configuration options always override more general conf
 
 From most specific to least specific:
 
-1. Per-package configuration (e.g. with package rules)
-1. Package-type configuration
-1. Per-repository configuration
+1. Update type (e.g. `major`, `minor`, `patch`)
+1. Package (e.g. `lodash`, `django`)
+1. Manager (e.g. `npm`, `pypi`)
+1. Repository config
 1. Global configuration
 
 ## Automatic discovery of package file locations
@@ -40,8 +41,7 @@ You could limit Renovate to only update the `package.json` in the root of the re
 
 By default, `renovate` will maintain separate branches for each dependency.
 So if 20 dependencies need updating, there will be at least 20 branches/PRs.
-Although this may seem undesirable, it's even less desirable if all 20 were in the same Pull Request.
-That way it would be up to the users to determine which dependency upgrade(s) caused the build to fail.
+Although this may seem undesirable, it's even less desirable if all 20 were in the same Pull Request and it's very difficult to work out which upgrade caused the test failure.
 
 However, you can override the default branch and PR name templates to get a single branch for all dependencies.
 The `groupName` configuration option can be used at a repository level (e.g. give it the value `All`) and then all dependency updates will be in the same branch/PR.
@@ -68,14 +68,12 @@ We do this because:
 - Branches often receive updates (e.g. new patches) before they're merged
 - Naming the branch like `1.x` means its name still names sense if a `1.2.1` release happens
 
-Note: You can configure the branch names by using a string template.
+Note: You can configure the branch names by using the string template `branchName` and/or its sub-templates `branchPrefix` and `branchTopic`.
 
 ## Pull Request Recreation
 
-By default, the script does not create a new PR if it finds an identical PR that's already closed.
+By default, the script does not create a new PR if it finds a previously-closed PR with the same branch name and PR title (assuming the PR title has a version in it).
 This allows users to close unwelcome upgrade PRs and not worry about them being recreated every run.
-Typically, this is most useful for major upgrades.
-This option is configurable. (WHERE/HOW???)
 
 ## Rebasing Unmergeable Pull Requests
 
