@@ -212,7 +212,7 @@ Try like this:
 
 If you are using VS Code, try like this:
 
-1. In the configuration file, i.e `config.js` in the root directory of the project, add `token` with your personal access token
+1. In the configuration file, e.g. `config.js` in the root directory of the project, add `token` with your personal access token
 2. In the same configuration file, add `repositories` with the repository you want to test against. The file `config.js` would look something like this:
 
 ```javascript
