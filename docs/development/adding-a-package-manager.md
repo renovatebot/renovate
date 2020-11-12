@@ -1,10 +1,10 @@
 # Adding a Package Manager
 
-This document describes the steps to take if you are interested in adding new language/package manager support.
+This document describes the steps to take if you want to add a new language/package manager.
 
 ### Code structure
 
-Each package manager lives under `lib/manager/*`, and are often tightly coupled to datasources under `lib/datasource/*`.
+Each package manager lives under `lib/manager/*`, and is often tightly coupled to datasources under `lib/datasource/*`.
 
 Versioning logic (e.g. semver, pep440) lives under `lib/versioning/*`.
 
