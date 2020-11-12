@@ -53,8 +53,10 @@ It returns an array of filenames and dependencies.
 
 #### `getRangeStrategy(config)` (optional)
 
-This optional function should be written if you wish the manager to support "auto" range strategies, e.g. pinning or not pinning depending on other values in the package file.
-`npm` uses this to pin `devDependencies` but not `dependencies` unless the package file is detected as an app.
+Write this optional function if you want the manager to support "auto" range strategies.
+For example, pinning or not pinning a dependency, depending on other values in the package file.
+
+The `npm` manager uses the `getRangeStrategy` function to pin `devDependencies` but not `dependencies` unless the package file is detected as an app.
 
 If left undefined, then a default `getRangeStrategy` will be used that always returns "replace".
 
