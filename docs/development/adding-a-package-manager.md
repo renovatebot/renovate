@@ -23,7 +23,8 @@ The manager's `index.ts` file supports the following values/functions:
 ##### `extractPackageFile(content, packageFile, config)` (async, semi-mandatory)
 
 This function is mandatory unless you use `extractAllPackageFiles` instead.
-It takes as arguments the file's content and optionally the file's full file pathname and config, and returns an array of detected/extracted dependencies, including:
+It takes as arguments the file's content and optionally the file's full file pathname and config.
+The function returns an array of detected/extracted dependencies, including:
 
 - dependency name
 - dependency type (e.g. dependencies, devDependencies, etc)
