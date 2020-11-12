@@ -30,7 +30,8 @@ You can override default configuration using a configuration file, with default 
 If you need an alternate location or name, set it in the environment variable `RENOVATE_CONFIG_FILE`.
 
 Using a configuration file gives you very granular configuration options.
-For instance, you can override most settings at the global (file), repository, or package level. e.g. apply one set of labels for `backend/package.json` and a different set for `frontend/package.json` in the same repository.
+For instance, you can override most settings at the global (file), repository, or package level.
+e.g. apply one set of labels for `backend/package.json` and a different set of labels for `frontend/package.json` in the same repository.
 
 ```javascript
 module.exports = {
