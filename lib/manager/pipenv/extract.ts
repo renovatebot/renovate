@@ -136,8 +136,26 @@ export function extractPackageFile(content: string): PackageFile | null {
     ...extractFromSection(pipfile, 'packages'),
     ...extractFromSection(pipfile, 'dev-packages'),
   ];
-  if (res.deps.length) {
-    return res;
+  if (!res.deps.length) {
+    return null;
   }
-  return null;
+  
+  const constraints: Record<string, any> = {};
+
+  if (is.nonEmptyString(pipfile.requires?.python_version)) {
+    constraints.python = `== ${pipfile.requires.python_version}.*`;
+  }
+  elif (is.nonEmptyString(pipfile.requires?.python_full_version)) {
+    constraints.python = `== ${pipfile.requires.python_full_version}`;
+  }
+  
+  if (is.nonEmptyString(pipfile.packages?.pipenv)) {
+    constraints.pipenv = pipfile.packages.pipenv;
+  }
+  elif (is.nonEmptyString(pipfile.dev_packages?.pipenv)) {
+    constraints.pipenv = pipfile.dev_packages.pipenv;
+  }
+  
+  res.constraints = constraints;
+  return res;
 }
