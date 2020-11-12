@@ -1175,7 +1175,7 @@ Use this field to restrict rules to a particular datasource. e.g.
 
 `matchCurrentVersion` can be an exact semver version or a semver range.
 
-This field also supports Regular Expressions which should begin and end with `/`.
+This field also supports Regular Expressions which have to begin and end with `/`.
 For example, the following will enforce that only `1.*` versions:
 
 ```json
