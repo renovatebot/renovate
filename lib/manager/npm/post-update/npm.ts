@@ -31,7 +31,7 @@ export async function generateLockFile(
     if (validRange(npmCompatibility)) {
       installNpm += `@${quote(npmCompatibility)}`;
     }
-    const preCommands = [installNpm];
+    const preCommands = [installNpm, 'hash -d npm'];
     const commands = [];
     let cmdOptions = '';
     if (postUpdateOptions?.includes('npmDedupe') || skipInstalls === false) {
