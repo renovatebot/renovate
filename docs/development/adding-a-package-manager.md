@@ -2,7 +2,7 @@
 
 This document describes the steps to take if you want to add a new language/package manager.
 
-### Code structure
+## Code structure
 
 Each package manager lives under `lib/manager/*`, and is often tightly coupled to datasources under `lib/datasource/*`.
 
@@ -10,7 +10,7 @@ Versioning logic (e.g. SemVer, PEP 440) lives under `lib/versioning/*`.
 
 Common application logic for Renovate, not specific to particular managers, usually lives under `lib/workers/*`.
 
-### Manager requirements
+## Manager requirements
 
 The manager's `index.ts` file supports the following values/functions:
 
@@ -20,7 +20,7 @@ The manager's `index.ts` file supports the following values/functions:
 - language (optional)
 - supportsLockFileMaintenance (optional)
 
-##### `extractPackageFile(content, packageFile, config)` (async, semi-mandatory)
+### `extractPackageFile(content, packageFile, config)` (async, semi-mandatory)
 
 This function is mandatory unless you use `extractAllPackageFiles` instead.
 It takes as arguments the file's content and optionally the file's full file pathname and config.
@@ -40,7 +40,7 @@ Make sure the `skipReason` variable string is helpful to someone reading the log
 
 Also, if a file is passed to `extractPackageFile` which is a "false match" (e.g. not an actual package file, or contains no dependencies) then this function can return `null` to have it ignored and removed from the list of package files.
 
-##### `extractAllPackageFiles(packageFiles)` (async, optional)
+### `extractAllPackageFiles(packageFiles)` (async, optional)
 
 Use this function instead of `extractPackageFile` if the package manager cannot parse/extract all package files in parallel.
 
@@ -51,7 +51,7 @@ As another example, Gradle needs to call a command via a child process in order 
 The `extractAllPackageFiles` function takes an array of filenames as input.
 It returns an array of filenames and dependencies.
 
-#### `getRangeStrategy(config)` (optional)
+### `getRangeStrategy(config)` (optional)
 
 Write this optional function if you want the manager to support "auto" range strategies.
 For example, pinning or not pinning a dependency, depending on other values in the package file.
@@ -60,10 +60,10 @@ The `npm` manager uses the `getRangeStrategy` function to pin `devDependencies` 
 
 If left undefined, then a default `getRangeStrategy` will be used that always returns "replace".
 
-##### `language` (optional)
+### `language` (optional)
 
 This is used when more than one package manager shares settings from a common language.
 
-#### `supportsLockFileMaintenance` (optional)
+### `supportsLockFileMaintenance` (optional)
 
 Set to true if this package manager needs to update lock files in addition to package files.
