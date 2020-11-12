@@ -62,7 +62,7 @@ If left undefined, then a default `getRangeStrategy` will be used that always re
 
 ##### `language` (optional)
 
-This is used when more than one package manager share settings from a common language.
+This is used when more than one package manager shares settings from a common language.
 
 #### `supportsLockFileMaintenance` (optional)
 
