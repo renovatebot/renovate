@@ -31,7 +31,8 @@ The function returns an array of detected/extracted dependencies, including:
 - currentValue
 - versioning used (e.g. SemVer, PEP 440)
 
-This function doesn't necessarily need to _understand_ the file or even syntax that it is passed, instead it just needs to understand enough to extract an accurate list of dependencies.
+The `extractPackageFile` function doesn't need to fully _understand_ the file or syntax that it receives.
+It needs to understand enough to extract an accurate list of dependencies.
 
 As a general approach, we want to extract _all_ dependencies from each dependency file, even if they contain values we don't support.
 For any that have unsupported values that we cannot renovate, this `extractPackageFile` function should set a `skipReason` to a value that would be helpful to someone reading the logs.
