@@ -140,7 +140,7 @@ export function extractPackageFile(content: string): PackageFile | null {
   if (!res.deps.length) {
     return null;
   }
-  
+
   const constraints: Record<string, any> = {};
 
   if (is.nonEmptyString(pipfile.requires?.python_version)) {
@@ -151,11 +151,10 @@ export function extractPackageFile(content: string): PackageFile | null {
 
   if (is.nonEmptyString(pipfile.packages?.pipenv)) {
     constraints.pipenv = pipfile.packages.pipenv;
+  } else if (is.nonEmptyString(pipfile['dev-packages']?.pipenv)) {
+    constraints.pipenv = pipfile['dev-packages'].pipenv;
   }
-// else if (is.nonEmptyString(pipfile['dev-packages']?.pipenv)) {
-//   constraints.pipenv = pipfile['dev-packages'].pipenv;
-// }
-  
+
   res.constraints = constraints;
   return res;
 }
