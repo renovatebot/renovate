@@ -4,7 +4,7 @@ This file documents the design choices as well as configuration options.
 
 ## Stateless
 
-A key feature of Renovate is that it does not require any state storage (e.g. on disk or in a database.
+A key feature of Renovate is that it does not require any state storage (e.g. on disk or in a database).
 Instead, Renovate's source of truth is the repository itself, e.g. branches, Issues and Pull Requests.
 Due to this design, it is possible to stop the script at any time without risking Renovate state being out of sync with repository state.
 
