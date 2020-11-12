@@ -29,7 +29,7 @@ The function returns an array of detected/extracted dependencies, including:
 - dependency name
 - dependency type (e.g. dependencies, devDependencies, etc)
 - currentValue
-- versioning used (e.g. semver, pep440)
+- versioning used (e.g. SemVer, PEP 440)
 
 This function doesn't necessarily need to _understand_ the file or even syntax that it is passed, instead it just needs to understand enough to extract an accurate list of dependencies.
 
