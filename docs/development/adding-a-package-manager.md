@@ -48,7 +48,8 @@ For example, npm/Yarn needs to correlate package files together for features suc
 
 As another example, Gradle needs to call a command via a child process in order to extract dependencies, so that must be done first.
 
-This function takes an array of filenames as input and returns an array of filenames and dependencies as a result.
+The `extractAllPackageFiles` function takes an array of filenames as input.
+It returns an array of filenames and dependencies.
 
 #### `getRangeStrategy(config)` (optional)
 
