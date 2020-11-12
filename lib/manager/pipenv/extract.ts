@@ -144,15 +144,13 @@ export function extractPackageFile(content: string): PackageFile | null {
 
   if (is.nonEmptyString(pipfile.requires?.python_version)) {
     constraints.python = `== ${pipfile.requires.python_version}.*`;
-  }
-  else if (is.nonEmptyString(pipfile.requires?.python_full_version)) {
+  } else if (is.nonEmptyString(pipfile.requires?.python_full_version)) {
     constraints.python = `== ${pipfile.requires.python_full_version}`;
   }
-  
+
   if (is.nonEmptyString(pipfile.packages?.pipenv)) {
     constraints.pipenv = pipfile.packages.pipenv;
-  }
-  else if (is.nonEmptyString(pipfile.dev_packages?.pipenv)) {
+  } else if (is.nonEmptyString(pipfile.dev_packages?.pipenv)) {
     constraints.pipenv = pipfile.dev_packages.pipenv;
   }
   
