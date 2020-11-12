@@ -13,6 +13,19 @@ Array [
 ]
 `;
 
+exports[`config/validation validateConfig(config) catches invalid matchCurrentVersion regex 1`] = `
+Array [
+  Object {
+    "depName": "Configuration Error",
+    "message": "Invalid regExp for packageRules[1].matchCurrentVersion: \`/***$}{]][/\`",
+  },
+  Object {
+    "depName": "Configuration Error",
+    "message": "Invalid regExp for packageRules[3].matchCurrentVersion: \`!/***$}{]][/\`",
+  },
+]
+`;
+
 exports[`config/validation validateConfig(config) catches invalid templates 1`] = `
 Array [
   Object {

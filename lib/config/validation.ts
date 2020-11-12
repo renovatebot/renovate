@@ -144,7 +144,10 @@ export async function validateConfig(
             message: `Invalid ${currentPath}: \`${errorMessage}\``,
           });
         }
-      } else if (key === 'allowedVersions' && isConfigRegex(val)) {
+      } else if (
+        ['allowedVersions', 'matchCurrentVersion'].includes(key) &&
+        isConfigRegex(val)
+      ) {
         if (!configRegexPredicate(val)) {
           errors.push({
             depName: 'Configuration Error',
