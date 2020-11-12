@@ -2,16 +2,20 @@
 
 ## Multiple files per branch
 
-Renovate can/should update multiple files in the same branch/PR.
-e.g. it might be `package.json` and `yarn.lock`, or it might be multiple `package.json` files in a monorepo.
+Renovate can, and should, update multiple files in the same branch/PR.
+
+e.g. Renovate can update the `package.json` and the corresponding `yarn.lock` file in one go.
+The bot can also update multiple `package.json` files in a monorepo.
 
 ## One commit per branch
 
-To keep things neat from a user perspective, and simplify things from Renovate's perspective, we aim to always use just one commit per branch, even when multiple files need updating.
+To keep things neat: aim to use one commit per branch, even when multiple files need updating.
+This way we can use the following logic:
 
-A positive side effect of this is that it allows us to have a shortcut rule of, "If there's only one commit in the branch then it's clean, otherwise it must have been edited by users and we should stop updating it".
+- If there's one commit in the branch, the branch is clean.
+- If there is more than one commit in the branch, then the branch has been edited by users and we stop updating the branch.
 
 ## Updating branches
 
-If files in an already-existing branch need updating (e.g. an even newer version has been released), then we still aim to have just one commit.
-We achieve this by force pushing with `git` to the existing branch.
+If files in an already-existing branch need updating (e.g. an even newer version has been released), then we still want to have only one commit.
+Do this by force pushing the necessary changes to the existing branch with `git`.
