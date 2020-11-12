@@ -5,7 +5,7 @@
 The Renovate bot can be configured via any of these methods:
 
 - Configuration file
-- Environment
+- Environment (variable? file? what is this about?)
 - CLI
 - Configuration file in target repository at one of the following paths:
   - `renovate.json`
