@@ -552,7 +552,7 @@ export function addAssignees(iid: number, assignees: string[]): Promise<void> {
   return Promise.resolve();
 }
 
-function isInvalidReviewersResponse(err: any): string[] {
+function isInvalidReviewersResponse(err: any): boolean {
   const errors = err?.response?.body?.errors || [];
   return (
     errors.length > 0 &&
@@ -566,9 +566,9 @@ function getInvalidReviewers(err: any): string[] {
   const errors = err?.response?.body?.errors || [];
   let invalidReviewers = [];
   for (const error of errors) {
-    if (error?.exceptionName === BITBUCKET_INVALID_REVIEWERS) {
+    if (error.exceptionName === BITBUCKET_INVALID_REVIEWERS) {
       invalidReviewers = invalidReviewers.concat(
-        error?.reviewerErrors?.map(({ context }) => context) || []
+        error.reviewerErrors?.map(({ context }) => context) || []
       );
     }
   }
@@ -924,25 +924,23 @@ export async function updatePr({
       updatePrVersion(pr.number, updatedStatePr.version);
     }
   } catch (err) {
-    logger.warn({ err, prNo }, `Failed to update PR`);
+    logger.debug({ err, prNo }, `Failed to update PR`);
     if (err.statusCode === 404) {
       throw new Error(REPOSITORY_NOT_FOUND);
-    } else if (err.statusCode === 409 && !isInvalidReviewersResponse(err)) {
-      throw new Error(REPOSITORY_CHANGED);
-    } else if (
-      err.statusCode === 409 &&
-      isInvalidReviewersResponse(err) &&
-      !bitbucketInvalidReviewers
-    ) {
-      // Retry again with invalid reviewers being removed
-      const invalidReviewers = getInvalidReviewers(err);
-      await updatePr({
-        number: prNo,
-        prTitle: title,
-        prBody: rawDescription,
-        state,
-        bitbucketInvalidReviewers: invalidReviewers,
-      });
+    } else if (err.statusCode === 409) {
+      if (isInvalidReviewersResponse(err) && !bitbucketInvalidReviewers) {
+        // Retry again with invalid reviewers being removed
+        const invalidReviewers = getInvalidReviewers(err);
+        await updatePr({
+          number: prNo,
+          prTitle: title,
+          prBody: rawDescription,
+          state,
+          bitbucketInvalidReviewers: invalidReviewers,
+        });
+      } else {
+        throw new Error(REPOSITORY_CHANGED);
+      }
     } else {
       throw err;
     }
