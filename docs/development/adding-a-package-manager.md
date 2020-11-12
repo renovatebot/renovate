@@ -42,7 +42,7 @@ Also, if a file is passed to `extractPackageFile` which is a "false match" (e.g.
 
 ##### `extractAllPackageFiles(packageFiles)` (async, optional)
 
-You can use this function instead of `extractPackageFile` if the package manager cannot parse/extract all package files in parallel.
+Use this function instead of `extractPackageFile` if the package manager cannot parse/extract all package files in parallel.
 
 For example, npm/Yarn needs to correlate package files together for features such as Lerna and Workspaces, so it's necessary to iterate through them all together after initial parsing.
 
