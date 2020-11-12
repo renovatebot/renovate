@@ -8,7 +8,7 @@ Each package manager lives under `lib/manager/*`, and is often tightly coupled t
 
 Versioning logic (e.g. SemVer, PEP 440) lives under `lib/versioning/*`.
 
-Common application logic for Renovate - not specific to particular managers - usually lives under `lib/workers/*`.
+Common application logic for Renovate, not specific to particular managers, usually lives under `lib/workers/*`.
 
 ### Manager requirements
 
