@@ -1,5 +1,5 @@
 import findUp from 'find-up';
-import * as path from 'upath';
+import * as upath from 'upath';
 import { XmlDocument } from 'xmldoc';
 import * as datasourceNuget from '../../datasource/nuget';
 import { logger } from '../../logger';
@@ -26,7 +26,7 @@ export async function determineRegistries(
   // Valid file names taken from https://github.com/NuGet/NuGet.Client/blob/f64621487c0b454eda4b98af853bf4a528bef72a/src/NuGet.Core/NuGet.Configuration/Settings/Settings.cs#L34
   const nuGetConfigFileNames = ['nuget.config', 'NuGet.config', 'NuGet.Config'];
   const nuGetConfigPath = await findUp(nuGetConfigFileNames, {
-    cwd: path.dirname(path.join(localDir, packageFile)),
+    cwd: upath.dirname(upath.join(localDir, packageFile)),
     type: 'file',
   });
 
