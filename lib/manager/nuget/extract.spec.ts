@@ -1,5 +1,5 @@
 import { readFileSync } from 'fs';
-import * as path from 'path';
+import * as path from 'upath';
 import { ExtractConfig } from '../common';
 import { extractPackageFile } from './extract';
 

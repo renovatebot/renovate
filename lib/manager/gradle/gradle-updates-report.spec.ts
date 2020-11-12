@@ -1,6 +1,6 @@
-import * as path from 'path';
 import * as fs from 'fs-extra';
 import tmp, { DirectoryResult } from 'tmp-promise';
+import * as path from 'upath';
 import { getName } from '../../../test/util';
 import { exec } from '../../util/exec';
 import { ifSystemSupportsGradle } from './__testutil__/gradle';

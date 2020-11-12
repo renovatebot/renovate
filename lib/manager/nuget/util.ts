@@ -1,5 +1,5 @@
-import * as path from 'path';
 import findUp from 'find-up';
+import * as path from 'upath';
 import { XmlDocument } from 'xmldoc';
 import * as datasourceNuget from '../../datasource/nuget';
 import { logger } from '../../logger';
