@@ -9,7 +9,7 @@ export async function getYarnLock(filePath: string): Promise<LockFile> {
   try {
     const parsed = parseSyml(yarnLockRaw);
     const lockedVersions: Record<string, string> = {};
-    let lockfileVersion = NaN;
+    let lockfileVersion;
 
     for (const [key, val] of Object.entries(parsed)) {
       if (key === '__metadata') {
@@ -33,6 +33,6 @@ export async function getYarnLock(filePath: string): Promise<LockFile> {
     };
   } catch (err) {
     logger.debug({ filePath, err }, 'Warning: Exception parsing yarn.lock');
-    return { isYarn1: true, lockfileVersion: NaN, lockedVersions: {} };
+    return { isYarn1: true, lockedVersions: {} };
   }
 }

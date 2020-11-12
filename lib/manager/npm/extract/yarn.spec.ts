@@ -21,7 +21,7 @@ describe('manager/npm/extract/yarn', () => {
       fs.readLocalFile.mockResolvedValueOnce(plocktest1Lock);
       const res = await getYarnLock('package.json');
       expect(res.isYarn1).toBe(true);
-      expect(res.lockfileVersion).toBe(NaN);
+      expect(res.lockfileVersion).toBeUndefined();
       expect(res.lockedVersions).toMatchSnapshot();
       expect(Object.keys(res.lockedVersions)).toHaveLength(7);
     });
