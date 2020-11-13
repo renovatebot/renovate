@@ -1598,7 +1598,7 @@ Example:
 
 ### matchStringsStrategy
 
-`matchStringsStrategy` defines which procedure should be used to interpret the with `matchString` defined regular expressions.
+`matchStringsStrategy` controls behavior when multiple `matchStrings` values are provided.
 Three options are available:
 
 - `any` (default)
@@ -1633,23 +1633,22 @@ a Dockerfile:
 
 ```dockerfile
 FROM amd64/ubuntu:18.04
-
 ENV GRADLE_VERSION=6.2 # gradle-version/gradle&versioning=maven
 ENV NODE_VERSION=10.19.0 # github-tags/nodejs/node&versioning=node
 ```
 
 #### recursive
 
-If using `recursive` the `matchString` will be looped through and the full match of the last will define the range of the next one.
+If using `recursive` the `matchStrings` will be looped through and the full match of the last will define the range of the next one.
 This can be used to narrow down the search area to prevent multiple matches.
-How ever the `recursive` strategy allows to handle multiple dependencies. The workflow is as follows.
-All matches of the first `matchString` are detected, for each of these matches the match range will used as basis for the second `matchString`.
-If this `matchString` again has multiple matches it will split again. This process will be followed as long there is a match,
-a regex is available or, a dependency is detected.
+However, the `recursive` strategy still allows the matching of multiple dependencies as described below.
+All matches of the first `matchStrings` pattern are detected, then each of these matches will used as basis be used as the input for the next `matchStrings` pattern, and so on.
+If the next `matchStrings` pattern has multiple matches then it will split again.
+This process will be followed as long there is a match plus a next `matchingStrings` pattern is available or a dependency is detected.
 
 This is an example how this can work.
 The first regex manager will only upgrade `grafana/loki` as looks for the `backup` key then looks for the `test` key and then uses this result for extraction of necessary attributes.
-How ever the second will upgrade both definitions as its first `matchString` matches both `test` keys.
+However, the second regex manager will upgrade both definitions as its first `matchStrings` matches both `test` keys.
 
 renovate.json:
 
@@ -1702,13 +1701,12 @@ example.json:
 
 #### combination
 
-This option allows to combine the values of multiple lines inside your file. This is also possible using both other `matchStringStrategy`s
-but with these the file content between the lines has to be factored in and can easily broken in some scenarios e.g. someone
-adds a comment between the lines or changes the order.
-`combination` will only update a single dependency, if you want to update multiple dependencies using `combination` you
-have to define multiple regex managers.
-As the other strategies will consider all matches of `matchStrings`, but later set regex groups will overwrite earlier ones.
-At the end the values will be merged, and a single dependency will be created.
+This option allows the possibility to combine the values of multiple lines inside a file.
+While using multiple lines is also possible using both other `matchStringStrategy` values, the `combination` approach is less susceptible to white space or line breaks stopping a match.
+
+`combination` will only match at most one dependency per file, so if you want to update multiple dependencies using `combination` you have to define multiple regex managers.
+
+Matched group values will be merged to form a single dependency.
 
 renovate.json:
 
@@ -1747,6 +1745,7 @@ thanos_image: "prom/prometheus"  // a comment
 thanos_version: "0.15.0" // a comment
 ```
 
+In the above example, each regex manager will match a single dependency each.
 ### depNameTemplate
 
 If `depName` cannot be captured with a named capture group in `matchString` then it can be defined manually using this field.
