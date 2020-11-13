@@ -98,9 +98,13 @@ What branch protection rules specifically are causing problems?
 
 ### Required reviews
 
-I think we want users to use the Renovate-approve and renovate-approve-2 bots?
-Probably should add links to those on the GitHub marketplace?
-Do we have bots for other platforms or only for GitHub?
+If you have turned on "Require pull request reviews before merging" in your GitHub branch protection settings, you'll need a way to approve the automerge Renovate pull requests.
+The Renovate team has made two apps to automate the approval.
+
+If you require one approval it's enough to install and use the [renovate-approve](https://github.com/apps/renovate-approve) app.
+But, if you require two approvals, then you also need to install and use the [Renovate Approve 2](https://github.com/apps/renovate-approve-2) app.
+
+These apps are only available for GitHub.
 
 ### Codeowners
 
