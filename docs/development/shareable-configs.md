@@ -32,9 +32,13 @@ In human-understandable form, the rules are:
 
 ### Non-scoped
 
-| name                                         | example use                                       | preset    | npm package resolves as           | parameters | Mandatory preset name? |
-| -------------------------------------------- | ------------------------------------------------- | --------- | --------------------------------- | ---------- | ---------------------- |
-| non-scoped short with preset name            | `somepackagename:default`                         | `default` | `renovate-config-somepackagename` | none       | yes                    |
-| non-scoped short with preset name and params | `somepackagename:default(eslint)`                 | `default` | `renovate-config-somepackagename` | `eslint`   | yes                    |
-| non-scoped full with preset name             | `renovate-config-somepackagename:default`         | `default` | `renovate-config-somepackagename` | none       | yes                    |
-| non-scoped full with preset name and params  | `renovate-config-somepackagename:default(eslint)` | `default` | `renovate-config-somepackagename` | `eslint`   | yes                    |
+If you use a non-scoped config, you must use a preset name!
+
+| name                                         | example use                                       | preset    | npm package resolves as           | parameters |
+| -------------------------------------------- | ------------------------------------------------- | --------- | --------------------------------- | ---------- |
+| non-scoped short with preset name            | `somepackagename:default`                         | `default` | `renovate-config-somepackagename` | none       |
+| non-scoped short with preset name and params | `somepackagename:default(eslint)`                 | `default` | `renovate-config-somepackagename` | `eslint`   |
+| non-scoped full with preset name             | `renovate-config-somepackagename:default`         | `default` | `renovate-config-somepackagename` | none       |
+| non-scoped full with preset name and params  | `renovate-config-somepackagename:default(eslint)` | `default` | `renovate-config-somepackagename` | `eslint`   |
+
+Reminder: If you use a non-scoped config, you must use a preset name!
