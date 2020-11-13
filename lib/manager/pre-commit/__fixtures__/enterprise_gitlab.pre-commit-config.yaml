@@ -1,0 +1,17 @@
+fail_fast: true
+repos:
+  - repo: https://gitlab.enterprise.com/pre-commit/pre-commit-hooks
+    # case with non-default url.
+    rev: v1.0.0
+  - repo: https://unknown.enterprise.com/pre-commit/pre-commit-hooks
+    # case with non-default url.
+    rev: v1.0.0
+  - repo: https://gitea.enterprise.com/pre-commit/pre-commit-hooks
+    # case with non-default url.
+    rev: v1.0.0
+  - repo: https://github.enterprise.com/pre-commit/pre-commit-hooks
+    # case with non-default url.
+    rev: v1.0.0
+  - repo: https://unknown.enterprise.com/pre-commit/pre-commit-hooks
+    # case with non-default url.
+    rev: v1.0.0

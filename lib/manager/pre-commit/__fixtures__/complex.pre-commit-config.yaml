@@ -29,9 +29,6 @@ repos:
       - id: prettier
         exclude: ^notebooks
     rev: v2.1.2
-  - repo: https://gitlab.enterprise.com/pre-commit/pre-commit-hooks
-    # case with non-default url. TODO: detect gitlab enterprise urls.
-    rev: v1.0.0
   - repo: git@github.com:prettier/pre-commit
     # should allow ssh urls
     hooks:

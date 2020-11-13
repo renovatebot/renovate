@@ -1,5 +1,10 @@
 import { readFileSync } from 'fs';
+import { mocked } from '../../../test/util';
+import * as _hostRules from '../../util/host-rules';
 import { extractPackageFile } from './extract';
+
+jest.mock('../../util/host-rules');
+const hostRules = mocked(_hostRules);
 
 const complexPrecommitConfig = readFileSync(
   'lib/manager/pre-commit/__fixtures__/complex.pre-commit-config.yaml',
@@ -23,6 +28,11 @@ const noReposPrecommitConfig = readFileSync(
 
 const invalidRepoPrecommitConfig = readFileSync(
   'lib/manager/pre-commit/__fixtures__/invalid_repo.pre-commit-config.yaml',
+  'utf8'
+);
+
+const enterpriseGitlabPrecommitConfig = readFileSync(
+  'lib/manager/pre-commit/__fixtures__/enterprise_gitlab.pre-commit-config.yaml',
   'utf8'
 );
 
@@ -59,8 +69,22 @@ describe('lib/manager/precommit/extract', () => {
       const result = extractPackageFile(examplePrecommitConfig);
       expect(result).toMatchSnapshot();
     });
-    it('extracts from complex config file correctly"', () => {
+    it('extracts from complex config file correctly', () => {
       const result = extractPackageFile(complexPrecommitConfig);
+      expect(result).toMatchSnapshot();
+    });
+    it('can handle private gitlab repos', () => {
+      // gitlab
+      hostRules.find.mockReturnValueOnce({ hostType: 'gitlab' });
+      // no matching rules
+      hostRules.find.mockReturnValueOnce({});
+      // gitea
+      hostRules.find.mockReturnValueOnce({ hostType: 'gitea' });
+      // github
+      hostRules.find.mockReturnValueOnce({ hostType: 'github' });
+      // Unknown host type
+      hostRules.find.mockReturnValueOnce({ hostType: 'somethingUnknown' });
+      const result = extractPackageFile(enterpriseGitlabPrecommitConfig);
       expect(result).toMatchSnapshot();
     });
   });

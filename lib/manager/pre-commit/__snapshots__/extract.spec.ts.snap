@@ -1,6 +1,63 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
-exports[`lib/manager/precommit/extract extractPackageFile() extracts from complex config file correctly" 1`] = `
+exports[`lib/manager/precommit/extract extractPackageFile() can handle private gitlab repos 1`] = `
+Object {
+  "deps": Array [
+    Object {
+      "currentValue": "v1.0.0",
+      "datasource": "gitlab-tags",
+      "depName": "pre-commit/pre-commit-hooks",
+      "depType": "repository",
+      "lookupName": "pre-commit/pre-commit-hooks",
+      "registryUrls": Array [
+        "gitlab.enterprise.com",
+      ],
+    },
+    Object {
+      "currentValue": "v1.0.0",
+      "depName": "pre-commit/pre-commit-hooks",
+      "depType": "repository",
+      "lookupName": "pre-commit/pre-commit-hooks",
+      "registryUrls": Array [
+        "unknown.enterprise.com",
+      ],
+      "skipReason": "unknown-registry",
+    },
+    Object {
+      "currentValue": "v1.0.0",
+      "datasource": "gitlab-tags",
+      "depName": "pre-commit/pre-commit-hooks",
+      "depType": "repository",
+      "lookupName": "pre-commit/pre-commit-hooks",
+      "registryUrls": Array [
+        "gitea.enterprise.com",
+      ],
+    },
+    Object {
+      "currentValue": "v1.0.0",
+      "datasource": "github-tags",
+      "depName": "pre-commit/pre-commit-hooks",
+      "depType": "repository",
+      "lookupName": "pre-commit/pre-commit-hooks",
+      "registryUrls": Array [
+        "github.enterprise.com",
+      ],
+    },
+    Object {
+      "currentValue": "v1.0.0",
+      "depName": "pre-commit/pre-commit-hooks",
+      "depType": "repository",
+      "lookupName": "pre-commit/pre-commit-hooks",
+      "registryUrls": Array [
+        "unknown.enterprise.com",
+      ],
+      "skipReason": "unknown-registry",
+    },
+  ],
+}
+`;
+
+exports[`lib/manager/precommit/extract extractPackageFile() extracts from complex config file correctly 1`] = `
 Object {
   "deps": Array [
     Object {
@@ -37,16 +94,6 @@ Object {
       "depName": "prettier/pre-commit",
       "depType": "repository",
       "lookupName": "prettier/pre-commit",
-    },
-    Object {
-      "currentValue": "v1.0.0",
-      "datasource": "gitlab-tags",
-      "depName": "pre-commit/pre-commit-hooks",
-      "depType": "repository",
-      "lookupName": "pre-commit/pre-commit-hooks",
-      "registryUrls": Array [
-        "gitlab.enterprise.com",
-      ],
     },
     Object {
       "currentValue": "v2.1.2",

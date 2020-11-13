@@ -1,9 +1,15 @@
 import is from '@sindresorhus/is';
 import yaml from 'js-yaml';
+import {
+  PLATFORM_TYPE_GITEA,
+  PLATFORM_TYPE_GITHUB,
+  PLATFORM_TYPE_GITLAB,
+} from '../../constants/platforms';
 import { id as githubTagsId } from '../../datasource/github-tags';
 import { id as gitlabTagsId } from '../../datasource/gitlab-tags';
 import { logger } from '../../logger';
 import { SkipReason } from '../../types';
+import { find } from '../../util/host-rules';
 import { regEx } from '../../util/regex';
 import { PackageDependency, PackageFile } from '../common';
 
@@ -21,25 +27,50 @@ import { PreCommitConfig } from './types';
  *        Used to determine which renovate datasource should be used.
  *        Is matched literally against `github.com` and `gitlab.com`.
  *        If that doesn't match, `hostRules.find()` is used to find related sources.
- *        In that case, the hostname is passed on as registryUrl.
+ *        In that case, the hostname is passed on as registryUrl to the corresponding datasource.
  */
 function determineDatasource(
   repository: string,
   hostName: string
-): { datasource?: string; registryUrls?: string[] } {
+): { datasource?: string; registryUrls?: string[]; skipReason?: SkipReason } {
   if (hostName === 'github.com') {
-    logger.debug({ repository, registry: hostName }, 'Found github dependency');
+    logger.debug({ repository, hostName }, 'Found github dependency');
     return { datasource: githubTagsId };
   }
   if (hostName === 'gitlab.com') {
-    logger.debug({ repository, registry: hostName }, 'Found gitlab dependency');
+    logger.debug({ repository, hostName }, 'Found gitlab dependency');
     return { datasource: gitlabTagsId };
+  }
+  const res = find({ url: hostName });
+  if (!res.hostType) {
+    logger.debug(
+      { repository, hostName },
+      'Provided hostname does not match any hostRules. Ignoring'
+    );
+    return { skipReason: SkipReason.UnknownRegistry, registryUrls: [hostName] };
+  }
+  if (
+    res.hostType === PLATFORM_TYPE_GITEA ||
+    res.hostType === PLATFORM_TYPE_GITLAB
+  ) {
+    logger.debug(
+      { repository, hostName, hostType: res.hostType },
+      'Provided hostname matches a gitlab hostrule.'
+    );
+    return { datasource: gitlabTagsId, registryUrls: [hostName] };
+  }
+  if (res.hostType === PLATFORM_TYPE_GITHUB) {
+    logger.debug(
+      { repository, hostName, hostType: res.hostType },
+      'Provided hostname matches a github hostrule.'
+    );
+    return { datasource: githubTagsId, registryUrls: [hostName] };
   }
   logger.debug(
     { repository, registry: hostName },
-    'Not github.com or gitlab.com, assuming private gitlab-ee.'
+    'Not github.com nor gitlab.com, nor any matching hostrule. Ignoring dependency'
   );
-  return { datasource: gitlabTagsId, registryUrls: [hostName] };
+  return { skipReason: SkipReason.UnknownRegistry, registryUrls: [hostName] };
 }
 
 function extractDependency(
