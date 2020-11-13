@@ -90,7 +90,7 @@ The result is that passing updates are essentially "silent" - the only sign of t
 
 ### Absence of tests
 
-If you don't have any tests at all, tell Renovate to ignore the tests with the <LINK TO OPTION DOCS GOES HERE>.
+If you have no tests but still want Renovate to automerge, you need to add "requiredStatusChecks": null to your configuration.
 
 ### Branch protection rules
 
