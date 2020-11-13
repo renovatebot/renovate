@@ -13,7 +13,7 @@ export async function getNpmLock(filePath: string): Promise<LockFile> {
       logger.trace({ entry, version: val.version });
       lockedVersions[entry] = val.version;
     }
-    return { lockedVersions };
+    return { lockedVersions, lockfileVersion: lockParsed.lockfileVersion };
   } catch (err) {
     logger.debug({ filePath, err }, 'Warning: Exception parsing npm lock file');
     return { lockedVersions: {} };
