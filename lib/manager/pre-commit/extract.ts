@@ -19,6 +19,10 @@ import {
 } from './parsing';
 import { PreCommitConfig } from './types';
 
+function isEmptyObject(obj: any): boolean {
+  return Object.keys(obj).length === 0 && obj.constructor === Object;
+}
+
 /**
  * Determines the datasource(id) to be used for this dependency
  * @param repository the full git url, ie git@github.com/user/project.
@@ -42,29 +46,26 @@ function determineDatasource(
     return { datasource: gitlabTagsId };
   }
   const res = find({ url: hostName });
-  if (!res.hostType) {
+  if (isEmptyObject(res)) {
+    // 1 check, to possibly prevent 3 failures in combined query of hostType & url.
     logger.debug(
       { repository, hostName },
       'Provided hostname does not match any hostRules. Ignoring'
     );
     return { skipReason: SkipReason.UnknownRegistry, registryUrls: [hostName] };
   }
-  if (
-    res.hostType === PLATFORM_TYPE_GITEA ||
-    res.hostType === PLATFORM_TYPE_GITLAB
-  ) {
-    logger.debug(
-      { repository, hostName, hostType: res.hostType },
-      'Provided hostname matches a gitlab hostrule.'
-    );
-    return { datasource: gitlabTagsId, registryUrls: [hostName] };
-  }
-  if (res.hostType === PLATFORM_TYPE_GITHUB) {
-    logger.debug(
-      { repository, hostName, hostType: res.hostType },
-      'Provided hostname matches a github hostrule.'
-    );
-    return { datasource: githubTagsId, registryUrls: [hostName] };
+  for (const [hostType, sourceId] of [
+    [PLATFORM_TYPE_GITEA, gitlabTagsId],
+    [PLATFORM_TYPE_GITHUB, githubTagsId],
+    [PLATFORM_TYPE_GITLAB, gitlabTagsId],
+  ]) {
+    if (!isEmptyObject(find({ hostType, url: hostName }))) {
+      logger.debug(
+        { repository, hostName, hostType: res.hostType },
+        `Provided hostname matches a ${hostType} hostrule.`
+      );
+      return { datasource: sourceId, registryUrls: [hostName] };
+    }
   }
   logger.debug(
     { repository, registry: hostName },

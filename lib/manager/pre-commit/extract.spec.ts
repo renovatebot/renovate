@@ -31,8 +31,8 @@ const invalidRepoPrecommitConfig = readFileSync(
   'utf8'
 );
 
-const enterpriseGitlabPrecommitConfig = readFileSync(
-  'lib/manager/pre-commit/__fixtures__/enterprise_gitlab.pre-commit-config.yaml',
+const enterpriseGitPrecommitConfig = readFileSync(
+  'lib/manager/pre-commit/__fixtures__/enterprise.pre-commit-config.yaml',
   'utf8'
 );
 
@@ -73,18 +73,22 @@ describe('lib/manager/precommit/extract', () => {
       const result = extractPackageFile(complexPrecommitConfig);
       expect(result).toMatchSnapshot();
     });
-    it('can handle private gitlab repos', () => {
-      // gitlab
-      hostRules.find.mockReturnValueOnce({ hostType: 'gitlab' });
-      // no matching rules
-      hostRules.find.mockReturnValueOnce({});
-      // gitea
-      hostRules.find.mockReturnValueOnce({ hostType: 'gitea' });
-      // github
-      hostRules.find.mockReturnValueOnce({ hostType: 'github' });
-      // Unknown host type
-      hostRules.find.mockReturnValueOnce({ hostType: 'somethingUnknown' });
-      const result = extractPackageFile(enterpriseGitlabPrecommitConfig);
+    it('can handle private git repos', () => {
+      hostRules.find.mockReturnValue({ token: 'value' });
+      const result = extractPackageFile(enterpriseGitPrecommitConfig);
+      expect(result).toMatchSnapshot();
+    });
+    it('can handle invalid private git repos', () => {
+      hostRules.find.mockReturnValue({});
+      const result = extractPackageFile(enterpriseGitPrecommitConfig);
+      expect(result).toMatchSnapshot();
+    });
+    it('can handle unknown private git repos', () => {
+      // First attemp returns a result
+      hostRules.find.mockReturnValueOnce({ token: 'value' });
+      // But all subsequent checks (those with hostType), then fail:
+      hostRules.find.mockReturnValue({});
+      const result = extractPackageFile(enterpriseGitPrecommitConfig);
       expect(result).toMatchSnapshot();
     });
   });
