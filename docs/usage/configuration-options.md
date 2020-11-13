@@ -1746,6 +1746,7 @@ thanos_version: "0.15.0" // a comment
 ```
 
 In the above example, each regex manager will match a single dependency each.
+
 ### depNameTemplate
 
 If `depName` cannot be captured with a named capture group in `matchString` then it can be defined manually using this field.
