@@ -13,7 +13,7 @@ export const defaultConfig = {
   pinDigests: false,
 };
 
-const fields = [
+const validMatchFields = [
   'depName',
   'lookupName',
   'currentValue',
@@ -42,7 +42,7 @@ function createDependency(
 ): PackageDependency {
   const dependency = dep || {};
   const { groups } = matchResult;
-  for (const field of fields) {
+  for (const field of validMatchFields) {
     const fieldTemplate = `${field}Template`;
     if (config[fieldTemplate]) {
       try {
@@ -71,7 +71,7 @@ function createDependency(
 function mergeDependency(deps: PackageDependency[]): PackageDependency {
   const result: PackageDependency = {};
   deps.forEach((dep) => {
-    fields.forEach((field) => {
+    validMatchFields.forEach((field) => {
       if (dep[field]) {
         result[field] = dep[field];
         // save the line replaceString of the section which contains the current Value for a speed up lookup during the replace phase
