@@ -13,23 +13,33 @@ import {
 } from './parsing';
 import { PreCommitConfig } from './types';
 
+/**
+ * Determines the datasource(id) to be used for this dependency
+ * @param repository the full git url, ie git@github.com/user/project.
+ *        Used in debug statements to clearly indicate the related dependency.
+ * @param hostName the hostname (ie github.com)
+ *        Used to determine which renovate datasource should be used.
+ *        Is matched literally against `github.com` and `gitlab.com`.
+ *        If that doesn't match, `hostRules.find()` is used to find related sources.
+ *        In that case, the hostname is passed on as registryUrl.
+ */
 function determineDatasource(
   repository: string,
-  domain: string
+  hostName: string
 ): { datasource?: string; registryUrls?: string[] } {
-  if (domain === 'github.com') {
-    logger.debug({ repository, domain }, 'Found github dependency');
+  if (hostName === 'github.com') {
+    logger.debug({ repository, registry: hostName }, 'Found github dependency');
     return { datasource: githubTagsId };
   }
-  if (domain === 'gitlab.com') {
-    logger.debug({ repository, domain }, 'Found gitlab dependency');
+  if (hostName === 'gitlab.com') {
+    logger.debug({ repository, registry: hostName }, 'Found gitlab dependency');
     return { datasource: gitlabTagsId };
   }
   logger.debug(
-    { repository, domain },
+    { repository, registry: hostName },
     'Not github.com or gitlab.com, assuming private gitlab-ee.'
   );
-  return { datasource: gitlabTagsId, registryUrls: [domain] };
+  return { datasource: gitlabTagsId, registryUrls: [hostName] };
 }
 
 function extractDependency(
@@ -43,39 +53,39 @@ function extractDependency(
   skipReason?: SkipReason;
   currentValue?: string;
 } {
-  let lookupName;
-  const currentValue = tag;
   logger.debug({ tag }, 'Found version');
 
   const urlMatchers = [
-    // This splits "http://github.com/user/repo" -> "github.com" "user/repo
-    regEx('^https?:\\/\\/(?<domain>[^\\/]+)\\/(?<depName>\\S*)'),
-    // This splits "git@domain.com:user/repo" -> "domain.com" "user/repo
-    regEx('^git@(?<domain>[^:]+):(?<depName>\\S*)'),
+    // This splits "http://my.github.com/user/repo" -> "my.github.com" "user/repo
+    regEx('^https?:\\/\\/(?<hostName>[^\\/]+)\\/(?<depName>\\S*)'),
+    // This splits "git@private.registry.com:user/repo" -> "private.registry.com" "user/repo
+    regEx('^git@(?<hostName>[^:]+):(?<depName>\\S*)'),
   ];
   for (const urlMatcher of urlMatchers) {
     const match = urlMatcher.exec(repository);
     if (match) {
-      const { domain, depName } = match.groups;
-      lookupName = depName;
-      const sourceDef = determineDatasource(repository, domain);
+      const { hostName, depName } = match.groups;
+      const sourceDef = determineDatasource(repository, hostName);
       return {
         ...sourceDef,
-        depName: lookupName,
+        depName,
         depType: 'repository',
-        lookupName,
-        currentValue,
+        lookupName: depName,
+        currentValue: tag,
       };
     }
   }
-  logger.info({ repository }, 'Could not separate host from lookup name.');
+  logger.info(
+    { repository },
+    'Could not separate hostname from full dependency url.'
+  );
   return {
     depName: undefined,
     depType: 'repository',
     datasource: undefined,
     lookupName: undefined,
     skipReason: SkipReason.InvalidUrl,
-    currentValue,
+    currentValue: tag,
   };
 }
 
