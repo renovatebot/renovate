@@ -106,6 +106,6 @@ Do we have bots for other platforms or only for GitHub?
 
 What should a user do when a codeowners file blocks renovate bot?
 
-### Assignees and reviewers (defuault empty when merging)
+### Assignees and reviewers (default empty when merging)
 
 I'm not really sure what the problem with this is right now.
