@@ -70,68 +70,11 @@ Keep in mind that an issue can be both affecting a platform and a self hosted in
 
 ### Manager
 
-<details>
-    <summary>Manager</summary>
-
-    manager:bazel
-    manager:buildkite
-    manager:bundler
-    manager:cargo
-    manager:circleci
-    manager:cocoapods
-    manager:composer
-    manager:docker-compose
-    manager:dockerfile
-    manager:github-actions
-    manager:gitlab-ci
-    manager:gomod
-    manager:gradle
-    manager:helm
-    manager:helm-values
-    manager:kubernetes
-    manager:kustomize
-    manager:maven
-    manager:meteor
-    manager:mix
-    manager:npm
-    manager:nuget
-    manager:pip_requirements
-    manager:pip_setup
-    manager:pipenv
-    manager:poetry
-    manager:ruby-version
-    manager:sbt
-    manager:swift
-    manager:terraform
-    manager:terragrunt
-    manager:travis
-
-</details>
-
 "manager" is short for "package manager".
-Add the relevant manager labels to the issue.
+Add the relevant `manager:` labels to the issue.
 If there are multiple managers affected, add labels for all of them.
 
 ### Datasource
-
-<details>
-    <summary>Datasource</summary>
-
-    datasource:docker
-    datasource:git-submodule
-    datasource:git-tags
-    datasource:github-tags
-    datasource:go
-    datasource:jenkins
-    datasource:maven
-    datasource:nuget
-    datasource:packagist
-    datasource:pypi
-    datasource:rubygems
-    datasource:terraform-module
-    datasource:terraform-provider
-
-</details>
 
 Use a `datasource:` label when it is applicable specifically to particular datasources (for example, as defined in the docs list of datasources).
 
