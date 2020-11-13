@@ -15,7 +15,7 @@ describe('manager/npm/extract/locked-versions', () => {
       async (yarnVersion) => {
         yarn.getYarnLock.mockReturnValue({
           isYarn1: yarnVersion === '1.22.0',
-          cacheVersion: yarnVersion === '2.2.0' ? 6 : NaN,
+          lockfileVersion: yarnVersion === '2.2.0' ? 6 : undefined,
           lockedVersions: {
             'a@1.0.0': '1.0.0',
             'b@2.0.0': '2.0.0',
@@ -46,9 +46,11 @@ describe('manager/npm/extract/locked-versions', () => {
 
     it('uses package-lock.json', async () => {
       npm.getNpmLock.mockReturnValue({
-        a: '1.0.0',
-        b: '2.0.0',
-        c: '3.0.0',
+        lockedVersions: {
+          a: '1.0.0',
+          b: '2.0.0',
+          c: '3.0.0',
+        },
       });
       const packageFiles = [
         {
