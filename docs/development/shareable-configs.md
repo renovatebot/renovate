@@ -11,9 +11,9 @@ Unlike ESLint though:
 In human-understandable form, the rules are:
 
 - A full preset URI consists of package name, preset name, and preset parameters, such as `package:preset(param)`
-- If a package scope is specified and no package, then the package name is assumed to be `renovate-config`, e.g. `@rarkins:webapp` is expanded to `@rarkins/renovate-config:webapp`
-- If a non-scoped package is specified then it is assumed to have prefix `renovate-config-`. e.g. `rarkins:webapp` is expanded to `renovate-config-rarkins:webapp`
-- If a package name is specified and no preset name, then `default` is assumed, e.g. `@rarkins` expands in full to `@rarkins/renovate-config:default` and `rarkins` expands in full to `renovate-config-rarkins:default`
+- If a package scope is specified and no package exists, then the package name is assumed to be `renovate-config`, e.g. `@rarkins:webapp` is expanded to `@rarkins/renovate-config:webapp`
+- If a non-scoped package is specified then it is assumed to have the prefix `renovate-config-`. e.g. `rarkins:webapp` is expanded to `renovate-config-rarkins:webapp`
+- If a package name is specified and has no preset name, then `default` is assumed, e.g. `@rarkins` expands in full to `@rarkins/renovate-config:default` and `rarkins` expands in full to `renovate-config-rarkins:default`
 - There is a special "default" namespace where no package name is necessary. e.g. `:webapp` (not the leading `:`) expands to `renovate-config-default:webapp`
 
 ## Supported config syntax
