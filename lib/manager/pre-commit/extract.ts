@@ -69,7 +69,7 @@ function determineDatasource(
   }
   logger.debug(
     { repository, registry: hostName },
-    'Not github.com nor gitlab.com, nor any matching hostrule. Ignoring dependency'
+    'Provided hostname did not match any of the hostRules of hostType gitea,github nor gitlab'
   );
   return { skipReason: SkipReason.UnknownRegistry, registryUrls: [hostName] };
 }
