@@ -20,25 +20,25 @@ In human-understandable form, the rules are:
 
 ### Scoped
 
-| name                                                | example use                                            | preset    | npm package resolves as      | parameters           |
-| --------------------------------------------------- | ------------------------------------------------------ | --------- | ---------------------------- | -------------------- |
-| scoped                                              | `@somescope`                                           | `default` | `@somescope/renovate-config` | none                 |
-| scoped with package name                            | `@somescope/somepackagename`                           | `default` | `@somescope/somepackagename` | none                 |
-| scoped with preset name                             | `@somescope:webapp`                                    | `webapp`  | `@somescope/renovate-config` | none                 |
-| scoped with params                                  | `@somescope(eslint, stylelint)`                        | `default` | `@somescope/renovate-config` | `eslint` `stylelint` |
-| scoped with preset name and params                  | `@somescope:webapp(eslint, stylelint)`                 | `webapp`  | `@somescope/renovate-config` | `eslint` `stylelint` |
-| scoped with package name and preset name            | `@somescope/somepackagename:webapp`                    | `webapp`  | `@somescope/somepackagename` | none                 |
-| scoped with package name and preset name and params | `@somescope/somepackagename:webapp(eslint, stylelint)` | `webapp`  | `@somescope/somepackagename` | `eslint` `stylelint` |
+| name                                               | example use                                 | preset    | npm package resolves as      | parameters |
+| -------------------------------------------------- | ------------------------------------------- | --------- | ---------------------------- | ---------- |
+| scoped                                             | `@somescope`                                | `default` | `@somescope/renovate-config` |            |
+| scoped with package name                           | `@somescope/somepackagename`                | `default` | `@somescope/somepackagename` |            |
+| scoped with preset name                            | `@somescope:webapp`                         | `webapp`  | `@somescope/renovate-config` |            |
+| scoped with param                                  | `@somescope(eslint)`                        | `default` | `@somescope/renovate-config` | `eslint`   |
+| scoped with preset name and param                  | `@somescope:webapp(eslint)`                 | `webapp`  | `@somescope/renovate-config` | `eslint`   |
+| scoped with package name and preset name           | `@somescope/somepackagename:webapp`         | `webapp`  | `@somescope/somepackagename` |            |
+| scoped with package name and preset name and param | `@somescope/somepackagename:webapp(eslint)` | `webapp`  | `@somescope/somepackagename` | `eslint`   |
 
 ### Non-scoped
 
 If you use a non-scoped config, you must use a preset name!
 
-| name                                         | example use                                       | preset    | npm package resolves as           | parameters |
-| -------------------------------------------- | ------------------------------------------------- | --------- | --------------------------------- | ---------- |
-| non-scoped short with preset name            | `somepackagename:default`                         | `default` | `renovate-config-somepackagename` | none       |
-| non-scoped short with preset name and params | `somepackagename:default(eslint)`                 | `default` | `renovate-config-somepackagename` | `eslint`   |
-| non-scoped full with preset name             | `renovate-config-somepackagename:default`         | `default` | `renovate-config-somepackagename` | none       |
-| non-scoped full with preset name and params  | `renovate-config-somepackagename:default(eslint)` | `default` | `renovate-config-somepackagename` | `eslint`   |
+| name                                        | example use                                       | preset    | npm package resolves as           | parameters |
+| ------------------------------------------- | ------------------------------------------------- | --------- | --------------------------------- | ---------- |
+| non-scoped short with preset name           | `somepackagename:default`                         | `default` | `renovate-config-somepackagename` |            |
+| non-scoped short with preset name and param | `somepackagename:default(eslint)`                 | `default` | `renovate-config-somepackagename` | `eslint`   |
+| non-scoped full with preset name            | `renovate-config-somepackagename:default`         | `default` | `renovate-config-somepackagename` |            |
+| non-scoped full with preset name and param  | `renovate-config-somepackagename:default(eslint)` | `default` | `renovate-config-somepackagename` | `eslint`   |
 
 Reminder: If you use a non-scoped config, you must use a preset name!
