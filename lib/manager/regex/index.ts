@@ -148,10 +148,9 @@ export function extractPackageFile(
       break;
   }
 
-  deps = deps.filter((dep) => {
-    return dep != null;
-  });
-  if (deps?.length) {
+  // filter all null values
+  deps = deps.filter(Boolean);
+  if (deps.length) {
     if (config.matchStringsStrategy) {
       return {
         deps,
