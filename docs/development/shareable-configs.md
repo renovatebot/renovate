@@ -18,16 +18,23 @@ In human-understandable form, the rules are:
 
 ## Supported config syntax
 
-| name                                                | example use                                            | what preset it uses | npm package resolves              |  parameters passed   | if using non-scoped packages, a preset name is mandatory? |
-| --------------------------------------------------- | ------------------------------------------------------ | :-----------------: | --------------------------------- | :------------------: | :-------------------------------------------------------: |
-| scoped                                              | `@somescope`                                           |      `default`      | `@somescope/renovate-config`      |         none         |                            no                             |
-| scoped with package name                            | `@somescope/somepackagename`                           |      `default`      | `@somescope/somepackagename`      |         none         |                            no                             |
-| scoped with preset name                             | `@somescope:webapp`                                    |      `webapp`       | `@somescope/renovate-config`      |         none         |                            no                             |
-| scoped with params                                  | `@somescope(eslint, stylelint)`                        |      `default`      | `@somescope/renovate-config`      | `eslint` `stylelint` |                            no                             |
-| scoped with preset name and params                  | `@somescope:webapp(eslint, stylelint)`                 |      `webapp`       | `@somescope/renovate-config`      | `eslint` `stylelint` |                            no                             |
-| scoped with package name and preset name            | `@somescope/somepackagename:webapp`                    |      `webapp`       | `@somescope/somepackagename`      |         none         |                            no                             |
-| scoped with package name and preset name and params | `@somescope/somepackagename:webapp(eslint, stylelint)` |      `webapp`       | `@somescope/somepackagename`      | `eslint` `stylelint` |                            no                             |
-| non-scoped short with preset name                   | `somepackagename:default`                              |      `default`      | `renovate-config-somepackagename` |         none         |                            yes                            |
-| non-scoped short with preset name and params        | `somepackagename:default(eslint)`                      |      `default`      | `renovate-config-somepackagename` |       `eslint`       |                            yes                            |
-| non-scoped full with preset name                    | `renovate-config-somepackagename:default`              |      `default`      | `renovate-config-somepackagename` |         none         |                            yes                            |
-| non-scoped full with preset name and params         | `renovate-config-somepackagename:default(eslint)`      |      `default`      | `renovate-config-somepackagename` |       `eslint`       |                            yes                            |
+### Scoped
+
+| name                                                | example use                                            | preset    | npm package resolves as      | parameters           |
+| --------------------------------------------------- | ------------------------------------------------------ | --------- | ---------------------------- | -------------------- |
+| scoped                                              | `@somescope`                                           | `default` | `@somescope/renovate-config` | none                 |
+| scoped with package name                            | `@somescope/somepackagename`                           | `default` | `@somescope/somepackagename` | none                 |
+| scoped with preset name                             | `@somescope:webapp`                                    | `webapp`  | `@somescope/renovate-config` | none                 |
+| scoped with params                                  | `@somescope(eslint, stylelint)`                        | `default` | `@somescope/renovate-config` | `eslint` `stylelint` |
+| scoped with preset name and params                  | `@somescope:webapp(eslint, stylelint)`                 | `webapp`  | `@somescope/renovate-config` | `eslint` `stylelint` |
+| scoped with package name and preset name            | `@somescope/somepackagename:webapp`                    | `webapp`  | `@somescope/somepackagename` | none                 |
+| scoped with package name and preset name and params | `@somescope/somepackagename:webapp(eslint, stylelint)` | `webapp`  | `@somescope/somepackagename` | `eslint` `stylelint` |
+
+### Non-scoped
+
+| name                                         | example use                                       | preset    | npm package resolves as           | parameters | Mandatory preset name? |
+| -------------------------------------------- | ------------------------------------------------- | --------- | --------------------------------- | ---------- | ---------------------- |
+| non-scoped short with preset name            | `somepackagename:default`                         | `default` | `renovate-config-somepackagename` | none       | yes                    |
+| non-scoped short with preset name and params | `somepackagename:default(eslint)`                 | `default` | `renovate-config-somepackagename` | `eslint`   | yes                    |
+| non-scoped full with preset name             | `renovate-config-somepackagename:default`         | `default` | `renovate-config-somepackagename` | none       | yes                    |
+| non-scoped full with preset name and params  | `renovate-config-somepackagename:default(eslint)` | `default` | `renovate-config-somepackagename` | `eslint`   | yes                    |
