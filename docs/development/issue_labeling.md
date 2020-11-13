@@ -103,6 +103,7 @@ Keep in mind that an issue can be both affecting a platform and a self hosted in
     manager:sbt
     manager:swift
     manager:terraform
+    manager:terragrunt
     manager:travis
 
 </details>
