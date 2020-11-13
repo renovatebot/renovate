@@ -25,7 +25,7 @@ describe(getName(__filename), () => {
           let workingDir: DirectoryResult;
 
           beforeEach(async () => {
-            workingDir = await tmp.dir({unsafeCleanup: true});
+            workingDir = await tmp.dir({ unsafeCleanup: true });
           });
 
           it(`generates a report for the project ${projectName}, with Gradle version ${gradleVersion}`, async () => {
