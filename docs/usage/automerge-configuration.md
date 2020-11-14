@@ -79,7 +79,7 @@ Non-major updates shouldn't have breaking changes (if they follow SemVer that is
 }
 ```
 
-The `matchCurrentVersion` setting above is a rule to exclude any dependencies which are pre-1.0.0 because those can make breaking changes at *any* time according to the SemVer spec.
+The `matchCurrentVersion` setting above is a rule to exclude any dependencies which are pre-1.0.0 because those can make breaking changes at _any_ time according to the SemVer spec.
 
 ## Automerging and scheduling
 
@@ -109,8 +109,8 @@ If you have enabled branch protection which prevents Renovate from automerging d
 
 ## Assignees and Reviewers
 
-When automerge is enabled on a PR, Renovate will *not* add assignees or reviewers at PR creation time, in order to decrease notifications noise a little.
-If tests subsequently *fail*, making automerge not possible, then Renovate will then add the configured assignees and/or reviewers.
+When automerge is enabled on a PR, Renovate will _not_ add assignees or reviewers at PR creation time, in order to decrease notifications noise a little.
+If tests subsequently _fail_, making automerge not possible, then Renovate will then add the configured assignees and/or reviewers.
 
 ## Frequent problems and how to resolve them
 
@@ -144,5 +144,3 @@ These approval helper apps are only available for GitHub.
 ### Codeowners
 
 Dependending on the platform, having a `CODEOWNERS` file could block automerging, because it means a code owner must review the PR.
-
-
