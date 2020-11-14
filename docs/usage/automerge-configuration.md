@@ -13,9 +13,9 @@ If there are updates for which you prefer to manually review release notes or co
 
 Automerge works particularly well for `devDependencies` as well as for production `dependencies` in projects which have great test coverage.
 
-For example, if you have `jest` or `mocha` as a dependency, and it has an upgrade with passing tests.. automerge them!
-If you have a linter like `eslint` or `tslint` and its update passes.. automerge them!
-If you have an API with 100% test coverage and `express` is updated.. automerge it!
+For example, if you have `jest` or `mocha` as a dependency, and it has an upgrade with passing tests... automerge them!
+If you have a linter like `eslint` or `tslint` and its update passes... automerge them!
+If you have an API with 100% test coverage and `express` is updated... automerge it!
 
 ## Configuration examples
 
