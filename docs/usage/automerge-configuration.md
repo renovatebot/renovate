@@ -1,24 +1,25 @@
 ---
-title: Automerge configuration/troubleshooting
+title: Automerge configuration and troubleshooting
 description: Learn all about Renovate's automerge functionality here
 ---
 
 # Introduction
 
-Automerging is a Renovate feature that can save you a lot of time/noise directly, while also benefiting grouping and scheduling.
-In short: it means that Renovate can merge PRs or even branches itself if they pass your tests.
+Automerging is a Renovate feature that can enable you to fully automate upgrading of certain dependencies.
+When enabled, it means Renovate will attempt to merge the proposed update once it has passed tests.
 
-It is recommended that you enable automerge for any types of dependency updates where you would just click Merge anyway.
-We all know that there are some types of updates that we (nearly) always verify manually before merging, and plenty of others that we don't bother looking at unless tests fail.
-Every time you click Merge on a Renovate PR without manually testing it, you should consider if you can enable automerge and save yourself the time in future.
+As a general guide, it is recommended that you enable automerge for any types of dependency updates where you would just click Merge anyway.
+If there are updates for which you prefer to manually review release notes or code before merging, even when they pass tests, then do not enable automerge for those.
 
-Automerge works particularly well for `devDependencies` and for production `dependencies` that have great test coverage.
+Automerge works particularly well for `devDependencies` as well as for production `dependencies` in projects which have great test coverage.
 
 For example, if you have `jest` or `mocha` as a dependency, and it has an upgrade with passing tests.. automerge them!
 If you have a linter like `eslint` or `tslint` and its update passes.. automerge them!
 If you have an API with 100% test coverage and `express` is updated.. automerge it!
 
-## Full configuration examples
+## Configuration examples
+
+<!-- Internal comment
 
 I think the endgame here should be:
 
@@ -26,21 +27,61 @@ I think the endgame here should be:
 - The example should explain the reasoning/thinking behind each setting.
 - The example should have links to each setting, so that the docs can be consulted.
 
-### Automerge lockfile dependencies
+-->
 
-I think this is a good usecase to cover, it's something that a lot of people will probably want.
+### Automerge lock file maintenance
 
-### Automerge Prettier or ESLint dependency
+The lowest risk type of update to automerge is probably `lockFileMaintenance`.
+When Renovate performs lock file maintenance, it means that it leaves the project dependency definitions unchanged, but refreshes the lock file completely so that latest versions according to package file constraints are installed.
+Here is an example of automerging lock file maintenance:
 
-This is probably a good one to cover as well.
-I think many users just click "merge" on those types of updates as well.
+```json
+{
+  "lockFileMaintenance": {
+    "enabled": true,
+    "automerge": true
+  }
+}
+```
 
-### Automerge patch/minor update
+### Automerge lint tool updates
+
+Automerging lint tool updates can be a real time-saver.
+Sometimes an update to a lint tool or plugin definition can cause tests to fail, and that is usually deliberate/intentional because the lint authors have added a new validation that you need to adhere to.
+However, in many cases the new version(s) will pass tests, and if so then there's really nothing else to consider before merging, so they may as well as automerged:
+
+```json
+{
+  "packageRules": [
+    {
+      "depTypeList": ["devDependencies"],
+      "packagePatterns": ["lint", "prettier"],
+      "automerge": true
+    }
+  ]
+}
+```
+
+### Automerge non-major updates update
 
 Automerge patch level updates is probably good to cover as well.
-Patch level `minor` updates shouldn't have breaking changes (if they follow SemVer that is...), so that makes them a good case to cover as well.
+Non-major updates shouldn't have breaking changes (if they follow SemVer that is...) so many users enable automerge for these:
 
-### Automerging and scheduling
+```json
+{
+  "packageRules": [
+    {
+      "updateTypes": ["minor", "patch"],
+      "matchCurrentVersion": "!/^0/",
+      "automerge": true
+    }
+  ]
+}
+```
+
+The `matchCurrentVersion` setting above is a rule to exclude any dependencies which are pre-1.0.0 because those can make breaking changes at *any* time according to the SemVer spec.
+
+## Automerging and scheduling
 
 Automerging is particularly beneficial if you have configured a schedule, because Renovate on its own may be able to automerge the majority of your updates.
 And this is especially so if your repository needs rebasing, e.g. because you use lock files. e.g. let's say you have dependencies `abc` and `xyz` with upgrades, and you use a `yarn.lock` file.
@@ -54,62 +95,54 @@ And this is especially so if your repository needs rebasing, e.g. because you us
 
 This is a lot better than you waking up to two PRs and then having to deal with conflicts yourself after you merge the first one.
 
-Remember our running `eslint` example? Let's automerge it if all the linting updates pass:
+## Branch vs PR automerging
 
-```json
-  "packageRules": [
-    {
-      "packagePatterns": [ "eslint" ],
-      "groupName": "eslint",
-      "schedule": ["before 2am on monday"],
-      "automerge": true,
-      "automergeType": "branch"
-    }
-  ]
-```
-
-Have you come up with a rule that you think others would benefit from?
-How about a PR back to [renovate-config](https://github.com/singapore/renovate-config) with the above rule named `":automergeEslintWeekly"` ?
-
-## Frequent problems and how to resolve them
-
-### Automerge config not correct to begin with
-
-What are the most common mistakes people make when doing the initial configuring?
-
-### Branch vs PR
-
-Those of you familiar with GitHub might note that even if you automerge PRs, you are still going to get notifications (noise) anyway - one when the PR is created and another when it is merged.
+Even if you automerge PRs, you are likely to still get notification noise - one when the PR is created and another when it is merged.
 For this reason we recommend you consider setting `automergeType=branch` which will mean:
 
 - Renovate first creates a branch and no PR
-- If tests pass, Renovate pushes a commit directly to `master` without PR
+- If tests pass, Renovate pushes a commit directly to the base branch without PR
 - If tests fail, Renovate raises a PR for you to review
 
 The result is that passing updates are essentially "silent" - the only sign of them are the commits to your `master` branch.
+If you have enabled branch protection which prevents Renovate from automerging directly to the base branch, then this won't work and you should stick with the default PR-based automerging instead.
+
+## Assignees and Reviewers
+
+When automerge is enabled on a PR, Renovate will *not* add assignees or reviewers at PR creation time, in order to decrease notifications noise a little.
+If tests subsequently *fail*, making automerge not possible, then Renovate will then add the configured assignees and/or reviewers.
+
+## Frequent problems and how to resolve them
+
+### Automerge not enabled correctly in config
+
+Sometimes, the reason Renovate is not automerging a PR is because of a configuration mistake.
+You can confirm that Renovate knows you want it to automerge by seeing if the PR body includes the text "Automerge: Enabled".
+If you see "Automerge: Disabled by config" then it means you need a config change for automerge to work.
 
 ### Absence of tests
 
-If you have no tests but still want Renovate to automerge, you need to add "requiredStatusChecks": null to your configuration.
+By default, Renovate will not automerge until it sees passing status checks / check runs for the branch.
+If you have no tests but still want Renovate to automerge, you need to add `"requiredStatusChecks": null` to your configuration.
+However, we strongly recommend you should have tests in any project where you are regularly updating dependencies.
 
-### Branch protection rules
+### Committer restrictions
 
-What branch protection rules specifically are causing problems?
+If you have protected your base branch with a list of allowed committers, and Renovate is not on that list, then naturally automerge can't work.
 
-### Required reviews
+### Pull Requests Required
 
-If you have turned on "Require pull request reviews before merging" in your GitHub branch protection settings, you'll need a way to approve the automerge Renovate pull requests.
-The Renovate team has made two apps to automate the approval.
+If you have configured your project to require Pull Requests before merging, it means that branch automerging is not possible, even if Renovate has rights to commit to the base branch.
 
-If you require one approval it's enough to install and use the [renovate-approve](https://github.com/apps/renovate-approve) app.
-But, if you require two approvals, then you also need to install and use the [Renovate Approve 2](https://github.com/apps/renovate-approve-2) app.
+### Required Pull Request reviews
 
-These apps are only available for GitHub.
+If you have mandatory Pull Request reviews then it means Renovate can't automerge its own PR until such a review has happened.
+
+If you are running the hosted WhiteSource Renovate App on `github.com`, you can also install the helper apps [renovate-approve](https://github.com/apps/renovate-approve) and [renovate-approve-2](https://github.com/apps/renovate-approve-2) and they will mark all automerging Pull Requests by Renovate as approved.
+These approval helper apps are only available for GitHub.
 
 ### Codeowners
 
-What should a user do when a codeowners file blocks renovate bot?
+Dependending on the platform, having a `CODEOWNERS` file could block automerging, because it means a code owner must review the PR.
 
-### Assignees and reviewers (default empty when merging)
 
-I'm not really sure what the problem with this is right now.
