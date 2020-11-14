@@ -3,7 +3,7 @@
 exports[`platform/azure/azure-got-wrapper gitApi should set bearer token and endpoint 1`] = `
 WebApi {
   "authHandler": BearerCredentialHandler {
-    "allowCrossOriginAuthentication": undefined,
+    "allowCrossOriginAuthentication": true,
     "token": "token",
   },
   "isNoProxyHost": [Function],
@@ -25,7 +25,7 @@ WebApi {
       "_socketTimeout": undefined,
       "handlers": Array [
         BearerCredentialHandler {
-          "allowCrossOriginAuthentication": undefined,
+          "allowCrossOriginAuthentication": true,
           "token": "token",
         },
       ],
@@ -55,7 +55,7 @@ WebApi {
         "_socketTimeout": undefined,
         "handlers": Array [
           BearerCredentialHandler {
-            "allowCrossOriginAuthentication": undefined,
+            "allowCrossOriginAuthentication": true,
             "token": "token",
           },
         ],
@@ -71,7 +71,7 @@ WebApi {
 exports[`platform/azure/azure-got-wrapper gitApi should set password and endpoint 1`] = `
 WebApi {
   "authHandler": BasicCredentialHandler {
-    "allowCrossOriginAuthentication": undefined,
+    "allowCrossOriginAuthentication": true,
     "password": "pass",
     "username": "user",
   },
@@ -94,7 +94,7 @@ WebApi {
       "_socketTimeout": undefined,
       "handlers": Array [
         BasicCredentialHandler {
-          "allowCrossOriginAuthentication": undefined,
+          "allowCrossOriginAuthentication": true,
           "password": "pass",
           "username": "user",
         },
@@ -125,7 +125,7 @@ WebApi {
         "_socketTimeout": undefined,
         "handlers": Array [
           BasicCredentialHandler {
-            "allowCrossOriginAuthentication": undefined,
+            "allowCrossOriginAuthentication": true,
             "password": "pass",
             "username": "user",
           },
@@ -142,7 +142,7 @@ WebApi {
 exports[`platform/azure/azure-got-wrapper gitApi should set personal access token and endpoint 1`] = `
 WebApi {
   "authHandler": PersonalAccessTokenCredentialHandler {
-    "allowCrossOriginAuthentication": undefined,
+    "allowCrossOriginAuthentication": true,
     "token": "1234567890123456789012345678901234567890123456789012",
   },
   "isNoProxyHost": [Function],
@@ -164,7 +164,7 @@ WebApi {
       "_socketTimeout": undefined,
       "handlers": Array [
         PersonalAccessTokenCredentialHandler {
-          "allowCrossOriginAuthentication": undefined,
+          "allowCrossOriginAuthentication": true,
           "token": "1234567890123456789012345678901234567890123456789012",
         },
       ],
@@ -194,7 +194,7 @@ WebApi {
         "_socketTimeout": undefined,
         "handlers": Array [
           PersonalAccessTokenCredentialHandler {
-            "allowCrossOriginAuthentication": undefined,
+            "allowCrossOriginAuthentication": true,
             "token": "1234567890123456789012345678901234567890123456789012",
           },
         ],
