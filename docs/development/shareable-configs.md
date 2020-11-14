@@ -40,5 +40,3 @@ If you use a non-scoped config, you must use a preset name!
 | non-scoped short with preset name and param | `somepackagename:default(eslint)`                 | `default` | `renovate-config-somepackagename` | `eslint`   |
 | non-scoped full with preset name            | `renovate-config-somepackagename:default`         | `default` | `renovate-config-somepackagename` |            |
 | non-scoped full with preset name and param  | `renovate-config-somepackagename:default(eslint)` | `default` | `renovate-config-somepackagename` | `eslint`   |
-
-Reminder: If you use a non-scoped config, you must use a preset name!
