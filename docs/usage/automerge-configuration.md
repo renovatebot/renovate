@@ -143,4 +143,4 @@ These approval helper apps are only available for GitHub.
 
 ### Codeowners
 
-Dependending on the platform, having a `CODEOWNERS` file could block automerging, because it means a code owner must review the PR.
+Depending on the platform, having a `CODEOWNERS` file could block automerging, because it means a code owner must review the PR.
