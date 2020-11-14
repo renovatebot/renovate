@@ -48,7 +48,7 @@ Here is an example of automerging lock file maintenance:
 
 Automerging lint tool updates can be a real time-saver.
 Sometimes an update to a lint tool or plugin definition can cause tests to fail, and that is usually deliberate/intentional because the lint authors have added a new validation that you need to adhere to.
-However, in many cases the new version(s) will pass tests, and if so then there's really nothing else to consider before merging, so they may as well as automerged:
+However, in many cases the new version(s) will pass tests, and if so then there's really nothing else to consider before merging, so they may as well be automerged:
 
 ```json
 {
