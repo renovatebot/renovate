@@ -83,7 +83,8 @@ The `matchCurrentVersion` setting above is a rule to exclude any dependencies wh
 ## Automerging and scheduling
 
 Automerging is particularly beneficial if you have configured a schedule, because Renovate on its own may be able to automerge the majority of your updates.
-And this is especially so if your repository needs rebasing, e.g. because you use lock files. e.g. let's say you have dependencies `abc` and `xyz` with upgrades, and you use a `yarn.lock` file.
+And this is especially so if your repository needs rebasing, e.g. because you use lock files.
+e.g. let's say you have dependencies `abc` and `xyz` with upgrades, and you use a `yarn.lock` file.
 
 - At the start of the schedule, `Renovate` will create branches for `abc` and `xyz` upgrades, including `yarn.lock` updates
 - After `abc` passes tests, `Renovate` will automerge it to `master`
