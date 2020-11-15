@@ -6,6 +6,9 @@ Unlike ESLint though:
 - Presets may be as small as a list of package names, or as large as a full config
 - Shared config files can contain many presets
 
+Presets can be defined using either npm packages, or with GitHub/GitLab repositories.
+Bitbucket-hosted presets are yet to be implemented.
+
 ## Preset config URIs
 
 In human-understandable form, the rules are:
@@ -40,3 +43,15 @@ If you use a non-scoped config, you must use a preset name!
 | non-scoped short with preset name and param | `somepackagename:default(eslint)`                 | `default` | `renovate-config-somepackagename` | `eslint`   |
 | non-scoped full with preset name            | `renovate-config-somepackagename:default`         | `default` | `renovate-config-somepackagename` |            |
 | non-scoped full with preset name and param  | `renovate-config-somepackagename:default(eslint)` | `default` | `renovate-config-somepackagename` | `eslint`   |
+
+### Git based
+
+In general, GitHub or GitLab-based preset hosting is easier than npm because you avoid the "publish" step - simply commit preset code to the default branch and it will be picked up by Renovate the next time it runs.
+An additional benefit of using source code hosting is that the same token/authentication can be reused by Renovate in case you want to make your config private.
+
+| name                    | example use          | preset    | resolves as                  | parameters |
+| ----------------------- | -------------------- | --------- | ---------------------------- | ---------- |
+| GitHub default          | `github>abc/foo`     | `default` | `https://github.com/abc/foo` |            |
+| GitHub with preset name | `github>abc/foo:xyz` | `xyz`     | `https://github.com/abc/foo` |            |
+| GitLab default          | `gitlab>abc/foo`     | `default` | `https://gitlab.com/abc/foo` |            |
+| GitLab with preset name | `gitlab>abc/foo:xyz` | `xyz`     | `https://gitlab.com/abc/foo` |            |
