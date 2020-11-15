@@ -2519,13 +2519,13 @@ aws4@^1.8.0:
   resolved "https://registry.yarnpkg.com/aws4/-/aws4-1.11.0.tgz#d61f46d83b2519250e2784daf5b09479a8b41c59"
   integrity sha512-xh1Rl34h6Fi1DC2WWKfxUTVqRsNnr6LsKz2+hfwDxQJWmrx8+c7ylaqBMcHfl1U1r2dsifOvKX3LQuLNZ+XSvA==
 
-azure-devops-node-api@10.1.1:
-  version "10.1.1"
-  resolved "https://registry.yarnpkg.com/azure-devops-node-api/-/azure-devops-node-api-10.1.1.tgz#9016d8935316fff260f5f8fafd81d0caff90a19e"
-  integrity sha512-P4Hyrh/+Nzc2KXQk73z72/GsenSWIH5o8uiyELqykJYs9TWTVCxVwghoR7lPeiY6QVoXkq2S2KtvAgi5fyjl9w==
+azure-devops-node-api@10.1.2:
+  version "10.1.2"
+  resolved "https://registry.yarnpkg.com/azure-devops-node-api/-/azure-devops-node-api-10.1.2.tgz#c3f66399b79495c5b8847c2b95cb3f7261b58085"
+  integrity sha512-0oPwjVcV1IbzSx+rcT6clhmO8bQQazU/p6haErbRwAlPf2Oh+MK277TCqo4bFNL/8HS3LR4nDrNowMSmQDh//Q==
   dependencies:
     tunnel "0.0.6"
-    typed-rest-client "^1.7.3"
+    typed-rest-client "^1.8.0"
     underscore "1.8.3"
 
 babel-jest@26.6.3, babel-jest@^26.6.3:
@@ -7760,7 +7760,6 @@ npm@^6.13.0:
     cmd-shim "^3.0.3"
     columnify "~1.5.4"
     config-chain "^1.1.12"
-    debuglog "*"
     detect-indent "~5.0.0"
     detect-newline "^2.1.0"
     dezalgo "~1.0.3"
@@ -7775,7 +7774,6 @@ npm@^6.13.0:
     has-unicode "~2.0.1"
     hosted-git-info "^2.8.8"
     iferr "^1.0.2"
-    imurmurhash "*"
     infer-owner "^1.0.4"
     inflight "~1.0.6"
     inherits "^2.0.4"
@@ -7794,14 +7792,8 @@ npm@^6.13.0:
     libnpx "^10.2.4"
     lock-verify "^2.1.0"
     lockfile "^1.0.4"
-    lodash._baseindexof "*"
     lodash._baseuniq "~4.6.0"
-    lodash._bindcallback "*"
-    lodash._cacheindexof "*"
-    lodash._createcache "*"
-    lodash._getnative "*"
     lodash.clonedeep "~4.5.0"
-    lodash.restparam "*"
     lodash.union "~4.6.0"
     lodash.uniq "~4.5.0"
     lodash.without "~4.4.0"
@@ -10429,7 +10421,7 @@ type-fest@^0.8.0, type-fest@^0.8.1:
   resolved "https://registry.yarnpkg.com/type-fest/-/type-fest-0.8.1.tgz#09e249ebde851d3b1e48d27c105444667f17b83d"
   integrity sha512-4dbzIzqvjtgiM5rw1k5rEHtBANKmdudhGyBEajN01fEyhaAIhsoKNy6y7+IN93IfpFtwY9iqi7kD+xwKhQsNJA==
 
-typed-rest-client@^1.7.3:
+typed-rest-client@^1.8.0:
   version "1.8.0"
   resolved "https://registry.yarnpkg.com/typed-rest-client/-/typed-rest-client-1.8.0.tgz#3b6c22a7cc31b665ec1e4bedb3482ebe12e2fbe6"
   integrity sha512-Nu1MrdH6ECrRW5gHoRAdubgCs4oH6q5/J76jsEC8bVDfvVoVPkigukPalhMHPwb7ZvpsZqPptd5zpt/QdtrdBw==
