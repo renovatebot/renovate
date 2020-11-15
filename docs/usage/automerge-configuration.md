@@ -64,8 +64,7 @@ However, in many cases the new version(s) will pass tests, and if so then there'
 
 ### Automerge non-major updates update
 
-Automerge patch level updates is probably good to cover as well.
-Non-major updates shouldn't have breaking changes (if they follow SemVer that is...) so many users enable automerge for these:
+Non-major updates in SemVer ecosystems shouldn't have breaking changes (if they follow the spec), therefore many users enable automerge for these too:
 
 ```json
 {
