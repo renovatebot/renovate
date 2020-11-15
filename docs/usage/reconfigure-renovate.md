@@ -14,9 +14,9 @@ If you wish to make config edits directly, it's recommended to do so via a PR an
 The validator is named `renovate-config-validator` and installed alongside `renovate` itself if you run `npm i -g renovate` or equivalent.
 If it validates your new config then it should be safe to merge.
 
-### CircleCI
+### Validation when using CircleCI
 
-If you are using CircleCI, you can use the [daniel-shuy/renovate](https://circleci.com/developer/orbs/orb/daniel-shuy/renovate) orb to validate your config as part of your workflow, eg.
+If you are using CircleCI, you can use the third-party [daniel-shuy/renovate](https://circleci.com/developer/orbs/orb/daniel-shuy/renovate) orb to validate your config as part of your workflow, eg.
 
 ```yml
 version: '2.1'
