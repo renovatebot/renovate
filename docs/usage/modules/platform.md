@@ -1,6 +1,6 @@
 # Renovate Platforms
 
-Renovate aims to be as platform-neutral as possible in general, while also taking advantage of any platform-specific features that are of benefit to users.
+Renovate aims to be platform-neutral, while also taking advantage of good platform-specific features.
 
 Currently supported platforms are:
 
