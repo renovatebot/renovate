@@ -16,7 +16,7 @@ If it validates your new config then it should be safe to merge.
 
 ### Validation when using CircleCI
 
-If you are using CircleCI, you can use the third-party [daniel-shuy/renovate](https://circleci.com/developer/orbs/orb/daniel-shuy/renovate) orb to validate your config as part of your workflow, eg.
+If you are using CircleCI, you can use the third-party [daniel-shuy/renovate](https://circleci.com/developer/orbs/orb/daniel-shuy/renovate) orb to validate your config as part of your workflow, e.g.
 
 ```yml
 version: '2.1'
