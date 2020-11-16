@@ -162,7 +162,7 @@ export async function ensurePr(
       `Branch is configured for branch automerge, branch status) is: ${await getBranchStatus()}`
     );
     if (
-      !config.stabilityDays &&
+      config.stabilityStatus !== BranchStatus.yellow &&
       (await getBranchStatus()) === BranchStatus.yellow
     ) {
       logger.debug('Checking how long this branch has been pending');
@@ -205,11 +205,7 @@ export async function ensurePr(
     !config.forcePr
   ) {
     logger.debug('Checking branch combined status');
-    if (
-      !dependencyDashboardCheck &&
-      !config.stabilityDays &&
-      (await getBranchStatus()) === BranchStatus.yellow
-    ) {
+    if ((await getBranchStatus()) === BranchStatus.yellow) {
       logger.debug(
         `Branch status is "${await getBranchStatus()}" - checking timeout`
       );
@@ -219,7 +215,11 @@ export async function ensurePr(
       const elapsedHours = Math.round(
         (currentTime.getTime() - lastCommitTime.getTime()) / millisecondsPerHour
       );
-      if (elapsedHours < config.prNotPendingHours) {
+      if (
+        !dependencyDashboardCheck &&
+        (config.stabilityStatus !== BranchStatus.yellow ||
+          elapsedHours < config.prNotPendingHours)
+      ) {
         logger.debug(
           `Branch is ${elapsedHours} hours old - skipping PR creation`
         );
