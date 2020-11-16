@@ -186,13 +186,14 @@ Option 2: Run Renovate with the CLI flag `--renovate-fork=true`
 
 Usually, `debug` is good enough to troubleshoot most problems or verify functionality.
 
-When logging at debug, it's usually easiest to view the logs in a text editor, so in that case, you can run like this:
+It's usually easier to have the logs in a file that you can open with a text editor.
+You can use a command like this to put the log messages in a file:
 
 ```
 $ rm -f debug.log && yarn start myaccount/therepo --log-level=debug > debug.log
 ```
 
-The above will delete any existing `debug.log` and then save Renovate's output to that file.
+The example command will delete any existing `debug.log` and then save Renovate's output to a new `debug.log` file.
 
 ### Adding configuration options
 
@@ -212,7 +213,7 @@ Try like this:
 
 If you are using VS Code, try like this:
 
-1. In the configuration file, i.e `config.js` in the root directory of the project, add `token` with your personal access token
+1. In the configuration file, e.g. `config.js` in the root directory of the project, add `token` with your personal access token
 2. In the same configuration file, add `repositories` with the repository you want to test against. The file `config.js` would look something like this:
 
 ```javascript

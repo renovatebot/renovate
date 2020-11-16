@@ -204,7 +204,7 @@ This is an advance field and it's recommend you seek a config review before appl
 ## bumpVersion
 
 Currently this setting supports `helmv3` and `npm` only, so raise a feature request if you have a use for it with other package managers.
-It's purpose is if you want Renovate to update the `version` field within your file's `package.json` any time it updates dependencies within.
+Its purpose is if you want Renovate to update the `version` field within your file's `package.json` any time it updates dependencies within.
 Usually this is for automatic release purposes, so that you don't need to add another step after Renovate before you can release a new version.
 
 Configure this value to `"patch"`, `"minor"` or `"major"` to have Renovate update the version in your edited `package.json`.
@@ -1174,6 +1174,34 @@ Use this field to restrict rules to a particular datasource. e.g.
 ### matchCurrentVersion
 
 `matchCurrentVersion` can be an exact semver version or a semver range.
+
+This field also supports Regular Expressions which have to begin and end with `/`.
+For example, the following will enforce that only `1.*` versions:
+
+```json
+{
+  "packageRules": [
+    {
+      "packagePatterns": ["io.github.resilience4j"],
+      "matchCurrentVersion": "/^1\\./"
+    }
+  ]
+}
+```
+
+This field also supports a special negated regex syntax for ignoring certain versions.
+Use the syntax `!/ /` like the following:
+
+```json
+{
+  "packageRules": [
+    {
+      "packagePatterns": ["io.github.resilience4j"],
+      "allowedVersions": "!/^0\\./"
+    }
+  ]
+}
+```
 
 ### packageNames
 
