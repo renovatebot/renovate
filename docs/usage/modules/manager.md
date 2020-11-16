@@ -45,7 +45,8 @@ If the default `fileMatch` value for a manager does not match against one of you
 #### Ignoring files that match the default fileMatch
 
 Note: Renovate will _extend_ the existing `fileMatch`, meaning you don't need to include the default values like `Dockerfile` in your own array.
-In other words, the values are "additive". If a manager matches a file that you _don't_ want it to, ignore it using the `ignorePaths` configuration option.
+In other words, the values are "additive".
+If a manager matches a file that you _don't_ want it to, ignore it using the `ignorePaths` configuration option.
 Also, if you ever find that Renovate is _not_ matching a file name that you're certain it should, be sure to check that you your preset config isn't the cause of it.
 The `config:base` preset ignores common test and example directory names, for example.
 
@@ -53,7 +54,8 @@ The `config:base` preset ignores common test and example directory names, for ex
 
 #### Enabling experimental managers
 
-Most managers are enabled by default. For those that aren't - typically because they are considered experimental - you can opt-in to them like the following:
+Most managers are enabled by default.
+For those that aren't - typically because they are considered experimental - you can opt-in to them like the following:
 
 ```json
 {
