@@ -1,6 +1,6 @@
 ---
 title: Template Fields
-description:
+description: Explain Renovate template fields
 ---
 
 # Template Fields
