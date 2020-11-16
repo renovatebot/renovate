@@ -152,8 +152,8 @@ By default, the orb looks for the self-hosted configuration file in the project 
 
 Secrets should be configured using environment variables (eg. `RENOVATE_TOKEN`, `GITHUB_COM_TOKEN`).
 
-Configure environment variables in CircleCI Project Settings (https://circleci.com/docs/2.0/env-vars/#setting-an-environment-variable-in-a-project).
-To share environment variables across projects, use CircleCI Contexts (https://circleci.com/docs/2.0/contexts/).
+[Configure environment variables in CircleCI Project Settings](https://circleci.com/docs/2.0/env-vars/#setting-an-environment-variable-in-a-project).
+To share environment variables across projects, use CircleCI [Contexts](https://circleci.com/docs/2.0/contexts/).
 
 The following example runs Renovate hourly, and looks for the self-hosted configuration file at `renovate-config.js`:
 
