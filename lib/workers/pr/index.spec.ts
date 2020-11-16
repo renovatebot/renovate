@@ -370,8 +370,8 @@ describe('workers/pr', () => {
       config.prCreation = 'not-pending';
       config.stabilityStatus = BranchStatus.yellow;
       const { prResult, pr } = await prWorker.ensurePr(config);
-      expect(prResult).toEqual(PrResult.Created);
-      expect(pr).toBeDefined();
+      expect(prResult).toEqual(PrResult.AwaitingNotPending);
+      expect(pr).toBeUndefined();
     });
     it('should create PR if pending timeout hit', async () => {
       platform.getBranchStatus.mockResolvedValueOnce(BranchStatus.yellow);
@@ -379,6 +379,7 @@ describe('workers/pr', () => {
         Promise.resolve(new Date('2017-01-01'))
       );
       config.prCreation = 'not-pending';
+      config.stabilityStatus = BranchStatus.yellow;
       const { prResult, pr } = await prWorker.ensurePr(config);
       expect(prResult).toEqual(PrResult.Created);
       expect(pr).toMatchObject({ displayNumber: 'New Pull Request' });
