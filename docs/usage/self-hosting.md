@@ -148,7 +148,7 @@ spec:
 
 If you are using CircleCI, you can use the third-party [daniel-shuy/renovate](https://circleci.com/developer/orbs/orb/daniel-shuy/renovate) orb to run a self-hosted instance of Renovate on CircleCI.
 
-By default, the orb looks for the self-hosted configuration file in the project root, but can be customized using the `config_file_path` parameter.
+By default, the orb looks for the self-hosted configuration file in the project root, but you can specify another path to the configuration file with the `config_file_path` parameter.
 
 Secrets should be configured using environment variables (eg. `RENOVATE_TOKEN`, `GITHUB_COM_TOKEN`).
 
