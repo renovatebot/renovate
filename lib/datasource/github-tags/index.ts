@@ -3,6 +3,7 @@ import { logger } from '../../logger';
 import * as packageCache from '../../util/cache/package';
 import { GithubHttp } from '../../util/http/github';
 import { DigestConfig, GetReleasesConfig, ReleaseResult } from '../common';
+import * as githubReleases from '../github-releases';
 
 export const id = 'github-tags';
 
@@ -109,17 +110,7 @@ export async function getDigest(
   return digest;
 }
 
-/**
- * github.getReleases
- *
- * This function can be used to fetch releases with a customisable versioning (e.g. semver) and with either tags or releases.
- *
- * This function will:
- *  - Fetch all tags or releases (depending on configuration)
- *  - Sanitize the versions if desired (e.g. strip out leading 'v')
- *  - Return a dependency object containing sourceUrl string and releases array
- */
-export async function getReleases({
+async function getTags({
   registryUrl: depHost,
   lookupName: repo,
 }: GetReleasesConfig): Promise<ReleaseResult | null> {
@@ -165,4 +156,36 @@ export async function getReleases({
     cacheMinutes
   );
   return dependency;
+}
+
+export async function getReleases(
+  config: GetReleasesConfig
+): Promise<ReleaseResult | null> {
+  const tagsResult = await getTags(config);
+
+  try {
+    if (tagsResult?.releases) {
+      // Fetch additional data from releases endpoint when possible
+      const releasesResult = await githubReleases.getReleases(config);
+      const releaseByVersion = {};
+      releasesResult?.releases?.forEach((release) => {
+        const key = release.version;
+        const value = { ...release };
+        delete value.version;
+        releaseByVersion[key] = value;
+      });
+
+      const mergedReleases = [];
+      tagsResult.releases.forEach((tag) => {
+        const release = releaseByVersion[tag.version];
+        mergedReleases.push({ ...release, ...tag });
+      });
+
+      tagsResult.releases = mergedReleases;
+    }
+  } catch (e) {
+    // no-op
+  }
+
+  return tagsResult;
 }

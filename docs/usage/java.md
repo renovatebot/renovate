@@ -5,7 +5,8 @@ description: Java versions support in Renovate
 
 # Java Dependency Updates
 
-Renovate can update the version used in Gradle and Maven projects. This includes libraries and plugins.
+Renovate can update the version used in Gradle and Maven projects.
+This includes libraries and plugins.
 
 ## Gradle
 
@@ -17,13 +18,14 @@ Renovate can update `build.gradle`/`build.gradle.kts` files in the root of the r
 
 Renovate does not support:
 
-- Projects with neither `build.gradle` nor `build.gradle.kts` in the root of the repository.
-- Android projects that require extra configuration to run (e.g. setting the Android SDK).
+- Projects with neither `build.gradle` nor `build.gradle.kts` in the root of the repository
+- Android projects that require extra configuration to run (e.g. setting the Android SDK)
 - Gradle versions prior to version 5.0.
 
 ### How It Works
 
-Renovate uses a plugin to search and extract versions from projects. They are then looked up using Maven datasources and patched into PRs the usual way.
+Renovate uses a plugin to search and extract versions from projects.
+They are then looked up using Maven datasources and patched into PRs the usual way.
 
 ## Maven
 

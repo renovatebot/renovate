@@ -28,6 +28,7 @@ import {
   isBranchModified,
 } from '../../util/git';
 import { regEx } from '../../util/regex';
+import * as template from '../../util/template';
 import { BranchConfig, PrResult, ProcessBranchResult } from '../common';
 import { checkAutoMerge, ensurePr } from '../pr';
 import { tryBranchAutomerge } from './automerge';
@@ -49,6 +50,14 @@ function rebaseCheck(config: RenovateConfig, branchPr: Pr): boolean {
 }
 
 const rebasingRegex = /\*\*Rebasing\*\*: .*/;
+
+async function deleteBranchSilently(branchName: string): Promise<void> {
+  try {
+    await deleteBranch(branchName);
+  } catch (err) /* istanbul ignore next */ {
+    logger.debug({ branchName, err }, 'Branch auto-remove failed');
+  }
+}
 
 export async function processBranch(
   branchConfig: BranchConfig,
@@ -373,13 +382,20 @@ export async function processBranch(
               'Post-upgrade task did not match any on allowed list'
             );
           } else {
-            logger.debug({ cmd }, 'Executing post-upgrade task');
+            const compiledCmd = config.allowPostUpgradeCommandTemplating
+              ? template.compile(cmd, config)
+              : cmd;
 
-            const execResult = await exec(cmd, {
+            logger.debug({ cmd: compiledCmd }, 'Executing post-upgrade task');
+
+            const execResult = await exec(compiledCmd, {
               cwd: config.localDir,
             });
 
-            logger.debug({ cmd, ...execResult }, 'Executed post-upgrade task');
+            logger.debug(
+              { cmd: compiledCmd, ...execResult },
+              'Executed post-upgrade task'
+            );
           }
         }
 
@@ -422,16 +438,18 @@ export async function processBranch(
       if (config.releaseTimestamp) {
         logger.debug(`Branch timestamp: ` + config.releaseTimestamp);
         const releaseTimestamp = DateTime.fromISO(config.releaseTimestamp);
-        if (releaseTimestamp.plus({ days: 1 }) < DateTime.local()) {
+        if (releaseTimestamp.plus({ hours: 2 }) < DateTime.local()) {
           logger.debug(
-            'PR is older than a day, raise PR with lock file errors'
+            'PR is older than 2 hours, raise PR with lock file errors'
           );
         } else if (branchExists) {
           logger.debug(
-            'PR is less than a day old but branchExists so updating anyway'
+            'PR is less than 2 hours old but branchExists so updating anyway'
           );
         } else {
-          logger.debug('PR is less than a day old - raise error instead of PR');
+          logger.debug(
+            'PR is less than 2 hours old - raise error instead of PR'
+          );
           throw new Error(MANAGER_LOCKFILE_ERROR);
         }
       } else {
@@ -474,6 +492,7 @@ export async function processBranch(
       const mergeStatus = await tryBranchAutomerge(config);
       logger.debug(`mergeStatus=${mergeStatus}`);
       if (mergeStatus === 'automerged') {
+        await deleteBranchSilently(config.branchName);
         logger.debug('Branch is automerged - returning');
         return ProcessBranchResult.Automerged;
       }
@@ -655,6 +674,7 @@ export async function processBranch(
         }
         const prAutomerged = await checkAutoMerge(pr, config);
         if (prAutomerged) {
+          await deleteBranchSilently(config.branchName);
           return ProcessBranchResult.Automerged;
         }
       }

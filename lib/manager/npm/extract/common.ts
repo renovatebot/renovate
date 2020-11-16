@@ -1,6 +1,6 @@
 import type { PackageJson } from 'type-fest';
 
-export type NpmPackageDependeny = PackageJson.Dependency;
+export type NpmPackageDependency = PackageJson.Dependency;
 
 export interface NpmPackage extends PackageJson {
   renovate?: unknown;
@@ -13,3 +13,9 @@ export type LockFileEntry = Record<
   string,
   { version: string; integrity?: boolean }
 >;
+
+export interface LockFile {
+  lockedVersions: Record<string, string>;
+  lockfileVersion?: number; // cache version for Yarn
+  isYarn1?: boolean;
+}

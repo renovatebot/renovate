@@ -128,6 +128,37 @@ describe('.updateArtifacts()', () => {
     ).not.toBeNull();
     expect(execSnapshots).toMatchSnapshot();
   });
+  it('supports vendor directory update', async () => {
+    const foo = join('vendor/foo/Foo.php');
+    const bar = join('vendor/bar/Bar.php');
+    const baz = join('vendor/baz/Baz.php');
+
+    fs.readLocalFile.mockResolvedValueOnce('Current composer.lock' as any);
+    const execSnapshots = mockExecAll(exec);
+    git.getRepoStatus.mockResolvedValueOnce({
+      modified: ['composer.lock', foo],
+      not_added: [bar],
+      deleted: [baz],
+    } as StatusResult);
+    fs.readLocalFile.mockResolvedValueOnce('New composer.lock' as any);
+    fs.readLocalFile.mockResolvedValueOnce('Foo' as any);
+    fs.readLocalFile.mockResolvedValueOnce('Bar' as any);
+    fs.getSiblingFileName.mockReturnValueOnce('vendor' as any);
+    const res = await composer.updateArtifacts({
+      packageFileName: 'composer.json',
+      updatedDeps: [],
+      newPackageFileContent: '{}',
+      config,
+    });
+    expect(res).not.toBeNull();
+    expect(res?.map(({ file }) => file)).toEqual([
+      { contents: 'New composer.lock', name: 'composer.lock' },
+      { contents: 'Foo', name: foo },
+      { contents: 'Bar', name: bar },
+      { contents: baz, name: '|delete|' },
+    ]);
+    expect(execSnapshots).toMatchSnapshot();
+  });
   it('performs lockFileMaintenance', async () => {
     fs.readLocalFile.mockResolvedValueOnce('Current composer.lock' as any);
     const execSnapshots = mockExecAll(exec);

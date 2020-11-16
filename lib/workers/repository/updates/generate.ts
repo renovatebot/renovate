@@ -9,7 +9,7 @@ import * as template from '../../../util/template';
 import { BranchConfig, BranchUpgradeConfig } from '../../common';
 import { formatCommitMessagePrefix } from '../util/commit-message';
 
-function isTypesGroup(branchUpgrades: any[]): boolean {
+function isTypesGroup(branchUpgrades: BranchUpgradeConfig[]): boolean {
   return (
     branchUpgrades.some(({ depName }) => depName?.startsWith('@types/')) &&
     new Set(
@@ -206,7 +206,7 @@ export function generateBranchConfig(
       'to v$1'
     );
     if (upgrade.toLowerCase) {
-      // We only need to lowercvase the first line
+      // We only need to lowercase the first line
       const splitMessage = upgrade.commitMessage.split('\n');
       splitMessage[0] = splitMessage[0].toLowerCase();
       upgrade.commitMessage = splitMessage.join('\n');

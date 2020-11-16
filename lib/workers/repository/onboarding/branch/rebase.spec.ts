@@ -10,6 +10,7 @@ describe('workers/repository/onboarding/branch/rebase', () => {
       jest.resetAllMocks();
       config = {
         ...defaultConfig,
+        repository: 'some/repo',
       };
     });
     it('does not rebase modified branch', async () => {

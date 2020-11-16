@@ -1,5 +1,8 @@
 import is from '@sindresorhus/is';
-import { PullRequestStatus } from 'azure-devops-node-api/interfaces/GitInterfaces';
+import {
+  GitStatusState,
+  PullRequestStatus,
+} from 'azure-devops-node-api/interfaces/GitInterfaces';
 import { BranchStatus, PrState } from '../../types';
 import * as _git from '../../util/git';
 import * as _hostRules from '../../util/host-rules';
@@ -324,7 +327,149 @@ describe('platform/azure', () => {
       expect(pr).toMatchSnapshot();
     });
   });
+  describe('getBranchStatusCheck(branchName, context)', () => {
+    it('should return green if status is succeeded', async () => {
+      await initRepo({ repository: 'some/repo' });
+      azureApi.gitApi.mockImplementationOnce(
+        () =>
+          ({
+            getBranch: jest.fn(() => ({ commit: { commitId: 'abcd1234' } })),
+            getStatuses: jest.fn(() => [
+              {
+                state: GitStatusState.Succeeded,
+                context: { genre: 'a-genre', name: 'a-name' },
+              },
+            ]),
+          } as any)
+      );
+      const res = await azure.getBranchStatusCheck(
+        'somebranch',
+        'a-genre/a-name'
+      );
+      expect(res).toBe(BranchStatus.green);
+    });
 
+    it('should return green if status is not applicable', async () => {
+      await initRepo({ repository: 'some/repo' });
+      azureApi.gitApi.mockImplementationOnce(
+        () =>
+          ({
+            getBranch: jest.fn(() => ({ commit: { commitId: 'abcd1234' } })),
+            getStatuses: jest.fn(() => [
+              {
+                state: GitStatusState.NotApplicable,
+                context: { genre: 'a-genre', name: 'a-name' },
+              },
+            ]),
+          } as any)
+      );
+      const res = await azure.getBranchStatusCheck(
+        'somebranch',
+        'a-genre/a-name'
+      );
+      expect(res).toBe(BranchStatus.green);
+    });
+    it('should return red if status is failed', async () => {
+      await initRepo({ repository: 'some/repo' });
+      azureApi.gitApi.mockImplementationOnce(
+        () =>
+          ({
+            getBranch: jest.fn(() => ({ commit: { commitId: 'abcd1234' } })),
+            getStatuses: jest.fn(() => [
+              {
+                state: GitStatusState.Failed,
+                context: { genre: 'a-genre', name: 'a-name' },
+              },
+            ]),
+          } as any)
+      );
+      const res = await azure.getBranchStatusCheck(
+        'somebranch',
+        'a-genre/a-name'
+      );
+      expect(res).toBe(BranchStatus.red);
+    });
+    it('should return red if context status is error', async () => {
+      await initRepo({ repository: 'some/repo' });
+      azureApi.gitApi.mockImplementationOnce(
+        () =>
+          ({
+            getBranch: jest.fn(() => ({ commit: { commitId: 'abcd1234' } })),
+            getStatuses: jest.fn(() => [
+              {
+                state: GitStatusState.Error,
+                context: { genre: 'a-genre', name: 'a-name' },
+              },
+            ]),
+          } as any)
+      );
+      const res = await azure.getBranchStatusCheck(
+        'somebranch',
+        'a-genre/a-name'
+      );
+      expect(res).toEqual(BranchStatus.red);
+    });
+    it('should return yellow if status is pending', async () => {
+      await initRepo({ repository: 'some/repo' });
+      azureApi.gitApi.mockImplementationOnce(
+        () =>
+          ({
+            getBranch: jest.fn(() => ({ commit: { commitId: 'abcd1234' } })),
+            getStatuses: jest.fn(() => [
+              {
+                state: GitStatusState.Pending,
+                context: { genre: 'a-genre', name: 'a-name' },
+              },
+            ]),
+          } as any)
+      );
+      const res = await azure.getBranchStatusCheck(
+        'somebranch',
+        'a-genre/a-name'
+      );
+      expect(res).toBe(BranchStatus.yellow);
+    });
+    it('should return yellow if status is not set', async () => {
+      await initRepo({ repository: 'some/repo' });
+      azureApi.gitApi.mockImplementationOnce(
+        () =>
+          ({
+            getBranch: jest.fn(() => ({ commit: { commitId: 'abcd1234' } })),
+            getStatuses: jest.fn(() => [
+              {
+                state: GitStatusState.NotSet,
+                context: { genre: 'a-genre', name: 'a-name' },
+              },
+            ]),
+          } as any)
+      );
+      const res = await azure.getBranchStatusCheck(
+        'somebranch',
+        'a-genre/a-name'
+      );
+      expect(res).toBe(BranchStatus.yellow);
+    });
+    it('should return null if status not found', async () => {
+      await initRepo({ repository: 'some/repo' });
+      azureApi.gitApi.mockImplementationOnce(
+        () =>
+          ({
+            getBranch: jest.fn(() => ({ commit: { commitId: 'abcd1234' } })),
+            getStatuses: jest.fn(() => [
+              {
+                state: GitStatusState.Pending,
+                context: { genre: 'another-genre', name: 'a-name' },
+              },
+            ]),
+          } as any)
+      );
+      const res = await azure.getBranchStatusCheck(
+        'somebranch',
+        'a-genre/a-name'
+      );
+      expect(res).toBeNull();
+    });
+  });
   describe('getBranchStatus(branchName, requiredStatusChecks)', () => {
     it('return success if requiredStatusChecks null', async () => {
       await initRepo('some-repo');
@@ -341,7 +486,8 @@ describe('platform/azure', () => {
       azureApi.gitApi.mockImplementationOnce(
         () =>
           ({
-            getBranch: jest.fn(() => ({ aheadCount: 0 })),
+            getBranch: jest.fn(() => ({ commit: { commitId: 'abcd1234' } })),
+            getStatuses: jest.fn(() => [{ state: GitStatusState.Succeeded }]),
           } as any)
       );
       const res = await azure.getBranchStatus('somebranch', []);
@@ -352,7 +498,32 @@ describe('platform/azure', () => {
       azureApi.gitApi.mockImplementationOnce(
         () =>
           ({
-            getBranch: jest.fn(() => ({ aheadCount: 123 })),
+            getBranch: jest.fn(() => ({ commit: { commitId: 'abcd1234' } })),
+            getStatuses: jest.fn(() => [{ state: GitStatusState.Error }]),
+          } as any)
+      );
+      const res = await azure.getBranchStatus('somebranch', []);
+      expect(res).toEqual(BranchStatus.red);
+    });
+    it('should pass through pending', async () => {
+      await initRepo({ repository: 'some/repo' });
+      azureApi.gitApi.mockImplementationOnce(
+        () =>
+          ({
+            getBranch: jest.fn(() => ({ commit: { commitId: 'abcd1234' } })),
+            getStatuses: jest.fn(() => [{ state: GitStatusState.Pending }]),
+          } as any)
+      );
+      const res = await azure.getBranchStatus('somebranch', []);
+      expect(res).toEqual(BranchStatus.yellow);
+    });
+    it('should fall back to yellow if no statuses returned', async () => {
+      await initRepo({ repository: 'some/repo' });
+      azureApi.gitApi.mockImplementationOnce(
+        () =>
+          ({
+            getBranch: jest.fn(() => ({ commit: { commitId: 'abcd1234' } })),
+            getStatuses: jest.fn(() => []),
           } as any)
       );
       const res = await azure.getBranchStatus('somebranch', []);
@@ -769,18 +940,71 @@ describe('platform/azure', () => {
     });
   });
 
-  describe('Not supported by Azure DevOps (yet!)', () => {
-    it('setBranchStatus', async () => {
-      const res = await azure.setBranchStatus({
+  describe('setBranchStatus', () => {
+    it('should build and call the create status api properly', async () => {
+      await initRepo({ repository: 'some/repo' });
+      const createCommitStatusMock = jest.fn();
+      azureApi.gitApi.mockImplementationOnce(
+        () =>
+          ({
+            getBranch: jest.fn(() => ({ commit: { commitId: 'abcd1234' } })),
+            createCommitStatus: createCommitStatusMock,
+          } as any)
+      );
+      await azure.setBranchStatus({
         branchName: 'test',
         context: 'test',
         description: 'test',
         state: BranchStatus.yellow,
-        url: 'test',
+        url: 'test.com',
       });
-      expect(res).toBeUndefined();
+      expect(createCommitStatusMock).toHaveBeenCalledWith(
+        {
+          context: {
+            genre: undefined,
+            name: 'test',
+          },
+          description: 'test',
+          state: GitStatusState.Pending,
+          targetUrl: 'test.com',
+        },
+        'abcd1234',
+        '1'
+      );
     });
-
+    it('should build and call the create status api properly with a complex context', async () => {
+      await initRepo({ repository: 'some/repo' });
+      const createCommitStatusMock = jest.fn();
+      azureApi.gitApi.mockImplementationOnce(
+        () =>
+          ({
+            getBranch: jest.fn(() => ({ commit: { commitId: 'abcd1234' } })),
+            createCommitStatus: createCommitStatusMock,
+          } as any)
+      );
+      await azure.setBranchStatus({
+        branchName: 'test',
+        context: 'renovate/artifact/test',
+        description: 'test',
+        state: BranchStatus.green,
+        url: 'test.com',
+      });
+      expect(createCommitStatusMock).toHaveBeenCalledWith(
+        {
+          context: {
+            genre: 'renovate/artifact',
+            name: 'test',
+          },
+          description: 'test',
+          state: GitStatusState.Succeeded,
+          targetUrl: 'test.com',
+        },
+        'abcd1234',
+        '1'
+      );
+    });
+  });
+  describe('Not supported by Azure DevOps (yet!)', () => {
     it('mergePr', async () => {
       const res = await azure.mergePr(0, undefined);
       expect(res).toBe(false);

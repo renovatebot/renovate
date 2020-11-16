@@ -1,6 +1,6 @@
 import os from 'os';
-import path from 'path';
 import fs from 'fs-extra';
+import upath from 'upath';
 import { PLATFORM_GPG_FAILED } from '../../constants/error-messages';
 import { logger } from '../../logger';
 import { exec } from '../exec';
@@ -16,7 +16,7 @@ async function importKey(): Promise<void> {
   if (keyId) {
     return;
   }
-  const keyFileName = path.join(os.tmpdir() + '/git-private.key');
+  const keyFileName = upath.join(os.tmpdir() + '/git-private.key');
   await fs.outputFile(keyFileName, gitPrivateKey);
   const { stdout, stderr } = await exec(`gpg --import ${keyFileName}`);
   logger.debug({ stdout, stderr }, 'Private key import result');

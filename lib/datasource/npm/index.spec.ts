@@ -1,4 +1,5 @@
-import moment from 'moment';
+import { DateTime } from 'luxon';
+import mockDate from 'mockdate';
 import nock from 'nock';
 import _registryAuthToken from 'registry-auth-token';
 import { getPkgReleases } from '..';
@@ -57,6 +58,7 @@ describe(getName(__filename), () => {
   });
   afterEach(() => {
     delete process.env.RENOVATE_CACHE_NPM_MINUTES;
+    mockDate.reset();
   });
   it('should return null for no versions', async () => {
     const missingVersions = { ...npmResponse };
@@ -171,7 +173,8 @@ describe(getName(__filename), () => {
     expect(getRelease(res, '0.0.2').canBeUnpublished).toBeUndefined();
   });
   it('should return canBeUnpublished=true', async () => {
-    npmResponse.time['0.0.2'] = moment().subtract(6, 'hours').format();
+    mockDate.set('2020-11-03T05:10:17.496+01:00');
+    npmResponse.time['0.0.2'] = DateTime.local().minus({ hours: 6 }).toISO();
     nock('https://registry.npmjs.org').get('/foobar').reply(200, npmResponse);
     const res = await getPkgReleases({ datasource, depName: 'foobar' });
     expect(getRelease(res, '0.0.1').canBeUnpublished).toBe(false);

@@ -66,12 +66,15 @@ export function extractContainer(
   return dep;
 }
 
-export function parseAzurePipelines(content: string): AzurePipelines | null {
+export function parseAzurePipelines(
+  content: string,
+  filename: string
+): AzurePipelines | null {
   let pkg = null;
   try {
-    pkg = safeLoad(content);
+    pkg = safeLoad(content, { json: true });
   } catch (err) /* istanbul ignore next */ {
-    logger.error({ err }, 'Error parsing azure-pipelines content');
+    logger.info({ filename, err }, 'Error parsing azure-pipelines content');
     return null;
   }
 
@@ -85,11 +88,14 @@ export function parseAzurePipelines(content: string): AzurePipelines | null {
   return pkg;
 }
 
-export function extractPackageFile(content: string): PackageFile | null {
-  logger.trace('azurePipelines.extractPackageFile()');
+export function extractPackageFile(
+  content: string,
+  filename: string
+): PackageFile | null {
+  logger.trace(`azurePipelines.extractPackageFile(${filename})`);
   const deps: PackageDependency[] = [];
 
-  const pkg = parseAzurePipelines(content);
+  const pkg = parseAzurePipelines(content, filename);
   if (!pkg) {
     return null;
   }
