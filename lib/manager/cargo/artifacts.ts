@@ -27,7 +27,7 @@ async function cargoUpdate(
   } catch (err) /* istanbul ignore next */ {
     // Two different versions of one dependency can be present in the same
     // crate, and when that happens an attempt to update it with --package ${dep}
-    // key results in cargo exiting with error code `101` and an error mssage:
+    // key results in cargo exiting with error code `101` and an error message:
     // "error: There are multiple `${dep}` packages in your project".
     //
     // If exception `err` was caused by this, we execute `updateAll` function

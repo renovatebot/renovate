@@ -97,6 +97,7 @@ const repoGroups = {
     'https://github.com/zeit/next.js', // old repo
     'https://github.com/vercel/next.js',
   ],
+  nivo: 'https://github.com/plouc/nivo',
   ngrx: 'https://github.com/ngrx/',
   nrwl: 'https://github.com/nrwl/',
   nuxtjs: 'https://github.com/nuxt/nuxt.js',
@@ -130,6 +131,7 @@ const repoGroups = {
 
 const patternGroups = {
   babel6: '^babel6$',
+  clarity: '^@clr/', // https://github.com/vmware/clarity/issues/5235
   wordpress: '^@wordpress/',
   angularmaterial: ['^@angular/material', '^@angular/cdk'],
   'aws-java-sdk': '^com.amazonaws:aws-java-sdk-',

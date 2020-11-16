@@ -1,5 +1,5 @@
 import { readFileSync } from 'fs';
-import path from 'path';
+import upath from 'upath';
 import { getConfig } from '../../../config/defaults';
 import * as _fs from '../../../util/fs';
 import * as npmExtract from '.';
@@ -11,7 +11,7 @@ const defaultConfig = getConfig();
 
 function readFixture(fixture: string) {
   return readFileSync(
-    path.resolve(__dirname, `../__fixtures__/${fixture}`),
+    upath.resolve(__dirname, `../__fixtures__/${fixture}`),
     'utf8'
   );
 }
@@ -215,6 +215,7 @@ describe('manager/npm/extract', () => {
           npm: '^8.0.0',
           pnpm: '^1.2.0',
           yarn: 'disabled',
+          vscode: '>=1.49.3',
         },
         main: 'index.js',
       };

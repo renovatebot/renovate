@@ -68,6 +68,7 @@ export interface GlobalConfig {
 }
 
 export interface RenovateAdminConfig {
+  allowPostUpgradeCommandTemplating?: boolean;
   allowedPostUpgradeCommands?: string[];
   autodiscover?: boolean;
   autodiscoverFilter?: string;
@@ -176,6 +177,8 @@ export interface RenovateConfig
   warnings?: ValidationMessage[];
   vulnerabilityAlerts?: RenovateSharedConfig;
   regexManagers?: CustomManager[];
+
+  fetchReleaseNotes?: boolean;
 }
 
 export interface AssigneesAndReviewersConfig {

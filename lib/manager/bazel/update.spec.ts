@@ -1,6 +1,6 @@
 import { readFileSync } from 'fs';
-import { resolve } from 'path';
 import { Readable } from 'stream';
+import { resolve } from 'upath';
 import * as httpMock from '../../../test/httpMock';
 import { UpdateType } from '../../config';
 import { updateDependency } from './update';
@@ -56,7 +56,7 @@ describe('manager/bazel/update', () => {
       expect(res).not.toEqual(content);
     });
 
-    it('updates container_pull deptype and prserves comment', async () => {
+    it('updates container_pull deptype and preserves comment', async () => {
       const upgrade = {
         depName: 'hasura',
         depType: 'container_pull',
