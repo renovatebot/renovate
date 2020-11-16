@@ -2,7 +2,7 @@
 
 Renovate aims to be platform-neutral, while also taking advantage of good platform-specific features.
 
-Currently supported platforms are:
+The currently supported platforms are:
 
 - Azure DevOps
 - Bitbucket Cloud
