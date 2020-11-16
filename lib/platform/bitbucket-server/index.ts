@@ -892,8 +892,7 @@ export async function updatePr({
           version: pr.version,
           reviewers: pr.reviewers
             .filter(
-              (name: string) =>
-                !bitbucketInvalidReviewers?.includes(name)
+              (name: string) => !bitbucketInvalidReviewers?.includes(name)
             )
             .map((name: string) => ({ user: { name } })),
         },
