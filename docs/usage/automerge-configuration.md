@@ -62,7 +62,7 @@ However, in many cases the new version(s) will pass tests, and if so then there'
 }
 ```
 
-### Automerge non-major updates update
+### Automerge non-major updates
 
 Non-major updates in SemVer ecosystems shouldn't have breaking changes (if they follow the spec), therefore many users enable automerge for these too:
 
