@@ -1,5 +1,4 @@
 import { readFileSync } from 'fs';
-import path from 'path';
 import * as upath from 'upath';
 import { ExtractConfig } from '../common';
 import { extractPackageFile } from './extract';
@@ -9,7 +8,7 @@ describe('lib/manager/nuget/extract', () => {
     let config: ExtractConfig;
     beforeEach(() => {
       config = {
-        localDir: path.resolve('lib/manager/nuget/__fixtures__'),
+        localDir: upath.resolve('lib/manager/nuget/__fixtures__'),
       };
     });
     it('returns empty for invalid csproj', async () => {
