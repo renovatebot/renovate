@@ -19,8 +19,8 @@ The `fileMatch` array contains Regular Expression strings that match against the
 
 #### Managers with no default fileMatch
 
-Some managers have no default `fileMatch` array, because they have no filename convention that would let Renovate intelligently filter them.
-In such a case, the manager will be disabled until you configure a `fileMatch` value, e.g. like the following:
+Some managers have no default `fileMatch` regular expression, because they have no filename convention that would let Renovate intelligently filter them.
+In such a case, the manager will be disabled until you create a `fileMatch` regular expression, e.g. like the following:
 
 ```json
 {
@@ -32,7 +32,7 @@ In such a case, the manager will be disabled until you configure a `fileMatch` v
 
 #### Extending a manager's default fileMatch
 
-If the default `fileMatch` value for a manager does not match against one of your relevant files, you can _extend_ the existing value(s) by configuring a manager's `fileMatch` like in this example:
+If the default `fileMatch` regular expression for a manager does not match against one of your relevant files, you can _extend_ the existing regular expression(s) by configuring a manager's `fileMatch` like in this example:
 
 ```json
 {
@@ -44,8 +44,8 @@ If the default `fileMatch` value for a manager does not match against one of you
 
 #### Ignoring files that match the default fileMatch
 
-Renovate will _extend_ the existing `fileMatch`, meaning you don't need to include the default values like `Dockerfile` in your own array.
-In other words, the values are "additive".
+Renovate will _extend_ the existing `fileMatch`, meaning you don't need to include the default regular expressions like `Dockerfile` in your own array.
+In other words, the regular expression are "additive".
 If a manager matches a file that you _don't_ want it to, ignore it using the `ignorePaths` configuration option.
 Also, if you ever find that Renovate is _not_ matching a file name that you're certain it should, check your preset config isn't the cause of it.
 The `config:base` preset ignores common test and example directory names, for example.
