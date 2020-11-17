@@ -1163,5 +1163,19 @@ describe('workers/repository/process/lookup', () => {
       const res = await lookup.lookupUpdates(config);
       expect(res).toMatchSnapshot();
     });
+    it('handles sourceUrl packageRules with version restrictions', async () => {
+      config.currentValue = '0.9.99';
+      config.depName = 'q';
+      config.datasource = datasourceNpmId;
+      config.packageRules = [
+        {
+          sourceUrlPrefixes: ['https://github.com/kriskowal/q'],
+          allowedVersions: '< 1.4.0',
+        },
+      ];
+      nock('https://registry.npmjs.org').get('/q').reply(200, qJson);
+      const res = await lookup.lookupUpdates(config);
+      expect(res).toMatchSnapshot();
+    });
   });
 });
