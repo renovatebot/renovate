@@ -4,7 +4,8 @@ Renovate aims to be platform-neutral, while also taking advantage of good platfo
 
 The currently supported platforms are:
 
-- Azure DevOps
+- Azure DevOps (azure.microsoft.com)
+- Azure DevOps Server (self-hosted)
 - Bitbucket Cloud
 - Bitbucket Server
 - GitHub (github.com, GitHub Enterprise)
