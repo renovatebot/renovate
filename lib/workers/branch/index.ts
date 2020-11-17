@@ -12,7 +12,7 @@ import {
   SYSTEM_INSUFFICIENT_DISK_SPACE,
   WORKER_FILE_UPDATE_FAILED,
 } from '../../constants/error-messages';
-import { logger } from '../../logger';
+import { addMeta, logger, removeMeta } from '../../logger';
 import { getAdditionalFiles } from '../../manager/npm/post-update';
 import { Pr, platform } from '../../platform';
 import { BranchStatus, PrState } from '../../types';
@@ -343,7 +343,8 @@ export async function processBranch(
       is.nonEmptyArray(config.allowedPostUpgradeCommands)
     ) {
       for (const upgrade of config.upgrades) {
-        logger.debug(
+        addMeta({ dep: upgrade.depName });
+        logger.trace(
           {
             dep: upgrade.depName,
             tasks: upgrade.postUpgradeTasks,
@@ -449,6 +450,7 @@ export async function processBranch(
         }
       }
     }
+    removeMeta(['dep']);
 
     if (config.artifactErrors?.length) {
       if (config.releaseTimestamp) {
