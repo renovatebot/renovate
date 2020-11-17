@@ -25,12 +25,17 @@ export async function determineRegistries(
 ): Promise<Registry[] | undefined> {
   // Valid file names taken from https://github.com/NuGet/NuGet.Client/blob/f64621487c0b454eda4b98af853bf4a528bef72a/src/NuGet.Core/NuGet.Configuration/Settings/Settings.cs#L34
   const nuGetConfigFileNames = ['nuget.config', 'NuGet.config', 'NuGet.Config'];
+  // normalize paths, otherwise startsWith can fail because of path delimitter mismatch
+  const baseDir = upath.normalizeSafe(localDir);
   const nuGetConfigPath = await findUp(nuGetConfigFileNames, {
-    cwd: upath.dirname(upath.join(localDir, packageFile)),
+    cwd: upath.dirname(upath.join(baseDir, packageFile)),
     type: 'file',
   });
 
-  if (nuGetConfigPath?.startsWith(localDir) !== true) {
+  if (
+    !nuGetConfigPath ||
+    upath.normalizeSafe(nuGetConfigPath).startsWith(baseDir) !== true
+  ) {
     return undefined;
   }
 
