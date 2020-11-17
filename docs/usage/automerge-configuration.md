@@ -104,6 +104,8 @@ For this reason we recommend you consider setting `automergeType=branch` which w
 - If tests pass, Renovate pushes a commit directly to the base branch without PR
 - If tests fail, Renovate raises a PR for you to review
 
+Add the `renovate/**` branch to your testing workflow files, or Renovate will not work properly with the `automergeType=branch` setting.
+
 The result is that passing updates are essentially "silent" - the only sign of them are the commits to your `master` branch.
 If you have enabled branch protection which prevents Renovate from automerging directly to the base branch, then this won't work and you should stick with the default PR-based automerging instead.
 
