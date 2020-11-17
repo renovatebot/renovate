@@ -167,7 +167,7 @@
     "simple-git": "2.21.0",
     "slugify": "1.4.6",
     "traverse": "0.6.6",
-    "upath": "2.0.0",
+    "upath": "2.0.1",
     "url-join": "4.0.1",
     "validate-npm-package-name": "3.0.0",
     "www-authenticate": "0.6.2",
