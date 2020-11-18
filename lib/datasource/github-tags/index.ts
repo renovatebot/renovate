@@ -13,8 +13,8 @@ export const registryStrategy = 'first';
 const http = new GithubHttp();
 
 const cacheNamespace = 'datasource-github-tags';
-function getCacheKey(repo: string, type: string): string {
-  return `${repo}:${type}`;
+function getCacheKey(registryUrl: string, repo: string, type: string): string {
+  return `${registryUrl}:${repo}:${type}`;
 }
 
 interface TagResponse {
@@ -26,12 +26,13 @@ interface TagResponse {
 }
 
 async function getTagCommit(
+  registryUrl: string,
   githubRepo: string,
   tag: string
 ): Promise<string | null> {
   const cachedResult = await packageCache.get<string>(
     cacheNamespace,
-    getCacheKey(githubRepo, `tag-${tag}`)
+    getCacheKey(registryUrl, githubRepo, `tag-${tag}`)
   );
   // istanbul ignore if
   if (cachedResult) {
@@ -60,7 +61,7 @@ async function getTagCommit(
   const cacheMinutes = 120;
   await packageCache.set(
     cacheNamespace,
-    getCacheKey(githubRepo, `tag-${tag}`),
+    getCacheKey(registryUrl, githubRepo, `tag-${tag}`),
     digest,
     cacheMinutes
   );
@@ -75,15 +76,15 @@ async function getTagCommit(
  * This function will simply return the latest commit hash for the configured repository.
  */
 export async function getDigest(
-  { lookupName: githubRepo }: Partial<DigestConfig>,
+  { lookupName: githubRepo, registryUrl }: Partial<DigestConfig>,
   newValue?: string
 ): Promise<string | null> {
   if (newValue?.length) {
-    return getTagCommit(githubRepo, newValue);
+    return getTagCommit(registryUrl, githubRepo, newValue);
   }
   const cachedResult = await packageCache.get<string>(
     cacheNamespace,
-    getCacheKey(githubRepo, 'commit')
+    getCacheKey(registryUrl, githubRepo, 'commit')
   );
   // istanbul ignore if
   if (cachedResult) {
@@ -106,7 +107,7 @@ export async function getDigest(
   const cacheMinutes = 10;
   await packageCache.set(
     cacheNamespace,
-    getCacheKey(githubRepo, 'commit'),
+    getCacheKey(registryUrl, githubRepo, 'commit'),
     digest,
     cacheMinutes
   );
@@ -119,7 +120,7 @@ async function getTags({
 }: GetReleasesConfig): Promise<ReleaseResult | null> {
   const cachedResult = await packageCache.get<ReleaseResult>(
     cacheNamespace,
-    getCacheKey(repo, 'tags')
+    getCacheKey(registryUrl, repo, 'tags')
   );
   // istanbul ignore if
   if (cachedResult) {
@@ -158,7 +159,7 @@ async function getTags({
   const cacheMinutes = 10;
   await packageCache.set(
     cacheNamespace,
-    getCacheKey(repo, 'tags'),
+    getCacheKey(registryUrl, repo, 'tags'),
     dependency,
     cacheMinutes
   );

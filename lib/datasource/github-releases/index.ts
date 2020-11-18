@@ -12,6 +12,11 @@ const cacheNamespace = 'datasource-github-releases';
 
 const http = new GithubHttp();
 
+function getCacheKey(depHost: string, repo: string): string {
+  const type = 'tags';
+  return `${depHost}:${repo}:${type}`;
+}
+
 type GithubRelease = {
   tag_name: string;
   published_at: string;
@@ -34,7 +39,7 @@ export async function getReleases({
 }: GetReleasesConfig): Promise<ReleaseResult | null> {
   const cachedResult = await packageCache.get<ReleaseResult>(
     cacheNamespace,
-    repo
+    getCacheKey(registryUrl, repo)
   );
   // istanbul ignore if
   if (cachedResult) {
@@ -67,6 +72,11 @@ export async function getReleases({
     })
   );
   const cacheMinutes = 10;
-  await packageCache.set(cacheNamespace, repo, dependency, cacheMinutes);
+  await packageCache.set(
+    cacheNamespace,
+    getCacheKey(registryUrl, repo),
+    dependency,
+    cacheMinutes
+  );
   return dependency;
 }
