@@ -9,7 +9,7 @@ Renovate supports upgrading dependencies in Bazel `WORKSPACE` files.
 
 ## How it works
 
-1. Bazel support is enabled automatically, so you do not have to explicitly configure it to be enabled
+1. Bazel support is enabled automatically
 2. Renovate will search repositories for any `WORKSPACE` files in the repository
 3. Existing dependencies will be extracted from `git_repository` and `http_archive` declarations
 4. Renovate will replace any old versions with the latest version available
