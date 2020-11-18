@@ -45,11 +45,12 @@ function determineDatasource(
     logger.debug({ repository, hostName }, 'Found gitlab dependency');
     return { datasource: gitlabTagsId };
   }
-  const res = find({ url: hostName });
+  const hostUrl = 'https://' + hostName;
+  const res = find({ url: hostUrl });
   if (isEmptyObject(res)) {
     // 1 check, to possibly prevent 3 failures in combined query of hostType & url.
     logger.debug(
-      { repository, hostName },
+      { repository, hostUrl },
       'Provided hostname does not match any hostRules. Ignoring'
     );
     return { skipReason: SkipReason.UnknownRegistry, registryUrls: [hostName] };
@@ -59,16 +60,16 @@ function determineDatasource(
     [PLATFORM_TYPE_GITHUB, githubTagsId],
     [PLATFORM_TYPE_GITLAB, gitlabTagsId],
   ]) {
-    if (!isEmptyObject(find({ hostType, url: hostName }))) {
+    if (!isEmptyObject(find({ hostType, url: hostUrl }))) {
       logger.debug(
-        { repository, hostName, hostType: res.hostType },
+        { repository, hostUrl, hostType },
         `Provided hostname matches a ${hostType} hostrule.`
       );
       return { datasource: sourceId, registryUrls: [hostName] };
     }
   }
   logger.debug(
-    { repository, registry: hostName },
+    { repository, registry: hostUrl },
     'Provided hostname did not match any of the hostRules of hostType gitea,github nor gitlab'
   );
   return { skipReason: SkipReason.UnknownRegistry, registryUrls: [hostName] };
