@@ -4,6 +4,7 @@ import { GithubHttp } from '../../util/http/github';
 import { GetReleasesConfig, ReleaseResult } from '../common';
 
 export const id = 'github-releases';
+export const registryStrategy = 'first';
 
 const cacheNamespace = 'datasource-github-releases';
 

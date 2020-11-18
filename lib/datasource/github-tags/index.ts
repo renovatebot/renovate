@@ -6,6 +6,7 @@ import { DigestConfig, GetReleasesConfig, ReleaseResult } from '../common';
 import * as githubReleases from '../github-releases';
 
 export const id = 'github-tags';
+export const registryStrategy = 'first';
 
 const http = new GithubHttp();
 
