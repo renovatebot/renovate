@@ -32,7 +32,7 @@ git_repository(
 )
 ```
 
-New versions will be detected using the list of **tags** for that repository on GitHub.
+Renovate uses the list of **tags** on the remote repository (GitHub) to detect a new version.
 
 ## http_archive and http_file
 
