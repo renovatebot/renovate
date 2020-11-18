@@ -22,7 +22,7 @@ Renovate will update any `git_repository` declaration that contains the followin
 2. remote matching `https://github.com/<owner>/<repo>.git`
 3. tag using a valid SemVer
 
-Example:
+e.g.:
 
 ```
 git_repository(
@@ -42,7 +42,7 @@ Renovate will update any `http_archive` or `http_file` declaration that contains
 2. url matching `https://github.com/<owner>/<repo>/releases/download/<semver>/<repo>.tar.gz`
 3. sha256
 
-Example:
+e.g.:
 
 ```
 http_archive(
