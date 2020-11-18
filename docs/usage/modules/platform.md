@@ -1,10 +1,11 @@
 # Renovate Platforms
 
-Renovate aims to be as platform-neutral as possible in general, while also taking advantage of any platform-specific features that are of benefit to users.
+Renovate aims to be platform-neutral, while also taking advantage of good platform-specific features.
 
-Currently supported platforms are:
+The currently supported platforms are:
 
-- Azure DevOps
+- Azure DevOps (dev.azure.com)
+- Azure DevOps Server (self-hosted)
 - Bitbucket Cloud
 - Bitbucket Server
 - GitHub (github.com, GitHub Enterprise)
