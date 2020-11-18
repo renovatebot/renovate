@@ -11,7 +11,7 @@
     [
       "@semantic-release/exec",
       {
-        "verifyConditionsCmd": "run-s verify",
+        "verifyConditionsCmd": "ls -l",
         "publishCmd": "run-s \"release -- {@}\" -- --release=${nextRelease.version} --sha=${nextRelease.gitHead}"
       }
     ]
