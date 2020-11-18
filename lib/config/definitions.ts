@@ -1784,7 +1784,7 @@ const options: RenovateOptions[] = [
     name: 'gitLabAutomerge',
     description: `Enable or disable usage of GitLab's "merge when pipeline succeeds" feature when automerging PRs`,
     type: 'boolean',
-    default: false,
+    default: true,
   },
   {
     name: 'regexManagers',
