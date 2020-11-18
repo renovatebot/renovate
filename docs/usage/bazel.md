@@ -52,7 +52,7 @@ http_archive(
 )
 ```
 
-New versions will be detected using the list of **releases** for that repository on GitHub.
+Renovate uses the list of **releases** that it finds at the `url` to detect a new version.
 
 ## Future work
 
