@@ -20,7 +20,7 @@ Renovate will update any `git_repository` declaration that contains the followin
 
 1. name
 2. remote matching `https://github.com/<owner>/<repo>.git`
-3. tag using a valid semver
+3. tag using a valid SemVer
 
 Example:
 
