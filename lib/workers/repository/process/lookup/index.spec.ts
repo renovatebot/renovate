@@ -35,6 +35,8 @@ docker.defaultRegistryUrls = ['https://index.docker.io'];
 const gitSubmodules = mocked(datasourceGitSubmodules);
 const githubReleases = mocked(datasourceGithubReleases);
 
+Object.assign(githubReleases, { defaultRegistryUrls: ['https://github.com'] });
+
 let config: lookup.LookupUpdateConfig;
 
 describe('workers/repository/process/lookup', () => {

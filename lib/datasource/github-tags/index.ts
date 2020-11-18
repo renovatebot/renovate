@@ -1,4 +1,3 @@
-import URL from 'url';
 import { logger } from '../../logger';
 import * as packageCache from '../../util/cache/package';
 import { GithubHttp } from '../../util/http/github';
@@ -38,9 +37,18 @@ async function getTagCommit(
   if (cachedResult) {
     return cachedResult;
   }
+
+  // default to GitHub.com if no GHE host is specified.
+  const sourceUrlBase = ensureTrailingSlash(
+    registryUrl ?? 'https://github.com/'
+  );
+  const apiBaseUrl =
+    sourceUrlBase !== 'https://github.com/'
+      ? `${sourceUrlBase}api/v3/`
+      : `https://api.github.com/`;
   let digest: string;
   try {
-    const url = `https://api.github.com/repos/${githubRepo}/git/refs/tags/${tag}`;
+    const url = `${apiBaseUrl}repos/${githubRepo}/git/refs/tags/${tag}`;
     const res = (await http.getJson<TagResponse>(url)).body.object;
     if (res.type === 'commit') {
       digest = res.sha;
@@ -76,28 +84,36 @@ async function getTagCommit(
  * This function will simply return the latest commit hash for the configured repository.
  */
 export async function getDigest(
-  { lookupName: githubRepo, registryUrl }: Partial<DigestConfig>,
+  { lookupName: repo, registryUrl }: Partial<DigestConfig>,
   newValue?: string
 ): Promise<string | null> {
   if (newValue?.length) {
-    return getTagCommit(registryUrl, githubRepo, newValue);
+    return getTagCommit(registryUrl, repo, newValue);
   }
   const cachedResult = await packageCache.get<string>(
     cacheNamespace,
-    getCacheKey(registryUrl, githubRepo, 'commit')
+    getCacheKey(registryUrl, repo, 'commit')
   );
   // istanbul ignore if
   if (cachedResult) {
     return cachedResult;
   }
+  // default to GitHub.com if no GHE host is specified.
+  const sourceUrlBase = ensureTrailingSlash(
+    registryUrl ?? 'https://github.com/'
+  );
+  const apiBaseUrl =
+    sourceUrlBase !== 'https://github.com/'
+      ? `${sourceUrlBase}api/v3/`
+      : `https://api.github.com/`;
   let digest: string;
   try {
-    const url = `https://api.github.com/repos/${githubRepo}/commits?per_page=1`;
+    const url = `${apiBaseUrl}repos/${repo}/commits?per_page=1`;
     const res = await http.getJson<{ sha: string }[]>(url);
     digest = res.body[0].sha;
   } catch (err) {
     logger.debug(
-      { githubRepo, err },
+      { githubRepo: repo, err, registryUrl },
       'Error getting latest commit from GitHub repo'
     );
   }
@@ -107,7 +123,7 @@ export async function getDigest(
   const cacheMinutes = 10;
   await packageCache.set(
     cacheNamespace,
-    getCacheKey(registryUrl, githubRepo, 'commit'),
+    getCacheKey(registryUrl, repo, 'commit'),
     digest,
     cacheMinutes
   );
@@ -127,18 +143,17 @@ async function getTags({
     return cachedResult;
   }
 
-  let depHost = registryUrl;
-  if (ensureTrailingSlash(depHost) === 'https://github.com/') {
-    depHost = null;
-  }
   // default to GitHub.com if no GHE host is specified.
-  const sourceUrlBase = depHost ?? `https://github.com/`;
-  const apiBaseUrl = depHost
-    ? URL.resolve(depHost, 'api/v3/')
-    : `https://api.github.com/`;
+  const sourceUrlBase = ensureTrailingSlash(
+    registryUrl ?? 'https://github.com/'
+  );
+  const apiBaseUrl =
+    sourceUrlBase !== 'https://github.com/'
+      ? `${sourceUrlBase}api/v3/`
+      : `https://api.github.com/`;
 
   // tag
-  const url = URL.resolve(apiBaseUrl, `repos/${repo}/tags?per_page=100`);
+  const url = `${apiBaseUrl}repos/${repo}/tags?per_page=100`;
   type GitHubTag = {
     name: string;
   }[];
@@ -149,7 +164,7 @@ async function getTags({
     })
   ).body.map((o) => o.name);
   const dependency: ReleaseResult = {
-    sourceUrl: URL.resolve(sourceUrlBase, repo),
+    sourceUrl: `${sourceUrlBase}${repo}`,
     releases: null,
   };
   dependency.releases = versions.map((version) => ({
