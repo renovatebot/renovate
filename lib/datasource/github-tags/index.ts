@@ -2,10 +2,12 @@ import URL from 'url';
 import { logger } from '../../logger';
 import * as packageCache from '../../util/cache/package';
 import { GithubHttp } from '../../util/http/github';
+import { ensureTrailingSlash } from '../../util/url';
 import { DigestConfig, GetReleasesConfig, ReleaseResult } from '../common';
 import * as githubReleases from '../github-releases';
 
 export const id = 'github-tags';
+export const defaultRegistryUrls = ['https://github.com'];
 export const registryStrategy = 'first';
 
 const http = new GithubHttp();
@@ -112,7 +114,7 @@ export async function getDigest(
 }
 
 async function getTags({
-  registryUrl: depHost,
+  registryUrl,
   lookupName: repo,
 }: GetReleasesConfig): Promise<ReleaseResult | null> {
   const cachedResult = await packageCache.get<ReleaseResult>(
@@ -124,6 +126,10 @@ async function getTags({
     return cachedResult;
   }
 
+  let depHost = registryUrl;
+  if (ensureTrailingSlash(depHost) === 'https://github.com/') {
+    depHost = null;
+  }
   // default to GitHub.com if no GHE host is specified.
   const sourceUrlBase = depHost ?? `https://github.com/`;
   const apiBaseUrl = depHost

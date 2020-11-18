@@ -1,9 +1,11 @@
 import URL from 'url';
 import * as packageCache from '../../util/cache/package';
 import { GithubHttp } from '../../util/http/github';
+import { ensureTrailingSlash } from '../../util/url';
 import { GetReleasesConfig, ReleaseResult } from '../common';
 
 export const id = 'github-releases';
+export const defaultRegistryUrls = ['https://github.com'];
 export const registryStrategy = 'first';
 
 const cacheNamespace = 'datasource-github-releases';
@@ -28,7 +30,7 @@ type GithubRelease = {
  */
 export async function getReleases({
   lookupName: repo,
-  registryUrl: depHost,
+  registryUrl,
 }: GetReleasesConfig): Promise<ReleaseResult | null> {
   const cachedResult = await packageCache.get<ReleaseResult>(
     cacheNamespace,
@@ -38,6 +40,11 @@ export async function getReleases({
   if (cachedResult) {
     return cachedResult;
   }
+  let depHost = registryUrl;
+  if (ensureTrailingSlash(depHost) === 'https://github.com/') {
+    depHost = null;
+  }
+
   const sourceUrlBase = depHost ?? `https://github.com/`;
   const apiBaseUrl = depHost
     ? URL.resolve(depHost, 'api/v3/')
