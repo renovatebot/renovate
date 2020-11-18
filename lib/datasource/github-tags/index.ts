@@ -187,25 +187,23 @@ export async function getReleases(
   const tagsResult = await getTags(config);
 
   try {
-    if (tagsResult?.releases) {
-      // Fetch additional data from releases endpoint when possible
-      const releasesResult = await githubReleases.getReleases(config);
-      const releaseByVersion = {};
-      releasesResult?.releases?.forEach((release) => {
-        const key = release.version;
-        const value = { ...release };
-        delete value.version;
-        releaseByVersion[key] = value;
-      });
+    // Fetch additional data from releases endpoint when possible
+    const releasesResult = await githubReleases.getReleases(config);
+    const releaseByVersion = {};
+    releasesResult?.releases?.forEach((release) => {
+      const key = release.version;
+      const value = { ...release };
+      delete value.version;
+      releaseByVersion[key] = value;
+    });
 
-      const mergedReleases = [];
-      tagsResult.releases.forEach((tag) => {
-        const release = releaseByVersion[tag.version];
-        mergedReleases.push({ ...release, ...tag });
-      });
+    const mergedReleases = [];
+    tagsResult.releases.forEach((tag) => {
+      const release = releaseByVersion[tag.version];
+      mergedReleases.push({ ...release, ...tag });
+    });
 
-      tagsResult.releases = mergedReleases;
-    }
+    tagsResult.releases = mergedReleases;
   } catch (e) {
     // no-op
   }
