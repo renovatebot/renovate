@@ -170,6 +170,9 @@ export interface RenovateConfig
   packageRules?: PackageRule[];
   prConcurrentLimit?: number;
   prHourlyLimit?: number;
+
+  registryUrls?: string[];
+
   repoIsOnboarded?: boolean;
 
   updateType?: UpdateType;
