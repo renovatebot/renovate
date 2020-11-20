@@ -30,7 +30,8 @@ In order to achieve these goals, preset configs allow for a very modular approac
 
 ## Preset Hosting
 
-Presets can be defined using either npm packages, or with GitHub/GitLab repositories. Bitbucket-hosted presets are yet to be implemented.
+Presets can be defined using either npm packages, or with GitHub/GitLab repositories.
+Bitbucket-hosted presets are yet to be implemented.
 
 The following namespace is used:
 
