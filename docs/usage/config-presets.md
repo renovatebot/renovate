@@ -18,8 +18,8 @@ In short:
 
 The main reason for supporting preset configs is to decrease duplication:
 
-1.  You shouldn't need copy/paste the same config across all your repositories
-2.  You shouldn't need to reinvent any config "wheels" that others have invented before
+1. You shouldn't need copy/paste the same config across all your repositories
+2. You shouldn't need to reinvent any config "wheels" that others have invented before
 
 A further reason was to make Renovate configuration "self-documenting", by adding the `"description"` field to all preset configs.
 
