@@ -82,6 +82,27 @@ describe('datasource/github-tags', () => {
       expect(res).toBeNull();
       expect(httpMock.getTrace()).toMatchSnapshot();
     });
+
+    it('supports ghe', async () => {
+      httpMock
+        .scope(githubEnterpriseApiHost)
+        .get(`/api/v3/repos/${lookupName}/git/refs/tags/${tag}`)
+        .reply(200, { object: { type: 'commit', sha: 'ddd111' } })
+        .get(`/api/v3/repos/${lookupName}/commits?per_page=1`)
+        .reply(200, [{ sha: 'abcdef' }]);
+
+      const sha1 = await github.getDigest(
+        { lookupName, registryUrl: githubEnterpriseApiHost },
+        null
+      );
+      const sha2 = await github.getDigest(
+        { lookupName: 'some/dep', registryUrl: githubEnterpriseApiHost },
+        'v1.2.0'
+      );
+      expect(httpMock.getTrace()).toMatchSnapshot();
+      expect(sha1).toBe('abcdef');
+      expect(sha2).toBe('ddd111');
+    });
   });
   describe('getReleases', () => {
     beforeEach(() => {
