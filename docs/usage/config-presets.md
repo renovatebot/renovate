@@ -57,7 +57,7 @@ An example of a full config is `config:base`, which is Renovate's default config
 It mostly uses Renovate config defaults but adds a few smart customisations such as grouping monorepo packages together.
 
 Special note: the `:xyz` naming convention (with `:` prefix) is a special shorthand for the `default:` presets.
-i.e. `:xyz` is equivalent to `default:xyz`.
+e.g. `:xyz` is equivalent to `default:xyz`.
 
 ## How to Use Preset Configs
 
