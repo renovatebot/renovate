@@ -64,7 +64,7 @@ e.g. `:xyz` is equivalent to `default:xyz`.
 By default, the Renovate App's onboarding process will suggest `["config:base]"`.
 If you are self hosting you must add `"onboardingConfig": { "extends": ["config:base"] }` to your bot's config.
 
-A typical onboarding `renovate.json` will then look like this:
+A typical onboarding `renovate.json` looks like this:
 
 ```json
 {
