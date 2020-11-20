@@ -62,7 +62,7 @@ e.g. `:xyz` is equivalent to `default:xyz`.
 ## How to Use Preset Configs
 
 By default, the Renovate App's onboarding process will suggest `["config:base]"`.
-If you are self hosting then you must add `"onboardingConfig": { "extends": ["config:base"] }` to your bot's config.
+If you are self hosting you must add `"onboardingConfig": { "extends": ["config:base"] }` to your bot's config.
 
 A typical onboarding `renovate.json` will then look like this:
 
