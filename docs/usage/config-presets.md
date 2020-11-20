@@ -116,7 +116,8 @@ Here is how you would use these in your Renovate config:
 In short, the number of `{{argx}}` params in the definition is how many parameters you need to provide.
 Parameters must be strings, non-quoted, and separated by commas if there are more than one.
 
-If you find that you are repeating config a lot, you might consider publishing one of these types of parameterised presets yourself, or if you think your preset would be valuable for others, please contribute a PR to the Renovate repository.
+If you find that you are repeating config a lot, you might consider publishing one of these types of parameterised presets yourself.
+Or if you think your preset would be valuable for others, please contribute a PR to the Renovate repository.
 
 ## How to Publish Preset Configs
 
