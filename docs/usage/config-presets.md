@@ -86,7 +86,7 @@ You can find the Renovate team's preset configs at the "Config Presets" section 
 
 ## Preset Parameters
 
-If you browse the "default" presets, you will see some that contain parameters, example:
+If you browse the "default" presets, you will see some that contain parameters, e.g.:
 
 ```json
     "labels": {
