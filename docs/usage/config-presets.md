@@ -82,7 +82,7 @@ To do this you can modify the default `renovate.json` file like this:
 ```
 
 This makes use of the `schedules:` presets.
-To see all presets published by the Renovate team then browse the "Config Presets" section of [Renovate Docs](https://docs.renovatebot.com).
+You can find the Renovate team's preset configs at the "Config Presets" section of [Renovate Docs](https://docs.renovatebot.com).
 
 ## Preset Parameters
 
