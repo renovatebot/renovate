@@ -16,12 +16,13 @@ In short:
 
 ## Goals of Preset Configs
 
-The main reason for supporting preset configs is to decrease duplication:
+The main reason for supporting preset configs is to decrease duplication.
+By using a preset config you:
 
-1. You shouldn't need copy/paste the same config across all your repositories
-2. You shouldn't need to reinvent any config "wheels" that others have invented before
+1. Avoid duplicating the same config across all your repositories
+2. Can use someone else's configuration and extend it
 
-A further reason was to make Renovate configuration "self-documenting", by adding the `"description"` field to all preset configs.
+Renovate's configuration is self-documenting, because you can fill in the `"description"` field in all preset configs.
 
 ## Implementation Approach
 
