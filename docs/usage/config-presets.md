@@ -44,8 +44,9 @@ The following namespace is used:
 - `gitlab>abc/foo`: gitlab repository `https://gitlab.com/abc/foo` and preset `default`
 - `gitlab>abc/foo:xyz`: gitlab repository `https://gitlab.com/abc/foo` and preset `xyz`
 
-In general, GitHub or GitLab-based preset hosting is easier than npm because you avoid the "publish" step - simply commit preset code to the default branch and it will be picked up by Renovate the next time it runs.
-An additional benefit of using source code hosting is that the same token/authentication can be reused by Renovate in case you want to make your config private.
+It's easier to use GitHub/GitLab based preset hosting, as you avoid the "publish" step that is necessary with a npm package.
+You can commit preset code to the default branch and it will be picked up by Renovate the next time it runs.
+An additional benefit of using GitHub/GitLab hosting is that the same token/authentication can be reused by Renovate in case you want to make your config private.
 
 ## Example configs
 
