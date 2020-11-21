@@ -20,6 +20,7 @@ export interface Registry {
   readonly name?: string;
 }
 
+/* istanbul ignore next */
 export function getRandomString(): string {
   return cryptoRandomString({ length: 16 });
 }
