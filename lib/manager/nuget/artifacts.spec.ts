@@ -33,6 +33,9 @@ describe('updateArtifacts', () => {
     jest.resetAllMocks();
     jest.resetModules();
     env.getChildProcessEnv.mockReturnValue(envMock.basic);
+    fs.ensureCacheDir.mockImplementation((dirName: string) =>
+      Promise.resolve(dirName)
+    );
     await setUtilConfig(config);
     docker.resetPrefetchedImages();
   });
