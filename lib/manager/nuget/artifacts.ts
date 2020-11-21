@@ -1,12 +1,13 @@
 import { join } from 'path';
 import cryptoRandomString from 'crypto-random-string';
-import { fs } from '../../../test/util';
 import { id } from '../../datasource/nuget';
 import { logger } from '../../logger';
 import { ExecOptions, exec } from '../../util/exec';
 import {
+  ensureCacheDir,
   getSiblingFileName,
   readLocalFile,
+  remove,
   writeLocalFile,
 } from '../../util/fs';
 import * as hostRules from '../../util/host-rules';
@@ -51,7 +52,7 @@ async function runDotnetRestore(
     },
   };
 
-  const nugetConfigDir = await fs.ensureCacheDir(
+  const nugetConfigDir = await ensureCacheDir(
     `./others/nuget/${cryptoRandomString({ length: 16 })}`
   );
   const nugetConfigFile = join(nugetConfigDir, 'nuget.config');
@@ -62,7 +63,7 @@ async function runDotnetRestore(
   ];
   logger.debug({ cmd: cmds }, 'dotnet command');
   await exec(cmds, execOptions);
-  await fs.remove(nugetConfigDir);
+  await remove(nugetConfigDir);
 }
 
 export async function updateArtifacts({
