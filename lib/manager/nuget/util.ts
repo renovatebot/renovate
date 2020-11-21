@@ -1,3 +1,4 @@
+import cryptoRandomString from 'crypto-random-string';
 import findUp from 'find-up';
 import * as upath from 'upath';
 import { XmlDocument } from 'xmldoc';
@@ -17,6 +18,10 @@ async function readFileAsXmlDocument(file: string): Promise<XmlDocument> {
 export interface Registry {
   readonly url: string;
   readonly name?: string;
+}
+
+export function getRandomString(): string {
+  return cryptoRandomString({ length: 16 });
 }
 
 export async function determineRegistries(

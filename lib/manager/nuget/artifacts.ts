@@ -1,5 +1,4 @@
 import { join } from 'path';
-import cryptoRandomString from 'crypto-random-string';
 import { id } from '../../datasource/nuget';
 import { logger } from '../../logger';
 import { ExecOptions, exec } from '../../util/exec';
@@ -16,7 +15,7 @@ import {
   UpdateArtifactsConfig,
   UpdateArtifactsResult,
 } from '../common';
-import { determineRegistries } from './util';
+import { determineRegistries, getRandomString } from './util';
 
 async function addSourceCmds(
   packageFileName: string,
@@ -53,7 +52,7 @@ async function runDotnetRestore(
   };
 
   const nugetConfigDir = await ensureCacheDir(
-    `./others/nuget/${cryptoRandomString({ length: 16 })}`
+    `./others/nuget/${getRandomString()}`
   );
   const nugetConfigFile = join(nugetConfigDir, 'nuget.config');
   const cmds = [

@@ -3,7 +3,7 @@
 exports[`updateArtifacts aborts if lock file is unchanged 1`] = `
 Array [
   Object {
-    "cmd": "dotnet new nugetconfig --output ./others/nuget/755461d51c07d4de",
+    "cmd": "dotnet new nugetconfig --output ./others/nuget/not-so-random",
     "options": Object {
       "cwd": "/tmp/github/some/repo",
       "encoding": "utf-8",
@@ -21,7 +21,7 @@ Array [
     },
   },
   Object {
-    "cmd": "dotnet restore project.csproj --force-evaluate --configfile others/nuget/755461d51c07d4de/nuget.config",
+    "cmd": "dotnet restore project.csproj --force-evaluate --configfile others/nuget/not-so-random/nuget.config",
     "options": Object {
       "cwd": "/tmp/github/some/repo",
       "encoding": "utf-8",
@@ -46,7 +46,7 @@ exports[`updateArtifacts aborts if no lock file found 1`] = `Array []`;
 exports[`updateArtifacts authenticates at registries 1`] = `
 Array [
   Object {
-    "cmd": "dotnet new nugetconfig --output ./others/nuget/6d74034e601eb829",
+    "cmd": "dotnet new nugetconfig --output ./others/nuget/not-so-random",
     "options": Object {
       "cwd": "/tmp/github/some/repo",
       "encoding": "utf-8",
@@ -64,7 +64,7 @@ Array [
     },
   },
   Object {
-    "cmd": "dotnet nuget add source https://my-registry.example.org --name myRegistry --configfile others/nuget/6d74034e601eb829/nuget.config --username some-username --password some-password --store-password-in-clear-text",
+    "cmd": "dotnet nuget add source https://my-registry.example.org --name myRegistry --configfile others/nuget/not-so-random/nuget.config --username some-username --password some-password --store-password-in-clear-text",
     "options": Object {
       "cwd": "/tmp/github/some/repo",
       "encoding": "utf-8",
@@ -82,7 +82,7 @@ Array [
     },
   },
   Object {
-    "cmd": "dotnet restore project.csproj --force-evaluate --configfile others/nuget/6d74034e601eb829/nuget.config",
+    "cmd": "dotnet restore project.csproj --force-evaluate --configfile others/nuget/not-so-random/nuget.config",
     "options": Object {
       "cwd": "/tmp/github/some/repo",
       "encoding": "utf-8",
@@ -120,7 +120,7 @@ exports[`updateArtifacts does not update lock file when non-proj file is changed
 exports[`updateArtifacts performs lock file maintenance 1`] = `
 Array [
   Object {
-    "cmd": "dotnet new nugetconfig --output ./others/nuget/bee8338fa55930a3",
+    "cmd": "dotnet new nugetconfig --output ./others/nuget/not-so-random",
     "options": Object {
       "cwd": "/tmp/github/some/repo",
       "encoding": "utf-8",
@@ -138,7 +138,7 @@ Array [
     },
   },
   Object {
-    "cmd": "dotnet restore project.csproj --force-evaluate --configfile others/nuget/bee8338fa55930a3/nuget.config",
+    "cmd": "dotnet restore project.csproj --force-evaluate --configfile others/nuget/not-so-random/nuget.config",
     "options": Object {
       "cwd": "/tmp/github/some/repo",
       "encoding": "utf-8",
@@ -173,7 +173,7 @@ Array [
     },
   },
   Object {
-    "cmd": "docker run --rm --name=renovate_dotnet --label=renovate_child --user=foobar -v \\"/tmp/github/some/repo\\":\\"/tmp/github/some/repo\\" -v \\"/tmp/renovate/cache\\":\\"/tmp/renovate/cache\\" -w \\"/tmp/github/some/repo\\" renovate/dotnet bash -l -c \\"dotnet new nugetconfig --output ./others/nuget/b8683917cce215c9 && dotnet restore project.csproj --force-evaluate --configfile others/nuget/b8683917cce215c9/nuget.config\\"",
+    "cmd": "docker run --rm --name=renovate_dotnet --label=renovate_child --user=foobar -v \\"/tmp/github/some/repo\\":\\"/tmp/github/some/repo\\" -v \\"/tmp/renovate/cache\\":\\"/tmp/renovate/cache\\" -w \\"/tmp/github/some/repo\\" renovate/dotnet bash -l -c \\"dotnet new nugetconfig --output ./others/nuget/not-so-random && dotnet restore project.csproj --force-evaluate --configfile others/nuget/not-so-random/nuget.config\\"",
     "options": Object {
       "cwd": "/tmp/github/some/repo",
       "encoding": "utf-8",
@@ -196,7 +196,7 @@ Array [
 exports[`updateArtifacts supports global mode 1`] = `
 Array [
   Object {
-    "cmd": "dotnet new nugetconfig --output ./others/nuget/2a78f82ffaf9f663",
+    "cmd": "dotnet new nugetconfig --output ./others/nuget/not-so-random",
     "options": Object {
       "cwd": "/tmp/github/some/repo",
       "encoding": "utf-8",
@@ -214,7 +214,7 @@ Array [
     },
   },
   Object {
-    "cmd": "dotnet restore project.csproj --force-evaluate --configfile others/nuget/2a78f82ffaf9f663/nuget.config",
+    "cmd": "dotnet restore project.csproj --force-evaluate --configfile others/nuget/not-so-random/nuget.config",
     "options": Object {
       "cwd": "/tmp/github/some/repo",
       "encoding": "utf-8",
@@ -237,7 +237,7 @@ Array [
 exports[`updateArtifacts updates lock file 1`] = `
 Array [
   Object {
-    "cmd": "dotnet new nugetconfig --output ./others/nuget/1286b7ff5b3196a7",
+    "cmd": "dotnet new nugetconfig --output ./others/nuget/not-so-random",
     "options": Object {
       "cwd": "/tmp/github/some/repo",
       "encoding": "utf-8",
@@ -255,7 +255,7 @@ Array [
     },
   },
   Object {
-    "cmd": "dotnet restore project.csproj --force-evaluate --configfile others/nuget/1286b7ff5b3196a7/nuget.config",
+    "cmd": "dotnet restore project.csproj --force-evaluate --configfile others/nuget/not-so-random/nuget.config",
     "options": Object {
       "cwd": "/tmp/github/some/repo",
       "encoding": "utf-8",
