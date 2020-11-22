@@ -126,6 +126,7 @@
     "clean-git-ref": "2.0.1",
     "commander": "6.2.0",
     "conventional-commits-detector": "1.0.3",
+    "crypto-random-string": "3.3.0",
     "deepmerge": "4.2.2",
     "delay": "4.4.0",
     "detect-indent": "6.0.0",
