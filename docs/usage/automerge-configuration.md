@@ -32,7 +32,7 @@ I think the endgame here should be:
 ### Automerge lock file maintenance
 
 The lowest risk type of update to automerge is probably `lockFileMaintenance`.
-When Renovate performs lock file maintenance, it means that it leaves the project dependency definitions unchanged, but refreshes the lock file completely so that latest versions according to package file constraints are installed.
+When Renovate performs lock file maintenance, it leaves the project dependency definitions unchanged, but refreshes the lock file completely so that the latest versions according to the package file constraints are installed.
 Here is an example of automerging lock file maintenance:
 
 ```json
