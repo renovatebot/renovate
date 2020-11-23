@@ -3,7 +3,7 @@ import { logger } from '../../logger';
 import { Http } from '../../util/http';
 import { ReleaseResult } from '../common';
 
-import { id, replaceBuildMeta } from './common';
+import { id, removeBuildMeta } from './common';
 
 const http = new Http(id);
 
@@ -33,7 +33,7 @@ export async function getReleases(
       const version = getPkgProp(pkgInfo, 'Version');
       const releaseTimestamp = getPkgProp(pkgInfo, 'Published');
       dep.releases.push({
-        version: replaceBuildMeta(version),
+        version: removeBuildMeta(version),
         releaseTimestamp,
       });
       try {
