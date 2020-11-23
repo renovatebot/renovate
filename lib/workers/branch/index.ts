@@ -673,7 +673,7 @@ export async function processBranch(
           }
         }
         const prAutomerged = await checkAutoMerge(pr, config);
-        if (prAutomerged) {
+        if (prAutomerged && config.automergeType !== 'pr-comment') {
           await deleteBranchSilently(config.branchName);
           return ProcessBranchResult.Automerged;
         }

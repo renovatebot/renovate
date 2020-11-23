@@ -29,18 +29,18 @@ When Renovate processes your project's repository it will look for the files lis
 
 ## Configuring Support Policy
 
-Renovate supports a [`supportPolicy`](/configuration-options/#supportpolicy) option that can be passed the following values and associated versions (current as of Oct 2020):
+Renovate supports a [`supportPolicy`](/configuration-options/#supportpolicy) option that can be passed the following values and associated versions (current as of Nov 2020):
 
 **Default:** `lts`
 
-| supportPolicy | versions   | description                                              |
-| ------------- | ---------- | -------------------------------------------------------- |
-| all           | 10, 12, 14 | All releases that have not passed their end date         |
-| lts           | 10, 12     | All releases classified as LTS, including in maintenance |
-| active        | 12, 14     | All releases not in maintenance                          |
-| lts_active    | 12         | All releases both LTS and active                         |
-| lts_latest    | 12         | The latest LTS release                                   |
-| current       | 14         | The latest release from "all"                            |
+| supportPolicy | versions       | description                                              |
+| ------------- | -------------- | -------------------------------------------------------- |
+| all           | 10, 12, 14, 15 | All releases that have not passed their end date         |
+| lts           | 10, 12, 14     | All releases classified as LTS, including in maintenance |
+| active        | 12, 14, 15     | All releases not in maintenance                          |
+| lts_active    | 12, 14         | All releases both LTS and active                         |
+| lts_latest    | 14             | The latest LTS release                                   |
+| current       | 15             | The latest release from "all"                            |
 
 The version numbers associated with each support policy will be updated as new versions of Node.js are released, moved to LTS or maintenance, etc.
 

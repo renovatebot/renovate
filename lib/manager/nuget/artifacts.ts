@@ -1,9 +1,12 @@
+import { join } from 'path';
 import { id } from '../../datasource/nuget';
 import { logger } from '../../logger';
 import { ExecOptions, exec } from '../../util/exec';
 import {
+  ensureCacheDir,
   getSiblingFileName,
   readLocalFile,
+  remove,
   writeLocalFile,
 } from '../../util/fs';
 import * as hostRules from '../../util/host-rules';
@@ -12,32 +15,30 @@ import {
   UpdateArtifactsConfig,
   UpdateArtifactsResult,
 } from '../common';
-import { determineRegistries } from './util';
+import { determineRegistries, getRandomString } from './util';
 
-async function authenticate(
+async function addSourceCmds(
   packageFileName: string,
   config: UpdateArtifactsConfig,
-  cmds: string[]
-): Promise<void> {
+  nugetConfigFile: string
+): Promise<string[]> {
   const registries = (
     (await determineRegistries(packageFileName, config.localDir)) || []
   ).filter((registry) => registry.name != null);
+  const result = [];
   for (const registry of registries) {
     const { username, password } = hostRules.find({
       hostType: id,
       url: registry.url,
     });
+    let addSourceCmd = `dotnet nuget add source ${registry.url} --name ${registry.name} --configfile ${nugetConfigFile}`;
     if (username && password) {
       // Add registry credentials from host rules.
-      cmds.unshift(
-        `dotnet nuget update source ${registry.name} --username ${username} --password ${password} --store-password-in-clear-text`
-      );
-      // Ensure that credentials are removed as soon as not necessary anymore.
-      cmds.push(
-        `dotnet nuget update source ${registry.name} --username '' --password '' --store-password-in-clear-text`
-      );
+      addSourceCmd += ` --username ${username} --password ${password} --store-password-in-clear-text`;
     }
+    result.push(addSourceCmd);
   }
+  return result;
 }
 
 async function runDotnetRestore(
@@ -49,10 +50,19 @@ async function runDotnetRestore(
       image: 'renovate/dotnet',
     },
   };
-  const cmds = [`dotnet restore ${packageFileName} --force-evaluate`];
-  await authenticate(packageFileName, config, cmds);
+
+  const nugetConfigDir = await ensureCacheDir(
+    `./others/nuget/${getRandomString()}`
+  );
+  const nugetConfigFile = join(nugetConfigDir, 'nuget.config');
+  const cmds = [
+    `dotnet new nugetconfig --output ${nugetConfigDir}`,
+    ...(await addSourceCmds(packageFileName, config, nugetConfigFile)),
+    `dotnet restore ${packageFileName} --force-evaluate --configfile ${nugetConfigFile}`,
+  ];
   logger.debug({ cmd: cmds }, 'dotnet command');
   await exec(cmds, execOptions);
+  await remove(nugetConfigDir);
 }
 
 export async function updateArtifacts({
