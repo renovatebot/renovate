@@ -202,7 +202,7 @@ You want to configure the encrypted token just once, which means in the preset.
 But you also probably want the preset to be private too, so how can the other repos reference it?
 
 The answer is to host your preset using GitHub or GitLab - not npmjs - and make sure you have added the preset's repo to Renovate too.
-GitHub will then permit Renovate to access the preset repo whenever it is processing any other repos within the same account/org.
+GitHub will then allow Renovate to access the preset repo whenever it is processing any other repos within the same account/org.
 
 ## Contributing to presets
 
