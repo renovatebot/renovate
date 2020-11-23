@@ -19,16 +19,6 @@ If you have an API with 100% test coverage and `express` is updated... automerge
 
 ## Configuration examples
 
-<!-- Internal comment
-
-I think the endgame here should be:
-
-- Each example use case is fully realised, and should be copy/pasteable and work.
-- The example should explain the reasoning/thinking behind each setting.
-- The example should have links to each setting, so that the docs can be consulted.
-
--->
-
 ### Automerge lock file maintenance
 
 The lowest risk type of update to automerge is probably `lockFileMaintenance`.
