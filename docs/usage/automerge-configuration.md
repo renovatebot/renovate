@@ -47,7 +47,7 @@ Here is an example of automerging lock file maintenance:
 ### Automerge lint tool updates
 
 Automerging lint tool updates can be a real time-saver.
-Sometimes an update to a lint tool or plugin definition can cause tests to fail, and that is usually deliberate/intentional because the lint authors have added a new validation that you need to adhere to.
+Sometimes an update to a lint tool or plugin definition can cause tests to fail, and that is usually deliberate/intentional because the lint authors have added a new rule that you need to adhere to.
 However, in many cases the new version(s) will pass tests, and if so then there's really nothing else to consider before merging, so they may as well be automerged:
 
 ```json
@@ -119,14 +119,14 @@ If tests subsequently _fail_, making automerge not possible, then Renovate will 
 ### Automerge not enabled correctly in config
 
 Sometimes, the reason Renovate is not automerging a PR is because of a configuration mistake.
-You can confirm that Renovate knows you want it to automerge by seeing if the PR body includes the text "Automerge: Enabled".
+You can confirm that Renovate knows you want it to automerge by checking if the PR body includes the text "Automerge: Enabled".
 If you see "Automerge: Disabled by config" then it means you need a config change for automerge to work.
 
 ### Absence of tests
 
 By default, Renovate will not automerge until it sees passing status checks / check runs for the branch.
 If you have no tests but still want Renovate to automerge, you need to add `"requiredStatusChecks": null` to your configuration.
-However, we strongly recommend you should have tests in any project where you are regularly updating dependencies.
+However, we strongly recommend you have tests in any project where you are regularly updating dependencies.
 
 ### Committer restrictions
 
