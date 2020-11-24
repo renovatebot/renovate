@@ -1,19 +1,10 @@
+import { hasKey } from '../../util/object';
+
 export type HelmDockerImageDependency = {
   registry?: string;
   repository: string;
   tag: string;
 };
-
-/**
- * This is a workaround helper to allow the usage of 'unknown' in
- * a type-guard function while checking that keys exist.
- *
- * @see https://github.com/microsoft/TypeScript/issues/21732
- * @see https://stackoverflow.com/a/58630274
- */
-function hasKey<K extends string, T>(k: K, o: T): o is T & Record<K, unknown> {
-  return typeof o === 'object' && k in o;
-}
 
 /**
  * Type guard to determine whether a given partial Helm values.yaml object potentially
