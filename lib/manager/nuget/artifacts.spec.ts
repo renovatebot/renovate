@@ -8,7 +8,10 @@ import * as docker from '../../util/exec/docker';
 import * as _env from '../../util/exec/env';
 import * as _hostRules from '../../util/host-rules';
 import * as nuget from './artifacts';
-import { determineRegistries as _determineRegistries } from './util';
+import {
+  determineRegistries as _determineRegistries,
+  getRandomString as _getRandomString,
+} from './util';
 
 jest.mock('child_process');
 jest.mock('../../util/exec/env');
@@ -19,6 +22,7 @@ jest.mock('./util');
 const exec: jest.Mock<typeof _exec> = _exec as any;
 const env = mocked(_env);
 const determineRegistries: jest.Mock<typeof _determineRegistries> = _determineRegistries as any;
+const getRandomString: jest.Mock<typeof _getRandomString> = _getRandomString as any;
 const hostRules = mocked(_hostRules);
 
 const config = {
@@ -33,6 +37,10 @@ describe('updateArtifacts', () => {
     jest.resetAllMocks();
     jest.resetModules();
     env.getChildProcessEnv.mockReturnValue(envMock.basic);
+    fs.ensureCacheDir.mockImplementation((dirName: string) =>
+      Promise.resolve(dirName)
+    );
+    getRandomString.mockReturnValue('not-so-random' as any);
     await setUtilConfig(config);
     docker.resetPrefetchedImages();
   });

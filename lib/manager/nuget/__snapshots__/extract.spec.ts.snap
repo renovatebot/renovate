@@ -183,6 +183,17 @@ Array [
 ]
 `;
 
+exports[`lib/manager/nuget/extract extractPackageFile() extracts package version dependency 1`] = `
+Array [
+  Object {
+    "currentValue": "4.5.0",
+    "datasource": "nuget",
+    "depName": "Autofac",
+    "depType": "nuget",
+  },
+]
+`;
+
 exports[`lib/manager/nuget/extract extractPackageFile() extracts registry URLs independently 1`] = `
 Object {
   "deps": Array [

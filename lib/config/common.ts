@@ -68,6 +68,7 @@ export interface GlobalConfig {
 }
 
 export interface RenovateAdminConfig {
+  allowPostUpgradeCommandTemplating?: boolean;
   allowedPostUpgradeCommands?: string[];
   autodiscover?: boolean;
   autodiscoverFilter?: string;
@@ -169,6 +170,9 @@ export interface RenovateConfig
   packageRules?: PackageRule[];
   prConcurrentLimit?: number;
   prHourlyLimit?: number;
+
+  registryUrls?: string[];
+
   repoIsOnboarded?: boolean;
 
   updateType?: UpdateType;

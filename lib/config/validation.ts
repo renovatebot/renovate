@@ -1,6 +1,6 @@
 import is from '@sindresorhus/is';
 import { getManagerList } from '../manager';
-import { regEx } from '../util/regex';
+import { configRegexPredicate, isConfigRegex, regEx } from '../util/regex';
 import * as template from '../util/template';
 import { hasValidSchedule, hasValidTimezone } from '../workers/branch/schedule';
 import { RenovateConfig, ValidationMessage } from './common';
@@ -145,30 +145,10 @@ export async function validateConfig(
           });
         }
       } else if (
-        key === 'allowedVersions' &&
-        is.string(val) &&
-        val.length > 1 &&
-        val.startsWith('/') &&
-        val.endsWith('/')
+        ['allowedVersions', 'matchCurrentVersion'].includes(key) &&
+        isConfigRegex(val)
       ) {
-        try {
-          regEx(val.slice(1, -1));
-        } catch (err) {
-          errors.push({
-            depName: 'Configuration Error',
-            message: `Invalid regExp for ${currentPath}: \`${val}\``,
-          });
-        }
-      } else if (
-        key === 'allowedVersions' &&
-        is.string(val) &&
-        val.length > 2 &&
-        val.startsWith('!/') &&
-        val.endsWith('/')
-      ) {
-        try {
-          regEx(val.slice(2, -1));
-        } catch (err) {
+        if (!configRegexPredicate(val)) {
           errors.push({
             depName: 'Configuration Error',
             message: `Invalid regExp for ${currentPath}: \`${val}\``,

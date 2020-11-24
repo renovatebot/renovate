@@ -225,6 +225,12 @@ export interface ManagerApi {
   language?: string;
   supportsLockFileMaintenance?: boolean;
 
+  bumpPackageVersion?(
+    content: string,
+    currentValue: string,
+    bumpVersion: ReleaseType | string
+  ): Result<string | null>;
+
   extractAllPackageFiles?(
     config: ExtractConfig,
     files: string[]

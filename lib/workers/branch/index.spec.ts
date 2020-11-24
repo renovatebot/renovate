@@ -681,15 +681,73 @@ describe('workers/branch', () => {
       const result = await branchWorker.processBranch({
         ...config,
         postUpgradeTasks: {
-          commands: ['echo 1', 'disallowed task'],
+          commands: ['echo {{{versioning}}}', 'disallowed task'],
           fileFilters: ['modified_file', 'deleted_file'],
         },
         localDir: '/localDir',
-        allowedPostUpgradeCommands: ['^echo 1$'],
+        allowedPostUpgradeCommands: ['^echo {{{versioning}}}$'],
+        allowPostUpgradeCommandTemplating: true,
       });
 
       expect(result).toEqual(ProcessBranchResult.Done);
-      expect(exec.exec).toHaveBeenCalledWith('echo 1', { cwd: '/localDir' });
+      expect(exec.exec).toHaveBeenCalledWith('echo semver', {
+        cwd: '/localDir',
+      });
+    });
+
+    it('executes post-upgrade tasks with disabled post-upgrade command templating', async () => {
+      const updatedPackageFile: File = {
+        name: 'pom.xml',
+        contents: 'pom.xml file contents',
+      };
+      getUpdated.getUpdatedPackageFiles.mockResolvedValueOnce({
+        updatedPackageFiles: [updatedPackageFile],
+        artifactErrors: [],
+      } as never);
+      npmPostExtract.getAdditionalFiles.mockResolvedValueOnce({
+        artifactErrors: [],
+        updatedArtifacts: [
+          {
+            name: 'yarn.lock',
+            contents: Buffer.from([1, 2, 3]) /* Binary content */,
+          },
+        ],
+      } as never);
+      git.branchExists.mockReturnValueOnce(true);
+      platform.getBranchPr.mockResolvedValueOnce({
+        title: 'rebase!',
+        state: PrState.Open,
+        body: `- [x] <!-- rebase-check -->`,
+      } as never);
+      git.isBranchModified.mockResolvedValueOnce(true);
+      git.getRepoStatus.mockResolvedValueOnce({
+        modified: ['modified_file'],
+        not_added: [],
+        deleted: ['deleted_file'],
+      } as StatusResult);
+      global.trustLevel = 'high';
+
+      fs.outputFile.mockReturnValue();
+      fs.readFile.mockResolvedValueOnce(Buffer.from('modified file content'));
+
+      schedule.isScheduledNow.mockReturnValueOnce(false);
+      commit.commitFilesToBranch.mockResolvedValueOnce(null);
+
+      const result = await branchWorker.processBranch({
+        ...config,
+        postUpgradeTasks: {
+          commands: ['echo {{{versioning}}}', 'disallowed task'],
+          fileFilters: ['modified_file', 'deleted_file'],
+        },
+        localDir: '/localDir',
+        allowedPostUpgradeCommands: ['^echo {{{versioning}}}$'],
+        allowPostUpgradeCommandTemplating: false,
+      });
+
+      expect(result).toEqual(ProcessBranchResult.Done);
+      expect(exec.exec).toHaveBeenCalledWith('echo {{{versioning}}}', {
+        cwd: '/localDir',
+      });
     });
   });
 });
