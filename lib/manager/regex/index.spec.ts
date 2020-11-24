@@ -1,5 +1,5 @@
 import { readFileSync } from 'fs';
-import { resolve } from 'path';
+import { resolve } from 'upath';
 import { getName } from '../../../test/util';
 import { defaultConfig, extractPackageFile } from '.';
 
@@ -59,5 +59,31 @@ describe(getName(__filename), () => {
       config
     );
     expect(res).toBeNull();
+  });
+  it('extracts registryUrl', async () => {
+    const config = {
+      matchStrings: [
+        'chart:\n *repository: (?<registryUrl>.*?)\n *name: (?<depName>.*?)\n *version: (?<currentValue>.*)\n',
+      ],
+      datasourceTemplate: 'helm',
+    };
+    const res = await extractPackageFile(
+      `
+      apiVersion: helm.fluxcd.io/v1
+      kind: HelmRelease
+      metadata:
+        name: prometheus-operator
+        namespace: monitoring
+      spec:
+        releaseName: prometheus-operator
+        chart:
+          repository: https://kubernetes-charts.storage.googleapis.com/
+          name: prometheus-operator
+          version: 8.12.13
+      `,
+      'Dockerfile',
+      config
+    );
+    expect(res).toMatchSnapshot();
   });
 });

@@ -46,6 +46,7 @@ const repoGroups = {
   angular1: 'https://github.com/angular/angular.js',
   angular: 'https://github.com/angular/angular',
   angularcli: 'https://github.com/angular/angular-cli',
+  angularfire: 'https://github.com/angular/angularfire',
   apolloclient: 'https://github.com/apollographql/apollo-client',
   apollolink: 'https://github.com/apollographql/apollo-link',
   awsappsync: 'https://github.com/awslabs/aws-mobile-appsync-sdk-js',
@@ -97,6 +98,7 @@ const repoGroups = {
     'https://github.com/zeit/next.js', // old repo
     'https://github.com/vercel/next.js',
   ],
+  nivo: 'https://github.com/plouc/nivo',
   ngrx: 'https://github.com/ngrx/',
   nrwl: 'https://github.com/nrwl/',
   nuxtjs: 'https://github.com/nuxt/nuxt.js',

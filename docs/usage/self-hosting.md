@@ -119,7 +119,7 @@ spec:
           containers:
             - image: renovate/renovate:23.22.1
               name: renovate-bot
-              env: # For illustration purposes, please user secrets.
+              env: # For illustration purposes, please use secrets.
                 - name: RENOVATE_PLATFORM
                   value: 'github'
                 - name: RENOVATE_TOKEN
@@ -142,6 +142,38 @@ spec:
                 name: renovate-config
             - name: work-volume
               emptyDir: {}
+```
+
+#### CircleCI
+
+If you are using CircleCI, you can use the third-party [daniel-shuy/renovate](https://circleci.com/developer/orbs/orb/daniel-shuy/renovate) orb to run a self-hosted instance of Renovate on CircleCI.
+
+By default, the orb looks for the self-hosted configuration file in the project root, but you can specify another path to the configuration file with the `config_file_path` parameter.
+
+Secrets should be configured using environment variables (eg. `RENOVATE_TOKEN`, `GITHUB_COM_TOKEN`).
+
+[Configure environment variables in CircleCI Project Settings](https://circleci.com/docs/2.0/env-vars/#setting-an-environment-variable-in-a-project).
+To share environment variables across projects, use CircleCI [Contexts](https://circleci.com/docs/2.0/contexts/).
+
+The following example runs Renovate hourly, and looks for the self-hosted configuration file at `renovate-config.js`:
+
+```yml
+version: '2.1'
+orbs:
+  renovate: daniel-shuy/renovate@2.1
+workflows:
+  renovate:
+    jobs:
+      - renovate/self-hosted:
+          config_file_path: renovate-config.js
+    nightly:
+      triggers:
+        - schedule:
+            cron: 0 * * * *
+            filters:
+              branches:
+                only:
+                  - master
 ```
 
 ## Configuration

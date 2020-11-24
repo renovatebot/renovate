@@ -25,6 +25,7 @@ export async function getUpdatedPackageFiles(
     'manager.getUpdatedPackageFiles()'
   );
   const updatedFileContents: Record<string, string> = {};
+  const nonUpdatedFileContents: Record<string, string> = {};
   const packageFileManagers: Record<string, string> = {};
   const packageFileUpdatedDeps: Record<string, string[]> = {};
   const lockFileMaintenanceFiles = [];
@@ -55,22 +56,27 @@ export async function getUpdatedPackageFiles(
           reuseExistingBranch: false,
         });
       }
+      const bumpPackageVersion = get(manager, 'bumpPackageVersion');
       const updateDependency = get(manager, 'updateDependency');
       if (!updateDependency) {
-        const res = await doAutoReplace(
+        let res = await doAutoReplace(
           upgrade,
           existingContent,
           reuseExistingBranch
         );
         if (res) {
+          if (bumpPackageVersion && upgrade.bumpVersion) {
+            res = await bumpPackageVersion(
+              res,
+              upgrade.packageFileVersion,
+              upgrade.bumpVersion
+            );
+          }
           if (res === existingContent) {
             logger.debug({ packageFile, depName }, 'No content changed');
-            if (
-              upgrade.currentValue === upgrade.newValue &&
-              upgrade.rangeStrategy === 'update-lockfile'
-            ) {
+            if (upgrade.rangeStrategy === 'update-lockfile') {
               logger.debug({ packageFile, depName }, 'update-lockfile add');
-              updatedFileContents[packageFile] = res;
+              nonUpdatedFileContents[packageFile] = res;
             }
           } else {
             logger.debug({ packageFile, depName }, 'Contents updated');
@@ -86,10 +92,17 @@ export async function getUpdatedPackageFiles(
         logger.error({ packageFile, depName }, 'Could not autoReplace');
         throw new Error(WORKER_FILE_UPDATE_FAILED);
       }
-      const newContent = await updateDependency({
+      let newContent = await updateDependency({
         fileContent: existingContent,
         upgrade,
       });
+      if (bumpPackageVersion && upgrade.bumpVersion) {
+        newContent = await bumpPackageVersion(
+          newContent,
+          upgrade.packageFileVersion,
+          upgrade.bumpVersion
+        );
+      }
       if (!newContent) {
         if (config.reuseExistingBranch) {
           logger.debug(
@@ -123,16 +136,11 @@ export async function getUpdatedPackageFiles(
         updatedFileContents[packageFile] = newContent;
       }
       if (newContent === existingContent) {
+        // istanbul ignore else
         if (upgrade.datasource === datasourceGitSubmodules.id) {
           updatedFileContents[packageFile] = newContent;
-        }
-        // istanbul ignore next
-        if (
-          upgrade.rangeStrategy === 'update-lockfile' &&
-          upgrade.currentValue === upgrade.newValue
-        ) {
-          // Treat the file as modified because we need to update artifacts
-          updatedFileContents[packageFile] = newContent;
+        } else if (upgrade.rangeStrategy === 'update-lockfile') {
+          nonUpdatedFileContents[packageFile] = newContent;
         }
       }
     }
@@ -157,6 +165,37 @@ export async function getUpdatedPackageFiles(
       if (is.nonEmptyArray(results)) {
         for (const res of results) {
           const { file, artifactError } = res;
+          if (file) {
+            updatedArtifacts.push(file);
+          } else if (artifactError) {
+            artifactErrors.push(artifactError);
+          }
+        }
+      }
+    }
+  }
+  const nonUpdatedPackageFiles = Object.keys(nonUpdatedFileContents).map(
+    (name) => ({
+      name,
+      contents: nonUpdatedFileContents[name],
+    })
+  );
+  for (const packageFile of nonUpdatedPackageFiles) {
+    const manager = packageFileManagers[packageFile.name];
+    const updatedDeps = packageFileUpdatedDeps[packageFile.name];
+    const updateArtifacts = get(manager, 'updateArtifacts');
+    if (updateArtifacts) {
+      const results = await updateArtifacts({
+        packageFileName: packageFile.name,
+        updatedDeps,
+        newPackageFileContent: packageFile.contents,
+        config,
+      });
+      if (is.nonEmptyArray(results)) {
+        updatedPackageFiles.push(packageFile);
+        for (const res of results) {
+          const { file, artifactError } = res;
+          // istanbul ignore else
           if (file) {
             updatedArtifacts.push(file);
           } else if (artifactError) {

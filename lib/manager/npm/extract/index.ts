@@ -1,5 +1,5 @@
-import { dirname } from 'path';
 import is from '@sindresorhus/is';
+import { dirname } from 'upath';
 import validateNpmPackageName from 'validate-npm-package-name';
 import { CONFIG_VALIDATION } from '../../../constants/error-messages';
 import * as datasourceGithubTags from '../../../datasource/github-tags';

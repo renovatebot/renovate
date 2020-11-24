@@ -203,14 +203,14 @@ This is an advance field and it's recommend you seek a config review before appl
 
 ## bumpVersion
 
-Currently this setting supports `npm` only, so raise a feature request if you have a use for it with other package managers.
-It's purpose is if you want Renovate to update the `version` field within your file's `package.json` any time it updates dependencies within.
+Currently this setting supports `helmv3` and `npm` only, so raise a feature request if you have a use for it with other package managers.
+Its purpose is if you want Renovate to update the `version` field within your file's `package.json` any time it updates dependencies within.
 Usually this is for automatic release purposes, so that you don't need to add another step after Renovate before you can release a new version.
 
 Configure this value to `"patch"`, `"minor"` or `"major"` to have Renovate update the version in your edited `package.json`.
 e.g. if you wish Renovate to always increase the target `package.json` version with a patch update, configure this to `"patch"`.
 
-You can also configure this field to `"mirror:x"` where `x` is the name of a package in the `package.json`.
+For `npm` only you can also configure this field to `"mirror:x"` where `x` is the name of a package in the `package.json`.
 Doing so means that the `package.json` `version` field will mirror whatever the version is that `x` depended on.
 Make sure that version is a pinned version of course, as otherwise it won't be valid.
 
@@ -1175,6 +1175,34 @@ Use this field to restrict rules to a particular datasource. e.g.
 
 `matchCurrentVersion` can be an exact semver version or a semver range.
 
+This field also supports Regular Expressions which have to begin and end with `/`.
+For example, the following will enforce that only `1.*` versions:
+
+```json
+{
+  "packageRules": [
+    {
+      "packagePatterns": ["io.github.resilience4j"],
+      "matchCurrentVersion": "/^1\\./"
+    }
+  ]
+}
+```
+
+This field also supports a special negated regex syntax for ignoring certain versions.
+Use the syntax `!/ /` like the following:
+
+```json
+{
+  "packageRules": [
+    {
+      "packagePatterns": ["io.github.resilience4j"],
+      "allowedVersions": "!/^0\\./"
+    }
+  ]
+}
+```
+
 ### packageNames
 
 Use this field if you want to have one or more exact name matches in your package rule.
@@ -1487,14 +1515,14 @@ Behaviour:
 - `bump` = e.g. bump the range even if the new version satisfies the existing range, e.g. `^1.0.0` -> `^1.1.0`
 - `replace` = Replace the range with a newer one if the new version falls outside it, e.g. `^1.0.0` -> `^2.0.0`
 - `widen` = Widen the range with newer one, e.g. `^1.0.0` -> `^1.0.0 || ^2.0.0`
-- `update-lockfile` = Update the lock file when in-range updates are available, otherwise `replace` for updates out of range. Works for `composer`, `npm` and `yarn` so far.
+- `update-lockfile` = Update the lock file when in-range updates are available, otherwise `replace` for updates out of range. Works for `composer`, `npm` and `yarn` so far
 
 Renovate's `"auto"` strategy works like this for npm:
 
 1.  Always pin `devDependencies`
 2.  Pin `dependencies` if we detect that it's an app and not a library
 3.  Widen `peerDependencies`
-4.  If an existing range already ends with an "or" operator - e.g. `"^1.0.0 || ^2.0.0"` - then Renovate will widen it, e.g. making it into `"^1.0.0 || ^2.0.0 || ^3.0.0"`.
+4.  If an existing range already ends with an "or" operator - e.g. `"^1.0.0 || ^2.0.0"` - then Renovate will widen it, e.g. making it into `"^1.0.0 || ^2.0.0 || ^3.0.0"`
 5.  Otherwise, replace the range. e.g. `"^2.0.0"` would be replaced by `"^3.0.0"`
 
 **bump**
@@ -1516,10 +1544,10 @@ By default this label is `"rebase"` however you can configure it to anything you
 
 Possible values and meanings:
 
-- `auto`: Renovate will autodetect the best setting. Defaults to `conflicted` unless the repository has a setting requiring PRs to be up to date with the base branch.
-- `never`: Renovate will never rebase the branch.
-- `conflicted`: Renovate will rebase only if the branch is conflicted.
-- `behind-base-branch`: Renovate will rebase whenever the branch falls 1 or more commit behind its base branch.
+- `auto`: Renovate will autodetect the best setting. Defaults to `conflicted` unless the repository has a setting requiring PRs to be up to date with the base branch
+- `never`: Renovate will never rebase the branch
+- `conflicted`: Renovate will rebase only if the branch is conflicted
+- `behind-base-branch`: Renovate will rebase whenever the branch falls 1 or more commit behind its base branch
 
 Note: this field replaces the previous fields of `rebaseConflictedPrs` and `rebaseStalePrs`.
 

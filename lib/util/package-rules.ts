@@ -2,7 +2,7 @@ import minimatch from 'minimatch';
 import { PackageRule, UpdateType, mergeChildConfig } from '../config';
 import { logger } from '../logger';
 import * as allVersioning from '../versioning';
-import { regEx } from './regex';
+import { configRegexPredicate, isConfigRegex, regEx } from './regex';
 
 // TODO: move to `../config`
 export interface Config extends Record<string, any> {
@@ -192,7 +192,13 @@ function matchesRule(inputConfig: Config, packageRule: PackageRule): boolean {
   if (matchCurrentVersion) {
     const version = allVersioning.get(versioning);
     const matchCurrentVersionStr = matchCurrentVersion.toString();
-    if (version.isVersion(matchCurrentVersionStr)) {
+    if (isConfigRegex(matchCurrentVersionStr)) {
+      const matches = configRegexPredicate(matchCurrentVersionStr);
+      if (!matches(currentValue)) {
+        return false;
+      }
+      positiveMatch = true;
+    } else if (version.isVersion(matchCurrentVersionStr)) {
       let isMatch = false;
       try {
         isMatch = version.matches(matchCurrentVersionStr, currentValue);

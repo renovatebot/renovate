@@ -1,7 +1,7 @@
-import path from 'path';
 import is from '@sindresorhus/is';
 import jsonValidator from 'json-dup-key-validator';
 import JSON5 from 'json5';
+import upath from 'upath';
 
 import { RenovateConfig, mergeChildConfig } from '../../../config';
 import { configFileNames } from '../../../config/app-strings';
@@ -66,7 +66,7 @@ export async function detectRepoFileConfig(): Promise<RepoFileConfig> {
       rawFileContents = '{}';
     }
 
-    const fileType = path.extname(configFileName);
+    const fileType = upath.extname(configFileName);
 
     if (fileType === '.json5') {
       try {

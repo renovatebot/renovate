@@ -41,11 +41,11 @@ _Windows_
 Follow these steps to set up your development environment on Windows 10.
 If you already installed a component, skip the corresponding step.
 
-- Install [Git](https://git-scm.com/downloads). Make sure you've [configured your username and email](https://git-scm.com/book/en/v2/Getting-Started-First-Time-Git-Setup).
-- Install [Node.js LTS](https://nodejs.org/en/download/).
-- In an Administrator PowerShell prompt, run `npm install -global npm` and then `npm --add-python-to-path='true' --debug install --global windows-build-tools`.
-- Install [Yarn](https://yarnpkg.com/lang/en/docs/install/#windows-stable).
-- Install Java, e.g. from [AdoptOpenJDK](https://adoptopenjdk.net/?variant=openjdk11) or any other distribution.
+- Install [Git](https://git-scm.com/downloads). Make sure you've [configured your username and email](https://git-scm.com/book/en/v2/Getting-Started-First-Time-Git-Setup)
+- Install [Node.js LTS](https://nodejs.org/en/download/)
+- In an Administrator PowerShell prompt, run `npm install -global npm` and then `npm --add-python-to-path='true' --debug install --global windows-build-tools`
+- Install [Yarn](https://yarnpkg.com/lang/en/docs/install/#windows-stable)
+- Install Java, e.g. from [AdoptOpenJDK](https://adoptopenjdk.net/?variant=openjdk11) or any other distribution
 
   Verify you're using the appropriate versions:
 
@@ -70,9 +70,9 @@ _VS Code Remote Development_
 
 If you are using [VS Code](https://code.visualstudio.com/) you can skip installing [the prerequisites](#prerequisites) and work in a [development container](https://code.visualstudio.com/docs/remote/containers) instead.
 
-- Install the [Remote - Containers extension](https://marketplace.visualstudio.com/items?itemName=ms-vscode-remote.remote-containers) and [check its system requirements](https://marketplace.visualstudio.com/items?itemName=ms-vscode-remote.remote-containers#system-requirements).
+- Install the [Remote - Containers extension](https://marketplace.visualstudio.com/items?itemName=ms-vscode-remote.remote-containers) and [check its system requirements](https://marketplace.visualstudio.com/items?itemName=ms-vscode-remote.remote-containers#system-requirements)
 - Open the repository folder in VS Code
-- Choose "Reopen in Container" via the command palette or the small button in the lower left corner.
+- Choose "Reopen in Container" via the command palette or the small button in the lower left corner
 
 VS Code [integrated terminal](https://code.visualstudio.com/docs/editor/integrated-terminal) is now running in the container and can be used to run additional commands.
 
@@ -83,18 +83,18 @@ The Renovate project uses the [Yarn](https://github.com/yarnpkg/yarn) package ma
 
 To ensure everything is working properly on your end, you must:
 
-1. Make sure you don't have a local `.npmrc` file that overrides npm's default registry.
-1. Install all dependencies with `yarn install`.
-1. Make a build with `yarn build`, which should pass with no errors.
-1. Verify all tests pass and have 100% test coverage, by running `yarn test`.
+1. Make sure you don't have a local `.npmrc` file that overrides npm's default registry
+1. Install all dependencies with `yarn install`
+1. Make a build with `yarn build`, which should pass with no errors
+1. Verify all tests pass and have 100% test coverage, by running `yarn test`
 1. Verify the installation by running `yarn start`. You must see this error: `Fatal error: No authentication found for platform https://api.github.com/ (github)`
 
 You only need to do these 5 steps this one time.
 
 Before you submit a pull request you should:
 
-1. Install newer dependencies with `yarn install`.
-1. Run the tests with `yarn test`.
+1. Install newer dependencies with `yarn install`
+1. Run the tests with `yarn test`
 
 ## Platform Account Setup
 
@@ -186,13 +186,14 @@ Option 2: Run Renovate with the CLI flag `--renovate-fork=true`
 
 Usually, `debug` is good enough to troubleshoot most problems or verify functionality.
 
-When logging at debug, it's usually easiest to view the logs in a text editor, so in that case, you can run like this:
+It's usually easier to have the logs in a file that you can open with a text editor.
+You can use a command like this to put the log messages in a file:
 
 ```
 $ rm -f debug.log && yarn start myaccount/therepo --log-level=debug > debug.log
 ```
 
-The above will delete any existing `debug.log` and then save Renovate's output to that file.
+The example command will delete any existing `debug.log` and then save Renovate's output to a new `debug.log` file.
 
 ### Adding configuration options
 
@@ -212,7 +213,7 @@ Try like this:
 
 If you are using VS Code, try like this:
 
-1. In the configuration file, i.e `config.js` in the root directory of the project, add `token` with your personal access token.
+1. In the configuration file, e.g. `config.js` in the root directory of the project, add `token` with your personal access token
 2. In the same configuration file, add `repositories` with the repository you want to test against. The file `config.js` would look something like this:
 
 ```javascript
@@ -222,5 +223,5 @@ module.exports = {
 };
 ```
 
-3. Set a breakpoint somewhere in the source code and launch the application in debug mode with selected configuration as `debug`.
-4. Wait for your breakpoint to be triggered.
+3. Set a breakpoint somewhere in the source code and launch the application in debug mode with selected configuration as `debug`
+4. Wait for your breakpoint to be triggered
