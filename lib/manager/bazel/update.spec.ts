@@ -1,6 +1,6 @@
 import { readFileSync } from 'fs';
-import { resolve } from 'path';
 import { Readable } from 'stream';
+import { resolve } from 'upath';
 import * as httpMock from '../../../test/httpMock';
 import { UpdateType } from '../../config';
 import { updateDependency } from './update';

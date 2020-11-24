@@ -184,7 +184,8 @@ export async function initRepo({
       `./rest/api/1.0/projects/${config.projectKey}/repos/${config.repositorySlug}/branches/default`
     );
 
-    if (branchRes.statusCode === 204) {
+    // 204 means empty, 404 means repo not found or missing default branch. repo must exist here.
+    if ([204, 404].includes(branchRes.statusCode)) {
       throw new Error(REPOSITORY_EMPTY);
     }
 

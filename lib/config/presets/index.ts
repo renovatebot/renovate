@@ -95,6 +95,7 @@ export function parsePreset(input: string): ParsedPreset {
     'packages',
     'preview',
     'schedule',
+    'workarounds',
   ];
   if (
     presetsPackages.some((presetPackage) => str.startsWith(`${presetPackage}:`))

@@ -1,7 +1,7 @@
-import path from 'path';
 import is from '@sindresorhus/is';
 import { ERROR } from 'bunyan';
 import fs from 'fs-extra';
+import upath from 'upath';
 import * as configParser from '../../config';
 import { validateConfigSecrets } from '../../config/secrets';
 import { getProblems, logger, setMeta } from '../../logger';
@@ -23,7 +23,7 @@ export async function getRepositoryConfig(
     globalConfig,
     is.string(repository) ? { repository } : repository
   );
-  repoConfig.localDir = path.join(
+  repoConfig.localDir = upath.join(
     repoConfig.baseDir,
     `./repos/${repoConfig.platform}/${repoConfig.repository}`
   );

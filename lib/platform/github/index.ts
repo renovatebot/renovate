@@ -566,7 +566,7 @@ async function getOpenPrs(): Promise<PrList> {
         pr.targetBranch = pr.baseRefName;
         delete pr.baseRefName;
         // https://developer.github.com/v4/enum/mergeablestate
-        const canMergeStates = ['BEHIND', 'CLEAN'];
+        const canMergeStates = ['BEHIND', 'CLEAN', 'HAS_HOOKS'];
         const hasNegativeReview = pr.reviews?.nodes?.length > 0;
         // istanbul ignore if
         if (hasNegativeReview) {

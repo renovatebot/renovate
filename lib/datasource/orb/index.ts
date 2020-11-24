@@ -58,7 +58,7 @@ export async function getReleases({
     dep.homepage = res.homeUrl;
   }
   dep.homepage =
-    dep.homepage || `https://circleci.com/orbs/registry/orb/${lookupName}`;
+    dep.homepage || `https://circleci.com/developer/orbs/orb/${lookupName}`;
   dep.releases = res.versions.map(({ version, createdAt }) => ({
     version,
     releaseTimestamp: createdAt || null,
