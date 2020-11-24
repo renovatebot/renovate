@@ -1,3 +1,4 @@
+import url from 'url';
 import { logger } from '../../logger';
 import { regEx } from '../../util/regex';
 import * as template from '../../util/template';
@@ -27,6 +28,7 @@ export function extractPackageFile(
         'currentDigest',
         'datasource',
         'versioning',
+        'registryUrl',
       ];
       for (const field of fields) {
         const fieldTemplate = `${field}Template`;
@@ -45,6 +47,12 @@ export function extractPackageFile(
         }
       }
       dep.replaceString = String(matchResult[0]);
+      if (dep.registryUrl) {
+        if (url.parse(dep.registryUrl)) {
+          dep.registryUrls = [dep.registryUrl];
+        }
+        delete dep.registryUrl;
+      }
       deps.push(dep);
     }
   } while (matchResult);
