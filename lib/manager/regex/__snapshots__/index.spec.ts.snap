@@ -73,3 +73,30 @@ Object {
   ],
 }
 `;
+
+exports[`manager/regex/index extracts registryUrl 1`] = `
+Object {
+  "deps": Array [
+    Object {
+      "currentValue": "8.12.13",
+      "datasource": "helm",
+      "depName": "prometheus-operator",
+      "registryUrls": Array [
+        "https://kubernetes-charts.storage.googleapis.com/",
+      ],
+      "replaceString": "chart:
+          repository: https://kubernetes-charts.storage.googleapis.com/
+          name: prometheus-operator
+          version: 8.12.13
+",
+    },
+  ],
+  "matchStrings": Array [
+    "chart:
+ *repository: (?<registryUrl>.*?)
+ *name: (?<depName>.*?)
+ *version: (?<currentValue>.*)
+",
+  ],
+}
+`;

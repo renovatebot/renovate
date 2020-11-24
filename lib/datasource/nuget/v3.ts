@@ -9,7 +9,7 @@ import { Http } from '../../util/http';
 import { ensureTrailingSlash } from '../../util/url';
 import { Release, ReleaseResult } from '../common';
 
-import { id } from './common';
+import { id, removeBuildMeta } from './common';
 
 const http = new Http(id);
 
@@ -145,7 +145,7 @@ export async function getReleases(
   let latestStable: string = null;
   const releases = catalogEntries.map(
     ({ version, published: releaseTimestamp, projectUrl, listed }) => {
-      const release: Release = { version };
+      const release: Release = { version: removeBuildMeta(version) };
       if (releaseTimestamp) {
         release.releaseTimestamp = releaseTimestamp;
       }
