@@ -55,16 +55,20 @@ function createDependency(
         return null;
       }
     } else if (groups[field]) {
-      dependency[field] = groups[field];
+      switch (field) {
+        case 'registryUrl':
+          // check if URL is valid and pack inside an array
+          if (url.parse(groups[field])) {
+            dependency.registryUrls = [groups[field]];
+          }
+          break;
+        default:
+          dependency[field] = groups[field];
+          break;
+      }
     }
   }
   dependency.replaceString = String(matchResult[0]);
-  if (dependency.registryUrl) {
-    if (url.parse(dep.registryUrl)) {
-      dependency.registryUrls = [dependency.registryUrl];
-    }
-    delete dependency.registryUrl;
-  }
   return dependency;
 }
 
