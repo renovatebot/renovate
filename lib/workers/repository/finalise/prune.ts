@@ -52,7 +52,7 @@ async function cleanUpBranches(
           );
           let newPrTitle = pr.title;
           if (!pr.title.endsWith('- autoclosed')) {
-            newPrTitle += '- autoclosed';
+            newPrTitle += ' - autoclosed';
           }
           await platform.updatePr({
             number: pr.number,

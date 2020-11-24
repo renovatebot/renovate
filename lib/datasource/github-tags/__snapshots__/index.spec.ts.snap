@@ -91,6 +91,33 @@ Array [
 ]
 `;
 
+exports[`datasource/github-tags getDigest supports ghe 1`] = `
+Array [
+  Object {
+    "headers": Object {
+      "accept": "application/vnd.github.v3+json",
+      "accept-encoding": "gzip, deflate",
+      "authorization": "token some-token",
+      "host": "git.enterprise.com",
+      "user-agent": "https://github.com/renovatebot/renovate",
+    },
+    "method": "GET",
+    "url": "https://git.enterprise.com/api/v3/repos/some/dep/commits?per_page=1",
+  },
+  Object {
+    "headers": Object {
+      "accept": "application/vnd.github.v3+json",
+      "accept-encoding": "gzip, deflate",
+      "authorization": "token some-token",
+      "host": "git.enterprise.com",
+      "user-agent": "https://github.com/renovatebot/renovate",
+    },
+    "method": "GET",
+    "url": "https://git.enterprise.com/api/v3/repos/some/dep/git/refs/tags/v1.2.0",
+  },
+]
+`;
+
 exports[`datasource/github-tags getDigest warns if unknown ref 1`] = `
 Array [
   Object {
