@@ -5,6 +5,7 @@ import { ExecOptions, exec } from '../../util/exec';
 import {
   ensureCacheDir,
   getSiblingFileName,
+  outputFile,
   readLocalFile,
   remove,
   writeLocalFile,
@@ -15,25 +16,33 @@ import {
   UpdateArtifactsConfig,
   UpdateArtifactsResult,
 } from '../common';
-import { determineRegistries, getRandomString } from './util';
+import {
+  getConfiguredRegistries,
+  getDefaultRegistries,
+  getRandomString,
+} from './util';
 
 async function addSourceCmds(
   packageFileName: string,
   config: UpdateArtifactsConfig,
   nugetConfigFile: string
 ): Promise<string[]> {
-  const registries = (
-    (await determineRegistries(packageFileName, config.localDir)) || []
-  ).filter((registry) => registry.name != null);
+  const registries =
+    (await getConfiguredRegistries(packageFileName, config.localDir)) ||
+    getDefaultRegistries();
   const result = [];
   for (const registry of registries) {
     const { username, password } = hostRules.find({
       hostType: id,
       url: registry.url,
     });
-    let addSourceCmd = `dotnet nuget add source ${registry.url} --name ${registry.name} --configfile ${nugetConfigFile}`;
+    let addSourceCmd = `dotnet nuget add source ${registry.url} --configfile ${nugetConfigFile}`;
+    if (registry.name) {
+      // Add name for registry, if known.
+      addSourceCmd += ` --name ${registry.name}`;
+    }
     if (username && password) {
-      // Add registry credentials from host rules.
+      // Add registry credentials from host rules, if configured.
       addSourceCmd += ` --username ${username} --password ${password} --store-password-in-clear-text`;
     }
     result.push(addSourceCmd);
@@ -55,8 +64,11 @@ async function runDotnetRestore(
     `./others/nuget/${getRandomString()}`
   );
   const nugetConfigFile = join(nugetConfigDir, 'nuget.config');
+  await outputFile(
+    nugetConfigFile,
+    `<?xml version="1.0" encoding="utf-8"?>\n<configuration>\n</configuration>\n`
+  );
   const cmds = [
-    `dotnet new nugetconfig --output ${nugetConfigDir}`,
     ...(await addSourceCmds(packageFileName, config, nugetConfigFile)),
     `dotnet restore ${packageFileName} --force-evaluate --configfile ${nugetConfigFile}`,
   ];

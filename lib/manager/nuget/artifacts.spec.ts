@@ -9,7 +9,8 @@ import * as _env from '../../util/exec/env';
 import * as _hostRules from '../../util/host-rules';
 import * as nuget from './artifacts';
 import {
-  determineRegistries as _determineRegistries,
+  getConfiguredRegistries as _getConfiguredRegistries,
+  getDefaultRegistries as _getDefaultRegistries,
   getRandomString as _getRandomString,
 } from './util';
 
@@ -21,7 +22,8 @@ jest.mock('./util');
 
 const exec: jest.Mock<typeof _exec> = _exec as any;
 const env = mocked(_env);
-const determineRegistries: jest.Mock<typeof _determineRegistries> = _determineRegistries as any;
+const getConfiguredRegistries: jest.Mock<typeof _getConfiguredRegistries> = _getConfiguredRegistries as any;
+const getDefaultRegistries: jest.Mock<typeof _getDefaultRegistries> = _getDefaultRegistries as any;
 const getRandomString: jest.Mock<typeof _getRandomString> = _getRandomString as any;
 const hostRules = mocked(_hostRules);
 
@@ -36,6 +38,7 @@ describe('updateArtifacts', () => {
   beforeEach(async () => {
     jest.resetAllMocks();
     jest.resetModules();
+    getDefaultRegistries.mockReturnValue([] as any);
     env.getChildProcessEnv.mockReturnValue(envMock.basic);
     fs.ensureCacheDir.mockImplementation((dirName: string) =>
       Promise.resolve(dirName)
@@ -191,7 +194,7 @@ describe('updateArtifacts', () => {
     fs.getSiblingFileName.mockReturnValueOnce('packages.lock.json');
     fs.readLocalFile.mockResolvedValueOnce('Current packages.lock.json' as any);
     fs.readLocalFile.mockResolvedValueOnce('New packages.lock.json' as any);
-    determineRegistries.mockResolvedValueOnce([
+    getConfiguredRegistries.mockResolvedValueOnce([
       {
         name: 'myRegistry',
         url: 'https://my-registry.example.org',
