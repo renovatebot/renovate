@@ -109,9 +109,6 @@ export async function extractPackageFile(
     deps = extractDepsFromXml(parsedXml).map((dep) => ({
       ...dep,
       ...(registryUrls && { registryUrls }),
-      ...(!versioning.isVersion(dep.currentValue) && {
-        skipReason: SkipReason.NotAVersion,
-      }),
     }));
     return { deps };
   } catch (err) {
