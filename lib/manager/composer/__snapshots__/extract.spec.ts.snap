@@ -2,6 +2,9 @@
 
 exports[`lib/manager/composer/extract extractPackageFile() extracts dependencies with lock file 1`] = `
 Object {
+  "constraints": Object {
+    "composer": "^1.10.0",
+  },
   "deps": Array [
     Object {
       "currentValue": ">=5.3.2",
@@ -196,6 +199,12 @@ Object {
       "depName": "behat/common-contexts",
       "depType": "require-dev",
       "skipReason": "any-version",
+    },
+    Object {
+      "currentValue": "^1.10.0",
+      "datasource": "packagist",
+      "depName": "composer/composer",
+      "depType": "require-dev",
     },
   ],
 }
@@ -203,6 +212,9 @@ Object {
 
 exports[`lib/manager/composer/extract extractPackageFile() extracts dependencies with no lock file 1`] = `
 Object {
+  "constraints": Object {
+    "composer": "^1.10.0",
+  },
   "deps": Array [
     Object {
       "currentValue": ">=5.3.2",
@@ -397,6 +409,12 @@ Object {
       "depName": "behat/common-contexts",
       "depType": "require-dev",
       "skipReason": "any-version",
+    },
+    Object {
+      "currentValue": "^1.10.0",
+      "datasource": "packagist",
+      "depName": "composer/composer",
+      "depType": "require-dev",
     },
   ],
 }
@@ -539,6 +557,9 @@ Object {
 
 exports[`lib/manager/composer/extract extractPackageFile() extracts registryUrls 1`] = `
 Object {
+  "constraints": Object {
+    "composer": "^1.10.0",
+  },
   "deps": Array [
     Object {
       "currentValue": "*",
@@ -546,6 +567,12 @@ Object {
       "depName": "aws/aws-sdk-php",
       "depType": "require",
       "skipReason": "any-version",
+    },
+    Object {
+      "currentValue": "^1.10.0",
+      "datasource": "packagist",
+      "depName": "composer/composer",
+      "depType": "require",
     },
     Object {
       "currentValue": "dev-trunk",

@@ -6,28 +6,7 @@ import { SkipReason } from '../../types';
 import { readLocalFile } from '../../util/fs';
 import { api as semverComposer } from '../../versioning/composer';
 import { PackageDependency, PackageFile } from '../common';
-
-interface Repo {
-  name?: string;
-  type: 'composer' | 'git' | 'package' | 'vcs';
-  packagist?: boolean;
-  'packagist.org'?: boolean;
-  url: string;
-}
-
-interface ComposerConfig {
-  type?: string;
-  /**
-   * A repositories field can be an array of Repo objects or an object of repoName: Repo
-   * Also it can be a boolean (usually false) to disable packagist.
-   * (Yes this can be confusing, as it is also not properly documented in the composer docs)
-   * See https://getcomposer.org/doc/05-repositories.md#disabling-packagist-org
-   */
-  repositories: Record<string, Repo | boolean> | Repo[];
-
-  require: Record<string, string>;
-  'require-dev': Record<string, string>;
-}
+import { ComposerConfig, Repo } from './utils';
 
 /**
  * The regUrl is expected to be a base URL. GitLab composer repository installation guide specifies
@@ -133,6 +112,13 @@ export async function extractPackageFile(
   }
   const deps = [];
   const depTypes = ['require', 'require-dev'];
+  if (composerJson.require?.['composer/composer']) {
+    res.constraints = { composer: composerJson.require?.['composer/composer'] };
+  } else if (composerJson['require-dev']?.['composer/composer']) {
+    res.constraints = {
+      composer: composerJson['require-dev']?.['composer/composer'],
+    };
+  }
   for (const depType of depTypes) {
     if (composerJson[depType]) {
       try {

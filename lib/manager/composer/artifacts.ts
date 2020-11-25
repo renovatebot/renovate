@@ -22,6 +22,7 @@ import {
 import { getRepoStatus } from '../../util/git';
 import * as hostRules from '../../util/host-rules';
 import { UpdateArtifact, UpdateArtifactsResult } from '../common';
+import { composerVersioningId, getConstraint } from './utils';
 
 interface UserPass {
   username: string;
@@ -90,12 +91,15 @@ function getAuthJson(): string | null {
   return is.emptyObject(authJson) ? null : JSON.stringify(authJson);
 }
 
-export async function updateArtifacts({
-  packageFileName,
-  updatedDeps,
-  newPackageFileContent,
-  config,
-}: UpdateArtifact): Promise<UpdateArtifactsResult[] | null> {
+export async function updateArtifacts(
+  updateArtifact: UpdateArtifact
+): Promise<UpdateArtifactsResult[] | null> {
+  const {
+    packageFileName,
+    updatedDeps,
+    newPackageFileContent,
+    config,
+  } = updateArtifact;
   logger.debug(`composer.updateArtifacts(${packageFileName})`);
 
   const cacheDir =
@@ -127,6 +131,8 @@ export async function updateArtifacts({
       },
       docker: {
         image: 'renovate/composer',
+        tagConstraint: getConstraint(updateArtifact),
+        tagScheme: composerVersioningId,
       },
     };
     const cmd = 'composer';

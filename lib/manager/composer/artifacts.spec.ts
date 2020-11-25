@@ -39,6 +39,7 @@ describe('.updateArtifacts()', () => {
     await setUtilConfig(config);
     docker.resetPrefetchedImages();
     hostRules.clear();
+    delete global.trustLevel;
   });
   it('returns if no composer.lock found', async () => {
     expect(
@@ -55,6 +56,7 @@ describe('.updateArtifacts()', () => {
     const execSnapshots = mockExecAll(exec);
     fs.readLocalFile.mockReturnValueOnce('Current composer.lock' as any);
     git.getRepoStatus.mockResolvedValue({ modified: [] } as StatusResult);
+    global.trustLevel = 'high';
     expect(
       await composer.updateArtifacts({
         packageFileName: 'composer.json',
@@ -192,7 +194,7 @@ describe('.updateArtifacts()', () => {
         packageFileName: 'composer.json',
         updatedDeps: [],
         newPackageFileContent: '{}',
-        config,
+        config: { ...config, constraints: { composer: '^1.10.0' } },
       })
     ).not.toBeNull();
     expect(execSnapshots).toMatchSnapshot();
