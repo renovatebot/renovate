@@ -57,7 +57,6 @@ function checkForPlatformFailure(err: Error): void {
     return;
   }
   const platformFailureStrings = [
-    'remote: error: cannot lock ref',
     'remote: Invalid username or password',
     'gnutls_handshake() failed',
     'The requested URL returned error: 5',
@@ -658,6 +657,10 @@ export async function commitFiles({
       logger.warn(
         'App has not been granted permissions to update Workflows - aborting branch.'
       );
+      return null;
+    }
+    if (err.message.includes('remote: error: cannot lock ref')) {
+      logger.error({ err }, 'Error committing files.');
       return null;
     }
     logger.debug({ err }, 'Error committing files');
