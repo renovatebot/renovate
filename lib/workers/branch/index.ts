@@ -346,7 +346,6 @@ export async function processBranch(
         addMeta({ dep: upgrade.depName });
         logger.trace(
           {
-            dep: upgrade.depName,
             tasks: upgrade.postUpgradeTasks,
             allowedCommands: config.allowedPostUpgradeCommands,
           },
