@@ -422,6 +422,7 @@ export async function processBranch(
                     contents: existingContent,
                   });
                 }
+                // If the file is deleted by a previous post-update command, remove the deletion from updatedArtifacts
                 config.updatedArtifacts = config.updatedArtifacts.filter(
                   (ua) => ua.name !== '|delete|' || ua.contents !== relativePath
                 );
@@ -440,6 +441,7 @@ export async function processBranch(
                   name: '|delete|',
                   contents: relativePath,
                 });
+                // If the file is created or modified by a previous post-update command, remove the modification from updatedArtifacts
                 config.updatedArtifacts = config.updatedArtifacts.filter(
                   (ua) => ua.name !== relativePath
                 );
