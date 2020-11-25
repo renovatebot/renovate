@@ -1698,7 +1698,7 @@ You could then configure a schedule like this at the repository level:
 
 ```json
 {
-  "schedule": ["after 10pm and before 5am on every weekday", "every weekend"]
+  "schedule": ["after 10pm and before 5am every weekday", "every weekend"]
 }
 ```
 
