@@ -38,6 +38,9 @@ describe('manager/gradle-lite/parser', () => {
 
     ({ urls } = parseGradle('url "https://example.com"'));
     expect(urls).toStrictEqual(['https://example.com']);
+
+    ({ urls } = parseGradle('url("https://example.com")'));
+    expect(urls).toStrictEqual(['https://example.com']);
   });
   it('parses long form deps', () => {
     let deps;
