@@ -414,13 +414,13 @@ export async function processBranch(
                 const existingUpdatedArtifacts = config.updatedArtifacts.find(
                   (ua) => ua.name === relativePath
                 );
-                if (!existingUpdatedArtifacts) {
+                if (existingUpdatedArtifacts) {
+                  existingUpdatedArtifacts.contents = existingContent;
+                } else {
                   config.updatedArtifacts.push({
                     name: relativePath,
                     contents: existingContent,
                   });
-                } else {
-                  existingUpdatedArtifacts.contents = existingContent;
                 }
                 config.updatedArtifacts = config.updatedArtifacts.filter(
                   (ua) => ua.name !== '|delete|' || ua.contents !== relativePath
