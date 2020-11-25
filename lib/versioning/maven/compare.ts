@@ -285,6 +285,9 @@ function isVersion(version: string): boolean {
   if (/[.-]$/.test(version)) {
     return false;
   }
+  if (['latest', 'release'].includes(version.toLowerCase())) {
+    return false;
+  }
   const tokens = tokenize(version);
   return !!tokens.length;
 }
