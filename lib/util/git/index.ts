@@ -57,7 +57,7 @@ function checkForPlatformFailure(err: Error): void {
     return;
   }
   const platformFailureStrings = [
-    'error: cannot lock ref',
+    'remote: error: cannot lock ref',
     'remote: Invalid username or password',
     'gnutls_handshake() failed',
     'The requested URL returned error: 5',
