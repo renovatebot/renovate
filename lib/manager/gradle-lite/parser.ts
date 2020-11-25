@@ -51,6 +51,13 @@ function matchTokens(
       return null;
     }
 
+    if (
+      is.array<string>(matcher.matchValue) &&
+      !matcher.matchValue.includes(token.value)
+    ) {
+      return null;
+    }
+
     lookaheadCount = matcher.lookahead ? lookaheadCount + 1 : 0;
 
     if (matcher.tokenMapKey) {
@@ -156,16 +163,25 @@ function processPlugin({
   tokenMap,
   packageFile,
 }: SyntaxHandlerInput): SyntaxHandlerOutput {
-  const { pluginName, pluginVersion } = tokenMap;
+  const { pluginName, pluginVersion, methodName } = tokenMap;
+  const plugin = pluginName.value;
+  const depName =
+    methodName.value === 'kotlin' ? `org.jetbrains.kotlin.${plugin}` : plugin;
+  const lookupName =
+    methodName.value === 'kotlin'
+      ? `org.jetbrains.kotlin.${plugin}:org.jetbrains.kotlin.${plugin}.gradle.plugin`
+      : `${plugin}:${plugin}.gradle.plugin`;
+  const currentValue = pluginVersion.value;
+  const fileReplacePosition = pluginVersion.offset;
   const dep = {
     depType: 'plugin',
-    depName: pluginName.value,
-    lookupName: `${pluginName.value}:${pluginName.value}.gradle.plugin`,
+    depName,
+    lookupName,
     registryUrls: ['https://plugins.gradle.org/m2/'],
-    currentValue: pluginVersion.value,
-    commitMessageTopic: `plugin ${pluginName.value}`,
+    currentValue,
+    commitMessageTopic: `plugin ${depName}`,
     managerData: {
-      fileReplacePosition: pluginVersion.offset,
+      fileReplacePosition,
       packageFile,
     },
   };
@@ -251,7 +267,11 @@ const matcherConfigs: SyntaxMatchConfig[] = [
   {
     // id 'foo.bar' version '1.2.3'
     matchers: [
-      { matchType: TokenType.Word, matchValue: 'id' },
+      {
+        matchType: TokenType.Word,
+        matchValue: ['id', 'kotlin'],
+        tokenMapKey: 'methodName',
+      },
       { matchType: TokenType.String, tokenMapKey: 'pluginName' },
       { matchType: TokenType.Word, matchValue: 'version' },
       { matchType: TokenType.String, tokenMapKey: 'pluginVersion' },
@@ -262,7 +282,11 @@ const matcherConfigs: SyntaxMatchConfig[] = [
   {
     // id('foo.bar') version '1.2.3'
     matchers: [
-      { matchType: TokenType.Word, matchValue: 'id' },
+      {
+        matchType: TokenType.Word,
+        matchValue: ['id', 'kotlin'],
+        tokenMapKey: 'methodName',
+      },
       { matchType: TokenType.LeftParen },
       { matchType: TokenType.String, tokenMapKey: 'pluginName' },
       { matchType: TokenType.RightParen },

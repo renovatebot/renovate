@@ -107,6 +107,16 @@ describe('manager/gradle-lite/parser', () => {
         currentValue: '1.2.3',
       },
     ]);
+
+    ({ deps } = parseGradle('kotlin("jvm") version "1.3.71"'));
+    expect(deps).toMatchObject([
+      {
+        depName: 'org.jetbrains.kotlin.jvm',
+        lookupName:
+          'org.jetbrains.kotlin.jvm:org.jetbrains.kotlin.jvm.gradle.plugin',
+        currentValue: '1.3.71',
+      },
+    ]);
   });
   it('parses fixture from "gradle" manager', () => {
     const content = getGradleFile(
