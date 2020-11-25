@@ -255,6 +255,20 @@ const matcherConfigs: SyntaxMatchConfig[] = [
       { matchType: TokenType.String, tokenMapKey: 'pluginName' },
       { matchType: TokenType.Word, matchValue: 'version' },
       { matchType: TokenType.String, tokenMapKey: 'pluginVersion' },
+      endOfInstruction,
+    ],
+    handler: processPlugin,
+  },
+  {
+    // id('foo.bar') version '1.2.3'
+    matchers: [
+      { matchType: TokenType.Word, matchValue: 'id' },
+      { matchType: TokenType.LeftParen },
+      { matchType: TokenType.String, tokenMapKey: 'pluginName' },
+      { matchType: TokenType.RightParen },
+      { matchType: TokenType.Word, matchValue: 'version' },
+      { matchType: TokenType.String, tokenMapKey: 'pluginVersion' },
+      endOfInstruction,
     ],
     handler: processPlugin,
   },

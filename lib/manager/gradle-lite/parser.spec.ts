@@ -70,7 +70,18 @@ describe('manager/gradle-lite/parser', () => {
     ]);
   });
   it('parses plugin', () => {
-    const { deps } = parseGradle('id "foo.bar" version "1.2.3"');
+    let deps;
+
+    ({ deps } = parseGradle('id "foo.bar" version "1.2.3"'));
+    expect(deps).toMatchObject([
+      {
+        depName: 'foo.bar',
+        lookupName: 'foo.bar:foo.bar.gradle.plugin',
+        currentValue: '1.2.3',
+      },
+    ]);
+
+    ({ deps } = parseGradle('id("foo.bar") version "1.2.3"'));
     expect(deps).toMatchObject([
       {
         depName: 'foo.bar',
