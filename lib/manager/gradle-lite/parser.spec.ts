@@ -68,6 +68,24 @@ describe('manager/gradle-lite/parser', () => {
         currentValue: '1.2.3',
       },
     ]);
+
+    ({ deps } = parseGradle('("com.example", "my.dependency", "1.2.3")'));
+    expect(deps).toMatchObject([
+      {
+        depName: 'com.example:my.dependency',
+        currentValue: '1.2.3',
+      },
+    ]);
+
+    ({ deps } = parseGradle(
+      '(group = "com.example", name = "my.dependency", version = "1.2.3")'
+    ));
+    expect(deps).toMatchObject([
+      {
+        depName: 'com.example:my.dependency',
+        currentValue: '1.2.3',
+      },
+    ]);
   });
   it('parses plugin', () => {
     let deps;
