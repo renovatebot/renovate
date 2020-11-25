@@ -39,6 +39,17 @@ describe(getName(__filename), () => {
       ).toEqual('1.1.0');
     });
 
+    it('returns composer-runtime-api', () => {
+      expect(
+        getConstraint({
+          ...config,
+          newPackageFileContent: JSON.stringify({
+            require: { 'composer-runtime-api': '^1.0.0' },
+          }),
+        })
+      ).toEqual('1.*');
+    });
+
     it('returns from null', () => {
       expect(
         getConstraint({

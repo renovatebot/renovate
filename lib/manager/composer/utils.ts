@@ -1,5 +1,5 @@
 import { logger } from '../../logger';
-import { id as composerVersioningId } from '../../versioning/composer';
+import { api, id as composerVersioningId } from '../../versioning/composer';
 import { UpdateArtifact } from '../common';
 
 export { composerVersioningId };
@@ -42,6 +42,11 @@ export function getConstraint(updateArtifact: UpdateArtifact): string {
 
   if (composerJson['require-dev']?.['composer/composer']) {
     return composerJson['require-dev']?.['composer/composer'];
+  }
+
+  if (composerJson.require?.['composer-runtime-api']) {
+    const major = api.getMajor(composerJson.require?.['composer-runtime-api']);
+    return `${major}.*`;
   }
 
   return null;
