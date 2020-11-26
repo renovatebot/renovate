@@ -47,7 +47,7 @@ You will also have less flexibility about what to do when one or more in the gro
 ## Scheduling Renovate
 
 On its own, the Renovate CLI tool runs once and then exits.
-Hence it only runs as often as its administrator sets it to (e.g. via `cron`).
+Hence, it only runs as often as its administrator sets it to (e.g. via `cron`).
 For the [Renovate app on GitHub](https://github.com/apps/renovate), it currently runs continuously using a job queue that gets refreshed hourly, or when you make relevant commits to your repository.
 Therefore, you can expect to get PRs at any time of the day, i.e. soon after versions are published to npm.
 
