@@ -91,15 +91,12 @@ function getAuthJson(): string | null {
   return is.emptyObject(authJson) ? null : JSON.stringify(authJson);
 }
 
-export async function updateArtifacts(
-  updateArtifact: UpdateArtifact
-): Promise<UpdateArtifactsResult[] | null> {
-  const {
-    packageFileName,
-    updatedDeps,
-    newPackageFileContent,
-    config,
-  } = updateArtifact;
+export async function updateArtifacts({
+  packageFileName,
+  updatedDeps,
+  newPackageFileContent,
+  config,
+}: UpdateArtifact): Promise<UpdateArtifactsResult[] | null> {
   logger.debug(`composer.updateArtifacts(${packageFileName})`);
 
   const cacheDir =
@@ -131,7 +128,7 @@ export async function updateArtifacts(
       },
       docker: {
         image: 'renovate/composer',
-        tagConstraint: getConstraint(updateArtifact),
+        tagConstraint: getConstraint(config),
         tagScheme: composerVersioningId,
       },
     };

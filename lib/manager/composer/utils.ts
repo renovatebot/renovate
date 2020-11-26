@@ -1,12 +1,11 @@
 import { logger } from '../../logger';
 import { api, id as composerVersioningId } from '../../versioning/composer';
-import { UpdateArtifact } from '../common';
+import { UpdateArtifactsConfig } from '../common';
 import type { ComposerConfig, ComposerLock } from './types';
 
 export { composerVersioningId };
 
-export function getConstraint(updateArtifact: UpdateArtifact): string {
-  const { config } = updateArtifact;
+export function getConstraint(config: UpdateArtifactsConfig): string {
   const { constraints = {} } = config;
   const { composer } = constraints;
 
