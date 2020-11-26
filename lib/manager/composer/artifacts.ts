@@ -167,7 +167,7 @@ export async function updateArtifacts(
       },
     ];
 
-    for (const f of status.modified.concat(status.not_added)) {
+    for (const f of [...status.modified, ...status.not_added]) {
       if (f.startsWith(vendorDir)) {
         res.push({
           file: {
@@ -177,7 +177,7 @@ export async function updateArtifacts(
         });
       }
     }
-    for (const f of status.deleted || /* istanbul ignore next */ []) {
+    for (const f of status.deleted) {
       res.push({
         file: {
           name: '|delete|',
