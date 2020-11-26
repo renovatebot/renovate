@@ -72,8 +72,8 @@ Don't think that you need to apply blanket rules to scheduling.
 Remember that Renovate's configuration is highly flexible so you can configure `automerge` anywhere from globally (entire repo) right down to a package/upgrade type level.
 You could even configure a nonsensical rule like: "patch updates of `jquery` are for Mondays only".
 
-Remember earlier our example of grouping all `eslint`?
-If you think about it.. updates to `eslint` rules don't exactly need to be applied in real time!
+Remember our example of grouping all `eslint` packages?
+If you think about it, updates to `eslint` rules don't exactly need to be applied in real time!
 You don't want to get too far behind, so how about we update `eslint` packages only once a month?
 
 ```json
