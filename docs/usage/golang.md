@@ -11,7 +11,7 @@ Renovate supports upgrading dependencies in `go.mod` files and their accompanyin
 
 1. Renovate searches in each repository for any `go.mod` files
 1. Renovate extracts existing dependencies from `require` statements
-1. Renovate resolves the dependency's source repository and checks for semver tags if found. Otherwise commits and `v0.0.0-....` syntax will be used
+1. Renovate resolves the dependency's source repository and checks for SemVer tags if found. Otherwise commits and `v0.0.0-....` syntax will be used
 1. If Renovate finds an update, Renovate will update `go.mod` to the new value
 1. Renovate runs `go get` to update the `go.sum` files
 1. If the user has enabled the option `gomodTidy` in the [`postUpdateOptions`](https://docs.renovatebot.com/configuration-options/#postupdateoptions) array, then Renovate runs `go mod tidy`, which itself can update `go.mod` and `go.sum`
