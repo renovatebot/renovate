@@ -39,4 +39,4 @@ Renovate will commit all files changed within the `vendor/` folder.
 #### Go binary version
 
 Currently, Renovate will try to keep up with the very latest version of `go`, and it is not configurable.
-It is planned though to support a configurable version of `go` per-repository soon.
+We plan to support a configurable version of `go` per-repository soon.
