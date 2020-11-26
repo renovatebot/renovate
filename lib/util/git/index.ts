@@ -659,6 +659,10 @@ export async function commitFiles({
       );
       return null;
     }
+    if (err.message.includes('remote: error: cannot lock ref')) {
+      logger.error({ err }, 'Error committing files.');
+      return null;
+    }
     logger.debug({ err }, 'Error committing files');
     throw new Error(REPOSITORY_CHANGED);
   }
