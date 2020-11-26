@@ -619,6 +619,7 @@ export async function processBranch(
           content += `##### File name: ${error.lockFile}\n\n`;
           content += `\`\`\`\n${error.stderr}\n\`\`\`\n\n`;
         });
+        content = platform.getPrBody(content);
         if (
           !(
             config.suppressNotifications.includes('artifactErrors') ||
