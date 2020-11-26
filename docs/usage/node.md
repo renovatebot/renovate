@@ -23,8 +23,8 @@ Node.js renovation in `package.json > engines` and in `.nvmrc` is enabled by def
 
 To enable `.travis.yml` renovation, you must:
 
-1.  Enable Travis renovation explicitly by setting the following Renovate configuration: `"travis": { "enabled": true }`
-2.  Optionally, configure a support policy (As documented below)
+1. Enable Travis renovation explicitly by setting the following Renovate configuration: `"travis": { "enabled": true }`
+1. Optionally, configure a support policy (As documented below)
 
 When Renovate processes your project's repository it will look for the files listed above and submit a single pull request that upgrades all Node.js versions simultaneously.
 
