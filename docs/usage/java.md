@@ -34,7 +34,7 @@ Renovate can update dependency versions found in Maven `pom.xml` files.
 
 ### File Support
 
-Renovate will search repositories for all files named `pom.xml` and then process them independently.
+Renovate will search repositories for all `pom.xml` files and processes them independently.
 
 ### Custom registry support, and authentication
 
