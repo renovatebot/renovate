@@ -69,7 +69,8 @@ Any of the above reasons can lead to a Renovate branch being considered "stale" 
 #### Selective scheduling
 
 Don't think that you need to apply blanket rules to scheduling.
-Remember that Renovate configuration is highly flexible so you can configure `automerge` anywhere from globally (entire repo) right down to a package/upgrade type level (e.g. you could even configure a nonsensical rule that patch updates of `jquery` are for Mondays only).
+Remember that Renovate's configuration is highly flexible so you can configure `automerge` anywhere from globally (entire repo) right down to a package/upgrade type level.
+You could even configure a nonsensical rule like: "patch updates of `jquery` are for Mondays only".
 
 Remember earlier our example of grouping all `eslint`?
 If you think about it.. updates to `eslint` rules don't exactly need to be applied in real time!
