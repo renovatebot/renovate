@@ -6,7 +6,8 @@ import { SkipReason } from '../../types';
 import { readLocalFile } from '../../util/fs';
 import { api as semverComposer } from '../../versioning/composer';
 import { PackageDependency, PackageFile } from '../common';
-import { ComposerConfig, Repo } from './utils';
+import type { ComposerConfig, ComposerLock, Repo } from './types';
+import { extractContraints } from './utils';
 
 /**
  * The regUrl is expected to be a base URL. GitLab composer repository installation guide specifies
@@ -54,10 +55,8 @@ function parseRepositories(
         if (repo.packagist === false || repo['packagist.org'] === false) {
           packagist = false;
         }
-      } else if (
-        ['packagist', 'packagist.org'].includes(key) &&
-        repo === false
-      ) {
+      } // istanbul ignore else: invalid repo
+      else if (['packagist', 'packagist.org'].includes(key) && repo === false) {
         packagist = false;
       }
     });
@@ -93,11 +92,11 @@ export async function extractPackageFile(
   // handle lockfile
   const lockfilePath = fileName.replace(/\.json$/, '.lock');
   const lockContents = await readLocalFile(lockfilePath, 'utf8');
-  let lockParsed;
+  let lockParsed: ComposerLock;
   if (lockContents) {
     logger.debug({ packageFile: fileName }, 'Found composer lock file');
     try {
-      lockParsed = JSON.parse(lockContents);
+      lockParsed = JSON.parse(lockContents) as ComposerLock;
     } catch (err) /* istanbul ignore next */ {
       logger.warn({ err }, 'Error processing composer.lock');
     }
@@ -110,15 +109,11 @@ export async function extractPackageFile(
   if (registryUrls.length !== 0) {
     res.registryUrls = registryUrls;
   }
+
+  res.constraints = extractContraints(composerJson, lockParsed);
+
   const deps = [];
   const depTypes = ['require', 'require-dev'];
-  if (composerJson.require?.['composer/composer']) {
-    res.constraints = { composer: composerJson.require?.['composer/composer'] };
-  } else if (composerJson['require-dev']?.['composer/composer']) {
-    res.constraints = {
-      composer: composerJson['require-dev']?.['composer/composer'],
-    };
-  }
   for (const depType of depTypes) {
     if (composerJson[depType]) {
       try {
@@ -158,8 +153,10 @@ export async function extractPackageFile(
           }
           if (lockParsed) {
             const lockField =
-              depType === 'require' ? 'packages' : 'packages-dev';
-            const lockedDep = lockParsed?.[lockField]?.find(
+              depType === 'require'
+                ? 'packages'
+                : /* istanbul ignore next */ 'packages-dev';
+            const lockedDep = lockParsed[lockField]?.find(
               (item) => item.name === dep.depName
             );
             if (lockedDep && semverComposer.isVersion(lockedDep.version)) {

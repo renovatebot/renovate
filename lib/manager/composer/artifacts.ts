@@ -177,7 +177,7 @@ export async function updateArtifacts(
         });
       }
     }
-    for (const f of status.deleted || []) {
+    for (const f of status.deleted || /* istanbul ignore next */ []) {
       res.push({
         file: {
           name: '|delete|',
