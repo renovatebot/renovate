@@ -22,6 +22,7 @@ import {
 import { getRepoStatus } from '../../util/git';
 import * as hostRules from '../../util/host-rules';
 import { UpdateArtifact, UpdateArtifactsResult } from '../common';
+import { composerVersioningId, getConstraint } from './utils';
 
 interface UserPass {
   username: string;
@@ -127,6 +128,8 @@ export async function updateArtifacts({
       },
       docker: {
         image: 'renovate/composer',
+        tagConstraint: getConstraint(config),
+        tagScheme: composerVersioningId,
       },
     };
     const cmd = 'composer';
@@ -161,7 +164,7 @@ export async function updateArtifacts({
       },
     ];
 
-    for (const f of status.modified.concat(status.not_added)) {
+    for (const f of [...status.modified, ...status.not_added]) {
       if (f.startsWith(vendorDir)) {
         res.push({
           file: {
@@ -171,7 +174,7 @@ export async function updateArtifacts({
         });
       }
     }
-    for (const f of status.deleted || []) {
+    for (const f of status.deleted) {
       res.push({
         file: {
           name: '|delete|',
