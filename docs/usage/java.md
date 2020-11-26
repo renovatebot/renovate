@@ -10,7 +10,7 @@ This includes libraries and plugins.
 
 ## Gradle
 
-Renovate detects versions specified as string `'group:artifact:version'` and as a map `(group:groupName, name:ArtifactName, version:Version)`.
+Renovate detects versions that are specified in a string `'group:artifact:version'` and those specified in a map `(group:groupName, name:ArtifactName, version:Version)`.
 
 ### File Support
 
