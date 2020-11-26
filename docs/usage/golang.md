@@ -21,14 +21,14 @@ Renovate supports upgrading dependencies in `go.mod` files and their accompanyin
 
 ## Enabling Go Modules Updating
 
-Go Modules updating is on by default in Renovate Bot.
+Renovate updates Go Modules by default.
 To install Renovate Bot itself, either enable the [Renovate App](https://github.com/apps/renovate) on GitHub, or check out [Renovate OSS](https://github.com/renovatebot/renovate) for self-hosted.
 
 ## Technical Details
 
 #### Module Tidying
 
-Go Modules tidying is not enabled by default, and so is opt-in via the [`postUpdateOptions`](https://docs.renovatebot.com/configuration-options/#postupdateoptions) config option.
+Go Modules tidying is not enabled by default, and is opt-in via the [`postUpdateOptions`](https://docs.renovatebot.com/configuration-options/#postupdateoptions) config option.
 The reason for this is that a `go mod tidy` command may make changes to `go.mod` and `go.sum` that are completely unrelated to the updated module(s) in the PR, and so may be confusing to some users.
 
 #### Module Vendoring
