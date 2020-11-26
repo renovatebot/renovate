@@ -112,9 +112,9 @@ Every time you click Merge on a Renovate PR without manually testing it, you sho
 
 Automerge works particularly well for `devDependencies` and for production `dependencies` that have great test coverage.
 
-For example, if you have `jest` or `mocha` as a dependency, and it has an upgrade with passing tests.. automerge them!
-If you have a linter like `eslint` or `tslint` and its update passes.. automerge them!
-If you have an API with 100% test coverage and `express` is updated.. automerge it!
+For example, if you have `jest` or `mocha` as a dependency, and it has an upgrade with passing tests: automerge them!
+If you have a linter like `eslint` or `tslint` and its update passes: automerge them!
+If you have an API with 100% test coverage and `express` is updated: automerge it!
 
 #### Branch automerging
 
