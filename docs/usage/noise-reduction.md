@@ -141,7 +141,8 @@ And this is especially so if your repository needs rebasing, e.g. because you us
 
 This is a lot better than you waking up to two PRs and then having to deal with conflicts yourself after you merge the first one.
 
-Remember our running `eslint` example? Let's automerge it if all the linting updates pass:
+Remember our running `eslint` example?
+Let's automerge it if all the linting updates pass:
 
 ```json
   "packageRules": [
