@@ -62,7 +62,7 @@ There are multiple reasons why Renovate may need to "recreate" PRs after you mer
 
 1. Conflict with `package.json` (sometimes)
 1. Conflict with lock files (often)
-1. If you have configure Renovate or GitHub that PRs must always be kept up-to-date with master
+1. If you have configured Renovate or GitHub that PRs must always be kept up-to-date with master
 
 Any of the above reasons can lead to a Renovate branch being considered "stale" and then Renovate needs to rebase it off `master` before you can test and merge again, and Renovate won't do this until it's back in schedule.
 
