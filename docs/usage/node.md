@@ -10,7 +10,7 @@ This way you're using the latest bug fixes, performance improvements, security m
 
 ## File Support
 
-Renovate is capable of managing the Node.js version in the following files:
+Renovate can manage the Node.js version in the following files:
 
 - The [`engines`](https://docs.npmjs.com/files/package.json#engines) field in [`package.json`](https://docs.npmjs.com/files/package.json)
 - The [`volta`](https://docs.volta.sh/guide/understanding#managing-your-project) field in [`package.json`](https://docs.npmjs.com/files/package.json)
