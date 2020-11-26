@@ -51,6 +51,7 @@ For example, to instruct Renovate to upgrade your project to the latest [Long-te
 "supportPolicy": ["lts_latest"]
 ```
 
-It's best to define this support policy inside the `node` configuration object so that it is applied to all Node.js-related files.
+We recommend that you define this support policy inside the `node` configuration object.
+This way, it is applied to all Node.js-related files.
 
 For additional language support see the [`supportPolicy` documentation](/configuration-options/#supportpolicy).
