@@ -175,7 +175,7 @@ The table below highlights different noise reduction strategies and their effect
 First of all, if you ever have any ideas about how to make Renovate less noisy, please raise or comment on issues in the [main repository](https://github.com/renovatebot/renovate).
 Our philosophy is:
 
-1.  Nearly everyone should probably use Renovate-like dependency update automation
+1.  Nearly everyone should use Renovate-like dependency update automation
 2.  Over time, you should "see" Renovate less and less
 
 One of our hopes with preset configs is that a set of "sensible" configs can be maintained by the community that combine grouping, scheduling and automerging to reduce the amount of noise in repositories with little downside or increased risk.
