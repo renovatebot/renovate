@@ -41,7 +41,7 @@ Alternative feeds can be specified either [in a `NuGet.config` file](https://doc
 
 In this example we defined 3 NuGet feeds.
 Packages resolving will process feeds consequentially.
-It means that if package will be resolved in second feed renovate won't look in last one.
+It means that if package will be resolved in second feed Renovate won't look in last one.
 
 ### Protocol versions
 
