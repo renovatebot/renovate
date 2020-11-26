@@ -9,15 +9,15 @@ Renovate supports upgrading dependencies in `go.mod` files and their accompanyin
 
 ## How It Works
 
-1.  Renovate will search each repository for any `go.mod` files
-1.  Existing dependencies will be extracted from `require` statements
-1.  Renovate will resolve the dependency's source repository and check for semver tags if found. Otherwise commits and `v0.0.0-....` syntax will be used
-1.  If an update was found, Renovate will update `go.mod` to the new value
-1.  Renovate will run `go get` to update the `go.sum` files
-1.  If the user has enabled the option `gomodTidy` in the [`postUpdateOptions`](https://docs.renovatebot.com/configuration-options/#postupdateoptions) array, then Renovate will run `go mod tidy`, which itself can update `go.mod` and `go.sum`
-1.  `go mod vendor` will be run if vendored modules have been detected
-1.  A PR will be created with `go.mod`,`go.sum`, and any updated vendored files updated in the one commit
-1.  If the source repository has either a "changelog" file or uses GitHub releases, then Release Notes for each version will be embedded in the generated PR
+1. Renovate will search each repository for any `go.mod` files
+1. Existing dependencies will be extracted from `require` statements
+1. Renovate will resolve the dependency's source repository and check for semver tags if found. Otherwise commits and `v0.0.0-....` syntax will be used
+1. If an update was found, Renovate will update `go.mod` to the new value
+1. Renovate will run `go get` to update the `go.sum` files
+1. If the user has enabled the option `gomodTidy` in the [`postUpdateOptions`](https://docs.renovatebot.com/configuration-options/#postupdateoptions) array, then Renovate will run `go mod tidy`, which itself can update `go.mod` and `go.sum`
+1. `go mod vendor` will be run if vendored modules have been detected
+1. A PR will be created with `go.mod`,`go.sum`, and any updated vendored files updated in the one commit
+1. If the source repository has either a "changelog" file or uses GitHub releases, then Release Notes for each version will be embedded in the generated PR
 
 ## Enabling Go Modules Updating
 
