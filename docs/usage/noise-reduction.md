@@ -14,7 +14,7 @@ Of course, please keep in mind that people's definitions of "noise" may differ.
 For some people, it's noisy only if they get a notification or email from GitHub.
 For others, too many commits in their `master` branch may be "noise".
 In other words, your mileage may vary.
-Please contact the author if you have any ideas on this topic!
+Please contact the author if you have any ideas on this topic! (How to contact the author (Rhys), do you want them to mail, Twitter, open a issue on GitHub?)
 
 ## Package Grouping
 
