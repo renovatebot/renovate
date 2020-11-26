@@ -25,7 +25,7 @@ For example, all `@angular/*` packages that are updated at the same time will be
 And every package in the React monorepo will be grouped together in a React monorepo PR too.
 
 You may wish to take this further, for example you might want to group together all packages related to `eslint`, even if they come from separate repositories/authors.
-In that case you might add config like this:
+In that case you might create a config like this:
 
 ```json
   "packageRules": [
