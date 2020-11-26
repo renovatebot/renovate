@@ -1,7 +1,6 @@
 import { safeLoad } from 'js-yaml';
 import * as datasourceDart from '../../datasource/dart';
 import { logger } from '../../logger';
-import { SkipReason } from '../../types';
 import { PackageDependency, PackageFile } from '../common';
 
 function getDeps(
@@ -31,9 +30,6 @@ function getDeps(
     }
 
     const dep: PackageDependency = { ...preset, depName, currentValue };
-    if (!currentValue) {
-      dep.skipReason = SkipReason.NotAVersion;
-    }
 
     return [...acc, dep];
   }, []);
