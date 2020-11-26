@@ -8,7 +8,7 @@ description: How to reduce the "noise" associated with module updates
 Generally, the first reaction people have to automated dependency updates like Renovate is "oh great/feel the power of automation".
 The next reaction a few days or weeks later is often "this is getting overwhelming".
 Indeed, if you leave Renovate on its default settings of raising a PR every single time any dependency receives any update.. you will get a lot of PRs and related notifications.
-This document will give you some ideas of how to reduce the amount of "noise" in your repository and the Pros/Cons of each.
+This document will give you some ideas of how to reduce the amount of "noise" in your repository and the Pros/Cons of each approach.
 
 Of course, please keep in mind that people's definitions of "noise" may differ.
 For some people, it's noisy only if they get a notification or email from GitHub.
