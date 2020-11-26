@@ -19,7 +19,7 @@ It also updates any `*.gradle`/`*.gradle.kts` files in a subdirectory as multi-p
 
 Renovate does not support:
 
-- Projects with neither `build.gradle` nor `build.gradle.kts` in the root of the repository
+- Projects which do not have either a `build.gradle` or `build.gradle.kts` in the repository root
 - Android projects that require extra configuration to run (e.g. setting the Android SDK)
 - Gradle versions prior to version 5.0.
 
