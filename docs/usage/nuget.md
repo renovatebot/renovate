@@ -45,7 +45,7 @@ This means that if a package is resolved in the second feed, Renovate won't chec
 
 ### Protocol versions
 
-NuGet supports two protocol versions, `v2` and `v3`, which NuGet client and server need to agree on.
+NuGet supports two protocol versions, `v2` and `v3`, the NuGet client and server must use the same protocol version.
 Renovate as a NuGet client supports both versions and will use `v2` unless the configured feed URL ends with `index.json` (which mirrors the behavior of the official NuGet client).
 If you have `v3` feed that does not match this pattern (e.g. JFrog Artifactory) you need to help Renovate by appending `#protocolVersion=3` to the registry URL:
 
