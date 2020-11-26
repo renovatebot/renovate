@@ -106,7 +106,7 @@ If you're wondering what is supported and not, under the hood, the schedule is p
 Automerging is a Renovate feature that can save you a lot of time/noise directly, while also benefiting grouping and scheduling.
 In short: it means that Renovate can merge PRs or even branches itself if they pass your tests.
 
-I recommend that you enable automerge for any type of dependency update where you would just click Merge anyway.
+We recommend that you enable automerge for any type of dependency update where you would just click Merge anyway.
 We all know that there are some types of updates that we (nearly) always verify manually before merging, and plenty of others that we don't bother looking at unless tests fail.
 Every time you click Merge on a Renovate PR without manually testing it, you should consider if you can enable automerge and save yourself the time in future.
 
