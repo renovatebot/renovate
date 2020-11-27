@@ -124,10 +124,10 @@ export interface BitbucketStatus {
 }
 
 interface BitbucketErrorResponse {
-  errors?: Array<{
+  errors?: {
     exceptionName?: string;
-    reviewerErrors?: Array<{ context?: string }>;
-  }>;
+    reviewerErrors?: { context?: string }[];
+  }[];
 }
 
 interface BitbucketError extends HTTPError {
