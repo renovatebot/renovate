@@ -161,7 +161,10 @@ export async function ensurePr(
     logger.debug(
       `Branch is configured for branch automerge, branch status) is: ${await getBranchStatus()}`
     );
-    if ((await getBranchStatus()) === BranchStatus.yellow) {
+    if (
+      config.stabilityStatus !== BranchStatus.yellow &&
+      (await getBranchStatus()) === BranchStatus.yellow
+    ) {
       logger.debug('Checking how long this branch has been pending');
       const lastCommitTime = await getBranchLastCommitTime(branchName);
       const currentTime = new Date();
@@ -214,7 +217,8 @@ export async function ensurePr(
       );
       if (
         !dependencyDashboardCheck &&
-        elapsedHours < config.prNotPendingHours
+        (config.stabilityStatus !== BranchStatus.yellow ||
+          elapsedHours < config.prNotPendingHours)
       ) {
         logger.debug(
           `Branch is ${elapsedHours} hours old - skipping PR creation`
@@ -421,6 +425,7 @@ export async function ensurePr(
       if (config.branchAutomergeFailureMessage === 'branch status error') {
         content += '\n___\n * Branch has one or more failed status checks';
       }
+      content = platform.getPrBody(content);
       logger.debug('Adding branch automerge failure message to PR');
       // istanbul ignore if
       if (config.dryRun) {

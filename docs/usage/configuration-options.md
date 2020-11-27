@@ -1596,6 +1596,157 @@ Example:
 }
 ```
 
+### matchStringsStrategy
+
+`matchStringsStrategy` controls behavior when multiple `matchStrings` values are provided.
+Three options are available:
+
+- `any` (default)
+- `recursive`
+- `combination`
+
+#### any
+
+Each provided `matchString` will be matched individually to the content of the `packageFile`.
+If a `matchString` has multiple matches in a file each will be interpreted as an independent dependency.
+
+As example the following configuration will update all 3 lines in the Dockerfile.
+renovate.json:
+
+```json
+{
+  "regexManagers": [
+    {
+      "fileMatch": ["^Dockerfile$"],
+      "matchStringsStrategy": "any",
+      "matchStrings": [
+        "ENV [A-Z]+_VERSION=(?<currentValue>.*) # (?<datasource>.*?)/(?<depName>.*?)(\\&versioning=(?<versioning>.*?))?\\s",
+        "FROM (?<depName>\\S*):(?<currentValue>\\S*)"
+      ],
+      "datasourceTemplate": "docker"
+    }
+  ]
+}
+```
+
+a Dockerfile:
+
+```dockerfile
+FROM amd64/ubuntu:18.04
+ENV GRADLE_VERSION=6.2 # gradle-version/gradle&versioning=maven
+ENV NODE_VERSION=10.19.0 # github-tags/nodejs/node&versioning=node
+```
+
+#### recursive
+
+If using `recursive` the `matchStrings` will be looped through and the full match of the last will define the range of the next one.
+This can be used to narrow down the search area to prevent multiple matches.
+However, the `recursive` strategy still allows the matching of multiple dependencies as described below.
+All matches of the first `matchStrings` pattern are detected, then each of these matches will used as basis be used as the input for the next `matchStrings` pattern, and so on.
+If the next `matchStrings` pattern has multiple matches then it will split again.
+This process will be followed as long there is a match plus a next `matchingStrings` pattern is available or a dependency is detected.
+
+This is an example how this can work.
+The first regex manager will only upgrade `grafana/loki` as looks for the `backup` key then looks for the `test` key and then uses this result for extraction of necessary attributes.
+However, the second regex manager will upgrade both definitions as its first `matchStrings` matches both `test` keys.
+
+renovate.json:
+
+```json
+{
+  "regexManagers": [
+    {
+      "fileMatch": ["^example.json$"],
+      "matchStringsStrategy": "recursive",
+      "matchStrings": [
+        "\"backup\":\\s*{[^}]*}",
+        "\"test\":\\s*\\{[^}]*}",
+        "\"name\":\\s*\"(?<depName>.*)\"[^\"]*\"type\":\\s*\"(?<datasource>.*)\"[^\"]*\"value\":\\s*\"(?<currentValue>.*)\""
+      ],
+      "datasourceTemplate": "docker"
+    },
+    {
+      "fileMatch": ["^example.json$"],
+      "matchStringsStrategy": "recursive",
+      "matchStrings": [
+        "\"test\":\\s*\\{[^}]*}",
+        "\"name\":\\s*\"(?<depName>.*)\"[^\"]*\"type\":\\s*\"(?<datasource>.*)\"[^\"]*\"value\":\\s*\"(?<currentValue>.*)\""
+      ],
+      "datasourceTemplate": "docker"
+    }
+  ]
+}
+```
+
+example.json:
+
+```json
+{
+  "backup": {
+    "test": {
+      "name": "grafana/loki",
+      "type": "docker",
+      "value": "1.6.1"
+    }
+  },
+  "setup": {
+    "test": {
+      "name": "python",
+      "type": "docker",
+      "value": "3.9.0"
+    }
+  }
+}
+```
+
+#### combination
+
+This option allows the possibility to combine the values of multiple lines inside a file.
+While using multiple lines is also possible using both other `matchStringStrategy` values, the `combination` approach is less susceptible to white space or line breaks stopping a match.
+
+`combination` will only match at most one dependency per file, so if you want to update multiple dependencies using `combination` you have to define multiple regex managers.
+
+Matched group values will be merged to form a single dependency.
+
+renovate.json:
+
+```json
+{
+  "regexManagers": [
+    {
+      "fileMatch": ["^main.yml$"],
+      "matchStringsStrategy": "combination",
+      "matchStrings": [
+        "prometheus_image:\\s*\"(?<depName>.*)\"\\s*//",
+        "prometheus_version:\\s*\"(?<currentValue>.*)\"\\s*//"
+      ],
+      "datasourceTemplate": "docker"
+    },
+    {
+      "fileMatch": ["^main.yml$"],
+      "matchStringsStrategy": "combination",
+      "matchStrings": [
+        "thanos_image:\\s*\"(?<depName>.*)\"\\s*//",
+        "thanos_version:\\s*\"(?<currentValue>.*)\"\\s*//"
+      ],
+      "datasourceTemplate": "docker"
+    }
+  ]
+}
+```
+
+Ansible variable file ( yaml ):
+
+```yaml
+prometheus_image: "prom/prometheus"  // a comment
+prometheus_version: "v2.21.0" // a comment
+------
+thanos_image: "prom/prometheus"  // a comment
+thanos_version: "0.15.0" // a comment
+```
+
+In the above example, each regex manager will match a single dependency each.
+
 ### depNameTemplate
 
 If `depName` cannot be captured with a named capture group in `matchString` then it can be defined manually using this field.
@@ -1698,7 +1849,7 @@ You could then configure a schedule like this at the repository level:
 
 ```json
 {
-  "schedule": ["after 10pm and before 5am on every weekday", "every weekend"]
+  "schedule": ["after 10pm and before 5am every weekday", "every weekend"]
 }
 ```
 
