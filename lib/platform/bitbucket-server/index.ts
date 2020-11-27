@@ -53,9 +53,6 @@ import * as utils from './utils';
  * https://confluence.atlassian.com/support/atlassian-support-end-of-life-policy-201851003.html#AtlassianSupportEndofLifePolicy-BitbucketServer
  */
 
-const BITBUCKET_INVALID_REVIEWERS =
-  'com.atlassian.bitbucket.pull.InvalidPullRequestReviewersException';
-
 let config: BbsConfig = {} as any;
 
 const bitbucketServerHttp = new BitbucketServerHttp();
@@ -552,30 +549,6 @@ export function addAssignees(iid: number, assignees: string[]): Promise<void> {
   return Promise.resolve();
 }
 
-function isInvalidReviewersResponse(err: any): boolean {
-  const errors = err?.response?.body?.errors || [];
-  return (
-    errors.length > 0 &&
-    errors.every(
-      (error) => error?.exceptionName === BITBUCKET_INVALID_REVIEWERS
-    )
-  );
-}
-
-function getInvalidReviewers(err: any): string[] {
-  const errors = err?.response?.body?.errors || [];
-  let invalidReviewers = [];
-  for (const error of errors) {
-    if (error.exceptionName === BITBUCKET_INVALID_REVIEWERS) {
-      invalidReviewers = invalidReviewers.concat(
-        error.reviewerErrors?.map(({ context }) => context) || []
-      );
-    }
-  }
-
-  return invalidReviewers;
-}
-
 export async function addReviewers(
   prNo: number,
   reviewers: string[]
@@ -607,7 +580,10 @@ export async function addReviewers(
     logger.warn({ err, reviewers, prNo }, `Failed to add reviewers`);
     if (err.statusCode === 404) {
       throw new Error(REPOSITORY_NOT_FOUND);
-    } else if (err.statusCode === 409 && !isInvalidReviewersResponse(err)) {
+    } else if (
+      err.statusCode === 409 &&
+      !utils.isInvalidReviewersResponse(err)
+    ) {
       throw new Error(REPOSITORY_CHANGED);
     } else {
       throw err;
@@ -926,9 +902,9 @@ export async function updatePr({
     if (err.statusCode === 404) {
       throw new Error(REPOSITORY_NOT_FOUND);
     } else if (err.statusCode === 409) {
-      if (isInvalidReviewersResponse(err) && !bitbucketInvalidReviewers) {
+      if (utils.isInvalidReviewersResponse(err) && !bitbucketInvalidReviewers) {
         // Retry again with invalid reviewers being removed
-        const invalidReviewers = getInvalidReviewers(err);
+        const invalidReviewers = utils.getInvalidReviewers(err);
         await updatePr({
           number: prNo,
           prTitle: title,
