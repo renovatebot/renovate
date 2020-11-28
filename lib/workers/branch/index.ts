@@ -12,7 +12,7 @@ import {
   SYSTEM_INSUFFICIENT_DISK_SPACE,
   WORKER_FILE_UPDATE_FAILED,
 } from '../../constants/error-messages';
-import { logger } from '../../logger';
+import { addMeta, logger, removeMeta } from '../../logger';
 import { getAdditionalFiles } from '../../manager/npm/post-update';
 import { Pr, platform } from '../../platform';
 import { BranchStatus, PrState } from '../../types';
@@ -342,97 +342,116 @@ export async function processBranch(
       global.trustLevel === 'high' &&
       is.nonEmptyArray(config.allowedPostUpgradeCommands)
     ) {
-      logger.debug(
-        {
-          tasks: config.postUpgradeTasks,
-          allowedCommands: config.allowedPostUpgradeCommands,
-        },
-        'Checking for post-upgrade tasks'
-      );
-      const commands = config.postUpgradeTasks.commands || [];
-      const fileFilters = config.postUpgradeTasks.fileFilters || [];
+      for (const upgrade of config.upgrades) {
+        addMeta({ dep: upgrade.depName });
+        logger.trace(
+          {
+            tasks: upgrade.postUpgradeTasks,
+            allowedCommands: config.allowedPostUpgradeCommands,
+          },
+          'Checking for post-upgrade tasks'
+        );
+        const commands = upgrade.postUpgradeTasks.commands || [];
+        const fileFilters = upgrade.postUpgradeTasks.fileFilters || [];
 
-      if (is.nonEmptyArray(commands)) {
-        // Persist updated files in file system so any executed commands can see them
-        for (const file of config.updatedPackageFiles.concat(
-          config.updatedArtifacts
-        )) {
-          if (file.name !== '|delete|') {
-            let contents;
-            if (typeof file.contents === 'string') {
-              contents = Buffer.from(file.contents);
+        if (is.nonEmptyArray(commands)) {
+          // Persist updated files in file system so any executed commands can see them
+          for (const file of config.updatedPackageFiles.concat(
+            config.updatedArtifacts
+          )) {
+            if (file.name !== '|delete|') {
+              let contents;
+              if (typeof file.contents === 'string') {
+                contents = Buffer.from(file.contents);
+              } else {
+                contents = file.contents;
+              }
+              await writeLocalFile(file.name, contents);
+            }
+          }
+
+          for (const cmd of commands) {
+            if (
+              !config.allowedPostUpgradeCommands.some((pattern) =>
+                regEx(pattern).test(cmd)
+              )
+            ) {
+              logger.warn(
+                {
+                  cmd,
+                  allowedPostUpgradeCommands: config.allowedPostUpgradeCommands,
+                },
+                'Post-upgrade task did not match any on allowed list'
+              );
             } else {
-              contents = file.contents;
-            }
-            await writeLocalFile(file.name, contents);
-          }
-        }
+              const compiledCmd = config.allowPostUpgradeCommandTemplating
+                ? template.compile(cmd, upgrade)
+                : cmd;
 
-        for (const cmd of commands) {
-          if (
-            !config.allowedPostUpgradeCommands.some((pattern) =>
-              regEx(pattern).test(cmd)
-            )
-          ) {
-            logger.warn(
-              {
-                cmd,
-                allowedPostUpgradeCommands: config.allowedPostUpgradeCommands,
-              },
-              'Post-upgrade task did not match any on allowed list'
-            );
-          } else {
-            const compiledCmd = config.allowPostUpgradeCommandTemplating
-              ? template.compile(cmd, config)
-              : cmd;
+              logger.debug({ cmd: compiledCmd }, 'Executing post-upgrade task');
 
-            logger.debug({ cmd: compiledCmd }, 'Executing post-upgrade task');
-
-            const execResult = await exec(compiledCmd, {
-              cwd: config.localDir,
-            });
-
-            logger.debug(
-              { cmd: compiledCmd, ...execResult },
-              'Executed post-upgrade task'
-            );
-          }
-        }
-
-        const status = await getRepoStatus();
-
-        for (const relativePath of status.modified.concat(status.not_added)) {
-          for (const pattern of fileFilters) {
-            if (minimatch(relativePath, pattern)) {
-              logger.debug(
-                { file: relativePath, pattern },
-                'Post-upgrade file saved'
-              );
-              const existingContent = await readLocalFile(relativePath);
-              config.updatedArtifacts.push({
-                name: relativePath,
-                contents: existingContent,
+              const execResult = await exec(compiledCmd, {
+                cwd: config.localDir,
               });
+
+              logger.debug(
+                { cmd: compiledCmd, ...execResult },
+                'Executed post-upgrade task'
+              );
             }
           }
-        }
 
-        for (const relativePath of status.deleted || []) {
-          for (const pattern of fileFilters) {
-            if (minimatch(relativePath, pattern)) {
-              logger.debug(
-                { file: relativePath, pattern },
-                'Post-upgrade file removed'
-              );
-              config.updatedArtifacts.push({
-                name: '|delete|',
-                contents: relativePath,
-              });
+          const status = await getRepoStatus();
+
+          for (const relativePath of status.modified.concat(status.not_added)) {
+            for (const pattern of fileFilters) {
+              if (minimatch(relativePath, pattern)) {
+                logger.debug(
+                  { file: relativePath, pattern },
+                  'Post-upgrade file saved'
+                );
+                const existingContent = await readLocalFile(relativePath);
+                const existingUpdatedArtifacts = config.updatedArtifacts.find(
+                  (ua) => ua.name === relativePath
+                );
+                if (existingUpdatedArtifacts) {
+                  existingUpdatedArtifacts.contents = existingContent;
+                } else {
+                  config.updatedArtifacts.push({
+                    name: relativePath,
+                    contents: existingContent,
+                  });
+                }
+                // If the file is deleted by a previous post-update command, remove the deletion from updatedArtifacts
+                config.updatedArtifacts = config.updatedArtifacts.filter(
+                  (ua) => ua.name !== '|delete|' || ua.contents !== relativePath
+                );
+              }
+            }
+          }
+
+          for (const relativePath of status.deleted || []) {
+            for (const pattern of fileFilters) {
+              if (minimatch(relativePath, pattern)) {
+                logger.debug(
+                  { file: relativePath, pattern },
+                  'Post-upgrade file removed'
+                );
+                config.updatedArtifacts.push({
+                  name: '|delete|',
+                  contents: relativePath,
+                });
+                // If the file is created or modified by a previous post-update command, remove the modification from updatedArtifacts
+                config.updatedArtifacts = config.updatedArtifacts.filter(
+                  (ua) => ua.name !== relativePath
+                );
+              }
             }
           }
         }
       }
     }
+    removeMeta(['dep']);
 
     if (config.artifactErrors?.length) {
       if (config.releaseTimestamp) {
