@@ -1808,6 +1808,15 @@ const options: RenovateOptions[] = [
     env: false,
   },
   {
+    name: 'matchStringsStrategy',
+    description: 'Strategy how to interpret matchStrings',
+    type: 'string',
+    default: 'any',
+    parent: 'regexManagers',
+    cli: false,
+    env: false,
+  },
+  {
     name: 'depNameTemplate',
     description:
       'Optional depName for extracted dependencies. Valid only within `regexManagers` object.',
