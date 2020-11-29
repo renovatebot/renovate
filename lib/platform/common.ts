@@ -40,6 +40,7 @@ export interface RepoParams {
   forkToken?: string;
   includeForks?: boolean;
   renovateUsername?: string;
+  cloneSubmodules?: boolean;
 }
 
 /**
