@@ -40,8 +40,8 @@ Alternative feeds can be specified either [in a `NuGet.config` file](https://doc
 ```
 
 In this example we defined 3 NuGet feeds.
-Package resolving processes feeds in the listed order, from top to bottom.
-This means that if a package is resolved in the second feed, Renovate won't check the third and final feed.
+The package resolving process uses the `merge` strategy to handle the 3 feeds.
+All feeds are checked for dependency updates, and duplicate updates are merged/joined together into a single dependency update.
 
 ### Protocol versions
 
