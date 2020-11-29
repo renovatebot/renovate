@@ -30,23 +30,16 @@ In order to achieve these goals, preset configs allow for a very modular approac
 
 ## Preset Hosting
 
-Presets can be defined using either npm packages, or with GitHub/GitLab repositories.
-Presets that are hosted elsewhere are not supported.
+In general, GitHub or GitLab-based preset hosting is easier than npm because you avoid the "publish" step - simply commit preset code to the default branch and it will be picked up by Renovate the next time it runs.
+An additional benefit of using source code hosting is that the same token/authentication can be reused by Renovate in case you want to make your config private.
 
-The following namespace is used:
-
-- `abc`: npm package `renovate-config-abc` and preset `default`
-- `@abc`: npm package `@abc/renovate-config` and preset `default`
-- `abc:xyz`: npm package `renovate-config-abc` and preset `xyz`
-- `@abc:xyz`: npm package `@abc/renovate-config` and preset `xyz`
-- `github>abc/foo`: github repository `https://github.com/abc/foo` and preset `default`
-- `github>abc/foo:xyz`: github repository `https://github.com/abc/foo` and preset `xyz`
-- `gitlab>abc/foo`: gitlab repository `https://gitlab.com/abc/foo` and preset `default`
-- `gitlab>abc/foo:xyz`: gitlab repository `https://gitlab.com/abc/foo` and preset `xyz`
-
-It's easier to use GitHub/GitLab based preset hosting, as you avoid the "publish" step that is necessary with a npm package.
-You can commit preset code to the default branch and it will be picked up by Renovate the next time it runs.
-An additional benefit of using GitHub/GitLab hosting is that the same token/authentication can be reused by Renovate in case you want to make your config private.
+| name                    | example use          | preset    | resolves as                          | filename                          |
+| ----------------------- | -------------------- | --------- | ------------------------------------ | --------------------------------- |
+| GitHub default          | `github>abc/foo`     | `default` | `https://github.com/abc/foo`         | `default.json` or `renovate.json` |
+| GitHub with preset name | `github>abc/foo:xyz` | `xyz`     | `https://github.com/abc/foo`         | `xyz.json`                        |
+| GitLab default          | `gitlab>abc/foo`     | `default` | `https://gitlab.com/abc/foo`         | `default.json` or `renovate.json` |
+| GitLab with preset name | `gitlab>abc/foo:xyz` | `xyz`     | `https://gitlab.com/abc/foo`         | `xyz.json`                        |
+| Local default           | `local>abc/foo`      | `default` | `https://github.company.com/abc/foo` | `default.json` or `renovate.json` |
 
 ## Example configs
 
