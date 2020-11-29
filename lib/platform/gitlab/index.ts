@@ -51,6 +51,7 @@ let config: {
   issueList: GitlabIssue[];
   mergeMethod: MergeMethod;
   defaultBranch: string;
+  cloneSubmodules: boolean;
 } = {} as any;
 
 const defaults = {
@@ -153,10 +154,12 @@ export async function getJsonFile(fileName: string): Promise<any | null> {
 export async function initRepo({
   repository,
   localDir,
+  cloneSubmodules,
 }: RepoParams): Promise<RepoResult> {
   config = {} as any;
   config.repository = urlEscape(repository);
   config.localDir = localDir;
+  config.cloneSubmodules = cloneSubmodules;
 
   let res: HttpResponse<RepoResponse>;
   try {
