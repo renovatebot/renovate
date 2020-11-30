@@ -1,4 +1,3 @@
-import { DateTime } from 'luxon';
 import mockDate from 'mockdate';
 import nock from 'nock';
 import _registryAuthToken from 'registry-auth-token';
