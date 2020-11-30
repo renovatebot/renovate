@@ -1468,7 +1468,7 @@ If you configure `prCreation=not-pending`, then Renovate will wait until tests a
 However there are cases where PRs may remain in pending state forever, e.g. absence of tests or status checks that are configure to pending indefinitely.
 Therefore we configure an upper limit for how long we wait until creating a PR.
 
-Note: if the option `stabilityDays` is non-zero then Renovate will disable `prNotPendingHours` functionality.
+Note: if the option `stabilityDays` is non-zero then Renovate will disable the `prNotPendingHours` functionality.
 
 ## prPriority
 
