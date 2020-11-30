@@ -1308,7 +1308,9 @@ Note that this limit is enforced on a per-repository basis.
 
 ## prNotPendingHours
 
-If you configure `prCreation=not-pending`, then Renovate will wait until tests are non-pending (all pass or at least one fails) before creating PRs. However there are cases where PRs may remain in pending state forever, e.g. absence of tests or status checks that are configure to pending indefinitely. Therefore we configure an upper limit for how long we wait until creating a PR.
+If you configure `prCreation=not-pending`, then Renovate will wait until tests are non-pending (all pass or at least one fails) before creating PRs.
+However there are cases where PRs may remain in pending state forever, e.g. absence of tests or status checks that are configure to pending indefinitely.
+Therefore we configure an upper limit for how long we wait until creating a PR.
 
 Note: if the option `stabilityDays` is non-zero then Renovate will disable `prNotPendingHours` functionality.
 
