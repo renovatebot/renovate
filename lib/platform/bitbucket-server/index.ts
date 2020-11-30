@@ -132,6 +132,7 @@ export async function getJsonFile(fileName: string): Promise<any | null> {
 export async function initRepo({
   repository,
   localDir,
+  cloneSubmodules,
 }: RepoParams): Promise<RepoResult> {
   logger.debug(
     `initRepo("${JSON.stringify({ repository, localDir }, null, 2)}")`
@@ -167,6 +168,7 @@ export async function initRepo({
     url: gitUrl,
     gitAuthorName: global.gitAuthor?.name,
     gitAuthorEmail: global.gitAuthor?.email,
+    cloneSubmodules,
   });
 
   try {
@@ -184,7 +186,8 @@ export async function initRepo({
       `./rest/api/1.0/projects/${config.projectKey}/repos/${config.repositorySlug}/branches/default`
     );
 
-    if (branchRes.statusCode === 204) {
+    // 204 means empty, 404 means repo not found or missing default branch. repo must exist here.
+    if ([204, 404].includes(branchRes.statusCode)) {
       throw new Error(REPOSITORY_EMPTY);
     }
 

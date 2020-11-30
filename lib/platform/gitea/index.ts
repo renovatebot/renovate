@@ -45,6 +45,7 @@ interface GiteaRepoConfig {
   issueList: Promise<Issue[]> | null;
   labelList: Promise<helper.Label[]> | null;
   defaultBranch: string;
+  cloneSubmodules: boolean;
 }
 
 const defaults = {
@@ -217,12 +218,17 @@ const platform: Platform = {
     }
   },
 
-  async initRepo({ repository, localDir }: RepoParams): Promise<RepoResult> {
+  async initRepo({
+    repository,
+    localDir,
+    cloneSubmodules,
+  }: RepoParams): Promise<RepoResult> {
     let repo: helper.Repo;
 
     config = {} as any;
     config.repository = repository;
     config.localDir = localDir;
+    config.cloneSubmodules = cloneSubmodules;
 
     // Attempt to fetch information about repository
     try {
@@ -793,7 +799,10 @@ const platform: Platform = {
   },
 
   getPrBody(prBody: string): string {
-    return smartTruncate(prBody, 1000000);
+    return smartTruncate(
+      prBody.replace(/\]\(\.\.\/pull\//g, '](pulls/'),
+      1000000
+    );
   },
 
   getVulnerabilityAlerts(): Promise<VulnerabilityAlert[]> {

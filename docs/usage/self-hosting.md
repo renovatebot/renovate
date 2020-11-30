@@ -18,7 +18,9 @@ The same goes for any other third party binary tool that may be needed, such as 
 
 #### Docker
 
-Renovate is available for Docker via an automated build [renovate/renovate](https://hub.docker.com/r/renovate/renovate/). It builds `latest` based on the `master` branch and all semver tags are published too. All the following are valid:
+Renovate is available for Docker via an automated build [renovate/renovate](https://hub.docker.com/r/renovate/renovate/).
+It builds `latest` based on the `master` branch and all semver tags are published too.
+All the following are valid:
 
 ```sh
 $ docker run --rm renovate/renovate
@@ -29,7 +31,8 @@ $ docker run --rm renovate/renovate:19
 
 (Please look up what the latest actual tags are though, do not use the above literally).
 
-If you wish to configure Renovate using a `config.js` file then map it to `/usr/src/app/config.js` using Docker volumes. For example:
+If you wish to configure Renovate using a `config.js` file then map it to `/usr/src/app/config.js` using Docker volumes.
+For example:
 
 ```sh
 $ docker run --rm -v "/path/to/your/config.js:/usr/src/app/config.js" renovate/renovate
@@ -37,7 +40,9 @@ $ docker run --rm -v "/path/to/your/config.js:/usr/src/app/config.js" renovate/r
 
 #### Kubernetes
 
-Renovate's official Docker image is compatible with Kubernetes. The following is an example manifest of running Renovate against a GitHub Enterprise server. First the Kubernetes manifest:
+Renovate's official Docker image is compatible with Kubernetes.
+The following is an example manifest of running Renovate against a GitHub Enterprise server.
+First the Kubernetes manifest:
 
 ```yaml
 apiVersion: batch/v1beta1
@@ -83,6 +88,94 @@ stringData:
   RENOVATE_TOKEN: 'your-github-enterprise-renovate-user-token'
 ```
 
+A `config.js` file can be added to the manifest using a `ConfigMap` as shown in the following example (using a "dry run" in github.com)
+
+```yaml
+---
+ apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: renovate-config
+data:
+  config.json: |-
+    {
+      "logLevel" : "debug",
+      "repositories": ["orgname/repo","username/repo"],
+      "dryRun" : "true"
+    }
+
+---
+apiVersion: batch/v1beta1
+kind: CronJob
+metadata:
+  name: renovate-bot
+spec:
+  schedule: '@hourly'
+  concurrencyPolicy: Forbid
+  jobTemplate:
+    spec:
+      template:
+        spec:
+          containers:
+            - image: renovate/renovate:23.22.1
+              name: renovate-bot
+              env: # For illustration purposes, please use secrets.
+                - name: RENOVATE_PLATFORM
+                  value: 'github'
+                - name: RENOVATE_TOKEN
+                  value: 'some-token'
+                - name: RENOVATE_AUTODISCOVER
+                  value: 'false'
+                - name: RENOVATE_BASE_DIR
+                  value: '/tmp/renovate/'
+                - name: RENOVATE_CONFIG_FILE
+                  value: '/opt/renovate/config.json'
+              volumeMounts:
+                - name: config-volume
+                  mountPath: /opt/renovate/
+                - name: work-volume
+                  mountPath: /tmp/renovate/
+          restartPolicy: Never
+          volumes:
+            - name: config-volume
+              configMap:
+                name: renovate-config
+            - name: work-volume
+              emptyDir: {}
+```
+
+#### CircleCI
+
+If you are using CircleCI, you can use the third-party [daniel-shuy/renovate](https://circleci.com/developer/orbs/orb/daniel-shuy/renovate) orb to run a self-hosted instance of Renovate on CircleCI.
+
+By default, the orb looks for the self-hosted configuration file in the project root, but you can specify another path to the configuration file with the `config_file_path` parameter.
+
+Secrets should be configured using environment variables (eg. `RENOVATE_TOKEN`, `GITHUB_COM_TOKEN`).
+
+[Configure environment variables in CircleCI Project Settings](https://circleci.com/docs/2.0/env-vars/#setting-an-environment-variable-in-a-project).
+To share environment variables across projects, use CircleCI [Contexts](https://circleci.com/docs/2.0/contexts/).
+
+The following example runs Renovate hourly, and looks for the self-hosted configuration file at `renovate-config.js`:
+
+```yml
+version: '2.1'
+orbs:
+  renovate: daniel-shuy/renovate@2.1
+workflows:
+  renovate:
+    jobs:
+      - renovate/self-hosted:
+          config_file_path: renovate-config.js
+    nightly:
+      triggers:
+        - schedule:
+            cron: 0 * * * *
+            filters:
+              branches:
+                only:
+                  - master
+```
+
 ## Configuration
 
 Self-hosted Renovate can be configured using any of the following (or a combination):
@@ -91,11 +184,13 @@ Self-hosted Renovate can be configured using any of the following (or a combinat
 - CLI params
 - Environment params
 
-Note that some Renovate configuratino options are _only_ available for self-hosting, and so can only be configured using one of the above methods. These are described in the [Self-hosted Configuration](./self-hosted-configuration.md) doc.
+Note that some Renovate configuration options are _only_ available for self-hosting, and so can only be configured using one of the above methods.
+These are described in the [Self-hosted Configuration](./self-hosted-configuration.md) doc.
 
 ## Authentication
 
-Regardless of platform, you need to select a user account for `renovate` to assume the identity of, and generate a Personal Access Token. It is recommended to be `@renovate-bot` if you are using a self-hosted server with free choice of usernames.
+Regardless of platform, you need to select a user account for `renovate` to assume the identity of, and generate a Personal Access Token.
+It is recommended to be `@renovate-bot` if you are using a self-hosted server with free choice of usernames.
 It is also recommended that you configure `config.gitAuthor` with the same identity as your Renovate user, e.g. like `"gitAuthor": "Renovate Bot <renovate@whitesourcesoftware.com>"`.
 
 #### GitHub Enterprise
@@ -137,9 +232,12 @@ Don't forget to configure `platform=gitea` somewhere in config.
 
 ## GitHub.com token for release notes
 
-If you are running on any platform except github.com, it's important to also configure the environment variable `GITHUB_COM_TOKEN` containing a personal access token for github.com. This account can actually be _any_ account on GitHub, and needs only read-only access. It's used when fetching release notes for repositories in order to increase the hourly API limit. It's also OK to configure the same as a host rule instead, if you prefer that.
+If you are running on any platform except github.com, it's important to also configure the environment variable `GITHUB_COM_TOKEN` containing a personal access token for github.com.
+This account can actually be _any_ account on GitHub, and needs only read-only access.
+It's used when fetching release notes for repositories in order to increase the hourly API limit.
+It's also OK to configure the same as a host rule instead, if you prefer that.
 
-**Note:** If you're using renovate in a project where dependencies are loaded from github.com (such as Go m=Modules hosted on github) it is highly recommended to add a token as you will run in the rate limit from the github.com api, which will lead to renovate closing and reopening PRs because it could not get reliable info on updated dependencies.
+**Note:** If you're using renovate in a project where dependencies are loaded from github.com (such as Go m=Modules hosted on GitHub) it is highly recommended to add a token as you will run in the rate limit from the github.com API, which will lead to renovate closing and reopening PRs because it could not get reliable info on updated dependencies.
 
 ## File/directory usage
 
@@ -147,7 +245,7 @@ By default, Renovate will store all files within a `renovate/` subdirectory of t
 
 Repository data will be copied or cloned into unique subdirectories under `repos/`, e.g. `/tmp/renovate/repos/github/owner1/repo-a/`.
 
-Cache data - such as Renovate's own cache as well as that for npm, yarn, composer, etc - will be stored in `/tmp/renovate/cache`.
+Cache data - such as Renovate's own cache as well as that for npm, Yarn, Composer, etc - will be stored in `/tmp/renovate/cache`.
 
 If you wish to override the base directory to be used (e.g. instead of `/tmp/renovate/`) then configure a value for `baseDir` in `config.js`, or via env (`RENOVATE_BASE_DIR`) or via CLI (`--base-dir=`).
 
@@ -157,7 +255,9 @@ If you wish to override the cache location specifically then configure a value f
 
 The following example uses the Renovate CLI tool, which can be installed by running `npm i -g renovate`.
 
-If running your own Renovate bot then you will need a user account that Renovate will run as. It's recommended to use a dedicated account for the bot, e.g. name it `renovate-bot` if on your own instance. Create and save a Personal Access Token for this account.
+If running your own Renovate bot then you will need a user account that Renovate will run as.
+It's recommended to use a dedicated account for the bot, e.g. name it `renovate-bot` if on your own instance.
+Create and save a Personal Access Token for this account.
 
 Create a Renovate config file, e.g. here is an example:
 
@@ -174,9 +274,10 @@ module.exports = {
 };
 ```
 
-Here change the `logFile` and `repositories` to something appropriate. Also replace gitlab-token value with the one created during the previous step.
+Here change the `logFile` and `repositories` to something appropriate.
+Also replace `gitlab-token` value with the one created during the previous step.
 
-If running against GitHub Enterprise, change the above gitlab values to the equivalent github ones.
+If running against GitHub Enterprise, change the above `gitlab` values to the equivalent GitHub ones.
 
 You can save this file as anything you want and then use `RENOVATE_CONFIG_FILE` env variable to tell Renovate where to find it.
 
@@ -194,17 +295,18 @@ export GITHUB_COM_TOKEN="**github-token**" # Delete this if using github.com
 renovate
 ```
 
-Note: the GitHub.com token in env is necessary in order to retrieve Release Notes that are usually hosted on github.com. You don't need to add it if you are already running the bot against github.com, but you do need to add it if you're using GitHub Enterprise, GitLab, Azure DevOps, or Bitbucket.
+Note: the GitHub.com token in env is necessary in order to retrieve Release Notes that are usually hosted on github.com.
+You don't need to add it if you are already running the bot against github.com, but you do need to add it if you're using GitHub Enterprise, GitLab, Azure DevOps, or Bitbucket.
 
 You should save and test out this script manually first, and add it to cron once you've verified it.
 
-## Kubernetes for Gitlab, using Git over SSH
+## Kubernetes for GitLab, using Git over SSH
 
-This section describes how to use git binary with ssh for Gitlab, to avoid API shortcomings.
+This section describes how to use Git binary with SSH for Gitlab, to avoid API shortcomings.
 
-You need to first create a ssh key, then add the public part to Gitlab (see this [guide](https://docs.gitlab.com/ee/ssh/))
+You need to first create a SSH key, then add the public part to Gitlab (see this [guide](https://docs.gitlab.com/ee/ssh/))
 
-Then, you need to create the secret to add the ssh key, and the following config to your container
+Then, you need to create the secret to add the SSH key, and the following config to your container
 
 ```
 host gitlab.com
@@ -234,8 +336,8 @@ metadata:
   namespace: <namespace>
 ```
 
-Then you just need to add Git author, and mount volumes
-The final configuration should look like something like this :
+Then you just need to add Git author, and mount volumes.
+The final configuration should look like something like this:
 
 ```yml
 ---
@@ -304,4 +406,5 @@ spec:
 
 ## Logging
 
-It's recommended to configure `LOG_LEVEL=debug` and `LOG_FORMAT=json` in environment if you are ingesting/parsing logs into another system. Debug logging is usually necessary for any debugging, while JSON format will mean that the output is parseable.
+It's recommended to configure `LOG_LEVEL=debug` and `LOG_FORMAT=json` in environment if you are ingesting/parsing logs into another system.
+Debug logging is usually necessary for any debugging, while JSON format will mean that the output is parseable.

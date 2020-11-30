@@ -40,6 +40,7 @@ export interface RepoParams {
   forkToken?: string;
   includeForks?: boolean;
   renovateUsername?: string;
+  cloneSubmodules?: boolean;
 }
 
 /**
@@ -63,6 +64,7 @@ export interface Pr {
   state: string;
   targetBranch?: string;
   title: string;
+  isDraft?: boolean;
 }
 
 /**

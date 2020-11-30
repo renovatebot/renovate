@@ -18,6 +18,7 @@ export interface GroupConfig extends Record<string, unknown> {
 
 // TODO: Proper typings
 export interface RenovateSharedConfig {
+  $schema?: string;
   automerge?: boolean;
   branchPrefix?: string;
   branchName?: string;
@@ -27,6 +28,7 @@ export interface RenovateSharedConfig {
   draftPR?: boolean;
   enabled?: boolean;
   enabledManagers?: string[];
+  extends?: string[];
   fileMatch?: string[];
   group?: GroupConfig;
   groupName?: string;
@@ -66,6 +68,7 @@ export interface GlobalConfig {
 }
 
 export interface RenovateAdminConfig {
+  allowPostUpgradeCommandTemplating?: boolean;
   allowedPostUpgradeCommands?: string[];
   autodiscover?: boolean;
   autodiscoverFilter?: string;
@@ -124,6 +127,7 @@ export type RenovateRepository =
 export interface CustomManager {
   fileMatch: string[];
   matchStrings: string[];
+  matchStringsStrategy?: string;
   depNameTemplate?: string;
   datasourceTemplate?: string;
   lookupNameTemplate?: string;
@@ -145,7 +149,6 @@ export interface RenovateConfig
   description?: string | string[];
 
   errors?: ValidationMessage[];
-  extends?: string[];
 
   gitAuthor?: string;
 
@@ -168,6 +171,9 @@ export interface RenovateConfig
   packageRules?: PackageRule[];
   prConcurrentLimit?: number;
   prHourlyLimit?: number;
+
+  registryUrls?: string[];
+
   repoIsOnboarded?: boolean;
 
   updateType?: UpdateType;
@@ -175,6 +181,8 @@ export interface RenovateConfig
   warnings?: ValidationMessage[];
   vulnerabilityAlerts?: RenovateSharedConfig;
   regexManagers?: CustomManager[];
+
+  fetchReleaseNotes?: boolean;
 }
 
 export interface AssigneesAndReviewersConfig {
@@ -197,6 +205,8 @@ export type UpdateType =
   | 'lockfileUpdate'
   | 'rollback'
   | 'bump';
+
+export type MatchStringsStrategy = 'any' | 'recursive' | 'combination';
 
 // TODO: Proper typings
 export interface PackageRule

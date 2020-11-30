@@ -16,8 +16,8 @@ describe('lib/manager/terraform/extract', () => {
     it('extracts', () => {
       const res = extractPackageFile(tf1);
       expect(res).toMatchSnapshot();
-      expect(res.deps).toHaveLength(41);
-      expect(res.deps.filter((dep) => dep.skipReason)).toHaveLength(12);
+      expect(res.deps).toHaveLength(44);
+      expect(res.deps.filter((dep) => dep.skipReason)).toHaveLength(8);
     });
     it('returns null if only local deps', () => {
       expect(extractPackageFile(tf2)).toBeNull();
@@ -26,7 +26,7 @@ describe('lib/manager/terraform/extract', () => {
       const res = extractPackageFile(helm);
       expect(res).toMatchSnapshot();
       expect(res.deps).toHaveLength(6);
-      expect(res.deps.filter((dep) => dep.skipReason)).toHaveLength(3);
+      expect(res.deps.filter((dep) => dep.skipReason)).toHaveLength(2);
     });
   });
 });

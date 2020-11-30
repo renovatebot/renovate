@@ -119,7 +119,7 @@ export async function getRepos(): Promise<string[]> {
   try {
     const res = await githubApi.getJson<{ full_name: string }[]>(
       'user/repos?per_page=100',
-      { paginate: true }
+      { paginate: 'all' }
     );
     return res.body.map((repo) => repo.full_name);
   } catch (err) /* istanbul ignore next */ {
@@ -168,10 +168,11 @@ export async function initRepo({
   forkToken,
   localDir,
   renovateUsername,
+  cloneSubmodules,
 }: RepoParams): Promise<RepoResult> {
   logger.debug(`initRepo("${repository}")`);
   // config is used by the platform api itself, not necessary for the app layer to know
-  config = { localDir, repository } as any;
+  config = { localDir, repository, cloneSubmodules } as any;
   // istanbul ignore if
   if (endpoint) {
     // Necessary for Renovate Pro - do not remove
@@ -484,13 +485,7 @@ async function getClosedPrs(): Promise<PrList> {
 }
 
 async function getOpenPrs(): Promise<PrList> {
-  // istanbul ignore if
-  if (config.isGhe) {
-    logger.debug(
-      'Skipping unsupported graphql PullRequests.mergeStateStatus query on GHE'
-    );
-    return {};
-  }
+  // The graphql query is supported in the current oldest GHE version 2.19
   if (!config.openPrList) {
     config.openPrList = {};
     let query;
@@ -572,7 +567,7 @@ async function getOpenPrs(): Promise<PrList> {
         pr.targetBranch = pr.baseRefName;
         delete pr.baseRefName;
         // https://developer.github.com/v4/enum/mergeablestate
-        const canMergeStates = ['BEHIND', 'CLEAN'];
+        const canMergeStates = ['BEHIND', 'CLEAN', 'HAS_HOOKS'];
         const hasNegativeReview = pr.reviews?.nodes?.length > 0;
         // istanbul ignore if
         if (hasNegativeReview) {
@@ -795,44 +790,43 @@ export async function getBranchStatus(
     'branch status check result'
   );
   let checkRuns: { name: string; status: string; conclusion: string }[] = [];
-  if (!config.isGhe) {
-    try {
-      const checkRunsUrl = `repos/${config.repository}/commits/${escapeHash(
-        branchName
-      )}/check-runs`;
-      const opts = {
-        headers: {
-          accept: 'application/vnd.github.antiope-preview+json',
-        },
-      };
-      const checkRunsRaw = (
-        await githubApi.getJson<{
-          check_runs: { name: string; status: string; conclusion: string }[];
-        }>(checkRunsUrl, opts)
-      ).body;
-      if (checkRunsRaw.check_runs?.length) {
-        checkRuns = checkRunsRaw.check_runs.map((run) => ({
-          name: run.name,
-          status: run.status,
-          conclusion: run.conclusion,
-        }));
-        logger.debug({ checkRuns }, 'check runs result');
-      } else {
-        // istanbul ignore next
-        logger.debug({ result: checkRunsRaw }, 'No check runs found');
-      }
-    } catch (err) /* istanbul ignore next */ {
-      if (err instanceof ExternalHostError) {
-        throw err;
-      }
-      if (
-        err.statusCode === 403 ||
-        err.message === PLATFORM_INTEGRATION_UNAUTHORIZED
-      ) {
-        logger.debug('No permission to view check runs');
-      } else {
-        logger.warn({ err }, 'Error retrieving check runs');
-      }
+  // API is supported in oldest available GHE version 2.19
+  try {
+    const checkRunsUrl = `repos/${config.repository}/commits/${escapeHash(
+      branchName
+    )}/check-runs`;
+    const opts = {
+      headers: {
+        accept: 'application/vnd.github.antiope-preview+json',
+      },
+    };
+    const checkRunsRaw = (
+      await githubApi.getJson<{
+        check_runs: { name: string; status: string; conclusion: string }[];
+      }>(checkRunsUrl, opts)
+    ).body;
+    if (checkRunsRaw.check_runs?.length) {
+      checkRuns = checkRunsRaw.check_runs.map((run) => ({
+        name: run.name,
+        status: run.status,
+        conclusion: run.conclusion,
+      }));
+      logger.debug({ checkRuns }, 'check runs result');
+    } else {
+      // istanbul ignore next
+      logger.debug({ result: checkRunsRaw }, 'No check runs found');
+    }
+  } catch (err) /* istanbul ignore next */ {
+    if (err instanceof ExternalHostError) {
+      throw err;
+    }
+    if (
+      err.statusCode === 403 ||
+      err.message === PLATFORM_INTEGRATION_UNAUTHORIZED
+    ) {
+      logger.debug('No permission to view check runs');
+    } else {
+      logger.warn({ err }, 'Error retrieving check runs');
     }
   }
   if (checkRuns.length === 0) {
@@ -1111,7 +1105,7 @@ export async function ensureIssue({
 }
 
 export async function ensureIssueClosing(title: string): Promise<void> {
-  logger.debug(`ensureIssueClosing(${title})`);
+  logger.trace(`ensureIssueClosing(${title})`);
   const issueList = await getIssueList();
   for (const issue of issueList) {
     if (issue.state === 'open' && issue.title === title) {
@@ -1243,7 +1237,7 @@ async function getComments(issueNo: number): Promise<Comment[]> {
     return comments;
   } catch (err) /* istanbul ignore next */ {
     if (err.statusCode === 404) {
-      logger.debug('404 respose when retrieving comments');
+      logger.debug('404 response when retrieving comments');
       throw new ExternalHostError(err, PLATFORM_TYPE_GITHUB);
     }
     throw err;

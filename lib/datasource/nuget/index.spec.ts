@@ -308,8 +308,10 @@ describe('datasource/nuget', () => {
       httpMock
         .scope('https://api.nuget.org')
         .get('/v3/index.json')
+        .twice()
         .reply(200, JSON.parse(nugetIndexV3))
         .get('/v3-flatcontainer/nunit/3.12.0/nunit.nuspec')
+        .twice()
         .reply(200, pkgInfoV3FromNuget)
         .get('/v3/registration5-gz-semver2/nunit/index.json')
         .twice()
@@ -317,6 +319,7 @@ describe('datasource/nuget', () => {
       httpMock
         .scope('https://myprivatefeed')
         .get('/index.json')
+        .twice()
         .reply(200, JSON.parse(nugetIndexV3));
 
       const res = await getPkgReleases({
@@ -371,6 +374,7 @@ describe('datasource/nuget', () => {
       httpMock
         .scope('https://api.nuget.org')
         .get('/v3/index.json')
+        .twice()
         .reply(200, JSON.parse(nugetIndexV3))
         .get('/v3/registration5-gz-semver2/nunit/index.json')
         .reply(200, pkgListV3Registration)
@@ -388,6 +392,7 @@ describe('datasource/nuget', () => {
       const scope = httpMock
         .scope('https://api.nuget.org')
         .get('/v3/index.json')
+        .twice()
         .reply(200, JSON.parse(nugetIndexV3));
       nlogMocks.forEach(({ url, result }) => {
         scope.get(url).reply(200, result);
@@ -405,10 +410,21 @@ describe('datasource/nuget', () => {
       httpMock
         .scope('https://api.nuget.org')
         .get('/v3/registration5-gz-semver2/nunit/index.json')
-        .reply(200, pkgListV3Registration);
+        .reply(
+          200,
+          pkgListV3Registration
+            .replace(/"http:\/\/nunit\.org"/g, '""')
+            .replace('"published": "2012-10-23T15:37:48+00:00",', '')
+        )
+        .get('/v3-flatcontainer/nunit/3.12.0/nunit.nuspec')
+        .reply(
+          200,
+          pkgInfoV3FromNuget.replace('https://github.com/nunit/nunit', '')
+        );
       httpMock
         .scope('https://myprivatefeed')
         .get('/index.json')
+        .twice()
         .reply(200, JSON.parse(nugetIndexV3));
 
       const res = await getPkgReleases({
@@ -416,8 +432,8 @@ describe('datasource/nuget', () => {
       });
       expect(res).not.toBeNull();
       expect(res).toMatchSnapshot();
-      expect(res.sourceUrl).toBeDefined();
       expect(httpMock.getTrace()).toMatchSnapshot();
+      expect(res.sourceUrl).toBeDefined();
     });
     it('processes real data (v2)', async () => {
       httpMock

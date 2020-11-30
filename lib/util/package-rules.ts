@@ -2,7 +2,7 @@ import minimatch from 'minimatch';
 import { PackageRule, UpdateType, mergeChildConfig } from '../config';
 import { logger } from '../logger';
 import * as allVersioning from '../versioning';
-import { regEx } from './regex';
+import { configRegexPredicate, isConfigRegex, regEx } from './regex';
 
 // TODO: move to `../config`
 export interface Config extends Record<string, any> {
@@ -136,7 +136,7 @@ function matchesRule(inputConfig: Config, packageRule: PackageRule): boolean {
     }
     positiveMatch = true;
   }
-  if (packageNames.length || packagePatterns.length) {
+  if (depName && (packageNames.length || packagePatterns.length)) {
     let isMatch = packageNames.includes(depName);
     // name match is "or" so we check patterns if we didn't match names
     if (!isMatch) {
@@ -164,7 +164,7 @@ function matchesRule(inputConfig: Config, packageRule: PackageRule): boolean {
     }
     positiveMatch = true;
   }
-  if (excludePackagePatterns.length) {
+  if (depName && excludePackagePatterns.length) {
     let isMatch = false;
     for (const pattern of excludePackagePatterns) {
       const packageRegex = regEx(
@@ -192,7 +192,13 @@ function matchesRule(inputConfig: Config, packageRule: PackageRule): boolean {
   if (matchCurrentVersion) {
     const version = allVersioning.get(versioning);
     const matchCurrentVersionStr = matchCurrentVersion.toString();
-    if (version.isVersion(matchCurrentVersionStr)) {
+    if (isConfigRegex(matchCurrentVersionStr)) {
+      const matches = configRegexPredicate(matchCurrentVersionStr);
+      if (!matches(currentValue)) {
+        return false;
+      }
+      positiveMatch = true;
+    } else if (version.isVersion(matchCurrentVersionStr)) {
       let isMatch = false;
       try {
         isMatch = version.matches(matchCurrentVersionStr, currentValue);

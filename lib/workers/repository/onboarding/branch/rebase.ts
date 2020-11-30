@@ -39,7 +39,7 @@ export async function rebaseOnboardingBranch(
     defaultConfigFile,
     config.onboardingBranch
   );
-  const contents = getOnboardingConfig(config);
+  const contents = await getOnboardingConfig(config);
   if (
     contents === existingContents &&
     !(await isBranchStale(config.onboardingBranch))
