@@ -210,7 +210,6 @@ Object {
   "sourceUrl": "https://github.com/kriskowal/q",
   "updates": Array [
     Object {
-      "canBeUnpublished": false,
       "fromVersion": "0.9.99",
       "isSingleVersion": true,
       "newMajor": 1,
