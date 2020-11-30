@@ -9,6 +9,7 @@ import * as npm from './npm';
 import * as packagesPreset from './packages';
 import * as previewPreset from './preview';
 import * as schedulePreset from './schedule';
+import * as workaroundsPreset from './workarounds';
 
 export const groups: Record<string, Record<string, Preset>> = {
   config: configPreset.presets,
@@ -21,6 +22,7 @@ export const groups: Record<string, Record<string, Preset>> = {
   packages: packagesPreset.presets,
   preview: previewPreset.presets,
   schedule: schedulePreset.presets,
+  workarounds: workaroundsPreset.presets,
 };
 
 export function getPreset({

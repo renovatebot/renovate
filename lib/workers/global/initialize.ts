@@ -1,6 +1,6 @@
 import os from 'os';
-import path from 'path';
 import fs from 'fs-extra';
+import upath from 'upath';
 import { RenovateConfig } from '../../config/common';
 import { logger } from '../../logger';
 import { initPlatform } from '../../platform';
@@ -14,14 +14,14 @@ async function setDirectories(input: RenovateConfig): Promise<RenovateConfig> {
   if (config.baseDir) {
     logger.debug('Using configured baseDir: ' + config.baseDir);
   } else {
-    config.baseDir = path.join(process.env.TMPDIR, 'renovate');
+    config.baseDir = upath.join(process.env.TMPDIR, 'renovate');
     logger.debug('Using baseDir: ' + config.baseDir);
   }
   await fs.ensureDir(config.baseDir);
   if (config.cacheDir) {
     logger.debug('Using configured cacheDir: ' + config.cacheDir);
   } else {
-    config.cacheDir = path.join(config.baseDir, 'cache');
+    config.cacheDir = upath.join(config.baseDir, 'cache');
     logger.debug('Using cacheDir: ' + config.cacheDir);
   }
   await fs.ensureDir(config.cacheDir);

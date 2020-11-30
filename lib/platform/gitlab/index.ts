@@ -11,6 +11,7 @@ import {
   REPOSITORY_EMPTY,
   REPOSITORY_MIRRORED,
   REPOSITORY_NOT_FOUND,
+  REPOSITORY_TEMPORARY_ERROR,
 } from '../../constants/error-messages';
 import { PLATFORM_TYPE_GITLAB } from '../../constants/platforms';
 import { logger } from '../../logger';
@@ -50,6 +51,7 @@ let config: {
   issueList: GitlabIssue[];
   mergeMethod: MergeMethod;
   defaultBranch: string;
+  cloneSubmodules: boolean;
 } = {} as any;
 
 const defaults = {
@@ -152,10 +154,12 @@ export async function getJsonFile(fileName: string): Promise<any | null> {
 export async function initRepo({
   repository,
   localDir,
+  cloneSubmodules,
 }: RepoParams): Promise<RepoResult> {
   config = {} as any;
   config.repository = urlEscape(repository);
   config.localDir = localDir;
+  config.cloneSubmodules = cloneSubmodules;
 
   let res: HttpResponse<RepoResponse>;
   try {
@@ -190,6 +194,11 @@ export async function initRepo({
       throw new Error(REPOSITORY_EMPTY);
     }
     config.defaultBranch = res.body.default_branch;
+    // istanbul ignore if
+    if (!config.defaultBranch) {
+      logger.warn({ resBody: res.body }, 'Error fetching GitLab project');
+      throw new Error(REPOSITORY_TEMPORARY_ERROR);
+    }
     config.mergeMethod = res.body.merge_method || 'merge';
     logger.debug(`${repository} default branch = ${config.defaultBranch}`);
     delete config.prList;

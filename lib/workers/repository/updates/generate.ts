@@ -277,6 +277,16 @@ export function generateBranchConfig(
         // This is because we need to replace from the bottom of the file up
         return a.fileReplacePosition > b.fileReplacePosition ? -1 : 1;
       }
+
+      // make sure that ordering is consistent :
+      // items without position will be first in the list.
+      if (a.fileReplacePosition) {
+        return 1;
+      }
+      if (b.fileReplacePosition) {
+        return -1;
+      }
+
       if (a.depName < b.depName) {
         return -1;
       }

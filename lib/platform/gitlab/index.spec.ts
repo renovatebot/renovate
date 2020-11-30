@@ -155,11 +155,12 @@ describe('platform/gitlab', () => {
   }
 
   describe('initRepo', () => {
+    const okReturn = { default_branch: 'master', url: 'https://some-url' };
     it(`should escape all forward slashes in project names`, async () => {
       httpMock
         .scope(gitlabApiHost)
         .get('/api/v4/projects/some%2Frepo%2Fproject')
-        .reply(200, []);
+        .reply(200, okReturn);
       await gitlab.initRepo({
         repository: 'some/repo/project',
         localDir: '',

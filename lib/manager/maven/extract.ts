@@ -1,5 +1,5 @@
-import { basename, dirname, join, normalize } from 'path';
 import is from '@sindresorhus/is';
+import { basename, dirname, join, normalize } from 'upath';
 import { XmlDocument, XmlElement } from 'xmldoc';
 import * as datasourceMaven from '../../datasource/maven';
 import { MAVEN_REPO } from '../../datasource/maven/common';

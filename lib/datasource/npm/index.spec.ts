@@ -1,3 +1,5 @@
+import { DateTime } from 'luxon';
+import mockDate from 'mockdate';
 import nock from 'nock';
 import _registryAuthToken from 'registry-auth-token';
 import { getPkgReleases } from '..';
@@ -47,6 +49,7 @@ describe(getName(__filename), () => {
   });
   afterEach(() => {
     delete process.env.RENOVATE_CACHE_NPM_MINUTES;
+    mockDate.reset();
   });
   it('should return null for no versions', async () => {
     const missingVersions = { ...npmResponse };

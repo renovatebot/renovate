@@ -18,13 +18,11 @@ Object {
       "currentValue": null,
       "depName": "baz",
       "depType": "dependencies",
-      "skipReason": "not-a-version",
     },
     Object {
       "currentValue": null,
       "depName": "qux",
       "depType": "dependencies",
-      "skipReason": "not-a-version",
     },
     Object {
       "currentValue": "^0.1",

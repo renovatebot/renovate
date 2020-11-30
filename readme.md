@@ -36,14 +36,23 @@ Renovate was released in 2017 and already is widely used in the developer commun
 
 ## Using Renovate
 
-The easiest way to use Renovate if you are hosted on GitHub.com or GitLab.com is to install the hosted Renovate app. On Azure DevOps you can install Renovate as an extension from the marketplace.
+The easiest way to use Renovate if you are hosted on GitHub.com or GitLab.com is to install the hosted Renovate app.
+On Azure DevOps you can install Renovate as an extension from the marketplace.
 
-For GitHub, go to [https://github.com/apps/renovate](https://github.com/apps/renovate) to install
-it now. A GitHub Marketplace plan is required only for private repositories. [More details on the GitHub App installation](https://docs.renovatebot.com/install-github-app/).
+For GitHub, go to [https://github.com/apps/renovate](https://github.com/apps/renovate) to install it now.
+A GitHub Marketplace plan is required only for private repositories.
+[More details on the GitHub App installation](https://docs.renovatebot.com/install-github-app/).
 
-For GitLab, log into [app.renovatebot.com/dashboard](https://app.renovatebot.com/dashboard) for a convenient way to add Renovate Bot to your project. Currently the GitLab app is free for both public and private repositories. [More details on the GitLab App installation](https://docs.renovatebot.com/install-gitlab-app/).
+For GitLab, log into [app.renovatebot.com/dashboard](https://app.renovatebot.com/dashboard) for a convenient way to add Renovate Bot to your project.
+Currently the GitLab app is free for both public and private repositories.
+[More details on the GitLab App installation](https://docs.renovatebot.com/install-gitlab-app/).
 
-For Azure DevOps, visit the Visual Studio Marketplace and install the [Renovate Me](https://marketplace.visualstudio.com/items?itemName=jyc.vsts-extensions-renovate-me) extension in your organisation. From there you can create a pipeline with the `RenovateMe` task. [More details on how to configure the pipeline](https://marketplace.visualstudio.com/items?itemName=jyc.vsts-extensions-renovate-me). Note: This extension is created and maintained personally by a Renovate developer/user so support requests relating to the extension itself cannot be answered directly in the main Renovate repository. Alternatively, you can create custom pipeline with with a `yml` definition that will trigger `npx renovate`. [More details on how to configure the pipeline](https://docs.renovatebot.com/setup-azure-devops/).
+For Azure DevOps, visit the Visual Studio Marketplace and install the [Renovate Me](https://marketplace.visualstudio.com/items?itemName=jyc.vsts-extensions-renovate-me) extension in your organisation.
+From there you can create a pipeline with the `RenovateMe` task.
+[More details on how to configure the pipeline](https://marketplace.visualstudio.com/items?itemName=jyc.vsts-extensions-renovate-me).
+Note: This extension is created and maintained personally by a Renovate developer/user so support requests relating to the extension itself cannot be answered directly in the main Renovate repository.
+Alternatively, you can create custom pipeline with with a `yml` definition that will trigger `npx renovate`.
+[More details on how to configure the pipeline](https://docs.renovatebot.com/setup-azure-devops/).
 
 ## Configuration
 
@@ -67,4 +76,5 @@ If you would like to contribute to Renovate or get a local copy running for some
 
 ## Security / Disclosure
 
-If you discover any important bug with Renovate that may pose a security problem, please disclose it confidentially to renovate-disclosure@whitesourcesoftware.com first, so that it can be assessed and hopefully fixed prior to being exploited. Please do not raise GitHub issues for security-related doubts or problems.
+If you discover any important bug with Renovate that may pose a security problem, please disclose it confidentially to renovate-disclosure@whitesourcesoftware.com first, so that it can be assessed and hopefully fixed prior to being exploited.
+Please do not raise GitHub issues for security-related doubts or problems.
