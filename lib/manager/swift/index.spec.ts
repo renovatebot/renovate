@@ -1,5 +1,5 @@
 import { readFileSync } from 'fs';
-import { resolve } from 'path';
+import { resolve } from 'upath';
 import { extractPackageFile } from './extract';
 
 const pkgContent = readFileSync(

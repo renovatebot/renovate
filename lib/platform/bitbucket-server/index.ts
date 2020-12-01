@@ -4,7 +4,6 @@ import delay from 'delay';
 import type { PartialDeep } from 'type-fest';
 import {
   REPOSITORY_CHANGED,
-  REPOSITORY_DISABLED,
   REPOSITORY_EMPTY,
   REPOSITORY_NOT_FOUND,
 } from '../../constants/error-messages';
@@ -113,12 +112,27 @@ export async function getRepos(): Promise<string[]> {
   }
 }
 
+export async function getJsonFile(fileName: string): Promise<any | null> {
+  try {
+    const { body } = await bitbucketServerHttp.getJson<FileData>(
+      `./rest/api/1.0/projects/${config.projectKey}/repos/${config.repositorySlug}/browse/${fileName}?limit=20000`
+    );
+    if (!body.isLastPage) {
+      logger.warn({ size: body.size }, `The file is too big`);
+    } else {
+      return JSON.parse(body.lines.map((l) => l.text).join(''));
+    }
+  } catch (err) {
+    // no-op
+  }
+  return null;
+}
+
 // Initialize GitLab by getting base branch
 export async function initRepo({
   repository,
   localDir,
-  optimizeForDisabled,
-  bbUseDefaultReviewers,
+  cloneSubmodules,
 }: RepoParams): Promise<RepoResult> {
   logger.debug(
     `initRepo("${JSON.stringify({ repository, localDir }, null, 2)}")`
@@ -130,29 +144,6 @@ export async function initRepo({
 
   const [projectKey, repositorySlug] = repository.split('/');
 
-  if (optimizeForDisabled) {
-    interface RenovateConfig {
-      enabled: boolean;
-    }
-
-    let renovateConfig: RenovateConfig;
-    try {
-      const { body } = await bitbucketServerHttp.getJson<FileData>(
-        `./rest/api/1.0/projects/${projectKey}/repos/${repositorySlug}/browse/renovate.json?limit=20000`
-      );
-      if (!body.isLastPage) {
-        logger.warn({ size: body.size }, `Renovate config to big`);
-      } else {
-        renovateConfig = JSON.parse(body.lines.map((l) => l.text).join(''));
-      }
-    } catch {
-      // Do nothing
-    }
-    if (renovateConfig && renovateConfig.enabled === false) {
-      throw new Error(REPOSITORY_DISABLED);
-    }
-  }
-
   config = {
     projectKey,
     repositorySlug,
@@ -160,12 +151,6 @@ export async function initRepo({
     prVersions: new Map<number, number>(),
     username: opts.username,
   } as any;
-
-  /* istanbul ignore else */
-  if (bbUseDefaultReviewers !== false) {
-    logger.debug('Enable bitbucket default reviewer');
-    config.bbUseDefaultReviewers = true;
-  }
 
   const { host, pathname } = url.parse(defaults.endpoint);
   const gitUrl = git.getUrl({
@@ -183,6 +168,7 @@ export async function initRepo({
     url: gitUrl,
     gitAuthorName: global.gitAuthor?.name,
     gitAuthorEmail: global.gitAuthor?.email,
+    cloneSubmodules,
   });
 
   try {
@@ -200,7 +186,8 @@ export async function initRepo({
       `./rest/api/1.0/projects/${config.projectKey}/repos/${config.repositorySlug}/branches/default`
     );
 
-    if (branchRes.statusCode === 204) {
+    // 204 means empty, 404 means repo not found or missing default branch. repo must exist here.
+    if ([204, 404].includes(branchRes.statusCode)) {
       throw new Error(REPOSITORY_EMPTY);
     }
 
@@ -298,7 +285,7 @@ const isRelevantPr = (
   prTitle: string | null | undefined,
   state: string
 ) => (p: Pr): boolean =>
-  p.branchName === branchName &&
+  p.sourceBranch === branchName &&
   (!prTitle || p.title === prTitle) &&
   matchesState(p.state, state);
 
@@ -772,18 +759,19 @@ const escapeHash = (input: string): string =>
   input ? input.replace(/#/g, '%23') : input;
 
 export async function createPr({
-  branchName,
+  sourceBranch,
   targetBranch,
   prTitle: title,
   prBody: rawDescription,
+  platformOptions,
 }: CreatePRConfig): Promise<Pr> {
   const description = sanitize(rawDescription);
-  logger.debug(`createPr(${branchName}, title=${title})`);
+  logger.debug(`createPr(${sourceBranch}, title=${title})`);
   const base = targetBranch;
   let reviewers: BbsRestUserRef[] = [];
 
   /* istanbul ignore else */
-  if (config.bbUseDefaultReviewers) {
+  if (platformOptions?.bbUseDefaultReviewers) {
     logger.debug(`fetching default reviewers`);
     const { id } = (
       await bitbucketServerHttp.getJson<{ id: number }>(
@@ -796,7 +784,7 @@ export async function createPr({
         `./rest/default-reviewers/1.0/projects/${config.projectKey}/repos/${
           config.repositorySlug
         }/reviewers?sourceRefId=refs/heads/${escapeHash(
-          branchName
+          sourceBranch
         )}&targetRefId=refs/heads/${base}&sourceRepoId=${id}&targetRepoId=${id}`
       )
     ).body;
@@ -810,7 +798,7 @@ export async function createPr({
     title,
     description,
     fromRef: {
-      id: `refs/heads/${branchName}`,
+      id: `refs/heads/${sourceBranch}`,
     },
     toRef: {
       id: `refs/heads/${base}`,
@@ -831,7 +819,7 @@ export async function createPr({
       logger.debug(
         'Empty pull request - deleting branch so it can be recreated next run'
       );
-      await deleteBranch(branchName);
+      await deleteBranch(sourceBranch);
       throw new Error(REPOSITORY_CHANGED);
     }
     throw err;

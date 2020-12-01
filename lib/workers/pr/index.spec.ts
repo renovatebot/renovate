@@ -176,6 +176,7 @@ describe('workers/pr', () => {
         'Some body<!-- Reviewable:start -->something<!-- Reviewable:end -->\n\n',
     } as never;
     beforeEach(() => {
+      jest.resetAllMocks();
       setupChangelogMock();
       config = partial<BranchConfig>({
         ...defaultConfig,
@@ -271,6 +272,22 @@ describe('workers/pr', () => {
       expect(prResult).toEqual(PrResult.LimitReached);
       expect(platform.createPr.mock.calls).toBeEmpty();
     });
+    it('should create PR if limit is reached but dashboard checked', async () => {
+      platform.getBranchStatus.mockResolvedValueOnce(BranchStatus.green);
+      config.logJSON = await getChangeLogJSON(config);
+      config.prCreation = 'status-success';
+      config.automerge = true;
+      config.schedule = ['before 5am'];
+      const { prResult } = await prWorker.ensurePr(
+        {
+          ...config,
+          dependencyDashboardChecks: { 'renovate/dummy-1.x': 'true' },
+        },
+        true
+      );
+      expect(prResult).toEqual(PrResult.Created);
+      expect(platform.createPr).toHaveBeenCalled();
+    });
     it('should create group PR', async () => {
       config.upgrades = config.upgrades.concat([
         {
@@ -345,12 +362,24 @@ describe('workers/pr', () => {
       expect(prResult).toEqual(PrResult.AwaitingNotPending);
       expect(pr).toBeUndefined();
     });
+    it('should not create PR if waiting for not pending with stabilityStatus yellow', async () => {
+      platform.getBranchStatus.mockResolvedValueOnce(BranchStatus.yellow);
+      git.getBranchLastCommitTime.mockImplementationOnce(() =>
+        Promise.resolve(new Date())
+      );
+      config.prCreation = 'not-pending';
+      config.stabilityStatus = BranchStatus.yellow;
+      const { prResult, pr } = await prWorker.ensurePr(config);
+      expect(prResult).toEqual(PrResult.AwaitingNotPending);
+      expect(pr).toBeUndefined();
+    });
     it('should create PR if pending timeout hit', async () => {
       platform.getBranchStatus.mockResolvedValueOnce(BranchStatus.yellow);
       git.getBranchLastCommitTime.mockImplementationOnce(() =>
         Promise.resolve(new Date('2017-01-01'))
       );
       config.prCreation = 'not-pending';
+      config.stabilityStatus = BranchStatus.yellow;
       const { prResult, pr } = await prWorker.ensurePr(config);
       expect(prResult).toEqual(PrResult.Created);
       expect(pr).toMatchObject({ displayNumber: 'New Pull Request' });
@@ -463,6 +492,17 @@ describe('workers/pr', () => {
       expect(reviewers).toHaveLength(2);
       expect(config.reviewers).toEqual(expect.arrayContaining(reviewers));
     });
+    it('should not add any assignees or reviewers to new PR', async () => {
+      config.assignees = ['foo', 'bar', 'baz'];
+      config.assigneesSampleSize = 0;
+      config.reviewers = ['baz', 'boo', 'bor'];
+      config.reviewersSampleSize = 0;
+      const { prResult, pr } = await prWorker.ensurePr(config);
+      expect(prResult).toEqual(PrResult.Created);
+      expect(pr).toMatchObject({ displayNumber: 'New Pull Request' });
+      expect(platform.addAssignees).toHaveBeenCalledTimes(0);
+      expect(platform.addReviewers).toHaveBeenCalledTimes(0);
+    });
     it('should add and deduplicate additionalReviewers on new PR', async () => {
       config.reviewers = ['@foo', 'bar'];
       config.additionalReviewers = ['bar', 'baz', '@boo'];
@@ -545,7 +585,7 @@ describe('workers/pr', () => {
       expect(prResult).toEqual(PrResult.BlockedByBranchAutomerge);
       expect(pr).toBeUndefined();
     });
-    it('should not return no PR if branch automerging taking too long', async () => {
+    it('should return PR if branch automerging taking too long', async () => {
       config.automerge = true;
       config.automergeType = 'branch';
       platform.getBranchStatus.mockResolvedValueOnce(BranchStatus.yellow);
@@ -553,6 +593,16 @@ describe('workers/pr', () => {
       const { prResult, pr } = await prWorker.ensurePr(config);
       expect(prResult).toEqual(PrResult.Created);
       expect(pr).toBeDefined();
+    });
+    it('should return no PR if stabilityStatus yellow', async () => {
+      config.automerge = true;
+      config.automergeType = 'branch';
+      config.stabilityStatus = BranchStatus.yellow;
+      platform.getBranchStatus.mockResolvedValueOnce(BranchStatus.yellow);
+      git.getBranchLastCommitTime.mockResolvedValueOnce(new Date('2018-01-01'));
+      const { prResult, pr } = await prWorker.ensurePr(config);
+      expect(prResult).toEqual(PrResult.BlockedByBranchAutomerge);
+      expect(pr).toBeUndefined();
     });
     it('handles duplicate upgrades', async () => {
       config.upgrades.push(config.upgrades[0]);

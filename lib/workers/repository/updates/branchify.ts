@@ -37,7 +37,9 @@ export async function branchifyUpgrades(
     );
   }
   logger.debug(`Returning ${Object.keys(branchUpgrades).length} branch(es)`);
-  await embedChangelogs(branchUpgrades);
+  if (config.fetchReleaseNotes) {
+    await embedChangelogs(branchUpgrades);
+  }
   for (const branchName of Object.keys(branchUpgrades)) {
     // Add branch name to metadata before generating branch config
     addMeta({

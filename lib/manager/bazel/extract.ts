@@ -49,7 +49,7 @@ function findBalancedParenIndex(longString: string): number {
    * if one opening parenthesis -> 1
    * if two opening parenthesis -> 2
    * if two opening and one closing parenthesis -> 1
-   * if ["""] finded then ignore all [)] until closing ["""] parsed.
+   * if ["""] found then ignore all [)] until closing ["""] parsed.
    * https://github.com/renovatebot/renovate/pull/3459#issuecomment-478249702
    */
   let intShouldNotBeOdd = 0; // openClosePythonMultiLineComment

@@ -5,6 +5,7 @@ import { logger } from '../logger';
 import { ExternalHostError } from '../types/errors/external-host-error';
 import * as memCache from '../util/cache/memory';
 import { clone } from '../util/clone';
+import { regEx } from '../util/regex';
 import * as allVersioning from '../versioning';
 import datasources from './api.generated';
 import {
@@ -47,7 +48,7 @@ function logError(datasource, lookupName, err): void {
 }
 
 async function getRegistryReleases(
-  datasource,
+  datasource: Datasource,
   config: GetReleasesConfig,
   registryUrl: string
 ): Promise<ReleaseResult> {
@@ -219,9 +220,9 @@ function getRawReleases(
     registryUrls
   )}`;
   // By returning a Promise and reusing it, we should only fetch each package at most once
-  const cachedResult = memCache.get(cacheKey);
+  const cachedResult = memCache.get<Promise<ReleaseResult | null>>(cacheKey);
   // istanbul ignore if
-  if (cachedResult) {
+  if (cachedResult !== undefined) {
     return cachedResult;
   }
   const promisedRes = fetchReleases(config);
@@ -259,6 +260,19 @@ export async function getPkgReleases(
   if (!res) {
     return res;
   }
+  if (config.extractVersion) {
+    const extractVersionRegEx = regEx(config.extractVersion);
+    res.releases = res.releases
+      .map((release) => {
+        const version = extractVersionRegEx.exec(release.version)?.groups
+          ?.version;
+        if (version) {
+          return { ...release, version }; // overwrite version
+        }
+        return null; // filter out any we can't extract
+      })
+      .filter(Boolean);
+  }
   // Filter by versioning
   const version = allVersioning.get(config.versioning);
   // Return a sorted list of valid Versions
@@ -270,6 +284,13 @@ export async function getPkgReleases(
       .filter((release) => version.isVersion(release.version))
       .sort(sortReleases);
   }
+  // Filter versions for uniqueness
+  res.releases = res.releases.filter(
+    (filterRelease, filterIndex) =>
+      res.releases.findIndex(
+        (findRelease) => findRelease.version === filterRelease.version
+      ) === filterIndex
+  );
   return res;
 }
 
@@ -294,5 +315,7 @@ export function getDefaultConfig(
   datasource: string
 ): Promise<Record<string, unknown>> {
   const loadedDatasource = load(datasource);
-  return Promise.resolve(loadedDatasource?.defaultConfig || Object.create({}));
+  return Promise.resolve<Record<string, unknown>>(
+    loadedDatasource?.defaultConfig || Object.create({})
+  );
 }

@@ -23,6 +23,7 @@ describe('workers/repository/onboarding/branch', () => {
     beforeEach(() => {
       jest.resetAllMocks();
       config = getConfig();
+      config.repository = 'some/repo';
       git.getFileList.mockResolvedValue([]);
     });
     it('throws if no package files', async () => {
@@ -96,7 +97,7 @@ describe('workers/repository/onboarding/branch', () => {
       platform.getPrList.mockResolvedValueOnce([
         {
           ...mock<Pr>(),
-          branchName: 'renovate/something',
+          sourceBranch: 'renovate/something',
           state: PrState.Open,
         },
       ]);

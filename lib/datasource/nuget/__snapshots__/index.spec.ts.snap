@@ -323,6 +323,7 @@ Object {
       "version": "2.5.10.11092",
     },
     Object {
+      "isDeprecated": true,
       "releaseTimestamp": "1900-01-01T00:00:00+00:00",
       "version": "2.6.0.12051",
     },
@@ -519,6 +520,16 @@ Array [
   },
   Object {
     "headers": Object {
+      "accept": "application/json",
+      "accept-encoding": "gzip, deflate",
+      "host": "api.nuget.org",
+      "user-agent": "https://github.com/renovatebot/renovate",
+    },
+    "method": "GET",
+    "url": "https://api.nuget.org/v3/index.json",
+  },
+  Object {
+    "headers": Object {
       "accept-encoding": "gzip, deflate",
       "host": "api.nuget.org",
       "user-agent": "https://github.com/renovatebot/renovate",
@@ -547,6 +558,7 @@ Object {
       "version": "2.5.10.11092",
     },
     Object {
+      "isDeprecated": true,
       "releaseTimestamp": "1900-01-01T00:00:00+00:00",
       "version": "2.6.0.12051",
     },
@@ -559,7 +571,6 @@ Object {
       "version": "2.6.1",
     },
     Object {
-      "releaseTimestamp": "2012-10-23T15:37:48+00:00",
       "version": "2.6.2",
     },
     Object {
@@ -741,6 +752,25 @@ Array [
     "method": "GET",
     "url": "https://api.nuget.org/v3/registration5-gz-semver2/nunit/index.json",
   },
+  Object {
+    "headers": Object {
+      "accept": "application/json",
+      "accept-encoding": "gzip, deflate",
+      "host": "myprivatefeed",
+      "user-agent": "https://github.com/renovatebot/renovate",
+    },
+    "method": "GET",
+    "url": "https://myprivatefeed/index.json",
+  },
+  Object {
+    "headers": Object {
+      "accept-encoding": "gzip, deflate",
+      "host": "api.nuget.org",
+      "user-agent": "https://github.com/renovatebot/renovate",
+    },
+    "method": "GET",
+    "url": "https://api.nuget.org/v3-flatcontainer/nunit/3.12.0/nunit.nuspec",
+  },
 ]
 `;
 
@@ -758,10 +788,12 @@ Object {
       "version": "2.0.0.2000",
     },
     Object {
+      "isDeprecated": true,
       "releaseTimestamp": "1900-01-01T00:00:00+00:00",
       "version": "2.0.1",
     },
     Object {
+      "isDeprecated": true,
       "releaseTimestamp": "1900-01-01T00:00:00+00:00",
       "version": "2.0.1.1",
     },
@@ -790,6 +822,7 @@ Object {
       "version": "3.2.1",
     },
     Object {
+      "isDeprecated": true,
       "releaseTimestamp": "1900-01-01T00:00:00+00:00",
       "version": "4.0.0-rc",
     },
@@ -802,10 +835,12 @@ Object {
       "version": "4.0.1",
     },
     Object {
+      "isDeprecated": true,
       "releaseTimestamp": "1900-01-01T00:00:00+00:00",
       "version": "4.1.0-alpha1",
     },
     Object {
+      "isDeprecated": true,
       "releaseTimestamp": "1900-01-01T00:00:00+00:00",
       "version": "4.1.0-rc1",
     },
@@ -814,6 +849,7 @@ Object {
       "version": "4.1.0",
     },
     Object {
+      "isDeprecated": true,
       "releaseTimestamp": "1900-01-01T00:00:00+00:00",
       "version": "4.1.1-rc1",
     },
@@ -826,6 +862,7 @@ Object {
       "version": "4.1.2",
     },
     Object {
+      "isDeprecated": true,
       "releaseTimestamp": "1900-01-01T00:00:00+00:00",
       "version": "4.2.0-rc1",
     },
@@ -834,6 +871,7 @@ Object {
       "version": "4.2.0",
     },
     Object {
+      "isDeprecated": true,
       "releaseTimestamp": "1900-01-01T00:00:00+00:00",
       "version": "4.2.1-rc1",
     },
@@ -850,42 +888,52 @@ Object {
       "version": "4.2.3",
     },
     Object {
+      "isDeprecated": true,
       "releaseTimestamp": "1900-01-01T00:00:00+00:00",
       "version": "4.3.0-alpha1",
     },
     Object {
+      "isDeprecated": true,
       "releaseTimestamp": "1900-01-01T00:00:00+00:00",
       "version": "4.3.0-alpha2",
     },
     Object {
+      "isDeprecated": true,
       "releaseTimestamp": "1900-01-01T00:00:00+00:00",
       "version": "4.3.0-alpha3",
     },
     Object {
+      "isDeprecated": true,
       "releaseTimestamp": "1900-01-01T00:00:00+00:00",
       "version": "4.3.0-alpha4",
     },
     Object {
+      "isDeprecated": true,
       "releaseTimestamp": "1900-01-01T00:00:00+00:00",
       "version": "4.3.0-beta1",
     },
     Object {
+      "isDeprecated": true,
       "releaseTimestamp": "1900-01-01T00:00:00+00:00",
       "version": "4.3.0-beta2",
     },
     Object {
+      "isDeprecated": true,
       "releaseTimestamp": "1900-01-01T00:00:00+00:00",
       "version": "4.3.0-beta3",
     },
     Object {
+      "isDeprecated": true,
       "releaseTimestamp": "1900-01-01T00:00:00+00:00",
       "version": "4.3.0-rc1",
     },
     Object {
+      "isDeprecated": true,
       "releaseTimestamp": "1900-01-01T00:00:00+00:00",
       "version": "4.3.0-rc2",
     },
     Object {
+      "isDeprecated": true,
       "releaseTimestamp": "1900-01-01T00:00:00+00:00",
       "version": "4.3.0-rc3",
     },
@@ -894,6 +942,7 @@ Object {
       "version": "4.3.0",
     },
     Object {
+      "isDeprecated": true,
       "releaseTimestamp": "1900-01-01T00:00:00+00:00",
       "version": "4.3.1-rc1",
     },
@@ -914,6 +963,7 @@ Object {
       "version": "4.3.4",
     },
     Object {
+      "isDeprecated": true,
       "releaseTimestamp": "1900-01-01T00:00:00+00:00",
       "version": "4.3.5-alpha1",
     },
@@ -934,6 +984,7 @@ Object {
       "version": "4.3.8",
     },
     Object {
+      "isDeprecated": true,
       "releaseTimestamp": "1900-01-01T00:00:00+00:00",
       "version": "4.3.9-test-retry-archive",
     },
@@ -950,90 +1001,112 @@ Object {
       "version": "4.3.11",
     },
     Object {
+      "isDeprecated": true,
       "releaseTimestamp": "1900-01-01T00:00:00+00:00",
       "version": "4.4.0-alpha1",
     },
     Object {
+      "isDeprecated": true,
       "releaseTimestamp": "1900-01-01T00:00:00+00:00",
       "version": "4.4.0-alpha2",
     },
     Object {
+      "isDeprecated": true,
       "releaseTimestamp": "1900-01-01T00:00:00+00:00",
       "version": "4.4.0-alpha3",
     },
     Object {
+      "isDeprecated": true,
       "releaseTimestamp": "1900-01-01T00:00:00+00:00",
       "version": "4.4.0-alpha4",
     },
     Object {
+      "isDeprecated": true,
       "releaseTimestamp": "1900-01-01T00:00:00+00:00",
       "version": "4.4.0-beta-14",
     },
     Object {
+      "isDeprecated": true,
       "releaseTimestamp": "1900-01-01T00:00:00+00:00",
       "version": "4.4.0-beta1",
     },
     Object {
+      "isDeprecated": true,
       "releaseTimestamp": "1900-01-01T00:00:00+00:00",
       "version": "4.4.0-beta10",
     },
     Object {
+      "isDeprecated": true,
       "releaseTimestamp": "1900-01-01T00:00:00+00:00",
       "version": "4.4.0-beta11",
     },
     Object {
+      "isDeprecated": true,
       "releaseTimestamp": "1900-01-01T00:00:00+00:00",
       "version": "4.4.0-beta12",
     },
     Object {
+      "isDeprecated": true,
       "releaseTimestamp": "1900-01-01T00:00:00+00:00",
       "version": "4.4.0-beta13",
     },
     Object {
+      "isDeprecated": true,
       "releaseTimestamp": "1900-01-01T00:00:00+00:00",
       "version": "4.4.0-beta2",
     },
     Object {
+      "isDeprecated": true,
       "releaseTimestamp": "1900-01-01T00:00:00+00:00",
       "version": "4.4.0-beta3",
     },
     Object {
+      "isDeprecated": true,
       "releaseTimestamp": "1900-01-01T00:00:00+00:00",
       "version": "4.4.0-beta4",
     },
     Object {
+      "isDeprecated": true,
       "releaseTimestamp": "1900-01-01T00:00:00+00:00",
       "version": "4.4.0-beta5",
     },
     Object {
+      "isDeprecated": true,
       "releaseTimestamp": "1900-01-01T00:00:00+00:00",
       "version": "4.4.0-beta6",
     },
     Object {
+      "isDeprecated": true,
       "releaseTimestamp": "1900-01-01T00:00:00+00:00",
       "version": "4.4.0-beta7",
     },
     Object {
+      "isDeprecated": true,
       "releaseTimestamp": "1900-01-01T00:00:00+00:00",
       "version": "4.4.0-beta8",
     },
     Object {
+      "isDeprecated": true,
       "releaseTimestamp": "1900-01-01T00:00:00+00:00",
       "version": "4.4.0-beta9",
     },
     Object {
+      "isDeprecated": true,
       "releaseTimestamp": "1900-01-01T00:00:00+00:00",
       "version": "4.4.0-betaV14",
     },
     Object {
+      "isDeprecated": true,
       "releaseTimestamp": "1900-01-01T00:00:00+00:00",
       "version": "4.4.0-betaV15",
     },
     Object {
+      "isDeprecated": true,
       "releaseTimestamp": "1900-01-01T00:00:00+00:00",
       "version": "4.4.0-rc1",
     },
     Object {
+      "isDeprecated": true,
       "releaseTimestamp": "1900-01-01T00:00:00+00:00",
       "version": "4.4.0-rc2",
     },
@@ -1042,10 +1115,12 @@ Object {
       "version": "4.4.0",
     },
     Object {
+      "isDeprecated": true,
       "releaseTimestamp": "1900-01-01T00:00:00+00:00",
       "version": "4.4.1-dev-b4084",
     },
     Object {
+      "isDeprecated": true,
       "releaseTimestamp": "1900-01-01T00:00:00+00:00",
       "version": "4.4.1-dev-b4085",
     },
@@ -1054,10 +1129,12 @@ Object {
       "version": "4.4.1",
     },
     Object {
+      "isDeprecated": true,
       "releaseTimestamp": "1900-01-01T00:00:00+00:00",
       "version": "4.4.2-rc1",
     },
     Object {
+      "isDeprecated": true,
       "releaseTimestamp": "1900-01-01T00:00:00+00:00",
       "version": "4.4.2-rc2",
     },
@@ -1074,6 +1151,7 @@ Object {
       "version": "4.4.4",
     },
     Object {
+      "isDeprecated": true,
       "releaseTimestamp": "1900-01-01T00:00:00+00:00",
       "version": "4.4.5-beta1",
     },
@@ -1082,18 +1160,22 @@ Object {
       "version": "4.4.5",
     },
     Object {
+      "isDeprecated": true,
       "releaseTimestamp": "1900-01-01T00:00:00+00:00",
       "version": "4.4.6-beta1",
     },
     Object {
+      "isDeprecated": true,
       "releaseTimestamp": "1900-01-01T00:00:00+00:00",
       "version": "4.4.6-beta2",
     },
     Object {
+      "isDeprecated": true,
       "releaseTimestamp": "1900-01-01T00:00:00+00:00",
       "version": "4.4.6-beta3",
     },
     Object {
+      "isDeprecated": true,
       "releaseTimestamp": "1900-01-01T00:00:00+00:00",
       "version": "4.4.6-rc1",
     },
@@ -1130,78 +1212,97 @@ Object {
       "version": "4.4.13",
     },
     Object {
+      "isDeprecated": true,
       "releaseTimestamp": "1900-01-01T00:00:00+00:00",
       "version": "4.5.0-alpha01",
     },
     Object {
+      "isDeprecated": true,
       "releaseTimestamp": "1900-01-01T00:00:00+00:00",
       "version": "4.5.0-alpha02",
     },
     Object {
+      "isDeprecated": true,
       "releaseTimestamp": "1900-01-01T00:00:00+00:00",
       "version": "4.5.0-alpha03",
     },
     Object {
+      "isDeprecated": true,
       "releaseTimestamp": "1900-01-01T00:00:00+00:00",
       "version": "4.5.0-alpha04",
     },
     Object {
+      "isDeprecated": true,
       "releaseTimestamp": "1900-01-01T00:00:00+00:00",
       "version": "4.5.0-beta01",
     },
     Object {
+      "isDeprecated": true,
       "releaseTimestamp": "1900-01-01T00:00:00+00:00",
       "version": "4.5.0-beta02",
     },
     Object {
+      "isDeprecated": true,
       "releaseTimestamp": "1900-01-01T00:00:00+00:00",
       "version": "4.5.0-beta03",
     },
     Object {
+      "isDeprecated": true,
       "releaseTimestamp": "1900-01-01T00:00:00+00:00",
       "version": "4.5.0-beta04",
     },
     Object {
+      "isDeprecated": true,
       "releaseTimestamp": "1900-01-01T00:00:00+00:00",
       "version": "4.5.0-beta05",
     },
     Object {
+      "isDeprecated": true,
       "releaseTimestamp": "1900-01-01T00:00:00+00:00",
       "version": "4.5.0-beta06",
     },
     Object {
+      "isDeprecated": true,
       "releaseTimestamp": "1900-01-01T00:00:00+00:00",
       "version": "4.5.0-beta07",
     },
     Object {
+      "isDeprecated": true,
       "releaseTimestamp": "1900-01-01T00:00:00+00:00",
       "version": "4.5.0-beta08",
     },
     Object {
+      "isDeprecated": true,
       "releaseTimestamp": "1900-01-01T00:00:00+00:00",
       "version": "4.5.0-rc01",
     },
     Object {
+      "isDeprecated": true,
       "releaseTimestamp": "1900-01-01T00:00:00+00:00",
       "version": "4.5.0-rc02",
     },
     Object {
+      "isDeprecated": true,
       "releaseTimestamp": "1900-01-01T00:00:00+00:00",
       "version": "4.5.0-rc03",
     },
     Object {
+      "isDeprecated": true,
       "releaseTimestamp": "1900-01-01T00:00:00+00:00",
       "version": "4.5.0-rc04",
     },
     Object {
+      "isDeprecated": true,
       "releaseTimestamp": "1900-01-01T00:00:00+00:00",
       "version": "4.5.0-rc05",
     },
     Object {
+      "isDeprecated": true,
       "releaseTimestamp": "1900-01-01T00:00:00+00:00",
       "version": "4.5.0-rc06",
     },
     Object {
+      "isDeprecated": true,
       "releaseTimestamp": "1900-01-01T00:00:00+00:00",
       "version": "4.5.0-rc07",
     },
@@ -1254,14 +1355,17 @@ Object {
       "version": "4.5.11",
     },
     Object {
+      "isDeprecated": true,
       "releaseTimestamp": "1900-01-01T00:00:00+00:00",
       "version": "4.6.0-rc1",
     },
     Object {
+      "isDeprecated": true,
       "releaseTimestamp": "1900-01-01T00:00:00+00:00",
       "version": "4.6.0-rc2",
     },
     Object {
+      "isDeprecated": true,
       "releaseTimestamp": "1900-01-01T00:00:00+00:00",
       "version": "4.6.0-rc3",
     },
@@ -1302,6 +1406,7 @@ Object {
       "version": "4.6.8",
     },
     Object {
+      "isDeprecated": true,
       "releaseTimestamp": "1900-01-01T00:00:00+00:00",
       "version": "4.7.0-rc1",
     },
@@ -1322,54 +1427,67 @@ Object {
       "version": "4.7.3",
     },
     Object {
+      "isDeprecated": true,
       "releaseTimestamp": "1900-01-01T00:00:00+00:00",
       "version": "5.0.0-beta01",
     },
     Object {
+      "isDeprecated": true,
       "releaseTimestamp": "1900-01-01T00:00:00+00:00",
       "version": "5.0.0-beta02",
     },
     Object {
+      "isDeprecated": true,
       "releaseTimestamp": "1900-01-01T00:00:00+00:00",
       "version": "5.0.0-beta03",
     },
     Object {
+      "isDeprecated": true,
       "releaseTimestamp": "1900-01-01T00:00:00+00:00",
       "version": "5.0.0-beta03-tryoutMutex",
     },
     Object {
+      "isDeprecated": true,
       "releaseTimestamp": "1900-01-01T00:00:00+00:00",
       "version": "5.0.0-beta04",
     },
     Object {
+      "isDeprecated": true,
       "releaseTimestamp": "1900-01-01T00:00:00+00:00",
       "version": "5.0.0-beta05",
     },
     Object {
+      "isDeprecated": true,
       "releaseTimestamp": "1900-01-01T00:00:00+00:00",
       "version": "5.0.0-beta05-test",
     },
     Object {
+      "isDeprecated": true,
       "releaseTimestamp": "1900-01-01T00:00:00+00:00",
       "version": "5.0.0-beta06",
     },
     Object {
+      "isDeprecated": true,
       "releaseTimestamp": "1900-01-01T00:00:00+00:00",
       "version": "5.0.0-beta07",
     },
     Object {
+      "isDeprecated": true,
       "releaseTimestamp": "1900-01-01T00:00:00+00:00",
       "version": "5.0.0-beta08",
     },
     Object {
+      "isDeprecated": true,
       "releaseTimestamp": "1900-01-01T00:00:00+00:00",
       "version": "5.0.0-beta09",
     },
     Object {
+      "isDeprecated": true,
       "releaseTimestamp": "1900-01-01T00:00:00+00:00",
       "version": "5.0.0-beta10",
     },
     Object {
+      "isDeprecated": true,
       "releaseTimestamp": "1900-01-01T00:00:00+00:00",
       "version": "5.0.0-beta11",
     },
@@ -1429,6 +1547,16 @@ Array [
     },
     "method": "GET",
     "url": "https://api.nuget.org/v3/registration5-gz-semver2/nlog/page/4.6.0-rc3/5.0.0-beta11.json",
+  },
+  Object {
+    "headers": Object {
+      "accept": "application/json",
+      "accept-encoding": "gzip, deflate",
+      "host": "api.nuget.org",
+      "user-agent": "https://github.com/renovatebot/renovate",
+    },
+    "method": "GET",
+    "url": "https://api.nuget.org/v3/index.json",
   },
   Object {
     "headers": Object {
@@ -1651,6 +1779,7 @@ Object {
       "version": "2.5.10.11092",
     },
     Object {
+      "isDeprecated": true,
       "releaseTimestamp": "1900-01-01T00:00:00+00:00",
       "version": "2.6.0.12051",
     },
@@ -1847,6 +1976,16 @@ Array [
   },
   Object {
     "headers": Object {
+      "accept": "application/json",
+      "accept-encoding": "gzip, deflate",
+      "host": "api.nuget.org",
+      "user-agent": "https://github.com/renovatebot/renovate",
+    },
+    "method": "GET",
+    "url": "https://api.nuget.org/v3/index.json",
+  },
+  Object {
+    "headers": Object {
       "accept-encoding": "gzip, deflate",
       "host": "api.nuget.org",
       "user-agent": "https://github.com/renovatebot/renovate",
@@ -1873,6 +2012,25 @@ Array [
     },
     "method": "GET",
     "url": "https://api.nuget.org/v3/registration5-gz-semver2/nunit/index.json",
+  },
+  Object {
+    "headers": Object {
+      "accept": "application/json",
+      "accept-encoding": "gzip, deflate",
+      "host": "myprivatefeed",
+      "user-agent": "https://github.com/renovatebot/renovate",
+    },
+    "method": "GET",
+    "url": "https://myprivatefeed/index.json",
+  },
+  Object {
+    "headers": Object {
+      "accept-encoding": "gzip, deflate",
+      "host": "api.nuget.org",
+      "user-agent": "https://github.com/renovatebot/renovate",
+    },
+    "method": "GET",
+    "url": "https://api.nuget.org/v3-flatcontainer/nunit/3.12.0/nunit.nuspec",
   },
 ]
 `;

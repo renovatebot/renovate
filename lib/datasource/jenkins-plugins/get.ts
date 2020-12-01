@@ -109,7 +109,7 @@ async function getJenkinsUpdateCenterResponse<T>(
   };
 
   try {
-    logger.debug(`jenkins-plugins: Fetching Jenkins plugns ${cache.name}`);
+    logger.debug(`jenkins-plugins: Fetching Jenkins plugins ${cache.name}`);
     const startTime = Date.now();
     response = (await http.getJson<T>(cache.dataUrl, options)).body;
     const durationMs = Math.round(Date.now() - startTime);
@@ -130,6 +130,7 @@ async function getJenkinsUpdateCenterResponse<T>(
 
 async function updateJenkinsPluginCache<T>(
   cache: JenkinsCache<JenkinsCacheTypes>,
+  // eslint-disable-next-line @typescript-eslint/no-shadow
   callback: (resp: T, cache: JenkinsCache<any>) => void
 ): Promise<void> {
   const response = await getJenkinsUpdateCenterResponse<T>(cache);

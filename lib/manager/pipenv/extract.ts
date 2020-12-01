@@ -1,6 +1,6 @@
+import toml from '@iarna/toml';
 import { RANGE_PATTERN } from '@renovate/pep440/lib/specifier';
 import is from '@sindresorhus/is';
-import toml from 'toml';
 import * as datasourcePypi from '../../datasource/pypi';
 import { logger } from '../../logger';
 import { SkipReason } from '../../types';
@@ -25,6 +25,7 @@ interface PipFile {
 
   packages?: Record<string, PipRequirement>;
   'dev-packages'?: Record<string, PipRequirement>;
+  requires?: Record<string, string>;
 }
 
 interface PipRequirement {
@@ -121,7 +122,8 @@ export function extractPackageFile(content: string): PackageFile | null {
 
   let pipfile: PipFile;
   try {
-    pipfile = toml.parse(content);
+    // TODO: fix type
+    pipfile = toml.parse(content) as any;
   } catch (err) {
     logger.debug({ err }, 'Error parsing Pipfile');
     return null;
@@ -135,8 +137,24 @@ export function extractPackageFile(content: string): PackageFile | null {
     ...extractFromSection(pipfile, 'packages'),
     ...extractFromSection(pipfile, 'dev-packages'),
   ];
-  if (res.deps.length) {
-    return res;
+  if (!res.deps.length) {
+    return null;
   }
-  return null;
+
+  const constraints: Record<string, any> = {};
+
+  if (is.nonEmptyString(pipfile.requires?.python_version)) {
+    constraints.python = `== ${pipfile.requires.python_version}.*`;
+  } else if (is.nonEmptyString(pipfile.requires?.python_full_version)) {
+    constraints.python = `== ${pipfile.requires.python_full_version}`;
+  }
+
+  if (is.nonEmptyString(pipfile.packages?.pipenv)) {
+    constraints.pipenv = pipfile.packages.pipenv;
+  } else if (is.nonEmptyString(pipfile['dev-packages']?.pipenv)) {
+    constraints.pipenv = pipfile['dev-packages'].pipenv;
+  }
+
+  res.constraints = constraints;
+  return res;
 }

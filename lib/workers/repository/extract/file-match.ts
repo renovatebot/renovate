@@ -1,7 +1,6 @@
 import minimatch from 'minimatch';
 import { RenovateConfig } from '../../../config/common';
 import { logger } from '../../../logger';
-import { getFileList } from '../../../util/git';
 import { regEx } from '../../../util/regex';
 
 export function getIncludedFiles(
@@ -46,10 +45,10 @@ export function getFilteredFileList(
   return filteredList;
 }
 
-export async function getMatchingFiles(
-  config: RenovateConfig
-): Promise<string[]> {
-  const allFiles = await getFileList();
+export function getMatchingFiles(
+  config: RenovateConfig,
+  allFiles: string[]
+): string[] {
   const fileList = getFilteredFileList(config, allFiles);
   const { fileMatch, manager } = config;
   let matchedFiles: string[] = [];
@@ -61,5 +60,5 @@ export async function getMatchingFiles(
     );
   }
   // filter out duplicates
-  return [...new Set(matchedFiles)];
+  return [...new Set(matchedFiles)].sort();
 }

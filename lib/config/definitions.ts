@@ -93,6 +93,13 @@ export type RenovateOptions =
 
 const options: RenovateOptions[] = [
   {
+    name: 'allowPostUpgradeCommandTemplating',
+    description: 'If true allow templating for post-upgrade commands.',
+    type: 'boolean',
+    default: false,
+    admin: true,
+  },
+  {
     name: 'allowedPostUpgradeCommands',
     description:
       'A list of regular expressions that determine which post-upgrade tasks are allowed. A task has to match at least one of the patterns to be allowed to run',
@@ -301,6 +308,14 @@ const options: RenovateOptions[] = [
     default: false,
   },
   {
+    name: 'dockerImagePrefix',
+    description:
+      'Change this value in order to override the default renovate docker sidecar image name prefix.',
+    type: 'string',
+    default: 'docker.io/renovate',
+    admin: true,
+  },
+  {
     name: 'dockerUser',
     description:
       'Specify UID and GID for docker-based binaries when binarySource=docker is used.',
@@ -453,6 +468,13 @@ const options: RenovateOptions[] = [
     stage: 'repository',
     type: 'string',
     replaceLineReturns: true,
+    admin: true,
+  },
+  {
+    name: 'privateKeyPath',
+    description: 'Path to the Server-side private key',
+    stage: 'repository',
+    type: 'string',
     admin: true,
   },
   {
@@ -690,6 +712,15 @@ const options: RenovateOptions[] = [
     env: false,
   },
   {
+    name: 'extractVersion',
+    description:
+      "A regex (re2) to extract a version from a datasource's raw version string",
+    type: 'string',
+    format: 'regex',
+    cli: false,
+    env: false,
+  },
+  {
     name: 'versioning',
     description: 'versioning to use for filtering and comparisons',
     type: 'string',
@@ -911,7 +942,8 @@ const options: RenovateOptions[] = [
   // Version behaviour
   {
     name: 'allowedVersions',
-    description: 'A semver range defining allowed versions for dependencies',
+    description:
+      'A version range or regex pattern capturing allowed versions for dependencies',
     type: 'string',
     parent: 'packageRules',
     stage: 'package',
@@ -998,7 +1030,7 @@ const options: RenovateOptions[] = [
   },
   {
     name: 'bumpVersion',
-    description: 'Bump the version in the package.json being updated',
+    description: 'Bump the version in the package file being updated',
     type: 'string',
     allowedValues: ['major', 'minor', 'patch'],
   },
@@ -1069,8 +1101,9 @@ const options: RenovateOptions[] = [
   {
     name: 'semanticCommits',
     description: 'Enable semantic commit prefixes for commits and PR titles',
-    type: 'boolean',
-    default: null,
+    type: 'string',
+    allowedValues: ['auto', 'enabled', 'disabled'],
+    default: 'auto',
   },
   {
     name: 'semanticCommitType',
@@ -1555,8 +1588,9 @@ const options: RenovateOptions[] = [
     cli: false,
   },
   {
-    name: 'compatibility',
-    description: 'Configuration object for compatibility',
+    name: 'constraints',
+    description:
+      'Configuration object for define language or manager version constraints',
     type: 'object',
     default: {},
     mergeable: true,
@@ -1642,7 +1676,7 @@ const options: RenovateOptions[] = [
   },
   {
     name: 'insecureRegistry',
-    description: 'explicity turn on insecure docker registry access (http)',
+    description: 'explicitly turn on insecure docker registry access (http)',
     type: 'boolean',
     stage: 'repository',
     parent: 'hostRules',
@@ -1774,6 +1808,15 @@ const options: RenovateOptions[] = [
     env: false,
   },
   {
+    name: 'matchStringsStrategy',
+    description: 'Strategy how to interpret matchStrings',
+    type: 'string',
+    default: 'any',
+    parent: 'regexManagers',
+    cli: false,
+    env: false,
+  },
+  {
     name: 'depNameTemplate',
     description:
       'Optional depName for extracted dependencies. Valid only within `regexManagers` object.',
@@ -1808,6 +1851,21 @@ const options: RenovateOptions[] = [
     parent: 'regexManagers',
     cli: false,
     env: false,
+  },
+  {
+    name: 'fetchReleaseNotes',
+    description: 'Allow to disable release notes fetching',
+    type: 'boolean',
+    default: true,
+    cli: false,
+    env: false,
+  },
+  {
+    name: 'cloneSubmodules',
+    description:
+      'Set to false to disable initialization of submodules during repository clone',
+    type: 'boolean',
+    default: true,
   },
 ];
 

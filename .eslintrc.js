@@ -42,7 +42,6 @@ module.exports = {
     'prefer-destructuring': 0,
     'prefer-template': 0,
     'no-underscore-dangle': 0,
-    // 'no-unused-vars': 2,
 
     'sort-imports': [
       'error',
@@ -62,17 +61,15 @@ module.exports = {
       },
     ],
 
-    // Makes no sense to allow type inferrence for expression parameters, but require typing the response
+    // Makes no sense to allow type inference for expression parameters, but require typing the response
     '@typescript-eslint/explicit-function-return-type': [
       'error',
       { allowExpressions: true, allowTypedFunctionExpressions: true },
     ],
 
     // TODO: fix lint
-    '@typescript-eslint/camelcase': 0, // disabled until ??
     '@typescript-eslint/no-explicit-any': 0,
-    '@typescript-eslint/no-floating-promises': 2,
-    '@typescript-eslint/no-non-null-assertion': 0,
+    '@typescript-eslint/no-non-null-assertion': 2,
     '@typescript-eslint/no-unused-vars': [
       2,
       {
@@ -111,7 +108,7 @@ module.exports = {
   },
   overrides: [
     {
-      files: ['**/*.spec.ts'],
+      files: ['**/*.spec.ts', 'test/**'],
       env: {
         jest: true,
       },
@@ -125,6 +122,8 @@ module.exports = {
         '@typescript-eslint/no-object-literal-type-assertion': 0,
         '@typescript-eslint/explicit-function-return-type': 0,
         '@typescript-eslint/unbound-method': 0,
+
+        'jest/valid-title': [0, { ignoreTypeOfDescribeName: true }],
       },
     },
     {

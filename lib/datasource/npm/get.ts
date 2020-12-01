@@ -2,7 +2,7 @@ import { OutgoingHttpHeaders } from 'http';
 import url from 'url';
 import is from '@sindresorhus/is';
 import delay from 'delay';
-import moment from 'moment';
+import { DateTime } from 'luxon';
 import registryAuthToken from 'registry-auth-token';
 import getRegistryUrl from 'registry-auth-token/registry-url';
 import { logger } from '../../logger';
@@ -77,7 +77,7 @@ export async function getDependency(
   // This is our datastore cache and is cleared at the end of each repo, i.e. we never requery/revalidate during a "run"
   if (memcache[packageName]) {
     logger.trace('Returning cached result');
-    return JSON.parse(memcache[packageName]);
+    return JSON.parse(memcache[packageName]) as NpmDependency;
   }
 
   const scope = packageName.split('/')[0];
@@ -217,8 +217,9 @@ export async function getDependency(
       };
       if (res.time?.[version]) {
         release.releaseTimestamp = res.time[version];
+        const relDate = DateTime.fromISO(release.releaseTimestamp);
         release.canBeUnpublished =
-          moment().diff(moment(release.releaseTimestamp), 'days') === 0;
+          relDate.isValid && DateTime.local().diff(relDate, 'days').days < 1;
       }
       if (res.versions[version].deprecated) {
         release.isDeprecated = true;

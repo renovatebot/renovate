@@ -34,9 +34,17 @@ async function getUrl(
   return URL.resolve(`${remoteUrl}/`, path);
 }
 
+const headRefRe = /ref: refs\/heads\/(?<branch>\w+)\s/;
+
+async function getDefaultBranch(subModuleUrl: string): Promise<string> {
+  const val = await Git().listRemote(['--symref', subModuleUrl, 'HEAD']);
+  return headRefRe.exec(val)?.groups?.branch ?? 'master';
+}
+
 async function getBranch(
   gitModulesPath: string,
-  submoduleName: string
+  submoduleName: string,
+  subModuleUrl: string
 ): Promise<string> {
   return (
     (await Git().raw([
@@ -45,7 +53,7 @@ async function getBranch(
       gitModulesPath,
       '--get',
       `submodule.${submoduleName}.branch`,
-    ])) || 'master'
+    ])) || (await getDefaultBranch(subModuleUrl))
   ).trim();
 }
 
@@ -98,9 +106,14 @@ export default async function extractPackageFile(
         try {
           const [currentValue] = (await git.subModule(['status', path]))
             .trim()
-            .split(/[+\s]/);
-          const submoduleBranch = await getBranch(gitModulesPath, name);
+            .replace(/^[-+]/, '')
+            .split(/\s/);
           const subModuleUrl = await getUrl(git, gitModulesPath, name);
+          const submoduleBranch = await getBranch(
+            gitModulesPath,
+            name,
+            subModuleUrl
+          );
           return {
             depName: path,
             registryUrls: [subModuleUrl, submoduleBranch],

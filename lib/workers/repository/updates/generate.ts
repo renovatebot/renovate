@@ -9,7 +9,7 @@ import * as template from '../../../util/template';
 import { BranchConfig, BranchUpgradeConfig } from '../../common';
 import { formatCommitMessagePrefix } from '../util/commit-message';
 
-function isTypesGroup(branchUpgrades: any[]): boolean {
+function isTypesGroup(branchUpgrades: BranchUpgradeConfig[]): boolean {
   return (
     branchUpgrades.some(({ depName }) => depName?.startsWith('@types/')) &&
     new Set(
@@ -173,7 +173,7 @@ export function generateBranchConfig(
       upgrade.isRange = false;
     }
     // Use templates to generate strings
-    if (upgrade.semanticCommits && !upgrade.commitMessagePrefix) {
+    if (upgrade.semanticCommits === 'enabled' && !upgrade.commitMessagePrefix) {
       logger.trace('Upgrade has semantic commits enabled');
       let semanticPrefix = upgrade.semanticCommitType;
       if (upgrade.semanticCommitScope) {
@@ -206,7 +206,7 @@ export function generateBranchConfig(
       'to v$1'
     );
     if (upgrade.toLowerCase) {
-      // We only need to lowercvase the first line
+      // We only need to lowercase the first line
       const splitMessage = upgrade.commitMessage.split('\n');
       splitMessage[0] = splitMessage[0].toLowerCase();
       upgrade.commitMessage = splitMessage.join('\n');
@@ -277,6 +277,16 @@ export function generateBranchConfig(
         // This is because we need to replace from the bottom of the file up
         return a.fileReplacePosition > b.fileReplacePosition ? -1 : 1;
       }
+
+      // make sure that ordering is consistent :
+      // items without position will be first in the list.
+      if (a.fileReplacePosition) {
+        return 1;
+      }
+      if (b.fileReplacePosition) {
+        return -1;
+      }
+
       if (a.depName < b.depName) {
         return -1;
       }
@@ -303,6 +313,10 @@ export function generateBranchConfig(
   config.automerge = config.upgrades.every((upgrade) => upgrade.automerge);
   config.blockedByPin = config.upgrades.every(
     (upgrade) => upgrade.blockedByPin
+  );
+  config.constraints = Object.assign(
+    {},
+    ...config.upgrades.map((upgrade) => upgrade.constraints)
   );
   const tableRows = config.upgrades
     .map((upgrade) => getTableValues(upgrade))

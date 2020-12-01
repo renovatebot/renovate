@@ -33,16 +33,14 @@ export interface RepoResult {
 }
 
 export interface RepoParams {
-  azureWorkItemId?: number; // shouldn't this be configurable within a renovate.json?
-  bbUseDefaultReviewers?: boolean; // shouldn't this be configurable within a renovate.json?
   localDir: string;
-  optimizeForDisabled: boolean;
   repository: string;
   endpoint?: string;
   forkMode?: string;
   forkToken?: string;
   includeForks?: boolean;
   renovateUsername?: string;
+  cloneSubmodules?: boolean;
 }
 
 /**
@@ -50,7 +48,7 @@ export interface RepoParams {
  */
 export interface Pr {
   body?: string;
-  branchName: string;
+  sourceBranch: string;
   canMerge?: boolean;
   canMergeReason?: string;
   createdAt?: string;
@@ -66,6 +64,7 @@ export interface Pr {
   state: string;
   targetBranch?: string;
   title: string;
+  isDraft?: boolean;
 }
 
 /**
@@ -79,10 +78,12 @@ export interface Issue {
 }
 export type PlatformPrOptions = {
   azureAutoComplete?: boolean;
+  azureWorkItemId?: number;
+  bbUseDefaultReviewers?: boolean;
   gitLabAutomerge?: boolean;
 };
 export interface CreatePRConfig {
-  branchName: string;
+  sourceBranch: string;
   targetBranch: string;
   prTitle: string;
   prBody: string;
@@ -142,6 +143,7 @@ export interface Platform {
   findIssue(title: string): Promise<Issue | null>;
   getIssueList(): Promise<Issue[]>;
   getVulnerabilityAlerts(): Promise<VulnerabilityAlert[]>;
+  getJsonFile(fileName: string): Promise<any | null>;
   initRepo(config: RepoParams): Promise<RepoResult>;
   getPrList(): Promise<Pr[]>;
   ensureIssueClosing(title: string): Promise<void>;

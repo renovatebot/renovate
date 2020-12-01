@@ -6,7 +6,31 @@ Object {
 }
 `;
 
-exports[`config/migration migrateConfig(config, parentConfig) it migrates config 1`] = `
+exports[`config/migration migrateConfig(config, parentConfig) migrates before and after schedules 1`] = `
+Object {
+  "major": Object {
+    "schedule": Array [
+      "after 10pm",
+      "before 7am",
+    ],
+  },
+  "minor": Object {
+    "schedule": Array [
+      "after 10pm every weekday",
+      "before 7am every weekday",
+    ],
+  },
+}
+`;
+
+exports[`config/migration migrateConfig(config, parentConfig) migrates before and after schedules 2`] = `
+Array [
+  "after 10pm every weekday",
+  "before 7am every weekday",
+]
+`;
+
+exports[`config/migration migrateConfig(config, parentConfig) migrates config 1`] = `
 Object {
   "additionalBranchPrefix": "{{parentDir}}-",
   "autodiscover": true,
@@ -18,6 +42,9 @@ Object {
   "branchPrefix": "renovate/",
   "commitMessage": "{{#if semanticCommitType}}{{semanticCommitType}}{{#if semanticCommitScope}}({{semanticCommitScope}}){{/if}}: {{/if}}some commit message",
   "commitMessageExtra": "{{currentValue}} something",
+  "constraints": Object {
+    "python": "3.7",
+  },
   "dependencyDashboard": true,
   "dependencyDashboardTitle": "foo",
   "enabled": true,
@@ -164,7 +191,7 @@ Object {
 }
 `;
 
-exports[`config/migration migrateConfig(config, parentConfig) it migrates more packageFiles 1`] = `
+exports[`config/migration migrateConfig(config, parentConfig) migrates more packageFiles 1`] = `
 Object {
   "includePaths": Array [
     "package.json",
@@ -192,7 +219,7 @@ Object {
 }
 `;
 
-exports[`config/migration migrateConfig(config, parentConfig) it migrates node to travis 1`] = `
+exports[`config/migration migrateConfig(config, parentConfig) migrates node to travis 1`] = `
 Object {
   "node": Object {
     "automerge": false,
@@ -206,7 +233,7 @@ Object {
 }
 `;
 
-exports[`config/migration migrateConfig(config, parentConfig) it migrates packageFiles 1`] = `
+exports[`config/migration migrateConfig(config, parentConfig) migrates packageFiles 1`] = `
 Object {
   "includePaths": Array [
     "package.json",
@@ -249,7 +276,7 @@ Object {
 }
 `;
 
-exports[`config/migration migrateConfig(config, parentConfig) it migrates packages 1`] = `
+exports[`config/migration migrateConfig(config, parentConfig) migrates packages 1`] = `
 Object {
   "packageRules": Array [
     Object {
@@ -260,7 +287,7 @@ Object {
 }
 `;
 
-exports[`config/migration migrateConfig(config, parentConfig) it migrates subconfig 1`] = `
+exports[`config/migration migrateConfig(config, parentConfig) migrates subconfig 1`] = `
 Object {
   "lockFileMaintenance": Object {
     "packageRules": Array [
@@ -275,7 +302,7 @@ Object {
 }
 `;
 
-exports[`config/migration migrateConfig(config, parentConfig) it overrides existing automerge setting 1`] = `
+exports[`config/migration migrateConfig(config, parentConfig) overrides existing automerge setting 1`] = `
 Object {
   "major": Object {
     "automerge": false,
@@ -300,7 +327,7 @@ Object {
 }
 `;
 
-exports[`config/migration migrateConfig(config, parentConfig) it removes invalid configs 1`] = `
+exports[`config/migration migrateConfig(config, parentConfig) removes invalid configs 1`] = `
 Object {
   "baseBranches": Array [],
   "commitMessage": "test",
@@ -310,28 +337,4 @@ Object {
   ],
   "rebaseWhen": "auto",
 }
-`;
-
-exports[`config/migration migrateConfig(config, parentConfig) migrates before and after schedules 1`] = `
-Object {
-  "major": Object {
-    "schedule": Array [
-      "after 10pm",
-      "before 7am",
-    ],
-  },
-  "minor": Object {
-    "schedule": Array [
-      "after 10pm every weekday",
-      "before 7am every weekday",
-    ],
-  },
-}
-`;
-
-exports[`config/migration migrateConfig(config, parentConfig) migrates before and after schedules 2`] = `
-Array [
-  "after 10pm every weekday",
-  "before 7am every weekday",
-]
 `;

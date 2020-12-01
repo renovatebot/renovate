@@ -1,5 +1,7 @@
 import * as URL from 'url';
+import is from '@sindresorhus/is';
 import { linkify } from 'linkify-markdown';
+import { DateTime } from 'luxon';
 import MarkdownIt from 'markdown-it';
 
 import { logger } from '../../../logger';
@@ -42,9 +44,9 @@ export function getCachedReleaseList(
   repository: string
 ): Promise<ChangeLogNotes[]> {
   const cacheKey = `getReleaseList-${apiBaseUrl}-${repository}`;
-  const cachedResult = memCache.get(cacheKey);
+  const cachedResult = memCache.get<Promise<ChangeLogNotes[]>>(cacheKey);
   // istanbul ignore if
-  if (cachedResult) {
+  if (cachedResult !== undefined) {
     return cachedResult;
   }
   const promisedRes = getReleaseList(apiBaseUrl, repository);
@@ -96,7 +98,9 @@ export async function getReleaseNotes(
     if (
       release.tag === version ||
       release.tag === `v${version}` ||
-      release.tag === `${depName}-${version}`
+      release.tag === `${depName}-${version}` ||
+      release.tag === `${depName}_v${version}` ||
+      release.tag === `${depName}@${version}`
     ) {
       releaseNotes = release;
       releaseNotes.url = baseUrl.includes('gitlab')
@@ -179,9 +183,9 @@ export async function getReleaseNotesMdFileInner(
 export function getReleaseNotesMdFile(
   repository: string,
   apiBaseUrl: string
-): Promise<ChangeLogFile> | null {
+): Promise<ChangeLogFile | null> {
   const cacheKey = `getReleaseNotesMdFile-${repository}-${apiBaseUrl}`;
-  const cachedResult = memCache.get(cacheKey);
+  const cachedResult = memCache.get<Promise<ChangeLogFile | null>>(cacheKey);
   // istanbul ignore if
   if (cachedResult !== undefined) {
     return cachedResult;
@@ -258,6 +262,31 @@ export async function getReleaseNotesMd(
   return null;
 }
 
+/**
+ * Determine how long to cache release notes based on when the version was released.
+ *
+ * It's not uncommon for release notes to be updated shortly after the release itself,
+ * so only cache for about an hour when the release is less than a week old. Otherwise,
+ * cache for days.
+ */
+export function releaseNotesCacheMinutes(releaseDate?: string | Date): number {
+  const dt = is.date(releaseDate)
+    ? DateTime.fromJSDate(releaseDate)
+    : DateTime.fromISO(releaseDate);
+
+  const now = DateTime.local();
+
+  if (!dt.isValid || now.diff(dt, 'days').days < 7) {
+    return 55;
+  }
+
+  if (now.diff(dt, 'months').months < 6) {
+    return 1435; // 5 minutes shy of one day
+  }
+
+  return 14495; // 5 minutes shy of 10 days
+}
+
 export async function addReleaseNotes(
   input: ChangeLogResult
 ): Promise<ChangeLogResult> {
@@ -283,22 +312,15 @@ export async function addReleaseNotes(
     let releaseNotes: ChangeLogNotes;
     const cacheKey = getCacheKey(v.version);
     releaseNotes = await packageCache.get(cacheNamespace, cacheKey);
+    // istanbul ignore else: no cache tests
     if (!releaseNotes) {
-      if (input.project.github != null) {
-        releaseNotes = await getReleaseNotesMd(
-          repository,
-          v.version,
-          input.project.baseUrl,
-          input.project.apiBaseUrl
-        );
-      } else {
-        releaseNotes = await getReleaseNotesMd(
-          repository,
-          v.version,
-          input.project.baseUrl,
-          input.project.apiBaseUrl
-        );
-      }
+      releaseNotes = await getReleaseNotesMd(
+        repository,
+        v.version,
+        input.project.baseUrl,
+        input.project.apiBaseUrl
+      );
+      // istanbul ignore else: should be tested
       if (!releaseNotes) {
         releaseNotes = await getReleaseNotes(
           repository,
@@ -312,7 +334,7 @@ export async function addReleaseNotes(
       if (!releaseNotes && v.compare.url) {
         releaseNotes = { url: v.compare.url };
       }
-      const cacheMinutes = 55;
+      const cacheMinutes = releaseNotesCacheMinutes(v.date);
       await packageCache.set(
         cacheNamespace,
         cacheKey,

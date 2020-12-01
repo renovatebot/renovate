@@ -13,9 +13,8 @@ export interface Config {
   owner: string;
   prList: Pr[];
   repository: string;
-  bbUseDefaultReviewers: boolean;
-
   username: string;
+  userUuid: string;
 }
 
 export interface PagedResult<T = any> {
@@ -175,7 +174,7 @@ export function prInfo(pr: PrResponse): Pr {
   return {
     number: pr.id,
     body: pr.summary ? pr.summary.raw : /* istanbul ignore next */ undefined,
-    branchName: pr.source.branch.name,
+    sourceBranch: pr.source.branch.name,
     targetBranch: pr.destination.branch.name,
     title: pr.title,
     state: prStates.closed.includes(pr.state)

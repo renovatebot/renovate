@@ -24,6 +24,7 @@ const repoGroups = {
   'date-io': 'https://github.com/dmtrKovalenko/date-io',
   'devextreme-reactive': 'https://github.com/DevExpress/devextreme-reactive',
   'electron-forge': 'https://github.com/electron-userland/electron-forge',
+  'feathers-databases': 'https://github.com/feathersjs/databases',
   'ember-decorators': 'https://github.com/ember-decorators/ember-decorators',
   'graphql-modules': 'https://github.com/Urigo/graphql-modules',
   'ionic-native': 'https://github.com/ionic-team/ionic-native',
@@ -35,6 +36,7 @@ const repoGroups = {
   'react-dnd': 'https://github.com/react-dnd/react-dnd',
   'react-navigation': 'https://github.com/react-navigation/react-navigation',
   'reactivestack-cookies': 'https://github.com/reactivestack/cookies',
+  'reg-suit': 'https://github.com/reg-viz/reg-suit',
   'semantic-release': 'https://github.com/semantic-release/',
   'telus-tds': 'https://github.com/telusdigital/tds',
   'typescript-eslint': 'https://github.com/typescript-eslint/typescript-eslint',
@@ -44,6 +46,7 @@ const repoGroups = {
   angular1: 'https://github.com/angular/angular.js',
   angular: 'https://github.com/angular/angular',
   angularcli: 'https://github.com/angular/angular-cli',
+  angularfire: 'https://github.com/angular/angularfire',
   apolloclient: 'https://github.com/apollographql/apollo-client',
   apollolink: 'https://github.com/apollographql/apollo-link',
   awsappsync: 'https://github.com/awslabs/aws-mobile-appsync-sdk-js',
@@ -58,8 +61,10 @@ const repoGroups = {
   dropwizard: 'https://github.com/dropwizard/dropwizard',
   emotion: 'https://github.com/emotion-js/emotion',
   expo: 'https://github.com/expo/expo',
+  feathers: 'https://github.com/feathersjs/feathers',
   fimbullinter: 'https://github.com/fimbullinter/wotan',
   flopflip: 'https://github.com/tdeekens/flopflip',
+  formatjs: 'https://github.com/formatjs/formatjs',
   framework7: 'https://github.com/framework7io/framework7',
   gatsby: 'https://github.com/gatsbyjs/gatsby',
   graphqlcodegenerator: [
@@ -72,6 +77,7 @@ const repoGroups = {
   hamcrest: 'https://github.com/hamcrest/JavaHamcrest',
   hapijs: 'https://github.com/hapijs',
   infrastructure: 'https://github.com/instructure/instructure-ui',
+  istanbuljs: 'https://github.com/istanbuljs/istanbuljs',
   jasmine: 'https://github.com/jasmine/jasmine',
   jersey: 'https://github.com/eclipse-ee4j/jersey',
   jest: 'https://github.com/facebook/jest',
@@ -89,9 +95,10 @@ const repoGroups = {
     'https://github.com/mozilla-neutrino/neutrino-dev',
   ],
   nextjs: [
-    'https://github.com/zeit/next.js', // for compatibility
+    'https://github.com/zeit/next.js', // old repo
     'https://github.com/vercel/next.js',
   ],
+  nivo: 'https://github.com/plouc/nivo',
   ngrx: 'https://github.com/ngrx/',
   nrwl: 'https://github.com/nrwl/',
   nuxtjs: 'https://github.com/nuxt/nuxt.js',
@@ -125,9 +132,11 @@ const repoGroups = {
 
 const patternGroups = {
   babel6: '^babel6$',
+  clarity: '^@clr/', // https://github.com/vmware/clarity/issues/5235
   wordpress: '^@wordpress/',
   angularmaterial: ['^@angular/material', '^@angular/cdk'],
   'aws-java-sdk': '^com.amazonaws:aws-java-sdk-',
+  embroider: '^@embroider/',
   fullcalendar: '^@fullcalendar/',
 };
 

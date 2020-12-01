@@ -2,32 +2,34 @@ import { structUtils } from '@yarnpkg/core';
 import { parseSyml } from '@yarnpkg/parsers';
 import { logger } from '../../../logger';
 import { readLocalFile } from '../../../util/fs';
+import { LockFile } from './common';
 
-export async function getYarnLock(
-  filePath: string
-): Promise<{ isYarn1: boolean; lockedVersions: Record<string, string> }> {
+export async function getYarnLock(filePath: string): Promise<LockFile> {
   const yarnLockRaw = await readLocalFile(filePath, 'utf8');
   try {
     const parsed = parseSyml(yarnLockRaw);
-    const lockFile: Record<string, string> = {};
+    const lockedVersions: Record<string, string> = {};
+    let lockfileVersion: number;
 
     for (const [key, val] of Object.entries(parsed)) {
       if (key === '__metadata') {
         // yarn 2
+        lockfileVersion = parseInt(val.cacheKey, 10);
       } else {
         for (const entry of key.split(', ')) {
           const { scope, name, range } = structUtils.parseDescriptor(entry);
-          const packageName = scope ? `${scope}/${name}` : name;
+          const packageName = scope ? `@${scope}/${name}` : name;
           const { selector } = structUtils.parseRange(range);
 
           logger.trace({ entry, version: val.version });
-          lockFile[packageName + '@' + selector] = parsed[key].version;
+          lockedVersions[packageName + '@' + selector] = parsed[key].version;
         }
       }
     }
     return {
       isYarn1: !('__metadata' in parsed),
-      lockedVersions: lockFile,
+      lockfileVersion,
+      lockedVersions,
     };
   } catch (err) {
     logger.debug({ filePath, err }, 'Warning: Exception parsing yarn.lock');

@@ -19,7 +19,7 @@ export function prInfo(pr: BbbsRestPr): BbsPr {
     version: pr.version,
     number: pr.id,
     body: pr.description,
-    branchName: pr.fromRef.displayId,
+    sourceBranch: pr.fromRef.displayId,
     targetBranch: pr.toRef.displayId,
     title: pr.title,
     state: prStateMapping[pr.state],

@@ -1,7 +1,6 @@
 import URL from 'url';
 import is from '@sindresorhus/is';
 import delay from 'delay';
-import { configFileNames } from '../../config/app-strings';
 import {
   PLATFORM_INTEGRATION_UNAUTHORIZED,
   REPOSITORY_ACCESS_FORBIDDEN,
@@ -49,7 +48,6 @@ import {
   Comment,
   GhBranchStatus,
   GhGraphQlPr,
-  GhPr,
   GhRepo,
   GhRestPr,
   LocalRepoConfig,
@@ -58,8 +56,6 @@ import {
 import { UserDetails, getUserDetails, getUserEmail } from './user';
 
 const githubApi = new githubHttp.GithubHttp();
-
-const defaultConfigFile = configFileNames[0];
 
 let config: LocalRepoConfig = {} as any;
 
@@ -123,7 +119,7 @@ export async function getRepos(): Promise<string[]> {
   try {
     const res = await githubApi.getJson<{ full_name: string }[]>(
       'user/repos?per_page=100',
-      { paginate: true }
+      { paginate: 'all' }
     );
     return res.body.map((repo) => repo.full_name);
   } catch (err) /* istanbul ignore next */ {
@@ -145,6 +141,23 @@ async function getBranchProtection(
   return res.body;
 }
 
+export async function getJsonFile(fileName: string): Promise<any | null> {
+  try {
+    return JSON.parse(
+      Buffer.from(
+        (
+          await githubApi.getJson<{ content: string }>(
+            `repos/${config.repository}/contents/${fileName}`
+          )
+        ).body.content,
+        'base64'
+      ).toString()
+    );
+  } catch (err) {
+    return null;
+  }
+}
+
 let existingRepos;
 
 // Initialize GitHub by getting base branch and SHA
@@ -154,13 +167,12 @@ export async function initRepo({
   forkMode,
   forkToken,
   localDir,
-  includeForks,
   renovateUsername,
-  optimizeForDisabled,
+  cloneSubmodules,
 }: RepoParams): Promise<RepoResult> {
   logger.debug(`initRepo("${repository}")`);
   // config is used by the platform api itself, not necessary for the app layer to know
-  config = { localDir, repository } as any;
+  config = { localDir, repository, cloneSubmodules } as any;
   // istanbul ignore if
   if (endpoint) {
     // Necessary for Renovate Pro - do not remove
@@ -203,26 +215,6 @@ export async function initRepo({
     if (!repo.defaultBranchRef?.name) {
       throw new Error(REPOSITORY_EMPTY);
     }
-    // istanbul ignore if
-    if (repo.isFork && !includeForks) {
-      try {
-        const renovateConfig = JSON.parse(
-          Buffer.from(
-            (
-              await githubApi.getJson<{ content: string }>(
-                `repos/${config.repository}/contents/${defaultConfigFile}`
-              )
-            ).body.content,
-            'base64'
-          ).toString()
-        );
-        if (!renovateConfig.includeForks) {
-          throw new Error();
-        }
-      } catch (err) {
-        throw new Error(REPOSITORY_FORKED);
-      }
-    }
     if (repo.nameWithOwner && repo.nameWithOwner !== repository) {
       logger.debug(
         { repository, this_repository: repo.nameWithOwner },
@@ -235,26 +227,6 @@ export async function initRepo({
         'Repository is archived - throwing error to abort renovation'
       );
       throw new Error(REPOSITORY_ARCHIVED);
-    }
-    if (optimizeForDisabled) {
-      let renovateConfig;
-      try {
-        renovateConfig = JSON.parse(
-          Buffer.from(
-            (
-              await githubApi.getJson<{ content: string }>(
-                `repos/${config.repository}/contents/${defaultConfigFile}`
-              )
-            ).body.content,
-            'base64'
-          ).toString()
-        );
-      } catch (err) {
-        // Do nothing
-      }
-      if (renovateConfig && renovateConfig.enabled === false) {
-        throw new Error(REPOSITORY_DISABLED);
-      }
     }
     // Use default branch as PR target unless later overridden.
     config.defaultBranch = repo.defaultBranchRef.name;
@@ -493,7 +465,7 @@ async function getClosedPrs(): Promise<PrList> {
         // https://developer.github.com/v4/object/pullrequest/
         pr.displayNumber = `Pull Request #${pr.number}`;
         pr.state = pr.state.toLowerCase();
-        pr.branchName = pr.headRefName;
+        pr.sourceBranch = pr.headRefName;
         delete pr.headRefName;
         pr.comments = pr.comments.nodes.map((comment) => ({
           id: comment.databaseId,
@@ -513,13 +485,7 @@ async function getClosedPrs(): Promise<PrList> {
 }
 
 async function getOpenPrs(): Promise<PrList> {
-  // istanbul ignore if
-  if (config.isGhe) {
-    logger.debug(
-      'Skipping unsupported graphql PullRequests.mergeStateStatus query on GHE'
-    );
-    return {};
-  }
+  // The graphql query is supported in the current oldest GHE version 2.19
   if (!config.openPrList) {
     config.openPrList = {};
     let query;
@@ -596,12 +562,12 @@ async function getOpenPrs(): Promise<PrList> {
         // https://developer.github.com/v4/object/pullrequest/
         pr.displayNumber = `Pull Request #${pr.number}`;
         pr.state = PrState.Open;
-        pr.branchName = pr.headRefName;
+        pr.sourceBranch = pr.headRefName;
         delete pr.headRefName;
         pr.targetBranch = pr.baseRefName;
         delete pr.baseRefName;
         // https://developer.github.com/v4/enum/mergeablestate
-        const canMergeStates = ['BEHIND', 'CLEAN'];
+        const canMergeStates = ['BEHIND', 'CLEAN', 'HAS_HOOKS'];
         const hasNegativeReview = pr.reviews?.nodes?.length > 0;
         // istanbul ignore if
         if (hasNegativeReview) {
@@ -673,7 +639,7 @@ export async function getPr(prNo: number): Promise<Pr | null> {
   // Harmonise PR values
   pr.displayNumber = `Pull Request #${pr.number}`;
   if (pr.state === PrState.Open) {
-    pr.branchName = pr.head ? pr.head.ref : undefined;
+    pr.sourceBranch = pr.head ? pr.head.ref : undefined;
     pr.sha = pr.head ? pr.head.sha : undefined;
     if (pr.mergeable === true) {
       pr.canMerge = true;
@@ -703,39 +669,45 @@ export async function getPrList(): Promise<Pr[]> {
   logger.trace('getPrList()');
   if (!config.prList) {
     logger.debug('Retrieving PR list');
-    let res;
+    let prList: GhRestPr[];
     try {
-      res = await githubApi.getJson<{
-        number: number;
-        head: { ref: string; sha: string; repo: { full_name: string } };
-        title: string;
-        state: string;
-        merged_at: string;
-        created_at: string;
-        closed_at: string;
-      }>(
-        `repos/${
-          config.parentRepo || config.repository
-        }/pulls?per_page=100&state=all`,
-        { paginate: true }
-      );
+      prList = (
+        await githubApi.getJson<GhRestPr[]>(
+          `repos/${
+            config.parentRepo || config.repository
+          }/pulls?per_page=100&state=all`,
+          { paginate: true }
+        )
+      ).body;
     } catch (err) /* istanbul ignore next */ {
       logger.debug({ err }, 'getPrList err');
       throw new ExternalHostError(err, PLATFORM_TYPE_GITHUB);
     }
-    config.prList = res.body.map((pr) => ({
-      number: pr.number,
-      branchName: pr.head.ref,
-      sha: pr.head.sha,
-      title: pr.title,
-      state:
-        pr.state === PrState.Closed && pr.merged_at?.length
-          ? /* istanbul ignore next */ PrState.Merged
-          : pr.state,
-      createdAt: pr.created_at,
-      closed_at: pr.closed_at,
-      sourceRepo: pr.head?.repo?.full_name,
-    }));
+    config.prList = prList
+      .filter((pr) => {
+        return (
+          config.forkMode ||
+          (pr?.user?.login && config?.renovateUsername
+            ? pr.user.login === config.renovateUsername
+            : true)
+        );
+      })
+      .map(
+        (pr) =>
+          ({
+            number: pr.number,
+            sourceBranch: pr.head.ref,
+            sha: pr.head.sha,
+            title: pr.title,
+            state:
+              pr.state === PrState.Closed && pr.merged_at?.length
+                ? /* istanbul ignore next */ PrState.Merged
+                : pr.state,
+            createdAt: pr.created_at,
+            closed_at: pr.closed_at,
+            sourceRepo: pr.head?.repo?.full_name,
+          } as never)
+      );
     logger.debug(`Retrieved ${config.prList.length} Pull Requests`);
   }
   return config.prList;
@@ -750,7 +722,7 @@ export async function findPr({
   const prList = await getPrList();
   const pr = prList.find(
     (p) =>
-      p.branchName === branchName &&
+      p.sourceBranch === branchName &&
       (!prTitle || p.title === prTitle) &&
       matchesState(p.state, state) &&
       (config.forkMode || config.repository === p.sourceRepo) // #5188
@@ -818,44 +790,43 @@ export async function getBranchStatus(
     'branch status check result'
   );
   let checkRuns: { name: string; status: string; conclusion: string }[] = [];
-  if (!config.isGhe) {
-    try {
-      const checkRunsUrl = `repos/${config.repository}/commits/${escapeHash(
-        branchName
-      )}/check-runs`;
-      const opts = {
-        headers: {
-          accept: 'application/vnd.github.antiope-preview+json',
-        },
-      };
-      const checkRunsRaw = (
-        await githubApi.getJson<{
-          check_runs: { name: string; status: string; conclusion: string }[];
-        }>(checkRunsUrl, opts)
-      ).body;
-      if (checkRunsRaw.check_runs?.length) {
-        checkRuns = checkRunsRaw.check_runs.map((run) => ({
-          name: run.name,
-          status: run.status,
-          conclusion: run.conclusion,
-        }));
-        logger.debug({ checkRuns }, 'check runs result');
-      } else {
-        // istanbul ignore next
-        logger.debug({ result: checkRunsRaw }, 'No check runs found');
-      }
-    } catch (err) /* istanbul ignore next */ {
-      if (err instanceof ExternalHostError) {
-        throw err;
-      }
-      if (
-        err.statusCode === 403 ||
-        err.message === PLATFORM_INTEGRATION_UNAUTHORIZED
-      ) {
-        logger.debug('No permission to view check runs');
-      } else {
-        logger.warn({ err }, 'Error retrieving check runs');
-      }
+  // API is supported in oldest available GHE version 2.19
+  try {
+    const checkRunsUrl = `repos/${config.repository}/commits/${escapeHash(
+      branchName
+    )}/check-runs`;
+    const opts = {
+      headers: {
+        accept: 'application/vnd.github.antiope-preview+json',
+      },
+    };
+    const checkRunsRaw = (
+      await githubApi.getJson<{
+        check_runs: { name: string; status: string; conclusion: string }[];
+      }>(checkRunsUrl, opts)
+    ).body;
+    if (checkRunsRaw.check_runs?.length) {
+      checkRuns = checkRunsRaw.check_runs.map((run) => ({
+        name: run.name,
+        status: run.status,
+        conclusion: run.conclusion,
+      }));
+      logger.debug({ checkRuns }, 'check runs result');
+    } else {
+      // istanbul ignore next
+      logger.debug({ result: checkRunsRaw }, 'No check runs found');
+    }
+  } catch (err) /* istanbul ignore next */ {
+    if (err instanceof ExternalHostError) {
+      throw err;
+    }
+    if (
+      err.statusCode === 403 ||
+      err.message === PLATFORM_INTEGRATION_UNAUTHORIZED
+    ) {
+      logger.debug('No permission to view check runs');
+    } else {
+      logger.warn({ err }, 'Error retrieving check runs');
     }
   }
   if (checkRuns.length === 0) {
@@ -1134,7 +1105,7 @@ export async function ensureIssue({
 }
 
 export async function ensureIssueClosing(title: string): Promise<void> {
-  logger.debug(`ensureIssueClosing(${title})`);
+  logger.trace(`ensureIssueClosing(${title})`);
   const issueList = await getIssueList();
   for (const issue of issueList) {
     if (issue.state === 'open' && issue.title === title) {
@@ -1266,7 +1237,7 @@ async function getComments(issueNo: number): Promise<Comment[]> {
     return comments;
   } catch (err) /* istanbul ignore next */ {
     if (err.statusCode === 404) {
-      logger.debug('404 respose when retrieving comments');
+      logger.debug('404 response when retrieving comments');
       throw new ExternalHostError(err, PLATFORM_TYPE_GITHUB);
     }
     throw err;
@@ -1368,18 +1339,17 @@ export async function ensureCommentRemoval({
 
 // Creates PR and returns PR number
 export async function createPr({
-  branchName,
+  sourceBranch,
   targetBranch,
   prTitle: title,
   prBody: rawBody,
   labels,
-  platformOptions = {},
   draftPR = false,
 }: CreatePRConfig): Promise<Pr> {
   const body = sanitize(rawBody);
   const base = targetBranch;
   // Include the repository owner to handle forkMode and regular mode
-  const head = `${config.repository.split('/')[0]}:${branchName}`;
+  const head = `${config.repository.split('/')[0]}:${sourceBranch}`;
   const options: any = {
     body: {
       title,
@@ -1396,13 +1366,13 @@ export async function createPr({
   }
   logger.debug({ title, head, base, draft: draftPR }, 'Creating PR');
   const pr = (
-    await githubApi.postJson<GhPr>(
+    await githubApi.postJson<GhRestPr>(
       `repos/${config.parentRepo || config.repository}/pulls`,
       options
     )
   ).body;
   logger.debug(
-    { branch: branchName, pr: pr.number, draft: draftPR },
+    { branch: sourceBranch, pr: pr.number, draft: draftPR },
     'PR created'
   );
   // istanbul ignore if
@@ -1410,7 +1380,8 @@ export async function createPr({
     config.prList.push(pr);
   }
   pr.displayNumber = `Pull Request #${pr.number}`;
-  pr.branchName = branchName;
+  pr.sourceBranch = sourceBranch;
+  pr.sourceRepo = pr.head.repo.full_name;
   await addLabels(pr.number, labels);
   return pr;
 }
