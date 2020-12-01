@@ -234,10 +234,10 @@ export async function getRepoConfig(
 ): Promise<RenovateConfig> {
   let config = { ...config_ };
   config.baseBranch = config.defaultBranch;
-  config = await checkOnboardingBranch(config);
-  config = await mergeRenovateConfig(config);
   if (config.semanticCommits === 'auto') {
     config.semanticCommits = await detectSemanticCommits();
   }
+  config = await checkOnboardingBranch(config);
+  config = await mergeRenovateConfig(config);
   return config;
 }
