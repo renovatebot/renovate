@@ -822,8 +822,9 @@ For instance if your repository has an "examples" directory of many package.json
 
 ## ignorePrAuthor
 
-If this is set to false, it means Renovate will try to fetch the entire list of PRs from the platform instead of only those which it has authored itself.
-You should only want to enable this if you are changing the bot account (e.g. from `@old-bot` to `@new-bot`) and want `@old-bot` to find and update any existing PRs created by `@new-bot`.
+If this is configured to true, it means Renovate will fetch the entire list of repository PRs instead of only those PRs which it created itself.
+You should only want to enable this if you are changing the bot account (e.g. from `@old-bot` to `@new-bot`) and want `@new-bot` to find and update any existing PRs created by `@old-bot`.
+It's recommended to revert this setting once that transition period is over and all old PRs are resolved.
 
 ## ignorePresets
 
