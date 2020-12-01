@@ -53,6 +53,7 @@ interface Config {
   fileList: null;
   repository: string;
   defaultBranch: string;
+  ignorePrAuthor: boolean;
 }
 
 interface User {

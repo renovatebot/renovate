@@ -820,6 +820,11 @@ Renovate will try to configure this to `true` also if you have configured any `n
 Using this setting, you can selectively ignore package files that you don't want Renovate autodiscovering.
 For instance if your repository has an "examples" directory of many package.json files that you don't want to be kept up to date.
 
+## ignorePrAuthor
+
+If this is set to false, it means Renovate will try to fetch the entire list of PRs from the platform instead of only those which it has authored itself.
+You should only want to enable this if you are changing the bot account (e.g. from `@old-bot` to `@new-bot`) and want `@old-bot` to find and update any existing PRs created by `@new-bot`.
+
 ## ignorePresets
 
 Use this if you are extending a complex preset but don't want to use every "sub preset" that it includes.
