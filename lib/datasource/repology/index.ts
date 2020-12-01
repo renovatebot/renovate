@@ -1,4 +1,3 @@
-import { URLSearchParams } from 'url';
 import { HOST_DISABLED } from '../../constants/error-messages';
 import { logger } from '../../logger';
 import { ExternalHostError } from '../../types/errors/external-host-error';
@@ -25,36 +24,30 @@ export interface RepologyPackage {
 
 async function queryPackage(
   repoName: string,
-  pkgName: string,
-  pkgType: RepologyPackageType
+  pkgName: string
 ): Promise<RepologyPackage> {
   try {
-    const query = new URLSearchParams({
-      repo: repoName,
-      name_type: pkgType,
-      target_page: 'api_v1_project',
-      noautoresolve: 'on',
-      name: pkgName,
-    }).toString();
-
     // Retrieve list of packages by looking up Repology project
-    const url = `https://repology.org/tools/project-by?${query}`;
+    const url = `https://repology.org/api/v1/project/${pkgName}`;
     const res = await http.getJson<RepologyPackage[]>(url);
     let pkgs = res.body.filter((pkg) => pkg.repo === repoName);
 
     // In some cases Repology bundles multiple packages into a single project,
     // which would result in ambiguous results. If we have more than one result
     // left, we should try to determine the correct package by comparing either
-    // binname or srcname (depending on pkgType) to the given dependency name.
+    // binname or srcname to the given dependency name.
     if (pkgs.length > 1) {
-      pkgs = pkgs.filter((pkg) => !pkg[pkgType] || pkg[pkgType] === pkgName);
+      pkgs = pkgs.filter((pkg) => !pkg.binname || pkg.binname === pkgName);
+    }
+    if (pkgs.length > 1) {
+      pkgs = pkgs.filter((pkg) => !pkg.srcname || pkg.srcname === pkgName);
     }
 
     // Abort if there is still more than one package left, as the result would
     // be ambiguous and unreliable. This should usually not happen...
     if (pkgs.length > 1) {
       logger.warn(
-        { repoName, pkgName, pkgType, pkgs },
+        { repoName, pkgName, pkgs },
         'Repology lookup returned ambiguous results, ignoring...'
       );
       return null;
@@ -64,13 +57,8 @@ async function queryPackage(
   } catch (err) {
     if (err.statusCode === 404) {
       logger.debug(
-        { repoName, pkgName, pkgType },
+        { repoName, pkgName },
         'Repository or package not found on Repology'
-      );
-    } else if (err.statusCode === 403) {
-      logger.debug(
-        { repoName },
-        'Repology does not support tools/project-by lookups for repository'
       );
     } else {
       throw err;
@@ -95,21 +83,14 @@ async function getCachedPackage(
     return cachedResult;
   }
 
-  // Attempt a binary package lookup and return if successfully
-  const binPkg = await queryPackage(repoName, pkgName, 'binname');
-  if (binPkg) {
-    await packageCache.set(cacheNamespace, cacheKey, binPkg, cacheMinutes);
-    return binPkg;
+  // Attempt a package lookup and return if successfully
+  const pkg = await queryPackage(repoName, pkgName);
+  if (pkg) {
+    await packageCache.set(cacheNamespace, cacheKey, pkg, cacheMinutes);
+    return pkg;
   }
 
-  // Otherwise, attempt a source package lookup and return if successfully
-  const srcPkg = await queryPackage(repoName, pkgName, 'srcname');
-  if (srcPkg) {
-    await packageCache.set(cacheNamespace, cacheKey, srcPkg, cacheMinutes);
-    return srcPkg;
-  }
-
-  // No binary or source package was found on Repology
+  // No package was found on Repology
   return null;
 }
 
