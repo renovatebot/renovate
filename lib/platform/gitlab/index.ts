@@ -376,8 +376,10 @@ async function fetchPrList(): Promise<Pr[]> {
   const searchParams = {
     per_page: '100',
   } as any;
-  if (!config.ignorePrAuthor) {
-    searchParams.author_id = `${authorId}`;
+  if (config.ignorePrAuthor) {
+    // https://docs.gitlab.com/ee/api/merge_requests.html#list-merge-requests
+    // default: `scope=created_by_me`
+    searchParams.scope = 'all';
   }
   const query = new URLSearchParams(searchParams).toString();
   const urlString = `projects/${config.repository}/merge_requests?${query}`;
