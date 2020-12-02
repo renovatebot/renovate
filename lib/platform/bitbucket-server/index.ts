@@ -128,7 +128,7 @@ export async function getJsonFile(fileName: string): Promise<any | null> {
   return null;
 }
 
-// Initialize GitLab by getting base branch
+// Initialize BitBucket Server by getting base branch
 export async function initRepo({
   repository,
   localDir,
@@ -584,15 +584,15 @@ export async function addReviewers(
     );
     await getPr(prNo, true);
   } catch (err) {
+    logger.warn({ err, reviewers, prNo }, `Failed to add reviewers`);
     if (err.statusCode === 404) {
       throw new Error(REPOSITORY_NOT_FOUND);
-    } else if (err.statusCode === 409) {
+    } else if (
+      err.statusCode === 409 &&
+      !utils.isInvalidReviewersResponse(err)
+    ) {
       throw new Error(REPOSITORY_CHANGED);
     } else {
-      logger.fatal(
-        { err },
-        `Failed to add reviewers '${reviewers.join(', ')}' to #${prNo}`
-      );
       throw err;
     }
   }
@@ -850,7 +850,10 @@ export async function updatePr({
   prTitle: title,
   prBody: rawDescription,
   state,
-}: UpdatePrConfig): Promise<void> {
+  bitbucketInvalidReviewers,
+}: UpdatePrConfig & {
+  bitbucketInvalidReviewers: string[] | undefined;
+}): Promise<void> {
   const description = sanitize(rawDescription);
   logger.debug(`updatePr(${prNo}, title=${title})`);
 
@@ -870,7 +873,11 @@ export async function updatePr({
           title,
           description,
           version: pr.version,
-          reviewers: pr.reviewers.map((name: string) => ({ user: { name } })),
+          reviewers: pr.reviewers
+            .filter(
+              (name: string) => !bitbucketInvalidReviewers?.includes(name)
+            )
+            .map((name: string) => ({ user: { name } })),
         },
       }
     );
@@ -898,12 +905,24 @@ export async function updatePr({
       updatePrVersion(pr.number, updatedStatePr.version);
     }
   } catch (err) {
+    logger.debug({ err, prNo }, `Failed to update PR`);
     if (err.statusCode === 404) {
       throw new Error(REPOSITORY_NOT_FOUND);
     } else if (err.statusCode === 409) {
-      throw new Error(REPOSITORY_CHANGED);
+      if (utils.isInvalidReviewersResponse(err) && !bitbucketInvalidReviewers) {
+        // Retry again with invalid reviewers being removed
+        const invalidReviewers = utils.getInvalidReviewers(err);
+        await updatePr({
+          number: prNo,
+          prTitle: title,
+          prBody: rawDescription,
+          state,
+          bitbucketInvalidReviewers: invalidReviewers,
+        });
+      } else {
+        throw new Error(REPOSITORY_CHANGED);
+      }
     } else {
-      logger.fatal({ err }, `Failed to update PR`);
       throw err;
     }
   }
