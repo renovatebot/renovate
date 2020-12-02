@@ -47,15 +47,16 @@ Alternatively, if you prefer to use "dot files" then you can add the same JSON c
 Most of the settings in the `renovate.json` onboarding configuration are defaults, however usually this configuration file will have some default overrides in it, such as:
 
 - Automatically enabling Angular-style semantic commits if your repository uses them
-- Determining whether to use dependency range pinning depending on the detected project type
+- Determining whether to use dependency range pinning depending on the detected project type (app vs library)
 
 ## Common Overrides
 
-Please check the docs on this website for an exhaustive Configuration Reference, however here are some of the most commonly changed (overridden) configuration settings:
+Please check the docs on this website for an exhaustive Configuration Reference.
+To help you get started, here are some of the most commonly changed (overridden) configuration settings:
 
 - **rangeStrategy**: By default (with zero config) it's `"replace"` however the `"config:base"` preset overrides it to `"auto"`. If you don't want to pin dependency versions and retain ranges, add the `":preserveSemverRanges"` preset to the `extends` array
 - **labels**: Labels to assign to Pull Requests
-- **assignees**: GitHub users to assign the Pull Requests to
+- **assignees**: GitHub user(s) to assign the Pull Requests to
 
 Renovate will update your PR description each time it finds changes.
 
