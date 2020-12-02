@@ -132,6 +132,8 @@ export async function getJsonFile(fileName: string): Promise<any | null> {
 export async function initRepo({
   repository,
   localDir,
+  cloneSubmodules,
+  ignorePrAuthor,
 }: RepoParams): Promise<RepoResult> {
   logger.debug(
     `initRepo("${JSON.stringify({ repository, localDir }, null, 2)}")`
@@ -149,6 +151,7 @@ export async function initRepo({
     repository,
     prVersions: new Map<number, number>(),
     username: opts.username,
+    ignorePrAuthor,
   } as any;
 
   const { host, pathname } = url.parse(defaults.endpoint);
@@ -167,6 +170,7 @@ export async function initRepo({
     url: gitUrl,
     gitAuthorName: global.gitAuthor?.name,
     gitAuthorEmail: global.gitAuthor?.email,
+    cloneSubmodules,
   });
 
   try {
@@ -292,11 +296,14 @@ export async function getPrList(refreshCache?: boolean): Promise<Pr[]> {
   logger.debug(`getPrList()`);
   // istanbul ignore next
   if (!config.prList || refreshCache) {
-    const query = new URLSearchParams({
+    const searchParams = {
       state: 'ALL',
-      'role.1': 'AUTHOR',
-      'username.1': config.username,
-    }).toString();
+    };
+    if (!config.ignorePrAuthor) {
+      searchParams['role.1'] = 'AUTHOR';
+      searchParams['username.1'] = config.username;
+    }
+    const query = new URLSearchParams(searchParams).toString();
     const values = await utils.accumulateValues(
       `./rest/api/1.0/projects/${config.projectKey}/repos/${config.repositorySlug}/pull-requests?${query}`
     );

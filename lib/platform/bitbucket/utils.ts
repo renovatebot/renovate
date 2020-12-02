@@ -15,6 +15,7 @@ export interface Config {
   repository: string;
   username: string;
   userUuid: string;
+  ignorePrAuthor: boolean;
 }
 
 export interface PagedResult<T = any> {

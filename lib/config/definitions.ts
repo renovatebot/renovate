@@ -1819,6 +1819,15 @@ const options: RenovateOptions[] = [
     env: false,
   },
   {
+    name: 'matchStringsStrategy',
+    description: 'Strategy how to interpret matchStrings',
+    type: 'string',
+    default: 'any',
+    parent: 'regexManagers',
+    cli: false,
+    env: false,
+  },
+  {
     name: 'depNameTemplate',
     description:
       'Optional depName for extracted dependencies. Valid only within `regexManagers` object.',
@@ -1868,6 +1877,13 @@ const options: RenovateOptions[] = [
       'Set to false to disable initialization of submodules during repository clone',
     type: 'boolean',
     default: true,
+  },
+  {
+    name: 'ignorePrAuthor',
+    description:
+      'Set to true to fetch the entire list of PRs instead of only those authored by the Renovate user',
+    type: 'boolean',
+    default: false,
   },
 ];
 
