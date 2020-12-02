@@ -202,9 +202,10 @@ async function filterMissingArtifacts(
 ): Promise<Release[]> {
   const cacheNamespace = 'datasource-maven-metadata';
   const cacheKey = `${repoUrl}${dependency.dependencyUrl}`;
-  let artifactsInfo: ArtifactsInfo | null = await packageCache.get<
-    ArtifactsInfo
-  >(cacheNamespace, cacheKey);
+  let artifactsInfo: ArtifactsInfo | null = await packageCache.get<ArtifactsInfo>(
+    cacheNamespace,
+    cacheKey
+  );
 
   if (!isValidArtifactsInfo(artifactsInfo, versions)) {
     const queue = versions
