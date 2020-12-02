@@ -41,6 +41,7 @@ export interface RepoParams {
   includeForks?: boolean;
   renovateUsername?: string;
   cloneSubmodules?: boolean;
+  ignorePrAuthor?: boolean;
 }
 
 /**

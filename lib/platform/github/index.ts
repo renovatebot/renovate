@@ -169,10 +169,11 @@ export async function initRepo({
   localDir,
   renovateUsername,
   cloneSubmodules,
+  ignorePrAuthor,
 }: RepoParams): Promise<RepoResult> {
   logger.debug(`initRepo("${repository}")`);
   // config is used by the platform api itself, not necessary for the app layer to know
-  config = { localDir, repository, cloneSubmodules } as any;
+  config = { localDir, repository, cloneSubmodules, ignorePrAuthor } as any;
   // istanbul ignore if
   if (endpoint) {
     // Necessary for Renovate Pro - do not remove
@@ -687,6 +688,7 @@ export async function getPrList(): Promise<Pr[]> {
       .filter((pr) => {
         return (
           config.forkMode ||
+          config.ignorePrAuthor ||
           (pr?.user?.login && config?.renovateUsername
             ? pr.user.login === config.renovateUsername
             : true)

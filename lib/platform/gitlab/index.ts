@@ -52,6 +52,7 @@ let config: {
   mergeMethod: MergeMethod;
   defaultBranch: string;
   cloneSubmodules: boolean;
+  ignorePrAuthor: boolean;
 } = {} as any;
 
 const defaults = {
@@ -155,11 +156,13 @@ export async function initRepo({
   repository,
   localDir,
   cloneSubmodules,
+  ignorePrAuthor,
 }: RepoParams): Promise<RepoResult> {
   config = {} as any;
   config.repository = urlEscape(repository);
   config.localDir = localDir;
   config.cloneSubmodules = cloneSubmodules;
+  config.ignorePrAuthor = ignorePrAuthor;
 
   let res: HttpResponse<RepoResponse>;
   try {
@@ -370,10 +373,16 @@ function massagePr(prToModify: Pr): Pr {
 }
 
 async function fetchPrList(): Promise<Pr[]> {
-  const query = new URLSearchParams({
+  const searchParams = {
     per_page: '100',
-    author_id: `${authorId}`,
-  }).toString();
+  } as any;
+  // istanbul ignore if
+  if (config.ignorePrAuthor) {
+    // https://docs.gitlab.com/ee/api/merge_requests.html#list-merge-requests
+    // default: `scope=created_by_me`
+    searchParams.scope = 'all';
+  }
+  const query = new URLSearchParams(searchParams).toString();
   const urlString = `projects/${config.repository}/merge_requests?${query}`;
   try {
     const res = await gitlabApi.getJson<
