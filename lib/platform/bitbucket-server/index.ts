@@ -300,8 +300,8 @@ export async function getPrList(refreshCache?: boolean): Promise<Pr[]> {
       state: 'ALL',
     };
     if (!config.ignorePrAuthor) {
-      searchParams['username.1'] = config.username;
       searchParams['role.1'] = 'AUTHOR';
+      searchParams['username.1'] = config.username;
     }
     const query = new URLSearchParams(searchParams).toString();
     const values = await utils.accumulateValues(
