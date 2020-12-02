@@ -887,9 +887,7 @@ describe('platform/gitlab', () => {
     it('returns true if no title and all state', async () => {
       httpMock
         .scope(gitlabApiHost)
-        .get(
-          '/api/v4/projects/undefined/merge_requests?per_page=100&author_id=undefined'
-        )
+        .get('/api/v4/projects/undefined/merge_requests?per_page=100')
         .reply(200, [
           {
             iid: 1,
@@ -907,9 +905,7 @@ describe('platform/gitlab', () => {
     it('returns true if not open', async () => {
       httpMock
         .scope(gitlabApiHost)
-        .get(
-          '/api/v4/projects/undefined/merge_requests?per_page=100&author_id=undefined'
-        )
+        .get('/api/v4/projects/undefined/merge_requests?per_page=100')
         .reply(200, [
           {
             iid: 1,
@@ -929,9 +925,7 @@ describe('platform/gitlab', () => {
     it('returns true if open and with title', async () => {
       httpMock
         .scope(gitlabApiHost)
-        .get(
-          '/api/v4/projects/undefined/merge_requests?per_page=100&author_id=undefined'
-        )
+        .get('/api/v4/projects/undefined/merge_requests?per_page=100')
         .reply(200, [
           {
             iid: 1,
@@ -952,9 +946,7 @@ describe('platform/gitlab', () => {
     it('returns true with title', async () => {
       httpMock
         .scope(gitlabApiHost)
-        .get(
-          '/api/v4/projects/undefined/merge_requests?per_page=100&author_id=undefined'
-        )
+        .get('/api/v4/projects/undefined/merge_requests?per_page=100')
         .reply(200, [
           {
             iid: 1,
@@ -973,9 +965,7 @@ describe('platform/gitlab', () => {
     it('returns true with draft prefix title', async () => {
       httpMock
         .scope(gitlabApiHost)
-        .get(
-          '/api/v4/projects/undefined/merge_requests?per_page=100&author_id=undefined'
-        )
+        .get('/api/v4/projects/undefined/merge_requests?per_page=100')
         .reply(200, [
           {
             iid: 1,
@@ -994,9 +984,7 @@ describe('platform/gitlab', () => {
     it('returns true with deprecated draft prefix title', async () => {
       httpMock
         .scope(gitlabApiHost)
-        .get(
-          '/api/v4/projects/undefined/merge_requests?per_page=100&author_id=undefined'
-        )
+        .get('/api/v4/projects/undefined/merge_requests?per_page=100')
         .reply(200, [
           {
             iid: 1,
@@ -1283,9 +1271,7 @@ describe('platform/gitlab', () => {
       await initPlatform('13.3.6-ee');
       httpMock
         .scope(gitlabApiHost)
-        .get(
-          '/api/v4/projects/undefined/merge_requests?per_page=100&author_id=undefined'
-        )
+        .get('/api/v4/projects/undefined/merge_requests?per_page=100')
         .reply(200, [
           {
             iid: 1,
@@ -1303,9 +1289,7 @@ describe('platform/gitlab', () => {
       await initPlatform('13.3.6-ee');
       httpMock
         .scope(gitlabApiHost)
-        .get(
-          '/api/v4/projects/undefined/merge_requests?per_page=100&author_id=undefined'
-        )
+        .get('/api/v4/projects/undefined/merge_requests?per_page=100')
         .reply(200, [
           {
             iid: 1,
@@ -1323,9 +1307,7 @@ describe('platform/gitlab', () => {
       await initPlatform('13.3.6-ee');
       httpMock
         .scope(gitlabApiHost)
-        .get(
-          '/api/v4/projects/undefined/merge_requests?per_page=100&author_id=undefined'
-        )
+        .get('/api/v4/projects/undefined/merge_requests?per_page=100')
         .reply(200, [
           {
             iid: 1,
@@ -1343,9 +1325,7 @@ describe('platform/gitlab', () => {
       await initPlatform('13.3.6-ee');
       httpMock
         .scope(gitlabApiHost)
-        .get(
-          '/api/v4/projects/undefined/merge_requests?per_page=100&author_id=undefined'
-        )
+        .get('/api/v4/projects/undefined/merge_requests?per_page=100')
         .reply(200, [
           {
             iid: 1,
