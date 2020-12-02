@@ -14,10 +14,8 @@ export async function createOnboardingBranch(
   const contents = await getOnboardingConfig(config);
   logger.debug('Creating onboarding branch');
 
-  const configFile = configFileNames.includes(
-    config.onboardingDefaultConfigFileName
-  )
-    ? config.onboardingDefaultConfigFileName
+  const configFile = configFileNames.includes(config.onboardingConfigFileName)
+    ? config.onboardingConfigFileName
     : defaultConfigFile;
 
   let commitMessagePrefix = '';
