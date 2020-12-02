@@ -376,6 +376,7 @@ async function fetchPrList(): Promise<Pr[]> {
   const searchParams = {
     per_page: '100',
   } as any;
+  // istanbul ignore if
   if (config.ignorePrAuthor) {
     // https://docs.gitlab.com/ee/api/merge_requests.html#list-merge-requests
     // default: `scope=created_by_me`
