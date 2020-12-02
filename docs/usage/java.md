@@ -26,7 +26,7 @@ Renovate does not support:
 ### How It Works
 
 Renovate uses a plugin to search and extract versions from projects.
-They are then looked up using Maven datasources and patched into PRs the usual way. (I think this needs some expanding on maybe?)
+Once the Gradle plugin has detected the dependencies, lookups and updating will be performed like usual with datasources and direct patching of files.
 
 ## Maven
 
