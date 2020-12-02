@@ -14,6 +14,12 @@ export async function createOnboardingBranch(
   const contents = await getOnboardingConfig(config);
   logger.debug('Creating onboarding branch');
 
+  const configFile = configFileNames.includes(
+    config.onboardingDefaultConfigFileName
+  )
+    ? config.onboardingDefaultConfigFileName
+    : defaultConfigFile;
+
   let commitMessagePrefix = '';
   if (config.commitMessagePrefix) {
     commitMessagePrefix = config.commitMessagePrefix;
@@ -33,7 +39,7 @@ export async function createOnboardingBranch(
   } else {
     onboardingCommitMessage = `${
       commitMessagePrefix ? 'add' : 'Add'
-    } ${defaultConfigFile}`;
+    } ${configFile}`;
   }
 
   const commitMessage = `${commitMessagePrefix} ${onboardingCommitMessage}`.trim();
@@ -47,7 +53,7 @@ export async function createOnboardingBranch(
     branchName: config.onboardingBranch,
     files: [
       {
-        name: defaultConfigFile,
+        name: configFile,
         contents,
       },
     ],
