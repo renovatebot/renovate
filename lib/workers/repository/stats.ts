@@ -1,6 +1,7 @@
 import URL from 'url';
 import { logger } from '../../logger';
 import * as memCache from '../../util/cache/memory';
+import { RequestStats } from '../../util/http';
 
 export function printRequestStats(): void {
   const httpRequests = memCache.get<RequestStats[]>('http-requests');
