@@ -2,13 +2,6 @@ import URL from 'url';
 import { logger } from '../../logger';
 import * as memCache from '../../util/cache/memory';
 
-interface RequestStats {
-  method: string;
-  url: string;
-  duration: number;
-  queueDuration: number;
-}
-
 export function printRequestStats(): void {
   const httpRequests = memCache.get<RequestStats[]>('http-requests');
   if (!httpRequests) {

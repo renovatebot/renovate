@@ -11,3 +11,10 @@ export type GotOptions = OptionsOfJSONResponseBody & {
 };
 
 export { RequestError_ as HttpError };
+
+export interface RequestStats {
+  method: string;
+  url: string;
+  duration: number;
+  queueDuration: number;
+}
