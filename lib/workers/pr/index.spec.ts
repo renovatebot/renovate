@@ -645,8 +645,6 @@ describe('workers/pr', () => {
     });
 
     it('should create a PR with set of labels and mergeable addLabels', async () => {
-      config.labels = ['deps', 'renovate'];
-      config.addLabels = ['deps', 'js'];
       const { prResult } = await prWorker.ensurePr(
         {...config, labels: ['deps', 'renovate'], addLabels: ['deps', 'js']}
       );
