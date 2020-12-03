@@ -9,6 +9,10 @@
   "stabilityDays": 3,
   "packageRules": [
     {
+      "packageNames": ["mcr.microsoft.com/vscode/devcontainers/typescript-node"],
+      "extends": ["schedule:weekly"],
+    },
+    {
       "datasources": ["docker"],
       "automerge": false
     },
