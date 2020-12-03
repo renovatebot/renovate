@@ -384,7 +384,7 @@ export async function ensurePr(
           targetBranch: config.baseBranch,
           prTitle,
           prBody,
-          labels: config.labels,
+          labels: [...new Set([...config.labels, ...config.addLabels])],
           platformOptions: getPlatformPrOptions(config),
           draftPR: config.draftPR,
         });
