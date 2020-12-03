@@ -1,0 +1,6 @@
+*.md                                   @HonkingGoose
+
+/lib/manager/git-submodules/           @JamieMagee
+
+/lib/platform/azure/                   @JamieMagee
+/lib/platform/gitea/                   @ppmathis
