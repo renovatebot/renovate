@@ -12,7 +12,7 @@
       "packageNames": [
         "mcr.microsoft.com/vscode/devcontainers/typescript-node"
       ],
-      "extends": ["schedule:weekly"]
+      "extends": ["schedule:monthly"]
     },
     {
       "datasources": ["docker"],
