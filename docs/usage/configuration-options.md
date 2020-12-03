@@ -27,6 +27,36 @@ Also, be sure to check out Renovate's [shareable config presets](/config-presets
 
 If you have any questions about the below config options, or would like to get help/feedback about a config, please post it as an issue in [renovatebot/config-help](https://github.com/renovatebot/config-help) where we will do our best to answer your question.
 
+## addLabels
+
+The `labels` field is non-mergeable, meaning that any config setting a list of PR labels will replace any existing list.
+If you want to append labels for matched rules, then define an `addLabels` array with one (or more) label strings.
+All matched `addLabels` strings will be attached to the PR.
+
+Consider this example:
+
+```json
+{
+  "labels": ["dependencies"],
+  "packageRules": [
+    {
+      "packagePatterns": ["eslint"],
+      "labels": ["linting"]
+    },
+    {
+      "depTypeList": ["optionalDependencies"],
+      "addLabels": ["optional"]
+    }
+  ]
+}
+```
+
+With the above config:
+
+- Optional dependencies will have the labels `dependencies` and `optional`
+- ESLint dependencies will have the label `linting`
+- All other dependencies will have the label `dependencies`
+
 ## additionalBranchPrefix
 
 This value defaults to an empty string, and is typically not necessary.
