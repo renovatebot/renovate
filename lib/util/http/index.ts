@@ -140,7 +140,7 @@ export class Http<GetOptions = HttpOptions, PostOptions = HttpPostOptions> {
         });
       };
       const queue = getQueue(url);
-      resPromise = queue ? queue.add(queueTask) : queueTask();
+      resPromise = queue?.add(queueTask) ?? queueTask();
       if (options.method === 'get') {
         memCache.set(cacheKey, resPromise); // always set if it's a get
       }
