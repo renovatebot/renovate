@@ -731,7 +731,9 @@ e.g. configure `"hostName": "docker.io"` to cover both `index.docker.io` and `au
 
 ### concurrentRequestLimit
 
-Setting this value will limit the number of concurrent outstanding requests for any host it applies to. It should be used only if a datasource is rate limiting Renovate or having problems with the load.
+Usually the default `concurrentRequestLimit` is fine, but you can use `concurrentRequestLimit` to limit the number of concurrent outstanding requests.
+You only need to adjust this setting if a datasource is rate limiting Renovate or has problems with the load.
+The limit will be set for any host it applies to.
 
 ### enableHttp2
 
