@@ -1,5 +1,5 @@
 import { ExecOptions as ChildProcessExecOptions } from 'child_process';
-import { dirname, join } from 'path';
+import { dirname, join } from 'upath';
 import { RenovateConfig } from '../../config/common';
 import { logger } from '../../logger';
 import {

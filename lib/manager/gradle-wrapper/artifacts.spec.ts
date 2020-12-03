@@ -1,7 +1,7 @@
 /* eslint jest/no-standalone-expect: 0 */
 import { exec as _exec } from 'child_process';
-import { resolve } from 'path';
 import { readFile } from 'fs-extra';
+import { resolve } from 'upath';
 import { envMock, mockExecAll } from '../../../test/execUtil';
 import * as httpMock from '../../../test/httpMock';
 import {

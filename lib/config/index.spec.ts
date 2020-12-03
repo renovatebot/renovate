@@ -1,4 +1,4 @@
-import path from 'path';
+import upath from 'upath';
 import { readFile } from '../util/fs';
 import getArgv from './config/__fixtures__/argv';
 import { getConfig } from './defaults';
@@ -62,7 +62,7 @@ describe('config/index', () => {
       expect(parsedConfig).not.toContainKey('configFile');
     });
     it('supports config.force', async () => {
-      const configPath = path.join(
+      const configPath = upath.join(
         __dirname,
         'config/__fixtures__/withForce.js'
       );
@@ -82,7 +82,7 @@ describe('config/index', () => {
       ]);
     });
     it('reads private key from file', async () => {
-      const privateKeyPath = path.join(
+      const privateKeyPath = upath.join(
         __dirname,
         'keys/__fixtures__/private.pem'
       );

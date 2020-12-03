@@ -1,5 +1,5 @@
-import { resolve } from 'path';
 import { stat } from 'fs-extra';
+import { resolve } from 'upath';
 import { logger } from '../../logger';
 import { ExecOptions, exec } from '../../util/exec';
 import { readLocalFile, writeLocalFile } from '../../util/fs';

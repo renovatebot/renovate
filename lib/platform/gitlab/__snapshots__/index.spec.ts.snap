@@ -854,7 +854,7 @@ Array [
       "user-agent": "https://github.com/renovatebot/renovate",
     },
     "method": "GET",
-    "url": "https://gitlab.com/api/v4/projects/undefined/merge_requests?per_page=100&author_id=undefined",
+    "url": "https://gitlab.com/api/v4/projects/undefined/merge_requests?per_page=100",
   },
 ]
 `;
@@ -870,7 +870,7 @@ Array [
       "user-agent": "https://github.com/renovatebot/renovate",
     },
     "method": "GET",
-    "url": "https://gitlab.com/api/v4/projects/undefined/merge_requests?per_page=100&author_id=undefined",
+    "url": "https://gitlab.com/api/v4/projects/undefined/merge_requests?per_page=100",
   },
 ]
 `;
@@ -886,7 +886,7 @@ Array [
       "user-agent": "https://github.com/renovatebot/renovate",
     },
     "method": "GET",
-    "url": "https://gitlab.com/api/v4/projects/undefined/merge_requests?per_page=100&author_id=undefined",
+    "url": "https://gitlab.com/api/v4/projects/undefined/merge_requests?per_page=100",
   },
 ]
 `;
@@ -902,7 +902,7 @@ Array [
       "user-agent": "https://github.com/renovatebot/renovate",
     },
     "method": "GET",
-    "url": "https://gitlab.com/api/v4/projects/undefined/merge_requests?per_page=100&author_id=undefined",
+    "url": "https://gitlab.com/api/v4/projects/undefined/merge_requests?per_page=100",
   },
 ]
 `;
@@ -918,7 +918,7 @@ Array [
       "user-agent": "https://github.com/renovatebot/renovate",
     },
     "method": "GET",
-    "url": "https://gitlab.com/api/v4/projects/undefined/merge_requests?per_page=100&author_id=undefined",
+    "url": "https://gitlab.com/api/v4/projects/undefined/merge_requests?per_page=100",
   },
 ]
 `;
@@ -934,7 +934,7 @@ Array [
       "user-agent": "https://github.com/renovatebot/renovate",
     },
     "method": "GET",
-    "url": "https://gitlab.com/api/v4/projects/undefined/merge_requests?per_page=100&author_id=undefined",
+    "url": "https://gitlab.com/api/v4/projects/undefined/merge_requests?per_page=100",
   },
 ]
 `;
@@ -2201,7 +2201,7 @@ Array [
       "user-agent": "https://github.com/renovatebot/renovate",
     },
     "method": "GET",
-    "url": "https://gitlab.com/api/v4/projects/undefined/merge_requests?per_page=100&author_id=undefined",
+    "url": "https://gitlab.com/api/v4/projects/undefined/merge_requests?per_page=100",
   },
   Object {
     "body": "{\\"title\\":\\"title\\",\\"description\\":\\"body\\",\\"state_event\\":\\"close\\"}",
@@ -2253,7 +2253,7 @@ Array [
       "user-agent": "https://github.com/renovatebot/renovate",
     },
     "method": "GET",
-    "url": "https://gitlab.com/api/v4/projects/undefined/merge_requests?per_page=100&author_id=undefined",
+    "url": "https://gitlab.com/api/v4/projects/undefined/merge_requests?per_page=100",
   },
   Object {
     "body": "{\\"title\\":\\"Draft: title\\",\\"description\\":\\"body\\"}",
@@ -2305,7 +2305,7 @@ Array [
       "user-agent": "https://github.com/renovatebot/renovate",
     },
     "method": "GET",
-    "url": "https://gitlab.com/api/v4/projects/undefined/merge_requests?per_page=100&author_id=undefined",
+    "url": "https://gitlab.com/api/v4/projects/undefined/merge_requests?per_page=100",
   },
   Object {
     "body": "{\\"title\\":\\"Draft: title\\",\\"description\\":\\"body\\"}",
@@ -2357,7 +2357,7 @@ Array [
       "user-agent": "https://github.com/renovatebot/renovate",
     },
     "method": "GET",
-    "url": "https://gitlab.com/api/v4/projects/undefined/merge_requests?per_page=100&author_id=undefined",
+    "url": "https://gitlab.com/api/v4/projects/undefined/merge_requests?per_page=100",
   },
   Object {
     "body": "{\\"title\\":\\"title\\",\\"description\\":\\"body\\"}",

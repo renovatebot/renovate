@@ -22,6 +22,7 @@ import {
 import { getRepoStatus } from '../../util/git';
 import * as hostRules from '../../util/host-rules';
 import { UpdateArtifact, UpdateArtifactsResult } from '../common';
+import { composerVersioningId, getConstraint } from './utils';
 
 interface UserPass {
   username: string;
@@ -110,7 +111,9 @@ export async function updateArtifacts({
     logger.debug('No composer.lock found');
     return null;
   }
-  await ensureLocalDir(getSiblingFileName(packageFileName, 'vendor'));
+
+  const vendorDir = getSiblingFileName(packageFileName, 'vendor');
+  await ensureLocalDir(vendorDir);
   try {
     await writeLocalFile(packageFileName, newPackageFileContent);
     if (config.isLockFileMaintenance) {
@@ -125,6 +128,8 @@ export async function updateArtifacts({
       },
       docker: {
         image: 'renovate/composer',
+        tagConstraint: getConstraint(config),
+        tagScheme: composerVersioningId,
       },
     };
     const cmd = 'composer';
@@ -150,7 +155,7 @@ export async function updateArtifacts({
       return null;
     }
     logger.debug('Returning updated composer.lock');
-    return [
+    const res: UpdateArtifactsResult[] = [
       {
         file: {
           name: lockFileName,
@@ -158,6 +163,27 @@ export async function updateArtifacts({
         },
       },
     ];
+
+    for (const f of [...status.modified, ...status.not_added]) {
+      if (f.startsWith(vendorDir)) {
+        res.push({
+          file: {
+            name: f,
+            contents: await readLocalFile(f),
+          },
+        });
+      }
+    }
+    for (const f of status.deleted) {
+      res.push({
+        file: {
+          name: '|delete|',
+          contents: f,
+        },
+      });
+    }
+
+    return res;
   } catch (err) {
     if (
       err.message?.includes(

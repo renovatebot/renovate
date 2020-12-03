@@ -1,5 +1,5 @@
 import { readFileSync } from 'fs';
-import { resolve } from 'path';
+import { resolve } from 'upath';
 import { defaultConfig } from '../../../test/util';
 import { extractPackageFile } from '../../manager/html';
 import { BranchUpgradeConfig } from '../common';

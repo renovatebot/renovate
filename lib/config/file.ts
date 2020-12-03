@@ -1,11 +1,11 @@
-import path from 'path';
+import upath from 'upath';
 import { logger } from '../logger';
 import { RenovateConfig } from './common';
 import { migrateConfig } from './migration';
 
 export function getConfig(env: NodeJS.ProcessEnv): RenovateConfig {
   let configFile = env.RENOVATE_CONFIG_FILE || 'config';
-  if (!path.isAbsolute(configFile)) {
+  if (!upath.isAbsolute(configFile)) {
     configFile = `${process.cwd()}/${configFile}`;
     logger.debug('Checking for config file in ' + configFile);
   }

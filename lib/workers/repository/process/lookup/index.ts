@@ -16,6 +16,7 @@ import { getRangeStrategy } from '../../../../manager';
 import { LookupUpdate, RangeConfig } from '../../../../manager/common';
 import { SkipReason } from '../../../../types';
 import { clone } from '../../../../util/clone';
+import { applyPackageRules } from '../../../../util/package-rules';
 import * as allVersioning from '../../../../versioning';
 import { FilterConfig, filterVersions } from './filter';
 import { RollbackConfig, getRollbackUpdate } from './rollback';
@@ -50,6 +51,8 @@ export interface LookupUpdateConfig
   vulnerabilityAlert?: boolean;
   separateMajorMinor?: boolean;
   separateMultipleMajor?: boolean;
+  datasource: string;
+  depName: string;
 }
 
 function getType(
@@ -131,8 +134,9 @@ function getBucket(config: LookupUpdateConfig, update: LookupUpdate): string {
 }
 
 export async function lookupUpdates(
-  config: LookupUpdateConfig
+  inconfig: LookupUpdateConfig
 ): Promise<UpdateResult> {
+  let config: LookupUpdateConfig = { ...inconfig };
   const { depName, currentValue, lockedVersion, vulnerabilityAlert } = config;
   logger.trace({ dependency: depName, currentValue }, 'lookupUpdates');
   const version = allVersioning.get(config.versioning);
@@ -200,6 +204,8 @@ export async function lookupUpdates(
         return res;
       }
     }
+    // Reapply package rules in case we missed something from sourceUrl
+    config = applyPackageRules({ ...config, sourceUrl: res.sourceUrl });
     if (config.followTag) {
       const taggedVersion = dependency.tags[config.followTag];
       if (!taggedVersion) {

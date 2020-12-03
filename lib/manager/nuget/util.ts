@@ -1,5 +1,6 @@
-import * as path from 'path';
+import cryptoRandomString from 'crypto-random-string';
 import findUp from 'find-up';
+import * as upath from 'upath';
 import { XmlDocument } from 'xmldoc';
 import * as datasourceNuget from '../../datasource/nuget';
 import { logger } from '../../logger';
@@ -19,18 +20,37 @@ export interface Registry {
   readonly name?: string;
 }
 
-export async function determineRegistries(
+/* istanbul ignore next */
+export function getRandomString(): string {
+  return cryptoRandomString({ length: 16 });
+}
+
+export function getDefaultRegistries(): Registry[] {
+  return datasourceNuget.defaultRegistryUrls.map(
+    (registryUrl) =>
+      ({
+        url: registryUrl,
+      } as Registry)
+  );
+}
+
+export async function getConfiguredRegistries(
   packageFile: string,
   localDir: string
 ): Promise<Registry[] | undefined> {
   // Valid file names taken from https://github.com/NuGet/NuGet.Client/blob/f64621487c0b454eda4b98af853bf4a528bef72a/src/NuGet.Core/NuGet.Configuration/Settings/Settings.cs#L34
   const nuGetConfigFileNames = ['nuget.config', 'NuGet.config', 'NuGet.Config'];
+  // normalize paths, otherwise startsWith can fail because of path delimitter mismatch
+  const baseDir = upath.normalizeSafe(localDir);
   const nuGetConfigPath = await findUp(nuGetConfigFileNames, {
-    cwd: path.dirname(path.join(localDir, packageFile)),
+    cwd: upath.dirname(upath.join(baseDir, packageFile)),
     type: 'file',
   });
 
-  if (nuGetConfigPath?.startsWith(localDir) !== true) {
+  if (
+    !nuGetConfigPath ||
+    upath.normalizeSafe(nuGetConfigPath).startsWith(baseDir) !== true
+  ) {
     return undefined;
   }
 
@@ -45,12 +65,7 @@ export async function determineRegistries(
     return undefined;
   }
 
-  const registries = datasourceNuget.defaultRegistryUrls.map(
-    (registryUrl) =>
-      ({
-        url: registryUrl,
-      } as Registry)
-  );
+  const registries = getDefaultRegistries();
   for (const child of packageSources.children) {
     if (child.type === 'element') {
       if (child.name === 'clear') {
