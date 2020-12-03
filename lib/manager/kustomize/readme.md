@@ -13,7 +13,7 @@ This package will manage two parts of the `kustomization.yaml` file:
 **Limitations**
 
 - Needs to have `kind: Kustomization` defined
-- Currently this hasn't been tested using https to fetch the repos
+- Currently this hasn't been tested using HTTPS to fetch the repos
 - The image tags are limited to the following formats:
 
 ```
