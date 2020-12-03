@@ -27,6 +27,31 @@ Also, be sure to check out Renovate's [shareable config presets](/config-presets
 
 If you have any questions about the below config options, or would like to get help/feedback about a config, please post it as an issue in [renovatebot/config-help](https://github.com/renovatebot/config-help) where we will do our best to answer your question.
 
+## addLabels
+
+Different sets of package matching `labels` are not appended to PRs, last matched rule just fully override labels to set.
+If you want to append labels for matched rules, then define an `addLabels` array of one or more label strings to append to the PR so all matched `addLabels` will be attached to PR.
+
+Consider this example:
+
+```json
+{
+  "labels": ["dependencies"],
+  "packageRules": [
+    {
+      "packagePatterns": ["eslint"],
+      "addLabels": ["linting"]
+    },
+    {
+      "depTypeList": ["optionalDependencies"],
+      "addLabels": ["optional"]
+    }
+  ]
+}
+```
+
+With the above config, every PR raised by Renovate will have the label `dependencies` while PRs containing `eslint`-related packages will instead have labels `dependencies` and `linting`, PRs for optional dependencies will have `dependencies` and `optional`, and so on for different combinations of matched rules.
+
 ## additionalBranchPrefix
 
 This value defaults to an empty string, and is typically not necessary.
@@ -898,30 +923,6 @@ Consider this example:
 ```
 
 With the above config, every PR raised by Renovate will have the label `dependencies` while PRs containing `eslint`-related packages will instead have the label `linting`.
-
-## addLabels
-
-Different sets of package matching `labels` are not appended to PRs, last matched rule just fully override labels to set.
-If you want to append labels for matched rules, then define an `addLabels` array of one or more label strings to append to the PR so all matched `addLabels` will be attached to PR.
-
-Consider this example:
-
-```json
-{
-  "labels": ["dependencies"],
-  "packageRules": [
-    {
-      "packagePatterns": ["eslint"],
-      "addLabels": ["linting"]
-    },
-    {
-      "depTypeList": ["optionalDependencies"],
-      "addLabels": ["optional"]
-    }
-  ]
-}
-```
-With the above config, every PR raised by Renovate will have the label `dependencies` while PRs containing `eslint`-related packages will instead have labels `dependencies` and `linting`, PRs for optional dependencies will have `dependencies` and `optional`, and so on for different combinations of matched rules.
 
 ## lockFileMaintenance
 
