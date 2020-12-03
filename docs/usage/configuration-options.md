@@ -29,8 +29,9 @@ If you have any questions about the below config options, or would like to get h
 
 ## addLabels
 
-The `labels` field is non-mergeable, meaning that any config setting a list of PR labels will replace any existing list that existed.
-If you want to append labels for matched rules, then define an `addLabels` array of one or more label strings to append to the PR so all matched `addLabels` will be attached to PR.
+The `labels` field is non-mergeable, meaning that any config setting a list of PR labels will replace any existing list.
+If you want to append labels for matched rules, then define an `addLabels` array with one (or more) label strings.
+All matched `addLabels` strings will be attached to the PR.
 
 Consider this example:
 
