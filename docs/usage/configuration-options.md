@@ -29,7 +29,7 @@ If you have any questions about the below config options, or would like to get h
 
 ## addLabels
 
-Different sets of package matching `labels` are not appended to PRs, last matched rule just fully override labels to set.
+The `labels` field is non-mergeable, meaning that any config setting a list of PR labels will replace any existing list that existed.
 If you want to append labels for matched rules, then define an `addLabels` array of one or more label strings to append to the PR so all matched `addLabels` will be attached to PR.
 
 Consider this example:
@@ -40,7 +40,7 @@ Consider this example:
   "packageRules": [
     {
       "packagePatterns": ["eslint"],
-      "addLabels": ["linting"]
+      "labels": ["linting"]
     },
     {
       "depTypeList": ["optionalDependencies"],
@@ -50,7 +50,10 @@ Consider this example:
 }
 ```
 
-With the above config, every PR raised by Renovate will have the label `dependencies` while PRs containing `eslint`-related packages will instead have labels `dependencies` and `linting`, PRs for optional dependencies will have `dependencies` and `optional`, and so on for different combinations of matched rules.
+With the above config:
+ - Optional dependencies will have the labels `dependencies` and `optional`
+ - ESLint dependencies will have the label `linting`
+ - All other dependencies will have the label `dependencies`
 
 ## additionalBranchPrefix
 
