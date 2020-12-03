@@ -1,9 +1,13 @@
 // SEE for the reference https://github.com/renovatebot/renovate/blob/c3e9e572b225085448d94aa121c7ec81c14d3955/lib/platform/bitbucket/utils.js
 import url from 'url';
+import { HTTPError, Response } from 'got';
 import { PrState } from '../../types';
 import { HttpOptions, HttpPostOptions, HttpResponse } from '../../util/http';
 import { BitbucketServerHttp } from '../../util/http/bitbucket-server';
 import { BbbsRestPr, BbsPr } from './types';
+
+const BITBUCKET_INVALID_REVIEWERS_EXCEPTION =
+  'com.atlassian.bitbucket.pull.InvalidPullRequestReviewersException';
 
 const bitbucketServerHttp = new BitbucketServerHttp();
 
@@ -117,4 +121,39 @@ export type BitbucketBranchState =
 export interface BitbucketStatus {
   key: string;
   state: BitbucketBranchState;
+}
+
+interface BitbucketErrorResponse {
+  errors?: {
+    exceptionName?: string;
+    reviewerErrors?: { context?: string }[];
+  }[];
+}
+
+interface BitbucketError extends HTTPError {
+  readonly response: Response<BitbucketErrorResponse>;
+}
+
+export function isInvalidReviewersResponse(err: BitbucketError): boolean {
+  const errors = err?.response?.body?.errors || [];
+  return (
+    errors.length > 0 &&
+    errors.every(
+      (error) => error.exceptionName === BITBUCKET_INVALID_REVIEWERS_EXCEPTION
+    )
+  );
+}
+
+export function getInvalidReviewers(err: BitbucketError): string[] {
+  const errors = err?.response?.body?.errors || [];
+  let invalidReviewers = [];
+  for (const error of errors) {
+    if (error.exceptionName === BITBUCKET_INVALID_REVIEWERS_EXCEPTION) {
+      invalidReviewers = invalidReviewers.concat(
+        error.reviewerErrors?.map(({ context }) => context) || []
+      );
+    }
+  }
+
+  return invalidReviewers;
 }
