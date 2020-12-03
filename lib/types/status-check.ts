@@ -4,5 +4,5 @@ export enum StatusCheck {
 }
 
 export function isStatusCheck(status: string): status is StatusCheck {
-  return Object.values(StatusCheck).indexOf(status as StatusCheck) !== -1;
+  return Object.values(StatusCheck).includes(status as StatusCheck);
 }

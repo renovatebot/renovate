@@ -454,6 +454,17 @@ describe('platform/gitlab', () => {
       expect(res).toEqual(BranchStatus.yellow);
       expect(httpMock.getTrace()).toMatchSnapshot();
     });
+    it('returns pending if only renovate checks are success', async () => {
+      const scope = await initRepo();
+      scope
+        .get(
+          '/api/v4/projects/some%2Frepo/repository/commits/0d9c7726c3d628b7e28af234595cfd20febdbf8e/statuses'
+        )
+        .reply(200, [{ status: 'success', name: 'renovate/stability-days' }]);
+      const res = await gitlab.getBranchStatus('somebranch', []);
+      expect(res).toEqual(BranchStatus.yellow);
+      expect(httpMock.getTrace()).toMatchSnapshot();
+    });
     it('returns success if all are success', async () => {
       const scope = await initRepo();
       scope

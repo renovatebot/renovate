@@ -330,10 +330,10 @@ export async function getBranchStatus(
 
   const res = await getStatus(branchName);
   logger.debug(`Got res with ${res.length} results`);
-  if (
-    res.filter((status: GitlabBranchStatus) => !isStatusCheck(status.name))
-      .length === 0
-  ) {
+  const filteredStatuses = res.filter(
+    (status: GitlabBranchStatus) => !isStatusCheck(status.name)
+  );
+  if (filteredStatuses.length === 0) {
     // Return 'pending' if we have no status checks
     return BranchStatus.yellow;
   }

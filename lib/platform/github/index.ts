@@ -831,9 +831,12 @@ export async function getBranchStatus(
       logger.warn({ err }, 'Error retrieving check runs');
     }
   }
+  const filteredStatuses = commitStatus.statuses.filter(
+    (status: { context: string }) => !isStatusCheck(status.context)
+  );
   if (
-    checkRuns.filter((status: { name: string }) => !isStatusCheck(status.name))
-      .length === 0
+    checkRuns.length === 0 &&
+    (commitStatus.statuses.length === 0 || filteredStatuses.length > 0)
   ) {
     if (commitStatus.state === 'success') {
       return BranchStatus.green;
@@ -850,10 +853,8 @@ export async function getBranchStatus(
     return BranchStatus.red;
   }
   if (
-    (commitStatus.state === 'success' ||
-      commitStatus.statuses.filter(
-        (status: { context: string }) => !isStatusCheck(status.context)
-      ).length === 0) &&
+    ((commitStatus.state === 'success' && filteredStatuses.length > 0) ||
+      commitStatus.statuses.length === 0) &&
     checkRuns.every((run) =>
       ['skipped', 'neutral', 'success'].includes(run.conclusion)
     )

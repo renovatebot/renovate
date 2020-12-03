@@ -306,6 +306,33 @@ describe('platform/bitbucket', () => {
       ).toBe(BranchStatus.yellow);
       expect(httpMock.getTrace()).toMatchSnapshot();
     });
+    it('returns pending if only renovate checks pass', async () => {
+      const scope = await initRepoMock();
+      scope
+        .get('/2.0/repositories/some/repo/refs/branches/branch')
+        .reply(200, {
+          name: 'branch',
+          target: {
+            hash: 'branch_hash',
+            parents: [{ hash: 'master_hash' }],
+          },
+        })
+        .get(
+          '/2.0/repositories/some/repo/commit/branch_hash/statuses?pagelen=100'
+        )
+        .reply(200, {
+          values: [
+            {
+              key: 'renovate/stability-days',
+              state: 'SUCCESSFUL',
+            },
+          ],
+        });
+      expect(await bitbucket.getBranchStatus('branch', [])).toBe(
+        BranchStatus.yellow
+      );
+      expect(httpMock.getTrace()).toMatchSnapshot();
+    });
   });
 
   describe('getBranchStatusCheck()', () => {
