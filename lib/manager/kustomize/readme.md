@@ -12,8 +12,9 @@ This package will manage two parts of the `kustomization.yaml` file:
 
 **Limitations**
 
+- Needs to have `kind: Kustomization` defined
 - Currently this hasn't been tested using https to fetch the repos
-- the image tags are limited to the following formats:
+- The image tags are limited to the following formats:
 
 ```
 - name: image/name
