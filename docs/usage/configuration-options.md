@@ -899,6 +899,30 @@ Consider this example:
 
 With the above config, every PR raised by Renovate will have the label `dependencies` while PRs containing `eslint`-related packages will instead have the label `linting`.
 
+## addLabels
+
+Different sets of package matching `labels` are not appended to PRs, last matched rule just fully override labels to set.
+If you want to append labels for matched rules, then define an `addLabels` array of one or more label strings to append to the PR so all matched `addLabels` will be attached to PR.
+
+Consider this example:
+
+```json
+{
+  "labels": ["dependencies"],
+  "packageRules": [
+    {
+      "packagePatterns": ["eslint"],
+      "addLabels": ["linting"]
+    },
+    {
+      "depTypeList": ["optionalDependencies"],
+      "addLabels": ["optional"]
+    }
+  ]
+}
+```
+With the above config, every PR raised by Renovate will have the label `dependencies` while PRs containing `eslint`-related packages will instead have labels `dependencies` and `linting`, PRs for optional dependencies will have `dependencies` and `optional`, and so on for different combinations of matched rules.
+
 ## lockFileMaintenance
 
 This feature can be used to refresh lock files and keep them up-to-date.
