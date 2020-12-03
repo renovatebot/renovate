@@ -15,7 +15,7 @@ import {
 } from '../../constants/error-messages';
 import { PLATFORM_TYPE_GITLAB } from '../../constants/platforms';
 import { logger } from '../../logger';
-import { BranchStatus, PrState } from '../../types';
+import { BranchStatus, PrState, isStatusCheck } from '../../types';
 import * as git from '../../util/git';
 import * as hostRules from '../../util/host-rules';
 import { HttpResponse } from '../../util/http';
@@ -330,7 +330,10 @@ export async function getBranchStatus(
 
   const res = await getStatus(branchName);
   logger.debug(`Got res with ${res.length} results`);
-  if (res.length === 0) {
+  if (
+    res.filter((status: GitlabBranchStatus) => !isStatusCheck(status.name))
+      .length === 0
+  ) {
     // Return 'pending' if we have no status checks
     return BranchStatus.yellow;
   }

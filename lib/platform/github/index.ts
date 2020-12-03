@@ -16,7 +16,7 @@ import {
 } from '../../constants/error-messages';
 import { PLATFORM_TYPE_GITHUB } from '../../constants/platforms';
 import { logger } from '../../logger';
-import { BranchStatus, PrState } from '../../types';
+import { BranchStatus, PrState, isStatusCheck } from '../../types';
 import { ExternalHostError } from '../../types/errors/external-host-error';
 import * as git from '../../util/git';
 import { deleteBranch } from '../../util/git';
@@ -831,7 +831,10 @@ export async function getBranchStatus(
       logger.warn({ err }, 'Error retrieving check runs');
     }
   }
-  if (checkRuns.length === 0) {
+  if (
+    checkRuns.filter((status: { name: string }) => !isStatusCheck(status.name))
+      .length === 0
+  ) {
     if (commitStatus.state === 'success') {
       return BranchStatus.green;
     }
@@ -847,7 +850,10 @@ export async function getBranchStatus(
     return BranchStatus.red;
   }
   if (
-    (commitStatus.state === 'success' || commitStatus.statuses.length === 0) &&
+    (commitStatus.state === 'success' ||
+      commitStatus.statuses.filter(
+        (status: { context: string }) => !isStatusCheck(status.context)
+      ).length === 0) &&
     checkRuns.every((run) =>
       ['skipped', 'neutral', 'success'].includes(run.conclusion)
     )
