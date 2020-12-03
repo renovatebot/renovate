@@ -726,8 +726,7 @@ Renovate does not do a "longest match" algorithm to pick between multiple matchi
 
 ### concurrentRequestLimit
 
-Usually the default setting is fine, but you can use `concurrentRequestLimit` to limit the number of concurrent
-outstanding requests.
+Usually the default setting is fine, but you can use `concurrentRequestLimit` to limit the number of concurrent outstanding requests.
 You only need to adjust this setting if a datasource is rate limiting Renovate or has problems with the load.
 The limit will be set for any host it applies to.
 
