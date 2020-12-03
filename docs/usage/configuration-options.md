@@ -51,9 +51,10 @@ Consider this example:
 ```
 
 With the above config:
- - Optional dependencies will have the labels `dependencies` and `optional`
- - ESLint dependencies will have the label `linting`
- - All other dependencies will have the label `dependencies`
+
+- Optional dependencies will have the labels `dependencies` and `optional`
+- ESLint dependencies will have the label `linting`
+- All other dependencies will have the label `dependencies`
 
 ## additionalBranchPrefix
 

@@ -1418,7 +1418,7 @@ const options: RenovateOptions[] = [
     description: 'Labels to add to Pull Request',
     type: 'array',
     subType: 'string',
-    mergeable: true
+    mergeable: true,
   },
   {
     name: 'assignees',
