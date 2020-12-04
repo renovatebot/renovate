@@ -18,7 +18,7 @@ Multi-platform and multi-language.
 - Bot behavior is extremely customizable via configuration files (config as code)
 - Use ESLint-like shared config presets for ease of use and simplifying configuration
 - Lock files are natively supported and updated in the same commit, including immediately resolving conflicts whenever PRs are merged
-- Supports GitHub (.com and Enterprise), GitLab (CE/EE), Bitbucket Server, Azure DevOps and Gitea. Bitbucket Cloud is also supported but considered in Beta until it gets the thumbs-up from more users
+- Supports GitHub (.com and Enterprise), GitLab (.com and CE/EE), Bitbucket Server, Azure DevOps and Gitea. Bitbucket Cloud is also supported but considered in Beta until it gets the thumbs-up from more users
 - Open source (installable via npm/Yarn or Docker Hub) so can be self-hosted or used via GitHub App
 
 ## Who Uses Renovate?
@@ -59,7 +59,7 @@ You can also raise an issue in https://github.com/renovatebot/config-help if you
 
 ## Self-Hosting
 
-If you are not on github.com, or you prefer to run your own instance of Renovate then you have several options:
+If you are not on github.com or gitlab.com, or you prefer to run your own instance of Renovate then you have several options:
 
 - Install the `renovate` CLI tool from npmjs, run it on a schedule (e.g. using cron)
 - Run the `renovate/renovate` Docker Hub image (same content/versions as the CLI tool), run it on a schedule
