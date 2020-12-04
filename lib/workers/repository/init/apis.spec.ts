@@ -78,5 +78,18 @@ describe('workers/repository/init/apis', () => {
       expect(workerPlatformConfig).toBeTruthy();
       expect(workerPlatformConfig.onboardingConfigFileName).toBeUndefined();
     });
+    it('falls back to "renovate.json" if onboardingConfigFileName is not valid', async () => {
+      platform.initRepo.mockResolvedValueOnce({
+        defaultBranch: 'master',
+        isFork: false,
+      });
+      platform.getJsonFile.mockResolvedValueOnce({ includeForks: false });
+      const workerPlatformConfig = await initApis({
+        config,
+        onboardingConfigFileName: 'foo.bar',
+      });
+      expect(workerPlatformConfig).toBeTruthy();
+      expect(workerPlatformConfig.onboardingConfigFileName).toBeUndefined();
+    });
   });
 });
