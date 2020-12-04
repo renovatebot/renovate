@@ -76,9 +76,7 @@ describe('workers/repository/init/apis', () => {
         onboardingConfigFileName: undefined,
       });
       expect(workerPlatformConfig).toBeTruthy();
-      expect(workerPlatformConfig.onboardingConfigFileName).toBe(
-        'renovate.json'
-      );
+      expect(workerPlatformConfig.onboardingConfigFileName).toBe(undefined);
     });
   });
 });
