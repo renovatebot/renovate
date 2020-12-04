@@ -19,7 +19,7 @@ Multi-platform and multi-language.
 - Use ESLint-like shared config presets for ease of use and simplifying configuration
 - Lock files are natively supported and updated in the same commit, including immediately resolving conflicts whenever PRs are merged
 - Supports GitHub (.com and Enterprise), GitLab (CE/EE), Bitbucket Server, Azure DevOps and Gitea. Bitbucket Cloud is also supported but considered in Beta until it gets the thumbs-up from more users
-- Open source (installable via npm/yarn or Docker Hub) so can be self-hosted or used via GitHub App
+- Open source (installable via npm/Yarn or Docker Hub) so can be self-hosted or used via GitHub App
 
 ## Who Uses Renovate?
 
