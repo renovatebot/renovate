@@ -38,5 +38,16 @@ describe('workers/repository/onboarding/pr/config-description', () => {
       const res = getConfigDesc(config);
       expect(res).toMatchSnapshot();
     });
+    it('contains the onboardingConfigFileName if set', () => {
+      delete config.description;
+      config.packageFiles = [];
+      config.assignees = ['someone', '@someone-else'];
+      config.labels = ['renovate', 'deps'];
+      config.schedule = ['before 5am'];
+      config.onboardingConfigFileName = '.github/renovate.json';
+      const res = getConfigDesc(config);
+      expect(res).toMatchSnapshot();
+      expect(res.indexOf('.github/renovate.json')).not.toBe(-1);
+    });
   });
 });
