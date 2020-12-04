@@ -31,6 +31,7 @@ import {
   FindPRConfig,
   Issue,
   PlatformParams,
+  PlatformPrOptions,
   PlatformResult,
   Pr,
   RepoParams,
@@ -419,6 +420,43 @@ export async function getPrList(): Promise<Pr[]> {
   return config.prList;
 }
 
+async function tryPrAutomerge(
+  pr: number,
+  platformOptions: PlatformPrOptions
+): Promise<void> {
+  if (platformOptions?.gitLabAutomerge) {
+    try {
+      const desiredStatus = 'can_be_merged';
+      const retryTimes = 5;
+
+      // Check for correct merge request status before setting `merge_when_pipeline_succeeds` to  `true`.
+      for (let attempt = 1; attempt <= retryTimes; attempt += 1) {
+        const { body } = await gitlabApi.getJson<{
+          merge_status: string;
+          pipeline: string;
+        }>(`projects/${config.repository}/merge_requests/${pr}`);
+        // Only continue if the merge request can be merged and has a pipeline.
+        if (body.merge_status === desiredStatus && body.pipeline !== null) {
+          break;
+        }
+        await delay(500 * attempt);
+      }
+
+      await gitlabApi.putJson(
+        `projects/${config.repository}/merge_requests/${pr}/merge`,
+        {
+          body: {
+            should_remove_source_branch: true,
+            merge_when_pipeline_succeeds: true,
+          },
+        }
+      );
+    } catch (err) /* istanbul ignore next */ {
+      logger.debug({ err }, 'Automerge on PR creation failed');
+    }
+  }
+}
+
 export async function createPr({
   sourceBranch,
   targetBranch,
@@ -455,37 +493,8 @@ export async function createPr({
   if (config.prList) {
     config.prList.push(pr);
   }
-  if (platformOptions?.gitLabAutomerge) {
-    try {
-      const desiredStatus = 'can_be_merged';
-      const retryTimes = 5;
 
-      // Check for correct merge request status before setting `merge_when_pipeline_succeeds` to  `true`.
-      for (let attempt = 1; attempt <= retryTimes; attempt += 1) {
-        const { body } = await gitlabApi.getJson<{
-          merge_status: string;
-          pipeline: string;
-        }>(`projects/${config.repository}/merge_requests/${pr.iid}`);
-        // Only continue if the merge request can be merged and has a pipeline.
-        if (body.merge_status === desiredStatus && body.pipeline !== null) {
-          break;
-        }
-        await delay(500 * attempt);
-      }
-
-      await gitlabApi.putJson(
-        `projects/${config.repository}/merge_requests/${pr.iid}/merge`,
-        {
-          body: {
-            should_remove_source_branch: true,
-            merge_when_pipeline_succeeds: true,
-          },
-        }
-      );
-    } catch (err) /* istanbul ignore next */ {
-      logger.debug({ err }, 'Automerge on PR creation failed');
-    }
-  }
+  await tryPrAutomerge(pr.iid, platformOptions);
 
   return massagePr(pr);
 }
@@ -536,6 +545,7 @@ export async function updatePr({
   prTitle,
   prBody: description,
   state,
+  platformOptions,
 }: UpdatePrConfig): Promise<void> {
   let title = prTitle;
   if ((await getPrList()).find((pr) => pr.number === iid)?.isDraft) {
@@ -555,6 +565,8 @@ export async function updatePr({
       },
     }
   );
+
+  await tryPrAutomerge(iid, platformOptions);
 }
 
 export async function mergePr(iid: number): Promise<boolean> {
