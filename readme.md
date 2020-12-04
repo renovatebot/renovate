@@ -2,7 +2,8 @@
 
 # Renovate
 
-Automated dependency updates. Multi-platform and multi-language.
+Automated dependency updates.
+Multi-platform and multi-language.
 
 [![License: AGPL v3](https://img.shields.io/badge/License-AGPL%20v3-blue.svg)](https://raw.githubusercontent.com/renovatebot/renovate/master/license)
 [![codecov](https://codecov.io/gh/renovatebot/renovate/branch/master/graph/badge.svg)](https://codecov.io/gh/renovatebot/renovate)
