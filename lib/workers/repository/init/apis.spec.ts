@@ -76,7 +76,7 @@ describe('workers/repository/init/apis', () => {
         onboardingConfigFileName: undefined,
       });
       expect(workerPlatformConfig).toBeTruthy();
-      expect(workerPlatformConfig.onboardingConfigFileName).toBe(undefined);
+      expect(workerPlatformConfig.onboardingConfigFileName).toBeUndefined();
     });
   });
 });
