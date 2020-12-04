@@ -730,7 +730,7 @@ Usually the default setting is fine, but you can use `concurrentRequestLimit` to
 You only need to adjust this setting if a datasource is rate limiting Renovate or has problems with the load.
 The limit will be set for any host it applies to.
 
-Example:
+Example config:
 
 ```json
 {
