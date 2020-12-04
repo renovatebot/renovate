@@ -89,7 +89,7 @@ describe('workers/repository/init/apis', () => {
         onboardingConfigFileName: 'foo.bar',
       });
       expect(workerPlatformConfig).toBeTruthy();
-      expect(workerPlatformConfig.onboardingConfigFileName).toBe('foo.bar');
+      expect(workerPlatformConfig.onboardingConfigFileName).toBe(undefined);
     });
   });
 });
