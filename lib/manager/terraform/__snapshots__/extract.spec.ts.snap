@@ -21,7 +21,6 @@ Object {
       "registryUrls": Array [
         "https://kubernetes-charts.storage.googleapis.com",
       ],
-      "skipReason": "unsupported-version",
     },
     Object {
       "datasource": "helm",
@@ -86,7 +85,14 @@ Object {
       "depNameShort": "hashicorp/example",
       "depType": "github",
       "lookupName": "hashicorp/example",
-      "skipReason": "unsupported-version",
+    },
+    Object {
+      "currentValue": "tfmodule_one-v0.0.9",
+      "datasource": "github-tags",
+      "depName": "github.com/githubuser/myrepo",
+      "depNameShort": "githubuser/myrepo",
+      "depType": "github",
+      "lookupName": "githubuser/myrepo",
     },
     Object {
       "currentValue": "v1.0.0",
@@ -217,7 +223,6 @@ Object {
       "depName": "helm",
       "depNameShort": "helm",
       "depType": "terraform",
-      "skipReason": "unsupported-version",
     },
     Object {
       "currentValue": "V1.9",
@@ -225,7 +230,6 @@ Object {
       "depName": "newrelic",
       "depNameShort": "newrelic",
       "depType": "terraform",
-      "skipReason": "unsupported-version",
     },
     Object {
       "currentValue": "v1.0.0",
@@ -250,7 +254,6 @@ Object {
       "depNameShort": "hashicorp/example",
       "depType": "gitTags",
       "lookupName": "https://bitbucket.com/hashicorp/example",
-      "skipReason": "unsupported-version",
     },
     Object {
       "currentValue": "v1.0.1",
@@ -301,6 +304,21 @@ Object {
       ],
     },
     Object {
+      "currentValue": "2.7.0",
+      "datasource": "terraform-provider",
+      "depName": "aws",
+      "depNameShort": "aws",
+      "depType": "terraform",
+      "lookupName": "aws",
+    },
+    Object {
+      "currentValue": "=2.27.0",
+      "datasource": "terraform-provider",
+      "depName": "azurerm",
+      "depNameShort": "azurerm",
+      "depType": "terraform",
+    },
+    Object {
       "currentValue": "1.2.4",
       "datasource": "terraform-provider",
       "depName": "invalid",
@@ -315,9 +333,6 @@ Object {
       "depNameShort": "helm",
       "depType": "terraform",
       "lookupName": "hashicorp/helm",
-      "registryUrls": Array [
-        "https://registry.terraform.io",
-      ],
     },
     Object {
       "currentValue": ">= 1.0",

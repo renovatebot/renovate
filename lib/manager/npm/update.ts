@@ -9,9 +9,6 @@ export function bumpPackageVersion(
   currentValue: string,
   bumpVersion: ReleaseType | string
 ): string {
-  if (!bumpVersion) {
-    return content;
-  }
   logger.debug(
     { bumpVersion, currentValue },
     'Checking if we should bump package.json version'
@@ -89,11 +86,7 @@ export function updateDependency({
     const oldVersion: string = parsedContents[depType][depName];
     if (oldVersion === newValue) {
       logger.trace('Version is already updated');
-      return bumpPackageVersion(
-        fileContent,
-        upgrade.packageFileVersion,
-        upgrade.bumpVersion
-      );
+      return fileContent;
     }
     // Update the file = this is what we want
     parsedContents[depType][depName] = newValue;
@@ -180,11 +173,7 @@ export function updateDependency({
         }
       }
     }
-    return bumpPackageVersion(
-      newFileContent,
-      upgrade.packageFileVersion,
-      upgrade.bumpVersion
-    );
+    return newFileContent;
   } catch (err) {
     logger.debug({ err }, 'updateDependency error');
     return null;

@@ -19,6 +19,7 @@ Object {
       ],
     },
   ],
+  "packageFileVersion": "0.1.0",
 }
 `;
 
@@ -34,6 +35,7 @@ Object {
       ],
     },
   ],
+  "packageFileVersion": "0.1.0",
 }
 `;
 
@@ -63,6 +65,7 @@ Object {
       "skipReason": "no-repository",
     },
   ],
+  "packageFileVersion": "0.1.0",
 }
 `;
 
@@ -86,5 +89,6 @@ Object {
       "skipReason": "local-dependency",
     },
   ],
+  "packageFileVersion": "0.1.0",
 }
 `;

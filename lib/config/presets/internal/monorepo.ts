@@ -24,6 +24,7 @@ const repoGroups = {
   'date-io': 'https://github.com/dmtrKovalenko/date-io',
   'devextreme-reactive': 'https://github.com/DevExpress/devextreme-reactive',
   'electron-forge': 'https://github.com/electron-userland/electron-forge',
+  'feathers-databases': 'https://github.com/feathersjs/databases',
   'ember-decorators': 'https://github.com/ember-decorators/ember-decorators',
   'graphql-modules': 'https://github.com/Urigo/graphql-modules',
   'ionic-native': 'https://github.com/ionic-team/ionic-native',
@@ -45,6 +46,7 @@ const repoGroups = {
   angular1: 'https://github.com/angular/angular.js',
   angular: 'https://github.com/angular/angular',
   angularcli: 'https://github.com/angular/angular-cli',
+  angularfire: 'https://github.com/angular/angularfire',
   apolloclient: 'https://github.com/apollographql/apollo-client',
   apollolink: 'https://github.com/apollographql/apollo-link',
   awsappsync: 'https://github.com/awslabs/aws-mobile-appsync-sdk-js',
@@ -59,6 +61,7 @@ const repoGroups = {
   dropwizard: 'https://github.com/dropwizard/dropwizard',
   emotion: 'https://github.com/emotion-js/emotion',
   expo: 'https://github.com/expo/expo',
+  feathers: 'https://github.com/feathersjs/feathers',
   fimbullinter: 'https://github.com/fimbullinter/wotan',
   flopflip: 'https://github.com/tdeekens/flopflip',
   formatjs: 'https://github.com/formatjs/formatjs',
@@ -95,6 +98,7 @@ const repoGroups = {
     'https://github.com/zeit/next.js', // old repo
     'https://github.com/vercel/next.js',
   ],
+  nivo: 'https://github.com/plouc/nivo',
   ngrx: 'https://github.com/ngrx/',
   nrwl: 'https://github.com/nrwl/',
   nuxtjs: 'https://github.com/nuxt/nuxt.js',
@@ -128,6 +132,7 @@ const repoGroups = {
 
 const patternGroups = {
   babel6: '^babel6$',
+  clarity: '^@clr/', // https://github.com/vmware/clarity/issues/5235
   wordpress: '^@wordpress/',
   angularmaterial: ['^@angular/material', '^@angular/cdk'],
   'aws-java-sdk': '^com.amazonaws:aws-java-sdk-',

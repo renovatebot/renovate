@@ -109,6 +109,23 @@ describe('applyPackageRules()', () => {
     expect(res.x).toBeUndefined();
     expect(res.y).toBeUndefined();
   });
+  it('ignores patterns if lock file maintenance', () => {
+    const dep = {
+      enabled: true,
+      packagePatterns: ['.*'],
+      updateType: 'lockFileMaintenance' as UpdateType,
+      packageRules: [
+        {
+          excludePackagePatterns: ['^foo'],
+          enabled: false,
+        },
+      ],
+    };
+    const res = applyPackageRules(dep);
+    expect(res.enabled).toBe(true);
+    const res2 = applyPackageRules({ ...dep, depName: 'anything' });
+    expect(res2.enabled).toBe(false);
+  });
   it('matches anything if missing inclusive rules', () => {
     const config: TestConfig = {
       packageRules: [
@@ -529,6 +546,64 @@ describe('applyPackageRules()', () => {
       },
     });
     expect(res1.x).toBeDefined();
+  });
+  it('checks if matchCurrentVersion selector works with regular expressions', () => {
+    const config: TestConfig = {
+      packageRules: [
+        {
+          packageNames: ['test'],
+          matchCurrentVersion: '/^4/',
+          x: 1,
+        },
+      ],
+    };
+    const res1 = applyPackageRules({
+      ...config,
+      ...{
+        depName: 'test',
+        currentValue: '4.6.0',
+        fromVersion: '4.6.0',
+      },
+    });
+    const res2 = applyPackageRules({
+      ...config,
+      ...{
+        depName: 'test',
+        currentValue: '5.6.0',
+        fromVersion: '5.6.0',
+      },
+    });
+    expect(res1.x).toBeDefined();
+    expect(res2.x).toBeUndefined();
+  });
+  it('checks if matchCurrentVersion selector works with negated regular expressions', () => {
+    const config: TestConfig = {
+      packageRules: [
+        {
+          packageNames: ['test'],
+          matchCurrentVersion: '!/^4/',
+          x: 1,
+        },
+      ],
+    };
+    const res1 = applyPackageRules({
+      ...config,
+      ...{
+        depName: 'test',
+        currentValue: '4.6.0',
+        fromVersion: '4.6.0',
+      },
+    });
+    const res2 = applyPackageRules({
+      ...config,
+      ...{
+        depName: 'test',
+        currentValue: '5.6.0',
+        fromVersion: '5.6.0',
+      },
+    });
+    expect(res1.x).toBeUndefined();
+    expect(res2.x).toBeDefined();
   });
   it('matches paths', () => {
     const config: TestConfig = {

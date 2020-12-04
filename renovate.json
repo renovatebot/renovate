@@ -1,42 +1,21 @@
 {
-  "extends": [
-    "config:base",
-    ":rebaseStalePrs",
-    ":automergeMinor",
-    ":label(ready)",
-    "group:linters",
-    ":masterIssue",
-    ":assignee(rarkins)"
-  ],
-  "lockFileMaintenance": {
-    "enabled": true,
-    "schedule": ["at any time"],
-    "stabilityDays": 0,
-    "masterIssueApproval": true
-  },
-  "postUpdateOptions": ["yarnDedupeHighest"],
+  "extends": ["github>renovatebot/presets-internal:node"],
+  "assignees": ["rarkins", "viceice"],
   "semanticCommitScope": "deps",
+  "automergeType": "pr",
   "dockerfile": {
-    "pinDigests": true,
     "semanticCommitType": "build"
   },
-  "prBodyDefinitions": {
-    "Sourcegraph": "[![code search for \"{{{depName}}}\"](https://sourcegraph.com/search/badge?q=repo:%5Egithub%5C.com/{{{repository}}}%24+case:yes+-file:package%28-lock%29%3F%5C.json+{{{depName}}}&label=matches)](https://sourcegraph.com/search?q=repo:%5Egithub%5C.com/{{{repository}}}%24+case:yes+-file:package%28-lock%29%3F%5C.json+{{{depName}}})"
-  },
-  "prBodyColumns": ["Package", "Update", "Type", "Change", "Sourcegraph"],
   "stabilityDays": 3,
-  "prCreation": "not-pending",
   "packageRules": [
     {
+      "packageNames": [
+        "mcr.microsoft.com/vscode/devcontainers/typescript-node"
+      ],
+      "extends": ["schedule:monthly"]
+    },
+    {
       "datasources": ["docker"],
-      "automerge": false
-    },
-    {
-      "updateTypes": ["major"],
-      "masterIssueApproval": true
-    },
-    {
-      "packageNames": ["npm", "yarn"],
       "automerge": false
     },
     {
@@ -54,15 +33,6 @@
     {
       "paths": ["**/__fixtures__/**"],
       "enabled": false
-    }
-  ],
-  "regexManagers": [
-    {
-      "fileMatch": ["^Dockerfile$"],
-      "matchStrings": [
-        "datasource=(?<datasource>.*?) depName=(?<depName>.*?)( versioning=(?<versioning>.*?))?\\sENV .*?_VERSION=(?<currentValue>.*)\\s"
-      ],
-      "versioningTemplate": "{{#if versioning}}{{versioning}}{{else}}semver{{/if}}"
     }
   ]
 }

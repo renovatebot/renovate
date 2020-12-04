@@ -2,6 +2,9 @@
 
 exports[`lib/manager/pipenv/extract extractPackageFile() extracts dependencies 1`] = `
 Object {
+  "constraints": Object {
+    "python": "== 3.6.*",
+  },
   "deps": Array [
     Object {
       "currentValue": "==0.3.1",
@@ -57,6 +60,9 @@ Object {
 
 exports[`lib/manager/pipenv/extract extractPackageFile() extracts example pipfile 1`] = `
 Object {
+  "constraints": Object {
+    "python": "== 2.7.*",
+  },
   "deps": Array [
     Object {
       "depName": "requests",
@@ -126,6 +132,9 @@ Object {
 
 exports[`lib/manager/pipenv/extract extractPackageFile() extracts multiple dependencies 1`] = `
 Object {
+  "constraints": Object {
+    "python": "== 3.6.*",
+  },
   "deps": Array [
     Object {
       "currentValue": "==1",
@@ -171,6 +180,7 @@ Object {
 
 exports[`lib/manager/pipenv/extract extractPackageFile() supports custom index 1`] = `
 Object {
+  "constraints": Object {},
   "deps": Array [
     Object {
       "currentValue": "==0.21.0",
