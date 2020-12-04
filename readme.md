@@ -14,8 +14,7 @@ Multi-platform and multi-language.
 
 - Receive automated Pull Requests whenever dependencies need updating
 - Define schedules to avoid unnecessary noise in projects (e.g. for weekends or outside of working hours, or weekly updates, etc.)
-- Relevant package files are discovered automatically (e.g. supports
-  monorepo architecture such as Lerna or Yarn workspaces without further configuration)
+- Relevant package files are discovered automatically (e.g. supports monorepo architecture such as Lerna or Yarn workspaces without further configuration)
 - Bot behavior is extremely customizable via configuration files (config as code)
 - Use ESLint-like shared config presets for ease of use and simplifying configuration
 - Lock files are natively supported and updated in the same commit, including immediately resolving conflicts whenever PRs are merged
