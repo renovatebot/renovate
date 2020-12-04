@@ -46,7 +46,7 @@ For Azure DevOps, visit the Visual Studio Marketplace and install the [Renovate 
 From there you can create a pipeline with the `RenovateMe` task.
 [More details on how to configure the pipeline](https://marketplace.visualstudio.com/items?itemName=jyc.vsts-extensions-renovate-me).
 Note: This extension is created and maintained personally by a Renovate developer/user so support requests relating to the extension itself cannot be answered directly in the main Renovate repository.
-Alternatively, you can create custom pipeline with with a `yml` definition that will trigger `npx renovate`.
+Alternatively, you can create a custom pipeline with a `yml` definition that will trigger `npx renovate`.
 [More details on how to configure the pipeline](https://docs.renovatebot.com/setup-azure-devops/).
 
 For Bitbucket Cloud, Bitbucket Server, Gitea and GitLab, use our self-hosting option.
