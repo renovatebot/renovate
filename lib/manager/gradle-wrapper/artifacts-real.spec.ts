@@ -1,6 +1,6 @@
-import { resolve } from 'path';
 import { readFile, readFileSync } from 'fs-extra';
 import Git from 'simple-git';
+import { resolve } from 'upath';
 import * as httpMock from '../../../test/httpMock';
 import { getName, git, partial } from '../../../test/util';
 import { setUtilConfig } from '../../util';

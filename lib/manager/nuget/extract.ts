@@ -1,12 +1,9 @@
 import { XmlDocument } from 'xmldoc';
 import * as datasourceNuget from '../../datasource/nuget';
 import { logger } from '../../logger';
-import { SkipReason } from '../../types';
-import { get } from '../../versioning';
-import * as semverVersioning from '../../versioning/semver';
 import { ExtractConfig, PackageDependency, PackageFile } from '../common';
 import { DotnetToolsManifest } from './types';
-import { determineRegistries } from './util';
+import { getConfiguredRegistries } from './util';
 
 /**
  * https://docs.microsoft.com/en-us/nuget/concepts/package-versioning
@@ -27,6 +24,7 @@ function extractDepsFromXml(xmlNode: XmlDocument): PackageDependency[] {
   for (const itemGroup of itemGroups) {
     const relevantChildren = [
       ...itemGroup.childrenNamed('PackageReference'),
+      ...itemGroup.childrenNamed('PackageVersion'),
       ...itemGroup.childrenNamed('DotNetCliToolReference'),
       ...itemGroup.childrenNamed('GlobalPackageReference'),
     ];
@@ -60,9 +58,11 @@ export async function extractPackageFile(
   config: ExtractConfig
 ): Promise<PackageFile | null> {
   logger.trace({ packageFile }, 'nuget.extractPackageFile()');
-  const versioning = get(config.versioning || semverVersioning.id);
 
-  const registries = await determineRegistries(packageFile, config.localDir);
+  const registries = await getConfiguredRegistries(
+    packageFile,
+    config.localDir
+  );
   const registryUrls = registries
     ? registries.map((registry) => registry.url)
     : undefined;
@@ -108,9 +108,6 @@ export async function extractPackageFile(
     deps = extractDepsFromXml(parsedXml).map((dep) => ({
       ...dep,
       ...(registryUrls && { registryUrls }),
-      ...(!versioning.isVersion(dep.currentValue) && {
-        skipReason: SkipReason.NotAVersion,
-      }),
     }));
     return { deps };
   } catch (err) {

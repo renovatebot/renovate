@@ -93,6 +93,13 @@ export type RenovateOptions =
 
 const options: RenovateOptions[] = [
   {
+    name: 'allowPostUpgradeCommandTemplating',
+    description: 'If true allow templating for post-upgrade commands.',
+    type: 'boolean',
+    default: false,
+    admin: true,
+  },
+  {
     name: 'allowedPostUpgradeCommands',
     description:
       'A list of regular expressions that determine which post-upgrade tasks are allowed. A task has to match at least one of the patterns to be allowed to run',
@@ -1023,7 +1030,7 @@ const options: RenovateOptions[] = [
   },
   {
     name: 'bumpVersion',
-    description: 'Bump the version in the package.json being updated',
+    description: 'Bump the version in the package file being updated',
     type: 'string',
     allowedValues: ['major', 'minor', 'patch'],
   },
@@ -1402,9 +1409,16 @@ const options: RenovateOptions[] = [
   // Pull Request options
   {
     name: 'labels',
+    description: 'Labels to set in Pull Request',
+    type: 'array',
+    subType: 'string',
+  },
+  {
+    name: 'addLabels',
     description: 'Labels to add to Pull Request',
     type: 'array',
     subType: 'string',
+    mergeable: true,
   },
   {
     name: 'assignees',
@@ -1801,6 +1815,15 @@ const options: RenovateOptions[] = [
     env: false,
   },
   {
+    name: 'matchStringsStrategy',
+    description: 'Strategy how to interpret matchStrings',
+    type: 'string',
+    default: 'any',
+    parent: 'regexManagers',
+    cli: false,
+    env: false,
+  },
+  {
     name: 'depNameTemplate',
     description:
       'Optional depName for extracted dependencies. Valid only within `regexManagers` object.',
@@ -1843,6 +1866,20 @@ const options: RenovateOptions[] = [
     default: true,
     cli: false,
     env: false,
+  },
+  {
+    name: 'cloneSubmodules',
+    description:
+      'Set to false to disable initialization of submodules during repository clone',
+    type: 'boolean',
+    default: true,
+  },
+  {
+    name: 'ignorePrAuthor',
+    description:
+      'Set to true to fetch the entire list of PRs instead of only those authored by the Renovate user',
+    type: 'boolean',
+    default: false,
   },
 ];
 

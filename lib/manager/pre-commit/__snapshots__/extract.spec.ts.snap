@@ -1,0 +1,123 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`lib/manager/precommit/extract extractPackageFile() can handle invalid private git repos 1`] = `
+Object {
+  "deps": Array [
+    Object {
+      "currentValue": "v1.0.0",
+      "depName": "pre-commit/pre-commit-hooks",
+      "depType": "repository",
+      "lookupName": "pre-commit/pre-commit-hooks",
+      "registryUrls": Array [
+        "enterprise.com",
+      ],
+      "skipReason": "unknown-registry",
+    },
+  ],
+}
+`;
+
+exports[`lib/manager/precommit/extract extractPackageFile() can handle private git repos 1`] = `
+Object {
+  "deps": Array [
+    Object {
+      "currentValue": "v1.0.0",
+      "datasource": "gitlab-tags",
+      "depName": "pre-commit/pre-commit-hooks",
+      "depType": "repository",
+      "lookupName": "pre-commit/pre-commit-hooks",
+      "registryUrls": Array [
+        "enterprise.com",
+      ],
+    },
+  ],
+}
+`;
+
+exports[`lib/manager/precommit/extract extractPackageFile() can handle unknown private git repos 1`] = `
+Object {
+  "deps": Array [
+    Object {
+      "currentValue": "v1.0.0",
+      "depName": "pre-commit/pre-commit-hooks",
+      "depType": "repository",
+      "lookupName": "pre-commit/pre-commit-hooks",
+      "registryUrls": Array [
+        "enterprise.com",
+      ],
+      "skipReason": "unknown-registry",
+    },
+  ],
+}
+`;
+
+exports[`lib/manager/precommit/extract extractPackageFile() extracts from complex config file correctly 1`] = `
+Object {
+  "deps": Array [
+    Object {
+      "currentValue": "v3.3.0",
+      "datasource": "github-tags",
+      "depName": "pre-commit/pre-commit-hooks",
+      "depType": "repository",
+      "lookupName": "pre-commit/pre-commit-hooks",
+    },
+    Object {
+      "currentValue": "19.3b0",
+      "datasource": "github-tags",
+      "depName": "psf/black",
+      "depType": "repository",
+      "lookupName": "psf/black",
+    },
+    Object {
+      "currentValue": "19.3b0",
+      "datasource": "gitlab-tags",
+      "depName": "psf/black",
+      "depType": "repository",
+      "lookupName": "psf/black",
+    },
+    Object {
+      "currentValue": "19.3b0",
+      "datasource": "gitlab-tags",
+      "depName": "psf/black",
+      "depType": "repository",
+      "lookupName": "psf/black",
+    },
+    Object {
+      "currentValue": "v2.1.2",
+      "datasource": "github-tags",
+      "depName": "prettier/pre-commit",
+      "depType": "repository",
+      "lookupName": "prettier/pre-commit",
+    },
+    Object {
+      "currentValue": "v2.1.2",
+      "datasource": "github-tags",
+      "depName": "prettier/pre-commit",
+      "depType": "repository",
+      "lookupName": "prettier/pre-commit",
+    },
+    Object {
+      "currentValue": "v1.0.0",
+      "datasource": undefined,
+      "depName": undefined,
+      "depType": "repository",
+      "lookupName": undefined,
+      "skipReason": "invalid-url",
+    },
+  ],
+}
+`;
+
+exports[`lib/manager/precommit/extract extractPackageFile() extracts from values.yaml correctly with same structure as "pre-commit sample-config" 1`] = `
+Object {
+  "deps": Array [
+    Object {
+      "currentValue": "v2.4.0",
+      "datasource": "github-tags",
+      "depName": "pre-commit/pre-commit-hooks",
+      "depType": "repository",
+      "lookupName": "pre-commit/pre-commit-hooks",
+    },
+  ],
+}
+`;

@@ -1,5 +1,5 @@
 import { readFileSync } from 'fs';
-import path from 'path';
+import upath from 'upath';
 import { getConfig } from '../../../config/defaults';
 import * as _fs from '../../../util/fs';
 import * as npmExtract from '.';
@@ -11,7 +11,7 @@ const defaultConfig = getConfig();
 
 function readFixture(fixture: string) {
   return readFileSync(
-    path.resolve(__dirname, `../__fixtures__/${fixture}`),
+    upath.resolve(__dirname, `../__fixtures__/${fixture}`),
     'utf8'
   );
 }

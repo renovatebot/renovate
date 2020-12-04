@@ -3,7 +3,7 @@
 exports[`updateArtifacts aborts if lock file is unchanged 1`] = `
 Array [
   Object {
-    "cmd": "dotnet restore project.csproj --force-evaluate",
+    "cmd": "dotnet restore project.csproj --force-evaluate --configfile others/nuget/not-so-random/nuget.config",
     "options": Object {
       "cwd": "/tmp/github/some/repo",
       "encoding": "utf-8",
@@ -28,7 +28,7 @@ exports[`updateArtifacts aborts if no lock file found 1`] = `Array []`;
 exports[`updateArtifacts authenticates at registries 1`] = `
 Array [
   Object {
-    "cmd": "dotnet nuget update source myRegistry --username some-username --password some-password --store-password-in-clear-text",
+    "cmd": "dotnet nuget add source https://my-registry.example.org --configfile others/nuget/not-so-random/nuget.config --name myRegistry --username some-username --password some-password --store-password-in-clear-text",
     "options": Object {
       "cwd": "/tmp/github/some/repo",
       "encoding": "utf-8",
@@ -46,25 +46,7 @@ Array [
     },
   },
   Object {
-    "cmd": "dotnet restore project.csproj --force-evaluate",
-    "options": Object {
-      "cwd": "/tmp/github/some/repo",
-      "encoding": "utf-8",
-      "env": Object {
-        "HOME": "/home/user",
-        "HTTPS_PROXY": "https://example.com",
-        "HTTP_PROXY": "http://example.com",
-        "LANG": "en_US.UTF-8",
-        "LC_ALL": "en_US",
-        "NO_PROXY": "localhost",
-        "PATH": "/tmp/path",
-      },
-      "maxBuffer": 10485760,
-      "timeout": 900000,
-    },
-  },
-  Object {
-    "cmd": "dotnet nuget update source myRegistry --username '' --password '' --store-password-in-clear-text",
+    "cmd": "dotnet restore project.csproj --force-evaluate --configfile others/nuget/not-so-random/nuget.config",
     "options": Object {
       "cwd": "/tmp/github/some/repo",
       "encoding": "utf-8",
@@ -102,7 +84,7 @@ exports[`updateArtifacts does not update lock file when non-proj file is changed
 exports[`updateArtifacts performs lock file maintenance 1`] = `
 Array [
   Object {
-    "cmd": "dotnet restore project.csproj --force-evaluate",
+    "cmd": "dotnet restore project.csproj --force-evaluate --configfile others/nuget/not-so-random/nuget.config",
     "options": Object {
       "cwd": "/tmp/github/some/repo",
       "encoding": "utf-8",
@@ -137,7 +119,7 @@ Array [
     },
   },
   Object {
-    "cmd": "docker run --rm --name=renovate_dotnet --label=renovate_child --user=foobar -v \\"/tmp/github/some/repo\\":\\"/tmp/github/some/repo\\" -v \\"/tmp/renovate/cache\\":\\"/tmp/renovate/cache\\" -w \\"/tmp/github/some/repo\\" renovate/dotnet bash -l -c \\"dotnet restore project.csproj --force-evaluate\\"",
+    "cmd": "docker run --rm --name=renovate_dotnet --label=renovate_child --user=foobar -v \\"/tmp/github/some/repo\\":\\"/tmp/github/some/repo\\" -v \\"/tmp/renovate/cache\\":\\"/tmp/renovate/cache\\" -w \\"/tmp/github/some/repo\\" renovate/dotnet bash -l -c \\"dotnet restore project.csproj --force-evaluate --configfile others/nuget/not-so-random/nuget.config\\"",
     "options": Object {
       "cwd": "/tmp/github/some/repo",
       "encoding": "utf-8",
@@ -160,7 +142,7 @@ Array [
 exports[`updateArtifacts supports global mode 1`] = `
 Array [
   Object {
-    "cmd": "dotnet restore project.csproj --force-evaluate",
+    "cmd": "dotnet restore project.csproj --force-evaluate --configfile others/nuget/not-so-random/nuget.config",
     "options": Object {
       "cwd": "/tmp/github/some/repo",
       "encoding": "utf-8",
@@ -183,7 +165,7 @@ Array [
 exports[`updateArtifacts updates lock file 1`] = `
 Array [
   Object {
-    "cmd": "dotnet restore project.csproj --force-evaluate",
+    "cmd": "dotnet restore project.csproj --force-evaluate --configfile others/nuget/not-so-random/nuget.config",
     "options": Object {
       "cwd": "/tmp/github/some/repo",
       "encoding": "utf-8",

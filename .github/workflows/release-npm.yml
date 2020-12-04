@@ -29,19 +29,19 @@ jobs:
           yarn config set version-git-tag false
           npm config set scripts-prepend-node-path true
 
-      - uses: actions/checkout@v2.3.3
+      - uses: actions/checkout@v2.3.4
         with:
           ref: ${{ github.event.client_payload.sha }}
 
       - name: Cache Yarn packages
         id: yarn_cache_packages
-        uses: actions/cache@v2.1.2
+        uses: actions/cache@v2.1.3
         with:
           path: ${{ env.YARN_CACHE_FOLDER }}
           key: ${{ env.YARN_PACKAGE_CACHE_KEY }}-${{ runner.os }}-yarn_cache-${{ hashFiles('**/yarn.lock') }}
 
       - name: Installing dependencies
-        run: yarn install --frozen-lockfile
+        run: yarn install --frozen-lockfile --verbose
 
       - name: Build ${{ github.event.client_payload.version }}
         run: yarn build

@@ -1,4 +1,3 @@
-import path from 'path';
 import is from '@sindresorhus/is';
 import { parseSyml } from '@yarnpkg/parsers';
 import upath from 'upath';
@@ -146,7 +145,7 @@ export async function writeExistingFiles(
   for (const packageFile of npmFiles) {
     const basedir = upath.join(
       config.localDir,
-      path.dirname(packageFile.packageFile)
+      upath.dirname(packageFile.packageFile)
     );
     const npmrc: string = packageFile.npmrc || config.npmrc;
     const npmrcFilename = upath.join(basedir, '.npmrc');
@@ -482,7 +481,7 @@ export async function getAdditionalFiles(
     logger.warn({ err }, 'Error getting token for packageFile');
   }
   for (const lockFile of dirs.npmLockDirs) {
-    const lockFileDir = path.dirname(lockFile);
+    const lockFileDir = upath.dirname(lockFile);
     const fullLockFileDir = upath.join(config.localDir, lockFileDir);
     const npmrcContent = await getNpmrcContent(fullLockFileDir);
     await updateNpmrcContent(
@@ -490,7 +489,7 @@ export async function getAdditionalFiles(
       npmrcContent,
       additionalNpmrcContent
     );
-    const fileName = path.basename(lockFile);
+    const fileName = upath.basename(lockFile);
     logger.debug(`Generating ${fileName} for ${lockFileDir}`);
     const upgrades = config.upgrades.filter(
       (upgrade) => upgrade.npmLock === lockFile
@@ -545,7 +544,7 @@ export async function getAdditionalFiles(
   }
 
   for (const lockFile of dirs.yarnLockDirs) {
-    const lockFileDir = path.dirname(lockFile);
+    const lockFileDir = upath.dirname(lockFile);
     const fullLockFileDir = upath.join(config.localDir, lockFileDir);
     const npmrcContent = await getNpmrcContent(fullLockFileDir);
     await updateNpmrcContent(
@@ -612,7 +611,7 @@ export async function getAdditionalFiles(
   }
 
   for (const lockFile of dirs.pnpmShrinkwrapDirs) {
-    const lockFileDir = path.dirname(lockFile);
+    const lockFileDir = upath.dirname(lockFile);
     const fullLockFileDir = upath.join(config.localDir, lockFileDir);
     const npmrcContent = await getNpmrcContent(fullLockFileDir);
     await updateNpmrcContent(
@@ -678,7 +677,7 @@ export async function getAdditionalFiles(
     let lockFile: string;
     logger.debug(`Finding package.json for lerna directory "${lernaDir}"`);
     const lernaPackageFile = packageFiles.npm.find(
-      (p) => path.dirname(p.packageFile) === lernaDir
+      (p) => upath.dirname(p.packageFile) === lernaDir
     );
     if (!lernaPackageFile) {
       logger.debug('No matching package.json found');

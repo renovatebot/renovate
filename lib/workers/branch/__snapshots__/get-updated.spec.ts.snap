@@ -1,5 +1,33 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
+exports[`workers/branch/get-updated getUpdatedPackageFiles() bumps versions in autoReplace managers 1`] = `
+Object {
+  "artifactErrors": Array [],
+  "reuseExistingBranch": undefined,
+  "updatedArtifacts": Array [],
+  "updatedPackageFiles": Array [
+    Object {
+      "contents": "version: 0.0.2",
+      "name": "undefined",
+    },
+  ],
+}
+`;
+
+exports[`workers/branch/get-updated getUpdatedPackageFiles() bumps versions in updateDependency managers 1`] = `
+Object {
+  "artifactErrors": Array [],
+  "reuseExistingBranch": undefined,
+  "updatedArtifacts": Array [],
+  "updatedPackageFiles": Array [
+    Object {
+      "contents": "new version",
+      "name": "undefined",
+    },
+  ],
+}
+`;
+
 exports[`workers/branch/get-updated getUpdatedPackageFiles() handles autoreplace base updated 1`] = `
 Object {
   "artifactErrors": Array [],
@@ -137,5 +165,24 @@ Object {
   "reuseExistingBranch": undefined,
   "updatedArtifacts": Array [],
   "updatedPackageFiles": Array [],
+}
+`;
+
+exports[`workers/branch/get-updated getUpdatedPackageFiles() update artifacts on update-lockfile strategy 1`] = `
+Object {
+  "artifactErrors": Array [],
+  "reuseExistingBranch": undefined,
+  "updatedArtifacts": Array [
+    Object {
+      "contents": "some contents",
+      "name": "composer.lock",
+    },
+  ],
+  "updatedPackageFiles": Array [
+    Object {
+      "contents": "existing content",
+      "name": "undefined",
+    },
+  ],
 }
 `;
