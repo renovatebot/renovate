@@ -178,11 +178,11 @@ workflows:
 
 #### GitLab CI/CD pipeline
 
-For GitLab pipelines we recommend to checkout [this](https://gitlab.com/renovate-bot/renovate-runner).
-We've prepared some pipeline templates to simply run renovate on pipeline schedules.
-You will find necessary configuration steps there.
+For GitLab pipelines we recommend you use the [renovate-runner project on GitLab](https://gitlab.com/renovate-bot/renovate-runner).
+We've prepared some pipeline templates to run Renovate on pipeline schedules in an easy way.
+You can also find the configuration steps there.
 
-For self-hosted GitLab clone / import [this](https://gitlab.com/renovate-bot/renovate-runner) project to your instance.
+For self-hosted GitLab clone/import the [renovate-runner](https://gitlab.com/renovate-bot/renovate-runner) project to your instance.
 
 ## Configuration
 
