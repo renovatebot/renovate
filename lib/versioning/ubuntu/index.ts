@@ -125,6 +125,10 @@ function matches(version: string, range: string): boolean {
   return equals(version, range);
 }
 
+function valueToVersion(version: string): string {
+  return version;
+}
+
 export const api: VersioningApi = {
   isCompatible,
   isSingleVersion,
@@ -144,6 +148,7 @@ export const api: VersioningApi = {
   sortVersions,
 
   matches,
+  valueToVersion,
 };
 
 export default api;
