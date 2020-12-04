@@ -176,6 +176,14 @@ workflows:
                   - master
 ```
 
+#### GitLab CI/CD pipeline
+
+For GitLab pipelines we recommend to checkout [this](https://gitlab.com/renovate-bot/renovate-runner).
+We've prepared some pipeline templates to simply run renovate on pipeline schedules.
+You will find necessary configuration steps there.
+
+For self-hosted GitLab clone / import [this](https://gitlab.com/renovate-bot/renovate-runner) project to your instance.
+
 ## Configuration
 
 Self-hosted Renovate can be configured using any of the following (or a combination):
@@ -200,7 +208,7 @@ Configure it either as `token` in your `config.js` file, or in environment varia
 
 #### GitLab CE/EE
 
-First, [create a personal access token](https://docs.gitlab.com/ee/user/profile/personal_access_tokens.html) for the bot account (select "api" scope).
+First, [create a personal access token](https://docs.gitlab.com/ee/user/profile/personal_access_tokens.html) for the bot account (select `read_user`, `api` and `write_repository` scopes).
 Configure it either as `token` in your `config.js` file, or in environment variable `RENOVATE_TOKEN`, or via CLI `--token=`.
 Don't forget to configure `platform=gitlab` somewhere in config.
 
