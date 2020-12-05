@@ -33,8 +33,7 @@ function isStable(version: string): boolean {
   if (!isValid(version)) {
     return false;
   }
-  const [major, minor] = version.split('.').map((x) => parseInt(x, 10));
-  return major % 2 === 0 && minor === 4;
+  return /^\d?[02468]\.04/.test(version);
 }
 
 // digestion of version
