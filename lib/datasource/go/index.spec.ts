@@ -152,6 +152,24 @@ describe('datasource/go', () => {
       expect(res).toBeDefined();
       expect(httpMock.getTrace()).toMatchSnapshot();
     });
+    it('support bitbucket', async () => {
+      httpMock
+        .scope('https://api.bitbucket.org/')
+        .get('/2.0/repositories/golang/text/refs/tags')
+        .reply(200, {
+          pagelen: 2,
+          page: 1,
+          values: [{ name: 'v1.0.0' }, { name: 'v2.0.0' }],
+        });
+      const res = await getPkgReleases({
+        datasource,
+        depName: 'bitbucket.org/golang/text',
+      });
+      expect(res).toMatchSnapshot();
+      expect(res).not.toBeNull();
+      expect(res).toBeDefined();
+      expect(httpMock.getTrace()).toMatchSnapshot();
+    });
     it('support ghe', async () => {
       httpMock
         .scope('https://git.enterprise.com/')

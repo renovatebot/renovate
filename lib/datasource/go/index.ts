@@ -2,6 +2,8 @@ import URL from 'url';
 import { logger } from '../../logger';
 import { Http } from '../../util/http';
 import { regEx } from '../../util/regex';
+import * as bitbucket from '../bitbucket-tags';
+import { bitbucketApiEndpoint } from '../../util/http/bitbucket';
 import { DigestConfig, GetReleasesConfig, ReleaseResult } from '../common';
 import * as github from '../github-tags';
 import * as gitlab from '../gitlab-tags';
@@ -34,6 +36,16 @@ async function getDatasource(goModule: string): Promise<DataSource | null> {
     return {
       datasource: github.id,
       lookupName,
+    };
+  }
+
+  if (goModule.startsWith('bitbucket.org/')) {
+    const split = goModule.split('/');
+    const lookupName = split[1] + '/' + split[2];
+    return {
+      datasource: bitbucket.id,
+      lookupName: lookupName,
+      registryUrl: bitbucketApiEndpoint,
     };
   }
 
@@ -113,13 +125,26 @@ export async function getReleases({
 }: GetReleasesConfig): Promise<ReleaseResult | null> {
   logger.trace(`go.getReleases(${lookupName})`);
   const source = await getDatasource(lookupName);
-  if (source?.datasource !== github.id && source?.datasource !== gitlab.id) {
-    return null;
+  let res = null;
+
+  switch (source.datasource) {
+    case github.id: {
+      res = await github.getReleases(source);
+      break;
+    }
+    case gitlab.id: {
+      res = await gitlab.getReleases(source);
+      break;
+    }
+    case bitbucket.id: {
+      res = await bitbucket.getReleases(source);
+      break;
+    }
+    default: {
+      return null;
+    }
   }
-  const res =
-    source.datasource === github.id
-      ? await github.getReleases(source)
-      : await gitlab.getReleases(source);
+
   // istanbul ignore if
   if (!res) {
     return res;
