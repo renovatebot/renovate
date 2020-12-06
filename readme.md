@@ -2,7 +2,8 @@
 
 # Renovate
 
-Automated dependency updates. Multi-platform and multi-language.
+Automated dependency updates.
+Multi-platform and multi-language.
 
 [![License: AGPL v3](https://img.shields.io/badge/License-AGPL%20v3-blue.svg)](https://raw.githubusercontent.com/renovatebot/renovate/master/license)
 [![codecov](https://codecov.io/gh/renovatebot/renovate/branch/master/graph/badge.svg)](https://codecov.io/gh/renovatebot/renovate)
@@ -11,15 +12,14 @@ Automated dependency updates. Multi-platform and multi-language.
 
 ## Why Use Renovate?
 
-- Receive automated Pull Requests whenever dependencies need updating.
-- Define schedules to avoid unnecessary noise in projects (e.g. for weekends or outside of working hours, or weekly updates, etc)
-- Relevant package files are discovered automatically (e.g. supports
-  monorepo architecture such as lerna or yarn workspaces without further configuration)
-- Bot behaviour is extremely customisable via configuration files (config as code)
-- Use eslint-like shared config presets for ease of use and simplifying configuration
+- Receive automated Pull Requests whenever dependencies need updating
+- Define schedules to avoid unnecessary noise in projects (e.g. for weekends or outside of working hours, or weekly updates, etc.)
+- Relevant package files are discovered automatically (e.g. supports monorepo architecture such as Lerna or Yarn workspaces without further configuration)
+- Bot behavior is extremely customizable via configuration files (config as code)
+- Use ESLint-like shared config presets for ease of use and simplifying configuration
 - Lock files are natively supported and updated in the same commit, including immediately resolving conflicts whenever PRs are merged
 - Supports GitHub (.com and Enterprise), GitLab (.com and CE/EE), Bitbucket Server, Azure DevOps and Gitea. Bitbucket Cloud is also supported but considered in Beta until it gets the thumbs-up from more users
-- Open source (installable via npm/yarn or Docker Hub) so can be self-hosted or used via GitHub App
+- Open source (installable via npm/Yarn or Docker Hub) so can be self-hosted or used via GitHub App
 
 ## Who Uses Renovate?
 
@@ -29,10 +29,10 @@ Renovate was released in 2017 and already is widely used in the developer commun
 
 ## The Renovate Approach
 
-- We believe everyone can benefit from automation, whether it's a little or a lot
+- We believe everyone benefits from automation, whether it's a little or a lot
 - Renovate should not cause you to change your workflow against your wishes, instead it should be adaptable to your existing workflow
-- All behaviour should be configurable, down to a ridiculous level if necessary
-- Autodetect settings wherever possible (to minimise configuration) but always allow overrides
+- All behavior should be configurable, down to a ridiculous level if necessary
+- Autodetect settings wherever possible (to minimize configuration) but always allow overrides
 
 ## Using Renovate
 
@@ -42,11 +42,11 @@ On Azure DevOps you can install Renovate as an extension from the marketplace.
 For GitHub, go to [https://github.com/apps/renovate](https://github.com/apps/renovate) to install it now.
 [More details on the GitHub App installation](https://docs.renovatebot.com/install-github-app/).
 
-For Azure DevOps, visit the Visual Studio Marketplace and install the [Renovate Me](https://marketplace.visualstudio.com/items?itemName=jyc.vsts-extensions-renovate-me) extension in your organisation.
+For Azure DevOps, visit the Visual Studio Marketplace and install the [Renovate Me](https://marketplace.visualstudio.com/items?itemName=jyc.vsts-extensions-renovate-me) extension in your organization.
 From there you can create a pipeline with the `RenovateMe` task.
 [More details on how to configure the pipeline](https://marketplace.visualstudio.com/items?itemName=jyc.vsts-extensions-renovate-me).
 Note: This extension is created and maintained personally by a Renovate developer/user so support requests relating to the extension itself cannot be answered directly in the main Renovate repository.
-Alternatively, you can create custom pipeline with with a `yml` definition that will trigger `npx renovate`.
+Alternatively, you can create a custom pipeline with a `yml` definition that will trigger `npx renovate`.
 [More details on how to configure the pipeline](https://docs.renovatebot.com/setup-azure-devops/).
 
 For Bitbucket Cloud, Bitbucket Server, Gitea and GitLab, use our self-hosting option.
