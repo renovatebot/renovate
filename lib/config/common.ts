@@ -37,6 +37,7 @@ export interface RenovateSharedConfig {
   ignoreDeps?: string[];
   ignorePaths?: string[];
   labels?: string[];
+  addLabels?: string[];
   managers?: string | string[];
   dependencyDashboardApproval?: boolean;
   npmrc?: string;
@@ -127,6 +128,7 @@ export type RenovateRepository =
 export interface CustomManager {
   fileMatch: string[];
   matchStrings: string[];
+  matchStringsStrategy?: string;
   depNameTemplate?: string;
   datasourceTemplate?: string;
   lookupNameTemplate?: string;
@@ -204,6 +206,8 @@ export type UpdateType =
   | 'lockfileUpdate'
   | 'rollback'
   | 'bump';
+
+export type MatchStringsStrategy = 'any' | 'recursive' | 'combination';
 
 // TODO: Proper typings
 export interface PackageRule

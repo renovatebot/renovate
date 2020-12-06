@@ -161,7 +161,10 @@ export async function ensurePr(
     logger.debug(
       `Branch is configured for branch automerge, branch status) is: ${await getBranchStatus()}`
     );
-    if ((await getBranchStatus()) === BranchStatus.yellow) {
+    if (
+      config.stabilityStatus !== BranchStatus.yellow &&
+      (await getBranchStatus()) === BranchStatus.yellow
+    ) {
       logger.debug('Checking how long this branch has been pending');
       const lastCommitTime = await getBranchLastCommitTime(branchName);
       const currentTime = new Date();
@@ -214,7 +217,8 @@ export async function ensurePr(
       );
       if (
         !dependencyDashboardCheck &&
-        elapsedHours < config.prNotPendingHours
+        (config.stabilityStatus !== BranchStatus.yellow ||
+          elapsedHours < config.prNotPendingHours)
       ) {
         logger.debug(
           `Branch is ${elapsedHours} hours old - skipping PR creation`
@@ -355,7 +359,12 @@ export async function ensurePr(
       if (config.dryRun) {
         logger.info(`DRY-RUN: Would update PR #${existingPr.number}`);
       } else {
-        await platform.updatePr({ number: existingPr.number, prTitle, prBody });
+        await platform.updatePr({
+          number: existingPr.number,
+          prTitle,
+          prBody,
+          platformOptions: getPlatformPrOptions(config),
+        });
         logger.info({ pr: existingPr.number, prTitle }, `PR updated`);
       }
       return { prResult: PrResult.Updated, pr: existingPr };
@@ -380,7 +389,7 @@ export async function ensurePr(
           targetBranch: config.baseBranch,
           prTitle,
           prBody,
-          labels: config.labels,
+          labels: [...new Set([...config.labels, ...config.addLabels])],
           platformOptions: getPlatformPrOptions(config),
           draftPR: config.draftPR,
         });
@@ -421,6 +430,7 @@ export async function ensurePr(
       if (config.branchAutomergeFailureMessage === 'branch status error') {
         content += '\n___\n * Branch has one or more failed status checks';
       }
+      content = platform.getPrBody(content);
       logger.debug('Adding branch automerge failure message to PR');
       // istanbul ignore if
       if (config.dryRun) {
