@@ -81,7 +81,7 @@ async function generateData(): Promise<void> {
 
   const contentMapDecl = 'const data = new Map<DataFile, string>();';
 
-  const contentMapAssignments = [];
+  const contentMapAssignments: string[] = [];
   for (const file of files) {
     shell.echo(`> data/${file}`);
     const rawFileContent = await fs.readFile(`data/${file}`, 'utf8');
