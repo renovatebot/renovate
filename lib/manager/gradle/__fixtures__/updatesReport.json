@@ -40,6 +40,11 @@
         "name": "bar",
         "group": "bar",
         "version": null
+      },
+      {
+        "name": "baz",
+        "group": "baz",
+        "version": null
       }
     ]
   }
