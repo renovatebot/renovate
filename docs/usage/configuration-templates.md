@@ -40,20 +40,20 @@ Do not touch this unless you know what you're doing.
 
 `commitMessageAction` is usually just one word, e.g. 'Update', 'Pin', 'Refresh', etc.
 You're probably fine leaving this setting alone, though you can change it.
-e.g. if you prefer that Renovate uses the term 'Upgrade' instead of 'Update'
-TODO: Explain how user can change `commitMessageAction` for 'Update' -> 'Upgrade'
+e.g. if you prefer that Renovate uses the term 'Upgrade' instead of 'Update' then you could configure `"commitMessageAction": "Upgrade"`.
 
 `commitMessageTopic` is usually two to three words that identify _what_ is being updated.
 e.g. it might be `dependency react` or `Docker image ubuntu`.
 You may want to edit this.
-If you think your new `commitMessageTopic` is helpful for others, please open a PR at (TODO: INSERT LOCATION WHICH ACCEPTS PR).
-You can also add this to the preset config repo (TODO: INSERT LINK TO PRESET CONFIG REPO) so that others with similar requirements can benefit too.
+If you think your new `commitMessageTopic` is helpful for others, please [open a PR](https://github.com/renovatebot/renovate/pulls).
 
 `commitMessageExtra` refers to the version being updated to.
 e.g. `to v16` for a major upgrade, or `to v16.0.3` for a patch update.
 It can be empty in some cases, like if the action/topic doesn't change a package version, e.g. `Pin Docker digests`.
 
-`commitMessageSuffix` defaults to empty and is there for flexibility and future use (TODO: EXPLAIN IF THIS IS FOR USER'S BENEFIT OF FOR RENOVATE'S BENEFIT).
+`commitMessageSuffix` defaults to empty but is currently used in two cases:
+- Differentiating major from non-major groups
+- Differentiating between PRs from different base branches
 Maybe for `major` updates you always want the PR to end with `(MAJOR)`, for instance.
 
 `commitBody` is used if you wish to add multi-line commit messages, such as for the `Signed-off-by` fields, or adding `[skip-ci]`, etc.
@@ -62,7 +62,7 @@ It is appended to the generated `commitMessage`, separated by a newline.
 ## PR Title
 
 Because commit messages match with the PR title, the PR title template defaults to `null` and inherits/copies the value from `commitMessage`.
-If you have a requirement where `prTitle` should be different from `commitMessage`, then please raise a feature request (TODO: INSERT LINK TO RENOVATE REPO) for discussion.
+If you have a requirement where `prTitle` should be different from `commitMessage`, then please [raise a feature request](https://github.com/renovatebot/renovate/issues) for discussion.
 
 ## PR Body
 
