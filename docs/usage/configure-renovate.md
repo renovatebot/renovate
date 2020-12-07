@@ -25,22 +25,21 @@ If you do, then make them in your base branch (e.g. `master`) so that Renovate c
 The Configure Renovate PR will include a `renovate.json` file in the root directory, with suggested default settings.
 If you don't want a `renovate.json` file in your repository you can use one of the following files instead:
 
-- `package.json`
+- `renovate.json5`
+- `.github/renovate.json`
+- `.github/renovate.json5`
+- `.gitlab/renovate.json`
+- `.gitlab/renovate.json5`
 - `.renovaterc`
 - `.renovaterc.json`
+- `package.json`
 
 ### package.json
 
 You can add the same settings to a `"renovate"` section in your `package.json` file instead.
-The `package.json` file must be located at the root of your repository. (I think this is what is intended, configure it in the root `package.json` which then also applies to other nested `package.json` files further in the directory structure)
+The `package.json` file must be located at the root of your repository.
 This is handy if you are already using a `package.json` file anyway, e.g. when you're working on a JavaScript project.
 The configuration in your `package.json` will apply to the whole project (this includes other, nested `package.json` files).
-
-TODO: Maybe add link to section that explains the `"renovate"` section in the `package.json` file workflow?
-
-### .renovaterc or .renovaterc.json
-
-Alternatively, if you prefer to use "dot files" then you can add the same JSON configuration to either a `.renovaterc` file or `.renovaterc.json` file instead of `renovate.json`.
 
 ## Customised Defaults
 
