@@ -127,14 +127,18 @@ export async function extractPackageFile(
   let lernaPackages: string[];
   let lernaClient: 'yarn' | 'npm';
   let hasFileRefs = false;
-  let lernaJson: { packages: string[]; npmClient: string };
+  let lernaJson: {
+    packages: string[];
+    npmClient: string;
+    useWorkspaces?: boolean;
+  };
   try {
     const lernaJsonFileName = getSiblingFileName(fileName, 'lerna.json');
     lernaJson = JSON.parse(await readLocalFile(lernaJsonFileName, 'utf8'));
   } catch (err) /* istanbul ignore next */ {
     logger.warn({ err }, 'Could not parse lerna.json');
   }
-  if (lernaJson) {
+  if (lernaJson && !lernaJson.useWorkspaces) {
     lernaDir = dirname(fileName);
     lernaPackages = lernaJson.packages;
     lernaClient =

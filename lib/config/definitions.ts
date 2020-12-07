@@ -157,6 +157,15 @@ const options: RenovateOptions[] = [
     cli: false,
   },
   {
+    name: 'onboardingConfigFileName',
+    description:
+      'Change this value in order to override the default onboarding config file name.',
+    type: 'string',
+    default: 'renovate.json',
+    admin: true,
+    cli: false,
+  },
+  {
     name: 'onboardingPrTitle',
     description:
       'Change this value in order to override the default onboarding PR title.',
