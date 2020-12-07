@@ -85,9 +85,8 @@ async function generateData(): Promise<void> {
   for (const file of files) {
     shell.echo(`> data/${file}`);
     const rawFileContent = await fs.readFile(`data/${file}`, 'utf8');
-    const prettyFileContent = `\n${rawFileContent.replace(/`/g, '\\`')}\n`;
     contentMapAssignments.push(
-      `data.set('${file}', \`${prettyFileContent}\`.slice(1, -1));`
+      `data.set('${file}', ${JSON.stringify(rawFileContent)});`
     );
   }
 
@@ -96,7 +95,7 @@ async function generateData(): Promise<void> {
     [
       `type DataFile =\n${importDataFileType};`,
       contentMapDecl,
-      ...contentMapAssignments,
+      contentMapAssignments.join('\n'),
       `export default data;\n`,
     ].join('\n\n')
   );
