@@ -213,6 +213,14 @@ However, if you want to allow more concurrent branches than concurrent PRs, you 
 
 This limit is enforced on a per-repository basis.
 
+Example config:
+
+```json
+{
+  "branchConcurrentLimit": 3
+}
+```
+
 ## branchName
 
 Warning: it's strongly recommended not to configure this field directly.
