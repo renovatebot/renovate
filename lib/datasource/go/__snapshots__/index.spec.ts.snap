@@ -357,6 +357,22 @@ Array [
 ]
 `;
 
+exports[`datasource/go getReleases unknown datasource returns null 1`] = `null`;
+
+exports[`datasource/go getReleases unknown datasource returns null 2`] = `
+Array [
+  Object {
+    "headers": Object {
+      "accept-encoding": "gzip, deflate",
+      "host": "some.unknown.website",
+      "user-agent": "https://github.com/renovatebot/renovate",
+    },
+    "method": "GET",
+    "url": "https://some.unknown.website/example/module?go-get=1",
+  },
+]
+`;
+
 exports[`datasource/go getReleases works for known servers 1`] = `
 Array [
   Object {

@@ -36,6 +36,10 @@ export async function getReleases({
     return cachedResult;
   }
 
+  if (!depHost) {
+    depHost = bitbucketApiEndpoint;
+  }
+
   const url = URL.resolve(depHost, `/2.0/repositories/${repo}/refs/tags`);
 
   const bitbucketTags = (

@@ -3,7 +3,6 @@ import { logger } from '../../logger';
 import { Http } from '../../util/http';
 import { regEx } from '../../util/regex';
 import * as bitbucket from '../bitbucket-tags';
-import { bitbucketApiEndpoint } from '../../util/http/bitbucket';
 import { DigestConfig, GetReleasesConfig, ReleaseResult } from '../common';
 import * as github from '../github-tags';
 import * as gitlab from '../gitlab-tags';
@@ -44,8 +43,7 @@ async function getDatasource(goModule: string): Promise<DataSource | null> {
     const lookupName = split[1] + '/' + split[2];
     return {
       datasource: bitbucket.id,
-      lookupName: lookupName,
-      registryUrl: bitbucketApiEndpoint,
+      lookupName,
     };
   }
 
@@ -139,6 +137,10 @@ export async function getReleases({
     case bitbucket.id: {
       res = await bitbucket.getReleases(source);
       break;
+    }
+    /* istanbul ignore next */
+    default: {
+      return null;
     }
   }
 
