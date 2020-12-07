@@ -7812,7 +7812,7 @@ npm@^6.14.8:
     lodash._bindcallback "*"
     lodash._cacheindexof "*"
     lodash._createcache "*"
-    lodash._getnative "*"    lodash.union "~4.6.0"
+    lodash._getnative "*"
     lodash.clonedeep "~4.5.0"
     lodash.restparam "*"
     lodash.union "~4.6.0"
