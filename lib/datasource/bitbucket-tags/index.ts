@@ -27,27 +27,25 @@ export async function getReleases({
   registryUrl: depHost,
   lookupName: repo,
 }: GetReleasesConfig): Promise<ReleaseResult | null> {
+  // fallback to default API endpoint if custom not provided
+  const host = depHost || bitbucketApiEndpoint;
   const cachedResult = await packageCache.get<ReleaseResult>(
     cacheNamespace,
-    getCacheKey(depHost, repo)
+    getCacheKey(host, repo)
   );
   // istanbul ignore if
   if (cachedResult) {
     return cachedResult;
   }
 
-  if (!depHost) {
-    depHost = bitbucketApiEndpoint;
-  }
-
-  const url = URL.resolve(depHost, `/2.0/repositories/${repo}/refs/tags`);
+  const url = URL.resolve(host, `/2.0/repositories/${repo}/refs/tags`);
 
   const bitbucketTags = (
     await bitbucketHttp.getJson<utils.PagedResult<BitbucketTag>>(url)
   ).body;
 
   const dependency: ReleaseResult = {
-    sourceUrl: URL.resolve(depHost, repo),
+    sourceUrl: URL.resolve(host, repo),
     releases: null,
   };
   dependency.releases = bitbucketTags.values.map(({ name, target }) => ({
@@ -59,7 +57,7 @@ export async function getReleases({
   const cacheMinutes = 10;
   await packageCache.set(
     cacheNamespace,
-    getCacheKey(depHost, repo),
+    getCacheKey(host, repo),
     dependency,
     cacheMinutes
   );
