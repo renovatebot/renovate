@@ -7,8 +7,7 @@ Batect configuration, you'll need to configure regular expressions for them in `
 {
   "batect": {
     "fileMatch": [
-      "(^|/)batect\\.yml$",
-      "(^|/)batect-bundle\\.yml$",
+      "(^|/)batect(-bundle)?\\.yml$",
       "(^|/)my-other-batect-file\\.yml$",
       "^a-directory/[^/]*\\.yml$"
     ]

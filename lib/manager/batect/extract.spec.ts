@@ -30,6 +30,7 @@ describe('lib/manager/batect/extract', () => {
 
       expect(res.deps).toEqual([
         getDep('alpine:1.2.3'),
+        getDep('alpine:1.2.3'),
         getDep('ubuntu:20.04'),
         getDep(
           'postgres:9.6.20@sha256:166179811e4c75f8a092367afed6091208c8ecf60b111c7e49f29af45ca05e08'

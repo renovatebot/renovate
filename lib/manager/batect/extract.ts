@@ -3,14 +3,7 @@ import { safeLoad } from 'js-yaml';
 import { logger } from '../../logger';
 import { PackageFile } from '../common';
 import { getDep } from '../dockerfile/extract';
-
-interface BatectConfig {
-  containers?: Record<string, BatectContainer>;
-}
-
-interface BatectContainer {
-  image?: string;
-}
+import { BatectConfig } from './types';
 
 function loadConfig(content: string): BatectConfig {
   const config = safeLoad(content);
@@ -24,20 +17,14 @@ function loadConfig(content: string): BatectConfig {
   return config as BatectConfig;
 }
 
-function uniqueValues<T>(items: T[]): T[] {
-  return [...new Set(items)];
-}
-
 function extractImages(config: BatectConfig): string[] {
   if (config.containers === undefined) {
     return [];
   }
 
-  const images = Object.values(config.containers)
+  return Object.values(config.containers)
     .filter((container) => container.image !== undefined)
     .map((container) => container.image);
-
-  return uniqueValues(images);
 }
 
 export function extractPackageFile(
@@ -62,7 +49,7 @@ export function extractPackageFile(
 
     return { deps };
   } catch (err) {
-    logger.error(
+    logger.warn(
       { err, fileName },
       'Extracting dependencies from Batect configuration file failed'
     );
