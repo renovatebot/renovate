@@ -7,7 +7,7 @@ import { GetReleasesConfig, ReleaseResult } from '../common';
 const bitbucketHttp = new BitbucketHttp();
 
 export const id = 'bitbucket-tags';
-export const defaultRegistryUrls = [bitbucketApiEndpoint+'2.0/'];
+export const defaultRegistryUrls = [bitbucketApiEndpoint + '2.0/'];
 export const registryStrategy = 'first';
 
 const cacheNamespace = 'datasource-bitbucket';

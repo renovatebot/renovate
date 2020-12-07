@@ -140,9 +140,6 @@ export async function getReleases({
       res = await bitbucket.getReleases(source);
       break;
     }
-    default: {
-      return null;
-    }
   }
 
   // istanbul ignore if

@@ -170,6 +170,19 @@ describe('datasource/go', () => {
       expect(res).toBeDefined();
       expect(httpMock.getTrace()).toMatchSnapshot();
     });
+    it('unknown datasource returns null', async () => {
+      httpMock
+        .scope('https://some.unknown.website/')
+        .get('/example/module?go-get=1')
+        .reply(404);
+      const res = await getPkgReleases({
+        datasource,
+        depName: 'some.unknown.website/example/module',
+      });
+      expect(res).toMatchSnapshot();
+      expect(res).toBeNull();
+      expect(httpMock.getTrace()).toMatchSnapshot();
+    });
     it('support ghe', async () => {
       httpMock
         .scope('https://git.enterprise.com/')
