@@ -1,16 +1,25 @@
 import * as packageCache from '../../util/cache/package';
 import { GithubHttp } from '../../util/http/github';
+import { ensureTrailingSlash } from '../../util/url';
 import { GetReleasesConfig, ReleaseResult } from '../common';
 
 export const id = 'github-releases';
+export const defaultRegistryUrls = ['https://github.com'];
+export const registryStrategy = 'first';
 
 const cacheNamespace = 'datasource-github-releases';
 
 const http = new GithubHttp();
 
+function getCacheKey(depHost: string, repo: string): string {
+  const type = 'tags';
+  return `${depHost}:${repo}:${type}`;
+}
+
 type GithubRelease = {
   tag_name: string;
   published_at: string;
+  prerelease: boolean;
 };
 
 /**
@@ -25,30 +34,48 @@ type GithubRelease = {
  */
 export async function getReleases({
   lookupName: repo,
+  registryUrl,
 }: GetReleasesConfig): Promise<ReleaseResult | null> {
   const cachedResult = await packageCache.get<ReleaseResult>(
     cacheNamespace,
-    repo
+    getCacheKey(registryUrl, repo)
   );
   // istanbul ignore if
   if (cachedResult) {
     return cachedResult;
   }
-  const url = `https://api.github.com/repos/${repo}/releases?per_page=100`;
+  // default to GitHub.com if no GHE host is specified.
+  const sourceUrlBase = ensureTrailingSlash(
+    registryUrl ?? 'https://github.com/'
+  );
+  const apiBaseUrl =
+    sourceUrlBase !== 'https://github.com/'
+      ? `${sourceUrlBase}api/v3/`
+      : `https://api.github.com/`;
+
+  const url = `${apiBaseUrl}repos/${repo}/releases?per_page=100`;
   const res = await http.getJson<GithubRelease[]>(url, {
     paginate: true,
   });
   const githubReleases = res.body;
   const dependency: ReleaseResult = {
-    sourceUrl: 'https://github.com/' + repo,
+    sourceUrl: `${sourceUrlBase}${repo}`,
     releases: null,
   };
-  dependency.releases = githubReleases.map(({ tag_name, published_at }) => ({
-    version: tag_name,
-    gitRef: tag_name,
-    releaseTimestamp: published_at,
-  }));
+  dependency.releases = githubReleases.map(
+    ({ tag_name, published_at, prerelease }) => ({
+      version: tag_name,
+      gitRef: tag_name,
+      releaseTimestamp: published_at,
+      isStable: prerelease ? false : undefined,
+    })
+  );
   const cacheMinutes = 10;
-  await packageCache.set(cacheNamespace, repo, dependency, cacheMinutes);
+  await packageCache.set(
+    cacheNamespace,
+    getCacheKey(registryUrl, repo),
+    dependency,
+    cacheMinutes
+  );
   return dependency;
 }

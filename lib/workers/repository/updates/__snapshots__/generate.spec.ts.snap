@@ -13,7 +13,7 @@ Object {
   "branchName": "some-branch",
   "canBeUnpublished": false,
   "commitMessage": "",
-  "compatibility": Object {},
+  "constraints": Object {},
   "depName": "some-dep",
   "dependencyDashboardApproval": false,
   "dependencyDashboardPrApproval": false,
@@ -74,7 +74,7 @@ Object {
 | ---------- | --------------- | ----- | ----- |
 | npm        | @types/some-dep | 0.5.7 | 0.5.8 |
 ",
-  "compatibility": Object {},
+  "constraints": Object {},
   "datasource": "npm",
   "depName": "some-dep",
   "dependencyDashboardApproval": false,
@@ -136,6 +136,6 @@ Object {
 }
 `;
 
-exports[`workers/repository/updates/generate generateBranchConfig() handles upgrades 1`] = `"some-title ()"`;
+exports[`workers/repository/updates/generate generateBranchConfig() handles upgrades 1`] = `"some-title (patch)"`;
 
 exports[`workers/repository/updates/generate generateBranchConfig() supports manual prTitle 1`] = `"upgrade some-dep"`;

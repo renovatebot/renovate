@@ -34,13 +34,14 @@ export interface RepoResult {
 
 export interface RepoParams {
   localDir: string;
-  optimizeForDisabled: boolean;
   repository: string;
   endpoint?: string;
   forkMode?: string;
   forkToken?: string;
   includeForks?: boolean;
   renovateUsername?: string;
+  cloneSubmodules?: boolean;
+  ignorePrAuthor?: boolean;
 }
 
 /**
@@ -48,7 +49,7 @@ export interface RepoParams {
  */
 export interface Pr {
   body?: string;
-  branchName: string;
+  sourceBranch: string;
   canMerge?: boolean;
   canMergeReason?: string;
   createdAt?: string;
@@ -64,6 +65,7 @@ export interface Pr {
   state: string;
   targetBranch?: string;
   title: string;
+  isDraft?: boolean;
 }
 
 /**
@@ -82,7 +84,7 @@ export type PlatformPrOptions = {
   gitLabAutomerge?: boolean;
 };
 export interface CreatePRConfig {
-  branchName: string;
+  sourceBranch: string;
   targetBranch: string;
   prTitle: string;
   prBody: string;
@@ -92,6 +94,7 @@ export interface CreatePRConfig {
 }
 export interface UpdatePrConfig {
   number: number;
+  platformOptions?: PlatformPrOptions;
   prTitle: string;
   prBody?: string;
   state?: PrState.Open | PrState.Closed;

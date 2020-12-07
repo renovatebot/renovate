@@ -48,7 +48,7 @@ function logError(datasource, lookupName, err): void {
 }
 
 async function getRegistryReleases(
-  datasource,
+  datasource: Datasource,
   config: GetReleasesConfig,
   registryUrl: string
 ): Promise<ReleaseResult> {
@@ -220,9 +220,9 @@ function getRawReleases(
     registryUrls
   )}`;
   // By returning a Promise and reusing it, we should only fetch each package at most once
-  const cachedResult = memCache.get(cacheKey);
+  const cachedResult = memCache.get<Promise<ReleaseResult | null>>(cacheKey);
   // istanbul ignore if
-  if (cachedResult) {
+  if (cachedResult !== undefined) {
     return cachedResult;
   }
   const promisedRes = fetchReleases(config);
@@ -315,5 +315,7 @@ export function getDefaultConfig(
   datasource: string
 ): Promise<Record<string, unknown>> {
   const loadedDatasource = load(datasource);
-  return Promise.resolve(loadedDatasource?.defaultConfig || Object.create({}));
+  return Promise.resolve<Record<string, unknown>>(
+    loadedDatasource?.defaultConfig || Object.create({})
+  );
 }

@@ -4,7 +4,6 @@ import delay from 'delay';
 import type { PartialDeep } from 'type-fest';
 import {
   REPOSITORY_CHANGED,
-  REPOSITORY_DISABLED,
   REPOSITORY_EMPTY,
   REPOSITORY_NOT_FOUND,
 } from '../../constants/error-messages';
@@ -123,17 +122,18 @@ export async function getJsonFile(fileName: string): Promise<any | null> {
     } else {
       return JSON.parse(body.lines.map((l) => l.text).join(''));
     }
-  } catch (err) /* istanbul ignore next */ {
+  } catch (err) {
     // no-op
   }
   return null;
 }
 
-// Initialize GitLab by getting base branch
+// Initialize BitBucket Server by getting base branch
 export async function initRepo({
   repository,
   localDir,
-  optimizeForDisabled,
+  cloneSubmodules,
+  ignorePrAuthor,
 }: RepoParams): Promise<RepoResult> {
   logger.debug(
     `initRepo("${JSON.stringify({ repository, localDir }, null, 2)}")`
@@ -151,18 +151,8 @@ export async function initRepo({
     repository,
     prVersions: new Map<number, number>(),
     username: opts.username,
+    ignorePrAuthor,
   } as any;
-
-  if (optimizeForDisabled) {
-    interface RenovateConfig {
-      enabled: boolean;
-    }
-
-    const renovateConfig: RenovateConfig = await getJsonFile('renovate.json');
-    if (renovateConfig && renovateConfig.enabled === false) {
-      throw new Error(REPOSITORY_DISABLED);
-    }
-  }
 
   const { host, pathname } = url.parse(defaults.endpoint);
   const gitUrl = git.getUrl({
@@ -180,6 +170,7 @@ export async function initRepo({
     url: gitUrl,
     gitAuthorName: global.gitAuthor?.name,
     gitAuthorEmail: global.gitAuthor?.email,
+    cloneSubmodules,
   });
 
   try {
@@ -197,7 +188,8 @@ export async function initRepo({
       `./rest/api/1.0/projects/${config.projectKey}/repos/${config.repositorySlug}/branches/default`
     );
 
-    if (branchRes.statusCode === 204) {
+    // 204 means empty, 404 means repo not found or missing default branch. repo must exist here.
+    if ([204, 404].includes(branchRes.statusCode)) {
       throw new Error(REPOSITORY_EMPTY);
     }
 
@@ -295,7 +287,7 @@ const isRelevantPr = (
   prTitle: string | null | undefined,
   state: string
 ) => (p: Pr): boolean =>
-  p.branchName === branchName &&
+  p.sourceBranch === branchName &&
   (!prTitle || p.title === prTitle) &&
   matchesState(p.state, state);
 
@@ -304,11 +296,14 @@ export async function getPrList(refreshCache?: boolean): Promise<Pr[]> {
   logger.debug(`getPrList()`);
   // istanbul ignore next
   if (!config.prList || refreshCache) {
-    const query = new URLSearchParams({
+    const searchParams = {
       state: 'ALL',
-      'role.1': 'AUTHOR',
-      'username.1': config.username,
-    }).toString();
+    };
+    if (!config.ignorePrAuthor) {
+      searchParams['role.1'] = 'AUTHOR';
+      searchParams['username.1'] = config.username;
+    }
+    const query = new URLSearchParams(searchParams).toString();
     const values = await utils.accumulateValues(
       `./rest/api/1.0/projects/${config.projectKey}/repos/${config.repositorySlug}/pull-requests?${query}`
     );
@@ -589,15 +584,15 @@ export async function addReviewers(
     );
     await getPr(prNo, true);
   } catch (err) {
+    logger.warn({ err, reviewers, prNo }, `Failed to add reviewers`);
     if (err.statusCode === 404) {
       throw new Error(REPOSITORY_NOT_FOUND);
-    } else if (err.statusCode === 409) {
+    } else if (
+      err.statusCode === 409 &&
+      !utils.isInvalidReviewersResponse(err)
+    ) {
       throw new Error(REPOSITORY_CHANGED);
     } else {
-      logger.fatal(
-        { err },
-        `Failed to add reviewers '${reviewers.join(', ')}' to #${prNo}`
-      );
       throw err;
     }
   }
@@ -769,14 +764,14 @@ const escapeHash = (input: string): string =>
   input ? input.replace(/#/g, '%23') : input;
 
 export async function createPr({
-  branchName,
+  sourceBranch,
   targetBranch,
   prTitle: title,
   prBody: rawDescription,
   platformOptions,
 }: CreatePRConfig): Promise<Pr> {
   const description = sanitize(rawDescription);
-  logger.debug(`createPr(${branchName}, title=${title})`);
+  logger.debug(`createPr(${sourceBranch}, title=${title})`);
   const base = targetBranch;
   let reviewers: BbsRestUserRef[] = [];
 
@@ -794,7 +789,7 @@ export async function createPr({
         `./rest/default-reviewers/1.0/projects/${config.projectKey}/repos/${
           config.repositorySlug
         }/reviewers?sourceRefId=refs/heads/${escapeHash(
-          branchName
+          sourceBranch
         )}&targetRefId=refs/heads/${base}&sourceRepoId=${id}&targetRepoId=${id}`
       )
     ).body;
@@ -808,7 +803,7 @@ export async function createPr({
     title,
     description,
     fromRef: {
-      id: `refs/heads/${branchName}`,
+      id: `refs/heads/${sourceBranch}`,
     },
     toRef: {
       id: `refs/heads/${base}`,
@@ -829,7 +824,7 @@ export async function createPr({
       logger.debug(
         'Empty pull request - deleting branch so it can be recreated next run'
       );
-      await deleteBranch(branchName);
+      await deleteBranch(sourceBranch);
       throw new Error(REPOSITORY_CHANGED);
     }
     throw err;
@@ -855,7 +850,10 @@ export async function updatePr({
   prTitle: title,
   prBody: rawDescription,
   state,
-}: UpdatePrConfig): Promise<void> {
+  bitbucketInvalidReviewers,
+}: UpdatePrConfig & {
+  bitbucketInvalidReviewers: string[] | undefined;
+}): Promise<void> {
   const description = sanitize(rawDescription);
   logger.debug(`updatePr(${prNo}, title=${title})`);
 
@@ -875,7 +873,11 @@ export async function updatePr({
           title,
           description,
           version: pr.version,
-          reviewers: pr.reviewers.map((name: string) => ({ user: { name } })),
+          reviewers: pr.reviewers
+            .filter(
+              (name: string) => !bitbucketInvalidReviewers?.includes(name)
+            )
+            .map((name: string) => ({ user: { name } })),
         },
       }
     );
@@ -903,12 +905,24 @@ export async function updatePr({
       updatePrVersion(pr.number, updatedStatePr.version);
     }
   } catch (err) {
+    logger.debug({ err, prNo }, `Failed to update PR`);
     if (err.statusCode === 404) {
       throw new Error(REPOSITORY_NOT_FOUND);
     } else if (err.statusCode === 409) {
-      throw new Error(REPOSITORY_CHANGED);
+      if (utils.isInvalidReviewersResponse(err) && !bitbucketInvalidReviewers) {
+        // Retry again with invalid reviewers being removed
+        const invalidReviewers = utils.getInvalidReviewers(err);
+        await updatePr({
+          number: prNo,
+          prTitle: title,
+          prBody: rawDescription,
+          state,
+          bitbucketInvalidReviewers: invalidReviewers,
+        });
+      } else {
+        throw new Error(REPOSITORY_CHANGED);
+      }
     } else {
-      logger.fatal({ err }, `Failed to update PR`);
       throw err;
     }
   }

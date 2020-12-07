@@ -28,6 +28,11 @@ export function getIndexSuffix(lookupName: string): string {
   );
 }
 
+interface CrateRecord {
+  vers: string;
+  yanked: boolean;
+}
+
 export async function getReleases({
   lookupName,
 }: GetReleasesConfig): Promise<ReleaseResult | null> {
@@ -49,13 +54,13 @@ export async function getReleases({
       .split('\n') // break into lines
       .map((line) => line.trim()) // remove whitespace
       .filter((line) => line.length !== 0) // remove empty lines
-      .map((line) => JSON.parse(line)); // parse
+      .map((line) => JSON.parse(line) as CrateRecord); // parse
     const result: ReleaseResult = {
       dependencyUrl,
       releases: [],
     };
     result.releases = lines
-      .map((version: { vers: string; yanked: boolean }) => {
+      .map((version) => {
         const release: Release = {
           version: version.vers,
         };

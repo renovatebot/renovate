@@ -1,6 +1,6 @@
 import fs from 'fs';
-import { resolve } from 'path';
 import nock from 'nock';
+import { resolve } from 'upath';
 import { Release, getPkgReleases } from '..';
 import { EXTERNAL_HOST_ERROR } from '../../constants/error-messages';
 import * as hostRules from '../../util/host-rules';
@@ -106,7 +106,7 @@ describe('datasource/maven', () => {
     nock.enableNetConnect();
   });
 
-  function generateReleases(versions): Release[] {
+  function generateReleases(versions: string[]): Release[] {
     return versions.map((v) => ({ version: v }));
   }
 

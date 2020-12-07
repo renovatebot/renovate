@@ -1,6 +1,8 @@
 import { Stream } from 'stream';
 import bunyan from 'bunyan';
 import fs from 'fs-extra';
+import { RequestError } from 'got';
+import { clone } from '../util/clone';
 import { redactedFields, sanitize } from '../util/sanitize';
 
 export interface BunyanRecord extends Record<string, any> {
@@ -11,8 +13,8 @@ export interface BunyanRecord extends Record<string, any> {
 
 const excludeProps = ['pid', 'time', 'v', 'hostname'];
 
-export class ErrorStream extends Stream {
-  private _errors: BunyanRecord[] = [];
+export class ProblemStream extends Stream {
+  private _problems: BunyanRecord[] = [];
 
   readable: boolean;
 
@@ -25,20 +27,20 @@ export class ErrorStream extends Stream {
   }
 
   write(data: BunyanRecord): boolean {
-    const err = { ...data };
+    const problem = { ...data };
     for (const prop of excludeProps) {
-      delete err[prop];
+      delete problem[prop];
     }
-    this._errors.push(err);
+    this._problems.push(problem);
     return true;
   }
 
-  getErrors(): BunyanRecord[] {
-    return this._errors;
+  getProblems(): BunyanRecord[] {
+    return this._problems;
   }
 
-  clearErrors(): void {
-    this._errors = [];
+  clearProblems(): void {
+    this._problems = [];
   }
 }
 const templateFields = ['prBody'];
@@ -48,6 +50,48 @@ const contentFields = [
   'packageLockParsed',
   'yarnLockParsed',
 ];
+
+export default function prepareError(err: Error): Record<string, unknown> {
+  const response: Record<string, unknown> = {
+    ...err,
+  };
+
+  // Required as message is non-enumerable
+  if (!response.message && err.message) {
+    response.message = err.message;
+  }
+
+  // Required as stack is non-enumerable
+  if (!response.stack && err.stack) {
+    response.stack = err.stack;
+  }
+
+  // handle got error
+  if (err instanceof RequestError) {
+    const options: Record<string, unknown> = {
+      headers: clone(err.options.headers),
+      url: err.options.url?.toString(),
+    };
+    response.options = options;
+
+    for (const k of ['username', 'password', 'method', 'http2']) {
+      options[k] = err.options[k];
+    }
+
+    // istanbul ignore else
+    if (err.response) {
+      response.response = {
+        statusCode: err.response?.statusCode,
+        statusMessage: err.response?.statusMessage,
+        body: clone(err.response.body),
+        headers: clone(err.response.headers),
+        httpVersion: err.response.httpVersion,
+      };
+    }
+  }
+
+  return response;
+}
 
 export function sanitizeValue(value: unknown, seen = new WeakMap()): any {
   if (Array.isArray(value)) {
@@ -67,6 +111,11 @@ export function sanitizeValue(value: unknown, seen = new WeakMap()): any {
     return '[content]';
   }
 
+  if (value instanceof Error) {
+    // eslint-disable-next-line no-param-reassign
+    value = prepareError(value);
+  }
+
   const valueType = typeof value;
 
   if (value != null && valueType !== 'function' && valueType === 'object') {
@@ -78,7 +127,9 @@ export function sanitizeValue(value: unknown, seen = new WeakMap()): any {
     seen.set(value as any, objectResult);
     for (const [key, val] of Object.entries<any>(value)) {
       let curValue: any;
-      if (redactedFields.includes(key)) {
+      if (!val) {
+        curValue = val;
+      } else if (redactedFields.includes(key)) {
         curValue = '***********';
       } else if (contentFields.includes(key)) {
         curValue = '[content]';

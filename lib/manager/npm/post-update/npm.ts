@@ -27,11 +27,11 @@ export async function generateLockFile(
   let lockFile = null;
   try {
     let installNpm = 'npm i -g npm';
-    const npmCompatibility = config.compatibility?.npm;
+    const npmCompatibility = config.constraints?.npm;
     if (validRange(npmCompatibility)) {
       installNpm += `@${quote(npmCompatibility)}`;
     }
-    const preCommands = [installNpm];
+    const preCommands = [installNpm, 'hash -d npm'];
     const commands = [];
     let cmdOptions = '';
     if (postUpdateOptions?.includes('npmDedupe') || skipInstalls === false) {
