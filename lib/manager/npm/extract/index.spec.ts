@@ -183,6 +183,20 @@ describe('manager/npm/extract', () => {
       );
       expect(res).toMatchSnapshot();
     });
+    it('finds simple yarn workspaces with lerna.json and useWorkspaces: true', async () => {
+      fs.readLocalFile = jest.fn((fileName) => {
+        if (fileName === 'lerna.json') {
+          return '{"useWorkspaces": true}';
+        }
+        return null;
+      });
+      const res = await npmExtract.extractPackageFile(
+        workspacesSimpleContent,
+        'package.json',
+        defaultConfig
+      );
+      expect(res).toMatchSnapshot();
+    });
     it('finds complex yarn workspaces', async () => {
       fs.readLocalFile = jest.fn((fileName) => {
         if (fileName === 'lerna.json') {

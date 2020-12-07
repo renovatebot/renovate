@@ -167,7 +167,18 @@ function dependencyStringVariableExpressionFormatMatch(
   dependency: GradleDependency
 ): RegExp {
   return regEx(
-    `\\s*dependency\\s+['"]${dependency.group}:${dependency.name}:([^'"]+)['"](?:\\s|;|})`
+    `\\s*dependency\\s+['"]${dependency.group}:${dependency.name}:` +
+      // eslint-disable-next-line no-template-curly-in-string
+      '${([^}]*)}' +
+      `['"](?:\\s|;|})`
+  );
+}
+
+function dependencyStringLiteralExpressionFormatMatch(
+  dependency: GradleDependency
+): RegExp {
+  return regEx(
+    `\\s*dependency\\s+['"]${dependency.group}:${dependency.name}:([^'"{}$]+)['"](?:\\s|;|})`
   );
 }
 
@@ -211,8 +222,14 @@ export function collectVersionVariables(
       }
     }
 
-    if (!dep.currentValue && variables[depName]) {
-      dep.currentValue = variables[depName];
+    if (!dep.currentValue) {
+      const dependencyLiteralRegex = dependencyStringLiteralExpressionFormatMatch(
+        dependency
+      );
+      const currentValue = dependencyLiteralRegex.exec(buildGradleContent)?.[1];
+      if (currentValue) {
+        dep.currentValue = currentValue;
+      }
     }
   }
 }
