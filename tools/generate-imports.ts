@@ -4,8 +4,13 @@ import shell from 'shelljs';
 shell.echo('generating imports');
 const newFiles = new Set();
 
-if (!fs.existsSync('lib') || !fs.existsSync('lib')) {
+if (!fs.existsSync('lib')) {
   shell.echo('> missing sources');
+  shell.exit(0);
+}
+
+if (!fs.existsSync('data')) {
+  shell.echo('> missing data folder');
   shell.exit(0);
 }
 
