@@ -1,6 +1,4 @@
-import is from '@sindresorhus/is';
 import {
-  PackageRule,
   RenovateConfig,
   filterConfig,
   getManagerConfig,
@@ -11,11 +9,6 @@ import { getDefaultConfig } from '../../../datasource';
 import { get } from '../../../manager';
 import { applyPackageRules } from '../../../util/package-rules';
 import { generateBranchName } from './branch-name';
-
-// Return only rules that contain an updateType
-function getUpdateTypeRules(packageRules: PackageRule[]): PackageRule[] {
-  return packageRules.filter((rule) => is.nonEmptyArray(rule.updateTypes));
-}
 
 const upper = (str: string): string =>
   str.charAt(0).toUpperCase() + str.substr(1);
@@ -73,10 +66,6 @@ export async function flattenUpdates(
             );
             updateConfig = mergeChildConfig(updateConfig, datasourceConfig);
             updateConfig = applyPackageRules(updateConfig);
-            // Keep only rules that haven't been applied yet (with updateTypes)
-            updateConfig.packageRules = getUpdateTypeRules(
-              updateConfig.packageRules
-            );
             // apply major/minor/patch/pin/digest
             updateConfig = mergeChildConfig(
               updateConfig,
