@@ -98,6 +98,7 @@ export interface RenovateAdminConfig {
   onboardingCommitMessage?: string;
   onboardingPrTitle?: string;
   onboardingConfig?: RenovateSharedConfig;
+  onboardingConfigFileName?: string;
 
   platform?: string;
   postUpdateOptions?: string[];

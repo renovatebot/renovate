@@ -16,6 +16,9 @@ describe('workers/repository/init/apis', () => {
       delete config.optimizeForDisabled;
       delete config.includeForks;
     });
+    afterEach(() => {
+      jest.resetAllMocks();
+    });
     it('runs', async () => {
       platform.initRepo.mockResolvedValueOnce({
         defaultBranch: 'master',
@@ -49,6 +52,56 @@ describe('workers/repository/init/apis', () => {
           includeForks: false,
         })
       ).rejects.toThrow(REPOSITORY_FORKED);
+    });
+    it('uses the onboardingConfigFileName if set', async () => {
+      platform.initRepo.mockResolvedValueOnce({
+        defaultBranch: 'master',
+        isFork: false,
+      });
+      platform.getJsonFile.mockResolvedValueOnce({ includeForks: false });
+      const workerPlatformConfig = await initApis({
+        ...config,
+        optimizeForDisabled: true,
+        onboardingConfigFileName: '.github/renovate.json',
+      });
+      expect(workerPlatformConfig).toBeTruthy();
+      expect(workerPlatformConfig.onboardingConfigFileName).toBe(
+        '.github/renovate.json'
+      );
+      expect(platform.getJsonFile).toHaveBeenCalledWith(
+        '.github/renovate.json'
+      );
+      expect(platform.getJsonFile).not.toHaveBeenCalledWith('renovate.json');
+    });
+    it('falls back to "renovate.json" if onboardingConfigFileName is not set', async () => {
+      platform.initRepo.mockResolvedValueOnce({
+        defaultBranch: 'master',
+        isFork: false,
+      });
+      platform.getJsonFile.mockResolvedValueOnce({ includeForks: false });
+      const workerPlatformConfig = await initApis({
+        ...config,
+        optimizeForDisabled: true,
+        onboardingConfigFileName: undefined,
+      });
+      expect(workerPlatformConfig).toBeTruthy();
+      expect(workerPlatformConfig.onboardingConfigFileName).toBeUndefined();
+      expect(platform.getJsonFile).toHaveBeenCalledWith('renovate.json');
+    });
+    it('falls back to "renovate.json" if onboardingConfigFileName is not valid', async () => {
+      platform.initRepo.mockResolvedValueOnce({
+        defaultBranch: 'master',
+        isFork: false,
+      });
+      platform.getJsonFile.mockResolvedValueOnce({ includeForks: false });
+      const workerPlatformConfig = await initApis({
+        ...config,
+        optimizeForDisabled: true,
+        onboardingConfigFileName: 'foo.bar',
+      });
+      expect(workerPlatformConfig).toBeTruthy();
+      expect(workerPlatformConfig.onboardingConfigFileName).toBe('foo.bar');
+      expect(platform.getJsonFile).toHaveBeenCalledWith('renovate.json');
     });
   });
 });
