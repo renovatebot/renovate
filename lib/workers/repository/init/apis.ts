@@ -12,13 +12,18 @@ export type WorkerPlatformConfig = RepoResult &
   RenovateConfig &
   Record<string, any>;
 
-const defaultConfigFile = configFileNames[0];
+const defaultConfigFile = (config: RenovateConfig): string =>
+  configFileNames.includes(config.onboardingConfigFileName)
+    ? config.onboardingConfigFileName
+    : configFileNames[0];
 
 async function validateOptimizeForDisabled(
   config: RenovateConfig
 ): Promise<void> {
   if (config.optimizeForDisabled) {
-    const renovateConfig = await platform.getJsonFile(defaultConfigFile);
+    const renovateConfig = await platform.getJsonFile(
+      defaultConfigFile(config)
+    );
     if (renovateConfig?.enabled === false) {
       throw new Error(REPOSITORY_DISABLED);
     }
@@ -27,7 +32,9 @@ async function validateOptimizeForDisabled(
 
 async function validateIncludeForks(config: RenovateConfig): Promise<void> {
   if (!config.includeForks && config.isFork) {
-    const renovateConfig = await platform.getJsonFile(defaultConfigFile);
+    const renovateConfig = await platform.getJsonFile(
+      defaultConfigFile(config)
+    );
     if (!renovateConfig?.includeForks) {
       throw new Error(REPOSITORY_FORKED);
     }

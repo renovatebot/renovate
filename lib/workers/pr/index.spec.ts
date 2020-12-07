@@ -642,5 +642,15 @@ describe('workers/pr', () => {
         gitLabAutomerge: true,
       });
     });
+
+    it('should create a PR with set of labels and mergeable addLabels', async () => {
+      config.labels = ['deps', 'renovate'];
+      config.addLabels = ['deps', 'js'];
+      const { prResult } = await prWorker.ensurePr(config);
+      expect(prResult).toEqual(PrResult.Created);
+      expect(platform.createPr.mock.calls[0][0]).toMatchObject({
+        labels: ['deps', 'renovate', 'js'],
+      });
+    });
   });
 });

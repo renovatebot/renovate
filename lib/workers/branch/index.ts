@@ -31,7 +31,7 @@ import { regEx } from '../../util/regex';
 import * as template from '../../util/template';
 import { BranchConfig, PrResult, ProcessBranchResult } from '../common';
 import { Limit, isLimitReached } from '../global/limits';
-import { checkAutoMerge, ensurePr } from '../pr';
+import { checkAutoMerge, ensurePr, getPlatformPrOptions } from '../pr';
 import { tryBranchAutomerge } from './automerge';
 import { prAlreadyExisted } from './check-existing';
 import { commitFilesToBranch } from './commit';
@@ -199,6 +199,7 @@ export async function processBranch(
                 number: branchPr.number,
                 prTitle: branchPr.title,
                 prBody: newBody,
+                platformOptions: getPlatformPrOptions(config),
               });
             }
             return ProcessBranchResult.PrEdited;
