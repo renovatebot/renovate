@@ -482,5 +482,41 @@ describe('workers/repository/updates/generate', () => {
       const res = generateBranchConfig(branch);
       expect(res.prTitle).toMatchSnapshot();
     });
+    it('sorts upgrades, without position first', () => {
+      const branch: BranchUpgradeConfig[] = [
+        {
+          depName: 'some-dep1',
+          branchName: 'some-branch',
+          prTitle: 'some-title',
+          newValue: '0.6.0',
+          fileReplacePosition: 1,
+        },
+        {
+          depName: 'some-dep2',
+          branchName: 'some-branch',
+          prTitle: 'some-title',
+          newValue: '0.6.0',
+          fileReplacePosition: undefined,
+        },
+        {
+          depName: 'some-dep3',
+          branchName: 'some-branch',
+          prTitle: 'some-title',
+          newValue: '0.6.0',
+          fileReplacePosition: 4,
+        },
+        {
+          depName: 'some-dep4',
+          branchName: 'some-branch',
+          prTitle: 'some-title',
+          newValue: '0.6.0',
+          fileReplacePosition: undefined,
+        },
+      ];
+      const res = generateBranchConfig(branch);
+      expect(
+        res.upgrades.map((upgrade) => upgrade.fileReplacePosition)
+      ).toStrictEqual([undefined, undefined, 4, 1]);
+    });
   });
 });

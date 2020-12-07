@@ -7,7 +7,8 @@ export const presets: Record<string, Preset> = {
     ],
     extends: [
       'workarounds:unstableV2SetupNodeActions',
-      'workarounds:mavenCommonsCliAncientVersion',
+      'workarounds:mavenCommonsAncientVersion',
+      'workarounds:ignoreSpringCloudNumeric',
     ],
   },
   unstableV2SetupNodeActions: {
@@ -20,12 +21,22 @@ export const presets: Record<string, Preset> = {
       },
     ],
   },
-  mavenCommonsCliAncientVersion: {
+  mavenCommonsAncientVersion: {
     packageRules: [
       {
         datasources: ['maven'],
-        packageNames: ['commons-cli:commons-cli'],
-        allowedVersions: '!/20040117.000000/',
+        packagePatterns: ['^commons-'],
+        allowedVersions: '!/^200\\d{5}(\\.\\d+)?/',
+      },
+    ],
+  },
+  ignoreSpringCloudNumeric: {
+    description: 'Ignore spring cloud 1.x releases',
+    packageRules: [
+      {
+        datasources: ['maven'],
+        packageNames: ['org.springframework.cloud:spring-cloud-starter-parent'],
+        allowedVersions: '/^[A-Z]/',
       },
     ],
   },
