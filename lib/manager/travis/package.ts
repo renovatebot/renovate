@@ -1,9 +1,9 @@
 import is from '@sindresorhus/is';
 import equal from 'fast-deep-equal';
+import dataFiles from '../../data-files.generated';
 import { getPkgReleases } from '../../datasource';
 import * as datasourceGithubTags from '../../datasource/github-tags';
 import { logger } from '../../logger';
-import { resolveFile } from '../../util';
 import { isVersion, maxSatisfyingVersion } from '../../versioning/semver';
 import { LookupUpdate, PackageUpdateConfig } from '../common';
 
@@ -26,9 +26,10 @@ type NodeJsData = Record<string, NodeJsSchedule>;
 let policies: NodeJsPolicies;
 let refreshDate: Date;
 
-async function generatePolicies(): Promise<NodeJsData> {
-  const file = await resolveFile('data/node-js-schedule.json');
-  const nodeJsSchedule = (await import(file)) as NodeJsData;
+function generatePolicies(): NodeJsData {
+  const nodeJsSchedule = JSON.parse(
+    dataFiles.get('node-js-schedule.json')
+  ) as NodeJsData;
   policies = {
     all: [],
     lts: [],
@@ -65,11 +66,11 @@ async function generatePolicies(): Promise<NodeJsData> {
   return nodeJsSchedule;
 }
 
-async function checkPolicies(): Promise<void> {
+function checkPolicies(): void {
   if (policies && refreshDate > new Date()) {
     return;
   }
-  const nodeJsSchedule = await generatePolicies();
+  const nodeJsSchedule = generatePolicies();
   refreshDate = new Date('3000-01-01'); // y3k
   const now = new Date();
   for (const data of Object.values(nodeJsSchedule)) {
@@ -92,7 +93,7 @@ export async function getPackageUpdates(
   if (!supportPolicy?.length) {
     return [];
   }
-  await checkPolicies();
+  checkPolicies();
   for (const policy of supportPolicy) {
     if (!Object.keys(policies).includes(policy)) {
       logger.warn({ policy }, `Unknown supportPolicy`);
