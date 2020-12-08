@@ -597,13 +597,18 @@ export async function mergePr(
       PullRequestStatus[PullRequestStatus.Completed]
     }) with lastMergeSourceCommit ${pr.lastMergeSourceCommit.commitId}`
   );
-  await azureApiGit.updatePullRequest(
-    objToUpdate,
-    config.repoId,
-    pullRequestId
-  );
 
-  return Promise.resolve(true);
+  try {
+    await azureApiGit.updatePullRequest(
+      objToUpdate,
+      config.repoId,
+      pullRequestId
+    );
+    return true;
+  } catch (err) {
+    logger.debug({ err }, 'Failed to set the PR as completed.');
+    return false;
+  }
 }
 
 export function getPrBody(input: string): string {

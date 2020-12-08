@@ -1032,6 +1032,26 @@ describe('platform/azure', () => {
       );
       expect(res).toBe(true);
     });
+    it('should return false if the PR does not update successfully', async () => {
+      await initRepo({ repository: 'some/repo' });
+      const pullRequestIdMock = 12345;
+      const branchNameMock = 'test';
+      const lastMergeSourceCommitMock = { commitId: 'abcd1234' };
+      const updatePullRequestMock = jest
+        .fn()
+        .mockRejectedValue(new Error(`oh no pr couldn't be updated`));
+      azureApi.gitApi.mockImplementationOnce(
+        () =>
+          ({
+            getPullRequestById: jest.fn(() => ({
+              lastMergeSourceCommit: lastMergeSourceCommitMock,
+            })),
+            updatePullRequest: updatePullRequestMock,
+          } as any)
+      );
+      const res = await azure.mergePr(pullRequestIdMock, branchNameMock);
+      expect(res).toBe(false);
+    });
   });
 
   describe('getVulnerabilityAlerts()', () => {
