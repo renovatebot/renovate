@@ -2,6 +2,6 @@ export interface BatectConfig {
   containers?: Record<string, BatectContainer>;
 }
 
-interface BatectContainer {
+export interface BatectContainer {
   image?: string;
 }
