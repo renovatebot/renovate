@@ -66,9 +66,10 @@ If you have a requirement where `prTitle` should be different from `commitMessag
 
 ## PR Body
 
-The PR body can be edited multiple ways:
+You can change the PR body in the following ways:
 
-- Editing the entire layout/flow using `prBodyTemplate` (but try to avoid that if possible)
-- Adding header or footer using `prHeader` and `prFooter`
-- Adding notes using `prBodyNotes`
-- Editing the embedded table using `prBodyDefinitions` and `prBodyColumns`
+- Change the entire layout/flow by using `prBodyTemplate` (we do not recommend this)
+- Add a header by using `prHeader`
+- Add a footer by using `prFooter`
+- Add a note by using `prBodyNotes`
+- Edit the embedded table by using `prBodyDefinitions` and `prBodyColumns`
