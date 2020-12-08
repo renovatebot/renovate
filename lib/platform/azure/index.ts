@@ -575,9 +575,35 @@ export async function setBranchStatus({
   logger.trace(`Created commit status of ${state} on branch ${branchName}`);
 }
 
-export function mergePr(pr: number, branchName: string): Promise<boolean> {
-  logger.debug(`mergePr(pr)(${pr}) - Not supported by Azure DevOps (yet!)`);
-  return Promise.resolve(false);
+export async function mergePr(
+  pullRequestId: number,
+  branchName: string
+): Promise<boolean> {
+  logger.debug(`mergePr(${pullRequestId}, ${branchName})`);
+  const azureApiGit = await azureApi.gitApi();
+
+  const pr = await azureApiGit.getPullRequestById(
+    pullRequestId,
+    config.project
+  );
+
+  const objToUpdate: GitPullRequest = {
+    status: PullRequestStatus.Completed,
+    lastMergeSourceCommit: pr.lastMergeSourceCommit,
+  };
+
+  logger.trace(
+    `Updating PR ${pullRequestId} to status ${PullRequestStatus.Completed} (${
+      PullRequestStatus[PullRequestStatus.Completed]
+    }) with lastMergeSourceCommit ${pr.lastMergeSourceCommit.commitId}`
+  );
+  await azureApiGit.updatePullRequest(
+    objToUpdate,
+    config.repoId,
+    pullRequestId
+  );
+
+  return Promise.resolve(true);
 }
 
 export function getPrBody(input: string): string {
