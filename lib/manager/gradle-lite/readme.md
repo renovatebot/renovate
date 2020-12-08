@@ -1,7 +1,6 @@
-This is an alternate manager for Gradle, written completely in JavaScript.
+`gradle-lite` is an an alternate manager for Gradle, and is written in JavaScript.
+The main benefit of `gradle-lite` is that it skips the slow Gradle commands.
 
-It performs much faster as it doesn't execute Gradle command.
+You can use the default `gradle` manager and `gradle-lite` at the same time.
 
-You can enable both `gradle` and `gradle-lite` if you wish.
-
-If commits produced by `gradle-lite` look good to you, you are welcome to switch completely.
+If you like the commits from `gradle-lite`, you can use `gradle-lite` as a complete replacement for the default manager.
