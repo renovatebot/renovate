@@ -66,5 +66,8 @@ If you have a requirement where `prTitle` should be different from `commitMessag
 
 ## PR Body
 
-The PR Body is currently a little difficult to edit because of its size, however it should soon be redesigned like the other templates to allow more easier editing without needing to copy/paste the whole template.
-TODO: CHECK WITH RENOVATE TEAM IF THE PR BODY IS USER EDITABLE NOW
+The PR body can be edited multiple ways:
+- Editing the entire layout/flow using `prBodyTemplate` (but try to avoid that if possible)
+- Adding header or footer using `prHeader` and `prFooter`
+- Adding notes using `prBodyNotes`
+- Editing the embedded table using `prBodyDefinitions` and `prBodyColumns`
