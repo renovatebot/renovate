@@ -52,9 +52,10 @@ e.g. `to v16` for a major upgrade, or `to v16.0.3` for a patch update.
 It can be empty in some cases, like if the action/topic doesn't change a package version, e.g. `Pin Docker digests`.
 
 `commitMessageSuffix` defaults to empty but is currently used in two cases:
+
 - Differentiating major from non-major groups
 - Differentiating between PRs from different base branches
-Maybe for `major` updates you always want the PR to end with `(MAJOR)`, for instance.
+  Maybe for `major` updates you always want the PR to end with `(MAJOR)`, for instance.
 
 `commitBody` is used if you wish to add multi-line commit messages, such as for the `Signed-off-by` fields, or adding `[skip-ci]`, etc.
 It is appended to the generated `commitMessage`, separated by a newline.
