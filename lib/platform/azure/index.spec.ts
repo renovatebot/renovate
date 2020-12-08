@@ -1004,10 +1004,33 @@ describe('platform/azure', () => {
       );
     });
   });
-  describe('Not supported by Azure DevOps (yet!)', () => {
-    it('mergePr', async () => {
-      const res = await azure.mergePr(0, undefined);
-      expect(res).toBe(false);
+
+  describe('mergePr', () => {
+    it('should complete the PR', async () => {
+      await initRepo({ repository: 'some/repo' });
+      const pullRequestIdMock = 12345;
+      const branchNameMock = 'test';
+      const lastMergeSourceCommitMock = { commitId: 'abcd1234' };
+      const updatePullRequestMock = jest.fn();
+      azureApi.gitApi.mockImplementationOnce(
+        () =>
+          ({
+            getPullRequestById: jest.fn(() => ({
+              lastMergeSourceCommit: lastMergeSourceCommitMock,
+            })),
+            updatePullRequest: updatePullRequestMock,
+          } as any)
+      );
+      const res = await azure.mergePr(pullRequestIdMock, branchNameMock);
+      expect(updatePullRequestMock).toHaveBeenCalledWith(
+        {
+          status: PullRequestStatus.Completed,
+          lastMergeSourceCommit: lastMergeSourceCommitMock,
+        },
+        '1',
+        pullRequestIdMock
+      );
+      expect(res).toBe(true);
     });
   });
 
