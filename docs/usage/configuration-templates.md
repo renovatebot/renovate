@@ -5,57 +5,71 @@ description: How to edit Renovate's config templates
 
 # Config Template Editing
 
-This document describes how you can edit the branch names, commit messages, or PR titles and content.
+This document describes how you can edit branch names, commit messages, PR titles and PR content.
 
 ## Branch Name
 
-The branch name is very important for Renovate because it helps determine "grouping" of updates, and also makes it efficient when an existing PR needs to be updated with a newer version.
-Also, if you change branchPrefix and have some upgrades "ignored" (closed without merging) then you may see duplicate PRs opened with your new branch name.
+The branch name is very important for Renovate because it helps determine "grouping" of updates, and also makes it efficient when an existing PR needs to be updated when a newer version of a package is released.
+If you change the `branchPrefix` while you have ignored some upgrades (closed PR without merging), you might get a duplicate PR after the new `branchPrefix` setting is picked up by the bot.
 
-`branchName` has a default value of `{{{branchPrefix}}}{{{additionalBranchPrefix}}}{{{branchTopic}}}`.
+`branchName` default value is `{{{branchPrefix}}}{{{additionalBranchPrefix}}}{{{branchTopic}}}`.
 
-The most common type of branch name you will see looks like this: `renovate/react-16.x`.
+The most common branch name you will see looks like this: `renovate/react-16.x`.
 In this example, the `branchPrefix` is the default `renovate/`, `additionalBranchPrefix` is empty, and `branchTopic` is `react-16.x`.
 
-Most people can leave `branchPrefix` as `renovate/` however if you prefer to have no forward slashes then you might pick `renovate-` instead.
-Please note that the onboarding PR is fixed to use `renovate/configure` however.
+Most users will be happy with the default `branchPrefix` of `renovate/`, but you can change this if you don't like the default.
+Say you don't want the forward slashes, in that case you would use `renovate-` as your `branchPrefix`.
+The onboarding PR will always use `renovate/configure`.
 
 `additionalBranchPrefix` is optional and by default is empty for all JavaScript dependencies.
-We use `docker-` for all Docker updates, so you might see branches like `renovate/docker-ubuntu-16.x`.
+We use `docker-` for all Docker updates, branches will look like this: `renovate/docker-ubuntu-16.x`.
 
 `branchTopic` depends on the package manager and upgrade type, so you will see a lot of variety.
-It is also the one you might be most likely to want to change, but be careful and consider posting your config to https://github.com/renovateapp/config-help first.
+This is probably a setting you want to change yourself.
+Be careful, and consider posting your config to https://github.com/renovateapp/config-help first to get help from the Renovate team with your config.
 
 ## Commit Message
 
-Renovate is designed to have just a single commit per branch, for merging convenience.
-As such, that commitMessage should reflect the contents of the branch and usually be the same as the PR Title.
+Renovate will use one commit per branch, this makes it easy for you to merge.
+As such, the `commitMessage` reflects the contents of the branch and is usually the same as the PR title.
 
 `commitMessage` has a default value of `{{commitMessagePrefix}} {{commitMessageAction}} {{commitMessageTopic}} {{commitMessageExtra}} {{commitMessageSuffix}}`, with the intention that you only edit some of those subcomponents.
 
-`commitMessagePrefix` is usually not necessary to configure directly, and is used by Renovate if it needs to add a prefix due to Semantic Commit conventions.
-Do not touch it unless you know what you're doing.
+You usually don't need to edit `commitMessagePrefix`, this option is used by Renovate if it needs to add a prefix to conform to the Semantic Commit convention.
+Do not touch this unless you know what you're doing.
 
-`commitMessageAction` is usually just 1 word, e.g. 'Update', 'Pin', 'Refresh', etc.
-It's usually also not necessary to edit, although maybe you prefer 'Upgrade' instead of 'Update'?
+`commitMessageAction` is usually just one word, e.g. 'Update', 'Pin', 'Refresh', etc.
+You're probably fine leaving this setting alone, though you can change it.
+e.g. if you prefer that Renovate uses the term 'Upgrade' instead of 'Update' then you could configure `"commitMessageAction": "Upgrade"`.
 
-`commitMessageTopic` is usually 2-3 words aimed to identify _what_ is being updated. e.g. it might be `dependency react` or `Docker image ubuntu`.
-You may want to edit this, but if you think your idea/requirement is a good one then maybe you can propose it to the project or publish it as a preset config for others with similar requirements.
+`commitMessageTopic` is usually two to three words that identify _what_ is being updated.
+e.g. it might be `dependency react` or `Docker image ubuntu`.
+You may want to edit this.
+If you think your new `commitMessageTopic` is helpful for others, please [open a PR](https://github.com/renovatebot/renovate/pulls).
 
-`commitMessageExtra` usually refers to the version being updated to. e.g. `to v16` for a major upgrade, or `to v16.0.3` for a patch update.
-It may also be empty in some cases, e.g. if the action/topic is `Pin Docker digests`.
+`commitMessageExtra` refers to the version being updated to.
+e.g. `to v16` for a major upgrade, or `to v16.0.3` for a patch update.
+It can be empty in some cases, like if the action/topic doesn't change a package version, e.g. `Pin Docker digests`.
 
-`commitMessageSuffix` defaults to empty and is there for flexibility and future use.
-Maybe for `major` updates you always want the PR to end with `(MAJOR)`, for instance.
+`commitMessageSuffix` defaults to empty but is currently used in two cases:
+
+- Differentiating major from non-major groups
+- Differentiating between PRs from different base branches, maybe for `major` updates you always want the PR to end with `(MAJOR)`, for instance
 
 `commitBody` is used if you wish to add multi-line commit messages, such as for the `Signed-off-by` fields, or adding `[skip-ci]`, etc.
 It is appended to the generated `commitMessage`, separated by a newline.
 
 ## PR Title
 
-Because commit messages should usually match with the PR title, the PR title template now defaults to `null` and inherits whatever is configured for `commitMessage`.
-If you have a requirement where `prTitle` should be different from `commitMessage`, then please raise a feature request for discussion.
+Because commit messages match with the PR title, the PR title template defaults to `null` and inherits/copies the value from `commitMessage`.
+If you have a requirement where `prTitle` should be different from `commitMessage`, then please [raise a feature request](https://github.com/renovatebot/renovate/issues) for discussion.
 
 ## PR Body
 
-The PR Body is currently a little difficult to edit because of its size, however it should soon be redesigned like the other templates to allow more easier editing without needing to copy/paste the whole template.
+You can change the PR body in the following ways:
+
+- Change the entire layout/flow by using `prBodyTemplate` (we do not recommend this)
+- Add a header by using `prHeader`
+- Add a footer by using `prFooter`
+- Add a note by using `prBodyNotes`
+- Edit the embedded table by using `prBodyDefinitions` and `prBodyColumns`
