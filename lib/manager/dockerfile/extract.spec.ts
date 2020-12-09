@@ -146,5 +146,9 @@ describe('lib/manager/dockerfile/extract', () => {
       const res = extractPackageFile('FROM calico/node\n').deps;
       expect(res).toMatchSnapshot();
     });
+    it('handles ubuntu', () => {
+      const res = extractPackageFile('FROM ubuntu:18.04\n').deps;
+      expect(res).toMatchSnapshot();
+    });
   });
 });

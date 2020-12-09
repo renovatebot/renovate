@@ -1,6 +1,7 @@
 import * as datasourceDocker from '../../datasource/docker';
 import { logger } from '../../logger';
 import { SkipReason } from '../../types';
+import * as ubuntuVersioning from '../../versioning/ubuntu';
 import { PackageDependency, PackageFile } from '../common';
 
 export function splitImageParts(currentFrom: string): PackageDependency {
@@ -47,6 +48,10 @@ export function getDep(
     dep.depName !== 'calico/node'
   ) {
     dep.commitMessageTopic = 'Node.js';
+  }
+
+  if (dep.depName === 'ubuntu') {
+    dep.versioning = ubuntuVersioning.id;
   }
   return dep;
 }

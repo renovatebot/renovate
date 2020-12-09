@@ -304,6 +304,21 @@ Array [
 ]
 `;
 
+exports[`lib/manager/dockerfile/extract extractPackageFile() handles ubuntu 1`] = `
+Array [
+  Object {
+    "autoReplaceStringTemplate": "{{depName}}{{#if newValue}}:{{newValue}}{{/if}}{{#if newDigest}}@{{newDigest}}{{/if}}",
+    "currentDigest": undefined,
+    "currentValue": "18.04",
+    "datasource": "docker",
+    "depName": "ubuntu",
+    "depType": "final",
+    "replaceString": "ubuntu:18.04",
+    "versioning": "ubuntu",
+  },
+]
+`;
+
 exports[`lib/manager/dockerfile/extract extractPackageFile() is case insensitive 1`] = `
 Array [
   Object {

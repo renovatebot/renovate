@@ -7,6 +7,7 @@ import Git, {
   StatusResult as StatusResult_,
 } from 'simple-git';
 import { join } from 'upath';
+import { configFileNames } from '../../config/app-strings';
 import {
   REPOSITORY_CHANGED,
   REPOSITORY_DISABLED,
@@ -606,7 +607,7 @@ export async function commitFiles({
       }
     }
     // istanbul ignore if
-    if (fileNames.length === 1 && fileNames[0] === 'renovate.json') {
+    if (fileNames.length === 1 && configFileNames.includes(fileNames[0])) {
       fileNames.unshift('-f');
     }
     if (fileNames.length) {

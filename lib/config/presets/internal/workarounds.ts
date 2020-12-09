@@ -24,7 +24,7 @@ export const presets: Record<string, Preset> = {
   mavenCommonsAncientVersion: {
     packageRules: [
       {
-        datasources: ['maven'],
+        datasources: ['maven', 'sbt-package'],
         packagePatterns: ['^commons-'],
         allowedVersions: '!/^200\\d{5}(\\.\\d+)?/',
       },
