@@ -7,8 +7,6 @@ import { NodeJsPolicies, getPolicies } from '../../versioning/node/schedule';
 import { isVersion, maxSatisfyingVersion } from '../../versioning/semver';
 import { LookupUpdate, PackageUpdateConfig } from '../common';
 
-let policies: NodeJsPolicies;
-
 export async function getPackageUpdates(
   config: PackageUpdateConfig
 ): Promise<LookupUpdate[]> {
@@ -17,7 +15,7 @@ export async function getPackageUpdates(
   if (!supportPolicy?.length) {
     return [];
   }
-  policies = policies || getPolicies();
+  const policies = getPolicies();
   for (const policy of supportPolicy) {
     if (!Object.keys(policies).includes(policy)) {
       logger.warn({ policy }, `Unknown supportPolicy`);
