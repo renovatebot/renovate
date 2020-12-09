@@ -112,7 +112,7 @@ Thanks to this, you may wish to change the way you tag your image dependencies t
 Currently, Renovate will upgrade minor/patch versions (e.g. from `14.9.0` to `14.9.1`) by default, but not upgrade major versions.
 If you wish to enable major versions then add the preset `docker:enableMajor` to your `extends` array in your `renovate.json`.
 
-Renovate has a some Docker-specific intelligence when it comes to versions.
+Renovate has some Docker-specific intelligence when it comes to versions.
 For example:
 
 ## Configuring/Disabling
