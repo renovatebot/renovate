@@ -1073,6 +1073,29 @@ Object {
 }
 `;
 
+exports[`manager/npm/extract .extractPackageFile() finds simple yarn workspaces with lerna.json and useWorkspaces: true 1`] = `
+Object {
+  "constraints": Object {},
+  "deps": Array [],
+  "ignoreNpmrcFile": undefined,
+  "lernaClient": undefined,
+  "lernaDir": undefined,
+  "lernaPackages": undefined,
+  "npmLock": undefined,
+  "npmrc": undefined,
+  "packageFileVersion": "0.0.8",
+  "packageJsonName": "@a/b",
+  "packageJsonType": "app",
+  "pnpmShrinkwrap": undefined,
+  "skipInstalls": true,
+  "yarnLock": undefined,
+  "yarnWorkspacesPackages": Array [
+    "packages/*",
+  ],
+  "yarnrc": undefined,
+}
+`;
+
 exports[`manager/npm/extract .extractPackageFile() returns an array of dependencies 1`] = `
 Object {
   "constraints": Object {},

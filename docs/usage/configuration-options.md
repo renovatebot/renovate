@@ -27,6 +27,36 @@ Also, be sure to check out Renovate's [shareable config presets](/config-presets
 
 If you have any questions about the below config options, or would like to get help/feedback about a config, please post it as an issue in [renovatebot/config-help](https://github.com/renovatebot/config-help) where we will do our best to answer your question.
 
+## addLabels
+
+The `labels` field is non-mergeable, meaning that any config setting a list of PR labels will replace any existing list.
+If you want to append labels for matched rules, then define an `addLabels` array with one (or more) label strings.
+All matched `addLabels` strings will be attached to the PR.
+
+Consider this example:
+
+```json
+{
+  "labels": ["dependencies"],
+  "packageRules": [
+    {
+      "packagePatterns": ["eslint"],
+      "labels": ["linting"]
+    },
+    {
+      "depTypeList": ["optionalDependencies"],
+      "addLabels": ["optional"]
+    }
+  ]
+}
+```
+
+With the above config:
+
+- Optional dependencies will have the labels `dependencies` and `optional`
+- ESLint dependencies will have the label `linting`
+- All other dependencies will have the label `dependencies`
+
 ## additionalBranchPrefix
 
 This value defaults to an empty string, and is typically not necessary.
@@ -820,6 +850,13 @@ Renovate will try to configure this to `true` also if you have configured any `n
 Using this setting, you can selectively ignore package files that you don't want Renovate autodiscovering.
 For instance if your repository has an "examples" directory of many package.json files that you don't want to be kept up to date.
 
+## ignorePrAuthor
+
+This is usually needed if someone needs to migrate bot accounts, including from hosted app to self-hosted.
+If `ignorePrAuthor` is configured to true, it means Renovate will fetch the entire list of repository PRs instead of optimizing to fetch only those PRs which it created itself.
+You should only want to enable this if you are changing the bot account (e.g. from `@old-bot` to `@new-bot`) and want `@new-bot` to find and update any existing PRs created by `@old-bot`.
+It's recommended to revert this setting once that transition period is over and all old PRs are resolved.
+
 ## ignorePresets
 
 Use this if you are extending a complex preset but don't want to use every "sub preset" that it includes.
@@ -1516,7 +1553,7 @@ Behaviour:
 - `bump` = e.g. bump the range even if the new version satisfies the existing range, e.g. `^1.0.0` -> `^1.1.0`
 - `replace` = Replace the range with a newer one if the new version falls outside it, e.g. `^1.0.0` -> `^2.0.0`
 - `widen` = Widen the range with newer one, e.g. `^1.0.0` -> `^1.0.0 || ^2.0.0`
-- `update-lockfile` = Update the lock file when in-range updates are available, otherwise `replace` for updates out of range. Works for `composer`, `npm` and `yarn` so far
+- `update-lockfile` = Update the lock file when in-range updates are available, otherwise `replace` for updates out of range. Works for `bundler`, `composer`, `npm`, and `yarn`, so far
 
 Renovate's `"auto"` strategy works like this for npm:
 

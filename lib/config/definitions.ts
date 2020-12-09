@@ -157,6 +157,15 @@ const options: RenovateOptions[] = [
     cli: false,
   },
   {
+    name: 'onboardingConfigFileName',
+    description:
+      'Change this value in order to override the default onboarding config file name.',
+    type: 'string',
+    default: 'renovate.json',
+    admin: true,
+    cli: false,
+  },
+  {
     name: 'onboardingPrTitle',
     description:
       'Change this value in order to override the default onboarding PR title.',
@@ -1401,9 +1410,16 @@ const options: RenovateOptions[] = [
   // Pull Request options
   {
     name: 'labels',
+    description: 'Labels to set in Pull Request',
+    type: 'array',
+    subType: 'string',
+  },
+  {
+    name: 'addLabels',
     description: 'Labels to add to Pull Request',
     type: 'array',
     subType: 'string',
+    mergeable: true,
   },
   {
     name: 'assignees',
@@ -1858,6 +1874,13 @@ const options: RenovateOptions[] = [
       'Set to false to disable initialization of submodules during repository clone',
     type: 'boolean',
     default: true,
+  },
+  {
+    name: 'ignorePrAuthor',
+    description:
+      'Set to true to fetch the entire list of PRs instead of only those authored by the Renovate user',
+    type: 'boolean',
+    default: false,
   },
 ];
 
