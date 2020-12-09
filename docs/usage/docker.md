@@ -10,7 +10,7 @@ Renovate supports upgrading dependencies in various types of Docker definition f
 - Docker's `Dockerfile` files
 - Docker Compose files
 - CircleCI config files
-- Kubernetes manifests
+- Kubernetes manifest files
 - Ansible configuration files
 
 ## How It Works
