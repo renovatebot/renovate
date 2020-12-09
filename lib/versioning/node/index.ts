@@ -29,13 +29,13 @@ function getNewValue({
 
 export { isValid };
 
-export function isStable(version: string, now = DateTime.local()): boolean {
+export function isStable(version: string): boolean {
   if (npm.isStable(version)) {
     const major = npm.getMajor(version);
     const schedule = nodeSchedule[`v${major}`];
     if (schedule?.lts) {
       // TODO: use the exact release that started LTS
-      return now > DateTime.fromISO(schedule.lts);
+      return DateTime.local() > DateTime.fromISO(schedule.lts);
     }
   }
   return false;
