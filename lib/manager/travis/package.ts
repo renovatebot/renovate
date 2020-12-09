@@ -4,7 +4,7 @@ import dataFiles from '../../data-files.generated';
 import { getPkgReleases } from '../../datasource';
 import * as datasourceGithubTags from '../../datasource/github-tags';
 import { logger } from '../../logger';
-import { isVersion, maxSatisfyingVersion } from '../../versioning/semver';
+import { getSatisfyingVersion, isVersion } from '../../versioning/semver';
 import { LookupUpdate, PackageUpdateConfig } from '../common';
 
 interface NodeJsPolicies {
@@ -116,7 +116,7 @@ export async function getPackageUpdates(
     ).releases.map((release) => release.version);
     newValue = newValue
       .map(String)
-      .map((value) => maxSatisfyingVersion(versions, value));
+      .map((value) => getSatisfyingVersion(versions, value));
   }
   if (is.string(config.currentValue[0])) {
     newValue = newValue.map(String);

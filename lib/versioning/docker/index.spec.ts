@@ -85,9 +85,9 @@ describe('docker.', () => {
       expect(docker.equals('1.2', '1.2.3')).toBe(false);
     });
   });
-  describe('maxSatisfyingVersion(versions, range)', () => {
+  describe('getSatisfyingVersion(versions, range)', () => {
     it('should support all versions length', () => {
-      [docker.minSatisfyingVersion, docker.maxSatisfyingVersion].forEach(
+      [docker.minSatisfyingVersion, docker.getSatisfyingVersion].forEach(
         (max) => {
           const versions = [
             '0.9.8',

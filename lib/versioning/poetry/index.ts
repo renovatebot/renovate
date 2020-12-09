@@ -53,8 +53,8 @@ const isVersion = (input: string): string | boolean => npm.isVersion(input);
 const matches = (version: string, range: string): boolean =>
   npm.matches(version, poetry2npm(range));
 
-const maxSatisfyingVersion = (versions: string[], range: string): string =>
-  npm.maxSatisfyingVersion(versions, poetry2npm(range));
+const getSatisfyingVersion = (versions: string[], range: string): string =>
+  npm.getSatisfyingVersion(versions, poetry2npm(range));
 
 const minSatisfyingVersion = (versions: string[], range: string): string =>
   npm.minSatisfyingVersion(versions, poetry2npm(range));
@@ -125,7 +125,7 @@ export const api: VersioningApi = {
   isSingleVersion,
   isValid,
   matches,
-  maxSatisfyingVersion,
+  getSatisfyingVersion,
   minSatisfyingVersion,
 };
 export default api;

@@ -103,7 +103,7 @@ function getFromVersion(
   }
   if (rangeStrategy === 'pin') {
     return (
-      lockedVersion || version.maxSatisfyingVersion(useVersions, currentValue)
+      lockedVersion || version.getSatisfyingVersion(useVersions, currentValue)
     );
   }
   if (rangeStrategy === 'bump') {
@@ -111,7 +111,7 @@ function getFromVersion(
     return version.minSatisfyingVersion(useVersions, currentValue);
   }
   // Use the highest version in the current range
-  return version.maxSatisfyingVersion(useVersions, currentValue);
+  return version.getSatisfyingVersion(useVersions, currentValue);
 }
 
 function getBucket(config: LookupUpdateConfig, update: LookupUpdate): string {

@@ -82,22 +82,22 @@ describe('semver.isLessThanRange()', () => {
     expect(semver.isLessThanRange('0.5.1', '~0.4')).toBe(false);
   });
 });
-describe('semver.maxSatisfyingVersion()', () => {
+describe('semver.getSatisfyingVersion()', () => {
   it('handles massaged tilde', () => {
     expect(
-      semver.maxSatisfyingVersion(
+      semver.getSatisfyingVersion(
         ['0.4.0', '0.5.0', '4.0.0', '4.2.0', '5.0.0'],
         '~4'
       )
     ).toBe('4.2.0');
     expect(
-      semver.maxSatisfyingVersion(
+      semver.getSatisfyingVersion(
         ['v0.4.0', 'v0.5.0', 'v4.0.0', 'v4.2.0', 'v5.0.0'],
         '~4'
       )
     ).toBe('4.2.0');
     expect(
-      semver.maxSatisfyingVersion(
+      semver.getSatisfyingVersion(
         ['0.4.0', '0.5.0', '4.0.0', '4.2.0', '5.0.0'],
         '~0.4'
       )
@@ -105,7 +105,7 @@ describe('semver.maxSatisfyingVersion()', () => {
   });
   it('handles prereleases', () => {
     expect(
-      semver.maxSatisfyingVersion(
+      semver.getSatisfyingVersion(
         [
           '0.4.0',
           '0.5.0',

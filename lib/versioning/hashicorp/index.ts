@@ -23,8 +23,8 @@ export const isValid = (input: string): string | boolean =>
 const matches = (version: string, range: string): boolean =>
   npm.matches(hashicorp2npm(version), hashicorp2npm(range));
 
-const maxSatisfyingVersion = (versions: string[], range: string): string =>
-  npm.maxSatisfyingVersion(versions.map(hashicorp2npm), hashicorp2npm(range));
+const getSatisfyingVersion = (versions: string[], range: string): string =>
+  npm.getSatisfyingVersion(versions.map(hashicorp2npm), hashicorp2npm(range));
 
 const minSatisfyingVersion = (versions: string[], range: string): string =>
   npm.minSatisfyingVersion(versions.map(hashicorp2npm), hashicorp2npm(range));
@@ -55,7 +55,7 @@ export const api: VersioningApi = {
   isLessThanRange,
   isValid,
   matches,
-  maxSatisfyingVersion,
+  getSatisfyingVersion,
   minSatisfyingVersion,
   getNewValue,
 };

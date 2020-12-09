@@ -6,16 +6,16 @@ describe('semver.matches()', () => {
     expect(semver.matches('4.2.0', '~> 4.0.0')).toBe(false);
   });
 });
-describe('semver.maxSatisfyingVersion()', () => {
+describe('semver.getSatisfyingVersion()', () => {
   it('handles tilde greater than', () => {
     expect(
-      semver.maxSatisfyingVersion(
+      semver.getSatisfyingVersion(
         ['0.4.0', '0.5.0', '4.0.0', '4.2.0', '5.0.0'],
         '~> 4.0'
       )
     ).toBe('4.2.0');
     expect(
-      semver.maxSatisfyingVersion(
+      semver.getSatisfyingVersion(
         ['0.4.0', '0.5.0', '4.0.0', '4.2.0', '5.0.0'],
         '~> 4.0.0'
       )

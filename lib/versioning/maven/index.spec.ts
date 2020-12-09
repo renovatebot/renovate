@@ -386,7 +386,7 @@ describe('versioning/maven/index', () => {
 
   it('api', () => {
     expect(maven.isGreaterThan('1.1', '1')).toBe(true);
-    expect(maven.maxSatisfyingVersion(['1'], '1')).toBe('1');
+    expect(maven.getSatisfyingVersion(['1'], '1')).toBe('1');
     expect(
       maven.getNewValue({
         currentValue: '1',

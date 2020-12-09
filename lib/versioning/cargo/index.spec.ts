@@ -9,16 +9,16 @@ describe('semver.matches()', () => {
     expect(semver.matches('4.2.0', '> 5.0.0, <= 6.0.0')).toBe(false);
   });
 });
-describe('semver.maxSatisfyingVersion()', () => {
+describe('semver.getSatisfyingVersion()', () => {
   it('handles comma', () => {
     expect(
-      semver.maxSatisfyingVersion(
+      semver.getSatisfyingVersion(
         ['4.2.1', '0.4.0', '0.5.0', '4.0.0', '4.2.0', '5.0.0'],
         '4.*.0, < 4.2.5'
       )
     ).toBe('4.2.1');
     expect(
-      semver.maxSatisfyingVersion(
+      semver.getSatisfyingVersion(
         ['0.4.0', '0.5.0', '4.0.0', '4.2.0', '5.0.0', '5.0.3'],
         '5.0, > 5.0.0'
       )

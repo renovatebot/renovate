@@ -121,7 +121,7 @@ const isStable = (version: string): boolean | null => {
   return null;
 };
 
-const maxSatisfyingVersion = (versions: string[], range: string): string => {
+const getSatisfyingVersion = (versions: string[], range: string): string => {
   // istanbul ignore next
   return versions.reduce((result, version) => {
     if (matches(version, range)) {
@@ -161,8 +161,8 @@ export const api: VersioningApi = {
   isValid,
   isVersion,
   matches,
-  maxSatisfyingVersion,
-  minSatisfyingVersion: maxSatisfyingVersion,
+  getSatisfyingVersion,
+  minSatisfyingVersion: getSatisfyingVersion,
   getNewValue,
   sortVersions: compare,
 };

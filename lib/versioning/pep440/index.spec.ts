@@ -64,12 +64,12 @@ const versions = [
   '2.0.3',
 ];
 
-describe('pep440.maxSatisfyingVersion(versions, range)', () => {
+describe('pep440.getSatisfyingVersion(versions, range)', () => {
   it('returns correct value', () => {
-    expect(pep440.maxSatisfyingVersion(versions, '~=1.2.1')).toBe('1.2.3');
+    expect(pep440.getSatisfyingVersion(versions, '~=1.2.1')).toBe('1.2.3');
   });
   it('returns null when none found', () => {
-    expect(pep440.maxSatisfyingVersion(versions, '~=2.1')).toBeNull();
+    expect(pep440.getSatisfyingVersion(versions, '~=2.1')).toBeNull();
   });
 });
 
