@@ -97,7 +97,7 @@ If you have followed our advice to go from tags like `node:14` to `node:14@sha25
 
 Previously this would have been "invisible" to you - one day you pull code that represents `node:14.9.0` and the next day you get `node:14.9.1`.
 But you can never be sure, especially as Docker caches.
-Perhaps some of your colleagues or worst still your build machine are stuck on an older version with a security vulnerability.
+Perhaps some of your colleagues or worse still your build machine are stuck on an older version with a security vulnerability.
 
 Instead, you will now receive these updates via Pull Requests, or perhaps committed directly to your repository if you enable branch automerge for convenience.
 This ensures everyone on the team gets the latest versions and is in sync.
