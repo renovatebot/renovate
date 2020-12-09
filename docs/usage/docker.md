@@ -118,10 +118,10 @@ For example:
 ## Configuring/Disabling
 
 If you wish to make changes that apply to all Docker managers, then add them to the `docker` config object.
-Note though that this is not foolproof, because some managers like `circleci` and `ansible` support multiple datasources so do not inherit from the `docker` config object.
+This is not foolproof, because some managers like `circleci` and `ansible` support multiple datasources that do not inherit from the `docker` config object.
 
 If you wish to override Docker settings for one particular type of manager, use that manager's config object instead.
-For example, to disable digest updates for Docker Compose only but leave them for other managers like `Dockerfile`, you would add this:
+For example, to disable digest updates for Docker Compose only but leave them for other managers like `Dockerfile`, you would use this:
 
 ```json
   "docker-compose": {
