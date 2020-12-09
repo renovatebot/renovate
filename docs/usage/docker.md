@@ -74,19 +74,22 @@ See the docs for `versioning` for documentation and examples of `regex` versioni
 
 ## Digest Pinning
 
-Pinning your Docker images to an exact digest is recommended for reasons of **immutability**.
-In short: pin to digests so every time you `pull`, you get the same content.
+We recommend that you pin your Docker images to an exact digest.
+By pinning to a digest you ensure your Docker builds are **immutable**: every time you do a `pull` you get the same content.
 
-If your experience with dependency versioning comes from a place like JavaScript/npm, you might be used to exact versions being immutable, e.g. if you specify a version like `2.0.1` then you and your colleagues will always get the exact same "code".
-What you may not expect is that Docker's tags are not immutable versions even if they look like a version.
-e.g. you probably expect that `node:14` and `node:14.9` will change over time, but you might incorrectly assume that `node:14.9.0` would never change.
+If you have experience with the way dependency versioning is handled in the JavaScript/npm ecosystem, you might be used to exact versions being immutable.
+e.g. if you specify a version like `2.0.1`, you and your colleagues always get the exact same "code".
+
+What you may not expect is that Docker's tags are not immutable versions, even if they look like a version.
+e.g. you probably expect `node:14` and `node:14.9` to change over time, but you might incorrectly assume that `node:14.9.0` never changes.
 Although it probably _shouldn't_, the reality is that any Docker image tag _can_ change content, and potentially break.
 
-Using a Docker digest as the image's primary identifier instead of Docker tag will achieve immutability but as a human it's quite inconvenient to deal with strings like `FROM node@sha256:d938c1761e3afbae9242848ffbb95b9cc1cb0a24d889f8bd955204d347a7266e`.
-The good news is that, as a human you no longer need to manually update such digests once you have Renovate on the job.
+Using a Docker digest as the image's primary identifier instead of using a Docker tag will achieve immutability.
+As a human it's quite inconvenient to work with strings like `FROM node@sha256:d938c1761e3afbae9242848ffbb95b9cc1cb0a24d889f8bd955204d347a7266e`.
+Luckily Renovate can update the digests for you, so you don't have to.
 
-Also, to retain some human-friendliness, Renovate will actually retain the tag in the `FROM` line too, e.g. `FROM node:14.15.1@sha256:d938c1761e3afbae9242848ffbb95b9cc1cb0a24d889f8bd955204d347a7266e`.
-Read on to see how Renovate keeps it up-to-date.
+To keep things human-friendly, Renovate will retain the Docker tag in the `FROM` line, e.g. `FROM node:14.15.1@sha256:d938c1761e3afbae9242848ffbb95b9cc1cb0a24d889f8bd955204d347a7266e`.
+Read on to see how Renovate updates Docker digests.
 
 ## Digest Updating
 
