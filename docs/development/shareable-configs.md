@@ -46,7 +46,7 @@ If you use a non-scoped config, you must use a preset name!
 
 ### Git based
 
-In general, GitHub or GitLab-based preset hosting is easier than npm because you avoid the "publish" step - simply commit preset code to the default branch and it will be picked up by Renovate the next time it runs.
+In general, GitHub, GitLab or Gitea-based preset hosting is easier than npm because you avoid the "publish" step - simply commit preset code to the default branch and it will be picked up by Renovate the next time it runs.
 An additional benefit of using source code hosting is that the same token/authentication can be reused by Renovate in case you want to make your config private.
 
 | name                    | example use          | preset    | resolves as                          | filename                          |
@@ -55,4 +55,6 @@ An additional benefit of using source code hosting is that the same token/authen
 | GitHub with preset name | `github>abc/foo:xyz` | `xyz`     | `https://github.com/abc/foo`         | `xyz.json`                        |
 | GitLab default          | `gitlab>abc/foo`     | `default` | `https://gitlab.com/abc/foo`         | `default.json` or `renovate.json` |
 | GitLab with preset name | `gitlab>abc/foo:xyz` | `xyz`     | `https://gitlab.com/abc/foo`         | `xyz.json`                        |
+| Gitea default           | `gitea>abc/foo`      | `default` | `https://gitea.com/abc/foo`          | `default.json` or `renovate.json` |
+| Gitea with preset name  | `gitea>abc/foo:xyz`  | `xyz`     | `https://gitea.com/abc/foo`          | `xyz.json`                        |
 | Local default           | `local>abc/foo`      | `default` | `https://github.company.com/abc/foo` | `default.json` or `renovate.json` |
