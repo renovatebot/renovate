@@ -11,6 +11,7 @@ import * as massage from '../massage';
 import * as migration from '../migration';
 import { mergeChildConfig } from '../utils';
 import { PresetApi } from './common';
+import * as gitea from './gitea';
 import * as github from './github';
 import * as gitlab from './gitlab';
 import * as internal from './internal';
@@ -21,6 +22,7 @@ const presetSources: Record<string, PresetApi> = {
   github,
   npm,
   gitlab,
+  gitea,
   local,
   internal,
 };
@@ -66,6 +68,9 @@ export function parsePreset(input: string): ParsedPreset {
   } else if (str.startsWith('gitlab>')) {
     presetSource = 'gitlab';
     str = str.substring('gitlab>'.length);
+  } else if (str.startsWith('gitea>')) {
+    presetSource = 'gitea';
+    str = str.substring('gitea>'.length);
   } else if (str.startsWith('local>')) {
     presetSource = 'local';
     str = str.substring('local>'.length);

@@ -1,15 +1,18 @@
 import { getName, mocked } from '../../../../test/util';
 import * as _bitbucketServer from '../bitbucket-server';
+import * as _gitea from '../gitea';
 import * as _github from '../github';
 import * as _gitlab from '../gitlab';
 import * as local from '.';
 
 jest.mock('../gitlab');
 jest.mock('../github');
+jest.mock('../gitea');
 jest.mock('../bitbucket-server');
 
 const gitlab = mocked(_gitlab);
 const github = mocked(_github);
+const gitea = mocked(_gitea);
 const bitbucketServer = mocked(_bitbucketServer);
 
 describe(getName(__filename), () => {
@@ -85,6 +88,29 @@ describe(getName(__filename), () => {
         },
       });
       expect(github.getPresetFromEndpoint.mock.calls).toMatchSnapshot();
+      expect(content).toMatchSnapshot();
+    });
+
+    it('forwards to gitea', async () => {
+      const content = await local.getPreset({
+        packageName: 'some/repo',
+        baseConfig: {
+          platform: 'gitea',
+        },
+      });
+      expect(gitea.getPresetFromEndpoint.mock.calls).toMatchSnapshot();
+      expect(content).toMatchSnapshot();
+    });
+    it('forwards to custom gitea', async () => {
+      const content = await local.getPreset({
+        packageName: 'some/repo',
+        presetName: 'default',
+        baseConfig: {
+          platform: 'gitea',
+          endpoint: 'https://api.gitea.example.com',
+        },
+      });
+      expect(gitea.getPresetFromEndpoint.mock.calls).toMatchSnapshot();
       expect(content).toMatchSnapshot();
     });
 

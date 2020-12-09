@@ -23,8 +23,8 @@ function getPaginationContainer(body: any): any[] {
   return null;
 }
 
-function resolveUrl(path: string): URL {
-  const resolvedUrlString = url.resolve(baseUrl, path);
+function resolveUrl(path: string, base: string): URL {
+  const resolvedUrlString = url.resolve(base, path);
   return new url.URL(resolvedUrlString);
 }
 
@@ -37,7 +37,7 @@ export class GiteaHttp extends Http<GiteaHttpOptions, GiteaHttpOptions> {
     path: string,
     options?: InternalHttpOptions & GiteaHttpOptions
   ): Promise<HttpResponse<T> | null> {
-    const resolvedUrl = resolveUrl(path);
+    const resolvedUrl = resolveUrl(path, options.baseUrl ?? baseUrl);
     const opts = {
       baseUrl,
       ...options,
