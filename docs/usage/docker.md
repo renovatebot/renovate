@@ -133,11 +133,11 @@ For example, to disable digest updates for Docker Compose only but leave them fo
 
 The following configuration options are applicable to Docker:
 
-##### Disable all Docker Renovation
+### Disable all Docker Renovation
 
 Add `"docker:disable"` to your `extends` array.
 
-##### Disable Renovate for only certain Dockerfiles
+### Disable Renovate for only certain Dockerfiles
 
 Add all paths to ignore into the `ignorePaths` configuration field. e.g.
 
@@ -148,20 +148,20 @@ Add all paths to ignore into the `ignorePaths` configuration field. e.g.
 }
 ```
 
-##### Enable Docker major updates
+### Enable Docker major updates
 
 Add `"docker:enableMajor"` to your `extends` array.
 
-##### Disable digest pinning
+### Disable digest pinning
 
 Add `"default:pinDigestsDisabled"` to your `extends` array.
 
-##### Automerge digest updates
+### Automerge digest updates
 
 Add `"default:automergeDigest"` to your `extends` array.
 Also add `"default:automergeBranchPush"` if you wish for these to be committed directly to your base branch without raising a PR first.
 
-##### Registry authentication
+### Registry authentication
 
 Here is an example of configuring a default Docker username/password in `config.js`:
 
