@@ -15,6 +15,5 @@ export function resolveBaseUrl(baseUrl: string, input: string | URL): string {
     pathname = inputString;
   }
 
-  const result = host ? inputString : urlJoin(baseUrl, pathname || '');
-  return result.replace(/\/+$/, '');
+  return host ? inputString : urlJoin(baseUrl, pathname || '');
 }
