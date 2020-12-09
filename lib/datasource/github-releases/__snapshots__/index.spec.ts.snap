@@ -4,20 +4,38 @@ exports[`datasource/github-releases getReleases returns releases 1`] = `
 Object {
   "releases": Array [
     Object {
+      "files": Array [],
       "gitRef": "1.0.0",
       "releaseTimestamp": "2020-03-09T11:00:00Z",
       "version": "1.0.0",
     },
     Object {
+      "files": Array [],
       "gitRef": "v1.1.0",
       "releaseTimestamp": "2020-03-09T10:00:00Z",
       "version": "v1.1.0",
     },
     Object {
+      "files": Array [],
       "gitRef": "2.0.0",
       "isStable": false,
       "releaseTimestamp": "2020-04-09T10:00:00Z",
       "version": "2.0.0",
+    },
+    Object {
+      "files": Array [
+        Object {
+          "name": "file-1",
+          "url": "https://gitstorage.com/some/dep/releases/download/3.0.0/file-1",
+        },
+        Object {
+          "name": "file-2",
+          "url": "https://gitstorage.com/some/dep/releases/download/3.0.0/file-2",
+        },
+      ],
+      "gitRef": "3.0.0",
+      "releaseTimestamp": "2020-12-09T10:00:00Z",
+      "version": "3.0.0",
     },
   ],
   "sourceUrl": "https://github.com/some/dep",

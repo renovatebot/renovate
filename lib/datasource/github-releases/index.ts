@@ -1,7 +1,7 @@
 import * as packageCache from '../../util/cache/package';
 import { GithubHttp } from '../../util/http/github';
 import { ensureTrailingSlash } from '../../util/url';
-import { GetReleasesConfig, ReleaseResult } from '../common';
+import { GetReleasesConfig, ReleaseFile, ReleaseResult } from '../common';
 
 export const id = 'github-releases';
 export const defaultRegistryUrls = ['https://github.com'];
@@ -16,11 +16,28 @@ function getCacheKey(depHost: string, repo: string): string {
   return `${depHost}:${repo}:${type}`;
 }
 
+type GithubReleaseAsset = {
+  name: string;
+  browser_download_url: string;
+};
+
 type GithubRelease = {
   tag_name: string;
   published_at: string;
   prerelease: boolean;
+  assets: GithubReleaseAsset[];
 };
+
+function mapAssets(assets: GithubReleaseAsset[]): ReleaseFile[] {
+  if (assets === undefined) {
+    return [];
+  }
+
+  return assets.map(({ name, browser_download_url }) => ({
+    name,
+    url: browser_download_url,
+  }));
+}
 
 /**
  * github.getReleases
@@ -63,11 +80,12 @@ export async function getReleases({
     releases: null,
   };
   dependency.releases = githubReleases.map(
-    ({ tag_name, published_at, prerelease }) => ({
+    ({ tag_name, published_at, prerelease, assets }) => ({
       version: tag_name,
       gitRef: tag_name,
       releaseTimestamp: published_at,
       isStable: prerelease ? false : undefined,
+      files: mapAssets(assets),
     })
   );
   const cacheMinutes = 10;

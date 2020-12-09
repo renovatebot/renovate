@@ -37,6 +37,11 @@ export function isGetPkgReleasesConfig(
   );
 }
 
+export interface ReleaseFile {
+  name: string;
+  url: string;
+}
+
 export interface Release {
   canBeUnpublished?: boolean;
   changelogUrl?: string;
@@ -48,6 +53,7 @@ export interface Release {
   releaseTimestamp?: any;
   version: string;
   newDigest?: string;
+  files: ReleaseFile[];
 }
 
 export interface ReleaseResult {
