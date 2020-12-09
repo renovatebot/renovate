@@ -15,9 +15,9 @@ Renovate supports upgrading dependencies in various types of Docker definition f
 
 ## How It Works
 
-1. Renovate will search each repository for any files matching each manager's configured `fileMatch` pattern(s)
-1. Files that match the pattern(s) are parsed and checked to see if they contain any Docker image references (e.g. `FROM` lines in a `Dockerfile`)
-1. If the image tag in use "looks" like a version (e.g. `node:14`, `node:14.1`, `node:14.1.0`, `node:14-onbuild`) then Renovate will look up the Docker registry to determine if any upgrades are available (e.g. `node:14.2.0`)
+1. Renovate searches in each repository for any files matching each manager's configured `fileMatch` pattern(s)
+1. Matching files are parsed, Renovate checks if the file(s) contain any Docker image references (e.g. `FROM` lines in a `Dockerfile`)
+1. If the image tag in use "looks" like a version (e.g. `node:14`, `node:14.1`, `node:14.1.0`, `node:14-onbuild`) then Renovate checks the Docker registry for upgrades (e.g. from `node:14.1.0` to `node:14.2.0`)
 
 ## Preservation of Version Precision
 
