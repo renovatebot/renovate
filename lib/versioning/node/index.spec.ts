@@ -1,3 +1,4 @@
+import { DateTime } from 'luxon';
 import { isStable, api as nodever } from '.';
 
 describe('semver.getNewValue()', () => {
@@ -22,11 +23,12 @@ describe('semver.getNewValue()', () => {
     ).toEqual('~8.2.0');
   });
   it('isStable', () => {
-    const now = new Date('2020-09-01').getTime();
+    const now = DateTime.fromISO('2020-09-01');
+    const then = DateTime.fromISO('2021-06-01');
     expect(isStable('16.0.0', now)).toBeFalse();
     expect(isStable('15.0.0', now)).toBeFalse();
     expect(isStable('14.9.0', now)).toBeFalse();
-    expect(isStable('14.0.0', new Date('2021-06-01').getTime())).toBeTrue();
+    expect(isStable('14.0.0', then)).toBeTrue();
     expect(isStable('12.0.3', now)).toBeTrue();
     expect(isStable('v12.0.3', now)).toBeTrue();
     expect(isStable('12.0.3a', now)).toBeFalse();

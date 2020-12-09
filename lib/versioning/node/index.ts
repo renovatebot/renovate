@@ -1,7 +1,7 @@
-import moment from 'moment';
 import { NewValueConfig, VersioningApi } from '../common';
 import npm, { isValid, isVersion } from '../npm';
-import { nodeSchedule } from './node-js-schedule';
+import { nodeSchedule } from './schedule';
+import { DateTime } from 'luxon';
 
 export const id = 'node';
 export const displayName = 'Node.js';
@@ -29,13 +29,13 @@ function getNewValue({
 
 export { isValid };
 
-export function isStable(version: string, now = Date.now()): boolean {
+export function isStable(version: string, now = DateTime.local()): boolean {
   if (npm.isStable(version)) {
     const major = npm.getMajor(version);
     const schedule = nodeSchedule[`v${major}`];
     if (schedule?.lts) {
       // TODO: use the exact release that started LTS
-      return moment(now).isAfter(moment(schedule.lts));
+      return now > DateTime.fromISO(schedule.lts);
     }
   }
   return false;
