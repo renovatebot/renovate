@@ -185,13 +185,13 @@ To host your preset config on GitLab:
 ## Gitea-hosted Presets
 
 It is also possible to host your preset config using just a regular Gitea repository and without needing to publish it to npmjs.
-In such cases Renovate will simply look for a renovate.json file in the default branch, (for now only the master branch is supported).
+In such cases Renovate will simply look for a `renovate.json` file in the default branch, (for now only the _master_ branch is supported).
 
 To host your preset config on Gitea:
 
-- Create a new repository on Gitea. Normally you'd call it renovate-config but it can be named anything
-- Add a renovate.json to this new repo containing the preset config. No other files are necessary
-- In other repos, reference it in an extends array like "gitea>owner/name", e.g. "gitea>rarkins/renovate-config"
+- Create a new repository on Gitea. Normally you'd call it `renovate-config` but you can use any name you want
+- Add a `renovate.json` to this new repository containing the preset config. No other files are necessary
+- In other repositories, reference it in an extends array like `"gitea>owner/name"`, e.g. `"gitea>rarkins/renovate-config"`
 
 ## Local presets
 
