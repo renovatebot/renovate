@@ -1,0 +1,95 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`manager/gradle-lite/parser parses fixture from "gradle" manager 1`] = `
+Array [
+  Object {
+    "currentValue": "1.5.2.RELEASE",
+    "depName": "org.springframework.boot:spring-boot-gradle-plugin",
+    "groupName": "springBootVersion",
+    "managerData": Object {
+      "fileReplacePosition": 53,
+      "packageFile": "build.gradle",
+    },
+  },
+  Object {
+    "currentValue": "1.2.3",
+    "depName": "com.github.jengelman.gradle.plugins:shadow",
+    "managerData": Object {
+      "fileReplacePosition": 388,
+      "packageFile": "build.gradle",
+    },
+  },
+  Object {
+    "currentValue": "0.1",
+    "depName": "com.fkorotkov:gradle-libraries-plugin",
+    "managerData": Object {
+      "fileReplacePosition": 452,
+      "packageFile": "build.gradle",
+    },
+  },
+  Object {
+    "currentValue": "0.2.3",
+    "depName": "gradle.plugin.se.patrikerdes:gradle-use-latest-versions-plugin",
+    "managerData": Object {
+      "fileReplacePosition": 539,
+      "packageFile": "build.gradle",
+    },
+  },
+  Object {
+    "currentValue": "3.1.1",
+    "depName": "org.apache.openjpa:openjpa",
+    "managerData": Object {
+      "fileReplacePosition": 592,
+      "packageFile": "build.gradle",
+    },
+  },
+  Object {
+    "currentValue": "6.0.9.RELEASE",
+    "depName": "org.grails:gorm-hibernate5-spring-boot",
+    "managerData": Object {
+      "fileReplacePosition": 1785,
+      "packageFile": "build.gradle",
+    },
+  },
+  Object {
+    "currentValue": "6.0.5",
+    "depName": "mysql:mysql-connector-java",
+    "managerData": Object {
+      "fileReplacePosition": 1841,
+      "packageFile": "build.gradle",
+    },
+  },
+  Object {
+    "currentValue": "1.0-groovy-2.4",
+    "depName": "org.spockframework:spock-spring",
+    "managerData": Object {
+      "fileReplacePosition": 1899,
+      "packageFile": "build.gradle",
+    },
+  },
+  Object {
+    "currentValue": "1.3",
+    "depName": "org.hamcrest:hamcrest-core",
+    "managerData": Object {
+      "fileReplacePosition": 2004,
+      "packageFile": "build.gradle",
+    },
+  },
+  Object {
+    "currentValue": "3.1",
+    "depName": "cglib:cglib-nodep",
+    "managerData": Object {
+      "fileReplacePosition": 2092,
+      "packageFile": "build.gradle",
+    },
+  },
+  Object {
+    "currentValue": "3.1.1",
+    "depName": "org.apache.openjpa:openjpa",
+    "managerData": Object {
+      "fileReplacePosition": 2198,
+      "packageFile": "build.gradle",
+    },
+  },
+]
+`;
