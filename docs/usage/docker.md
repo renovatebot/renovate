@@ -21,18 +21,22 @@ Renovate supports upgrading dependencies in various types of Docker definition f
 
 ## Preservation of Version Precision
 
-Renovate by default will preserve the precision of Docker images.
-For example if the existing image is `node:14.1` then Renovate would only propose upgrades to `node:14.2` or `node:14.3` and not to more specified versions like `node:14.2.0` or `node:14.3.0`.
+By default, Renovate preserves the precision level specified in the Docker images.
+For example, if the existing image is pinned at `node:14.1` then Renovate only proposes upgrades to `node:14.2` or `node:14.3`.
+This means that you will not get upgrades to a more specific versions like `node:14.2.0` or `node:14.3.0`.
 Renovate does not yet support "pinning" an imprecise version to a precise version, e.g. from `node:14.2` to `node:14.2.0`, however it's a feature we'd like to implement one day.
 
 ## Version compatibility
 
 Although suffixes in SemVer indicate pre-releases (e.g. `v1.2.0-alpha.2`), in Docker they typically indicate compatibility, e.g. `12.2.0-alpine`.
-Renovate defaults to assuming suffixes indicate compatibility so will never _change_ it.
-e.g. `14.1.0-alpine` might get updated to `14.1.1-alpine` but never `14.1.1` or `14.1.1-stretch`.
+By default Renovate assumes suffixes indicate compatibility, for this reason Renovate will not _change_ any suffixes.
+Renovate will update `14.1.0-alpine` to `14.1.1-alpine` but never updates to `14.1.1` or `14.1.1-stretch` as that would change the suffix.
 
-If this behavior does not suit a particular package you have, Renovate allows you to customize the `versioning` in use.
-For example, if you have a Docker image `foo/bar` that sticks to SemVer versioning and you need Renovate to understand that suffixes indicate pre-releases versions and not compatibility, then you could configure this package rule:
+If this behavior does not suit a particular package you have, Renovate allows you to customize the `versioning` scheme it uses.
+For example, you have a Docker image `foo/bar` that sticks to SemVer versioning.
+This means that you need to tell Renovate that suffixes indicate pre-release versions, and not compatibility.
+
+You could then use this `packageRules` array, to tell Renovate to use `semver` versioning for the `foo/bar` package:
 
 ```json
 {
@@ -47,7 +51,7 @@ For example, if you have a Docker image `foo/bar` that sticks to SemVer versioni
 ```
 
 Another example is the official `python` image, which follows `pep440` versioning.
-You can configure that with another package rule:
+You can tell Renovate to use the `pep440` versioning scheme with this set of `packageRules`:
 
 ```json
 {
@@ -62,11 +66,11 @@ You can configure that with another package rule:
 ```
 
 If traditional versioning doesn't work, consider using Renovate's built-in `loose` `versioning`.
-It essentially just does a best effort sort of versions, regardless of whether they contain letters or digits.
+It essentially does a best-effort sort of versions, regardless of whether they contain letters or digits.
 
-Finally, if you use a Docker image that follows a versioning approach not captured by one of our existing versionings, and which `loose` sorts incorrectly, you could see if the `regex` `versioning` can work.
+Finally, if you use a Docker image that follows a versioning approach not captured by any of the existing versioning schemes, and which `loose` sorts incorrectly, you can try the `regex` `versioning`.
 It uses regex capture group syntax to let you specify which part of the version string is major, minor, patch, pre-release, or compatibility.
-See the docs for `versioning` for documentation/examples of `regex` versioning in action.
+See the docs for `versioning` for documentation and examples of `regex` versioning in action.
 
 ## Digest Pinning
 
