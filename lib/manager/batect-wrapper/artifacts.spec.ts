@@ -11,13 +11,16 @@ const newWindowsWrapperContent = `Windows wrapper script for ${newVersion}`;
 jest.mock('../../datasource/github-releases');
 const githubReleases: any = _githubReleases;
 
-function artifactForPath(path: string): UpdateArtifact {
+function artifactForPath(
+  path: string,
+  toVersion: string = newVersion
+): UpdateArtifact {
   return {
     packageFileName: path,
     updatedDeps: ['batect/batect'],
     newPackageFileContent: 'not used',
     config: {
-      toVersion: newVersion,
+      toVersion,
     },
   };
 }
@@ -26,6 +29,15 @@ describe('lib/manager/batect-wrapper/artifacts', () => {
   beforeEach(() => {
     githubReleases.getReleases.mockResolvedValue({
       releases: [
+        {
+          version: '1.0.1',
+          files: [
+            {
+              name: 'batect.cmd',
+              url: 'https://shouldnotbeused.com',
+            },
+          ],
+        },
         {
           version: '1.1.0',
           files: [
@@ -118,6 +130,22 @@ describe('lib/manager/batect-wrapper/artifacts', () => {
           },
         },
       ]);
+    });
+
+    it('throws an error if release information for the new version cannot be found', async () => {
+      const artifact = artifactForPath('batect', '3.4.5');
+
+      await expect(updateArtifacts(artifact)).rejects.toThrow(
+        'Found 0 releases of Batect for version 3.4.5'
+      );
+    });
+
+    it('throws an error if the release does not contain information for one of the expected wrapper scripts', async () => {
+      const artifact = artifactForPath('batect', '1.0.1');
+
+      await expect(updateArtifacts(artifact)).rejects.toThrow(
+        'Batect release 1.0.1 contains 0 files with name batect'
+      );
     });
   });
 });

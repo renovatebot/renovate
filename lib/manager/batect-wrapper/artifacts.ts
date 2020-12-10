@@ -42,7 +42,6 @@ async function getFileContent(
 
 export async function updateArtifacts({
   packageFileName,
-  updatedDeps,
   config,
 }: UpdateArtifact): Promise<UpdateArtifactsResult[] | null> {
   logger.debug(
