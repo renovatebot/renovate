@@ -1,9 +1,10 @@
 import { safeLoad } from 'js-yaml';
 
 import { logger } from '../../logger';
-import { PackageFile } from '../common';
+import { PackageDependency, PackageFile } from '../common';
 import { getDep } from '../dockerfile/extract';
 import { BatectConfig } from './types';
+import { id as dockerVersioning } from '../../versioning/docker';
 
 function loadConfig(content: string): BatectConfig {
   const config = safeLoad(content);
@@ -27,6 +28,13 @@ function extractImages(config: BatectConfig): string[] {
     .map((container) => container.image);
 }
 
+function createDependency(tag: string): PackageDependency {
+  return {
+    ...getDep(tag),
+    versioning: dockerVersioning,
+  };
+}
+
 export function extractPackageFile(
   content: string,
   fileName?: string
@@ -36,7 +44,7 @@ export function extractPackageFile(
   try {
     const config = loadConfig(content);
     const images = extractImages(config);
-    const deps = images.map((image) => getDep(image));
+    const deps = images.map((image) => createDependency(image));
 
     if (deps.length === 0) {
       return null;
