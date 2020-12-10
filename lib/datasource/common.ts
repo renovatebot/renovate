@@ -53,7 +53,7 @@ export interface Release {
   releaseTimestamp?: any;
   version: string;
   newDigest?: string;
-  files: ReleaseFile[];
+  files?: ReleaseFile[];
 }
 
 export interface ReleaseResult {
