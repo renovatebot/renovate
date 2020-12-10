@@ -220,10 +220,8 @@ export class GithubHttp extends Http<GithubHttpOptions, GithubHttpOptions> {
 
     const path = 'graphql';
 
-    const { origin } = new URL(baseUrl);
-
     const opts: HttpPostOptions = {
-      baseUrl: origin,
+      baseUrl: baseUrl.replace('/v3/', '/'), // GHE uses unversioned graphql path
       body: { query },
       headers: { accept: options?.acceptHeader },
     };
