@@ -17,18 +17,31 @@ describe('workers/repository/process/limits', () => {
       platform.getPrList.mockResolvedValueOnce([
         {
           createdAt: DateTime.local().toISO(),
-          sourceBranch: null,
-          title: null,
-          state: null,
+          sourceBranch: 'renovate/test',
         },
-      ]);
-      const res = await limits.getPrHourlyRemaining(config);
+        {
+          createdAt: DateTime.local().toISO(),
+          sourceBranch: 'renovate/configure',
+        },
+        {
+          createdAt: DateTime.local().toISO(),
+          sourceBranch: 'foobar',
+        },
+      ] as never);
+      const res = await limits.getPrHourlyRemaining(config, [
+        { branchName: 'renovate/configure' },
+        { branchName: 'renovate/test' },
+      ] as never);
       expect(res).toEqual(1);
     });
-    it('returns 99 if errored', async () => {
+    it('returns prHourlyLimit if errored', async () => {
       config.prHourlyLimit = 2;
-      platform.getPrList.mockResolvedValueOnce([null]);
-      const res = await limits.getPrHourlyRemaining(config);
+      platform.getPrList.mockRejectedValue('Unknown error');
+      const res = await limits.getPrHourlyRemaining(config, []);
+      expect(res).toEqual(2);
+    });
+    it('returns 99 if no hourly limit', async () => {
+      const res = await limits.getPrHourlyRemaining(config, []);
       expect(res).toEqual(99);
     });
   });
