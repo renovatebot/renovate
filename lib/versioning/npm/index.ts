@@ -16,7 +16,7 @@ export const supportedRangeStrategies = ['bump', 'extend', 'pin', 'replace'];
 
 const {
   compare: sortVersions,
-  maxSatisfying: maxSatisfyingVersion,
+  maxSatisfying: getSatisfyingVersion,
   minSatisfying: minSatisfyingVersion,
   major: getMajor,
   minor: getMinor,
@@ -51,7 +51,7 @@ export const api: VersioningApi = {
   isValid,
   isVersion,
   matches,
-  maxSatisfyingVersion,
+  getSatisfyingVersion,
   minSatisfyingVersion,
   sortVersions,
 };
