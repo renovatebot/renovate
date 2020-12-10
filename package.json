@@ -233,7 +233,7 @@
     "cross-env": "7.0.3",
     "eslint": "7.12.1",
     "eslint-config-airbnb-typescript": "12.0.0",
-    "eslint-config-prettier": "6.15.0",
+    "eslint-config-prettier": "7.0.0",
     "eslint-plugin-import": "2.22.1",
     "eslint-plugin-jest": "24.1.0",
     "eslint-plugin-promise": "4.2.1",
