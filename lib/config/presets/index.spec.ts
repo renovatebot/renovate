@@ -249,6 +249,9 @@ describe('config/presets', () => {
     it('parses gitlab', () => {
       expect(presets.parsePreset('gitlab>some/repo')).toMatchSnapshot();
     });
+    it('parses gitea', () => {
+      expect(presets.parsePreset('gitea>some/repo')).toMatchSnapshot();
+    });
     it('parses local', () => {
       expect(presets.parsePreset('local>some/repo')).toMatchSnapshot();
     });
