@@ -28,6 +28,13 @@ async function setDirectories(input: RenovateConfig): Promise<RenovateConfig> {
   return config;
 }
 
+function initCommitsPerRun(config: RenovateConfig): void {
+  const limit = config.prCommitsPerRunLimit;
+  if (typeof limit === 'number' && limit > 0) {
+    setMaxLimit(Limit.Commits, limit);
+  }
+}
+
 export async function globalInitialize(
   config_: RenovateConfig
 ): Promise<RenovateConfig> {
@@ -35,7 +42,7 @@ export async function globalInitialize(
   config = await initPlatform(config);
   config = await setDirectories(config);
   packageCache.init(config);
-  setMaxLimit(Limit.Commits, config.prCommitsPerRunLimit);
+  initCommitsPerRun(config);
   setEmojiConfig(config);
   return config;
 }
