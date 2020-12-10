@@ -220,8 +220,7 @@ export class GithubHttp extends Http<GithubHttpOptions, GithubHttpOptions> {
 
     const path = 'graphql';
 
-    const { origin } = new URL(baseUrl);
-
+    const origin = new URL('/api', baseUrl).toString();
     const opts: HttpPostOptions = {
       baseUrl: origin,
       body: { query },

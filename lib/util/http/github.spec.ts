@@ -217,13 +217,13 @@ describe(getName(__filename), () => {
       setBaseUrl('https://ghe.mycompany.com/api/v3/');
       const repository = { foo: 'foo', bar: 'bar' };
       httpMock
-        .scope('https://ghe.mycompany.com')
+        .scope('https://ghe.mycompany.com/api')
         .post('/graphql')
         .reply(200, { data: { repository } });
       await githubApi.queryRepo(query);
       const [req] = httpMock.getTrace();
       expect(req).toBeDefined();
-      expect(req.url).toEqual('https://ghe.mycompany.com/graphql');
+      expect(req.url).toEqual('https://ghe.mycompany.com/api/graphql');
     });
     it('supports app mode', async () => {
       hostRules.add({ hostType: 'github', token: 'x-access-token:abc123' });
