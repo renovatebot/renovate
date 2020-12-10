@@ -82,6 +82,8 @@ export async function ensureCacheDir(
 
 export function localPathExists(pathName: string): Promise<boolean> {
   // Works for both files as well as directories
-  return fs.stat(join(localDir, pathName).then(s=> !!s).catch(() => false);
-  });
+  return fs
+    .stat(join(localDir, pathName))
+    .then((s) => !!s)
+    .catch(() => false);
 }
