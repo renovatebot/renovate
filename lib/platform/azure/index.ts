@@ -586,16 +586,29 @@ export async function mergePr(
     pullRequestId,
     config.project
   );
+  const mergeMethod = await azureHelper.getMergeMethod(
+    config.repoId,
+    config.project,
+    pr.targetRefName
+  );
 
   const objToUpdate: GitPullRequest = {
     status: PullRequestStatus.Completed,
     lastMergeSourceCommit: pr.lastMergeSourceCommit,
+    completionOptions: {
+      mergeStrategy: mergeMethod,
+      deleteSourceBranch: true,
+    },
   };
 
   logger.trace(
     `Updating PR ${pullRequestId} to status ${PullRequestStatus.Completed} (${
       PullRequestStatus[PullRequestStatus.Completed]
-    }) with lastMergeSourceCommit ${pr.lastMergeSourceCommit.commitId}`
+    }) with lastMergeSourceCommit ${
+      pr.lastMergeSourceCommit.commitId
+    } using mergeStrategy ${mergeMethod} (${
+      GitPullRequestMergeStrategy[mergeMethod]
+    })`
   );
 
   try {

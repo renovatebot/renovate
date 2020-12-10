@@ -1,5 +1,6 @@
 import is from '@sindresorhus/is';
 import {
+  GitPullRequestMergeStrategy,
   GitStatusState,
   PullRequestStatus,
 } from 'azure-devops-node-api/interfaces/GitInterfaces';
@@ -1017,15 +1018,26 @@ describe('platform/azure', () => {
           ({
             getPullRequestById: jest.fn(() => ({
               lastMergeSourceCommit: lastMergeSourceCommitMock,
+              targetRefName: 'refs/heads/ding',
             })),
             updatePullRequest: updatePullRequestMock,
           } as any)
       );
+
+      azureHelper.getMergeMethod = jest
+        .fn()
+        .mockReturnValue(GitPullRequestMergeStrategy.Squash);
+
       const res = await azure.mergePr(pullRequestIdMock, branchNameMock);
+
       expect(updatePullRequestMock).toHaveBeenCalledWith(
         {
           status: PullRequestStatus.Completed,
           lastMergeSourceCommit: lastMergeSourceCommitMock,
+          completionOptions: {
+            mergeStrategy: GitPullRequestMergeStrategy.Squash,
+            deleteSourceBranch: true,
+          },
         },
         '1',
         pullRequestIdMock
@@ -1037,18 +1049,22 @@ describe('platform/azure', () => {
       const pullRequestIdMock = 12345;
       const branchNameMock = 'test';
       const lastMergeSourceCommitMock = { commitId: 'abcd1234' };
-      const updatePullRequestMock = jest
-        .fn()
-        .mockRejectedValue(new Error(`oh no pr couldn't be updated`));
       azureApi.gitApi.mockImplementationOnce(
         () =>
           ({
             getPullRequestById: jest.fn(() => ({
               lastMergeSourceCommit: lastMergeSourceCommitMock,
             })),
-            updatePullRequest: updatePullRequestMock,
+            updatePullRequest: jest
+              .fn()
+              .mockRejectedValue(new Error(`oh no pr couldn't be updated`)),
           } as any)
       );
+
+      azureHelper.getMergeMethod = jest
+        .fn()
+        .mockReturnValue(GitPullRequestMergeStrategy.Squash);
+
       const res = await azure.mergePr(pullRequestIdMock, branchNameMock);
       expect(res).toBe(false);
     });
