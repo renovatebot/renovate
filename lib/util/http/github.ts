@@ -1,4 +1,3 @@
-import URL from 'url';
 import is from '@sindresorhus/is';
 import pAll from 'p-all';
 import parseLinkHeader from 'parse-link-header';
@@ -159,13 +158,6 @@ export class GithubHttp extends Http<GithubHttpOptions, GithubHttpOptions> {
       throwHttpErrors: true,
     };
 
-    const method = opts.method || 'get';
-
-    if (method.toLowerCase() === 'post' && url === 'graphql') {
-      // GitHub Enterprise uses unversioned graphql path
-      opts.baseUrl = opts.baseUrl.replace('/v3/', '/');
-    }
-
     const accept = constructAcceptString(opts.headers?.accept);
 
     opts.headers = {
@@ -196,11 +188,11 @@ export class GithubHttp extends Http<GithubHttpOptions, GithubHttpOptions> {
             ).slice(1);
             const queue = pageNumbers.map(
               (page) => (): Promise<HttpResponse> => {
-                const nextUrl = URL.parse(linkHeader.next.url, true);
+                const nextUrl = new URL(linkHeader.next.url, baseUrl);
                 delete nextUrl.search;
-                nextUrl.query.page = page.toString();
+                nextUrl.searchParams.set('page', page.toString());
                 return this.request(
-                  URL.format(nextUrl),
+                  nextUrl,
                   { ...opts, paginate: false },
                   okToRetry
                 );
@@ -228,7 +220,10 @@ export class GithubHttp extends Http<GithubHttpOptions, GithubHttpOptions> {
 
     const path = 'graphql';
 
+    const { origin } = new URL(baseUrl);
+
     const opts: HttpPostOptions = {
+      baseUrl: origin,
       body: { query },
       headers: { accept: options?.acceptHeader },
     };
