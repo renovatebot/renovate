@@ -29,11 +29,9 @@ async function setDirectories(input: RenovateConfig): Promise<RenovateConfig> {
 }
 
 function limitCommitsPerRun(config: RenovateConfig): void {
-  const limit = config.prCommitsPerRunLimit;
-  /* istanbul ignore if */
-  if (typeof limit === 'number' && limit > 0) {
-    setMaxLimit(Limit.Commits, limit);
-  }
+  let limit = config.prCommitsPerRunLimit;
+  limit = typeof limit === 'number' && limit > 0 ? limit : null;
+  setMaxLimit(Limit.Commits, limit);
 }
 
 export async function globalInitialize(

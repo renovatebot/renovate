@@ -16,10 +16,10 @@ export function resetAllLimits(): void {
 }
 
 export function setMaxLimit(key: Limit, max: unknown): void {
-  if (typeof max === 'number') {
+  if (max === null || typeof max === 'number') {
     limits.set(key, {
       current: 0,
-      max: Math.max(0, max),
+      max: typeof max === 'number' ? Math.max(0, max) : null,
     });
     logger.debug(`${key} limit = ${max}`);
   }
