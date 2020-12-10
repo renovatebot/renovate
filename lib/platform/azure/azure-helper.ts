@@ -177,15 +177,18 @@ export function getProjectAndRepo(
 
 export async function getMergeMethod(
   repoId: string,
-  project: string
+  project: string,
+  branchRef?: string
 ): Promise<GitPullRequestMergeStrategy> {
   const policyConfigurations = (
     await (await azureApi.policyApi()).getPolicyConfigurations(project)
   )
     .filter(
       (p) =>
-        p.settings.scope.some((s) => s.repositoryId === repoId) &&
-        p.type.id === mergePolicyGuid
+        p.settings.scope.some(
+          (s) =>
+            s.repositoryId === repoId && (!branchRef || s.refName === branchRef)
+        ) && p.type.id === mergePolicyGuid
     )
     .map((p) => p.settings)[0];
 
