@@ -114,13 +114,13 @@ export async function updateDependency({
         );
       }
     } else if (
-      (upgrade.depType === 'http_archive' || upgrade.depType === 'http_file') &&
-      upgrade.newValue
+      upgrade.depType === 'http_archive' ||
+      upgrade.depType === 'http_file'
     ) {
       newDef = updateWithNewVersion(
         upgrade.managerData.def,
-        upgrade.currentValue,
-        upgrade.newValue
+        upgrade.currentValue || upgrade.currentDigest,
+        upgrade.newValue || upgrade.newDigest
       );
       const massages = {
         'bazel-skylib.': 'bazel_skylib-',
@@ -144,23 +144,6 @@ export async function updateDependency({
       }
       logger.debug({ hash }, 'Calculated hash');
       newDef = setNewHash(newDef, hash);
-    } else if (
-      (upgrade.depType === 'http_archive' || upgrade.depType === 'http_file') &&
-      upgrade.newDigest
-    ) {
-      const [, shortRepo] = upgrade.repo.split('/');
-      const url = `https://github.com/${upgrade.repo}/archive/${upgrade.newDigest}.tar.gz`;
-      const hash = await getHashFromUrl(url);
-      newDef = setNewHash(upgrade.managerData.def, hash);
-      newDef = newDef.replace(
-        regEx(`(strip_prefix\\s*=\\s*)"[^"]*"`),
-        `$1"${shortRepo}-${upgrade.newDigest}"`
-      );
-      const match =
-        upgrade.managerData.def.match(/(?<=archive\/).*(?=\.tar\.gz)/g) || [];
-      match.forEach((matchedHash) => {
-        newDef = newDef.replace(matchedHash, upgrade.newDigest);
-      });
     }
     logger.debug({ oldDef: upgrade.managerData.def, newDef });
     let existingRegExStr = `${upgrade.depType}\\([^\\)]+name\\s*=\\s*"${upgrade.depName}"(.*\\n)+?\\s*\\)`;
