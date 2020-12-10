@@ -37,7 +37,23 @@ describe('lib/workers/global/limits', () => {
   it('increments undefined', () => {
     incLimitedValue(Limit.Commits);
     expect(isLimitReached(Limit.Commits)).toBe(false);
+  });
+
+  it('resets counter', () => {
     setMaxLimit(Limit.Commits, 1);
+    incLimitedValue(Limit.Commits);
     expect(isLimitReached(Limit.Commits)).toBe(true);
+    setMaxLimit(Limit.Commits, 1);
+    expect(isLimitReached(Limit.Commits)).toBe(false);
+  });
+
+  it('zero as unlimited', () => {
+    setMaxLimit(Limit.Commits, 0);
+    expect(isLimitReached(Limit.Commits)).toBeFalse();
+  });
+
+  it('zero as limit', () => {
+    setMaxLimit(Limit.Commits, 0, false);
+    expect(isLimitReached(Limit.Commits)).toBeTrue();
   });
 });
