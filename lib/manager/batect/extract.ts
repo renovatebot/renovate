@@ -1,10 +1,10 @@
 import { safeLoad } from 'js-yaml';
 
 import { logger } from '../../logger';
+import { id as dockerVersioning } from '../../versioning/docker';
 import { PackageDependency, PackageFile } from '../common';
 import { getDep } from '../dockerfile/extract';
 import { BatectConfig } from './types';
-import { id as dockerVersioning } from '../../versioning/docker';
 
 function loadConfig(content: string): BatectConfig {
   const config = safeLoad(content);
