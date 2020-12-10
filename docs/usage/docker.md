@@ -65,11 +65,11 @@ You can tell Renovate to use the `pep440` versioning scheme with this set of `pa
 }
 ```
 
-If traditional versioning doesn't work, consider using Renovate's built-in `loose` `versioning`.
-It essentially does a best-effort sort of versions, regardless of whether they contain letters or digits.
+If traditional versioning doesn't work, try Renovate's built-in `loose` `versioning`.
+Renovate will perform a best-effort sort of the versions, regardless of whether they contain letters or digits.
 
-Finally, if you use a Docker image that follows a versioning approach not captured by any of the existing versioning schemes, and which `loose` sorts incorrectly, you can try the `regex` `versioning`.
-It uses regex capture group syntax to let you specify which part of the version string is major, minor, patch, pre-release, or compatibility.
+If both the tradional versioning, and the `loose` versioning do not give the results you want, try the `regex` `versioning`.
+This approach uses regex capture group syntax to specify which part of the version string is major, minor, patch, pre-release, or compatibility.
 See the docs for `versioning` for documentation and examples of `regex` versioning in action.
 
 ## Digest Pinning
@@ -80,15 +80,15 @@ By pinning to a digest you ensure your Docker builds are **immutable**: every ti
 If you have experience with the way dependency versioning is handled in the JavaScript/npm ecosystem, you might be used to exact versions being immutable.
 e.g. if you specify a version like `2.0.1`, you and your colleagues always get the exact same "code".
 
-What you may not expect is that Docker's tags are not immutable versions, even if they look like a version.
+What you may not know is that Docker's tags are not immutable versions, even if they look like a version.
 e.g. you probably expect `node:14` and `node:14.9` to change over time, but you might incorrectly assume that `node:14.9.0` never changes.
 Although it probably _shouldn't_, the reality is that any Docker image tag _can_ change content, and potentially break.
 
 Using a Docker digest as the image's primary identifier instead of using a Docker tag will achieve immutability.
-As a human it's quite inconvenient to work with strings like `FROM node@sha256:d938c1761e3afbae9242848ffbb95b9cc1cb0a24d889f8bd955204d347a7266e`.
+It's not easy to work with strings like `FROM node@sha256:d938c1761e3afbae9242848ffbb95b9cc1cb0a24d889f8bd955204d347a7266e`.
 Luckily Renovate can update the digests for you, so you don't have to.
 
-To keep things human-friendly, Renovate will retain the Docker tag in the `FROM` line, e.g. `FROM node:14.15.1@sha256:d938c1761e3afbae9242848ffbb95b9cc1cb0a24d889f8bd955204d347a7266e`.
+To keep things simple, Renovate retains the Docker tag in the `FROM` line, e.g. `FROM node:14.15.1@sha256:d938c1761e3afbae9242848ffbb95b9cc1cb0a24d889f8bd955204d347a7266e`.
 Read on to see how Renovate updates Docker digests.
 
 ## Digest Updating
@@ -105,9 +105,9 @@ This ensures everyone on the team uses the latest versions and is in sync.
 ## Version Upgrading
 
 Renovate also supports _upgrading_ versions in Docker tags, e.g. from `node:14.9.0` to `node:14.9.1` or `node:14.9` to `node:14.10`.
-If your tags looks like a version, Renovate will upgrade it like a version.
+If a tag looks like a version, Renovate will upgrade it like a version.
 
-Thanks to this, you may wish to change the way you tag your image dependencies to be more specific, e.g. change from `node:14` to `node:14.9.1` so that every Renovate PR will be more human friendly, e.g. you can know that you are getting a PR because `node` upgraded from `14.9.1` to `14.9.2` and not because `14.9.1` somehow changed.
+Thanks to this, you may wish to change the way you tag your images to be more specific, e.g. change from `node:14` to `node:14.9.1` so that every Renovate PR will be more human friendly, e.g. you can know that you are getting a PR because `node` upgraded from `14.9.1` to `14.9.2` and not because `14.9.1` somehow changed.
 
 Currently, Renovate will upgrade minor/patch versions (e.g. from `14.9.0` to `14.9.1`) by default, but not upgrade major versions.
 If you wish to enable major versions then add the preset `docker:enableMajor` to your `extends` array in your `renovate.json`.
@@ -159,11 +159,12 @@ Add `"default:pinDigestsDisabled"` to your `extends` array.
 ### Automerge digest updates
 
 Add `"default:automergeDigest"` to your `extends` array.
-Also add `"default:automergeBranchPush"` if you wish for these to be committed directly to your base branch without raising a PR first.
+If you want Renovate to commit directly to your base branch without opening a PR first, add add `"default:automergeBranchPush"` to the `extends` array.
 
 ### Registry authentication
 
-Here is an example of configuring a default Docker username/password in `config.js`:
+Here is an example of configuring a default Docker username/password in `config.js`.
+The Docker Hub password is stored in a process environment variable.
 
 ```js
 module.exports = {
@@ -171,14 +172,17 @@ module.exports = {
     {
       hostType: 'docker',
       username: '<your-username>',
-      password: '<your-password>',
+      password: 'process.env.DOCKER_HUB_PASSWORD',
     },
   ],
 };
 ```
 
-It is possible to add additional host rules following the [documentation](https://docs.renovatebot.com/configuration-options/#hostrules).
-For example if you have some images you host yourself that are password protected and also some images you pull from Docker Hub without authentication then you can configure for a specific Docker host like this:
+You can add additional host rules, read the [hostrules documentation](https://docs.renovatebot.com/configuration-options/#hostrules) for more information.
+
+Say you host some Docker images yourself, and use a password to your selfhosted Docker images.
+In addition to selfhosting, you also pull images from Docker Hub, without a password.
+In this example you would configure a specific Docker host like this:
 
 ```js
 module.exports = {
@@ -187,10 +191,10 @@ module.exports = {
       hostType: 'docker',
       hostName: 'your.host.io',
       username: '<your-username>',
-      password: '<your-password>',
+      password: 'process.env.SELF_HOSTED_DOCKER_IMAGES_PASSWORD',
     },
   ],
 };
 ```
 
-If you need to configure per-repository credentials then you can also configure the above within a repository's Renovate config (e.g. `renovate.json`);
+If you need to configure per-repository credentials then you can also configure the above within a repository's Renovate config (e.g. `renovate.json`).
