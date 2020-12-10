@@ -213,13 +213,13 @@ describe('versioning/ubuntu', () => {
     expect(ubuntu.isGreaterThan('20.04.1', '19.10.1')).toBe(true);
   });
 
-  it('maxSatisfyingVersion', () => {
+  it('getSatisfyingVersion', () => {
     const versions = ['18.10', '19.04', '19.10', '20.04'];
-    expect(ubuntu.maxSatisfyingVersion(versions, '2020.04')).toBeNull();
-    expect(ubuntu.maxSatisfyingVersion(versions, 'foobar')).toBeNull();
-    expect(ubuntu.maxSatisfyingVersion(versions, '20.04')).toBe('20.04');
-    expect(ubuntu.maxSatisfyingVersion(versions, '19.10')).toBe('19.10');
-    expect(ubuntu.maxSatisfyingVersion(versions, '04.10')).toBeNull();
+    expect(ubuntu.getSatisfyingVersion(versions, '2020.04')).toBeNull();
+    expect(ubuntu.getSatisfyingVersion(versions, 'foobar')).toBeNull();
+    expect(ubuntu.getSatisfyingVersion(versions, '20.04')).toBe('20.04');
+    expect(ubuntu.getSatisfyingVersion(versions, '19.10')).toBe('19.10');
+    expect(ubuntu.getSatisfyingVersion(versions, '04.10')).toBeNull();
   });
 
   it('minSatisfyingVersion', () => {

@@ -13,13 +13,13 @@ describe('lib/versioning/hex', () => {
   });
   it('handles tilde greater than', () => {
     expect(
-      hexScheme.maxSatisfyingVersion(
+      hexScheme.getSatisfyingVersion(
         ['0.4.0', '0.5.0', '4.0.0', '4.2.0', '5.0.0'],
         '~> 4.0'
       )
     ).toBe('4.2.0');
     expect(
-      hexScheme.maxSatisfyingVersion(
+      hexScheme.getSatisfyingVersion(
         ['0.4.0', '0.5.0', '4.0.0', '4.2.0', '5.0.0'],
         '~> 4.0.0'
       )
