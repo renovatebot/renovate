@@ -1,7 +1,7 @@
 import { readFile, readFileSync } from 'fs-extra';
 import Git from 'simple-git';
 import { resolve } from 'upath';
-import * as httpMock from '../../../test/httpMock';
+import * as httpMock from '../../../test/http-mock';
 import { getName, git, partial } from '../../../test/util';
 import { setUtilConfig } from '../../util';
 import { StatusResult } from '../../util/git';
@@ -70,14 +70,12 @@ describe(getName(__filename), () => {
           'gradle/wrapper/gradle-wrapper.jar',
           'gradlew',
           'gradlew.bat',
-        ].map((fileProjectPath) => {
-          return {
-            file: {
-              name: fileProjectPath,
-              contents: readBinSync(`./testFiles/${fileProjectPath}`),
-            },
-          };
-        })
+        ].map((fileProjectPath) => ({
+          file: {
+            name: fileProjectPath,
+            contents: readBinSync(`./testFiles/${fileProjectPath}`),
+          },
+        }))
       );
 
       [

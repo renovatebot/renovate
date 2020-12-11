@@ -40,26 +40,28 @@ Renovate will search repositories for all `pom.xml` files and processes them ind
 
 Here is an example configuration to work with custom Artifactory servers using authentication:
 
-```
+```json
 {
-	"maven": {
-	    "enabled": true
-	},
-	"hostRules": [{
-	    "hostType": "maven",
-        "endpoint": "https://artifactoryurl1/",
-	    "username": "artifactoryusername",
-	    "password": "artifactorypassword"
-	}, {
-	    "hostType": "maven",
-        "endpoint": "https://artifactoryurl2/",
-	    "username": "artifactoryusername",
-	    "password": "artifactorypassword"
-	}],
-    "packageRules": [{
-        "managers": ["maven"],
-	    "registryUrls": ["https://artifactoryurl1/", "https://artifactoryurl2/"]
-    }]
+  "hostRules": [
+    {
+      "hostType": "maven",
+      "baseUrl": "https://artifactoryurl1/",
+      "username": "artifactoryusername",
+      "password": "artifactorypassword"
+    },
+    {
+      "hostType": "maven",
+      "baseUrl": "https://artifactoryurl2/",
+      "username": "artifactoryusername",
+      "password": "artifactorypassword"
+    }
+  ],
+  "packageRules": [
+    {
+      "managers": ["maven"],
+      "registryUrls": ["https://artifactoryurl1/", "https://artifactoryurl2/"]
+    }
+  ]
 }
 ```
 

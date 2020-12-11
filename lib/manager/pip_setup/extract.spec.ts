@@ -1,4 +1,4 @@
-import { envMock, exec, mockExecSequence } from '../../../test/execUtil';
+import { envMock, exec, mockExecSequence } from '../../../test/exec-util';
 import { env, getName } from '../../../test/util';
 import {
   getPythonAlias,

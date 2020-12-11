@@ -1,5 +1,5 @@
 import fs from 'fs-extra';
-import * as httpMock from '../../../test/httpMock';
+import * as httpMock from '../../../test/http-mock';
 import { mocked } from '../../../test/util';
 import {
   REPOSITORY_NOT_FOUND,

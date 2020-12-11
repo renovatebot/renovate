@@ -5,7 +5,7 @@ import {
   exec,
   mockExecAll,
   mockExecSequence,
-} from '../../../test/execUtil';
+} from '../../../test/exec-util';
 import { env, getName } from '../../../test/util';
 import { BinarySource } from '../../util/exec/common';
 import * as fs from '../../util/fs';

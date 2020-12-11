@@ -298,9 +298,6 @@ export function generateBranchConfig(
   }
   // Now assign first upgrade's config as branch config
   config = { ...config, ...config.upgrades[0], releaseTimestamp }; // TODO: fixme
-  config.canBeUnpublished = config.upgrades.some(
-    (upgrade) => upgrade.canBeUnpublished
-  );
   config.reuseLockFiles = config.upgrades.every(
     (upgrade) => upgrade.updateType !== 'lockFileMaintenance'
   );

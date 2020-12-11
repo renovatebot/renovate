@@ -16,7 +16,6 @@ import * as _commit from './commit';
 import * as _getUpdated from './get-updated';
 import * as _reuse from './reuse';
 import * as _schedule from './schedule';
-import * as _statusChecks from './status-checks';
 import * as branchWorker from '.';
 
 jest.mock('./get-updated');
@@ -24,7 +23,6 @@ jest.mock('./schedule');
 jest.mock('./check-existing');
 jest.mock('./reuse');
 jest.mock('../../manager/npm/post-update');
-jest.mock('./status-checks');
 jest.mock('./automerge');
 jest.mock('./commit');
 jest.mock('../pr');
@@ -37,7 +35,6 @@ const schedule = mocked(_schedule);
 const checkExisting = mocked(_checkExisting);
 const reuse = mocked(_reuse);
 const npmPostExtract = mocked(_npmPostExtract);
-const statusChecks = mocked(_statusChecks);
 const automerge = mocked(_automerge);
 const commit = mocked(_commit);
 const prWorker = mocked(_prWorker);
@@ -83,12 +80,20 @@ describe('workers/branch', () => {
       const res = await branchWorker.processBranch(config);
       expect(res).toEqual(ProcessBranchResult.NotScheduled);
     });
-    it('skips branch if not unpublishSafe + pending', async () => {
+    it('skips branch for fresh release with stabilityDays', async () => {
       schedule.isScheduledNow.mockReturnValueOnce(true);
-      config.unpublishSafe = true;
-      config.canBeUnpublished = true;
       config.prCreation = 'not-pending';
-      git.branchExists.mockReturnValueOnce(true);
+      config.upgrades = [
+        {
+          releaseTimestamp: new Date('2019-01-01').getTime(),
+          stabilityDays: 1,
+        },
+        {
+          releaseTimestamp: new Date().getTime(),
+          stabilityDays: 1,
+        },
+      ] as never;
+      git.branchExists.mockReturnValueOnce(false);
       const res = await branchWorker.processBranch(config);
       expect(res).toEqual(ProcessBranchResult.Pending);
     });
@@ -270,7 +275,6 @@ describe('workers/branch', () => {
       commit.commitFilesToBranch.mockResolvedValueOnce(null);
       automerge.tryBranchAutomerge.mockResolvedValueOnce('automerged');
       await branchWorker.processBranch(config);
-      expect(statusChecks.setUnpublishable).toHaveBeenCalledTimes(1);
       expect(automerge.tryBranchAutomerge).toHaveBeenCalledTimes(1);
       expect(prWorker.ensurePr).toHaveBeenCalledTimes(0);
     });
@@ -289,7 +293,6 @@ describe('workers/branch', () => {
         ...config,
         requiredStatusChecks: null,
       });
-      expect(statusChecks.setUnpublishable).toHaveBeenCalledTimes(1);
       expect(automerge.tryBranchAutomerge).toHaveBeenCalledTimes(1);
       expect(prWorker.ensurePr).toHaveBeenCalledTimes(0);
     });
@@ -306,7 +309,6 @@ describe('workers/branch', () => {
       commit.commitFilesToBranch.mockResolvedValueOnce(null);
       automerge.tryBranchAutomerge.mockResolvedValueOnce('automerged');
       await branchWorker.processBranch({ ...config, dryRun: true });
-      expect(statusChecks.setUnpublishable).toHaveBeenCalledTimes(1);
       expect(automerge.tryBranchAutomerge).toHaveBeenCalledTimes(1);
       expect(prWorker.ensurePr).toHaveBeenCalledTimes(0);
     });

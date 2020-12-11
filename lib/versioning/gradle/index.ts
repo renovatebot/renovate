@@ -150,8 +150,8 @@ const matches = (a: string, b: string): boolean => {
   return leftResult && rightResult;
 };
 
-const getSatisfyingVersion = (versions: string[], range: string): string => {
-  return versions.reduce((result, version) => {
+const getSatisfyingVersion = (versions: string[], range: string): string =>
+  versions.reduce((result, version) => {
     if (matches(version, range)) {
       if (!result) {
         return version;
@@ -162,10 +162,9 @@ const getSatisfyingVersion = (versions: string[], range: string): string => {
     }
     return result;
   }, null);
-};
 
-const minSatisfyingVersion = (versions: string[], range: string): string => {
-  return versions.reduce((result, version) => {
+const minSatisfyingVersion = (versions: string[], range: string): string =>
+  versions.reduce((result, version) => {
     if (matches(version, range)) {
       if (!result) {
         return version;
@@ -176,7 +175,6 @@ const minSatisfyingVersion = (versions: string[], range: string): string => {
     }
     return result;
   }, null);
-};
 
 function getNewValue({
   currentValue,
