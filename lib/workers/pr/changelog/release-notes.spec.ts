@@ -12,7 +12,7 @@ import {
 } from './release-notes';
 
 const angularJsChangelogMd = fs.readFileSync(
-  'lib/workers/pr/__fixtures__/angular.js.md',
+  'lib/workers/pr/__fixtures__/angular-js.md',
   'utf8'
 );
 const jestChangelogMd = fs.readFileSync(
