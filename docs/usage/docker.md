@@ -68,7 +68,7 @@ You can tell Renovate to use the `pep440` versioning scheme with this set of `pa
 If traditional versioning doesn't work, try Renovate's built-in `loose` `versioning`.
 Renovate will perform a best-effort sort of the versions, regardless of whether they contain letters or digits.
 
-If both the tradional versioning, and the `loose` versioning do not give the results you want, try the `regex` `versioning`.
+If both the traditional versioning, and the `loose` versioning do not give the results you want, try the `regex` `versioning`.
 This approach uses regex capture group syntax to specify which part of the version string is major, minor, patch, pre-release, or compatibility.
 See the docs for `versioning` for documentation and examples of `regex` versioning in action.
 
