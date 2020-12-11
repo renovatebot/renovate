@@ -72,7 +72,6 @@ describe('workers/repository/updates/generate', () => {
             foo: 2,
           },
           releaseTimestamp: '2017-02-07T20:01:41+00:00',
-          canBeUnpublished: false,
           automerge: true,
           constraints: {
             foo: '1.0.0',
@@ -92,7 +91,6 @@ describe('workers/repository/updates/generate', () => {
             foo: 2,
           },
           releaseTimestamp: '2017-02-06T20:01:41+00:00',
-          canBeUnpublished: true,
           automerge: false,
           constraints: {
             foo: '1.0.0',
@@ -113,7 +111,6 @@ describe('workers/repository/updates/generate', () => {
             foo: 2,
           },
           releaseTimestamp: '2017-02-06T20:01:41+00:00',
-          canBeUnpublished: true,
           automerge: false,
         },
       ];
@@ -121,7 +118,6 @@ describe('workers/repository/updates/generate', () => {
       expect(res.foo).toBe(2);
       expect(res.groupName).toBeDefined();
       expect(res.releaseTimestamp).toEqual('2017-02-07T20:01:41+00:00');
-      expect(res.canBeUnpublished).toBe(true);
       expect(res.automerge).toBe(false);
       expect(res.constraints).toEqual({
         foo: '1.0.0',

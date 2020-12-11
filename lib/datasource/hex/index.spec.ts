@@ -19,7 +19,8 @@ const baseUrl = 'https://hex.pm/api/packages/';
 
 describe('datasource/hex', () => {
   beforeEach(() => {
-    hostRules.hosts = jest.fn(() => []);
+    hostRules.hosts.mockReturnValue([]);
+    hostRules.find.mockReturnValue({});
     httpMock.setup();
   });
 

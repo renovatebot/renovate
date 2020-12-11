@@ -118,7 +118,7 @@ describe('config/migration', () => {
           pathRules: [
             {
               paths: ['node/**'],
-              extends: ['node'],
+              extends: 'node',
             },
           ],
         },
@@ -435,6 +435,7 @@ describe('config/migration', () => {
       expect(res.isMigrated).toBe(false);
       expect(res.migratedConfig).toMatchObject({ semanticCommits: 'disabled' });
     });
+
     it('it migrates preset strings to array', () => {
       let config: RenovateConfig;
       let res: MigratedConfig;
@@ -454,6 +455,89 @@ describe('config/migration', () => {
       expect(res.isMigrated).toBe(true);
       expect(res.migratedConfig).toMatchObject({
         extends: ['foo', 'config:js-app', 'bar'],
+      });
+    });
+
+    it('it migrates unpublishSafe', () => {
+      let config: RenovateConfig;
+      let res: MigratedConfig;
+
+      config = { unpublishSafe: true };
+      res = configMigration.migrateConfig(config);
+      expect(res.isMigrated).toBe(true);
+      expect(res.migratedConfig).toMatchObject({
+        extends: ['npm:unpublishSafe'],
+      });
+
+      config = { unpublishSafe: true, extends: 'foo' } as never;
+      res = configMigration.migrateConfig(config);
+      expect(res.isMigrated).toBe(true);
+      expect(res.migratedConfig).toMatchObject({
+        extends: ['foo', 'npm:unpublishSafe'],
+      });
+
+      config = { unpublishSafe: true, extends: [] };
+      res = configMigration.migrateConfig(config);
+      expect(res.isMigrated).toBe(true);
+      expect(res.migratedConfig).toMatchObject({
+        extends: ['npm:unpublishSafe'],
+      });
+
+      config = { unpublishSafe: true, extends: ['foo', 'bar'] };
+      res = configMigration.migrateConfig(config);
+      expect(res.isMigrated).toBe(true);
+      expect(res.migratedConfig).toMatchObject({
+        extends: ['foo', 'bar', 'npm:unpublishSafe'],
+      });
+
+      config = {
+        unpublishSafe: true,
+        extends: ['foo', ':unpublishSafe', 'bar'],
+      };
+      res = configMigration.migrateConfig(config);
+      expect(res.isMigrated).toBe(true);
+      expect(res.migratedConfig).toMatchObject({
+        extends: ['foo', ':unpublishSafe', 'bar', 'npm:unpublishSafe'],
+      });
+
+      config = {
+        unpublishSafe: true,
+        extends: ['foo', 'default:unpublishSafe', 'bar'],
+      };
+      res = configMigration.migrateConfig(config);
+      expect(res.isMigrated).toBe(true);
+      expect(res.migratedConfig).toMatchObject({
+        extends: ['foo', 'default:unpublishSafe', 'bar', 'npm:unpublishSafe'],
+      });
+
+      config = {
+        unpublishSafe: false,
+        extends: ['foo', 'bar'],
+      };
+      res = configMigration.migrateConfig(config);
+      expect(res.isMigrated).toBe(true);
+      expect(res.migratedConfig).toMatchObject({
+        extends: ['foo', 'bar'],
+      });
+
+      config = {
+        unpublishSafe: true,
+        extends: ['foo', 'bar'],
+      };
+      res = configMigration.migrateConfig(config);
+      expect(res.isMigrated).toBe(true);
+      expect(res.migratedConfig).toMatchObject({
+        extends: ['foo', 'bar', 'npm:unpublishSafe'],
+      });
+
+      config = {
+        unpublishSafe: true,
+        extends: [':unpublishSafeDisabled'],
+      };
+      res = configMigration.migrateConfig(config);
+      expect(res.isMigrated).toBe(true);
+      expect(res.migratedConfig).toMatchObject({
+        extends: [':unpublishSafeDisabled', 'npm:unpublishSafe'],
       });
     });
   });
