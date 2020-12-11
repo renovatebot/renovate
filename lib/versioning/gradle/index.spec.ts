@@ -227,7 +227,7 @@ describe('versioning/gradle', () => {
   it('api', () => {
     expect(api.isGreaterThan('1.1', '1')).toBe(true);
     expect(api.minSatisfyingVersion(['0', '1.5', '1', '2'], '1.+')).toBe('1');
-    expect(api.maxSatisfyingVersion(['0', '1', '1.5', '2'], '1.+')).toBe('1.5');
+    expect(api.getSatisfyingVersion(['0', '1', '1.5', '2'], '1.+')).toBe('1.5');
     expect(
       api.getNewValue({
         currentValue: '1',

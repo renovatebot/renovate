@@ -52,18 +52,14 @@ function uniq<T = unknown>(
   array: T[],
   eql = (x: T, y: T): boolean => x === y
 ): T[] {
-  return array.filter((x, idx, arr) => {
-    return arr.findIndex((y) => eql(x, y)) === idx;
-  });
+  return array.filter((x, idx, arr) => arr.findIndex((y) => eql(x, y)) === idx);
 }
 
 function prepareVolumes(volumes: VolumeOption[] = []): string[] {
   const expanded: (VolumesPair | null)[] = volumes.map(expandVolumeOption);
   const filtered: VolumesPair[] = expanded.filter((vol) => vol !== null);
   const unique: VolumesPair[] = uniq<VolumesPair>(filtered, volumesEql);
-  return unique.map(([from, to]) => {
-    return `-v "${from}":"${to}"`;
-  });
+  return unique.map(([from, to]) => `-v "${from}":"${to}"`);
 }
 
 function prepareCommands(commands: Opt<string>[]): string[] {
