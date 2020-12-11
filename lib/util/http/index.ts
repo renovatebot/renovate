@@ -8,7 +8,8 @@ import { clone } from '../clone';
 import { resolveBaseUrl } from '../url';
 import { applyAuthorization, removeAuthorization } from './auth';
 import { applyHostRules } from './host-rules';
-import { GotOptions } from './types';
+import { getQueue } from './queue';
+import { GotOptions, RequestStats } from './types';
 
 // TODO: refactor code to remove this
 import './legacy';
@@ -69,20 +70,17 @@ function applyDefaultHeaders(options: Options): void {
 async function gotRoutine<T>(
   url: string,
   options: GotOptions,
-  startTime: number
+  requestStats: Partial<RequestStats>
 ): Promise<Response<T>> {
-  const requestTime = Date.now();
   logger.trace({ url, options }, 'got request');
+
   const resp = await got<T>(url, options);
-  const responseTime = Date.now();
+  const duration = resp.timings.phases.total || 0;
+
   const httpRequests = memCache.get('http-requests') || [];
-  httpRequests.push({
-    method: options.method,
-    url,
-    duration: responseTime - requestTime,
-    queueDuration: requestTime - startTime,
-  });
+  httpRequests.push({ ...requestStats, duration });
   memCache.set('http-requests', httpRequests);
+
   return resp;
 }
 
@@ -133,7 +131,16 @@ export class Http<GetOptions = HttpOptions, PostOptions = HttpPostOptions> {
 
     if (!resPromise) {
       const startTime = Date.now();
-      resPromise = gotRoutine<T>(url, options, startTime);
+      const queueTask = (): Promise<Response<T>> => {
+        const queueDuration = Date.now() - startTime;
+        return gotRoutine(url, options, {
+          method: options.method,
+          url,
+          queueDuration,
+        });
+      };
+      const queue = getQueue(url);
+      resPromise = queue?.add(queueTask) ?? queueTask();
       if (options.method === 'get') {
         memCache.set(cacheKey, resPromise); // always set if it's a get
       }

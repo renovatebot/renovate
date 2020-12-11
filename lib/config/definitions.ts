@@ -1732,6 +1732,16 @@ const options: RenovateOptions[] = [
     env: false,
   },
   {
+    name: 'concurrentRequestLimit',
+    description: 'Limit concurrent requests per host.',
+    type: 'integer',
+    stage: 'repository',
+    parent: 'hostRules',
+    default: null,
+    cli: false,
+    env: false,
+  },
+  {
     name: 'prBodyDefinitions',
     description: 'Table column definitions for use in PR tables',
     type: 'object',

@@ -754,6 +754,25 @@ For example, `"baseUrl": "https://api.github.com"` is equivalent to `"hostName":
 
 Renovate does not do a "longest match" algorithm to pick between multiple matching `baseUrl` values in different rules, so put the longer `baseUrl` rule _after_ the shorter one in your `hostRules`.
 
+### concurrentRequestLimit
+
+Usually the default setting is fine, but you can use `concurrentRequestLimit` to limit the number of concurrent outstanding requests.
+You only need to adjust this setting if a datasource is rate limiting Renovate or has problems with the load.
+The limit will be set for any host it applies to.
+
+Example config:
+
+```json
+{
+  "hostRules": [
+    {
+      "hostName": "github.com",
+      "concurrentRequestLimit": 2
+    }
+  ]
+}
+```
+
 ### domainName
 
 If you have any uncertainty about exactly which hosts a service uses, then it can be more reliable to use `domainName` instead of `hostName` or `baseUrl`.

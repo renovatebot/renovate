@@ -158,6 +158,7 @@
     "node-emoji": "1.10.0",
     "p-all": "3.0.0",
     "p-map": "4.0.0",
+    "p-queue": "6.6.1",
     "parse-diff": "0.7.1",
     "parse-link-header": "1.0.1",
     "redis": "3.0.2",
