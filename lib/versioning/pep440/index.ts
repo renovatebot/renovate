@@ -50,9 +50,8 @@ export const isSingleVersion = (constraint: string): string =>
 
 export { isVersion, matches };
 
-const equals = (version1: string, version2: string): boolean => {
-  return isVersion(version1) && isVersion(version2) && eq(version1, version2);
-};
+const equals = (version1: string, version2: string): boolean =>
+  isVersion(version1) && isVersion(version2) && eq(version1, version2);
 
 export const api: VersioningApi = {
   equals,

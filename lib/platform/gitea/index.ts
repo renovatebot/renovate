@@ -155,9 +155,9 @@ function getLabelList(): Promise<helper.Label[]> {
         return [];
       });
 
-    config.labelList = Promise.all([repoLabels, orgLabels]).then((labels) => {
-      return [].concat(...labels);
-    });
+    config.labelList = Promise.all([repoLabels, orgLabels]).then((labels) =>
+      [].concat(...labels)
+    );
   }
 
   return config.labelList;

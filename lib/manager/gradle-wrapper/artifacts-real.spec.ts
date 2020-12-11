@@ -70,14 +70,12 @@ describe(getName(__filename), () => {
           'gradle/wrapper/gradle-wrapper.jar',
           'gradlew',
           'gradlew.bat',
-        ].map((fileProjectPath) => {
-          return {
-            file: {
-              name: fileProjectPath,
-              contents: readBinSync(`./testFiles/${fileProjectPath}`),
-            },
-          };
-        })
+        ].map((fileProjectPath) => ({
+          file: {
+            name: fileProjectPath,
+            contents: readBinSync(`./testFiles/${fileProjectPath}`),
+          },
+        }))
       );
 
       [
