@@ -6,20 +6,18 @@ import { PrState } from '../../../types';
 import { BranchConfig } from '../../common';
 
 export async function getPrHourlyRemaining(
-  config: RenovateConfig,
-  branches: BranchConfig[]
+  config: RenovateConfig
 ): Promise<number> {
   if (config.prHourlyLimit) {
-    logger.debug('Calculating hourly PRs remaining');
     try {
-      const branchList = branches.map(({ branchName }) => branchName);
+      logger.debug('Calculating hourly PRs remaining');
       const prList = await platform.getPrList();
       const currentHourStart = DateTime.local().startOf('hour');
       logger.debug(`currentHourStart=${String(currentHourStart)}`);
       const soFarThisHour = prList.filter(
         (pr) =>
           pr.sourceBranch !== config.onboardingBranch &&
-          branchList.includes(pr.sourceBranch) &&
+          pr.sourceBranch.startsWith(config.branchPrefix) &&
           DateTime.fromISO(pr.createdAt) > currentHourStart
       );
       const prsRemaining = Math.max(
@@ -77,7 +75,7 @@ export async function getPrsRemaining(
   config: RenovateConfig,
   branches: BranchConfig[]
 ): Promise<number> {
-  const hourlyRemaining = await getPrHourlyRemaining(config, branches);
+  const hourlyRemaining = await getPrHourlyRemaining(config);
   const concurrentRemaining = await getConcurrentPrsRemaining(config, branches);
   return Math.min(hourlyRemaining, concurrentRemaining);
 }

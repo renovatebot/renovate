@@ -13,35 +13,35 @@ beforeEach(() => {
 describe('workers/repository/process/limits', () => {
   describe('getPrHourlyRemaining()', () => {
     it('calculates hourly limit remaining', async () => {
-      config.prHourlyLimit = 2;
+      const time = DateTime.local();
+      const createdAt = time.toISO();
       platform.getPrList.mockResolvedValueOnce([
+        { createdAt, sourceBranch: 'foo/test-1' },
+        { createdAt, sourceBranch: 'foo/test-2' },
+        { createdAt, sourceBranch: 'foo/test-3' },
         {
-          createdAt: DateTime.local().toISO(),
-          sourceBranch: 'renovate/test',
+          createdAt: time.minus({ hours: 1 }).toISO(),
+          sourceBranch: 'foo/test-4',
         },
-        {
-          createdAt: DateTime.local().toISO(),
-          sourceBranch: 'renovate/configure',
-        },
-        {
-          createdAt: DateTime.local().toISO(),
-          sourceBranch: 'foobar',
-        },
+        { createdAt, sourceBranch: 'bar/configure' },
+        { createdAt, sourceBranch: 'baz/test' },
       ] as never);
-      const res = await limits.getPrHourlyRemaining(config, [
-        { branchName: 'renovate/configure' },
-        { branchName: 'renovate/test' },
-      ] as never);
-      expect(res).toEqual(1);
+      const res = await limits.getPrHourlyRemaining({
+        ...config,
+        prHourlyLimit: 10,
+        branchPrefix: 'foo/',
+        onboardingBranch: 'bar/configure',
+      });
+      expect(res).toEqual(7);
     });
     it('returns prHourlyLimit if errored', async () => {
       config.prHourlyLimit = 2;
       platform.getPrList.mockRejectedValue('Unknown error');
-      const res = await limits.getPrHourlyRemaining(config, []);
+      const res = await limits.getPrHourlyRemaining(config);
       expect(res).toEqual(2);
     });
     it('returns 99 if no hourly limit', async () => {
-      const res = await limits.getPrHourlyRemaining(config, []);
+      const res = await limits.getPrHourlyRemaining(config);
       expect(res).toEqual(99);
     });
   });
