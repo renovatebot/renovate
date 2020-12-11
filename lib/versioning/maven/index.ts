@@ -121,9 +121,9 @@ const isStable = (version: string): boolean | null => {
   return null;
 };
 
-const getSatisfyingVersion = (versions: string[], range: string): string => {
-  // istanbul ignore next
-  return versions.reduce((result, version) => {
+// istanbul ignore next
+const getSatisfyingVersion = (versions: string[], range: string): string =>
+  versions.reduce((result, version) => {
     if (matches(version, range)) {
       if (!result) {
         return version;
@@ -134,7 +134,6 @@ const getSatisfyingVersion = (versions: string[], range: string): string => {
     }
     return result;
   }, null);
-};
 
 function getNewValue({
   currentValue,

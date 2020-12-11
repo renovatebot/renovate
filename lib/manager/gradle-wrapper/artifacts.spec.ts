@@ -84,14 +84,12 @@ describe(getName(__filename), () => {
         'gradle/wrapper/gradle-wrapper.properties',
         'gradlew',
         'gradlew.bat',
-      ].map((fileProjectPath) => {
-        return {
-          file: {
-            name: fileProjectPath,
-            contents: 'test',
-          },
-        };
-      })
+      ].map((fileProjectPath) => ({
+        file: {
+          name: fileProjectPath,
+          contents: 'test',
+        },
+      }))
     );
     expect(execSnapshots).toMatchSnapshot();
   });
