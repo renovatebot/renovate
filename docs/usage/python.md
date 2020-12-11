@@ -23,22 +23,6 @@ It supports both pinned versions as well as ranges. Legacy versions (`===` prefi
 3.  Renovate will look up the latest version on [PyPI](https://pypi.org/) to determine if any upgrades are available
 4.  If the source package includes a GitHub URL as its source, and has either a "changelog" file or uses GitHub releases, then Release Notes for each version will be embedded in the generated PR
 
-## Enabling Beta
-
-Both `pipenv` and `setup.py` are classified a "beta", so they are not enabled by default.
-To enable them, you need to add configuration like the following to your `renovate.json` file:
-
-```json
-{
-  "pipenv": {
-    "enabled": true
-  }
-}
-```
-
-Note: if you _only_ have these package files and no other package files (like `package.json`, `Dockerfile`, etc) then Renovate won't detect them and you won't get an onboarding PR.
-In that case you need to add Renovate configuration manually to skip the onboarding step.
-
 ## Alternative file names
 
 The default file matching regex for `requirements.txt` aims to pick up the most popular conventions for file naming, but it's possible that some get missed.
