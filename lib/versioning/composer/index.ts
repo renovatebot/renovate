@@ -109,8 +109,8 @@ export const isVersion = (input: string): string | boolean =>
 const matches = (version: string, range: string): boolean =>
   npm.matches(composer2npm(version), composer2npm(range));
 
-const maxSatisfyingVersion = (versions: string[], range: string): string =>
-  npm.maxSatisfyingVersion(versions.map(composer2npm), composer2npm(range));
+const getSatisfyingVersion = (versions: string[], range: string): string =>
+  npm.getSatisfyingVersion(versions.map(composer2npm), composer2npm(range));
 
 const minSatisfyingVersion = (versions: string[], range: string): string =>
   npm.minSatisfyingVersion(versions.map(composer2npm), composer2npm(range));
@@ -211,7 +211,7 @@ export const api: VersioningApi = {
   isValid,
   isVersion,
   matches,
-  maxSatisfyingVersion,
+  getSatisfyingVersion,
   minSatisfyingVersion,
   getNewValue,
   sortVersions,

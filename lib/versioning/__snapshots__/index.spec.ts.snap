@@ -7,6 +7,7 @@ Array [
   "getMinor",
   "getNewValue",
   "getPatch",
+  "getSatisfyingVersion",
   "isCompatible",
   "isGreaterThan",
   "isLessThanRange",
@@ -15,7 +16,6 @@ Array [
   "isValid",
   "isVersion",
   "matches",
-  "maxSatisfyingVersion",
   "minSatisfyingVersion",
   "sortVersions",
 ]
