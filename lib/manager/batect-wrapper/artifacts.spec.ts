@@ -1,4 +1,4 @@
-import * as httpMock from '../../../test/httpMock';
+import * as httpMock from '../../../test/http-mock';
 
 import { UpdateArtifact } from '../common';
 import { updateArtifacts } from './artifacts';
