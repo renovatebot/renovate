@@ -182,7 +182,7 @@ module.exports = {
 
 You can add additional host rules, read the [hostrules documentation](https://docs.renovatebot.com/configuration-options/#hostrules) for more information.
 
-Say you host some Docker images yourself, and use a password to your self-hosted Docker images.
+Say you host some Docker images yourself, and use a password to access your self-hosted Docker images.
 In addition to self-hosting, you also pull images from Docker Hub, without a password.
 In this example you would configure a specific Docker host like this:
 
