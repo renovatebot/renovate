@@ -262,6 +262,18 @@ export function migrateConfig(
             presets[i] = preset;
           }
         }
+      } else if (key === 'unpublishSafe') {
+        isMigrated = true;
+        if (val === true) {
+          migratedConfig.extends = migratedConfig.extends || [];
+          if (is.string(migratedConfig.extends)) {
+            migratedConfig.extends = [migratedConfig.extends];
+          }
+          if (!migratedConfig.extends.includes('npm:unpublishSafe')) {
+            migratedConfig.extends.push('npm:unpublishSafe');
+          }
+        }
+        delete migratedConfig.unpublishSafe;
       } else if (key === 'versionScheme') {
         isMigrated = true;
         migratedConfig.versioning = val;
@@ -535,6 +547,7 @@ export function migrateConfig(
       delete migratedConfig.endpoints;
       isMigrated = true;
     }
+
     return { isMigrated, migratedConfig };
   } catch (err) /* istanbul ignore next */ {
     logger.debug({ config }, 'migrateConfig() error');

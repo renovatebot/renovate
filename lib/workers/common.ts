@@ -104,7 +104,6 @@ export interface BranchConfig
   automergeComment?: string;
   automergeType?: string;
   baseBranch?: string;
-  canBeUnpublished?: boolean;
   errors?: ValidationMessage[];
   hasTypes?: boolean;
   dependencyDashboardChecks?: Record<string, string>;

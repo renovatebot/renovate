@@ -2,7 +2,6 @@ import { OutgoingHttpHeaders } from 'http';
 import url from 'url';
 import is from '@sindresorhus/is';
 import delay from 'delay';
-import { DateTime } from 'luxon';
 import registryAuthToken from 'registry-auth-token';
 import getRegistryUrl from 'registry-auth-token/registry-url';
 import { logger } from '../../logger';
@@ -29,7 +28,6 @@ export function resetCache(): void {
 }
 
 export interface NpmRelease extends Release {
-  canBeUnpublished?: boolean;
   gitRef?: string;
 }
 export interface NpmDependency extends ReleaseResult {
@@ -217,9 +215,6 @@ export async function getDependency(
       };
       if (res.time?.[version]) {
         release.releaseTimestamp = res.time[version];
-        const relDate = DateTime.fromISO(release.releaseTimestamp);
-        release.canBeUnpublished =
-          relDate.isValid && DateTime.local().diff(relDate, 'days').days < 1;
       }
       if (res.versions[version].deprecated) {
         release.isDeprecated = true;

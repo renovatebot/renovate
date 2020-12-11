@@ -11,7 +11,6 @@ Object {
   "automerge": false,
   "blockedByPin": false,
   "branchName": "some-branch",
-  "canBeUnpublished": false,
   "commitMessage": "",
   "constraints": Object {},
   "depName": "some-dep",
@@ -66,7 +65,6 @@ Object {
   "automerge": false,
   "blockedByPin": false,
   "branchName": "some-branch",
-  "canBeUnpublished": false,
   "commitBodyTable": true,
   "commitMessage": "
 

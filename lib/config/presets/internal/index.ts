@@ -5,6 +5,7 @@ import * as dockerPreset from './docker';
 import * as groupPreset from './group';
 import * as helpersPreset from './helpers';
 import * as monorepoPreset from './monorepo';
+import * as npm from './npm';
 import * as packagesPreset from './packages';
 import * as previewPreset from './preview';
 import * as schedulePreset from './schedule';
@@ -17,6 +18,7 @@ export const groups: Record<string, Record<string, Preset>> = {
   group: groupPreset.presets,
   helpers: helpersPreset.presets,
   monorepo: monorepoPreset.presets,
+  npm: npm.presets,
   packages: packagesPreset.presets,
   preview: previewPreset.presets,
   schedule: schedulePreset.presets,

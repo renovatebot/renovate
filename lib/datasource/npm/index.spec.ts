@@ -1,4 +1,3 @@
-import { DateTime } from 'luxon';
 import mockDate from 'mockdate';
 import nock from 'nock';
 import _registryAuthToken from 'registry-auth-token';
@@ -13,15 +12,6 @@ jest.mock('delay');
 
 const registryAuthToken: jest.Mock<_registryAuthToken.NpmCredentials> = _registryAuthToken as never;
 let npmResponse: any;
-
-function getRelease(
-  dependency: { releases: { version: string; canBeUnpublished?: boolean }[] },
-  version: string
-) {
-  return dependency.releases.find(
-    (release: { version: string }) => release.version === version
-  );
-}
 
 describe(getName(__filename), () => {
   delete process.env.NPM_TOKEN;
@@ -73,8 +63,6 @@ describe(getName(__filename), () => {
     nock('https://registry.npmjs.org').get('/foobar').reply(200, npmResponse);
     const res = await getPkgReleases({ datasource, depName: 'foobar' });
     expect(res).toMatchSnapshot();
-    expect(getRelease(res, '0.0.1').canBeUnpublished).toBe(false);
-    expect(getRelease(res, '0.0.2').canBeUnpublished).toBe(false);
   });
   it('should parse repo url', async () => {
     const pkg = {
@@ -169,16 +157,6 @@ describe(getName(__filename), () => {
     nock('https://registry.npmjs.org').get('/foobar').reply(200, npmResponse);
     const res = await getPkgReleases({ datasource, depName: 'foobar' });
     expect(res).toMatchSnapshot();
-    expect(getRelease(res, '0.0.1').canBeUnpublished).toBe(false);
-    expect(getRelease(res, '0.0.2').canBeUnpublished).toBeUndefined();
-  });
-  it('should return canBeUnpublished=true', async () => {
-    mockDate.set('2020-11-03T05:10:17.496+01:00');
-    npmResponse.time['0.0.2'] = DateTime.local().minus({ hours: 6 }).toISO();
-    nock('https://registry.npmjs.org').get('/foobar').reply(200, npmResponse);
-    const res = await getPkgReleases({ datasource, depName: 'foobar' });
-    expect(getRelease(res, '0.0.1').canBeUnpublished).toBe(false);
-    expect(getRelease(res, '0.0.2').canBeUnpublished).toBe(true);
   });
   it('should return null if lookup fails 401', async () => {
     nock('https://registry.npmjs.org').get('/foobar').reply(401);
