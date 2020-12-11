@@ -161,7 +161,7 @@ Add `"default:pinDigestsDisabled"` to your `extends` array.
 ### Automerge digest updates
 
 Add `"default:automergeDigest"` to your `extends` array.
-If you want Renovate to commit directly to your base branch without opening a PR first, add add `"default:automergeBranchPush"` to the `extends` array.
+If you want Renovate to commit directly to your base branch without opening a PR first, add `"default:automergeBranchPush"` to the `extends` array.
 
 ### Registry authentication
 
