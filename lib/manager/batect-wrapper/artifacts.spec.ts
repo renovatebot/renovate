@@ -1,5 +1,4 @@
 import * as httpMock from '../../../test/httpMock';
-import * as _githubReleases from '../../datasource/github-releases';
 
 import { UpdateArtifact } from '../common';
 import { updateArtifacts } from './artifacts';
@@ -7,9 +6,6 @@ import { updateArtifacts } from './artifacts';
 const newVersion = '1.2.3';
 const newUnixWrapperContent = `Unix wrapper script for ${newVersion}`;
 const newWindowsWrapperContent = `Windows wrapper script for ${newVersion}`;
-
-jest.mock('../../datasource/github-releases');
-const githubReleases: any = _githubReleases;
 
 function artifactForPath(
   path: string,
@@ -27,64 +23,22 @@ function artifactForPath(
 
 describe('lib/manager/batect-wrapper/artifacts', () => {
   beforeEach(() => {
-    githubReleases.getReleases.mockResolvedValue({
-      releases: [
-        {
-          version: '1.0.1',
-          files: [
-            {
-              name: 'batect.cmd',
-              url: 'https://shouldnotbeused.com',
-            },
-          ],
-        },
-        {
-          version: '1.1.0',
-          files: [
-            {
-              name: 'batect',
-              url: 'https://shouldnotbeused.com',
-            },
-            {
-              name: 'batect.cmd',
-              url: 'https://shouldnotbeused.com',
-            },
-          ],
-        },
-        {
-          version: '1.2.3',
-          files: [
-            {
-              name: 'batect',
-              url:
-                'https://gitstorage.com/batect/batect/releases/download/1.2.3/batect',
-            },
-            {
-              name: 'batect.cmd',
-              url:
-                'https://gitstorage.com/batect/batect/releases/download/1.2.3/batect.cmd',
-            },
-            {
-              name: 'batect.jar',
-              url:
-                'https://gitstorage.com/batect/batect/releases/download/1.2.3/batect.jar',
-            },
-          ],
-        },
-      ],
-    });
-
     httpMock.setup();
 
     httpMock
-      .scope('https://gitstorage.com')
+      .scope('https://github.com')
       .get('/batect/batect/releases/download/1.2.3/batect')
       .reply(200, newUnixWrapperContent);
 
     httpMock
-      .scope('https://gitstorage.com')
+      .scope('https://github.com')
       .get('/batect/batect/releases/download/1.2.3/batect.cmd')
       .reply(200, newWindowsWrapperContent);
+
+    httpMock
+      .scope('https://github.com')
+      .get('/batect/batect/releases/download/3.4.5/batect')
+      .reply(404);
   });
 
   afterEach(() => {
@@ -132,19 +86,11 @@ describe('lib/manager/batect-wrapper/artifacts', () => {
       ]);
     });
 
-    it('throws an error if release information for the new version cannot be found', async () => {
+    it('throws an error if the updated wrapper script cannot be downloaded', async () => {
       const artifact = artifactForPath('batect', '3.4.5');
 
       await expect(updateArtifacts(artifact)).rejects.toThrow(
-        'Found 0 releases of Batect for version 3.4.5'
-      );
-    });
-
-    it('throws an error if the release does not contain information for one of the expected wrapper scripts', async () => {
-      const artifact = artifactForPath('batect', '1.0.1');
-
-      await expect(updateArtifacts(artifact)).rejects.toThrow(
-        'Batect release 1.0.1 contains 0 files with name batect'
+        'HTTP GET https://github.com/batect/batect/releases/download/3.4.5/batect failed: HTTPError: Response code 404 (Not Found)'
       );
     });
   });
