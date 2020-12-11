@@ -1,6 +1,6 @@
 import fs from 'fs';
 import { getPkgReleases } from '..';
-import * as httpMock from '../../../test/httpMock';
+import * as httpMock from '../../../test/http-mock';
 import { EXTERNAL_HOST_ERROR } from '../../constants/error-messages';
 import * as _hostRules from '../../util/host-rules';
 import { id as datasource } from '.';

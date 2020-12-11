@@ -21,8 +21,9 @@
     "jest": "cross-env NODE_ENV=test LOG_LEVEL=fatal node --expose-gc node_modules/jest/bin/jest.js",
     "jest-debug": "cross-env NODE_ENV=test LOG_LEVEL=fatal node --expose-gc --inspect-brk node_modules/jest/bin/jest.js",
     "jest-silent": "cross-env NODE_ENV=test yarn jest --reporters jest-silent-reporter",
-    "lint": "run-s eslint prettier",
+    "lint": "run-s ls-lint eslint prettier",
     "lint-fix": "run-s eslint-fix prettier-fix",
+    "ls-lint": "ls-lint",
     "prepare": "run-s prepare:*",
     "prepare:tools": "tsc -p tools",
     "prepare:re2": "node --experimental-modules tools/check-re2.mjs",
@@ -113,6 +114,7 @@
   "dependencies": {
     "@breejs/later": "4.0.2",
     "@iarna/toml": "2.2.5",
+    "@ls-lint/ls-lint": "1.9.2",
     "@renovate/pep440": "0.4.1",
     "@renovatebot/ruby-semver": "0.2.1",
     "@sindresorhus/is": "4.0.0",

@@ -1,7 +1,7 @@
 // TODO fix mocks
 import nock from 'nock';
 import { Platform, RepoParams } from '..';
-import * as httpMock from '../../../test/httpMock';
+import * as httpMock from '../../../test/http-mock';
 import {
   REPOSITORY_ARCHIVED,
   REPOSITORY_CHANGED,
