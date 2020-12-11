@@ -138,13 +138,11 @@ exports[`datasource/github-tags getReleases returns tags 1`] = `
 Object {
   "releases": Array [
     Object {
-      "files": Array [],
       "gitRef": "v1.0.0",
       "releaseTimestamp": "1970-01-01T00:00:00.000Z",
       "version": "v1.0.0",
     },
     Object {
-      "files": Array [],
       "gitRef": "v1.1.0",
       "isStable": false,
       "releaseTimestamp": "1970-01-01T00:00:00.001Z",

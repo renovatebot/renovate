@@ -20,22 +20,6 @@ const responseBody = [
     published_at: '2020-04-09T10:00:00Z',
     prerelease: true,
   },
-  {
-    tag_name: '3.0.0',
-    published_at: '2020-12-09T10:00:00Z',
-    assets: [
-      {
-        name: 'file-1',
-        browser_download_url:
-          'https://gitstorage.com/some/dep/releases/download/3.0.0/file-1',
-      },
-      {
-        name: 'file-2',
-        browser_download_url:
-          'https://gitstorage.com/some/dep/releases/download/3.0.0/file-2',
-      },
-    ],
-  },
 ];
 
 describe('datasource/github-releases', () => {
@@ -63,7 +47,7 @@ describe('datasource/github-releases', () => {
         depName: 'some/dep',
       });
       expect(res).toMatchSnapshot();
-      expect(res.releases).toHaveLength(4);
+      expect(res.releases).toHaveLength(3);
       expect(
         res.releases.find((release) => release.version === 'v1.1.0')
       ).toBeDefined();
