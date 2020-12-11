@@ -35,6 +35,7 @@ import {
 } from '../common';
 import { smartTruncate } from '../utils/pr-body';
 import * as helper from './gitea-helper';
+import { smartLinks } from './utils';
 
 interface GiteaRepoConfig {
   repository: string;
@@ -596,12 +597,14 @@ const platform: Platform = {
   async ensureIssue({
     title,
     reuseTitle,
-    body,
+    body: content,
     shouldReOpen,
     once,
   }: EnsureIssueConfig): Promise<'updated' | 'created' | null> {
     logger.debug(`ensureIssue(${title})`);
     try {
+      const body = smartLinks(content);
+
       const issueList = await platform.getIssueList();
       let issues = issueList.filter((i) => i.title === title);
       if (!issues.length) {
@@ -799,10 +802,7 @@ const platform: Platform = {
   },
 
   getPrBody(prBody: string): string {
-    return smartTruncate(
-      prBody.replace(/\]\(\.\.\/pull\//g, '](pulls/'),
-      1000000
-    );
+    return smartTruncate(smartLinks(prBody), 1000000);
   },
 
   getVulnerabilityAlerts(): Promise<VulnerabilityAlert[]> {
