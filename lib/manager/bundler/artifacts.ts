@@ -121,9 +121,13 @@ export async function updateArtifacts(
 
     const bundlerHostRulesVariables = findAllAuthenticatable({
       hostType: 'bundler',
-    }).reduce((variables, hostRule) => {
-      return { ...variables, ...buildBundleHostVariable(hostRule) };
-    }, {} as Record<string, string>);
+    }).reduce(
+      (variables, hostRule) => ({
+        ...variables,
+        ...buildBundleHostVariable(hostRule),
+      }),
+      {} as Record<string, string>
+    );
 
     const execOptions: ExecOptions = {
       cwdFile: packageFileName,

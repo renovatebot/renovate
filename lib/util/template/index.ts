@@ -6,9 +6,9 @@ import { clone } from '../clone';
 handlebars.registerHelper('encodeURIComponent', encodeURIComponent);
 
 // istanbul ignore next
-handlebars.registerHelper('replace', (find, replace, context) => {
-  return context.replace(new RegExp(find, 'g'), replace);
-});
+handlebars.registerHelper('replace', (find, replace, context) =>
+  context.replace(new RegExp(find, 'g'), replace)
+);
 
 export const exposedConfigOptions = [
   'branchName',

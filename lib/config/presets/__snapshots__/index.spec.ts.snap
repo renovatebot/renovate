@@ -82,6 +82,15 @@ Object {
 }
 `;
 
+exports[`config/presets parsePreset parses gitea 1`] = `
+Object {
+  "packageName": "some/repo",
+  "params": undefined,
+  "presetName": "default",
+  "presetSource": "gitea",
+}
+`;
+
 exports[`config/presets parsePreset parses github 1`] = `
 Object {
   "packageName": "some/repo",

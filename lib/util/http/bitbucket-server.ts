@@ -1,5 +1,5 @@
-import URL from 'url';
 import { PLATFORM_TYPE_BITBUCKET_SERVER } from '../../constants/platforms';
+import { resolveBaseUrl } from '../url';
 import { Http, HttpOptions, HttpResponse, InternalHttpOptions } from '.';
 
 let baseUrl: string;
@@ -16,7 +16,7 @@ export class BitbucketServerHttp extends Http {
     path: string,
     options?: InternalHttpOptions
   ): Promise<HttpResponse<T> | null> {
-    const url = URL.resolve(baseUrl, path);
+    const url = resolveBaseUrl(baseUrl, path);
     const opts = {
       baseUrl,
       ...options,

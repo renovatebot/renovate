@@ -16,6 +16,7 @@ import {
   ensureDir,
   ensureLocalDir,
   getSiblingFileName,
+  localPathExists,
   readLocalFile,
   writeLocalFile,
 } from '../../util/fs';
@@ -113,6 +114,7 @@ export async function updateArtifacts({
   }
 
   const vendorDir = getSiblingFileName(packageFileName, 'vendor');
+  const commitVendorFiles = await localPathExists(vendorDir);
   await ensureLocalDir(vendorDir);
   try {
     await writeLocalFile(packageFileName, newPackageFileContent);
@@ -164,6 +166,11 @@ export async function updateArtifacts({
       },
     ];
 
+    if (!commitVendorFiles) {
+      return res;
+    }
+
+    logger.debug(`Commiting vendor files in ${vendorDir}`);
     for (const f of [...status.modified, ...status.not_added]) {
       if (f.startsWith(vendorDir)) {
         res.push({

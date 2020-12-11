@@ -1826,11 +1826,13 @@ The field supports multiple URLs however it is datasource-dependent on whether o
 
 ## requiredStatusChecks
 
-This is a future feature that is partially implemented.
 Currently Renovate's default behaviour is to only automerge if every status check has succeeded.
-In future, this might be configurable to allow certain status checks to be ignored.
 
-You can still override this to `null` today if your repository doesn't support status checks (i.e. no tests) but you still want to use Renovate anyway.
+Setting this option to `null` means that Renovate will ignore all status checks.
+You need to set this if you don't have any status checks but still want Renovate to automerge PRs.
+
+In future, this might be configurable to allow certain status checks to be ignored/required.
+See [issue 1853 at the renovate repository](https://github.com/renovatebot/renovate/issues/1853) for more details.
 
 ## respectLatest
 

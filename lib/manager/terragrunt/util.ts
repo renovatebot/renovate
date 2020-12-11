@@ -48,7 +48,5 @@ export function checkFileContainsDependency(
   content: string,
   checkList: string[]
 ): boolean {
-  return checkList.some((check) => {
-    return content.includes(check);
-  });
+  return checkList.some((check) => content.includes(check));
 }
