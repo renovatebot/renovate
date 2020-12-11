@@ -1,5 +1,5 @@
 import nock from 'nock';
-import * as httpMock from '../../../test/httpMock';
+import * as httpMock from '../../../test/http-mock';
 import { getName } from '../../../test/util';
 import {
   REPOSITORY_CHANGED,

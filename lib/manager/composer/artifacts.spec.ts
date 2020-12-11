@@ -1,6 +1,6 @@
 import { exec as _exec } from 'child_process';
 import { join } from 'upath';
-import { envMock, mockExecAll } from '../../../test/execUtil';
+import { envMock, mockExecAll } from '../../../test/exec-util';
 import { env, fs, git, mocked, partial } from '../../../test/util';
 import {
   PLATFORM_TYPE_GITHUB,

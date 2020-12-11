@@ -64,7 +64,7 @@ describe('config/index', () => {
     it('supports config.force', async () => {
       const configPath = upath.join(
         __dirname,
-        'config/__fixtures__/withForce.js'
+        'config/__fixtures__/with-force.js'
       );
       const env: NodeJS.ProcessEnv = {
         ...defaultEnv,

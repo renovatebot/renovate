@@ -1,4 +1,4 @@
-import * as httpMock from '../../../test/httpMock';
+import * as httpMock from '../../../test/http-mock';
 import { PrState } from '../../types';
 import { setBaseUrl } from '../../util/http/gitea';
 import * as ght from './gitea-helper';

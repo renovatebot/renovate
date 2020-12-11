@@ -2,7 +2,7 @@ import { exec as _exec } from 'child_process';
 import { readFileSync } from 'fs';
 import _fs from 'fs-extra';
 import { join } from 'upath';
-import { envMock, mockExecAll } from '../../../test/execUtil';
+import { envMock, mockExecAll } from '../../../test/exec-util';
 import { mocked } from '../../../test/util';
 import * as _datasource from '../../datasource';
 import { setExecConfig } from '../../util/exec';
