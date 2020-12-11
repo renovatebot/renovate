@@ -17,20 +17,20 @@ Renovate supports upgrading dependencies in various types of Docker definition f
 
 1. Renovate searches in each repository for any files matching each manager's configured `fileMatch` pattern(s)
 1. Matching files are parsed, Renovate checks if the file(s) contain any Docker image references (e.g. `FROM` lines in a `Dockerfile`)
-1. If the image tag in use "looks" like a version (e.g. `node:14`, `node:14.1`, `node:14.1.0`, `node:14-onbuild`) then Renovate checks the Docker registry for upgrades (e.g. from `node:14.1.0` to `node:14.2.0`)
+1. If the image tag in use "looks" like a version (e.g. `node:1`, `node:1.1`, `node:1.1.0`, `node:1-onbuild`) then Renovate checks the Docker registry for upgrades (e.g. from `node:1.1.0` to `node:1.2.0`)
 
 ## Preservation of Version Precision
 
 By default, Renovate preserves the precision level specified in the Docker images.
-For example, if the existing image is pinned at `node:14.1` then Renovate only proposes upgrades to `node:14.2` or `node:14.3`.
-This means that you will not get upgrades to a more specific versions like `node:14.2.0` or `node:14.3.0`.
-Renovate does not yet support "pinning" an imprecise version to a precise version, e.g. from `node:14.2` to `node:14.2.0`, however it's a feature we'd like to implement one day.
+For example, if the existing image is pinned at `node:1.1` then Renovate only proposes upgrades to `node:1.2` or `node:1.3`.
+This means that you will not get upgrades to a more specific versions like `node:1.2.0` or `node:1.3.0`.
+Renovate does not yet support "pinning" an imprecise version to a precise version, e.g. from `node:1.2` to `node:1.2.0`, however it's a feature we'd like to implement one day.
 
 ## Version compatibility
 
-Although suffixes in SemVer indicate pre-releases (e.g. `v1.2.0-alpha.2`), in Docker they typically indicate compatibility, e.g. `12.2.0-alpine`.
+Although suffixes in SemVer indicate pre-releases (e.g. `v1.2.0-alpha.2`), in Docker they typically indicate compatibility, e.g. `1.2.0-alpine`.
 By default Renovate assumes suffixes indicate compatibility, for this reason Renovate will not _change_ any suffixes.
-Renovate will update `14.1.0-alpine` to `14.1.1-alpine` but never updates to `14.1.1` or `14.1.1-stretch` as that would change the suffix.
+Renovate will update `1.2.0-alpine` to `1.2.1-alpine` but never updates to `1.2.1` or `1.2.1-stretch` as that would change the suffix.
 
 If this behavior does not suit a particular package you have, Renovate allows you to customize the `versioning` scheme it uses.
 For example, you have a Docker image `foo/bar` that sticks to SemVer versioning.
@@ -81,7 +81,7 @@ If you have experience with the way dependency versioning is handled in the Java
 e.g. if you specify a version like `2.0.1`, you and your colleagues always get the exact same "code".
 
 What you may not know is that Docker's tags are not immutable versions, even if they look like a version.
-e.g. you probably expect `node:14` and `node:14.9` to change over time, but you might incorrectly assume that `node:14.9.0` never changes.
+e.g. you probably expect `node:1` and `node:1.2` to change over time, but you might incorrectly assume that `node:1.2.0` never changes.
 Although it probably _shouldn't_, the reality is that any Docker image tag _can_ change content, and potentially break.
 
 Using a Docker digest as the image's primary identifier instead of using a Docker tag will achieve immutability.
@@ -95,7 +95,7 @@ Read on to see how Renovate updates Docker digests.
 
 If you follow our advice to go from a simple tag like `node:14` to using a pinned digest `node:14@sha256:d938c1761e3afbae9242848ffbb95b9cc1cb0a24d889f8bd955204d347a7266e`, you will receive Renovate PRs whenever the `node:14` image is updated on Docker Hub.
 
-Previously this update would have been "invisible" to you - one day you pull code that represents `node:14.9.0` and the next day you get code that represents `node:14.9.1`.
+Previously this update would have been "invisible" to you - one day you pull code that represents `node:14.15.0` and the next day you get code that represents `node:14.15.1`.
 But you can never be sure, especially as Docker caches.
 Perhaps some of your colleagues or worse still your build machine are stuck on an older version with a security vulnerability.
 
@@ -104,12 +104,12 @@ This ensures everyone on the team uses the latest versions and is in sync.
 
 ## Version Upgrading
 
-Renovate also supports _upgrading_ versions in Docker tags, e.g. from `node:14.9.0` to `node:14.9.1` or `node:14.9` to `node:14.10`.
+Renovate also supports _upgrading_ versions in Docker tags, e.g. from `node:1.2.0` to `node:1.2.1` or `node:1.2` to `node:1.3`.
 If a tag looks like a version, Renovate will upgrade it like a version.
 
-Thanks to this, you may wish to change the way you tag your images to be more specific, e.g. change from `node:14` to `node:14.9.1` so that every Renovate PR will be more human friendly, e.g. you can know that you are getting a PR because `node` upgraded from `14.9.1` to `14.9.2` and not because `14.9.1` somehow changed.
+Thanks to this, you may wish to change the way you tag your images to be more specific, e.g. change from `node:1` to `node:1.1.1` so that every Renovate PR will be more human friendly, e.g. you can know that you are getting a PR because `node` upgraded from `1.1.1` to `1.1.2` and not because `1.1.1` somehow changed.
 
-Currently, Renovate will upgrade minor/patch versions (e.g. from `14.9.0` to `14.9.1`) by default, but not upgrade major versions.
+Currently, Renovate will upgrade minor/patch versions (e.g. from `1.2.0` to `1.2.1`) by default, but not upgrade major versions.
 If you wish to enable major versions then add the preset `docker:enableMajor` to your `extends` array in your `renovate.json`.
 
 Renovate has some Docker-specific intelligence when it comes to versions.
