@@ -15,7 +15,8 @@ async function getFileContent(
 
     return response.body;
   } catch (err) {
-    throw new Error(`HTTP GET ${url} failed: ${err.toString()}`);
+    const errorDescription: string = err.toString();
+    throw new Error(`HTTP GET ${url} failed: ${errorDescription}`);
   }
 }
 
