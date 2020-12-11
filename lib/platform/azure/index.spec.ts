@@ -529,6 +529,23 @@ describe('platform/azure', () => {
       const res = await azure.getBranchStatus('somebranch', []);
       expect(res).toEqual(BranchStatus.yellow);
     });
+    it('should fall back to yellow if only renovate statuses returned', async () => {
+      await initRepo({ repository: 'some/repo' });
+      azureApi.gitApi.mockImplementationOnce(
+        () =>
+          ({
+            getBranch: jest.fn(() => ({ commit: { commitId: 'abcd1234' } })),
+            getStatuses: jest.fn(() => [
+              {
+                state: GitStatusState.Succeeded,
+                context: { genre: 'renovate', name: 'stability-days' },
+              },
+            ]),
+          } as any)
+      );
+      const res = await azure.getBranchStatus('somebranch', []);
+      expect(res).toEqual(BranchStatus.yellow);
+    });
   });
 
   describe('getPr(prNo)', () => {

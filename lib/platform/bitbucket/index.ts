@@ -4,7 +4,7 @@ import parseDiff from 'parse-diff';
 import { REPOSITORY_NOT_FOUND } from '../../constants/error-messages';
 import { PLATFORM_TYPE_BITBUCKET } from '../../constants/platforms';
 import { logger } from '../../logger';
-import { BranchStatus, PrState } from '../../types';
+import { BranchStatus, PrState, isStatusCheck } from '../../types';
 import * as git from '../../util/git';
 import * as hostRules from '../../util/host-rules';
 import { BitbucketHttp, setBaseUrl } from '../../util/http/bitbucket';
@@ -344,7 +344,10 @@ export async function getBranchStatus(
   }
   const statuses = await getStatus(branchName);
   logger.debug({ branch: branchName, statuses }, 'branch status check result');
-  if (!statuses.length) {
+  if (
+    statuses.filter((status: { key: string }) => !isStatusCheck(status.key))
+      .length === 0
+  ) {
     logger.debug('empty branch status check result = returning "pending"');
     return BranchStatus.yellow;
   }

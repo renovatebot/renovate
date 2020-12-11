@@ -568,6 +568,7 @@ describe('platform/github', () => {
         .get('/repos/some/repo/commits/somebranch/status')
         .reply(200, {
           state: 'success',
+          statuses: [],
         })
         .get('/repos/some/repo/commits/somebranch/check-runs')
         .reply(200, []);
@@ -586,6 +587,7 @@ describe('platform/github', () => {
         .get('/repos/some/repo/commits/somebranch/status')
         .reply(200, {
           state: 'failure',
+          statuses: [],
         })
         .get('/repos/some/repo/commits/somebranch/check-runs')
         .reply(200, []);
@@ -604,6 +606,30 @@ describe('platform/github', () => {
         .get('/repos/some/repo/commits/somebranch/status')
         .reply(200, {
           state: 'unknown',
+          statuses: [],
+        })
+        .get('/repos/some/repo/commits/somebranch/check-runs')
+        .reply(200, []);
+      await github.initRepo({
+        repository: 'some/repo',
+      } as any);
+      const res = await github.getBranchStatus('somebranch', []);
+      expect(res).toEqual(BranchStatus.yellow);
+      expect(httpMock.getTrace()).toMatchSnapshot();
+    });
+    it('defaults to pending if only renovate status check passed', async () => {
+      const scope = httpMock.scope(githubApiHost);
+      initRepoMock(scope, 'some/repo');
+      scope
+        .get('/repos/some/repo/commits/somebranch/status')
+        .reply(200, {
+          state: 'success',
+          statuses: [
+            {
+              context: 'renovate/stability-days',
+              state: 'success',
+            },
+          ],
         })
         .get('/repos/some/repo/commits/somebranch/check-runs')
         .reply(200, []);

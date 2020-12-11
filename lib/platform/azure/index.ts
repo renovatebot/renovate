@@ -10,7 +10,7 @@ import {
 import { REPOSITORY_EMPTY } from '../../constants/error-messages';
 import { PLATFORM_TYPE_AZURE } from '../../constants/platforms';
 import { logger } from '../../logger';
-import { BranchStatus, PrState } from '../../types';
+import { BranchStatus, PrState, isStatusCheck } from '../../types';
 import * as git from '../../util/git';
 import * as hostRules from '../../util/host-rules';
 import { sanitize } from '../../util/sanitize';
@@ -328,7 +328,12 @@ export async function getBranchStatus(
   }
   const statuses = await getStatusCheck(branchName);
   logger.debug({ branch: branchName, statuses }, 'branch status check result');
-  if (!statuses.length) {
+  if (
+    statuses.filter(
+      (status: GitStatus) =>
+        !isStatusCheck(getGitStatusContextCombinedName(status.context))
+    ).length === 0
+  ) {
     logger.debug('empty branch status check result = returning "pending"');
     return BranchStatus.yellow;
   }
