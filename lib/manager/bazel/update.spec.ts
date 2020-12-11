@@ -122,6 +122,7 @@ describe('manager/bazel/update', () => {
         managerData: {
           def: `http_archive(\n  name="distroless",\n  sha256="f7a6ecfb8174a1dd4713ea3b21621072996ada7e8f1a69e6ae7581be137c6dd6",\n  strip_prefix="distroless-446923c3756ceeaa75888f52fcbdd48bb314fbf8",\n  urls=["https://github.com/GoogleContainerTools/distroless/archive/446923c3756ceeaa75888f52fcbdd48bb314fbf8.tar.gz"]\n)`,
         },
+        currentDigest: '446923c3756ceeaa75888f52fcbdd48bb314fbf8',
         newDigest: '033387ac8853e6cc1cd47df6c346bc53cbc490d8',
       };
       httpMock

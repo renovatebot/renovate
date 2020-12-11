@@ -106,7 +106,7 @@ export class RegExpVersioningApi extends GenericVersioningApi<RegExpVersion> {
     return ltr(asSemver(this._parse(version)), asSemver(this._parse(range)));
   }
 
-  maxSatisfyingVersion(versions: string[], range: string): string | null {
+  getSatisfyingVersion(versions: string[], range: string): string | null {
     return maxSatisfying(
       versions.map((v) => asSemver(this._parse(v))),
       asSemver(this._parse(range))

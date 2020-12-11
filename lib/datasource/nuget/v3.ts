@@ -150,7 +150,7 @@ export async function getReleases(
         release.releaseTimestamp = releaseTimestamp;
       }
       if (semver.valid(version) && !semver.prerelease(version)) {
-        latestStable = version;
+        latestStable = removeBuildMeta(version);
         homepage = projectUrl || homepage;
       }
       if (listed === false) {

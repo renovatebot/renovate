@@ -222,9 +222,9 @@ export interface UpdateArtifact {
   config: UpdateArtifactsConfig;
 }
 
-export interface UpdateDependencyConfig {
+export interface UpdateDependencyConfig<T = Record<string, any>> {
   fileContent: string;
-  upgrade: Upgrade;
+  upgrade: Upgrade<T>;
 }
 
 export interface ManagerApi {

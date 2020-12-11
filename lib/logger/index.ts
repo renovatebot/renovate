@@ -60,19 +60,20 @@ const bunyanLogger = bunyan.createLogger({
   ].map(withSanitizer),
 });
 
-const logFactory = (level: bunyan.LogLevelString): any => {
-  return (p1: any, p2: any): void => {
-    if (p2) {
-      // meta and msg provided
-      bunyanLogger[level]({ logContext, ...curMeta, ...p1 }, p2);
-    } else if (is.string(p1)) {
-      // only message provided
-      bunyanLogger[level]({ logContext, ...curMeta }, p1);
-    } else {
-      // only meta provided
-      bunyanLogger[level]({ logContext, ...curMeta, ...p1 });
-    }
-  };
+const logFactory = (level: bunyan.LogLevelString): any => (
+  p1: any,
+  p2: any
+): void => {
+  if (p2) {
+    // meta and msg provided
+    bunyanLogger[level]({ logContext, ...curMeta, ...p1 }, p2);
+  } else if (is.string(p1)) {
+    // only message provided
+    bunyanLogger[level]({ logContext, ...curMeta }, p1);
+  } else {
+    // only meta provided
+    bunyanLogger[level]({ logContext, ...curMeta, ...p1 });
+  }
 };
 
 const loggerLevels: bunyan.LogLevelString[] = [
