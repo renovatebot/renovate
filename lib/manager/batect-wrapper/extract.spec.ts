@@ -38,8 +38,18 @@ describe('lib/manager/batect-wrapper/extract', () => {
       expect(res).toEqual({ deps: [expectedDependency] });
     });
 
-    it('returns null for a wrapper script with multiple versions', () => {
-      expect(extractPackageFile(malformedWrapperContent)).toBeNull();
+    it('returns the first version from a wrapper script with multiple versions', () => {
+      const res = extractPackageFile(malformedWrapperContent);
+
+      const expectedDependency: PackageDependency = {
+        depName: 'batect/batect',
+        commitMessageTopic: 'Batect',
+        currentValue: '0.60.1',
+        datasource: githubReleaseDatasource,
+        versioning: semverVersioning,
+      };
+
+      expect(res).toEqual({ deps: [expectedDependency] });
     });
   });
 });

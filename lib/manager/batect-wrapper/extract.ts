@@ -3,22 +3,20 @@ import { logger } from '../../logger';
 import { id as semverVersioning } from '../../versioning/semver';
 import { PackageDependency, PackageFile } from '../common';
 
-const VERSION_REGEX = /^\s+VERSION="(?<version>.*)"$/gm;
+const VERSION_REGEX = /^\s+VERSION="(.*)"$/m;
 
 export function extractPackageFile(fileContent: string): PackageFile | null {
-  logger.debug('batect.extractPackageFile()');
-  const matches = [...fileContent.matchAll(VERSION_REGEX)];
+  logger.trace('batect.extractPackageFile()');
+  const match = VERSION_REGEX.exec(fileContent);
 
-  if (matches.length !== 1) {
+  if (match === null) {
     return null;
   }
-
-  const match = matches[0];
 
   const dependency: PackageDependency = {
     depName: 'batect/batect',
     commitMessageTopic: 'Batect',
-    currentValue: match.groups.version,
+    currentValue: match[1],
     datasource: githubReleaseDatasource,
     versioning: semverVersioning,
   };
