@@ -107,7 +107,9 @@ This ensures everyone on the team uses the latest versions and is in sync.
 Renovate also supports _upgrading_ versions in Docker tags, e.g. from `node:1.2.0` to `node:1.2.1` or `node:1.2` to `node:1.3`.
 If a tag looks like a version, Renovate will upgrade it like a version.
 
-Thanks to this, you may wish to change the way you tag your images to be more specific, e.g. change from `node:1` to `node:1.1.1` so that every Renovate PR will be more human friendly, e.g. you can know that you are getting a PR because `node` upgraded from `1.1.1` to `1.1.2` and not because `1.1.1` somehow changed.
+We recommend you use the major.minor.patch tagging scheme e.g. change from `node:1` to `node:1.1.1`.
+This way it's easy to see what the Renovate PR is going to change.
+You can see the difference between a PR that upgrades `node` from `1.1.1` to `1.1.2`. and a PR that changes the contents of the version you already use (`1.1.1`).
 
 Currently, Renovate will upgrade minor/patch versions (e.g. from `1.2.0` to `1.2.1`) by default, but not upgrade major versions.
 If you wish to enable major versions then add the preset `docker:enableMajor` to your `extends` array in your `renovate.json`.
