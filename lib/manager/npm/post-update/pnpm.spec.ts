@@ -1,5 +1,5 @@
 import { exec as _exec } from 'child_process';
-import { envMock, mockExecAll } from '../../../../test/execUtil';
+import { envMock, mockExecAll } from '../../../../test/exec-util';
 import { mocked } from '../../../../test/util';
 import * as _env from '../../../util/exec/env';
 import * as _fs from '../../../util/fs/proxies';

@@ -3,7 +3,7 @@ import os from 'os';
 import fsExtra from 'fs-extra';
 import tmp from 'tmp-promise';
 import * as upath from 'upath';
-import { envMock, mockExecAll } from '../../../test/execUtil';
+import { envMock, mockExecAll } from '../../../test/exec-util';
 import {
   addReplacingSerializer,
   getName,

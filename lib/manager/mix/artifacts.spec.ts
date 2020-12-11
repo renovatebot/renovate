@@ -1,6 +1,6 @@
 import { exec as _exec } from 'child_process';
 import _fs from 'fs-extra';
-import { envMock, mockExecAll } from '../../../test/execUtil';
+import { envMock, mockExecAll } from '../../../test/exec-util';
 import { mocked } from '../../../test/util';
 import { BinarySource } from '../../util/exec/common';
 import * as _env from '../../util/exec/env';

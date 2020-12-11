@@ -1,6 +1,6 @@
 import fs from 'fs-extra';
 import { DateTime } from 'luxon';
-import * as httpMock from '../../../../test/httpMock';
+import * as httpMock from '../../../../test/http-mock';
 import { getName } from '../../../../test/util';
 import { ChangeLogNotes } from './common';
 import {

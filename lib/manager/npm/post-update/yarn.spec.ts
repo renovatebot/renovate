@@ -1,5 +1,9 @@
 import { exec as _exec } from 'child_process';
-import { ExecSnapshots, envMock, mockExecAll } from '../../../../test/execUtil';
+import {
+  ExecSnapshots,
+  envMock,
+  mockExecAll,
+} from '../../../../test/exec-util';
 import { fs, getName, mocked } from '../../../../test/util';
 import * as _env from '../../../util/exec/env';
 import * as _yarnHelper from './yarn';
