@@ -126,7 +126,7 @@ describe('platform/bitbucket', () => {
     it('returns repos', async () => {
       httpMock
         .scope(baseUrl)
-        .get('/2.0/repositories/?role=contributor&pagelen=100')
+        .get('/2.0/repositories?role=contributor&pagelen=100')
         .reply(200, {
           values: [{ full_name: 'foo/bar' }, { full_name: 'some/repo' }],
         });
