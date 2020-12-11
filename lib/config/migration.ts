@@ -67,12 +67,8 @@ export function migrateConfig(
         delete migratedConfig[key];
       } else if (key === 'pathRules') {
         if (is.array(val)) {
-          migratedConfig.packageRules = migratedConfig.packageRules || [];
-          const migratedPathRules = migratedConfig.pathRules.map(
-            (p) => migrateConfig(p, key).migratedConfig
-          );
-          migratedConfig.packageRules = migratedPathRules.concat(
-            migratedConfig.packageRules
+          migratedConfig.packageRules = val.concat(
+            migratedConfig.packageRules || []
           );
         }
         delete migratedConfig.pathRules;
@@ -308,12 +304,9 @@ export function migrateConfig(
           migratedConfig.automerge = true;
         }
       } else if (key === 'packages') {
-        migratedConfig.packageRules = migratedConfig.packageRules || [];
-        migratedConfig.packageRules = migratedConfig.packageRules.concat(
-          migratedConfig.packages.map(
-            (p) => migrateConfig(p, key).migratedConfig
-          )
-        );
+        migratedConfig.packageRules = (
+          migratedConfig.packageRules || []
+        ).concat(migratedConfig.packages);
         delete migratedConfig.packages;
       } else if (key === 'excludedPackageNames') {
         migratedConfig.excludePackageNames = val;
@@ -484,6 +477,13 @@ export function migrateConfig(
       delete migratedConfig.endpoints;
     }
     const isMigrated = !equal(config, migratedConfig);
+    if (isMigrated) {
+      // recursive call in case any migrated configs need further migrating
+      return {
+        isMigrated,
+        migratedConfig: migrateConfig(migratedConfig).migratedConfig,
+      };
+    }
     return { isMigrated, migratedConfig };
   } catch (err) /* istanbul ignore next */ {
     logger.debug({ config }, 'migrateConfig() error');
