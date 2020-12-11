@@ -150,7 +150,7 @@ const matches = (a: string, b: string): boolean => {
   return leftResult && rightResult;
 };
 
-const maxSatisfyingVersion = (versions: string[], range: string): string => {
+const getSatisfyingVersion = (versions: string[], range: string): string => {
   return versions.reduce((result, version) => {
     if (matches(version, range)) {
       if (!result) {
@@ -201,7 +201,7 @@ export const api: VersioningApi = {
   isValid,
   isVersion,
   matches,
-  maxSatisfyingVersion,
+  getSatisfyingVersion,
   minSatisfyingVersion,
   getNewValue,
   sortVersions: compare,

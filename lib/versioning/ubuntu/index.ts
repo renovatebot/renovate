@@ -92,7 +92,7 @@ function isGreaterThan(version: string, other: string): boolean {
   return xPatch > yPatch;
 }
 
-function maxSatisfyingVersion(
+function getSatisfyingVersion(
   versions: string[],
   range: string
 ): string | null {
@@ -103,7 +103,7 @@ function minSatisfyingVersion(
   versions: string[],
   range: string
 ): string | null {
-  return maxSatisfyingVersion(versions, range);
+  return getSatisfyingVersion(versions, range);
 }
 
 function getNewValue(newValueConfig: NewValueConfig): string {
@@ -137,7 +137,7 @@ export const api: VersioningApi = {
 
   equals,
   isGreaterThan,
-  maxSatisfyingVersion,
+  getSatisfyingVersion,
   minSatisfyingVersion,
   getNewValue,
   sortVersions,

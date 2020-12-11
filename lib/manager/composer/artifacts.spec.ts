@@ -142,7 +142,7 @@ describe('.updateArtifacts()', () => {
     const foo = join('vendor/foo/Foo.php');
     const bar = join('vendor/bar/Bar.php');
     const baz = join('vendor/baz/Baz.php');
-
+    fs.localPathExists.mockResolvedValueOnce(true);
     fs.readLocalFile.mockResolvedValueOnce('Current composer.lock' as any);
     const execSnapshots = mockExecAll(exec);
     git.getRepoStatus.mockResolvedValueOnce({

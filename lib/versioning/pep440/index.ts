@@ -34,7 +34,7 @@ const isStable = (input: string): boolean => {
 export const isValid = (input: string): string =>
   validRange(input) || isVersion(input);
 
-const maxSatisfyingVersion = (versions: string[], range: string): string => {
+const getSatisfyingVersion = (versions: string[], range: string): string => {
   const found = filter(versions, range).sort(sortVersions);
   return found.length === 0 ? null : found[found.length - 1];
 };
@@ -66,7 +66,7 @@ export const api: VersioningApi = {
   isValid,
   isVersion,
   matches,
-  maxSatisfyingVersion,
+  getSatisfyingVersion,
   minSatisfyingVersion,
   getNewValue,
   sortVersions,
