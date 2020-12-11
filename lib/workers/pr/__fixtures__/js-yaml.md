@@ -279,7 +279,7 @@
 - AMD support.
 - Don't quote dumped strings because of `-` & `?` (if not first char).
 - __Deprecated__ loading yaml files via `require()`, as not recommended
-  behaviour for node.
+  behavior for node.
 
 
 2.1.3 / 2013-10-16
