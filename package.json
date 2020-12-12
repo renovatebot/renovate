@@ -114,7 +114,6 @@
   "dependencies": {
     "@breejs/later": "4.0.2",
     "@iarna/toml": "2.2.5",
-    "@ls-lint/ls-lint": "1.9.2",
     "@renovate/pep440": "0.4.1",
     "@renovatebot/ruby-semver": "0.2.1",
     "@sindresorhus/is": "4.0.0",
@@ -195,6 +194,7 @@
     "@jest/globals": "26.6.2",
     "@jest/reporters": "26.6.2",
     "@jest/test-result": "26.6.2",
+    "@ls-lint/ls-lint": "1.9.2",
     "@semantic-release/exec": "5.0.0",
     "@types/bunyan": "1.8.6",
     "@types/cacache": "12.0.1",
