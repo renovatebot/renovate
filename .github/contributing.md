@@ -7,7 +7,7 @@ Instead, email security@renovatebot.com with as much details as possible so that
 
 ## Support
 
-If you have a **configuration question**, please create an issue in https://github.com/renovatebot/config-help
+If you want help with your Renovate configuration, go to the [discussions tab in the Renovate repository](https://github.com/renovatebot/renovate/discussions) and open a new "config help" discussion post.
 
 ## Bug Reports and Feature Requests
 

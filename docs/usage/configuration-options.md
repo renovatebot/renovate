@@ -25,7 +25,8 @@ Renovate does not read/override the config from within each base branch if prese
 
 Also, be sure to check out Renovate's [shareable config presets](/config-presets/) to save yourself from reinventing any wheels.
 
-If you have any questions about the below config options, or would like to get help/feedback about a config, please post it as an issue in [renovatebot/config-help](https://github.com/renovatebot/config-help) where we will do our best to answer your question.
+If you have any questions about the config options, or want to get help/feedback about a config, go to the [discussions tab in the Renovate repository](https://github.com/renovatebot/renovate/discussions) and start a new "config help" discussion.
+We will do our best to answer your question(s).
 
 ## addLabels
 
@@ -211,7 +212,7 @@ Warning: it's strongly recommended not to configure this field directly.
 Use at your own risk.
 If you truly need to configure this then it probably means either:
 
-- You are hopefully mistaken, and there's a better approach you should use, so [ask here](https://github.com/renovatebot/config-help) or
+- You are hopefully mistaken, and there's a better approach you should use, so open a new "config help" discussion at the [Renovate discussions tab](https://github.com/renovatebot/renovate/discussions) or
 - You have a use case we didn't anticipate and we should have a feature request from you to add it to the project
 
 ## branchPrefix
@@ -295,7 +296,7 @@ The "topic" is usually refers to the dependency being updated, e.g. `"dependency
 
 ## configWarningReuseIssue
 
-Renovate's default behaviour is to reuse/reopen a single Config Warning issue in each repository so as to keep the "noise" down.
+Renovate's default behavior is to reuse/reopen a single Config Warning issue in each repository so as to keep the "noise" down.
 However for some people this has the downside that the config warning won't be sorted near the top if you view issues by creation date.
 Configure this option to `false` if you prefer Renovate to open a new issue whenever there is a config warning.
 
@@ -1565,7 +1566,7 @@ Currently the only Python package manager is `pip` - specifically for `requireme
 
 ## rangeStrategy
 
-Behaviour:
+Behavior:
 
 - `auto` = Renovate decides (this will be done on a manager-by-manager basis)
 - `pin` = convert ranges to exact versions, e.g. `^1.0.0` -> `1.1.0`
@@ -1612,7 +1613,7 @@ Note: this field replaces the previous fields of `rebaseConflictedPrs` and `reba
 
 By default, Renovate will detect if it has proposed an update to a project before and not propose the same one again.
 For example the Webpack 3.x case described above.
-This field lets you customise this behaviour down to a per-package level.
+This field lets you customise this behavior down to a per-package level.
 For example we override it to `true` in the following cases where branch names and PR titles need to be reused:
 
 - Package groups
@@ -1845,7 +1846,7 @@ The field supports multiple URLs however it is datasource-dependent on whether o
 
 ## requiredStatusChecks
 
-Currently Renovate's default behaviour is to only automerge if every status check has succeeded.
+Currently Renovate's default behavior is to only automerge if every status check has succeeded.
 
 Setting this option to `null` means that Renovate will ignore all status checks.
 You need to set this if you don't have any status checks but still want Renovate to automerge PRs.
@@ -1875,7 +1876,7 @@ Take a random sample of given size from reviewers.
 
 ## rollbackPrs
 
-Configure this to `false` either globally, per-language, or per-package if you want to disable Renovate's behaviour of generating rollback PRs when it can't find the current version on the registry anymore.
+Configure this to `false` either globally, per-language, or per-package if you want to disable Renovate's behavior of generating rollback PRs when it can't find the current version on the registry anymore.
 
 ## ruby
 
@@ -1952,7 +1953,7 @@ However, please note that Renovate will autodetect if your repository is already
 
 ## separateMajorMinor
 
-Renovate's default behaviour is to create a separate branch/PR if both minor and major version updates exist (note that your choice of `rangeStrategy` value can influence which updates exist in the first place however).
+Renovate's default behavior is to create a separate branch/PR if both minor and major version updates exist (note that your choice of `rangeStrategy` value can influence which updates exist in the first place however).
 For example, if you were using Webpack 2.0.0 and versions 2.1.0 and 3.0.0 were both available, then Renovate would create two PRs so that you have the choice whether to apply the minor update to 2.x or the major update of 3.x.
 If you were to apply the minor update then Renovate would keep updating the 3.x branch for you as well, e.g. if Webpack 3.0.1 or 3.1.0 were released.
 If instead you applied the 3.0.0 update then Renovate would clean up the unneeded 2.x branch for you on the next run.
@@ -1974,7 +1975,7 @@ If you wish to distinguish between patch and minor upgrades, for example if you 
 ## separateMultipleMajor
 
 Configure this to `true` if you wish to receive one PR for every separate major version upgrade of a dependency.
-e.g. if you are on webpack@v1 currently then default behaviour is a PR for upgrading to webpack@v3 and not for webpack@v2.
+e.g. if you are on webpack@v1 currently then default behavior is a PR for upgrading to webpack@v3 and not for webpack@v2.
 If this setting is true then you would get one PR for webpack@v2 and one for webpack@v3.
 
 ## stabilityDays
