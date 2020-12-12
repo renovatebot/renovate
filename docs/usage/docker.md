@@ -17,14 +17,14 @@ Renovate supports upgrading dependencies in various types of Docker definition f
 
 1. Renovate searches in each repository for any files matching each manager's configured `fileMatch` pattern(s)
 1. Matching files are parsed, Renovate checks if the file(s) contain any Docker image references (e.g. `FROM` lines in a `Dockerfile`)
-1. If the image tag in use "looks" like a version (e.g. `node:1`, `node:1.1`, `node:1.1.0`, `node:1-onbuild`) then Renovate checks the Docker registry for upgrades (e.g. from `node:1.1.0` to `node:1.2.0`)
+1. If the image tag in use "looks" like a version (e.g. `myimage:1`, `myimage:1.1`, `myimage:1.1.0`, `myimage:1-onbuild`) then Renovate checks the Docker registry for upgrades (e.g. from `myimage:1.1.0` to `myimage:1.2.0`)
 
 ## Preservation of Version Precision
 
 By default, Renovate preserves the precision level specified in the Docker images.
-For example, if the existing image is pinned at `node:1.1` then Renovate only proposes upgrades to `node:1.2` or `node:1.3`.
-This means that you will not get upgrades to a more specific versions like `node:1.2.0` or `node:1.3.0`.
-Renovate does not yet support "pinning" an imprecise version to a precise version, e.g. from `node:1.2` to `node:1.2.0`, however it's a feature we'd like to implement one day.
+For example, if the existing image is pinned at `myimage:1.1` then Renovate only proposes upgrades to `myimage:1.2` or `myimage:1.3`.
+This means that you will not get upgrades to a more specific versions like `myimage:1.2.0` or `myimage:1.3.0`.
+Renovate does not yet support "pinning" an imprecise version to a precise version, e.g. from `myimage:1.2` to `myimage:1.2.0`, however it's a feature we'd like to implement one day.
 
 ## Version compatibility
 
@@ -81,7 +81,7 @@ If you have experience with the way dependency versioning is handled in the Java
 e.g. if you specify a version like `2.0.1`, you and your colleagues always get the exact same "code".
 
 What you may not know is that Docker's tags are not immutable versions, even if they look like a version.
-e.g. you probably expect `node:1` and `node:1.2` to change over time, but you might incorrectly assume that `node:1.2.0` never changes.
+e.g. you probably expect `myimage:1` and `myimage:1.2` to change over time, but you might incorrectly assume that `myimage:1.2.0` never changes.
 Although it probably _shouldn't_, the reality is that any Docker image tag _can_ change content, and potentially break.
 
 Using a Docker digest as the image's primary identifier instead of using a Docker tag will achieve immutability.
@@ -104,10 +104,10 @@ This ensures everyone on the team uses the latest versions and is in sync.
 
 ## Version Upgrading
 
-Renovate also supports _upgrading_ versions in Docker tags, e.g. from `node:1.2.0` to `node:1.2.1` or `node:1.2` to `node:1.3`.
+Renovate also supports _upgrading_ versions in Docker tags, e.g. from `myimage:1.2.0` to `myimage:1.2.1` or `myimage:1.2` to `myimage:1.3`.
 If a tag looks like a version, Renovate will upgrade it like a version.
 
-We recommend you use the major.minor.patch tagging scheme e.g. change from `node:1` to `node:1.1.1`.
+We recommend you use the major.minor.patch tagging scheme e.g. change from `myimage:1` to `myimage:1.1.1`.
 This way it's easy to see what the Renovate PR is going to change.
 You can see the difference between a PR that upgrades `node` from `1.1.1` to `1.1.2`. and a PR that changes the contents of the version you already use (`1.1.1`).
 
