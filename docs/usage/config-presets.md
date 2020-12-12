@@ -67,7 +67,7 @@ A typical onboarding `renovate.json` looks like this:
 }
 ```
 
-Say you want to modify the default behavior, for example scheduling Renovate to process upgrades during non-office hours only.
+Say you want to modify the default behaviour, for example scheduling Renovate to process upgrades during non-office hours only.
 To do this you can modify the default `renovate.json` file like this:
 
 ```json

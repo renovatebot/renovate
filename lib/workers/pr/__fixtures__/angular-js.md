@@ -1451,7 +1451,7 @@ Previously the request count would not have been updated until the
 request to the server is actually in flight. Now the request count is
 updated before the async interceptor is called.
 
-The new behavior is correct but it may change the expected behavior in
+The new behaviour is correct but it may change the expected behaviour in
 a small number of e2e test cases where an async request interceptor is
 being used.
 
@@ -1505,7 +1505,7 @@ Previously this would not fallback to default content:
 ```
 
 Now the whitespace between the opening and closing tags is treated as empty. To force the
-previous behavior simply add a comment:
+previous behaviour simply add a comment:
 
 ```html
 <some-component><!-- -->
@@ -2861,7 +2861,7 @@ Previously the request count would not have been updated until the
 request to the server is actually in flight. Now the request count is
 updated before the async interceptor is called.
 
-The new behavior is correct but it may change the expected behavior in
+The new behaviour is correct but it may change the expected behaviour in
 a small number of e2e test cases where an async request interceptor is
 being used.
 
@@ -2916,7 +2916,7 @@ ancestor.
 It is possible that an `ngModelOptions` directive that does not set a property,
 has an ancestor ngModelOptions that does set this property to a value other than
 `undefined`. This would cause the `ngModel` and input controls below this `ngModelOptions`
-directive to display different behavior. This is fixed by explicitly setting the
+directive to display different behaviour. This is fixed by explicitly setting the
 property in the `ngModelOptions` to prevent it from inheriting from the ancestor.
 
 For example if you had the following HTML:
@@ -2929,7 +2929,7 @@ For example if you had the following HTML:
 
 Then before this change the input would update on the default event not blur.
 After this change the input will inherit the option to update on blur.
-If you want the original behavior then you will need to specify the option
+If you want the original behaviour then you will need to specify the option
 on the input as well:
 
 ```html
@@ -4366,7 +4366,7 @@ promise for a `$resource` request in version v1.4.8.
 Up to v1.4.7 (included), using a promise as a timeout in `$resource`, would silently
 fail (i.e. have no effect).
 
-In v1.4.8, using a promise as timeout would have the (buggy) behavior described
+In v1.4.8, using a promise as timeout would have the (buggy) behaviour described
 in https://github.com/angular/angular.js/pull/12657#issuecomment-152108887.
 (I.e. it will work as expected for the first time you resolve the promise and will
 cancel all subsequent requests after that - one has to re-create the resource

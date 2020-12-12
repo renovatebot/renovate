@@ -31,7 +31,7 @@ Although suffixes in semver indicate pre-releases (e.g. `v1.2.0-alpha.2`), in Do
 Renovate defaults to assuming suffixes indicate compatibility so will never _change_ it.
 e.g. `12.1.0-alpine` might get updated to `12.1.1-alpine` but never `12.1.1` or `12.1.1-stretch`.
 
-If this behavior does not suit a particular package you have, Renovate allows you to customize the `versioning` in use.
+If this behaviour does not suit a particular package you have, Renovate allows you to customize the `versioning` in use.
 For example, if you have a Docker image `foo/bar` that sticks to semver versioning and you need Renovate to understand that suffixes indicate pre-releases versions and not compatibility, then you could configure this package rule:
 
 ```json
