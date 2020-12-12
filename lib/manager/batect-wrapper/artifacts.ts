@@ -4,19 +4,32 @@ import { UpdateArtifact, UpdateArtifactsResult } from '../common';
 
 const http = new Http('batect-wrapper');
 
-async function getFileContent(
-  version: string,
-  fileName: string
-): Promise<string> {
+async function updateArtifact(
+  path: string,
+  fileName: string,
+  version: string
+): Promise<UpdateArtifactsResult> {
   const url = `https://github.com/batect/batect/releases/download/${version}/${fileName}`;
 
   try {
     const response = await http.get(url);
+    const contents = response.body;
 
-    return response.body;
+    return {
+      file: {
+        name: path,
+        contents,
+      },
+    };
   } catch (err) {
     const errorDescription: string = err.toString();
-    throw new Error(`HTTP GET ${url} failed: ${errorDescription}`);
+
+    return {
+      artifactError: {
+        lockFile: path,
+        stderr: `HTTP GET ${url} failed: ${errorDescription}`,
+      },
+    };
   }
 }
 
@@ -29,17 +42,7 @@ export async function updateArtifacts({
   logger.debug({ version, packageFileName }, 'Updating Batect wrapper scripts');
 
   return [
-    {
-      file: {
-        name: packageFileName,
-        contents: await getFileContent(version, 'batect'),
-      },
-    },
-    {
-      file: {
-        name: `${packageFileName}.cmd`,
-        contents: await getFileContent(version, 'batect.cmd'),
-      },
-    },
+    await updateArtifact(packageFileName, 'batect', version),
+    await updateArtifact(`${packageFileName}.cmd`, 'batect.cmd', version),
   ];
 }

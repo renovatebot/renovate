@@ -39,6 +39,11 @@ describe('lib/manager/batect-wrapper/artifacts', () => {
       .scope('https://github.com')
       .get('/batect/batect/releases/download/3.4.5/batect')
       .reply(404);
+
+    httpMock
+      .scope('https://github.com')
+      .get('/batect/batect/releases/download/3.4.5/batect.cmd')
+      .reply(418);
   });
 
   afterEach(() => {
@@ -86,12 +91,26 @@ describe('lib/manager/batect-wrapper/artifacts', () => {
       ]);
     });
 
-    it('throws an error if the updated wrapper script cannot be downloaded', async () => {
+    it('returns an error if the updated wrapper script cannot be downloaded', async () => {
       const artifact = artifactForPath('batect', '3.4.5');
+      const result = await updateArtifacts(artifact);
 
-      await expect(updateArtifacts(artifact)).rejects.toThrow(
-        'HTTP GET https://github.com/batect/batect/releases/download/3.4.5/batect failed: HTTPError: Response code 404 (Not Found)'
-      );
+      expect(result).toEqual([
+        {
+          artifactError: {
+            lockFile: 'batect',
+            stderr:
+              'HTTP GET https://github.com/batect/batect/releases/download/3.4.5/batect failed: HTTPError: Response code 404 (Not Found)',
+          },
+        },
+        {
+          artifactError: {
+            lockFile: 'batect.cmd',
+            stderr:
+              "HTTP GET https://github.com/batect/batect/releases/download/3.4.5/batect.cmd failed: HTTPError: Response code 418 (I'm a Teapot)",
+          },
+        },
+      ]);
     });
   });
 });
