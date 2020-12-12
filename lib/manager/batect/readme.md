@@ -2,7 +2,7 @@ Extracts all Docker images and Batect bundles from Batect configuration files.
 
 For updates to Batect itself, see [batect-wrapper](../batect-wrapper).
 
-## Files searched
+### Files searched
 
 By default, the manager searches for files called `batect.yml` or `batect-bundle.yml`.
 
@@ -26,7 +26,7 @@ For example:
 }
 ```
 
-## Bundle versioning
+### Bundle versioning
 
 This manager assumes that any bundles referenced use tags for versioning, and that these tags use [semver](../../versioning/semver).
 The implementation of semver is strict - versions must follow the `X.Y.Z` or `vX.Y.Z` format.
