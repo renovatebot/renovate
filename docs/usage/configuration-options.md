@@ -25,7 +25,8 @@ Renovate does not read/override the config from within each base branch if prese
 
 Also, be sure to check out Renovate's [shareable config presets](/config-presets/) to save yourself from reinventing any wheels.
 
-If you have any questions about the below config options, or would like to get help/feedback about a config, please post it as an issue in [renovatebot/config-help](https://github.com/renovatebot/config-help) where we will do our best to answer your question.
+If you have any questions about the config options, or want to get help/feedback about a config, go to the [discussions tab in the Renovate repository](https://github.com/renovatebot/renovate/discussions) and start a new "config help" discussion.
+We will do our best to answer your question(s).
 
 ## addLabels
 
@@ -211,7 +212,7 @@ Warning: it's strongly recommended not to configure this field directly.
 Use at your own risk.
 If you truly need to configure this then it probably means either:
 
-- You are hopefully mistaken, and there's a better approach you should use, so [ask here](https://github.com/renovatebot/config-help) or
+- You are hopefully mistaken, and there's a better approach you should use, so open a new "config help" discussion at the [Renovate discussions tab](https://github.com/renovatebot/renovate/discussions) or
 - You have a use case we didn't anticipate and we should have a feature request from you to add it to the project
 
 ## branchPrefix
