@@ -26,7 +26,7 @@ We use `docker-` for all Docker updates, branches will look like this: `renovate
 
 `branchTopic` depends on the package manager and upgrade type, so you will see a lot of variety.
 This is probably a setting you want to change yourself.
-Be careful, and consider posting your config to https://github.com/renovateapp/config-help first to get help from the Renovate team with your config.
+Be careful, and consider creating a new "config help" post at the [discussions tab in the Renovate repository](https://github.com/renovatebot/renovate/discussions) to get help from the Renovate team with your config.
 
 ## Commit Message
 
