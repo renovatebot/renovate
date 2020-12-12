@@ -21,7 +21,7 @@ export function extractPackageFile(fileContent: string): PackageFile | null {
     versioning: semverVersioning,
   };
 
-  logger.debug(dependency, 'Found Batect wrapper version');
+  logger.trace(dependency, 'Found Batect wrapper version');
 
   return { deps: [dependency] };
 }
