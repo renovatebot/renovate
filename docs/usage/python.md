@@ -54,7 +54,7 @@ some-other-package==1.0.0
 
 #### Sources in `Pipfile`
 
-Renovate will detect any custom-configured sources in `Pipfile` and use them.
+Renovate detects any custom-configured sources in `Pipfile` and uses them.
 
 #### Specify URL in configuration
 
