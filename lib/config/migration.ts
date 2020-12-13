@@ -109,6 +109,8 @@ export function migrateConfig(
       } else if (parentKey === 'hostRules' && key === 'host') {
         migratedConfig.hostName = val;
         delete migratedConfig.host;
+      } else if (key === 'packageRules' && is.plainObject(val)) {
+        migratedConfig.packageRules = [val];
       } else if (key === 'packageFiles' && is.array(val)) {
         const fileList = [];
         for (const packageFile of val) {
