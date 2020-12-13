@@ -58,8 +58,8 @@ Renovate detects any custom-configured sources in `Pipfile` and uses them.
 
 #### Specify URL in configuration
 
-The configuration option `registryUrls` can be used to configure an alternate index URL.
-Example:
+You can use the `registryUrls` array to configure alternate index URL(s).
+e.g.:
 
 ```json
   "python": {
