@@ -41,7 +41,7 @@ e.g.:
 By default Renovate performs all lookups on pypi.org, but you can configure alternative index URLs.
 There are two ways to do this:
 
-#### index-url in `requirements.txt`
+### index-url in `requirements.txt`
 
 The index URL can be specified in the first line of the file.
 For example:
@@ -52,11 +52,11 @@ some-package==0.3.1
 some-other-package==1.0.0
 ```
 
-#### Sources in `Pipfile`
+### Sources in `Pipfile`
 
 Renovate detects any custom-configured sources in `Pipfile` and uses them.
 
-#### Specify URL in configuration
+### Specify URL in configuration
 
 You can use the `registryUrls` array to configure alternate index URL(s).
 e.g.:
