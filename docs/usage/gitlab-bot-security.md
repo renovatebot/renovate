@@ -38,7 +38,7 @@ There is still a small problem that you can't _prevent_ users from inviting the 
 ### Project Access Tokens
 
 [Project Access Tokens](https://docs.gitlab.com/ee/user/project/settings/project_access_tokens.html) are a recently added feature for GitLab.
-There are a couple of main downsides to their use for a shared bot service, mainly:
+The main downsides to their use for a shared bot service are:
 
 - It is not yet possible to [provision them through the API](https://gitlab.com/gitlab-org/gitlab/-/issues/238991), so project maintainers would need to provision a project bot account and then save it to Renovate manually and per-project
 - Project Access Tokens are a paid-only feature for gitlab.com so would exclude a large percentage of the public service user base
