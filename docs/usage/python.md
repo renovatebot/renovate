@@ -27,8 +27,8 @@ Legacy versions (`===` prefix) are ignored.
 ## Alternative file names
 
 The default file matching regex for `requirements.txt` aims to pick up the most popular conventions for file naming, but it's possible that some get missed.
-If you have a specific file or file pattern you want to get found by Renovate, then you can do this by adding a new pattern under the `fileMatch` field of `pip_requirements`.
-e.g. you could add this to your config:
+If you have a specific file or file pattern you want the Renovate bot to find, use the `fileMatch` field in the `pip_requirements` object.
+e.g.:
 
 ```json
   "pip_requirements": {
