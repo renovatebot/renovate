@@ -584,4 +584,7 @@ export const presets: Record<string, Preset> = {
     description: 'deprecated alias for config:js-lib',
     extends: ['config:js-lib'],
   },
+  unpublishSafe: {
+    extends: ['npm:unpublishSafe'],
+  },
 };
