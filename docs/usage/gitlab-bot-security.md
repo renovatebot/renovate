@@ -30,7 +30,7 @@ The following research notes may help you to assess the GitLab bot security risk
 ### Public projects only
 
 If a bot service is run on public projects only, then the risk of private project data being accessed by unauthorized users is zero.
-However, malicious users can still either spoof or spam packages to any other public project they themselves are not a member of, so that rules out this approach for a public hosted service.
+However, malicious users can still spoof or spam packages to any other public project they themselves are not a member of, so that rules out this approach for a public hosted service.
 
 A public-visibility-only bot service should be low risk for most self-hosted GitLab instances, but there is still a small problem that you can't _prevent_ users from inviting the bot into private projects if they are not aware of the risks of doing so.
 
