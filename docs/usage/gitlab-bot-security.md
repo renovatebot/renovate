@@ -1,4 +1,4 @@
-# GitLab Bot Security
+# GitLab bot security
 
 If running a "bot" service like Renovate on GitLab, it's important to be aware of how GitLab's security model works, particularly in relation to pipeline credentials.
 
@@ -23,11 +23,11 @@ If you are running your own self-hosted Renovate service, it is advisable to:
 - Run a shared service only within projects which have shared visibility/security within the users, or which have a low risk that a user would try to gain access to a private project they don't otherwise have access to
 - If running with `autodiscover`, also configure a value for `autodiscoverFilter` so that the bot can't be invited to projects or groups you don't intend
 
-## Security Solutions and Workarounds
+## Security solutions and workarounds
 
 The following research notes may help you when assessing GitLab bot security risk.
 
-### Public Projects Only
+### Public projects only
 
 If a bot service is run on public projects only, then the risk of private project data being accessed by unauthorized users is zero.
 However, malicious users can still either spoof or spam packages to any other public project they themselves are not a member of, so that rules out this approach for a public hosted service.
@@ -70,7 +70,7 @@ An alternative to a bot service running with a bot PAT would be to have it run u
 In this scenario, an OAuth app would be needed to allow users to "install" the bot into projects with members they trust not to exploit them, and then commits and Merge Requests would appear to be authored by the _user_, not any bot.
 Bot services are better if they are provisioned with a "bot identity" so that users can quickly distinguish bot activity from real user activity.
 
-## Recommended Migration
+## Recommended migration
 
 Until the hosted app can be reactivated, we recommend users migrate to use self-hosted pipelines to run Renovate.
 Please see the [renovate-bot/renovate-runner README on GitLab](https://gitlab.com/renovate-bot/renovate-runner/-/blob/master/README.md) for instructions on how to set this up as easily as possible.
