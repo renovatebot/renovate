@@ -229,6 +229,10 @@ export function migrateConfig(
               preset = 'config:js-lib';
             } else if (preset.startsWith(':masterIssue')) {
               preset = preset.replace('masterIssue', 'dependencyDashboard');
+            } else if (
+              [':unpublishSafe', 'default:unpublishSafe'].includes(preset)
+            ) {
+              preset = 'npm:unpublishSafe';
             }
             presets[i] = preset;
           }
@@ -239,7 +243,13 @@ export function migrateConfig(
           if (is.string(migratedConfig.extends)) {
             migratedConfig.extends = [migratedConfig.extends];
           }
-          if (!migratedConfig.extends.includes('npm:unpublishSafe')) {
+          if (
+            ![
+              ':unpublishSafe',
+              'default:unpublishSafe',
+              'npm:unpublishSafe',
+            ].some((x) => migratedConfig.extends.includes(x))
+          ) {
             migratedConfig.extends.push('npm:unpublishSafe');
           }
         }
