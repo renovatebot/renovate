@@ -3,12 +3,12 @@ title: Ruby Bundler Support
 description: Ruby Bundler support in Renovate
 ---
 
-# Automated Dependency Updates for Ruby Bundler Dependencies
+# Automated dependency updates for Ruby Bundler dependencies
 
 Renovate supports upgrading dependencies in Bundler's `Gemfile`s and their accompanying `Gemfile.lock` files.
 Support is considered "alpha" stage until there have been some more real-world tests.
 
-## How It Works
+## How it works
 
 1. Renovate searches in each repository for any `Gemfile` files
 1. Existing dependencies are extracted from the `Gemfile`'s
