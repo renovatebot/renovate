@@ -38,8 +38,8 @@ e.g.:
 
 ## Alternate registries
 
-Renovate will default to performing all lookups on pypi.org, but it also supports alternative index URLs.
-There are two ways to achieve this:
+By default Renovate performs all lookups on pypi.org, but you can configure alternative index URLs.
+There are two ways to do this:
 
 #### index-url in `requirements.txt`
 
