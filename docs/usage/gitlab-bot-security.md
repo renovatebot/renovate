@@ -41,7 +41,7 @@ There is still a small problem that you can't _prevent_ users from inviting the 
 The main downsides to their use for a shared bot service are:
 
 - It is not yet possible to [provision them through the API](https://gitlab.com/gitlab-org/gitlab/-/issues/238991), so project maintainers would need to provision a project bot account and then save it to Renovate manually and per-project
-- Project Access Tokens are a paid-only feature for gitlab.com so would exclude a large percentage of the public service user base
+- Project Access Tokens are a paid-only feature for gitlab.com, which excludes a large percentage of the public service user base
 - At time of writing, there are still some issues with getting Project Access Tokens to trigger and authenticate CI
 - Any service using such tokens would get MRs from a user like `@project_123_bot` which is less intuitive than `@renovate-bot`
 
