@@ -14,7 +14,8 @@ Renovate supports the following Python package managers:
 ## Versioning support
 
 The [PEP440](https://www.python.org/dev/peps/pep-0440/) versioning scheme has been rewritten for JavaScript for the purposes of use in this project is published as [@renovatebot/pep440](https://github.com/renovatebot/pep440).
-It supports both pinned versions as well as ranges. Legacy versions (`===` prefix) are ignored.
+It supports both pinned versions as well as ranges.
+Legacy versions (`===` prefix) are ignored.
 
 ## How it works
 
