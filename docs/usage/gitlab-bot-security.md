@@ -45,7 +45,7 @@ The main downsides to their use for a shared bot service are:
 - At time of writing, there are still some issues with getting Project Access Tokens to trigger and authenticate CI
 - Any service using such tokens would get MRs from a user like `@project_123_bot` which is less intuitive than `@renovate-bot`
 
-However the big advantage of Project Access Tokens would be their limited scope so that users with write access to one project would not be able to read or write to other projects.
+The big benefit of Project Access Tokens is their limited scope, users with write access to one project cannot read/write to other projects.
 
 ### Group Access Tokens
 
