@@ -304,6 +304,23 @@ describe('config/migration', () => {
         migratedConfig.lockFileMaintenance.packageRules[0].respectLatest
       ).toBe(false);
     });
+
+    it('migrates packageRules objects', () => {
+      const config = {
+        packageRules: {
+          packageNames: ['typescript'],
+          updateTypes: ['major'],
+          commitMessage:
+            'fix(package): update peerDependency to accept typescript ^{{newVersion}}',
+        },
+      } as any;
+      const { isMigrated, migratedConfig } = configMigration.migrateConfig(
+        config,
+        defaultConfig
+      );
+      expect(isMigrated).toBe(true);
+      expect(migratedConfig.packageRules).toHaveLength(1);
+    });
     it('migrates node to travis', () => {
       const config: RenovateConfig = {
         node: {
