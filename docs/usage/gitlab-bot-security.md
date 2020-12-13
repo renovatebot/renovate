@@ -10,7 +10,7 @@ The concept of `CI_JOB_TOKEN` permissions was [overhauled in GitLab release 8.12
 For security reasons the token was limited to read-only permissions and a limited set of API endpoints, however it’s since been extended to allow [write access to the GitLab Package Registry](https://docs.gitlab.com/ee/api/README.html#gitlab-ci-job-token).
 Any pipeline triggered by a user account thus has permissions to read any repository which that account has access to as well as publish packages to them.
 
-With the current GitLab CI permissions model, everyone should avoid committing to any project which they don’t trust completely, because that project could otherwise maliciously steal repository data, publish fake releases, or perhaps spam releases.
+With the current GitLab CI permissions model, you should avoid committing to any project which you don’t trust completely, because that project could maliciously steal repository data, publish fake releases, or spam releases.
 
 ## Risks of hosting a Renovate GitLab app/bot/service
 
