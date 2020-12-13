@@ -34,6 +34,20 @@ Array [
 ]
 `;
 
+exports[`manager/kustomize/extract extractPackageFile() extracts sha256 instead of tag 1`] = `
+Object {
+  "deps": Array [
+    Object {
+      "currentDigest": "sha256:b0cfe264cb1143c7c660ddfd5c482464997d62d6bc9f97f8fdf3deefce881a8c",
+      "currentValue": undefined,
+      "datasource": "docker",
+      "depName": "postgres",
+      "versioning": "docker",
+    },
+  ],
+}
+`;
+
 exports[`manager/kustomize/extract extractPackageFile() extracts ssh dependency 1`] = `
 Array [
   Object {
@@ -72,30 +86,35 @@ Array [
 exports[`manager/kustomize/extract extractPackageFile() should extract out image versions 1`] = `
 Array [
   Object {
+    "currentDigest": undefined,
     "currentValue": "v0.1.0",
     "datasource": "docker",
     "depName": "node",
     "versioning": "docker",
   },
   Object {
+    "currentDigest": undefined,
     "currentValue": "v0.0.1",
     "datasource": "docker",
     "depName": "group/instance",
     "versioning": "docker",
   },
   Object {
+    "currentDigest": undefined,
     "currentValue": "v0.0.2",
     "datasource": "docker",
     "depName": "quay.io/test/repo",
     "versioning": "docker",
   },
   Object {
+    "currentDigest": undefined,
     "currentValue": "v0.0.3",
     "datasource": "docker",
     "depName": "gitlab.com/org/suborg/image",
     "versioning": "docker",
   },
   Object {
+    "currentDigest": undefined,
     "currentValue": "v0.0.4",
     "datasource": "docker",
     "depName": "but.this.lives.on.local/private-registry",

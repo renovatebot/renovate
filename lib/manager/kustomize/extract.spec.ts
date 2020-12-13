@@ -50,6 +50,8 @@ const kustomizeDepsInResources = readFileSync(
   'utf8'
 );
 
+const sha = readFileSync('lib/manager/kustomize/__fixtures__/sha.yaml', 'utf8');
+
 describe('manager/kustomize/extract', () => {
   it('should successfully parse a valid kustomize file', () => {
     const file = parseKustomize(kustomizeGitSSHBase);
@@ -259,6 +261,9 @@ describe('manager/kustomize/extract', () => {
       expect(res.deps[0].currentValue).toEqual('v0.0.1');
       expect(res.deps[1].currentValue).toEqual('1.19.0');
       expect(res.deps[1].depName).toEqual('fluxcd/flux');
+    });
+    it('extracts sha256 instead of tag', () => {
+      expect(extractPackageFile(sha)).toMatchSnapshot();
     });
   });
 });
