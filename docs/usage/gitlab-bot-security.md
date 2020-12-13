@@ -25,7 +25,7 @@ If you are running a self-hosted Renovate service, it is advisable to:
 
 ## Security solutions and workarounds
 
-The following research notes may help you when assessing GitLab bot security risk.
+The following research notes may help you to assess the GitLab bot security risk.
 
 ### Public projects only
 
