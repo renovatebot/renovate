@@ -6,7 +6,7 @@ You should understand GitLab's security model, before deciding to run a "bot" se
 
 ## `CI_JOB_TOKEN` permissions
 
-The concept of `CI_JOB_TOKEN` permissions was [overhauled in GitLab release 8.12](https://docs.gitlab.com/ee/user/project/new_ci_build_permissions_model.html), after which jobs are now run with the permissions of the user account which _triggered_ the pipeline.
+The concept of `CI_JOB_TOKEN` permissions was [overhauled in GitLab release 8.12](https://docs.gitlab.com/ee/user/project/new_ci_build_permissions_model.html), jobs are now run with the permissions of the user account which _triggered_ the pipeline.
 For security reasons the token was limited to read-only permissions and a limited set of API endpoints, however it’s since been extended to allow [write access to the GitLab Package Registry](https://docs.gitlab.com/ee/api/README.html#gitlab-ci-job-token).
 Any pipeline triggered by a user account thus has permissions to read any repository which that account has access to as well as publish packages to them.
 
