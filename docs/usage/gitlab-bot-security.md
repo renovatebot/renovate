@@ -18,7 +18,7 @@ The GitLab security model means that the risks of running a _public_ bot service
 
 It's also important to remember that when accounts are invited into projects or groups on GitLab, acceptance happens automatically (which was a useful feature to leverage for a shared service).
 
-If you are running your own self-hosted Renovate service, it is advisable to:
+If you are running a self-hosted Renovate service, it is advisable to:
 
 - Run a shared service only within projects which have shared visibility/security within the users, or which have a low risk that a user would try to gain access to a private project they don't otherwise have access to
 - If running with `autodiscover`, also configure a value for `autodiscoverFilter` so that the bot can't be invited to projects or groups you don't intend
