@@ -241,7 +241,13 @@ export function migrateConfig(
           if (is.string(migratedConfig.extends)) {
             migratedConfig.extends = [migratedConfig.extends];
           }
-          if (!migratedConfig.extends.includes('npm:unpublishSafe')) {
+          if (
+            ![
+              ':unpublishSafe',
+              'default:unpublishSafe',
+              'npm:unpublishSafe',
+            ].some((x) => migratedConfig.extends.includes(x))
+          ) {
             migratedConfig.extends.push('npm:unpublishSafe');
           }
         }
