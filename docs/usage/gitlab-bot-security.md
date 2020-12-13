@@ -49,7 +49,7 @@ The big benefit of Project Access Tokens is their limited scope, users with writ
 
 ### Group Access Tokens
 
-Group Access Tokens are still in planning stage, but may offer a more scalable way to manage a Renovate service.
+Group Access Tokens are still in the planning stage, but may offer a more scalable way to manage a Renovate service.
 Tokens could be provisioned into Renovate per-group and permissions/visibility would need to be kept uniform throughout the group to ensure escalation of privileges is not possible.
 
 It should be noted though that many GitLab users _do not_ have uniform permissions/visibility throughout groups today, so this is a risk of Group Access Tokens in general.
