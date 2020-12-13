@@ -227,6 +227,10 @@ export function migrateConfig(
               preset = 'config:js-lib';
             } else if (preset.startsWith(':masterIssue')) {
               preset = preset.replace('masterIssue', 'dependencyDashboard');
+            } else if (
+              [':unpublishSafe', 'default:unpublishSafe'].includes(preset)
+            ) {
+              preset = 'npm:unpublishSafe';
             }
             presets[i] = preset;
           }
