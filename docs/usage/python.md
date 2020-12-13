@@ -86,9 +86,3 @@ In that case this would enable _only_ `npm`:
 ```json
   "enabledManagers": ["npm"]
 ```
-
-## Future work
-
-Feature requests are open for Conda support and additional file types (e.g. `setup.cfg`).
-You can locate these issues by filtering on the [#python](https://github.com/renovatebot/renovate/issues?q=is%3Aissue+is%3Aopen+sort%3Aupdated-desc+label%3A%23python) hashtag in the repository.
-Please +1 and/or add a comment to each issue that would benefit you so that we can gauge the popularity/importance of each.
