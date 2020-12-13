@@ -76,7 +76,8 @@ Bot services are better if they are provisioned with a "bot identity" so that us
 Until the hosted app can be reactivated, we recommend users migrate to use self-hosted pipelines to run Renovate.
 Please see the [renovate-bot/renovate-runner README on GitLab](https://gitlab.com/renovate-bot/renovate-runner/-/blob/master/README.md) for instructions on how to set this up as easily as possible.
 
-We will simultaneously be working to find a feasible design for the app so that it can be reactivated securely in future, and welcome any ideas you may have.
+The Renovate team is working to find a feasible design for the app so that we can reactive it securely in future.
+We welcome any ideas you may have.
 
 ## Acknowledgments
 
