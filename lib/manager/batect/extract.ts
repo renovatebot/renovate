@@ -1,10 +1,12 @@
 import { safeLoad } from 'js-yaml';
 
+import { id as gitTagDatasource } from '../../datasource/git-tags';
 import { logger } from '../../logger';
 import { id as dockerVersioning } from '../../versioning/docker';
+import { id as semverVersioning } from '../../versioning/semver';
 import { PackageDependency, PackageFile } from '../common';
 import { getDep } from '../dockerfile/extract';
-import { BatectConfig } from './types';
+import { BatectConfig, BatectGitInclude } from './types';
 
 function loadConfig(content: string): BatectConfig {
   const config = safeLoad(content);
@@ -28,32 +30,68 @@ function extractImages(config: BatectConfig): string[] {
     .map((container) => container.image);
 }
 
-function createDependency(tag: string): PackageDependency {
+function createImageDependency(tag: string): PackageDependency {
   return {
     ...getDep(tag),
     versioning: dockerVersioning,
   };
 }
 
+function extractImageDependencies(config: BatectConfig): PackageDependency[] {
+  const images = extractImages(config);
+  const deps = images.map((image) => createImageDependency(image));
+
+  logger.trace({ deps }, 'Loaded images from Batect configuration file');
+
+  return deps;
+}
+
+function extractGitBundles(config: BatectConfig): BatectGitInclude[] {
+  if (config.include === undefined) {
+    return [];
+  }
+
+  return config.include.filter(
+    (include): include is BatectGitInclude =>
+      typeof include === 'object' && include.type === 'git'
+  );
+}
+
+function createBundleDependency(bundle: BatectGitInclude): PackageDependency {
+  return {
+    depName: bundle.repo,
+    currentValue: bundle.ref,
+    versioning: semverVersioning,
+    datasource: gitTagDatasource,
+    commitMessageTopic: 'bundle {{depName}}',
+  };
+}
+
+function extractBundleDependencies(config: BatectConfig): PackageDependency[] {
+  const bundles = extractGitBundles(config);
+  const deps = bundles.map((bundle) => createBundleDependency(bundle));
+
+  logger.trace({ deps }, 'Loaded bundles from Batect configuration file');
+
+  return deps;
+}
+
 export function extractPackageFile(
   content: string,
   fileName?: string
 ): PackageFile | null {
-  logger.debug('batect.extractPackageFile()');
+  logger.debug({ fileName }, 'batect.extractPackageFile()');
 
   try {
     const config = loadConfig(content);
-    const images = extractImages(config);
-    const deps = images.map((image) => createDependency(image));
+    const deps = [
+      ...extractImageDependencies(config),
+      ...extractBundleDependencies(config),
+    ];
 
     if (deps.length === 0) {
       return null;
     }
-
-    logger.trace(
-      { deps, fileName },
-      'Loaded images from Batect configuration file'
-    );
 
     return { deps };
   } catch (err) {

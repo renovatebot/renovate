@@ -13,3 +13,21 @@ containers:
 
   container-5:
     image: postgres:9.6.20@sha256:166179811e4c75f8a092367afed6091208c8ecf60b111c7e49f29af45ca05e08
+
+include:
+  - some/file/include.yml
+
+  - type: file
+    path: a/valid/file/include.yml
+
+  - type: file
+    repo: https://file.includes/should/not/have/repo.git
+    ref: this-isn't-valid
+
+  - type: git
+    repo: https://includes.com/my-repo.git
+    ref: 1.2.3
+
+  - type: git
+    repo: https://includes.com/my-other-repo.git
+    ref: 4.5.6

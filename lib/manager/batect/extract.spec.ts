@@ -1,5 +1,7 @@
 import { readFileSync } from 'fs';
+import { id as gitTagDatasource } from '../../datasource/git-tags';
 import { id as dockerVersioning } from '../../versioning/docker';
+import { id as semverVersioning } from '../../versioning/semver';
 import { PackageDependency } from '../common';
 import { getDep } from '../dockerfile/extract';
 import { extractPackageFile } from './extract';
@@ -13,6 +15,16 @@ function createDockerDependency(tag: string): PackageDependency {
   return {
     ...getDep(tag),
     versioning: dockerVersioning,
+  };
+}
+
+function createGitDependency(repo: string, version: string): PackageDependency {
+  return {
+    depName: repo,
+    currentValue: version,
+    versioning: semverVersioning,
+    datasource: gitTagDatasource,
+    commitMessageTopic: 'bundle {{depName}}',
   };
 }
 
@@ -44,6 +56,8 @@ describe('lib/manager/batect/extract', () => {
         createDockerDependency(
           'postgres:9.6.20@sha256:166179811e4c75f8a092367afed6091208c8ecf60b111c7e49f29af45ca05e08'
         ),
+        createGitDependency('https://includes.com/my-repo.git', '1.2.3'),
+        createGitDependency('https://includes.com/my-other-repo.git', '4.5.6'),
       ]);
     });
   });
