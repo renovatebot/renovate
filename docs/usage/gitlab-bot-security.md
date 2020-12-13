@@ -1,6 +1,6 @@
 # GitLab bot security
 
-If running a "bot" service like Renovate on GitLab, it's important to be aware of how GitLab's security model works, particularly in relation to pipeline credentials.
+You should understand GitLab's security model, before deciding to run a "bot" service like Renovate on GitLab, particularly the pipeline credentials.
 
 **Important**: If you have any doubts or concerns about this content that could affect other users, please abide by our [Security Policy](https://github.com/renovatebot/renovate/security/policy) and report them confidentially.
 
