@@ -10,16 +10,17 @@ Support is considered "alpha" stage until there have been some more real-world t
 
 ## How It Works
 
-1. Renovate will search each repository for any `Gemfile` files
-1. Existing dependencies will be extracted from the files
-1. Renovate will resolve the dependency on Rubygems or elsewhere if configured, and look for any newer versions
-1. A PR will be created with `Gemfile` and `Gemfile.lock` updated in the same commit
-1. If the source repository has either a "changelog" file or uses GitHub releases, then Release Notes for each version will be embedded in the generated PR
+1. Renovate searches in each repository for any `Gemfile` files
+1. Existing dependencies are extracted from the `Gemfile`'s
+1. Renovate resolves the dependency on Rubygems.org (or elsewhere if configured), and checks for newer versions
+1. A PR is created which updates the `Gemfile` and `Gemfile.lock` in a single commit
+1. If the source repository has a "changelog" file or uses GitHub releases, then Release Notes for each version are embedded in the generated PR
 
 ## Enabling
 
-Either install the [Renovate App](https://github.com/apps/renovate) on GitHub, or check out [Renovate OSS](https://github.com/renovatebot/renovate) for self-hosted.
-Bundler support is now enabled by default in both.
+You can install the [Renovate App](https://github.com/apps/renovate) on GitHub.
+Or you can check out [Renovate OSS](https://github.com/renovatebot/renovate) to self-host Renovate.
+Both versions support Bundler.
 
 ## Future work
 
