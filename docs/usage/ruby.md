@@ -21,10 +21,3 @@ Support is considered "alpha" stage until there have been some more real-world t
 You can install the [Renovate App](https://github.com/apps/renovate) on GitHub.
 Or you can check out [Renovate OSS](https://github.com/renovatebot/renovate) to self-host Renovate.
 Both versions support Bundler.
-
-## Future work
-
-- Updating `.gemspec` files
-- Pinning dependencies to the version found in `Gemfile.lock` rather than the latest matching version
-- Lock file maintenance
-- Selective lock file updating (if ranges are in use in the `Gemfile`)
