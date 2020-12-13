@@ -19,10 +19,10 @@ Legacy versions (`===` prefix) are ignored.
 
 ## How it works
 
-1. Renovate searches trough each repository for package files
+1. Renovate searches through each repository for package files
 1. Existing dependencies are extracted from the package files
 1. Renovate looks up the latest version on [PyPI](https://pypi.org/) to determine if any upgrades are available
-1. If the source package includes a GitHub URL as it's source, and has a "changelog" file or uses GitHub releases, a Release Note will be embedded in the generated PR
+1. If the source package includes a GitHub URL as its source, and has a "changelog" file or uses GitHub releases, a Release Note will be embedded in the generated PR
 
 ## Alternative file names
 
