@@ -3,7 +3,7 @@ title: Python Package Manager Support
 description: Python/pip dependencies support in Renovate
 ---
 
-# Python Package Manager Support
+# Python package manager support
 
 Renovate supports the following Python package managers:
 
@@ -11,12 +11,12 @@ Renovate supports the following Python package managers:
 - `pipenv` (e.g. `Pipfile`)
 - `setup.py`
 
-## Versioning Support
+## Versioning support
 
 The [PEP440](https://www.python.org/dev/peps/pep-0440/) versioning scheme has been rewritten for JavaScript for the purposes of use in this project is published as [@renovatebot/pep440](https://github.com/renovatebot/pep440).
 It supports both pinned versions as well as ranges. Legacy versions (`===` prefix) are ignored.
 
-## How It Works
+## How it works
 
 1.  Renovate will search each repository for any package files it finds
 2.  Existing dependencies will be extracted from the file(s)
@@ -69,7 +69,7 @@ Example:
 Note: an index-url found in the `requirements.txt` will take precedent over a registryUrl configured like the above.
 To override the URL found in `requirements.txt`, you need to configure it in `packageRules`, as they are applied _after_ package file extraction.
 
-## Disabling Python Support
+## Disabling Python support
 
 The most direct way to disable all Python support in Renovate is like this:
 
