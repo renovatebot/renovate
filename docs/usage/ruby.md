@@ -1,5 +1,5 @@
 ---
-title: Ruby Bundler Support
+title: Ruby Bundler support
 description: Ruby Bundler support in Renovate
 ---
 
