@@ -11,7 +11,7 @@ description: How to setup Renovate for Azure DevOps
 
 1. Select your repository
 
-1. Within <i>Configure your pipeline</i> select: <b>Starter pipeline file</b>
+1. Within _Configure your pipeline_ select: **Starter pipeline file**
 
 ![Azure DevOps starter pipeline template](assets/images/azure-devops-setup-2.png)
 
