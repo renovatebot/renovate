@@ -15,7 +15,7 @@ description: How to setup Renovate for Azure DevOps
 
 ![Azure DevOps starter pipeline template](assets/images/azure-devops-setup-2.png)
 
-1. Replace all contents with next NPM/YARN template (change all <i>PLACEHOLDER</i> strings with your values):
+1. Replace all contents with next npm/Yarn template (change all <i>PLACEHOLDER</i> strings with your values):
 
 ```
 schedules:
