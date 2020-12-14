@@ -4,9 +4,12 @@ import { issueCommand } from '@actions/core/lib/command';
 import { AggregatedResult, BaseReporter, Context } from '@jest/reporters';
 import { AssertionResult, TestResult } from '@jest/test-result';
 import stripAnsi from 'strip-ansi';
-import { getEnv } from './utils';
 
 const ROOT = process.cwd();
+
+function getEnv(key: string): string {
+  return process.env[key] ?? '';
+}
 
 type Level = 'debug' | 'warning' | 'error';
 
