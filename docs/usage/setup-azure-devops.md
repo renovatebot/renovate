@@ -78,4 +78,4 @@ jobs:
             npx --userconfig .npmrc renovate
 ```
 
-1. Additionally, you can add `renovate.json` with renovate configurations in the root of the repo. [Read more about configurations options](https://docs.renovatebot.com/configuration-options/)
+1. Additionally, you can add `renovate.json` with Renovate configurations in the root of the repo. [Read more about configurations options](https://docs.renovatebot.com/configuration-options/)
