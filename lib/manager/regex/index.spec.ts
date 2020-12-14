@@ -26,7 +26,7 @@ describe(getName(__filename), () => {
   it('extracts multiple dependencies', async () => {
     const config = {
       matchStrings: [
-        'ENV .*?_VERSION=(?<currentValue>.*) # (?<datasource>.*?)/(?<depName>.*?)(\\&versioning=(?<versioning>.*?))?\\s',
+        'ENV .*?_VERSION=(?<currentValue>.*) # (?<datasource>.*?)/(?<depName>[^&]*?)(\\&versioning=(?<versioning>[^&]*?))?\\s',
       ],
       versioningTemplate:
         '{{#if versioning}}{{versioning}}{{else}}semver{{/if}}',
@@ -48,7 +48,7 @@ describe(getName(__filename), () => {
   it('returns null if no dependencies found', async () => {
     const config = {
       matchStrings: [
-        'ENV .*?_VERSION=(?<currentValue>.*) # (?<datasource>.*?)/(?<depName>.*?)(\\&versioning=(?<versioning>.*?))?\\s',
+        'ENV .*?_VERSION=(?<currentValue>.*) # (?<datasource>.*?)/(?<depName>[^&]*?)(\\&versioning=(?<versioning>[^&]*?))?\\s',
       ],
       versioningTemplate:
         '{{#if versioning}}{{versioning}}{{else}}semver{{/if}}',
@@ -59,7 +59,7 @@ describe(getName(__filename), () => {
   it('returns null if invalid template', async () => {
     const config = {
       matchStrings: [
-        'ENV .*?_VERSION=(?<currentValue>.*) # (?<datasource>.*?)/(?<depName>.*?)(\\&versioning=(?<versioning>.*?))?\\s',
+        'ENV .*?_VERSION=(?<currentValue>.*) # (?<datasource>.*?)/(?<depName>[^&]*?)(\\&versioning=(?<versioning>[^&]*?))?\\s',
       ],
       versioningTemplate: '{{#if versioning}}{{versioning}}{{else}}semver',
     };
