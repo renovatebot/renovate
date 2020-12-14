@@ -11,7 +11,7 @@ First, navigate to [https://github.com/apps/renovate](https://github.com/apps/re
 
 ![Github App Install button](assets/images/github-app-install.png)
 
-The only choice you need to make is whether to run Renovate on:
+The only choice you need to make is whether to run Renovate on all repositories or on selected repositories:
 
 ![Github App repositories](assets/images/github-app-choose-repos.png)
 
