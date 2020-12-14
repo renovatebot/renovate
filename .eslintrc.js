@@ -127,12 +127,41 @@ module.exports = {
       },
     },
     {
-      files: ['**/*.mjs'],
+      files: ['**/*.{js,mjs}'],
 
       rules: {
         '@typescript-eslint/explicit-function-return-type': 0,
         '@typescript-eslint/explicit-module-boundary-types': 0,
         '@typescript-eslint/restrict-template-expressions': 0,
+      },
+    },
+    {
+      files: ['tools/**/*.{ts,js,mjs}'],
+      env: {
+        node: true,
+      },
+      rules: {
+        // esm always requires extensions
+        'import/extensions': 0,
+      },
+    },
+    {
+      files: ['tools/**/*.{js,mjs}'],
+      env: {
+        node: true,
+      },
+      rules: {
+        // esm always requires extensions
+        'import/extensions': [1, 'ignorePackages'],
+      },
+    },
+    {
+      files: ['docs/website/**/*.js'],
+      env: {
+        node: true,
+      },
+      rules: {
+        '@typescript-eslint/no-var-requires': 0,
       },
     },
   ],

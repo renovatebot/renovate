@@ -5,7 +5,7 @@ import {
   UpdateType,
   ValidationMessage,
 } from '../config/common';
-import { RangeStrategy, SkipReason } from '../types';
+import { ModuleApi, RangeStrategy, SkipReason } from '../types';
 import { File } from '../util/git';
 
 export type Result<T> = T | Promise<T>;
@@ -227,8 +227,12 @@ export interface UpdateDependencyConfig<T = Record<string, any>> {
   upgrade: Upgrade<T>;
 }
 
-export interface ManagerApi {
-  defaultConfig: Record<string, unknown>;
+export interface ManagerDefaultConfig extends Record<string, unknown> {
+  fileMatch?: string[];
+}
+
+export interface ManagerApi extends ModuleApi {
+  defaultConfig: ManagerDefaultConfig;
   language?: string;
   supportsLockFileMaintenance?: boolean;
 

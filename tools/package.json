@@ -10,6 +10,7 @@
     "fs-extra": "9.0.1",
     "got": "11.8.0",
     "lodash": "4.17.20",
+    "renovate": "..",
     "shelljs": "0.8.4",
     "strip-ansi": "6.0.0"
   },

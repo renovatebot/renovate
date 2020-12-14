@@ -16,7 +16,7 @@
     "docs:install": "cd docs && yarn",
     "docs:install:ci": "cd docs && yarn --frozen-lockfile",
     "generate": "run-s generate:*",
-    "generate:imports": "node tmp/tools/generate-imports.js",
+    "generate:imports": "node tools/generate-imports.js",
     "create-json-schema": "babel-node --extensions \".ts,.js\" -- bin/create-json-schema.js && prettier --write \"renovate-schema.json\"",
     "debug": "babel-node --inspect-brk  --extensions \".ts,.js\" -- lib/renovate.ts",
     "eslint": "eslint --ext .js,.mjs,.ts lib/ test/ tools/",

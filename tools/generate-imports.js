@@ -1,8 +1,8 @@
 import fs from 'fs-extra';
 import shell from 'shelljs';
+import { camelCase, findModules, newFiles, updateFile } from './utils/index.js';
 
 shell.echo('generating imports');
-const newFiles = new Set();
 
 if (!fs.existsSync('lib')) {
   shell.echo('> missing sources');
@@ -14,42 +14,12 @@ if (!fs.existsSync('data')) {
   shell.exit(0);
 }
 
-function findModules(dirname: string): string[] {
-  return fs
-    .readdirSync(dirname, { withFileTypes: true })
-    .filter((dirent) => dirent.isDirectory())
-    .map((dirent) => dirent.name)
-    .filter((name) => !name.startsWith('__'))
-    .sort();
-}
-
-async function updateFile(file: string, code: string): Promise<void> {
-  const oldCode = fs.existsSync(file) ? await fs.readFile(file, 'utf8') : null;
-  if (code !== oldCode) {
-    await fs.writeFile(file, code);
-  }
-  newFiles.add(file);
-}
-
-function camelCase(input: string): string {
-  return input
-    .replace(/(?:^\w|[A-Z]|\b\w)/g, (char, index) =>
-      index === 0 ? char.toLowerCase() : char.toUpperCase()
-    )
-    .replace(/-/g, '');
-}
-
-async function generate({
-  path,
-  types,
-  map = '',
-  excludes = [],
-}: {
-  path: string;
-  types: string[];
-  map?: string;
-  excludes?: string[];
-}): Promise<void> {
+/**
+ *
+ * @param {{path:string;  types:string[];  map?: string;  excludes?: string[];}} arg
+ * @returns {Promise<void>}
+ */
+async function generate({ path, types, map = '', excludes = [] }) {
   shell.echo(`> lib/${path}/`);
   let imports = '';
   let maps = '';
@@ -70,7 +40,7 @@ async function generate({
   await updateFile(`lib/${path}/api.generated.ts`, code.replace(/^\s+/gm, ''));
 }
 
-async function generateData(): Promise<void> {
+async function generateData() {
   const files = fs
     .readdirSync('data', { withFileTypes: true })
     .filter((dirent) => dirent.isFile())
@@ -81,7 +51,7 @@ async function generateData(): Promise<void> {
 
   const contentMapDecl = 'const data = new Map<DataFile, string>();';
 
-  const contentMapAssignments: string[] = [];
+  const contentMapAssignments = [];
   for (const file of files) {
     shell.echo(`> data/${file}`);
     const rawFileContent = await fs.readFile(`data/${file}`, 'utf8');
