@@ -5,7 +5,7 @@ description: How to install the Renovate GitHub App
 
 # GitHub app installation
 
-Installing/Enabling the Renovate GitHub App is fairly simple, and no different to any other GitHub App.
+Installing/enabling the Renovate GitHub App is simple.
 
 First, navigate to [https://github.com/apps/renovate](https://github.com/apps/renovate) and click the Install button:
 
