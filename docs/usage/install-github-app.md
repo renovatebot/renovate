@@ -1,9 +1,9 @@
 ---
-title: GitHub App Installation
+title: GitHub App installation
 description: How to install the Renovate GitHub App
 ---
 
-# GitHub App Installation
+# GitHub app installation
 
 Installing/Enabling the Renovate GitHub App is fairly simple, and no different to any other GitHub App.
 
