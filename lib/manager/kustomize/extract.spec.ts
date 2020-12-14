@@ -149,8 +149,10 @@ describe('manager/kustomize/extract', () => {
     });
     it('should correctly extract a default image', () => {
       const sample = {
+        currentDigest: undefined,
         currentValue: 'v1.0.0',
         datasource: datasourceDocker.id,
+        replaceString: 'v1.0.0',
         versioning: dockerVersioning.id,
         depName: 'node',
       };
@@ -162,8 +164,10 @@ describe('manager/kustomize/extract', () => {
     });
     it('should correctly extract an image in a repo', () => {
       const sample = {
+        currentDigest: undefined,
         currentValue: 'v1.0.0',
         datasource: datasourceDocker.id,
+        replaceString: 'v1.0.0',
         versioning: dockerVersioning.id,
         depName: 'test/node',
       };
@@ -175,8 +179,10 @@ describe('manager/kustomize/extract', () => {
     });
     it('should correctly extract from a different registry', () => {
       const sample = {
+        currentDigest: undefined,
         currentValue: 'v1.0.0',
         datasource: datasourceDocker.id,
+        replaceString: 'v1.0.0',
         versioning: dockerVersioning.id,
         depName: 'quay.io/repo/image',
       };
@@ -188,9 +194,11 @@ describe('manager/kustomize/extract', () => {
     });
     it('should correctly extract from a different port', () => {
       const sample = {
+        currentDigest: undefined,
         currentValue: 'v1.0.0',
         datasource: datasourceDocker.id,
         versioning: dockerVersioning.id,
+        replaceString: 'v1.0.0',
         depName: 'localhost:5000/repo/image',
       };
       const pkg = extractImage({
@@ -201,7 +209,9 @@ describe('manager/kustomize/extract', () => {
     });
     it('should correctly extract from a multi-depth registry', () => {
       const sample = {
+        currentDigest: undefined,
         currentValue: 'v1.0.0',
+        replaceString: 'v1.0.0',
         datasource: datasourceDocker.id,
         versioning: dockerVersioning.id,
         depName: 'localhost:5000/repo/image/service',

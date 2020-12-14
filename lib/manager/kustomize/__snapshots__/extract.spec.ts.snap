@@ -42,6 +42,7 @@ Object {
       "currentValue": undefined,
       "datasource": "docker",
       "depName": "postgres",
+      "replaceString": "sha256:b0cfe264cb1143c7c660ddfd5c482464997d62d6bc9f97f8fdf3deefce881a8c",
       "versioning": "docker",
     },
   ],
@@ -90,6 +91,7 @@ Array [
     "currentValue": "v0.1.0",
     "datasource": "docker",
     "depName": "node",
+    "replaceString": "v0.1.0",
     "versioning": "docker",
   },
   Object {
@@ -97,6 +99,7 @@ Array [
     "currentValue": "v0.0.1",
     "datasource": "docker",
     "depName": "group/instance",
+    "replaceString": "v0.0.1",
     "versioning": "docker",
   },
   Object {
@@ -104,6 +107,7 @@ Array [
     "currentValue": "v0.0.2",
     "datasource": "docker",
     "depName": "quay.io/test/repo",
+    "replaceString": "v0.0.2",
     "versioning": "docker",
   },
   Object {
@@ -111,6 +115,7 @@ Array [
     "currentValue": "v0.0.3",
     "datasource": "docker",
     "depName": "gitlab.com/org/suborg/image",
+    "replaceString": "v0.0.3",
     "versioning": "docker",
   },
   Object {
@@ -118,6 +123,7 @@ Array [
     "currentValue": "v0.0.4",
     "datasource": "docker",
     "depName": "but.this.lives.on.local/private-registry",
+    "replaceString": "v0.0.4",
     "versioning": "docker",
   },
 ]
