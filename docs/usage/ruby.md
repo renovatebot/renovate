@@ -19,4 +19,3 @@ Renovate supports upgrading dependencies in Bundler's `Gemfile`s and their accom
 
 You can install the [Renovate App](https://github.com/apps/renovate) on GitHub.
 Or you can check out [Renovate OSS](https://github.com/renovatebot/renovate) to self-host Renovate.
-Both versions support Bundler.
