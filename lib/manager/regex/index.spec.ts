@@ -70,6 +70,25 @@ describe(getName(__filename), () => {
     );
     expect(res).toBeNull();
   });
+  it('extracts extractVersion', async () => {
+    const config = {
+      matchStrings: [
+        'ENV NGINX_MODULE_HEADERS_MORE_VERSION=(?<currentValue>.*) # (?<datasource>.*?)/(?<depName>.*?)(\\&versioning=(?<versioning>.*?))?(\\&extractVersion=(?<extractVersion>.*?))?\\s',
+      ],
+    };
+    const res = await extractPackageFile(
+      dockerfileContent,
+      'Dockerfile',
+      config
+    );
+    expect(res).toMatchSnapshot();
+    expect(res.deps).toHaveLength(1);
+    expect(
+      res.deps.find(
+        (dep) => dep.depName === 'openresty/headers-more-nginx-module'
+      ).extractVersion
+    ).toEqual('^v(?<version>.*)$');
+  });
   it('extracts registryUrl', async () => {
     const config = {
       matchStrings: [
