@@ -66,6 +66,7 @@ const manualSourceUrls = {
   },
   docker: {
     'docker/compose': 'https://github.com/docker/compose',
+    'drone/drone': 'https://github.com/drone/drone',
     'gcr.io/kaniko-project/executor':
       'https://github.com/GoogleContainerTools/kaniko',
     'gitlab/gitlab-ce': 'https://gitlab.com/gitlab-org/omnibus-gitlab',
