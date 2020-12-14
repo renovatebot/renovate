@@ -3,6 +3,7 @@ import { RenovateConfig } from '../../../config';
 import { logger } from '../../../logger';
 import { Pr, platform } from '../../../platform';
 import { PrState } from '../../../types';
+import { ExternalHostError } from '../../../types/errors/external-host-error';
 import { BranchConfig } from '../../common';
 
 export async function getPrHourlyRemaining(
@@ -27,6 +28,10 @@ export async function getPrHourlyRemaining(
       logger.debug(`PR hourly limit remaining: ${prsRemaining}`);
       return prsRemaining;
     } catch (err) {
+      // istanbul ignore if
+      if (err instanceof ExternalHostError) {
+        throw err;
+      }
       logger.error({ err }, 'Error checking PRs created per hour');
       return config.prHourlyLimit;
     }
