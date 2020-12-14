@@ -3,7 +3,7 @@ title: Azure DevOps setup
 description: How to setup Renovate for Azure DevOps
 ---
 
-# Azure DevOps Setup (for NPM/YARN)
+# Azure DevOps setup (for npm/Yarn)
 
 1. Create a brand new pipeline within Azure DevOps, and select your source
 
