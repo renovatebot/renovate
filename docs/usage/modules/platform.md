@@ -1,3 +1,8 @@
+---
+title: Platforms
+hide_title: true
+---
+
 # Renovate Platforms
 
 Renovate aims to be platform-neutral, while also taking advantage of good platform-specific features.

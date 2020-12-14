@@ -1,3 +1,8 @@
+---
+title: Versioning
+hide_title: true
+---
+
 # Versioning
 
 Once Managers have extracted dependencies, and Datasources have located available versions, then Renovate will use a "Versioning" scheme to perform sorting and filtering of results.
