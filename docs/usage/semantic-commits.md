@@ -1,9 +1,9 @@
 ---
-title: Semantic Commit Messages
+title: Semantic Commit messages
 description: Configuring Renovate to use Semantic Commits
 ---
 
-# Semantic Commit Messages
+# Semantic Commit messages
 
 Renovate attempts to autodetect if your repository uses "semantic" commit message prefixes, and adds them if so.
 To do so, it looks at the 10 most recent commit messages in the base branch and uses [conventional-commits-detector](https://github.com/conventional-changelog/conventional-commits-detector) to determine convention commit type.
@@ -21,13 +21,13 @@ If Angular-style commits are found then Renovate will structure its commit messa
 
 If you wish to manually override Renovate's semantic commit detection, then you can add either `":semanticCommits"` or `":semanticCommitsDisabled"` to your `extends` array.
 
-## Changing the Semantic Commit Type
+## Changing the Semantic Commit type
 
 If you wish to say use "chore" for every PR, then you can add `":semanticCommitTypeAll(chore)"` to your `extends` array.
 Or if you wish to use `ci` then you would add `":semanticCommitTypeAll(ci)"` instead.
 This second case would mean your PR titles and commit messages will start with "ci(deps):".
 
-## Changing the Semantic Commit Scope
+## Changing the Semantic Commit scope
 
 If you don't like "deps" then this can also be configured.
 For example, to set it to "package" you should add the preset `":semanticCommitScope(package)"` to your `extends` array.
