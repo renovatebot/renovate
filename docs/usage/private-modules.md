@@ -1,6 +1,7 @@
 ---
 title: Private npm module support
 description: How to support private npm  modules when using Renovate
+hide_title: true
 ---
 
 # Private npm module support

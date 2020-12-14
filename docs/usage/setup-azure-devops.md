@@ -1,6 +1,7 @@
 ---
 title: Azure DevOps Setup
 description: How to setup Renovate for Azure DevOps
+hide_title: true
 ---
 
 # Azure DevOps Setup (for NPM/YARN)

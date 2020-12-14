@@ -1,6 +1,7 @@
 ---
 title: Configuration Options
 description: Configuration Options usable in renovate.json or package.json
+hide_title: true
 ---
 
 # Configuration Options

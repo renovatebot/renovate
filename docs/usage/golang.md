@@ -1,6 +1,7 @@
 ---
 title: Go Modules
 description: Go modules support in Renovate
+hide_title: true
 ---
 
 # Automated Dependency Updates for Go Modules

@@ -1,6 +1,7 @@
 ---
 title: Reconfiguring Renovate
 description: How to reconfigure Renovate once it's onboarded
+hide_title: true
 ---
 
 # Reconfiguring Renovate

@@ -1,6 +1,7 @@
 ---
 title: Bazel
 description: Bazel dependencies support in Renovate
+hide_title: true
 ---
 
 # Bazel

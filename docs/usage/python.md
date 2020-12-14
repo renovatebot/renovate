@@ -1,6 +1,7 @@
 ---
 title: Python Package Manager Support
 description: Python/pip dependencies support in Renovate
+hide_title: true
 ---
 
 # Python package manager support

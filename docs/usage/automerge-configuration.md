@@ -1,6 +1,7 @@
 ---
 title: Automerge configuration and troubleshooting
 description: Learn all about Renovate's automerge functionality here
+hide_title: true
 ---
 
 # Introduction

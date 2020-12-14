@@ -1,3 +1,8 @@
+---
+title: GitLab bot security
+hide_title: true
+---
+
 # GitLab bot security
 
 You should understand GitLab's security model, before deciding to run a "bot" service like Renovate on GitLab, particularly the pipeline credentials.

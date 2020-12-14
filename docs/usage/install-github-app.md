@@ -1,6 +1,7 @@
 ---
 title: GitHub App Installation
 description: How to install the Renovate GitHub App
+hide_title: true
 ---
 
 # GitHub App Installation

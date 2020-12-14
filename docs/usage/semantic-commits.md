@@ -1,6 +1,7 @@
 ---
 title: Semantic Commit Messages
 description: Configuring Renovate to use Semantic Commits
+hide_title: true
 ---
 
 # Semantic Commit Messages

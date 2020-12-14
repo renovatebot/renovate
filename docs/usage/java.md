@@ -1,6 +1,7 @@
 ---
 title: Java Versions
 description: Java versions support in Renovate
+hide_title: true
 ---
 
 # Java Dependency Updates

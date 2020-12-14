@@ -1,6 +1,7 @@
 ---
 title: GitLab App Installation
 description: How to install the Renovate GitLab App
+hide_title: true
 ---
 
 # Hosted GitLab App

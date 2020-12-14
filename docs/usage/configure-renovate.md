@@ -1,6 +1,7 @@
 ---
 title: Configure Renovate (Onboarding PR)
 description: How to onboard Renovate via a Pull Request
+hide_title: true
 ---
 
 # Configure Renovate (Onboarding PR)

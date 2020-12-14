@@ -1,6 +1,7 @@
 ---
 title: Frequently Asked Questions (FAQ)
 description: Frequently Asked Questions for Renovate Configuration
+hide_title: true
 ---
 
 # Frequently Asked Questions (FAQ)

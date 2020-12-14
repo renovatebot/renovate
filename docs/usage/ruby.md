@@ -1,6 +1,7 @@
 ---
 title: Ruby Bundler Support
 description: Ruby Bundler support in Renovate
+hide_title: true
 ---
 
 # Automated Dependency Updates for Ruby Bundler Dependencies

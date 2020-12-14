@@ -1,6 +1,7 @@
 ---
 title: Self-Hosted Configuration
 description: Self-Hosted Configuration usable in renovate.json or package.json
+hide_title: true
 ---
 
 # Self-Hosted Configuration Options

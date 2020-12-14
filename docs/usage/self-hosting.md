@@ -1,3 +1,8 @@
+---
+title: Self-hosting
+hide_title: true
+---
+
 # Self-Hosting Renovate
 
 ## Installing Renovate OSS CLI

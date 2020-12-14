@@ -1,6 +1,7 @@
 ---
 title: Node.js Versions
 description: Node.js versions support in Renovate
+hide_title: true
 ---
 
 # Node.js Versions

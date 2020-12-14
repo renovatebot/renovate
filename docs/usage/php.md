@@ -1,6 +1,7 @@
 ---
 title: PHP Composer Support
 description: PHP Composer support in Renovate
+hide_title: true
 ---
 
 # Automated Dependency Updates for PHP Composer Dependencies

@@ -1,6 +1,7 @@
 ---
 title: Config Template Editing
 description: How to edit Renovate's config templates
+hide_title: true
 ---
 
 # Config Template Editing

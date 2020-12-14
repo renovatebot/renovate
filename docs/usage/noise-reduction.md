@@ -1,6 +1,7 @@
 ---
 title: Noise Reduction
 description: How to reduce the "noise" associated with module updates
+hide_title: true
 ---
 
 # Noise Reduction

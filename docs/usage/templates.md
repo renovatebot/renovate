@@ -1,6 +1,7 @@
 ---
 title: Template fields
 description: Explain Renovate template fields
+hide_title: true
 ---
 
 # Template fields

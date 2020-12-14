@@ -1,6 +1,7 @@
 ---
 title: Docker
 description: Docker Package Manager Support in Renovate
+hide_title: true
 ---
 
 # Docker

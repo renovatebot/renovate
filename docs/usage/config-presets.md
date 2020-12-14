@@ -1,6 +1,7 @@
 ---
 title: Shareable Config Presets
 description: Renovate's support for ESLint-like shareable configs
+hide_title: true
 ---
 
 # Shareable Config Presets

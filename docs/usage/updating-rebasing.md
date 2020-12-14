@@ -1,6 +1,7 @@
 ---
 title: Updating and Rebasing Branches
 description: How Renovate Updates and Rebases Branches
+hide_title: true
 ---
 
 # Updating and Rebasing Branches
