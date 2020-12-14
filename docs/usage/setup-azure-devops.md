@@ -1,5 +1,5 @@
 ---
-title: Azure DevOps Setup
+title: Azure DevOps setup
 description: How to setup Renovate for Azure DevOps
 ---
 
