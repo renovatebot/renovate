@@ -1,5 +1,5 @@
 import { readFileSync } from 'fs';
-import path from 'path';
+import upath from 'upath';
 import { getConfig } from '../../../config/defaults';
 import * as _fs from '../../../util/fs';
 import * as npmExtract from '.';
@@ -11,7 +11,7 @@ const defaultConfig = getConfig();
 
 function readFixture(fixture: string) {
   return readFileSync(
-    path.resolve(__dirname, `../__fixtures__/${fixture}`),
+    upath.resolve(__dirname, `../__fixtures__/${fixture}`),
     'utf8'
   );
 }
@@ -173,6 +173,20 @@ describe('manager/npm/extract', () => {
       fs.readLocalFile = jest.fn((fileName) => {
         if (fileName === 'lerna.json') {
           return '{}';
+        }
+        return null;
+      });
+      const res = await npmExtract.extractPackageFile(
+        workspacesSimpleContent,
+        'package.json',
+        defaultConfig
+      );
+      expect(res).toMatchSnapshot();
+    });
+    it('finds simple yarn workspaces with lerna.json and useWorkspaces: true', async () => {
+      fs.readLocalFile = jest.fn((fileName) => {
+        if (fileName === 'lerna.json') {
+          return '{"useWorkspaces": true}';
         }
         return null;
       });

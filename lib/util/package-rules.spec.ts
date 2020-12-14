@@ -547,6 +547,64 @@ describe('applyPackageRules()', () => {
     });
     expect(res1.x).toBeDefined();
   });
+  it('checks if matchCurrentVersion selector works with regular expressions', () => {
+    const config: TestConfig = {
+      packageRules: [
+        {
+          packageNames: ['test'],
+          matchCurrentVersion: '/^4/',
+          x: 1,
+        },
+      ],
+    };
+    const res1 = applyPackageRules({
+      ...config,
+      ...{
+        depName: 'test',
+        currentValue: '4.6.0',
+        fromVersion: '4.6.0',
+      },
+    });
+    const res2 = applyPackageRules({
+      ...config,
+      ...{
+        depName: 'test',
+        currentValue: '5.6.0',
+        fromVersion: '5.6.0',
+      },
+    });
+    expect(res1.x).toBeDefined();
+    expect(res2.x).toBeUndefined();
+  });
+  it('checks if matchCurrentVersion selector works with negated regular expressions', () => {
+    const config: TestConfig = {
+      packageRules: [
+        {
+          packageNames: ['test'],
+          matchCurrentVersion: '!/^4/',
+          x: 1,
+        },
+      ],
+    };
+    const res1 = applyPackageRules({
+      ...config,
+      ...{
+        depName: 'test',
+        currentValue: '4.6.0',
+        fromVersion: '4.6.0',
+      },
+    });
+    const res2 = applyPackageRules({
+      ...config,
+      ...{
+        depName: 'test',
+        currentValue: '5.6.0',
+        fromVersion: '5.6.0',
+      },
+    });
+    expect(res1.x).toBeUndefined();
+    expect(res2.x).toBeDefined();
+  });
   it('matches paths', () => {
     const config: TestConfig = {
       packageFile: 'examples/foo/package.json',

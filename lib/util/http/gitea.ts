@@ -1,5 +1,5 @@
-import url from 'url';
 import { PLATFORM_TYPE_GITEA } from '../../constants/platforms';
+import { resolveBaseUrl } from '../url';
 import { Http, HttpOptions, HttpResponse, InternalHttpOptions } from '.';
 
 let baseUrl;
@@ -23,9 +23,9 @@ function getPaginationContainer(body: any): any[] {
   return null;
 }
 
-function resolveUrl(path: string): URL {
-  const resolvedUrlString = url.resolve(baseUrl, path);
-  return new url.URL(resolvedUrlString);
+function resolveUrl(path: string, base: string): URL {
+  const resolvedUrlString = resolveBaseUrl(base, path);
+  return new URL(resolvedUrlString);
 }
 
 export class GiteaHttp extends Http<GiteaHttpOptions, GiteaHttpOptions> {
@@ -37,7 +37,7 @@ export class GiteaHttp extends Http<GiteaHttpOptions, GiteaHttpOptions> {
     path: string,
     options?: InternalHttpOptions & GiteaHttpOptions
   ): Promise<HttpResponse<T> | null> {
-    const resolvedUrl = resolveUrl(path);
+    const resolvedUrl = resolveUrl(path, options.baseUrl ?? baseUrl);
     const opts = {
       baseUrl,
       ...options,

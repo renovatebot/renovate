@@ -1,4 +1,3 @@
-import { join } from 'path';
 import URL from 'url';
 import fs from 'fs-extra';
 import Git, {
@@ -7,6 +6,8 @@ import Git, {
   SimpleGit,
   StatusResult as StatusResult_,
 } from 'simple-git';
+import { join } from 'upath';
+import { configFileNames } from '../../config/app-strings';
 import {
   REPOSITORY_CHANGED,
   REPOSITORY_DISABLED,
@@ -39,6 +40,7 @@ interface StorageConfig {
   extraCloneOpts?: GitOptions;
   gitAuthorName?: string;
   gitAuthorEmail?: string;
+  cloneSubmodules?: boolean;
 }
 
 interface LocalConfig extends StorageConfig {
@@ -140,7 +142,7 @@ export async function initRepo(args: StorageConfig): Promise<void> {
   config = { ...args } as any;
   config.additionalBranches = [];
   config.branchIsModified = {};
-  git = Git(config.localDir).silent(true);
+  git = Git(config.localDir);
   gitInitialized = false;
   await fetchBranchCommits();
 }
@@ -263,13 +265,15 @@ export async function syncGit(): Promise<void> {
     logger.debug({ durationMs }, 'git clone completed');
   }
   config.currentBranchSha = (await git.raw(['rev-parse', 'HEAD'])).trim();
-  const submodules = await getSubmodules();
-  for (const submodule of submodules) {
-    try {
-      logger.debug(`Cloning git submodule at ${submodule}`);
-      await git.submoduleUpdate(['--init', '--', submodule]);
-    } catch (err) {
-      logger.warn(`Unable to initialise git submodule at ${submodule}`);
+  if (config.cloneSubmodules) {
+    const submodules = await getSubmodules();
+    for (const submodule of submodules) {
+      try {
+        logger.debug(`Cloning git submodule at ${submodule}`);
+        await git.submoduleUpdate(['--init', submodule]);
+      } catch (err) {
+        logger.warn(`Unable to initialise git submodule at ${submodule}`);
+      }
     }
   }
   try {
@@ -603,7 +607,7 @@ export async function commitFiles({
       }
     }
     // istanbul ignore if
-    if (fileNames.length === 1 && fileNames[0] === 'renovate.json') {
+    if (fileNames.length === 1 && configFileNames.includes(fileNames[0])) {
       fileNames.unshift('-f');
     }
     if (fileNames.length) {
@@ -654,6 +658,10 @@ export async function commitFiles({
       logger.warn(
         'App has not been granted permissions to update Workflows - aborting branch.'
       );
+      return null;
+    }
+    if (err.message.includes('remote: error: cannot lock ref')) {
+      logger.error({ err }, 'Error committing files.');
       return null;
     }
     logger.debug({ err }, 'Error committing files');

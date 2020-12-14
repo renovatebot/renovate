@@ -1,6 +1,6 @@
-import * as path from 'path';
 import * as fs from 'fs-extra';
 import tmp, { DirectoryResult } from 'tmp-promise';
+import * as upath from 'upath';
 import { getName } from '../../../test/util';
 import { exec } from '../../util/exec';
 import { ifSystemSupportsGradle } from './__testutil__/gradle';
@@ -32,7 +32,7 @@ describe(getName(__filename), () => {
           );
           await createRenovateGradlePlugin(workingDir.path);
 
-          const gradlew = path.join(workingDir.path, 'gradlew');
+          const gradlew = upath.join(workingDir.path, 'gradlew');
           await exec(`${gradlew} ${GRADLE_DEPENDENCY_REPORT_OPTIONS}`, {
             cwd: workingDir.path,
             extraEnv,

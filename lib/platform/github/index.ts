@@ -168,10 +168,12 @@ export async function initRepo({
   forkToken,
   localDir,
   renovateUsername,
+  cloneSubmodules,
+  ignorePrAuthor,
 }: RepoParams): Promise<RepoResult> {
   logger.debug(`initRepo("${repository}")`);
   // config is used by the platform api itself, not necessary for the app layer to know
-  config = { localDir, repository } as any;
+  config = { localDir, repository, cloneSubmodules, ignorePrAuthor } as any;
   // istanbul ignore if
   if (endpoint) {
     // Necessary for Renovate Pro - do not remove
@@ -566,7 +568,7 @@ async function getOpenPrs(): Promise<PrList> {
         pr.targetBranch = pr.baseRefName;
         delete pr.baseRefName;
         // https://developer.github.com/v4/enum/mergeablestate
-        const canMergeStates = ['BEHIND', 'CLEAN'];
+        const canMergeStates = ['BEHIND', 'CLEAN', 'HAS_HOOKS'];
         const hasNegativeReview = pr.reviews?.nodes?.length > 0;
         // istanbul ignore if
         if (hasNegativeReview) {
@@ -683,14 +685,14 @@ export async function getPrList(): Promise<Pr[]> {
       throw new ExternalHostError(err, PLATFORM_TYPE_GITHUB);
     }
     config.prList = prList
-      .filter((pr) => {
-        return (
+      .filter(
+        (pr) =>
           config.forkMode ||
+          config.ignorePrAuthor ||
           (pr?.user?.login && config?.renovateUsername
             ? pr.user.login === config.renovateUsername
             : true)
-        );
-      })
+      )
       .map(
         (pr) =>
           ({

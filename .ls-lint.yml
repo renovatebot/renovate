@@ -1,0 +1,18 @@
+ls:
+  .js: kebab-case
+  .md: kebab-case
+  .ts: kebab-case
+  .d.ts: kebab-case
+  .spec.ts: kebab-case
+  .generated.ts: kebab-case
+
+ignore:
+  - .eslintrc.js
+  - .git
+  - .github/ISSUE_TEMPLATE
+  - .github/pull_request_template.md
+  - dist
+  - jest.config.js
+  - node_modules
+  - SECURITY.md
+  - test/e2e/node_modules

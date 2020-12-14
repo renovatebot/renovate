@@ -5,13 +5,13 @@ description: How to setup Renovate for Azure DevOps
 
 # Azure DevOps Setup (for NPM/YARN)
 
-1. Create a brand new pipeline within Azure DevOps, and select your source.
+1. Create a brand new pipeline within Azure DevOps, and select your source
 
 ![Azure DevOps create new pipeline](assets/images/azure-devops-setup-1.png)
 
-1. Select your repository.
+1. Select your repository
 
-1. Within <i>Configure your pipeline</i> select: <b>Starter pipeline file</b>.
+1. Within <i>Configure your pipeline</i> select: <b>Starter pipeline file</b>
 
 ![Azure DevOps starter pipeline template](assets/images/azure-devops-setup-2.png)
 
@@ -78,4 +78,4 @@ jobs:
             npx --userconfig .npmrc renovate
 ```
 
-1. Additionally, you can add `renovate.json` with renovate configurations in the root of the repo. [Read more about configurations options](https://docs.renovatebot.com/configuration-options/).
+1. Additionally, you can add `renovate.json` with renovate configurations in the root of the repo. [Read more about configurations options](https://docs.renovatebot.com/configuration-options/)

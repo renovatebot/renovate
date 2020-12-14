@@ -2,7 +2,7 @@ import * as semver from 'semver';
 import { CONFIG_VALIDATION } from '../../../../constants/error-messages';
 import { Release } from '../../../../datasource';
 import { logger } from '../../../../logger';
-import { regEx } from '../../../../util/regex';
+import { configRegexPredicate, isConfigRegex } from '../../../../util/regex';
 import * as allVersioning from '../../../../versioning';
 import * as npmVersioning from '../../../../versioning/npm';
 import * as pep440 from '../../../../versioning/pep440';
@@ -17,8 +17,6 @@ export interface FilterConfig {
   respectLatest?: boolean;
   versioning: string;
 }
-
-const regexes: Record<string, RegExp> = {};
 
 export function filterVersions(
   config: FilterConfig,
@@ -74,25 +72,10 @@ export function filterVersions(
   }
 
   if (allowedVersions) {
-    if (
-      allowedVersions.length > 1 &&
-      allowedVersions.startsWith('/') &&
-      allowedVersions.endsWith('/')
-    ) {
-      regexes[allowedVersions] =
-        regexes[allowedVersions] || regEx(allowedVersions.slice(1, -1));
-      filteredVersions = filteredVersions.filter((v) =>
-        regexes[allowedVersions].test(v.version)
-      );
-    } else if (
-      allowedVersions.length > 2 &&
-      allowedVersions.startsWith('!/') &&
-      allowedVersions.endsWith('/')
-    ) {
-      regexes[allowedVersions] =
-        regexes[allowedVersions] || regEx(allowedVersions.slice(2, -1));
-      filteredVersions = filteredVersions.filter(
-        (v) => !regexes[allowedVersions].test(v.version)
+    if (isConfigRegex(allowedVersions)) {
+      const isAllowed = configRegexPredicate(allowedVersions);
+      filteredVersions = filteredVersions.filter(({ version }) =>
+        isAllowed(version)
       );
     } else if (versioning.isValid(allowedVersions)) {
       filteredVersions = filteredVersions.filter((v) =>

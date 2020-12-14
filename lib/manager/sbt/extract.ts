@@ -176,6 +176,10 @@ function parseDepExpr(
     currentValue,
   };
 
+  if (variables[rawVersion]) {
+    result.groupName = `${rawVersion} for ${groupId}`;
+  }
+
   if (depType) {
     result.depType = depType;
   }

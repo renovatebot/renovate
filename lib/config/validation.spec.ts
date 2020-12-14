@@ -44,6 +44,31 @@ describe('config/validation', () => {
       expect(errors).toHaveLength(2);
       expect(errors).toMatchSnapshot();
     });
+    it('catches invalid matchCurrentVersion regex', async () => {
+      const config = {
+        packageRules: [
+          {
+            packageNames: ['foo'],
+            matchCurrentVersion: '/^2/',
+          },
+          {
+            packageNames: ['bar'],
+            matchCurrentVersion: '/***$}{]][/',
+          },
+          {
+            packageNames: ['baz'],
+            matchCurrentVersion: '!/^2/',
+          },
+          {
+            packageNames: ['quack'],
+            matchCurrentVersion: '!/***$}{]][/',
+          },
+        ],
+      };
+      const { errors } = await configValidation.validateConfig(config);
+      expect(errors).toHaveLength(2);
+      expect(errors).toMatchSnapshot();
+    });
     it('returns nested errors', async () => {
       const config: RenovateConfig = {
         foo: 1,

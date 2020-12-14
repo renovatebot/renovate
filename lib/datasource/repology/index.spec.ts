@@ -1,42 +1,20 @@
 import fs from 'fs';
 import { getPkgReleases } from '..';
-import * as httpMock from '../../../test/httpMock';
+import * as httpMock from '../../../test/http-mock';
 import { getName } from '../../../test/util';
 import { EXTERNAL_HOST_ERROR } from '../../constants/error-messages';
 import { id as versioning } from '../../versioning/loose';
 import { RepologyPackage, id as datasource } from '.';
 
-const repologyApiHost = 'https://repology.org/';
+const repologyApiHost = 'https://repology.org/api/v1/';
 
 type ResponseMock = { status: number; body?: string };
 
-const mockProjectBy = (
-  repo: string,
-  name: string,
-  binary: ResponseMock,
-  source: ResponseMock
-) => {
-  const endpoint = '/tools/project-by';
-  const defaultParams = {
-    target_page: 'api_v1_project',
-    noautoresolve: 'on',
-  };
-
-  if (binary) {
-    httpMock
-      .scope(repologyApiHost)
-      .get(endpoint)
-      .query({ ...defaultParams, repo, name, name_type: 'binname' })
-      .reply(binary.status, binary.body);
-  }
-
-  if (source) {
-    httpMock
-      .scope(repologyApiHost)
-      .get(endpoint)
-      .query({ ...defaultParams, repo, name, name_type: 'srcname' })
-      .reply(source.status, source.body);
-  }
+const mockProjectBy = (name: string, response: ResponseMock) => {
+  httpMock
+    .scope(repologyApiHost)
+    .get(`/project/${name}`)
+    .reply(response.status, response.body);
 };
 
 const fixtureNginx = fs.readFileSync(
@@ -65,12 +43,7 @@ describe(getName(__filename), () => {
     afterEach(() => httpMock.reset());
 
     it('returns null for empty result', async () => {
-      mockProjectBy(
-        'debian_stable',
-        'nginx',
-        { status: 200, body: '[]' },
-        { status: 200, body: '[]' }
-      );
+      mockProjectBy('nginx', { status: 200, body: '[]' });
 
       expect(
         await getPkgReleases({
@@ -83,12 +56,7 @@ describe(getName(__filename), () => {
     });
 
     it('returns null for missing repository or package', async () => {
-      mockProjectBy(
-        'this_should',
-        'never-exist',
-        { status: 404 },
-        { status: 404 }
-      );
+      mockProjectBy('never-exist', { status: 404 });
 
       expect(
         await getPkgReleases({
@@ -100,39 +68,8 @@ describe(getName(__filename), () => {
       expect(httpMock.getTrace()).toMatchSnapshot();
     });
 
-    it('returns null for unsupported repository', async () => {
-      mockProjectBy(
-        'unsupported_repo',
-        'nginx',
-        { status: 403 },
-        { status: 403 }
-      );
-
-      expect(
-        await getPkgReleases({
-          datasource,
-          versioning,
-          depName: 'unsupported_repo/nginx',
-        })
-      ).toBeNull();
-      expect(httpMock.getTrace()).toMatchSnapshot();
-    });
-
     it('throws error on unexpected response during binary package lookup', async () => {
-      mockProjectBy('debian_stable', 'nginx', { status: 500 }, null);
-
-      await expect(
-        getPkgReleases({
-          datasource,
-          versioning,
-          depName: 'debian_stable/nginx',
-        })
-      ).rejects.toThrow(EXTERNAL_HOST_ERROR);
-      expect(httpMock.getTrace()).toMatchSnapshot();
-    });
-
-    it('throws error on unexpected response during source package lookup', async () => {
-      mockProjectBy('debian_stable', 'nginx', { status: 404 }, { status: 500 });
+      mockProjectBy('nginx', { status: 500 });
 
       await expect(
         getPkgReleases({
@@ -156,12 +93,7 @@ describe(getName(__filename), () => {
     });
 
     it('returns correct version for binary package', async () => {
-      mockProjectBy(
-        'debian_stable',
-        'nginx',
-        { status: 200, body: fixtureNginx },
-        null
-      );
+      mockProjectBy('nginx', { status: 200, body: fixtureNginx });
 
       const res = await getPkgReleases({
         datasource,
@@ -175,12 +107,7 @@ describe(getName(__filename), () => {
     });
 
     it('returns correct version for source package', async () => {
-      mockProjectBy(
-        'debian_stable',
-        'gcc-defaults',
-        { status: 404 },
-        { status: 200, body: fixtureGccDefaults }
-      );
+      mockProjectBy('gcc-defaults', { status: 200, body: fixtureGccDefaults });
 
       const res = await getPkgReleases({
         datasource,
@@ -194,12 +121,7 @@ describe(getName(__filename), () => {
     });
 
     it('returns correct version for multi-package project with same name', async () => {
-      mockProjectBy(
-        'alpine_3_12',
-        'gcc',
-        { status: 200, body: fixtureGcc },
-        null
-      );
+      mockProjectBy('gcc', { status: 200, body: fixtureGcc });
 
       const res = await getPkgReleases({
         datasource,
@@ -213,12 +135,10 @@ describe(getName(__filename), () => {
     });
 
     it('returns correct version for multi-package project with different name', async () => {
-      mockProjectBy(
-        'debian_stable',
-        'pulseaudio-utils',
-        { status: 200, body: fixturePulseaudio },
-        null
-      );
+      mockProjectBy('pulseaudio-utils', {
+        status: 200,
+        body: fixturePulseaudio,
+      });
 
       const res = await getPkgReleases({
         datasource,
@@ -238,12 +158,7 @@ describe(getName(__filename), () => {
       ];
       const pkgsJSON = JSON.stringify(pkgs);
 
-      mockProjectBy(
-        'dummy',
-        'example',
-        { status: 200, body: pkgsJSON },
-        { status: 200, body: pkgsJSON }
-      );
+      mockProjectBy('example', { status: 200, body: pkgsJSON });
 
       expect(
         await getPkgReleases({

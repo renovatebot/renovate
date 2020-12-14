@@ -35,6 +35,7 @@ import {
 } from '../common';
 import { smartTruncate } from '../utils/pr-body';
 import * as helper from './gitea-helper';
+import { smartLinks } from './utils';
 
 interface GiteaRepoConfig {
   repository: string;
@@ -45,6 +46,7 @@ interface GiteaRepoConfig {
   issueList: Promise<Issue[]> | null;
   labelList: Promise<helper.Label[]> | null;
   defaultBranch: string;
+  cloneSubmodules: boolean;
 }
 
 const defaults = {
@@ -154,9 +156,9 @@ function getLabelList(): Promise<helper.Label[]> {
         return [];
       });
 
-    config.labelList = Promise.all([repoLabels, orgLabels]).then((labels) => {
-      return [].concat(...labels);
-    });
+    config.labelList = Promise.all([repoLabels, orgLabels]).then((labels) =>
+      [].concat(...labels)
+    );
   }
 
   return config.labelList;
@@ -217,12 +219,17 @@ const platform: Platform = {
     }
   },
 
-  async initRepo({ repository, localDir }: RepoParams): Promise<RepoResult> {
+  async initRepo({
+    repository,
+    localDir,
+    cloneSubmodules,
+  }: RepoParams): Promise<RepoResult> {
     let repo: helper.Repo;
 
     config = {} as any;
     config.repository = repository;
     config.localDir = localDir;
+    config.cloneSubmodules = cloneSubmodules;
 
     // Attempt to fetch information about repository
     try {
@@ -590,12 +597,14 @@ const platform: Platform = {
   async ensureIssue({
     title,
     reuseTitle,
-    body,
+    body: content,
     shouldReOpen,
     once,
   }: EnsureIssueConfig): Promise<'updated' | 'created' | null> {
     logger.debug(`ensureIssue(${title})`);
     try {
+      const body = smartLinks(content);
+
       const issueList = await platform.getIssueList();
       let issues = issueList.filter((i) => i.title === title);
       if (!issues.length) {
@@ -793,7 +802,7 @@ const platform: Platform = {
   },
 
   getPrBody(prBody: string): string {
-    return smartTruncate(prBody, 1000000);
+    return smartTruncate(smartLinks(prBody), 1000000);
   },
 
   getVulnerabilityAlerts(): Promise<VulnerabilityAlert[]> {

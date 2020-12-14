@@ -1,14 +1,15 @@
-import path from 'path';
 import fs from 'fs-extra';
+import upath from 'upath';
+
 import { extractPackageFile } from '.';
 
 const simplePodfile = fs.readFileSync(
-  path.resolve(__dirname, './__fixtures__/Podfile.simple'),
+  upath.resolve(__dirname, './__fixtures__/Podfile.simple'),
   'utf-8'
 );
 
 const complexPodfile = fs.readFileSync(
-  path.resolve(__dirname, './__fixtures__/Podfile.complex'),
+  upath.resolve(__dirname, './__fixtures__/Podfile.complex'),
   'utf-8'
 );
 

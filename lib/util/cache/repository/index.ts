@@ -22,6 +22,7 @@ export interface BranchUpgradeCache {
   newDigest?: string;
   newValue?: string;
   toVersion?: string;
+  sourceUrl?: string;
 }
 
 export interface BranchCache {

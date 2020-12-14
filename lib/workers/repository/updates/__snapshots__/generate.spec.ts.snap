@@ -11,7 +11,6 @@ Object {
   "automerge": false,
   "blockedByPin": false,
   "branchName": "some-branch",
-  "canBeUnpublished": false,
   "commitMessage": "",
   "constraints": Object {},
   "depName": "some-dep",
@@ -66,7 +65,6 @@ Object {
   "automerge": false,
   "blockedByPin": false,
   "branchName": "some-branch",
-  "canBeUnpublished": false,
   "commitBodyTable": true,
   "commitMessage": "
 
@@ -136,6 +134,6 @@ Object {
 }
 `;
 
-exports[`workers/repository/updates/generate generateBranchConfig() handles upgrades 1`] = `"some-title ()"`;
+exports[`workers/repository/updates/generate generateBranchConfig() handles upgrades 1`] = `"some-title (patch)"`;
 
 exports[`workers/repository/updates/generate generateBranchConfig() supports manual prTitle 1`] = `"upgrade some-dep"`;

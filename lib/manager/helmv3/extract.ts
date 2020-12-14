@@ -37,6 +37,7 @@ export function extractPackageFile(
     logger.debug({ fileName }, 'Failed to parse helm Chart.yaml');
     return null;
   }
+  const packageFileVersion = chart.version;
   let deps: PackageDependency[] = [];
   if (!is.nonEmptyArray(chart?.dependencies)) {
     logger.debug({ fileName }, 'Chart has no dependencies');
@@ -84,6 +85,7 @@ export function extractPackageFile(
   const res = {
     deps,
     datasource: datasourceHelm.id,
+    packageFileVersion,
   };
   return res;
 }

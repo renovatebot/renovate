@@ -1,4 +1,4 @@
-import { RenovateConfig } from '../../config/common';
+import { RenovateConfig } from '../../config';
 import {
   PLATFORM_INTEGRATION_UNAUTHORIZED,
   PLATFORM_RATE_LIMIT_EXCEEDED,
@@ -98,6 +98,20 @@ export async function addAssigneesReviewers(
   }
 }
 
+export function getPlatformPrOptions(
+  config: RenovateConfig & PlatformPrOptions
+): PlatformPrOptions {
+  return {
+    azureAutoComplete: config.azureAutoComplete,
+    azureWorkItemId: config.azureWorkItemId,
+    bbUseDefaultReviewers: config.bbUseDefaultReviewers,
+    gitLabAutomerge:
+      config.automerge &&
+      config.automergeType === 'pr' &&
+      config.gitLabAutomerge,
+  };
+}
+
 // Ensures that PR exists with matching title/body
 export async function ensurePr(
   prConfig: BranchConfig,
@@ -147,7 +161,10 @@ export async function ensurePr(
     logger.debug(
       `Branch is configured for branch automerge, branch status) is: ${await getBranchStatus()}`
     );
-    if ((await getBranchStatus()) === BranchStatus.yellow) {
+    if (
+      config.stabilityStatus !== BranchStatus.yellow &&
+      (await getBranchStatus()) === BranchStatus.yellow
+    ) {
       logger.debug('Checking how long this branch has been pending');
       const lastCommitTime = await getBranchLastCommitTime(branchName);
       const currentTime = new Date();
@@ -200,7 +217,8 @@ export async function ensurePr(
       );
       if (
         !dependencyDashboardCheck &&
-        elapsedHours < config.prNotPendingHours
+        (config.stabilityStatus !== BranchStatus.yellow ||
+          elapsedHours < config.prNotPendingHours)
       ) {
         logger.debug(
           `Branch is ${elapsedHours} hours old - skipping PR creation`
@@ -341,7 +359,12 @@ export async function ensurePr(
       if (config.dryRun) {
         logger.info(`DRY-RUN: Would update PR #${existingPr.number}`);
       } else {
-        await platform.updatePr({ number: existingPr.number, prTitle, prBody });
+        await platform.updatePr({
+          number: existingPr.number,
+          prTitle,
+          prBody,
+          platformOptions: getPlatformPrOptions(config),
+        });
         logger.info({ pr: existingPr.number, prTitle }, `PR updated`);
       }
       return { prResult: PrResult.Updated, pr: existingPr };
@@ -358,15 +381,6 @@ export async function ensurePr(
         logger.info('DRY-RUN: Would create PR: ' + prTitle);
         pr = { number: 0, displayNumber: 'Dry run PR' } as never;
       } else {
-        const platformOptions: PlatformPrOptions = {
-          azureAutoComplete: config.azureAutoComplete,
-          azureWorkItemId: config.azureWorkItemId,
-          bbUseDefaultReviewers: config.bbUseDefaultReviewers,
-          gitLabAutomerge:
-            config.automerge &&
-            config.automergeType === 'pr' &&
-            config.gitLabAutomerge,
-        };
         if (!dependencyDashboardCheck && prLimitReached) {
           return { prResult: PrResult.LimitReached };
         }
@@ -375,8 +389,8 @@ export async function ensurePr(
           targetBranch: config.baseBranch,
           prTitle,
           prBody,
-          labels: config.labels,
-          platformOptions,
+          labels: [...new Set([...config.labels, ...config.addLabels])],
+          platformOptions: getPlatformPrOptions(config),
           draftPR: config.draftPR,
         });
         logger.info({ pr: pr.number, prTitle }, 'PR created');
@@ -416,6 +430,7 @@ export async function ensurePr(
       if (config.branchAutomergeFailureMessage === 'branch status error') {
         content += '\n___\n * Branch has one or more failed status checks';
       }
+      content = platform.getPrBody(content);
       logger.debug('Adding branch automerge failure message to PR');
       // istanbul ignore if
       if (config.dryRun) {

@@ -1,5 +1,10 @@
 import { ReleaseType } from 'semver';
-import { GlobalConfig, UpdateType, ValidationMessage } from '../config/common';
+import {
+  GlobalConfig,
+  MatchStringsStrategy,
+  UpdateType,
+  ValidationMessage,
+} from '../config/common';
 import { RangeStrategy, SkipReason } from '../types';
 import { File } from '../util/git';
 
@@ -29,6 +34,7 @@ export interface ExtractConfig extends ManagerConfig {
 
 export interface CustomExtractConfig extends ExtractConfig {
   matchStrings: string[];
+  matchStringsStrategy?: MatchStringsStrategy;
   depNameTemplate?: string;
   lookupNameTemplate?: string;
   datasourceTemplate?: string;
@@ -96,6 +102,7 @@ export interface PackageFile<T = Record<string, any>>
   yarnrc?: string;
   yarnWorkspacesPackages?: string[] | string;
   matchStrings?: string[];
+  matchStringsStrategy?: MatchStringsStrategy;
 }
 
 export interface Package<T> extends ManagerData<T> {
@@ -215,15 +222,21 @@ export interface UpdateArtifact {
   config: UpdateArtifactsConfig;
 }
 
-export interface UpdateDependencyConfig {
+export interface UpdateDependencyConfig<T = Record<string, any>> {
   fileContent: string;
-  upgrade: Upgrade;
+  upgrade: Upgrade<T>;
 }
 
 export interface ManagerApi {
   defaultConfig: Record<string, unknown>;
   language?: string;
   supportsLockFileMaintenance?: boolean;
+
+  bumpPackageVersion?(
+    content: string,
+    currentValue: string,
+    bumpVersion: ReleaseType | string
+  ): Result<string | null>;
 
   extractAllPackageFiles?(
     config: ExtractConfig,

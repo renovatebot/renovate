@@ -1,73 +1,9 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
-exports[`platform/azure/azure-got-wrapper gitApi should set personal access token and endpoint 1`] = `
-WebApi {
-  "authHandler": PersonalAccessTokenCredentialHandler {
-    "token": "1234567890123456789012345678901234567890123456789012",
-  },
-  "isNoProxyHost": [Function],
-  "options": Object {
-    "ignoreSslError": false,
-  },
-  "rest": RestClient {
-    "client": HttpClient {
-      "_allowRedirectDowngrade": false,
-      "_allowRedirects": true,
-      "_allowRetries": false,
-      "_certConfig": undefined,
-      "_disposed": false,
-      "_httpProxy": undefined,
-      "_ignoreSslError": false,
-      "_keepAlive": false,
-      "_maxRedirects": 50,
-      "_maxRetries": 1,
-      "_socketTimeout": undefined,
-      "handlers": Array [
-        PersonalAccessTokenCredentialHandler {
-          "token": "1234567890123456789012345678901234567890123456789012",
-        },
-      ],
-      "requestOptions": Object {
-        "ignoreSslError": false,
-      },
-    },
-  },
-  "serverUrl": "https://dev.azure.com/renovate1",
-  "vsoClient": VsoClient {
-    "_initializationPromise": Promise {},
-    "_locationsByAreaPromises": Object {},
-    "basePath": "/renovate1",
-    "baseUrl": "https://dev.azure.com/renovate1",
-    "restClient": RestClient {
-      "client": HttpClient {
-        "_allowRedirectDowngrade": false,
-        "_allowRedirects": true,
-        "_allowRetries": false,
-        "_certConfig": undefined,
-        "_disposed": false,
-        "_httpProxy": undefined,
-        "_ignoreSslError": false,
-        "_keepAlive": false,
-        "_maxRedirects": 50,
-        "_maxRetries": 1,
-        "_socketTimeout": undefined,
-        "handlers": Array [
-          PersonalAccessTokenCredentialHandler {
-            "token": "1234567890123456789012345678901234567890123456789012",
-          },
-        ],
-        "requestOptions": Object {
-          "ignoreSslError": false,
-        },
-      },
-    },
-  },
-}
-`;
-
 exports[`platform/azure/azure-got-wrapper gitApi should set bearer token and endpoint 1`] = `
 WebApi {
   "authHandler": BearerCredentialHandler {
+    "allowCrossOriginAuthentication": true,
     "token": "token",
   },
   "isNoProxyHost": [Function],
@@ -89,6 +25,7 @@ WebApi {
       "_socketTimeout": undefined,
       "handlers": Array [
         BearerCredentialHandler {
+          "allowCrossOriginAuthentication": true,
           "token": "token",
         },
       ],
@@ -118,6 +55,7 @@ WebApi {
         "_socketTimeout": undefined,
         "handlers": Array [
           BearerCredentialHandler {
+            "allowCrossOriginAuthentication": true,
             "token": "token",
           },
         ],
@@ -133,6 +71,7 @@ WebApi {
 exports[`platform/azure/azure-got-wrapper gitApi should set password and endpoint 1`] = `
 WebApi {
   "authHandler": BasicCredentialHandler {
+    "allowCrossOriginAuthentication": true,
     "password": "pass",
     "username": "user",
   },
@@ -155,6 +94,7 @@ WebApi {
       "_socketTimeout": undefined,
       "handlers": Array [
         BasicCredentialHandler {
+          "allowCrossOriginAuthentication": true,
           "password": "pass",
           "username": "user",
         },
@@ -185,8 +125,77 @@ WebApi {
         "_socketTimeout": undefined,
         "handlers": Array [
           BasicCredentialHandler {
+            "allowCrossOriginAuthentication": true,
             "password": "pass",
             "username": "user",
+          },
+        ],
+        "requestOptions": Object {
+          "ignoreSslError": false,
+        },
+      },
+    },
+  },
+}
+`;
+
+exports[`platform/azure/azure-got-wrapper gitApi should set personal access token and endpoint 1`] = `
+WebApi {
+  "authHandler": PersonalAccessTokenCredentialHandler {
+    "allowCrossOriginAuthentication": true,
+    "token": "1234567890123456789012345678901234567890123456789012",
+  },
+  "isNoProxyHost": [Function],
+  "options": Object {
+    "ignoreSslError": false,
+  },
+  "rest": RestClient {
+    "client": HttpClient {
+      "_allowRedirectDowngrade": false,
+      "_allowRedirects": true,
+      "_allowRetries": false,
+      "_certConfig": undefined,
+      "_disposed": false,
+      "_httpProxy": undefined,
+      "_ignoreSslError": false,
+      "_keepAlive": false,
+      "_maxRedirects": 50,
+      "_maxRetries": 1,
+      "_socketTimeout": undefined,
+      "handlers": Array [
+        PersonalAccessTokenCredentialHandler {
+          "allowCrossOriginAuthentication": true,
+          "token": "1234567890123456789012345678901234567890123456789012",
+        },
+      ],
+      "requestOptions": Object {
+        "ignoreSslError": false,
+      },
+    },
+  },
+  "serverUrl": "https://dev.azure.com/renovate1",
+  "vsoClient": VsoClient {
+    "_initializationPromise": Promise {},
+    "_locationsByAreaPromises": Object {},
+    "basePath": "/renovate1",
+    "baseUrl": "https://dev.azure.com/renovate1",
+    "restClient": RestClient {
+      "client": HttpClient {
+        "_allowRedirectDowngrade": false,
+        "_allowRedirects": true,
+        "_allowRetries": false,
+        "_certConfig": undefined,
+        "_disposed": false,
+        "_httpProxy": undefined,
+        "_ignoreSslError": false,
+        "_keepAlive": false,
+        "_maxRedirects": 50,
+        "_maxRetries": 1,
+        "_socketTimeout": undefined,
+        "handlers": Array [
+          PersonalAccessTokenCredentialHandler {
+            "allowCrossOriginAuthentication": true,
+            "token": "1234567890123456789012345678901234567890123456789012",
           },
         ],
         "requestOptions": Object {

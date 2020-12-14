@@ -5,9 +5,8 @@ import { logger } from '../../logger';
 import { SkipReason } from '../../types';
 import { ExtractConfig, PackageDependency, PackageFile } from '../common';
 
-const isValidChartName = (name: string): boolean => {
-  return !/[!@#$%^&*(),.?":{}/|<>A-Z]/.test(name);
-};
+const isValidChartName = (name: string): boolean =>
+  !/[!@#$%^&*(),.?":{}/|<>A-Z]/.test(name);
 
 export function extractPackageFile(
   content: string,

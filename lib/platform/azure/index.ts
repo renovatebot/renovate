@@ -118,6 +118,7 @@ export async function getJsonFile(fileName: string): Promise<any | null> {
 export async function initRepo({
   repository,
   localDir,
+  cloneSubmodules,
 }: RepoParams): Promise<RepoResult> {
   logger.debug(`initRepo("${repository}")`);
   config = { repository } as Config;
@@ -161,6 +162,7 @@ export async function initRepo({
     extraCloneOpts: azureHelper.getStorageExtraCloneOpts(opts),
     gitAuthorName: global.gitAuthor?.name,
     gitAuthorEmail: global.gitAuthor?.email,
+    cloneSubmodules,
   });
   const repoConfig: RepoResult = {
     defaultBranch,

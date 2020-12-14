@@ -6,8 +6,6 @@ A [list of all supported repositories](https://repology.org/repositories/statist
 
 As an example, the `Alpine Linux 3.12` repository points to `https://repology.org/repository/alpine_3_12` and therefor has the repository identifier `alpine_3_12`.
 
-Please note that as of today, the Repology API endpoint `/tools/project-by` does not support a small subset of repositories. You can manually double-check [on their website](https://repology.org/tools/project-by) if your desired repository is supported and otherwise raise a request on their side. This datasource will also print a debug message `Repology does not support tools/project-by lookups for repository` if the given repository is unsupported.
-
 **Usage Example**
 
 A real world example for this specific datasource would be maintaining system packages within a Dockerfile, as this allows to specifically pin each dependency without having to manually keep the versions up-to-date. This can be achieved by configuring a generic regex manager in `renovate.json` for files named `Dockerfile`:

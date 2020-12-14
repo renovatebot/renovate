@@ -18,6 +18,7 @@ export const presets: Record<string, Preset> = {
       'group:monorepos',
       'group:recommended',
       'helpers:disableTypesNodeMajor',
+      'workarounds:all',
     ],
   },
   'base-js': {

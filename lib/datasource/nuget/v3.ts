@@ -1,12 +1,15 @@
+import is from '@sindresorhus/is';
+import { RequestError } from 'got';
 import pAll from 'p-all';
 import * as semver from 'semver';
 import { XmlDocument } from 'xmldoc';
 import { logger } from '../../logger';
 import * as packageCache from '../../util/cache/package';
 import { Http } from '../../util/http';
+import { ensureTrailingSlash } from '../../util/url';
 import { Release, ReleaseResult } from '../common';
 
-import { id } from './common';
+import { id, removeBuildMeta } from './common';
 
 const http = new Http(id);
 
@@ -47,6 +50,7 @@ export async function getResourceUrl(
       cacheNamespace,
       responseCacheKey
     );
+    // istanbul ignore else: currently not testable
     if (!servicesIndexRaw) {
       servicesIndexRaw = (await http.getJson<ServicesIndexRaw>(url)).body;
       await packageCache.set(
@@ -72,17 +76,21 @@ export async function getResourceUrl(
     // istanbul ignore if
     if (
       resourceType === 'RegistrationsBaseUrl' &&
+      !version?.startsWith('3.0.0-') &&
       !semver.satisfies(version, '^3.0.0')
     ) {
-      logger.warn(`Nuget: RegistrationsBaseUrl/${version} is the major update`);
+      logger.warn(
+        { url, version },
+        `Nuget: Unknown version returned. Only v3 is supported`
+      );
     }
 
     await packageCache.set(cacheNamespace, resultCacheKey, serviceId, 60);
     return serviceId;
   } catch (err) {
     logger.debug(
-      { err },
-      `nuget registry failure: can't get ${resourceType} form ${url}`
+      { err, url },
+      `nuget registry failure: can't get ${resourceType}`
     );
     return null;
   }
@@ -138,12 +146,12 @@ export async function getReleases(
   let latestStable: string = null;
   const releases = catalogEntries.map(
     ({ version, published: releaseTimestamp, projectUrl, listed }) => {
-      const release: Release = { version };
+      const release: Release = { version: removeBuildMeta(version) };
       if (releaseTimestamp) {
         release.releaseTimestamp = releaseTimestamp;
       }
       if (semver.valid(version) && !semver.prerelease(version)) {
-        latestStable = version;
+        latestStable = removeBuildMeta(version);
         homepage = projectUrl || homepage;
       }
       if (listed === false) {
@@ -162,27 +170,44 @@ export async function getReleases(
     releases,
   };
 
-  if (registryUrl.toLowerCase() === defaultNugetFeed.toLowerCase()) {
-    try {
-      const nuspecUrl = `https://api.nuget.org/v3-flatcontainer/${pkgName.toLowerCase()}/${latestStable}/${pkgName.toLowerCase()}.nuspec`;
+  try {
+    const packageBaseAddress = await getResourceUrl(
+      registryUrl,
+      'PackageBaseAddress'
+    );
+    // istanbul ignore else: this is a required v3 api
+    if (is.nonEmptyString(packageBaseAddress)) {
+      const nuspecUrl = `${ensureTrailingSlash(
+        packageBaseAddress
+      )}${pkgName.toLowerCase()}/${latestStable}/${pkgName.toLowerCase()}.nuspec`;
       const metaresult = await http.get(nuspecUrl);
       const nuspec = new XmlDocument(metaresult.body);
       const sourceUrl = nuspec.valueWithPath('metadata.repository@url');
       if (sourceUrl) {
         dep.sourceUrl = sourceUrl;
       }
-    } catch (err) /* istanbul ignore next */ {
+    }
+  } catch (err) /* istanbul ignore next */ {
+    // ignore / silence 404. Seen on proget, if remote connector is used and package is not yet cached
+    if (err instanceof RequestError && err.response?.statusCode === 404) {
       logger.debug(
-        `Cannot obtain sourceUrl for ${pkgName} using version ${latestStable}`
+        { registryUrl, pkgName, pkgVersion: latestStable },
+        `package manifest (.nuspec) not found`
       );
       return dep;
     }
-  } else if (homepage) {
-    dep.sourceUrl = homepage;
+    logger.debug(
+      { err, registryUrl, pkgName, pkgVersion: latestStable },
+      `Cannot obtain sourceUrl`
+    );
+    return dep;
   }
 
+  // istanbul ignore else: not easy testable
   if (homepage) {
-    dep.homepage = homepage;
+    // only assign if not assigned
+    dep.sourceUrl ??= homepage;
+    dep.homepage ??= homepage;
   }
 
   return dep;

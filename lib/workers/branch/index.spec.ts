@@ -16,7 +16,6 @@ import * as _commit from './commit';
 import * as _getUpdated from './get-updated';
 import * as _reuse from './reuse';
 import * as _schedule from './schedule';
-import * as _statusChecks from './status-checks';
 import * as branchWorker from '.';
 
 jest.mock('./get-updated');
@@ -24,7 +23,6 @@ jest.mock('./schedule');
 jest.mock('./check-existing');
 jest.mock('./reuse');
 jest.mock('../../manager/npm/post-update');
-jest.mock('./status-checks');
 jest.mock('./automerge');
 jest.mock('./commit');
 jest.mock('../pr');
@@ -37,7 +35,6 @@ const schedule = mocked(_schedule);
 const checkExisting = mocked(_checkExisting);
 const reuse = mocked(_reuse);
 const npmPostExtract = mocked(_npmPostExtract);
-const statusChecks = mocked(_statusChecks);
 const automerge = mocked(_automerge);
 const commit = mocked(_commit);
 const prWorker = mocked(_prWorker);
@@ -83,12 +80,20 @@ describe('workers/branch', () => {
       const res = await branchWorker.processBranch(config);
       expect(res).toEqual(ProcessBranchResult.NotScheduled);
     });
-    it('skips branch if not unpublishSafe + pending', async () => {
+    it('skips branch for fresh release with stabilityDays', async () => {
       schedule.isScheduledNow.mockReturnValueOnce(true);
-      config.unpublishSafe = true;
-      config.canBeUnpublished = true;
       config.prCreation = 'not-pending';
-      git.branchExists.mockReturnValueOnce(true);
+      config.upgrades = [
+        {
+          releaseTimestamp: new Date('2019-01-01').getTime(),
+          stabilityDays: 1,
+        },
+        {
+          releaseTimestamp: new Date().getTime(),
+          stabilityDays: 1,
+        },
+      ] as never;
+      git.branchExists.mockReturnValueOnce(false);
       const res = await branchWorker.processBranch(config);
       expect(res).toEqual(ProcessBranchResult.Pending);
     });
@@ -270,7 +275,6 @@ describe('workers/branch', () => {
       commit.commitFilesToBranch.mockResolvedValueOnce(null);
       automerge.tryBranchAutomerge.mockResolvedValueOnce('automerged');
       await branchWorker.processBranch(config);
-      expect(statusChecks.setUnpublishable).toHaveBeenCalledTimes(1);
       expect(automerge.tryBranchAutomerge).toHaveBeenCalledTimes(1);
       expect(prWorker.ensurePr).toHaveBeenCalledTimes(0);
     });
@@ -289,7 +293,6 @@ describe('workers/branch', () => {
         ...config,
         requiredStatusChecks: null,
       });
-      expect(statusChecks.setUnpublishable).toHaveBeenCalledTimes(1);
       expect(automerge.tryBranchAutomerge).toHaveBeenCalledTimes(1);
       expect(prWorker.ensurePr).toHaveBeenCalledTimes(0);
     });
@@ -306,7 +309,6 @@ describe('workers/branch', () => {
       commit.commitFilesToBranch.mockResolvedValueOnce(null);
       automerge.tryBranchAutomerge.mockResolvedValueOnce('automerged');
       await branchWorker.processBranch({ ...config, dryRun: true });
-      expect(statusChecks.setUnpublishable).toHaveBeenCalledTimes(1);
       expect(automerge.tryBranchAutomerge).toHaveBeenCalledTimes(1);
       expect(prWorker.ensurePr).toHaveBeenCalledTimes(0);
     });
@@ -681,15 +683,224 @@ describe('workers/branch', () => {
       const result = await branchWorker.processBranch({
         ...config,
         postUpgradeTasks: {
-          commands: ['echo 1', 'disallowed task'],
+          commands: ['echo {{{versioning}}}', 'disallowed task'],
           fileFilters: ['modified_file', 'deleted_file'],
         },
         localDir: '/localDir',
-        allowedPostUpgradeCommands: ['^echo 1$'],
+        allowedPostUpgradeCommands: ['^echo {{{versioning}}}$'],
+        allowPostUpgradeCommandTemplating: true,
+        upgrades: [
+          {
+            ...defaultConfig,
+            depName: 'some-dep-name',
+            postUpgradeTasks: {
+              commands: ['echo {{{versioning}}}', 'disallowed task'],
+              fileFilters: ['modified_file', 'deleted_file'],
+            },
+          } as never,
+        ],
       });
 
       expect(result).toEqual(ProcessBranchResult.Done);
-      expect(exec.exec).toHaveBeenCalledWith('echo 1', { cwd: '/localDir' });
+      expect(exec.exec).toHaveBeenCalledWith('echo semver', {
+        cwd: '/localDir',
+      });
+    });
+
+    it('executes post-upgrade tasks with disabled post-upgrade command templating', async () => {
+      const updatedPackageFile: File = {
+        name: 'pom.xml',
+        contents: 'pom.xml file contents',
+      };
+      getUpdated.getUpdatedPackageFiles.mockResolvedValueOnce({
+        updatedPackageFiles: [updatedPackageFile],
+        artifactErrors: [],
+      } as never);
+      npmPostExtract.getAdditionalFiles.mockResolvedValueOnce({
+        artifactErrors: [],
+        updatedArtifacts: [
+          {
+            name: 'yarn.lock',
+            contents: Buffer.from([1, 2, 3]) /* Binary content */,
+          },
+        ],
+      } as never);
+      git.branchExists.mockReturnValueOnce(true);
+      platform.getBranchPr.mockResolvedValueOnce({
+        title: 'rebase!',
+        state: PrState.Open,
+        body: `- [x] <!-- rebase-check -->`,
+      } as never);
+      git.isBranchModified.mockResolvedValueOnce(true);
+      git.getRepoStatus.mockResolvedValueOnce({
+        modified: ['modified_file'],
+        not_added: [],
+        deleted: ['deleted_file'],
+      } as StatusResult);
+      global.trustLevel = 'high';
+
+      fs.outputFile.mockReturnValue();
+      fs.readFile.mockResolvedValueOnce(Buffer.from('modified file content'));
+
+      schedule.isScheduledNow.mockReturnValueOnce(false);
+      commit.commitFilesToBranch.mockResolvedValueOnce(null);
+
+      const result = await branchWorker.processBranch({
+        ...config,
+        postUpgradeTasks: {
+          commands: ['echo {{{versioning}}}', 'disallowed task'],
+          fileFilters: ['modified_file', 'deleted_file'],
+        },
+        localDir: '/localDir',
+        allowedPostUpgradeCommands: ['^echo {{{versioning}}}$'],
+        allowPostUpgradeCommandTemplating: false,
+        upgrades: [
+          {
+            ...defaultConfig,
+            depName: 'some-dep-name',
+            postUpgradeTasks: {
+              commands: ['echo {{{versioning}}}', 'disallowed task'],
+              fileFilters: ['modified_file', 'deleted_file'],
+            },
+          } as never,
+        ],
+      });
+
+      expect(result).toEqual(ProcessBranchResult.Done);
+      expect(exec.exec).toHaveBeenCalledWith('echo {{{versioning}}}', {
+        cwd: '/localDir',
+      });
+    });
+
+    it('executes post-upgrade tasks with multiple dependecy in one branch', async () => {
+      const updatedPackageFile: File = {
+        name: 'pom.xml',
+        contents: 'pom.xml file contents',
+      };
+      getUpdated.getUpdatedPackageFiles.mockResolvedValueOnce({
+        updatedPackageFiles: [updatedPackageFile],
+        artifactErrors: [],
+      } as never);
+      npmPostExtract.getAdditionalFiles.mockResolvedValueOnce({
+        artifactErrors: [],
+        updatedArtifacts: [
+          {
+            name: 'yarn.lock',
+            contents: Buffer.from([1, 2, 3]) /* Binary content */,
+          },
+        ],
+      } as never);
+      git.branchExists.mockReturnValueOnce(true);
+      platform.getBranchPr.mockResolvedValueOnce({
+        title: 'rebase!',
+        state: PrState.Open,
+        body: `- [x] <!-- rebase-check -->`,
+      } as never);
+      git.isBranchModified.mockResolvedValueOnce(true);
+      git.getRepoStatus
+        .mockResolvedValueOnce({
+          modified: ['modified_file', 'modified_then_deleted_file'],
+          not_added: [],
+          deleted: ['deleted_file', 'deleted_then_created_file'],
+        } as StatusResult)
+        .mockResolvedValueOnce({
+          modified: ['modified_file', 'deleted_then_created_file'],
+          not_added: [],
+          deleted: ['deleted_file', 'modified_then_deleted_file'],
+        } as StatusResult);
+      global.trustLevel = 'high';
+
+      fs.outputFile.mockReturnValue();
+      fs.readFile
+        .mockResolvedValueOnce(Buffer.from('modified file content'))
+        .mockResolvedValueOnce(Buffer.from('this file will not exists'))
+        .mockResolvedValueOnce(Buffer.from('modified file content again'))
+        .mockResolvedValueOnce(Buffer.from('this file was once deleted'));
+
+      schedule.isScheduledNow.mockReturnValueOnce(false);
+      commit.commitFilesToBranch.mockResolvedValueOnce(null);
+
+      const inconfig = {
+        ...config,
+        postUpgradeTasks: {
+          commands: ['echo {{{depName}}}', 'disallowed task'],
+          fileFilters: [
+            'modified_file',
+            'deleted_file',
+            'deleted_then_created_file',
+            'modified_then_deleted_file',
+          ],
+        },
+        localDir: '/localDir',
+        allowedPostUpgradeCommands: ['^echo {{{depName}}}$'],
+        allowPostUpgradeCommandTemplating: true,
+        upgrades: [
+          {
+            ...defaultConfig,
+            depName: 'some-dep-name-1',
+            postUpgradeTasks: {
+              commands: ['echo {{{depName}}}', 'disallowed task'],
+              fileFilters: [
+                'modified_file',
+                'deleted_file',
+                'deleted_then_created_file',
+                'modified_then_deleted_file',
+              ],
+            },
+          } as never,
+          {
+            ...defaultConfig,
+            depName: 'some-dep-name-2',
+            postUpgradeTasks: {
+              commands: ['echo {{{depName}}}', 'disallowed task'],
+              fileFilters: [
+                'modified_file',
+                'deleted_file',
+                'deleted_then_created_file',
+                'modified_then_deleted_file',
+              ],
+            },
+          } as never,
+        ],
+      };
+
+      const result = await branchWorker.processBranch(inconfig);
+
+      expect(result).toEqual(ProcessBranchResult.Done);
+      expect(exec.exec).toHaveBeenNthCalledWith(1, 'echo some-dep-name-1', {
+        cwd: '/localDir',
+      });
+      expect(exec.exec).toHaveBeenNthCalledWith(2, 'echo some-dep-name-2', {
+        cwd: '/localDir',
+      });
+      expect(exec.exec).toHaveBeenCalledTimes(2);
+      expect(
+        (commit.commitFilesToBranch.mock.calls[0][0].updatedArtifacts.find(
+          (f) => f.name === 'modified_file'
+        ).contents as Buffer).toString()
+      ).toBe('modified file content again');
+      expect(
+        (commit.commitFilesToBranch.mock.calls[0][0].updatedArtifacts.find(
+          (f) => f.name === 'deleted_then_created_file'
+        ).contents as Buffer).toString()
+      ).toBe('this file was once deleted');
+      expect(
+        commit.commitFilesToBranch.mock.calls[0][0].updatedArtifacts.find(
+          (f) =>
+            f.contents === 'deleted_then_created_file' && f.name === '|delete|'
+        )
+      ).toBeUndefined();
+      expect(
+        commit.commitFilesToBranch.mock.calls[0][0].updatedArtifacts.find(
+          (f) => f.name === 'modified_then_deleted_file'
+        )
+      ).toBeUndefined();
+      expect(
+        commit.commitFilesToBranch.mock.calls[0][0].updatedArtifacts.find(
+          (f) =>
+            f.contents === 'modified_then_deleted_file' && f.name === '|delete|'
+        )
+      ).not.toBeUndefined();
     });
   });
 });

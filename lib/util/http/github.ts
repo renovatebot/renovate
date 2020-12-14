@@ -1,4 +1,3 @@
-import URL from 'url';
 import is from '@sindresorhus/is';
 import pAll from 'p-all';
 import parseLinkHeader from 'parse-link-header';
@@ -159,13 +158,6 @@ export class GithubHttp extends Http<GithubHttpOptions, GithubHttpOptions> {
       throwHttpErrors: true,
     };
 
-    const method = opts.method || 'get';
-
-    if (method.toLowerCase() === 'post' && url === 'graphql') {
-      // GitHub Enterprise uses unversioned graphql path
-      opts.baseUrl = opts.baseUrl.replace('/v3/', '/');
-    }
-
     const accept = constructAcceptString(opts.headers?.accept);
 
     opts.headers = {
@@ -194,18 +186,18 @@ export class GithubHttp extends Http<GithubHttpOptions, GithubHttpOptions> {
               new Array(lastPage),
               (x, i) => i + 1
             ).slice(1);
-            const queue = pageNumbers.map((page) => (): Promise<
-              HttpResponse
-            > => {
-              const nextUrl = URL.parse(linkHeader.next.url, true);
-              delete nextUrl.search;
-              nextUrl.query.page = page.toString();
-              return this.request(
-                URL.format(nextUrl),
-                { ...opts, paginate: false },
-                okToRetry
-              );
-            });
+            const queue = pageNumbers.map(
+              (page) => (): Promise<HttpResponse> => {
+                const nextUrl = new URL(linkHeader.next.url, baseUrl);
+                delete nextUrl.search;
+                nextUrl.searchParams.set('page', page.toString());
+                return this.request(
+                  nextUrl,
+                  { ...opts, paginate: false },
+                  okToRetry
+                );
+              }
+            );
             const pages = await pAll(queue, { concurrency: 5 });
             result.body = result.body.concat(
               ...pages.filter(Boolean).map((page) => page.body)
@@ -229,6 +221,7 @@ export class GithubHttp extends Http<GithubHttpOptions, GithubHttpOptions> {
     const path = 'graphql';
 
     const opts: HttpPostOptions = {
+      baseUrl: baseUrl.replace('/v3/', '/'), // GHE uses unversioned graphql path
       body: { query },
       headers: { accept: options?.acceptHeader },
     };

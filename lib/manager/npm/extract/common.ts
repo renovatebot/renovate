@@ -13,3 +13,9 @@ export type LockFileEntry = Record<
   string,
   { version: string; integrity?: boolean }
 >;
+
+export interface LockFile {
+  lockedVersions: Record<string, string>;
+  lockfileVersion?: number; // cache version for Yarn
+  isYarn1?: boolean;
+}
