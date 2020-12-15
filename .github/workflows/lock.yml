@@ -16,8 +16,8 @@ jobs:
         if: github.repository == 'renovatebot/renovate'
         with:
           github-token: ${{ github.token }}
-          issue-lock-inactive-days: 730
-          pr-lock-inactive-days: 730
+          issue-lock-inactive-days: 30
+          pr-lock-inactive-days: 30
           issue-lock-comment: >
             This issue has been automatically locked since there
             has not been any recent activity after it was closed.
