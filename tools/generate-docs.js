@@ -4,6 +4,7 @@ import { generateDatasources } from './docs/datasources.js';
 import { generateManagers } from './docs/manager.js';
 import { generateModules } from './docs/modules.js';
 import { generatePresets } from './docs/presets.js';
+import { generateSchema } from './docs/schema.js';
 import { generateTemplates } from './docs/templates.js';
 import { generateVersioning } from './docs/versioning.js';
 
@@ -46,6 +47,10 @@ import { generateVersioning } from './docs/versioning.js';
     // self-hosted-configuration
     shell.echo('* self-hosted-configuration');
     await generateConfig(true);
+
+    // json-schema
+    shell.echo('* json-schema');
+    await generateSchema();
   } catch (e) {
     shell.echo(e.toString());
     shell.exit(1);
