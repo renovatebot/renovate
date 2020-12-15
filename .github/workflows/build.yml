@@ -169,6 +169,64 @@ jobs:
       - name: Type check
         run: yarn type-check
 
+  docs:
+    runs-on: ubuntu-latest
+
+    # lint shouldn't need more than 10 min
+    timeout-minutes: 15
+
+    steps:
+      - name: Set up Node.js ${{ env.NODE_VERSION }}
+        uses: actions/setup-node@v1.4.4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+
+      - name: Init platform
+        run: |
+          git config --global core.autocrlf false
+          git config --global core.symlinks true
+          git config --global user.email 'renovate@whitesourcesoftware.com'
+          git config --global user.name  'Renovate Bot'
+          npm config set scripts-prepend-node-path true
+          echo "Node $(node --version)"
+          echo "Yarn $(yarn --version)"
+
+      - uses: actions/checkout@v2.3.4
+
+      - name: Cache Yarn packages
+        id: yarn_cache_packages
+        uses: actions/cache@v2.1.3
+        with:
+          path: ${{ env.YARN_CACHE_FOLDER }}
+          key: ${{ env.YARN_PACKAGE_CACHE_KEY }}-${{ runner.os }}-yarn_cache-${{ hashFiles('**/yarn.lock') }}
+          restore-keys: |
+            ${{ env.YARN_PACKAGE_CACHE_KEY }}-${{ runner.os }}-yarn_cache-
+
+      # Clear caches on cache miss, otherwise they will grow indefinitely
+      - name: Clear yarn cache
+        if: steps.yarn_cache_packages.outputs.cache-hit != 'true'
+        run: yarn cache clean
+
+      - name: Installing dependencies
+        run: yarn install --frozen-lockfile
+
+      - name: Build renovate
+        run: yarn build
+
+      - name: Installing docs dependencies
+        run: yarn install --frozen-lockfile
+        working-directory: ./docs/website
+
+      - name: Build docs
+        run: yarn build
+        working-directory: ./docs/website
+
+      - name: Upload docs
+        uses: actions/upload-artifact@v2.2.1
+        with:
+          name: docs
+          path: docs/website/build
+
   release:
     needs: [lint, test]
     runs-on: ubuntu-latest
