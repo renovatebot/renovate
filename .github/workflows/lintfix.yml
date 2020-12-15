@@ -1,8 +1,6 @@
 name: lintfix
 
 on:
-  # enable normal pr for testing, needs to be disabled!!!
-  pull_request:
   pull_request_target:
 
 env:
