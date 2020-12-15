@@ -12,7 +12,8 @@
     "lodash": "4.17.20",
     "markdown-table": "2.0.0",
     "shelljs": "0.8.4",
-    "strip-ansi": "6.0.0"
+    "strip-ansi": "6.0.0",
+    "upath": "2.0.1"
   },
   "devDependencies": {
     "@types/graceful-fs": "4.1.4"

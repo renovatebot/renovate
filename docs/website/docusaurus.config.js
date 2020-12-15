@@ -1,3 +1,6 @@
+/* eslint-disable import/no-extraneous-dependencies */
+const theme = require('prism-react-renderer/themes/github');
+
 module.exports = {
   title: 'Renovate Docs',
   tagline: 'Documentation for Renovate',
@@ -34,6 +37,9 @@ module.exports = {
         src: '/img/logo.png',
       },
       copyright: `Built with Daucusaurus v2`,
+    },
+    prism: {
+      theme,
     },
   },
   presets: [

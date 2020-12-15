@@ -1,4 +1,5 @@
 import fs from 'fs-extra';
+import path from 'upath';
 
 /**
  * @type {Set<string>}
@@ -49,6 +50,7 @@ export function camelCase(input) {
 export async function updateFile(file, code) {
   const oldCode = fs.existsSync(file) ? await fs.readFile(file, 'utf8') : null;
   if (code !== oldCode) {
+    await fs.ensureDir(path.dirname(file));
     await fs.writeFile(file, code);
   }
   newFiles.add(file);
