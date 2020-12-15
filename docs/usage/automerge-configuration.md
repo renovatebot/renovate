@@ -17,7 +17,7 @@ For example, if you have `jest` or `mocha` as a dependency, and it has an upgrad
 If you have a linter like `eslint` or `tslint` and its update passes... automerge them!
 If you have an API with 100% test coverage and `express` is updated... automerge it!
 
-![Automerge](assets/images/automerge.png)
+![Automerged PR](assets/images/automerged-pr.png)
 
 ## Configuration examples
 
