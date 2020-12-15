@@ -1407,12 +1407,12 @@ These updates have all been created already. Click a checkbox below to force a r
       const scope = await initRepo();
       scope
         .get(
-          '/api/v4/projects/some%2Frepo/repository/files/file.json?ref=master'
+          '/api/v4/projects/some%2Frepo/repository/files/dir%2Ffile.json?ref=master'
         )
         .reply(200, {
           content: Buffer.from(JSON.stringify(data)).toString('base64'),
         });
-      const res = await gitlab.getJsonFile('file.json');
+      const res = await gitlab.getJsonFile('dir/file.json');
       expect(res).toEqual(data);
       expect(httpMock.getTrace()).toMatchSnapshot();
     });

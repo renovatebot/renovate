@@ -137,11 +137,12 @@ function urlEscape(str: string): string {
 
 export async function getJsonFile(fileName: string): Promise<any | null> {
   try {
+    const escapedFileName = urlEscape(fileName);
     return JSON.parse(
       Buffer.from(
         (
           await gitlabApi.getJson<{ content: string }>(
-            `projects/${config.repository}/repository/files/${fileName}?ref=${config.defaultBranch}`
+            `projects/${config.repository}/repository/files/${escapedFileName}?ref=${config.defaultBranch}`
           )
         ).body.content,
         'base64'
