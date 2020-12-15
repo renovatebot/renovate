@@ -25,6 +25,7 @@
     "bin",
     "coverage",
     "config.js",
-    "tmp"
+    "tmp",
+    "docs"
   ]
 }
