@@ -24,7 +24,7 @@ async function generate({ path, types, map = '', excludes = [] }) {
   let imports = '';
   let maps = '';
   for (const ds of findModules(`lib/${path}`).filter(
-    (n) => !excludes?.includes(n)
+    (n) => !excludes.includes(n)
   )) {
     const name = camelCase(ds);
     imports += `import * as ${name} from './${ds}';\n`;

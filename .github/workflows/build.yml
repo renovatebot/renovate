@@ -155,6 +155,9 @@ jobs:
       - name: Installing dependencies
         run: yarn install --frozen-lockfile
 
+      - name: Build
+        run: yarn build
+
       - name: Lint
         run: |
           yarn eslint -f ./tmp/tools/eslint-gh-reporter.js
