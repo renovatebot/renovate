@@ -321,6 +321,7 @@ describe(getName(__filename), () => {
       });
 
       expect(release).toBeNull();
+      expect(httpMock.getTrace()).toMatchSnapshot();
     });
   });
 });
