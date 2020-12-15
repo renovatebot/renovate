@@ -3,6 +3,7 @@ import { generateDatasources } from './docs/datasources.js';
 import { generateManagers } from './docs/manager.js';
 import { generateModules } from './docs/modules.js';
 import { generatePresets } from './docs/presets.js';
+import { generateTemplates } from './docs/templates.js';
 import { generateVersioning } from './docs/versioning.js';
 
 // eslint-disable-next-line @typescript-eslint/no-floating-promises
@@ -32,6 +33,10 @@ import { generateVersioning } from './docs/versioning.js';
     // presets
     shell.echo('* presets');
     await generatePresets();
+
+    // templates
+    shell.echo('* templates');
+    await generateTemplates();
   } catch (e) {
     shell.echo(e.toString());
     shell.exit(1);

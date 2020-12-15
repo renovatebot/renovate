@@ -16,8 +16,10 @@ Some are configuration options passed through, while others are generated as par
 
 ## Exposed config options
 
-<!-- Automatically insert exposed configuration options here -->
+<!-- Autogenerate in https://github.com/renovatebot/renovatebot.github.io -->
+<!-- Autogenerate end -->
 
 ## Other available fields
 
-<!-- Insert runtime fields here -->
+<!-- Autogenerate in https://github.com/renovatebot/renovatebot.github.io -->
+<!-- Autogenerate end -->

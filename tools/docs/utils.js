@@ -45,9 +45,9 @@ export function replaceContent(content, txt) {
   const replaceStartIndex = content.indexOf(replaceStart);
   const replaceStopIndex = content.indexOf(replaceStop);
   return (
-    content.slice(0, replaceStartIndex + replaceStart.length) +
+    content.slice(0, replaceStartIndex) +
     txt +
-    content.slice(replaceStopIndex)
+    content.slice(replaceStopIndex + replaceStop.length)
   );
 }
 

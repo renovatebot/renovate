@@ -9,10 +9,10 @@ import shell from 'shelljs';
 export async function generateModules() {
   shell.mkdir(
     '-p',
-    'docs/modules/datasource',
-    'docs/modules/manager',
-    'docs/modules/platform',
-    'docs/modules/versioning'
+    // 'docs/modules/datasource',
+    'docs/modules/manager'
+    // 'docs/modules/platform',
+    // 'docs/modules/versioning'
   );
 
   //   for (const f of shell.ls('../usage/modules/*.md')) {
