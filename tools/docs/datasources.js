@@ -14,13 +14,15 @@ export async function generateDatasources() {
     dsList.map((v) => `\`${v}\``).join(', ') +
     '.\n\n';
   for (const datasource of dsList) {
-    const definition = await import(`../../dist/datasource/${datasource}.js`);
+    const definition = await import(
+      `../../dist/datasource/${datasource}/index.js`
+    );
     const { id, urls, defaultConfig } = definition;
     const displayName = getDisplayName(datasource, definition);
     datasourceContent += `\n### ${displayName} Datasource\n\n`;
     datasourceContent += `**Identifier**: \`${id}\`\n\n`;
     datasourceContent += formatUrls(urls);
-    datasourceContent += formatDescription('datasource', datasource);
+    datasourceContent += await formatDescription('datasource', datasource);
 
     if (defaultConfig) {
       datasourceContent +=

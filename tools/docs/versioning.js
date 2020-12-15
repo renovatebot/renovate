@@ -32,7 +32,7 @@ export async function generateVersioning() {
     } else {
       versioningContent += `❌ No range support.\n\n`;
     }
-    versioningContent += formatDescription('versioning', versioning);
+    versioningContent += await formatDescription('versioning', versioning);
     versioningContent += `\n----\n\n`;
   }
   let indexContent = await readFile(`../usage/modules/versioning.md`);
