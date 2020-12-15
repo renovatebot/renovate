@@ -134,7 +134,7 @@ async function queryPackage(
   } catch (err) {
     if (err.statusCode === 403) {
       logger.debug(
-        { repoName, pkgName, err },
+        { repoName, pkgName },
         'Repology does not support tools/project-by lookups for repository. Will try direct API access now'
       );
 
