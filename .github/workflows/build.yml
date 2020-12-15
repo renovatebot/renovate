@@ -27,7 +27,7 @@ jobs:
         os: [ubuntu-latest, windows-latest] # macos-latest
         node-version: [12, 14]
         python-version: [3.8]
-        java-version: [8]
+        java-version: [11]
         exclude:
           - os: windows-latest
             node-version: 12
