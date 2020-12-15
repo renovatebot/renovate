@@ -180,6 +180,7 @@ export interface PackageDependency<T = Record<string, any>> extends Package<T> {
   depIndex?: number;
   editFile?: string;
   separateMinorPatch?: boolean;
+  extractVersion?: string;
 }
 
 export interface Upgrade<T = Record<string, any>>

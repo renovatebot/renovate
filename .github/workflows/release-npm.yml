@@ -7,9 +7,7 @@ env:
   YARN_MODULES_CACHE_KEY: v1
   YARN_PACKAGE_CACHE_KEY: v1
   YARN_CACHE_FOLDER: .cache/yarn
-  NODE_VERSION: 12
-  # https://github.com/chalk/supports-color/issues/106
-  FORCE_COLOR: true
+  NODE_VERSION: 14
 
 jobs:
   release-npm:
@@ -41,7 +39,7 @@ jobs:
           key: ${{ env.YARN_PACKAGE_CACHE_KEY }}-${{ runner.os }}-yarn_cache-${{ hashFiles('**/yarn.lock') }}
 
       - name: Installing dependencies
-        run: yarn install --frozen-lockfile --verbose
+        run: yarn install --frozen-lockfile
 
       - name: Build ${{ github.event.client_payload.version }}
         run: yarn build
