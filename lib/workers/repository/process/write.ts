@@ -59,14 +59,13 @@ export async function writeUpdates(
       incLimitedValue(Limit.PullRequests);
     }
     // istanbul ignore if
-    if (
+    else if (
       res === ProcessBranchResult.Automerged &&
       branch.automergeType === 'pr-comment' &&
       branch.requiredStatusChecks === null
     ) {
       incLimitedValue(Limit.PullRequests);
-    }
-    if (
+    } else if (
       res === ProcessBranchResult.Pending &&
       !branchExisted &&
       branchExists(branch.branchName)
