@@ -1,4 +1,5 @@
 import shell from 'shelljs';
+import { generateConfig } from './docs/config.js';
 import { generateDatasources } from './docs/datasources.js';
 import { generateManagers } from './docs/manager.js';
 import { generateModules } from './docs/modules.js';
@@ -37,6 +38,14 @@ import { generateVersioning } from './docs/versioning.js';
     // templates
     shell.echo('* templates');
     await generateTemplates();
+
+    // configuration-options
+    shell.echo('* configuration-options');
+    await generateConfig();
+
+    // self-hosted-configuration
+    shell.echo('* self-hosted-configuration');
+    await generateConfig(true);
   } catch (e) {
     shell.echo(e.toString());
     shell.exit(1);
