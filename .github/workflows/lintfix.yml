@@ -10,8 +10,6 @@ env:
   YARN_PACKAGE_CACHE_KEY: v1
   YARN_CACHE_FOLDER: .cache/yarn
   NODE_VERSION: 14
-  # https://github.com/chalk/supports-color/issues/106
-  FORCE_COLOR: true
   FIX_AUTHOR_EMAIL: renovate@whitesourcesoftware.com
 
 jobs:
