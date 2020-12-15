@@ -1,3 +1,5 @@
+import { readFile } from '../utils/index.js';
+
 const replaceStart =
   '<!-- Autogenerate in https://github.com/renovatebot/renovatebot.github.io -->';
 const replaceStop = '<!-- Autogenerate end -->';
@@ -47,4 +49,28 @@ export function replaceContent(content, txt) {
     txt +
     content.slice(replaceStopIndex)
   );
+}
+
+/**
+ * @param {string[]} urls
+ */
+export function formatUrls(urls) {
+  if (urls?.length > 0) {
+    return `**References**:\n\n${urls
+      .map((url) => ` - [${url}](${url})`)
+      .join('\n')}\n\n`;
+  }
+  return '';
+}
+
+/**
+ * @param {string} type
+ * @param {string} name
+ */
+export async function formatDescription(type, name) {
+  const content = await readFile(`../../lib/${type}/${name}/readme.md`);
+  if (!content) {
+    return '';
+  }
+  return `**Description**:\n\n${content}\n`;
 }

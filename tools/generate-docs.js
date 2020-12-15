@@ -1,6 +1,8 @@
 import shell from 'shelljs';
+import { generateDatasources } from './docs/datasources.js';
 import { generateManagers } from './docs/manager.js';
 import { generateModules } from './docs/modules.js';
+import { generateVersioning } from './docs/versioning.js';
 
 // eslint-disable-next-line @typescript-eslint/no-floating-promises
 (async () => {
@@ -13,8 +15,11 @@ import { generateModules } from './docs/modules.js';
 
     await generateModules();
 
+    // versionigs
+    await generateVersioning();
+
     // datasources
-    // await generate({ path: 'datasource' });
+    await generateDatasources();
 
     // managers
     await generateManagers();

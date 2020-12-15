@@ -12,6 +12,13 @@ function getTitle(manager, displayName) {
   return `Automated Dependency Updates for ${displayName}`;
 }
 
+/**
+ * @param {string} manager
+ */
+function getManagerLink(manager) {
+  return `[${manager}](./manager/${manager}.md)`;
+}
+
 export async function generateManagers() {
   const managerIndex = await import('../../dist/manager/index.js');
   const managers = managerIndex.getManagers();
@@ -57,19 +64,15 @@ sidebar_label: ${displayName}
       md += `For details on how to extend a manager's \`fileMatch\` value, please follow [this link](/modules/manager/#file-matching).\n\n`;
     }
 
-    const managerReadmeFile = `../../lib/manager/${manager}/readme.md`;
-
-    try {
-      const managerReadmeContent = await readFile(managerReadmeFile);
-      if (manager !== 'regex') {
-        md += '\n## Additional Information\n\n';
-      }
-      md += managerReadmeContent + '\n\n';
-    } catch (err) {
-      // console.warn('Not found:' + moduleReadmeFile);
+    const managerReadmeContent = await readFile(
+      `../../lib/manager/${manager}/readme.md`
+    );
+    if (manager !== 'regex') {
+      md += '\n## Additional Information\n\n';
     }
-    const managerFileName = `./docs/modules/manager/${manager}.md`;
-    await updateFile(managerFileName, md);
+    md += managerReadmeContent + '\n\n';
+
+    await updateFile(`./docs/modules/manager/${manager}.md`, md);
   }
   const languages = Object.keys(allLanguages).filter(
     (language) => language !== 'other'
@@ -77,16 +80,13 @@ sidebar_label: ${displayName}
   languages.sort();
   languages.push('other');
   let languageText = '\n';
-  function getManagerLink(manager) {
-    return `[${manager}](./manager/${manager}.md)`;
-  }
+
   for (const language of languages) {
     languageText += `**${language}**: `;
     languageText += allLanguages[language].map(getManagerLink).join(', ');
     languageText += '\n\n';
   }
-  const indexFileName = `./docs/modules/manager.md`;
-  let indexContent = await readFile(indexFileName);
+  let indexContent = await readFile(`../usage/modules/manager.md`);
   indexContent = replaceContent(indexContent, languageText);
-  await updateFile(indexFileName, indexContent);
+  await updateFile(`./docs/modules/manager.md`, indexContent);
 }
