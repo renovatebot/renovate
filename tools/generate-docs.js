@@ -2,6 +2,7 @@ import shell from 'shelljs';
 import { generateConfig } from './docs/config.js';
 import { generateDatasources } from './docs/datasources.js';
 import { generateManagers } from './docs/manager.js';
+import { generateMergeConfidence } from './docs/merge-confidence.js';
 import { generateModules } from './docs/modules.js';
 import { generatePresets } from './docs/presets.js';
 import { generateSchema } from './docs/schema.js';
@@ -51,6 +52,10 @@ import { generateVersioning } from './docs/versioning.js';
     // json-schema
     shell.echo('* json-schema');
     await generateSchema();
+
+    // merge-confidence
+    shell.echo('* merge-confidence');
+    await generateMergeConfidence();
   } catch (e) {
     shell.echo(e.toString());
     shell.exit(1);

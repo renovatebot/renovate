@@ -53,7 +53,7 @@ module.exports = {
       ],
     },
     {
-      'All Other': ['templates', 'faq'],
+      'All Other': ['merge-confidence', 'templates', 'faq'],
     },
   ],
   managerSidebar: [
