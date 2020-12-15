@@ -12,9 +12,7 @@ env:
   YARN_MODULES_CACHE_KEY: v1
   YARN_PACKAGE_CACHE_KEY: v1
   YARN_CACHE_FOLDER: .cache/yarn
-  NODE_VERSION: 12
-  # https://github.com/chalk/supports-color/issues/106
-  FORCE_COLOR: true
+  NODE_VERSION: 14
 
 jobs:
   test:
@@ -25,16 +23,17 @@ jobs:
 
     strategy:
       matrix:
-        os: [ubuntu-latest, macos-latest, windows-latest]
-        node-version: [12, ^14.15.0]
+        # disable macos-latest: https://github.com/actions/virtual-environments/issues/2247
+        os: [ubuntu-latest, windows-latest] # macos-latest
+        node-version: [12, 14]
         python-version: [3.8]
         java-version: [8]
         exclude:
           - os: windows-latest
-            node-version: 10
+            node-version: 12
 
     env:
-      coverage: ${{ matrix.os == 'ubuntu-latest' && matrix.node-version == 12 }}
+      coverage: ${{ matrix.os == 'ubuntu-latest' && matrix.node-version == 14 }}
       NODE_VERSION: ${{ matrix.node-version }}
       PYTHON_VERSION: ${{ matrix.python-version }}
       JAVA_VERSION: ${{ matrix.java-version }}
@@ -51,13 +50,13 @@ jobs:
           python-version: ${{ env.PYTHON_VERSION }}
 
       - name: Set up Java  ${{ env.JAVA_VERSION }}
-        if: env.NODE_VERSION == '12'
+        if: env.NODE_VERSION == '14'
         uses: actions/setup-java@v1.4.3
         with:
           java-version: ${{ env.JAVA_VERSION }}
 
       - name: Skip Java tests
-        if: env.NODE_VERSION != '12'
+        if: env.NODE_VERSION != '14'
         run: echo "SKIP_JAVA_TESTS=true" >> $GITHUB_ENV
 
       - name: Init platform
