@@ -26,7 +26,7 @@ describe(getName(__filename), () => {
   it('extracts multiple dependencies', async () => {
     const config = {
       matchStrings: [
-        'ENV .*?_VERSION=(?<currentValue>.*) # (?<datasource>.*?)/(?<depName>.*?)(\\&versioning=(?<versioning>.*?))?\\s',
+        'ENV .*?_VERSION=(?<currentValue>.*) # (?<datasource>.*?)/(?<depName>[^&]*?)(\\&versioning=(?<versioning>[^&]*?))?\\s',
       ],
       versioningTemplate:
         '{{#if versioning}}{{versioning}}{{else}}semver{{/if}}',
@@ -48,7 +48,7 @@ describe(getName(__filename), () => {
   it('returns null if no dependencies found', async () => {
     const config = {
       matchStrings: [
-        'ENV .*?_VERSION=(?<currentValue>.*) # (?<datasource>.*?)/(?<depName>.*?)(\\&versioning=(?<versioning>.*?))?\\s',
+        'ENV .*?_VERSION=(?<currentValue>.*) # (?<datasource>.*?)/(?<depName>[^&]*?)(\\&versioning=(?<versioning>[^&]*?))?\\s',
       ],
       versioningTemplate:
         '{{#if versioning}}{{versioning}}{{else}}semver{{/if}}',
@@ -59,7 +59,7 @@ describe(getName(__filename), () => {
   it('returns null if invalid template', async () => {
     const config = {
       matchStrings: [
-        'ENV .*?_VERSION=(?<currentValue>.*) # (?<datasource>.*?)/(?<depName>.*?)(\\&versioning=(?<versioning>.*?))?\\s',
+        'ENV .*?_VERSION=(?<currentValue>.*) # (?<datasource>.*?)/(?<depName>[^&]*?)(\\&versioning=(?<versioning>[^&]*?))?\\s',
       ],
       versioningTemplate: '{{#if versioning}}{{versioning}}{{else}}semver',
     };
@@ -69,6 +69,25 @@ describe(getName(__filename), () => {
       config
     );
     expect(res).toBeNull();
+  });
+  it('extracts extractVersion', async () => {
+    const config = {
+      matchStrings: [
+        'ENV NGINX_MODULE_HEADERS_MORE_VERSION=(?<currentValue>.*) # (?<datasource>.*?)/(?<depName>.*?)(\\&versioning=(?<versioning>.*?))?(\\&extractVersion=(?<extractVersion>.*?))?\\s',
+      ],
+    };
+    const res = await extractPackageFile(
+      dockerfileContent,
+      'Dockerfile',
+      config
+    );
+    expect(res).toMatchSnapshot();
+    expect(res.deps).toHaveLength(1);
+    expect(
+      res.deps.find(
+        (dep) => dep.depName === 'openresty/headers-more-nginx-module'
+      ).extractVersion
+    ).toEqual('^v(?<version>.*)$');
   });
   it('extracts registryUrl', async () => {
     const config = {
