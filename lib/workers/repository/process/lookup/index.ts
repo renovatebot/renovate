@@ -16,6 +16,7 @@ import { getRangeStrategy } from '../../../../manager';
 import { LookupUpdate, RangeConfig } from '../../../../manager/common';
 import { SkipReason } from '../../../../types';
 import { clone } from '../../../../util/clone';
+import { applyPackageRules } from '../../../../util/package-rules';
 import * as allVersioning from '../../../../versioning';
 import { FilterConfig, filterVersions } from './filter';
 import { RollbackConfig, getRollbackUpdate } from './rollback';
@@ -50,6 +51,8 @@ export interface LookupUpdateConfig
   vulnerabilityAlert?: boolean;
   separateMajorMinor?: boolean;
   separateMultipleMajor?: boolean;
+  datasource: string;
+  depName: string;
 }
 
 function getType(
@@ -100,7 +103,7 @@ function getFromVersion(
   }
   if (rangeStrategy === 'pin') {
     return (
-      lockedVersion || version.maxSatisfyingVersion(useVersions, currentValue)
+      lockedVersion || version.getSatisfyingVersion(useVersions, currentValue)
     );
   }
   if (rangeStrategy === 'bump') {
@@ -108,7 +111,7 @@ function getFromVersion(
     return version.minSatisfyingVersion(useVersions, currentValue);
   }
   // Use the highest version in the current range
-  return version.maxSatisfyingVersion(useVersions, currentValue);
+  return version.getSatisfyingVersion(useVersions, currentValue);
 }
 
 function getBucket(config: LookupUpdateConfig, update: LookupUpdate): string {
@@ -131,8 +134,9 @@ function getBucket(config: LookupUpdateConfig, update: LookupUpdate): string {
 }
 
 export async function lookupUpdates(
-  config: LookupUpdateConfig
+  inconfig: LookupUpdateConfig
 ): Promise<UpdateResult> {
+  let config: LookupUpdateConfig = { ...inconfig };
   const { depName, currentValue, lockedVersion, vulnerabilityAlert } = config;
   logger.trace({ dependency: depName, currentValue }, 'lookupUpdates');
   const version = allVersioning.get(config.versioning);
@@ -200,6 +204,8 @@ export async function lookupUpdates(
         return res;
       }
     }
+    // Reapply package rules in case we missed something from sourceUrl
+    config = applyPackageRules({ ...config, sourceUrl: res.sourceUrl });
     if (config.followTag) {
       const taggedVersion = dependency.tags[config.followTag];
       if (!taggedVersion) {
@@ -342,12 +348,8 @@ export async function lookupUpdates(
       // TODO: think more about whether to just Object.assign this
       const releaseFields: (keyof Pick<
         Release,
-        | 'releaseTimestamp'
-        | 'canBeUnpublished'
-        | 'downloadUrl'
-        | 'checksumUrl'
-        | 'newDigest'
-      >)[] = ['releaseTimestamp', 'canBeUnpublished', 'newDigest'];
+        'releaseTimestamp' | 'downloadUrl' | 'checksumUrl' | 'newDigest'
+      >)[] = ['releaseTimestamp', 'newDigest'];
       releaseFields.forEach((field) => {
         if (updateRelease[field] !== undefined) {
           update[field] = updateRelease[field] as never;

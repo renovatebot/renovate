@@ -307,6 +307,11 @@ describe('versioning/maven/index', () => {
     expect(isVersion('-1')).toBe(false);
     expect(isVersion('1-')).toBe(false);
     expect(isVersion('[1.12.6,1.18.6]')).toBe(false);
+    expect(isVersion('RELEASE')).toBe(false);
+    expect(isVersion('release')).toBe(false);
+    expect(isVersion('LATEST')).toBe(false);
+    expect(isVersion('latest')).toBe(false);
+    expect(isVersion('foobar')).toBe(true);
   });
   it('checks if version is stable', () => {
     expect(isStable('')).toBeNull();
@@ -381,7 +386,7 @@ describe('versioning/maven/index', () => {
 
   it('api', () => {
     expect(maven.isGreaterThan('1.1', '1')).toBe(true);
-    expect(maven.maxSatisfyingVersion(['1'], '1')).toBe('1');
+    expect(maven.getSatisfyingVersion(['1'], '1')).toBe('1');
     expect(
       maven.getNewValue({
         currentValue: '1',

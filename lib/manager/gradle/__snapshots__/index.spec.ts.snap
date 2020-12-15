@@ -236,10 +236,20 @@ Array [
         ],
       },
       Object {
-        "currentValue": "3.4.5",
+        "currentValue": "This.Is.Valid.Version.Good.Luck",
         "depGroup": "bar",
         "depName": "bar:bar",
         "name": "bar",
+        "registryUrls": Array [
+          "https://repo.maven.apache.org/maven2/",
+          "https://jitpack.io",
+        ],
+      },
+      Object {
+        "currentValue": null,
+        "depGroup": "baz",
+        "depName": "baz:baz",
+        "name": "baz",
         "registryUrls": Array [
           "https://repo.maven.apache.org/maven2/",
           "https://jitpack.io",
@@ -314,10 +324,20 @@ Array [
         ],
       },
       Object {
-        "currentValue": "3.4.5",
+        "currentValue": "This.Is.Valid.Version.Good.Luck",
         "depGroup": "bar",
         "depName": "bar:bar",
         "name": "bar",
+        "registryUrls": Array [
+          "https://repo.maven.apache.org/maven2/",
+          "https://jitpack.io",
+        ],
+      },
+      Object {
+        "currentValue": null,
+        "depGroup": "baz",
+        "depName": "baz:baz",
+        "name": "baz",
         "registryUrls": Array [
           "https://repo.maven.apache.org/maven2/",
           "https://jitpack.io",
@@ -421,10 +441,20 @@ Array [
         ],
       },
       Object {
-        "currentValue": "3.4.5",
+        "currentValue": "This.Is.Valid.Version.Good.Luck",
         "depGroup": "bar",
         "depName": "bar:bar",
         "name": "bar",
+        "registryUrls": Array [
+          "https://repo.maven.apache.org/maven2/",
+          "https://jitpack.io",
+        ],
+      },
+      Object {
+        "currentValue": null,
+        "depGroup": "baz",
+        "depName": "baz:baz",
+        "name": "baz",
         "registryUrls": Array [
           "https://repo.maven.apache.org/maven2/",
           "https://jitpack.io",
@@ -528,10 +558,20 @@ Array [
         ],
       },
       Object {
-        "currentValue": "3.4.5",
+        "currentValue": "This.Is.Valid.Version.Good.Luck",
         "depGroup": "bar",
         "depName": "bar:bar",
         "name": "bar",
+        "registryUrls": Array [
+          "https://repo.maven.apache.org/maven2/",
+          "https://jitpack.io",
+        ],
+      },
+      Object {
+        "currentValue": null,
+        "depGroup": "baz",
+        "depName": "baz:baz",
+        "name": "baz",
         "registryUrls": Array [
           "https://repo.maven.apache.org/maven2/",
           "https://jitpack.io",
@@ -606,10 +646,20 @@ Array [
         ],
       },
       Object {
-        "currentValue": "3.4.5",
+        "currentValue": "This.Is.Valid.Version.Good.Luck",
         "depGroup": "bar",
         "depName": "bar:bar",
         "name": "bar",
+        "registryUrls": Array [
+          "https://repo.maven.apache.org/maven2/",
+          "https://jitpack.io",
+        ],
+      },
+      Object {
+        "currentValue": null,
+        "depGroup": "baz",
+        "depName": "baz:baz",
+        "name": "baz",
         "registryUrls": Array [
           "https://repo.maven.apache.org/maven2/",
           "https://jitpack.io",

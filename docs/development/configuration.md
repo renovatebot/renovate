@@ -2,11 +2,11 @@
 
 ## Configuration Methods
 
-Configuration is supported via any or all of the below:
+Renovate's bot admin settings can be configured via any of these methods:
 
 - Configuration file
-- Environment
-- CLI
+- Environment variables
+- CLI parameters
 - Configuration file in target repository at one of the following paths:
   - `renovate.json`
   - `renovate.json5`
@@ -22,8 +22,8 @@ The above are listed in **_reverse order_** of preference. e.g. CLI values will 
 
 ### Default Configuration
 
-Default configuration values can be found in
-[lib/config/definitions.ts](../../lib/config/definitions.ts)
+The default configuration values can be found in [lib/config/definitions.ts](../../lib/config/definitions.ts).
+Options which have `"admin": true` are reserved only for bot admin configuration and cannot be configured within repository config files.
 
 ### Configuration File
 
@@ -31,7 +31,8 @@ You can override default configuration using a configuration file, with default 
 If you need an alternate location or name, set it in the environment variable `RENOVATE_CONFIG_FILE`.
 
 Using a configuration file gives you very granular configuration options.
-For instance, you can override most settings at the global (file), repository, or package level. e.g. apply one set of labels for `backend/package.json` and a different set for `frontend/package.json` in the same repository.
+For instance, you can override most settings at the global (file), repository, or package level.
+e.g. apply one set of labels for `backend/package.json` and a different set of labels for `frontend/package.json` in the same repository.
 
 ```javascript
 module.exports = {

@@ -1,5 +1,5 @@
 import { getPkgReleases } from '..';
-import * as httpMock from '../../../test/httpMock';
+import * as httpMock from '../../../test/http-mock';
 import { id as datasource, getDigest } from '.';
 
 const res1 = `<!DOCTYPE html>
@@ -116,7 +116,9 @@ describe('datasource/go', () => {
       httpMock
         .scope('https://api.github.com/')
         .get('/repos/golang/text/tags?per_page=100')
-        .reply(200, [{ name: 'v1.0.0' }, { name: 'v2.0.0' }]);
+        .reply(200, [{ name: 'v1.0.0' }, { name: 'v2.0.0' }])
+        .get('/repos/golang/text/releases?per_page=100')
+        .reply(200, []);
       const res = await getPkgReleases({
         datasource,
         depName: 'golang.org/x/text',
@@ -158,7 +160,9 @@ describe('datasource/go', () => {
       httpMock
         .scope('https://git.enterprise.com/')
         .get('/api/v3/repos/example/module/tags?per_page=100')
-        .reply(200, [{ name: 'v1.0.0' }, { name: 'v2.0.0' }]);
+        .reply(200, [{ name: 'v1.0.0' }, { name: 'v2.0.0' }])
+        .get('/api/v3/repos/example/module/releases?per_page=100')
+        .reply(200, []);
       const res = await getPkgReleases({
         datasource,
         depName: 'git.enterprise.com/example/module',
@@ -221,9 +225,15 @@ describe('datasource/go', () => {
         .scope('https://api.github.com/')
         .get('/repos/x/text/tags?per_page=100')
         .reply(200, [])
+        .get('/repos/x/text/releases?per_page=100')
+        .reply(200, [])
         .get('/repos/x/text/tags?per_page=100')
         .reply(200, [])
+        .get('/repos/x/text/releases?per_page=100')
+        .reply(200, [])
         .get('/repos/go-x/x/tags?per_page=100')
+        .reply(200, [])
+        .get('/repos/go-x/x/releases?per_page=100')
         .reply(200, []);
       const packages = [
         { datasource, depName: 'github.com/x/text' },
@@ -235,7 +245,7 @@ describe('datasource/go', () => {
         expect(res.releases).toBeEmpty();
       }
       const httpCalls = httpMock.getTrace();
-      expect(httpCalls).toHaveLength(3);
+      expect(httpCalls).toHaveLength(6);
       expect(httpCalls).toMatchSnapshot();
     });
     it('works for nested modules on github', async () => {
@@ -250,7 +260,9 @@ describe('datasource/go', () => {
         httpMock
           .scope('https://api.github.com/')
           .get('/repos/x/text/tags?per_page=100')
-          .reply(200, tags);
+          .reply(200, tags)
+          .get('/repos/x/text/releases?per_page=100')
+          .reply(200, []);
 
         const prefix = pkg.depName.split('/')[3];
         const result = await getPkgReleases(pkg);
@@ -274,7 +286,9 @@ describe('datasource/go', () => {
         httpMock
           .scope('https://api.github.com/')
           .get('/repos/x/text/tags?per_page=100')
-          .reply(200, tags);
+          .reply(200, tags)
+          .get('/repos/x/text/releases?per_page=100')
+          .reply(200, []);
 
         const result = await getPkgReleases(pkg);
         expect(result.releases).toHaveLength(2);

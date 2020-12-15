@@ -11,11 +11,14 @@ jest.mock('./config', () => ({
     }),
 }));
 
-const buildExpectedCommitFilesArgument = (message: string) => ({
+const buildExpectedCommitFilesArgument = (
+  message: string,
+  filename = 'renovate.json'
+) => ({
   branchName: 'renovate/configure',
   files: [
     {
-      name: 'renovate.json',
+      name: filename,
       contents: '{"foo":"bar"}',
     },
   ],
@@ -90,6 +93,54 @@ describe('workers/repository/onboarding/branch', () => {
         expect(commitFiles).toHaveBeenCalledWith(
           buildExpectedCommitFilesArgument(
             `${prefix}${COMMIT_MESSAGE_PREFIX_SEPARATOR} ${message}`
+          )
+        );
+      });
+    });
+    describe('setting the onboarding configuration file name', () => {
+      it('falls back to the default option if not present', async () => {
+        const prefix = 'chore(deps)';
+        config.semanticCommits = 'enabled';
+        config.onboardingConfigFileName = undefined;
+        await createOnboardingBranch(config);
+        expect(commitFiles).toHaveBeenCalledWith(
+          buildExpectedCommitFilesArgument(
+            `${prefix}${COMMIT_MESSAGE_PREFIX_SEPARATOR} add renovate.json`
+          )
+        );
+      });
+      it('falls back to the default option if in list of allowed names', async () => {
+        const prefix = 'chore(deps)';
+        config.semanticCommits = 'enabled';
+        config.onboardingConfigFileName = 'superConfigFile.yaml';
+        await createOnboardingBranch(config);
+        expect(commitFiles).toHaveBeenCalledWith(
+          buildExpectedCommitFilesArgument(
+            `${prefix}${COMMIT_MESSAGE_PREFIX_SEPARATOR} add renovate.json`
+          )
+        );
+      });
+      it('uses the given name if valid', async () => {
+        const prefix = 'chore(deps)';
+        config.semanticCommits = 'enabled';
+        config.onboardingConfigFileName = '.gitlab/renovate.json';
+        await createOnboardingBranch(config);
+        expect(commitFiles).toHaveBeenCalledWith(
+          buildExpectedCommitFilesArgument(
+            `${prefix}${COMMIT_MESSAGE_PREFIX_SEPARATOR} add ${config.onboardingConfigFileName}`,
+            config.onboardingConfigFileName
+          )
+        );
+      });
+      it('applies to the default commit message', async () => {
+        const prefix = 'chore(deps)';
+        config.semanticCommits = 'enabled';
+        config.onboardingConfigFileName = `.renovaterc`;
+        await createOnboardingBranch(config);
+        expect(commitFiles).toHaveBeenCalledWith(
+          buildExpectedCommitFilesArgument(
+            `${prefix}${COMMIT_MESSAGE_PREFIX_SEPARATOR} add ${config.onboardingConfigFileName}`,
+            config.onboardingConfigFileName
           )
         );
       });

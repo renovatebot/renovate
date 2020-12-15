@@ -33,6 +33,9 @@ export function getConfigDesc(
   config: RenovateConfig,
   packageFiles?: Record<string, PackageFile[]>
 ): string {
+  const configFile = configFileNames.includes(config.onboardingConfigFileName)
+    ? config.onboardingConfigFileName
+    : defaultConfigFile;
   logger.debug('getConfigDesc()');
   logger.trace({ config });
   const descriptionArr = getDescriptionArray(config);
@@ -50,7 +53,7 @@ export function getConfigDesc(
   desc += emojify(
     `:abcd: Would you like to change the way Renovate is upgrading your dependencies?`
   );
-  desc += ` Simply edit the \`${defaultConfigFile}\` in this branch with your custom config and the list of Pull Requests in the "What to Expect" section below will be updated the next time Renovate runs.`;
+  desc += ` Simply edit the \`${configFile}\` in this branch with your custom config and the list of Pull Requests in the "What to Expect" section below will be updated the next time Renovate runs.`;
   desc += '\n\n---\n';
   return desc;
 }

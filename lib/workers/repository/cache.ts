@@ -26,6 +26,7 @@ function generateBranchUpgradeCache(
     toVersion,
     currentDigest,
     newDigest,
+    sourceUrl,
   } = upgrade;
   return {
     datasource,
@@ -36,6 +37,7 @@ function generateBranchUpgradeCache(
     toVersion,
     currentDigest,
     newDigest,
+    sourceUrl,
   };
 }
 

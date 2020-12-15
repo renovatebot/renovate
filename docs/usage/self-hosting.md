@@ -144,6 +144,46 @@ spec:
               emptyDir: {}
 ```
 
+#### CircleCI
+
+If you are using CircleCI, you can use the third-party [daniel-shuy/renovate](https://circleci.com/developer/orbs/orb/daniel-shuy/renovate) orb to run a self-hosted instance of Renovate on CircleCI.
+
+By default, the orb looks for the self-hosted configuration file in the project root, but you can specify another path to the configuration file with the `config_file_path` parameter.
+
+Secrets should be configured using environment variables (eg. `RENOVATE_TOKEN`, `GITHUB_COM_TOKEN`).
+
+[Configure environment variables in CircleCI Project Settings](https://circleci.com/docs/2.0/env-vars/#setting-an-environment-variable-in-a-project).
+To share environment variables across projects, use CircleCI [Contexts](https://circleci.com/docs/2.0/contexts/).
+
+The following example runs Renovate hourly, and looks for the self-hosted configuration file at `renovate-config.js`:
+
+```yml
+version: '2.1'
+orbs:
+  renovate: daniel-shuy/renovate@2.1
+workflows:
+  renovate:
+    jobs:
+      - renovate/self-hosted:
+          config_file_path: renovate-config.js
+    nightly:
+      triggers:
+        - schedule:
+            cron: 0 * * * *
+            filters:
+              branches:
+                only:
+                  - master
+```
+
+#### GitLab CI/CD pipeline
+
+For GitLab pipelines we recommend you use the [renovate-runner project on GitLab](https://gitlab.com/renovate-bot/renovate-runner).
+We've prepared some pipeline templates to run Renovate on pipeline schedules in an easy way.
+You can also find the configuration steps there.
+
+For self-hosted GitLab clone/import the [renovate-runner](https://gitlab.com/renovate-bot/renovate-runner) project to your instance.
+
 ## Configuration
 
 Self-hosted Renovate can be configured using any of the following (or a combination):
@@ -168,7 +208,7 @@ Configure it either as `token` in your `config.js` file, or in environment varia
 
 #### GitLab CE/EE
 
-First, [create a personal access token](https://docs.gitlab.com/ee/api/README.html#personal-access-tokens) for the bot account (select "api" scope).
+First, [create a personal access token](https://docs.gitlab.com/ee/user/profile/personal_access_tokens.html) for the bot account (select `read_user`, `api` and `write_repository` scopes).
 Configure it either as `token` in your `config.js` file, or in environment variable `RENOVATE_TOKEN`, or via CLI `--token=`.
 Don't forget to configure `platform=gitlab` somewhere in config.
 

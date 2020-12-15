@@ -1,6 +1,6 @@
-import path from 'path';
 import * as cacache from 'cacache';
 import { DateTime } from 'luxon';
+import upath from 'upath';
 import { logger } from '../../../logger';
 
 function getKey(namespace: string, key: string): string {
@@ -58,6 +58,6 @@ export async function set(
 }
 
 export function init(cacheDir: string): void {
-  cacheFileName = path.join(cacheDir, '/renovate/renovate-cache-v1');
+  cacheFileName = upath.join(cacheDir, '/renovate/renovate-cache-v1');
   logger.debug('Initializing Renovate internal cache into ' + cacheFileName);
 }

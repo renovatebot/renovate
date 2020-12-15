@@ -1,0 +1,5 @@
+fail_fast: true
+repos:
+  - repo: https://enterprise.com/pre-commit/pre-commit-hooks
+    # case with non-default url.
+    rev: v1.0.0

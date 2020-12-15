@@ -46,6 +46,7 @@ const repoGroups = {
   angular1: 'https://github.com/angular/angular.js',
   angular: 'https://github.com/angular/angular',
   angularcli: 'https://github.com/angular/angular-cli',
+  angularfire: 'https://github.com/angular/angularfire',
   apolloclient: 'https://github.com/apollographql/apollo-client',
   apollolink: 'https://github.com/apollographql/apollo-link',
   awsappsync: 'https://github.com/awslabs/aws-mobile-appsync-sdk-js',

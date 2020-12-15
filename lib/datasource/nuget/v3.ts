@@ -9,7 +9,7 @@ import { Http } from '../../util/http';
 import { ensureTrailingSlash } from '../../util/url';
 import { Release, ReleaseResult } from '../common';
 
-import { id } from './common';
+import { id, removeBuildMeta } from './common';
 
 const http = new Http(id);
 
@@ -76,11 +76,12 @@ export async function getResourceUrl(
     // istanbul ignore if
     if (
       resourceType === 'RegistrationsBaseUrl' &&
+      !version?.startsWith('3.0.0-') &&
       !semver.satisfies(version, '^3.0.0')
     ) {
       logger.warn(
-        { url },
-        `Nuget: RegistrationsBaseUrl/${version} is the major update`
+        { url, version },
+        `Nuget: Unknown version returned. Only v3 is supported`
       );
     }
 
@@ -145,12 +146,12 @@ export async function getReleases(
   let latestStable: string = null;
   const releases = catalogEntries.map(
     ({ version, published: releaseTimestamp, projectUrl, listed }) => {
-      const release: Release = { version };
+      const release: Release = { version: removeBuildMeta(version) };
       if (releaseTimestamp) {
         release.releaseTimestamp = releaseTimestamp;
       }
       if (semver.valid(version) && !semver.prerelease(version)) {
-        latestStable = version;
+        latestStable = removeBuildMeta(version);
         homepage = projectUrl || homepage;
       }
       if (listed === false) {

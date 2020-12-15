@@ -13,9 +13,9 @@ let endpoint: string;
 
 function getAuthenticationHandler(config: HostRule): IRequestHandler {
   if (!config.token && config.username && config.password) {
-    return getBasicHandler(config.username, config.password);
+    return getBasicHandler(config.username, config.password, true);
   }
-  return getHandlerFromToken(config.token);
+  return getHandlerFromToken(config.token, true);
 }
 
 export function azureObj(): azure.WebApi {

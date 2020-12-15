@@ -72,7 +72,6 @@ describe('workers/repository/updates/generate', () => {
             foo: 2,
           },
           releaseTimestamp: '2017-02-07T20:01:41+00:00',
-          canBeUnpublished: false,
           automerge: true,
           constraints: {
             foo: '1.0.0',
@@ -92,7 +91,6 @@ describe('workers/repository/updates/generate', () => {
             foo: 2,
           },
           releaseTimestamp: '2017-02-06T20:01:41+00:00',
-          canBeUnpublished: true,
           automerge: false,
           constraints: {
             foo: '1.0.0',
@@ -113,7 +111,6 @@ describe('workers/repository/updates/generate', () => {
             foo: 2,
           },
           releaseTimestamp: '2017-02-06T20:01:41+00:00',
-          canBeUnpublished: true,
           automerge: false,
         },
       ];
@@ -121,7 +118,6 @@ describe('workers/repository/updates/generate', () => {
       expect(res.foo).toBe(2);
       expect(res.groupName).toBeDefined();
       expect(res.releaseTimestamp).toEqual('2017-02-07T20:01:41+00:00');
-      expect(res.canBeUnpublished).toBe(true);
       expect(res.automerge).toBe(false);
       expect(res.constraints).toEqual({
         foo: '1.0.0',
@@ -481,6 +477,42 @@ describe('workers/repository/updates/generate', () => {
       ];
       const res = generateBranchConfig(branch);
       expect(res.prTitle).toMatchSnapshot();
+    });
+    it('sorts upgrades, without position first', () => {
+      const branch: BranchUpgradeConfig[] = [
+        {
+          depName: 'some-dep1',
+          branchName: 'some-branch',
+          prTitle: 'some-title',
+          newValue: '0.6.0',
+          fileReplacePosition: 1,
+        },
+        {
+          depName: 'some-dep2',
+          branchName: 'some-branch',
+          prTitle: 'some-title',
+          newValue: '0.6.0',
+          fileReplacePosition: undefined,
+        },
+        {
+          depName: 'some-dep3',
+          branchName: 'some-branch',
+          prTitle: 'some-title',
+          newValue: '0.6.0',
+          fileReplacePosition: 4,
+        },
+        {
+          depName: 'some-dep4',
+          branchName: 'some-branch',
+          prTitle: 'some-title',
+          newValue: '0.6.0',
+          fileReplacePosition: undefined,
+        },
+      ];
+      const res = generateBranchConfig(branch);
+      expect(
+        res.upgrades.map((upgrade) => upgrade.fileReplacePosition)
+      ).toStrictEqual([undefined, undefined, 4, 1]);
     });
   });
 });

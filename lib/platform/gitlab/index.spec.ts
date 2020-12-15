@@ -1,7 +1,7 @@
 // TODO fix mocks
 import nock from 'nock';
 import { Platform, RepoParams } from '..';
-import * as httpMock from '../../../test/httpMock';
+import * as httpMock from '../../../test/http-mock';
 import {
   REPOSITORY_ARCHIVED,
   REPOSITORY_CHANGED,
@@ -155,11 +155,12 @@ describe('platform/gitlab', () => {
   }
 
   describe('initRepo', () => {
+    const okReturn = { default_branch: 'master', url: 'https://some-url' };
     it(`should escape all forward slashes in project names`, async () => {
       httpMock
         .scope(gitlabApiHost)
         .get('/api/v4/projects/some%2Frepo%2Fproject')
-        .reply(200, []);
+        .reply(200, okReturn);
       await gitlab.initRepo({
         repository: 'some/repo/project',
         localDir: '',
@@ -886,9 +887,7 @@ describe('platform/gitlab', () => {
     it('returns true if no title and all state', async () => {
       httpMock
         .scope(gitlabApiHost)
-        .get(
-          '/api/v4/projects/undefined/merge_requests?per_page=100&author_id=undefined'
-        )
+        .get('/api/v4/projects/undefined/merge_requests?per_page=100')
         .reply(200, [
           {
             iid: 1,
@@ -906,9 +905,7 @@ describe('platform/gitlab', () => {
     it('returns true if not open', async () => {
       httpMock
         .scope(gitlabApiHost)
-        .get(
-          '/api/v4/projects/undefined/merge_requests?per_page=100&author_id=undefined'
-        )
+        .get('/api/v4/projects/undefined/merge_requests?per_page=100')
         .reply(200, [
           {
             iid: 1,
@@ -928,9 +925,7 @@ describe('platform/gitlab', () => {
     it('returns true if open and with title', async () => {
       httpMock
         .scope(gitlabApiHost)
-        .get(
-          '/api/v4/projects/undefined/merge_requests?per_page=100&author_id=undefined'
-        )
+        .get('/api/v4/projects/undefined/merge_requests?per_page=100')
         .reply(200, [
           {
             iid: 1,
@@ -951,9 +946,7 @@ describe('platform/gitlab', () => {
     it('returns true with title', async () => {
       httpMock
         .scope(gitlabApiHost)
-        .get(
-          '/api/v4/projects/undefined/merge_requests?per_page=100&author_id=undefined'
-        )
+        .get('/api/v4/projects/undefined/merge_requests?per_page=100')
         .reply(200, [
           {
             iid: 1,
@@ -972,9 +965,7 @@ describe('platform/gitlab', () => {
     it('returns true with draft prefix title', async () => {
       httpMock
         .scope(gitlabApiHost)
-        .get(
-          '/api/v4/projects/undefined/merge_requests?per_page=100&author_id=undefined'
-        )
+        .get('/api/v4/projects/undefined/merge_requests?per_page=100')
         .reply(200, [
           {
             iid: 1,
@@ -993,9 +984,7 @@ describe('platform/gitlab', () => {
     it('returns true with deprecated draft prefix title', async () => {
       httpMock
         .scope(gitlabApiHost)
-        .get(
-          '/api/v4/projects/undefined/merge_requests?per_page=100&author_id=undefined'
-        )
+        .get('/api/v4/projects/undefined/merge_requests?per_page=100')
         .reply(200, [
           {
             iid: 1,
@@ -1282,9 +1271,7 @@ describe('platform/gitlab', () => {
       await initPlatform('13.3.6-ee');
       httpMock
         .scope(gitlabApiHost)
-        .get(
-          '/api/v4/projects/undefined/merge_requests?per_page=100&author_id=undefined'
-        )
+        .get('/api/v4/projects/undefined/merge_requests?per_page=100')
         .reply(200, [
           {
             iid: 1,
@@ -1302,9 +1289,7 @@ describe('platform/gitlab', () => {
       await initPlatform('13.3.6-ee');
       httpMock
         .scope(gitlabApiHost)
-        .get(
-          '/api/v4/projects/undefined/merge_requests?per_page=100&author_id=undefined'
-        )
+        .get('/api/v4/projects/undefined/merge_requests?per_page=100')
         .reply(200, [
           {
             iid: 1,
@@ -1322,9 +1307,7 @@ describe('platform/gitlab', () => {
       await initPlatform('13.3.6-ee');
       httpMock
         .scope(gitlabApiHost)
-        .get(
-          '/api/v4/projects/undefined/merge_requests?per_page=100&author_id=undefined'
-        )
+        .get('/api/v4/projects/undefined/merge_requests?per_page=100')
         .reply(200, [
           {
             iid: 1,
@@ -1342,9 +1325,7 @@ describe('platform/gitlab', () => {
       await initPlatform('13.3.6-ee');
       httpMock
         .scope(gitlabApiHost)
-        .get(
-          '/api/v4/projects/undefined/merge_requests?per_page=100&author_id=undefined'
-        )
+        .get('/api/v4/projects/undefined/merge_requests?per_page=100')
         .reply(200, [
           {
             iid: 1,

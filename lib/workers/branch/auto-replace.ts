@@ -136,9 +136,9 @@ export async function doAutoReplace(
   logger.trace({ depName, replaceString }, 'autoReplace replaceString');
   let searchIndex = existingContent.indexOf(replaceString);
   if (searchIndex === -1) {
-    logger.warn(
+    logger.info(
       { packageFile, depName, existingContent, replaceString },
-      'Cannot find replaceString in current file content'
+      'Cannot find replaceString in current file content. Was it already updated?'
     );
     return existingContent;
   }

@@ -6,12 +6,10 @@ Object {
   "name": "foobar",
   "releases": Array [
     Object {
-      "canBeUnpublished": false,
       "releaseTimestamp": "2018-05-06T07:21:53+02:00",
       "version": "0.0.1",
     },
     Object {
-      "canBeUnpublished": false,
       "releaseTimestamp": "2018-05-07T07:21:53+02:00",
       "version": "0.0.2",
     },
@@ -31,12 +29,10 @@ Object {
   "name": "foobar",
   "releases": Array [
     Object {
-      "canBeUnpublished": false,
       "releaseTimestamp": "2018-05-06T07:21:53+02:00",
       "version": "0.0.1",
     },
     Object {
-      "canBeUnpublished": false,
       "releaseTimestamp": "2018-05-07T07:21:53+02:00",
       "version": "0.0.2",
     },
@@ -56,12 +52,10 @@ Object {
   "name": "foobar",
   "releases": Array [
     Object {
-      "canBeUnpublished": false,
       "releaseTimestamp": "2018-05-06T07:21:53+02:00",
       "version": "0.0.1",
     },
     Object {
-      "canBeUnpublished": false,
       "releaseTimestamp": "2018-05-07T07:21:53+02:00",
       "version": "0.0.2",
     },
@@ -81,7 +75,6 @@ Object {
   "name": "foobar",
   "releases": Array [
     Object {
-      "canBeUnpublished": false,
       "releaseTimestamp": "2018-05-06T07:21:53+02:00",
       "version": "0.0.1",
     },
@@ -104,7 +97,6 @@ Object {
   "name": "foobar",
   "releases": Array [
     Object {
-      "canBeUnpublished": false,
       "releaseTimestamp": "2018-05-06T07:21:53+02:00",
       "version": "0.0.1",
     },
@@ -123,7 +115,6 @@ Object {
   "name": "foobar",
   "releases": Array [
     Object {
-      "canBeUnpublished": false,
       "releaseTimestamp": "2018-05-06T07:21:53+02:00",
       "version": "0.0.1",
     },
@@ -142,12 +133,10 @@ Object {
   "name": "foobar",
   "releases": Array [
     Object {
-      "canBeUnpublished": false,
       "releaseTimestamp": "2018-05-06T07:21:53+02:00",
       "version": "0.0.1",
     },
     Object {
-      "canBeUnpublished": false,
       "releaseTimestamp": "2018-05-07T07:21:53+02:00",
       "version": "0.0.2",
     },
@@ -173,12 +162,10 @@ Marking the latest version of an npm package as deprecated results in the entire
   "name": "foobar",
   "releases": Array [
     Object {
-      "canBeUnpublished": false,
       "releaseTimestamp": "2018-05-06T07:21:53+02:00",
       "version": "0.0.1",
     },
     Object {
-      "canBeUnpublished": false,
       "isDeprecated": true,
       "releaseTimestamp": "2018-05-07T07:21:53+02:00",
       "version": "0.0.2",
@@ -206,12 +193,10 @@ Object {
   "name": "foobar",
   "releases": Array [
     Object {
-      "canBeUnpublished": false,
       "releaseTimestamp": "2018-05-06T07:21:53+02:00",
       "version": "0.0.1",
     },
     Object {
-      "canBeUnpublished": false,
       "releaseTimestamp": "2018-05-07T07:21:53+02:00",
       "version": "0.0.2",
     },
@@ -231,12 +216,10 @@ Object {
   "name": "foobar",
   "releases": Array [
     Object {
-      "canBeUnpublished": false,
       "releaseTimestamp": "2018-05-06T07:21:53+02:00",
       "version": "0.0.1",
     },
     Object {
-      "canBeUnpublished": false,
       "releaseTimestamp": "2018-05-07T07:21:53+02:00",
       "version": "0.0.2",
     },
@@ -256,12 +239,10 @@ Object {
   "name": "foobar",
   "releases": Array [
     Object {
-      "canBeUnpublished": false,
       "releaseTimestamp": "2018-05-06T07:21:53+02:00",
       "version": "0.0.1",
     },
     Object {
-      "canBeUnpublished": false,
       "releaseTimestamp": "2018-05-07T07:21:53+02:00",
       "version": "0.0.2",
     },
@@ -281,12 +262,10 @@ Object {
   "name": "foobar",
   "releases": Array [
     Object {
-      "canBeUnpublished": false,
       "releaseTimestamp": "2018-05-06T07:21:53+02:00",
       "version": "0.0.1",
     },
     Object {
-      "canBeUnpublished": false,
       "releaseTimestamp": "2018-05-07T07:21:53+02:00",
       "version": "0.0.2",
     },
@@ -306,12 +285,10 @@ Object {
   "name": "foobar",
   "releases": Array [
     Object {
-      "canBeUnpublished": false,
       "releaseTimestamp": "2018-05-06T07:21:53+02:00",
       "version": "0.0.1",
     },
     Object {
-      "canBeUnpublished": false,
       "releaseTimestamp": "2018-05-07T07:21:53+02:00",
       "version": "0.0.2",
     },

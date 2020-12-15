@@ -1,6 +1,6 @@
 import fs from 'fs';
 import { getPkgReleases } from '..';
-import * as httpMock from '../../../test/httpMock';
+import * as httpMock from '../../../test/http-mock';
 import * as _hostRules from '../../util/host-rules';
 import { id as versioning } from '../../versioning/nuget';
 import { id as datasource } from '.';
@@ -132,7 +132,8 @@ describe('datasource/nuget', () => {
   describe('getReleases', () => {
     beforeEach(() => {
       jest.resetAllMocks();
-      hostRules.hosts = jest.fn(() => []);
+      hostRules.hosts.mockReturnValue([]);
+      hostRules.find.mockReturnValue({});
       httpMock.setup();
     });
 

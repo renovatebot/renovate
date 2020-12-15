@@ -1,6 +1,4 @@
-import path from 'path';
 import is from '@sindresorhus/is';
-
 import minimatch from 'minimatch';
 import upath from 'upath';
 import { logger } from '../../../logger';
@@ -27,7 +25,7 @@ export function detectMonorepos(packageFiles: Partial<PackageFile>[]): void {
       lernaPackages,
       yarnWorkspacesPackages,
     } = p;
-    const basePath = path.dirname(packageFile);
+    const basePath = upath.dirname(packageFile);
     const packages = yarnWorkspacesPackages || lernaPackages;
     if (packages?.length) {
       logger.debug(
@@ -39,7 +37,10 @@ export function detectMonorepos(packageFiles: Partial<PackageFile>[]): void {
         : [packages]
       ).map((pattern) => upath.join(basePath, pattern));
       const internalPackageFiles = packageFiles.filter((sp) =>
-        matchesAnyPattern(path.dirname(sp.packageFile), internalPackagePatterns)
+        matchesAnyPattern(
+          upath.dirname(sp.packageFile),
+          internalPackagePatterns
+        )
       );
       const internalPackageNames = internalPackageFiles
         .map((sp) => sp.packageJsonName)

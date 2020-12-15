@@ -144,7 +144,10 @@ export async function validateConfig(
             message: `Invalid ${currentPath}: \`${errorMessage}\``,
           });
         }
-      } else if (key === 'allowedVersions' && isConfigRegex(val)) {
+      } else if (
+        ['allowedVersions', 'matchCurrentVersion'].includes(key) &&
+        isConfigRegex(val)
+      ) {
         if (!configRegexPredicate(val)) {
           errors.push({
             depName: 'Configuration Error',
@@ -265,6 +268,7 @@ export async function validateConfig(
               const allowedKeys = [
                 'fileMatch',
                 'matchStrings',
+                'matchStringsStrategy',
                 'depNameTemplate',
                 'lookupNameTemplate',
                 'datasourceTemplate',
@@ -285,14 +289,6 @@ export async function validateConfig(
                     message: `Regex Manager contains disallowed fields: ${disallowedKeys.join(
                       ', '
                     )}`,
-                  });
-                } else if (
-                  !regexManager.matchStrings ||
-                  regexManager.matchStrings.length !== 1
-                ) {
-                  errors.push({
-                    depName: 'Configuration Error',
-                    message: `Each Regex Manager must contain a matchStrings array of length one`,
                   });
                 } else if (!is.nonEmptyArray(regexManager.fileMatch)) {
                   errors.push({

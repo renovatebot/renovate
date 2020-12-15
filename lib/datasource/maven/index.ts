@@ -55,11 +55,7 @@ async function downloadMavenXml(
       logger.debug('Skipping s3 dependency');
       return null;
     default:
-      logger.warn(
-        `Invalid protocol '${
-          pkgUrl.protocol
-        }' for Maven url: ${pkgUrl.toString()}`
-      );
+      logger.debug({ url: pkgUrl.toString() }, `Unsupported Maven protocol`);
       return null;
   }
 
@@ -202,9 +198,10 @@ async function filterMissingArtifacts(
 ): Promise<Release[]> {
   const cacheNamespace = 'datasource-maven-metadata';
   const cacheKey = `${repoUrl}${dependency.dependencyUrl}`;
-  let artifactsInfo: ArtifactsInfo | null = await packageCache.get<
-    ArtifactsInfo
-  >(cacheNamespace, cacheKey);
+  let artifactsInfo: ArtifactsInfo | null = await packageCache.get<ArtifactsInfo>(
+    cacheNamespace,
+    cacheKey
+  );
 
   if (!isValidArtifactsInfo(artifactsInfo, versions)) {
     const queue = versions

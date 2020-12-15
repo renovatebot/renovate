@@ -1,10 +1,11 @@
 import fs from 'fs';
-import path from 'path';
+import upath from 'upath';
+
 import * as npmUpdater from './update';
 
 function readFixture(fixture: string) {
   return fs.readFileSync(
-    path.resolve(__dirname, `./__fixtures__/${fixture}`),
+    upath.resolve(__dirname, `./__fixtures__/${fixture}`),
     'utf8'
   );
 }

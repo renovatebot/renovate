@@ -1,9 +1,9 @@
-import path from 'path';
 import fs from 'fs-extra';
+import upath from 'upath';
 import { extractPackageFile } from '.';
 
 const sample = fs.readFileSync(
-  path.resolve(__dirname, './__fixtures__/mix.exs'),
+  upath.resolve(__dirname, './__fixtures__/mix.exs'),
   'utf-8'
 );
 
