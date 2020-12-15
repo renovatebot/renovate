@@ -27,8 +27,8 @@ You can disable this functionality by configuring `"rebaseWhen": "never"` (not r
 
 There are two cases where Renovate will rebase its branches off the base branch every time they are out of date:
 
-1.  If you manually configure `"rebaseWhen": "behind-base-branch"`
-2.  If you have enabled "Require branches to be up to date before merging" on GitHub protected branches settings, and `rebaseWhen` has default value `"auto"`
+1. If you manually configure `"rebaseWhen": "behind-base-branch"`
+2. If you have enabled "Require branches to be up to date before merging" on GitHub protected branches settings, and `rebaseWhen` has default value `"auto"`
 
 In that case Renovate PRs will be continuously rebased off the repository's base branch whenever necessary, even if the PRs are not conflicted.
 
