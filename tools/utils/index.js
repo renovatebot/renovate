@@ -12,7 +12,7 @@ export const newFiles = new Set();
  * @returns {string}
  */
 export function getEnv(key) {
-  return process.env[key] ?? '';
+  return process.env[key] || '';
 }
 
 /**
