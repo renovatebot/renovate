@@ -371,6 +371,6 @@ describe('platform/azure/helpers', () => {
       expect(await azureHelper.getMergeMethod('', '', refMock)).toEqual(
         GitPullRequestMergeStrategy.Rebase
       );
-    })
+    });
   });
 });

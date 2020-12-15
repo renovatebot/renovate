@@ -193,8 +193,8 @@ export async function getMergeMethod(
       return true;
     }
     return scope.matchKind === 'Exact'
-            ? scope.refName === branchRef
-            : branchRef.startsWith(scope.refName);
+      ? scope.refName === branchRef
+      : branchRef.startsWith(scope.refName);
   };
 
   const policyConfigurations = (
@@ -206,7 +206,13 @@ export async function getMergeMethod(
     )
     .map((p) => p.settings)[0];
 
-  logger.trace(`getMergeMethod(${repoId}, ${project}, ${branchRef}) determining mergeMethod from matched policy:\n${JSON.stringify(policyConfigurations, null, 4)}`);
+  logger.trace(
+    `getMergeMethod(${repoId}, ${project}, ${branchRef}) determining mergeMethod from matched policy:\n${JSON.stringify(
+      policyConfigurations,
+      null,
+      4
+    )}`
+  );
 
   try {
     return Object.keys(policyConfigurations)
