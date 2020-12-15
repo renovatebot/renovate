@@ -1,3 +1,4 @@
+const { groups: presetGroups } = require('../../dist/config/presets/internal');
 const { getManagerList } = require('../../dist/manager');
 
 module.exports = {
@@ -48,15 +49,7 @@ module.exports = {
     },
     {
       'Included Presets': [
-        // 'presets-config',
-        // 'presets-default',
-        // 'presets-docker',
-        // 'presets-group',
-        // 'presets-helpers',
-        // 'presets-monorepo',
-        // 'presets-packages',
-        // 'presets-preview',
-        // 'presets-schedule',
+        ...Object.keys(presetGroups).map((n) => `presets-${n}`),
       ],
     },
     {

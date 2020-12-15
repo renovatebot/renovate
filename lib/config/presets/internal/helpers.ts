@@ -19,12 +19,12 @@ export const presets: Record<string, Preset> = {
   },
   followTypescriptNext: {
     description:
-      'Keep <typescript> version in sync with the <code>next</code> tag',
+      'Keep _typescript_ version in sync with the <code>next</code> tag',
     extends: [':followTag(typescript, next)'],
   },
   followTypescriptRc: {
     description:
-      'Keep <typescript> version in sync with the <code>rc</code> tag',
+      'Keep _typescript_ version in sync with the <code>rc</code> tag',
     extends: [':followTag(typescript, rc)'],
   },
 };
