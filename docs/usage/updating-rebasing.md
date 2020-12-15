@@ -1,9 +1,9 @@
 ---
-title: Updating and Rebasing Branches
-description: How Renovate Updates and Rebases Branches
+title: Updating and Rebasing branches
+description: How Renovate Updates and Rebases branches
 ---
 
-# Updating and Rebasing Branches
+# Updating and Rebasing branches
 
 There are many cases where Renovate will need to update a branch/PR after its initial creation, and this document will attempt to describe them.
 
@@ -16,14 +16,14 @@ First of all, here is the one time when Renovate _won't_ update branches.
 If you have edited a Renovate branch directly (e.g. to make a code fix to allow tests to pass again) then Renovate will stop all updates of that branch.
 It is up to you to either finish the job and merge the PR, or rename it and close it so that Renovate can take back over again.
 
-## Rebasing Conflicted PRs
+## Rebasing conflicted PRs
 
 If new commits to the base branch - such as merging another Renovate PR - result in an open Renovate PR having merge conflicts, then Renovate will recreate ("rebase") any conflicted PRs.
 This applies both to commits to dependency files such as `package.json` as well as lock files such as `yarn.lock`.
 You should not ever need to resolve such conflicts manually.
 You can disable this functionality by configuring `"rebaseWhen": "never"` (not recommended);
 
-## Rebasing Out-of-date Branches
+## Rebasing out-of-date branches
 
 There are two cases where Renovate will rebase its branches off the base branch every time they are out of date:
 
@@ -32,7 +32,7 @@ There are two cases where Renovate will rebase its branches off the base branch 
 
 In that case Renovate PRs will be continuously rebased off the repository's base branch whenever necessary, even if the PRs are not conflicted.
 
-## Newer Dependency Versions
+## Newer dependency versions
 
 If an existing PR is open to upgrade dependency "foo" to v1.1.0 and then v1.1.1 is released, then Renovate will regenerate the branch again.
 This way:
