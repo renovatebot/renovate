@@ -301,6 +301,19 @@ describe('platform/azure/helpers', () => {
                   allowSquash: true,
                   scope: [
                     {
+                      repositoryId: 'doo-dee-doo-repository-id',
+                    },
+                  ],
+                },
+                type: {
+                  id: 'fa4e907d-c16b-4a4c-9dfa-4916e5d171ab',
+                },
+              },
+              {
+                settings: {
+                  allowSquash: true,
+                  scope: [
+                    {
                       repositoryId: '',
                     },
                   ],
