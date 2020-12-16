@@ -371,6 +371,20 @@ describe('platform/gitea/gitea-helper', () => {
     });
   });
 
+  describe('addReviewers', () => {
+    it('should call /api/v1/repos/[repo]/pulls/[pull]/requested_reviewers endpoint', async () => {
+      httpMock
+        .scope(baseUrl)
+        .post(
+          `/repos/${mockRepo.full_name}/pulls/${mockPR.number}/requested_reviewers`
+        )
+        .reply(200);
+
+      await ght.requestPrReviewers(mockRepo.full_name, mockPR.number, {});
+      expect(httpMock.getTrace()).toMatchSnapshot();
+    });
+  });
+
   describe('searchPRs', () => {
     it('should call /api/v1/repos/[repo]/pulls endpoint', async () => {
       httpMock
