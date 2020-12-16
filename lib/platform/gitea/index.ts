@@ -791,14 +791,13 @@ const platform: Platform = {
     });
   },
 
-  addReviewers(number: number, reviewers: string[]): Promise<void> {
-    // Adding reviewers to a PR through API is not supported by Gitea as of today
-    // See tracking issue: https://github.com/go-gitea/gitea/issues/5733
-    logger.debug(
-      `Updating reviewers '${reviewers?.join(', ')}' on Pull Request #${number}`
-    );
-    logger.warn('Unimplemented in Gitea: Reviewers');
-    return Promise.resolve();
+  async addReviewers(number: number, reviewers: string[]): Promise<void> {
+    logger.debug(`Adding reviewers '${reviewers?.join(', ')}' to #${number}`);
+    try {
+      await helper.requestPrReviewers(config.repository, number, { reviewers });
+    } catch (err) {
+      logger.warn({ err, number, reviewers }, 'Failed to assign reviewer');
+    }
   },
 
   getPrBody(prBody: string): string {
