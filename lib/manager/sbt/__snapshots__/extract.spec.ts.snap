@@ -33,6 +33,7 @@ Object {
       ],
     },
   ],
+  "packageFileVersion": undefined,
 }
 `;
 
@@ -69,6 +70,7 @@ Object {
       ],
     },
   ],
+  "packageFileVersion": undefined,
 }
 `;
 
@@ -237,6 +239,7 @@ Object {
       ],
     },
   ],
+  "packageFileVersion": "1.0",
 }
 `;
 
@@ -375,6 +378,7 @@ Object {
       ],
     },
   ],
+  "packageFileVersion": "3.2.1",
 }
 `;
 
@@ -391,6 +395,7 @@ Object {
       ],
     },
   ],
+  "packageFileVersion": undefined,
 }
 `;
 
@@ -417,6 +422,7 @@ Object {
       ],
     },
   ],
+  "packageFileVersion": undefined,
 }
 `;
 
@@ -444,5 +450,6 @@ Object {
       ],
     },
   ],
+  "packageFileVersion": "1.0.1",
 }
 `;
