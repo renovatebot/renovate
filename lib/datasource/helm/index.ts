@@ -17,6 +17,13 @@ export const defaultRegistryUrls = [
 ];
 export const registryStrategy = 'first';
 
+export const defaultConfig = {
+  commitMessageTopic: 'Helm release {{depNameShort}}',
+  group: {
+    commitMessageTopic: '{{{groupName}}} Helm releases',
+  },
+};
+
 export async function getRepositoryData(
   repository: string
 ): Promise<ReleaseResult[]> {
