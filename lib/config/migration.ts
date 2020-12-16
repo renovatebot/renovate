@@ -67,9 +67,10 @@ export function migrateConfig(
         delete migratedConfig[key];
       } else if (key === 'pathRules') {
         if (is.array(val)) {
-          migratedConfig.packageRules = val.concat(
-            migratedConfig.packageRules || []
-          );
+          migratedConfig.packageRules = is.array(migratedConfig.packageRules)
+            ? migratedConfig.packageRules
+            : [];
+          migratedConfig.packageRules = val.concat(migratedConfig.packageRules);
         }
         delete migratedConfig.pathRules;
       } else if (key === 'suppressNotifications') {
@@ -110,14 +111,21 @@ export function migrateConfig(
         migratedConfig.hostName = val;
         delete migratedConfig.host;
       } else if (key === 'packageRules' && is.plainObject(val)) {
-        migratedConfig.packageRules = [val];
+        migratedConfig.packageRules = is.array(migratedConfig.packageRules)
+          ? migratedConfig.packageRules
+          : [];
+        migratedConfig.packageRules.push(val);
       } else if (key === 'packageFiles' && is.array(val)) {
         const fileList = [];
         for (const packageFile of val) {
           if (is.object(packageFile) && !is.array(packageFile)) {
             fileList.push((packageFile as any).packageFile);
             if (Object.keys(packageFile).length > 1) {
-              migratedConfig.packageRules = migratedConfig.packageRules || [];
+              migratedConfig.packageRules = is.array(
+                migratedConfig.packageRules
+              )
+                ? migratedConfig.packageRules
+                : [];
               const payload = migrateConfig(packageFile as RenovateConfig, key)
                 .migratedConfig;
               for (const subrule of payload.packageRules || []) {
@@ -140,7 +148,9 @@ export function migrateConfig(
         migratedConfig.includePaths = fileList;
         delete migratedConfig.packageFiles;
       } else if (depTypes.includes(key)) {
-        migratedConfig.packageRules = migratedConfig.packageRules || [];
+        migratedConfig.packageRules = is.array(migratedConfig.packageRules)
+          ? migratedConfig.packageRules
+          : [];
         const depTypePackageRule = migrateConfig(val as RenovateConfig, key)
           .migratedConfig;
         depTypePackageRule.depTypeList = [key];
@@ -316,9 +326,12 @@ export function migrateConfig(
           migratedConfig.automerge = true;
         }
       } else if (key === 'packages') {
-        migratedConfig.packageRules = (
-          migratedConfig.packageRules || []
-        ).concat(migratedConfig.packages);
+        migratedConfig.packageRules = is.array(migratedConfig.packageRules)
+          ? migratedConfig.packageRules
+          : [];
+        migratedConfig.packageRules = migratedConfig.packageRules.concat(
+          migratedConfig.packages
+        );
         delete migratedConfig.packages;
       } else if (key === 'excludedPackageNames') {
         migratedConfig.excludePackageNames = val;
@@ -407,7 +420,11 @@ export function migrateConfig(
           if (is.object(depType) && !is.array(depType)) {
             const depTypeName = (depType as any).depType;
             if (depTypeName) {
-              migratedConfig.packageRules = migratedConfig.packageRules || [];
+              migratedConfig.packageRules = is.array(
+                migratedConfig.packageRules
+              )
+                ? migratedConfig.packageRules
+                : [];
               const newPackageRule = migrateConfig(
                 depType as RenovateConfig,
                 key
@@ -498,7 +515,7 @@ export function migrateConfig(
     }
     return { isMigrated, migratedConfig };
   } catch (err) /* istanbul ignore next */ {
-    logger.debug({ config }, 'migrateConfig() error');
+    logger.debug({ config, err }, 'migrateConfig() error');
     throw err;
   }
 }
