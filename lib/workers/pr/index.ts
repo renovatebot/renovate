@@ -15,6 +15,7 @@ import {
   isBranchModified,
 } from '../../util/git';
 import { BranchConfig, PrResult } from '../common';
+import { Limit, isLimitReached } from '../global/limits';
 import { getPrBody } from './body';
 import { ChangeLogError } from './changelog';
 import { codeOwnersForPr } from './code-owners';
@@ -114,8 +115,7 @@ export function getPlatformPrOptions(
 
 // Ensures that PR exists with matching title/body
 export async function ensurePr(
-  prConfig: BranchConfig,
-  prLimitReached?: boolean
+  prConfig: BranchConfig
 ): Promise<{
   prResult: PrResult;
   pr?: Pr;
@@ -381,7 +381,7 @@ export async function ensurePr(
         logger.info('DRY-RUN: Would create PR: ' + prTitle);
         pr = { number: 0, displayNumber: 'Dry run PR' } as never;
       } else {
-        if (!dependencyDashboardCheck && prLimitReached) {
+        if (!dependencyDashboardCheck && isLimitReached(Limit.PullRequests)) {
           return { prResult: PrResult.LimitReached };
         }
         pr = await platform.createPr({
