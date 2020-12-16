@@ -152,12 +152,12 @@ export async function processBranch(
     }
     if (
       !branchExists &&
-      isLimitReached(Limit.PullRequests) &&
+      isLimitReached(Limit.Branches) &&
       !dependencyDashboardCheck &&
       !config.vulnerabilityAlert
     ) {
-      logger.debug('Reached PR limit - skipping branch creation');
-      return ProcessBranchResult.PrLimitReached;
+      logger.debug('Reached branch limit - skipping branch creation');
+      return ProcessBranchResult.BranchLimitReached;
     }
     if (
       isLimitReached(Limit.Commits) &&
