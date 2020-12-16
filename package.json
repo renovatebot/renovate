@@ -141,7 +141,7 @@
     "global-agent": "2.1.12",
     "got": "11.8.0",
     "handlebars": "4.7.6",
-    "handy-redis": "2.0.2",
+    "handy-redis": "2.1.0",
     "hasha": "5.2.2",
     "ignore": "5.1.8",
     "ini": "1.3.6",
