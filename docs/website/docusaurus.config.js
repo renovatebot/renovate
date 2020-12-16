@@ -30,13 +30,13 @@ module.exports = {
       ],
     },
     footer: {
-      style: 'dark',
+      style: 'light',
       links: [],
       logo: {
         alt: 'Renovate Logo',
         src: '/img/logo.png',
       },
-      copyright: `Built with Daucusaurus v2`,
+      copyright: `Built with Docusaurus v2`,
     },
     prism: {
       theme,
