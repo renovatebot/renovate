@@ -45,7 +45,8 @@ import {
 
 interface Config {
   repoForceRebase: boolean;
-  mergeMethod: GitPullRequestMergeStrategy;
+  defaultMergeMethod: GitPullRequestMergeStrategy;
+  mergeMethods: Record<string, GitPullRequestMergeStrategy>;
   owner: string;
   repoId: string;
   project: string;
@@ -143,7 +144,11 @@ export async function initRepo({
   const defaultBranch = repo.defaultBranch.replace('refs/heads/', '');
   config.defaultBranch = defaultBranch;
   logger.debug(`${repository} default branch = ${defaultBranch}`);
-  config.mergeMethod = await azureHelper.getMergeMethod(repo.id, names.project);
+  config.defaultMergeMethod = await azureHelper.getMergeMethod(
+    repo.id,
+    names.project
+  );
+  config.mergeMethods = {};
   config.repoForceRebase = false;
 
   const [projectName, repoName] = repository.split('/');
@@ -387,7 +392,7 @@ export async function createPr({
           id: pr.createdBy.id,
         },
         completionOptions: {
-          mergeStrategy: config.mergeMethod,
+          mergeStrategy: config.defaultMergeMethod,
           deleteSourceBranch: true,
         },
       },
@@ -586,11 +591,14 @@ export async function mergePr(
     pullRequestId,
     config.project
   );
-  const mergeMethod = await azureHelper.getMergeMethod(
-    config.repoId,
-    config.project,
-    pr.targetRefName
-  );
+
+  const mergeMethod =
+    config.mergeMethods[pr.targetRefName] ??
+    (config.mergeMethods[pr.targetRefName] = await azureHelper.getMergeMethod(
+      config.repoId,
+      config.project,
+      pr.targetRefName
+    ));
 
   const objToUpdate: GitPullRequest = {
     status: PullRequestStatus.Completed,

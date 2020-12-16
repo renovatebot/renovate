@@ -1068,6 +1068,28 @@ describe('platform/azure', () => {
       const res = await azure.mergePr(pullRequestIdMock, branchNameMock);
       expect(res).toBe(false);
     });
+
+    it('should cache the mergeMethod for subsequent merges', async () => {
+      await initRepo({ repository: 'some/repo' });
+      azureApi.gitApi.mockImplementation(
+        () =>
+          ({
+            getPullRequestById: jest.fn(() => ({
+              lastMergeSourceCommit: { commitId: 'abcd1234' },
+              targetRefName: 'refs/heads/ding',
+            })),
+            updatePullRequest: jest.fn(),
+          } as any)
+      );
+      azureHelper.getMergeMethod = jest
+        .fn()
+        .mockReturnValue(GitPullRequestMergeStrategy.Squash);
+
+      await azure.mergePr(1234, 'test-branch-1');
+      await azure.mergePr(5678, 'test-branch-2');
+
+      expect(azureHelper.getMergeMethod).toHaveBeenCalledTimes(1);
+    });
   });
 
   describe('getVulnerabilityAlerts()', () => {
