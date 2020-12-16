@@ -1,6 +1,7 @@
 import { URLSearchParams } from 'url';
 import { BranchStatus, PrState } from '../../types';
 import { GiteaHttp, GiteaHttpOptions } from '../../util/http/gitea';
+import { PrReviewersParams } from './types';
 
 const giteaHttp = new GiteaHttp();
 
@@ -321,6 +322,19 @@ export async function getPR(
   const url = `repos/${repoPath}/pulls/${idx}`;
   const res = await giteaHttp.getJson<PR>(url, options);
   return res.body;
+}
+
+export async function requestPrReviewers(
+  repoPath: string,
+  idx: number,
+  params: PrReviewersParams,
+  options?: GiteaHttpOptions
+): Promise<void> {
+  const url = `repos/${repoPath}/pulls/${idx}/requested_reviewers`;
+  await giteaHttp.postJson(url, {
+    ...options,
+    body: params,
+  });
 }
 
 export async function searchPRs(
