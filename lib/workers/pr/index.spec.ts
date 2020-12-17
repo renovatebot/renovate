@@ -4,6 +4,7 @@ import { PLATFORM_TYPE_GITLAB } from '../../constants/platforms';
 import { Pr, platform as _platform } from '../../platform';
 import { BranchStatus } from '../../types';
 import { BranchConfig, PrResult } from '../common';
+import * as _limits from '../global/limits';
 import * as _changelogHelper from './changelog';
 import { getChangeLogJSON } from './changelog';
 import * as codeOwners from './code-owners';
@@ -14,10 +15,12 @@ const changelogHelper = mocked(_changelogHelper);
 const gitlabChangelogHelper = mocked(_changelogHelper);
 const platform = mocked(_platform);
 const defaultConfig = getConfig();
+const limits = mocked(_limits);
 
 jest.mock('../../util/git');
 jest.mock('./changelog');
 jest.mock('./code-owners');
+jest.mock('../global/limits');
 
 function setupChangelogMock() {
   changelogHelper.getChangeLogJSON = jest.fn();
@@ -268,7 +271,8 @@ describe('workers/pr', () => {
       config.prCreation = 'status-success';
       config.automerge = true;
       config.schedule = ['before 5am'];
-      const { prResult } = await prWorker.ensurePr(config, true);
+      limits.isLimitReached.mockReturnValueOnce(true);
+      const { prResult } = await prWorker.ensurePr(config);
       expect(prResult).toEqual(PrResult.LimitReached);
       expect(platform.createPr.mock.calls).toBeEmpty();
     });
@@ -278,13 +282,11 @@ describe('workers/pr', () => {
       config.prCreation = 'status-success';
       config.automerge = true;
       config.schedule = ['before 5am'];
-      const { prResult } = await prWorker.ensurePr(
-        {
-          ...config,
-          dependencyDashboardChecks: { 'renovate/dummy-1.x': 'true' },
-        },
-        true
-      );
+      limits.isLimitReached.mockReturnValueOnce(true);
+      const { prResult } = await prWorker.ensurePr({
+        ...config,
+        dependencyDashboardChecks: { 'renovate/dummy-1.x': 'true' },
+      });
       expect(prResult).toEqual(PrResult.Created);
       expect(platform.createPr).toHaveBeenCalled();
     });
