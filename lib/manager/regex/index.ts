@@ -20,6 +20,7 @@ const validMatchFields = [
   'currentDigest',
   'datasource',
   'versioning',
+  'extractVersion',
   'registryUrl',
 ];
 

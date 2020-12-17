@@ -65,7 +65,7 @@ Credentials for authenticated/private feeds can be provided via host rules in th
 "hostRules": [
   {
     "hostType": "nuget",
-    "endpoint": "http://example1.com/nuget",
+    "baseUrl": "http://example1.com/nuget",
     "username": "root",
     "password": "p4$$w0rd"
   }

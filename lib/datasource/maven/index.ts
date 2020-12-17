@@ -55,11 +55,7 @@ async function downloadMavenXml(
       logger.debug('Skipping s3 dependency');
       return null;
     default:
-      logger.warn(
-        `Invalid protocol '${
-          pkgUrl.protocol
-        }' for Maven url: ${pkgUrl.toString()}`
-      );
+      logger.debug({ url: pkgUrl.toString() }, `Unsupported Maven protocol`);
       return null;
   }
 

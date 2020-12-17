@@ -73,7 +73,7 @@ export const isValid = (input: string): boolean =>
 
 export const matches = (version: string, range: string): boolean =>
   satisfies(vtrim(version), vtrim(range));
-const maxSatisfyingVersion = (versions: string[], range: string): string =>
+const getSatisfyingVersion = (versions: string[], range: string): string =>
   maxSatisfying(versions.map(vtrim), vtrim(range));
 const minSatisfyingVersion = (versions: string[], range: string): string =>
   minSatisfying(versions.map(vtrim), vtrim(range));
@@ -147,7 +147,7 @@ export const api: VersioningApi = {
   isValid,
   isVersion,
   matches,
-  maxSatisfyingVersion,
+  getSatisfyingVersion,
   minSatisfyingVersion,
   getNewValue,
   sortVersions,

@@ -137,11 +137,12 @@ function urlEscape(str: string): string {
 
 export async function getJsonFile(fileName: string): Promise<any | null> {
   try {
+    const escapedFileName = urlEscape(fileName);
     return JSON.parse(
       Buffer.from(
         (
           await gitlabApi.getJson<{ content: string }>(
-            `projects/${config.repository}/repository/files/${fileName}?ref=${config.defaultBranch}`
+            `projects/${config.repository}/repository/files/${escapedFileName}?ref=${config.defaultBranch}`
           )
         ).body.content,
         'base64'
@@ -607,33 +608,39 @@ export function getPrBody(input: string): string {
 
 // Branch
 
+function matchesState(state: string, desiredState: string): boolean {
+  if (desiredState === PrState.All) {
+    return true;
+  }
+  if (desiredState.startsWith('!')) {
+    return state !== desiredState.substring(1);
+  }
+  return state === desiredState;
+}
+
+export async function findPr({
+  branchName,
+  prTitle,
+  state = PrState.All,
+}: FindPRConfig): Promise<Pr> {
+  logger.debug(`findPr(${branchName}, ${prTitle}, ${state})`);
+  const prList = await getPrList();
+  return prList.find(
+    (p: { sourceBranch: string; title: string; state: string }) =>
+      p.sourceBranch === branchName &&
+      (!prTitle || p.title === prTitle) &&
+      matchesState(p.state, state)
+  );
+}
+
 // Returns the Pull Request for a branch. Null if not exists.
 export async function getBranchPr(branchName: string): Promise<Pr> {
   logger.debug(`getBranchPr(${branchName})`);
-  // istanbul ignore if
-  if (!git.branchExists(branchName)) {
-    return null;
-  }
-  const query = new URLSearchParams({
-    per_page: '100',
-    state: 'opened',
-    source_branch: branchName,
-  }).toString();
-  const urlString = `projects/${config.repository}/merge_requests?${query}`;
-  const res = await gitlabApi.getJson<{ source_branch: string }[]>(urlString, {
-    paginate: true,
+  const existingPr = await findPr({
+    branchName,
+    state: PrState.Open,
   });
-  logger.debug(`Got res with ${res.body.length} results`);
-  let pr: any = null;
-  res.body.forEach((result) => {
-    if (result.source_branch === branchName) {
-      pr = result;
-    }
-  });
-  if (!pr) {
-    return null;
-  }
-  return getPr(pr.iid);
+  return existingPr ? getPr(existingPr.number) : null;
 }
 
 export async function getBranchStatusCheck(
@@ -997,31 +1004,6 @@ export async function ensureCommentRemoval({
   if (commentId) {
     await deleteComment(issueNo, commentId);
   }
-}
-
-function matchesState(state: string, desiredState: string): boolean {
-  if (desiredState === PrState.All) {
-    return true;
-  }
-  if (desiredState.startsWith('!')) {
-    return state !== desiredState.substring(1);
-  }
-  return state === desiredState;
-}
-
-export async function findPr({
-  branchName,
-  prTitle,
-  state = PrState.All,
-}: FindPRConfig): Promise<Pr> {
-  logger.debug(`findPr(${branchName}, ${prTitle}, ${state})`);
-  const prList = await getPrList();
-  return prList.find(
-    (p: { sourceBranch: string; title: string; state: string }) =>
-      p.sourceBranch === branchName &&
-      (!prTitle || p.title === prTitle) &&
-      matchesState(p.state, state)
-  );
 }
 
 export function getVulnerabilityAlerts(): Promise<VulnerabilityAlert[]> {

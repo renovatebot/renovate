@@ -1105,7 +1105,7 @@ Array [
       "user-agent": "https://github.com/renovatebot/renovate",
     },
     "method": "GET",
-    "url": "https://api.bitbucket.org/2.0/repositories/?role=contributor&pagelen=100",
+    "url": "https://api.bitbucket.org/2.0/repositories?role=contributor&pagelen=100",
   },
 ]
 `;

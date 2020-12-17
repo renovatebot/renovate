@@ -30,6 +30,7 @@ import {
 import { regEx } from '../../util/regex';
 import * as template from '../../util/template';
 import { BranchConfig, PrResult, ProcessBranchResult } from '../common';
+import { Limit, isLimitReached } from '../global/limits';
 import { checkAutoMerge, ensurePr, getPlatformPrOptions } from '../pr';
 import { tryBranchAutomerge } from './automerge';
 import { prAlreadyExisted } from './check-existing';
@@ -37,7 +38,7 @@ import { commitFilesToBranch } from './commit';
 import { getUpdatedPackageFiles } from './get-updated';
 import { shouldReuseExistingBranch } from './reuse';
 import { isScheduledNow } from './schedule';
-import { setStability, setUnpublishable } from './status-checks';
+import { setStability } from './status-checks';
 
 function rebaseCheck(config: RenovateConfig, branchPr: Pr): boolean {
   const titleRebase = branchPr.title?.startsWith('rebase!');
@@ -60,9 +61,7 @@ async function deleteBranchSilently(branchName: string): Promise<void> {
 }
 
 export async function processBranch(
-  branchConfig: BranchConfig,
-  prLimitReached?: boolean,
-  commitLimitReached?: boolean
+  branchConfig: BranchConfig
 ): Promise<ProcessBranchResult> {
   const config: BranchConfig = { ...branchConfig };
   const dependencies = config.upgrades
@@ -153,7 +152,7 @@ export async function processBranch(
     }
     if (
       !branchExists &&
-      prLimitReached &&
+      isLimitReached(Limit.PullRequests) &&
       !dependencyDashboardCheck &&
       !config.vulnerabilityAlert
     ) {
@@ -161,7 +160,7 @@ export async function processBranch(
       return ProcessBranchResult.PrLimitReached;
     }
     if (
-      commitLimitReached &&
+      isLimitReached(Limit.Commits) &&
       !dependencyDashboardCheck &&
       !config.vulnerabilityAlert
     ) {
@@ -228,19 +227,6 @@ export async function processBranch(
       logger.debug(
         'Branch + PR exists but is not scheduled -- will update if necessary'
       );
-    }
-
-    if (
-      config.updateType !== 'lockFileMaintenance' &&
-      config.unpublishSafe &&
-      config.canBeUnpublished &&
-      (config.prCreation === 'not-pending' ||
-        /* istanbul ignore next */ config.prCreation === 'status-success')
-    ) {
-      logger.debug(
-        'Skipping branch creation due to unpublishSafe + status checks'
-      );
-      return ProcessBranchResult.Pending;
     }
 
     if (
@@ -494,7 +480,6 @@ export async function processBranch(
     }
     // Set branch statuses
     await setStability(config);
-    await setUnpublishable(config);
 
     // break if we pushed a new commit because status check are pretty sure pending but maybe not reported yet
     if (
@@ -597,7 +582,7 @@ export async function processBranch(
     logger.debug(
       `There are ${config.errors.length} errors and ${config.warnings.length} warnings`
     );
-    const { prResult: result, pr } = await ensurePr(config, prLimitReached);
+    const { prResult: result, pr } = await ensurePr(config);
     if (result === PrResult.LimitReached) {
       logger.debug('Reached PR limit - skipping PR creation');
       return ProcessBranchResult.PrLimitReached;

@@ -685,15 +685,14 @@ export async function getPrList(): Promise<Pr[]> {
       throw new ExternalHostError(err, PLATFORM_TYPE_GITHUB);
     }
     config.prList = prList
-      .filter((pr) => {
-        return (
+      .filter(
+        (pr) =>
           config.forkMode ||
           config.ignorePrAuthor ||
           (pr?.user?.login && config?.renovateUsername
             ? pr.user.login === config.renovateUsername
             : true)
-        );
-      })
+      )
       .map(
         (pr) =>
           ({
