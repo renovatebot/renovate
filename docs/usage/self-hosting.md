@@ -24,9 +24,9 @@ For example, all the following are valid tags:
 
 ```sh
 $ docker run --rm renovate/renovate
-$ docker run --rm renovate/renovate:19.181.2
-$ docker run --rm renovate/renovate:19.181
-$ docker run --rm renovate/renovate:19
+$ docker run --rm renovate/renovate:24.7.1
+$ docker run --rm renovate/renovate:24.7
+$ docker run --rm renovate/renovate:24
 ```
 
 (Please look up what the latest actual tags are though, do not use the above literally).
