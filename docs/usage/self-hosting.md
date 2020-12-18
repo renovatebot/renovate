@@ -32,7 +32,7 @@ $ docker run --rm renovate/renovate:24
 Do not use the example tags listed above, as they will be out-of-date.
 Go to [renovate/renovate tags](https://hub.docker.com/r/renovate/renovate/tags) to grab the latest tagged release from Renovate.
 
-If you wish to configure Renovate using a `config.js` file then map it to `/usr/src/app/config.js` using Docker volumes.
+If you want to configure Renovate using a `config.js` file then map it to `/usr/src/app/config.js` using Docker volumes.
 For example:
 
 ```sh
