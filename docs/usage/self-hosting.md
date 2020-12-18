@@ -8,7 +8,7 @@
 $ npm install -g renovate
 ```
 
-Since renovate v20 `npm`, `pnpm` and `yarn` are no longer embedded, so you need to install them globally if you need to update lockfiles.
+Since Renovate v20 `npm`, `pnpm` and `yarn` are no longer embedded, so you must install them globally if you need to update lockfiles.
 
 ```sh
 $ npm install -g yarn pnpm
