@@ -2,12 +2,19 @@ import { ExternalHostError } from '../../types/errors/external-host-error';
 import * as packageCache from '../../util/cache/package';
 import { Http } from '../../util/http';
 import { GetReleasesConfig, Release, ReleaseResult } from '../common';
+import { logger } from '../../logger';
+import { ensureCacheDir } from '../../util/fs';
+import Git, { SimpleGitTaskCallback } from 'simple-git';
 
 export const id = 'crate';
 
+export const registryStrategy = 'first';
+
+const registryClonePaths: Record<string, string> = {};
+
 const http = new Http(id);
 
-const BASE_URL =
+const CRATES_IO_BASE_URL =
   'https://raw.githubusercontent.com/rust-lang/crates.io-index/master/';
 
 export function getIndexSuffix(lookupName: string): string {
@@ -35,20 +42,46 @@ interface CrateRecord {
 
 export async function getReleases({
   lookupName,
+  registryUrl,
 }: GetReleasesConfig): Promise<ReleaseResult | null> {
+  console.log(
+    `getReleases(lookupName = ${lookupName}, registryUrl = ${registryUrl})`
+  );
   const cacheNamespace = 'datasource-crate';
-  const cacheKey = lookupName;
+  const cacheKey = registryUrl ? `${registryUrl}/${lookupName}` : lookupName;
   const cachedResult = await packageCache.get<ReleaseResult>(
     cacheNamespace,
     cacheKey
   );
   // istanbul ignore if
   if (cachedResult) {
+    console.log(`returning cached result`);
     return cachedResult;
   }
 
-  const crateUrl = BASE_URL + getIndexSuffix(lookupName);
-  const dependencyUrl = `https://crates.io/crates/${lookupName}`;
+  let registryInfo = await fetchRegistryInfo(registryUrl);
+  console.log(`registryInfo: ${JSON.stringify(registryInfo, null, 2)}`);
+
+  const crateUrl = CRATES_IO_BASE_URL + getIndexSuffix(lookupName);
+  let dependencyUrl = `https://crates.io/crates/${lookupName}`;
+  let parsedRegistryUrl: URL | undefined;
+  try {
+    parsedRegistryUrl = new URL(registryUrl);
+  } catch (err) {
+    logger.debug({ err }, 'failed to parse crate registry URL');
+  }
+
+  if (parsedRegistryUrl) {
+    if (parsedRegistryUrl.hostname == 'dl.cloudsmith.io') {
+      // input: https://dl.cloudsmith.io/basic/$org/$repo/cargo/index.git
+      // output: https://cloudsmith.io/~$org/repos/$repo/packages/detail/cargo/$package/
+      let tokens = parsedRegistryUrl.pathname.split('/');
+      let org = tokens[2];
+      let repo = tokens[3];
+      dependencyUrl = `https://cloudsmith.io/~${org}/repos/${repo}/packages/detail/cargo/${lookupName}`;
+    }
+  }
+
   try {
     const lines = (await http.get(crateUrl)).body
       .split('\n') // break into lines
@@ -85,4 +118,75 @@ export async function getReleases({
     }
     throw err;
   }
+}
+
+enum RegistryFlavor {
+  /// https://crates.io, supports rawgit access
+  CratesIo,
+
+  /// https://cloudsmith.io, needs git clone
+  Cloudsmith,
+
+  /// unknown, assuming private git repository
+  Other,
+}
+
+interface RegistryInfo {
+  flavor: RegistryFlavor;
+
+  /// raw URL of the registry, as specified in cargo config
+  rawUrl?: string;
+
+  /// parsed URL of the registry
+  url?: URL;
+
+  /// path where the registry is cloned
+  clonePath?: string;
+}
+
+async function fetchRegistryInfo(registryUrl?: string): Promise<RegistryInfo> {
+  if (!registryUrl) {
+    return defaultRegistry();
+  }
+
+  let url: URL;
+  try {
+    url = new URL(registryUrl);
+  } catch (err) {
+    console.debug({ registryUrl }, 'could not parse registry URL');
+  }
+
+  let flavor: RegistryFlavor;
+  if (url.hostname === 'dl.cloudsmith.io') {
+    flavor = RegistryFlavor.Cloudsmith;
+  } else {
+    flavor = RegistryFlavor.Other;
+  }
+
+  let clonePath = registryClonePaths[registryUrl];
+  if (!clonePath) {
+    clonePath = await ensureCacheDir(url.hostname);
+    console.log(`Cloning repo... (to ${clonePath})`);
+    {
+      let git = Git();
+      await git.clone(registryUrl, clonePath, {
+        '--depth': 1,
+      });
+    }
+    console.log(`Cloning repo... done!`);
+    registryClonePaths[registryUrl] = clonePath;
+  }
+
+  return {
+    flavor,
+    rawUrl: registryUrl,
+    url,
+    clonePath,
+  };
+}
+
+function defaultRegistry(): RegistryInfo {
+  return {
+    flavor: RegistryFlavor.CratesIo,
+  };
 }
