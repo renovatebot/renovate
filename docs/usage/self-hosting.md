@@ -350,7 +350,7 @@ metadata:
 ```
 
 Then you just need to add Git author, and mount volumes.
-The final configuration should look like something like this:
+The final configuration should look something like this:
 
 ```yml
 ---

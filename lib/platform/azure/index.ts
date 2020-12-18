@@ -45,7 +45,8 @@ import {
 
 interface Config {
   repoForceRebase: boolean;
-  mergeMethod: GitPullRequestMergeStrategy;
+  defaultMergeMethod: GitPullRequestMergeStrategy;
+  mergeMethods: Record<string, GitPullRequestMergeStrategy>;
   owner: string;
   repoId: string;
   project: string;
@@ -143,7 +144,11 @@ export async function initRepo({
   const defaultBranch = repo.defaultBranch.replace('refs/heads/', '');
   config.defaultBranch = defaultBranch;
   logger.debug(`${repository} default branch = ${defaultBranch}`);
-  config.mergeMethod = await azureHelper.getMergeMethod(repo.id, names.project);
+  config.defaultMergeMethod = await azureHelper.getMergeMethod(
+    repo.id,
+    names.project
+  );
+  config.mergeMethods = {};
   config.repoForceRebase = false;
 
   const [projectName, repoName] = repository.split('/');
@@ -387,7 +392,7 @@ export async function createPr({
           id: pr.createdBy.id,
         },
         completionOptions: {
-          mergeStrategy: config.mergeMethod,
+          mergeStrategy: config.defaultMergeMethod,
           deleteSourceBranch: true,
         },
       },
@@ -575,9 +580,56 @@ export async function setBranchStatus({
   logger.trace(`Created commit status of ${state} on branch ${branchName}`);
 }
 
-export function mergePr(pr: number, branchName: string): Promise<boolean> {
-  logger.debug(`mergePr(pr)(${pr}) - Not supported by Azure DevOps (yet!)`);
-  return Promise.resolve(false);
+export async function mergePr(
+  pullRequestId: number,
+  branchName: string
+): Promise<boolean> {
+  logger.debug(`mergePr(${pullRequestId}, ${branchName})`);
+  const azureApiGit = await azureApi.gitApi();
+
+  const pr = await azureApiGit.getPullRequestById(
+    pullRequestId,
+    config.project
+  );
+
+  const mergeMethod =
+    config.mergeMethods[pr.targetRefName] ??
+    (config.mergeMethods[pr.targetRefName] = await azureHelper.getMergeMethod(
+      config.repoId,
+      config.project,
+      pr.targetRefName
+    ));
+
+  const objToUpdate: GitPullRequest = {
+    status: PullRequestStatus.Completed,
+    lastMergeSourceCommit: pr.lastMergeSourceCommit,
+    completionOptions: {
+      mergeStrategy: mergeMethod,
+      deleteSourceBranch: true,
+    },
+  };
+
+  logger.trace(
+    `Updating PR ${pullRequestId} to status ${PullRequestStatus.Completed} (${
+      PullRequestStatus[PullRequestStatus.Completed]
+    }) with lastMergeSourceCommit ${
+      pr.lastMergeSourceCommit.commitId
+    } using mergeStrategy ${mergeMethod} (${
+      GitPullRequestMergeStrategy[mergeMethod]
+    })`
+  );
+
+  try {
+    await azureApiGit.updatePullRequest(
+      objToUpdate,
+      config.repoId,
+      pullRequestId
+    );
+    return true;
+  } catch (err) {
+    logger.debug({ err }, 'Failed to set the PR as completed.');
+    return false;
+  }
 }
 
 export function getPrBody(input: string): string {

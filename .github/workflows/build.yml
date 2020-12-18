@@ -40,7 +40,7 @@ jobs:
 
     steps:
       - name: Set up Node.js ${{ env.NODE_VERSION }}
-        uses: actions/setup-node@v1.4.4
+        uses: actions/setup-node@v2.1.4
         with:
           node-version: ${{ env.NODE_VERSION }}
 
@@ -122,7 +122,7 @@ jobs:
 
     steps:
       - name: Set up Node.js ${{ env.NODE_VERSION }}
-        uses: actions/setup-node@v1.4.4
+        uses: actions/setup-node@v2.1.4
         with:
           node-version: ${{ env.NODE_VERSION }}
 
@@ -235,7 +235,7 @@ jobs:
 
     steps:
       - name: Set up Node.js ${{ env.NODE_VERSION }}
-        uses: actions/setup-node@v1.4.4
+        uses: actions/setup-node@v2.1.4
         with:
           node-version: ${{ env.NODE_VERSION }}
 
