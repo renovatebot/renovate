@@ -13,6 +13,7 @@ export const PLATFORM_RATE_LIMIT_EXCEEDED = 'rate-limit-exceeded';
 // Config Error
 export const CONFIG_VALIDATION = 'config-validation';
 export const CONFIG_SECRETS_EXPOSED = 'config-secrets-exposed';
+export const CONFIG_SECRETS_INVALID = 'config-secrets-invalid';
 
 // Repository Error
 export const REPOSITORY_ACCESS_FORBIDDEN = 'forbidden';

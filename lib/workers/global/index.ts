@@ -3,6 +3,7 @@ import { ERROR } from 'bunyan';
 import fs from 'fs-extra';
 import upath from 'upath';
 import * as configParser from '../../config';
+import { validateConfigSecrets } from '../../config/secrets';
 import { getProblems, logger, setMeta } from '../../logger';
 import { setUtilConfig } from '../../util';
 import * as hostRules from '../../util/host-rules';
@@ -50,6 +51,8 @@ export async function start(): Promise<number> {
     config = await getGlobalConfig();
     // initialize all submodules
     config = await globalInitialize(config);
+    // validate secrets. Will throw and abort if invalid
+    validateConfigSecrets(config);
     // autodiscover repositories (needs to come after platform initialization)
     config = await autodiscoverRepositories(config);
     // Iterate through repositories sequentially
