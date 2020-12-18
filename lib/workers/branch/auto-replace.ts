@@ -38,7 +38,7 @@ export async function confirmIfDepUpdated(
     return false;
   }
 
-  if (newUpgrade.depName && upgrade.depName !== newUpgrade.depName) {
+  if (upgrade.depName !== newUpgrade.depName) {
     logger.debug(
       {
         manager,
