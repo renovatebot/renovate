@@ -13,7 +13,7 @@ export interface CargoSection {
   'build-dependencies': CargoDeps;
 }
 
-export interface CargoConfig extends CargoSection {
+export interface CargoManifest extends CargoSection {
   target: Record<string, CargoSection>;
 }
 

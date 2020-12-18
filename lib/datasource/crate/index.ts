@@ -1,12 +1,12 @@
-import { ExternalHostError } from '../../types/errors/external-host-error';
+import { join } from 'path';
 import * as fs from 'fs-extra';
+import Git from 'simple-git';
+import { logger } from '../../logger';
+import { ExternalHostError } from '../../types/errors/external-host-error';
 import * as packageCache from '../../util/cache/package';
+import { ensureCacheDir } from '../../util/fs';
 import { Http } from '../../util/http';
 import { GetReleasesConfig, Release, ReleaseResult } from '../common';
-import { ensureCacheDir } from '../../util/fs';
-import Git from 'simple-git';
-import { join } from 'path';
-import { logger } from '../../logger';
 
 export const id = 'crate';
 
@@ -18,6 +18,30 @@ const http = new Http(id);
 
 const CRATES_IO_BASE_URL =
   'https://raw.githubusercontent.com/rust-lang/crates.io-index/master/';
+
+enum RegistryFlavor {
+  /// https://crates.io, supports rawgit access
+  CratesIo,
+
+  /// https://cloudsmith.io, needs git clone
+  Cloudsmith,
+
+  /// unknown, assuming private git repository
+  Other,
+}
+
+interface RegistryInfo {
+  flavor: RegistryFlavor;
+
+  /// raw URL of the registry, as specified in cargo config
+  rawUrl?: string;
+
+  /// parsed URL of the registry
+  url?: URL;
+
+  /// path where the registry is cloned
+  clonePath?: string;
+}
 
 export function getIndexSuffix(lookupName: string): string[] {
   const len = lookupName.length;
@@ -40,6 +64,102 @@ interface CrateRecord {
   yanked: boolean;
 }
 
+async function fetchCrateRecordsPayload(
+  info: RegistryInfo,
+  lookupName: string
+): Promise<string> {
+  if (info.clonePath) {
+    const path = join(info.clonePath, ...getIndexSuffix(lookupName));
+    return fs.readFile(path, { encoding: 'utf8' });
+  }
+
+  if (info.flavor === RegistryFlavor.CratesIo) {
+    const crateUrl = CRATES_IO_BASE_URL + getIndexSuffix(lookupName).join('/');
+    try {
+      return (await http.get(crateUrl)).body;
+    } catch (err) {
+      if (
+        err.statusCode === 429 ||
+        (err.statusCode >= 500 && err.statusCode < 600)
+      ) {
+        throw new ExternalHostError(err);
+      }
+    }
+  }
+
+  throw new Error(`unsupported crate registry flavor: ${info.flavor}`);
+}
+
+/// Computes the dependency URL for a crate, given
+/// registry information
+function getDependencyUrl(info: RegistryInfo, lookupName: string): string {
+  switch (info.flavor) {
+    case RegistryFlavor.CratesIo:
+      return `https://crates.io/crates/${lookupName}`;
+    case RegistryFlavor.Cloudsmith: {
+      // input: https://dl.cloudsmith.io/basic/$org/$repo/cargo/index.git
+      const tokens = info.url.pathname.split('/');
+      const org = tokens[2];
+      const repo = tokens[3];
+      return `https://cloudsmith.io/~${org}/repos/${repo}/packages/detail/cargo/${lookupName}`;
+    }
+    default:
+      return `${info.rawUrl}/${lookupName}`;
+  }
+}
+
+/// Returns information for the default registry: crates.io
+function defaultRegistry(): RegistryInfo {
+  return {
+    flavor: RegistryFlavor.CratesIo,
+  };
+}
+
+/// Fetches information about a registry, by url.
+/// If no url is given, assumes crates.io.
+/// If an url is given, assumes it's a valid Git repository
+/// url and clones it to cache.
+async function fetchRegistryInfo(registryUrl?: string): Promise<RegistryInfo> {
+  if (!registryUrl) {
+    return defaultRegistry();
+  }
+
+  let url: URL;
+  try {
+    url = new URL(registryUrl);
+  } catch (err) {
+    logger.debug({ registryUrl }, 'could not parse registry URL');
+    return defaultRegistry();
+  }
+
+  let flavor: RegistryFlavor;
+  if (url.hostname === 'dl.cloudsmith.io') {
+    flavor = RegistryFlavor.Cloudsmith;
+  } else {
+    flavor = RegistryFlavor.Other;
+  }
+
+  let clonePath = registryClonePaths[registryUrl];
+  if (!clonePath) {
+    clonePath = await ensureCacheDir(`crate-registry-${url.hostname}`);
+    logger.info({ clonePath, registryUrl }, `Cloning private cargo registry`);
+    {
+      const git = Git();
+      await git.clone(registryUrl, clonePath, {
+        '--depth': 1,
+      });
+    }
+    registryClonePaths[registryUrl] = clonePath;
+  }
+
+  return {
+    flavor,
+    rawUrl: registryUrl,
+    url,
+    clonePath,
+  };
+}
+
 export async function getReleases({
   lookupName,
   registryUrl,
@@ -55,10 +175,10 @@ export async function getReleases({
     return cachedResult;
   }
 
-  let registryInfo = await fetchRegistryInfo(registryUrl);
-  let dependencyUrl = getDependencyUrl(registryInfo, lookupName);
+  const registryInfo = await fetchRegistryInfo(registryUrl);
+  const dependencyUrl = getDependencyUrl(registryInfo, lookupName);
 
-  let payload = await fetchCrateRecordsPayload(registryInfo, lookupName);
+  const payload = await fetchCrateRecordsPayload(registryInfo, lookupName);
   const lines = payload
     .split('\n') // break into lines
     .map((line) => line.trim()) // remove whitespace
@@ -85,113 +205,4 @@ export async function getReleases({
   const cacheMinutes = 10;
   await packageCache.set(cacheNamespace, cacheKey, result, cacheMinutes);
   return result;
-}
-
-enum RegistryFlavor {
-  /// https://crates.io, supports rawgit access
-  CratesIo,
-
-  /// https://cloudsmith.io, needs git clone
-  Cloudsmith,
-
-  /// unknown, assuming private git repository
-  Other,
-}
-
-interface RegistryInfo {
-  flavor: RegistryFlavor;
-
-  /// raw URL of the registry, as specified in cargo config
-  rawUrl?: string;
-
-  /// parsed URL of the registry
-  url?: URL;
-
-  /// path where the registry is cloned
-  clonePath?: string;
-}
-
-async function fetchRegistryInfo(registryUrl?: string): Promise<RegistryInfo> {
-  if (!registryUrl) {
-    return defaultRegistry();
-  }
-
-  let url: URL;
-  try {
-    url = new URL(registryUrl);
-  } catch (err) {
-    console.debug({ registryUrl }, 'could not parse registry URL');
-  }
-
-  let flavor: RegistryFlavor;
-  if (url.hostname === 'dl.cloudsmith.io') {
-    flavor = RegistryFlavor.Cloudsmith;
-  } else {
-    flavor = RegistryFlavor.Other;
-  }
-
-  let clonePath = registryClonePaths[registryUrl];
-  if (!clonePath) {
-    clonePath = await ensureCacheDir(url.hostname);
-    logger.info({ clonePath, registryUrl }, `Cloning private cargo registry`);
-    {
-      let git = Git();
-      await git.clone(registryUrl, clonePath, {
-        '--depth': 1,
-      });
-    }
-    registryClonePaths[registryUrl] = clonePath;
-  }
-
-  return {
-    flavor,
-    rawUrl: registryUrl,
-    url,
-    clonePath,
-  };
-}
-
-function defaultRegistry(): RegistryInfo {
-  return {
-    flavor: RegistryFlavor.CratesIo,
-  };
-}
-
-/// Computes the dependency URL for a crate, given
-/// registry informatoin
-function getDependencyUrl(info: RegistryInfo, lookupName: string): string {
-  switch (info.flavor) {
-    case RegistryFlavor.CratesIo:
-      return `https://crates.io/crates/${lookupName}`;
-    case RegistryFlavor.Cloudsmith:
-      // input: https://dl.cloudsmith.io/basic/$org/$repo/cargo/index.git
-      let tokens = info.url.pathname.split('/');
-      let org = tokens[2];
-      let repo = tokens[3];
-      return `https://cloudsmith.io/~${org}/repos/${repo}/packages/detail/cargo/${lookupName}`;
-    default:
-      return `${info.rawUrl}/${lookupName}`;
-  }
-}
-
-async function fetchCrateRecordsPayload(
-  info: RegistryInfo,
-  lookupName: string
-): Promise<string> {
-  if (info.clonePath) {
-    let path = join(info.clonePath, ...getIndexSuffix(lookupName));
-    return await fs.readFile(path, { encoding: 'utf8' });
-  } else {
-    const crateUrl = CRATES_IO_BASE_URL + getIndexSuffix(lookupName).join('/');
-    try {
-      return (await http.get(crateUrl)).body;
-    } catch (err) {
-      if (
-        err.statusCode === 429 ||
-        (err.statusCode >= 500 && err.statusCode < 600)
-      ) {
-        throw new ExternalHostError(err);
-      }
-    }
-  }
 }

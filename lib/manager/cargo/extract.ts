@@ -1,13 +1,13 @@
-import { parse } from '@iarna/toml';
-import { join } from 'path';
 import { existsSync, readFileSync } from 'fs';
+import { join } from 'path';
+import { parse } from '@iarna/toml';
 import * as datasourceCrate from '../../datasource/crate';
 import { logger } from '../../logger';
 import { SkipReason } from '../../types';
 import { ExtractConfig, PackageDependency, PackageFile } from '../common';
 import {
   CargoConfig,
-  CargoConfig as CargoManifest,
+  CargoManifest,
   CargoRegistries,
   CargoSection,
 } from './types';
@@ -38,7 +38,7 @@ function extractFromSection(
         currentValue = version;
         nestedVersion = true;
         if (registryName) {
-          let registryUrl = cargoRegistries[registryName];
+          const registryUrl = cargoRegistries[registryName];
           if (registryUrl) {
             registryUrls = [registryUrl];
           } else {
@@ -102,18 +102,18 @@ export function extractPackageFile(
           readFileSync(configPath, { encoding: 'utf-8' })
         ) as any;
       } catch (err) {
-        logger.debug({ err }, 'Error parsing cargo config from ${configPath}');
+        logger.debug({ err }, `Error parsing cargo config from ${configPath}`);
       }
     } else {
       logger.debug('Neither .cargo/config nor .cargo/config.toml found');
     }
   }
 
-  let cargoRegistries: CargoRegistries = {};
+  const cargoRegistries: CargoRegistries = {};
   if (cargoConfig) {
     if (cargoConfig.registries) {
       for (const registryName of Object.keys(cargoConfig.registries)) {
-        let registry = cargoConfig.registries[registryName];
+        const registry = cargoConfig.registries[registryName];
         if (registry.index) {
           cargoRegistries[registryName] = registry.index;
         } else {
@@ -123,10 +123,10 @@ export function extractPackageFile(
     }
   }
 
-  let parsedContent: CargoManifest;
+  let cargoManifest: CargoManifest;
   try {
     // TODO: fix type
-    parsedContent = parse(content) as any;
+    cargoManifest = parse(content) as any;
   } catch (err) {
     logger.debug({ err }, 'Error parsing Cargo.toml file');
     return null;
@@ -138,13 +138,13 @@ export function extractPackageFile(
     [build-dependencies]
     [target.*.dependencies]
   */
-  const targetSection = parsedContent.target;
+  const targetSection = cargoManifest.target;
   // An array of all dependencies in the target section
   let targetDeps: PackageDependency[] = [];
   if (targetSection) {
     const targets = Object.keys(targetSection);
     targets.forEach((target) => {
-      const targetContent = parsedContent.target[target];
+      const targetContent = cargoManifest.target[target];
       // Dependencies for `${target}`
       const deps = [
         ...extractFromSection(
@@ -170,9 +170,9 @@ export function extractPackageFile(
     });
   }
   const deps = [
-    ...extractFromSection(parsedContent, 'dependencies', cargoRegistries),
-    ...extractFromSection(parsedContent, 'dev-dependencies', cargoRegistries),
-    ...extractFromSection(parsedContent, 'build-dependencies', cargoRegistries),
+    ...extractFromSection(cargoManifest, 'dependencies', cargoRegistries),
+    ...extractFromSection(cargoManifest, 'dev-dependencies', cargoRegistries),
+    ...extractFromSection(cargoManifest, 'build-dependencies', cargoRegistries),
     ...targetDeps,
   ];
   if (!deps.length) {
