@@ -161,7 +161,7 @@ The following example runs Renovate hourly, and looks for the self-hosted config
 ```yml
 version: '2.1'
 orbs:
-  renovate: daniel-shuy/renovate@2.1
+  renovate: daniel-shuy/renovate@2.1.1
 workflows:
   renovate:
     jobs:
