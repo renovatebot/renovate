@@ -16,13 +16,13 @@ const baseUrl =
 describe('datasource/crate', () => {
   describe('getIndexSuffix', () => {
     it('returns correct suffixes', () => {
-      expect(getIndexSuffix('a')).toBe(['1', 'a']);
-      expect(getIndexSuffix('1')).toBe(['1', '1']);
-      expect(getIndexSuffix('1234567')).toBe(['12', '34', '1234567']);
-      expect(getIndexSuffix('ab')).toBe(['2', 'ab']);
-      expect(getIndexSuffix('abc')).toBe(['3', 'a', 'abc']);
-      expect(getIndexSuffix('abcd')).toBe(['ab', 'cd', 'abcd']);
-      expect(getIndexSuffix('abcde')).toBe(['ab', 'cd', 'abcde']);
+      expect(getIndexSuffix('a')).toStrictEqual(['1', 'a']);
+      expect(getIndexSuffix('1')).toStrictEqual(['1', '1']);
+      expect(getIndexSuffix('1234567')).toStrictEqual(['12', '34', '1234567']);
+      expect(getIndexSuffix('ab')).toStrictEqual(['2', 'ab']);
+      expect(getIndexSuffix('abc')).toStrictEqual(['3', 'a', 'abc']);
+      expect(getIndexSuffix('abcd')).toStrictEqual(['ab', 'cd', 'abcd']);
+      expect(getIndexSuffix('abcde')).toStrictEqual(['ab', 'cd', 'abcde']);
     });
   });
 
@@ -33,6 +33,7 @@ describe('datasource/crate', () => {
         await getPkgReleases({
           datasource,
           depName: 'non_existent_crate',
+          registryUrls: ['https://crates.io'],
         })
       ).toBeNull();
       expect(httpMock.getTrace()).toMatchSnapshot();
@@ -46,6 +47,7 @@ describe('datasource/crate', () => {
         await getPkgReleases({
           datasource,
           depName: 'non_existent_crate',
+          registryUrls: ['https://crates.io'],
         })
       ).toBeNull();
       expect(httpMock.getTrace()).toMatchSnapshot();
@@ -56,6 +58,7 @@ describe('datasource/crate', () => {
         await getPkgReleases({
           datasource,
           depName: 'non_existent_crate',
+          registryUrls: ['https://crates.io'],
         })
       ).toBeNull();
       expect(httpMock.getTrace()).toMatchSnapshot();
@@ -63,7 +66,11 @@ describe('datasource/crate', () => {
     it('returns null for 404', async () => {
       httpMock.scope(baseUrl).get('/so/me/some_crate').reply(404);
       expect(
-        await getPkgReleases({ datasource, depName: 'some_crate' })
+        await getPkgReleases({
+          datasource,
+          depName: 'some_crate',
+          registryUrls: ['https://crates.io'],
+        })
       ).toBeNull();
       expect(httpMock.getTrace()).toMatchSnapshot();
     });
@@ -71,7 +78,11 @@ describe('datasource/crate', () => {
       httpMock.scope(baseUrl).get('/so/me/some_crate').reply(502);
       let e;
       try {
-        await getPkgReleases({ datasource, depName: 'some_crate' });
+        await getPkgReleases({
+          datasource,
+          depName: 'some_crate',
+          registryUrls: ['https://crates.io'],
+        });
       } catch (err) {
         e = err;
       }
@@ -82,7 +93,11 @@ describe('datasource/crate', () => {
     it('returns null for unknown error', async () => {
       httpMock.scope(baseUrl).get('/so/me/some_crate').replyWithError('');
       expect(
-        await getPkgReleases({ datasource, depName: 'some_crate' })
+        await getPkgReleases({
+          datasource,
+          depName: 'some_crate',
+          registryUrls: ['https://crates.io'],
+        })
       ).toBeNull();
       expect(httpMock.getTrace()).toMatchSnapshot();
     });
@@ -91,6 +106,7 @@ describe('datasource/crate', () => {
       const res = await getPkgReleases({
         datasource,
         depName: 'libc',
+        registryUrls: ['https://crates.io'],
       });
       expect(res).toMatchSnapshot();
       expect(res).not.toBeNull();
@@ -102,6 +118,7 @@ describe('datasource/crate', () => {
       const res = await getPkgReleases({
         datasource,
         depName: 'amethyst',
+        registryUrls: ['https://crates.io'],
       });
       expect(res).toMatchSnapshot();
       expect(res).not.toBeNull();
