@@ -190,8 +190,8 @@ For self-hosted GitLab clone/import the [renovate-runner](https://gitlab.com/ren
 Self-hosted Renovate can be configured using any of the following (or a combination):
 
 - A `config.js` file (can also be named `config.json`, but you can't have both at the same time)
-- CLI params
-- Environment params
+- CLI parameters
+- Environment parameters
 
 Note that some Renovate configuration options are _only_ available for self-hosting, and so can only be configured using one of the above methods.
 These are described in the [Self-hosted Configuration](./self-hosted-configuration.md) doc.
