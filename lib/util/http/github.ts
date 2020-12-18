@@ -124,6 +124,7 @@ function handleGotError(
 interface GraphqlOptions {
   paginate?: boolean;
   count?: number;
+  limit?: number;
   acceptHeader?: string;
   fromEnd?: boolean;
 }
@@ -251,13 +252,14 @@ export class GithubHttp extends Http<GithubHttpOptions, GithubHttpOptions> {
 
     const { paginate = true } = options;
     let count = options.count || 100;
+    let limit = options.limit || 1000;
     let cursor: string = null;
 
     let isIterating = true;
     while (isIterating) {
       let query = queryOrig;
       if (paginate) {
-        let replacement = `$1${fieldName}$2(first: ${count}`;
+        let replacement = `$1${fieldName}$2(first: ${Math.min(count, limit)}`;
         replacement += cursor ? `, after: "${cursor}", ` : ', ';
         query = query.replace(regex, replacement);
       }
@@ -267,7 +269,11 @@ export class GithubHttp extends Http<GithubHttpOptions, GithubHttpOptions> {
         result.push(...nodes);
         result.push(...edges);
 
-        if (paginate && pageInfo) {
+        limit = Math.max(0, limit - nodes.length - edges.length);
+
+        if (limit === 0) {
+          isIterating = false;
+        } else if (paginate && pageInfo) {
           const { hasNextPage, endCursor } = pageInfo;
           if (hasNextPage && endCursor) {
             cursor = endCursor;
