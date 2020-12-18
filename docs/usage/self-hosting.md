@@ -251,11 +251,11 @@ It's also OK to configure the same as a host rule instead, if you prefer that.
 
 ## File/directory usage
 
-By default, Renovate will store all files within a `renovate/` subdirectory of the operating system's temporary directory, e.g. `/tmp/renovate/`.
+By default, Renovate stores all files in the `renovate/` subdirectory of the operating system's temporary directory, e.g. `/tmp/renovate/`.
 
-Repository data will be copied or cloned into unique subdirectories under `repos/`, e.g. `/tmp/renovate/repos/github/owner1/repo-a/`.
+Repository data is copied or cloned into unique subdirectories under `repos/`, e.g. `/tmp/renovate/repos/github/owner1/repo-a/`.
 
-Cache data - such as Renovate's own cache as well as that for npm, Yarn, Composer, etc - will be stored in `/tmp/renovate/cache`.
+Renovate's own cache, as well as the caches(s) for npm, Yarn, Composer etc, is stored in `/tmp/renovate/cache`.
 
 If you wish to override the base directory to be used (e.g. instead of `/tmp/renovate/`) then configure a value for `baseDir` in `config.js`, or via env (`RENOVATE_BASE_DIR`) or via CLI (`--base-dir=`).
 
