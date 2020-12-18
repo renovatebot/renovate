@@ -56,6 +56,11 @@ function replaceSecretsInString(
   value: string,
   secrets: Record<string, string>
 ): string {
+  // do nothing if no secret template found
+  if (!secretTemplateRegex.test(value)) {
+    return value;
+  }
+
   const disallowedPrefixes = ['branch', 'commit', 'group', 'pr', 'semantic'];
   if (disallowedPrefixes.some((prefix) => key.startsWith(prefix))) {
     const error = new Error(CONFIG_VALIDATION);

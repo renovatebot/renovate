@@ -1,11 +1,15 @@
+import { defaultConfig, getName } from '../../test/util';
 import {
   CONFIG_SECRETS_INVALID,
   CONFIG_VALIDATION,
 } from '../constants/error-messages';
 import { applySecretsToConfig, validateConfigSecrets } from './secrets';
 
-describe('config/secrets', () => {
+describe(getName(__filename), () => {
   describe('validateConfigSecrets(config)', () => {
+    it('works with default config', () => {
+      expect(() => validateConfigSecrets(defaultConfig)).not.toThrow();
+    });
     it('returns if no secrets', () => {
       expect(validateConfigSecrets({})).toBeUndefined();
     });
@@ -33,6 +37,13 @@ describe('config/secrets', () => {
         })
       ).toThrow(CONFIG_SECRETS_INVALID);
     });
+  });
+
+  describe('applySecretsToConfig(config)', () => {
+    it('works with default config', () => {
+      expect(() => applySecretsToConfig(defaultConfig)).not.toThrow();
+    });
+
     it('throws if disallowed field is used', () => {
       const config = {
         prTitle: '{{ secrets.ARTIFACTORY_TOKEN }}',
