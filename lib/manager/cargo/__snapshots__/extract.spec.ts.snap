@@ -10,6 +10,9 @@ Array [
     "managerData": Object {
       "nestedVersion": true,
     },
+    "registryUrls": Array [
+      "https://crates.io",
+    ],
     "skipReason": "path-dependency",
   },
   Object {
@@ -20,6 +23,9 @@ Array [
     "managerData": Object {
       "nestedVersion": true,
     },
+    "registryUrls": Array [
+      "https://crates.io",
+    ],
     "skipReason": "path-dependency",
   },
   Object {
@@ -30,6 +36,9 @@ Array [
     "managerData": Object {
       "nestedVersion": true,
     },
+    "registryUrls": Array [
+      "https://crates.io",
+    ],
     "skipReason": "path-dependency",
   },
   Object {
@@ -40,6 +49,9 @@ Array [
     "managerData": Object {
       "nestedVersion": true,
     },
+    "registryUrls": Array [
+      "https://crates.io",
+    ],
     "skipReason": "path-dependency",
   },
   Object {
@@ -50,6 +62,9 @@ Array [
     "managerData": Object {
       "nestedVersion": true,
     },
+    "registryUrls": Array [
+      "https://crates.io",
+    ],
     "skipReason": "path-dependency",
   },
   Object {
@@ -60,6 +75,9 @@ Array [
     "managerData": Object {
       "nestedVersion": true,
     },
+    "registryUrls": Array [
+      "https://crates.io",
+    ],
     "skipReason": "path-dependency",
   },
   Object {
@@ -70,6 +88,9 @@ Array [
     "managerData": Object {
       "nestedVersion": true,
     },
+    "registryUrls": Array [
+      "https://crates.io",
+    ],
     "skipReason": "path-dependency",
   },
   Object {
@@ -80,6 +101,9 @@ Array [
     "managerData": Object {
       "nestedVersion": true,
     },
+    "registryUrls": Array [
+      "https://crates.io",
+    ],
     "skipReason": "path-dependency",
   },
   Object {
@@ -90,6 +114,9 @@ Array [
     "managerData": Object {
       "nestedVersion": true,
     },
+    "registryUrls": Array [
+      "https://crates.io",
+    ],
     "skipReason": "path-dependency",
   },
   Object {
@@ -100,6 +127,9 @@ Array [
     "managerData": Object {
       "nestedVersion": true,
     },
+    "registryUrls": Array [
+      "https://crates.io",
+    ],
     "skipReason": "path-dependency",
   },
   Object {
@@ -110,6 +140,9 @@ Array [
     "managerData": Object {
       "nestedVersion": true,
     },
+    "registryUrls": Array [
+      "https://crates.io",
+    ],
     "skipReason": "path-dependency",
   },
   Object {
@@ -120,6 +153,9 @@ Array [
     "managerData": Object {
       "nestedVersion": false,
     },
+    "registryUrls": Array [
+      "https://crates.io",
+    ],
   },
   Object {
     "currentValue": "0.5",
@@ -129,6 +165,9 @@ Array [
     "managerData": Object {
       "nestedVersion": true,
     },
+    "registryUrls": Array [
+      "https://crates.io",
+    ],
   },
   Object {
     "currentValue": "0.4",
@@ -138,6 +177,9 @@ Array [
     "managerData": Object {
       "nestedVersion": false,
     },
+    "registryUrls": Array [
+      "https://crates.io",
+    ],
   },
   Object {
     "currentValue": "1.0.1",
@@ -147,6 +189,9 @@ Array [
     "managerData": Object {
       "nestedVersion": false,
     },
+    "registryUrls": Array [
+      "https://crates.io",
+    ],
   },
   Object {
     "currentValue": "0.1",
@@ -156,6 +201,9 @@ Array [
     "managerData": Object {
       "nestedVersion": false,
     },
+    "registryUrls": Array [
+      "https://crates.io",
+    ],
   },
   Object {
     "currentValue": "0.15",
@@ -165,6 +213,9 @@ Array [
     "managerData": Object {
       "nestedVersion": false,
     },
+    "registryUrls": Array [
+      "https://crates.io",
+    ],
   },
   Object {
     "currentValue": "0.1",
@@ -174,6 +225,9 @@ Array [
     "managerData": Object {
       "nestedVersion": true,
     },
+    "registryUrls": Array [
+      "https://crates.io",
+    ],
   },
   Object {
     "currentValue": "0.2",
@@ -183,6 +237,9 @@ Array [
     "managerData": Object {
       "nestedVersion": true,
     },
+    "registryUrls": Array [
+      "https://crates.io",
+    ],
     "skipReason": "path-dependency",
   },
   Object {
@@ -193,6 +250,9 @@ Array [
     "managerData": Object {
       "nestedVersion": false,
     },
+    "registryUrls": Array [
+      "https://crates.io",
+    ],
   },
   Object {
     "currentValue": "0.6",
@@ -202,6 +262,9 @@ Array [
     "managerData": Object {
       "nestedVersion": false,
     },
+    "registryUrls": Array [
+      "https://crates.io",
+    ],
   },
   Object {
     "currentValue": "0.2",
@@ -211,6 +274,9 @@ Array [
     "managerData": Object {
       "nestedVersion": false,
     },
+    "registryUrls": Array [
+      "https://crates.io",
+    ],
   },
   Object {
     "currentValue": "1.0",
@@ -220,6 +286,9 @@ Array [
     "managerData": Object {
       "nestedVersion": false,
     },
+    "registryUrls": Array [
+      "https://crates.io",
+    ],
   },
   Object {
     "currentValue": "1.0",
@@ -229,6 +298,9 @@ Array [
     "managerData": Object {
       "nestedVersion": false,
     },
+    "registryUrls": Array [
+      "https://crates.io",
+    ],
   },
   Object {
     "currentValue": "0.1",
@@ -238,6 +310,9 @@ Array [
     "managerData": Object {
       "nestedVersion": false,
     },
+    "registryUrls": Array [
+      "https://crates.io",
+    ],
   },
 ]
 `;
@@ -252,6 +327,9 @@ Array [
     "managerData": Object {
       "nestedVersion": false,
     },
+    "registryUrls": Array [
+      "https://crates.io",
+    ],
   },
   Object {
     "currentValue": "1.0.4",
@@ -261,6 +339,9 @@ Array [
     "managerData": Object {
       "nestedVersion": false,
     },
+    "registryUrls": Array [
+      "https://crates.io",
+    ],
   },
   Object {
     "currentValue": "=0.1",
@@ -270,6 +351,9 @@ Array [
     "managerData": Object {
       "nestedVersion": true,
     },
+    "registryUrls": Array [
+      "https://crates.io",
+    ],
     "skipReason": "path-dependency",
   },
   Object {
@@ -280,6 +364,9 @@ Array [
     "managerData": Object {
       "nestedVersion": true,
     },
+    "registryUrls": Array [
+      "https://crates.io",
+    ],
   },
   Object {
     "currentValue": "0.1.0",
@@ -289,6 +376,9 @@ Array [
     "managerData": Object {
       "nestedVersion": true,
     },
+    "registryUrls": Array [
+      "https://crates.io",
+    ],
     "skipReason": "git-dependency",
   },
   Object {
@@ -299,6 +389,9 @@ Array [
     "managerData": Object {
       "nestedVersion": false,
     },
+    "registryUrls": Array [
+      "https://crates.io",
+    ],
     "skipReason": "git-dependency",
   },
   Object {
@@ -309,6 +402,9 @@ Array [
     "managerData": Object {
       "nestedVersion": false,
     },
+    "registryUrls": Array [
+      "https://crates.io",
+    ],
   },
   Object {
     "currentValue": "0.0.0",
@@ -318,6 +414,9 @@ Array [
     "managerData": Object {
       "nestedVersion": false,
     },
+    "registryUrls": Array [
+      "https://crates.io",
+    ],
   },
   Object {
     "currentValue": "0.0.0",
@@ -327,6 +426,9 @@ Array [
     "managerData": Object {
       "nestedVersion": false,
     },
+    "registryUrls": Array [
+      "https://crates.io",
+    ],
   },
   Object {
     "currentValue": "0.4.2",
@@ -336,6 +438,9 @@ Array [
     "managerData": Object {
       "nestedVersion": true,
     },
+    "registryUrls": Array [
+      "https://crates.io",
+    ],
   },
   Object {
     "currentValue": "=0.3.6",
@@ -345,6 +450,9 @@ Array [
     "managerData": Object {
       "nestedVersion": true,
     },
+    "registryUrls": Array [
+      "https://crates.io",
+    ],
     "target": "cfg(windows)",
   },
   Object {
@@ -355,6 +463,9 @@ Array [
     "managerData": Object {
       "nestedVersion": false,
     },
+    "registryUrls": Array [
+      "https://crates.io",
+    ],
     "target": "cfg(target_arch = \\"wasm32\\")",
   },
   Object {
@@ -365,6 +476,9 @@ Array [
     "managerData": Object {
       "nestedVersion": false,
     },
+    "registryUrls": Array [
+      "https://crates.io",
+    ],
     "target": "cfg(target_arch = \\"wasm32\\")",
   },
   Object {
@@ -375,6 +489,9 @@ Array [
     "managerData": Object {
       "nestedVersion": false,
     },
+    "registryUrls": Array [
+      "https://crates.io",
+    ],
     "skipReason": "path-dependency",
     "target": "cfg(target_arch = \\"wasm32\\")",
   },
@@ -386,6 +503,9 @@ Array [
     "managerData": Object {
       "nestedVersion": true,
     },
+    "registryUrls": Array [
+      "https://crates.io",
+    ],
     "target": "cfg(target_arch = \\"wasm32\\")",
   },
 ]
@@ -401,6 +521,9 @@ Array [
     "managerData": Object {
       "nestedVersion": false,
     },
+    "registryUrls": Array [
+      "https://crates.io",
+    ],
     "target": "cfg(target_arch = \\"wasm32\\")",
   },
   Object {
@@ -411,6 +534,9 @@ Array [
     "managerData": Object {
       "nestedVersion": false,
     },
+    "registryUrls": Array [
+      "https://crates.io",
+    ],
     "target": "cfg(target_arch = \\"wasm32\\")",
   },
   Object {
@@ -421,6 +547,9 @@ Array [
     "managerData": Object {
       "nestedVersion": false,
     },
+    "registryUrls": Array [
+      "https://crates.io",
+    ],
     "skipReason": "path-dependency",
     "target": "cfg(target_arch = \\"wasm32\\")",
   },
@@ -432,6 +561,9 @@ Array [
     "managerData": Object {
       "nestedVersion": true,
     },
+    "registryUrls": Array [
+      "https://crates.io",
+    ],
     "target": "cfg(target_arch = \\"wasm32\\")",
   },
 ]
@@ -447,6 +579,9 @@ Array [
     "managerData": Object {
       "nestedVersion": true,
     },
+    "registryUrls": Array [
+      "https://crates.io",
+    ],
     "skipReason": "path-dependency",
   },
   Object {
@@ -457,6 +592,9 @@ Array [
     "managerData": Object {
       "nestedVersion": true,
     },
+    "registryUrls": Array [
+      "https://crates.io",
+    ],
   },
   Object {
     "currentValue": "1.2",
@@ -466,6 +604,9 @@ Array [
     "managerData": Object {
       "nestedVersion": true,
     },
+    "registryUrls": Array [
+      "https://crates.io",
+    ],
     "skipReason": "path-dependency",
   },
   Object {
@@ -476,6 +617,9 @@ Array [
     "managerData": Object {
       "nestedVersion": true,
     },
+    "registryUrls": Array [
+      "https://crates.io",
+    ],
     "skipReason": "path-dependency",
   },
   Object {
@@ -486,6 +630,9 @@ Array [
     "managerData": Object {
       "nestedVersion": true,
     },
+    "registryUrls": Array [
+      "https://crates.io",
+    ],
     "skipReason": "path-dependency",
   },
   Object {
@@ -496,6 +643,9 @@ Array [
     "managerData": Object {
       "nestedVersion": true,
     },
+    "registryUrls": Array [
+      "https://crates.io",
+    ],
   },
   Object {
     "currentValue": "3.2.1",
@@ -505,6 +655,9 @@ Array [
     "managerData": Object {
       "nestedVersion": true,
     },
+    "registryUrls": Array [
+      "https://crates.io",
+    ],
   },
   Object {
     "currentValue": "",
@@ -514,6 +667,9 @@ Array [
     "managerData": Object {
       "nestedVersion": false,
     },
+    "registryUrls": Array [
+      "https://crates.io",
+    ],
     "skipReason": "invalid-dependency-specification",
   },
 ]
@@ -529,6 +685,9 @@ Array [
     "managerData": Object {
       "nestedVersion": true,
     },
+    "registryUrls": Array [
+      "https://crates.io",
+    ],
     "skipReason": "path-dependency",
   },
   Object {
@@ -539,6 +698,9 @@ Array [
     "managerData": Object {
       "nestedVersion": true,
     },
+    "registryUrls": Array [
+      "https://crates.io",
+    ],
     "skipReason": "path-dependency",
   },
   Object {
@@ -549,6 +711,9 @@ Array [
     "managerData": Object {
       "nestedVersion": true,
     },
+    "registryUrls": Array [
+      "https://crates.io",
+    ],
     "skipReason": "path-dependency",
   },
   Object {
@@ -559,6 +724,9 @@ Array [
     "managerData": Object {
       "nestedVersion": true,
     },
+    "registryUrls": Array [
+      "https://crates.io",
+    ],
     "skipReason": "path-dependency",
   },
   Object {
@@ -569,6 +737,9 @@ Array [
     "managerData": Object {
       "nestedVersion": false,
     },
+    "registryUrls": Array [
+      "https://crates.io",
+    ],
     "skipReason": "path-dependency",
   },
   Object {
@@ -579,6 +750,9 @@ Array [
     "managerData": Object {
       "nestedVersion": false,
     },
+    "registryUrls": Array [
+      "https://crates.io",
+    ],
     "skipReason": "invalid-dependency-specification",
   },
 ]
