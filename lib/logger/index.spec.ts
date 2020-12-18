@@ -154,9 +154,6 @@ describe('logger', () => {
       buffer: Buffer.from('test'),
       content: 'test',
       prBody: 'test',
-      secrets: {
-        foo: 'barsecret',
-      },
     });
 
     expect(logged.foo).not.toEqual('secret"password');
@@ -167,6 +164,5 @@ describe('logger', () => {
     expect(logged.buffer).toEqual('[content]');
     expect(logged.content).toEqual('[content]');
     expect(logged.prBody).toEqual('[Template]');
-    expect(logged.secrets.foo).toEqual('***********');
   });
 });

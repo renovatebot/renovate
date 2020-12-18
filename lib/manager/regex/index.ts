@@ -139,7 +139,7 @@ export function extractPackageFile(
   packageFile: string,
   config: CustomExtractConfig
 ): Result<PackageFile | null> {
-  let deps;
+  let deps: PackageDependency[];
   switch (config.matchStringsStrategy) {
     default:
     case 'any':
@@ -156,17 +156,17 @@ export function extractPackageFile(
   // filter all null values
   deps = deps.filter(Boolean);
   if (deps.length) {
+    const res: PackageFile = { deps, matchStrings: config.matchStrings };
     if (config.matchStringsStrategy) {
-      return {
-        deps,
-        matchStrings: config.matchStrings,
-        matchStringsStrategy: config.matchStringsStrategy,
-      };
+      res.matchStringsStrategy = config.matchStringsStrategy;
     }
-    return {
-      deps,
-      matchStrings: config.matchStrings,
-    };
+    // copy over templates for autoreplace
+    for (const field of validMatchFields.map((f) => `${f}Template`)) {
+      if (config[field]) {
+        res[field] = config[field];
+      }
+    }
+    return res;
   }
 
   return null;
