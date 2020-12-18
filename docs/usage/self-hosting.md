@@ -81,7 +81,7 @@ metadata:
 type: Opaque
 stringData:
   GITHUB_COM_TOKEN: 'any-personal-user-token-for-github-com-for-fetching-changelogs'
-  # set to true to run on all repos you have push access to
+  # You can set RENOVATE_AUTODISCOVER to true to run Renovate on all repos you have push access to
   RENOVATE_AUTODISCOVER: 'false'
   RENOVATE_ENDPOINT: 'https://github.company.com/api/v3'
   RENOVATE_GIT_AUTHOR: 'Renovate Bot <bot@renovateapp.com>'
