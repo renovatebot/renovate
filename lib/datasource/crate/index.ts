@@ -132,7 +132,7 @@ async function fetchRegistryInfo(
     flavor = RegistryFlavor.Other;
   }
 
-  let registry: RegistryInfo = {
+  const registry: RegistryInfo = {
     flavor,
     rawUrl: registryUrl,
     url,
