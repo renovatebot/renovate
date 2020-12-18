@@ -9,6 +9,7 @@ import { PrState } from '../../types';
 import * as _exec from '../../util/exec';
 import { File, StatusResult } from '../../util/git';
 import { BranchConfig, PrResult, ProcessBranchResult } from '../common';
+import * as _limits from '../global/limits';
 import * as _prWorker from '../pr';
 import * as _automerge from './automerge';
 import * as _checkExisting from './check-existing';
@@ -16,7 +17,6 @@ import * as _commit from './commit';
 import * as _getUpdated from './get-updated';
 import * as _reuse from './reuse';
 import * as _schedule from './schedule';
-import * as _statusChecks from './status-checks';
 import * as branchWorker from '.';
 
 jest.mock('./get-updated');
@@ -24,25 +24,25 @@ jest.mock('./schedule');
 jest.mock('./check-existing');
 jest.mock('./reuse');
 jest.mock('../../manager/npm/post-update');
-jest.mock('./status-checks');
 jest.mock('./automerge');
 jest.mock('./commit');
 jest.mock('../pr');
 jest.mock('../../util/exec');
 jest.mock('../../util/git');
 jest.mock('fs-extra');
+jest.mock('../global/limits');
 
 const getUpdated = mocked(_getUpdated);
 const schedule = mocked(_schedule);
 const checkExisting = mocked(_checkExisting);
 const reuse = mocked(_reuse);
 const npmPostExtract = mocked(_npmPostExtract);
-const statusChecks = mocked(_statusChecks);
 const automerge = mocked(_automerge);
 const commit = mocked(_commit);
 const prWorker = mocked(_prWorker);
 const exec = mocked(_exec);
 const fs = mocked(_fs);
+const limits = mocked(_limits);
 
 describe('workers/branch', () => {
   describe('processBranch', () => {
@@ -83,12 +83,20 @@ describe('workers/branch', () => {
       const res = await branchWorker.processBranch(config);
       expect(res).toEqual(ProcessBranchResult.NotScheduled);
     });
-    it('skips branch if not unpublishSafe + pending', async () => {
+    it('skips branch for fresh release with stabilityDays', async () => {
       schedule.isScheduledNow.mockReturnValueOnce(true);
-      config.unpublishSafe = true;
-      config.canBeUnpublished = true;
       config.prCreation = 'not-pending';
-      git.branchExists.mockReturnValueOnce(true);
+      config.upgrades = [
+        {
+          releaseTimestamp: new Date('2019-01-01').getTime(),
+          stabilityDays: 1,
+        },
+        {
+          releaseTimestamp: new Date().getTime(),
+          stabilityDays: 1,
+        },
+      ] as never;
+      git.branchExists.mockReturnValueOnce(false);
       const res = await branchWorker.processBranch(config);
       expect(res).toEqual(ProcessBranchResult.Pending);
     });
@@ -210,8 +218,9 @@ describe('workers/branch', () => {
         artifactErrors: [],
         updatedArtifacts: [],
       });
-      git.branchExists.mockReturnValue(false);
-      expect(await branchWorker.processBranch(config, true)).toEqual(
+      limits.isLimitReached.mockReturnValueOnce(true);
+      limits.isLimitReached.mockReturnValueOnce(false);
+      expect(await branchWorker.processBranch(config)).toEqual(
         ProcessBranchResult.PrLimitReached
       );
     });
@@ -227,7 +236,8 @@ describe('workers/branch', () => {
       prWorker.ensurePr.mockResolvedValueOnce({
         prResult: PrResult.LimitReached,
       });
-      expect(await branchWorker.processBranch(config, true)).toEqual(
+      limits.isLimitReached.mockReturnValue(false);
+      expect(await branchWorker.processBranch(config)).toEqual(
         ProcessBranchResult.PrLimitReached
       );
     });
@@ -240,7 +250,9 @@ describe('workers/branch', () => {
         updatedArtifacts: [],
       });
       git.branchExists.mockReturnValue(false);
-      expect(await branchWorker.processBranch(config, false, true)).toEqual(
+      limits.isLimitReached.mockReturnValueOnce(false);
+      limits.isLimitReached.mockReturnValueOnce(true);
+      expect(await branchWorker.processBranch(config)).toEqual(
         ProcessBranchResult.CommitLimitReached
       );
     });
@@ -270,7 +282,6 @@ describe('workers/branch', () => {
       commit.commitFilesToBranch.mockResolvedValueOnce(null);
       automerge.tryBranchAutomerge.mockResolvedValueOnce('automerged');
       await branchWorker.processBranch(config);
-      expect(statusChecks.setUnpublishable).toHaveBeenCalledTimes(1);
       expect(automerge.tryBranchAutomerge).toHaveBeenCalledTimes(1);
       expect(prWorker.ensurePr).toHaveBeenCalledTimes(0);
     });
@@ -289,7 +300,6 @@ describe('workers/branch', () => {
         ...config,
         requiredStatusChecks: null,
       });
-      expect(statusChecks.setUnpublishable).toHaveBeenCalledTimes(1);
       expect(automerge.tryBranchAutomerge).toHaveBeenCalledTimes(1);
       expect(prWorker.ensurePr).toHaveBeenCalledTimes(0);
     });
@@ -306,7 +316,6 @@ describe('workers/branch', () => {
       commit.commitFilesToBranch.mockResolvedValueOnce(null);
       automerge.tryBranchAutomerge.mockResolvedValueOnce('automerged');
       await branchWorker.processBranch({ ...config, dryRun: true });
-      expect(statusChecks.setUnpublishable).toHaveBeenCalledTimes(1);
       expect(automerge.tryBranchAutomerge).toHaveBeenCalledTimes(1);
       expect(prWorker.ensurePr).toHaveBeenCalledTimes(0);
     });

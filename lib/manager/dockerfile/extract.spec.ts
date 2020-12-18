@@ -1,5 +1,5 @@
 import { readFileSync } from 'fs';
-import { extractPackageFile } from './extract';
+import { extractPackageFile, getDep } from './extract';
 
 const d1 = readFileSync(
   'lib/manager/dockerfile/__fixtures__/Dockerfile1',
@@ -149,6 +149,11 @@ describe('lib/manager/dockerfile/extract', () => {
     it('handles ubuntu', () => {
       const res = extractPackageFile('FROM ubuntu:18.04\n').deps;
       expect(res).toMatchSnapshot();
+    });
+  });
+  describe('getDep()', () => {
+    it('rejects null', () => {
+      expect(getDep(null)).toMatchSnapshot();
     });
   });
 });

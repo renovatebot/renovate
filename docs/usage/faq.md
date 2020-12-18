@@ -5,7 +5,7 @@ description: Frequently Asked Questions for Renovate Configuration
 
 # Frequently Asked Questions (FAQ)
 
-## What Is The Default Behaviour?
+## What Is The Default Behavior?
 
 Renovate will:
 
@@ -183,7 +183,7 @@ Nest it inside config objects `patch` or `minor` if you want it to apply to cert
 
 ### Separate patch releases from minor releases
 
-Renovate's default behaviour is to separate major and minor releases, while patch releases are also consider "minor".
+Renovate's default behavior is to separate major and minor releases, while patch releases are also consider "minor".
 For example if you were running `q@0.8.7` you would receive one branch for the minor update to `q@0.9.7` and a second for the major update to `q@1.4.1`.
 
 If you set the configuration option `separateMinorPatch` to `true`, or you configure `automerge` to have value `"patch"`, then Renovate will then separate patch releases as well.

@@ -2,8 +2,8 @@
 import { exec as _exec } from 'child_process';
 import { readFile } from 'fs-extra';
 import { resolve } from 'upath';
-import { envMock, mockExecAll } from '../../../test/execUtil';
-import * as httpMock from '../../../test/httpMock';
+import { envMock, mockExecAll } from '../../../test/exec-util';
+import * as httpMock from '../../../test/http-mock';
 import {
   addReplacingSerializer,
   env,

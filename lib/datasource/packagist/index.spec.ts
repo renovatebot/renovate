@@ -1,6 +1,6 @@
 import fs from 'fs';
 import { getPkgReleases } from '..';
-import * as httpMock from '../../../test/httpMock';
+import * as httpMock from '../../../test/http-mock';
 import * as _hostRules from '../../util/host-rules';
 import * as composerVersioning from '../../versioning/composer';
 import { id as versioning } from '../../versioning/loose';

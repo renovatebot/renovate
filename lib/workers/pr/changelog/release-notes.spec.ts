@@ -1,6 +1,6 @@
 import fs from 'fs-extra';
 import { DateTime } from 'luxon';
-import * as httpMock from '../../../../test/httpMock';
+import * as httpMock from '../../../../test/http-mock';
 import { getName } from '../../../../test/util';
 import { ChangeLogNotes } from './common';
 import {
@@ -12,7 +12,7 @@ import {
 } from './release-notes';
 
 const angularJsChangelogMd = fs.readFileSync(
-  'lib/workers/pr/__fixtures__/angular.js.md',
+  'lib/workers/pr/__fixtures__/angular-js.md',
   'utf8'
 );
 const jestChangelogMd = fs.readFileSync(

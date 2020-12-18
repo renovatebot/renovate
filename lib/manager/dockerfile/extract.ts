@@ -1,3 +1,4 @@
+import is from '@sindresorhus/is';
 import * as datasourceDocker from '../../datasource/docker';
 import { logger } from '../../logger';
 import { SkipReason } from '../../types';
@@ -35,6 +36,11 @@ export function getDep(
   currentFrom: string,
   specifyReplaceString = true
 ): PackageDependency {
+  if (!is.string(currentFrom)) {
+    return {
+      skipReason: SkipReason.InvalidValue,
+    };
+  }
   const dep = splitImageParts(currentFrom);
   if (specifyReplaceString) {
     dep.replaceString = currentFrom;

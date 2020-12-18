@@ -3,7 +3,7 @@ import {
   ExecOptions as ChildProcessExecOptions,
   exec as _cpExec,
 } from 'child_process';
-import { envMock } from '../../../test/execUtil';
+import { envMock } from '../../../test/exec-util';
 import {
   BinarySource,
   ExecConfig,

@@ -66,6 +66,13 @@ const manualSourceUrls = {
   },
   docker: {
     'docker/compose': 'https://github.com/docker/compose',
+    'drone/drone': 'https://github.com/drone/drone',
+    'drone/drone-runner-docker':
+      'https://github.com/drone-runners/drone-runner-docker',
+    'drone/drone-runner-kube':
+      'https://github.com/drone-runners/drone-runner-kube',
+    'drone/drone-runner-ssh':
+      'https://github.com/drone-runners/drone-runner-ssh',
     'gcr.io/kaniko-project/executor':
       'https://github.com/GoogleContainerTools/kaniko',
     'gitlab/gitlab-ce': 'https://gitlab.com/gitlab-org/omnibus-gitlab',

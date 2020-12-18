@@ -1,4 +1,4 @@
-import * as httpMock from '../../../test/httpMock';
+import * as httpMock from '../../../test/http-mock';
 import { PrState } from '../../types';
 import { setBaseUrl } from '../../util/http/gitea';
 import * as ght from './gitea-helper';
@@ -367,6 +367,20 @@ describe('platform/gitea/gitea-helper', () => {
 
       const res = await ght.getPR(mockRepo.full_name, mockPR.number);
       expect(res).toEqual(mockPR);
+      expect(httpMock.getTrace()).toMatchSnapshot();
+    });
+  });
+
+  describe('addReviewers', () => {
+    it('should call /api/v1/repos/[repo]/pulls/[pull]/requested_reviewers endpoint', async () => {
+      httpMock
+        .scope(baseUrl)
+        .post(
+          `/repos/${mockRepo.full_name}/pulls/${mockPR.number}/requested_reviewers`
+        )
+        .reply(200);
+
+      await ght.requestPrReviewers(mockRepo.full_name, mockPR.number, {});
       expect(httpMock.getTrace()).toMatchSnapshot();
     });
   });

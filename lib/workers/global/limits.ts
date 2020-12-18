@@ -2,6 +2,7 @@ import { logger } from '../../logger';
 
 export enum Limit {
   Commits = 'Commits',
+  PullRequests = 'PullRequests',
 }
 
 interface LimitValue {

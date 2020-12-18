@@ -378,3 +378,9 @@ Array [
   },
 ]
 `;
+
+exports[`lib/manager/dockerfile/extract getDep() rejects null 1`] = `
+Object {
+  "skipReason": "invalid-value",
+}
+`;
