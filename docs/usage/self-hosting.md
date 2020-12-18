@@ -399,7 +399,7 @@ spec:
           containers:
             - name: renovate
               # Update this to the latest available and then enable Renovate on the manifest
-              image: renovate/renovate:23.19.2
+              image: renovate/renovate:24.7.1
               volumeMounts:
                 - name: ssh-key-volume
                   readOnly: true
