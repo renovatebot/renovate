@@ -2,7 +2,7 @@
 
 ## Installing Renovate OSS CLI
 
-#### npmjs
+### npmjs
 
 ```sh
 $ npm install -g renovate
@@ -16,7 +16,7 @@ $ npm install -g yarn pnpm
 
 The same goes for any other third party binary tool that may be needed, such as `gradle` or `poetry` - you need to make sure they are installed and the appropriate version you need before running Renovate.
 
-#### Docker
+### Docker
 
 Renovate is available for Docker via an automated build [renovate/renovate](https://hub.docker.com/r/renovate/renovate/).
 It builds `latest` based on the `master` branch and all semver tags are published too.
@@ -38,7 +38,7 @@ For example:
 $ docker run --rm -v "/path/to/your/config.js:/usr/src/app/config.js" renovate/renovate
 ```
 
-#### Kubernetes
+### Kubernetes
 
 Renovate's official Docker image is compatible with Kubernetes.
 The following is an example manifest of running Renovate against a GitHub Enterprise server.
@@ -144,7 +144,7 @@ spec:
               emptyDir: {}
 ```
 
-#### CircleCI
+### CircleCI
 
 If you are using CircleCI, you can use the third-party [daniel-shuy/renovate](https://circleci.com/developer/orbs/orb/daniel-shuy/renovate) orb to run a self-hosted instance of Renovate on CircleCI.
 
@@ -176,7 +176,7 @@ workflows:
                   - master
 ```
 
-#### GitLab CI/CD pipeline
+### GitLab CI/CD pipeline
 
 For GitLab pipelines we recommend you use the [renovate-runner project on GitLab](https://gitlab.com/renovate-bot/renovate-runner).
 We've prepared some pipeline templates to run Renovate on pipeline schedules in an easy way.
@@ -201,32 +201,32 @@ Regardless of platform, you need to select a user account for `renovate` to assu
 It is recommended to be `@renovate-bot` if you are using a self-hosted server with free choice of usernames.
 It is also recommended that you configure `config.gitAuthor` with the same identity as your Renovate user, e.g. like `"gitAuthor": "Renovate Bot <renovate@whitesourcesoftware.com>"`.
 
-#### GitHub Enterprise
+### GitHub Enterprise
 
 First, [create a personal access token](https://help.github.com/articles/creating-an-access-token-for-command-line-use/) for the bot account (select "repo" permissions).
 Configure it either as `token` in your `config.js` file, or in environment variable `RENOVATE_TOKEN`, or via CLI `--token=`.
 
-#### GitLab CE/EE
+### GitLab CE/EE
 
 First, [create a personal access token](https://docs.gitlab.com/ee/user/profile/personal_access_tokens.html) for the bot account (select `read_user`, `api` and `write_repository` scopes).
 Configure it either as `token` in your `config.js` file, or in environment variable `RENOVATE_TOKEN`, or via CLI `--token=`.
 Don't forget to configure `platform=gitlab` somewhere in config.
 
-#### Bitbucket Cloud
+### Bitbucket Cloud
 
 First, [create an AppPassword](https://confluence.atlassian.com/bitbucket/app-passwords-828781300.html) for the bot account.
 Configure it as `password` in your `config.js` file, or in environment variable `RENOVATE_PASSWORD`, or via CLI `--password=`.
 Also be sure to configure the `username` for your bot account too.
 Don't forget to configure `platform=bitbucket` somewhere in config.
 
-#### Bitbucket Server
+### Bitbucket Server
 
 Create a [Personal Access Token](https://confluence.atlassian.com/bitbucketserver/personal-access-tokens-939515499.html) for your bot account.
 Configure it as `password` in your `config.js` file, or in environment variable `RENOVATE_PASSWORD`, or via CLI `--password=`.
 Also configure the `username` for your bot account too, if you decided not to name it `@renovate-bot`.
 Don't forget to configure `platform=bitbucket-server` somewhere in config.
 
-#### Azure DevOps
+### Azure DevOps
 
 First, [create a personal access token](https://docs.microsoft.com/en-us/azure/devops/integrate/get-started/authentication/pats) for the bot account.
 Configure it either as `token` in your `config.js` file, or in environment variable `RENOVATE_TOKEN`, or via CLI `--token=`.
