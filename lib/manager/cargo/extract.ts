@@ -84,12 +84,12 @@ function extractFromSection(
 export function extractPackageFile(
   content: string,
   fileName: string,
-  config: ExtractConfig
+  config?: ExtractConfig
 ): PackageFile | null {
   logger.trace(`cargo.extractPackageFile(${fileName})`);
 
   let cargoConfig: CargoConfig | undefined;
-  if (config.localDir) {
+  if (config?.localDir) {
     let configPath = join(config.localDir, '.cargo', 'config.toml');
     if (!existsSync(configPath)) {
       configPath = join(config.localDir, '.cargo', 'config');
