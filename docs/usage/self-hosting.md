@@ -295,7 +295,8 @@ If running against GitHub Enterprise, change the above `gitlab` values to the eq
 
 You can save this file as anything you want and then use `RENOVATE_CONFIG_FILE` env variable to tell Renovate where to find it.
 
-Most people will run Renovate via cron, e.g. once per hour. Here is an example bash script that you can point `cron` to:
+Most people will run Renovate via cron, e.g. once per hour.
+Here is an example bash script that you can point `cron` to:
 
 ```sh
 #!/bin/bash
