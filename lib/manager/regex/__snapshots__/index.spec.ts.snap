@@ -90,6 +90,7 @@ Object {
   "matchStrings": Array [
     "ENV .*?_VERSION=(?<currentValue>.*) # (?<datasource>.*?)/(?<depName>[^&]*?)(\\\\&versioning=(?<versioning>[^&]*?))?\\\\s",
   ],
+  "versioningTemplate": "{{#if versioning}}{{versioning}}{{else}}semver{{/if}}",
 }
 `;
 
@@ -117,11 +118,13 @@ Object {
     "ENV GRADLE_VERSION=(?<currentValue>.*) # (?<datasource>.*?)/(?<depName>.*?)(\\\\&versioning=(?<versioning>.*?))?\\\\s",
     "ENV NODE_VERSION=(?<currentValue>.*) # (?<datasource>.*?)/(?<depName>.*?)(\\\\&versioning=(?<versioning>.*?))?\\\\s",
   ],
+  "versioningTemplate": "{{#if versioning}}{{versioning}}{{else}}semver{{/if}}",
 }
 `;
 
 exports[`manager/regex/index extracts registryUrl 1`] = `
 Object {
+  "datasourceTemplate": "helm",
   "deps": Array [
     Object {
       "currentValue": "8.12.13",
@@ -149,6 +152,7 @@ Object {
 
 exports[`manager/regex/index extracts with combination strategy 1`] = `
 Object {
+  "datasourceTemplate": "docker",
   "deps": Array [
     Object {
       "currentValue": "v2.21.0",
@@ -167,6 +171,7 @@ Object {
 
 exports[`manager/regex/index extracts with combination strategy and multiple matches 1`] = `
 Object {
+  "datasourceTemplate": "docker",
   "deps": Array [
     Object {
       "currentValue": "0.12.0",
