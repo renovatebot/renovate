@@ -257,9 +257,13 @@ Repository data is copied or cloned into unique subdirectories under `repos/`, e
 
 Renovate's own cache, as well as the caches(s) for npm, Yarn, Composer etc, is stored in `/tmp/renovate/cache`.
 
-If you wish to override the base directory to be used (e.g. instead of `/tmp/renovate/`) then configure a value for `baseDir` in `config.js`, or via env (`RENOVATE_BASE_DIR`) or via CLI (`--base-dir=`).
+To use another directory as the base directory, instead of `tmp/renovate`:
 
-If you wish to override the cache location specifically then configure a value for `cacheDir` instead.
+- Configure a value for `baseDir` in `config.js`
+- Use an environment variable `RENOVATE_BASE_DIR`
+- Use the CLI to pass a base directory: `--base-dir=`
+
+If you want to override the cache location then configure a value for `cacheDir` instead.
 
 ## Usage
 
