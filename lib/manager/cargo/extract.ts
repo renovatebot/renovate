@@ -102,7 +102,7 @@ export function extractPackageFile(
           readFileSync(configPath, { encoding: 'utf-8' })
         ) as any;
       } catch (err) {
-        logger.debug({ err }, 'Error parsing .cargo/config.toml file');
+        logger.debug({ err }, 'Error parsing cargo config from ${configPath}');
       }
     } else {
       logger.debug('Neither .cargo/config nor .cargo/config.toml found');
@@ -178,7 +178,5 @@ export function extractPackageFile(
   if (!deps.length) {
     return null;
   }
-  let res = { deps };
-  console.log(`extracted package file: ${JSON.stringify(res, null, 2)}`);
-  return res;
+  return { deps };
 }

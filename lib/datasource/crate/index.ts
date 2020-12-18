@@ -6,6 +6,7 @@ import { GetReleasesConfig, Release, ReleaseResult } from '../common';
 import { ensureCacheDir } from '../../util/fs';
 import Git from 'simple-git';
 import { join } from 'path';
+import { logger } from '../../logger';
 
 export const id = 'crate';
 
@@ -43,9 +44,6 @@ export async function getReleases({
   lookupName,
   registryUrl,
 }: GetReleasesConfig): Promise<ReleaseResult | null> {
-  console.log(
-    `getReleases(lookupName = ${lookupName}, registryUrl = ${registryUrl})`
-  );
   const cacheNamespace = 'datasource-crate';
   const cacheKey = registryUrl ? `${registryUrl}/${lookupName}` : lookupName;
   const cachedResult = await packageCache.get<ReleaseResult>(
@@ -54,17 +52,13 @@ export async function getReleases({
   );
   // istanbul ignore if
   if (cachedResult) {
-    console.log(`returning cached result`);
     return cachedResult;
   }
 
   let registryInfo = await fetchRegistryInfo(registryUrl);
-  console.log(`registryInfo: ${JSON.stringify(registryInfo, null, 2)}`);
-
   let dependencyUrl = getDependencyUrl(registryInfo, lookupName);
 
   let payload = await fetchCrateRecordsPayload(registryInfo, lookupName);
-  console.log(`payload =\n${payload}`);
   const lines = payload
     .split('\n') // break into lines
     .map((line) => line.trim()) // remove whitespace
@@ -139,14 +133,13 @@ async function fetchRegistryInfo(registryUrl?: string): Promise<RegistryInfo> {
   let clonePath = registryClonePaths[registryUrl];
   if (!clonePath) {
     clonePath = await ensureCacheDir(url.hostname);
-    console.log(`Cloning repo... (to ${clonePath})`);
+    logger.info({ clonePath, registryUrl }, `Cloning private cargo registry`);
     {
       let git = Git();
       await git.clone(registryUrl, clonePath, {
         '--depth': 1,
       });
     }
-    console.log(`Cloning repo... done!`);
     registryClonePaths[registryUrl] = clonePath;
   }
 
