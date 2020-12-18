@@ -108,56 +108,53 @@ function getDependencyUrl(info: RegistryInfo, lookupName: string): string {
   }
 }
 
-/// Returns information for the default registry: crates.io
-function defaultRegistry(): RegistryInfo {
-  return {
-    flavor: RegistryFlavor.CratesIo,
-  };
-}
-
 /// Fetches information about a registry, by url.
 /// If no url is given, assumes crates.io.
 /// If an url is given, assumes it's a valid Git repository
 /// url and clones it to cache.
-async function fetchRegistryInfo(registryUrl?: string): Promise<RegistryInfo> {
-  if (!registryUrl) {
-    return defaultRegistry();
-  }
-
+async function fetchRegistryInfo(
+  registryUrl: string
+): Promise<RegistryInfo | null> {
   let url: URL;
   try {
     url = new URL(registryUrl);
   } catch (err) {
     logger.debug({ registryUrl }, 'could not parse registry URL');
-    return defaultRegistry();
+    return null;
   }
 
   let flavor: RegistryFlavor;
-  if (url.hostname === 'dl.cloudsmith.io') {
+  if (url.hostname === 'crates.io') {
+    flavor = RegistryFlavor.CratesIo;
+  } else if (url.hostname === 'dl.cloudsmith.io') {
     flavor = RegistryFlavor.Cloudsmith;
   } else {
     flavor = RegistryFlavor.Other;
   }
 
-  let clonePath = registryClonePaths[registryUrl];
-  if (!clonePath) {
-    clonePath = await ensureCacheDir(`crate-registry-${url.hostname}`);
-    logger.info({ clonePath, registryUrl }, `Cloning private cargo registry`);
-    {
-      const git = Git();
-      await git.clone(registryUrl, clonePath, {
-        '--depth': 1,
-      });
-    }
-    registryClonePaths[registryUrl] = clonePath;
-  }
-
-  return {
+  let registry: RegistryInfo = {
     flavor,
     rawUrl: registryUrl,
     url,
-    clonePath,
   };
+
+  if (flavor !== RegistryFlavor.CratesIo) {
+    let clonePath = registryClonePaths[registryUrl];
+    if (!clonePath) {
+      clonePath = await ensureCacheDir(`crate-registry-${url.hostname}`);
+      logger.info({ clonePath, registryUrl }, `Cloning private cargo registry`);
+      {
+        const git = Git();
+        await git.clone(registryUrl, clonePath, {
+          '--depth': 1,
+        });
+      }
+      registryClonePaths[registryUrl] = clonePath;
+    }
+    registry.clonePath = clonePath;
+  }
+
+  return registry;
 }
 
 export async function getReleases({
@@ -176,6 +173,11 @@ export async function getReleases({
   }
 
   const registryInfo = await fetchRegistryInfo(registryUrl);
+  if (!registryInfo) {
+    logger.debug({ registryUrl }, 'Could not fetch registry info');
+    return null;
+  }
+
   const dependencyUrl = getDependencyUrl(registryInfo, lookupName);
 
   const payload = await fetchCrateRecordsPayload(registryInfo, lookupName);

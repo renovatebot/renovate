@@ -27,7 +27,7 @@ function extractFromSection(
     let skipReason: SkipReason;
     let currentValue = sectionContent[depName];
     let nestedVersion = false;
-    let registryUrls: string[] | undefined;
+    let registryUrls: string[] = ['https://crates.io'];
 
     if (typeof currentValue !== 'string') {
       const version = currentValue.version;

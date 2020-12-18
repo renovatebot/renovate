@@ -16,13 +16,13 @@ const baseUrl =
 describe('datasource/crate', () => {
   describe('getIndexSuffix', () => {
     it('returns correct suffixes', () => {
-      expect(getIndexSuffix('a')).toBe('1/a');
-      expect(getIndexSuffix('1')).toBe('1/1');
-      expect(getIndexSuffix('1234567')).toBe('12/34/1234567');
-      expect(getIndexSuffix('ab')).toBe('2/ab');
-      expect(getIndexSuffix('abc')).toBe('3/a/abc');
-      expect(getIndexSuffix('abcd')).toBe('ab/cd/abcd');
-      expect(getIndexSuffix('abcde')).toBe('ab/cd/abcde');
+      expect(getIndexSuffix('a')).toBe(['1', 'a']);
+      expect(getIndexSuffix('1')).toBe(['1', '1']);
+      expect(getIndexSuffix('1234567')).toBe(['12', '34', '1234567']);
+      expect(getIndexSuffix('ab')).toBe(['2', 'ab']);
+      expect(getIndexSuffix('abc')).toBe(['3', 'a', 'abc']);
+      expect(getIndexSuffix('abcd')).toBe(['ab', 'cd', 'abcd']);
+      expect(getIndexSuffix('abcde')).toBe(['ab', 'cd', 'abcde']);
     });
   });
 
