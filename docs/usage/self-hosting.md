@@ -14,7 +14,7 @@ Since Renovate v20 `npm`, `pnpm` and `yarn` are no longer embedded, so you must 
 $ npm install -g yarn pnpm
 ```
 
-The same goes for any other third party binary tool that may be needed, such as `gradle` or `poetry` - you need to make sure they are installed and the appropriate version you need before running Renovate.
+The same goes for any other third party binary tool like `gradle` or `poetry` - you need to make sure they are installed and the appropriate version before running Renovate.
 
 ### Docker
 
