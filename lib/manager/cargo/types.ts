@@ -12,13 +12,13 @@ export interface CargoDep {
 export type CargoDeps = Record<string, CargoDep | string>;
 
 export interface CargoSection {
-  dependencies: CargoDeps;
-  'dev-dependencies': CargoDeps;
-  'build-dependencies': CargoDeps;
+  dependencies?: CargoDeps;
+  'dev-dependencies'?: CargoDeps;
+  'build-dependencies'?: CargoDeps;
 }
 
 export interface CargoManifest extends CargoSection {
-  target: Record<string, CargoSection>;
+  target?: Record<string, CargoSection>;
 }
 
 export interface CargoConfig {

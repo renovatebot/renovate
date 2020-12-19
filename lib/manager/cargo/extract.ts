@@ -1,9 +1,8 @@
-import { existsSync, readFileSync } from 'fs';
 import { parse } from '@iarna/toml';
-import { join } from 'upath';
 import * as datasourceCrate from '../../datasource/crate';
 import { logger } from '../../logger';
 import { SkipReason } from '../../types';
+import { readLocalFile } from '../../util/fs';
 import { ExtractConfig, PackageDependency, PackageFile } from '../common';
 import {
   CargoConfig,
@@ -83,53 +82,61 @@ function extractFromSection(
   return deps;
 }
 
-export function extractPackageFile(
+/// Reads `.cargo/config.toml`, or, if not found, `.cargo/config`
+async function readCargoConfig(): Promise<CargoConfig | null> {
+  for (const configName of ['config.toml', 'config']) {
+    const path = `.cargo/${configName}`;
+    const payload = await readLocalFile(path, 'utf8');
+    if (payload) {
+      try {
+        return parse(payload) as CargoConfig;
+      } catch (err) {
+        logger.debug({ err }, `Error parsing ${path}`);
+      }
+      break;
+    }
+  }
+
+  logger.debug('Neither .cargo/config nor .cargo/config.toml found');
+  return null;
+}
+
+/// Extracts a map of cargo registries from a CargoConfig
+function extractCargoRegistries(
+  config: CargoConfig | null
+): CargoRegistries | null {
+  if (!config?.registries) {
+    return null;
+  }
+
+  const { registries } = config;
+
+  const result: CargoRegistries = {};
+  for (const registryName of Object.keys(registries)) {
+    const registry = registries[registryName];
+    if (registry.index) {
+      result[registryName] = registry.index;
+    } else {
+      logger.debug({ registryName }, 'cargo registry is missing index');
+    }
+  }
+
+  return result;
+}
+
+export async function extractPackageFile(
   content: string,
   fileName: string,
-  config?: ExtractConfig
-): PackageFile | null {
+  _config?: ExtractConfig
+): Promise<PackageFile | null> {
   logger.trace(`cargo.extractPackageFile(${fileName})`);
 
-  let cargoConfig: CargoConfig | undefined;
-
-  if (config?.localDir) {
-    let configPath = join(config.localDir, '.cargo', 'config.toml');
-    if (!existsSync(configPath)) {
-      configPath = join(config.localDir, '.cargo', 'config');
-    }
-
-    if (existsSync(configPath)) {
-      try {
-        // TODO: fix type
-        cargoConfig = parse(
-          readFileSync(configPath, { encoding: 'utf-8' })
-        ) as any;
-      } catch (err) {
-        logger.debug({ err }, `Error parsing cargo config from ${configPath}`);
-      }
-    } else {
-      logger.debug('Neither .cargo/config nor .cargo/config.toml found');
-    }
-  }
-
-  const cargoRegistries: CargoRegistries = {};
-  if (cargoConfig) {
-    if (cargoConfig.registries) {
-      for (const registryName of Object.keys(cargoConfig.registries)) {
-        const registry = cargoConfig.registries[registryName];
-        if (registry.index) {
-          cargoRegistries[registryName] = registry.index;
-        } else {
-          logger.debug({ registryName }, 'cargo registry is missing index');
-        }
-      }
-    }
-  }
+  const cargoConfig = await readCargoConfig();
+  const cargoRegistries = extractCargoRegistries(cargoConfig);
 
   let cargoManifest: CargoManifest;
   try {
-    // TODO: fix type
-    cargoManifest = parse(content) as any;
+    cargoManifest = parse(content);
   } catch (err) {
     logger.debug({ err }, 'Error parsing Cargo.toml file');
     return null;

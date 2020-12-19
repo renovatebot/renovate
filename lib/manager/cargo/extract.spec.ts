@@ -40,45 +40,51 @@ describe('lib/manager/cargo/extract', () => {
     beforeEach(() => {
       config = {};
     });
-    it('returns null for invalid toml', () => {
+    it('returns null for invalid toml', async () => {
       expect(
-        extractPackageFile('invalid toml', 'Cargo.toml', config)
+        await extractPackageFile('invalid toml', 'Cargo.toml', config)
       ).toBeNull();
     });
-    it('returns null for empty dependencies', () => {
+    it('returns null for empty dependencies', async () => {
       const cargotoml = '[dependencies]\n';
-      expect(extractPackageFile(cargotoml, 'Cargo.toml', config)).toBeNull();
+      expect(
+        await extractPackageFile(cargotoml, 'Cargo.toml', config)
+      ).toBeNull();
     });
-    it('returns null for empty dev-dependencies', () => {
+    it('returns null for empty dev-dependencies', async () => {
       const cargotoml = '[dev-dependencies]\n';
-      expect(extractPackageFile(cargotoml, 'Cargo.toml', config)).toBeNull();
+      expect(
+        await extractPackageFile(cargotoml, 'Cargo.toml', config)
+      ).toBeNull();
     });
-    it('returns null for empty custom target', () => {
+    it('returns null for empty custom target', async () => {
       const cargotoml = '[target."foo".dependencies]\n';
-      expect(extractPackageFile(cargotoml, 'Cargo.toml', config)).toBeNull();
+      expect(
+        await extractPackageFile(cargotoml, 'Cargo.toml', config)
+      ).toBeNull();
     });
-    it('extracts multiple dependencies simple', () => {
-      const res = extractPackageFile(cargo1toml, 'Cargo.toml', config);
+    it('extracts multiple dependencies simple', async () => {
+      const res = await extractPackageFile(cargo1toml, 'Cargo.toml', config);
       expect(res.deps).toMatchSnapshot();
       expect(res.deps).toHaveLength(15);
     });
-    it('extracts multiple dependencies advanced', () => {
-      const res = extractPackageFile(cargo2toml, 'Cargo.toml', config);
+    it('extracts multiple dependencies advanced', async () => {
+      const res = await extractPackageFile(cargo2toml, 'Cargo.toml', config);
       expect(res.deps).toMatchSnapshot();
       expect(res.deps).toHaveLength(18 + 6 + 1);
     });
-    it('handles inline tables', () => {
-      const res = extractPackageFile(cargo3toml, 'Cargo.toml', config);
+    it('handles inline tables', async () => {
+      const res = await extractPackageFile(cargo3toml, 'Cargo.toml', config);
       expect(res.deps).toMatchSnapshot();
       expect(res.deps).toHaveLength(8);
     });
-    it('handles standard tables', () => {
-      const res = extractPackageFile(cargo4toml, 'Cargo.toml', config);
+    it('handles standard tables', async () => {
+      const res = await extractPackageFile(cargo4toml, 'Cargo.toml', config);
       expect(res.deps).toMatchSnapshot();
       expect(res.deps).toHaveLength(6);
     });
-    it('extracts platform specific dependencies', () => {
-      const res = extractPackageFile(cargo5toml, 'Cargo.toml', config);
+    it('extracts platform specific dependencies', async () => {
+      const res = await extractPackageFile(cargo5toml, 'Cargo.toml', config);
       expect(res.deps).toMatchSnapshot();
       expect(res.deps).toHaveLength(4);
     });
@@ -92,7 +98,7 @@ describe('lib/manager/cargo/extract', () => {
       });
       await writeLocalFile('.cargo/config.toml', cargo6configtoml);
 
-      const res = extractPackageFile(cargo6toml, 'Cargo.toml', {
+      const res = await extractPackageFile(cargo6toml, 'Cargo.toml', {
         ...config,
         localDir,
       });
@@ -109,7 +115,7 @@ describe('lib/manager/cargo/extract', () => {
       });
       await writeLocalFile('.cargo/config', cargo6configtoml);
 
-      const res = extractPackageFile(cargo6toml, 'Cargo.toml', {
+      const res = await extractPackageFile(cargo6toml, 'Cargo.toml', {
         ...config,
         localDir,
       });
