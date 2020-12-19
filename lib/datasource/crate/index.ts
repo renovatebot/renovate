@@ -9,7 +9,7 @@ import { Http } from '../../util/http';
 import { GetReleasesConfig, Release, ReleaseResult } from '../common';
 
 export const id = 'crate';
-
+export const defaultRegistryUrls = ['https://crates.io'];
 export const registryStrategy = 'first';
 
 const registryClonePaths: Record<string, string> = {};
