@@ -1,8 +1,12 @@
 export interface CargoDep {
-  path: any;
-  git: any;
-  version: any;
-  registry: any;
+  /// Path on disk to the crate sources
+  path?: string;
+  /// Git URL for the dependency
+  git?: string;
+  /// Semver version
+  version?: string;
+  /// Name of a registry whose URL is configured in `.cargo/config.toml`
+  registry?: string;
 }
 
 export type CargoDeps = Record<string, CargoDep | string>;
