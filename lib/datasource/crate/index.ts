@@ -174,8 +174,15 @@ export async function getReleases({
   lookupName,
   registryUrl,
 }: GetReleasesConfig): Promise<ReleaseResult | null> {
+  if (!registryUrl) {
+    logger.debug(
+      'crate datasource: No registryUrl specified, cannot perform getReleases'
+    );
+    return null;
+  }
+
   const cacheNamespace = 'datasource-crate';
-  const cacheKey = registryUrl ? `${registryUrl}/${lookupName}` : lookupName;
+  const cacheKey = `${registryUrl}/${lookupName}`;
   const cachedResult = await packageCache.get<ReleaseResult>(
     cacheNamespace,
     cacheKey
