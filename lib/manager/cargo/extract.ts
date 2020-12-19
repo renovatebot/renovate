@@ -91,6 +91,7 @@ export function extractPackageFile(
   logger.trace(`cargo.extractPackageFile(${fileName})`);
 
   let cargoConfig: CargoConfig | undefined;
+
   if (config?.localDir) {
     let configPath = join(config.localDir, '.cargo', 'config.toml');
     if (!existsSync(configPath)) {
