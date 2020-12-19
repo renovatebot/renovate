@@ -1,5 +1,6 @@
 import { join } from 'path';
 import * as fs from 'fs-extra';
+import hasha from 'hasha';
 import Git from 'simple-git';
 import { logger } from '../../logger';
 import { ExternalHostError } from '../../types/errors/external-host-error';
@@ -108,6 +109,18 @@ function getDependencyUrl(info: RegistryInfo, lookupName: string): string {
   }
 }
 
+/// Given a Git URL, computes a semi-human-readable name for a folder in which to
+/// clone the repository.
+function cacheDirFromUrl(url: URL): string {
+  const proto = url.protocol.replace(/:$/, '');
+  const host = url.hostname;
+  const hash = hasha(url.pathname, {
+    algorithm: 'sha256',
+  }).substr(0, 7);
+
+  return `crate-registry-${proto}-${host}-${hash}`;
+}
+
 /// Fetches information about a registry, by url.
 /// If no url is given, assumes crates.io.
 /// If an url is given, assumes it's a valid Git repository
@@ -141,7 +154,7 @@ async function fetchRegistryInfo(
   if (flavor !== RegistryFlavor.CratesIo) {
     let clonePath = registryClonePaths[registryUrl];
     if (!clonePath) {
-      clonePath = await ensureCacheDir(`crate-registry-${url.hostname}`);
+      clonePath = await ensureCacheDir(cacheDirFromUrl(url));
       logger.info({ clonePath, registryUrl }, `Cloning private cargo registry`);
       {
         const git = Git();
