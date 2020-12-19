@@ -9,7 +9,7 @@ There are many situations in which Renovate must update/rebase a branch.
 
 Here is a list of the most common cases where Renovate must update/rebase the branch:
 
-- When a pull request has conflicts due to changes on the base branches
+- When a pull request has conflicts due to changes on the base branch
 - When you have enabled "Require branches to be up to date before merging" on GitHub
 - When you have manually told Renovate to rebase when behind the base branch with `"rebaseWhen": "behind-base-branch"`
 - When a newer version of the dependency is released
