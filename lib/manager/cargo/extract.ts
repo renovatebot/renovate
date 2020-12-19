@@ -1,5 +1,5 @@
 import { existsSync, readFileSync } from 'fs';
-import { join } from 'path';
+import { join } from 'upath';
 import { parse } from '@iarna/toml';
 import * as datasourceCrate from '../../datasource/crate';
 import { logger } from '../../logger';
