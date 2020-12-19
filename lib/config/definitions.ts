@@ -182,7 +182,7 @@ const options: RenovateOptions[] = [
     mergeable: true,
     default: {
       documentation: 'https://docs.renovatebot.com/',
-      help: 'https://github.com/renovatebot/config-help/issues',
+      help: 'https://github.com/renovatebot/renovate/issues',
       homepage: 'https://github.com/renovatebot/renovate',
     },
     additionalProperties: {
