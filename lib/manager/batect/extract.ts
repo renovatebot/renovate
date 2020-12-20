@@ -1,5 +1,5 @@
-import * as path from 'path';
 import { safeLoad } from 'js-yaml';
+import * as upath from 'upath';
 
 import { id as gitTagDatasource } from '../../datasource/git-tags';
 import { logger } from '../../logger';
@@ -86,7 +86,7 @@ function extractReferencedConfigFiles(
     return [];
   }
 
-  const dirName = path.dirname(fileName);
+  const dirName = upath.dirname(fileName);
 
   const paths = [
     ...config.include.filter(
@@ -100,7 +100,7 @@ function extractReferencedConfigFiles(
       .map((include) => include.path),
   ].filter((p) => p !== undefined && p !== null);
 
-  return paths.map((p) => path.join(dirName, p));
+  return paths.map((p) => upath.join(dirName, p));
 }
 
 interface ExtractionResult {
