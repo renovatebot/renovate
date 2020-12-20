@@ -141,24 +141,22 @@ export async function extractAllPackageFiles(
   config: ExtractConfig,
   packageFiles: string[]
 ): Promise<PackageFile[] | null> {
-  const filesToExamine = [...packageFiles];
-  const filesAlreadyExamined = [];
+  const filesToExamine = new Set<string>(packageFiles);
+  const filesAlreadyExamined = new Set<string>();
   const results: PackageFile[] = [];
 
-  while (filesToExamine.length > 0) {
-    const packageFile = filesToExamine.pop();
-    filesAlreadyExamined.push(packageFile);
+  while (filesToExamine.size > 0) {
+    const packageFile = filesToExamine.values().next().value;
+    filesToExamine.delete(packageFile);
+    filesAlreadyExamined.add(packageFile);
 
     const content = await readLocalFile(packageFile, 'utf8');
     const result = extractPackageFile(content, packageFile);
 
     if (result !== null) {
       result.referencedConfigFiles.forEach((f) => {
-        if (
-          filesAlreadyExamined.indexOf(f) === -1 &&
-          filesToExamine.indexOf(f) === -1
-        ) {
-          filesToExamine.push(f);
+        if (!filesAlreadyExamined.has(f) && !filesToExamine.has(f)) {
+          filesToExamine.add(f);
         }
       });
 
