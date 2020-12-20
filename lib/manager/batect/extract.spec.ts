@@ -45,7 +45,6 @@ describe('lib/manager/batect/extract', () => {
 
       expect(result).toEqual([
         {
-          manager: 'batect',
           packageFile: `${fixturesDir}/no-containers-or-includes/batect.yml`,
           deps: [],
         },
@@ -61,7 +60,6 @@ describe('lib/manager/batect/extract', () => {
         result.sort((a, b) => a.packageFile.localeCompare(b.packageFile))
       ).toEqual([
         {
-          manager: 'batect',
           packageFile: `${fixturesDir}/valid/another-include.yml`,
           deps: [
             createDockerDependency('ubuntu:19.10'),
@@ -72,7 +70,6 @@ describe('lib/manager/batect/extract', () => {
           ],
         },
         {
-          manager: 'batect',
           packageFile: `${fixturesDir}/valid/batect.yml`,
           deps: [
             createDockerDependency('alpine:1.2.3'),
@@ -89,7 +86,6 @@ describe('lib/manager/batect/extract', () => {
           ],
         },
         {
-          manager: 'batect',
           packageFile: `${fixturesDir}/valid/include.yml`,
           deps: [
             createDockerDependency('ubuntu:20.10'),
@@ -97,7 +93,6 @@ describe('lib/manager/batect/extract', () => {
           ],
         },
         {
-          manager: 'batect',
           packageFile: `${fixturesDir}/valid/subdir/file.yml`,
           deps: [
             createDockerDependency('ubuntu:19.04'),

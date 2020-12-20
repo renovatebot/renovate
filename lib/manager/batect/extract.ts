@@ -161,7 +161,6 @@ export async function extractAllPackageFiles(
       });
 
       results.push({
-        manager: 'batect',
         packageFile,
         deps: result.deps,
       });
