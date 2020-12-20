@@ -1,15 +1,11 @@
-import { readFileSync } from 'fs';
 import { id as gitTagDatasource } from '../../datasource/git-tags';
 import { id as dockerVersioning } from '../../versioning/docker';
 import { id as semverVersioning } from '../../versioning/semver';
 import { PackageDependency } from '../common';
 import { getDep } from '../dockerfile/extract';
-import { extractPackageFile } from './extract';
+import { extractAllPackageFiles } from './extract';
 
-const sampleFile = readFileSync(
-  'lib/manager/batect/__fixtures__/batect.yml',
-  'utf8'
-);
+const fixturesDir = 'lib/manager/batect/__fixtures__';
 
 function createDockerDependency(tag: string): PackageDependency {
   return {
@@ -30,34 +26,84 @@ function createGitDependency(repo: string, version: string): PackageDependency {
 
 describe('lib/manager/batect/extract', () => {
   describe('extractPackageFile()', () => {
-    it('returns null for empty configuration file', () => {
-      expect(extractPackageFile('')).toBeNull();
+    it('returns empty array for empty configuration file', async () => {
+      expect(
+        await extractAllPackageFiles({}, [`${fixturesDir}/empty/batect.yml`])
+      ).toEqual([]);
     });
 
-    it('returns null for non-object configuration file', () => {
-      expect(extractPackageFile('nothing here')).toBeNull();
+    it('returns empty array for non-object configuration file', async () => {
+      expect(
+        await extractAllPackageFiles({}, [`${fixturesDir}/invalid/batect.yml`])
+      ).toEqual([]);
     });
 
-    it('returns null for malformed configuration file', () => {
-      expect(extractPackageFile('nothing here\n:::::::')).toBeNull();
+    it('returns an a package file with no dependencies for configuration file without containers or includes', async () => {
+      const result = await extractAllPackageFiles({}, [
+        `${fixturesDir}/no-containers-or-includes/batect.yml`,
+      ]);
+
+      expect(result).toEqual([
+        {
+          manager: 'batect',
+          packageFile: `${fixturesDir}/no-containers-or-includes/batect.yml`,
+          deps: [],
+        },
+      ]);
     });
 
-    it('returns null for configuration file without containers', () => {
-      expect(extractPackageFile('something_else: some_value')).toBeNull();
-    });
+    it('extracts all available images and bundles from a valid Batect configuration file, including dependencies in included files', async () => {
+      const result = await extractAllPackageFiles({}, [
+        `${fixturesDir}/valid/batect.yml`,
+      ]);
 
-    it('extracts all available images from a valid Batect configuration file', () => {
-      const res = extractPackageFile(sampleFile);
-
-      expect(res.deps).toEqual([
-        createDockerDependency('alpine:1.2.3'),
-        createDockerDependency('alpine:1.2.3'),
-        createDockerDependency('ubuntu:20.04'),
-        createDockerDependency(
-          'postgres:9.6.20@sha256:166179811e4c75f8a092367afed6091208c8ecf60b111c7e49f29af45ca05e08'
-        ),
-        createGitDependency('https://includes.com/my-repo.git', '1.2.3'),
-        createGitDependency('https://includes.com/my-other-repo.git', '4.5.6'),
+      expect(
+        result.sort((a, b) => a.packageFile.localeCompare(b.packageFile))
+      ).toEqual([
+        {
+          manager: 'batect',
+          packageFile: `${fixturesDir}/valid/another-include.yml`,
+          deps: [
+            createDockerDependency('ubuntu:19.10'),
+            createGitDependency(
+              'https://another-include.com/my-repo.git',
+              '4.5.6'
+            ),
+          ],
+        },
+        {
+          manager: 'batect',
+          packageFile: `${fixturesDir}/valid/batect.yml`,
+          deps: [
+            createDockerDependency('alpine:1.2.3'),
+            createDockerDependency('alpine:1.2.3'),
+            createDockerDependency('ubuntu:20.04'),
+            createDockerDependency(
+              'postgres:9.6.20@sha256:166179811e4c75f8a092367afed6091208c8ecf60b111c7e49f29af45ca05e08'
+            ),
+            createGitDependency('https://includes.com/my-repo.git', '1.2.3'),
+            createGitDependency(
+              'https://includes.com/my-other-repo.git',
+              '4.5.6'
+            ),
+          ],
+        },
+        {
+          manager: 'batect',
+          packageFile: `${fixturesDir}/valid/include.yml`,
+          deps: [
+            createDockerDependency('ubuntu:20.10'),
+            createGitDependency('https://include.com/my-repo.git', '4.5.6'),
+          ],
+        },
+        {
+          manager: 'batect',
+          packageFile: `${fixturesDir}/valid/subdir/file.yml`,
+          deps: [
+            createDockerDependency('ubuntu:19.04'),
+            createGitDependency('https://file.com/my-repo.git', '4.5.6'),
+          ],
+        },
       ]);
     });
   });
