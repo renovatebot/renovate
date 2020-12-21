@@ -24,7 +24,8 @@ Unless it's a very simple bug, the Renovate team cannot fix the bug, and verify 
 ## Why we require a minimal reproduction
 
 To help us with debugging, we insist that you create a minimal reproduction repository.
-This repository must be hosted on GitHub/GitLab/Bitbucket, and must be publicly acessible.
+We prefer that you use GitHub to host your reproduction.
+If the bug occurs on another platform, host the reproduction on that platform.
 
 ### Making a reproduction repository is too much work for me
 
