@@ -90,7 +90,6 @@ export interface PackageFile<T = Record<string, any>>
   ignoreNpmrcFile?: boolean;
   lernaClient?: string;
   lernaPackages?: string[];
-  manager?: string;
   mavenProps?: Record<string, any>;
   npmrc?: string;
   packageFile?: string;
