@@ -58,19 +58,21 @@ patchesStrategicMerge:
 images:
   - name: postgres
     newTag: sha256:b0cfe264cb1143c7c660ddfd5c482464997d62d6bc9f97f8fdf3deefce881a8c
-  - name: alpine
-    digest: sha256:074d3636ebda6dd446d0d00304c4454f468237fdacf08fb0eeac90bdbfa1bac7
+
+  - name: mariadb
+    digest: sha256:3f18ce9e12e3ece07029895336f5497eeb2d9cb8fe148cc54d4905f77cbc062d
+
   - name: alpine
     newTag: 3.12.2
-    digest: sha256:074d3636ebda6dd446d0d00304c4454f468237fdacf08fb0eeac90bdbfa1bac7
+    digest: sha256:25f5332d060da2c7ea2c8a85d2eac623bd0b5f97d508b165f846c7d172897438
 ",
       "versioning": "docker",
     },
     Object {
-      "currentDigest": "sha256:074d3636ebda6dd446d0d00304c4454f468237fdacf08fb0eeac90bdbfa1bac7",
+      "currentDigest": "sha256:3f18ce9e12e3ece07029895336f5497eeb2d9cb8fe148cc54d4905f77cbc062d",
       "currentValue": undefined,
       "datasource": "docker",
-      "depName": "alpine",
+      "depName": "mariadb",
       "replaceString": "apiVersion: kustomize.config.k8s.io/v1beta1
 kind: Kustomization
 
@@ -88,16 +90,18 @@ patchesStrategicMerge:
 images:
   - name: postgres
     newTag: sha256:b0cfe264cb1143c7c660ddfd5c482464997d62d6bc9f97f8fdf3deefce881a8c
-  - name: alpine
-    digest: sha256:074d3636ebda6dd446d0d00304c4454f468237fdacf08fb0eeac90bdbfa1bac7
+
+  - name: mariadb
+    digest: sha256:3f18ce9e12e3ece07029895336f5497eeb2d9cb8fe148cc54d4905f77cbc062d
+
   - name: alpine
     newTag: 3.12.2
-    digest: sha256:074d3636ebda6dd446d0d00304c4454f468237fdacf08fb0eeac90bdbfa1bac7
+    digest: sha256:25f5332d060da2c7ea2c8a85d2eac623bd0b5f97d508b165f846c7d172897438
 ",
       "versioning": "docker",
     },
     Object {
-      "currentDigest": "sha256:074d3636ebda6dd446d0d00304c4454f468237fdacf08fb0eeac90bdbfa1bac7",
+      "currentDigest": "sha256:25f5332d060da2c7ea2c8a85d2eac623bd0b5f97d508b165f846c7d172897438",
       "currentValue": "3.12.2",
       "datasource": "docker",
       "depName": "alpine",
@@ -118,11 +122,13 @@ patchesStrategicMerge:
 images:
   - name: postgres
     newTag: sha256:b0cfe264cb1143c7c660ddfd5c482464997d62d6bc9f97f8fdf3deefce881a8c
-  - name: alpine
-    digest: sha256:074d3636ebda6dd446d0d00304c4454f468237fdacf08fb0eeac90bdbfa1bac7
+
+  - name: mariadb
+    digest: sha256:3f18ce9e12e3ece07029895336f5497eeb2d9cb8fe148cc54d4905f77cbc062d
+
   - name: alpine
     newTag: 3.12.2
-    digest: sha256:074d3636ebda6dd446d0d00304c4454f468237fdacf08fb0eeac90bdbfa1bac7
+    digest: sha256:25f5332d060da2c7ea2c8a85d2eac623bd0b5f97d508b165f846c7d172897438
 ",
       "versioning": "docker",
     },
