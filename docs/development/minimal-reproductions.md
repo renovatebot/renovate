@@ -31,8 +31,8 @@ If the bug occurs on another platform, host the reproduction on that platform.
 
 We know that making the minimal reproduction can be a lot of work, and that it can be hard to figure out what parts are needed to trigger the bug.
 
-If you do not want to do the work to make the reproduction, how can you expect the Renovate team to invest time in fixing your bug?
-No reproduction, no bug fix.
+Although we'd love to get down to zero reported bugs remaining, there's usually a queue and we need to prioritize.
+We prioritize based on whether a reproduction repo is available, because that's also a good indication of whether it's important to the person reporting it.
 
 ## How to create a good minimal reproduction
 
