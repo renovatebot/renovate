@@ -8,7 +8,12 @@ import { id as dockerVersioning } from '../../versioning/docker';
 import { id as semverVersioning } from '../../versioning/semver';
 import { ExtractConfig, PackageDependency, PackageFile } from '../common';
 import { getDep } from '../dockerfile/extract';
-import { BatectConfig, BatectFileInclude, BatectGitInclude } from './types';
+import {
+  BatectConfig,
+  BatectFileInclude,
+  BatectGitInclude,
+  BatectInclude,
+} from './types';
 
 function loadConfig(content: string): BatectConfig {
   const config = safeLoad(content);
@@ -48,15 +53,18 @@ function extractImageDependencies(config: BatectConfig): PackageDependency[] {
   return deps;
 }
 
+function includeIsGitInclude(
+  include: BatectInclude
+): include is BatectGitInclude {
+  return typeof include === 'object' && include.type === 'git';
+}
+
 function extractGitBundles(config: BatectConfig): BatectGitInclude[] {
   if (config.include === undefined) {
     return [];
   }
 
-  return config.include.filter(
-    (include): include is BatectGitInclude =>
-      typeof include === 'object' && include.type === 'git'
-  );
+  return config.include.filter(includeIsGitInclude);
 }
 
 function createBundleDependency(bundle: BatectGitInclude): PackageDependency {
@@ -78,6 +86,16 @@ function extractBundleDependencies(config: BatectConfig): PackageDependency[] {
   return deps;
 }
 
+function includeIsStringFileInclude(include: BatectInclude): include is string {
+  return typeof include === 'string';
+}
+
+function includeIsObjectFileInclude(
+  include: BatectInclude
+): include is BatectFileInclude {
+  return typeof include === 'object' && include.type === 'file';
+}
+
 function extractReferencedConfigFiles(
   config: BatectConfig,
   fileName: string
@@ -89,14 +107,9 @@ function extractReferencedConfigFiles(
   const dirName = upath.dirname(fileName);
 
   const paths = [
-    ...config.include.filter(
-      (include): include is string => typeof include === 'string'
-    ),
+    ...config.include.filter(includeIsStringFileInclude),
     ...config.include
-      .filter(
-        (include): include is BatectFileInclude =>
-          typeof include === 'object' && include.type === 'file'
-      )
+      .filter(includeIsObjectFileInclude)
       .map((include) => include.path),
   ].filter((p) => p !== undefined && p !== null);
 
