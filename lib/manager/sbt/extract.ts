@@ -269,6 +269,10 @@ function parseSbtLine(
     if (!dep.datasource) {
       if (dep.depType === 'plugin') {
         dep.datasource = datasourceSbtPlugin.id;
+        dep.registryUrls = [
+          ...registryUrls,
+          ...datasourceSbtPlugin.defaultRegistryUrls,
+        ];
       } else {
         dep.datasource = datasourceSbtPackage.id;
       }
