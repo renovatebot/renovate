@@ -15,3 +15,8 @@ patchesStrategicMerge:
 images:
   - name: postgres
     newTag: sha256:b0cfe264cb1143c7c660ddfd5c482464997d62d6bc9f97f8fdf3deefce881a8c
+  - name: alpine
+    digest: sha256:074d3636ebda6dd446d0d00304c4454f468237fdacf08fb0eeac90bdbfa1bac7
+  - name: alpine
+    newTag: 3.12.2
+    digest: sha256:074d3636ebda6dd446d0d00304c4454f468237fdacf08fb0eeac90bdbfa1bac7

@@ -8,8 +8,10 @@ import { PackageDependency, PackageFile } from '../common';
 
 interface Image {
   name: string;
-  newTag: string;
+  newTag?: string;
   newName?: string;
+
+  digest?: string;
 }
 
 interface Kustomize {
@@ -47,24 +49,22 @@ export function extractBase(base: string): PackageDependency | null {
 }
 
 export function extractImage(image: Image): PackageDependency | null {
-  if (image?.name && image.newTag) {
-    const replaceString = image.newTag;
-    let currentValue;
-    let currentDigest;
-    if (replaceString.startsWith('sha256:')) {
-      currentDigest = replaceString;
-      currentValue = undefined;
-    } else {
-      currentValue = replaceString;
-    }
-    return {
+  if (image?.name && (image.newTag || image.digest)) {
+    const res: PackageDependency = {
       datasource: datasourceDocker.id,
       versioning: dockerVersioning.id,
       depName: image.newName ?? image.name,
-      currentValue,
-      currentDigest,
-      replaceString,
     };
+
+    if (image.digest) {
+      res.currentDigest = image.digest;
+      res.currentValue = image.newTag;
+    } else if (image.newTag.startsWith('sha256:')) {
+      res.currentDigest = image.newTag;
+    } else {
+      res.currentValue = image.newTag;
+    }
+    return res;
   }
 
   return null;
@@ -113,7 +113,7 @@ export function extractPackageFile(content: string): PackageFile | null {
   for (const image of pkg.images) {
     const dep = extractImage(image);
     if (dep) {
-      deps.push(dep);
+      deps.push({ ...dep, replaceString: content });
     }
   }
 
