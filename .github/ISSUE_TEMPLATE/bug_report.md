@@ -23,7 +23,7 @@ Paste the *relevant* logs here, not the entire thing and not just a link to the 
 
 **To Reproduce**
 
-<!-- Except for very simple bugs like typos, a debuggable reproduction repository is usually needed. Please read the [minimal reproductions documentation](../../docs/development/minimal-reproductions.md) to learn how to make a good minimal reproduction repository. -->
+<!-- Except for very simple bugs like typos, a debuggable reproduction repository is usually needed. Please read the [minimal reproductions documentation](https://github.com/renovatebot/renovate/blob/master/docs/development/minimal-reproductions.md) to learn how to make a good minimal reproduction repository. -->
 
 **Additional context**
 
