@@ -15,10 +15,11 @@ containers:
     image: postgres:9.6.20@sha256:166179811e4c75f8a092367afed6091208c8ecf60b111c7e49f29af45ca05e08
 
 include:
-  - some/file/include.yml
+  - include.yml
+  - subdir/file.yml
 
   - type: file
-    path: a/valid/file/include.yml
+    path: another-include.yml
 
   - type: file
     repo: https://file.includes/should/not/have/repo.git
