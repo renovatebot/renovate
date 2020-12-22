@@ -41,4 +41,3 @@ A good minimal reproduction:
 - Reduces the Renovate to the minimum necessary
 
 Sometimes you may find it easiest to start with a fork and then remove files/config until the bug no longer reproduces, but other times it may be simplest to start with an empty repository with a couple of files you copy over manually from your main repository.
-
