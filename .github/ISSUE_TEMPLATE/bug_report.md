@@ -23,7 +23,7 @@ Paste the *relevant* logs here, not the entire thing and not just a link to the 
 
 **To Reproduce**
 
-<!-- To fix a bug, we usually need a *minimal* public repository to reproduce it in, before verifying that our fix works using the same repo. If you provide a public repo that already reproduces the problem, then your bug will get highest priority for fixing. If you can't reproduce it in a simple repo, do your best to describe how it could be reproduced, or under what circumstances the bug occurs, but it's possible that nobody will start work on it if there's no way to reproduce it without a lot of work. -->
+<!-- Except for very simple bugs like typos, a debuggable reproduction repository is usually needed. Please read the [minimal reproductions documentation](../../docs/development/minimal-reproductions.md) to learn how to make a good minimal reproduction repository. -->
 
 **Additional context**
 
