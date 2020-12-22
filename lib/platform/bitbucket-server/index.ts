@@ -43,6 +43,18 @@ import { smartTruncate } from '../utils/pr-body';
 import { BbbsRestPr, BbsConfig, BbsPr, BbsRestUserRef } from './types';
 import * as utils from './utils';
 
+interface RepoResponse {
+  project: { key: string };
+  parent: string;
+  links: {
+    clone: { href: string; name: string }[];
+  };
+}
+
+interface BranchResponse {
+  displayId: string;
+}
+
 /*
  * Version: 5.3 (EOL Date: 15 Aug 2019)
  * See following docs for api information:
@@ -154,37 +166,17 @@ export async function initRepo({
     ignorePrAuthor,
   } as any;
 
-  const { host, pathname } = url.parse(defaults.endpoint);
-  const gitUrl = git.getUrl({
-    protocol: defaults.endpoint.split(':')[0] as GitProtocol,
-    auth: `${opts.username}:${opts.password}`,
-    host: `${host}${pathname}${
-      pathname.endsWith('/') ? '' : /* istanbul ignore next */ '/'
-    }scm`,
-    repository,
-  });
-
-  await git.initRepo({
-    ...config,
-    localDir,
-    url: gitUrl,
-    gitAuthorName: global.gitAuthor?.name,
-    gitAuthorEmail: global.gitAuthor?.email,
-    cloneSubmodules,
-  });
-
+  let info: RepoResponse;
+  let branchRes: HttpResponse<BranchResponse>;
   try {
-    const info = (
-      await bitbucketServerHttp.getJson<{
-        project: { key: string };
-        parent: string;
-      }>(
+    info = (
+      await bitbucketServerHttp.getJson<RepoResponse>(
         `./rest/api/1.0/projects/${config.projectKey}/repos/${config.repositorySlug}`
       )
     ).body;
     config.owner = info.project.key;
     logger.debug(`${repository} owner = ${config.owner}`);
-    const branchRes = await bitbucketServerHttp.getJson<{ displayId: string }>(
+    branchRes = await bitbucketServerHttp.getJson<BranchResponse>(
       `./rest/api/1.0/projects/${config.projectKey}/repos/${config.repositorySlug}/branches/default`
     );
 
@@ -193,12 +185,42 @@ export async function initRepo({
       throw new Error(REPOSITORY_EMPTY);
     }
 
-    config.mergeMethod = 'merge';
-    const repoConfig: RepoResult = {
-      defaultBranch: branchRes.body.displayId,
-      isFork: !!info.parent,
-    };
-    return repoConfig;
+    let cloneUrl = info.links.clone?.find(({ name }) => name === 'http');
+    if (!cloneUrl) {
+      // Http access might be disabled, try to find ssh url in this case
+      cloneUrl = info.links.clone?.find(({ name }) => name === 'ssh');
+    }
+
+    let gitUrl: string;
+    if (!cloneUrl) {
+      // Fallback to generating the url if the API didn't give us an URL
+      const { host, pathname } = url.parse(defaults.endpoint);
+      gitUrl = git.getUrl({
+        protocol: defaults.endpoint.split(':')[0] as GitProtocol,
+        auth: `${opts.username}:${opts.password}`,
+        host: `${host}${pathname}${
+          pathname.endsWith('/') ? '' : /* istanbul ignore next */ '/'
+        }scm`,
+        repository,
+      });
+    } else if (cloneUrl.name === 'http') {
+      // Inject auth into the API provided URL
+      const repoUrl = url.parse(cloneUrl.href);
+      repoUrl.auth = `${opts.username}:${opts.password}`;
+      gitUrl = url.format(repoUrl);
+    } else {
+      // SSH urls can be used directly
+      gitUrl = cloneUrl.href;
+    }
+
+    await git.initRepo({
+      ...config,
+      localDir,
+      url: gitUrl,
+      gitAuthorName: global.gitAuthor?.name,
+      gitAuthorEmail: global.gitAuthor?.email,
+      cloneSubmodules,
+    });
   } catch (err) /* istanbul ignore next */ {
     if (err.statusCode === 404) {
       throw new Error(REPOSITORY_NOT_FOUND);
@@ -210,6 +232,14 @@ export async function initRepo({
     logger.debug({ err }, 'Unknown Bitbucket initRepo error');
     throw err;
   }
+
+  config.mergeMethod = 'merge';
+  const repoConfig: RepoResult = {
+    defaultBranch: branchRes.body.displayId,
+    isFork: !!info.parent,
+  };
+
+  return repoConfig;
 }
 
 export async function getRepoForceRebase(): Promise<boolean> {
