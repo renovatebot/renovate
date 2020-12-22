@@ -25,6 +25,7 @@ Paste the *relevant* logs here, not the entire thing and not just a link to the 
 
 Please read the [minimal reproductions documentation](https://github.com/renovatebot/renovate/blob/master/docs/development/minimal-reproductions.md) to learn how to make a good minimal reproduction repository.
 
+- [ ] This is a really small bug, it does not need a reproduction (think small typo)
 - [ ] I have provided a minimal reproduction repository
 - [ ] I don't have time for that, but it happens in a public repository I have linked to
 - [ ] I don't have time for that, and cannot share my private repository
