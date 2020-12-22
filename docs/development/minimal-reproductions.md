@@ -38,6 +38,6 @@ Therefore you are free to raise bug reports without a reproduction repository bu
 A good minimal reproduction:
 
 - Uses the fewest amount of repository files and dependencies possible
-- Reduces the Renovate to the minimum necessary
+- Reduces the Renovate config to the minimum necessary
 
 Sometimes you may find it easiest to start with a fork and then remove files/config until the bug no longer reproduces, but other times it may be simplest to start with an empty repository with a couple of files you copy over manually from your main repository.
