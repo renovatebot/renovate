@@ -3,6 +3,8 @@ name: Bug report
 about: You've found a bug with Renovate
 ---
 
+<!-- Do not use this form to report security vulnerabilities. Instead please send an email to renovate-disclosure@whitesourcesoftware.com describing what you have found. Please do not raise an issue in this repository or publicize your concern in any other forum without giving us adequate time to investigate first. -->
+
 **What Renovate type, platform and version are you using?**
 
 <!-- Tell us if you're using the hosted App, or if you are self-hosted Renovate yourself. Platform too (GitHub, GitLab, etc) plus which version of Renovate if you're self-hosted. -->
