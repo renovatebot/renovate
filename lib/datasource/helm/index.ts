@@ -19,7 +19,7 @@ export const registryStrategy = 'first';
 
 export const defaultConfig = {
   additionalBranchPrefix: 'helm-',
-  commitMessageTopic: 'Helm release {{depNameShort}}',
+  commitMessageTopic: 'Helm release {{depName}}',
   group: {
     commitMessageTopic: '{{{groupName}}} Helm releases',
   },

@@ -21,9 +21,15 @@ If you're running self-hosted, run with `--log-level=debug` or LOG_LEVEL=debug a
 Paste the *relevant* logs here, not the entire thing and not just a link to the dashboard (others do not have permissions to view them).
 -->
 
-**To Reproduce**
+**Have you created a minimal reproduction repository?**
 
-<!-- To fix a bug, we usually need a *minimal* public repository to reproduce it in, before verifying that our fix works using the same repo. If you provide a public repo that already reproduces the problem, then your bug will get highest priority for fixing. If you can't reproduce it in a simple repo, do your best to describe how it could be reproduced, or under what circumstances the bug occurs, but it's possible that nobody will start work on it if there's no way to reproduce it without a lot of work. -->
+Please read the [minimal reproductions documentation](https://github.com/renovatebot/renovate/blob/master/docs/development/minimal-reproductions.md) to learn how to make a good minimal reproduction repository.
+
+- [ ] This is a really small bug, it does not need a reproduction (think small typo)
+- [ ] I have provided a minimal reproduction repository
+- [ ] I don't have time for that, but it happens in a public repository I have linked to
+- [ ] I don't have time for that, and cannot share my private repository
+- [ ] The nature of this bug means it's impossible to reproduce publicly
 
 **Additional context**
 
