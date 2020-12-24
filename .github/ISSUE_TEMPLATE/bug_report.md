@@ -3,7 +3,7 @@ name: Bug report
 about: You've found a bug with Renovate
 ---
 
-<!-- 
+<!--
       PLEASE DO NOT REPORT ANY SECURITY CONCERNS THIS WAY
       Email renovate-disclosure@whitesourcesoftware.com instead.
 -->
