@@ -3,7 +3,10 @@ name: Bug report
 about: You've found a bug with Renovate
 ---
 
-<!-- Do not use this form to report security vulnerabilities. Instead please send an email to renovate-disclosure@whitesourcesoftware.com describing what you have found. Please do not raise an issue in this repository or publicize your concern in any other forum without giving us adequate time to investigate first. -->
+<!-- 
+      PLEASE DO NOT REPORT ANY SECURITY CONCERNS THIS WAY
+      Email renovate-disclosure@whitesourcesoftware.com instead.
+-->
 
 **What Renovate type, platform and version are you using?**
 
