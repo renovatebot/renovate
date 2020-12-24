@@ -3,6 +3,11 @@ name: Bug report
 about: You've found a bug with Renovate
 ---
 
+<!--
+      PLEASE DO NOT REPORT ANY SECURITY CONCERNS THIS WAY
+      Email renovate-disclosure@whitesourcesoftware.com instead.
+-->
+
 **What Renovate type, platform and version are you using?**
 
 <!-- Tell us if you're using the hosted App, or if you are self-hosted Renovate yourself. Platform too (GitHub, GitLab, etc) plus which version of Renovate if you're self-hosted. -->
