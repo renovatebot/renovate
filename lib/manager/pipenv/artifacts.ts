@@ -97,9 +97,9 @@ export async function updateArtifacts({
       config
     );
     const execOptions: ExecOptions = {
+      cwdFile: pipfileName,
       extraEnv: {
         PIPENV_CACHE_DIR: cacheDir,
-        PIPENV_PIPFILE: pipfileName,
       },
       docker: {
         image: 'renovate/python',
