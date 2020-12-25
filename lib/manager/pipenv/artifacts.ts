@@ -90,7 +90,7 @@ export async function updateArtifacts({
     if (config.isLockFileMaintenance) {
       await deleteLocalFile(lockFileName);
     }
-    const cmd = `PIPENV_PIPFILE=${pipfileName} pipenv lock`;
+    const cmd = 'pipenv lock';
     const tagConstraint = getPythonConstraint(existingLockFileContent, config);
     const pipenvConstraint = getPipenvConstraint(
       existingLockFileContent,
@@ -99,6 +99,7 @@ export async function updateArtifacts({
     const execOptions: ExecOptions = {
       extraEnv: {
         PIPENV_CACHE_DIR: cacheDir,
+        PIPENV_PIPFILE: pipfileName,
       },
       docker: {
         image: 'renovate/python',
