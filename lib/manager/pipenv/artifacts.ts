@@ -90,7 +90,7 @@ export async function updateArtifacts({
     if (config.isLockFileMaintenance) {
       await deleteLocalFile(lockFileName);
     }
-    const cmd = 'pipenv lock';
+    const cmd = `PIPENV_PIPFILE=${pipfileName} pipenv lock`;
     const tagConstraint = getPythonConstraint(existingLockFileContent, config);
     const pipenvConstraint = getPipenvConstraint(
       existingLockFileContent,
