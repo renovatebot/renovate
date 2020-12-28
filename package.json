@@ -120,7 +120,7 @@
     "@yarnpkg/core": "2.4.0",
     "@yarnpkg/parsers": "2.3.0",
     "aws-sdk": "2.792.0",
-    "azure-devops-node-api": "10.1.2",
+    "azure-devops-node-api": "10.2.0",
     "bunyan": "1.8.14",
     "cacache": "15.0.5",
     "chalk": "4.1.0",
