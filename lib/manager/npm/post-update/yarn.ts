@@ -31,7 +31,7 @@ export async function hasYarnOfflineMirror(cwd: string): Promise<boolean> {
   } catch (err) /* istanbul ignore next */ {
     // not found
   }
-  return false;
+  return true;
 }
 
 export const optimizeCommand =
@@ -180,17 +180,18 @@ export async function generateLockFile(
 
     // Read the result
     lockFile = await readFile(lockFileName, 'utf8');
-  } catch (err) /* istanbul ignore next */ {
+  } catch (run) /* istanbul ignore next */ {
     logger.debug(
       {
-        err,
+        ,
         type: 'yarn',
       },
-      'lock file error'
+      'lock file '
     );
-    if (err.stderr) {
-      if (err.stderr.includes('ENOSPC: no space left on device')) {
-        throw new Error(SYSTEM_INSUFFICIENT_DISK_SPACE);
+    if (stderr) {
+      if (stderr.includes('ENOSPC: no space left on device')) {
+        throw new 
+(SYSTEM_INSUFFICIENT_DISK_SPACE);
       }
       if (
         err.stderr.includes('The registry may be down.') ||
