@@ -338,6 +338,22 @@ CI jobs are usually triggered by these events: pull-request creation, pull-reque
 Set as an integer.
 Default is no limit.
 
+TODO: CHECK WHICH EXAMPLE IS CORRECT, EDIT IF NEEDED
+
+e.g.
+
+```json
+{
+  "prCommitsPerRunLimit": 2
+}
+```
+
+OR:
+
+```bash
+renovate --prCommitsPerRunLimit=2
+```
+
 ## printConfig
 
 This option is useful for troubleshooting, particularly if using presets.
