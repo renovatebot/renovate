@@ -70,7 +70,16 @@ Use the `autodiscoverFilter` option to limit the bot to only the wanted reposito
 
 ## autodiscoverFilter
 
-A [minimatch](https://www.npmjs.com/package/minimatch) glob-style pattern for filtering `autodiscover`ed repositories. Ex: `project/*`
+You can use this option to filter the list of repositories that the Renovate bot account can access trough `autodiscover`.
+It takes a [minimatch](https://www.npmjs.com/package/minimatch) glob-style pattern.
+
+e.g.
+
+```json
+{
+  "autodiscoverFilter": "project/*"
+}
+```
 
 ## baseDir
 
