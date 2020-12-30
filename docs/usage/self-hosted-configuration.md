@@ -118,9 +118,20 @@ To use Docker-based binaries:
 
 ## cacheDir
 
-Configure this directory if you want to change which directory Renovate uses for storing cache data.
-If left unconfigured, it will typically be a temporary directory like `/tmp/renovate/cache/`.
-If you configure this to be different to the `baseDir`, it means you can have one location for repo data and another for cache data.
+By default Renovate uses a temporary directory like `/tmp/renovate/cache` to store cache data.
+Use the `cacheDir` option to override this default.
+
+The `baseDir` and `cacheDir` option do not need to point to the same directory.
+You can use one directory for the repo data, and another for the the cache data.
+
+e.g.
+
+```json
+{
+  "baseDir": "/my-own-different-temporary-folder",
+  "cacheDir": "/my-own-different-cache-folder"
+}
+```
 
 ## composerIgnorePlatformReqs
 
