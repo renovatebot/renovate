@@ -175,9 +175,17 @@ Currently applicable to `.npmrc` only.
 ## dockerUser
 
 Override default user and group used by Docker-based binaries.
-UID and GID should match the user that executes renovate.
-See [Docker run reference](https://docs.docker.com/engine/reference/run/#user) for more information on user and group syntax.
+The user-id (UID) and group-id (GID) should match the user that executes Renovate.
+
+Read the [Docker run reference](https://docs.docker.com/engine/reference/run/#user) for more information on user and group syntax.
 Set this to `1001:1002` to use UID 1001 and GID 1002.
+e.g.
+
+```json
+{
+  "dockerUser": "1001:1002"
+}
+```
 
 ## dryRun
 
