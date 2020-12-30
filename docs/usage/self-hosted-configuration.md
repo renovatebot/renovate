@@ -200,7 +200,7 @@ TODO: Add JSON example.
 ## force
 
 This object is used as a "force override" when you need to make sure certain configuration overrides whatever is configured in the repository.
-For example, forcing a null (no) schedule to make sure Renovate raises PRs on a run even if the repository itself or its preset defines a schedule that's currently in active.
+For example, forcing a null (no) schedule to make sure Renovate raises PRs on a run even if the repository itself or its preset defines a schedule that's currently inactive.
 
 In practice, it is implemented by converting the `force` configuration into a `packageRule` that matches all packages.
 
