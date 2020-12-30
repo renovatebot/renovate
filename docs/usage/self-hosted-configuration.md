@@ -381,6 +381,8 @@ TODO: add example of use.
 
 Override this object if you wish to change the URLs that Renovate links to, e.g. if you have an internal forum for asking for help.
 
+TODO: add example of use.
+
 ## redisUrl
 
 If this value is set then Renovate will use Redis for its global cache instead of the local file system.
