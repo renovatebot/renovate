@@ -189,7 +189,13 @@ e.g.
 
 ## dryRun
 
+TODO: Describe the `dryRun` option.
+TODO: Add JSON example.
+
 ## endpoint
+
+TODO: Describe the `endpoint` option.
+TODO: Add JSON example.
 
 ## force
 
