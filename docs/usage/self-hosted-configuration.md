@@ -1,9 +1,9 @@
 ---
-title: Self-Hosted Configuration
-description: Self-Hosted Configuration usable in renovate.json or package.json
+title: Self-Hosted configuration
+description: Self-Hosted configuration usable in renovate.json or package.json
 ---
 
-# Self-Hosted Configuration Options
+# Self-Hosted configuration options
 
 The below configuration options are applicable only if you are running your own instance ("bot") of Renovate.
 
