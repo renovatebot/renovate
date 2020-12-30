@@ -52,7 +52,7 @@ npx ng update @angular/core --from=9.0.0 --to=10.0.0 --migrateOnly --allowDirty 
 ## allowedPostUpgradeCommands
 
 A list of regular expressions that determine which commands in `postUpgradeTasks` are allowed to be executed.
-If this list is empty then no tasks will be executed.
+If the list is empty no tasks will be executed.
 
 e.g.
 
