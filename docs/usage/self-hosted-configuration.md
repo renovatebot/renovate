@@ -227,6 +227,8 @@ TODO: Also what is `forkMode`? The section doesn't explain.
 You can customize the Git author that's used whenever Renovate creates a commit.
 The `gitAuthor` option accepts a RFC5322-compliant string.
 
+TODO: add exaple of `gitAuthor` usage here.
+
 If you are migrating from a old Git author to a new Git author, put the old `gitAuthor` into `RENOVATE_LEGACY_GIT_AUTHOR_EMAIL` in environment (TODO: Explain where/what is this "environment"???).
 Renovate will then check for the old and current Git author before it decides if a branch has been modified.
 
