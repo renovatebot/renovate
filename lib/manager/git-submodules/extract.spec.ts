@@ -1,3 +1,4 @@
+import { mock } from 'jest-mock-extended';
 import _simpleGit, { Response, SimpleGit } from 'simple-git';
 import { partial } from '../../../test/util';
 import { PackageFile } from '../common';
@@ -11,7 +12,7 @@ const localDir = `${__dirname}/__fixtures__`;
 
 describe('lib/manager/gitsubmodules/extract', () => {
   beforeAll(() => {
-    simpleGit.mockImplementation((basePath?: string) => {
+    simpleGit.mockImplementation((basePath: string) => {
       const git = Git(basePath);
       return {
         subModule() {
@@ -34,6 +35,7 @@ describe('lib/manager/gitsubmodules/extract', () => {
             )
           );
         },
+        ...mock<SimpleGit>(),
       };
     });
   });
