@@ -246,7 +246,8 @@ Before the first commit in a repository, Renovate will:
 1. Run `gpg import` (if it hasn't been run before)
 1. Run `git config user.signingkey` and `git config commit.gpgsign true`
 
-The `git` commands are run locally in the cloned repo instead of globally to reduce the chance of causing unintended consequences with global Git configs on shared systems.
+The `git` commands are run locally in the cloned repo instead of globally.
+This reduces the chance of unintended consequences with global Git configs on shared systems.
 
 ## logContext
 
