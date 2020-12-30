@@ -147,9 +147,19 @@ e.g.
 
 ## dockerImagePrefix
 
-Override the default renovate sidecar Docker containers image prefix from `docker.io/renovate` to a custom value, so renovate will pull images from a custom Docker registry.
+By default Renovate pulls the sidecar Docker containers from `docker.io/renovate`.
+You can use the `dockerImagePrefix` option to override this default.
 
-If this is set to `ghcr.io/renovatebot` the final image for `node` would become `ghcr.io/renovatebot/node` instead of currently used `docker.io/renovate/node`.
+Say you want to pull your images from `ghcr.io/renovatebot` instead of `docker.io/renovate`.
+You would use put this in your configuration file:
+
+```json
+{
+  "dockerImagePrefix": "ghcr.io/renovatebot"
+}
+```
+
+If you pulled a new `node` image, the final image would be `ghcr.io/renovatebot/node` instead of `docker.io/renovate/node`.
 
 ## dockerMapDotfiles
 
