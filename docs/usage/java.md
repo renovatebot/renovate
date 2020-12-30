@@ -65,7 +65,7 @@ Here is an example configuration to work with custom Artifactory servers using a
 }
 ```
 
-In the above config, the custom registry URLs are defined using a package rule, and the username/passwords are set using a host rule each. If you don't want to store your artifactory credentials in plaintext, you can pass them as an environment variable using a javascript config file like `renovate-config.js`:
+In the above config, the custom registry URLs are defined using a package rule, and the username/passwords are set using a host rule each. If you don't want to store your artifactory credentials in plaintext, you can pass them as an environment variable using a javascript config file like `config.js`:
 
 ```js
 module.exports = {
