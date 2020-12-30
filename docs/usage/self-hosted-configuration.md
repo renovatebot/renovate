@@ -389,6 +389,8 @@ If this value is set then Renovate will use Redis for its global cache instead o
 The global cache is used to store lookup results (e.g. dependency versions and release notes) between repositories and runs.
 Example url: `redis://localhost`.
 
+TODO: Add example use in JSON file???
+
 ## repositories
 
 TODO: Explain `repositories`, add example of use.
@@ -401,6 +403,10 @@ JSON files will be stored inside the `cacheDir` beside the existing file-based p
 
 Warning: this is an experimental feature and may be modified or removed in a future non-major release.
 
+TODO: Check if this feature is still present in the Renovate code.
+TODO: Add example of use.
+TODO: Warn users away more strongly if this is still experimental.
+
 ## requireConfig
 
 TODO: Explain `requireConfig`, add example of use.
@@ -410,6 +416,8 @@ TODO: Explain `requireConfig`, add example of use.
 By default, Renovate will use the most efficient approach to updating package files and lock files, which in most cases skips the need to perform a full module install by the bot.
 If this is set to false, then a full install of modules will be done.
 This is currently applicable to `npm` and `lerna`/`npm` only, and only used in cases where bugs in `npm` result in incorrect lock files being updated.
+
+TODO: add example of use, probably a JSON file with `"skipInstalls": true` in it?
 
 ## token
 
@@ -423,6 +431,8 @@ Setting trustLevel=high means:
 
 - Child processes are run with full access to `env`
 - `.npmrc` files can have environment variable substitution performed
+
+TODO: add example of use.
 
 ## username
 
