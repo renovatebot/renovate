@@ -137,6 +137,14 @@ e.g.
 
 Set to `false` to prevent usage of `--ignore-platform-reqs` in the Composer package manager.
 
+e.g.
+
+```json
+{
+  "composerIgnorePlatformReqs": false
+}
+```
+
 ## dockerImagePrefix
 
 Override the default renovate sidecar Docker containers image prefix from `docker.io/renovate` to a custom value, so renovate will pull images from a custom Docker registry.
