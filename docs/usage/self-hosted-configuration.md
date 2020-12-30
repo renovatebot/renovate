@@ -256,7 +256,11 @@ If left as default (null), a random short ID will be selected.
 
 ## logFile
 
+TODO: Explain what this is and how to use it.
+
 ## logFileLevel
+
+TODO: Explain what this is and how to use it.
 
 ## logLevel
 
