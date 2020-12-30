@@ -5,7 +5,7 @@ description: Self-Hosted configuration usable in renovate.json or package.json
 
 # Self-Hosted configuration options
 
-The below configuration options are applicable only if you are running your own instance ("bot") of Renovate.
+The configuration options listed in this document are applicable to self-hosted instances of Renovate ("the bot").
 
 ## allowPostUpgradeCommandTemplating
 
