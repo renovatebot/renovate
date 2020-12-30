@@ -64,8 +64,9 @@ e.g.
 
 ## autodiscover
 
-Be cautious when using this option - it will run Renovate over _every_ repository that the bot account has access to.
-To filter this list, use `autodiscoverFilter`.
+When you enable `autodiscover`, by default, Renovate will run on _every_ repository that the bot account can access.
+This is probably not what you want.
+Use the `autodiscoverFilter` option to limit the bot to only the wanted repositories.
 
 ## autodiscoverFilter
 
