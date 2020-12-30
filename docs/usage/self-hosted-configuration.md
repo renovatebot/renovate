@@ -264,8 +264,11 @@ TODO: Explain what this is and how to use it.
 
 ## logLevel
 
-It's recommended to run at debug level if you can, and configure it using the environment variable `LOG_LEVEL=debug`.
-By configuring using the environment it means that debug logging starts from the beginning of the app, while if you configure it using file config then the debug logging can only start after the file config is parsed.
+We recommend that you run the Renovate bot at the debug level if you can.
+Use the environment variable `LOG_LEVEL=debug` to run Renovate at the debug level.
+
+When you use `LOG_LEVEL=debug`, debug logging starts from the beginning of the app.
+If you had configured debug logging in a file config, then the debug logging starts _after_ the file config is parsed.
 
 Additionally, if you configure `LOG_FORMAT=json` in env then logging will be done in JSON format instead of "pretty" format, which is usually better if you're doing any ingestion or parsing of the logs.
 
