@@ -9,11 +9,11 @@ The configuration options listed in this document are applicable to self-hosted 
 
 ## allowPostUpgradeCommandTemplating
 
-If true allow templating for post-upgrade commands.
+Set to true to allow templating of post upgrade commands.
 
 Let's look at an example of configuring packages with existing Angular migrations.
 
-Add two properties to `config.js`: `allowPostUpgradeCommandTemplating` and `allowedPostUpgradeCommands`
+Add two properties to `config.js`: `allowPostUpgradeCommandTemplating` and `allowedPostUpgradeCommands`:
 
 ```javascript
 module.export = {
@@ -23,8 +23,7 @@ module.export = {
 ```
 
 In the `renovate.json` file, define the commands and files to be included in the final commit.
-
-The command to install dependencies is necessary because, by default, the installation of dependencies is skipped (see the `skipInstalls` admin option)
+The command to install dependencies (`npm ci --ignore-scripts`) is necessary because, by default, the installation of dependencies is skipped (see the `skipInstalls` admin option).
 
 ```json
 {
@@ -43,7 +42,7 @@ The command to install dependencies is necessary because, by default, the instal
 }
 ```
 
-With this configuration, the executable command for `@angular/core` will look like this
+With this configuration, the executable command for `@angular/core` looks like this:
 
 ```bash
 npm ci --ignore-scripts
