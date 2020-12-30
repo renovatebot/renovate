@@ -96,8 +96,25 @@ e.g.
 
 ## binarySource
 
-Set this to `global` if you wish Renovate to use globally-installed binaries (`npm`, `yarn`, etc) instead of using its bundled versions.
-Set this to `docker` instead to use Docker-based binaries.
+By default Renovate uses the binaries that are bundled with the Renovate bot.
+Use the `binarySource` option to override this default.
+You can use globally installed binaries, or Docker-based binaries.
+
+To use your globally installed binaries (`npm`, `yarn`, etc):
+
+```json
+{
+  "binarySource": "global"
+}
+```
+
+To use Docker-based binaries:
+
+```json
+{
+  "binarySource": "docker"
+}
+```
 
 ## cacheDir
 
