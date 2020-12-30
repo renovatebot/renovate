@@ -280,6 +280,8 @@ Set this to `false` only if all three statements are true:
 - You want to run Renovate on every repository the bot has access to
 - You want to skip all onboarding PRs
 
+TODO: I think this is not really what we want to say here, is it? I've changed the sentence into a ordered list, to make clear what the old sentence actually said.
+
 ## onboardingBranch
 
 Note that this setting is independent of `branchPrefix`.
