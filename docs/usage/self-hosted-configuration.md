@@ -83,8 +83,16 @@ e.g.
 
 ## baseDir
 
-Configure this directory if you want to change which directory Renovate uses for storing data.
-If left unconfigured, it will typically be a temporary directory like `/tmp/renovate/`.
+By default Renovate uses a temporary directory like `/tmp/renovate` to store its data.
+You can override this default with the `baseDir` option.
+
+e.g.
+
+```json
+{
+  "baseDir": "/my-own-different-temporary-folder"
+}
+```
 
 ## binarySource
 
