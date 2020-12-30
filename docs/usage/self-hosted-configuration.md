@@ -375,6 +375,8 @@ To create the key pair with OpenSSL use the following commands:
 
 Used as an alternative to `privateKey`, if you wish for the key to be read from disk instead.
 
+TODO: add example of use.
+
 ## productLinks
 
 Override this object if you wish to change the URLs that Renovate links to, e.g. if you have an internal forum for asking for help.
