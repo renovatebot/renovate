@@ -294,6 +294,8 @@ Note that if `commitMessagePrefix` or `semanticCommits` values are defined then 
 
 ## onboardingConfig
 
+TODO: Explain `onboardingConfig`, add example of use.
+
 ## onboardingConfigFileName
 
 If set to one of the valid [config file names](https://docs.renovatebot.com/configuration-options/), the onboarding PR will create a configuration file with the provided name instead of `renovate.json`.
@@ -305,7 +307,11 @@ Similarly to `onboardingBranch`, if you have an existing Renovate installation a
 
 ## optimizeForDisabled
 
+TODO: Explain `optimizeForDisabled`, add example of use.
+
 ## password
+
+TODO: Explain `password`, add example of use.
 
 ## persistRepoData
 
@@ -313,7 +319,17 @@ Set this to true if you wish for Renovate to persist repo data between runs.
 The intention is that this allows Renovate to do a faster `git fetch` between runs rather than `git clone`.
 It also may mean that ignored directories like `node_modules` can be preserved and save time on operations like `npm install`.
 
+e.g.
+
+```json
+{
+  "persistRepoData": true
+}
+```
+
 ## platform
+
+TODO: Explain `platform`, add example of use.
 
 ## prCommitsPerRunLimit
 
@@ -355,6 +371,8 @@ Example url: `redis://localhost`.
 
 ## repositories
 
+TODO: Explain `repositories`, add example of use.
+
 ## repositoryCache
 
 Set this to `"enabled"` to have Renovate maintain a JSON file cache per-repository to speed up extractions.
@@ -365,6 +383,8 @@ Warning: this is an experimental feature and may be modified or removed in a fut
 
 ## requireConfig
 
+TODO: Explain `requireConfig`, add example of use.
+
 ## skipInstalls
 
 By default, Renovate will use the most efficient approach to updating package files and lock files, which in most cases skips the need to perform a full module install by the bot.
@@ -372,6 +392,8 @@ If this is set to false, then a full install of modules will be done.
 This is currently applicable to `npm` and `lerna`/`npm` only, and only used in cases where bugs in `npm` result in incorrect lock files being updated.
 
 ## token
+
+TODO: Explain `token`, add example of use.
 
 ## trustLevel
 
@@ -383,3 +405,5 @@ Setting trustLevel=high means:
 - `.npmrc` files can have environment variable substitution performed
 
 ## username
+
+TODO: Explain `username`, add example of use.
