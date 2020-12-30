@@ -204,14 +204,23 @@ For example, forcing a null (no) schedule to make sure Renovate raises PRs on a 
 
 In practice, it is implemented by converting the `force` configuration into a `packageRule` that matches all packages.
 
+TODO: Add JSON example of using `force` with `packageRule` here.
+TODO: Improve language used in this section, this is really hard to understand as-is.
+
 ## forceCli
 
 This is set to true by default, meaning that any settings (such as `schedule`) take maximum priority even against custom settings existing inside individual repositories.
 It will also override any settings in `packageRules`.
 
+TODO: add clarification, I think we mean to say: "The CLI input will take precedence over everything else by default."
+TODO: add JSON example here.
+
 ## forkMode
 
 You probably have no need for this option - it is an experimental setting for the Renovate hosted GitHub App.
+
+TODO: Is this still relevant? If this is such an experimental thing, why not warn users away more strongly?
+TODO: Also what is `forkMode`? The section doesn't explain.
 
 ## gitAuthor
 
