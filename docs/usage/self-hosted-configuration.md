@@ -9,7 +9,7 @@ The configuration options listed in this document are applicable to self-hosted 
 
 ## allowPostUpgradeCommandTemplating
 
-Set to true to allow templating of post upgrade commands.
+Set to true to allow templating of post-upgrade commands.
 
 Let's look at an example of configuring packages with existing Angular migrations.
 
