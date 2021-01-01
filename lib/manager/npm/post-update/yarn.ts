@@ -64,6 +64,7 @@ export async function generateLockFile(
     const extraEnv: ExecOptions['extraEnv'] = {
       NPM_CONFIG_CACHE: env.NPM_CONFIG_CACHE,
       npm_config_store: env.npm_config_store,
+      YARN_CACHE_FOLDER: env.YARN_CACHE_FOLDER,
       CI: 'true',
     };
 
