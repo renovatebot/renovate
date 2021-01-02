@@ -14,7 +14,7 @@ Of course, please keep in mind that people's definitions of "noise" may differ.
 For some people, it's noisy only if they get a notification or email from GitHub.
 For others, too many commits in their `master` branch may be "noise".
 In other words, your mileage may vary.
-If you have any ideas on this topic, please contact the author by opening an [issue on the Renovate repository](https://github.com/renovatebot/renovate/issues).
+If you have any ideas on this topic, please contact the author by starting a [new discussion on the Renovate repository](https://github.com/renovatebot/renovate/discussions).
 
 ## Package Grouping
 
