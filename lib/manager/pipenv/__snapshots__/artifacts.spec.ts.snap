@@ -142,6 +142,7 @@ Array [
   },
 ]
 `;
+
 exports[`.updateArtifacts() uses pipenv version from Pipfile 1`] = `
 Array [
   Object {
@@ -177,6 +178,7 @@ Array [
   },
 ]
 `;
+
 exports[`.updateArtifacts() uses pipenv version from Pipfile dev packages 1`] = `
 Array [
   Object {
@@ -212,6 +214,7 @@ Array [
   },
 ]
 `;
+
 exports[`.updateArtifacts() uses pipenv version from config 1`] = `
 Array [
   Object {
