@@ -8,4 +8,5 @@ export const language = LANGUAGE_NODE;
 export const defaultConfig = {
   fileMatch: ['(^|/)\\.nvmrc$'],
   versioning: nodeVersioning.id,
+  pinDigests: false,
 };
