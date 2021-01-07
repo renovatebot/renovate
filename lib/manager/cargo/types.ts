@@ -31,5 +31,5 @@ export interface CargoRegistry {
 
 export interface CargoRegistries {
   // maps registry names to URLs
-  map?: Record<string, string>;
+  [key: string]: string;
 }

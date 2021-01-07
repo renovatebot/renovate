@@ -174,8 +174,9 @@ export async function getReleases({
   lookupName,
   registryUrl,
 }: GetReleasesConfig): Promise<ReleaseResult | null> {
+  // istanbul ignore if
   if (!registryUrl) {
-    logger.debug(
+    logger.warn(
       'crate datasource: No registryUrl specified, cannot perform getReleases'
     );
     return null;

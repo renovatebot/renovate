@@ -122,5 +122,46 @@ describe('lib/manager/cargo/extract', () => {
       expect(res.deps).toMatchSnapshot();
       expect(res.deps).toHaveLength(3);
     });
+    it('skips unknown registries', async () => {
+      const cargotoml =
+        '[dependencies]\nfoobar = { version = "0.1.0", registry = "not-listed" }';
+      const res = await extractPackageFile(cargotoml, 'Cargo.toml', config);
+      expect(res.deps).toMatchSnapshot();
+      expect(res.deps).toHaveLength(1);
+    });
+    it('fails to parse cargo config with invalid TOML', async () => {
+      const tmpDir = await dir();
+      const localDir = join(tmpDir.path, 'local');
+      const cacheDir = join(tmpDir.path, 'cache');
+      setFsConfig({
+        localDir,
+        cacheDir,
+      });
+      await writeLocalFile('.cargo/config', '[registries');
+
+      const res = await extractPackageFile(cargo6toml, 'Cargo.toml', {
+        ...config,
+        localDir,
+      });
+      expect(res.deps).toMatchSnapshot();
+      expect(res.deps).toHaveLength(3);
+    });
+    it('ignore cargo config registries with missing index', async () => {
+      const tmpDir = await dir();
+      const localDir = join(tmpDir.path, 'local');
+      const cacheDir = join(tmpDir.path, 'cache');
+      setFsConfig({
+        localDir,
+        cacheDir,
+      });
+      await writeLocalFile('.cargo/config', '[registries.mine]\nfoo = "bar"');
+
+      const res = await extractPackageFile(cargo6toml, 'Cargo.toml', {
+        ...config,
+        localDir,
+      });
+      expect(res.deps).toMatchSnapshot();
+      expect(res.deps).toHaveLength(3);
+    });
   });
 });

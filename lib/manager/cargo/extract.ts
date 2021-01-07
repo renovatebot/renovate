@@ -23,7 +23,7 @@ function extractFromSection(
     return [];
   }
   Object.keys(sectionContent).forEach((depName) => {
-    let skipReason: SkipReason;
+    let skipReason: SkipReason | undefined;
     let currentValue = sectionContent[depName];
     let nestedVersion = false;
     let registryUrls: string[] | undefined;
@@ -102,16 +102,14 @@ async function readCargoConfig(): Promise<CargoConfig | null> {
 }
 
 /// Extracts a map of cargo registries from a CargoConfig
-function extractCargoRegistries(
-  config: CargoConfig | null
-): CargoRegistries | null {
+function extractCargoRegistries(config: CargoConfig | null): CargoRegistries {
+  const result: CargoRegistries = {};
   if (!config?.registries) {
-    return null;
+    return result;
   }
 
   const { registries } = config;
 
-  const result: CargoRegistries = {};
   for (const registryName of Object.keys(registries)) {
     const registry = registries[registryName];
     if (registry.index) {
@@ -154,7 +152,7 @@ export async function extractPackageFile(
   if (targetSection) {
     const targets = Object.keys(targetSection);
     targets.forEach((target) => {
-      const targetContent = cargoManifest.target[target];
+      const targetContent = targetSection[target];
       // Dependencies for `${target}`
       const deps = [
         ...extractFromSection(
