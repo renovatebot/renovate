@@ -48,30 +48,43 @@ export async function extractPackageFile(
       depName: dep.name,
       currentValue: dep.version,
     };
-    if (dep.repository) {
-      res.registryUrls = [dep.repository];
-      if (dep.repository.startsWith('@')) {
-        const repoWithAtRemoved = dep.repository.slice(1);
-        const alias = config.aliases[repoWithAtRemoved];
-        if (alias) {
-          res.registryUrls = [alias];
-          return res;
-        }
 
-        res.skipReason = SkipReason.PlaceholderUrl;
-      } else {
-        try {
-          const url = new URL(dep.repository);
-          if (url.protocol === 'file:') {
-            res.skipReason = SkipReason.LocalDependency;
-          }
-        } catch (err) {
-          logger.debug({ err }, 'Error parsing url');
-          res.skipReason = SkipReason.InvalidUrl;
-        }
-      }
-    } else {
+    if (!res.depName) {
+      res.skipReason = SkipReason.InvalidName;
+    }
+
+    if (!res.currentValue) {
+      res.skipReason = SkipReason.InvalidVersion;
+    }
+
+    if (!dep.repository) {
       res.skipReason = SkipReason.NoRepository;
+    }
+
+    if (res.skipReason) {
+      return res;
+    }
+
+    res.registryUrls = [dep.repository];
+    if (dep.repository.startsWith('@')) {
+      const repoWithAtRemoved = dep.repository.slice(1);
+      const alias = config.aliases[repoWithAtRemoved];
+      if (alias) {
+        res.registryUrls = [alias];
+        return res;
+      }
+
+      res.skipReason = SkipReason.PlaceholderUrl;
+    } else {
+      try {
+        const url = new URL(dep.repository);
+        if (url.protocol === 'file:') {
+          res.skipReason = SkipReason.LocalDependency;
+        }
+      } catch (err) {
+        logger.debug({ err }, 'Error parsing url');
+        res.skipReason = SkipReason.InvalidUrl;
+      }
     }
     return res;
   });

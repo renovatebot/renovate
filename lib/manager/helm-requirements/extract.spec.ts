@@ -202,5 +202,66 @@ describe('lib/manager/helm-requirements/extract', () => {
       });
       expect(result).toBeNull();
     });
+    it('validates name is present', async () => {
+      fs.readLocalFile.mockResolvedValueOnce(`
+      apiVersion: v1
+      appVersion: "1.0"
+      description: A Helm chart for Kubernetes
+      name: example
+      version: 0.1.0
+      `);
+      const content = `
+      dependencies:
+        - version: 0.9.0
+          repository: https://kubernetes-charts.storage.googleapis.com/
+      `;
+      const fileName = 'requirements.yaml';
+      const result = await extractPackageFile(content, fileName, {});
+      expect(result).not.toBeNull();
+      expect(result).toMatchSnapshot();
+    });
+    it('validates name, repository and version are present', async () => {
+      fs.readLocalFile.mockResolvedValueOnce(`
+      apiVersion: v1
+      appVersion: "1.0"
+      description: A Helm chart for Kubernetes
+      name: example
+      version: 0.1.0
+      `);
+      const content = `
+      dependencies:
+        - repository: https://kubernetes-charts.storage.googleapis.com/
+      `;
+      const fileName = 'requirements.yaml';
+      const result = await extractPackageFile(content, fileName, {});
+      expect(result).not.toBeNull();
+      expect(result).toMatchSnapshot();
+    });
+
+    it('skips only invalid dependences', async () => {
+      fs.readLocalFile.mockResolvedValueOnce(`
+      apiVersion: v1
+      appVersion: "1.0"
+      description: A Helm chart for Kubernetes
+      name: example
+      version: 0.1.0
+      `);
+      const content = `
+      dependencies:
+        - name: postgresql
+          repository: https://kubernetes-charts.storage.googleapis.com/
+        - version: 0.0.1
+          repository: https://kubernetes-charts.storage.googleapis.com/
+        - name: redis
+          version: 0.0.1
+        - name: redis
+          version: 0.0.1
+          repository: https://kubernetes-charts.storage.googleapis.com/
+      `;
+      const fileName = 'requirements.yaml';
+      const result = await extractPackageFile(content, fileName, {});
+      expect(result).not.toBeNull();
+      expect(result).toMatchSnapshot();
+    });
   });
 });
