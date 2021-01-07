@@ -157,6 +157,7 @@ async function fetchRegistryInfo(
       clonePath = await ensureCacheDir(cacheDirFromUrl(url));
       logger.info({ clonePath, registryUrl }, `Cloning private cargo registry`);
       {
+        await fs.remove(clonePath);
         const git = Git();
         await git.clone(registryUrl, clonePath, {
           '--depth': 1,
