@@ -88,3 +88,87 @@ Object {
   ],
 }
 `;
+
+exports[`lib/manager/helm-requirements/extract extractPackageFile() skips only invalid dependences 1`] = `
+Object {
+  "datasource": "helm",
+  "deps": Array [
+    Object {
+      "currentValue": undefined,
+      "depName": "postgresql",
+      "skipReason": "invalid-version",
+    },
+    Object {
+      "currentValue": "0.0.1",
+      "depName": undefined,
+      "skipReason": "invalid-name",
+    },
+    Object {
+      "currentValue": "0.0.1",
+      "depName": "redis",
+      "skipReason": "no-repository",
+    },
+    Object {
+      "currentValue": "0.0.1",
+      "depName": "redis",
+      "registryUrls": Array [
+        "https://kubernetes-charts.storage.googleapis.com/",
+      ],
+    },
+  ],
+}
+`;
+
+exports[`lib/manager/helm-requirements/extract extractPackageFile() validates name is present 1`] = `
+Object {
+  "datasource": "helm",
+  "deps": Array [
+    Object {
+      "currentValue": "0.9.0",
+      "depName": undefined,
+      "skipReason": "invalid-name",
+    },
+  ],
+}
+`;
+
+exports[`lib/manager/helm-requirements/extract extractPackageFile() validates name, repository and version are present 1`] = `
+Object {
+  "datasource": "helm",
+  "deps": Array [
+    Object {
+      "currentValue": undefined,
+      "depName": undefined,
+      "skipReason": "invalid-version",
+    },
+  ],
+}
+`;
+
+exports[`lib/manager/helm-requirements/extract extractPackageFile() validates repository is present 1`] = `
+Object {
+  "datasource": "helm",
+  "deps": Array [
+    Object {
+      "currentValue": "0.0.0",
+      "depName": "redis",
+      "registryUrls": Array [
+        "https://kubernetes-charts.storage.googleapis.com/",
+      ],
+    },
+  ],
+}
+`;
+
+exports[`lib/manager/helm-requirements/extract extractPackageFile() validates version is present 1`] = `
+Object {
+  "datasource": "helm",
+  "deps": Array [
+    Object {
+      "currentValue": undefined,
+      "depName": "redis",
+      "skipReason": "invalid-version",
+    },
+  ],
+}
+`;
