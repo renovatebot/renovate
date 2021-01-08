@@ -1,5 +1,6 @@
 import { fs } from '../../../test/util';
 import { extractPackageFile } from './extract';
+import { SkipReason } from '../../types';
 
 jest.mock('../../util/fs');
 
@@ -202,42 +203,74 @@ describe('lib/manager/helm-requirements/extract', () => {
       });
       expect(result).toBeNull();
     });
-    it('validates name is present', async () => {
-      fs.readLocalFile.mockResolvedValueOnce(`
-      apiVersion: v1
-      appVersion: "1.0"
-      description: A Helm chart for Kubernetes
-      name: example
-      version: 0.1.0
-      `);
-      const content = `
-      dependencies:
-        - version: 0.9.0
-          repository: https://kubernetes-charts.storage.googleapis.com/
-      `;
-      const fileName = 'requirements.yaml';
-      const result = await extractPackageFile(content, fileName, {});
-      expect(result).not.toBeNull();
-      expect(result).toMatchSnapshot();
-    });
-    it('validates name, repository and version are present', async () => {
-      fs.readLocalFile.mockResolvedValueOnce(`
-      apiVersion: v1
-      appVersion: "1.0"
-      description: A Helm chart for Kubernetes
-      name: example
-      version: 0.1.0
-      `);
-      const content = `
-      dependencies:
-        - repository: https://kubernetes-charts.storage.googleapis.com/
-      `;
-      const fileName = 'requirements.yaml';
-      const result = await extractPackageFile(content, fileName, {});
-      expect(result).not.toBeNull();
-      expect(result).toMatchSnapshot();
-    });
 
+    describe.each([
+      {
+        content: `
+      dependencies:
+        - {}
+      `,
+        fieldName: 'name',
+        want: {
+          datasource: 'helm',
+          deps: [
+            {
+              currentValue: undefined,
+              depName: undefined,
+              skipReason: SkipReason.InvalidName,
+            },
+          ],
+        },
+      },
+      {
+        content: `
+      dependencies:
+        - name: postgres
+      `,
+        fieldName: 'version',
+        want: {
+          datasource: 'helm',
+          deps: [
+            {
+              currentValue: undefined,
+              depName: 'postgres',
+              skipReason: SkipReason.InvalidVersion,
+            },
+          ],
+        },
+      },
+      {
+        content: `
+      dependencies:
+        - name: postgres
+          version: 0.1.0
+      `,
+        fieldName: 'repository',
+        want: {
+          datasource: 'helm',
+          deps: [
+            {
+              currentValue: '0.1.0',
+              depName: 'postgres',
+              skipReason: SkipReason.NoRepository,
+            },
+          ],
+        },
+      },
+    ])('validates required fields', (params) => {
+      it(`validates ${params.fieldName} is required`, async () => {
+        fs.readLocalFile.mockResolvedValueOnce(`
+      apiVersion: v1
+      appVersion: "1.0"
+      description: A Helm chart for Kubernetes
+      name: example
+      version: 0.1.0
+      `);
+        const fileName = 'requirements.yaml';
+        const result = await extractPackageFile(params.content, fileName, {});
+        expect(result).toEqual(params.want);
+      });
+    });
     it('skips only invalid dependences', async () => {
       fs.readLocalFile.mockResolvedValueOnce(`
       apiVersion: v1
@@ -260,8 +293,31 @@ describe('lib/manager/helm-requirements/extract', () => {
       `;
       const fileName = 'requirements.yaml';
       const result = await extractPackageFile(content, fileName, {});
-      expect(result).not.toBeNull();
-      expect(result).toMatchSnapshot();
+      expect(result).toEqual({
+        datasource: 'helm',
+        deps: [
+          {
+            currentValue: undefined,
+            depName: 'postgresql',
+            skipReason: 'invalid-version',
+          },
+          {
+            currentValue: '0.0.1',
+            depName: undefined,
+            skipReason: 'invalid-name',
+          },
+          {
+            currentValue: '0.0.1',
+            depName: 'redis',
+            skipReason: 'no-repository',
+          },
+          {
+            currentValue: '0.0.1',
+            depName: 'redis',
+            registryUrls: ['https://kubernetes-charts.storage.googleapis.com/'],
+          },
+        ],
+      });
     });
   });
 });

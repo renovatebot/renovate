@@ -51,17 +51,16 @@ export async function extractPackageFile(
 
     if (!res.depName) {
       res.skipReason = SkipReason.InvalidName;
+      return res;
     }
 
     if (!res.currentValue) {
       res.skipReason = SkipReason.InvalidVersion;
+      return res;
     }
 
     if (!dep.repository) {
       res.skipReason = SkipReason.NoRepository;
-    }
-
-    if (res.skipReason) {
       return res;
     }
 
