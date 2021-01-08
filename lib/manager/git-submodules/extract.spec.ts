@@ -54,6 +54,9 @@ describe('lib/manager/gitsubmodules/extract', () => {
       expect(res.deps).toHaveLength(1);
       res = await extractPackageFile('', '.gitmodules.5', { localDir });
       expect(res.deps).toHaveLength(3);
+      expect(res.deps[2].registryUrls[0]).toEqual(
+        'https://github.com/renovatebot/renovate-config.git'
+      );
     });
   });
 });
