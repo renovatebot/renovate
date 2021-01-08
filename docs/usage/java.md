@@ -38,7 +38,8 @@ Renovate will search repositories for all `pom.xml` files and processes them ind
 
 ### Custom registry support, and authentication
 
-In the above config, the custom registry URLs are defined using a package rule, and the username/passwords are set using a host rule each. If you don't want to store your artifactory credentials in plaintext, you can pass them as an environment variable using a javascript config file like `config.js`:
+This example shows how you can use a `config.js` file to configure Renovate for use with Artifactory.
+We're using environment variables to pass the Artifactory username and password to Renovate bot.
 
 ```js
 module.exports = {
@@ -46,8 +47,8 @@ module.exports = {
     {
       hostType: 'maven',
       baseUrl: 'https://artifactory.yourcompany.com/',
-      username: process.env.ARTIFACTORY_USR,
-      password: process.env.ARTIFACTORY_PSW,
+      username: process.env.ARTIFACTORY_USERNAME,
+      password: process.env.ARTIFACTORY_PASSWORD,
     },
   ],
 };
