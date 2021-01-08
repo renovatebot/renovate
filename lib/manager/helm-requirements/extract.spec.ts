@@ -1,6 +1,6 @@
 import { fs } from '../../../test/util';
-import { extractPackageFile } from './extract';
 import { SkipReason } from '../../types';
+import { extractPackageFile } from './extract';
 
 jest.mock('../../util/fs');
 
