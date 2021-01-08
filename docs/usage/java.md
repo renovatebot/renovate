@@ -38,33 +38,6 @@ Renovate will search repositories for all `pom.xml` files and processes them ind
 
 ### Custom registry support, and authentication
 
-Here is an example configuration to work with custom Artifactory servers using authentication:
-
-```json
-{
-  "hostRules": [
-    {
-      "hostType": "maven",
-      "baseUrl": "https://artifactoryurl1/",
-      "username": "artifactoryusername",
-      "password": "artifactorypassword"
-    },
-    {
-      "hostType": "maven",
-      "baseUrl": "https://artifactoryurl2/",
-      "username": "artifactoryusername",
-      "password": "artifactorypassword"
-    }
-  ],
-  "packageRules": [
-    {
-      "managers": ["maven"],
-      "registryUrls": ["https://artifactoryurl1/", "https://artifactoryurl2/"]
-    }
-  ]
-}
-```
-
 In the above config, the custom registry URLs are defined using a package rule, and the username/passwords are set using a host rule each. If you don't want to store your artifactory credentials in plaintext, you can pass them as an environment variable using a javascript config file like `config.js`:
 
 ```js
@@ -74,7 +47,8 @@ module.exports = {
       hostType: 'maven',
       baseUrl: 'https://artifactory.yourcompany.com/',
       username: process.env.ARTIFACTORY_USR,
-      password: process.env.ARTIFACTORY_PSW
-    }
-  ]
+      password: process.env.ARTIFACTORY_PSW,
+    },
+  ],
 };
+```
