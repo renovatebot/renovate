@@ -169,6 +169,7 @@ export async function processBranch(
     }
     if (branchExists) {
       logger.debug('Checking if PR has been edited');
+      const branchIsModified = await isBranchModified(config.branchName);
       if (branchPr) {
         logger.debug('Found existing branch PR');
         if (branchPr.state !== PrState.Open) {
@@ -177,7 +178,6 @@ export async function processBranch(
           );
           throw new Error(REPOSITORY_CHANGED);
         }
-        const branchIsModified = await isBranchModified(config.branchName);
         if (
           branchIsModified ||
           (branchPr.targetBranch &&
@@ -205,6 +205,9 @@ export async function processBranch(
             return ProcessBranchResult.PrEdited;
           }
         }
+      } else if (branchIsModified) {
+        logger.debug('Branch has been edited');
+        return ProcessBranchResult.PrEdited;
       }
     }
 
