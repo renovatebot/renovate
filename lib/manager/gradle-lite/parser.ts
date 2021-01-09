@@ -299,7 +299,7 @@ const matcherConfigs: SyntaxMatchConfig[] = [
   {
     // url 'https://repo.spring.io/snapshot/'
     matchers: [
-      { matchType: TokenType.Word, matchValue: 'url' },
+      { matchType: TokenType.Word, matchValue: ['uri', 'url'] },
       { matchType: TokenType.String, tokenMapKey: 'registryUrl' },
       endOfInstruction,
     ],
@@ -308,7 +308,7 @@ const matcherConfigs: SyntaxMatchConfig[] = [
   {
     // url('https://repo.spring.io/snapshot/')
     matchers: [
-      { matchType: TokenType.Word, matchValue: 'url' },
+      { matchType: TokenType.Word, matchValue: ['uri', 'url'] },
       { matchType: TokenType.LeftParen },
       { matchType: TokenType.String, tokenMapKey: 'registryUrl' },
       { matchType: TokenType.RightParen },

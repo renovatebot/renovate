@@ -1,0 +1,11 @@
+include:
+  - another-include.yml
+
+  - type: git
+    repo: https://include.com/my-repo.git
+    ref: 4.5.6
+
+containers:
+  include-container-1:
+    image: ubuntu:20.10
+
