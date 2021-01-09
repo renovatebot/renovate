@@ -22,7 +22,7 @@ export const presets: Record<string, Preset> = {
     schedule: ['every 3 months on the first day of the month'],
   },
   yearly: {
-    description: 'Schedule once a year',
+    description: 'Schedule once a year (not recommended)',
     schedule: ['every 12 months on the first day of the month'],
   },
   weekends: {
