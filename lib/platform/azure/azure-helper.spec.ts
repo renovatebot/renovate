@@ -290,5 +290,100 @@ describe('platform/azure/helpers', () => {
         GitPullRequestMergeStrategy.Squash
       );
     });
+    it('should return most specific exact branch policy', async () => {
+      const refMock = 'refs/heads/ding';
+      azureApi.policyApi.mockImplementationOnce(
+        () =>
+          ({
+            getPolicyConfigurations: jest.fn(() => [
+              {
+                settings: {
+                  allowSquash: true,
+                  scope: [
+                    {
+                      repositoryId: 'doo-dee-doo-repository-id',
+                    },
+                  ],
+                },
+                type: {
+                  id: 'fa4e907d-c16b-4a4c-9dfa-4916e5d171ab',
+                },
+              },
+              {
+                settings: {
+                  allowSquash: true,
+                  scope: [
+                    {
+                      repositoryId: '',
+                    },
+                  ],
+                },
+                type: {
+                  id: 'fa4e907d-c16b-4a4c-9dfa-4916e5d171ab',
+                },
+              },
+              {
+                settings: {
+                  allowRebase: true,
+                  scope: [
+                    {
+                      matchKind: 'Exact',
+                      refName: refMock,
+                      repositoryId: '',
+                    },
+                  ],
+                },
+                type: {
+                  id: 'fa4e907d-c16b-4a4c-9dfa-4916e5d171ab',
+                },
+              },
+            ]),
+          } as any)
+      );
+      expect(await azureHelper.getMergeMethod('', '', refMock)).toEqual(
+        GitPullRequestMergeStrategy.Rebase
+      );
+    });
+    it('should return most specific prefix branch policy', async () => {
+      const refMock = 'refs/heads/ding-wow';
+      azureApi.policyApi.mockImplementationOnce(
+        () =>
+          ({
+            getPolicyConfigurations: jest.fn(() => [
+              {
+                settings: {
+                  allowSquash: true,
+                  scope: [
+                    {
+                      repositoryId: '',
+                    },
+                  ],
+                },
+                type: {
+                  id: 'fa4e907d-c16b-4a4c-9dfa-4916e5d171ab',
+                },
+              },
+              {
+                settings: {
+                  allowRebase: true,
+                  scope: [
+                    {
+                      matchKind: 'Prefix',
+                      refName: 'refs/heads/ding',
+                      repositoryId: '',
+                    },
+                  ],
+                },
+                type: {
+                  id: 'fa4e907d-c16b-4a4c-9dfa-4916e5d171ab',
+                },
+              },
+            ]),
+          } as any)
+      );
+      expect(await azureHelper.getMergeMethod('', '', refMock)).toEqual(
+        GitPullRequestMergeStrategy.Rebase
+      );
+    });
   });
 });

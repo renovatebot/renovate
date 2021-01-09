@@ -1,5 +1,6 @@
 import URL from 'url';
 import fs from 'fs-extra';
+import GitUrlParse from 'git-url-parse';
 import Git, {
   DiffResult as DiffResult_,
   ResetMode,
@@ -67,6 +68,7 @@ function checkForPlatformFailure(err: Error): void {
     'Failed to connect to',
     'Connection timed out',
     'malformed object name',
+    'TF401027:', // You need the Git 'GenericContribute' permission to perform this action
   ];
   for (const errorStr of platformFailureStrings) {
     if (err.message.includes(errorStr)) {
@@ -692,4 +694,10 @@ export function getUrl({
     host,
     pathname: repository + '.git',
   });
+}
+
+export function getHttpUrl(url: string, token?: string): string {
+  const parsedUrl = GitUrlParse(url);
+  parsedUrl.token = token;
+  return parsedUrl.toString('https');
 }

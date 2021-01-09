@@ -1,3 +1,4 @@
+import { mock } from 'jest-mock-extended';
 import _simpleGit, { Response, SimpleGit } from 'simple-git';
 import { partial } from '../../../test/util';
 import { PackageFile } from '../common';
@@ -11,7 +12,7 @@ const localDir = `${__dirname}/__fixtures__`;
 
 describe('lib/manager/gitsubmodules/extract', () => {
   beforeAll(() => {
-    simpleGit.mockImplementation((basePath?: string) => {
+    simpleGit.mockImplementation((basePath: string) => {
       const git = Git(basePath);
       return {
         subModule() {
@@ -34,6 +35,7 @@ describe('lib/manager/gitsubmodules/extract', () => {
             )
           );
         },
+        ...mock<SimpleGit>(),
       };
     });
   });
@@ -52,6 +54,9 @@ describe('lib/manager/gitsubmodules/extract', () => {
       expect(res.deps).toHaveLength(1);
       res = await extractPackageFile('', '.gitmodules.5', { localDir });
       expect(res.deps).toHaveLength(3);
+      expect(res.deps[2].registryUrls[0]).toEqual(
+        'https://github.com/renovatebot/renovate-config.git'
+      );
     });
   });
 });
