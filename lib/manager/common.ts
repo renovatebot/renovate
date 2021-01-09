@@ -90,7 +90,6 @@ export interface PackageFile<T = Record<string, any>>
   ignoreNpmrcFile?: boolean;
   lernaClient?: string;
   lernaPackages?: string[];
-  manager?: string;
   mavenProps?: Record<string, any>;
   npmrc?: string;
   packageFile?: string;
@@ -180,6 +179,7 @@ export interface PackageDependency<T = Record<string, any>> extends Package<T> {
   depIndex?: number;
   editFile?: string;
   separateMinorPatch?: boolean;
+  extractVersion?: string;
 }
 
 export interface Upgrade<T = Record<string, any>>
@@ -222,9 +222,9 @@ export interface UpdateArtifact {
   config: UpdateArtifactsConfig;
 }
 
-export interface UpdateDependencyConfig {
+export interface UpdateDependencyConfig<T = Record<string, any>> {
   fileContent: string;
-  upgrade: Upgrade;
+  upgrade: Upgrade<T>;
 }
 
 export interface ManagerApi {

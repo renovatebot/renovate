@@ -31,10 +31,10 @@ From most specific to least specific:
 
 ## Automatic discovery of package file locations
 
-The default behaviour is to auto-discover all package file (e.g. `package.json`) locations in a repository and process them all.
+The default behavior is to auto-discover all package file (e.g. `package.json`) locations in a repository and process them all.
 Doing so means that "monorepos" are supported by default.
 
-This behaviour can be overridden by the configuration option `includePaths`, where you list the file paths manually.
+This behavior can be overridden by the configuration option `includePaths`, where you list the file paths manually.
 You could limit Renovate to only update the `package.json` in the root of the repository and ignore `package.json` files in other directories.
 
 ## Separate Branches per dependency
@@ -57,7 +57,7 @@ Our reasons for separating minor and major PRs:
 - It's also often the case that previous major versions continue receiving Minor or Patch updates
 - Projects should get Minor and Patch updates for their current Major release even if a new Major release exists
 
-This behaviour can be overridden via the config option `separateMajorMinor`.
+This behavior can be overridden via the config option `separateMajorMinor`.
 
 ## Branch naming
 
@@ -77,7 +77,7 @@ This allows users to close unwelcome upgrade PRs and not worry about them being 
 
 ## Rebasing Unmergeable Pull Requests
 
-With the default behaviour of one branch per dependency, it's often the case that a PR gets merge conflicts after an adjacent dependency update is merged.
+With the default behavior of one branch per dependency, it's often the case that a PR gets merge conflicts after an adjacent dependency update is merged.
 Although platforms often have a web interface for simple merge conflicts, this is still annoying to resolve manually.
 
 `renovate` will rebase any unmergeable branches and add the latest necessary commit on top of the most recent `master` commit.

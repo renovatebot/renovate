@@ -5,7 +5,7 @@ import {
   analyzeTerraformProvider,
   extractTerraformProvider,
 } from './providers';
-import { extractTerraformRequiredProviders } from './required_providers';
+import { extractTerraformRequiredProviders } from './required-providers';
 import {
   analyseTerraformResource,
   extractTerraformResource,

@@ -1,5 +1,23 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
+exports[`platform/gitea/gitea-helper addReviewers should call /api/v1/repos/[repo]/pulls/[pull]/requested_reviewers endpoint 1`] = `
+Array [
+  Object {
+    "body": "{}",
+    "headers": Object {
+      "accept": "application/json",
+      "accept-encoding": "gzip, deflate",
+      "content-length": "2",
+      "content-type": "application/json",
+      "host": "gitea.renovatebot.com",
+      "user-agent": "https://github.com/renovatebot/renovate",
+    },
+    "method": "POST",
+    "url": "https://gitea.renovatebot.com/api/v1/repos/some/repo/pulls/13/requested_reviewers",
+  },
+]
+`;
+
 exports[`platform/gitea/gitea-helper closeIssue should call /api/v1/repos/[repo]/issues/[issue] endpoint 1`] = `
 Array [
   Object {

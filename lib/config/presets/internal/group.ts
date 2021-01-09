@@ -23,10 +23,9 @@ const staticGroups = {
     packageRules: [
       {
         packagePatterns: ['*'],
-        minor: {
-          groupName: 'all non-major dependencies',
-          groupSlug: 'all-minor-patch',
-        },
+        updateTypes: ['minor', 'patch'],
+        groupName: 'all non-major dependencies',
+        groupSlug: 'all-minor-patch',
       },
     ],
   },

@@ -103,7 +103,7 @@ function getFromVersion(
   }
   if (rangeStrategy === 'pin') {
     return (
-      lockedVersion || version.maxSatisfyingVersion(useVersions, currentValue)
+      lockedVersion || version.getSatisfyingVersion(useVersions, currentValue)
     );
   }
   if (rangeStrategy === 'bump') {
@@ -111,7 +111,7 @@ function getFromVersion(
     return version.minSatisfyingVersion(useVersions, currentValue);
   }
   // Use the highest version in the current range
-  return version.maxSatisfyingVersion(useVersions, currentValue);
+  return version.getSatisfyingVersion(useVersions, currentValue);
 }
 
 function getBucket(config: LookupUpdateConfig, update: LookupUpdate): string {
@@ -348,12 +348,8 @@ export async function lookupUpdates(
       // TODO: think more about whether to just Object.assign this
       const releaseFields: (keyof Pick<
         Release,
-        | 'releaseTimestamp'
-        | 'canBeUnpublished'
-        | 'downloadUrl'
-        | 'checksumUrl'
-        | 'newDigest'
-      >)[] = ['releaseTimestamp', 'canBeUnpublished', 'newDigest'];
+        'releaseTimestamp' | 'downloadUrl' | 'checksumUrl' | 'newDigest'
+      >)[] = ['releaseTimestamp', 'newDigest'];
       releaseFields.forEach((field) => {
         if (updateRelease[field] !== undefined) {
           update[field] = updateRelease[field] as never;

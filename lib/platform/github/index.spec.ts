@@ -1,5 +1,5 @@
 import fs from 'fs-extra';
-import * as httpMock from '../../../test/httpMock';
+import * as httpMock from '../../../test/http-mock';
 import { mocked } from '../../../test/util';
 import {
   REPOSITORY_NOT_FOUND,
@@ -460,8 +460,10 @@ describe('platform/github', () => {
       initRepoMock(scope, 'some/repo');
       scope
         .post('/graphql')
-        .twice()
-        .reply(200, {})
+        .twice() // getOpenPrs() and getClosedPrs()
+        .reply(200, {
+          data: { repository: { pullRequests: { pageInfo: {} } } },
+        })
         .get('/repos/some/repo/pulls?per_page=100&state=all')
         .reply(200, [
           {
@@ -500,8 +502,10 @@ describe('platform/github', () => {
       forkInitRepoMock(scope, 'some/repo', 'forked/repo');
       scope
         .post('/graphql')
-        .twice()
-        .reply(200, {})
+        .twice() // getOpenPrs() and getClosedPrs()
+        .reply(200, {
+          data: { repository: { pullRequests: { pageInfo: {} } } },
+        })
         .get('/repos/some/repo/pulls?per_page=100&state=all')
         .reply(200, [
           {
@@ -1359,7 +1363,9 @@ describe('platform/github', () => {
       initRepoMock(scope, 'some/repo');
       scope
         .post('/graphql')
-        .reply(200, {})
+        .reply(200, {
+          data: { repository: { pullRequests: { pageInfo: {} } } },
+        })
         .get('/repos/some/repo/issues/42/comments?per_page=100')
         .reply(200, [])
         .post('/repos/some/repo/issues/42/comments')
@@ -1398,7 +1404,9 @@ describe('platform/github', () => {
       initRepoMock(scope, 'some/repo');
       scope
         .post('/graphql')
-        .reply(200, {})
+        .reply(200, {
+          data: { repository: { pullRequests: { pageInfo: {} } } },
+        })
         .get('/repos/some/repo/issues/42/comments?per_page=100')
         .reply(200, [{ id: 1234, body: '### some-subject\n\nblablabla' }])
         .patch('/repos/some/repo/issues/comments/1234')
@@ -1418,7 +1426,9 @@ describe('platform/github', () => {
       initRepoMock(scope, 'some/repo');
       scope
         .post('/graphql')
-        .reply(200, {})
+        .reply(200, {
+          data: { repository: { pullRequests: { pageInfo: {} } } },
+        })
         .get('/repos/some/repo/issues/42/comments?per_page=100')
         .reply(200, [{ id: 1234, body: '### some-subject\n\nsome\ncontent' }]);
       await github.initRepo({
@@ -1436,7 +1446,9 @@ describe('platform/github', () => {
       initRepoMock(scope, 'some/repo');
       scope
         .post('/graphql')
-        .reply(200, {})
+        .reply(200, {
+          data: { repository: { pullRequests: { pageInfo: {} } } },
+        })
         .get('/repos/some/repo/issues/42/comments?per_page=100')
         .reply(200, [{ id: 1234, body: '!merge' }]);
       await github.initRepo({
@@ -1456,7 +1468,9 @@ describe('platform/github', () => {
       initRepoMock(scope, 'some/repo');
       scope
         .post('/graphql')
-        .reply(200, {})
+        .reply(200, {
+          data: { repository: { pullRequests: { pageInfo: {} } } },
+        })
         .get('/repos/some/repo/issues/42/comments?per_page=100')
         .reply(200, [{ id: 1234, body: '### some-subject\n\nblablabla' }])
         .delete('/repos/some/repo/issues/comments/1234')
@@ -1470,7 +1484,9 @@ describe('platform/github', () => {
       initRepoMock(scope, 'some/repo');
       scope
         .post('/graphql')
-        .reply(200, {})
+        .reply(200, {
+          data: { repository: { pullRequests: { pageInfo: {} } } },
+        })
         .get('/repos/some/repo/issues/42/comments?per_page=100')
         .reply(200, [{ id: 1234, body: 'some-content' }])
         .delete('/repos/some/repo/issues/comments/1234')

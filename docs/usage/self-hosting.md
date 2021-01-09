@@ -24,9 +24,9 @@ All the following are valid:
 
 ```sh
 $ docker run --rm renovate/renovate
-$ docker run --rm renovate/renovate:19.181.2
-$ docker run --rm renovate/renovate:19.181
-$ docker run --rm renovate/renovate:19
+$ docker run --rm renovate/renovate:24.11.3
+$ docker run --rm renovate/renovate:24.11
+$ docker run --rm renovate/renovate:24
 ```
 
 (Please look up what the latest actual tags are though, do not use the above literally).
@@ -60,7 +60,7 @@ spec:
             - name: renovate
               # Update this to the latest available and then enable Renovate on
               # the manifest
-              image: renovate/renovate:23.19.2
+              image: renovate/renovate:24.11.3
               args:
                 - user/repo
               # Environment Variables
@@ -117,7 +117,7 @@ spec:
       template:
         spec:
           containers:
-            - image: renovate/renovate:23.22.1
+            - image: renovate/renovate:24.11.3
               name: renovate-bot
               env: # For illustration purposes, please use secrets.
                 - name: RENOVATE_PLATFORM
@@ -176,6 +176,14 @@ workflows:
                   - master
 ```
 
+#### GitLab CI/CD pipeline
+
+For GitLab pipelines we recommend you use the [renovate-runner project on GitLab](https://gitlab.com/renovate-bot/renovate-runner).
+We've prepared some pipeline templates to run Renovate on pipeline schedules in an easy way.
+You can also find the configuration steps there.
+
+For self-hosted GitLab clone/import the [renovate-runner](https://gitlab.com/renovate-bot/renovate-runner) project to your instance.
+
 ## Configuration
 
 Self-hosted Renovate can be configured using any of the following (or a combination):
@@ -200,7 +208,7 @@ Configure it either as `token` in your `config.js` file, or in environment varia
 
 #### GitLab CE/EE
 
-First, [create a personal access token](https://docs.gitlab.com/ee/user/profile/personal_access_tokens.html) for the bot account (select "api" scope).
+First, [create a personal access token](https://docs.gitlab.com/ee/user/profile/personal_access_tokens.html) for the bot account (select `read_user`, `api` and `write_repository` scopes).
 Configure it either as `token` in your `config.js` file, or in environment variable `RENOVATE_TOKEN`, or via CLI `--token=`.
 Don't forget to configure `platform=gitlab` somewhere in config.
 
@@ -337,7 +345,7 @@ metadata:
 ```
 
 Then you just need to add Git author, and mount volumes.
-The final configuration should look like something like this:
+The final configuration should look something like this:
 
 ```yml
 ---
@@ -390,7 +398,7 @@ spec:
           containers:
             - name: renovate
               # Update this to the latest available and then enable Renovate on the manifest
-              image: renovate/renovate:23.19.2
+              image: renovate/renovate:24.11.3
               volumeMounts:
                 - name: ssh-key-volume
                   readOnly: true

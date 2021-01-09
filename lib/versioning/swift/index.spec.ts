@@ -6,7 +6,7 @@ const {
   isValid,
   isVersion,
   minSatisfyingVersion,
-  maxSatisfyingVersion,
+  getSatisfyingVersion,
   isLessThanRange,
   matches,
 } = swift;
@@ -68,13 +68,13 @@ describe('isValid(input)', () => {
       minSatisfyingVersion(['v1.2.3', 'v1.2.4', 'v1.2.5'], '..<"1.2.4"')
     ).toBe('1.2.3');
     expect(
-      maxSatisfyingVersion(['1.2.3', '1.2.4', '1.2.5'], '..<"1.2.4"')
+      getSatisfyingVersion(['1.2.3', '1.2.4', '1.2.5'], '..<"1.2.4"')
     ).toBe('1.2.3');
     expect(
-      maxSatisfyingVersion(['v1.2.3', 'v1.2.4', 'v1.2.5'], '..<"1.2.4"')
+      getSatisfyingVersion(['v1.2.3', 'v1.2.4', 'v1.2.5'], '..<"1.2.4"')
     ).toBe('1.2.3');
     expect(
-      maxSatisfyingVersion(['1.2.3', '1.2.4', '1.2.5'], '..."1.2.4"')
+      getSatisfyingVersion(['1.2.3', '1.2.4', '1.2.5'], '..."1.2.4"')
     ).toBe('1.2.4');
     expect(isLessThanRange('1.2.3', '..."1.2.4"')).toBe(false);
     expect(isLessThanRange('v1.2.3', '..."1.2.4"')).toBe(false);

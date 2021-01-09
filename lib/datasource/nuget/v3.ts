@@ -76,11 +76,12 @@ export async function getResourceUrl(
     // istanbul ignore if
     if (
       resourceType === 'RegistrationsBaseUrl' &&
+      !version?.startsWith('3.0.0-') &&
       !semver.satisfies(version, '^3.0.0')
     ) {
       logger.warn(
-        { url },
-        `Nuget: RegistrationsBaseUrl/${version} is the major update`
+        { url, version },
+        `Nuget: Unknown version returned. Only v3 is supported`
       );
     }
 
@@ -150,7 +151,7 @@ export async function getReleases(
         release.releaseTimestamp = releaseTimestamp;
       }
       if (semver.valid(version) && !semver.prerelease(version)) {
-        latestStable = version;
+        latestStable = removeBuildMeta(version);
         homepage = projectUrl || homepage;
       }
       if (listed === false) {

@@ -169,10 +169,11 @@ export async function initRepo({
   localDir,
   renovateUsername,
   cloneSubmodules,
+  ignorePrAuthor,
 }: RepoParams): Promise<RepoResult> {
   logger.debug(`initRepo("${repository}")`);
   // config is used by the platform api itself, not necessary for the app layer to know
-  config = { localDir, repository, cloneSubmodules } as any;
+  config = { localDir, repository, cloneSubmodules, ignorePrAuthor } as any;
   // istanbul ignore if
   if (endpoint) {
     // Necessary for Renovate Pro - do not remove
@@ -431,7 +432,11 @@ async function getClosedPrs(): Promise<PrList> {
       query = `
       query {
         repository(owner: "${config.repositoryOwner}", name: "${config.repositoryName}") {
-          pullRequests(states: [CLOSED, MERGED], first: 100, orderBy: {field: UPDATED_AT, direction: DESC}) {
+          pullRequests(states: [CLOSED, MERGED], orderBy: {field: UPDATED_AT, direction: DESC}) {
+            pageInfo {
+              endCursor
+              hasNextPage
+            }
             nodes {
               number
               state
@@ -450,10 +455,7 @@ async function getClosedPrs(): Promise<PrList> {
       `;
       const nodes = await githubApi.queryRepoField<GhGraphQlPr>(
         query,
-        'pullRequests',
-        {
-          paginate: false,
-        }
+        'pullRequests'
       );
       const prNumbers: number[] = [];
       // istanbul ignore if
@@ -494,7 +496,11 @@ async function getOpenPrs(): Promise<PrList> {
       query = `
       query {
         repository(owner: "${config.repositoryOwner}", name: "${config.repositoryName}") {
-          pullRequests(states: [OPEN], first: 100, orderBy: {field: UPDATED_AT, direction: DESC}) {
+          pullRequests(states: [OPEN], orderBy: {field: UPDATED_AT, direction: DESC}) {
+            pageInfo {
+              endCursor
+              hasNextPage
+            }
             nodes {
               number
               headRefName
@@ -548,7 +554,6 @@ async function getOpenPrs(): Promise<PrList> {
         query,
         'pullRequests',
         {
-          paginate: false,
           acceptHeader: 'application/vnd.github.merge-info-preview+json',
         }
       );
@@ -684,14 +689,14 @@ export async function getPrList(): Promise<Pr[]> {
       throw new ExternalHostError(err, PLATFORM_TYPE_GITHUB);
     }
     config.prList = prList
-      .filter((pr) => {
-        return (
+      .filter(
+        (pr) =>
           config.forkMode ||
+          config.ignorePrAuthor ||
           (pr?.user?.login && config?.renovateUsername
             ? pr.user.login === config.renovateUsername
             : true)
-        );
-      })
+      )
       .map(
         (pr) =>
           ({

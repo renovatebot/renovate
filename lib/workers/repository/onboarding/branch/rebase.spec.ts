@@ -35,5 +35,33 @@ describe('workers/repository/onboarding/branch/rebase', () => {
       await rebaseOnboardingBranch(config);
       expect(git.commitFiles).toHaveBeenCalledTimes(1);
     });
+    it('uses the onboardingConfigFileName if set', async () => {
+      git.isBranchStale.mockResolvedValueOnce(true);
+      await rebaseOnboardingBranch({
+        ...config,
+        onboardingConfigFileName: '.github/renovate.json',
+      });
+      expect(git.commitFiles).toHaveBeenCalledTimes(1);
+      expect(git.commitFiles.mock.calls[0][0].message).toContain(
+        '.github/renovate.json'
+      );
+      expect(git.commitFiles.mock.calls[0][0].files[0].name).toBe(
+        '.github/renovate.json'
+      );
+    });
+    it('falls back to "renovate.json" if onboardingConfigFileName is not set', async () => {
+      git.isBranchStale.mockResolvedValueOnce(true);
+      await rebaseOnboardingBranch({
+        ...config,
+        onboardingConfigFileName: undefined,
+      });
+      expect(git.commitFiles).toHaveBeenCalledTimes(1);
+      expect(git.commitFiles.mock.calls[0][0].message).toContain(
+        'renovate.json'
+      );
+      expect(git.commitFiles.mock.calls[0][0].files[0].name).toBe(
+        'renovate.json'
+      );
+    });
   });
 });

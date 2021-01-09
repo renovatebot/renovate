@@ -3,7 +3,7 @@ import * as datasourceNuget from '../../datasource/nuget';
 import { logger } from '../../logger';
 import { ExtractConfig, PackageDependency, PackageFile } from '../common';
 import { DotnetToolsManifest } from './types';
-import { determineRegistries } from './util';
+import { getConfiguredRegistries } from './util';
 
 /**
  * https://docs.microsoft.com/en-us/nuget/concepts/package-versioning
@@ -59,7 +59,10 @@ export async function extractPackageFile(
 ): Promise<PackageFile | null> {
   logger.trace({ packageFile }, 'nuget.extractPackageFile()');
 
-  const registries = await determineRegistries(packageFile, config.localDir);
+  const registries = await getConfiguredRegistries(
+    packageFile,
+    config.localDir
+  );
   const registryUrls = registries
     ? registries.map((registry) => registry.url)
     : undefined;

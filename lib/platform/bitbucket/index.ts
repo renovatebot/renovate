@@ -117,6 +117,7 @@ export async function initRepo({
   repository,
   localDir,
   cloneSubmodules,
+  ignorePrAuthor,
 }: RepoParams): Promise<RepoResult> {
   logger.debug(`initRepo("${repository}")`);
   const opts = hostRules.find({
@@ -126,6 +127,7 @@ export async function initRepo({
   config = {
     repository,
     username: opts.username,
+    ignorePrAuthor,
   } as utils.Config;
   let info: utils.RepoInfo;
   try {
@@ -209,7 +211,7 @@ export async function getPrList(): Promise<Pr[]> {
     config.prList = prs
       .filter((pr) => {
         const prAuthorId = pr?.author?.uuid;
-        return renovateUserUuid && prAuthorId
+        return renovateUserUuid && prAuthorId && !config.ignorePrAuthor
           ? renovateUserUuid === prAuthorId
           : true;
       })

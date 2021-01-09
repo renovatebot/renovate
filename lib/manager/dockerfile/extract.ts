@@ -1,6 +1,8 @@
+import is from '@sindresorhus/is';
 import * as datasourceDocker from '../../datasource/docker';
 import { logger } from '../../logger';
 import { SkipReason } from '../../types';
+import * as ubuntuVersioning from '../../versioning/ubuntu';
 import { PackageDependency, PackageFile } from '../common';
 
 export function splitImageParts(currentFrom: string): PackageDependency {
@@ -34,6 +36,11 @@ export function getDep(
   currentFrom: string,
   specifyReplaceString = true
 ): PackageDependency {
+  if (!is.string(currentFrom)) {
+    return {
+      skipReason: SkipReason.InvalidValue,
+    };
+  }
   const dep = splitImageParts(currentFrom);
   if (specifyReplaceString) {
     dep.replaceString = currentFrom;
@@ -47,6 +54,10 @@ export function getDep(
     dep.depName !== 'calico/node'
   ) {
     dep.commitMessageTopic = 'Node.js';
+  }
+
+  if (dep.depName === 'ubuntu') {
+    dep.versioning = ubuntuVersioning.id;
   }
   return dep;
 }

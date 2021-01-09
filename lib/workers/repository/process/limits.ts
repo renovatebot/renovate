@@ -3,36 +3,37 @@ import { RenovateConfig } from '../../../config';
 import { logger } from '../../../logger';
 import { Pr, platform } from '../../../platform';
 import { PrState } from '../../../types';
+import { ExternalHostError } from '../../../types/errors/external-host-error';
 import { BranchConfig } from '../../common';
 
 export async function getPrHourlyRemaining(
   config: RenovateConfig
 ): Promise<number> {
   if (config.prHourlyLimit) {
-    logger.debug('Calculating hourly PRs remaining');
-    const prList = await platform.getPrList();
-    const currentHourStart = DateTime.local().startOf('hour');
-    logger.debug(`currentHourStart=${String(currentHourStart)}`);
     try {
+      logger.debug('Calculating hourly PRs remaining');
+      const prList = await platform.getPrList();
+      const currentHourStart = DateTime.local().startOf('hour');
+      logger.debug(`currentHourStart=${String(currentHourStart)}`);
       const soFarThisHour = prList.filter(
         (pr) =>
           pr.sourceBranch !== config.onboardingBranch &&
+          pr.sourceBranch.startsWith(config.branchPrefix) &&
           DateTime.fromISO(pr.createdAt) > currentHourStart
       );
-      const prsRemaining = config.prHourlyLimit - soFarThisHour.length;
+      const prsRemaining = Math.max(
+        0,
+        config.prHourlyLimit - soFarThisHour.length
+      );
       logger.debug(`PR hourly limit remaining: ${prsRemaining}`);
-      // istanbul ignore if
-      if (prsRemaining <= 0) {
-        logger.debug(
-          {
-            prs: prsRemaining,
-          },
-          'Creation of new PRs is blocked by existing PRs'
-        );
-      }
       return prsRemaining;
     } catch (err) {
-      logger.error('Error checking PRs created per hour');
+      // istanbul ignore if
+      if (err instanceof ExternalHostError) {
+        throw err;
+      }
+      logger.error({ err }, 'Error checking PRs created per hour');
+      return config.prHourlyLimit;
     }
   }
   return 99;
@@ -81,7 +82,5 @@ export async function getPrsRemaining(
 ): Promise<number> {
   const hourlyRemaining = await getPrHourlyRemaining(config);
   const concurrentRemaining = await getConcurrentPrsRemaining(config, branches);
-  return hourlyRemaining < concurrentRemaining
-    ? hourlyRemaining
-    : concurrentRemaining;
+  return Math.min(hourlyRemaining, concurrentRemaining);
 }

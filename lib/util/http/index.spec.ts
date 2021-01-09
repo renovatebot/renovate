@@ -5,6 +5,7 @@ import {
   HOST_DISABLED,
 } from '../../constants/error-messages';
 import * as hostRules from '../host-rules';
+import * as queue from './queue';
 import { Http } from '.';
 
 const baseUrl = 'http://renovate.com';
@@ -16,6 +17,7 @@ describe(getName(__filename), () => {
     http = new Http('dummy');
     nock.cleanAll();
     hostRules.clear();
+    queue.clear();
   });
   it('get', async () => {
     nock(baseUrl).get('/test').reply(200);
@@ -130,5 +132,72 @@ describe(getName(__filename), () => {
     } finally {
       process.env.NODE_ENV = NODE_ENV;
     }
+  });
+
+  it('limits concurrency by host', async () => {
+    hostRules.add({ hostName: 'renovate.com', concurrentRequestLimit: 1 });
+
+    let foo = false;
+    let bar = false;
+    let baz = false;
+
+    const mockRequestResponse = () => {
+      let resolveRequest;
+      const request = new Promise((resolve) => {
+        resolveRequest = resolve;
+      });
+
+      let resolveResponse;
+      const response = new Promise((resolve) => {
+        resolveResponse = resolve;
+      });
+
+      return [request, resolveRequest, response, resolveResponse];
+    };
+
+    const [fooReq, fooStart, fooResp, fooFinish] = mockRequestResponse();
+    const [barReq, barStart, barResp, barFinish] = mockRequestResponse();
+
+    nock(baseUrl)
+      .get('/foo')
+      .reply(200, () => {
+        foo = true;
+        fooStart();
+        return fooResp;
+      })
+      .get('/bar')
+      .reply(200, () => {
+        bar = true;
+        barStart();
+        return barResp;
+      })
+      .get('/baz')
+      .reply(200, () => {
+        baz = true;
+        return 'baz';
+      });
+
+    const all = Promise.all([
+      http.get('http://renovate.com/foo'),
+      http.get('http://renovate.com/bar'),
+      http.get('http://renovate.com/baz'),
+    ]);
+
+    await fooReq;
+    expect(foo).toBeTrue();
+    expect(bar).toBeFalse();
+    expect(baz).toBeFalse();
+    fooFinish();
+
+    await barReq;
+    expect(foo).toBeTrue();
+    expect(bar).toBeTrue();
+    expect(baz).toBeFalse();
+    barFinish();
+
+    await all;
+    expect(foo).toBeTrue();
+    expect(bar).toBeTrue();
+    expect(baz).toBeTrue();
   });
 });

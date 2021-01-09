@@ -50,6 +50,8 @@ const kustomizeDepsInResources = readFileSync(
   'utf8'
 );
 
+const sha = readFileSync('lib/manager/kustomize/__fixtures__/sha.yaml', 'utf8');
+
 describe('manager/kustomize/extract', () => {
   it('should successfully parse a valid kustomize file', () => {
     const file = parseKustomize(kustomizeGitSSHBase);
@@ -147,8 +149,10 @@ describe('manager/kustomize/extract', () => {
     });
     it('should correctly extract a default image', () => {
       const sample = {
+        currentDigest: undefined,
         currentValue: 'v1.0.0',
         datasource: datasourceDocker.id,
+        replaceString: 'v1.0.0',
         versioning: dockerVersioning.id,
         depName: 'node',
       };
@@ -160,8 +164,10 @@ describe('manager/kustomize/extract', () => {
     });
     it('should correctly extract an image in a repo', () => {
       const sample = {
+        currentDigest: undefined,
         currentValue: 'v1.0.0',
         datasource: datasourceDocker.id,
+        replaceString: 'v1.0.0',
         versioning: dockerVersioning.id,
         depName: 'test/node',
       };
@@ -173,8 +179,10 @@ describe('manager/kustomize/extract', () => {
     });
     it('should correctly extract from a different registry', () => {
       const sample = {
+        currentDigest: undefined,
         currentValue: 'v1.0.0',
         datasource: datasourceDocker.id,
+        replaceString: 'v1.0.0',
         versioning: dockerVersioning.id,
         depName: 'quay.io/repo/image',
       };
@@ -186,9 +194,11 @@ describe('manager/kustomize/extract', () => {
     });
     it('should correctly extract from a different port', () => {
       const sample = {
+        currentDigest: undefined,
         currentValue: 'v1.0.0',
         datasource: datasourceDocker.id,
         versioning: dockerVersioning.id,
+        replaceString: 'v1.0.0',
         depName: 'localhost:5000/repo/image',
       };
       const pkg = extractImage({
@@ -199,7 +209,9 @@ describe('manager/kustomize/extract', () => {
     });
     it('should correctly extract from a multi-depth registry', () => {
       const sample = {
+        currentDigest: undefined,
         currentValue: 'v1.0.0',
+        replaceString: 'v1.0.0',
         datasource: datasourceDocker.id,
         versioning: dockerVersioning.id,
         depName: 'localhost:5000/repo/image/service',
@@ -259,6 +271,9 @@ describe('manager/kustomize/extract', () => {
       expect(res.deps[0].currentValue).toEqual('v0.0.1');
       expect(res.deps[1].currentValue).toEqual('1.19.0');
       expect(res.deps[1].depName).toEqual('fluxcd/flux');
+    });
+    it('extracts sha256 instead of tag', () => {
+      expect(extractPackageFile(sha)).toMatchSnapshot();
     });
   });
 });

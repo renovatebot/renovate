@@ -1,5 +1,5 @@
 import nock from 'nock';
-import * as httpMock from '../../../test/httpMock';
+import * as httpMock from '../../../test/http-mock';
 import { getName } from '../../../test/util';
 import {
   EXTERNAL_HOST_ERROR,
@@ -39,19 +39,6 @@ describe(getName(__filename), () => {
       expect(req.headers.accept).toBe(
         'some-accept, application/vnd.github.machine-man-preview+json'
       );
-    });
-    it('strips v3 for graphql', async () => {
-      httpMock
-        .scope('https://ghe.mycompany.com')
-        .post('/graphql')
-        .reply(200, {});
-      setBaseUrl('https://ghe.mycompany.com/api/v3/');
-      await githubApi.postJson('/graphql', {
-        body: {},
-      });
-      const [req] = httpMock.getTrace();
-      expect(req).toBeDefined();
-      expect(req.url).not.toContain('/v3');
     });
     it('paginates', async () => {
       const url = '/some-url';
@@ -226,6 +213,81 @@ describe(getName(__filename), () => {
         }
       }`;
 
+    const page1 = {
+      data: {
+        repository: {
+          testItem: {
+            pageInfo: {
+              endCursor: 'cursor1',
+              hasNextPage: true,
+            },
+            nodes: [
+              {
+                number: 1,
+                state: 'OPEN',
+                title: 'title-1',
+                body: 'the body 1',
+              },
+            ],
+          },
+        },
+      },
+    };
+
+    const page2 = {
+      data: {
+        repository: {
+          testItem: {
+            pageInfo: {
+              endCursor: 'cursor2',
+              hasNextPage: true,
+            },
+            nodes: [
+              {
+                number: 2,
+                state: 'CLOSED',
+                title: 'title-2',
+                body: 'the body 2',
+              },
+            ],
+          },
+        },
+      },
+    };
+
+    const page3 = {
+      data: {
+        repository: {
+          testItem: {
+            pageInfo: {
+              endCursor: 'cursor3',
+              hasNextPage: false,
+            },
+            nodes: [
+              {
+                number: 3,
+                state: 'OPEN',
+                title: 'title-3',
+                body: 'the body 3',
+              },
+            ],
+          },
+        },
+      },
+    };
+
+    it('strips path from baseUrl', async () => {
+      setBaseUrl('https://ghe.mycompany.com/api/v3/');
+      const repository = { foo: 'foo', bar: 'bar' };
+      httpMock
+        .scope('https://ghe.mycompany.com')
+        .post('/api/graphql')
+        .reply(200, { data: { repository } });
+      await githubApi.queryRepo(query);
+      const [req] = httpMock.getTrace();
+      expect(req).toBeDefined();
+      expect(req.url).toEqual('https://ghe.mycompany.com/api/graphql');
+    });
     it('supports app mode', async () => {
       hostRules.add({ hostType: 'github', token: 'x-access-token:abc123' });
       httpMock
@@ -302,72 +364,29 @@ describe(getName(__filename), () => {
       httpMock
         .scope(githubApiHost)
         .post('/graphql')
-        .reply(200, {
-          data: {
-            repository: {
-              testItem: {
-                pageInfo: {
-                  endCursor: 'cursor1',
-                  hasNextPage: true,
-                },
-                nodes: [
-                  {
-                    number: 1,
-                    state: 'OPEN',
-                    title: 'title-1',
-                    body: 'the body 1',
-                  },
-                ],
-              },
-            },
-          },
-        })
+        .reply(200, page1)
         .post('/graphql')
-        .reply(200, {
-          data: {
-            repository: {
-              testItem: {
-                pageInfo: {
-                  endCursor: 'cursor2',
-                  hasNextPage: true,
-                },
-                nodes: [
-                  {
-                    number: 2,
-                    state: 'CLOSED',
-                    title: 'title-2',
-                    body: 'the body 2',
-                  },
-                ],
-              },
-            },
-          },
-        })
+        .reply(200, page2)
         .post('/graphql')
-        .reply(200, {
-          data: {
-            repository: {
-              testItem: {
-                pageInfo: {
-                  endCursor: 'cursor3',
-                  hasNextPage: false,
-                },
-                nodes: [
-                  {
-                    number: 3,
-                    state: 'OPEN',
-                    title: 'title-3',
-                    body: 'the body 3',
-                  },
-                ],
-              },
-            },
-          },
-        });
+        .reply(200, page3);
 
       const items = await githubApi.queryRepoField(query, 'testItem');
       expect(httpMock.getTrace()).toHaveLength(3);
       expect(items).toHaveLength(3);
+    });
+    it('limit result size', async () => {
+      httpMock
+        .scope(githubApiHost)
+        .post('/graphql')
+        .reply(200, page1)
+        .post('/graphql')
+        .reply(200, page2);
+
+      const items = await githubApi.queryRepoField(query, 'testItem', {
+        limit: 2,
+      });
+      expect(httpMock.getTrace()).toHaveLength(2);
+      expect(items).toHaveLength(2);
     });
   });
 });

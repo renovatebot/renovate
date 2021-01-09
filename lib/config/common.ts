@@ -37,6 +37,7 @@ export interface RenovateSharedConfig {
   ignoreDeps?: string[];
   ignorePaths?: string[];
   labels?: string[];
+  addLabels?: string[];
   managers?: string | string[];
   dependencyDashboardApproval?: boolean;
   npmrc?: string;
@@ -97,6 +98,7 @@ export interface RenovateAdminConfig {
   onboardingCommitMessage?: string;
   onboardingPrTitle?: string;
   onboardingConfig?: RenovateSharedConfig;
+  onboardingConfigFileName?: string;
 
   platform?: string;
   postUpdateOptions?: string[];

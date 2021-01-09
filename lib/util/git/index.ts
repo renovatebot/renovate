@@ -1,5 +1,6 @@
 import URL from 'url';
 import fs from 'fs-extra';
+import GitUrlParse from 'git-url-parse';
 import Git, {
   DiffResult as DiffResult_,
   ResetMode,
@@ -7,6 +8,7 @@ import Git, {
   StatusResult as StatusResult_,
 } from 'simple-git';
 import { join } from 'upath';
+import { configFileNames } from '../../config/app-strings';
 import {
   REPOSITORY_CHANGED,
   REPOSITORY_DISABLED,
@@ -66,6 +68,7 @@ function checkForPlatformFailure(err: Error): void {
     'Failed to connect to',
     'Connection timed out',
     'malformed object name',
+    'TF401027:', // You need the Git 'GenericContribute' permission to perform this action
   ];
   for (const errorStr of platformFailureStrings) {
     if (err.message.includes(errorStr)) {
@@ -606,7 +609,7 @@ export async function commitFiles({
       }
     }
     // istanbul ignore if
-    if (fileNames.length === 1 && fileNames[0] === 'renovate.json') {
+    if (fileNames.length === 1 && configFileNames.includes(fileNames[0])) {
       fileNames.unshift('-f');
     }
     if (fileNames.length) {
@@ -691,4 +694,10 @@ export function getUrl({
     host,
     pathname: repository + '.git',
   });
+}
+
+export function getHttpUrl(url: string, token?: string): string {
+  const parsedUrl = GitUrlParse(url);
+  parsedUrl.token = token;
+  return parsedUrl.toString('https');
 }

@@ -41,6 +41,7 @@ export interface RepoParams {
   includeForks?: boolean;
   renovateUsername?: string;
   cloneSubmodules?: boolean;
+  ignorePrAuthor?: boolean;
 }
 
 /**
@@ -93,6 +94,7 @@ export interface CreatePRConfig {
 }
 export interface UpdatePrConfig {
   number: number;
+  platformOptions?: PlatformPrOptions;
   prTitle: string;
   prBody?: string;
   state?: PrState.Open | PrState.Closed;

@@ -25,7 +25,16 @@ export function getRandomString(): string {
   return cryptoRandomString({ length: 16 });
 }
 
-export async function determineRegistries(
+export function getDefaultRegistries(): Registry[] {
+  return datasourceNuget.defaultRegistryUrls.map(
+    (registryUrl) =>
+      ({
+        url: registryUrl,
+      } as Registry)
+  );
+}
+
+export async function getConfiguredRegistries(
   packageFile: string,
   localDir: string
 ): Promise<Registry[] | undefined> {
@@ -56,12 +65,7 @@ export async function determineRegistries(
     return undefined;
   }
 
-  const registries = datasourceNuget.defaultRegistryUrls.map(
-    (registryUrl) =>
-      ({
-        url: registryUrl,
-      } as Registry)
-  );
+  const registries = getDefaultRegistries();
   for (const child of packageSources.children) {
     if (child.type === 'element') {
       if (child.name === 'clear') {

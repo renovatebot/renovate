@@ -1,5 +1,5 @@
 import nock from 'nock';
-import * as httpMock from '../../../test/httpMock';
+import * as httpMock from '../../../test/http-mock';
 import { logger as _logger } from '../../logger';
 import { BranchStatus, PrState } from '../../types';
 import * as _git from '../../util/git';
@@ -126,7 +126,7 @@ describe('platform/bitbucket', () => {
     it('returns repos', async () => {
       httpMock
         .scope(baseUrl)
-        .get('/2.0/repositories/?role=contributor&pagelen=100')
+        .get('/2.0/repositories?role=contributor&pagelen=100')
         .reply(200, {
           values: [{ full_name: 'foo/bar' }, { full_name: 'some/repo' }],
         });
