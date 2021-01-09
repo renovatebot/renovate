@@ -69,7 +69,8 @@ export async function getUpdatedPackageFiles(
             res = await bumpPackageVersion(
               res,
               upgrade.packageFileVersion,
-              upgrade.bumpVersion
+              upgrade.bumpVersion,
+              packageFile
             );
           }
           if (res === existingContent) {
@@ -100,7 +101,8 @@ export async function getUpdatedPackageFiles(
         newContent = await bumpPackageVersion(
           newContent,
           upgrade.packageFileVersion,
-          upgrade.bumpVersion
+          upgrade.bumpVersion,
+          packageFile
         );
       }
       if (!newContent) {

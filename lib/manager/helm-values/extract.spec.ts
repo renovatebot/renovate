@@ -1,4 +1,5 @@
 import { readFileSync } from 'fs';
+import { fs } from '../../../test/util';
 import { extractPackageFile } from './extract';
 
 const helmDefaultChartInitValues = readFileSync(
@@ -15,26 +16,41 @@ describe('lib/manager/helm-values/extract', () => {
   describe('extractPackageFile()', () => {
     beforeEach(() => {
       jest.resetAllMocks();
+      fs.readLocalFile = jest.fn();
     });
-    it('returns null for invalid yaml file content', () => {
-      const result = extractPackageFile('nothing here: [');
+    it('returns null for invalid yaml file content', async () => {
+      const result = await extractPackageFile('nothing here: [');
       expect(result).toBeNull();
     });
-    it('returns null for empty yaml file content', () => {
-      const result = extractPackageFile('');
+    it('returns null for empty yaml file content', async () => {
+      const result = await extractPackageFile('');
       expect(result).toBeNull();
     });
-    it('returns null for no file content', () => {
-      const result = extractPackageFile(null);
+    it('returns null for no file content', async () => {
+      const result = await extractPackageFile(null);
       expect(result).toBeNull();
     });
-    it('extracts from values.yaml correctly with same structure as "helm create"', () => {
-      const result = extractPackageFile(helmDefaultChartInitValues);
+    it('extracts from values.yaml correctly with same structure as "helm create"', async () => {
+      const result = await extractPackageFile(helmDefaultChartInitValues);
       expect(result).toMatchSnapshot();
     });
-    it('extracts from complex values file correctly"', () => {
-      const result = extractPackageFile(helmMultiAndNestedImageValues);
+    it('extracts from complex values file correctly"', async () => {
+      const result = await extractPackageFile(helmMultiAndNestedImageValues);
       expect(result).toMatchSnapshot();
+    });
+    it('returns the package file version from the sibling Chart.yaml"', async () => {
+      fs.readLocalFile.mockResolvedValueOnce(`
+      apiVersion: v2
+      appVersion: "1.0"
+      description: A Helm chart for Kubernetes
+      name: example
+      version: 0.1.0
+      `);
+      const result = await extractPackageFile(
+        helmMultiAndNestedImageValues,
+        'values.yaml'
+      );
+      expect(result.packageFileVersion).toBe('0.1.0');
     });
   });
 });
