@@ -90,11 +90,11 @@ describe('workers/repository/process/limits', () => {
     });
   });
 
-  describe('getBranchesRemaining()', () => {
+  describe('getConcurrentBranchesRemaining()', () => {
     it('calculates concurrent limit remaining', () => {
       config.branchConcurrentLimit = 20;
       git.branchExists.mockReturnValueOnce(true);
-      const res = limits.getBranchesRemaining(config, [
+      const res = limits.getConcurrentBranchesRemaining(config, [
         { branchName: 'foo' },
       ] as never);
       expect(res).toEqual(19);
@@ -103,7 +103,7 @@ describe('workers/repository/process/limits', () => {
       config.branchConcurrentLimit = null;
       config.prConcurrentLimit = 20;
       git.branchExists.mockReturnValueOnce(true);
-      const res = limits.getBranchesRemaining(config, [
+      const res = limits.getConcurrentBranchesRemaining(config, [
         { branchName: 'foo' },
       ] as never);
       expect(res).toEqual(19);
@@ -111,17 +111,28 @@ describe('workers/repository/process/limits', () => {
     it('does not use prConcurrentLimit for explicit branchConcurrentLimit=0', () => {
       config.branchConcurrentLimit = 0;
       config.prConcurrentLimit = 20;
-      const res = limits.getBranchesRemaining(config, []);
+      const res = limits.getConcurrentBranchesRemaining(config, []);
       expect(res).toEqual(99);
     });
     it('returns 99 if no limits are set', () => {
-      const res = limits.getBranchesRemaining(config, []);
+      const res = limits.getConcurrentBranchesRemaining(config, []);
       expect(res).toEqual(99);
     });
     it('returns prConcurrentLimit if errored', () => {
       config.branchConcurrentLimit = 2;
-      const res = limits.getBranchesRemaining(config, null);
+      const res = limits.getConcurrentBranchesRemaining(config, null);
       expect(res).toEqual(2);
+    });
+  });
+
+  describe('getBranchesRemaining()', () => {
+    it('returns concurrent branches', () => {
+      config.branchConcurrentLimit = 20;
+      git.branchExists.mockReturnValueOnce(true);
+      const res = limits.getBranchesRemaining(config, [
+        { branchName: 'foo' },
+      ] as never);
+      expect(res).toEqual(19);
     });
   });
 });
