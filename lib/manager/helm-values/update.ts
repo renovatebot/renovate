@@ -1,17 +1,20 @@
 import { ReleaseType, inc } from 'semver';
 import { logger } from '../../logger';
+import { getSiblingFileName } from '../../util/fs';
+import { BumpPackageVersionResult } from '../common';
 import { getSiblingChartYamlContent } from './util';
 
 export async function bumpPackageVersion(
-  _content: string,
+  content: string,
   currentValue: string,
   bumpVersion: ReleaseType | string,
   packageFile: string
-): Promise<string> {
+): Promise<BumpPackageVersionResult> {
   logger.debug(
     { bumpVersion, currentValue },
     'Checking if we should bump Chart.yaml version'
   );
+  const chartFileName = getSiblingFileName(packageFile, 'Chart.yaml');
   const chartYamlContent = await getSiblingChartYamlContent(packageFile);
   let newChartVersion: string;
   try {
@@ -29,7 +32,10 @@ export async function bumpPackageVersion(
     } else {
       logger.debug('Bumped Chart.yaml version');
     }
-    return bumpedContent;
+    return {
+      bumpedContent: content,
+      bumpedFile: { fileName: chartFileName, newContent: bumpedContent },
+    };
   } catch (err) {
     logger.warn(
       {
@@ -39,6 +45,8 @@ export async function bumpPackageVersion(
       },
       'Failed to bumpVersion'
     );
-    return chartYamlContent;
+    return {
+      bumpedContent: content,
+    };
   }
 }

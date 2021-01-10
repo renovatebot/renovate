@@ -3,7 +3,7 @@ import { WORKER_FILE_UPDATE_FAILED } from '../../constants/error-messages';
 import * as datasourceGitSubmodules from '../../datasource/git-submodules';
 import { logger } from '../../logger';
 import { get } from '../../manager';
-import { ArtifactError } from '../../manager/common';
+import { ArtifactError, BumpedPackageFile } from '../../manager/common';
 import { File, getFile } from '../../util/git';
 import { BranchConfig } from '../common';
 import { doAutoReplace } from './auto-replace';
@@ -64,15 +64,18 @@ export async function getUpdatedPackageFiles(
           existingContent,
           reuseExistingBranch
         );
+
         if (res) {
+          let bumpedPackageFile: BumpedPackageFile;
           if (bumpPackageVersion && upgrade.bumpVersion) {
-            const { bumpedContent } = await bumpPackageVersion(
+            const bumpResult = await bumpPackageVersion(
               res,
               upgrade.packageFileVersion,
               upgrade.bumpVersion,
               packageFile
             );
-            res = bumpedContent;
+            res = bumpResult.bumpedContent;
+            bumpedPackageFile = bumpResult.bumpedFile;
           }
           if (res === existingContent) {
             logger.debug({ packageFile, depName }, 'No content changed');
@@ -83,6 +86,12 @@ export async function getUpdatedPackageFiles(
           } else {
             logger.debug({ packageFile, depName }, 'Contents updated');
             updatedFileContents[packageFile] = res;
+          }
+          // indicates that the version was bumped in another file in
+          // addition to or instead of the packageFile
+          if (bumpedPackageFile) {
+            updatedFileContents[bumpedPackageFile.fileName] =
+              bumpedPackageFile.newContent;
           }
           continue; // eslint-disable-line no-continue
         } else if (reuseExistingBranch) {
@@ -98,14 +107,16 @@ export async function getUpdatedPackageFiles(
         fileContent: existingContent,
         upgrade,
       });
+      let bumpedPackageFile: BumpedPackageFile;
       if (bumpPackageVersion && upgrade.bumpVersion) {
-        const { bumpedContent } = await bumpPackageVersion(
+        const bumpResult = await bumpPackageVersion(
           newContent,
           upgrade.packageFileVersion,
           upgrade.bumpVersion,
           packageFile
         );
-        newContent = bumpedContent;
+        newContent = bumpResult.bumpedContent;
+        bumpedPackageFile = bumpResult.bumpedFile;
       }
       if (!newContent) {
         if (config.reuseExistingBranch) {
@@ -146,6 +157,14 @@ export async function getUpdatedPackageFiles(
         } else if (upgrade.rangeStrategy === 'update-lockfile') {
           nonUpdatedFileContents[packageFile] = newContent;
         }
+      }
+      if (bumpedPackageFile) {
+        logger.debug(
+          { bumpedPackageFile, depName },
+          'Updating bumpedPackageFile content'
+        );
+        updatedFileContents[bumpedPackageFile.fileName] =
+          bumpedPackageFile.newContent;
       }
     }
   }

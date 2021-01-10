@@ -229,6 +229,13 @@ export interface UpdateDependencyConfig<T = Record<string, any>> {
 
 export interface BumpPackageVersionResult {
   bumpedContent: string | null;
+  // describes a file that was changed instead of or in addition to the packageFile
+  bumpedFile?: BumpedPackageFile;
+}
+
+export interface BumpedPackageFile {
+  fileName: string | null;
+  newContent: string | null;
 }
 
 export interface ManagerApi {
