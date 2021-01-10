@@ -46,6 +46,9 @@ export async function writeUpdates(
     addMeta({ branch: branch.branchName });
     const branchExisted = branchExists(branch.branchName);
     const prExisted = await prExists(branch.branchName);
+
+    branch.shouldUseForcePush = config.shouldUseForcePush;
+
     const res = await processBranch(branch);
     branch.res = res;
     if (

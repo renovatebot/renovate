@@ -987,6 +987,13 @@ const options: RenovateOptions[] = [
     default: false,
   },
   {
+    name: 'shouldUseForcePush',
+    description:
+      'If set to false, branches will be deleted and repushed in order to be updated. Open pull requests will be closed.',
+    type: 'boolean',
+    default: true,
+  },
+  {
     name: 'ignoreUnstable',
     description: 'Ignore versions with unstable semver',
     stage: 'package',

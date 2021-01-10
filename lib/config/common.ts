@@ -178,6 +178,8 @@ export interface RenovateConfig
 
   repoIsOnboarded?: boolean;
 
+  shouldUseForcePush?: boolean;
+
   updateType?: UpdateType;
 
   warnings?: ValidationMessage[];

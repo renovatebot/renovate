@@ -569,13 +569,41 @@ export type CommitFilesConfig = {
   files: File[];
   message: string;
   force?: boolean;
+  shouldUseForcePush: boolean;
 };
 
+async function pushBranch(
+  branchName: string,
+  shouldUseForcePush: boolean
+): Promise<void> {
+  if (shouldUseForcePush) {
+    await git.push('origin', `${branchName}:${branchName}`, {
+      '--force': null,
+      '-u': null,
+      '--no-verify': null,
+    });
+  } else {
+    try {
+      await git.push('origin', `${branchName}:${branchName}`, {
+        '--delete': null,
+        '--no-verify': null,
+      });
+    } catch (err) /* istanbul ignore next */ {
+      checkForPlatformFailure(err);
+      logger.debug({ err }, 'Branch could not be deleted or does not exist.');
+    }
+    await git.push('origin', `${branchName}:${branchName}`, {
+      '-u': null,
+      '--no-verify': null,
+    });
+  }
+}
 export async function commitFiles({
   branchName,
   files,
   message,
   force = false,
+  shouldUseForcePush,
 }: CommitFilesConfig): Promise<CommitSha | null> {
   await syncGit();
   logger.debug(`Committing files to branch ${branchName}`);
@@ -636,11 +664,7 @@ export async function commitFiles({
       );
       return null;
     }
-    await git.push('origin', `${branchName}:${branchName}`, {
-      '--force': null,
-      '-u': null,
-      '--no-verify': null,
-    });
+    await pushBranch(branchName, shouldUseForcePush);
     // Fetch it after create
     const ref = `refs/heads/${branchName}:refs/remotes/origin/${branchName}`;
     await git.fetch(['origin', ref, '--depth=2', '--force']);

@@ -48,5 +48,6 @@ export function commitFilesToBranch(
     files: updatedFiles,
     message: config.commitMessage,
     force: !!config.forceCommit,
+    shouldUseForcePush: config.shouldUseForcePush,
   });
 }

@@ -111,6 +111,8 @@ export interface BranchConfig
   forceCommit?: boolean;
   rebaseRequested?: boolean;
 
+  shouldUseForcePush?: boolean;
+
   res?: ProcessBranchResult;
   upgrades: BranchUpgradeConfig[];
   packageFiles?: Record<string, PackageFile[]>;

@@ -182,6 +182,7 @@ describe('platform/git', () => {
         branchName: 'renovate/branch_with_changes',
         files: [file],
         message: 'Create something',
+        shouldUseForcePush: true,
       });
       const branchFiles = await git.getBranchFiles(
         'renovate/branch_with_changes'
@@ -234,7 +235,7 @@ describe('platform/git', () => {
       expect(await git.getFile('some-path', 'some-branch')).toBeNull();
     });
   });
-  describe('commitFiles({branchName, files, message})', () => {
+  describe('commitFiles({branchName, files, message, shouldUseForcePush})', () => {
     it('creates file', async () => {
       const file = {
         name: 'some-new-file',
@@ -244,6 +245,20 @@ describe('platform/git', () => {
         branchName: 'renovate/past_branch',
         files: [file],
         message: 'Create something',
+        shouldUseForcePush: true,
+      });
+      expect(commit).not.toBeNull();
+    });
+    it('creates file when shouldUseForcePush is false', async () => {
+      const file = {
+        name: 'some-new-file',
+        contents: 'some new-contents',
+      };
+      const commit = await git.commitFiles({
+        branchName: 'renovate/past_branch',
+        files: [file],
+        message: 'Create something',
+        shouldUseForcePush: false,
       });
       expect(commit).not.toBeNull();
     });
@@ -256,6 +271,7 @@ describe('platform/git', () => {
         branchName: 'renovate/something',
         files: [file],
         message: 'Delete something',
+        shouldUseForcePush: true,
       });
       expect(commit).not.toBeNull();
     });
@@ -274,6 +290,7 @@ describe('platform/git', () => {
         branchName: 'renovate/something',
         files,
         message: 'Update something',
+        shouldUseForcePush: true,
       });
       expect(commit).not.toBeNull();
     });
@@ -288,6 +305,7 @@ describe('platform/git', () => {
         branchName: 'renovate/something',
         files,
         message: 'Update something',
+        shouldUseForcePush: true,
       });
       expect(commit).not.toBeNull();
     });
@@ -304,6 +322,7 @@ describe('platform/git', () => {
         branchName,
         files,
         message: 'Update something',
+        shouldUseForcePush: true,
       });
       expect(commit).toBeNull();
     });
