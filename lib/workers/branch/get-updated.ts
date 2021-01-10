@@ -90,6 +90,10 @@ export async function getUpdatedPackageFiles(
           // indicates that the version was bumped in another file in
           // addition to or instead of the packageFile
           if (bumpedPackageFile) {
+            logger.debug(
+              { bumpedPackageFile, depName },
+              'Updating bumpedPackageFile content'
+            );
             updatedFileContents[bumpedPackageFile.fileName] =
               bumpedPackageFile.newContent;
           }
@@ -107,16 +111,14 @@ export async function getUpdatedPackageFiles(
         fileContent: existingContent,
         upgrade,
       });
-      let bumpedPackageFile: BumpedPackageFile;
       if (bumpPackageVersion && upgrade.bumpVersion) {
-        const bumpResult = await bumpPackageVersion(
+        const { bumpedContent } = await bumpPackageVersion(
           newContent,
           upgrade.packageFileVersion,
           upgrade.bumpVersion,
           packageFile
         );
-        newContent = bumpResult.bumpedContent;
-        bumpedPackageFile = bumpResult.bumpedFile;
+        newContent = bumpedContent;
       }
       if (!newContent) {
         if (config.reuseExistingBranch) {
@@ -157,14 +159,6 @@ export async function getUpdatedPackageFiles(
         } else if (upgrade.rangeStrategy === 'update-lockfile') {
           nonUpdatedFileContents[packageFile] = newContent;
         }
-      }
-      if (bumpedPackageFile) {
-        logger.debug(
-          { bumpedPackageFile, depName },
-          'Updating bumpedPackageFile content'
-        );
-        updatedFileContents[bumpedPackageFile.fileName] =
-          bumpedPackageFile.newContent;
       }
     }
   }
