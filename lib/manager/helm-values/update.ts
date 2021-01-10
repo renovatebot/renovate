@@ -16,9 +16,8 @@ export async function bumpPackageVersion(
   );
   const chartFileName = getSiblingFileName(packageFile, 'Chart.yaml');
   const chartYamlContent = await getSiblingChartYamlContent(packageFile);
-  let newChartVersion: string;
   try {
-    newChartVersion = inc(currentValue, bumpVersion as ReleaseType);
+    const newChartVersion = inc(currentValue, bumpVersion as ReleaseType);
     if (!newChartVersion) {
       throw new Error('semver inc failed');
     }
