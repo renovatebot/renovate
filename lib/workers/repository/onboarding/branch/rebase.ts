@@ -67,5 +67,6 @@ export async function rebaseOnboardingBranch(
       },
     ],
     message: commitMessage,
+    shouldUseForcePush: config.shouldUseForcePush,
   });
 }
