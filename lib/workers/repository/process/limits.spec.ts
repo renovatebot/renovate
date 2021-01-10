@@ -111,7 +111,7 @@ describe('workers/repository/process/limits', () => {
     it('does not use prConcurrentLimit for explicit branchConcurrentLimit=0', () => {
       config.branchConcurrentLimit = 0;
       config.prConcurrentLimit = 20;
-      const res = limits.getBranchesRemaining(config, [] as never);
+      const res = limits.getBranchesRemaining(config, []);
       expect(res).toEqual(99);
     });
     it('returns 99 if no limits are set', () => {
