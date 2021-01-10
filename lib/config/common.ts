@@ -178,7 +178,7 @@ export interface RenovateConfig
 
   repoIsOnboarded?: boolean;
 
-  shouldUseForcePush?: boolean;
+  gitDeleteBeforePush?: boolean;
 
   updateType?: UpdateType;
 

@@ -574,15 +574,9 @@ export type CommitFilesConfig = {
 
 async function pushBranch(
   branchName: string,
-  shouldUseForcePush: boolean
+  gitDeleteBeforePush: boolean
 ): Promise<void> {
-  if (shouldUseForcePush) {
-    await git.push('origin', `${branchName}:${branchName}`, {
-      '--force': null,
-      '-u': null,
-      '--no-verify': null,
-    });
-  } else {
+  if (gitDeleteBeforePush) {
     try {
       await git.push('origin', `${branchName}:${branchName}`, {
         '--delete': null,
@@ -596,6 +590,12 @@ async function pushBranch(
       '-u': null,
       '--no-verify': null,
     });
+  } else {
+    await git.push('origin', `${branchName}:${branchName}`, {
+      '--force': null,
+      '-u': null,
+      '--no-verify': null,
+    });
   }
 }
 export async function commitFiles({
@@ -603,7 +603,7 @@ export async function commitFiles({
   files,
   message,
   force = false,
-  shouldUseForcePush,
+  gitDeleteBeforePush,
 }: CommitFilesConfig): Promise<CommitSha | null> {
   await syncGit();
   logger.debug(`Committing files to branch ${branchName}`);
@@ -664,7 +664,7 @@ export async function commitFiles({
       );
       return null;
     }
-    await pushBranch(branchName, shouldUseForcePush);
+    await pushBranch(branchName, gitDeleteBeforePush);
     // Fetch it after create
     const ref = `refs/heads/${branchName}:refs/remotes/origin/${branchName}`;
     await git.fetch(['origin', ref, '--depth=2', '--force']);

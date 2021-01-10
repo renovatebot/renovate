@@ -111,7 +111,7 @@ export interface BranchConfig
   forceCommit?: boolean;
   rebaseRequested?: boolean;
 
-  shouldUseForcePush?: boolean;
+  gitDeleteBeforePush?: boolean;
 
   res?: ProcessBranchResult;
   upgrades: BranchUpgradeConfig[];

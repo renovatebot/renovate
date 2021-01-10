@@ -23,7 +23,7 @@ const buildExpectedCommitFilesArgument = (
     },
   ],
   message,
-  shouldUseForcePush: true,
+  gitDeleteBeforePush: false,
 });
 
 describe('workers/repository/onboarding/branch', () => {

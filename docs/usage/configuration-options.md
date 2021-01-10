@@ -1978,9 +1978,9 @@ Configure this to `true` if you wish to receive one PR for every separate major 
 e.g. if you are on webpack@v1 currently then default behavior is a PR for upgrading to webpack@v3 and not for webpack@v2.
 If this setting is true then you would get one PR for webpack@v2 and one for webpack@v3.
 
-## shouldUseForcePush
+## gitDeleteBeforePush
 
-Configure this to `false` to change branch push behavior from using force push to deleting the branch (if it exists) and repushing.
+Configure this to `true` to change branch push behavior from using force push to deleting the branch (if it exists) and repushing.
 This is generally reserved for environments where force push has been disabled. This will cause open pull requests for
 the deleted branch to be closed.
 

@@ -987,11 +987,11 @@ const options: RenovateOptions[] = [
     default: false,
   },
   {
-    name: 'shouldUseForcePush',
+    name: 'gitDeleteBeforePush',
     description:
-      'If set to false, branches will be deleted and repushed in order to be updated. Open pull requests will be closed.',
+      'If set to true, branches will be deleted and repushed in order to be updated. Open pull requests will be closed.',
     type: 'boolean',
-    default: true,
+    default: false,
   },
   {
     name: 'ignoreUnstable',
