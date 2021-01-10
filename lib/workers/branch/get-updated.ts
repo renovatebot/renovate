@@ -66,12 +66,13 @@ export async function getUpdatedPackageFiles(
         );
         if (res) {
           if (bumpPackageVersion && upgrade.bumpVersion) {
-            res = await bumpPackageVersion(
+            const { bumpedContent } = await bumpPackageVersion(
               res,
               upgrade.packageFileVersion,
               upgrade.bumpVersion,
               packageFile
             );
+            res = bumpedContent;
           }
           if (res === existingContent) {
             logger.debug({ packageFile, depName }, 'No content changed');
@@ -98,12 +99,13 @@ export async function getUpdatedPackageFiles(
         upgrade,
       });
       if (bumpPackageVersion && upgrade.bumpVersion) {
-        newContent = await bumpPackageVersion(
+        const { bumpedContent } = await bumpPackageVersion(
           newContent,
           upgrade.packageFileVersion,
           upgrade.bumpVersion,
           packageFile
         );
+        newContent = bumpedContent;
       }
       if (!newContent) {
         if (config.reuseExistingBranch) {

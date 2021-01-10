@@ -227,6 +227,10 @@ export interface UpdateDependencyConfig<T = Record<string, any>> {
   upgrade: Upgrade<T>;
 }
 
+export interface BumpPackageVersionResult {
+  bumpedContent: string | null;
+}
+
 export interface ManagerApi {
   defaultConfig: Record<string, unknown>;
   language?: string;
@@ -237,7 +241,7 @@ export interface ManagerApi {
     currentValue: string,
     bumpVersion: ReleaseType | string,
     packageFile?: string
-  ): Result<string | null>;
+  ): Result<BumpPackageVersionResult>;
 
   extractAllPackageFiles?(
     config: ExtractConfig,
