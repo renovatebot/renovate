@@ -10,3 +10,20 @@ Array [
   },
 ]
 `;
+
+exports[`lib/manager/gitsubmodules/artifacts updateArtifacts() returns two modules 1`] = `
+Array [
+  Object {
+    "file": Object {
+      "contents": "",
+      "name": "renovate",
+    },
+  },
+  Object {
+    "file": Object {
+      "contents": "",
+      "name": "renovate-pro",
+    },
+  },
+]
+`;

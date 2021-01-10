@@ -68,6 +68,7 @@ function checkForPlatformFailure(err: Error): void {
     'Failed to connect to',
     'Connection timed out',
     'malformed object name',
+    'TF401027:', // You need the Git 'GenericContribute' permission to perform this action
   ];
   for (const errorStr of platformFailureStrings) {
     if (err.message.includes(errorStr)) {
