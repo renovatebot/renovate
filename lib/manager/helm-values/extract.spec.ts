@@ -52,5 +52,29 @@ describe('lib/manager/helm-values/extract', () => {
       );
       expect(result.packageFileVersion).toBe('0.1.0');
     });
+    it('does not fail if the sibling Chart.yaml is invalid', async () => {
+      fs.readLocalFile.mockResolvedValueOnce(`
+      invalidYaml: [
+      `);
+      const result = await extractPackageFile(
+        helmMultiAndNestedImageValues,
+        'values.yaml'
+      );
+      expect(result).not.toBeNull();
+      expect(result.packageFileVersion).toBeUndefined();
+    });
+    it('does not fail if the sibling Chart.yaml does not contain the required fields', async () => {
+      fs.readLocalFile.mockResolvedValueOnce(`
+      appVersion: v2
+      name: test
+      version: is-missing
+      `);
+      const result = await extractPackageFile(
+        helmMultiAndNestedImageValues,
+        'values.yaml'
+      );
+      expect(result).not.toBeNull();
+      expect(result.packageFileVersion).toBeUndefined();
+    });
   });
 });

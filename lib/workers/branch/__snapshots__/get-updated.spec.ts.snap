@@ -187,7 +187,7 @@ Object {
 }
 `;
 
-exports[`workers/branch/get-updated getUpdatedPackageFiles() bumps versions in helm values managers 1`] = `
+exports[`workers/branch/get-updated getUpdatedPackageFiles() bumps versions in autoReplace managers with a bumpPackageFile different from the packageFile 1`] = `
 Object {
   "artifactErrors": Array [],
   "reuseExistingBranch": undefined,

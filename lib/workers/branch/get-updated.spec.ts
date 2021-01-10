@@ -199,7 +199,7 @@ describe('workers/branch/get-updated', () => {
       const res = await getUpdatedPackageFiles(config);
       expect(res).toMatchSnapshot();
     });
-    it('bumps versions in helm values managers', async () => {
+    it('bumps versions in autoReplace managers with a bumpPackageFile different from the packageFile', async () => {
       config.upgrades.push({
         branchName: undefined,
         bumpVersion: 'patch',
