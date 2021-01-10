@@ -65,9 +65,9 @@ describe('lib/manager/helm-values/extract', () => {
     });
     it('does not fail if the sibling Chart.yaml does not contain the required fields', async () => {
       fs.readLocalFile.mockResolvedValueOnce(`
-      appVersion: v2
+      apiVersion: v2
       name: test
-      version: is-missing
+      version-is: missing
       `);
       const result = await extractPackageFile(
         helmMultiAndNestedImageValues,
