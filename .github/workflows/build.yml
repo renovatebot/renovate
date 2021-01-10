@@ -23,8 +23,7 @@ jobs:
 
     strategy:
       matrix:
-        # disable macos-latest: https://github.com/actions/virtual-environments/issues/2247
-        os: [ubuntu-latest, windows-latest] # macos-latest
+        os: [ubuntu-latest, macos-latest, windows-latest]
         node-version: [12, 14]
         python-version: [3.8]
         java-version: [11]
