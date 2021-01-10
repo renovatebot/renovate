@@ -3,11 +3,19 @@ import { getPreset } from '../../../../config/presets/local';
 import { PRESET_DEP_NOT_FOUND } from '../../../../config/presets/util';
 import { logger } from '../../../../logger';
 import { clone } from '../../../../util/clone';
+import { detectSemanticCommits } from '../../init/semantic';
 
 export async function getOnboardingConfig(
   config: RenovateConfig
 ): Promise<string> {
   let onboardingConfig = clone(config.onboardingConfig);
+
+  if (
+    typeof onboardingConfig.semanticCommits === 'undefined' &&
+    (await detectSemanticCommits()) === 'enabled'
+  ) {
+    onboardingConfig.semanticCommits = 'enabled';
+  }
 
   let orgPreset: string;
 
