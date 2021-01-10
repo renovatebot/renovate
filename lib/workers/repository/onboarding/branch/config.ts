@@ -11,7 +11,7 @@ export async function getOnboardingConfig(
   let onboardingConfig = clone(config.onboardingConfig);
 
   if (
-    typeof onboardingConfig.semanticCommits === 'undefined' &&
+    config.semanticCommits === 'auto' &&
     (await detectSemanticCommits()) === 'enabled'
   ) {
     onboardingConfig.semanticCommits = 'enabled';

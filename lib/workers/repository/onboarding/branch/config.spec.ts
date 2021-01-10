@@ -75,6 +75,8 @@ describe('workers/repository/onboarding/branch', () => {
       expect(JSON.parse(onboardingConfig).semanticCommits).toBeUndefined();
     });
     it('does not set semanticCommits if already enabled', async () => {
+      mockedSemantic.detectSemanticCommits.mockReset();
+      mockedSemantic.detectSemanticCommits.mockResolvedValueOnce('enabled');
       onboardingConfig = await getOnboardingConfig({
         ...config,
         semanticCommits: 'enabled',
@@ -82,16 +84,11 @@ describe('workers/repository/onboarding/branch', () => {
       expect(JSON.parse(onboardingConfig).semanticCommits).toBeUndefined();
     });
     it('does not set semanticCommits if already disabled', async () => {
+      mockedSemantic.detectSemanticCommits.mockReset();
+      mockedSemantic.detectSemanticCommits.mockResolvedValueOnce('enabled');
       onboardingConfig = await getOnboardingConfig({
         ...config,
         semanticCommits: 'disabled',
-      });
-      expect(JSON.parse(onboardingConfig).semanticCommits).toBeUndefined();
-    });
-    it('does not set semanticCommits if already set to auto', async () => {
-      onboardingConfig = await getOnboardingConfig({
-        ...config,
-        semanticCommits: 'auto',
       });
       expect(JSON.parse(onboardingConfig).semanticCommits).toBeUndefined();
     });
