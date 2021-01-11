@@ -46,6 +46,7 @@ export async function getNodeConstraint(
       !isStable('16.100.0') && // this should return false as soon as Node 16 is LTS
       validRange(`${constraint} <15`)
     ) {
+      logger.debug('Augmenting constraint to avoid node 15');
       constraint = `${constraint} <15`;
     }
   } else {
