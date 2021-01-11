@@ -6,6 +6,14 @@ import {
 
 export type VulnerabilityAlert = _VulnerabilityAlert;
 
+type VulnerabilityKey = string;
+type VulnerabilityRangeKey = string;
+type VulnerabilityPatch = string;
+export type AggregatedVulnerabilities = Record<
+  VulnerabilityKey,
+  Record<VulnerabilityRangeKey, VulnerabilityPatch>
+>;
+
 export interface PlatformParams {
   endpoint?: string;
   token?: string;
@@ -21,21 +29,19 @@ export interface PlatformResult {
 
 export interface RepoResult {
   defaultBranch: string;
-  defaultBranchSha?: string;
   isFork: boolean;
 }
 
 export interface RepoParams {
-  azureWorkItemId?: number; // shouldn't this be configurable within a renovate.json?
-  bbUseDefaultReviewers?: boolean; // shouldn't this be configurable within a renovate.json?
   localDir: string;
-  optimizeForDisabled: boolean;
   repository: string;
   endpoint?: string;
   forkMode?: string;
   forkToken?: string;
   includeForks?: boolean;
   renovateUsername?: string;
+  cloneSubmodules?: boolean;
+  ignorePrAuthor?: boolean;
 }
 
 /**
@@ -43,7 +49,7 @@ export interface RepoParams {
  */
 export interface Pr {
   body?: string;
-  branchName: string;
+  sourceBranch: string;
   canMerge?: boolean;
   canMergeReason?: string;
   createdAt?: string;
@@ -59,6 +65,7 @@ export interface Pr {
   state: string;
   targetBranch?: string;
   title: string;
+  isDraft?: boolean;
 }
 
 /**
@@ -72,11 +79,12 @@ export interface Issue {
 }
 export type PlatformPrOptions = {
   azureAutoComplete?: boolean;
-  statusCheckVerify?: boolean;
+  azureWorkItemId?: number;
+  bbUseDefaultReviewers?: boolean;
   gitLabAutomerge?: boolean;
 };
 export interface CreatePRConfig {
-  branchName: string;
+  sourceBranch: string;
   targetBranch: string;
   prTitle: string;
   prBody: string;
@@ -86,6 +94,7 @@ export interface CreatePRConfig {
 }
 export interface UpdatePrConfig {
   number: number;
+  platformOptions?: PlatformPrOptions;
   prTitle: string;
   prBody?: string;
   state?: PrState.Open | PrState.Closed;
@@ -136,6 +145,7 @@ export interface Platform {
   findIssue(title: string): Promise<Issue | null>;
   getIssueList(): Promise<Issue[]>;
   getVulnerabilityAlerts(): Promise<VulnerabilityAlert[]>;
+  getJsonFile(fileName: string): Promise<any | null>;
   initRepo(config: RepoParams): Promise<RepoResult>;
   getPrList(): Promise<Pr[]>;
   ensureIssueClosing(title: string): Promise<void>;
@@ -162,7 +172,6 @@ export interface Platform {
       | EnsureCommentRemovalConfigByContent
   ): Promise<void>;
   ensureComment(ensureComment: EnsureCommentConfig): Promise<boolean>;
-  setBaseBranch(branchName: string): Promise<string>;
   getPr(number: number): Promise<Pr>;
   findPr(findPRConfig: FindPRConfig): Promise<Pr>;
   refreshPr?(number: number): Promise<void>;

@@ -16,6 +16,7 @@ const findFile = async (fileName: string): Promise<boolean> => {
 const configFileExists = async (): Promise<boolean> => {
   for (const fileName of configFileNames) {
     if (fileName !== 'package.json' && (await findFile(fileName))) {
+      logger.debug({ fileName }, 'Config file exists');
       return true;
     }
   }
@@ -54,7 +55,6 @@ export const isOnboarded = async (config: RenovateConfig): Promise<boolean> => {
     return true;
   }
   if (await configFileExists()) {
-    logger.debug('config file exists');
     await platform.ensureIssueClosing(title);
     return true;
   }

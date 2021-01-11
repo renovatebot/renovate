@@ -11,8 +11,8 @@ Object {
   "automerge": false,
   "blockedByPin": false,
   "branchName": "some-branch",
-  "canBeUnpublished": false,
   "commitMessage": "",
+  "constraints": Object {},
   "depName": "some-dep",
   "dependencyDashboardApproval": false,
   "dependencyDashboardPrApproval": false,
@@ -65,7 +65,6 @@ Object {
   "automerge": false,
   "blockedByPin": false,
   "branchName": "some-branch",
-  "canBeUnpublished": false,
   "commitBodyTable": true,
   "commitMessage": "
 
@@ -73,6 +72,7 @@ Object {
 | ---------- | --------------- | ----- | ----- |
 | npm        | @types/some-dep | 0.5.7 | 0.5.8 |
 ",
+  "constraints": Object {},
   "datasource": "npm",
   "depName": "some-dep",
   "dependencyDashboardApproval": false,
@@ -134,6 +134,6 @@ Object {
 }
 `;
 
-exports[`workers/repository/updates/generate generateBranchConfig() handles upgrades 1`] = `"some-title ()"`;
+exports[`workers/repository/updates/generate generateBranchConfig() handles upgrades 1`] = `"some-title (patch)"`;
 
 exports[`workers/repository/updates/generate generateBranchConfig() supports manual prTitle 1`] = `"upgrade some-dep"`;

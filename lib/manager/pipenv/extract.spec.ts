@@ -89,5 +89,29 @@ describe('lib/manager/pipenv/extract', () => {
       expect(res.deps[0].registryUrls).toBeDefined();
       expect(res.deps[0].registryUrls).toHaveLength(1);
     });
+    it('gets python constraint from python_version', () => {
+      const content =
+        '[packages]\r\nfoo = "==1.0.0"\r\n' +
+        '[requires]\r\npython_version = "3.8"';
+      const res = extractPackageFile(content);
+      expect(res.constraints.python).toEqual('== 3.8.*');
+    });
+    it('gets python constraint from python_full_version', () => {
+      const content =
+        '[packages]\r\nfoo = "==1.0.0"\r\n' +
+        '[requires]\r\npython_full_version = "3.8.6"';
+      const res = extractPackageFile(content);
+      expect(res.constraints.python).toEqual('== 3.8.6');
+    });
+    it('gets pipenv constraint from packages', () => {
+      const content = '[packages]\r\npipenv = "==2020.8.13"';
+      const res = extractPackageFile(content);
+      expect(res.constraints.pipenv).toEqual('==2020.8.13');
+    });
+    it('gets pipenv constraint from dev-packages', () => {
+      const content = '[dev-packages]\r\npipenv = "==2020.8.13"';
+      const res = extractPackageFile(content);
+      expect(res.constraints.pipenv).toEqual('==2020.8.13');
+    });
   });
 });

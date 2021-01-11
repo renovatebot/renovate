@@ -5,9 +5,8 @@ import { logger } from '../../logger';
 import { SkipReason } from '../../types';
 import { ExtractConfig, PackageDependency, PackageFile } from '../common';
 
-const isValidChartName = (name: string): boolean => {
-  return !/[!@#$%^&*(),.?":{}/|<>A-Z]/.test(name);
-};
+const isValidChartName = (name: string): boolean =>
+  !/[!@#$%^&*(),.?":{}/|<>A-Z]/.test(name);
 
 export function extractPackageFile(
   content: string,
@@ -68,7 +67,7 @@ export function extractPackageFile(
       res.skipReason = SkipReason.LocalChart;
     }
 
-    // By definition on helm the chart name should be lowecase letter + number + -
+    // By definition on helm the chart name should be lowercase letter + number + -
     // However helmfile support templating of that field
     if (!isValidChartName(res.depName)) {
       res.skipReason = SkipReason.UnsupportedChartType;

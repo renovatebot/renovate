@@ -21,6 +21,9 @@ async function getFiles(dir: string): Promise<string[]> {
 }
 
 describe('static-files', () => {
+  // workaround for GitHub macOS
+  jest.setTimeout(10 * 1000);
+
   it('has same static files in lib and dist', async () => {
     expect(await getFiles('dist')).toEqual(await getFiles('lib'));
   });

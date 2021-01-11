@@ -1,5 +1,5 @@
 import { ExecOptions as ChildProcessExecOptions } from 'child_process';
-import { dirname, join } from 'path';
+import { dirname, join } from 'upath';
 import { RenovateConfig } from '../../config/common';
 import { logger } from '../../logger';
 import {
@@ -20,6 +20,7 @@ import { getChildProcessEnv } from './env';
 
 const execConfig: ExecConfig = {
   binarySource: null,
+  dockerImagePrefix: null,
   dockerUser: null,
   localDir: null,
   cacheDir: null,
@@ -118,6 +119,8 @@ export async function exec(
   };
   // Set default timeout to 15 minutes
   rawExecOptions.timeout = rawExecOptions.timeout || 15 * 60 * 1000;
+  // Set default max buffer size to 10MB
+  rawExecOptions.maxBuffer = rawExecOptions.maxBuffer || 10 * 1024 * 1024;
 
   let commands = typeof cmd === 'string' ? [cmd] : cmd;
   const useDocker = execConfig.binarySource === BinarySource.Docker && docker;
@@ -158,9 +161,10 @@ export async function exec(
       logger.trace({ err }, 'rawExec err');
       clearTimeout(timer);
       if (useDocker) {
-        await removeDockerContainer(docker.image).catch((removeErr) => {
+        await removeDockerContainer(docker.image).catch((removeErr: Error) => {
+          const message: string = err.message;
           throw new Error(
-            `Error: "${removeErr.message}" - Original Error: "${err.message}"`
+            `Error: "${removeErr.message}" - Original Error: "${message}"`
           );
         });
       }

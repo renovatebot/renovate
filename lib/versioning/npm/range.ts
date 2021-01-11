@@ -40,7 +40,7 @@ export function getNewValue({
       fromVersion,
       toVersion,
     });
-    if (element.operator && element.operator.startsWith('<')) {
+    if (element.operator?.startsWith('<')) {
       // TODO fix this
       const splitCurrent = currentValue.split(element.operator);
       splitCurrent.pop();
@@ -53,7 +53,7 @@ export function getNewValue({
         splitCurrent.pop();
         return splitCurrent.join('-') + '- ' + newValue;
       }
-      if (element.operator && element.operator.startsWith('>')) {
+      if (element.operator?.startsWith('>')) {
         logger.warn(`Complex ranges ending in greater than are not supported`);
         return null;
       }
@@ -82,11 +82,11 @@ export function getNewValue({
         }
         if (split.length === 1) {
           // ^4
-          return '^' + toVersionMajor;
+          return `^${toVersionMajor}`;
         }
         if (split.length === 2) {
           // ^4.1
-          return '^' + toVersionMajor + '.' + toVersionMinor;
+          return `^${toVersionMajor}.${toVersionMinor}`;
         }
         return `^${toVersion}`;
       }
@@ -97,11 +97,11 @@ export function getNewValue({
         }
         if (split.length === 1) {
           // ~4
-          return '~' + toVersionMajor;
+          return `~${toVersionMajor}`;
         }
         if (split.length === 2) {
           // ~4.1
-          return '~' + toVersionMajor + '.' + toVersionMinor;
+          return `~${toVersionMajor}.${toVersionMinor}`;
         }
         return `~${toVersion}`;
       }
@@ -116,6 +116,27 @@ export function getNewValue({
       if (element.operator.startsWith('<')) {
         return currentValue;
       }
+    } else {
+      const newRange = parseRange(currentValue);
+      const versions = newRange.map((x) => {
+        const subRange = x.semver;
+        const bumpedSubRange = getNewValue({
+          currentValue: subRange,
+          rangeStrategy: 'bump',
+          fromVersion,
+          toVersion,
+        });
+        if (satisfies(toVersion, bumpedSubRange)) {
+          return bumpedSubRange;
+        }
+        return getNewValue({
+          currentValue: subRange,
+          rangeStrategy: 'replace',
+          fromVersion,
+          toVersion,
+        });
+      });
+      return versions.filter((x) => x !== null && x !== '').join(' ');
     }
     logger.debug(
       'Unsupported range type for rangeStrategy=bump: ' + currentValue

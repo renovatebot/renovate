@@ -210,16 +210,6 @@ export const presets: Record<string, Preset> = {
       'Rebase existing PRs any time the base branch has been updated',
     rebaseWhen: 'behind-base-branch',
   },
-  unpublishSafe: {
-    description:
-      'Set a status check to warn when upgrades <  24 hours old might get unpublished',
-    unpublishSafe: true,
-  },
-  unpublishSafeDisabled: {
-    description:
-      "Create branches/PRs for dependency upgrades as soon as they're available",
-    unpublishSafe: false,
-  },
   prImmediately: {
     description: 'Raise PRs immediately (after branch is created)',
     prCreation: 'immediate',
@@ -351,7 +341,7 @@ export const presets: Record<string, Preset> = {
     description: 'Run lock file maintenance (updates) early Monday mornings',
     lockFileMaintenance: {
       enabled: true,
-      extends: 'schedule:weekly',
+      extends: ['schedule:weekly'],
     },
   },
   maintainLockFilesMonthly: {
@@ -359,7 +349,7 @@ export const presets: Record<string, Preset> = {
       'Run lock file maintenance (updates) on the first day of each month',
     lockFileMaintenance: {
       enabled: true,
-      extends: 'schedule:monthly',
+      extends: ['schedule:monthly'],
     },
   },
   ignoreUnstable: {
@@ -510,11 +500,11 @@ export const presets: Record<string, Preset> = {
   },
   semanticCommits: {
     description: 'Use semantic prefixes for commit messages and PR titles',
-    semanticCommits: true,
+    semanticCommits: 'enabled',
   },
   semanticCommitsDisabled: {
     description: 'Disable semantic prefixes for commit messages and PR titles',
-    semanticCommits: false,
+    semanticCommits: 'disabled',
   },
   disableLockFiles: {
     description: 'Disable lock file updates',

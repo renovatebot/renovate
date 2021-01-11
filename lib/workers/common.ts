@@ -60,6 +60,11 @@ export interface BranchUpgradeConfig
   updatedArtifacts?: File[];
 
   logJSON?: ChangeLogResult;
+
+  homepage?: string;
+  changelogUrl?: string;
+  dependencyUrl?: string;
+  sourceUrl?: string;
 }
 
 export enum PrResult {
@@ -72,23 +77,26 @@ export enum PrResult {
   ErrorAlreadyExists = 'ErrorAlreadyExists',
   NotUpdated = 'NotUpdated',
   Updated = 'Updated',
+  LimitReached = 'LimitReached',
 }
 
-export type ProcessBranchResult =
-  | 'already-existed'
-  | 'automerged'
-  | 'done'
-  | 'error'
-  | 'needs-approval'
-  | 'needs-pr-approval'
-  | 'not-scheduled'
-  | 'no-work'
-  | 'pending'
-  | 'pr-created'
-  | 'pr-edited'
-  | 'pr-limit-reached'
-  | 'commit-limit-reached'
-  | 'rebase';
+export enum ProcessBranchResult {
+  AlreadyExisted = 'already-existed',
+  Automerged = 'automerged',
+  Done = 'done',
+  Error = 'error',
+  NeedsApproval = 'needs-approval',
+  NeedsPrApproval = 'needs-pr-approval',
+  NotScheduled = 'not-scheduled',
+  NoWork = 'no-work',
+  Pending = 'pending',
+  PrCreated = 'pr-created',
+  PrEdited = 'pr-edited',
+  PrLimitReached = 'pr-limit-reached',
+  CommitLimitReached = 'commit-limit-reached',
+  BranchLimitReached = 'branch-limit-reached',
+  Rebase = 'rebase',
+}
 
 export interface BranchConfig
   extends BranchUpgradeConfig,
@@ -97,7 +105,6 @@ export interface BranchConfig
   automergeComment?: string;
   automergeType?: string;
   baseBranch?: string;
-  canBeUnpublished?: boolean;
   errors?: ValidationMessage[];
   hasTypes?: boolean;
   dependencyDashboardChecks?: Record<string, string>;

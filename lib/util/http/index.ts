@@ -1,13 +1,15 @@
 import crypto from 'crypto';
-import URL from 'url';
-import got, { Options } from 'got';
+import got, { Options, Response } from 'got';
 import { HOST_DISABLED } from '../../constants/error-messages';
+import { logger } from '../../logger';
 import { ExternalHostError } from '../../types/errors/external-host-error';
 import * as memCache from '../cache/memory';
 import { clone } from '../clone';
+import { resolveBaseUrl } from '../url';
 import { applyAuthorization, removeAuthorization } from './auth';
 import { applyHostRules } from './host-rules';
-import { GotOptions } from './types';
+import { getQueue } from './queue';
+import { GotOptions, RequestStats } from './types';
 
 // TODO: refactor code to remove this
 import './legacy';
@@ -33,12 +35,13 @@ export interface HttpPostOptions extends HttpOptions {
 }
 
 export interface InternalHttpOptions extends HttpOptions {
-  json?: object;
+  json?: Record<string, unknown>;
   responseType?: 'json';
   method?: 'get' | 'post' | 'put' | 'patch' | 'delete' | 'head';
 }
 
 export interface HttpResponse<T = string> {
+  statusCode: number;
   body: T;
   headers: any;
 }
@@ -46,24 +49,10 @@ export interface HttpResponse<T = string> {
 function cloneResponse<T>(response: any): HttpResponse<T> {
   // clone body and headers so that the cached result doesn't get accidentally mutated
   return {
+    statusCode: response.statusCode,
     body: clone<T>(response.body),
     headers: clone(response.headers),
   };
-}
-
-async function resolveResponse<T>(
-  promisedRes: Promise<HttpResponse<T>>,
-  { abortOnError, abortIgnoreStatusCodes }: GotOptions
-): Promise<HttpResponse<T>> {
-  try {
-    const res = await promisedRes;
-    return cloneResponse(res);
-  } catch (err) {
-    if (abortOnError && !abortIgnoreStatusCodes?.includes(err.statusCode)) {
-      throw new ExternalHostError(err);
-    }
-    throw err;
-  }
 }
 
 function applyDefaultHeaders(options: Options): void {
@@ -78,6 +67,23 @@ function applyDefaultHeaders(options: Options): void {
   };
 }
 
+async function gotRoutine<T>(
+  url: string,
+  options: GotOptions,
+  requestStats: Partial<RequestStats>
+): Promise<Response<T>> {
+  logger.trace({ url, options }, 'got request');
+
+  const resp = await got<T>(url, options);
+  const duration = resp.timings.phases.total || 0;
+
+  const httpRequests = memCache.get('http-requests') || [];
+  httpRequests.push({ ...requestStats, duration });
+  memCache.set('http-requests', httpRequests);
+
+  return resp;
+}
+
 export class Http<GetOptions = HttpOptions, PostOptions = HttpPostOptions> {
   constructor(private hostType: string, private options?: HttpOptions) {}
 
@@ -87,7 +93,7 @@ export class Http<GetOptions = HttpOptions, PostOptions = HttpPostOptions> {
   ): Promise<HttpResponse<T> | null> {
     let url = requestUrl.toString();
     if (httpOptions?.baseUrl) {
-      url = URL.resolve(httpOptions.baseUrl, url);
+      url = resolveBaseUrl(httpOptions.baseUrl, url);
     }
     // TODO: deep merge in order to merge headers
     let options: GotOptions = {
@@ -111,33 +117,45 @@ export class Http<GetOptions = HttpOptions, PostOptions = HttpPostOptions> {
     }
     options = applyAuthorization(options);
 
-    // Cache GET requests unless useCache=false
     const cacheKey = crypto
       .createHash('md5')
       .update('got-' + JSON.stringify({ url, headers: options.headers }))
       .digest('hex');
+
+    let resPromise;
+
+    // Cache GET requests unless useCache=false
     if (options.method === 'get' && options.useCache !== false) {
-      // return from cache if present
-      const cachedRes = memCache.get(cacheKey);
-      // istanbul ignore if
-      if (cachedRes) {
-        return resolveResponse<T>(cachedRes, options);
+      resPromise = memCache.get(cacheKey);
+    }
+
+    if (!resPromise) {
+      const startTime = Date.now();
+      const queueTask = (): Promise<Response<T>> => {
+        const queueDuration = Date.now() - startTime;
+        return gotRoutine(url, options, {
+          method: options.method,
+          url,
+          queueDuration,
+        });
+      };
+      const queue = getQueue(url);
+      resPromise = queue?.add(queueTask) ?? queueTask();
+      if (options.method === 'get') {
+        memCache.set(cacheKey, resPromise); // always set if it's a get
       }
     }
-    const startTime = Date.now();
-    const promisedRes = got<T>(url, options);
-    if (options.method === 'get') {
-      memCache.set(cacheKey, promisedRes); // always set if it's a get
+
+    try {
+      const res = await resPromise;
+      return cloneResponse(res);
+    } catch (err) {
+      const { abortOnError, abortIgnoreStatusCodes } = options;
+      if (abortOnError && !abortIgnoreStatusCodes?.includes(err.statusCode)) {
+        throw new ExternalHostError(err);
+      }
+      throw err;
     }
-    const res = await resolveResponse<T>(promisedRes, options);
-    const httpRequests = memCache.get('http-requests') || [];
-    httpRequests.push({
-      method: options.method,
-      url,
-      duration: Date.now() - startTime,
-    });
-    memCache.set('http-requests', httpRequests);
-    return res;
   }
 
   get(url: string, options: HttpOptions = {}): Promise<HttpResponse> {
@@ -216,7 +234,7 @@ export class Http<GetOptions = HttpOptions, PostOptions = HttpPostOptions> {
     // istanbul ignore else: needs test
     if (options?.baseUrl) {
       // eslint-disable-next-line no-param-reassign
-      url = URL.resolve(options.baseUrl, url);
+      url = resolveBaseUrl(options.baseUrl, url);
     }
 
     applyDefaultHeaders(combinedOptions);

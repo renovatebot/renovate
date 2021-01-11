@@ -93,6 +93,13 @@ export type RenovateOptions =
 
 const options: RenovateOptions[] = [
   {
+    name: 'allowPostUpgradeCommandTemplating',
+    description: 'If true allow templating for post-upgrade commands.',
+    type: 'boolean',
+    default: false,
+    admin: true,
+  },
+  {
     name: 'allowedPostUpgradeCommands',
     description:
       'A list of regular expressions that determine which post-upgrade tasks are allowed. A task has to match at least one of the patterns to be allowed to run',
@@ -141,6 +148,24 @@ const options: RenovateOptions[] = [
     cli: false,
   },
   {
+    name: 'onboardingCommitMessage',
+    description:
+      'Change this value in order to override the default onboarding commit message.',
+    type: 'string',
+    default: null,
+    admin: true,
+    cli: false,
+  },
+  {
+    name: 'onboardingConfigFileName',
+    description:
+      'Change this value in order to override the default onboarding config file name.',
+    type: 'string',
+    default: 'renovate.json',
+    admin: true,
+    cli: false,
+  },
+  {
     name: 'onboardingPrTitle',
     description:
       'Change this value in order to override the default onboarding PR title.',
@@ -157,7 +182,7 @@ const options: RenovateOptions[] = [
     mergeable: true,
     default: {
       documentation: 'https://docs.renovatebot.com/',
-      help: 'https://github.com/renovatebot/config-help/issues',
+      help: 'https://github.com/renovatebot/renovate/discussions',
       homepage: 'https://github.com/renovatebot/renovate',
     },
     additionalProperties: {
@@ -290,6 +315,14 @@ const options: RenovateOptions[] = [
     admin: true,
     type: 'boolean',
     default: false,
+  },
+  {
+    name: 'dockerImagePrefix',
+    description:
+      'Change this value in order to override the default renovate docker sidecar image name prefix.',
+    type: 'string',
+    default: 'docker.io/renovate',
+    admin: true,
   },
   {
     name: 'dockerUser',
@@ -444,6 +477,13 @@ const options: RenovateOptions[] = [
     stage: 'repository',
     type: 'string',
     replaceLineReturns: true,
+    admin: true,
+  },
+  {
+    name: 'privateKeyPath',
+    description: 'Path to the Server-side private key',
+    stage: 'repository',
+    type: 'string',
     admin: true,
   },
   {
@@ -612,7 +652,6 @@ const options: RenovateOptions[] = [
     type: 'array',
     stage: 'package',
     cli: false,
-    env: false,
   },
   {
     name: 'gitAuthor',
@@ -678,6 +717,15 @@ const options: RenovateOptions[] = [
     subType: 'string',
     default: null,
     stage: 'branch',
+    cli: false,
+    env: false,
+  },
+  {
+    name: 'extractVersion',
+    description:
+      "A regex (re2) to extract a version from a datasource's raw version string",
+    type: 'string',
+    format: 'regex',
     cli: false,
     env: false,
   },
@@ -902,7 +950,8 @@ const options: RenovateOptions[] = [
   // Version behaviour
   {
     name: 'allowedVersions',
-    description: 'A semver range defining allowed versions for dependencies',
+    description:
+      'A version range or regex pattern capturing allowed versions for dependencies',
     type: 'string',
     parent: 'packageRules',
     stage: 'package',
@@ -989,7 +1038,7 @@ const options: RenovateOptions[] = [
   },
   {
     name: 'bumpVersion',
-    description: 'Bump the version in the package.json being updated',
+    description: 'Bump the version in the package file being updated',
     type: 'string',
     allowedValues: ['major', 'minor', 'patch'],
   },
@@ -1028,7 +1077,6 @@ const options: RenovateOptions[] = [
     stage: 'package',
     type: 'object',
     default: {
-      unpublishSafe: false,
       recreateClosed: true,
       rebaseWhen: 'behind-base-branch',
       groupName: 'Pin Dependencies',
@@ -1060,8 +1108,9 @@ const options: RenovateOptions[] = [
   {
     name: 'semanticCommits',
     description: 'Enable semantic commit prefixes for commits and PR titles',
-    type: 'boolean',
-    default: null,
+    type: 'string',
+    allowedValues: ['auto', 'enabled', 'disabled'],
+    default: 'auto',
   },
   {
     name: 'semanticCommitType',
@@ -1103,18 +1152,6 @@ const options: RenovateOptions[] = [
     default: 'rebase',
   },
   {
-    name: 'statusCheckVerify',
-    description: 'Set a verify status check for all PRs',
-    type: 'boolean',
-    default: false,
-  },
-  {
-    name: 'unpublishSafe',
-    description: 'Set a status check for unpublish-safe upgrades',
-    type: 'boolean',
-    default: false,
-  },
-  {
     name: 'stabilityDays',
     description:
       'Number of days required before a new release is considered to be stabilized.',
@@ -1132,7 +1169,6 @@ const options: RenovateOptions[] = [
     name: 'prNotPendingHours',
     description: 'Timeout in hours for when prCreation=not-pending',
     type: 'integer',
-    // Must be at least 24 hours to give time for the unpublishSafe check to "complete".
     default: 25,
   },
   {
@@ -1148,6 +1184,13 @@ const options: RenovateOptions[] = [
       'Limit to a maximum of x concurrent branches/PRs. 0 (default) means no limit.',
     type: 'integer',
     default: 0, // no limit
+  },
+  {
+    name: 'branchConcurrentLimit',
+    description:
+      'Limit to a maximum of x concurrent branches. 0 means no limit, `null` (default) inherits value from `prConcurrentLimit`.',
+    type: 'integer',
+    default: null, // inherit prConcurrentLimit
   },
   {
     name: 'prPriority',
@@ -1215,12 +1258,12 @@ const options: RenovateOptions[] = [
     name: 'branchName',
     description: 'Branch name template',
     type: 'string',
-    default: '{{{branchPrefix}}}{{{managerBranchPrefix}}}{{{branchTopic}}}',
+    default: '{{{branchPrefix}}}{{{additionalBranchPrefix}}}{{{branchTopic}}}',
     cli: false,
   },
   {
-    name: 'managerBranchPrefix',
-    description: 'Branch manager prefix',
+    name: 'additionalBranchPrefix',
+    description: 'Additional string value to be appended to branchPrefix',
     type: 'string',
     default: '',
     cli: false,
@@ -1292,6 +1335,15 @@ const options: RenovateOptions[] = [
     cli: false,
   },
   {
+    name: 'prBodyTemplate',
+    description:
+      'Pull Request body template. Controls which sections are rendered in the body.',
+    type: 'string',
+    default:
+      '{{{header}}}{{{table}}}{{{notes}}}{{{changelogs}}}{{{configDescription}}}{{{controls}}}{{{footer}}}',
+    cli: false,
+  },
+  {
     name: 'prTitle',
     description:
       'Pull Request title template (deprecated). Now uses commitMessage.',
@@ -1335,12 +1387,6 @@ const options: RenovateOptions[] = [
   },
   // Dependency Groups
   {
-    name: 'lazyGrouping',
-    description: 'Use group names only when multiple dependencies upgraded',
-    type: 'boolean',
-    default: true,
-  },
-  {
     name: 'groupName',
     description: 'Human understandable name for the dependency group',
     type: 'string',
@@ -1370,9 +1416,16 @@ const options: RenovateOptions[] = [
   // Pull Request options
   {
     name: 'labels',
+    description: 'Labels to set in Pull Request',
+    type: 'array',
+    subType: 'string',
+  },
+  {
+    name: 'addLabels',
     description: 'Labels to add to Pull Request',
     type: 'array',
     subType: 'string',
+    mergeable: true,
   },
   {
     name: 'assignees',
@@ -1549,8 +1602,9 @@ const options: RenovateOptions[] = [
     cli: false,
   },
   {
-    name: 'compatibility',
-    description: 'Configuration object for compatibility',
+    name: 'constraints',
+    description:
+      'Configuration object for define language or manager version constraints',
     type: 'object',
     default: {},
     mergeable: true,
@@ -1636,7 +1690,7 @@ const options: RenovateOptions[] = [
   },
   {
     name: 'insecureRegistry',
-    description: 'explicity turn on insecure docker registry access (http)',
+    description: 'explicitly turn on insecure docker registry access (http)',
     type: 'boolean',
     stage: 'repository',
     parent: 'hostRules',
@@ -1672,6 +1726,16 @@ const options: RenovateOptions[] = [
     stage: 'repository',
     parent: 'hostRules',
     default: false,
+    cli: false,
+    env: false,
+  },
+  {
+    name: 'concurrentRequestLimit',
+    description: 'Limit concurrent requests per host.',
+    type: 'integer',
+    stage: 'repository',
+    parent: 'hostRules',
+    default: null,
     cli: false,
     env: false,
   },
@@ -1768,6 +1832,15 @@ const options: RenovateOptions[] = [
     env: false,
   },
   {
+    name: 'matchStringsStrategy',
+    description: 'Strategy how to interpret matchStrings',
+    type: 'string',
+    default: 'any',
+    parent: 'regexManagers',
+    cli: false,
+    env: false,
+  },
+  {
     name: 'depNameTemplate',
     description:
       'Optional depName for extracted dependencies. Valid only within `regexManagers` object.',
@@ -1802,6 +1875,28 @@ const options: RenovateOptions[] = [
     parent: 'regexManagers',
     cli: false,
     env: false,
+  },
+  {
+    name: 'fetchReleaseNotes',
+    description: 'Allow to disable release notes fetching',
+    type: 'boolean',
+    default: true,
+    cli: false,
+    env: false,
+  },
+  {
+    name: 'cloneSubmodules',
+    description:
+      'Set to false to disable initialization of submodules during repository clone',
+    type: 'boolean',
+    default: true,
+  },
+  {
+    name: 'ignorePrAuthor',
+    description:
+      'Set to true to fetch the entire list of PRs instead of only those authored by the Renovate user',
+    type: 'boolean',
+    default: false,
   },
 ];
 

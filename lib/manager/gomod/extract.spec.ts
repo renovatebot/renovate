@@ -17,10 +17,10 @@ describe('lib/manager/gomod/extract', () => {
       expect(res.filter((e) => e.skipReason)).toHaveLength(1);
       expect(res.filter((e) => e.depType === 'replace')).toHaveLength(1);
     });
-    it('extracts compatibility', () => {
+    it('extracts constraints', () => {
       const res = extractPackageFile(gomod3);
       expect(res).toMatchSnapshot();
-      expect(res.compatibility.go).toEqual('1.13');
+      expect(res.constraints.go).toEqual('1.13');
     });
     it('extracts multi-line requires', () => {
       const res = extractPackageFile(gomod2).deps;

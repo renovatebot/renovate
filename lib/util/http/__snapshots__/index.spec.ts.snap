@@ -6,6 +6,7 @@ Object {
   "headers": Object {
     "content-type": "application/json",
   },
+  "statusCode": 200,
 }
 `;
 
@@ -13,6 +14,7 @@ exports[`util/http/index get 1`] = `
 Object {
   "body": "",
   "headers": Object {},
+  "statusCode": 200,
 }
 `;
 
@@ -22,6 +24,7 @@ Object {
     "test": true,
   },
   "headers": Object {},
+  "statusCode": 200,
 }
 `;
 
@@ -31,6 +34,7 @@ Object {
   "headers": Object {
     "content-type": "application/json",
   },
+  "statusCode": 200,
 }
 `;
 
@@ -40,6 +44,7 @@ Object {
   "headers": Object {
     "content-type": "application/json",
   },
+  "statusCode": 200,
 }
 `;
 
@@ -49,6 +54,7 @@ Object {
   "headers": Object {
     "content-type": "application/json",
   },
+  "statusCode": 200,
 }
 `;
 
@@ -58,6 +64,7 @@ Object {
   "headers": Object {
     "content-type": "application/json",
   },
+  "statusCode": 200,
 }
 `;
 
@@ -67,5 +74,6 @@ Object {
   "headers": Object {
     "x-some-header": "abc",
   },
+  "statusCode": 200,
 }
 `;

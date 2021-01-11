@@ -44,14 +44,14 @@ function getDep(
 
 export function extractPackageFile(content: string): PackageFile | null {
   logger.trace({ content }, 'gomod.extractPackageFile()');
-  const compatibility: Record<string, any> = {};
+  const constraints: Record<string, any> = {};
   const deps: PackageDependency[] = [];
   try {
     const lines = content.split('\n');
     for (let lineNumber = 0; lineNumber < lines.length; lineNumber += 1) {
       let line = lines[lineNumber];
       if (line.startsWith('go ') && validRange(line.replace('go ', ''))) {
-        compatibility.go = line.replace('go ', '');
+        constraints.go = line.replace('go ', '');
       }
       const replaceMatch = /^replace\s+[^\s]+[\s]+[=][>]\s+([^\s]+)\s+([^\s]+)/.exec(
         line
@@ -90,5 +90,5 @@ export function extractPackageFile(content: string): PackageFile | null {
   if (!deps.length) {
     return null;
   }
-  return { compatibility, deps };
+  return { constraints, deps };
 }

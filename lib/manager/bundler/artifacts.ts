@@ -26,8 +26,8 @@ async function getRubyConstraint(
   updateArtifact: UpdateArtifact
 ): Promise<string> {
   const { packageFileName, config } = updateArtifact;
-  const { compatibility = {} } = config;
-  const { ruby } = compatibility;
+  const { constraints = {} } = config;
+  const { ruby } = constraints;
 
   let rubyConstraint: string;
   if (ruby) {
@@ -72,7 +72,7 @@ export async function updateArtifacts(
     newPackageFileContent,
     config,
   } = updateArtifact;
-  const { compatibility = {} } = config;
+  const { constraints = {} } = config;
   logger.debug(`bundler.updateArtifacts(${packageFileName})`);
   const existingError = memCache.get<string>('bundlerArtifactsError');
   // istanbul ignore if
@@ -103,7 +103,7 @@ export async function updateArtifacts(
     }
 
     let bundlerVersion = '';
-    const { bundler } = compatibility;
+    const { bundler } = constraints;
     if (bundler) {
       if (isValid(bundler)) {
         logger.debug({ bundlerVersion: bundler }, 'Found bundler version');
@@ -121,9 +121,13 @@ export async function updateArtifacts(
 
     const bundlerHostRulesVariables = findAllAuthenticatable({
       hostType: 'bundler',
-    }).reduce((variables, hostRule) => {
-      return { ...variables, ...buildBundleHostVariable(hostRule) };
-    }, {} as Record<string, string>);
+    }).reduce(
+      (variables, hostRule) => ({
+        ...variables,
+        ...buildBundleHostVariable(hostRule),
+      }),
+      {} as Record<string, string>
+    );
 
     const execOptions: ExecOptions = {
       cwdFile: packageFileName,
@@ -154,7 +158,7 @@ export async function updateArtifacts(
       },
     ];
   } catch (err) /* istanbul ignore next */ {
-    const output = `${err.stdout}\n${err.stderr}`;
+    const output = `${String(err.stdout)}\n${String(err.stderr)}`;
     if (
       err.message.includes('fatal: Could not parse object') ||
       output.includes('but that version could not be found')
@@ -223,7 +227,7 @@ export async function updateArtifacts(
       {
         artifactError: {
           lockFile: lockFileName,
-          stderr: `${err.stdout}\n${err.stderr}`,
+          stderr: `${String(err.stdout)}\n${String(err.stderr)}`,
         },
       },
     ];

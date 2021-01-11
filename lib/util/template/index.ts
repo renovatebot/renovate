@@ -6,9 +6,9 @@ import { clone } from '../clone';
 handlebars.registerHelper('encodeURIComponent', encodeURIComponent);
 
 // istanbul ignore next
-handlebars.registerHelper('replace', (find, replace, context) => {
-  return context.replace(new RegExp(find, 'g'), replace);
-});
+handlebars.registerHelper('replace', (find, replace, context) =>
+  context.replace(new RegExp(find, 'g'), replace)
+);
 
 export const exposedConfigOptions = [
   'branchName',
@@ -23,7 +23,9 @@ export const exposedConfigOptions = [
   'group',
   'groupSlug',
   'groupName',
-  'managerBranchPrefix',
+  'additionalBranchPrefix',
+  'addLabels',
+  'labels',
   'prBodyColumns',
   'prBodyDefinitions',
   'prBodyNotes',
@@ -84,7 +86,9 @@ export const allowedFields = {
   versions: 'An array of ChangeLogRelease objects in the upgrade',
 };
 
-function getFilteredObject(input: any): any {
+type CompileInput = Record<string, unknown>;
+
+function getFilteredObject(input: CompileInput): any {
   const obj = clone(input);
   const res = {};
   const allAllowed = [
@@ -94,8 +98,10 @@ function getFilteredObject(input: any): any {
   for (const field of allAllowed) {
     const value = obj[field];
     if (is.array(value)) {
-      res[field] = value.map((element) => getFilteredObject(element));
-    } else if (is.object(value)) {
+      res[field] = value.map((element) =>
+        getFilteredObject(element as CompileInput)
+      );
+    } else if (is.plainObject(value)) {
       res[field] = getFilteredObject(value);
     } else if (!is.undefined(value)) {
       res[field] = value;
@@ -106,7 +112,7 @@ function getFilteredObject(input: any): any {
 
 export function compile(
   template: string,
-  input: any,
+  input: CompileInput,
   filterFields = true
 ): string {
   const filteredInput = filterFields ? getFilteredObject(input) : input;

@@ -1,0 +1,33 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`workers/repository/master-issue ensureMasterIssue() contains logged problems 1`] = `
+"This issue contains a list of Renovate updates and their statuses.
+
+## Repository problems
+
+These problems occurred while renovating this repository.
+
+ - ERROR: everything is broken
+ - WARN: just a bit
+ - ERROR: i am a duplicated problem
+ - ERROR: i am a non-duplicated problem
+ - WARN: i am a non-duplicated problem
+
+## Pending Status Checks
+
+These updates await pending status checks. To force their creation now, check the box below.
+
+ - [ ] <!-- approvePr-branch=branchName1 -->pr1
+
+"
+`;
+
+exports[`workers/repository/master-issue ensureMasterIssue() open or update Dependency Dashboard when all branches are closed and dependencyDashboardAutoclose is false 1`] = `
+"This issue contains a list of Renovate updates and their statuses.
+
+This repository currently has no open or pending branches.
+
+---
+And this is a footer
+"
+`;

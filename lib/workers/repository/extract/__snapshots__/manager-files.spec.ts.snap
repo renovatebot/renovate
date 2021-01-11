@@ -3,7 +3,7 @@
 exports[`workers/repository/extract/manager-files getManagerPackageFiles() returns files with extractAllPackageFiles 1`] = `
 Array [
   Object {
-    "compatibility": Object {},
+    "constraints": Object {},
     "deps": Array [
       Object {
         "currentValue": "2.0.0",
@@ -21,9 +21,9 @@ Array [
     "npmLock": undefined,
     "npmrc": undefined,
     "packageFile": "package.json",
+    "packageFileVersion": undefined,
     "packageJsonName": undefined,
     "packageJsonType": "app",
-    "packageJsonVersion": undefined,
     "pnpmShrinkwrap": undefined,
     "skipInstalls": undefined,
     "yarnLock": undefined,
@@ -45,7 +45,6 @@ Array [
         "replaceString": "abc",
       },
     ],
-    "manager": "html",
     "packageFile": "Dockerfile",
   },
 ]

@@ -1,7 +1,7 @@
 import AWS from 'aws-sdk';
 import AWSMock from 'aws-sdk-mock';
 import { getDigest, getPkgReleases } from '..';
-import * as httpMock from '../../../test/httpMock';
+import * as httpMock from '../../../test/http-mock';
 import { getName, mocked } from '../../../test/util';
 import { EXTERNAL_HOST_ERROR } from '../../constants/error-messages';
 import * as _hostRules from '../../util/host-rules';
@@ -230,7 +230,7 @@ describe(getName(__filename), () => {
       AWSMock.mock(
         'ECR',
         'getAuthorizationToken',
-        (params: {}, callback: Function) => {
+        (params: unknown, callback: (...unknown) => void) => {
           callback(null, {
             authorizationData: [{ authorizationToken: 'abcdef' }],
           });
@@ -262,7 +262,7 @@ describe(getName(__filename), () => {
       AWSMock.mock(
         'ECR',
         'getAuthorizationToken',
-        (params: {}, callback: Function) => {
+        (params: unknown, callback: (...unknown) => void) => {
           callback(null, {});
         }
       );
@@ -291,7 +291,7 @@ describe(getName(__filename), () => {
       AWSMock.mock(
         'ECR',
         'getAuthorizationToken',
-        (params: {}, callback: Function) => {
+        (params: unknown, callback: (...unknown) => void) => {
           callback(Error('some error'), null);
         }
       );

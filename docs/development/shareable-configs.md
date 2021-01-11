@@ -1,136 +1,60 @@
 # Preset configs
 
-Renovate uses the term "presets" to refer to shareable config snippets, similar
-to eslint. Unlike eslint though:
+Renovate uses the term "presets" to refer to shareable config snippets, similar to ESLint.
+Unlike ESLint though:
 
-- Presets may be as small as a list of package names, or as large as a full
-  config
+- Presets may be as small as a list of package names, or as large as a full config
 - Shared config files can contain many presets
+
+Presets can be defined using either npm packages, or with GitHub/GitLab repositories.
+Bitbucket-hosted presets are yet to be implemented.
 
 ## Preset config URIs
 
 In human-understandable form, the rules are:
 
-- A full preset URI consists of package name, preset name, and preset
-  parameters, such as `package:preset(param)`
-- If a package scope is specified and no package, then the package name is
-  assumed to be `renovate-config`, e.g. `@rarkins:webapp` is expanded to
-  `@rarkins/renovate-config:webapp`
-- If a non-scoped package is specified then it is assumed to have prefix
-  `renovate-config-`. e.g. `rarkins:webapp` is expanded to
-  `renovate-config-rarkins:webapp`
-- If a package name is specified and no preset name, then `default` is assumed,
-  e.g. `@rarkins` expands in full to `@rarkins/renovate-config:default` and
-  `rarkins` expands in full to `renovate-config-rarkins:default`
-- There is a special "default" namespace where no package name is necessary.
-  e.g. `:webapp` (not the leading `:`) expands to
-  `renovate-config-default:webapp`
+- A full preset URI consists of package name, preset name, and preset parameters, such as `package:preset(param)`
+- If a package scope is specified and no package exists, then the package name is assumed to be `renovate-config`, e.g. `@rarkins:webapp` is expanded to `@rarkins/renovate-config:webapp`
+- If a non-scoped package is specified then it is assumed to have the prefix `renovate-config-`. e.g. `rarkins:webapp` is expanded to `renovate-config-rarkins:webapp`
+- If a package name is specified and has no preset name, then `default` is assumed, e.g. `@rarkins` expands in full to `@rarkins/renovate-config:default` and `rarkins` expands in full to `renovate-config-rarkins:default`
+- There is a special "default" namespace where no package name is necessary. e.g. `:webapp` (not the leading `:`) expands to `renovate-config-default:webapp`
 
 ## Supported config syntax
 
 ### Scoped
 
-```
-@somescope
-```
+| name                                               | example use                                 | preset    | npm package resolves as      | parameters |
+| -------------------------------------------------- | ------------------------------------------- | --------- | ---------------------------- | ---------- |
+| scoped                                             | `@somescope`                                | `default` | `@somescope/renovate-config` |            |
+| scoped with package name                           | `@somescope/somepackagename`                | `default` | `@somescope/somepackagename` |            |
+| scoped with preset name                            | `@somescope:webapp`                         | `webapp`  | `@somescope/renovate-config` |            |
+| scoped with param                                  | `@somescope(eslint)`                        | `default` | `@somescope/renovate-config` | `eslint`   |
+| scoped with preset name and param                  | `@somescope:webapp(eslint)`                 | `webapp`  | `@somescope/renovate-config` | `eslint`   |
+| scoped with package name and preset name           | `@somescope/somepackagename:webapp`         | `webapp`  | `@somescope/somepackagename` |            |
+| scoped with package name and preset name and param | `@somescope/somepackagename:webapp(eslint)` | `webapp`  | `@somescope/somepackagename` | `eslint`   |
 
-This will resolve to use the preset `default` in the npm package
-`@somescope/renovate-config`.
+### Non-scoped
 
-### Scoped with package name
+If you use a non-scoped config, you must use a preset name!
 
-```
-@somescope/somepackagename
-```
+| name                                        | example use                                       | preset    | npm package resolves as           | parameters |
+| ------------------------------------------- | ------------------------------------------------- | --------- | --------------------------------- | ---------- |
+| non-scoped short with preset name           | `somepackagename:default`                         | `default` | `renovate-config-somepackagename` |            |
+| non-scoped short with preset name and param | `somepackagename:default(eslint)`                 | `default` | `renovate-config-somepackagename` | `eslint`   |
+| non-scoped full with preset name            | `renovate-config-somepackagename:default`         | `default` | `renovate-config-somepackagename` |            |
+| non-scoped full with preset name and param  | `renovate-config-somepackagename:default(eslint)` | `default` | `renovate-config-somepackagename` | `eslint`   |
 
-This will resolve to use the preset `default` in the npm package
-`@somescope/somepackagename`.
+### Git based
 
-### Scoped with preset name
+In general, GitHub, GitLab or Gitea-based preset hosting is easier than npm because you avoid the "publish" step - simply commit preset code to the default branch and it will be picked up by Renovate the next time it runs.
+An additional benefit of using source code hosting is that the same token/authentication can be reused by Renovate in case you want to make your config private.
 
-```
-@somescope:webapp
-```
-
-This will resolve to use the preset `webapp` in the npm package
-`@somescope/renovate-config`.
-
-### Scoped with params
-
-```
-@somescope(eslint, stylelint)
-```
-
-This will resolve to use the preset `default` in the npm package
-`@somescope/renovate-config` and pass the parameters `eslint` and `stylelint`.
-
-### Scoped with preset name and params
-
-```
-@somescope:webapp(eslint, stylelint)
-```
-
-This will resolve to use the preset `webapp` in the npm package
-`@somescope/renovate-config` and pass the parameters `eslint` and `stylelint`.
-
-### Scoped with package name and preset name
-
-```
-@somescope/somepackagename:webapp
-```
-
-This will resolve to use the preset `webapp` in the npm package
-`@somescope/somepackagename`.
-
-### Scoped with package name and preset name and params
-
-```
-@somescope/somepackagename:webapp(eslint, stylelint)
-```
-
-This will resolve to use the preset `webapp` in the npm package
-`@somescope/somepackagename` and pass the parameters `eslint` and `stylelint`.
-
-### Non-scoped short with preset name
-
-Note: if using non-scoped packages, a preset name is mandatory.
-
-```
-somepackagename:default
-```
-
-This will resolve to use the preset `default` in the npm package
-`renovate-config-somepackagename`.
-
-### Non-scoped short with preset name and params
-
-Note: if using non-scoped packages, a preset name is mandatory.
-
-```
-somepackagename:default(eslint)
-```
-
-This will resolve to use the preset `default` in the npm package
-`renovate-config-somepackagename` with param `eslint`.
-
-### Non-scoped full with preset name
-
-Note: if using non-scoped packages, a preset name is mandatory.
-
-```
-renovate-config-somepackagename:default
-```
-
-This will resolve to use the preset `default` in the npm package
-`renovate-config-somepackagename`.
-
-### Non-scoped full with preset name and params
-
-Note: if using non-scoped packages, a preset name is mandatory.
-
-```
-renovate-config-somepackagename:default(eslint)
-```
-
-This will resolve to use the preset `default` in the npm package
-`renovate-config-somepackagename` and param `eslint`.
+| name                    | example use          | preset    | resolves as                          | filename                          |
+| ----------------------- | -------------------- | --------- | ------------------------------------ | --------------------------------- |
+| GitHub default          | `github>abc/foo`     | `default` | `https://github.com/abc/foo`         | `default.json` or `renovate.json` |
+| GitHub with preset name | `github>abc/foo:xyz` | `xyz`     | `https://github.com/abc/foo`         | `xyz.json`                        |
+| GitLab default          | `gitlab>abc/foo`     | `default` | `https://gitlab.com/abc/foo`         | `default.json` or `renovate.json` |
+| GitLab with preset name | `gitlab>abc/foo:xyz` | `xyz`     | `https://gitlab.com/abc/foo`         | `xyz.json`                        |
+| Gitea default           | `gitea>abc/foo`      | `default` | `https://gitea.com/abc/foo`          | `default.json` or `renovate.json` |
+| Gitea with preset name  | `gitea>abc/foo:xyz`  | `xyz`     | `https://gitea.com/abc/foo`          | `xyz.json`                        |
+| Local default           | `local>abc/foo`      | `default` | `https://github.company.com/abc/foo` | `default.json` or `renovate.json` |

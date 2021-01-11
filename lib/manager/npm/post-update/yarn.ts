@@ -1,5 +1,5 @@
 import is from '@sindresorhus/is';
-import { validRange } from 'semver';
+import { gte, minVersion, validRange } from 'semver';
 import { quote } from 'shlex';
 import { join } from 'upath';
 import { SYSTEM_INSUFFICIENT_DISK_SPACE } from '../../../constants/error-messages';
@@ -47,13 +47,29 @@ export async function generateLockFile(
   logger.debug(`Spawning yarn install to create ${lockFileName}`);
   let lockFile = null;
   try {
+    const yarnCompatibility = config.constraints?.yarn;
+    const minYarnVersion =
+      validRange(yarnCompatibility) && minVersion(yarnCompatibility);
+    const isYarn1 = !minYarnVersion || minYarnVersion.major === 1;
+    const isYarnDedupeAvailable =
+      minYarnVersion && gte(minYarnVersion, '2.2.0');
+
     let installYarn = 'npm i -g yarn';
-    const yarnCompatibility = config.compatibility?.yarn;
-    if (validRange(yarnCompatibility)) {
+    if (isYarn1 && minYarnVersion) {
       installYarn += `@${quote(yarnCompatibility)}`;
     }
+
     const preCommands = [installYarn];
+
+    const extraEnv: ExecOptions['extraEnv'] = {
+      NPM_CONFIG_CACHE: env.NPM_CONFIG_CACHE,
+      npm_config_store: env.npm_config_store,
+      YARN_CACHE_FOLDER: env.YARN_CACHE_FOLDER,
+      CI: 'true',
+    };
+
     if (
+      isYarn1 &&
       config.skipInstalls !== false &&
       (await hasYarnOfflineMirror(cwd)) === false
     ) {
@@ -62,18 +78,24 @@ export async function generateLockFile(
       preCommands.push(optimizeCommand);
     }
     const commands = [];
-    let cmdOptions =
-      '--ignore-engines --ignore-platform --network-timeout 100000';
+    let cmdOptions = '';
+    if (isYarn1) {
+      cmdOptions +=
+        '--ignore-engines --ignore-platform --network-timeout 100000';
+    } else {
+      extraEnv.YARN_HTTP_TIMEOUT = '100000';
+    }
     if (global.trustLevel !== 'high' || config.ignoreScripts) {
-      cmdOptions += ' --ignore-scripts';
+      if (isYarn1) {
+        cmdOptions += ' --ignore-scripts';
+      } else {
+        extraEnv.YARN_ENABLE_SCRIPTS = '0';
+      }
     }
     const tagConstraint = await getNodeConstraint(config);
     const execOptions: ExecOptions = {
       cwd,
-      extraEnv: {
-        NPM_CONFIG_CACHE: env.NPM_CONFIG_CACHE,
-        npm_config_store: env.npm_config_store,
-      },
+      extraEnv,
       docker: {
         image: 'renovate/node',
         tagScheme: 'npm',
@@ -81,6 +103,12 @@ export async function generateLockFile(
         preCommands,
       },
     };
+    // istanbul ignore if
+    if (global.trustLevel === 'high') {
+      execOptions.extraEnv.NPM_AUTH = env.NPM_AUTH;
+      execOptions.extraEnv.NPM_EMAIL = env.NPM_EMAIL;
+      execOptions.extraEnv.NPM_TOKEN = env.NPM_TOKEN;
+    }
     if (config.dockerMapDotfiles) {
       const homeDir =
         process.env.HOME || process.env.HOMEPATH || process.env.USERPROFILE;
@@ -92,28 +120,46 @@ export async function generateLockFile(
     commands.push(`yarn install ${cmdOptions}`.trim());
 
     // rangeStrategy = update-lockfile
-    const lockUpdates = upgrades
-      .filter((upgrade) => upgrade.isLockfileUpdate)
-      .map((upgrade) => upgrade.depName); // note - this can hit a yarn bug, see https://github.com/yarnpkg/yarn/issues/8236
+    const lockUpdates = upgrades.filter((upgrade) => upgrade.isLockfileUpdate);
     if (lockUpdates.length) {
       logger.debug('Performing lockfileUpdate (yarn)');
-      commands.push(
-        `yarn upgrade ${lockUpdates.join(' ')} ${cmdOptions}`.trim()
-      );
+      if (isYarn1) {
+        // `yarn upgrade` updates based on the version range specified in the package file
+        // note - this can hit a yarn bug, see https://github.com/yarnpkg/yarn/issues/8236
+        commands.push(
+          `yarn upgrade ${lockUpdates
+            .map((update) => update.depName)
+            .join(' ')} ${cmdOptions}`.trim()
+        );
+      } else {
+        // `yarn up` updates to the latest release, so the range should be specified
+        commands.push(
+          `yarn up ${lockUpdates
+            .map((update) => `${update.depName}@${update.newValue}`)
+            .join(' ')}`
+        );
+      }
     }
 
     // postUpdateOptions
-    if (config.postUpdateOptions?.includes('yarnDedupeFewer')) {
+    if (isYarn1 && config.postUpdateOptions?.includes('yarnDedupeFewer')) {
       logger.debug('Performing yarn dedupe fewer');
       commands.push('npx yarn-deduplicate --strategy fewer');
       // Run yarn again in case any changes are necessary
       commands.push(`yarn install ${cmdOptions}`.trim());
     }
-    if (config.postUpdateOptions?.includes('yarnDedupeHighest')) {
+    if (
+      (isYarn1 || isYarnDedupeAvailable) &&
+      config.postUpdateOptions?.includes('yarnDedupeHighest')
+    ) {
       logger.debug('Performing yarn dedupe highest');
-      commands.push('npx yarn-deduplicate --strategy highest');
-      // Run yarn again in case any changes are necessary
-      commands.push(`yarn install ${cmdOptions}`.trim());
+      if (isYarn1) {
+        commands.push('npx yarn-deduplicate --strategy highest');
+        // Run yarn again in case any changes are necessary
+        commands.push(`yarn install ${cmdOptions}`.trim());
+      } else {
+        commands.push('yarn dedupe --strategy highest');
+      }
     }
 
     if (upgrades.find((upgrade) => upgrade.isLockFileMaintenance)) {

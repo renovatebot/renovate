@@ -1,24 +1,33 @@
 import { exec as _exec } from 'child_process';
+import { readFileSync } from 'fs';
 import _fs from 'fs-extra';
 import { join } from 'upath';
-import { envMock, mockExecAll } from '../../../test/execUtil';
+import { envMock, mockExecAll } from '../../../test/exec-util';
 import { mocked } from '../../../test/util';
 import * as _datasource from '../../datasource';
 import { setExecConfig } from '../../util/exec';
 import { BinarySource } from '../../util/exec/common';
 import * as docker from '../../util/exec/docker';
 import * as _env from '../../util/exec/env';
+import * as _hostRules from '../../util/host-rules';
 import { updateArtifacts } from './artifacts';
+
+const pyproject10toml = readFileSync(
+  'lib/manager/poetry/__fixtures__/pyproject.10.toml',
+  'utf8'
+);
 
 jest.mock('fs-extra');
 jest.mock('child_process');
 jest.mock('../../util/exec/env');
 jest.mock('../../datasource');
+jest.mock('../../util/host-rules');
 
 const fs: jest.Mocked<typeof _fs> = _fs as any;
 const exec: jest.Mock<typeof _exec> = _exec as any;
 const env = mocked(_env);
 const datasource = mocked(_datasource);
+const hostRules = mocked(_hostRules);
 
 const config = {
   localDir: join('/tmp/github/some/repo'),
@@ -82,7 +91,29 @@ describe('.updateArtifacts()', () => {
     ).not.toBeNull();
     expect(execSnapshots).toMatchSnapshot();
   });
-
+  it('passes private credential environment vars', async () => {
+    fs.readFile.mockResolvedValueOnce(null);
+    fs.readFile.mockResolvedValueOnce('[metadata]\n' as never);
+    const execSnapshots = mockExecAll(exec);
+    fs.readFile.mockReturnValueOnce('New poetry.lock' as any);
+    hostRules.find.mockReturnValueOnce({
+      username: 'usernameOne',
+      password: 'passwordOne',
+    });
+    hostRules.find.mockReturnValueOnce({ username: 'usernameTwo' });
+    hostRules.find.mockReturnValueOnce({ password: 'passwordFour' });
+    const updatedDeps = ['dep1'];
+    expect(
+      await updateArtifacts({
+        packageFileName: 'pyproject.toml',
+        updatedDeps,
+        newPackageFileContent: pyproject10toml,
+        config,
+      })
+    ).not.toBeNull();
+    expect(hostRules.find.mock.calls).toHaveLength(3);
+    expect(execSnapshots).toMatchSnapshot();
+  });
   it('returns updated pyproject.lock', async () => {
     fs.readFile.mockResolvedValueOnce(null);
     fs.readFile.mockResolvedValueOnce('[metadata]\n' as never);
@@ -120,13 +151,13 @@ describe('.updateArtifacts()', () => {
         newPackageFileContent: '{}',
         config: {
           ...config,
-          compatibility: { python: '~2.7 || ^3.4' },
+          constraints: { python: '~2.7 || ^3.4' },
         },
       })
     ).not.toBeNull();
     expect(execSnapshots).toMatchSnapshot();
   });
-  it('returns updated poetry.lock using docker (constaints)', async () => {
+  it('returns updated poetry.lock using docker (constraints)', async () => {
     jest.spyOn(docker, 'removeDanglingContainers').mockResolvedValueOnce();
     await setExecConfig({
       ...config,
@@ -149,7 +180,7 @@ describe('.updateArtifacts()', () => {
         newPackageFileContent: '{}',
         config: {
           ...config,
-          compatibility: { poetry: 'poetry>=1.0' },
+          constraints: { poetry: 'poetry>=1.0' },
         },
       })
     ).not.toBeNull();

@@ -2,17 +2,29 @@
 
 exports[`platform/azure createPr() should create and return a PR object 1`] = `
 Object {
+  "body": undefined,
+  "createdAt": undefined,
   "displayNumber": "Pull Request #456",
   "number": 456,
   "pullRequestId": 456,
+  "sourceBranch": undefined,
+  "sourceRefName": undefined,
+  "state": "open",
+  "targetBranch": undefined,
 }
 `;
 
 exports[`platform/azure createPr() should create and return a PR object from base branch 1`] = `
 Object {
+  "body": undefined,
+  "createdAt": undefined,
   "displayNumber": "Pull Request #456",
   "number": 456,
   "pullRequestId": 456,
+  "sourceBranch": undefined,
+  "sourceRefName": undefined,
+  "state": "open",
+  "targetBranch": undefined,
 }
 `;
 
@@ -21,15 +33,22 @@ Object {
   "autoCompleteSetBy": Object {
     "id": 123,
   },
+  "body": undefined,
   "completionOptions": Object {
     "deleteSourceBranch": true,
     "squashMerge": true,
   },
+  "createdAt": undefined,
   "createdBy": Object {
     "id": 123,
   },
   "displayNumber": "Pull Request #456",
+  "number": 456,
   "pullRequestId": 456,
+  "sourceBranch": undefined,
+  "sourceRefName": undefined,
+  "state": "open",
+  "targetBranch": undefined,
 }
 `;
 
@@ -94,36 +113,68 @@ content",
 
 exports[`platform/azure findPr(branchName, prTitle, state) returns pr if found it all state 1`] = `
 Object {
+  "body": undefined,
+  "createdAt": undefined,
+  "displayNumber": "Pull Request #1",
   "number": 1,
+  "pullRequestId": 1,
+  "sourceBranch": "branch-a",
   "sourceRefName": "refs/heads/branch-a",
   "state": "closed",
+  "status": 2,
+  "targetBranch": "branch-b",
+  "targetRefName": "refs/heads/branch-b",
   "title": "branch a pr",
 }
 `;
 
 exports[`platform/azure findPr(branchName, prTitle, state) returns pr if found it close 1`] = `
 Object {
+  "body": undefined,
+  "createdAt": undefined,
+  "displayNumber": "Pull Request #1",
   "number": 1,
+  "pullRequestId": 1,
+  "sourceBranch": "branch-a",
   "sourceRefName": "refs/heads/branch-a",
   "state": "closed",
+  "status": 2,
+  "targetBranch": "branch-b",
+  "targetRefName": "refs/heads/branch-b",
   "title": "branch a pr",
 }
 `;
 
 exports[`platform/azure findPr(branchName, prTitle, state) returns pr if found it open 1`] = `
 Object {
+  "body": undefined,
+  "createdAt": undefined,
+  "displayNumber": "Pull Request #1",
   "number": 1,
+  "pullRequestId": 1,
+  "sourceBranch": "branch-a",
   "sourceRefName": "refs/heads/branch-a",
   "state": "open",
+  "status": 1,
+  "targetBranch": "branch-b",
+  "targetRefName": "refs/heads/branch-b",
   "title": "branch a pr",
 }
 `;
 
 exports[`platform/azure findPr(branchName, prTitle, state) returns pr if found not open 1`] = `
 Object {
+  "body": undefined,
+  "createdAt": undefined,
+  "displayNumber": "Pull Request #1",
   "number": 1,
+  "pullRequestId": 1,
+  "sourceBranch": "branch-a",
   "sourceRefName": "refs/heads/branch-a",
-  "state": "closed",
+  "state": "merged",
+  "status": 3,
+  "targetBranch": "branch-b",
+  "targetRefName": "refs/heads/branch-b",
   "title": "branch a pr",
 }
 `;
@@ -132,11 +183,19 @@ exports[`platform/azure getBranchPr(branchName) should return the pr 1`] = `null
 
 exports[`platform/azure getPr(prNo) should return a pr in the right format 1`] = `
 Object {
+  "body": undefined,
+  "createdAt": undefined,
+  "displayNumber": "Pull Request #1234",
   "hasReviewers": false,
   "labels": Array [
     "renovate",
   ],
   "number": 1234,
+  "pullRequestId": 1234,
+  "sourceBranch": undefined,
+  "sourceRefName": undefined,
+  "state": "open",
+  "targetBranch": undefined,
 }
 `;
 
@@ -180,6 +239,26 @@ Array [
     Object {
       "description": undefined,
       "status": 2,
+      "title": "The New Title",
+    },
+    "1",
+    1234,
+  ],
+]
+`;
+
+exports[`platform/azure updatePr(prNo, title, body) should reopen the PR 1`] = `
+Array [
+  Array [
+    Object {
+      "status": 1,
+    },
+    "1",
+    1234,
+  ],
+  Array [
+    Object {
+      "description": undefined,
       "title": "The New Title",
     },
     "1",

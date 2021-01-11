@@ -1,4 +1,4 @@
-import URL from 'url';
+import is from '@sindresorhus/is';
 import pAll from 'p-all';
 import parseLinkHeader from 'parse-link-header';
 import {
@@ -43,8 +43,8 @@ function handleGotError(
 ): never {
   const path = url.toString();
   let message = err.message || '';
-  if (err.body?.message) {
-    message = err.body.message;
+  if (is.plainObject(err.response?.body) && 'message' in err.response.body) {
+    message = String(err.response.body.message);
   }
   if (
     err.name === 'RequestError' &&
@@ -114,7 +114,7 @@ function handleGotError(
     throw new ExternalHostError(err, PLATFORM_TYPE_GITHUB);
   }
   if (err.statusCode === 404) {
-    logger.debug({ url: err.options?.url }, 'GitHub 404');
+    logger.debug({ url: path }, 'GitHub 404');
   } else {
     logger.debug({ err }, 'Unknown GitHub error');
   }
@@ -124,6 +124,7 @@ function handleGotError(
 interface GraphqlOptions {
   paginate?: boolean;
   count?: number;
+  limit?: number;
   acceptHeader?: string;
   fromEnd?: boolean;
 }
@@ -158,13 +159,6 @@ export class GithubHttp extends Http<GithubHttpOptions, GithubHttpOptions> {
       throwHttpErrors: true,
     };
 
-    const method = opts.method || 'get';
-
-    if (method.toLowerCase() === 'post' && url === 'graphql') {
-      // GitHub Enterprise uses unversioned graphql path
-      opts.baseUrl = opts.baseUrl.replace('/v3/', '/');
-    }
-
     const accept = constructAcceptString(opts.headers?.accept);
 
     opts.headers = {
@@ -193,18 +187,18 @@ export class GithubHttp extends Http<GithubHttpOptions, GithubHttpOptions> {
               new Array(lastPage),
               (x, i) => i + 1
             ).slice(1);
-            const queue = pageNumbers.map((page) => (): Promise<
-              HttpResponse
-            > => {
-              const nextUrl = URL.parse(linkHeader.next.url, true);
-              delete nextUrl.search;
-              nextUrl.query.page = page.toString();
-              return this.request(
-                URL.format(nextUrl),
-                { ...opts, paginate: false },
-                okToRetry
-              );
-            });
+            const queue = pageNumbers.map(
+              (page) => (): Promise<HttpResponse> => {
+                const nextUrl = new URL(linkHeader.next.url, baseUrl);
+                delete nextUrl.search;
+                nextUrl.searchParams.set('page', page.toString());
+                return this.request(
+                  nextUrl,
+                  { ...opts, paginate: false },
+                  okToRetry
+                );
+              }
+            );
             const pages = await pAll(queue, { concurrency: 5 });
             result.body = result.body.concat(
               ...pages.filter(Boolean).map((page) => page.body)
@@ -228,6 +222,7 @@ export class GithubHttp extends Http<GithubHttpOptions, GithubHttpOptions> {
     const path = 'graphql';
 
     const opts: HttpPostOptions = {
+      baseUrl: baseUrl.replace('/v3/', '/'), // GHE uses unversioned graphql path
       body: { query },
       headers: { accept: options?.acceptHeader },
     };
@@ -257,13 +252,14 @@ export class GithubHttp extends Http<GithubHttpOptions, GithubHttpOptions> {
 
     const { paginate = true } = options;
     let count = options.count || 100;
-    let cursor = null;
+    let limit = options.limit || 1000;
+    let cursor: string = null;
 
     let isIterating = true;
     while (isIterating) {
       let query = queryOrig;
       if (paginate) {
-        let replacement = `$1${fieldName}$2(first: ${count}`;
+        let replacement = `$1${fieldName}$2(first: ${Math.min(count, limit)}`;
         replacement += cursor ? `, after: "${cursor}", ` : ', ';
         query = query.replace(regex, replacement);
       }
@@ -273,7 +269,11 @@ export class GithubHttp extends Http<GithubHttpOptions, GithubHttpOptions> {
         result.push(...nodes);
         result.push(...edges);
 
-        if (paginate && pageInfo) {
+        limit = Math.max(0, limit - nodes.length - edges.length);
+
+        if (limit === 0) {
+          isIterating = false;
+        } else if (paginate && pageInfo) {
           const { hasNextPage, endCursor } = pageInfo;
           if (hasNextPage && endCursor) {
             cursor = endCursor;

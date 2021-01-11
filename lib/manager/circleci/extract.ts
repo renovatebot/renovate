@@ -39,7 +39,7 @@ export function extractPackageFile(content: string): PackageFile | null {
           }
         } while (foundOrb);
       }
-      const match = /^\s*- image:\s*'?"?([^\s'"]+)'?"?\s*$/.exec(line);
+      const match = /^\s*-? image:\s*'?"?([^\s'"]+)'?"?\s*$/.exec(line);
       if (match) {
         const currentFrom = match[1];
         const dep = getDep(currentFrom);

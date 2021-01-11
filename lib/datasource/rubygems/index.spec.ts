@@ -1,5 +1,5 @@
 import { getPkgReleases } from '..';
-import * as httpMock from '../../../test/httpMock';
+import * as httpMock from '../../../test/http-mock';
 import * as rubyVersioning from '../../versioning/ruby';
 import railsInfo from './__fixtures__/rails/info.json';
 import railsVersions from './__fixtures__/rails/versions.json';
@@ -33,7 +33,10 @@ describe('datasource/rubygems', () => {
       versioning: rubyVersioning.id,
       datasource: rubygems.id,
       depName: 'rails',
-      registryUrls: ['https://thirdparty.com', 'https://firstparty.com'],
+      registryUrls: [
+        'https://thirdparty.com',
+        'https://firstparty.com/basepath/',
+      ],
     };
 
     beforeEach(() => {
@@ -51,7 +54,7 @@ describe('datasource/rubygems', () => {
     it('returns null for missing pkg', async () => {
       httpMock
         .scope('https://firstparty.com')
-        .get('/api/v1/gems/rails.json')
+        .get('/basepath/api/v1/gems/rails.json')
         .reply(200, null);
       httpMock
         .scope('https://thirdparty.com')
@@ -141,9 +144,9 @@ describe('datasource/rubygems', () => {
         .reply(401);
       httpMock
         .scope('https://firstparty.com/')
-        .get('/api/v1/gems/rails.json')
+        .get('/basepath/api/v1/gems/rails.json')
         .reply(200, railsInfo)
-        .get('/api/v1/versions/rails.json')
+        .get('/basepath/api/v1/versions/rails.json')
         .reply(200, railsVersions);
 
       const res = await getPkgReleases(params);
@@ -159,10 +162,30 @@ describe('datasource/rubygems', () => {
         .reply(200, { ...railsInfo, name: 'oooops' });
       httpMock
         .scope('https://firstparty.com/')
-        .get('/api/v1/gems/rails.json')
+        .get('/basepath/api/v1/gems/rails.json')
         .reply(200, null);
       expect(await getPkgReleases(params)).toBeNull();
       expect(httpMock.getTrace()).toMatchSnapshot();
+    });
+    it('falls back to info when version request fails', async () => {
+      httpMock
+        .scope('https://thirdparty.com/')
+        .get('/api/v1/gems/rails.json')
+        .reply(200, railsInfo)
+        .get('/api/v1/versions/rails.json')
+        .reply(400, {});
+      const res = await getPkgReleases(params);
+      expect(res.releases).toHaveLength(1);
+      expect(res.releases[0].version).toBe(railsInfo.version);
+    });
+    it('errors when version request fails with anything other than 400 or 404', async () => {
+      httpMock
+        .scope('https://thirdparty.com/')
+        .get('/api/v1/gems/rails.json')
+        .reply(200, railsInfo)
+        .get('/api/v1/versions/rails.json')
+        .reply(500, {});
+      expect(await getPkgReleases(params)).toBeNull();
     });
   });
 });

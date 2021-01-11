@@ -9,16 +9,16 @@ describe('semver.matches()', () => {
     expect(semver.matches('4.2.0', '> 5.0.0, <= 6.0.0')).toBe(false);
   });
 });
-describe('semver.maxSatisfyingVersion()', () => {
+describe('semver.getSatisfyingVersion()', () => {
   it('handles comma', () => {
     expect(
-      semver.maxSatisfyingVersion(
+      semver.getSatisfyingVersion(
         ['4.2.1', '0.4.0', '0.5.0', '4.0.0', '4.2.0', '5.0.0'],
         '4.*.0, < 4.2.5'
       )
     ).toBe('4.2.1');
     expect(
-      semver.maxSatisfyingVersion(
+      semver.getSatisfyingVersion(
         ['0.4.0', '0.5.0', '4.0.0', '4.2.0', '5.0.0', '5.0.3'],
         '5.0, > 5.0.0'
       )
@@ -379,5 +379,55 @@ describe('semver.getNewValue()', () => {
         toVersion: '1.5.0',
       })
     ).toEqual('<= 1.5.0');
+  });
+  it('bumps complex ranges', () => {
+    expect(
+      semver.getNewValue({
+        currentValue: '>= 0.1.21, < 0.2.0',
+        rangeStrategy: 'bump',
+        fromVersion: '0.1.21',
+        toVersion: '0.1.24',
+      })
+    ).toEqual('>= 0.1.24, < 0.2.0');
+    expect(
+      semver.getNewValue({
+        currentValue: '>= 0.1.21, <= 0.2.0',
+        rangeStrategy: 'bump',
+        fromVersion: '0.1.21',
+        toVersion: '0.1.24',
+      })
+    ).toEqual('>= 0.1.24, <= 0.2.0');
+    expect(
+      semver.getNewValue({
+        currentValue: '>= 0.0.1, <= 0.1',
+        rangeStrategy: 'bump',
+        fromVersion: '0.0.1',
+        toVersion: '0.0.2',
+      })
+    ).toEqual('>= 0.0.2, <= 0.1');
+    expect(
+      semver.getNewValue({
+        currentValue: '>= 1.2.3, <= 1',
+        rangeStrategy: 'bump',
+        fromVersion: '1.2.3',
+        toVersion: '1.2.4',
+      })
+    ).toEqual('>= 1.2.4, <= 1');
+    expect(
+      semver.getNewValue({
+        currentValue: '>= 1.2.3, <= 1.0',
+        rangeStrategy: 'bump',
+        fromVersion: '1.2.3',
+        toVersion: '1.2.4',
+      })
+    ).toEqual('>= 1.2.4, <= 1.2');
+    expect(
+      semver.getNewValue({
+        currentValue: '>= 0.0.1, < 0.1',
+        rangeStrategy: 'bump',
+        fromVersion: '0.1.0',
+        toVersion: '0.2.1',
+      })
+    ).toEqual('>= 0.2.1, < 0.3');
   });
 });

@@ -12,9 +12,7 @@ env:
   YARN_MODULES_CACHE_KEY: v1
   YARN_PACKAGE_CACHE_KEY: v1
   YARN_CACHE_FOLDER: .cache/yarn
-  NODE_VERSION: 12
-  # https://github.com/chalk/supports-color/issues/106
-  FORCE_COLOR: true
+  NODE_VERSION: 14
 
 jobs:
   test:
@@ -26,39 +24,41 @@ jobs:
     strategy:
       matrix:
         os: [ubuntu-latest, macos-latest, windows-latest]
-        node-version: [12]
+        node-version: [12, 14]
         python-version: [3.8]
-        java-version: [8]
+        java-version: [11]
         exclude:
           - os: windows-latest
-            node-version: 10
+            node-version: 12
+          - os: macos-latest
+            node-version: 12
 
     env:
-      coverage: ${{ matrix.os == 'ubuntu-latest' && matrix.node-version == 12 }}
+      coverage: ${{ matrix.os == 'ubuntu-latest' && matrix.node-version == 14 }}
       NODE_VERSION: ${{ matrix.node-version }}
       PYTHON_VERSION: ${{ matrix.python-version }}
       JAVA_VERSION: ${{ matrix.java-version }}
 
     steps:
       - name: Set up Node.js ${{ env.NODE_VERSION }}
-        uses: actions/setup-node@v1
+        uses: actions/setup-node@v2.1.4
         with:
           node-version: ${{ env.NODE_VERSION }}
 
       - name: Set up Python ${{ env.PYTHON_VERSION }}
-        uses: actions/setup-python@v1
+        uses: actions/setup-python@v2.2.1
         with:
           python-version: ${{ env.PYTHON_VERSION }}
 
       - name: Set up Java  ${{ env.JAVA_VERSION }}
-        if: env.NODE_VERSION == '12'
-        uses: actions/setup-java@v1
+        if: env.NODE_VERSION == '14'
+        uses: actions/setup-java@v1.4.3
         with:
           java-version: ${{ env.JAVA_VERSION }}
 
       - name: Skip Java tests
-        if: env.NODE_VERSION != '12'
-        run: echo "::set-env name=SKIP_JAVA_TESTS::true"
+        if: env.NODE_VERSION != '14'
+        run: echo "SKIP_JAVA_TESTS=true" >> $GITHUB_ENV
 
       - name: Init platform
         shell: bash
@@ -72,24 +72,16 @@ jobs:
           python --version
           echo "Yarn $(yarn --version)"
 
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v2.3.4
 
       - name: Cache Yarn packages
         id: yarn_cache_packages
-        uses: actions/cache@v2
+        uses: actions/cache@v2.1.3
         with:
           path: ${{ env.YARN_CACHE_FOLDER }}
           key: ${{ env.YARN_PACKAGE_CACHE_KEY }}-${{ runner.os }}-yarn_cache-${{ hashFiles('**/yarn.lock') }}
           restore-keys: |
             ${{ env.YARN_PACKAGE_CACHE_KEY }}-${{ runner.os }}-yarn_cache-
-
-      - name: Cache node_modules
-        uses: actions/cache@v2
-        with:
-          path: node_modules
-          key: ${{ env.YARN_MODULES_CACHE_KEY }}-${{ runner.os }}-${{ env.NODE_VERSION }}-yarn-${{ hashFiles('**/yarn.lock') }}
-          restore-keys: |
-            ${{ env.YARN_MODULES_CACHE_KEY }}-${{ runner.os }}-${{ env.NODE_VERSION }}-yarn-
 
       # Clear caches on cache miss, otherwise they will grow indefinitely
       - name: Clear yarn cache
@@ -97,7 +89,7 @@ jobs:
         run: yarn cache clean
 
       - name: Installing dependencies
-        run: yarn install --frozen-lockfile --link-duplicates
+        run: yarn install --frozen-lockfile
 
       - name: Build
         run: yarn build
@@ -106,7 +98,7 @@ jobs:
         run: yarn jest --maxWorkers=2 --ci --coverage ${{ env.coverage }}
 
       - name: Upload coverage
-        uses: actions/upload-artifact@v1
+        uses: actions/upload-artifact@v2.2.2
         if: always() && env.coverage == 'true'
         with:
           name: coverage
@@ -131,7 +123,7 @@ jobs:
 
     steps:
       - name: Set up Node.js ${{ env.NODE_VERSION }}
-        uses: actions/setup-node@v1
+        uses: actions/setup-node@v2.1.4
         with:
           node-version: ${{ env.NODE_VERSION }}
 
@@ -145,24 +137,16 @@ jobs:
           echo "Node $(node --version)"
           echo "Yarn $(yarn --version)"
 
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v2.3.4
 
       - name: Cache Yarn packages
         id: yarn_cache_packages
-        uses: actions/cache@v2
+        uses: actions/cache@v2.1.3
         with:
           path: ${{ env.YARN_CACHE_FOLDER }}
           key: ${{ env.YARN_PACKAGE_CACHE_KEY }}-${{ runner.os }}-yarn_cache-${{ hashFiles('**/yarn.lock') }}
           restore-keys: |
             ${{ env.YARN_PACKAGE_CACHE_KEY }}-${{ runner.os }}-yarn_cache-
-
-      - name: Cache node_modules
-        uses: actions/cache@v2
-        with:
-          path: node_modules
-          key: ${{ env.YARN_MODULES_CACHE_KEY }}-${{ runner.os }}-${{ env.NODE_VERSION }}-yarn-${{ hashFiles('**/yarn.lock') }}
-          restore-keys: |
-            ${{ env.YARN_MODULES_CACHE_KEY }}-${{ runner.os }}-${{ env.NODE_VERSION }}-yarn-
 
       # Clear caches on cache miss, otherwise they will grow indefinitely
       - name: Clear yarn cache
@@ -170,7 +154,7 @@ jobs:
         run: yarn cache clean
 
       - name: Installing dependencies
-        run: yarn install --frozen-lockfile --link-duplicates
+        run: yarn install --frozen-lockfile
 
       - name: Lint
         run: |
@@ -191,7 +175,7 @@ jobs:
 
     steps:
       - name: Set up Node.js ${{ env.NODE_VERSION }}
-        uses: actions/setup-node@v1
+        uses: actions/setup-node@v2.1.4
         with:
           node-version: ${{ env.NODE_VERSION }}
 
@@ -205,24 +189,18 @@ jobs:
           npm config set scripts-prepend-node-path true
 
       # full checkout for semantic-release
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v2.3.4
         with:
           fetch-depth: 0
 
       - name: Cache Yarn packages
-        uses: actions/cache@v2
+        uses: actions/cache@v2.1.3
         with:
           path: ${{ env.YARN_CACHE_FOLDER }}
           key: ${{ env.YARN_PACKAGE_CACHE_KEY }}-${{ runner.os }}-yarn_cache-${{ hashFiles('**/yarn.lock') }}
 
-      - name: Cache node_modules
-        uses: actions/cache@v2
-        with:
-          path: node_modules
-          key: ${{ env.YARN_MODULES_CACHE_KEY }}-${{ runner.os }}-${{ env.NODE_VERSION }}-yarn-${{ hashFiles('**/yarn.lock') }}
-
       - name: Installing dependencies
-        run: yarn install --frozen-lockfile --link-duplicates
+        run: yarn install --frozen-lockfile
 
       - name: semantic-release
         if: github.ref == 'refs/heads/master'

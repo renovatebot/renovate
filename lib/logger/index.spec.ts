@@ -1,10 +1,12 @@
 import _fs from 'fs-extra';
 import { add } from '../util/host-rules';
+import { add as addSecret } from '../util/sanitize';
 import {
   addMeta,
   addStream,
+  clearProblems,
   getContext,
-  getErrors,
+  getProblems,
   levels,
   logger,
   removeMeta,
@@ -51,12 +53,17 @@ describe('logger', () => {
     expect(() => levels('stdout', 'debug')).not.toThrow();
   });
 
-  it('saves errors', () => {
+  it('saves problems', () => {
+    addSecret('p4$$w0rd');
     levels('stdout', 'fatal');
     logger.error('some meta');
-    logger.error({ some: 'meta' });
+    logger.error({ some: 'meta', password: 'super secret' });
     logger.error({ some: 'meta' }, 'message');
-    expect(getErrors()).toMatchSnapshot();
+    logger.warn('a warning with a p4$$w0rd');
+    logger.info('ignored');
+    expect(getProblems()).toMatchSnapshot();
+    clearProblems();
+    expect(getProblems()).toHaveLength(0);
   });
 
   it('should contain path or stream parameters', () => {

@@ -50,7 +50,7 @@ export function getMeta(rec: BunyanRecord): string {
     return res;
   }
   const metaStr = filteredMeta
-    .map((field) => `${field}=${rec[field]}`)
+    .map((field) => `${field}=${String(rec[field])}`)
     .join(', ');
   res = ` (${metaStr})${res}`;
   return chalk.gray(res);

@@ -13,6 +13,19 @@ Array [
 ]
 `;
 
+exports[`config/validation validateConfig(config) catches invalid matchCurrentVersion regex 1`] = `
+Array [
+  Object {
+    "depName": "Configuration Error",
+    "message": "Invalid regExp for packageRules[1].matchCurrentVersion: \`/***$}{]][/\`",
+  },
+  Object {
+    "depName": "Configuration Error",
+    "message": "Invalid regExp for packageRules[3].matchCurrentVersion: \`!/***$}{]][/\`",
+  },
+]
+`;
+
 exports[`config/validation validateConfig(config) catches invalid templates 1`] = `
 Array [
   Object {
@@ -79,7 +92,7 @@ exports[`config/validation validateConfig(config) errors for unsafe fileMatches 
 Array [
   Object {
     "depName": "Configuration Error",
-    "message": "Invalid regExp for docker.fileMatch: \`x?+\`",
+    "message": "Invalid regExp for dockerfile.fileMatch: \`x?+\`",
   },
   Object {
     "depName": "Configuration Error",
@@ -102,6 +115,24 @@ Array [
   Object {
     "depName": "Configuration Error",
     "message": "Invalid alias object configuration",
+  },
+]
+`;
+
+exports[`config/validation validateConfig(config) errors if fileMatch has wrong parent 1`] = `
+Array [
+  Object {
+    "depName": "Config error",
+    "message": "\\"fileMatch\\" may not be defined at the top level of a config and must instead be within a manager block",
+  },
+]
+`;
+
+exports[`config/validation validateConfig(config) errors if fileMatch has wrong parent 2`] = `
+Array [
+  Object {
+    "depName": "Config warning",
+    "message": "\\"fileMatch\\" must be configured in a manager block and not here: npm.gradle",
   },
 ]
 `;
@@ -165,6 +196,15 @@ Array [
   Object {
     "depName": "Configuration Error",
     "message": "matchPackageNames: matchPackageNames should be inside a \`packageRule\` only",
+  },
+]
+`;
+
+exports[`config/validation validateConfig(config) validates regEx for each fileMatch 1`] = `
+Array [
+  Object {
+    "depName": "Configuration Error",
+    "message": "Invalid regExp for regexManagers[0].fileMatch: \`***$}{]][\`",
   },
 ]
 `;

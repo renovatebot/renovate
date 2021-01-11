@@ -1,33 +1,38 @@
-import { parse } from '@yarnpkg/lockfile';
+import { structUtils } from '@yarnpkg/core';
+import { parseSyml } from '@yarnpkg/parsers';
 import { logger } from '../../../logger';
 import { readLocalFile } from '../../../util/fs';
-import { LockFileEntry } from './common';
+import { LockFile } from './common';
 
-export type YarnLock = Record<string, string>;
-
-export async function getYarnLock(filePath: string): Promise<YarnLock> {
+export async function getYarnLock(filePath: string): Promise<LockFile> {
   const yarnLockRaw = await readLocalFile(filePath, 'utf8');
   try {
-    const yarnLockParsed = parse(yarnLockRaw);
-    // istanbul ignore if
-    if (yarnLockParsed.type !== 'success') {
-      logger.debug(
-        { filePath, parseType: yarnLockParsed.type },
-        'Error parsing yarn.lock - not success'
-      );
-      return {};
-    }
-    const lockFile: YarnLock = {};
+    const parsed = parseSyml(yarnLockRaw);
+    const lockedVersions: Record<string, string> = {};
+    let lockfileVersion: number;
 
-    for (const [entry, val] of Object.entries(
-      yarnLockParsed.object as LockFileEntry
-    )) {
-      logger.trace({ entry, version: val.version });
-      lockFile[entry] = val.version;
+    for (const [key, val] of Object.entries(parsed)) {
+      if (key === '__metadata') {
+        // yarn 2
+        lockfileVersion = parseInt(val.cacheKey, 10);
+      } else {
+        for (const entry of key.split(', ')) {
+          const { scope, name, range } = structUtils.parseDescriptor(entry);
+          const packageName = scope ? `@${scope}/${name}` : name;
+          const { selector } = structUtils.parseRange(range);
+
+          logger.trace({ entry, version: val.version });
+          lockedVersions[packageName + '@' + selector] = parsed[key].version;
+        }
+      }
     }
-    return lockFile;
+    return {
+      isYarn1: !('__metadata' in parsed),
+      lockfileVersion,
+      lockedVersions,
+    };
   } catch (err) {
     logger.debug({ filePath, err }, 'Warning: Exception parsing yarn.lock');
-    return {};
+    return { isYarn1: true, lockedVersions: {} };
   }
 }

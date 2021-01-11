@@ -7,6 +7,32 @@ export const id = 'crate';
 
 const http = new Http(id);
 
+const BASE_URL =
+  'https://raw.githubusercontent.com/rust-lang/crates.io-index/master/';
+
+export function getIndexSuffix(lookupName: string): string {
+  const len = lookupName.length;
+
+  if (len === 1) {
+    return '1/' + lookupName;
+  }
+  if (len === 2) {
+    return '2/' + lookupName;
+  }
+  if (len === 3) {
+    return '3/' + lookupName[0] + '/' + lookupName;
+  }
+
+  return (
+    lookupName.slice(0, 2) + '/' + lookupName.slice(2, 4) + '/' + lookupName
+  );
+}
+
+interface CrateRecord {
+  vers: string;
+  yanked: boolean;
+}
+
 export async function getReleases({
   lookupName,
 }: GetReleasesConfig): Promise<ReleaseResult | null> {
@@ -21,34 +47,20 @@ export async function getReleases({
     return cachedResult;
   }
 
-  const len = lookupName.length;
-  let path: string;
-  // Ignored because there is no way to test this without hitting up GitHub API
-  /* istanbul ignore next */
-  if (len === 1) {
-    path = '1/' + lookupName;
-  } else if (len === 2) {
-    path = '2/' + lookupName;
-  } else if (len === 3) {
-    path = '3/' + lookupName[0] + '/' + lookupName;
-  } else {
-    path =
-      lookupName.slice(0, 2) + '/' + lookupName.slice(2, 4) + '/' + lookupName;
-  }
-  const baseUrl =
-    'https://raw.githubusercontent.com/rust-lang/crates.io-index/master/';
-  const crateUrl = baseUrl + path;
+  const crateUrl = BASE_URL + getIndexSuffix(lookupName);
+  const dependencyUrl = `https://crates.io/crates/${lookupName}`;
   try {
     const lines = (await http.get(crateUrl)).body
       .split('\n') // break into lines
       .map((line) => line.trim()) // remove whitespace
       .filter((line) => line.length !== 0) // remove empty lines
-      .map((line) => JSON.parse(line)); // parse
+      .map((line) => JSON.parse(line) as CrateRecord); // parse
     const result: ReleaseResult = {
+      dependencyUrl,
       releases: [],
     };
     result.releases = lines
-      .map((version: { vers: string; yanked: boolean }) => {
+      .map((version) => {
         const release: Release = {
           version: version.vers,
         };

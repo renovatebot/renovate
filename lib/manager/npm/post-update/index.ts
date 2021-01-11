@@ -1,5 +1,5 @@
-import path from 'path';
 import is from '@sindresorhus/is';
+import { parseSyml } from '@yarnpkg/parsers';
 import upath from 'upath';
 import { SYSTEM_INSUFFICIENT_DISK_SPACE } from '../../../constants/error-messages';
 import { id as npmId } from '../../../datasource/npm';
@@ -89,7 +89,7 @@ export function determineLockFileDirs(
   }
 
   for (const p of config.updatedPackageFiles) {
-    logger.trace(`Checking ${p.name} for lock files`);
+    logger.trace(`Checking ${String(p.name)} for lock files`);
     const packageFile = getPackageFile(p.name);
     // lerna first
     if (packageFile.lernaDir && packageFile.npmLock) {
@@ -125,7 +125,7 @@ export async function writeExistingFiles(
   const npmrcFile = upath.join(config.localDir, '.npmrc');
   if (config.npmrc) {
     logger.debug(`Writing repo .npmrc (${config.localDir})`);
-    await outputFile(npmrcFile, config.npmrc);
+    await outputFile(npmrcFile, `${String(config.npmrc)}\n`);
   } else if (config.ignoreNpmrcFile) {
     logger.debug('Removing ignored .npmrc file before artifact generation');
     await remove(npmrcFile);
@@ -145,13 +145,13 @@ export async function writeExistingFiles(
   for (const packageFile of npmFiles) {
     const basedir = upath.join(
       config.localDir,
-      path.dirname(packageFile.packageFile)
+      upath.dirname(packageFile.packageFile)
     );
-    const npmrc = packageFile.npmrc || config.npmrc;
+    const npmrc: string = packageFile.npmrc || config.npmrc;
     const npmrcFilename = upath.join(basedir, '.npmrc');
     if (npmrc) {
       try {
-        await outputFile(npmrcFilename, npmrc);
+        await outputFile(npmrcFilename, `${npmrc}\n`);
       } catch (err) /* istanbul ignore next */ {
         logger.warn({ npmrcFilename, err }, 'Error writing .npmrc');
       }
@@ -192,7 +192,9 @@ export async function writeExistingFiles(
           }
         }
         if (widens.length) {
-          logger.debug(`Removing ${widens} from ${npmLock} to force an update`);
+          logger.debug(
+            `Removing ${String(widens)} from ${npmLock} to force an update`
+          );
           try {
             const npmLockParsed = JSON.parse(existingNpmLock);
             if (npmLockParsed.dependencies) {
@@ -236,7 +238,7 @@ export async function writeUpdatedPackageFiles(
     if (!packageFile.name.endsWith('package.json')) {
       continue; // eslint-disable-line
     }
-    logger.debug(`Writing ${packageFile.name}`);
+    logger.debug(`Writing ${String(packageFile.name)}`);
     const massagedFile = JSON.parse(packageFile.contents);
     try {
       const { token } = hostRules.find({
@@ -272,7 +274,7 @@ interface ArtifactError {
   stderr: string;
 }
 
-interface UpdatedArtifcats {
+interface UpdatedArtifacts {
   name: string;
   contents: string | Buffer;
 }
@@ -305,7 +307,8 @@ async function updateNpmrcContent(
   try {
     const newContent = newNpmrc.join('\n');
     if (newContent !== originalContent) {
-      await writeFile(npmrcFilePath, newContent);
+      logger.debug(`Writing updated .npmrc file to ${npmrcFilePath}`);
+      await writeFile(npmrcFilePath, `${newContent}\n`);
     }
   } catch {
     logger.warn('Unable to write custom npmrc file');
@@ -333,9 +336,73 @@ async function resetNpmrcContent(
   }
 }
 
+// istanbul ignore next
+async function updateYarnOffline(
+  lockFileDir: string,
+  localDir: string,
+  updatedArtifacts: UpdatedArtifacts[]
+): Promise<void> {
+  try {
+    const resolvedPaths: string[] = [];
+    const yarnrcYml = await getFile(upath.join(lockFileDir, '.yarnrc.yml'));
+    const yarnrc = await getFile(upath.join(lockFileDir, '.yarnrc'));
+
+    // As .yarnrc.yml overrides .yarnrc in Yarn 1 (https://git.io/JUcco)
+    // both files may exist, so check for .yarnrc.yml first
+    if (yarnrcYml) {
+      // Yarn 2 (offline cache and zero-installs)
+      const config = parseSyml(yarnrcYml);
+      resolvedPaths.push(
+        upath.join(lockFileDir, config.cacheFolder || './.yarn/cache')
+      );
+
+      resolvedPaths.push(upath.join(lockFileDir, '.pnp'));
+      if (config.pnpDataPath) {
+        resolvedPaths.push(upath.join(lockFileDir, config.pnpDataPath));
+      }
+    } else if (yarnrc) {
+      // Yarn 1 (offline mirror)
+      const mirrorLine = yarnrc
+        .split('\n')
+        .find((line) => line.startsWith('yarn-offline-mirror '));
+      if (mirrorLine) {
+        const mirrorPath = mirrorLine
+          .split(' ')[1]
+          .replace(/"/g, '')
+          .replace(/\/?$/, '/');
+        resolvedPaths.push(upath.join(lockFileDir, mirrorPath));
+      }
+    }
+    logger.debug({ resolvedPaths }, 'updateYarnOffline resolvedPaths');
+
+    if (resolvedPaths.length) {
+      const status = await getRepoStatus();
+      for (const f of status.modified.concat(status.not_added)) {
+        if (resolvedPaths.some((p) => f.startsWith(p))) {
+          const localModified = upath.join(localDir, f);
+          updatedArtifacts.push({
+            name: f,
+            contents: await readFile(localModified),
+          });
+        }
+      }
+      for (const f of status.deleted || []) {
+        if (resolvedPaths.some((p) => f.startsWith(p))) {
+          updatedArtifacts.push({
+            name: '|delete|',
+            contents: f,
+          });
+        }
+      }
+    }
+  } catch (err) {
+    logger.error({ err }, 'Error updating yarn offline packages');
+  }
+}
+
 export interface WriteExistingFilesResult {
   artifactErrors: ArtifactError[];
-  updatedArtifacts: UpdatedArtifcats[];
+  updatedArtifacts: UpdatedArtifacts[];
 }
 // istanbul ignore next
 export async function getAdditionalFiles(
@@ -344,7 +411,7 @@ export async function getAdditionalFiles(
 ): Promise<WriteExistingFilesResult> {
   logger.trace({ config }, 'getAdditionalFiles');
   const artifactErrors: ArtifactError[] = [];
-  const updatedArtifacts: UpdatedArtifcats[] = [];
+  const updatedArtifacts: UpdatedArtifacts[] = [];
   if (!packageFiles.npm?.length) {
     return { artifactErrors, updatedArtifacts };
   }
@@ -356,7 +423,7 @@ export async function getAdditionalFiles(
   if (
     config.updateType === 'lockFileMaintenance' &&
     config.reuseExistingBranch &&
-    (await branchExists(config.branchName))
+    branchExists(config.branchName)
   ) {
     logger.debug('Skipping lockFileMaintenance update');
     return { artifactErrors, updatedArtifacts };
@@ -414,7 +481,7 @@ export async function getAdditionalFiles(
     logger.warn({ err }, 'Error getting token for packageFile');
   }
   for (const lockFile of dirs.npmLockDirs) {
-    const lockFileDir = path.dirname(lockFile);
+    const lockFileDir = upath.dirname(lockFile);
     const fullLockFileDir = upath.join(config.localDir, lockFileDir);
     const npmrcContent = await getNpmrcContent(fullLockFileDir);
     await updateNpmrcContent(
@@ -422,7 +489,7 @@ export async function getAdditionalFiles(
       npmrcContent,
       additionalNpmrcContent
     );
-    const fileName = path.basename(lockFile);
+    const fileName = upath.basename(lockFile);
     logger.debug(`Generating ${fileName} for ${lockFileDir}`);
     const upgrades = config.upgrades.filter(
       (upgrade) => upgrade.npmLock === lockFile
@@ -477,7 +544,7 @@ export async function getAdditionalFiles(
   }
 
   for (const lockFile of dirs.yarnLockDirs) {
-    const lockFileDir = path.dirname(lockFile);
+    const lockFileDir = upath.dirname(lockFile);
     const fullLockFileDir = upath.join(config.localDir, lockFileDir);
     const npmrcContent = await getNpmrcContent(fullLockFileDir);
     await updateNpmrcContent(
@@ -535,43 +602,7 @@ export async function getAdditionalFiles(
           name: lockFileName,
           contents: res.lockFile,
         });
-        // istanbul ignore next
-        try {
-          const yarnrc = await getFile(upath.join(lockFileDir, '.yarnrc'));
-          if (yarnrc) {
-            const mirrorLine = yarnrc
-              .split('\n')
-              .find((line) => line.startsWith('yarn-offline-mirror '));
-            if (mirrorLine) {
-              const mirrorPath = mirrorLine
-                .split(' ')[1]
-                .replace(/"/g, '')
-                .replace(/\/?$/, '/');
-              const resolvedPath = upath.join(lockFileDir, mirrorPath);
-              logger.debug('Found yarn offline  mirror: ' + resolvedPath);
-              const status = await getRepoStatus();
-              for (const f of status.modified.concat(status.not_added)) {
-                if (f.startsWith(resolvedPath)) {
-                  const localModified = upath.join(config.localDir, f);
-                  updatedArtifacts.push({
-                    name: f,
-                    contents: await readFile(localModified),
-                  });
-                }
-              }
-              for (const f of status.deleted || []) {
-                if (f.startsWith(resolvedPath)) {
-                  updatedArtifacts.push({
-                    name: '|delete|',
-                    contents: f,
-                  });
-                }
-              }
-            }
-          }
-        } catch (err) {
-          logger.error({ err }, 'Error updating yarn offline packages');
-        }
+        await updateYarnOffline(lockFileDir, config.localDir, updatedArtifacts);
       } else {
         logger.debug("yarn.lock hasn't changed");
       }
@@ -580,7 +611,7 @@ export async function getAdditionalFiles(
   }
 
   for (const lockFile of dirs.pnpmShrinkwrapDirs) {
-    const lockFileDir = path.dirname(lockFile);
+    const lockFileDir = upath.dirname(lockFile);
     const fullLockFileDir = upath.join(config.localDir, lockFileDir);
     const npmrcContent = await getNpmrcContent(fullLockFileDir);
     await updateNpmrcContent(
@@ -646,7 +677,7 @@ export async function getAdditionalFiles(
     let lockFile: string;
     logger.debug(`Finding package.json for lerna directory "${lernaDir}"`);
     const lernaPackageFile = packageFiles.npm.find(
-      (p) => path.dirname(p.packageFile) === lernaDir
+      (p) => upath.dirname(p.packageFile) === lernaDir
     );
     if (!lernaPackageFile) {
       logger.debug('No matching package.json found');

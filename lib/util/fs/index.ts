@@ -53,27 +53,37 @@ export async function writeLocalFile(
 }
 
 export async function deleteLocalFile(fileName: string): Promise<void> {
-  const localFileName = join(localDir, fileName);
-  await fs.remove(localFileName);
+  if (localDir) {
+    const localFileName = join(localDir, fileName);
+    await fs.remove(localFileName);
+  }
 }
 
 // istanbul ignore next
-export async function ensureDir(dirName): Promise<void> {
+export async function ensureDir(dirName: string): Promise<void> {
   await fs.ensureDir(dirName);
 }
 
 // istanbul ignore next
-export async function ensureLocalDir(dirName): Promise<void> {
+export async function ensureLocalDir(dirName: string): Promise<void> {
   const localDirName = join(localDir, dirName);
   await fs.ensureDir(localDirName);
 }
 
 export async function ensureCacheDir(
-  dirName,
+  dirName: string,
   envPathVar?: string
 ): Promise<string> {
   const envCacheDirName = envPathVar ? process.env[envPathVar] : null;
   const cacheDirName = envCacheDirName || join(cacheDir, dirName);
   await fs.ensureDir(cacheDirName);
   return cacheDirName;
+}
+
+export function localPathExists(pathName: string): Promise<boolean> {
+  // Works for both files as well as directories
+  return fs
+    .stat(join(localDir, pathName))
+    .then((s) => !!s)
+    .catch(() => false);
 }

@@ -39,7 +39,7 @@ function sanitize(key: string, val: string): void {
     add(val);
     const password = Buffer.from(val, 'base64').toString();
     add(password);
-    const username = npmrc[key.replace(':_password', ':username')];
+    const username: string = npmrc[key.replace(':_password', ':username')];
     add(Buffer.from(`${username}:${password}`).toString('base64'));
   }
 }

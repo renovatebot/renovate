@@ -1,3 +1,5 @@
+import { ERROR, WARN } from 'bunyan';
+import { logger } from '../../../test/util';
 import * as _configParser from '../../config';
 import {
   PLATFORM_TYPE_GITHUB,
@@ -20,6 +22,7 @@ const limits = _limits;
 describe('lib/workers/global', () => {
   beforeEach(() => {
     jest.resetAllMocks();
+    logger.getProblems.mockImplementationOnce(() => []);
     configParser.parseConfigs = jest.fn();
     platform.initPlatform.mockImplementation((input) => Promise.resolve(input));
   });
@@ -59,7 +62,7 @@ describe('lib/workers/global', () => {
   });
 
   it('processes repositories break', async () => {
-    limits.getLimitRemaining = jest.fn(() => 0);
+    limits.isLimitReached = jest.fn(() => true);
     configParser.parseConfigs.mockResolvedValueOnce({
       gitAuthor: 'a@b.com',
       enabled: true,
@@ -77,7 +80,36 @@ describe('lib/workers/global', () => {
     expect(configParser.parseConfigs).toHaveBeenCalledTimes(1);
     expect(repositoryWorker.renovateRepository).toHaveBeenCalledTimes(0);
   });
-
+  it('exits with non-zero when errors are logged', async () => {
+    configParser.parseConfigs.mockResolvedValueOnce({
+      baseDir: '/tmp/base',
+      cacheDir: '/tmp/cache',
+      repositories: [],
+    });
+    logger.getProblems.mockReset();
+    logger.getProblems.mockImplementationOnce(() => [
+      {
+        level: ERROR,
+        msg: 'meh',
+      },
+    ]);
+    await expect(globalWorker.start()).resolves.not.toEqual(0);
+  });
+  it('exits with zero when warnings are logged', async () => {
+    configParser.parseConfigs.mockResolvedValueOnce({
+      baseDir: '/tmp/base',
+      cacheDir: '/tmp/cache',
+      repositories: [],
+    });
+    logger.getProblems.mockReset();
+    logger.getProblems.mockImplementationOnce(() => [
+      {
+        level: WARN,
+        msg: 'meh',
+      },
+    ]);
+    await expect(globalWorker.start()).resolves.toEqual(0);
+  });
   describe('processes platforms', () => {
     it('github', async () => {
       configParser.parseConfigs.mockResolvedValueOnce({

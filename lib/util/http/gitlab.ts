@@ -1,4 +1,3 @@
-import { URL } from 'url';
 import parseLinkHeader from 'parse-link-header';
 import { PLATFORM_TYPE_GITLAB } from '../../constants/platforms';
 import { logger } from '../../logger';

@@ -1,5 +1,9 @@
 import is from '@sindresorhus/is';
-import { REPOSITORY_DISABLED } from '../../constants/error-messages';
+import {
+  GitPullRequestMergeStrategy,
+  GitStatusState,
+  PullRequestStatus,
+} from 'azure-devops-node-api/interfaces/GitInterfaces';
 import { BranchStatus, PrState } from '../../types';
 import * as _git from '../../util/git';
 import * as _hostRules from '../../util/host-rules';
@@ -24,7 +28,7 @@ describe('platform/azure', () => {
     azureApi = require('./azure-got-wrapper');
     azureHelper = require('./azure-helper');
     git = require('../../util/git');
-    git.branchExists.mockResolvedValue(true);
+    git.branchExists.mockReturnValue(true);
     git.isBranchStale.mockResolvedValue(false);
     hostRules.find.mockReturnValue({
       token: 'token',
@@ -161,14 +165,6 @@ describe('platform/azure', () => {
       expect(azureApi.gitApi.mock.calls).toMatchSnapshot();
       expect(config).toMatchSnapshot();
     });
-
-    it('throws disabled', async () => {
-      expect.assertions(1);
-      azureHelper.getFile.mockResolvedValueOnce('{ "enabled": false }');
-      await expect(
-        initRepo({ repository: 'some-repo', optimizeForDisabled: true })
-      ).rejects.toThrow(REPOSITORY_DISABLED);
-    });
   });
 
   describe('getRepoForceRebase', () => {
@@ -189,23 +185,12 @@ describe('platform/azure', () => {
                 {
                   pullRequestId: 1,
                   sourceRefName: 'refs/heads/branch-a',
+                  targetRefName: 'refs/heads/branch-b',
                   title: 'branch a pr',
-                  state: PrState.Open,
+                  status: PullRequestStatus.Active,
                 },
               ]),
             getPullRequestCommits: jest.fn().mockReturnValue([]),
-          } as any)
-      );
-      azureHelper.getNewBranchName.mockImplementationOnce(
-        () => 'refs/heads/branch-a'
-      );
-      azureHelper.getRenovatePRFormat.mockImplementationOnce(
-        () =>
-          ({
-            number: 1,
-            sourceRefName: 'refs/heads/branch-a',
-            title: 'branch a pr',
-            state: PrState.Open,
           } as any)
       );
       const res = await azure.findPr({
@@ -226,23 +211,12 @@ describe('platform/azure', () => {
                 {
                   pullRequestId: 1,
                   sourceRefName: 'refs/heads/branch-a',
+                  targetRefName: 'refs/heads/branch-b',
                   title: 'branch a pr',
-                  state: PrState.Closed,
+                  status: PullRequestStatus.Completed,
                 },
               ]),
             getPullRequestCommits: jest.fn().mockReturnValue([]),
-          } as any)
-      );
-      azureHelper.getNewBranchName.mockImplementationOnce(
-        () => 'refs/heads/branch-a'
-      );
-      azureHelper.getRenovatePRFormat.mockImplementationOnce(
-        () =>
-          ({
-            number: 1,
-            sourceRefName: 'refs/heads/branch-a',
-            title: 'branch a pr',
-            state: PrState.Closed,
           } as any)
       );
       const res = await azure.findPr({
@@ -263,23 +237,12 @@ describe('platform/azure', () => {
                 {
                   pullRequestId: 1,
                   sourceRefName: 'refs/heads/branch-a',
+                  targetRefName: 'refs/heads/branch-b',
                   title: 'branch a pr',
-                  state: PrState.Closed,
+                  status: PullRequestStatus.Abandoned,
                 },
               ]),
             getPullRequestCommits: jest.fn().mockReturnValue([]),
-          } as any)
-      );
-      azureHelper.getNewBranchName.mockImplementationOnce(
-        () => 'refs/heads/branch-a'
-      );
-      azureHelper.getRenovatePRFormat.mockImplementationOnce(
-        () =>
-          ({
-            number: 1,
-            sourceRefName: 'refs/heads/branch-a',
-            title: 'branch a pr',
-            state: PrState.Closed,
           } as any)
       );
       const res = await azure.findPr({
@@ -300,23 +263,12 @@ describe('platform/azure', () => {
                 {
                   pullRequestId: 1,
                   sourceRefName: 'refs/heads/branch-a',
+                  targetRefName: 'refs/heads/branch-b',
                   title: 'branch a pr',
-                  state: PrState.Closed,
+                  status: PullRequestStatus.Abandoned,
                 },
               ]),
             getPullRequestCommits: jest.fn().mockReturnValue([]),
-          } as any)
-      );
-      azureHelper.getNewBranchName.mockImplementationOnce(
-        () => 'refs/heads/branch-a'
-      );
-      azureHelper.getRenovatePRFormat.mockImplementationOnce(
-        () =>
-          ({
-            number: 1,
-            sourceRefName: 'refs/heads/branch-a',
-            title: 'branch a pr',
-            state: PrState.Closed,
           } as any)
       );
       const res = await azure.findPr({
@@ -372,24 +324,153 @@ describe('platform/azure', () => {
             getPullRequestCommits: jest.fn().mockReturnValue([]),
           } as any)
       );
-      azureHelper.getNewBranchName.mockImplementation(
-        () => 'refs/heads/branch-a'
-      );
-      azureHelper.getRenovatePRFormat.mockImplementation(
-        () =>
-          ({
-            pullRequestId: 1,
-            number: 1,
-            head: { ref: 'branch-a' },
-            title: 'branch a pr',
-            isClosed: false,
-          } as any)
-      );
       const pr = await azure.getBranchPr('somebranch');
       expect(pr).toMatchSnapshot();
     });
   });
+  describe('getBranchStatusCheck(branchName, context)', () => {
+    it('should return green if status is succeeded', async () => {
+      await initRepo({ repository: 'some/repo' });
+      azureApi.gitApi.mockImplementationOnce(
+        () =>
+          ({
+            getBranch: jest.fn(() => ({ commit: { commitId: 'abcd1234' } })),
+            getStatuses: jest.fn(() => [
+              {
+                state: GitStatusState.Succeeded,
+                context: { genre: 'a-genre', name: 'a-name' },
+              },
+            ]),
+          } as any)
+      );
+      const res = await azure.getBranchStatusCheck(
+        'somebranch',
+        'a-genre/a-name'
+      );
+      expect(res).toBe(BranchStatus.green);
+    });
 
+    it('should return green if status is not applicable', async () => {
+      await initRepo({ repository: 'some/repo' });
+      azureApi.gitApi.mockImplementationOnce(
+        () =>
+          ({
+            getBranch: jest.fn(() => ({ commit: { commitId: 'abcd1234' } })),
+            getStatuses: jest.fn(() => [
+              {
+                state: GitStatusState.NotApplicable,
+                context: { genre: 'a-genre', name: 'a-name' },
+              },
+            ]),
+          } as any)
+      );
+      const res = await azure.getBranchStatusCheck(
+        'somebranch',
+        'a-genre/a-name'
+      );
+      expect(res).toBe(BranchStatus.green);
+    });
+    it('should return red if status is failed', async () => {
+      await initRepo({ repository: 'some/repo' });
+      azureApi.gitApi.mockImplementationOnce(
+        () =>
+          ({
+            getBranch: jest.fn(() => ({ commit: { commitId: 'abcd1234' } })),
+            getStatuses: jest.fn(() => [
+              {
+                state: GitStatusState.Failed,
+                context: { genre: 'a-genre', name: 'a-name' },
+              },
+            ]),
+          } as any)
+      );
+      const res = await azure.getBranchStatusCheck(
+        'somebranch',
+        'a-genre/a-name'
+      );
+      expect(res).toBe(BranchStatus.red);
+    });
+    it('should return red if context status is error', async () => {
+      await initRepo({ repository: 'some/repo' });
+      azureApi.gitApi.mockImplementationOnce(
+        () =>
+          ({
+            getBranch: jest.fn(() => ({ commit: { commitId: 'abcd1234' } })),
+            getStatuses: jest.fn(() => [
+              {
+                state: GitStatusState.Error,
+                context: { genre: 'a-genre', name: 'a-name' },
+              },
+            ]),
+          } as any)
+      );
+      const res = await azure.getBranchStatusCheck(
+        'somebranch',
+        'a-genre/a-name'
+      );
+      expect(res).toEqual(BranchStatus.red);
+    });
+    it('should return yellow if status is pending', async () => {
+      await initRepo({ repository: 'some/repo' });
+      azureApi.gitApi.mockImplementationOnce(
+        () =>
+          ({
+            getBranch: jest.fn(() => ({ commit: { commitId: 'abcd1234' } })),
+            getStatuses: jest.fn(() => [
+              {
+                state: GitStatusState.Pending,
+                context: { genre: 'a-genre', name: 'a-name' },
+              },
+            ]),
+          } as any)
+      );
+      const res = await azure.getBranchStatusCheck(
+        'somebranch',
+        'a-genre/a-name'
+      );
+      expect(res).toBe(BranchStatus.yellow);
+    });
+    it('should return yellow if status is not set', async () => {
+      await initRepo({ repository: 'some/repo' });
+      azureApi.gitApi.mockImplementationOnce(
+        () =>
+          ({
+            getBranch: jest.fn(() => ({ commit: { commitId: 'abcd1234' } })),
+            getStatuses: jest.fn(() => [
+              {
+                state: GitStatusState.NotSet,
+                context: { genre: 'a-genre', name: 'a-name' },
+              },
+            ]),
+          } as any)
+      );
+      const res = await azure.getBranchStatusCheck(
+        'somebranch',
+        'a-genre/a-name'
+      );
+      expect(res).toBe(BranchStatus.yellow);
+    });
+    it('should return null if status not found', async () => {
+      await initRepo({ repository: 'some/repo' });
+      azureApi.gitApi.mockImplementationOnce(
+        () =>
+          ({
+            getBranch: jest.fn(() => ({ commit: { commitId: 'abcd1234' } })),
+            getStatuses: jest.fn(() => [
+              {
+                state: GitStatusState.Pending,
+                context: { genre: 'another-genre', name: 'a-name' },
+              },
+            ]),
+          } as any)
+      );
+      const res = await azure.getBranchStatusCheck(
+        'somebranch',
+        'a-genre/a-name'
+      );
+      expect(res).toBeNull();
+    });
+  });
   describe('getBranchStatus(branchName, requiredStatusChecks)', () => {
     it('return success if requiredStatusChecks null', async () => {
       await initRepo('some-repo');
@@ -406,7 +487,8 @@ describe('platform/azure', () => {
       azureApi.gitApi.mockImplementationOnce(
         () =>
           ({
-            getBranch: jest.fn(() => ({ aheadCount: 0 })),
+            getBranch: jest.fn(() => ({ commit: { commitId: 'abcd1234' } })),
+            getStatuses: jest.fn(() => [{ state: GitStatusState.Succeeded }]),
           } as any)
       );
       const res = await azure.getBranchStatus('somebranch', []);
@@ -417,7 +499,32 @@ describe('platform/azure', () => {
       azureApi.gitApi.mockImplementationOnce(
         () =>
           ({
-            getBranch: jest.fn(() => ({ aheadCount: 123 })),
+            getBranch: jest.fn(() => ({ commit: { commitId: 'abcd1234' } })),
+            getStatuses: jest.fn(() => [{ state: GitStatusState.Error }]),
+          } as any)
+      );
+      const res = await azure.getBranchStatus('somebranch', []);
+      expect(res).toEqual(BranchStatus.red);
+    });
+    it('should pass through pending', async () => {
+      await initRepo({ repository: 'some/repo' });
+      azureApi.gitApi.mockImplementationOnce(
+        () =>
+          ({
+            getBranch: jest.fn(() => ({ commit: { commitId: 'abcd1234' } })),
+            getStatuses: jest.fn(() => [{ state: GitStatusState.Pending }]),
+          } as any)
+      );
+      const res = await azure.getBranchStatus('somebranch', []);
+      expect(res).toEqual(BranchStatus.yellow);
+    });
+    it('should fall back to yellow if no statuses returned', async () => {
+      await initRepo({ repository: 'some/repo' });
+      azureApi.gitApi.mockImplementationOnce(
+        () =>
+          ({
+            getBranch: jest.fn(() => ({ commit: { commitId: 'abcd1234' } })),
+            getStatuses: jest.fn(() => []),
           } as any)
       );
       const res = await azure.getBranchStatus('somebranch', []);
@@ -466,12 +573,6 @@ describe('platform/azure', () => {
             ]),
           } as any)
       );
-      azureHelper.getRenovatePRFormat.mockImplementation(
-        () =>
-          ({
-            number: 1234,
-          } as any)
-      );
       const pr = await azure.getPr(1234);
       expect(pr).toMatchSnapshot();
     });
@@ -490,16 +591,8 @@ describe('platform/azure', () => {
             createPullRequestLabel: jest.fn(() => ({})),
           } as any)
       );
-      azureHelper.getRenovatePRFormat.mockImplementation(
-        () =>
-          ({
-            displayNumber: 'Pull Request #456',
-            number: 456,
-            pullRequestId: 456,
-          } as any)
-      );
       const pr = await azure.createPr({
-        branchName: 'some-branch',
+        sourceBranch: 'some-branch',
         targetBranch: 'master',
         prTitle: 'The Title',
         prBody: 'Hello world',
@@ -519,16 +612,8 @@ describe('platform/azure', () => {
             createPullRequestLabel: jest.fn(() => ({})),
           } as any)
       );
-      azureHelper.getRenovatePRFormat.mockImplementation(
-        () =>
-          ({
-            displayNumber: 'Pull Request #456',
-            number: 456,
-            pullRequestId: 456,
-          } as any)
-      );
       const pr = await azure.createPr({
-        branchName: 'some-branch',
+        sourceBranch: 'some-branch',
         targetBranch: 'master',
         prTitle: 'The Title',
         prBody: 'Hello world',
@@ -566,9 +651,8 @@ describe('platform/azure', () => {
             updatePullRequest: updateFn,
           } as any)
       );
-      azureHelper.getRenovatePRFormat.mockImplementation((x) => x as any);
       const pr = await azure.createPr({
-        branchName: 'some-branch',
+        sourceBranch: 'some-branch',
         targetBranch: 'dev',
         prTitle: 'The Title',
         prBody: 'Hello world',
@@ -628,6 +712,24 @@ describe('platform/azure', () => {
         prTitle: 'The New Title',
         prBody: 'Hello world again',
         state: PrState.Closed,
+      });
+      expect(updatePullRequest.mock.calls).toMatchSnapshot();
+    });
+
+    it('should reopen the PR', async () => {
+      await initRepo({ repository: 'some/repo' });
+      const updatePullRequest = jest.fn();
+      azureApi.gitApi.mockImplementationOnce(
+        () =>
+          ({
+            updatePullRequest,
+          } as any)
+      );
+      await azure.updatePr({
+        number: 1234,
+        prTitle: 'The New Title',
+        prBody: 'Hello world again',
+        state: PrState.Open,
       });
       expect(updatePullRequest.mock.calls).toMatchSnapshot();
     });
@@ -839,21 +941,154 @@ describe('platform/azure', () => {
     });
   });
 
-  describe('Not supported by Azure DevOps (yet!)', () => {
-    it('setBranchStatus', async () => {
-      const res = await azure.setBranchStatus({
+  describe('setBranchStatus', () => {
+    it('should build and call the create status api properly', async () => {
+      await initRepo({ repository: 'some/repo' });
+      const createCommitStatusMock = jest.fn();
+      azureApi.gitApi.mockImplementationOnce(
+        () =>
+          ({
+            getBranch: jest.fn(() => ({ commit: { commitId: 'abcd1234' } })),
+            createCommitStatus: createCommitStatusMock,
+          } as any)
+      );
+      await azure.setBranchStatus({
         branchName: 'test',
         context: 'test',
         description: 'test',
         state: BranchStatus.yellow,
-        url: 'test',
+        url: 'test.com',
       });
-      expect(res).toBeUndefined();
+      expect(createCommitStatusMock).toHaveBeenCalledWith(
+        {
+          context: {
+            genre: undefined,
+            name: 'test',
+          },
+          description: 'test',
+          state: GitStatusState.Pending,
+          targetUrl: 'test.com',
+        },
+        'abcd1234',
+        '1'
+      );
+    });
+    it('should build and call the create status api properly with a complex context', async () => {
+      await initRepo({ repository: 'some/repo' });
+      const createCommitStatusMock = jest.fn();
+      azureApi.gitApi.mockImplementationOnce(
+        () =>
+          ({
+            getBranch: jest.fn(() => ({ commit: { commitId: 'abcd1234' } })),
+            createCommitStatus: createCommitStatusMock,
+          } as any)
+      );
+      await azure.setBranchStatus({
+        branchName: 'test',
+        context: 'renovate/artifact/test',
+        description: 'test',
+        state: BranchStatus.green,
+        url: 'test.com',
+      });
+      expect(createCommitStatusMock).toHaveBeenCalledWith(
+        {
+          context: {
+            genre: 'renovate/artifact',
+            name: 'test',
+          },
+          description: 'test',
+          state: GitStatusState.Succeeded,
+          targetUrl: 'test.com',
+        },
+        'abcd1234',
+        '1'
+      );
+    });
+  });
+
+  describe('mergePr', () => {
+    it('should complete the PR', async () => {
+      await initRepo({ repository: 'some/repo' });
+      const pullRequestIdMock = 12345;
+      const branchNameMock = 'test';
+      const lastMergeSourceCommitMock = { commitId: 'abcd1234' };
+      const updatePullRequestMock = jest.fn();
+      azureApi.gitApi.mockImplementationOnce(
+        () =>
+          ({
+            getPullRequestById: jest.fn(() => ({
+              lastMergeSourceCommit: lastMergeSourceCommitMock,
+              targetRefName: 'refs/heads/ding',
+            })),
+            updatePullRequest: updatePullRequestMock,
+          } as any)
+      );
+
+      azureHelper.getMergeMethod = jest
+        .fn()
+        .mockReturnValue(GitPullRequestMergeStrategy.Squash);
+
+      const res = await azure.mergePr(pullRequestIdMock, branchNameMock);
+
+      expect(updatePullRequestMock).toHaveBeenCalledWith(
+        {
+          status: PullRequestStatus.Completed,
+          lastMergeSourceCommit: lastMergeSourceCommitMock,
+          completionOptions: {
+            mergeStrategy: GitPullRequestMergeStrategy.Squash,
+            deleteSourceBranch: true,
+          },
+        },
+        '1',
+        pullRequestIdMock
+      );
+      expect(res).toBe(true);
+    });
+    it('should return false if the PR does not update successfully', async () => {
+      await initRepo({ repository: 'some/repo' });
+      const pullRequestIdMock = 12345;
+      const branchNameMock = 'test';
+      const lastMergeSourceCommitMock = { commitId: 'abcd1234' };
+      azureApi.gitApi.mockImplementationOnce(
+        () =>
+          ({
+            getPullRequestById: jest.fn(() => ({
+              lastMergeSourceCommit: lastMergeSourceCommitMock,
+            })),
+            updatePullRequest: jest
+              .fn()
+              .mockRejectedValue(new Error(`oh no pr couldn't be updated`)),
+          } as any)
+      );
+
+      azureHelper.getMergeMethod = jest
+        .fn()
+        .mockReturnValue(GitPullRequestMergeStrategy.Squash);
+
+      const res = await azure.mergePr(pullRequestIdMock, branchNameMock);
+      expect(res).toBe(false);
     });
 
-    it('mergePr', async () => {
-      const res = await azure.mergePr(0, undefined);
-      expect(res).toBe(false);
+    it('should cache the mergeMethod for subsequent merges', async () => {
+      await initRepo({ repository: 'some/repo' });
+      azureApi.gitApi.mockImplementation(
+        () =>
+          ({
+            getPullRequestById: jest.fn(() => ({
+              lastMergeSourceCommit: { commitId: 'abcd1234' },
+              targetRefName: 'refs/heads/ding',
+            })),
+            updatePullRequest: jest.fn(),
+          } as any)
+      );
+      azureHelper.getMergeMethod = jest
+        .fn()
+        .mockReturnValue(GitPullRequestMergeStrategy.Squash);
+
+      await azure.mergePr(1234, 'test-branch-1');
+      await azure.mergePr(5678, 'test-branch-2');
+
+      expect(azureHelper.getMergeMethod).toHaveBeenCalledTimes(1);
     });
   });
 
@@ -875,6 +1110,25 @@ describe('platform/azure', () => {
       );
       await azure.deleteLabel(1234, 'rebase');
       expect(azureApi.gitApi.mock.calls).toMatchSnapshot();
+    });
+  });
+  describe('getJsonFile()', () => {
+    it('returns file content', async () => {
+      const data = { foo: 'bar' };
+      azureHelper.getFile.mockResolvedValueOnce(JSON.stringify(data));
+      await initRepo({
+        repository: 'some-repo',
+      });
+      const res = await azure.getJsonFile('file.json');
+      expect(res).toEqual(data);
+    });
+    it('returns null on errors', async () => {
+      azureHelper.getFile.mockRejectedValueOnce('some error');
+      await initRepo({
+        repository: 'some-repo',
+      });
+      const res = await azure.getJsonFile('file.json');
+      expect(res).toBeNull();
     });
   });
 });

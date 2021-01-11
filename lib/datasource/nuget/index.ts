@@ -15,8 +15,8 @@ function parseRegistryUrl(
   try {
     const parsedUrl = urlApi.parse(registryUrl);
     let protocolVersion = 2;
-    const protolVersionRegExp = /#protocolVersion=(2|3)/;
-    const protocolVersionMatch = protolVersionRegExp.exec(parsedUrl.hash);
+    const protocolVersionRegExp = /#protocolVersion=(2|3)/;
+    const protocolVersionMatch = protocolVersionRegExp.exec(parsedUrl.hash);
     if (protocolVersionMatch) {
       parsedUrl.hash = '';
       protocolVersion = Number.parseInt(protocolVersionMatch[1], 10);
@@ -24,8 +24,8 @@ function parseRegistryUrl(
       protocolVersion = 3;
     }
     return { feedUrl: urlApi.format(parsedUrl), protocolVersion };
-  } catch (e) {
-    logger.debug({ e }, `nuget registry failure: can't parse ${registryUrl}`);
+  } catch (err) {
+    logger.debug({ err }, `nuget registry failure: can't parse ${registryUrl}`);
     return { feedUrl: registryUrl, protocolVersion: null };
   }
 }
@@ -40,8 +40,8 @@ export async function getReleases({
     return v2.getReleases(feedUrl, lookupName);
   }
   if (protocolVersion === 3) {
-    const queryUrl = await v3.getQueryUrl(feedUrl);
-    if (queryUrl !== null) {
+    const queryUrl = await v3.getResourceUrl(feedUrl);
+    if (queryUrl) {
       return v3.getReleases(feedUrl, queryUrl, lookupName);
     }
   }

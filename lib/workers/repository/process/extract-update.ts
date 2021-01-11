@@ -4,6 +4,7 @@ import { RenovateConfig } from '../../../config';
 import { logger } from '../../../logger';
 import { PackageFile } from '../../../manager/common';
 import { getCache } from '../../../util/cache/repository';
+import { checkoutBranch, getBranchCommit } from '../../../util/git';
 import { BranchConfig } from '../../common';
 import { extractAllDependencies } from '../extract';
 import { branchifyUpgrades } from '../updates/branchify';
@@ -50,8 +51,9 @@ export async function extract(
   config: RenovateConfig
 ): Promise<Record<string, PackageFile[]>> {
   logger.debug('extract()');
-  const { baseBranch, baseBranchSha } = config;
-  let packageFiles;
+  const { baseBranch } = config;
+  const baseBranchSha = getBranchCommit(baseBranch);
+  let packageFiles: Record<string, PackageFile[]>;
   const cache = getCache();
   const cachedExtract = cache?.scan?.[baseBranch];
   const configHash = hasha(JSON.stringify(config));
@@ -62,9 +64,21 @@ export async function extract(
   ) {
     logger.debug({ baseBranch, baseBranchSha }, 'Found cached extract');
     packageFiles = cachedExtract.packageFiles;
+    try {
+      for (const files of Object.values(packageFiles)) {
+        for (const file of files) {
+          for (const dep of file.deps) {
+            delete dep.updates;
+          }
+        }
+      }
+      logger.debug('Deleted cached dep updates');
+    } catch (err) {
+      logger.info({ err }, 'Error deleting cached dep updates');
+    }
   } else {
+    await checkoutBranch(baseBranch);
     packageFiles = await extractAllDependencies(config);
-    cache.scan = cache.scan || Object.create({});
     cache.scan[baseBranch] = {
       sha: baseBranchSha,
       configHash,

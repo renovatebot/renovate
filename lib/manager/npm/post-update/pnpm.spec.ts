@@ -1,5 +1,5 @@
 import { exec as _exec } from 'child_process';
-import { envMock, mockExecAll } from '../../../../test/execUtil';
+import { envMock, mockExecAll } from '../../../../test/exec-util';
 import { mocked } from '../../../../test/util';
 import * as _env from '../../../util/exec/env';
 import * as _fs from '../../../util/fs/proxies';
@@ -20,7 +20,7 @@ delete process.env.NPM_CONFIG_CACHE;
 describe('generateLockFile', () => {
   let config: PostUpdateConfig;
   beforeEach(() => {
-    config = { cacheDir: 'some-cache-dir', compatibility: { pnpm: '^2.0.0' } };
+    config = { cacheDir: 'some-cache-dir', constraints: { pnpm: '^2.0.0' } };
     env.getChildProcessEnv.mockReturnValue(envMock.basic);
   });
   it('generates lock files', async () => {

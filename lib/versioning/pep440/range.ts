@@ -147,7 +147,7 @@ export function getNewValue({
     // we failed at creating the range
     logger.error(
       { result, toVersion, currentValue },
-      'pep440: failed to calcuate newValue'
+      'pep440: failed to calculate newValue'
     );
     return null;
   }

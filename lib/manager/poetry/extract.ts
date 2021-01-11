@@ -1,5 +1,5 @@
+import { parse } from '@iarna/toml';
 import is from '@sindresorhus/is';
-import { parse } from 'toml';
 import * as datasourcePypi from '../../datasource/pypi';
 import { logger } from '../../logger';
 import { SkipReason } from '../../types';
@@ -112,22 +112,22 @@ export function extractPackageFile(
     return null;
   }
 
-  const compatibility: Record<string, any> = {};
+  const constraints: Record<string, any> = {};
 
   // https://python-poetry.org/docs/pyproject/#poetry-and-pep-517
   if (
     pyprojectfile['build-system']?.['build-backend'] === 'poetry.masonry.api'
   ) {
-    compatibility.poetry = pyprojectfile['build-system']?.requires.join(' ');
+    constraints.poetry = pyprojectfile['build-system']?.requires.join(' ');
   }
 
-  if (is.nonEmptyString(pyprojectfile.tool?.poetry?.['dependencies']?.python)) {
-    compatibility.python = pyprojectfile.tool?.poetry?.['dependencies']?.python;
+  if (is.nonEmptyString(pyprojectfile.tool?.poetry?.dependencies?.python)) {
+    constraints.python = pyprojectfile.tool?.poetry?.dependencies?.python;
   }
 
   return {
     deps,
     registryUrls: extractRegistries(pyprojectfile),
-    compatibility,
+    constraints,
   };
 }

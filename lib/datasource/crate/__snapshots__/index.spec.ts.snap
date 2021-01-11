@@ -2,6 +2,7 @@
 
 exports[`datasource/crate getReleases processes real data: amethyst 1`] = `
 Object {
+  "dependencyUrl": "https://crates.io/crates/amethyst",
   "releases": Array [
     Object {
       "version": "0.1.0",
@@ -144,6 +145,7 @@ Array [
 
 exports[`datasource/crate getReleases processes real data: libc 1`] = `
 Object {
+  "dependencyUrl": "https://crates.io/crates/libc",
   "releases": Array [
     Object {
       "version": "0.1.0",

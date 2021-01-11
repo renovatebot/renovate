@@ -1,8 +1,8 @@
 import fs from 'fs';
 import { getPkgReleases } from '..';
-import * as httpMock from '../../../test/httpMock';
+import * as httpMock from '../../../test/http-mock';
 
-import { id as datasource } from '.';
+import { id as datasource, getIndexSuffix } from '.';
 
 const res1 = fs.readFileSync('lib/datasource/crate/__fixtures__/libc', 'utf8');
 const res2 = fs.readFileSync(
@@ -14,6 +14,18 @@ const baseUrl =
   'https://raw.githubusercontent.com/rust-lang/crates.io-index/master/';
 
 describe('datasource/crate', () => {
+  describe('getIndexSuffix', () => {
+    it('returns correct suffixes', () => {
+      expect(getIndexSuffix('a')).toBe('1/a');
+      expect(getIndexSuffix('1')).toBe('1/1');
+      expect(getIndexSuffix('1234567')).toBe('12/34/1234567');
+      expect(getIndexSuffix('ab')).toBe('2/ab');
+      expect(getIndexSuffix('abc')).toBe('3/a/abc');
+      expect(getIndexSuffix('abcd')).toBe('ab/cd/abcd');
+      expect(getIndexSuffix('abcde')).toBe('ab/cd/abcde');
+    });
+  });
+
   describe('getReleases', () => {
     it('returns null for empty result', async () => {
       httpMock.scope(baseUrl).get('/no/n_/non_existent_crate').reply(200, {});

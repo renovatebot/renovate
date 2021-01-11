@@ -2,12 +2,30 @@
 
 exports[`manager/npm/extract/npm .getNpmLock() extracts 1`] = `
 Object {
-  "ansi-styles": "3.2.1",
-  "chalk": "2.4.1",
-  "color-convert": "1.9.1",
-  "color-name": "1.1.3",
-  "escape-string-regexp": "1.0.5",
-  "has-flag": "3.0.0",
-  "supports-color": "5.4.0",
+  "lockedVersions": Object {
+    "ansi-styles": "3.2.1",
+    "chalk": "2.4.1",
+    "color-convert": "1.9.1",
+    "color-name": "1.1.3",
+    "escape-string-regexp": "1.0.5",
+    "has-flag": "3.0.0",
+    "supports-color": "5.4.0",
+  },
+  "lockfileVersion": 1,
+}
+`;
+
+exports[`manager/npm/extract/npm .getNpmLock() extracts npm 7 lockfile 1`] = `
+Object {
+  "lockedVersions": Object {
+    "ansi-styles": "3.2.1",
+    "chalk": "2.4.1",
+    "color-convert": "1.9.1",
+    "color-name": "1.1.3",
+    "escape-string-regexp": "1.0.5",
+    "has-flag": "3.0.0",
+    "supports-color": "5.4.0",
+  },
+  "lockfileVersion": 2,
 }
 `;

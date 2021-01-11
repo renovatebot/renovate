@@ -5,7 +5,7 @@ import {
   analyzeTerraformProvider,
   extractTerraformProvider,
 } from './providers';
-import { extractTerraformRequiredProviders } from './required_providers';
+import { extractTerraformRequiredProviders } from './required-providers';
 import {
   analyseTerraformResource,
   extractTerraformResource,
@@ -85,7 +85,7 @@ export function extractPackageFile(content: string): PackageFile | null {
       }
     }
   } catch (err) /* istanbul ignore next */ {
-    logger.warn({ err }, 'Error extracting buildkite plugins');
+    logger.warn({ err }, 'Error extracting terraform plugins');
   }
   deps.forEach((dep) => {
     switch (dep.managerData.terraformDependencyType) {

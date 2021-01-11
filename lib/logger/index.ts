@@ -6,10 +6,10 @@ import cmdSerializer from './cmd-serializer';
 import configSerializer from './config-serializer';
 import errSerializer from './err-serializer';
 import { RenovateStream } from './pretty-stdout';
-import { ErrorStream, withSanitizer } from './utils';
+import { BunyanRecord, ProblemStream, withSanitizer } from './utils';
 
 let logContext: string = process.env.LOG_CONTEXT || shortid.generate();
-let meta = {};
+let curMeta = {};
 
 export interface LogError {
   level: bunyan.LogLevel;
@@ -17,14 +17,17 @@ export interface LogError {
   msg?: string;
 }
 
-const errors = new ErrorStream();
+const problems = new ProblemStream();
 
 const stdout: bunyan.Stream = {
   name: 'stdout',
-  level: (process.env.LOG_LEVEL as bunyan.LogLevel) || 'info',
+  level:
+    (process.env.LOG_LEVEL as bunyan.LogLevel) ||
+    /* istanbul ignore next: not testable */ 'info',
   stream: process.stdout,
 };
 
+// istanbul ignore else: not testable
 if (process.env.LOG_FORMAT !== 'json') {
   // TODO: typings
   const prettyStdOut = new RenovateStream() as any;
@@ -49,27 +52,28 @@ const bunyanLogger = bunyan.createLogger({
   streams: [
     stdout,
     {
-      name: 'error',
-      level: 'error' as bunyan.LogLevel,
-      stream: errors as any,
+      name: 'problems',
+      level: 'warn' as bunyan.LogLevel,
+      stream: problems as any,
       type: 'raw',
     },
   ].map(withSanitizer),
 });
 
-const logFactory = (level: bunyan.LogLevelString): any => {
-  return (p1: any, p2: any): void => {
-    if (p2) {
-      // meta and msg provided
-      bunyanLogger[level]({ logContext, ...meta, ...p1 }, p2);
-    } else if (is.string(p1)) {
-      // only message provided
-      bunyanLogger[level]({ logContext, ...meta }, p1);
-    } else {
-      // only meta provided
-      bunyanLogger[level]({ logContext, ...meta, ...p1 });
-    }
-  };
+const logFactory = (level: bunyan.LogLevelString): any => (
+  p1: any,
+  p2: any
+): void => {
+  if (p2) {
+    // meta and msg provided
+    bunyanLogger[level]({ logContext, ...curMeta, ...p1 }, p2);
+  } else if (is.string(p1)) {
+    // only message provided
+    bunyanLogger[level]({ logContext, ...curMeta }, p1);
+  } else {
+    // only meta provided
+    bunyanLogger[level]({ logContext, ...curMeta, ...p1 });
+  }
 };
 
 const loggerLevels: bunyan.LogLevelString[] = [
@@ -111,22 +115,20 @@ export function getContext(): any {
 }
 
 // setMeta overrides existing meta, may remove fields if no longer existing
-// eslint-disable-next-lint @typescript-eslint/explicit-module-boundary-types
-export function setMeta(obj: any): void {
-  meta = { ...obj };
+export function setMeta(obj: Record<string, unknown>): void {
+  curMeta = { ...obj };
 }
 
 // addMeta overrides or adds fields but does not remove any
-// eslint-disable-next-lint @typescript-eslint/explicit-module-boundary-types
-export function addMeta(obj: any): void {
-  meta = { ...meta, ...obj };
+export function addMeta(obj: Record<string, unknown>): void {
+  curMeta = { ...curMeta, ...obj };
 }
 
 // removeMeta removes the provided fields from meta
 export function removeMeta(fields: string[]): void {
-  Object.keys(meta).forEach((key) => {
+  Object.keys(curMeta).forEach((key) => {
     if (fields.includes(key)) {
-      delete meta[key];
+      delete curMeta[key];
     }
   });
 }
@@ -141,6 +143,10 @@ export function levels(name: string, level: bunyan.LogLevel): void {
   bunyanLogger.levels(name, level);
 }
 
-export function getErrors(): any {
-  return errors.getErrors();
+export function getProblems(): BunyanRecord[] {
+  return problems.getProblems();
+}
+
+export function clearProblems(): void {
+  return problems.clearProblems();
 }

@@ -37,7 +37,8 @@
     "behat/behat-bundle": "*",
     "behat/mink-bundle": "*",
     "behat/sahi-client": "*",
-    "behat/common-contexts": "*"
+    "behat/common-contexts": "*",
+    "composer/composer": "^1.10.0"
   },
   "scripts": {
     "post-install-cmd": [

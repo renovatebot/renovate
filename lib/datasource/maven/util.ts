@@ -99,10 +99,15 @@ export async function downloadHttpProtocol(
 export async function isHttpResourceExists(
   pkgUrl: url.URL | string,
   hostType = id
-): Promise<boolean | null> {
+): Promise<boolean | string | null> {
   try {
     const httpClient = httpByHostType(hostType);
-    await httpClient.head(pkgUrl.toString());
+    const res = await httpClient.head(pkgUrl.toString());
+    const pkgUrlHost = url.parse(pkgUrl.toString()).host;
+    if (pkgUrlHost === 'repo.maven.apache.org') {
+      const timestamp = res?.headers?.['last-modified'] as string;
+      return timestamp || true;
+    }
     return true;
   } catch (err) {
     if (isNotFoundError(err)) {

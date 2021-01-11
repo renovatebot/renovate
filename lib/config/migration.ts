@@ -1,5 +1,6 @@
+import later from '@breejs/later';
 import is from '@sindresorhus/is';
-import later from 'later';
+import equal from 'fast-deep-equal';
 import { logger } from '../logger';
 import { HostRule } from '../types';
 import { clone } from '../util/clone';
@@ -22,6 +23,8 @@ const removedOptions = [
   'groupCommitMessage',
   'groupPrTitle',
   'groupPrBody',
+  'statusCheckVerify',
+  'lazyGrouping',
 ];
 
 export interface MigratedConfig {
@@ -51,7 +54,6 @@ export function migrateConfig(
         optionTypes[option.name] = option.type;
       });
     }
-    let isMigrated = false;
     const migratedConfig = clone(config) as MigratedRenovateConfig;
     const depTypes = [
       'dependencies',
@@ -62,29 +64,22 @@ export function migrateConfig(
     ];
     for (const [key, val] of Object.entries(config)) {
       if (removedOptions.includes(key)) {
-        isMigrated = true;
         delete migratedConfig[key];
       } else if (key === 'pathRules') {
-        isMigrated = true;
         if (is.array(val)) {
-          migratedConfig.packageRules = migratedConfig.packageRules || [];
-          const migratedPathRules = migratedConfig.pathRules.map(
-            (p) => migrateConfig(p, key).migratedConfig
-          );
-          migratedConfig.packageRules = migratedPathRules.concat(
-            migratedConfig.packageRules
-          );
+          migratedConfig.packageRules = is.array(migratedConfig.packageRules)
+            ? migratedConfig.packageRules
+            : [];
+          migratedConfig.packageRules = val.concat(migratedConfig.packageRules);
         }
         delete migratedConfig.pathRules;
       } else if (key === 'suppressNotifications') {
         if (is.nonEmptyArray(val) && val.includes('prEditNotification')) {
-          isMigrated = true;
           migratedConfig.suppressNotifications = migratedConfig.suppressNotifications.filter(
             (item) => item !== 'prEditNotification'
           );
         }
       } else if (key.startsWith('masterIssue')) {
-        isMigrated = true;
         const newKey = key.replace('masterIssue', 'dependencyDashboard');
         migratedConfig[newKey] = val;
         if (optionTypes[newKey] === 'boolean' && val === 'true') {
@@ -92,33 +87,45 @@ export function migrateConfig(
         }
         delete migratedConfig[key];
       } else if (key === 'gomodTidy') {
-        isMigrated = true;
         if (val) {
           migratedConfig.postUpdateOptions =
             migratedConfig.postUpdateOptions || [];
           migratedConfig.postUpdateOptions.push('gomodTidy');
         }
         delete migratedConfig.gomodTidy;
+      } else if (key === 'semanticCommits') {
+        if (val === true) {
+          migratedConfig.semanticCommits = 'enabled';
+        } else if (val === false) {
+          migratedConfig.semanticCommits = 'disabled';
+        } else if (val !== 'enabled' && val !== 'disabled') {
+          migratedConfig.semanticCommits = 'auto';
+        }
       } else if (parentKey === 'hostRules' && key === 'platform') {
-        isMigrated = true;
         migratedConfig.hostType = val;
         delete migratedConfig.platform;
       } else if (parentKey === 'hostRules' && key === 'endpoint') {
-        isMigrated = true;
         migratedConfig.baseUrl = val;
         delete migratedConfig.endpoint;
       } else if (parentKey === 'hostRules' && key === 'host') {
-        isMigrated = true;
         migratedConfig.hostName = val;
         delete migratedConfig.host;
+      } else if (key === 'packageRules' && is.plainObject(val)) {
+        migratedConfig.packageRules = is.array(migratedConfig.packageRules)
+          ? migratedConfig.packageRules
+          : [];
+        migratedConfig.packageRules.push(val);
       } else if (key === 'packageFiles' && is.array(val)) {
-        isMigrated = true;
         const fileList = [];
         for (const packageFile of val) {
           if (is.object(packageFile) && !is.array(packageFile)) {
             fileList.push((packageFile as any).packageFile);
             if (Object.keys(packageFile).length > 1) {
-              migratedConfig.packageRules = migratedConfig.packageRules || [];
+              migratedConfig.packageRules = is.array(
+                migratedConfig.packageRules
+              )
+                ? migratedConfig.packageRules
+                : [];
               const payload = migrateConfig(packageFile as RenovateConfig, key)
                 .migratedConfig;
               for (const subrule of payload.packageRules || []) {
@@ -141,8 +148,9 @@ export function migrateConfig(
         migratedConfig.includePaths = fileList;
         delete migratedConfig.packageFiles;
       } else if (depTypes.includes(key)) {
-        isMigrated = true;
-        migratedConfig.packageRules = migratedConfig.packageRules || [];
+        migratedConfig.packageRules = is.array(migratedConfig.packageRules)
+          ? migratedConfig.packageRules
+          : [];
         const depTypePackageRule = migrateConfig(val as RenovateConfig, key)
           .migratedConfig;
         depTypePackageRule.depTypeList = [key];
@@ -150,7 +158,6 @@ export function migrateConfig(
         migratedConfig.packageRules.push(depTypePackageRule);
         delete migratedConfig[key];
       } else if (key === 'pinVersions') {
-        isMigrated = true;
         delete migratedConfig.pinVersions;
         if (val === true) {
           migratedConfig.rangeStrategy = 'pin';
@@ -158,10 +165,8 @@ export function migrateConfig(
           migratedConfig.rangeStrategy = 'replace';
         }
       } else if (key === 'gitFs') {
-        isMigrated = true;
         delete migratedConfig.gitFs;
       } else if (key === 'rebaseStalePrs') {
-        isMigrated = true;
         delete migratedConfig.rebaseStalePrs;
         if (!migratedConfig.rebaseWhen) {
           if (val === null) {
@@ -175,33 +180,39 @@ export function migrateConfig(
           }
         }
       } else if (key === 'rebaseConflictedPrs') {
-        isMigrated = true;
         delete migratedConfig.rebaseConflictedPrs;
         if (val === false) {
           migratedConfig.rebaseWhen = 'never';
         }
       } else if (key === 'exposeEnv') {
-        isMigrated = true;
         delete migratedConfig.exposeEnv;
         if (val === true) {
           migratedConfig.trustLevel = 'high';
         } else if (val === false) {
           migratedConfig.trustLevel = 'low';
         }
+      } else if (key === 'managerBranchPrefix') {
+        delete migratedConfig.managerBranchPrefix;
+        migratedConfig.additionalBranchPrefix = val;
+      } else if (
+        key === 'branchPrefix' &&
+        is.string(val) &&
+        val.includes('{{')
+      ) {
+        const templateIndex = val.indexOf(`{{`);
+        migratedConfig.branchPrefix = val.substring(0, templateIndex);
+        migratedConfig.additionalBranchPrefix = val.substring(templateIndex);
       } else if (key === 'upgradeInRange') {
-        isMigrated = true;
         delete migratedConfig.upgradeInRange;
         if (val === true) {
           migratedConfig.rangeStrategy = 'bump';
         }
       } else if (key === 'versionStrategy') {
-        isMigrated = true;
         delete migratedConfig.versionStrategy;
         if (val === 'widen') {
           migratedConfig.rangeStrategy = 'widen';
         }
       } else if (key === 'semanticPrefix' && is.string(val)) {
-        isMigrated = true;
         delete migratedConfig.semanticPrefix;
         let [text] = val.split(':') as any; // TODO: fixme
         text = text.split('(');
@@ -211,24 +222,49 @@ export function migrateConfig(
         } else {
           migratedConfig.semanticCommitScope = null;
         }
-      } else if (key === 'extends' && is.array<string>(val)) {
-        for (let i = 0; i < val.length; i += 1) {
-          if (val[i] === 'config:application' || val[i] === ':js-app') {
-            isMigrated = true;
-            migratedConfig.extends[i] = 'config:js-app';
-          } else if (val[i] === ':library' || val[i] === 'config:library') {
-            isMigrated = true;
-            migratedConfig.extends[i] = 'config:js-lib';
-          } else if (is.string(val[i]) && val[i].startsWith(':masterIssue')) {
-            isMigrated = true;
-            migratedConfig.extends[i] = val[i].replace(
-              'masterIssue',
-              'dependencyDashboard'
-            );
+      } else if (
+        key === 'extends' &&
+        (is.array<string>(val) || is.string(val))
+      ) {
+        if (is.string(migratedConfig.extends)) {
+          migratedConfig.extends = [migratedConfig.extends];
+        }
+        const presets = migratedConfig.extends;
+        for (let i = 0; i < presets.length; i += 1) {
+          let preset = presets[i];
+          if (is.string(preset)) {
+            if (preset === 'config:application' || preset === ':js-app') {
+              preset = 'config:js-app';
+            } else if (preset === ':library' || preset === 'config:library') {
+              preset = 'config:js-lib';
+            } else if (preset.startsWith(':masterIssue')) {
+              preset = preset.replace('masterIssue', 'dependencyDashboard');
+            } else if (
+              [':unpublishSafe', 'default:unpublishSafe'].includes(preset)
+            ) {
+              preset = 'npm:unpublishSafe';
+            }
+            presets[i] = preset;
           }
         }
+      } else if (key === 'unpublishSafe') {
+        if (val === true) {
+          migratedConfig.extends = migratedConfig.extends || [];
+          if (is.string(migratedConfig.extends)) {
+            migratedConfig.extends = [migratedConfig.extends];
+          }
+          if (
+            ![
+              ':unpublishSafe',
+              'default:unpublishSafe',
+              'npm:unpublishSafe',
+            ].some((x) => migratedConfig.extends.includes(x))
+          ) {
+            migratedConfig.extends.push('npm:unpublishSafe');
+          }
+        }
+        delete migratedConfig.unpublishSafe;
       } else if (key === 'versionScheme') {
-        isMigrated = true;
         migratedConfig.versioning = val;
         delete migratedConfig.versionScheme;
       } else if (
@@ -236,41 +272,32 @@ export function migrateConfig(
         is.string(val) &&
         val.startsWith('branch-')
       ) {
-        isMigrated = true;
         migratedConfig.automergeType = 'branch';
       } else if (key === 'automergeMinor') {
-        isMigrated = true;
         migratedConfig.minor = migratedConfig.minor || {};
         migratedConfig.minor.automerge = val == true; // eslint-disable-line eqeqeq
         delete migratedConfig[key];
       } else if (key === 'automergeMajor') {
-        isMigrated = true;
         migratedConfig.major = migratedConfig.major || {};
         migratedConfig.major.automerge = val == true; // eslint-disable-line eqeqeq
         delete migratedConfig[key];
       } else if (key === 'multipleMajorPrs') {
-        isMigrated = true;
         delete migratedConfig.multipleMajorPrs;
         migratedConfig.separateMultipleMajor = val;
       } else if (key === 'renovateFork' && is.boolean(val)) {
-        isMigrated = true;
         delete migratedConfig.renovateFork;
         migratedConfig.includeForks = val;
       } else if (key === 'separateMajorReleases') {
-        isMigrated = true;
         delete migratedConfig.separateMultipleMajor;
         migratedConfig.separateMajorMinor = val;
       } else if (key === 'separatePatchReleases') {
-        isMigrated = true;
         delete migratedConfig.separatePatchReleases;
         migratedConfig.separateMinorPatch = val;
       } else if (key === 'automergePatch') {
-        isMigrated = true;
         migratedConfig.patch = migratedConfig.patch || {};
         migratedConfig.patch.automerge = val == true; // eslint-disable-line eqeqeq
         delete migratedConfig[key];
       } else if (key === 'ignoreNodeModules') {
-        isMigrated = true;
         delete migratedConfig.ignoreNodeModules;
         migratedConfig.ignorePaths = val ? ['node_modules/'] : [];
       } else if (
@@ -279,7 +306,6 @@ export function migrateConfig(
         ['none', 'patch', 'minor', 'any'].includes(val)
       ) {
         delete migratedConfig.automerge;
-        isMigrated = true;
         if (val === 'none') {
           migratedConfig.automerge = false;
         } else if (val === 'patch') {
@@ -300,28 +326,23 @@ export function migrateConfig(
           migratedConfig.automerge = true;
         }
       } else if (key === 'packages') {
-        isMigrated = true;
-        migratedConfig.packageRules = migratedConfig.packageRules || [];
+        migratedConfig.packageRules = is.array(migratedConfig.packageRules)
+          ? migratedConfig.packageRules
+          : [];
         migratedConfig.packageRules = migratedConfig.packageRules.concat(
-          migratedConfig.packages.map(
-            (p) => migrateConfig(p, key).migratedConfig
-          )
+          migratedConfig.packages
         );
         delete migratedConfig.packages;
       } else if (key === 'excludedPackageNames') {
-        isMigrated = true;
         migratedConfig.excludePackageNames = val;
         delete migratedConfig.excludedPackageNames;
       } else if (key === 'packageName') {
-        isMigrated = true;
         migratedConfig.packageNames = [val];
         delete migratedConfig.packageName;
       } else if (key === 'packagePattern') {
-        isMigrated = true;
         migratedConfig.packagePatterns = [val];
         delete migratedConfig.packagePattern;
       } else if (key === 'baseBranch') {
-        isMigrated = true;
         migratedConfig.baseBranches = (is.array(val) ? val : [val]) as string[];
         delete migratedConfig.baseBranch;
       } else if (key === 'schedule' && val) {
@@ -341,7 +362,6 @@ export function migrateConfig(
             ).schedules[0];
             // Only migrate if the after time is greater than before, e.g. "after 10pm and before 5am"
             if (parsedSchedule?.t_a?.[0] > parsedSchedule?.t_b?.[0]) {
-              isMigrated = true;
               const toSplit = schedules[i];
               schedules[i] = toSplit
                 .replace(
@@ -362,43 +382,35 @@ export function migrateConfig(
         }
         for (let i = 0; i < schedules.length; i += 1) {
           if (schedules[i].includes('on the last day of the month')) {
-            isMigrated = true;
             schedules[i] = schedules[i].replace(
               'on the last day of the month',
               'on the first day of the month'
             );
           }
           if (schedules[i].includes('on every weekday')) {
-            isMigrated = true;
             schedules[i] = schedules[i].replace(
               'on every weekday',
               'every weekday'
             );
           }
           if (schedules[i].endsWith(' every day')) {
-            isMigrated = true;
             schedules[i] = schedules[i].replace(' every day', '');
           }
           if (
             /every (mon|tues|wednes|thurs|fri|satur|sun)day$/.test(schedules[i])
           ) {
-            isMigrated = true;
             schedules[i] = schedules[i].replace(/every ([a-z]*day)$/, 'on $1');
           }
           if (schedules[i].endsWith('days')) {
-            isMigrated = true;
             schedules[i] = schedules[i].replace('days', 'day');
           }
         }
-        if (isMigrated) {
-          if (is.string(val) && schedules.length === 1) {
-            [migratedConfig.schedule] = schedules as any; // TODO: fixme
-          } else {
-            migratedConfig.schedule = schedules;
-          }
+        if (is.string(val) && schedules.length === 1) {
+          [migratedConfig.schedule] = schedules as any; // TODO: fixme
+        } else {
+          migratedConfig.schedule = schedules;
         }
       } else if (is.string(val) && val.startsWith('{{semanticPrefix}}')) {
-        isMigrated = true;
         migratedConfig[key] = val.replace(
           '{{semanticPrefix}}',
           '{{#if semanticCommitType}}{{semanticCommitType}}{{#if semanticCommitScope}}({{semanticCommitScope}}){{/if}}: {{/if}}'
@@ -408,7 +420,11 @@ export function migrateConfig(
           if (is.object(depType) && !is.array(depType)) {
             const depTypeName = (depType as any).depType;
             if (depTypeName) {
-              migratedConfig.packageRules = migratedConfig.packageRules || [];
+              migratedConfig.packageRules = is.array(
+                migratedConfig.packageRules
+              )
+                ? migratedConfig.packageRules
+                : [];
               const newPackageRule = migrateConfig(
                 depType as RenovateConfig,
                 key
@@ -419,10 +435,8 @@ export function migrateConfig(
             }
           }
         });
-        isMigrated = true;
         delete migratedConfig.depTypes;
       } else if (optionTypes[key] === 'object' && is.boolean(val)) {
-        isMigrated = true;
         migratedConfig[key] = { enabled: val };
       } else if (optionTypes[key] === 'boolean') {
         if (val === 'true') {
@@ -435,9 +449,8 @@ export function migrateConfig(
         is.array(val) &&
         val.length === 1
       ) {
-        migratedConfig[key] = `${val[0]}`;
+        migratedConfig[key] = String(val[0]);
       } else if (key === 'node' && (val as RenovateConfig).enabled === true) {
-        isMigrated = true;
         delete migratedConfig.node.enabled;
         migratedConfig.travis = migratedConfig.travis || {};
         migratedConfig.travis.enabled = true;
@@ -453,21 +466,20 @@ export function migrateConfig(
           if (is.object(item) && !is.array(item)) {
             const arrMigrate = migrateConfig(item as RenovateConfig, key);
             newArray.push(arrMigrate.migratedConfig);
-            if (arrMigrate.isMigrated) {
-              isMigrated = true;
-            }
           } else {
             newArray.push(item);
           }
         }
         migratedConfig[key] = newArray;
+      } else if (key === 'compatibility' && is.object(val)) {
+        migratedConfig.constraints = migratedConfig.compatibility;
+        delete migratedConfig.compatibility;
       } else if (is.object(val)) {
         const subMigrate = migrateConfig(
           migratedConfig[key] as RenovateConfig,
           key
         );
         if (subMigrate.isMigrated) {
-          isMigrated = true;
           migratedConfig[key] = subMigrate.migratedConfig;
         }
       } else if (
@@ -475,14 +487,12 @@ export function migrateConfig(
         is.string(val) &&
         (val.includes('currentVersion') || val.includes('newVersion'))
       ) {
-        isMigrated = true;
         migratedConfig[key] = val
           .replace(/currentVersion/g, 'currentValue')
           .replace(/newVersion/g, 'newValue')
           .replace(/newValueMajor/g, 'newMajor')
           .replace(/newValueMinor/g, 'newMinor');
       } else if (key === 'raiseDeprecationWarnings') {
-        isMigrated = true;
         delete migratedConfig.raiseDeprecationWarnings;
         if (val === false) {
           migratedConfig.suppressNotifications =
@@ -494,7 +504,14 @@ export function migrateConfig(
     if (migratedConfig.endpoints) {
       migratedConfig.hostRules = migratedConfig.endpoints;
       delete migratedConfig.endpoints;
-      isMigrated = true;
+    }
+    const isMigrated = !equal(config, migratedConfig);
+    if (isMigrated) {
+      // recursive call in case any migrated configs need further migrating
+      return {
+        isMigrated,
+        migratedConfig: migrateConfig(migratedConfig).migratedConfig,
+      };
     }
     if (is.array(migratedConfig.packageRules)) {
       const renameMap = {
@@ -522,7 +539,7 @@ export function migrateConfig(
     }
     return { isMigrated, migratedConfig };
   } catch (err) /* istanbul ignore next */ {
-    logger.debug({ config }, 'migrateConfig() error');
+    logger.debug({ config, err }, 'migrateConfig() error');
     throw err;
   }
 }

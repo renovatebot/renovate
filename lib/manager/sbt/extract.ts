@@ -176,6 +176,10 @@ function parseDepExpr(
     currentValue,
   };
 
+  if (variables[rawVersion]) {
+    result.groupName = `${rawVersion} for ${groupId}`;
+  }
+
   if (depType) {
     result.depType = depType;
   }
@@ -265,6 +269,10 @@ function parseSbtLine(
     if (!dep.datasource) {
       if (dep.depType === 'plugin') {
         dep.datasource = datasourceSbtPlugin.id;
+        dep.registryUrls = [
+          ...registryUrls,
+          ...datasourceSbtPlugin.defaultRegistryUrls,
+        ];
       } else {
         dep.datasource = datasourceSbtPackage.id;
       }

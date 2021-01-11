@@ -145,11 +145,40 @@ function kotlinPluginVariableVersionFormatMatch(
   );
 }
 
+function kotlinImplementationVariableVersionFormatMatch(
+  dependency: GradleDependency
+): RegExp {
+  // implementation("com.graphql-java", "graphql-java", graphqlVersion)
+  return regEx(
+    `(?:implementation|testImplementation)\\s*\\(\\s*['"]${dependency.group}['"]\\s*,\\s*['"]${dependency.name}['"]\\s*,\\s*([a-zA-Z_][a-zA-Z_0-9]*)\\s*\\)\\s*(?:\\s|;|})`
+  );
+}
+
+function kotlinPluginVariableDotVersionFormatMatch(
+  dependency: GradleDependency
+): RegExp {
+  // id("org.jetbrains.kotlin.jvm").version(kotlinVersion)
+  return regEx(
+    `id\\s*\\(\\s*"${dependency.group}"\\s*\\)\\s*\\.\\s*version\\s*\\(\\s*([a-zA-Z_][a-zA-Z_0-9]*)\\s*\\)\\s*(?:\\s|;|})`
+  );
+}
+
 function dependencyStringVariableExpressionFormatMatch(
   dependency: GradleDependency
 ): RegExp {
   return regEx(
-    `\\s*dependency\\s+['"]${dependency.group}:${dependency.name}:([^'"]+)['"](?:\\s|;|})`
+    `\\s*dependency\\s+['"]${dependency.group}:${dependency.name}:` +
+      // eslint-disable-next-line no-template-curly-in-string
+      '${([^}]*)}' +
+      `['"](?:\\s|;|})`
+  );
+}
+
+function dependencyStringLiteralExpressionFormatMatch(
+  dependency: GradleDependency
+): RegExp {
+  return regEx(
+    `\\s*dependency\\s+['"]${dependency.group}:${dependency.name}:([^'"{}$]+)['"](?:\\s|;|})`
   );
 }
 
@@ -181,6 +210,8 @@ export function collectVersionVariables(
       dependencyStringVariableExpressionFormatMatch(dependency),
       ...moduleMapVariableVersionFormatMatch(dependency),
       ...moduleKotlinNamedArgumentVariableVersionFormatMatch(dependency),
+      kotlinImplementationVariableVersionFormatMatch(dependency),
+      kotlinPluginVariableDotVersionFormatMatch(dependency),
     ];
 
     const depName = `${dependency.group}:${dependency.name}`;
@@ -191,8 +222,14 @@ export function collectVersionVariables(
       }
     }
 
-    if (!dep.currentValue && variables[depName]) {
-      dep.currentValue = variables[depName];
+    if (!dep.currentValue) {
+      const dependencyLiteralRegex = dependencyStringLiteralExpressionFormatMatch(
+        dependency
+      );
+      const currentValue = dependencyLiteralRegex.exec(buildGradleContent)?.[1];
+      if (currentValue) {
+        dep.currentValue = currentValue;
+      }
     }
   }
 }
@@ -235,6 +272,7 @@ function updateLocalVariables(
     moduleStringVariableExpressionVersionFormatMatch(dependency),
     groovyPluginVariableVersionFormatMatch(dependency),
     kotlinPluginVariableVersionFormatMatch(dependency),
+    kotlinImplementationVariableVersionFormatMatch(dependency),
     ...moduleKotlinNamedArgumentVariableVersionFormatMatch(dependency),
   ];
   for (const regex of regexes) {

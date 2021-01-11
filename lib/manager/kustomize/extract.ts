@@ -3,11 +3,13 @@ import * as datasourceDocker from '../../datasource/docker';
 import * as datasourceGitTags from '../../datasource/git-tags';
 import * as datasourceGitHubTags from '../../datasource/github-tags';
 import { logger } from '../../logger';
+import * as dockerVersioning from '../../versioning/docker';
 import { PackageDependency, PackageFile } from '../common';
 
 interface Image {
   name: string;
   newTag: string;
+  newName?: string;
 }
 
 interface Kustomize {
@@ -16,58 +18,52 @@ interface Kustomize {
   images: Image[];
 }
 
-// extract the version from the url
-const versionMatch = /(?<basename>.*)\?ref=(?<version>.*)\s*$/;
-
-// extract the url from the base of a url with a subdir
-const extractUrl = /^(?<url>.*)(?:\/\/.*)$/;
-
-const githubUrl = /^github\.com\/(?<depName>(?<lookupName>[^/]+?\/[^/]+?)(?:\/[^/]+?)*)\?ref=(?<currentValue>.+)$/;
+// URL specifications should follow the hashicorp URL format
+// https://github.com/hashicorp/go-getter#url-format
+const gitUrl = /^(?:git::)?(?<url>(?:(?:(?:http|https|ssh):\/\/)?(?:.*@)?)?(?<path>(?:[^:/]+[:/])?(?<project>[^/]+\/[^/]+)))(?<subdir>[^?]*)\?ref=(?<currentValue>.+)$/;
 
 export function extractBase(base: string): PackageDependency | null {
-  const githubMatch = githubUrl.exec(base);
+  const match = gitUrl.exec(base);
 
-  if (githubMatch?.groups) {
-    const { currentValue, depName, lookupName } = githubMatch.groups;
+  if (!match) {
+    return null;
+  }
 
+  if (match?.groups.path.startsWith('github.com')) {
     return {
+      currentValue: match.groups.currentValue,
       datasource: datasourceGitHubTags.id,
-      depName,
-      lookupName,
-      currentValue,
+      depName: match.groups.project.replace('.git', ''),
     };
   }
 
-  const basenameVersion = versionMatch.exec(base);
-  if (basenameVersion) {
-    const currentValue = basenameVersion.groups.version;
-    const root = basenameVersion.groups.basename;
-
-    const urlResult = extractUrl.exec(root);
-    let url = root;
-    // if a match, then there was a subdir, update
-    if (urlResult && !url.startsWith('http')) {
-      url = urlResult.groups.url;
-    }
-
-    return {
-      datasource: datasourceGitTags.id,
-      depName: root,
-      lookupName: url,
-      currentValue,
-    };
-  }
-
-  return null;
+  return {
+    datasource: datasourceGitTags.id,
+    depName: match.groups.path.replace('.git', ''),
+    depNameShort: match.groups.project.replace('.git', ''),
+    lookupName: match.groups.url,
+    currentValue: match.groups.currentValue,
+  };
 }
 
 export function extractImage(image: Image): PackageDependency | null {
   if (image?.name && image.newTag) {
+    const replaceString = image.newTag;
+    let currentValue;
+    let currentDigest;
+    if (replaceString.startsWith('sha256:')) {
+      currentDigest = replaceString;
+      currentValue = undefined;
+    } else {
+      currentValue = replaceString;
+    }
     return {
       datasource: datasourceDocker.id,
-      depName: image.name,
-      lookupName: image.name,
-      currentValue: image.newTag,
+      versioning: dockerVersioning.id,
+      depName: image.newName ?? image.name,
+      currentValue,
+      currentDigest,
+      replaceString,
     };
   }
 
@@ -77,7 +73,7 @@ export function extractImage(image: Image): PackageDependency | null {
 export function parseKustomize(content: string): Kustomize | null {
   let pkg = null;
   try {
-    pkg = safeLoad(content);
+    pkg = safeLoad(content, { json: true });
   } catch (e) /* istanbul ignore next */ {
     return null;
   }

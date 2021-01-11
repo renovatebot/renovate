@@ -1,6 +1,6 @@
 import fs from 'fs';
 import { Readable } from 'stream';
-import * as httpMock from '../../../test/httpMock';
+import * as httpMock from '../../../test/http-mock';
 import { updateDependency } from './update';
 
 const aide = fs.readFileSync(

@@ -48,11 +48,10 @@ async function fetchDepUpdates(
     dep.updates = dep.updates || [];
     // istanbul ignore if
     if (dep.updates.length) {
+      const results = String(dep.updates.map((upgrade) => upgrade.newValue));
       logger.trace(
         { dependency: depName },
-        `${dep.updates.length} result(s): ${dep.updates.map(
-          (upgrade) => upgrade.newValue
-        )}`
+        `${dep.updates.length} result(s): ${results}`
       );
     }
     logger.trace({

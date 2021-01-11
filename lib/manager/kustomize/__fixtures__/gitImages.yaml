@@ -15,3 +15,6 @@ images:
   newTag: v0.0.2
 - name: gitlab.com/org/suborg/image
   newTag: v0.0.3
+- name: this-lives/on-docker-hub
+  newName: but.this.lives.on.local/private-registry # and therefore we need to check the versions available here
+  newTag: v0.0.4

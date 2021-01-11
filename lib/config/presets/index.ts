@@ -11,6 +11,7 @@ import * as massage from '../massage';
 import * as migration from '../migration';
 import { mergeChildConfig } from '../utils';
 import { PresetApi } from './common';
+import * as gitea from './gitea';
 import * as github from './github';
 import * as gitlab from './gitlab';
 import * as internal from './internal';
@@ -21,6 +22,7 @@ const presetSources: Record<string, PresetApi> = {
   github,
   npm,
   gitlab,
+  gitea,
   local,
   internal,
 };
@@ -66,6 +68,9 @@ export function parsePreset(input: string): ParsedPreset {
   } else if (str.startsWith('gitlab>')) {
     presetSource = 'gitlab';
     str = str.substring('gitlab>'.length);
+  } else if (str.startsWith('gitea>')) {
+    presetSource = 'gitea';
+    str = str.substring('gitea>'.length);
   } else if (str.startsWith('local>')) {
     presetSource = 'local';
     str = str.substring('local>'.length);
@@ -92,9 +97,11 @@ export function parsePreset(input: string): ParsedPreset {
     'group',
     'helpers',
     'monorepo',
+    'npm',
     'packages',
     'preview',
     'schedule',
+    'workarounds',
   ];
   if (
     presetsPackages.some((presetPackage) => str.startsWith(`${presetPackage}:`))
@@ -195,10 +202,14 @@ export async function resolveConfigPresets(
     for (const preset of inputConfig.extends) {
       // istanbul ignore if
       if (existingPresets.includes(preset)) {
-        logger.debug(`Already seen preset ${preset} in ${existingPresets}`);
+        logger.debug(
+          `Already seen preset ${preset} in [${existingPresets.join(', ')}]`
+        );
       } else if (ignorePresets.includes(preset)) {
         // istanbul ignore next
-        logger.debug(`Ignoring preset ${preset} in ${existingPresets}`);
+        logger.debug(
+          `Ignoring preset ${preset} in [${existingPresets.join(', ')}]`
+        );
       } else {
         logger.trace(`Resolving preset "${preset}"`);
         let fetchedPreset: RenovateConfig;

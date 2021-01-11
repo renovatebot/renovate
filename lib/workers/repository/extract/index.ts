@@ -7,6 +7,7 @@ import {
 import { logger } from '../../../logger';
 import { getManagerList } from '../../../manager';
 import { PackageFile } from '../../../manager/common';
+import { getFileList } from '../../../util/git';
 import { getMatchingFiles } from './file-match';
 import { getManagerPackageFiles } from './manager-files';
 
@@ -21,6 +22,7 @@ export async function extractAllDependencies(
     );
   }
   const extractList: RenovateConfig[] = [];
+  const fileList = await getFileList();
   for (const manager of managerList) {
     const managerConfig = getManagerConfig(config, manager);
     managerConfig.manager = manager;
@@ -30,15 +32,16 @@ export async function extractAllDependencies(
           managerConfig,
           regexManager
         );
-        regexManagerConfig.fileList = await getMatchingFiles(
-          regexManagerConfig
+        regexManagerConfig.fileList = getMatchingFiles(
+          regexManagerConfig,
+          fileList
         );
         if (regexManagerConfig.fileList.length) {
           extractList.push(regexManagerConfig);
         }
       }
     } else {
-      managerConfig.fileList = await getMatchingFiles(managerConfig);
+      managerConfig.fileList = getMatchingFiles(managerConfig, fileList);
       if (managerConfig.fileList.length) {
         extractList.push(managerConfig);
       }

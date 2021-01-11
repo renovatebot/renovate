@@ -37,7 +37,7 @@ export function writeFile(
 // istanbul ignore next
 export function outputFile(
   file: string,
-  data: any,
+  data: unknown,
   options?: WriteFileOptions | string
 ): Promise<void> {
   return fs.outputFile(file, data, options ?? {});

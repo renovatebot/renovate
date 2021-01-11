@@ -1,5 +1,31 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
+exports[`lib/manager/circleci/extract extractPackageFile() extracts image without leading dash 1`] = `
+Array [
+  Object {
+    "autoReplaceStringTemplate": "{{depName}}{{#if newValue}}:{{newValue}}{{/if}}{{#if newDigest}}@{{newDigest}}{{/if}}",
+    "commitMessageTopic": "Node.js",
+    "currentDigest": undefined,
+    "currentValue": "14.8.0",
+    "datasource": "docker",
+    "depName": "cimg/node",
+    "depType": "docker",
+    "replaceString": "cimg/node:14.8.0",
+    "versioning": "docker",
+  },
+  Object {
+    "autoReplaceStringTemplate": "{{depName}}{{#if newValue}}:{{newValue}}{{/if}}{{#if newDigest}}@{{newDigest}}{{/if}}",
+    "currentDigest": undefined,
+    "currentValue": "201903-01",
+    "datasource": "docker",
+    "depName": "ubuntu-1604",
+    "depType": "docker",
+    "replaceString": "ubuntu-1604:201903-01",
+    "versioning": "docker",
+  },
+]
+`;
+
 exports[`lib/manager/circleci/extract extractPackageFile() extracts multiple image lines 1`] = `
 Array [
   Object {

@@ -1,6 +1,7 @@
 import { readFileSync } from 'fs';
-import { resolve } from 'path';
+import { resolve } from 'upath';
 import { defaultConfig } from '../../../test/util';
+import { WORKER_FILE_UPDATE_FAILED } from '../../constants/error-messages';
 import { extractPackageFile } from '../../manager/html';
 import { BranchUpgradeConfig } from '../common';
 import { doAutoReplace } from './auto-replace';
@@ -140,6 +141,24 @@ describe('workers/branch/auto-replace', () => {
         '{{depName}}{{#if newValue}}:{{newValue}}{{/if}}{{#if newDigest}}@{{newDigest}}{{/if}}';
       const res = await doAutoReplace(upgrade, dockerfile, reuseExistingBranch);
       expect(res).toMatchSnapshot();
+    });
+    it('fails with oldversion in depname', async () => {
+      const yml =
+        'image: "1111111111.dkr.ecr.us-east-1.amazonaws.com/my-repository:1"\n\n';
+      upgrade.manager = 'regex';
+      upgrade.depName =
+        '1111111111.dkr.ecr.us-east-1.amazonaws.com/my-repository';
+      upgrade.currentValue = '1';
+      upgrade.newValue = '42';
+      upgrade.depIndex = 0;
+      upgrade.replaceString =
+        'image: "1111111111.dkr.ecr.us-east-1.amazonaws.com/my-repository:1"\n\n';
+      upgrade.packageFile = 'k8s/base/defaults.yaml';
+      upgrade.matchStrings = [
+        'image:\\s*\\\'?\\"?(?<depName>[^:]+):(?<currentValue>[^\\s\\\'\\"]+)\\\'?\\"?\\s*',
+      ];
+      const res = doAutoReplace(upgrade, yml, reuseExistingBranch);
+      await expect(res).rejects.toThrow(WORKER_FILE_UPDATE_FAILED);
     });
   });
 });

@@ -1,7 +1,9 @@
-import moment from 'moment';
+import { DateTime } from 'luxon';
 import { RenovateConfig } from '../../../config';
 import { logger } from '../../../logger';
-import { platform } from '../../../platform';
+import { Pr, platform } from '../../../platform';
+import { PrState } from '../../../types';
+import { ExternalHostError } from '../../../types/errors/external-host-error';
 import { branchExists } from '../../../util/git';
 import { BranchConfig } from '../../common';
 
@@ -9,32 +11,30 @@ export async function getPrHourlyRemaining(
   config: RenovateConfig
 ): Promise<number> {
   if (config.prHourlyLimit) {
-    logger.debug('Calculating hourly PRs remaining');
-    const prList = await platform.getPrList();
-    const currentHourStart = moment({
-      hour: moment().hour(),
-    });
-    logger.debug('currentHourStart=' + currentHourStart);
     try {
+      logger.debug('Calculating hourly PRs remaining');
+      const prList = await platform.getPrList();
+      const currentHourStart = DateTime.local().startOf('hour');
+      logger.debug(`currentHourStart=${String(currentHourStart)}`);
       const soFarThisHour = prList.filter(
         (pr) =>
-          pr.branchName !== config.onboardingBranch &&
-          moment(pr.createdAt).isAfter(currentHourStart)
+          pr.sourceBranch !== config.onboardingBranch &&
+          pr.sourceBranch.startsWith(config.branchPrefix) &&
+          DateTime.fromISO(pr.createdAt) > currentHourStart
       );
-      const prsRemaining = config.prHourlyLimit - soFarThisHour.length;
+      const prsRemaining = Math.max(
+        0,
+        config.prHourlyLimit - soFarThisHour.length
+      );
       logger.debug(`PR hourly limit remaining: ${prsRemaining}`);
-      // istanbul ignore if
-      if (prsRemaining <= 0) {
-        logger.debug(
-          {
-            prs: prsRemaining,
-          },
-          'Creation of new PRs is blocked by existing PRs'
-        );
-      }
       return prsRemaining;
     } catch (err) {
-      logger.error('Error checking PRs created per hour');
+      // istanbul ignore if
+      if (err instanceof ExternalHostError) {
+        throw err;
+      }
+      logger.error({ err }, 'Error checking PRs created per hour');
+      return config.prHourlyLimit;
     }
   }
   return 99;
@@ -45,17 +45,34 @@ export async function getConcurrentPrsRemaining(
   branches: BranchConfig[]
 ): Promise<number> {
   if (config.prConcurrentLimit) {
-    logger.debug(`Enforcing prConcurrentLimit (${config.prConcurrentLimit})`);
-    let currentlyOpen = 0;
-    for (const branch of branches) {
-      if (await branchExists(branch.branchName)) {
-        currentlyOpen += 1;
+    logger.debug(`Calculating prConcurrentLimit (${config.prConcurrentLimit})`);
+    try {
+      const openPrs: Pr[] = [];
+      for (const { branchName } of branches) {
+        try {
+          const pr = await platform.getBranchPr(branchName);
+          if (
+            pr &&
+            pr.sourceBranch !== config.onboardingBranch &&
+            pr.state === PrState.Open
+          ) {
+            openPrs.push(pr);
+          }
+        } catch (err) {
+          // no-op
+        }
       }
+      logger.debug(`${openPrs.length} PRs are currently open`);
+      const concurrentRemaining = Math.max(
+        0,
+        config.prConcurrentLimit - openPrs.length
+      );
+      logger.debug(`PR concurrent limit remaining: ${concurrentRemaining}`);
+      return concurrentRemaining;
+    } catch (err) /* istanbul ignore next */ {
+      logger.error({ err }, 'Error checking concurrent PRs');
+      return config.prConcurrentLimit;
     }
-    logger.debug(`${currentlyOpen} PRs are currently open`);
-    const concurrentRemaining = config.prConcurrentLimit - currentlyOpen;
-    logger.debug(`PR concurrent limit remaining: ${concurrentRemaining}`);
-    return concurrentRemaining;
   }
   return 99;
 }
@@ -66,7 +83,42 @@ export async function getPrsRemaining(
 ): Promise<number> {
   const hourlyRemaining = await getPrHourlyRemaining(config);
   const concurrentRemaining = await getConcurrentPrsRemaining(config, branches);
-  return hourlyRemaining < concurrentRemaining
-    ? hourlyRemaining
-    : concurrentRemaining;
+  return Math.min(hourlyRemaining, concurrentRemaining);
+}
+
+export function getConcurrentBranchesRemaining(
+  config: RenovateConfig,
+  branches: BranchConfig[]
+): number {
+  const { branchConcurrentLimit, prConcurrentLimit } = config;
+  const limit =
+    typeof branchConcurrentLimit === 'number'
+      ? branchConcurrentLimit
+      : prConcurrentLimit;
+  if (typeof limit === 'number' && limit) {
+    logger.debug(`Calculating branchConcurrentLimit (${limit})`);
+    try {
+      let currentlyOpen = 0;
+      for (const branch of branches) {
+        if (branchExists(branch.branchName)) {
+          currentlyOpen += 1;
+        }
+      }
+      logger.debug(`${currentlyOpen} branches are currently open`);
+      const concurrentRemaining = Math.max(0, limit - currentlyOpen);
+      logger.debug(`Branch concurrent limit remaining: ${concurrentRemaining}`);
+      return concurrentRemaining;
+    } catch (err) {
+      logger.error({ err }, 'Error checking concurrent branches');
+      return limit;
+    }
+  }
+  return 99;
+}
+
+export function getBranchesRemaining(
+  config: RenovateConfig,
+  branches: BranchConfig[]
+): number {
+  return getConcurrentBranchesRemaining(config, branches);
 }

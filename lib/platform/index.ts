@@ -98,7 +98,7 @@ export async function initPlatform(
     );
     gitAuthor = 'Renovate Bot <renovate@whitesourcesoftware.com>';
   } /* istanbul ignore next */ else {
-    logger.debug('Using platform gitAuthor: ' + platformInfo.gitAuthor);
+    logger.debug(`Using platform gitAuthor: ${String(platformInfo.gitAuthor)}`);
     gitAuthor = platformInfo.gitAuthor;
   }
   const gitAuthorParsed = parseGitAuthor(gitAuthor);

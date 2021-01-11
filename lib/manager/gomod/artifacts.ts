@@ -68,7 +68,7 @@ export async function updateArtifacts({
       },
       docker: {
         image: 'renovate/go',
-        tagConstraint: config.compatibility?.go,
+        tagConstraint: config.constraints?.go,
         tagScheme: 'npm',
         volumes: [goPath],
         preCommands: getPreCommands(),

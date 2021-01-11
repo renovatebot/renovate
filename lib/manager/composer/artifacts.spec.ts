@@ -1,24 +1,28 @@
 import { exec as _exec } from 'child_process';
 import { join } from 'upath';
-import { envMock, mockExecAll } from '../../../test/execUtil';
-import { fs, git, mocked } from '../../../test/util';
+import { envMock, mockExecAll } from '../../../test/exec-util';
+import { env, fs, git, mocked, partial } from '../../../test/util';
+import {
+  PLATFORM_TYPE_GITHUB,
+  PLATFORM_TYPE_GITLAB,
+} from '../../constants/platforms';
+import * as _datasource from '../../datasource';
+import * as datasourcePackagist from '../../datasource/packagist';
 import { setUtilConfig } from '../../util';
 import { BinarySource } from '../../util/exec/common';
 import * as docker from '../../util/exec/docker';
-import * as _env from '../../util/exec/env';
 import { StatusResult } from '../../util/git';
+import * as hostRules from '../../util/host-rules';
 import * as composer from './artifacts';
 
 jest.mock('child_process');
 jest.mock('../../util/exec/env');
+jest.mock('../../../lib/datasource');
 jest.mock('../../util/fs');
 jest.mock('../../util/git');
-jest.mock('../../util/host-rules');
-
-const hostRules = require('../../util/host-rules');
 
 const exec: jest.Mock<typeof _exec> = _exec as any;
-const env = mocked(_env);
+const datasource = mocked(_datasource);
 
 const config = {
   // `join` fixes Windows CI
@@ -28,6 +32,12 @@ const config = {
   composerIgnorePlatformReqs: true,
 };
 
+const repoStatus = partial<StatusResult>({
+  modified: [],
+  not_added: [],
+  deleted: [],
+});
+
 describe('.updateArtifacts()', () => {
   beforeEach(async () => {
     jest.resetAllMocks();
@@ -35,6 +45,8 @@ describe('.updateArtifacts()', () => {
     env.getChildProcessEnv.mockReturnValue(envMock.basic);
     await setUtilConfig(config);
     docker.resetPrefetchedImages();
+    hostRules.clear();
+    delete global.trustLevel;
   });
   it('returns if no composer.lock found', async () => {
     expect(
@@ -50,7 +62,8 @@ describe('.updateArtifacts()', () => {
     fs.readLocalFile.mockResolvedValueOnce('Current composer.lock' as any);
     const execSnapshots = mockExecAll(exec);
     fs.readLocalFile.mockReturnValueOnce('Current composer.lock' as any);
-    git.getRepoStatus.mockResolvedValue({ modified: [] } as StatusResult);
+    git.getRepoStatus.mockResolvedValue(repoStatus);
+    global.trustLevel = 'high';
     expect(
       await composer.updateArtifacts({
         packageFileName: 'composer.json',
@@ -61,7 +74,34 @@ describe('.updateArtifacts()', () => {
     ).toBeNull();
     expect(execSnapshots).toMatchSnapshot();
   });
-  it('uses hostRules to write auth.json', async () => {
+  it('uses hostRules to set COMPOSER_AUTH', async () => {
+    hostRules.add({
+      hostType: PLATFORM_TYPE_GITHUB,
+      hostName: 'api.github.com',
+      token: 'github-token',
+    });
+    hostRules.add({
+      hostType: PLATFORM_TYPE_GITLAB,
+      hostName: 'gitlab.com',
+      token: 'gitlab-token',
+    });
+    hostRules.add({
+      hostType: datasourcePackagist.id,
+      hostName: 'packagist.renovatebot.com',
+      username: 'some-username',
+      password: 'some-password',
+    });
+    hostRules.add({
+      hostType: datasourcePackagist.id,
+      endpoint: 'https://artifactory.yyyyyyy.com/artifactory/api/composer/',
+      username: 'some-other-username',
+      password: 'some-other-password',
+    });
+    hostRules.add({
+      hostType: datasourcePackagist.id,
+      username: 'some-other-username',
+      password: 'some-other-password',
+    });
     fs.readLocalFile.mockResolvedValueOnce('Current composer.lock' as any);
     const execSnapshots = mockExecAll(exec);
     fs.readLocalFile.mockReturnValueOnce('Current composer.lock' as any);
@@ -69,11 +109,7 @@ describe('.updateArtifacts()', () => {
       ...config,
       registryUrls: ['https://packagist.renovatebot.com'],
     };
-    hostRules.find.mockReturnValue({
-      username: 'some-username',
-      password: 'some-password',
-    });
-    git.getRepoStatus.mockResolvedValue({ modified: [] } as StatusResult);
+    git.getRepoStatus.mockResolvedValue(repoStatus);
     expect(
       await composer.updateArtifacts({
         packageFileName: 'composer.json',
@@ -89,8 +125,9 @@ describe('.updateArtifacts()', () => {
     const execSnapshots = mockExecAll(exec);
     fs.readLocalFile.mockReturnValueOnce('New composer.lock' as any);
     git.getRepoStatus.mockResolvedValue({
+      ...repoStatus,
       modified: ['composer.lock'],
-    } as StatusResult);
+    });
     expect(
       await composer.updateArtifacts({
         packageFileName: 'composer.json',
@@ -101,13 +138,46 @@ describe('.updateArtifacts()', () => {
     ).not.toBeNull();
     expect(execSnapshots).toMatchSnapshot();
   });
+  it('supports vendor directory update', async () => {
+    const foo = join('vendor/foo/Foo.php');
+    const bar = join('vendor/bar/Bar.php');
+    const baz = join('vendor/baz/Baz.php');
+    fs.localPathExists.mockResolvedValueOnce(true);
+    fs.readLocalFile.mockResolvedValueOnce('Current composer.lock' as any);
+    const execSnapshots = mockExecAll(exec);
+    git.getRepoStatus.mockResolvedValueOnce({
+      ...repoStatus,
+      modified: ['composer.lock', foo],
+      not_added: [bar],
+      deleted: [baz],
+    });
+    fs.readLocalFile.mockResolvedValueOnce('New composer.lock' as any);
+    fs.readLocalFile.mockResolvedValueOnce('Foo' as any);
+    fs.readLocalFile.mockResolvedValueOnce('Bar' as any);
+    fs.getSiblingFileName.mockReturnValueOnce('vendor' as any);
+    const res = await composer.updateArtifacts({
+      packageFileName: 'composer.json',
+      updatedDeps: [],
+      newPackageFileContent: '{}',
+      config,
+    });
+    expect(res).not.toBeNull();
+    expect(res?.map(({ file }) => file)).toEqual([
+      { contents: 'New composer.lock', name: 'composer.lock' },
+      { contents: 'Foo', name: foo },
+      { contents: 'Bar', name: bar },
+      { contents: baz, name: '|delete|' },
+    ]);
+    expect(execSnapshots).toMatchSnapshot();
+  });
   it('performs lockFileMaintenance', async () => {
     fs.readLocalFile.mockResolvedValueOnce('Current composer.lock' as any);
     const execSnapshots = mockExecAll(exec);
     fs.readLocalFile.mockReturnValueOnce('New composer.lock' as any);
     git.getRepoStatus.mockResolvedValue({
+      ...repoStatus,
       modified: ['composer.lock'],
-    } as StatusResult);
+    });
     expect(
       await composer.updateArtifacts({
         packageFileName: 'composer.json',
@@ -129,12 +199,26 @@ describe('.updateArtifacts()', () => {
     const execSnapshots = mockExecAll(exec);
 
     fs.readLocalFile.mockReturnValueOnce('New composer.lock' as any);
+    datasource.getPkgReleases.mockResolvedValueOnce({
+      releases: [
+        { version: '1.10.0' },
+        { version: '1.10.17' },
+        { version: '2.0.0' },
+        { version: '2.0.7' },
+      ],
+    });
+
+    git.getRepoStatus.mockResolvedValue({
+      ...repoStatus,
+      modified: ['composer.lock'],
+    });
+
     expect(
       await composer.updateArtifacts({
         packageFileName: 'composer.json',
         updatedDeps: [],
         newPackageFileContent: '{}',
-        config,
+        config: { ...config, constraints: { composer: '^1.10.0' } },
       })
     ).not.toBeNull();
     expect(execSnapshots).toMatchSnapshot();
@@ -143,6 +227,10 @@ describe('.updateArtifacts()', () => {
     fs.readLocalFile.mockResolvedValueOnce('Current composer.lock' as any);
     const execSnapshots = mockExecAll(exec);
     fs.readLocalFile.mockReturnValueOnce('New composer.lock' as any);
+    git.getRepoStatus.mockResolvedValue({
+      ...repoStatus,
+      modified: ['composer.lock'],
+    });
     expect(
       await composer.updateArtifacts({
         packageFileName: 'composer.json',
@@ -207,8 +295,9 @@ describe('.updateArtifacts()', () => {
     const execSnapshots = mockExecAll(exec);
     fs.readLocalFile.mockReturnValueOnce('New composer.lock' as any);
     git.getRepoStatus.mockResolvedValue({
+      ...repoStatus,
       modified: ['composer.lock'],
-    } as StatusResult);
+    });
     expect(
       await composer.updateArtifacts({
         packageFileName: 'composer.json',

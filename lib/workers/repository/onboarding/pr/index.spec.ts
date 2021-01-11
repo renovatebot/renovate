@@ -5,6 +5,7 @@ import {
   partial,
   platform,
 } from '../../../../../test/util';
+import { logger } from '../../../../logger';
 import { PackageFile } from '../../../../manager/common';
 import { Pr } from '../../../../platform';
 import { BranchConfig } from '../../../common';
@@ -84,6 +85,35 @@ describe('workers/repository/onboarding/pr', () => {
       config.requireConfig = false;
       await ensureOnboardingPr(config, packageFiles, branches);
       expect(platform.createPr).toHaveBeenCalledTimes(1);
+    });
+    it('dryrun of updates PR when modified', async () => {
+      config.dryRun = true;
+      config.baseBranch = 'some-branch';
+      platform.getBranchPr.mockResolvedValueOnce(
+        partial<Pr>({
+          title: 'Configure Renovate',
+          body: createPrBody,
+          isConflicted: true,
+        })
+      );
+      git.isBranchModified.mockResolvedValueOnce(true);
+      await ensureOnboardingPr(config, {}, branches);
+      expect(logger.info).toHaveBeenCalledWith(
+        'DRY-RUN: Would check branch renovate/configure'
+      );
+      expect(logger.info).toHaveBeenLastCalledWith(
+        'DRY-RUN: Would update onboarding PR'
+      );
+    });
+    it('dryrun of creates PR', async () => {
+      config.dryRun = true;
+      await ensureOnboardingPr(config, packageFiles, branches);
+      expect(logger.info).toHaveBeenCalledWith(
+        'DRY-RUN: Would check branch renovate/configure'
+      );
+      expect(logger.info).toHaveBeenLastCalledWith(
+        'DRY-RUN: Would create onboarding PR'
+      );
     });
   });
 });

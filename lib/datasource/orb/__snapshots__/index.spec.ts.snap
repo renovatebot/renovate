@@ -84,7 +84,7 @@ Array [
 
 exports[`datasource/orb getReleases processes real data 1`] = `
 Object {
-  "homepage": "https://circleci.com/orbs/registry/orb/hyper-expanse/library-release-workflows",
+  "homepage": "https://circleci.com/developer/orbs/orb/hyper-expanse/library-release-workflows",
   "name": "hyper-expanse/library-release-workflows",
   "releases": Array [
     Object {

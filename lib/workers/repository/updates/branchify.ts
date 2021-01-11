@@ -1,28 +1,10 @@
-import { clean as cleanGitRef } from 'clean-git-ref';
-import slugify from 'slugify';
 import type { Merge } from 'type-fest';
 import { RenovateConfig, ValidationMessage } from '../../../config';
 import { addMeta, logger, removeMeta } from '../../../logger';
-import * as template from '../../../util/template';
 import { BranchConfig, BranchUpgradeConfig } from '../../common';
 import { embedChangelogs } from '../changelog';
 import { flattenUpdates } from './flatten';
 import { generateBranchConfig } from './generate';
-
-/**
- * Clean git branch name
- *
- * Remove what clean-git-ref fails to:
- * - leading dot/leading dot after slash
- * - trailing dot
- * - whitespace
- */
-function cleanBranchName(branchName: string): string {
-  return cleanGitRef(branchName)
-    .replace(/^\.|\.$/, '') // leading or trailing dot
-    .replace(/\/\./g, '/') // leading dot after slash
-    .replace(/\s/g, ''); // whitespace
-}
 
 export type BranchifiedConfig = Merge<
   RenovateConfig,
@@ -48,69 +30,16 @@ export async function branchifyUpgrades(
   const branchUpgrades: Record<string, BranchUpgradeConfig[]> = {};
   const branches: BranchConfig[] = [];
   for (const u of updates) {
-    // extract parentDir and baseDir from packageFile
-    if (u.packageFile) {
-      const packagePath = u.packageFile.split('/');
-      if (packagePath.length > 0) {
-        packagePath.splice(-1, 1);
-      }
-      if (packagePath.length > 0) {
-        u.parentDir = packagePath[packagePath.length - 1];
-        u.baseDir = packagePath.join('/');
-      } else {
-        u.parentDir = '';
-        u.baseDir = '';
-      }
-    }
     const update: BranchUpgradeConfig = { ...u } as any;
-    // Massage legacy vars just in case
-    update.currentVersion = update.currentValue;
-    update.newVersion = update.newVersion || update.newValue;
-    const upper = (str: string): string =>
-      str.charAt(0).toUpperCase() + str.substr(1);
-    if (update.updateType) {
-      update[`is${upper(update.updateType)}`] = true;
-    }
-    // Check whether to use a group name
-    if (update.groupName) {
-      logger.debug('Using group branchName template');
-      logger.debug(
-        `Dependency ${update.depName} is part of group ${update.groupName}`
-      );
-      update.groupSlug = slugify(update.groupSlug || update.groupName, {
-        lower: true,
-      });
-      if (update.updateType === 'major' && update.separateMajorMinor) {
-        if (update.separateMultipleMajor) {
-          update.groupSlug = `major-${update.newMajor}-${update.groupSlug}`;
-        } else {
-          update.groupSlug = `major-${update.groupSlug}`;
-        }
-      }
-      if (update.updateType === 'patch') {
-        update.groupSlug = `patch-${update.groupSlug}`;
-      }
-      update.branchTopic = update.group.branchTopic || update.branchTopic;
-      update.branchName = template.compile(
-        update.group.branchName || update.branchName,
-        update
-      );
-    } else {
-      update.branchName = template.compile(update.branchName, update);
-    }
-    // Compile extra times in case of nested templates
-    update.branchName = template.compile(update.branchName, update);
-    update.branchName = cleanBranchName(
-      template.compile(update.branchName, update)
-    );
-
     branchUpgrades[update.branchName] = branchUpgrades[update.branchName] || [];
     branchUpgrades[update.branchName] = [update].concat(
       branchUpgrades[update.branchName]
     );
   }
   logger.debug(`Returning ${Object.keys(branchUpgrades).length} branch(es)`);
-  await embedChangelogs(branchUpgrades);
+  if (config.fetchReleaseNotes) {
+    await embedChangelogs(branchUpgrades);
+  }
   for (const branchName of Object.keys(branchUpgrades)) {
     // Add branch name to metadata before generating branch config
     addMeta({

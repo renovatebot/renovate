@@ -9,6 +9,10 @@ const file2 = readFileSync(
   'lib/manager/circleci/__fixtures__/config2.yml',
   'utf8'
 );
+const file3 = readFileSync(
+  'lib/manager/circleci/__fixtures__/config3.yml',
+  'utf8'
+);
 
 describe('lib/manager/circleci/extract', () => {
   describe('extractPackageFile()', () => {
@@ -24,6 +28,10 @@ describe('lib/manager/circleci/extract', () => {
       const res = extractPackageFile(file2);
       expect(res.deps).toMatchSnapshot();
       // expect(res.deps).toHaveLength(4);
+    });
+    it('extracts image without leading dash', () => {
+      const res = extractPackageFile(file3);
+      expect(res.deps).toMatchSnapshot();
     });
   });
 });

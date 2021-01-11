@@ -40,7 +40,7 @@ function npm2cargo(input: string): string {
   }
   // Note: this doesn't remove the ^
   const res = input
-    .split(' ')
+    .split(/\s+,?\s*|\s*,?\s+/)
     .map((str) => str.trim())
     .filter(notEmpty);
   const operators = ['^', '~', '=', '>', '<', '<=', '>='];
@@ -62,8 +62,8 @@ export const isValid = (input: string): string | boolean =>
 const matches = (version: string, range: string): boolean =>
   npm.matches(version, cargo2npm(range));
 
-const maxSatisfyingVersion = (versions: string[], range: string): string =>
-  npm.maxSatisfyingVersion(versions, cargo2npm(range));
+const getSatisfyingVersion = (versions: string[], range: string): string =>
+  npm.getSatisfyingVersion(versions, cargo2npm(range));
 
 const minSatisfyingVersion = (versions: string[], range: string): string =>
   npm.minSatisfyingVersion(versions, cargo2npm(range));
@@ -118,7 +118,7 @@ export const api: VersioningApi = {
   isSingleVersion,
   isValid,
   matches,
-  maxSatisfyingVersion,
+  getSatisfyingVersion,
   minSatisfyingVersion,
 };
 export default api;

@@ -1,14 +1,15 @@
-import path from 'path';
 import is from '@sindresorhus/is';
+import { ERROR } from 'bunyan';
 import fs from 'fs-extra';
+import upath from 'upath';
 import * as configParser from '../../config';
-import { getErrors, logger, setMeta } from '../../logger';
+import { getProblems, logger, setMeta } from '../../logger';
 import { setUtilConfig } from '../../util';
 import * as hostRules from '../../util/host-rules';
 import * as repositoryWorker from '../repository';
 import { autodiscoverRepositories } from './autodiscover';
 import { globalFinalize, globalInitialize } from './initialize';
-import * as limits from './limits';
+import { Limit, isLimitReached } from './limits';
 
 type RenovateConfig = configParser.RenovateConfig;
 type RenovateRepository = configParser.RenovateRepository;
@@ -21,7 +22,7 @@ export async function getRepositoryConfig(
     globalConfig,
     is.string(repository) ? { repository } : repository
   );
-  repoConfig.localDir = path.join(
+  repoConfig.localDir = upath.join(
     repoConfig.baseDir,
     `./repos/${repoConfig.platform}/${repoConfig.repository}`
   );
@@ -35,14 +36,14 @@ function getGlobalConfig(): Promise<RenovateConfig> {
 }
 
 function haveReachedLimits(): boolean {
-  if (limits.getLimitRemaining('prCommitsPerRunLimit') <= 0) {
+  if (isLimitReached(Limit.Commits)) {
     logger.info('Max commits created for this run.');
     return true;
   }
   return false;
 }
 
-export async function start(): Promise<0 | 1> {
+export async function start(): Promise<number> {
   let config: RenovateConfig;
   try {
     // read global config from file, env and cli args
@@ -70,14 +71,18 @@ export async function start(): Promise<0 | 1> {
     if (err.message.startsWith('Init: ')) {
       logger.fatal(err.message.substring(6));
     } else {
-      logger.fatal({ err }, `Fatal error: ${err.message}`);
+      logger.fatal({ err }, `Fatal error: ${String(err.message)}`);
+    }
+    if (!config) {
+      // return early if we can't parse config options
+      logger.debug(`Missing config`);
+      return 2;
     }
   } finally {
     globalFinalize(config);
     logger.debug(`Renovate exiting`);
   }
-  const loggerErrors = getErrors();
-  /* istanbul ignore if */
+  const loggerErrors = getProblems().filter((p) => p.level >= ERROR);
   if (loggerErrors.length) {
     logger.info(
       { loggerErrors },

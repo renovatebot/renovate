@@ -24,7 +24,7 @@ export function get<T = any>(namespace: string, key: string): Promise<T> {
 export function set(
   namespace: string,
   key: string,
-  value: any,
+  value: unknown,
   minutes: number
 ): Promise<void> {
   if (!cacheProxy) {

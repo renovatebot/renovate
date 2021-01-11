@@ -39,7 +39,7 @@ export async function getReleases({
     if (!res || !res.body) {
       logger.warn(
         { dependency: lookupName },
-        `Received invalid crate data from ${galaxyAPIUrl}`
+        `Received invalid data from ${galaxyAPIUrl}`
       );
       return null;
     }
@@ -56,7 +56,7 @@ export async function getReleases({
       return null;
     }
     if (response.results.length === 0) {
-      logger.warn(
+      logger.info(
         { dependency: lookupName },
         `Received no results from ${galaxyAPIUrl}`
       );
@@ -71,12 +71,9 @@ export async function getReleases({
     };
 
     result.dependencyUrl = galaxyProjectUrl;
-    if (resultObject.github_user && resultObject.github_repo) {
-      result.sourceUrl =
-        'https://github.com/' +
-        resultObject.github_user +
-        '/' +
-        resultObject.github_repo;
+    const { github_user: user = null, github_repo: repo = null } = resultObject;
+    if (typeof user === 'string' && typeof repo === 'string') {
+      result.sourceUrl = `https://github.com/${user}/${repo}`;
     }
 
     result.releases = versions.map(

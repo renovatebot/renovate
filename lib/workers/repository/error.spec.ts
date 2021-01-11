@@ -93,6 +93,13 @@ describe('workers/repository/error', () => {
       const res = await handleError(config, gitError);
       expect(res).toEqual(EXTERNAL_HOST_ERROR);
     });
+    it('rewrites git fatal error', async () => {
+      const gitError = new Error(
+        'fatal: not a git repository (or any parent up to mount point /mnt)\nStopping at filesystem boundary (GIT_DISCOVERY_ACROSS_FILESYSTEM not set).\n'
+      );
+      const res = await handleError(config, gitError);
+      expect(res).toEqual(REPOSITORY_TEMPORARY_ERROR);
+    });
     it('handles unknown error', async () => {
       const res = await handleError(config, new Error('abcdefg'));
       expect(res).toEqual(UNKNOWN_ERROR);

@@ -26,8 +26,19 @@ export interface GhPr extends Pr {
 }
 
 export interface GhRestPr extends GhPr {
-  head: { ref: string; sha: string };
+  head: {
+    ref: string;
+    sha: string;
+    repo: { full_name: string };
+  };
   mergeable_state: string;
+  number: number;
+  title: string;
+  state: string;
+  merged_at: string;
+  created_at: string;
+  closed_at: string;
+  user?: { login?: string };
 }
 
 export interface GhGraphQlPr extends GhPr {
@@ -56,13 +67,13 @@ export interface LocalRepoConfig {
   issueList: any[] | null;
   mergeMethod: string;
   defaultBranch: string;
-  defaultBranchSha?: string;
   repositoryOwner: string;
   repository: string | null;
   localDir: string;
   isGhe: boolean;
   renovateUsername: string;
   productLinks: any;
+  ignorePrAuthor: boolean;
 }
 
 export type BranchProtection = any;

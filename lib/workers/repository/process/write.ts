@@ -1,9 +1,10 @@
 import { RenovateConfig } from '../../../config';
 import { addMeta, logger, removeMeta } from '../../../logger';
+import { branchExists } from '../../../util/git';
 import { processBranch } from '../../branch';
-import { BranchConfig } from '../../common';
-import { getLimitRemaining } from '../../global/limits';
-import { getPrsRemaining } from './limits';
+import { BranchConfig, ProcessBranchResult } from '../../common';
+import { Limit, incLimitedValue, setMaxLimit } from '../../global/limits';
+import { getBranchesRemaining, getPrsRemaining } from './limits';
 
 export type WriteUpdateResult = 'done' | 'automerged';
 
@@ -27,31 +28,33 @@ export async function writeUpdates(
     }
     return true;
   });
-  let prsRemaining = await getPrsRemaining(config, branches);
+
+  const prsRemaining = await getPrsRemaining(config, branches);
   logger.debug({ prsRemaining }, 'Calculated maximum PRs remaining this run');
+  setMaxLimit(Limit.PullRequests, prsRemaining);
+
+  const branchesRemaining = getBranchesRemaining(config, branches);
+  logger.debug(
+    { branchesRemaining },
+    'Calculated maximum branches remaining this run'
+  );
+  setMaxLimit(Limit.Branches, branchesRemaining);
+
   for (const branch of branches) {
     addMeta({ branch: branch.branchName });
-    const prLimitReached = prsRemaining <= 0;
-    const commitLimitReached = getLimitRemaining('prCommitsPerRunLimit') <= 0;
-    const res = await processBranch(branch, prLimitReached, commitLimitReached);
+    const branchExisted = branchExists(branch.branchName);
+    const res = await processBranch(branch);
     branch.res = res;
-    if (res === 'automerged' && branch.automergeType !== 'pr-comment') {
-      // Stop procesing other branches because base branch has been changed
-      return res;
-    }
-    let deductPrRemainingCount = 0;
-    if (res === 'pr-created') {
-      deductPrRemainingCount = 1;
-    }
-    // istanbul ignore if
     if (
-      res === 'automerged' &&
-      branch.automergeType === 'pr-comment' &&
-      branch.requiredStatusChecks === null
+      res === ProcessBranchResult.Automerged &&
+      branch.automergeType !== 'pr-comment'
     ) {
-      deductPrRemainingCount = 1;
+      // Stop processing other branches because base branch has been changed
+      return 'automerged';
     }
-    prsRemaining -= deductPrRemainingCount;
+    if (!branchExisted && branchExists(branch.branchName)) {
+      incLimitedValue(Limit.Branches);
+    }
   }
   removeMeta(['branch']);
   return 'done';

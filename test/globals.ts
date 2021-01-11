@@ -2,7 +2,7 @@ import nock from 'nock';
 import 'jest-extended';
 
 jest.mock('../lib/platform', () => ({
-  platform: jest.genMockFromModule('../lib/platform/github'),
+  platform: jest.createMockFromModule('../lib/platform/github'),
   initPlatform: jest.fn(),
   getPlatformList: jest.fn(),
 }));

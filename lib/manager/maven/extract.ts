@@ -1,5 +1,5 @@
-import { basename, dirname, join, normalize } from 'path';
 import is from '@sindresorhus/is';
+import { basename, dirname, join, normalize } from 'upath';
 import { XmlDocument, XmlElement } from 'xmldoc';
 import * as datasourceMaven from '../../datasource/maven';
 import { MAVEN_REPO } from '../../datasource/maven/common';
@@ -183,7 +183,7 @@ export function extractPackage(
   if (propsNode?.children) {
     for (const propNode of propsNode.children as XmlElement[]) {
       const key = propNode.name;
-      const val = propNode.val && propNode.val.trim();
+      const val = propNode?.val?.trim();
       if (key && val) {
         const fileReplacePosition = propNode.position;
         props[key] = { val, fileReplacePosition, packageFile };

@@ -3,7 +3,7 @@ import {
   ExecOptions as ChildProcessExecOptions,
   exec as _cpExec,
 } from 'child_process';
-import { envMock } from '../../../test/execUtil';
+import { envMock } from '../../../test/exec-util';
 import {
   BinarySource,
   ExecConfig,
@@ -56,7 +56,7 @@ describe(`Child process execution wrapper`, () => {
     global.trustLevel = trustLevelOrig;
   });
 
-  const image = 'example/image';
+  const image = 'renovate/image';
   const name = image.replace(/\//g, '_');
   const tag = '1.2.3';
   const inCmd = 'echo hello';
@@ -87,7 +87,15 @@ describe(`Child process execution wrapper`, () => {
         inCmd,
         inOpts: {},
         outCmd,
-        outOpts: [{ cwd, encoding, env: envMock.basic, timeout: 900000 }],
+        outOpts: [
+          {
+            cwd,
+            encoding,
+            env: envMock.basic,
+            timeout: 900000,
+            maxBuffer: 10485760,
+          },
+        ],
       },
     ],
 
@@ -100,9 +108,27 @@ describe(`Child process execution wrapper`, () => {
         inOpts: {},
         outCmd: ['echo "begin"', ...outCmd, "echo 'end'"],
         outOpts: [
-          { cwd, encoding, env: envMock.basic, timeout: 900000 },
-          { cwd, encoding, env: envMock.basic, timeout: 900000 },
-          { cwd, encoding, env: envMock.basic, timeout: 900000 },
+          {
+            cwd,
+            encoding,
+            env: envMock.basic,
+            timeout: 900000,
+            maxBuffer: 10485760,
+          },
+          {
+            cwd,
+            encoding,
+            env: envMock.basic,
+            timeout: 900000,
+            maxBuffer: 10485760,
+          },
+          {
+            cwd,
+            encoding,
+            env: envMock.basic,
+            timeout: 900000,
+            maxBuffer: 10485760,
+          },
         ],
       },
     ],
@@ -121,6 +147,7 @@ describe(`Child process execution wrapper`, () => {
             encoding,
             env: { ...envMock.basic, FOO: 'BAR' },
             timeout: 900000,
+            maxBuffer: 10485760,
           },
         ],
       },
@@ -134,7 +161,15 @@ describe(`Child process execution wrapper`, () => {
         inCmd,
         inOpts: {},
         outCmd,
-        outOpts: [{ cwd, encoding, env: envMock.basic, timeout: 900000 }],
+        outOpts: [
+          {
+            cwd,
+            encoding,
+            env: envMock.basic,
+            timeout: 900000,
+            maxBuffer: 10485760,
+          },
+        ],
       },
     ],
 
@@ -146,7 +181,15 @@ describe(`Child process execution wrapper`, () => {
         inCmd,
         inOpts: {},
         outCmd,
-        outOpts: [{ cwd, encoding, env: envMock.full, timeout: 900000 }],
+        outOpts: [
+          {
+            cwd,
+            encoding,
+            env: envMock.full,
+            timeout: 900000,
+            maxBuffer: 10485760,
+          },
+        ],
         trustLevel: 'high',
       },
     ],
@@ -166,7 +209,13 @@ describe(`Child process execution wrapper`, () => {
         outOpts: [
           dockerPullOpts,
           dockerRemoveOpts,
-          { cwd, encoding, env: envMock.basic, timeout: 900000 },
+          {
+            cwd,
+            encoding,
+            env: envMock.basic,
+            timeout: 900000,
+            maxBuffer: 10485760,
+          },
         ],
       },
     ],
@@ -186,7 +235,15 @@ describe(`Child process execution wrapper`, () => {
           },
         },
         outCmd,
-        outOpts: [{ cwd, encoding, env: envMock.filtered, timeout: 900000 }],
+        outOpts: [
+          {
+            cwd,
+            encoding,
+            env: envMock.filtered,
+            timeout: 900000,
+            maxBuffer: 10485760,
+          },
+        ],
       },
     ],
 
@@ -214,7 +271,13 @@ describe(`Child process execution wrapper`, () => {
         outOpts: [
           dockerPullOpts,
           dockerRemoveOpts,
-          { cwd, encoding, env: envMock.filtered, timeout: 900000 },
+          {
+            cwd,
+            encoding,
+            env: envMock.filtered,
+            timeout: 900000,
+            maxBuffer: 10485760,
+          },
         ],
       },
     ],
@@ -233,6 +296,7 @@ describe(`Child process execution wrapper`, () => {
             encoding,
             env: { ...envMock.basic, SELECTED_ENV_VAR: 'Default value' },
             timeout: 900000,
+            maxBuffer: 10485760,
           },
         ],
       },
@@ -262,6 +326,7 @@ describe(`Child process execution wrapper`, () => {
             encoding,
             env: { ...envMock.basic, SELECTED_ENV_VAR: 'Default value' },
             timeout: 900000,
+            maxBuffer: 10485760,
           },
         ],
       },
@@ -282,7 +347,13 @@ describe(`Child process execution wrapper`, () => {
         outOpts: [
           dockerPullOpts,
           dockerRemoveOpts,
-          { cwd, encoding, env: envMock.basic, timeout: 900000 },
+          {
+            cwd,
+            encoding,
+            env: envMock.basic,
+            timeout: 900000,
+            maxBuffer: 10485760,
+          },
         ],
       },
     ],
@@ -302,7 +373,13 @@ describe(`Child process execution wrapper`, () => {
         outOpts: [
           dockerPullOpts,
           dockerRemoveOpts,
-          { cwd, encoding, env: envMock.basic, timeout: 900000 },
+          {
+            cwd,
+            encoding,
+            env: envMock.basic,
+            timeout: 900000,
+            maxBuffer: 10485760,
+          },
         ],
       },
     ],
@@ -326,7 +403,43 @@ describe(`Child process execution wrapper`, () => {
         outOpts: [
           dockerPullOpts,
           dockerRemoveOpts,
-          { cwd, encoding, env: envMock.basic, timeout: 900000 },
+          {
+            cwd,
+            encoding,
+            env: envMock.basic,
+            timeout: 900000,
+            maxBuffer: 10485760,
+          },
+        ],
+      },
+    ],
+
+    [
+      'Docker image prefix',
+      {
+        execConfig: {
+          ...execConfig,
+          binarySource: BinarySource.Docker,
+          dockerImagePrefix: 'ghcr.io/renovatebot',
+        },
+        processEnv,
+        inCmd,
+        inOpts: { docker },
+        outCmd: [
+          `docker pull ghcr.io/renovatebot/image`,
+          dockerRemoveCmd,
+          `docker run --rm --name=${name} --label=renovate_child ${defaultVolumes} -w "${cwd}" ghcr.io/renovatebot/image bash -l -c "${inCmd}"`,
+        ],
+        outOpts: [
+          dockerPullOpts,
+          dockerRemoveOpts,
+          {
+            cwd,
+            encoding,
+            env: envMock.basic,
+            timeout: 900000,
+            maxBuffer: 10485760,
+          },
         ],
       },
     ],
@@ -355,7 +468,13 @@ describe(`Child process execution wrapper`, () => {
         outOpts: [
           dockerPullOpts,
           dockerRemoveOpts,
-          { cwd, encoding, env: envMock.basic, timeout: 900000 },
+          {
+            cwd,
+            encoding,
+            env: envMock.basic,
+            timeout: 900000,
+            maxBuffer: 10485760,
+          },
         ],
       },
     ],
@@ -384,7 +503,35 @@ describe(`Child process execution wrapper`, () => {
         outOpts: [
           dockerPullOpts,
           dockerRemoveOpts,
-          { cwd, encoding, env: envMock.basic, timeout: 900000 },
+          {
+            cwd,
+            encoding,
+            env: envMock.basic,
+            timeout: 900000,
+            maxBuffer: 10485760,
+          },
+        ],
+      },
+    ],
+
+    [
+      'Explicit maxBuffer',
+      {
+        execConfig,
+        processEnv,
+        inCmd,
+        inOpts: {
+          maxBuffer: 1024,
+        },
+        outCmd,
+        outOpts: [
+          {
+            cwd,
+            encoding,
+            env: envMock.basic,
+            timeout: 900000,
+            maxBuffer: 1024,
+          },
         ],
       },
     ],

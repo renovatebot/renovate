@@ -3,7 +3,7 @@ import os from 'os';
 import fsExtra from 'fs-extra';
 import tmp from 'tmp-promise';
 import * as upath from 'upath';
-import { envMock, mockExecAll } from '../../../test/execUtil';
+import { envMock, mockExecAll } from '../../../test/exec-util';
 import {
   addReplacingSerializer,
   getName,
@@ -59,7 +59,8 @@ async function setupMocks() {
 
   fs.readLocalFile.mockResolvedValue(`
     dependency 'foo:foo:1.2.3'
-    dependency "bar:bar:3.4.5"
+    dependency "bar:bar:This.Is.Valid.Version.Good.Luck"
+    dependency "baz:baz:\${bazVersion}"
   `);
   env.getChildProcessEnv.mockReturnValue(envMock.basic);
   await util.setUtilConfig(baseConfig);

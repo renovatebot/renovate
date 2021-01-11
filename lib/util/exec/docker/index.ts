@@ -2,6 +2,7 @@ import { SYSTEM_INSUFFICIENT_MEMORY } from '../../../constants/error-messages';
 import { getPkgReleases } from '../../../datasource';
 import { logger } from '../../../logger';
 import * as versioning from '../../../versioning';
+import { ensureTrailingSlash } from '../../url';
 import {
   DockerOptions,
   ExecConfig,
@@ -51,18 +52,14 @@ function uniq<T = unknown>(
   array: T[],
   eql = (x: T, y: T): boolean => x === y
 ): T[] {
-  return array.filter((x, idx, arr) => {
-    return arr.findIndex((y) => eql(x, y)) === idx;
-  });
+  return array.filter((x, idx, arr) => arr.findIndex((y) => eql(x, y)) === idx);
 }
 
 function prepareVolumes(volumes: VolumeOption[] = []): string[] {
   const expanded: (VolumesPair | null)[] = volumes.map(expandVolumeOption);
   const filtered: VolumesPair[] = expanded.filter((vol) => vol !== null);
   const unique: VolumesPair[] = uniq<VolumesPair>(filtered, volumesEql);
-  return unique.map(([from, to]) => {
-    return `-v "${from}":"${to}"`;
-  });
+  return unique.map(([from, to]) => `-v "${from}":"${to}"`);
 }
 
 function prepareCommands(commands: Opt<string>[]): string[] {
@@ -117,7 +114,7 @@ function getContainerName(image: string): string {
   return image.replace(/\//g, '_');
 }
 
-export async function removeDockerContainer(image): Promise<void> {
+export async function removeDockerContainer(image: string): Promise<void> {
   const containerName = getContainerName(image);
   let cmd = `docker ps --filter name=${containerName} -aq`;
   try {
@@ -180,7 +177,8 @@ export async function generateDockerCommand(
   options: DockerOptions,
   config: ExecConfig
 ): Promise<string> {
-  const { image, envVars, cwd, tagScheme, tagConstraint } = options;
+  const { envVars, cwd, tagScheme, tagConstraint } = options;
+  let image = options.image;
   const volumes = options.volumes || [];
   const preCommands = options.preCommands || [];
   const postCommands = options.postCommands || [];
@@ -208,7 +206,14 @@ export async function generateDockerCommand(
     result.push(`-w "${cwd}"`);
   }
 
-  let tag;
+  if (config.dockerImagePrefix) {
+    image = image.replace(
+      /^renovate\//,
+      ensureTrailingSlash(config.dockerImagePrefix)
+    );
+  }
+
+  let tag: string;
   if (options.tag) {
     tag = options.tag;
   } else if (tagConstraint) {

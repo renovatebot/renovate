@@ -102,6 +102,23 @@ describe('datasource/index', () => {
     expect(res.changelogUrl).toBeDefined();
     expect(res.sourceUrl).toBeDefined();
   });
+  it('applies extractVersion', async () => {
+    npmDatasource.getReleases.mockResolvedValue({
+      releases: [
+        { version: 'v1.0.0' },
+        { version: 'v1.0.1' },
+        { version: 'v2' },
+      ],
+    });
+    const res = await datasource.getPkgReleases({
+      datasource: datasourceNpm.id,
+      depName: 'react-native',
+      extractVersion: '^(?<version>v\\d+\\.\\d+)',
+      versioning: 'loose',
+    });
+    expect(res.releases).toHaveLength(1);
+    expect(res.releases[0].version).toEqual('v1.0');
+  });
   it('adds sourceUrl', async () => {
     npmDatasource.getReleases.mockResolvedValue({
       releases: [{ version: '1.0.0' }],

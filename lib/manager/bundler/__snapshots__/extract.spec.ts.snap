@@ -2,7 +2,7 @@
 
 exports[`lib/manager/bundler/extract extractPackageFile() parse Ruby CI Gemfile 1`] = `
 Object {
-  "compatibility": Object {
+  "constraints": Object {
     "bundler": "2.0.2",
   },
   "deps": Array [
@@ -151,7 +151,7 @@ Object {
 
 exports[`lib/manager/bundler/extract extractPackageFile() parse mastodon Gemfile 1`] = `
 Object {
-  "compatibility": Object {
+  "constraints": Object {
     "ruby": ">= 2.4.0",
   },
   "deps": Array [
@@ -1387,7 +1387,7 @@ Object {
 
 exports[`lib/manager/bundler/extract extractPackageFile() parse webpacker Gemfile 1`] = `
 Object {
-  "compatibility": Object {
+  "constraints": Object {
     "bundler": "1.17.3",
   },
   "deps": Array [
@@ -1448,7 +1448,7 @@ Object {
 
 exports[`lib/manager/bundler/extract extractPackageFile() parses rails Gemfile 1`] = `
 Object {
-  "compatibility": Object {
+  "constraints": Object {
     "bundler": "1.17.2",
   },
   "deps": Array [
@@ -2146,7 +2146,7 @@ Object {
 
 exports[`lib/manager/bundler/extract extractPackageFile() parses sourceGroups 1`] = `
 Object {
-  "compatibility": Object {
+  "constraints": Object {
     "ruby": "~> 1.5.3",
   },
   "deps": Array [
@@ -2216,7 +2216,7 @@ Object {
 
 exports[`lib/manager/bundler/extract parse Gitlab Foss Gemfile 1`] = `
 Object {
-  "compatibility": Object {
+  "constraints": Object {
     "bundler": "1.17.3",
   },
   "deps": Array [
@@ -2491,12 +2491,13 @@ Object {
       },
     },
     Object {
+      "currentValue": "~> 0.0.2",
+      "datasource": "rubygems",
       "depName": "omniauth-ultraauth",
       "lockedVersion": "0.0.2",
       "managerData": Object {
         "lineNumber": 46,
       },
-      "skipReason": "no-version",
     },
     Object {
       "currentValue": "~> 1.0.5",
@@ -4689,9 +4690,39 @@ Object {
 }
 `;
 
+exports[`lib/manager/bundler/extract parse source blocks in Gemfile 1`] = `
+Object {
+  "deps": Array [
+    Object {
+      "currentValue": "~> 1",
+      "datasource": "rubygems",
+      "depName": "sfn_my_dep1",
+      "managerData": Object {
+        "lineNumber": 1,
+      },
+      "registryUrls": Array [
+        "https://hub.tech.my.domain.de/artifactory/api/gems/my-gems-prod-local/",
+      ],
+    },
+    Object {
+      "currentValue": "~> 1",
+      "datasource": "rubygems",
+      "depName": "sfn_my_dep2",
+      "managerData": Object {
+        "lineNumber": 2,
+      },
+      "registryUrls": Array [
+        "https://hub.tech.my.domain.de/artifactory/api/gems/my-gems-prod-local/",
+      ],
+    },
+  ],
+  "registryUrls": Array [],
+}
+`;
+
 exports[`lib/manager/bundler/extract parse source blocks with spaces in Gemfile 1`] = `
 Object {
-  "compatibility": Object {
+  "constraints": Object {
     "bundler": "1.16.6",
   },
   "deps": Array [

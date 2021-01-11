@@ -1,5 +1,5 @@
 import { readFileSync } from 'fs';
-import { extractPackageFile } from './extract';
+import { extractPackageFile, getDep } from './extract';
 
 const d1 = readFileSync(
   'lib/manager/dockerfile/__fixtures__/Dockerfile1',
@@ -81,7 +81,7 @@ describe('lib/manager/dockerfile/extract', () => {
       ).deps;
       expect(res).toMatchSnapshot();
     });
-    it('handles abnoral spacing', () => {
+    it('handles abnormal spacing', () => {
       const res = extractPackageFile(
         'FROM    registry.allmine.info:5005/node:8.7.0\n\n'
       ).deps;
@@ -94,7 +94,7 @@ describe('lib/manager/dockerfile/extract', () => {
       expect(res).toMatchSnapshot();
       expect(res).toHaveLength(2);
     });
-    it('skips scratchs', () => {
+    it('skips scratches', () => {
       const res = extractPackageFile('FROM scratch\nADD foo\n');
       expect(res).toBeNull();
     });
@@ -145,6 +145,15 @@ describe('lib/manager/dockerfile/extract', () => {
     it('handles calico/node', () => {
       const res = extractPackageFile('FROM calico/node\n').deps;
       expect(res).toMatchSnapshot();
+    });
+    it('handles ubuntu', () => {
+      const res = extractPackageFile('FROM ubuntu:18.04\n').deps;
+      expect(res).toMatchSnapshot();
+    });
+  });
+  describe('getDep()', () => {
+    it('rejects null', () => {
+      expect(getDep(null)).toMatchSnapshot();
     });
   });
 });

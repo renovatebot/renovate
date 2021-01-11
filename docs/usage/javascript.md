@@ -1,6 +1,6 @@
 ---
 title: JavaScript
-description: JavaScript (npm/yarn) Package Manager Support in Renovate
+description: JavaScript (npm/Yarn) Package Manager Support in Renovate
 ---
 
 # JavaScript

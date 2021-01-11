@@ -27,11 +27,11 @@ export async function generateLockFile(
   let lockFile = null;
   try {
     let installNpm = 'npm i -g npm';
-    const npmCompatibility = config.compatibility?.npm;
+    const npmCompatibility = config.constraints?.npm;
     if (validRange(npmCompatibility)) {
       installNpm += `@${quote(npmCompatibility)}`;
     }
-    const preCommands = [installNpm];
+    const preCommands = [installNpm, 'hash -d npm'];
     const commands = [];
     let cmdOptions = '';
     if (postUpdateOptions?.includes('npmDedupe') || skipInstalls === false) {
@@ -55,6 +55,12 @@ export async function generateLockFile(
         preCommands,
       },
     };
+    // istanbul ignore if
+    if (global.trustLevel === 'high') {
+      execOptions.extraEnv.NPM_AUTH = env.NPM_AUTH;
+      execOptions.extraEnv.NPM_EMAIL = env.NPM_EMAIL;
+      execOptions.extraEnv.NPM_TOKEN = env.NPM_TOKEN;
+    }
     if (config.dockerMapDotfiles) {
       const homeDir =
         process.env.HOME || process.env.HOMEPATH || process.env.USERPROFILE;

@@ -6,6 +6,7 @@ Object {
     "All lint-related packages",
   ],
   "extends": Array [
+    "packages:emberTemplateLint",
     "packages:eslint",
     "packages:stylelint",
     "packages:tslint",
@@ -78,6 +79,15 @@ Object {
     "Use version pinning (maintain a single version only and not semver ranges)",
   ],
   "rangeStrategy": "pin",
+}
+`;
+
+exports[`config/presets parsePreset parses gitea 1`] = `
+Object {
+  "packageName": "some/repo",
+  "params": undefined,
+  "presetName": "default",
+  "presetSource": "gitea",
 }
 `;
 
@@ -393,11 +403,10 @@ Object {
   "schedule": Array [
     "before 8am",
   ],
-  "semanticCommits": true,
+  "semanticCommits": "enabled",
   "separateMajorMinor": true,
   "separateMinorPatch": false,
   "timezone": "Asia/Taipei",
-  "unpublishSafe": false,
 }
 `;
 
@@ -424,6 +433,7 @@ Object {
     "remark-lint",
   ],
   "matchPackagePatterns": Array [
+    "^ember-template-lint",
     "^@typescript-eslint/",
     "^eslint",
     "^stylelint",
@@ -449,6 +459,7 @@ Object {
         "remark-lint",
       ],
       "matchPackagePatterns": Array [
+        "^ember-template-lint",
         "^@typescript-eslint/",
         "^eslint",
         "^stylelint",

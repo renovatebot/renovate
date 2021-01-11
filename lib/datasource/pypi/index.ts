@@ -1,7 +1,7 @@
 import url from 'url';
 import changelogFilenameRegex from 'changelog-filename-regex';
-import { parse } from 'node-html-parser';
 import { logger } from '../../logger';
+import { parse } from '../../util/html';
 import { Http } from '../../util/http';
 import { ensureTrailingSlash } from '../../util/url';
 import { matches } from '../../versioning/pep440';
@@ -14,7 +14,7 @@ export const defaultRegistryUrls = [
 ];
 export const registryStrategy = 'merge';
 
-const github_repo_pattern = /^https?:\/\/github\.com\/[^\\/]+\/[^\\/]+$/;
+const githubRepoPattern = /^https?:\/\/github\.com\/[^\\/]+\/[^\\/]+$/;
 const http = new Http(id);
 
 type PypiJSONRelease = {
@@ -39,10 +39,10 @@ function normalizeName(input: string): string {
 
 function compatibleVersions(
   releases: Releases,
-  compatibility: Record<string, string>
+  constraints: Record<string, string>
 ): string[] {
   const versions = Object.keys(releases);
-  if (!(compatibility?.python && pep440.isVersion(compatibility.python))) {
+  if (!(constraints?.python && pep440.isVersion(constraints.python))) {
     return versions;
   }
   return versions.filter((version) =>
@@ -50,7 +50,7 @@ function compatibleVersions(
       if (!release.requires_python) {
         return true;
       }
-      return matches(compatibility.python, release.requires_python);
+      return matches(constraints.python, release.requires_python);
     })
   );
 }
@@ -58,7 +58,7 @@ function compatibleVersions(
 async function getDependency(
   packageName: string,
   hostUrl: string,
-  compatibility: Record<string, string>
+  constraints: Record<string, string>
 ): Promise<ReleaseResult | null> {
   const lookupUrl = url.resolve(hostUrl, `${packageName}/json`);
   const dependency: ReleaseResult = { releases: null };
@@ -82,7 +82,7 @@ async function getDependency(
 
   if (dep.info?.home_page) {
     dependency.homepage = dep.info.home_page;
-    if (github_repo_pattern.exec(dep.info.home_page)) {
+    if (githubRepoPattern.exec(dep.info.home_page)) {
       dependency.sourceUrl = dep.info.home_page.replace('http://', 'https://');
     }
   }
@@ -96,7 +96,7 @@ async function getDependency(
         (lower.startsWith('repo') ||
           lower === 'code' ||
           lower === 'source' ||
-          github_repo_pattern.exec(projectUrl))
+          githubRepoPattern.exec(projectUrl))
       ) {
         dependency.sourceUrl = projectUrl;
       }
@@ -121,7 +121,7 @@ async function getDependency(
 
   dependency.releases = [];
   if (dep.releases) {
-    const versions = compatibleVersions(dep.releases, compatibility);
+    const versions = compatibleVersions(dep.releases, constraints);
     dependency.releases = versions.map((version) => {
       const releases = dep.releases[version] || [];
       const { upload_time: releaseTimestamp } = releases[0] || {};
@@ -185,7 +185,7 @@ function cleanSimpleHtml(html: string): string {
 async function getSimpleDependency(
   packageName: string,
   hostUrl: string,
-  compatibility: Record<string, string>
+  constraints: Record<string, string>
 ): Promise<ReleaseResult | null> {
   const lookupUrl = url.resolve(hostUrl, `${packageName}`);
   const dependency: ReleaseResult = { releases: null };
@@ -195,7 +195,7 @@ async function getSimpleDependency(
     logger.trace({ dependency: packageName }, 'pip package not found');
     return null;
   }
-  const root: HTMLElement = parse(cleanSimpleHtml(dep)) as any;
+  const root: HTMLElement = parse(cleanSimpleHtml(dep));
   const links = root.querySelectorAll('a');
   const releases: Releases = {};
   for (const link of Array.from(links)) {
@@ -214,7 +214,7 @@ async function getSimpleDependency(
       releases[version].push(release);
     }
   }
-  const versions = compatibleVersions(releases, compatibility);
+  const versions = compatibleVersions(releases, constraints);
   dependency.releases = versions.map((version) => {
     const versionReleases = releases[version] || [];
     const isDeprecated = versionReleases.some(({ yanked }) => yanked);
@@ -228,7 +228,7 @@ async function getSimpleDependency(
 }
 
 export async function getReleases({
-  compatibility,
+  constraints,
   lookupName,
   registryUrl,
 }: GetReleasesConfig): Promise<ReleaseResult | null> {
@@ -237,13 +237,13 @@ export async function getReleases({
   // not all simple indexes use this identifier, but most do
   if (hostUrl.endsWith('/simple/') || hostUrl.endsWith('/+simple/')) {
     logger.trace({ lookupName, hostUrl }, 'Looking up pypi simple dependency');
-    return getSimpleDependency(lookupName, hostUrl, compatibility);
+    return getSimpleDependency(lookupName, hostUrl, constraints);
   }
 
   logger.trace({ lookupName, hostUrl }, 'Looking up pypi api dependency');
   try {
     // we need to resolve early here so we can catch any 404s and fallback to a simple lookup
-    const releases = await getDependency(lookupName, hostUrl, compatibility);
+    const releases = await getDependency(lookupName, hostUrl, constraints);
     // the dep was found in the json api, return as-is
     return releases;
   } catch (err) {
@@ -259,7 +259,7 @@ export async function getReleases({
     const releases = await getSimpleDependency(
       lookupName,
       hostUrl,
-      compatibility
+      constraints
     );
     return releases;
   }

@@ -1,5 +1,5 @@
-import { dirname } from 'path';
 import is from '@sindresorhus/is';
+import { dirname } from 'upath';
 import validateNpmPackageName from 'validate-npm-package-name';
 import { CONFIG_VALIDATION } from '../../../constants/error-messages';
 import * as datasourceGithubTags from '../../../datasource/github-tags';
@@ -19,7 +19,7 @@ import {
   PackageDependency,
   PackageFile,
 } from '../../common';
-import { NpmPackage, NpmPackageDependeny } from './common';
+import { NpmPackage, NpmPackageDependency } from './common';
 import { getLockedVersions } from './locked-versions';
 import { detectMonorepos } from './monorepo';
 import { mightBeABrowserLibrary } from './type';
@@ -64,7 +64,7 @@ export async function extractPackageFile(
   logger.debug(
     `npm file ${fileName} has name ${JSON.stringify(packageJsonName)}`
   );
-  const packageJsonVersion = packageJson.version;
+  const packageFileVersion = packageJson.version;
   let yarnWorkspacesPackages: string[];
   if (is.array(packageJson.workspaces)) {
     yarnWorkspacesPackages = packageJson.workspaces;
@@ -127,14 +127,18 @@ export async function extractPackageFile(
   let lernaPackages: string[];
   let lernaClient: 'yarn' | 'npm';
   let hasFileRefs = false;
-  let lernaJson: { packages: string[]; npmClient: string };
+  let lernaJson: {
+    packages: string[];
+    npmClient: string;
+    useWorkspaces?: boolean;
+  };
   try {
     const lernaJsonFileName = getSiblingFileName(fileName, 'lerna.json');
     lernaJson = JSON.parse(await readLocalFile(lernaJsonFileName, 'utf8'));
   } catch (err) /* istanbul ignore next */ {
     logger.warn({ err }, 'Could not parse lerna.json');
   }
-  if (lernaJson) {
+  if (lernaJson && !lernaJson.useWorkspaces) {
     lernaDir = dirname(fileName);
     lernaPackages = lernaJson.packages;
     lernaClient =
@@ -151,7 +155,7 @@ export async function extractPackageFile(
     resolutions: 'resolutions',
   };
 
-  const compatibility: Record<string, any> = {};
+  const constraints: Record<string, any> = {};
 
   function extractDependency(
     depType: string,
@@ -173,19 +177,23 @@ export async function extractPackageFile(
         dep.datasource = datasourceGithubTags.id;
         dep.lookupName = 'nodejs/node';
         dep.versioning = nodeVersioning.id;
-        compatibility.node = dep.currentValue;
+        constraints.node = dep.currentValue;
       } else if (depName === 'yarn') {
         dep.datasource = datasourceNpm.id;
         dep.commitMessageTopic = 'Yarn';
-        compatibility.yarn = dep.currentValue;
+        constraints.yarn = dep.currentValue;
       } else if (depName === 'npm') {
         dep.datasource = datasourceNpm.id;
         dep.commitMessageTopic = 'npm';
-        compatibility.npm = dep.currentValue;
+        constraints.npm = dep.currentValue;
       } else if (depName === 'pnpm') {
         dep.datasource = datasourceNpm.id;
         dep.commitMessageTopic = 'pnpm';
-        compatibility.pnpm = dep.currentValue;
+        constraints.pnpm = dep.currentValue;
+      } else if (depName === 'vscode') {
+        dep.datasource = datasourceGithubTags.id;
+        dep.lookupName = 'microsoft/vscode';
+        constraints.vscode = dep.currentValue;
       } else {
         dep.skipReason = SkipReason.UnknownEngines;
       }
@@ -295,7 +303,7 @@ export async function extractPackageFile(
     if (packageJson[depType]) {
       try {
         for (const [key, val] of Object.entries(
-          packageJson[depType] as NpmPackageDependeny
+          packageJson[depType] as NpmPackageDependency
         )) {
           const depName = parseDepName(depType, key);
           const dep: PackageDependency = {
@@ -325,7 +333,7 @@ export async function extractPackageFile(
     if (
       !(
         packageJsonName ||
-        packageJsonVersion ||
+        packageFileVersion ||
         npmrc ||
         lernaDir ||
         yarnWorkspacesPackages
@@ -352,7 +360,7 @@ export async function extractPackageFile(
   return {
     deps,
     packageJsonName,
-    packageJsonVersion,
+    packageFileVersion,
     packageJsonType,
     npmrc,
     ignoreNpmrcFile,
@@ -363,7 +371,7 @@ export async function extractPackageFile(
     lernaPackages,
     skipInstalls,
     yarnWorkspacesPackages,
-    compatibility,
+    constraints,
   };
 }
 

@@ -7,5 +7,5 @@ export const defaultConfig = {
   commitMessageTopic: 'buildkite plugin {{depName}}',
   commitMessageExtra:
     'to {{#if isMajor}}v{{{newMajor}}}{{else}}{{{newValue}}}{{/if}}',
-  managerBranchPrefix: 'buildkite-',
+  additionalBranchPrefix: 'buildkite-',
 };

@@ -6,6 +6,10 @@ module "bar" {
   source = "github.com/hashicorp/example?ref=next"
 }
 
+module "repo-with-non-semver-ref" {
+  source = "github.com/githubuser/myrepo//terraform/modules/moduleone?ref=tfmodule_one-v0.0.9"
+}
+
 module "repo-with-dot" {
   source = "github.com/hashicorp/example.2.3?ref=v1.0.0"
 }
@@ -177,6 +181,14 @@ terraform {
     docker = {
       source  = "terraform-providers/docker"
       version = "2.7.2"
+    }
+    aws = {
+      source  = "aws"
+      version = "2.7.0"
+    }
+    // falls back block name for source
+    azurerm = {
+      version = "=2.27.0"
     }
     invalid = {
       source  = "//hashicorp/helm"

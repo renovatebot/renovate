@@ -17,7 +17,7 @@ someOtherKey:
   - image:
       registry: docker.io
       repository: bitnami/postgresql
-      tag: 11.5.0-debian-9-r0
+      tag: 11.5.0-debian-9-r0@sha256:4762726f1471ef048dd807afdc0e19265e95ffdcc7cb4a34891f680290022809
       some-non-image-related-key: 'with-some-value'
 
 empty_key:

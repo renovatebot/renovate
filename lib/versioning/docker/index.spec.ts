@@ -11,7 +11,7 @@ describe('docker.', () => {
       expect(docker.isValid('3')).toBe('3');
       expect(docker.isValid('foo')).toBeNull();
     });
-    it('it should return null if the version string looks like a git commit hash', () => {
+    it('should return null if the version string looks like a git commit hash', () => {
       [
         '0a1b2c3',
         '0a1b2c3d',
@@ -85,9 +85,9 @@ describe('docker.', () => {
       expect(docker.equals('1.2', '1.2.3')).toBe(false);
     });
   });
-  describe('maxSatisfyingVersion(versions, range)', () => {
+  describe('getSatisfyingVersion(versions, range)', () => {
     it('should support all versions length', () => {
-      [docker.minSatisfyingVersion, docker.maxSatisfyingVersion].forEach(
+      [docker.minSatisfyingVersion, docker.getSatisfyingVersion].forEach(
         (max) => {
           const versions = [
             '0.9.8',

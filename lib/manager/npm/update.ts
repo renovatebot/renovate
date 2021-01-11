@@ -2,21 +2,19 @@ import equal from 'fast-deep-equal';
 import { ReleaseType, inc } from 'semver';
 import { logger } from '../../logger';
 import { matchAt, replaceAt } from '../../util/string';
-import { UpdateDependencyConfig } from '../common';
+import { BumpPackageVersionResult, UpdateDependencyConfig } from '../common';
 
 export function bumpPackageVersion(
   content: string,
   currentValue: string,
   bumpVersion: ReleaseType | string
-): string {
-  if (!bumpVersion) {
-    return content;
-  }
+): BumpPackageVersionResult {
   logger.debug(
     { bumpVersion, currentValue },
     'Checking if we should bump package.json version'
   );
   let newPjVersion: string;
+  let bumpedContent = content;
   try {
     if (bumpVersion.startsWith('mirror:')) {
       const mirrorPackage = bumpVersion.replace('mirror:', '');
@@ -28,13 +26,13 @@ export function bumpPackageVersion(
         (parsedContent.peerDependencies || {})[mirrorPackage];
       if (!newPjVersion) {
         logger.warn('bumpVersion mirror package not found: ' + mirrorPackage);
-        return content;
+        return { bumpedContent };
       }
     } else {
       newPjVersion = inc(currentValue, bumpVersion as ReleaseType);
     }
     logger.debug({ newPjVersion });
-    const bumpedContent = content.replace(
+    bumpedContent = content.replace(
       /("version":\s*")[^"]*/,
       `$1${newPjVersion}`
     );
@@ -43,7 +41,6 @@ export function bumpPackageVersion(
     } else {
       logger.debug('Bumped package.json version');
     }
-    return bumpedContent;
   } catch (err) {
     logger.warn(
       {
@@ -53,8 +50,8 @@ export function bumpPackageVersion(
       },
       'Failed to bumpVersion'
     );
-    return content;
   }
+  return { bumpedContent };
 }
 
 export function updateDependency({
@@ -62,7 +59,7 @@ export function updateDependency({
   upgrade,
 }: UpdateDependencyConfig): string | null {
   const { depType, managerData } = upgrade;
-  const depName = managerData?.key || upgrade.depName;
+  const depName: string = managerData?.key || upgrade.depName;
   let { newValue } = upgrade;
   if (upgrade.currentRawValue) {
     if (upgrade.currentDigest) {
@@ -86,14 +83,10 @@ export function updateDependency({
   try {
     const parsedContents = JSON.parse(fileContent);
     // Save the old version
-    const oldVersion = parsedContents[depType][depName];
+    const oldVersion: string = parsedContents[depType][depName];
     if (oldVersion === newValue) {
       logger.trace('Version is already updated');
-      return bumpPackageVersion(
-        fileContent,
-        upgrade.packageJsonVersion,
-        upgrade.bumpVersion
-      );
+      return fileContent;
     }
     // Update the file = this is what we want
     parsedContents[depType][depName] = newValue;
@@ -152,7 +145,7 @@ export function updateDependency({
           );
         }
         // Look for the old version number
-        const oldResolution = `"${parsedContents.resolutions[depKey]}"`;
+        const oldResolution = `"${String(parsedContents.resolutions[depKey])}"`;
         const newResolution = `"${newValue}"`;
         // Update the file = this is what we want
         parsedContents.resolutions[depKey] = newValue;
@@ -180,11 +173,7 @@ export function updateDependency({
         }
       }
     }
-    return bumpPackageVersion(
-      newFileContent,
-      upgrade.packageJsonVersion,
-      upgrade.bumpVersion
-    );
+    return newFileContent;
   } catch (err) {
     logger.debug({ err }, 'updateDependency error');
     return null;

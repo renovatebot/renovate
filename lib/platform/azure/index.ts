@@ -3,9 +3,11 @@ import {
   GitPullRequest,
   GitPullRequestCommentThread,
   GitPullRequestMergeStrategy,
+  GitStatus,
+  GitStatusState,
   PullRequestStatus,
 } from 'azure-devops-node-api/interfaces/GitInterfaces';
-import { REPOSITORY_DISABLED } from '../../constants/error-messages';
+import { REPOSITORY_EMPTY } from '../../constants/error-messages';
 import { PLATFORM_TYPE_AZURE } from '../../constants/platforms';
 import { logger } from '../../logger';
 import { BranchStatus, PrState } from '../../types';
@@ -33,17 +35,25 @@ import { smartTruncate } from '../utils/pr-body';
 import * as azureApi from './azure-got-wrapper';
 import * as azureHelper from './azure-helper';
 import { AzurePr } from './types';
+import {
+  getBranchNameWithoutRefsheadsPrefix,
+  getGitStatusContextCombinedName,
+  getGitStatusContextFromCombinedName,
+  getNewBranchName,
+  getRenovatePRFormat,
+} from './util';
 
 interface Config {
   repoForceRebase: boolean;
-  mergeMethod: GitPullRequestMergeStrategy;
+  defaultMergeMethod: GitPullRequestMergeStrategy;
+  mergeMethods: Record<string, GitPullRequestMergeStrategy>;
   owner: string;
   repoId: string;
   project: string;
-  azureWorkItemId: string;
   prList: AzurePr[];
   fileList: null;
   repository: string;
+  defaultBranch: string;
 }
 
 interface User {
@@ -93,14 +103,26 @@ export async function getRepos(): Promise<string[]> {
   return repos.map((repo) => `${repo.project.name}/${repo.name}`);
 }
 
+export async function getJsonFile(fileName: string): Promise<any | null> {
+  try {
+    const json = await azureHelper.getFile(
+      config.repoId,
+      fileName,
+      config.defaultBranch
+    );
+    return JSON.parse(json);
+  } catch (err) {
+    return null;
+  }
+}
+
 export async function initRepo({
   repository,
   localDir,
-  azureWorkItemId,
-  optimizeForDisabled,
+  cloneSubmodules,
 }: RepoParams): Promise<RepoResult> {
   logger.debug(`initRepo("${repository}")`);
-  config = { repository, azureWorkItemId } as any;
+  config = { repository } as Config;
   const azureApiGit = await azureApi.gitApi();
   const repos = await azureApiGit.getRepositories();
   const names = azureHelper.getProjectAndRepo(repository);
@@ -110,52 +132,42 @@ export async function initRepo({
       c.project.name.toLowerCase() === names.project.toLowerCase()
   )[0];
   logger.debug({ repositoryDetails: repo }, 'Repository details');
+  // istanbul ignore if
+  if (!repo.defaultBranch) {
+    logger.debug('Repo is empty');
+    throw new Error(REPOSITORY_EMPTY);
+  }
   config.repoId = repo.id;
   config.project = repo.project.name;
   config.owner = '?owner?';
   logger.debug(`${repository} owner = ${config.owner}`);
-  // Use default branch as PR target unless later overridden
   const defaultBranch = repo.defaultBranch.replace('refs/heads/', '');
+  config.defaultBranch = defaultBranch;
   logger.debug(`${repository} default branch = ${defaultBranch}`);
-  config.mergeMethod = await azureHelper.getMergeMethod(repo.id, names.project);
+  config.defaultMergeMethod = await azureHelper.getMergeMethod(
+    repo.id,
+    names.project
+  );
+  config.mergeMethods = {};
   config.repoForceRebase = false;
-
-  if (optimizeForDisabled) {
-    interface RenovateConfig {
-      enabled: boolean;
-    }
-
-    let renovateConfig: RenovateConfig;
-    try {
-      const json = await azureHelper.getFile(
-        repo.id,
-        'renovate.json',
-        defaultBranch
-      );
-      renovateConfig = JSON.parse(json);
-    } catch {
-      // Do nothing
-    }
-    if (renovateConfig && renovateConfig.enabled === false) {
-      throw new Error(REPOSITORY_DISABLED);
-    }
-  }
 
   const [projectName, repoName] = repository.split('/');
   const opts = hostRules.find({
     hostType: defaults.hostType,
     url: defaults.endpoint,
   });
-  const url =
+  const manualUrl =
     defaults.endpoint +
     `${encodeURIComponent(projectName)}/_git/${encodeURIComponent(repoName)}`;
-  git.initRepo({
+  const url = repo.remoteUrl || manualUrl;
+  await git.initRepo({
     ...config,
     localDir,
     url,
     extraCloneOpts: azureHelper.getStorageExtraCloneOpts(opts),
     gitAuthorName: global.gitAuthor?.name,
     gitAuthorEmail: global.gitAuthor?.email,
+    cloneSubmodules,
   });
   const repoConfig: RepoResult = {
     defaultBranch,
@@ -166,13 +178,6 @@ export async function initRepo({
 
 export function getRepoForceRebase(): Promise<boolean> {
   return Promise.resolve(config.repoForceRebase === true);
-}
-
-// istanbul ignore next
-export async function setBaseBranch(branchName: string): Promise<string> {
-  logger.debug(`Setting base branch to ${branchName}`);
-  const baseBranchSha = await git.setBranch(branchName);
-  return baseBranchSha;
 }
 
 export async function getPrList(): Promise<AzurePr[]> {
@@ -195,7 +200,7 @@ export async function getPrList(): Promise<AzurePr[]> {
       skip += 100;
     } while (fetchedPrs.length > 0);
 
-    config.prList = prs.map(azureHelper.getRenovatePRFormat);
+    config.prList = prs.map(getRenovatePRFormat);
     logger.debug({ length: config.prList.length }, 'Retrieved Pull Requests');
   }
   return config.prList;
@@ -237,7 +242,7 @@ export async function findPr({
     const prs = await getPrList();
 
     prsFiltered = prs.filter(
-      (item) => item.sourceRefName === azureHelper.getNewBranchName(branchName)
+      (item) => item.sourceRefName === getNewBranchName(branchName)
     );
 
     if (prTitle) {
@@ -273,20 +278,43 @@ export async function getBranchPr(branchName: string): Promise<Pr | null> {
   return existingPr ? getPr(existingPr.number) : null;
 }
 
-export async function getBranchStatusCheck(
-  branchName: string,
-  context: string
-): Promise<BranchStatus> {
-  logger.trace(`getBranchStatusCheck(${branchName}, ${context})`);
+async function getStatusCheck(branchName: string): Promise<GitStatus[]> {
   const azureApiGit = await azureApi.gitApi();
   const branch = await azureApiGit.getBranch(
     config.repoId,
-    azureHelper.getBranchNameWithoutRefsheadsPrefix(branchName)!
+    getBranchNameWithoutRefsheadsPrefix(branchName)
   );
-  if (branch.aheadCount === 0) {
-    return BranchStatus.green;
+  // only grab the latest statuses, it will group any by context
+  return azureApiGit.getStatuses(
+    branch.commit.commitId,
+    config.repoId,
+    undefined,
+    undefined,
+    undefined,
+    true
+  );
+}
+
+const azureToRenovateStatusMapping: Record<GitStatusState, BranchStatus> = {
+  [GitStatusState.Succeeded]: BranchStatus.green,
+  [GitStatusState.NotApplicable]: BranchStatus.green,
+  [GitStatusState.NotSet]: BranchStatus.yellow,
+  [GitStatusState.Pending]: BranchStatus.yellow,
+  [GitStatusState.Error]: BranchStatus.red,
+  [GitStatusState.Failed]: BranchStatus.red,
+};
+
+export async function getBranchStatusCheck(
+  branchName: string,
+  context: string
+): Promise<BranchStatus | null> {
+  const res = await getStatusCheck(branchName);
+  for (const check of res) {
+    if (getGitStatusContextCombinedName(check.context) === context) {
+      return azureToRenovateStatusMapping[check.state] || BranchStatus.yellow;
+    }
   }
-  return BranchStatus.yellow;
+  return null;
 }
 
 export async function getBranchStatus(
@@ -303,26 +331,47 @@ export async function getBranchStatus(
     logger.warn({ requiredStatusChecks }, `Unsupported requiredStatusChecks`);
     return BranchStatus.red;
   }
-  const branchStatusCheck = await getBranchStatusCheck(branchName, null);
-  return branchStatusCheck;
+  const statuses = await getStatusCheck(branchName);
+  logger.debug({ branch: branchName, statuses }, 'branch status check result');
+  if (!statuses.length) {
+    logger.debug('empty branch status check result = returning "pending"');
+    return BranchStatus.yellow;
+  }
+  const noOfFailures = statuses.filter(
+    (status: GitStatus) =>
+      status.state === GitStatusState.Error ||
+      status.state === GitStatusState.Failed
+  ).length;
+  if (noOfFailures) {
+    return BranchStatus.red;
+  }
+  const noOfPending = statuses.filter(
+    (status: GitStatus) =>
+      status.state === GitStatusState.NotSet ||
+      status.state === GitStatusState.Pending
+  ).length;
+  if (noOfPending) {
+    return BranchStatus.yellow;
+  }
+  return BranchStatus.green;
 }
 
 export async function createPr({
-  branchName,
+  sourceBranch,
   targetBranch,
   prTitle: title,
   prBody: body,
   labels,
   draftPR = false,
-  platformOptions = {},
+  platformOptions,
 }: CreatePRConfig): Promise<Pr> {
-  const sourceRefName = azureHelper.getNewBranchName(branchName);
-  const targetRefName = azureHelper.getNewBranchName(targetBranch);
+  const sourceRefName = getNewBranchName(sourceBranch);
+  const targetRefName = getNewBranchName(targetBranch);
   const description = azureHelper.max4000Chars(sanitize(body));
   const azureApiGit = await azureApi.gitApi();
   const workItemRefs = [
     {
-      id: config.azureWorkItemId,
+      id: platformOptions?.azureWorkItemId?.toString(),
     },
   ];
   let pr: GitPullRequest = await azureApiGit.createPullRequest(
@@ -336,14 +385,14 @@ export async function createPr({
     },
     config.repoId
   );
-  if (platformOptions.azureAutoComplete) {
+  if (platformOptions?.azureAutoComplete) {
     pr = await azureApiGit.updatePullRequest(
       {
         autoCompleteSetBy: {
           id: pr.createdBy.id,
         },
         completionOptions: {
-          mergeStrategy: config.mergeMethod,
+          mergeStrategy: config.defaultMergeMethod,
           deleteSourceBranch: true,
         },
       },
@@ -362,7 +411,7 @@ export async function createPr({
       )
     )
   );
-  return azureHelper.getRenovatePRFormat(pr);
+  return getRenovatePRFormat(pr);
 }
 
 export async function updatePr({
@@ -373,19 +422,23 @@ export async function updatePr({
 }: UpdatePrConfig): Promise<void> {
   logger.debug(`updatePr(${prNo}, ${title}, body)`);
 
-  const status = {
-    [PrState.Open]: PullRequestStatus.Active,
-    [PrState.Closed]: PullRequestStatus.Abandoned,
-  }[state];
-
   const azureApiGit = await azureApi.gitApi();
   const objToUpdate: GitPullRequest = {
     title,
-    ...(status && { status }),
   };
 
   if (body) {
     objToUpdate.description = azureHelper.max4000Chars(sanitize(body));
+  }
+
+  if (state === PrState.Open) {
+    await azureApiGit.updatePullRequest(
+      { status: PullRequestStatus.Active },
+      config.repoId,
+      prNo
+    );
+  } else if (state === PrState.Closed) {
+    objToUpdate.status = PullRequestStatus.Abandoned;
   }
 
   await azureApiGit.updatePullRequest(objToUpdate, config.repoId, prNo);
@@ -491,7 +544,14 @@ export async function ensureCommentRemoval({
   }
 }
 
-export function setBranchStatus({
+const renovateToAzureStatusMapping: Record<BranchStatus, GitStatusState> = {
+  [BranchStatus.green]: [GitStatusState.Succeeded],
+  [BranchStatus.green]: GitStatusState.Succeeded,
+  [BranchStatus.yellow]: GitStatusState.Pending,
+  [BranchStatus.red]: GitStatusState.Failed,
+};
+
+export async function setBranchStatus({
   branchName,
   context,
   description,
@@ -499,14 +559,77 @@ export function setBranchStatus({
   url: targetUrl,
 }: BranchStatusConfig): Promise<void> {
   logger.debug(
-    `setBranchStatus(${branchName}, ${context}, ${description}, ${state}, ${targetUrl}) - Not supported by Azure DevOps (yet!)`
+    `setBranchStatus(${branchName}, ${context}, ${description}, ${state}, ${targetUrl})`
   );
-  return Promise.resolve();
+  const azureApiGit = await azureApi.gitApi();
+  const branch = await azureApiGit.getBranch(
+    config.repoId,
+    getBranchNameWithoutRefsheadsPrefix(branchName)
+  );
+  const statusToCreate: GitStatus = {
+    description,
+    context: getGitStatusContextFromCombinedName(context),
+    state: renovateToAzureStatusMapping[state],
+    targetUrl,
+  };
+  await azureApiGit.createCommitStatus(
+    statusToCreate,
+    branch.commit.commitId,
+    config.repoId
+  );
+  logger.trace(`Created commit status of ${state} on branch ${branchName}`);
 }
 
-export function mergePr(pr: number, branchName: string): Promise<boolean> {
-  logger.debug(`mergePr(pr)(${pr}) - Not supported by Azure DevOps (yet!)`);
-  return Promise.resolve(false);
+export async function mergePr(
+  pullRequestId: number,
+  branchName: string
+): Promise<boolean> {
+  logger.debug(`mergePr(${pullRequestId}, ${branchName})`);
+  const azureApiGit = await azureApi.gitApi();
+
+  const pr = await azureApiGit.getPullRequestById(
+    pullRequestId,
+    config.project
+  );
+
+  const mergeMethod =
+    config.mergeMethods[pr.targetRefName] ??
+    (config.mergeMethods[pr.targetRefName] = await azureHelper.getMergeMethod(
+      config.repoId,
+      config.project,
+      pr.targetRefName
+    ));
+
+  const objToUpdate: GitPullRequest = {
+    status: PullRequestStatus.Completed,
+    lastMergeSourceCommit: pr.lastMergeSourceCommit,
+    completionOptions: {
+      mergeStrategy: mergeMethod,
+      deleteSourceBranch: true,
+    },
+  };
+
+  logger.trace(
+    `Updating PR ${pullRequestId} to status ${PullRequestStatus.Completed} (${
+      PullRequestStatus[PullRequestStatus.Completed]
+    }) with lastMergeSourceCommit ${
+      pr.lastMergeSourceCommit.commitId
+    } using mergeStrategy ${mergeMethod} (${
+      GitPullRequestMergeStrategy[mergeMethod]
+    })`
+  );
+
+  try {
+    await azureApiGit.updatePullRequest(
+      objToUpdate,
+      config.repoId,
+      pullRequestId
+    );
+    return true;
+  } catch (err) {
+    logger.debug({ err }, 'Failed to set the PR as completed.');
+    return false;
+  }
 }
 
 export function getPrBody(input: string): string {

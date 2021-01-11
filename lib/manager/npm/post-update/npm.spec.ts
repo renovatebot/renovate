@@ -1,6 +1,7 @@
 import { exec as _exec } from 'child_process';
-import path from 'path';
-import { envMock, mockExecAll } from '../../../../test/execUtil';
+import upath from 'upath';
+
+import { envMock, mockExecAll } from '../../../../test/exec-util';
 import { mocked } from '../../../../test/util';
 import { BinarySource } from '../../../util/exec/common';
 import * as _env from '../../../util/exec/env';
@@ -75,16 +76,16 @@ describe('generateLockFile', () => {
       { skipInstalls }
     );
     expect(fs.pathExists).toHaveBeenCalledWith(
-      path.join('some-dir', 'package-lock.json')
+      upath.join('some-dir', 'package-lock.json')
     );
     expect(fs.move).toHaveBeenCalledTimes(1);
     expect(fs.move).toHaveBeenCalledWith(
-      path.join('some-dir', 'package-lock.json'),
-      path.join('some-dir', 'npm-shrinkwrap.json')
+      upath.join('some-dir', 'package-lock.json'),
+      upath.join('some-dir', 'npm-shrinkwrap.json')
     );
     expect(fs.readFile).toHaveBeenCalledTimes(1);
     expect(fs.readFile).toHaveBeenCalledWith(
-      path.join('some-dir', 'npm-shrinkwrap.json'),
+      upath.join('some-dir', 'npm-shrinkwrap.json'),
       'utf8'
     );
     expect(res.error).toBeUndefined();
@@ -104,12 +105,12 @@ describe('generateLockFile', () => {
       { skipInstalls }
     );
     expect(fs.pathExists).toHaveBeenCalledWith(
-      path.join('some-dir', 'package-lock.json')
+      upath.join('some-dir', 'package-lock.json')
     );
     expect(fs.move).toHaveBeenCalledTimes(0);
     expect(fs.readFile).toHaveBeenCalledTimes(1);
     expect(fs.readFile).toHaveBeenCalledWith(
-      path.join('some-dir', 'npm-shrinkwrap.json'),
+      upath.join('some-dir', 'npm-shrinkwrap.json'),
       'utf8'
     );
     expect(res.error).toBeUndefined();
@@ -166,7 +167,7 @@ describe('generateLockFile', () => {
       'some-dir',
       {},
       'package-lock.json',
-      { binarySource: BinarySource.Docker, compatibility: { npm: '^6.0.0' } }
+      { binarySource: BinarySource.Docker, constraints: { npm: '^6.0.0' } }
     );
     expect(fs.readFile).toHaveBeenCalledTimes(1);
     expect(res.lockFile).toEqual('package-lock-contents');

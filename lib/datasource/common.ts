@@ -10,7 +10,7 @@ export interface DigestConfig extends Config {
 }
 
 interface ReleasesConfigBase {
-  compatibility?: Record<string, string>;
+  constraints?: Record<string, string>;
   npmrc?: string;
   registryUrls?: string[];
 }
@@ -25,10 +25,11 @@ export interface GetPkgReleasesConfig extends ReleasesConfigBase {
   depName: string;
   lookupName?: string;
   versioning?: string;
+  extractVersion?: string;
 }
 
 export function isGetPkgReleasesConfig(
-  input: any
+  input: unknown
 ): input is GetPkgReleasesConfig {
   return (
     (input as GetPkgReleasesConfig).datasource !== undefined &&
@@ -37,13 +38,12 @@ export function isGetPkgReleasesConfig(
 }
 
 export interface Release {
-  canBeUnpublished?: boolean;
   changelogUrl?: string;
   checksumUrl?: string;
   downloadUrl?: string;
   gitRef?: string;
   isDeprecated?: boolean;
-
+  isStable?: boolean;
   releaseTimestamp?: any;
   version: string;
   newDigest?: string;
@@ -75,9 +75,9 @@ export interface DatasourceApi {
   getReleases(config: GetReleasesConfig): Promise<ReleaseResult | null>;
   defaultRegistryUrls?: string[];
   appendRegistryUrls?: string[];
-  defaultConfig?: object;
+  defaultConfig?: Record<string, unknown>;
   registryStrategy?: 'first' | 'hunt' | 'merge';
 }
 
-// TODO: remove, only for compatabillity
+// TODO: remove, only for compatibility
 export type Datasource = DatasourceApi;

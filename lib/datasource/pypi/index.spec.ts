@@ -1,6 +1,6 @@
 import fs from 'fs';
 import { getPkgReleases } from '..';
-import * as httpMock from '../../../test/httpMock';
+import * as httpMock from '../../../test/http-mock';
 import { id as datasource } from '.';
 
 const res1: any = fs.readFileSync(
@@ -184,7 +184,7 @@ describe('datasource/pypi', () => {
       expect(httpMock.getTrace()).toMatchSnapshot();
     });
 
-    it('respects compatibility', async () => {
+    it('respects constraints', async () => {
       httpMock
         .scope(baseUrl)
         .get('/doit/json')
@@ -205,7 +205,7 @@ describe('datasource/pypi', () => {
       expect(
         await getPkgReleases({
           datasource,
-          compatibility: { python: '2.7' },
+          constraints: { python: '2.7' },
           depName: 'doit',
         })
       ).toMatchSnapshot();
@@ -223,7 +223,7 @@ describe('datasource/pypi', () => {
         await getPkgReleases({
           datasource,
           ...config,
-          compatibility: { python: '2.7' },
+          constraints: { python: '2.7' },
           depName: 'dj-database-url',
         })
       ).toMatchSnapshot();
@@ -241,7 +241,7 @@ describe('datasource/pypi', () => {
         await getPkgReleases({
           datasource,
           ...config,
-          compatibility: { python: '2.7' },
+          constraints: { python: '2.7' },
           depName: 'dj-database-url',
         })
       ).toMatchSnapshot();
@@ -259,7 +259,7 @@ describe('datasource/pypi', () => {
         await getPkgReleases({
           datasource,
           ...config,
-          compatibility: { python: '2.7' },
+          constraints: { python: '2.7' },
           depName: 'image-collector',
         })
       ).toMatchSnapshot();
@@ -277,7 +277,7 @@ describe('datasource/pypi', () => {
         await getPkgReleases({
           datasource,
           ...config,
-          compatibility: { python: '2.7' },
+          constraints: { python: '2.7' },
           depName: 'dj-database-url',
         })
       ).toBeNull();
@@ -295,7 +295,7 @@ describe('datasource/pypi', () => {
         await getPkgReleases({
           datasource,
           ...config,
-          compatibility: { python: '2.7' },
+          constraints: { python: '2.7' },
           depName: 'dj-database-url',
         })
       ).toBeNull();
@@ -313,7 +313,7 @@ describe('datasource/pypi', () => {
         await getPkgReleases({
           datasource,
           ...config,
-          compatibility: { python: '2.7' },
+          constraints: { python: '2.7' },
           depName: 'dj-database-url',
         })
       ).toBeNull();
@@ -338,7 +338,7 @@ describe('datasource/pypi', () => {
       expect(result).toMatchSnapshot();
       expect(httpMock.getTrace()).toMatchSnapshot();
     });
-    it('parses data-requires-python and respects compatibility from simple endpoint', async () => {
+    it('parses data-requires-python and respects constraints from simple endpoint', async () => {
       httpMock
         .scope('https://pypi.org/simple/')
         .get('/dj-database-url')
@@ -349,7 +349,7 @@ describe('datasource/pypi', () => {
       expect(
         await getPkgReleases({
           datasource,
-          compatibility: { python: '2.7' },
+          constraints: { python: '2.7' },
           ...config,
           depName: 'dj-database-url',
         })

@@ -28,6 +28,7 @@ export function sanitize(input: string): string {
 
 export function add(secret: string): void {
   secrets.add(secret);
+  secrets.add(secret?.replace('x-access-token:', '')); // GitHub App tokens
 }
 
 export function clear(): void {

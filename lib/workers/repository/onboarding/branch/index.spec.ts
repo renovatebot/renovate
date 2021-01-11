@@ -23,6 +23,7 @@ describe('workers/repository/onboarding/branch', () => {
     beforeEach(() => {
       jest.resetAllMocks();
       config = getConfig();
+      config.repository = 'some/repo';
       git.getFileList.mockResolvedValue([]);
     });
     it('throws if no package files', async () => {
@@ -84,7 +85,7 @@ describe('workers/repository/onboarding/branch', () => {
       platform.getPrList.mockResolvedValueOnce([
         {
           ...mock<Pr>(),
-          branchName: 'renovate/something',
+          sourceBranch: 'renovate/something',
           state: PrState.Open,
         },
       ]);
@@ -98,7 +99,7 @@ describe('workers/repository/onboarding/branch', () => {
       const res = await checkOnboardingBranch(config);
       expect(res.repoIsOnboarded).toBe(false);
       expect(res.branchList).toEqual(['renovate/configure']);
-      expect(platform.setBaseBranch).toHaveBeenCalledTimes(1);
+      expect(git.checkoutBranch).toHaveBeenCalledTimes(1);
       expect(git.commitFiles).toHaveBeenCalledTimes(0);
     });
   });

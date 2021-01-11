@@ -51,7 +51,7 @@ Array [
       "user-agent": "https://github.com/renovatebot/renovate",
     },
     "method": "GET",
-    "url": "https://firstparty.com/api/v1/gems/rails.json",
+    "url": "https://firstparty.com/basepath/api/v1/gems/rails.json",
   },
 ]
 `;
@@ -93,7 +93,7 @@ Array [
       "user-agent": "https://github.com/renovatebot/renovate",
     },
     "method": "GET",
-    "url": "https://firstparty.com/api/v1/gems/rails.json",
+    "url": "https://firstparty.com/basepath/api/v1/gems/rails.json",
   },
 ]
 `;
@@ -2502,7 +2502,7 @@ Array [
       "user-agent": "https://github.com/renovatebot/renovate",
     },
     "method": "GET",
-    "url": "https://firstparty.com/api/v1/gems/rails.json",
+    "url": "https://firstparty.com/basepath/api/v1/gems/rails.json",
   },
   Object {
     "headers": Object {
@@ -2513,7 +2513,7 @@ Array [
       "user-agent": "https://github.com/renovatebot/renovate",
     },
     "method": "GET",
-    "url": "https://firstparty.com/api/v1/versions/rails.json",
+    "url": "https://firstparty.com/basepath/api/v1/versions/rails.json",
   },
 ]
 `;

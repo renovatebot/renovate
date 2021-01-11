@@ -18,6 +18,10 @@ export const presets: Record<string, Preset> = {
     description: 'All mapbox-related packages',
     matchPackagePatterns: ['^(leaflet|mapbox)'],
   },
+  emberTemplateLint: {
+    description: 'All ember-template-lint packages',
+    packagePatterns: ['^ember-template-lint'],
+  },
   eslint: {
     description: 'All eslint packages',
     matchPackageNames: ['babel-eslint'],
@@ -34,7 +38,12 @@ export const presets: Record<string, Preset> = {
   },
   linters: {
     description: 'All lint-related packages',
-    extends: ['packages:eslint', 'packages:stylelint', 'packages:tslint'],
+    extends: [
+      'packages:emberTemplateLint',
+      'packages:eslint',
+      'packages:stylelint',
+      'packages:tslint',
+    ],
     matchPackageNames: ['remark-lint'],
   },
   postcss: {
@@ -46,6 +55,9 @@ export const presets: Record<string, Preset> = {
     description: 'Unit test packages for javascript',
     matchPackageNames: [
       'coveralls',
+      'ember-exam',
+      'ember-mocha',
+      'ember-qunit',
       'istanbul',
       'mock-fs',
       'nock',
@@ -77,5 +89,10 @@ export const presets: Record<string, Preset> = {
   gatsby: {
     description: 'All packages published by Gatsby',
     extends: ['monorepo:gatsby'],
+  },
+  googleapis: {
+    datasources: ['npm'],
+    description: 'All googleapis packages',
+    packagePatterns: ['^@google-cloud/'],
   },
 };

@@ -1,3 +1,4 @@
+import { mock } from 'jest-mock-extended';
 import _simpleGit, { Response, SimpleGit } from 'simple-git';
 import { partial } from '../../../test/util';
 import { PackageFile } from '../common';
@@ -11,7 +12,7 @@ const localDir = `${__dirname}/__fixtures__`;
 
 describe('lib/manager/gitsubmodules/extract', () => {
   beforeAll(() => {
-    simpleGit.mockImplementation((basePath?: string) => {
+    simpleGit.mockImplementation((basePath: string) => {
       const git = Git(basePath);
       return {
         subModule() {
@@ -27,6 +28,14 @@ describe('lib/manager/gitsubmodules/extract', () => {
           }
           return git.raw(options);
         },
+        listRemote(): Response<string> {
+          return partial<Response<string>>(
+            Promise.resolve(
+              'ref: refs/heads/main  HEAD\n5701164b9f5edba1f6ca114c491a564ffb55a964        HEAD'
+            )
+          );
+        },
+        ...mock<SimpleGit>(),
       };
     });
   });
@@ -38,12 +47,16 @@ describe('lib/manager/gitsubmodules/extract', () => {
       ).toBeNull();
       res = await extractPackageFile('', '.gitmodules.2', { localDir });
       expect(res.deps).toHaveLength(1);
+      expect(res.deps[0].registryUrls[1]).toEqual('main');
       res = await extractPackageFile('', '.gitmodules.3', { localDir });
       expect(res.deps).toHaveLength(1);
       res = await extractPackageFile('', '.gitmodules.4', { localDir });
       expect(res.deps).toHaveLength(1);
       res = await extractPackageFile('', '.gitmodules.5', { localDir });
       expect(res.deps).toHaveLength(3);
+      expect(res.deps[2].registryUrls[0]).toEqual(
+        'https://github.com/renovatebot/renovate-config.git'
+      );
     });
   });
 });
