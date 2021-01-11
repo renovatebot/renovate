@@ -37,12 +37,11 @@ export async function getNodeConstraint(
     (await getNodeFile(getSiblingFileName(packageFile, '.node-version'))) ||
     getPackageJsonConstraint(config);
   if (constraint) {
-    // Avoid selecting an unstable version unless necessary
+    // Remove this once node 16 is LTS
     if (
       validRange(constraint) &&
       satisfies('14.100.0', constraint) &&
       satisfies('15.100.0', constraint) &&
-      !isStable('15.100.0') &&
       validRange(`${constraint} <15`)
     ) {
       constraint = `${constraint} <15`;
