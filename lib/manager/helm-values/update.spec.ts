@@ -24,7 +24,7 @@ describe('lib/manager/helm-values/update', () => {
     it('increments', async () => {
       const {
         bumpedContent,
-        bumpedFile,
+        bumpedFiles,
       } = await helmValuesUpdater.bumpPackageVersion(
         helmValuesContent,
         '0.0.2',
@@ -32,13 +32,15 @@ describe('lib/manager/helm-values/update', () => {
         'values.yaml'
       );
       expect(bumpedContent).toEqual(helmValuesContent);
+      expect(bumpedFiles).toHaveLength(1);
+      const bumpedFile = bumpedFiles[0];
       expect(bumpedFile.fileName).toEqual('Chart.yaml');
       expect(bumpedFile.newContent).toMatchSnapshot();
     });
     it('no ops', async () => {
       const {
         bumpedContent,
-        bumpedFile,
+        bumpedFiles,
       } = await helmValuesUpdater.bumpPackageVersion(
         helmValuesContent,
         '0.0.1',
@@ -46,12 +48,14 @@ describe('lib/manager/helm-values/update', () => {
         'values.yaml'
       );
       expect(bumpedContent).toEqual(helmValuesContent);
+      expect(bumpedFiles).toHaveLength(1);
+      const bumpedFile = bumpedFiles[0];
       expect(bumpedFile.newContent).toEqual(chartContent);
     });
     it('updates', async () => {
       const {
         bumpedContent,
-        bumpedFile,
+        bumpedFiles,
       } = await helmValuesUpdater.bumpPackageVersion(
         helmValuesContent,
         '0.0.1',
@@ -59,13 +63,15 @@ describe('lib/manager/helm-values/update', () => {
         'values.yaml'
       );
       expect(bumpedContent).toEqual(helmValuesContent);
-      expect(bumpedFile.newContent).toMatchSnapshot();
+      expect(bumpedFiles).toHaveLength(1);
+      const bumpedFile = bumpedFiles[0];
       expect(bumpedFile.fileName).toEqual('Chart.yaml');
+      expect(bumpedFile.newContent).toMatchSnapshot();
     });
     it('returns content if bumping errors', async () => {
       const {
         bumpedContent,
-        bumpedFile,
+        bumpedFiles,
       } = await helmValuesUpdater.bumpPackageVersion(
         helmValuesContent,
         '0.0.2',
@@ -73,7 +79,7 @@ describe('lib/manager/helm-values/update', () => {
         'values.yaml'
       );
       expect(bumpedContent).toEqual(helmValuesContent);
-      expect(bumpedFile).toBeUndefined();
+      expect(bumpedFiles).toBeUndefined();
     });
   });
 });

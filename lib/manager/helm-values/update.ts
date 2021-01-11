@@ -33,7 +33,7 @@ export async function bumpPackageVersion(
     }
     return {
       bumpedContent: content,
-      bumpedFile: { fileName: chartFileName, newContent: bumpedContent },
+      bumpedFiles: [{ fileName: chartFileName, newContent: bumpedContent }],
     };
   } catch (err) {
     logger.warn(

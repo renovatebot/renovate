@@ -66,7 +66,7 @@ export async function getUpdatedPackageFiles(
         );
 
         if (res) {
-          let bumpedPackageFile: BumpedPackageFile;
+          let bumpedPackageFiles: BumpedPackageFile[];
           if (bumpPackageVersion && upgrade.bumpVersion) {
             const bumpResult = await bumpPackageVersion(
               res,
@@ -75,7 +75,7 @@ export async function getUpdatedPackageFiles(
               packageFile
             );
             res = bumpResult.bumpedContent;
-            bumpedPackageFile = bumpResult.bumpedFile;
+            bumpedPackageFiles = bumpResult.bumpedFiles;
           }
           if (res === existingContent) {
             logger.debug({ packageFile, depName }, 'No content changed');
@@ -87,15 +87,17 @@ export async function getUpdatedPackageFiles(
             logger.debug({ packageFile, depName }, 'Contents updated');
             updatedFileContents[packageFile] = res;
           }
-          // indicates that the version was bumped in another file in
+          // indicates that the version was bumped in one or more files in
           // addition to or instead of the packageFile
-          if (bumpedPackageFile) {
-            logger.debug(
-              { bumpedPackageFile, depName },
-              'Updating bumpedPackageFile content'
-            );
-            updatedFileContents[bumpedPackageFile.fileName] =
-              bumpedPackageFile.newContent;
+          if (bumpedPackageFiles) {
+            for (const bumpedPackageFile of bumpedPackageFiles) {
+              logger.debug(
+                { bumpedPackageFile, depName },
+                'Updating bumpedPackageFile content'
+              );
+              updatedFileContents[bumpedPackageFile.fileName] =
+                bumpedPackageFile.newContent;
+            }
           }
           continue; // eslint-disable-line no-continue
         } else if (reuseExistingBranch) {
