@@ -36,8 +36,9 @@ export async function getNodeConstraint(
     (await getNodeFile(getSiblingFileName(packageFile, '.nvmrc'))) ||
     (await getNodeFile(getSiblingFileName(packageFile, '.node-version'))) ||
     getPackageJsonConstraint(config);
+  // Avoid using node 15 if node 14 also satisfies the same constraint
+  // Remove this once node 16 is LTS
   if (constraint) {
-    // Remove this once node 16 is LTS
     if (
       validRange(constraint) &&
       satisfies('14.100.0', constraint) &&
