@@ -85,7 +85,7 @@ Currently it is needed/supported for the `helm-requirements` manager only.
 ```json
 {
   "aliases": {
-    "stable": "https://kubernetes-charts.storage.googleapis.com/"
+    "stable": "https://charts.helm.sh/stable"
   }
 }
 ```
