@@ -98,7 +98,7 @@ export async function generateLockFile(
       extraEnv,
       docker: {
         image: 'renovate/node',
-        tagScheme: 'npm',
+        tagScheme: 'node',
         tagConstraint,
         preCommands,
       },
