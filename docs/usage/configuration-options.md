@@ -41,11 +41,11 @@ Consider this example:
   "labels": ["dependencies"],
   "packageRules": [
     {
-      "packagePatterns": ["eslint"],
+      "matchPackagePatterns": ["eslint"],
       "labels": ["linting"]
     },
     {
-      "depTypeList": ["optionalDependencies"],
+      "matchDepTypes": ["optionalDependencies"],
       "addLabels": ["optional"]
     }
   ]
@@ -515,7 +515,7 @@ For example, to extract only the major.minor precision from a GitHub release, th
 {
   "packageRules": [
     {
-      "packageNames": ["foo"],
+      "matchPackageNames": ["foo"],
       "extractVersion": "^(?<version>v\\d+\\.\\d+)"
     }
   ]
@@ -530,7 +530,7 @@ Alternatively, to strip a `release-` prefix:
 {
   "packageRules": [
     {
-      "packageNames": ["bar"],
+      "matchPackageNames": ["bar"],
       "extractVersion": "^release-(?<version>.*)$"
     }
   ]
@@ -544,7 +544,7 @@ A similar one could strip leading `v` prefixes:
 {
   "packageRules": [
     {
-      "packageNames": ["baz"],
+      "matchPackageNames": ["baz"],
       "extractVersion": "^v(?<version>.*)$"
     }
   ]
@@ -1040,7 +1040,7 @@ Here is an example where you might want to limit the "noisy" package `aws-sdk` t
 }
 ```
 
-For Maven dependencies, the package name is `<groupId:artefactId>`, eg `"packageNames": ["com.thoughtworks.xstream:xstream"]`
+For Maven dependencies, the package name is `<groupId:artefactId>`, eg `"matchPackageNames": ["com.thoughtworks.xstream:xstream"]`
 
 Note how the above uses `matchPackageNames` instead of `matchPackagePatterns` because it is an exact match package name.
 This is the equivalent of defining `"matchPackagePatterns": ["^aws\-sdk$"]` and hence much simpler.
@@ -1256,7 +1256,7 @@ For example, the following will enforce that only `1.*` versions:
 {
   "packageRules": [
     {
-      "packagePatterns": ["io.github.resilience4j"],
+      "matchPackagePatterns": ["io.github.resilience4j"],
       "matchCurrentVersion": "/^1\\./"
     }
   ]
@@ -1270,7 +1270,7 @@ Use the syntax `!/ /` like the following:
 {
   "packageRules": [
     {
-      "packagePatterns": ["io.github.resilience4j"],
+      "matchPackagePatterns": ["io.github.resilience4j"],
       "allowedVersions": "!/^0\\./"
     }
   ]
@@ -1852,7 +1852,7 @@ In case there is a need to configure them manually, it can be done using this `r
 {
   "packageRules": [
     {
-      "datasources": ["docker"],
+      "matchDatasources": ["docker"],
       "registryUrls": ["https://docker.mycompany.domain"]
     }
   ]

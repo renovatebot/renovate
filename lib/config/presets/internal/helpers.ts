@@ -5,7 +5,7 @@ export const presets: Record<string, Preset> = {
     packageRules: [
       {
         matchPackageNames: ['@types/node'],
-        updateTypes: ['major'],
+        matchUpdateTypes: ['major'],
         enabled: false,
       },
     ],

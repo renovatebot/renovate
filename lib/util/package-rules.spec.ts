@@ -112,7 +112,7 @@ describe('applyPackageRules()', () => {
   it('ignores patterns if lock file maintenance', () => {
     const dep = {
       enabled: true,
-      packagePatterns: ['.*'],
+      matchPackagePatterns: ['.*'],
       updateType: 'lockFileMaintenance' as UpdateType,
       packageRules: [
         {
@@ -551,7 +551,7 @@ describe('applyPackageRules()', () => {
     const config: TestConfig = {
       packageRules: [
         {
-          packageNames: ['test'],
+          matchPackageNames: ['test'],
           matchCurrentVersion: '/^4/',
           x: 1,
         },
@@ -580,7 +580,7 @@ describe('applyPackageRules()', () => {
     const config: TestConfig = {
       packageRules: [
         {
-          packageNames: ['test'],
+          matchPackageNames: ['test'],
           matchCurrentVersion: '!/^4/',
           x: 1,
         },

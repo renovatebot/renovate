@@ -48,19 +48,19 @@ describe('config/validation', () => {
       const config = {
         packageRules: [
           {
-            packageNames: ['foo'],
+            matchPackageNames: ['foo'],
             matchCurrentVersion: '/^2/',
           },
           {
-            packageNames: ['bar'],
+            matchPackageNames: ['bar'],
             matchCurrentVersion: '/***$}{]][/',
           },
           {
-            packageNames: ['baz'],
+            matchPackageNames: ['baz'],
             matchCurrentVersion: '!/^2/',
           },
           {
-            packageNames: ['quack'],
+            matchPackageNames: ['quack'],
             matchCurrentVersion: '!/***$}{]][/',
           },
         ],

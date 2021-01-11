@@ -14,8 +14,8 @@ export const presets: Record<string, Preset> = {
   mavenCommonsAncientVersion: {
     packageRules: [
       {
-        datasources: ['maven', 'sbt-package'],
-        packagePatterns: ['^commons-'],
+        matchDatasources: ['maven', 'sbt-package'],
+        matchPackagePatterns: ['^commons-'],
         allowedVersions: '!/^200\\d{5}(\\.\\d+)?/',
       },
     ],
@@ -24,7 +24,7 @@ export const presets: Record<string, Preset> = {
     description: 'Do not upgrade sbt latest.integration',
     packageRules: [
       {
-        managers: ['sbt'],
+        matchManagers: ['sbt'],
         matchCurrentVersion: '/^latest\\.integration$/',
         enabled: false,
       },
@@ -34,8 +34,10 @@ export const presets: Record<string, Preset> = {
     description: 'Ignore spring cloud 1.x releases',
     packageRules: [
       {
-        datasources: ['maven'],
-        packageNames: ['org.springframework.cloud:spring-cloud-starter-parent'],
+        matchDatasources: ['maven'],
+        matchPackageNames: [
+          'org.springframework.cloud:spring-cloud-starter-parent',
+        ],
         allowedVersions: '/^[A-Z]/',
       },
     ],

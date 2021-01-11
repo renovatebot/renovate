@@ -35,7 +35,7 @@ describe('workers/repository/updates/flatten', () => {
               { depName: '@org/a', updates: [{ newValue: '1.0.0' }] },
               { depName: 'foo', updates: [{ newValue: '2.0.0' }] },
               {
-                matchUpdateTypes: ['pin'],
+                updateTypes: ['pin'],
                 updates: [{ newValue: '2.0.0' }],
               },
             ],

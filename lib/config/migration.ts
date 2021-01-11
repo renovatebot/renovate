@@ -505,14 +505,6 @@ export function migrateConfig(
       migratedConfig.hostRules = migratedConfig.endpoints;
       delete migratedConfig.endpoints;
     }
-    const isMigrated = !equal(config, migratedConfig);
-    if (isMigrated) {
-      // recursive call in case any migrated configs need further migrating
-      return {
-        isMigrated,
-        migratedConfig: migrateConfig(migratedConfig).migratedConfig,
-      };
-    }
     if (is.array(migratedConfig.packageRules)) {
       const renameMap = {
         paths: 'matchPaths',
@@ -530,12 +522,19 @@ export function migrateConfig(
         for (const [oldKey, ruleVal] of Object.entries(packageRule)) {
           const newKey = renameMap[oldKey];
           if (newKey) {
-            isMigrated = true;
             packageRule[newKey] = ruleVal;
             delete packageRule[oldKey];
           }
         }
       }
+    }
+    const isMigrated = !equal(config, migratedConfig);
+    if (isMigrated) {
+      // recursive call in case any migrated configs need further migrating
+      return {
+        isMigrated,
+        migratedConfig: migrateConfig(migratedConfig).migratedConfig,
+      };
     }
     return { isMigrated, migratedConfig };
   } catch (err) /* istanbul ignore next */ {

@@ -20,7 +20,7 @@ export const presets: Record<string, Preset> = {
   },
   emberTemplateLint: {
     description: 'All ember-template-lint packages',
-    packagePatterns: ['^ember-template-lint'],
+    matchPackagePatterns: ['^ember-template-lint'],
   },
   eslint: {
     description: 'All eslint packages',
@@ -91,8 +91,8 @@ export const presets: Record<string, Preset> = {
     extends: ['monorepo:gatsby'],
   },
   googleapis: {
-    datasources: ['npm'],
+    matchDatasources: ['npm'],
     description: 'All googleapis packages',
-    packagePatterns: ['^@google-cloud/'],
+    matchPackagePatterns: ['^@google-cloud/'],
   },
 };

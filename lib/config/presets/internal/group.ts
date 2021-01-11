@@ -23,7 +23,7 @@ const staticGroups = {
     packageRules: [
       {
         matchPackagePatterns: ['*'],
-        updateTypes: ['minor', 'patch'],
+        matchUpdateTypes: ['minor', 'patch'],
         groupName: 'all non-major dependencies',
         groupSlug: 'all-minor-patch',
       },
@@ -132,7 +132,7 @@ const staticGroups = {
       {
         groupName: 'Glimmer.js packages',
         groupSlug: 'glimmer',
-        packageNames: ['@glimmer/component', '@glimmer/tracking'],
+        matchPackageNames: ['@glimmer/component', '@glimmer/tracking'],
       },
     ],
   },
@@ -205,7 +205,7 @@ const staticGroups = {
     description: 'Group Java Resilience4j packages',
     packageRules: [
       {
-        packagePatterns: ['^io.github.resilience4j:'],
+        matchPackagePatterns: ['^io.github.resilience4j:'],
         groupName: 'resilience4j',
       },
     ],
