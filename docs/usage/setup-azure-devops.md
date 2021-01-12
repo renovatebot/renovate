@@ -3,74 +3,77 @@ title: Azure DevOps setup
 description: How to setup Renovate for Azure DevOps
 ---
 
-# Azure DevOps setup (for npm/Yarn)
+# Azure DevOps setup
 
 1. Create a brand new pipeline within Azure DevOps, and select your source
    ![Azure DevOps create new pipeline](assets/images/azure-devops-setup-1.png)
 1. Select your repository
 1. Within _Configure your pipeline_ select: **Starter pipeline file**
    ![Azure DevOps starter pipeline template](assets/images/azure-devops-setup-2.png)
-1. Replace all contents with next npm/Yarn template (change all _PLACEHOLDER_ strings with your values):
+1. Replace all contents with:
 
    ```
    schedules:
      - cron: '0 3 * * *'
        displayName: 'Every day at 3am'
        branches:
-         include:
-           - master
-       always: true
+         include: [master]
 
    trigger: none
 
-   jobs:
-     - job:
-       pool:
-         vmImage: 'ubuntu-latest'
-       steps:
-         - checkout: none
+   pool:
+     vmImage: ubuntu-latest
 
-         - task: Bash@3
-           displayName: Create .npmrc file
-           inputs:
-             targetType: inline
-             script: |
-               cat > .npmrc << EOF
-               PLACEHOLDER(.NPMRC CONTENTS)
-               EOF
+   steps:
+     - task: npmAuthenticate@0
+       inputs:
+         workingFile: .npmrc
+   
+     - bash: |
+         git config --global user.email 'bot@renovateapp.com'
+         git config --global user.name 'Renovate Bot'
+         cp .npmrc ~/.npmrc
+         npx renovate
+       env:
+         TOKEN: $(System.AccessToken)
+   ```
 
-         - task: npmAuthenticate@0
-           displayName: npm Authenticate
-           inputs:
-             workingFile: .npmrc
+1. Add a file named `.npmrc` to your repository with the following contents:  
+   (replacing `YOUR-ORG` with your Azure DevOps organization and `YOUR-FEED` with your Azure Artifacts feed)
 
-         - task: Bash@3
-           displayName: Create renovate config
-           inputs:
-             targetType: inline
-             script: |
-               cat > config.js << EOF
-               module.exports = {
-                 platform: 'azure',
-                 endpoint: 'https://dev.azure.com/PLACEHOLDER(ORGANIZATION)/',
-                 token: '$(System.AccessToken)',
-                 npmrc:
-                   '$(sed ':a;N;$!ba;s/\n/\\n/g' .npmrc)',
-                 ignoreNpmrcFile: true,
-                 repositories: ['PLACEHOLDER(PROJECT)/PLACEHOLDER(REPO NAME)']
-               };
-               EOF
+   ```
+   @enpowerx:registry=https://pkgs.dev.azure.com/YOUR-ORG/_packaging/YOUR-FEED/npm/registry/ 
+   always-auth=true
+   ```
 
-         - task: Bash@3
-           displayName: Run renovate
-           inputs:
-             targetType: inline
-             script: |
-               # Git credentials
-               git config --global user.email 'bot@renovateapp.com'
-               git config --global user.name  'Renovate Bot'
-               # Run renovate
-               npx --userconfig .npmrc renovate
+1. Add a file named `config.js` to your repository with the following contents:  
+   (replacing `YOUR-ORG` with your Azure DevOps organization and `YOUR-PROJECT/YOUR-REPO` with your Azure DevOps project and repository)
+
+   ```javascript
+   module.exports = {
+     platform: 'azure',
+     endpoint: 'https://dev.azure.com/YOUR-ORG/',
+     token: process.env.TOKEN,
+     hostRules: [
+       {
+         hostName: 'pkgs.dev.azure.com',
+         username: 'apikey',
+         password: process.env.TOKEN,
+       }
+     ],
+     repositories: [
+       'YOUR-PROJECT/YOUR-REPO'
+     ]
+   };
    ```
 
 1. Additionally, you can add `renovate.json` with Renovate configurations in the root of the repo. [Read more about configurations options](https://docs.renovatebot.com/configuration-options/)
+
+If you wish to use a single Renovate pipeline to update multiple repositories:
+
+1. Add the names of the repositories to `config.js`.
+
+1. Make sure that the "Project Collection Build Service" user has the following permissions on the repositores:
+   - Contribute
+   - Contribute to pull requests
+   - Create branch
