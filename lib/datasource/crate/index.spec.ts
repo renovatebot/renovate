@@ -5,7 +5,13 @@ import { dirname, join } from 'upath';
 import { getPkgReleases } from '..';
 import * as httpMock from '../../../test/http-mock';
 import { setFsConfig } from '../../util/fs';
-import { id as datasource, getIndexSuffix } from '.';
+import {
+  RegistryFlavor,
+  RegistryInfo,
+  id as datasource,
+  fetchCrateRecordsPayload,
+  getIndexSuffix,
+} from '.';
 
 jest.mock('simple-git');
 const simpleGit: any = _simpleGit;
@@ -188,16 +194,12 @@ describe('datasource/crate', () => {
       const { mockClone } = setupGitMocks();
 
       const url = 'https://dl.cloudsmith.io/basic/myorg/myrepo/cargo/index.git';
-      const cloneName = 'crate-registry-https-dl.cloudsmith.io-314e186';
-      const clonePath = join(cacheDir, cloneName);
       const res = await getPkgReleases({
         datasource,
         depName: 'mypkg',
         registryUrls: [url],
       });
-      expect(mockClone).toHaveBeenCalledWith(url, clonePath, {
-        '--depth': 1,
-      });
+      expect(mockClone).toHaveBeenCalled();
       expect(res).toMatchSnapshot();
       expect(res).not.toBeNull();
       expect(res).toBeDefined();
@@ -206,16 +208,12 @@ describe('datasource/crate', () => {
       const { mockClone } = setupGitMocks();
 
       const url = 'https://github.com/mcorbin/testregistry';
-      const cloneName = 'crate-registry-https-github.com-87af2ec';
-      const clonePath = join(cacheDir, cloneName);
       const res = await getPkgReleases({
         datasource,
         depName: 'mypkg',
         registryUrls: [url],
       });
-      expect(mockClone).toHaveBeenCalledWith(url, clonePath, {
-        '--depth': 1,
-      });
+      expect(mockClone).toHaveBeenCalled();
       expect(res).toMatchSnapshot();
       expect(res).not.toBeNull();
       expect(res).toBeDefined();
@@ -235,6 +233,15 @@ describe('datasource/crate', () => {
         registryUrls: [url],
       });
       expect(mockClone).toHaveBeenCalledTimes(1);
+    });
+  });
+
+  describe('fetchCrateRecordsPayload', () => {
+    it('rejects if it has neither clonePath nor crates.io flavor', async () => {
+      const info: RegistryInfo = {
+        flavor: RegistryFlavor.Cloudsmith,
+      };
+      await expect(fetchCrateRecordsPayload(info, 'benedict')).toReject();
     });
   });
 });

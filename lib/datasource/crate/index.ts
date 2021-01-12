@@ -2,25 +2,27 @@ import { join } from 'path';
 import * as fs from 'fs-extra';
 import hasha from 'hasha';
 import Git from 'simple-git';
+import * as tmp from 'tmp-promise';
 import { logger } from '../../logger';
 import { ExternalHostError } from '../../types/errors/external-host-error';
 import * as packageCache from '../../util/cache/package';
-import { ensureCacheDir } from '../../util/fs';
 import { Http } from '../../util/http';
 import { GetReleasesConfig, Release, ReleaseResult } from '../common';
+
+tmp.setGracefulCleanup();
 
 export const id = 'crate';
 export const defaultRegistryUrls = ['https://crates.io'];
 export const registryStrategy = 'first';
 
-const registryClonePaths: Record<string, string> = {};
+const registryClonePaths: Record<string, tmp.DirectoryResult> = {};
 
 const http = new Http(id);
 
 const CRATES_IO_BASE_URL =
   'https://raw.githubusercontent.com/rust-lang/crates.io-index/master/';
 
-enum RegistryFlavor {
+export enum RegistryFlavor {
   /// https://crates.io, supports rawgit access
   CratesIo,
 
@@ -31,7 +33,7 @@ enum RegistryFlavor {
   Other,
 }
 
-interface RegistryInfo {
+export interface RegistryInfo {
   flavor: RegistryFlavor;
 
   /// raw URL of the registry, as specified in cargo config
@@ -41,7 +43,7 @@ interface RegistryInfo {
   url?: URL;
 
   /// path where the registry is cloned
-  clonePath?: string;
+  clonePath?: tmp.DirectoryResult;
 }
 
 export function getIndexSuffix(lookupName: string): string[] {
@@ -65,12 +67,12 @@ interface CrateRecord {
   yanked: boolean;
 }
 
-async function fetchCrateRecordsPayload(
+export async function fetchCrateRecordsPayload(
   info: RegistryInfo,
   lookupName: string
 ): Promise<string> {
   if (info.clonePath) {
-    const path = join(info.clonePath, ...getIndexSuffix(lookupName));
+    const path = join(info.clonePath.path, ...getIndexSuffix(lookupName));
     return fs.readFile(path, { encoding: 'utf8' });
   }
 
@@ -154,12 +156,17 @@ async function fetchRegistryInfo(
   if (flavor !== RegistryFlavor.CratesIo) {
     let clonePath = registryClonePaths[registryUrl];
     if (!clonePath) {
-      clonePath = await ensureCacheDir(cacheDirFromUrl(url));
-      logger.info({ clonePath, registryUrl }, `Cloning private cargo registry`);
+      clonePath = await tmp.dir({
+        prefix: cacheDirFromUrl(url),
+        unsafeCleanup: true,
+      });
+      logger.info(
+        { clonePath: clonePath.path, registryUrl },
+        `Cloning private cargo registry`
+      );
       {
-        await fs.remove(clonePath);
         const git = Git();
-        await git.clone(registryUrl, clonePath, {
+        await git.clone(registryUrl, clonePath.path, {
           '--depth': 1,
         });
       }
@@ -169,6 +176,12 @@ async function fetchRegistryInfo(
   }
 
   return registry;
+}
+
+export function areReleasesCacheable(registryUrl: string): boolean {
+  // We only cache public releases, we don't want to cache private
+  // cloned data between runs.
+  return registryUrl === 'https://crates.io';
 }
 
 export async function getReleases({
@@ -183,15 +196,20 @@ export async function getReleases({
     return null;
   }
 
+  const cacheable = areReleasesCacheable(registryUrl);
   const cacheNamespace = 'datasource-crate';
   const cacheKey = `${registryUrl}/${lookupName}`;
-  const cachedResult = await packageCache.get<ReleaseResult>(
-    cacheNamespace,
-    cacheKey
-  );
-  // istanbul ignore if
-  if (cachedResult) {
-    return cachedResult;
+
+  if (cacheable) {
+    const cachedResult = await packageCache.get<ReleaseResult>(
+      cacheNamespace,
+      cacheKey
+    );
+    // istanbul ignore if
+    if (cachedResult) {
+      logger.debug({ cacheKey }, 'Returning cached resource');
+      return cachedResult;
+    }
   }
 
   const registryInfo = await fetchRegistryInfo(registryUrl);
@@ -226,7 +244,11 @@ export async function getReleases({
   if (!result.releases.length) {
     return null;
   }
-  const cacheMinutes = 10;
-  await packageCache.set(cacheNamespace, cacheKey, result, cacheMinutes);
+
+  if (cacheable) {
+    const cacheMinutes = 10;
+    await packageCache.set(cacheNamespace, cacheKey, result, cacheMinutes);
+  }
+
   return result;
 }

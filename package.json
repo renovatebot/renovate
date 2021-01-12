@@ -177,7 +177,8 @@
     "url-join": "4.0.1",
     "validate-npm-package-name": "3.0.0",
     "www-authenticate": "0.6.2",
-    "xmldoc": "1.1.2"
+    "xmldoc": "1.1.2",
+    "tmp-promise": "3.0.2"
   },
   "optionalDependencies": {
     "re2": "1.15.9"
@@ -260,7 +261,6 @@
     "semantic-release": "17.3.1",
     "shelljs": "0.8.4",
     "strip-ansi": "6.0.0",
-    "tmp-promise": "3.0.2",
     "type-fest": "0.20.2",
     "typescript": "4.1.3"
   },
