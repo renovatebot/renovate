@@ -2,20 +2,17 @@ import { join } from 'path';
 import * as fs from 'fs-extra';
 import hasha from 'hasha';
 import Git from 'simple-git';
-import * as tmp from 'tmp-promise';
 import { logger } from '../../logger';
 import { ExternalHostError } from '../../types/errors/external-host-error';
+import * as memCache from '../../util/cache/memory';
 import * as packageCache from '../../util/cache/package';
+import { privateCacheDir } from '../../util/fs';
 import { Http } from '../../util/http';
 import { GetReleasesConfig, Release, ReleaseResult } from '../common';
-
-tmp.setGracefulCleanup();
 
 export const id = 'crate';
 export const defaultRegistryUrls = ['https://crates.io'];
 export const registryStrategy = 'first';
-
-const registryClonePaths: Record<string, tmp.DirectoryResult> = {};
 
 const http = new Http(id);
 
@@ -43,7 +40,7 @@ export interface RegistryInfo {
   url?: URL;
 
   /// path where the registry is cloned
-  clonePath?: tmp.DirectoryResult;
+  clonePath?: string;
 }
 
 export function getIndexSuffix(lookupName: string): string[] {
@@ -72,7 +69,7 @@ export async function fetchCrateRecordsPayload(
   lookupName: string
 ): Promise<string> {
   if (info.clonePath) {
-    const path = join(info.clonePath.path, ...getIndexSuffix(lookupName));
+    const path = join(info.clonePath, ...getIndexSuffix(lookupName));
     return fs.readFile(path, { encoding: 'utf8' });
   }
 
@@ -154,24 +151,21 @@ async function fetchRegistryInfo(
   };
 
   if (flavor !== RegistryFlavor.CratesIo) {
-    let clonePath = registryClonePaths[registryUrl];
+    const cacheKey = `crate-datasource/registry-clone-path/${registryUrl}`;
+
+    let clonePath: string = memCache.get(cacheKey);
     if (!clonePath) {
-      clonePath = await tmp.dir({
-        prefix: cacheDirFromUrl(url),
-        unsafeCleanup: true,
-      });
-      logger.info(
-        { clonePath: clonePath.path, registryUrl },
-        `Cloning private cargo registry`
-      );
+      clonePath = join(privateCacheDir(), cacheDirFromUrl(url));
+      logger.info({ clonePath, registryUrl }, `Cloning private cargo registry`);
       {
         const git = Git();
-        await git.clone(registryUrl, clonePath.path, {
+        await git.clone(registryUrl, clonePath, {
           '--depth': 1,
         });
       }
-      registryClonePaths[registryUrl] = clonePath;
+      memCache.set(cacheKey, clonePath);
     }
+
     registry.clonePath = clonePath;
   }
 

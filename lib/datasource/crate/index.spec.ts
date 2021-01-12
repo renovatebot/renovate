@@ -4,6 +4,7 @@ import { DirectoryResult, dir } from 'tmp-promise';
 import { dirname, join } from 'upath';
 import { getPkgReleases } from '..';
 import * as httpMock from '../../../test/http-mock';
+import * as memCache from '../../util/cache/memory';
 import { setFsConfig } from '../../util/fs';
 import {
   RegistryFlavor,
@@ -69,6 +70,7 @@ describe('datasource/crate', () => {
         cacheDir,
       });
       simpleGit.mockReset();
+      memCache.init();
     });
     afterEach(() => {
       fs.rmdirSync(tmpDir.path, { recursive: true });
