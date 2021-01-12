@@ -4,6 +4,7 @@ import { logger } from '../../logger';
 import { regEx } from '../../util/regex';
 import { PackageDependency } from '../common';
 import {
+  GOOGLE_REPO,
   JCENTER_REPO,
   MAVEN_REPO,
   ManagerData,
@@ -190,7 +191,7 @@ function processPlugin({
   return { deps: [dep] };
 }
 
-function processRegistryUrl({
+function processCustomRegistryUrl({
   tokenMap,
 }: SyntaxHandlerInput): SyntaxHandlerOutput {
   const registryUrl = tokenMap.registryUrl?.value;
@@ -205,6 +206,18 @@ function processRegistryUrl({
     // no-op
   }
   return null;
+}
+
+function processPredefinedRegistryUrl({
+  tokenMap,
+}: SyntaxHandlerInput): SyntaxHandlerOutput {
+  const registryName = tokenMap.registryName?.value;
+  const registryUrl = {
+    mavenCentral: MAVEN_REPO,
+    jcenter: JCENTER_REPO,
+    google: GOOGLE_REPO,
+  }[registryName];
+  return { urls: [registryUrl] };
 }
 
 function processLongFormDep({
@@ -301,22 +314,16 @@ const matcherConfigs: SyntaxMatchConfig[] = [
   {
     // mavenCentral()
     matchers: [
-      { matchType: TokenType.Word, matchValue: 'mavenCentral' },
+      {
+        matchType: TokenType.Word,
+        matchValue: ['mavenCentral', 'jcenter', 'google'],
+        tokenMapKey: 'registryName',
+      },
       { matchType: TokenType.LeftParen },
       { matchType: TokenType.RightParen },
       endOfInstruction,
     ],
-    handler: () => ({ urls: [MAVEN_REPO] }),
-  },
-  {
-    // jcenter()
-    matchers: [
-      { matchType: TokenType.Word, matchValue: 'jcenter' },
-      { matchType: TokenType.LeftParen },
-      { matchType: TokenType.RightParen },
-      endOfInstruction,
-    ],
-    handler: () => ({ urls: [JCENTER_REPO] }),
+    handler: processPredefinedRegistryUrl,
   },
   {
     // url 'https://repo.spring.io/snapshot/'
@@ -325,7 +332,7 @@ const matcherConfigs: SyntaxMatchConfig[] = [
       { matchType: TokenType.String, tokenMapKey: 'registryUrl' },
       endOfInstruction,
     ],
-    handler: processRegistryUrl,
+    handler: processCustomRegistryUrl,
   },
   {
     // url('https://repo.spring.io/snapshot/')
@@ -336,7 +343,7 @@ const matcherConfigs: SyntaxMatchConfig[] = [
       { matchType: TokenType.RightParen },
       endOfInstruction,
     ],
-    handler: processRegistryUrl,
+    handler: processCustomRegistryUrl,
   },
   {
     // group: "com.example", name: "my.dependency", version: "1.2.3"
