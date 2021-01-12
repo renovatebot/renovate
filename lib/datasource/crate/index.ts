@@ -69,7 +69,7 @@ export async function fetchCrateRecordsPayload(
 ): Promise<string> {
   if (info.clonePath) {
     const path = join(info.clonePath, ...getIndexSuffix(lookupName));
-    return readFile(path, { encoding: 'utf8' });
+    return readFile(path, 'utf8');
   }
 
   if (info.flavor === RegistryFlavor.CratesIo) {
