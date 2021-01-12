@@ -1,6 +1,6 @@
 import { fs } from '../../../../test/util';
-import { getNodeConstraint } from './node-version';
 import { isStable } from '../../../versioning/node';
+import { getNodeConstraint } from './node-version';
 
 jest.mock('../../../util/fs');
 
