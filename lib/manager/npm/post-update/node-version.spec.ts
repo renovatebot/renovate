@@ -1,5 +1,6 @@
 import { fs } from '../../../../test/util';
 import { getNodeConstraint } from './node-version';
+import { isStable } from '../../../versioning/node';
 
 jest.mock('../../../util/fs');
 
@@ -23,7 +24,9 @@ describe('getNodeConstraint', () => {
       ...config,
       constraints: { node: '>= 12.16.0' },
     });
-    expect(res).toEqual('>= 12.16.0 <15');
+    const isAugmentedRange = res === '>= 12.16.0 <15';
+    const node16IsStable = isStable('16.100.0');
+    expect(isAugmentedRange || node16IsStable).toBe(true);
   });
   it('returns .node-version value', async () => {
     fs.readLocalFile = jest.fn();
