@@ -15,6 +15,16 @@ describe('getNodeConstraint', () => {
     const res = await getNodeConstraint(config);
     expect(res).toEqual('^12.16.0');
   });
+  it('augments to avoid node 15', async () => {
+    fs.readLocalFile = jest.fn();
+    fs.readLocalFile.mockResolvedValueOnce(null);
+    fs.readLocalFile.mockResolvedValueOnce(null);
+    const res = await getNodeConstraint({
+      ...config,
+      constraints: { node: '>= 12.16.0' },
+    });
+    expect(res).toEqual('>= 12.16.0 <15');
+  });
   it('returns .node-version value', async () => {
     fs.readLocalFile = jest.fn();
     fs.readLocalFile.mockResolvedValueOnce(null);
