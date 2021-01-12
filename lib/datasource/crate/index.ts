@@ -1,7 +1,7 @@
-import { join } from 'path';
 import * as fs from 'fs-extra';
 import hasha from 'hasha';
 import Git from 'simple-git';
+import { join } from 'upath';
 import { logger } from '../../logger';
 import { ExternalHostError } from '../../types/errors/external-host-error';
 import * as memCache from '../../util/cache/memory';
