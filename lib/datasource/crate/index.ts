@@ -20,26 +20,26 @@ const CRATES_IO_BASE_URL =
   'https://raw.githubusercontent.com/rust-lang/crates.io-index/master/';
 
 export enum RegistryFlavor {
-  /// https://crates.io, supports rawgit access
+  /** https://crates.io, supports rawgit access */
   CratesIo,
 
-  /// https://cloudsmith.io, needs git clone
+  /** https://cloudsmith.io, needs git clone */
   Cloudsmith,
 
-  /// unknown, assuming private git repository
+  /** unknown, assuming private git repository */
   Other,
 }
 
 export interface RegistryInfo {
   flavor: RegistryFlavor;
 
-  /// raw URL of the registry, as specified in cargo config
+  /** raw URL of the registry, as specified in cargo config */
   rawUrl?: string;
 
-  /// parsed URL of the registry
+  /** parsed URL of the registry */
   url?: URL;
 
-  /// path where the registry is cloned
+  /** path where the registry is cloned */
   clonePath?: string;
 }
 
@@ -90,8 +90,10 @@ export async function fetchCrateRecordsPayload(
   throw new Error(`unsupported crate registry flavor: ${info.flavor}`);
 }
 
-/// Computes the dependency URL for a crate, given
-/// registry information
+/**
+ * Computes the dependency URL for a crate, given
+ * registry information
+ */
 function getDependencyUrl(info: RegistryInfo, lookupName: string): string {
   switch (info.flavor) {
     case RegistryFlavor.CratesIo:
@@ -108,8 +110,10 @@ function getDependencyUrl(info: RegistryInfo, lookupName: string): string {
   }
 }
 
-/// Given a Git URL, computes a semi-human-readable name for a folder in which to
-/// clone the repository.
+/**
+ * Given a Git URL, computes a semi-human-readable name for a folder in which to
+ * clone the repository.
+ */
 function cacheDirFromUrl(url: URL): string {
   const proto = url.protocol.replace(/:$/, '');
   const host = url.hostname;
@@ -120,10 +124,12 @@ function cacheDirFromUrl(url: URL): string {
   return `crate-registry-${proto}-${host}-${hash}`;
 }
 
-/// Fetches information about a registry, by url.
-/// If no url is given, assumes crates.io.
-/// If an url is given, assumes it's a valid Git repository
-/// url and clones it to cache.
+/**
+ * Fetches information about a registry, by url.
+ * If no url is given, assumes crates.io.
+ * If an url is given, assumes it's a valid Git repository
+ * url and clones it to cache.
+ */
 async function fetchRegistryInfo(
   registryUrl: string
 ): Promise<RegistryInfo | null> {

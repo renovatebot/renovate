@@ -82,7 +82,7 @@ function extractFromSection(
   return deps;
 }
 
-/// Reads `.cargo/config.toml`, or, if not found, `.cargo/config`
+/** Reads `.cargo/config.toml`, or, if not found, `.cargo/config` */
 async function readCargoConfig(): Promise<CargoConfig | null> {
   for (const configName of ['config.toml', 'config']) {
     const path = `.cargo/${configName}`;
@@ -101,7 +101,7 @@ async function readCargoConfig(): Promise<CargoConfig | null> {
   return null;
 }
 
-/// Extracts a map of cargo registries from a CargoConfig
+/** Extracts a map of cargo registries from a CargoConfig */
 function extractCargoRegistries(config: CargoConfig | null): CargoRegistries {
   const result: CargoRegistries = {};
   if (!config?.registries) {
