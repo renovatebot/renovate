@@ -57,7 +57,7 @@ describe(`Child process execution wrapper`, () => {
   });
 
   const image = 'renovate/image';
-  const name = image.replace(/\//g, '_');
+  const name = 'renovate_'.concat(image.replace(/\//g, '_'));
   const tag = '1.2.3';
   const inCmd = 'echo hello';
   const outCmd = ['echo hello'];
@@ -445,6 +445,36 @@ describe(`Child process execution wrapper`, () => {
     ],
 
     [
+      'Docker child prefix',
+      {
+        execConfig: {
+          ...execConfig,
+          binarySource: BinarySource.Docker,
+          dockerChildPrefix: 'foo_',
+        },
+        processEnv,
+        inCmd,
+        inOpts: { docker },
+        outCmd: [
+          dockerPullCmd,
+          `docker ps --filter name=foo_renovate_image -aq`,
+          `docker run --rm --name=foo_renovate_image --label=foo_child ${defaultVolumes} -w "${cwd}" ${image} bash -l -c "${inCmd}"`,
+        ],
+        outOpts: [
+          dockerPullOpts,
+          dockerRemoveOpts,
+          {
+            cwd,
+            encoding,
+            env: envMock.basic,
+            timeout: 900000,
+            maxBuffer: 10485760,
+          },
+        ],
+      },
+    ],
+
+    [
       'Docker extra commands',
       {
         execConfig: {
@@ -604,7 +634,7 @@ describe(`Child process execution wrapper`, () => {
     expect(actualCmd).toMatchSnapshot();
   });
 
-  it('only calls removeDockerContainer in catch block is useDocker is set', async () => {
+  it('only calls removeDockerContainer in catch block if useDocker is set', async () => {
     cpExec.mockImplementation(() => {
       throw new Error('some error occurred');
     });

@@ -706,7 +706,7 @@ Array [
     },
   },
   Object {
-    "cmd": "docker ps --filter name=renovate_gradle -aq",
+    "cmd": "docker ps --filter name=renovate_renovate_gradle -aq",
     "options": Object {
       "encoding": "utf-8",
     },
@@ -718,7 +718,7 @@ Array [
     },
   },
   Object {
-    "cmd": "docker run --rm --name=renovate_gradle --label=renovate_child -v \\"localDir\\":\\"localDir\\" -e GRADLE_OPTS -w \\"localDir\\" renovate/gradle bash -l -c \\"<gradlew> --init-script renovate-plugin.gradle renovate\\"",
+    "cmd": "docker run --rm --name=renovate_renovate_gradle --label=renovate_child -v \\"localDir\\":\\"localDir\\" -e GRADLE_OPTS -w \\"localDir\\" renovate/gradle bash -l -c \\"<gradlew> --init-script renovate-plugin.gradle renovate\\"",
     "options": Object {
       "cwd": "localDir",
       "encoding": "utf-8",
@@ -748,7 +748,7 @@ Array [
     },
   },
   Object {
-    "cmd": "docker ps --filter name=renovate_gradle -aq",
+    "cmd": "docker ps --filter name=renovate_renovate_gradle -aq",
     "options": Object {
       "encoding": "utf-8",
     },
@@ -760,7 +760,7 @@ Array [
     },
   },
   Object {
-    "cmd": "docker run --rm --name=renovate_gradle --label=renovate_child -v \\"localDir\\":\\"localDir\\" -e GRADLE_OPTS -w \\"localDir\\" renovate/gradle bash -l -c \\"<gradlew> --init-script renovate-plugin.gradle renovate\\"",
+    "cmd": "docker run --rm --name=renovate_renovate_gradle --label=renovate_child -v \\"localDir\\":\\"localDir\\" -e GRADLE_OPTS -w \\"localDir\\" renovate/gradle bash -l -c \\"<gradlew> --init-script renovate-plugin.gradle renovate\\"",
     "options": Object {
       "cwd": "localDir",
       "encoding": "utf-8",
@@ -790,7 +790,7 @@ Array [
     },
   },
   Object {
-    "cmd": "docker ps --filter name=renovate_gradle -aq",
+    "cmd": "docker ps --filter name=renovate_renovate_gradle -aq",
     "options": Object {
       "encoding": "utf-8",
     },
@@ -802,7 +802,7 @@ Array [
     },
   },
   Object {
-    "cmd": "docker run --rm --name=renovate_gradle --label=renovate_child -v \\"localDir\\":\\"localDir\\" -e GRADLE_OPTS -w \\"localDir\\" renovate/gradle bash -l -c \\"gradle --init-script renovate-plugin.gradle renovate\\"",
+    "cmd": "docker run --rm --name=renovate_renovate_gradle --label=renovate_child -v \\"localDir\\":\\"localDir\\" -e GRADLE_OPTS -w \\"localDir\\" renovate/gradle bash -l -c \\"gradle --init-script renovate-plugin.gradle renovate\\"",
     "options": Object {
       "cwd": "localDir",
       "encoding": "utf-8",

@@ -92,6 +92,12 @@ If you configure this to be different to the `baseDir`, it means you can have on
 
 Set to `false` to prevent usage of `--ignore-platform-reqs` in the Composer package manager.
 
+## dockerChildPrefix
+
+Override the default renovate sidecar Docker containers name prefix from `renovate_` to a custom value, so renovate will name and label images from a custom prefix.
+
+If this is set to `myprefix_` the final image name for `renovate/node` would be named `myprefix_renovate_node` instead of currently used `renovate_node` and be labeled `myprefix_child` instead of `renovate_child`.
+
 ## dockerImagePrefix
 
 Override the default renovate sidecar Docker containers image prefix from `docker.io/renovate` to a custom value, so renovate will pull images from a custom Docker registry.

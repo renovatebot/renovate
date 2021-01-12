@@ -309,6 +309,14 @@ const options: RenovateOptions[] = [
     type: 'string',
   },
   {
+    name: 'dockerChildPrefix',
+    description:
+      'Change this value in order to override the default renovate docker sidecar container name and label prefix.',
+    type: 'string',
+    default: 'renovate_',
+    admin: true,
+  },
+  {
     name: 'dockerMapDotfiles',
     description:
       'Map relevant home directory dotfiles into containers when binarySource=docker.',

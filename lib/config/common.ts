@@ -80,6 +80,7 @@ export interface RenovateAdminConfig {
 
   dockerImagePrefix?: string;
   dockerUser?: string;
+  dockerChildPrefix?: string;
 
   dryRun?: boolean;
 

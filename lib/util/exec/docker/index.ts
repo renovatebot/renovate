@@ -110,12 +110,23 @@ async function getDockerTag(
   return 'latest';
 }
 
-function getContainerName(image: string): string {
-  return image.replace(/\//g, '_');
+export function getContainerName(image: string, prefix: string): string {
+  if (prefix) {
+    return prefix.concat(image.replace(/\//g, '_'));
+  }
+  return 'renovate_'.concat(image.replace(/\//g, '_'));
 }
 
-export async function removeDockerContainer(image: string): Promise<void> {
-  const containerName = getContainerName(image);
+export function getContainerLabel(prefix: string): string {
+  if (prefix) {
+    return `${prefix}child`;
+  }
+  return 'renovate_child';
+}
+
+export async function removeDockerContainer(
+  containerName: string
+): Promise<void> {
   let cmd = `docker ps --filter name=${containerName} -aq`;
   try {
     const res = await rawExec(cmd, {
@@ -130,21 +141,20 @@ export async function removeDockerContainer(image: string): Promise<void> {
         encoding: 'utf-8',
       });
     } else {
-      logger.trace({ image, containerName }, 'No running containers to remove');
+      logger.trace({ containerName }, 'No running containers to remove');
     }
   } catch (err) /* istanbul ignore next */ {
     logger.trace({ err }, 'removeDockerContainer err');
-    logger.info(
-      { image, containerName, cmd },
-      'Could not remove Docker container'
-    );
+    logger.info({ containerName, cmd }, 'Could not remove Docker container');
   }
 }
 
 // istanbul ignore next
-export async function removeDanglingContainers(): Promise<void> {
+export async function removeDanglingContainers(
+  childLabel: string
+): Promise<void> {
   try {
-    const res = await rawExec(`docker ps --filter label=renovate_child -aq`, {
+    const res = await rawExec(`docker ps --filter label=${childLabel} -aq`, {
       encoding: 'utf-8',
     });
     if (res?.stdout?.trim().length) {
@@ -185,9 +195,13 @@ export async function generateDockerCommand(
   const { localDir, cacheDir, dockerUser } = config;
 
   const result = ['docker run --rm'];
-  const containerName = getContainerName(image);
+
+  const containerName = getContainerName(image, config.dockerChildPrefix);
+  const containerLabel = getContainerLabel(config.dockerChildPrefix);
+
   result.push(`--name=${containerName}`);
-  result.push(`--label=renovate_child`);
+  result.push(`--label=${containerLabel}`);
+
   if (dockerUser) {
     result.push(`--user=${dockerUser}`);
   }

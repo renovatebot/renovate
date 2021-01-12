@@ -89,13 +89,13 @@ Array [
     },
   },
   Object {
-    "cmd": "docker ps --filter name=renovate_helm -aq",
+    "cmd": "docker ps --filter name=renovate_renovate_helm -aq",
     "options": Object {
       "encoding": "utf-8",
     },
   },
   Object {
-    "cmd": "docker run --rm --name=renovate_helm --label=renovate_child --user=foobar -v \\"/tmp/github/some/repo\\":\\"/tmp/github/some/repo\\" -w \\"/tmp/github/some/repo\\" renovate/helm bash -l -c \\"helm dependency update ''\\"",
+    "cmd": "docker run --rm --name=renovate_renovate_helm --label=renovate_child --user=foobar -v \\"/tmp/github/some/repo\\":\\"/tmp/github/some/repo\\" -w \\"/tmp/github/some/repo\\" renovate/helm bash -l -c \\"helm dependency update ''\\"",
     "options": Object {
       "cwd": "/tmp/github/some/repo",
       "encoding": "utf-8",
