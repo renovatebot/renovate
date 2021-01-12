@@ -4,6 +4,8 @@ import { logger } from '../../logger';
 import { regEx } from '../../util/regex';
 import { PackageDependency } from '../common';
 import {
+  JCENTER_REPO,
+  MAVEN_REPO,
   ManagerData,
   PackageVariables,
   StringInterpolation,
@@ -295,6 +297,26 @@ const matcherConfigs: SyntaxMatchConfig[] = [
       endOfInstruction,
     ],
     handler: processPlugin,
+  },
+  {
+    // mavenCentral()
+    matchers: [
+      { matchType: TokenType.Word, matchValue: 'mavenCentral' },
+      { matchType: TokenType.LeftParen },
+      { matchType: TokenType.RightParen },
+      endOfInstruction,
+    ],
+    handler: () => ({ urls: [MAVEN_REPO] }),
+  },
+  {
+    // jcenter()
+    matchers: [
+      { matchType: TokenType.Word, matchValue: 'jcenter' },
+      { matchType: TokenType.LeftParen },
+      { matchType: TokenType.RightParen },
+      endOfInstruction,
+    ],
+    handler: () => ({ urls: [JCENTER_REPO] }),
   },
   {
     // url 'https://repo.spring.io/snapshot/'

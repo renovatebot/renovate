@@ -1,5 +1,6 @@
 import { readFileSync } from 'fs';
 import path from 'path';
+import { JCENTER_REPO, MAVEN_REPO } from './common';
 import { parseGradle, parseProps } from './parser';
 
 function getGradleFile(fileName: string): string {
@@ -45,8 +46,14 @@ describe('manager/gradle-lite/parser', () => {
     ({ urls } = parseGradle('uri "https://example.com"'));
     expect(urls).toStrictEqual(['https://example.com']);
 
-    ({ urls } = parseGradle('uri("https://example.com")'));
-    expect(urls).toStrictEqual(['https://example.com']);
+    ({ urls } = parseGradle(
+      'mavenCentral(); uri("https://example.com"); jcenter();'
+    ));
+    expect(urls).toStrictEqual([
+      MAVEN_REPO,
+      'https://example.com',
+      JCENTER_REPO,
+    ]);
   });
   it('parses long form deps', () => {
     let deps;

@@ -1,5 +1,9 @@
 import { PackageDependency } from '../common';
 
+export { MAVEN_REPO } from '../../datasource/maven/common';
+
+export const JCENTER_REPO = 'https://jcenter.bintray.com/';
+
 export interface ManagerData {
   fileReplacePosition: number;
   packageFile?: string;
