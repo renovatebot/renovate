@@ -1,4 +1,3 @@
-import * as fs from 'fs-extra';
 import hasha from 'hasha';
 import Git from 'simple-git';
 import { join } from 'upath';
@@ -6,7 +5,7 @@ import { logger } from '../../logger';
 import { ExternalHostError } from '../../types/errors/external-host-error';
 import * as memCache from '../../util/cache/memory';
 import * as packageCache from '../../util/cache/package';
-import { privateCacheDir } from '../../util/fs';
+import { privateCacheDir, readFile } from '../../util/fs';
 import { Http } from '../../util/http';
 import { GetReleasesConfig, Release, ReleaseResult } from '../common';
 
@@ -70,7 +69,7 @@ export async function fetchCrateRecordsPayload(
 ): Promise<string> {
   if (info.clonePath) {
     const path = join(info.clonePath, ...getIndexSuffix(lookupName));
-    return fs.readFile(path, { encoding: 'utf8' });
+    return readFile(path, { encoding: 'utf8' });
   }
 
   if (info.flavor === RegistryFlavor.CratesIo) {
