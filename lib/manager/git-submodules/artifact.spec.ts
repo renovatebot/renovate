@@ -12,5 +12,15 @@ describe('lib/manager/gitsubmodules/artifacts', () => {
         })
       ).toMatchSnapshot();
     });
+    it('returns two modules', () => {
+      expect(
+        updateArtifacts({
+          packageFileName: '',
+          updatedDeps: ['renovate', 'renovate-pro'],
+          newPackageFileContent: '',
+          config: {},
+        })
+      ).toMatchSnapshot();
+    });
   });
 });

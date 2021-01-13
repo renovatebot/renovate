@@ -16,6 +16,7 @@ const repoGroups = {
   'aspnet AspNetWebStack': 'https://github.com/aspnet/AspNetWebStack',
   'aspnet Extensions': 'https://github.com/aspnet/Extensions',
   'aws-cdk': 'https://github.com/aws/aws-cdk',
+  'aws-sdk-js-v3': 'https://github.com/aws/aws-sdk-js-v3',
   'azure azure-libraries-for-net':
     'https://github.com/Azure/azure-libraries-for-net',
   'azure azure-sdk-for-net': 'https://github.com/Azure/azure-sdk-for-net',
@@ -132,7 +133,7 @@ const repoGroups = {
 
 const patternGroups = {
   babel6: '^babel6$',
-  clarity: '^@clr/', // https://github.com/vmware/clarity/issues/5235
+  clarity: ['^@cds/', '^@clr/'], // https://github.com/vmware/clarity/issues/5235
   wordpress: '^@wordpress/',
   angularmaterial: ['^@angular/material', '^@angular/cdk'],
   'aws-java-sdk': '^com.amazonaws:aws-java-sdk-',

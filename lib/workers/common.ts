@@ -94,6 +94,7 @@ export enum ProcessBranchResult {
   PrEdited = 'pr-edited',
   PrLimitReached = 'pr-limit-reached',
   CommitLimitReached = 'commit-limit-reached',
+  BranchLimitReached = 'branch-limit-reached',
   Rebase = 'rebase',
 }
 

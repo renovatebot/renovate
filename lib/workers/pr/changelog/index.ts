@@ -20,7 +20,9 @@ export async function getChangeLogJSON(
     if (version.equals(fromVersion, toVersion)) {
       return null;
     }
-
+    logger.debug(
+      `Fetching changelog: ${sourceUrl} (${fromVersion} -> ${toVersion})`
+    );
     const releases = args.releases || (await getInRangeReleases(args));
 
     let res: ChangeLogResult | null = null;

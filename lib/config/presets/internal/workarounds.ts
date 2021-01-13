@@ -7,6 +7,7 @@ export const presets: Record<string, Preset> = {
     ],
     extends: [
       'workarounds:mavenCommonsAncientVersion',
+      'workarounds:ignoreSbtLatestIntegration',
       'workarounds:ignoreSpringCloudNumeric',
     ],
   },
@@ -16,6 +17,16 @@ export const presets: Record<string, Preset> = {
         datasources: ['maven', 'sbt-package'],
         packagePatterns: ['^commons-'],
         allowedVersions: '!/^200\\d{5}(\\.\\d+)?/',
+      },
+    ],
+  },
+  ignoreSbtLatestIntegration: {
+    description: 'Do not upgrade sbt latest.integration',
+    packageRules: [
+      {
+        managers: ['sbt'],
+        matchCurrentVersion: '/^latest\\.integration$/',
+        enabled: false,
       },
     ],
   },

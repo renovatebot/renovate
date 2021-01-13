@@ -85,7 +85,7 @@ Currently it is needed/supported for the `helm-requirements` manager only.
 ```json
 {
   "aliases": {
-    "stable": "https://kubernetes-charts.storage.googleapis.com/"
+    "stable": "https://charts.helm.sh/stable"
   }
 }
 ```
@@ -205,6 +205,23 @@ If so then Renovate will reflect this setting in its description and use package
 ## bbUseDefaultReviewers
 
 Configuring this to `true` means that Renovate will detect and apply the default reviewers rules to PRs (Bitbucket only).
+
+## branchConcurrentLimit
+
+By default, Renovate won't enforce any concurrent branch limits. If you want the same limit for both concurrent branches
+and concurrent PRs, then just set a value for `prConcurrentLimit` and it will be reused for branch calculations too.
+However, if you want to allow more concurrent branches than concurrent PRs, you can configure both values (
+e.g. `branchConcurrentLimit=5` and `prConcurrentLimit=3`).
+
+This limit is enforced on a per-repository basis.
+
+Example config:
+
+```json
+{
+  "branchConcurrentLimit": 3
+}
+```
 
 ## branchName
 

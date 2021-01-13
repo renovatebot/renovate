@@ -14,8 +14,9 @@ import {
   getBranchLastCommitTime,
   isBranchModified,
 } from '../../util/git';
+import * as template from '../../util/template';
 import { BranchConfig, PrResult } from '../common';
-import { Limit, isLimitReached } from '../global/limits';
+import { Limit, incLimitedValue, isLimitReached } from '../global/limits';
 import { getPrBody } from './body';
 import { ChangeLogError } from './changelog';
 import { codeOwnersForPr } from './code-owners';
@@ -389,10 +390,13 @@ export async function ensurePr(
           targetBranch: config.baseBranch,
           prTitle,
           prBody,
-          labels: [...new Set([...config.labels, ...config.addLabels])],
+          labels: [
+            ...new Set([...config.labels, ...config.addLabels]),
+          ].map((label) => template.compile(label, config)),
           platformOptions: getPlatformPrOptions(config),
           draftPR: config.draftPR,
         });
+        incLimitedValue(Limit.PullRequests);
         logger.info({ pr: pr.number, prTitle }, 'PR created');
       }
     } catch (err) /* istanbul ignore next */ {

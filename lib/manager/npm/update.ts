@@ -2,18 +2,19 @@ import equal from 'fast-deep-equal';
 import { ReleaseType, inc } from 'semver';
 import { logger } from '../../logger';
 import { matchAt, replaceAt } from '../../util/string';
-import { UpdateDependencyConfig } from '../common';
+import { BumpPackageVersionResult, UpdateDependencyConfig } from '../common';
 
 export function bumpPackageVersion(
   content: string,
   currentValue: string,
   bumpVersion: ReleaseType | string
-): string {
+): BumpPackageVersionResult {
   logger.debug(
     { bumpVersion, currentValue },
     'Checking if we should bump package.json version'
   );
   let newPjVersion: string;
+  let bumpedContent = content;
   try {
     if (bumpVersion.startsWith('mirror:')) {
       const mirrorPackage = bumpVersion.replace('mirror:', '');
@@ -25,13 +26,13 @@ export function bumpPackageVersion(
         (parsedContent.peerDependencies || {})[mirrorPackage];
       if (!newPjVersion) {
         logger.warn('bumpVersion mirror package not found: ' + mirrorPackage);
-        return content;
+        return { bumpedContent };
       }
     } else {
       newPjVersion = inc(currentValue, bumpVersion as ReleaseType);
     }
     logger.debug({ newPjVersion });
-    const bumpedContent = content.replace(
+    bumpedContent = content.replace(
       /("version":\s*")[^"]*/,
       `$1${newPjVersion}`
     );
@@ -40,7 +41,6 @@ export function bumpPackageVersion(
     } else {
       logger.debug('Bumped package.json version');
     }
-    return bumpedContent;
   } catch (err) {
     logger.warn(
       {
@@ -50,8 +50,8 @@ export function bumpPackageVersion(
       },
       'Failed to bumpVersion'
     );
-    return content;
   }
+  return { bumpedContent };
 }
 
 export function updateDependency({
